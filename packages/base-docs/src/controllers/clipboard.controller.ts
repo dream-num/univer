@@ -1,8 +1,11 @@
 import { ITextSelectionRenderManager } from '@univerjs/base-render';
 import {
     Disposable,
+    FOCUSING_DOC,
+    FOCUSING_EDITOR,
     ICommandInfo,
     ICommandService,
+    IContextService,
     IDocumentBody,
     ILogService,
     IParagraph,
@@ -24,7 +27,8 @@ export class DocClipboardController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @IDocClipboardService private readonly _docClipboardService: IDocClipboardService,
-        @ITextSelectionRenderManager private _textSelectionRenderManager: ITextSelectionRenderManager
+        @ITextSelectionRenderManager private _textSelectionRenderManager: ITextSelectionRenderManager,
+        @IContextService private readonly _contextService: IContextService,
     ) {
         super();
         this._commandExecutedListener();
@@ -46,6 +50,13 @@ export class DocClipboardController extends Disposable {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (!updateCommandList.includes(command.id)) {
+                    return;
+                }
+
+                if (
+                    !this._contextService.getContextValue(FOCUSING_DOC) &&
+                    !this._contextService.getContextValue(FOCUSING_EDITOR)
+                ) {
                     return;
                 }
 

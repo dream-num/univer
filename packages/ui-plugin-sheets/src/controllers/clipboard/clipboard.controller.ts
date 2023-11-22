@@ -12,7 +12,6 @@ import {
     ISetSelectionsOperationParams,
     ISetWorksheetColWidthMutationParams,
     ISetWorksheetRowHeightMutationParams,
-    MAX_CELL_PER_SHEET_KEY,
     NORMAL_SELECTION_PLUGIN_NAME,
     RemoveMergeUndoMutationFactory,
     RemoveWorksheetMergeMutation,
@@ -22,7 +21,7 @@ import {
     SetWorksheetColWidthMutation,
     SetWorksheetRowHeightMutation,
 } from '@univerjs/base-sheets';
-import { handleStringToStyle, IMessageService, textTrim } from '@univerjs/base-ui';
+import { IMessageService, textTrim } from '@univerjs/base-ui';
 import {
     BooleanNumber,
     DEFAULT_WORKSHEET_COLUMN_WIDTH,
@@ -30,9 +29,9 @@ import {
     Disposable,
     handleStyleToString,
     ICellData,
-    ICommandInfo,
     ICommandService,
     IConfigService,
+    IMutationInfo,
     IRange,
     IRowData,
     IUniverInstanceService,
@@ -40,6 +39,7 @@ import {
     LocaleService,
     ObjectArray,
     ObjectMatrix,
+    ObjectMatrixPrimitiveType,
     OnLifecycle,
     Rectangle,
     Worksheet,
@@ -48,12 +48,8 @@ import { MessageType } from '@univerjs/design';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { SheetCopyCommand, SheetCutCommand, SheetPasteCommand } from '../../commands/commands/clipboard.command';
-import {
-    IClipboardPropertyItem,
-    IParsedCellValue,
-    ISheetClipboardHook,
-    ISheetClipboardService,
-} from '../../services/clipboard/clipboard.service';
+import { ISheetClipboardService } from '../../services/clipboard/clipboard.service';
+import { ICellDataWithSpanInfo, IClipboardPropertyItem, ISheetClipboardHook } from '../../services/clipboard/type';
 
 /**
  * This controller add basic clipboard logic for basic features such as text color / BISU / row widths to the clipboard
@@ -71,7 +67,7 @@ export class SheetClipboardController extends Disposable {
         @Inject(LocaleService) private readonly _localService: LocaleService
     ) {
         super();
-
+        // this._commandExecutedListener();
         this._init();
     }
 
@@ -89,6 +85,49 @@ export class SheetClipboardController extends Disposable {
             })
         );
     }
+
+    // private _commandExecutedListener() {
+    //     const updateCommandList = [SheetCopyCommand.id, SheetCutCommand.id, SheetPasteCommand.id];
+
+    //     this.disposeWithMe(
+    //         this._commandService.onCommandExecuted((command: ICommandInfo) => {
+    //             if (!updateCommandList.includes(command.id)) {
+    //                 return;
+    //             }
+
+    //             switch (command.id) {
+    //                 case SheetPasteCommand.id: {
+    //                     this._handlePaste();
+    //                     break;
+    //                 }
+
+    //                 case SheetCopyCommand.id: {
+    //                     this._handleCopy();
+    //                     break;
+    //                 }
+
+    //                 case SheetCutCommand.id: {
+    //                     this._handleCut();
+    //                     break;
+    //                 }
+
+    //                 default:
+    //                     throw new Error(`Unhandled command ${command.id}`);
+    //             }
+    //         })
+    //     );
+    // }
+
+    // private async _handleCopy() {
+    //     const { cli: clipboard } = this;
+    //     const documentBodyList = this._getDocumentBodyInRanges();
+
+    //     try {
+    //         clipboard.setClipboardData(documentBodyList);
+    //     } catch (_e) {
+    //         this._logService.error('[DocClipboardController] set clipboard failed');
+    //     }
+    // }
 
     private _initCopyingHooks(): ISheetClipboardHook {
         const self = this;
@@ -190,7 +229,7 @@ export class SheetClipboardController extends Disposable {
 
                 // examine if pasting would cause number of cells to exceed the upper limit
                 // this is not implemented yet
-                const maxConfig = self._configService.getConfig<number>(MAX_CELL_PER_SHEET_KEY);
+                const maxConfig = self._configService.getConfig<number>(workbookId_, 'maxCellsPerSheet');
                 const { endRow, endColumn } = range;
                 if (maxConfig && endRow * endColumn > maxConfig) {
                     self._messageService.show({
@@ -204,8 +243,8 @@ export class SheetClipboardController extends Disposable {
             },
 
             onPasteRows(range, rowProperties) {
-                const redoMutations: ICommandInfo[] = [];
-                const undoMutations: ICommandInfo[] = [];
+                const redoMutations: IMutationInfo[] = [];
+                const undoMutations: IMutationInfo[] = [];
 
                 // if the range is outside ot the worksheet's boundary, we should add rows
                 const maxRow = currentSheet!.getMaxRows();
@@ -290,8 +329,8 @@ export class SheetClipboardController extends Disposable {
             },
 
             onPasteColumns(range, colProperties) {
-                const redoMutations: ICommandInfo[] = [];
-                const undoMutations: ICommandInfo[] = [];
+                const redoMutations: IMutationInfo[] = [];
+                const undoMutations: IMutationInfo[] = [];
 
                 // if the range is outside ot the worksheet's boundary, we should add rows
                 const maxColumn = currentSheet!.getMaxColumns();
@@ -342,20 +381,96 @@ export class SheetClipboardController extends Disposable {
                 return self._onPasteCells(range, matrix, workbookId!, worksheetId!);
             },
 
+            onRemoveCutCells(range, workbookId, worksheetId) {
+                return self._onRemoveCutCells(range, workbookId, worksheetId);
+            },
+
             onAfterPaste(success) {
                 currentSheet = null;
             },
         };
     }
 
-    private _onPasteCells(
+    private _onRemoveCutCells(
         range: IRange,
-        matrix: ObjectMatrix<IParsedCellValue>,
         workbookId: string,
         worksheetId: string
     ): {
-        redos: ICommandInfo[];
-        undos: ICommandInfo[];
+        redos: IMutationInfo[];
+        undos: IMutationInfo[];
+    } {
+        const redos: IMutationInfo[] = [];
+        const undos: IMutationInfo[] = [];
+        const accessor = {
+            get: this._injector.get.bind(this._injector),
+        };
+        const workbook = this._currentUniverSheet.getUniverSheetInstance(workbookId);
+        const worksheet = workbook?.getSheetBySheetId(worksheetId);
+        if (workbook && worksheet) {
+            // clear style and content
+            const clearMutationParams: ISetRangeValuesMutationParams = {
+                worksheetId,
+                workbookId,
+                cellValue: generateNullCellValue([range]),
+            };
+            const undoClearMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
+                accessor,
+                clearMutationParams
+            );
+
+            redos.push({
+                id: SetRangeValuesMutation.id,
+                params: clearMutationParams,
+            });
+            undos.push({
+                id: SetRangeValuesMutation.id,
+                params: undoClearMutationParams,
+            });
+
+            // remove merged cells
+            let hasMerge = false;
+            const mergeData = worksheet.getConfig().mergeData;
+            mergeData.forEach((merge) => {
+                if (Rectangle.intersects(range, merge)) {
+                    hasMerge = true;
+                }
+            });
+
+            if (hasMerge) {
+                const removeMergeParams: IRemoveWorksheetMergeMutationParams = {
+                    workbookId,
+                    worksheetId,
+                    ranges: [range],
+                };
+                const undoRemoveMergeParams: IAddWorksheetMergeMutationParams = RemoveMergeUndoMutationFactory(
+                    accessor,
+                    removeMergeParams
+                );
+
+                redos.push({
+                    id: RemoveWorksheetMergeMutation.id,
+                    params: removeMergeParams,
+                });
+                undos.push({
+                    id: AddWorksheetMergeMutation.id,
+                    params: undoRemoveMergeParams,
+                });
+            }
+        }
+        return {
+            undos,
+            redos,
+        };
+    }
+
+    private _onPasteCells(
+        range: IRange,
+        matrix: ObjectMatrix<ICellDataWithSpanInfo>,
+        workbookId: string,
+        worksheetId: string
+    ): {
+        redos: IMutationInfo[];
+        undos: IMutationInfo[];
     } {
         // insert cell style, insert cell content and insert merged cell info
         // 1. merged cell
@@ -366,25 +481,23 @@ export class SheetClipboardController extends Disposable {
         const valueMatrix = new ObjectMatrix<ICellData>();
         const clearStyleMatrix = new ObjectMatrix<ICellData>();
         const mergeRangeData: IRange[] = [];
-        const redoMutationsInfo: ICommandInfo[] = [];
-        const undoMutationsInfo: ICommandInfo[] = [];
+        const redoMutationsInfo: IMutationInfo[] = [];
+        const undoMutationsInfo: IMutationInfo[] = [];
         let hasMerge = false;
 
         // TODO@Dushusir: undo selection
         matrix.forValue((row, col, value) => {
-            // TODO@Dushusir Temporarily use handleStringToStyle. After all replication and paste function is completed, fix the handleStringToStyle method
-            const style = handleStringToStyle(undefined, value.properties.style);
-
             // NOTE: When pasting, the original cell may contain a default style that is not explicitly carried, resulting in the failure to overwrite the style of the target cell.
             // If the original cell has a style (lack of other default styles) or is undefined (all default styles), we need to clear the existing styles in the target area
             // If the original cell style is "", it is to handle the situation where the target area contains merged cells. The style is not overwritten, only the value is overwritten. There is no need to clear the existing style of the target area.
-            if (value.properties.style !== '') {
+            if (value.s) {
                 clearStyleMatrix.setValue(row + startRow, col + startColumn, { s: null });
             }
 
+            // TODO@yuhongz: formula
             valueMatrix.setValue(row + startRow, col + startColumn, {
-                v: value.content,
-                s: style,
+                v: value.v,
+                s: value.s,
             });
 
             // rowspan and colspan to merge data
@@ -580,4 +693,19 @@ export class SheetClipboardController extends Disposable {
 
         return worksheet;
     }
+}
+
+// Generate cellValue from range and set null
+function generateNullCellValue(range: IRange[]): ObjectMatrixPrimitiveType<ICellData> {
+    const cellValue = new ObjectMatrix<ICellData>();
+    range.forEach((range: IRange) => {
+        const { startRow, startColumn, endRow, endColumn } = range;
+        for (let i = startRow; i <= endRow; i++) {
+            for (let j = startColumn; j <= endColumn; j++) {
+                cellValue.setValue(i, j, null);
+            }
+        }
+    });
+
+    return cellValue.getData();
 }

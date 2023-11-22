@@ -15,6 +15,10 @@ jobs:
         if: github.repository == 'dream-num/univer'
         runs-on: ubuntu-latest
 
+        env:
+            TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+            TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+
         steps:
             # Get PR ID from artifact
             - name: download pr artifact
@@ -24,18 +28,63 @@ jobs:
                   run_id: ${{ github.event.workflow_run.id }}
                   name: pr-id
 
-            - name: save PR id
+            - name: get PR id
               id: pr
               run: echo "id=$(<pr-id.txt)" >> $GITHUB_OUTPUT
 
+            # Get PR ID from artifact
+            - name: download pr artifact
+              uses: dawidd6/action-download-artifact@v2
+              with:
+                  workflow: ${{ github.event.workflow_run.workflow_id }}
+                  run_id: ${{ github.event.workflow_run.id }}
+                  name: pr-ref
+
+            - name: get PR ref
+              id: ref
+              run: echo "ref=$(<pr-ref.txt)" >> $GITHUB_OUTPUT
+
             - name: Checkout
               uses: actions/checkout@v3
-
-            - name: Restore demo cache
-              uses: actions/cache/restore@v3
               with:
-                  path: .workspace
-                  key: ${{ runner.os }}-demo-${{ steps.pr.outputs.id }}
+                  ref: ${{ steps.ref.outputs.ref }}
+
+            - name: Install Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 18
+
+            - name: Install pnpm
+              uses: pnpm/action-setup@v2
+              with:
+                  version: 8
+                  run_install: false
+
+            - name: Get pnpm store directory
+              shell: bash
+              run: |
+                  echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+            - name: Setup pnpm cache
+              uses: actions/cache@v3
+              with:
+                  path: ${{ env.STORE_PATH }}
+                  key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+                  restore-keys: |
+                      ${{ runner.os }}-pnpm-
+
+            - name: Install dependencies
+              run: pnpm install
+
+            #  ================= Deploy Demo =================
+            - name: 📦 Build demo
+              run: pnpm run build:demo
+
+            - name: Copy demo to workspace
+              run: |
+                  mkdir .workspace
+                  cp -r ./examples/univer-doc-ts/local .workspace/doc
+                  cp -r ./examples/univer-sheet-ts/local .workspace/sheet
 
             - name: 🚀 Deploy to Vercel (demo)
               uses: amondnet/vercel-action@v25
@@ -45,11 +94,9 @@ jobs:
                   vercel-org-id: ${{ secrets.ORG_ID}}
                   vercel-project-id: ${{ secrets.PROJECT_ID}}
 
-            - name: Restore storybook cache
-              uses: actions/cache/restore@v3
-              with:
-                  path: storybook-static
-                  key: ${{ runner.os }}-storybook-${{ steps.pr.outputs.id }}
+            # ================= Deploy Storybook =================
+            - name: 📦 Build storybook
+              run: pnpm run build:storybook
 
             - name: 🚀 Deploy to Vercel (storybook)
               uses: amondnet/vercel-action@v25
@@ -59,6 +106,7 @@ jobs:
                   vercel-org-id: ${{ secrets.ORG_ID}}
                   vercel-project-id: ${{ secrets.PROJECT_ID_STORYBOOK}}
 
+            # ================= Notify Discord =================
             - name: 👾 Discord Notification
               uses: sarisia/actions-status-discord@v1
               if: ${{ success() }}
@@ -94,6 +142,7 @@ jobs:
                   color: 0xd63031
                   username: GitHub Actions
 
+            # ================= Create Comment =================
             - name: 🧽 Find And Delete Comment
               uses: peter-evans/find-comment@v2
               id: fc

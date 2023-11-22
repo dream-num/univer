@@ -12,13 +12,11 @@ jobs:
         if: github.repository == 'dream-num/univer'
         runs-on: ubuntu-latest
 
-        env:
-            TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-            TURBO_TEAM: ${{ vars.TURBO_TEAM }}
-
         steps:
             - name: Checkout
               uses: actions/checkout@v3
+              with:
+                  ref: ${{ steps.ref.outputs.ref }}
 
             - name: Install Node.js
               uses: actions/setup-node@v3
@@ -50,33 +48,6 @@ jobs:
             - name: 📦 Build
               run: pnpm run build
 
-            # build demo
-            - name: 📦 Build demo
-              run: pnpm run build:demo
-
-            - name: Copy demo to workspace
-              run: |
-                  mkdir .workspace
-                  cp -r ./examples/univer-doc-ts/local .workspace/doc
-                  cp -r ./examples/univer-sheet-ts/local .workspace/sheet
-                  cp -r ./examples/univer-slide-ts/local .workspace/slide
-
-            - name: Save demo cache
-              uses: actions/cache/save@v3
-              with:
-                  path: .workspace
-                  key: ${{ runner.os }}-demo-${{ github.event.pull_request.number }}
-
-            # build storybook
-            - name: 📦 Build storybook
-              run: pnpm run build:storybook
-
-            - name: Save storybook cache
-              uses: actions/cache/save@v3
-              with:
-                  path: storybook-static
-                  key: ${{ runner.os }}-storybook-${{ github.event.pull_request.number }}
-
     set-pr-id:
         name: Set PR ID
         runs-on: ubuntu-latest
@@ -85,6 +56,7 @@ jobs:
               if: ${{ always() }}
               run: |
                   echo ${{ github.event.pull_request.number }} > ./pr-id.txt
+                  echo ${{ github.head_ref }} >> ./pr-ref.txt
 
             - name: Upload PR number
               if: ${{ always() }}
@@ -92,3 +64,10 @@ jobs:
               with:
                   name: pr-id
                   path: ./pr-id.txt
+
+            - name: Upload PR ref
+              if: ${{ always() }}
+              uses: actions/upload-artifact@v3
+              with:
+                  name: pr-ref
+                  path: ./pr-ref.txt

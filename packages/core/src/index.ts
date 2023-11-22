@@ -1,6 +1,7 @@
 export * from './basics';
 export { dedupe, remove } from './common/array';
 export { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY } from './common/const';
+export { type ISequenceExecuteResult, sequence, sequenceAsync } from './common/sequence';
 export * from './docs/domain';
 export * from './observer';
 export { Plugin, PluginType } from './plugin/plugin';
@@ -19,6 +20,7 @@ export {
     type IOperation,
     type IOperationInfo,
     sequenceExecute,
+    sequenceExecuteAsync,
 } from './services/command/command.service';
 export { IConfigService } from './services/config/config.service';
 export * from './services/context/context';

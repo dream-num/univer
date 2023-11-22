@@ -1,7 +1,8 @@
 import { forwardRef, Inject, Injector } from '@wendellhu/redi';
 import { Subject } from 'rxjs';
 
-import { IResourceManagerService } from '../services/resource-manager/type';
+import { INTERCEPTOR_POINT } from '../services/sheet-interceptor/interceptor-const';
+import { SheetInterceptorService } from '../services/sheet-interceptor/sheet-interceptor.service';
 import { GenName, Nullable, Tools } from '../shared';
 import { Disposable } from '../shared/lifecycle';
 import { DEFAULT_RANGE_ARRAY, DEFAULT_WORKBOOK, DEFAULT_WORKSHEET } from '../types/const';
@@ -59,7 +60,7 @@ export class Workbook extends Disposable {
         workbookData: Partial<IWorkbookData> = {},
         @Inject(forwardRef(() => GenName)) private readonly _genName: GenName,
         @Inject(Injector) readonly _injector: Injector,
-        @Inject(IResourceManagerService) private _resourceManagerService: IResourceManagerService
+        @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService
     ) {
         super();
 
@@ -318,23 +319,10 @@ export class Workbook extends Disposable {
     }
 
     save(): IWorkbookData {
-        // TODO
-        const resourceList = this._resourceManagerService.getAllResource(this.getUnitId());
-        const unitID = this.getUnitId();
-        const resources = resourceList
-            .map((item) => {
-                const id = (this._snapshot.resources || []).find(
-                    (resourceSnapshot) => resourceSnapshot.name === item.resourceName
-                )?.id;
-                return {
-                    id,
-                    name: item.resourceName,
-                    data: item.hook.toJson(unitID),
-                };
-            })
-            .filter((v) => !!v) as IWorkbookData['resources'];
-
-        return { ...this._snapshot, resources };
+        const snapshot =
+            this._sheetInterceptorService.fetchThroughInterceptors(INTERCEPTOR_POINT.SAVE)(this._snapshot, this) ||
+            this._snapshot;
+        return snapshot;
     }
 
     /**

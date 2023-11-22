@@ -436,7 +436,6 @@ class MultiCommand implements IMultiCommand {
 
 export function sequenceExecute(tasks: ICommandInfo[], commandService: ICommandService, options?: IExecutionOptions) {
     const promises = tasks.map((task) => () => commandService.syncExecuteCommand(task.id, task.params, options));
-
     return syncSequence(promises);
 }
 
@@ -446,6 +445,5 @@ export function sequenceExecuteAsync(
     options?: IExecutionOptions
 ) {
     const promises = tasks.map((task) => () => commandService.executeCommand(task.id, task.params, options));
-
     return sequence(promises);
 }

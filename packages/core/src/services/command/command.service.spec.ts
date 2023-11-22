@@ -5,6 +5,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DesktopLogService, ILogService } from '../log/log.service';
 import { CommandService, CommandType, ICommandService, sequenceExecute, sequenceExecuteAsync } from './command.service';
 
+const commandID = 'emit-plural-error-command';
+
 describe('Test CommandService', () => {
     let injector: Injector;
     let commandService: ICommandService;
@@ -16,7 +18,7 @@ describe('Test CommandService', () => {
 
         commandService = injector.get(ICommandService);
         commandService.registerCommand({
-            id: 'emit-plural-error-command',
+            id: commandID,
             type: CommandType.COMMAND,
             handler: (_accessor, params: { value: number }) => {
                 if (params.value === 100) {
@@ -39,9 +41,9 @@ describe('Test CommandService', () => {
             expect(
                 sequenceExecute(
                     [
-                        { id: 'emit-plural-error-command', params: { value: 1 } },
-                        { id: 'emit-plural-error-command', params: { value: 2 } },
-                        { id: 'emit-plural-error-command', params: { value: 3 } },
+                        { id: commandID, params: { value: 1 } },
+                        { id: commandID, params: { value: 2 } },
+                        { id: commandID, params: { value: 3 } },
                     ],
                     commandService
                 )
@@ -55,11 +57,11 @@ describe('Test CommandService', () => {
             expect(
                 sequenceExecute(
                     [
-                        { id: 'emit-plural-error-command', params: { value: 1 } },
-                        { id: 'emit-plural-error-command', params: { value: 3 } },
-                        { id: 'emit-plural-error-command', params: { value: 5 } },
-                        { id: 'emit-plural-error-command', params: { value: 100 } },
-                        { id: 'emit-plural-error-command', params: { value: 7 } },
+                        { id: commandID, params: { value: 1 } },
+                        { id: commandID, params: { value: 3 } },
+                        { id: commandID, params: { value: 5 } },
+                        { id: commandID, params: { value: 100 } },
+                        { id: commandID, params: { value: 7 } },
                     ],
                     commandService
                 )
@@ -75,9 +77,9 @@ describe('Test CommandService', () => {
             expect(
                 await sequenceExecuteAsync(
                     [
-                        { id: 'emit-plural-error-command', params: { value: 1 } },
-                        { id: 'emit-plural-error-command', params: { value: 2 } },
-                        { id: 'emit-plural-error-command', params: { value: 3 } },
+                        { id: commandID, params: { value: 1 } },
+                        { id: commandID, params: { value: 2 } },
+                        { id: commandID, params: { value: 3 } },
                     ],
                     commandService
                 )
@@ -91,11 +93,11 @@ describe('Test CommandService', () => {
             expect(
                 await sequenceExecuteAsync(
                     [
-                        { id: 'emit-plural-error-command', params: { value: 1 } },
-                        { id: 'emit-plural-error-command', params: { value: 3 } },
-                        { id: 'emit-plural-error-command', params: { value: 5 } },
-                        { id: 'emit-plural-error-command', params: { value: 100 } },
-                        { id: 'emit-plural-error-command', params: { value: 7 } },
+                        { id: commandID, params: { value: 1 } },
+                        { id: commandID, params: { value: 3 } },
+                        { id: commandID, params: { value: 5 } },
+                        { id: commandID, params: { value: 100 } },
+                        { id: commandID, params: { value: 7 } },
                     ],
                     commandService
                 )
@@ -111,9 +113,9 @@ describe('Test CommandService', () => {
             expect(
                 sequenceExecute(
                     [
-                        { id: 'emit-plural-error-command', params: { value: 1 } },
-                        { id: 'emit-plural-error-command', params: { value: 2 } },
-                        { id: 'emit-plural-error-command', params: { value: 3 } },
+                        { id: commandID, params: { value: 1 } },
+                        { id: commandID, params: { value: 2 } },
+                        { id: commandID, params: { value: 3 } },
                     ],
                     commandService
                 )
@@ -127,11 +129,11 @@ describe('Test CommandService', () => {
             expect(
                 sequenceExecute(
                     [
-                        { id: 'emit-plural-error-command', params: { value: 1 } },
-                        { id: 'emit-plural-error-command', params: { value: 3 } },
-                        { id: 'emit-plural-error-command', params: { value: 5 } },
-                        { id: 'emit-plural-error-command', params: { value: 100 } },
-                        { id: 'emit-plural-error-command', params: { value: 7 } },
+                        { id: commandID, params: { value: 1 } },
+                        { id: commandID, params: { value: 3 } },
+                        { id: commandID, params: { value: 5 } },
+                        { id: commandID, params: { value: 100 } },
+                        { id: commandID, params: { value: 7 } },
                     ],
                     commandService
                 )

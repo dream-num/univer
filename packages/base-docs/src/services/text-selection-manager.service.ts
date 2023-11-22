@@ -182,6 +182,7 @@ export class TextSelectionManagerService implements IDisposable {
     }
 
     private _refresh(param: ITextSelectionManagerSearchParam): void {
+        console.error('www');
         const allTextRanges = this._getTextRanges(param) ?? [];
 
         this._textSelectionInfo$.next(

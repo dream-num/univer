@@ -131,7 +131,7 @@ export class ZoomController extends Disposable {
 
                     const zoomRatio = documentModel.zoomRatio || 1;
 
-                    this._updateViewZoom(zoomRatio);
+                    this._updateViewZoom(zoomRatio, false);
                 })
             )
         );
@@ -159,7 +159,7 @@ export class ZoomController extends Disposable {
         );
     }
 
-    private _updateViewZoom(zoomRatio: number) {
+    private _updateViewZoom(zoomRatio: number, needRefreshSelection = true) {
         const docObject = this._getDocObject();
         if (docObject == null) {
             return;
@@ -169,7 +169,9 @@ export class ZoomController extends Disposable {
 
         this._calculatePagePosition(docObject, zoomRatio);
 
-        this._textSelectionManagerService.refreshSelection();
+        if (needRefreshSelection) {
+            this._textSelectionManagerService.refreshSelection();
+        }
 
         docObject.scene.getTransformer()?.hideControl();
     }

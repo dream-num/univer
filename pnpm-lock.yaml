@@ -406,6 +406,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
+      numfmt:
+        specifier: ^2.5.2
+        version: 2.5.2
     devDependencies:
       '@vitest/coverage-istanbul':
         specifier: ^0.34.6
@@ -1045,6 +1048,15 @@ importers:
       '@wendellhu/redi':
         specifier: ^0.12.11
         version: 0.12.11
+<<<<<<< HEAD
+=======
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+>>>>>>> 3c92c01c (fix(sheet): the intersceptor should dispose when  selection change)
     devDependencies:
       '@types/react':
         specifier: ^18.2.38
@@ -10588,6 +10600,10 @@ packages:
 
   /numeral@2.0.6:
     resolution: {integrity: sha512-qaKRmtYPZ5qdw4jWJD6bxEf1FJEqllJrwxCLIm0sQU/A7v2/czigzOb+C2uSiFsa9lBUzeH7M1oK+Q+OLxL3kA==}
+    dev: false
+
+  /numfmt@2.5.2:
+    resolution: {integrity: sha512-VXrB2bpU9Xa0oCHq8IsqE2CcUx5OLupLC3oryFT4DB9e/xe+OnUzBndhXfNHUzxFE4DYI3Sx4OtzS1Sdaf7tEw==}
     dev: false
 
   /object-assign@4.1.1:

@@ -38,7 +38,7 @@ import {
 } from '@univerjs/core';
 import { SheetSkeletonManagerService } from '@univerjs/ui-plugin-sheets';
 import { IDisposable, Inject, Injector } from '@wendellhu/redi';
-import { Observable } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 import { bufferTime, distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
 
 import { SHEET_NUMFMT_PLUGIN } from '../base/const/PLUGIN_NAME';
@@ -102,11 +102,11 @@ export class NumfmtController extends Disposable {
         this._initInterceptorEditorStart();
         this._initInterceptorEditorEnd();
         this._initInterceptorCommands();
-        this._registerRefRange();
         this._initRealTimeRenderingInterceptor();
+        this._registerRefRange();
         this._initMenu();
         this._initLocal();
-        this.initPanel();
+        this._initPanel();
         this._initCommands();
     }
 
@@ -195,7 +195,7 @@ export class NumfmtController extends Disposable {
         });
     }
 
-    private initPanel() {
+    private _initPanel() {
         this._componentManager.register(SHEET_NUMFMT_PLUGIN, SheetNumfmtPanel);
     }
     private _initLocal = () => {
@@ -319,33 +319,29 @@ export class NumfmtController extends Disposable {
                 }
             });
         });
+        const combineOpenAndSelection$ = combineLatest([
+            isPanelOpenObserver,
+            this._selectionManagerService.selectionInfo$.pipe(
+                map((selectionInfos) => {
+                    if (!selectionInfos) {
+                        return [];
+                    }
+                    return selectionInfos.map((selectionInfo) => selectionInfo.range);
+                })
+            ),
+        ]);
         this.disposeWithMe(
             toDisposable(
-                isPanelOpenObserver
+                combineOpenAndSelection$
                     .pipe(
-                        distinctUntilChanged(),
                         switchMap(
-                            (isOpen) =>
+                            ([isOpen, selectionRanges]) =>
                                 new Observable<{
                                     disposableCollection: DisposableCollection;
                                     selectionRanges: IRange[];
                                 }>((subscribe) => {
                                     const disposableCollection = new DisposableCollection();
-                                    isOpen &&
-                                        disposableCollection.add(
-                                            toDisposable(
-                                                this._selectionManagerService.selectionInfo$.subscribe(
-                                                    (selectionInfos) => {
-                                                        const selectionRanges = selectionInfos?.map(
-                                                            (selectionInfo) => selectionInfo.range
-                                                        );
-
-                                                        selectionRanges &&
-                                                            subscribe.next({ disposableCollection, selectionRanges });
-                                                    }
-                                                )
-                                            )
-                                        );
+                                    isOpen && subscribe.next({ selectionRanges, disposableCollection });
                                     return () => {
                                         disposableCollection.dispose();
                                     };
@@ -374,7 +370,6 @@ export class NumfmtController extends Disposable {
                                         if (value === undefined || value === null || type !== CellValueType.NUMBER) {
                                             return next();
                                         }
-                                        // const pattern = ''; // todo get
                                         const info = getPatternPreview(this._previewPattern, value as number);
                                         if (info.color) {
                                             const colorMap = this._themeService.getCurrentTheme();

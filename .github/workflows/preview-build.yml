@@ -48,6 +48,16 @@ jobs:
             - name: 📦 Build
               run: pnpm run build
 
+            - name: Pending Comment
+              uses: peter-evans/create-or-update-comment@v3
+              with:
+                  issue-number: ${{ github.event.pull_request.number }}
+                  body: |
+                      ## View Deployment
+
+                      🚧 Pending...
+                  edit-mode: append
+
     set-pr-id:
         name: Set PR ID
         runs-on: ubuntu-latest

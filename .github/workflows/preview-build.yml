@@ -42,9 +42,9 @@ jobs:
               uses: actions/cache@v3
               with:
                   path: ${{ env.STORE_PATH }}
-                  key: ${{ runner.os }}-demo-${{ hashFiles('**/pnpm-lock.yaml') }}
+                  key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
                   restore-keys: |
-                      ${{ runner.os }}-demo-
+                      ${{ runner.os }}-pnpm-
 
             - name: Install dependencies
               run: pnpm install
@@ -57,18 +57,18 @@ jobs:
 
             - name: Copy demo to workspace
               run: |
-                    mkdir .workspace
-                    cp -r ./examples/univer-doc-ts/local .workspace/doc
-                    cp -r ./examples/univer-sheet-ts/local .workspace/sheet
-                    cp -r ./examples/univer-slide-ts/local .workspace/slide
+                  mkdir .workspace
+                  cp -r ./examples/univer-doc-ts/local .workspace/doc
+                  cp -r ./examples/univer-sheet-ts/local .workspace/sheet
+                  cp -r ./examples/univer-slide-ts/local .workspace/slide
 
             - name: Setup demo cache
               uses: actions/cache@v3
               with:
-                path: .workspace
-                key: ${{ runner.os }}-demo-${{ github.event.pull_request.number }}
-                restore-keys: |
-                    ${{ runner.os }}-demo-
+                  path: .workspace
+                  key: ${{ runner.os }}-demo-${{ github.event.pull_request.number }}
+                  restore-keys: |
+                      ${{ runner.os }}-demo-
 
     set-pr-id:
         name: Set PR ID
@@ -76,7 +76,9 @@ jobs:
         steps:
             - name: Save PR number
               if: ${{ always() }}
-              run: echo ${{ github.event.pull_request.number }} > ./pr-id.txt
+              run: |
+                  echo ${{ github.event.pull_request.number }} > ./pr-id.txt
+                  echo ${{ github.event.ref }} > ./pr-branch-name.txt
 
             - name: Upload PR number
               if: ${{ always() }}
@@ -84,3 +86,10 @@ jobs:
               with:
                   name: pr
                   path: ./pr-id.txt
+
+            - name: Upload PR branch name
+              if: ${{ always() }}
+              uses: actions/upload-artifact@v3
+              with:
+                  name: pr
+                  path: ./pr-branch-name.txt

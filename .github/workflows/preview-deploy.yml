@@ -29,12 +29,10 @@ jobs:
               run: echo "id=$(<pr-id.txt)" >> $GITHUB_OUTPUT
 
             - name: Checkout
-              if: ${{ steps.pr.outputs.id != '' }}
               uses: actions/checkout@v3
 
-            - name: Setup workspace cache
+            - name: Setup demo cache
               uses: actions/cache@v3
-              if: ${{ steps.pr.outputs.id != '' }}
               with:
                   path: .workspace
                   key: ${{ runner.os }}-demo-${{ steps.pr.outputs.id }}
@@ -43,16 +41,22 @@ jobs:
 
             - name: 🚀 Deploy to Vercel (demo)
               uses: amondnet/vercel-action@v25
-              if: ${{ steps.pr.outputs.id != '' }}
               id: vercel-demo
               with:
                   vercel-token: ${{ secrets.VERCEL_TOKEN }}
                   vercel-org-id: ${{ secrets.ORG_ID}}
                   vercel-project-id: ${{ secrets.PROJECT_ID}}
 
+            - name: Setup storybook cache
+              uses: actions/cache@v3
+              with:
+                  path: storybook-static
+                  key: ${{ runner.os }}-storybook-${{ steps.pr.outputs.id }}
+                  restore-keys: |
+                      ${{ runner.os }}-storybook-
+
             - name: 🚀 Deploy to Vercel (storybook)
               uses: amondnet/vercel-action@v25
-              if: ${{ steps.pr.outputs.id != '' }}
               id: vercel-storybook
               with:
                   vercel-token: ${{ secrets.VERCEL_TOKEN }}
@@ -61,7 +65,7 @@ jobs:
 
             - name: 👾 Discord Notification
               uses: sarisia/actions-status-discord@v1
-              if: ${{ steps.pr.outputs.id != '' && success() }}
+              if: ${{ success() }}
               with:
                   webhook: ${{ secrets.DISCORD_WEBHOOK }}
                   status: ${{ job.status }}
@@ -81,7 +85,7 @@ jobs:
 
             - name: 👾 Discord Notification
               uses: sarisia/actions-status-discord@v1
-              if: ${{ steps.pr.outputs.id != '' && failure() }}
+              if: ${{ failure() }}
               with:
                   webhook: ${{ secrets.DISCORD_WEBHOOK }}
                   status: ${{ job.status }}
@@ -96,7 +100,6 @@ jobs:
 
             - name: 🧽 Find And Delete Comment
               uses: peter-evans/find-comment@v2
-              if: ${{ steps.pr.outputs.id != '' }}
               id: fc
               with:
                   issue-number: ${{ steps.pr.outputs.id }}
@@ -105,7 +108,6 @@ jobs:
 
             - name: 📝 Create or update comment
               uses: peter-evans/create-or-update-comment@v3
-              if: ${{ steps.pr.outputs.id != '' }}
               with:
                   comment-id: ${{ steps.fc.outputs.comment-id }}
                   issue-number: ${{ steps.pr.outputs.id }}

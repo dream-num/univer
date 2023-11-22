@@ -1,10 +1,8 @@
 name: 📦 Preview Build
 
 on:
-    push:
-        branches: [main, dev]
     pull_request:
-        branches: [main, dev]
+        branches: [dev]
 
 permissions:
     contents: read
@@ -52,6 +50,7 @@ jobs:
             - name: 📦 Build
               run: pnpm run build
 
+            # build demo
             - name: 📦 Build demo
               run: pnpm run build:demo
 
@@ -69,6 +68,18 @@ jobs:
                   key: ${{ runner.os }}-demo-${{ github.event.pull_request.number }}
                   restore-keys: |
                       ${{ runner.os }}-demo-
+
+            # build storybook
+            - name: 📦 Build storybook
+              run: pnpm run build:storybook
+
+            - name: Setup storybook cache
+              uses: actions/cache@v3
+              with:
+                  path: storybook-static
+                  key: ${{ runner.os }}-storybook-${{ github.event.pull_request.number }}
+                  restore-keys: |
+                      ${{ runner.os }}-storybook-
 
     set-pr-id:
         name: Set PR ID

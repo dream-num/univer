@@ -20,11 +20,13 @@
             },
             "./*": {
                 "import": "./lib/esm/*",
-                "require": "./lib/cjs/*"
+                "require": "./lib/cjs/*",
+                "types": "./lib/types/index.d.ts"
             },
             "./locale/*": {
                 "import": "./lib/esm/locale/*.js",
-                "require": "./lib/cjs/locale/*.js"
+                "require": "./lib/cjs/locale/*.js",
+                "types": "./lib/types/index.d.ts"
             }
         }
     },

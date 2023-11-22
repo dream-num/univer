@@ -20,11 +20,13 @@
             },
             "./*": {
                 "import": "./lib/esm/*",
-                "require": "./lib/cjs/*"
+                "require": "./lib/cjs/*",
+                "types": "./lib/types/index.d.ts"
             },
             "./locale/*": {
                 "import": "./lib/esm/locale/*.js",
-                "require": "./lib/cjs/locale/*.js"
+                "require": "./lib/cjs/locale/*.js",
+                "types": "./lib/types/index.d.ts"
             }
         }
     },
@@ -59,13 +61,11 @@
         "@wendellhu/redi": "^0.12.11",
         "clsx": "^2.0.0",
         "react": "^18.2.0",
-        "react-dom": "^18.2.0",
         "rxjs": "^7.8.1"
     },
     "devDependencies": {
         "@types/node": "^20.9.0",
         "@types/react": "^18.2.37",
-        "@types/react-dom": "^18.2.15",
         "@vitest/coverage-istanbul": "^0.34.6",
         "esbuild": "^0.19.5",
         "happy-dom": "^12.10.3",

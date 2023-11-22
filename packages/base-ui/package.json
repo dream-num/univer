@@ -20,11 +20,13 @@
             },
             "./*": {
                 "import": "./lib/esm/*",
-                "require": "./lib/cjs/*"
+                "require": "./lib/cjs/*",
+                "types": "./lib/types/index.d.ts"
             },
             "./locale/*": {
                 "import": "./lib/esm/locale/*.js",
-                "require": "./lib/cjs/locale/*.js"
+                "require": "./lib/cjs/locale/*.js",
+                "types": "./lib/types/index.d.ts"
             }
         }
     },
@@ -55,9 +57,9 @@
         "clsx": "^2.0.0",
         "localforage": "^1.10.0",
         "rc-notification": "^5.3.0",
+        "rc-util": "^5.38.1",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
-        "react-transition-group": "^4.4.5",
         "rxjs": "^7.8.1"
     },
     "devDependencies": {

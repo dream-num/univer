@@ -1,5 +1,5 @@
 import { ErrorSingle, SuccessSingle, WarningSingle } from '@univerjs/icons';
-import { createRoot } from 'react-dom/client';
+import { render } from 'rc-util/lib/React/render';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 
 import styles from './index.module.less';
@@ -66,14 +66,12 @@ const MessageContainer = (props: { messages: IMessageProps[] }) => {
 };
 
 export class Message {
-    private div: HTMLDivElement;
-    private root: ReturnType<typeof createRoot>;
-    private messages: IMessageProps[] = [];
+    private _div: HTMLDivElement;
+    private _messages: IMessageProps[] = [];
 
     constructor(container: HTMLElement) {
-        this.div = document.createElement('div');
-        container.appendChild(this.div);
-        this.root = createRoot(this.div);
+        this._div = document.createElement('div');
+        container.appendChild(this._div);
 
         this.render();
     }
@@ -83,7 +81,7 @@ export class Message {
         const { content, delay = 3000 } = options;
         const key = Date.now();
 
-        this.messages.push({
+        this._messages.push({
             key,
             type,
             content,
@@ -97,13 +95,13 @@ export class Message {
     }
 
     teardown(key: number) {
-        this.messages = this.messages.filter((message) => message.key !== key);
+        this._messages = this._messages.filter((message) => message.key !== key);
 
         this.render();
     }
 
     render() {
-        this.root.render(<MessageContainer messages={this.messages} />);
+        render(<MessageContainer messages={this._messages} />, this._div);
     }
 
     success(options: IMessageMethodOptions) {

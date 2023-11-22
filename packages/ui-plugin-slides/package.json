@@ -33,13 +33,11 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@wendellhu/redi": "^0.12.11",
-        "react": "^18.2.0",
-        "react-dom": "^18.2.0"
+        "react": "^18.2.0"
     },
     "devDependencies": {
         "@types/node": "^20.9.0",
         "@types/react": "^18.2.37",
-        "@types/react-dom": "^18.2.15",
         "@vitest/coverage-istanbul": "^0.34.6",
         "less": "^4.2.0",
         "ts-node": "^10.9.1",

@@ -65,6 +65,13 @@ export * from './shared';
 // #region sheet
 
 export { Range } from './sheets/range';
+export {
+    deserializeRangeWithSheet,
+    serializeRange,
+    serializeRangeToRefString,
+    serializeRangeWithSheet,
+    serializeRangeWithSpreadsheet,
+} from './sheets/reference';
 export { Styles } from './sheets/styles';
 export { SheetViewModel } from './sheets/view-model';
 export { getWorksheetUID, Workbook } from './sheets/workbook';

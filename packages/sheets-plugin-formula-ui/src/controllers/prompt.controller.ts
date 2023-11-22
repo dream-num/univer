@@ -1,6 +1,5 @@
 import { MoveCursorOperation, TextSelectionManagerService } from '@univerjs/base-docs';
 import {
-    deserializeRangeWithSheet,
     FormulaEngineService,
     IFunctionInfo,
     includeFormulaLexerToken,
@@ -9,7 +8,6 @@ import {
     matchToken,
     normalizeSheetName,
     sequenceNodeType,
-    serializeRangeToRefString,
 } from '@univerjs/base-formula-engine';
 import {
     DeviceInputEventType,
@@ -27,6 +25,7 @@ import {
 } from '@univerjs/base-sheets';
 import { KeyCode, MetaKeys } from '@univerjs/base-ui';
 import {
+    deserializeRangeWithSheet,
     Direction,
     Disposable,
     DisposableCollection,
@@ -44,6 +43,7 @@ import {
     LocaleService,
     Nullable,
     OnLifecycle,
+    serializeRangeToRefString,
     ThemeService,
     toDisposable,
     Tools,

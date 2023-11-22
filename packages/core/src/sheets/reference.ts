@@ -1,10 +1,8 @@
-import { IRange, Tools } from '@univerjs/core';
+import { Tools } from '../shared/tools';
+import { IRange } from '../types/interfaces/i-range';
 
-import { UNIT_NAME_REGEX } from './regex';
-import { matchToken } from './token';
-
+const UNIT_NAME_REGEX = '\'?\\[((?![\\/?:"<>|*\\\\]).)*\\]';
 const $ROW_REGEX = /[^0-9]/g;
-
 const $COLUMN_REGEX = /[^A-Za-z]/g;
 
 export interface IGridRangeName {
@@ -94,7 +92,7 @@ export function deserializeRangeWithSheet(refString: string): IGridRangeName {
         refBody = refString;
     }
 
-    const colonIndex = refBody.indexOf(matchToken.COLON);
+    const colonIndex = refBody.indexOf(':');
 
     if (colonIndex === -1) {
         const grid = singleReferenceToGrid(refBody);

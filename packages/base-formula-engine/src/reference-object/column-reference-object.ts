@@ -1,7 +1,6 @@
-import { IRange } from '@univerjs/core';
+import { deserializeRangeWithSheet, IRange } from '@univerjs/core';
 
 import { ErrorType } from '../basics/error-type';
-import { deserializeRangeWithSheet } from '../basics/reference';
 import { ErrorValueObject } from '../other-object/error-value-object';
 import { BaseReferenceObject } from './base-reference-object';
 

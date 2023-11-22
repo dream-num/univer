@@ -634,7 +634,25 @@ export function fillLoopSeries(data: Array<Nullable<ICellData>>, len: number, st
     return applyData;
 }
 
-// TODO@Dushusir: add step
+/**
+ *  TODO@Dushusir: add step
+ * 
+ *  TODO@Dushusir: 插入、下拉填充、粘贴公式规则
+
+    1. 先左侧匹配，再上面匹配，没有就空
+    2. 左边或者上边第一个位置开始，匹配一段连续的范围
+    3. 每个范围（无论是整行整列还是多行多列）中先取primary位置的判断结果，再依次设置其他位置的公式偏移量
+    4. 包含绝对引用的范围信息无需偏移
+
+    特殊情况
+    1. 外部复制或者复制纯文本，再粘贴公式，无需计算偏移量
+    2. 选择单个范围插入公式：整行或者整列，先取primary位置的判断结果，再依次设置其他位置的公式偏移量；多行多列，只取primary位置的判断结果，并且进入编辑模式
+
+ * @param data 
+ * @param len 
+ * @param direction 
+ * @returns 
+ */
 export function fillCopyFormula(data: Array<Nullable<ICellData>>, len: number, direction: Direction) {
     const applyData = [];
 
@@ -648,6 +666,7 @@ export function fillCopyFormula(data: Array<Nullable<ICellData>>, len: number, d
             if (originalFormula) {
                 const shiftedFormula = shiftFormula(originalFormula, i, direction);
                 d.f = shiftedFormula;
+                d.v = null;
                 if (direction === Direction.DOWN || direction === Direction.RIGHT) {
                     applyData.push(d);
                 } else {

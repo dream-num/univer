@@ -24167,7 +24167,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                     3: {
                         v: 2,
                         m: '2',
-                        f: '=SUM(B1)',
+                        f: '=SUM(A1)',
                     },
                 },
                 1: {
@@ -24186,11 +24186,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                     0: {
                         v: 444,
                         m: '444',
-                    },
-                    11: {
-                        v: '其他情况',
-                        m: '其他情况',
-                        f: '=IF(C3="条件1", IF(D3>10, SUM(E3:E12), VLOOKUP(F3, G3:H12, 2, FALSE)), "其他情况")',
                     },
                 },
             },

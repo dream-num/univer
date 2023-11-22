@@ -58,6 +58,8 @@ export interface IUnitSheetNameMap {
  */
 export interface IFormulaDataItem {
     f: string; // formulaString
+    x?: number; // 距离x 方向的偏移量
+    y?: number; // offset
     // si: string; // formulaId,
     // row: number;
     // column: number;

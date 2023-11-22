@@ -113,6 +113,7 @@ export class CalculateController extends Disposable {
         // Convert the formula ID to formula string
         cellData.forValue((r, c, cell) => {
             const formulaId = cell?.f || '';
+            // TODO@Dushusir: remove formulaIdMap
             if (formulaIdMap.has(formulaId)) {
                 cellData.setValue(r, c, { f: formulaIdMap.get(formulaId) as string });
             }

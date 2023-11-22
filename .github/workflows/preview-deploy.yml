@@ -22,7 +22,7 @@ jobs:
               with:
                   workflow: ${{ github.event.workflow_run.workflow_id }}
                   run_id: ${{ github.event.workflow_run.id }}
-                  name: pr
+                  name: pr-id
 
             - name: save PR id
               id: pr

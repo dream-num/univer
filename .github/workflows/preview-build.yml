@@ -84,12 +84,12 @@ jobs:
               if: ${{ always() }}
               uses: actions/upload-artifact@v3
               with:
-                  name: pr
+                  name: pr-id
                   path: ./pr-id.txt
 
             - name: Upload PR branch name
               if: ${{ always() }}
               uses: actions/upload-artifact@v3
               with:
-                  name: pr
+                  name: pr-branch-name
                   path: ./pr-branch-name.txt

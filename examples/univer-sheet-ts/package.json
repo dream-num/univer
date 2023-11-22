@@ -31,14 +31,9 @@
         "@univerjs/sheets-plugin-numfmt": "workspace:*",
         "@univerjs/ui-plugin-docs": "workspace:*",
         "@univerjs/ui-plugin-sheets": "workspace:*",
-        "@wendellhu/redi": "^0.12.11",
-        "react": "^18.2.0",
-        "react-dom": "^18.2.0"
+        "@wendellhu/redi": "^0.12.11"
     },
     "devDependencies": {
-        "@types/node": "^20.9.0",
-        "@types/react": "^18.2.37",
-        "@types/react-dom": "^18.2.15",
         "esbuild": "^0.19.5",
         "esbuild-plugin-clean": "^1.0.1",
         "esbuild-plugin-copy": "^2.1.1",

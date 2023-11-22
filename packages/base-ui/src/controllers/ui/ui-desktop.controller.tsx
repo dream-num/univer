@@ -2,8 +2,8 @@ import { IRenderManagerService } from '@univerjs/base-render';
 import { Disposable, LifecycleService, LifecycleStages, toDisposable } from '@univerjs/core';
 import { IDisposable, Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
+import { render as createRoot, unmount } from 'rc-util/lib/React/render';
 import React, { ComponentType } from 'react';
-import { createRoot } from 'react-dom/client';
 import { Observable, Subject } from 'rxjs';
 
 import { IFocusService } from '../../services/focus/focus.service';
@@ -173,7 +173,6 @@ function bootStrap(
         mountContainer = createContainer('univer');
     }
 
-    const root = createRoot(mountContainer);
     const ConnectedApp = connectInjector(App, injector);
     const desktopUIController = injector.get(IUIController) as IDesktopUIController;
     const onRendered = (canvasElement: HTMLElement) => callback(canvasElement, mountContainer);
@@ -184,7 +183,7 @@ function bootStrap(
         const footerComponents = desktopUIController.getFooterComponents();
         // const sidebarComponents = desktopUIController.getSidebarComponents();
         const headerMenuComponents = desktopUIController.getHeaderMenuComponents();
-        root.render(
+        createRoot(
             <ConnectedApp
                 {...options}
                 mountContainer={mountContainer}
@@ -193,7 +192,8 @@ function bootStrap(
                 contentComponents={contentComponents}
                 onRendered={onRendered}
                 footerComponents={footerComponents}
-            />
+            />,
+            mountContainer
         );
     }
 
@@ -201,7 +201,7 @@ function bootStrap(
     render();
 
     return toDisposable(() => {
-        root.unmount();
+        unmount(mountContainer);
         updateSubscription.unsubscribe();
     });
 }

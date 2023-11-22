@@ -19,7 +19,8 @@
             },
             "./*": {
                 "import": "./lib/esm/*",
-                "require": "./lib/cjs/*"
+                "require": "./lib/cjs/*",
+                "types": "./lib/types/index.d.ts"
             }
         }
     },

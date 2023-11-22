@@ -151,6 +151,10 @@ export class FormulaEngineService extends Disposable {
         return this.lexerTreeBuilder.checkIfAddBracket(formulaString);
     }
 
+    getFunctionAndParameter(formulaString: string, strIndex: number) {
+        return this.lexerTreeBuilder.getFunctionAndParameter(formulaString, strIndex);
+    }
+
     /**
      *
      * @param unitId

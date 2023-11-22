@@ -309,8 +309,6 @@ export class StartEditController extends Disposable {
 
         const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
 
-        const scrollBar = viewportMain?.getScrollBar() as Nullable<ScrollBar>;
-
         const clientHeight =
             document.body.clientHeight -
             startY -
@@ -320,20 +318,9 @@ export class StartEditController extends Disposable {
 
         const clientWidth = document.body.clientWidth - startX - canvasOffset.left;
 
-        editorWidth += scrollBar?.barSize || 0;
-
-        if (editorWidth > clientWidth) {
-            editorWidth = clientWidth;
-        }
-
         let physicHeight = editorHeight;
 
-        scene.transformByState({
-            width: editorWidth,
-            height: editorHeight,
-        });
-
-        documentComponent.resize(editorWidth, editorHeight);
+        let scrollBar = viewportMain?.getScrollBar() as Nullable<ScrollBar>;
 
         if (physicHeight > clientHeight) {
             physicHeight = clientHeight;
@@ -343,8 +330,22 @@ export class StartEditController extends Disposable {
                 viewportMain?.resetSizeAndScrollBar();
             }
         } else {
+            scrollBar = null;
             viewportMain?.getScrollBar()?.dispose();
         }
+
+        editorWidth += scrollBar?.barSize || 0;
+
+        if (editorWidth > clientWidth) {
+            editorWidth = clientWidth;
+        }
+
+        scene.transformByState({
+            width: editorWidth,
+            height: editorHeight,
+        });
+
+        documentComponent.resize(editorWidth, editorHeight);
 
         this._addBackground(scene, editorWidth, editorHeight, fill);
 

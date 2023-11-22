@@ -2,7 +2,6 @@ import { MoveCursorOperation, TextSelectionManagerService } from '@univerjs/base
 import {
     deserializeRangeWithSheet,
     FormulaEngineService,
-    IFunctionInfo,
     includeFormulaLexerToken,
     ISequenceNode,
     isFormulaLexerToken,
@@ -70,17 +69,17 @@ import { HelpFunctionOperation } from '../commands/operations/help-function.oper
 import { SearchFunctionOperation } from '../commands/operations/search-function.operation';
 import { META_KEY_CTRL_AND_SHIFT } from '../common/prompt';
 import { FORMULA_REF_SELECTION_PLUGIN_NAME, getFormulaRefSelectionStyle } from '../common/selection';
-import { IDescriptionService, ISearchItem } from '../services/description.service';
+import { IDescriptionService } from '../services/description.service';
 import { IFormulaPromptService } from '../services/prompt.service';
 
-interface IFunctionPanelParam {
-    visibleSearch: boolean;
-    visibleHelp: boolean;
-    searchText: string;
-    paramIndex: number;
-    functionInfo?: IFunctionInfo;
-    searchList?: ISearchItem[];
-}
+// interface IFunctionPanelParam {
+//     visibleSearch: boolean;
+//     visibleHelp: boolean;
+//     searchText: string;
+//     paramIndex: number;
+//     functionInfo?: IFunctionInfo;
+//     searchList?: ISearchItem[];
+// }
 
 interface IRefSelection {
     refIndex: number;
@@ -94,6 +93,13 @@ enum ArrowMoveAction {
     moveRefReady,
     movingRef,
     exitInput,
+}
+
+enum InputPanelState {
+    InitialState,
+    keyNormal,
+    keyArrow,
+    mouse,
 }
 
 @OnLifecycle(LifecycleStages.Steady, PromptController)
@@ -129,6 +135,8 @@ export class PromptController extends Disposable {
     private _numberColor = '';
 
     private _insertSelections: ISelectionWithStyle[] = [];
+
+    private _inputPanelState: InputPanelState = InputPanelState.InitialState;
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
@@ -246,11 +254,11 @@ export class PromptController extends Disposable {
 
                     this._highlightFormula(currentBody);
 
-                    if (this._isLockedOnSelectionInsertRefString) {
-                        return;
-                    }
+                    // if (this._isLockedOnSelectionInsertRefString) {
+                    //     return;
+                    // }
                     // TODO@Dushusir: use real text info
-                    this._setFunctionPanel(dataStream);
+                    this._changeFunctionPanelState();
                 })
             )
         );
@@ -272,10 +280,14 @@ export class PromptController extends Disposable {
                     if (
                         ![KeyCode.ARROW_DOWN, KeyCode.ARROW_UP, KeyCode.ARROW_LEFT, KeyCode.ARROW_RIGHT].includes(
                             e.which
-                        ) &&
-                        this._arrowMoveActionState !== ArrowMoveAction.moveCursor
+                        )
                     ) {
-                        this._arrowMoveActionState = ArrowMoveAction.moveRefReady;
+                        if (this._arrowMoveActionState !== ArrowMoveAction.moveCursor) {
+                            this._arrowMoveActionState = ArrowMoveAction.moveRefReady;
+                        }
+                        this._inputPanelState = InputPanelState.keyNormal;
+                    } else {
+                        this._inputPanelState = InputPanelState.keyArrow;
                     }
                 })
             )
@@ -432,34 +444,122 @@ export class PromptController extends Disposable {
     private _initAcceptFormula() {
         this.disposeWithMe(
             toDisposable(
-                this._formulaPromptService.acceptFormulaName$.subscribe((name: string) => {
-                    console.log(`TODO: set ${name} to cell editor`);
+                this._formulaPromptService.acceptFormulaName$.subscribe((formulaString: string) => {
+                    console.log(`TODO: set ${formulaString} to cell editor`);
+
+                    const activeRange = this._textSelectionRenderManager.getActiveRange();
+
+                    if (activeRange == null) {
+                        this._hideFunctionPanel();
+                        return;
+                    }
+
+                    const { startOffset } = activeRange;
+
+                    const nodeIndex = this._searchSequenceIndex(this._lastSequenceNodes, startOffset - 2);
+                    const node = this._lastSequenceNodes[nodeIndex];
+
+                    if (node == null || typeof node === 'string') {
+                        this._hideFunctionPanel();
+                        return;
+                    }
+
+                    const difference = formulaString.length - node.token.length;
+
+                    node.token = formulaString;
+
+                    node.endIndex += difference;
+
+                    this._lastSequenceNodes.splice(nodeIndex + 1, 0, matchToken.OPEN_BRACKET);
+
+                    const formulaStringCount = formulaString.length + 1;
+
+                    for (let i = nodeIndex + 2, len = this._lastSequenceNodes.length; i < len; i++) {
+                        const node = this._lastSequenceNodes[i];
+                        if (typeof node === 'string') {
+                            continue;
+                        }
+
+                        node.startIndex += formulaStringCount;
+                        node.endIndex += formulaStringCount;
+                    }
+
+                    this._sycToEditor(this._lastSequenceNodes, node.endIndex + 2);
                 })
             )
         );
     }
 
-    private _showFunctionPanel(dataStream: string) {
+    private _changeFunctionPanelState() {
         const activeRange = this._textSelectionRenderManager.getActiveRange();
 
         if (activeRange == null) {
+            this._hideFunctionPanel();
             return;
         }
 
         const { startOffset } = activeRange;
 
         const currentSequenceNode =
-            this._lastSequenceNodes[this._searchSequenceIndex(this._lastSequenceNodes, startOffset - 1)];
+            this._lastSequenceNodes[this._searchSequenceIndex(this._lastSequenceNodes, startOffset - 2)];
 
         if (currentSequenceNode == null) {
+            this._hideFunctionPanel();
             return;
         }
 
         if (typeof currentSequenceNode !== 'string' && currentSequenceNode.nodeType === sequenceNodeType.FUNCTION) {
-            console.log('similar function');
+            const token = currentSequenceNode.token.toUpperCase();
+
+            if (this._inputPanelState === InputPanelState.keyNormal) {
+                // show search function panel
+                const searchList = this._descriptionService.getSearchListByName(token);
+                this._hideFunctionPanel();
+                if (searchList == null || searchList.length === 0) {
+                    return;
+                }
+                this._commandService.executeCommand(SearchFunctionOperation.id, {
+                    visible: true,
+                    searchText: token,
+                    searchList,
+                });
+            } else if (this._descriptionService.hasFunction(token)) {
+                // show help function panel
+                this._changeHelpFunctionPanelState(token, -1);
+            }
+
+            return;
         }
 
-        console.log('must search param');
+        const currentBody = this._getCurrentBody();
+
+        const dataStream = currentBody?.dataStream || '';
+
+        const functionAndParameter = this._formulaEngineService.getFunctionAndParameter(dataStream, startOffset - 1);
+
+        if (functionAndParameter == null) {
+            this._hideFunctionPanel();
+            return;
+        }
+
+        const { functionName, paramIndex } = functionAndParameter;
+
+        this._changeHelpFunctionPanelState(functionName.toUpperCase(), paramIndex);
+    }
+
+    private _changeHelpFunctionPanelState(token: string, paramIndex: number) {
+        const functionInfo = this._descriptionService.getFunctionInfo(token);
+        this._hideFunctionPanel();
+        if (functionInfo == null) {
+            return;
+        }
+
+        // show help function panel
+        this._commandService.executeCommand(HelpFunctionOperation.id, {
+            visible: true,
+            paramIndex,
+            functionInfo,
+        });
     }
 
     private _hideFunctionPanel() {
@@ -473,60 +573,60 @@ export class PromptController extends Disposable {
         });
     }
 
-    // TODO@Dushusir: remove after use real text info
-    private _setFunctionPanel(currentInputValue: string) {
-        let param: IFunctionPanelParam = {
-            visibleSearch: false,
-            visibleHelp: false,
-            searchText: '',
-            paramIndex: 0,
-            functionInfo: {} as IFunctionInfo,
-            searchList: [],
-        };
+    // // TODO@Dushusir: remove after use real text info
+    // private _setFunctionPanel(currentInputValue: string) {
+    //     let param: IFunctionPanelParam = {
+    //         visibleSearch: false,
+    //         visibleHelp: false,
+    //         searchText: '',
+    //         paramIndex: 0,
+    //         functionInfo: {} as IFunctionInfo,
+    //         searchList: [],
+    //     };
 
-        if (this._getContextState()) {
-            currentInputValue = currentInputValue.split('\r\n')[0].toLocaleUpperCase();
+    //     if (this._getContextState()) {
+    //         currentInputValue = currentInputValue.split('\r\n')[0].toLocaleUpperCase();
 
-            const searchText = currentInputValue.substring(1);
+    //         const searchText = currentInputValue.substring(1);
 
-            // TODO@Dushusir: remove after use real text info
-            const matchList = ['SUM', 'AVERAGE'];
+    //         // TODO@Dushusir: remove after use real text info
+    //         const matchList = ['SUM', 'AVERAGE'];
 
-            // help function
-            if (matchList.includes(searchText)) {
-                const paramIndex = Math.random() > 0.5 ? 0 : 1;
+    //         // help function
+    //         if (matchList.includes(searchText)) {
+    //             const paramIndex = Math.random() > 0.5 ? 0 : 1;
 
-                const functionInfo = this._descriptionService.getFunctionInfo(searchText);
-                param = {
-                    visibleSearch: false,
-                    visibleHelp: !!functionInfo,
-                    searchText,
-                    paramIndex,
-                    functionInfo,
-                };
-            } else {
-                const searchList = this._descriptionService.getSearchListByName(searchText);
-                param = {
-                    visibleSearch: searchList.length > 0,
-                    visibleHelp: false,
-                    searchText,
-                    paramIndex: 0,
-                    searchList,
-                };
-            }
-        }
+    //             const functionInfo = this._descriptionService.getFunctionInfo(searchText);
+    //             param = {
+    //                 visibleSearch: false,
+    //                 visibleHelp: !!functionInfo,
+    //                 searchText,
+    //                 paramIndex,
+    //                 functionInfo,
+    //             };
+    //         } else {
+    //             const searchList = this._descriptionService.getSearchListByName(searchText);
+    //             param = {
+    //                 visibleSearch: searchList.length > 0,
+    //                 visibleHelp: false,
+    //                 searchText,
+    //                 paramIndex: 0,
+    //                 searchList,
+    //             };
+    //         }
+    //     }
 
-        this._commandService.executeCommand(SearchFunctionOperation.id, {
-            visible: param.visibleSearch,
-            searchText: param.searchText,
-            searchList: param.searchList,
-        });
-        this._commandService.executeCommand(HelpFunctionOperation.id, {
-            visible: param.visibleHelp,
-            paramIndex: param.paramIndex,
-            functionInfo: param.functionInfo,
-        });
-    }
+    //     this._commandService.executeCommand(SearchFunctionOperation.id, {
+    //         visible: param.visibleSearch,
+    //         searchText: param.searchText,
+    //         searchList: param.searchList,
+    //     });
+    //     this._commandService.executeCommand(HelpFunctionOperation.id, {
+    //         visible: param.visibleHelp,
+    //         paramIndex: param.paramIndex,
+    //         functionInfo: param.functionInfo,
+    //     });
+    // }
 
     /**
      * If the cursor is located at a formula token,
@@ -1333,6 +1433,8 @@ export class PromptController extends Disposable {
             toDisposable(
                 documentComponent.onPointerDownObserver.add(() => {
                     this._arrowMoveActionState = ArrowMoveAction.moveCursor;
+
+                    this._inputPanelState = InputPanelState.mouse;
                 })
             )
         );
@@ -1349,6 +1451,10 @@ export class PromptController extends Disposable {
                     const { keycode, metaKey } = params;
 
                     if (keycode === KeyCode.ENTER) {
+                        if (this._formulaPromptService.isSearching()) {
+                            this._formulaPromptService.accept(true);
+                            return;
+                        }
                         this._editorBridgeService.changeVisible({
                             visible: false,
                             eventType: DeviceInputEventType.Keyboard,
@@ -1360,6 +1466,10 @@ export class PromptController extends Disposable {
                         return;
                     }
                     if (keycode === KeyCode.TAB) {
+                        if (this._formulaPromptService.isSearching()) {
+                            this._formulaPromptService.accept(true);
+                            return;
+                        }
                         this._editorBridgeService.changeVisible({
                             visible: false,
                             eventType: DeviceInputEventType.Keyboard,
@@ -1369,6 +1479,17 @@ export class PromptController extends Disposable {
                             direction: Direction.RIGHT,
                         });
                         return;
+                    }
+
+                    if (this._formulaPromptService.isSearching()) {
+                        if (keycode === KeyCode.ARROW_DOWN) {
+                            this._formulaPromptService.navigate({ direction: Direction.DOWN });
+                            return;
+                        }
+                        if (keycode === KeyCode.ARROW_UP) {
+                            this._formulaPromptService.navigate({ direction: Direction.UP });
+                            return;
+                        }
                     }
 
                     if (this._arrowMoveActionState === ArrowMoveAction.moveCursor) {

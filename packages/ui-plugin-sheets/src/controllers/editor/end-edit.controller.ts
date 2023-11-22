@@ -155,7 +155,8 @@ export class EndEditController extends Disposable {
             let newDataStream = lastString === DEFAULT_EMPTY_DOCUMENT_VALUE ? data.substring(0, data.length - 2) : data;
 
             if (isFormulaString(newDataStream)) {
-                if (this._formulaEngineService.checkIfAddBracket(newDataStream)) {
+                const bracketCount = this._formulaEngineService.checkIfAddBracket(newDataStream);
+                for (let i = 0; i < bracketCount; i++) {
                     newDataStream += matchToken.CLOSE_BRACKET;
                 }
 

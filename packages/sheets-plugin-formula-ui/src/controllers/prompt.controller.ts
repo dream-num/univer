@@ -9,13 +9,7 @@ import {
     normalizeSheetName,
     sequenceNodeType,
 } from '@univerjs/base-formula-engine';
-import {
-    DeviceInputEventType,
-    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
-    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-    IRenderManagerService,
-    ITextSelectionRenderManager,
-} from '@univerjs/base-render';
+import { DeviceInputEventType, IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/base-render';
 import {
     convertSelectionDataToRange,
     getNormalSelectionStyle,
@@ -29,6 +23,8 @@ import {
     Direction,
     Disposable,
     DisposableCollection,
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     FOCUSING_EDITOR_INPUT_FORMULA,
     ICommandInfo,
     ICommandService,

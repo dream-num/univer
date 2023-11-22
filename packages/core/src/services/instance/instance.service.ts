@@ -14,6 +14,7 @@ export const enum DocumentType {
     UNKNOWN = 0,
     DOC = 1,
     SHEET = 2,
+    // eslint-disable-next-line no-magic-numbers
     SLIDE = 3,
 }
 
@@ -149,10 +150,12 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
 
     changeDoc(unitId: string, doc: DocumentModel): void {
         const oldDoc = this._docs.find((doc) => doc.getUnitId() === unitId);
+
         if (oldDoc != null) {
             const index = this._docs.indexOf(oldDoc);
             this._docs.splice(index, 1);
         }
+
         this.addDoc(doc);
     }
 

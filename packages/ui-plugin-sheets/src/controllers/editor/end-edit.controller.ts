@@ -1,18 +1,14 @@
 import { MoveCursorOperation } from '@univerjs/base-docs';
 import { FormulaEngineService, matchToken } from '@univerjs/base-formula-engine';
-import {
-    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
-    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-    IMouseEvent,
-    IPointerEvent,
-    IRenderManagerService,
-} from '@univerjs/base-render';
+import { IMouseEvent, IPointerEvent, IRenderManagerService } from '@univerjs/base-render';
 import { SetRangeValuesCommand } from '@univerjs/base-sheets';
 import { KeyCode } from '@univerjs/base-ui';
 import {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     Direction,
     Disposable,
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     DocumentModel,
     FOCUSING_EDITOR,
     FOCUSING_EDITOR_BUT_HIDDEN,
@@ -22,6 +18,7 @@ import {
     ICommandService,
     IContextService,
     isFormulaString,
+    IUndoRedoService,
     IUniverInstanceService,
     LifecycleStages,
     Nullable,
@@ -65,7 +62,8 @@ export class EndEditController extends Disposable {
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @IContextService private readonly _contextService: IContextService,
         @ICellEditorManagerService private readonly _cellEditorManagerService: ICellEditorManagerService,
-        @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService
+        @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService,
+        @IUndoRedoService private _undoRedoService: IUndoRedoService
     ) {
         super();
 
@@ -200,6 +198,8 @@ export class EndEditController extends Disposable {
         this._cellEditorManagerService.setState({
             show: param.visible,
         });
+        this._undoRedoService.clearUndoRedo(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
+        this._undoRedoService.clearUndoRedo(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
     }
 
     private _moveCursor(keycode?: KeyCode) {

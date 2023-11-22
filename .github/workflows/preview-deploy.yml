@@ -31,13 +31,11 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v3
 
-            - name: Setup demo cache
-              uses: actions/cache@v3
+            - name: Restore demo cache
+              uses: actions/cache/restore@v3
               with:
                   path: .workspace
                   key: ${{ runner.os }}-demo-${{ steps.pr.outputs.id }}
-                  restore-keys: |
-                      ${{ runner.os }}-demo-
 
             - name: 🚀 Deploy to Vercel (demo)
               uses: amondnet/vercel-action@v25
@@ -47,13 +45,11 @@ jobs:
                   vercel-org-id: ${{ secrets.ORG_ID}}
                   vercel-project-id: ${{ secrets.PROJECT_ID}}
 
-            - name: Setup storybook cache
-              uses: actions/cache@v3
+            - name: Restore storybook cache
+              uses: actions/cache/restore@v3
               with:
                   path: storybook-static
                   key: ${{ runner.os }}-storybook-${{ steps.pr.outputs.id }}
-                  restore-keys: |
-                      ${{ runner.os }}-storybook-
 
             - name: 🚀 Deploy to Vercel (storybook)
               uses: amondnet/vercel-action@v25

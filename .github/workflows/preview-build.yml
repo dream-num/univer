@@ -61,25 +61,21 @@ jobs:
                   cp -r ./examples/univer-sheet-ts/local .workspace/sheet
                   cp -r ./examples/univer-slide-ts/local .workspace/slide
 
-            - name: Setup demo cache
-              uses: actions/cache@v3
+            - name: Save demo cache
+              uses: actions/cache/save@v3
               with:
                   path: .workspace
                   key: ${{ runner.os }}-demo-${{ github.event.pull_request.number }}
-                  restore-keys: |
-                      ${{ runner.os }}-demo-
 
             # build storybook
             - name: 📦 Build storybook
               run: pnpm run build:storybook
 
-            - name: Setup storybook cache
-              uses: actions/cache@v3
+            - name: Save storybook cache
+              uses: actions/cache/save@v3
               with:
                   path: storybook-static
                   key: ${{ runner.os }}-storybook-${{ github.event.pull_request.number }}
-                  restore-keys: |
-                      ${{ runner.os }}-storybook-
 
     set-pr-id:
         name: Set PR ID

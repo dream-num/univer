@@ -133,6 +133,11 @@ export class ObjectMatrix<T> {
         objectArray.set(column, value as T);
     }
 
+    /**
+     * ！！
+     * Please +1 ‘！’, who fell into this pit.
+     * @deprecated use `realDelete` or `splice`
+     */
     deleteValue(row: number, column: number): void {
         const objectArray = this.getRow(row);
         if (objectArray) {

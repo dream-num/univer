@@ -52,7 +52,7 @@ export class NumfmtService extends Disposable {
         if (value) {
             model.setValue(row, col, value);
         } else {
-            model.deleteValue(row, col);
+            model.realDeleteValue(row, col);
         }
     }
 

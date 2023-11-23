@@ -74,46 +74,46 @@ describe('test case in apply utils', () => {
             const removedTextRuns = deleteTextRuns(body as IDocumentBody, 10, 20);
 
             expect(removedTextRuns.length).toBe(0);
-            expect(body?.textRuns[2].st).toBe(20);
-            expect(body?.textRuns[2].ed).toBe(30);
+            expect(body?.textRuns![2].st).toBe(20);
+            expect(body?.textRuns![2].ed).toBe(30);
         });
 
         it('the inserted textRun is bigger than one testRuns', async () => {
             const removeTextRuns = deleteTextRuns(body as IDocumentBody, 20, 5);
 
             expect(removeTextRuns.length).toBe(2);
-            expect(body?.textRuns[0].ed).toBe(5);
-            expect(body?.textRuns[1].st).toBe(10);
-            expect(body?.textRuns[1].ed).toBe(20);
+            expect(body?.textRuns![0].ed).toBe(5);
+            expect(body?.textRuns![1].st).toBe(10);
+            expect(body?.textRuns![1].ed).toBe(20);
         });
 
         it('the inserted textRun is smaller than one testRuns', async () => {
             const removeTextRuns = deleteTextRuns(body as IDocumentBody, 2, 16);
 
             expect(removeTextRuns.length).toBe(1);
-            expect(body?.textRuns[1].ed).toBe(18);
-            expect(body?.textRuns[2].st).toBe(28);
-            expect(body?.textRuns[2].ed).toBe(38);
+            expect(body?.textRuns![1].ed).toBe(18);
+            expect(body?.textRuns![2].st).toBe(28);
+            expect(body?.textRuns![2].ed).toBe(38);
         });
 
         it('the inserted textRun is across two testRuns', async () => {
             const removeTextRuns = deleteTextRuns(body as IDocumentBody, 13, 5);
 
             expect(removeTextRuns.length).toBe(2);
-            expect(body?.textRuns[0].ed).toBe(5);
-            expect(body?.textRuns[1].st).toBe(5);
-            expect(body?.textRuns[1].ed).toBe(7);
-            expect(body?.textRuns[2].st).toBe(17);
-            expect(body?.textRuns[2].ed).toBe(27);
+            expect(body?.textRuns![0].ed).toBe(5);
+            expect(body?.textRuns![1].st).toBe(5);
+            expect(body?.textRuns![1].ed).toBe(7);
+            expect(body?.textRuns![2].st).toBe(17);
+            expect(body?.textRuns![2].ed).toBe(27);
         });
 
         it('the inserted textRun is across two testRuns that scattered', async () => {
             const removeTextRuns = deleteTextRuns(body as IDocumentBody, 20, 18);
 
             expect(removeTextRuns.length).toBe(2);
-            expect(body?.textRuns[1].ed).toBe(18);
-            expect(body?.textRuns[2].st).toBe(18);
-            expect(body?.textRuns[2].ed).toBe(20);
+            expect(body?.textRuns![1].ed).toBe(18);
+            expect(body?.textRuns![2].st).toBe(18);
+            expect(body?.textRuns![2].ed).toBe(20);
         });
     });
 

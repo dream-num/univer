@@ -122,7 +122,13 @@ function MenuOptionsWrapper(props: IBaseMenuProps) {
 
             return (
                 <DesignMenuItem key={key} eventKey={key} className={_className} onClick={handleClick}>
-                    <span className={clsx(styles.menuItemContent, styles.menuItemSelectable)}>
+                    <span
+                        className={clsx(styles.menuItemContent, {
+                            [styles.menuItemSelectable]: !(
+                                typeof option.label !== 'string' && !option.label?.hoverable
+                            ),
+                        })}
+                    >
                         {typeof value !== 'undefined' && String(value) === String(option.value) && (
                             <span className={styles.menuItemSelectableIcon}>
                                 <CheckMarkSingle style={{ color: 'rgb(var(--success-color))' }} />

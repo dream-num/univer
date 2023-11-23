@@ -33,7 +33,7 @@ export function ShortcutPanel() {
             const group = shortcut.group!;
             const shortcutItem: IRenderShortcutItem = {
                 title: localeService.t(shortcut.description ?? shortcut.id),
-                shortcut: shortcutService.getShortcutDisplay(shortcut.id)!,
+                shortcut: shortcutService.getShortcutDisplay(shortcut),
             };
 
             if (!/\d+_[a-zA-Z0-9]/.test(group)) {
@@ -58,6 +58,7 @@ export function ShortcutPanel() {
             })
             .sort((a, b) => a.sequence - b.sequence);
 
+        console.log('debug', toRender);
         setShortcutItems(toRender);
     }, [shortcutService, localeService]);
 

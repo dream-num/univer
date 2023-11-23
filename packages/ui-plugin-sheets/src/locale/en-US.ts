@@ -557,4 +557,33 @@ export default {
         placeholder: 'Select range or input value',
         tooltip: 'Select range',
     },
+
+    shortcut: {
+        sheet: {
+            'zoom-in': 'Zoom in',
+            'zoom-out': 'Zoom out',
+            'reset-zoom': 'Reset zoom level',
+            'select-below-cell': 'Select the cell below',
+            'select-up-cell': 'Select the cell above',
+            'select-left-cell': 'Select the left cell',
+            'select-right-cell': 'Select the right cell',
+            'select-next-cell': 'Select the next cell',
+            'select-previous-cell': 'Select the previous cell',
+            'select-up-value-cell': 'Select the cell above that has value',
+            'select-below-value-cell': 'Select the cell below that has value',
+            'select-left-value-cell': 'Select the cell left that has value',
+            'select-right-value-cell': 'Select the cell right that has value',
+            'expand-selection-down': 'Expand selection down',
+            'expand-selection-up': 'Expand selection up',
+            'expand-selection-left': 'Expand selection left',
+            'expand-selection-right': 'Expand selection right',
+            'expand-selection-to-left-gap': 'Expand selection to the left gap',
+            'expand-selection-to-below-gap': 'Expand selection to the below gap',
+            'expand-selection-to-right-gap': 'Expand selection to the right gap',
+            'expand-selection-to-up-gap': 'Expand selection to the up gap',
+            'select-all': 'Select all',
+        },
+    },
+
+    'sheet-view': 'Sheet View',
 };

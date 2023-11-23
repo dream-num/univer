@@ -3,7 +3,6 @@ import { createIdentifier, IDisposable } from '@wendellhu/redi';
 import { Observable, Subject } from 'rxjs';
 
 import { fromDocumentEvent } from '../../common/lifecycle';
-import { IFocusService } from '../focus/focus.service';
 import { IPlatformService } from '../platform/platform.service';
 import { KeyCodeToChar, MetaKeys } from './keycode';
 
@@ -36,7 +35,7 @@ export interface IShortcutService {
     shortcutChanged$: Observable<void>;
 
     registerShortcut(shortcut: IShortcutItem): IDisposable;
-    getShortcutDisplay(id: string): string | null;
+    getShortcutDisplay(shortcut: IShortcutItem): string;
     getAllShortcuts(): IShortcutItem[];
 }
 
@@ -45,16 +44,13 @@ export const IShortcutService = createIdentifier<IShortcutService>('univer.short
 export class DesktopShortcutService extends Disposable implements IShortcutService {
     private readonly _shortCutMapping = new Map<number, Set<IShortcutItem>>();
 
-    private readonly _idToShortcut = new Map<string, number>();
-
     private readonly _shortcutChanged$ = new Subject<void>();
     readonly shortcutChanged$ = this._shortcutChanged$.asObservable();
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IPlatformService private readonly _platformService: IPlatformService,
-        @IContextService private readonly _contextService: IContextService,
-        @IFocusService private readonly _focusService: IFocusService
+        @IContextService private readonly _contextService: IContextService
     ) {
         super();
 
@@ -76,29 +72,21 @@ export class DesktopShortcutService extends Disposable implements IShortcutServi
         // first map shortcut to a number, so it could be converted and fetched quickly
         const binding = this._getBindingFromItem(shortcut);
         const existing = this._shortCutMapping.get(binding);
-
         if (existing) {
             existing.add(shortcut);
         } else {
             this._shortCutMapping.set(binding, new Set([shortcut]));
         }
 
-        this._idToShortcut.set(shortcut.id, binding);
         this._emitShortcutChanged();
-
         return toDisposable(() => {
+            this._shortCutMapping.get(binding)?.delete(shortcut);
             this._emitShortcutChanged();
-            this._idToShortcut.delete(shortcut.id);
-            this._shortCutMapping.delete(binding);
         });
     }
 
-    getShortcutDisplay(id: string): string | null {
-        const binding = this._idToShortcut.get(id);
-        if (!binding) {
-            return null;
-        }
-
+    getShortcutDisplay(shortcut: IShortcutItem): string {
+        const binding = this._getBindingFromItem(shortcut);
         const ctrlKey = binding & MetaKeys.CTRL_COMMAND;
         const shiftKey = binding & MetaKeys.SHIFT;
         const altKey = binding & MetaKeys.ALT;

@@ -321,10 +321,6 @@ export const SetBorderCommand: ICommand = {
                 }
             });
         }
-        console.log('topRange', topRange, topRangeOut);
-        console.log('bottomRange', bottomRange, bottomRangeOut);
-        console.log('leftRange', leftRange, leftRangeOut);
-        console.log('rightRange', rightRange, rightRangeOut);
 
         if (!top && !bottom && !left && !right && !vertical && !horizontal) {
             setBorderStyle(topRangeOut, { b: null });

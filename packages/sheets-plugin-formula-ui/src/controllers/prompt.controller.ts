@@ -1,4 +1,4 @@
-import { MoveCursorOperation, TextSelectionManagerService } from '@univerjs/base-docs';
+import { MoveCursorOperation, ReplaceContentCommand, TextSelectionManagerService } from '@univerjs/base-docs';
 import {
     FormulaEngineService,
     includeFormulaLexerToken,
@@ -115,6 +115,8 @@ export class PromptController extends Disposable {
     private _insertSelections: ISelectionWithStyle[] = [];
 
     private _inputPanelState: InputPanelState = InputPanelState.InitialState;
+
+    private _sycToEditorTimeout: number = -1;
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
@@ -974,13 +976,23 @@ export class PromptController extends Disposable {
 
         this._isSelectionMovingRefSelections = refSelections;
 
-        this._updateEditorModel(`=${dataStream}\r\n`, textRuns);
+        // this._updateEditorModel(`=${dataStream}\r\n`, textRuns);
 
         const activeRange = this._textSelectionManagerService.getLast();
 
         if (activeRange == null) {
             return;
         }
+
+        this._commandService.executeCommand(ReplaceContentCommand.id, {
+            unitId: this._editorBridgeService.getCurrentEditorId(),
+            body: {
+                dataStream: `=${dataStream}`,
+                textRuns,
+            },
+            textRanges: [],
+            segmentId: null,
+        });
 
         const { collapsed, style } = activeRange;
 

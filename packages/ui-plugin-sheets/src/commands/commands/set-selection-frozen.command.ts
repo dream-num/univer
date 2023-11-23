@@ -18,6 +18,7 @@ import { IAccessor } from '@wendellhu/redi';
 
 import { ScrollManagerService } from '../../services/scroll-manager.service';
 
+// TODO @zw this command was duplicate with set-frozen.command.ts, should delete it
 export const SetSelectionFrozenCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-selection-frozen',

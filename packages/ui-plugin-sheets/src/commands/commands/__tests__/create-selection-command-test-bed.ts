@@ -1,8 +1,15 @@
-import { SetSelectionsOperation } from '@univerjs/base-sheets';
+import { SetFrozenMutation, SetSelectionsOperation } from '@univerjs/base-sheets';
 import { createCommandTestBed } from '@univerjs/base-sheets/commands/commands/__tests__/create-command-test-bed.js';
 import { ShortcutExperienceService } from '@univerjs/base-ui';
 import { ICommandService, IWorkbookData, LocaleType } from '@univerjs/core';
 
+import { ScrollManagerService } from '../../../services/scroll-manager.service';
+import {
+    CancelFrozenCommand,
+    SetColumnFrozenCommand,
+    SetRowFrozenCommand,
+    SetSelectionFrozenCommand,
+} from '../set-frozen.command';
 import { ExpandSelectionCommand, MoveSelectionCommand, SelectAllCommand } from '../set-selection.command';
 
 export function createSelectionCommandTestBed(workbookConfig?: IWorkbookData) {
@@ -12,6 +19,31 @@ export function createSelectionCommandTestBed(workbookConfig?: IWorkbookData) {
 
     const commandService = get(ICommandService);
     [MoveSelectionCommand, ExpandSelectionCommand, SelectAllCommand, SetSelectionsOperation].forEach((c) => {
+        commandService.registerCommand(c);
+    });
+
+    return {
+        univer,
+        get,
+        sheet,
+    };
+}
+
+export function createFrozenCommandTestBed(workbookConfig?: IWorkbookData) {
+    const { univer, get, sheet } = createCommandTestBed(workbookConfig || SIMPLE_SELECTION_WORKBOOK_DATA, [
+        [ShortcutExperienceService],
+        [ScrollManagerService],
+    ]);
+
+    const commandService = get(ICommandService);
+    [
+        SetSelectionFrozenCommand,
+        SetRowFrozenCommand,
+        SetColumnFrozenCommand,
+        CancelFrozenCommand,
+        SetSelectionsOperation,
+        SetFrozenMutation,
+    ].forEach((c) => {
         commandService.registerCommand(c);
     });
 

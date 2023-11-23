@@ -1,8 +1,10 @@
-name: 📦 CI Preview
+name: 📤 Preview Deploy
 
 on:
-    pull_request:
-        branches: [main, dev]
+    workflow_run:
+        workflows: ['📦 Preview Build']
+        types:
+            - completed
 
 permissions:
     contents: read
@@ -18,13 +20,39 @@ jobs:
             TURBO_TEAM: ${{ vars.TURBO_TEAM }}
 
         steps:
+            # Get PR ID from artifact
+            - name: download pr artifact
+              uses: dawidd6/action-download-artifact@v2
+              with:
+                  workflow: ${{ github.event.workflow_run.workflow_id }}
+                  run_id: ${{ github.event.workflow_run.id }}
+                  name: pr-id
+
+            - name: get PR id
+              id: pr
+              run: echo "id=$(<pr-id.txt)" >> $GITHUB_OUTPUT
+
+            # Get PR ID from artifact
+            - name: download pr artifact
+              uses: dawidd6/action-download-artifact@v2
+              with:
+                  workflow: ${{ github.event.workflow_run.workflow_id }}
+                  run_id: ${{ github.event.workflow_run.id }}
+                  name: pr-ref
+
+            - name: get PR ref
+              id: ref
+              run: echo "ref=$(<pr-ref.txt)" >> $GITHUB_OUTPUT
+
             - name: Checkout
               uses: actions/checkout@v3
+              with:
+                  ref: ${{ steps.ref.outputs.ref }}
 
             - name: Install Node.js
               uses: actions/setup-node@v3
               with:
-                  node-version: 16
+                  node-version: 18
 
             - name: Install pnpm
               uses: pnpm/action-setup@v2
@@ -41,18 +69,22 @@ jobs:
               uses: actions/cache@v3
               with:
                   path: ${{ env.STORE_PATH }}
-                  key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+                  key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
                   restore-keys: |
-                      ${{ runner.os }}-pnpm-store-
+                      ${{ runner.os }}-pnpm-
 
             - name: Install dependencies
               run: pnpm install
 
-            - name: 📦 Build
-              run: pnpm run build
-
+            #  ================= Deploy Demo =================
             - name: 📦 Build demo
               run: pnpm run build:demo
+
+            - name: Copy demo to workspace
+              run: |
+                  mkdir .workspace
+                  cp -r ./examples/univer-doc-ts/local .workspace/doc
+                  cp -r ./examples/univer-sheet-ts/local .workspace/sheet
 
             - name: 🚀 Deploy to Vercel (demo)
               uses: amondnet/vercel-action@v25
@@ -62,6 +94,10 @@ jobs:
                   vercel-org-id: ${{ secrets.ORG_ID}}
                   vercel-project-id: ${{ secrets.PROJECT_ID}}
 
+            # ================= Deploy Storybook =================
+            - name: 📦 Build storybook
+              run: pnpm run build:storybook
+
             - name: 🚀 Deploy to Vercel (storybook)
               uses: amondnet/vercel-action@v25
               id: vercel-storybook
@@ -70,6 +106,7 @@ jobs:
                   vercel-org-id: ${{ secrets.ORG_ID}}
                   vercel-project-id: ${{ secrets.PROJECT_ID_STORYBOOK}}
 
+            # ================= Notify Discord =================
             - name: 👾 Discord Notification
               uses: sarisia/actions-status-discord@v1
               if: ${{ success() }}
@@ -98,18 +135,19 @@ jobs:
                   status: ${{ job.status }}
                   description: |
                       CI Pipeline: Unsuccessful 📛
-                      **[View PR]**
-                      [click here](${{ github.event.pull_request.html_url }})
+                      **[PR ID]**
+                      #${{ steps.pr.outputs.id }}
                   nofail: false
                   nodetail: false
                   color: 0xd63031
                   username: GitHub Actions
 
+            # ================= Create Comment =================
             - name: 🧽 Find And Delete Comment
               uses: peter-evans/find-comment@v2
               id: fc
               with:
-                  issue-number: ${{ github.event.pull_request.number }}
+                  issue-number: ${{ steps.pr.outputs.id }}
                   comment-author: 'github-actions[bot]'
                   body-includes: View Deployment
 
@@ -117,7 +155,7 @@ jobs:
               uses: peter-evans/create-or-update-comment@v3
               with:
                   comment-id: ${{ steps.fc.outputs.comment-id }}
-                  issue-number: ${{ github.event.pull_request.number }}
+                  issue-number: ${{ steps.pr.outputs.id }}
                   body: |
                       ## View Deployment
                       | 📝 Doc | 📊 Sheet | 📽️ Slide |

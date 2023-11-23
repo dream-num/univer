@@ -129,11 +129,14 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
     id: 'sheet.mutation.set-range-values',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
-        const { cellValue, worksheetId } = params;
+        const { cellValue, worksheetId, workbookId } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-        const worksheet = workbook.getSheetBySheetId(worksheetId);
+        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
+        if (!workbook) {
+            return false;
+        }
 
+        const worksheet = workbook.getSheetBySheetId(worksheetId);
         if (!worksheet) {
             return false;
         }

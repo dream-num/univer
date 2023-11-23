@@ -23,7 +23,6 @@ export * from './object-matrix';
 export * from './permission';
 export * from './random';
 export * from './rectangle';
-export * from './reference';
 export * from './row-col-iter';
 export * from './sequence';
 export * from './serialize/index';

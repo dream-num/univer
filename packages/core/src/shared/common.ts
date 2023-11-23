@@ -127,7 +127,7 @@ export function getColorStyle(color: Nullable<IColorStyle>): Nullable<string> {
 }
 
 export function isFormulaString(value: any): boolean {
-    return Tools.isString(value) && value.indexOf('=') === 0 && value.length > 1;
+    return Tools.isString(value) && value.substring(0, 1) === '=' && value.length > 1;
 }
 
 export function isFormulaId(value: any): boolean {

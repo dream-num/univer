@@ -224,7 +224,7 @@ function updateParagraphs(
         return;
     }
 
-    const removeParagraphs = deleteParagraphs(body, textLength, currentIndex, true);
+    const removeParagraphs = deleteParagraphs(body, textLength, currentIndex);
 
     if (coverType !== UpdateDocsAttributeType.REPLACE) {
         const newUpdateParagraphs: IParagraph[] = [];

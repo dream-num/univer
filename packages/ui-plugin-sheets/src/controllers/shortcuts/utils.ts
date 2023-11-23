@@ -34,3 +34,11 @@ export function whenEditorDidNotInputFormulaActivated(contextService: IContextSe
         !contextService.getContextValue(FOCUSING_EDITOR_INPUT_FORMULA)
     );
 }
+
+export function whenEditorNotActivatedOrFormulaActivated(contextService: IContextService) {
+    return (
+        contextService.getContextValue(FOCUSING_SHEET) &&
+        (!contextService.getContextValue(FOCUSING_EDITOR) ||
+            contextService.getContextValue(FOCUSING_EDITOR_INPUT_FORMULA))
+    );
+}

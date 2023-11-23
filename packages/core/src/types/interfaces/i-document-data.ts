@@ -107,8 +107,6 @@ export interface IDocumentBody {
     customRanges?: ICustomRange[]; // plugin注册，实现针对stream的特殊逻辑，超链接，field，structured document tags， bookmark，comment
 }
 
-export interface placeHolder {}
-
 export interface IDocStyle {
     name: string;
     basedOn: string;

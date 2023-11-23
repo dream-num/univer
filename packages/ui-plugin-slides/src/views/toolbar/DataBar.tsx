@@ -1,3 +1,5 @@
+import React from 'react';
+
 type BarProps = {
     list: Array<Record<string, string>>;
     img: string;

@@ -1,6 +1,7 @@
-import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, IRenderManagerService } from '@univerjs/base-render';
+import { IRenderManagerService } from '@univerjs/base-render';
+import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { switchMap } from 'rxjs/operators';
 
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
@@ -17,6 +18,10 @@ const EDITOR_DEFAULT_POSITION = {
     left: HIDDEN_EDITOR_POSITION,
 };
 
+/**
+ * Floating editor's container.
+ * @returns
+ */
 export const EditorContainer: React.FC<ICellIEditorProps> = () => {
     const [state, setState] = useState({
         ...EDITOR_DEFAULT_POSITION,

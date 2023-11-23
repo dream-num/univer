@@ -63,6 +63,37 @@ export class SelectionManagerService implements IDisposable {
         return this._currentSelection;
     }
 
+    getLastByPlugin(pluginName: string) {
+        if (this._currentSelection == null) {
+            return;
+        }
+        return this._getLastByParam({ ...this._currentSelection, pluginName });
+    }
+
+    changePlugin(pluginName: string) {
+        if (this._currentSelection == null) {
+            return;
+        }
+        this._currentSelection = {
+            pluginName,
+            unitId: this._currentSelection?.unitId,
+            sheetId: this._currentSelection?.sheetId,
+        };
+
+        this.refresh(this._currentSelection);
+    }
+
+    changePluginNoRefresh(pluginName: string) {
+        if (this._currentSelection == null) {
+            return;
+        }
+        this._currentSelection = {
+            pluginName,
+            unitId: this._currentSelection?.unitId,
+            sheetId: this._currentSelection?.sheetId,
+        };
+    }
+
     reset() {
         if (this._currentSelection == null) {
             return;
@@ -146,6 +177,19 @@ export class SelectionManagerService implements IDisposable {
         return this._getLastByParam(this._currentSelection) as Readonly<
             Nullable<ISelectionWithStyle & { primary: ISelectionCell }>
         >;
+    }
+
+    addNoRefresh(selectionDatas: ISelectionWithStyle[]) {
+        if (this._currentSelection == null) {
+            return;
+        }
+        this._addByParam(
+            {
+                ...this._currentSelection,
+                selectionDatas,
+            },
+            false
+        );
     }
 
     add(selectionDatas: ISelectionWithStyle[]) {
@@ -272,7 +316,7 @@ export class SelectionManagerService implements IDisposable {
         return selectionData?.[selectionData.length - 1];
     }
 
-    private _addByParam(insertParam: ISelectionManagerInsertParam): void {
+    private _addByParam(insertParam: ISelectionManagerInsertParam, isRefresh = true): void {
         const { pluginName, unitId, sheetId, selectionDatas } = insertParam;
 
         if (!this._selectionInfo.has(pluginName)) {
@@ -294,7 +338,9 @@ export class SelectionManagerService implements IDisposable {
             OldSelectionDatas.push(...selectionDatas);
         }
 
-        this.refresh({ pluginName, unitId, sheetId });
+        if (isRefresh) {
+            this.refresh({ pluginName, unitId, sheetId });
+        }
     }
 
     private _replaceByParam(insertParam: ISelectionManagerInsertParam) {

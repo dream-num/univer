@@ -1,5 +1,5 @@
 import { getCellInfoInMergeData } from '@univerjs/base-render';
-import { SelectionManagerService } from '@univerjs/base-sheets';
+import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '@univerjs/base-sheets';
 import {
     Direction,
     Disposable,
@@ -48,6 +48,37 @@ export class AutoFillController extends Disposable {
         this._init();
     }
 
+    private _handleFillDrag(sourceRange: IRange, destRange: IRange) {
+        // situation 1: drag to smaller range, horizontally.
+        if (destRange.endColumn < sourceRange.endColumn && destRange.endColumn > sourceRange.startColumn) {
+            this._commandService.executeCommand(AutoClearContentCommand.id, {
+                clearRange: {
+                    startRow: destRange.startRow,
+                    endRow: destRange.endRow,
+                    startColumn: destRange.endColumn + 1,
+                    endColumn: sourceRange.endColumn,
+                },
+                selectionRange: destRange,
+            });
+            return;
+        }
+        // situation 2: drag to smaller range, vertically.
+        if (destRange.endRow < sourceRange.endRow && destRange.endRow > sourceRange.startRow) {
+            this._commandService.executeCommand(AutoClearContentCommand.id, {
+                clearRange: {
+                    startRow: destRange.endRow + 1,
+                    endRow: sourceRange.endRow,
+                    startColumn: destRange.startColumn,
+                    endColumn: destRange.endColumn,
+                },
+                selectionRange: destRange,
+            });
+            return;
+        }
+        // situation 3: drag to larger range, expand to fill
+        this._presetAndCacheData(sourceRange, destRange);
+    }
+
     private _init() {
         this._onSelectionControlFillChanged();
         this._onApplyTypeChanged();
@@ -63,6 +94,16 @@ export class AutoFillController extends Disposable {
                 this._selectionManagerService.selectionInfo$.subscribe(() => {
                     // Each range change requires re-listening
                     disposableCollection.dispose();
+
+                    const current = this._selectionManagerService.getCurrent();
+
+                    /**
+                     * Auto fill only responds to regular selections;
+                     * it does not apply to selections for features like formulas or charts.
+                     */
+                    if (current?.pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
+                        return;
+                    }
 
                     const selectionControls = this._selectionRenderService.getCurrentControls();
                     selectionControls.forEach((controlSelection) => {
@@ -109,37 +150,6 @@ export class AutoFillController extends Disposable {
                 })
             )
         );
-    }
-
-    private _handleFillDrag(sourceRange: IRange, destRange: IRange) {
-        // situation 1: drag to smaller range, horizontally.
-        if (destRange.endColumn < sourceRange.endColumn && destRange.endColumn > sourceRange.startColumn) {
-            this._commandService.executeCommand(AutoClearContentCommand.id, {
-                clearRange: {
-                    startRow: destRange.startRow,
-                    endRow: destRange.endRow,
-                    startColumn: destRange.endColumn + 1,
-                    endColumn: sourceRange.endColumn,
-                },
-                selectionRange: destRange,
-            });
-            return;
-        }
-        // situation 2: drag to smaller range, vertically.
-        if (destRange.endRow < sourceRange.endRow && destRange.endRow > sourceRange.startRow) {
-            this._commandService.executeCommand(AutoClearContentCommand.id, {
-                clearRange: {
-                    startRow: destRange.endRow + 1,
-                    endRow: sourceRange.endRow,
-                    startColumn: destRange.startColumn,
-                    endColumn: destRange.endColumn,
-                },
-                selectionRange: destRange,
-            });
-            return;
-        }
-        // situation 3: drag to larger range, expand to fill
-        this._presetAndCacheData(sourceRange, destRange);
     }
 
     // refill when apply type changed

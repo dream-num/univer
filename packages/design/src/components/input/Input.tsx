@@ -1,6 +1,7 @@
 import { CloseSingle } from '@univerjs/icons';
 import clsx from 'clsx';
 import RcInput from 'rc-input';
+import React from 'react';
 
 import styles from './index.module.less';
 

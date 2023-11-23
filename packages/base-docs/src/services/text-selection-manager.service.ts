@@ -127,7 +127,7 @@ export class TextSelectionManagerService implements IDisposable {
     }
 
     // It is will being opened when it needs to be used
-    private clear(): void {
+    private _clear(): void {
         if (this._currentSelection == null) {
             return;
         }
@@ -136,7 +136,7 @@ export class TextSelectionManagerService implements IDisposable {
     }
 
     // It is will being opened when it needs to be used
-    private remove(index: number): void {
+    private _remove(index: number): void {
         if (this._currentSelection == null) {
             return;
         }
@@ -145,7 +145,7 @@ export class TextSelectionManagerService implements IDisposable {
     }
 
     // It is will being opened when it needs to be used
-    private reset() {
+    private _reset() {
         if (this._currentSelection == null) {
             return;
         }
@@ -161,7 +161,7 @@ export class TextSelectionManagerService implements IDisposable {
     }
 
     // It is will being opened when it needs to be used
-    private resetPlugin() {
+    private _resetPlugin() {
         if (this._currentSelection == null) {
             return;
         }
@@ -222,12 +222,7 @@ export class TextSelectionManagerService implements IDisposable {
 
         const unitTextRange = this._textSelectionInfo.get(pluginName)!;
 
-        if (!unitTextRange.has(unitId)) {
-            unitTextRange.set(unitId, textRanges);
-        } else {
-            const OldTextRanges = unitTextRange.get(unitId)!;
-            OldTextRanges.splice(0, OldTextRanges.length, ...textRanges);
-        }
+        unitTextRange.set(unitId, textRanges);
     }
 
     private _clearByParam(param: ITextSelectionManagerSearchParam): void {

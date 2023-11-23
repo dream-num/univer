@@ -2,9 +2,9 @@ import { InsertSheetCommand } from '@univerjs/base-sheets';
 import { ICommandService } from '@univerjs/core';
 import { IncreaseSingle, MoreSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-import { ISheetBarService } from '../../services/sheetbar/sheetbar.service';
+import { ISheetBarService } from '../../services/sheet-bar/sheet-bar.service';
 import styles from './index.module.less';
 import { SheetBarButton } from './sheet-bar-button/SheetBarButton';
 import { SheetBarMenu } from './sheet-bar-menu/SheetBarMenu';
@@ -68,7 +68,7 @@ export const SheetBar = () => {
 
             {/* Scroll arrows */}
             {(!leftScrollState || !rightScrollState) && (
-                <div className={styles.sheetBarOptions}>
+                <div className={`${styles.sheetBarOptions} ${styles.sheetBarOptionsDivider}`}>
                     <SheetBarButton disabled={leftScrollState} onClick={handleScrollLeft}>
                         <MoreSingle style={{ transform: 'rotateZ(180deg)' }} />
                     </SheetBarButton>

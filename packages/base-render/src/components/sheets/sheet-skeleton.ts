@@ -122,7 +122,7 @@ export interface IRowAutoHeightInfo {
     autoHeight?: number;
 }
 
-interface CellOtherConfig {
+interface ICellOtherConfig {
     /**
      * textRotation
      */
@@ -388,7 +388,7 @@ export class SpreadsheetSkeleton extends Skeleton {
                 const hasUnMergedCell = hasUnMergedCellInRow(rowIndex, startColumn, endColumn, mergeData);
 
                 if (hasUnMergedCell) {
-                    const autoHeight = this.calculateRowAutoHeight(rowIndex);
+                    const autoHeight = this._calculateRowAutoHeight(rowIndex);
 
                     results.push({
                         row: rowIndex,
@@ -401,7 +401,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         return results;
     }
 
-    private calculateRowAutoHeight(rowNum: number): number {
+    private _calculateRowAutoHeight(rowNum: number): number {
         const { columnCount, columnData, mergeData, defaultRowHeight } = this._config;
         const data = Tools.createObjectArray(columnData);
         let height = defaultRowHeight;
@@ -415,7 +415,7 @@ export class SpreadsheetSkeleton extends Skeleton {
                 continue;
             }
 
-            const modelObject = this.getCellDocumentModel(rowNum, i);
+            const modelObject = this._getCellDocumentModel(rowNum, i);
             if (modelObject == null) {
                 continue;
             }
@@ -970,8 +970,9 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this.getMergeBounding(startRow, startColumn, endRow, endColumn);
     }
 
-    getBlankCellDocumentModel(row: number, column: number, isFull: boolean = false): IDocumentLayoutObject {
-        const documentModelObject = this.getCellDocumentModel(row, column);
+    // Only used for cell edit, and no need to rotate text when edit cell content!
+    getBlankCellDocumentModel(row: number, column: number, isFull: boolean = true): IDocumentLayoutObject {
+        const documentModelObject = this._getCellDocumentModel(row, column, undefined, undefined, undefined, true);
 
         if (documentModelObject != null) {
             if (documentModelObject.documentModel == null) {
@@ -1005,31 +1006,45 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
     }
 
-    getCellDocumentModel(
+    getCellDocumentModel(row: number, column: number) {
+        return this._getCellDocumentModel(row, column);
+    }
+
+    // Only used for cell edit, and no need to rotate text when edit cell content!
+    getCellDocumentModelWithFormula(row: number, column: number) {
+        return this._getCellDocumentModel(row, column, true, true, true, true);
+    }
+
+    private _getCellDocumentModel(
         row: number,
         column: number,
         isFull: boolean = false,
-        isDeepClone: boolean = false
+        isDeepClone: boolean = false,
+        formulaFirst: boolean = false,
+        ignoreTextRotation: boolean = false
     ): Nullable<IDocumentLayoutObject> {
         const cell = this._cellData.getValue(row, column);
         const style = this._styles.getStyleByCell(cell);
+
         if (!cell) {
             return;
         }
 
-        const content = cell.m || cell.v;
-
         let documentModel: Nullable<DocumentModelSimple>;
         let fontString = 'document';
-        const cellOtherConfig = this._getOtherStyle(style) as CellOtherConfig;
+        const cellOtherConfig = this._getOtherStyle(style) as ICellOtherConfig;
 
-        const textRotation: ITextRotation = cellOtherConfig.textRotation || { a: 0, v: BooleanNumber.FALSE };
+        const textRotation: ITextRotation = ignoreTextRotation
+            ? { a: 0, v: BooleanNumber.FALSE }
+            : cellOtherConfig.textRotation || { a: 0, v: BooleanNumber.FALSE };
         const horizontalAlign: HorizontalAlign = cellOtherConfig.horizontalAlign || HorizontalAlign.UNSPECIFIED;
         const verticalAlign: VerticalAlign = cellOtherConfig.verticalAlign || VerticalAlign.UNSPECIFIED;
         const wrapStrategy: WrapStrategy = cellOtherConfig.wrapStrategy || WrapStrategy.UNSPECIFIED;
         const paddingData: IPaddingData = cellOtherConfig.paddingData || DEFAULT_PADDING_DATA;
 
-        if (cell.p) {
+        if (cell.f && formulaFirst) {
+            documentModel = this._getDocumentDataByStyle(cell.f.toString(), {}, {}, isFull);
+        } else if (cell.p) {
             const { a: angle = 0, v: isVertical = BooleanNumber.FALSE } = textRotation;
             let centerAngle = 0;
             let vertexAngle = angle;
@@ -1049,11 +1064,16 @@ export class SpreadsheetSkeleton extends Skeleton {
                 },
                 isFull
             );
-        } else if (content) {
+        } else if (cell.v) {
             const textStyle = this._getFontFormat(style);
             fontString = getFontStyleString(textStyle, this._localService).fontCache;
 
-            documentModel = this._getDocumentDataByStyle(content.toString(), textStyle, cellOtherConfig, isFull);
+            documentModel = this._getDocumentDataByStyle(
+                cell.v.toString(),
+                textStyle,
+                { ...cellOtherConfig, textRotation },
+                isFull
+            );
         }
 
         /**
@@ -1465,7 +1485,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             this._setBorderProps(r, c, BORDER_TYPE.RIGHT, style, cache);
         }
 
-        const modelObject = this.getCellDocumentModel(r, c);
+        const modelObject = this._getCellDocumentModel(r, c);
 
         if (modelObject == null) {
             return;
@@ -1541,7 +1561,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     private _getDocumentDataByStyle(
         content: string,
         textStyle: ITextStyle,
-        config: CellOtherConfig,
+        config: ICellOtherConfig,
         isFull: boolean = false
     ) {
         const contentLength = content.length;

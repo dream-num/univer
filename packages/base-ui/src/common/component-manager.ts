@@ -1,3 +1,4 @@
+import { toDisposable } from '@univerjs/core';
 import {
     AdjustHeight,
     AdjustWidth,
@@ -69,6 +70,7 @@ import {
     VerticalIntegrationSingle,
     VerticalTextSingle,
 } from '@univerjs/icons';
+import { IDisposable } from '@wendellhu/redi';
 
 export interface ICustomComponent {
     name: string;
@@ -78,7 +80,7 @@ export interface ICustomComponent {
 export type ComponentList = Map<string, React.ForwardRefExoticComponent<any>>;
 
 export class ComponentManager {
-    private _componentList: ComponentList = new Map();
+    private _components: ComponentList = new Map();
 
     constructor() {
         const iconList: Record<string, React.ForwardRefExoticComponent<any>> = {
@@ -158,18 +160,20 @@ export class ComponentManager {
         }
     }
 
-    register(name: string, component: any) {
-        if (this._componentList.has(name)) {
+    register(name: string, component: any): IDisposable {
+        if (this._components.has(name)) {
             console.warn(`Component ${name} already exists.`);
         }
-        this._componentList.set(name, component);
+
+        this._components.set(name, component);
+        return toDisposable(() => this._components.delete(name));
     }
 
     get(name: string) {
-        return this._componentList.get(name);
+        return this._components.get(name);
     }
 
     delete(name: string) {
-        this._componentList.delete(name);
+        this._components.delete(name);
     }
 }

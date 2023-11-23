@@ -1,7 +1,8 @@
 import { LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
+import React from 'react';
 
-import { ComponentManager } from '../../Common';
+import { ComponentManager } from '../../common/component-manager';
 import { IMenuSelectorItem } from '../../services/menu/menu';
 
 export type ICustomLabelProps = {

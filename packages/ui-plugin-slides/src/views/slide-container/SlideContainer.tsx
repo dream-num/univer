@@ -1,5 +1,5 @@
 import { BaseComponentProps } from '@univerjs/base-ui';
-import { Component, createRef } from 'react';
+import React, { Component, createRef } from 'react';
 
 import { ISlideUIPluginConfig } from '../../basics';
 import { InfoBar } from '../info-bar';

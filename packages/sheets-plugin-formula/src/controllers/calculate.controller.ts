@@ -4,6 +4,7 @@ import {
     Disposable,
     ICommandInfo,
     ICommandService,
+    IConfigService,
     IRange,
     isFormulaId,
     isFormulaString,
@@ -22,6 +23,7 @@ import { FormulaDataModel } from '../models/formula-data.model';
 @OnLifecycle(LifecycleStages.Starting, CalculateController)
 export class CalculateController extends Disposable {
     constructor(
+        @IConfigService private readonly _configService: IConfigService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService,

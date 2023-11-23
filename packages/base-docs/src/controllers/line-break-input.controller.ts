@@ -88,6 +88,15 @@ export class LineBreakInputController extends Disposable {
         const unitId = docsModel.getUnitId();
 
         const { startOffset, segmentId, style } = activeRange;
+        // move selection
+        const textRanges = [
+            {
+                startOffset: startOffset + 1,
+                endOffset: startOffset + 1,
+                collapsed: true,
+                style,
+            },
+        ];
 
         // split paragraph
         this._commandService.executeCommand(InsertCommand.id, {
@@ -97,20 +106,11 @@ export class LineBreakInputController extends Disposable {
                 paragraphs: generateParagraphs(DataStreamTreeTokenType.PARAGRAPH),
             },
             range: activeRange,
+            textRanges,
             segmentId,
         });
 
         skeleton?.calculate();
-
-        // move selection
-        this._textSelectionManagerService.replaceTextRanges([
-            {
-                startOffset: startOffset + 1,
-                endOffset: startOffset + 1,
-                collapsed: true,
-                style,
-            },
-        ]);
     }
 
     private _getDocObject() {

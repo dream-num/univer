@@ -1,5 +1,6 @@
 import { LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
+import React from 'react';
 
 import styles from './index.module.less';
 import { IFontFamilyProps } from './interface';

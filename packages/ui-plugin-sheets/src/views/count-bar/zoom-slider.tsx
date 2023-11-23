@@ -2,7 +2,7 @@ import { SetWorksheetActivateCommand } from '@univerjs/base-sheets';
 import { ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { Slider } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { SetZoomRatioCommand } from '../../commands/commands/set-zoom-ratio.command';
 import { SetZoomRatioOperation } from '../../commands/operations/set-zoom-ratio.operation';

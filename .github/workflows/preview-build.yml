@@ -1,0 +1,73 @@
+name: 📦 Preview Build
+
+on:
+    pull_request:
+        branches: [dev]
+
+permissions:
+    contents: read
+
+jobs:
+    build:
+        if: github.repository == 'dream-num/univer'
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3
+              with:
+                  ref: ${{ steps.ref.outputs.ref }}
+
+            - name: Install Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 18
+
+            - name: Install pnpm
+              uses: pnpm/action-setup@v2
+              with:
+                  version: 8
+                  run_install: false
+
+            - name: Get pnpm store directory
+              shell: bash
+              run: |
+                  echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+            - name: Setup pnpm cache
+              uses: actions/cache@v3
+              with:
+                  path: ${{ env.STORE_PATH }}
+                  key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+                  restore-keys: |
+                      ${{ runner.os }}-pnpm-
+
+            - name: Install dependencies
+              run: pnpm install
+
+            - name: 📦 Build
+              run: pnpm run build
+
+    set-pr-id:
+        name: Set PR ID
+        runs-on: ubuntu-latest
+        steps:
+            - name: Save PR number
+              if: ${{ always() }}
+              run: |
+                  echo ${{ github.event.pull_request.number }} > ./pr-id.txt
+                  echo ${{ github.head_ref }} >> ./pr-ref.txt
+
+            - name: Upload PR number
+              if: ${{ always() }}
+              uses: actions/upload-artifact@v3
+              with:
+                  name: pr-id
+                  path: ./pr-id.txt
+
+            - name: Upload PR ref
+              if: ${{ always() }}
+              uses: actions/upload-artifact@v3
+              with:
+                  name: pr-ref
+                  path: ./pr-ref.txt

@@ -95,6 +95,10 @@ export interface IFormulaPromptService {
      */
     acceptFormulaName(param: string): void;
 
+    isSearching(): boolean;
+
+    isHelping(): boolean;
+
     dispose(): void;
 }
 
@@ -124,6 +128,7 @@ export class FormulaPromptService implements IFormulaPromptService, IDisposable 
     private _searching: boolean = false;
 
     private _helping: boolean = false;
+    private _isInsertRefString: boolean = false;
 
     dispose(): void {
         this._search$.complete();

@@ -1,5 +1,5 @@
 import RcSelect from 'rc-select';
-import { useContext } from 'react';
+import React, { useContext } from 'react';
 
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import styles from './index.module.less';

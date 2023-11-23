@@ -9,7 +9,7 @@ export interface SlideTabBarConfig {
     slideTabBarItemActiveClassName: string;
     slideTabBarItemClassName: string;
     slideTabBarSpanEditClassName: string;
-    slideTabRootClassName: string;
+    slideTabBarContainer: HTMLDivElement | null;
     slideTabBarItemAutoSort: boolean;
     currentIndex: number;
     onSlideEnd: (event: MouseEvent, compareIndex: number) => void;
@@ -413,12 +413,12 @@ export class SlideTabBar {
     protected _rightMoveX: number = 0;
 
     constructor(config: Partial<SlideTabBarConfig>) {
-        if (config.slideTabRootClassName == null) {
+        if (config.slideTabBarContainer == null) {
             throw new Error('not found slide-tab-bar root element');
         }
 
-        const slideTabBar = document.querySelector(
-            `.${config.slideTabRootClassName} .${config.slideTabBarClassName ?? 'slide-tab-bar'}`
+        const slideTabBar = config.slideTabBarContainer.querySelector(
+            `.${config.slideTabBarClassName ?? 'slide-tab-bar'}`
         );
         if (slideTabBar == null) {
             throw new Error('not found slide-tab-bar');
@@ -662,11 +662,77 @@ export class SlideTabBar {
 
     setScroll(x: number) {
         this._slideScrollbar.scrollX(this._slideScrollbar.getScrollX() + x);
+        if (x > 0) {
+            const left = this.calculateLeftScrollX();
+            this._slideScrollbar.scrollX(this._slideScrollbar.getScrollX() + left);
+        } else if (x < 0) {
+            const right = this.calculateRightScrollX();
+            this._slideScrollbar.scrollX(this._slideScrollbar.getScrollX() + right);
+        }
 
         this._config.onScroll({
             leftEnd: this.isLeftEnd(),
             rightEnd: this.isRightEnd(),
         });
+    }
+
+    flipPage(x: number) {
+        if (x > 0) {
+            const left = this.calculateLeftScrollX(true);
+            this._slideScrollbar.scrollX(this._slideScrollbar.getScrollX() + left);
+        } else if (x < 0) {
+            const right = this.calculateRightScrollX(true);
+            this._slideScrollbar.scrollX(this._slideScrollbar.getScrollX() + right);
+        }
+
+        this._config.onScroll({
+            leftEnd: this.isLeftEnd(),
+            rightEnd: this.isRightEnd(),
+        });
+    }
+
+    calculateLeftScrollX(shouldFlipPage?: boolean): number {
+        let scrollX = 0;
+        const padding = 4;
+        this._slideTabItems.some((item) => {
+            const containerRect = this._slideTabBar.getBoundingClientRect();
+            const containerPosition = containerRect.left + containerRect.width;
+            const itemReact = item.getSlideTabItem().getBoundingClientRect();
+            const itemLeft = itemReact.left;
+            const itemWidth = itemReact.width;
+            if (itemLeft < containerPosition && itemLeft + itemWidth + padding * 2 > containerPosition) {
+                scrollX = shouldFlipPage
+                    ? itemLeft - containerRect.left - padding
+                    : itemLeft + itemWidth - containerPosition + padding;
+
+                return true;
+            }
+            return false;
+        });
+
+        return scrollX;
+    }
+
+    calculateRightScrollX(shouldFlipPage?: boolean): number {
+        let scrollX = 0;
+        const padding = 4;
+        this._slideTabItems.some((item) => {
+            const containerRect = this._slideTabBar.getBoundingClientRect();
+            const containerPosition = containerRect.left;
+            const itemReact = item.getSlideTabItem().getBoundingClientRect();
+            const itemLeft = itemReact.left;
+            const itemWidth = itemReact.width;
+            if (itemLeft - padding * 2 < containerPosition && itemLeft + itemWidth > containerPosition) {
+                scrollX = shouldFlipPage
+                    ? itemLeft + itemWidth - containerRect.left - containerRect.width + padding
+                    : itemLeft - containerPosition - padding;
+
+                return true;
+            }
+            return false;
+        });
+
+        return scrollX;
     }
 
     destroy() {

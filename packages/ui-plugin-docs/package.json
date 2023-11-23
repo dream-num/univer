@@ -5,11 +5,13 @@
     "keywords": [],
     "author": "DreamNum <developer@univer.ai>",
     "license": "MIT",
-    "main": "./src/index.ts",
+    "main": "./lib/cjs/index.js",
+    "module": "./lib/esm/index.js",
     "types": "./lib/index.d.ts",
     "publishConfig": {
         "access": "public",
-        "main": "./lib/index.cjs.js",
+        "main": "./lib/cjs/index.js",
+        "module": "./lib/esm/index.js",
         "exports": {
             ".": {
                 "import": "./lib/esm/index.js",
@@ -18,11 +20,13 @@
             },
             "./*": {
                 "import": "./lib/esm/*",
-                "require": "./lib/cjs/*"
+                "require": "./lib/cjs/*",
+                "types": "./lib/types/index.d.ts"
             },
             "./locale/*": {
                 "import": "./lib/esm/locale/*.js",
-                "require": "./lib/cjs/locale/*.js"
+                "require": "./lib/cjs/locale/*.js",
+                "types": "./lib/types/index.d.ts"
             }
         }
     },
@@ -38,7 +42,6 @@
         "lib"
     ],
     "private": false,
-    "type": "module",
     "scripts": {
         "test": "vitest run",
         "esbuild": "node ./esbuild.config.mjs && tsc -p tsconfig.esbuild.json"
@@ -49,19 +52,20 @@
         "@univerjs/base-ui": "workspace:*",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
-        "@wendellhu/redi": "^0.12.11",
-        "react": "^18.2.0",
-        "react-dom": "^18.2.0"
+        "@wendellhu/redi": "^0.12.11"
     },
     "devDependencies": {
-        "@types/node": "^20.9.0",
-        "@types/react": "^18.2.37",
-        "@types/react-dom": "^18.2.15",
+        "@types/react": "^18.2.38",
         "@vitest/coverage-istanbul": "^0.34.6",
-        "esbuild": "^0.19.5",
+        "esbuild": "^0.19.7",
         "happy-dom": "^12.10.3",
         "less": "^4.2.0",
+        "react": "^18.2.0",
         "ts-node": "^10.9.1",
+        "typescript": "^5.3.2",
         "vitest": "^0.34.6"
+    },
+    "peerDependencies": {
+        "react": ">=16.9.0"
     }
 }

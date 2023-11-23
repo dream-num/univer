@@ -3,11 +3,13 @@
     "version": "0.0.1",
     "author": "DreamNum <developer@univer.ai>",
     "license": "MIT",
-    "main": "./src/index.ts",
+    "main": "./lib/cjs/index.js",
+    "module": "./lib/esm/index.js",
     "types": "./lib/index.d.ts",
     "publishConfig": {
         "access": "public",
-        "main": "./lib/index.cjs.js",
+        "main": "./lib/cjs/index.js",
+        "module": "./lib/esm/index.js",
         "exports": {
             ".": {
                 "import": "./lib/esm/index.js",
@@ -16,7 +18,8 @@
             },
             "./*": {
                 "import": "./lib/esm/*",
-                "require": "./lib/cjs/*"
+                "require": "./lib/cjs/*",
+                "types": "./lib/types/index.d.ts"
             }
         }
     },
@@ -31,7 +34,6 @@
         "lib"
     ],
     "private": false,
-    "type": "module",
     "scripts": {
         "esbuild": "node ./esbuild.config.mjs && tsc -p tsconfig.esbuild.json"
     },
@@ -42,6 +44,7 @@
         "@wendellhu/redi": "^0.12.11"
     },
     "devDependencies": {
-        "esbuild": "^0.19.5"
+        "esbuild": "^0.19.5",
+        "typescript": "^5.3.2"
     }
 }

@@ -2,7 +2,7 @@ import { ComponentManager } from '@univerjs/base-ui';
 import { Nullable } from '@univerjs/core';
 import { CheckMarkSingle, CloseSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 import styles from './index.module.less';
 

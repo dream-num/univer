@@ -9,8 +9,6 @@ import {
 } from '@univerjs/base-docs';
 import {
     DeviceInputEventType,
-    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
-    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     DocumentSkeleton,
     IDocumentLayoutObject,
     IEditorInputConfig,
@@ -24,6 +22,8 @@ import { KeyCode } from '@univerjs/base-ui';
 import {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     Disposable,
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     DocumentModel,
     FOCUSING_EDITOR,
     FOCUSING_EDITOR_BUT_HIDDEN,
@@ -49,6 +49,7 @@ import { Subscription } from 'rxjs';
 
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
+import { SetEditorResizeOperation } from '../../commands/operations/set-editor-resize.operation';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import styles from '../../views/sheet-container/index.module.less';
@@ -112,11 +113,11 @@ export class StartEditController extends Disposable {
 
     private _initialEditFocusListener() {
         this._onInputSubscription = this._editorBridgeService.state$.subscribe((param) => {
-            if (param == null) {
+            if (param == null || this._editorBridgeService.isForceKeepVisible()) {
                 return;
             }
 
-            const { position, documentLayoutObject, scaleX } = param;
+            const { position, documentLayoutObject, scaleX, editorUnitId } = param;
 
             const editorObject = this._getEditorObject();
 
@@ -132,7 +133,7 @@ export class StartEditController extends Disposable {
 
             const { a: angle } = textRotation as ITextRotation;
 
-            documentModel!.updateDocumentId(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+            documentModel!.updateDocumentId(editorUnitId);
 
             // documentModel!.updateDocumentDataMargin(paddingData);
 
@@ -140,9 +141,9 @@ export class StartEditController extends Disposable {
                 documentModel!.updateDocumentDataPageSize((endX - startX) / scaleX);
             }
 
-            this._currentUniverService.changeDoc(DOCS_NORMAL_EDITOR_UNIT_ID_KEY, documentModel! as DocumentModel);
+            this._currentUniverService.changeDoc(editorUnitId, documentModel! as DocumentModel);
 
-            const docParam = this._docSkeletonManagerService.updateCurrent({ unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY });
+            const docParam = this._docSkeletonManagerService.updateCurrent({ unitId: editorUnitId });
 
             if (docParam == null) {
                 return;
@@ -308,8 +309,6 @@ export class StartEditController extends Disposable {
 
         const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
 
-        const scrollBar = viewportMain?.getScrollBar() as Nullable<ScrollBar>;
-
         const clientHeight =
             document.body.clientHeight -
             startY -
@@ -319,20 +318,9 @@ export class StartEditController extends Disposable {
 
         const clientWidth = document.body.clientWidth - startX - canvasOffset.left;
 
-        editorWidth += scrollBar?.barSize || 0;
-
-        if (editorWidth > clientWidth) {
-            editorWidth = clientWidth;
-        }
-
         let physicHeight = editorHeight;
 
-        scene.transformByState({
-            width: editorWidth,
-            height: editorHeight,
-        });
-
-        documentComponent.resize(editorWidth, editorHeight);
+        let scrollBar = viewportMain?.getScrollBar() as Nullable<ScrollBar>;
 
         if (physicHeight > clientHeight) {
             physicHeight = clientHeight;
@@ -342,13 +330,29 @@ export class StartEditController extends Disposable {
                 viewportMain?.resetSizeAndScrollBar();
             }
         } else {
+            scrollBar = null;
             viewportMain?.getScrollBar()?.dispose();
         }
+
+        editorWidth += scrollBar?.barSize || 0;
+
+        if (editorWidth > clientWidth) {
+            editorWidth = clientWidth;
+        }
+
+        scene.transformByState({
+            width: editorWidth,
+            height: editorHeight,
+        });
+
+        documentComponent.resize(editorWidth, editorHeight);
 
         this._addBackground(scene, editorWidth, editorHeight, fill);
 
         // resize canvas
-        engine.resizeBySize(editorWidth, physicHeight);
+        requestIdleCallback(() => {
+            engine.resizeBySize(editorWidth, physicHeight);
+        });
 
         this._cellEditorManagerService.setState({
             startX,
@@ -544,9 +548,9 @@ export class StartEditController extends Disposable {
 
     private _commandExecutedListener() {
         // Listen to document edits to refresh the size of the editor.
-        const updateCommandList = [RichTextEditingMutation.id];
+        const updateCommandList = [RichTextEditingMutation.id, SetEditorResizeOperation.id];
 
-        const excludeUnitList = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY];
+        const excludeUnitList = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];
 
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
@@ -594,10 +598,6 @@ export class StartEditController extends Disposable {
     }
 
     private _getEditorObject() {
-        return getEditorObject(DOCS_NORMAL_EDITOR_UNIT_ID_KEY, this._renderManagerService);
-    }
-
-    private _getFormulaBarEditorObject() {
-        return getEditorObject(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, this._renderManagerService);
+        return getEditorObject(this._editorBridgeService.getCurrentEditorId(), this._renderManagerService);
     }
 }

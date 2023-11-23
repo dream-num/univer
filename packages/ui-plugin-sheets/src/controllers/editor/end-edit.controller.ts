@@ -1,12 +1,7 @@
-import { MoveCursorOperation, TextSelectionManagerService } from '@univerjs/base-docs';
-import {
-    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
-    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-    IMouseEvent,
-    IPointerEvent,
-    IRenderManagerService,
-} from '@univerjs/base-render';
-import { SelectionManagerService, SetRangeValuesCommand } from '@univerjs/base-sheets';
+import { MoveCursorOperation, MoveSelectionOperation } from '@univerjs/base-docs';
+import { FormulaEngineService, matchToken } from '@univerjs/base-formula-engine';
+import { IMouseEvent, IPointerEvent, IRenderManagerService } from '@univerjs/base-render';
+import { SetRangeValuesCommand } from '@univerjs/base-sheets';
 import { KeyCode } from '@univerjs/base-ui';
 import {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
@@ -21,6 +16,7 @@ import {
     ICommandService,
     IContextService,
     isFormulaString,
+    IUndoRedoService,
     IUniverInstanceService,
     LifecycleStages,
     Nullable,
@@ -64,8 +60,8 @@ export class EndEditController extends Disposable {
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @IContextService private readonly _contextService: IContextService,
         @ICellEditorManagerService private readonly _cellEditorManagerService: ICellEditorManagerService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService
+        @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService,
+        @IUndoRedoService private _undoRedoService: IUndoRedoService
     ) {
         super();
 
@@ -150,24 +146,30 @@ export class EndEditController extends Disposable {
                 return;
             }
 
-            if (body.textRuns && body.textRuns.length > 1) {
-                cellData.p = snapshot;
-            } else {
-                const data = body.dataStream;
-                const lastString = data.substring(data.length - 2, data.length);
-                const newDataStream =
-                    lastString === DEFAULT_EMPTY_DOCUMENT_VALUE ? data.substring(0, data.length - 2) : data;
+            const data = body.dataStream;
+            const lastString = data.substring(data.length - 2, data.length);
+            let newDataStream = lastString === DEFAULT_EMPTY_DOCUMENT_VALUE ? data.substring(0, data.length - 2) : data;
 
+            if (isFormulaString(newDataStream)) {
+                const bracketCount = this._formulaEngineService.checkIfAddBracket(newDataStream);
+                for (let i = 0; i < bracketCount; i++) {
+                    newDataStream += matchToken.CLOSE_BRACKET;
+                }
+
+                cellData.f = newDataStream;
+                cellData.v = null;
+                cellData.p = null;
+            } else if (body.textRuns && body.textRuns.length > 1) {
+                cellData.p = snapshot;
+                cellData.v = null;
+                cellData.f = null;
+            } else {
                 if (newDataStream === cellData.v) {
                     return;
                 }
-
-                if (isFormulaString(newDataStream)) {
-                    cellData.f = newDataStream;
-                } else {
-                    cellData.v = newDataStream;
-                    cellData.m = newDataStream;
-                }
+                cellData.v = newDataStream;
+                cellData.f = null;
+                cellData.p = null;
             }
 
             this._commandService.executeCommand(SetRangeValuesCommand.id, {
@@ -191,6 +193,11 @@ export class EndEditController extends Disposable {
         this._cellEditorManagerService.setState({
             show: param.visible,
         });
+        const editorUnitId = this._editorBridgeService.getCurrentEditorId();
+        if (editorUnitId == null) {
+            return;
+        }
+        this._undoRedoService.clearUndoRedo(editorUnitId);
     }
 
     private _moveCursor(keycode?: KeyCode) {
@@ -259,8 +266,8 @@ export class EndEditController extends Disposable {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (updateCommandList.includes(command.id)) {
-                    const params = command.params as IEditorBridgeServiceVisibleParam;
-                    const { keycode } = params;
+                    const params = command.params as IEditorBridgeServiceVisibleParam & { isShift: boolean };
+                    const { keycode, isShift } = params;
 
                     /**
                      * After the user enters the editor and actively moves the editor selection area with the mouse,
@@ -268,7 +275,7 @@ export class EndEditController extends Disposable {
                      * but move the cursor within the editor instead.
                      */
                     if (keycode != null && this._isCursorChange === CursorChange.CursorChange) {
-                        this._moveInEditor(keycode);
+                        this._moveInEditor(keycode, isShift);
                         return;
                     }
 
@@ -278,7 +285,8 @@ export class EndEditController extends Disposable {
         );
     }
 
-    private _moveInEditor(keycode: KeyCode) {
+    // TODO: @JOCS, is it necessary to move these commands MoveSelectionOperation\MoveCursorOperation to shortcut? and use multi-commands?
+    private _moveInEditor(keycode: KeyCode, isShift: boolean) {
         let direction = Direction.LEFT;
         if (keycode === KeyCode.ARROW_DOWN) {
             direction = Direction.DOWN;
@@ -288,16 +296,18 @@ export class EndEditController extends Disposable {
             direction = Direction.RIGHT;
         }
 
-        this._commandService.executeCommand(MoveCursorOperation.id, {
-            direction,
-        });
+        if (isShift) {
+            this._commandService.executeCommand(MoveSelectionOperation.id, {
+                direction,
+            });
+        } else {
+            this._commandService.executeCommand(MoveCursorOperation.id, {
+                direction,
+            });
+        }
     }
 
     private _getEditorObject() {
-        return getEditorObject(DOCS_NORMAL_EDITOR_UNIT_ID_KEY, this._renderManagerService);
-    }
-
-    private _getFormulaBarEditorObject() {
-        return getEditorObject(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, this._renderManagerService);
+        return getEditorObject(this._editorBridgeService.getCurrentEditorId(), this._renderManagerService);
     }
 }

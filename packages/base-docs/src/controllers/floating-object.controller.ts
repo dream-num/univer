@@ -1,15 +1,9 @@
-import {
-    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
-    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-    Documents,
-    DocumentSkeleton,
-    IRender,
-    IRenderManagerService,
-    Liquid,
-} from '@univerjs/base-render';
+import { Documents, DocumentSkeleton, IRender, IRenderManagerService, Liquid } from '@univerjs/base-render';
 import {
     DEFAULT_DOCUMENT_SUB_COMPONENT_ID,
     Disposable,
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     ICommandInfo,
     ICommandService,
     IFloatingObjectManagerParam,

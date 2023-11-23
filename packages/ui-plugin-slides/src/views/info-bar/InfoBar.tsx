@@ -1,7 +1,7 @@
 import { BaseComponentProps } from '@univerjs/base-ui';
 import { Nullable } from '@univerjs/core';
 import { Container, Input, Tooltip } from '@univerjs/design';
-import { Component } from 'react';
+import React, { Component } from 'react';
 
 import { BaseInfoBarProps } from '../../controllers/info-bar-ui-controller';
 import styles from './index.module.less';

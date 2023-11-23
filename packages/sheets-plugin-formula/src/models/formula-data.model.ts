@@ -2,6 +2,8 @@ import { ArrayFormulaDataType, IFormulaData } from '@univerjs/base-formula-engin
 import { Disposable, ObjectMatrix } from '@univerjs/core';
 
 export interface IFormulaConfig {
+    notExecuteFormula?: boolean;
+
     formulaData: IFormulaData;
 }
 

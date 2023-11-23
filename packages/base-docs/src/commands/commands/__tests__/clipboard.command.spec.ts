@@ -17,9 +17,9 @@ import { NORMAL_TEXT_SELECTION_PLUGIN_NAME } from '../../../basics/docs-view-key
 import { TextSelectionManagerService } from '../../../services/text-selection-manager.service';
 import { RichTextEditingMutation } from '../../mutations/core-editing.mutation';
 import {
+    CutContentCommand,
     IInnerCutCommandParams,
     IInnerPasteCommandParams,
-    InnerCutCommand,
     InnerPasteCommand,
 } from '../clipboard.inner.command';
 import { createCommandTestBed } from './create-command-test-bed';
@@ -115,7 +115,7 @@ describe('test cases in clipboard', () => {
 
         commandService = get(ICommandService);
         commandService.registerCommand(InnerPasteCommand);
-        commandService.registerCommand(InnerCutCommand);
+        commandService.registerCommand(CutContentCommand);
         commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
 
         const selectionManager = get(TextSelectionManagerService);
@@ -165,6 +165,7 @@ describe('test cases in clipboard', () => {
                         },
                     ],
                 },
+                textRanges: [], // only used to eliminate TS type check error.
             };
 
             await commandService.executeCommand(InnerPasteCommand.id, commandParams);
@@ -184,9 +185,10 @@ describe('test cases in clipboard', () => {
 
             const commandParams: IInnerCutCommandParams = {
                 segmentId: '',
+                textRanges: [], // only used to eliminate TS type check error.
             };
 
-            await commandService.executeCommand(InnerCutCommand.id, commandParams);
+            await commandService.executeCommand(CutContentCommand.id, commandParams);
 
             expect(getTextByPosition(0, 5)).toBe(`s New`);
 

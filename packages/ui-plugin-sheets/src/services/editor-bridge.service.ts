@@ -20,6 +20,7 @@ export interface IEditorBridgeServiceParam {
     documentLayoutObject: IDocumentLayoutObject;
     scaleX: number;
     scaleY: number;
+    editorUnitId: string;
 }
 
 export interface IEditorBridgeService {
@@ -30,10 +31,16 @@ export interface IEditorBridgeService {
     getState(): Readonly<Nullable<IEditorBridgeServiceParam>>;
     changeVisible(param: IEditorBridgeServiceVisibleParam): void;
     isVisible(): IEditorBridgeServiceVisibleParam;
+    enableForceKeepVisible(): void;
+    disableForceKeepVisible(): void;
+    isForceKeepVisible(): boolean;
+    getCurrentEditorId(): Nullable<string>;
 }
 
 export class EditorBridgeService implements IEditorBridgeService, IDisposable {
     private _state: Nullable<IEditorBridgeServiceParam> = null;
+
+    private _isForceKeepVisible: boolean = false;
 
     private _visible: IEditorBridgeServiceVisibleParam = {
         visible: false,
@@ -45,6 +52,9 @@ export class EditorBridgeService implements IEditorBridgeService, IDisposable {
 
     private readonly _visible$ = new BehaviorSubject<IEditorBridgeServiceVisibleParam>(this._visible);
     readonly visible$ = this._visible$.asObservable();
+
+    private readonly _afterVisible$ = new BehaviorSubject<IEditorBridgeServiceVisibleParam>(this._visible);
+    readonly afterVisible$ = this._afterVisible$.asObservable();
 
     dispose(): void {
         this._state$.complete();
@@ -61,13 +71,31 @@ export class EditorBridgeService implements IEditorBridgeService, IDisposable {
         return this._state;
     }
 
+    getCurrentEditorId() {
+        return this._state?.editorUnitId;
+    }
+
     changeVisible(param: IEditorBridgeServiceVisibleParam) {
         this._visible = param;
+
         this._visible$.next(this._visible);
+        this._afterVisible$.next(this._visible);
     }
 
     isVisible() {
         return this._visible;
+    }
+
+    enableForceKeepVisible(): void {
+        this._isForceKeepVisible = true;
+    }
+
+    disableForceKeepVisible(): void {
+        this._isForceKeepVisible = false;
+    }
+
+    isForceKeepVisible(): boolean {
+        return this._isForceKeepVisible;
     }
 }
 

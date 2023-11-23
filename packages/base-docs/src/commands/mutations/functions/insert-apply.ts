@@ -41,7 +41,7 @@ export function InsertApply(
         bodyModel.insert(insertBody, currentIndex);
     }
 
-    console.log('插入的model打印', bodyModel, textLength, currentIndex);
+    // console.log('插入的model打印', bodyModel, textLength, currentIndex);
 }
 
 function updateAttributeByInsert(

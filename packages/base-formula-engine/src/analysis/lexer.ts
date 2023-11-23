@@ -1,17 +1,16 @@
 import { Disposable, Nullable, Tools } from '@univerjs/core';
 
 import { ErrorType } from '../basics/error-type';
+import { isFormulaLexerToken } from '../basics/match-token';
 import { isReferenceString, REFERENCE_SINGLE_RANGE_REGEX } from '../basics/regex';
 import { ISequenceArray, ISequenceNode, sequenceNodeType } from '../basics/sequence';
 import {
-    compareToken,
     matchToken,
     OPERATOR_TOKEN_PRIORITY,
     OPERATOR_TOKEN_SET,
     operatorToken,
     prefixToken,
     SUFFIX_TOKEN_SET,
-    suffixToken,
 } from '../basics/token';
 import {
     DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER,
@@ -46,7 +45,7 @@ export class LexerTreeBuilder extends Disposable {
     private _colonState = false; // :
 
     override dispose(): void {
-        this.resetTemp();
+        this._resetTemp();
         this._currentLexerNode.dispose();
     }
 
@@ -90,8 +89,96 @@ export class LexerTreeBuilder extends Disposable {
         return this._currentLexerNode;
     }
 
-    getCurrentParamIndex(formulaString: string, index: number) {
-        return this._nodeMaker(formulaString, undefined, index);
+    getFunctionAndParameter(formulaString: string, strIndex: number) {
+        const current = this._getCurrentParamIndex(formulaString, strIndex);
+
+        if (current == null || current === ErrorType.VALUE) {
+            return;
+        }
+
+        const lexerNode = current[0];
+
+        if (typeof lexerNode === 'string') {
+            return;
+        }
+
+        let parent = lexerNode.getParent();
+
+        let children = lexerNode;
+
+        while (parent) {
+            const token = parent.getToken();
+            if (
+                token !== DEFAULT_TOKEN_TYPE_PARAMETER &&
+                !isFormulaLexerToken(token) &&
+                parent.getStartIndex() !== -1
+            ) {
+                const paramIndex = parent.getChildren().indexOf(children);
+
+                return {
+                    functionName: token,
+                    paramIndex,
+                };
+            }
+
+            children = parent;
+            parent = parent.getParent();
+        }
+    }
+
+    /**
+     * Estimate the number of right brackets that need to be automatically added to the end of the formula.
+     * @param formulaString
+     * @returns
+     */
+    checkIfAddBracket(formulaString: string) {
+        let lastBracketCount = 0;
+        let lastIndex = formulaString.length - 1;
+        let lastString = formulaString[lastIndex];
+        /**
+         * Determine how many close brackets are at the end, and estimate how many functions need to automatically add close brackets.
+         */
+        while (lastString === matchToken.CLOSE_BRACKET || lastString === ' ') {
+            if (lastString === matchToken.CLOSE_BRACKET) {
+                lastBracketCount++;
+            }
+            lastString = formulaString[--lastIndex];
+        }
+
+        const current = this._getCurrentParamIndex(formulaString, formulaString.length - 2);
+
+        if (current == null || current === ErrorType.VALUE) {
+            return 0;
+        }
+
+        const lexerNode = current[0];
+
+        if (typeof lexerNode === 'string') {
+            return 0;
+        }
+
+        let parent = lexerNode.getParent();
+        let bracketCount = 0;
+
+        /**
+         * Perform an upward search on the syntax tree to see how many layers the function is nested.
+         * For each layer passed, subtract the estimated number of right brackets,
+         * ultimately obtaining the number of right brackets that need to be completed.
+         */
+        while (parent) {
+            const token = parent.getToken();
+            if (token !== DEFAULT_TOKEN_TYPE_PARAMETER && token !== matchToken.COLON && parent.getStartIndex() !== -1) {
+                if (lastBracketCount === 0) {
+                    bracketCount += 1;
+                } else {
+                    lastBracketCount--;
+                }
+            }
+
+            parent = parent.getParent();
+        }
+
+        return bracketCount;
     }
 
     sequenceNodesBuilder(formulaString: string) {
@@ -106,7 +193,7 @@ export class LexerTreeBuilder extends Disposable {
 
         for (let i = 0, len = sequenceArray.length; i < len; i++) {
             const item = sequenceArray[i];
-            console.log('item', item);
+            // console.log('item', item);
             const preItem = sequenceArray[i - 1];
 
             const { segment, currentString, cur } = item;
@@ -197,29 +284,25 @@ export class LexerTreeBuilder extends Disposable {
 
         const newSequenceNodes = this._mergeSequenceNodeReference(sequenceNodes);
 
-        let sequenceString = '';
-        for (const node of newSequenceNodes) {
-            if (typeof node === 'string') {
-                sequenceString += node;
-            } else {
-                sequenceString += node.token;
-            }
-        }
-        console.log('sequenceString', sequenceString);
+        // let sequenceString = '';
+        // for (const node of newSequenceNodes) {
+        //     if (typeof node === 'string') {
+        //         sequenceString += node;
+        //     } else {
+        //         sequenceString += node.token;
+        //     }
+        // }
+        // console.log('sequenceString', sequenceString);
 
         return newSequenceNodes;
     }
 
+    private _getCurrentParamIndex(formulaString: string, index: number) {
+        return this._nodeMaker(formulaString, undefined, index);
+    }
+
     private _isLastMergeString(str: string) {
-        return (
-            str === matchToken.DOUBLE_QUOTATION ||
-            Tools.isStringNumber(str) ||
-            (!Object.values(compareToken).includes(str as compareToken) &&
-                !Object.values(operatorToken).includes(str as operatorToken) &&
-                !Object.values(matchToken).includes(str as matchToken) &&
-                !Object.values(suffixToken).includes(str as suffixToken) &&
-                !Object.values(prefixToken).includes(str as prefixToken))
-        );
+        return str === matchToken.DOUBLE_QUOTATION || Tools.isStringNumber(str) || !isFormulaLexerToken(str);
     }
 
     /**
@@ -604,7 +687,7 @@ export class LexerTreeBuilder extends Disposable {
         return sequenceArray;
     }
 
-    private resetTemp() {
+    private _resetTemp() {
         this._currentLexerNode = new LexerNode();
 
         this._upLevel = 0;
@@ -632,7 +715,7 @@ export class LexerTreeBuilder extends Disposable {
         const formulaStringArray = formulaString.split('');
         const formulaStringArrayCount = formulaStringArray.length;
         let cur = 0;
-        this.resetTemp();
+        this._resetTemp();
         while (cur < formulaStringArrayCount) {
             const currentString = formulaStringArray[cur];
 

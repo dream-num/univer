@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import { useContext } from 'react';
+import React, { useContext } from 'react';
 import { describe, expect, test } from 'vitest';
 
 import { enUS, ILocale, zhCN } from '../../../locale';

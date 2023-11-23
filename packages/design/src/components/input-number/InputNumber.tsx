@@ -1,4 +1,5 @@
 import RcInputNumber from 'rc-input-number';
+import React from 'react';
 
 import styles from './index.module.less';
 

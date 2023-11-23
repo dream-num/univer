@@ -5,17 +5,15 @@ export { DocCopyCommand, DocCutCommand, DocPasteCommand } from './commands/comma
 export {
     CoverCommand,
     DeleteCommand,
-    getRetainAndDeleteFromReplace,
     type ICoverCommandParams,
     type IDeleteCommandParams,
-    type IIMEInputCommandParams,
     type IInsertCommandParams,
-    IMEInputCommand,
     InsertCommand,
     type IUpdateCommandParams,
     UpdateCommand,
 } from './commands/commands/core-editing.command';
 export { BreakLineCommand, DeleteLeftCommand } from './commands/commands/core-editing.command';
+export { type IIMEInputCommandParams, IMEInputCommand } from './commands/commands/ime-input.command';
 export {
     SetInlineFormatBoldCommand,
     SetInlineFormatCommand,
@@ -26,6 +24,7 @@ export {
     SetInlineFormatTextColorCommand,
     SetInlineFormatUnderlineCommand,
 } from './commands/commands/inline-format.command';
+export { ReplaceContentCommand } from './commands/commands/replace-content.command';
 export {
     type IRichTextEditingMutationParams,
     RichTextEditingMutation,

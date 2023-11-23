@@ -1,6 +1,7 @@
 // import { joinClassNames } from '@univerjs/base-ui';
 import { LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
+import React from 'react';
 
 export interface BaseFormatItemProps {
     selected?: boolean;

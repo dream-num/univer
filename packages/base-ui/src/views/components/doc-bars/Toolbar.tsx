@@ -1,5 +1,5 @@
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { useObservable } from '../../../components/hooks/observable';
 import { IDisplayMenuItem, IMenuItem, MenuGroup, MenuPosition } from '../../../services/menu/menu';

@@ -8,7 +8,7 @@ import {
 import { CheckMarkSingle, MoreSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { isObservable, of } from 'rxjs';
 
 import {
@@ -100,38 +100,46 @@ function MenuWrapper(props: IBaseMenuProps) {
 function MenuOptionsWrapper(props: IBaseMenuProps) {
     const { options, value, onOptionSelect, parentKey } = props;
 
-    return options?.map((option: IValueOption, index: number) => {
-        const key = `${parentKey}-${option.label ?? option.id}-${index}`;
+    return (
+        options?.map((option: IValueOption, index: number) => {
+            const key = `${parentKey}-${option.label ?? option.id}-${index}`;
 
-        const onChange = (v: string | number) => {
-            onOptionSelect?.({ value: v, label: option?.label });
-        };
+            const onChange = (v: string | number) => {
+                onOptionSelect?.({ value: v, label: option?.label });
+            };
 
-        const handleClick = () => {
-            if (typeof option.value === 'undefined') return;
+            const handleClick = () => {
+                if (typeof option.value === 'undefined') return;
 
-            onOptionSelect?.({
-                ...option,
+                onOptionSelect?.({
+                    ...option,
+                });
+            };
+
+            const _className = clsx({
+                [styles.menuItemNoHover]: typeof option.label !== 'string' && !option.label?.hoverable,
             });
-        };
 
-        const _className = clsx({
-            [styles.menuItemNoHover]: typeof option.label !== 'string' && !option.label?.hoverable,
-        });
-
-        return (
-            <DesignMenuItem key={key} eventKey={key} className={_className} onClick={handleClick}>
-                <span className={clsx(styles.menuItemContent, styles.menuItemSelectable)}>
-                    {typeof value !== 'undefined' && String(value) === String(option.value) && (
-                        <span className={styles.menuItemSelectableIcon}>
-                            <CheckMarkSingle style={{ color: 'rgb(var(--success-color))' }} />
-                        </span>
-                    )}
-                    <CustomLabel value={option.value} label={option.label} icon={option.icon} onChange={onChange} />
-                </span>
-            </DesignMenuItem>
-        );
-    });
+            return (
+                <DesignMenuItem key={key} eventKey={key} className={_className} onClick={handleClick}>
+                    <span
+                        className={clsx(styles.menuItemContent, {
+                            [styles.menuItemSelectable]: !(
+                                typeof option.label !== 'string' && !option.label?.hoverable
+                            ),
+                        })}
+                    >
+                        {typeof value !== 'undefined' && String(value) === String(option.value) && (
+                            <span className={styles.menuItemSelectableIcon}>
+                                <CheckMarkSingle style={{ color: 'rgb(var(--success-color))' }} />
+                            </span>
+                        )}
+                        <CustomLabel value={option.value} label={option.label} icon={option.icon} onChange={onChange} />
+                    </span>
+                </DesignMenuItem>
+            );
+        }) ?? <></>
+    );
 }
 
 export const Menu = (props: IBaseMenuProps) => (

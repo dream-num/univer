@@ -16,6 +16,8 @@ export interface IDescriptionService {
      */
     getDescriptions(): Map<string, IFunctionInfo>;
 
+    hasFunction(searchText: string): boolean;
+
     /**
      * get function info by name
      * @param searchText
@@ -55,6 +57,11 @@ export class DescriptionService implements IDescriptionService, IDisposable {
 
     getDescriptions() {
         return this._formulaEngineService.getDescriptions();
+    }
+
+    hasFunction(searchText: string) {
+        const functionList = this._formulaEngineService.getDescriptions();
+        return functionList.get(searchText.toLocaleUpperCase()) !== undefined;
     }
 
     getFunctionInfo(searchText: string) {

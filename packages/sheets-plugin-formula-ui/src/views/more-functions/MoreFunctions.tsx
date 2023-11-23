@@ -3,7 +3,7 @@ import { ISidebarService } from '@univerjs/base-ui';
 import { LocaleService } from '@univerjs/core';
 import { Button } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 import styles from './index.module.less';
 import { InputParams } from './input-params/InputParams';

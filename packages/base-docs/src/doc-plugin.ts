@@ -18,10 +18,10 @@ import {
     DeleteCommand,
     DeleteLeftCommand,
     DeleteRightCommand,
-    IMEInputCommand,
     InsertCommand,
     UpdateCommand,
 } from './commands/commands/core-editing.command';
+import { IMEInputCommand } from './commands/commands/ime-input.command';
 import {
     SetInlineFormatBoldCommand,
     SetInlineFormatCommand,
@@ -32,9 +32,11 @@ import {
     SetInlineFormatTextColorCommand,
     SetInlineFormatUnderlineCommand,
 } from './commands/commands/inline-format.command';
+import { ReplaceContentCommand } from './commands/commands/replace-content.command';
 import { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';
 import { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
 import { MoveCursorOperation, MoveSelectionOperation } from './commands/operations/cursor.operation';
+import { SelectAllOperation } from './commands/operations/select-all.operation';
 import { SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
 import { SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
 import { DocClipboardController } from './controllers/clipboard.controller';
@@ -48,10 +50,11 @@ import { MoveCursorController } from './controllers/move-cursor.controller';
 import { NormalInputController } from './controllers/normal-input.controller';
 import { PageRenderController } from './controllers/page-render.controller';
 import { TextSelectionController } from './controllers/text-selection.controller';
-import { ZoomController } from './controllers/zoom.cotroller';
+import { ZoomController } from './controllers/zoom.controller';
 import { enUS } from './locale';
 import { DocClipboardService, IDocClipboardService } from './services/clipboard/clipboard.service';
 import { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
+import { IMEInputManagerService } from './services/ime-input-manager.service';
 import { TextSelectionManagerService } from './services/text-selection-manager.service';
 import { BreakLineShortcut, DeleteLeftShortcut, DeleteRightShortcut } from './shortcuts/core-editing.shortcut';
 import {
@@ -63,6 +66,7 @@ import {
     MoveSelectionLeftShortcut,
     MoveSelectionRightShortcut,
     MoveSelectionUpShortcut,
+    SelectAllShortcut,
 } from './shortcuts/cursor.shortcut';
 import { DocCanvasView } from './views/doc-canvas-view';
 
@@ -123,9 +127,11 @@ export class DocPlugin extends Plugin {
                 IMEInputCommand,
                 RichTextEditingMutation,
                 CoverCommand,
+                ReplaceContentCommand,
                 SetDocZoomRatioCommand,
                 SetDocZoomRatioOperation,
                 SetTextSelectionsOperation,
+                SelectAllOperation,
             ] as ICommand[]
         ).forEach((command) => {
             this._injector.get(ICommandService).registerCommand(command);
@@ -140,6 +146,7 @@ export class DocPlugin extends Plugin {
             MoveSelectionDownShortcut,
             MoveSelectionLeftShortcut,
             MoveSelectionRightShortcut,
+            SelectAllShortcut,
             DeleteLeftShortcut,
             DeleteRightShortcut,
             BreakLineShortcut,
@@ -164,6 +171,7 @@ export class DocPlugin extends Plugin {
 
                 // services
                 [DocSkeletonManagerService],
+                [IMEInputManagerService],
                 [
                     IDocClipboardService,
                     {

@@ -8,9 +8,13 @@ export interface IDocObjectParam {
 }
 
 export function getEditorObject(
-    unitId: string,
+    unitId: Nullable<string>,
     renderManagerService: IRenderManagerService
 ): Nullable<IDocObjectParam> {
+    if (unitId == null) {
+        return;
+    }
+
     const currentRender = renderManagerService.getRenderById(unitId);
 
     if (currentRender == null) {

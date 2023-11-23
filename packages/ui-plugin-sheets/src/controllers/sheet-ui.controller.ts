@@ -57,6 +57,7 @@ import {
 } from '../commands/operations/cell-edit.operation';
 import { SetScrollOperation } from '../commands/operations/scroll.operation';
 import { SetCopySelectionsOperation } from '../commands/operations/selection.operation';
+import { SetEditorResizeOperation } from '../commands/operations/set-editor-resize.operation';
 import { SetFormatPainterOperation } from '../commands/operations/set-format-painter.operation';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import { BorderPanel } from '../components/border-panel/BorderPanel';
@@ -150,7 +151,7 @@ import {
     EditorCursorTabShortcut,
     EditorDeleteLeftShortcut,
     EditorDeleteLeftShortcutInActive,
-    generateArrowSelectionShortCuItem,
+    generateArrowSelectionShortCutItem,
 } from './shortcuts/editor.shortcut';
 import { SetColHiddenShortcutItem, SetRowHiddenShortcutItem } from './shortcuts/operation.shortcut';
 import {
@@ -162,7 +163,7 @@ import {
     ExpandSelectionLeftShortcutItem,
     ExpandSelectionRightShortcutItem,
     ExpandSelectionUpShortcutItem,
-    MoveBackSelectionShortcutItem,
+    // MoveBackSelectionShortcutItem,
     MoveSelectionDownShortcutItem,
     MoveSelectionEndDownShortcutItem,
     MoveSelectionEndLeftShortcutItem,
@@ -223,6 +224,7 @@ export class SheetUIController extends Disposable {
             ScrollCommand,
             SelectAllCommand,
             SetActivateCellEditOperation,
+            SetEditorResizeOperation,
             SetBoldCommand,
             SetCellEditVisibleArrowOperation,
             SetCellEditVisibleOperation,
@@ -342,7 +344,7 @@ export class SheetUIController extends Disposable {
             MoveSelectionTabLeftShortcutItem,
             MoveSelectionEnterShortcutItem,
             MoveSelectionEnterUpShortcutItem,
-            MoveBackSelectionShortcutItem,
+            // MoveBackSelectionShortcutItem,
             MoveSelectionEndDownShortcutItem,
             MoveSelectionEndUpShortcutItem,
             MoveSelectionEndLeftShortcutItem,
@@ -370,7 +372,7 @@ export class SheetUIController extends Disposable {
 
             // cell content editing shortcuts
             ClearSelectionValueShortcutItem,
-            ...generateArrowSelectionShortCuItem(),
+            ...generateArrowSelectionShortCutItem(),
             EditorCursorEnterShortcut,
             EditorCursorTabShortcut,
             EditorBreakLineShortcut,

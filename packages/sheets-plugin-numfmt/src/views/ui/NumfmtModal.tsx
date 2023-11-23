@@ -1,5 +1,5 @@
 import { BaseComponentProps, ComponentManager } from '@univerjs/base-ui';
-import { Component } from 'react';
+import React, { Component } from 'react';
 
 import { ModalDataProps } from '../../controllers/numfmt-modal-controller';
 

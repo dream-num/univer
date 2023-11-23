@@ -69,11 +69,11 @@ export class MoveCursorController extends Disposable {
 
                 switch (command.id) {
                     case MoveCursorOperation.id: {
-                        return this._moveCursorFunction(param.direction);
+                        return this._handleMoveCursor(param.direction);
                     }
 
                     case MoveSelectionOperation.id: {
-                        return this._moveSelectionFunction(param.direction);
+                        return this._handleShiftMoveSelection(param.direction);
                     }
 
                     default: {
@@ -84,7 +84,7 @@ export class MoveCursorController extends Disposable {
         );
     }
 
-    private _moveSelectionFunction(direction: Direction) {
+    private _handleShiftMoveSelection(direction: Direction) {
         const activeRange = this._textSelectionRenderManager.getActiveRange();
         const allRanges = this._textSelectionRenderManager.getAllTextRanges();
 
@@ -126,10 +126,9 @@ export class MoveCursorController extends Disposable {
               : endOffset;
 
         let focusOffset = collapsed ? endOffset : rangeDirection === RANGE_DIRECTION.FORWARD ? endOffset : startOffset;
+        const dataStreamLength = skeleton.getModel().getBodyModel().getBody().dataStream.length ?? Infinity;
 
         if (direction === Direction.LEFT || direction === Direction.RIGHT) {
-            const dataStreamLength = skeleton.getModel().getBodyModel().getBody().dataStream.length ?? Infinity;
-
             focusOffset = direction === Direction.RIGHT ? ++focusOffset : --focusOffset;
 
             focusOffset = Math.min(dataStreamLength - 2, Math.max(0, focusOffset));
@@ -149,6 +148,22 @@ export class MoveCursorController extends Disposable {
 
             const newPos = this._getTopOrBottomPosition(skeleton, focusSpan, direction === Direction.DOWN);
             if (newPos == null) {
+                // move selection
+                const newFocusOffset = direction === Direction.UP ? 0 : dataStreamLength - 2;
+
+                if (newFocusOffset === focusOffset) {
+                    return;
+                }
+
+                this._textSelectionManagerService.replaceTextRanges([
+                    {
+                        startOffset: anchorOffset,
+                        endOffset: newFocusOffset,
+                        collapsed: anchorOffset === newFocusOffset,
+                        style,
+                    },
+                ]);
+
                 return;
             }
 
@@ -169,7 +184,7 @@ export class MoveCursorController extends Disposable {
         }
     }
 
-    private _moveCursorFunction(direction: Direction) {
+    private _handleMoveCursor(direction: Direction) {
         const activeRange = this._textSelectionRenderManager.getActiveRange();
         const allRanges = this._textSelectionRenderManager.getAllTextRanges();
 
@@ -181,7 +196,8 @@ export class MoveCursorController extends Disposable {
             return;
         }
 
-        const { startOffset, endOffset, style } = activeRange;
+        const { startOffset, endOffset, style, collapsed } = activeRange;
+        const dataStreamLength = skeleton.getModel().getBodyModel().getBody().dataStream.length ?? Infinity;
 
         if (direction === Direction.LEFT || direction === Direction.RIGHT) {
             let cursor;
@@ -200,7 +216,6 @@ export class MoveCursorController extends Disposable {
                 if (direction === Direction.LEFT) {
                     cursor = Math.max(0, startOffset - 1);
                 } else {
-                    const dataStreamLength = skeleton.getModel().getBodyModel().getBody().dataStream.length ?? Infinity;
                     // -1 because the length of the string will be 1 larger than the index, and the reason for subtracting another 1 is because it ends in \n
                     cursor = Math.min(dataStreamLength - 2, endOffset + 1);
                 }
@@ -215,12 +230,38 @@ export class MoveCursorController extends Disposable {
                 },
             ]);
         } else {
-            const preSpan = skeleton.findNodeByCharIndex(endOffset);
+            const startNode = skeleton.findNodeByCharIndex(startOffset);
+            const endNode = skeleton.findNodeByCharIndex(endOffset);
 
             const documentOffsetConfig = docObject.document.getOffsetConfig();
 
-            const newPos = this._getTopOrBottomPosition(skeleton, preSpan, direction === Direction.DOWN);
+            const newPos = this._getTopOrBottomPosition(
+                skeleton,
+                direction === Direction.UP ? startNode : endNode,
+                direction === Direction.DOWN
+            );
+
             if (newPos == null) {
+                let cursor;
+
+                if (collapsed) {
+                    // Move cursor to the beginning place when arrow up at first line,
+                    // and move cursor to the end place when arrow down at last line.
+                    cursor = direction === Direction.UP ? 0 : dataStreamLength - 2;
+                } else {
+                    // Handle at the startOffset at first line when arrow up,
+                    // and endOffset at the last line when arrow down.
+                    cursor = direction === Direction.UP ? startOffset : endOffset;
+                }
+
+                this._textSelectionManagerService.replaceTextRanges([
+                    {
+                        startOffset: cursor,
+                        endOffset: cursor,
+                        collapsed: true,
+                        style,
+                    },
+                ]);
                 return;
             }
 

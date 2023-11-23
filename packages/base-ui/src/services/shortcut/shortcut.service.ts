@@ -1,10 +1,11 @@
 import { Disposable, ICommandService, IContextService, toDisposable } from '@univerjs/core';
 import { createIdentifier, IDisposable } from '@wendellhu/redi';
+import { Observable, Subject } from 'rxjs';
 
-import { fromDocumentEvent } from '../../Common/lifecycle';
+import { fromDocumentEvent } from '../../common/lifecycle';
 import { IFocusService } from '../focus/focus.service';
 import { IPlatformService } from '../platform/platform.service';
-import { MetaKeys } from './keycode';
+import { KeyCodeToChar, MetaKeys } from './keycode';
 
 export interface IShortcutItem<P extends object = object> {
     /** This should reuse the corresponding command's id. */
@@ -21,14 +22,22 @@ export interface IShortcutItem<P extends object = object> {
     win?: number;
     linux?: number;
 
+    /**
+     * The group of the menu item should belong to. The shortcut item would be rendered in the
+     * panel if this is set.
+     */
+    group?: string;
+
     /** Static parameters of this shortcut. Would be send to `CommandService.executeCommand`. */
     staticParameters?: P;
 }
 
 export interface IShortcutService {
-    registerShortcut(shortcut: IShortcutItem): IDisposable;
+    shortcutChanged$: Observable<void>;
 
-    getCommandShortcut(id: string): string | null;
+    registerShortcut(shortcut: IShortcutItem): IDisposable;
+    getShortcutDisplay(id: string): string | null;
+    getAllShortcuts(): IShortcutItem[];
 }
 
 export const IShortcutService = createIdentifier<IShortcutService>('univer.shortcut');
@@ -38,6 +47,9 @@ export class DesktopShortcutService extends Disposable implements IShortcutServi
 
     private readonly _idToShortcut = new Map<string, number>();
 
+    private readonly _shortcutChanged$ = new Subject<void>();
+    readonly shortcutChanged$ = this._shortcutChanged$.asObservable();
+
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IPlatformService private readonly _platformService: IPlatformService,
@@ -46,18 +58,23 @@ export class DesktopShortcutService extends Disposable implements IShortcutServi
     ) {
         super();
 
+        // Register native keydown event handler to trigger shortcuts.
         this.disposeWithMe(
             fromDocumentEvent('keydown', (e: KeyboardEvent) => {
-                // if (this._focusService.isFocused) {
-                this.resolveMouseEvent(e);
-                // }
+                this._resolveMouseEvent(e);
             })
         );
     }
 
+    getAllShortcuts(): IShortcutItem[] {
+        return Array.from(this._shortCutMapping.values())
+            .map((v) => Array.from(v.values()))
+            .flat();
+    }
+
     registerShortcut(shortcut: IShortcutItem): IDisposable {
         // first map shortcut to a number, so it could be converted and fetched quickly
-        const binding = this.getBindingFromItem(shortcut);
+        const binding = this._getBindingFromItem(shortcut);
         const existing = this._shortCutMapping.get(binding);
 
         if (existing) {
@@ -67,14 +84,16 @@ export class DesktopShortcutService extends Disposable implements IShortcutServi
         }
 
         this._idToShortcut.set(shortcut.id, binding);
+        this._emitShortcutChanged();
 
         return toDisposable(() => {
+            this._emitShortcutChanged();
             this._idToShortcut.delete(shortcut.id);
             this._shortCutMapping.delete(binding);
         });
     }
 
-    getCommandShortcut(id: string): string | null {
+    getShortcutDisplay(id: string): string | null {
         const binding = this._idToShortcut.get(id);
         if (!binding) {
             return null;
@@ -85,25 +104,27 @@ export class DesktopShortcutService extends Disposable implements IShortcutServi
         const altKey = binding & MetaKeys.ALT;
         const macCtrl = binding & MetaKeys.MAC_CTRL;
 
+        const body = KeyCodeToChar[binding & 0xff] ?? '<->';
+
         if (this._platformService.isMac) {
-            return `${ctrlKey ? '⌘' : ''}${shiftKey ? '⇧' : ''}${altKey ? '⌥' : ''}${
-                macCtrl ? '⌃' : ''
-            }${String.fromCharCode(binding & 0xff)}`;
+            return `${ctrlKey ? '⌘' : ''}${shiftKey ? '⇧' : ''}${altKey ? '⌥' : ''}${macCtrl ? '⌃' : ''}${body}`;
         }
-        return `${ctrlKey ? 'Ctrl+' : ''}${shiftKey ? 'Shift+' : ''}${altKey ? 'Alt+' : ''}${String.fromCharCode(
-            binding & 0xff
-        )}`;
+        return `${ctrlKey ? 'Ctrl+' : ''}${shiftKey ? 'Shift+' : ''}${altKey ? 'Alt+' : ''}${body}`;
     }
 
-    private resolveMouseEvent(e: KeyboardEvent): void {
-        const shouldPreventDefault = this.dispatch(e);
+    private _emitShortcutChanged(): void {
+        this._shortcutChanged$.next();
+    }
+
+    private _resolveMouseEvent(e: KeyboardEvent): void {
+        const shouldPreventDefault = this._dispatch(e);
         if (shouldPreventDefault) {
             e.preventDefault();
         }
     }
 
-    private dispatch(e: KeyboardEvent): boolean {
-        const binding = this.deriveBindingFromEvent(e);
+    private _dispatch(e: KeyboardEvent): boolean {
+        const binding = this._deriveBindingFromEvent(e);
         if (binding === null) {
             return false;
         }
@@ -125,7 +146,7 @@ export class DesktopShortcutService extends Disposable implements IShortcutServi
         return false;
     }
 
-    private getBindingFromItem(item: IShortcutItem): number {
+    private _getBindingFromItem(item: IShortcutItem): number {
         if (this._platformService.isMac && item.mac) {
             return item.mac;
         }
@@ -141,7 +162,7 @@ export class DesktopShortcutService extends Disposable implements IShortcutServi
         return item.binding;
     }
 
-    private deriveBindingFromEvent(e: KeyboardEvent): number | null {
+    private _deriveBindingFromEvent(e: KeyboardEvent): number | null {
         const { shiftKey, metaKey, altKey, keyCode } = e;
 
         let binding = keyCode;

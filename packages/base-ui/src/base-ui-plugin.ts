@@ -1,10 +1,11 @@
 import { ILocalStorageService, LocaleService, Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
-import { ComponentManager } from './Common/ComponentManager';
-import { ZIndexManager } from './Common/ZIndexManager';
+import { ComponentManager } from './common/component-manager';
+import { ZIndexManager } from './common/z-index-manager';
 import { ErrorController } from './controllers/error/error.controller';
 import { SharedController } from './controllers/shared-shortcut.controller';
+import { ShortcutPanelController } from './controllers/shortcut-display/shortcut-panel.controller';
 import { IUIController, IWorkbenchOptions } from './controllers/ui/ui.controller';
 import { DesktopUIController } from './controllers/ui/ui-desktop.controller';
 import { enUS } from './locale';
@@ -25,6 +26,7 @@ import { INotificationService } from './services/notification/notification.servi
 import { DesktopPlatformService, IPlatformService } from './services/platform/platform.service';
 import { DesktopShortcutService, IShortcutService } from './services/shortcut/shortcut.service';
 import { ShortcutExperienceService } from './services/shortcut/shortcut-experience.service';
+import { ShortcutPanelService } from './services/shortcut/shortcut-panel.service';
 import { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
 import { ISidebarService } from './services/sidebar/sidebar.service';
 
@@ -67,8 +69,10 @@ export class UIPlugin extends Plugin {
             // legacy managers - deprecated
             [ComponentManager],
             [ZIndexManager],
+
             // services
             [ShortcutExperienceService],
+            [ShortcutPanelService],
             [IShortcutService, { useClass: DesktopShortcutService }],
             [IPlatformService, { useClass: DesktopPlatformService }],
             [IMenuService, { useClass: DesktopMenuService }],
@@ -81,11 +85,13 @@ export class UIPlugin extends Plugin {
             [IMessageService, { useClass: DesktopMessageService, lazy: true }],
             [ILocalStorageService, { useClass: DesktopLocalStorageService, lazy: true }],
             [IBeforeCloseService, { useClass: DesktopBeforeCloseService }],
+
             // controllers
             [IFocusService, { useClass: DesktopFocusService }],
             [IUIController, { useClass: DesktopUIController }],
             [SharedController],
             [ErrorController],
+            [ShortcutPanelController],
         ];
 
         dependencies.forEach((dependency) => injector.add(dependency));

@@ -1,15 +1,20 @@
 export { UIPlugin } from './base-ui-plugin';
 export * from './BaseComponent';
-export * from './Common';
+export * from './common';
 export * from './components';
 export { useObservable } from './components/hooks/observable';
-export { SharedController } from './controllers/shared-shortcut.controller';
+export {
+    CopyShortcutItem,
+    CutShortcutItem,
+    PasteShortcutItem,
+    RedoShortcutItem,
+    SharedController,
+    UndoShortcutItem,
+} from './controllers/shared-shortcut.controller';
 export { IUIController } from './controllers/ui/ui.controller';
 export { DesktopUIPart, type IDesktopUIController } from './controllers/ui/ui-desktop.controller';
-export * from './helpers';
 export { DesktopBeforeCloseService, IBeforeCloseService } from './services/before-close/before-close.service';
 export { CopyCommand, CutCommand, PasteCommand } from './services/clipboard/clipboard.command';
-export { CopyShortcutItem, CutShortcutItem, PasteShortcutItem } from './services/clipboard/clipboard.shortcut';
 export {
     BrowserClipboardService,
     HTML_CLIPBOARD_MIME_TYPE,
@@ -48,4 +53,4 @@ export { DesktopShortcutService, type IShortcutItem, IShortcutService } from './
 export { ShortcutExperienceService } from './services/shortcut/shortcut-experience.service';
 export { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
 export { ISidebarService } from './services/sidebar/sidebar.service';
-export * from './Utils';
+export * from './utils';

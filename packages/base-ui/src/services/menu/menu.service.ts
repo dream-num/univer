@@ -118,7 +118,7 @@ export class DesktopMenuService extends Disposable implements IMenuService {
     }
 
     private getDisplayMenuItems(menuItem: IMenuItem): IDisplayMenuItem<IMenuItem> {
-        const shortcut = this._shortcutService.getCommandShortcut(menuItem.id);
+        const shortcut = this._shortcutService.getShortcutDisplay(menuItem.id);
         if (!shortcut) {
             return menuItem;
         }

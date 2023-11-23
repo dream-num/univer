@@ -284,6 +284,7 @@ export class EndEditController extends Disposable {
         );
     }
 
+    // TODO: @JOCS, is it necessary to move these commands MoveSelectionOperation\MoveCursorOperation to shortcut? and use multi-commands?
     private _moveInEditor(keycode: KeyCode, isShift: boolean) {
         let direction = Direction.LEFT;
         if (keycode === KeyCode.ARROW_DOWN) {

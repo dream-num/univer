@@ -36,6 +36,7 @@ import { ReplaceContentCommand } from './commands/commands/replace-content.comma
 import { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';
 import { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
 import { MoveCursorOperation, MoveSelectionOperation } from './commands/operations/cursor.operation';
+import { SelectAllOperation } from './commands/operations/select-all.operation';
 import { SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
 import { SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
 import { DocClipboardController } from './controllers/clipboard.controller';
@@ -65,6 +66,7 @@ import {
     MoveSelectionLeftShortcut,
     MoveSelectionRightShortcut,
     MoveSelectionUpShortcut,
+    SelectAllShortcut,
 } from './shortcuts/cursor.shortcut';
 import { DocCanvasView } from './views/doc-canvas-view';
 
@@ -129,6 +131,7 @@ export class DocPlugin extends Plugin {
                 SetDocZoomRatioCommand,
                 SetDocZoomRatioOperation,
                 SetTextSelectionsOperation,
+                SelectAllOperation,
             ] as ICommand[]
         ).forEach((command) => {
             this._injector.get(ICommandService).registerCommand(command);
@@ -143,6 +146,7 @@ export class DocPlugin extends Plugin {
             MoveSelectionDownShortcut,
             MoveSelectionLeftShortcut,
             MoveSelectionRightShortcut,
+            SelectAllShortcut,
             DeleteLeftShortcut,
             DeleteRightShortcut,
             BreakLineShortcut,

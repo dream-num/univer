@@ -123,7 +123,7 @@ export class DesktopShortcutService extends Disposable implements IShortcutServi
         }
     }
 
-    private _dispatch(e: KeyboardEvent): boolean {
+    private _dispatch(e: KeyboardEvent) {
         const binding = this._deriveBindingFromEvent(e);
         if (binding === null) {
             return false;

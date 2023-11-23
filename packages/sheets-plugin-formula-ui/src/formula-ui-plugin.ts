@@ -3,10 +3,12 @@ import { IUniverInstanceService, LocaleService, Plugin, PluginType } from '@univ
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
 import { FORMULA_UI_PLUGIN_NAME } from './common/plugin-name';
+import { FormulaInputController } from './controllers/formula-input.controller';
 import { FormulaUIController } from './controllers/formula-ui.controller';
 import { PromptController } from './controllers/prompt.controller';
 import { enUS } from './locale';
 import { DescriptionService, IDescriptionService } from './services/description.service';
+import { FormulaInputService, IFormulaInputService } from './services/formula-input.service';
 import { FormulaPromptService, IFormulaPromptService } from './services/prompt.service';
 
 // TODO@Dushusir: user config IFunctionInfo, we will register all function info in formula engine
@@ -36,9 +38,11 @@ export class FormulaUIPlugin extends Plugin {
             // services
             [IFormulaPromptService, { useClass: FormulaPromptService }],
             [IDescriptionService, { useValue: descriptionService }],
+            [IFormulaInputService, { useClass: FormulaInputService }],
             // controllers
             [FormulaUIController],
             [PromptController],
+            [FormulaInputController],
         ];
 
         dependencies.forEach((dependency) => this._injector.add(dependency));

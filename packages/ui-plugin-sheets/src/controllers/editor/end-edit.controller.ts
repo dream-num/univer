@@ -7,8 +7,6 @@ import {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     Direction,
     Disposable,
-    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
-    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     DocumentModel,
     FOCUSING_EDITOR,
     FOCUSING_EDITOR_BUT_HIDDEN,
@@ -195,8 +193,11 @@ export class EndEditController extends Disposable {
         this._cellEditorManagerService.setState({
             show: param.visible,
         });
-        this._undoRedoService.clearUndoRedo(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
-        this._undoRedoService.clearUndoRedo(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+        const editorUnitId = this._editorBridgeService.getCurrentEditorId();
+        if (editorUnitId == null) {
+            return;
+        }
+        this._undoRedoService.clearUndoRedo(editorUnitId);
     }
 
     private _moveCursor(keycode?: KeyCode) {
@@ -300,10 +301,6 @@ export class EndEditController extends Disposable {
     }
 
     private _getEditorObject() {
-        return getEditorObject(DOCS_NORMAL_EDITOR_UNIT_ID_KEY, this._renderManagerService);
-    }
-
-    private _getFormulaBarEditorObject() {
-        return getEditorObject(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, this._renderManagerService);
+        return getEditorObject(this._editorBridgeService.getCurrentEditorId(), this._renderManagerService);
     }
 }

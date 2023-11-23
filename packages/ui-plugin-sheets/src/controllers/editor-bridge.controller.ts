@@ -7,6 +7,7 @@ import {
 } from '@univerjs/base-sheets';
 import {
     Disposable,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     ICommandInfo,
     ICommandService,
     IUniverInstanceService,
@@ -22,11 +23,6 @@ import { IEditorBridgeService } from '../services/editor-bridge.service';
 import { ISelectionRenderService } from '../services/selection/selection-render.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 import { getSheetObject } from './utils/component-tools';
-
-interface ISetWorksheetMutationParams {
-    workbookId: string;
-    worksheetId: string;
-}
 
 @OnLifecycle(LifecycleStages.Rendered, EditorBridgeController)
 export class EditorBridgeController extends Disposable {
@@ -139,6 +135,7 @@ export class EditorBridgeController extends Disposable {
                 unitId,
                 sheetId,
                 documentLayoutObject,
+                editorUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
             });
         });
     }

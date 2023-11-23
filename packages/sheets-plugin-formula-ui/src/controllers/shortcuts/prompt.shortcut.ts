@@ -3,6 +3,7 @@ import { IShortcutItem, KeyCode, MetaKeys } from '@univerjs/base-ui';
 import { whenEditorInputFormulaActivated } from '@univerjs/ui-plugin-sheets';
 
 import { SelectEditorFormulaOperation } from '../../commands/operations/editor-formula.operation';
+import { ReferenceAbsoluteOperation } from '../../commands/operations/reference-absolute.operation';
 import { META_KEY_CTRL_AND_SHIFT } from '../../common/prompt';
 
 export const PROMPT_SELECTION_KEYCODE_ARROW_LIST = [
@@ -80,3 +81,9 @@ export function promptSelectionShortcutItemCtrlAndShift() {
     }
     return shortcutList;
 }
+
+export const ChangeRefToAbsoluteShortcut: IShortcutItem = {
+    id: ReferenceAbsoluteOperation.id,
+    binding: KeyCode.F4,
+    preconditions: (contextService) => whenEditorInputFormulaActivated(contextService),
+};

@@ -63,24 +63,6 @@ export class SheetCanvasView {
                 this._addNewRender();
                 this._loadedMap.add(unitId);
             }
-
-            // if (!this._isLoadedEditor) {
-            //     // create univer doc normal editor instance
-
-            //     this._currentUniverService.createDoc({
-            //         id: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-            //         documentStyle: {},
-            //     });
-
-            //     // create univer doc formula bar editor instance
-
-            //     this._currentUniverService.createDoc({
-            //         id: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
-            //         documentStyle: {},
-            //     });
-
-            //     this._isLoadedEditor = true;
-            // }
         });
     }
 

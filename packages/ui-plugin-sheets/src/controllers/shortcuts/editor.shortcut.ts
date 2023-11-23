@@ -18,7 +18,7 @@ export const ARROW_SELECTION_KEYCODE_LIST = [
 
 export const MOVE_SELECTION_KEYCODE_LIST = [KeyCode.ENTER, KeyCode.TAB, ...ARROW_SELECTION_KEYCODE_LIST];
 
-export function generateArrowSelectionShortCuItem() {
+export function generateArrowSelectionShortCutItem() {
     const shortcutList: IShortcutItem[] = [];
 
     for (const keycode of ARROW_SELECTION_KEYCODE_LIST) {

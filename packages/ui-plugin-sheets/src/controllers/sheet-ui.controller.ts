@@ -141,7 +141,7 @@ import {
     EditorCursorTabShortcut,
     EditorDeleteLeftShortcut,
     EditorDeleteLeftShortcutInActive,
-    generateArrowSelectionShortCuItem,
+    generateArrowSelectionShortCutItem,
 } from './shortcuts/editor.shortcut';
 import { SetColHiddenShortcutItem, SetRowHiddenShortcutItem } from './shortcuts/operation.shortcut';
 import {
@@ -354,7 +354,7 @@ export class SheetUIController extends Disposable {
 
             // cell content editing shortcuts
             ClearSelectionValueShortcutItem,
-            ...generateArrowSelectionShortCuItem(),
+            ...generateArrowSelectionShortCutItem(),
             EditorCursorEnterShortcut,
             EditorCursorTabShortcut,
             EditorBreakLineShortcut,

@@ -8,11 +8,17 @@ import {
     Rect,
 } from '@univerjs/base-render';
 import {
+    DeltaColumnWidthCommand,
+    DeltaRowHeightCommand,
+    IDeltaColumnWidthCommandParams,
+    IDeltaRowHeightCommand,
     ISetFrozenMutationParams,
+    ISetWorksheetRowAutoHeightMutationParams,
     SelectionManagerService,
     SetFrozenCommand,
     SetFrozenMutation,
     SetWorksheetActivateMutation,
+    SetWorksheetRowAutoHeightMutation,
 } from '@univerjs/base-sheets';
 import {
     Disposable,
@@ -975,6 +981,40 @@ export class FreezeController extends Disposable {
                     const { startRow = -1, startColumn = -1, ySplit = 0, xSplit = 0 } = worksheet.getConfig().freeze;
 
                     this._refreshFreeze(startRow, startColumn, ySplit, xSplit);
+                } else if (command.id === DeltaRowHeightCommand.id) {
+                    const freeze = this._getFreeze();
+                    if (
+                        command.params &&
+                        freeze &&
+                        (command.params as IDeltaRowHeightCommand).anchorRow < freeze.startRow
+                    ) {
+                        this._refreshCurrent();
+                    }
+                } else if (command.id === DeltaColumnWidthCommand.id) {
+                    const freeze = this._getFreeze();
+                    if (
+                        command.params &&
+                        freeze &&
+                        (command.params as IDeltaColumnWidthCommandParams).anchorCol < freeze.startColumn
+                    ) {
+                        this._refreshCurrent();
+                    }
+                } else if (command.id === SetWorksheetRowAutoHeightMutation.id) {
+                    const params = command.params as ISetWorksheetRowAutoHeightMutationParams;
+                    const freeze = this._getFreeze();
+
+                    if (
+                        freeze &&
+                        freeze.startRow > -1 &&
+                        params.rowsAutoHeightInfo.some((info) => info.row < freeze.startRow)
+                    ) {
+                        const subscription = this._sheetSkeletonManagerService.currentSkeleton$.subscribe(() => {
+                            this._refreshCurrent();
+                            setTimeout(() => {
+                                subscription.unsubscribe();
+                            });
+                        });
+                    }
                 }
             })
         );

@@ -364,6 +364,9 @@ export default {
         generateNewMatrix: '生成新矩阵',
         fitContent: '适合数据',
         freeze: '冻结',
+        freezeCol: '冻结列',
+        freezeRow: '冻结行',
+        cancelFreeze: '取消冻结',
     },
     info: {
         tooltip: '提示',

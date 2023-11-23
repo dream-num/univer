@@ -58,7 +58,12 @@ import {
     SetInfiniteFormatPainterCommand,
     SetOnceFormatPainterCommand,
 } from '../../commands/commands/set-format-painter.command';
-import { SetSelectionFrozenCommand } from '../../commands/commands/set-frozen.command';
+import {
+    CancelFrozenCommand,
+    SetColumnFrozenCommand,
+    SetRowFrozenCommand,
+    SetSelectionFrozenCommand,
+} from '../../commands/commands/set-frozen.command';
 import { COLOR_PICKER_COMPONENT } from '../../components/color-picker';
 import { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from '../../components/font-family';
 import { FONT_SIZE_COMPONENT } from '../../components/font-size';
@@ -903,16 +908,69 @@ export function FitContentMenuItemFactory(): IMenuButtonItem {
     };
 }
 
+export const SHEET_FROZEN_MENU_ID = 'sheet.menu.sheet-frozen';
+
+export function SheetFrozenMenuItemFactory(): IMenuSelectorItem<string> {
+    return {
+        id: SHEET_FROZEN_MENU_ID,
+        group: MenuGroup.CONTEXT_MENU_LAYOUT,
+        type: MenuItemType.SUBITEMS,
+        title: 'rightClick.freeze',
+        icon: 'FreezeToSelectedSingle',
+        positions: [MenuPosition.CONTEXT_MENU],
+    };
+}
+
+export const SHEET_FROZEN_HEADER_MENU_ID = 'sheet.header-menu.sheet-frozen';
+
+export function SheetFrozenHeaderMenuItemFactory(): IMenuSelectorItem<string> {
+    return {
+        id: SHEET_FROZEN_HEADER_MENU_ID,
+        group: MenuGroup.CONTEXT_MENU_LAYOUT,
+        type: MenuItemType.SUBITEMS,
+        title: 'rightClick.freeze',
+        icon: 'FreezeToSelectedSingle',
+        positions: [SheetMenuPosition.ROW_HEADER_CONTEXT_MENU, SheetMenuPosition.COL_HEADER_CONTEXT_MENU],
+    };
+}
+
 export function FrozenMenuItemFactory(): IMenuButtonItem {
     return {
         id: SetSelectionFrozenCommand.id,
         type: MenuItemType.BUTTON,
-        positions: [
-            MenuPosition.CONTEXT_MENU,
-            SheetMenuPosition.COL_HEADER_CONTEXT_MENU,
-            SheetMenuPosition.ROW_HEADER_CONTEXT_MENU,
-        ],
+        positions: [SHEET_FROZEN_MENU_ID, SHEET_FROZEN_HEADER_MENU_ID],
         title: 'rightClick.freeze',
+        icon: 'FreezeToSelectedSingle',
+    };
+}
+
+export function FrozenRowMenuItemFactory(): IMenuButtonItem {
+    return {
+        id: SetRowFrozenCommand.id,
+        type: MenuItemType.BUTTON,
+        positions: [SHEET_FROZEN_MENU_ID],
+        title: 'rightClick.freezeRow',
+        icon: 'FreezeRowSingle',
+    };
+}
+
+export function FrozenColMenuItemFactory(): IMenuButtonItem {
+    return {
+        id: SetColumnFrozenCommand.id,
+        type: MenuItemType.BUTTON,
+        positions: [SHEET_FROZEN_MENU_ID],
+        title: 'rightClick.freezeCol',
+        icon: 'FreezeColumnSingle',
+    };
+}
+
+export function CancelFrozenMenuItemFactory(): IMenuButtonItem {
+    return {
+        id: CancelFrozenCommand.id,
+        type: MenuItemType.BUTTON,
+        positions: [SHEET_FROZEN_MENU_ID, SHEET_FROZEN_HEADER_MENU_ID],
+        title: 'rightClick.cancelFreeze',
+        icon: 'CancelFreezeSingle',
     };
 }
 

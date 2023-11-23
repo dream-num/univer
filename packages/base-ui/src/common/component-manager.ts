@@ -10,6 +10,7 @@ import {
     AvgSingle,
     BoldSingle,
     BrushSingle,
+    CancelFreezeSingle,
     CancelMergeSingle,
     ClearFormat,
     CntSingle,
@@ -22,6 +23,9 @@ import {
     DeleteRow,
     DownBorder,
     FontColor,
+    FreezeColumnSingle,
+    FreezeRowSingle,
+    FreezeToSelectedSingle,
     FunctionSingle,
     Hide,
     HorizontallySingle,
@@ -145,6 +149,10 @@ export class ComponentManager {
             MaxSingle,
             MinSingle,
             SumSingle,
+            CancelFreezeSingle,
+            FreezeColumnSingle,
+            FreezeRowSingle,
+            FreezeToSelectedSingle,
         };
 
         for (const k in iconList) {

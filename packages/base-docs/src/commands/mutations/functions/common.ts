@@ -11,14 +11,8 @@ import {
     ITextRun,
     Nullable,
     sortRulesFactory,
+    Tools,
 } from '@univerjs/core';
-
-function hasIntersectionBetweenTextRuns(textRun1: ITextRun, textRun2: ITextRun) {
-    const { st: firstSt, ed: firstEd } = textRun1;
-    const { st: secondSt, ed: secondEd } = textRun2;
-
-    return firstEd >= secondSt && secondEd >= firstSt;
-}
 
 export function normalizeTextRuns(textRuns: ITextRun[]) {
     const results: ITextRun[] = [];
@@ -36,7 +30,10 @@ export function normalizeTextRuns(textRuns: ITextRun[]) {
         }
 
         const peak = results.pop()!;
-        if (isSameStyleTextRun(textRun, peak) && hasIntersectionBetweenTextRuns(peak, textRun)) {
+        if (
+            isSameStyleTextRun(textRun, peak) &&
+            Tools.hasIntersectionBetweenTwoRanges(peak.st, peak.ed, textRun.st, textRun.ed)
+        ) {
             results.push({
                 ...textRun,
                 st: peak.st,
@@ -437,44 +434,32 @@ export function deleteTextRuns(body: IDocumentBody, textLength: number, currentI
     return removeTextRuns;
 }
 
-export function deleteParagraphs(
-    body: IDocumentBody,
-    textLength: number,
-    currentIndex: number,
-    closeRemoveAfterFirstNew = false
-) {
+export function deleteParagraphs(body: IDocumentBody, textLength: number, currentIndex: number) {
     const { paragraphs } = body;
 
     const startIndex = currentIndex;
 
-    const endIndex = currentIndex + textLength - 1;
+    const endIndex = currentIndex + textLength;
     const removeParagraphs: IParagraph[] = [];
     let removeAfterFirstNew: Nullable<IParagraph> = null;
     let isRemove = false;
+
     if (paragraphs) {
         const newParagraphs = [];
         for (let i = 0, len = paragraphs.length; i < len; i++) {
             const paragraph = paragraphs[i];
             const { startIndex: index } = paragraph;
-            // if (startIndex === endIndex && endIndex === index) {
-            //     const nextParagraph = paragraphs[i + 1];
-            //     const isBullet = checkParagraphHasBullet(nextParagraph);
-            //     const isIndent = checkParagraphHasIndent(nextParagraph);
-            //     if (isBullet && nextParagraph != null) {
-            //         delete nextParagraph.bullet;
-            //     } else if (isIndent && nextParagraph != null) {
-            //         delete nextParagraph.paragraphStyle?.hanging;
-            //         delete nextParagraph.paragraphStyle?.indentStart;
-            //     }
-            // } else
-            if (index >= startIndex && index <= endIndex) {
+
+            if (index >= startIndex && index < endIndex) {
                 removeParagraphs.push({
                     ...paragraph,
                     startIndex: index - currentIndex,
                 });
+
                 isRemove = true;
+
                 continue;
-            } else if (index > endIndex) {
+            } else if (index >= endIndex) {
                 paragraph.startIndex -= textLength;
             }
 
@@ -484,23 +469,27 @@ export function deleteParagraphs(
                 removeAfterFirstNew = paragraph;
             }
         }
-        if (removeAfterFirstNew != null && closeRemoveAfterFirstNew === false) {
-            // When deleting a paragraph, the configuration of the paragraph
-            // in the beginning range should be retained. Due to the label design,
-            // the paragraph mark is located after the content, so when deleting,
-            // it will surround the configuration of the end range. A position update is required,
-            // and the undo time should also be considered Restoration of position
-            const removeFirst = removeParagraphs[0];
-            if (removeFirst) {
-                const newInsert = { ...removeFirst };
-                removeParagraphs.push(removeAfterFirstNew);
-                newParagraphs.splice(newParagraphs.indexOf(removeAfterFirstNew), 1, newInsert);
-                newInsert.startIndex = removeAfterFirstNew.startIndex;
-                removeAfterFirstNew.startIndex += textLength - currentIndex;
-            }
-        }
+        // if (removeAfterFirstNew != null && closeRemoveAfterFirstNew === false) {
+        //     // When deleting a paragraph, the configuration of the paragraph
+        //     // in the beginning range should be retained. Due to the label design,
+        //     // the paragraph mark is located after the content, so when deleting,
+        //     // it will surround the configuration of the end range. A position update is required,
+        //     // and the undo time should also be considered Restoration of position
+        //     const removeFirst = removeParagraphs[0];
+
+        //     if (removeFirst) {
+        //         const newInsert = { ...removeFirst };
+        //         removeParagraphs.splice(removeParagraphs.indexOf(removeFirst), 1, removeAfterFirstNew);
+        //         newParagraphs.splice(newParagraphs.indexOf(removeAfterFirstNew), 1, newInsert);
+        //         const tempIndex = newInsert.startIndex;
+        //         newInsert.startIndex = removeAfterFirstNew.startIndex;
+        //         removeAfterFirstNew.startIndex = tempIndex;
+        //     }
+        // }
+
         body.paragraphs = newParagraphs;
     }
+
     return removeParagraphs;
 }
 

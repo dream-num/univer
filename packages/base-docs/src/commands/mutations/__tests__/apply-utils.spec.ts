@@ -2,19 +2,16 @@
 import { BooleanNumber, IDocumentBody, ITextRun, Nullable, UpdateDocsAttributeType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { deleteTextRuns, insertTextRuns } from '../functions/common';
+import { deleteParagraphs, deleteTextRuns, insertTextRuns } from '../functions/common';
 import { coverTextRuns } from '../functions/update-apply';
 
-interface IMockBody {
-    textRuns: ITextRun[];
-}
-
 describe('test case in apply utils', () => {
-    let body: Nullable<IMockBody> = null;
+    let body: Nullable<IDocumentBody> = null;
     let updateTextRuns: ITextRun[] = [];
 
     beforeEach(() => {
         body = {
+            dataStream: 'hello\rworld hello\rworld hello\rworld he\r\n',
             textRuns: [
                 {
                     st: 0,
@@ -37,6 +34,20 @@ describe('test case in apply utils', () => {
                     ts: {
                         bl: BooleanNumber.FALSE,
                     },
+                },
+            ],
+            paragraphs: [
+                {
+                    startIndex: 5,
+                },
+                {
+                    startIndex: 17,
+                },
+                {
+                    startIndex: 29,
+                },
+                {
+                    startIndex: 38,
                 },
             ],
         };
@@ -63,46 +74,46 @@ describe('test case in apply utils', () => {
             const removedTextRuns = deleteTextRuns(body as IDocumentBody, 10, 20);
 
             expect(removedTextRuns.length).toBe(0);
-            expect(body?.textRuns[2].st).toBe(20);
-            expect(body?.textRuns[2].ed).toBe(30);
+            expect(body?.textRuns![2].st).toBe(20);
+            expect(body?.textRuns![2].ed).toBe(30);
         });
 
         it('the inserted textRun is bigger than one testRuns', async () => {
             const removeTextRuns = deleteTextRuns(body as IDocumentBody, 20, 5);
 
             expect(removeTextRuns.length).toBe(2);
-            expect(body?.textRuns[0].ed).toBe(5);
-            expect(body?.textRuns[1].st).toBe(10);
-            expect(body?.textRuns[1].ed).toBe(20);
+            expect(body?.textRuns![0].ed).toBe(5);
+            expect(body?.textRuns![1].st).toBe(10);
+            expect(body?.textRuns![1].ed).toBe(20);
         });
 
         it('the inserted textRun is smaller than one testRuns', async () => {
             const removeTextRuns = deleteTextRuns(body as IDocumentBody, 2, 16);
 
             expect(removeTextRuns.length).toBe(1);
-            expect(body?.textRuns[1].ed).toBe(18);
-            expect(body?.textRuns[2].st).toBe(28);
-            expect(body?.textRuns[2].ed).toBe(38);
+            expect(body?.textRuns![1].ed).toBe(18);
+            expect(body?.textRuns![2].st).toBe(28);
+            expect(body?.textRuns![2].ed).toBe(38);
         });
 
         it('the inserted textRun is across two testRuns', async () => {
             const removeTextRuns = deleteTextRuns(body as IDocumentBody, 13, 5);
 
             expect(removeTextRuns.length).toBe(2);
-            expect(body?.textRuns[0].ed).toBe(5);
-            expect(body?.textRuns[1].st).toBe(5);
-            expect(body?.textRuns[1].ed).toBe(7);
-            expect(body?.textRuns[2].st).toBe(17);
-            expect(body?.textRuns[2].ed).toBe(27);
+            expect(body?.textRuns![0].ed).toBe(5);
+            expect(body?.textRuns![1].st).toBe(5);
+            expect(body?.textRuns![1].ed).toBe(7);
+            expect(body?.textRuns![2].st).toBe(17);
+            expect(body?.textRuns![2].ed).toBe(27);
         });
 
         it('the inserted textRun is across two testRuns that scattered', async () => {
             const removeTextRuns = deleteTextRuns(body as IDocumentBody, 20, 18);
 
             expect(removeTextRuns.length).toBe(2);
-            expect(body?.textRuns[1].ed).toBe(18);
-            expect(body?.textRuns[2].st).toBe(18);
-            expect(body?.textRuns[2].ed).toBe(20);
+            expect(body?.textRuns![1].ed).toBe(18);
+            expect(body?.textRuns![2].st).toBe(18);
+            expect(body?.textRuns![2].ed).toBe(20);
         });
     });
 
@@ -282,7 +293,7 @@ describe('test case in apply utils', () => {
                 0
             );
 
-            expect(body?.textRuns.length).toBe(4);
+            expect(body?.textRuns!.length).toBe(4);
         });
 
         it('it should pass the case when the insertTextRuns is between original testRuns', async () => {
@@ -295,11 +306,11 @@ describe('test case in apply utils', () => {
                 25
             );
 
-            expect(body?.textRuns.length).toBe(4);
-            expect(body?.textRuns[0].ts?.bl).toBe(BooleanNumber.FALSE);
-            expect(body?.textRuns[1].ts?.bl).toBe(BooleanNumber.FALSE);
-            expect(body?.textRuns[2].ts?.bl).toBe(BooleanNumber.TRUE);
-            expect(body?.textRuns[3].ts?.bl).toBe(BooleanNumber.FALSE);
+            expect(body?.textRuns!.length).toBe(4);
+            expect(body?.textRuns![0].ts?.bl).toBe(BooleanNumber.FALSE);
+            expect(body?.textRuns![1].ts?.bl).toBe(BooleanNumber.FALSE);
+            expect(body?.textRuns![2].ts?.bl).toBe(BooleanNumber.TRUE);
+            expect(body?.textRuns![3].ts?.bl).toBe(BooleanNumber.FALSE);
         });
 
         it('it should pass the case when the insertTextRuns is at the end of one testRun', async () => {
@@ -312,7 +323,7 @@ describe('test case in apply utils', () => {
                 15
             );
 
-            expect(body?.textRuns.length).toBe(4);
+            expect(body?.textRuns!.length).toBe(4);
         });
 
         it('it should pass the case when the insertTextRuns is at the in the middle of one testRun', async () => {
@@ -325,7 +336,7 @@ describe('test case in apply utils', () => {
                 10
             );
 
-            expect(body?.textRuns.length).toBe(5);
+            expect(body?.textRuns!.length).toBe(5);
         });
 
         it('it should pass the case when the insertTextRuns has the same style with the origin textRun, and should be merged', async () => {
@@ -347,10 +358,10 @@ describe('test case in apply utils', () => {
                 10
             );
 
-            expect(body?.textRuns.length).toBe(3);
-            expect(body?.textRuns[0].ts?.bl).toBe(BooleanNumber.FALSE);
-            expect(body?.textRuns[1].ts?.bl).toBe(BooleanNumber.FALSE);
-            expect(body?.textRuns[2].ts?.bl).toBe(BooleanNumber.FALSE);
+            expect(body?.textRuns!.length).toBe(3);
+            expect(body?.textRuns![0].ts?.bl).toBe(BooleanNumber.FALSE);
+            expect(body?.textRuns![1].ts?.bl).toBe(BooleanNumber.FALSE);
+            expect(body?.textRuns![2].ts?.bl).toBe(BooleanNumber.FALSE);
         });
 
         it('it should pass the case when the insertTextRuns is empty', async () => {
@@ -363,10 +374,10 @@ describe('test case in apply utils', () => {
                 10
             );
 
-            expect(body?.textRuns.length).toBe(3);
-            expect(body?.textRuns[0].ts?.bl).toBe(BooleanNumber.FALSE);
-            expect(body?.textRuns[1].ts?.bl).toBe(BooleanNumber.FALSE);
-            expect(body?.textRuns[2].ts?.bl).toBe(BooleanNumber.FALSE);
+            expect(body?.textRuns!.length).toBe(3);
+            expect(body?.textRuns![0].ts?.bl).toBe(BooleanNumber.FALSE);
+            expect(body?.textRuns![1].ts?.bl).toBe(BooleanNumber.FALSE);
+            expect(body?.textRuns![2].ts?.bl).toBe(BooleanNumber.FALSE);
         });
 
         it(`If textRuns doesn't intersect, they shouldn't be merged`, async () => {
@@ -388,11 +399,24 @@ describe('test case in apply utils', () => {
                 25
             );
 
-            expect(body?.textRuns.length).toBe(4);
-            expect(body?.textRuns[0].ts?.bl).toBe(BooleanNumber.FALSE);
-            expect(body?.textRuns[1].ts?.bl).toBe(BooleanNumber.FALSE);
-            expect(body?.textRuns[2].ts?.bl).toBe(BooleanNumber.FALSE);
-            expect(body?.textRuns[3].ts?.bl).toBe(BooleanNumber.FALSE);
+            expect(body?.textRuns!.length).toBe(4);
+            expect(body?.textRuns![0].ts?.bl).toBe(BooleanNumber.FALSE);
+            expect(body?.textRuns![1].ts?.bl).toBe(BooleanNumber.FALSE);
+            expect(body?.textRuns![2].ts?.bl).toBe(BooleanNumber.FALSE);
+            expect(body?.textRuns![3].ts?.bl).toBe(BooleanNumber.FALSE);
+        });
+    });
+
+    describe('test cases in function deleteParagraphs', () => {
+        it('it should pass the case when the delete range has no paragraphs', async () => {
+            const removedParagraphs = deleteParagraphs(body!, 2, 0);
+            expect(removedParagraphs.length).toBe(0);
+        });
+
+        it('it should pass the case when the delete range has one paragraphs', async () => {
+            const removedParagraphs = deleteParagraphs(body!, 2, 5);
+            expect(removedParagraphs.length).toBe(1);
+            expect(removedParagraphs[0].startIndex).toBe(0);
         });
     });
 });

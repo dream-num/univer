@@ -1,7 +1,6 @@
 import {
     getParagraphBySpan,
     hasListSpan,
-    IRenderManagerService,
     isFirstSpan,
     isIndentBySpan,
     isSameLine,
@@ -14,13 +13,12 @@ import {
     IParagraph,
     IUniverInstanceService,
     LifecycleStages,
-    Nullable,
     OnLifecycle,
+    UpdateDocsAttributeType,
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
-import { Subscription } from 'rxjs';
 
-import { getDocObject } from '../basics/component-tools';
+import { CutContentCommand } from '../commands/commands/clipboard.inner.command';
 import {
     DeleteCommand,
     DeleteDirection,
@@ -33,12 +31,9 @@ import { TextSelectionManagerService } from '../services/text-selection-manager.
 
 @OnLifecycle(LifecycleStages.Rendered, DeleteController)
 export class DeleteController extends Disposable {
-    private _onInputSubscription: Nullable<Subscription>;
-
     constructor(
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @ICommandService private readonly _commandService: ICommandService
@@ -48,10 +43,6 @@ export class DeleteController extends Disposable {
         this._initialize();
 
         this._commandExecutedListener();
-    }
-
-    override dispose(): void {
-        this._onInputSubscription?.unsubscribe();
     }
 
     private _initialize() {}
@@ -79,6 +70,7 @@ export class DeleteController extends Disposable {
         );
     }
 
+    // Use BACKSPACE to delete left.
     private _handleDeleteLeft() {
         const activeRange = this._textSelectionRenderManager.getActiveRange();
 
@@ -138,9 +130,11 @@ export class DeleteController extends Disposable {
                 }
             } else if (preIsIndent === true) {
                 const bullet = paragraph.bullet;
+
                 if (bullet) {
                     updateParagraph.bullet = bullet;
                 }
+
                 if (paragraphStyle != null) {
                     updateParagraph.paragraphStyle = { ...paragraphStyle };
                     delete updateParagraph.paragraphStyle.hanging;
@@ -164,11 +158,12 @@ export class DeleteController extends Disposable {
                     paragraphs: [{ ...updateParagraph }],
                 },
                 range: {
-                    startOffset: paragraphIndex + 1,
+                    startOffset: paragraphIndex,
                     endOffset: paragraphIndex + 1,
                     collapsed: true,
                 },
                 textRanges,
+                coverType: UpdateDocsAttributeType.REPLACE,
                 segmentId,
             });
         } else {
@@ -181,27 +176,37 @@ export class DeleteController extends Disposable {
                 }
             }
 
-            const textRanges = [
-                {
-                    startOffset: cursor,
-                    endOffset: cursor,
-                    collapsed: true,
-                    style,
-                },
-            ];
-
-            this._commandService.executeCommand(DeleteCommand.id, {
-                unitId: docsModel.getUnitId(),
-                range: activeRange,
-                segmentId,
-                direction: DeleteDirection.LEFT,
-                textRanges,
-            });
+            if (collapsed === true) {
+                const textRanges = [
+                    {
+                        startOffset: cursor,
+                        endOffset: cursor,
+                        collapsed: true,
+                        style,
+                    },
+                ];
+                this._commandService.executeCommand(DeleteCommand.id, {
+                    unitId: docsModel.getUnitId(),
+                    range: activeRange,
+                    segmentId,
+                    direction: DeleteDirection.LEFT,
+                    textRanges,
+                });
+            } else {
+                const textRanges = this._getTextRangesWhenDelete();
+                // If the selection is not closed, the effect of Delete and
+                // BACKSPACE is the same as CUT, so the CUT command is executed.
+                this._commandService.executeCommand(CutContentCommand.id, {
+                    segmentId,
+                    textRanges,
+                });
+            }
         }
 
         skeleton?.calculate();
     }
 
+    // Use DELETE to delete right.
     private _handleDeleteRight() {
         const activeRange = this._textSelectionRenderManager.getActiveRange();
 
@@ -220,27 +225,64 @@ export class DeleteController extends Disposable {
             return;
         }
 
-        const textRanges = [
-            {
-                startOffset,
-                endOffset: startOffset,
-                collapsed: true,
-                style,
-            },
-        ];
+        if (collapsed === true) {
+            const textRanges = [
+                {
+                    startOffset,
+                    endOffset: startOffset,
+                    collapsed: true,
+                    style,
+                },
+            ];
 
-        this._commandService.executeCommand(DeleteCommand.id, {
-            unitId: docsModel.getUnitId(),
-            range: activeRange,
-            segmentId,
-            direction: DeleteDirection.RIGHT,
-            textRanges,
-        });
+            this._commandService.executeCommand(DeleteCommand.id, {
+                unitId: docsModel.getUnitId(),
+                range: activeRange,
+                segmentId,
+                direction: DeleteDirection.RIGHT,
+                textRanges,
+            });
+        } else {
+            const textRanges = this._getTextRangesWhenDelete();
+            // If the selection is not closed, the effect of Delete and
+            // BACKSPACE is the same as CUT, so the CUT command is executed.
+            this._commandService.executeCommand(CutContentCommand.id, {
+                segmentId,
+                textRanges,
+            });
+        }
 
         skeleton?.calculate();
     }
 
-    private _getDocObject() {
-        return getDocObject(this._currentUniverService, this._renderManagerService);
+    // get cursor position when BACKSPACE/DELETE excuse the CutContentCommand.
+    private _getTextRangesWhenDelete() {
+        const activeRange = this._textSelectionRenderManager.getActiveRange()!;
+        const ranges = this._textSelectionRenderManager.getAllTextRanges();
+
+        let cursor = activeRange.endOffset;
+
+        for (const range of ranges) {
+            const { startOffset, endOffset } = range;
+
+            if (startOffset == null || endOffset == null) {
+                continue;
+            }
+
+            if (endOffset <= activeRange.endOffset) {
+                cursor -= endOffset - startOffset;
+            }
+        }
+
+        const textRanges = [
+            {
+                startOffset: cursor,
+                endOffset: cursor,
+                collapsed: true,
+                style: activeRange.style,
+            },
+        ];
+
+        return textRanges;
     }
 }

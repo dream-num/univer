@@ -36,6 +36,7 @@ export interface IShortcutService {
 
     registerShortcut(shortcut: IShortcutItem): IDisposable;
     getShortcutDisplay(shortcut: IShortcutItem): string;
+    getShortcutDisplayOfCommand(id: string): string | null;
     getAllShortcuts(): IShortcutItem[];
 }
 
@@ -43,6 +44,7 @@ export const IShortcutService = createIdentifier<IShortcutService>('univer.short
 
 export class DesktopShortcutService extends Disposable implements IShortcutService {
     private readonly _shortCutMapping = new Map<number, Set<IShortcutItem>>();
+    private readonly _commandIDMapping = new Map<string, Set<IShortcutItem>>();
 
     private readonly _shortcutChanged$ = new Subject<void>();
     readonly shortcutChanged$ = this._shortcutChanged$.asObservable();
@@ -71,18 +73,45 @@ export class DesktopShortcutService extends Disposable implements IShortcutServi
     registerShortcut(shortcut: IShortcutItem): IDisposable {
         // first map shortcut to a number, so it could be converted and fetched quickly
         const binding = this._getBindingFromItem(shortcut);
-        const existing = this._shortCutMapping.get(binding);
-        if (existing) {
-            existing.add(shortcut);
+        const bindingSet = this._shortCutMapping.get(binding);
+        if (bindingSet) {
+            bindingSet.add(shortcut);
         } else {
             this._shortCutMapping.set(binding, new Set([shortcut]));
+        }
+
+        const commandID = shortcut.id;
+        const commandIDSet = this._commandIDMapping.get(commandID);
+        if (commandIDSet) {
+            commandIDSet.add(shortcut);
+        } else {
+            this._commandIDMapping.set(commandID, new Set([shortcut]));
         }
 
         this._emitShortcutChanged();
         return toDisposable(() => {
             this._shortCutMapping.get(binding)?.delete(shortcut);
+            if (this._shortCutMapping.get(binding)?.size === 0) {
+                this._shortCutMapping.delete(binding);
+            }
+
+            this._commandIDMapping.get(commandID)?.delete(shortcut);
+            if (this._commandIDMapping.get(commandID)?.size === 0) {
+                this._commandIDMapping.delete(commandID);
+            }
+
             this._emitShortcutChanged();
         });
+    }
+
+    getShortcutDisplayOfCommand(id: string): string | null {
+        const set = this._commandIDMapping.get(id);
+        // if (!set || set.size > 1) {
+        if (!set) {
+            return null;
+        }
+
+        return this.getShortcutDisplay(set.values().next().value);
     }
 
     getShortcutDisplay(shortcut: IShortcutItem): string {

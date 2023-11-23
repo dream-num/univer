@@ -50,6 +50,9 @@ export const KeyCodeToChar: { [key: number]: string } = {
     [KeyCode.X]: 'X',
     [KeyCode.Y]: 'Y',
     [KeyCode.Z]: 'Z',
+
+    [KeyCode.MINUS]: '-',
+    [KeyCode.EQUAL]: '=',
 };
 
 /** KeyCode that maps to browser standard keycode. */

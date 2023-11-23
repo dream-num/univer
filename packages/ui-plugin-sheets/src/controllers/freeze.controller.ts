@@ -10,6 +10,7 @@ import {
 import {
     DeltaColumnWidthCommand,
     DeltaRowHeightCommand,
+    IDeltaColumnWidthCommandParams,
     IDeltaRowHeightCommand,
     ISetFrozenMutationParams,
     ISetWorksheetRowAutoHeightMutationParams,
@@ -994,7 +995,7 @@ export class FreezeController extends Disposable {
                     if (
                         command.params &&
                         freeze &&
-                        (command.params as IDeltaRowHeightCommand).anchorRow < freeze.startRow
+                        (command.params as IDeltaColumnWidthCommandParams).anchorCol < freeze.startColumn
                     ) {
                         this._refreshCurrent();
                     }

@@ -1,5 +1,6 @@
 import type { Meta } from '@storybook/react';
 import { Button } from '@univerjs/design';
+import React from 'react';
 
 import { Notification, notification } from './Notification';
 

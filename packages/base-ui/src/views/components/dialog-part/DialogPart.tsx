@@ -1,6 +1,6 @@
 import { Dialog, IDialogProps } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
 import { IDialogService } from '../../../services/dialog/dialog.service';

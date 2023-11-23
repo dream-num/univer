@@ -1,7 +1,7 @@
 import { LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
-import { ComponentType, useEffect, useState } from 'react';
+import React, { ComponentType, useEffect, useState } from 'react';
 
 import { useObservable } from '../../../components/hooks/observable';
 import { MenuPosition } from '../../../services/menu/menu';

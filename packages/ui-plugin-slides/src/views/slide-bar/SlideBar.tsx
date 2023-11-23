@@ -1,6 +1,6 @@
 import { BaseComponentProps } from '@univerjs/base-ui';
 import { ISlidePage } from '@univerjs/core';
-import { Component, createRef } from 'react';
+import React, { Component, createRef } from 'react';
 
 import styles from './index.module.less';
 

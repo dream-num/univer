@@ -1,7 +1,7 @@
 import { IRenderManagerService } from '@univerjs/base-render';
 import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { switchMap } from 'rxjs/operators';
 
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';

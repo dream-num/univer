@@ -1,6 +1,6 @@
 import { IFunctionInfo, IFunctionParam } from '@univerjs/base-formula-engine';
 import { RangeSelector } from '@univerjs/ui-plugin-sheets';
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 import { FunctionParams } from '../function-params/FunctionParams';
 import styles from './index.module.less';

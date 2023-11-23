@@ -1,4 +1,5 @@
 import type { Meta } from '@storybook/react';
+import React from 'react';
 
 import { ColorPicker } from './ColorPicker';
 

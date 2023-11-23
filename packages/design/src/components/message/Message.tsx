@@ -1,5 +1,6 @@
 import { ErrorSingle, SuccessSingle, WarningSingle } from '@univerjs/icons';
 import { render } from 'rc-util/lib/React/render';
+import React from 'react';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 
 import styles from './index.module.less';

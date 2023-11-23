@@ -1,5 +1,5 @@
 import RcDialog from 'rc-dialog';
-import { useContext, useState } from 'react';
+import React, { useContext, useState } from 'react';
 import Draggable from 'react-draggable';
 
 import { ConfigContext } from '../config-provider/ConfigProvider';

@@ -1,7 +1,7 @@
 import { CloseSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
 import { ISidebarService } from '../../../services/sidebar/sidebar.service';

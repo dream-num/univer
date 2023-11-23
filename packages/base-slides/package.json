@@ -24,8 +24,7 @@
         "lib"
     ],
     "private": true,
-    "scripts": {
-    },
+    "scripts": {},
     "dependencies": {
         "@univerjs/base-render": "workspace:*",
         "@univerjs/base-ui": "workspace:*",
@@ -37,6 +36,7 @@
         "@vitest/coverage-istanbul": "^0.34.6",
         "less": "^4.2.0",
         "ts-node": "^10.9.1",
+        "typescript": "^5.3.2",
         "vitest": "^0.34.6"
     }
 }

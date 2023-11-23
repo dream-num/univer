@@ -3,7 +3,7 @@ import { LocaleService } from '@univerjs/core';
 import { Tooltip } from '@univerjs/design';
 import { SelectRangeSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import styles from './index.module.less';
 

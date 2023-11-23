@@ -3,6 +3,7 @@ import { BorderStyleTypes } from '@univerjs/core';
 import { ColorPicker, Dropdown, Menu, MenuItem } from '@univerjs/design';
 import { MoreDownSingle, PaintBucket } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
+import React from 'react';
 
 import { BorderLine } from './border-line/BorderLine';
 import styles from './index.module.less';

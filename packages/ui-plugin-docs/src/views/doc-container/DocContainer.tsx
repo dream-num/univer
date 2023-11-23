@@ -1,5 +1,5 @@
 import { BaseComponentProps } from '@univerjs/base-ui';
-import { Component, createRef } from 'react';
+import React, { Component, createRef } from 'react';
 
 import { IDocUIPluginConfig } from '../../basics';
 import style from './index.module.less';

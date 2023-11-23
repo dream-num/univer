@@ -1,5 +1,5 @@
 import { Nullable } from '@univerjs/core';
-import { Component } from 'react';
+import React, { Component } from 'react';
 
 interface SearchProps {
     config: any;

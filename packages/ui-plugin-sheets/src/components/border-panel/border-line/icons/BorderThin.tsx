@@ -1,3 +1,5 @@
+import React from 'react';
+
 export const BorderThin = () => (
     <svg width="120" height="2" viewBox="0 0 120 2" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path

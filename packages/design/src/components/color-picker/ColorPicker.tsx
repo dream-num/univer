@@ -1,4 +1,5 @@
 import RcColorPicker, { Color, ColorBlock } from '@rc-component/color-picker';
+import React from 'react';
 
 import styles from './index.module.less';
 import { colorPresets } from './presets';

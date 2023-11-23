@@ -20,7 +20,9 @@ export const SetDocZoomRatioUndoMutationFactory = (
 
 export const SetDocZoomRatioOperation: IOperation<ISetDocZoomRatioOperationParams> = {
     id: 'doc.operation.set-zoom-ratio',
+
     type: CommandType.OPERATION,
+
     handler: (accessor, params: ISetDocZoomRatioOperationParams) => {
         const documentModel = accessor.get(IUniverInstanceService).getUniverDocInstance(params.unitId);
         if (!documentModel) {

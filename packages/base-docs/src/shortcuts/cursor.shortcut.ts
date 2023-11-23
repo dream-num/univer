@@ -1,7 +1,8 @@
 import { IShortcutItem, KeyCode, MetaKeys } from '@univerjs/base-ui';
-import { Direction, FOCUSING_DOC } from '@univerjs/core';
+import { Direction, FOCUSING_DOC, FOCUSING_EDITOR } from '@univerjs/core';
 
 import { MoveCursorOperation, MoveSelectionOperation } from '../commands/operations/cursor.operation';
+import { SelectAllOperation } from '../commands/operations/select-all.operation';
 
 export const MoveCursorUpShortcut: IShortcutItem = {
     id: MoveCursorOperation.id,
@@ -73,4 +74,11 @@ export const MoveSelectionRightShortcut: IShortcutItem = {
     staticParameters: {
         direction: Direction.RIGHT,
     },
+};
+
+export const SelectAllShortcut: IShortcutItem = {
+    id: SelectAllOperation.id,
+    binding: KeyCode.A | MetaKeys.CTRL_COMMAND,
+    preconditions: (contextService) =>
+        contextService.getContextValue(FOCUSING_DOC) || contextService.getContextValue(FOCUSING_EDITOR),
 };

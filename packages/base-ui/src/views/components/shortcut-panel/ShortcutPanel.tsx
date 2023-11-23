@@ -58,7 +58,6 @@ export function ShortcutPanel() {
             })
             .sort((a, b) => a.sequence - b.sequence);
 
-        console.log('debug', toRender);
         setShortcutItems(toRender);
     }, [shortcutService, localeService]);
 

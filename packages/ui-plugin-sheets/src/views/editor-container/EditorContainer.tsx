@@ -18,6 +18,10 @@ const EDITOR_DEFAULT_POSITION = {
     left: HIDDEN_EDITOR_POSITION,
 };
 
+/**
+ * Floating editor's container.
+ * @returns
+ */
 export const EditorContainer: React.FC<ICellIEditorProps> = () => {
     const [state, setState] = useState({
         ...EDITOR_DEFAULT_POSITION,

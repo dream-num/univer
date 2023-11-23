@@ -69,7 +69,10 @@ export * from './shared';
 
 export { Range } from './sheets/range';
 export {
+    AbsoluteRefType,
     deserializeRangeWithSheet,
+    getAbsoluteRefTypeWithSingleString,
+    getAbsoluteRefTypeWitString,
     serializeRange,
     serializeRangeToRefString,
     serializeRangeWithSheet,

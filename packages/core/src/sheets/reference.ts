@@ -11,6 +11,13 @@ export interface IGridRangeName {
     range: IRange;
 }
 
+export enum AbsoluteRefType {
+    NONE,
+    ROW,
+    COLUMN,
+    ALL,
+}
+
 function singleReferenceToGrid(refBody: string) {
     const row = parseInt(refBody.replace($ROW_REGEX, '')) - 1;
     const column = Tools.ABCatNum(refBody.replace($COLUMN_REGEX, ''));
@@ -22,14 +29,71 @@ function singleReferenceToGrid(refBody: string) {
 }
 
 /**
+ *
+ * @param singleRefString for example A1 or B10,  not A1:B10
+ */
+export function getAbsoluteRefTypeWithSingleString(singleRefString: string) {
+    const isColumnAbsolute = singleRefString[0] === '$';
+    const remainChar = singleRefString.substring(1);
+
+    const isRowAbsolute = remainChar.indexOf('$') > -1;
+
+    if (isColumnAbsolute && isRowAbsolute) {
+        return AbsoluteRefType.ALL;
+    }
+    if (isColumnAbsolute) {
+        return AbsoluteRefType.COLUMN;
+    }
+    if (isRowAbsolute) {
+        return AbsoluteRefType.ROW;
+    }
+
+    return AbsoluteRefType.NONE;
+}
+
+/**
+ *
+ * @param refString for example A1:B10
+ */
+export function getAbsoluteRefTypeWitString(refString: string) {
+    const sheetArray = refString.split('!');
+
+    if (sheetArray.length > 1) {
+        refString = sheetArray[sheetArray.length - 1];
+    }
+
+    const refArray = refString.split(':');
+
+    if (refArray.length > 1) {
+        return getAbsoluteRefTypeWithSingleString(refArray[0]) && getAbsoluteRefTypeWithSingleString(refArray[1]);
+    }
+
+    return getAbsoluteRefTypeWithSingleString(refArray[0]);
+}
+
+/**
  * Serialize an `IRange` into a string.
  * @param range The `IRange` to be serialized
  */
-export function serializeRange(range: IRange): string {
+export function serializeRange(range: IRange, type: AbsoluteRefType = AbsoluteRefType.NONE): string {
     const { startColumn, startRow, endColumn, endRow } = range;
-    const startStr = `${Tools.chatAtABC(startColumn) + (startRow + 1)}`;
 
-    const endStr = `${Tools.chatAtABC(endColumn)}${endRow + 1}`;
+    let rowAbsoluteString = '';
+
+    let columnAbsoluteString = '';
+
+    if (type === AbsoluteRefType.ROW) {
+        rowAbsoluteString = '$';
+    } else if (type === AbsoluteRefType.COLUMN) {
+        columnAbsoluteString = '$';
+    } else if (type === AbsoluteRefType.ALL) {
+        rowAbsoluteString = '$';
+        columnAbsoluteString = '$';
+    }
+
+    const startStr = `${columnAbsoluteString}${Tools.chatAtABC(startColumn)}${rowAbsoluteString}${startRow + 1}`;
+
+    const endStr = `${columnAbsoluteString}${Tools.chatAtABC(endColumn)}${rowAbsoluteString}${endRow + 1}`;
 
     if (startStr === endStr) {
         return startStr;
@@ -44,8 +108,12 @@ export function serializeRange(range: IRange): string {
  * @param range
  * @returns
  */
-export function serializeRangeWithSheet(sheetName: string, range: IRange): string {
-    return `${sheetName}!${serializeRange(range)}`;
+export function serializeRangeWithSheet(
+    sheetName: string,
+    range: IRange,
+    type: AbsoluteRefType = AbsoluteRefType.NONE
+): string {
+    return `${sheetName}!${serializeRange(range, type)}`;
 }
 
 /**
@@ -55,8 +123,13 @@ export function serializeRangeWithSheet(sheetName: string, range: IRange): strin
  * @param range
  * @returns
  */
-export function serializeRangeWithSpreadsheet(unit: string, sheetName: string, range: IRange): string {
-    return `[${unit}]${sheetName}!${serializeRange(range)}`;
+export function serializeRangeWithSpreadsheet(
+    unit: string,
+    sheetName: string,
+    range: IRange,
+    type: AbsoluteRefType = AbsoluteRefType.NONE
+): string {
+    return `[${unit}]${sheetName}!${serializeRange(range, type)}`;
 }
 
 export function serializeRangeToRefString(gridRangeName: IGridRangeName) {

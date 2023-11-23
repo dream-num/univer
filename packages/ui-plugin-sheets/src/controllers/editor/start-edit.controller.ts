@@ -117,7 +117,7 @@ export class StartEditController extends Disposable {
                 return;
             }
 
-            const { position, documentLayoutObject, scaleX } = param;
+            const { position, documentLayoutObject, scaleX, editorUnitId } = param;
 
             const editorObject = this._getEditorObject();
 
@@ -133,7 +133,7 @@ export class StartEditController extends Disposable {
 
             const { a: angle } = textRotation as ITextRotation;
 
-            documentModel!.updateDocumentId(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+            documentModel!.updateDocumentId(editorUnitId);
 
             // documentModel!.updateDocumentDataMargin(paddingData);
 
@@ -141,9 +141,9 @@ export class StartEditController extends Disposable {
                 documentModel!.updateDocumentDataPageSize((endX - startX) / scaleX);
             }
 
-            this._currentUniverService.changeDoc(DOCS_NORMAL_EDITOR_UNIT_ID_KEY, documentModel! as DocumentModel);
+            this._currentUniverService.changeDoc(editorUnitId, documentModel! as DocumentModel);
 
-            const docParam = this._docSkeletonManagerService.updateCurrent({ unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY });
+            const docParam = this._docSkeletonManagerService.updateCurrent({ unitId: editorUnitId });
 
             if (docParam == null) {
                 return;
@@ -350,9 +350,9 @@ export class StartEditController extends Disposable {
         this._addBackground(scene, editorWidth, editorHeight, fill);
 
         // resize canvas
-        setTimeout(() => {
+        requestIdleCallback(() => {
             engine.resizeBySize(editorWidth, physicHeight);
-        }, 0);
+        });
 
         this._cellEditorManagerService.setState({
             startX,
@@ -550,7 +550,7 @@ export class StartEditController extends Disposable {
         // Listen to document edits to refresh the size of the editor.
         const updateCommandList = [RichTextEditingMutation.id, SetEditorResizeOperation.id];
 
-        const excludeUnitList = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY];
+        const excludeUnitList = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];
 
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
@@ -598,10 +598,6 @@ export class StartEditController extends Disposable {
     }
 
     private _getEditorObject() {
-        return getEditorObject(DOCS_NORMAL_EDITOR_UNIT_ID_KEY, this._renderManagerService);
-    }
-
-    private _getFormulaBarEditorObject() {
-        return getEditorObject(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, this._renderManagerService);
+        return getEditorObject(this._editorBridgeService.getCurrentEditorId(), this._renderManagerService);
     }
 }

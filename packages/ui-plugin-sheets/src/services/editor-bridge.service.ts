@@ -20,6 +20,7 @@ export interface IEditorBridgeServiceParam {
     documentLayoutObject: IDocumentLayoutObject;
     scaleX: number;
     scaleY: number;
+    editorUnitId: string;
 }
 
 export interface IEditorBridgeService {
@@ -33,6 +34,7 @@ export interface IEditorBridgeService {
     enableForceKeepVisible(): void;
     disableForceKeepVisible(): void;
     isForceKeepVisible(): boolean;
+    getCurrentEditorId(): Nullable<string>;
 }
 
 export class EditorBridgeService implements IEditorBridgeService, IDisposable {
@@ -67,6 +69,10 @@ export class EditorBridgeService implements IEditorBridgeService, IDisposable {
 
     getState(): Readonly<Nullable<IEditorBridgeServiceParam>> {
         return this._state;
+    }
+
+    getCurrentEditorId() {
+        return this._state?.editorUnitId;
     }
 
     changeVisible(param: IEditorBridgeServiceVisibleParam) {

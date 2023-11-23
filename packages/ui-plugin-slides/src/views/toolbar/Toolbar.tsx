@@ -1,6 +1,6 @@
 import { BaseComponentProps } from '@univerjs/base-ui';
 import { Button, Container, Tooltip } from '@univerjs/design';
-import { Component, createRef } from 'react';
+import React, { Component, createRef } from 'react';
 
 import { SlideUIPlugin } from '../..';
 import { SLIDE_UI_PLUGIN_NAME } from '../../basics';

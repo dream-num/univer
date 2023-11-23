@@ -1,6 +1,6 @@
 import { CheckMarkSingle } from '@univerjs/icons';
 import clsx from 'clsx';
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 
 import styles from './index.module.less';
 

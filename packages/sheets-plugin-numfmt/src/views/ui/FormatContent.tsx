@@ -1,5 +1,5 @@
 import { InputNumber } from '@univerjs/design';
-import { Component, createRef } from 'react';
+import React, { Component, createRef } from 'react';
 
 import styles from './index.module.less';
 

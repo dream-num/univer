@@ -2,7 +2,7 @@ import { InsertSheetCommand } from '@univerjs/base-sheets';
 import { ICommandService } from '@univerjs/core';
 import { IncreaseSingle, MoreSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { ISheetBarService } from '../../services/sheet-bar/sheet-bar.service';
 import styles from './index.module.less';

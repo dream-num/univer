@@ -2,7 +2,7 @@ import { ICommandService, LocaleService } from '@univerjs/core';
 import { Dropdown, Tooltip } from '@univerjs/design';
 import { MoreDownSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Subscription } from 'rxjs';
 
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';

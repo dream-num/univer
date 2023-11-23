@@ -1,7 +1,7 @@
 /* eslint-disable no-magic-numbers */
 import { IncreaseSingle, ReduceSingle } from '@univerjs/icons';
 import clsx from 'clsx';
-import { useContext, useMemo, useRef } from 'react';
+import React, { useContext, useMemo, useRef } from 'react';
 
 import { Button } from '../button/Button';
 import { ConfigContext } from '../config-provider/ConfigProvider';

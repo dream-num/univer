@@ -3,7 +3,7 @@ import { Checkbox, Dropdown } from '@univerjs/design';
 import { MoreSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { IStatusBarService } from '../../services/status-bar.service';
 import { CopyableStatisticItem, formatNumber, functionDisplayNames, IStatisticItem } from './CopyableStatisticItem';

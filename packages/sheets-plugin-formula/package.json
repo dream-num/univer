@@ -44,6 +44,7 @@
         "@wendellhu/redi": "^0.12.11"
     },
     "devDependencies": {
-        "esbuild": "^0.19.5"
+        "esbuild": "^0.19.5",
+        "typescript": "^5.3.2"
     }
 }

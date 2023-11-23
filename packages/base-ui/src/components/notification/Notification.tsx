@@ -3,7 +3,7 @@ import { CloseSingle, ErrorSingle, SuccessSingle, WarningSingle } from '@univerj
 import clsx from 'clsx';
 import { useNotification } from 'rc-notification';
 import { Placement } from 'rc-notification/es/interface';
-import { useContext, useEffect, useRef } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 import { Subject } from 'rxjs';
 
 import styles from './index.module.less';

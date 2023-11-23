@@ -1,5 +1,5 @@
 import { InputNumber } from '@univerjs/design';
-import { useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import styles from './index.module.less';
 import { IFontSizeProps } from './interface';

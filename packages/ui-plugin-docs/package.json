@@ -52,16 +52,20 @@
         "@univerjs/base-ui": "workspace:*",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
-        "@wendellhu/redi": "^0.12.11",
-        "react": "^18.2.0"
+        "@wendellhu/redi": "^0.12.11"
     },
     "devDependencies": {
-        "@types/react": "^18.2.37",
+        "@types/react": "^18.2.38",
         "@vitest/coverage-istanbul": "^0.34.6",
-        "esbuild": "^0.19.5",
+        "esbuild": "^0.19.7",
         "happy-dom": "^12.10.3",
         "less": "^4.2.0",
+        "react": "^18.2.0",
         "ts-node": "^10.9.1",
+        "typescript": "^5.3.2",
         "vitest": "^0.34.6"
+    },
+    "peerDependencies": {
+        "react": ">=16.9.0"
     }
 }

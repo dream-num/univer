@@ -8,7 +8,7 @@ import {
 import { CheckMarkSingle, MoreSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { isObservable, of } from 'rxjs';
 
 import {

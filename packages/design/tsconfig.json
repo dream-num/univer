@@ -1,15 +1,11 @@
 {
+    "extends": "../../tsconfig.json",
     "compilerOptions": {
-        "target": "es2016",
-        "module": "commonjs",
+        "rootDir": "./",
+        "outDir": "lib",
+        "baseUrl": "./",
         "esModuleInterop": true,
-        "forceConsistentCasingInFileNames": true,
-        "strict": true,
-        "isolatedModules": true,
-        "allowJs": true,
-        "jsx": "react-jsx",
-        "jsxImportSource": "react",
-        "types": ["node", "esbuild-style-plugin"]
+        "strictPropertyInitialization": false,
     },
-    "include": ["src"]
+    "include": ["src/**/*"]
 }

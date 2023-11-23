@@ -1,3 +1,5 @@
+import React from 'react';
+
 import { AutoFillPopupMenu } from './AutoFillPopupMenu';
 import styles from './index.module.less';
 

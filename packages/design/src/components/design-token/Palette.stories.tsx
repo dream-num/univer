@@ -1,8 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import React from 'react';
 
-// eslint-disable-next-line import/no-relative-packages
-import { themes } from '../../../../../.storybook/preview';
+import { defaultTheme, greenTheme } from '../../themes';
 import { Palette } from './Palette';
+
+const themes: Record<string, Record<string, string>> = {
+    default: defaultTheme,
+    green: greenTheme,
+};
 
 const meta: Meta = {
     title: 'Design / Design Token',

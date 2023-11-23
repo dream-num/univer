@@ -1,6 +1,6 @@
 import { BaseComponentProps } from '@univerjs/base-ui';
 import { ICheckboxGroupProps } from '@univerjs/design';
-import { Component } from 'react';
+import React, { Component } from 'react';
 
 type searchResult = {
     count: number;

@@ -1,3 +1,5 @@
+import React from 'react';
+
 import { ISheetUIPluginConfig } from '../../basics';
 import { CountBar } from '../count-bar/CountBar';
 import { EditorContainer } from '../editor-container/EditorContainer';

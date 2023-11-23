@@ -1,5 +1,5 @@
 import type { Meta } from '@storybook/react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 import { enUS, type ILocale, zhCN } from '../../locale';
 import { Button } from '../button/Button';

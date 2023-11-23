@@ -3,6 +3,7 @@ import { IClipboardInterfaceService, IMessageService } from '@univerjs/base-ui';
 import { LocaleService } from '@univerjs/core';
 import { MessageType, Tooltip } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
+import React from 'react';
 
 import styles from './index.module.less';
 

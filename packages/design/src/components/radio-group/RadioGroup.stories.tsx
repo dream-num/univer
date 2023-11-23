@@ -1,5 +1,5 @@
 import type { Meta } from '@storybook/react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 import { Radio } from '../radio/Radio';
 import { RadioGroup } from './RadioGroup';

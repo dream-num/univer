@@ -1,4 +1,5 @@
 import { BorderStyleTypes } from '@univerjs/core';
+import React from 'react';
 
 import { BorderDashDot } from './icons/BorderDashDot';
 import { BorderDashDotDot } from './icons/BorderDashDotDot';

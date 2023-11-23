@@ -1,8 +1,8 @@
 import { ILocalStorageService, LocaleService, Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
-import { ComponentManager } from './Common/ComponentManager';
-import { ZIndexManager } from './Common/ZIndexManager';
+import { ComponentManager } from './common/component-manager';
+import { ZIndexManager } from './common/z-index-manager';
 import { ErrorController } from './controllers/error/error.controller';
 import { SharedController } from './controllers/shared-shortcut.controller';
 import { IUIController, IWorkbenchOptions } from './controllers/ui/ui.controller';

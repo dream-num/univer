@@ -89,37 +89,96 @@ export class LexerTreeBuilder extends Disposable {
         return this._currentLexerNode;
     }
 
-    checkIfAddBracket(formulaString: string) {
-        const lastString = formulaString[formulaString.length - 1];
-
-        if (lastString === matchToken.CLOSE_BRACKET) {
-            return false;
-        }
-
-        const current = this._getCurrentParamIndex(formulaString, formulaString.length - 2);
+    getFunctionAndParameter(formulaString: string, strIndex: number) {
+        const current = this._getCurrentParamIndex(formulaString, strIndex);
 
         if (current == null || current === ErrorType.VALUE) {
-            return false;
+            return;
         }
 
         const lexerNode = current[0];
 
         if (typeof lexerNode === 'string') {
-            return false;
+            return;
         }
 
         let parent = lexerNode.getParent();
 
+        let children = lexerNode;
+
+        while (parent) {
+            const token = parent.getToken();
+            if (
+                token !== DEFAULT_TOKEN_TYPE_PARAMETER &&
+                !isFormulaLexerToken(token) &&
+                parent.getStartIndex() !== -1
+            ) {
+                const paramIndex = parent.getChildren().indexOf(children);
+
+                return {
+                    functionName: token,
+                    paramIndex,
+                };
+            }
+
+            children = parent;
+            parent = parent.getParent();
+        }
+    }
+
+    /**
+     * Estimate the number of right brackets that need to be automatically added to the end of the formula.
+     * @param formulaString
+     * @returns
+     */
+    checkIfAddBracket(formulaString: string) {
+        let lastBracketCount = 0;
+        let lastIndex = formulaString.length - 1;
+        let lastString = formulaString[lastIndex];
+        /**
+         * Determine how many close brackets are at the end, and estimate how many functions need to automatically add close brackets.
+         */
+        while (lastString === matchToken.CLOSE_BRACKET || lastString === ' ') {
+            if (lastString === matchToken.CLOSE_BRACKET) {
+                lastBracketCount++;
+            }
+            lastString = formulaString[--lastIndex];
+        }
+
+        const current = this._getCurrentParamIndex(formulaString, formulaString.length - 2);
+
+        if (current == null || current === ErrorType.VALUE) {
+            return 0;
+        }
+
+        const lexerNode = current[0];
+
+        if (typeof lexerNode === 'string') {
+            return 0;
+        }
+
+        let parent = lexerNode.getParent();
+        let bracketCount = 0;
+
+        /**
+         * Perform an upward search on the syntax tree to see how many layers the function is nested.
+         * For each layer passed, subtract the estimated number of right brackets,
+         * ultimately obtaining the number of right brackets that need to be completed.
+         */
         while (parent) {
             const token = parent.getToken();
             if (token !== DEFAULT_TOKEN_TYPE_PARAMETER && token !== matchToken.COLON && parent.getStartIndex() !== -1) {
-                return true;
+                if (lastBracketCount === 0) {
+                    bracketCount += 1;
+                } else {
+                    lastBracketCount--;
+                }
             }
 
             parent = parent.getParent();
         }
 
-        return false;
+        return bracketCount;
     }
 
     sequenceNodesBuilder(formulaString: string) {

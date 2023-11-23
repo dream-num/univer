@@ -27,13 +27,13 @@ import { DocComponent } from './doc-component';
 import { DOCS_EXTENSION_TYPE } from './doc-extension';
 import { DocumentSkeleton } from './doc-skeleton';
 
-interface PageMarginLayout {
+interface IPageMarginLayout {
     pageMarginLeft: number;
     pageMarginTop: number;
     pageLayoutType?: PageLayoutType;
 }
 
-export interface IDocumentsConfig extends PageMarginLayout {
+export interface IDocumentsConfig extends IPageMarginLayout {
     allowCache?: boolean;
     hasEditor?: boolean;
 }
@@ -45,7 +45,7 @@ export interface IPageRenderConfig {
     ctx: CanvasRenderingContext2D;
 }
 
-export interface IDocumentOffsetConfig extends PageMarginLayout {
+export interface IDocumentOffsetConfig extends IPageMarginLayout {
     docsLeft: number;
     docsTop: number;
     documentTransform: Transform;

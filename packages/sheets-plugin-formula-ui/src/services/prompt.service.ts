@@ -95,6 +95,10 @@ export interface IFormulaPromptService {
      */
     acceptFormulaName(param: string): void;
 
+    isSearching(): boolean;
+
+    isHelping(): boolean;
+
     dispose(): void;
 }
 

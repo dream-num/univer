@@ -1,7 +1,6 @@
 import { MoveCursorOperation, TextSelectionManagerService } from '@univerjs/base-docs';
 import {
     FormulaEngineService,
-    IFunctionInfo,
     includeFormulaLexerToken,
     ISequenceNode,
     isFormulaLexerToken,
@@ -66,17 +65,17 @@ import { HelpFunctionOperation } from '../commands/operations/help-function.oper
 import { SearchFunctionOperation } from '../commands/operations/search-function.operation';
 import { META_KEY_CTRL_AND_SHIFT } from '../common/prompt';
 import { FORMULA_REF_SELECTION_PLUGIN_NAME, getFormulaRefSelectionStyle } from '../common/selection';
-import { IDescriptionService, ISearchItem } from '../services/description.service';
+import { IDescriptionService } from '../services/description.service';
 import { IFormulaPromptService } from '../services/prompt.service';
 
-interface IFunctionPanelParam {
-    visibleSearch: boolean;
-    visibleHelp: boolean;
-    searchText: string;
-    paramIndex: number;
-    functionInfo?: IFunctionInfo;
-    searchList?: ISearchItem[];
-}
+// interface IFunctionPanelParam {
+//     visibleSearch: boolean;
+//     visibleHelp: boolean;
+//     searchText: string;
+//     paramIndex: number;
+//     functionInfo?: IFunctionInfo;
+//     searchList?: ISearchItem[];
+// }
 
 interface IRefSelection {
     refIndex: number;
@@ -90,6 +89,13 @@ enum ArrowMoveAction {
     moveRefReady,
     movingRef,
     exitInput,
+}
+
+enum InputPanelState {
+    InitialState,
+    keyNormal,
+    keyArrow,
+    mouse,
 }
 
 @OnLifecycle(LifecycleStages.Steady, PromptController)
@@ -125,6 +131,8 @@ export class PromptController extends Disposable {
     private _numberColor = '';
 
     private _insertSelections: ISelectionWithStyle[] = [];
+
+    private _inputPanelState: InputPanelState = InputPanelState.InitialState;
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
@@ -242,11 +250,11 @@ export class PromptController extends Disposable {
 
                     this._highlightFormula(currentBody);
 
-                    if (this._isLockedOnSelectionInsertRefString) {
-                        return;
-                    }
+                    // if (this._isLockedOnSelectionInsertRefString) {
+                    //     return;
+                    // }
                     // TODO@Dushusir: use real text info
-                    this._setFunctionPanel(dataStream);
+                    this._changeFunctionPanelState();
                 })
             )
         );
@@ -268,10 +276,14 @@ export class PromptController extends Disposable {
                     if (
                         ![KeyCode.ARROW_DOWN, KeyCode.ARROW_UP, KeyCode.ARROW_LEFT, KeyCode.ARROW_RIGHT].includes(
                             e.which
-                        ) &&
-                        this._arrowMoveActionState !== ArrowMoveAction.moveCursor
+                        )
                     ) {
-                        this._arrowMoveActionState = ArrowMoveAction.moveRefReady;
+                        if (this._arrowMoveActionState !== ArrowMoveAction.moveCursor) {
+                            this._arrowMoveActionState = ArrowMoveAction.moveRefReady;
+                        }
+                        this._inputPanelState = InputPanelState.keyNormal;
+                    } else {
+                        this._inputPanelState = InputPanelState.keyArrow;
                     }
                 })
             )
@@ -320,6 +332,8 @@ export class PromptController extends Disposable {
                     this._selectionRenderService.resetStyle();
 
                     this._resetTemp();
+
+                    this._hideFunctionPanel();
                 })
             )
         );
@@ -423,6 +437,193 @@ export class PromptController extends Disposable {
         );
     }
 
+    private _initAcceptFormula() {
+        this.disposeWithMe(
+            toDisposable(
+                this._formulaPromptService.acceptFormulaName$.subscribe((formulaString: string) => {
+                    console.log(`TODO: set ${formulaString} to cell editor`);
+
+                    const activeRange = this._textSelectionRenderManager.getActiveRange();
+
+                    if (activeRange == null) {
+                        this._hideFunctionPanel();
+                        return;
+                    }
+
+                    const { startOffset } = activeRange;
+
+                    const nodeIndex = this._searchSequenceIndex(this._lastSequenceNodes, startOffset - 2);
+                    const node = this._lastSequenceNodes[nodeIndex];
+
+                    if (node == null || typeof node === 'string') {
+                        this._hideFunctionPanel();
+                        return;
+                    }
+
+                    const difference = formulaString.length - node.token.length;
+
+                    node.token = formulaString;
+
+                    node.endIndex += difference;
+
+                    this._lastSequenceNodes.splice(nodeIndex + 1, 0, matchToken.OPEN_BRACKET);
+
+                    const formulaStringCount = formulaString.length + 1;
+
+                    for (let i = nodeIndex + 2, len = this._lastSequenceNodes.length; i < len; i++) {
+                        const node = this._lastSequenceNodes[i];
+                        if (typeof node === 'string') {
+                            continue;
+                        }
+
+                        node.startIndex += formulaStringCount;
+                        node.endIndex += formulaStringCount;
+                    }
+
+                    this._sycToEditor(this._lastSequenceNodes, node.endIndex + 2);
+                })
+            )
+        );
+    }
+
+    private _changeFunctionPanelState() {
+        const activeRange = this._textSelectionRenderManager.getActiveRange();
+
+        if (activeRange == null) {
+            this._hideFunctionPanel();
+            return;
+        }
+
+        const { startOffset } = activeRange;
+
+        const currentSequenceNode =
+            this._lastSequenceNodes[this._searchSequenceIndex(this._lastSequenceNodes, startOffset - 2)];
+
+        if (currentSequenceNode == null) {
+            this._hideFunctionPanel();
+            return;
+        }
+
+        if (typeof currentSequenceNode !== 'string' && currentSequenceNode.nodeType === sequenceNodeType.FUNCTION) {
+            const token = currentSequenceNode.token.toUpperCase();
+
+            if (this._inputPanelState === InputPanelState.keyNormal) {
+                // show search function panel
+                const searchList = this._descriptionService.getSearchListByName(token);
+                this._hideFunctionPanel();
+                if (searchList == null || searchList.length === 0) {
+                    return;
+                }
+                this._commandService.executeCommand(SearchFunctionOperation.id, {
+                    visible: true,
+                    searchText: token,
+                    searchList,
+                });
+            } else if (this._descriptionService.hasFunction(token)) {
+                // show help function panel
+                this._changeHelpFunctionPanelState(token, -1);
+            }
+
+            return;
+        }
+
+        const currentBody = this._getCurrentBody();
+
+        const dataStream = currentBody?.dataStream || '';
+
+        const functionAndParameter = this._formulaEngineService.getFunctionAndParameter(dataStream, startOffset - 1);
+
+        if (functionAndParameter == null) {
+            this._hideFunctionPanel();
+            return;
+        }
+
+        const { functionName, paramIndex } = functionAndParameter;
+
+        this._changeHelpFunctionPanelState(functionName.toUpperCase(), paramIndex);
+    }
+
+    private _changeHelpFunctionPanelState(token: string, paramIndex: number) {
+        const functionInfo = this._descriptionService.getFunctionInfo(token);
+        this._hideFunctionPanel();
+        if (functionInfo == null) {
+            return;
+        }
+
+        // show help function panel
+        this._commandService.executeCommand(HelpFunctionOperation.id, {
+            visible: true,
+            paramIndex,
+            functionInfo,
+        });
+    }
+
+    private _hideFunctionPanel() {
+        this._commandService.executeCommand(SearchFunctionOperation.id, {
+            visible: false,
+            searchText: '',
+        });
+        this._commandService.executeCommand(HelpFunctionOperation.id, {
+            visible: false,
+            paramIndex: -1,
+        });
+    }
+
+    // // TODO@Dushusir: remove after use real text info
+    // private _setFunctionPanel(currentInputValue: string) {
+    //     let param: IFunctionPanelParam = {
+    //         visibleSearch: false,
+    //         visibleHelp: false,
+    //         searchText: '',
+    //         paramIndex: 0,
+    //         functionInfo: {} as IFunctionInfo,
+    //         searchList: [],
+    //     };
+
+    //     if (this._getContextState()) {
+    //         currentInputValue = currentInputValue.split('\r\n')[0].toLocaleUpperCase();
+
+    //         const searchText = currentInputValue.substring(1);
+
+    //         // TODO@Dushusir: remove after use real text info
+    //         const matchList = ['SUM', 'AVERAGE'];
+
+    //         // help function
+    //         if (matchList.includes(searchText)) {
+    //             const paramIndex = Math.random() > 0.5 ? 0 : 1;
+
+    //             const functionInfo = this._descriptionService.getFunctionInfo(searchText);
+    //             param = {
+    //                 visibleSearch: false,
+    //                 visibleHelp: !!functionInfo,
+    //                 searchText,
+    //                 paramIndex,
+    //                 functionInfo,
+    //             };
+    //         } else {
+    //             const searchList = this._descriptionService.getSearchListByName(searchText);
+    //             param = {
+    //                 visibleSearch: searchList.length > 0,
+    //                 visibleHelp: false,
+    //                 searchText,
+    //                 paramIndex: 0,
+    //                 searchList,
+    //             };
+    //         }
+    //     }
+
+    //     this._commandService.executeCommand(SearchFunctionOperation.id, {
+    //         visible: param.visibleSearch,
+    //         searchText: param.searchText,
+    //         searchList: param.searchList,
+    //     });
+    //     this._commandService.executeCommand(HelpFunctionOperation.id, {
+    //         visible: param.visibleHelp,
+    //         paramIndex: param.paramIndex,
+    //         functionInfo: param.functionInfo,
+    //     });
+    // }
+
     /**
      * If the cursor is located at a formula token,
      * it is necessary to prohibit the behavior of closing the editor by clicking on the canvas,
@@ -456,6 +657,11 @@ export class PromptController extends Disposable {
         }
     }
 
+    /**
+     * Determine whether the character is a token keyword for the formula engine.
+     * @param char
+     * @returns
+     */
     private _matchRefDrawToken(char: string) {
         return (
             (isFormulaLexerToken(char) &&
@@ -467,6 +673,10 @@ export class PromptController extends Disposable {
         );
     }
 
+    /**
+     *
+     * @returns Return the character under the current cursor in the editor.
+     */
     private _getCurrentChar() {
         const activeRange = this._textSelectionRenderManager.getActiveRange();
 
@@ -487,6 +697,10 @@ export class PromptController extends Disposable {
         return dataStream[startOffset - 1];
     }
 
+    /**
+     * Disable the ref string generation mode. In the ref string generation mode,
+     * users can select a certain area using the mouse and arrow keys, and convert the area into a ref string.
+     */
     private _disableForceKeepVisible() {
         this._editorBridgeService.disableForceKeepVisible();
 
@@ -505,6 +719,13 @@ export class PromptController extends Disposable {
         return documentModel?.snapshot?.body;
     }
 
+    /**
+     * Detect whether the user's input content is a formula. If it is a formula,
+     * serialize the current input content into a sequenceNode;
+     * otherwise, close the formula panel.
+     * @param currentInputValue The text content entered by the user in the editor.
+     * @returns
+     */
     private _contextSwitch(currentInputValue: string) {
         if (isFormulaString(currentInputValue)) {
             this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, true);
@@ -529,72 +750,13 @@ export class PromptController extends Disposable {
             this._isLockedOnSelectionInsertRefString = false;
 
             this._lastSequenceNodes = [];
+
+            this._hideFunctionPanel();
         }
     }
 
     private _getContextState() {
         return this._contextService.getContextValue(FOCUSING_EDITOR_INPUT_FORMULA);
-    }
-
-    // TODO@Dushusir: remove after use real text info
-    private _setFunctionPanel(currentInputValue: string) {
-        let param: IFunctionPanelParam = {
-            visibleSearch: false,
-            visibleHelp: false,
-            searchText: '',
-            paramIndex: 0,
-            functionInfo: {} as IFunctionInfo,
-            searchList: [],
-        };
-
-        if (this._getContextState()) {
-            currentInputValue = currentInputValue.split('\r\n')[0].toLocaleUpperCase();
-
-            const searchText = currentInputValue.substring(1);
-
-            // TODO@Dushusir: remove after use real text info
-            const matchList = ['SUM', 'AVERAGE'];
-
-            // help function
-            if (matchList.includes(searchText)) {
-                const paramIndex = Math.random() > 0.5 ? 0 : 1;
-
-                const functionInfo = this._descriptionService.getFunctionInfo(searchText);
-                param = {
-                    visibleSearch: false,
-                    visibleHelp: !!functionInfo,
-                    searchText,
-                    paramIndex,
-                    functionInfo,
-                };
-            } else {
-                const searchList = this._descriptionService.getSearchListByName(searchText);
-                param = {
-                    visibleSearch: searchList.length > 0,
-                    visibleHelp: false,
-                    searchText,
-                    paramIndex: 0,
-                    searchList,
-                };
-            }
-        }
-
-        this._commandService.executeCommand(SearchFunctionOperation.id, {
-            visible: param.visibleSearch,
-            searchText: param.searchText,
-            searchList: param.searchList,
-        });
-        this._commandService.executeCommand(HelpFunctionOperation.id, {
-            visible: param.visibleHelp,
-            paramIndex: param.paramIndex,
-            functionInfo: param.functionInfo,
-        });
-    }
-
-    private _initAcceptFormula() {
-        this._formulaPromptService.acceptFormulaName$.subscribe((name: string) => {
-            console.log(`TODO: set ${name} to cell editor`);
-        });
     }
 
     /**
@@ -829,6 +991,11 @@ export class PromptController extends Disposable {
         };
     }
 
+    /**
+     * Convert the selection range to a ref string for the formula engine, such as A1:B1
+     * @param range
+     * @returns
+     */
     private _getRefString(range: IRange) {
         const { unitId, sheetId } = this._getCurrentUnitIdAndSheetId();
 
@@ -918,35 +1085,6 @@ export class PromptController extends Disposable {
             return;
         }
 
-        // const { unitId, sheetId } = this._getCurrentUnitIdAndSheetId();
-
-        // let refUnitId = '';
-        // let refSheetName = '';
-
-        // if (unitId === this._currentUnitId) {
-        //     refUnitId = '';
-        // } else {
-        //     refUnitId = unitId;
-        // }
-
-        // if (sheetId === this._currentSheetId) {
-        //     refSheetName = '';
-        // } else {
-        //     refSheetName = this._getSheetNameById(unitId, sheetId);
-        // }
-
-        // const { startRow, endRow, startColumn, endColumn } = range;
-        // const refString = serializeRangeToRefString({
-        //     sheetName: refSheetName,
-        //     unitId: refUnitId,
-        //     range: {
-        //         startRow,
-        //         endRow,
-        //         startColumn,
-        //         endColumn,
-        //     },
-        // });
-
         const refString = this._getRefString(range);
 
         const refStringCount = refString.length;
@@ -973,6 +1111,12 @@ export class PromptController extends Disposable {
         this._sycToEditor(sequenceNodes, index + refStringCount);
     }
 
+    /**
+     * Insert a string at the cursor position in the text corresponding to the sequenceNodes.
+     * @param sequenceNodes
+     * @param index
+     * @param content
+     */
     private _insertSequenceString(sequenceNodes: Array<string | ISequenceNode>, index: number, content: string) {
         const nodeIndex = this._searchSequenceIndex(sequenceNodes, index);
         const str = content.split('');
@@ -991,6 +1135,12 @@ export class PromptController extends Disposable {
         }
     }
 
+    /**
+     * Query the text coordinates in the sequenceNodes and determine the actual insertion index.
+     * @param sequenceNodes
+     * @param strIndex
+     * @returns
+     */
     private _searchSequenceIndex(sequenceNodes: Array<string | ISequenceNode>, strIndex: number) {
         let nodeIndex = 0;
         for (let i = 0, len = sequenceNodes.length; i < len; i++) {
@@ -1012,6 +1162,12 @@ export class PromptController extends Disposable {
         return sequenceNodes.length;
     }
 
+    /**
+     * Restore the sequenceNode generated by the lexer to the text in the editor, and set the cursor position.
+     * @param sequenceNodes
+     * @param textSelectionOffset
+     * @returns
+     */
     private async _sycToEditor(sequenceNodes: Array<string | ISequenceNode>, textSelectionOffset: number) {
         const dataStream = this._generateStringWithSequence(sequenceNodes);
 
@@ -1273,6 +1429,8 @@ export class PromptController extends Disposable {
             toDisposable(
                 documentComponent.onPointerDownObserver.add(() => {
                     this._arrowMoveActionState = ArrowMoveAction.moveCursor;
+
+                    this._inputPanelState = InputPanelState.mouse;
                 })
             )
         );
@@ -1289,6 +1447,10 @@ export class PromptController extends Disposable {
                     const { keycode, metaKey } = params;
 
                     if (keycode === KeyCode.ENTER) {
+                        if (this._formulaPromptService.isSearching()) {
+                            this._formulaPromptService.accept(true);
+                            return;
+                        }
                         this._editorBridgeService.changeVisible({
                             visible: false,
                             eventType: DeviceInputEventType.Keyboard,
@@ -1300,6 +1462,10 @@ export class PromptController extends Disposable {
                         return;
                     }
                     if (keycode === KeyCode.TAB) {
+                        if (this._formulaPromptService.isSearching()) {
+                            this._formulaPromptService.accept(true);
+                            return;
+                        }
                         this._editorBridgeService.changeVisible({
                             visible: false,
                             eventType: DeviceInputEventType.Keyboard,
@@ -1309,6 +1475,17 @@ export class PromptController extends Disposable {
                             direction: Direction.RIGHT,
                         });
                         return;
+                    }
+
+                    if (this._formulaPromptService.isSearching()) {
+                        if (keycode === KeyCode.ARROW_DOWN) {
+                            this._formulaPromptService.navigate({ direction: Direction.DOWN });
+                            return;
+                        }
+                        if (keycode === KeyCode.ARROW_UP) {
+                            this._formulaPromptService.navigate({ direction: Direction.UP });
+                            return;
+                        }
                     }
 
                     if (this._arrowMoveActionState === ArrowMoveAction.moveCursor) {

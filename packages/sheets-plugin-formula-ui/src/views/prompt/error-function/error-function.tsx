@@ -1,8 +1,8 @@
 import { ICellEditorManagerService } from '@univerjs/ui-plugin-sheets';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-import { IFormulaPromptService, IHelpFunctionCommandParams } from '../../../services/prompt.service';
+import { IFormulaPromptService, IHelpFunctionOperationParams } from '../../../services/prompt.service';
 import styles from './index.module.less';
 
 export function ErrorFunction() {
@@ -12,7 +12,7 @@ export function ErrorFunction() {
     const cellEditorManagerService = useDependency(ICellEditorManagerService);
     useEffect(() => {
         // TODO@Dushusir: use cell notification service
-        const subscription = promptService.help$.subscribe((params: IHelpFunctionCommandParams) => {
+        const subscription = promptService.help$.subscribe((params: IHelpFunctionOperationParams) => {
             const selection = cellEditorManagerService.getState();
             if (!selection) return;
 

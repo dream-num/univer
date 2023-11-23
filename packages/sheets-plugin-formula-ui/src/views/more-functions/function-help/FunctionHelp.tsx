@@ -1,4 +1,5 @@
 import { IFunctionParam } from '@univerjs/base-formula-engine';
+import React from 'react';
 
 interface IFunctionHelpProps {
     prefix?: string;

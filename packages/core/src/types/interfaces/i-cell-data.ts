@@ -65,3 +65,18 @@ export function isICellData(value: any): value is ICellData {
         (value as ICellData).f !== undefined
     );
 }
+
+export function getCellValueType(cell: ICellData) {
+    if (cell.t !== undefined) {
+        return cell.t;
+    }
+    if (typeof cell.v === 'string') {
+        return CellValueType.STRING;
+    }
+    if (typeof cell.v === 'number') {
+        return CellValueType.NUMBER;
+    }
+    if (typeof cell.v === 'boolean') {
+        return CellValueType.BOOLEAN;
+    }
+}

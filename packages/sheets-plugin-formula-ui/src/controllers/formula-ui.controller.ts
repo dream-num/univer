@@ -9,6 +9,7 @@ import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univ
 import { Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 
+import { InsertFunctionCommand } from '../commands/commands/insert-function.command';
 import { SelectEditorFormulaOperation } from '../commands/operations/editor-formula.operation';
 import { HelpFunctionOperation } from '../commands/operations/help-function.operation';
 import { InsertFunctionOperation } from '../commands/operations/insert-function.operation';
@@ -57,6 +58,7 @@ export class FormulaUIController extends Disposable {
 
     private _registerCommands(): void {
         [
+            InsertFunctionCommand,
             InsertFunctionOperation,
             MoreFunctionsOperation,
             SearchFunctionOperation,

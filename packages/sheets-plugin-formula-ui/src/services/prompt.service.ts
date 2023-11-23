@@ -5,7 +5,7 @@ import { Observable, Subject } from 'rxjs';
 
 import { ISearchItem } from './description.service';
 
-export interface ISearchFunctionParams {
+export interface ISearchFunctionOperationParams {
     /**
      * show SearchFunction Component or not
      */
@@ -22,7 +22,7 @@ export interface ISearchFunctionParams {
     searchList: ISearchItem[];
 }
 
-export interface IHelpFunctionCommandParams {
+export interface IHelpFunctionOperationParams {
     /**
      * show HelpFunction Component or not
      */
@@ -47,23 +47,23 @@ export interface IFormulaPromptService {
     /**
      * listen search function open
      */
-    search$: Observable<ISearchFunctionParams>;
+    search$: Observable<ISearchFunctionOperationParams>;
 
     /**
      * open search function
      */
-    search(param: ISearchFunctionParams): void;
+    search(param: ISearchFunctionOperationParams): void;
 
     /**
      * listen help function open
      */
-    help$: Observable<IHelpFunctionCommandParams>;
+    help$: Observable<IHelpFunctionOperationParams>;
 
     /**
      * open help function
      */
 
-    help(param: IHelpFunctionCommandParams): void;
+    help(param: IHelpFunctionOperationParams): void;
 
     /**
      * listen navigate shortcut, UP and DOWN
@@ -105,9 +105,9 @@ export interface IFormulaPromptService {
 export const IFormulaPromptService = createIdentifier<FormulaPromptService>('formula-ui.prompt-service');
 
 export class FormulaPromptService implements IFormulaPromptService, IDisposable {
-    private readonly _search$ = new Subject<ISearchFunctionParams>();
+    private readonly _search$ = new Subject<ISearchFunctionOperationParams>();
 
-    private readonly _help$ = new Subject<IHelpFunctionCommandParams>();
+    private readonly _help$ = new Subject<IHelpFunctionOperationParams>();
 
     private readonly _navigate$ = new Subject<INavigateParam>();
 
@@ -138,7 +138,7 @@ export class FormulaPromptService implements IFormulaPromptService, IDisposable 
         this._acceptFormulaName$.complete();
     }
 
-    search(param: ISearchFunctionParams) {
+    search(param: ISearchFunctionOperationParams) {
         this._searching = param.visible;
         this._search$.next(param);
     }
@@ -147,7 +147,7 @@ export class FormulaPromptService implements IFormulaPromptService, IDisposable 
         return this._searching;
     }
 
-    help(param: IHelpFunctionCommandParams) {
+    help(param: IHelpFunctionOperationParams) {
         this._helping = param.visible;
         this._help$.next(param);
     }

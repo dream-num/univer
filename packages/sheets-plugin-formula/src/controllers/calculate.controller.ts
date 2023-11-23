@@ -74,7 +74,7 @@ export class CalculateController extends Disposable {
 
         const cellData = new ObjectMatrix(formulaData[unitId][sheetId]);
         const rangeMatrix = new ObjectMatrix(cellValue);
-        const formulaIdMap = new Map<string, string>(); // Connect the formula and ID
+        const formulaIdMap = new Map<string, { f: string; r: number; c: number }>(); // Connect the formula and ID
 
         let isArrayFormula = false;
         // update formula string，Any modification to cellData will be linked to formulaData
@@ -86,7 +86,7 @@ export class CalculateController extends Disposable {
             const formulaValue = cell?.v;
             if (!formulaString && formulaId) {
                 isCalculate = true;
-                cellData.setValue(r, c, { f: formulaId });
+                cellData.setValue(r, c, { f: formulaId }); // IFormulaDataItem only has f field
             } else if (arrayFormCellRangeData && Tools.isBlank(formulaValue)) {
                 isArrayFormula = true;
                 isCalculate = true;
@@ -105,7 +105,7 @@ export class CalculateController extends Disposable {
                 cellData.setValue(r, c, { f: formulaString });
 
                 if (isFormulaId(formulaId)) {
-                    formulaIdMap.set(formulaId, formulaString);
+                    formulaIdMap.set(formulaId, { f: formulaString, r, c });
                 }
             }
         });
@@ -115,7 +115,14 @@ export class CalculateController extends Disposable {
             const formulaId = cell?.f || '';
             // TODO@Dushusir: remove formulaIdMap
             if (formulaIdMap.has(formulaId)) {
-                cellData.setValue(r, c, { f: formulaIdMap.get(formulaId) as string });
+                const formulaInfo = formulaIdMap.get(formulaId);
+                if (!formulaInfo) return false;
+
+                const f = formulaInfo.f;
+                const x = r - formulaInfo.r;
+                const y = c - formulaInfo.c;
+
+                cellData.setValue(r, c, { f, x, y });
             }
         });
 

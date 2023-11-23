@@ -5,7 +5,11 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
 import { ISearchItem } from '../../../services/description.service';
-import { IFormulaPromptService, INavigateParam, ISearchFunctionParams } from '../../../services/prompt.service';
+import {
+    IFormulaPromptService,
+    INavigateParam,
+    ISearchFunctionOperationParams,
+} from '../../../services/prompt.service';
 import styles from './index.module.less';
 
 export function SearchFunction() {
@@ -21,7 +25,7 @@ export function SearchFunction() {
         // TODO@Dushusir: How to get updated values in subscribe callback better
         let updatedSearchList: ISearchItem[] = [];
         let updatedActive = 0;
-        const subscribeSearch = promptService.search$.subscribe((params: ISearchFunctionParams) => {
+        const subscribeSearch = promptService.search$.subscribe((params: ISearchFunctionOperationParams) => {
             const selection = cellEditorManagerService.getState();
             if (!selection) return;
 

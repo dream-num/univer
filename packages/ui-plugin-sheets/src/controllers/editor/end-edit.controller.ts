@@ -1,4 +1,4 @@
-import { MoveCursorOperation } from '@univerjs/base-docs';
+import { MoveCursorOperation, MoveSelectionOperation } from '@univerjs/base-docs';
 import { FormulaEngineService, matchToken } from '@univerjs/base-formula-engine';
 import { IMouseEvent, IPointerEvent, IRenderManagerService } from '@univerjs/base-render';
 import { SetRangeValuesCommand } from '@univerjs/base-sheets';
@@ -265,8 +265,8 @@ export class EndEditController extends Disposable {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (updateCommandList.includes(command.id)) {
-                    const params = command.params as IEditorBridgeServiceVisibleParam;
-                    const { keycode } = params;
+                    const params = command.params as IEditorBridgeServiceVisibleParam & { isShift: boolean };
+                    const { keycode, isShift } = params;
 
                     /**
                      * After the user enters the editor and actively moves the editor selection area with the mouse,
@@ -274,7 +274,7 @@ export class EndEditController extends Disposable {
                      * but move the cursor within the editor instead.
                      */
                     if (keycode != null && this._isCursorChange === CursorChange.CursorChange) {
-                        this._moveInEditor(keycode);
+                        this._moveInEditor(keycode, isShift);
                         return;
                     }
 
@@ -284,7 +284,8 @@ export class EndEditController extends Disposable {
         );
     }
 
-    private _moveInEditor(keycode: KeyCode) {
+    // TODO: @JOCS, is it necessary to move these commands MoveSelectionOperation\MoveCursorOperation to shortcut? and use multi-commands?
+    private _moveInEditor(keycode: KeyCode, isShift: boolean) {
         let direction = Direction.LEFT;
         if (keycode === KeyCode.ARROW_DOWN) {
             direction = Direction.DOWN;
@@ -294,9 +295,15 @@ export class EndEditController extends Disposable {
             direction = Direction.RIGHT;
         }
 
-        this._commandService.executeCommand(MoveCursorOperation.id, {
-            direction,
-        });
+        if (isShift) {
+            this._commandService.executeCommand(MoveSelectionOperation.id, {
+                direction,
+            });
+        } else {
+            this._commandService.executeCommand(MoveCursorOperation.id, {
+                direction,
+            });
+        }
     }
 
     private _getEditorObject() {

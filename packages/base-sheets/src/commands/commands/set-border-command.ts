@@ -227,7 +227,9 @@ export const SetBorderCommand: ICommand = {
 
                 if (rectangle) {
                     if (reserve) {
-                        const style = mr.getValue(rectangle.startRow, rectangle.startColumn)?.s as IStyleData;
+                        const style = Tools.deepClone(
+                            mr.getValue(rectangle.startRow, rectangle.startColumn)?.s
+                        ) as IStyleData;
                         bdStyle = style?.bd ? Object.assign(style.bd, defaultStyle) : defaultStyle;
                     }
                     mr.setValue(rectangle.startRow, rectangle.startColumn, {
@@ -237,7 +239,7 @@ export const SetBorderCommand: ICommand = {
                     });
                 } else {
                     if (reserve) {
-                        const style = mr.getValue(row, column)?.s as IStyleData;
+                        const style = Tools.deepClone(mr.getValue(row, column)?.s) as IStyleData;
                         bdStyle = style?.bd ? Object.assign(style.bd, defaultStyle) : defaultStyle;
                     }
                     mr.setValue(row, column, { s: { bd: bdStyle } });
@@ -319,6 +321,10 @@ export const SetBorderCommand: ICommand = {
                 }
             });
         }
+        console.log('topRange', topRange, topRangeOut);
+        console.log('bottomRange', bottomRange, bottomRangeOut);
+        console.log('leftRange', leftRange, leftRangeOut);
+        console.log('rightRange', rightRange, rightRangeOut);
 
         if (!top && !bottom && !left && !right && !vertical && !horizontal) {
             setBorderStyle(topRangeOut, { b: null });

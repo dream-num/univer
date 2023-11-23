@@ -4,6 +4,16 @@ export enum COPY_TYPE {
     COPY = 'COPY',
     CUT = 'CUT',
 }
+
+export enum PASTE_TYPE {
+    DEFAULT = 'DEFAULT',
+    VALUE = 'VALUE',
+    FORMAT = 'FORMAT',
+    FORMULA = 'FORMULA',
+    COL_WIDTH = 'COL_WIDTH',
+    BESIDES_BORDER = 'BESIDES_BORDER',
+}
+
 export type ICellDataWithSpanInfo = ICellData & { rowSpan?: number; colSpan?: number };
 
 export interface IClipboardPropertyItem {
@@ -100,21 +110,24 @@ export interface ISheetClipboardHook {
      */
     onPasteCells?(
         range: IRange,
-        matrix: ObjectMatrix<ICellDataWithSpanInfo>
+        matrix: ObjectMatrix<ICellDataWithSpanInfo>,
+        pasteType: PASTE_TYPE
     ): {
         undos: IMutationInfo[];
         redos: IMutationInfo[];
     };
     onPasteRows?(
         range: IRange,
-        rowProperties: IClipboardPropertyItem[]
+        rowProperties: IClipboardPropertyItem[],
+        pasteType: PASTE_TYPE
     ): {
         undos: IMutationInfo[];
         redos: IMutationInfo[];
     };
     onPasteColumns?(
         range: IRange,
-        colProperties: IClipboardPropertyItem[]
+        colProperties: IClipboardPropertyItem[],
+        pasteType: PASTE_TYPE
     ): {
         undos: IMutationInfo[];
         redos: IMutationInfo[];

@@ -17,6 +17,7 @@ import {
     ObjectMatrixPrimitiveType,
     Rectangle,
     toDisposable,
+    Tools,
     Worksheet,
 } from '@univerjs/core';
 import { createIdentifier, IDisposable, Inject } from '@wendellhu/redi';
@@ -30,6 +31,7 @@ import {
     IPasteTarget,
     ISheetClipboardHook,
     IUniverSheetCopyDataModel,
+    PASTE_TYPE,
 } from './type';
 import { USMToHtmlService } from './usm-to-html/convertor';
 
@@ -39,7 +41,7 @@ import { USMToHtmlService } from './usm-to-html/convertor';
 export interface ISheetClipboardService {
     copy(): Promise<boolean>;
     cut(): Promise<boolean>;
-    paste(item: ClipboardItem): Promise<boolean>;
+    paste(item: ClipboardItem, pasteType?: PASTE_TYPE): Promise<boolean>;
 
     addClipboardHook(hook: ISheetClipboardHook): IDisposable;
 }
@@ -50,6 +52,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     private _clipboardHooks: ISheetClipboardHook[] = [];
     private _htmlToUSM = new HtmlToUSMService();
     private _usmToHtml = new USMToHtmlService();
+    private _pasteType = PASTE_TYPE.DEFAULT;
 
     constructor(
         @ILogService private readonly _logService: ILogService,
@@ -120,7 +123,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         return this.copy(COPY_TYPE.CUT);
     }
 
-    async paste(item: ClipboardItem): Promise<boolean> {
+    async paste(item: ClipboardItem, pasteType: PASTE_TYPE): Promise<boolean> {
         const types = item.types;
         const text =
             types.indexOf(PLAIN_TEXT_CLIPBOARD_MIME_TYPE) !== -1
@@ -134,7 +137,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         if (html && isLegalSpreadsheetHTMLContent(html)) {
             // Firstly see if the html content is in good format.
             // In another word, if it is copied from any spreadsheet apps (including Univer itself).
-            return this._pasteHTML(html);
+            return this._pasteHTML(html, pasteType);
         }
 
         if (text) {
@@ -184,18 +187,18 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         return result;
     }
 
-    private async _pasteHTML(html: string): Promise<boolean> {
+    private async _pasteHTML(html: string, pasteType = PASTE_TYPE.DEFAULT): Promise<boolean> {
         // this._logService.log('[SheetClipboardService]', 'pasting html content', html);
 
         const copyId = extractId(html);
 
         if (copyId) {
-            return this._pasteInternal(copyId);
+            return this._pasteInternal(copyId, pasteType);
         }
-        return this._pasteExternal(html);
+        return this._pasteExternal(html, pasteType);
     }
 
-    private async _pasteExternal(html: string): Promise<boolean> {
+    private async _pasteExternal(html: string, pasteType = PASTE_TYPE.DEFAULT): Promise<boolean> {
         // this._logService.log('[SheetClipboardService]', 'pasting external content', html);
 
         // steps of pasting:
@@ -208,8 +211,9 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         // 1. get properties of the table by parsing raw html content, including col properties / row properties
         // cell properties and cell contents.
         const { rowProperties, colProperties, cellMatrix } = this._htmlToUSM.convert(html);
-        const rowCount = cellMatrix?.getLength() || 0;
-        const colCount = cellMatrix?.getSizeOf() || 0;
+        const { startColumn, endColumn, startRow, endRow } = cellMatrix.getDataRange();
+        const rowCount = endRow - startRow + 1;
+        const colCount = endColumn - startColumn + 1;
         if (!cellMatrix) {
             return false;
         }
@@ -243,11 +247,13 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                 workbookId,
                 worksheetId,
                 pastedRange,
-            }
+            },
+            undefined,
+            pasteType
         );
     }
 
-    private async _pasteInternal(copyId: string): Promise<boolean> {
+    private async _pasteInternal(copyId: string, pasteType = PASTE_TYPE.DEFAULT): Promise<boolean> {
         const target = this._getPastingTarget();
         const { selection, workbookId, worksheetId } = target;
         const cachedData = copyContentCache.get(copyId);
@@ -260,8 +266,16 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             return false;
         }
 
+        const styles = this._currentUniverService.getUniverSheetInstance(workbookId)?.getStyles();
+        cellMatrix.forValue((row, col, value) => {
+            if (typeof value.s === 'string') {
+                const newValue = Tools.deepClone(value);
+                newValue.s = styles?.getStyleByCell(value);
+                cellMatrix.setValue(row, col, newValue);
+            }
+        });
+
         const { startColumn, endColumn, startRow, endRow } = cellMatrix.getDataRange();
-        const colCount = cellMatrix.getSizeOf();
         const pastedRange = this._transformPastedData(
             endRow - startRow + 1,
             endColumn - startColumn + 1,
@@ -286,7 +300,8 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                 worksheetId: cachedData.worksheetId,
                 copyType: cachedData.copyType,
                 copyId,
-            }
+            },
+            pasteType
         );
 
         if (cachedData.copyType === COPY_TYPE.CUT) {
@@ -294,10 +309,14 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         }
 
         return pasteRes;
-        // NOTE: if the source is from a cut command, we should invoke a move mutation instead
     }
 
-    private _pasteUSM(data: IUniverSheetCopyDataModel, target: IPasteTarget, source?: IPasteSource): boolean {
+    private _pasteUSM(
+        data: IUniverSheetCopyDataModel,
+        target: IPasteTarget,
+        source?: IPasteSource,
+        pasteType = PASTE_TYPE.DEFAULT
+    ): boolean {
         const { rowProperties, colProperties, cellMatrix } = data;
         const { workbookId, worksheetId, pastedRange } = target;
         const { startColumn, endColumn } = pastedRange;
@@ -318,20 +337,24 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
         hooks.forEach((h) => {
             if (rowProperties) {
-                const rowReturn = h.onPasteRows?.(pastedRange, rowProperties);
+                const rowReturn = h.onPasteRows?.(pastedRange, rowProperties, pasteType);
                 if (rowReturn) {
                     redoMutationsInfo.push(...rowReturn.redos);
                     undoMutationsInfo.push(...rowReturn.undos);
                 }
             }
 
-            const colReturn = h.onPasteColumns?.(pastedRange, colProperties || new Array(colCount).map(() => ({})));
+            const colReturn = h.onPasteColumns?.(
+                pastedRange,
+                colProperties || new Array(colCount).map(() => ({})),
+                pasteType
+            );
             if (colReturn) {
                 redoMutationsInfo.push(...colReturn.redos);
                 undoMutationsInfo.push(...colReturn.undos);
             }
 
-            const contentReturn = h.onPasteCells?.(pastedRange, cellMatrix);
+            const contentReturn = h.onPasteCells?.(pastedRange, cellMatrix, pasteType);
             if (contentReturn) {
                 redoMutationsInfo.push(...contentReturn.redos);
                 undoMutationsInfo.push(...contentReturn.undos);

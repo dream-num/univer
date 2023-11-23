@@ -1,8 +1,10 @@
 import { CopyCommand, CutCommand, IClipboardInterfaceService, PasteCommand } from '@univerjs/base-ui';
-import { CommandType, ILogService, IMultiCommand } from '@univerjs/core';
+import { CommandType, ICommand, ICommandService, ILogService, IMultiCommand } from '@univerjs/core';
+import { IAccessor } from '@wendellhu/redi';
 
 import { whenEditorNotActivated } from '../../controllers/shortcuts/utils';
 import { ISheetClipboardService } from '../../services/clipboard/clipboard.service';
+import { PASTE_TYPE } from '../../services/clipboard/type';
 
 export const SheetCopyCommand: IMultiCommand = {
     id: CopyCommand.id,
@@ -30,6 +32,10 @@ export const SheetCutCommand: IMultiCommand = {
     },
 };
 
+export interface ISheetPasteParams {
+    value: PASTE_TYPE;
+}
+
 export const SheetPasteCommand: IMultiCommand = {
     id: PasteCommand.id,
     type: CommandType.COMMAND,
@@ -37,7 +43,7 @@ export const SheetPasteCommand: IMultiCommand = {
     name: 'sheet.command.paste',
     priority: 1000,
     preconditions: whenEditorNotActivated,
-    handler: async (accessor) => {
+    handler: async (accessor: IAccessor, params: ISheetPasteParams) => {
         const logService = accessor.get(ILogService);
 
         // use cell editor to get ClipboardData first
@@ -59,12 +65,48 @@ export const SheetPasteCommand: IMultiCommand = {
 
             // logService.log('[SheetPasteCommand]: clipboard data is', clipboardItems);
             if (clipboardItems.length !== 0) {
-                return sheetClipboardService.paste(clipboardItems[0]);
+                return sheetClipboardService.paste(clipboardItems[0], params?.type);
             }
 
             return false;
         }
 
         return false;
+    },
+};
+
+export const SheetPasteValueCommand: ICommand = {
+    id: 'sheet.command.paste-value',
+    type: CommandType.COMMAND,
+    handler: async (accessor) => {
+        const commandService = accessor.get(ICommandService);
+        return commandService.executeCommand(SheetPasteCommand.id, { type: PASTE_TYPE.VALUE });
+    },
+};
+
+export const SheetPasteFormatCommand: ICommand = {
+    id: 'sheet.command.paste-format',
+    type: CommandType.COMMAND,
+    handler: async (accessor) => {
+        const commandService = accessor.get(ICommandService);
+        return commandService.executeCommand(SheetPasteCommand.id, { type: PASTE_TYPE.FORMAT });
+    },
+};
+
+export const SheetPasteColWidthCommand: ICommand = {
+    id: 'sheet.command.paste-col-width',
+    type: CommandType.COMMAND,
+    handler: async (accessor) => {
+        const commandService = accessor.get(ICommandService);
+        return commandService.executeCommand(SheetPasteCommand.id, { type: PASTE_TYPE.COL_WIDTH });
+    },
+};
+
+export const SheetPasteBesidesBorderCommand: ICommand = {
+    id: 'sheet.command.paste-besides-border',
+    type: CommandType.COMMAND,
+    handler: async (accessor) => {
+        const commandService = accessor.get(ICommandService);
+        return commandService.executeCommand(SheetPasteCommand.id, { type: PASTE_TYPE.BESIDES_BORDER });
     },
 };

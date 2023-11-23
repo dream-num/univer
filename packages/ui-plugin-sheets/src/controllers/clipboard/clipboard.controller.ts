@@ -47,9 +47,22 @@ import {
 import { MessageType } from '@univerjs/design';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { SheetCopyCommand, SheetCutCommand, SheetPasteCommand } from '../../commands/commands/clipboard.command';
+import {
+    SheetCopyCommand,
+    SheetCutCommand,
+    SheetPasteBesidesBorderCommand,
+    SheetPasteColWidthCommand,
+    SheetPasteCommand,
+    SheetPasteFormatCommand,
+    SheetPasteValueCommand,
+} from '../../commands/commands/clipboard.command';
 import { ISheetClipboardService } from '../../services/clipboard/clipboard.service';
-import { ICellDataWithSpanInfo, IClipboardPropertyItem, ISheetClipboardHook } from '../../services/clipboard/type';
+import {
+    ICellDataWithSpanInfo,
+    IClipboardPropertyItem,
+    ISheetClipboardHook,
+    PASTE_TYPE,
+} from '../../services/clipboard/type';
 
 /**
  * This controller add basic clipboard logic for basic features such as text color / BISU / row widths to the clipboard
@@ -77,6 +90,12 @@ export class SheetClipboardController extends Disposable {
             this.disposeWithMe(this._commandService.registerAsMultipleCommand(command))
         );
 
+        [
+            SheetPasteValueCommand,
+            SheetPasteFormatCommand,
+            SheetPasteColWidthCommand,
+            SheetPasteBesidesBorderCommand,
+        ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
         // register basic sheet clipboard hooks
         this.disposeWithMe(
             this._sheetClipboardService.addClipboardHook({
@@ -328,7 +347,7 @@ export class SheetClipboardController extends Disposable {
                 };
             },
 
-            onPasteColumns(range, colProperties) {
+            onPasteColumns(range, colProperties, pasteType) {
                 const redoMutations: IMutationInfo[] = [];
                 const undoMutations: IMutationInfo[] = [];
 
@@ -336,38 +355,56 @@ export class SheetClipboardController extends Disposable {
                 const maxColumn = currentSheet!.getMaxColumns();
                 const addingColsCount = range.endColumn - maxColumn;
                 const existingColsCount = colProperties.length - addingColsCount;
-                if (addingColsCount > 0) {
-                    const addColMutation: IInsertColMutationParams = {
+
+                if (pasteType === PASTE_TYPE.COL_WIDTH) {
+                    const setColPropertyMutation: ISetWorksheetColWidthMutationParams = {
                         workbookId: workbookId!,
                         worksheetId: worksheetId!,
-                        ranges: [{ ...range, startColumn: maxColumn }],
-                        colInfo: new ObjectArray(
-                            colProperties.slice(existingColsCount).map((property) => ({
-                                w: property.width ? +property.width : DEFAULT_WORKSHEET_COLUMN_WIDTH,
-                                hd: BooleanNumber.FALSE,
-                            }))
+                        ranges: [{ ...range, endRow: Math.min(range.endColumn, maxColumn) }],
+                        colWidth: new ObjectArray(
+                            colProperties
+                                .slice(0, existingColsCount)
+                                .map((property) => (property.width ? +property.width : DEFAULT_WORKSHEET_COLUMN_WIDTH))
                         ),
                     };
                     redoMutations.push({
-                        id: InsertColMutation.id,
-                        params: addColMutation,
+                        id: SetWorksheetColWidthMutation.id,
+                        params: setColPropertyMutation,
+                    });
+                } else {
+                    if (addingColsCount > 0) {
+                        const addColMutation: IInsertColMutationParams = {
+                            workbookId: workbookId!,
+                            worksheetId: worksheetId!,
+                            ranges: [{ ...range, startColumn: maxColumn }],
+                            colInfo: new ObjectArray(
+                                colProperties.slice(existingColsCount).map((property) => ({
+                                    w: property.width ? +property.width : DEFAULT_WORKSHEET_COLUMN_WIDTH,
+                                    hd: BooleanNumber.FALSE,
+                                }))
+                            ),
+                        };
+                        redoMutations.push({
+                            id: InsertColMutation.id,
+                            params: addColMutation,
+                        });
+                    }
+                    // apply col properties to the existing rows
+                    const setColPropertyMutation: ISetWorksheetColWidthMutationParams = {
+                        workbookId: workbookId!,
+                        worksheetId: worksheetId!,
+                        ranges: [{ ...range, endRow: Math.min(range.endColumn, maxColumn) }],
+                        colWidth: new ObjectArray(
+                            colProperties
+                                .slice(0, existingColsCount)
+                                .map((property) => (property.width ? +property.width : DEFAULT_WORKSHEET_COLUMN_WIDTH))
+                        ),
+                    };
+                    redoMutations.push({
+                        id: SetWorksheetColWidthMutation.id,
+                        params: setColPropertyMutation,
                     });
                 }
-                // apply row properties to the existing rows
-                const setRowPropertyMutation: ISetWorksheetColWidthMutationParams = {
-                    workbookId: workbookId!,
-                    worksheetId: worksheetId!,
-                    ranges: [{ ...range, endRow: Math.min(range.endColumn, maxColumn) }],
-                    colWidth: new ObjectArray(
-                        colProperties
-                            .slice(0, existingColsCount)
-                            .map((property) => (property.width ? +property.width : DEFAULT_WORKSHEET_COLUMN_WIDTH))
-                    ),
-                };
-                redoMutations.push({
-                    id: SetWorksheetColWidthMutation.id,
-                    params: setRowPropertyMutation,
-                });
 
                 // TODO: add undo mutations but we cannot do it now because underlying mechanism is not ready
 
@@ -377,8 +414,8 @@ export class SheetClipboardController extends Disposable {
                 };
             },
 
-            onPasteCells(range, matrix) {
-                return self._onPasteCells(range, matrix, workbookId!, worksheetId!);
+            onPasteCells(range, matrix, pasteType) {
+                return self._onPasteCells(range, matrix, workbookId!, worksheetId!, pasteType);
             },
 
             onRemoveCutCells(range, workbookId, worksheetId) {
@@ -467,7 +504,8 @@ export class SheetClipboardController extends Disposable {
         range: IRange,
         matrix: ObjectMatrix<ICellDataWithSpanInfo>,
         workbookId: string,
-        worksheetId: string
+        worksheetId: string,
+        pasteType: PASTE_TYPE
     ): {
         redos: IMutationInfo[];
         undos: IMutationInfo[];
@@ -484,6 +522,9 @@ export class SheetClipboardController extends Disposable {
         const redoMutationsInfo: IMutationInfo[] = [];
         const undoMutationsInfo: IMutationInfo[] = [];
         let hasMerge = false;
+        if (pasteType === PASTE_TYPE.COL_WIDTH) {
+            return { redos: [], undos: [] };
+        }
 
         // TODO@Dushusir: undo selection
         matrix.forValue((row, col, value) => {
@@ -494,33 +535,93 @@ export class SheetClipboardController extends Disposable {
                 clearStyleMatrix.setValue(row + startRow, col + startColumn, { s: null });
             }
 
-            // TODO@yuhongz: formula
-            valueMatrix.setValue(row + startRow, col + startColumn, {
-                v: value.v,
-                s: value.s,
-            });
+            if (pasteType === PASTE_TYPE.VALUE) {
+                valueMatrix.setValue(row + startRow, col + startColumn, {
+                    v: value.v,
+                });
+            } else if (pasteType === PASTE_TYPE.FORMAT) {
+                valueMatrix.setValue(row + startRow, col + startColumn, {
+                    s: value.s,
+                });
+                // rowspan and colspan to merge data
+                if (value.rowSpan) {
+                    const colSpan = value.colSpan || 1;
+                    const mergeRange = {
+                        startRow: startRow + row,
+                        endRow: startRow + row + value.rowSpan - 1,
+                        startColumn: startColumn + col,
+                        endColumn: startColumn + col + colSpan - 1,
+                    };
+                    mergeRangeData.push(mergeRange);
+                    hasMerge = true;
+                } else if (value.colSpan) {
+                    const rowSpan = value.rowSpan || 1;
+                    const mergeRange = {
+                        startRow: startRow + row,
+                        endRow: startRow + row + rowSpan - 1,
+                        startColumn: startColumn + col,
+                        endColumn: startColumn + col + value.colSpan - 1,
+                    };
+                    mergeRangeData.push(mergeRange);
+                    hasMerge = true;
+                }
+            } else if (pasteType === PASTE_TYPE.BESIDES_BORDER) {
+                const style = value.s;
+                if (typeof style === 'object')
+                    valueMatrix.setValue(row + startRow, col + startColumn, {
+                        s: { ...style, bd: undefined },
+                        v: value.v,
+                    });
+                // rowspan and colspan to merge data
+                if (value.rowSpan) {
+                    const colSpan = value.colSpan || 1;
+                    const mergeRange = {
+                        startRow: startRow + row,
+                        endRow: startRow + row + value.rowSpan - 1,
+                        startColumn: startColumn + col,
+                        endColumn: startColumn + col + colSpan - 1,
+                    };
+                    mergeRangeData.push(mergeRange);
+                    hasMerge = true;
+                } else if (value.colSpan) {
+                    const rowSpan = value.rowSpan || 1;
+                    const mergeRange = {
+                        startRow: startRow + row,
+                        endRow: startRow + row + rowSpan - 1,
+                        startColumn: startColumn + col,
+                        endColumn: startColumn + col + value.colSpan - 1,
+                    };
+                    mergeRangeData.push(mergeRange);
+                    hasMerge = true;
+                }
+            } else {
+                valueMatrix.setValue(row + startRow, col + startColumn, {
+                    v: value.v,
+                    s: value.s,
+                });
 
-            // rowspan and colspan to merge data
-            if (value.rowSpan) {
-                const colSpan = value.colSpan || 1;
-                const mergeRange = {
-                    startRow: startRow + row,
-                    endRow: startRow + row + value.rowSpan - 1,
-                    startColumn: startColumn + col,
-                    endColumn: startColumn + col + colSpan - 1,
-                };
-                mergeRangeData.push(mergeRange);
-                hasMerge = true;
-            } else if (value.colSpan) {
-                const rowSpan = value.rowSpan || 1;
-                const mergeRange = {
-                    startRow: startRow + row,
-                    endRow: startRow + row + rowSpan - 1,
-                    startColumn: startColumn + col,
-                    endColumn: startColumn + col + value.colSpan - 1,
-                };
-                mergeRangeData.push(mergeRange);
-                hasMerge = true;
+                // rowspan and colspan to merge data
+                if (value.rowSpan) {
+                    const colSpan = value.colSpan || 1;
+                    const mergeRange = {
+                        startRow: startRow + row,
+                        endRow: startRow + row + value.rowSpan - 1,
+                        startColumn: startColumn + col,
+                        endColumn: startColumn + col + colSpan - 1,
+                    };
+                    mergeRangeData.push(mergeRange);
+                    hasMerge = true;
+                } else if (value.colSpan) {
+                    const rowSpan = value.rowSpan || 1;
+                    const mergeRange = {
+                        startRow: startRow + row,
+                        endRow: startRow + row + rowSpan - 1,
+                        startColumn: startColumn + col,
+                        endColumn: startColumn + col + value.colSpan - 1,
+                    };
+                    mergeRangeData.push(mergeRange);
+                    hasMerge = true;
+                }
             }
         });
 

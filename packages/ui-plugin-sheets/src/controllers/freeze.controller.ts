@@ -10,7 +10,6 @@ import {
 import {
     DeltaColumnWidthCommand,
     DeltaRowHeightCommand,
-    IDeltaColumnWidthCommandParams,
     IDeltaRowHeightCommand,
     ISetFrozenMutationParams,
     ISetWorksheetRowAutoHeightMutationParams,
@@ -981,41 +980,25 @@ export class FreezeController extends Disposable {
                     const { startRow = -1, startColumn = -1, ySplit = 0, xSplit = 0 } = worksheet.getConfig().freeze;
 
                     this._refreshFreeze(startRow, startColumn, ySplit, xSplit);
-                }
-            })
-        );
-
-        this.disposeWithMe(
-            this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                const freeze = this._getFreeze();
-                if (
-                    command.id === DeltaRowHeightCommand.id &&
-                    command.params &&
-                    freeze &&
-                    (command.params as IDeltaRowHeightCommand).anchorRow < freeze.startRow
-                ) {
-                    this._refreshCurrent();
-                }
-            })
-        );
-
-        this.disposeWithMe(
-            this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                const freeze = this._getFreeze();
-                if (
-                    command.id === DeltaColumnWidthCommand.id &&
-                    command.params &&
-                    freeze &&
-                    (command.params as IDeltaColumnWidthCommandParams).anchorCol < freeze.startColumn
-                ) {
-                    this._refreshCurrent();
-                }
-            })
-        );
-
-        this.disposeWithMe(
-            this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (command.id === SetWorksheetRowAutoHeightMutation.id) {
+                } else if (command.id === DeltaRowHeightCommand.id) {
+                    const freeze = this._getFreeze();
+                    if (
+                        command.params &&
+                        freeze &&
+                        (command.params as IDeltaRowHeightCommand).anchorRow < freeze.startRow
+                    ) {
+                        this._refreshCurrent();
+                    }
+                } else if (command.id === DeltaColumnWidthCommand.id) {
+                    const freeze = this._getFreeze();
+                    if (
+                        command.params &&
+                        freeze &&
+                        (command.params as IDeltaRowHeightCommand).anchorRow < freeze.startRow
+                    ) {
+                        this._refreshCurrent();
+                    }
+                } else if (command.id === SetWorksheetRowAutoHeightMutation.id) {
                     const params = command.params as ISetWorksheetRowAutoHeightMutationParams;
                     const freeze = this._getFreeze();
 
@@ -1079,7 +1062,6 @@ export class FreezeController extends Disposable {
 
         const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
         const position = skeleton?.getNoMergeCellPositionByIndex(row, column, scaleX, scaleY);
-        console.log('===get position', position);
         if (skeleton == null) {
             return;
         }

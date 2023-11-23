@@ -1010,7 +1010,9 @@ export class FreezeController extends Disposable {
                     ) {
                         const subscription = this._sheetSkeletonManagerService.currentSkeleton$.subscribe(() => {
                             this._refreshCurrent();
-                            subscription.unsubscribe();
+                            setTimeout(() => {
+                                subscription.unsubscribe();
+                            });
                         });
                     }
                 }

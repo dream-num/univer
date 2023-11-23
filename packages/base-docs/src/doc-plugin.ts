@@ -32,6 +32,7 @@ import {
     SetInlineFormatTextColorCommand,
     SetInlineFormatUnderlineCommand,
 } from './commands/commands/inline-format.command';
+import { ReplaceContentCommand } from './commands/commands/replace-content.command';
 import { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';
 import { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
 import { MoveCursorOperation, MoveSelectionOperation } from './commands/operations/cursor.operation';
@@ -124,6 +125,7 @@ export class DocPlugin extends Plugin {
                 IMEInputCommand,
                 RichTextEditingMutation,
                 CoverCommand,
+                ReplaceContentCommand,
                 SetDocZoomRatioCommand,
                 SetDocZoomRatioOperation,
                 SetTextSelectionsOperation,

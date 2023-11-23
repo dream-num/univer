@@ -24,6 +24,7 @@ export {
     SetInlineFormatTextColorCommand,
     SetInlineFormatUnderlineCommand,
 } from './commands/commands/inline-format.command';
+export { ReplaceContentCommand } from './commands/commands/replace-content.command';
 export {
     type IRichTextEditingMutationParams,
     RichTextEditingMutation,

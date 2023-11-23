@@ -20,6 +20,7 @@ export const MOVE_SELECTION_KEYCODE_LIST = [KeyCode.ENTER, KeyCode.TAB, ...ARROW
 
 export function generateArrowSelectionShortCuItem() {
     const shortcutList: IShortcutItem[] = [];
+
     for (const keycode of ARROW_SELECTION_KEYCODE_LIST) {
         shortcutList.push({
             id: SetCellEditVisibleArrowOperation.id,
@@ -29,9 +30,23 @@ export function generateArrowSelectionShortCuItem() {
                 visible: false,
                 eventType: DeviceInputEventType.Keyboard,
                 keycode,
+                isShift: false,
+            },
+        });
+
+        shortcutList.push({
+            id: SetCellEditVisibleArrowOperation.id,
+            binding: keycode | MetaKeys.SHIFT,
+            preconditions: (contextService) => whenEditorDidNotInputFormulaActivated(contextService),
+            staticParameters: {
+                visible: false,
+                eventType: DeviceInputEventType.Keyboard,
+                keycode,
+                isShift: true,
             },
         });
     }
+
     return shortcutList;
 }
 

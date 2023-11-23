@@ -5,7 +5,7 @@ import { Observable, Subject } from 'rxjs';
 import { fromDocumentEvent } from '../../common/lifecycle';
 import { IFocusService } from '../focus/focus.service';
 import { IPlatformService } from '../platform/platform.service';
-import { MetaKeys } from './keycode';
+import { KeyCodeToChar, MetaKeys } from './keycode';
 
 export interface IShortcutItem<P extends object = object> {
     /** This should reuse the corresponding command's id. */
@@ -21,6 +21,12 @@ export interface IShortcutItem<P extends object = object> {
     mac?: number;
     win?: number;
     linux?: number;
+
+    /**
+     * The group of the menu item should belong to. The shortcut item would be rendered in the
+     * panel if this is set.
+     */
+    group?: string;
 
     /** Static parameters of this shortcut. Would be send to `CommandService.executeCommand`. */
     staticParameters?: P;
@@ -98,14 +104,12 @@ export class DesktopShortcutService extends Disposable implements IShortcutServi
         const altKey = binding & MetaKeys.ALT;
         const macCtrl = binding & MetaKeys.MAC_CTRL;
 
+        const body = KeyCodeToChar[binding & 0xff] ?? '<->';
+
         if (this._platformService.isMac) {
-            return `${ctrlKey ? '⌘' : ''}${shiftKey ? '⇧' : ''}${altKey ? '⌥' : ''}${
-                macCtrl ? '⌃' : ''
-            }${String.fromCharCode(binding & 0xff)}`;
+            return `${ctrlKey ? '⌘' : ''}${shiftKey ? '⇧' : ''}${altKey ? '⌥' : ''}${macCtrl ? '⌃' : ''}${body}`;
         }
-        return `${ctrlKey ? 'Ctrl+' : ''}${shiftKey ? 'Shift+' : ''}${altKey ? 'Alt+' : ''}${String.fromCharCode(
-            binding & 0xff
-        )}`;
+        return `${ctrlKey ? 'Ctrl+' : ''}${shiftKey ? 'Shift+' : ''}${altKey ? 'Alt+' : ''}${body}`;
     }
 
     private _emitShortcutChanged(): void {

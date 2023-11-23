@@ -5,11 +5,15 @@ import React, { useCallback, useEffect } from 'react';
 import { IShortcutService } from '../../../services/shortcut/shortcut.service';
 import styles from './index.module.less';
 
-// TODO@wzhudev: shortcuts should be displayed in groups
-
 interface IRenderShortcutItem {
     title: string;
     shortcut: string;
+}
+
+interface IShortcutGroup {
+    items: IRenderShortcutItem[];
+    sequence: number;
+    name: string;
 }
 
 /**
@@ -19,23 +23,43 @@ export function ShortcutPanel() {
     const shortcutService = useDependency(IShortcutService);
     const localeService = useDependency(LocaleService);
 
-    const [shortcutItems, setShortcutItems] = React.useState<IRenderShortcutItem[]>([]);
+    const [shortcutItems, setShortcutItems] = React.useState<IShortcutGroup[]>([]);
 
     const updateShortcuts = useCallback(() => {
-        const shortcuts = shortcutService.getAllShortcuts();
-        const shortcutItems: IRenderShortcutItem[] = [];
+        const shortcutGroups = new Map<string, IRenderShortcutItem[]>();
 
+        const shortcuts = shortcutService.getAllShortcuts().filter((item) => !!item.group);
         for (const shortcut of shortcuts) {
+            const group = shortcut.group!;
             const shortcutItem: IRenderShortcutItem = {
                 title: localeService.t(shortcut.description ?? shortcut.id),
                 shortcut: shortcutService.getShortcutDisplay(shortcut.id)!,
             };
 
-            shortcutItems.push(shortcutItem);
+            if (!/\d+_[a-zA-Z0-9]/.test(group)) {
+                throw new Error(`[ShortcutPanel]: Invalid shortcut group: ${group}!`);
+            }
+
+            if (!shortcutGroups.has(group)) {
+                shortcutGroups.set(group, []);
+            }
+            shortcutGroups.get(group)!.push(shortcutItem);
         }
 
-        setShortcutItems(shortcutItems);
-    }, [shortcutService]);
+        const toRender = Array.from(shortcutGroups.entries())
+            .map(([name, items]) => {
+                const groupSequence = name.split('_')[0];
+                const groupName = name.slice(groupSequence.length + 1);
+                return {
+                    sequence: +groupSequence,
+                    name: localeService.t(groupName),
+                    items,
+                };
+            })
+            .sort((a, b) => a.sequence - b.sequence);
+
+        setShortcutItems(toRender);
+    }, [shortcutService, localeService]);
 
     useEffect(() => {
         // first update
@@ -46,14 +70,17 @@ export function ShortcutPanel() {
         return () => subscription.unsubscribe();
     }, [shortcutService]);
 
-    // TODO@wzhudev: add some UI here
-
     return (
         <div className={styles.shortcutPanel}>
-            {shortcutItems.map((item, index) => (
-                <div className={styles.shortcutPanelItem} key={index}>
-                    <span className={styles.shortcutPanelItemTitle}>{item.title}</span>
-                    <span className={styles.shortcutPanelItemShortcut}>{item.shortcut}</span>
+            {shortcutItems.map((group) => (
+                <div className={styles.shortcutPanelGroup} key={group.name}>
+                    <div className={styles.shortcutPanelGroupTitle}>{group.name}</div>
+                    {group.items.map((item, index) => (
+                        <div className={styles.shortcutPanelItem} key={index}>
+                            <span className={styles.shortcutPanelItemTitle}>{item.title}</span>
+                            <span className={styles.shortcutPanelItemShortcut}>{item.shortcut}</span>
+                        </div>
+                    ))}
                 </div>
             ))}
         </div>

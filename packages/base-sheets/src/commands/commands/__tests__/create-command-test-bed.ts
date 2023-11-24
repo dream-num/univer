@@ -6,6 +6,7 @@ import {
     Plugin,
     PluginType,
     Univer,
+    Workbook,
 } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
@@ -36,14 +37,16 @@ const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
     styles: {},
 };
 
-export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencies?: Dependency[]) {
+export interface ITestBed {
+    univer: Univer;
+    get: Injector['get'];
+    sheet: Workbook;
+}
+
+export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencies?: Dependency[]): ITestBed {
     const univer = new Univer();
+    const injector = univer.__getInjector();
 
-    let get: Injector['get'] | undefined;
-
-    /**
-     * This plugin hooks into Sheet's DI system to expose API to test scripts
-     */
     class TestSpyPlugin extends Plugin {
         static override type = PluginType.Sheet;
 
@@ -54,7 +57,6 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
             super('test-plugin');
 
             this._injector = _injector;
-            get = this._injector.get.bind(this._injector);
         }
 
         override onStarting(injector: Injector): void {
@@ -63,28 +65,20 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
 
             dependencies?.forEach((d) => injector.add(d));
         }
-
-        override onDestroy(): void {
-            get = undefined;
-        }
     }
 
     univer.registerPlugin(TestSpyPlugin);
     const sheet = univer.createUniverSheet(workbookConfig || TEST_WORKBOOK_DATA_DEMO);
 
-    if (get === undefined) {
-        throw new Error('[TestPlugin]: not hooked on!');
-    }
-
-    const univerInstanceService = get(IUniverInstanceService);
+    const univerInstanceService = injector.get(IUniverInstanceService);
     univerInstanceService.focusUniverInstance('test');
+    const logService = injector.get(ILogService);
 
-    const logService = get(ILogService);
     logService.toggleLogEnabled(false); // change this to `true` to debug tests via logs
 
     return {
         univer,
-        get,
+        get: injector.get.bind(injector),
         sheet,
     };
 }

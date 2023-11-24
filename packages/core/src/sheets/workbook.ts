@@ -95,7 +95,7 @@ export class Workbook extends Disposable {
     }
 
     getRev(): number {
-        return this._snapshot.rev ?? 0;
+        return this._snapshot.rev ?? 1; // the revision number should start with one
     }
 
     incrementRev(): void {

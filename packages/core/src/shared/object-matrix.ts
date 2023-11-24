@@ -366,6 +366,45 @@ export class ObjectMatrix<T> {
         };
     }
 
+    getDiscreteRanges() {
+        const ranges: IRange[] = [];
+
+        // Traverse row by row
+        this.forEach((r, row) => {
+            // Traverse column by column
+            row.forEach((c, cell) => {
+                let merged = false;
+                // Check if it can be merged with any of the existing ranges
+                for (const range of ranges) {
+                    if (
+                        r >= range.startRow &&
+                        r <= range.endRow + 1 &&
+                        c >= range.startColumn &&
+                        c <= range.endColumn + 1
+                    ) {
+                        // Extend the range
+                        range.endRow = Math.max(r, range.endRow);
+                        range.endColumn = Math.max(c, range.endColumn);
+                        merged = true;
+                        break;
+                    }
+                }
+
+                // If not merged, then create a new range
+                if (!merged) {
+                    ranges.push({
+                        startRow: r,
+                        endRow: r,
+                        startColumn: c,
+                        endColumn: c,
+                    });
+                }
+            });
+        });
+
+        return ranges;
+    }
+
     private _setOriginValue(matrix: ObjectMatrixPrimitiveType<T> = {}) {
         this._matrix = matrix;
         this._option = new ObjectArray<ObjectArrayPrimitiveType<T>>(matrix);

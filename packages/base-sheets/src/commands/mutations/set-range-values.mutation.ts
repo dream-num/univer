@@ -33,6 +33,11 @@ export interface ISetRangeValuesMutationParams {
      * @deprecated not a good design
      */
     options?: ICopyToOptionsData;
+
+    /**
+     * for formula calculate
+     */
+    isFormulaUpdate?: boolean;
 }
 
 export interface ISetRangeValuesRangeMutationParams extends ISetRangeValuesMutationParams {

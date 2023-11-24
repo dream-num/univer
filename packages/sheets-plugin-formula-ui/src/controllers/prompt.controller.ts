@@ -392,7 +392,7 @@ export class PromptController extends Disposable {
         );
     }
 
-    private _selectionChanging(ranges: Nullable<IRange[]>) {
+    private _selectionChanging(ranges: Nullable<IRange[]>, isSync: boolean = false) {
         if (ranges == null) {
             return;
         }
@@ -404,6 +404,12 @@ export class PromptController extends Disposable {
         this._formulaInputService.enableSelectionMoving();
 
         this._inertControlSelection(ranges);
+
+        if (ranges == null || isSync === false) {
+            return;
+        }
+        const currentRange = ranges[ranges.length - 1];
+        this._inertControlSelectionReplace(currentRange);
     }
 
     private _initialRefSelectionInsertEvent() {
@@ -412,7 +418,11 @@ export class PromptController extends Disposable {
         );
 
         this.disposeWithMe(
-            toDisposable(this._selectionRenderService.selectionMoveStart$.subscribe(this._selectionChanging.bind(this)))
+            toDisposable(
+                this._selectionRenderService.selectionMoveStart$.subscribe((ranges) => {
+                    this._selectionChanging(ranges, true);
+                })
+            )
         );
     }
 

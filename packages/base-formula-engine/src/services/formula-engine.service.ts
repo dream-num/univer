@@ -161,7 +161,7 @@ export class FormulaEngineService extends Disposable {
      * @param formulaData
      * @param interpreterDatasetConfig
      * @param forceCalculate force calculate all formula, and ignore dependency relationship
-     * @param updateRangeList input external unit data for multi workbook
+     * @param dirtyRanges input external unit data for multi workbook
      * @returns
      */
     async execute(unitId: string, formulaDatasetConfig: IFormulaDatasetConfig) {

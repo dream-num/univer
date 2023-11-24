@@ -116,8 +116,6 @@ export class PromptController extends Disposable {
 
     private _inputPanelState: InputPanelState = InputPanelState.InitialState;
 
-    private _sycToEditorTimeout: number = -1;
-
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
@@ -969,14 +967,16 @@ export class PromptController extends Disposable {
      * @param textSelectionOffset
      * @returns
      */
-    private async _syncToEditor(sequenceNodes: Array<string | ISequenceNode>, textSelectionOffset: number) {
+    private async _syncToEditor(
+        sequenceNodes: Array<string | ISequenceNode>,
+        textSelectionOffset: number,
+        canUndo: boolean = true
+    ) {
         const dataStream = this._generateStringWithSequence(sequenceNodes);
 
         const { textRuns, refSelections } = this._buildTextRuns(sequenceNodes);
 
         this._isSelectionMovingRefSelections = refSelections;
-
-        // this._updateEditorModel(`=${dataStream}\r\n`, textRuns);
 
         const activeRange = this._textSelectionManagerService.getLast();
 
@@ -984,30 +984,40 @@ export class PromptController extends Disposable {
             return;
         }
 
-        this._commandService.executeCommand(ReplaceContentCommand.id, {
-            unitId: this._editorBridgeService.getCurrentEditorId(),
-            body: {
-                dataStream: `=${dataStream}`,
-                textRuns,
-            },
-            textRanges: [],
-            segmentId: null,
-        });
-
         const { collapsed, style } = activeRange;
+
+        if (canUndo) {
+            this._commandService.executeCommand(ReplaceContentCommand.id, {
+                unitId: this._editorBridgeService.getCurrentEditorId(),
+                body: {
+                    dataStream: `=${dataStream}`,
+                    textRuns,
+                },
+                textRanges: [
+                    {
+                        startOffset: textSelectionOffset + 1,
+                        endOffset: textSelectionOffset + 1,
+                        collapsed,
+                        style,
+                    },
+                ],
+                segmentId: null,
+            });
+        } else {
+            this._updateEditorModel(`=${dataStream}\r\n`, textRuns);
+            this._textSelectionManagerService.replaceTextRanges([
+                {
+                    startOffset: textSelectionOffset + 1,
+                    endOffset: textSelectionOffset + 1,
+                    collapsed,
+                    style,
+                },
+            ]);
+        }
 
         this._currentInsertRefStringIndex = textSelectionOffset;
 
         await this._fitEditorSize();
-
-        this._textSelectionManagerService.replaceTextRanges([
-            {
-                startOffset: textSelectionOffset + 1,
-                endOffset: textSelectionOffset + 1,
-                collapsed,
-                style,
-            },
-        ]);
     }
 
     private async _fitEditorSize() {

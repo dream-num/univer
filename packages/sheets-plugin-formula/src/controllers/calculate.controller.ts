@@ -72,7 +72,7 @@ export class CalculateController extends Disposable {
             formulaData[unitId][sheetId] = {};
         }
 
-        const cellData = new ObjectMatrix(formulaData[unitId][sheetId]);
+        const formulaCellData = new ObjectMatrix(formulaData[unitId][sheetId]);
         const rangeMatrix = new ObjectMatrix(cellValue);
         const formulaIdMap = new Map<string, { f: string; r: number; c: number }>(); // Connect the formula and ID
 
@@ -86,7 +86,7 @@ export class CalculateController extends Disposable {
             const formulaValue = cell?.v;
             if (!formulaString && formulaId) {
                 isCalculate = true;
-                cellData.setValue(r, c, { f: formulaId }); // IFormulaDataItem only has f field
+                formulaCellData.setValue(r, c, { f: formulaId }); // IFormulaDataItem only has f field
             } else if (arrayFormCellRangeData && Tools.isBlank(formulaValue)) {
                 isArrayFormula = true;
                 isCalculate = true;
@@ -96,13 +96,13 @@ export class CalculateController extends Disposable {
                 isCalculate = true;
 
                 // if change formula to number, remove formula
-                const formulaCell = cellData.getRow(r)?.get(c);
+                const formulaCell = formulaCellData.getRow(r)?.get(c);
                 if (formulaCell) {
-                    cellData.deleteValue(r, c);
+                    formulaCellData.deleteValue(r, c);
                 }
             } else if (isFormulaString(formulaString)) {
                 isCalculate = true;
-                cellData.setValue(r, c, { f: formulaString });
+                formulaCellData.setValue(r, c, { f: formulaString });
 
                 if (isFormulaId(formulaId)) {
                     formulaIdMap.set(formulaId, { f: formulaString, r, c });
@@ -111,7 +111,7 @@ export class CalculateController extends Disposable {
         });
 
         // Convert the formula ID to formula string
-        cellData.forValue((r, c, cell) => {
+        formulaCellData.forValue((r, c, cell) => {
             const formulaId = cell?.f || '';
             // TODO@Dushusir: remove formulaIdMap
             if (formulaIdMap.has(formulaId)) {
@@ -122,7 +122,7 @@ export class CalculateController extends Disposable {
                 const x = r - formulaInfo.r;
                 const y = c - formulaInfo.c;
 
-                cellData.setValue(r, c, { f, x, y });
+                formulaCellData.setValue(r, c, { f, x, y });
             }
         });
 
@@ -132,10 +132,15 @@ export class CalculateController extends Disposable {
 
         if (unitRange.length === 0 || !isCalculate) return;
 
-        this._executeFormula(unitId, formulaData, unitRange);
+        this._executeFormula(unitId, formulaData, false, unitRange);
     }
 
-    private _executeFormula(unitId: string, formulaData: IFormulaData, unitRange: IUnitRange[]) {
+    private _executeFormula(
+        unitId: string,
+        formulaData: IFormulaData,
+        forceCalculate: boolean = false,
+        unitRange: IUnitRange[]
+    ) {
         const engine = this._formulaEngineService;
         const { sheetData, sheetNameMap } = this._getSheetData();
         // Add mutation after calculating the formula
@@ -148,8 +153,8 @@ export class CalculateController extends Disposable {
                 sheetNameMap: {
                     [unitId]: sheetNameMap,
                 },
-                forceCalculate: true,
-                updateRangeList: unitRange,
+                forceCalculate,
+                dirtyRanges: unitRange,
             })
             .then((data) => {
                 const { sheetData, arrayFormulaData } = data;

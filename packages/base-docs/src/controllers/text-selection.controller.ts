@@ -128,7 +128,7 @@ export class TextSelectionController extends Disposable {
             // Remove all textRanges.
             this._textSelectionRenderManager.removeAllTextRanges();
 
-            if (param == null || unitId == null || param.length === 0) {
+            if (param == null || unitId == null) {
                 return;
             }
 

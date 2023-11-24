@@ -12,7 +12,7 @@ export interface IFormulaCurrentConfigService {
 
     isForceCalculate(): boolean;
 
-    getUpdateRangeList(): IUnitRange[];
+    getDirtyRanges(): IUnitRange[];
 
     registerUnitData(unitData: IUnitData): void;
 
@@ -28,13 +28,13 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
     private _forceCalculate: boolean = false;
 
-    private _updateRangeList: IUnitRange[] = [];
+    private _dirtyRanges: IUnitRange[] = [];
 
     override dispose(): void {
         this._unitData = {};
         this._formulaData = {};
         this._sheetNameMap = {};
-        this._updateRangeList = [];
+        this._dirtyRanges = [];
     }
 
     getUnitData() {
@@ -53,8 +53,8 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         return this._forceCalculate;
     }
 
-    getUpdateRangeList() {
-        return this._updateRangeList;
+    getDirtyRanges() {
+        return this._dirtyRanges;
     }
 
     load(config: IFormulaDatasetConfig) {
@@ -64,7 +64,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
         this._forceCalculate = config.forceCalculate;
 
-        this._updateRangeList = config.updateRangeList;
+        this._dirtyRanges = config.dirtyRanges;
     }
 
     registerUnitData(unitData: IUnitData) {

@@ -106,7 +106,7 @@ export class EditingController extends Disposable {
         //         formulaData,
         //         sheetNameMap: {},
         //         forceCalculate: true,
-        //         updateRangeList: [],
+        //         dirtyRanges: [],
         //     })
         //     .then((res) => {
         //         console.log(res.sheetData, res.arrayFormulaData);

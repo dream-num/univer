@@ -4,6 +4,13 @@ import { RENDER_CLASS_TYPE } from './basics/const';
 import { cancelRequestFrame, requestNewFrame } from './basics/tools';
 import { Vector2 } from './basics/vector2';
 
+export enum ScrollTimerType {
+    ALL,
+    X,
+    Y,
+    NONE,
+}
+
 export class ScrollTimer {
     private _requestNewFrameNumber: number = -1;
 
@@ -25,6 +32,7 @@ export class ScrollTimer {
 
     constructor(
         private _scene: any,
+        private _scrollTimerType: ScrollTimerType = ScrollTimerType.ALL,
         private _padding?: IPaddingData,
         private _smoothRatioX = 0.05,
         private _smoothRatioY = 0.05
@@ -34,8 +42,8 @@ export class ScrollTimer {
         }
     }
 
-    static create(scene: any, padding?: IPaddingData) {
-        return new ScrollTimer(scene, padding);
+    static create(scene: any, scrollTimerType: ScrollTimerType = ScrollTimerType.ALL, padding?: IPaddingData) {
+        return new ScrollTimer(scene, scrollTimerType, padding);
     }
 
     startScroll(offsetX: number, offsetY: number, targetViewport?: any) {
@@ -67,24 +75,28 @@ export class ScrollTimer {
 
         let shouldScroll = false;
 
-        if (this._moveX < leftBounding + l) {
-            x = (this._moveX - leftBounding - l) * this._smoothRatioX;
-            shouldScroll = true;
+        if (this._scrollTimerType !== ScrollTimerType.Y) {
+            if (this._moveX < leftBounding + l) {
+                x = (this._moveX - leftBounding - l) * this._smoothRatioX;
+                shouldScroll = true;
+            }
+
+            if (this._moveX > rightBounding - r) {
+                x = (this._moveX - rightBounding + r) * this._smoothRatioX;
+                shouldScroll = true;
+            }
         }
 
-        if (this._moveX > rightBounding - r) {
-            x = (this._moveX - rightBounding + r) * this._smoothRatioX;
-            shouldScroll = true;
-        }
+        if (this._scrollTimerType !== ScrollTimerType.X) {
+            if (this._moveY < topBounding + t) {
+                y = (this._moveY - topBounding - t) * this._smoothRatioY;
+                shouldScroll = true;
+            }
 
-        if (this._moveY < topBounding + t) {
-            y = (this._moveY - topBounding - t) * this._smoothRatioY;
-            shouldScroll = true;
-        }
-
-        if (this._moveY > bottomBounding - b) {
-            y = (this._moveY - bottomBounding + b) * this._smoothRatioY;
-            shouldScroll = true;
+            if (this._moveY > bottomBounding - b) {
+                y = (this._moveY - bottomBounding + b) * this._smoothRatioY;
+                shouldScroll = true;
+            }
         }
 
         if (!shouldScroll) {

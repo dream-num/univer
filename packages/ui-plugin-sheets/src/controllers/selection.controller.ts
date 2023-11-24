@@ -1,4 +1,10 @@
-import { IMouseEvent, IPointerEvent, IRenderManagerService, SpreadsheetSkeleton } from '@univerjs/base-render';
+import {
+    IMouseEvent,
+    IPointerEvent,
+    IRenderManagerService,
+    ScrollTimerType,
+    SpreadsheetSkeleton,
+} from '@univerjs/base-render';
 import {
     convertSelectionDataToRange,
     getNormalSelectionStyle,
@@ -133,7 +139,8 @@ export class SelectionController extends Disposable {
                         evt,
                         (spreadsheet?.zIndex || 1) + 1,
                         RANGE_TYPE.ROW,
-                        viewportMain
+                        viewportMain,
+                        ScrollTimerType.Y
                     );
                     if (evt.button !== 2) {
                         state.stopPropagation();
@@ -156,7 +163,8 @@ export class SelectionController extends Disposable {
                         evt,
                         (spreadsheet?.zIndex || 1) + 1,
                         RANGE_TYPE.COLUMN,
-                        viewportMain
+                        viewportMain,
+                        ScrollTimerType.X
                     );
                     if (evt.button !== 2) {
                         state.stopPropagation();

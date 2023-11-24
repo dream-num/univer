@@ -1,7 +1,5 @@
-import { TextSelectionManagerService } from '@univerjs/base-docs';
 import { FormulaEngineService, matchToken, sequenceNodeType } from '@univerjs/base-formula-engine';
-import { IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/base-render';
-import { SelectionManagerService } from '@univerjs/base-sheets';
+import { DeviceInputEventType, IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/base-render';
 import { KeyCode } from '@univerjs/base-ui';
 import {
     AbsoluteRefType,
@@ -11,28 +9,16 @@ import {
     getAbsoluteRefTypeWitString,
     ICommandInfo,
     ICommandService,
-    IContextService,
-    IUniverInstanceService,
     LifecycleStages,
-    LocaleService,
     OnLifecycle,
     serializeRange,
-    ThemeService,
     toDisposable,
 } from '@univerjs/core';
-import {
-    EditorBridgeService,
-    getEditorObject,
-    IEditorBridgeService,
-    ISelectionRenderService,
-    SheetSkeletonManagerService,
-} from '@univerjs/ui-plugin-sheets';
+import { EditorBridgeService, getEditorObject, IEditorBridgeService } from '@univerjs/ui-plugin-sheets';
 import { Inject } from '@wendellhu/redi';
 
 import { ReferenceAbsoluteOperation } from '../commands/operations/reference-absolute.operation';
-import { IDescriptionService } from '../services/description.service';
 import { IFormulaInputService } from '../services/formula-input.service';
-import { IFormulaPromptService } from '../services/prompt.service';
 
 @OnLifecycle(LifecycleStages.Steady, FormulaInputController)
 export class FormulaInputController extends Disposable {
@@ -40,20 +26,10 @@ export class FormulaInputController extends Disposable {
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @IContextService private readonly _contextService: IContextService,
         @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
         @Inject(IEditorBridgeService) private readonly _editorBridgeService: EditorBridgeService,
-        @Inject(IFormulaPromptService) private readonly _formulaPromptService: IFormulaPromptService,
         @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(ThemeService) private readonly _themeService: ThemeService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
-        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
-        @Inject(ISelectionRenderService) private readonly _selectionRenderService: ISelectionRenderService,
-        @Inject(IDescriptionService) private readonly _descriptionService: IDescriptionService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @IFormulaInputService private readonly _formulaInputService: IFormulaInputService
     ) {
         super();
@@ -67,6 +43,8 @@ export class FormulaInputController extends Disposable {
         this._initialEditorInputChange();
 
         this._userMouseListener();
+
+        this._inputFormulaListener();
     }
 
     private _initialEditorInputChange() {
@@ -97,6 +75,30 @@ export class FormulaInputController extends Disposable {
             toDisposable(
                 documentComponent.onPointerDownObserver.add(() => {
                     this._userCursorMove = true;
+                })
+            )
+        );
+    }
+
+    private _inputFormulaListener() {
+        this.disposeWithMe(
+            toDisposable(
+                this._formulaInputService.inputFormula$.subscribe((formulaString) => {
+                    const visibleState = this._editorBridgeService.isVisible();
+                    if (visibleState.visible === false) {
+                        this._editorBridgeService.changeVisible({
+                            visible: true,
+                            eventType: DeviceInputEventType.Dblclick,
+                        });
+                    }
+
+                    const dataStream = `=${formulaString}(`;
+
+                    const lastSequenceNodes = this._formulaEngineService.buildSequenceNodes(dataStream) || [];
+
+                    this._formulaInputService.setSequenceNodes(lastSequenceNodes);
+
+                    this._formulaInputService.syncToEditor(dataStream.length - 1);
                 })
             )
         );

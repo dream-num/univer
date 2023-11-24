@@ -3,6 +3,7 @@ import {
     IPointerEvent,
     Scene,
     ScrollTimer,
+    ScrollTimerType,
     SpreadsheetSkeleton,
     Vector2,
     Viewport,
@@ -69,7 +70,13 @@ export interface ISelectionRenderService {
     convertSelectionRangeToData(selectionWithStyle: ISelectionWithStyle): ISelectionWithCoordAndStyle;
     convertRangeDataToSelection(range: IRange): Nullable<IRangeWithCoord>;
     convertCellRangeToInfo(primary: Nullable<ISelectionCell>): Nullable<ISelectionCellWithCoord>;
-    eventTrigger(evt: IPointerEvent | IMouseEvent, zIndex: number, rangeType: RANGE_TYPE, viewport?: Viewport): void;
+    eventTrigger(
+        evt: IPointerEvent | IMouseEvent,
+        zIndex: number,
+        rangeType: RANGE_TYPE,
+        viewport?: Viewport,
+        scrollTimerType?: ScrollTimerType
+    ): void;
     // getMoveCellInfo(direction: Direction, selectionData: Nullable<ISelectionWithCoord>): Nullable<ISelectionWithCoord>;
     // transformCellDataToSelectionData(row: number, column: number): Nullable<ISelectionWithCoord>;
     reset(): void;
@@ -391,7 +398,8 @@ export class SelectionRenderService implements ISelectionRenderService {
         evt: IPointerEvent | IMouseEvent,
         zIndex = 0,
         rangeType: RANGE_TYPE = RANGE_TYPE.NORMAL,
-        viewport?: Viewport
+        viewport?: Viewport,
+        scrollTimerType: ScrollTimerType = ScrollTimerType.ALL
     ) {
         if (this._isSelectionEnabled === false) {
             return;
@@ -574,7 +582,7 @@ export class SelectionRenderService implements ISelectionRenderService {
 
         scene.disableEvent();
 
-        const scrollTimer = ScrollTimer.create(this._scene);
+        const scrollTimer = ScrollTimer.create(this._scene, scrollTimerType);
         scrollTimer.startScroll(newEvtOffsetX, newEvtOffsetY, viewport);
 
         this._scrollTimer = scrollTimer;

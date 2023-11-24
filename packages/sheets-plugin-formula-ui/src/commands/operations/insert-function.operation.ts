@@ -14,6 +14,7 @@ import {
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
+import { IFormulaInputService } from '../../services/formula-input.service';
 import { InsertFunctionCommand } from '../commands/insert-function.command';
 
 export interface IInsertFunctionOperationParams {
@@ -28,6 +29,7 @@ export const InsertFunctionOperation: ICommand = {
     type: CommandType.OPERATION,
     handler: async (accessor: IAccessor, params: IInsertFunctionOperationParams) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
+        const formulaInputService = accessor.get(IFormulaInputService);
         const currentSelections = selectionManagerService.getSelections();
         if (!currentSelections || !currentSelections.length) {
             return false;
@@ -36,6 +38,8 @@ export const InsertFunctionOperation: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const cellMatrix = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getCellMatrix();
 
+        const { value } = params;
+
         // Select a single range to insert a formula:
         // 1. The entire row or column, first get the judgment result of the primary position, and then set the formula ID of other positions in sequence;
         // 2. For multiple rows and multiple columns, only get the judgment result of the primary position, and enter the edit mode
@@ -43,11 +47,10 @@ export const InsertFunctionOperation: ICommand = {
             const { startRow, endRow, startColumn, endColumn } = currentSelections[0].range;
             if (startRow !== endRow && startColumn !== endColumn) {
                 // TODO@Dushusir: Enter the editing mode
+                formulaInputService.inputFormula(value);
                 return false;
             }
         }
-
-        const { value } = params;
 
         const commandService = accessor.get(ICommandService);
 

@@ -89,7 +89,7 @@ export interface IFormulaDatasetConfig {
     formulaData: IFormulaData;
     sheetNameMap: IUnitSheetNameMap;
     forceCalculate: boolean;
-    updateRangeList: IUnitRange[];
+    dirtyRanges: IUnitRange[];
 }
 
 export enum ConcatenateType {

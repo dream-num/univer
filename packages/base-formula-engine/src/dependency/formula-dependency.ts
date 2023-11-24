@@ -38,13 +38,13 @@ export class FormulaDependencyGenerator extends Disposable {
 
     updateRangeFlatten() {
         const forceCalculate = this._currentConfigService.isForceCalculate();
-        const updateRangeList = this._currentConfigService.getUpdateRangeList();
+        const dirtyRanges = this._currentConfigService.getDirtyRanges();
         if (forceCalculate) {
             return;
         }
         this._updateRangeFlattenCache = new Map<string, Map<string, IRange>>();
-        for (let i = 0; i < updateRangeList.length; i++) {
-            const gridRange = updateRangeList[i];
+        for (let i = 0; i < dirtyRanges.length; i++) {
+            const gridRange = dirtyRanges[i];
             const range = gridRange.range;
             const sheetId = gridRange.sheetId;
             const unitId = gridRange.unitId;

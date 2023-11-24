@@ -1,4 +1,4 @@
-import { MoveCursorOperation, TextSelectionManagerService } from '@univerjs/base-docs';
+import { MoveCursorOperation, ReplaceContentCommand, TextSelectionManagerService } from '@univerjs/base-docs';
 import {
     FormulaEngineService,
     includeFormulaLexerToken,
@@ -392,7 +392,7 @@ export class PromptController extends Disposable {
         );
     }
 
-    private _selectionChanging(ranges: Nullable<IRange[]>) {
+    private _selectionChanging(ranges: Nullable<IRange[]>, isSync: boolean = false) {
         if (ranges == null) {
             return;
         }
@@ -404,6 +404,12 @@ export class PromptController extends Disposable {
         this._formulaInputService.enableSelectionMoving();
 
         this._inertControlSelection(ranges);
+
+        if (ranges == null || isSync === false) {
+            return;
+        }
+        const currentRange = ranges[ranges.length - 1];
+        this._inertControlSelectionReplace(currentRange);
     }
 
     private _initialRefSelectionInsertEvent() {
@@ -412,7 +418,11 @@ export class PromptController extends Disposable {
         );
 
         this.disposeWithMe(
-            toDisposable(this._selectionRenderService.selectionMoveStart$.subscribe(this._selectionChanging.bind(this)))
+            toDisposable(
+                this._selectionRenderService.selectionMoveStart$.subscribe((ranges) => {
+                    this._selectionChanging(ranges, true);
+                })
+            )
         );
     }
 
@@ -967,14 +977,16 @@ export class PromptController extends Disposable {
      * @param textSelectionOffset
      * @returns
      */
-    private async _syncToEditor(sequenceNodes: Array<string | ISequenceNode>, textSelectionOffset: number) {
+    private async _syncToEditor(
+        sequenceNodes: Array<string | ISequenceNode>,
+        textSelectionOffset: number,
+        canUndo: boolean = true
+    ) {
         const dataStream = this._generateStringWithSequence(sequenceNodes);
 
         const { textRuns, refSelections } = this._buildTextRuns(sequenceNodes);
 
         this._isSelectionMovingRefSelections = refSelections;
-
-        this._updateEditorModel(`=${dataStream}\r\n`, textRuns);
 
         const activeRange = this._textSelectionManagerService.getLast();
 
@@ -984,18 +996,38 @@ export class PromptController extends Disposable {
 
         const { collapsed, style } = activeRange;
 
+        if (canUndo) {
+            this._commandService.executeCommand(ReplaceContentCommand.id, {
+                unitId: this._editorBridgeService.getCurrentEditorId(),
+                body: {
+                    dataStream: `=${dataStream}`,
+                    textRuns,
+                },
+                textRanges: [
+                    {
+                        startOffset: textSelectionOffset + 1,
+                        endOffset: textSelectionOffset + 1,
+                        collapsed,
+                        style,
+                    },
+                ],
+                segmentId: null,
+            });
+        } else {
+            this._updateEditorModel(`=${dataStream}\r\n`, textRuns);
+            this._textSelectionManagerService.replaceTextRanges([
+                {
+                    startOffset: textSelectionOffset + 1,
+                    endOffset: textSelectionOffset + 1,
+                    collapsed,
+                    style,
+                },
+            ]);
+        }
+
         this._currentInsertRefStringIndex = textSelectionOffset;
 
         await this._fitEditorSize();
-
-        this._textSelectionManagerService.replaceTextRanges([
-            {
-                startOffset: textSelectionOffset + 1,
-                endOffset: textSelectionOffset + 1,
-                collapsed,
-                style,
-            },
-        ]);
     }
 
     private async _fitEditorSize() {

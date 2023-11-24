@@ -2,7 +2,7 @@ import numfmt from '@univerjs/base-numfmt-engine';
 import { LocaleService } from '@univerjs/core';
 import { SelectList } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { FC, useEffect, useMemo, useState } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 
 import { BusinessComponentProps } from '../../base/types';
 import { getDateFormatOptions } from '../../utils/options';

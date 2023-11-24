@@ -1,6 +1,6 @@
 import { LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { FC, useEffect } from 'react';
+import React, { FC, useEffect } from 'react';
 
 import { BusinessComponentProps } from '../../base/types';
 

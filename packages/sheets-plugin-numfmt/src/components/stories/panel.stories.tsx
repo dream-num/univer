@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { LocaleService, LocaleType, ThemeService } from '@univerjs/core';
 import { Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 
 import { zhCn } from '../../locale/zh-CN';
 import { SheetNumfmtPanel, SheetNumfmtPanelProps } from '../index';

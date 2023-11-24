@@ -1,7 +1,7 @@
 import { LocaleService } from '@univerjs/core';
 import { InputNumber, Select } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { FC, useEffect, useMemo, useState } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 
 import { BusinessComponentProps } from '../../base/types';
 import { getCurrencyType } from '../../utils/currency';

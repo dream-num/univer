@@ -3,7 +3,7 @@ import './index.less';
 import { LocaleService } from '@univerjs/core';
 import { Button, ISelectProps, Select } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { FC, useEffect, useMemo, useRef, useState } from 'react';
+import React, { FC, useEffect, useMemo, useRef, useState } from 'react';
 
 import { BusinessComponentProps } from '../base/types';
 import { AccountingPanel, isAccountingPanel } from './accounting';

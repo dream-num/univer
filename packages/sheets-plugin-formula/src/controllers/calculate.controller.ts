@@ -62,7 +62,7 @@ export class CalculateController extends Disposable {
 
         const formulaData = this._formulaDataModel.getFormulaData();
 
-        const unitRange: IUnitRange[] = [];
+        const dirtyRanges: IUnitRange[] = [];
         let isCalculate = false;
 
         if (!formulaData[unitId]) {
@@ -91,7 +91,7 @@ export class CalculateController extends Disposable {
                 isArrayFormula = true;
                 isCalculate = true;
 
-                unitRange.push({ unitId, sheetId, range: arrayFormCellRangeData });
+                dirtyRanges.push({ unitId, sheetId, range: arrayFormCellRangeData });
             } else if (Tools.isStringNumber(formulaString)) {
                 isCalculate = true;
 
@@ -127,19 +127,19 @@ export class CalculateController extends Disposable {
         });
 
         if (!isArrayFormula) {
-            unitRange.push({ unitId, sheetId, range: rangeMatrix.getDataRange() });
+            dirtyRanges.push({ unitId, sheetId, range: rangeMatrix.getDataRange() });
         }
 
-        if (unitRange.length === 0 || !isCalculate) return;
+        if (dirtyRanges.length === 0 || !isCalculate) return;
 
-        this._executeFormula(unitId, formulaData, false, unitRange);
+        this._executeFormula(unitId, formulaData, false, dirtyRanges);
     }
 
     private _executeFormula(
         unitId: string,
         formulaData: IFormulaData,
         forceCalculate: boolean = false,
-        unitRange: IUnitRange[]
+        dirtyRanges: IUnitRange[]
     ) {
         const engine = this._formulaEngineService;
         const { sheetData, sheetNameMap } = this._getSheetData();
@@ -154,7 +154,7 @@ export class CalculateController extends Disposable {
                     [unitId]: sheetNameMap,
                 },
                 forceCalculate,
-                dirtyRanges: unitRange,
+                dirtyRanges,
             })
             .then((data) => {
                 const { sheetData, arrayFormulaData } = data;

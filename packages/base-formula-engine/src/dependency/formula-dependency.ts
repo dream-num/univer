@@ -24,7 +24,7 @@ export const FormulaASTCache = new FormulaAstLRU<AstRootNode>(FORMULA_CACHE_LRU_
 
 @OnLifecycle(LifecycleStages.Rendered, FormulaDependencyGenerator)
 export class FormulaDependencyGenerator extends Disposable {
-    private _updateRangeFlattenCache = new Map<string, Map<string, IRange>>();
+    private _updateRangeFlattenCache = new Map<string, Map<string, IRange[]>>();
 
     constructor(
         @IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService,
@@ -41,25 +41,8 @@ export class FormulaDependencyGenerator extends Disposable {
         FormulaASTCache.clear();
     }
 
-    updateRangeFlatten() {
-        const forceCalculate = this._currentConfigService.isForceCalculate();
-        const dirtyRanges = this._currentConfigService.getDirtyRanges();
-        if (forceCalculate) {
-            return;
-        }
-        this._updateRangeFlattenCache = new Map<string, Map<string, IRange>>();
-        for (let i = 0; i < dirtyRanges.length; i++) {
-            const gridRange = dirtyRanges[i];
-            const range = gridRange.range;
-            const sheetId = gridRange.sheetId;
-            const unitId = gridRange.unitId;
-
-            this._addFlattenCache(unitId, sheetId, range);
-        }
-    }
-
     async generate() {
-        this.updateRangeFlatten();
+        this._updateRangeFlatten();
 
         // const formulaInterpreter = Interpreter.create(interpreterDatasetConfig);
 
@@ -122,6 +105,27 @@ export class FormulaDependencyGenerator extends Disposable {
         return treeList;
     }
 
+    /**
+     * Break down the dirty areas into ranges for subsequent matching.
+     * @returns
+     */
+    private _updateRangeFlatten() {
+        const forceCalculate = this._currentConfigService.isForceCalculate();
+        const dirtyRanges = this._currentConfigService.getDirtyRanges();
+        if (forceCalculate) {
+            return;
+        }
+        this._updateRangeFlattenCache.clear();
+        for (let i = 0; i < dirtyRanges.length; i++) {
+            const gridRange = dirtyRanges[i];
+            const range = gridRange.range;
+            const sheetId = gridRange.sheetId;
+            const unitId = gridRange.unitId;
+
+            this._addFlattenCache(unitId, sheetId, range);
+        }
+    }
+
     private _generateAstNode(formulaString: string) {
         let astNode: Nullable<AstRootNode> = FormulaASTCache.get(formulaString);
 
@@ -150,12 +154,19 @@ export class FormulaDependencyGenerator extends Disposable {
 
     private _addFlattenCache(unitId: string, sheetId: string, range: IRange) {
         let unitMatrix = this._updateRangeFlattenCache.get(unitId);
-        if (!unitMatrix) {
-            unitMatrix = new Map<string, IRange>();
+        if (unitMatrix == null) {
+            unitMatrix = new Map<string, IRange[]>();
             this._updateRangeFlattenCache.set(unitId, unitMatrix);
         }
 
-        unitMatrix.set(sheetId, range);
+        let ranges = unitMatrix.get(sheetId);
+
+        if (ranges == null) {
+            ranges = [];
+            unitMatrix.set(sheetId, ranges);
+        }
+
+        ranges.push(range);
 
         // let sheetMatrix = unitMatrix.get(sheetId);
         // if (!sheetMatrix) {
@@ -234,6 +245,12 @@ export class FormulaDependencyGenerator extends Disposable {
         return value;
     }
 
+    /**
+     * Calculate the range required for collection in advance,
+     * including references and location functions (such as OFFSET, INDIRECT, INDEX, etc.).
+     * @param node
+     * @returns
+     */
     private async _getRangeListByNode(node: BaseAstNode) {
         // ref function in offset indirect INDEX
         const preCalculateNodeList: PreCalculateNodeType[] = [];
@@ -267,6 +284,12 @@ export class FormulaDependencyGenerator extends Disposable {
         return rangeList;
     }
 
+    /**
+     * Determine whether all ranges of the current node exist within the dirty area.
+     * If they are within the dirty area, return true, indicating that this node needs to be calculated.
+     * @param tree
+     * @returns
+     */
     private _includeTree(tree: FormulaDependencyTree) {
         const unitId = tree.unitId;
         const sheetId = tree.sheetId;
@@ -281,10 +304,12 @@ export class FormulaDependencyGenerator extends Disposable {
             return false;
         }
 
-        const range = sheetRangeMap.get(sheetId)!;
+        const ranges = sheetRangeMap.get(sheetId)!;
 
-        if (tree.compareRangeData(range)) {
-            return true;
+        for (const range of ranges) {
+            if (tree.compareRangeData(range)) {
+                return true;
+            }
         }
 
         return false;

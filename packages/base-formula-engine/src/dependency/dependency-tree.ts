@@ -69,7 +69,13 @@ export class FormulaDependencyTree extends Disposable {
         return true;
     }
 
-    dependencyRange(dependencyRangeList: Map<string, Map<string, IRange>>) {
+    /**
+     * "Determine whether all ranges of the current node exist within the dirty area.
+     *  If they are within the dirty area, return true, indicating that this node needs to be calculated.
+     * @param dependencyRangeList
+     * @returns
+     */
+    dependencyRange(dependencyRangeList: Map<string, Map<string, IRange[]>>) {
         if (this.rangeList.length === 0) {
             return false;
         }
@@ -90,19 +96,21 @@ export class FormulaDependencyTree extends Disposable {
                 continue;
             }
 
-            const dependencyRange = sheetRangeMap.get(sheetId)!;
+            const dependencyRanges = sheetRangeMap.get(sheetId)!;
 
-            const { startRow, startColumn, endRow, endColumn } = dependencyRange;
+            for (const dependencyRange of dependencyRanges) {
+                const { startRow, startColumn, endRow, endColumn } = dependencyRange;
 
-            if (
-                range.startRow > endRow ||
-                range.endRow < startRow ||
-                range.startColumn > endColumn ||
-                range.endColumn < startColumn
-            ) {
-                continue;
-            } else {
-                return true;
+                if (
+                    range.startRow > endRow ||
+                    range.endRow < startRow ||
+                    range.startColumn > endColumn ||
+                    range.endColumn < startColumn
+                ) {
+                    continue;
+                } else {
+                    return true;
+                }
             }
         }
 
@@ -114,10 +122,19 @@ export class FormulaDependencyTree extends Disposable {
         tree._pushParent(this);
     }
 
+    /**
+     * Add the range corresponding to the current ast node.
+     * @param range
+     */
     pushRangeList(range: IUnitRange) {
         this.rangeList.push(range);
     }
 
+    /**
+     * Determine whether it is dependent on other trees.
+     * @param dependenceTree
+     * @returns
+     */
     dependency(dependenceTree: FormulaDependencyTree) {
         if (this.rangeList.length === 0) {
             return false;

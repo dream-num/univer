@@ -5,7 +5,7 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 import { Subscription } from 'rxjs';
 
-import { ComponentManager } from '../../../Common/ComponentManager';
+import { ComponentManager } from '../../../common/component-manager';
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
 import { Menu } from '../../../components/menu/Menu';
 import {

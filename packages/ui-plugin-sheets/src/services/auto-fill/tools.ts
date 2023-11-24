@@ -1,7 +1,5 @@
 import { Direction, ICellData, Nullable, Tools } from '@univerjs/core';
 
-import { DATA_TYPE, ICopyDataPiece } from './type';
-
 export const chnNumChar = { 零: 0, 一: 1, 二: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9 };
 export const chnNumChar2 = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
 export const chnUnitSection = ['', '万', '亿', '万亿', '亿亿'];
@@ -22,18 +20,6 @@ export const chnNameValue = {
     亿: { value: 100000000, secUnit: true },
 };
 
-export function getEmptyCopyDataPiece(): ICopyDataPiece {
-    return {
-        [DATA_TYPE.NUMBER]: [],
-        [DATA_TYPE.DATE]: [],
-        [DATA_TYPE.EXTEND_NUMBER]: [],
-        [DATA_TYPE.CHN_NUMBER]: [],
-        [DATA_TYPE.CHN_WEEK2]: [],
-        [DATA_TYPE.CHN_WEEK3]: [],
-        [DATA_TYPE.FORMULA]: [],
-        [DATA_TYPE.OTHER]: [],
-    };
-}
 export function chineseToNumber(chnStr?: Nullable<string>) {
     if (!chnStr) {
         return 0;
@@ -253,7 +239,7 @@ export function getLenS(indexArr: any[], rsd: number) {
     let s = 0;
 
     for (let j = 0; j < indexArr.length; j++) {
-        if (indexArr[j] <= rsd) {
+        if (indexArr[j] < rsd) {
             s++;
         } else {
             break;
@@ -290,14 +276,14 @@ export function getDataIndex(csLen: number, asLen: number, indexArr: number[]) {
 
     let sum = 0;
     if (num > 0) {
-        for (let i = 1; i <= num; i++) {
+        for (let i = 0; i < num; i++) {
             for (let j = 0; j < indexArr.length; j++) {
-                obj[indexArr[j] + (i - 1) * csLen] = sum;
+                obj[indexArr[j] + i * csLen] = sum;
                 sum++;
             }
         }
         for (let a = 0; a < indexArr.length; a++) {
-            if (indexArr[a] <= rsd) {
+            if (indexArr[a] < rsd) {
                 obj[indexArr[a] + csLen * num] = sum;
                 sum++;
             } else {
@@ -306,7 +292,7 @@ export function getDataIndex(csLen: number, asLen: number, indexArr: number[]) {
         }
     } else {
         for (let a = 0; a < indexArr.length; a++) {
-            if (indexArr[a] <= rsd) {
+            if (indexArr[a] < rsd) {
                 obj[indexArr[a]] = sum;
                 sum++;
             } else {

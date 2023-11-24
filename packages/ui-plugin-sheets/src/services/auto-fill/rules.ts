@@ -21,6 +21,7 @@ import { APPLY_TYPE, DATA_TYPE, IAutoFillRule } from './type';
 
 export const numberRule: IAutoFillRule = {
     type: DATA_TYPE.NUMBER,
+    priority: 1000,
     match: (cellData) => typeof cellData?.v === 'number' || !isNaN(Number(cellData?.v)),
     // TODO@yuhongz: not the good way to match number, will be changed after cell type is supported
     isContinue: (prev, cur) => {
@@ -30,7 +31,8 @@ export const numberRule: IAutoFillRule = {
         return false;
     },
     applyFunctions: {
-        [APPLY_TYPE.SERIES]: (data, len, direction) => {
+        [APPLY_TYPE.SERIES]: (dataWithIndex, len, direction) => {
+            const { data } = dataWithIndex;
             if (direction === Direction.LEFT || direction === Direction.UP) {
                 data.reverse();
             }
@@ -41,6 +43,7 @@ export const numberRule: IAutoFillRule = {
 
 export const otherRule: IAutoFillRule = {
     type: DATA_TYPE.OTHER,
+    priority: 0,
     match: () => true,
     isContinue: (prev, cur) => {
         if (prev.type === DATA_TYPE.OTHER) {
@@ -52,6 +55,7 @@ export const otherRule: IAutoFillRule = {
 
 export const extendNumberRule: IAutoFillRule = {
     type: DATA_TYPE.EXTEND_NUMBER,
+    priority: 900,
     match: (cellData) => matchExtendNumber(cellData?.m || '').isExtendNumber,
     isContinue: (prev, cur) => {
         if (prev.type === DATA_TYPE.EXTEND_NUMBER) {
@@ -64,7 +68,9 @@ export const extendNumberRule: IAutoFillRule = {
         return false;
     },
     applyFunctions: {
-        [APPLY_TYPE.SERIES]: (data, len, direction) => {
+        [APPLY_TYPE.SERIES]: (dataWithIndex, len, direction) => {
+            const { data } = dataWithIndex;
+
             let step;
             if (data.length === 1) {
                 step = direction === Direction.DOWN || direction === Direction.RIGHT ? 1 : -1;
@@ -93,6 +99,7 @@ export const extendNumberRule: IAutoFillRule = {
 
 export const chnNumberRule: IAutoFillRule = {
     type: DATA_TYPE.CHN_NUMBER,
+    priority: 830,
     match: (cellData) => {
         if (isChnNumber(cellData?.m || '')) {
             return true;
@@ -106,7 +113,9 @@ export const chnNumberRule: IAutoFillRule = {
         return false;
     },
     applyFunctions: {
-        [APPLY_TYPE.SERIES]: (data, len, direction) => {
+        [APPLY_TYPE.SERIES]: (dataWithIndex, len, direction) => {
+            const { data } = dataWithIndex;
+
             const isReverse = direction === Direction.LEFT || direction === Direction.UP;
             if (data.length === 1) {
                 const formattedValue = data[0]?.m;
@@ -177,6 +186,7 @@ export const chnNumberRule: IAutoFillRule = {
 
 export const chnWeek2Rule: IAutoFillRule = {
     type: DATA_TYPE.CHN_WEEK2,
+    priority: 820,
     match: (cellData) => {
         if (isChnWeek2(cellData?.m || '')) {
             return true;
@@ -185,7 +195,9 @@ export const chnWeek2Rule: IAutoFillRule = {
     },
     isContinue: (prev, cur) => prev.type === DATA_TYPE.CHN_WEEK2,
     applyFunctions: {
-        [APPLY_TYPE.SERIES]: (data, len, direction) => {
+        [APPLY_TYPE.SERIES]: (dataWithIndex, len, direction) => {
+            const { data } = dataWithIndex;
+
             const isReverse = direction === Direction.LEFT || direction === Direction.UP;
             if (data.length === 1) {
                 let step;
@@ -231,10 +243,13 @@ export const chnWeek2Rule: IAutoFillRule = {
 
 export const chnWeek3Rule: IAutoFillRule = {
     type: DATA_TYPE.CHN_WEEK3,
+    priority: 810,
     match: (cellData) => isChnWeek3(cellData?.m || ''),
     isContinue: (prev, cur) => prev.type === DATA_TYPE.CHN_WEEK3,
     applyFunctions: {
-        [APPLY_TYPE.SERIES]: (data, len, direction) => {
+        [APPLY_TYPE.SERIES]: (dataWithIndex, len, direction) => {
+            const { data } = dataWithIndex;
+
             const isReverse = direction === Direction.LEFT || direction === Direction.UP;
             if (data.length === 1) {
                 let step;
@@ -282,6 +297,7 @@ export const chnWeek3Rule: IAutoFillRule = {
 
 export const loopSeriesRule: IAutoFillRule = {
     type: DATA_TYPE.LOOP_SERIES,
+    priority: 800,
     match: (cellData) => isLoopSeries(cellData?.m || ''),
     isContinue: (prev, cur) => {
         if (prev.type === DATA_TYPE.LOOP_SERIES) {
@@ -290,7 +306,8 @@ export const loopSeriesRule: IAutoFillRule = {
         return false;
     },
     applyFunctions: {
-        [APPLY_TYPE.SERIES]: (data, len, direction) => {
+        [APPLY_TYPE.SERIES]: (dataWithIndex, len, direction) => {
+            const { data } = dataWithIndex;
             const isReverse = direction === Direction.LEFT || direction === Direction.UP;
             const { series } = getLoopSeriesInfo(data[0]?.m || '');
             if (data.length === 1) {
@@ -340,6 +357,7 @@ export const loopSeriesRule: IAutoFillRule = {
  */
 export const formulaRule: IAutoFillRule = {
     type: DATA_TYPE.FORMULA,
+    priority: 1000,
     match: (cellData) => isFormulaString(cellData?.f),
     isContinue: (prev, cur) => {
         if (prev.type === DATA_TYPE.FORMULA) {
@@ -349,6 +367,9 @@ export const formulaRule: IAutoFillRule = {
     },
     applyFunctions: {
         // FIXME@Dushusir: COPY not work
-        [APPLY_TYPE.COPY]: (data, len, direction) => fillCopyFormula(data, len, direction),
+        [APPLY_TYPE.COPY]: (dataWithIndex, len, direction) => {
+            const { data, index } = dataWithIndex; // TODO@Dushusir: now you have index infos when applying formula
+            return fillCopyFormula(data, len, direction);
+        },
     },
 };

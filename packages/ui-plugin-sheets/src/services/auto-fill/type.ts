@@ -28,7 +28,6 @@ export interface IAutoFillRule {
     match: (cellData: Nullable<ICellData>) => boolean;
     isContinue: (prev: IRuleConfirmedData, cur: Nullable<ICellData>) => boolean;
     applyFunctions?: APPLY_FUNCTIONS;
-    // 优先级
     priority: number;
 }
 
@@ -39,7 +38,7 @@ export interface IRuleConfirmedData {
 
 export type APPLY_FUNCTIONS = {
     [key in APPLY_TYPE]?: (
-        data: Array<Nullable<ICellData>>,
+        dataWithIndex: ICopyDataInType,
         len: number,
         direction: Direction
     ) => Array<Nullable<ICellData>>;

@@ -31,7 +31,8 @@ export const numberRule: IAutoFillRule = {
         return false;
     },
     applyFunctions: {
-        [APPLY_TYPE.SERIES]: (data, len, direction) => {
+        [APPLY_TYPE.SERIES]: (dataWithIndex, len, direction) => {
+            const { data } = dataWithIndex;
             if (direction === Direction.LEFT || direction === Direction.UP) {
                 data.reverse();
             }
@@ -67,7 +68,9 @@ export const extendNumberRule: IAutoFillRule = {
         return false;
     },
     applyFunctions: {
-        [APPLY_TYPE.SERIES]: (data, len, direction) => {
+        [APPLY_TYPE.SERIES]: (dataWithIndex, len, direction) => {
+            const { data } = dataWithIndex;
+
             let step;
             if (data.length === 1) {
                 step = direction === Direction.DOWN || direction === Direction.RIGHT ? 1 : -1;
@@ -110,7 +113,9 @@ export const chnNumberRule: IAutoFillRule = {
         return false;
     },
     applyFunctions: {
-        [APPLY_TYPE.SERIES]: (data, len, direction) => {
+        [APPLY_TYPE.SERIES]: (dataWithIndex, len, direction) => {
+            const { data } = dataWithIndex;
+
             const isReverse = direction === Direction.LEFT || direction === Direction.UP;
             if (data.length === 1) {
                 const formattedValue = data[0]?.m;
@@ -190,7 +195,9 @@ export const chnWeek2Rule: IAutoFillRule = {
     },
     isContinue: (prev, cur) => prev.type === DATA_TYPE.CHN_WEEK2,
     applyFunctions: {
-        [APPLY_TYPE.SERIES]: (data, len, direction) => {
+        [APPLY_TYPE.SERIES]: (dataWithIndex, len, direction) => {
+            const { data } = dataWithIndex;
+
             const isReverse = direction === Direction.LEFT || direction === Direction.UP;
             if (data.length === 1) {
                 let step;
@@ -240,7 +247,9 @@ export const chnWeek3Rule: IAutoFillRule = {
     match: (cellData) => isChnWeek3(cellData?.m || ''),
     isContinue: (prev, cur) => prev.type === DATA_TYPE.CHN_WEEK3,
     applyFunctions: {
-        [APPLY_TYPE.SERIES]: (data, len, direction) => {
+        [APPLY_TYPE.SERIES]: (dataWithIndex, len, direction) => {
+            const { data } = dataWithIndex;
+
             const isReverse = direction === Direction.LEFT || direction === Direction.UP;
             if (data.length === 1) {
                 let step;
@@ -297,7 +306,8 @@ export const loopSeriesRule: IAutoFillRule = {
         return false;
     },
     applyFunctions: {
-        [APPLY_TYPE.SERIES]: (data, len, direction) => {
+        [APPLY_TYPE.SERIES]: (dataWithIndex, len, direction) => {
+            const { data } = dataWithIndex;
             const isReverse = direction === Direction.LEFT || direction === Direction.UP;
             const { series } = getLoopSeriesInfo(data[0]?.m || '');
             if (data.length === 1) {

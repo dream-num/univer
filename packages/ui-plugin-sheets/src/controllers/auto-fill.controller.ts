@@ -25,6 +25,7 @@ import {
     APPLY_TYPE,
     APPLY_TYPE_IN_USE,
     DATA_TYPE,
+    ICopyDataInType,
     ICopyDataPiece,
     IRuleConfirmedData,
 } from '../services/auto-fill/type';
@@ -207,14 +208,14 @@ export class AutoFillController extends Disposable {
             copyDataInType.forEach((copySquad) => {
                 const s = getLenS(copySquad.index, rsd);
                 const len = copySquad.index.length * num + s;
-                const arrData = this._applyFunctions(copySquad.data, len, direction, applyType, customApplyFunctions);
+                const arrData = this._applyFunctions(copySquad, len, direction, applyType, customApplyFunctions);
                 const arrIndex = getDataIndex(csLen, asLen, copySquad.index);
                 applyDataInTypes[type].push({ data: arrData, index: arrIndex });
             });
         });
 
         // calc index
-        for (let x = 1; x <= asLen; x++) {
+        for (let x = 0; x < asLen; x++) {
             rules.forEach((r) => {
                 const { type } = r;
                 const applyDataInType = applyDataInTypes[type];
@@ -230,19 +231,20 @@ export class AutoFillController extends Disposable {
     }
 
     private _applyFunctions(
-        data: Array<Nullable<ICellData>>,
+        copySquad: ICopyDataInType,
         len: number,
         direction: Direction,
         applyType: APPLY_TYPE_IN_USE,
         customApplyFunctions?: APPLY_FUNCTIONS
     ) {
+        const { data } = copySquad;
         const isReverse = direction === Direction.UP || direction === Direction.LEFT;
 
         // according to applyType, apply functions. if customApplyFunctions is provided, use it instead of default apply functions
         if (applyType === APPLY_TYPE.COPY) {
             const custom = customApplyFunctions?.[APPLY_TYPE.COPY];
             if (custom) {
-                return custom(data, len, direction);
+                return custom(copySquad, len, direction);
             }
             isReverse && data.reverse();
             return fillCopy(data, len);
@@ -250,7 +252,7 @@ export class AutoFillController extends Disposable {
         if (applyType === APPLY_TYPE.SERIES) {
             const custom = customApplyFunctions?.[APPLY_TYPE.SERIES];
             if (custom) {
-                return custom(data, len, direction);
+                return custom(copySquad, len, direction);
             }
             isReverse && data.reverse();
             // special rules must provide custom SERIES apply functions, or will be applied as copy
@@ -260,7 +262,7 @@ export class AutoFillController extends Disposable {
         if (applyType === APPLY_TYPE.ONLY_FORMAT) {
             const custom = customApplyFunctions?.[APPLY_TYPE.ONLY_FORMAT];
             if (custom) {
-                return custom(data, len, direction);
+                return custom(copySquad, len, direction);
             }
             return fillCopyStyles(data, len);
         }
@@ -315,19 +317,19 @@ export class AutoFillController extends Disposable {
 
                     const last = typeInfo![typeInfo!.length - 1];
                     last.data.push(data);
-                    last.index.push(b - b1 + 1);
+                    last.index.push(b - b1);
                 } else {
                     const typeInfo = copyDataPiece[type];
                     if (typeInfo) {
                         typeInfo.push({
                             data: [data],
-                            index: [b - b1 + 1],
+                            index: [b - b1],
                         });
                     } else {
                         copyDataPiece[type] = [
                             {
                                 data: [data],
-                                index: [b - b1 + 1],
+                                index: [b - b1],
                             },
                         ];
                     }

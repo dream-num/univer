@@ -239,7 +239,7 @@ export function getLenS(indexArr: any[], rsd: number) {
     let s = 0;
 
     for (let j = 0; j < indexArr.length; j++) {
-        if (indexArr[j] <= rsd) {
+        if (indexArr[j] < rsd) {
             s++;
         } else {
             break;
@@ -276,14 +276,14 @@ export function getDataIndex(csLen: number, asLen: number, indexArr: number[]) {
 
     let sum = 0;
     if (num > 0) {
-        for (let i = 1; i <= num; i++) {
+        for (let i = 0; i < num; i++) {
             for (let j = 0; j < indexArr.length; j++) {
-                obj[indexArr[j] + (i - 1) * csLen] = sum;
+                obj[indexArr[j] + i * csLen] = sum;
                 sum++;
             }
         }
         for (let a = 0; a < indexArr.length; a++) {
-            if (indexArr[a] <= rsd) {
+            if (indexArr[a] < rsd) {
                 obj[indexArr[a] + csLen * num] = sum;
                 sum++;
             } else {
@@ -292,7 +292,7 @@ export function getDataIndex(csLen: number, asLen: number, indexArr: number[]) {
         }
     } else {
         for (let a = 0; a < indexArr.length; a++) {
-            if (indexArr[a] <= rsd) {
+            if (indexArr[a] < rsd) {
                 obj[indexArr[a]] = sum;
                 sum++;
             } else {

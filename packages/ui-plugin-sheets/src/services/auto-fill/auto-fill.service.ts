@@ -100,7 +100,7 @@ export class AutoFillService extends Disposable implements IAutoFillService {
     registryRule(rule: IAutoFillRule) {
         // if rule.type is used, console error
         if (this._rules.find((r) => r.type === rule.type)) {
-            console.error(`[ERROR]: registry rule failed, type '${rule.type}' already exist!`);
+            throw new Error(`Registry rule failed, type '${rule.type}' already exist!`);
             return;
         }
         // insert rules according to the rule.priority, the higher priority will be inserted at the beginning of the array

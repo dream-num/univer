@@ -2,7 +2,7 @@ import { TinyColor } from '@ctrl/tinycolor';
 import { LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React from 'react';
-import { Observable } from 'rxjs';
+import { isObservable, Observable } from 'rxjs';
 
 import { ComponentManager } from '../../common/component-manager';
 import { IMenuSelectorItem } from '../../services/menu/menu';
@@ -34,11 +34,18 @@ export function CustomLabel(props: ICustomLabelProps): JSX.Element | null {
         realValue = useObservable(value$, undefined, true);
     }
 
+    let realIcon;
+    if (isObservable(icon)) {
+        realIcon = useObservable(icon, undefined, true);
+    } else {
+        realIcon = icon;
+    }
+
     // if value is not valid, use primary color
     const { isValid } = new TinyColor(realValue);
 
     if (icon) {
-        const Icon = componentManager.get(icon);
+        const Icon = componentManager.get(realIcon ?? '');
         Icon &&
             nodes.push(
                 <Icon key={index++} extend={{ colorChannel1: isValid ? realValue : 'rgb(var(--primary-color))' }} />

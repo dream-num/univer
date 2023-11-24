@@ -46,7 +46,7 @@ interface IMenuItemBase<V> {
     subId?: string;
     title?: string;
     description?: string;
-    icon?: string;
+    icon?: string | Observable<string>;
     tooltip?: string;
 
     /** The group that the item belongs to. */

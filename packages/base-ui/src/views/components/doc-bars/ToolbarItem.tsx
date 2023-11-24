@@ -3,10 +3,11 @@ import { Dropdown, Tooltip } from '@univerjs/design';
 import { MoreDownSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
-import { Subscription } from 'rxjs';
+import { isObservable, Subscription } from 'rxjs';
 
 import { ComponentManager } from '../../../common/component-manager';
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
+import { useObservable } from '../../../components/hooks/observable';
 import { Menu } from '../../../components/menu/Menu';
 import {
     IDisplayMenuItem,
@@ -68,7 +69,12 @@ export function ToolbarItem(props: IDisplayMenuItem<IMenuItem>) {
         const { selections } = props as IDisplayMenuItem<IMenuSelectorItem>;
 
         const options = selections as IValueOption[];
-        const iconToDisplay = options?.find((o) => o.value === value)?.icon ?? icon;
+        let iconToDisplay = icon;
+        if (isObservable(icon)) {
+            iconToDisplay = useObservable(icon, undefined, true);
+        } else {
+            iconToDisplay = options?.find((o) => o.value === value)?.icon ?? icon;
+        }
 
         function handleSelect(option: IValueOption) {
             let commandId = id;

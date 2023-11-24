@@ -8,60 +8,7 @@ import React from 'react';
 
 import { BorderLine } from './border-line/BorderLine';
 import styles from './index.module.less';
-import { IBorderPanelProps } from './interface';
-
-const BORDER_LINE_CHILDREN = [
-    {
-        label: 'borderLine.borderTop',
-        icon: 'UpBorder',
-        value: 'top',
-    },
-    {
-        label: 'borderLine.borderBottom',
-        icon: 'DownBorder',
-        value: 'bottom',
-    },
-    {
-        label: 'borderLine.borderLeft',
-        icon: 'LeftBorder',
-        value: 'left',
-    },
-    {
-        label: 'borderLine.borderRight',
-        icon: 'RightBorder',
-        value: 'right',
-    },
-    {
-        label: 'borderLine.borderNone',
-        icon: 'NoBorderSingle',
-        value: 'none',
-    },
-    {
-        label: 'borderLine.borderAll',
-        icon: 'AllBorderSingle',
-        value: 'all',
-    },
-    {
-        label: 'borderLine.borderOutside',
-        icon: 'OuterBorder',
-        value: 'outside',
-    },
-    {
-        label: 'borderLine.borderInside',
-        icon: 'InnerBorder',
-        value: 'inside',
-    },
-    {
-        label: 'borderLine.borderHorizontal',
-        icon: 'InnerBorder',
-        value: 'horizontal',
-    },
-    {
-        label: 'borderLine.borderVertical',
-        icon: 'InnerBorder',
-        value: 'vertical',
-    },
-];
+import { BORDER_LINE_CHILDREN, type IBorderPanelProps } from './interface';
 
 const BORDER_SIZE_CHILDREN = [
     {
@@ -158,7 +105,7 @@ export function BorderPanel(props: IBorderPanelProps) {
                         }
                     >
                         <a className={styles.uiPluginSheetsBorderPanelButton} onClick={stopPropagation}>
-                            <PaintBucket extend={{ colorChannel1: 'rgb(var(--primary-color))' }} />
+                            <PaintBucket extend={{ colorChannel1: value.color ?? 'rgb(var(--primary-color))' }} />
                             <span className={styles.uiPluginSheetsBorderPanelMoreIcon}>
                                 <MoreDownSingle />
                             </span>

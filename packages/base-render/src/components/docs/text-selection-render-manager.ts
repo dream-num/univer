@@ -101,6 +101,12 @@ export interface ITextSelectionRenderManager {
         }
     >;
 
+    handleDblClick(
+        evt: IPointerEvent | IMouseEvent,
+        documentOffsetConfig: IDocumentOffsetConfig,
+        viewport: Nullable<Viewport>
+    ): void;
+
     eventTrigger(
         evt: IPointerEvent | IMouseEvent,
         documentOffsetConfig: IDocumentOffsetConfig,
@@ -382,6 +388,12 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         const nodeIndex = spanGroup.indexOf(startNode.node);
 
         if (nodeIndex === -1) {
+            return;
+        }
+
+        // Firefox do not support Segmenter, so you need a Segmenter polyfill if you want use it in Firefox.
+        // TODO: @JOCS write this in DOCS or README when we publish the package.
+        if (Intl.Segmenter == null) {
             return;
         }
 

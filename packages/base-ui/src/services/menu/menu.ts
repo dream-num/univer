@@ -34,6 +34,8 @@ export const enum MenuItemType {
     BUTTON,
     /** Menu item with submenus. Submenus could be other IMenuItem or an ID of a registered component. */
     SELECTOR,
+    /** Button style menu item with a dropdown menu. */
+    BUTTON_SELECTOR,
     /** Submenus have to specific features and do not invoke commands. */
     SUBITEMS,
 }
@@ -100,7 +102,7 @@ export interface ICustomComponentProps<T> {
 }
 
 export interface IMenuSelectorItem<V = MenuItemDefaultValueType> extends IMenuItemBase<V> {
-    type: MenuItemType.SELECTOR | MenuItemType.SUBITEMS;
+    type: MenuItemType.SELECTOR | MenuItemType.BUTTON_SELECTOR | MenuItemType.SUBITEMS;
 
     // selections 子菜单可以为三种类型
     // 一个是当前 menu 的 options，选中后直接使用其 value 触发 command

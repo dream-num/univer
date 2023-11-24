@@ -5,6 +5,11 @@ import styles from './index.module.less';
 
 export interface IInputNumberProps {
     /**
+     * The className of the input
+     */
+    className?: string;
+
+    /**
      * The input content value
      */
     value?: number | null;
@@ -69,6 +74,7 @@ export interface IInputNumberProps {
 
 export function InputNumber(props: IInputNumberProps) {
     const {
+        className,
         value,
         max,
         min,
@@ -91,6 +97,7 @@ export function InputNumber(props: IInputNumberProps) {
     return (
         <RcInputNumber
             prefixCls={styles.inputNumber}
+            className={className}
             value={value}
             max={max}
             min={min}

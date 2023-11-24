@@ -1,3 +1,4 @@
+import { TinyColor } from '@ctrl/tinycolor';
 import { LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React from 'react';
@@ -17,16 +18,22 @@ export type ICustomLabelProps = {
  * @returns
  */
 export function CustomLabel(props: ICustomLabelProps): JSX.Element | null {
-    const { title, icon, label } = props;
+    const { title, icon, label, value } = props;
     const localeService = useDependency(LocaleService);
     const componentManager = useDependency(ComponentManager);
 
     const nodes = [];
     let index = 0;
 
+    // if value is not valid, use primary color
+    const { isValid } = new TinyColor(value);
+
     if (icon) {
         const Icon = componentManager.get(icon);
-        Icon && nodes.push(<Icon key={index++} extend={{ colorChannel1: 'rgb(var(--primary-color))' }} />);
+        Icon &&
+            nodes.push(
+                <Icon key={index++} extend={{ colorChannel1: isValid ? value : 'rgb(var(--primary-color))' }} />
+            );
     }
     if (label) {
         const isStringLabel = typeof label === 'string';

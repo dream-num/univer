@@ -64,7 +64,7 @@ export function ToolbarItem(props: IDisplayMenuItem<IMenuItem>) {
 
     const tooltipTitle = localeService.t(tooltip ?? '') + (shortcut ? ` (${shortcut})` : '');
 
-    function renderSelectorType() {
+    function renderSelectorType(menuType: MenuItemType) {
         const { selections } = props as IDisplayMenuItem<IMenuSelectorItem>;
 
         const options = selections as IValueOption[];
@@ -86,9 +86,16 @@ export function ToolbarItem(props: IDisplayMenuItem<IMenuItem>) {
             commandService.executeCommand(commandId, { value });
         }
 
-        return (
-            <Dropdown overlay={<Menu menuType={id} options={options} onOptionSelect={handleSelect} value={value} />}>
-                <div className={styles.toolbarItemSelectButton}>
+        function handleClick() {
+            if (menuType === MenuItemType.BUTTON_SELECTOR) {
+                const commandId = id;
+                commandService.executeCommand(commandId, { value });
+            }
+        }
+
+        return menuType === MenuItemType.BUTTON_SELECTOR ? (
+            <div className={styles.toolbarItemSelectButton}>
+                <div className={styles.toolbarItemSelectButtonLabel} onClick={handleClick}>
                     <CustomLabel
                         icon={iconToDisplay}
                         title={title!}
@@ -96,7 +103,26 @@ export function ToolbarItem(props: IDisplayMenuItem<IMenuItem>) {
                         label={label}
                         onChange={handleChange}
                     />
+                </div>
+                <Dropdown
+                    overlay={<Menu menuType={id} options={options} onOptionSelect={handleSelect} value={value} />}
+                >
                     <div className={styles.toolbarItemSelectButtonArrow}>
+                        <MoreDownSingle />
+                    </div>
+                </Dropdown>
+            </div>
+        ) : (
+            <Dropdown overlay={<Menu menuType={id} options={options} onOptionSelect={handleSelect} value={value} />}>
+                <div className={styles.toolbarItemSelect}>
+                    <CustomLabel
+                        icon={iconToDisplay}
+                        title={title!}
+                        value={value}
+                        label={label}
+                        onChange={handleChange}
+                    />
+                    <div className={styles.toolbarItemSelectArrow}>
                         <MoreDownSingle />
                     </div>
                 </div>
@@ -127,9 +153,10 @@ export function ToolbarItem(props: IDisplayMenuItem<IMenuItem>) {
 
     function renderItem() {
         switch (props.type) {
-            case MenuItemType.SUBITEMS:
+            case MenuItemType.BUTTON_SELECTOR:
             case MenuItemType.SELECTOR:
-                return renderSelectorType();
+            case MenuItemType.SUBITEMS:
+                return renderSelectorType(props.type);
             case MenuItemType.BUTTON:
             default:
                 return renderButtonType();

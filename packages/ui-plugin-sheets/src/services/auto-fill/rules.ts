@@ -367,6 +367,9 @@ export const formulaRule: IAutoFillRule = {
     },
     applyFunctions: {
         // FIXME@Dushusir: COPY not work
-        [APPLY_TYPE.COPY]: (data, len, direction) => fillCopyFormula(data, len, direction),
+        [APPLY_TYPE.COPY]: (dataWithIndex, len, direction) => {
+            const { data, index } = dataWithIndex; // TODO@Dushusir: now you have index infos when applying formula
+            return fillCopyFormula(data, len, direction);
+        },
     },
 };

@@ -6,7 +6,7 @@ import { ICellEditorManagerService } from '@univerjs/ui-plugin-sheets';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
-import { IFormulaPromptService, IHelpFunctionCommandParams } from '../../../services/prompt.service';
+import { IFormulaPromptService, IHelpFunctionOperationParams } from '../../../services/prompt.service';
 import styles from './index.module.less';
 
 export function HelpFunction() {
@@ -24,7 +24,7 @@ export function HelpFunction() {
     const optional = localeService.t('formula.prompt.optional');
 
     useEffect(() => {
-        const subscription = promptService.help$.subscribe((params: IHelpFunctionCommandParams) => {
+        const subscription = promptService.help$.subscribe((params: IHelpFunctionOperationParams) => {
             const selection = cellEditorManagerService.getState();
             if (!selection) return;
 

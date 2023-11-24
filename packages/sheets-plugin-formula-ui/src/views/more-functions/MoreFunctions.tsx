@@ -36,7 +36,8 @@ export function MoreFunctions() {
             {selectFunction && <SelectFunction onChange={setFunctionInfo}></SelectFunction>}
             {inputParams && <InputParams functionInfo={functionInfo} onChange={setParams}></InputParams>}
             <div className={styles.formulaMoreFunctionsOperation}>
-                {selectFunction && (
+                {/* TODO@Dushusir: open input params after range selector refactor */}
+                {inputParams && (
                     <Button type="primary" onClick={handleClickNextPrev}>
                         {localeService.t('formula.moreFunctions.next')}
                     </Button>
@@ -44,7 +45,7 @@ export function MoreFunctions() {
                 {inputParams && (
                     <Button onClick={handleClickNextPrev}>{localeService.t('formula.moreFunctions.prev')}</Button>
                 )}
-                {inputParams && (
+                {selectFunction && (
                     <Button type="primary" onClick={handleConfirm}>
                         {localeService.t('formula.moreFunctions.confirm')}
                     </Button>

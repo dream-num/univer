@@ -33,13 +33,32 @@ export function RangeSelector(props: IRangeSelectorProps) {
                 }
             });
 
+            document.addEventListener('click', handleActiveClick);
+
             return () => {
+                document.removeEventListener('click', handleActiveClick);
                 subscribe.unsubscribe();
             };
         }
-
         onChange(editableRef.current?.innerHTML || '');
     }, [active]);
+
+    function handleActiveClick(e: MouseEvent) {
+        // content and footer area, used to select the area
+        const selector = (e.target as Element)?.closest('[data-range-selector="true"]');
+        if (selector) return;
+
+        // Current editor area
+        if (e.target === editableRef.current) return;
+
+        // Right button
+        const editorContainer = (e.target as Element)?.closest(`.${styles.rangeSelector}`);
+        const editor = editorContainer?.querySelector(`.${styles.rangeSelectorEditor}`);
+        if (editor === editableRef.current) return;
+
+        setActive(false);
+        editableRef.current?.blur();
+    }
 
     function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
         e.stopPropagation();
@@ -55,6 +74,10 @@ export function RangeSelector(props: IRangeSelectorProps) {
     }
 
     function handleClick() {
+        if (!active) {
+            editableRef.current?.focus();
+            return;
+        }
         setActive(!active);
     }
 

@@ -6,7 +6,7 @@
     margin: 0;
     padding: var(--padding-base);
 
-    font-size: var(--font-size-sm);
+    line-height: 20px;
     list-style: none;
 
     background-color: rgb(var(--bg-color-secondary));
@@ -19,7 +19,7 @@
         cursor: pointer;
 
         box-sizing: border-box;
-        padding: var(--padding-sm);
+        padding: var(--padding-xs) var(--padding-sm);
 
         color: rgb(var(--text-color));
 
@@ -28,6 +28,8 @@
         transition: background .2s;
 
         &-name {
+            font-size: var(--font-size-xs);
+
             &-light {
                 color: rgb(var(--error-color));
             }
@@ -35,7 +37,7 @@
 
         &-desc{
             display: block;
-            margin-top: var(--margin-xs);
+            font-size: var(--font-size-xxs);
         }
 
         &-active {

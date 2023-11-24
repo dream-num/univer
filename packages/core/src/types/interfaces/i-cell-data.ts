@@ -23,6 +23,9 @@ export interface ICellData {
      * Origin value
      */
     v?: Nullable<ICellV>;
+    /**
+     * @deprecated
+     */
     m?: Nullable<string>; // formatted value
     // Usually the type is automatically determined based on the data, or the user directly specifies
     t?: Nullable<CellValueType>; // 0 string, 1 number, 2 boolean, 3 force string, green icon, set null for cell clear all
@@ -61,4 +64,19 @@ export function isICellData(value: any): value is ICellData {
                 (value as ICellData).v !== undefined)) ||
         (value as ICellData).f !== undefined
     );
+}
+
+export function getCellValueType(cell: ICellData) {
+    if (cell.t !== undefined) {
+        return cell.t;
+    }
+    if (typeof cell.v === 'string') {
+        return CellValueType.STRING;
+    }
+    if (typeof cell.v === 'number') {
+        return CellValueType.NUMBER;
+    }
+    if (typeof cell.v === 'boolean') {
+        return CellValueType.BOOLEAN;
+    }
 }

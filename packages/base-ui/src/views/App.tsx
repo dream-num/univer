@@ -104,7 +104,7 @@ export function App(props: IUniverAppProps) {
                         {/* <ComponentContainer components={sidebarComponents} /> */}
 
                         <ContextMenu>
-                            <section ref={contentRef} className={styles.appContainerContent}>
+                            <section ref={contentRef} className={styles.appContainerContent} data-range-selector>
                                 <ComponentContainer components={contentComponents} />
                             </section>
                         </ContextMenu>

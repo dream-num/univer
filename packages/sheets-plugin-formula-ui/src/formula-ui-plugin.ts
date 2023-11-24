@@ -32,13 +32,17 @@ export class FormulaUIPlugin extends Plugin {
             enUS,
         });
 
-        const descriptionService = this._injector.createInstance(DescriptionService, this._config?.description || []);
-
         const dependencies: Dependency[] = [
             // services
             [IFormulaPromptService, { useClass: FormulaPromptService }],
-            [IDescriptionService, { useValue: descriptionService }],
             [IFormulaInputService, { useClass: FormulaInputService }],
+            [
+                IDescriptionService,
+                {
+                    useFactory: () =>
+                        this._injector.createInstance(DescriptionService, this._config?.description || []), // TODO@Dusuhir: initialize config with asynchronous method?
+                },
+            ],
             // controllers
             [FormulaUIController],
             [PromptController],

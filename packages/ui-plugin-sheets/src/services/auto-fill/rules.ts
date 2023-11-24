@@ -1,10 +1,11 @@
-import { Direction } from '@univerjs/core';
+import { Direction, isFormulaString } from '@univerjs/core';
 
 import {
     chineseToNumber,
     fillChnNumber,
     fillChnWeek,
     fillCopy,
+    fillCopyFormula,
     fillExtendNumber,
     fillLoopSeries,
     fillSeries,
@@ -331,5 +332,23 @@ export const loopSeriesRule: IAutoFillRule = {
             }
             return fillCopy(data, len);
         },
+    },
+};
+
+/**
+ * TODO@Dushusir: move to formula plugin after register function is supported
+ */
+export const formulaRule: IAutoFillRule = {
+    type: DATA_TYPE.FORMULA,
+    match: (cellData) => isFormulaString(cellData?.f),
+    isContinue: (prev, cur) => {
+        if (prev.type === DATA_TYPE.FORMULA) {
+            return true;
+        }
+        return false;
+    },
+    applyFunctions: {
+        // FIXME@Dushusir: COPY not work
+        [APPLY_TYPE.COPY]: (data, len, direction) => fillCopyFormula(data, len, direction),
     },
 };

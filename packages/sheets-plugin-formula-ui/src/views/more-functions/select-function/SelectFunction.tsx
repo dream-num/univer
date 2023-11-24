@@ -7,6 +7,7 @@ import React, { useEffect, useState } from 'react';
 
 import { IDescriptionService, ISearchItem } from '../../../services/description.service';
 import { getFunctionTypeValues } from '../../../services/utils';
+import { FunctionHelp } from '../function-help/FunctionHelp';
 import { FunctionParams } from '../function-params/FunctionParams';
 import styles from './index.module.less';
 
@@ -152,7 +153,9 @@ export function SelectFunction(props: ISelectFunctionProps) {
 
                     <FunctionParams
                         title={localeService.t('formula.moreFunctions.syntax')}
-                        value={<Help prefix={functionInfo.functionName} value={functionInfo.functionParameter} />}
+                        value={
+                            <FunctionHelp prefix={functionInfo.functionName} value={functionInfo.functionParameter} />
+                        }
                     />
 
                     <FunctionParams
@@ -175,25 +178,3 @@ export function SelectFunction(props: ISelectFunctionProps) {
         </div>
     );
 }
-
-interface IHelpProps {
-    prefix?: string;
-    value?: IFunctionParam[];
-}
-
-const Help = (props: IHelpProps) => {
-    const { prefix, value } = props;
-    return (
-        <div>
-            <span>{prefix}(</span>
-            {value &&
-                value.map((item: IFunctionParam, i: number) => (
-                    <span key={i}>
-                        <span>{item.repeat ? `[${item.name},...]` : item.name}</span>
-                        {i === value.length - 1 ? '' : ','}
-                    </span>
-                ))}
-            )
-        </div>
-    );
-};

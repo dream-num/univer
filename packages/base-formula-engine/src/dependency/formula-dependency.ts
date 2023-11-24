@@ -285,36 +285,10 @@ export class FormulaDependencyGenerator extends Disposable {
     }
 
     /**
-     * Determine whether all ranges of the current node exist within the dirty area.
-     * If they are within the dirty area, return true, indicating that this node needs to be calculated.
-     * @param tree
+     * Build a formula dependency tree based on the dependency relationships.
+     * @param treeList
      * @returns
      */
-    private _includeTree(tree: FormulaDependencyTree) {
-        const unitId = tree.unitId;
-        const sheetId = tree.sheetId;
-
-        if (!this._updateRangeFlattenCache.has(unitId)) {
-            return false;
-        }
-
-        const sheetRangeMap = this._updateRangeFlattenCache.get(unitId)!;
-
-        if (!sheetRangeMap.has(sheetId)) {
-            return false;
-        }
-
-        const ranges = sheetRangeMap.get(sheetId)!;
-
-        for (const range of ranges) {
-            if (tree.compareRangeData(range)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     private _getUpdateTreeListAndMakeDependency(treeList: FormulaDependencyTree[]) {
         const newTreeList: FormulaDependencyTree[] = [];
         const existTree = new Set<FormulaDependencyTree>();
@@ -349,6 +323,42 @@ export class FormulaDependencyGenerator extends Disposable {
         return newTreeList;
     }
 
+    /**
+     * Determine whether all ranges of the current node exist within the dirty area.
+     * If they are within the dirty area, return true, indicating that this node needs to be calculated.
+     * @param tree
+     * @returns
+     */
+    private _includeTree(tree: FormulaDependencyTree) {
+        const unitId = tree.unitId;
+        const sheetId = tree.sheetId;
+
+        if (!this._updateRangeFlattenCache.has(unitId)) {
+            return false;
+        }
+
+        const sheetRangeMap = this._updateRangeFlattenCache.get(unitId)!;
+
+        if (!sheetRangeMap.has(sheetId)) {
+            return false;
+        }
+
+        const ranges = sheetRangeMap.get(sheetId)!;
+
+        for (const range of ranges) {
+            if (tree.compareRangeData(range)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Generate the final formula calculation order array by traversing the dependency tree established via depth-first search.
+     * @param treeList
+     * @returns
+     */
     private _calculateRunList(treeList: FormulaDependencyTree[]) {
         let stack = treeList;
         const formulaRunList = [];

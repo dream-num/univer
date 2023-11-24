@@ -2,12 +2,16 @@ import { TinyColor } from '@ctrl/tinycolor';
 import { LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React from 'react';
+import { Observable } from 'rxjs';
 
 import { ComponentManager } from '../../common/component-manager';
 import { IMenuSelectorItem } from '../../services/menu/menu';
+import { useObservable } from '../hooks/observable';
 
-export type ICustomLabelProps = {
+export type ICustomLabelProps<T = undefined> = {
     value?: string | number | undefined;
+
+    value$?: Observable<T>;
 
     onChange?(v: string | number): void;
 } & Pick<IMenuSelectorItem<unknown>, 'label' | 'icon' | 'title'>;
@@ -18,21 +22,26 @@ export type ICustomLabelProps = {
  * @returns
  */
 export function CustomLabel(props: ICustomLabelProps): JSX.Element | null {
-    const { title, icon, label, value } = props;
+    const { title, icon, label, value, value$ } = props;
     const localeService = useDependency(LocaleService);
     const componentManager = useDependency(ComponentManager);
 
     const nodes = [];
     let index = 0;
 
+    let realValue = value;
+    if (value$) {
+        realValue = useObservable(value$, undefined, true);
+    }
+
     // if value is not valid, use primary color
-    const { isValid } = new TinyColor(value);
+    const { isValid } = new TinyColor(realValue);
 
     if (icon) {
         const Icon = componentManager.get(icon);
         Icon &&
             nodes.push(
-                <Icon key={index++} extend={{ colorChannel1: isValid ? value : 'rgb(var(--primary-color))' }} />
+                <Icon key={index++} extend={{ colorChannel1: isValid ? realValue : 'rgb(var(--primary-color))' }} />
             );
     }
     if (label) {
@@ -44,7 +53,7 @@ export function CustomLabel(props: ICustomLabelProps): JSX.Element | null {
         const CustomComponent = componentManager.get(labelName);
 
         if (CustomComponent) {
-            nodes.push(<CustomComponent key={index++} {...customProps} />);
+            nodes.push(<CustomComponent key={index++} {...customProps} value={realValue} />);
         } else {
             nodes.push(<span key={index++}>{localeService.t(labelName)}</span>);
         }

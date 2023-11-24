@@ -17,7 +17,7 @@ import {
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
-import { BorderStyleManagerService } from '../../services/border-style-manager.service';
+import { BorderStyleManagerService, type IBorderInfo } from '../../services/border-style-manager.service';
 import { SelectionManagerService } from '../../services/selection-manager.service';
 import {
     ISetRangeValuesMutationParams,
@@ -35,22 +35,22 @@ function forEach(range: IRange, action: (row: number, column: number) => void): 
 }
 
 export interface ISetBorderBasicCommand {
-    value: {
-        id: string;
-        value: string;
-    };
+    value: IBorderInfo;
 }
 export const SetBorderBasicCommand: ICommand<ISetBorderBasicCommand> = {
     id: 'sheet.command.set-border-basic',
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor, params: ISetBorderBasicCommand) => {
-        const { value, id } = params.value;
-
-        if (!value || !id) return false;
+        const { type, color, style } = params.value;
 
         const commandService = accessor.get(ICommandService);
+        const borderManager = accessor.get(BorderStyleManagerService);
 
-        return commandService.executeCommand(id, { value });
+        borderManager.setType(type);
+        borderManager.setColor(color);
+        borderManager.setStyle(style);
+
+        return commandService.executeCommand(SetBorderCommand.id);
     },
 };
 

@@ -36,7 +36,7 @@ export {
     shrinkToNextGapRange,
 } from './commands/commands/utils/selection-util';
 export { MAX_CELL_PER_SHEET_KEY } from './controllers/config/config';
-export { BorderStyleManagerService } from './services/border-style-manager.service';
+export { BorderStyleManagerService, type IBorderInfo } from './services/border-style-manager.service';
 export { SheetEditablePermission, SheetPermissionService } from './services/permission';
 export { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from './services/selection-manager.service';
 

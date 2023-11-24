@@ -80,8 +80,9 @@ export interface IMenuButtonItem<V = undefined> extends IMenuItemBase<V> {
     activated$?: Observable<boolean>;
 }
 
-export interface IValueOption {
+export interface IValueOption<T = undefined> {
     value?: string | number;
+    value$?: Observable<T>;
     label?:
         | string
         | {
@@ -101,7 +102,7 @@ export interface ICustomComponentProps<T> {
     onChange: (v: T) => void;
 }
 
-export interface IMenuSelectorItem<V = MenuItemDefaultValueType> extends IMenuItemBase<V> {
+export interface IMenuSelectorItem<V = MenuItemDefaultValueType, T = undefined> extends IMenuItemBase<V> {
     type: MenuItemType.SELECTOR | MenuItemType.BUTTON_SELECTOR | MenuItemType.SUBITEMS;
 
     // selections 子菜单可以为三种类型
@@ -109,7 +110,7 @@ export interface IMenuSelectorItem<V = MenuItemDefaultValueType> extends IMenuIt
     // 一个是一个特殊组件，比如 color picker，选中后直接使用其 value 触发 command
     // 一个是其他 menu 的 id，直接渲染成其他的 menu
     /** Options or IDs of registered components. */
-    selections?: IValueOption[] | Observable<IValueOption[]>;
+    selections?: Array<IValueOption<T>> | Observable<Array<IValueOption<T>>>;
 }
 
 export function isMenuSelectorItem<T extends MenuItemDefaultValueType>(v: IMenuItem): v is IMenuSelectorItem<T> {

@@ -1,3 +1,4 @@
+import { IBorderInfo } from '@univerjs/base-sheets';
 import { ComponentManager } from '@univerjs/base-ui';
 import { BorderStyleTypes } from '@univerjs/core';
 import { ColorPicker, Dropdown, Menu, MenuItem } from '@univerjs/design';
@@ -7,7 +8,7 @@ import React from 'react';
 
 import { BorderLine } from './border-line/BorderLine';
 import styles from './index.module.less';
-import { BorderPanelType, IBorderPanelProps } from './interface';
+import { IBorderPanelProps } from './interface';
 
 const BORDER_LINE_CHILDREN = [
     {
@@ -111,17 +112,13 @@ const BORDER_SIZE_CHILDREN = [
 
 export function BorderPanel(props: IBorderPanelProps) {
     const componentManager = useDependency(ComponentManager);
-    const { panelType, onChange } = props;
+    const { onChange, value } = props;
 
-    function handleClick(item: { value: string | number }, type: BorderPanelType) {
-        const { id } = panelType.find((item) => item.type === type) ?? {};
-
-        if (id) {
-            onChange?.({
-                id,
-                value: item.value,
-            });
-        }
+    function handleClick(v: string | number, type: keyof IBorderInfo) {
+        onChange?.({
+            ...value,
+            [type]: v,
+        });
     }
 
     function renderIcon(icon: string) {
@@ -141,7 +138,7 @@ export function BorderPanel(props: IBorderPanelProps) {
                     <div
                         key={item.value}
                         className={styles.uiPluginSheetsBorderPanelPositionItem}
-                        onClick={() => handleClick(item, BorderPanelType.POSITION)}
+                        onClick={() => handleClick(item.value, 'type')}
                     >
                         {renderIcon(item.icon)}
                     </div>
@@ -156,7 +153,7 @@ export function BorderPanel(props: IBorderPanelProps) {
                         }}
                         overlay={
                             <section className={styles.uiPluginSheetsBorderPanelBoard} onClick={stopPropagation}>
-                                <ColorPicker onChange={(value) => handleClick({ value }, BorderPanelType.COLOR)} />
+                                <ColorPicker onChange={(value) => handleClick(value, 'color')} />
                             </section>
                         }
                     >
@@ -181,7 +178,7 @@ export function BorderPanel(props: IBorderPanelProps) {
                                         <MenuItem
                                             key={item.value}
                                             eventKey={item.value.toString()}
-                                            onClick={() => handleClick({ value: item.value }, BorderPanelType.STYLE)}
+                                            onClick={() => handleClick(item.value, 'style')}
                                         >
                                             <BorderLine type={item.value} />
                                         </MenuItem>

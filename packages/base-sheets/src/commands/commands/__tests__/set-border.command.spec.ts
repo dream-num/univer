@@ -18,6 +18,7 @@ import { RemoveWorksheetMergeMutation } from '../../mutations/remove-worksheet-m
 import { AddWorksheetMergeAllCommand, AddWorksheetMergeCommand } from '../add-worksheet-merge.command';
 import { RemoveWorksheetMergeCommand } from '../remove-worksheet-merge.command';
 import {
+    SetBorderBasicCommand,
     SetBorderColorCommand,
     SetBorderCommand,
     SetBorderPositionCommand,
@@ -37,6 +38,7 @@ describe('Test style commands', () => {
 
         commandService = get(ICommandService);
         [
+            SetBorderBasicCommand,
             SetBorderColorCommand,
             SetBorderStyleCommand,
             SetBorderCommand,
@@ -248,6 +250,20 @@ describe('Test style commands', () => {
                 expect(getBorder({ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 })?.b).toStrictEqual({
                     s: BorderStyleTypes.SLANT_DASH_DOT,
                     cl: { rgb: '#aaaaaa' },
+                });
+
+                expect(
+                    await commandService.executeCommand(SetBorderBasicCommand.id, {
+                        value: {
+                            type: BorderType.TOP,
+                            color: '#123456',
+                            style: BorderStyleTypes.DASHED,
+                        },
+                    })
+                ).toBeTruthy();
+                expect(getBorder({ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 })?.t).toStrictEqual({
+                    s: BorderStyleTypes.DASHED,
+                    cl: { rgb: '#123456' },
                 });
             });
         });

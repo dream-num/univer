@@ -9,6 +9,7 @@ import { greenTheme } from '@univerjs/design';
 import { IUniverRPCMainThreadPluginConfig, UniverRPCMainThreadPlugin } from '@univerjs/rpc';
 import { FormulaPlugin } from '@univerjs/sheets-plugin-formula';
 import { FormulaUIPlugin } from '@univerjs/sheets-plugin-formula-ui';
+import { NumfmtPlugin } from '@univerjs/sheets-plugin-numfmt';
 import { SheetUIPlugin } from '@univerjs/ui-plugin-sheets';
 
 import { locales } from './locales';
@@ -37,6 +38,8 @@ univer.registerPlugin(SheetPlugin);
 univer.registerPlugin(SheetUIPlugin);
 
 // sheet feature plugins
+
+univer.registerPlugin(NumfmtPlugin);
 univer.registerPlugin(DebuggerPlugin);
 univer.registerPlugin(BaseFormulaEnginePlugin);
 univer.registerPlugin(FormulaPlugin, {

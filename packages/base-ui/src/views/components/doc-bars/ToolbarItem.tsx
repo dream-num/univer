@@ -5,6 +5,7 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 import { Subscription } from 'rxjs';
 
+import { ComponentManager } from '../../../common/component-manager';
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
 import { Menu } from '../../../components/menu/Menu';
 import {
@@ -45,14 +46,12 @@ export function ToolbarItem(props: IDisplayMenuItem<IMenuItem>) {
                 );
         }
 
-        if (props.type === MenuItemType.SELECTOR) {
-            props.value$ &&
-                subscriptions.push(
-                    props.value$.subscribe((value) => {
-                        setValue(value);
-                    })
-                );
-        }
+        props.value$ &&
+            subscriptions.push(
+                props.value$.subscribe((value) => {
+                    setValue(value);
+                })
+            );
 
         return () => {
             subscriptions.forEach((subscription) => {
@@ -106,6 +105,9 @@ export function ToolbarItem(props: IDisplayMenuItem<IMenuItem>) {
     }
 
     function renderButtonType() {
+        const componentManager = useDependency(ComponentManager);
+        const isCustomComponent = componentManager.get(typeof label === 'string' ? label : label?.name ?? '');
+
         return (
             <ToolbarButton
                 className={styles.toolbarItemTextButton}
@@ -114,7 +116,11 @@ export function ToolbarItem(props: IDisplayMenuItem<IMenuItem>) {
                 onClick={() => commandService.executeCommand(props.id)}
                 onDoubleClick={() => props.subId && commandService.executeCommand(props.subId)}
             >
-                <CustomLabel icon={icon} />
+                {isCustomComponent ? (
+                    <CustomLabel title={title!} value={value} label={label} />
+                ) : (
+                    <CustomLabel icon={icon} />
+                )}
             </ToolbarButton>
         );
     }

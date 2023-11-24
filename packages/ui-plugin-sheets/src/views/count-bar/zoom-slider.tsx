@@ -28,7 +28,7 @@ export function ZoomSlider() {
 
     function getCurrentZoom() {
         const currentZoom =
-            univerInstanceService.getCurrentUniverSheetInstance()?.getActiveSheet().getZoomRatio() * 100 ?? 100;
+            univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getZoomRatio() * 100 || 100;
 
         return Math.round(currentZoom);
     }

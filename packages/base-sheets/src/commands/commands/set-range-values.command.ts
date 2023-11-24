@@ -111,7 +111,7 @@ export const SetRangeValuesCommand: ICommand = {
             params: { ...setRangeValuesMutationParams, range: currentSelections },
         });
 
-        const result = sequenceExecute([...redos], commandService);
+        const result = await sequenceExecute([...redos], commandService);
 
         if (setValueMutationResult && result.result) {
             undoRedoService.pushUndoRedo({

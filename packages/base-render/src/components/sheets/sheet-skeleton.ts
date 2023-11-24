@@ -405,7 +405,10 @@ export class SpreadsheetSkeleton extends Skeleton {
         const { columnCount, columnData, mergeData, defaultRowHeight } = this._config;
         const data = Tools.createObjectArray(columnData);
         let height = defaultRowHeight;
-
+        const worksheet = this._worksheet;
+        if (!worksheet) {
+            return height;
+        }
         for (let i = 0; i < columnCount; i++) {
             // When calculating the automatic height of a row, if a cell is in a merged cell,
             // skip the cell directly, which currently follows the logic of Excel
@@ -414,8 +417,8 @@ export class SpreadsheetSkeleton extends Skeleton {
             if (isMerged || isMergedMainCell) {
                 continue;
             }
-
-            const modelObject = this._getCellDocumentModel(rowNum, i);
+            const cell = worksheet.getCell(rowNum, i);
+            const modelObject = cell && this.getCellDocumentModel(cell);
             if (modelObject == null) {
                 continue;
             }
@@ -971,8 +974,8 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     // Only used for cell edit, and no need to rotate text when edit cell content!
-    getBlankCellDocumentModel(row: number, column: number, isFull: boolean = true): IDocumentLayoutObject {
-        const documentModelObject = this._getCellDocumentModel(row, column, undefined, undefined, undefined, true);
+    getBlankCellDocumentModel(cell: Nullable<ICellData>, isFull: boolean = true): IDocumentLayoutObject {
+        const documentModelObject = this._getCellDocumentModel(cell, undefined, undefined, undefined, true);
 
         if (documentModelObject != null) {
             if (documentModelObject.documentModel == null) {
@@ -1006,24 +1009,22 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
     }
 
-    getCellDocumentModel(row: number, column: number) {
-        return this._getCellDocumentModel(row, column);
+    getCellDocumentModel(cell: ICellData) {
+        return this._getCellDocumentModel(cell);
     }
 
     // Only used for cell edit, and no need to rotate text when edit cell content!
-    getCellDocumentModelWithFormula(row: number, column: number) {
-        return this._getCellDocumentModel(row, column, true, true, true, true);
+    getCellDocumentModelWithFormula(cell: ICellData) {
+        return this._getCellDocumentModel(cell, true, true, true, true);
     }
 
     private _getCellDocumentModel(
-        row: number,
-        column: number,
+        cell: Nullable<ICellData>,
         isFull: boolean = false,
         isDeepClone: boolean = false,
         formulaFirst: boolean = false,
         ignoreTextRotation: boolean = false
     ): Nullable<IDocumentLayoutObject> {
-        const cell = this._cellData.getValue(row, column);
         const style = this._styles.getStyleByCell(cell);
 
         if (!cell) {
@@ -1296,7 +1297,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             const columnCount = this._columnWidthAccumulation.length - 1;
             for (let i = startColumn; i >= endColumn; i--) {
                 const column = i;
-                const cell = this._cellData.getValue(row, column);
+                const cell = this._worksheet?.getCell(row, column);
                 if ((!isEmptyCell(cell) && column !== startColumn) || this.intersectMergeRange(row, column)) {
                     if (column === startColumn) {
                         return column;
@@ -1325,7 +1326,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
         for (let i = startColumn; i <= endColumn; i++) {
             const column = i;
-            const cell = this._cellData.getValue(row, column);
+            const cell = this._worksheet?.getCell(row, column);
             if ((!isEmptyCell(cell) && column !== startColumn) || this.intersectMergeRange(row, column)) {
                 if (column === startColumn) {
                     return column;
@@ -1485,7 +1486,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             this._setBorderProps(r, c, BORDER_TYPE.RIGHT, style, cache);
         }
 
-        const modelObject = this._getCellDocumentModel(r, c);
+        const modelObject = cell && this.getCellDocumentModel(cell);
 
         if (modelObject == null) {
             return;

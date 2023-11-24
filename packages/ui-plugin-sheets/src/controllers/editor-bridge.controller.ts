@@ -10,10 +10,12 @@ import {
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     ICommandInfo,
     ICommandService,
+    INTERCEPTOR_POINT,
     IUniverInstanceService,
     LifecycleStages,
     makeCellToSelection,
     OnLifecycle,
+    SheetInterceptorService,
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
@@ -33,7 +35,8 @@ export class EditorBridgeController extends Disposable {
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
-        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService
+        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
+        @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService
     ) {
         super();
 
@@ -111,11 +114,25 @@ export class EditorBridgeController extends Disposable {
             endX = skeleton.convertTransformToOffsetX(endX, scaleX, scrollXY);
 
             endY = skeleton.convertTransformToOffsetY(endY, scaleY, scrollXY);
+            const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+            const worksheet = workbook.getActiveSheet();
+            const location = {
+                workbook,
+                worksheet,
+                workbookId: workbook.getUnitId(),
+                worksheetId: worksheet.getSheetId(),
+                row: startRow,
+                col: startColumn,
+            };
+            const cell = this._sheetInterceptorService.fetchThroughInterceptors(INTERCEPTOR_POINT.BEFORE_CELL_EDIT)(
+                worksheet.getCell(startRow, startColumn),
+                location
+            );
 
-            let documentLayoutObject = skeleton.getCellDocumentModelWithFormula(startRow, startColumn);
+            let documentLayoutObject = cell && skeleton.getCellDocumentModelWithFormula(cell);
 
-            if (documentLayoutObject == null || documentLayoutObject.documentModel == null) {
-                documentLayoutObject = skeleton.getBlankCellDocumentModel(startRow, startColumn);
+            if (!documentLayoutObject || documentLayoutObject.documentModel == null) {
+                documentLayoutObject = skeleton.getBlankCellDocumentModel(cell);
             }
 
             documentLayoutObject.documentModel?.setZoomRatio(Math.max(scaleX, scaleY));

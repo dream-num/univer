@@ -406,6 +406,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
+      numfmt:
+        specifier: ^2.5.2
+        version: 2.5.2
     devDependencies:
       '@vitest/coverage-istanbul':
         specifier: ^0.34.6
@@ -1036,12 +1039,21 @@ importers:
       '@univerjs/design':
         specifier: workspace:*
         version: link:../design
+      '@univerjs/icons':
+        specifier: ^0.1.12
+        version: 0.1.12(react-dom@18.2.0)(react@18.2.0)
       '@univerjs/ui-plugin-sheets':
         specifier: workspace:*
         version: link:../ui-plugin-sheets
       '@wendellhu/redi':
         specifier: ^0.12.11
         version: 0.12.11
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
     devDependencies:
       '@types/react':
         specifier: ^18.2.38
@@ -1055,9 +1067,6 @@ importers:
       less:
         specifier: ^4.2.0
         version: 4.2.0
-      react:
-        specifier: ^18.2.0
-        version: 18.2.0
       ts-node:
         specifier: ^10.9.1
         version: 10.9.1(@swc/core@1.3.99)(@types/node@20.9.4)(typescript@5.3.2)
@@ -10585,6 +10594,10 @@ packages:
 
   /numeral@2.0.6:
     resolution: {integrity: sha512-qaKRmtYPZ5qdw4jWJD6bxEf1FJEqllJrwxCLIm0sQU/A7v2/czigzOb+C2uSiFsa9lBUzeH7M1oK+Q+OLxL3kA==}
+    dev: false
+
+  /numfmt@2.5.2:
+    resolution: {integrity: sha512-VXrB2bpU9Xa0oCHq8IsqE2CcUx5OLupLC3oryFT4DB9e/xe+OnUzBndhXfNHUzxFE4DYI3Sx4OtzS1Sdaf7tEw==}
     dev: false
 
   /object-assign@4.1.1:

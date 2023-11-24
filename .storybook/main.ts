@@ -21,6 +21,11 @@ const config: StorybookConfig = {
             files: '*.stories.@(js|jsx|mjs|ts|tsx)',
             titlePrefix: 'Base UI'
         },
+        {
+            directory: '../packages/sheets-plugin-numfmt/src/**',
+            files: '*.stories.@(js|jsx|mjs|ts|tsx)',
+            titlePrefix: 'Numfmt'
+        },
     ],
     addons: [
         getAbsolutePath('@storybook/addon-links'),

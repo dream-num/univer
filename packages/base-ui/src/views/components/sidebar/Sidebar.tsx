@@ -56,9 +56,9 @@ export function Sidebar() {
         };
 
         setSidebarOptions(options);
-
         const sidebar$ = sidebarService.getObservableSidebar();
         sidebar$.next(options);
+        options?.onClose?.();
     }
 
     return (

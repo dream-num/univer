@@ -3,8 +3,7 @@ name: 📤 Preview Deploy
 on:
     workflow_run:
         workflows: ['📦 Preview Build']
-        types:
-            - completed
+        types: [completed]
 
 permissions:
     contents: read
@@ -12,7 +11,7 @@ permissions:
 
 jobs:
     build:
-        if: github.repository == 'dream-num/univer'
+        if: ${{ github.event.workflow_run.conclusion == 'success' }}
         runs-on: ubuntu-latest
 
         env:

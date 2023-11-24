@@ -1,7 +1,7 @@
 {
     "name": "@univerjs/sheets-plugin-numfmt",
     "version": "0.0.1",
-    "description": "UniverSheet normal plugin UI manager",
+    "description": "UniverSheet numfmt plugin",
     "keywords": [],
     "author": "DreamNum <developer@univer.ai>",
     "license": "MIT",
@@ -52,9 +52,12 @@
         "@univerjs/base-sheets": "workspace:*",
         "@univerjs/base-ui": "workspace:*",
         "@univerjs/core": "workspace:*",
+        "@univerjs/icons": "^0.1.12",
         "@univerjs/design": "workspace:*",
         "@univerjs/ui-plugin-sheets": "workspace:*",
-        "@wendellhu/redi": "^0.12.11"
+        "@wendellhu/redi": "^0.12.11",
+        "react": "^18.2.0",
+         "rxjs": "^7.8.1"
     },
     "devDependencies": {
         "@types/react": "^18.2.38",

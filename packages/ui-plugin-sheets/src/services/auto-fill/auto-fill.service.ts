@@ -93,9 +93,19 @@ export class AutoFillService extends Disposable implements IAutoFillService {
             chnWeek3Rule,
             loopSeriesRule,
             otherRule,
-        ];
-        // this._applyType = APPLY_TYPE.SERIES;
+        ].sort((a, b) => b.priority - a.priority);
         this._isFillingStyle = true;
+    }
+
+    registryRule(rule: IAutoFillRule) {
+        // if rule.type is used, console error
+        if (this._rules.find((r) => r.type === rule.type)) {
+            console.error(`[ERROR]: registry rule failed, type '${rule.type}' already exist!`);
+            return;
+        }
+        // insert rules according to the rule.priority, the higher priority will be inserted at the beginning of the array
+        const index = this._rules.findIndex((r) => r.priority < rule.priority);
+        this._rules.splice(index === -1 ? this._rules.length : index, 0, rule);
     }
 
     getRules() {

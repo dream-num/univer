@@ -13,7 +13,7 @@ export enum DATA_TYPE {
 }
 
 export type ICopyDataPiece = {
-    [key in DATA_TYPE]?: ICopyDataInType[];
+    [key: string]: ICopyDataInType[];
 };
 
 export interface ICopyDataInType {
@@ -24,14 +24,16 @@ export interface ICopyDataInType {
 export type ICopyDataInTypeIndexInfo = number[];
 
 export interface IAutoFillRule {
-    type: DATA_TYPE;
+    type: string;
     match: (cellData: Nullable<ICellData>) => boolean;
     isContinue: (prev: IRuleConfirmedData, cur: Nullable<ICellData>) => boolean;
     applyFunctions?: APPLY_FUNCTIONS;
+    // 优先级
+    priority: number;
 }
 
 export interface IRuleConfirmedData {
-    type?: DATA_TYPE;
+    type?: string;
     cellData: Nullable<ICellData>;
 }
 

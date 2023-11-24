@@ -345,6 +345,7 @@ export class AutoFillController extends Disposable {
         this._autoFillService.getRules().forEach((r) => {
             copyDataPiece[r.type] = [];
         });
+
         return copyDataPiece;
     }
 

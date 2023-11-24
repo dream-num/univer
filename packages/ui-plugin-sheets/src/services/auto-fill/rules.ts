@@ -21,6 +21,7 @@ import { APPLY_TYPE, DATA_TYPE, IAutoFillRule } from './type';
 
 export const numberRule: IAutoFillRule = {
     type: DATA_TYPE.NUMBER,
+    priority: 1000,
     match: (cellData) => typeof cellData?.v === 'number' || !isNaN(Number(cellData?.v)),
     // TODO@yuhongz: not the good way to match number, will be changed after cell type is supported
     isContinue: (prev, cur) => {
@@ -41,6 +42,7 @@ export const numberRule: IAutoFillRule = {
 
 export const otherRule: IAutoFillRule = {
     type: DATA_TYPE.OTHER,
+    priority: 0,
     match: () => true,
     isContinue: (prev, cur) => {
         if (prev.type === DATA_TYPE.OTHER) {
@@ -52,6 +54,7 @@ export const otherRule: IAutoFillRule = {
 
 export const extendNumberRule: IAutoFillRule = {
     type: DATA_TYPE.EXTEND_NUMBER,
+    priority: 900,
     match: (cellData) => matchExtendNumber(cellData?.m || '').isExtendNumber,
     isContinue: (prev, cur) => {
         if (prev.type === DATA_TYPE.EXTEND_NUMBER) {
@@ -93,6 +96,7 @@ export const extendNumberRule: IAutoFillRule = {
 
 export const chnNumberRule: IAutoFillRule = {
     type: DATA_TYPE.CHN_NUMBER,
+    priority: 830,
     match: (cellData) => {
         if (isChnNumber(cellData?.m || '')) {
             return true;
@@ -177,6 +181,7 @@ export const chnNumberRule: IAutoFillRule = {
 
 export const chnWeek2Rule: IAutoFillRule = {
     type: DATA_TYPE.CHN_WEEK2,
+    priority: 820,
     match: (cellData) => {
         if (isChnWeek2(cellData?.m || '')) {
             return true;
@@ -231,6 +236,7 @@ export const chnWeek2Rule: IAutoFillRule = {
 
 export const chnWeek3Rule: IAutoFillRule = {
     type: DATA_TYPE.CHN_WEEK3,
+    priority: 810,
     match: (cellData) => isChnWeek3(cellData?.m || ''),
     isContinue: (prev, cur) => prev.type === DATA_TYPE.CHN_WEEK3,
     applyFunctions: {
@@ -282,6 +288,7 @@ export const chnWeek3Rule: IAutoFillRule = {
 
 export const loopSeriesRule: IAutoFillRule = {
     type: DATA_TYPE.LOOP_SERIES,
+    priority: 800,
     match: (cellData) => isLoopSeries(cellData?.m || ''),
     isContinue: (prev, cur) => {
         if (prev.type === DATA_TYPE.LOOP_SERIES) {
@@ -340,6 +347,7 @@ export const loopSeriesRule: IAutoFillRule = {
  */
 export const formulaRule: IAutoFillRule = {
     type: DATA_TYPE.FORMULA,
+    priority: 1000,
     match: (cellData) => isFormulaString(cellData?.f),
     isContinue: (prev, cur) => {
         if (prev.type === DATA_TYPE.FORMULA) {

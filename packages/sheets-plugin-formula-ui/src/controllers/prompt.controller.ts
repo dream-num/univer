@@ -996,6 +996,10 @@ export class PromptController extends Disposable {
 
         const { collapsed, style } = activeRange;
 
+        this._currentInsertRefStringIndex = textSelectionOffset;
+
+        await this._fitEditorSize();
+
         if (canUndo) {
             this._commandService.executeCommand(ReplaceContentCommand.id, {
                 unitId: this._editorBridgeService.getCurrentEditorId(),
@@ -1024,10 +1028,6 @@ export class PromptController extends Disposable {
                 },
             ]);
         }
-
-        this._currentInsertRefStringIndex = textSelectionOffset;
-
-        await this._fitEditorSize();
     }
 
     private async _fitEditorSize() {

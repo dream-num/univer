@@ -255,9 +255,11 @@ export class AutoFillController extends Disposable {
                 return custom(copySquad, len, direction);
             }
             isReverse && data.reverse();
-            // special rules must provide custom SERIES apply functions, or will be applied as copy
-            const copyFunc = customApplyFunctions?.[APPLY_TYPE.COPY] || fillCopy;
-            return copyFunc(data, len, direction);
+            // special rules, if not provide custom SERIES apply functions, will be applied as copy
+            if (customApplyFunctions?.[APPLY_TYPE.COPY]) {
+                return customApplyFunctions[APPLY_TYPE.COPY](copySquad, len, direction);
+            }
+            return fillCopy(data, len);
         }
         if (applyType === APPLY_TYPE.ONLY_FORMAT) {
             const custom = customApplyFunctions?.[APPLY_TYPE.ONLY_FORMAT];

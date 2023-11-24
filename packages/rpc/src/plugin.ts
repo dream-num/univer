@@ -19,6 +19,7 @@ import { ChannelClient, ChannelServer, fromModule, toModule } from './services/r
 
 export interface IUniverRPCMainThreadPluginConfig {
     workerURL: string | URL;
+    unsyncMutations?: Set<string>;
 }
 
 interface ITestService {
@@ -47,7 +48,13 @@ export class UniverRPCMainThreadPlugin extends Plugin {
         const server = new ChannelServer(messageProtocol);
 
         const dependencies: Dependency[] = [
-            [DataSyncPrimaryController],
+            [
+                DataSyncPrimaryController,
+                {
+                    useFactory: () =>
+                        injector.createInstance(DataSyncPrimaryController, this._config?.unsyncMutations ?? new Set()),
+                },
+            ],
             [
                 IRemoteInstanceService,
                 { useFactory: () => toModule<IRemoteInstanceService>(client.getChannel(RemoteInstanceServiceName)) },

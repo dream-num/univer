@@ -22,6 +22,7 @@ import {
 @OnLifecycle(LifecycleStages.Starting, DataSyncPrimaryController)
 export class DataSyncPrimaryController extends RxDisposable {
     constructor(
+        private readonly _unsyncMutations: Set<string>,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IRemoteInstanceService private readonly _remoteInstanceService: IRemoteInstanceService,
         @ICommandService private readonly _commandService: ICommandService
@@ -51,7 +52,11 @@ export class DataSyncPrimaryController extends RxDisposable {
         this.disposeWithMe(
             // Mutations executed on the main thread should be synced to the worker thread.
             this._commandService.onCommandExecuted((commandInfo, options) => {
-                if (commandInfo.type === CommandType.MUTATION && !(options as IRemoteSyncMutationOptions)?.fromSync) {
+                if (
+                    commandInfo.type === CommandType.MUTATION &&
+                    !(options as IRemoteSyncMutationOptions)?.fromSync &&
+                    !this._unsyncMutations.has(commandInfo.id)
+                ) {
                     this._remoteInstanceService.syncMutation({
                         mutationInfo: commandInfo as IMutationInfo,
                     });

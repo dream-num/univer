@@ -34,7 +34,7 @@ import { IDescriptionService } from '../services/description.service';
 import { IFormulaInputService } from '../services/formula-input.service';
 import { IFormulaPromptService } from '../services/prompt.service';
 
-@OnLifecycle(LifecycleStages.Ready, FormulaInputController)
+@OnLifecycle(LifecycleStages.Steady, FormulaInputController)
 export class FormulaInputController extends Disposable {
     private _userCursorMove: boolean = false;
 

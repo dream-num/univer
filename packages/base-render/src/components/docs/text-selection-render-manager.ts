@@ -3,7 +3,7 @@ import { createIdentifier } from '@wendellhu/redi';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 import { CURSOR_TYPE } from '../../basics/const';
-import { PageLayoutType } from '../../basics/i-document-skeleton-cached';
+import { IDocumentSkeletonSpan, PageLayoutType } from '../../basics/i-document-skeleton-cached';
 import { IMouseEvent, IPointerEvent } from '../../basics/i-events';
 import { INodeInfo, INodePosition } from '../../basics/interfaces';
 import { getOffsetRectForDom, transformBoundingCoord } from '../../basics/position';
@@ -40,6 +40,43 @@ export function getCanvasOffsetByEngine(engine: Nullable<Engine>) {
     return {
         left,
         top,
+    };
+}
+
+function getParagraphInfoBySpan(node: IDocumentSkeletonSpan) {
+    const line = node.parent?.parent;
+    const column = line?.parent;
+
+    if (line == null || column == null) {
+        return;
+    }
+
+    const { paragraphIndex } = line;
+    const lines = column.lines.filter((line) => line.paragraphIndex === paragraphIndex);
+    let nodeIndex = -1;
+    let content = '';
+    let hasFound = false;
+
+    for (const line of lines) {
+        for (const divide of line.divides) {
+            for (const span of divide.spanGroup) {
+                if (!hasFound) {
+                    nodeIndex++;
+                }
+                if (span === node) {
+                    hasFound = true;
+                }
+
+                content += span.content;
+            }
+        }
+    }
+
+    return {
+        st: lines[0].st,
+        ed: paragraphIndex,
+        content,
+        nodeIndex,
     };
 }
 
@@ -102,6 +139,12 @@ export interface ITextSelectionRenderManager {
     >;
 
     handleDblClick(
+        evt: IPointerEvent | IMouseEvent,
+        documentOffsetConfig: IDocumentOffsetConfig,
+        viewport: Nullable<Viewport>
+    ): void;
+
+    handleTripleClick(
         evt: IPointerEvent | IMouseEvent,
         documentOffsetConfig: IDocumentOffsetConfig,
         viewport: Nullable<Viewport>
@@ -383,10 +426,12 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             return;
         }
 
-        const { spanGroup, st } = startNode.node.parent!;
-        const content = spanGroup.map((span) => span.content).join('');
-        const nodeIndex = spanGroup.indexOf(startNode.node);
+        const paragraphInfo = getParagraphInfoBySpan(startNode.node);
+        if (paragraphInfo == null) {
+            return;
+        }
 
+        const { content, st, nodeIndex } = paragraphInfo;
         if (nodeIndex === -1) {
             return;
         }
@@ -406,9 +451,11 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         // Use that for segmentation
         for (const { segment, index, isWordLike } of segments) {
-            if (index <= nodeIndex && nodeIndex <= index + segment.length && isWordLike) {
+            if (index <= nodeIndex && nodeIndex < index + segment.length && isWordLike) {
                 startOffset = index + st;
                 endOffset = index + st + segment.length;
+
+                break;
             }
         }
 
@@ -425,6 +472,46 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
             this.addTextRanges(textRanges);
         }
+    }
+
+    handleTripleClick(
+        evt: IPointerEvent | IMouseEvent,
+        documentOffsetConfig: IDocumentOffsetConfig,
+        viewportMain: Nullable<Viewport>
+    ) {
+        if (!this._scene || !this._isSelectionEnabled) {
+            return;
+        }
+
+        if (viewportMain != null) {
+            this._activeViewport = viewportMain;
+        }
+
+        this._documentOffsetConfig = documentOffsetConfig;
+
+        const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
+
+        const startNode = this._findNodeByCoord(evtOffsetX, evtOffsetY);
+        if (startNode == null || startNode.node == null) {
+            return;
+        }
+
+        const paragraphInfo = getParagraphInfoBySpan(startNode.node);
+        if (paragraphInfo == null) {
+            return;
+        }
+
+        const { st, ed } = paragraphInfo;
+
+        const textRanges: ITextRangeWithStyle[] = [
+            {
+                startOffset: st,
+                endOffset: ed,
+                collapsed: st === ed,
+            },
+        ];
+
+        this.addTextRanges(textRanges);
     }
 
     // Handle pointer down.

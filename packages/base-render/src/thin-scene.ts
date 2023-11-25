@@ -22,6 +22,8 @@ export abstract class ThinScene {
 
     onDblclickObserver = new Observable<IPointerEvent | IMouseEvent>();
 
+    onTripleClickObserver = new Observable<IPointerEvent | IMouseEvent>();
+
     onMouseWheelObserver = new Observable<IWheelEvent>();
 
     onKeyDownObservable = new Observable<IKeyboardEvent>();
@@ -145,6 +147,8 @@ export abstract class ThinScene {
     triggerPointerMove(evt: IPointerEvent | IMouseEvent) {}
 
     triggerDblclick(evt: IPointerEvent | IMouseEvent) {}
+
+    triggerTripleClick(evt: IPointerEvent | IMouseEvent) {}
 
     triggerPointerDown(evt: IPointerEvent | IMouseEvent) {}
 

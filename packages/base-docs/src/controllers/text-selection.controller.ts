@@ -37,6 +37,8 @@ export class TextSelectionController extends Disposable {
 
     private _dblClickObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 
+    private _tripleClickObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
+
     private _loadedMap = new Set();
 
     constructor(
@@ -79,6 +81,7 @@ export class TextSelectionController extends Disposable {
             mainComponent.onPointerLeaveObserver.remove(this._moveOutObserver);
             mainComponent.onPointerDownObserver.remove(this._downObserver);
             mainComponent.onDblclickObserver.remove(this._dblClickObserver);
+            mainComponent.onTripleClickObserver.remove(this._tripleClickObserver);
         });
     }
 
@@ -123,8 +126,12 @@ export class TextSelectionController extends Disposable {
             }
         });
 
-        this._dblClickObserver = document?.onDblclickObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+        this._dblClickObserver = document?.onDblclickObserver.add((evt: IPointerEvent | IMouseEvent) => {
             this._textSelectionRenderManager.handleDblClick(evt, document.getOffsetConfig(), viewportMain);
+        });
+
+        this._tripleClickObserver = document?.onTripleClickObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            this._textSelectionRenderManager.handleTripleClick(evt, document.getOffsetConfig(), viewportMain);
         });
     }
 

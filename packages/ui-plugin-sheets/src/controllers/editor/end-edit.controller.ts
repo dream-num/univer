@@ -7,7 +7,7 @@ import {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     Direction,
     Disposable,
-    DocumentModel,
+    DocumentDataModel,
     FOCUSING_EDITOR,
     FOCUSING_EDITOR_BUT_HIDDEN,
     FOCUSING_EDITOR_INPUT_FORMULA,
@@ -139,7 +139,7 @@ export class EndEditController extends Disposable {
 
             const cellData: ICellData = Tools.deepClone(worksheet.getCell(row, column) || {});
 
-            const documentModel = documentLayoutObject.documentModel as DocumentModel;
+            const documentModel = documentLayoutObject.documentModel as DocumentDataModel;
 
             const snapshot = documentModel.getSnapshot();
 

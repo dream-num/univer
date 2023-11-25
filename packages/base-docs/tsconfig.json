@@ -10,5 +10,5 @@
     "include": [
         "src/**/*",
         "test/**/*.test.(ts|tsx|js)"
-, "../core/src/docs/model/__tests__", "../core/src/docs/model/apply-utils", "../core/src/common/memory-cursor.ts"    ]
+, "../core/src/docs/data-model/__tests__", "../core/src/docs/data-model/apply-utils", "../core/src/common/memory-cursor.ts"    ]
 }

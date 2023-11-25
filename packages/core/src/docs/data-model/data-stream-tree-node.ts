@@ -70,7 +70,7 @@ export class DataStreamTreeNode {
         this.startIndex += len;
         this.endIndex += len;
 
-        this.addIndexForBlock(len);
+        this._addIndexForBlock(len);
     }
 
     selfPlus(len: number, index?: number) {
@@ -80,7 +80,7 @@ export class DataStreamTreeNode {
             index = this.startIndex;
         }
 
-        this.addIndexForBlock(len, index);
+        this._addIndexForBlock(len, index);
     }
 
     split(index: number) {
@@ -137,9 +137,9 @@ export class DataStreamTreeNode {
 
         lastNode.children = lastChildNodes;
 
-        firstNode.resetBlocks();
+        firstNode._resetBlocks();
 
-        lastNode.resetBlocks();
+        lastNode._resetBlocks();
 
         return {
             firstNode,
@@ -196,7 +196,7 @@ export class DataStreamTreeNode {
         node.remove();
     }
 
-    private addIndexForBlock(addLen: number, index: number = -Infinity) {
+    private _addIndexForBlock(addLen: number, index: number = -Infinity) {
         for (let i = 0, len = this.blocks.length; i < len; i++) {
             const block = this.blocks[i];
 
@@ -206,7 +206,7 @@ export class DataStreamTreeNode {
         }
     }
 
-    private resetBlocks() {
+    private _resetBlocks() {
         if (this.nodeType !== DataStreamTreeNodeType.PARAGRAPH) {
             return;
         }

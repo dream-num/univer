@@ -7,13 +7,13 @@ export {
 } from './common/const';
 export { MemoryCursor } from './common/memory-cursor';
 export { type ISequenceExecuteResult, sequence, sequenceAsync } from './common/sequence';
-export * from './docs/model';
+export * from './docs/data-model';
 export {
     type DocMutationParams,
     type IDeleteMutationParams,
     type IInsertMutationParams,
     type IRetainMutationParams,
-} from './docs/model/document-model-types';
+} from './docs/data-model/document-model-types';
 export * from './observer';
 export { Plugin, PluginType } from './plugin/plugin';
 export {

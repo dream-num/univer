@@ -22,9 +22,9 @@ interface IDrawingUpdateConfig {
     width: number;
 }
 
-export type DocumentModelOrSimple = DocumentModelSimple | DocumentModel;
+export type DocumentModelOrSimple = DocumentDataModelSimple | DocumentDataModel;
 
-export class DocumentModelSimple {
+export class DocumentDataModelSimple {
     snapshot: IDocumentData;
 
     headerTreeMap!: Map<string, DocumentBodyModel>; // sub class should guarantee this is not null
@@ -197,7 +197,7 @@ export class DocumentModelSimple {
     }
 }
 
-export class DocumentModel extends DocumentModelSimple {
+export class DocumentDataModel extends DocumentDataModelSimple {
     private _unitId: string;
 
     constructor(snapshot: Partial<IDocumentData>) {
@@ -362,9 +362,9 @@ export class DocumentModel extends DocumentModelSimple {
         updateAttributeByInsert(body, insertBody, textLength, currentIndex);
 
         if (insertBody.dataStream.length > 1 && /\r/.test(insertBody.dataStream)) {
-            // TODO: @JOCS, The DocumentModel needs to be rewritten to better support the
+            // TODO: @JOCS, The DocumentDataModel needs to be rewritten to better support the
             // large area of updates that are brought about by the paste, abstract the
-            // methods associated with the DocumentModel insertion, and support atomic operations
+            // methods associated with the DocumentDataModel insertion, and support atomic operations
             bodyModel.reset(body);
         } else {
             bodyModel.insert(insertBody, currentIndex);

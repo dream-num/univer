@@ -3,7 +3,7 @@
 import {
     BooleanNumber,
     DEFAULT_EMPTY_DOCUMENT_VALUE,
-    DocumentModelSimple,
+    DocumentDataModelSimple,
     IBorderData,
     IColorStyle,
     IDocumentData,
@@ -104,7 +104,7 @@ export class RichText extends BaseObject {
             });
         }
 
-        const docModel = new DocumentModelSimple(this._documentData);
+        const docModel = new DocumentDataModelSimple(this._documentData);
 
         this._documentSkeleton = DocumentSkeleton.create(docModel, this._localeService);
 

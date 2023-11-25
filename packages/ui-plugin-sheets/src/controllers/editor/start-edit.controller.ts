@@ -24,7 +24,7 @@ import {
     Disposable,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-    DocumentModel,
+    DocumentDataModel,
     FOCUSING_EDITOR,
     FOCUSING_EDITOR_BUT_HIDDEN,
     HorizontalAlign,
@@ -141,7 +141,7 @@ export class StartEditController extends Disposable {
                 documentModel!.updateDocumentDataPageSize((endX - startX) / scaleX);
             }
 
-            this._currentUniverService.changeDoc(editorUnitId, documentModel! as DocumentModel);
+            this._currentUniverService.changeDoc(editorUnitId, documentModel! as DocumentDataModel);
 
             const docParam = this._docSkeletonManagerService.updateCurrent({ unitId: editorUnitId });
 
@@ -440,7 +440,7 @@ export class StartEditController extends Disposable {
 
             const { skeleton } = docParam;
 
-            const documentModel = skeleton.getModel() as DocumentModel;
+            const documentModel = skeleton.getModel() as DocumentDataModel;
 
             this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject, scaleX, scaleY);
 

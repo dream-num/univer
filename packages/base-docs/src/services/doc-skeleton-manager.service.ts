@@ -1,5 +1,5 @@
 import { DocumentSkeleton } from '@univerjs/base-render';
-import { DocumentModel, IUniverInstanceService, LocaleService, Nullable } from '@univerjs/core';
+import { DocumentDataModel, IUniverInstanceService, LocaleService, Nullable } from '@univerjs/core';
 import { IDisposable, Inject } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 
@@ -138,7 +138,7 @@ export class DocSkeletonManagerService implements IDisposable {
         return this._docSkeletonParam.find((param) => param.unitId === searchParm.unitId);
     }
 
-    private _buildSkeleton(documentModel: DocumentModel) {
+    private _buildSkeleton(documentModel: DocumentDataModel) {
         return DocumentSkeleton.create(documentModel, this._localeService);
     }
 }

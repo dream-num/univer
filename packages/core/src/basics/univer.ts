@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Ctor, Injector } from '@wendellhu/redi';
 
-import { DocumentModel } from '../docs/model/document-model';
+import { DocumentDataModel } from '../docs/data-model/document-data-model';
 import { Plugin, PluginCtor, PluginRegistry, PluginStore, PluginType } from '../plugin/plugin';
 import { CommandService, ICommandService } from '../services/command/command.service';
 import { ConfigService, IConfigService } from '../services/config/config.service';
@@ -111,8 +111,8 @@ export class Univer {
         return workbook!;
     }
 
-    createUniverDoc(config: Partial<IDocumentData>): DocumentModel {
-        let doc: DocumentModel;
+    createUniverDoc(config: Partial<IDocumentData>): DocumentDataModel {
+        let doc: DocumentDataModel;
         const addDoc = () => {
             doc = this._univerDoc!.createDoc(config);
             this._univerInstanceService.addDoc(doc);

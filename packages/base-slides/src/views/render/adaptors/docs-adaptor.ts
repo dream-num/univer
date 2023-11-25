@@ -14,7 +14,7 @@ import {
     ScrollBar,
     Viewport,
 } from '@univerjs/base-render';
-import { DocumentModel, EventState, IPageElement, LocaleService, PageElementType } from '@univerjs/core';
+import { DocumentDataModel, EventState, IPageElement, LocaleService, PageElementType } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { CanvasObjectProviderRegistry, ObjectAdaptor } from '../adaptor';
@@ -68,7 +68,7 @@ export class DocsAdaptor extends ObjectAdaptor {
             return;
         }
 
-        const documentSkeleton = DocumentSkeleton.create(new DocumentModel(documentData), this._localeService);
+        const documentSkeleton = DocumentSkeleton.create(new DocumentDataModel(documentData), this._localeService);
 
         const documents = new Documents(DOCS_VIEW_KEY.MAIN, documentSkeleton);
 

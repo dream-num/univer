@@ -1,9 +1,9 @@
 import {
     BooleanNumber,
     DEFAULT_EMPTY_DOCUMENT_VALUE,
-    DocumentModel,
+    DocumentDataModel,
+    DocumentDataModelSimple,
     DocumentModelOrSimple,
-    DocumentModelSimple,
     getColorStyle,
     HorizontalAlign,
     IBorderStyleData,
@@ -1031,7 +1031,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             return;
         }
 
-        let documentModel: Nullable<DocumentModelSimple>;
+        let documentModel: Nullable<DocumentDataModelSimple>;
         let fontString = 'document';
         const cellOtherConfig = this._getOtherStyle(style) as ICellOtherConfig;
 
@@ -1554,10 +1554,10 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
 
         if (isFull === false) {
-            return new DocumentModelSimple(documentData);
+            return new DocumentDataModelSimple(documentData);
         }
 
-        return new DocumentModel(documentData);
+        return new DocumentDataModel(documentData);
     }
 
     private _getDocumentDataByStyle(
@@ -1629,10 +1629,10 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
 
         if (isFull === false) {
-            return new DocumentModelSimple(documentData);
+            return new DocumentDataModelSimple(documentData);
         }
 
-        return new DocumentModel(documentData);
+        return new DocumentDataModel(documentData);
     }
 
     private _setBorderProps(r: number, c: number, type: BORDER_TYPE, style: IStyleData, cache: IStylesCache) {

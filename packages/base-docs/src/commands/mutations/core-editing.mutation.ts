@@ -18,7 +18,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         const documentModel = univerInstanceService.getUniverDocInstance(unitId);
 
         if (!documentModel) {
-            throw new Error(`DocumentModel not found for unitId: ${unitId}`);
+            throw new Error(`DocumentDataModel not found for unitId: ${unitId}`);
         }
 
         const undoMutations = documentModel.apply(mutations);

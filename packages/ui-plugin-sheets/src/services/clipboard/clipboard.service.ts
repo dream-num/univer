@@ -24,8 +24,8 @@ import {
 } from '@univerjs/core';
 import { createIdentifier, IDisposable, Inject } from '@wendellhu/redi';
 
+import { IMarkSelectionService } from '../mark-selection/mark-selection.service';
 import { ISelectionRenderService } from '../selection/selection-render.service';
-import { SelectionShape } from '../selection/selection-shape';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { copyContentCache, extractId, genId } from './copy-content-cache';
 import { HtmlToUSMService } from './html-to-usm/converter';
@@ -57,6 +57,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     private _clipboardHooks: ISheetClipboardHook[] = [];
     private _htmlToUSM = new HtmlToUSMService();
     private _usmToHtml = new USMToHtmlService();
+    private _copyMarkId: string | null = null;
     private _pasteType = PASTE_TYPE.DEFAULT;
 
     constructor(
@@ -69,7 +70,8 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @Inject(ThemeService) private readonly _themeService: ThemeService
+        @Inject(ThemeService) private readonly _themeService: ThemeService,
+        @IMarkSelectionService private readonly _markSelectionService: IMarkSelectionService
     ) {
         super();
     }
@@ -122,19 +124,9 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         // 8. write html and get plain text info the clipboard interface
         await this._clipboardInterfaceService.write(plain, html);
 
-        // @DR-Univer help me here :D
-        const scene = this._renderManagerService.getCurrent()?.scene;
-
-        const { rangeWithCoord, primaryWithCoord } =
-            this._selectionRenderService.convertSelectionRangeToData(selection);
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-        if (!scene || !skeleton) return false;
-        const { rowHeaderWidth, columnHeaderHeight } = skeleton;
-
-        const control = new SelectionShape(scene, 10, false, this._themeService);
+        // 9. mark the copy range
         const style = this._selectionManagerService.createCopyPasteSelection();
-
-        control.update(rangeWithCoord, rowHeaderWidth, columnHeaderHeight, style, primaryWithCoord);
+        this._copyMarkId = this._markSelectionService.addShape({ ...selection, style });
 
         // tell hooks to clean up
         hooks.forEach((h) => h.onAfterCopy?.());
@@ -330,6 +322,9 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         if (cachedData.copyType === COPY_TYPE.CUT) {
             copyContentCache.del(copyId);
         }
+
+        this._copyMarkId && this._markSelectionService.removeShape(this._copyMarkId);
+        this._copyMarkId = null;
 
         return pasteRes;
     }

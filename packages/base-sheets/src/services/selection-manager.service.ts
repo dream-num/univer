@@ -255,6 +255,7 @@ export class SelectionManagerService implements IDisposable {
             fill: 'rgba(0, 0, 0, 0.2)',
             widgets: {},
             hasAutoFill: false,
+            strokeDash: 8,
         };
     }
 

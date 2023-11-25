@@ -10,13 +10,13 @@ permissions:
     pull-requests: write
 
 jobs:
-    build:
+    setup:
         if: ${{ github.event.workflow_run.conclusion == 'success' }}
         runs-on: ubuntu-latest
 
-        env:
-            TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-            TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+        outputs:
+            id: ${{ steps.pr.outputs.id }}
+            ref: ${{ steps.ref.outputs.ref }}
 
         steps:
             # Get PR ID from artifact
@@ -43,10 +43,48 @@ jobs:
               id: ref
               run: echo "ref=$(<pr-ref.txt)" >> $GITHUB_OUTPUT
 
+    prepare:
+        runs-on: ubuntu-latest
+        needs: [setup]
+
+        steps:
+            # ================= Create Comment =================
+            - name: 🧽 Find And Delete Comment
+              uses: peter-evans/find-comment@v2
+              if: ${{ needs.setup.outputs.id != '' }}
+              id: fc
+              with:
+                  issue-number: ${{ needs.setup.outputs.id }}
+                  comment-author: 'github-actions[bot]'
+                  body-includes: View Deployment
+
+            - name: 📝 Create or update comment
+              uses: peter-evans/create-or-update-comment@v3
+              if: ${{ needs.setup.outputs.id != '' }}
+              with:
+                  comment-id: ${{ steps.fc.outputs.comment-id }}
+                  issue-number: ${{ needs.setup.outputs.id }}
+                  body: |
+                      ## View Deployment
+
+                      🚧 🚧 🚧 🚧 🚧 🚧 🚧 🚧 🚧 🚧 🚧 🚧 🚧 🚧 🚧
+                      Still cooking, please come back later
+                      🚧 🚧 🚧 🚧 🚧 🚧 🚧 🚧 🚧 🚧 🚧 🚧 🚧 🚧 🚧
+                  edit-mode: replace
+
+
+    build-demo:
+        runs-on: ubuntu-latest
+        needs: [setup]
+
+        outputs:
+            preview-url: ${{ steps.vercel-demo.outputs.preview-url }}
+
+        steps:
             - name: Checkout
               uses: actions/checkout@v3
               with:
-                  ref: ${{ steps.ref.outputs.ref }}
+                  ref: ${{ needs.setup.outputs.ref }}
 
             - name: Install Node.js
               uses: actions/setup-node@v3
@@ -93,6 +131,46 @@ jobs:
                   vercel-org-id: ${{ secrets.ORG_ID}}
                   vercel-project-id: ${{ secrets.PROJECT_ID}}
 
+    build-storybook:
+        runs-on: ubuntu-latest
+        needs: [setup]
+
+        outputs:
+            preview-url: ${{ steps.vercel-storybook.outputs.preview-url }}
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3
+              with:
+                  ref: ${{ needs.setup.outputs.ref }}
+
+            - name: Install Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 18
+
+            - name: Install pnpm
+              uses: pnpm/action-setup@v2
+              with:
+                  version: 8
+                  run_install: false
+
+            - name: Get pnpm store directory
+              shell: bash
+              run: |
+                  echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+            - name: Setup pnpm cache
+              uses: actions/cache@v3
+              with:
+                  path: ${{ env.STORE_PATH }}
+                  key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+                  restore-keys: |
+                      ${{ runner.os }}-pnpm-
+
+            - name: Install dependencies
+              run: pnpm install
+
             # ================= Deploy Storybook =================
             - name: 📦 Build storybook
               run: pnpm run build:storybook
@@ -105,6 +183,11 @@ jobs:
                   vercel-org-id: ${{ secrets.ORG_ID}}
                   vercel-project-id: ${{ secrets.PROJECT_ID_STORYBOOK}}
 
+    notify:
+        runs-on: ubuntu-latest
+        needs: [setup, build-demo, build-storybook]
+
+        steps:
             # ================= Notify Discord =================
             - name: 👾 Discord Notification
               uses: sarisia/actions-status-discord@v1
@@ -113,18 +196,21 @@ jobs:
                   webhook: ${{ secrets.DISCORD_WEBHOOK }}
                   status: ${{ job.status }}
                   description: |
+                      Ref: ${{ needs.setup.outputs.ref }}
+
                       CI Pipeline: Success 🏆
                       **[View Deployment]**
-                      - [Doc](${{ steps.vercel-demo.outputs.preview-url }}/doc/)
-                      - [Sheet](${{ steps.vercel-demo.outputs.preview-url }}/sheet/)
-                      - [Slide](${{ steps.vercel-demo.outputs.preview-url }}/slide/)
+                      - [Doc](${{ needs.build-demo.outputs.preview-url }}/doc/)
+                      - [Sheet](${{ needs.build-demo.outputs.preview-url }}/sheet/)
+                      - [Slide](${{ needs.build-demo.outputs.preview-url }}/slide/)
 
                       **[View Storybook]**
-                      - [Storybook](${{ steps.vercel-storybook.outputs.preview-url }}/)
+                      - [Storybook](${{ needs.build-storybook.outputs.preview-url }}/)
                   nofail: false
                   nodetail: false
                   color: 0x00b894
                   username: GitHub Actions
+                  nocontext: false
 
             - name: 👾 Discord Notification
               uses: sarisia/actions-status-discord@v1
@@ -133,36 +219,41 @@ jobs:
                   webhook: ${{ secrets.DISCORD_WEBHOOK }}
                   status: ${{ job.status }}
                   description: |
+                      Ref: ${{ needs.setup.outputs.ref }}
+
                       CI Pipeline: Unsuccessful 📛
                       **[PR ID]**
-                      #${{ steps.pr.outputs.id }}
+                      #${{ needs.setup.outputs.id }}
                   nofail: false
                   nodetail: false
                   color: 0xd63031
                   username: GitHub Actions
+                  nocontext: false
 
             # ================= Create Comment =================
             - name: 🧽 Find And Delete Comment
               uses: peter-evans/find-comment@v2
+              if: ${{ needs.setup.outputs.id != '' }}
               id: fc
               with:
-                  issue-number: ${{ steps.pr.outputs.id }}
+                  issue-number: ${{ needs.setup.outputs.id }}
                   comment-author: 'github-actions[bot]'
                   body-includes: View Deployment
 
             - name: 📝 Create or update comment
               uses: peter-evans/create-or-update-comment@v3
+              if: ${{ needs.setup.outputs.id != '' }}
               with:
                   comment-id: ${{ steps.fc.outputs.comment-id }}
-                  issue-number: ${{ steps.pr.outputs.id }}
+                  issue-number: ${{ needs.setup.outputs.id }}
                   body: |
                       ## View Deployment
                       | 📝 Doc | 📊 Sheet | 📽️ Slide |
                       | --- | --- | --- |
-                      | [🔗 Preview link](${{ steps.vercel-demo.outputs.preview-url }}/doc/) | [🔗 Preview link](${{ steps.vercel-demo.outputs.preview-url }}/sheet/) | [🔗 Preview link](${{ steps.vercel-demo.outputs.preview-url }}/slide/) |
+                      | [🔗 Preview link](${{ needs.build-demo.outputs.preview-url }}/doc/) | [🔗 Preview link](${{ needs.build-demo.outputs.preview-url }}/sheet/) | [🔗 Preview link](${{ needs.build-demo.outputs.preview-url }}/slide/) |
 
                       ## View Storybook
                       | 📚 Storybook |
                       | --- |
-                      | [🔗 Preview link](${{ steps.vercel-storybook.outputs.preview-url }}/) |
+                      | [🔗 Preview link](${{ needs.build-storybook.outputs.preview-url }}/) |
                   edit-mode: replace

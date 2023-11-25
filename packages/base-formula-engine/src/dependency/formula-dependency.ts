@@ -1,4 +1,13 @@
-import { Disposable, IRange, IUnitRange, LifecycleStages, Nullable, ObjectMatrix, OnLifecycle } from '@univerjs/core';
+import {
+    deserializeRangeWithSheet,
+    Disposable,
+    IRange,
+    IUnitRange,
+    LifecycleStages,
+    Nullable,
+    ObjectMatrix,
+    OnLifecycle,
+} from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { LexerTreeBuilder } from '../analysis/lexer';
@@ -8,9 +17,10 @@ import { AstRootNode, FunctionNode, PrefixNode, SuffixNode } from '../ast-node';
 import { BaseAstNode, ErrorNode } from '../ast-node/base-ast-node';
 import { NodeType } from '../ast-node/node-type';
 import { FormulaAstLRU } from '../basics/cache-lru';
-import { IFormulaData } from '../basics/common';
+import { IFormulaData, IUnitSheetNameMap } from '../basics/common';
 import { ErrorType } from '../basics/error-type';
 import { PreCalculateNodeType } from '../basics/node-type';
+import { sequenceNodeType } from '../basics/sequence';
 import { prefixToken, suffixToken } from '../basics/token';
 import { Interpreter } from '../interpreter/interpreter';
 import { BaseReferenceObject } from '../reference-object/base-reference-object';
@@ -21,6 +31,26 @@ import { FormulaDependencyTree } from './dependency-tree';
 const FORMULA_CACHE_LRU_COUNT = 100000;
 
 export const FormulaASTCache = new FormulaAstLRU<AstRootNode>(FORMULA_CACHE_LRU_COUNT);
+
+export enum FormulaReferenceMoveType {
+    Move, // range
+    Insert, // row column
+    Remove, // row column
+    DeleteMoveLeft, // range
+    DeleteMoveUp, // range
+    InsertMoveDown, // range
+    InsertMoveRight, // range
+}
+
+export interface IFormulaReferenceMoveParam {
+    type: FormulaReferenceMoveType;
+    unitId: string;
+    sheetId: string;
+    sheetNameMap: IUnitSheetNameMap;
+    ranges?: IRange[];
+    from?: IRange;
+    to?: IRange;
+}
 
 @OnLifecycle(LifecycleStages.Rendered, FormulaDependencyGenerator)
 export class FormulaDependencyGenerator extends Disposable {
@@ -55,6 +85,45 @@ export class FormulaDependencyGenerator extends Disposable {
         return Promise.resolve(this._calculateRunList(updateTreeList));
     }
 
+    async getFormulaReferenceMoveInfo(
+        formulaData: IFormulaData,
+        formulaReferenceMoveParam: IFormulaReferenceMoveParam
+    ) {
+        const treeList = await this._generateTreeList(formulaData);
+
+        const { type, unitId, sheetId, ranges, from, to, sheetNameMap } = formulaReferenceMoveParam;
+
+        for (const tree of treeList) {
+            const { formula, rangeList } = tree;
+
+            const sequenceNodes = this._lexerTreeBuilder.sequenceNodesBuilder(formula);
+
+            if (sequenceNodes == null) {
+                continue;
+            }
+
+            for (const sequence of sequenceNodes) {
+                if (typeof sequence === 'string' || sequence.nodeType !== sequenceNodeType.REFERENCE) {
+                    continue;
+                }
+                const { token } = sequence;
+
+                const sequenceRange = deserializeRangeWithSheet(token);
+
+                const { range, sheetName, unitId } = sequenceRange;
+
+                const sheetId = sheetNameMap[unitId][sheetName];
+            }
+        }
+    }
+
+    private _matchRange() {}
+
+    /**
+     * Generate nodes for the dependency tree, where each node contains all the reference data ranges included in each formula.
+     * @param formulaData
+     * @returns
+     */
     private async _generateTreeList(formulaData: IFormulaData) {
         const formulaDataKeys = Object.keys(formulaData);
 

@@ -60,6 +60,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ts: {
                     fs: 14,
                     ff: 'Microsoft YaHei',
+                    bl: BooleanNumber.TRUE,
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },

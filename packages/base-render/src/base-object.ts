@@ -37,6 +37,8 @@ export abstract class BaseObject {
 
     onDblclickObserver = new Observable<IPointerEvent | IMouseEvent>();
 
+    onTripleClickObserver = new Observable<IPointerEvent | IMouseEvent>();
+
     onMouseWheelObserver = new Observable<IWheelEvent>();
     // onKeyDownObservable = new Observable<IKeyboardEvent>();
     // onKeyUpObservable = new Observable<IKeyboardEvent>();
@@ -583,6 +585,16 @@ export abstract class BaseObject {
     triggerDblclick(evt: IPointerEvent | IMouseEvent) {
         if (!this.onDblclickObserver.notifyObservers(evt)?.stopPropagation) {
             this._parent?.triggerDblclick(evt);
+
+            return false;
+        }
+
+        return true;
+    }
+
+    triggerTripleClick(evt: IPointerEvent | IMouseEvent) {
+        if (!this.onTripleClickObserver.notifyObservers(evt)?.stopPropagation) {
+            this._parent?.triggerTripleClick(evt);
 
             return false;
         }

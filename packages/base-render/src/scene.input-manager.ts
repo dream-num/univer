@@ -22,8 +22,8 @@ export class InputManager {
     /** Time in milliseconds to wait to raise long press events if button is still pressed */
     static LongPressDelay = 500; // in milliseconds
 
-    /** Time in milliseconds with two consecutive clicks will be considered as a double click */
-    static DoubleClickDelay = 300; // in milliseconds
+    /** Time in milliseconds with two consecutive clicks will be considered as a double or triple click */
+    static DoubleOrTripleClickDelay = 600; // in milliseconds
 
     /** If you need to check double click without raising a single click at first click, enable this flag */
     static ExclusiveDoubleClickMode = false;
@@ -179,7 +179,7 @@ export class InputManager {
         this._onPointerUp = (evt: IPointerEvent) => {
             // preserve compatibility with Safari when pointerId is not present
             if (evt.pointerId === undefined) {
-                (evt as any).pointerId = 0;
+                evt.pointerId = 0;
             }
 
             const currentObject = this._getCurrentObject(evt.offsetX, evt.offsetY);
@@ -191,7 +191,7 @@ export class InputManager {
                 }
             }
 
-            this._prePointerDoubleClick(evt);
+            this._prePointerDoubleOrTripleClick(evt);
         };
 
         this._onMouseWheel = (evt: IWheelEvent) => {
@@ -334,7 +334,7 @@ export class InputManager {
         );
     }
 
-    private _prePointerDoubleClick(evt: IPointerEvent) {
+    private _prePointerDoubleOrTripleClick(evt: IPointerEvent) {
         const { clientX, clientY } = evt;
 
         if (this._doubleClickOccurred === 0) {
@@ -346,7 +346,7 @@ export class InputManager {
 
         this._delayedTimeout = window.setTimeout(() => {
             this._resetDoubleClickParam();
-        }, InputManager.DoubleClickDelay);
+        }, InputManager.DoubleOrTripleClickDelay);
 
         if (this._doubleClickOccurred < 2) {
             return;
@@ -359,19 +359,28 @@ export class InputManager {
             return;
         }
 
-        this._scene?.pick(Vector2.FromArray([evt.offsetX, evt.offsetY]))?.triggerDblclick(evt);
+        if (this._doubleClickOccurred === 2) {
+            this._scene?.pick(Vector2.FromArray([evt.offsetX, evt.offsetY]))?.triggerDblclick(evt);
 
-        // if (this._scene.onDblclick) {
-        //     this._scene.onDblclick(evt);
-        // }
+            if (this._scene.onDblclickObserver.hasObservers()) {
+                this._scene.onDblclickObserver.notifyObservers(evt);
+            }
 
-        if (this._scene.onDblclickObserver.hasObservers()) {
-            this._scene.onDblclickObserver.notifyObservers(evt);
+            console.log('_prePointerDoubleClick', evt);
         }
 
-        this._resetDoubleClickParam();
+        // eslint-disable-next-line no-magic-numbers
+        if (this._doubleClickOccurred === 3) {
+            this._scene?.pick(Vector2.FromArray([evt.offsetX, evt.offsetY]))?.triggerTripleClick(evt);
 
-        console.log('_prePointerDoubleClick', evt);
+            if (this._scene.onTripleClickObserver.hasObservers()) {
+                this._scene.onTripleClickObserver.notifyObservers(evt);
+            }
+
+            this._resetDoubleClickParam();
+
+            console.log('_prePointerTripleClick', evt);
+        }
     }
 
     private _resetDoubleClickParam() {

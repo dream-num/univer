@@ -652,6 +652,7 @@ export class Scene extends ThinScene {
         this.onPointerEnterObserver.clear();
         this.onPointerLeaveObserver.clear();
         this.onDblclickObserver.clear();
+        this.onTripleClickObserver.clear();
         this.onMouseWheelObserver.clear();
         this.onKeyDownObservable.clear();
         this.onKeyUpObservable.clear();
@@ -776,6 +777,17 @@ export class Scene extends ThinScene {
             this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
         ) {
             (this._parent as SceneViewer)?.triggerDblclick(evt);
+            return false;
+        }
+        return true;
+    }
+
+    override triggerTripleClick(evt: IPointerEvent | IMouseEvent) {
+        if (
+            !this.onTripleClickObserver.notifyObservers(evt)?.stopPropagation &&
+            this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
+        ) {
+            (this._parent as SceneViewer)?.triggerTripleClick(evt);
             return false;
         }
         return true;

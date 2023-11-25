@@ -49,6 +49,34 @@ export class AutoFillController extends Disposable {
         this._init();
     }
 
+    private _detectFillRange(sourceRange: IRange) {
+        const { startRow, endRow, startColumn, endColumn } = sourceRange;
+        const matrix = this._univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getCellMatrix();
+        const matrixDataRange = matrix.getDataRange();
+        let detectEndRow = endRow;
+        if (startColumn > 0 && matrix.getValue(startRow, startColumn - 1)?.v != null) {
+            let cur = startRow;
+            while (matrix.getValue(cur, startColumn - 1)?.v !== null && cur < matrixDataRange.endRow) {
+                cur += 1;
+            }
+            detectEndRow = cur;
+        }
+        if (endColumn < matrixDataRange.endColumn && matrix.getValue(endRow, endColumn + 1)?.v != null) {
+            let cur = startRow;
+            while (matrix.getValue(cur, endColumn + 1)?.v !== null && cur < matrixDataRange.endRow) {
+                cur++;
+            }
+            detectEndRow = cur;
+        }
+
+        return {
+            startColumn,
+            endColumn,
+            startRow,
+            endRow: detectEndRow,
+        };
+    }
+
     private _handleFillDrag(sourceRange: IRange, destRange: IRange) {
         // situation 1: drag to smaller range, horizontally.
         if (destRange.endColumn < sourceRange.endColumn && destRange.endColumn > sourceRange.startColumn) {
@@ -137,6 +165,45 @@ export class AutoFillController extends Disposable {
                                         startRow,
                                         endRow,
                                     };
+                                    const destRange = {
+                                        startColumn: newStartColumn || startColumn,
+                                        endColumn: newEndColumn || endColumn,
+                                        startRow: newStartRow || startRow,
+                                        endRow: newEndRow || endRow,
+                                    };
+                                    this._handleFillDrag(sourceRange, destRange);
+                                })
+                            )
+                        );
+
+                        // double click to fill range, range length will align to left or right column.
+                        // fill results will be as same as drag operation
+                        disposableCollection.add(
+                            toDisposable(
+                                controlSelection.fillControl.onDblclickObserver.add(() => {
+                                    const { startColumn, endColumn, startRow, endRow } = controlSelection.model;
+                                    const sourceRange = {
+                                        startColumn,
+                                        endColumn,
+                                        startRow,
+                                        endRow,
+                                    };
+
+                                    const {
+                                        startColumn: newStartColumn,
+                                        endColumn: newEndColumn,
+                                        startRow: newStartRow,
+                                        endRow: newEndRow,
+                                    } = this._detectFillRange(sourceRange);
+
+                                    if (
+                                        startColumn === newStartColumn &&
+                                        endColumn === newEndColumn &&
+                                        startRow === newStartRow &&
+                                        endRow === newEndRow
+                                    ) {
+                                        return;
+                                    }
                                     const destRange = {
                                         startColumn: newStartColumn || startColumn,
                                         endColumn: newEndColumn || endColumn,

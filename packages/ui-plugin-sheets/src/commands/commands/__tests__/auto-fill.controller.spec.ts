@@ -149,6 +149,55 @@ const TEST_WORKBOOK_DATA = {
                         t: CellValueType.STRING,
                     },
                 },
+                // db click to fill
+                '10': {
+                    '0': {
+                        v: 1,
+                        m: '1',
+                        t: CellValueType.NUMBER,
+                    },
+                    '1': {
+                        v: 2,
+                        m: '2',
+                        t: CellValueType.NUMBER,
+                    },
+                    '2': {
+                        v: 3,
+                        m: '3',
+                        t: CellValueType.NUMBER,
+                    },
+                    '3': {
+                        v: 4,
+                        m: '4',
+                        t: CellValueType.NUMBER,
+                    },
+                },
+                '11': {
+                    '0': {
+                        v: 2,
+                        m: '2',
+                        t: CellValueType.NUMBER,
+                    },
+                    '2': {
+                        v: 3,
+                        m: '3',
+                        t: CellValueType.NUMBER,
+                    },
+                },
+                '12': {
+                    '0': {
+                        v: 3,
+                        m: '3',
+                        t: CellValueType.NUMBER,
+                    },
+                },
+                '13': {
+                    '0': {
+                        v: 4,
+                        m: '4',
+                        t: CellValueType.NUMBER,
+                    },
+                },
             },
         },
     },
@@ -194,7 +243,7 @@ describe('Test auto fill rules in controller', () => {
                 const workbook = get(IUniverInstanceService).getCurrentUniverSheetInstance();
                 if (!workbook) throw new Error('This is an error');
                 // test number
-                (autoFillController as any)._handleFillDrag(
+                (autoFillController as any)._handleFill(
                     {
                         startRow: 0,
                         startColumn: 0,
@@ -211,7 +260,7 @@ describe('Test auto fill rules in controller', () => {
                 expect(workbook.getSheetBySheetId('sheet1')?.getCell(0, 2)?.v).toBe(3);
                 expect(workbook.getSheetBySheetId('sheet1')?.getCell(0, 3)?.v).toBe(4);
                 // test number. descending
-                (autoFillController as any)._handleFillDrag(
+                (autoFillController as any)._handleFill(
                     {
                         startRow: 1,
                         startColumn: 0,
@@ -235,7 +284,7 @@ describe('Test auto fill rules in controller', () => {
                 const workbook = get(IUniverInstanceService).getCurrentUniverSheetInstance();
                 if (!workbook) throw new Error('This is an error');
                 // test extend number
-                (autoFillController as any)._handleFillDrag(
+                (autoFillController as any)._handleFill(
                     {
                         startRow: 2,
                         startColumn: 0,
@@ -259,7 +308,7 @@ describe('Test auto fill rules in controller', () => {
                 const workbook = get(IUniverInstanceService).getCurrentUniverSheetInstance();
                 if (!workbook) throw new Error('This is an error');
                 // test chinese number
-                (autoFillController as any)._handleFillDrag(
+                (autoFillController as any)._handleFill(
                     {
                         startRow: 3,
                         startColumn: 0,
@@ -284,7 +333,7 @@ describe('Test auto fill rules in controller', () => {
                 if (!workbook) throw new Error('This is an error');
 
                 // test chinese week
-                (autoFillController as any)._handleFillDrag(
+                (autoFillController as any)._handleFill(
                     {
                         startRow: 4,
                         startColumn: 0,
@@ -308,7 +357,7 @@ describe('Test auto fill rules in controller', () => {
                 const workbook = get(IUniverInstanceService).getCurrentUniverSheetInstance();
                 if (!workbook) throw new Error('This is an error');
                 // test loop series
-                (autoFillController as any)._handleFillDrag(
+                (autoFillController as any)._handleFill(
                     {
                         startRow: 5,
                         startColumn: 0,
@@ -332,7 +381,7 @@ describe('Test auto fill rules in controller', () => {
                 const workbook = get(IUniverInstanceService).getCurrentUniverSheetInstance();
                 if (!workbook) throw new Error('This is an error');
                 // test other string
-                (autoFillController as any)._handleFillDrag(
+                (autoFillController as any)._handleFill(
                     {
                         startRow: 6,
                         startColumn: 0,
@@ -356,7 +405,7 @@ describe('Test auto fill rules in controller', () => {
                 const workbook = get(IUniverInstanceService).getCurrentUniverSheetInstance();
                 if (!workbook) throw new Error('This is an error');
                 // test mixed mode
-                (autoFillController as any)._handleFillDrag(
+                (autoFillController as any)._handleFill(
                     {
                         startRow: 7,
                         startColumn: 0,
@@ -388,6 +437,34 @@ describe('Test auto fill rules in controller', () => {
                 expect(workbook.getSheetBySheetId('sheet1')?.getCell(7, 6)?.v).toBe('第3');
                 expect(workbook.getSheetBySheetId('sheet1')?.getCell(7, 7)?.v).toBe('第4');
             });
+        });
+    });
+
+    describe('auto fill range is auto detected', async () => {
+        it('correct situation', async () => {
+            const workbook = get(IUniverInstanceService).getCurrentUniverSheetInstance();
+            if (!workbook) throw new Error('This is an error');
+            // test other string
+            (autoFillController as any)._handleDbClickFill({
+                startRow: 10,
+                startColumn: 1,
+                endRow: 10,
+                endColumn: 1,
+            });
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(11, 1)?.v).toBe(3);
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(12, 1)?.v).toBe(4);
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(13, 1)?.v).toBe(5);
+
+            // undo redo
+            await commandService.executeCommand(UndoCommand.id);
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(11, 1)?.v).toBe(undefined);
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(12, 1)?.v).toBe(undefined);
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(13, 1)?.v).toBe(undefined);
+
+            await commandService.executeCommand(RedoCommand.id);
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(11, 1)?.v).toBe(3);
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(12, 1)?.v).toBe(4);
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(13, 1)?.v).toBe(5);
         });
     });
 });

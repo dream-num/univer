@@ -49,7 +49,76 @@ export class AutoFillController extends Disposable {
         this._init();
     }
 
-    private _handleFillDrag(sourceRange: IRange, destRange: IRange) {
+    private _init() {
+        this._onSelectionControlFillChanged();
+        this._onApplyTypeChanged();
+        [AutoFillCommand, AutoClearContentCommand].forEach((command) => {
+            this.disposeWithMe(this._commandService.registerCommand(command));
+        });
+    }
+
+    private _handleDbClickFill(sourceRange: IRange) {
+        const destRange = this._detectFillRange(sourceRange);
+        // double click only works when dest range is longer than source range
+        if (destRange.endRow <= sourceRange.endRow) {
+            return;
+        }
+        // double click effect is the same as drag effect, but the apply area is automatically calculated (by method '_detectFillRange')
+        this._handleFill(sourceRange, destRange);
+    }
+
+    private _detectFillRange(sourceRange: IRange) {
+        const { startRow, endRow, startColumn, endColumn } = sourceRange;
+        const worksheet = this._univerInstanceService.getCurrentUniverSheetInstance()?.getActiveSheet();
+        if (!worksheet) {
+            return sourceRange;
+        }
+        const matrix = worksheet.getCellMatrix();
+        const maxRow = worksheet.getMaxRows() - 1;
+        const maxColumn = worksheet.getMaxColumns() - 1;
+        let detectEndRow = endRow;
+        // left column first, or consider right column.
+        if (startColumn > 0 && matrix.getValue(startRow, startColumn - 1)?.v != null) {
+            let cur = startRow;
+            while (matrix.getValue(cur, startColumn - 1)?.v != null && cur < maxRow) {
+                cur += 1;
+            }
+            detectEndRow = cur;
+        } else if (endColumn < maxColumn && matrix.getValue(endRow, endColumn + 1)?.v != null) {
+            let cur = startRow;
+            while (matrix.getValue(cur, endColumn + 1)?.v != null && cur < maxRow) {
+                cur++;
+            }
+            detectEndRow = cur;
+        }
+
+        for (let i = endRow + 1; i <= detectEndRow; i++) {
+            for (let j = startColumn; j <= endColumn; j++) {
+                if (matrix.getValue(i, j)?.v != null) {
+                    detectEndRow = i - 1;
+                    break;
+                }
+            }
+        }
+
+        return {
+            startColumn,
+            endColumn,
+            startRow,
+            endRow: detectEndRow,
+        };
+    }
+
+    private _handleFill(sourceRange: IRange, destRange: IRange) {
+        // if source range === dest range, do nothing;
+        if (
+            sourceRange.startColumn === destRange.startColumn &&
+            sourceRange.startRow === destRange.startRow &&
+            sourceRange.endColumn === destRange.endColumn &&
+            sourceRange.endRow === destRange.endRow
+        ) {
+            return;
+        }
         // situation 1: drag to smaller range, horizontally.
         if (destRange.endColumn < sourceRange.endColumn && destRange.endColumn > sourceRange.startColumn) {
             this._commandService.executeCommand(AutoClearContentCommand.id, {
@@ -80,14 +149,6 @@ export class AutoFillController extends Disposable {
         this._presetAndCacheData(sourceRange, destRange);
     }
 
-    private _init() {
-        this._onSelectionControlFillChanged();
-        this._onApplyTypeChanged();
-        [AutoFillCommand, AutoClearContentCommand].forEach((command) => {
-            this.disposeWithMe(this._commandService.registerCommand(command));
-        });
-    }
-
     private _onSelectionControlFillChanged() {
         const disposableCollection = new DisposableCollection();
         this.disposeWithMe(
@@ -114,36 +175,36 @@ export class AutoFillController extends Disposable {
                                     if (filled == null) {
                                         return;
                                     }
-                                    const { startColumn, endColumn, startRow, endRow } = controlSelection.model;
-                                    const {
-                                        startColumn: newStartColumn,
-                                        endColumn: newEndColumn,
-                                        startRow: newStartRow,
-                                        endRow: newEndRow,
-                                    } = filled || {};
-                                    // if no change happened, return
-                                    if (
-                                        startColumn === newStartColumn &&
-                                        endColumn === newEndColumn &&
-                                        startRow === newStartRow &&
-                                        endRow === newEndRow
-                                    ) {
-                                        return;
-                                    }
+                                    const sourceRange: IRange = {
+                                        startColumn: controlSelection.model.startColumn,
+                                        endColumn: controlSelection.model.endColumn,
+                                        startRow: controlSelection.model.startRow,
+                                        endRow: controlSelection.model.endRow,
+                                    };
+                                    const destRange: IRange = {
+                                        startColumn: filled.startColumn,
+                                        endColumn: filled.endColumn,
+                                        startRow: filled.startRow,
+                                        endRow: filled.endRow,
+                                    };
 
+                                    this._handleFill(sourceRange, destRange);
+                                })
+                            )
+                        );
+
+                        // double click to fill range, range length will align to left or right column.
+                        // fill results will be as same as drag operation
+                        disposableCollection.add(
+                            toDisposable(
+                                controlSelection.fillControl.onDblclickObserver.add(() => {
                                     const sourceRange = {
-                                        startColumn,
-                                        endColumn,
-                                        startRow,
-                                        endRow,
+                                        startColumn: controlSelection.model.startColumn,
+                                        endColumn: controlSelection.model.endColumn,
+                                        startRow: controlSelection.model.startRow,
+                                        endRow: controlSelection.model.endRow,
                                     };
-                                    const destRange = {
-                                        startColumn: newStartColumn || startColumn,
-                                        endColumn: newEndColumn || endColumn,
-                                        startRow: newStartRow || startRow,
-                                        endRow: newEndRow || endRow,
-                                    };
-                                    this._handleFillDrag(sourceRange, destRange);
+                                    this._handleDbClickFill(sourceRange);
                                 })
                             )
                         );

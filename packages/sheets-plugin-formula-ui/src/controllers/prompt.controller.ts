@@ -1,6 +1,7 @@
 import { MoveCursorOperation, ReplaceContentCommand, TextSelectionManagerService } from '@univerjs/base-docs';
 import {
     FormulaEngineService,
+    generateStringWithSequence,
     includeFormulaLexerToken,
     ISequenceNode,
     isFormulaLexerToken,
@@ -982,7 +983,7 @@ export class PromptController extends Disposable {
         textSelectionOffset: number,
         canUndo: boolean = true
     ) {
-        const dataStream = this._generateStringWithSequence(sequenceNodes);
+        const dataStream = generateStringWithSequence(sequenceNodes);
 
         const { textRuns, refSelections } = this._buildTextRuns(sequenceNodes);
 
@@ -1039,23 +1040,6 @@ export class PromptController extends Disposable {
         await this._commandService.syncExecuteCommand(SetEditorResizeOperation.id, {
             unitId: editorUnitId,
         });
-    }
-
-    /**
-     * Deserialize Sequence to text.
-     * @param newSequenceNodes
-     * @returns
-     */
-    private _generateStringWithSequence(newSequenceNodes: Array<string | ISequenceNode>) {
-        let sequenceString = '';
-        for (const node of newSequenceNodes) {
-            if (typeof node === 'string') {
-                sequenceString += node;
-            } else {
-                sequenceString += node.token;
-            }
-        }
-        return sequenceString;
     }
 
     /**

@@ -17,10 +17,10 @@ import { AstRootNode, FunctionNode, PrefixNode, SuffixNode } from '../ast-node';
 import { BaseAstNode, ErrorNode } from '../ast-node/base-ast-node';
 import { NodeType } from '../ast-node/node-type';
 import { FormulaAstLRU } from '../basics/cache-lru';
-import { IFormulaData, IUnitSheetNameMap } from '../basics/common';
+import { IFormulaData, IFormulaDataItem, IUnitSheetNameMap } from '../basics/common';
 import { ErrorType } from '../basics/error-type';
 import { PreCalculateNodeType } from '../basics/node-type';
-import { sequenceNodeType } from '../basics/sequence';
+import { generateStringWithSequence, sequenceNodeType } from '../basics/sequence';
 import { prefixToken, suffixToken } from '../basics/token';
 import { Interpreter } from '../interpreter/interpreter';
 import { BaseReferenceObject } from '../reference-object/base-reference-object';
@@ -31,6 +31,11 @@ import { FormulaDependencyTree } from './dependency-tree';
 const FORMULA_CACHE_LRU_COUNT = 100000;
 
 export const FormulaASTCache = new FormulaAstLRU<AstRootNode>(FORMULA_CACHE_LRU_COUNT);
+
+interface IUnitRangeWithOffset extends IUnitRange {
+    refOffsetX: number;
+    refOffsetY: number;
+}
 
 export enum FormulaReferenceMoveType {
     Move, // range
@@ -46,7 +51,6 @@ export interface IFormulaReferenceMoveParam {
     type: FormulaReferenceMoveType;
     unitId: string;
     sheetId: string;
-    sheetNameMap: IUnitSheetNameMap;
     ranges?: IRange[];
     from?: IRange;
     to?: IRange;
@@ -87,37 +91,125 @@ export class FormulaDependencyGenerator extends Disposable {
 
     async getFormulaReferenceMoveInfo(
         formulaData: IFormulaData,
+        sheetNameMap: IUnitSheetNameMap,
         formulaReferenceMoveParam: IFormulaReferenceMoveParam
     ) {
-        const treeList = await this._generateTreeList(formulaData);
+        const formulaDataKeys = Object.keys(formulaData);
 
-        const { type, unitId, sheetId, ranges, from, to, sheetNameMap } = formulaReferenceMoveParam;
+        const newFormulaData: IFormulaData = {};
 
-        for (const tree of treeList) {
-            const { formula, rangeList } = tree;
+        for (const unitId of formulaDataKeys) {
+            const sheetData = formulaData[unitId];
 
-            const sequenceNodes = this._lexerTreeBuilder.sequenceNodesBuilder(formula);
+            const sheetDataKeys = Object.keys(sheetData);
 
-            if (sequenceNodes == null) {
-                continue;
+            if (newFormulaData[unitId] == null) {
+                newFormulaData[unitId] = {};
             }
 
-            for (const sequence of sequenceNodes) {
-                if (typeof sequence === 'string' || sequence.nodeType !== sequenceNodeType.REFERENCE) {
-                    continue;
-                }
-                const { token } = sequence;
+            for (const sheetId of sheetDataKeys) {
+                const matrixData = new ObjectMatrix(sheetData[sheetId]);
 
-                const sequenceRange = deserializeRangeWithSheet(token);
+                const newFormulaDataItem = new ObjectMatrix<IFormulaDataItem>();
 
-                const { range, sheetName, unitId } = sequenceRange;
+                matrixData.forValue((row, column, formulaDataItem) => {
+                    const { f: formulaString, x, y, si } = formulaDataItem;
 
-                const sheetId = sheetNameMap[unitId][sheetName];
+                    const sequenceNodes = this._lexerTreeBuilder.sequenceNodesBuilder(formulaString);
+
+                    if (sequenceNodes == null) {
+                        return true;
+                    }
+
+                    let shouldModify = false;
+                    for (const sequence of sequenceNodes) {
+                        if (typeof sequence === 'string' || sequence.nodeType !== sequenceNodeType.REFERENCE) {
+                            continue;
+                        }
+                        const { token } = sequence;
+
+                        const sequenceGrid = deserializeRangeWithSheet(token);
+
+                        const { range, sheetName, unitId: sequenceUnitId } = sequenceGrid;
+
+                        const sequenceSheetId = sheetNameMap[sequenceUnitId][sheetName];
+
+                        const sequenceUnitRangeWidthOffset = {
+                            range,
+                            sheetId: sequenceSheetId,
+                            unitId: sequenceUnitId,
+                            refOffsetX: x || 0,
+                            refOffsetY: y || 0,
+                        };
+
+                        const newRefString = this._getNewRangeByMoveParam(
+                            sequenceUnitRangeWidthOffset,
+                            formulaReferenceMoveParam
+                        );
+
+                        if (newRefString != null) {
+                            sequence.token = newRefString;
+                            shouldModify = true;
+                        }
+                    }
+
+                    if (!shouldModify) {
+                        return true;
+                    }
+
+                    newFormulaDataItem.setValue(row, column, {
+                        f: generateStringWithSequence(sequenceNodes),
+                        x,
+                        y,
+                        si,
+                    });
+                });
+
+                newFormulaData[unitId][sheetId] = newFormulaDataItem.getData();
             }
         }
+
+        return newFormulaData;
     }
 
-    private _matchRange() {}
+    private _getNewRangeByMoveParam(
+        unitRangeWidthOffset: IUnitRangeWithOffset,
+        formulaReferenceMoveParam: IFormulaReferenceMoveParam
+    ) {
+        const { type, unitId, sheetId, ranges, from, to } = formulaReferenceMoveParam;
+
+        const {
+            range: sequenceRange,
+            sheetId: sequenceSheetId,
+            unitId: sequenceRangeUnitId,
+            refOffsetX,
+            refOffsetY,
+        } = unitRangeWidthOffset;
+
+        if (type === FormulaReferenceMoveType.Move) {
+            if (from == null || to == null) {
+                return;
+            }
+        }
+
+        if (ranges == null) {
+            return;
+        }
+
+        if (type === FormulaReferenceMoveType.Insert) {
+            console.log();
+        } else if (type === FormulaReferenceMoveType.Remove) {
+            console.log();
+        } else if (type === FormulaReferenceMoveType.DeleteMoveLeft) {
+            console.log();
+        } else if (type === FormulaReferenceMoveType.DeleteMoveUp) {
+            console.log();
+        } else if (type === FormulaReferenceMoveType.InsertMoveDown) {
+            console.log();
+        } else if (type === FormulaReferenceMoveType.InsertMoveRight) {
+            console.log();
+        }
+    }
 
     /**
      * Generate nodes for the dependency tree, where each node contains all the reference data ranges included in each formula.

@@ -1,3 +1,4 @@
+/* eslint-disable no-magic-numbers */
 import {
     Documents,
     EVENT_TYPE,

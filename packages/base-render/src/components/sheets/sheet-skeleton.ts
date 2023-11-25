@@ -1556,6 +1556,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         if (isFull === false) {
             return new DocumentModelSimple(documentData);
         }
+
         return new DocumentModel(documentData);
     }
 
@@ -1630,6 +1631,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         if (isFull === false) {
             return new DocumentModelSimple(documentData);
         }
+
         return new DocumentModel(documentData);
     }
 

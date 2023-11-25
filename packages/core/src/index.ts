@@ -1,13 +1,21 @@
 export * from './basics';
 export { dedupe, remove } from './common/array';
-export { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY } from './common/const';
+export {
+    DEFAULT_EMPTY_DOCUMENT_VALUE,
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+} from './common/const';
+export { MemoryCursor } from './common/memory-cursor';
 export { type ISequenceExecuteResult, sequence, sequenceAsync } from './common/sequence';
-export * from './docs/domain';
+export * from './docs/model';
+export {
+    type DocMutationParams,
+    type IDeleteMutationParams,
+    type IInsertMutationParams,
+    type IRetainMutationParams,
+} from './docs/model/document-model-types';
 export * from './observer';
 export { Plugin, PluginType } from './plugin/plugin';
-
-// #region services
-
 export {
     CommandType,
     type ICommand,
@@ -60,9 +68,6 @@ export {
     RedoCommand,
     UndoCommand,
 } from './services/undoredo/undoredo.service';
-
-// #endregion
-
 export * from './shared';
 
 // #region sheet
@@ -82,9 +87,6 @@ export { Styles } from './sheets/styles';
 export { SheetViewModel } from './sheets/view-model';
 export { getWorksheetUID, Workbook } from './sheets/workbook';
 export { Worksheet } from './sheets/worksheet';
-
-// #endregion
-
 export * from './slides/domain';
 export * from './types/const';
 export * from './types/enum';

@@ -1,7 +1,7 @@
 import { createIdentifier } from '@wendellhu/redi';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 
-import { DocumentModel } from '../../docs/domain/document-model';
+import { DocumentModel } from '../../docs/model/document-model';
 import { Nullable } from '../../shared';
 import { Disposable } from '../../shared/lifecycle';
 import { Workbook } from '../../sheets/workbook';
@@ -217,9 +217,11 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
 
     getCurrentUniverDocInstance(): DocumentModel {
         const doc = this._currentDoc$.getValue();
+
         if (!doc) {
             throw new Error('No current doc!');
         }
+
         return doc;
     }
 

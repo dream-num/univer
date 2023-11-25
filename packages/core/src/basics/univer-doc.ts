@@ -1,6 +1,6 @@
 import { Ctor, Inject, Injector } from '@wendellhu/redi';
 
-import { DocumentModel } from '../docs/domain/document-model';
+import { DocumentModel } from '../docs/model/document-model';
 import { Plugin, PluginCtor, PluginStore } from '../plugin/plugin';
 import { LifecycleStages } from '../services/lifecycle/lifecycle';
 import { LifecycleInitializerService, LifecycleService } from '../services/lifecycle/lifecycle.service';

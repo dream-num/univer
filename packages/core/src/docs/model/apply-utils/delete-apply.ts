@@ -1,14 +1,7 @@
-import {
-    DEFAULT_EMPTY_DOCUMENT_VALUE,
-    deleteContent,
-    DocumentBodyModel,
-    DocumentModel,
-    getDocsUpdateBody,
-    IDocumentBody,
-    IParagraph,
-    Tools,
-} from '@univerjs/core';
-
+import { DEFAULT_EMPTY_DOCUMENT_VALUE } from '../../../common/const';
+import { deleteContent, Tools } from '../../../shared';
+import { IDocumentBody, IParagraph } from '../../../types/interfaces';
+import { DocumentBodyModel } from '../document-body-model';
 import {
     deleteCustomBlocks,
     deleteCustomRanges,
@@ -18,38 +11,7 @@ import {
     deleteTextRuns,
 } from './common';
 
-export function DeleteApply(
-    document: DocumentModel,
-    textLength: number,
-    currentIndex: number,
-    segmentId?: string
-): IDocumentBody {
-    const doc = document.snapshot;
-
-    const bodyModel = document.getBodyModel(segmentId);
-
-    const body = getDocsUpdateBody(doc, segmentId);
-
-    if (body == null) {
-        throw new Error('no body has changed');
-    }
-
-    if (textLength <= 0) {
-        return { dataStream: '' };
-    }
-
-    bodyModel.delete(currentIndex, textLength);
-
-    const deleBody = updateAttributeByDelete(body, textLength, currentIndex);
-
-    recoveryBody(bodyModel, body, deleBody); // If the last paragraph in the document is deleted, restore an initial blank document.
-
-    // console.log('删除的model打印', bodyModel, body, deleBody);
-
-    return deleBody;
-}
-
-function updateAttributeByDelete(body: IDocumentBody, textLength: number, currentIndex: number): IDocumentBody {
+export function updateAttributeByDelete(body: IDocumentBody, textLength: number, currentIndex: number): IDocumentBody {
     const { dataStream } = body;
 
     const startIndex = currentIndex;
@@ -86,7 +48,7 @@ function updateAttributeByDelete(body: IDocumentBody, textLength: number, curren
     };
 }
 
-function recoveryBody(bodyModel: DocumentBodyModel, body: IDocumentBody, deleBody: IDocumentBody) {
+export function recoveryBody(bodyModel: DocumentBodyModel, body: IDocumentBody, deleBody: IDocumentBody) {
     if (bodyModel.children[0].children.length === 0) {
         bodyModel.reset({
             dataStream: DEFAULT_EMPTY_DOCUMENT_VALUE,

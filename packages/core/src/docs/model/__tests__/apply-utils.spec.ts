@@ -1,9 +1,11 @@
 /* eslint-disable no-magic-numbers */
-import { BooleanNumber, IDocumentBody, ITextRun, Nullable, UpdateDocsAttributeType } from '@univerjs/core';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, Nullable } from 'vitest';
 
-import { deleteParagraphs, deleteTextRuns, insertTextRuns } from '../functions/common';
-import { coverTextRuns } from '../functions/update-apply';
+import { UpdateDocsAttributeType } from '../../../shared';
+import { BooleanNumber } from '../../../types/enum';
+import { IDocumentBody, ITextRun } from '../../../types/interfaces';
+import { deleteParagraphs, deleteTextRuns, insertTextRuns } from '../apply-utils/common';
+import { coverTextRuns } from '../apply-utils/update-apply';
 
 describe('test case in apply utils', () => {
     let body: Nullable<IDocumentBody> = null;

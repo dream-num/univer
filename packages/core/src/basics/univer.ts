@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Ctor, Injector } from '@wendellhu/redi';
 
-import { DocumentModel } from '../docs/domain/document-model';
+import { DocumentModel } from '../docs/model/document-model';
 import { Plugin, PluginCtor, PluginRegistry, PluginStore, PluginType } from '../plugin/plugin';
 import { CommandService, ICommandService } from '../services/command/command.service';
 import { ConfigService, IConfigService } from '../services/config/config.service';

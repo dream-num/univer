@@ -1,6 +1,5 @@
+import { Nullable, Tools, UpdateDocsAttributeType } from '../../../shared';
 import {
-    DocumentModel,
-    getDocsUpdateBody,
     ICustomBlock,
     ICustomRange,
     IDocumentBody,
@@ -8,11 +7,7 @@ import {
     ISectionBreak,
     ITable,
     ITextRun,
-    Nullable,
-    Tools,
-    UpdateDocsAttributeType,
-} from '@univerjs/core';
-
+} from '../../../types/interfaces';
 import {
     deleteCustomBlocks,
     deleteCustomRanges,
@@ -27,30 +22,7 @@ import {
     normalizeTextRuns,
 } from './common';
 
-export function UpdateAttributeApply(
-    document: DocumentModel,
-    updateBody: Nullable<IDocumentBody>,
-    textLength: number,
-    currentIndex: number,
-    coverType = UpdateDocsAttributeType.COVER,
-    segmentId?: string
-): IDocumentBody {
-    if (updateBody == null) {
-        throw new Error('updateBody is none');
-    }
-
-    const doc = document.snapshot;
-
-    const body = getDocsUpdateBody(doc, segmentId);
-
-    if (body == null) {
-        throw new Error('no body has changed');
-    }
-
-    return updateAttribute(body, updateBody, textLength, currentIndex, coverType);
-}
-
-function updateAttribute(
+export function updateAttribute(
     body: IDocumentBody,
     updateBody: IDocumentBody,
     textLength: number,

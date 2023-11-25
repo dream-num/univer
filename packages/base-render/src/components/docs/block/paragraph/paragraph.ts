@@ -36,8 +36,8 @@ import {
 } from '../../common/tools';
 import { dealWidthBullet } from './bullet';
 import { dealWidthInlineDrawing } from './inline-drawing';
-import { composeCharForLanguage } from './language.-ruler';
-import { calculateParagraphLayout } from './layout.-ruler';
+import { composeCharForLanguage } from './language-ruler';
+import { calculateParagraphLayout } from './layout-ruler';
 
 // eslint-disable-next-line max-lines-per-function
 export function dealWidthParagraph(

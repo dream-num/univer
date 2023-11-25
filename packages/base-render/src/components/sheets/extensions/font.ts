@@ -1,7 +1,7 @@
 import { HorizontalAlign, IColorStyle, IScale, ObjectMatrix, WrapStrategy } from '@univerjs/core';
 
 import { fixLineWidthByScale } from '../../../basics/tools';
-import { Documents } from '../..';
+import type { Documents } from '../../docs/document';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import { IFontCacheItem } from '../interfaces';
 import { SheetComponent } from '../sheet-component';

@@ -3,7 +3,7 @@ import { LocaleService, LocaleType } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { ISlideUIPluginConfig } from '../basics';
-import { SlideContainer } from '../views/slide-container';
+import type { SlideContainer } from '../views/slide-container';
 import { InfoBarUIController } from './info-bar-ui-controller';
 import { SlideBarUIController } from './slide-bar-ui-controller';
 import { ToolbarUIController } from './toolbar-ui-controller';

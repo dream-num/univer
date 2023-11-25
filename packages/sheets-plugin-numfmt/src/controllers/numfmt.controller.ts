@@ -26,11 +26,9 @@ import {
     INTERCEPTOR_POINT,
     IRange,
     IUniverInstanceService,
-    LifecycleStages,
     LocaleService,
     LocaleType,
     Nullable,
-    OnLifecycle,
     Range,
     SheetInterceptorService,
     ThemeService,
@@ -57,8 +55,9 @@ import { OpenNumfmtPanelOperator } from '../commands/operators/open.numfmt.panel
 import { SheetNumfmtPanel, SheetNumfmtPanelProps } from '../components/index';
 import { zhCn } from '../locale/zh-CN';
 import { AddDecimalMenuItem, CurrencyMenuItem, FactoryOtherMenuItem, SubtractDecimalMenuItem } from '../menu/menu';
-import { NumfmtService } from '../service/numfmt.service';
+import { INumfmtService } from '../service/type';
 import { getPatternPreview, getPatternType } from '../utils/pattern';
+import type { INumfmtController } from './type';
 
 const createCollectEffectMutation = () => {
     type Config = { workbookId: string; worksheetId: string; row: number; col: number; value: Nullable<NumfmtItem> };
@@ -75,8 +74,7 @@ const createCollectEffectMutation = () => {
         clean,
     };
 };
-@OnLifecycle(LifecycleStages.Ready, NumfmtController)
-export class NumfmtController extends Disposable {
+export class NumfmtController extends Disposable implements INumfmtController {
     // collect effect mutations when edit end and push this to  commands stack in next commands progress
     private _collectEffectMutation = createCollectEffectMutation();
     private _previewPattern = '';
@@ -91,7 +89,7 @@ export class NumfmtController extends Disposable {
         @Inject(ICommandService) private _commandService: ICommandService,
         @Inject(SelectionManagerService) private _selectionManagerService: SelectionManagerService,
         @Inject(IRenderManagerService) private _renderManagerService: IRenderManagerService,
-        @Inject(NumfmtService) private _numfmtService: NumfmtService,
+        @Inject(INumfmtService) private _numfmtService: INumfmtService,
         @Inject(ComponentManager) private _componentManager: ComponentManager,
         @Inject(IMenuService) private _menuService: IMenuService,
         @Inject(ISidebarService) private _sidebarService: ISidebarService,

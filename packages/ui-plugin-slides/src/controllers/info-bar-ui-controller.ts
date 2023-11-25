@@ -1,5 +1,5 @@
 import { InfoBarModel } from '../model/info-bar-model';
-import { InfoBar } from '../views/info-bar';
+import type { InfoBar } from '../views/info-bar';
 
 type IProps = {
     label?: string;

@@ -2,7 +2,7 @@ import { SelectionManagerService } from '@univerjs/base-sheets';
 import { CommandType, ICommand, ICommandService, IUniverInstanceService, Range } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
-import { NumfmtService } from '../../service/numfmt.service';
+import { INumfmtService } from '../../service/type';
 import { getDecimalFromPattern, isPatternEqualWithoutDecimal, setPatternDecimal } from '../../utils/decimal';
 import { SetNumfmtCommand, SetNumfmtCommandParams } from './set.numfmt.command';
 
@@ -12,7 +12,7 @@ export const AddDecimalCommand: ICommand = {
     handler: async (accessor: IAccessor) => {
         const commandService = accessor.get(ICommandService);
         const selectionManagerService = accessor.get(SelectionManagerService);
-        const numfmtService = accessor.get(NumfmtService);
+        const numfmtService = accessor.get(INumfmtService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
         const selections = selectionManagerService.getSelections();

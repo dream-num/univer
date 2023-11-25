@@ -7,8 +7,5 @@
         "esModuleInterop": true,
         "strictPropertyInitialization": false
     },
-    "include": [
-        "src/**/*",
-        "test/**/*.test.(ts|tsx|js)"
-, "../core/src/docs/data-model/__tests__", "../core/src/docs/data-model/apply-utils", "../core/src/common/memory-cursor.ts"    ]
+    "include": ["src/**/*", "test/**/*.test.(ts|tsx|js)"]
 }

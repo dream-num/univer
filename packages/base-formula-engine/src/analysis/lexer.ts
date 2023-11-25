@@ -1,5 +1,6 @@
 import { Disposable, Nullable, Tools } from '@univerjs/core';
 
+import { FormulaAstLRU } from '../basics/cache-lru';
 import { ErrorType } from '../basics/error-type';
 import { isFormulaLexerToken } from '../basics/match-token';
 import { isReferenceString, REFERENCE_SINGLE_RANGE_REGEX } from '../basics/regex';
@@ -25,6 +26,12 @@ enum bracketType {
     LAMBDA,
 }
 
+const FORMULA_CACHE_LRU_COUNT = 100000;
+
+export const FormulaLexerNodeCache = new FormulaAstLRU<LexerNode>(FORMULA_CACHE_LRU_COUNT);
+
+export const FormulaSequenceNodeCache = new FormulaAstLRU<Array<string | ISequenceNode>>(FORMULA_CACHE_LRU_COUNT);
+
 export class LexerTreeBuilder extends Disposable {
     private _currentLexerNode: LexerNode = new LexerNode();
 
@@ -47,6 +54,10 @@ export class LexerTreeBuilder extends Disposable {
     override dispose(): void {
         this._resetTemp();
         this._currentLexerNode.dispose();
+
+        FormulaLexerNodeCache.clear();
+
+        FormulaSequenceNodeCache.clear();
     }
 
     getUpLevel() {
@@ -182,6 +193,11 @@ export class LexerTreeBuilder extends Disposable {
     }
 
     sequenceNodesBuilder(formulaString: string) {
+        const sequenceNodesCache = FormulaSequenceNodeCache.get(formulaString);
+        if (sequenceNodesCache) {
+            return sequenceNodesCache;
+        }
+
         const sequenceArray = this._getSequenceArray(formulaString);
         if (sequenceArray.length === 0) {
             return;
@@ -294,6 +310,8 @@ export class LexerTreeBuilder extends Disposable {
         // }
         // console.log('sequenceString', sequenceString);
 
+        FormulaSequenceNodeCache.set(formulaString, newSequenceNodes);
+
         return newSequenceNodes;
     }
 
@@ -381,6 +399,13 @@ export class LexerTreeBuilder extends Disposable {
     }
 
     treeBuilder(formulaString: string, transformSuffix = true) {
+        if (transformSuffix === true) {
+            const lexerNode = FormulaLexerNodeCache.get(formulaString);
+            if (lexerNode) {
+                return lexerNode;
+            }
+        }
+
         this._resetCurrentLexerNode();
 
         this._currentLexerNode.setToken(DEFAULT_TOKEN_TYPE_ROOT);
@@ -398,6 +423,8 @@ export class LexerTreeBuilder extends Disposable {
 
         if (transformSuffix) {
             this._suffixExpressionHandler(this._currentLexerNode);
+
+            FormulaLexerNodeCache.set(formulaString, this._currentLexerNode);
         }
 
         return this._currentLexerNode;

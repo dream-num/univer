@@ -6,8 +6,9 @@ import { LexerNode } from '../analysis/lexer-node';
 import { AstTreeBuilder } from '../analysis/parser';
 import { AstRootNode, FunctionNode, PrefixNode, SuffixNode } from '../ast-node';
 import { BaseAstNode, ErrorNode } from '../ast-node/base-ast-node';
-import { FormulaASTCache } from '../ast-node/cache-lru';
 import { NodeType } from '../ast-node/node-type';
+import { FormulaAstLRU } from '../basics/cache-lru';
+import { IFormulaData } from '../basics/common';
 import { ErrorType } from '../basics/error-type';
 import { PreCalculateNodeType } from '../basics/node-type';
 import { prefixToken, suffixToken } from '../basics/token';
@@ -16,6 +17,10 @@ import { BaseReferenceObject } from '../reference-object/base-reference-object';
 import { IFormulaCurrentConfigService } from '../services/current-data.service';
 import { IFormulaRuntimeService } from '../services/runtime.service';
 import { FormulaDependencyTree } from './dependency-tree';
+
+const FORMULA_CACHE_LRU_COUNT = 100000;
+
+export const FormulaASTCache = new FormulaAstLRU<AstRootNode>(FORMULA_CACHE_LRU_COUNT);
 
 @OnLifecycle(LifecycleStages.Rendered, FormulaDependencyGenerator)
 export class FormulaDependencyGenerator extends Disposable {
@@ -60,6 +65,14 @@ export class FormulaDependencyGenerator extends Disposable {
 
         const formulaData = this._currentConfigService.getFormulaData();
 
+        const treeList = await this._generateTreeList(formulaData);
+
+        const updateTreeList = this._getUpdateTreeListAndMakeDependency(treeList);
+
+        return Promise.resolve(this._calculateRunList(updateTreeList));
+    }
+
+    private async _generateTreeList(formulaData: IFormulaData) {
         const formulaDataKeys = Object.keys(formulaData);
 
         const treeList: FormulaDependencyTree[] = [];
@@ -106,9 +119,7 @@ export class FormulaDependencyGenerator extends Disposable {
             }
         }
 
-        const updateTreeList = this._getUpdateTreeListAndMakeDependency(treeList);
-
-        return Promise.resolve(this._calculateRunList(updateTreeList));
+        return treeList;
     }
 
     private _generateAstNode(formulaString: string) {

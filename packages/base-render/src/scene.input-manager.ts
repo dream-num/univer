@@ -22,7 +22,7 @@ export class InputManager {
     /** Time in milliseconds to wait to raise long press events if button is still pressed */
     static LongPressDelay = 500; // in milliseconds
 
-    /** Time in milliseconds with two consecutive clicks will be considered as a double click */
+    /** Time in milliseconds with two consecutive clicks will be considered as a double or triple click */
     static DoubleOrTripleClickDelay = 600; // in milliseconds
 
     /** If you need to check double click without raising a single click at first click, enable this flag */

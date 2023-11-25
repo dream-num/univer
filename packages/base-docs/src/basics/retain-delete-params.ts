@@ -1,6 +1,4 @@
-import { ITextRange } from '@univerjs/core';
-
-import { IDeleteMutationParams, IRetainMutationParams } from '../commands/mutations/core-editing.mutation';
+import { IDeleteMutationParams, IRetainMutationParams, ITextRange } from '@univerjs/core';
 
 export function getRetainAndDeleteFromReplace(
     range: ITextRange,

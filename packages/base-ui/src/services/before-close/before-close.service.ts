@@ -16,24 +16,24 @@ export interface IBeforeCloseService {
 export const IBeforeCloseService = createIdentifier<IBeforeCloseService>('univer.ui.before-close-service');
 
 export class DesktopBeforeCloseService implements IBeforeCloseService {
-    private callbacks: Array<() => string | undefined> = [];
+    private _callbacks: Array<() => string | undefined> = [];
 
     constructor(@INotificationService private readonly _notificationService: INotificationService) {
         this._init();
     }
 
     registerBeforeClose(callback: () => string | undefined): IDisposable {
-        this.callbacks.push(callback);
+        this._callbacks.push(callback);
         return {
             dispose: () => {
-                this.callbacks = this.callbacks.filter((cb) => cb !== callback);
+                this._callbacks = this._callbacks.filter((cb) => cb !== callback);
             },
         };
     }
 
     private _init(): void {
         window.onbeforeunload = (event: BeforeUnloadEvent) => {
-            const message = this.callbacks
+            const message = this._callbacks
                 .map((callback) => callback())
                 .filter((m) => !!m)
                 .join('\n');

@@ -1,3 +1,4 @@
+import { IRenderManagerService } from '@univerjs/base-render';
 import { ISetRangeValuesMutationParams, SelectionManagerService, SetRangeValuesMutation } from '@univerjs/base-sheets';
 import {
     HTML_CLIPBOARD_MIME_TYPE,
@@ -16,12 +17,16 @@ import {
     ObjectMatrix,
     ObjectMatrixPrimitiveType,
     Rectangle,
+    ThemeService,
     toDisposable,
     Tools,
     Worksheet,
 } from '@univerjs/core';
 import { createIdentifier, IDisposable, Inject } from '@wendellhu/redi';
 
+import { ISelectionRenderService } from '../selection/selection-render.service';
+import { SelectionShape } from '../selection/selection-shape';
+import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { copyContentCache, extractId, genId } from './copy-content-cache';
 import { HtmlToUSMService } from './html-to-usm/converter';
 import {
@@ -60,7 +65,11 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @IClipboardInterfaceService private readonly _clipboardInterfaceService: IClipboardInterfaceService,
         @IUndoRedoService private readonly _undoRedoService: IUndoRedoService,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
+        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
+        @Inject(ThemeService) private readonly _themeService: ThemeService
     ) {
         super();
     }
@@ -112,6 +121,20 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
         // 8. write html and get plain text info the clipboard interface
         await this._clipboardInterfaceService.write(plain, html);
+
+        // @DR-Univer help me here :D
+        const scene = this._renderManagerService.getCurrent()?.scene;
+
+        const { rangeWithCoord, primaryWithCoord } =
+            this._selectionRenderService.convertSelectionRangeToData(selection);
+        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        if (!scene || !skeleton) return false;
+        const { rowHeaderWidth, columnHeaderHeight } = skeleton;
+
+        const control = new SelectionShape(scene, 10, false, this._themeService);
+        const style = this._selectionManagerService.createCopyPasteSelection();
+
+        control.update(rangeWithCoord, rowHeaderWidth, columnHeaderHeight, style, primaryWithCoord);
 
         // tell hooks to clean up
         hooks.forEach((h) => h.onAfterCopy?.());

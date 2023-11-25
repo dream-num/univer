@@ -1,6 +1,7 @@
 @toolbar-btn-size: 24px;
 
 .headerbar {
+    user-select: none;
     position: relative;
 
     > .header-menu {
@@ -27,9 +28,9 @@
 
             border-radius: 4px;
 
-        &:hover {
-            background-color: rgb(var(--grey-300));
-        }
+            &:hover {
+                background-color: rgb(var(--grey-300));
+            }
         }
 
     }
@@ -69,6 +70,8 @@
 }
 
 .toolbar {
+    user-select: none;
+
     position: relative;
 
     display: flex;
@@ -117,6 +120,75 @@
 
     &-item {
         &-select-button {
+            cursor: pointer;
+
+            position: relative;
+
+            overflow: hidden;
+            display: flex;
+            gap: var(--margin-xs);
+            align-items: center;
+
+            height: @toolbar-btn-size;
+            padding-right: 18px;
+
+            font-size: var(--font-size-lg);
+
+            border-radius: var(--border-radius-base);
+
+            &:hover {
+                background-color: rgb(var(--grey-100));
+
+                .toolbar {
+                    &-item {
+                        &-select-button {
+                            &-label {
+                                background-color: rgb(var(--grey-100));
+                            }
+                        }
+                    }
+                }
+            }
+
+            &-label {
+                position: relative;
+                z-index: 1;
+
+                display: flex;
+                align-items: center;
+
+                height: 100%;
+                padding: 0 var(--padding-xs);
+
+                &:hover {
+                    background-color: rgb(var(--grey-300)) !important;
+                }
+            }
+
+            &-arrow {
+                position: absolute;
+                top: 0;
+                left: 0;
+
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+
+                box-sizing: border-box;
+                width: 100%;
+                height: 100%;
+                padding-right: var(--padding-xs);
+
+                font-size: 10px;
+                color: rgb(var(--grey-400));
+
+                &:hover {
+                    background-color: rgb(var(--grey-300));
+                }
+            }
+        }
+
+        &-select {
             cursor: pointer;
 
             position: relative;

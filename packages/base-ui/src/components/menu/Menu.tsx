@@ -134,7 +134,13 @@ function MenuOptionsWrapper(props: IBaseMenuProps) {
                                 <CheckMarkSingle style={{ color: 'rgb(var(--success-color))' }} />
                             </span>
                         )}
-                        <CustomLabel value={option.value} label={option.label} icon={option.icon} onChange={onChange} />
+                        <CustomLabel
+                            value$={option.value$}
+                            value={option.value}
+                            label={option.label}
+                            icon={option.icon}
+                            onChange={onChange}
+                        />
                     </span>
                 </DesignMenuItem>
             );

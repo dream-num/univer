@@ -3,10 +3,11 @@ import { Dropdown, Tooltip } from '@univerjs/design';
 import { MoreDownSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
-import { Subscription } from 'rxjs';
+import { isObservable, Subscription } from 'rxjs';
 
 import { ComponentManager } from '../../../common/component-manager';
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
+import { useObservable } from '../../../components/hooks/observable';
 import { Menu } from '../../../components/menu/Menu';
 import {
     IDisplayMenuItem,
@@ -64,11 +65,16 @@ export function ToolbarItem(props: IDisplayMenuItem<IMenuItem>) {
 
     const tooltipTitle = localeService.t(tooltip ?? '') + (shortcut ? ` (${shortcut})` : '');
 
-    function renderSelectorType() {
+    function renderSelectorType(menuType: MenuItemType) {
         const { selections } = props as IDisplayMenuItem<IMenuSelectorItem>;
 
         const options = selections as IValueOption[];
-        const iconToDisplay = options?.find((o) => o.value === value)?.icon ?? icon;
+        let iconToDisplay = icon;
+        if (isObservable(icon)) {
+            iconToDisplay = useObservable(icon, undefined, true);
+        } else {
+            iconToDisplay = options?.find((o) => o.value === value)?.icon ?? icon;
+        }
 
         function handleSelect(option: IValueOption) {
             let commandId = id;
@@ -86,9 +92,16 @@ export function ToolbarItem(props: IDisplayMenuItem<IMenuItem>) {
             commandService.executeCommand(commandId, { value });
         }
 
-        return (
-            <Dropdown overlay={<Menu menuType={id} options={options} onOptionSelect={handleSelect} value={value} />}>
-                <div className={styles.toolbarItemSelectButton}>
+        function handleClick() {
+            if (menuType === MenuItemType.BUTTON_SELECTOR) {
+                const commandId = id;
+                commandService.executeCommand(commandId, { value });
+            }
+        }
+
+        return menuType === MenuItemType.BUTTON_SELECTOR ? (
+            <div className={styles.toolbarItemSelectButton}>
+                <div className={styles.toolbarItemSelectButtonLabel} onClick={handleClick}>
                     <CustomLabel
                         icon={iconToDisplay}
                         title={title!}
@@ -96,7 +109,26 @@ export function ToolbarItem(props: IDisplayMenuItem<IMenuItem>) {
                         label={label}
                         onChange={handleChange}
                     />
+                </div>
+                <Dropdown
+                    overlay={<Menu menuType={id} options={options} onOptionSelect={handleSelect} value={value} />}
+                >
                     <div className={styles.toolbarItemSelectButtonArrow}>
+                        <MoreDownSingle />
+                    </div>
+                </Dropdown>
+            </div>
+        ) : (
+            <Dropdown overlay={<Menu menuType={id} options={options} onOptionSelect={handleSelect} value={value} />}>
+                <div className={styles.toolbarItemSelect}>
+                    <CustomLabel
+                        icon={iconToDisplay}
+                        title={title!}
+                        value={value}
+                        label={label}
+                        onChange={handleChange}
+                    />
+                    <div className={styles.toolbarItemSelectArrow}>
                         <MoreDownSingle />
                     </div>
                 </div>
@@ -127,9 +159,10 @@ export function ToolbarItem(props: IDisplayMenuItem<IMenuItem>) {
 
     function renderItem() {
         switch (props.type) {
-            case MenuItemType.SUBITEMS:
+            case MenuItemType.BUTTON_SELECTOR:
             case MenuItemType.SELECTOR:
-                return renderSelectorType();
+            case MenuItemType.SUBITEMS:
+                return renderSelectorType(props.type);
             case MenuItemType.BUTTON:
             default:
                 return renderButtonType();

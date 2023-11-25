@@ -39,6 +39,7 @@ import {
     ICommandService,
     IUniverInstanceService,
     RANGE_TYPE,
+    ThemeService,
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
@@ -545,13 +546,15 @@ export function ResetTextColorMenuItemFactory(): IMenuButtonItem {
 
 export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     const commandService = accessor.get(ICommandService);
+    const themeService = accessor.get(ThemeService);
 
     return {
         id: SetRangeTextColorCommand.id,
         icon: 'FontColor',
         tooltip: 'toolbar.textColor.main',
+
         group: MenuGroup.TOOLBAR_FORMAT,
-        type: MenuItemType.SELECTOR,
+        type: MenuItemType.BUTTON_SELECTOR,
         positions: [MenuPosition.TOOLBAR_START],
         selections: [
             {
@@ -562,7 +565,7 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
             },
         ],
         value$: new Observable<string>((subscriber) => {
-            const defaultColor = '#000';
+            const defaultColor = themeService.getCurrentTheme().textColor;
             const disposable = commandService.onCommandExecuted((c) => {
                 if (c.id === SetRangeTextColorCommand.id) {
                     const color = (c.params as { value: string }).value;
@@ -588,12 +591,13 @@ export function ResetBackgroundColorMenuItemFactory(): IMenuButtonItem {
 
 export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     const commandService = accessor.get(ICommandService);
+    const themeService = accessor.get(ThemeService);
 
     return {
         id: SetBackgroundColorCommand.id,
         tooltip: 'toolbar.fillColor.main',
         group: MenuGroup.TOOLBAR_FORMAT,
-        type: MenuItemType.SELECTOR,
+        type: MenuItemType.BUTTON_SELECTOR,
         positions: [MenuPosition.TOOLBAR_START],
         icon: 'PaintBucket',
         selections: [
@@ -605,7 +609,7 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
             },
         ],
         value$: new Observable<string>((subscriber) => {
-            const defaultColor = '#fff';
+            const defaultColor = themeService.getCurrentTheme().primaryColor;
             const disposable = commandService.onCommandExecuted((c) => {
                 if (c.id === SetBackgroundColorCommand.id) {
                     const color = (c.params as { value: string }).value;

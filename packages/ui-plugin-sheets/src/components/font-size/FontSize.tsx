@@ -27,6 +27,7 @@ export const FontSize = (props: IFontSizeProps) => {
     return (
         <div className={styles.uiPluginSheetsFontSize}>
             <InputNumber
+                className={styles.uiPluginSheetsFontSizeInput}
                 value={_value}
                 controls={false}
                 min={min}

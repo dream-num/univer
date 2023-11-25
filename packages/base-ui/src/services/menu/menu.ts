@@ -34,6 +34,8 @@ export const enum MenuItemType {
     BUTTON,
     /** Menu item with submenus. Submenus could be other IMenuItem or an ID of a registered component. */
     SELECTOR,
+    /** Button style menu item with a dropdown menu. */
+    BUTTON_SELECTOR,
     /** Submenus have to specific features and do not invoke commands. */
     SUBITEMS,
 }
@@ -44,7 +46,7 @@ interface IMenuItemBase<V> {
     subId?: string;
     title?: string;
     description?: string;
-    icon?: string;
+    icon?: string | Observable<string>;
     tooltip?: string;
 
     /** The group that the item belongs to. */
@@ -78,8 +80,9 @@ export interface IMenuButtonItem<V = undefined> extends IMenuItemBase<V> {
     activated$?: Observable<boolean>;
 }
 
-export interface IValueOption {
+export interface IValueOption<T = undefined> {
     value?: string | number;
+    value$?: Observable<T>;
     label?:
         | string
         | {
@@ -99,15 +102,15 @@ export interface ICustomComponentProps<T> {
     onChange: (v: T) => void;
 }
 
-export interface IMenuSelectorItem<V = MenuItemDefaultValueType> extends IMenuItemBase<V> {
-    type: MenuItemType.SELECTOR | MenuItemType.SUBITEMS;
+export interface IMenuSelectorItem<V = MenuItemDefaultValueType, T = undefined> extends IMenuItemBase<V> {
+    type: MenuItemType.SELECTOR | MenuItemType.BUTTON_SELECTOR | MenuItemType.SUBITEMS;
 
     // selections 子菜单可以为三种类型
     // 一个是当前 menu 的 options，选中后直接使用其 value 触发 command
     // 一个是一个特殊组件，比如 color picker，选中后直接使用其 value 触发 command
     // 一个是其他 menu 的 id，直接渲染成其他的 menu
     /** Options or IDs of registered components. */
-    selections?: IValueOption[] | Observable<IValueOption[]>;
+    selections?: Array<IValueOption<T>> | Observable<Array<IValueOption<T>>>;
 }
 
 export function isMenuSelectorItem<T extends MenuItemDefaultValueType>(v: IMenuItem): v is IMenuSelectorItem<T> {

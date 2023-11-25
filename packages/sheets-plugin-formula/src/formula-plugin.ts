@@ -10,7 +10,7 @@ import { FormulaDataModel, IFormulaConfig } from './models/formula-data.model';
 export class FormulaPlugin extends Plugin {
     static override type = PluginType.Sheet;
 
-    private _formulaDataModel: FormulaDataModel;
+    private _formulaDataModel: FormulaDataModel | null = null;
 
     constructor(
         private _config: IFormulaConfig | undefined,
@@ -41,6 +41,6 @@ export class FormulaPlugin extends Plugin {
     }
 
     override onReady(): void {
-        this._formulaDataModel.initFormulaData();
+        this._formulaDataModel?.initFormulaData();
     }
 }

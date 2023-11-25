@@ -54,6 +54,7 @@ export { ClearSelectionContentCommand } from './commands/commands/clear-selectio
 export { ClearSelectionFormatCommand } from './commands/commands/clear-selection-format.command';
 export { CopySheetCommand } from './commands/commands/copy-worksheet.command';
 export { DeleteRangeMoveLeftCommand } from './commands/commands/delete-range-move-left.command';
+export { type DeleteRangeMoveLeftCommandParams } from './commands/commands/delete-range-move-left.command';
 export { DeleteRangeMoveUpCommand } from './commands/commands/delete-range-move-up.command';
 export { InsertRangeMoveDownCommand } from './commands/commands/insert-range-move-down.command';
 export { InsertRangeMoveRightCommand } from './commands/commands/insert-range-move-right.command';
@@ -150,6 +151,8 @@ export {
     AddMergeUndoMutationFactory,
     AddWorksheetMergeMutation,
 } from './commands/mutations/add-worksheet-merge.mutation';
+export { DeleteRangeMutation } from './commands/mutations/delete-range.mutation';
+export { InsertRangeMutation } from './commands/mutations/insert-range.mutation';
 export {
     InsertColMutation,
     InsertColMutationUndoFactory,
@@ -157,7 +160,11 @@ export {
     InsertRowMutationUndoFactory,
 } from './commands/mutations/insert-row-col.mutation';
 export { InsertSheetMutation, InsertSheetUndoMutationFactory } from './commands/mutations/insert-sheet.mutation';
-export { MoveRowsMutation } from './commands/mutations/move-rows-cols.mutation';
+export { MoveRangeMutation } from './commands/mutations/move-range.mutation';
+export { type MoveRangeMutationParams } from './commands/mutations/move-range.mutation';
+export { type IMoveColumnsMutationParams } from './commands/mutations/move-rows-cols.mutation';
+export { type IMoveRowsMutationParams, MoveRowsMutation } from './commands/mutations/move-rows-cols.mutation';
+export { MoveColsMutation } from './commands/mutations/move-rows-cols.mutation';
 export { RemoveColMutation, RemoveRowMutation } from './commands/mutations/remove-row-col.mutation';
 export { RemoveSheetMutation, RemoveSheetUndoMutationFactory } from './commands/mutations/remove-sheet.mutation';
 export { RemoveWorksheetMergeMutation } from './commands/mutations/remove-worksheet-merge.mutation';

@@ -1,5 +1,5 @@
-import { ArrayFormulaDataType, IFormulaData } from '@univerjs/base-formula-engine';
-import { Disposable, ObjectMatrix } from '@univerjs/core';
+import { ArrayFormulaDataType, IFormulaData, IFormulaDataItem } from '@univerjs/base-formula-engine';
+import { Disposable, isFormulaId, isFormulaString, IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
 
 export interface IFormulaConfig {
     notExecuteFormula?: boolean;
@@ -12,12 +12,8 @@ export class FormulaDataModel extends Disposable {
 
     private _arrayFormulaData: ArrayFormulaDataType = {};
 
-    constructor(config?: IFormulaConfig) {
+    constructor(@IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService) {
         super();
-
-        if (config?.formulaData) {
-            this._formulaData = config.formulaData;
-        }
     }
 
     getFormulaData() {
@@ -41,6 +37,45 @@ export class FormulaDataModel extends Disposable {
             arrayFormula.forValue((r, c, v) => {
                 this._arrayFormulaData[sheetId].setValue(r, c, v);
             });
+        });
+    }
+
+    initFormulaData() {
+        // load formula data from workbook config data
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+        const unitId = workbook.getUnitId();
+        this._formulaData[unitId] = {};
+
+        const worksheets = workbook.getSheets();
+        worksheets.forEach((worksheet) => {
+            const cellMatrix = worksheet.getCellMatrix();
+            const formulaDataMatrix = new ObjectMatrix<IFormulaDataItem>();
+            cellMatrix.forValue((r, c, cell) => {
+                const formulaString = cell?.f || '';
+                const formulaId = cell?.si || '';
+
+                const checkFormulaString = isFormulaString(formulaString);
+                const checkFormulaId = isFormulaId(formulaId);
+
+                if (checkFormulaString && checkFormulaId) {
+                    formulaDataMatrix.setValue(r, c, {
+                        f: formulaString,
+                        si: formulaId,
+                    });
+                } else if (checkFormulaString && !checkFormulaId) {
+                    formulaDataMatrix.setValue(r, c, {
+                        f: formulaString,
+                    });
+                } else if (!checkFormulaString && checkFormulaId) {
+                    formulaDataMatrix.setValue(r, c, {
+                        f: '',
+                        si: formulaId,
+                    });
+                }
+            });
+
+            const sheetId = worksheet.getSheetId();
+            this._formulaData[unitId][sheetId] = formulaDataMatrix.getData();
         });
     }
 }

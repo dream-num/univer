@@ -60,7 +60,7 @@ export interface IFormulaDataItem {
     f: string; // formulaString
     x?: number; // Offset from x direction
     y?: number; // Offset from y direction
-    // si: string; // formulaId,
+    si?: string; // formulaId,
     // row: number;
     // column: number;
     // sheetId: string;

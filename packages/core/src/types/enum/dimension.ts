@@ -5,11 +5,11 @@
  */
 export enum Dimension {
     /**
-     * The column (vertical) dimension.
+     * The column (vertical) dimension. move left or right
      */
     COLUMNS,
     /**
-     * The row (horizontal) dimension.
+     * The row (horizontal) dimension. move up or down
      */
     ROWS,
 }

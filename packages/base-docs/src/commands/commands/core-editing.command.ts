@@ -1,7 +1,7 @@
 import { ITextRangeWithStyle } from '@univerjs/base-render';
 import {
     CommandType,
-    createEmptyDocSnapshot,
+    DEFAULT_EMPTY_DOCUMENT_VALUE,
     ICommand,
     ICommandService,
     IDocumentBody,
@@ -323,3 +323,11 @@ export const CoverCommand: ICommand<ICoverCommandParams> = {
         return true;
     },
 };
+
+function createEmptyDocSnapshot(): Partial<IDocumentData> {
+    return {
+        body: {
+            dataStream: DEFAULT_EMPTY_DOCUMENT_VALUE,
+        },
+    };
+}

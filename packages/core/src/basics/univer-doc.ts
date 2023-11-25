@@ -1,6 +1,6 @@
 import { Ctor, Inject, Injector } from '@wendellhu/redi';
 
-import { DocumentModel } from '../docs/domain/document-model';
+import { DocumentDataModel } from '../docs/data-model/document-data-model';
 import { Plugin, PluginCtor, PluginStore } from '../plugin/plugin';
 import { LifecycleStages } from '../services/lifecycle/lifecycle';
 import { LifecycleInitializerService, LifecycleService } from '../services/lifecycle/lifecycle.service';
@@ -53,8 +53,8 @@ export class UniverDoc extends Disposable {
         );
     }
 
-    createDoc(docData: Partial<IDocumentData>): DocumentModel {
-        return this._injector.createInstance(DocumentModel, docData);
+    createDoc(docData: Partial<IDocumentData>): DocumentDataModel {
+        return this._injector.createInstance(DocumentDataModel, docData);
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

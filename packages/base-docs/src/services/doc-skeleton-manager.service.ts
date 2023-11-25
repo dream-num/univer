@@ -1,5 +1,5 @@
 import { DocumentSkeleton } from '@univerjs/base-render';
-import { DocumentModel, IUniverInstanceService, LocaleService, Nullable } from '@univerjs/core';
+import { DocumentDataModel, IUniverInstanceService, LocaleService, Nullable } from '@univerjs/core';
 import { IDisposable, Inject } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 
@@ -84,15 +84,15 @@ export class DocSkeletonManagerService implements IDisposable {
     }
 
     setCurrent(searchParm: IDocSkeletonManagerSearch): Nullable<IDocSkeletonManagerParam> {
-        const param = this._getCurrentBySearch(searchParm);
+        const curSkeleton = this._getCurrentBySearch(searchParm);
 
-        if (param != null) {
-            if (param.dirty) {
-                param.skeleton.makeDirty(true);
-                param.dirty = false;
+        if (curSkeleton != null) {
+            if (curSkeleton.dirty) {
+                curSkeleton.skeleton.makeDirty(true);
+                curSkeleton.dirty = false;
             }
 
-            param.skeleton.calculate();
+            curSkeleton.skeleton.calculate();
         } else {
             const { unitId } = searchParm;
 
@@ -138,7 +138,7 @@ export class DocSkeletonManagerService implements IDisposable {
         return this._docSkeletonParam.find((param) => param.unitId === searchParm.unitId);
     }
 
-    private _buildSkeleton(documentModel: DocumentModel) {
+    private _buildSkeleton(documentModel: DocumentDataModel) {
         return DocumentSkeleton.create(documentModel, this._localeService);
     }
 }

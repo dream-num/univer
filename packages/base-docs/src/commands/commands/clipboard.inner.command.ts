@@ -4,22 +4,19 @@ import {
     getDocsUpdateBody,
     ICommand,
     ICommandService,
+    IDeleteMutationParams,
     IDocumentBody,
     IMutationInfo,
+    IRetainMutationParams,
     ITextRange,
     IUndoRedoService,
     IUniverInstanceService,
+    MemoryCursor,
 } from '@univerjs/core';
 
-import { MemoryCursor } from '../../basics/memory-cursor';
 import { getRetainAndDeleteFromReplace } from '../../basics/retain-delete-params';
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
-import {
-    IDeleteMutationParams,
-    IRetainMutationParams,
-    IRichTextEditingMutationParams,
-    RichTextEditingMutation,
-} from '../mutations/core-editing.mutation';
+import { IRichTextEditingMutationParams, RichTextEditingMutation } from '../mutations/core-editing.mutation';
 
 export interface IInnerPasteCommandParams {
     segmentId: string;

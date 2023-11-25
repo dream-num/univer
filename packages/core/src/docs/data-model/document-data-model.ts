@@ -1,7 +1,14 @@
+import { MemoryCursor } from '../../common/memory-cursor';
+import { getDocsUpdateBody, Nullable } from '../../shared';
+import { UpdateDocsAttributeType } from '../../shared/command-enum';
 import { Tools } from '../../shared/tools';
-import { IDocumentData, IDocumentRenderConfig } from '../../types/interfaces/i-document-data';
+import { IDocumentBody, IDocumentData, IDocumentRenderConfig } from '../../types/interfaces/i-document-data';
 import { IPaddingData } from '../../types/interfaces/i-style-data';
+import { recoveryBody, updateAttributeByDelete } from './apply-utils/delete-apply';
+import { updateAttributeByInsert } from './apply-utils/insert-apply';
+import { updateAttribute } from './apply-utils/update-apply';
 import { DocumentBodyModel } from './document-body-model';
+import { DocMutationParams } from './document-model-types';
 
 export const DEFAULT_DOC = {
     id: 'default_doc',
@@ -15,9 +22,9 @@ interface IDrawingUpdateConfig {
     width: number;
 }
 
-export type DocumentModelOrSimple = DocumentModelSimple | DocumentModel;
+export type DocumentModelOrSimple = DocumentDataModelSimple | DocumentDataModel;
 
-export class DocumentModelSimple {
+export class DocumentDataModelSimple {
     snapshot: IDocumentData;
 
     headerTreeMap!: Map<string, DocumentBodyModel>; // sub class should guarantee this is not null
@@ -46,12 +53,19 @@ export class DocumentModelSimple {
         return this.snapshot.lists;
     }
 
+    /**
+     * @deprecated use getBody to instead.
+     */
     get body() {
         return this.snapshot.body;
     }
 
     get zoomRatio() {
         return this.snapshot.settings?.zoomRatio || 1;
+    }
+
+    getBody() {
+        return this.snapshot.body;
     }
 
     dispose() {
@@ -172,11 +186,11 @@ export class DocumentModelSimple {
 
         const objectTransform = drawing.objectTransform;
 
-        objectTransform.size.width = config.width;
-        objectTransform.size.height = config.height;
+        objectTransform.size.width = width;
+        objectTransform.size.height = height;
 
-        objectTransform.positionH.posOffset = config.left;
-        objectTransform.positionV.posOffset = config.top;
+        objectTransform.positionH.posOffset = left;
+        objectTransform.positionV.posOffset = top;
     }
 
     setZoomRatio(zoomRatio: number = 1) {
@@ -190,16 +204,16 @@ export class DocumentModelSimple {
     }
 }
 
-const UNIT_ID_LENGTH = 6;
-
-export class DocumentModel extends DocumentModelSimple {
+export class DocumentDataModel extends DocumentDataModelSimple {
     private _unitId: string;
 
     constructor(snapshot: Partial<IDocumentData>) {
         super(snapshot);
 
+        const UNIT_ID_LENGTH = 6;
+
         this._unitId = this.snapshot.id ?? Tools.generateRandomId(UNIT_ID_LENGTH);
-        this._initializeRowColTree();
+        this._initializeHeaderFooterTree();
     }
 
     getRev(): number {
@@ -220,12 +234,150 @@ export class DocumentModel extends DocumentModelSimple {
         }
 
         this.snapshot = { ...DEFAULT_DOC, ...snapshot };
-        this._initializeRowColTree();
+        this._initializeHeaderFooterTree();
         this.bodyModel.reset(snapshot.body ?? { dataStream: '\r\n' });
     }
 
     getUnitId(): string {
         return this._unitId;
+    }
+
+    apply(mutations: DocMutationParams[]) {
+        const undoMutations: DocMutationParams[] = [];
+
+        const memoryCursor = new MemoryCursor();
+
+        memoryCursor.reset();
+
+        mutations.forEach((mutation) => {
+            // FIXME: @jocs Since updateApply modifies the mutation(used in undo/redo),
+            // so make a deep copy here, does updateApply need to
+            // be modified to have no side effects in the future?
+            mutation = Tools.deepClone(mutation);
+
+            if (mutation.t === 'r') {
+                const { coverType, body, len, segmentId } = mutation;
+
+                if (body != null) {
+                    const documentBody = this._updateApply(body, len, memoryCursor.cursor, coverType, segmentId);
+
+                    undoMutations.push({
+                        ...mutation,
+                        t: 'r',
+                        coverType: UpdateDocsAttributeType.REPLACE,
+                        body: documentBody,
+                    });
+                } else {
+                    undoMutations.push({
+                        ...mutation,
+                        t: 'r',
+                    });
+                }
+
+                memoryCursor.moveCursor(len);
+            } else if (mutation.t === 'i') {
+                const { body, len, segmentId, line } = mutation;
+
+                this._insertApply(body!, len, memoryCursor.cursor, segmentId);
+                memoryCursor.moveCursor(len);
+                undoMutations.push({
+                    t: 'd',
+                    len,
+                    line,
+                    segmentId,
+                });
+            } else if (mutation.t === 'd') {
+                const { len, segmentId } = mutation;
+                const documentBody = this._deleteApply(len, memoryCursor.cursor, segmentId);
+
+                undoMutations.push({
+                    ...mutation,
+                    t: 'i',
+                    body: documentBody,
+                });
+            } else {
+                throw new Error(`Unknown mutation type for mutation: ${mutation}.`);
+            }
+        });
+
+        return undoMutations;
+    }
+
+    private _updateApply(
+        updateBody: Nullable<IDocumentBody>,
+        textLength: number,
+        currentIndex: number,
+        coverType = UpdateDocsAttributeType.COVER,
+        segmentId?: string
+    ): IDocumentBody {
+        if (updateBody == null) {
+            throw new Error('updateBody is none');
+        }
+
+        const doc = this.snapshot;
+
+        const body = getDocsUpdateBody(doc, segmentId);
+
+        if (body == null) {
+            throw new Error('no body has changed');
+        }
+
+        return updateAttribute(body, updateBody, textLength, currentIndex, coverType);
+    }
+
+    private _deleteApply(textLength: number, currentIndex: number, segmentId?: string): IDocumentBody {
+        const doc = this.snapshot;
+
+        const bodyModel = this.getBodyModel(segmentId);
+
+        const body = getDocsUpdateBody(doc, segmentId);
+
+        if (body == null) {
+            throw new Error('no body has changed');
+        }
+
+        if (textLength <= 0) {
+            return { dataStream: '' };
+        }
+
+        bodyModel.delete(currentIndex, textLength);
+
+        const deleBody = updateAttributeByDelete(body, textLength, currentIndex);
+
+        recoveryBody(bodyModel, body, deleBody); // If the last paragraph in the document is deleted, restore an initial blank document.
+
+        // console.log('删除的model打印', bodyModel, body, deleBody);
+
+        return deleBody;
+    }
+
+    private _insertApply(insertBody: IDocumentBody, textLength: number, currentIndex: number, segmentId?: string) {
+        const doc = this.snapshot;
+
+        const bodyModel = this.getBodyModel(segmentId);
+
+        const body = getDocsUpdateBody(doc, segmentId);
+
+        if (textLength === 0) {
+            return;
+        }
+
+        if (body == null) {
+            throw new Error('no body has changed');
+        }
+
+        updateAttributeByInsert(body, insertBody, textLength, currentIndex);
+
+        if (insertBody.dataStream.length > 1 && /\r/.test(insertBody.dataStream)) {
+            // TODO: @JOCS, The DocumentDataModel needs to be rewritten to better support the
+            // large area of updates that are brought about by the paste, abstract the
+            // methods associated with the DocumentDataModel insertion, and support atomic operations
+            bodyModel.reset(body);
+        } else {
+            bodyModel.insert(insertBody, currentIndex);
+        }
+
+        // console.log('插入的model打印', bodyModel, textLength, currentIndex);
     }
 
     override updateDocumentId(unitId: string) {
@@ -234,8 +386,7 @@ export class DocumentModel extends DocumentModelSimple {
         this._unitId = unitId;
     }
 
-    // TODO: @jocs The function name and content don't match?
-    private _initializeRowColTree() {
+    private _initializeHeaderFooterTree() {
         this.headerTreeMap = new Map();
         this.footerTreeMap = new Map();
 
@@ -255,14 +406,4 @@ export class DocumentModel extends DocumentModelSimple {
             }
         }
     }
-}
-
-export const DEFAULT_EMPTY_DOCUMENT_VALUE = '\r\n';
-
-export function createEmptyDocSnapshot(): Partial<IDocumentData> {
-    return {
-        body: {
-            dataStream: DEFAULT_EMPTY_DOCUMENT_VALUE,
-        },
-    };
 }

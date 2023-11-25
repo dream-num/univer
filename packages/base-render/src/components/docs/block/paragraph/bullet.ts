@@ -3,7 +3,7 @@ import { IBullet, ILists, INestingLevel, ITextStyle, LocaleService, Nullable } f
 import { FontCache } from '../../../../basics/font-cache';
 import { IDocumentSkeletonBullet } from '../../../../basics/i-document-skeleton-cached';
 import { getFontStyleString } from '../../../../basics/tools';
-import { getBulletOrderedSymbol } from './bullet.-ruler';
+import { getBulletOrderedSymbol } from './bullet-ruler';
 
 export function dealWidthBullet(
     bullet?: IBullet,

@@ -3,7 +3,7 @@
 import {
     BooleanNumber,
     DEFAULT_EMPTY_DOCUMENT_VALUE,
-    DocumentModelSimple,
+    DocumentDataModelSimple,
     IBorderData,
     IColorStyle,
     IDocumentData,
@@ -94,7 +94,7 @@ export class RichText extends BaseObject {
             this._bd = props.bd;
             this._cl = props.cl;
 
-            this._documentData = this.convertToDocumentData(props.text || '');
+            this._documentData = this._convertToDocumentData(props.text || '');
         }
 
         if (this._allowCache) {
@@ -104,7 +104,7 @@ export class RichText extends BaseObject {
             });
         }
 
-        const docModel = new DocumentModelSimple(this._documentData);
+        const docModel = new DocumentDataModelSimple(this._documentData);
 
         this._documentSkeleton = DocumentSkeleton.create(docModel, this._localeService);
 
@@ -228,7 +228,7 @@ export class RichText extends BaseObject {
         this._documents.render(ctx);
     }
 
-    private convertToDocumentData(text: string) {
+    private _convertToDocumentData(text: string) {
         const contentLength = text.length;
         const documentData: IDocumentData = {
             id: 'd',

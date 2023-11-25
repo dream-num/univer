@@ -1,3 +1,4 @@
+/* eslint-disable no-magic-numbers */
 import { IRenderManagerService, IWheelEvent } from '@univerjs/base-render';
 import {
     Disposable,
@@ -72,11 +73,11 @@ export class ZoomController extends Disposable {
 
             this._initializedRender.add(unitId);
 
-            const { mainComponent, components, scene } = currentRender;
+            const { scene } = currentRender;
 
             this.disposeWithMe(
                 toDisposable(
-                    scene.onMouseWheelObserver.add((e: IWheelEvent, state) => {
+                    scene.onMouseWheelObserver.add((e: IWheelEvent) => {
                         if (!e.ctrlKey) {
                             return;
                         }

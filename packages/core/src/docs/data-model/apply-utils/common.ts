@@ -1,18 +1,15 @@
+import { horizontalLineSegmentsSubtraction, Nullable, sortRulesFactory, Tools } from '../../../shared';
+import { isSameStyleTextRun } from '../../../shared/compare';
 import {
-    DataStreamTreeTokenType,
-    horizontalLineSegmentsSubtraction,
     ICustomBlock,
     ICustomRange,
     IDocumentBody,
     IParagraph,
     ISectionBreak,
-    isSameStyleTextRun,
     ITable,
     ITextRun,
-    Nullable,
-    sortRulesFactory,
-    Tools,
-} from '@univerjs/core';
+} from '../../../types/interfaces';
+import { DataStreamTreeTokenType } from '../types';
 
 export function normalizeTextRuns(textRuns: ITextRun[]) {
     const results: ITextRun[] = [];

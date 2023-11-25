@@ -1,3 +1,4 @@
+/* eslint-disable no-magic-numbers */
 import {
     Documents,
     EVENT_TYPE,
@@ -11,7 +12,7 @@ import {
     Viewport,
 } from '@univerjs/base-render';
 import {
-    DocumentModel,
+    DocumentDataModel,
     EventState,
     IConfigService,
     IUniverInstanceService,
@@ -19,7 +20,7 @@ import {
     Nullable,
     OnLifecycle,
 } from '@univerjs/core';
-import { Inject, Injector } from '@wendellhu/redi';
+import { Inject } from '@wendellhu/redi';
 
 import {
     DOCS_COMPONENT_DEFAULT_Z_INDEX,
@@ -34,7 +35,7 @@ import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.serv
 export class DocCanvasView {
     private _scene!: Scene;
 
-    private _currentDocumentModel!: DocumentModel;
+    private _currentDocumentModel!: DocumentDataModel;
 
     private _loadedMap = new Set();
 
@@ -42,8 +43,7 @@ export class DocCanvasView {
         @IRenderManagerService private readonly _renderManagerService: RenderManagerService,
         @IConfigService private readonly _configService: IConfigService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
-        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
-        @Inject(Injector) private readonly _injector: Injector
+        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService
     ) {
         this._currentUniverService.currentDoc$.subscribe((documentModel) => {
             if (documentModel == null) {
@@ -117,7 +117,7 @@ export class DocCanvasView {
                 } else if (scene.scaleX + scrollNum < 0.1) {
                     scene.scale(0.1, 0.1);
                 } else {
-                    const value = e.deltaY > 0 ? 0.1 : -0.1;
+                    // const value = e.deltaY > 0 ? 0.1 : -0.1;
                     // scene.scaleBy(scrollNum, scrollNum);
                     e.preventDefault();
                 }

@@ -8,12 +8,14 @@ import {
     InsertColMutation,
     InsertRangeMutation,
     InsertRowMutation,
+    ISetRangeValuesMutationParams,
     MoveColsMutation,
     MoveRangeMutation,
     MoveRangeMutationParams,
     MoveRowsMutation,
     RemoveColMutation,
     RemoveRowMutation,
+    SetRangeValuesMutation,
 } from '@univerjs/base-sheets';
 import {
     Dimension,
@@ -104,7 +106,10 @@ export class UpdateFormulaController extends Disposable {
                         break;
                 }
 
-                // TODO@Dushusir: update formula
+                // TODO@Dushusir: update formula and get update cell data matrix
+                // if (result) {
+                //     this._updateFormula(cellValue);
+                // }
             })
         );
     }
@@ -185,6 +190,20 @@ export class UpdateFormulaController extends Disposable {
                 ranges,
             };
         }
+    }
+
+    private _updateFormula(cellValue: ObjectMatrixPrimitiveType<ICellData>) {
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+        const workbookId = workbook.getUnitId();
+        const worksheetId = workbook.getActiveSheet().getSheetId();
+
+        const setRangeValuesMutation: ISetRangeValuesMutationParams = {
+            worksheetId,
+            workbookId,
+            cellValue,
+        };
+
+        this._commandService.executeCommand(SetRangeValuesMutation.id, setRangeValuesMutation);
     }
 }
 

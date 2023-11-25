@@ -15,7 +15,7 @@ import {
 import { IAccessor } from '@wendellhu/redi';
 
 import { IFormulaInputService } from '../../services/formula-input.service';
-import { InsertFunctionCommand } from '../commands/insert-function.command';
+import { IInsertFunction, InsertFunctionCommand } from '../commands/insert-function.command';
 
 export interface IInsertFunctionOperationParams {
     /**
@@ -39,43 +39,43 @@ export const InsertFunctionOperation: ICommand = {
         const cellMatrix = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getCellMatrix();
 
         const { value } = params;
-
-        // Select a single range to insert a formula:
-        // 1. The entire row or column, first get the judgment result of the primary position, and then set the formula ID of other positions in sequence;
-        // 2. For multiple rows and multiple columns, only get the judgment result of the primary position, and enter the edit mode
-        if (currentSelections.length === 1) {
-            const { startRow, endRow, startColumn, endColumn } = currentSelections[0].range;
-            if (startRow !== endRow && startColumn !== endColumn) {
-                // TODO@Dushusir: Enter the editing mode
-                formulaInputService.inputFormula(value);
-                return false;
-            }
-        }
-
         const commandService = accessor.get(ICommandService);
+
+        // TODO@Dushusir: no match refRange situation, enter edit mode
 
         // In each range (whether it is an entire row or column or multiple rows and columns),
         // 1. First get the judgment result of the primary position, and then set the formula id of other positions;
         // 2. If there is no primary range, just judge the upper left corner cell.
-        const list = currentSelections.map((selection) => {
+        const list: IInsertFunction[] = [];
+        currentSelections.some((selection) => {
             const { range, primary } = selection;
 
             const row = primary?.actualRow ?? range.startRow;
             const column = primary?.actualColumn ?? range.startColumn;
 
             const refRange = findRefRange(cellMatrix, row, column);
-            const rangeString = refRange ? serializeRange(refRange) : '';
+
+            if (!refRange) {
+                formulaInputService.inputFormula(value);
+                return true;
+            }
+
+            const rangeString = serializeRange(refRange);
             const formulaString = `=${value}(${rangeString})`;
 
-            return {
+            list.push({
                 range,
                 primary: {
                     row,
                     column,
                 },
                 formula: formulaString,
-            };
+            });
+
+            return false;
         });
+
+        if (list) return false;
 
         return commandService.executeCommand(InsertFunctionCommand.id, {
             list,

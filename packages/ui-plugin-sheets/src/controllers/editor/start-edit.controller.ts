@@ -183,6 +183,7 @@ export class StartEditController extends Disposable {
         scaleY: number = 1
     ) {
         const { startX, startY, endX, endY } = actualRangeWithCoord;
+        const documentDataModel = this._currentUniverService.getCurrentUniverDocInstance();
         const { actualWidth, actualHeight } = this._predictingSize(
             actualRangeWithCoord,
             canvasOffset,
@@ -204,7 +205,7 @@ export class StartEditController extends Disposable {
         if (editorHeight < actualHeight) {
             editorHeight = actualHeight;
             // To restore the page margins for the skeleton.
-            documentSkeleton.getModel().updateDocumentDataMargin(paddingData);
+            documentDataModel.updateDocumentDataMargin(paddingData);
         } else {
             // Set the top margin under vertical alignment.
             let offsetTop = paddingData.t || 0;
@@ -219,7 +220,7 @@ export class StartEditController extends Disposable {
 
             offsetTop = offsetTop < (paddingData.t || 0) ? paddingData.t || 0 : offsetTop;
 
-            documentSkeleton.getModel().updateDocumentDataMargin({
+            documentDataModel.updateDocumentDataMargin({
                 t: offsetTop,
             });
         }
@@ -247,6 +248,8 @@ export class StartEditController extends Disposable {
 
         const { textRotation, wrapStrategy } = documentLayoutObject;
 
+        const documentDataModel = this._currentUniverService.getCurrentUniverDocInstance();
+
         const { a: angle } = textRotation as ITextRotation;
 
         const clientWidth = document.body.clientWidth;
@@ -259,7 +262,7 @@ export class StartEditController extends Disposable {
                 actualHeight: actualHeight * scaleY,
             };
         }
-        documentSkeleton.getModel().updateDocumentDataPageSize(clientWidth - startX - canvasOffset.left);
+        documentDataModel.updateDocumentDataPageSize(clientWidth - startX - canvasOffset.left);
         documentSkeleton.calculate();
 
         const size = documentSkeleton.getActualSize();
@@ -271,9 +274,9 @@ export class StartEditController extends Disposable {
         }
 
         // Scaling is handled by the renderer, so the skeleton only accepts the original width and height, which need to be divided by the magnification factor.
-        documentSkeleton.getModel()!.updateDocumentDataPageSize(editorWidth / scaleX);
+        documentDataModel.updateDocumentDataPageSize(editorWidth / scaleX);
 
-        documentSkeleton.getModel()!.updateDocumentRenderConfig({
+        documentDataModel.updateDocumentRenderConfig({
             horizontalAlign: HorizontalAlign.UNSPECIFIED,
         });
 
@@ -440,16 +443,16 @@ export class StartEditController extends Disposable {
 
             const { skeleton } = docParam;
 
-            const documentModel = skeleton.getModel() as DocumentDataModel;
+            const documentDataModel = this._currentUniverService.getCurrentUniverDocInstance();
 
             this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject, scaleX, scaleY);
 
             // move selection
             if (eventType === DeviceInputEventType.Keyboard) {
-                const snapshot = Tools.deepClone(documentModel.snapshot) as IDocumentData;
+                const snapshot = Tools.deepClone(documentDataModel.snapshot) as IDocumentData;
                 this._resetBodyStyle(snapshot.body!);
 
-                documentModel.reset(snapshot);
+                documentDataModel.reset(snapshot);
 
                 document.makeDirty();
 
@@ -467,7 +470,7 @@ export class StartEditController extends Disposable {
                 ]);
             } else {
                 // TODO: @JOCS, Get the position close to the cursor after clicking on the cell.
-                const cursor = documentModel.getBodyModel().getLastIndex() - 1 || 0;
+                const cursor = documentDataModel.getBody()!.dataStream.length - 2 || 0;
 
                 scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)?.scrollTo({
                     y: Infinity,

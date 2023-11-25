@@ -87,6 +87,7 @@ export class MoveCursorController extends Disposable {
     private _handleShiftMoveSelection(direction: Direction) {
         const activeRange = this._textSelectionRenderManager.getActiveRange();
         const allRanges = this._textSelectionRenderManager.getAllTextRanges();
+        const docDataModel = this._currentUniverService.getCurrentUniverDocInstance();
 
         const skeleton = this._docSkeletonManagerService.getCurrent()?.skeleton;
 
@@ -126,7 +127,7 @@ export class MoveCursorController extends Disposable {
               : endOffset;
 
         let focusOffset = collapsed ? endOffset : rangeDirection === RANGE_DIRECTION.FORWARD ? endOffset : startOffset;
-        const dataStreamLength = skeleton.getModel().getBodyModel().getBody().dataStream.length ?? Infinity;
+        const dataStreamLength = docDataModel.getBody()!.dataStream.length ?? Infinity;
 
         if (direction === Direction.LEFT || direction === Direction.RIGHT) {
             focusOffset = direction === Direction.RIGHT ? ++focusOffset : --focusOffset;
@@ -187,6 +188,7 @@ export class MoveCursorController extends Disposable {
     private _handleMoveCursor(direction: Direction) {
         const activeRange = this._textSelectionRenderManager.getActiveRange();
         const allRanges = this._textSelectionRenderManager.getAllTextRanges();
+        const docDataModel = this._currentUniverService.getCurrentUniverDocInstance();
 
         const skeleton = this._docSkeletonManagerService.getCurrent()?.skeleton;
 
@@ -197,7 +199,7 @@ export class MoveCursorController extends Disposable {
         }
 
         const { startOffset, endOffset, style, collapsed } = activeRange;
-        const dataStreamLength = skeleton.getModel().getBodyModel().getBody().dataStream.length ?? Infinity;
+        const dataStreamLength = docDataModel.getBody()!.dataStream.length ?? Infinity;
 
         if (direction === Direction.LEFT || direction === Direction.RIGHT) {
             let cursor;

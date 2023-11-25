@@ -638,7 +638,7 @@ export class DocumentSkeleton extends Skeleton {
                 // TODO
             }
 
-            const { pages, renderedBlockIdMap } = blockInfo;
+            const { pages } = blockInfo;
 
             // renderedBlockIdMap.forEach((value, blockId) => {
             //     this._renderedBlockIdMap.set(blockId, value);

@@ -94,7 +94,7 @@ export class RichText extends BaseObject {
             this._bd = props.bd;
             this._cl = props.cl;
 
-            this._documentData = this.convertToDocumentData(props.text || '');
+            this._documentData = this._convertToDocumentData(props.text || '');
         }
 
         if (this._allowCache) {
@@ -228,7 +228,7 @@ export class RichText extends BaseObject {
         this._documents.render(ctx);
     }
 
-    private convertToDocumentData(text: string) {
+    private _convertToDocumentData(text: string) {
         const contentLength = text.length;
         const documentData: IDocumentData = {
             id: 'd',

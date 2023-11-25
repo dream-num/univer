@@ -53,12 +53,19 @@ export class DocumentDataModelSimple {
         return this.snapshot.lists;
     }
 
+    /**
+     * @deprecated use getBody to instead.
+     */
     get body() {
         return this.snapshot.body;
     }
 
     get zoomRatio() {
         return this.snapshot.settings?.zoomRatio || 1;
+    }
+
+    getBody() {
+        return this.snapshot.body;
     }
 
     dispose() {

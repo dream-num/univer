@@ -128,14 +128,9 @@ export class DocClipboardController extends Disposable {
 
     private _getDocumentBodyInRanges(): IDocumentBody[] {
         const ranges = this._textSelectionRenderManager.getAllTextRanges();
-        const skeletonObject = this._docSkeletonManagerService.getCurrent();
+        const docDataModel = this._currentUniverService.getCurrentUniverDocInstance();
 
-        if (skeletonObject == null) {
-            return [];
-        }
-
-        const { skeleton } = skeletonObject;
-        const { dataStream, textRuns = [], paragraphs = [] } = skeleton.getModel().getBodyModel().getBody();
+        const { dataStream, textRuns = [], paragraphs = [] } = docDataModel.getBody()!;
 
         const results: IDocumentBody[] = [];
 

@@ -101,6 +101,12 @@ export interface ITextSelectionRenderManager {
         }
     >;
 
+    handleDblClick(
+        evt: IPointerEvent | IMouseEvent,
+        documentOffsetConfig: IDocumentOffsetConfig,
+        viewport: Nullable<Viewport>
+    ): void;
+
     eventTrigger(
         evt: IPointerEvent | IMouseEvent,
         documentOffsetConfig: IDocumentOffsetConfig,
@@ -351,6 +357,73 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         if (documentOffsetConfig) {
             this._documentOffsetConfig = documentOffsetConfig;
+        }
+    }
+
+    // Handler double click.
+    handleDblClick(
+        evt: IPointerEvent | IMouseEvent,
+        documentOffsetConfig: IDocumentOffsetConfig,
+        viewportMain: Nullable<Viewport>
+    ) {
+        if (!this._scene || !this._isSelectionEnabled) {
+            return;
+        }
+
+        if (viewportMain != null) {
+            this._activeViewport = viewportMain;
+        }
+
+        this._documentOffsetConfig = documentOffsetConfig;
+
+        const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
+
+        const startNode = this._findNodeByCoord(evtOffsetX, evtOffsetY);
+        if (startNode == null || startNode.node == null) {
+            return;
+        }
+
+        const { spanGroup, st } = startNode.node.parent!;
+        const content = spanGroup.map((span) => span.content).join('');
+        const nodeIndex = spanGroup.indexOf(startNode.node);
+
+        if (nodeIndex === -1) {
+            return;
+        }
+
+        // Firefox do not support Segmenter, so you need a Segmenter polyfill if you want use it in Firefox.
+        // TODO: @JOCS write this in DOCS or README when we publish the package.
+        if (Intl.Segmenter == null) {
+            return;
+        }
+
+        // Create a locale-specific word segmenter
+        const segmenter = new Intl.Segmenter(undefined, { granularity: 'word' });
+        const segments = segmenter.segment(content);
+
+        let startOffset = -Infinity;
+        let endOffset = -Infinity;
+
+        // Use that for segmentation
+        for (const { segment, index, isWordLike } of segments) {
+            if (index <= nodeIndex && nodeIndex <= index + segment.length && isWordLike) {
+                startOffset = index + st;
+                endOffset = index + st + segment.length;
+            }
+        }
+
+        if (Number.isFinite(startOffset) && Number.isFinite(endOffset)) {
+            this.removeAllTextRanges();
+
+            const textRanges: ITextRangeWithStyle[] = [
+                {
+                    startOffset,
+                    endOffset,
+                    collapsed: startOffset === endOffset,
+                },
+            ];
+
+            this.addTextRanges(textRanges);
         }
     }
 

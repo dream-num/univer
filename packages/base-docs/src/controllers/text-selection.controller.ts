@@ -1,6 +1,5 @@
 import {
     CURSOR_TYPE,
-    Documents,
     IMouseEvent,
     IPointerEvent,
     IRenderManagerService,
@@ -35,6 +34,8 @@ export class TextSelectionController extends Disposable {
     private _moveOutObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 
     private _downObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
+
+    private _dblClickObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 
     private _loadedMap = new Set();
 
@@ -73,10 +74,11 @@ export class TextSelectionController extends Disposable {
             if (mainComponent == null) {
                 return;
             }
-            const document = mainComponent as Documents;
-            document.onPointerEnterObserver.remove(this._moveInObserver);
-            document.onPointerLeaveObserver.remove(this._moveOutObserver);
-            document.onPointerLeaveObserver.remove(this._downObserver);
+
+            mainComponent.onPointerEnterObserver.remove(this._moveInObserver);
+            mainComponent.onPointerLeaveObserver.remove(this._moveOutObserver);
+            mainComponent.onPointerDownObserver.remove(this._downObserver);
+            mainComponent.onDblclickObserver.remove(this._dblClickObserver);
         });
     }
 
@@ -119,6 +121,10 @@ export class TextSelectionController extends Disposable {
             if (evt.button !== 2) {
                 state.stopPropagation();
             }
+        });
+
+        this._dblClickObserver = document?.onDblclickObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+            this._textSelectionRenderManager.handleDblClick(evt, document.getOffsetConfig(), viewportMain);
         });
     }
 

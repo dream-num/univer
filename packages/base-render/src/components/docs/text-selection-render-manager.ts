@@ -501,6 +501,8 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             return;
         }
 
+        this.removeAllTextRanges();
+
         const { st, ed } = paragraphInfo;
 
         const textRanges: ITextRangeWithStyle[] = [

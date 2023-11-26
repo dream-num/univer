@@ -1,6 +1,7 @@
 import { Disposable, DisposableCollection, Nullable, toDisposable } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
+import { share } from 'rxjs/operators';
 
 export type SocketBodyType = string | ArrayBufferLike | Blob | ArrayBufferView;
 
@@ -27,10 +28,10 @@ export interface ISocket {
      */
     send(data: SocketBodyType): void;
 
-    close$: Observable<[ISocket, CloseEvent]>;
-    error$: Observable<[ISocket, Event]>;
-    message$: Observable<[ISocket, MessageEvent]>;
-    open$: Observable<[ISocket, Event]>;
+    close$: Observable<CloseEvent>;
+    error$: Observable<Event>;
+    message$: Observable<MessageEvent>;
+    open$: Observable<Event>;
 }
 
 /**
@@ -51,26 +52,26 @@ export class WebSocketService extends Disposable implements ISocketService {
                 send: (data: SocketBodyType) => {
                     connection.send(data);
                 },
-                open$: new Observable((subscriber) => {
-                    const callback = (event: Event) => subscriber.next([webSocket, event]);
+                open$: new Observable<Event>((subscriber) => {
+                    const callback = (event: Event) => subscriber.next(event);
                     connection.addEventListener('open', callback);
                     disposables.add(toDisposable(() => connection.removeEventListener('open', callback)));
-                }),
-                close$: new Observable((subscriber) => {
-                    const callback = (event: CloseEvent) => subscriber.next([webSocket, event]);
+                }).pipe(share()),
+                close$: new Observable<CloseEvent>((subscriber) => {
+                    const callback = (event: CloseEvent) => subscriber.next(event);
                     connection.addEventListener('close', callback);
                     disposables.add(toDisposable(() => connection.removeEventListener('close', callback)));
-                }),
-                error$: new Observable((subscriber) => {
-                    const callback = (event: Event) => subscriber.next([webSocket, event]);
+                }).pipe(share()),
+                error$: new Observable<Event>((subscriber) => {
+                    const callback = (event: Event) => subscriber.next(event);
                     connection.addEventListener('error', callback);
                     disposables.add(toDisposable(() => connection.removeEventListener('error', callback)));
-                }),
-                message$: new Observable((subscriber) => {
-                    const callback = (event: MessageEvent) => subscriber.next([webSocket, event]);
+                }).pipe(share()),
+                message$: new Observable<MessageEvent>((subscriber) => {
+                    const callback = (event: MessageEvent) => subscriber.next(event);
                     connection.addEventListener('message', callback);
                     disposables.add(toDisposable(() => connection.removeEventListener('message', callback)));
-                }),
+                }).pipe(share()),
             };
 
             return webSocket;

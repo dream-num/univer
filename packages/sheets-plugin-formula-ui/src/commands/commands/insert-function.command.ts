@@ -2,7 +2,7 @@ import { ISetRangeValuesCommandParams, SetRangeValuesCommand } from '@univerjs/b
 import { CommandType, ICellData, ICommand, ICommandService, IRange, ObjectMatrix, Tools } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
-interface IInsertFunction {
+export interface IInsertFunction {
     /**
      * The range into which the function is to be inserted
      */
@@ -28,7 +28,7 @@ export interface IInsertFunctionCommandParams {
 
 export const InsertFunctionCommand: ICommand = {
     id: 'formula-ui.command.insert-function',
-    type: CommandType.OPERATION,
+    type: CommandType.COMMAND,
     handler: async (accessor: IAccessor, params: IInsertFunctionCommandParams) => {
         const { list } = params;
         const commandService = accessor.get(ICommandService);

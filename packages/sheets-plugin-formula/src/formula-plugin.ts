@@ -4,10 +4,13 @@ import { Dependency, Inject, Injector } from '@wendellhu/redi';
 import { FORMULA_PLUGIN_NAME } from './common/plugin-name';
 import { CalculateController } from './controllers/calculate.controller';
 import { FormulaController } from './controllers/formula.controller';
+import { UpdateFormulaController } from './controllers/update-formula.controller';
 import { FormulaDataModel, IFormulaConfig } from './models/formula-data.model';
 
 export class FormulaPlugin extends Plugin {
     static override type = PluginType.Sheet;
+
+    private _formulaDataModel: FormulaDataModel | null = null;
 
     constructor(
         private _config: IFormulaConfig | undefined,
@@ -17,15 +20,17 @@ export class FormulaPlugin extends Plugin {
     }
 
     initialize(): void {
+        this._formulaDataModel = this._injector.createInstance(FormulaDataModel);
         const dependencies: Dependency[] = [
             // models
-            [FormulaDataModel, { useFactory: () => this._injector.createInstance(FormulaDataModel, this._config) }],
+            [FormulaDataModel, { useValue: this._formulaDataModel }],
             // controllers
             [FormulaController],
         ];
 
         if (!this._config?.notExecuteFormula) {
             dependencies.push([CalculateController]);
+            dependencies.push([UpdateFormulaController]);
         }
 
         dependencies.forEach((dependency) => this._injector.add(dependency));
@@ -33,5 +38,9 @@ export class FormulaPlugin extends Plugin {
 
     override onStarting(): void {
         this.initialize();
+    }
+
+    override onReady(): void {
+        this._formulaDataModel?.initFormulaData();
     }
 }

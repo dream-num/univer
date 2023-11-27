@@ -1,0 +1,31 @@
+{
+  "name": "@univerjs/uniscript",
+  "private": true,
+  "author": "DreamNum Inc. <developer@univer.ai>",
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
+  "dependencies": {
+    "@univerjs/core": "workspace:*",
+    "@univerjs/base-ui": "workspace:*",
+    "@univerjs/design": "workspace:*",
+    "@univerjs/base-sheets": "workspace:*",
+    "@univerjs/ui-plugin-sheets": "workspace:*",
+    "@wendellhu/redi": "^0.12.10",
+        "rxjs": "^7.8.1"
+  },
+  "devDependencies": {
+
+        "@types/react": "^18.2.38",
+        "@types/react-dom": "^18.2.15",
+    "@types/node": "^20.9.0",
+    "@types/numeral": "^2.0.5",
+    "@vitest/coverage-istanbul": "^0.34.6",
+    "esbuild": "^0.19.5",
+    "less": "^4.2.0",
+    "ts-node": "^10.9.1",
+    "vitest": "^0.34.6"
+  },
+    "peerDependencies": {
+        "monaco-editor": "0.44.0"
+    }
+}

@@ -31,7 +31,9 @@
         "@univerjs/sheets-plugin-numfmt": "workspace:*",
         "@univerjs/ui-plugin-docs": "workspace:*",
         "@univerjs/ui-plugin-sheets": "workspace:*",
-        "@wendellhu/redi": "^0.12.11"
+        "@univerjs/uniscript": "workspace:*",
+        "@wendellhu/redi": "^0.12.11",
+        "monaco-editor": "0.44.0"
     },
     "devDependencies": {
         "esbuild": "^0.19.7",

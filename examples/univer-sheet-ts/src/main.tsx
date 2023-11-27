@@ -51,6 +51,8 @@ univer.registerPlugin(UniverRPCMainThreadPlugin, {
     unsyncMutations: new Set([RichTextEditingMutation.id]),
 } as IUniverRPCMainThreadPluginConfig);
 
+univer.registerPlugin(UniscriptPlugin);
+
 // create univer sheet instance
 univer.createUniverSheet(DEFAULT_WORKBOOK_DATA_DEMO);
 

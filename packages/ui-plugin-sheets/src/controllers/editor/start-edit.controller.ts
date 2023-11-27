@@ -1,7 +1,6 @@
 import {
     DOCS_COMPONENT_MAIN_LAYER_INDEX,
     DocSkeletonManagerService,
-    DocViewModelManagerService,
     IRichTextEditingMutationParams,
     NORMAL_TEXT_SELECTION_PLUGIN_NAME,
     RichTextEditingMutation,
@@ -75,7 +74,6 @@ export class StartEditController extends Disposable {
 
     constructor(
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
-        @Inject(DocViewModelManagerService) private readonly _docViewModelManagerService: DocViewModelManagerService,
         @IContextService private readonly _contextService: IContextService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
@@ -436,16 +434,15 @@ export class StartEditController extends Disposable {
 
             this._contextService.setContextValue(FOCUSING_EDITOR, true);
 
+            const { documentModel: documentDataModel, documentViewModel } = documentLayoutObject;
+
             const docParam = this._docSkeletonManagerService.getCurrent();
 
-            if (docParam == null) {
+            if (docParam == null || documentDataModel == null || documentViewModel == null) {
                 return;
             }
 
             const { skeleton } = docParam;
-
-            const documentDataModel = this._currentUniverService.getCurrentUniverDocInstance();
-            const documentViewModel = this._docViewModelManagerService.getCurrent()?.docViewModel;
 
             this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject, scaleX, scaleY);
 
@@ -455,7 +452,7 @@ export class StartEditController extends Disposable {
                 this._resetBodyStyle(snapshot.body!);
 
                 documentDataModel.reset(snapshot);
-                documentViewModel?.reset(documentDataModel);
+                documentViewModel.reset(documentDataModel);
 
                 document.makeDirty();
 

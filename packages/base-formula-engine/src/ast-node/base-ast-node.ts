@@ -6,9 +6,9 @@ import { ErrorValueObject } from '../other-object/error-value-object';
 import { FunctionVariantType } from '../reference-object/base-reference-object';
 import { NodeType } from './node-type';
 
-interface AstNodeNodeJson {
+interface IAstNodeNodeJson {
     token: string;
-    children?: AstNodeNodeJson[];
+    children?: IAstNodeNodeJson[];
     nodeType: string;
 }
 
@@ -110,7 +110,7 @@ export class BaseAstNode extends Disposable {
         const token = this.getToken();
         const children = this.getChildren();
 
-        const childrenSerialization: AstNodeNodeJson[] = [];
+        const childrenSerialization: IAstNodeNodeJson[] = [];
         const childrenCount = children.length;
 
         for (let i = 0; i < childrenCount; i++) {
@@ -118,7 +118,7 @@ export class BaseAstNode extends Disposable {
             childrenSerialization.push(item.serialize());
         }
 
-        const result: AstNodeNodeJson = {
+        const result: IAstNodeNodeJson = {
             token,
             nodeType: this.nodeType,
         };

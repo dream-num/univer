@@ -5,8 +5,6 @@ import {
     AbsoluteRefType,
     deserializeRangeWithSheet,
     Disposable,
-    getAbsoluteRefTypeWithSingleString,
-    getAbsoluteRefTypeWitString,
     ICommandInfo,
     ICommandService,
     LifecycleStages,
@@ -168,29 +166,37 @@ export class FormulaInputController extends Disposable {
 
     private _changeRangeRef(token: string) {
         const range = deserializeRangeWithSheet(token).range;
-        const type = getAbsoluteRefTypeWitString(token);
         let resultToken = '';
-        if (type === AbsoluteRefType.NONE) {
-            resultToken = serializeRange(range, AbsoluteRefType.ALL);
+        if (range.startAbsoluteRefType === AbsoluteRefType.NONE || range.startAbsoluteRefType == null) {
+            range.startAbsoluteRefType = AbsoluteRefType.ALL;
+            range.endAbsoluteRefType = AbsoluteRefType.ALL;
         } else {
-            resultToken = serializeRange(range, AbsoluteRefType.NONE);
+            range.startAbsoluteRefType = AbsoluteRefType.NONE;
+            range.endAbsoluteRefType = AbsoluteRefType.NONE;
         }
+        resultToken = serializeRange(range);
         return resultToken;
     }
 
     private _changeSingleRef(token: string) {
         const range = deserializeRangeWithSheet(token).range;
-        const type = getAbsoluteRefTypeWithSingleString(token);
+        const type = range.startAbsoluteRefType;
         let resultToken = '';
-        if (type === AbsoluteRefType.NONE) {
-            resultToken = serializeRange(range, AbsoluteRefType.ALL);
+        if (type === AbsoluteRefType.NONE || type == null) {
+            range.startAbsoluteRefType = AbsoluteRefType.ALL;
+            range.endAbsoluteRefType = AbsoluteRefType.ALL;
         } else if (type === AbsoluteRefType.ALL) {
-            resultToken = serializeRange(range, AbsoluteRefType.ROW);
+            range.startAbsoluteRefType = AbsoluteRefType.ROW;
+            range.endAbsoluteRefType = AbsoluteRefType.ROW;
         } else if (type === AbsoluteRefType.ROW) {
-            resultToken = serializeRange(range, AbsoluteRefType.COLUMN);
+            range.startAbsoluteRefType = AbsoluteRefType.COLUMN;
+            range.endAbsoluteRefType = AbsoluteRefType.COLUMN;
         } else {
-            resultToken = serializeRange(range, AbsoluteRefType.NONE);
+            range.startAbsoluteRefType = AbsoluteRefType.NONE;
+            range.endAbsoluteRefType = AbsoluteRefType.NONE;
         }
+
+        resultToken = serializeRange(range);
         return resultToken;
     }
 

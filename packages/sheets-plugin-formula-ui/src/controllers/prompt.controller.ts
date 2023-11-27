@@ -453,9 +453,17 @@ export class PromptController extends Disposable {
 
                     const difference = formulaString.length - node.token.length;
 
-                    node.token = formulaString;
+                    // node.token = formulaString;
 
-                    node.endIndex += difference;
+                    // node.endIndex += difference;
+
+                    const newNode = { ...node };
+
+                    newNode.token = formulaString;
+
+                    newNode.endIndex += difference;
+
+                    lastSequenceNodes[nodeIndex] = newNode;
 
                     lastSequenceNodes.splice(nodeIndex + 1, 0, matchToken.OPEN_BRACKET);
 
@@ -467,8 +475,15 @@ export class PromptController extends Disposable {
                             continue;
                         }
 
-                        node.startIndex += formulaStringCount;
-                        node.endIndex += formulaStringCount;
+                        // node.startIndex += formulaStringCount;
+                        // node.endIndex += formulaStringCount;
+
+                        const newNode = { ...node };
+
+                        newNode.startIndex += formulaStringCount;
+                        newNode.endIndex += formulaStringCount;
+
+                        lastSequenceNodes[i] = newNode;
                     }
 
                     this._syncToEditor(lastSequenceNodes, node.endIndex + 2);

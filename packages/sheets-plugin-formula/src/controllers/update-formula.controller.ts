@@ -3,6 +3,7 @@ import {
     generateStringWithSequence,
     IFormulaData,
     IFormulaDataItem,
+    ISequenceNode,
     IUnitSheetNameMap,
     sequenceNodeType,
 } from '@univerjs/base-formula-engine';
@@ -40,6 +41,7 @@ import {
     ObjectMatrix,
     ObjectMatrixPrimitiveType,
     OnLifecycle,
+    serializeRangeToRefString,
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
@@ -270,11 +272,13 @@ export class UpdateFormulaController extends Disposable {
                     }
 
                     let shouldModify = false;
-                    for (const sequence of sequenceNodes) {
-                        if (typeof sequence === 'string' || sequence.nodeType !== sequenceNodeType.REFERENCE) {
+                    const refChangeIds: number[] = [];
+                    for (let i = 0, len = sequenceNodes.length; i < len; i++) {
+                        const node = sequenceNodes[i];
+                        if (typeof node === 'string' || node.nodeType !== sequenceNodeType.REFERENCE) {
                             continue;
                         }
-                        const { token } = sequence;
+                        const { token } = node;
 
                         const sequenceGrid = deserializeRangeWithSheet(token);
 
@@ -298,8 +302,12 @@ export class UpdateFormulaController extends Disposable {
                         );
 
                         if (newRefString != null) {
-                            sequence.token = newRefString;
+                            sequenceNodes[i] = {
+                                ...node,
+                                token: newRefString,
+                            };
                             shouldModify = true;
+                            refChangeIds.push(i);
                         }
                     }
 
@@ -307,8 +315,10 @@ export class UpdateFormulaController extends Disposable {
                         return true;
                     }
 
+                    const newSequenceNodes = this._updateRefOffset(sequenceNodes, refChangeIds, x, y);
+
                     newFormulaDataItem.setValue(row, column, {
-                        f: generateStringWithSequence(sequenceNodes),
+                        f: generateStringWithSequence(newSequenceNodes),
                         x,
                         y,
                         si,
@@ -418,14 +428,54 @@ export class UpdateFormulaController extends Disposable {
     }
 
     private _refOffset(range: IRange, refOffsetX: number, refOffsetY: number) {
-        const { startRow, endRow, startColumn, endColumn } = range;
+        const { startRow, endRow, startColumn, endColumn, startAbsoluteRefType, endAbsoluteRefType } = range;
 
         return {
             startRow: startRow + refOffsetY,
             endRow: endRow + refOffsetY,
             startColumn: startColumn + refOffsetX,
             endColumn: endColumn + refOffsetX,
+            startAbsoluteRefType,
+            endAbsoluteRefType,
         };
+    }
+
+    /**
+     * Update all ref nodes to the latest offset state.
+     */
+    private _updateRefOffset(
+        sequenceNodes: Array<string | ISequenceNode>,
+        refChangeIds: number[],
+        refOffsetX: number = 0,
+        refOffsetY: number = 0
+    ) {
+        const newSequenceNodes: Array<string | ISequenceNode> = [];
+        for (let i = 0, len = sequenceNodes.length; i < len; i++) {
+            const node = sequenceNodes[i];
+            if (typeof node === 'string' || node.nodeType !== sequenceNodeType.REFERENCE || refChangeIds.includes(i)) {
+                newSequenceNodes.push(node);
+                continue;
+            }
+
+            const { token } = node;
+
+            const sequenceGrid = deserializeRangeWithSheet(token);
+
+            const { range, sheetName, unitId: sequenceUnitId } = sequenceGrid;
+
+            const newRange = this._refOffset(range, refOffsetX, refOffsetY);
+
+            newSequenceNodes.push({
+                ...node,
+                token: serializeRangeToRefString({
+                    range: newRange,
+                    unitId: sequenceUnitId,
+                    sheetName,
+                }),
+            });
+        }
+
+        return newSequenceNodes;
     }
 
     /**

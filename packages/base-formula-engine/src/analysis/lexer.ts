@@ -195,7 +195,7 @@ export class LexerTreeBuilder extends Disposable {
     sequenceNodesBuilder(formulaString: string) {
         const sequenceNodesCache = FormulaSequenceNodeCache.get(formulaString);
         if (sequenceNodesCache) {
-            return sequenceNodesCache;
+            return [...sequenceNodesCache];
         }
 
         const sequenceArray = this._getSequenceArray(formulaString);
@@ -310,7 +310,7 @@ export class LexerTreeBuilder extends Disposable {
         // }
         // console.log('sequenceString', sequenceString);
 
-        FormulaSequenceNodeCache.set(formulaString, newSequenceNodes);
+        FormulaSequenceNodeCache.set(formulaString, [...newSequenceNodes]);
 
         return newSequenceNodes;
     }

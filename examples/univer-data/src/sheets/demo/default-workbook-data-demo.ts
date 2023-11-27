@@ -24169,7 +24169,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                         v: 2,
                         m: '2',
                         f: '=SUM(A1)',
-                        si: '3e4r5t',
                     },
                 },
                 1: {

@@ -137,6 +137,7 @@ export class FormulaDataModel extends Disposable {
         const cellMatrix = new ObjectMatrix(cellValue);
 
         const formulaIdMap = new Map<string, { f: string; r: number; c: number }>(); // Connect the formula and ID
+        const deleteFormulaIdMap = new Map<string, string | { f: string; r: number; c: number }>();
 
         const formulaData = this._formulaData;
         if (formulaData[unitId] == null) {
@@ -174,22 +175,50 @@ export class FormulaDataModel extends Disposable {
                     si: formulaId,
                 });
             } else if (!checkFormulaString && !checkFormulaId && sheetFormulaDataMatrix.getRow(r)?.get(c)) {
+                const currentFormulaInfo = sheetFormulaDataMatrix.getRow(r)?.get(c);
+                const f = currentFormulaInfo?.f || '';
+                const si = currentFormulaInfo?.si || '';
+
+                // The id that needs to be offset
+                if (isFormulaString(f) && isFormulaId(si)) {
+                    deleteFormulaIdMap.set(si, f);
+                }
+
                 sheetFormulaDataMatrix.realDeleteValue(r, c);
             }
         });
 
         // Convert the formula ID to formula string
         sheetFormulaDataMatrix.forValue((r, c, cell) => {
-            const formulaString = cell?.f || '';
             const formulaId = cell?.si || '';
-            if (!isFormulaString(formulaString) && isFormulaId(formulaId) && formulaIdMap.has(formulaId)) {
+
+            if (isFormulaId(formulaId)) {
                 const formulaInfo = formulaIdMap.get(formulaId);
+                const deleteFormula = deleteFormulaIdMap.get(formulaId);
                 if (formulaInfo) {
                     const f = formulaInfo.f;
                     const x = c - formulaInfo.c;
                     const y = r - formulaInfo.r;
 
                     sheetFormulaDataMatrix.setValue(r, c, { f, si: formulaId, x, y });
+                } else if (typeof deleteFormula === 'string') {
+                    deleteFormulaIdMap.set(formulaId, {
+                        r,
+                        c,
+                        f: deleteFormula,
+                    });
+
+                    sheetFormulaDataMatrix.setValue(r, c, { f: deleteFormula, si: formulaId });
+                } else if (typeof deleteFormula === 'object') {
+                    const x = c - deleteFormula.c;
+                    const y = r - deleteFormula.r;
+                    // let f = '';
+                    sheetFormulaDataMatrix.setValue(r, c, {
+                        f: deleteFormula.f,
+                        si: formulaId,
+                        x,
+                        y,
+                    });
                 }
             }
         });

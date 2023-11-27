@@ -90,13 +90,11 @@ export class FormulaInputController extends Disposable {
                         });
                     }
 
-                    const dataStream = `=${formulaString}(`;
-
-                    const lastSequenceNodes = this._formulaEngineService.buildSequenceNodes(dataStream) || [];
+                    const lastSequenceNodes = this._formulaEngineService.buildSequenceNodes(formulaString) || [];
 
                     this._formulaInputService.setSequenceNodes(lastSequenceNodes);
 
-                    this._formulaInputService.syncToEditor(dataStream.length - 1);
+                    this._formulaInputService.syncToEditor(formulaString.length - 1);
                 })
             )
         );

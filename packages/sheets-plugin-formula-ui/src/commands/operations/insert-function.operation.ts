@@ -57,7 +57,8 @@ export const InsertFunctionOperation: ICommand = {
             const refRange = findRefRange(cellMatrix, row, column);
 
             if (!refRange) {
-                formulaInputService.inputFormula(value);
+                // TODO@Dushusir: set current position
+                formulaInputService.inputFormula(`=${value}(`);
                 return true;
             }
 

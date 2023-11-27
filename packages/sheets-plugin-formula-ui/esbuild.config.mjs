@@ -3,7 +3,7 @@ import esbuild from 'esbuild';
 // eslint-disable-next-line import/no-relative-packages
 import baseConfig, { postBuild } from '../../esbuild.config.mjs';
 
-['cjs', 'esm'].forEach(async (format) => {
+for (const format of ['cjs', 'esm']) {
     await esbuild.build({
         ...baseConfig,
         globalName: 'UniverPluginFormulaUi',
@@ -17,4 +17,4 @@ import baseConfig, { postBuild } from '../../esbuild.config.mjs';
     });
 
     await postBuild(format);
-});
+}

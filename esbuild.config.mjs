@@ -23,6 +23,7 @@ export default {
     entryPoints: ['./src/index.ts'],
     define: { 'process.env.NODE_ENV': '"production"' },
     packages: 'external',
+    logLevel: 'verbose',
 };
 
 export async function postBuild(format) {

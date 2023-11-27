@@ -11,6 +11,7 @@ import {
     Nullable,
     ObjectMatrix,
     serializeRange,
+    Tools,
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
@@ -43,9 +44,9 @@ export const InsertFunctionOperation: ICommand = {
 
         // TODO@Dushusir: no match refRange situation, enter edit mode
 
-        // In each range (whether it is an entire row or column or multiple rows and columns),
-        // 1. First get the judgment result of the primary position, and then set the formula id of other positions;
-        // 2. If there is no primary range, just judge the upper left corner cell.
+        // In each range, first take the judgment result of the primary position (if there is no primary, take the upper left corner),
+        // If there is a range, set the formula range directly, and then set the formula id of other positions.
+        // If the range cannot be found, enter the edit mode.
         const list: IInsertFunction[] = [];
         currentSelections.some((selection) => {
             const { range, primary } = selection;
@@ -75,7 +76,7 @@ export const InsertFunctionOperation: ICommand = {
             return false;
         });
 
-        if (list) return false;
+        if (list.length === 0) return false;
 
         return commandService.executeCommand(InsertFunctionCommand.id, {
             list,
@@ -118,13 +119,11 @@ function findStartRow(cellMatrix: ObjectMatrix<ICellData>, row: number, column: 
     for (let r = row - 1; r >= 0; r--) {
         const cell = cellMatrix.getValue(r, column);
 
-        if (!cell) continue;
-
-        if (getCellValueType(cell) === CellValueType.NUMBER && !isFirstNumber) {
+        if (isNumberCell(cell) && !isFirstNumber) {
             if (r === 0) return 0;
             isFirstNumber = true;
-        } else if (isFirstNumber && getCellValueType(cell) !== CellValueType.NUMBER) {
-            return r - 1;
+        } else if (isFirstNumber && !isNumberCell(cell)) {
+            return r + 1;
         } else if (isFirstNumber && r === 0) {
             return 0;
         }
@@ -140,17 +139,20 @@ function findStartColumn(cellMatrix: ObjectMatrix<ICellData>, row: number, colum
 
     for (let c = column - 1; c >= 0; c--) {
         const cell = cellMatrix.getValue(row, c);
-        if (!cell) continue;
 
-        if (getCellValueType(cell) === CellValueType.NUMBER && !isFirstNumber) {
+        if (isNumberCell(cell) && !isFirstNumber) {
             if (c === 0) return 0;
             isFirstNumber = true;
-        } else if (isFirstNumber && getCellValueType(cell) !== CellValueType.NUMBER) {
-            return c - 1;
+        } else if (isFirstNumber && !isNumberCell(cell)) {
+            return c + 1;
         } else if (isFirstNumber && c === 0) {
             return 0;
         }
     }
 
     return column;
+}
+
+function isNumberCell(cell: Nullable<ICellData>) {
+    return cell && (Tools.isStringNumber(cell.v) || getCellValueType(cell) === CellValueType.NUMBER);
 }

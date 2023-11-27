@@ -1,10 +1,4 @@
-import {
-    FormulaEngineService,
-    IFormulaData,
-    ISheetData,
-    IUnitData,
-    IUnitSheetNameMap,
-} from '@univerjs/base-formula-engine';
+import { FormulaEngineService, IFormulaData, IUnitData, IUnitSheetNameMap } from '@univerjs/base-formula-engine';
 import { ISetRangeValuesMutationParams, SetRangeValuesMutation } from '@univerjs/base-sheets';
 import {
     Disposable,
@@ -44,6 +38,7 @@ export class CalculateController extends Disposable {
         const updateCommandList = [SetRangeValuesMutation.id];
 
         this.disposeWithMe(
+            // TODO@Dushusir: use SheetInterceptorService?
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (!updateCommandList.includes(command.id)) {
                     return;
@@ -61,8 +56,6 @@ export class CalculateController extends Disposable {
         const { worksheetId: sheetId, workbookId: unitId, cellValue } = params;
         if (cellValue == null) return;
 
-        // const formulaData = this._formulaDataModel.getFormulaData();
-
         const dirtyRanges: IUnitRange[] = [];
 
         const discreteRanges = new ObjectMatrix(cellValue).getDiscreteRanges();
@@ -73,7 +66,9 @@ export class CalculateController extends Disposable {
 
         if (dirtyRanges.length === 0) return;
 
-        const { allUnitData, formulaData, unitSheetNameMap } = this._getCalculateData();
+        const { allUnitData, unitSheetNameMap } = this._formulaDataModel.getCalculateData();
+        this._formulaDataModel.updateFormulaData(unitId, sheetId, cellValue);
+        const formulaData = this._formulaDataModel.getFormulaData();
 
         this._executeFormula(unitId, allUnitData, formulaData, unitSheetNameMap, false, dirtyRanges);
     }
@@ -130,71 +125,5 @@ export class CalculateController extends Disposable {
                 const result = redoMutationsInfo.every((m) => this._commandService.executeCommand(m.id, m.params));
                 return result;
             });
-    }
-
-    private _getCalculateData() {
-        const unitAllSheet = this._currentUniverService.getAllUniverSheetsInstance();
-
-        const formulaData: IFormulaData = {};
-
-        const allUnitData: IUnitData = {};
-
-        const unitSheetNameMap: IUnitSheetNameMap = {};
-
-        for (const workbook of unitAllSheet) {
-            const unitId = workbook.getUnitId();
-            if (formulaData[unitId] == null) {
-                formulaData[unitId] = {};
-            }
-            const sheets = workbook.getSheets();
-
-            const workbookFormulaData = formulaData[unitId];
-
-            const sheetData: ISheetData = {};
-
-            const sheetNameMap: { [sheetName: string]: string } = {};
-
-            for (const sheet of sheets) {
-                const sheetId = sheet.getSheetId();
-                if (workbookFormulaData[sheetId] == null) {
-                    workbookFormulaData[sheetId] = {};
-                }
-
-                const sheetFormulaData = workbookFormulaData[sheetId];
-
-                const cellDatas = sheet.getCellMatrix();
-
-                cellDatas.forValue((row, column, cellData) => {
-                    if (cellData?.f != null) {
-                        if (sheetFormulaData[row] == null) {
-                            sheetFormulaData[row] = {};
-                        }
-                        sheetFormulaData[row][column] = {
-                            f: cellData.f,
-                            x: 0,
-                            y: 0,
-                        };
-                    }
-                });
-
-                const sheetConfig = sheet.getConfig();
-                sheetData[sheetId] = {
-                    cellData: new ObjectMatrix(sheetConfig.cellData),
-                    rowCount: sheetConfig.rowCount,
-                    columnCount: sheetConfig.columnCount,
-                };
-                sheetNameMap[sheet.getName()] = sheet.getSheetId();
-            }
-
-            allUnitData[unitId] = sheetData;
-
-            unitSheetNameMap[unitId] = sheetNameMap;
-        }
-
-        return {
-            formulaData,
-            allUnitData,
-            unitSheetNameMap,
-        };
     }
 }

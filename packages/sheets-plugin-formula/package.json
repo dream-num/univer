@@ -50,10 +50,12 @@
     },
     "devDependencies": {
         "@vitest/coverage-istanbul": "^0.34.6",
-        "esbuild": "^0.19.5",
         "typedoc": "^0.25.4",
-        "typescript": "^5.3.2",
+        "esbuild": "^0.19.8",
+        "happy-dom": "^12.10.3",
+        "less": "^4.2.0",
         "ts-node": "^10.9.1",
+        "typescript": "^5.3.2",
         "vitest": "^0.34.6"
     }
 }

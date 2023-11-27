@@ -210,9 +210,9 @@ export class FormulaEngineService extends Disposable {
         }
 
         // this.lexerTreeBuilder.suffixExpressionHandler(lexerNode); // suffix Express, 1+(3*4=4)*5+1 convert to 134*4=5*1++
-        console.log('lexerNode', (lexerNode as LexerNode).serialize());
+        // console.log('lexerNode', (lexerNode as LexerNode).serialize());
 
-        console.log('sequence', this.lexerTreeBuilder.sequenceNodesBuilder(formulaString));
+        // console.log('sequence', this.lexerTreeBuilder.sequenceNodesBuilder(formulaString));
 
         // this.getObserver('onAfterFormulaLexerObservable')?.notifyObservers(lexerNode);
 
@@ -220,7 +220,7 @@ export class FormulaEngineService extends Disposable {
 
         const astNode = this.astTreeBuilder.parse(lexerNode as LexerNode);
 
-        console.log('astNode', astNode?.serialize());
+        // console.log('astNode', astNode?.serialize());
 
         // const interpreter = Interpreter.create();
 

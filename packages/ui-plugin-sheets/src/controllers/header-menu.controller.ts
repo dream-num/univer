@@ -221,7 +221,6 @@ export class HeaderMenuController extends Disposable {
         });
 
         this._hoverMenu.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            console.log('add');
             const sheetObject = this._getSheetObject();
             if (sheetObject == null) {
                 return;

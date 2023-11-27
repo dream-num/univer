@@ -2,13 +2,13 @@ import { CommandType, ICommand } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 import { FormatType } from '../../base/types';
-import { NumfmtService } from '../../service/numfmt.service';
+import { INumfmtService } from '../../service/type';
 
 export const factorySetNumfmtUndoMutation = (
     accessor: IAccessor,
     option: SetNumfmtMutationParams
 ): SetNumfmtMutationParams => {
-    const numfmtService = accessor.get(NumfmtService);
+    const numfmtService = accessor.get(INumfmtService);
     const undos: SetNumfmtMutationParams = {
         ...option,
         values: option.values
@@ -36,7 +36,7 @@ export const SetNumfmtMutation: ICommand<SetNumfmtMutationParams> = {
             return false;
         }
         const values = params.values;
-        const numfmtService = accessor.get(NumfmtService);
+        const numfmtService = accessor.get(INumfmtService);
         const workbookId = params.workbookId;
         const sheetId = params.worksheetId;
         values.forEach((item) => {

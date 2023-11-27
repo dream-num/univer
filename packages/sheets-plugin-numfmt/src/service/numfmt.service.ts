@@ -1,27 +1,11 @@
-import {
-    Disposable,
-    ICellData,
-    ICommandService,
-    LifecycleStages,
-    Nullable,
-    ObjectMatrix,
-    OnLifecycle,
-} from '@univerjs/core';
+import { Disposable, ICommandService, Nullable, ObjectMatrix } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { NumfmtItem } from '../base/types';
 import { SetNumfmtMutation } from '../commands/mutations/set.numfmt.mutation';
+import type { INumfmtService, NumfmtItemWithCache } from './type';
 
-type NumfmtItemWithCache = NumfmtItem & {
-    // when change parameters or pattern, the cache is cleared follow mutation execute
-    _cache?: {
-        result: ICellData;
-        parameters: number; // The parameter that was last calculated
-    };
-};
-
-@OnLifecycle(LifecycleStages.Ready, NumfmtService)
-export class NumfmtService extends Disposable {
+export class NumfmtService extends Disposable implements INumfmtService {
     numfmtModel: Map<string, ObjectMatrix<NumfmtItemWithCache>> = new Map();
     // collect effect mutations when edit end and push this to  commands stack in next commands progress
 

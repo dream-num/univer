@@ -13,7 +13,7 @@ import { ColorPicker } from '@univerjs/design';
 import { Inject } from '@wendellhu/redi';
 
 import { DefaultToolbarConfig, SLIDE_UI_PLUGIN_NAME, SlideToolbarConfig } from '../basics';
-import { Toolbar } from '../views/toolbar';
+import type { Toolbar } from '../views/toolbar';
 import styles from '../views/toolbar/index.module.less';
 
 export interface BaseToolbarSelectProps {

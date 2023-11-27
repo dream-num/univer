@@ -14,7 +14,7 @@ import { isCurrencyPanel } from '../components/currency';
 import { isDatePanel } from '../components/date';
 import { MoreNumfmtType } from '../components/more-numfmt-type/MoreNumfmtType';
 import { isThousandthPercentilePanel } from '../components/thousandth-percentile';
-import { NumfmtService } from '../service/numfmt.service';
+import { INumfmtService } from '../service/type';
 
 export const CurrencyMenuItem = (componentManager: ComponentManager) => {
     const iconKey = 'icon-rmbSingle';
@@ -61,7 +61,7 @@ export const SubtractDecimalMenuItem = (componentManager: ComponentManager) => {
 export const FactoryOtherMenuItem = (componentManager: ComponentManager) => {
     componentManager.register('sheet.numfmt.moreNumfmtType', MoreNumfmtType);
     return (_accessor: IAccessor) => {
-        const numfmtService = _accessor.get(NumfmtService);
+        const numfmtService = _accessor.get(INumfmtService);
         const univerInstanceService = _accessor.get(IUniverInstanceService);
         const selectionManagerService = _accessor.get(SelectionManagerService);
         const value$ = new Observable((subscribe) =>

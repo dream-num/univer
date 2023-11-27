@@ -13,8 +13,14 @@ export type NumfmtItemWithCache = NumfmtItem & {
 };
 export interface INumfmtService {
     getValue(workbookId: string, worksheetId: string, row: number, col: number): Nullable<NumfmtItemWithCache>;
-    setValue(workbookId: string, worksheetId: string, row: number, col: number, value: Nullable<NumfmtItem>): void;
     getModel(workbookId: string, worksheetId: string): Nullable<ObjectMatrix<NumfmtItemWithCache>>;
+
+    setValue(workbookId: string, worksheetId: string, row: number, col: number, value: Nullable<NumfmtItem>): void;
+    setValues(
+        workbookId: string,
+        worksheetId: string,
+        values: Array<{ row: number; col: number; pattern?: string; type: NumfmtItem['type'] }>
+    ): void;
 }
 
 export const INumfmtService = createIdentifier<INumfmtService>('INumfmtService');

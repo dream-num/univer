@@ -84,7 +84,7 @@ function createAndSendDocument() {
 
 ## 可选的方案以及优缺点分析
 
-我们 Facade 的 API 时受到以下条件的约束（或者不？）
+我们设计 Facade 的 API 时受到以下条件的约束（或者不？）
 
 1. 为了和 Apps Scripts 的语法保持一致（一定吗？），API 看起来要像是同步执行的
 2. 必然有一些操作行为是异步的，例如读取文件，网络请求等等

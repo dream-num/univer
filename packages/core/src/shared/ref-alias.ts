@@ -1,3 +1,13 @@
+/**
+ * Enter an object, indexed by the keys in the object
+ * example:
+ * object a is {a:'a',b:'b',c:'c'}
+ * object b is {a:'aa',b:'bb',c:'cc'}
+ * object b is {a:'aaa',b:'bbb',c:'ccc'}
+ * const model = new RefAlias([a,b,c],['a','b']) // the index is 'a' and 'b'.
+ * we can use model.getValue('aa') or model.getValue('bb') get the object b
+ * but can't use model.getValue('cc') to get the object b ,because model([a,b,c],['a','b']) is not set 'c' in the second parameter array
+ */
 export class RefAlias<T extends Record<string, unknown>, K extends keyof T = keyof T> {
     _values: T[] = [];
     _keys: K[] = [];

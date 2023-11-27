@@ -1,4 +1,4 @@
-import { Direction, ICellData, Nullable } from '@univerjs/core';
+import { Direction, ICellData, IMutationInfo, IRange, Nullable } from '@univerjs/core';
 
 export enum DATA_TYPE {
     NUMBER = 'number',
@@ -31,6 +31,24 @@ export interface IAutoFillRule {
     priority: number;
 }
 
+export interface IMutations {
+    redos: IMutationInfo[];
+    undos: IMutationInfo[];
+}
+export interface IAutoFillHook {
+    hookName: string;
+    hook: {
+        [APPLY_TYPE.SERIES]: (sourceRange: IRange, targetRange: IRange) => IMutations;
+        [APPLY_TYPE.NO_FORMAT]: (sourceRange: IRange, targetRange: IRange) => IMutations;
+        [APPLY_TYPE.ONLY_FORMAT]: (sourceRange: IRange, targetRange: IRange) => IMutations;
+        [APPLY_TYPE.COPY]: (
+            sourceStartCell: { row: number; col: number },
+            targetStartCell: { row: number; col: number },
+            relativeRange: IRange
+        ) => IMutations;
+    };
+}
+
 export interface IRuleConfirmedData {
     type?: string;
     cellData: Nullable<ICellData>;
@@ -50,5 +68,3 @@ export enum APPLY_TYPE {
     ONLY_FORMAT = '2',
     NO_FORMAT = '3',
 }
-
-export type APPLY_TYPE_IN_USE = Omit<APPLY_TYPE, APPLY_TYPE.NO_FORMAT>;

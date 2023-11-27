@@ -7,6 +7,7 @@ import {
     TextSelectionManagerService,
     VIEWPORT_KEY,
 } from '@univerjs/base-docs';
+import { DocViewModelManagerService } from '@univerjs/base-docs/services/doc-view-model-manager.service.js';
 import {
     DeviceInputEventType,
     DocumentSkeleton,
@@ -75,6 +76,7 @@ export class StartEditController extends Disposable {
 
     constructor(
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
+        @Inject(DocViewModelManagerService) private readonly _docViewModelManagerService: DocViewModelManagerService,
         @IContextService private readonly _contextService: IContextService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
@@ -143,7 +145,8 @@ export class StartEditController extends Disposable {
 
             this._currentUniverService.changeDoc(editorUnitId, documentModel! as DocumentDataModel);
 
-            const docParam = this._docSkeletonManagerService.updateCurrent({ unitId: editorUnitId });
+            // REFACTOR
+            const docParam = this._docSkeletonManagerService.getCurrent();
 
             if (docParam == null) {
                 return;
@@ -444,6 +447,7 @@ export class StartEditController extends Disposable {
             const { skeleton } = docParam;
 
             const documentDataModel = this._currentUniverService.getCurrentUniverDocInstance();
+            const documentViewModel = this._docViewModelManagerService.getCurrent()?.docViewModel;
 
             this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject, scaleX, scaleY);
 
@@ -453,6 +457,7 @@ export class StartEditController extends Disposable {
                 this._resetBodyStyle(snapshot.body!);
 
                 documentDataModel.reset(snapshot);
+                documentViewModel?.reset(documentDataModel);
 
                 document.makeDirty();
 

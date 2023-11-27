@@ -1,7 +1,6 @@
 import { ITextRangeWithStyle } from '@univerjs/base-render';
 import {
     CommandType,
-    DEFAULT_EMPTY_DOCUMENT_VALUE,
     ICommand,
     ICommandService,
     IDocumentBody,
@@ -9,7 +8,6 @@ import {
     IMutationInfo,
     ITextRange,
     IUndoRedoService,
-    IUniverInstanceService,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
 
@@ -298,36 +296,4 @@ export interface ICoverCommandParams {
 
     snapshot?: IDocumentData;
     clearUndoRedoStack?: boolean;
-}
-
-// Cover all content with new snapshot or empty doc, and clear undo redo stack.
-export const CoverCommand: ICommand<ICoverCommandParams> = {
-    id: 'doc.command-cover-content',
-    type: CommandType.COMMAND,
-    handler: async (accessor, params: ICoverCommandParams) => {
-        const { unitId, snapshot, clearUndoRedoStack } = params;
-        const univerInstanceService = accessor.get(IUniverInstanceService);
-        const doc = univerInstanceService.getUniverDocInstance(unitId);
-
-        if (!doc) {
-            return false;
-        }
-
-        doc.reset(snapshot || createEmptyDocSnapshot());
-
-        if (clearUndoRedoStack) {
-            const undoRedoService = accessor.get(IUndoRedoService);
-            undoRedoService.clearUndoRedo(unitId);
-        }
-
-        return true;
-    },
-};
-
-function createEmptyDocSnapshot(): Partial<IDocumentData> {
-    return {
-        body: {
-            dataStream: DEFAULT_EMPTY_DOCUMENT_VALUE,
-        },
-    };
 }

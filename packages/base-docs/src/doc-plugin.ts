@@ -14,7 +14,6 @@ import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
 import {
     BreakLineCommand,
-    CoverCommand,
     DeleteCommand,
     DeleteLeftCommand,
     DeleteRightCommand,
@@ -54,6 +53,7 @@ import { ZoomController } from './controllers/zoom.controller';
 import { enUS } from './locale';
 import { DocClipboardService, IDocClipboardService } from './services/clipboard/clipboard.service';
 import { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
+import { DocViewModelManagerService } from './services/doc-view-model-manager.service';
 import { IMEInputManagerService } from './services/ime-input-manager.service';
 import { TextSelectionManagerService } from './services/text-selection-manager.service';
 import { BreakLineShortcut, DeleteLeftShortcut, DeleteRightShortcut } from './shortcuts/core-editing.shortcut';
@@ -126,7 +126,6 @@ export class DocPlugin extends Plugin {
                 UpdateCommand,
                 IMEInputCommand,
                 RichTextEditingMutation,
-                CoverCommand,
                 ReplaceContentCommand,
                 SetDocZoomRatioCommand,
                 SetDocZoomRatioOperation,
@@ -171,6 +170,7 @@ export class DocPlugin extends Plugin {
 
                 // services
                 [DocSkeletonManagerService],
+                [DocViewModelManagerService],
                 [IMEInputManagerService],
                 [
                     IDocClipboardService,

@@ -47,7 +47,7 @@ export class DocRenderController extends Disposable {
                 return;
             }
 
-            const { mainComponent, components, scene } = currentRender;
+            const { mainComponent } = currentRender;
 
             const docsComponent = mainComponent as Documents;
 

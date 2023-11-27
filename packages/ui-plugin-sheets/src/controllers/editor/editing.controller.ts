@@ -1,9 +1,8 @@
-import { DocSkeletonManagerService, getDocObject, TextSelectionManagerService } from '@univerjs/base-docs';
+import { getDocObject } from '@univerjs/base-docs';
 import { FormulaEngineService, ISheetData } from '@univerjs/base-formula-engine';
-import { IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/base-render';
+import { IRenderManagerService } from '@univerjs/base-render';
 import {
     Disposable,
-    ICommandService,
     IUniverInstanceService,
     LifecycleStages,
     Nullable,
@@ -13,20 +12,13 @@ import {
 import { Inject } from '@wendellhu/redi';
 import { Subscription } from 'rxjs';
 
-import { IEditorBridgeService } from '../../services/editor-bridge.service';
-
 @OnLifecycle(LifecycleStages.Steady, EditingController)
 export class EditingController extends Disposable {
     private _onInputSubscription: Nullable<Subscription>;
 
     constructor(
-        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
-        @ICommandService private readonly _commandService: ICommandService,
-        @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService
     ) {
         super();

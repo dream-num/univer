@@ -1,6 +1,6 @@
+/* eslint-disable no-magic-numbers */
 import {
     ColumnSeparatorType,
-    DocumentModelOrSimple,
     GridType,
     HorizontalAlign,
     ISectionBreak,
@@ -30,6 +30,7 @@ import { Liquid } from './common/liquid';
 import { createSkeletonPage } from './common/page';
 import { createSkeletonSection } from './common/section';
 import { getLastPage, updateBlockIndex } from './common/tools';
+import { DocumentViewModel } from './view-model/document-view-model';
 
 const DEFAULT_SECTION_BREAK: ISectionBreak = {
     columnProperties: [],
@@ -48,7 +49,7 @@ export enum DocumentSkeletonState {
 export class DocumentSkeleton extends Skeleton {
     // onRecalculateChangeObservable = new Observable<IDocumentSkeletonCached>();
 
-    private _docModel!: DocumentModelOrSimple;
+    private _docViewModel!: DocumentViewModel;
 
     private _skeletonData: Nullable<IDocumentSkeletonCached>;
 
@@ -56,18 +57,18 @@ export class DocumentSkeleton extends Skeleton {
 
     private _findLiquid: Liquid = new Liquid();
 
-    constructor(docModel: DocumentModelOrSimple, localeService: LocaleService) {
+    constructor(docViewModel: DocumentViewModel, localeService: LocaleService) {
         super(localeService);
 
-        this._docModel = docModel;
+        this._docViewModel = docViewModel;
     }
 
-    static create(docModel: DocumentModelOrSimple, localeService: LocaleService) {
-        return new DocumentSkeleton(docModel, localeService);
+    static create(docViewModel: DocumentViewModel, localeService: LocaleService) {
+        return new DocumentSkeleton(docViewModel, localeService);
     }
 
-    getModel() {
-        return this._docModel;
+    getViewModel() {
+        return this._docViewModel;
     }
 
     calculate(bounds?: IBoundRect) {
@@ -121,7 +122,7 @@ export class DocumentSkeleton extends Skeleton {
     }
 
     getPageSize() {
-        return this._docModel.documentStyle.pageSize;
+        return this.getViewModel().getDataModel().documentStyle.pageSize;
     }
 
     findPositionBySpan(span: IDocumentSkeletonSpan): Nullable<INodeSearch> {
@@ -463,7 +464,8 @@ export class DocumentSkeleton extends Skeleton {
     private _createSkeleton(bounds?: IBoundRect) {
         // 每一个布局
         const DEFAULT_PAGE_SIZE = { width: Infinity, height: Infinity };
-        const { documentStyle, headerTreeMap, footerTreeMap, lists, drawings } = this._docModel;
+        const { headerTreeMap, footerTreeMap } = this.getViewModel();
+        const { documentStyle, lists, drawings } = this.getViewModel().getDataModel();
         const {
             pageNumberStart: global_pageNumberStart = 1, // pageNumberStart
             pageSize: global_pageSize = DEFAULT_PAGE_SIZE,
@@ -531,7 +533,7 @@ export class DocumentSkeleton extends Skeleton {
 
         skeleton.pages = allSkeletonPages;
 
-        const bodyModel = this._docModel.bodyModel;
+        const bodyModel = this.getViewModel();
 
         bodyModel.resetCache();
 

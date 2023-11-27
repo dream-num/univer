@@ -29,7 +29,7 @@ import {
     DOCS_VIEW_KEY,
     VIEWPORT_KEY,
 } from '../basics/docs-view-key';
-import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
+import { DocViewModelManagerService } from '../services/doc-view-model-manager.service';
 
 @OnLifecycle(LifecycleStages.Ready, DocCanvasView)
 export class DocCanvasView {
@@ -43,8 +43,12 @@ export class DocCanvasView {
         @IRenderManagerService private readonly _renderManagerService: RenderManagerService,
         @IConfigService private readonly _configService: IConfigService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
-        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService
+        @Inject(DocViewModelManagerService) private readonly _docViewModelManagerService: DocViewModelManagerService
     ) {
+        this._initialize();
+    }
+
+    private _initialize() {
         this._currentUniverService.currentDoc$.subscribe((documentModel) => {
             if (documentModel == null) {
                 return;
@@ -54,6 +58,10 @@ export class DocCanvasView {
 
             if (!this._loadedMap.has(unitId)) {
                 this._currentDocumentModel = documentModel;
+
+                // Build the view model and notify the skeleton manager to create the skeleton.
+                this._docViewModelManagerService.setCurrent(unitId);
+
                 this._addNewRender();
                 this._loadedMap.add(unitId);
             }
@@ -158,19 +166,16 @@ export class DocCanvasView {
     private _addComponent(currentRender: IRender) {
         const scene = this._scene;
         const documentModel = this._currentDocumentModel;
-
-        const unitId = documentModel.getUnitId();
         const documents = new Documents(DOCS_VIEW_KEY.MAIN, undefined, {
             pageMarginLeft: documentModel.documentStyle.marginLeft || 0,
             pageMarginTop: documentModel.documentStyle.marginTop || 0,
         });
+
         documents.zIndex = DOCS_COMPONENT_DEFAULT_Z_INDEX;
 
         currentRender.mainComponent = documents;
         currentRender.components.set(DOCS_VIEW_KEY.MAIN, documents);
 
         scene.addObjects([documents], DOCS_COMPONENT_MAIN_LAYER_INDEX);
-
-        this._docSkeletonManagerService.setCurrent({ unitId });
     }
 }

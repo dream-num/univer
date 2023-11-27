@@ -2,7 +2,6 @@ export { getDocObject } from './basics/component-tools';
 export * from './basics/docs-view-key';
 export { DocCopyCommand, DocCutCommand, DocPasteCommand } from './commands/commands/clipboard.command';
 export {
-    CoverCommand,
     DeleteCommand,
     type ICoverCommandParams,
     type IDeleteCommandParams,

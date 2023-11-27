@@ -1,24 +1,22 @@
+import {
+    DataStreamTreeNodeType,
+    DataStreamTreeTokenType,
+    DocumentDataModel,
+    IDocumentBody,
+    ITextRun,
+    Nullable,
+} from '@univerjs/core';
 import { IDisposable } from '@wendellhu/redi';
 
-import { Nullable } from '../../shared/types';
-import { IDocumentBody, ITextRun } from '../../types/interfaces/i-document-data';
 import { DataStreamTreeNode } from './data-stream-tree-node';
-import { DataStreamTreeNodeType, DataStreamTreeTokenType } from './types';
 
-type DocumentBodyModelOrSimple = DocumentBodyModelSimple | DocumentBodyModel;
+type DocumentViewModelOrSimple = DocumentViewModelSimple | DocumentViewModel;
 
-export class DocumentBodyModelSimple implements IDisposable {
+export class DocumentViewModelSimple implements IDisposable {
     children: DataStreamTreeNode[] = [];
 
-    constructor(
-        /** @deprecated this does not hold true fact about the text model, do not use this directly */
-        public body: IDocumentBody
-    ) {
-        if (this.body == null) {
-            return;
-        }
-
-        this.children = this._transformToTree(this.body.dataStream);
+    constructor(private _documentBody: IDocumentBody) {
+        this.children = this._transformToTree(this._documentBody.dataStream);
     }
 
     dispose(): void {
@@ -30,7 +28,7 @@ export class DocumentBodyModelSimple implements IDisposable {
     resetCache() {}
 
     getSectionBreak(index: number) {
-        return this.body.sectionBreaks?.[0];
+        return this.getBody()!.sectionBreaks?.[0];
     }
 
     getParagraph(index: number) {}
@@ -63,7 +61,7 @@ export class DocumentBodyModelSimple implements IDisposable {
     }
 
     getBody() {
-        return this.body;
+        return this._documentBody;
     }
 
     protected _transformToTree(dataStream: string) {
@@ -190,27 +188,9 @@ export class DocumentBodyModelSimple implements IDisposable {
 
         parent.setIndexRange(children[0].startIndex - startOffset, children[children.length - 1].endIndex + 1);
     }
-
-    // private _checkParagraphBullet(index: number) {
-    //     const { paragraphs } = this.body;
-    //     if (paragraphs == null) {
-    //         return false;
-    //     }
-
-    //     return checkParagraphHasBullet(paragraphs[index]);
-    // }
-
-    // private _checkParagraphIndent(index: number) {
-    //     const { paragraphs } = this.body;
-    //     if (paragraphs == null) {
-    //         return false;
-    //     }
-
-    //     return checkParagraphHasIndent(paragraphs[index]);
-    // }
 }
 
-export class DocumentBodyModel extends DocumentBodyModelSimple {
+export class DocumentViewModel extends DocumentViewModelSimple {
     private _sectionBreakCurrentIndex = 0;
 
     private _paragraphCurrentIndex = 0;
@@ -223,18 +203,40 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
 
     private _customRangeCurrentIndex = 0;
 
-    /**
-     * @deprecated use constructor directly
-     * @param body
-     * @returns
-     */
-    static create(body: IDocumentBody) {
-        return new DocumentBodyModel(body);
+    headerTreeMap: Map<string, DocumentViewModel> = new Map();
+    footerTreeMap: Map<string, DocumentViewModel> = new Map();
+
+    constructor(private _documentDataModel: DocumentDataModel) {
+        super(_documentDataModel.getBody()!);
+
+        this._buildHeaderFooterViewModel();
     }
 
-    reset(body: IDocumentBody) {
-        this.children = this._transformToTree(body.dataStream);
-        this.body = body;
+    getDataModel() {
+        return this._documentDataModel;
+    }
+
+    getSelfOrHeaderFooterViewModel(segmentId?: string) {
+        if (segmentId == null) {
+            return this as DocumentViewModel;
+        }
+
+        if (this.headerTreeMap.has(segmentId)) {
+            return this.headerTreeMap.get(segmentId)!;
+        }
+
+        if (this.footerTreeMap.has(segmentId)) {
+            return this.footerTreeMap.get(segmentId)!;
+        }
+
+        return this as DocumentViewModel;
+    }
+
+    reset(documentDataModel: DocumentDataModel) {
+        this._documentDataModel = documentDataModel;
+
+        this.children = this._transformToTree(documentDataModel.getBody()!.dataStream);
+        this._buildHeaderFooterViewModel();
     }
 
     insert(insertBody: IDocumentBody, insertIndex = 0) {
@@ -247,7 +249,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
         }
 
         if (dataStream[dataStreamLen - 1] === DataStreamTreeTokenType.SECTION_BREAK) {
-            const insertBodyModel = new DocumentBodyModelSimple(insertBody);
+            const insertBodyModel = new DocumentViewModelSimple(insertBody);
             dataStreamLen -= 1; // sectionBreak can not be inserted
 
             const insertNodes = insertBodyModel.children;
@@ -326,6 +328,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
 
     delete(currentIndex: number, textLength: number) {
         const nodes = this.children;
+
         this._deleteTree(nodes, currentIndex, textLength);
     }
 
@@ -348,48 +351,6 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
         return pieces.join('');
     }
 
-    private _getParagraphByIndex(nodes: DataStreamTreeNode[], insertIndex: number): Nullable<DataStreamTreeNode> {
-        for (const node of nodes) {
-            const { children } = node;
-
-            if (node.exclude(insertIndex)) {
-                continue;
-            }
-
-            if (node.nodeType === DataStreamTreeNodeType.PARAGRAPH) {
-                return node;
-            }
-
-            return this._getParagraphByIndex(children, insertIndex);
-        }
-
-        return null;
-    }
-
-    private _forEachTop(
-        node: Nullable<DataStreamTreeNode>,
-        func: (node: DataStreamTreeNode | DocumentBodyModelOrSimple) => void
-    ) {
-        let parent: Nullable<DataStreamTreeNode> = node;
-
-        while (parent) {
-            func(parent);
-            parent = parent.parent;
-        }
-
-        func(this);
-    }
-
-    private _forEachDown(node: DataStreamTreeNode, func: (node: DataStreamTreeNode) => void) {
-        func(node);
-
-        const children = node.children;
-
-        for (node of children) {
-            this._forEachDown(node, func);
-        }
-    }
-
     override resetCache() {
         this._sectionBreakCurrentIndex = 0;
         this._paragraphCurrentIndex = 0;
@@ -403,7 +364,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
         if (index == null) {
             return;
         }
-        const sectionBreaks = this.body.sectionBreaks;
+        const sectionBreaks = this.getBody()!.sectionBreaks;
         if (sectionBreaks == null) {
             return;
         }
@@ -418,7 +379,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
     }
 
     override getParagraph(index: number) {
-        const paragraphs = this.body.paragraphs;
+        const paragraphs = this.getBody()!.paragraphs;
         if (paragraphs == null) {
             return;
         }
@@ -433,7 +394,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
     }
 
     override getTextRunRange(startIndex: number = 0, endIndex: number) {
-        const textRuns = this.body.textRuns;
+        const textRuns = this.getBody()!.textRuns;
         if (textRuns == null) {
             return [
                 {
@@ -487,7 +448,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
      * textRun matches according to the selection. If the text length is 10, then the range of textRun is from 0 to 11.
      */
     override getTextRun(index: number) {
-        const textRuns = this.body.textRuns;
+        const textRuns = this.getBody()!.textRuns;
         if (textRuns == null) {
             return;
         }
@@ -515,7 +476,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
     }
 
     override getCustomBlock(index: number) {
-        const customBlocks = this.body.customBlocks;
+        const customBlocks = this.getBody()!.customBlocks;
         if (customBlocks == null) {
             return;
         }
@@ -530,7 +491,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
     }
 
     override getTable(index: number) {
-        const tables = this.body.tables;
+        const tables = this.getBody()!.tables;
         if (tables == null) {
             return;
         }
@@ -545,7 +506,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
     }
 
     override getCustomRange(index: number) {
-        const customRanges = this.body.customRanges;
+        const customRanges = this.getBody()!.customRanges;
         if (customRanges == null) {
             return;
         }
@@ -557,12 +518,67 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
         }
     }
 
+    private _buildHeaderFooterViewModel() {
+        const { headerModelMap, footerModelMap } = this._documentDataModel;
+
+        for (const [headerId, headerModel] of headerModelMap) {
+            this.headerTreeMap.set(headerId, new DocumentViewModel(headerModel));
+        }
+
+        for (const [footerId, footerModel] of footerModelMap) {
+            this.footerTreeMap.set(footerId, new DocumentViewModel(footerModel));
+        }
+    }
+
+    private _getParagraphByIndex(nodes: DataStreamTreeNode[], insertIndex: number): Nullable<DataStreamTreeNode> {
+        for (const node of nodes) {
+            const { children } = node;
+
+            if (node.exclude(insertIndex)) {
+                continue;
+            }
+
+            if (node.nodeType === DataStreamTreeNodeType.PARAGRAPH) {
+                return node;
+            }
+
+            return this._getParagraphByIndex(children, insertIndex);
+        }
+
+        return null;
+    }
+
+    private _forEachTop(
+        node: Nullable<DataStreamTreeNode>,
+        func: (node: DataStreamTreeNode | DocumentViewModelOrSimple) => void
+    ) {
+        let parent: Nullable<DataStreamTreeNode> = node;
+
+        while (parent) {
+            func(parent);
+            parent = parent.parent;
+        }
+
+        func(this);
+    }
+
+    private _forEachDown(node: DataStreamTreeNode, func: (node: DataStreamTreeNode) => void) {
+        func(node);
+
+        const children = node.children;
+
+        for (node of children) {
+            this._forEachDown(node, func);
+        }
+    }
+
     private _deleteTree(nodes: DataStreamTreeNode[], currentIndex: number, textLength: number) {
         const startIndex = currentIndex;
         const endIndex = currentIndex + textLength - 1;
         let mergeNode: Nullable<DataStreamTreeNode> = null;
         let nodeCount = nodes.length;
         let i = 0;
+
         while (i < nodeCount) {
             const node = nodes[i];
             const { startIndex: st, endIndex: ed, children } = node;

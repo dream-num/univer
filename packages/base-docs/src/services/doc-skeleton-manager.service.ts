@@ -1,7 +1,9 @@
-import { DocumentSkeleton } from '@univerjs/base-render';
-import { DocumentDataModel, IUniverInstanceService, LocaleService, Nullable } from '@univerjs/core';
+import { DocumentSkeleton, DocumentViewModel } from '@univerjs/base-render';
+import { LocaleService, Nullable } from '@univerjs/core';
 import { IDisposable, Inject } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
+
+import { DocViewModelManagerService, IDocumentViewModelManagerParam } from './doc-view-model-manager.service';
 
 export interface IDocSkeletonManagerParam {
     unitId: string;
@@ -35,9 +37,21 @@ export class DocSkeletonManagerService implements IDisposable {
     readonly currentSkeletonBefore$ = this._currentSkeletonBefore$.asObservable();
 
     constructor(
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
-    ) {}
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @Inject(DocViewModelManagerService) private readonly _docViewModelManagerService: DocViewModelManagerService
+    ) {
+        this.initialize();
+    }
+
+    initialize() {
+        this._docViewModelManagerService.currentDocViewModel$.subscribe((docViewModel) => {
+            if (docViewModel == null) {
+                return;
+            }
+
+            this._setCurrent(docViewModel);
+        });
+    }
 
     dispose(): void {
         this._currentSkeletonBefore$.complete();
@@ -49,42 +63,43 @@ export class DocSkeletonManagerService implements IDisposable {
         return this._getCurrentBySearch(this._currentSkeleton);
     }
 
-    updateCurrent(searchParm: IDocSkeletonManagerSearch) {
-        const { unitId } = searchParm;
+    // updateCurrent(searchParm: IDocSkeletonManagerSearch) {
+    //     const { unitId } = searchParm;
 
-        const documentModel = this._currentUniverService.getUniverDocInstance(searchParm.unitId);
+    //     const documentModel = this._currentUniverService.getUniverDocInstance(searchParm.unitId);
 
-        if (documentModel == null || documentModel.bodyModel == null) {
-            return;
-        }
+    //     if (documentModel == null || documentModel.bodyModel == null) {
+    //         return;
+    //     }
 
-        const skeleton = this._buildSkeleton(documentModel);
+    //     const skeleton = this._buildSkeleton(documentModel);
 
-        skeleton.calculate();
+    //     skeleton.calculate();
 
-        const oldDocSkeleton = this._docSkeletonParam.find((doc) => doc.unitId === unitId);
-        if (oldDocSkeleton != null) {
-            const index = this._docSkeletonParam.indexOf(oldDocSkeleton);
-            this._docSkeletonParam.splice(index, 1);
-        }
+    //     const oldDocSkeleton = this._docSkeletonParam.find((doc) => doc.unitId === unitId);
+    //     if (oldDocSkeleton != null) {
+    //         const index = this._docSkeletonParam.indexOf(oldDocSkeleton);
+    //         this._docSkeletonParam.splice(index, 1);
+    //     }
 
-        this._docSkeletonParam.push({
-            unitId,
-            skeleton,
-            dirty: false,
-        });
+    //     this._docSkeletonParam.push({
+    //         unitId,
+    //         skeleton,
+    //         dirty: false,
+    //     });
 
-        this._currentSkeleton = searchParm;
+    //     this._currentSkeleton = searchParm;
 
-        this._currentSkeletonBefore$.next(this.getCurrent());
+    //     this._currentSkeletonBefore$.next(this.getCurrent());
 
-        this._currentSkeleton$.next(this.getCurrent());
+    //     this._currentSkeleton$.next(this.getCurrent());
 
-        return this.getCurrent();
-    }
+    //     return this.getCurrent();
+    // }
 
-    setCurrent(searchParm: IDocSkeletonManagerSearch): Nullable<IDocSkeletonManagerParam> {
-        const curSkeleton = this._getCurrentBySearch(searchParm);
+    private _setCurrent(docViewModelParam: IDocumentViewModelManagerParam): Nullable<IDocSkeletonManagerParam> {
+        const { unitId } = docViewModelParam;
+        const curSkeleton = this._getCurrentBySearch({ unitId });
 
         if (curSkeleton != null) {
             if (curSkeleton.dirty) {
@@ -94,15 +109,7 @@ export class DocSkeletonManagerService implements IDisposable {
 
             curSkeleton.skeleton.calculate();
         } else {
-            const { unitId } = searchParm;
-
-            const documentModel = this._currentUniverService.getUniverDocInstance(searchParm.unitId);
-
-            if (documentModel == null || documentModel.bodyModel == null) {
-                return;
-            }
-
-            const skeleton = this._buildSkeleton(documentModel);
+            const skeleton = this._buildSkeleton(docViewModelParam.docViewModel);
 
             skeleton.calculate();
 
@@ -113,7 +120,7 @@ export class DocSkeletonManagerService implements IDisposable {
             });
         }
 
-        this._currentSkeleton = searchParm;
+        this._currentSkeleton = { unitId };
 
         this._currentSkeletonBefore$.next(this.getCurrent());
 
@@ -138,7 +145,7 @@ export class DocSkeletonManagerService implements IDisposable {
         return this._docSkeletonParam.find((param) => param.unitId === searchParm.unitId);
     }
 
-    private _buildSkeleton(documentModel: DocumentDataModel) {
-        return DocumentSkeleton.create(documentModel, this._localeService);
+    private _buildSkeleton(documentViewModel: DocumentViewModel) {
+        return DocumentSkeleton.create(documentViewModel, this._localeService);
     }
 }

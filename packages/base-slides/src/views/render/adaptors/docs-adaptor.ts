@@ -69,6 +69,7 @@ export class DocsAdaptor extends ObjectAdaptor {
             return;
         }
 
+        // REFACTOR: 这儿需要 view model
         const documentSkeleton = DocumentSkeleton.create(new DocumentDataModel(documentData), this._localeService);
 
         const documents = new Documents(DOCS_VIEW_KEY.MAIN, documentSkeleton);

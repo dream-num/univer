@@ -1557,6 +1557,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             return new DocumentDataModelSimple(documentData);
         }
 
+        // REFACTOR: 这儿是需要 data model 还是 view model？
         return new DocumentDataModel(documentData);
     }
 
@@ -1632,6 +1633,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             return new DocumentDataModelSimple(documentData);
         }
 
+        // REFACTOR: 这儿是需要 data model 还是 view model？
         return new DocumentDataModel(documentData);
     }
 

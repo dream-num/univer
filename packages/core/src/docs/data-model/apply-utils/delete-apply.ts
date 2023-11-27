@@ -1,7 +1,5 @@
-import { DEFAULT_EMPTY_DOCUMENT_VALUE } from '../../../common/const';
-import { deleteContent, Tools } from '../../../shared';
-import { IDocumentBody, IParagraph } from '../../../types/interfaces';
-import { DocumentBodyModel } from '../document-body-model';
+import { deleteContent } from '../../../shared';
+import { IDocumentBody } from '../../../types/interfaces';
 import {
     deleteCustomBlocks,
     deleteCustomRanges,
@@ -48,22 +46,22 @@ export function updateAttributeByDelete(body: IDocumentBody, textLength: number,
     };
 }
 
-export function recoveryBody(bodyModel: DocumentBodyModel, body: IDocumentBody, deleBody: IDocumentBody) {
-    if (bodyModel.children[0].children.length === 0) {
-        bodyModel.reset({
-            dataStream: DEFAULT_EMPTY_DOCUMENT_VALUE,
-        });
-    }
+// export function recoveryBody(bodyModel: DocumentViewModel, body: IDocumentBody, deleBody: IDocumentBody) {
+//     if (bodyModel.children[0].children.length === 0) {
+//         bodyModel.reset({
+//             dataStream: DEFAULT_EMPTY_DOCUMENT_VALUE,
+//         });
+//     }
 
-    if (body.dataStream === '\n') {
-        body.dataStream = DEFAULT_EMPTY_DOCUMENT_VALUE;
+//     if (body.dataStream === '\n') {
+//         body.dataStream = DEFAULT_EMPTY_DOCUMENT_VALUE;
 
-        const firstParagraph = deleBody.paragraphs?.[0];
+//         const firstParagraph = deleBody.paragraphs?.[0];
 
-        if (firstParagraph != null) {
-            const newParagraph = Tools.deepClone(firstParagraph) as IParagraph;
-            newParagraph.startIndex = 0;
-            body.paragraphs = [newParagraph];
-        }
-    }
-}
+//         if (firstParagraph != null) {
+//             const newParagraph = Tools.deepClone(firstParagraph) as IParagraph;
+//             newParagraph.startIndex = 0;
+//             body.paragraphs = [newParagraph];
+//         }
+//     }
+// }

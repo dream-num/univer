@@ -13,7 +13,7 @@ export {
     type IDeleteMutationParams,
     type IInsertMutationParams,
     type IRetainMutationParams,
-} from './docs/data-model/document-model-types';
+} from './docs/data-model/mutation-types';
 export * from './observer';
 export { Plugin, PluginType } from './plugin/plugin';
 export {

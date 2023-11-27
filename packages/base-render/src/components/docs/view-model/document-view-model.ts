@@ -12,10 +12,14 @@ import { DataStreamTreeNode } from './data-stream-tree-node';
 
 type DocumentViewModelOrSimple = DocumentViewModelSimple | DocumentViewModel;
 
-export class DocumentViewModelSimple implements IDisposable {
+class DocumentViewModelSimple implements IDisposable {
     children: DataStreamTreeNode[] = [];
 
     constructor(private _documentBody: IDocumentBody) {
+        if (_documentBody == null) {
+            return;
+        }
+
         this.children = this._transformToTree(this._documentBody.dataStream);
     }
 
@@ -204,6 +208,7 @@ export class DocumentViewModel extends DocumentViewModelSimple {
     private _customRangeCurrentIndex = 0;
 
     headerTreeMap: Map<string, DocumentViewModel> = new Map();
+
     footerTreeMap: Map<string, DocumentViewModel> = new Map();
 
     constructor(private _documentDataModel: DocumentDataModel) {

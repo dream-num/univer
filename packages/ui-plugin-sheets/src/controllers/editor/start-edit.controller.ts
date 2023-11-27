@@ -1,13 +1,13 @@
 import {
     DOCS_COMPONENT_MAIN_LAYER_INDEX,
     DocSkeletonManagerService,
+    DocViewModelManagerService,
     IRichTextEditingMutationParams,
     NORMAL_TEXT_SELECTION_PLUGIN_NAME,
     RichTextEditingMutation,
     TextSelectionManagerService,
     VIEWPORT_KEY,
 } from '@univerjs/base-docs';
-import { DocViewModelManagerService } from '@univerjs/base-docs/services/doc-view-model-manager.service.js';
 import {
     DeviceInputEventType,
     DocumentSkeleton,
@@ -25,7 +25,6 @@ import {
     Disposable,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-    DocumentDataModel,
     FOCUSING_EDITOR,
     FOCUSING_EDITOR_BUT_HIDDEN,
     HorizontalAlign,
@@ -143,7 +142,7 @@ export class StartEditController extends Disposable {
                 documentModel!.updateDocumentDataPageSize((endX - startX) / scaleX);
             }
 
-            this._currentUniverService.changeDoc(editorUnitId, documentModel! as DocumentDataModel);
+            this._currentUniverService.changeDoc(editorUnitId, documentModel!);
 
             // REFACTOR
             const docParam = this._docSkeletonManagerService.getCurrent();

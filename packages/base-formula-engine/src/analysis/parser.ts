@@ -209,7 +209,7 @@ export class AstTreeBuilder extends Disposable {
             // currentAstNode.setParent(parent);
             // parent.addChildren(currentAstNode);
         }
-        console.log('currentAstNode', currentAstNode.nodeType, currentAstNode, lexerNode);
+        // console.log('currentAstNode', currentAstNode.nodeType, currentAstNode, lexerNode);
         const firstChild = children[0];
         // let isSkipFirstInLambda = false;
         // if (
@@ -254,7 +254,7 @@ export class AstTreeBuilder extends Disposable {
             if (astNode == null) {
                 return;
             }
-            console.log('bugfix1', astNode, astNode.nodeType, currentAstNode, lexerNode);
+            // console.log('bugfix1', astNode, astNode.nodeType, currentAstNode, lexerNode);
             switch (astNode.nodeType) {
                 case NodeType.ERROR:
                     return astNode;

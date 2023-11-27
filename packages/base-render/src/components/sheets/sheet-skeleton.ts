@@ -2,8 +2,6 @@ import {
     BooleanNumber,
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     DocumentDataModel,
-    DocumentDataModelSimple,
-    DocumentModelOrSimple,
     getColorStyle,
     HorizontalAlign,
     IBorderStyleData,
@@ -51,6 +49,7 @@ import {
 import { IBoundRect } from '../../basics/vector2';
 import { columnIterator } from '../docs/common/tools';
 import { DocumentSkeleton } from '../docs/doc-skeleton';
+import { DocumentViewModel } from '../docs/view-model/document-view-model';
 import { Skeleton } from '../skeleton';
 import { BorderCache, IStylesCache } from './interfaces';
 
@@ -157,7 +156,8 @@ interface IRowColumnSegment {
 }
 
 export interface IDocumentLayoutObject {
-    documentModel: Nullable<DocumentModelOrSimple>;
+    documentModel: Nullable<DocumentDataModel>;
+    documentViewModel: Nullable<DocumentViewModel>;
     fontString: string;
     textRotation: ITextRotation;
     wrapStrategy: WrapStrategy;
@@ -405,10 +405,12 @@ export class SpreadsheetSkeleton extends Skeleton {
         const { columnCount, columnData, mergeData, defaultRowHeight } = this._config;
         const data = Tools.createObjectArray(columnData);
         let height = defaultRowHeight;
+
         const worksheet = this._worksheet;
         if (!worksheet) {
             return height;
         }
+
         for (let i = 0; i < columnCount; i++) {
             // When calculating the automatic height of a row, if a cell is in a merged cell,
             // skip the cell directly, which currently follows the logic of Excel
@@ -418,13 +420,13 @@ export class SpreadsheetSkeleton extends Skeleton {
                 continue;
             }
             const cell = worksheet.getCell(rowNum, i);
-            const modelObject = cell && this.getCellDocumentModel(cell);
+            const modelObject = cell && this._getCellDocumentModel(cell);
             if (modelObject == null) {
                 continue;
             }
 
-            const { documentModel, textRotation, wrapStrategy } = modelObject;
-            if (documentModel == null) {
+            const { documentModel, documentViewModel, textRotation, wrapStrategy } = modelObject;
+            if (documentModel == null || documentViewModel == null) {
                 continue;
             }
 
@@ -440,7 +442,7 @@ export class SpreadsheetSkeleton extends Skeleton {
                 documentModel.updateDocumentDataPageSize(colWidth);
             }
 
-            const documentSkeleton = DocumentSkeleton.create(documentModel, this._localService);
+            const documentSkeleton = DocumentSkeleton.create(documentViewModel, this._localService);
             documentSkeleton.calculate();
 
             const { height: h = 0 } = getDocsSkeletonPageSize(documentSkeleton, angle) ?? {};
@@ -974,12 +976,12 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     // Only used for cell edit, and no need to rotate text when edit cell content!
-    getBlankCellDocumentModel(cell: Nullable<ICellData>, isFull: boolean = true): IDocumentLayoutObject {
-        const documentModelObject = this._getCellDocumentModel(cell, undefined, undefined, undefined, true);
+    getBlankCellDocumentModel(cell: Nullable<ICellData>): IDocumentLayoutObject {
+        const documentModelObject = this._getCellDocumentModel(cell, undefined, undefined, true);
 
         if (documentModelObject != null) {
             if (documentModelObject.documentModel == null) {
-                documentModelObject.documentModel = this._getDocumentDataByStyle('', {}, {}, isFull);
+                documentModelObject.documentModel = this._getDocumentDataByStyle('', {}, {});
             }
             return documentModelObject;
         }
@@ -996,10 +998,12 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         fontString = getFontStyleString({}, this._localService).fontCache;
 
-        const documentModel = this._getDocumentDataByStyle(content, {}, {}, isFull);
+        const documentModel = this._getDocumentDataByStyle(content, {}, {});
+        const documentViewModel = new DocumentViewModel(documentModel);
 
         return {
             documentModel,
+            documentViewModel,
             fontString,
             textRotation,
             wrapStrategy,
@@ -1009,18 +1013,13 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
     }
 
-    getCellDocumentModel(cell: ICellData) {
-        return this._getCellDocumentModel(cell);
-    }
-
     // Only used for cell edit, and no need to rotate text when edit cell content!
     getCellDocumentModelWithFormula(cell: ICellData) {
-        return this._getCellDocumentModel(cell, true, true, true, true);
+        return this._getCellDocumentModel(cell, true, true, true);
     }
 
     private _getCellDocumentModel(
         cell: Nullable<ICellData>,
-        isFull: boolean = false,
         isDeepClone: boolean = false,
         formulaFirst: boolean = false,
         ignoreTextRotation: boolean = false
@@ -1031,7 +1030,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             return;
         }
 
-        let documentModel: Nullable<DocumentDataModelSimple>;
+        let documentModel: Nullable<DocumentDataModel>;
         let fontString = 'document';
         const cellOtherConfig = this._getOtherStyle(style) as ICellOtherConfig;
 
@@ -1044,7 +1043,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         const paddingData: IPaddingData = cellOtherConfig.paddingData || DEFAULT_PADDING_DATA;
 
         if (cell.f && formulaFirst) {
-            documentModel = this._getDocumentDataByStyle(cell.f.toString(), {}, {}, isFull);
+            documentModel = this._getDocumentDataByStyle(cell.f.toString(), {}, {});
         } else if (cell.p) {
             const { a: angle = 0, v: isVertical = BooleanNumber.FALSE } = textRotation;
             let centerAngle = 0;
@@ -1053,7 +1052,7 @@ export class SpreadsheetSkeleton extends Skeleton {
                 centerAngle = DEFAULT_ROTATE_ANGLE;
                 vertexAngle = DEFAULT_ROTATE_ANGLE;
             }
-            documentModel = this._updateRenderConfigAndHorizon(
+            documentModel = this._updateConfigAndGetDocumentModel(
                 isDeepClone ? Tools.deepClone(cell.p) : cell.p,
                 horizontalAlign,
                 {
@@ -1062,19 +1061,22 @@ export class SpreadsheetSkeleton extends Skeleton {
                     centerAngle,
                     vertexAngle,
                     wrapStrategy,
-                },
-                isFull
+                }
             );
         } else if (cell.v) {
             const textStyle = this._getFontFormat(style);
             fontString = getFontStyleString(textStyle, this._localService).fontCache;
 
-            documentModel = this._getDocumentDataByStyle(
-                cell.v.toString(),
-                textStyle,
-                { ...cellOtherConfig, textRotation },
-                isFull
-            );
+            documentModel = this._getDocumentDataByStyle(cell.v.toString(), textStyle, {
+                ...cellOtherConfig,
+                textRotation,
+            });
+        }
+
+        let documentViewModel;
+
+        if (documentModel) {
+            documentViewModel = new DocumentViewModel(documentModel);
         }
 
         /**
@@ -1092,6 +1094,7 @@ export class SpreadsheetSkeleton extends Skeleton {
          */
         return {
             documentModel,
+            documentViewModel,
             fontString,
             textRotation,
             wrapStrategy,
@@ -1486,13 +1489,14 @@ export class SpreadsheetSkeleton extends Skeleton {
             this._setBorderProps(r, c, BORDER_TYPE.RIGHT, style, cache);
         }
 
-        const modelObject = cell && this.getCellDocumentModel(cell);
+        const modelObject = cell && this._getCellDocumentModel(cell);
 
         if (modelObject == null) {
             return;
         }
 
-        const { documentModel, fontString, textRotation, wrapStrategy, verticalAlign, horizontalAlign } = modelObject;
+        const { documentViewModel, fontString, textRotation, wrapStrategy, verticalAlign, horizontalAlign } =
+            modelObject;
 
         if (!cache.font![fontString]) {
             cache.font![fontString] = new ObjectMatrix();
@@ -1507,11 +1511,10 @@ export class SpreadsheetSkeleton extends Skeleton {
             angle = DEFAULT_ROTATE_ANGLE;
         }
 
-        if (documentModel) {
-            const documentSkeleton = DocumentSkeleton.create(documentModel, this._localService);
+        if (documentViewModel) {
+            const documentSkeleton = DocumentSkeleton.create(documentViewModel, this._localService);
             if (angle === 0 || wrapStrategy !== WrapStrategy.WRAP) {
                 documentSkeleton.calculate();
-                // console.log(cell.v, documentSkeleton);
             }
             fontCache.setValue(r, c, {
                 documentSkeleton,
@@ -1519,16 +1522,14 @@ export class SpreadsheetSkeleton extends Skeleton {
                 verticalAlign,
                 horizontalAlign,
                 wrapStrategy,
-                // content: content?.toString(),
             });
         }
     }
 
-    private _updateRenderConfigAndHorizon(
+    private _updateConfigAndGetDocumentModel(
         documentData: IDocumentData,
         horizontalAlign: HorizontalAlign,
-        renderConfig?: IDocumentRenderConfig,
-        isFull: boolean = false
+        renderConfig?: IDocumentRenderConfig
     ) {
         if (!renderConfig) {
             return;
@@ -1553,20 +1554,10 @@ export class SpreadsheetSkeleton extends Skeleton {
             paragraph.paragraphStyle.horizontalAlign = horizontalAlign;
         }
 
-        if (isFull === false) {
-            return new DocumentDataModelSimple(documentData);
-        }
-
-        // REFACTOR: 这儿是需要 data model 还是 view model？
         return new DocumentDataModel(documentData);
     }
 
-    private _getDocumentDataByStyle(
-        content: string,
-        textStyle: ITextStyle,
-        config: ICellOtherConfig,
-        isFull: boolean = false
-    ) {
+    private _getDocumentDataByStyle(content: string, textStyle: ITextStyle, config: ICellOtherConfig) {
         const contentLength = content.length;
         const {
             textRotation = { a: 0, v: BooleanNumber.FALSE },
@@ -1629,11 +1620,6 @@ export class SpreadsheetSkeleton extends Skeleton {
             },
         };
 
-        if (isFull === false) {
-            return new DocumentDataModelSimple(documentData);
-        }
-
-        // REFACTOR: 这儿是需要 data model 还是 view model？
         return new DocumentDataModel(documentData);
     }
 

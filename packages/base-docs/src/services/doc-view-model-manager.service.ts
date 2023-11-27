@@ -35,14 +35,14 @@ export class DocViewModelManagerService implements IDisposable {
     }
 
     setCurrent(unitId: string) {
-        if (this._docViewModelMap.has(unitId)) {
-            this._currentViewModelUnitId = unitId;
-            return;
-        }
-
         const documentDataModel = this._currentUniverService.getUniverDocInstance(unitId);
         if (documentDataModel == null) {
             throw new Error(`Document data model with id ${unitId} not found when build view model.`);
+        }
+
+        // No need to build view model, if data model has no body.
+        if (documentDataModel.getBody() == null) {
+            return;
         }
 
         const docViewModel = this._buildDocViewModel(documentDataModel);

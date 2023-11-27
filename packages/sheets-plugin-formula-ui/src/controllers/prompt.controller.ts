@@ -1,5 +1,9 @@
-import { MoveCursorOperation, ReplaceContentCommand, TextSelectionManagerService } from '@univerjs/base-docs';
-import { DocViewModelManagerService } from '@univerjs/base-docs/services/doc-view-model-manager.service.js';
+import {
+    DocViewModelManagerService,
+    MoveCursorOperation,
+    ReplaceContentCommand,
+    TextSelectionManagerService,
+} from '@univerjs/base-docs';
 import {
     FormulaEngineService,
     includeFormulaLexerToken,

@@ -21,9 +21,7 @@ interface IDrawingUpdateConfig {
     width: number;
 }
 
-export type DocumentModelOrSimple = DocumentDataModelSimple | DocumentDataModel;
-
-export class DocumentDataModelSimple {
+class DocumentDataModelSimple {
     snapshot: IDocumentData;
 
     constructor(snapshot: Partial<IDocumentData>) {

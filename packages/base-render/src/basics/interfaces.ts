@@ -14,7 +14,7 @@ import {
     LocaleService,
 } from '@univerjs/core';
 
-import { DocumentViewModelSimple } from '../components/docs/view-model/document-view-model';
+import { DocumentViewModel } from '../components/docs/view-model/document-view-model';
 import {
     IDocumentSkeletonBullet,
     IDocumentSkeletonDrawing,
@@ -83,8 +83,8 @@ export interface IMeasureTextCache {
 export interface IDocsConfig extends IReferenceSource, IDocumentLayout {
     localeService: LocaleService;
     documentTextStyle?: ITextStyle;
-    headerTreeMap: Map<string, DocumentViewModelSimple>;
-    footerTreeMap: Map<string, DocumentViewModelSimple>;
+    headerTreeMap: Map<string, DocumentViewModel>;
+    footerTreeMap: Map<string, DocumentViewModel>;
 }
 
 export interface IHeaderIds {

@@ -70,7 +70,7 @@
         "@types/react-dom": "^18.2.15",
         "@types/react-transition-group": "^4.4.9",
         "@vitest/coverage-istanbul": "^0.34.6",
-        "esbuild": "^0.19.7",
+        "esbuild": "^0.19.8",
         "happy-dom": "^12.10.3",
         "less": "^4.2.0",
         "react": "^18.2.0",

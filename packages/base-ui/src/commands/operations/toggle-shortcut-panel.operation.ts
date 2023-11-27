@@ -10,16 +10,16 @@ export const ToggleShortcutPanelOperation: IOperation = {
     id: 'base-ui.operation.toggle-shortcut-panel',
     type: CommandType.OPERATION,
     handler: (accessor: IAccessor) => {
-        const shortcutPanelStatusService = accessor.get(ShortcutPanelService);
+        const shortcutPanelService = accessor.get(ShortcutPanelService);
         const sidebarService = accessor.get(ISidebarService);
 
-        const isOpen = shortcutPanelStatusService.isOpen;
+        const isOpen = shortcutPanelService.isOpen;
 
         if (isOpen) {
-            shortcutPanelStatusService.close();
+            shortcutPanelService.close();
             sidebarService.close();
         } else {
-            shortcutPanelStatusService.open();
+            shortcutPanelService.open();
             sidebarService.open({
                 header: { title: 'shortcut-panel.title' },
                 children: { label: ShortcutPanelComponentName },

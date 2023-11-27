@@ -34,6 +34,10 @@ export interface IShortcutItem<P extends object = object> {
 export interface IShortcutService {
     shortcutChanged$: Observable<void>;
 
+    forceEscape(): IDisposable;
+    // registerCaptureSelector(selector: string): IDisposable;
+    // registerEscapeSelector(selector: string): IDisposable;
+
     registerShortcut(shortcut: IShortcutItem): IDisposable;
     getShortcutDisplay(shortcut: IShortcutItem): string;
     getShortcutDisplayOfCommand(id: string): string | null;
@@ -49,6 +53,8 @@ export class DesktopShortcutService extends Disposable implements IShortcutServi
     private readonly _shortcutChanged$ = new Subject<void>();
     readonly shortcutChanged$ = this._shortcutChanged$.asObservable();
 
+    private _forceEscaped = false;
+
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IPlatformService private readonly _platformService: IPlatformService,
@@ -59,7 +65,7 @@ export class DesktopShortcutService extends Disposable implements IShortcutServi
         // Register native keydown event handler to trigger shortcuts.
         this.disposeWithMe(
             fromDocumentEvent('keydown', (e: KeyboardEvent) => {
-                this._resolveMouseEvent(e);
+                this._resolveKeyboardEvent(e);
             })
         );
     }
@@ -133,7 +139,20 @@ export class DesktopShortcutService extends Disposable implements IShortcutServi
         this._shortcutChanged$.next();
     }
 
-    private _resolveMouseEvent(e: KeyboardEvent): void {
+    forceEscape(): IDisposable {
+        this._forceEscaped = true;
+        return toDisposable(() => (this._forceEscaped = false));
+    }
+
+    private _resolveKeyboardEvent(e: KeyboardEvent): void {
+        // Should get the container element of the Univer instance and see if
+        // the event target is a descendant of the container element.
+        // Also we should check through escape list and force catching list.
+        // if the target is not focused on the univer instance we should ingore the keyboard event
+        if (this._forceEscaped) {
+            return;
+        }
+
         const shouldPreventDefault = this._dispatch(e);
         if (shouldPreventDefault) {
             e.preventDefault();

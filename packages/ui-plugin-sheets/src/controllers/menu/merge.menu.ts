@@ -6,13 +6,9 @@ import {
     RemoveWorksheetMergeCommand,
 } from '@univerjs/base-sheets';
 import { IMenuButtonItem, IMenuSelectorItem, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/base-ui';
-import { ICommandService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 export function CellMergeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
-    // const permissionService = accessor.get(IPermissionService);
-    const commandService = accessor.get(ICommandService);
-
     return {
         id: AddWorksheetMergeCommand.id,
         icon: 'MergeAllSingle',
@@ -24,9 +20,6 @@ export function CellMergeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem
     };
 }
 export function CellMergeAllMenuItemFactory(accessor: IAccessor): IMenuButtonItem<string> {
-    // const permissionService = accessor.get(IPermissionService);
-    const commandService = accessor.get(ICommandService);
-
     return {
         id: AddWorksheetMergeAllCommand.id,
         type: MenuItemType.BUTTON,
@@ -36,9 +29,6 @@ export function CellMergeAllMenuItemFactory(accessor: IAccessor): IMenuButtonIte
     };
 }
 export function CellMergeVerticalMenuItemFactory(accessor: IAccessor): IMenuButtonItem<string> {
-    // const permissionService = accessor.get(IPermissionService);
-    const commandService = accessor.get(ICommandService);
-
     return {
         id: AddWorksheetMergeVerticalCommand.id,
         type: MenuItemType.BUTTON,
@@ -48,9 +38,6 @@ export function CellMergeVerticalMenuItemFactory(accessor: IAccessor): IMenuButt
     };
 }
 export function CellMergeHorizontalMenuItemFactory(accessor: IAccessor): IMenuButtonItem<string> {
-    // const permissionService = accessor.get(IPermissionService);
-    const commandService = accessor.get(ICommandService);
-
     return {
         id: AddWorksheetMergeHorizontalCommand.id,
         type: MenuItemType.BUTTON,
@@ -60,9 +47,6 @@ export function CellMergeHorizontalMenuItemFactory(accessor: IAccessor): IMenuBu
     };
 }
 export function CellMergeCancelMenuItemFactory(accessor: IAccessor): IMenuButtonItem<string> {
-    // const permissionService = accessor.get(IPermissionService);
-    const commandService = accessor.get(ICommandService);
-
     return {
         id: RemoveWorksheetMergeCommand.id,
         type: MenuItemType.BUTTON,

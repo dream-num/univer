@@ -9,7 +9,6 @@ import { IMessageService } from '../services/message/message.service';
 import { ISidebarService } from '../services/sidebar/sidebar.service';
 import styles from './app.module.less';
 import { ComponentContainer } from './components/ComponentContainer';
-import { ContextMenu } from './components/context-menu/ContextMenu';
 import { MenuBar } from './components/doc-bars/MenuBar';
 import { Toolbar } from './components/doc-bars/Toolbar';
 import { Sidebar } from './components/sidebar/Sidebar';
@@ -103,11 +102,14 @@ export function App(props: IUniverAppProps) {
 
                         {/* <ComponentContainer components={sidebarComponents} /> */}
 
-                        <ContextMenu>
-                            <section ref={contentRef} className={styles.appContainerContent} data-range-selector>
-                                <ComponentContainer components={contentComponents} />
-                            </section>
-                        </ContextMenu>
+                        <section
+                            ref={contentRef}
+                            className={styles.appContainerContent}
+                            data-range-selector
+                            onContextMenu={(e) => e.preventDefault()}
+                        >
+                            <ComponentContainer components={contentComponents} />
+                        </section>
                     </section>
 
                     <aside className={styles.appContainerSidebar}>

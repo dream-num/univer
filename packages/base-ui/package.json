@@ -50,6 +50,7 @@
     },
     "dependencies": {
         "@ctrl/tinycolor": "^4.0.2",
+        "@rc-component/trigger": "^1.18.2",
         "@univerjs/base-render": "workspace:*",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",

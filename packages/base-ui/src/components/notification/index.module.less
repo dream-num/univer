@@ -2,6 +2,7 @@
 
 .notification {
     position: fixed;
+    z-index: 1000;
 
     display: flex;
     flex-direction: column;
@@ -52,7 +53,7 @@
             border-radius: var(--border-radius-base);
             outline: none;
 
-            transition: background-color .2s;
+            transition: background-color 0.2s;
 
             &:hover {
                 background-color: rgb(var(--bg-color-hover));
@@ -125,72 +126,72 @@
     }
 
     // Animation
-      &-fade {
+    &-fade {
         overflow: hidden;
         transition: all 0.3s;
-      }
+    }
 
-      &-fade-appear-prepare {
+    &-fade-appear-prepare {
         opacity: 0;
-      }
+    }
 
-      &-fade-appear-start {
+    &-fade-appear-start {
         transform: translateX(100%);
         opacity: 0;
-      }
+    }
 
-      &-fade-appear-active {
+    &-fade-appear-active {
         transform: translateX(0);
         opacity: 1;
-      }
+    }
 
-      .fade-effect() {
+    .fade-effect() {
         animation-duration: 0.3s;
         animation-timing-function: cubic-bezier(0.55, 0, 0.55, 0.2);
         animation-fill-mode: both;
-      }
+    }
 
-      &-fade-appear,
-      &-fade-enter {
+    &-fade-appear,
+    &-fade-enter {
         opacity: 0;
         animation-play-state: paused;
         .fade-effect();
-      }
+    }
 
-      &-fade-leave {
+    &-fade-leave {
         .fade-effect();
 
         animation-play-state: paused;
-      }
+    }
 
-      &-fade-appear&-fade-appear-active,
-      &-fade-enter&-fade-enter-active {
+    &-fade-appear&-fade-appear-active,
+    &-fade-enter&-fade-enter-active {
         animation-name: notification-fade-in;
         animation-play-state: running;
-      }
+    }
 
-      &-fade-leave&-fade-leave-active {
+    &-fade-leave&-fade-leave-active {
         animation-name: notification-fade-out;
         animation-play-state: running;
-      }
+    }
 
-      @keyframes notification-fade-in {
+    @keyframes notification-fade-in {
         0% {
-          opacity: 0;
+            opacity: 0;
         }
 
         100% {
-          opacity: 1;
+            opacity: 1;
         }
-      }
+    }
 
-      @keyframes notification-fade-out {
+    @keyframes notification-fade-out {
         0% {
-          opacity: 1;
+            opacity: 1;
         }
 
         100% {
-          opacity: 0;
+            opacity: 0;
         }
-      }
+    }
 }

@@ -33,6 +33,7 @@ export interface IAutoFillService {
     applyType$: Observable<APPLY_TYPE>;
     menu$: Observable<IApplyMenuItem[]>;
     setDisableApplyType: (type: APPLY_TYPE, disable: boolean) => void;
+    registerRule(rule: IAutoFillRule): void;
 }
 
 export interface IApplyMenuItem {
@@ -97,11 +98,10 @@ export class AutoFillService extends Disposable implements IAutoFillService {
         this._isFillingStyle = true;
     }
 
-    registryRule(rule: IAutoFillRule) {
+    registerRule(rule: IAutoFillRule) {
         // if rule.type is used, console error
         if (this._rules.find((r) => r.type === rule.type)) {
             throw new Error(`Registry rule failed, type '${rule.type}' already exist!`);
-            return;
         }
         // insert rules according to the rule.priority, the higher priority will be inserted at the beginning of the array
         const index = this._rules.findIndex((r) => r.priority < rule.priority);

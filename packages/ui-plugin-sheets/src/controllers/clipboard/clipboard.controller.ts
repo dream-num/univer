@@ -12,6 +12,9 @@ import {
     ISetSelectionsOperationParams,
     ISetWorksheetColWidthMutationParams,
     ISetWorksheetRowHeightMutationParams,
+    MoveRangeCommand,
+    MoveRangeMutation,
+    MoveRangeMutationParams,
     NORMAL_SELECTION_PLUGIN_NAME,
     RemoveMergeUndoMutationFactory,
     RemoveWorksheetMergeMutation,
@@ -42,6 +45,7 @@ import {
     ObjectMatrixPrimitiveType,
     OnLifecycle,
     Rectangle,
+    SheetInterceptorService,
     Worksheet,
 } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
@@ -58,6 +62,7 @@ import {
 } from '../../commands/commands/clipboard.command';
 import { ISheetClipboardService } from '../../services/clipboard/clipboard.service';
 import {
+    COPY_TYPE,
     ICellDataWithSpanInfo,
     IClipboardPropertyItem,
     ISheetClipboardHook,
@@ -104,49 +109,6 @@ export class SheetClipboardController extends Disposable {
             })
         );
     }
-
-    // private _commandExecutedListener() {
-    //     const updateCommandList = [SheetCopyCommand.id, SheetCutCommand.id, SheetPasteCommand.id];
-
-    //     this.disposeWithMe(
-    //         this._commandService.onCommandExecuted((command: ICommandInfo) => {
-    //             if (!updateCommandList.includes(command.id)) {
-    //                 return;
-    //             }
-
-    //             switch (command.id) {
-    //                 case SheetPasteCommand.id: {
-    //                     this._handlePaste();
-    //                     break;
-    //                 }
-
-    //                 case SheetCopyCommand.id: {
-    //                     this._handleCopy();
-    //                     break;
-    //                 }
-
-    //                 case SheetCutCommand.id: {
-    //                     this._handleCut();
-    //                     break;
-    //                 }
-
-    //                 default:
-    //                     throw new Error(`Unhandled command ${command.id}`);
-    //             }
-    //         })
-    //     );
-    // }
-
-    // private async _handleCopy() {
-    //     const { cli: clipboard } = this;
-    //     const documentBodyList = this._getDocumentBodyInRanges();
-
-    //     try {
-    //         clipboard.setClipboardData(documentBodyList);
-    //     } catch (_e) {
-    //         this._logService.error('[DocClipboardController] set clipboard failed');
-    //     }
-    // }
 
     private _initCopyingHooks(): ISheetClipboardHook {
         const self = this;
@@ -414,8 +376,8 @@ export class SheetClipboardController extends Disposable {
                 };
             },
 
-            onPasteCells(range, matrix, pasteType) {
-                return self._onPasteCells(range, matrix, workbookId!, worksheetId!, pasteType);
+            onPasteCells(range, matrix, pasteType, copyInfo) {
+                return self._onPasteCells(range, matrix, workbookId!, worksheetId!, pasteType, copyInfo);
             },
 
             onRemoveCutCells(range, workbookId, worksheetId) {
@@ -501,281 +463,372 @@ export class SheetClipboardController extends Disposable {
     }
 
     private _onPasteCells(
-        range: IRange,
+        pastedRange: IRange,
         matrix: ObjectMatrix<ICellDataWithSpanInfo>,
         workbookId: string,
         worksheetId: string,
-        pasteType: PASTE_TYPE
+        pasteType: PASTE_TYPE,
+        copyInfo?: {
+            copyType: COPY_TYPE;
+            copyRange: IRange;
+        }
     ): {
         redos: IMutationInfo[];
         undos: IMutationInfo[];
     } {
-        // insert cell style, insert cell content and insert merged cell info
-        // 1. merged cell
-        // 2. raw content
-        // 3. cell style
-
-        const { startColumn, startRow, endColumn, endRow } = range;
-        const valueMatrix = new ObjectMatrix<ICellData>();
-        const clearStyleMatrix = new ObjectMatrix<ICellData>();
-        const mergeRangeData: IRange[] = [];
-        const redoMutationsInfo: IMutationInfo[] = [];
-        const undoMutationsInfo: IMutationInfo[] = [];
-        let hasMerge = false;
-        if (pasteType === PASTE_TYPE.COL_WIDTH) {
-            return { redos: [], undos: [] };
-        }
-
-        // TODO@Dushusir: undo selection
-        matrix.forValue((row, col, value) => {
-            // NOTE: When pasting, the original cell may contain a default style that is not explicitly carried, resulting in the failure to overwrite the style of the target cell.
-            // If the original cell has a style (lack of other default styles) or is undefined (all default styles), we need to clear the existing styles in the target area
-            // If the original cell style is "", it is to handle the situation where the target area contains merged cells. The style is not overwritten, only the value is overwritten. There is no need to clear the existing style of the target area.
-            if (value.s) {
-                clearStyleMatrix.setValue(row + startRow, col + startColumn, { s: null });
-            }
-
-            if (pasteType === PASTE_TYPE.VALUE) {
-                valueMatrix.setValue(row + startRow, col + startColumn, {
-                    v: value.v,
-                });
-            } else if (pasteType === PASTE_TYPE.FORMAT) {
-                valueMatrix.setValue(row + startRow, col + startColumn, {
-                    s: value.s,
-                });
-                // rowspan and colspan to merge data
-                if (value.rowSpan) {
-                    const colSpan = value.colSpan || 1;
-                    const mergeRange = {
-                        startRow: startRow + row,
-                        endRow: startRow + row + value.rowSpan - 1,
-                        startColumn: startColumn + col,
-                        endColumn: startColumn + col + colSpan - 1,
-                    };
-                    mergeRangeData.push(mergeRange);
-                    hasMerge = true;
-                } else if (value.colSpan) {
-                    const rowSpan = value.rowSpan || 1;
-                    const mergeRange = {
-                        startRow: startRow + row,
-                        endRow: startRow + row + rowSpan - 1,
-                        startColumn: startColumn + col,
-                        endColumn: startColumn + col + value.colSpan - 1,
-                    };
-                    mergeRangeData.push(mergeRange);
-                    hasMerge = true;
-                }
-            } else if (pasteType === PASTE_TYPE.BESIDES_BORDER) {
-                const style = value.s;
-                if (typeof style === 'object')
-                    valueMatrix.setValue(row + startRow, col + startColumn, {
-                        s: { ...style, bd: undefined },
-                        v: value.v,
-                    });
-                // rowspan and colspan to merge data
-                if (value.rowSpan) {
-                    const colSpan = value.colSpan || 1;
-                    const mergeRange = {
-                        startRow: startRow + row,
-                        endRow: startRow + row + value.rowSpan - 1,
-                        startColumn: startColumn + col,
-                        endColumn: startColumn + col + colSpan - 1,
-                    };
-                    mergeRangeData.push(mergeRange);
-                    hasMerge = true;
-                } else if (value.colSpan) {
-                    const rowSpan = value.rowSpan || 1;
-                    const mergeRange = {
-                        startRow: startRow + row,
-                        endRow: startRow + row + rowSpan - 1,
-                        startColumn: startColumn + col,
-                        endColumn: startColumn + col + value.colSpan - 1,
-                    };
-                    mergeRangeData.push(mergeRange);
-                    hasMerge = true;
-                }
-            } else {
-                valueMatrix.setValue(row + startRow, col + startColumn, {
-                    v: value.v,
-                    s: value.s,
-                });
-
-                // rowspan and colspan to merge data
-                if (value.rowSpan) {
-                    const colSpan = value.colSpan || 1;
-                    const mergeRange = {
-                        startRow: startRow + row,
-                        endRow: startRow + row + value.rowSpan - 1,
-                        startColumn: startColumn + col,
-                        endColumn: startColumn + col + colSpan - 1,
-                    };
-                    mergeRangeData.push(mergeRange);
-                    hasMerge = true;
-                } else if (value.colSpan) {
-                    const rowSpan = value.rowSpan || 1;
-                    const mergeRange = {
-                        startRow: startRow + row,
-                        endRow: startRow + row + rowSpan - 1,
-                        startColumn: startColumn + col,
-                        endColumn: startColumn + col + value.colSpan - 1,
-                    };
-                    mergeRangeData.push(mergeRange);
-                    hasMerge = true;
-                }
-            }
-        });
-
+        let redoMutationsInfo: IMutationInfo[] = [];
+        let undoMutationsInfo: IMutationInfo[] = [];
         const accessor = {
             get: this._injector.get.bind(this._injector),
         };
+        const { copyType, copyRange } = copyInfo || {};
 
-        // clear style
-        if (clearStyleMatrix.getLength() > 0) {
-            const clearMutation: ISetRangeValuesMutationParams = {
-                worksheetId,
+        // only inner cut and inner copy can be handled here
+        if (copyType === COPY_TYPE.CUT) {
+            if (copyRange) {
+                const univerInstanceService = accessor.get(IUniverInstanceService);
+                const sheetInterceptorService = accessor.get(SheetInterceptorService);
+                const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+                const worksheet = workbook.getActiveSheet();
+                const workbookId = workbook.getUnitId();
+                const worksheetId = worksheet.getSheetId();
+                const fromValues = worksheet.getRange(copyRange).getValues();
+
+                const newFromCellValues = fromValues.reduce((res, row, rowIndex) => {
+                    row.forEach((colItem, colIndex) => {
+                        res.setValue(copyRange.startRow + rowIndex, copyRange.startColumn + colIndex, null);
+                    });
+                    return res;
+                }, new ObjectMatrix<ICellData | null>());
+                const currentFromCellValues = fromValues.reduce((res, row, rowIndex) => {
+                    row.forEach((colItem, colIndex) => {
+                        res.setValue(copyRange.startRow + rowIndex, copyRange.startColumn + colIndex, colItem);
+                    });
+                    return res;
+                }, new ObjectMatrix<ICellData | null>());
+
+                const newToCellValues = fromValues.reduce((res, row, rowIndex) => {
+                    row.forEach((colItem, colIndex) => {
+                        res.setValue(pastedRange.startRow + rowIndex, pastedRange.startColumn + colIndex, colItem);
+                    });
+                    return res;
+                }, new ObjectMatrix<ICellData | null>());
+                const currentToCellValues = worksheet
+                    .getRange(pastedRange)
+                    .getValues()
+                    .reduce((res, row, rowIndex) => {
+                        row.forEach((colItem, colIndex) => {
+                            res.setValue(pastedRange.startRow + rowIndex, pastedRange.startColumn + colIndex, colItem);
+                        });
+                        return res;
+                    }, new ObjectMatrix<ICellData | null>());
+
+                const doMoveRangeMutation: MoveRangeMutationParams = {
+                    from: newFromCellValues.getMatrix(),
+                    to: newToCellValues.getMatrix(),
+                    workbookId,
+                    worksheetId,
+                };
+                const undoMoveRangeMutation: MoveRangeMutationParams = {
+                    from: currentFromCellValues.getMatrix(),
+                    to: currentToCellValues.getMatrix(),
+                    workbookId,
+                    worksheetId,
+                };
+                const interceptorCommands = sheetInterceptorService.onCommandExecute({
+                    id: MoveRangeCommand.id,
+                    params: { toRange: pastedRange, fromRange: copyRange },
+                });
+
+                redoMutationsInfo = [
+                    { id: MoveRangeMutation.id, params: doMoveRangeMutation },
+                    ...interceptorCommands.redos,
+                    {
+                        id: SetSelectionsOperation.id,
+                        params: {
+                            unitId: workbookId,
+                            sheetId: worksheetId,
+                            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+                            selections: [{ range: pastedRange }],
+                        },
+                    },
+                ];
+                undoMutationsInfo = [
+                    {
+                        id: SetSelectionsOperation.id,
+                        params: {
+                            unitId: workbookId,
+                            sheetId: worksheetId,
+                            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+                            selections: [{ range: copyRange }],
+                        },
+                    },
+                    ...interceptorCommands.undos,
+                    { id: MoveRangeMutation.id, params: undoMoveRangeMutation },
+                ];
+            }
+        } else {
+            // insert cell style, insert cell content and insert merged cell info
+            // 1. merged cell
+            // 2. raw content
+            // 3. cell style
+            const { startColumn, startRow, endColumn, endRow } = pastedRange;
+            const valueMatrix = new ObjectMatrix<ICellData>();
+            const clearStyleMatrix = new ObjectMatrix<ICellData>();
+            const mergeRangeData: IRange[] = [];
+
+            let hasMerge = false;
+            if (pasteType === PASTE_TYPE.COL_WIDTH) {
+                return { redos: [], undos: [] };
+            }
+
+            // TODO@Dushusir: undo selection
+            matrix.forValue((row, col, value) => {
+                // NOTE: When pasting, the original cell may contain a default style that is not explicitly carried, resulting in the failure to overwrite the style of the target cell.
+                // If the original cell has a style (lack of other default styles) or is undefined (all default styles), we need to clear the existing styles in the target area
+                // If the original cell style is "", it is to handle the situation where the target area contains merged cells. The style is not overwritten, only the value is overwritten. There is no need to clear the existing style of the target area.
+                if (value.s) {
+                    clearStyleMatrix.setValue(row + startRow, col + startColumn, { s: null });
+                }
+
+                if (pasteType === PASTE_TYPE.VALUE) {
+                    valueMatrix.setValue(row + startRow, col + startColumn, {
+                        v: value.v,
+                    });
+                } else if (pasteType === PASTE_TYPE.FORMAT) {
+                    valueMatrix.setValue(row + startRow, col + startColumn, {
+                        s: value.s,
+                    });
+                    // rowspan and colspan to merge data
+                    if (value.rowSpan) {
+                        const colSpan = value.colSpan || 1;
+                        const mergeRange = {
+                            startRow: startRow + row,
+                            endRow: startRow + row + value.rowSpan - 1,
+                            startColumn: startColumn + col,
+                            endColumn: startColumn + col + colSpan - 1,
+                        };
+                        mergeRangeData.push(mergeRange);
+                        hasMerge = true;
+                    } else if (value.colSpan) {
+                        const rowSpan = value.rowSpan || 1;
+                        const mergeRange = {
+                            startRow: startRow + row,
+                            endRow: startRow + row + rowSpan - 1,
+                            startColumn: startColumn + col,
+                            endColumn: startColumn + col + value.colSpan - 1,
+                        };
+                        mergeRangeData.push(mergeRange);
+                        hasMerge = true;
+                    }
+                } else if (pasteType === PASTE_TYPE.BESIDES_BORDER) {
+                    const style = value.s;
+                    if (typeof style === 'object')
+                        valueMatrix.setValue(row + startRow, col + startColumn, {
+                            s: { ...style, bd: undefined },
+                            v: value.v,
+                        });
+                    // rowspan and colspan to merge data
+                    if (value.rowSpan) {
+                        const colSpan = value.colSpan || 1;
+                        const mergeRange = {
+                            startRow: startRow + row,
+                            endRow: startRow + row + value.rowSpan - 1,
+                            startColumn: startColumn + col,
+                            endColumn: startColumn + col + colSpan - 1,
+                        };
+                        mergeRangeData.push(mergeRange);
+                        hasMerge = true;
+                    } else if (value.colSpan) {
+                        const rowSpan = value.rowSpan || 1;
+                        const mergeRange = {
+                            startRow: startRow + row,
+                            endRow: startRow + row + rowSpan - 1,
+                            startColumn: startColumn + col,
+                            endColumn: startColumn + col + value.colSpan - 1,
+                        };
+                        mergeRangeData.push(mergeRange);
+                        hasMerge = true;
+                    }
+                } else {
+                    valueMatrix.setValue(row + startRow, col + startColumn, {
+                        v: value.v,
+                        s: value.s,
+                    });
+
+                    // rowspan and colspan to merge data
+                    if (value.rowSpan) {
+                        const colSpan = value.colSpan || 1;
+                        const mergeRange = {
+                            startRow: startRow + row,
+                            endRow: startRow + row + value.rowSpan - 1,
+                            startColumn: startColumn + col,
+                            endColumn: startColumn + col + colSpan - 1,
+                        };
+                        mergeRangeData.push(mergeRange);
+                        hasMerge = true;
+                    } else if (value.colSpan) {
+                        const rowSpan = value.rowSpan || 1;
+                        const mergeRange = {
+                            startRow: startRow + row,
+                            endRow: startRow + row + rowSpan - 1,
+                            startColumn: startColumn + col,
+                            endColumn: startColumn + col + value.colSpan - 1,
+                        };
+                        mergeRangeData.push(mergeRange);
+                        hasMerge = true;
+                    }
+                }
+            });
+
+            // clear style
+            if (clearStyleMatrix.getLength() > 0) {
+                const clearMutation: ISetRangeValuesMutationParams = {
+                    worksheetId,
+                    workbookId,
+                    cellValue: clearStyleMatrix.getData(),
+                };
+                redoMutationsInfo.push({
+                    id: SetRangeValuesMutation.id,
+                    params: clearMutation,
+                });
+
+                // undo
+                const undoClearMutation: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
+                    accessor,
+                    clearMutation
+                );
+
+                undoMutationsInfo.push({
+                    id: SetRangeValuesMutation.id,
+                    params: undoClearMutation,
+                });
+            }
+
+            // set cell value and style
+            const setValuesMutation: ISetRangeValuesMutationParams = {
                 workbookId,
-                cellValue: clearStyleMatrix.getData(),
+                worksheetId,
+                cellValue: valueMatrix.getData(),
             };
+
             redoMutationsInfo.push({
                 id: SetRangeValuesMutation.id,
-                params: clearMutation,
+                params: setValuesMutation,
             });
 
             // undo
-            const undoClearMutation: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
+            const undoSetValuesMutation: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
                 accessor,
-                clearMutation
+                setValuesMutation
             );
 
             undoMutationsInfo.push({
                 id: SetRangeValuesMutation.id,
-                params: undoClearMutation,
+                params: undoSetValuesMutation,
             });
-        }
 
-        // set cell value and style
-        const setValuesMutation: ISetRangeValuesMutationParams = {
-            workbookId,
-            worksheetId,
-            cellValue: valueMatrix.getData(),
-        };
+            // remove current range's all merged Cell
+            if (hasMerge) {
+                // get all merged cells
+                const mergeData = this._getWorksheet(workbookId, worksheetId).getMergeData();
+                const mergedCellsInRange = mergeData.filter((rect) =>
+                    Rectangle.intersects({ startRow, startColumn, endRow, endColumn }, rect)
+                );
 
-        redoMutationsInfo.push({
-            id: SetRangeValuesMutation.id,
-            params: setValuesMutation,
-        });
+                const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
+                    workbookId,
+                    worksheetId,
+                    ranges: mergedCellsInRange,
+                };
+                redoMutationsInfo.push({
+                    id: RemoveWorksheetMergeMutation.id,
+                    params: removeMergeMutationParams,
+                });
 
-        // undo
-        const undoSetValuesMutation: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
-            accessor,
-            setValuesMutation
-        );
+                const undoRemoveMergeMutationParams: IAddWorksheetMergeMutationParams = RemoveMergeUndoMutationFactory(
+                    accessor,
+                    removeMergeMutationParams
+                );
 
-        undoMutationsInfo.push({
-            id: SetRangeValuesMutation.id,
-            params: undoSetValuesMutation,
-        });
+                undoMutationsInfo.push({
+                    id: AddWorksheetMergeMutation.id,
+                    params: undoRemoveMergeMutationParams,
+                });
+            }
 
-        // remove current range's all merged Cell
-        if (hasMerge) {
-            // get all merged cells
-            const mergeData = this._getWorksheet(workbookId, worksheetId).getMergeData();
-            const mergedCellsInRange = mergeData.filter((rect) =>
-                Rectangle.intersects({ startRow, startColumn, endRow, endColumn }, rect)
-            );
-
-            const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
+            // set merged cell info
+            const addMergeMutationParams: IAddWorksheetMergeMutationParams = {
                 workbookId,
                 worksheetId,
-                ranges: mergedCellsInRange,
+                ranges: mergeRangeData,
             };
             redoMutationsInfo.push({
-                id: RemoveWorksheetMergeMutation.id,
-                params: removeMergeMutationParams,
+                id: AddWorksheetMergeMutation.id,
+                params: addMergeMutationParams,
             });
 
-            const undoRemoveMergeMutationParams: IAddWorksheetMergeMutationParams = RemoveMergeUndoMutationFactory(
+            // undo
+            const undoAddMergeMutation: IRemoveWorksheetMergeMutationParams = AddMergeUndoMutationFactory(
                 accessor,
-                removeMergeMutationParams
+                addMergeMutationParams
             );
 
             undoMutationsInfo.push({
-                id: AddWorksheetMergeMutation.id,
-                params: undoRemoveMergeMutationParams,
+                id: RemoveWorksheetMergeMutation.id,
+                params: undoAddMergeMutation,
             });
-        }
 
-        // set merged cell info
-        const addMergeMutationParams: IAddWorksheetMergeMutationParams = {
-            workbookId,
-            worksheetId,
-            ranges: mergeRangeData,
-        };
-        redoMutationsInfo.push({
-            id: AddWorksheetMergeMutation.id,
-            params: addMergeMutationParams,
-        });
-
-        // undo
-        const undoAddMergeMutation: IRemoveWorksheetMergeMutationParams = AddMergeUndoMutationFactory(
-            accessor,
-            addMergeMutationParams
-        );
-
-        undoMutationsInfo.push({
-            id: RemoveWorksheetMergeMutation.id,
-            params: undoAddMergeMutation,
-        });
-
-        // set selection
-        const worksheet = this._getWorksheet(workbookId, worksheetId);
-        // const destinationRange = {
-        //     startRow,
-        //     endRow: range.endRow - 1,
-        //     startColumn,
-        //     endColumn: range.endColumn - 1,
-        // };
-        const primaryCell = {
-            startRow,
-            endRow: startRow,
-            startColumn,
-            endColumn: startColumn,
-        };
-
-        const primary = getPrimaryForRange(primaryCell, worksheet);
-
-        const mainCell = matrix.getValue(0, 0);
-        const rowSpan = mainCell?.rowSpan || 1;
-        const colSpan = mainCell?.colSpan || 1;
-
-        if (rowSpan > 1 || colSpan > 1) {
-            const mergeRange = {
+            // set selection
+            const worksheet = this._getWorksheet(workbookId, worksheetId);
+            // const destinationRange = {
+            //     startRow,
+            //     endRow: range.endRow - 1,
+            //     startColumn,
+            //     endColumn: range.endColumn - 1,
+            // };
+            const primaryCell = {
                 startRow,
-                endRow: startRow + rowSpan - 1,
+                endRow: startRow,
                 startColumn,
-                endColumn: startColumn + colSpan - 1,
+                endColumn: startColumn,
             };
 
-            primary.startRow = mergeRange.startRow;
-            primary.endRow = mergeRange.endRow;
-            primary.startColumn = mergeRange.startColumn;
-            primary.endColumn = mergeRange.endColumn;
+            const primary = getPrimaryForRange(primaryCell, worksheet);
 
-            primary.isMerged = true;
-            primary.isMergedMainCell = true;
+            const mainCell = matrix.getValue(0, 0);
+            const rowSpan = mainCell?.rowSpan || 1;
+            const colSpan = mainCell?.colSpan || 1;
+
+            if (rowSpan > 1 || colSpan > 1) {
+                const mergeRange = {
+                    startRow,
+                    endRow: startRow + rowSpan - 1,
+                    startColumn,
+                    endColumn: startColumn + colSpan - 1,
+                };
+
+                primary.startRow = mergeRange.startRow;
+                primary.endRow = mergeRange.endRow;
+                primary.startColumn = mergeRange.startColumn;
+                primary.endColumn = mergeRange.endColumn;
+
+                primary.isMerged = true;
+                primary.isMergedMainCell = true;
+            }
+
+            // selection does not require undo
+            const setSelectionsParam: ISetSelectionsOperationParams = {
+                workbookId,
+                worksheetId,
+                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+                selections: [{ range: pastedRange, primary, style: null }],
+            };
+            redoMutationsInfo.push({
+                id: SetSelectionsOperation.id,
+                params: setSelectionsParam,
+            });
         }
-
-        // selection does not require undo
-        const setSelectionsParam: ISetSelectionsOperationParams = {
-            workbookId,
-            worksheetId,
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-            selections: [{ range, primary, style: null }],
-        };
-        redoMutationsInfo.push({
-            id: SetSelectionsOperation.id,
-            params: setSelectionsParam,
-        });
 
         return {
             redos: redoMutationsInfo,

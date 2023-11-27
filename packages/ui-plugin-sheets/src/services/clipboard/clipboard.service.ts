@@ -350,6 +350,8 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         }
         if (!cellMatrix) return false;
 
+        const copyInfo = source ? { copyRange: source.range, copyType: source.copyType } : undefined;
+
         const redoMutationsInfo: IMutationInfo[] = [];
         const undoMutationsInfo: IMutationInfo[] = [];
 
@@ -372,19 +374,10 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                 undoMutationsInfo.push(...colReturn.undos);
             }
 
-            const contentReturn = h.onPasteCells?.(pastedRange, cellMatrix, pasteType);
+            const contentReturn = h.onPasteCells?.(pastedRange, cellMatrix, pasteType, copyInfo);
             if (contentReturn) {
                 redoMutationsInfo.push(...contentReturn.redos);
                 undoMutationsInfo.push(...contentReturn.undos);
-            }
-
-            if (source && source.copyType === COPY_TYPE.CUT) {
-                const { worksheetId, workbookId, range } = source;
-                const removeReturn = h.onRemoveCutCells?.(range, workbookId, worksheetId);
-                if (removeReturn) {
-                    redoMutationsInfo.push(...removeReturn.redos);
-                    undoMutationsInfo.push(...removeReturn.undos);
-                }
             }
         });
 

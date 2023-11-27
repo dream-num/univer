@@ -109,9 +109,13 @@ export interface ISheetClipboardHook {
      * @param col
      */
     onPasteCells?(
-        range: IRange,
+        pastedRange: IRange,
         matrix: ObjectMatrix<ICellDataWithSpanInfo>,
-        pasteType: PASTE_TYPE
+        pasteType: PASTE_TYPE,
+        copyInfo?: {
+            copyType: COPY_TYPE;
+            copyRange: IRange;
+        }
     ): {
         undos: IMutationInfo[];
         redos: IMutationInfo[];

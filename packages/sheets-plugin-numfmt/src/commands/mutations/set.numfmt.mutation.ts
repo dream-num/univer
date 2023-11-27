@@ -15,7 +15,10 @@ export const factorySetNumfmtUndoMutation = (
             .map((item) => {
                 const { row, col } = item;
                 const oldValue = numfmtService.getValue(option.workbookId, option.worksheetId, row, col);
-                return { pattern: oldValue?.pattern, type: oldValue?.type, row, col };
+                if (oldValue) {
+                    return { pattern: oldValue.pattern, type: oldValue.type, row, col };
+                }
+                return { row, col };
             })
             .reverse(),
     };
@@ -39,10 +42,11 @@ export const SetNumfmtMutation: ICommand<SetNumfmtMutationParams> = {
         const numfmtService = accessor.get(INumfmtService);
         const workbookId = params.workbookId;
         const sheetId = params.worksheetId;
-        values.forEach((item) => {
-            const value = item.pattern ? { pattern: item.pattern!, type: item.type! } : null;
-            numfmtService.setValue(workbookId, sheetId, Number(item.row), Number(item.col), value);
-        });
+        numfmtService.setValues(
+            workbookId,
+            sheetId,
+            values.map((item) => ({ ...item, type: item.type! }))
+        );
         return true;
     },
 };

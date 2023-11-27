@@ -9,9 +9,9 @@
  * but can't use model.getValue('cc') to get the object b ,because model([a,b,c],['a','b']) is not set 'c' in the second parameter array
  */
 export class RefAlias<T extends Record<string, unknown>, K extends keyof T = keyof T> {
-    _values: T[] = [];
-    _keys: K[] = [];
-    _keyMaps: Map<keyof T, Map<unknown, T>> = new Map();
+    private _values: T[] = [];
+    private _keys: K[] = [];
+    private _keyMaps: Map<keyof T, Map<unknown, T>> = new Map();
 
     constructor(values: T[], keys: K[]) {
         this._values = values;

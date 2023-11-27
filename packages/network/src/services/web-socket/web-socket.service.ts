@@ -21,8 +21,6 @@ export interface ISocket {
 
     close(code?: number, reason?: string): void;
 
-    // TODO: Data type can support plain object as a type.
-
     /**
      * Send a message to the remote server.
      */

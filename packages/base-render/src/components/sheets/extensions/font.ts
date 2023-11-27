@@ -26,8 +26,7 @@ export class Font extends SheetExtension {
     }
 
     override draw(ctx: CanvasRenderingContext2D, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {
-        const { rowColumnSegment, rowHeaderWidth, columnHeaderHeight, stylesCache, dataMergeCache, overflowCache } =
-            spreadsheetSkeleton;
+        const { stylesCache, dataMergeCache, overflowCache } = spreadsheetSkeleton;
         const { font: fontList } = stylesCache;
         if (!spreadsheetSkeleton) {
             return;
@@ -158,7 +157,7 @@ export class Font extends SheetExtension {
             throw new Error('documents is null');
         }
 
-        const { documentSkeleton, angle, verticalAlign, horizontalAlign, wrapStrategy } = docsConfig;
+        const { documentSkeleton, angle, wrapStrategy } = docsConfig;
         const cellWidth = endX - startX;
         const cellHeight = endY - startY;
 

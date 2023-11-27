@@ -54,14 +54,13 @@ export class DocCanvasView {
                 return;
             }
 
+            this._currentDocumentModel = documentModel;
+
             const unitId = documentModel.getUnitId();
+            // Build the view model and notify the skeleton manager to create the skeleton.
+            this._docViewModelManagerService.setCurrent(unitId);
 
             if (!this._loadedMap.has(unitId)) {
-                this._currentDocumentModel = documentModel;
-
-                // Build the view model and notify the skeleton manager to create the skeleton.
-                this._docViewModelManagerService.setCurrent(unitId);
-
                 this._addNewRender();
                 this._loadedMap.add(unitId);
             }

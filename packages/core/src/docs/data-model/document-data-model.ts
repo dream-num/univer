@@ -166,9 +166,9 @@ class DocumentDataModelSimple {
 export class DocumentDataModel extends DocumentDataModelSimple {
     private _unitId: string;
 
-    headerModelMap: Map<string, DocumentDataModel> = new Map(); // sub class should guarantee this is not null
+    headerModelMap: Map<string, DocumentDataModel> = new Map();
 
-    footerModelMap: Map<string, DocumentDataModel> = new Map(); // sub class should guarantee this is not null
+    footerModelMap: Map<string, DocumentDataModel> = new Map();
 
     constructor(snapshot: Partial<IDocumentData>) {
         super(snapshot);
@@ -238,7 +238,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
         memoryCursor.reset();
 
         mutations.forEach((mutation) => {
-            // FIXME: @jocs Since updateApply modifies the mutation(used in undo/redo),
+            // FIXME: @JOCS Since updateApply modifies the mutation(used in undo/redo),
             // so make a deep copy here, does updateApply need to
             // be modified to have no side effects in the future?
             mutation = Tools.deepClone(mutation);

@@ -144,7 +144,6 @@ export class StartEditController extends Disposable {
 
             this._currentUniverService.changeDoc(editorUnitId, documentModel!);
 
-            // REFACTOR
             const docParam = this._docSkeletonManagerService.getCurrent();
 
             if (docParam == null) {

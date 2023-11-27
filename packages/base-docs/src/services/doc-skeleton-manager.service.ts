@@ -11,19 +11,13 @@ export interface IDocSkeletonManagerParam {
     dirty: boolean;
 }
 
-export interface IDocSkeletonManagerSearch {
-    unitId: string;
-}
-
 /**
  * This service is for worksheet build sheet skeleton.
  */
 export class DocSkeletonManagerService implements IDisposable {
-    private _currentSkeleton: IDocSkeletonManagerSearch = {
-        unitId: '',
-    };
+    private _currentSkeletonUnitId: string = '';
 
-    private _docSkeletonParam: IDocSkeletonManagerParam[] = [];
+    private _docSkeletonMap: Map<string, IDocSkeletonManagerParam> = new Map();
 
     private readonly _currentSkeleton$ = new BehaviorSubject<Nullable<IDocSkeletonManagerParam>>(null);
 
@@ -56,11 +50,11 @@ export class DocSkeletonManagerService implements IDisposable {
     dispose(): void {
         this._currentSkeletonBefore$.complete();
         this._currentSkeleton$.complete();
-        this._docSkeletonParam = [];
+        this._docSkeletonMap = new Map();
     }
 
     getCurrent(): Nullable<IDocSkeletonManagerParam> {
-        return this._getCurrentBySearch(this._currentSkeleton);
+        return this._getCurrentByUnitId(this._currentSkeletonUnitId);
     }
 
     // updateCurrent(searchParm: IDocSkeletonManagerSearch) {
@@ -99,7 +93,7 @@ export class DocSkeletonManagerService implements IDisposable {
 
     private _setCurrent(docViewModelParam: IDocumentViewModelManagerParam): Nullable<IDocSkeletonManagerParam> {
         const { unitId } = docViewModelParam;
-        const curSkeleton = this._getCurrentBySearch({ unitId });
+        const curSkeleton = this._getCurrentByUnitId(unitId);
 
         if (curSkeleton != null) {
             if (curSkeleton.dirty) {
@@ -113,14 +107,14 @@ export class DocSkeletonManagerService implements IDisposable {
 
             skeleton.calculate();
 
-            this._docSkeletonParam.push({
+            this._docSkeletonMap.set(unitId, {
                 unitId,
                 skeleton,
                 dirty: false,
             });
         }
 
-        this._currentSkeleton = { unitId };
+        this._currentSkeletonUnitId = unitId;
 
         this._currentSkeletonBefore$.next(this.getCurrent());
 
@@ -130,19 +124,20 @@ export class DocSkeletonManagerService implements IDisposable {
     }
 
     makeDirtyCurrent(state: boolean = true) {
-        this.makeDirty(this._currentSkeleton, state);
+        this.makeDirty(this._currentSkeletonUnitId, state);
     }
 
-    makeDirty(searchParm: IDocSkeletonManagerSearch, state: boolean = true) {
-        const param = this._getCurrentBySearch(searchParm);
+    makeDirty(unitId: string, state: boolean = true) {
+        const param = this._getCurrentByUnitId(unitId);
         if (param == null) {
             return;
         }
+
         param.dirty = state;
     }
 
-    private _getCurrentBySearch(searchParm: IDocSkeletonManagerSearch): Nullable<IDocSkeletonManagerParam> {
-        return this._docSkeletonParam.find((param) => param.unitId === searchParm.unitId);
+    private _getCurrentByUnitId(unitId: string): Nullable<IDocSkeletonManagerParam> {
+        return this._docSkeletonMap.get(unitId);
     }
 
     private _buildSkeleton(documentViewModel: DocumentViewModel) {

@@ -1516,6 +1516,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             if (angle === 0 || wrapStrategy !== WrapStrategy.WRAP) {
                 documentSkeleton.calculate();
             }
+
             fontCache.setValue(r, c, {
                 documentSkeleton,
                 angle,

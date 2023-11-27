@@ -50,6 +50,7 @@ import { FormulaDataModel } from '../models/formula-data.model';
 interface IUnitRangeWithOffset extends IUnitRange {
     refOffsetX: number;
     refOffsetY: number;
+    sheetName: string;
 }
 
 enum FormulaReferenceMoveType {
@@ -69,6 +70,14 @@ interface IFormulaReferenceMoveParam {
     ranges?: IRange[];
     from?: IRange;
     to?: IRange;
+}
+
+enum OriginRangeEdgeType {
+    UP,
+    DOWN,
+    LEFT,
+    RIGHT,
+    ALL,
 }
 
 @OnLifecycle(LifecycleStages.Starting, UpdateFormulaController)
@@ -290,6 +299,7 @@ export class UpdateFormulaController extends Disposable {
                             range,
                             sheetId: sequenceSheetId,
                             unitId: sequenceUnitId,
+                            sheetName,
                             refOffsetX: x || 0,
                             refOffsetY: y || 0,
                         };
@@ -344,6 +354,7 @@ export class UpdateFormulaController extends Disposable {
             range,
             sheetId: sequenceRangeSheetId,
             unitId: sequenceRangeUnitId,
+            sheetName: sequenceRangeSheetName,
             refOffsetX,
             refOffsetY,
         } = unitRangeWidthOffset;
@@ -362,28 +373,21 @@ export class UpdateFormulaController extends Disposable {
         }
 
         const sequenceRange = this._refOffset(range, refOffsetX, refOffsetY);
-
+        const newRange: Nullable<IRange> = null;
         if (type === FormulaReferenceMoveType.Move) {
             if (from == null || to == null) {
                 return;
             }
 
-            const direction = this._checkMoveEdge(sequenceRange, from);
+            const moveEdge = this._checkMoveEdge(sequenceRange, from);
 
-            if (direction == null) {
-                return;
-            }
+            // const fromAndToDirection = this._checkMoveFromAndToDirection(from, to);
 
-            switch (direction) {
-                case Direction.UP:
-                    break;
-                case Direction.DOWN:
-                    break;
-                case Direction.LEFT:
-                    break;
-                case Direction.RIGHT:
-                    break;
-            }
+            // if (moveEdge == null || fromAndToDirection == null) {
+            //     return;
+            // }
+
+            // newRange = this._getMoveNewRange(sequenceRange, moveEdge, fromAndToDirection);
         }
 
         if (ranges == null) {
@@ -403,6 +407,16 @@ export class UpdateFormulaController extends Disposable {
         } else if (type === FormulaReferenceMoveType.InsertMoveRight) {
             console.log();
         }
+
+        if (newRange == null) {
+            return;
+        }
+
+        return serializeRangeToRefString({
+            range: newRange,
+            sheetName: sequenceRangeSheetName,
+            unitId: sequenceRangeUnitId,
+        });
     }
 
     private _checkIsSameUnitAndSheet(
@@ -481,10 +495,68 @@ export class UpdateFormulaController extends Disposable {
     /**
      * Determine the range of the moving selection,
      * and check if it is at the edge of the reference range of the formula.
-     * @param selfRange
+     * @param originRange
      * @param fromRange
      */
-    private _checkMoveEdge(selfRange: IRange, fromRange: IRange): Nullable<Direction> {}
+    private _checkMoveEdge(originRange: IRange, fromRange: IRange): Nullable<OriginRangeEdgeType> {
+        const { startRow, startColumn, endRow, endColumn } = originRange;
+
+        const {
+            startRow: fromStartRow,
+            startColumn: fromStartColumn,
+            endRow: fromEndRow,
+            endColumn: fromEndColumn,
+        } = fromRange;
+
+        if (
+            startRow >= fromStartRow &&
+            endRow <= fromEndRow &&
+            startColumn >= fromStartColumn &&
+            endColumn <= fromEndColumn
+        ) {
+            return OriginRangeEdgeType.ALL;
+        }
+
+        if (
+            startColumn >= fromStartColumn &&
+            endColumn <= fromEndColumn &&
+            startRow >= fromStartRow &&
+            startRow <= fromEndRow &&
+            endRow > fromEndRow
+        ) {
+            return OriginRangeEdgeType.UP;
+        }
+
+        if (
+            startColumn >= fromStartColumn &&
+            endColumn <= fromEndColumn &&
+            endRow >= fromStartRow &&
+            endRow <= fromEndRow &&
+            startRow < fromStartRow
+        ) {
+            return OriginRangeEdgeType.DOWN;
+        }
+
+        if (
+            startRow >= fromStartRow &&
+            endRow <= fromEndRow &&
+            startColumn >= fromStartColumn &&
+            startColumn <= fromEndColumn &&
+            endColumn > fromEndColumn
+        ) {
+            return OriginRangeEdgeType.LEFT;
+        }
+
+        if (
+            startRow >= fromStartRow &&
+            endRow <= fromEndRow &&
+            endColumn >= fromStartColumn &&
+            endColumn <= fromEndColumn &&
+            startColumn < fromStartColumn
+        ) {
+            return OriginRangeEdgeType.RIGHT;
+        }
+    }
 
     /**
      * Determine whether the direction from 'from' to 'to' in the moving selection is vertical or horizontal.
@@ -492,7 +564,77 @@ export class UpdateFormulaController extends Disposable {
      * @param selfRange
      * @param fromRange
      */
-    private _checkMoveFromAndToDirection(from: IRange, to: IRange): Nullable<Direction> {}
+    private _checkMoveFromAndToDirection(
+        originRange: IRange,
+        from: IRange,
+        to: IRange
+    ): Nullable<{ direction: OriginRangeEdgeType; step: number }> {
+        const {
+            startRow: fromStartRow,
+            startColumn: fromStartColumn,
+            endRow: fromEndRow,
+            endColumn: fromEndColumn,
+        } = from;
+
+        const { startRow, startColumn, endRow, endColumn } = to;
+
+        if (
+            startRow === fromStartRow &&
+            startColumn === fromStartColumn &&
+            endRow === fromEndRow &&
+            endColumn === fromEndColumn
+        ) {
+            return;
+        }
+
+        if (startColumn === fromStartColumn && endColumn === fromEndColumn) {
+            let step = startRow - fromStartRow;
+            let direction = OriginRangeEdgeType.DOWN;
+            if (step < 0) {
+                step = Math.abs(step);
+                direction = OriginRangeEdgeType.UP;
+            }
+            return {
+                direction,
+                step,
+            };
+        }
+
+        if (startRow === fromStartRow && endRow === fromEndRow) {
+            let step = startColumn - fromStartColumn;
+            let direction = OriginRangeEdgeType.RIGHT;
+            if (step < 0) {
+                step = Math.abs(step);
+                direction = OriginRangeEdgeType.LEFT;
+            }
+            return {
+                direction,
+                step,
+            };
+        }
+    }
+
+    /**
+     * Calculate the new ref information for the moving selection.
+     */
+    private _getMoveNewRange(
+        originRange: IRange,
+        moveEdge: OriginRangeEdgeType,
+        fromToDirection: { direction: Direction; step: number }
+    ) {
+        switch (moveEdge) {
+            case OriginRangeEdgeType.UP:
+                break;
+            case OriginRangeEdgeType.DOWN:
+                break;
+            case OriginRangeEdgeType.LEFT:
+                break;
+            case OriginRangeEdgeType.RIGHT:
+                break;
+            case OriginRangeEdgeType.ALL:
+                break;
+        }
+    }
 }
 
 function getRangeFromMatrixObject(matrixObject: ObjectMatrixPrimitiveType<ICellData | null>) {

@@ -78,11 +78,6 @@ export class SheetInterceptorService extends Disposable {
             priority: -1,
             handler: (_value) => _value,
         });
-
-        this.intercept(INTERCEPTOR_POINT.SAVE, {
-            priority: -1,
-            handler: (initValue, context) => initValue || context.getSnapshot(),
-        });
     }
 
     override dispose(): void {

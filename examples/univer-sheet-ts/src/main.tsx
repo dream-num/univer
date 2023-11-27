@@ -11,6 +11,7 @@ import { FormulaPlugin } from '@univerjs/sheets-plugin-formula';
 import { FormulaUIPlugin } from '@univerjs/sheets-plugin-formula-ui';
 import { NumfmtPlugin } from '@univerjs/sheets-plugin-numfmt';
 import { SheetUIPlugin } from '@univerjs/ui-plugin-sheets';
+import { UniscriptPlugin } from '@univerjs/uniscript';
 
 import { locales } from './locales';
 import { DebuggerPlugin } from './sheets-plugin-debugger';

@@ -33,7 +33,7 @@ const monacoBuildTask = () => esbuild.build({
 const ctx = await esbuild[args.watch ? 'context' : 'build']({
     bundle: true,
     color: true,
-    loader: { '.svg': 'file' },
+    loader: { '.svg': 'file', '.ttf': 'file' },
     sourcemap: true,
     plugins: [
         copyPlugin({

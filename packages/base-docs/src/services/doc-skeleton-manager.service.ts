@@ -57,62 +57,18 @@ export class DocSkeletonManagerService implements IDisposable {
         return this._getCurrentByUnitId(this._currentSkeletonUnitId);
     }
 
-    // updateCurrent(searchParm: IDocSkeletonManagerSearch) {
-    //     const { unitId } = searchParm;
-
-    //     const documentModel = this._currentUniverService.getUniverDocInstance(searchParm.unitId);
-
-    //     if (documentModel == null || documentModel.bodyModel == null) {
-    //         return;
-    //     }
-
-    //     const skeleton = this._buildSkeleton(documentModel);
-
-    //     skeleton.calculate();
-
-    //     const oldDocSkeleton = this._docSkeletonParam.find((doc) => doc.unitId === unitId);
-    //     if (oldDocSkeleton != null) {
-    //         const index = this._docSkeletonParam.indexOf(oldDocSkeleton);
-    //         this._docSkeletonParam.splice(index, 1);
-    //     }
-
-    //     this._docSkeletonParam.push({
-    //         unitId,
-    //         skeleton,
-    //         dirty: false,
-    //     });
-
-    //     this._currentSkeleton = searchParm;
-
-    //     this._currentSkeletonBefore$.next(this.getCurrent());
-
-    //     this._currentSkeleton$.next(this.getCurrent());
-
-    //     return this.getCurrent();
-    // }
-
     private _setCurrent(docViewModelParam: IDocumentViewModelManagerParam): Nullable<IDocSkeletonManagerParam> {
         const { unitId } = docViewModelParam;
-        const curSkeleton = this._getCurrentByUnitId(unitId);
 
-        if (curSkeleton != null) {
-            if (curSkeleton.dirty) {
-                curSkeleton.skeleton.makeDirty(true);
-                curSkeleton.dirty = false;
-            }
+        const skeleton = this._buildSkeleton(docViewModelParam.docViewModel);
 
-            curSkeleton.skeleton.calculate();
-        } else {
-            const skeleton = this._buildSkeleton(docViewModelParam.docViewModel);
+        skeleton.calculate();
 
-            skeleton.calculate();
-
-            this._docSkeletonMap.set(unitId, {
-                unitId,
-                skeleton,
-                dirty: false,
-            });
-        }
+        this._docSkeletonMap.set(unitId, {
+            unitId,
+            skeleton,
+            dirty: false,
+        });
 
         this._currentSkeletonUnitId = unitId;
 

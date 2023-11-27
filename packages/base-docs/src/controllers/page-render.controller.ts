@@ -3,8 +3,6 @@ import {
     Disposable,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-    ICommandService,
-    IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
 } from '@univerjs/core';
@@ -20,9 +18,7 @@ const PAGE_FILL_COLOR = 'rgba(255,255,255, 1)';
 export class PageRenderController extends Disposable {
     constructor(
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @ICommandService private readonly _commandService: ICommandService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
 

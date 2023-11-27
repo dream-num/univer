@@ -87,6 +87,7 @@ export class RenderManagerService implements IRenderManagerService {
 
     createRender(unitId: string): IRender {
         const engine = new Engine();
+
         return this._createRender(unitId, engine);
     }
 

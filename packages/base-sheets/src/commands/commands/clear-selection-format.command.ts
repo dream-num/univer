@@ -66,10 +66,10 @@ export const ClearSelectionFormatCommand: ICommand = {
             params: undoClearMutationParams,
         });
 
-        const interceptor = sheetInterceptorService.onCommandExecute({ id: ClearSelectionFormatCommand.id });
+        const intercepted = sheetInterceptorService.onCommandExecute({ id: ClearSelectionFormatCommand.id });
 
-        sequenceExecuteList.push(...interceptor.redos);
-        sequenceExecuteUndoList.unshift(...interceptor.undos);
+        sequenceExecuteList.push(...intercepted.redos);
+        sequenceExecuteUndoList.unshift(...intercepted.undos);
 
         const result = sequenceExecute(sequenceExecuteList, commandService);
 

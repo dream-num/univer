@@ -66,10 +66,10 @@ export const ClearSelectionAllCommand: ICommand = {
             params: undoClearMutationParams,
         });
 
-        const interceptor = sheetInterceptorService.onCommandExecute({ id: ClearSelectionAllCommand.id });
+        const intercepted = sheetInterceptorService.onCommandExecute({ id: ClearSelectionAllCommand.id });
 
-        sequenceExecuteList.push(...interceptor.redos);
-        sequenceExecuteUndoList.unshift(...interceptor.undos);
+        sequenceExecuteList.push(...intercepted.redos);
+        sequenceExecuteUndoList.unshift(...intercepted.undos);
         const result = sequenceExecute(sequenceExecuteList, commandService);
 
         if (result) {

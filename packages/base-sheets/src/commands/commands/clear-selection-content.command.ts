@@ -52,9 +52,9 @@ export const ClearSelectionContentCommand: ICommand = {
             clearMutationParams
         );
 
-        const interceptor = sheetInterceptorService.onCommandExecute({ id: ClearSelectionContentCommand.id });
-        const redos = [{ id: SetRangeValuesMutation.id, params: clearMutationParams }, ...interceptor.redos];
-        const undos = [...interceptor.undos, { id: SetRangeValuesMutation.id, params: undoClearMutationParams }];
+        const intercepted = sheetInterceptorService.onCommandExecute({ id: ClearSelectionContentCommand.id });
+        const redos = [{ id: SetRangeValuesMutation.id, params: clearMutationParams }, ...intercepted.redos];
+        const undos = [...intercepted.undos, { id: SetRangeValuesMutation.id, params: undoClearMutationParams }];
 
         const result = sequenceExecute(redos, commandService).result;
         if (result) {

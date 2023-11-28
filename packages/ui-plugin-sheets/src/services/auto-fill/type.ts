@@ -41,11 +41,7 @@ export interface IAutoFillHook {
         [APPLY_TYPE.SERIES]: (sourceRange: IRange, targetRange: IRange) => IMutations;
         [APPLY_TYPE.NO_FORMAT]: (sourceRange: IRange, targetRange: IRange) => IMutations;
         [APPLY_TYPE.ONLY_FORMAT]: (sourceRange: IRange, targetRange: IRange) => IMutations;
-        [APPLY_TYPE.COPY]: (
-            sourceStartCell: { row: number; col: number },
-            targetStartCell: { row: number; col: number },
-            relativeRange: IRange
-        ) => IMutations;
+        [APPLY_TYPE.COPY]: (sourceRange: IRange, targetRange: IRange) => IMutations;
     };
 }
 

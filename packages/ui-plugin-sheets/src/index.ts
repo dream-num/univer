@@ -13,6 +13,10 @@ export {
     getSheetObject,
     getTransformCoord,
 } from './controllers/utils/component-tools';
+export { IAutoFillService } from './services/auto-fill/auto-fill.service';
+export { getRepeatRange } from './services/auto-fill/tools';
+export type { IAutoFillHook } from './services/auto-fill/type';
+export { APPLY_TYPE, DATA_TYPE } from './services/auto-fill/type';
 export { CellEditorManagerService, ICellEditorManagerService } from './services/editor/cell-editor-manager.service';
 export {
     EditorBridgeService,

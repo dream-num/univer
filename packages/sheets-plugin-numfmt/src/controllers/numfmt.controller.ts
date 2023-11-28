@@ -23,6 +23,7 @@ import {
     Disposable,
     DisposableCollection,
     ICommandService,
+    IMutationInfo,
     INTERCEPTOR_POINT,
     IRange,
     IUniverInstanceService,
@@ -30,11 +31,18 @@ import {
     LocaleType,
     Nullable,
     Range,
+    Rectangle,
     SheetInterceptorService,
     ThemeService,
     toDisposable,
 } from '@univerjs/core';
-import { SheetSkeletonManagerService } from '@univerjs/ui-plugin-sheets';
+import {
+    APPLY_TYPE,
+    getRepeatRange,
+    IAutoFillHook,
+    IAutoFillService,
+    SheetSkeletonManagerService,
+} from '@univerjs/ui-plugin-sheets';
 import { IDisposable, Inject, Injector } from '@wendellhu/redi';
 import { combineLatest, Observable } from 'rxjs';
 import { bufferTime, distinctUntilChanged, filter, map, switchMap, tap } from 'rxjs/operators';
@@ -93,7 +101,8 @@ export class NumfmtController extends Disposable implements INumfmtController {
         @Inject(ComponentManager) private _componentManager: ComponentManager,
         @Inject(IMenuService) private _menuService: IMenuService,
         @Inject(ISidebarService) private _sidebarService: ISidebarService,
-        @Inject(LocaleService) private _localeService: LocaleService
+        @Inject(LocaleService) private _localeService: LocaleService,
+        @Inject(IAutoFillService) private _autoFillService: IAutoFillService
     ) {
         super();
         this._initInterceptorCellContent();
@@ -106,6 +115,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
         this._initLocal();
         this._initPanel();
         this._initCommands();
+        this._initAutoFill();
     }
 
     openPanel = () => {
@@ -179,6 +189,121 @@ export class NumfmtController extends Disposable implements INumfmtController {
             },
         });
     };
+
+    private _initAutoFill() {
+        const noopReturnFunc = () => ({ redos: [], undos: [] });
+        const loopFunc = (
+            sourceStartCell: { row: number; col: number },
+            targetStartCell: { row: number; col: number },
+            relativeRange: IRange
+        ) => {
+            const workbookId = this._univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+            const worksheetId = this._univerInstanceService
+                .getCurrentUniverSheetInstance()
+                .getActiveSheet()
+                .getSheetId();
+            const sourceRange = {
+                startRow: sourceStartCell.row,
+                startColumn: sourceStartCell.col,
+                endColumn: sourceStartCell.col,
+                endRow: sourceStartCell.row,
+            };
+            const targetRange = {
+                startRow: targetStartCell.row,
+                startColumn: targetStartCell.col,
+                endColumn: targetStartCell.col,
+                endRow: targetStartCell.row,
+            };
+
+            const values: SetNumfmtMutationParams['values'] = [];
+
+            Range.foreach(relativeRange, (row, col) => {
+                const sourcePositionRange = Rectangle.getPositionRange(
+                    {
+                        startRow: row,
+                        startColumn: col,
+                        endColumn: col,
+                        endRow: row,
+                    },
+                    sourceRange
+                );
+                const oldNumfmtValue = this._numfmtService.getValue(
+                    workbookId,
+                    worksheetId,
+                    sourcePositionRange.startRow,
+                    sourcePositionRange.startColumn
+                );
+                if (oldNumfmtValue) {
+                    const targetPositionRange = Rectangle.getPositionRange(
+                        {
+                            startRow: row,
+                            startColumn: col,
+                            endColumn: col,
+                            endRow: row,
+                        },
+                        targetRange
+                    );
+                    values.push({
+                        pattern: oldNumfmtValue.pattern,
+                        type: oldNumfmtValue.type,
+                        row: targetPositionRange.startRow,
+                        col: targetPositionRange.startColumn,
+                    });
+                }
+            });
+            if (values.length) {
+                const redo: IMutationInfo<SetNumfmtMutationParams> = {
+                    id: SetNumfmtMutation.id,
+                    params: {
+                        values,
+                        workbookId,
+                        worksheetId,
+                    },
+                };
+                const undo = {
+                    id: SetNumfmtMutation.id,
+                    params: {
+                        values: factorySetNumfmtUndoMutation(this._injector, redo.params),
+                        workbookId,
+                        worksheetId,
+                    },
+                };
+                return {
+                    redos: [redo],
+                    undos: [undo],
+                };
+            }
+            return { redos: [], undos: [] };
+        };
+        const generalApplyFunc = (sourceRange: IRange, targetRange: IRange) => {
+            const totalUndos: IMutationInfo[] = [];
+            const totalRedos: IMutationInfo[] = [];
+            const sourceStartCell = {
+                row: sourceRange.startRow,
+                col: sourceRange.startColumn,
+            };
+            const repeats = getRepeatRange(sourceRange, targetRange);
+            repeats.forEach((repeat) => {
+                const { undos, redos } = loopFunc(sourceStartCell, repeat.repeatStartCell, repeat.relativeRange);
+                totalUndos.push(...undos);
+                totalRedos.push(...redos);
+            });
+            return {
+                undos: totalUndos,
+                redos: totalRedos,
+            };
+        };
+        const hook: IAutoFillHook = {
+            hookName: SHEET_NUMFMT_PLUGIN,
+            hook: {
+                [APPLY_TYPE.COPY]: generalApplyFunc,
+                [APPLY_TYPE.NO_FORMAT]: noopReturnFunc,
+                [APPLY_TYPE.ONLY_FORMAT]: generalApplyFunc,
+                [APPLY_TYPE.SERIES]: generalApplyFunc,
+            },
+        };
+        this.disposeWithMe(this._autoFillService.addHook(hook));
+    }
 
     private _initCommands() {
         [

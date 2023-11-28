@@ -157,6 +157,7 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
             };
 
             const len = startOffset - memoryCursor.cursor;
+
             if (len !== 0) {
                 doMutation.params!.mutations.push({
                     t: 'r',

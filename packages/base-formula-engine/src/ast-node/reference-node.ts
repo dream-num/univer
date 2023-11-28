@@ -46,6 +46,10 @@ export class ReferenceNode extends BaseAstNode {
         this._referenceObject.setDefaultUnitId(runtimeService.currentUnitId);
         this._referenceObject.setRuntimeData(runtimeService.getUnitData());
 
+        const { x, y } = this.getRefOffset();
+
+        this._referenceObject.setRefOffset(x, y);
+
         this.setValue(this._referenceObject);
     }
 }

@@ -156,6 +156,17 @@ export class FormulaEngineService extends Disposable {
     }
 
     /**
+     * Modify the formula text to offset the 'ref' text within it.
+     * @param formulaString '=SUM(A1:B10)'
+     * @param refOffsetX
+     * @param refOffsetY
+     * @returns
+     */
+    moveFormulaRefOffset(formulaString: string, refOffsetX: number, refOffsetY: number) {
+        return this.lexerTreeBuilder.moveFormulaRefOffset(formulaString, refOffsetX, refOffsetY);
+    }
+
+    /**
      *
      * @param unitId
      * @param formulaData

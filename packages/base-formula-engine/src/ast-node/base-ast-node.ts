@@ -27,6 +27,10 @@ export class BaseAstNode extends Disposable {
 
     private _address = false;
 
+    private _refOffsetX: number = 0;
+
+    private _refOffsetY: number = 0;
+
     constructor(private _token: string) {
         super();
     }
@@ -99,6 +103,18 @@ export class BaseAstNode extends Disposable {
 
     execute() {
         /* abstract */
+    }
+
+    setRefOffset(x: number = 0, y: number = 0) {
+        this._refOffsetX = x;
+        this._refOffsetY = y;
+    }
+
+    getRefOffset() {
+        return {
+            x: this._refOffsetX,
+            y: this._refOffsetY,
+        };
     }
 
     async executeAsync(): Promise<AstNodePromiseType> {

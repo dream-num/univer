@@ -1,10 +1,17 @@
-import { Disposable, Nullable, Tools } from '@univerjs/core';
+import {
+    deserializeRangeWithSheet,
+    Disposable,
+    Nullable,
+    Rectangle,
+    serializeRangeToRefString,
+    Tools,
+} from '@univerjs/core';
 
 import { FormulaAstLRU } from '../basics/cache-lru';
 import { ErrorType } from '../basics/error-type';
 import { isFormulaLexerToken } from '../basics/match-token';
 import { isReferenceString, REFERENCE_SINGLE_RANGE_REGEX } from '../basics/regex';
-import { ISequenceArray, ISequenceNode, sequenceNodeType } from '../basics/sequence';
+import { generateStringWithSequence, ISequenceArray, ISequenceNode, sequenceNodeType } from '../basics/sequence';
 import {
     matchToken,
     OPERATOR_TOKEN_PRIORITY,
@@ -135,6 +142,43 @@ export class LexerTreeBuilder extends Disposable {
             children = parent;
             parent = parent.getParent();
         }
+    }
+
+    moveFormulaRefOffset(formulaString: string, refOffsetX: number, refOffsetY: number) {
+        const sequenceNodes = this.sequenceNodesBuilder(formulaString);
+
+        if (sequenceNodes == null) {
+            return formulaString;
+        }
+
+        const newSequenceNodes: Array<string | ISequenceNode> = [];
+
+        for (let i = 0, len = sequenceNodes.length; i < len; i++) {
+            const node = sequenceNodes[i];
+            if (typeof node === 'string' || node.nodeType !== sequenceNodeType.REFERENCE) {
+                newSequenceNodes.push(node);
+                continue;
+            }
+
+            const { token } = node;
+
+            const sequenceGrid = deserializeRangeWithSheet(token);
+
+            const { range, sheetName, unitId: sequenceUnitId } = sequenceGrid;
+
+            const newRange = Rectangle.moveOffset(range, refOffsetX, refOffsetY);
+
+            newSequenceNodes.push({
+                ...node,
+                token: serializeRangeToRefString({
+                    range: newRange,
+                    unitId: sequenceUnitId,
+                    sheetName,
+                }),
+            });
+        }
+
+        return `=${generateStringWithSequence(newSequenceNodes)}`;
     }
 
     /**

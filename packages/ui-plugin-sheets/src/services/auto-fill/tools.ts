@@ -1,4 +1,4 @@
-import { Direction, ICellData, Nullable, Tools } from '@univerjs/core';
+import { Direction, ICellData, IRange, Nullable, Tools } from '@univerjs/core';
 
 export const chnNumChar = { 零: 0, 一: 1, 二: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9 };
 export const chnNumChar2 = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
@@ -663,6 +663,151 @@ export function fillCopyFormula(data: Array<Nullable<ICellData>>, len: number, d
     }
 
     return applyData;
+}
+
+export function getRepeatRange(sourceRange: IRange, targetRange: IRange) {
+    const repeats: Array<{
+        repeatStartCell: { col: number; row: number };
+        relativeRange: IRange;
+    }> = [];
+    let direction: Direction;
+    if (targetRange.startRow < sourceRange.startRow) {
+        direction = Direction.UP;
+    } else if (targetRange.endRow > sourceRange.endRow) {
+        direction = Direction.DOWN;
+    } else if (targetRange.startColumn < sourceRange.startColumn) {
+        direction = Direction.LEFT;
+    } else if (targetRange.endColumn > sourceRange.endColumn) {
+        direction = Direction.RIGHT;
+    } else {
+        return [];
+    }
+    // according to direction, calculate every repeat range.
+    // repeatStartCell is the start cell of each repeat range, relativeRange is the relative range of each repeat range
+    if (direction === Direction.DOWN || direction === Direction.UP) {
+        const sourceLength = sourceRange.endRow - sourceRange.startRow + 1;
+        const targetLength = targetRange.endRow - targetRange.startRow + 1;
+        const mod = targetLength / sourceLength;
+        const rest = targetLength % sourceLength;
+        const relativeRange = {
+            startRow: 0,
+            startColumn: 0,
+            endRow: sourceRange.endRow - sourceRange.startRow,
+            endColumn: sourceRange.endColumn - sourceRange.startColumn,
+        };
+        if (direction === Direction.DOWN) {
+            for (let i = 0; i < mod; i++) {
+                repeats.push({
+                    repeatStartCell: {
+                        row: sourceRange.startRow + (i + 1) * sourceLength,
+                        col: sourceRange.startColumn,
+                    },
+                    relativeRange,
+                });
+            }
+            if (rest > 0) {
+                repeats.push({
+                    repeatStartCell: {
+                        row: sourceRange.startRow + (mod + 1) * sourceLength,
+                        col: sourceRange.startColumn,
+                    },
+                    relativeRange: {
+                        startRow: 0,
+                        startColumn: 0,
+                        endRow: rest - 1,
+                        endColumn: sourceRange.endColumn - sourceRange.startColumn,
+                    },
+                });
+            }
+        } else {
+            for (let i = 0; i < mod; i++) {
+                repeats.push({
+                    repeatStartCell: {
+                        row: sourceRange.startRow - (i + 1) * sourceLength,
+                        col: sourceRange.startColumn,
+                    },
+                    relativeRange,
+                });
+            }
+            if (rest > 0) {
+                repeats.push({
+                    repeatStartCell: {
+                        row: sourceRange.startRow - (mod + 1) * sourceLength,
+                        col: sourceRange.startColumn,
+                    },
+                    relativeRange: {
+                        startRow: sourceLength - rest,
+                        endRow: sourceLength - 1,
+                        startColumn: 0,
+                        endColumn: sourceRange.endColumn - sourceRange.startColumn,
+                    },
+                });
+            }
+        }
+    }
+    if (direction === Direction.RIGHT || direction === Direction.LEFT) {
+        const sourceLength = sourceRange.endColumn - sourceRange.startColumn + 1;
+        const targetLength = targetRange.endColumn - targetRange.startColumn + 1;
+        const mod = targetLength / sourceLength;
+        const rest = targetLength % sourceLength;
+        const relativeRange = {
+            startRow: 0,
+            startColumn: 0,
+            endRow: sourceRange.endRow - sourceRange.startRow,
+            endColumn: sourceRange.endColumn - sourceRange.startColumn,
+        };
+        if (direction === Direction.RIGHT) {
+            for (let i = 0; i < mod; i++) {
+                repeats.push({
+                    repeatStartCell: {
+                        row: sourceRange.startRow,
+                        col: sourceRange.startColumn + (i + 1) * sourceLength,
+                    },
+                    relativeRange,
+                });
+            }
+            if (rest > 0) {
+                repeats.push({
+                    repeatStartCell: {
+                        row: sourceRange.startRow,
+                        col: sourceRange.startColumn + (mod + 1) * sourceLength,
+                    },
+                    relativeRange: {
+                        startRow: 0,
+                        startColumn: 0,
+                        endRow: sourceRange.endRow - sourceRange.startRow,
+                        endColumn: rest - 1,
+                    },
+                });
+            }
+        } else {
+            for (let i = 0; i < mod; i++) {
+                repeats.push({
+                    repeatStartCell: {
+                        row: sourceRange.startRow,
+                        col: sourceRange.startColumn - (i + 1) * sourceLength,
+                    },
+                    relativeRange,
+                });
+            }
+            if (rest > 0) {
+                repeats.push({
+                    repeatStartCell: {
+                        row: sourceRange.startRow,
+                        col: sourceRange.startColumn - (mod + 1) * sourceLength,
+                    },
+                    relativeRange: {
+                        startRow: 0,
+                        startColumn: sourceLength - rest,
+                        endRow: sourceRange.endRow - sourceRange.startRow,
+                        endColumn: sourceLength - 1,
+                    },
+                });
+            }
+        }
+    }
+
+    return repeats;
 }
 
 function shiftFormula(originalFormula: string, shift: number, direction: Direction): string {

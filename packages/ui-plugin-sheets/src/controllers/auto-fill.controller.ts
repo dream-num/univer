@@ -641,33 +641,11 @@ export class AutoFillController extends Disposable {
         const extendRedos: IMutationInfo[] = [];
         const extendUndos: IMutationInfo[] = [];
         const hookApplyType: APPLY_TYPE = this._hasFillingStyle ? applyType : APPLY_TYPE.NO_FORMAT;
-        const repeats = this._getRepeatRange(sourceRange, applyRange, direction);
         hooks.forEach((h) => {
             const { hook } = h;
-            if (hookApplyType === APPLY_TYPE.COPY) {
-                repeats.forEach((repeat) => {
-                    const { repeatStartCell, relativeRange } = repeat;
-                    const { redos, undos } = hook?.[hookApplyType](
-                        { row: sourceRange.startRow, col: sourceRange.startColumn },
-                        repeatStartCell,
-                        relativeRange
-                    );
-                    redos.forEach((redo) => {
-                        extendRedos.push(redo);
-                    });
-                    undos.forEach((undo) => {
-                        extendUndos.push(undo);
-                    });
-                });
-            } else {
-                const { redos, undos } = hook?.[hookApplyType](sourceRange, applyRange);
-                redos.forEach((redo) => {
-                    extendRedos.push(redo);
-                });
-                undos.forEach((undo) => {
-                    extendUndos.push(undo);
-                });
-            }
+            const { redos, undos } = hook?.[hookApplyType](sourceRange, applyRange);
+            extendRedos.push(...redos);
+            extendUndos.push(...undos);
         });
 
         this._commandService.executeCommand(AutoFillCommand.id, {
@@ -694,138 +672,5 @@ export class AutoFillController extends Disposable {
             });
             return res;
         });
-    }
-
-    private _getRepeatRange(sourceRange: IRange, targetRange: IRange, direction: Direction) {
-        const repeats: Array<{
-            repeatStartCell: { col: number; row: number };
-            relativeRange: IRange;
-        }> = [];
-        // according to direction, calculate every repeat range.
-        // repeatStartCell is the start cell of each repeat range, relativeRange is the relative range of each repeat range
-        if (direction === Direction.DOWN || direction === Direction.UP) {
-            const sourceLength = sourceRange.endRow - sourceRange.startRow + 1;
-            const targetLength = targetRange.endRow - targetRange.startRow + 1;
-            const mod = targetLength / sourceLength;
-            const rest = targetLength % sourceLength;
-            const relativeRange = {
-                startRow: 0,
-                startColumn: 0,
-                endRow: sourceRange.endRow - sourceRange.startRow,
-                endColumn: sourceRange.endColumn - sourceRange.startColumn,
-            };
-            if (direction === Direction.DOWN) {
-                for (let i = 0; i < mod; i++) {
-                    repeats.push({
-                        repeatStartCell: {
-                            row: sourceRange.startRow + (i + 1) * sourceLength,
-                            col: sourceRange.startColumn,
-                        },
-                        relativeRange,
-                    });
-                }
-                if (rest > 0) {
-                    repeats.push({
-                        repeatStartCell: {
-                            row: sourceRange.startRow + (mod + 1) * sourceLength,
-                            col: sourceRange.startColumn,
-                        },
-                        relativeRange: {
-                            startRow: 0,
-                            startColumn: 0,
-                            endRow: rest - 1,
-                            endColumn: sourceRange.endColumn - sourceRange.startColumn,
-                        },
-                    });
-                }
-            } else {
-                for (let i = 0; i < mod; i++) {
-                    repeats.push({
-                        repeatStartCell: {
-                            row: sourceRange.startRow - (i + 1) * sourceLength,
-                            col: sourceRange.startColumn,
-                        },
-                        relativeRange,
-                    });
-                }
-                if (rest > 0) {
-                    repeats.push({
-                        repeatStartCell: {
-                            row: sourceRange.startRow - (mod + 1) * sourceLength,
-                            col: sourceRange.startColumn,
-                        },
-                        relativeRange: {
-                            startRow: sourceLength - rest,
-                            endRow: sourceLength - 1,
-                            startColumn: 0,
-                            endColumn: sourceRange.endColumn - sourceRange.startColumn,
-                        },
-                    });
-                }
-            }
-        }
-        if (direction === Direction.RIGHT || direction === Direction.LEFT) {
-            const sourceLength = sourceRange.endColumn - sourceRange.startColumn + 1;
-            const targetLength = targetRange.endColumn - targetRange.startColumn + 1;
-            const mod = targetLength / sourceLength;
-            const rest = targetLength % sourceLength;
-            const relativeRange = {
-                startRow: 0,
-                startColumn: 0,
-                endRow: sourceRange.endRow - sourceRange.startRow,
-                endColumn: sourceRange.endColumn - sourceRange.startColumn,
-            };
-            if (direction === Direction.RIGHT) {
-                for (let i = 0; i < mod; i++) {
-                    repeats.push({
-                        repeatStartCell: {
-                            row: sourceRange.startRow,
-                            col: sourceRange.startColumn + (i + 1) * sourceLength,
-                        },
-                        relativeRange,
-                    });
-                }
-                if (rest > 0) {
-                    repeats.push({
-                        repeatStartCell: {
-                            row: sourceRange.startRow,
-                            col: sourceRange.startColumn + (mod + 1) * sourceLength,
-                        },
-                        relativeRange: {
-                            startRow: 0,
-                            startColumn: 0,
-                            endRow: sourceRange.endRow - sourceRange.startRow,
-                            endColumn: rest - 1,
-                        },
-                    });
-                }
-            } else {
-                for (let i = 0; i < mod; i++) {
-                    repeats.push({
-                        repeatStartCell: {
-                            row: sourceRange.startRow,
-                            col: sourceRange.startColumn - (i + 1) * sourceLength,
-                        },
-                        relativeRange,
-                    });
-                }
-                if (rest > 0) {
-                    repeats.push({
-                        repeatStartCell: {
-                            row: sourceRange.startRow,
-                            col: sourceRange.startColumn - (mod + 1) * sourceLength,
-                        },
-                        relativeRange: {
-                            startRow: 0,
-                            startColumn: sourceLength - rest,
-                            endRow: sourceRange.endRow - sourceRange.startRow,
-                            endColumn: sourceLength - 1,
-                        },
-                    });
-                }
-            }
-        }
-
-        return repeats;
     }
 }

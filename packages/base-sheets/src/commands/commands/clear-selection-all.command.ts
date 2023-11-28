@@ -11,6 +11,7 @@ import {
     ObjectMatrixPrimitiveType,
     Rectangle,
     sequenceExecute,
+    SheetInterceptorService,
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
@@ -41,6 +42,7 @@ export const ClearSelectionAllCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const selectionManagerService = accessor.get(SelectionManagerService);
         const undoRedoService = accessor.get(IUndoRedoService);
+        const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
         const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         const workbookId = workbook.getUnitId();
@@ -105,7 +107,10 @@ export const ClearSelectionAllCommand: ICommand = {
                 params: undoRemoveMergeParams,
             });
         }
+        const interceptor = sheetInterceptorService.onCommandExecute({ id: ClearSelectionAllCommand.id });
 
+        sequenceExecuteList.push(...interceptor.redos);
+        sequenceExecuteUndoList.unshift(...interceptor.undos);
         const result = sequenceExecute(sequenceExecuteList, commandService);
 
         if (result) {

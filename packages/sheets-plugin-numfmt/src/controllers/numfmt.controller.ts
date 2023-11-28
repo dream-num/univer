@@ -1,6 +1,8 @@
 import numfmt from '@univerjs/base-numfmt-engine';
 import { IRenderManagerService } from '@univerjs/base-render';
 import {
+    ClearSelectionAllCommand,
+    ClearSelectionFormatCommand,
     EffectRefRangeParams,
     EffectRefRangId,
     handleDeleteRangeMoveLeft,
@@ -338,13 +340,13 @@ export class NumfmtController extends Disposable implements INumfmtController {
         this.disposeWithMe(
             this._sheetInterceptorService.interceptCommand({
                 getMutations(command) {
-                    const workbookId = self._univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-                    const worksheetId = self._univerInstanceService
-                        .getCurrentUniverSheetInstance()
-                        .getActiveSheet()
-                        .getSheetId();
                     switch (command.id) {
                         case SetRangeValuesCommand.id: {
+                            const workbookId = self._univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+                            const worksheetId = self._univerInstanceService
+                                .getCurrentUniverSheetInstance()
+                                .getActiveSheet()
+                                .getSheetId();
                             const list = self._collectEffectMutation.getEffects();
                             if (!list.length) {
                                 return {
@@ -362,6 +364,36 @@ export class NumfmtController extends Disposable implements INumfmtController {
                                     type: item.value?.type,
                                 })),
                             };
+                            const undos = factorySetNumfmtUndoMutation(self._injector, redos);
+                            return {
+                                redos: [{ id: SetNumfmtMutation.id, params: redos }],
+                                undos: [{ id: SetNumfmtMutation.id, params: undos }],
+                            };
+                        }
+                        case ClearSelectionAllCommand.id:
+                        case ClearSelectionFormatCommand.id: {
+                            const workbookId = self._univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+                            const worksheetId = self._univerInstanceService
+                                .getCurrentUniverSheetInstance()
+                                .getActiveSheet()
+                                .getSheetId();
+                            const selections = self._selectionManagerService.getSelectionRanges();
+                            if (!selections?.length) {
+                                break;
+                            }
+                            const redos: SetNumfmtMutationParams = {
+                                workbookId,
+                                worksheetId,
+                                values: [],
+                            };
+                            selections.forEach((range) => {
+                                Range.foreach(range, (row, col) => {
+                                    redos.values.push({
+                                        row,
+                                        col,
+                                    });
+                                });
+                            });
                             const undos = factorySetNumfmtUndoMutation(self._injector, redos);
                             return {
                                 redos: [{ id: SetNumfmtMutation.id, params: redos }],

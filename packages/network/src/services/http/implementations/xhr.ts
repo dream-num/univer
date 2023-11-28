@@ -21,7 +21,16 @@ export class XHRHTTPImplementation implements IHTTPImplementation {
                 xhr.withCredentials = true;
             }
 
+            // set default HTTP headers
+
             request.headers.forEach((key, value) => xhr.setRequestHeader(key, value.join(',')));
+            if (!request.headers.has('Accept')) {
+                xhr.setRequestHeader('Accept', 'application/json, text/plain, */*');
+            }
+
+            if (!request.headers.has('Content-Type')) {
+                xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+            }
 
             let responseHeader: Nullable<ResponseHeader>;
 

@@ -303,7 +303,7 @@ export class AutoFillController extends Disposable {
         copySquad: ICopyDataInType,
         len: number,
         direction: Direction,
-        applyType: APPLY_TYPE_IN_USE,
+        applyType: APPLY_TYPE,
         customApplyFunctions: APPLY_FUNCTIONS,
         copyDataPiece: ICopyDataPiece
     ) {

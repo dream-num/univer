@@ -212,6 +212,7 @@ export class FormulaDataModel extends Disposable {
                 } else if (typeof deleteFormula === 'object') {
                     const x = c - deleteFormula.c;
                     const y = r - deleteFormula.r;
+                    // TODO@Dushusir: Calculate the new formula based on the offset
                     // let f = '';
                     sheetFormulaDataMatrix.setValue(r, c, {
                         f: deleteFormula.f,

@@ -15,6 +15,7 @@ import {
     IAutoFillRule,
     IAutoFillService,
     ICopyDataInTypeIndexInfo,
+    ICopyDataPiece,
 } from '@univerjs/ui-plugin-sheets';
 
 @OnLifecycle(LifecycleStages.Ready, FormulaAutoFillController)
@@ -41,9 +42,9 @@ export class FormulaAutoFillController extends Disposable {
                 return false;
             },
             applyFunctions: {
-                [APPLY_TYPE.COPY]: (dataWithIndex, len, direction) => {
-                    const { data, index } = dataWithIndex; // TODO@Dushusir: now you have index infos when applying formula
-                    return fillCopyFormula(data, len, direction, index);
+                [APPLY_TYPE.COPY]: (dataWithIndex, len, direction, copyDataPiece) => {
+                    const { data, index } = dataWithIndex;
+                    return fillCopyFormula(data, len, direction, index, copyDataPiece);
                 },
             },
         };
@@ -62,10 +63,12 @@ export function fillCopyFormula(
     data: Array<Nullable<ICellData>>,
     len: number,
     direction: Direction,
-    index: ICopyDataInTypeIndexInfo
+    index: ICopyDataInTypeIndexInfo,
+    copyDataPiece: ICopyDataPiece
 ) {
+    const step = getDataLength(copyDataPiece);
     const applyData = [];
-    let formulaId: string = '';
+    const formulaIdMap = new Map<number, string>();
 
     for (let i = 1; i <= len; i++) {
         const index = (i - 1) % data.length;
@@ -76,17 +79,24 @@ export function fillCopyFormula(
 
             if (originalFormula) {
                 // The first position setting formula and formulaId
-                if (i === 1) {
-                    const shiftedFormula = shiftFormula(originalFormula, i, direction);
-                    d.si = d.si || Tools.generateRandomId(6);
-                    formulaId = d.si;
+                let formulaId = formulaIdMap.get(index);
+
+                if (!formulaId) {
+                    formulaId = Tools.generateRandomId(6);
+                    formulaIdMap.set(index, formulaId);
+
+                    const shiftedFormula = shiftFormula(originalFormula, step, direction);
+
+                    d.si = formulaId;
                     d.f = shiftedFormula;
                     d.v = null;
+                    d.p = null;
                 } else {
                     // At the beginning of the second formula, set formulaId only
                     d.si = formulaId;
                     d.f = null;
                     d.v = null;
+                    d.p = null;
                 }
 
                 if (direction === Direction.DOWN || direction === Direction.RIGHT) {
@@ -156,4 +166,15 @@ function shiftColumn(col: string, shift: number): string {
     const currentCharCode = col.charCodeAt(0);
     const shiftedCharCode = currentCharCode + shift;
     return String.fromCharCode(shiftedCharCode);
+}
+
+function getDataLength(copyDataPiece: ICopyDataPiece) {
+    let length = 0;
+    for (const t in copyDataPiece) {
+        copyDataPiece[t].forEach((item) => {
+            length += item.data.length;
+        });
+    }
+
+    return length;
 }

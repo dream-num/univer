@@ -9,22 +9,12 @@ import {
     IUniverInstanceService,
     ObjectMatrix,
     ObjectMatrixPrimitiveType,
-    Rectangle,
     sequenceExecute,
     SheetInterceptorService,
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
-import {
-    IAddWorksheetMergeMutationParams,
-    IRemoveWorksheetMergeMutationParams,
-} from '../../basics/interfaces/mutation-interface';
 import { SelectionManagerService } from '../../services/selection-manager.service';
-import { AddWorksheetMergeMutation } from '../mutations/add-worksheet-merge.mutation';
-import {
-    RemoveMergeUndoMutationFactory,
-    RemoveWorksheetMergeMutation,
-} from '../mutations/remove-worksheet-merge.mutation';
 import {
     ISetRangeValuesMutationParams,
     SetRangeValuesMutation,
@@ -76,37 +66,6 @@ export const ClearSelectionFormatCommand: ICommand = {
             params: undoClearMutationParams,
         });
 
-        // remove merged cells
-        let hasMerge = false;
-        const mergeData = worksheet.getConfig().mergeData;
-        selections.forEach((selection) => {
-            mergeData.forEach((merge) => {
-                if (Rectangle.intersects(selection, merge)) {
-                    hasMerge = true;
-                }
-            });
-        });
-
-        if (hasMerge) {
-            const removeMergeParams: IRemoveWorksheetMergeMutationParams = {
-                workbookId,
-                worksheetId,
-                ranges: selections,
-            };
-            const undoRemoveMergeParams: IAddWorksheetMergeMutationParams = RemoveMergeUndoMutationFactory(
-                accessor,
-                removeMergeParams
-            );
-
-            sequenceExecuteList.push({
-                id: RemoveWorksheetMergeMutation.id,
-                params: removeMergeParams,
-            });
-            sequenceExecuteUndoList.push({
-                id: AddWorksheetMergeMutation.id,
-                params: undoRemoveMergeParams,
-            });
-        }
         const interceptor = sheetInterceptorService.onCommandExecute({ id: ClearSelectionFormatCommand.id });
 
         sequenceExecuteList.push(...interceptor.redos);

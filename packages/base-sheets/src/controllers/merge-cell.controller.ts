@@ -2,11 +2,13 @@ import {
     Disposable,
     DisposableCollection,
     ICommandService,
+    IMutationInfo,
     IRange,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
     Rectangle,
+    SheetInterceptorService,
     Tools,
     Workbook,
 } from '@univerjs/core';
@@ -19,6 +21,8 @@ import {
     IRemoveWorksheetMergeMutationParams,
 } from '../basics/interfaces/mutation-interface';
 import { getAddMergeMutationRangeByType } from '../commands/commands/add-worksheet-merge.command';
+import { ClearSelectionAllCommand } from '../commands/commands/clear-selection-all.command';
+import { ClearSelectionFormatCommand } from '../commands/commands/clear-selection-format.command';
 import {
     DeleteRangeMoveLeftCommand,
     DeleteRangeMoveLeftCommandParams,
@@ -57,6 +61,7 @@ import {
 } from '../commands/mutations/remove-worksheet-merge.mutation';
 import { RefRangeService } from '../services/ref-range/ref-range.service';
 import { EffectRefRangeParams } from '../services/ref-range/type';
+import { SelectionManagerService } from '../services/selection-manager.service';
 
 @OnLifecycle(LifecycleStages.Steady, MergeCellController)
 export class MergeCellController extends Disposable {
@@ -64,10 +69,55 @@ export class MergeCellController extends Disposable {
         @Inject(ICommandService) private readonly _commandService: ICommandService,
         @Inject(RefRangeService) private readonly _refRangeService: RefRangeService,
         @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(Injector) private _injector: Injector
+        @Inject(Injector) private _injector: Injector,
+        @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
+        @Inject(SelectionManagerService) private _selectionManagerService: SelectionManagerService
     ) {
         super();
         this._onRefRangeChange();
+        this._initCommandInterceptor();
+    }
+
+    private _initCommandInterceptor() {
+        const self = this;
+        this._sheetInterceptorService.interceptCommand({
+            getMutations(commandInfo) {
+                switch (commandInfo.id) {
+                    case ClearSelectionAllCommand.id:
+                    case ClearSelectionFormatCommand.id: {
+                        const workbook = self._univerInstanceService.getCurrentUniverSheetInstance();
+                        const workbookId = workbook.getUnitId();
+                        const worksheet = workbook.getActiveSheet();
+                        const worksheetId = worksheet.getSheetId();
+                        const mergeData = worksheet.getConfig().mergeData;
+                        const selections = self._selectionManagerService.getSelectionRanges();
+                        if (selections && selections.length > 0) {
+                            const isHasMerge = selections.some((range) =>
+                                mergeData.some((item) => Rectangle.intersects(item, range))
+                            );
+                            if (isHasMerge) {
+                                const removeMergeParams: IRemoveWorksheetMergeMutationParams = {
+                                    workbookId,
+                                    worksheetId,
+                                    ranges: selections,
+                                };
+                                const undoRemoveMergeParams: IAddWorksheetMergeMutationParams =
+                                    RemoveMergeUndoMutationFactory(self._injector, removeMergeParams);
+                                const redos: IMutationInfo[] = [
+                                    { id: RemoveWorksheetMergeMutation.id, params: removeMergeParams },
+                                ];
+                                const undos: IMutationInfo[] = [
+                                    { id: AddWorksheetMergeMutation.id, params: undoRemoveMergeParams },
+                                ];
+                                return { redos, undos };
+                            }
+                        }
+                    }
+                }
+
+                return { redos: [], undos: [] };
+            },
+        });
     }
 
     private _onRefRangeChange() {

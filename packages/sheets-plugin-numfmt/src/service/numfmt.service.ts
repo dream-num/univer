@@ -1,6 +1,8 @@
 import {
     Disposable,
     ICommandService,
+    ILogService,
+    IUniverInstanceService,
     LifecycleStages,
     Nullable,
     ObjectMatrix,
@@ -10,17 +12,26 @@ import {
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
-import { NumfmtItem } from '../base/types';
+import { FormatType, NumfmtItem } from '../base/types';
 import { SetNumfmtMutation } from '../commands/mutations/set.numfmt.mutation';
-import type { INumfmtService, NumfmtItemWithCache } from './type';
+import type { INumfmtService, RefItem } from './type';
 
 @OnLifecycle(LifecycleStages.Ready, NumfmtService)
 export class NumfmtService extends Disposable implements INumfmtService {
-    _numfmtModel: Map<string, ObjectMatrix<NumfmtItemWithCache>> = new Map();
+    /**
+     * Map<unitID ,<sheetId ,ObjectMatrix>>
+     * @type {Map<string, Map<string, ObjectMatrix<NumfmtItemWithCache>>>}
+     * @memberof NumfmtService
+     */
+    _numfmtModel: Map<string, Map<string, ObjectMatrix<NumfmtItem>>> = new Map();
 
-    _refAliasModel = new RefAlias<{ count: number; numfmtId: string; pattern: string }>([], ['pattern', 'numfmtId']);
+    _refAliasModel: Map<string, RefAlias<RefItem, 'numfmtId' | 'pattern'>> = new Map();
 
-    constructor(@Inject(ICommandService) private _commandService: ICommandService) {
+    constructor(
+        @Inject(ICommandService) private _commandService: ICommandService,
+        @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
+        @Inject(ILogService) private _logService: ILogService
+    ) {
         super();
         this._initModel();
         this._initCommands();
@@ -40,31 +51,34 @@ export class NumfmtService extends Disposable implements INumfmtService {
         [SetNumfmtMutation].forEach((config) => this.disposeWithMe(this._commandService.registerCommand(config)));
     }
 
-    getValue(
-        workbookId: string,
-        worksheetId: string,
-        row: number,
-        col: number,
-        model?: ObjectMatrix<NumfmtItemWithCache>
-    ) {
-        const _model: Nullable<ObjectMatrix<NumfmtItemWithCache>> = model || this.getModel(workbookId, worksheetId);
+    getValue(workbookId: string, worksheetId: string, row: number, col: number, model?: ObjectMatrix<NumfmtItem>) {
+        const _model: Nullable<ObjectMatrix<NumfmtItem>> = model || this.getModel(workbookId, worksheetId);
         if (!_model) {
             return null;
         }
+        const refMode = this._refAliasModel.get(workbookId);
         const value = _model.getValue(row, col);
-        if (value) {
-            const realPattern = this._refAliasModel.getValue(value?.pattern)?.pattern || value?.pattern;
-            return value ? { ...value, pattern: realPattern } : null;
+        if (value && refMode) {
+            const refValue = refMode.getValue(value?.pattern);
+            if (!refValue) {
+                this._logService.error('[Numfmt Service]:', 'RefAliasModel is not match model');
+                return null;
+            }
+            return {
+                pattern: refValue.pattern,
+                type: refValue.type,
+            };
         }
         return null;
     }
 
-    setValue(workbookId: string, worksheetId: string, row: number, col: number, value: Nullable<NumfmtItem>) {
+    private _setValue(workbookId: string, worksheetId: string, row: number, col: number, value: Nullable<NumfmtItem>) {
         let model = this.getModel(workbookId, worksheetId);
         if (!model) {
-            const key = getModelKey(workbookId, worksheetId);
             model = new ObjectMatrix();
-            this._numfmtModel.set(key, model);
+            const map = new Map();
+            map.set(worksheetId, model);
+            this._numfmtModel.set(workbookId, map);
         }
         if (value) {
             model.setValue(row, col, value);
@@ -76,24 +90,29 @@ export class NumfmtService extends Disposable implements INumfmtService {
     setValues(
         workbookId: string,
         worksheetId: string,
-        values: Array<{ row: number; col: number; pattern?: string; type: NumfmtItem['type'] }>
+        values: Array<{ row: number; col: number; pattern?: string; type: FormatType }>
     ) {
         const ___delete___ = '___delete___';
         const group = this._groupByKey(values, 'pattern', ___delete___);
         const model = this.getModel(workbookId, worksheetId);
+        let refModel = this._refAliasModel.get(workbookId)!;
+        if (!refModel) {
+            refModel = new RefAlias<RefItem, 'numfmtId' | 'pattern'>([], ['pattern', 'numfmtId']);
+            this._refAliasModel.set(workbookId, refModel);
+        }
         Object.keys(group).forEach((pattern: string) => {
             const values = group[pattern];
             const length = values.length;
             if (!length) {
                 return;
             }
-            let refPattern = this._refAliasModel.getValue(pattern);
+            let refPattern = refModel.getValue(pattern);
             if (pattern === ___delete___) {
                 values.forEach((item) => {
                     const { row, col } = item;
                     const oldValue = this.getValue(workbookId, worksheetId, row, col, model);
                     if (oldValue && oldValue.pattern) {
-                        const oldRefPattern = this._refAliasModel.getValue(oldValue.pattern);
+                        const oldRefPattern = refModel.getValue(oldValue.pattern);
                         if (oldRefPattern) {
                             oldRefPattern.count--;
                             // if (oldRefPattern.count <= 0) {
@@ -101,12 +120,12 @@ export class NumfmtService extends Disposable implements INumfmtService {
                             // }
                         }
                     }
-                    this.setValue(workbookId, worksheetId, row, col, null);
+                    this._setValue(workbookId, worksheetId, row, col, null);
                 });
                 if (refPattern) {
                     const count = refPattern.count - length;
                     if (count > 0) {
-                        this._refAliasModel.setValue(pattern, 'count', count);
+                        refModel.setValue(pattern, 'count', count);
                     }
                     //else {
                     // this._refAliasModel.deleteValue(pattern);
@@ -114,15 +133,20 @@ export class NumfmtService extends Disposable implements INumfmtService {
                 }
             } else {
                 if (!refPattern) {
-                    refPattern = { count: 0, numfmtId: this._getUniqueRefId(), pattern };
-                    this._refAliasModel.addValue(refPattern);
+                    refPattern = {
+                        count: 0,
+                        numfmtId: this._getUniqueRefId(workbookId),
+                        pattern,
+                        type: values[0].type,
+                    };
+                    refModel.addValue(refPattern);
                 }
                 values.forEach((item) => {
-                    const { row, col, type } = item;
+                    const { row, col } = item;
                     if (model) {
                         const oldValue = this.getValue(workbookId, worksheetId, row, col, model);
                         if (oldValue && oldValue.pattern) {
-                            const oldRefPattern = this._refAliasModel.getValue(oldValue.pattern);
+                            const oldRefPattern = refModel.getValue(oldValue.pattern);
                             if (oldRefPattern) {
                                 oldRefPattern.count--;
                                 // if (oldRefPattern.count <= 0) {
@@ -131,9 +155,8 @@ export class NumfmtService extends Disposable implements INumfmtService {
                             }
                         }
                     }
-                    this.setValue(workbookId, worksheetId, row, col, {
+                    this._setValue(workbookId, worksheetId, row, col, {
                         pattern: refPattern?.numfmtId || pattern!,
-                        type,
                     });
                     refPattern!.count++;
                 });
@@ -159,16 +182,19 @@ export class NumfmtService extends Disposable implements INumfmtService {
         );
     }
 
-    _getUniqueRefId() {
-        const keyList = this._refAliasModel.getKeyMap('numfmtId') as string[];
+    _getUniqueRefId(unitID: string) {
+        const refModel = this._refAliasModel.get(unitID);
+        if (!refModel) {
+            return '0';
+        }
+        const keyList = refModel.getKeyMap('numfmtId') as string[];
         const maxId = Math.max(...keyList.map(Number), 0);
         return `${maxId + 1}`;
     }
 
     getModel(workbookId: string, worksheetId: string) {
-        const key = getModelKey(workbookId, worksheetId);
-        return this._numfmtModel.get(key);
+        const workbookModel = this._numfmtModel.get(workbookId);
+        const sheetModel = workbookModel?.get(worksheetId);
+        return sheetModel;
     }
 }
-
-const getModelKey = (workbookId: string, worksheetId: string) => `${workbookId}_${worksheetId}`;

@@ -2,7 +2,7 @@ import type { ICellData, Nullable, ObjectMatrix } from '@univerjs/core';
 import { LifecycleStages, runOnLifecycle } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 
-import { NumfmtItem } from '../base/types/index';
+import { FormatType, NumfmtItem } from '../base/types/index';
 
 export type NumfmtItemWithCache = NumfmtItem & {
     // when change parameters or pattern, the cache is cleared follow mutation execute
@@ -10,16 +10,17 @@ export type NumfmtItemWithCache = NumfmtItem & {
         result: ICellData;
         parameters: number; // The parameter that was last calculated
     };
+    type: FormatType;
 };
+export type RefItem = NumfmtItem & { count: number; numfmtId: string; type: FormatType };
+
 export interface INumfmtService {
     getValue(workbookId: string, worksheetId: string, row: number, col: number): Nullable<NumfmtItemWithCache>;
-    getModel(workbookId: string, worksheetId: string): Nullable<ObjectMatrix<NumfmtItemWithCache>>;
-
-    setValue(workbookId: string, worksheetId: string, row: number, col: number, value: Nullable<NumfmtItem>): void;
+    getModel(workbookId: string, worksheetId: string): Nullable<ObjectMatrix<NumfmtItem>>;
     setValues(
         workbookId: string,
         worksheetId: string,
-        values: Array<{ row: number; col: number; pattern?: string; type: NumfmtItem['type'] }>
+        values: Array<{ row: number; col: number; pattern?: string; type: FormatType }>
     ): void;
 }
 

@@ -24,6 +24,7 @@ import {
     CellValueType,
     Disposable,
     DisposableCollection,
+    ICellData,
     ICommandService,
     IMutationInfo,
     INTERCEPTOR_POINT,
@@ -32,6 +33,7 @@ import {
     LocaleService,
     LocaleType,
     Nullable,
+    ObjectMatrix,
     Range,
     Rectangle,
     SheetInterceptorService,
@@ -50,7 +52,6 @@ import { combineLatest, Observable } from 'rxjs';
 import { bufferTime, distinctUntilChanged, filter, map, switchMap, tap } from 'rxjs/operators';
 
 import { SHEET_NUMFMT_PLUGIN } from '../base/const/PLUGIN_NAME';
-import { NumfmtItem } from '../base/types';
 import { AddDecimalCommand } from '../commands/commands/add.decimal.command';
 import { SetCurrencyCommand } from '../commands/commands/set.currency.command';
 import { SetNumfmtCommand, SetNumfmtCommandParams } from '../commands/commands/set.numfmt.command';
@@ -65,15 +66,26 @@ import { OpenNumfmtPanelOperator } from '../commands/operators/open.numfmt.panel
 import { SheetNumfmtPanel, SheetNumfmtPanelProps } from '../components/index';
 import { zhCn } from '../locale/zh-CN';
 import { AddDecimalMenuItem, CurrencyMenuItem, FactoryOtherMenuItem, SubtractDecimalMenuItem } from '../menu/menu';
-import { INumfmtService } from '../service/type';
+import { INumfmtService, NumfmtItemWithCache } from '../service/type';
 import { getPatternPreview, getPatternType } from '../utils/pattern';
 import type { INumfmtController } from './type';
 
 const createCollectEffectMutation = () => {
-    type Config = { workbookId: string; worksheetId: string; row: number; col: number; value: Nullable<NumfmtItem> };
+    type Config = {
+        workbookId: string;
+        worksheetId: string;
+        row: number;
+        col: number;
+        value: Nullable<NumfmtItemWithCache>;
+    };
     let list: Config[] = [];
-    const add = (workbookId: string, worksheetId: string, row: number, col: number, value: Nullable<NumfmtItem>) =>
-        list.push({ workbookId, worksheetId, row, col, value });
+    const add = (
+        workbookId: string,
+        worksheetId: string,
+        row: number,
+        col: number,
+        value: Nullable<NumfmtItemWithCache>
+    ) => list.push({ workbookId, worksheetId, row, col, value });
     const getEffects = () => list;
     const clean = () => {
         list = [];
@@ -88,7 +100,6 @@ export class NumfmtController extends Disposable implements INumfmtController {
     // collect effect mutations when edit end and push this to  commands stack in next commands progress
     private _collectEffectMutation = createCollectEffectMutation();
     private _previewPattern = '';
-
     constructor(
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @Inject(ThemeService) private _themeService: ThemeService,
@@ -411,6 +422,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
     }
 
     private _initInterceptorCellContent() {
+        const renderCache = new ObjectMatrix<{ result: ICellData; parameters: string | number }>();
         this.disposeWithMe(
             this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
                 handler: (cell, location, next) => {
@@ -430,8 +442,9 @@ export class NumfmtController extends Disposable implements INumfmtController {
                     }
 
                     let numfmtRes: string = '';
-                    if (numfmtValue._cache && numfmtValue._cache.parameters === originCellValue.v) {
-                        return numfmtValue._cache.result;
+                    const cache = renderCache.getValue(location.row, location.col);
+                    if (cache && cache.parameters === originCellValue.v) {
+                        return cache.result;
                     }
 
                     const info = getPatternPreview(numfmtValue.pattern, Number(originCellValue.v));
@@ -452,15 +465,33 @@ export class NumfmtController extends Disposable implements INumfmtController {
                         }
                     }
 
-                    numfmtValue._cache = {
+                    renderCache.setValue(location.row, location.col, {
                         result: res,
                         parameters: originCellValue.v as number,
-                    };
+                    });
 
                     return res;
                 },
             })
         );
+        this._commandService.onCommandExecuted((commandInfo) => {
+            if (commandInfo.id === SetNumfmtMutation.id) {
+                const params = commandInfo.params as SetNumfmtMutationParams;
+                params.values
+                    .map((value) => ({ row: value.row, col: value.col }))
+                    .forEach(({ row, col }) => {
+                        renderCache.realDeleteValue(row, col);
+                    });
+            }
+        });
+        this._sheetSkeletonManagerService.currentSkeleton$
+            .pipe(
+                map((skeleton) => skeleton?.sheetId),
+                distinctUntilChanged()
+            )
+            .subscribe(() => {
+                renderCache.reset();
+            });
     }
 
     private _initRealTimeRenderingInterceptor() {

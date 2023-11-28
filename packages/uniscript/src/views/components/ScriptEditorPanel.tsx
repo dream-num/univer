@@ -1,15 +1,13 @@
-import { IShortcutService } from '@univerjs/base-ui';
+import { IMessageService, IShortcutService } from '@univerjs/base-ui';
 import { DisposableCollection, LocaleService, Nullable, toDisposable } from '@univerjs/core';
-import { Button } from '@univerjs/design';
+import { Button, MessageType } from '@univerjs/design';
 import { IDisposable } from '@wendellhu/redi';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { editor } from 'monaco-editor';
 import React, { useCallback, useEffect, useRef } from 'react';
 
-import { UniscriptService } from '../../services/script.service';
+import { UniscriptExecutionService } from '../../services/script-execution.service';
 import styles from './index.module.less';
-
-// TODO@wzhudev: load monaco editor's resources for web worker
 
 // TODO: @wzhudev: this should be moved to a MonacoEditorLoadService
 window.MonacoEnvironment = {
@@ -23,15 +21,15 @@ window.MonacoEnvironment = {
 };
 
 export function ScriptEditorPanel() {
-    // HTML element ref
     const editorContentRef = useRef<HTMLDivElement | null>(null);
     const editorContainerRef = useRef<HTMLDivElement | null>(null);
 
     const monacoEditorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
 
     const localeService = useDependency(LocaleService);
-    const scriptService = useDependency(UniscriptService);
+    const scriptService = useDependency(UniscriptExecutionService);
     const shortcutService = useDependency(IShortcutService);
+    const messageService = useDependency(IMessageService);
 
     useEffect(() => {
         const containerElement = editorContainerRef.current;
@@ -85,11 +83,22 @@ export function ScriptEditorPanel() {
     }, []);
 
     const startExecution = useCallback(() => {
-        const monacoEditor = monacoEditorRef.current;
-        if (monacoEditor) {
-            scriptService.execute('').then(() => {
-                console.log('execution completed');
-            });
+        const model = monacoEditorRef.current?.getModel();
+        if (model) {
+            scriptService
+                .execute(model.getValue())
+                .then(() => {
+                    messageService.show({
+                        content: 'Execution completed',
+                        type: MessageType.Success,
+                    });
+                })
+                .catch(() => {
+                    messageService.show({
+                        content: 'Execution failed',
+                        type: MessageType.Error,
+                    });
+                });
         }
     }, [scriptService]);
 
@@ -99,7 +108,7 @@ export function ScriptEditorPanel() {
                 <div className={styles.scriptEditorContainer} ref={editorContainerRef}></div>
             </div>
             <div className={styles.scriptEditorActions}>
-                <Button type="primary" size="small">
+                <Button type="primary" size="small" onClick={startExecution}>
                     {localeService.t('script-panel.panel.execute')}
                 </Button>
             </div>

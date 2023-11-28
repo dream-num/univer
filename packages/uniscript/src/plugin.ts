@@ -3,16 +3,19 @@ import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
 import { UniscriptController } from './controllers/uniscript.controller';
 import { enUS } from './locale';
-import { UniscriptService } from './services/script.service';
+import { IScripteEditorServiceConfig, ScriptEditorService } from './services/script-editor.service';
+import { UniscriptExecutionService } from './services/script-execution.service';
 import { ScriptPanelService } from './services/script-panel.service';
 
 const PLUGIN_NAME = 'uniscript';
+
+export interface IUniscriptPluginConfig extends IScripteEditorServiceConfig {}
 
 export class UniscriptPlugin extends Plugin {
     static override type = PluginType.Univer;
 
     constructor(
-        _config: unknown,
+        private readonly _config: IUniscriptPluginConfig,
         @Inject(Injector) protected override _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
@@ -25,8 +28,9 @@ export class UniscriptPlugin extends Plugin {
             [UniscriptController],
 
             // services
+            [ScriptEditorService, { useFactory: () => injector.createInstance(ScriptEditorService, this._config) }],
             [ScriptPanelService],
-            [UniscriptService],
+            [UniscriptExecutionService],
         ];
 
         dependencies.forEach((d) => injector.add(d));

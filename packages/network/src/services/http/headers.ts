@@ -32,6 +32,10 @@ export class HTTPHeaders {
         });
     }
 
+    has(key: string): boolean {
+        return !!this._headers[key];
+    }
+
     private _setHeader(name: string, value: string | number | boolean): void {
         const lowerCase = name.toLowerCase();
         if (this._headers[lowerCase]) {

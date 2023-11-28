@@ -2,7 +2,7 @@ name: 🥷 Release Nightly
 
 on:
     schedule:
-        - cron: '0 16 * * *'
+        - cron: '0 17 * * *'
 
 permissions:
     contents: read
@@ -62,15 +62,15 @@ jobs:
                       node -e "const fs = require('fs'); const package = JSON.parse(fs.readFileSync('./packages/$package/package.json')); package.version = '${{ steps.nightly-version.outputs.version }}'; fs.writeFileSync('./packages/$package/package.json', JSON.stringify(package, null, 2));"
                   done
 
-            - name: Write .npmrc
-              run: |
-                  echo '\n${{ secrets.VERDACCIO_URL }}:_authToken="${{ secrets.VERDACCIO_TOKEN }}"' >> .npmrc
-
             - name: Install dependencies
               run: pnpm install
 
             - name: Build
               run: pnpm run build
+
+            - name: Set publishing config
+              run: |
+                  pnpm config set '${{ secrets.VERDACCIO_URL }}:_authToken' "${{ secrets.VERDACCIO_TOKEN }}"
 
             - name: Publish
               run: pnpm publish --access public --tag nightly -r

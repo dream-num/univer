@@ -12,13 +12,10 @@ import {
     OnLifecycle,
     Tools,
 } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
 
 import { DocCopyCommand, DocCutCommand, DocPasteCommand } from '../commands/commands/clipboard.command';
 import { CutContentCommand, InnerPasteCommand } from '../commands/commands/clipboard.inner.command';
 import { IDocClipboardService } from '../services/clipboard/clipboard.service';
-import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
-import { TextSelectionManagerService } from '../services/text-selection-manager.service';
 
 @OnLifecycle(LifecycleStages.Rendered, DocClipboardController)
 export class DocClipboardController extends Disposable {
@@ -27,9 +24,7 @@ export class DocClipboardController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @IDocClipboardService private readonly _docClipboardService: IDocClipboardService,
-        @ITextSelectionRenderManager private _textSelectionRenderManager: ITextSelectionRenderManager,
-        @Inject(TextSelectionManagerService) private _textSelectionManagerService: TextSelectionManagerService,
-        @Inject(DocSkeletonManagerService) private _docSkeletonManagerService: DocSkeletonManagerService
+        @ITextSelectionRenderManager private _textSelectionRenderManager: ITextSelectionRenderManager
     ) {
         super();
         this._commandExecutedListener();

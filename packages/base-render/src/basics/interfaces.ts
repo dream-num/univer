@@ -1,6 +1,5 @@
 import {
     BooleanNumber,
-    DocumentBodyModel,
     GridType,
     IDocStyleBase,
     IDocumentLayout,
@@ -15,6 +14,7 @@ import {
     LocaleService,
 } from '@univerjs/core';
 
+import { DocumentViewModel } from '../components/docs/view-model/document-view-model';
 import {
     IDocumentSkeletonBullet,
     IDocumentSkeletonDrawing,
@@ -83,8 +83,8 @@ export interface IMeasureTextCache {
 export interface IDocsConfig extends IReferenceSource, IDocumentLayout {
     localeService: LocaleService;
     documentTextStyle?: ITextStyle;
-    headerTreeMap: Map<string, DocumentBodyModel>;
-    footerTreeMap: Map<string, DocumentBodyModel>;
+    headerTreeMap: Map<string, DocumentViewModel>;
+    footerTreeMap: Map<string, DocumentViewModel>;
 }
 
 export interface IHeaderIds {

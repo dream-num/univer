@@ -1,8 +1,6 @@
 import {
     BooleanNumber,
-    DataStreamTreeNode,
     DataStreamTreeTokenType,
-    DocumentBodyModel,
     GridType,
     HorizontalAlign,
     IBullet,
@@ -34,6 +32,8 @@ import {
     getSpanGroupWidth,
     lineIterator,
 } from '../../common/tools';
+import { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
+import { DocumentViewModel } from '../../view-model/document-view-model';
 import { dealWidthBullet } from './bullet';
 import { dealWidthInlineDrawing } from './inline-drawing';
 import { composeCharForLanguage } from './language-ruler';
@@ -41,7 +41,7 @@ import { calculateParagraphLayout } from './layout-ruler';
 
 // eslint-disable-next-line max-lines-per-function
 export function dealWidthParagraph(
-    bodyModel: DocumentBodyModel,
+    bodyModel: DocumentViewModel,
     paragraphNode: DataStreamTreeNode,
     curPage: IDocumentSkeletonPage,
     sectionBreakConfig: ISectionBreakConfig,

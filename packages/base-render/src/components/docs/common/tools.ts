@@ -2,8 +2,6 @@ import {
     AlignTypeH,
     AlignTypeV,
     BooleanNumber,
-    DataStreamTreeNode,
-    DocumentBodyModel,
     GridType,
     INumberUnit,
     IParagraphStyle,
@@ -29,6 +27,8 @@ import {
 } from '../../../basics/i-document-skeleton-cached';
 import { IParagraphConfig, ISectionBreakConfig } from '../../../basics/interfaces';
 import { getFontStyleString, isFunction } from '../../../basics/tools';
+import { DataStreamTreeNode } from '../view-model/data-stream-tree-node';
+import { DocumentViewModel } from '../view-model/document-view-model';
 
 export function getLastPage(pages: IDocumentSkeletonPage[]) {
     return pages?.[pages.length - 1];
@@ -684,7 +684,7 @@ export function clearFontCreateConfigCache() {
 
 export function getFontCreateConfig(
     index: number,
-    bodyModel: DocumentBodyModel,
+    bodyModel: DocumentViewModel,
     paragraphNode: DataStreamTreeNode,
     sectionBreakConfig: ISectionBreakConfig,
     paragraphStyle: IParagraphStyle

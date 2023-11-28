@@ -5,7 +5,6 @@ import {
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     ICommandInfo,
     ICommandService,
-    IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
 } from '@univerjs/core';
@@ -18,19 +17,14 @@ import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.serv
 export class DocRenderController extends Disposable {
     constructor(
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
 
-        this._initialize();
+        this._initialRenderRefresh();
 
         this._commandExecutedListener();
-    }
-
-    private _initialize() {
-        this._initialRenderRefresh();
     }
 
     private _initialRenderRefresh() {
@@ -47,17 +41,13 @@ export class DocRenderController extends Disposable {
                 return;
             }
 
-            const { mainComponent, components, scene } = currentRender;
+            const { mainComponent } = currentRender;
 
             const docsComponent = mainComponent as Documents;
 
             docsComponent.changeSkeleton(documentSkeleton);
 
-            // documentSkeleton.calculate();
-
             this.recalculateSizeBySkeleton(currentRender, documentSkeleton);
-
-            // this.calculatePagePosition(currentRender);
         });
     }
 
@@ -108,7 +98,7 @@ export class DocRenderController extends Disposable {
     // }
 
     recalculateSizeBySkeleton(currentRender: IRender, skeleton: DocumentSkeleton) {
-        const { mainComponent, scene } = currentRender;
+        const { mainComponent } = currentRender;
 
         const docsComponent = mainComponent as Documents;
 
@@ -121,6 +111,7 @@ export class DocRenderController extends Disposable {
         const pages = data.pages;
         let width = 0;
         let height = 0;
+
         for (let i = 0, len = pages.length; i < len; i++) {
             const page = pages[i];
             const { pageWidth, pageHeight } = page;
@@ -179,8 +170,6 @@ export class DocRenderController extends Disposable {
                     }
 
                     this.recalculateSizeBySkeleton(currentRender, skeleton);
-
-                    // this.calculatePagePosition(currentRender);
                 }
             })
         );

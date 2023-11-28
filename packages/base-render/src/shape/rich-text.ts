@@ -3,7 +3,7 @@
 import {
     BooleanNumber,
     DEFAULT_EMPTY_DOCUMENT_VALUE,
-    DocumentDataModelSimple,
+    DocumentDataModel,
     IBorderData,
     IColorStyle,
     IDocumentData,
@@ -22,6 +22,7 @@ import { IBoundRect } from '../basics/vector2';
 import { Canvas } from '../canvas';
 import { DocumentSkeleton } from '../components/docs/doc-skeleton';
 import { Documents } from '../components/docs/document';
+import { DocumentViewModel } from '../components/docs/view-model/document-view-model';
 
 export interface IRichTextProps extends ITransformState, IStyleBase {
     text?: string;
@@ -104,9 +105,10 @@ export class RichText extends BaseObject {
             });
         }
 
-        const docModel = new DocumentDataModelSimple(this._documentData);
+        const docModel = new DocumentDataModel(this._documentData);
+        const docViewModel = new DocumentViewModel(docModel);
 
-        this._documentSkeleton = DocumentSkeleton.create(docModel, this._localeService);
+        this._documentSkeleton = DocumentSkeleton.create(docViewModel, this._localeService);
 
         this._documents = new Documents(`${this.oKey}_DOCUMENTS`, this._documentSkeleton, {
             pageMarginLeft: 0,
@@ -116,7 +118,7 @@ export class RichText extends BaseObject {
         this._initialProps(props);
 
         this.onTransformChangeObservable.add((changeState) => {
-            const { type, value, preValue } = changeState;
+            const { type } = changeState;
             if (type === TRANSFORM_CHANGE_OBSERVABLE_TYPE.resize || type === TRANSFORM_CHANGE_OBSERVABLE_TYPE.all) {
                 docModel.updateDocumentDataPageSize(this.width);
                 this._documentSkeleton.makeDirty(true);
@@ -260,11 +262,15 @@ export class RichText extends BaseObject {
                 },
             },
         };
+
         return documentData;
     }
 
     private _initialProps(props?: IRichTextProps) {
-        this._documentSkeleton.getModel().updateDocumentDataPageSize(props?.width, props?.height);
+        this._documentSkeleton
+            .getViewModel()
+            .getDataModel()
+            .updateDocumentDataPageSize(props?.width, props?.height);
 
         this._documentSkeleton.calculate();
 

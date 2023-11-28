@@ -27,7 +27,6 @@ import {
     UpdateCommand,
 } from '../commands/commands/core-editing.command';
 import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
-import { TextSelectionManagerService } from '../services/text-selection-manager.service';
 
 @OnLifecycle(LifecycleStages.Rendered, DeleteController)
 export class DeleteController extends Disposable {
@@ -35,7 +34,6 @@ export class DeleteController extends Disposable {
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
@@ -80,7 +78,7 @@ export class DeleteController extends Disposable {
             return;
         }
 
-        const docsModel = this._currentUniverService.getCurrentUniverDocInstance();
+        const docDataModel = this._currentUniverService.getCurrentUniverDocInstance();
 
         const { startOffset, collapsed, segmentId, style } = activeRange;
 
@@ -94,7 +92,7 @@ export class DeleteController extends Disposable {
         // is in bullet list?
         const preIsBullet = hasListSpan(preSpan);
         // is in indented paragraph?
-        const preIsIndent = isIndentBySpan(preSpan, docsModel.body);
+        const preIsIndent = isIndentBySpan(preSpan, docDataModel.body);
 
         let cursor = startOffset;
 
@@ -108,7 +106,7 @@ export class DeleteController extends Disposable {
             isFirstSpan(preSpan) && span !== preSpan && (preIsBullet === true || preIsIndent === true);
 
         if (isUpdateParagraph) {
-            const paragraph = getParagraphBySpan(preSpan, docsModel.body);
+            const paragraph = getParagraphBySpan(preSpan, docDataModel.body);
 
             if (paragraph == null) {
                 return;
@@ -152,7 +150,7 @@ export class DeleteController extends Disposable {
             ];
 
             this._commandService.executeCommand(UpdateCommand.id, {
-                unitId: docsModel.getUnitId(),
+                unitId: docDataModel.getUnitId(),
                 updateBody: {
                     dataStream: '',
                     paragraphs: [{ ...updateParagraph }],
@@ -186,7 +184,7 @@ export class DeleteController extends Disposable {
                     },
                 ];
                 this._commandService.executeCommand(DeleteCommand.id, {
-                    unitId: docsModel.getUnitId(),
+                    unitId: docDataModel.getUnitId(),
                     range: activeRange,
                     segmentId,
                     direction: DeleteDirection.LEFT,
@@ -216,12 +214,12 @@ export class DeleteController extends Disposable {
             return;
         }
 
-        const docsModel = this._currentUniverService.getCurrentUniverDocInstance();
+        const docDataModel = this._currentUniverService.getCurrentUniverDocInstance();
 
         const { startOffset, collapsed, segmentId, style } = activeRange;
 
         // No need to delete when the cursor is at the last position of the last paragraph.
-        if (startOffset === docsModel.getBodyModel().getBody().dataStream.length - 2 && collapsed) {
+        if (startOffset === docDataModel.getBody()!.dataStream.length - 2 && collapsed) {
             return;
         }
 
@@ -236,7 +234,7 @@ export class DeleteController extends Disposable {
             ];
 
             this._commandService.executeCommand(DeleteCommand.id, {
-                unitId: docsModel.getUnitId(),
+                unitId: docDataModel.getUnitId(),
                 range: activeRange,
                 segmentId,
                 direction: DeleteDirection.RIGHT,

@@ -2,6 +2,7 @@ export * from './base-object';
 export * from './basics';
 export * from './canvas';
 export * from './components';
+export { DocumentViewModel } from './components/docs/view-model/document-view-model';
 export * from './custom';
 export * from './engine';
 export * from './group';

@@ -2,7 +2,6 @@ export { getDocObject } from './basics/component-tools';
 export * from './basics/docs-view-key';
 export { DocCopyCommand, DocCutCommand, DocPasteCommand } from './commands/commands/clipboard.command';
 export {
-    CoverCommand,
     DeleteCommand,
     type ICoverCommandParams,
     type IDeleteCommandParams,
@@ -31,4 +30,5 @@ export {
 export { MoveCursorOperation, MoveSelectionOperation } from './commands/operations/cursor.operation';
 export { DocPlugin, type IDocPluginConfig } from './doc-plugin';
 export { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
+export { DocViewModelManagerService } from './services/doc-view-model-manager.service';
 export { TextSelectionManagerService } from './services/text-selection-manager.service';

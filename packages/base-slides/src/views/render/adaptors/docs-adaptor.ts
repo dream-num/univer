@@ -3,6 +3,7 @@ import {
     BaseObject,
     Documents,
     DocumentSkeleton,
+    DocumentViewModel,
     EVENT_TYPE,
     IDocumentSkeletonDrawing,
     IPageRenderConfig,
@@ -69,7 +70,9 @@ export class DocsAdaptor extends ObjectAdaptor {
             return;
         }
 
-        const documentSkeleton = DocumentSkeleton.create(new DocumentDataModel(documentData), this._localeService);
+        const docDataModel = new DocumentDataModel(documentData);
+        const docViewModel = new DocumentViewModel(docDataModel);
+        const documentSkeleton = DocumentSkeleton.create(docViewModel, this._localeService);
 
         const documents = new Documents(DOCS_VIEW_KEY.MAIN, documentSkeleton);
 
@@ -220,12 +223,15 @@ export class DocsAdaptor extends ObjectAdaptor {
 
                 // console.log('onChangingObservable', top, docsTop, marginTop, top - docsTop - marginTop);
 
-                documentSkeleton?.getModel().updateDrawing(oKey, {
-                    left: left - docsLeft - marginLeft,
-                    top: top - docsTop - marginTop,
-                    height,
-                    width,
-                });
+                documentSkeleton
+                    ?.getViewModel()
+                    .getDataModel()
+                    .updateDrawing(oKey, {
+                        left: left - docsLeft - marginLeft,
+                        top: top - docsTop - marginTop,
+                        height,
+                        width,
+                    });
             });
 
             documentSkeleton?.calculate();

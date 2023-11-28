@@ -1,6 +1,7 @@
 import {
     DOCS_COMPONENT_MAIN_LAYER_INDEX,
     DocSkeletonManagerService,
+    DocViewModelManagerService,
     IRichTextEditingMutationParams,
     NORMAL_TEXT_SELECTION_PLUGIN_NAME,
     RichTextEditingMutation,
@@ -24,7 +25,6 @@ import {
     Disposable,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-    DocumentDataModel,
     FOCUSING_EDITOR,
     FOCUSING_EDITOR_BUT_HIDDEN,
     HorizontalAlign,
@@ -75,6 +75,7 @@ export class StartEditController extends Disposable {
 
     constructor(
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
+        @Inject(DocViewModelManagerService) private readonly _docViewModelManagerService: DocViewModelManagerService,
         @IContextService private readonly _contextService: IContextService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
@@ -141,9 +142,9 @@ export class StartEditController extends Disposable {
                 documentModel!.updateDocumentDataPageSize((endX - startX) / scaleX);
             }
 
-            this._currentUniverService.changeDoc(editorUnitId, documentModel! as DocumentDataModel);
+            this._currentUniverService.changeDoc(editorUnitId, documentModel!);
 
-            const docParam = this._docSkeletonManagerService.updateCurrent({ unitId: editorUnitId });
+            const docParam = this._docSkeletonManagerService.getCurrent();
 
             if (docParam == null) {
                 return;
@@ -435,28 +436,30 @@ export class StartEditController extends Disposable {
 
             this._contextService.setContextValue(FOCUSING_EDITOR, true);
 
+            const { documentModel: documentDataModel } = documentLayoutObject;
+
             const docParam = this._docSkeletonManagerService.getCurrent();
 
-            if (docParam == null) {
+            if (docParam == null || documentDataModel == null) {
                 return;
             }
 
             const { skeleton } = docParam;
-
-            const documentDataModel = this._currentUniverService.getCurrentUniverDocInstance();
 
             this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject, scaleX, scaleY);
 
             // move selection
             if (eventType === DeviceInputEventType.Keyboard) {
                 const snapshot = Tools.deepClone(documentDataModel.snapshot) as IDocumentData;
+                const documentViewModel = this._docViewModelManagerService.getCurrent()?.docViewModel!;
                 this._resetBodyStyle(snapshot.body!);
 
                 documentDataModel.reset(snapshot);
+                documentViewModel.reset(documentDataModel);
 
                 document.makeDirty();
 
-                // @JOCS, Why calculate here？
+                // @JOCS, Why calculate here?
                 if (keycode === KeyCode.BACKSPACE) {
                     skeleton.calculate();
                 }

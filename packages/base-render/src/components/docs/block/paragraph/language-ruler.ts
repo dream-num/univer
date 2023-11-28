@@ -1,16 +1,12 @@
-import {
-    DataStreamTreeNode,
-    DataStreamTreeTokenType,
-    DocumentBodyModel,
-    IParagraphStyle,
-    Nullable,
-} from '@univerjs/core';
+import { DataStreamTreeTokenType, IParagraphStyle, Nullable } from '@univerjs/core';
 
 import { IDocumentSkeletonSpan } from '../../../../basics/i-document-skeleton-cached';
 import { ISectionBreakConfig } from '../../../../basics/interfaces';
 import { hasArabic, hasCJK, hasSpaceAndTab, hasTibetan } from '../../../../basics/tools';
 import { createSkeletonLetterSpan, createSkeletonWordSpan } from '../../common/span';
 import { getFontCreateConfig } from '../../common/tools';
+import { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
+import { DocumentViewModel } from '../../view-model/document-view-model';
 
 interface LanguageResult {
     charIndex: number;
@@ -21,7 +17,7 @@ export function composeCharForLanguage(
     char: string,
     index: number,
     charArray: string,
-    bodyModel: DocumentBodyModel,
+    bodyModel: DocumentViewModel,
     paragraphNode: DataStreamTreeNode,
     sectionBreakConfig: ISectionBreakConfig,
     paragraphStyle: IParagraphStyle
@@ -44,7 +40,7 @@ function notCJKHandler(
     char: string,
     index: number,
     charArray: string,
-    bodyModel: DocumentBodyModel,
+    bodyModel: DocumentViewModel,
     paragraphNode: DataStreamTreeNode,
     sectionBreakConfig: ISectionBreakConfig,
     paragraphStyle: IParagraphStyle
@@ -84,7 +80,7 @@ function ArabicHandler(
     char: string,
     index: number,
     charArray: string,
-    bodyModel: DocumentBodyModel,
+    bodyModel: DocumentViewModel,
     paragraphNode: DataStreamTreeNode,
     sectionBreakConfig: ISectionBreakConfig,
     paragraphStyle: IParagraphStyle
@@ -112,7 +108,7 @@ function TibetanHandler(
     char: string,
     index: number,
     charArray: string,
-    bodyModel: DocumentBodyModel,
+    bodyModel: DocumentViewModel,
     paragraphNode: DataStreamTreeNode,
     sectionBreakConfig: ISectionBreakConfig,
     paragraphStyle: IParagraphStyle

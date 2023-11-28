@@ -4,11 +4,10 @@ import { UpdateDocsAttributeType } from '../../shared/command-enum';
 import { Tools } from '../../shared/tools';
 import { IDocumentBody, IDocumentData, IDocumentRenderConfig } from '../../types/interfaces/i-document-data';
 import { IPaddingData } from '../../types/interfaces/i-style-data';
-import { recoveryBody, updateAttributeByDelete } from './apply-utils/delete-apply';
+import { updateAttributeByDelete } from './apply-utils/delete-apply';
 import { updateAttributeByInsert } from './apply-utils/insert-apply';
 import { updateAttribute } from './apply-utils/update-apply';
-import { DocumentBodyModel } from './document-body-model';
-import { DocMutationParams } from './document-model-types';
+import { DocMutationParams } from './mutation-types';
 
 export const DEFAULT_DOC = {
     id: 'default_doc',
@@ -22,23 +21,11 @@ interface IDrawingUpdateConfig {
     width: number;
 }
 
-export type DocumentModelOrSimple = DocumentDataModelSimple | DocumentDataModel;
-
-export class DocumentDataModelSimple {
+class DocumentDataModelSimple {
     snapshot: IDocumentData;
-
-    headerTreeMap!: Map<string, DocumentBodyModel>; // sub class should guarantee this is not null
-
-    footerTreeMap!: Map<string, DocumentBodyModel>; // sub class should guarantee this is not null
-
-    bodyModel!: DocumentBodyModel; // sub class should guarantee this is not null
 
     constructor(snapshot: Partial<IDocumentData>) {
         this.snapshot = { ...DEFAULT_DOC, ...snapshot };
-
-        if (this.snapshot.body != null) {
-            this.bodyModel = DocumentBodyModel.create(this.snapshot.body);
-        }
     }
 
     get drawings() {
@@ -68,18 +55,6 @@ export class DocumentDataModelSimple {
         return this.snapshot.body;
     }
 
-    dispose() {
-        this.bodyModel.dispose();
-
-        this.headerTreeMap.forEach((headerTree) => {
-            headerTree.dispose();
-        });
-
-        this.footerTreeMap.forEach((footerTree) => {
-            footerTree.dispose();
-        });
-    }
-
     getShouldRenderLoopImmediately() {
         const should = this.snapshot.shouldStartRenderingImmediately;
 
@@ -92,22 +67,6 @@ export class DocumentDataModelSimple {
 
     getParentRenderUnitId() {
         return this.snapshot.parentRenderUnitId;
-    }
-
-    getBodyModel(segmentId?: string) {
-        if (segmentId == null) {
-            return this.bodyModel;
-        }
-
-        if (this.headerTreeMap.has(segmentId)) {
-            return this.headerTreeMap.get(segmentId)!;
-        }
-
-        if (this.footerTreeMap.has(segmentId)) {
-            return this.footerTreeMap.get(segmentId)!;
-        }
-
-        return this.bodyModel;
     }
 
     getSnapshot() {
@@ -207,13 +166,28 @@ export class DocumentDataModelSimple {
 export class DocumentDataModel extends DocumentDataModelSimple {
     private _unitId: string;
 
+    headerModelMap: Map<string, DocumentDataModel> = new Map();
+
+    footerModelMap: Map<string, DocumentDataModel> = new Map();
+
     constructor(snapshot: Partial<IDocumentData>) {
         super(snapshot);
 
         const UNIT_ID_LENGTH = 6;
 
         this._unitId = this.snapshot.id ?? Tools.generateRandomId(UNIT_ID_LENGTH);
-        this._initializeHeaderFooterTree();
+
+        this._initializeHeaderFooterModel();
+    }
+
+    dispose() {
+        this.headerModelMap.forEach((header) => {
+            header.dispose();
+        });
+
+        this.footerModelMap.forEach((footer) => {
+            footer.dispose();
+        });
     }
 
     getRev(): number {
@@ -228,14 +202,28 @@ export class DocumentDataModel extends DocumentDataModelSimple {
         return this.snapshot.settings;
     }
 
+    // TODO: @JOCS do not use reset, please use apply to modify the snapshot.
     reset(snapshot: Partial<IDocumentData>) {
         if (snapshot.id && snapshot.id !== this._unitId) {
             throw new Error('Cannot reset a document model with a different unit id!');
         }
 
         this.snapshot = { ...DEFAULT_DOC, ...snapshot };
-        this._initializeHeaderFooterTree();
-        this.bodyModel.reset(snapshot.body ?? { dataStream: '\r\n' });
+        this._initializeHeaderFooterModel();
+    }
+
+    getSelfOrHeaderFooterModel(segmentId?: string) {
+        if (segmentId != null) {
+            if (this.headerModelMap.has(segmentId)) {
+                return this.headerModelMap.get(segmentId)!;
+            }
+
+            if (this.footerModelMap.has(segmentId)) {
+                return this.footerModelMap.get(segmentId)!;
+            }
+        }
+
+        return this as DocumentDataModel;
     }
 
     getUnitId(): string {
@@ -250,7 +238,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
         memoryCursor.reset();
 
         mutations.forEach((mutation) => {
-            // FIXME: @jocs Since updateApply modifies the mutation(used in undo/redo),
+            // FIXME: @JOCS Since updateApply modifies the mutation(used in undo/redo),
             // so make a deep copy here, does updateApply need to
             // be modified to have no side effects in the future?
             mutation = Tools.deepClone(mutation);
@@ -328,8 +316,6 @@ export class DocumentDataModel extends DocumentDataModelSimple {
     private _deleteApply(textLength: number, currentIndex: number, segmentId?: string): IDocumentBody {
         const doc = this.snapshot;
 
-        const bodyModel = this.getBodyModel(segmentId);
-
         const body = getDocsUpdateBody(doc, segmentId);
 
         if (body == null) {
@@ -340,21 +326,16 @@ export class DocumentDataModel extends DocumentDataModelSimple {
             return { dataStream: '' };
         }
 
-        bodyModel.delete(currentIndex, textLength);
+        const deletedBody = updateAttributeByDelete(body, textLength, currentIndex);
 
-        const deleBody = updateAttributeByDelete(body, textLength, currentIndex);
+        // TODO: @JOCS, find why need to recoveryBody and how to trigger remove all the content?
+        // recoveryBody(body, deletedBody); // If the last paragraph in the document is deleted, restore an initial blank document.
 
-        recoveryBody(bodyModel, body, deleBody); // If the last paragraph in the document is deleted, restore an initial blank document.
-
-        // console.log('删除的model打印', bodyModel, body, deleBody);
-
-        return deleBody;
+        return deletedBody;
     }
 
     private _insertApply(insertBody: IDocumentBody, textLength: number, currentIndex: number, segmentId?: string) {
         const doc = this.snapshot;
-
-        const bodyModel = this.getBodyModel(segmentId);
 
         const body = getDocsUpdateBody(doc, segmentId);
 
@@ -367,43 +348,29 @@ export class DocumentDataModel extends DocumentDataModelSimple {
         }
 
         updateAttributeByInsert(body, insertBody, textLength, currentIndex);
-
-        if (insertBody.dataStream.length > 1 && /\r/.test(insertBody.dataStream)) {
-            // TODO: @JOCS, The DocumentDataModel needs to be rewritten to better support the
-            // large area of updates that are brought about by the paste, abstract the
-            // methods associated with the DocumentDataModel insertion, and support atomic operations
-            bodyModel.reset(body);
-        } else {
-            bodyModel.insert(insertBody, currentIndex);
-        }
-
-        // console.log('插入的model打印', bodyModel, textLength, currentIndex);
     }
 
-    override updateDocumentId(unitId: string) {
-        super.updateDocumentId(unitId);
-
-        this._unitId = unitId;
-    }
-
-    private _initializeHeaderFooterTree() {
-        this.headerTreeMap = new Map();
-        this.footerTreeMap = new Map();
-
-        const { headers, footers } = this.snapshot;
+    private _initializeHeaderFooterModel() {
+        const { headers, footers } = this.getSnapshot();
 
         if (headers) {
             for (const headerId in headers) {
                 const header = headers[headerId];
-                this.headerTreeMap.set(headerId, DocumentBodyModel.create(header.body));
+                this.headerModelMap.set(headerId, new DocumentDataModel(header));
             }
         }
 
         if (footers) {
             for (const footerId in footers) {
                 const footer = footers[footerId];
-                this.footerTreeMap.set(footerId, DocumentBodyModel.create(footer.body));
+                this.footerModelMap.set(footerId, new DocumentDataModel(footer));
             }
         }
+    }
+
+    override updateDocumentId(unitId: string) {
+        super.updateDocumentId(unitId);
+
+        this._unitId = unitId;
     }
 }

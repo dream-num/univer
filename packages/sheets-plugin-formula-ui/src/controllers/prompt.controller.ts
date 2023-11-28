@@ -1,4 +1,9 @@
-import { MoveCursorOperation, ReplaceContentCommand, TextSelectionManagerService } from '@univerjs/base-docs';
+import {
+    DocViewModelManagerService,
+    MoveCursorOperation,
+    ReplaceContentCommand,
+    TextSelectionManagerService,
+} from '@univerjs/base-docs';
 import {
     FormulaEngineService,
     generateStringWithSequence,
@@ -133,7 +138,8 @@ export class PromptController extends Disposable {
         @Inject(ISelectionRenderService) private readonly _selectionRenderService: ISelectionRenderService,
         @Inject(IDescriptionService) private readonly _descriptionService: IDescriptionService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
-        @IFormulaInputService private readonly _formulaInputService: IFormulaInputService
+        @IFormulaInputService private readonly _formulaInputService: IFormulaInputService,
+        @Inject(DocViewModelManagerService) private readonly _docViewModelManagerService: DocViewModelManagerService
     ) {
         super();
 
@@ -1068,13 +1074,13 @@ export class PromptController extends Disposable {
         if (editorUnitId == null) {
             return;
         }
-        const documentModel = this._currentUniverService.getUniverDocInstance(editorUnitId);
-        const bodyModel = documentModel?.getBodyModel();
-        if (bodyModel == null) {
+        const documentDataModel = this._currentUniverService.getUniverDocInstance(editorUnitId);
+        const docViewModel = this._docViewModelManagerService.getViewModel(editorUnitId);
+        if (docViewModel == null || documentDataModel == null) {
             return;
         }
 
-        const snapshot = documentModel?.snapshot;
+        const snapshot = documentDataModel?.getSnapshot();
 
         if (snapshot == null) {
             return;
@@ -1085,9 +1091,9 @@ export class PromptController extends Disposable {
             textRuns,
         };
 
-        bodyModel.reset(newBody);
-
         snapshot.body = newBody;
+
+        docViewModel.reset(documentDataModel);
     }
 
     private _inertControlSelectionReplace(currentRange: IRange) {

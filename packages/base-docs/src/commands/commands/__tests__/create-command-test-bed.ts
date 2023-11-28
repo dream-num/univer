@@ -9,6 +9,7 @@ import {
 } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
+import { DocViewModelManagerService } from '../../../services/doc-view-model-manager.service';
 import { TextSelectionManagerService } from '../../../services/text-selection-manager.service';
 
 const TEST_DOCUMENT_DATA_EN: IDocumentData = {
@@ -89,6 +90,7 @@ export function createCommandTestBed(workbookConfig?: IDocumentData, dependencie
 
         override onStarting(injector: Injector): void {
             injector.add([TextSelectionManagerService]);
+            injector.add([DocViewModelManagerService]);
 
             dependencies?.forEach((d) => injector.add(d));
         }
@@ -104,6 +106,10 @@ export function createCommandTestBed(workbookConfig?: IDocumentData, dependencie
     if (get === undefined) {
         throw new Error('[TestPlugin]: not hooked on!');
     }
+
+    const docViewModelManagerService = get(DocViewModelManagerService);
+
+    docViewModelManagerService.setCurrent('test-doc');
 
     const univerInstanceService = get(IUniverInstanceService);
     univerInstanceService.focusUniverInstance('test-doc');

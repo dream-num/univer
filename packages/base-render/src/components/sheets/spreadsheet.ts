@@ -566,7 +566,7 @@ export class Spreadsheet extends SheetComponent {
                         );
 
                         const cellHeight = endY - startY;
-                        documentSkeleton.getModel().updateDocumentDataPageSize(cellHeight);
+                        documentSkeleton.getViewModel().getDataModel().updateDocumentDataPageSize(cellHeight);
                         documentSkeleton.calculate();
                         const contentSize = getDocsSkeletonPageSize(documentSkeleton, angle);
 

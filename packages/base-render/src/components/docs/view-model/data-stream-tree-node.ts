@@ -1,6 +1,11 @@
-import { deleteContent, horizontalLineSegmentsSubtraction, insertTextToContent } from '../../shared/doc-tool';
-import { Nullable } from '../../shared/types';
-import { DataStreamTreeNodeType, DataStreamTreeTokenType } from './types';
+import {
+    DataStreamTreeNodeType,
+    DataStreamTreeTokenType,
+    deleteContent,
+    horizontalLineSegmentsSubtraction,
+    insertTextToContent,
+    Nullable,
+} from '@univerjs/core';
 
 export class DataStreamTreeNode {
     children: DataStreamTreeNode[] = [];

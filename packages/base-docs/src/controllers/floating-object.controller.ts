@@ -76,12 +76,15 @@ export class FloatingObjectController extends Disposable {
                 const marginLeft = cache?.marginLeft || 0;
                 const marginTop = cache?.marginTop || 0;
 
-                skeleton?.getModel().updateDrawing(floatingObjectId, {
-                    left: left - docsLeft - marginLeft,
-                    top: top - docsTop - marginTop,
-                    height,
-                    width,
-                });
+                skeleton
+                    ?.getViewModel()
+                    .getDataModel()
+                    .updateDrawing(floatingObjectId, {
+                        left: left - docsLeft - marginLeft,
+                        top: top - docsTop - marginTop,
+                        height,
+                        width,
+                    });
             });
 
             skeleton?.calculate();
@@ -103,7 +106,7 @@ export class FloatingObjectController extends Disposable {
                 return;
             }
 
-            const { mainComponent, components, scene } = currentRender;
+            const { mainComponent } = currentRender;
 
             const docsComponent = mainComponent as Documents;
 

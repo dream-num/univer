@@ -1,4 +1,4 @@
-name: 📦 Preview Build
+name: 📦 Build
 
 on:
     push:

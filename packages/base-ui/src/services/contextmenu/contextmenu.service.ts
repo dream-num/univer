@@ -18,6 +18,7 @@ export class DesktopContextMenuService extends Disposable implements IContextMen
     private _currentHandler: IContextMenuHandler | null = null;
 
     triggerContextMenu(event: IPointerEvent | IMouseEvent, menuType: string): void {
+        event.stopPropagation();
         this._currentHandler?.handleContextMenu(event, menuType);
     }
 

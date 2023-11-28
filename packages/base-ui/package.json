@@ -64,11 +64,11 @@
     "devDependencies": {
         "@testing-library/react": "^14.1.0",
         "@types/react": "^18.2.38",
-        "@types/react-dom": "^18.2.15",
+        "@types/react-dom": "^18.2.17",
         "@types/react-transition-group": "^4.4.9",
         "@vitejs/plugin-react": "^4.1.1",
         "@vitest/coverage-istanbul": "^0.34.6",
-        "esbuild": "^0.19.7",
+        "esbuild": "^0.19.8",
         "happy-dom": "^12.10.3",
         "less": "^4.2.0",
         "react": "^18.2.0",

@@ -59,7 +59,7 @@
     },
     "devDependencies": {
         "@vitest/coverage-istanbul": "^0.34.6",
-        "esbuild": "^0.19.7",
+        "esbuild": "^0.19.8",
         "happy-dom": "^12.10.3",
         "less": "^4.2.0",
         "ts-node": "^10.9.1",

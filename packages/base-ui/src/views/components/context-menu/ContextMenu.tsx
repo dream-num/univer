@@ -1,76 +1,55 @@
 import { IMouseEvent } from '@univerjs/base-render';
-import { DisposableCollection, ICommandService } from '@univerjs/core';
-import { Dropdown } from '@univerjs/design';
+import { ICommandService } from '@univerjs/core';
+import { Popup } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
 import { Menu } from '../../../components/menu/Menu';
 import { IContextMenuService } from '../../../services/contextmenu/contextmenu.service';
 
-export interface IProps {
-    children: React.ReactElement;
-}
+export interface IProps {}
 
-export function ContextMenu(props: IProps) {
-    const { children } = props;
-
+export function ContextMenu() {
     const [visible, setVisible] = useState(false);
     const [menuType, setMenuType] = useState('');
+    const [offset, setOffset] = useState<[number, number]>([0, 0]);
 
     const contextMenuService = useDependency(IContextMenuService);
     const commandService = useDependency(ICommandService);
 
     useEffect(() => {
-        const _disposables = new DisposableCollection();
+        const disposables = contextMenuService.registerContextMenuHandler({
+            handleContextMenu,
+        });
 
-        document.addEventListener('click', handleClick);
-
-        _disposables.add(
-            contextMenuService.registerContextMenuHandler({
-                handleContextMenu,
-            })
-        );
+        document.addEventListener('pointerdown', handleClose);
 
         return () => {
-            document.removeEventListener('click', handleClick);
-            _disposables.dispose();
+            document.removeEventListener('pointerdown', handleClose);
+            disposables.dispose();
         };
     }, []);
 
-    function handleVisibleChange(visible: boolean) {
-        setVisible(visible);
-    }
-
     function handleContextMenu(event: IMouseEvent, menuType: string) {
-        event.preventDefault();
-
         setMenuType(menuType);
+        setOffset([event.clientX, event.clientY]);
+        setVisible(true);
     }
 
-    function handleClick() {
-        if (visible) {
-            setVisible(false);
-        }
+    function handleClose() {
+        setVisible(false);
     }
 
     return (
-        <Dropdown
-            visible={visible}
-            trigger={['contextMenu']}
-            alignPoint
-            overlay={
-                <Menu
-                    menuType={[menuType]}
-                    onOptionSelect={(params) => {
-                        const { label: commandId, value } = params;
-                        commandService && commandService.executeCommand(commandId as string, { value });
-                        setVisible(false);
-                    }}
-                />
-            }
-            onVisibleChange={handleVisibleChange}
-        >
-            {children}
-        </Dropdown>
+        <Popup visible={visible} offset={offset}>
+            <Menu
+                menuType={[menuType]}
+                onOptionSelect={(params) => {
+                    const { label: commandId, value } = params;
+                    commandService && commandService.executeCommand(commandId as string, { value });
+                    setVisible(false);
+                }}
+            />
+        </Popup>
     );
 }

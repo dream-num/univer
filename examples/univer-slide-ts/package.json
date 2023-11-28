@@ -23,7 +23,7 @@
         "@univerjs/ui-plugin-slides": "workspace:*"
     },
     "devDependencies": {
-        "esbuild": "^0.19.7",
+        "esbuild": "^0.19.8",
         "esbuild-plugin-clean": "^1.0.1",
         "esbuild-plugin-copy": "^2.1.1",
         "esbuild-style-plugin": "^1.6.3",

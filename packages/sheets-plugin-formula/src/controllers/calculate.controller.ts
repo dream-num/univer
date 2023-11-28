@@ -100,6 +100,7 @@ export class CalculateController extends Disposable {
 
                 if (!sheetData) {
                     console.error('No sheetData from Formula Engine!');
+                    return;
                 }
 
                 if (arrayFormulaData) {
@@ -164,7 +165,7 @@ export class CalculateController extends Disposable {
                 const cellDatas = sheet.getCellMatrix();
 
                 cellDatas.forValue((row, column, cellData) => {
-                    if (cellData.f != null) {
+                    if (cellData?.f != null) {
                         if (sheetFormulaData[row] == null) {
                             sheetFormulaData[row] = {};
                         }

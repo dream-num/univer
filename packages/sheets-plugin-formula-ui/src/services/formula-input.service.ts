@@ -136,7 +136,7 @@ export class FormulaInputService implements IFormulaInputService, IDisposable {
             }
         }
 
-        return this._sequenceNodes.length - 1;
+        return this._sequenceNodes.length;
     }
 
     /**

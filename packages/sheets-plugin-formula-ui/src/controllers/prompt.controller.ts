@@ -486,7 +486,7 @@ export class PromptController extends Disposable {
                         lastSequenceNodes[i] = newNode;
                     }
 
-                    this._syncToEditor(lastSequenceNodes, node.endIndex + 2);
+                    this._syncToEditor(lastSequenceNodes, newNode.endIndex + 2);
                 })
             )
         );
@@ -1139,7 +1139,7 @@ export class PromptController extends Disposable {
             this._inertControlSelectionReplace(currentRange);
         } else {
             // Holding down ctrl causes an addition, requiring the ref string to be increased.
-            const insertNodes = this._formulaInputService.getSequenceNodes();
+            let insertNodes = this._formulaInputService.getSequenceNodes();
 
             if (insertNodes == null) {
                 return;
@@ -1155,6 +1155,8 @@ export class PromptController extends Disposable {
 
             if (!this._matchRefDrawToken(char)) {
                 this._formulaInputService.insertSequenceString(this._currentInsertRefStringIndex, matchToken.COMMA);
+
+                insertNodes = this._formulaInputService.getSequenceNodes();
 
                 this._previousInsertRefStringIndex += 1;
             }

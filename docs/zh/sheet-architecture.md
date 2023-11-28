@@ -32,7 +32,13 @@ Univer Sheet 的架构主要由以下几个部分组成：
 3. sheet 数据验证
 4. sheet 数据透视表
 
-等等
+等等。
+
+**何时使用 SheetInterceptorService，何时不要使用？**
+
+当各个功能需要操作同一块数据或者状态，但是它们之前并没有明确的依赖关系时使用 SheetInterceptorService，例如：数据透视表、公式、条件格式、数据验证、单元格原始数据都可能影响其他功能对单元格内容的取值结果，但是它们之间并没有明确的依赖关系，因此使用 SheetInterceptorService 来实现这些功能是比较合适的。
+
+如果一个功能明确地依赖其他功能，例如公式需要在下拉填充或复制粘贴功能被调用时做一些操作，那么公式模块应该直接依赖下拉填充和复制粘贴模块，而不是通过 SheetInterceptorService 来实现。
 
 ### base-sheets
 

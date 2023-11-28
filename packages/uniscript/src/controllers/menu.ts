@@ -7,7 +7,7 @@ export function UniscriptMenuItemFactory(): IMenuButtonItem {
         id: ToggleScriptPanelOperation.id,
         title: 'toggle-script-panel',
         tooltip: 'script-panel.tooltip.menu-button',
-        icon: 'KeyboardSingle',
+        icon: 'CodeSingle',
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.TOOLBAR_START],
     };

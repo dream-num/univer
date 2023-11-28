@@ -29,6 +29,10 @@ import { LexerNode } from './lexer-node';
 export class AstTreeBuilder extends Disposable {
     private _astNodeFactoryList: AstRootNodeFactory[] = [];
 
+    private _refOffsetX = 0;
+
+    private _refOffsetY = 0;
+
     constructor(
         @IFormulaRuntimeService private readonly _runtimeService: IFormulaRuntimeService,
         @Inject(AstRootNodeFactory) private readonly _astRootNodeFactory: AstRootNodeFactory,
@@ -55,8 +59,12 @@ export class AstTreeBuilder extends Disposable {
         this._astNodeFactoryList = [];
     }
 
-    parse(lexerNode: LexerNode) {
+    parse(lexerNode: LexerNode, refOffsetX: number = 0, refOffsetY: number = 0) {
         const astNode = new AstRootNode(DEFAULT_TOKEN_TYPE_ROOT);
+
+        this._refOffsetX = refOffsetX;
+
+        this._refOffsetY = refOffsetY;
 
         const node = this._parse(lexerNode, astNode);
         return node;
@@ -288,6 +296,7 @@ export class AstTreeBuilder extends Disposable {
                     break;
                 }
                 case NodeType.REFERENCE:
+                    astNode.setRefOffset(this._refOffsetX, this._refOffsetY);
                     calculateStack.push(astNode);
                     break;
                 case NodeType.ROOT:

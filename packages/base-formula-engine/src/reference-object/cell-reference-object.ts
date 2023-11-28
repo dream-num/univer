@@ -9,6 +9,7 @@ export class CellReferenceObject extends BaseReferenceObject {
     constructor(token: string) {
         super(token);
         const grid = deserializeRangeWithSheet(token);
+        this.setForcedUnitIdDirect(grid.unitId);
         this.setForcedSheetName(grid.sheetName);
         this.setRangeData(grid.range);
     }
@@ -77,6 +78,10 @@ export class CellReferenceObject extends BaseReferenceObject {
         rangeReferenceObject.setDefaultUnitId(this.getDefaultUnitId());
 
         rangeReferenceObject.setRuntimeData(this.getRuntimeData());
+
+        const { x, y } = this.getRefOffset();
+
+        rangeReferenceObject.setRefOffset(x, y);
 
         const forceId = this.getForcedUnitId();
 

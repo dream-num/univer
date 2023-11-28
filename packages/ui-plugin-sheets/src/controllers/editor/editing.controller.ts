@@ -112,10 +112,10 @@ export class EditingController extends Disposable {
         //         console.log(res.sheetData, res.arrayFormulaData);
         //     });
 
-        console.log(
-            'calculate',
-            this._formulaEngineService.calculate(`=REDUCE(1, 'sheeASDF%#@ASDFt-1'!A:B1, LAMBDA(a,b,a+b^2))`, false)
-        );
+        // console.log(
+        //     'calculate',
+        //     this._formulaEngineService.calculate(`=REDUCE(1, 'sheeASDF%#@ASDFt-1'!A:B1, LAMBDA(a,b,a+b^2))`, false)
+        // );
     }
 
     private _commandExecutedListener() {}

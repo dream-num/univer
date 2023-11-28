@@ -474,7 +474,7 @@ export class UpdateFormulaController extends Disposable {
             return;
         }
 
-        const sequenceRange = this._refOffset(range, refOffsetX, refOffsetY);
+        const sequenceRange = Rectangle.moveOffset(range, refOffsetX, refOffsetY);
         let newRange: Nullable<IRange> = null;
 
         if (type === FormulaReferenceMoveType.Move) {
@@ -699,19 +699,6 @@ export class UpdateFormulaController extends Disposable {
         return false;
     }
 
-    private _refOffset(range: IRange, refOffsetX: number, refOffsetY: number) {
-        const { startRow, endRow, startColumn, endColumn, startAbsoluteRefType, endAbsoluteRefType } = range;
-
-        return {
-            startRow: startRow + refOffsetY,
-            endRow: endRow + refOffsetY,
-            startColumn: startColumn + refOffsetX,
-            endColumn: endColumn + refOffsetX,
-            startAbsoluteRefType,
-            endAbsoluteRefType,
-        };
-    }
-
     /**
      * Update all ref nodes to the latest offset state.
      */
@@ -735,7 +722,7 @@ export class UpdateFormulaController extends Disposable {
 
             const { range, sheetName, unitId: sequenceUnitId } = sequenceGrid;
 
-            const newRange = this._refOffset(range, refOffsetX, refOffsetY);
+            const newRange = Rectangle.moveOffset(range, refOffsetX, refOffsetY);
 
             newSequenceNodes.push({
                 ...node,

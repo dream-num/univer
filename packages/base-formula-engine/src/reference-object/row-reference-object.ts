@@ -8,6 +8,7 @@ export class RowReferenceObject extends BaseReferenceObject {
     constructor(token: string) {
         super(token);
         const grid = deserializeRangeWithSheet(token);
+        this.setForcedUnitIdDirect(grid.unitId);
         this.setForcedSheetName(grid.sheetName);
         const range: IRange = {
             startColumn: -1,

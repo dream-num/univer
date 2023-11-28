@@ -38,6 +38,10 @@ export class BaseReferenceObject extends ObjectClassType {
 
     private _runtimeData: IRuntimeUnitDataType = {};
 
+    private _refOffsetX = 0;
+
+    private _refOffsetY = 0;
+
     constructor(private _token: string) {
         super();
     }
@@ -46,6 +50,18 @@ export class BaseReferenceObject extends ObjectClassType {
         this._unitData = {};
 
         this._runtimeData = {};
+    }
+
+    setRefOffset(x: number = 0, y: number = 0) {
+        this._refOffsetX = x;
+        this._refOffsetY = y;
+    }
+
+    getRefOffset() {
+        return {
+            x: this._refOffsetX,
+            y: this._refOffsetY,
+        };
     }
 
     getRangePosition() {
@@ -87,7 +103,7 @@ export class BaseReferenceObject extends ObjectClassType {
 
         for (let r = startRow; r <= endRow; r++) {
             for (let c = startColumn; c <= endColumn; c++) {
-                const cell = this.getCellData(r, c);
+                const cell = this.getCellData(r + this._refOffsetY, c + this._refOffsetX);
                 let result: Nullable<boolean> = false;
                 if (!cell) {
                     result = callback(new NumberValueObject(0, true), r, c);
@@ -128,7 +144,9 @@ export class BaseReferenceObject extends ObjectClassType {
     }
 
     setForcedUnitIdDirect(unitId: string) {
-        this._forcedUnitId = unitId;
+        if (unitId.length > 0) {
+            this._forcedUnitId = unitId;
+        }
     }
 
     getForcedUnitId() {
@@ -148,7 +166,9 @@ export class BaseReferenceObject extends ObjectClassType {
     }
 
     setForcedSheetName(sheetName: string) {
-        this._forcedSheetName = sheetName;
+        if (sheetName.length > 0) {
+            this._forcedSheetName = sheetName;
+        }
     }
 
     getForcedSheetName() {

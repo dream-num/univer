@@ -74,8 +74,9 @@ export class FormulaDependencyGenerator extends Disposable {
                 const matrixData = new ObjectMatrix(sheetData[sheetId]);
 
                 matrixData.forValue((row, column, formulaDataItem) => {
-                    const formulaString = formulaDataItem.f;
-                    const node = this._generateAstNode(formulaString);
+                    // const formulaString = formulaDataItem.f;
+                    const { f: formulaString, x, y } = formulaDataItem;
+                    const node = this._generateAstNode(formulaString, x, y);
 
                     const FDtree = new FormulaDependencyTree();
 
@@ -131,7 +132,7 @@ export class FormulaDependencyGenerator extends Disposable {
         }
     }
 
-    private _generateAstNode(formulaString: string) {
+    private _generateAstNode(formulaString: string, refOffsetX: number = 0, refOffsetY: number = 0) {
         let astNode: Nullable<AstRootNode> = FormulaASTCache.get(formulaString);
 
         if (astNode) {
@@ -146,7 +147,7 @@ export class FormulaDependencyGenerator extends Disposable {
 
         // suffix Express, 1+(3*4=4)*5+1 convert to 134*4=5*1++
 
-        astNode = this._astTreeBuilder.parse(lexerNode as LexerNode);
+        astNode = this._astTreeBuilder.parse(lexerNode as LexerNode, refOffsetX, refOffsetY);
 
         if (astNode == null) {
             throw new Error('astNode is null');

@@ -182,4 +182,12 @@ export class Rectangle {
         startRow: range.startRow + step,
         endRow: range.endRow + step + length,
     });
+
+    static moveOffset = (range: IRange, offsetX: number, offsetY: number): IRange => ({
+        ...range,
+        startRow: range.startRow + offsetY,
+        endRow: range.endRow + offsetY,
+        startColumn: range.startColumn + offsetX,
+        endColumn: range.endColumn + offsetX,
+    });
 }

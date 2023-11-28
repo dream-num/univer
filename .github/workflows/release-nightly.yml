@@ -64,7 +64,7 @@ jobs:
 
             - name: Write .npmrc
               run: |
-                  echo '${{ secrets.VERDACCIO_URL }}:_authToken="${{ secrets.VERDACCIO_TOKEN }}"' >> .npmrc
+                  echo '\n${{ secrets.VERDACCIO_URL }}:_authToken="${{ secrets.VERDACCIO_TOKEN }}"' >> .npmrc
 
             - name: Install dependencies
               run: pnpm install

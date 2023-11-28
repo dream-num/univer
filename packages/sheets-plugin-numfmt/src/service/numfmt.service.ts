@@ -1,10 +1,11 @@
+import type { Nullable, ObjectMatrixPrimitiveType, Workbook } from '@univerjs/core';
 import {
     Disposable,
     ICommandService,
     ILogService,
+    IResourceManagerService,
     IUniverInstanceService,
     LifecycleStages,
-    Nullable,
     ObjectMatrix,
     OnLifecycle,
     RefAlias,
@@ -12,23 +13,28 @@ import {
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
-import { FormatType, NumfmtItem } from '../base/types';
+import { SHEET_NUMFMT_PLUGIN } from '../base/const/PLUGIN_NAME';
+import type { FormatType, NumfmtItem } from '../base/types';
 import { SetNumfmtMutation } from '../commands/mutations/set.numfmt.mutation';
-import type { INumfmtService, RefItem } from './type';
+import type { INumfmtService, ISnapshot, RefItem } from './type';
 
 @OnLifecycle(LifecycleStages.Ready, NumfmtService)
 export class NumfmtService extends Disposable implements INumfmtService {
     /**
-     * Map<unitID ,<sheetId ,ObjectMatrix>>
-     * @type {Map<string, Map<string, ObjectMatrix<NumfmtItemWithCache>>>}
-     * @memberof NumfmtService
+     * @type {Map<WorkbookId, Map<worksheetId, ObjectMatrix<NumfmtItemWithCache>>>}
      */
     private _numfmtModel: Map<string, Map<string, ObjectMatrix<NumfmtItem>>> = new Map();
 
+    /**
+     * @private
+     * @type {(Map<workbookId, RefAlias<RefItem, 'numfmtId' | 'pattern'>>)}
+     * @memberof NumfmtService
+     */
     private _refAliasModel: Map<string, RefAlias<RefItem, 'numfmtId' | 'pattern'>> = new Map();
 
     constructor(
         @Inject(ICommandService) private _commandService: ICommandService,
+        @Inject(IResourceManagerService) private _resourceManagerService: IResourceManagerService,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
         @Inject(ILogService) private _logService: ILogService
     ) {
@@ -44,7 +50,79 @@ export class NumfmtService extends Disposable implements INumfmtService {
     }
 
     private _initModel() {
-        // todo init model after resource-plugin finished.
+        const handleWorkbookAdd = (workbook: Workbook) => {
+            const unitID = workbook.getUnitId();
+            this._resourceManagerService.registerPluginResource<ISnapshot>(unitID, SHEET_NUMFMT_PLUGIN, {
+                toJson: (unitID) => this._toJson(unitID),
+                parseJson: (json) => this._parseJson(json),
+                onChange: (unitID, value) => {
+                    const { model, refModel } = value;
+
+                    if (model) {
+                        const parseModel = Object.keys(model).reduce((result, sheetId) => {
+                            result.set(sheetId, new ObjectMatrix<NumfmtItem>(model[sheetId]));
+                            return result;
+                        }, new Map<string, ObjectMatrix<NumfmtItem>>());
+                        this._numfmtModel.set(unitID, parseModel);
+                    }
+                    if (refModel) {
+                        this._refAliasModel.set(
+                            unitID,
+                            new RefAlias<RefItem, 'numfmtId' | 'pattern'>(refModel, ['numfmtId', 'pattern'])
+                        );
+                    }
+                },
+            });
+        };
+        this.disposeWithMe(toDisposable(this._univerInstanceService.sheetAdded$.subscribe(handleWorkbookAdd)));
+        this.disposeWithMe(
+            toDisposable(
+                this._univerInstanceService.sheetDisposed$.subscribe((workbook) => {
+                    const unitID = workbook.getUnitId();
+                    const model = this._numfmtModel.get(unitID);
+                    if (model) {
+                        this._numfmtModel.delete(unitID);
+                    }
+                    const refModel = this._refAliasModel.get(unitID);
+                    if (refModel) {
+                        this._refAliasModel.delete(unitID);
+                    }
+                })
+            )
+        );
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+        handleWorkbookAdd(workbook);
+    }
+
+    private _toJson(unitID: string) {
+        const workbookModel = this._numfmtModel.get(unitID);
+        const workbookRefModel = this._refAliasModel.get(unitID);
+        if (!workbookModel || !workbookRefModel) {
+            return '';
+        }
+        const model = [...workbookModel.keys()].reduce(
+            (result, key) => {
+                const object = workbookModel.get(key)!;
+                result[key] = object.toJSON();
+                return result;
+            },
+            {} as Record<string, ObjectMatrixPrimitiveType<NumfmtItem>>
+        );
+        // Filter the count equal 0 when snapshot save.
+        // It is typically cleaned up once every 100 versions.
+
+        const refModel = workbookRefModel.getValues().filter((item) => item.count > 0);
+        const obj: ISnapshot = { model, refModel };
+        return JSON.stringify(obj);
+    }
+
+    private _parseJson(json: string): ISnapshot {
+        try {
+            const obj = JSON.parse(json);
+            return obj;
+        } catch (err) {
+            return { model: {}, refModel: [] };
+        }
     }
 
     private _initCommands() {

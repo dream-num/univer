@@ -8,7 +8,7 @@ export interface IResourceHook<T = unknown> {
 }
 
 export interface IResourceManagerService {
-    registerPluginResource: (unitID: string, pluginName: string, hook: IResourceHook) => IDisposable;
+    registerPluginResource: <T = unknown>(unitID: string, pluginName: string, hook: IResourceHook<T>) => IDisposable;
     disposePluginResource: (unitID: string, pluginName: string) => void;
     getAllResource: (unitID: string) => Array<{ unitID: string; resourceName: string; hook: IResourceHook }>;
     register$: Observable<{ resourceName: string; hook: IResourceHook; unitID: string }>;

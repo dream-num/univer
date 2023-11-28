@@ -302,7 +302,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
                 [APPLY_TYPE.SERIES]: generalApplyFunc,
             },
         };
-        this._autoFillService.addHook(hook);
+        this.disposeWithMe(this._autoFillService.addHook(hook));
     }
 
     private _initCommands() {

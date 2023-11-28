@@ -51,6 +51,49 @@ export class NumfmtService extends Disposable implements INumfmtService {
         [SetNumfmtMutation].forEach((config) => this.disposeWithMe(this._commandService.registerCommand(config)));
     }
 
+    private _setValue(workbookId: string, worksheetId: string, row: number, col: number, value: Nullable<NumfmtItem>) {
+        let model = this.getModel(workbookId, worksheetId);
+        if (!model) {
+            model = new ObjectMatrix();
+            const map = new Map();
+            map.set(worksheetId, model);
+            this._numfmtModel.set(workbookId, map);
+        }
+        if (value) {
+            model.setValue(row, col, value);
+        } else {
+            model.realDeleteValue(row, col);
+        }
+    }
+
+    private _groupByKey<T = Record<string, unknown>>(arr: T[], key: string, blankKey = '') {
+        return arr.reduce(
+            (result, current) => {
+                const pattern = current && ((current as Record<string, unknown>)[key] as string);
+                if (pattern) {
+                    if (!result[pattern]) {
+                        result[pattern] = [];
+                    }
+                    result[pattern].push(current);
+                } else {
+                    result[blankKey].push(current);
+                }
+                return result;
+            },
+            { [blankKey]: [] } as Record<string, T[]>
+        );
+    }
+
+    private _getUniqueRefId(unitID: string) {
+        const refModel = this._refAliasModel.get(unitID);
+        if (!refModel) {
+            return '0';
+        }
+        const keyList = refModel.getKeyMap('numfmtId') as string[];
+        const maxId = Math.max(...keyList.map(Number), 0);
+        return `${maxId + 1}`;
+    }
+
     getValue(workbookId: string, worksheetId: string, row: number, col: number, model?: ObjectMatrix<NumfmtItem>) {
         const _model: Nullable<ObjectMatrix<NumfmtItem>> = model || this.getModel(workbookId, worksheetId);
         if (!_model) {
@@ -70,21 +113,6 @@ export class NumfmtService extends Disposable implements INumfmtService {
             };
         }
         return null;
-    }
-
-    private _setValue(workbookId: string, worksheetId: string, row: number, col: number, value: Nullable<NumfmtItem>) {
-        let model = this.getModel(workbookId, worksheetId);
-        if (!model) {
-            model = new ObjectMatrix();
-            const map = new Map();
-            map.set(worksheetId, model);
-            this._numfmtModel.set(workbookId, map);
-        }
-        if (value) {
-            model.setValue(row, col, value);
-        } else {
-            model.realDeleteValue(row, col);
-        }
     }
 
     setValues(
@@ -164,37 +192,14 @@ export class NumfmtService extends Disposable implements INumfmtService {
         });
     }
 
-    _groupByKey<T = Record<string, unknown>>(arr: T[], key: string, blankKey = '') {
-        return arr.reduce(
-            (result, current) => {
-                const pattern = current && ((current as Record<string, unknown>)[key] as string);
-                if (pattern) {
-                    if (!result[pattern]) {
-                        result[pattern] = [];
-                    }
-                    result[pattern].push(current);
-                } else {
-                    result[blankKey].push(current);
-                }
-                return result;
-            },
-            { [blankKey]: [] } as Record<string, T[]>
-        );
-    }
-
-    _getUniqueRefId(unitID: string) {
-        const refModel = this._refAliasModel.get(unitID);
-        if (!refModel) {
-            return '0';
-        }
-        const keyList = refModel.getKeyMap('numfmtId') as string[];
-        const maxId = Math.max(...keyList.map(Number), 0);
-        return `${maxId + 1}`;
-    }
-
     getModel(workbookId: string, worksheetId: string) {
         const workbookModel = this._numfmtModel.get(workbookId);
         const sheetModel = workbookModel?.get(worksheetId);
         return sheetModel;
+    }
+
+    getRefModel(workbookId: string) {
+        const refModel = this._refAliasModel.get(workbookId);
+        return refModel;
     }
 }

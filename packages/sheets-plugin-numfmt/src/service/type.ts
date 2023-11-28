@@ -1,5 +1,5 @@
 import type { ICellData, Nullable, ObjectMatrix } from '@univerjs/core';
-import { LifecycleStages, runOnLifecycle } from '@univerjs/core';
+import { LifecycleStages, RefAlias, runOnLifecycle } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 
 import { FormatType, NumfmtItem } from '../base/types/index';
@@ -22,6 +22,7 @@ export interface INumfmtService {
         worksheetId: string,
         values: Array<{ row: number; col: number; pattern?: string; type: FormatType }>
     ): void;
+    getRefModel(workbookId: string): Nullable<RefAlias<RefItem, 'numfmtId' | 'pattern'>>;
 }
 
 export const INumfmtService = createIdentifier<INumfmtService>('INumfmtService');

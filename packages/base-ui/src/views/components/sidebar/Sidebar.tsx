@@ -1,7 +1,7 @@
 import { CloseSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
 import { ISidebarService } from '../../../services/sidebar/sidebar.service';
@@ -45,9 +45,15 @@ export function Sidebar() {
         [styles.sidebarOpen]: options.visible,
     });
 
-    const style = {
-        width: typeof options.width === 'number' ? `${options.width}px` : options.width,
-    };
+    const width = useMemo(() => {
+        if (!options.visible) return 0;
+
+        if (typeof options.width === 'number') {
+            return `${options.width}px`;
+        }
+
+        return options.width;
+    }, [options]);
 
     function handleClose() {
         const options = {
@@ -62,7 +68,7 @@ export function Sidebar() {
     }
 
     return (
-        <section className={_className} style={style}>
+        <section className={_className} style={{ width }}>
             <section className={styles.sidebarContainer}>
                 <header className={styles.sidebarHeader}>
                     {options?.header}

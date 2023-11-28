@@ -1,5 +1,5 @@
 import { Direction } from '@univerjs/core';
-import { Dropdown } from '@univerjs/design';
+import { Popup } from '@univerjs/design';
 import { ICellEditorManagerService } from '@univerjs/ui-plugin-sheets';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
@@ -12,7 +12,7 @@ import styles from './index.module.less';
 export function SearchFunction() {
     const [visible, setVisible] = useState(false);
     const [active, setActive] = useState(0);
-    const [offset, setOffset] = useState<number[]>([0, 0]);
+    const [offset, setOffset] = useState<[number, number]>([0, 0]);
     const [searchList, setSearchList] = useState<ISearchItem[]>([]);
     const [searchText, setSearchText] = useState<string>('');
     const promptService = useDependency(IFormulaPromptService);
@@ -78,34 +78,28 @@ export function SearchFunction() {
     }
 
     return (
-        <Dropdown
-            visible={visible}
-            align={{ offset }}
-            overlay={
-                <ul className={styles.formulaSearchFunction}>
-                    {searchList.map((item, index) => (
-                        <li
-                            key={index}
-                            className={
-                                active === index
-                                    ? `${styles.formulaSearchFunctionItem} ${styles.formulaSearchFunctionItemActive}`
-                                    : styles.formulaSearchFunctionItem
-                            }
-                            onMouseEnter={() => handleLiMouseEnter(index)}
-                            onMouseLeave={handleLiMouseLeave}
-                            onClick={() => promptService.acceptFormulaName(item.name)}
-                        >
-                            <span className={styles.formulaSearchFunctionItemName}>
-                                <span className={styles.formulaSearchFunctionItemNameLight}>{searchText}</span>
-                                <span>{item.name.slice(searchText.length)}</span>
-                            </span>
-                            <span className={styles.formulaSearchFunctionItemDesc}>{item.desc}</span>
-                        </li>
-                    ))}
-                </ul>
-            }
-        >
-            <span />
-        </Dropdown>
+        <Popup visible={visible} offset={offset}>
+            <ul className={styles.formulaSearchFunction}>
+                {searchList.map((item, index) => (
+                    <li
+                        key={index}
+                        className={
+                            active === index
+                                ? `${styles.formulaSearchFunctionItem} ${styles.formulaSearchFunctionItemActive}`
+                                : styles.formulaSearchFunctionItem
+                        }
+                        onMouseEnter={() => handleLiMouseEnter(index)}
+                        onMouseLeave={handleLiMouseLeave}
+                        onClick={() => promptService.acceptFormulaName(item.name)}
+                    >
+                        <span className={styles.formulaSearchFunctionItemName}>
+                            <span className={styles.formulaSearchFunctionItemNameLight}>{searchText}</span>
+                            <span>{item.name.slice(searchText.length)}</span>
+                        </span>
+                        <span className={styles.formulaSearchFunctionItemDesc}>{item.desc}</span>
+                    </li>
+                ))}
+            </ul>
+        </Popup>
     );
 }

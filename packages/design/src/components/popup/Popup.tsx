@@ -27,6 +27,11 @@ export function Popup(props: IPopupProps) {
     const [realoffset, setRealOffset] = useState<[number, number]>(offset);
 
     useEffect(() => {
+        if (!visible) {
+            setRealOffset([-9999, -9999]);
+            return;
+        }
+
         // edge avoidance
         const [left, top] = offset;
         const { clientWidth, clientHeight } = nodeRef.current!;

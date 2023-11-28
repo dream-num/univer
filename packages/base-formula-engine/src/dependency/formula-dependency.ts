@@ -6,8 +6,9 @@ import { LexerNode } from '../analysis/lexer-node';
 import { AstTreeBuilder } from '../analysis/parser';
 import { AstRootNode, FunctionNode, PrefixNode, SuffixNode } from '../ast-node';
 import { BaseAstNode, ErrorNode } from '../ast-node/base-ast-node';
-import { FormulaASTCache } from '../ast-node/cache-lru';
 import { NodeType } from '../ast-node/node-type';
+import { FormulaAstLRU } from '../basics/cache-lru';
+import { IFormulaData } from '../basics/common';
 import { ErrorType } from '../basics/error-type';
 import { PreCalculateNodeType } from '../basics/node-type';
 import { prefixToken, suffixToken } from '../basics/token';
@@ -17,9 +18,13 @@ import { IFormulaCurrentConfigService } from '../services/current-data.service';
 import { IFormulaRuntimeService } from '../services/runtime.service';
 import { FormulaDependencyTree } from './dependency-tree';
 
+const FORMULA_CACHE_LRU_COUNT = 100000;
+
+export const FormulaASTCache = new FormulaAstLRU<AstRootNode>(FORMULA_CACHE_LRU_COUNT);
+
 @OnLifecycle(LifecycleStages.Rendered, FormulaDependencyGenerator)
 export class FormulaDependencyGenerator extends Disposable {
-    private _updateRangeFlattenCache = new Map<string, Map<string, IRange>>();
+    private _updateRangeFlattenCache = new Map<string, Map<string, IRange[]>>();
 
     constructor(
         @IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService,
@@ -36,30 +41,26 @@ export class FormulaDependencyGenerator extends Disposable {
         FormulaASTCache.clear();
     }
 
-    updateRangeFlatten() {
-        const forceCalculate = this._currentConfigService.isForceCalculate();
-        const dirtyRanges = this._currentConfigService.getDirtyRanges();
-        if (forceCalculate) {
-            return;
-        }
-        this._updateRangeFlattenCache = new Map<string, Map<string, IRange>>();
-        for (let i = 0; i < dirtyRanges.length; i++) {
-            const gridRange = dirtyRanges[i];
-            const range = gridRange.range;
-            const sheetId = gridRange.sheetId;
-            const unitId = gridRange.unitId;
-
-            this._addFlattenCache(unitId, sheetId, range);
-        }
-    }
-
     async generate() {
-        this.updateRangeFlatten();
+        this._updateRangeFlatten();
 
         // const formulaInterpreter = Interpreter.create(interpreterDatasetConfig);
 
         const formulaData = this._currentConfigService.getFormulaData();
 
+        const treeList = await this._generateTreeList(formulaData);
+
+        const updateTreeList = this._getUpdateTreeListAndMakeDependency(treeList);
+
+        return Promise.resolve(this._calculateRunList(updateTreeList));
+    }
+
+    /**
+     * Generate nodes for the dependency tree, where each node contains all the reference data ranges included in each formula.
+     * @param formulaData
+     * @returns
+     */
+    private async _generateTreeList(formulaData: IFormulaData) {
         const formulaDataKeys = Object.keys(formulaData);
 
         const treeList: FormulaDependencyTree[] = [];
@@ -106,9 +107,28 @@ export class FormulaDependencyGenerator extends Disposable {
             }
         }
 
-        const updateTreeList = this._getUpdateTreeListAndMakeDependency(treeList);
+        return treeList;
+    }
 
-        return Promise.resolve(this._calculateRunList(updateTreeList));
+    /**
+     * Break down the dirty areas into ranges for subsequent matching.
+     * @returns
+     */
+    private _updateRangeFlatten() {
+        const forceCalculate = this._currentConfigService.isForceCalculate();
+        const dirtyRanges = this._currentConfigService.getDirtyRanges();
+        if (forceCalculate) {
+            return;
+        }
+        this._updateRangeFlattenCache.clear();
+        for (let i = 0; i < dirtyRanges.length; i++) {
+            const gridRange = dirtyRanges[i];
+            const range = gridRange.range;
+            const sheetId = gridRange.sheetId;
+            const unitId = gridRange.unitId;
+
+            this._addFlattenCache(unitId, sheetId, range);
+        }
     }
 
     private _generateAstNode(formulaString: string) {
@@ -139,12 +159,19 @@ export class FormulaDependencyGenerator extends Disposable {
 
     private _addFlattenCache(unitId: string, sheetId: string, range: IRange) {
         let unitMatrix = this._updateRangeFlattenCache.get(unitId);
-        if (!unitMatrix) {
-            unitMatrix = new Map<string, IRange>();
+        if (unitMatrix == null) {
+            unitMatrix = new Map<string, IRange[]>();
             this._updateRangeFlattenCache.set(unitId, unitMatrix);
         }
 
-        unitMatrix.set(sheetId, range);
+        let ranges = unitMatrix.get(sheetId);
+
+        if (ranges == null) {
+            ranges = [];
+            unitMatrix.set(sheetId, ranges);
+        }
+
+        ranges.push(range);
 
         // let sheetMatrix = unitMatrix.get(sheetId);
         // if (!sheetMatrix) {
@@ -223,6 +250,12 @@ export class FormulaDependencyGenerator extends Disposable {
         return value;
     }
 
+    /**
+     * Calculate the range required for collection in advance,
+     * including references and location functions (such as OFFSET, INDIRECT, INDEX, etc.).
+     * @param node
+     * @returns
+     */
     private async _getRangeListByNode(node: BaseAstNode) {
         // ref function in offset indirect INDEX
         const preCalculateNodeList: PreCalculateNodeType[] = [];
@@ -256,29 +289,11 @@ export class FormulaDependencyGenerator extends Disposable {
         return rangeList;
     }
 
-    private _includeTree(tree: FormulaDependencyTree) {
-        const unitId = tree.unitId;
-        const sheetId = tree.sheetId;
-
-        if (!this._updateRangeFlattenCache.has(unitId)) {
-            return false;
-        }
-
-        const sheetRangeMap = this._updateRangeFlattenCache.get(unitId)!;
-
-        if (!sheetRangeMap.has(sheetId)) {
-            return false;
-        }
-
-        const range = sheetRangeMap.get(sheetId)!;
-
-        if (tree.compareRangeData(range)) {
-            return true;
-        }
-
-        return false;
-    }
-
+    /**
+     * Build a formula dependency tree based on the dependency relationships.
+     * @param treeList
+     * @returns
+     */
     private _getUpdateTreeListAndMakeDependency(treeList: FormulaDependencyTree[]) {
         const newTreeList: FormulaDependencyTree[] = [];
         const existTree = new Set<FormulaDependencyTree>();
@@ -313,6 +328,42 @@ export class FormulaDependencyGenerator extends Disposable {
         return newTreeList;
     }
 
+    /**
+     * Determine whether all ranges of the current node exist within the dirty area.
+     * If they are within the dirty area, return true, indicating that this node needs to be calculated.
+     * @param tree
+     * @returns
+     */
+    private _includeTree(tree: FormulaDependencyTree) {
+        const unitId = tree.unitId;
+        const sheetId = tree.sheetId;
+
+        if (!this._updateRangeFlattenCache.has(unitId)) {
+            return false;
+        }
+
+        const sheetRangeMap = this._updateRangeFlattenCache.get(unitId)!;
+
+        if (!sheetRangeMap.has(sheetId)) {
+            return false;
+        }
+
+        const ranges = sheetRangeMap.get(sheetId)!;
+
+        for (const range of ranges) {
+            if (tree.compareRangeData(range)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Generate the final formula calculation order array by traversing the dependency tree established via depth-first search.
+     * @param treeList
+     * @returns
+     */
     private _calculateRunList(treeList: FormulaDependencyTree[]) {
         let stack = treeList;
         const formulaRunList = [];

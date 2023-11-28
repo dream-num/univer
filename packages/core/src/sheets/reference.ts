@@ -1,5 +1,5 @@
 import { Tools } from '../shared/tools';
-import { IRange } from '../types/interfaces/i-range';
+import { AbsoluteRefType, IRange } from '../types/interfaces/i-range';
 
 const UNIT_NAME_REGEX = '\'?\\[((?![\\/?:"<>|*\\\\]).)*\\]';
 const $ROW_REGEX = /[^0-9]/g;
@@ -9,23 +9,6 @@ export interface IGridRangeName {
     unitId: string;
     sheetName: string;
     range: IRange;
-}
-
-export enum AbsoluteRefType {
-    NONE,
-    ROW,
-    COLUMN,
-    ALL,
-}
-
-function singleReferenceToGrid(refBody: string) {
-    const row = parseInt(refBody.replace($ROW_REGEX, '')) - 1;
-    const column = Tools.ABCatNum(refBody.replace($COLUMN_REGEX, ''));
-
-    return {
-        row,
-        column,
-    };
 }
 
 /**
@@ -65,35 +48,51 @@ export function getAbsoluteRefTypeWitString(refString: string) {
     const refArray = refString.split(':');
 
     if (refArray.length > 1) {
-        return getAbsoluteRefTypeWithSingleString(refArray[0]) && getAbsoluteRefTypeWithSingleString(refArray[1]);
+        return {
+            startAbsoluteRefType: getAbsoluteRefTypeWithSingleString(refArray[0]),
+            endAbsoluteRefType: getAbsoluteRefTypeWithSingleString(refArray[1]),
+        };
     }
 
-    return getAbsoluteRefTypeWithSingleString(refArray[0]);
+    return { startAbsoluteRefType: getAbsoluteRefTypeWithSingleString(refArray[0]) };
+}
+
+function _getAbsoluteToken(absoluteRefType = AbsoluteRefType.NONE) {
+    let rowAbsoluteString = '';
+
+    let columnAbsoluteString = '';
+
+    if (absoluteRefType === AbsoluteRefType.ROW) {
+        rowAbsoluteString = '$';
+    } else if (absoluteRefType === AbsoluteRefType.COLUMN) {
+        columnAbsoluteString = '$';
+    } else if (absoluteRefType === AbsoluteRefType.ALL) {
+        rowAbsoluteString = '$';
+        columnAbsoluteString = '$';
+    }
+
+    return {
+        rowAbsoluteString,
+        columnAbsoluteString,
+    };
 }
 
 /**
  * Serialize an `IRange` into a string.
  * @param range The `IRange` to be serialized
  */
-export function serializeRange(range: IRange, type: AbsoluteRefType = AbsoluteRefType.NONE): string {
-    const { startColumn, startRow, endColumn, endRow } = range;
+export function serializeRange(range: IRange): string {
+    const { startColumn, startRow, endColumn, endRow, startAbsoluteRefType, endAbsoluteRefType } = range;
 
-    let rowAbsoluteString = '';
+    const start = _getAbsoluteToken(startAbsoluteRefType);
 
-    let columnAbsoluteString = '';
+    const end = _getAbsoluteToken(endAbsoluteRefType);
 
-    if (type === AbsoluteRefType.ROW) {
-        rowAbsoluteString = '$';
-    } else if (type === AbsoluteRefType.COLUMN) {
-        columnAbsoluteString = '$';
-    } else if (type === AbsoluteRefType.ALL) {
-        rowAbsoluteString = '$';
-        columnAbsoluteString = '$';
-    }
+    const startStr = `${start.columnAbsoluteString}${Tools.chatAtABC(startColumn)}${start.rowAbsoluteString}${
+        startRow + 1
+    }`;
 
-    const startStr = `${columnAbsoluteString}${Tools.chatAtABC(startColumn)}${rowAbsoluteString}${startRow + 1}`;
-
-    const endStr = `${columnAbsoluteString}${Tools.chatAtABC(endColumn)}${rowAbsoluteString}${endRow + 1}`;
+    const endStr = `${end.columnAbsoluteString}${Tools.chatAtABC(endColumn)}${end.rowAbsoluteString}${endRow + 1}`;
 
     if (startStr === endStr) {
         return startStr;
@@ -108,12 +107,8 @@ export function serializeRange(range: IRange, type: AbsoluteRefType = AbsoluteRe
  * @param range
  * @returns
  */
-export function serializeRangeWithSheet(
-    sheetName: string,
-    range: IRange,
-    type: AbsoluteRefType = AbsoluteRefType.NONE
-): string {
-    return `${sheetName}!${serializeRange(range, type)}`;
+export function serializeRangeWithSheet(sheetName: string, range: IRange): string {
+    return `${sheetName}!${serializeRange(range)}`;
 }
 
 /**
@@ -123,13 +118,8 @@ export function serializeRangeWithSheet(
  * @param range
  * @returns
  */
-export function serializeRangeWithSpreadsheet(
-    unit: string,
-    sheetName: string,
-    range: IRange,
-    type: AbsoluteRefType = AbsoluteRefType.NONE
-): string {
-    return `[${unit}]${sheetName}!${serializeRange(range, type)}`;
+export function serializeRangeWithSpreadsheet(unit: string, sheetName: string, range: IRange): string {
+    return `[${unit}]${sheetName}!${serializeRange(range)}`;
 }
 
 export function serializeRangeToRefString(gridRangeName: IGridRangeName) {
@@ -144,6 +134,19 @@ export function serializeRangeToRefString(gridRangeName: IGridRangeName) {
     }
 
     return serializeRange(range);
+}
+
+function singleReferenceToGrid(refBody: string) {
+    const row = parseInt(refBody.replace($ROW_REGEX, '')) - 1;
+    const column = Tools.ABCatNum(refBody.replace($COLUMN_REGEX, ''));
+
+    const absoluteRefType = getAbsoluteRefTypeWithSingleString(refBody);
+
+    return {
+        row,
+        column,
+        absoluteRefType,
+    };
 }
 
 export function deserializeRangeWithSheet(refString: string): IGridRangeName {
@@ -171,11 +174,14 @@ export function deserializeRangeWithSheet(refString: string): IGridRangeName {
         const grid = singleReferenceToGrid(refBody);
         const row = grid.row;
         const column = grid.column;
+        const absoluteRefType = grid.absoluteRefType;
         const range: IRange = {
             startRow: row,
             startColumn: column,
             endRow: row,
             endColumn: column,
+            startAbsoluteRefType: absoluteRefType,
+            endAbsoluteRefType: absoluteRefType,
         };
 
         return {
@@ -187,8 +193,11 @@ export function deserializeRangeWithSheet(refString: string): IGridRangeName {
 
     const refStartString = refBody.substring(0, colonIndex);
     const refEndString = refBody.substring(colonIndex + 1);
+
     const startGrid = singleReferenceToGrid(refStartString);
+
     const endGrid = singleReferenceToGrid(refEndString);
+
     const startRow = startGrid.row;
     const startColumn = startGrid.column;
     const endRow = endGrid.row;
@@ -202,6 +211,10 @@ export function deserializeRangeWithSheet(refString: string): IGridRangeName {
             startColumn,
             endRow,
             endColumn,
+
+            startAbsoluteRefType: startGrid.absoluteRefType,
+
+            endAbsoluteRefType: endGrid.absoluteRefType,
         },
     };
 }

@@ -89,11 +89,11 @@ export class FormulaInputService implements IFormulaInputService, IDisposable {
     }
 
     syncToEditor(textSelectionOffset: number) {
-        this._syncToEditor$.next({ sequences: this._sequenceNodes, textSelectionOffset });
+        this._syncToEditor$.next({ sequences: this.getSequenceNodes(), textSelectionOffset });
     }
 
     getSequenceNodes() {
-        return this._sequenceNodes;
+        return [...this._sequenceNodes];
     }
 
     setSequenceNodes(nodes: Array<string | ISequenceNode>) {
@@ -154,9 +154,13 @@ export class FormulaInputService implements IFormulaInputService, IDisposable {
 
         const difference = refString.length - node.token.length;
 
-        node.token = refString;
+        const newNode = { ...node };
 
-        node.endIndex += difference;
+        newNode.token = refString;
+
+        newNode.endIndex += difference;
+
+        this._sequenceNodes[nodeIndex] = newNode;
 
         for (let i = nodeIndex + 1, len = this._sequenceNodes.length; i < len; i++) {
             const node = this._sequenceNodes[i];
@@ -164,8 +168,12 @@ export class FormulaInputService implements IFormulaInputService, IDisposable {
                 continue;
             }
 
-            node.startIndex += difference;
-            node.endIndex += difference;
+            const newNode = { ...node };
+
+            newNode.startIndex += difference;
+            newNode.endIndex += difference;
+
+            this._sequenceNodes[i] = newNode;
         }
 
         this._changeRef$.next(true);
@@ -195,8 +203,12 @@ export class FormulaInputService implements IFormulaInputService, IDisposable {
                 continue;
             }
 
-            node.startIndex += refStringCount;
-            node.endIndex += refStringCount;
+            const newNode = { ...node };
+
+            newNode.startIndex += refStringCount;
+            newNode.endIndex += refStringCount;
+
+            this._sequenceNodes[i] = newNode;
         }
 
         this._changeRef$.next(true);
@@ -221,8 +233,12 @@ export class FormulaInputService implements IFormulaInputService, IDisposable {
                 continue;
             }
 
-            node.startIndex += contentCount;
-            node.endIndex += contentCount;
+            const newNode = { ...node };
+
+            newNode.startIndex += contentCount;
+            newNode.endIndex += contentCount;
+
+            this._sequenceNodes[i] = newNode;
         }
 
         this._changeRef$.next(true);

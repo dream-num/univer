@@ -6,6 +6,19 @@ export enum RANGE_TYPE {
 }
 
 /**
+ * none: A1
+ * row: A$1
+ * column: $A1
+ * all: $A$1
+ */
+export enum AbsoluteRefType {
+    NONE,
+    ROW,
+    COLUMN,
+    ALL,
+}
+
+/**
  * Range data structure
  *
  * One of the range types,
@@ -46,6 +59,10 @@ export interface IRange {
     endColumn: number;
 
     rangeType?: RANGE_TYPE;
+
+    startAbsoluteRefType?: AbsoluteRefType;
+
+    endAbsoluteRefType?: AbsoluteRefType;
 }
 
 /**

@@ -1,6 +1,7 @@
 import { MoveCursorOperation, ReplaceContentCommand, TextSelectionManagerService } from '@univerjs/base-docs';
 import {
     FormulaEngineService,
+    generateStringWithSequence,
     includeFormulaLexerToken,
     ISequenceNode,
     isFormulaLexerToken,
@@ -452,9 +453,17 @@ export class PromptController extends Disposable {
 
                     const difference = formulaString.length - node.token.length;
 
-                    node.token = formulaString;
+                    // node.token = formulaString;
 
-                    node.endIndex += difference;
+                    // node.endIndex += difference;
+
+                    const newNode = { ...node };
+
+                    newNode.token = formulaString;
+
+                    newNode.endIndex += difference;
+
+                    lastSequenceNodes[nodeIndex] = newNode;
 
                     lastSequenceNodes.splice(nodeIndex + 1, 0, matchToken.OPEN_BRACKET);
 
@@ -466,11 +475,18 @@ export class PromptController extends Disposable {
                             continue;
                         }
 
-                        node.startIndex += formulaStringCount;
-                        node.endIndex += formulaStringCount;
+                        // node.startIndex += formulaStringCount;
+                        // node.endIndex += formulaStringCount;
+
+                        const newNode = { ...node };
+
+                        newNode.startIndex += formulaStringCount;
+                        newNode.endIndex += formulaStringCount;
+
+                        lastSequenceNodes[i] = newNode;
                     }
 
-                    this._syncToEditor(lastSequenceNodes, node.endIndex + 2);
+                    this._syncToEditor(lastSequenceNodes, newNode.endIndex + 2);
                 })
             )
         );
@@ -982,7 +998,7 @@ export class PromptController extends Disposable {
         textSelectionOffset: number,
         canUndo: boolean = true
     ) {
-        const dataStream = this._generateStringWithSequence(sequenceNodes);
+        const dataStream = generateStringWithSequence(sequenceNodes);
 
         const { textRuns, refSelections } = this._buildTextRuns(sequenceNodes);
 
@@ -1039,23 +1055,6 @@ export class PromptController extends Disposable {
         await this._commandService.syncExecuteCommand(SetEditorResizeOperation.id, {
             unitId: editorUnitId,
         });
-    }
-
-    /**
-     * Deserialize Sequence to text.
-     * @param newSequenceNodes
-     * @returns
-     */
-    private _generateStringWithSequence(newSequenceNodes: Array<string | ISequenceNode>) {
-        let sequenceString = '';
-        for (const node of newSequenceNodes) {
-            if (typeof node === 'string') {
-                sequenceString += node;
-            } else {
-                sequenceString += node.token;
-            }
-        }
-        return sequenceString;
     }
 
     /**
@@ -1140,7 +1139,7 @@ export class PromptController extends Disposable {
             this._inertControlSelectionReplace(currentRange);
         } else {
             // Holding down ctrl causes an addition, requiring the ref string to be increased.
-            const insertNodes = this._formulaInputService.getSequenceNodes();
+            let insertNodes = this._formulaInputService.getSequenceNodes();
 
             if (insertNodes == null) {
                 return;
@@ -1156,6 +1155,8 @@ export class PromptController extends Disposable {
 
             if (!this._matchRefDrawToken(char)) {
                 this._formulaInputService.insertSequenceString(this._currentInsertRefStringIndex, matchToken.COMMA);
+
+                insertNodes = this._formulaInputService.getSequenceNodes();
 
                 this._previousInsertRefStringIndex += 1;
             }

@@ -14,6 +14,8 @@ import {
     CancelMergeSingle,
     ClearFormat,
     CntSingle,
+    CodeSingle,
+    ContentSingle16,
     Copy,
     DeleteCellMoveDown,
     DeleteCellShiftLeft,
@@ -99,6 +101,7 @@ export class ComponentManager {
             InnerBorder,
             ItalicSingle,
             KeyboardSingle,
+            ContentSingle16,
             LeftBorder,
             LeftJustifyingSingle,
             LeftRotationFortyFiveDegreesSingle,
@@ -153,6 +156,7 @@ export class ComponentManager {
             FreezeColumnSingle,
             FreezeRowSingle,
             FreezeToSelectedSingle,
+            CodeSingle,
         };
 
         for (const k in iconList) {

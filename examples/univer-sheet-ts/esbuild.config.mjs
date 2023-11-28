@@ -10,15 +10,32 @@ const nodeModules = path.resolve(process.cwd(), './node_modules');
 
 const args = minimist(process.argv.slice(2));
 
-const ctx = await esbuild[args.watch ? 'context' : 'build']({
+// User should also config their bunlder to build monaco editor's resources for web worker.
+const monacoEditorEntryPoints = [
+    'vs/language/typescript/ts.worker.js',
+    'vs/editor/editor.worker.js',
+];
+
+const monacoBuildTask = () => esbuild.build({
+    entryPoints: monacoEditorEntryPoints.map(entry => `./node_modules/monaco-editor/esm/${entry}`),
     bundle: true,
     color: true,
-    loader: { '.svg': 'file' },
-    sourcemap: true,
+    format: 'iife',
+    outbase: './node_modules/monaco-editor/esm/',
+    outdir: './local',
     plugins: [
         cleanPlugin({
             patterns: ['./local'],
         }),
+    ]
+});
+
+const ctx = await esbuild[args.watch ? 'context' : 'build']({
+    bundle: true,
+    color: true,
+    loader: { '.svg': 'file', '.ttf': 'file' },
+    sourcemap: true,
+    plugins: [
         copyPlugin({
             assets: {
                 from: ['./public/*'],
@@ -43,6 +60,7 @@ const ctx = await esbuild[args.watch ? 'context' : 'build']({
 });
 
 if (args.watch) {
+    await monacoBuildTask();
     await ctx.watch();
 
     const { host, port } = await ctx.serve({

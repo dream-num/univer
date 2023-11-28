@@ -11,6 +11,7 @@ import { FormulaPlugin } from '@univerjs/sheets-plugin-formula';
 import { FormulaUIPlugin } from '@univerjs/sheets-plugin-formula-ui';
 import { NumfmtPlugin } from '@univerjs/sheets-plugin-numfmt';
 import { SheetUIPlugin } from '@univerjs/ui-plugin-sheets';
+import { IUniscriptPluginConfig, UniscriptPlugin } from '@univerjs/uniscript';
 
 import { locales } from './locales';
 import { DebuggerPlugin } from './sheets-plugin-debugger';
@@ -50,6 +51,16 @@ univer.registerPlugin(UniverRPCMainThreadPlugin, {
     workerURL: './worker.js',
     unsyncMutations: new Set([RichTextEditingMutation.id]),
 } as IUniverRPCMainThreadPluginConfig);
+
+univer.registerPlugin(UniscriptPlugin, {
+    getWorkerUrl(moduleID, label) {
+        if (label === 'typescript' || label === 'javascript') {
+            return './vs/language/typescript/ts.worker.js';
+        }
+
+        return './vs/editor/editor.worker.js';
+    },
+} as IUniscriptPluginConfig);
 
 // create univer sheet instance
 univer.createUniverSheet(DEFAULT_WORKBOOK_DATA_DEMO);

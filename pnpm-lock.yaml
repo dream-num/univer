@@ -249,9 +249,15 @@ importers:
       '@univerjs/ui-plugin-sheets':
         specifier: workspace:*
         version: link:../../packages/ui-plugin-sheets
+      '@univerjs/uniscript':
+        specifier: workspace:*
+        version: link:../../packages/uniscript
       '@wendellhu/redi':
         specifier: ^0.12.11
         version: 0.12.11
+      monaco-editor:
+        specifier: 0.44.0
+        version: 0.44.0
     devDependencies:
       esbuild:
         specifier: ^0.19.7
@@ -543,8 +549,8 @@ importers:
         specifier: workspace:*
         version: link:../design
       '@univerjs/icons':
-        specifier: ^0.1.12
-        version: 0.1.12(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^0.1.14
+        version: 0.1.14(react-dom@18.2.0)(react@18.2.0)
       '@wendellhu/redi':
         specifier: ^0.12.11
         version: 0.12.11
@@ -706,8 +712,8 @@ importers:
         specifier: ^1.18.2
         version: 1.18.2(react-dom@18.2.0)(react@18.2.0)
       '@univerjs/icons':
-        specifier: ^0.1.12
-        version: 0.1.12(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^0.1.14
+        version: 0.1.14(react-dom@18.2.0)(react@18.2.0)
       clsx:
         specifier: ^2.0.0
         version: 2.0.0
@@ -927,8 +933,8 @@ importers:
         specifier: workspace:*
         version: link:../design
       '@univerjs/icons':
-        specifier: ^0.1.12
-        version: 0.1.12(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^0.1.14
+        version: 0.1.14(react-dom@18.2.0)(react@18.2.0)
       '@univerjs/ui-plugin-sheets':
         specifier: workspace:*
         version: link:../ui-plugin-sheets
@@ -1031,8 +1037,8 @@ importers:
         specifier: workspace:*
         version: link:../design
       '@univerjs/icons':
-        specifier: ^0.1.12
-        version: 0.1.12(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^0.1.14
+        version: 0.1.14(react-dom@18.2.0)(react@18.2.0)
       '@univerjs/ui-plugin-sheets':
         specifier: workspace:*
         version: link:../ui-plugin-sheets
@@ -1144,8 +1150,8 @@ importers:
         specifier: workspace:*
         version: link:../design
       '@univerjs/icons':
-        specifier: ^0.1.12
-        version: 0.1.12(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^0.1.14
+        version: 0.1.14(react-dom@18.2.0)(react@18.2.0)
       '@wendellhu/redi':
         specifier: ^0.12.11
         version: 0.12.11
@@ -1223,6 +1229,61 @@ importers:
       typescript:
         specifier: ^5.3.2
         version: 5.3.2
+      vitest:
+        specifier: ^0.34.6
+        version: 0.34.6(happy-dom@12.10.3)(less@4.2.0)
+
+  packages/uniscript:
+    dependencies:
+      '@univerjs/base-sheets':
+        specifier: workspace:*
+        version: link:../base-sheets
+      '@univerjs/base-ui':
+        specifier: workspace:*
+        version: link:../base-ui
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../core
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../design
+      '@univerjs/ui-plugin-sheets':
+        specifier: workspace:*
+        version: link:../ui-plugin-sheets
+      '@wendellhu/redi':
+        specifier: ^0.12.10
+        version: 0.12.11
+      monaco-editor:
+        specifier: 0.44.0
+        version: 0.44.0
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+    devDependencies:
+      '@types/node':
+        specifier: ^20.9.0
+        version: 20.10.0
+      '@types/numeral':
+        specifier: ^2.0.5
+        version: 2.0.5
+      '@types/react':
+        specifier: ^18.2.38
+        version: 18.2.38
+      '@types/react-dom':
+        specifier: ^18.2.15
+        version: 18.2.17
+      '@vitest/coverage-istanbul':
+        specifier: ^0.34.6
+        version: 0.34.6(vitest@0.34.6)
+      esbuild:
+        specifier: ^0.19.5
+        version: 0.19.7
+      less:
+        specifier: ^4.2.0
+        version: 4.2.0
+      ts-node:
+        specifier: ^10.9.1
+        version: 10.9.1(@swc/core@1.3.99)(@types/node@20.10.0)(typescript@5.3.2)
       vitest:
         specifier: ^0.34.6
         version: 0.34.6(happy-dom@12.10.3)(less@4.2.0)
@@ -5996,8 +6057,8 @@ packages:
     resolution: {integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==}
     dev: true
 
-  /@univerjs/icons@0.1.12(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-1EN0Ce85NIFQCycT/3BmLUzIdQKRz7nLYLyjb6IYXlLf7tlDp478GhqRiE7jVZNHsfziLt7VeKY7kIqdTixsaA==}
+  /@univerjs/icons@0.1.14(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-FW1AOvZ+VnejiGiOiO9iaOAharpHG8x2ofpSRnlj1SN8+2daN+7b1dae6pKSqZzAJKFiQOyb1KGY95+ADYFGsw==}
     peerDependencies:
       react: '*'
       react-dom: '*'
@@ -10305,6 +10366,10 @@ packages:
       pkg-types: 1.0.3
       ufo: 1.3.2
     dev: true
+
+  /monaco-editor@0.44.0:
+    resolution: {integrity: sha512-5SmjNStN6bSuSE5WPT2ZV+iYn1/yI9sd4Igtk23ChvqB7kDk9lZbB9F5frsuvpB+2njdIeGGFf2G4gbE6rCC9Q==}
+    dev: false
 
   /mri@1.2.0:
     resolution: {integrity: sha512-tzzskb3bG8LvYGFF/mDTpq3jpI6Q9wc3LEmBaghu+DdCssd1FakN7Bc0hVNmEyGq1bq3RgfkCb3cmQLpNPOroA==}

@@ -6,8 +6,9 @@ import {
     LifecycleStages,
     OnLifecycle,
     SheetInterceptorService,
+    toDisposable,
 } from '@univerjs/core';
-import { createIdentifier, Inject } from '@wendellhu/redi';
+import { createIdentifier, IDisposable, Inject } from '@wendellhu/redi';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 import {
@@ -35,6 +36,7 @@ export interface IAutoFillService {
     setDisableApplyType: (type: APPLY_TYPE, disable: boolean) => void;
     registerRule(rule: IAutoFillRule): void;
     getHooks(): IAutoFillHook[];
+    addHook(hook: IAutoFillHook): IDisposable;
 }
 
 export interface IApplyMenuItem {
@@ -105,6 +107,12 @@ export class AutoFillService extends Disposable implements IAutoFillService {
             throw new Error(`Add hook failed, hook name '${hook.hookName}' already exist!`);
         }
         this._hooks.push(hook);
+        return toDisposable(() => {
+            const index = this._hooks.findIndex((item) => item === hook);
+            if (index > -1) {
+                this._hooks.splice(index, 1);
+            }
+        });
     }
 
     registerRule(rule: IAutoFillRule) {

@@ -1,6 +1,7 @@
 import {
     DOCS_COMPONENT_MAIN_LAYER_INDEX,
     DocSkeletonManagerService,
+    DocViewModelManagerService,
     IRichTextEditingMutationParams,
     NORMAL_TEXT_SELECTION_PLUGIN_NAME,
     RichTextEditingMutation,
@@ -74,6 +75,7 @@ export class StartEditController extends Disposable {
 
     constructor(
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
+        @Inject(DocViewModelManagerService) private readonly _docViewModelManagerService: DocViewModelManagerService,
         @IContextService private readonly _contextService: IContextService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
@@ -434,11 +436,11 @@ export class StartEditController extends Disposable {
 
             this._contextService.setContextValue(FOCUSING_EDITOR, true);
 
-            const { documentModel: documentDataModel, documentViewModel } = documentLayoutObject;
+            const { documentModel: documentDataModel } = documentLayoutObject;
 
             const docParam = this._docSkeletonManagerService.getCurrent();
 
-            if (docParam == null || documentDataModel == null || documentViewModel == null) {
+            if (docParam == null || documentDataModel == null) {
                 return;
             }
 
@@ -449,6 +451,7 @@ export class StartEditController extends Disposable {
             // move selection
             if (eventType === DeviceInputEventType.Keyboard) {
                 const snapshot = Tools.deepClone(documentDataModel.snapshot) as IDocumentData;
+                const documentViewModel = this._docViewModelManagerService.getCurrent()?.docViewModel!;
                 this._resetBodyStyle(snapshot.body!);
 
                 documentDataModel.reset(snapshot);
@@ -456,7 +459,7 @@ export class StartEditController extends Disposable {
 
                 document.makeDirty();
 
-                // @JOCS, Why calculate here？
+                // @JOCS, Why calculate here?
                 if (keycode === KeyCode.BACKSPACE) {
                     skeleton.calculate();
                 }

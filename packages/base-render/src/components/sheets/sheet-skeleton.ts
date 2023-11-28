@@ -157,13 +157,13 @@ interface IRowColumnSegment {
 
 export interface IDocumentLayoutObject {
     documentModel: Nullable<DocumentDataModel>;
-    documentViewModel: Nullable<DocumentViewModel>;
     fontString: string;
     textRotation: ITextRotation;
     wrapStrategy: WrapStrategy;
     verticalAlign: VerticalAlign;
     horizontalAlign: HorizontalAlign;
     paddingData: IPaddingData;
+    documentViewModel?: Nullable<DocumentViewModel>;
     fill?: Nullable<string>;
 }
 
@@ -999,11 +999,9 @@ export class SpreadsheetSkeleton extends Skeleton {
         fontString = getFontStyleString({}, this._localService).fontCache;
 
         const documentModel = this._getDocumentDataByStyle(content, {}, {});
-        const documentViewModel = new DocumentViewModel(documentModel);
 
         return {
             documentModel,
-            documentViewModel,
             fontString,
             textRotation,
             wrapStrategy,

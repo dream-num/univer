@@ -57,6 +57,19 @@ export class DocSkeletonManagerService implements IDisposable {
         return this._getCurrentByUnitId(this._currentSkeletonUnitId);
     }
 
+    makeDirtyCurrent(state: boolean = true) {
+        this.makeDirty(this._currentSkeletonUnitId, state);
+    }
+
+    makeDirty(unitId: string, state: boolean = true) {
+        const param = this._getCurrentByUnitId(unitId);
+        if (param == null) {
+            return;
+        }
+
+        param.dirty = state;
+    }
+
     private _setCurrent(docViewModelParam: IDocumentViewModelManagerParam): Nullable<IDocSkeletonManagerParam> {
         const { unitId } = docViewModelParam;
 
@@ -77,19 +90,6 @@ export class DocSkeletonManagerService implements IDisposable {
         this._currentSkeleton$.next(this.getCurrent());
 
         return this.getCurrent();
-    }
-
-    makeDirtyCurrent(state: boolean = true) {
-        this.makeDirty(this._currentSkeletonUnitId, state);
-    }
-
-    makeDirty(unitId: string, state: boolean = true) {
-        const param = this._getCurrentByUnitId(unitId);
-        if (param == null) {
-            return;
-        }
-
-        param.dirty = state;
     }
 
     private _getCurrentByUnitId(unitId: string): Nullable<IDocSkeletonManagerParam> {

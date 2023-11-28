@@ -10,17 +10,32 @@ import { IDisposable } from '@wendellhu/redi';
 
 import { DataStreamTreeNode } from './data-stream-tree-node';
 
-type DocumentViewModelOrSimple = DocumentViewModelSimple | DocumentViewModel;
-
-class DocumentViewModelSimple implements IDisposable {
+export class DocumentViewModel implements IDisposable {
     children: DataStreamTreeNode[] = [];
 
-    constructor(private _documentBody: IDocumentBody) {
-        if (_documentBody == null) {
+    private _sectionBreakCurrentIndex = 0;
+
+    private _paragraphCurrentIndex = 0;
+
+    private _textRunCurrentIndex = 0;
+
+    private _customBlockCurrentIndex = 0;
+
+    private _tableBlockCurrentIndex = 0;
+
+    private _customRangeCurrentIndex = 0;
+
+    headerTreeMap: Map<string, DocumentViewModel> = new Map();
+
+    footerTreeMap: Map<string, DocumentViewModel> = new Map();
+
+    constructor(private _documentDataModel: DocumentDataModel) {
+        if (_documentDataModel.getBody() == null) {
             return;
         }
 
-        this.children = this._transformToTree(this._documentBody.dataStream);
+        this.children = this._transformToTree(_documentDataModel.getBody()!.dataStream);
+        this._buildHeaderFooterViewModel();
     }
 
     dispose(): void {
@@ -28,31 +43,6 @@ class DocumentViewModelSimple implements IDisposable {
             child.dispose();
         });
     }
-
-    resetCache() {}
-
-    getSectionBreak(index: number) {
-        return this.getBody()!.sectionBreaks?.[0];
-    }
-
-    getParagraph(index: number) {}
-
-    getTextRun(index: number) {}
-
-    getTextRunRange(startIndex: number = 0, endIndex: number) {
-        return [
-            {
-                st: startIndex,
-                ed: endIndex,
-            },
-        ] as ITextRun[];
-    }
-
-    getCustomBlock(index: number) {}
-
-    getTable(index: number) {}
-
-    getCustomRange(index: number) {}
 
     selfPlus(len: number, index: number) {}
 
@@ -65,7 +55,316 @@ class DocumentViewModelSimple implements IDisposable {
     }
 
     getBody() {
-        return this._documentBody;
+        return this._documentDataModel.getBody();
+    }
+
+    getDataModel() {
+        return this._documentDataModel;
+    }
+
+    getSelfOrHeaderFooterViewModel(segmentId?: string) {
+        if (segmentId == null) {
+            return this as DocumentViewModel;
+        }
+
+        if (this.headerTreeMap.has(segmentId)) {
+            return this.headerTreeMap.get(segmentId)!;
+        }
+
+        if (this.footerTreeMap.has(segmentId)) {
+            return this.footerTreeMap.get(segmentId)!;
+        }
+
+        return this as DocumentViewModel;
+    }
+
+    reset(documentDataModel: DocumentDataModel) {
+        this._documentDataModel = documentDataModel;
+
+        this.children = this._transformToTree(documentDataModel.getBody()!.dataStream);
+
+        this._buildHeaderFooterViewModel();
+    }
+
+    insert(insertBody: IDocumentBody, insertIndex = 0) {
+        const dataStream = insertBody.dataStream;
+        let dataStreamLen = dataStream.length;
+        const insertedNode = this._getParagraphByIndex(this.children, insertIndex);
+
+        if (insertedNode == null) {
+            return;
+        }
+
+        if (dataStream[dataStreamLen - 1] === DataStreamTreeTokenType.SECTION_BREAK) {
+            const docDataModel = new DocumentDataModel({ body: insertBody });
+            const insertBodyModel = new DocumentViewModel(docDataModel);
+
+            dataStreamLen -= 1; // sectionBreak can not be inserted
+
+            const insertNodes = insertBodyModel.children;
+
+            for (const node of insertNodes) {
+                this._forEachDown(node, (newNode) => {
+                    newNode.plus(insertIndex);
+                });
+            }
+
+            const insertedNodeSplit = insertedNode.split(insertIndex);
+
+            if (insertedNodeSplit == null) {
+                return;
+            }
+
+            const { firstNode: insertedFirstNode, lastNode: insertedLastNode } = insertedNodeSplit;
+
+            insertedNode.parent?.children.splice(
+                insertedNode.getPositionInParent(),
+                1,
+                insertedFirstNode,
+                ...insertNodes,
+                insertedLastNode
+            );
+
+            this._forEachTop(insertedNode.parent, (currentNode) => {
+                // currentNode.endIndex += dataStreamLen;
+                currentNode.selfPlus(dataStreamLen, currentNode.getPositionInParent());
+                const children = currentNode.children;
+                let isStartFix = false;
+
+                for (const node of children) {
+                    if (node === insertedLastNode) {
+                        isStartFix = true;
+                    }
+
+                    if (!isStartFix) {
+                        continue;
+                    }
+
+                    this._forEachDown(node, (newNode) => {
+                        newNode.plus(dataStreamLen);
+                    });
+                }
+            });
+        } else if (dataStreamLen === 1 && dataStream[dataStreamLen - 1] === DataStreamTreeTokenType.PARAGRAPH) {
+            this._insertParagraph(insertedNode, insertIndex);
+        } else {
+            insertedNode.insertText(dataStream, insertIndex);
+
+            // insertedNode.endIndex += dataStreamLen;
+            insertedNode.selfPlus(dataStreamLen, insertIndex);
+
+            this._forEachTop(insertedNode.parent, (currentNode) => {
+                // currentNode.endIndex += dataStreamLen;
+                currentNode.selfPlus(dataStreamLen, currentNode.getPositionInParent());
+                const children = currentNode.children;
+                let isStartFix = false;
+                for (const node of children) {
+                    if (node.startIndex > insertIndex) {
+                        isStartFix = true;
+                    }
+
+                    if (!isStartFix) {
+                        continue;
+                    }
+
+                    this._forEachDown(node, (newNode) => {
+                        newNode.plus(dataStreamLen);
+                    });
+                }
+            });
+        }
+    }
+
+    delete(currentIndex: number, textLength: number) {
+        const nodes = this.children;
+
+        this._deleteTree(nodes, currentIndex, textLength);
+    }
+
+    /** Get pure text content in the given range. */
+    getText(): string {
+        // Basically this is a DFS traversal of the tree to get the `content` and append it to the result.
+        // TODO: implement
+        const pieces: string[] = [];
+
+        function traverseTreeNode(node: DataStreamTreeNode) {
+            if (node.content) {
+                pieces.push(node.content);
+            }
+
+            node.children.forEach(traverseTreeNode);
+        }
+
+        this.children.forEach((n) => traverseTreeNode(n));
+
+        return pieces.join('');
+    }
+
+    resetCache() {
+        this._sectionBreakCurrentIndex = 0;
+        this._paragraphCurrentIndex = 0;
+        this._textRunCurrentIndex = 0;
+        this._customBlockCurrentIndex = 0;
+        this._tableBlockCurrentIndex = 0;
+        this._customRangeCurrentIndex = 0;
+    }
+
+    getSectionBreak(index: number) {
+        if (index == null) {
+            return;
+        }
+        const sectionBreaks = this.getBody()!.sectionBreaks;
+        if (sectionBreaks == null) {
+            return;
+        }
+
+        for (let i = this._sectionBreakCurrentIndex; i < sectionBreaks.length; i++) {
+            const sectionBreak = sectionBreaks[i];
+            if (sectionBreak.startIndex === index) {
+                this._sectionBreakCurrentIndex = i;
+                return sectionBreak;
+            }
+        }
+    }
+
+    getParagraph(index: number) {
+        const paragraphs = this.getBody()!.paragraphs;
+        if (paragraphs == null) {
+            return;
+        }
+
+        for (let i = this._paragraphCurrentIndex; i < paragraphs.length; i++) {
+            const paragraph = paragraphs[i];
+            if (paragraph.startIndex === index) {
+                this._paragraphCurrentIndex = i;
+                return paragraph;
+            }
+        }
+    }
+
+    getTextRunRange(startIndex: number = 0, endIndex: number) {
+        const textRuns = this.getBody()!.textRuns;
+        if (textRuns == null) {
+            return [
+                {
+                    st: startIndex,
+                    ed: endIndex,
+                },
+            ];
+        }
+
+        const trRange: ITextRun[] = [];
+
+        for (let i = this._textRunCurrentIndex, textRunsLen = textRuns.length; i < textRunsLen; i++) {
+            const textRun = textRuns[i];
+            if (textRun.st > endIndex) {
+                this._textRunCurrentIndex = i;
+                break;
+            } else if (textRun.ed < startIndex) {
+                this._textRunCurrentIndex = i;
+                continue;
+            } else {
+                trRange.push({
+                    st: textRun.st < startIndex ? startIndex : textRun.st,
+                    ed: textRun.ed > endIndex ? endIndex : textRun.ed,
+                    sId: textRun.sId,
+                    ts: textRun.ts,
+                });
+                this._textRunCurrentIndex = i;
+            }
+        }
+
+        const firstTr = trRange[0] || { st: endIndex + 1 };
+        if (firstTr.st > startIndex) {
+            trRange.push({
+                st: startIndex,
+                ed: firstTr.st - 1,
+            });
+        }
+
+        const lastTr = trRange[trRange.length - 1] || { ed: startIndex - 1 };
+        if (lastTr.ed < endIndex) {
+            trRange.push({
+                st: lastTr.ed + 1,
+                ed: endIndex,
+            });
+        }
+
+        return trRange;
+    }
+
+    /**
+     * textRun matches according to the selection. If the text length is 10, then the range of textRun is from 0 to 11.
+     */
+    getTextRun(index: number) {
+        const textRuns = this.getBody()!.textRuns;
+        if (textRuns == null) {
+            return;
+        }
+
+        const curTextRun = textRuns[this._textRunCurrentIndex];
+
+        if (curTextRun != null) {
+            if (index >= curTextRun.st && index < curTextRun.ed) {
+                return curTextRun;
+            }
+
+            if (index < curTextRun.st) {
+                return;
+            }
+        }
+
+        for (let i = this._textRunCurrentIndex, textRunsLen = textRuns.length; i < textRunsLen; i++) {
+            const textRun = textRuns[i];
+
+            if (index >= textRun.st && index < textRun.ed) {
+                this._textRunCurrentIndex = i;
+                return textRun;
+            }
+        }
+    }
+
+    getCustomBlock(index: number) {
+        const customBlocks = this.getBody()!.customBlocks;
+        if (customBlocks == null) {
+            return;
+        }
+
+        for (let i = this._customBlockCurrentIndex; i < customBlocks.length; i++) {
+            const customBlock = customBlocks[i];
+            if (customBlock.startIndex === index) {
+                this._customBlockCurrentIndex = i;
+                return customBlock;
+            }
+        }
+    }
+
+    getTable(index: number) {
+        const tables = this.getBody()!.tables;
+        if (tables == null) {
+            return;
+        }
+
+        for (let i = this._tableBlockCurrentIndex; i < tables.length; i++) {
+            const table = tables[i];
+            if (table.startIndex === index) {
+                this._tableBlockCurrentIndex = i;
+                return table;
+            }
+        }
+    }
+
+    getCustomRange(index: number) {
+        const customRanges = this.getBody()!.customRanges;
+        if (customRanges == null) {
+            return;
+        }
+        for (let i = 0, customRangesLen = customRanges.length; i < customRangesLen; i++) {
+            const customRange = customRanges[i];
+            if (index >= customRange.startIndex && index <= customRange.endIndex) {
+                return customRange;
+            }
+        }
     }
 
     protected _transformToTree(dataStream: string) {
@@ -192,336 +491,6 @@ class DocumentViewModelSimple implements IDisposable {
 
         parent.setIndexRange(children[0].startIndex - startOffset, children[children.length - 1].endIndex + 1);
     }
-}
-
-export class DocumentViewModel extends DocumentViewModelSimple {
-    private _sectionBreakCurrentIndex = 0;
-
-    private _paragraphCurrentIndex = 0;
-
-    private _textRunCurrentIndex = 0;
-
-    private _customBlockCurrentIndex = 0;
-
-    private _tableBlockCurrentIndex = 0;
-
-    private _customRangeCurrentIndex = 0;
-
-    headerTreeMap: Map<string, DocumentViewModel> = new Map();
-
-    footerTreeMap: Map<string, DocumentViewModel> = new Map();
-
-    constructor(private _documentDataModel: DocumentDataModel) {
-        super(_documentDataModel.getBody()!);
-
-        this._buildHeaderFooterViewModel();
-    }
-
-    getDataModel() {
-        return this._documentDataModel;
-    }
-
-    getSelfOrHeaderFooterViewModel(segmentId?: string) {
-        if (segmentId == null) {
-            return this as DocumentViewModel;
-        }
-
-        if (this.headerTreeMap.has(segmentId)) {
-            return this.headerTreeMap.get(segmentId)!;
-        }
-
-        if (this.footerTreeMap.has(segmentId)) {
-            return this.footerTreeMap.get(segmentId)!;
-        }
-
-        return this as DocumentViewModel;
-    }
-
-    reset(documentDataModel: DocumentDataModel) {
-        this._documentDataModel = documentDataModel;
-
-        this.children = this._transformToTree(documentDataModel.getBody()!.dataStream);
-        this._buildHeaderFooterViewModel();
-    }
-
-    insert(insertBody: IDocumentBody, insertIndex = 0) {
-        const dataStream = insertBody.dataStream;
-        let dataStreamLen = dataStream.length;
-        const insertedNode = this._getParagraphByIndex(this.children, insertIndex);
-
-        if (insertedNode == null) {
-            return;
-        }
-
-        if (dataStream[dataStreamLen - 1] === DataStreamTreeTokenType.SECTION_BREAK) {
-            const insertBodyModel = new DocumentViewModelSimple(insertBody);
-            dataStreamLen -= 1; // sectionBreak can not be inserted
-
-            const insertNodes = insertBodyModel.children;
-
-            for (const node of insertNodes) {
-                this._forEachDown(node, (newNode) => {
-                    newNode.plus(insertIndex);
-                });
-            }
-
-            const insertedNodeSplit = insertedNode.split(insertIndex);
-
-            if (insertedNodeSplit == null) {
-                return;
-            }
-
-            const { firstNode: insertedFirstNode, lastNode: insertedLastNode } = insertedNodeSplit;
-
-            insertedNode.parent?.children.splice(
-                insertedNode.getPositionInParent(),
-                1,
-                insertedFirstNode,
-                ...insertNodes,
-                insertedLastNode
-            );
-
-            this._forEachTop(insertedNode.parent, (currentNode) => {
-                // currentNode.endIndex += dataStreamLen;
-                currentNode.selfPlus(dataStreamLen, currentNode.getPositionInParent());
-                const children = currentNode.children;
-                let isStartFix = false;
-
-                for (const node of children) {
-                    if (node === insertedLastNode) {
-                        isStartFix = true;
-                    }
-
-                    if (!isStartFix) {
-                        continue;
-                    }
-
-                    this._forEachDown(node, (newNode) => {
-                        newNode.plus(dataStreamLen);
-                    });
-                }
-            });
-        } else if (dataStreamLen === 1 && dataStream[dataStreamLen - 1] === DataStreamTreeTokenType.PARAGRAPH) {
-            this._insertParagraph(insertedNode, insertIndex);
-        } else {
-            insertedNode.insertText(dataStream, insertIndex);
-
-            // insertedNode.endIndex += dataStreamLen;
-            insertedNode.selfPlus(dataStreamLen, insertIndex);
-
-            this._forEachTop(insertedNode.parent, (currentNode) => {
-                // currentNode.endIndex += dataStreamLen;
-                currentNode.selfPlus(dataStreamLen, currentNode.getPositionInParent());
-                const children = currentNode.children;
-                let isStartFix = false;
-                for (const node of children) {
-                    if (node.startIndex > insertIndex) {
-                        isStartFix = true;
-                    }
-
-                    if (!isStartFix) {
-                        continue;
-                    }
-
-                    this._forEachDown(node, (newNode) => {
-                        newNode.plus(dataStreamLen);
-                    });
-                }
-            });
-        }
-    }
-
-    delete(currentIndex: number, textLength: number) {
-        const nodes = this.children;
-
-        this._deleteTree(nodes, currentIndex, textLength);
-    }
-
-    /** Get pure text content in the given range. */
-    getText(): string {
-        // Basically this is a DFS traversal of the tree to get the `content` and append it to the result.
-        // TODO: implement
-        const pieces: string[] = [];
-
-        function traverseTreeNode(node: DataStreamTreeNode) {
-            if (node.content) {
-                pieces.push(node.content);
-            }
-
-            node.children.forEach(traverseTreeNode);
-        }
-
-        this.children.forEach((n) => traverseTreeNode(n));
-
-        return pieces.join('');
-    }
-
-    override resetCache() {
-        this._sectionBreakCurrentIndex = 0;
-        this._paragraphCurrentIndex = 0;
-        this._textRunCurrentIndex = 0;
-        this._customBlockCurrentIndex = 0;
-        this._tableBlockCurrentIndex = 0;
-        this._customRangeCurrentIndex = 0;
-    }
-
-    override getSectionBreak(index: number) {
-        if (index == null) {
-            return;
-        }
-        const sectionBreaks = this.getBody()!.sectionBreaks;
-        if (sectionBreaks == null) {
-            return;
-        }
-
-        for (let i = this._sectionBreakCurrentIndex; i < sectionBreaks.length; i++) {
-            const sectionBreak = sectionBreaks[i];
-            if (sectionBreak.startIndex === index) {
-                this._sectionBreakCurrentIndex = i;
-                return sectionBreak;
-            }
-        }
-    }
-
-    override getParagraph(index: number) {
-        const paragraphs = this.getBody()!.paragraphs;
-        if (paragraphs == null) {
-            return;
-        }
-
-        for (let i = this._paragraphCurrentIndex; i < paragraphs.length; i++) {
-            const paragraph = paragraphs[i];
-            if (paragraph.startIndex === index) {
-                this._paragraphCurrentIndex = i;
-                return paragraph;
-            }
-        }
-    }
-
-    override getTextRunRange(startIndex: number = 0, endIndex: number) {
-        const textRuns = this.getBody()!.textRuns;
-        if (textRuns == null) {
-            return [
-                {
-                    st: startIndex,
-                    ed: endIndex,
-                },
-            ];
-        }
-
-        const trRange: ITextRun[] = [];
-
-        for (let i = this._textRunCurrentIndex, textRunsLen = textRuns.length; i < textRunsLen; i++) {
-            const textRun = textRuns[i];
-            if (textRun.st > endIndex) {
-                this._textRunCurrentIndex = i;
-                break;
-            } else if (textRun.ed < startIndex) {
-                this._textRunCurrentIndex = i;
-                continue;
-            } else {
-                trRange.push({
-                    st: textRun.st < startIndex ? startIndex : textRun.st,
-                    ed: textRun.ed > endIndex ? endIndex : textRun.ed,
-                    sId: textRun.sId,
-                    ts: textRun.ts,
-                });
-                this._textRunCurrentIndex = i;
-            }
-        }
-
-        const firstTr = trRange[0] || { st: endIndex + 1 };
-        if (firstTr.st > startIndex) {
-            trRange.push({
-                st: startIndex,
-                ed: firstTr.st - 1,
-            });
-        }
-
-        const lastTr = trRange[trRange.length - 1] || { ed: startIndex - 1 };
-        if (lastTr.ed < endIndex) {
-            trRange.push({
-                st: lastTr.ed + 1,
-                ed: endIndex,
-            });
-        }
-
-        return trRange;
-    }
-
-    /**
-     * textRun matches according to the selection. If the text length is 10, then the range of textRun is from 0 to 11.
-     */
-    override getTextRun(index: number) {
-        const textRuns = this.getBody()!.textRuns;
-        if (textRuns == null) {
-            return;
-        }
-
-        const curTextRun = textRuns[this._textRunCurrentIndex];
-
-        if (curTextRun != null) {
-            if (index >= curTextRun.st && index < curTextRun.ed) {
-                return curTextRun;
-            }
-
-            if (index < curTextRun.st) {
-                return;
-            }
-        }
-
-        for (let i = this._textRunCurrentIndex, textRunsLen = textRuns.length; i < textRunsLen; i++) {
-            const textRun = textRuns[i];
-
-            if (index >= textRun.st && index < textRun.ed) {
-                this._textRunCurrentIndex = i;
-                return textRun;
-            }
-        }
-    }
-
-    override getCustomBlock(index: number) {
-        const customBlocks = this.getBody()!.customBlocks;
-        if (customBlocks == null) {
-            return;
-        }
-
-        for (let i = this._customBlockCurrentIndex; i < customBlocks.length; i++) {
-            const customBlock = customBlocks[i];
-            if (customBlock.startIndex === index) {
-                this._customBlockCurrentIndex = i;
-                return customBlock;
-            }
-        }
-    }
-
-    override getTable(index: number) {
-        const tables = this.getBody()!.tables;
-        if (tables == null) {
-            return;
-        }
-
-        for (let i = this._tableBlockCurrentIndex; i < tables.length; i++) {
-            const table = tables[i];
-            if (table.startIndex === index) {
-                this._tableBlockCurrentIndex = i;
-                return table;
-            }
-        }
-    }
-
-    override getCustomRange(index: number) {
-        const customRanges = this.getBody()!.customRanges;
-        if (customRanges == null) {
-            return;
-        }
-        for (let i = 0, customRangesLen = customRanges.length; i < customRangesLen; i++) {
-            const customRange = customRanges[i];
-            if (index >= customRange.startIndex && index <= customRange.endIndex) {
-                return customRange;
-            }
-        }
-    }
 
     private _buildHeaderFooterViewModel() {
         const { headerModelMap, footerModelMap } = this._documentDataModel;
@@ -555,7 +524,7 @@ export class DocumentViewModel extends DocumentViewModelSimple {
 
     private _forEachTop(
         node: Nullable<DataStreamTreeNode>,
-        func: (node: DataStreamTreeNode | DocumentViewModelOrSimple) => void
+        func: (node: DataStreamTreeNode | DocumentViewModel) => void
     ) {
         let parent: Nullable<DataStreamTreeNode> = node;
 

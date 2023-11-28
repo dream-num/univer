@@ -3,13 +3,13 @@ import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
 import { UniscriptController } from './controllers/uniscript.controller';
 import { enUS } from './locale';
-import { IScripteEditorServiceConfig, ScriptEditorService } from './services/script-editor.service';
+import { IScriptEditorServiceConfig, ScriptEditorService } from './services/script-editor.service';
 import { UniscriptExecutionService } from './services/script-execution.service';
 import { ScriptPanelService } from './services/script-panel.service';
 
 const PLUGIN_NAME = 'uniscript';
 
-export interface IUniscriptPluginConfig extends IScripteEditorServiceConfig {}
+export interface IUniscriptPluginConfig extends IScriptEditorServiceConfig {}
 
 export class UniscriptPlugin extends Plugin {
     static override type = PluginType.Univer;

@@ -6,19 +6,9 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import { editor } from 'monaco-editor';
 import React, { useCallback, useEffect, useRef } from 'react';
 
+import { ScriptEditorService } from '../../services/script-editor.service';
 import { UniscriptExecutionService } from '../../services/script-execution.service';
 import styles from './index.module.less';
-
-// TODO: @wzhudev: this should be moved to a MonacoEditorLoadService
-window.MonacoEnvironment = {
-    getWorkerUrl(moduleID, label) {
-        if (label === 'typescript' || label === 'javascript') {
-            return './vs/language/typescript/ts.worker.js';
-        }
-
-        return './vs/editor/editor.worker.js';
-    },
-};
 
 export function ScriptEditorPanel() {
     const editorContentRef = useRef<HTMLDivElement | null>(null);
@@ -29,6 +19,7 @@ export function ScriptEditorPanel() {
     const localeService = useDependency(LocaleService);
     const scriptService = useDependency(UniscriptExecutionService);
     const shortcutService = useDependency(IShortcutService);
+    const editorService = useDependency(ScriptEditorService);
     const messageService = useDependency(IMessageService);
 
     useEffect(() => {
@@ -39,10 +30,10 @@ export function ScriptEditorPanel() {
         let resizeObserver: Nullable<ResizeObserver> = null;
 
         if (containerElement && contentElement) {
+            editorService.requireVscodeEditor();
             const monacoEditor = (monacoEditorRef.current = editor.create(containerElement, {
                 value: '',
                 language: 'javascript',
-                automaticLayout: true,
             }));
 
             resizeObserver = new ResizeObserver(() => {

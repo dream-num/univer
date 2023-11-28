@@ -1,1 +1,1 @@
-export { UniscriptPlugin } from './plugin';
+export { type IUniscriptPluginConfig, UniscriptPlugin } from './plugin';

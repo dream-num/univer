@@ -8,6 +8,8 @@ import {
     IUniverInstanceService,
     ObjectMatrix,
     ObjectMatrixPrimitiveType,
+    sequenceExecute,
+    SheetInterceptorService,
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
@@ -29,6 +31,7 @@ export const ClearSelectionContentCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const selectionManagerService = accessor.get(SelectionManagerService);
         const undoRedoService = accessor.get(IUndoRedoService);
+        const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
         const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         const workbookId = workbook.getUnitId();
@@ -49,14 +52,18 @@ export const ClearSelectionContentCommand: ICommand = {
             clearMutationParams
         );
 
-        const result = commandService.syncExecuteCommand(SetRangeValuesMutation.id, clearMutationParams);
+        const intercepted = sheetInterceptorService.onCommandExecute({ id: ClearSelectionContentCommand.id });
+        const redos = [{ id: SetRangeValuesMutation.id, params: clearMutationParams }, ...intercepted.redos];
+        const undos = [...intercepted.undos, { id: SetRangeValuesMutation.id, params: undoClearMutationParams }];
+
+        const result = sequenceExecute(redos, commandService).result;
         if (result) {
             undoRedoService.pushUndoRedo({
                 // If there are multiple mutations that form an encapsulated project, they must be encapsulated in the same undo redo element.
                 // Hooks can be used to hook the code of external controllers to add new actions.
                 unitID: workbookId,
-                undoMutations: [{ id: SetRangeValuesMutation.id, params: undoClearMutationParams }],
-                redoMutations: [{ id: SetRangeValuesMutation.id, params: clearMutationParams }],
+                undoMutations: undos,
+                redoMutations: redos,
             });
 
             return true;

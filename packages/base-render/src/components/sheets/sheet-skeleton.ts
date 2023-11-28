@@ -163,7 +163,6 @@ export interface IDocumentLayoutObject {
     verticalAlign: VerticalAlign;
     horizontalAlign: HorizontalAlign;
     paddingData: IPaddingData;
-    documentViewModel?: Nullable<DocumentViewModel>;
     fill?: Nullable<string>;
 }
 
@@ -425,10 +424,12 @@ export class SpreadsheetSkeleton extends Skeleton {
                 continue;
             }
 
-            const { documentModel, documentViewModel, textRotation, wrapStrategy } = modelObject;
-            if (documentModel == null || documentViewModel == null) {
+            const { documentModel, textRotation, wrapStrategy } = modelObject;
+            if (documentModel == null) {
                 continue;
             }
+
+            const documentViewModel = new DocumentViewModel(documentModel);
 
             let { a: angle } = textRotation as ITextRotation;
             const { v: isVertical = BooleanNumber.FALSE } = textRotation as ITextRotation;
@@ -1071,12 +1072,6 @@ export class SpreadsheetSkeleton extends Skeleton {
             });
         }
 
-        let documentViewModel;
-
-        if (documentModel) {
-            documentViewModel = new DocumentViewModel(documentModel);
-        }
-
         /**
          * the alignment mode is returned with respect to the offset of the sheet cell,
          * because the document needs to render the layout for cells and
@@ -1092,7 +1087,6 @@ export class SpreadsheetSkeleton extends Skeleton {
          */
         return {
             documentModel,
-            documentViewModel,
             fontString,
             textRotation,
             wrapStrategy,
@@ -1493,8 +1487,13 @@ export class SpreadsheetSkeleton extends Skeleton {
             return;
         }
 
-        const { documentViewModel, fontString, textRotation, wrapStrategy, verticalAlign, horizontalAlign } =
-            modelObject;
+        const { documentModel, fontString, textRotation, wrapStrategy, verticalAlign, horizontalAlign } = modelObject;
+
+        if (documentModel == null) {
+            return;
+        }
+
+        const documentViewModel = new DocumentViewModel(documentModel);
 
         if (!cache.font![fontString]) {
             cache.font![fontString] = new ObjectMatrix();

@@ -31,6 +31,7 @@ export interface IAutoFillCommandParams {
     applyRange: IRange;
     selectionRange: IRange;
     applyDatas: ICellData[][];
+    extendMutations: { undo: IMutationInfo[]; redo: IMutationInfo[] };
     applyMergeRanges?: IRange[];
 }
 
@@ -38,7 +39,7 @@ export const AutoFillCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.auto-fill',
     // eslint-disable-next-line max-lines-per-function
-    handler: async (accessor: IAccessor, params?: IAutoFillCommandParams) => {
+    handler: async (accessor: IAccessor, params: IAutoFillCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const undoRedoService = accessor.get(IUndoRedoService);
@@ -136,7 +137,19 @@ export const AutoFillCommand: ICommand = {
             redoSeq.push({ id: AddWorksheetMergeMutation.id, params: addMergeMutationParams });
         }
 
-        if (setRangeResult && removeMergeResult && addMergeResult && selectionResult) {
+        // deal with extend mutations by hooks
+        const { undo, redo } = params?.extendMutations;
+        const extendResult = redo.every((item: IMutationInfo) =>
+            commandService.syncExecuteCommand(item.id, item.params)
+        );
+        undo.forEach((item: IMutationInfo) => {
+            undoSeq.push(item);
+        });
+        redo.forEach((item: IMutationInfo) => {
+            redoSeq.push(item);
+        });
+
+        if (setRangeResult && removeMergeResult && addMergeResult && selectionResult && extendResult) {
             undoRedoService.pushUndoRedo({
                 unitID: workbookId,
                 undoMutations: undoSeq,

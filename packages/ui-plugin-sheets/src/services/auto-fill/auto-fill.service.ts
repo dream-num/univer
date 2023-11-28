@@ -20,7 +20,7 @@ import {
     numberRule,
     otherRule,
 } from './rules';
-import { APPLY_TYPE, IAutoFillRule } from './type';
+import { APPLY_TYPE, IAutoFillHook, IAutoFillRule } from './type';
 
 export interface IAutoFillService {
     getRules(): IAutoFillRule[];
@@ -34,6 +34,7 @@ export interface IAutoFillService {
     menu$: Observable<IApplyMenuItem[]>;
     setDisableApplyType: (type: APPLY_TYPE, disable: boolean) => void;
     registerRule(rule: IAutoFillRule): void;
+    getHooks(): IAutoFillHook[];
 }
 
 export interface IApplyMenuItem {
@@ -45,6 +46,7 @@ export interface IApplyMenuItem {
 @OnLifecycle(LifecycleStages.Rendered, AutoFillService)
 export class AutoFillService extends Disposable implements IAutoFillService {
     private _rules: IAutoFillRule[] = [];
+    private _hooks: IAutoFillHook[] = [];
     private readonly _applyType$: BehaviorSubject<APPLY_TYPE> = new BehaviorSubject<APPLY_TYPE>(APPLY_TYPE.SERIES);
     private _isFillingStyle: boolean = true;
     private _sourceRange: IRange | null = null;
@@ -98,6 +100,13 @@ export class AutoFillService extends Disposable implements IAutoFillService {
         this._isFillingStyle = true;
     }
 
+    addHook(hook: IAutoFillHook) {
+        if (this._hooks.find((h) => h.hookName === hook.hookName)) {
+            throw new Error(`Add hook failed, hook name '${hook.hookName}' already exist!`);
+        }
+        this._hooks.push(hook);
+    }
+
     registerRule(rule: IAutoFillRule) {
         // if rule.type is used, console error
         if (this._rules.find((r) => r.type === rule.type)) {
@@ -110,6 +119,10 @@ export class AutoFillService extends Disposable implements IAutoFillService {
 
     getRules() {
         return this._rules;
+    }
+
+    getHooks() {
+        return this._hooks;
     }
 
     getApplyType() {

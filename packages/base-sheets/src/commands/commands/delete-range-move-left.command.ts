@@ -18,7 +18,7 @@ import { SelectionManagerService } from '../../services/selection-manager.servic
 import { DeleteRangeMutation, DeleteRangeUndoMutationFactory } from '../mutations/delete-range.mutation';
 import { InsertRangeMutation } from '../mutations/insert-range.mutation';
 
-export interface DeleteRangeMoveLeftCommandParams {
+export interface IDeleteRangeMoveLeftCommandParams {
     ranges: IRange[];
 }
 
@@ -30,7 +30,7 @@ export const DeleteRangeMoveLeftCommand: ICommand = {
     type: CommandType.COMMAND,
     id: DeleteRangeMoveLeftCommandId,
 
-    handler: async (accessor: IAccessor, params?: DeleteRangeMoveLeftCommandParams) => {
+    handler: async (accessor: IAccessor, params?: IDeleteRangeMoveLeftCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -69,7 +69,7 @@ export const DeleteRangeMoveLeftCommand: ICommand = {
 
         const sheetInterceptor = sheetInterceptorService.onCommandExecute({
             id: DeleteRangeMoveLeftCommand.id,
-            params: { ranges } as DeleteRangeMoveLeftCommandParams,
+            params: { ranges } as IDeleteRangeMoveLeftCommandParams,
         });
         const redos: IMutationInfo[] = [{ id: DeleteRangeMutation.id, params: deleteRangeMutationParams }];
         const undos: IMutationInfo[] = [{ id: InsertRangeMutation.id, params: insertRangeMutationParams }];

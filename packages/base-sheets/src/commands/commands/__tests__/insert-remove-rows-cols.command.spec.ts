@@ -34,7 +34,7 @@ import {
     InsertRowBeforeCommand,
     InsertRowCommand,
 } from '../insert-row-col.command';
-import { RemoveColCommand, RemoveRowColCommandParams, RemoveRowCommand } from '../remove-row-col.command';
+import { IRemoveRowColCommandParams, RemoveColCommand, RemoveRowCommand } from '../remove-row-col.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('Test insert and remove rows cols commands', () => {
@@ -292,7 +292,7 @@ describe('Test insert and remove rows cols commands', () => {
                         endColumn: 1,
                     },
                 ],
-            } as RemoveRowColCommandParams);
+            } as IRemoveRowColCommandParams);
             expect(getMergedInfo(12, 2)).toEqual({ startRow: 10, endRow: 13, startColumn: 2, endColumn: 2 });
         });
     });
@@ -307,7 +307,7 @@ describe('Test insert and remove rows cols commands', () => {
                         endColumn: 13,
                     },
                 ],
-            } as RemoveRowColCommandParams);
+            } as IRemoveRowColCommandParams);
             expect(getMergedInfo(10, 12)).toEqual({ startRow: 10, endRow: 10, startColumn: 10, endColumn: 13 });
         });
     });

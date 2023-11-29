@@ -2,11 +2,11 @@ import { ICommandInfo, IRange } from '@univerjs/core';
 
 import {
     DeleteRangeMoveLeftCommandId,
-    DeleteRangeMoveLeftCommandParams,
+    IDeleteRangeMoveLeftCommandParams,
 } from '../../commands/commands/delete-range-move-left.command';
 import {
     DeleteRangeMoveUpCommandId,
-    DeleteRangeMoveUpCommandParams,
+    IDeleteRangeMoveUpCommandParams,
 } from '../../commands/commands/delete-range-move-up.command';
 import {
     InsertRangeMoveDownCommandId,
@@ -24,21 +24,21 @@ import {
 } from '../../commands/commands/insert-row-col.command';
 import { IMoveRangeCommandParams, MoveRangeCommandId } from '../../commands/commands/move-range.command';
 import {
+    IRemoveRowColCommandParams,
     RemoveColCommandId,
-    RemoveRowColCommandParams,
     RemoveRowCommandId,
 } from '../../commands/commands/remove-row-col.command';
 
 export type IMoveRangeCommand = ICommandInfo<IMoveRangeCommandParams> & { id: typeof MoveRangeCommandId };
 export type IInsertRowCommand = ICommandInfo<IInsertRowCommandParams> & { id: typeof InsertRowCommandId };
 export type IInsertColCommand = ICommandInfo<IInsertColCommandParams> & { id: typeof InsertColCommandId };
-export type IRemoveRowColCommand = ICommandInfo<RemoveRowColCommandParams> & {
+export type IRemoveRowColCommand = ICommandInfo<IRemoveRowColCommandParams> & {
     id: typeof RemoveColCommandId | typeof RemoveRowCommandId;
 };
-export type IDeleteRangeMoveLeftCommand = ICommandInfo<DeleteRangeMoveLeftCommandParams> & {
+export type IDeleteRangeMoveLeftCommand = ICommandInfo<IDeleteRangeMoveLeftCommandParams> & {
     id: typeof DeleteRangeMoveLeftCommandId;
 };
-export type IDeleteRangeMoveUpCommand = ICommandInfo<DeleteRangeMoveUpCommandParams> & {
+export type IDeleteRangeMoveUpCommand = ICommandInfo<IDeleteRangeMoveUpCommandParams> & {
     id: typeof DeleteRangeMoveUpCommandId;
 };
 export type IInsertRangeMoveDownCommand = ICommandInfo<InsertRangeMoveDownCommandParams> & {

@@ -26,11 +26,11 @@ export class FormulaPlugin extends Plugin {
             [FormulaDataModel, { useValue: this._formulaDataModel }],
             // controllers
             [FormulaController],
+            [UpdateFormulaController],
         ];
 
         if (!this._config?.notExecuteFormula) {
             dependencies.push([CalculateController]);
-            dependencies.push([UpdateFormulaController]);
         }
 
         dependencies.forEach((dependency) => this._injector.add(dependency));

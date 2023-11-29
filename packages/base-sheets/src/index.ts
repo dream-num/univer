@@ -54,10 +54,13 @@ export { ClearSelectionContentCommand } from './commands/commands/clear-selectio
 export { ClearSelectionFormatCommand } from './commands/commands/clear-selection-format.command';
 export { CopySheetCommand } from './commands/commands/copy-worksheet.command';
 export { DeleteRangeMoveLeftCommand } from './commands/commands/delete-range-move-left.command';
-export { type DeleteRangeMoveLeftCommandParams } from './commands/commands/delete-range-move-left.command';
+export { type IDeleteRangeMoveLeftCommandParams } from './commands/commands/delete-range-move-left.command';
 export { DeleteRangeMoveUpCommand } from './commands/commands/delete-range-move-up.command';
+export { type IDeleteRangeMoveUpCommandParams } from './commands/commands/delete-range-move-up.command';
 export { InsertRangeMoveDownCommand } from './commands/commands/insert-range-move-down.command';
+export { type InsertRangeMoveDownCommandParams } from './commands/commands/insert-range-move-down.command';
 export { InsertRangeMoveRightCommand } from './commands/commands/insert-range-move-right.command';
+export { type InsertRangeMoveRightCommandParams } from './commands/commands/insert-range-move-right.command';
 export type { IInsertColCommandParams, IInsertRowCommandParams } from './commands/commands/insert-row-col.command';
 export {
     InsertColAfterCommand,

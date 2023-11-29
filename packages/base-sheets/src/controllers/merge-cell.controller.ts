@@ -25,11 +25,11 @@ import { ClearSelectionAllCommand } from '../commands/commands/clear-selection-a
 import { ClearSelectionFormatCommand } from '../commands/commands/clear-selection-format.command';
 import {
     DeleteRangeMoveLeftCommand,
-    DeleteRangeMoveLeftCommandParams,
+    IDeleteRangeMoveLeftCommandParams,
 } from '../commands/commands/delete-range-move-left.command';
 import {
     DeleteRangeMoveUpCommand,
-    DeleteRangeMoveUpCommandParams,
+    IDeleteRangeMoveUpCommandParams,
 } from '../commands/commands/delete-range-move-up.command';
 import {
     InsertRangeMoveDownCommand,
@@ -170,11 +170,11 @@ export class MergeCellController extends Disposable {
                         return this._handleInsertRangeMoveDownCommand(params, workbookId, worksheetId);
                     }
                     case DeleteRangeMoveUpCommand.id: {
-                        const params = config.params as unknown as DeleteRangeMoveUpCommandParams;
+                        const params = config.params as unknown as IDeleteRangeMoveUpCommandParams;
                         return this._handleDeleteRangeMoveUpCommand(params, workbookId, worksheetId);
                     }
                     case DeleteRangeMoveLeftCommand.id: {
-                        const params = config.params as unknown as DeleteRangeMoveLeftCommandParams;
+                        const params = config.params as unknown as IDeleteRangeMoveLeftCommandParams;
                         return this._handleDeleteRangeMoveLeftCommand(params, workbookId, worksheetId);
                     }
                 }
@@ -710,7 +710,7 @@ export class MergeCellController extends Disposable {
     }
 
     private _handleDeleteRangeMoveUpCommand(
-        config: DeleteRangeMoveUpCommandParams,
+        config: IDeleteRangeMoveUpCommandParams,
         workbookId: string,
         worksheetId: string
     ) {
@@ -785,7 +785,7 @@ export class MergeCellController extends Disposable {
     }
 
     private _handleDeleteRangeMoveLeftCommand(
-        config: DeleteRangeMoveLeftCommandParams,
+        config: IDeleteRangeMoveLeftCommandParams,
         workbookId: string,
         worksheetId: string
     ) {

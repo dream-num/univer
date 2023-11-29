@@ -4,13 +4,12 @@ import {
     IFormulaData,
     IFormulaDataItem,
     ISequenceNode,
-    ISheetData,
-    IUnitData,
     IUnitSheetNameMap,
     sequenceNodeType,
 } from '@univerjs/base-formula-engine';
 import {
-    DeleteRangeMutation,
+    DeleteRangeMoveLeftCommand,
+    DeleteRangeMoveUpCommand,
     EffectRefRangId,
     handleDeleteRangeMoveLeft,
     handleDeleteRangeMoveUp,
@@ -21,32 +20,39 @@ import {
     handleIRemoveCol,
     handleIRemoveRow,
     handleMoveRange,
-    IDeleteRangeMutationParams,
-    IInsertRangeMutationParams,
-    IMoveColumnsMutationParams,
-    IMoveRowsMutationParams,
-    InsertColMutation,
-    InsertRangeMutation,
-    InsertRowMutation,
+    IDeleteRangeMoveLeftCommandParams,
+    IDeleteRangeMoveUpCommandParams,
+    IInsertColCommandParams,
+    IInsertRowCommandParams,
+    IMoveColsCommandParams,
+    IMoveRangeCommandParams,
+    IMoveRowsCommandParams,
+    InsertColCommand,
+    InsertRangeMoveDownCommand,
+    InsertRangeMoveDownCommandParams,
+    InsertRangeMoveRightCommand,
+    InsertRangeMoveRightCommandParams,
+    InsertRowCommand,
+    IRemoveRowColCommandParams,
     ISetRangeValuesMutationParams,
-    MoveColsMutation,
-    MoveRangeMutation,
-    MoveRangeMutationParams,
-    MoveRowsMutation,
-    RemoveColMutation,
-    RemoveRowMutation,
+    MoveColsCommand,
+    MoveRangeCommand,
+    MoveRowsCommand,
+    RemoveColCommand,
+    RemoveRowCommand,
     runRefRangeMutations,
     SetRangeValuesMutation,
+    SetRangeValuesUndoMutationFactory,
 } from '@univerjs/base-sheets';
 import {
     deserializeRangeWithSheet,
-    Dimension,
     Direction,
     Disposable,
     ICellData,
     ICommandInfo,
     ICommandService,
     IRange,
+    isFormulaString,
     IUnitRange,
     IUniverInstanceService,
     LifecycleStages,
@@ -54,10 +60,13 @@ import {
     ObjectMatrix,
     ObjectMatrixPrimitiveType,
     OnLifecycle,
+    RANGE_TYPE,
     Rectangle,
     serializeRangeToRefString,
+    SheetInterceptorService,
+    Tools,
 } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 
 import { FormulaDataModel } from '../models/formula-data.model';
 
@@ -107,7 +116,9 @@ export class UpdateFormulaController extends Disposable {
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService,
-        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
+        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
+        @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
+        @Inject(Injector) readonly _injector: Injector
     ) {
         super();
 
@@ -118,239 +129,337 @@ export class UpdateFormulaController extends Disposable {
         this._commandExecutedListener();
     }
 
-    /**
-     * TODO: @DR-Univer Temporary method, will be deleted later.
-     * @returns
-     */
-    private _getCalculateData() {
-        const unitAllSheet = this._currentUniverService.getAllUniverSheetsInstance();
-
-        const formulaData: IFormulaData = {};
-
-        const allUnitData: IUnitData = {};
-
-        const unitSheetNameMap: IUnitSheetNameMap = {};
-
-        for (const workbook of unitAllSheet) {
-            const unitId = workbook.getUnitId();
-            if (formulaData[unitId] == null) {
-                formulaData[unitId] = {};
-            }
-            const sheets = workbook.getSheets();
-
-            const workbookFormulaData = formulaData[unitId];
-
-            const sheetData: ISheetData = {};
-
-            const sheetNameMap: { [sheetName: string]: string } = {};
-
-            for (const sheet of sheets) {
-                const sheetId = sheet.getSheetId();
-                if (workbookFormulaData[sheetId] == null) {
-                    workbookFormulaData[sheetId] = {};
-                }
-
-                const sheetFormulaData = workbookFormulaData[sheetId];
-
-                const cellDatas = sheet.getCellMatrix();
-
-                cellDatas.forValue((row, column, cellData) => {
-                    if (cellData?.f != null) {
-                        if (sheetFormulaData[row] == null) {
-                            sheetFormulaData[row] = {};
-                        }
-                        sheetFormulaData[row][column] = {
-                            f: cellData.f,
-                            x: 0,
-                            y: 0,
-                        };
-                    }
-                });
-
-                const sheetConfig = sheet.getConfig();
-                sheetData[sheetId] = {
-                    cellData: new ObjectMatrix(sheetConfig.cellData),
-                    rowCount: sheetConfig.rowCount,
-                    columnCount: sheetConfig.columnCount,
-                };
-                sheetNameMap[sheet.getName()] = sheet.getSheetId();
-            }
-
-            allUnitData[unitId] = sheetData;
-
-            unitSheetNameMap[unitId] = sheetNameMap;
-        }
-
-        return {
-            formulaData,
-            allUnitData,
-            unitSheetNameMap,
-        };
-    }
-
     private _commandExecutedListener() {
-        const updateCommandList = [
-            MoveRangeMutation.id,
-            MoveRowsMutation.id,
-            MoveColsMutation.id,
-            InsertRangeMutation.id,
-            InsertRowMutation.id,
-            InsertColMutation.id,
-            DeleteRangeMutation.id,
-            RemoveRowMutation.id,
-            RemoveColMutation.id,
-        ];
-
         this.disposeWithMe(
-            this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                const { id } = command;
-                let result: Nullable<IFormulaReferenceMoveParam> = null;
-
-                // TODO@Dushusir: handle cut operation, same as move operation
-                switch (id) {
-                    case MoveRangeMutation.id:
-                        result = this._handleMoveRange(command as ICommandInfo<MoveRangeMutationParams>);
-                        break;
-                    case MoveRowsMutation.id:
-                        result = this._handleMoveRows(command as ICommandInfo<IMoveRowsMutationParams>);
-                        break;
-                    case MoveColsMutation.id:
-                        result = this._handleMoveCols(command as ICommandInfo<IMoveColumnsMutationParams>);
-                        break;
-                    case InsertRangeMutation.id:
-                        result = this._handleInsertRange(command as ICommandInfo<IInsertRangeMutationParams>);
-                        break;
-                    case DeleteRangeMutation.id:
-                        result = this._handleDeleteRange(command as ICommandInfo<IDeleteRangeMutationParams>);
-                        break;
-                }
-
-                // TODO@Dushusir: update formula and get update cell data matrix
-                if (result) {
-                    const state = this._getCalculateData();
-                    this.getFormulaReferenceMoveInfo(state.formulaData, state.unitSheetNameMap, result).then(
-                        (cellValue) => {
-                            this._updateFormula(cellValue);
-                        }
-                    );
-                }
+            this._sheetInterceptorService.interceptCommand({
+                getMutations: (command) => this._getUpdateFormula(command),
             })
         );
     }
 
-    private _handleMoveRange(command: ICommandInfo<MoveRangeMutationParams>) {
-        const { params } = command;
-        if (!params) return null;
+    private _getUpdateFormula(command: ICommandInfo) {
+        const { id } = command;
+        let result: Nullable<IFormulaReferenceMoveParam> = null;
 
-        const { from, to, workbookId, worksheetId } = params;
-        if (!from || !to) return null;
+        switch (id) {
+            case MoveRangeCommand.id:
+                result = this._handleMoveRange(command as ICommandInfo<IMoveRangeCommandParams>);
+                break;
+            case MoveRowsCommand.id:
+                result = this._handleMoveRows(command as ICommandInfo<IMoveRowsCommandParams>);
+                break;
+            case MoveColsCommand.id:
+                result = this._handleMoveCols(command as ICommandInfo<IMoveColsCommandParams>);
+                break;
+            case InsertRowCommand.id:
+                result = this._handleInsertRow(command as ICommandInfo<IInsertRowCommandParams>);
+                break;
+            case InsertColCommand.id:
+                result = this._handleInsertCol(command as ICommandInfo<IInsertColCommandParams>);
+                break;
+            case InsertRangeMoveRightCommand.id:
+                result = this._handleInsertRangeMoveRight(command as ICommandInfo<InsertRangeMoveRightCommandParams>);
+                break;
+            case InsertRangeMoveDownCommand.id:
+                result = this._handleInsertRangeMoveDown(command as ICommandInfo<InsertRangeMoveDownCommandParams>);
+                break;
+            case RemoveRowCommand.id:
+                result = this._handleRemoveRow(command as ICommandInfo<IRemoveRowColCommandParams>);
+                break;
+            case RemoveColCommand.id:
+                result = this._handleRemoveCol(command as ICommandInfo<IRemoveRowColCommandParams>);
+                break;
+            case DeleteRangeMoveUpCommand.id:
+                result = this._handleDeleteRangeMoveUp(command as ICommandInfo<IDeleteRangeMoveUpCommandParams>);
+                break;
+            case DeleteRangeMoveLeftCommand.id:
+                result = this._handleDeleteRangeMoveLeft(command as ICommandInfo<IDeleteRangeMoveLeftCommandParams>);
+                break;
+        }
+
+        if (result) {
+            const { unitSheetNameMap } = this._formulaDataModel.getCalculateData();
+            const oldFormulaData = Tools.deepClone(this._formulaDataModel.getFormulaData());
+            const formulaData = this.getFormulaReferenceMoveInfo(oldFormulaData, unitSheetNameMap, result);
+            return this._getUpdateFormulaMutations(oldFormulaData, formulaData);
+        }
 
         return {
-            type: FormulaReferenceMoveType.Move,
-            from: getRangeFromMatrixObject(from),
-            to: getRangeFromMatrixObject(to),
-            unitId: workbookId,
-            sheetId: worksheetId,
+            undos: [],
+            redos: [],
         };
     }
 
-    private _handleMoveRows(command: ICommandInfo<IMoveRowsMutationParams>) {
+    private _handleMoveRange(command: ICommandInfo<IMoveRangeCommandParams>) {
         const { params } = command;
         if (!params) return null;
 
-        const { sourceRange, targetRange, workbookId, worksheetId } = params;
+        const { fromRange, toRange } = params;
+        if (!fromRange || !toRange) return null;
+
+        const { unitId, sheetId } = this._getCurrentSheetInfo();
+
         return {
             type: FormulaReferenceMoveType.Move,
-            from: sourceRange,
-            to: targetRange,
-            unitId: workbookId,
-            sheetId: worksheetId,
+            from: fromRange,
+            to: toRange,
+            unitId,
+            sheetId,
         };
     }
 
-    private _handleMoveCols(command: ICommandInfo<IMoveColumnsMutationParams>) {
+    private _handleMoveRows(command: ICommandInfo<IMoveRowsCommandParams>) {
         const { params } = command;
         if (!params) return null;
 
-        const { sourceRange, targetRange, workbookId, worksheetId } = params;
-        return {
-            type: FormulaReferenceMoveType.Move,
-            from: sourceRange,
-            to: targetRange,
-            unitId: workbookId,
-            sheetId: worksheetId,
-        };
-    }
+        const { fromRow, toRow } = params;
 
-    private _handleInsertRange(command: ICommandInfo<IInsertRangeMutationParams>) {
-        const { params } = command;
-        if (!params) return null;
-
-        const { ranges, shiftDimension, workbookId, worksheetId } = params;
-
-        if (shiftDimension === Dimension.ROWS) {
-            return {
-                type: FormulaReferenceMoveType.InsertMoveDown,
-                ranges,
-                unitId: workbookId,
-                sheetId: worksheetId,
-            };
-        }
-        if (shiftDimension === Dimension.COLUMNS) {
-            return {
-                type: FormulaReferenceMoveType.InsertMoveRight,
-                ranges,
-                unitId: workbookId,
-                sheetId: worksheetId,
-            };
-        }
-    }
-
-    private _handleDeleteRange(command: ICommandInfo<IDeleteRangeMutationParams>) {
-        const { params } = command;
-        if (!params) return null;
-
-        const { ranges, shiftDimension, workbookId, worksheetId } = params;
-
-        if (shiftDimension === Dimension.ROWS) {
-            return {
-                type: FormulaReferenceMoveType.DeleteMoveUp,
-                ranges,
-                unitId: workbookId,
-                sheetId: worksheetId,
-            };
-        }
-        if (shiftDimension === Dimension.COLUMNS) {
-            return {
-                type: FormulaReferenceMoveType.DeleteMoveLeft,
-                ranges,
-                unitId: workbookId,
-                sheetId: worksheetId,
-            };
-        }
-    }
-
-    private _updateFormula(formulaData: ObjectMatrixPrimitiveType<ICellData>) {
         const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
-        const workbookId = workbook.getUnitId();
-        const worksheetId = workbook.getActiveSheet().getSheetId();
+        const unitId = workbook.getUnitId();
+        const worksheet = workbook.getActiveSheet();
+        const sheetId = worksheet.getSheetId();
 
-        const cellValue = formulaData['workbook-01' as any]['sheet-0011' as any] as any;
-
-        if (cellValue == null) {
-            return;
-        }
-
-        const setRangeValuesMutation: ISetRangeValuesMutationParams = {
-            worksheetId: 'sheet-0011',
-            workbookId: 'workbook-01',
-            cellValue,
+        const from = {
+            startRow: fromRow,
+            startColumn: 0,
+            endRow: fromRow,
+            endColumn: worksheet.getColumnCount() - 1,
+            rangeType: RANGE_TYPE.ROW,
+        };
+        const to = {
+            startRow: toRow,
+            startColumn: 0,
+            endRow: toRow,
+            endColumn: worksheet.getColumnCount() - 1,
+            rangeType: RANGE_TYPE.ROW,
         };
 
-        this._commandService.executeCommand(SetRangeValuesMutation.id, setRangeValuesMutation);
+        return {
+            type: FormulaReferenceMoveType.Move,
+            from,
+            to,
+            unitId,
+            sheetId,
+        };
     }
 
-    async getFormulaReferenceMoveInfo(
+    private _handleMoveCols(command: ICommandInfo<IMoveColsCommandParams>) {
+        const { params } = command;
+        if (!params) return null;
+
+        const { fromCol, toCol } = params;
+
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+        const unitId = workbook.getUnitId();
+        const worksheet = workbook.getActiveSheet();
+        const sheetId = worksheet.getSheetId();
+
+        const from = {
+            startRow: 0,
+            startColumn: fromCol,
+            endRow: worksheet.getRowCount() - 1,
+            endColumn: fromCol,
+            rangeType: RANGE_TYPE.COLUMN,
+        };
+        const to = {
+            startRow: 0,
+            startColumn: toCol,
+            endRow: worksheet.getRowCount() - 1,
+            endColumn: toCol,
+            rangeType: RANGE_TYPE.COLUMN,
+        };
+
+        return {
+            type: FormulaReferenceMoveType.Move,
+            from,
+            to,
+            unitId,
+            sheetId,
+        };
+    }
+
+    private _handleInsertRow(command: ICommandInfo<IInsertRowCommandParams>) {
+        const { params } = command;
+        if (!params) return null;
+
+        const { range, workbookId, worksheetId } = params;
+        return {
+            type: FormulaReferenceMoveType.InsertRow,
+            ranges: [range],
+            unitId: workbookId,
+            sheetId: worksheetId,
+        };
+    }
+
+    private _handleInsertCol(command: ICommandInfo<IInsertColCommandParams>) {
+        const { params } = command;
+        if (!params) return null;
+
+        const { range, workbookId, worksheetId } = params;
+        return {
+            type: FormulaReferenceMoveType.InsertColumn,
+            ranges: [range],
+            unitId: workbookId,
+            sheetId: worksheetId,
+        };
+    }
+
+    private _handleInsertRangeMoveRight(command: ICommandInfo<InsertRangeMoveRightCommandParams>) {
+        const { params } = command;
+        if (!params) return null;
+
+        const { ranges } = params;
+        const { unitId, sheetId } = this._getCurrentSheetInfo();
+
+        return {
+            type: FormulaReferenceMoveType.InsertMoveRight,
+            ranges,
+            unitId,
+            sheetId,
+        };
+    }
+
+    private _handleInsertRangeMoveDown(command: ICommandInfo<InsertRangeMoveDownCommandParams>) {
+        const { params } = command;
+        if (!params) return null;
+
+        const { ranges } = params;
+        const { unitId, sheetId } = this._getCurrentSheetInfo();
+
+        return {
+            type: FormulaReferenceMoveType.InsertMoveDown,
+            ranges,
+            unitId,
+            sheetId,
+        };
+    }
+
+    private _handleRemoveRow(command: ICommandInfo<IRemoveRowColCommandParams>) {
+        const { params } = command;
+        if (!params) return null;
+
+        const { ranges } = params;
+        const { unitId, sheetId } = this._getCurrentSheetInfo();
+
+        return {
+            type: FormulaReferenceMoveType.RemoveRow,
+            ranges,
+            unitId,
+            sheetId,
+        };
+    }
+
+    private _handleRemoveCol(command: ICommandInfo<IRemoveRowColCommandParams>) {
+        const { params } = command;
+        if (!params) return null;
+
+        const { ranges } = params;
+        const { unitId, sheetId } = this._getCurrentSheetInfo();
+
+        return {
+            type: FormulaReferenceMoveType.RemoveColumn,
+            ranges,
+            unitId,
+            sheetId,
+        };
+    }
+
+    private _handleDeleteRangeMoveUp(command: ICommandInfo<IDeleteRangeMoveUpCommandParams>) {
+        const { params } = command;
+        if (!params) return null;
+
+        const { ranges } = params;
+        const { unitId, sheetId } = this._getCurrentSheetInfo();
+
+        return {
+            type: FormulaReferenceMoveType.DeleteMoveUp,
+            ranges,
+            unitId,
+            sheetId,
+        };
+    }
+
+    private _handleDeleteRangeMoveLeft(command: ICommandInfo<IDeleteRangeMoveLeftCommandParams>) {
+        const { params } = command;
+        if (!params) return null;
+
+        const { ranges } = params;
+        const { unitId, sheetId } = this._getCurrentSheetInfo();
+
+        return {
+            type: FormulaReferenceMoveType.DeleteMoveLeft,
+            ranges,
+            unitId,
+            sheetId,
+        };
+    }
+
+    private _getUpdateFormulaMutations(oldFormulaData: IFormulaData, formulaData: IFormulaData) {
+        const redos = [];
+        const undos = [];
+        const accessor = {
+            get: this._injector.get.bind(this._injector),
+        };
+
+        const formulaDataKeys = Object.keys(formulaData);
+
+        for (const workbookId of formulaDataKeys) {
+            const sheetData = formulaData[workbookId];
+            const sheetDataKeys = Object.keys(sheetData);
+
+            for (const worksheetId of sheetDataKeys) {
+                const oldFormulaMatrix = new ObjectMatrix<IFormulaDataItem>(oldFormulaData[workbookId][worksheetId]);
+                const formulaMatrix = new ObjectMatrix<IFormulaDataItem>(sheetData[worksheetId]);
+                const cellMatrix = new ObjectMatrix<ICellData>();
+
+                formulaMatrix.forValue((r, c, formulaItem) => {
+                    const formulaString = formulaItem?.f || '';
+
+                    const oldFormulaItem = oldFormulaMatrix.getRow(r)?.get(c);
+                    const oldFormulaString = oldFormulaItem?.f || '';
+
+                    if (isFormulaString(formulaString)) {
+                        // formula with formula id
+                        if (isFormulaString(oldFormulaString)) {
+                            cellMatrix.setValue(r, c, { f: formulaString });
+                        } else {
+                            // formula with only id
+                            cellMatrix.setValue(r, c, { f: formulaString, si: null });
+                        }
+                    }
+                });
+
+                const cellValue = cellMatrix.getData();
+                if (Tools.isEmptyObject(cellValue)) continue;
+
+                const setRangeValuesMutationParams: ISetRangeValuesMutationParams = {
+                    worksheetId,
+                    workbookId,
+                    cellValue,
+                };
+
+                redos.push({
+                    id: SetRangeValuesMutation.id,
+                    params: setRangeValuesMutationParams,
+                });
+
+                const undoSetRangeValuesMutationParams: ISetRangeValuesMutationParams =
+                    SetRangeValuesUndoMutationFactory(accessor, setRangeValuesMutationParams);
+
+                undos.push({
+                    id: SetRangeValuesMutation.id,
+                    params: undoSetRangeValuesMutationParams,
+                });
+            }
+        }
+
+        return {
+            redos,
+            undos,
+        };
+    }
+
+    getFormulaReferenceMoveInfo(
         formulaData: IFormulaData,
         unitSheetNameMap: IUnitSheetNameMap,
         formulaReferenceMoveParam: IFormulaReferenceMoveParam
@@ -939,4 +1048,15 @@ export class UpdateFormulaController extends Disposable {
     }
 
     private _getInsertNewRange() {}
+
+    private _getCurrentSheetInfo() {
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+        const unitId = workbook.getUnitId();
+        const sheetId = workbook.getActiveSheet().getSheetId();
+
+        return {
+            unitId,
+            sheetId,
+        };
+    }
 }

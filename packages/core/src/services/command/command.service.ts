@@ -1,6 +1,6 @@
 import { createIdentifier, IAccessor, IDisposable, Inject, Injector } from '@wendellhu/redi';
 
-import { remove } from '../../common/array';
+import { findLast, remove } from '../../common/array';
 import { sequence, sequenceAsync } from '../../common/sequence';
 import { toDisposable } from '../../shared/lifecycle';
 import { IKeyValue } from '../../shared/types';

@@ -24,6 +24,7 @@ export {
     type IExecutionOptions,
     type IMultiCommand,
     type IMutation,
+    type IMutationCommonParams,
     type IMutationInfo,
     type IOperation,
     type IOperationInfo,

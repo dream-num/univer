@@ -1,4 +1,10 @@
-import { CommandType, type DocMutationParams, IMutation, IUniverInstanceService, MemoryCursor } from '@univerjs/core';
+import {
+    CommandType,
+    type DocMutationParams,
+    type IMutation,
+    IUniverInstanceService,
+    MemoryCursor,
+} from '@univerjs/core';
 
 import { DocViewModelManagerService } from '../../services/doc-view-model-manager.service';
 

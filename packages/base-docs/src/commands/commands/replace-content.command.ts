@@ -1,16 +1,10 @@
-import { ITextRangeWithStyle } from '@univerjs/base-render';
-import {
-    CommandType,
-    ICommand,
-    ICommandService,
-    IDocumentBody,
-    IMutationInfo,
-    IUndoRedoService,
-    IUniverInstanceService,
-} from '@univerjs/core';
+import type { ITextRangeWithStyle } from '@univerjs/base-render';
+import type { ICommand, IDocumentBody, IMutationInfo } from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
 
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
-import { IRichTextEditingMutationParams, RichTextEditingMutation } from '../mutations/core-editing.mutation';
+import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
+import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
 
 interface IReplaceContentCommandParams {
     unitId: string;
@@ -126,20 +120,25 @@ function getMutationParams(unitId: string, segmentId: string, prevBody: IDocumen
         },
     };
 
-    doMutation.params.mutations.push({
-        t: 'd',
-        len: prevBody?.dataStream.length - 2,
-        line: 0,
-        segmentId,
-    });
+    const deleteLen = prevBody?.dataStream.length - 2;
+    if (deleteLen > 0) {
+        doMutation.params.mutations.push({
+            t: 'd',
+            len: deleteLen,
+            line: 0,
+            segmentId,
+        });
+    }
 
-    doMutation.params.mutations.push({
-        t: 'i',
-        body,
-        len: body.dataStream.length,
-        line: 0,
-        segmentId,
-    });
+    if (body.dataStream.length > 0) {
+        doMutation.params.mutations.push({
+            t: 'i',
+            body,
+            len: body.dataStream.length,
+            line: 0,
+            segmentId,
+        });
+    }
 
     return doMutation;
 }

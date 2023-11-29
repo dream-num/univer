@@ -8,6 +8,7 @@ import type {
 import {
     InsertColMutation,
     InsertRowMutation,
+    MAX_CELL_PER_SHEET_KEY,
     SetRangeValuesMutation,
     SetRangeValuesUndoMutationFactory,
     SetWorksheetColWidthMutation,
@@ -202,7 +203,7 @@ export class SheetClipboardController extends Disposable {
 
                 // examine if pasting would cause number of cells to exceed the upper limit
                 // this is not implemented yet
-                const maxConfig = self._configService.getConfig<number>(workbookId_, 'maxCellsPerSheet');
+                const maxConfig = self._configService.getConfig<number>(MAX_CELL_PER_SHEET_KEY);
                 const { endRow, endColumn } = range;
                 if (maxConfig && endRow * endColumn > maxConfig) {
                     self._messageService.show({

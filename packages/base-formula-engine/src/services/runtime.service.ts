@@ -4,6 +4,7 @@ import { createIdentifier } from '@wendellhu/redi';
 import { BaseAstNode } from '../ast-node/base-ast-node';
 import {
     ArrayFormulaDataType,
+    IRuntimeOtherUnitDataType,
     IRuntimeSheetData,
     IRuntimeUnitDataType,
     UnitArrayFormulaDataType,
@@ -13,12 +14,33 @@ import { BaseReferenceObject, FunctionVariantType } from '../reference-object/ba
 import { ArrayValueObject } from '../value-object/array-value-object';
 import { BaseValueObject, CalculateValueType } from '../value-object/base-value-object';
 
+/**
+ * IDLE: Idle phase of the formula engine.
+ *
+ * DEPENDENCY: Dependency calculation phase, where the formulas that need to be calculated are determined by the modified area,
+ * as well as their dependencies. This outputs an array of formulas to execute.
+ *
+ * INTERPRETER：Formula execution phase, where the calculation of formulas begins.
+ *
+ */
+export enum FormulaExecuteStageType {
+    IDLE,
+    DEPENDENCY,
+    INTERPRETER,
+}
+
+export interface IAllRuntimeData {
+    unitData: IRuntimeUnitDataType;
+    unitArrayFormulaData: UnitArrayFormulaDataType;
+    unitOtherData: IRuntimeOtherUnitDataType;
+}
+
 export interface IFormulaRuntimeService {
     currentRow: number;
 
     currentColumn: number;
 
-    currentSheetId: string;
+    currentSubComponentId: string;
 
     currentUnitId: string;
 
@@ -41,15 +63,35 @@ export interface IFormulaRuntimeService {
     getUnitData(): IRuntimeUnitDataType;
 
     getUnitArrayFormula(): UnitArrayFormulaDataType;
+
+    stopExecution(): void;
+
+    setFormulaExecuteStage(type: FormulaExecuteStageType): void;
+
+    isStopExecution(): boolean;
+
+    getFormulaExecuteStage(): FormulaExecuteStageType;
+
+    setRuntimeOtherData(formulaId: string, functionVariant: FunctionVariantType): void;
+
+    getRuntimeOtherData(): IRuntimeOtherUnitDataType;
+
+    getAllRuntimeData(): IAllRuntimeData;
 }
 
 export class FormulaRuntimeService extends Disposable implements IFormulaRuntimeService {
+    private _formulaExecuteStage: FormulaExecuteStageType = FormulaExecuteStageType.IDLE;
+
+    private _stopState = false;
+
     private _currentRow: number = 0;
     private _currentColumn: number = 0;
-    private _currentSheetId: string = '';
+    private _currentSubComponentId: string = '';
     private _currentUnitId: string = '';
 
     private _runtimeData: IRuntimeUnitDataType = {};
+
+    private _runtimeOtherData: IRuntimeOtherUnitDataType = {}; // Data returned by other businesses through formula calculation, excluding the sheet.
 
     private _unitArrayFormulaData: UnitArrayFormulaDataType = {};
 
@@ -64,8 +106,8 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         return this._currentColumn;
     }
 
-    get currentSheetId() {
-        return this._currentSheetId;
+    get currentSubComponentId() {
+        return this._currentSubComponentId;
     }
 
     get currentUnitId() {
@@ -74,6 +116,24 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
     override dispose(): void {
         this.reset();
+    }
+
+    stopExecution() {
+        this._stopState = true;
+
+        this.setFormulaExecuteStage(FormulaExecuteStageType.IDLE);
+    }
+
+    isStopExecution() {
+        return this._stopState;
+    }
+
+    setFormulaExecuteStage(type: FormulaExecuteStageType) {
+        this._formulaExecuteStage = type;
+    }
+
+    getFormulaExecuteStage() {
+        return this._formulaExecuteStage;
     }
 
     reset() {
@@ -85,7 +145,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
     setCurrent(row: number, column: number, sheetId: string, unitId: string) {
         this._currentRow = row;
         this._currentColumn = column;
-        this._currentSheetId = sheetId;
+        this._currentSubComponentId = sheetId;
         this._currentUnitId = unitId;
     }
 
@@ -101,10 +161,29 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         return this._functionDefinitionPrivacyVar.get(lambdaId);
     }
 
+    setRuntimeOtherData(formulaId: string, functionVariant: FunctionVariantType) {
+        const subComponentId = this._currentSubComponentId;
+        const unitId = this._currentUnitId;
+
+        if (this._runtimeOtherData[unitId] === undefined) {
+            this._runtimeOtherData[unitId] = {};
+        }
+
+        const unitData = this._runtimeOtherData[unitId];
+
+        if (unitData[subComponentId] === undefined) {
+            unitData[subComponentId] = {};
+        }
+
+        const subComponentData = unitData[subComponentId];
+
+        subComponentData[formulaId] = this._objectValueToCellValue(functionVariant as CalculateValueType)!;
+    }
+
     setRuntimeData(functionVariant: FunctionVariantType) {
         const row = this._currentRow;
         const column = this._currentColumn;
-        const sheetId = this._currentSheetId;
+        const sheetId = this._currentSubComponentId;
         const unitId = this._currentUnitId;
 
         if (this._runtimeData[unitId] === undefined) {
@@ -168,6 +247,18 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
     getUnitArrayFormula() {
         return this._unitArrayFormulaData;
+    }
+
+    getRuntimeOtherData() {
+        return this._runtimeOtherData;
+    }
+
+    getAllRuntimeData() {
+        return {
+            unitData: this.getUnitData(),
+            unitArrayFormulaData: this.getUnitArrayFormula(),
+            unitOtherData: this.getRuntimeOtherData(),
+        };
     }
 
     private _objectValueToCellValue(objectValue: CalculateValueType) {

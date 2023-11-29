@@ -1,5 +1,18 @@
-import { FormulaEngineService, IFormulaData, IUnitData, IUnitSheetNameMap } from '@univerjs/base-formula-engine';
-import { ISetRangeValuesMutationParams, SetRangeValuesMutation } from '@univerjs/base-sheets';
+import { FormulaEngineService } from '@univerjs/base-formula-engine';
+import {
+    AddWorksheetMergeMutation,
+    DeleteRangeMutation,
+    InsertRangeMutation,
+    ISetRangeValuesMutationParams,
+    MoveColsMutation,
+    MoveRangeMutation,
+    MoveRowsMutation,
+    RemoveColMutation,
+    RemoveRowMutation,
+    RemoveSheetMutation,
+    SetRangeValuesMutation,
+    SetWorksheetNameMutation,
+} from '@univerjs/base-sheets';
 import {
     Disposable,
     ICommandInfo,
@@ -31,11 +44,27 @@ export class CalculateController extends Disposable {
 
     private _initialize(): void {
         this._commandExecutedListener();
+
+        this._initialExecuteCompleteFormula();
     }
 
     private _commandExecutedListener() {
-        // TODO@Dushusir: sheet rename
-        const updateCommandList = [SetRangeValuesMutation.id];
+        const updateCommandList = [
+            // ClearSelectionAllCommand.id,
+            // ClearSelectionContentCommand.id,
+            // SetRangeValuesCommand.id,
+            SetRangeValuesMutation.id,
+            MoveRangeMutation.id,
+            MoveRowsMutation.id,
+            MoveColsMutation.id,
+            DeleteRangeMutation.id,
+            InsertRangeMutation.id,
+            RemoveRowMutation.id,
+            RemoveColMutation.id,
+            RemoveSheetMutation.id,
+            SetWorksheetNameMutation.id,
+            AddWorksheetMergeMutation.id,
+        ];
 
         this.disposeWithMe(
             // TODO@Dushusir: use SheetInterceptorService?
@@ -44,19 +73,26 @@ export class CalculateController extends Disposable {
                     return;
                 }
 
-                this._calculate(command as ICommandInfo<ISetRangeValuesMutationParams>);
+                let dirtyRanges: IUnitRange[] = [];
+                if (command.id === SetRangeValuesMutation.id) {
+                    dirtyRanges = this._getSetRangeValuesMutationDirtyRange(
+                        command.params as ISetRangeValuesMutationParams
+                    );
+                }
+
+                this._calculate(dirtyRanges);
             })
         );
     }
 
-    private _calculate(command: ICommandInfo<ISetRangeValuesMutationParams>) {
-        const { params } = command;
-        if (!params || params.isFormulaUpdate === true) return;
-
+    private _getSetRangeValuesMutationDirtyRange(params: ISetRangeValuesMutationParams) {
         const { worksheetId: sheetId, workbookId: unitId, cellValue } = params;
-        if (cellValue == null) return;
 
         const dirtyRanges: IUnitRange[] = [];
+
+        if (cellValue == null) {
+            return dirtyRanges;
+        }
 
         const discreteRanges = new ObjectMatrix(cellValue).getDiscreteRanges();
 
@@ -64,49 +100,47 @@ export class CalculateController extends Disposable {
             dirtyRanges.push({ unitId, sheetId, range });
         });
 
-        if (dirtyRanges.length === 0) return;
-
-        const { allUnitData, unitSheetNameMap } = this._formulaDataModel.getCalculateData();
         this._formulaDataModel.updateFormulaData(unitId, sheetId, cellValue);
-        const formulaData = this._formulaDataModel.getFormulaData();
 
-        this._executeFormula(unitId, allUnitData, formulaData, unitSheetNameMap, false, dirtyRanges);
+        return dirtyRanges;
     }
 
-    private _executeFormula(
-        unitId: string,
-        allUnitData: IUnitData,
-        formulaData: IFormulaData,
-        unitSheetNameMap: IUnitSheetNameMap,
-        forceCalculate: boolean = false,
-        dirtyRanges: IUnitRange[]
-    ) {
-        // Add mutation after calculating the formula
-        this._formulaEngineService
-            .execute(unitId, {
-                unitData: allUnitData,
-                formulaData,
-                sheetNameMap: unitSheetNameMap,
-                forceCalculate,
-                dirtyRanges,
-            })
-            .then((data) => {
-                const { sheetData, arrayFormulaData } = data;
+    private _calculate(dirtyRanges: IUnitRange[]) {
+        if (dirtyRanges.length === 0) return;
 
-                if (!sheetData) {
-                    console.error('No sheetData from Formula Engine!');
-                    return;
-                }
+        const formulaData = this._formulaDataModel.getFormulaData();
 
-                if (arrayFormulaData) {
-                    // TODO@Dushusir: refresh array formula view
-                    this._formulaDataModel.setArrayFormulaData(arrayFormulaData);
-                }
+        this._formulaEngineService.execute({
+            formulaData,
+            forceCalculate: false,
+            dirtyRanges,
+        });
+    }
+
+    private _initialExecuteCompleteFormula() {
+        this._formulaEngineService.executionCompleteListener$.subscribe((data) => {
+            const { unitData, unitArrayFormulaData } = data;
+
+            if (!unitData) {
+                console.error('No sheetData from Formula Engine!');
+                return;
+            }
+
+            if (unitArrayFormulaData) {
+                // TODO@Dushusir: refresh array formula view
+                this._formulaDataModel.setArrayFormulaData(unitArrayFormulaData);
+            }
+
+            const unitIds = Object.keys(unitData);
+
+            // Update each calculated value, possibly involving all cells
+            const redoMutationsInfo: ICommandInfo[] = [];
+
+            unitIds.forEach((unitId) => {
+                const sheetData = unitData[unitId];
 
                 const sheetIds = Object.keys(sheetData);
 
-                // Update each calculated value, possibly involving all cells
-                const redoMutationsInfo: ICommandInfo[] = [];
                 sheetIds.forEach((sheetId) => {
                     const cellData = sheetData[sheetId];
                     const setRangeValuesMutation: ISetRangeValuesMutationParams = {
@@ -121,9 +155,10 @@ export class CalculateController extends Disposable {
                         params: setRangeValuesMutation,
                     });
                 });
-
-                const result = redoMutationsInfo.every((m) => this._commandService.executeCommand(m.id, m.params));
-                return result;
             });
+
+            const result = redoMutationsInfo.every((m) => this._commandService.executeCommand(m.id, m.params));
+            return result;
+        });
     }
 }

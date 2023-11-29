@@ -21,11 +21,13 @@ export class FormulaDependencyTree extends Disposable {
 
     column: number = -1;
 
-    sheetId: string = '';
+    subComponentId: string = '';
 
     unitId: string = '';
 
     rangeList: IUnitRange[] = [];
+
+    formulaId: Nullable<string>;
 
     private _state = FDtreeStateType.DEFAULT;
 
@@ -148,7 +150,7 @@ export class FormulaDependencyTree extends Disposable {
 
             if (
                 dependenceTree.unitId === unitId &&
-                dependenceTree.sheetId === sheetId &&
+                dependenceTree.subComponentId === sheetId &&
                 dependenceTree.compareRangeData(range)
             ) {
                 return true;

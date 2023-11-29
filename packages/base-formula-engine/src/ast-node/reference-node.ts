@@ -42,7 +42,7 @@ export class ReferenceNode extends BaseAstNode {
         this._referenceObject.setUnitData(currentConfigService.getUnitData());
         this._referenceObject.setForcedSheetId(currentConfigService.getSheetNameMap());
 
-        this._referenceObject.setDefaultSheetId(runtimeService.currentSheetId);
+        this._referenceObject.setDefaultSheetId(runtimeService.currentSubComponentId);
         this._referenceObject.setDefaultUnitId(runtimeService.currentUnitId);
         this._referenceObject.setRuntimeData(runtimeService.getUnitData());
 

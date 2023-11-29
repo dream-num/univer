@@ -1,5 +1,6 @@
 import { Disposable, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { Ctor, Dependency, Inject, Injector } from '@wendellhu/redi';
+import { Subject } from 'rxjs';
 
 import { LexerTreeBuilder } from '../analysis/lexer';
 import { LexerNode } from '../analysis/lexer-node';
@@ -42,11 +43,24 @@ import { FunctionVariantType } from '../reference-object/base-reference-object';
 import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from './current-data.service';
 import { DefinedNamesService, IDefinedNamesService } from './defined-names.service';
 import { FunctionService, IFunctionService } from './function.service';
-import { FormulaRuntimeService, IFormulaRuntimeService } from './runtime.service';
+import {
+    FormulaExecuteStageType,
+    FormulaRuntimeService,
+    IAllRuntimeData,
+    IFormulaRuntimeService,
+} from './runtime.service';
 import { ISuperTableService, SuperTableService } from './super-table.service';
 
 @OnLifecycle(LifecycleStages.Rendered, FormulaEngineService)
 export class FormulaEngineService extends Disposable {
+    private readonly _executionStartListener$ = new Subject<boolean>();
+
+    readonly executionStartListener$ = this._executionStartListener$.asObservable();
+
+    private readonly _executionCompleteListener$ = new Subject<IAllRuntimeData>();
+
+    readonly executionCompleteListener$ = this._executionCompleteListener$.asObservable();
+
     constructor(@Inject(Injector) private readonly _injector: Injector) {
         super();
         this._initializeDependencies();
@@ -175,16 +189,21 @@ export class FormulaEngineService extends Disposable {
      * @param dirtyRanges input external unit data for multi workbook
      * @returns
      */
-    async execute(unitId: string, formulaDatasetConfig: IFormulaDatasetConfig) {
+    async execute(formulaDatasetConfig: IFormulaDatasetConfig) {
+        this._executionStartListener$.next(true);
+
         this.currentConfigService.load(formulaDatasetConfig);
 
         this.runtimeService.reset();
 
         // const dependencyGenerator = FormulaDependencyGenerator.create(formulaData, forceCalculate);
+        this.runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.DEPENDENCY);
 
         const treeList = await this.formulaDependencyGenerator.generate();
 
         const interpreter = this.interpreter;
+
+        this.runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.INTERPRETER);
 
         for (let i = 0, len = treeList.length; i < len; i++) {
             const tree = treeList[i];
@@ -195,19 +214,34 @@ export class FormulaEngineService extends Disposable {
                 throw new Error('astNode is null');
             }
 
-            this.runtimeService.setCurrent(tree.row, tree.column, tree.sheetId, tree.unitId);
+            this.runtimeService.setCurrent(tree.row, tree.column, tree.subComponentId, tree.unitId);
 
             if (interpreter.checkAsyncNode(astNode)) {
                 value = await interpreter.executeAsync(astNode);
             } else {
                 value = interpreter.execute(astNode);
             }
-            this.runtimeService.setRuntimeData(value);
+
+            if (this.runtimeService.isStopExecution()) {
+                this.runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.IDLE);
+                return;
+            }
+
+            if (tree.formulaId != null) {
+                this.runtimeService.setRuntimeOtherData(tree.formulaId, value);
+            } else {
+                this.runtimeService.setRuntimeData(value);
+            }
         }
 
+        this.runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.IDLE);
+
+        this._executionCompleteListener$.next(this.runtimeService.getAllRuntimeData());
+
         return {
-            sheetData: this.runtimeService.getSheetData(unitId),
-            arrayFormulaData: this.runtimeService.getSheetArrayFormula(unitId),
+            unitData: this.runtimeService.getUnitData(),
+            unitArrayFormulaData: this.runtimeService.getUnitArrayFormula(),
+            unitOtherData: this.runtimeService.getRuntimeOtherData(),
         };
     }
 

@@ -8,14 +8,14 @@ import { AstRootNode, FunctionNode, PrefixNode, SuffixNode } from '../ast-node';
 import { BaseAstNode, ErrorNode } from '../ast-node/base-ast-node';
 import { NodeType } from '../ast-node/node-type';
 import { FormulaAstLRU } from '../basics/cache-lru';
-import { IFormulaData } from '../basics/common';
+import { IFormulaData, IOtherFormulaData } from '../basics/common';
 import { ErrorType } from '../basics/error-type';
 import { PreCalculateNodeType } from '../basics/node-type';
 import { prefixToken, suffixToken } from '../basics/token';
 import { Interpreter } from '../interpreter/interpreter';
 import { BaseReferenceObject } from '../reference-object/base-reference-object';
 import { IFormulaCurrentConfigService } from '../services/current-data.service';
-import { IFormulaRuntimeService } from '../services/runtime.service';
+import { FormulaExecuteStageType, IFormulaRuntimeService } from '../services/runtime.service';
 import { FormulaDependencyTree } from './dependency-tree';
 
 const FORMULA_CACHE_LRU_COUNT = 100000;
@@ -48,7 +48,11 @@ export class FormulaDependencyGenerator extends Disposable {
 
         const formulaData = this._currentConfigService.getFormulaData();
 
-        const treeList = await this._generateTreeList(formulaData);
+        const otherFormulaData = this._currentConfigService.getOtherFormulaData();
+
+        this._runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.DEPENDENCY);
+
+        const treeList = await this._generateTreeList(formulaData, otherFormulaData);
 
         const updateTreeList = this._getUpdateTreeListAndMakeDependency(treeList);
 
@@ -60,8 +64,10 @@ export class FormulaDependencyGenerator extends Disposable {
      * @param formulaData
      * @returns
      */
-    private async _generateTreeList(formulaData: IFormulaData) {
+    private async _generateTreeList(formulaData: IFormulaData, otherFormulaData: IOtherFormulaData) {
         const formulaDataKeys = Object.keys(formulaData);
+
+        const otherFormulaDataKeys = Object.keys(otherFormulaData);
 
         const treeList: FormulaDependencyTree[] = [];
 
@@ -83,7 +89,7 @@ export class FormulaDependencyGenerator extends Disposable {
                     FDtree.node = node;
                     FDtree.formula = formulaString;
                     FDtree.unitId = unitId;
-                    FDtree.sheetId = sheetId;
+                    FDtree.subComponentId = sheetId;
                     FDtree.row = row;
                     FDtree.column = column;
 
@@ -92,10 +98,41 @@ export class FormulaDependencyGenerator extends Disposable {
             }
         }
 
+        for (const unitId of otherFormulaDataKeys) {
+            const subComponentData = otherFormulaData[unitId];
+
+            const subComponentKeys = Object.keys(subComponentData);
+
+            for (const subComponentId of subComponentKeys) {
+                const subFormulaData = subComponentData[subComponentId];
+
+                const subFormulaDataKeys = Object.keys(subFormulaData);
+
+                for (const subFormulaDataId of subFormulaDataKeys) {
+                    const formulaDataItem = subFormulaData[subFormulaDataId];
+
+                    const { f: formulaString } = formulaDataItem;
+
+                    const node = this._generateAstNode(formulaString);
+
+                    const FDtree = new FormulaDependencyTree();
+
+                    FDtree.node = node;
+                    FDtree.formula = formulaString;
+                    FDtree.unitId = unitId;
+                    FDtree.subComponentId = subComponentId;
+
+                    FDtree.formulaId = subFormulaDataId;
+
+                    treeList.push(FDtree);
+                }
+            }
+        }
+
         for (let i = 0, len = treeList.length; i < len; i++) {
             const tree = treeList[i];
 
-            this._runtimeService.setCurrent(tree.row, tree.column, tree.sheetId, tree.unitId);
+            this._runtimeService.setCurrent(tree.row, tree.column, tree.subComponentId, tree.unitId);
 
             if (tree.node == null) {
                 throw new Error('tree node is null');
@@ -337,7 +374,7 @@ export class FormulaDependencyGenerator extends Disposable {
      */
     private _includeTree(tree: FormulaDependencyTree) {
         const unitId = tree.unitId;
-        const sheetId = tree.sheetId;
+        const subComponentId = tree.subComponentId;
 
         if (!this._updateRangeFlattenCache.has(unitId)) {
             return false;
@@ -345,11 +382,11 @@ export class FormulaDependencyGenerator extends Disposable {
 
         const sheetRangeMap = this._updateRangeFlattenCache.get(unitId)!;
 
-        if (!sheetRangeMap.has(sheetId)) {
+        if (!sheetRangeMap.has(subComponentId)) {
             return false;
         }
 
-        const ranges = sheetRangeMap.get(sheetId)!;
+        const ranges = sheetRangeMap.get(subComponentId)!;
 
         for (const range of ranges) {
             if (tree.compareRangeData(range)) {

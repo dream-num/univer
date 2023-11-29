@@ -48,6 +48,10 @@ export interface IRuntimeUnitDataType {
     [unitId: string]: IRuntimeSheetData;
 }
 
+export interface IRuntimeOtherUnitDataType {
+    [unitId: string]: { [sheetId: string]: { [formulaId: string]: ICellData } };
+}
+
 export interface IUnitSheetNameMap {
     [unitId: string]: { [sheetName: string]: string };
 }
@@ -70,6 +74,10 @@ export interface IFormulaData {
     [unitId: string]: { [sheetId: string]: ObjectMatrixPrimitiveType<IFormulaDataItem> };
 }
 
+export interface IOtherFormulaData {
+    [unitId: string]: { [subComponentId: string]: { [formulaId: string]: IFormulaDataItem } };
+}
+
 export interface ISuperTable {
     sheetId: string;
     hasCustomTitle: BooleanNumber;
@@ -85,9 +93,7 @@ export enum TableOptionType {
 }
 
 export interface IFormulaDatasetConfig {
-    unitData: IUnitData;
     formulaData: IFormulaData;
-    sheetNameMap: IUnitSheetNameMap;
     forceCalculate: boolean;
     dirtyRanges: IUnitRange[];
 }

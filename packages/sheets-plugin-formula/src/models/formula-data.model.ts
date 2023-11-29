@@ -1,10 +1,10 @@
 import {
-    ArrayFormulaDataType,
     IFormulaData,
     IFormulaDataItem,
     ISheetData,
     IUnitData,
     IUnitSheetNameMap,
+    UnitArrayFormulaDataType,
 } from '@univerjs/base-formula-engine';
 import {
     Disposable,
@@ -25,7 +25,7 @@ export interface IFormulaConfig {
 export class FormulaDataModel extends Disposable {
     private _formulaData: IFormulaData = {};
 
-    private _arrayFormulaData: ArrayFormulaDataType = {};
+    private _arrayFormulaData: UnitArrayFormulaDataType = {};
 
     constructor(@IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService) {
         super();
@@ -39,24 +39,36 @@ export class FormulaDataModel extends Disposable {
         this._formulaData = value;
     }
 
-    getArrayFormulaData(): ArrayFormulaDataType {
+    getArrayFormulaData(): UnitArrayFormulaDataType {
         return this._arrayFormulaData;
     }
 
-    setArrayFormulaData(value: ArrayFormulaDataType) {
-        Object.keys(value).forEach((sheetId) => {
-            const arrayFormula = value[sheetId];
-            if (!this._arrayFormulaData[sheetId]) {
-                this._arrayFormulaData[sheetId] = new ObjectMatrix();
+    setArrayFormulaData(formulaData: UnitArrayFormulaDataType) {
+        Object.keys(formulaData).forEach((unitId) => {
+            const sheetData = formulaData[unitId];
+
+            if (!this._arrayFormulaData[unitId]) {
+                this._arrayFormulaData[unitId] = {};
             }
-            arrayFormula.forValue((r, c, v) => {
-                this._arrayFormulaData[sheetId].setValue(r, c, v);
+
+            Object.keys(sheetData).forEach((sheetId) => {
+                const arrayFormula = sheetData[sheetId];
+
+                if (!this._arrayFormulaData[unitId][sheetId]) {
+                    this._arrayFormulaData[unitId][sheetId] = new ObjectMatrix();
+                }
+                arrayFormula.forValue((r, c, v) => {
+                    this._arrayFormulaData[unitId][sheetId].setValue(r, c, v);
+                });
             });
         });
     }
 
     initFormulaData() {
         // load formula data from workbook config data
+
+        const unitFile = this._currentUniverService.getAllUniverSheetsInstance();
+
         const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
         const unitId = workbook.getUnitId();
         this._formulaData[unitId] = {};

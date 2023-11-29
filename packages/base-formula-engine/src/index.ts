@@ -7,6 +7,7 @@ export type {
     ISheetData,
     IUnitData,
     IUnitSheetNameMap,
+    UnitArrayFormulaDataType,
 } from './basics/common';
 export { FUNCTION_NAMES, FunctionType, type IFunctionInfo, type IFunctionParam } from './basics/function';
 export { includeFormulaLexerToken, isFormulaLexerToken, normalizeSheetName } from './basics/match-token';

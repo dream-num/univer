@@ -29,3 +29,14 @@ export function dedupe<T>(arr: T[]): T[] {
     }
     return result;
 }
+
+export function findLast<T>(arr: T[], callback: (item: T, index: number) => boolean): T | null {
+    for (let i = arr.length - 1; i > -1; i--) {
+        const item = arr[i];
+        if (callback(item, i)) {
+            return item;
+        }
+    }
+
+    return null;
+}

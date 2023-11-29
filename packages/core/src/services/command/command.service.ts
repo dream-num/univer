@@ -241,7 +241,8 @@ export class CommandService implements ICommandService {
             // If the executed command is of type `Mutation`, we should add a trigger params,
             // whose value is the command's ID that triggers the mutation.
             if (command.type === CommandType.MUTATION) {
-                const triggerCommand = this._commandExecutionStack.findLast(
+                const triggerCommand = findLast(
+                    this._commandExecutionStack,
                     (item) => item.type === CommandType.COMMAND
                 );
                 if (triggerCommand) {

@@ -1,3 +1,4 @@
+import { FormulaEngineService } from '@univerjs/base-formula-engine';
 import {
     Direction,
     Disposable,
@@ -17,10 +18,14 @@ import {
     ICopyDataInTypeIndexInfo,
     ICopyDataPiece,
 } from '@univerjs/ui-plugin-sheets';
+import { Inject } from '@wendellhu/redi';
 
 @OnLifecycle(LifecycleStages.Ready, FormulaAutoFillController)
 export class FormulaAutoFillController extends Disposable {
-    constructor(@IAutoFillService private readonly _autoFillService: AutoFillService) {
+    constructor(
+        @IAutoFillService private readonly _autoFillService: AutoFillService,
+        @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService
+    ) {
         super();
 
         this._initialize();
@@ -44,128 +49,91 @@ export class FormulaAutoFillController extends Disposable {
             applyFunctions: {
                 [APPLY_TYPE.COPY]: (dataWithIndex, len, direction, copyDataPiece) => {
                     const { data, index } = dataWithIndex;
-                    return fillCopyFormula(data, len, direction, index, copyDataPiece);
+                    return this._fillCopyFormula(data, len, direction, index, copyDataPiece);
                 },
             },
         };
         this._autoFillService.registerRule(formulaRule);
     }
-}
 
-/**
- *  TODO@Dushusir: add step
- * @param data
- * @param len
- * @param direction
- * @returns
- */
-export function fillCopyFormula(
-    data: Array<Nullable<ICellData>>,
-    len: number,
-    direction: Direction,
-    index: ICopyDataInTypeIndexInfo,
-    copyDataPiece: ICopyDataPiece
-) {
-    const step = getDataLength(copyDataPiece);
-    const applyData = [];
-    const formulaIdMap = new Map<number, string>();
+    private _fillCopyFormula(
+        data: Array<Nullable<ICellData>>,
+        len: number,
+        direction: Direction,
+        index: ICopyDataInTypeIndexInfo,
+        copyDataPiece: ICopyDataPiece
+    ) {
+        const step = getDataLength(copyDataPiece);
+        const applyData = [];
+        const formulaIdMap = new Map<number, string>();
 
-    for (let i = 1; i <= len; i++) {
-        const index = (i - 1) % data.length;
-        const d = Tools.deepClone(data[index]);
+        for (let i = 1; i <= len; i++) {
+            const index = (i - 1) % data.length;
+            const d = Tools.deepClone(data[index]);
 
-        if (d) {
-            const originalFormula = data[index]?.f;
+            if (d) {
+                const originalFormula = data[index]?.f;
 
-            if (originalFormula) {
-                // The first position setting formula and formulaId
-                let formulaId = formulaIdMap.get(index);
+                if (originalFormula) {
+                    // The first position setting formula and formulaId
+                    let formulaId = formulaIdMap.get(index);
 
-                if (!formulaId) {
-                    formulaId = Tools.generateRandomId(6);
-                    formulaIdMap.set(index, formulaId);
+                    if (!formulaId) {
+                        formulaId = Tools.generateRandomId(6);
+                        formulaIdMap.set(index, formulaId);
 
-                    const shiftedFormula = shiftFormula(originalFormula, step, direction);
+                        const { offsetX, offsetY } = directionToOffset(step, direction);
+                        const shiftedFormula = this._formulaEngineService.moveFormulaRefOffset(
+                            originalFormula,
+                            offsetX,
+                            offsetY
+                        );
 
-                    d.si = formulaId;
-                    d.f = shiftedFormula;
-                    d.v = null;
-                    d.p = null;
-                } else {
-                    // At the beginning of the second formula, set formulaId only
-                    d.si = formulaId;
-                    d.f = null;
-                    d.v = null;
-                    d.p = null;
-                }
+                        d.si = formulaId;
+                        d.f = shiftedFormula;
+                        d.v = null;
+                        d.p = null;
+                    } else {
+                        // At the beginning of the second formula, set formulaId only
+                        d.si = formulaId;
+                        d.f = null;
+                        d.v = null;
+                        d.p = null;
+                    }
 
-                if (direction === Direction.DOWN || direction === Direction.RIGHT) {
-                    applyData.push(d);
-                } else {
-                    applyData.unshift(d);
+                    if (direction === Direction.DOWN || direction === Direction.RIGHT) {
+                        applyData.push(d);
+                    } else {
+                        applyData.unshift(d);
+                    }
                 }
             }
         }
+
+        return applyData;
+    }
+}
+
+function directionToOffset(step: number, direction: Direction) {
+    let offsetX = 0;
+    let offsetY = 0;
+
+    switch (direction) {
+        case Direction.UP:
+            offsetY = -step;
+            break;
+        case Direction.RIGHT:
+            offsetX = step;
+            break;
+        case Direction.DOWN:
+            offsetY = step;
+            break;
+        case Direction.LEFT:
+            offsetX = -step;
+            break;
     }
 
-    return applyData;
-}
-
-function shiftFormula(originalFormula: string, shift: number, direction: Direction): string {
-    const tokens = tokenizeFormula(originalFormula);
-    const shiftedTokens = [];
-
-    for (const token of tokens) {
-        if (isCellReference(token)) {
-            const shiftedReference = shiftCellReference(token, shift, direction);
-            shiftedTokens.push(shiftedReference);
-        } else {
-            shiftedTokens.push(token);
-        }
-    }
-
-    return shiftedTokens.join('');
-}
-
-function tokenizeFormula(formula: string): string[] {
-    const regex = /([A-Z]+\d+|[A-Z]+|\d+|\S)/g;
-    return formula.match(regex) || [];
-}
-
-function isCellReference(token: string): boolean {
-    const cellReferenceRegex = /^[A-Z]+\d+$/;
-    return cellReferenceRegex.test(token);
-}
-
-function shiftCellReference(cellReference: string, shift: number, direction: Direction): string {
-    const [col, row] = extractColRow(cellReference);
-
-    let shiftedCol = col;
-    let shiftedRow = row;
-
-    if (direction === Direction.DOWN) {
-        shiftedRow += shift;
-    } else if (direction === Direction.RIGHT) {
-        shiftedCol = shiftColumn(col, shift);
-    } else if (direction === Direction.UP) {
-        shiftedRow -= shift;
-    } else if (direction === Direction.LEFT) {
-        shiftedCol = shiftColumn(col, -shift);
-    }
-
-    return shiftedCol + shiftedRow;
-}
-
-function extractColRow(cellReference: string): [string, number] {
-    const col = cellReference.replace(/\d/g, '');
-    const row = parseInt(cellReference.replace(/[A-Z]+/g, ''), 10);
-    return [col, row];
-}
-
-function shiftColumn(col: string, shift: number): string {
-    const currentCharCode = col.charCodeAt(0);
-    const shiftedCharCode = currentCharCode + shift;
-    return String.fromCharCode(shiftedCharCode);
+    return { offsetX, offsetY };
 }
 
 function getDataLength(copyDataPiece: ICopyDataPiece) {

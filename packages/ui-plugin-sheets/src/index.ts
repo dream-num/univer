@@ -1,5 +1,6 @@
 export * from './basics';
 export { getEditorObject } from './basics/editor/get-editor-object';
+export { AutoFillCommand } from './commands/commands/auto-fill.command';
 export { ExpandSelectionCommand, JumpOver, MoveSelectionCommand } from './commands/commands/set-selection.command';
 export { SetCellEditVisibleArrowOperation } from './commands/operations/cell-edit.operation';
 export { SetScrollOperation } from './commands/operations/scroll.operation';

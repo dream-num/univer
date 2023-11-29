@@ -9,7 +9,7 @@ export const zhCn = {
             accounting: '会计',
             currency: '货币',
             date: '日期',
-            thousandthPercentile: '千分为符',
+            thousandthPercentile: '千分位符',
             preview: '示例',
             decimalLength: '小数位数',
             currencyType: '货币类型',

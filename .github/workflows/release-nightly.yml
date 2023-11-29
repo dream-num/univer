@@ -2,13 +2,13 @@ name: 🥷 Release Nightly
 
 on:
     schedule:
-        - cron: '0 16 * * *'
+        - cron: '0 19 * * *'
 
 permissions:
     contents: read
 
 jobs:
-    build:
+    release-nightly:
         if: github.repository == 'dream-num/univer'
         runs-on: ubuntu-latest
 
@@ -60,7 +60,7 @@ jobs:
             - name: Set all monorepo's package version
               run: |
                   for package in $(ls packages); do
-                      node -e "const fs = require('fs'); const package = JSON.parse(fs.readFileSync('./packages/$package/package.json')); package.version = '${{ steps.nightly-version.outputs.version }}'; fs.writeFileSync('./packages/$package/package.json', JSON.stringify(package, null, 2));"
+                      node -e "const fs = require('fs'); const package = JSON.parse(fs.readFileSync('./packages/$package/package.json')); package.version = '${{ steps.nightly-version.outputs.version }}'; fs.writeFileSync('./packages/$package/package.json', JSON.stringify(package, null, 4));"
                   done
 
             - name: Install dependencies
@@ -71,7 +71,51 @@ jobs:
 
             - name: Set publishing config
               run: |
-                  pnpm config set '${{ secrets.VERDACCIO_URL }}:_authToken' "${{ secrets.VERDACCIO_TOKEN }}"
+                  echo '\n${{ secrets.VERDACCIO_URL }}:_authToken=${{ secrets.VERDACCIO_TOKEN }}' >> .npmrc
+                  echo '\nregistry=https:${{ secrets.VERDACCIO_URL }}' >> .npmrc
 
             - name: Publish
               run: pnpm publish --access public --tag nightly -r
+
+            # ================= Notify Discord =================
+            - name: 👾 Discord Notification
+              uses: sarisia/actions-status-discord@v1
+              if: ${{ success() }}
+              with:
+                    webhook: ${{ secrets.DISCORD_WEBHOOK }}
+                    status: ${{ job.status }}
+                    description: |
+                        🌝 Nightly release: Successful
+
+                        🎉 🎉 🎉 🎉 🎉 🎉 🎉 🎉 🎉
+                        Release version: ${{ steps.nightly-version.outputs.version }}
+                        🎉 🎉 🎉 🎉 🎉 🎉 🎉 🎉 🎉
+
+                        Have a good dream! 🌙
+                    nofail: false
+                    nodetail: false
+                    nocontext: false
+                    noprefix: true
+                    color: 0x00b894
+                    username: Nightly Release
+
+            - name: 👾 Discord Notification
+              uses: sarisia/actions-status-discord@v1
+              if: ${{ failure() }}
+              with:
+                    webhook: ${{ secrets.DISCORD_WEBHOOK }}
+                    status: ${{ job.status }}
+                    description: |
+                        🌚 Nightly release: Unsuccessful 💩
+
+                        👿 👿 👿 👿 👿 👿 👿 👿 👿
+                        Failed version: ${{ steps.nightly-version.outputs.version }}
+                        👿 👿 👿 👿 👿 👿 👿 👿 👿
+
+                        Don't worry, tomorrow will be better! 🌞
+                    nofail: false
+                    nodetail: false
+                    nocontext: false
+                    noprefix: true
+                    color: 0xd63031
+                    username: Nightly Release

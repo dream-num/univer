@@ -137,7 +137,8 @@ module.exports = {
         'simple-import-sort/exports': 'error',
         'simple-import-sort/imports': 'error',
         'unused-imports/no-unused-imports': 'error',
-        '@typescript-eslint/consistent-type-definitions': 'error',
+        '@typescript-eslint/consistent-type-definitions': ['warn'],
+        '@typescript-eslint/consistent-type-imports': ['warn'],
         'react/self-closing-comp': [
             'error',
             {

@@ -1,13 +1,15 @@
 import { LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
-import React, { ComponentType, useEffect, useState } from 'react';
+import type { ComponentType } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { useObservable } from '../../../components/hooks/observable';
 import { MenuPosition } from '../../../services/menu/menu';
 import { IMenuService } from '../../../services/menu/menu.service';
 import { ComponentContainer } from '../ComponentContainer';
-import { IMenuGroup, position$, positions, setPosition } from './hooks/menu';
+import type { IMenuGroup } from './hooks/menu';
+import { position$, positions, setPosition } from './hooks/menu';
 import styles from './index.module.less';
 
 export interface IMenuBarProps {

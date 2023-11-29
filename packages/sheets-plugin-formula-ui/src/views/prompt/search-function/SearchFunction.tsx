@@ -4,12 +4,9 @@ import { ICellEditorManagerService } from '@univerjs/ui-plugin-sheets';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
-import { ISearchItem } from '../../../services/description.service';
-import {
-    IFormulaPromptService,
-    INavigateParam,
-    ISearchFunctionOperationParams,
-} from '../../../services/prompt.service';
+import type { ISearchItem } from '../../../services/description.service';
+import type { INavigateParam, ISearchFunctionOperationParams } from '../../../services/prompt.service';
+import { IFormulaPromptService } from '../../../services/prompt.service';
 import styles from './index.module.less';
 
 export function SearchFunction() {
@@ -108,7 +105,7 @@ export function SearchFunction() {
                 </ul>
             }
         >
-            <span></span>
+            <span />
         </Dropdown>
     );
 }

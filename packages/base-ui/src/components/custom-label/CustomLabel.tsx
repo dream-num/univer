@@ -2,10 +2,11 @@ import { TinyColor } from '@ctrl/tinycolor';
 import { LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React from 'react';
-import { isObservable, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { isObservable } from 'rxjs';
 
 import { ComponentManager } from '../../common/component-manager';
-import { IMenuSelectorItem } from '../../services/menu/menu';
+import type { IMenuSelectorItem } from '../../services/menu/menu';
 import { useObservable } from '../hooks/observable';
 
 export type ICustomLabelProps<T = undefined> = {

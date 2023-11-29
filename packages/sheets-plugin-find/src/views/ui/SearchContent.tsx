@@ -1,4 +1,4 @@
-import { Nullable } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
 import React, { Component } from 'react';
 
 interface SearchProps {
@@ -7,22 +7,22 @@ interface SearchProps {
     keys?: string;
 }
 
-type SearchState = {
+interface SearchState {
     tab: LabelProps[];
     content: LabelProps[];
     match: LabelProps[];
     buttons: LabelProps[];
     changeSearchText: Nullable<(e: Event) => void>;
     getMatch: Nullable<(value: string[]) => void>;
-};
+}
 
-type LabelProps = {
+interface LabelProps {
     locale?: string;
     label?: string;
     value?: string;
     key?: string;
     onClick?: () => void;
-};
+}
 
 export class SearchContent extends Component<SearchProps, SearchState> {
     // initialize() {
@@ -59,7 +59,7 @@ export class SearchContent extends Component<SearchProps, SearchState> {
         // if (!changeSearchText || !getMatch) return;
 
         return (
-            <div></div>
+            <div />
             // <Tab activeKey={activeKey} type="card">
             //     {tab.map((item, index) => (
             //         <TabPane tab={item.label} keys={item.key} key={index}>

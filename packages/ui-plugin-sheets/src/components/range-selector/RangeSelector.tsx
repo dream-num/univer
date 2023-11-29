@@ -90,7 +90,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
                 data-placeholder={localeService.t('rangeSelector.placeholder')}
                 onKeyDown={handleKeyDown}
                 onFocus={handleFocus}
-            ></div>
+            />
 
             <Tooltip title={localeService.t('rangeSelector.tooltip')} placement="bottom">
                 <button className={styles.rangeSelectorIcon} onClick={handleClick}>

@@ -1,10 +1,10 @@
 import React from 'react';
 
-type BarProps = {
+interface BarProps {
     list: Array<Record<string, string>>;
     img: string;
     onClick?: (item: {}, index: number) => void;
-};
+}
 
 export const DataBar = (props: BarProps) => {
     const { list, img, onClick } = props;
@@ -21,7 +21,7 @@ export const DataBar = (props: BarProps) => {
                     key={index}
                     onClick={() => handleClick(item, index)}
                     style={{ width: '28px', height: '26px', background, backgroundPosition: `${item.x} ${item.y}` }}
-                ></div>
+                />
             ))}
         </div>
     );

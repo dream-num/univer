@@ -1,10 +1,11 @@
-import { Confirm, IConfirmProps } from '@univerjs/design';
+import type { IConfirmProps } from '@univerjs/design';
+import { Confirm } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
 import { IConfirmService } from '../../../services/confirm/confirm.service';
-import { IConfirmPartMethodOptions } from './interface';
+import type { IConfirmPartMethodOptions } from './interface';
 
 export function ConfirmPart() {
     const confirmService = useDependency(IConfirmService);

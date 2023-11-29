@@ -1,4 +1,4 @@
-import { IFunctionInfo } from '@univerjs/base-formula-engine';
+import type { IFunctionInfo } from '@univerjs/base-formula-engine';
 import { ISidebarService } from '@univerjs/base-ui';
 import { LocaleService } from '@univerjs/core';
 import { Button } from '@univerjs/design';
@@ -33,8 +33,8 @@ export function MoreFunctions() {
 
     return (
         <div className={styles.formulaMoreFunctions}>
-            {selectFunction && <SelectFunction onChange={setFunctionInfo}></SelectFunction>}
-            {inputParams && <InputParams functionInfo={functionInfo} onChange={setParams}></InputParams>}
+            {selectFunction && <SelectFunction onChange={setFunctionInfo} />}
+            {inputParams && <InputParams functionInfo={functionInfo} onChange={setParams} />}
             <div className={styles.formulaMoreFunctionsOperation}>
                 {/* TODO@Dushusir: open input params after range selector refactor */}
                 {inputParams && (

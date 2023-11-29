@@ -1,4 +1,4 @@
-import { IBorderInfo } from '@univerjs/base-sheets';
+import type { IBorderInfo } from '@univerjs/base-sheets';
 import { ComponentManager } from '@univerjs/base-ui';
 import { BorderStyleTypes } from '@univerjs/core';
 import { ColorPicker, Dropdown, Menu, MenuItem } from '@univerjs/design';

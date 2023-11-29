@@ -1,7 +1,8 @@
 import { InputNumber, SelectList } from '@univerjs/design';
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
-import { BusinessComponentProps } from '../../base/types';
+import type { BusinessComponentProps } from '../../base/types';
 import {
     getDecimalFromPattern,
     isPatternEqualWithoutDecimal,
@@ -49,7 +50,7 @@ export const ThousandthPercentilePanel: FC<BusinessComponentProps> = (props) => 
             </div>
             <div className="m-t-16 label"> 负数类型</div>
             <div className="m-t-8">
-                <SelectList onChange={handleClick} options={options} value={suffix}></SelectList>
+                <SelectList onChange={handleClick} options={options} value={suffix} />
             </div>
             <div className="describe m-t-14">货币格式用于表示一般货币数值。会计格式可以对一列数值进行小数点对齐。</div>
         </div>

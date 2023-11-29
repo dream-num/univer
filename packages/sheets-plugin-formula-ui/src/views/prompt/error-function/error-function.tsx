@@ -2,7 +2,8 @@ import { ICellEditorManagerService } from '@univerjs/ui-plugin-sheets';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
-import { IFormulaPromptService, IHelpFunctionOperationParams } from '../../../services/prompt.service';
+import type { IHelpFunctionOperationParams } from '../../../services/prompt.service';
+import { IFormulaPromptService } from '../../../services/prompt.service';
 import styles from './index.module.less';
 
 export function ErrorFunction() {

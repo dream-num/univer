@@ -1,6 +1,7 @@
 import { TinyColor } from '@ctrl/tinycolor';
 import { Menu } from '@univerjs/base-ui';
-import { BooleanNumber, ICommandService, ThemeService } from '@univerjs/core';
+import type { BooleanNumber } from '@univerjs/core';
+import { ICommandService, ThemeService } from '@univerjs/core';
 import { Dropdown } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';

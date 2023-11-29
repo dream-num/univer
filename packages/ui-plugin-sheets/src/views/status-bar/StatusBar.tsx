@@ -6,7 +6,8 @@ import clsx from 'clsx';
 import React, { useEffect, useState } from 'react';
 
 import { IStatusBarService } from '../../services/status-bar.service';
-import { CopyableStatisticItem, formatNumber, functionDisplayNames, IStatisticItem } from './CopyableStatisticItem';
+import type { IStatisticItem } from './CopyableStatisticItem';
+import { CopyableStatisticItem, formatNumber, functionDisplayNames } from './CopyableStatisticItem';
 import styles from './index.module.less';
 
 const SINGLE_MODE_WIDTH = 800;
@@ -123,7 +124,7 @@ export const StatusBar = () => {
                                         value={item.name}
                                         checked={item.show}
                                         onChange={() => onChange && onChange(item)}
-                                    ></Checkbox>
+                                    />
                                     <span>{`${localeService.t(
                                         functionDisplayNames?.[item.name] || item.name
                                     )}: ${formatNumber(item.value)}`}</span>
@@ -136,7 +137,7 @@ export const StatusBar = () => {
                         <MoreSingle />
                     </div>
                 </Dropdown>
-                <div className={styles.statusBarDiv}></div>
+                <div className={styles.statusBarDiv} />
             </div>
         )
     );

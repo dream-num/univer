@@ -2,9 +2,10 @@ import numfmt from '@univerjs/base-numfmt-engine';
 import { LocaleService } from '@univerjs/core';
 import { SelectList } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
-import { BusinessComponentProps } from '../../base/types';
+import type { BusinessComponentProps } from '../../base/types';
 import { getDateFormatOptions } from '../../utils/options';
 
 export const isDatePanel = (pattern: string) => {
@@ -37,7 +38,7 @@ export const DatePanel: FC<BusinessComponentProps> = (props) => {
         <div>
             <div className="m-t-16 label">{t('sheet.numfmt.dateType')}</div>
             <div className="m-t-8">
-                <SelectList value={suffix} options={options} onChange={suffixSet}></SelectList>
+                <SelectList value={suffix} options={options} onChange={suffixSet} />
             </div>
             <div className="describe m-t-14">{t('sheet.numfmt.dateDes')}</div>
         </div>

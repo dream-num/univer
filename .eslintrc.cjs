@@ -5,7 +5,15 @@ module.exports = {
         es2021: true,
     },
     parser: '@typescript-eslint/parser',
-    plugins: ['@typescript-eslint', 'prettier', 'import', 'import-newlines', 'unused-imports', 'simple-import-sort'],
+    plugins: [
+        '@typescript-eslint',
+        'prettier',
+        'import',
+        'import-newlines',
+        'unused-imports',
+        'simple-import-sort',
+        'react',
+    ],
     extends: [
         'airbnb-base', // https://www.npmjs.com/package/eslint-config-airbnb-base
         'airbnb-typescript/base', // https://www.npmjs.com/package/eslint-config-airbnb-typescript
@@ -129,6 +137,15 @@ module.exports = {
         'simple-import-sort/exports': 'error',
         'simple-import-sort/imports': 'error',
         'unused-imports/no-unused-imports': 'error',
+        '@typescript-eslint/consistent-type-definitions': ['warn'],
+        '@typescript-eslint/consistent-type-imports': ['warn'],
+        'react/self-closing-comp': [
+            'error',
+            {
+                component: true,
+                html: true,
+            },
+        ],
     },
     // https://www.npmjs.com/package/eslint-import-resolver-typescript
     settings: {

@@ -1,21 +1,23 @@
 import './index.less';
 
 import { LocaleService } from '@univerjs/core';
-import { Button, ISelectProps, Select } from '@univerjs/design';
+import type { ISelectProps } from '@univerjs/design';
+import { Button, Select } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import React, { FC, useEffect, useMemo, useRef, useState } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-import { BusinessComponentProps } from '../base/types';
+import type { BusinessComponentProps } from '../base/types';
 import { AccountingPanel, isAccountingPanel } from './accounting';
 import { CurrencyPanel, isCurrencyPanel } from './currency';
 import { DatePanel, isDatePanel } from './date';
 import { GeneralPanel, isGeneralPanel } from './general';
 import { isThousandthPercentilePanel, ThousandthPercentilePanel } from './thousandth-percentile';
 
-export type SheetNumfmtPanelProps = {
+export interface SheetNumfmtPanelProps {
     value: { defaultValue: number; defaultPattern: string };
     onChange: (config: { type: 'change' | 'cancel' | 'confirm'; value: string }) => void;
-};
+}
 export const SheetNumfmtPanel: FC<SheetNumfmtPanelProps> = (props) => {
     const { defaultValue, defaultPattern } = props.value;
     const localeService = useDependency(LocaleService);
@@ -75,7 +77,7 @@ export const SheetNumfmtPanel: FC<SheetNumfmtPanelProps> = (props) => {
             <div>
                 <div className="label m-t-14">{t('sheet.numfmt.numfmtType')}</div>
                 <div className="m-t-8">
-                    <Select onChange={handleSelect} options={selectOptions} value={type}></Select>
+                    <Select onChange={handleSelect} options={selectOptions} value={type} />
                 </div>
                 <div>{BusinessComponent && <BusinessComponent {...subProps} />}</div>
             </div>

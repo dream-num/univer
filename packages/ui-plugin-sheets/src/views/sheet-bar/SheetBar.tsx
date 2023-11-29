@@ -9,7 +9,7 @@ import styles from './index.module.less';
 import { SheetBarButton } from './sheet-bar-button/SheetBarButton';
 import { SheetBarMenu } from './sheet-bar-menu/SheetBarMenu';
 import { SheetBarTabs } from './sheet-bar-tabs/SheetBarTabs';
-import { IScrollState } from './sheet-bar-tabs/utils/slide-tab-bar';
+import type { IScrollState } from './sheet-bar-tabs/utils/slide-tab-bar';
 
 const SCROLL_WIDTH = 100;
 

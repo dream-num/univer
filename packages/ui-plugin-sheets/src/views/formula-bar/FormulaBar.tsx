@@ -1,22 +1,22 @@
 import { ComponentManager } from '@univerjs/base-ui';
-import { Nullable } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
 import { CheckMarkSingle, CloseSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useState } from 'react';
 
 import styles from './index.module.less';
 
-type FormulaState = {
+interface FormulaState {
     namedRanges: any[];
     spanClass: string;
     formulaContent: string;
     fx: Nullable<Fx>;
-};
+}
 
-export type Fx = {
+export interface Fx {
     icon: string;
     onClick: () => void;
-};
+}
 
 export function FormulaBar() {
     const [state, setState] = useState<FormulaState>({

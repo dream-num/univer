@@ -1,7 +1,7 @@
-import { BaseComponentProps } from '@univerjs/base-ui';
+import type { BaseComponentProps } from '@univerjs/base-ui';
 import React, { Component, createRef } from 'react';
 
-import { IDocUIPluginConfig } from '../../basics';
+import type { IDocUIPluginConfig } from '../../basics';
 import style from './index.module.less';
 
 export interface BaseDocContainerProps extends BaseComponentProps {
@@ -153,7 +153,7 @@ export class DocContainer extends Component<BaseDocContainerProps> {
         return (
             <section className={style.layoutContainer}>
                 <div>
-                    <aside style={{ display: config.outerLeft ? 'block' : 'none' }}></aside>
+                    <aside style={{ display: config.outerLeft ? 'block' : 'none' }} />
                     <div className={style.mainContent} style={{ position: 'relative' }}>
                         <div>
                             <aside
@@ -172,17 +172,14 @@ export class DocContainer extends Component<BaseDocContainerProps> {
                             >
                                 {!!config.contentSplit && (
                                     <div ref={this.splitLeftRef} className={style.contentInnerLeftContainer}>
-                                        <div
-                                            className={style.hoverCursor}
-                                            onMouseDown={this.handleSplitBarMouseDown}
-                                        ></div>
+                                        <div className={style.hoverCursor} onMouseDown={this.handleSplitBarMouseDown} />
                                     </div>
                                 )}
                                 <div
                                     onContextMenu={(e) => e.preventDefault()}
                                     ref={this.contentRef}
                                     className={style.contentInnerRightContainer}
-                                ></div>
+                                />
                                 {/* extend main content */}
                             </div>
 
@@ -199,14 +196,14 @@ export class DocContainer extends Component<BaseDocContainerProps> {
                             style={{
                                 display: config.footer ? 'block' : 'none',
                             }}
-                        ></footer>
+                        />
                     </div>
                     <aside
                         style={{
                             display: config.outerRight ? 'block' : 'none',
                         }}
                         className={style.outerRightContainer}
-                    ></aside>
+                    />
                 </div>
             </section>
         );

@@ -1,12 +1,5 @@
-import RcMenu, {
-    MenuItem as RcMenuItem,
-    MenuItemGroup as RcMenuItemGroup,
-    MenuItemGroupProps,
-    MenuItemProps,
-    MenuProps,
-    SubMenu as RcSubMenu,
-    SubMenuProps,
-} from 'rc-menu';
+import type { MenuItemGroupProps, MenuItemProps, MenuProps, SubMenuProps } from 'rc-menu';
+import RcMenu, { MenuItem as RcMenuItem, MenuItemGroup as RcMenuItemGroup, SubMenu as RcSubMenu } from 'rc-menu';
 import React, { useContext } from 'react';
 
 import { ConfigContext } from '../config-provider/ConfigProvider';

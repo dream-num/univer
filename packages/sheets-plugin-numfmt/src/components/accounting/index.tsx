@@ -1,9 +1,10 @@
 import { LocaleService } from '@univerjs/core';
 import { InputNumber, Select } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
-import { BusinessComponentProps } from '../../base/types';
+import type { BusinessComponentProps } from '../../base/types';
 import { getCurrencyType } from '../../utils/currency';
 import { getDecimalFromPattern, setPatternDecimal } from '../../utils/decimal';
 import { getCurrencyOptions } from '../../utils/options';
@@ -45,7 +46,7 @@ export const AccountingPanel: FC<BusinessComponentProps> = (props) => {
                     <div className="label">{t('sheet.numfmt.currencyType')}</div>
 
                     <div className="m-t-8 w-140">
-                        <Select onChange={suffixSet} options={currencyOptions} value={suffix}></Select>
+                        <Select onChange={suffixSet} options={currencyOptions} value={suffix} />
                     </div>
                 </div>
             </div>

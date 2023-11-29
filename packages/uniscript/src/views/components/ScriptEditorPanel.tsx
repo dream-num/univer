@@ -1,7 +1,8 @@
 import { IMessageService, IShortcutService } from '@univerjs/base-ui';
-import { DisposableCollection, LocaleService, Nullable, toDisposable } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
+import { DisposableCollection, LocaleService, toDisposable } from '@univerjs/core';
 import { Button, MessageType } from '@univerjs/design';
-import { IDisposable } from '@wendellhu/redi';
+import type { IDisposable } from '@wendellhu/redi';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { editor } from 'monaco-editor';
 import React, { useCallback, useEffect, useRef } from 'react';
@@ -96,7 +97,7 @@ export function ScriptEditorPanel() {
     return (
         <div className={styles.scriptEditorPanel}>
             <div className={styles.scriptEditorContent} ref={editorContentRef}>
-                <div className={styles.scriptEditorContainer} ref={editorContainerRef}></div>
+                <div className={styles.scriptEditorContainer} ref={editorContainerRef} />
             </div>
             <div className={styles.scriptEditorActions}>
                 <Button type="primary" size="small" onClick={startExecution}>

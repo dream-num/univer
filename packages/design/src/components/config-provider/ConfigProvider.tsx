@@ -1,6 +1,7 @@
 import React, { createContext } from 'react';
 
-import { enUS, ILocale } from '../../locale';
+import type { ILocale } from '../../locale';
+import { enUS } from '../../locale';
 
 export interface IConfigProviderProps {
     children: React.ReactNode;

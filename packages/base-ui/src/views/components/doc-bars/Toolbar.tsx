@@ -2,9 +2,11 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
 import { useObservable } from '../../../components/hooks/observable';
-import { IDisplayMenuItem, IMenuItem, MenuGroup, MenuPosition } from '../../../services/menu/menu';
+import type { IDisplayMenuItem, IMenuItem } from '../../../services/menu/menu';
+import { MenuGroup, MenuPosition } from '../../../services/menu/menu';
 import { IMenuService } from '../../../services/menu/menu.service';
-import { IMenuGroup, position$, positions } from './hooks/menu';
+import type { IMenuGroup } from './hooks/menu';
+import { position$, positions } from './hooks/menu';
 import styles from './index.module.less';
 import { ToolbarItem } from './ToolbarItem';
 

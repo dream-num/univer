@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { ISheetUIPluginConfig } from '../../basics';
+import type { ISheetUIPluginConfig } from '../../basics';
 import { CountBar } from '../count-bar/CountBar';
 import { EditorContainer } from '../editor-container/EditorContainer';
 import { FormulaBar } from '../formula-bar/FormulaBar';

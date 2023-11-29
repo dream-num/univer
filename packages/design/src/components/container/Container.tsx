@@ -1,4 +1,5 @@
-import React, { forwardRef, Ref } from 'react';
+import type { Ref } from 'react';
+import React, { forwardRef } from 'react';
 
 export interface IContainerProps {
     children?: React.ReactNode;

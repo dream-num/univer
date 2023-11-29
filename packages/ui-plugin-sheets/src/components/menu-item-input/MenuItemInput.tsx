@@ -4,7 +4,7 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
 import styles from './index.module.less';
-import { IMenuItemInputProps } from './interface';
+import type { IMenuItemInputProps } from './interface';
 
 export const MenuItemInput = (props: IMenuItemInputProps) => {
     const { prefix, suffix, value, onChange } = props;

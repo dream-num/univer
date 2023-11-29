@@ -1,5 +1,6 @@
 import { createIdentifier, IAccessor, IDisposable, Inject, Injector } from '@wendellhu/redi';
 
+import { remove } from '../../common/array';
 import { sequence, sequenceAsync } from '../../common/sequence';
 import { toDisposable } from '../../shared/lifecycle';
 import { IKeyValue } from '../../shared/types';
@@ -36,10 +37,14 @@ export interface IMultiCommand<P extends object = object, R = boolean> extends I
     preconditions?: (contextService: IContextService) => boolean;
 }
 
+export interface IMutationCommonParams {
+    trigger?: string;
+}
+
 /**
  * Mutation would change the model of Univer applications.
  */
-export interface IMutation<P extends object = object, R = boolean> extends ICommand<P, R> {
+export interface IMutation<P extends object, R = boolean> extends ICommand<P, R> {
     type: CommandType.MUTATION;
 
     /**
@@ -152,6 +157,8 @@ class CommandRegistry {
     }
 }
 
+interface ICommandExecutionStackItem extends ICommandInfo {}
+
 export class CommandService implements ICommandService {
     private readonly _commandRegistry: CommandRegistry;
 
@@ -160,6 +167,8 @@ export class CommandService implements ICommandService {
     private _multiCommandDisposables = new Map<string, IDisposable>();
 
     private _commandExecutingLevel = 0;
+
+    private _commandExecutionStack: ICommandExecutionStackItem[] = [];
 
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
@@ -197,14 +206,16 @@ export class CommandService implements ICommandService {
         const item = this._commandRegistry.getCommand(id);
         if (item) {
             const [command] = item;
-            const result = await this._execute<P, R>(command as ICommand<P, R>, params);
             const commandInfo: ICommandInfo = {
                 id: command.id,
                 type: command.type,
                 params,
             };
 
-            // emit command execution info
+            const stackItemDisposable = this._pushCommandExecutionStack(commandInfo);
+            const result = await this._execute<P, R>(command as ICommand<P, R>, params);
+            stackItemDisposable.dispose();
+
             this._commandExecutedListeners.forEach((listener) => listener(commandInfo, options));
 
             return result;
@@ -221,18 +232,40 @@ export class CommandService implements ICommandService {
         const item = this._commandRegistry.getCommand(id);
         if (item) {
             const [command] = item;
-            const result = this._syncExecute<P, R>(command as ICommand<P, R>, params);
             const commandInfo: ICommandInfo = {
                 id: command.id,
                 type: command.type,
                 params,
             };
+
+            // If the executed command is of type `Mutation`, we should add a trigger params,
+            // whose value is the command's ID that triggers the mutation.
+            if (command.type === CommandType.MUTATION) {
+                const triggerCommand = this._commandExecutionStack.findLast(
+                    (item) => item.type === CommandType.COMMAND
+                );
+                if (triggerCommand) {
+                    commandInfo.params = commandInfo.params ?? {};
+                    (commandInfo.params as { [key: string]: any }).trigger = triggerCommand.id;
+                }
+            }
+
+            const stackItemDisposable = this._pushCommandExecutionStack(commandInfo);
+
+            const result = this._syncExecute<P, R>(command as ICommand<P, R>, params);
+            stackItemDisposable.dispose();
+
             this._commandExecutedListeners.forEach((listener) => listener(commandInfo, options));
 
             return result;
         }
 
         throw new Error(`[CommandService]: Command "${id}" is not registered.`);
+    }
+
+    private _pushCommandExecutionStack(stackItem: ICommandExecutionStackItem): IDisposable {
+        this._commandExecutionStack.push(stackItem);
+        return toDisposable(() => remove(this._commandExecutionStack, stackItem));
     }
 
     private _registerCommand(command: ICommand): IDisposable {
@@ -288,7 +321,9 @@ export class CommandService implements ICommandService {
     private _syncExecute<P extends object, R = boolean>(command: ICommand<P, R>, params?: P): R {
         this._log.log(
             '[CommandService]',
-            `${'|-'.repeat(Math.max(0, this._commandExecutingLevel))}executing command "${command.id}"`
+            `${'|-'.repeat(Math.max(0, this._commandExecutingLevel))}executing command "${
+                command.id
+            }", ${JSON.stringify(params)}`
         );
 
         this._commandExecutingLevel++;

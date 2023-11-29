@@ -8,6 +8,7 @@ import {
     IDocumentData,
     IKeyValue,
     IMutation,
+    IMutationCommonParams,
     IRange,
     IStyleData,
     ITextStyle,
@@ -20,7 +21,7 @@ import {
 import { IAccessor } from '@wendellhu/redi';
 
 /** Params of `SetRangeValuesMutation` */
-export interface ISetRangeValuesMutationParams {
+export interface ISetRangeValuesMutationParams extends IMutationCommonParams {
     worksheetId: string;
     workbookId: string;
 

@@ -3,7 +3,7 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import React from 'react';
 
 import styles from './index.module.less';
-import { IFontFamilyItemProps } from './interface';
+import type { IFontFamilyItemProps } from './interface';
 
 export const FontFamilyItem = (props: IFontFamilyItemProps) => {
     const { value } = props;

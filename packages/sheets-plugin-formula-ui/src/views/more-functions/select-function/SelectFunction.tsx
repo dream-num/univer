@@ -1,11 +1,13 @@
-import { FunctionType, IFunctionInfo, IFunctionParam } from '@univerjs/base-formula-engine';
+import type { IFunctionInfo, IFunctionParam } from '@univerjs/base-formula-engine';
+import { FunctionType } from '@univerjs/base-formula-engine';
 import { LocaleService } from '@univerjs/core';
 import { Input, Select } from '@univerjs/design';
 import { CheckMarkSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
-import { IDescriptionService, ISearchItem } from '../../../services/description.service';
+import type { ISearchItem } from '../../../services/description.service';
+import { IDescriptionService } from '../../../services/description.service';
 import { getFunctionTypeValues } from '../../../services/utils';
 import { FunctionHelp } from '../function-help/FunctionHelp';
 import { FunctionParams } from '../function-params/FunctionParams';
@@ -114,7 +116,7 @@ export function SelectFunction(props: ISelectFunctionProps) {
     return (
         <div>
             <div className={styles.formulaSelectFunctionSelect}>
-                <Select value={typeSelected} options={options} onChange={handleSelectChange}></Select>
+                <Select value={typeSelected} options={options} onChange={handleSelectChange} />
 
                 <Input
                     placeholder={localeService.t(`formula.moreFunctions.searchFunctionPlaceholder`)}
@@ -123,7 +125,7 @@ export function SelectFunction(props: ISelectFunctionProps) {
                     onChange={handleSearchInputChange}
                     size="large"
                     allowClear
-                ></Input>
+                />
             </div>
 
             <ul className={styles.formulaSelectFunctionResult} onKeyDown={handleSelectListKeyDown} tabIndex={-1}>

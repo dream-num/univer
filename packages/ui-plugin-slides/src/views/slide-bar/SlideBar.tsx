@@ -1,5 +1,5 @@
-import { BaseComponentProps } from '@univerjs/base-ui';
-import { ISlidePage } from '@univerjs/core';
+import type { BaseComponentProps } from '@univerjs/base-ui';
+import type { ISlidePage } from '@univerjs/core';
 import React, { Component, createRef } from 'react';
 
 import styles from './index.module.less';
@@ -95,7 +95,7 @@ export class SlideBar extends Component<{}, SlideBarState> {
                             onClick={() => this.activeSlide(item.id, index)}
                         >
                             <span>{index + 1}</span>
-                            <div className={styles.slideBarBox}></div>
+                            <div className={styles.slideBarBox} />
                         </div>
                     ))}
                 </div>

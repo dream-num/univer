@@ -2,7 +2,7 @@ import { InputNumber } from '@univerjs/design';
 import React, { useMemo, useState } from 'react';
 
 import styles from './index.module.less';
-import { IFontSizeProps } from './interface';
+import type { IFontSizeProps } from './interface';
 
 export const FontSize = (props: IFontSizeProps) => {
     const { value, min, max, onChange } = props;

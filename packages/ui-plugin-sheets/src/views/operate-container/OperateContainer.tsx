@@ -5,6 +5,6 @@ import styles from './index.module.less';
 
 export const OperateContainer: React.FC = () => (
     <div className={styles.operateContainer}>
-        <AutoFillPopupMenu></AutoFillPopupMenu>
+        <AutoFillPopupMenu />
     </div>
 );

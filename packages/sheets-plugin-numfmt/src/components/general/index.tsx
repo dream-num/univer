@@ -1,8 +1,9 @@
 import { LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import React, { FC, useEffect } from 'react';
+import type { FC } from 'react';
+import React, { useEffect } from 'react';
 
-import { BusinessComponentProps } from '../../base/types';
+import type { BusinessComponentProps } from '../../base/types';
 
 export const isGeneralPanel = (pattern: string) => !pattern;
 

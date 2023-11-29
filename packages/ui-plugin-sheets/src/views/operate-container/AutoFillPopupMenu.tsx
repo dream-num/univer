@@ -1,17 +1,15 @@
 import { IRenderManagerService } from '@univerjs/base-render';
 import { SetRangeValuesMutation } from '@univerjs/base-sheets';
-import { ICommandInfo, ICommandService, IUniverInstanceService, LocaleService, toDisposable } from '@univerjs/core';
+import type { ICommandInfo } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LocaleService, toDisposable } from '@univerjs/core';
 import { Dropdown } from '@univerjs/design';
 import { Autofill, CheckMarkSingle, MoreDownSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
 import React, { useCallback, useEffect, useState } from 'react';
 
-import {
-    AutoClearContentCommand,
-    AutoFillCommand,
-    IAutoFillCommandParams,
-} from '../../commands/commands/auto-fill.command';
+import type { IAutoFillCommandParams } from '../../commands/commands/auto-fill.command';
+import { AutoClearContentCommand, AutoFillCommand } from '../../commands/commands/auto-fill.command';
 import { RefillCommand } from '../../commands/commands/refill.command';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 import { SetScrollOperation } from '../../commands/operations/scroll.operation';
@@ -178,12 +176,8 @@ export const AutoFillPopupMenu: React.FC<{}> = () => {
                     <Autofill
                         style={{ color: '#35322B' }}
                         extend={{ colorChannel1: 'rgb(var(--green-700, #409f11))' }}
-                    ></Autofill>
-                    {showMore && (
-                        <MoreDownSingle
-                            style={{ color: '#CCCCCC', fontSize: '8px', marginLeft: '8px' }}
-                        ></MoreDownSingle>
-                    )}
+                    />
+                    {showMore && <MoreDownSingle style={{ color: '#CCCCCC', fontSize: '8px', marginLeft: '8px' }} />}
                 </div>
             </Dropdown>
         </div>

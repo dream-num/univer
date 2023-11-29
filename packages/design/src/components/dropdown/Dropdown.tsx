@@ -1,6 +1,6 @@
 import type { ActionType, AlignType } from '@rc-component/trigger';
 import RcDropdown from 'rc-dropdown';
-import Placements from 'rc-dropdown/lib/placements';
+import type Placements from 'rc-dropdown/lib/placements';
 import React, { useContext } from 'react';
 
 import { ConfigContext } from '../config-provider/ConfigProvider';

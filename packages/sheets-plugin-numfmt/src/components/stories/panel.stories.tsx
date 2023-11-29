@@ -5,7 +5,8 @@ import { connectInjector } from '@wendellhu/redi/react-bindings';
 import React, { useMemo } from 'react';
 
 import { zhCn } from '../../locale/zh-CN';
-import { SheetNumfmtPanel, SheetNumfmtPanelProps } from '../index';
+import type { SheetNumfmtPanelProps } from '../index';
+import { SheetNumfmtPanel } from '../index';
 
 const Index = (props: any) => {
     const inject = useMemo(() => new Injector([[LocaleService], [ThemeService]]), []);

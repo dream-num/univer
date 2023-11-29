@@ -6,7 +6,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
 import { ISidebarService } from '../../../services/sidebar/sidebar.service';
 import styles from './index.module.less';
-import { ISidebarMethodOptions } from './interface';
+import type { ISidebarMethodOptions } from './interface';
 
 export function Sidebar() {
     const sidebarService = useDependency(ISidebarService);

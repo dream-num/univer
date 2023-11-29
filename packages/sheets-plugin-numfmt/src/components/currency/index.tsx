@@ -3,9 +3,10 @@ import './index.less';
 import { LocaleService } from '@univerjs/core';
 import { InputNumber, Select, SelectList } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import React, { FC, useEffect, useMemo, useRef, useState } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-import { BusinessComponentProps } from '../../base/types';
+import type { BusinessComponentProps } from '../../base/types';
 import { getCurrencyType } from '../../utils/currency';
 import { getDecimalFromPattern, isPatternEqualWithoutDecimal, setPatternDecimal } from '../../utils/decimal';
 import { getCurrencyFormatOptions, getCurrencyOptions } from '../../utils/options';
@@ -78,14 +79,14 @@ export const CurrencyPanel: FC<BusinessComponentProps> = (props) => {
                             }}
                             options={currencyOptions}
                             value={suffix}
-                        ></Select>
+                        />
                     </div>
                 </div>
             </div>
             <div className="m-t-16 label"> {t('sheet.numfmt.negType')}</div>
 
             <div className="m-t-8">
-                <SelectList onChange={patternSet} options={negativeOptions} value={pattern}></SelectList>
+                <SelectList onChange={patternSet} options={negativeOptions} value={pattern} />
             </div>
 
             <div className="describe m-t-14">{t('sheet.numfmt.currencyDes')}</div>

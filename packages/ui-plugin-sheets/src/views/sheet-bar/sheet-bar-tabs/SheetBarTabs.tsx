@@ -11,14 +11,17 @@ import {
     SetWorksheetOrderMutation,
 } from '@univerjs/base-sheets';
 import { IConfirmService } from '@univerjs/base-ui';
-import { BooleanNumber, ICommandInfo, ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
+import type { ICommandInfo } from '@univerjs/core';
+import { BooleanNumber, ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { ISheetBarService } from '../../../services/sheet-bar/sheet-bar.service';
 import styles from './index.module.less';
-import { IBaseSheetBarProps, SheetBarItem } from './SheetBarItem';
-import { IScrollState, SlideTabBar } from './utils/slide-tab-bar';
+import type { IBaseSheetBarProps } from './SheetBarItem';
+import { SheetBarItem } from './SheetBarItem';
+import type { IScrollState } from './utils/slide-tab-bar';
+import { SlideTabBar } from './utils/slide-tab-bar';
 
 export interface ISheetBarTabsProps {}
 

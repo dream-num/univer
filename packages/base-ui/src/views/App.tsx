@@ -1,10 +1,12 @@
 import { LocaleService, ThemeService } from '@univerjs/core';
-import { ConfigProvider, defaultTheme, ILocale, themeInstance } from '@univerjs/design';
+import type { ILocale } from '@univerjs/design';
+import { ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
-import React, { ComponentType, useEffect, useMemo, useRef, useState } from 'react';
+import type { ComponentType } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-import { IWorkbenchOptions } from '../controllers/ui/ui.controller';
+import type { IWorkbenchOptions } from '../controllers/ui/ui.controller';
 import { IMessageService } from '../services/message/message.service';
 import { ISidebarService } from '../services/sidebar/sidebar.service';
 import styles from './app.module.less';

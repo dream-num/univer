@@ -2,7 +2,8 @@ import { render } from '@testing-library/react';
 import React, { useContext } from 'react';
 import { describe, expect, test } from 'vitest';
 
-import { enUS, ILocale, zhCN } from '../../../locale';
+import type { ILocale } from '../../../locale';
+import { enUS, zhCN } from '../../../locale';
 import { ConfigContext, ConfigProvider } from '../ConfigProvider';
 
 describe('ConfigProvider', () => {

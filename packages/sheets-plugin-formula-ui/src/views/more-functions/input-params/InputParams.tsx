@@ -1,4 +1,4 @@
-import { IFunctionInfo, IFunctionParam } from '@univerjs/base-formula-engine';
+import type { IFunctionInfo, IFunctionParam } from '@univerjs/base-formula-engine';
 import { RangeSelector } from '@univerjs/ui-plugin-sheets';
 import React, { useState } from 'react';
 

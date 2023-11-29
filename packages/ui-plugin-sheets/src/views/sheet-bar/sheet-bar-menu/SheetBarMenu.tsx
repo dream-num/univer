@@ -8,13 +8,8 @@ import {
     SetWorksheetOrderMutation,
     SetWorksheetShowCommand,
 } from '@univerjs/base-sheets';
-import {
-    BooleanNumber,
-    DisposableCollection,
-    ICommandInfo,
-    ICommandService,
-    IUniverInstanceService,
-} from '@univerjs/core';
+import type { ICommandInfo } from '@univerjs/core';
+import { BooleanNumber, DisposableCollection, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { Dropdown } from '@univerjs/design';
 import { CheckMarkSingle, ConvertSingle, EyelashSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';

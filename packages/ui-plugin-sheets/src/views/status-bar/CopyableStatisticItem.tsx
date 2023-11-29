@@ -21,9 +21,9 @@ export const functionDisplayNames: FunctionNameMap = {
     [FUNCTION_NAMES.COUNT]: 'statusbar.count',
     [FUNCTION_NAMES.CONCATENATE]: 'concatenate',
 };
-type FunctionNameMap = {
+interface FunctionNameMap {
     [key: string]: string;
-};
+}
 
 export const CopyableStatisticItem: React.FC<IStatisticItem> = (item: IStatisticItem) => {
     const localeService = useDependency(LocaleService);

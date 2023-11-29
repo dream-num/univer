@@ -3,19 +3,15 @@ import { Dropdown, Tooltip } from '@univerjs/design';
 import { MoreDownSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
-import { isObservable, Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
+import { isObservable } from 'rxjs';
 
 import { ComponentManager } from '../../../common/component-manager';
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
 import { useObservable } from '../../../components/hooks/observable';
 import { Menu } from '../../../components/menu/Menu';
-import {
-    IDisplayMenuItem,
-    IMenuItem,
-    IMenuSelectorItem,
-    IValueOption,
-    MenuItemType,
-} from '../../../services/menu/menu';
+import type { IDisplayMenuItem, IMenuItem, IMenuSelectorItem, IValueOption } from '../../../services/menu/menu';
+import { MenuItemType } from '../../../services/menu/menu';
 import { ToolbarButton } from './Button/ToolbarButton';
 import styles from './index.module.less';
 

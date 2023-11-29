@@ -1,20 +1,20 @@
 import React, { Component } from 'react';
 
-type LocationProps = {
+interface LocationProps {
     config: any;
-};
-type LocationState = {
+}
+interface LocationState {
     radioGroup: LabelProps[];
     active: string | number;
-};
-type LabelProps = {
+}
+interface LabelProps {
     locale: string;
     label?: string;
     value: string;
     disabled?: boolean;
     children?: LabelProps[];
     checked?: boolean;
-};
+}
 
 export class LocationContent extends Component<LocationProps, LocationState> {
     // private _localeObserver: Nullable<Observer<Workbook>>;
@@ -67,7 +67,7 @@ export class LocationContent extends Component<LocationProps, LocationState> {
         // const RadioGroup = this.Render.renderFunction('RadioGroup');
         // const { radioGroup, active } = this.state;
         return (
-            <div></div>
+            <div />
             // <div className={styles.locationContent}>
             //     <RadioGroup vertical={true} onChange={this.handleChange} active={active}>
             //         {radioGroup.map((item) => {

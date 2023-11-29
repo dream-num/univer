@@ -1,10 +1,10 @@
-import { BaseComponentProps } from '@univerjs/base-ui';
+import type { BaseComponentProps } from '@univerjs/base-ui';
 import { Button, Container, Tooltip } from '@univerjs/design';
 import React, { Component, createRef } from 'react';
 
-import { SlideUIPlugin } from '../..';
+import type { SlideUIPlugin } from '../..';
 import { SLIDE_UI_PLUGIN_NAME } from '../../basics';
-import { IToolbarItemProps } from '../../controllers';
+import type { IToolbarItemProps } from '../../controllers';
 import styles from './index.module.less';
 
 interface IProps extends BaseComponentProps {

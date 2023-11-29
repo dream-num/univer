@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { ICheckboxProps } from '../checkbox/Checkbox';
+import type { ICheckboxProps } from '../checkbox/Checkbox';
 import styles from './index.module.less';
 
 export interface ICheckboxGroupProps {

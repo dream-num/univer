@@ -1,14 +1,18 @@
 import { IRenderManagerService } from '@univerjs/base-render';
 import { Disposable, LifecycleService, LifecycleStages, toDisposable } from '@univerjs/core';
-import { IDisposable, Inject, Injector } from '@wendellhu/redi';
+import type { IDisposable } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 import { render as createRoot, unmount } from 'rc-util/lib/React/render';
-import React, { ComponentType } from 'react';
-import { Observable, Subject } from 'rxjs';
+import type { ComponentType } from 'react';
+import React from 'react';
+import type { Observable } from 'rxjs';
+import { Subject } from 'rxjs';
 
 import { IFocusService } from '../../services/focus/focus.service';
 import { App } from '../../views/App';
-import { IUIController, IWorkbenchOptions } from './ui.controller';
+import type { IWorkbenchOptions } from './ui.controller';
+import { IUIController } from './ui.controller';
 
 export enum DesktopUIPart {
     HEADER = 'header',

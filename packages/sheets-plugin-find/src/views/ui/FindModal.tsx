@@ -1,12 +1,12 @@
-import { BaseComponentProps } from '@univerjs/base-ui';
-import { ICheckboxGroupProps } from '@univerjs/design';
+import type { BaseComponentProps } from '@univerjs/base-ui';
+import type { ICheckboxGroupProps } from '@univerjs/design';
 import React, { Component } from 'react';
 
-type searchResult = {
+interface searchResult {
     count: number;
     current: number;
     replaceCount: number;
-};
+}
 
 // Types for props
 export interface IProps extends BaseComponentProps {

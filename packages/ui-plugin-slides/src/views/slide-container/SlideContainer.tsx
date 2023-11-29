@@ -1,7 +1,7 @@
-import { BaseComponentProps } from '@univerjs/base-ui';
+import type { BaseComponentProps } from '@univerjs/base-ui';
 import React, { Component, createRef } from 'react';
 
-import { ISlideUIPluginConfig } from '../../basics';
+import type { ISlideUIPluginConfig } from '../../basics';
 import { InfoBar } from '../info-bar';
 import { SlideBar } from '../slide-bar/SlideBar';
 import { Toolbar } from '../toolbar';
@@ -156,11 +156,11 @@ export class SlideContainer extends Component<BaseSlideContainerProps> {
         return (
             <section className={style.layoutContainer}>
                 <div>
-                    <aside style={{ display: config.outerLeft ? 'block' : 'none' }}></aside>
+                    <aside style={{ display: config.outerLeft ? 'block' : 'none' }} />
                     <div className={style.mainContent} style={{ position: 'relative' }}>
                         <header style={{ display: config.header ? 'block' : 'none' }}>
-                            {config.infoBar && <InfoBar {...methods.infoBar}></InfoBar>}
-                            {config.toolbar && <Toolbar {...methods.toolbar}></Toolbar>}
+                            {config.infoBar && <InfoBar {...methods.infoBar} />}
+                            {config.toolbar && <Toolbar {...methods.toolbar} />}
                         </header>
                         <div>
                             <aside
@@ -169,7 +169,7 @@ export class SlideContainer extends Component<BaseSlideContainerProps> {
                                     display: config.innerLeft ? 'block' : 'none',
                                 }}
                             >
-                                <SlideBar {...methods.slideBar}></SlideBar>
+                                <SlideBar {...methods.slideBar} />
                             </aside>
                             <div
                                 className={
@@ -180,10 +180,7 @@ export class SlideContainer extends Component<BaseSlideContainerProps> {
                             >
                                 {!!config.contentSplit && (
                                     <div ref={this.splitLeftRef} className={style.contentInnerLeftContainer}>
-                                        <div
-                                            className={style.hoverCursor}
-                                            onMouseDown={this.handleSplitBarMouseDown}
-                                        ></div>
+                                        <div className={style.hoverCursor} onMouseDown={this.handleSplitBarMouseDown} />
                                     </div>
                                 )}
                                 <div
@@ -218,7 +215,7 @@ export class SlideContainer extends Component<BaseSlideContainerProps> {
                             display: config.outerRight ? 'block' : 'none',
                         }}
                         className={style.outerRightContainer}
-                    ></aside>
+                    />
                 </div>
             </section>
         );

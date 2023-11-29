@@ -2,7 +2,7 @@ import { ConfigContext } from '@univerjs/design';
 import { CloseSingle, ErrorSingle, SuccessSingle, WarningSingle } from '@univerjs/icons';
 import clsx from 'clsx';
 import { useNotification } from 'rc-notification';
-import { Placement } from 'rc-notification/es/interface';
+import type { Placement } from 'rc-notification/es/interface';
 import React, { useContext, useEffect, useRef } from 'react';
 import { Subject } from 'rxjs';
 

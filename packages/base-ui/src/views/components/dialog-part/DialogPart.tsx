@@ -1,10 +1,11 @@
-import { Dialog, IDialogProps } from '@univerjs/design';
+import type { IDialogProps } from '@univerjs/design';
+import { Dialog } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
 import { IDialogService } from '../../../services/dialog/dialog.service';
-import { IDialogPartMethodOptions } from './interface';
+import type { IDialogPartMethodOptions } from './interface';
 
 export function DialogPart() {
     const dialogService = useDependency(IDialogService);

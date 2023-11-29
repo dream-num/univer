@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { IRadioProps } from '../radio/Radio';
+import type { IRadioProps } from '../radio/Radio';
 import styles from './index.module.less';
 
 export interface IRadioGroupProps {

@@ -11,16 +11,15 @@ import clsx from 'clsx';
 import React, { useState } from 'react';
 import { isObservable, of } from 'rxjs';
 
-import {
+import type {
     IDisplayMenuItem,
     IMenuButtonItem,
     IMenuItem,
     IMenuSelectorItem,
     IValueOption,
-    MenuGroup,
     MenuItemDefaultValueType,
-    MenuItemType,
 } from '../../services/menu/menu';
+import { MenuGroup, MenuItemType } from '../../services/menu/menu';
 import { IMenuService } from '../../services/menu/menu.service';
 import { CustomLabel } from '../custom-label/CustomLabel';
 import { useObservable } from '../hooks/observable';

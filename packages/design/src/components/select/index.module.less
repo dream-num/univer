@@ -184,9 +184,18 @@
 
         .@{select-prefix}-arrow {
             pointer-events: none;
+
             position: absolute;
             top: 0;
-            right: 5px;
+            right: var(--margin-sm);
+
+            display: flex;
+            align-items: center;
+
+            height: 100%;
+
+            font-size: var(--font-size-xxs);
+            color: rgb(var(--text-color-secondary));
 
             &-icon::after {
                 content: '';
@@ -230,22 +239,29 @@
 
     // =============== Option ================
     &-item {
+        cursor: pointer;
         padding: var(--padding-sm) var(--padding-base);
         font-size: var(--font-size-sm);
 
         // >>> Group
         &-group {
-            font-size: 80%;
-            font-weight: bold;
-            color: #999;
+            // font-size: 80%;
+            // font-weight: bold;
+            // color: #999;
+            padding: 0;
+
+            &:not(:first-child) {
+                border-top: 1px solid rgb(var(--border-color));
+            }
         }
 
         // >>> Option
         &-option {
             position: relative;
+            transition: all 0.15s;
 
             &-grouped {
-                padding-left: 24px;
+                // padding-left: 24px;
             }
 
             .@{select-prefix}-item-option-state {

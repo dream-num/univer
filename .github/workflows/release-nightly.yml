@@ -2,7 +2,7 @@ name: 🥷 Release Nightly
 
 on:
     schedule:
-        - cron: '0 16 * * *'
+        - cron: '0 19 * * *'
 
 permissions:
     contents: read
@@ -60,7 +60,7 @@ jobs:
             - name: Set all monorepo's package version
               run: |
                   for package in $(ls packages); do
-                      node -e "const fs = require('fs'); const package = JSON.parse(fs.readFileSync('./packages/$package/package.json')); package.version = '${{ steps.nightly-version.outputs.version }}'; fs.writeFileSync('./packages/$package/package.json', JSON.stringify(package, null, 2));"
+                      node -e "const fs = require('fs'); const package = JSON.parse(fs.readFileSync('./packages/$package/package.json')); package.version = '${{ steps.nightly-version.outputs.version }}'; fs.writeFileSync('./packages/$package/package.json', JSON.stringify(package, null, 4));"
                   done
 
             - name: Install dependencies
@@ -71,7 +71,8 @@ jobs:
 
             - name: Set publishing config
               run: |
-                  pnpm config set '${{ secrets.VERDACCIO_URL }}:_authToken' "${{ secrets.VERDACCIO_TOKEN }}"
+                  echo '\n${{ secrets.VERDACCIO_URL }}:_authToken=${{ secrets.VERDACCIO_TOKEN }}' >> .npmrc
+                  echo '\nregistry=https:${{ secrets.VERDACCIO_URL }}' >> .npmrc
 
             - name: Publish
               run: pnpm publish --access public --tag nightly -r

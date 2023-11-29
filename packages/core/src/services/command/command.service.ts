@@ -246,7 +246,7 @@ export class CommandService implements ICommandService {
                 );
                 if (triggerCommand) {
                     commandInfo.params = commandInfo.params ?? {};
-                    (commandInfo.params as { [key: string]: any }).trigger = triggerCommand.id;
+                    (commandInfo.params as { [key: string]: IMutationCommonParams }).trigger = triggerCommand.id;
                 }
             }
 
@@ -321,9 +321,7 @@ export class CommandService implements ICommandService {
     private _syncExecute<P extends object, R = boolean>(command: ICommand<P, R>, params?: P): R {
         this._log.log(
             '[CommandService]',
-            `${'|-'.repeat(Math.max(0, this._commandExecutingLevel))}executing command "${
-                command.id
-            }", ${JSON.stringify(params)}`
+            `${'|-'.repeat(Math.max(0, this._commandExecutingLevel))}executing command "${command.id}".`
         );
 
         this._commandExecutingLevel++;

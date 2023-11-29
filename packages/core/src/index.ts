@@ -17,6 +17,8 @@ export {
 export * from './observer';
 export { Plugin, PluginType } from './plugin/plugin';
 export {
+    type CommandListener,
+    CommandService,
     CommandType,
     type ICommand,
     type ICommandInfo,

@@ -1,27 +1,21 @@
+import type { ICellData, ICommand, IRange, ObjectMatrixPrimitiveType } from '@univerjs/core';
 import {
     CommandType,
-    ICellData,
-    ICommand,
     ICommandService,
     INTERCEPTOR_POINT,
-    IRange,
     isICellData,
     IUndoRedoService,
     IUniverInstanceService,
     ObjectMatrix,
-    ObjectMatrixPrimitiveType,
     sequenceExecute,
     SheetInterceptorService,
     Tools,
 } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { IAccessor } from '@wendellhu/redi';
 
 import { SelectionManagerService } from '../../services/selection-manager.service';
-import {
-    ISetRangeValuesMutationParams,
-    SetRangeValuesMutation,
-    SetRangeValuesUndoMutationFactory,
-} from '../mutations/set-range-values.mutation';
+import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
+import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 
 export interface ISetRangeValuesCommandParams {
     worksheetId?: string;
@@ -54,6 +48,7 @@ export const SetRangeValuesCommand: ICommand = {
             workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId(),
             worksheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId(),
         } = params;
+
         const currentSelections = range ? [range] : selectionManagerService.getSelectionRanges();
         if (!currentSelections || !currentSelections.length) {
             return false;

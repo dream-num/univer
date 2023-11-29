@@ -97,8 +97,7 @@ export {
     SetSpecificColsVisibleCommand,
 } from './commands/commands/set-col-visible.command';
 export { SetFrozenCommand } from './commands/commands/set-frozen.command';
-export type { ISetRangeValuesCommandParams } from './commands/commands/set-range-values.command';
-export { SetRangeValuesCommand } from './commands/commands/set-range-values.command';
+export { type ISetRangeValuesCommandParams, SetRangeValuesCommand } from './commands/commands/set-range-values.command';
 export {
     type ISetSpecificRowsVisibleCommandParams,
     SetRowHiddenCommand,
@@ -106,7 +105,7 @@ export {
     SetSpecificRowsVisibleCommand,
 } from './commands/commands/set-row-visible.command';
 export {
-    type ISetStyleParams,
+    type ISetStyleCommandParams,
     ResetBackgroundColorCommand,
     ResetTextColorCommand,
     SetBackgroundColorCommand,

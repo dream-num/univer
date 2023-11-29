@@ -1,39 +1,42 @@
+import type {
+    HorizontalAlign,
+    ICellData,
+    IColorStyle,
+    ICommand,
+    IRange,
+    IStyleData,
+    ITextRotation,
+    VerticalAlign,
+    WrapStrategy,
+} from '@univerjs/core';
 import {
     BooleanNumber,
     CommandType,
     FontItalic,
     FontWeight,
-    HorizontalAlign,
-    ICellData,
-    IColorStyle,
-    ICommand,
     ICommandService,
-    IStyleData,
-    ITextRotation,
     IUndoRedoService,
     IUniverInstanceService,
     ObjectMatrix,
     sequenceExecute,
     SheetInterceptorService,
     Tools,
-    VerticalAlign,
-    WrapStrategy,
 } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { IAccessor } from '@wendellhu/redi';
 
 import { SelectionManagerService } from '../../services/selection-manager.service';
-import {
-    ISetRangeValuesMutationParams,
-    SetRangeValuesMutation,
-    SetRangeValuesUndoMutationFactory,
-} from '../mutations/set-range-values.mutation';
+import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
+import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 
 export interface IStyleTypeValue<T> {
     type: keyof IStyleData;
     value: T | T[][];
 }
 
-export interface ISetStyleParams<T> {
+export interface ISetStyleCommandParams<T> {
+    worksheetId?: string;
+    workbookId?: string;
+    range?: IRange;
     style: IStyleTypeValue<T>;
 }
 
@@ -41,25 +44,27 @@ export interface ISetStyleParams<T> {
  * The command to set cell style.
  * Set style to a bunch of ranges.
  */
-export const SetStyleCommand: ICommand<ISetStyleParams<unknown>> = {
+export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-style',
 
-    handler: async <T>(accessor: IAccessor, params: ISetStyleParams<T>) => {
+    handler: async <T>(accessor: IAccessor, params: ISetStyleCommandParams<T>) => {
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+
+        const {
+            workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId(),
+            worksheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId(),
+            range,
+            style,
+        } = params;
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const selectionManagerService = accessor.get(SelectionManagerService);
-        const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const ranges = selectionManagerService.getSelectionRanges();
+        const ranges = range ? [range] : selectionManagerService.getSelectionRanges();
         if (!ranges?.length) {
             return false;
         }
-
-        const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
-
-        const { style } = params;
 
         const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
         const worksheet = workbook?.getSheetBySheetId(worksheetId);
@@ -68,7 +73,6 @@ export const SetStyleCommand: ICommand<ISetStyleParams<unknown>> = {
         }
 
         const cellValue = new ObjectMatrix<ICellData>();
-        // let value: ObjectMatrixPrimitiveType<ICellData> | undefined;
 
         if (Tools.isArray(style.value)) {
             for (let i = 0; i < ranges.length; i++) {
@@ -84,8 +88,6 @@ export const SetStyleCommand: ICommand<ISetStyleParams<unknown>> = {
                     }
                 }
             }
-
-            // value = cellValue.getData();
         } else {
             for (let i = 0; i < ranges.length; i++) {
                 const { startRow, endRow, startColumn, endColumn } = ranges[i];
@@ -95,7 +97,7 @@ export const SetStyleCommand: ICommand<ISetStyleParams<unknown>> = {
                         [style.type]: style.value,
                     },
                 };
-                // value = Tools.fillObjectMatrix(endRow - startRow + 1, endColumn - startColumn + 1, colorObj);
+
                 for (let r = startRow; r <= endRow; r++) {
                     for (let c = startColumn; c <= endColumn; c++) {
                         cellValue.setValue(r, c, colorObj);
@@ -159,7 +161,7 @@ export const SetBoldCommand: ICommand = {
         const { actualRow, actualColumn } = selection.primary;
         const currentlyBold = worksheet.getRange(actualRow, actualColumn).getFontWeight() === FontWeight.BOLD;
 
-        const setStyleParams: ISetStyleParams<BooleanNumber> = {
+        const setStyleParams: ISetStyleCommandParams<BooleanNumber> = {
             style: {
                 type: 'bl',
                 value: currentlyBold ? BooleanNumber.FALSE : BooleanNumber.TRUE,
@@ -193,7 +195,7 @@ export const SetItalicCommand: ICommand = {
             currentlyItalic = worksheet.getRange(startRow, startColumn).getFontStyle() === FontItalic.ITALIC;
         }
 
-        const setStyleParams: ISetStyleParams<BooleanNumber> = {
+        const setStyleParams: ISetStyleCommandParams<BooleanNumber> = {
             style: {
                 type: 'it',
                 value: currentlyItalic ? BooleanNumber.FALSE : BooleanNumber.TRUE,
@@ -228,7 +230,7 @@ export const SetUnderlineCommand: ICommand = {
                 .getUnderline().s;
         }
 
-        const setStyleParams: ISetStyleParams<{ s: number }> = {
+        const setStyleParams: ISetStyleCommandParams<{ s: number }> = {
             style: {
                 type: 'ul',
                 value: {
@@ -265,7 +267,7 @@ export const SetStrikeThroughCommand: ICommand = {
                 .getStrikeThrough().s;
         }
 
-        const setStyleParams: ISetStyleParams<{ s: number }> = {
+        const setStyleParams: ISetStyleCommandParams<{ s: number }> = {
             style: {
                 type: 'st',
                 value: { s: currentlyStrokeThrough ? BooleanNumber.FALSE : BooleanNumber.TRUE },
@@ -300,7 +302,7 @@ export const SetOverlineCommand: ICommand = {
                 .getOverline().s;
         }
 
-        const setStyleParams: ISetStyleParams<{ s: number }> = {
+        const setStyleParams: ISetStyleCommandParams<{ s: number }> = {
             style: {
                 type: 'ol',
                 value: {
@@ -326,7 +328,7 @@ export const SetFontFamilyCommand: ICommand<ISetFontFamilyCommandParams> = {
         }
 
         const commandService = accessor.get(ICommandService);
-        const setStyleParams: ISetStyleParams<string> = {
+        const setStyleParams: ISetStyleCommandParams<string> = {
             style: {
                 type: 'ff',
                 value: params.value,
@@ -350,7 +352,7 @@ export const SetFontSizeCommand: ICommand<ISetFontSizeCommandParams> = {
         }
 
         const commandService = accessor.get(ICommandService);
-        const setStyleParams: ISetStyleParams<number> = {
+        const setStyleParams: ISetStyleCommandParams<number> = {
             style: {
                 type: 'fs',
                 value: params.value,
@@ -374,7 +376,7 @@ export const SetTextColorCommand: ICommand<ISetColorCommandParams> = {
         }
 
         const commandService = accessor.get(ICommandService);
-        const setStyleParams: ISetStyleParams<IColorStyle> = {
+        const setStyleParams: ISetStyleCommandParams<IColorStyle> = {
             style: {
                 type: 'cl',
                 value: {
@@ -392,7 +394,7 @@ export const ResetTextColorCommand: ICommand = {
     id: 'sheet.command.reset-text-color',
     handler: async (accessor) => {
         const commandService = accessor.get(ICommandService);
-        const setStyleParams: ISetStyleParams<IColorStyle> = {
+        const setStyleParams: ISetStyleCommandParams<IColorStyle> = {
             style: {
                 type: 'cl',
                 value: {
@@ -414,7 +416,7 @@ export const SetBackgroundColorCommand: ICommand<ISetColorCommandParams> = {
         }
 
         const commandService = accessor.get(ICommandService);
-        const setStyleParams: ISetStyleParams<IColorStyle> = {
+        const setStyleParams: ISetStyleCommandParams<IColorStyle> = {
             style: {
                 type: 'bg',
                 value: {
@@ -432,7 +434,7 @@ export const ResetBackgroundColorCommand: ICommand = {
     id: 'sheet.command.reset-background-color',
     handler: async (accessor) => {
         const commandService = accessor.get(ICommandService);
-        const setStyleParams: ISetStyleParams<IColorStyle> = {
+        const setStyleParams: ISetStyleCommandParams<IColorStyle> = {
             style: {
                 type: 'bg',
                 value: {
@@ -458,7 +460,7 @@ export const SetVerticalTextAlignCommand: ICommand<ISetVerticalTextAlignCommandP
         }
 
         const commandService = accessor.get(ICommandService);
-        const setStyleParams: ISetStyleParams<VerticalAlign> = {
+        const setStyleParams: ISetStyleCommandParams<VerticalAlign> = {
             style: {
                 type: 'vt',
                 value: params.value,
@@ -482,7 +484,7 @@ export const SetHorizontalTextAlignCommand: ICommand<ISetHorizontalTextAlignComm
         }
 
         const commandService = accessor.get(ICommandService);
-        const setStyleParams: ISetStyleParams<HorizontalAlign> = {
+        const setStyleParams: ISetStyleCommandParams<HorizontalAlign> = {
             style: {
                 type: 'ht',
                 value: params.value,
@@ -506,7 +508,7 @@ export const SetTextWrapCommand: ICommand<ISetTextWrapCommandParams> = {
         }
 
         const commandService = accessor.get(ICommandService);
-        const setStyleParams: ISetStyleParams<WrapStrategy> = {
+        const setStyleParams: ISetStyleCommandParams<WrapStrategy> = {
             style: {
                 type: 'tb',
                 value: params.value,
@@ -532,7 +534,7 @@ export const SetTextRotationCommand: ICommand<ISetTextRotationCommandParams> = {
         const value = typeof params.value === 'number' ? { a: params.value } : { a: 0, v: BooleanNumber.TRUE };
 
         const commandService = accessor.get(ICommandService);
-        const setStyleParams: ISetStyleParams<ITextRotation> = {
+        const setStyleParams: ISetStyleCommandParams<ITextRotation> = {
             style: {
                 type: 'tr',
                 value,

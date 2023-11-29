@@ -109,6 +109,18 @@ export const AutoFillPopupMenu: React.FC<{}> = () => {
         return disposable.dispose;
     }, [autoFillService]);
 
+    useEffect(() => {
+        function handleClose() {
+            setVisible(false);
+        }
+
+        document.addEventListener('wheel', handleClose);
+
+        return () => {
+            document.removeEventListener('wheel', handleClose);
+        };
+    }, [visible]);
+
     if (anchor.col < 0 || anchor.row < 0) {
         return null;
     }
@@ -154,10 +166,8 @@ export const AutoFillPopupMenu: React.FC<{}> = () => {
                                 className={styles.autoFillPopupMenuItem}
                             >
                                 <span className={styles.autoFillPopupMenuItemIcon}>
-                                    {item.value === selected ? (
+                                    {item.value === selected && (
                                         <CheckMarkSingle style={{ color: 'rgb(var(--green-700, #409f11))' }} />
-                                    ) : (
-                                        ''
                                     )}
                                 </span>
                                 <span className={styles.autoFillPopupMenuItemTitle}>{localeService.t(item.label)}</span>

@@ -75,9 +75,11 @@ export class CalculateController extends Disposable {
 
                 let dirtyRanges: IUnitRange[] = [];
                 if (command.id === SetRangeValuesMutation.id) {
-                    dirtyRanges = this._getSetRangeValuesMutationDirtyRange(
-                        command.params as ISetRangeValuesMutationParams
-                    );
+                    const params = command.params as ISetRangeValuesMutationParams;
+                    if (params.isFormulaUpdate === true) {
+                        return;
+                    }
+                    dirtyRanges = this._getSetRangeValuesMutationDirtyRange(params);
                 }
 
                 this._calculate(dirtyRanges);

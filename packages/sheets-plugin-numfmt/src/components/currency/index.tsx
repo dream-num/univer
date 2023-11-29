@@ -6,10 +6,11 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { FC } from 'react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-import type { BusinessComponentProps } from '../../base/types';
+import { BusinessComponentProps } from '../../base/types';
+import { useCurrencyOptions } from '../../hooks/useCurrencyOptions';
 import { getCurrencyType } from '../../utils/currency';
 import { getDecimalFromPattern, isPatternEqualWithoutDecimal, setPatternDecimal } from '../../utils/decimal';
-import { getCurrencyFormatOptions, getCurrencyOptions } from '../../utils/options';
+import { getCurrencyFormatOptions } from '../../utils/options';
 
 export const isCurrencyPanel = (pattern: string) => {
     const type = getCurrencyType(pattern);
@@ -29,9 +30,16 @@ export const CurrencyPanel: FC<BusinessComponentProps> = (props) => {
     const localeService = useDependency(LocaleService);
     const t = localeService.t;
     const [decimal, decimalSet] = useState(() => getDecimalFromPattern(props.defaultPattern || '', 2));
-    const [suffix, suffixSet] = useState(
-        () => getCurrencyType(props.defaultPattern || '') || getCurrencyOptions()[0].value
-    );
+    const [suffix, suffixSet] = useState('');
+    const { options } = useCurrencyOptions((list) => {
+        const suffix = getCurrencyType(props.defaultPattern) || list[0];
+        suffixSet(suffix);
+        const negativeOptions = getCurrencyFormatOptions(suffix);
+        const pattern =
+            negativeOptions.find((item) => isPatternEqualWithoutDecimal(item.value, props.defaultPattern))?.value ||
+            negativeOptions[0].value;
+        patternSet(pattern);
+    });
 
     const negativeOptions = useMemo(() => getCurrencyFormatOptions(suffix), [suffix]);
 
@@ -49,16 +57,14 @@ export const CurrencyPanel: FC<BusinessComponentProps> = (props) => {
 
     const resultPattern = useMemo(() => setPatternDecimal(pattern, decimal), [pattern, decimal]);
 
-    const currencyOptions = useMemo(getCurrencyOptions, []);
-
     useEffect(() => {
         props.onChange(resultPattern);
     }, [resultPattern]);
 
-    useEffectWithoutFirst(() => {
-        patternSet(negativeOptions[0].value);
-        return () => {};
-    }, [negativeOptions]);
+    const onSelect = (value: string) => {
+        suffixSet(value);
+        patternSet(getCurrencyFormatOptions(value)[0].value);
+    };
 
     return (
         <div>
@@ -72,14 +78,7 @@ export const CurrencyPanel: FC<BusinessComponentProps> = (props) => {
                 <div className="option">
                     <div className="label"> {t('sheet.numfmt.currencyType')}</div>
                     <div className="m-t-8 w-140">
-                        <Select
-                            onChange={(value) => {
-                                suffixSet(value);
-                                patternSet(negativeOptions[0].value);
-                            }}
-                            options={currencyOptions}
-                            value={suffix}
-                        />
+                        <Select onChange={onSelect} options={options} value={suffix}></Select>
                     </div>
                 </div>
             </div>

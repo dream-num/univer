@@ -7,7 +7,9 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { FC } from 'react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-import type { BusinessComponentProps } from '../base/types';
+import { BusinessComponentProps } from '../base/types';
+import { useCurrencyOptions } from '../hooks/useCurrencyOptions';
+import { getCurrencyType } from '../utils/currency';
 import { AccountingPanel, isAccountingPanel } from './accounting';
 import { CurrencyPanel, isCurrencyPanel } from './currency';
 import { DatePanel, isDatePanel } from './date';
@@ -22,6 +24,7 @@ export const SheetNumfmtPanel: FC<SheetNumfmtPanelProps> = (props) => {
     const { defaultValue, defaultPattern } = props.value;
     const localeService = useDependency(LocaleService);
     const t = localeService.t;
+    const { mark } = useCurrencyOptions();
     const options = useMemo(
         () =>
             [
@@ -48,15 +51,22 @@ export const SheetNumfmtPanel: FC<SheetNumfmtPanelProps> = (props) => {
         label: option.label,
         value: option.label,
     }));
+
     const handleSelect: ISelectProps['onChange'] = (value) => {
         typeSet(value);
     };
+
     const handleChange = (v: string) => {
         pattern.current = v;
         props.onChange({ type: 'change', value: v });
     };
+
     const handleConfirm = () => {
-        props.onChange({ type: 'confirm', value: pattern.current });
+        const currency = getCurrencyType(pattern.current);
+        if (currency) {
+            mark(currency);
+        }
+        if (pattern.current) props.onChange({ type: 'confirm', value: pattern.current });
     };
     const handleCancel = () => {
         props.onChange({ type: 'cancel', value: pattern.current });
@@ -72,6 +82,8 @@ export const SheetNumfmtPanel: FC<SheetNumfmtPanelProps> = (props) => {
         typeSet(findDefaultType());
     }, [defaultPattern, defaultValue]);
 
+    const key = useMemo(() => `${defaultPattern}_${defaultValue}`, [defaultValue, defaultPattern]);
+
     return (
         <div className="numfmt-panel p-b-20">
             <div>
@@ -79,7 +91,7 @@ export const SheetNumfmtPanel: FC<SheetNumfmtPanelProps> = (props) => {
                 <div className="m-t-8">
                     <Select onChange={handleSelect} options={selectOptions} value={type} />
                 </div>
-                <div>{BusinessComponent && <BusinessComponent {...subProps} />}</div>
+                <div>{BusinessComponent && <BusinessComponent {...subProps} key={key} />}</div>
             </div>
 
             <div className="btn-list m-t-14 m-b-20">

@@ -4,10 +4,10 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { FC } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
 
-import type { BusinessComponentProps } from '../../base/types';
+import { BusinessComponentProps } from '../../base/types';
+import { useCurrencyOptions } from '../../hooks/useCurrencyOptions';
 import { getCurrencyType } from '../../utils/currency';
 import { getDecimalFromPattern, setPatternDecimal } from '../../utils/decimal';
-import { getCurrencyOptions } from '../../utils/options';
 
 export const isAccountingPanel = (pattern: string) => {
     const type = getCurrencyType(pattern);
@@ -16,9 +16,17 @@ export const isAccountingPanel = (pattern: string) => {
 
 export const AccountingPanel: FC<BusinessComponentProps> = (props) => {
     const [decimal, decimalSet] = useState(() => getDecimalFromPattern(props.defaultPattern || '', 2));
-    const [suffix, suffixSet] = useState(
-        () => getCurrencyType(props.defaultPattern || '') || getCurrencyOptions()[0].value
-    );
+    const [suffix, suffixSet] = useState('');
+
+    const { options } = useCurrencyOptions((list) => {
+        const suffix = getCurrencyType(props.defaultPattern);
+        if (!suffix) {
+            suffixSet(list[0]);
+        } else {
+            suffixSet(suffix);
+        }
+    });
+
     const localeService = useDependency(LocaleService);
     const t = localeService.t;
     const pattern = useMemo(
@@ -26,11 +34,13 @@ export const AccountingPanel: FC<BusinessComponentProps> = (props) => {
         [suffix, decimal]
     );
 
-    const currencyOptions = useMemo(getCurrencyOptions, []);
-
     useEffect(() => {
         props.onChange(pattern);
     }, [pattern]);
+
+    const onSelect = (v: string) => {
+        suffixSet(v);
+    };
 
     return (
         <div>
@@ -46,7 +56,7 @@ export const AccountingPanel: FC<BusinessComponentProps> = (props) => {
                     <div className="label">{t('sheet.numfmt.currencyType')}</div>
 
                     <div className="m-t-8 w-140">
-                        <Select onChange={suffixSet} options={currencyOptions} value={suffix} />
+                        <Select onChange={onSelect} options={options} value={suffix}></Select>
                     </div>
                 </div>
             </div>

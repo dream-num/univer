@@ -52,7 +52,9 @@ export const ThousandthPercentilePanel: FC<BusinessComponentProps> = (props) => 
             <div className="m-t-8">
                 <SelectList onChange={handleClick} options={options} value={suffix} />
             </div>
-            <div className="describe m-t-14">货币格式用于表示一般货币数值。会计格式可以对一列数值进行小数点对齐。</div>
+            <div className="describe m-t-14">
+                数值格式用于一般数字的表示。货币和会计格式则提供货币值计算的专用格式。
+            </div>
         </div>
     );
 };

@@ -6,7 +6,7 @@ import { ConfigContext } from '../config-provider/ConfigProvider';
 import styles from './index.module.less';
 
 interface IOption {
-    label?: string;
+    label?: string | React.ReactNode;
     value?: string;
     options?: IOption[];
 }
@@ -33,8 +33,6 @@ export function Select(props: ISelectProps) {
     const { value, options = [], onChange } = props;
 
     const { mountContainer } = useContext(ConfigContext);
-
-    console.log(options);
 
     return (
         <RcSelect

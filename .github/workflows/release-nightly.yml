@@ -8,7 +8,7 @@ permissions:
     contents: read
 
 jobs:
-    build:
+    release-nightly:
         if: github.repository == 'dream-num/univer'
         runs-on: ubuntu-latest
 
@@ -76,3 +76,46 @@ jobs:
 
             - name: Publish
               run: pnpm publish --access public --tag nightly -r
+
+            # ================= Notify Discord =================
+            - name: 👾 Discord Notification
+              uses: sarisia/actions-status-discord@v1
+              if: ${{ success() }}
+              with:
+                    webhook: ${{ secrets.DISCORD_WEBHOOK }}
+                    status: ${{ job.status }}
+                    description: |
+                        🌝 Nightly release: Successful
+
+                        🎉 🎉 🎉 🎉 🎉 🎉 🎉 🎉 🎉
+                        Release version: ${{ steps.nightly-version.outputs.version }}
+                        🎉 🎉 🎉 🎉 🎉 🎉 🎉 🎉 🎉
+
+                        Have a good dream! 🌙
+                    nofail: false
+                    nodetail: false
+                    nocontext: false
+                    noprefix: true
+                    color: 0x00b894
+                    username: Nightly Release
+
+            - name: 👾 Discord Notification
+              uses: sarisia/actions-status-discord@v1
+              if: ${{ failure() }}
+              with:
+                    webhook: ${{ secrets.DISCORD_WEBHOOK }}
+                    status: ${{ job.status }}
+                    description: |
+                        🌚 Nightly release: Unsuccessful 💩
+
+                        👿 👿 👿 👿 👿 👿 👿 👿 👿
+                        Failed version: ${{ steps.nightly-version.outputs.version }}
+                        👿 👿 👿 👿 👿 👿 👿 👿 👿
+
+                        Don't worry, tomorrow will be better! 🌞
+                    nofail: false
+                    nodetail: false
+                    nocontext: false
+                    noprefix: true
+                    color: 0xd63031
+                    username: Nightly Release

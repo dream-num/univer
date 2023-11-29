@@ -1,8 +1,15 @@
+import { MoreDownSingle } from '@univerjs/icons';
 import RcSelect from 'rc-select';
 import React, { useContext } from 'react';
 
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import styles from './index.module.less';
+
+interface IOption {
+    label?: string;
+    value?: string;
+    options?: IOption[];
+}
 
 export interface ISelectProps {
     /**
@@ -14,10 +21,7 @@ export interface ISelectProps {
      * The options of select
      * @default []
      */
-    options?: Array<{
-        label: string;
-        value: string;
-    }>;
+    options?: IOption[];
 
     /**
      * The callback function that is triggered when the value is changed
@@ -30,6 +34,8 @@ export function Select(props: ISelectProps) {
 
     const { mountContainer } = useContext(ConfigContext);
 
+    console.log(options);
+
     return (
         <RcSelect
             prefixCls={styles.select}
@@ -37,7 +43,8 @@ export function Select(props: ISelectProps) {
             options={options}
             value={value}
             menuItemSelectedIcon={null}
+            suffixIcon={<MoreDownSingle />}
             onChange={onChange}
-        ></RcSelect>
+        />
     );
 }

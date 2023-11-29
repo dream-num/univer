@@ -45,7 +45,7 @@ export class CalculateController extends Disposable {
     private _initialize(): void {
         this._commandExecutedListener();
 
-        this._initialExecuteCompleteFormula();
+        this._initialExecuteFormulaListener();
     }
 
     private _commandExecutedListener() {
@@ -119,7 +119,56 @@ export class CalculateController extends Disposable {
         });
     }
 
-    private _initialExecuteCompleteFormula() {
+    private _initialExecuteFormulaListener() {
+        /**
+         * Clearing the data unfold values of array formulas.
+         */
+        this._formulaEngineService.executionStartListener$.subscribe(() => {
+            const arrayFormulaData = this._formulaDataModel.getArrayFormulaData();
+
+            const redoMutationsInfo: ICommandInfo[] = [];
+
+            Object.keys(arrayFormulaData).forEach((unitId) => {
+                const sheetData = arrayFormulaData[unitId];
+
+                const sheetIds = Object.keys(sheetData);
+
+                sheetIds.forEach((sheetId) => {
+                    const cellData = sheetData[sheetId];
+                    const cellValue = new ObjectMatrix<null>();
+                    cellData.forValue((row, column, range) => {
+                        const { startRow, startColumn, endRow, endColumn } = range;
+
+                        for (let r = startRow; r <= endRow; r++) {
+                            for (let c = startColumn; c <= endColumn; c++) {
+                                if (r === row && c === column) {
+                                    continue;
+                                }
+                                cellValue.setValue(r, c, null);
+                            }
+                        }
+                    });
+                    const setRangeValuesMutation: ISetRangeValuesMutationParams = {
+                        worksheetId: sheetId,
+                        workbookId: unitId,
+                        cellValue: cellValue.getData(),
+                        isFormulaUpdate: true,
+                    };
+
+                    redoMutationsInfo.push({
+                        id: SetRangeValuesMutation.id,
+                        params: setRangeValuesMutation,
+                    });
+                });
+            });
+
+            const result = redoMutationsInfo.every((m) => this._commandService.executeCommand(m.id, m.params));
+            return result;
+        });
+
+        /**
+         * Assignment operation after formula calculation.
+         */
         this._formulaEngineService.executionCompleteListener$.subscribe((data) => {
             const { unitData, unitArrayFormulaData } = data;
 
@@ -145,6 +194,9 @@ export class CalculateController extends Disposable {
 
                 sheetIds.forEach((sheetId) => {
                     const cellData = sheetData[sheetId];
+
+                    const arrayFormula = unitArrayFormulaData[unitId][sheetId];
+
                     const setRangeValuesMutation: ISetRangeValuesMutationParams = {
                         worksheetId: sheetId,
                         workbookId: unitId,
@@ -163,4 +215,6 @@ export class CalculateController extends Disposable {
             return result;
         });
     }
+
+    private _checkInArrayFormulaRange() {}
 }

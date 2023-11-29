@@ -385,14 +385,16 @@ export class SelectionShape {
         AutofillSize /= scale;
         AutofillStrokeWidth /= scale;
 
-        const leftAdjustWidth = strokeWidth + SELECTION_CONTROL_BORDER_BUFFER_WIDTH;
+        const borderBuffer = SELECTION_CONTROL_BORDER_BUFFER_WIDTH / scale;
+
+        const leftAdjustWidth = strokeWidth + borderBuffer;
 
         this.leftControl.transformByState({
             height: endY - startY,
             left: -leftAdjustWidth / 2,
             width: strokeWidth,
-            strokeWidth: SELECTION_CONTROL_BORDER_BUFFER_WIDTH,
-            top: -SELECTION_CONTROL_BORDER_BUFFER_WIDTH / 2,
+            strokeWidth: borderBuffer,
+            top: -borderBuffer / 2,
         });
 
         this.leftControl.setProps({
@@ -404,8 +406,8 @@ export class SelectionShape {
             height: endY - startY,
             left: endX - startX - leftAdjustWidth / 2,
             width: strokeWidth,
-            strokeWidth: SELECTION_CONTROL_BORDER_BUFFER_WIDTH,
-            top: -SELECTION_CONTROL_BORDER_BUFFER_WIDTH / 2,
+            strokeWidth: borderBuffer,
+            top: -borderBuffer / 2,
         });
 
         this.rightControl.setProps({
@@ -418,7 +420,7 @@ export class SelectionShape {
             top: -leftAdjustWidth / 2,
             left: -leftAdjustWidth / 2,
             height: strokeWidth,
-            strokeWidth: SELECTION_CONTROL_BORDER_BUFFER_WIDTH,
+            strokeWidth: borderBuffer,
         });
 
         this.topControl.setProps({
@@ -431,7 +433,7 @@ export class SelectionShape {
             top: endY - startY - leftAdjustWidth / 2,
             height: strokeWidth,
             left: -leftAdjustWidth / 2,
-            strokeWidth: SELECTION_CONTROL_BORDER_BUFFER_WIDTH,
+            strokeWidth: borderBuffer,
         });
 
         this.bottomControl.setProps({

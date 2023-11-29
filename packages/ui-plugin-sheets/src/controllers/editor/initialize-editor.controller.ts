@@ -1,5 +1,6 @@
 import { getDocObject } from '@univerjs/base-docs';
 import { IRenderManagerService } from '@univerjs/base-render';
+import type { Nullable } from '@univerjs/core';
 import {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     Disposable,
@@ -8,12 +9,11 @@ import {
     HorizontalAlign,
     IUniverInstanceService,
     LifecycleStages,
-    Nullable,
     OnLifecycle,
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 
 @OnLifecycle(LifecycleStages.Rendered, InitializeEditorController)
 export class InitializeEditorController extends Disposable {
@@ -48,7 +48,7 @@ export class InitializeEditorController extends Disposable {
         this._currentUniverService.createDoc({
             id: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
             body: {
-                dataStream: `hello world${DEFAULT_EMPTY_DOCUMENT_VALUE}`,
+                dataStream: `${DEFAULT_EMPTY_DOCUMENT_VALUE}`,
                 paragraphs: [
                     {
                         startIndex: 11,
@@ -57,8 +57,8 @@ export class InitializeEditorController extends Disposable {
             },
             documentStyle: {
                 pageSize: {
-                    width: 1000,
-                    height: 30,
+                    width: Infinity,
+                    height: Infinity,
                 },
                 marginTop: 0,
                 marginBottom: 0,

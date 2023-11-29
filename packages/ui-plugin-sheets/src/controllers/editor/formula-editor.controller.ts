@@ -5,6 +5,7 @@ import {
     DocViewModelManagerService,
     getDocObject,
     RichTextEditingMutation,
+    VIEWPORT_KEY,
 } from '@univerjs/base-docs';
 import { IRenderManagerService } from '@univerjs/base-render';
 import type { ICommandInfo, Nullable } from '@univerjs/core';
@@ -20,6 +21,8 @@ import {
 import { Inject } from '@wendellhu/redi';
 import { type Subscription } from 'rxjs';
 
+import { getEditorObject } from '../../basics/editor/get-editor-object';
+import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 
 @OnLifecycle(LifecycleStages.Steady, FormulaEditorController)
@@ -32,7 +35,8 @@ export class FormulaEditorController extends Disposable {
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @Inject(DocViewModelManagerService) private readonly _docViewModelManagerService: DocViewModelManagerService,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @IFormulaEditorManagerService private readonly _formulaEditorManagerService: IFormulaEditorManagerService
     ) {
         super();
 
@@ -46,6 +50,40 @@ export class FormulaEditorController extends Disposable {
     private _initialize() {
         this._syncFormulaEditorContent();
         this._commandExecutedListener();
+        this._syncEditorSize();
+    }
+
+    private _syncEditorSize() {
+        this._formulaEditorManagerService.position$.subscribe((position) => {
+            if (position == null) {
+                return;
+            }
+            const editorObject = getEditorObject(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, this._renderManagerService);
+
+            if (editorObject == null) {
+                return;
+            }
+
+            const { width, height } = position;
+
+            const { document: documentComponent, scene, engine } = editorObject;
+
+            const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+
+            viewportMain?.getScrollBar()?.dispose();
+            console.log(width, height);
+            scene.transformByState({
+                width,
+                height,
+            });
+
+            documentComponent.resize(width, height);
+
+            // resize canvas
+            requestIdleCallback(() => {
+                engine.resizeBySize(width, height);
+            });
+        });
     }
 
     // Sync cell content to formula editor bar when sheet selection changed.

@@ -1,5 +1,6 @@
 import { IUniverInstanceService, LocaleService, Plugin, PluginType } from '@univerjs/core';
-import { Dependency, Inject, Injector } from '@wendellhu/redi';
+import type { Dependency } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 import { filter } from 'rxjs/operators';
 
 import { SHEET_UI_PLUGIN_NAME } from './basics';
@@ -31,6 +32,10 @@ import { enUS } from './locale';
 import { AutoFillService, IAutoFillService } from './services/auto-fill/auto-fill.service';
 import { ISheetClipboardService, SheetClipboardService } from './services/clipboard/clipboard.service';
 import { CellEditorManagerService, ICellEditorManagerService } from './services/editor/cell-editor-manager.service';
+import {
+    FormulaEditorManagerService,
+    IFormulaEditorManagerService,
+} from './services/editor/formula-editor-manager.service';
 import { EditorBridgeService, IEditorBridgeService } from './services/editor-bridge.service';
 import { FormatPainterService, IFormatPainterService } from './services/format-painter/format-painter.service';
 import { ScrollManagerService } from './services/scroll-manager.service';
@@ -68,6 +73,7 @@ export class SheetUIPlugin extends Plugin {
                 [ISheetBarService, { useClass: SheetBarService }],
                 [IFormatPainterService, { useClass: FormatPainterService }],
                 [ICellEditorManagerService, { useClass: CellEditorManagerService }],
+                [IFormulaEditorManagerService, { useClass: FormulaEditorManagerService }],
                 [IAutoFillService, { useClass: AutoFillService }],
                 [ScrollManagerService],
                 [SheetSkeletonManagerService],

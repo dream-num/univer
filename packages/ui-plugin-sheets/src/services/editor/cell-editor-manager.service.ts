@@ -1,6 +1,8 @@
-import { IPosition, Nullable } from '@univerjs/core';
-import { createIdentifier, IDisposable } from '@wendellhu/redi';
-import { BehaviorSubject, Observable } from 'rxjs';
+import type { IPosition, Nullable } from '@univerjs/core';
+import type { IDisposable } from '@wendellhu/redi';
+import { createIdentifier } from '@wendellhu/redi';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 export interface ICellEditorManagerParam extends Partial<IPosition> {
     show: boolean;

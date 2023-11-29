@@ -1,26 +1,8 @@
 /* eslint-disable no-magic-numbers */
-import {
-    Documents,
-    EVENT_TYPE,
-    IRender,
-    IRenderManagerService,
-    IWheelEvent,
-    Layer,
-    RenderManagerService,
-    Scene,
-    ScrollBar,
-    Viewport,
-} from '@univerjs/base-render';
-import {
-    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
-    DocumentDataModel,
-    EventState,
-    IConfigService,
-    IUniverInstanceService,
-    LifecycleStages,
-    Nullable,
-    OnLifecycle,
-} from '@univerjs/core';
+import type { IRender, IWheelEvent, RenderManagerService, Scene } from '@univerjs/base-render';
+import { Documents, EVENT_TYPE, IRenderManagerService, Layer, ScrollBar, Viewport } from '@univerjs/base-render';
+import type { DocumentDataModel, EventState, Nullable } from '@univerjs/core';
+import { IConfigService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import {
@@ -177,16 +159,5 @@ export class DocCanvasView {
         currentRender.components.set(DOCS_VIEW_KEY.MAIN, documents);
 
         scene.addObjects([documents], DOCS_COMPONENT_MAIN_LAYER_INDEX);
-
-        const unitId = this._currentDocumentModel.getUnitId();
-        if (unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
-            const { width, height } = documentModel.documentStyle.pageSize!;
-            scene.transformByState({
-                width,
-                height,
-            });
-
-            currentRender.mainComponent.resize(width, height);
-        }
     }
 }

@@ -6,6 +6,7 @@ import { CheckMarkSingle, CloseSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useRef, useState } from 'react';
 
+import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 import styles from './index.module.less';
 
 interface IFormulaState {
@@ -37,6 +38,8 @@ export function FormulaBar() {
 
     const renderManagerService: IRenderManagerService = useDependency(IRenderManagerService);
 
+    const formulaEditorManagerService = useDependency(IFormulaEditorManagerService);
+
     const componentManager = useDependency(ComponentManager);
     const Icon = componentManager.get(state.fx?.icon ?? '');
 
@@ -61,8 +64,17 @@ export function FormulaBar() {
             engine?.setContainer(editor);
         });
 
+        const resizeObserver = new ResizeObserver(() => {
+            const editorRect = editor.getBoundingClientRect();
+
+            formulaEditorManagerService.setPosition(editorRect);
+        });
+
+        resizeObserver.observe(editor);
+
         // Clean up on unmount
         return () => {
+            resizeObserver.unobserve(editor);
             renderSubscription.unsubscribe();
         };
     }, []); // Empty dependency array means this effect runs once on mount and clean up on unmount

@@ -1,25 +1,22 @@
+import type { IRichTextEditingMutationParams } from '@univerjs/base-docs';
 import {
     DOCS_COMPONENT_MAIN_LAYER_INDEX,
     DocSkeletonManagerService,
     DocViewModelManagerService,
-    IRichTextEditingMutationParams,
-    NORMAL_TEXT_SELECTION_PLUGIN_NAME,
     RichTextEditingMutation,
     TextSelectionManagerService,
     VIEWPORT_KEY,
 } from '@univerjs/base-docs';
+import type { DocumentSkeleton, IDocumentLayoutObject, IEditorInputConfig, Scene } from '@univerjs/base-render';
 import {
     DeviceInputEventType,
-    DocumentSkeleton,
-    IDocumentLayoutObject,
-    IEditorInputConfig,
     IRenderManagerService,
     ITextSelectionRenderManager,
     Rect,
-    Scene,
     ScrollBar,
 } from '@univerjs/base-render';
 import { KeyCode } from '@univerjs/base-ui';
+import type { ICommandInfo, IDocumentBody, IDocumentData, IPosition, ITextRotation, Nullable } from '@univerjs/core';
 import {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     Disposable,
@@ -28,24 +25,18 @@ import {
     FOCUSING_EDITOR,
     FOCUSING_EDITOR_BUT_HIDDEN,
     HorizontalAlign,
-    ICommandInfo,
     ICommandService,
     IContextService,
-    IDocumentBody,
-    IDocumentData,
-    IPosition,
-    ITextRotation,
     IUniverInstanceService,
     LifecycleStages,
     LocaleService,
-    Nullable,
     OnLifecycle,
     Tools,
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
@@ -154,14 +145,7 @@ export class StartEditController extends Disposable {
 
             documentComponent.changeSkeleton(documentSkeleton);
 
-            this._textSelectionManagerService.setCurrentSelectionNotRefresh({
-                pluginName: NORMAL_TEXT_SELECTION_PLUGIN_NAME,
-                unitId: docParam.unitId,
-            });
-
             this._contextService.setContextValue(FOCUSING_EDITOR_BUT_HIDDEN, true);
-
-            // this._textSelectionRenderManager.changeRuntime(documentSkeleton, scene);
 
             this._textSelectionManagerService.replaceTextRanges([
                 {
@@ -542,9 +526,6 @@ export class StartEditController extends Disposable {
         if (config == null) {
             return;
         }
-        // const { event, content, activeRange, selectionList } = config;
-
-        // this._editorBridgeService.show(DeviceInputEventType.Keyboard);
 
         const event = config.event as KeyboardEvent;
 

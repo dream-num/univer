@@ -1,10 +1,10 @@
 import { CopyCommand, CutCommand, IClipboardInterfaceService, PasteCommand } from '@univerjs/base-ui';
-import { CommandType, ICommand, ICommandService, ILogService, IMultiCommand } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { ICommand, IMultiCommand } from '@univerjs/core';
+import { CommandType, ICommandService, ILogService } from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
 
 import { whenEditorNotActivated } from '../../controllers/shortcuts/utils';
-import { ISheetClipboardService } from '../../services/clipboard/clipboard.service';
-import { PASTE_TYPE } from '../../services/clipboard/type';
+import { ISheetClipboardService, PREDEFINED_HOOK_NAME } from '../../services/clipboard/clipboard.service';
 
 export const SheetCopyCommand: IMultiCommand = {
     id: CopyCommand.id,
@@ -33,7 +33,7 @@ export const SheetCutCommand: IMultiCommand = {
 };
 
 export interface ISheetPasteParams {
-    value: PASTE_TYPE;
+    value: string;
 }
 
 export const SheetPasteCommand: IMultiCommand = {
@@ -65,7 +65,7 @@ export const SheetPasteCommand: IMultiCommand = {
 
             // logService.log('[SheetPasteCommand]: clipboard data is', clipboardItems);
             if (clipboardItems.length !== 0) {
-                return sheetClipboardService.paste(clipboardItems[0], params?.type);
+                return sheetClipboardService.paste(clipboardItems[0], params?.value);
             }
 
             return false;
@@ -80,7 +80,7 @@ export const SheetPasteValueCommand: ICommand = {
     type: CommandType.COMMAND,
     handler: async (accessor) => {
         const commandService = accessor.get(ICommandService);
-        return commandService.executeCommand(SheetPasteCommand.id, { type: PASTE_TYPE.VALUE });
+        return commandService.executeCommand(SheetPasteCommand.id, { value: PREDEFINED_HOOK_NAME.SPECIAL_PASTE_VALUE });
     },
 };
 
@@ -89,7 +89,9 @@ export const SheetPasteFormatCommand: ICommand = {
     type: CommandType.COMMAND,
     handler: async (accessor) => {
         const commandService = accessor.get(ICommandService);
-        return commandService.executeCommand(SheetPasteCommand.id, { type: PASTE_TYPE.FORMAT });
+        return commandService.executeCommand(SheetPasteCommand.id, {
+            value: PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMAT,
+        });
     },
 };
 
@@ -98,7 +100,9 @@ export const SheetPasteColWidthCommand: ICommand = {
     type: CommandType.COMMAND,
     handler: async (accessor) => {
         const commandService = accessor.get(ICommandService);
-        return commandService.executeCommand(SheetPasteCommand.id, { type: PASTE_TYPE.COL_WIDTH });
+        return commandService.executeCommand(SheetPasteCommand.id, {
+            value: PREDEFINED_HOOK_NAME.SPECIAL_PASTE_COL_WIDTH,
+        });
     },
 };
 
@@ -107,6 +111,8 @@ export const SheetPasteBesidesBorderCommand: ICommand = {
     type: CommandType.COMMAND,
     handler: async (accessor) => {
         const commandService = accessor.get(ICommandService);
-        return commandService.executeCommand(SheetPasteCommand.id, { type: PASTE_TYPE.BESIDES_BORDER });
+        return commandService.executeCommand(SheetPasteCommand.id, {
+            value: PREDEFINED_HOOK_NAME.SPECIAL_PASTE_BESIDES_BORDER,
+        });
     },
 };

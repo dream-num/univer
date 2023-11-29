@@ -1,52 +1,34 @@
-import {
-    AddMergeUndoMutationFactory,
-    AddWorksheetMergeMutation,
-    getPrimaryForRange,
-    IAddWorksheetMergeMutationParams,
+import type {
     IInsertColMutationParams,
     IInsertRowMutationParams,
-    InsertColMutation,
-    InsertRowMutation,
-    IRemoveWorksheetMergeMutationParams,
     ISetRangeValuesMutationParams,
-    ISetSelectionsOperationParams,
     ISetWorksheetColWidthMutationParams,
     ISetWorksheetRowHeightMutationParams,
-    MoveRangeCommand,
-    MoveRangeMutation,
-    MoveRangeMutationParams,
-    NORMAL_SELECTION_PLUGIN_NAME,
-    RemoveMergeUndoMutationFactory,
-    RemoveWorksheetMergeMutation,
+} from '@univerjs/base-sheets';
+import {
+    InsertColMutation,
+    InsertRowMutation,
     SetRangeValuesMutation,
     SetRangeValuesUndoMutationFactory,
-    SetSelectionsOperation,
     SetWorksheetColWidthMutation,
     SetWorksheetRowHeightMutation,
 } from '@univerjs/base-sheets';
 import { IMessageService, textTrim } from '@univerjs/base-ui';
+import type { ICellData, IMutationInfo, IRange, IRowData, ObjectMatrixPrimitiveType, Worksheet } from '@univerjs/core';
 import {
     BooleanNumber,
     DEFAULT_WORKSHEET_COLUMN_WIDTH,
     DEFAULT_WORKSHEET_ROW_HEIGHT,
     Disposable,
     handleStyleToString,
-    ICellData,
     ICommandService,
     IConfigService,
-    IMutationInfo,
-    IRange,
-    IRowData,
     IUniverInstanceService,
     LifecycleStages,
     LocaleService,
     ObjectArray,
     ObjectMatrix,
-    ObjectMatrixPrimitiveType,
     OnLifecycle,
-    Rectangle,
-    SheetInterceptorService,
-    Worksheet,
 } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -60,14 +42,20 @@ import {
     SheetPasteFormatCommand,
     SheetPasteValueCommand,
 } from '../../commands/commands/clipboard.command';
-import { ISheetClipboardService } from '../../services/clipboard/clipboard.service';
-import {
+import { ISheetClipboardService, PREDEFINED_HOOK_NAME } from '../../services/clipboard/clipboard.service';
+import type {
     COPY_TYPE,
     ICellDataWithSpanInfo,
     IClipboardPropertyItem,
     ISheetClipboardHook,
-    PASTE_TYPE,
 } from '../../services/clipboard/type';
+import {
+    getClearAndSetMergeMutations,
+    getClearCellStyleMutations,
+    getDefaultOnPasteCellMutations,
+    getSetCellStyleMutations,
+    getSetCellValueMutations,
+} from './utils';
 
 /**
  * This controller add basic clipboard logic for basic features such as text color / BISU / row widths to the clipboard
@@ -102,18 +90,20 @@ export class SheetClipboardController extends Disposable {
             SheetPasteBesidesBorderCommand,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
         // register basic sheet clipboard hooks
-        this.disposeWithMe(
-            this._sheetClipboardService.addClipboardHook({
-                ...this._initCopyingHooks(),
-                ...this._initPastingHook(),
-            })
+        this.disposeWithMe(this._sheetClipboardService.addClipboardHook(this._initCopyingHooks()));
+        this.disposeWithMe(this._sheetClipboardService.addClipboardHook(this._initPastingHook()));
+        const disposables = this._initSpecialPasteHooks().map((hook) =>
+            this._sheetClipboardService.addClipboardHook(hook)
         );
+        this.disposeWithMe({ dispose: () => disposables.forEach((d) => d.dispose()) });
     }
 
     private _initCopyingHooks(): ISheetClipboardHook {
         const self = this;
         let currentSheet: Worksheet | null = null;
         return {
+            hookName: PREDEFINED_HOOK_NAME.DEFAULT_COPY,
+            isDefaultHook: true,
             onBeforeCopy(workbookId, worksheetId) {
                 currentSheet = self._getWorksheet(workbookId, worksheetId);
             },
@@ -203,6 +193,8 @@ export class SheetClipboardController extends Disposable {
         let currentSheet: Worksheet | null = null;
 
         return {
+            hookName: PREDEFINED_HOOK_NAME.DEFAULT_PASTE,
+            isDefaultHook: true,
             onBeforePaste(workbookId_, worksheetId_, range) {
                 currentSheet = self._getWorksheet(workbookId_, worksheetId_);
                 workbookId = workbookId_;
@@ -318,55 +310,38 @@ export class SheetClipboardController extends Disposable {
                 const addingColsCount = range.endColumn - maxColumn;
                 const existingColsCount = colProperties.length - addingColsCount;
 
-                if (pasteType === PASTE_TYPE.COL_WIDTH) {
-                    const setColPropertyMutation: ISetWorksheetColWidthMutationParams = {
+                if (addingColsCount > 0) {
+                    const addColMutation: IInsertColMutationParams = {
                         workbookId: workbookId!,
                         worksheetId: worksheetId!,
-                        ranges: [{ ...range, endRow: Math.min(range.endColumn, maxColumn) }],
-                        colWidth: new ObjectArray(
-                            colProperties
-                                .slice(0, existingColsCount)
-                                .map((property) => (property.width ? +property.width : DEFAULT_WORKSHEET_COLUMN_WIDTH))
+                        ranges: [{ ...range, startColumn: maxColumn }],
+                        colInfo: new ObjectArray(
+                            colProperties.slice(existingColsCount).map((property) => ({
+                                w: property.width ? +property.width : DEFAULT_WORKSHEET_COLUMN_WIDTH,
+                                hd: BooleanNumber.FALSE,
+                            }))
                         ),
                     };
                     redoMutations.push({
-                        id: SetWorksheetColWidthMutation.id,
-                        params: setColPropertyMutation,
-                    });
-                } else {
-                    if (addingColsCount > 0) {
-                        const addColMutation: IInsertColMutationParams = {
-                            workbookId: workbookId!,
-                            worksheetId: worksheetId!,
-                            ranges: [{ ...range, startColumn: maxColumn }],
-                            colInfo: new ObjectArray(
-                                colProperties.slice(existingColsCount).map((property) => ({
-                                    w: property.width ? +property.width : DEFAULT_WORKSHEET_COLUMN_WIDTH,
-                                    hd: BooleanNumber.FALSE,
-                                }))
-                            ),
-                        };
-                        redoMutations.push({
-                            id: InsertColMutation.id,
-                            params: addColMutation,
-                        });
-                    }
-                    // apply col properties to the existing rows
-                    const setColPropertyMutation: ISetWorksheetColWidthMutationParams = {
-                        workbookId: workbookId!,
-                        worksheetId: worksheetId!,
-                        ranges: [{ ...range, endRow: Math.min(range.endColumn, maxColumn) }],
-                        colWidth: new ObjectArray(
-                            colProperties
-                                .slice(0, existingColsCount)
-                                .map((property) => (property.width ? +property.width : DEFAULT_WORKSHEET_COLUMN_WIDTH))
-                        ),
-                    };
-                    redoMutations.push({
-                        id: SetWorksheetColWidthMutation.id,
-                        params: setColPropertyMutation,
+                        id: InsertColMutation.id,
+                        params: addColMutation,
                     });
                 }
+                // apply col properties to the existing rows
+                const setColPropertyMutation: ISetWorksheetColWidthMutationParams = {
+                    workbookId: workbookId!,
+                    worksheetId: worksheetId!,
+                    ranges: [{ ...range, endRow: Math.min(range.endColumn, maxColumn) }],
+                    colWidth: new ObjectArray(
+                        colProperties
+                            .slice(0, existingColsCount)
+                            .map((property) => (property.width ? +property.width : DEFAULT_WORKSHEET_COLUMN_WIDTH))
+                    ),
+                };
+                redoMutations.push({
+                    id: SetWorksheetColWidthMutation.id,
+                    params: setColPropertyMutation,
+                });
 
                 // TODO: add undo mutations but we cannot do it now because underlying mechanism is not ready
 
@@ -380,85 +355,9 @@ export class SheetClipboardController extends Disposable {
                 return self._onPasteCells(range, matrix, workbookId!, worksheetId!, pasteType, copyInfo);
             },
 
-            onRemoveCutCells(range, workbookId, worksheetId) {
-                return self._onRemoveCutCells(range, workbookId, worksheetId);
-            },
-
             onAfterPaste(success) {
                 currentSheet = null;
             },
-        };
-    }
-
-    private _onRemoveCutCells(
-        range: IRange,
-        workbookId: string,
-        worksheetId: string
-    ): {
-        redos: IMutationInfo[];
-        undos: IMutationInfo[];
-    } {
-        const redos: IMutationInfo[] = [];
-        const undos: IMutationInfo[] = [];
-        const accessor = {
-            get: this._injector.get.bind(this._injector),
-        };
-        const workbook = this._currentUniverSheet.getUniverSheetInstance(workbookId);
-        const worksheet = workbook?.getSheetBySheetId(worksheetId);
-        if (workbook && worksheet) {
-            // clear style and content
-            const clearMutationParams: ISetRangeValuesMutationParams = {
-                worksheetId,
-                workbookId,
-                cellValue: generateNullCellValue([range]),
-            };
-            const undoClearMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
-                accessor,
-                clearMutationParams
-            );
-
-            redos.push({
-                id: SetRangeValuesMutation.id,
-                params: clearMutationParams,
-            });
-            undos.push({
-                id: SetRangeValuesMutation.id,
-                params: undoClearMutationParams,
-            });
-
-            // remove merged cells
-            let hasMerge = false;
-            const mergeData = worksheet.getConfig().mergeData;
-            mergeData.forEach((merge) => {
-                if (Rectangle.intersects(range, merge)) {
-                    hasMerge = true;
-                }
-            });
-
-            if (hasMerge) {
-                const removeMergeParams: IRemoveWorksheetMergeMutationParams = {
-                    workbookId,
-                    worksheetId,
-                    ranges: [range],
-                };
-                const undoRemoveMergeParams: IAddWorksheetMergeMutationParams = RemoveMergeUndoMutationFactory(
-                    accessor,
-                    removeMergeParams
-                );
-
-                redos.push({
-                    id: RemoveWorksheetMergeMutation.id,
-                    params: removeMergeParams,
-                });
-                undos.push({
-                    id: AddWorksheetMergeMutation.id,
-                    params: undoRemoveMergeParams,
-                });
-            }
-        }
-        return {
-            undos,
-            redos,
         };
     }
 
@@ -467,373 +366,199 @@ export class SheetClipboardController extends Disposable {
         matrix: ObjectMatrix<ICellDataWithSpanInfo>,
         workbookId: string,
         worksheetId: string,
-        pasteType: PASTE_TYPE,
-        copyInfo?: {
+        pasteType: string,
+        copyInfo: {
             copyType: COPY_TYPE;
-            copyRange: IRange;
+            copyRange?: IRange;
         }
     ): {
         redos: IMutationInfo[];
         undos: IMutationInfo[];
     } {
-        let redoMutationsInfo: IMutationInfo[] = [];
-        let undoMutationsInfo: IMutationInfo[] = [];
         const accessor = {
             get: this._injector.get.bind(this._injector),
         };
-        const { copyType, copyRange } = copyInfo || {};
+        return getDefaultOnPasteCellMutations(pastedRange, matrix, workbookId, worksheetId, copyInfo, accessor);
+    }
 
-        // only inner cut and inner copy can be handled here
-        if (copyType === COPY_TYPE.CUT) {
-            if (copyRange) {
-                const univerInstanceService = accessor.get(IUniverInstanceService);
-                const sheetInterceptorService = accessor.get(SheetInterceptorService);
-                const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-                const worksheet = workbook.getActiveSheet();
-                const workbookId = workbook.getUnitId();
-                const worksheetId = worksheet.getSheetId();
-                const fromValues = worksheet.getRange(copyRange).getValues();
+    private _initSpecialPasteHooks() {
+        const accessor = {
+            get: this._injector.get.bind(this._injector),
+        };
+        const self = this;
+        const workbook = this._currentUniverSheet.getCurrentUniverSheetInstance();
+        const workbookId = workbook.getUnitId();
+        const worksheetId = workbook.getActiveSheet().getSheetId();
+        const specialPasteValueHook: ISheetClipboardHook = {
+            hookName: PREDEFINED_HOOK_NAME.SPECIAL_PASTE_VALUE,
+            specialPasteInfo: {
+                label: 'specialPaste.value',
+            },
+            onPasteCells: (pastedRange, matrix, pasteType, copyInfo) =>
+                getSetCellValueMutations(workbookId, worksheetId, pastedRange, matrix, accessor),
+        };
+        const specialPasteFormatHook: ISheetClipboardHook = {
+            hookName: PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMAT,
+            specialPasteInfo: {
+                label: 'specialPaste.format',
+            },
+            onPasteCells(pastedRange, matrix, pasteType, copyInfo) {
+                const redoMutationsInfo: IMutationInfo[] = [];
+                const undoMutationsInfo: IMutationInfo[] = [];
 
-                const newFromCellValues = fromValues.reduce((res, row, rowIndex) => {
-                    row.forEach((colItem, colIndex) => {
-                        res.setValue(copyRange.startRow + rowIndex, copyRange.startColumn + colIndex, null);
-                    });
-                    return res;
-                }, new ObjectMatrix<ICellData | null>());
-                const currentFromCellValues = fromValues.reduce((res, row, rowIndex) => {
-                    row.forEach((colItem, colIndex) => {
-                        res.setValue(copyRange.startRow + rowIndex, copyRange.startColumn + colIndex, colItem);
-                    });
-                    return res;
-                }, new ObjectMatrix<ICellData | null>());
-
-                const newToCellValues = fromValues.reduce((res, row, rowIndex) => {
-                    row.forEach((colItem, colIndex) => {
-                        res.setValue(pastedRange.startRow + rowIndex, pastedRange.startColumn + colIndex, colItem);
-                    });
-                    return res;
-                }, new ObjectMatrix<ICellData | null>());
-                const currentToCellValues = worksheet
-                    .getRange(pastedRange)
-                    .getValues()
-                    .reduce((res, row, rowIndex) => {
-                        row.forEach((colItem, colIndex) => {
-                            res.setValue(pastedRange.startRow + rowIndex, pastedRange.startColumn + colIndex, colItem);
-                        });
-                        return res;
-                    }, new ObjectMatrix<ICellData | null>());
-
-                const doMoveRangeMutation: MoveRangeMutationParams = {
-                    from: newFromCellValues.getMatrix(),
-                    to: newToCellValues.getMatrix(),
+                // clear cell style
+                const { undos: styleUndos, redos: styleRedos } = getClearCellStyleMutations(
                     workbookId,
                     worksheetId,
-                };
-                const undoMoveRangeMutation: MoveRangeMutationParams = {
-                    from: currentFromCellValues.getMatrix(),
-                    to: currentToCellValues.getMatrix(),
+                    pastedRange,
+                    matrix,
+                    accessor
+                );
+                redoMutationsInfo.push(...styleRedos);
+                undoMutationsInfo.push(...styleUndos);
+
+                // clear and set merge
+                const { undos: mergeUndos, redos: mergeRedos } = getClearAndSetMergeMutations(
                     workbookId,
                     worksheetId,
+                    pastedRange,
+                    matrix,
+                    accessor
+                );
+                redoMutationsInfo.push(...mergeRedos);
+                undoMutationsInfo.push(...mergeUndos);
+
+                const { undos: setStyleUndos, redos: setStyleRedos } = getSetCellStyleMutations(
+                    workbookId,
+                    worksheetId,
+                    pastedRange,
+                    matrix,
+                    accessor
+                );
+
+                redoMutationsInfo.push(...setStyleRedos);
+                undoMutationsInfo.push(...setStyleUndos);
+
+                return {
+                    undos: undoMutationsInfo,
+                    redos: redoMutationsInfo,
                 };
-                const interceptorCommands = sheetInterceptorService.onCommandExecute({
-                    id: MoveRangeCommand.id,
-                    params: { toRange: pastedRange, fromRange: copyRange },
+            },
+        };
+
+        const specialPasteColWidthHook: ISheetClipboardHook = {
+            hookName: PREDEFINED_HOOK_NAME.SPECIAL_PASTE_COL_WIDTH,
+            specialPasteInfo: {
+                label: 'specialPaste.colWidth',
+            },
+            onPasteCells() {
+                return {
+                    undos: [],
+                    redos: [],
+                };
+            },
+            onPasteColumns(range, colProperties, pasteType) {
+                const redoMutations: IMutationInfo[] = [];
+                const undoMutations: IMutationInfo[] = [];
+                const currentSheet = self._getWorksheet(workbookId, worksheetId);
+
+                // if the range is outside ot the worksheet's boundary, we should add rows
+                const maxColumn = currentSheet!.getMaxColumns();
+                const addingColsCount = range.endColumn - maxColumn;
+                const existingColsCount = colProperties.length - addingColsCount;
+
+                const setColPropertyMutation: ISetWorksheetColWidthMutationParams = {
+                    workbookId: workbookId!,
+                    worksheetId: worksheetId!,
+                    ranges: [{ ...range, endRow: Math.min(range.endColumn, maxColumn) }],
+                    colWidth: new ObjectArray(
+                        colProperties
+                            .slice(0, existingColsCount)
+                            .map((property) => (property.width ? +property.width : DEFAULT_WORKSHEET_COLUMN_WIDTH))
+                    ),
+                };
+                redoMutations.push({
+                    id: SetWorksheetColWidthMutation.id,
+                    params: setColPropertyMutation,
                 });
 
-                redoMutationsInfo = [
-                    { id: MoveRangeMutation.id, params: doMoveRangeMutation },
-                    ...interceptorCommands.redos,
-                    {
-                        id: SetSelectionsOperation.id,
-                        params: {
-                            unitId: workbookId,
-                            sheetId: worksheetId,
-                            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-                            selections: [{ range: pastedRange }],
-                        },
-                    },
-                ];
-                undoMutationsInfo = [
-                    {
-                        id: SetSelectionsOperation.id,
-                        params: {
-                            unitId: workbookId,
-                            sheetId: worksheetId,
-                            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-                            selections: [{ range: copyRange }],
-                        },
-                    },
-                    ...interceptorCommands.undos,
-                    { id: MoveRangeMutation.id, params: undoMoveRangeMutation },
-                ];
-            }
-        } else {
-            // insert cell style, insert cell content and insert merged cell info
-            // 1. merged cell
-            // 2. raw content
-            // 3. cell style
-            const { startColumn, startRow, endColumn, endRow } = pastedRange;
-            const valueMatrix = new ObjectMatrix<ICellData>();
-            const clearStyleMatrix = new ObjectMatrix<ICellData>();
-            const mergeRangeData: IRange[] = [];
+                redoMutations.push({
+                    id: SetWorksheetColWidthMutation.id,
+                    params: setColPropertyMutation,
+                });
 
-            let hasMerge = false;
-            if (pasteType === PASTE_TYPE.COL_WIDTH) {
-                return { redos: [], undos: [] };
-            }
+                // TODO: add undo mutations but we cannot do it now because underlying mechanism is not ready
 
-            // TODO@Dushusir: undo selection
-            matrix.forValue((row, col, value) => {
-                // NOTE: When pasting, the original cell may contain a default style that is not explicitly carried, resulting in the failure to overwrite the style of the target cell.
-                // If the original cell has a style (lack of other default styles) or is undefined (all default styles), we need to clear the existing styles in the target area
-                // If the original cell style is "", it is to handle the situation where the target area contains merged cells. The style is not overwritten, only the value is overwritten. There is no need to clear the existing style of the target area.
-                if (value.s) {
-                    clearStyleMatrix.setValue(row + startRow, col + startColumn, { s: null });
-                }
+                return {
+                    redos: redoMutations,
+                    undos: [] || undoMutations,
+                };
+            },
+        };
 
-                if (pasteType === PASTE_TYPE.VALUE) {
-                    valueMatrix.setValue(row + startRow, col + startColumn, {
-                        v: value.v,
-                    });
-                } else if (pasteType === PASTE_TYPE.FORMAT) {
-                    valueMatrix.setValue(row + startRow, col + startColumn, {
-                        s: value.s,
-                    });
-                    // rowspan and colspan to merge data
-                    if (value.rowSpan) {
-                        const colSpan = value.colSpan || 1;
-                        const mergeRange = {
-                            startRow: startRow + row,
-                            endRow: startRow + row + value.rowSpan - 1,
-                            startColumn: startColumn + col,
-                            endColumn: startColumn + col + colSpan - 1,
-                        };
-                        mergeRangeData.push(mergeRange);
-                        hasMerge = true;
-                    } else if (value.colSpan) {
-                        const rowSpan = value.rowSpan || 1;
-                        const mergeRange = {
-                            startRow: startRow + row,
-                            endRow: startRow + row + rowSpan - 1,
-                            startColumn: startColumn + col,
-                            endColumn: startColumn + col + value.colSpan - 1,
-                        };
-                        mergeRangeData.push(mergeRange);
-                        hasMerge = true;
-                    }
-                } else if (pasteType === PASTE_TYPE.BESIDES_BORDER) {
+        const specialPasteBesidesBorder: ISheetClipboardHook = {
+            hookName: PREDEFINED_HOOK_NAME.SPECIAL_PASTE_BESIDES_BORDER,
+            specialPasteInfo: {
+                label: 'specialPaste.besidesBorder',
+            },
+            onPasteCells(pastedRange, matrix, pasteType, copyInfo) {
+                const redoMutationsInfo: IMutationInfo[] = [];
+                const undoMutationsInfo: IMutationInfo[] = [];
+                const { startColumn, startRow, endColumn, endRow } = pastedRange;
+                const valueMatrix = new ObjectMatrix<ICellData>();
+
+                // TODO@Dushusir: undo selection
+                matrix.forValue((row, col, value) => {
                     const style = value.s;
-                    if (typeof style === 'object')
+                    if (typeof style === 'object') {
                         valueMatrix.setValue(row + startRow, col + startColumn, {
                             s: { ...style, bd: undefined },
                             v: value.v,
                         });
-                    // rowspan and colspan to merge data
-                    if (value.rowSpan) {
-                        const colSpan = value.colSpan || 1;
-                        const mergeRange = {
-                            startRow: startRow + row,
-                            endRow: startRow + row + value.rowSpan - 1,
-                            startColumn: startColumn + col,
-                            endColumn: startColumn + col + colSpan - 1,
-                        };
-                        mergeRangeData.push(mergeRange);
-                        hasMerge = true;
-                    } else if (value.colSpan) {
-                        const rowSpan = value.rowSpan || 1;
-                        const mergeRange = {
-                            startRow: startRow + row,
-                            endRow: startRow + row + rowSpan - 1,
-                            startColumn: startColumn + col,
-                            endColumn: startColumn + col + value.colSpan - 1,
-                        };
-                        mergeRangeData.push(mergeRange);
-                        hasMerge = true;
                     }
-                } else {
-                    valueMatrix.setValue(row + startRow, col + startColumn, {
-                        v: value.v,
-                        s: value.s,
-                    });
+                });
 
-                    // rowspan and colspan to merge data
-                    if (value.rowSpan) {
-                        const colSpan = value.colSpan || 1;
-                        const mergeRange = {
-                            startRow: startRow + row,
-                            endRow: startRow + row + value.rowSpan - 1,
-                            startColumn: startColumn + col,
-                            endColumn: startColumn + col + colSpan - 1,
-                        };
-                        mergeRangeData.push(mergeRange);
-                        hasMerge = true;
-                    } else if (value.colSpan) {
-                        const rowSpan = value.rowSpan || 1;
-                        const mergeRange = {
-                            startRow: startRow + row,
-                            endRow: startRow + row + rowSpan - 1,
-                            startColumn: startColumn + col,
-                            endColumn: startColumn + col + value.colSpan - 1,
-                        };
-                        mergeRangeData.push(mergeRange);
-                        hasMerge = true;
-                    }
-                }
-            });
-
-            // clear style
-            if (clearStyleMatrix.getLength() > 0) {
-                const clearMutation: ISetRangeValuesMutationParams = {
-                    worksheetId,
+                // set cell value and style
+                const setValuesMutation: ISetRangeValuesMutationParams = {
                     workbookId,
-                    cellValue: clearStyleMatrix.getData(),
+                    worksheetId,
+                    cellValue: valueMatrix.getData(),
                 };
+
                 redoMutationsInfo.push({
                     id: SetRangeValuesMutation.id,
-                    params: clearMutation,
+                    params: setValuesMutation,
                 });
 
                 // undo
-                const undoClearMutation: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
+                const undoSetValuesMutation: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
                     accessor,
-                    clearMutation
+                    setValuesMutation
                 );
 
                 undoMutationsInfo.push({
                     id: SetRangeValuesMutation.id,
-                    params: undoClearMutation,
+                    params: undoSetValuesMutation,
                 });
-            }
 
-            // set cell value and style
-            const setValuesMutation: ISetRangeValuesMutationParams = {
-                workbookId,
-                worksheetId,
-                cellValue: valueMatrix.getData(),
-            };
-
-            redoMutationsInfo.push({
-                id: SetRangeValuesMutation.id,
-                params: setValuesMutation,
-            });
-
-            // undo
-            const undoSetValuesMutation: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
-                accessor,
-                setValuesMutation
-            );
-
-            undoMutationsInfo.push({
-                id: SetRangeValuesMutation.id,
-                params: undoSetValuesMutation,
-            });
-
-            // remove current range's all merged Cell
-            if (hasMerge) {
-                // get all merged cells
-                const mergeData = this._getWorksheet(workbookId, worksheetId).getMergeData();
-                const mergedCellsInRange = mergeData.filter((rect) =>
-                    Rectangle.intersects({ startRow, startColumn, endRow, endColumn }, rect)
-                );
-
-                const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
+                const { undos, redos } = getClearAndSetMergeMutations(
                     workbookId,
                     worksheetId,
-                    ranges: mergedCellsInRange,
-                };
-                redoMutationsInfo.push({
-                    id: RemoveWorksheetMergeMutation.id,
-                    params: removeMergeMutationParams,
-                });
-
-                const undoRemoveMergeMutationParams: IAddWorksheetMergeMutationParams = RemoveMergeUndoMutationFactory(
-                    accessor,
-                    removeMergeMutationParams
+                    pastedRange,
+                    matrix,
+                    accessor
                 );
+                undoMutationsInfo.push(...undos);
+                redoMutationsInfo.push(...redos);
 
-                undoMutationsInfo.push({
-                    id: AddWorksheetMergeMutation.id,
-                    params: undoRemoveMergeMutationParams,
-                });
-            }
-
-            // set merged cell info
-            const addMergeMutationParams: IAddWorksheetMergeMutationParams = {
-                workbookId,
-                worksheetId,
-                ranges: mergeRangeData,
-            };
-            redoMutationsInfo.push({
-                id: AddWorksheetMergeMutation.id,
-                params: addMergeMutationParams,
-            });
-
-            // undo
-            const undoAddMergeMutation: IRemoveWorksheetMergeMutationParams = AddMergeUndoMutationFactory(
-                accessor,
-                addMergeMutationParams
-            );
-
-            undoMutationsInfo.push({
-                id: RemoveWorksheetMergeMutation.id,
-                params: undoAddMergeMutation,
-            });
-
-            // set selection
-            const worksheet = this._getWorksheet(workbookId, worksheetId);
-            // const destinationRange = {
-            //     startRow,
-            //     endRow: range.endRow - 1,
-            //     startColumn,
-            //     endColumn: range.endColumn - 1,
-            // };
-            const primaryCell = {
-                startRow,
-                endRow: startRow,
-                startColumn,
-                endColumn: startColumn,
-            };
-
-            const primary = getPrimaryForRange(primaryCell, worksheet);
-
-            const mainCell = matrix.getValue(0, 0);
-            const rowSpan = mainCell?.rowSpan || 1;
-            const colSpan = mainCell?.colSpan || 1;
-
-            if (rowSpan > 1 || colSpan > 1) {
-                const mergeRange = {
-                    startRow,
-                    endRow: startRow + rowSpan - 1,
-                    startColumn,
-                    endColumn: startColumn + colSpan - 1,
+                return {
+                    redos: redoMutationsInfo,
+                    undos: undoMutationsInfo,
                 };
-
-                primary.startRow = mergeRange.startRow;
-                primary.endRow = mergeRange.endRow;
-                primary.startColumn = mergeRange.startColumn;
-                primary.endColumn = mergeRange.endColumn;
-
-                primary.isMerged = true;
-                primary.isMergedMainCell = true;
-            }
-
-            // selection does not require undo
-            const setSelectionsParam: ISetSelectionsOperationParams = {
-                workbookId,
-                worksheetId,
-                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-                selections: [{ range: pastedRange, primary, style: null }],
-            };
-            redoMutationsInfo.push({
-                id: SetSelectionsOperation.id,
-                params: setSelectionsParam,
-            });
-        }
-
-        return {
-            redos: redoMutationsInfo,
-            undos: undoMutationsInfo,
+            },
         };
+
+        return [specialPasteValueHook, specialPasteFormatHook, specialPasteColWidthHook, specialPasteBesidesBorder];
     }
 
     private _getWorksheet(workbookId: string, worksheetId: string): Worksheet {

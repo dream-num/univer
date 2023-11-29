@@ -1,15 +1,12 @@
 import { ITextSelectionRenderManager } from '@univerjs/base-render';
+import type { ICommandInfo, IDocumentBody, IParagraph, ITextRun } from '@univerjs/core';
 import {
     Disposable,
     FOCUSING_DOC,
     FOCUSING_EDITOR,
-    ICommandInfo,
     ICommandService,
     IContextService,
-    IDocumentBody,
     ILogService,
-    IParagraph,
-    ITextRun,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
@@ -28,7 +25,7 @@ export class DocClipboardController extends Disposable {
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @IDocClipboardService private readonly _docClipboardService: IDocClipboardService,
         @ITextSelectionRenderManager private _textSelectionRenderManager: ITextSelectionRenderManager,
-        @IContextService private readonly _contextService: IContextService,
+        @IContextService private readonly _contextService: IContextService
     ) {
         super();
         this._commandExecutedListener();

@@ -1,8 +1,11 @@
 import { IRenderManagerService } from '@univerjs/base-render';
-import { ISelectionWithStyle, SelectionManagerService } from '@univerjs/base-sheets';
-import { Disposable, IUniverInstanceService, ThemeService, Tools } from '@univerjs/core';
+import type { ISelectionWithStyle } from '@univerjs/base-sheets';
+import { SelectionManagerService } from '@univerjs/base-sheets';
+import type { ICommandInfo } from '@univerjs/core';
+import { Disposable, ICommandService, IUniverInstanceService, ThemeService, Tools } from '@univerjs/core';
 import { createIdentifier, Inject } from '@wendellhu/redi';
 
+import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 import { ISelectionRenderService } from '../selection/selection-render.service';
 import { SelectionShape } from '../selection/selection-shape';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
@@ -20,14 +23,16 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
     private _shapeMap: Map<string, SelectionShape> = new Map();
 
     constructor(
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @IUniverInstanceService private readonly _currentService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
+        @ICommandService private readonly _commandService: ICommandService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @Inject(ThemeService) private readonly _themeService: ThemeService
+        @Inject(ThemeService) private readonly _themeService: ThemeService,
+        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService
     ) {
         super();
+        this._addRemoveListener();
     }
 
     addShape(selection: ISelectionWithStyle, zIndex: number = DEFAULT_Z_INDEX): string | null {
@@ -61,5 +66,16 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
             shape.dispose();
         }
         this._shapeMap.clear();
+    }
+
+    private _addRemoveListener() {
+        const removeCommands = [SetCellEditVisibleOperation.id];
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                if (removeCommands.includes(command.id)) {
+                    this.removeAllShapes();
+                }
+            })
+        );
     }
 }

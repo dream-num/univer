@@ -1,17 +1,8 @@
-import { ICellData, IMutationInfo, IRange, ObjectMatrix } from '@univerjs/core';
+import type { ICellData, IMutationInfo, IRange, ObjectMatrix } from '@univerjs/core';
 
 export enum COPY_TYPE {
     COPY = 'COPY',
     CUT = 'CUT',
-}
-
-export enum PASTE_TYPE {
-    DEFAULT = 'DEFAULT',
-    VALUE = 'VALUE',
-    FORMAT = 'FORMAT',
-    FORMULA = 'FORMULA',
-    COL_WIDTH = 'COL_WIDTH',
-    BESIDES_BORDER = 'BESIDES_BORDER',
 }
 
 export type ICellDataWithSpanInfo = ICellData & { rowSpan?: number; colSpan?: number };
@@ -46,6 +37,11 @@ export interface IPasteSource {
     range: IRange;
     copyType: COPY_TYPE;
 }
+
+export interface ISpecialPasteInfo {
+    label: string;
+    icon?: string;
+}
 /**
  * `ClipboardHook` could:
  * 1. Before copy/cut/paste, decide whether to execute the command and prepare caches if necessary.
@@ -53,6 +49,9 @@ export interface IPasteSource {
  * 1. When pasting, get access to the clipboard content and append mutations to the paste command.
  */
 export interface ISheetClipboardHook {
+    hookName: string;
+    isDefaultHook?: boolean;
+    specialPasteInfo?: ISpecialPasteInfo; // only special paste info should be provided, which will replace the default hook.
     priority?: number;
 
     /**
@@ -111,10 +110,10 @@ export interface ISheetClipboardHook {
     onPasteCells?(
         pastedRange: IRange,
         matrix: ObjectMatrix<ICellDataWithSpanInfo>,
-        pasteType: PASTE_TYPE,
-        copyInfo?: {
+        pasteType: string,
+        copyInfo: {
             copyType: COPY_TYPE;
-            copyRange: IRange;
+            copyRange?: IRange;
         }
     ): {
         undos: IMutationInfo[];
@@ -123,7 +122,7 @@ export interface ISheetClipboardHook {
     onPasteRows?(
         range: IRange,
         rowProperties: IClipboardPropertyItem[],
-        pasteType: PASTE_TYPE
+        pasteType: string
     ): {
         undos: IMutationInfo[];
         redos: IMutationInfo[];
@@ -131,15 +130,7 @@ export interface ISheetClipboardHook {
     onPasteColumns?(
         range: IRange,
         colProperties: IClipboardPropertyItem[],
-        pasteType: PASTE_TYPE
-    ): {
-        undos: IMutationInfo[];
-        redos: IMutationInfo[];
-    };
-    onRemoveCutCells?(
-        range: IRange,
-        workbookId: string,
-        worksheetId: string
+        pasteType: string
     ): {
         undos: IMutationInfo[];
         redos: IMutationInfo[];

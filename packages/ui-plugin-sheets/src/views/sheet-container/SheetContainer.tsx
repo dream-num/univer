@@ -9,7 +9,7 @@ import { SheetBar } from '../sheet-bar/SheetBar';
 import { StatusBar } from '../status-bar/StatusBar';
 import styles from './index.module.less';
 
-export interface BaseSheetContainerProps {
+export interface IBaseSheetContainerProps {
     config: ISheetUIPluginConfig;
     changeLocale: (locale: string) => void;
     methods?: any;

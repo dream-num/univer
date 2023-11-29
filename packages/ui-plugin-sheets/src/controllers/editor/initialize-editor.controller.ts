@@ -1,13 +1,17 @@
 import { getDocObject } from '@univerjs/base-docs';
 import { IRenderManagerService } from '@univerjs/base-render';
 import {
+    DEFAULT_EMPTY_DOCUMENT_VALUE,
     Disposable,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    HorizontalAlign,
     IUniverInstanceService,
     LifecycleStages,
     Nullable,
     OnLifecycle,
+    VerticalAlign,
+    WrapStrategy,
 } from '@univerjs/core';
 import { Subscription } from 'rxjs';
 
@@ -43,7 +47,31 @@ export class InitializeEditorController extends Disposable {
         // create univer doc formula bar editor instance
         this._currentUniverService.createDoc({
             id: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
-            documentStyle: {},
+            body: {
+                dataStream: `hello world${DEFAULT_EMPTY_DOCUMENT_VALUE}`,
+                paragraphs: [
+                    {
+                        startIndex: 11,
+                    },
+                ],
+            },
+            documentStyle: {
+                pageSize: {
+                    width: 1000,
+                    height: 27,
+                },
+                marginTop: 0,
+                marginBottom: 0,
+                marginRight: 0,
+                marginLeft: 0,
+                renderConfig: {
+                    horizontalAlign: HorizontalAlign.UNSPECIFIED,
+                    verticalAlign: VerticalAlign.UNSPECIFIED,
+                    centerAngle: 0,
+                    vertexAngle: 0,
+                    wrapStrategy: WrapStrategy.WRAP,
+                },
+            },
         });
     }
 

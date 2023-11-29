@@ -328,6 +328,7 @@ export class StartEditController extends Disposable {
 
         if (physicHeight > clientHeight) {
             physicHeight = clientHeight;
+
             if (scrollBar == null) {
                 viewportMain && new ScrollBar(viewportMain, { enableHorizontal: false });
             } else {
@@ -358,6 +359,7 @@ export class StartEditController extends Disposable {
             engine.resizeBySize(editorWidth, physicHeight);
         });
 
+        // Update cell editor container position and size.
         this._cellEditorManagerService.setState({
             startX,
             startY,

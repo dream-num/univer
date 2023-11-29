@@ -176,5 +176,15 @@ export class DocCanvasView {
         currentRender.components.set(DOCS_VIEW_KEY.MAIN, documents);
 
         scene.addObjects([documents], DOCS_COMPONENT_MAIN_LAYER_INDEX);
+
+        // if (unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
+        //     const { width, height } = documentModel.documentStyle.pageSize!;
+        //     scene.transformByState({
+        //         width,
+        //         height,
+        //     });
+
+        //     currentRender.mainComponent.resize(width, height);
+        // }
     }
 }

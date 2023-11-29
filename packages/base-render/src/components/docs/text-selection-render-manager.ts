@@ -544,6 +544,8 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         const position = this._getNodePosition(startNode);
 
+        console.log(this._docSkeleton);
+
         console.log('startNode', startNode, position, evtOffsetX, evtOffsetY);
 
         if (position == null) {

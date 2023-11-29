@@ -47,6 +47,10 @@ export class DocRenderController extends Disposable {
 
             docsComponent.changeSkeleton(documentSkeleton);
 
+            // documentSkeleton.calculate();
+
+            console.log(documentSkeleton);
+
             this.recalculateSizeBySkeleton(currentRender, documentSkeleton);
         });
     }

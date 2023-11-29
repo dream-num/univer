@@ -42,6 +42,10 @@ export function Popup(props: IPopupProps) {
         setRealOffset([x, y]);
     }, [offset, visible]);
 
+    function preventDefault(event: React.MouseEvent) {
+        event.preventDefault();
+    }
+
     return (
         <CSSTransition
             in={visible}
@@ -62,6 +66,7 @@ export function Popup(props: IPopupProps) {
                     left: realoffset[0],
                     top: realoffset[1],
                 }}
+                onContextMenu={preventDefault}
             >
                 {children}
             </section>

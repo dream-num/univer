@@ -26,6 +26,8 @@ export function HelpFunction() {
 
     useEffect(() => {
         const subscription = promptService.help$.subscribe((params: IHelpFunctionOperationParams) => {
+            const rect = cellEditorManagerService.getRect();
+            if (!rect) return;
             const selection = cellEditorManagerService.getState();
             if (!selection) return;
 
@@ -48,8 +50,9 @@ export function HelpFunction() {
                     repeat: item.repeat,
                 })),
             };
-            const { startX = 0, startY = 0, endY = 0 } = selection;
-            setOffset([startX, endY]);
+            const { left, top, height } = rect;
+            const { startX = 0, startY = 0 } = selection;
+            setOffset([left, top + height]);
             setParamIndex(paramIndex);
             setFunctionInfo(localeInfo);
             setDecoratorPosition({ left: startX, top: startY });

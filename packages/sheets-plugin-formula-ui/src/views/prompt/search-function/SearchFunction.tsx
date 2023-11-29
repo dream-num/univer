@@ -23,8 +23,8 @@ export function SearchFunction() {
         let updatedSearchList: ISearchItem[] = [];
         let updatedActive = 0;
         const subscribeSearch = promptService.search$.subscribe((params: ISearchFunctionOperationParams) => {
-            const selection = cellEditorManagerService.getState();
-            if (!selection) return;
+            const rect = cellEditorManagerService.getRect();
+            if (!rect) return;
 
             const { visible, searchText, searchList } = params;
             if (!visible) {
@@ -32,12 +32,12 @@ export function SearchFunction() {
                 return;
             }
 
-            const { startX = 0, endY = 0 } = selection;
+            const { left, top, height } = rect;
 
             setSearchText(searchText);
             setSearchList(searchList);
             updatedSearchList = searchList;
-            setOffset([startX, endY]);
+            setOffset([left, top + height]);
             setVisible(visible);
             setActive(0); // Reset active state
         });

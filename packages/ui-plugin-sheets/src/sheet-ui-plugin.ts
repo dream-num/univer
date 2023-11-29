@@ -9,6 +9,7 @@ import { SheetClipboardController } from './controllers/clipboard/clipboard.cont
 import { SheetContextMenuController } from './controllers/contextmenu/contextmenu.controller';
 import { EditingController } from './controllers/editor/editing.controller';
 import { EndEditController } from './controllers/editor/end-edit.controller';
+import { FormulaEditorController } from './controllers/editor/formula-editor.controller';
 import { InitializeEditorController } from './controllers/editor/initialize-editor.controller';
 import { StartEditController } from './controllers/editor/start-edit.controller';
 import { EditorBridgeController } from './controllers/editor-bridge.controller';
@@ -83,6 +84,7 @@ export class SheetUIPlugin extends Plugin {
                 [EditingController],
                 [EditorBridgeController],
                 [EndEditController],
+                [FormulaEditorController],
                 [FormatPainterController],
                 [FreezeController],
                 [HeaderMenuController],

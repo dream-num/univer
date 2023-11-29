@@ -12,6 +12,7 @@ import {
     Viewport,
 } from '@univerjs/base-render';
 import {
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DocumentDataModel,
     EventState,
     IConfigService,
@@ -177,14 +178,15 @@ export class DocCanvasView {
 
         scene.addObjects([documents], DOCS_COMPONENT_MAIN_LAYER_INDEX);
 
-        // if (unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
-        //     const { width, height } = documentModel.documentStyle.pageSize!;
-        //     scene.transformByState({
-        //         width,
-        //         height,
-        //     });
+        const unitId = this._currentDocumentModel.getUnitId();
+        if (unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
+            const { width, height } = documentModel.documentStyle.pageSize!;
+            scene.transformByState({
+                width,
+                height,
+            });
 
-        //     currentRender.mainComponent.resize(width, height);
-        // }
+            currentRender.mainComponent.resize(width, height);
+        }
     }
 }

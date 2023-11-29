@@ -47,10 +47,6 @@ export class DocRenderController extends Disposable {
 
             docsComponent.changeSkeleton(documentSkeleton);
 
-            // documentSkeleton.calculate();
-
-            console.log(documentSkeleton);
-
             this.recalculateSizeBySkeleton(currentRender, documentSkeleton);
         });
     }
@@ -146,19 +142,15 @@ export class DocRenderController extends Disposable {
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (updateCommandList.includes(command.id)) {
                     const params = command.params as IRichTextEditingMutationParams;
-                    const { unitId: commandUnitId } = params;
+                    const { unitId } = params;
 
-                    const docsSkeletonObject = this._docSkeletonManagerService.getCurrent();
+                    const docsSkeletonObject = this._docSkeletonManagerService.getSkeletonByUnitId(unitId);
 
                     if (docsSkeletonObject == null) {
                         return;
                     }
 
-                    const { unitId, skeleton } = docsSkeletonObject;
-
-                    if (commandUnitId !== unitId) {
-                        return;
-                    }
+                    const { skeleton } = docsSkeletonObject;
 
                     const currentRender = this._renderManagerService.getRenderById(unitId);
 

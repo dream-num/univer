@@ -58,7 +58,7 @@ export class InitializeEditorController extends Disposable {
             documentStyle: {
                 pageSize: {
                     width: 1000,
-                    height: 27,
+                    height: 30,
                 },
                 marginTop: 0,
                 marginBottom: 0,

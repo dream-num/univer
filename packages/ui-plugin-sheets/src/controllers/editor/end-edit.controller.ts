@@ -205,6 +205,7 @@ export class EndEditController extends Disposable {
         this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
         this._contextService.setContextValue(FOCUSING_EDITOR, false);
         this._contextService.setContextValue(FOCUSING_EDITOR_BUT_HIDDEN, false);
+
         this._cellEditorManagerService.setState({
             show: param.visible,
         });

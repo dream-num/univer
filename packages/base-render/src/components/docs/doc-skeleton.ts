@@ -652,7 +652,9 @@ export class DocumentSkeleton extends Skeleton {
 
             allSkeletonPages.push(...pages);
         }
-
+        if (allSkeletonPages.length === 0) {
+            console.error(allSkeletonPages);
+        }
         // 计算页和节的位置信息
         updateBlockIndex(allSkeletonPages);
 

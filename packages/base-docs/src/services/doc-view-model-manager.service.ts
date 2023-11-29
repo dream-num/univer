@@ -1,5 +1,5 @@
 import { DocumentViewModel } from '@univerjs/base-render';
-import { DocumentDataModel, IUniverInstanceService, Nullable } from '@univerjs/core';
+import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DocumentDataModel, IUniverInstanceService, Nullable } from '@univerjs/core';
 import { IDisposable } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 
@@ -45,12 +45,17 @@ export class DocViewModelManagerService implements IDisposable {
             return;
         }
 
-        const docViewModel = this._buildDocViewModel(documentDataModel);
+        // Only cell editor need to rebuild view model when edit cell content every time.
+        const REBUILD_VIEW_MODEL_LIST = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY];
 
-        this._docViewModelMap.set(unitId, {
-            unitId,
-            docViewModel,
-        });
+        if (REBUILD_VIEW_MODEL_LIST.includes(unitId) || !this._docViewModelMap.has(unitId)) {
+            const docViewModel = this._buildDocViewModel(documentDataModel);
+
+            this._docViewModelMap.set(unitId, {
+                unitId,
+                docViewModel,
+            });
+        }
 
         this._currentViewModelUnitId = unitId;
 

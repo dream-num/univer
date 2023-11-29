@@ -247,6 +247,7 @@ export class Scene extends ThinScene {
         if (optionKeys.length === 0) {
             return;
         }
+
         optionKeys.forEach((pKey) => {
             if (state[pKey as keyof ISceneTransformState] !== undefined) {
                 (preKeys as IKeyValue)[pKey] = this[pKey as keyof Scene];

@@ -161,7 +161,7 @@ export class StartEditController extends Disposable {
 
             this._contextService.setContextValue(FOCUSING_EDITOR_BUT_HIDDEN, true);
 
-            this._textSelectionRenderManager.changeRuntime(documentSkeleton, scene);
+            // this._textSelectionRenderManager.changeRuntime(documentSkeleton, scene);
 
             this._textSelectionManagerService.replaceTextRanges([
                 {
@@ -534,6 +534,7 @@ export class StartEditController extends Disposable {
     }
 
     private _initialKeyboardListener() {
+        // TODO: @JOCS, 需要判断是否在编辑 formula editor
         this._textSelectionRenderManager.onInputBefore$.subscribe(this._showEditorByKeyboard.bind(this));
     }
 
@@ -554,8 +555,8 @@ export class StartEditController extends Disposable {
         });
     }
 
+    // Listen to document edits to refresh the size of the editor.
     private _commandExecutedListener() {
-        // Listen to document edits to refresh the size of the editor.
         const updateCommandList = [RichTextEditingMutation.id, SetEditorResizeOperation.id];
 
         const excludeUnitList = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];

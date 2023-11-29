@@ -6,9 +6,6 @@ import {
     LifecycleStages,
     OnLifecycle,
 } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
-
-import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
 
 const PAGE_STROKE_COLOR = 'rgba(198,198,198, 1)';
 
@@ -16,10 +13,7 @@ const PAGE_FILL_COLOR = 'rgba(255,255,255, 1)';
 
 @OnLifecycle(LifecycleStages.Rendered, PageRenderController)
 export class PageRenderController extends Disposable {
-    constructor(
-        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
-    ) {
+    constructor(@IRenderManagerService private readonly _renderManagerService: IRenderManagerService) {
         super();
 
         this._initialize();
@@ -32,12 +26,10 @@ export class PageRenderController extends Disposable {
     }
 
     private _initialRenderRefresh() {
-        this._docSkeletonManagerService.currentSkeleton$.subscribe((param) => {
-            if (param == null) {
+        this._renderManagerService.currentRender$.subscribe((unitId) => {
+            if (unitId == null) {
                 return;
             }
-
-            const { unitId } = param;
 
             const currentRender = this._renderManagerService.getRenderById(unitId);
 

@@ -1,5 +1,4 @@
 import { transformFile } from '@swc/core';
-import cleanPlugin from 'esbuild-plugin-clean';
 import stylePlugin from 'esbuild-style-plugin';
 import { writeFileSync } from 'fs';
 
@@ -10,9 +9,6 @@ export default {
     loader: { '.svg': 'file' },
     sourcemap: false,
     plugins: [
-        cleanPlugin({
-            patterns: ['./lib'],
-        }),
         stylePlugin({
             cssModulesOptions: {
                 localsConvention: 'camelCaseOnly',

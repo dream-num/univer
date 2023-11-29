@@ -46,7 +46,6 @@
         "@univerjs/design": "workspace:*",
         "@vitejs/plugin-react": "^4.2.0",
         "esbuild": "^0.19.8",
-        "esbuild-plugin-clean": "^1.0.1",
         "esbuild-style-plugin": "^1.6.3",
         "eslint": "^8.54.0",
         "eslint-config-airbnb-base": "^15.0.0",

@@ -68,9 +68,6 @@ importers:
       esbuild:
         specifier: ^0.19.8
         version: 0.19.8
-      esbuild-plugin-clean:
-        specifier: ^1.0.1
-        version: 1.0.1(esbuild@0.19.8)
       esbuild-style-plugin:
         specifier: ^1.6.3
         version: 1.6.3

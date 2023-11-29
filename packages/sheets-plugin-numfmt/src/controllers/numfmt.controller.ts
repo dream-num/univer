@@ -474,24 +474,30 @@ export class NumfmtController extends Disposable implements INumfmtController {
                 },
             })
         );
-        this._commandService.onCommandExecuted((commandInfo) => {
-            if (commandInfo.id === SetNumfmtMutation.id) {
-                const params = commandInfo.params as SetNumfmtMutationParams;
-                params.values
-                    .map((value) => ({ row: value.row, col: value.col }))
-                    .forEach(({ row, col }) => {
-                        renderCache.realDeleteValue(row, col);
-                    });
-            }
-        });
-        this._sheetSkeletonManagerService.currentSkeleton$
-            .pipe(
-                map((skeleton) => skeleton?.sheetId),
-                distinctUntilChanged()
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((commandInfo) => {
+                if (commandInfo.id === SetNumfmtMutation.id) {
+                    const params = commandInfo.params as SetNumfmtMutationParams;
+                    params.values
+                        .map((value) => ({ row: value.row, col: value.col }))
+                        .forEach(({ row, col }) => {
+                            renderCache.realDeleteValue(row, col);
+                        });
+                }
+            })
+        );
+        this.disposeWithMe(
+            toDisposable(
+                this._sheetSkeletonManagerService.currentSkeleton$
+                    .pipe(
+                        map((skeleton) => skeleton?.sheetId),
+                        distinctUntilChanged()
+                    )
+                    .subscribe(() => {
+                        renderCache.reset();
+                    })
             )
-            .subscribe(() => {
-                renderCache.reset();
-            });
+        );
     }
 
     private _initRealTimeRenderingInterceptor() {

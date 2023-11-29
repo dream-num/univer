@@ -23,9 +23,9 @@ export class NumfmtService extends Disposable implements INumfmtService {
      * @type {Map<string, Map<string, ObjectMatrix<NumfmtItemWithCache>>>}
      * @memberof NumfmtService
      */
-    _numfmtModel: Map<string, Map<string, ObjectMatrix<NumfmtItem>>> = new Map();
+    private _numfmtModel: Map<string, Map<string, ObjectMatrix<NumfmtItem>>> = new Map();
 
-    _refAliasModel: Map<string, RefAlias<RefItem, 'numfmtId' | 'pattern'>> = new Map();
+    private _refAliasModel: Map<string, RefAlias<RefItem, 'numfmtId' | 'pattern'>> = new Map();
 
     constructor(
         @Inject(ICommandService) private _commandService: ICommandService,

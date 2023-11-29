@@ -1,18 +1,14 @@
-import {
-    IRenderManagerService,
-    Rect,
-    Spreadsheet,
-    SpreadsheetColumnHeader,
-    SpreadsheetRowHeader,
-} from '@univerjs/base-render';
+import type { Rect, Spreadsheet, SpreadsheetColumnHeader, SpreadsheetRowHeader } from '@univerjs/base-render';
+import { IRenderManagerService } from '@univerjs/base-render';
 import {
     COMMAND_LISTENER_SKELETON_CHANGE,
+    COMMAND_LISTENER_VALUE_CHANGE,
     SelectionManagerService,
     SetWorksheetActivateMutation,
 } from '@univerjs/base-sheets';
+import type { ICommandInfo } from '@univerjs/core';
 import {
     Disposable,
-    ICommandInfo,
     ICommandService,
     IUniverInstanceService,
     LifecycleStages,
@@ -131,10 +127,11 @@ export class SheetRenderController extends Disposable {
                         sheetId,
                         commandId: command.id,
                     });
+                } else if (COMMAND_LISTENER_VALUE_CHANGE.includes(command.id)) {
+                    this._sheetSkeletonManagerService.reCalculate();
                 }
-                // else if (COMMAND_LISTENER_VALUE_CHANGE.includes(command.id)) {
-                //     this._sheetSkeletonManagerService.reCalculate();
-                // }
+
+                // this._sheetSkeletonManagerService.reCalculate();
 
                 this._renderManagerService.getRenderById(unitId)?.mainComponent?.makeDirty(); // refresh spreadsheet
             })

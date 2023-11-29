@@ -1,11 +1,13 @@
 // TODO@wzhudev: re-export from base-sheets
-import {
-    DeltaColumnWidthCommand,
+import type {
     ISetRangeValuesRangeMutationParams,
-    ISetStyleParams,
+    ISetStyleCommandParams,
     ISetWorksheetColWidthMutationParams,
     ISetWorksheetRowAutoHeightMutationParams,
     ISetWorksheetRowIsAutoHeightMutationParams,
+} from '@univerjs/base-sheets';
+import {
+    DeltaColumnWidthCommand,
     SelectionManagerService,
     SetColWidthCommand,
     SetRangeValuesCommand,
@@ -14,7 +16,8 @@ import {
     SetWorksheetRowAutoHeightMutationFactory,
     SetWorksheetRowIsAutoHeightCommand,
 } from '@univerjs/base-sheets';
-import { IRange, IUniverInstanceService, LifecycleStages, OnLifecycle, SheetInterceptorService } from '@univerjs/core';
+import type { IRange } from '@univerjs/core';
+import { IUniverInstanceService, LifecycleStages, OnLifecycle, SheetInterceptorService } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
@@ -118,7 +121,7 @@ export class AutoHeightController {
 
         // for intercept set style command.
         sheetInterceptorService.interceptCommand({
-            getMutations: (command: { id: string; params: ISetStyleParams<number> }) => {
+            getMutations: (command: { id: string; params: ISetStyleCommandParams<number> }) => {
                 if (command.id !== SetStyleCommand.id) {
                     return {
                         redos: [],

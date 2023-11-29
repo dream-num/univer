@@ -444,7 +444,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
                     let numfmtRes: string = '';
                     const cache = renderCache.getValue(location.row, location.col);
                     if (cache && cache.parameters === originCellValue.v) {
-                        return cache.result;
+                        return { ...cell, ...cache.result };
                     }
 
                     const info = getPatternPreview(numfmtValue.pattern, Number(originCellValue.v));
@@ -455,7 +455,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
                         return next(cell);
                     }
 
-                    const res = { ...cell, v: numfmtRes };
+                    const res: ICellData = { v: numfmtRes };
 
                     if (info.color) {
                         const color = this._themeService.getCurrentTheme()[`${info.color}500`];
@@ -470,7 +470,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
                         parameters: originCellValue.v as number,
                     });
 
-                    return res;
+                    return { ...cell, ...res };
                 },
             })
         );
@@ -533,7 +533,9 @@ export class NumfmtController extends Disposable implements INumfmtController {
                                     selectionRanges: IRange[];
                                 }>((subscribe) => {
                                     const disposableCollection = new DisposableCollection();
-                                    isOpen && subscribe.next({ selectionRanges, disposableCollection });
+                                    isOpen &&
+                                        selectionRanges.length &&
+                                        subscribe.next({ selectionRanges, disposableCollection });
                                     return () => {
                                         disposableCollection.dispose();
                                     };

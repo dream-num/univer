@@ -146,14 +146,17 @@ export class SheetInterceptorService extends Disposable {
                 const sheetDisposables = new DisposableCollection();
                 const cellInterceptorDisposable = viewModel.registerCellContentInterceptor({
                     getCell(row: number, col: number): Nullable<ICellData> {
-                        return self.fetchThroughInterceptors(INTERCEPTOR_POINT.CELL_CONTENT)(undefined, {
-                            workbookId,
-                            worksheetId,
-                            row,
-                            col,
-                            worksheet,
-                            workbook,
-                        });
+                        return self.fetchThroughInterceptors(INTERCEPTOR_POINT.CELL_CONTENT)(
+                            worksheet.getCellRaw(row, col),
+                            {
+                                workbookId,
+                                worksheetId,
+                                row,
+                                col,
+                                worksheet,
+                                workbook,
+                            }
+                        );
                     },
                 });
                 sheetDisposables.add(cellInterceptorDisposable);

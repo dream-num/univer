@@ -1,29 +1,28 @@
+import type {
+    IAddWorksheetMergeMutationParams,
+    IRemoveWorksheetMergeMutationParams,
+    ISetRangeValuesMutationParams,
+} from '@univerjs/base-sheets';
 import {
     AddMergeUndoMutationFactory,
     AddWorksheetMergeMutation,
     getAddMergeMutationRangeByType,
-    IAddWorksheetMergeMutationParams,
-    IRemoveWorksheetMergeMutationParams,
-    ISetRangeValuesMutationParams,
     RemoveMergeUndoMutationFactory,
     RemoveWorksheetMergeMutation,
     SetRangeValuesMutation,
     SetRangeValuesUndoMutationFactory,
     SetSelectionsOperation,
 } from '@univerjs/base-sheets';
+import type { ICellData, ICommand, IMutationInfo, IRange, ObjectMatrixPrimitiveType } from '@univerjs/core';
 import {
     CommandType,
-    ICellData,
-    ICommand,
     ICommandService,
-    IMutationInfo,
-    IRange,
     IUndoRedoService,
     IUniverInstanceService,
     ObjectMatrix,
-    ObjectMatrixPrimitiveType,
+    RANGE_TYPE,
 } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { IAccessor } from '@wendellhu/redi';
 
 export interface IAutoFillCommandParams {
     worksheetId?: string;
@@ -88,9 +87,12 @@ export const AutoFillCommand: ICommand = {
                 {
                     primary: {
                         ...selectionRange,
+                        endColumn: selectionRange.startColumn,
+                        endRow: selectionRange.startRow,
                     },
                     range: {
                         ...selectionRange,
+                        rangeType: RANGE_TYPE.NORMAL,
                     },
                 },
             ],

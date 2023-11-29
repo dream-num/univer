@@ -246,7 +246,7 @@ export class CommandService implements ICommandService {
                 );
                 if (triggerCommand) {
                     commandInfo.params = commandInfo.params ?? {};
-                    (commandInfo.params as { [key: string]: IMutationCommonParams }).trigger = triggerCommand.id;
+                    (commandInfo.params as IMutationCommonParams).trigger = triggerCommand.id;
                 }
             }
 

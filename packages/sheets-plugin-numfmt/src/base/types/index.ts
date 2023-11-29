@@ -3,10 +3,9 @@ export type BusinessComponentProps = {
     defaultValue: number;
     defaultPattern: string;
 };
-export interface NumfmtItem {
+export type NumfmtItem = {
     pattern: string;
-    type: FormatType;
-}
+};
 
 export type FormatType =
     | 'currency'

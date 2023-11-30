@@ -1,8 +1,8 @@
 import type { IFunctionInfo, IFunctionParam } from '@univerjs/base-formula-engine';
-import { LocaleService } from '@univerjs/core';
+import { FOCUSING_FORMULA_EDITOR, IContextService, LocaleService } from '@univerjs/core';
 import { Popup } from '@univerjs/design';
 import { CloseSingle, DetailsSingle, MoreSingle } from '@univerjs/icons';
-import { ICellEditorManagerService } from '@univerjs/ui-plugin-sheets';
+import { ICellEditorManagerService, IFormulaEditorManagerService } from '@univerjs/ui-plugin-sheets';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
@@ -21,21 +21,33 @@ export function HelpFunction() {
     const promptService = useDependency(IFormulaPromptService);
     const cellEditorManagerService = useDependency(ICellEditorManagerService);
     const localeService = useDependency(LocaleService);
+    const formulaEditorManagerService = useDependency(IFormulaEditorManagerService);
+    const contextService = useDependency(IContextService);
     const required = localeService.t('formula.prompt.required');
     const optional = localeService.t('formula.prompt.optional');
 
     useEffect(() => {
         const subscription = promptService.help$.subscribe((params: IHelpFunctionOperationParams) => {
-            const rect = cellEditorManagerService.getRect();
-            if (!rect) return;
-            const selection = cellEditorManagerService.getState();
-            if (!selection) return;
-
             const { visible, paramIndex, functionInfo } = params;
             if (!visible) {
                 setVisible(visible);
                 return;
             }
+
+            const selection = cellEditorManagerService.getState();
+            if (!selection) return;
+
+            const isFocusFormulaEditor = contextService.getContextValue(FOCUSING_FORMULA_EDITOR);
+
+            const position = isFocusFormulaEditor
+                ? formulaEditorManagerService.getPosition()
+                : cellEditorManagerService.getRect();
+
+            if (position == null) {
+                return;
+            }
+
+            const { left, top, height } = position;
 
             const localeInfo: IFunctionInfo = {
                 functionName: functionInfo.functionName,
@@ -50,11 +62,12 @@ export function HelpFunction() {
                     repeat: item.repeat,
                 })),
             };
-            const { left, top, height } = rect;
+
             const { startX = 0, startY = 0 } = selection;
             setOffset([left, top + height]);
             setParamIndex(paramIndex);
             setFunctionInfo(localeInfo);
+            // TODO: @Dushusir update position of decorator.
             setDecoratorPosition({ left: startX, top: startY });
             setVisible(visible);
         });

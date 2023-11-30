@@ -1,9 +1,10 @@
-import type { IRichTextEditingMutationParams } from '@univerjs/base-docs';
+import type { IRichTextEditingMutationParams, ISetTextSelectionsOperationParams } from '@univerjs/base-docs';
 import {
     DocSkeletonManagerService,
     DocViewModelManagerService,
     getDocObject,
     RichTextEditingMutation,
+    SetTextSelectionsOperation,
     VIEWPORT_KEY,
 } from '@univerjs/base-docs';
 import type { IMouseEvent, IPointerEvent, RenderComponentType } from '@univerjs/base-render';
@@ -180,6 +181,13 @@ export class FormulaEditorController extends Disposable {
                         }
 
                         this._syncContentAndRender(syncId, content);
+                    }
+                }
+
+                if (command.id === SetTextSelectionsOperation.id) {
+                    const { unitId } = command.params as ISetTextSelectionsOperationParams;
+                    if (unitId !== DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
+                        this._contextService.setContextValue(FOCUSING_FORMULA_EDITOR, false);
                     }
                 }
             })

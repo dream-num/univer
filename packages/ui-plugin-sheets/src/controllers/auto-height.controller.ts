@@ -1,4 +1,3 @@
-// TODO@wzhudev: re-export from base-sheets
 import type {
     ISetRangeValuesRangeMutationParams,
     ISetStyleCommandParams,

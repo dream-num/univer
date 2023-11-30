@@ -32,3 +32,6 @@ yarn-error.log*
 
 # yarn v2
 .yarn
+
+# Uniscript example
+**/examples/china-id-validation.js

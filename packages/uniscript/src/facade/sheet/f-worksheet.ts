@@ -1,7 +1,8 @@
 import { SelectionManagerService } from '@univerjs/base-sheets';
-import type { Workbook, Worksheet } from '@univerjs/core';
+import type { IRange, Workbook, Worksheet } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
+import { FRange } from './f-range';
 import { FSelection } from './f-selection';
 
 export class FWorksheet {
@@ -19,5 +20,16 @@ export class FWorksheet {
         }
 
         return this._injector.createInstance(FSelection, this._workbook, this._worksheet, selections);
+    }
+
+    getRange(row: number, col: number): FRange | null {
+        const range: IRange = {
+            startRow: row,
+            endRow: row,
+            startColumn: col,
+            endColumn: col,
+        };
+
+        return this._injector.createInstance(FRange, this._workbook, this._worksheet, range);
     }
 }

@@ -71,6 +71,13 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                         left: startX - 1.5,
                         top: startY - 1.5,
                     });
+
+                    // update editor's rect
+                    const editor = editorRef.current;
+                    if (!editor) return;
+
+                    const { left, top, width, height } = editor.getBoundingClientRect();
+                    cellEditorManagerService.setRect({ left, top, width, height });
                 }
             });
 

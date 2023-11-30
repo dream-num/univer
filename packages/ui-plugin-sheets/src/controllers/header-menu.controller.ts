@@ -242,6 +242,7 @@ export class HeaderMenuController extends Disposable {
                 sheetObject.spreadsheetColumnHeader.onPointerDownObserver.notifyObservers(evt);
             } else {
                 evt.stopPropagation();
+                evt.preventDefault();
                 this._contextMenuService.triggerContextMenu(evt, SheetMenuPosition.COL_HEADER_CONTEXT_MENU);
             }
         });

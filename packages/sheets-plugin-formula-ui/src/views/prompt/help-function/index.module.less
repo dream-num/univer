@@ -7,7 +7,6 @@
     box-sizing: border-box;
     width: @width;
     margin: 0;
-    padding: var(--padding-xl);
 
     line-height: 20px;
     list-style: none;
@@ -23,9 +22,14 @@
         align-items: center;
         justify-content: space-between;
 
+        box-sizing: border-box;
+        padding: var(--padding-base) var(--padding-xl);
+
         font-size: var(--font-size-xs);
         font-weight: 500;
         color: rgb(var(--text-color));
+
+        border-bottom: 1px solid rgb(var(--border-color));
 
         &-icons {
             display: flex;
@@ -38,10 +42,11 @@
             align-items: center;
             justify-content: center;
 
+            box-sizing: border-box;
             width: fit-content;
             height: fit-content;
             margin-left: var(--margin-sm);
-            padding: var(--padding-xs);
+            padding: var(--padding-base) var(--padding-xs);
 
             color: rgb(var(--text-color-secondary));
 
@@ -59,12 +64,12 @@
 
     &-content {
         overflow-y: auto;
+        box-sizing: border-box;
         max-height: @max-height;
+        padding: 0 var(--padding-xl) var(--padding-xl);
 
         &-inner {
             margin-top: var(--padding-xl);
-            padding: var(--padding-base) 0;
-            border-top: 1px solid rgb(var(--border-color));
         }
 
         &-params {

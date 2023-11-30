@@ -23,9 +23,11 @@ export function ContextMenu() {
         });
 
         document.addEventListener('pointerdown', handleClose);
+        document.addEventListener('wheel', handleClose);
 
         return () => {
             document.removeEventListener('pointerdown', handleClose);
+            document.removeEventListener('wheel', handleClose);
             disposables.dispose();
         };
     }, []);

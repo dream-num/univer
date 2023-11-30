@@ -27,6 +27,11 @@ export function Popup(props: IPopupProps) {
     const [realoffset, setRealOffset] = useState<[number, number]>(offset);
 
     useEffect(() => {
+        if (!visible) {
+            setRealOffset([-9999, -9999]);
+            return;
+        }
+
         // edge avoidance
         const [left, top] = offset;
         const { clientWidth, clientHeight } = nodeRef.current!;
@@ -36,6 +41,10 @@ export function Popup(props: IPopupProps) {
 
         setRealOffset([x, y]);
     }, [offset, visible]);
+
+    function preventDefault(event: React.MouseEvent) {
+        event.preventDefault();
+    }
 
     return (
         <CSSTransition
@@ -57,6 +66,7 @@ export function Popup(props: IPopupProps) {
                     left: realoffset[0],
                     top: realoffset[1],
                 }}
+                onContextMenu={preventDefault}
             >
                 {children}
             </section>

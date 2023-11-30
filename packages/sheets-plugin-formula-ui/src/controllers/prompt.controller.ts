@@ -4,67 +4,61 @@ import {
     ReplaceContentCommand,
     TextSelectionManagerService,
 } from '@univerjs/base-docs';
+import type { ISequenceNode } from '@univerjs/base-formula-engine';
 import {
     FormulaEngineService,
     generateStringWithSequence,
     includeFormulaLexerToken,
-    ISequenceNode,
     isFormulaLexerToken,
     matchToken,
     normalizeSheetName,
     sequenceNodeType,
 } from '@univerjs/base-formula-engine';
 import { DeviceInputEventType, IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/base-render';
+import type { ISelectionWithStyle } from '@univerjs/base-sheets';
 import {
     convertSelectionDataToRange,
     getNormalSelectionStyle,
-    ISelectionWithStyle,
     NORMAL_SELECTION_PLUGIN_NAME,
     SelectionManagerService,
 } from '@univerjs/base-sheets';
 import { KeyCode, MetaKeys } from '@univerjs/base-ui';
+import type { ICommandInfo, IRange, IRangeWithCoord, ITextRun, Nullable } from '@univerjs/core';
 import {
     deserializeRangeWithSheet,
     Direction,
     Disposable,
     DisposableCollection,
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     FOCUSING_EDITOR_INPUT_FORMULA,
-    ICommandInfo,
     ICommandService,
     IContextService,
-    IDocumentBody,
-    IRange,
-    IRangeWithCoord,
     isFormulaString,
-    ITextRun,
     IUniverInstanceService,
     LifecycleStages,
     LocaleService,
-    Nullable,
     OnLifecycle,
     serializeRangeToRefString,
     ThemeService,
     toDisposable,
     Tools,
 } from '@univerjs/core';
+import type { EditorBridgeService, SelectionShape } from '@univerjs/ui-plugin-sheets';
 import {
-    EditorBridgeService,
     ExpandSelectionCommand,
     getEditorObject,
     IEditorBridgeService,
     ISelectionRenderService,
     JumpOver,
     MoveSelectionCommand,
-    SelectionShape,
     SetEditorResizeOperation,
     SheetSkeletonManagerService,
 } from '@univerjs/ui-plugin-sheets';
 import { Inject } from '@wendellhu/redi';
 
-import {
-    ISelectEditorFormulaOperationParam,
-    SelectEditorFormulaOperation,
-} from '../commands/operations/editor-formula.operation';
+import type { ISelectEditorFormulaOperationParam } from '../commands/operations/editor-formula.operation';
+import { SelectEditorFormulaOperation } from '../commands/operations/editor-formula.operation';
 import { HelpFunctionOperation } from '../commands/operations/help-function.operation';
 import { SearchFunctionOperation } from '../commands/operations/search-function.operation';
 import { META_KEY_CTRL_AND_SHIFT } from '../common/prompt';
@@ -237,7 +231,7 @@ export class PromptController extends Disposable {
                         return;
                     }
 
-                    this._highlightFormula(currentBody);
+                    this._highlightFormula();
 
                     // if (this._isLockedOnSelectionInsertRefString) {
                     //     return;
@@ -679,6 +673,16 @@ export class PromptController extends Disposable {
         return documentModel?.snapshot?.body;
     }
 
+    private _getFormulaAndCellEditorBody() {
+        const unitIds = [DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY];
+
+        return unitIds.map((unitId) => {
+            const dataModel = this._currentUniverService.getUniverDocInstance(unitId);
+
+            return dataModel?.getBody();
+        });
+    }
+
     /**
      * Detect whether the user's input content is a formula. If it is a formula,
      * serialize the current input content into a sequenceNode;
@@ -752,12 +756,10 @@ export class PromptController extends Disposable {
     }
 
     /**
-     *
-     * @param body the body object of the current input box
-     * @returns
+     * Highlight cell editor and formula bar editor.
      */
-    private _highlightFormula(body: Nullable<IDocumentBody>) {
-        if (body == null || this._getContextState() === false) {
+    private _highlightFormula() {
+        if (this._getContextState() === false) {
             return;
         }
 
@@ -768,20 +770,24 @@ export class PromptController extends Disposable {
         // );
 
         const sequenceNodes = this._formulaInputService.getSequenceNodes();
+        const bodyList = this._getFormulaAndCellEditorBody().filter((b) => !!b);
 
         this._selectionManagerService.clear();
 
         if (sequenceNodes == null || sequenceNodes.length === 0) {
-            body.textRuns = [];
+            bodyList.forEach((body) => {
+                body!.textRuns = [];
+            });
         } else {
             // this._lastSequenceNodes = sequenceNodes;
             const { textRuns, refSelections } = this._buildTextRuns(sequenceNodes);
-            body.textRuns = textRuns;
-
+            bodyList.forEach((body) => {
+                body!.textRuns = textRuns;
+            });
             this._refreshSelectionForReference(refSelections);
         }
 
-        this._refreshEditorObject();
+        this._refreshFormulaAndCellEditor();
     }
 
     /**
@@ -1271,14 +1277,22 @@ export class PromptController extends Disposable {
         controlSelection.update(toRange);
     }
 
-    private _refreshEditorObject() {
-        const editorObject = this._getEditorObject();
+    private _refreshFormulaAndCellEditor() {
+        const unitIds = [DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY];
 
-        const documentComponent = editorObject?.document;
+        for (const unitId of unitIds) {
+            const editorObject = getEditorObject(unitId, this._renderManagerService);
 
-        documentComponent?.getSkeleton()?.calculate();
+            const documentComponent = editorObject?.document;
 
-        documentComponent?.makeDirty();
+            if (documentComponent == null) {
+                continue;
+            }
+
+            documentComponent.getSkeleton()?.calculate();
+
+            documentComponent.makeDirty();
+        }
     }
 
     private _cursorStateListener() {

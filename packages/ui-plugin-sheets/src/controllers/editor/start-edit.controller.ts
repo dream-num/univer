@@ -20,6 +20,7 @@ import type { ICommandInfo, IDocumentBody, IDocumentData, IPosition, ITextRotati
 import {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     Disposable,
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     FOCUSING_EDITOR,
     FOCUSING_EDITOR_BUT_HIDDEN,
@@ -394,6 +395,8 @@ export class StartEditController extends Disposable {
         this._onInputActivateSubscription = this._editorBridgeService.visible$.subscribe((param) => {
             const { visible, eventType, keycode } = param;
 
+            console.log('_initialStartEdit', param);
+
             if (visible === this._editorVisiblePrevious) {
                 return;
             }
@@ -410,7 +413,7 @@ export class StartEditController extends Disposable {
                 return;
             }
 
-            const { position, documentLayoutObject, canvasOffset, scaleX, scaleY } = state;
+            const { position, documentLayoutObject, canvasOffset, scaleX, scaleY, editorUnitId } = state;
 
             const editorObject = this._getEditorObject();
 
@@ -424,7 +427,7 @@ export class StartEditController extends Disposable {
 
             const { documentModel: documentDataModel } = documentLayoutObject;
 
-            const docParam = this._docSkeletonManagerService.getCurrent();
+            const docParam = this._docSkeletonManagerService.getSkeletonByUnitId(editorUnitId);
 
             if (docParam == null || documentDataModel == null) {
                 return;
@@ -457,7 +460,7 @@ export class StartEditController extends Disposable {
                         collapsed: true,
                     },
                 ]);
-            } else {
+            } else if (eventType === DeviceInputEventType.Dblclick) {
                 // TODO: @JOCS, Get the position close to the cursor after clicking on the cell.
                 const cursor = documentDataModel.getBody()!.dataStream.length - 2 || 0;
 
@@ -545,25 +548,26 @@ export class StartEditController extends Disposable {
     private _commandExecutedListener() {
         const updateCommandList = [RichTextEditingMutation.id, SetEditorResizeOperation.id];
 
-        const excludeUnitList = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY];
+        const excludeUnitList = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];
 
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (updateCommandList.includes(command.id)) {
                     const params = command.params as IRichTextEditingMutationParams;
                     const { unitId: commandUnitId } = params;
+                    const unitId = this._editorBridgeService.getCurrentEditorId();
 
-                    const docsSkeletonObject = this._docSkeletonManagerService.getCurrent();
+                    if (unitId == null) {
+                        return;
+                    }
+
+                    const docsSkeletonObject = this._docSkeletonManagerService.getSkeletonByUnitId(unitId);
 
                     if (docsSkeletonObject == null) {
                         return;
                     }
 
-                    const { unitId, skeleton } = docsSkeletonObject;
-
-                    if (commandUnitId !== unitId) {
-                        return;
-                    }
+                    const { skeleton } = docsSkeletonObject;
 
                     const currentRender = this._renderManagerService.getRenderById(unitId);
 
@@ -571,7 +575,7 @@ export class StartEditController extends Disposable {
                         return;
                     }
 
-                    if (!excludeUnitList.includes(unitId)) {
+                    if (!excludeUnitList.includes(commandUnitId)) {
                         return;
                     }
 

@@ -1,8 +1,10 @@
 // This file provide operations to change selection of sheets.
 
-import { CommandType, IOperation } from '@univerjs/core';
+import type { IOperation } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
 
-import { IEditorBridgeService, IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
+import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
+import { IEditorBridgeService } from '../../services/editor-bridge.service';
 
 export const SetCellEditVisibleOperation: IOperation<IEditorBridgeServiceVisibleParam> = {
     id: 'sheet.operation.set-cell-edit-visible',

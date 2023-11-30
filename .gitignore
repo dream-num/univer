@@ -104,3 +104,6 @@ doc
 
 # storybook
 storybook-static
+
+# typedoc
+typedoc

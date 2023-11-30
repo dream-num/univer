@@ -5,7 +5,7 @@
     "license": "MIT",
     "main": "./lib/cjs/index.js",
     "module": "./lib/esm/index.js",
-    "types": "./lib/index.d.ts",
+    "types": "./lib/types/index.d.ts",
     "publishConfig": {
         "access": "public",
         "main": "./lib/cjs/index.js",
@@ -31,7 +31,8 @@
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*",
-        "./locale/*": "./src/locale/*.ts"
+        "./locale/*": "./src/locale/*.ts",
+        "./typedoc/*": "./typedoc/*.json"
     },
     "directories": {
         "lib": "lib"
@@ -41,7 +42,8 @@
     ],
     "private": false,
     "scripts": {
-        "esbuild": "node ./esbuild.config.mjs && tsc -p tsconfig.esbuild.json"
+        "esbuild": "node ./esbuild.config.mjs && tsc -p tsconfig.esbuild.json",
+        "typedoc": "typedoc"
     },
     "dependencies": {
         "@ctrl/tinycolor": "^4.0.2",
@@ -66,6 +68,7 @@
         "react": "^18.2.0",
         "ts-node": "^10.9.1",
         "typescript": "^5.3.2",
+        "typedoc": "^0.25.4",
         "vitest": "^0.34.6"
     },
     "peerDependencies": {

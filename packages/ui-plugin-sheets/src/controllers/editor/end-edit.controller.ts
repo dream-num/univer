@@ -1,18 +1,17 @@
 import { MoveCursorOperation, MoveSelectionOperation } from '@univerjs/base-docs';
 import { FormulaEngineService, matchToken } from '@univerjs/base-formula-engine';
-import { IMouseEvent, IPointerEvent, IRenderManagerService } from '@univerjs/base-render';
+import type { IMouseEvent, IPointerEvent } from '@univerjs/base-render';
+import { DeviceInputEventType, IRenderManagerService } from '@univerjs/base-render';
 import { SetRangeValuesCommand } from '@univerjs/base-sheets';
 import { KeyCode } from '@univerjs/base-ui';
+import type { DocumentDataModel, ICellData, ICommandInfo, Nullable, Observer } from '@univerjs/core';
 import {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     Direction,
     Disposable,
-    DocumentDataModel,
     FOCUSING_EDITOR,
     FOCUSING_EDITOR_BUT_HIDDEN,
     FOCUSING_EDITOR_INPUT_FORMULA,
-    ICellData,
-    ICommandInfo,
     ICommandService,
     IContextService,
     INTERCEPTOR_POINT,
@@ -20,20 +19,19 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
     LifecycleStages,
-    Nullable,
-    Observer,
     OnLifecycle,
     SheetInterceptorService,
     Tools,
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../commands/commands/set-selection.command';
 import { SetCellEditVisibleArrowOperation } from '../../commands/operations/cell-edit.operation';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
-import { IEditorBridgeService, IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
+import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
+import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { MOVE_SELECTION_KEYCODE_LIST } from '../shortcuts/editor.shortcut';
 
 enum CursorChange {
@@ -94,7 +92,7 @@ export class EndEditController extends Disposable {
 
     private _initialExitInput() {
         this._onInputSubscription = this._editorBridgeService.visible$.subscribe((param) => {
-            const { visible, keycode } = param;
+            const { visible, keycode, eventType } = param;
 
             if (visible === this._editorVisiblePrevious) {
                 return;
@@ -103,7 +101,11 @@ export class EndEditController extends Disposable {
             this._editorVisiblePrevious = visible;
 
             if (visible === true) {
-                this._isCursorChange = CursorChange.StartEditor;
+                // Change `CursorChange` to changed status, when formula bar clicked.
+                this._isCursorChange =
+                    eventType === DeviceInputEventType.PointerDown
+                        ? CursorChange.CursorChange
+                        : CursorChange.StartEditor;
                 return;
             }
 

@@ -3,22 +3,14 @@
 
     box-sizing: border-box;
     height: 28px;
-    padding: 0 var(--padding-xl);
 
     background: rgb(var(--bg-color-secondary));
     border-bottom: 1px solid rgb(var(--border-color));
 
-    .select-button .tooltip-group .tooltip-body {
-        display: flex;
-
-        input {
-            width: 85px;
-            height: 100%;
-        }
-
-        svg {
-            vertical-align: text-bottom;
-        }
+    .name-ranges {
+        width: 80px;
+        height: 27px;
+        border: 1px solid rgb(var(--border-color));
     }
 
     .formula-bar {
@@ -26,13 +18,41 @@
         width: 100%;
 
         .formula-icon {
+            position: relative;
+
             display: flex;
             align-items: center;
-            font-size: var(--font-size-xs);
-            border-right: 1px solid var(--gray-15);
+            justify-content: space-between;
 
-            span[role='img'] {
-                font-size: 24px;
+            width: 100px;
+            height: 27px;
+            padding: 0 5px;
+
+            font-size: var(--font-size-xs);
+            color: var(--gray-5);
+
+            &::before {
+                content: '';
+
+                position: absolute;
+                top: 4px;
+                right: 0;
+
+                width: 1px;
+                height: 17px;
+
+                background-color: rgb(var(--border-color));
+            }
+
+            .icon-container {
+                cursor: pointer;
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                width: 25px;
+                height: 25px;
             }
 
             .formula-grey {
@@ -47,10 +67,10 @@
         .formula-input {
             overflow: hidden;
             display: flex;
-            align-items: center;
+            align-items: top;
 
             width: 100%;
-            padding: 0 10px;
+            padding: 0 0 0 10px;
 
             .formula-content {
                 position: relative;
@@ -61,6 +81,20 @@
                 word-wrap: break-word;
 
                 outline: none;
+            }
+
+            .arrow-container {
+                cursor: pointer;
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                width: 20px;
+                height: 27px;
+
+                font-size: var(--font-size-xs);
+                color: var(--gray-5);
             }
         }
     }

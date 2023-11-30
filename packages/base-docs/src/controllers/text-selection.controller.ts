@@ -196,6 +196,7 @@ export class TextSelectionController extends Disposable {
     private _skeletonListener() {
         // Change text selection runtime(skeleton, scene) and update text selection manager current selection.
         this._docSkeletonManagerService.currentSkeleton$.subscribe((param) => {
+            console.log(param);
             if (param == null) {
                 return;
             }

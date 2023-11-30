@@ -20,10 +20,10 @@ import type { ICommandInfo, IDocumentBody, IDocumentData, IPosition, ITextRotati
 import {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     Disposable,
-    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     FOCUSING_EDITOR,
     FOCUSING_EDITOR_BUT_HIDDEN,
+    FOCUSING_FORMULA_EDITOR,
     HorizontalAlign,
     ICommandService,
     IContextService,
@@ -518,8 +518,13 @@ export class StartEditController extends Disposable {
     }
 
     private _initialKeyboardListener() {
-        // TODO: @JOCS, 需要判断是否在编辑 formula editor
-        this._textSelectionRenderManager.onInputBefore$.subscribe(this._showEditorByKeyboard.bind(this));
+        this._textSelectionRenderManager.onInputBefore$.subscribe((config) => {
+            const isFocusFormulaEditor = this._contextService.getContextValue(FOCUSING_FORMULA_EDITOR);
+
+            if (!isFocusFormulaEditor) {
+                this._showEditorByKeyboard(config);
+            }
+        });
     }
 
     private _showEditorByKeyboard(config: Nullable<IEditorInputConfig>) {
@@ -540,7 +545,7 @@ export class StartEditController extends Disposable {
     private _commandExecutedListener() {
         const updateCommandList = [RichTextEditingMutation.id, SetEditorResizeOperation.id];
 
-        const excludeUnitList = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];
+        const excludeUnitList = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY];
 
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {

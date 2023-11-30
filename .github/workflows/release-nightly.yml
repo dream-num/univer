@@ -2,7 +2,7 @@ name: 🥷 Release Nightly
 
 on:
     schedule:
-        - cron: '30 1 * * *'
+        - cron: '0 16 * * *'
 
 permissions:
     contents: read
@@ -20,6 +20,7 @@ jobs:
               uses: actions/setup-node@v3
               with:
                   node-version: 18
+                  registry-url: ${{ secrets.VERDACCIO_URL }}
 
             - name: Install pnpm
               uses: pnpm/action-setup@v2
@@ -40,10 +41,10 @@ jobs:
                   restore-keys: |
                       ${{ runner.os }}-pnpm-
 
-            - name: Get package version(version + date)
+            - name: 📌 Get package version (version + date)
               id: nightly-version
               run: |
-                  echo "::set-output name=version::$(node -p "require('./package.json').version")-nightly-$(date +%Y%m%d%H%M)"
+                  echo "::set-output name=version::$(node -p "require('./package.json').version")-nightly.$(date +%Y%m%d%H%M)"
 
             # - name: Create tag
             #   uses: actions/github-script@v5
@@ -57,66 +58,62 @@ jobs:
             #             sha: context.sha
             #           })
 
-            - name: Set all monorepo's package version
+            - name: 🔏 Set all monorepo's package version
               run: |
                   for package in $(ls packages); do
                       node -e "const fs = require('fs'); const package = JSON.parse(fs.readFileSync('./packages/$package/package.json')); package.version = '${{ steps.nightly-version.outputs.version }}'; fs.writeFileSync('./packages/$package/package.json', JSON.stringify(package, null, 4));"
                   done
 
-            - name: Install dependencies
+            - name: 🚚 Install dependencies
               run: pnpm install
 
-            - name: Build
+            - name: 📦 Build
               run: pnpm run build
 
-            - name: Set publishing config
-              run: pnpm config set '${NODE_REGISTRY}:_authToken' "${NODE_AUTH_TOKEN}"
-              env:
-                  NODE_REGISTRY: ${{ secrets.VERDACCIO_URL }}
-                  NODE_AUTH_TOKEN: ${{ secrets.VERDACCIO_TOKEN }}
- 
-            - name: Publish
+            - name: 🐙 Publish
               run: pnpm publish --access public --tag nightly -r
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.VERDACCIO_TOKEN }}
 
             # ================= Notify Discord =================
             - name: 👾 Discord Notification
               uses: sarisia/actions-status-discord@v1
               if: ${{ success() }}
               with:
-                    webhook: ${{ secrets.DISCORD_WEBHOOK }}
-                    status: ${{ job.status }}
-                    description: |
-                        🌝 Nightly release: Successful
+                  webhook: ${{ secrets.DISCORD_WEBHOOK }}
+                  status: ${{ job.status }}
+                  description: |
+                      🌝 Nightly release: Successful
 
-                        🎉 🎉 🎉 🎉 🎉 🎉 🎉 🎉 🎉
-                        Release version: ${{ steps.nightly-version.outputs.version }}
-                        🎉 🎉 🎉 🎉 🎉 🎉 🎉 🎉 🎉
+                      🎉 🎉 🎉 🎉 🎉 🎉 🎉 🎉 🎉
+                      Release version: ${{ steps.nightly-version.outputs.version }}
+                      🎉 🎉 🎉 🎉 🎉 🎉 🎉 🎉 🎉
 
-                        Have a good dream! 🌙
-                    nofail: false
-                    nodetail: false
-                    nocontext: false
-                    noprefix: true
-                    color: 0x00b894
-                    username: Nightly Release
+                      Have a good dream! 🌙
+                  nofail: false
+                  nodetail: false
+                  nocontext: false
+                  noprefix: true
+                  color: 0x00b894
+                  username: Nightly Release
 
             - name: 👾 Discord Notification
               uses: sarisia/actions-status-discord@v1
               if: ${{ failure() }}
               with:
-                    webhook: ${{ secrets.DISCORD_WEBHOOK }}
-                    status: ${{ job.status }}
-                    description: |
-                        🌚 Nightly release: Unsuccessful 💩
+                  webhook: ${{ secrets.DISCORD_WEBHOOK }}
+                  status: ${{ job.status }}
+                  description: |
+                      🌚 Nightly release: Unsuccessful 💩
 
-                        👿 👿 👿 👿 👿 👿 👿 👿 👿
-                        Failed version: ${{ steps.nightly-version.outputs.version }}
-                        👿 👿 👿 👿 👿 👿 👿 👿 👿
+                      👿 👿 👿 👿 👿 👿 👿 👿 👿
+                      Failed version: ${{ steps.nightly-version.outputs.version }}
+                      👿 👿 👿 👿 👿 👿 👿 👿 👿
 
-                        Don't worry, tomorrow will be better! 🌞
-                    nofail: false
-                    nodetail: false
-                    nocontext: false
-                    noprefix: true
-                    color: 0xd63031
-                    username: Nightly Release
+                      Don't worry, tomorrow will be better! 🌞
+                  nofail: false
+                  nodetail: false
+                  nocontext: false
+                  noprefix: true
+                  color: 0xd63031
+                  username: Nightly Release

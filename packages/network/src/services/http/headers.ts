@@ -2,11 +2,14 @@ interface IHeadersConstructorProps {
     [key: string]: string | number | boolean;
 }
 
+// Header keys in `HTTPHeaders` should be in lower case.
+export const ApplicationJSONType = 'application/json';
+
 /**
  * It wraps headers of HTTP requests' and responses' headers.
  */
 export class HTTPHeaders {
-    private readonly _headers: { [key: string]: string[] } = {};
+    private readonly _headers: Map<string, string[]> = new Map();
 
     constructor(headers?: IHeadersConstructorProps | string) {
         if (typeof headers === 'string') {
@@ -27,21 +30,24 @@ export class HTTPHeaders {
     }
 
     forEach(callback: (name: string, value: string[]) => void): void {
-        Object.keys(this._headers).forEach((name) => {
-            callback(name, this._headers[name]);
-        });
+        this._headers.forEach((v, key) => callback(key, v));
     }
 
     has(key: string): boolean {
-        return !!this._headers[key];
+        return !!this._headers.has(key.toLowerCase());
+    }
+
+    get(key: string): string[] | null {
+        const k = key.toLowerCase();
+        return this._headers.has(k) ? this._headers.get(k)! : null;
     }
 
     private _setHeader(name: string, value: string | number | boolean): void {
         const lowerCase = name.toLowerCase();
-        if (this._headers[lowerCase]) {
-            this._headers[lowerCase].push(value.toString());
+        if (this._headers.has(lowerCase)) {
+            this._headers.get(lowerCase)!.push(value.toString());
         } else {
-            this._headers[lowerCase] = [value.toString()];
+            this._headers.set(lowerCase, [value.toString()]);
         }
     }
 }

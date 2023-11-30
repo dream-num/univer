@@ -1,6 +1,7 @@
-import { HTTPHeaders } from './headers';
-import { HTTPResponseType } from './http';
-import { HTTPParams } from './params';
+import type { HTTPHeaders } from './headers';
+import { ApplicationJSONType } from './headers';
+import type { HTTPResponseType } from './http';
+import type { HTTPParams } from './params';
 
 export type HTTPRequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
@@ -43,10 +44,12 @@ export class HTTPRequest {
     }
 
     getBody(): string | null {
-        if (!this.requestParams?.body) {
-            return null;
+        const contentType = this.headers.get('Content-Type') ?? ApplicationJSONType;
+        const body = this.requestParams?.body;
+        if (contentType === ApplicationJSONType && body && typeof body === 'object') {
+            return JSON.stringify(body);
         }
 
-        return '';
+        return body ? `${body}` : null;
     }
 }

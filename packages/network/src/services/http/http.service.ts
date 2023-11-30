@@ -1,18 +1,22 @@
-import { Disposable, Nullable, remove, toDisposable } from '@univerjs/core';
-import { IDisposable } from '@wendellhu/redi';
-import { firstValueFrom, Observable, of } from 'rxjs';
+import type { Nullable } from '@univerjs/core';
+import { Disposable, remove, toDisposable } from '@univerjs/core';
+import type { IDisposable } from '@wendellhu/redi';
+import type { Observable } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 import { concatMap } from 'rxjs/operators';
 
 import { HTTPHeaders } from './headers';
-import { HTTPResponseType } from './http';
+import type { HTTPResponseType } from './http';
 import { IHTTPImplementation } from './implementations/implementation';
 import { HTTPParams } from './params';
-import { HTTPRequest, HTTPRequestMethod } from './request';
-import { HTTPEvent, HTTPResponse, HTTPResponseError } from './response';
-
-// TODO: error handling of HTTPService should be strengthened.
+import type { HTTPRequestMethod } from './request';
+import { HTTPRequest } from './request';
+import type { HTTPEvent, HTTPResponseError } from './response';
+import { HTTPResponse } from './response';
 
 export interface IRequestParams {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    body?: any;
     /** Query params. These params would be append to the url before the request is sent. */
     params?: { [param: string]: string | number | boolean };
     headers?: { [key: string]: string | number | boolean };
@@ -91,6 +95,7 @@ export class HTTPService extends Disposable {
             params,
             withCredentials: options?.withCredentials ?? false, // default value for withCredentials is false by MDN
             responseType: options?.responseType ?? 'json',
+            body: options?.body,
         });
 
         const events$: Observable<HTTPEvent<any>> = of(request).pipe(

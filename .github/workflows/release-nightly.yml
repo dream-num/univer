@@ -2,7 +2,7 @@ name: 🥷 Release Nightly
 
 on:
     schedule:
-        - cron: '0 19 * * *'
+        - cron: '30 1 * * *'
 
 permissions:
     contents: read
@@ -70,10 +70,11 @@ jobs:
               run: pnpm run build
 
             - name: Set publishing config
-              run: |
-                  echo '\n${{ secrets.VERDACCIO_URL }}:_authToken=${{ secrets.VERDACCIO_TOKEN }}' >> .npmrc
-                  echo '\nregistry=https:${{ secrets.VERDACCIO_URL }}' >> .npmrc
-
+              run: pnpm config set '${NODE_REGISTRY}:_authToken' "${NODE_AUTH_TOKEN}"
+              env:
+                  NODE_REGISTRY: ${{ secrets.VERDACCIO_URL }}
+                  NODE_AUTH_TOKEN: ${{ secrets.VERDACCIO_TOKEN }}
+ 
             - name: Publish
               run: pnpm publish --access public --tag nightly -r
 

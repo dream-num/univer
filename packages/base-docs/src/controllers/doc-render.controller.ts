@@ -1,16 +1,18 @@
-import { Documents, DocumentSkeleton, IRender, IRenderManagerService, PageLayoutType } from '@univerjs/base-render';
+import type { Documents, DocumentSkeleton, IRender } from '@univerjs/base-render';
+import { IRenderManagerService, PageLayoutType } from '@univerjs/base-render';
+import type { ICommandInfo } from '@univerjs/core';
 import {
     Disposable,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-    ICommandInfo,
     ICommandService,
     LifecycleStages,
     OnLifecycle,
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
-import { IRichTextEditingMutationParams, RichTextEditingMutation } from '../commands/mutations/core-editing.mutation';
+import type { IRichTextEditingMutationParams } from '../commands/mutations/core-editing.mutation';
+import { RichTextEditingMutation } from '../commands/mutations/core-editing.mutation';
 import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
 
 @OnLifecycle(LifecycleStages.Rendered, DocRenderController)
@@ -46,6 +48,12 @@ export class DocRenderController extends Disposable {
             const docsComponent = mainComponent as Documents;
 
             docsComponent.changeSkeleton(documentSkeleton);
+
+            const excludeUnitList = [DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY];
+
+            if (excludeUnitList.includes(unitId)) {
+                return;
+            }
 
             this.recalculateSizeBySkeleton(currentRender, documentSkeleton);
         });

@@ -51,7 +51,7 @@ export class InitializeEditorController extends Disposable {
                 dataStream: `${DEFAULT_EMPTY_DOCUMENT_VALUE}`,
                 paragraphs: [
                     {
-                        startIndex: 11,
+                        startIndex: 0,
                     },
                 ],
             },
@@ -60,10 +60,11 @@ export class InitializeEditorController extends Disposable {
                     width: Infinity,
                     height: Infinity,
                 },
-                marginTop: 0,
-                marginBottom: 0,
+                marginTop: 5,
+                marginBottom: 5,
                 marginRight: 0,
                 marginLeft: 0,
+                paragraphLineGapDefault: 0,
                 renderConfig: {
                     horizontalAlign: HorizontalAlign.UNSPECIFIED,
                     verticalAlign: VerticalAlign.UNSPECIFIED,

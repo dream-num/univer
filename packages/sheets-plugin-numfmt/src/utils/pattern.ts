@@ -1,6 +1,5 @@
 import numfmt from '@univerjs/base-numfmt-engine';
-
-import { FormatType } from '../base/types';
+import type { FormatType } from '@univerjs/base-sheets';
 
 export const getPatternType = (pattern: string): FormatType => numfmt.getInfo(pattern).type || 'unknown';
 export const getPatternPreview = (pattern: string, value: number) => {

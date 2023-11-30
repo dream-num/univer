@@ -54,7 +54,7 @@ import type { SetNumfmtMutationParams } from '../commands/mutations/set.numfmt.m
 import { factorySetNumfmtUndoMutation, SetNumfmtMutation } from '../commands/mutations/set.numfmt.mutation';
 import { CloseNumfmtPanelOperator } from '../commands/operators/close.numfmt.panel.operator';
 import { OpenNumfmtPanelOperator } from '../commands/operators/open.numfmt.panel.operator';
-import type { SheetNumfmtPanelProps } from '../components/index';
+import type { ISheetNumfmtPanelProps } from '../components/index';
 import { SheetNumfmtPanel } from '../components/index';
 import { zhCn } from '../locale/zh-CN';
 import { AddDecimalMenuItem, CurrencyMenuItem, FactoryOtherMenuItem, SubtractDecimalMenuItem } from '../menu/menu';
@@ -156,7 +156,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
         // eslint-disable-next-line no-magic-numbers
         const defaultValue = (cellValue?.t === CellValueType.NUMBER ? cellValue.v : 12345678) as number;
 
-        const props: SheetNumfmtPanelProps = {
+        const props: ISheetNumfmtPanelProps = {
             onChange: (config) => {
                 if (config.type === 'change') {
                     this._previewPattern = config.value;

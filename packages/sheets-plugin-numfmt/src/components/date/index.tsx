@@ -33,12 +33,18 @@ export const DatePanel: FC<BusinessComponentProps> = (props) => {
 
     useEffect(() => {
         props.onChange(suffix);
-    }, [suffix]);
+    }, []);
+
+    const onChange = (v: string) => {
+        suffixSet(v);
+        props.onChange(v);
+    };
+
     return (
         <div>
             <div className="m-t-16 label">{t('sheet.numfmt.dateType')}</div>
             <div className="m-t-8">
-                <SelectList value={suffix} options={options} onChange={suffixSet} />
+                <SelectList value={suffix} options={options} onChange={onChange} />
             </div>
             <div className="describe m-t-14">{t('sheet.numfmt.dateDes')}</div>
         </div>

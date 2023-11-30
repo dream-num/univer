@@ -7,7 +7,8 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { FC } from 'react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-import { BusinessComponentProps } from '../base/types';
+import type { BusinessComponentProps } from '../base/types';
+import { UserHabitCurrencyContext } from '../context/user-habit';
 import { useCurrencyOptions } from '../hooks/useCurrencyOptions';
 import { getCurrencyType } from '../utils/currency';
 import { AccountingPanel, isAccountingPanel } from './accounting';
@@ -16,16 +17,17 @@ import { DatePanel, isDatePanel } from './date';
 import { GeneralPanel, isGeneralPanel } from './general';
 import { isThousandthPercentilePanel, ThousandthPercentilePanel } from './thousandth-percentile';
 
-export interface SheetNumfmtPanelProps {
+export interface ISheetNumfmtPanelProps {
     value: { defaultValue: number; defaultPattern: string };
     onChange: (config: { type: 'change' | 'cancel' | 'confirm'; value: string }) => void;
 }
-export const SheetNumfmtPanel: FC<SheetNumfmtPanelProps> = (props) => {
+export const SheetNumfmtPanel: FC<ISheetNumfmtPanelProps> = (props) => {
     const { defaultValue, defaultPattern } = props.value;
     const localeService = useDependency(LocaleService);
     const t = localeService.t;
-    const { mark } = useCurrencyOptions();
-    const options = useMemo(
+
+    const pattern = useRef('');
+    const typeOptions = useMemo(
         () =>
             [
                 { label: 'sheet.numfmt.general', component: GeneralPanel },
@@ -36,18 +38,23 @@ export const SheetNumfmtPanel: FC<SheetNumfmtPanelProps> = (props) => {
             ].map((item) => ({ ...item, label: t(item.label) })),
         []
     );
-    const findDefaultType = () => {
+    const [type, typeSet] = useState(findDefaultType);
+    const [key, keySet] = useState(() => `${defaultValue}_${defaultPattern}`);
+    const { mark, userHabitCurrency } = useCurrencyOptions(() =>
+        keySet(`${defaultPattern}_${defaultValue}_userCurrency'`)
+    );
+
+    const BusinessComponent = useMemo(() => typeOptions.find((item) => item.label === type)?.component, [type]);
+
+    function findDefaultType() {
         const list = [isGeneralPanel, isAccountingPanel, isCurrencyPanel, isDatePanel, isThousandthPercentilePanel];
         return (
-            list.reduce((pre, curFn, index) => pre || (curFn(defaultPattern) ? options[index].label : ''), '') ||
-            options[0].label
+            list.reduce((pre, curFn, index) => pre || (curFn(defaultPattern) ? typeOptions[index].label : ''), '') ||
+            typeOptions[0].label
         );
-    };
-    const [type, typeSet] = useState(findDefaultType);
-    const pattern = useRef('');
-    const BusinessComponent = useMemo(() => options.find((item) => item.label === type)?.component, [type]);
+    }
 
-    const selectOptions: ISelectProps['options'] = options.map((option) => ({
+    const selectOptions: ISelectProps['options'] = typeOptions.map((option) => ({
         label: option.label,
         value: option.label,
     }));
@@ -80,9 +87,8 @@ export const SheetNumfmtPanel: FC<SheetNumfmtPanelProps> = (props) => {
 
     useEffect(() => {
         typeSet(findDefaultType());
+        keySet(`${defaultPattern}_${defaultValue}`);
     }, [defaultPattern, defaultValue]);
-
-    const key = useMemo(() => `${defaultPattern}_${defaultValue}`, [defaultValue, defaultPattern]);
 
     return (
         <div className="numfmt-panel p-b-20">
@@ -91,7 +97,13 @@ export const SheetNumfmtPanel: FC<SheetNumfmtPanelProps> = (props) => {
                 <div className="m-t-8">
                     <Select onChange={handleSelect} options={selectOptions} value={type} />
                 </div>
-                <div>{BusinessComponent && <BusinessComponent {...subProps} key={key} />}</div>
+                <div>
+                    {BusinessComponent && (
+                        <UserHabitCurrencyContext.Provider value={userHabitCurrency}>
+                            <BusinessComponent {...subProps} key={key} />
+                        </UserHabitCurrencyContext.Provider>
+                    )}
+                </div>
             </div>
 
             <div className="btn-list m-t-14 m-b-20">

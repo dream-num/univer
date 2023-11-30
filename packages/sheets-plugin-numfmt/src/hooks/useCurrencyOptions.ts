@@ -1,5 +1,5 @@
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { useLayoutEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { currencySymbols } from '../base/const/CURRENCY-SYMBOLS';
 import { UserHabitController } from '../controllers/user-habit.controller';
@@ -9,7 +9,7 @@ export const useCurrencyOptions = (onOptionChange?: (options: string[]) => void)
     const userHabitController = useDependency(UserHabitController);
     const [options, optionsSet] = useState(currencySymbols);
 
-    useLayoutEffect(() => {
+    useEffect(() => {
         userHabitController.addHabit('numfmtCurrency', []).then(() => {
             userHabitController.getHabit(key, [...currencySymbols]).then((list) => {
                 optionsSet(list as string[]);
@@ -18,9 +18,8 @@ export const useCurrencyOptions = (onOptionChange?: (options: string[]) => void)
         });
     }, []);
 
-    const memoOptions = useMemo(() => options.map((v) => ({ label: v, value: v })), [options]);
     const mark = (v: string) => {
         userHabitController.markHabit(key, v);
     };
-    return { options: memoOptions, mark };
+    return { userHabitCurrency: options, mark };
 };

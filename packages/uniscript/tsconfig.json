@@ -1,0 +1,15 @@
+{
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "rootDir": "./",
+        "outDir": "lib",
+        "baseUrl": "./",
+        "esModuleInterop": true,
+        "strictPropertyInitialization": false
+    },
+    "include": [
+        "src/**/*",
+        "examples/**/*",
+        "test/**/*.test.(ts|tsx|js)"
+    ]
+}

@@ -1,6 +1,4 @@
-import {
-    CellValueType,
-    CommandType,
+import type {
     IBorderData,
     ICellData,
     ICellV,
@@ -12,13 +10,11 @@ import {
     IRange,
     IStyleData,
     ITextStyle,
-    IUniverInstanceService,
     Nullable,
-    ObjectMatrix,
     ObjectMatrixPrimitiveType,
-    Tools,
 } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import { CellValueType, CommandType, IUniverInstanceService, ObjectMatrix, Tools } from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
 
 /** Params of `SetRangeValuesMutation` */
 export interface ISetRangeValuesMutationParams extends IMutationCommonParams {
@@ -231,7 +227,7 @@ function checkCellValueType(v: Nullable<ICellV>): Nullable<CellValueType> {
     if (v === null) return null;
 
     if (typeof v === 'string') {
-        if (isNumeric(v)) {
+        if (isSafeNumeric(v)) {
             return CellValueType.NUMBER;
         }
         return CellValueType.STRING;
@@ -387,4 +383,13 @@ export function mergeRichTextStyle(p: IDocumentData, newStyle: Nullable<IStyleDa
 
 function isNumeric(str: string) {
     return /^-?\d+(\.\d+)?$/.test(str);
+}
+
+function isSafeNumeric(str: string) {
+    const numberic = isNumeric(str);
+    if (!numberic) {
+        return false;
+    }
+
+    return Number(str) <= Number.MAX_SAFE_INTEGER;
 }

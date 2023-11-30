@@ -775,15 +775,12 @@ export class PromptController extends Disposable {
         this._selectionManagerService.clear();
 
         if (sequenceNodes == null || sequenceNodes.length === 0) {
-            bodyList.forEach((body) => {
-                body!.textRuns = [];
-            });
+            bodyList.forEach((body) => (body!.textRuns = []));
         } else {
             // this._lastSequenceNodes = sequenceNodes;
             const { textRuns, refSelections } = this._buildTextRuns(sequenceNodes);
-            bodyList.forEach((body) => {
-                body!.textRuns = textRuns;
-            });
+            bodyList.forEach((body) => (body!.textRuns = textRuns));
+
             this._refreshSelectionForReference(refSelections);
         }
 

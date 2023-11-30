@@ -169,7 +169,12 @@ export class StartEditController extends Disposable {
         scaleY: number = 1
     ) {
         const { startX, startY, endX, endY } = actualRangeWithCoord;
-        const documentDataModel = this._currentUniverService.getCurrentUniverDocInstance();
+        const documentDataModel = documentLayoutObject.documentModel;
+
+        if (documentDataModel == null) {
+            return;
+        }
+
         const { actualWidth, actualHeight } = this._predictingSize(
             actualRangeWithCoord,
             canvasOffset,
@@ -234,7 +239,7 @@ export class StartEditController extends Disposable {
 
         const { textRotation, wrapStrategy } = documentLayoutObject;
 
-        const documentDataModel = this._currentUniverService.getCurrentUniverDocInstance();
+        const documentDataModel = documentLayoutObject.documentModel;
 
         const { a: angle } = textRotation as ITextRotation;
 
@@ -248,7 +253,8 @@ export class StartEditController extends Disposable {
                 actualHeight: actualHeight * scaleY,
             };
         }
-        documentDataModel.updateDocumentDataPageSize(clientWidth - startX - canvasOffset.left);
+
+        documentDataModel?.updateDocumentDataPageSize(clientWidth - startX - canvasOffset.left);
         documentSkeleton.calculate();
 
         const size = documentSkeleton.getActualSize();
@@ -260,9 +266,9 @@ export class StartEditController extends Disposable {
         }
 
         // Scaling is handled by the renderer, so the skeleton only accepts the original width and height, which need to be divided by the magnification factor.
-        documentDataModel.updateDocumentDataPageSize(editorWidth / scaleX);
+        documentDataModel?.updateDocumentDataPageSize(editorWidth / scaleX);
 
-        documentDataModel.updateDocumentRenderConfig({
+        documentDataModel?.updateDocumentRenderConfig({
             horizontalAlign: HorizontalAlign.UNSPECIFIED,
         });
 
@@ -561,17 +567,9 @@ export class StartEditController extends Disposable {
                         return;
                     }
 
-                    const docsSkeletonObject = this._docSkeletonManagerService.getSkeletonByUnitId(unitId);
+                    const skeleton = this._docSkeletonManagerService.getSkeletonByUnitId(unitId)?.skeleton;
 
-                    if (docsSkeletonObject == null) {
-                        return;
-                    }
-
-                    const { skeleton } = docsSkeletonObject;
-
-                    const currentRender = this._renderManagerService.getRenderById(unitId);
-
-                    if (currentRender == null) {
+                    if (skeleton == null) {
                         return;
                     }
 
@@ -587,10 +585,6 @@ export class StartEditController extends Disposable {
                     const { position, documentLayoutObject, canvasOffset, scaleX, scaleY } = param;
 
                     this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject, scaleX, scaleY);
-
-                    // const editorObject = this._getEditorObject();
-
-                    // editorObject?.document.makeDirty();
                 }
             })
         );

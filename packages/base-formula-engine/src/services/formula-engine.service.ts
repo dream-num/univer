@@ -47,6 +47,7 @@ import {
     FormulaExecuteStageType,
     FormulaRuntimeService,
     IAllRuntimeData,
+    IExecutionInProgressParams,
     IFormulaRuntimeService,
 } from './runtime.service';
 import { ISuperTableService, SuperTableService } from './super-table.service';
@@ -60,6 +61,10 @@ export class FormulaEngineService extends Disposable {
     private readonly _executionCompleteListener$ = new Subject<IAllRuntimeData>();
 
     readonly executionCompleteListener$ = this._executionCompleteListener$.asObservable();
+
+    private readonly _executionInProgressListener$ = new Subject<IExecutionInProgressParams>();
+
+    readonly executionInProgressListener$ = this._executionInProgressListener$.asObservable();
 
     constructor(@Inject(Injector) private readonly _injector: Injector) {
         super();
@@ -197,13 +202,19 @@ export class FormulaEngineService extends Disposable {
         this.runtimeService.reset();
 
         // const dependencyGenerator = FormulaDependencyGenerator.create(formulaData, forceCalculate);
-        this.runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.DEPENDENCY);
+        this.runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.START_DEPENDENCY);
+
+        this._executionInProgressListener$.next(this.runtimeService.getRuntimeState());
 
         const treeList = await this.formulaDependencyGenerator.generate();
 
         const interpreter = this.interpreter;
 
-        this.runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.INTERPRETER);
+        this.runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.START_CALCULATION);
+
+        this._executionInProgressListener$.next(this.runtimeService.getRuntimeState());
+
+        this.runtimeService.setTotalFormulasToCalculate(treeList.length);
 
         for (let i = 0, len = treeList.length; i < len; i++) {
             const tree = treeList[i];
@@ -224,6 +235,8 @@ export class FormulaEngineService extends Disposable {
 
             if (this.runtimeService.isStopExecution()) {
                 this.runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.IDLE);
+                this.runtimeService.markedAsStopFunctionsExecuted();
+                this._executionCompleteListener$.next(this.runtimeService.getAllRuntimeData());
                 return;
             }
 
@@ -232,17 +245,27 @@ export class FormulaEngineService extends Disposable {
             } else {
                 this.runtimeService.setRuntimeData(value);
             }
+
+            this.runtimeService.setCompletedFormulasCount(i + 1);
+
+            this.runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.CURRENTLY_CALCULATING);
+
+            this._executionInProgressListener$.next(this.runtimeService.getRuntimeState());
         }
 
-        this.runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.IDLE);
+        if (treeList.length > 0) {
+            this.runtimeService.markedAsSuccessfullyExecuted();
+        } else {
+            this.runtimeService.markedAsNoFunctionsExecuted();
+        }
+
+        this.runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.CALCULATION_COMPLETED);
+
+        this._executionInProgressListener$.next(this.runtimeService.getRuntimeState());
 
         this._executionCompleteListener$.next(this.runtimeService.getAllRuntimeData());
 
-        return {
-            unitData: this.runtimeService.getUnitData(),
-            unitArrayFormulaData: this.runtimeService.getUnitArrayFormula(),
-            unitOtherData: this.runtimeService.getRuntimeOtherData(),
-        };
+        return this.runtimeService.getAllRuntimeData();
     }
 
     calculate(formulaString: string, transformSuffix: boolean = true) {

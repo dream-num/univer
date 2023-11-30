@@ -17,4 +17,5 @@ export { BaseFormulaEnginePlugin } from './plugin';
 export { RangeReferenceObject } from './reference-object/range-reference-object';
 export { FormulaEngineService } from './services/formula-engine.service';
 export { IFunctionService } from './services/function.service';
+export { FormulaExecutedStateType, type IAllRuntimeData } from './services/runtime.service';
 export type { BaseValueObject } from './value-object/base-value-object';

@@ -1,4 +1,4 @@
-import { FormulaEngineService } from '@univerjs/base-formula-engine';
+import { FormulaEngineService, FormulaExecutedStateType, IAllRuntimeData } from '@univerjs/base-formula-engine';
 import {
     AddWorksheetMergeMutation,
     DeleteRangeMutation,
@@ -123,98 +123,111 @@ export class CalculateController extends Disposable {
         /**
          * Clearing the data unfold values of array formulas.
          */
-        this._formulaEngineService.executionStartListener$.subscribe(() => {
-            const arrayFormulaData = this._formulaDataModel.getArrayFormulaData();
+        // this._formulaEngineService.executionStartListener$.subscribe(() => {
+        //     const arrayFormulaData = this._formulaDataModel.getArrayFormulaData();
 
-            const redoMutationsInfo: ICommandInfo[] = [];
+        //     const redoMutationsInfo: ICommandInfo[] = [];
 
-            Object.keys(arrayFormulaData).forEach((unitId) => {
-                const sheetData = arrayFormulaData[unitId];
+        //     Object.keys(arrayFormulaData).forEach((unitId) => {
+        //         const sheetData = arrayFormulaData[unitId];
 
-                const sheetIds = Object.keys(sheetData);
+        //         const sheetIds = Object.keys(sheetData);
 
-                sheetIds.forEach((sheetId) => {
-                    const cellData = sheetData[sheetId];
-                    const cellValue = new ObjectMatrix<null>();
-                    cellData.forValue((row, column, range) => {
-                        const { startRow, startColumn, endRow, endColumn } = range;
+        //         sheetIds.forEach((sheetId) => {
+        //             const cellData = sheetData[sheetId];
+        //             const cellValue = new ObjectMatrix<null>();
+        //             cellData.forValue((row, column, range) => {
+        //                 const { startRow, startColumn, endRow, endColumn } = range;
 
-                        for (let r = startRow; r <= endRow; r++) {
-                            for (let c = startColumn; c <= endColumn; c++) {
-                                if (r === row && c === column) {
-                                    continue;
-                                }
-                                cellValue.setValue(r, c, null);
-                            }
-                        }
-                    });
-                    const setRangeValuesMutation: ISetRangeValuesMutationParams = {
-                        worksheetId: sheetId,
-                        workbookId: unitId,
-                        cellValue: cellValue.getData(),
-                        isFormulaUpdate: true,
-                    };
+        //                 for (let r = startRow; r <= endRow; r++) {
+        //                     for (let c = startColumn; c <= endColumn; c++) {
+        //                         if (r === row && c === column) {
+        //                             continue;
+        //                         }
+        //                         cellValue.setValue(r, c, null);
+        //                     }
+        //                 }
+        //             });
+        //             const setRangeValuesMutation: ISetRangeValuesMutationParams = {
+        //                 worksheetId: sheetId,
+        //                 workbookId: unitId,
+        //                 cellValue: cellValue.getData(),
+        //                 isFormulaUpdate: true,
+        //             };
 
-                    redoMutationsInfo.push({
-                        id: SetRangeValuesMutation.id,
-                        params: setRangeValuesMutation,
-                    });
-                });
-            });
+        //             redoMutationsInfo.push({
+        //                 id: SetRangeValuesMutation.id,
+        //                 params: setRangeValuesMutation,
+        //             });
+        //         });
+        //     });
 
-            const result = redoMutationsInfo.every((m) => this._commandService.executeCommand(m.id, m.params));
-            return result;
-        });
+        //     const result = redoMutationsInfo.every((m) => this._commandService.executeCommand(m.id, m.params));
+        //     return result;
+        // });
 
         /**
          * Assignment operation after formula calculation.
          */
         this._formulaEngineService.executionCompleteListener$.subscribe((data) => {
-            const { unitData, unitArrayFormulaData } = data;
-
-            if (!unitData) {
-                console.error('No sheetData from Formula Engine!');
-                return;
+            const functionsExecutedState = data.functionsExecutedState;
+            switch (functionsExecutedState) {
+                case FormulaExecutedStateType.NOT_EXECUTED:
+                    break;
+                case FormulaExecutedStateType.STOP_EXECUTION:
+                    break;
+                case FormulaExecutedStateType.SUCCESS:
+                    this._applyFormula(data);
+                    break;
+                case FormulaExecutedStateType.INITIAL:
+                    break;
             }
-
-            if (unitArrayFormulaData) {
-                // TODO@Dushusir: refresh array formula view
-                this._formulaDataModel.setArrayFormulaData(unitArrayFormulaData);
-            }
-
-            const unitIds = Object.keys(unitData);
-
-            // Update each calculated value, possibly involving all cells
-            const redoMutationsInfo: ICommandInfo[] = [];
-
-            unitIds.forEach((unitId) => {
-                const sheetData = unitData[unitId];
-
-                const sheetIds = Object.keys(sheetData);
-
-                sheetIds.forEach((sheetId) => {
-                    const cellData = sheetData[sheetId];
-
-                    const arrayFormula = unitArrayFormulaData[unitId][sheetId];
-
-                    const setRangeValuesMutation: ISetRangeValuesMutationParams = {
-                        worksheetId: sheetId,
-                        workbookId: unitId,
-                        cellValue: cellData.getData(),
-                        isFormulaUpdate: true,
-                    };
-
-                    redoMutationsInfo.push({
-                        id: SetRangeValuesMutation.id,
-                        params: setRangeValuesMutation,
-                    });
-                });
-            });
-
-            const result = redoMutationsInfo.every((m) => this._commandService.executeCommand(m.id, m.params));
-            return result;
         });
     }
 
-    private _checkInArrayFormulaRange() {}
+    private _applyFormula(data: IAllRuntimeData) {
+        const { unitData, unitArrayFormulaData } = data;
+
+        if (!unitData) {
+            console.error('No sheetData from Formula Engine!');
+            return;
+        }
+
+        if (unitArrayFormulaData) {
+            // TODO@Dushusir: refresh array formula view
+            this._formulaDataModel.setArrayFormulaData(unitArrayFormulaData);
+        }
+
+        const unitIds = Object.keys(unitData);
+
+        // Update each calculated value, possibly involving all cells
+        const redoMutationsInfo: ICommandInfo[] = [];
+
+        unitIds.forEach((unitId) => {
+            const sheetData = unitData[unitId];
+
+            const sheetIds = Object.keys(sheetData);
+
+            sheetIds.forEach((sheetId) => {
+                const cellData = sheetData[sheetId];
+
+                const arrayFormula = unitArrayFormulaData[unitId][sheetId];
+
+                const setRangeValuesMutation: ISetRangeValuesMutationParams = {
+                    worksheetId: sheetId,
+                    workbookId: unitId,
+                    cellValue: cellData.getData(),
+                    isFormulaUpdate: true,
+                };
+
+                redoMutationsInfo.push({
+                    id: SetRangeValuesMutation.id,
+                    params: setRangeValuesMutation,
+                });
+            });
+        });
+
+        const result = redoMutationsInfo.every((m) => this._commandService.executeCommand(m.id, m.params));
+        return result;
+    }
 }

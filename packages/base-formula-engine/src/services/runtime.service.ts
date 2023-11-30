@@ -25,14 +25,30 @@ import { BaseValueObject, CalculateValueType } from '../value-object/base-value-
  */
 export enum FormulaExecuteStageType {
     IDLE,
-    DEPENDENCY,
-    INTERPRETER,
+    START_DEPENDENCY,
+    START_CALCULATION,
+    CURRENTLY_CALCULATING,
+    CALCULATION_COMPLETED,
+}
+
+export enum FormulaExecutedStateType {
+    INITIAL,
+    STOP_EXECUTION,
+    NOT_EXECUTED,
+    SUCCESS,
 }
 
 export interface IAllRuntimeData {
     unitData: IRuntimeUnitDataType;
     unitArrayFormulaData: UnitArrayFormulaDataType;
     unitOtherData: IRuntimeOtherUnitDataType;
+    functionsExecutedState: FormulaExecutedStateType;
+}
+
+export interface IExecutionInProgressParams {
+    totalFormulasToCalculate: number;
+    completedFormulasCount: number;
+    stage: FormulaExecuteStageType;
 }
 
 export interface IFormulaRuntimeService {
@@ -77,6 +93,24 @@ export interface IFormulaRuntimeService {
     getRuntimeOtherData(): IRuntimeOtherUnitDataType;
 
     getAllRuntimeData(): IAllRuntimeData;
+
+    markedAsSuccessfullyExecuted(): void;
+
+    markedAsNoFunctionsExecuted(): void;
+
+    markedAsStopFunctionsExecuted(): void;
+
+    markedAsInitialFunctionsExecuted(): void;
+
+    setTotalFormulasToCalculate(value: number): void;
+
+    getTotalFormulasToCalculate(): number;
+
+    setCompletedFormulasCount(value: number): void;
+
+    getCompletedFormulasCount(): number;
+
+    getRuntimeState(): IExecutionInProgressParams;
 }
 
 export class FormulaRuntimeService extends Disposable implements IFormulaRuntimeService {
@@ -95,8 +129,14 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
     private _unitArrayFormulaData: UnitArrayFormulaDataType = {};
 
+    private _functionsExecutedState: FormulaExecutedStateType = FormulaExecutedStateType.INITIAL;
+
     // lambdaId: { key: BaseAstNode }
     private _functionDefinitionPrivacyVar: Map<string, Map<string, Nullable<BaseAstNode>>> = new Map();
+
+    private _totalFormulasToCalculate: number = 0;
+
+    private _completedFormulasCount: number = 0;
 
     get currentRow() {
         return this._currentRow;
@@ -118,6 +158,38 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         this.reset();
     }
 
+    setTotalFormulasToCalculate(value: number) {
+        this._totalFormulasToCalculate = value;
+    }
+
+    getTotalFormulasToCalculate() {
+        return this._totalFormulasToCalculate;
+    }
+
+    setCompletedFormulasCount(value: number) {
+        this._completedFormulasCount = value;
+    }
+
+    getCompletedFormulasCount() {
+        return this._completedFormulasCount;
+    }
+
+    markedAsSuccessfullyExecuted() {
+        this._functionsExecutedState = FormulaExecutedStateType.SUCCESS;
+    }
+
+    markedAsNoFunctionsExecuted() {
+        this._functionsExecutedState = FormulaExecutedStateType.NOT_EXECUTED;
+    }
+
+    markedAsStopFunctionsExecuted() {
+        this._functionsExecutedState = FormulaExecutedStateType.STOP_EXECUTION;
+    }
+
+    markedAsInitialFunctionsExecuted() {
+        this._functionsExecutedState = FormulaExecutedStateType.INITIAL;
+    }
+
     stopExecution() {
         this._stopState = true;
 
@@ -137,9 +209,15 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
     }
 
     reset() {
+        this._formulaExecuteStage = FormulaExecuteStageType.IDLE;
         this._runtimeData = {};
+        this._runtimeOtherData = {};
         this._unitArrayFormulaData = {};
         this._functionDefinitionPrivacyVar.clear();
+        this.markedAsInitialFunctionsExecuted();
+
+        this._totalFormulasToCalculate = 0;
+        this._completedFormulasCount = 0;
     }
 
     setCurrent(row: number, column: number, sheetId: string, unitId: string) {
@@ -213,7 +291,9 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
             (functionVariant.isValueObject() && (functionVariant as BaseValueObject).isArray())
         ) {
             const objectValueRefOrArray = functionVariant as BaseReferenceObject | ArrayValueObject;
+
             const { startRow, startColumn, endRow, endColumn } = objectValueRefOrArray.getRangePosition();
+
             objectValueRefOrArray.iterator((valueObject, rowIndex, columnIndex) => {
                 sheetData.setValue(
                     rowIndex - startRow + row,
@@ -253,11 +333,22 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         return this._runtimeOtherData;
     }
 
-    getAllRuntimeData() {
+    getAllRuntimeData(): IAllRuntimeData {
         return {
             unitData: this.getUnitData(),
             unitArrayFormulaData: this.getUnitArrayFormula(),
             unitOtherData: this.getRuntimeOtherData(),
+            functionsExecutedState: this._functionsExecutedState,
+        };
+    }
+
+    getRuntimeState(): IExecutionInProgressParams {
+        return {
+            totalFormulasToCalculate: this.getTotalFormulasToCalculate(),
+
+            completedFormulasCount: this.getCompletedFormulasCount(),
+
+            stage: this.getFormulaExecuteStage(),
         };
     }
 
@@ -287,6 +378,24 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                 v,
                 t: CellValueType.STRING,
             };
+        }
+    }
+
+    private _checkIfArrayFormulaRangeHasData(
+        formulaUnitId: number,
+        formulaSheetId: number,
+        formulaRow: number,
+        formulaColumn: number,
+        arrayRange: IRange
+    ) {
+        const { startRow, startColumn, endRow, endColumn } = arrayRange;
+
+        for (let r = startRow; r <= endRow; r++) {
+            for (let c = startColumn; c <= endColumn; c++) {
+                const cell = this._runtimeData?.[formulaUnitId]?.[formulaSheetId]?.getValue(r, c);
+                const formulaString = cell?.f || '';
+                const formulaId = cell?.si || '';
+            }
         }
     }
 }

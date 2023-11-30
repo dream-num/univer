@@ -192,7 +192,8 @@ export class EndEditController extends Disposable {
                 cellData.v = null;
                 cellData.f = null;
             } else {
-                if (newDataStream === cellData.v) {
+                // eslint-disable-next-line eqeqeq
+                if (newDataStream == cellData.v || (newDataStream == '' && cellData.v == null)) {
                     return;
                 }
                 cellData.v = newDataStream;

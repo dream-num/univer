@@ -80,3 +80,25 @@ export function getCellValueType(cell: ICellData) {
         return CellValueType.BOOLEAN;
     }
 }
+
+export function isNullCell(cell: Nullable<ICellData>) {
+    if (cell == null) {
+        return true;
+    }
+
+    const { v, f, si, p, s } = cell;
+
+    if (!(v == null || (typeof v === 'string' && v.length === 0))) {
+        return false;
+    }
+
+    if ((f != null && f.length > 0) || (si != null && si.length > 0)) {
+        return false;
+    }
+
+    if (p != null) {
+        return false;
+    }
+
+    return true;
+}

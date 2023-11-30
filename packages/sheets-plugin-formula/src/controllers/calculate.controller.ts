@@ -1,4 +1,10 @@
-import { FormulaEngineService, FormulaExecutedStateType, IAllRuntimeData } from '@univerjs/base-formula-engine';
+import {
+    FormulaEngineService,
+    FormulaExecutedStateType,
+    IAllRuntimeData,
+    isInDirtyRange,
+    UnitArrayFormulaDataType,
+} from '@univerjs/base-formula-engine';
 import {
     AddWorksheetMergeMutation,
     DeleteRangeMutation,
@@ -30,6 +36,8 @@ import { FormulaDataModel } from '../models/formula-data.model';
 
 @OnLifecycle(LifecycleStages.Starting, CalculateController)
 export class CalculateController extends Disposable {
+    private _previousDirtyRanges: IUnitRange[] = [];
+
     constructor(
         @IConfigService private readonly _configService: IConfigService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
@@ -96,23 +104,51 @@ export class CalculateController extends Disposable {
             return dirtyRanges;
         }
 
-        const discreteRanges = new ObjectMatrix(cellValue).getDiscreteRanges();
+        const cellMatrix = new ObjectMatrix(cellValue);
+
+        const discreteRanges = cellMatrix.getDiscreteRanges();
 
         discreteRanges.forEach((range) => {
             dirtyRanges.push({ unitId, sheetId, range });
         });
+
+        const arrayFormulaData = this._formulaDataModel.getArrayFormulaData();
+
+        const cellRangeData = arrayFormulaData?.[unitId]?.[sheetId];
+
+        if (cellRangeData) {
+            cellMatrix.forValue((row, column) => {
+                cellRangeData.forValue((arrayFormulaRow, arrayFormulaColumn, arrayFormulaRange) => {
+                    const { startRow, startColumn, endRow, endColumn } = arrayFormulaRange;
+                    if (row >= startRow && row <= endRow && column >= startColumn && column <= endColumn) {
+                        dirtyRanges.push({
+                            unitId,
+                            sheetId,
+                            range: {
+                                startRow,
+                                startColumn,
+                                endRow: startRow,
+                                endColumn: startColumn,
+                            },
+                        });
+                    }
+                });
+            });
+        }
 
         this._formulaDataModel.updateFormulaData(unitId, sheetId, cellValue);
 
         return dirtyRanges;
     }
 
-    private _calculate(dirtyRanges: IUnitRange[]) {
+    private async _calculate(dirtyRanges: IUnitRange[]) {
         if (dirtyRanges.length === 0) return;
+
+        this._previousDirtyRanges = dirtyRanges;
 
         const formulaData = this._formulaDataModel.getFormulaData();
 
-        this._formulaEngineService.execute({
+        return this._formulaEngineService.execute({
             formulaData,
             forceCalculate: false,
             dirtyRanges,
@@ -120,52 +156,6 @@ export class CalculateController extends Disposable {
     }
 
     private _initialExecuteFormulaListener() {
-        /**
-         * Clearing the data unfold values of array formulas.
-         */
-        // this._formulaEngineService.executionStartListener$.subscribe(() => {
-        //     const arrayFormulaData = this._formulaDataModel.getArrayFormulaData();
-
-        //     const redoMutationsInfo: ICommandInfo[] = [];
-
-        //     Object.keys(arrayFormulaData).forEach((unitId) => {
-        //         const sheetData = arrayFormulaData[unitId];
-
-        //         const sheetIds = Object.keys(sheetData);
-
-        //         sheetIds.forEach((sheetId) => {
-        //             const cellData = sheetData[sheetId];
-        //             const cellValue = new ObjectMatrix<null>();
-        //             cellData.forValue((row, column, range) => {
-        //                 const { startRow, startColumn, endRow, endColumn } = range;
-
-        //                 for (let r = startRow; r <= endRow; r++) {
-        //                     for (let c = startColumn; c <= endColumn; c++) {
-        //                         if (r === row && c === column) {
-        //                             continue;
-        //                         }
-        //                         cellValue.setValue(r, c, null);
-        //                     }
-        //                 }
-        //             });
-        //             const setRangeValuesMutation: ISetRangeValuesMutationParams = {
-        //                 worksheetId: sheetId,
-        //                 workbookId: unitId,
-        //                 cellValue: cellValue.getData(),
-        //                 isFormulaUpdate: true,
-        //             };
-
-        //             redoMutationsInfo.push({
-        //                 id: SetRangeValuesMutation.id,
-        //                 params: setRangeValuesMutation,
-        //             });
-        //         });
-        //     });
-
-        //     const result = redoMutationsInfo.every((m) => this._commandService.executeCommand(m.id, m.params));
-        //     return result;
-        // });
-
         /**
          * Assignment operation after formula calculation.
          */
@@ -185,13 +175,15 @@ export class CalculateController extends Disposable {
         });
     }
 
-    private _applyFormula(data: IAllRuntimeData) {
+    private async _applyFormula(data: IAllRuntimeData) {
         const { unitData, unitArrayFormulaData } = data;
 
         if (!unitData) {
             console.error('No sheetData from Formula Engine!');
             return;
         }
+
+        const deleteMutationInfo = this._deletePreviousArrayFormulaValue(unitArrayFormulaData);
 
         if (unitArrayFormulaData) {
             // TODO@Dushusir: refresh array formula view
@@ -201,7 +193,7 @@ export class CalculateController extends Disposable {
         const unitIds = Object.keys(unitData);
 
         // Update each calculated value, possibly involving all cells
-        const redoMutationsInfo: ICommandInfo[] = [];
+        const redoMutationsInfo: ICommandInfo[] = [...deleteMutationInfo];
 
         unitIds.forEach((unitId) => {
             const sheetData = unitData[unitId];
@@ -211,7 +203,7 @@ export class CalculateController extends Disposable {
             sheetIds.forEach((sheetId) => {
                 const cellData = sheetData[sheetId];
 
-                const arrayFormula = unitArrayFormulaData[unitId][sheetId];
+                // const arrayFormula = unitArrayFormulaData[unitId][sheetId];
 
                 const setRangeValuesMutation: ISetRangeValuesMutationParams = {
                     worksheetId: sheetId,
@@ -229,5 +221,58 @@ export class CalculateController extends Disposable {
 
         const result = redoMutationsInfo.every((m) => this._commandService.executeCommand(m.id, m.params));
         return result;
+    }
+
+    private _deletePreviousArrayFormulaValue(unitArrayFormulaData: UnitArrayFormulaDataType) {
+        const oldArrayFormulaData = this._formulaDataModel.getArrayFormulaData();
+
+        const redoMutationsInfo: ICommandInfo[] = [];
+
+        Object.keys(oldArrayFormulaData).forEach((oldUnitId) => {
+            const oldSheetData = oldArrayFormulaData[oldUnitId];
+
+            const oldSheetIds = Object.keys(oldSheetData);
+
+            oldSheetIds.forEach((oldSheetId) => {
+                const oldCellData = oldSheetData[oldSheetId];
+                const oldCellValue = new ObjectMatrix<null>();
+                oldCellData.forValue((oldRow, oldColumn, oldRange) => {
+                    const newCellData = unitArrayFormulaData?.[oldUnitId]?.[oldSheetId].getValue(oldRow, oldColumn);
+
+                    if (newCellData == null) {
+                        return false;
+                    }
+
+                    const { startRow, startColumn, endRow, endColumn } = oldRange;
+
+                    for (let r = startRow; r <= endRow; r++) {
+                        for (let c = startColumn; c <= endColumn; c++) {
+                            if (r === oldRow && c === oldColumn) {
+                                continue;
+                            }
+
+                            if (isInDirtyRange(this._previousDirtyRanges, oldUnitId, oldSheetId, r, c)) {
+                                continue;
+                            }
+
+                            oldCellValue.setValue(r, c, null);
+                        }
+                    }
+                });
+                const setRangeValuesMutation: ISetRangeValuesMutationParams = {
+                    worksheetId: oldSheetId,
+                    workbookId: oldUnitId,
+                    cellValue: oldCellValue.getData(),
+                    isFormulaUpdate: true,
+                };
+
+                redoMutationsInfo.push({
+                    id: SetRangeValuesMutation.id,
+                    params: setRangeValuesMutation,
+                });
+            });
+        });
+
+        return redoMutationsInfo;
     }
 }

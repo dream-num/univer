@@ -1,6 +1,7 @@
 import { Disposable, IRange, IUnitRange, Nullable } from '@univerjs/core';
 
 import { BaseAstNode } from '../ast-node/base-ast-node';
+import { IUnitExcludedCell } from '../basics/common';
 
 export enum FDtreeStateType {
     DEFAULT,
@@ -77,7 +78,10 @@ export class FormulaDependencyTree extends Disposable {
      * @param dependencyRangeList
      * @returns
      */
-    dependencyRange(dependencyRangeList: Map<string, Map<string, IRange[]>>) {
+    dependencyRange(
+        dependencyRangeList: Map<string, Map<string, IRange[]>>,
+        unitExcludedCell: Nullable<IUnitExcludedCell>
+    ) {
         if (this.rangeList.length === 0) {
             return false;
         }
@@ -100,6 +104,8 @@ export class FormulaDependencyTree extends Disposable {
 
             const dependencyRanges = sheetRangeMap.get(sheetId)!;
 
+            const excludedCell = unitExcludedCell?.[unitId]?.[sheetId];
+
             for (const dependencyRange of dependencyRanges) {
                 const { startRow, startColumn, endRow, endColumn } = dependencyRange;
 
@@ -111,7 +117,26 @@ export class FormulaDependencyTree extends Disposable {
                 ) {
                     continue;
                 } else {
-                    return true;
+                    let isInclude = true;
+                    /**
+                     * The position of the primary cell in the array formula needs to be excluded when calculating the impact of the array formula on dependencies.
+                     * This is because its impact was already considered during the first calculation.
+                     */
+                    excludedCell?.forValue((row, column) => {
+                        if (
+                            row >= range.startRow &&
+                            row <= range.endRow &&
+                            column >= range.startColumn &&
+                            column <= range.endColumn
+                        ) {
+                            isInclude = false;
+                            return false;
+                        }
+                    });
+
+                    if (isInclude) {
+                        return true;
+                    }
                 }
             }
         }

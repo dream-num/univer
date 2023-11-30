@@ -1,4 +1,4 @@
-import { Disposable, IUnitRange, IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
+import { Disposable, IUnitRange, IUniverInstanceService, Nullable, ObjectMatrix } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 
 import {
@@ -7,6 +7,7 @@ import {
     IOtherFormulaData,
     ISheetData,
     IUnitData,
+    IUnitExcludedCell,
     IUnitSheetNameMap,
 } from '../basics/common';
 
@@ -30,6 +31,10 @@ export interface IFormulaCurrentConfigService {
     registerFormulaData(formulaData: IFormulaData): void;
 
     registerSheetNameMap(sheetNameMap: IUnitSheetNameMap): void;
+
+    getExcludedRange(): Nullable<IUnitExcludedCell>;
+
+    loadDirtyRangesAndExcludedCell(dirtyRanges: IUnitRange[], excludedCell?: IUnitExcludedCell): void;
 }
 
 export class FormulaCurrentConfigService extends Disposable implements IFormulaCurrentConfigService {
@@ -45,6 +50,8 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
     private _dirtyRanges: IUnitRange[] = [];
 
+    private _excludedCell: Nullable<IUnitExcludedCell>;
+
     constructor(@IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService) {
         super();
     }
@@ -54,6 +61,11 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         this._formulaData = {};
         this._sheetNameMap = {};
         this._dirtyRanges = [];
+        this._excludedCell = {};
+    }
+
+    getExcludedRange() {
+        return this._excludedCell;
     }
 
     getUnitData() {
@@ -94,6 +106,14 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         this._forceCalculate = config.forceCalculate;
 
         this._dirtyRanges = config.dirtyRanges;
+
+        this._excludedCell = config.excludedCell;
+    }
+
+    loadDirtyRangesAndExcludedCell(dirtyRanges: IUnitRange[], excludedCell?: IUnitExcludedCell) {
+        this._dirtyRanges = dirtyRanges;
+
+        this._excludedCell = excludedCell;
     }
 
     registerUnitData(unitData: IUnitData) {

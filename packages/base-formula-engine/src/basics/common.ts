@@ -92,10 +92,15 @@ export enum TableOptionType {
     TOTALS = '#Totals',
 }
 
+export interface IUnitExcludedCell {
+    [unitId: string]: { [sheetId: string]: ObjectMatrix<boolean> };
+}
+
 export interface IFormulaDatasetConfig {
     formulaData: IFormulaData;
     forceCalculate: boolean;
     dirtyRanges: IUnitRange[];
+    excludedCell?: IUnitExcludedCell;
 }
 
 export enum ConcatenateType {

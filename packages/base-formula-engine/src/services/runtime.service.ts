@@ -1,4 +1,4 @@
-import { CellValueType, Disposable, ICellData, IRange, Nullable, ObjectMatrix } from '@univerjs/core';
+import { CellValueType, Disposable, ICellData, IRange, isNullCell, Nullable, ObjectMatrix } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 
 import { BaseAstNode } from '../ast-node/base-ast-node';
@@ -9,10 +9,13 @@ import {
     IRuntimeUnitDataType,
     UnitArrayFormulaDataType,
 } from '../basics/common';
+import { isInDirtyRange } from '../basics/dirty';
+import { ErrorType } from '../basics/error-type';
 import { ErrorValueObject } from '../other-object/error-value-object';
 import { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
 import { ArrayValueObject } from '../value-object/array-value-object';
 import { BaseValueObject, CalculateValueType } from '../value-object/base-value-object';
+import { IFormulaCurrentConfigService } from './current-data.service';
 
 /**
  * IDLE: Idle phase of the formula engine.
@@ -28,6 +31,9 @@ export enum FormulaExecuteStageType {
     START_DEPENDENCY,
     START_CALCULATION,
     CURRENTLY_CALCULATING,
+    START_DEPENDENCY_ARRAY_FORMULA,
+    START_CALCULATION_ARRAY_FORMULA,
+    CURRENTLY_CALCULATING_ARRAY_FORMULA,
     CALCULATION_COMPLETED,
 }
 
@@ -48,6 +54,10 @@ export interface IAllRuntimeData {
 export interface IExecutionInProgressParams {
     totalFormulasToCalculate: number;
     completedFormulasCount: number;
+
+    totalArrayFormulasToCalculate: number;
+    completedArrayFormulasCount: number;
+
     stage: FormulaExecuteStageType;
 }
 
@@ -111,6 +121,20 @@ export interface IFormulaRuntimeService {
     getCompletedFormulasCount(): number;
 
     getRuntimeState(): IExecutionInProgressParams;
+
+    setTotalArrayFormulasToCalculate(value: number): void;
+
+    getTotalArrayFormulasToCalculate(): number;
+
+    setCompletedArrayFormulasCount(value: number): void;
+
+    getCompletedArrayFormulasCount(): number;
+
+    enableCycleDependency(): void;
+
+    disableCycleDependency(): void;
+
+    isCycleDependency(): boolean;
 }
 
 export class FormulaRuntimeService extends Disposable implements IFormulaRuntimeService {
@@ -138,6 +162,16 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
     private _completedFormulasCount: number = 0;
 
+    private _totalArrayFormulasToCalculate: number = 0;
+
+    private _completedArrayFormulasCount: number = 0;
+
+    private _isCycleDependency: boolean = false;
+
+    constructor(@IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService) {
+        super();
+    }
+
     get currentRow() {
         return this._currentRow;
     }
@@ -156,6 +190,34 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
     override dispose(): void {
         this.reset();
+    }
+
+    enableCycleDependency() {
+        this._isCycleDependency = true;
+    }
+
+    disableCycleDependency() {
+        this._isCycleDependency = false;
+    }
+
+    isCycleDependency() {
+        return this._isCycleDependency;
+    }
+
+    setTotalArrayFormulasToCalculate(value: number) {
+        this._totalArrayFormulasToCalculate = value;
+    }
+
+    getTotalArrayFormulasToCalculate() {
+        return this._totalArrayFormulasToCalculate;
+    }
+
+    setCompletedArrayFormulasCount(value: number) {
+        this._completedArrayFormulasCount = value;
+    }
+
+    getCompletedArrayFormulasCount() {
+        return this._completedArrayFormulasCount;
     }
 
     setTotalFormulasToCalculate(value: number) {
@@ -215,6 +277,8 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         this._unitArrayFormulaData = {};
         this._functionDefinitionPrivacyVar.clear();
         this.markedAsInitialFunctionsExecuted();
+
+        this._isCycleDependency = false;
 
         this._totalFormulasToCalculate = 0;
         this._completedFormulasCount = 0;
@@ -294,20 +358,25 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
             const { startRow, startColumn, endRow, endColumn } = objectValueRefOrArray.getRangePosition();
 
-            objectValueRefOrArray.iterator((valueObject, rowIndex, columnIndex) => {
-                sheetData.setValue(
-                    rowIndex - startRow + row,
-                    columnIndex - startColumn + column,
-                    this._objectValueToCellValue(valueObject)
-                );
-            });
-
-            arrayData.setValue(row, column, {
+            const arrayRange = {
                 startRow: row,
                 startColumn: column,
-                endRow: endRow - startRow + 1 + row,
-                endColumn: endColumn - startColumn + 1 + column,
-            });
+                endRow: endRow - startRow + row,
+                endColumn: endColumn - startColumn + column,
+            };
+
+            if (this._checkIfArrayFormulaRangeHasData(unitId, sheetId, row, column, arrayRange)) {
+                sheetData.setValue(row, column, this._objectValueToCellValue(new ErrorValueObject(ErrorType.SPILL)));
+            } else {
+                objectValueRefOrArray.iterator((valueObject, rowIndex, columnIndex) => {
+                    sheetData.setValue(
+                        rowIndex - startRow + row,
+                        columnIndex - startColumn + column,
+                        this._objectValueToCellValue(valueObject)
+                    );
+                });
+            }
+            arrayData.setValue(row, column, arrayRange);
         } else {
             sheetData.setValue(row, column, this._objectValueToCellValue(functionVariant as CalculateValueType));
         }
@@ -348,6 +417,10 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
             completedFormulasCount: this.getCompletedFormulasCount(),
 
+            totalArrayFormulasToCalculate: this.getTotalArrayFormulasToCalculate(),
+
+            completedArrayFormulasCount: this.getCompletedArrayFormulasCount(),
+
             stage: this.getFormulaExecuteStage(),
         };
     }
@@ -382,21 +455,41 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
     }
 
     private _checkIfArrayFormulaRangeHasData(
-        formulaUnitId: number,
-        formulaSheetId: number,
+        formulaUnitId: string,
+        formulaSheetId: string,
         formulaRow: number,
         formulaColumn: number,
         arrayRange: IRange
     ) {
         const { startRow, startColumn, endRow, endColumn } = arrayRange;
 
+        const unitData = this._currentConfigService.getUnitData();
+
         for (let r = startRow; r <= endRow; r++) {
             for (let c = startColumn; c <= endColumn; c++) {
+                if (r === formulaRow && formulaColumn === c) {
+                    continue;
+                }
+
                 const cell = this._runtimeData?.[formulaUnitId]?.[formulaSheetId]?.getValue(r, c);
-                const formulaString = cell?.f || '';
-                const formulaId = cell?.si || '';
+
+                const currentCell = unitData?.[formulaUnitId]?.[formulaSheetId]?.cellData?.getValue(r, c);
+
+                if (
+                    (!isNullCell(cell) || !isNullCell(currentCell)) &&
+                    this._isInDirtyRange(formulaUnitId, formulaSheetId, r, c)
+                ) {
+                    return true;
+                }
             }
         }
+
+        return false;
+    }
+
+    private _isInDirtyRange(unitId: string, sheetId: string, row: number, column: number) {
+        const dirtyRanges = this._currentConfigService.getDirtyRanges();
+        return isInDirtyRange(dirtyRanges, unitId, sheetId, row, column);
     }
 }
 

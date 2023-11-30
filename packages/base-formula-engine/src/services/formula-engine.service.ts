@@ -1,4 +1,4 @@
-import { Disposable, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, IConfigService, IUnitRange, LifecycleStages, ObjectMatrix, OnLifecycle } from '@univerjs/core';
 import { Ctor, Dependency, Inject, Injector } from '@wendellhu/redi';
 import { Subject } from 'rxjs';
 
@@ -16,7 +16,7 @@ import { ReferenceNodeFactory } from '../ast-node/reference-node';
 import { SuffixNodeFactory } from '../ast-node/suffix-node';
 import { UnionNodeFactory } from '../ast-node/union-node';
 import { ValueNodeFactory } from '../ast-node/value-node';
-import { IFormulaDatasetConfig } from '../basics/common';
+import { IFormulaDatasetConfig, IUnitExcludedCell, UnitArrayFormulaDataType } from '../basics/common';
 import { ErrorType } from '../basics/error-type';
 import { FUNCTION_NAMES, IFunctionInfo } from '../basics/function';
 import { FormulaDependencyGenerator } from '../dependency/formula-dependency';
@@ -52,6 +52,10 @@ import {
 } from './runtime.service';
 import { ISuperTableService, SuperTableService } from './super-table.service';
 
+export const DEFAULT_CYCLE_REFERENCE_COUNT = 1;
+
+export const CYCLE_REFERENCE_COUNT = 'cycleReferenceCount';
+
 @OnLifecycle(LifecycleStages.Rendered, FormulaEngineService)
 export class FormulaEngineService extends Disposable {
     private readonly _executionStartListener$ = new Subject<boolean>();
@@ -66,7 +70,10 @@ export class FormulaEngineService extends Disposable {
 
     readonly executionInProgressListener$ = this._executionInProgressListener$.asObservable();
 
-    constructor(@Inject(Injector) private readonly _injector: Injector) {
+    constructor(
+        @Inject(Injector) private readonly _injector: Injector,
+        @IConfigService private readonly _configService: IConfigService
+    ) {
         super();
         this._initializeDependencies();
         this._initializeFunctions();
@@ -201,8 +208,92 @@ export class FormulaEngineService extends Disposable {
 
         this.runtimeService.reset();
 
-        // const dependencyGenerator = FormulaDependencyGenerator.create(formulaData, forceCalculate);
-        this.runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.START_DEPENDENCY);
+        const cycleReferenceCount = (this._configService.getConfig('CYCLE_REFERENCE_COUNT') ||
+            DEFAULT_CYCLE_REFERENCE_COUNT) as number;
+
+        for (let i = 0; i < cycleReferenceCount; i++) {
+            await this._execute();
+            const isCycleDependency = this.runtimeService.isCycleDependency();
+            if (!isCycleDependency) {
+                break;
+            }
+        }
+
+        this.runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.CALCULATION_COMPLETED);
+
+        this._executionInProgressListener$.next(this.runtimeService.getRuntimeState());
+
+        this._executionCompleteListener$.next(this.runtimeService.getAllRuntimeData());
+    }
+
+    private async _execute() {
+        const executeState = await this._apply();
+
+        if (executeState == null) {
+            return;
+        }
+
+        const { unitArrayFormulaData } = executeState;
+
+        const { dirtyRanges, excludedCell } = this._getArrayFormulaDirtyRangeAndExcludedRange(unitArrayFormulaData);
+
+        if (dirtyRanges == null || dirtyRanges.length === 0) {
+            return true;
+        }
+
+        this.currentConfigService.loadDirtyRangesAndExcludedCell(dirtyRanges, excludedCell);
+
+        await this._apply(true);
+
+        return true;
+    }
+
+    private _getArrayFormulaDirtyRangeAndExcludedRange(unitArrayFormulaData: UnitArrayFormulaDataType) {
+        const dirtyRanges: IUnitRange[] = [];
+        const excludedCell: IUnitExcludedCell = {};
+        Object.keys(unitArrayFormulaData).forEach((unitId) => {
+            const sheetArrayFormulaData = unitArrayFormulaData[unitId];
+            Object.keys(sheetArrayFormulaData).forEach((sheetId) => {
+                const cellValue = sheetArrayFormulaData[sheetId];
+
+                if (cellValue == null) {
+                    return true;
+                }
+
+                const newCellData = new ObjectMatrix<boolean>();
+
+                cellValue.forValue((row, column, range) => {
+                    newCellData.setValue(row, column, true);
+
+                    dirtyRanges.push({ unitId, sheetId, range });
+                });
+
+                if (excludedCell[unitId] == null) {
+                    excludedCell[unitId] = {};
+                }
+
+                excludedCell[unitId][sheetId] = newCellData;
+            });
+        });
+
+        return { dirtyRanges, excludedCell };
+    }
+
+    /**
+     *
+     * @param unitId
+     * @param formulaData
+     * @param interpreterDatasetConfig
+     * @param forceCalculate force calculate all formula, and ignore dependency relationship
+     * @param dirtyRanges input external unit data for multi workbook
+     * @returns
+     */
+    private async _apply(isArrayFormulaState = false) {
+        if (isArrayFormulaState) {
+            this.runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.START_DEPENDENCY_ARRAY_FORMULA);
+        } else {
+            this.runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.START_DEPENDENCY);
+        }
 
         this._executionInProgressListener$.next(this.runtimeService.getRuntimeState());
 
@@ -210,11 +301,17 @@ export class FormulaEngineService extends Disposable {
 
         const interpreter = this.interpreter;
 
-        this.runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.START_CALCULATION);
+        if (isArrayFormulaState) {
+            this.runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.START_CALCULATION_ARRAY_FORMULA);
+
+            this.runtimeService.setTotalArrayFormulasToCalculate(treeList.length);
+        } else {
+            this.runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.START_CALCULATION);
+
+            this.runtimeService.setTotalFormulasToCalculate(treeList.length);
+        }
 
         this._executionInProgressListener$.next(this.runtimeService.getRuntimeState());
-
-        this.runtimeService.setTotalFormulasToCalculate(treeList.length);
 
         for (let i = 0, len = treeList.length; i < len; i++) {
             const tree = treeList[i];
@@ -246,24 +343,24 @@ export class FormulaEngineService extends Disposable {
                 this.runtimeService.setRuntimeData(value);
             }
 
-            this.runtimeService.setCompletedFormulasCount(i + 1);
+            if (isArrayFormulaState) {
+                this.runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.CURRENTLY_CALCULATING_ARRAY_FORMULA);
 
-            this.runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.CURRENTLY_CALCULATING);
+                this.runtimeService.setCompletedArrayFormulasCount(i + 1);
+            } else {
+                this.runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.CURRENTLY_CALCULATING);
+
+                this.runtimeService.setCompletedFormulasCount(i + 1);
+            }
 
             this._executionInProgressListener$.next(this.runtimeService.getRuntimeState());
         }
 
         if (treeList.length > 0) {
             this.runtimeService.markedAsSuccessfullyExecuted();
-        } else {
+        } else if (!isArrayFormulaState) {
             this.runtimeService.markedAsNoFunctionsExecuted();
         }
-
-        this.runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.CALCULATION_COMPLETED);
-
-        this._executionInProgressListener$.next(this.runtimeService.getRuntimeState());
-
-        this._executionCompleteListener$.next(this.runtimeService.getAllRuntimeData());
 
         return this.runtimeService.getAllRuntimeData();
     }

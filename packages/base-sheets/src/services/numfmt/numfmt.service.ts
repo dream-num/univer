@@ -128,10 +128,11 @@ export class NumfmtService extends Disposable implements INumfmtService {
     private _setValue(workbookId: string, worksheetId: string, row: number, col: number, value: Nullable<INumfmtItem>) {
         let model = this.getModel(workbookId, worksheetId);
         if (!model) {
-            model = new ObjectMatrix();
-            const map = new Map();
-            map.set(worksheetId, model);
-            this._numfmtModel.set(workbookId, map);
+            const worksheetMap = this._numfmtModel.get(workbookId) || new Map<string, ObjectMatrix<INumfmtItem>>();
+            const worksheetModel = worksheetMap.get(worksheetId) || new ObjectMatrix<INumfmtItem>();
+            worksheetMap.set(worksheetId, worksheetModel);
+            this._numfmtModel.set(workbookId, worksheetMap);
+            model = worksheetModel;
         }
         if (value) {
             model.setValue(row, col, value);

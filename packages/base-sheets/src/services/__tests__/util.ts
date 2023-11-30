@@ -1,13 +1,7 @@
-import {
-    ILogService,
-    IUniverInstanceService,
-    IWorkbookData,
-    LocaleType,
-    Plugin,
-    PluginType,
-    Univer,
-} from '@univerjs/core';
-import { Dependency, Inject, Injector } from '@wendellhu/redi';
+import type { IWorkbookData } from '@univerjs/core';
+import { ILogService, IUniverInstanceService, LocaleType, Plugin, PluginType, Univer } from '@univerjs/core';
+import type { Dependency } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 
 export const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
     id: 'test',
@@ -26,10 +20,23 @@ export const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
                 },
             },
         },
+        sheet2: {
+            id: 'sheet2',
+            cellData: {
+                '0': {
+                    '0': {
+                        v: 'A1',
+                    },
+                    '1': {
+                        v: 'A2',
+                    },
+                },
+            },
+        },
     },
     locale: LocaleType.EN_US,
     name: '',
-    sheetOrder: [],
+    sheetOrder: ['sheet1'],
     styles: {},
 };
 

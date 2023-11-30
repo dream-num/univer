@@ -1,19 +1,19 @@
-import { useEffect, useReducer, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export const useNextTick = () => {
     const effectList = useRef<Array<() => void>>([]);
-    const [_, dispatch] = useReducer(() => ({}), {});
+    const [value, dispatch] = useState<Record<string, string>>({});
 
     useEffect(() => {
         effectList.current.forEach((fn) => {
             fn();
         });
         effectList.current = [];
-    });
+    }, [value]);
 
     const nextTick = (fn: () => void) => {
         effectList.current.push(fn);
-        dispatch();
+        dispatch({});
     };
     return nextTick;
 };

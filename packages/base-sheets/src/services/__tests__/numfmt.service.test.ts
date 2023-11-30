@@ -101,4 +101,32 @@ describe('test numfmt service', () => {
         expect(refModel?.getValue('asdws')?.count).toEqual(0);
         expect(refModel?.getValue('1')?.count).toEqual(0);
     });
+
+    it('model delete', () => {
+        const univerInstanceService = get(IUniverInstanceService);
+        const numfmtService = get(INumfmtService);
+        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+        const workbookId = workbook.getUnitId();
+        const sheets = workbook.getSheets();
+        const pattern = 'asdws';
+        const params1: ISetNumfmtMutationParams = {
+            workbookId,
+            worksheetId: sheets[0].getSheetId(),
+            values: [{ row: 1, col: 1, pattern }],
+        };
+        commandService.executeCommand(SetNumfmtMutation.id, params1);
+        const params2: ISetNumfmtMutationParams = {
+            workbookId,
+            worksheetId: sheets[1].getSheetId(),
+            values: [{ row: 1, col: 1, pattern }],
+        };
+        commandService.executeCommand(SetNumfmtMutation.id, params2);
+        const refModel = numfmtService.getRefModel(workbookId);
+        const model1 = numfmtService.getModel(workbookId, sheets[0].getSheetId());
+        const model2 = numfmtService.getModel(workbookId, sheets[1].getSheetId());
+        expect(refModel?.getValue(pattern)?.count).toBe(2);
+        expect(model1?.getValue(1, 1)?.pattern).toBe('1');
+        expect(model2?.getValue(1, 1)?.pattern).toBe('1');
+        expect(refModel?.getValue(model2?.getValue(1, 1)?.pattern!)?.pattern).toBe(pattern);
+    });
 });

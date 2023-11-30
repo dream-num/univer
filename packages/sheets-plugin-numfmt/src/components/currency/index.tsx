@@ -4,9 +4,9 @@ import { LocaleService } from '@univerjs/core';
 import { InputNumber, Select, SelectList } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { FC } from 'react';
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useContext, useMemo, useState } from 'react';
 
-import type { BusinessComponentProps } from '../../base/types';
+import type { IBusinessComponentProps } from '../../base/types';
 import { UserHabitCurrencyContext } from '../../context/user-habit';
 import { getCurrencyType } from '../../utils/currency';
 import { getDecimalFromPattern, isPatternEqualWithoutDecimal, setPatternDecimal } from '../../utils/decimal';
@@ -17,7 +17,7 @@ export const isCurrencyPanel = (pattern: string) => {
     return !!type && !pattern.startsWith('_(');
 };
 
-export const CurrencyPanel: FC<BusinessComponentProps> = (props) => {
+export const CurrencyPanel: FC<IBusinessComponentProps> = (props) => {
     const localeService = useDependency(LocaleService);
     const t = localeService.t;
     const userHabitCurrency = useContext(UserHabitCurrencyContext);
@@ -34,9 +34,7 @@ export const CurrencyPanel: FC<BusinessComponentProps> = (props) => {
     const negativeOptions = useMemo(() => getCurrencyFormatOptions(suffix), [suffix]);
     const options = useMemo(() => userHabitCurrency.map((key) => ({ label: key, value: key })), [userHabitCurrency]);
 
-    useEffect(() => {
-        props.onChange(setPatternDecimal(pattern, decimal));
-    }, []);
+    props.action.current = () => setPatternDecimal(pattern, decimal);
 
     const onSelect = (value: string) => {
         suffixSet(value);

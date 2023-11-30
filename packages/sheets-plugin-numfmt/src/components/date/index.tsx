@@ -3,9 +3,9 @@ import { LocaleService } from '@univerjs/core';
 import { SelectList } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { FC } from 'react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
-import type { BusinessComponentProps } from '../../base/types';
+import type { IBusinessComponentProps } from '../../base/types';
 import { getDateFormatOptions } from '../../utils/options';
 
 export const isDatePanel = (pattern: string) => {
@@ -17,7 +17,7 @@ export const isDatePanel = (pattern: string) => {
     );
 };
 
-export const DatePanel: FC<BusinessComponentProps> = (props) => {
+export const DatePanel: FC<IBusinessComponentProps> = (props) => {
     const options = useMemo(getDateFormatOptions, []);
     const localeService = useDependency(LocaleService);
     const t = localeService.t;
@@ -31,9 +31,7 @@ export const DatePanel: FC<BusinessComponentProps> = (props) => {
         return options[0].value;
     });
 
-    useEffect(() => {
-        props.onChange(suffix);
-    }, []);
+    props.action.current = () => suffix;
 
     const onChange = (v: string) => {
         suffixSet(v);

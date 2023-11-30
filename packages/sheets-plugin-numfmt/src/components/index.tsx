@@ -7,9 +7,10 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { FC } from 'react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-import type { BusinessComponentProps } from '../base/types';
+import type { IBusinessComponentProps } from '../base/types';
 import { UserHabitCurrencyContext } from '../context/user-habit';
 import { useCurrencyOptions } from '../hooks/useCurrencyOptions';
+import { useNextTick } from '../hooks/useNextTick';
 import { getCurrencyType } from '../utils/currency';
 import { AccountingPanel, isAccountingPanel } from './accounting';
 import { CurrencyPanel, isCurrencyPanel } from './currency';
@@ -18,14 +19,15 @@ import { GeneralPanel, isGeneralPanel } from './general';
 import { isThousandthPercentilePanel, ThousandthPercentilePanel } from './thousandth-percentile';
 
 export interface ISheetNumfmtPanelProps {
-    value: { defaultValue: number; defaultPattern: string };
+    value: { defaultValue: number; defaultPattern: string; row: number; col: number };
     onChange: (config: { type: 'change' | 'cancel' | 'confirm'; value: string }) => void;
 }
 export const SheetNumfmtPanel: FC<ISheetNumfmtPanelProps> = (props) => {
-    const { defaultValue, defaultPattern } = props.value;
+    const { defaultValue, defaultPattern, row, col } = props.value;
     const localeService = useDependency(LocaleService);
+    const getCurrentPattern = useRef<() => string | null>(() => '');
     const t = localeService.t;
-
+    const nextTick = useNextTick();
     const pattern = useRef('');
     const typeOptions = useMemo(
         () =>
@@ -39,10 +41,8 @@ export const SheetNumfmtPanel: FC<ISheetNumfmtPanelProps> = (props) => {
         []
     );
     const [type, typeSet] = useState(findDefaultType);
-    const [key, keySet] = useState(() => `${defaultValue}_${defaultPattern}`);
-    const { mark, userHabitCurrency } = useCurrencyOptions(() =>
-        keySet(`${defaultPattern}_${defaultValue}_userCurrency'`)
-    );
+    const [key, keySet] = useState(() => `${row}_${col}`);
+    const { mark, userHabitCurrency } = useCurrencyOptions(() => keySet(`${row}_${col}_userCurrency'`));
 
     const BusinessComponent = useMemo(() => typeOptions.find((item) => item.label === type)?.component, [type]);
 
@@ -61,6 +61,8 @@ export const SheetNumfmtPanel: FC<ISheetNumfmtPanelProps> = (props) => {
 
     const handleSelect: ISelectProps['onChange'] = (value) => {
         typeSet(value);
+        // after the BusinessComponent render.
+        nextTick(() => props.onChange({ type: 'change', value: getCurrentPattern.current() || '' }));
     };
 
     const handleChange = (v: string) => {
@@ -79,16 +81,17 @@ export const SheetNumfmtPanel: FC<ISheetNumfmtPanelProps> = (props) => {
         props.onChange({ type: 'cancel', value: pattern.current });
     };
 
-    const subProps: BusinessComponentProps = {
+    const subProps: IBusinessComponentProps = {
         onChange: handleChange,
         defaultValue,
         defaultPattern,
+        action: getCurrentPattern,
     };
 
     useEffect(() => {
         typeSet(findDefaultType());
-        keySet(`${defaultPattern}_${defaultValue}`);
-    }, [defaultPattern, defaultValue]);
+        keySet(`${row}_${col}`);
+    }, [row, col]);
 
     return (
         <div className="numfmt-panel p-b-20">

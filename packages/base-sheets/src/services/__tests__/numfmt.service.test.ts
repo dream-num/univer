@@ -1,20 +1,27 @@
+import type { ISetNumfmtMutationParams } from '@univerjs/base-sheets';
+import type { Univer } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService } from '@univerjs/core';
-import { Injector } from '@wendellhu/redi';
-import { beforeEach, describe, expect, it } from 'vitest';
+import type { Injector } from '@wendellhu/redi';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { SetNumfmtMutation, SetNumfmtMutationParams } from '../commands/mutations/set.numfmt.mutation';
-import { NumfmtService } from '../service/numfmt.service';
-import { INumfmtService } from '../service/type';
-import { createTestBase } from './createTestBase';
+import { SetNumfmtMutation } from '../../commands/mutations/set-numfmt-mutation';
+import { NumfmtService } from '../numfmt/numfmt.service';
+import { INumfmtService } from '../numfmt/type';
+import { createTestBase } from './util';
 
 describe('test numfmt service', () => {
+    let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
 
     beforeEach(() => {
         const testBed = createTestBase(undefined, [[INumfmtService, { useClass: NumfmtService }]]);
+        univer = testBed.univer;
         get = testBed.get;
         commandService = get(ICommandService);
+    });
+    afterEach(() => {
+        univer.dispose();
     });
 
     it('model set', () => {
@@ -24,7 +31,7 @@ describe('test numfmt service', () => {
         const sheet = workbook.getActiveSheet();
         const workbookId = workbook.getUnitId();
         const worksheetId = sheet.getSheetId();
-        const params: SetNumfmtMutationParams = {
+        const params: ISetNumfmtMutationParams = {
             workbookId,
             worksheetId,
             values: [{ row: 1, col: 1, pattern: 'asdws' }],
@@ -43,7 +50,7 @@ describe('test numfmt service', () => {
         const sheet = workbook.getActiveSheet();
         const workbookId = workbook.getUnitId();
         const worksheetId = sheet.getSheetId();
-        const params: SetNumfmtMutationParams = {
+        const params: ISetNumfmtMutationParams = {
             workbookId,
             worksheetId,
             values: [{ row: 1, col: 1, pattern: 'asdws' }],
@@ -63,7 +70,7 @@ describe('test numfmt service', () => {
         const sheet = workbook.getActiveSheet();
         const workbookId = workbook.getUnitId();
         const worksheetId = sheet.getSheetId();
-        const params: SetNumfmtMutationParams = {
+        const params: ISetNumfmtMutationParams = {
             workbookId,
             worksheetId,
             values: [{ row: 1, col: 1, pattern: 'asdws' }],
@@ -83,7 +90,7 @@ describe('test numfmt service', () => {
         const sheet = workbook.getActiveSheet();
         const workbookId = workbook.getUnitId();
         const worksheetId = sheet.getSheetId();
-        const params: SetNumfmtMutationParams = {
+        const params: ISetNumfmtMutationParams = {
             workbookId,
             worksheetId,
             values: [{ row: 1, col: 1, pattern: 'asdws' }],

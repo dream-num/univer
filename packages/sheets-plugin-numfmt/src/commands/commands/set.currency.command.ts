@@ -1,9 +1,11 @@
 import { SelectionManagerService } from '@univerjs/base-sheets';
-import { CommandType, ICommand, ICommandService, Range } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { ICommand } from '@univerjs/core';
+import { CommandType, ICommandService, Range } from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
 
 import { CURRENCYFORMAT } from '../../base/const/FORMATDETAIL';
-import { SetNumfmtCommand, SetNumfmtCommandParams } from './set.numfmt.command';
+import type { ISetNumfmtCommandParams } from './set.numfmt.command';
+import { SetNumfmtCommand } from './set.numfmt.command';
 
 export const SetCurrencyCommand: ICommand = {
     id: 'sheet.command.numfmt.set.currency',
@@ -16,7 +18,7 @@ export const SetCurrencyCommand: ICommand = {
         if (!selections || !selections.length) {
             return false;
         }
-        const values: SetNumfmtCommandParams['values'] = [];
+        const values: ISetNumfmtCommandParams['values'] = [];
 
         const suffix = CURRENCYFORMAT[0].suffix('¥');
 

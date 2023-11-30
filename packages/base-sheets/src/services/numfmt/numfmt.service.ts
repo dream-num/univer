@@ -13,24 +13,20 @@ import {
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
-import { SHEET_NUMFMT_PLUGIN } from '../base/const/PLUGIN_NAME';
-import type { FormatType, NumfmtItem } from '../base/types';
-import { SetNumfmtMutation } from '../commands/mutations/set.numfmt.mutation';
-import type { INumfmtService, ISnapshot, RefItem } from './type';
+import { SetNumfmtMutation } from '../../commands/mutations/set-numfmt-mutation';
+import type { FormatType, INumfmtItem, INumfmtService, IRefItem, ISnapshot } from './type';
 
+const SHEET_NUMFMT_PLUGIN = 'SHEET_NUMFMT_PLUGIN';
 @OnLifecycle(LifecycleStages.Ready, NumfmtService)
 export class NumfmtService extends Disposable implements INumfmtService {
     /**
-     * @type {Map<WorkbookId, Map<worksheetId, ObjectMatrix<NumfmtItemWithCache>>>}
-     */
-    private _numfmtModel: Map<string, Map<string, ObjectMatrix<NumfmtItem>>> = new Map();
-
-    /**
-     * @private
-     * @type {(Map<workbookId, RefAlias<RefItem, 'numfmtId' | 'pattern'>>)}
+     * Map<unitID ,<sheetId ,ObjectMatrix>>
+     * @type {Map<string, Map<string, ObjectMatrix<INumfmtItemWithCache>>>}
      * @memberof NumfmtService
      */
-    private _refAliasModel: Map<string, RefAlias<RefItem, 'numfmtId' | 'pattern'>> = new Map();
+    private _numfmtModel: Map<string, Map<string, ObjectMatrix<INumfmtItem>>> = new Map();
+
+    private _refAliasModel: Map<string, RefAlias<IRefItem, 'numfmtId' | 'pattern'>> = new Map();
 
     constructor(
         @Inject(ICommandService) private _commandService: ICommandService,
@@ -60,15 +56,15 @@ export class NumfmtService extends Disposable implements INumfmtService {
 
                     if (model) {
                         const parseModel = Object.keys(model).reduce((result, sheetId) => {
-                            result.set(sheetId, new ObjectMatrix<NumfmtItem>(model[sheetId]));
+                            result.set(sheetId, new ObjectMatrix<INumfmtItem>(model[sheetId]));
                             return result;
-                        }, new Map<string, ObjectMatrix<NumfmtItem>>());
+                        }, new Map<string, ObjectMatrix<INumfmtItem>>());
                         this._numfmtModel.set(unitID, parseModel);
                     }
                     if (refModel) {
                         this._refAliasModel.set(
                             unitID,
-                            new RefAlias<RefItem, 'numfmtId' | 'pattern'>(refModel, ['numfmtId', 'pattern'])
+                            new RefAlias<IRefItem, 'numfmtId' | 'pattern'>(refModel, ['numfmtId', 'pattern'])
                         );
                     }
                 },
@@ -106,7 +102,7 @@ export class NumfmtService extends Disposable implements INumfmtService {
                 result[key] = object.toJSON();
                 return result;
             },
-            {} as Record<string, ObjectMatrixPrimitiveType<NumfmtItem>>
+            {} as Record<string, ObjectMatrixPrimitiveType<INumfmtItem>>
         );
         // Filter the count equal 0 when snapshot save.
         // It is typically cleaned up once every 100 versions.
@@ -129,7 +125,7 @@ export class NumfmtService extends Disposable implements INumfmtService {
         [SetNumfmtMutation].forEach((config) => this.disposeWithMe(this._commandService.registerCommand(config)));
     }
 
-    private _setValue(workbookId: string, worksheetId: string, row: number, col: number, value: Nullable<NumfmtItem>) {
+    private _setValue(workbookId: string, worksheetId: string, row: number, col: number, value: Nullable<INumfmtItem>) {
         let model = this.getModel(workbookId, worksheetId);
         if (!model) {
             model = new ObjectMatrix();
@@ -172,8 +168,8 @@ export class NumfmtService extends Disposable implements INumfmtService {
         return `${maxId + 1}`;
     }
 
-    getValue(workbookId: string, worksheetId: string, row: number, col: number, model?: ObjectMatrix<NumfmtItem>) {
-        const _model: Nullable<ObjectMatrix<NumfmtItem>> = model || this.getModel(workbookId, worksheetId);
+    getValue(workbookId: string, worksheetId: string, row: number, col: number, model?: ObjectMatrix<INumfmtItem>) {
+        const _model: Nullable<ObjectMatrix<INumfmtItem>> = model || this.getModel(workbookId, worksheetId);
         if (!_model) {
             return null;
         }
@@ -203,7 +199,7 @@ export class NumfmtService extends Disposable implements INumfmtService {
         const model = this.getModel(workbookId, worksheetId);
         let refModel = this._refAliasModel.get(workbookId)!;
         if (!refModel) {
-            refModel = new RefAlias<RefItem, 'numfmtId' | 'pattern'>([], ['pattern', 'numfmtId']);
+            refModel = new RefAlias<IRefItem, 'numfmtId' | 'pattern'>([], ['pattern', 'numfmtId']);
             this._refAliasModel.set(workbookId, refModel);
         }
         Object.keys(group).forEach((pattern: string) => {

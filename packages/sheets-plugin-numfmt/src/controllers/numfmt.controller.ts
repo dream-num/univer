@@ -1,10 +1,11 @@
 import numfmt from '@univerjs/base-numfmt-engine';
 import { IRenderManagerService } from '@univerjs/base-render';
-import type { EffectRefRangeParams } from '@univerjs/base-sheets';
+import type { EffectRefRangeParams, INumfmtItemWithCache, ISetNumfmtMutationParams } from '@univerjs/base-sheets';
 import {
     ClearSelectionAllCommand,
     ClearSelectionFormatCommand,
     EffectRefRangId,
+    factorySetNumfmtUndoMutation,
     handleDeleteRangeMoveLeft,
     handleDeleteRangeMoveUp,
     handleInsertCol,
@@ -14,9 +15,11 @@ import {
     handleIRemoveCol,
     handleIRemoveRow,
     handleMoveRange,
+    INumfmtService,
     RefRangeService,
     runRefRangeMutations,
     SelectionManagerService,
+    SetNumfmtMutation,
     SetRangeValuesCommand,
 } from '@univerjs/base-sheets';
 import { ComponentManager, IMenuService, ISidebarService } from '@univerjs/base-ui';
@@ -47,19 +50,15 @@ import { bufferTime, distinctUntilChanged, filter, map, switchMap, tap } from 'r
 import { SHEET_NUMFMT_PLUGIN } from '../base/const/PLUGIN_NAME';
 import { AddDecimalCommand } from '../commands/commands/add.decimal.command';
 import { SetCurrencyCommand } from '../commands/commands/set.currency.command';
-import type { SetNumfmtCommandParams } from '../commands/commands/set.numfmt.command';
+import type { ISetNumfmtCommandParams } from '../commands/commands/set.numfmt.command';
 import { SetNumfmtCommand } from '../commands/commands/set.numfmt.command';
 import { SubtractDecimalCommand } from '../commands/commands/subtract.decimal.command';
-import type { SetNumfmtMutationParams } from '../commands/mutations/set.numfmt.mutation';
-import { factorySetNumfmtUndoMutation, SetNumfmtMutation } from '../commands/mutations/set.numfmt.mutation';
 import { CloseNumfmtPanelOperator } from '../commands/operators/close.numfmt.panel.operator';
 import { OpenNumfmtPanelOperator } from '../commands/operators/open.numfmt.panel.operator';
 import type { ISheetNumfmtPanelProps } from '../components/index';
 import { SheetNumfmtPanel } from '../components/index';
 import { zhCn } from '../locale/zh-CN';
 import { AddDecimalMenuItem, CurrencyMenuItem, FactoryOtherMenuItem, SubtractDecimalMenuItem } from '../menu/menu';
-import type { NumfmtItemWithCache } from '../service/type';
-import { INumfmtService } from '../service/type';
 import { getPatternPreview, getPatternType } from '../utils/pattern';
 import type { INumfmtController } from './type';
 
@@ -69,7 +68,7 @@ const createCollectEffectMutation = () => {
         worksheetId: string;
         row: number;
         col: number;
-        value: Nullable<NumfmtItemWithCache>;
+        value: Nullable<INumfmtItemWithCache>;
     }
     let list: IConfig[] = [];
     const add = (
@@ -77,7 +76,7 @@ const createCollectEffectMutation = () => {
         worksheetId: string,
         row: number,
         col: number,
-        value: Nullable<NumfmtItemWithCache>
+        value: Nullable<INumfmtItemWithCache>
     ) => list.push({ workbookId, worksheetId, row, col, value });
     const getEffects = () => list;
     const clean = () => {
@@ -92,7 +91,14 @@ const createCollectEffectMutation = () => {
 export class NumfmtController extends Disposable implements INumfmtController {
     // collect effect mutations when edit end and push this to  commands stack in next commands progress
     private _collectEffectMutation = createCollectEffectMutation();
-    private _previewPattern = '';
+
+    /**
+     * If _previewPattern is null ,the realTimeRenderingInterceptor will skip and if it is '',realTimeRenderingInterceptor will clear numfmt.
+     * @private
+     * @type {(string | null)}
+     * @memberof NumfmtController
+     */
+    private _previewPattern: string | null = '';
     constructor(
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @Inject(ThemeService) private _themeService: ThemeService,
@@ -164,7 +170,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
                     this._renderManagerService.getRenderById(workbook.getUnitId())?.mainComponent?.makeDirty();
                 } else if (config.type === 'confirm') {
                     const selections = selectionManagerService.getSelectionRanges() || [];
-                    const params: SetNumfmtCommandParams = { values: [] };
+                    const params: ISetNumfmtCommandParams = { values: [] };
                     const patternType = getPatternType(config.value);
                     selections.forEach((rangeInfo) => {
                         Range.foreach(rangeInfo, (row, col) => {
@@ -182,7 +188,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
                     sidebarService.close();
                 }
             },
-            value: { defaultPattern: pattern, defaultValue },
+            value: { defaultPattern: pattern, defaultValue, row: range.startRow, col: range.startColumn },
         };
 
         sidebarService.open({
@@ -223,7 +229,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
                 endRow: targetStartCell.row,
             };
 
-            const values: SetNumfmtMutationParams['values'] = [];
+            const values: ISetNumfmtMutationParams['values'] = [];
 
             Range.foreach(relativeRange, (row, col) => {
                 const sourcePositionRange = Rectangle.getPositionRange(
@@ -260,7 +266,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
                 }
             });
             if (values.length) {
-                const redo: IMutationInfo<SetNumfmtMutationParams> = {
+                const redo: IMutationInfo<ISetNumfmtMutationParams> = {
                     id: SetNumfmtMutation.id,
                     params: {
                         values,
@@ -360,7 +366,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
                                     undos: [],
                                 };
                             }
-                            const redos: SetNumfmtMutationParams = {
+                            const redos: ISetNumfmtMutationParams = {
                                 workbookId,
                                 worksheetId,
                                 values: list.map((item) => ({
@@ -387,7 +393,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
                             if (!selections?.length) {
                                 break;
                             }
-                            const redos: SetNumfmtMutationParams = {
+                            const redos: ISetNumfmtMutationParams = {
                                 workbookId,
                                 worksheetId,
                                 values: [],
@@ -472,7 +478,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((commandInfo) => {
                 if (commandInfo.id === SetNumfmtMutation.id) {
-                    const params = commandInfo.params as SetNumfmtMutationParams;
+                    const params = commandInfo.params as ISetNumfmtMutationParams;
                     params.values
                         .map((value) => ({ row: value.row, col: value.col }))
                         .forEach(({ row, col }) => {
@@ -536,24 +542,8 @@ export class NumfmtController extends Disposable implements INumfmtController {
                                     };
                                 })
                         ),
-                        // _previewPattern will be correct by react effect,this is late and causes the render to flash.
-                        // this to fix this problem by preset the correct rendering pattern in advance.
-                        tap(({ selectionRanges }) => {
-                            const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
-                            const range = selectionRanges[0];
-                            const row = range.startRow;
-                            const col = range.startColumn;
-                            const numfmtValue = this._numfmtService.getValue(
-                                workbook.getUnitId(),
-                                workbook.getActiveSheet().getSheetId(),
-                                row,
-                                col
-                            );
-                            if (numfmtValue) {
-                                this._previewPattern = numfmtValue.pattern;
-                            } else {
-                                this._previewPattern = '';
-                            }
+                        tap(() => {
+                            this._previewPattern = null;
                         })
                     )
                     .subscribe(({ disposableCollection, selectionRanges }) => {
@@ -576,8 +566,13 @@ export class NumfmtController extends Disposable implements INumfmtController {
                                         const rawValue = location.worksheet.getCellRaw(row, col);
                                         const value = rawValue?.v;
                                         const type = rawValue?.t;
-                                        if (value === undefined || value === null || type !== CellValueType.NUMBER) {
-                                            return next();
+                                        if (
+                                            value === undefined ||
+                                            value === null ||
+                                            type !== CellValueType.NUMBER ||
+                                            this._previewPattern === null
+                                        ) {
+                                            return next(cell);
                                         }
                                         const info = getPatternPreview(this._previewPattern, value as number);
                                         if (info.color) {
@@ -795,7 +790,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
                             const result = runRefRangeMutations(operators, targetRange);
                             if (!result) {
                                 // 删除
-                                const redoParams: SetNumfmtMutationParams = {
+                                const redoParams: ISetNumfmtMutationParams = {
                                     workbookId,
                                     worksheetId,
                                     values: [{ row, col }],
@@ -819,7 +814,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
                             const numfmtValue = this._numfmtService.getValue(workbookId, worksheetId, row, col);
 
                             if (numfmtValue) {
-                                const redoParams: SetNumfmtMutationParams = {
+                                const redoParams: ISetNumfmtMutationParams = {
                                     workbookId,
                                     worksheetId,
                                     values: [
@@ -864,11 +859,11 @@ export class NumfmtController extends Disposable implements INumfmtController {
                         // on change
                         disposableCollection.add(
                             toDisposable(
-                                new Observable<SetNumfmtMutationParams>((subscribe) => {
+                                new Observable<ISetNumfmtMutationParams>((subscribe) => {
                                     disposableCollection.add(
                                         this._commandService.onCommandExecuted((commandInfo) => {
                                             if (commandInfo.id === SetNumfmtMutation.id) {
-                                                subscribe.next(commandInfo.params as SetNumfmtMutationParams);
+                                                subscribe.next(commandInfo.params as ISetNumfmtMutationParams);
                                             }
                                         })
                                     );

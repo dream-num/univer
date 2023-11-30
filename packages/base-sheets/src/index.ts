@@ -179,6 +179,8 @@ export {
     SetFrozenMutation,
     SetFrozenMutationFactory,
 } from './commands/mutations/set-frozen.mutation';
+export type { ISetNumfmtMutationParams } from './commands/mutations/set-numfmt-mutation';
+export { factorySetNumfmtUndoMutation, SetNumfmtMutation } from './commands/mutations/set-numfmt-mutation';
 export type { ISetRangeValuesMutationParams } from './commands/mutations/set-range-values.mutation';
 export { SetRangeValuesMutation } from './commands/mutations/set-range-values.mutation';
 export { SetRangeValuesUndoMutationFactory } from './commands/mutations/set-range-values.mutation';
@@ -212,6 +214,8 @@ export {
 } from './commands/mutations/set-worksheet-row-height.mutation';
 export { type ISetSelectionsOperationParams, SetSelectionsOperation } from './commands/operations/selection.operation';
 export { type ISheetCommandSharedParams } from './commands/utils/interface';
+export type { FormatType, INumfmtItem, INumfmtItemWithCache } from './services/numfmt/type';
+export { INumfmtService } from './services/numfmt/type';
 export { RefRangeService } from './services/ref-range/ref-range.service';
 export type { EffectRefRangeParams } from './services/ref-range/type';
 export { EffectRefRangId, OperatorType } from './services/ref-range/type';

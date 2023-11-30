@@ -1,14 +1,14 @@
-import { CommandType, ICommand, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { FormatType } from '@univerjs/base-sheets';
+import { factorySetNumfmtUndoMutation, SetNumfmtMutation } from '@univerjs/base-sheets';
+import type { ICommand } from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
 
-import { FormatType } from '../../base/types';
-import { factorySetNumfmtUndoMutation, SetNumfmtMutation } from '../mutations/set.numfmt.mutation';
-
-export type SetNumfmtCommandParams = {
+export interface ISetNumfmtCommandParams {
     values: Array<{ pattern?: string; row: number; col: number; type?: FormatType }>;
-};
+}
 
-export const SetNumfmtCommand: ICommand<SetNumfmtCommandParams> = {
+export const SetNumfmtCommand: ICommand<ISetNumfmtCommandParams> = {
     id: 'sheet.command.numfmt.set.numfmt',
     type: CommandType.COMMAND,
     handler: (accessor: IAccessor, params) => {

@@ -58,7 +58,6 @@ import {
     LifecycleStages,
     Nullable,
     ObjectMatrix,
-    ObjectMatrixPrimitiveType,
     OnLifecycle,
     RANGE_TYPE,
     Rectangle,
@@ -68,7 +67,9 @@ import {
 } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
+import { SetFormulaDataMutation } from '../commands/mutations/set-formula-data.mutation';
 import { FormulaDataModel } from '../models/formula-data.model';
+import { offsetFormula } from './utils';
 
 interface IUnitRangeWithOffset extends IUnitRange {
     refOffsetX: number;
@@ -105,11 +106,6 @@ enum OriginRangeEdgeType {
     ALL,
 }
 
-function getRangeFromMatrixObject(matrixObject: ObjectMatrixPrimitiveType<ICellData | null>) {
-    const matrix = new ObjectMatrix(matrixObject);
-    return matrix.getDataRange();
-}
-
 @OnLifecycle(LifecycleStages.Starting, UpdateFormulaController)
 export class UpdateFormulaController extends Disposable {
     constructor(
@@ -133,6 +129,18 @@ export class UpdateFormulaController extends Disposable {
         this.disposeWithMe(
             this._sheetInterceptorService.interceptCommand({
                 getMutations: (command) => this._getUpdateFormula(command),
+            })
+        );
+
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                // Synchronous data from worker
+                if (command.id !== SetFormulaDataMutation.id) {
+                    return;
+                }
+
+                const formulaData = command.params as IFormulaData;
+                this._formulaDataModel.setFormulaData(formulaData);
             })
         );
     }
@@ -180,8 +188,15 @@ export class UpdateFormulaController extends Disposable {
         if (result) {
             const { unitSheetNameMap } = this._formulaDataModel.getCalculateData();
             const oldFormulaData = Tools.deepClone(this._formulaDataModel.getFormulaData());
-            const formulaData = this.getFormulaReferenceMoveInfo(oldFormulaData, unitSheetNameMap, result);
-            return this._getUpdateFormulaMutations(oldFormulaData, formulaData);
+            const formulaData = this._getFormulaReferenceMoveInfo(oldFormulaData, unitSheetNameMap, result);
+
+            const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+            const unitId = workbook.getUnitId();
+            const sheetId = workbook.getActiveSheet().getSheetId();
+            const offsetFormulaData = offsetFormula(formulaData, command, unitId, sheetId);
+            console.info('offsetFormulaData', offsetFormulaData);
+
+            return this._getUpdateFormulaMutations(oldFormulaData, offsetFormulaData);
         }
 
         return {
@@ -459,7 +474,7 @@ export class UpdateFormulaController extends Disposable {
         };
     }
 
-    getFormulaReferenceMoveInfo(
+    private _getFormulaReferenceMoveInfo(
         formulaData: IFormulaData,
         unitSheetNameMap: IUnitSheetNameMap,
         formulaReferenceMoveParam: IFormulaReferenceMoveParam

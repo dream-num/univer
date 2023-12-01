@@ -21,6 +21,8 @@ export class FormulaPlugin extends Plugin {
 
     initialize(): void {
         this._formulaDataModel = this._injector.createInstance(FormulaDataModel);
+
+        // main thread and worker
         const dependencies: Dependency[] = [
             // models
             [FormulaDataModel, { useValue: this._formulaDataModel }],
@@ -29,6 +31,7 @@ export class FormulaPlugin extends Plugin {
             [UpdateFormulaController],
         ];
 
+        // only worker
         if (!this._config?.notExecuteFormula) {
             dependencies.push([CalculateController]);
         }

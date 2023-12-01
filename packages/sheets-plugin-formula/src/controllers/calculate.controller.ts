@@ -32,6 +32,7 @@ import {
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
+import { SetFormulaDataMutation } from '../commands/mutations/set-formula-data.mutation';
 import { FormulaDataModel } from '../models/formula-data.model';
 
 @OnLifecycle(LifecycleStages.Starting, CalculateController)
@@ -75,7 +76,6 @@ export class CalculateController extends Disposable {
         ];
 
         this.disposeWithMe(
-            // TODO@Dushusir: use SheetInterceptorService?
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (!updateCommandList.includes(command.id)) {
                     return;
@@ -147,6 +147,9 @@ export class CalculateController extends Disposable {
         this._previousDirtyRanges = dirtyRanges;
 
         const formulaData = this._formulaDataModel.getFormulaData();
+
+        // Synchronous to the main thread
+        this._commandService.executeCommand(SetFormulaDataMutation.id, formulaData);
 
         return this._formulaEngineService.execute({
             formulaData,

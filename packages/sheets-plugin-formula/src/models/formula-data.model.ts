@@ -9,6 +9,7 @@ import {
 import {
     Disposable,
     ICellData,
+    ICommandService,
     isFormulaId,
     isFormulaString,
     IUniverInstanceService,
@@ -27,7 +28,10 @@ export class FormulaDataModel extends Disposable {
 
     private _arrayFormulaData: UnitArrayFormulaDataType = {};
 
-    constructor(@IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService) {
+    constructor(
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @ICommandService private readonly _commandService: ICommandService
+    ) {
         super();
     }
 

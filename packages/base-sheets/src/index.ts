@@ -155,7 +155,9 @@ export {
     AddWorksheetMergeMutation,
 } from './commands/mutations/add-worksheet-merge.mutation';
 export { DeleteRangeMutation } from './commands/mutations/delete-range.mutation';
+export { handleDeleteRangeMutation } from './commands/mutations/delete-range.mutation';
 export { InsertRangeMutation } from './commands/mutations/insert-range.mutation';
+export { handleInsertRangeMutation } from './commands/mutations/insert-range.mutation';
 export {
     InsertColMutation,
     InsertColMutationUndoFactory,

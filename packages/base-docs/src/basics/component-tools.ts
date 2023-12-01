@@ -1,5 +1,5 @@
-import { Documents, Engine, IRenderManagerService, Scene } from '@univerjs/base-render';
-import { IUniverInstanceService, Nullable } from '@univerjs/core';
+import type { Documents, Engine, IRenderManagerService, Scene } from '@univerjs/base-render';
+import type { IUniverInstanceService, Nullable } from '@univerjs/core';
 
 export interface IDocObjectParam {
     document: Documents;

@@ -681,6 +681,7 @@ export abstract class BaseObject {
                 props[key] = this[key as keyof BaseObject];
             }
         });
+
         return props;
     }
 

@@ -1,7 +1,7 @@
 import { ITextSelectionRenderManager, TextSelectionRenderManager } from '@univerjs/base-render';
 import { IShortcutService } from '@univerjs/base-ui';
+import type { ICommand } from '@univerjs/core';
 import {
-    ICommand,
     ICommandService,
     IConfigService,
     IUniverInstanceService,
@@ -10,7 +10,8 @@ import {
     PLUGIN_NAMES,
     PluginType,
 } from '@univerjs/core';
-import { Dependency, Inject, Injector } from '@wendellhu/redi';
+import type { Dependency } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 
 import {
     BreakLineCommand,

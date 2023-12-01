@@ -125,7 +125,12 @@ export interface ITextSelectionRenderManager {
 
     deactivate(): void;
 
-    changeRuntime(docSkeleton: DocumentSkeleton, scene: Scene): void;
+    changeRuntime(
+        docSkeleton: DocumentSkeleton,
+        scene: Scene,
+        viewport?: Nullable<Viewport>,
+        documentOffsetConfig?: IDocumentOffsetConfig
+    ): void;
 
     dispose(): void;
 
@@ -392,6 +397,11 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
     ) {
         // this._docSkeleton?.onRecalculateChangeObservable.remove(this._skeletonObserver);
 
+        // Need to empty text ranges when change doc.
+        if (docSkeleton !== this._docSkeleton) {
+            this.removeAllTextRanges();
+        }
+
         this._docSkeleton = docSkeleton;
 
         this._scene = scene;
@@ -543,8 +553,6 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         const startNode = this._findNodeByCoord(evtOffsetX, evtOffsetY);
 
         const position = this._getNodePosition(startNode);
-
-        console.log(this._docSkeleton);
 
         console.log('startNode', startNode, position, evtOffsetX, evtOffsetY);
 

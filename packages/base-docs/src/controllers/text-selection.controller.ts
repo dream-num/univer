@@ -1,4 +1,4 @@
-import type { IMouseEvent, IPointerEvent } from '@univerjs/base-render';
+import type { Documents, IMouseEvent, IPointerEvent } from '@univerjs/base-render';
 import { CURSOR_TYPE, IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/base-render';
 import type { ICommandInfo, Nullable, Observer } from '@univerjs/core';
 import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
@@ -207,9 +207,15 @@ export class TextSelectionController extends Disposable {
                 return;
             }
 
-            const { scene } = currentRender;
+            const { scene, mainComponent } = currentRender;
+            const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
 
-            this._textSelectionRenderManager.changeRuntime(skeleton, scene);
+            this._textSelectionRenderManager.changeRuntime(
+                skeleton,
+                scene,
+                viewportMain,
+                (mainComponent as Documents).getOffsetConfig()
+            );
 
             this._textSelectionManagerService.setCurrentSelectionNotRefresh({
                 pluginName: NORMAL_TEXT_SELECTION_PLUGIN_NAME,

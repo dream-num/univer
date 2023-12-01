@@ -49,6 +49,7 @@ export class InitializeEditorController extends Disposable {
             id: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
             body: {
                 dataStream: `${DEFAULT_EMPTY_DOCUMENT_VALUE}`,
+                textRuns: [],
                 paragraphs: [
                     {
                         startIndex: 0,

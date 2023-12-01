@@ -1,12 +1,6 @@
-import {
-    DataStreamTreeNodeType,
-    DataStreamTreeTokenType,
-    DocumentDataModel,
-    IDocumentBody,
-    ITextRun,
-    Nullable,
-} from '@univerjs/core';
-import { IDisposable } from '@wendellhu/redi';
+import type { IDocumentBody, ITextRun, Nullable } from '@univerjs/core';
+import { DataStreamTreeNodeType, DataStreamTreeTokenType, DocumentDataModel } from '@univerjs/core';
+import type { IDisposable } from '@wendellhu/redi';
 
 import { DataStreamTreeNode } from './data-stream-tree-node';
 

@@ -1,12 +1,12 @@
-import {
+import type {
     IDocumentSkeletonColumn,
     IDocumentSkeletonDivide,
     IDocumentSkeletonLine,
     IDocumentSkeletonPage,
     IDocumentSkeletonSection,
     IDocumentSkeletonSpan,
-    PageLayoutType,
 } from '../../../basics/i-document-skeleton-cached';
+import { PageLayoutType } from '../../../basics/i-document-skeleton-cached';
 
 export class Liquid {
     private _translateX: number = 0;

@@ -1,29 +1,28 @@
-import { DataStreamTreeTokenType, Nullable, Observer, RxDisposable } from '@univerjs/core';
+import type { Nullable, Observer } from '@univerjs/core';
+import { DataStreamTreeTokenType, RxDisposable } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
-import { BehaviorSubject, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 import { CURSOR_TYPE } from '../../basics/const';
-import { IDocumentSkeletonSpan, PageLayoutType } from '../../basics/i-document-skeleton-cached';
-import { IMouseEvent, IPointerEvent } from '../../basics/i-events';
-import { INodeInfo, INodePosition } from '../../basics/interfaces';
+import type { IDocumentSkeletonSpan } from '../../basics/i-document-skeleton-cached';
+import { PageLayoutType } from '../../basics/i-document-skeleton-cached';
+import type { IMouseEvent, IPointerEvent } from '../../basics/i-events';
+import type { INodeInfo, INodePosition } from '../../basics/interfaces';
 import { getOffsetRectForDom, transformBoundingCoord } from '../../basics/position';
-import {
-    ITextRangeWithStyle,
-    ITextSelectionStyle,
-    NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
-    RANGE_DIRECTION,
-} from '../../basics/range';
+import type { ITextRangeWithStyle, ITextSelectionStyle, RANGE_DIRECTION } from '../../basics/range';
+import { NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '../../basics/range';
 import { getCurrentScrollXY } from '../../basics/scroll-xy';
 import { checkStyle, injectStyle } from '../../basics/tools';
 import { Transform } from '../../basics/transform';
 import { Vector2 } from '../../basics/vector2';
-import { Engine } from '../../engine';
-import { Scene } from '../../scene';
+import type { Engine } from '../../engine';
+import type { Scene } from '../../scene';
 import { ScrollTimer } from '../../scroll-timer';
-import { IScrollObserverParam, Viewport } from '../../viewport';
+import type { IScrollObserverParam, Viewport } from '../../viewport';
 import { cursorConvertToTextRange, TextRange } from './common/range';
-import { DocumentSkeleton } from './doc-skeleton';
-import { IDocumentOffsetConfig } from './document';
+import type { DocumentSkeleton } from './doc-skeleton';
+import type { IDocumentOffsetConfig } from './document';
 
 export function getCanvasOffsetByEngine(engine: Nullable<Engine>) {
     const canvas = engine?.getCanvasElement();

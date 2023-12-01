@@ -25,6 +25,7 @@ import { Inject } from '@wendellhu/redi';
 import { type Subscription } from 'rxjs';
 
 import { getEditorObject } from '../../basics/editor/get-editor-object';
+import { SetEditorResizeOperation } from '../../commands/operations/set-editor-resize.operation';
 import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 
@@ -165,8 +166,7 @@ export class FormulaEditorController extends Disposable {
     }
 
     private _commandExecutedListener() {
-        // sync cell content to formula editor bar when edit cell editor.
-        const updateCommandList = [RichTextEditingMutation.id];
+        const updateCommandList = [RichTextEditingMutation.id, SetEditorResizeOperation.id];
 
         const INCLUDE_LIST = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];
 
@@ -177,6 +177,7 @@ export class FormulaEditorController extends Disposable {
                     const { unitId } = params;
 
                     if (INCLUDE_LIST.includes(unitId)) {
+                        // sync cell content to formula editor bar when edit cell editor and vice verse.
                         const editorDocDataModel = this._univerInstanceService.getUniverDocInstance(unitId);
                         const dataStream = editorDocDataModel?.getBody()?.dataStream;
                         const paragraphs = editorDocDataModel?.getBody()?.paragraphs;
@@ -193,9 +194,13 @@ export class FormulaEditorController extends Disposable {
                         }
 
                         this._syncContentAndRender(syncId, dataStream, paragraphs);
+
+                        // handle weather need to show scroll bar.
+                        this._autoScroll();
                     }
                 }
 
+                // Mark formula editor as non-focused, when current selection is not in formula editor.
                 if (command.id === SetTextSelectionsOperation.id) {
                     const { unitId } = command.params as ISetTextSelectionsOperationParams;
                     if (unitId !== DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
@@ -236,6 +241,8 @@ export class FormulaEditorController extends Disposable {
             currentRender.mainComponent?.makeDirty();
         }
     }
+
+    private _autoScroll() {}
 
     private _getDocObject() {
         return getDocObject(this._univerInstanceService, this._renderManagerService);

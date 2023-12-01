@@ -1,8 +1,8 @@
 import { sortRules } from '@univerjs/core';
 
 import { BaseObject } from '../base-object';
-import { IBoundRect } from '../basics/vector2';
-import { ComponentExtension } from './extension';
+import type { IBoundRect } from '../basics/vector2';
+import type { ComponentExtension } from './extension';
 
 export class RenderComponent<T, U> extends BaseObject {
     private _extensions = new Map<string, ComponentExtension<T, U>>();

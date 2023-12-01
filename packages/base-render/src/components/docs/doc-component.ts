@@ -1,14 +1,15 @@
-import { Nullable } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
 
 import { RENDER_CLASS_TYPE } from '../../basics/const';
-import { IDocumentSkeletonLine, IDocumentSkeletonSpan, PageLayoutType } from '../../basics/i-document-skeleton-cached';
-import { INodeInfo, ITransformChangeState } from '../../basics/interfaces';
-import { IBoundRect } from '../../basics/vector2';
+import type { IDocumentSkeletonLine, IDocumentSkeletonSpan } from '../../basics/i-document-skeleton-cached';
+import { PageLayoutType } from '../../basics/i-document-skeleton-cached';
+import type { INodeInfo, ITransformChangeState } from '../../basics/interfaces';
+import type { IBoundRect } from '../../basics/vector2';
 import { Canvas } from '../../canvas';
-import { Scene } from '../../scene';
+import type { Scene } from '../../scene';
 import { RenderComponent } from '../component';
-import { DOCS_EXTENSION_TYPE } from './doc-extension';
-import { DocumentSkeleton } from './doc-skeleton';
+import type { DOCS_EXTENSION_TYPE } from './doc-extension';
+import type { DocumentSkeleton } from './doc-skeleton';
 
 export class DocComponent extends RenderComponent<IDocumentSkeletonSpan | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE> {
     pageMarginLeft: number = 0;

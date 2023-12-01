@@ -1,6 +1,7 @@
-import { getColorStyle, IScale } from '@univerjs/core';
+import type { IScale } from '@univerjs/core';
+import { getColorStyle } from '@univerjs/core';
 
-import { IDocumentSkeletonSpan } from '../../../basics/i-document-skeleton-cached';
+import type { IDocumentSkeletonSpan } from '../../../basics/i-document-skeleton-cached';
 import { Vector2 } from '../../../basics/vector2';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
 import { docExtension } from '../doc-extension';

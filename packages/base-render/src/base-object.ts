@@ -1,11 +1,14 @@
-import { EventState, IKeyValue, Nullable, Observable, Observer } from '@univerjs/core';
+import type { EventState, IKeyValue, Nullable, Observer } from '@univerjs/core';
+import { Observable } from '@univerjs/core';
 
-import { CURSOR_TYPE, EVENT_TYPE, RENDER_CLASS_TYPE } from './basics/const';
-import { IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
-import { IObjectFullState, ITransformChangeState, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './basics/interfaces';
+import type { EVENT_TYPE } from './basics/const';
+import { CURSOR_TYPE, RENDER_CLASS_TYPE } from './basics/const';
+import type { IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
+import type { IObjectFullState, ITransformChangeState } from './basics/interfaces';
+import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './basics/interfaces';
 import { generateRandomKey, toPx } from './basics/tools';
 import { Transform } from './basics/transform';
-import { IBoundRect, Vector2 } from './basics/vector2';
+import type { IBoundRect, Vector2 } from './basics/vector2';
 
 export const BASE_OBJECT_ARRAY = [
     'top',
@@ -338,6 +341,7 @@ export abstract class BaseObject {
         if (state) {
             this.parent?.makeDirty(state);
         }
+
         return this;
     }
 
@@ -662,6 +666,7 @@ export abstract class BaseObject {
         this.onPointerOverObserver.clear();
         this.onPointerEnterObserver.clear();
         this.onDblclickObserver.clear();
+        this.onTripleClickObserver.clear();
         this.onIsAddedToParentObserver.clear();
 
         this.parent?.removeObject(this);

@@ -95,8 +95,6 @@ export class Documents extends DocComponent {
         this.pageLayoutType = config?.pageLayoutType || PageLayoutType.VERTICAL;
 
         this.setAllowCache(config?.allowCache || false);
-
-        console.log(this);
     }
 
     getOffsetConfig(): IDocumentOffsetConfig {
@@ -225,12 +223,14 @@ export class Documents extends DocComponent {
                 pagePaddingRight * scale,
                 horizontalAlign
             );
+
             const verticalOffsetNoAngle = this._verticalHandler(
                 actualHeight * scale,
                 pagePaddingTop * scale,
                 pagePaddingBottom * scale,
                 verticalAlign
             );
+
             const alignOffsetNoAngle = Vector2.create(horizontalOffsetNoAngle / scale, verticalOffsetNoAngle / scale);
 
             const centerAngle = degToRad(centerAngleDeg);

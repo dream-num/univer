@@ -1,31 +1,22 @@
 import './extensions';
 
-import {
-    BooleanNumber,
-    HorizontalAlign,
-    Nullable,
-    Observable,
-    Observer,
-    VerticalAlign,
-    WrapStrategy,
-} from '@univerjs/core';
+import type { Nullable, Observer } from '@univerjs/core';
+import { BooleanNumber, HorizontalAlign, Observable, VerticalAlign, WrapStrategy } from '@univerjs/core';
 
 import { calculateRectRotate, getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
-import {
-    IDocumentSkeletonCached,
-    IDocumentSkeletonPage,
-    LineType,
-    PageLayoutType,
-} from '../../basics/i-document-skeleton-cached';
+import type { IDocumentSkeletonCached, IDocumentSkeletonPage } from '../../basics/i-document-skeleton-cached';
+import { LineType, PageLayoutType } from '../../basics/i-document-skeleton-cached';
 import { degToRad, fixLineWidthByScale, getScale } from '../../basics/tools';
-import { Transform } from '../../basics/transform';
-import { IBoundRect, Vector2 } from '../../basics/vector2';
-import { Scene } from '../../scene';
-import { DocumentsSpanAndLineExtensionRegistry, IExtensionConfig } from '../extension';
+import type { Transform } from '../../basics/transform';
+import type { IBoundRect } from '../../basics/vector2';
+import { Vector2 } from '../../basics/vector2';
+import type { Scene } from '../../scene';
+import type { IExtensionConfig } from '../extension';
+import { DocumentsSpanAndLineExtensionRegistry } from '../extension';
 import { Liquid } from './common/liquid';
 import { DocComponent } from './doc-component';
 import { DOCS_EXTENSION_TYPE } from './doc-extension';
-import { DocumentSkeleton } from './doc-skeleton';
+import type { DocumentSkeleton } from './doc-skeleton';
 
 interface IPageMarginLayout {
     pageMarginLeft: number;
@@ -104,6 +95,8 @@ export class Documents extends DocComponent {
         this.pageLayoutType = config?.pageLayoutType || PageLayoutType.VERTICAL;
 
         this.setAllowCache(config?.allowCache || false);
+
+        console.log(this);
     }
 
     getOffsetConfig(): IDocumentOffsetConfig {

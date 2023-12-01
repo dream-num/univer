@@ -1,19 +1,18 @@
-import { ITextRangeWithStyle } from '@univerjs/base-render';
-import {
-    CommandType,
+import type { ITextRangeWithStyle } from '@univerjs/base-render';
+import type {
     ICommand,
-    ICommandService,
     IDocumentBody,
     IDocumentData,
     IMutationInfo,
     ITextRange,
-    IUndoRedoService,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService } from '@univerjs/core';
 
 import { getRetainAndDeleteFromReplace } from '../../basics/retain-delete-params';
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
-import { IRichTextEditingMutationParams, RichTextEditingMutation } from '../mutations/core-editing.mutation';
+import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
+import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
 
 // TODO: @JOCS, do not use command as event bus.
 export const DeleteLeftCommand: ICommand = {

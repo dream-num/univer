@@ -9,7 +9,7 @@ import {
 } from '@univerjs/base-docs';
 import type { IMouseEvent, IPointerEvent, RenderComponentType } from '@univerjs/base-render';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/base-render';
-import type { ICommandInfo, Nullable, Observer } from '@univerjs/core';
+import type { ICommandInfo, IParagraph, Nullable, Observer } from '@univerjs/core';
 import {
     Disposable,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
@@ -112,8 +112,11 @@ export class FormulaEditorController extends Disposable {
                 return;
             }
             const editorObject = getEditorObject(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, this._renderManagerService);
+            const formulaEditorDataModel = this._univerInstanceService.getUniverDocInstance(
+                DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY
+            );
 
-            if (editorObject == null) {
+            if (editorObject == null || formulaEditorDataModel == null) {
                 return;
             }
 
@@ -122,6 +125,9 @@ export class FormulaEditorController extends Disposable {
             const { document: documentComponent, scene, engine } = editorObject;
 
             const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+
+            // Update page size when container resized.
+            formulaEditorDataModel.updateDocumentDataPageSize(width);
 
             viewportMain?.getScrollBar()?.dispose();
 
@@ -146,13 +152,15 @@ export class FormulaEditorController extends Disposable {
                 return;
             }
 
-            const content = param.documentLayoutObject.documentModel?.getBody()?.dataStream;
+            const body = param.documentLayoutObject.documentModel?.getBody();
+            const dataStream = body?.dataStream;
+            const paragraphs = body?.paragraphs;
 
-            if (content == null) {
+            if (dataStream == null || paragraphs == null) {
                 return;
             }
 
-            this._syncContentAndRender(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, content);
+            this._syncContentAndRender(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, dataStream, paragraphs);
         });
     }
 
@@ -170,17 +178,21 @@ export class FormulaEditorController extends Disposable {
 
                     if (INCLUDE_LIST.includes(unitId)) {
                         const editorDocDataModel = this._univerInstanceService.getUniverDocInstance(unitId);
-                        const content = editorDocDataModel?.getBody()!.dataStream;
+                        const dataStream = editorDocDataModel?.getBody()?.dataStream;
+                        const paragraphs = editorDocDataModel?.getBody()?.paragraphs;
+
+                        console.log(paragraphs);
+
                         const syncId =
                             unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY
                                 ? DOCS_NORMAL_EDITOR_UNIT_ID_KEY
                                 : DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY;
 
-                        if (content == null) {
+                        if (dataStream == null || paragraphs == null) {
                             return;
                         }
 
-                        this._syncContentAndRender(syncId, content);
+                        this._syncContentAndRender(syncId, dataStream, paragraphs);
                     }
                 }
 
@@ -194,24 +206,21 @@ export class FormulaEditorController extends Disposable {
         );
     }
 
-    private _syncContentAndRender(unitId: string, content: string) {
+    private _syncContentAndRender(unitId: string, dataStream: string, paragraphs: IParagraph[]) {
         const INCLUDE_LIST = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];
 
         const docsSkeletonObject = this._docSkeletonManagerService.getSkeletonByUnitId(unitId);
         const docDataModel = this._univerInstanceService.getUniverDocInstance(unitId);
         const docViewModel = this._docViewModelManagerService.getViewModel(unitId);
 
-        if (docDataModel == null || docViewModel == null) {
+        if (docDataModel == null || docViewModel == null || docsSkeletonObject == null) {
             return;
         }
 
-        docDataModel.getBody()!.dataStream = content;
+        docDataModel.getBody()!.dataStream = dataStream;
+        docDataModel.getBody()!.paragraphs = paragraphs;
 
         docViewModel.reset(docDataModel);
-
-        if (docsSkeletonObject == null) {
-            return;
-        }
 
         const { skeleton } = docsSkeletonObject;
 

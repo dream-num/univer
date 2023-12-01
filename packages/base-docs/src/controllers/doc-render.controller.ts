@@ -51,9 +51,9 @@ export class DocRenderController extends Disposable {
 
             const excludeUnitList = [DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY];
 
-            if (excludeUnitList.includes(unitId)) {
-                return;
-            }
+            // if (excludeUnitList.includes(unitId)) {
+            //     return;
+            // }
 
             this.recalculateSizeBySkeleton(currentRender, documentSkeleton);
         });
@@ -110,13 +110,12 @@ export class DocRenderController extends Disposable {
 
         const docsComponent = mainComponent as Documents;
 
-        const data = skeleton.getSkeletonData();
+        const pages = skeleton.getSkeletonData()?.pages;
 
-        if (data == null) {
+        if (pages == null) {
             return;
         }
 
-        const pages = data.pages;
         let width = 0;
         let height = 0;
 
@@ -128,6 +127,7 @@ export class DocRenderController extends Disposable {
                 if (i !== len - 1) {
                     height += docsComponent.pageMarginTop;
                 }
+
                 width = Math.max(width, pageWidth);
             } else if (docsComponent.pageLayoutType === PageLayoutType.HORIZONTAL) {
                 width += pageWidth;
@@ -137,7 +137,8 @@ export class DocRenderController extends Disposable {
                 height = Math.max(height, pageHeight);
             }
         }
-
+        console.log(docsComponent.pageMarginTop);
+        console.log(width, height);
         docsComponent.resize(width, height);
     }
 

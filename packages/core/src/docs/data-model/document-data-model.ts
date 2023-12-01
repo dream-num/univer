@@ -118,6 +118,7 @@ class DocumentDataModelSimple {
         if (!documentStyle.pageSize) {
             width = width ?? Infinity;
             height = height ?? Infinity;
+
             documentStyle.pageSize = {
                 width,
                 height,

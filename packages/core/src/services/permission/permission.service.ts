@@ -1,49 +1,111 @@
-import { createIdentifier } from '@wendellhu/redi';
+import { createIdentifier, Inject } from '@wendellhu/redi';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { Disposable, PermissionPoint, PermissionStatus } from '../../shared';
+import { Disposable, PermissionPoint, PermissionStatus, toDisposable } from '../../shared';
+import { Nullable } from '../../shared/types';
+import { IUniverInstanceService } from '../instance/instance.service';
 import { LifecycleStages, OnLifecycle } from '../lifecycle/lifecycle';
+import { IResourceManagerService } from '../resource-manager/type';
 
 export interface IPermissionService {
-    deletePermissionPoint(id: string): void;
-    addPermissionPoint(item: PermissionPoint): boolean;
-    updatePermissionPoint(id: string, value: any): void;
-    getPermissionPoint(id: string): PermissionPoint;
-    composePermission$(permissionIdList: string[]): Observable<PermissionPoint[]>;
-    composePermission(permissionIdList: string[]): PermissionPoint[];
+    deletePermissionPoint(unitID: string, id: string): void;
+    addPermissionPoint(unitID: string, item: PermissionPoint): boolean;
+    updatePermissionPoint(unitID: string, id: string, value: any): void;
+    getPermissionPoint(unitID: string, id: string): Nullable<PermissionPoint>;
+    composePermission$(unitID: string, permissionIdList: string[]): Observable<PermissionPoint[]>;
+    composePermission(unitID: string, permissionIdList: string[]): PermissionPoint[];
 }
 export const IPermissionService = createIdentifier<IPermissionService>('univer.permission-service');
-
+const resourceKey = 'PERMISSION';
 @OnLifecycle(LifecycleStages.Starting, PermissionService)
 export class PermissionService extends Disposable implements IPermissionService {
-    constructor(initPermissionConfig: PermissionPoint[] = []) {
+    private _permissionPointMap: Map<string, Map<string, BehaviorSubject<PermissionPoint>>> = new Map();
+
+    constructor(
+        @Inject(IResourceManagerService) private _resourceManagerService: IResourceManagerService,
+        @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService
+    ) {
         super();
-        initPermissionConfig.forEach((item) => {
-            this.permissionPointMap.set(item.id, new BehaviorSubject<PermissionPoint>(item));
-        });
+        this._init();
     }
 
-    private permissionPointMap: Map<string, BehaviorSubject<PermissionPoint>> = new Map();
+    private _init() {
+        this.disposeWithMe(
+            toDisposable(
+                this._univerInstanceService.sheetAdded$.subscribe((workbook) => {
+                    this._resourceManagerService.registerPluginResource(workbook.getUnitId(), resourceKey, {
+                        onChange: (unitID, value) => {
+                            (value as PermissionPoint[]).forEach((permissionPoint) => {
+                                if (this.getPermissionPoint(unitID, permissionPoint.id)) {
+                                    this.updatePermissionPoint(unitID, permissionPoint.id, permissionPoint.value);
+                                } else {
+                                    this.addPermissionPoint(unitID, permissionPoint);
+                                }
+                            });
+                        },
+                        toJson: (unitID: string) => this._toJson(unitID),
+                        parseJson: (json: string) => this._parseJson(json),
+                    });
+                })
+            )
+        );
+        this.disposeWithMe(
+            toDisposable(
+                this._univerInstanceService.sheetDisposed$.subscribe((workbook) => {
+                    this._resourceManagerService.disposePluginResource(workbook.getUnitId(), resourceKey);
+                })
+            )
+        );
+    }
 
-    deletePermissionPoint = (id: string) => {
-        const subject = this.permissionPointMap.get(id);
-        if (subject) {
-            subject.complete();
-            this.permissionPointMap.delete(id);
+    private _toJson(unitID: string) {
+        const permissionMap = this._permissionPointMap.get(unitID);
+        let list: PermissionPoint[] = [];
+        if (permissionMap) {
+            list = [...permissionMap.keys()].reduce((pre, key) => {
+                const value = permissionMap.get(key);
+                if (value) {
+                    pre.push(value.getValue());
+                }
+                return pre;
+            }, [] as PermissionPoint[]);
+        }
+        return JSON.stringify(list);
+    }
+
+    private _parseJson(json: string) {
+        return JSON.parse(json);
+    }
+
+    deletePermissionPoint = (unitID: string, id: string) => {
+        const permissionMap = this._permissionPointMap.get(unitID);
+        if (permissionMap) {
+            const subject = permissionMap.get(id);
+            if (subject) {
+                subject.complete();
+                this._permissionPointMap.delete(id);
+            }
         }
     };
 
-    addPermissionPoint = (item: PermissionPoint) => {
-        if (!this.permissionPointMap.has(item.id)) {
-            this.permissionPointMap.set(item.id, new BehaviorSubject(item));
+    addPermissionPoint = (unitID: string, item: PermissionPoint) => {
+        const permissionMap =
+            this._permissionPointMap.get(unitID) || new Map<string, BehaviorSubject<PermissionPoint>>();
+        if (!permissionMap.has(item.id)) {
+            permissionMap.set(item.id, new BehaviorSubject(item));
+            this._permissionPointMap.set(unitID, permissionMap);
             return true;
         }
         return false;
     };
 
-    updatePermissionPoint = (permissionId: string, value: any) => {
-        const permissionSubject = this.permissionPointMap.get(permissionId);
+    updatePermissionPoint = (unitID: string, permissionId: string, value: any) => {
+        const permissionMap = this._permissionPointMap.get(unitID);
+        if (!permissionMap) {
+            return;
+        }
+        const permissionSubject = permissionMap.get(permissionId);
         if (permissionSubject) {
             const subject = permissionSubject.getValue() as PermissionPoint;
             subject.value = value;
@@ -52,17 +114,19 @@ export class PermissionService extends Disposable implements IPermissionService 
         }
     };
 
-    getPermissionPoint = (permissionId: string) => {
-        const item = this.permissionPointMap.get(permissionId);
+    getPermissionPoint = (unitID: string, permissionId: string) => {
+        const permissionMap = this._permissionPointMap.get(unitID);
+        if (!permissionMap) return;
+        const item = permissionMap.get(permissionId);
         if (item) {
             return item.getValue();
         }
-        throw new Error(`${permissionId} permissionPoint does not exist`);
     };
 
-    composePermission$(permissionIdList: string[]) {
+    composePermission$(unitID: string, permissionIdList: string[]) {
+        const permissionMap = this._permissionPointMap.get(unitID);
         const subjectList = permissionIdList.map((id) => {
-            const subject = this.permissionPointMap.get(id);
+            const subject = permissionMap?.get(id);
             if (!subject) {
                 throw new Error(`${id} permissionPoint is not exist`);
             }
@@ -71,7 +135,7 @@ export class PermissionService extends Disposable implements IPermissionService 
         return combineLatest(subjectList).pipe(
             // Check that all permissions exist
             map((list) => {
-                if (list.every((item) => this.permissionPointMap.get(item.id))) {
+                if (list.every((item) => this._permissionPointMap.get(item.id))) {
                     return list;
                 }
                 return list;
@@ -79,9 +143,11 @@ export class PermissionService extends Disposable implements IPermissionService 
         );
     }
 
-    composePermission(permissionIdList: string[]) {
+    composePermission(unitID: string, permissionIdList: string[]) {
+        const permissionMap = this._permissionPointMap.get(unitID);
+
         const valueList = permissionIdList.map((id) => {
-            const subject = this.permissionPointMap.get(id);
+            const subject = permissionMap?.get(id);
             if (!subject) {
                 throw new Error(`${id} permissionPoint is not exist`);
             }

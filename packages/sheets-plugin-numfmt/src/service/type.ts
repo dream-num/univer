@@ -1,8 +1,8 @@
-import type { ICellData, Nullable, ObjectMatrix } from '@univerjs/core';
-import { LifecycleStages, RefAlias, runOnLifecycle } from '@univerjs/core';
+import type { ICellData, Nullable, ObjectMatrix, ObjectMatrixPrimitiveType, RefAlias } from '@univerjs/core';
+import { LifecycleStages, runOnLifecycle } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 
-import { FormatType, NumfmtItem } from '../base/types/index';
+import type { FormatType, NumfmtItem } from '../base/types/index';
 
 export type NumfmtItemWithCache = NumfmtItem & {
     // when change parameters or pattern, the cache is cleared follow mutation execute
@@ -23,6 +23,11 @@ export interface INumfmtService {
         values: Array<{ row: number; col: number; pattern?: string; type: FormatType }>
     ): void;
     getRefModel(workbookId: string): Nullable<RefAlias<RefItem, 'numfmtId' | 'pattern'>>;
+}
+
+export interface ISnapshot {
+    model: Record<string, ObjectMatrixPrimitiveType<NumfmtItem>>;
+    refModel: RefItem[];
 }
 
 export const INumfmtService = createIdentifier<INumfmtService>('INumfmtService');

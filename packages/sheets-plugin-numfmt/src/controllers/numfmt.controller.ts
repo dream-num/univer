@@ -64,14 +64,14 @@ import { getPatternPreview, getPatternType } from '../utils/pattern';
 import type { INumfmtController } from './type';
 
 const createCollectEffectMutation = () => {
-    interface Config {
+    interface IConfig {
         workbookId: string;
         worksheetId: string;
         row: number;
         col: number;
         value: Nullable<NumfmtItemWithCache>;
     }
-    let list: Config[] = [];
+    let list: IConfig[] = [];
     const add = (
         workbookId: string,
         worksheetId: string,

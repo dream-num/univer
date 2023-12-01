@@ -17,18 +17,24 @@ export class UniverPermissionService extends Disposable {
     }
 
     private _init() {
-        const univerEditablePermission = new UniverEditablePermission();
-        this._permissionService.addPermissionPoint(univerEditablePermission);
+        this._univerInstanceService.sheetAdded$.subscribe((workbook) => {
+            const univerEditablePermission = new UniverEditablePermission(workbook.getUnitId());
+            this._permissionService.addPermissionPoint(workbook.getUnitId(), univerEditablePermission);
+        });
     }
 
-    getEditable() {
-        const univerEditablePermission = new UniverEditablePermission();
-        const permission = this._permissionService.getPermissionPoint(univerEditablePermission.id);
-        return permission.value;
+    getEditable(unitID?: string) {
+        let workbookId = unitID;
+        if (!workbookId) {
+            workbookId = this._univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+        }
+        const univerEditablePermission = new UniverEditablePermission(workbookId);
+        const permission = this._permissionService.getPermissionPoint(workbookId, univerEditablePermission.id);
+        return permission?.value;
     }
 
-    setEditable(v: boolean) {
-        const univerEditablePermission = new UniverEditablePermission();
-        this._permissionService.updatePermissionPoint(univerEditablePermission.id, v);
+    setEditable(unitID: string, v: boolean) {
+        const univerEditablePermission = new UniverEditablePermission(unitID);
+        this._permissionService.updatePermissionPoint(unitID, univerEditablePermission.id, v);
     }
 }

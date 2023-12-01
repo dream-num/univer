@@ -315,11 +315,6 @@ export class Workbook extends Disposable {
         this._snapshot = config;
     }
 
-    save(): IWorkbookData {
-        // TODO
-        return this._snapshot;
-    }
-
     /**
      * Get the range array based on the range string and sheet id
      *

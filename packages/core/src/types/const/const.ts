@@ -60,6 +60,7 @@ export const DEFAULT_WORKBOOK: IWorkbookData = {
     locale: LocaleType.EN_US,
     styles: {},
     sheets: {},
+    resources: [],
 };
 
 export const DEFAULT_WORKSHEET_ROW_COUNT = 1000;

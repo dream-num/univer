@@ -6,6 +6,7 @@ export enum PermissionStatus {
 export abstract class PermissionPoint<T = any> {
     abstract id: string; // permission
     abstract value: T;
+    abstract unitID: string;
     status = PermissionStatus.INIT;
 }
 

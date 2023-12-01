@@ -8,21 +8,49 @@ TODO: Logo Here
 
 Univer 是一套企业协同办公文档与数据解决方案。
 
+[![npm version](https://badge.fury.io/js/@univerjs%2Fcore.svg)](https://badge.fury.io/js/@univerjs%2Fcore)
+
 ## 特性
 
 * 📈 支持电子表格，后续还会支持文档和幻灯片
-* 🔌 高度可扩展性架构设计；方便二次开发，支持自定义插件
-* ⚡ 统一高效的渲染引擎和公式引擎
-* 🧮 高性能的公式引擎，支持 web worker
+* 🌌 高度可扩展的架构设计
+    * 🔌 插件化架构，文档的能力可按需组合，支持自定义插件，方便二次开发
+    * 💄 提供组件库和图标
+* ⚡ 高性能
+    * ✏️ 统一高效的渲染引擎和公式引擎，基于 Canvas
+    * 🧮 高性能的公式引擎，支持 web worker
 * 🌍 国际化支持
 
-## 版本
+## 安装
 
-TODO: 版本号
+Univer 的前端通过多个 npm 包发布，你可以通过以下命令安装核心包：
+
+```bash
+npm install @univerjs/core
+```
+
+然后可以根据你的实际需要安装其它包。例如想要创建一个基本的电子表格，可以以如下命令安装相关的包：
+
+```zsh
+npm install @univerjs/base-docs \
+    @univerjs/base-formula-engine \
+    @univerjs/base-render \
+    @univerjs/base-sheets \
+    @univerjs/base-ui \
+    @univerjs/design \
+    @univerjs/sheets-plugin-formula \
+    @univerjs/sheets-plugin-formula-ui \
+    @univerjs/ui-plugin-sheets
+```
 
 ## 如何使用
 
 请参考[快速上手](/docs/category/quick-start)。
+
+## 在线 demo
+
+我们准备了一个在线 IDE 来帮助你快速体验如何使用 Univer 开发，点击[这里](/playground)访问。
+
 
 ## 链接
 
@@ -40,11 +68,11 @@ TODO: 版本号
 
 如果你在使用过程中碰到问题，可以在以下社区寻求帮助：
 
-1. Discord 社区
-1. GitHub Discussions
+1. [Discord 社区](https://discord.gg/XPGnMBmpd6)
+1. [GitHub Discussions](https://github.com/dream-num/univer/discussions)
 1. 加入 Univer 中文社群
 
-你也可以在以下技术问题提出问题，建议带上 univer 标签
+你也可以在以下技术社区提出问题，建议带上 univer 标签：
 
 1. stackoverflow
 1. segmentfault
@@ -55,45 +83,3 @@ TODO: 版本号
 *
 
 ## 联系方式
-
-
-
-## Getting Started
-
-Get started by **creating a new site**.
-
-Or **try Docusaurus immediately** with **[docusaurus.new](https://docusaurus.new)**.
-
-### What you'll need
-
-- [Node.js](https://nodejs.org/en/download/) version 18.0 or above:
-  - When installing Node.js, you are recommended to check all checkboxes related to dependencies.
-
-## Generate a new site
-
-Generate a new Docusaurus site using the **classic template**.
-
-The classic template will automatically be added to your project after you run the command:
-
-```bash
-npm init docusaurus@latest my-website classic
-```
-
-You can type this command into Command Prompt, Powershell, Terminal, or any other integrated terminal of your code editor.
-
-The command also installs all necessary dependencies you need to run Docusaurus.
-
-## Start your site
-
-Run the development server:
-
-```bash
-cd my-website
-npm run start
-```
-
-The `cd` command changes the directory you're working with. In order to work with your newly created Docusaurus site, you'll need to navigate the terminal there.
-
-The `npm run start` command builds your website locally and serves it through a development server, ready for you to view at http://localhost:3000/.
-
-Open `docs/intro.md` (this page) and edit some lines: the site **reloads automatically** and displays your changes.

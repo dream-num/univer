@@ -77,6 +77,11 @@ const config: Config = {
                     label: 'API',
                 },
                 {
+                    to: 'playground',
+                    position: 'left',
+                    label: 'Playground',
+                },
+                {
                     href: 'https://github.com/dream-num/univer',
                     label: 'GitHub',
                     position: 'right',

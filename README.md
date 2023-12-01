@@ -18,22 +18,22 @@ We provide JavaScript part of code in the repository, including a canvas-based f
 
 ## Packages
 
-| Name | Description | Version |
-| :--- | :---------- | :------ |
-| [base-doc](./packages/base-doc) | - | - |
-| [base-formula-engine](./packages/base-formula-engine) | - | - |
-| [base-numfmt-engine](./packages/base-numfmt-engine) | - | - |
-| [base-render](./packages/base-render) | - | - |
-| [base-sheets](./packages/base-sheets) | - | - |
-| [base-ui](./packages/base-ui) | - | - |
-| [core](./packages/core) | - | - |
-| [design](./packages/design) | - | - |
-| [rpc](./packages/rpc) | - | - |
-| [sheets-plugin-formula](./packages/sheets-plugin-formula) | - | - |
-| [sheets-plugin-formula-ui](./packages/sheets-plugin-formula-ui) | - | - |
-| [sheets-plugin-numfmt](./packages/sheets-plugin-numfmt) | - | - |
-| [ui-plugin-docs](./packages/ui-plugin-docs) | - | - |
-| [ui-plugin-sheets](./packages/ui-plugin-sheets) | - | - |
+| Name                                                            | Description | Version                                                                                                      |
+| :-------------------------------------------------------------- | :---------- | :----------------------------------------------------------------------------------------------------------- |
+| [base-doc](./packages/base-doc)                                 | -           | [![npm version](https://badge.fury.io/js/@univerjs%2Fcore.svg)](https://badge.fury.io/js/@univerjs%2Fbase-doc) |
+| [base-formula-engine](./packages/base-formula-engine)           | -           | [![npm version](https://badge.fury.io/js/@univerjs%2Fcore.svg)](https://badge.fury.io/js/@univerjs%2Fbase-formula-engine) |
+| [base-numfmt-engine](./packages/base-numfmt-engine)             | -           | [![npm version](https://badge.fury.io/js/@univerjs%2Fcore.svg)](https://badge.fury.io/js/@univerjs%2Fbase-numfmt-engine) |
+| [base-render](./packages/base-render)                           | -           | [![npm version](https://badge.fury.io/js/@univerjs%2Fcore.svg)](https://badge.fury.io/js/@univerjs%2Fbase-render) |
+| [base-sheets](./packages/base-sheets)                           | -           | [![npm version](https://badge.fury.io/js/@univerjs%2Fcore.svg)](https://badge.fury.io/js/@univerjs%2Fbase-sheets) |
+| [base-ui](./packages/base-ui)                                   | -           | [![npm version](https://badge.fury.io/js/@univerjs%2Fcore.svg)](https://badge.fury.io/js/@univerjs%2Fbase-ui) |
+| [core](./packages/core)                                         | -           | [![npm version](https://badge.fury.io/js/@univerjs%2Fcore.svg)](https://badge.fury.io/js/@univerjs%2Fcore)   |
+| [design](./packages/design)                                     | -           | [![npm version](https://badge.fury.io/js/@univerjs%2Fcore.svg)](https://badge.fury.io/js/@univerjs%2Fdesign) |
+| [rpc](./packages/rpc)                                           | -           | [![npm version](https://badge.fury.io/js/@univerjs%2Fcore.svg)](https://badge.fury.io/js/@univerjs%2Frpc) |
+| [sheets-plugin-formula](./packages/sheets-plugin-formula)       | -           | [![npm version](https://badge.fury.io/js/@univerjs%2Fcore.svg)](https://badge.fury.io/js/@univerjs%2Fsheets-plugin-formula) |
+| [sheets-plugin-formula-ui](./packages/sheets-plugin-formula-ui) | -           | [![npm version](https://badge.fury.io/js/@univerjs%2Fcore.svg)](https://badge.fury.io/js/@univerjs%2Fsheets-plugin-formula-ai) |
+| [sheets-plugin-numfmt](./packages/sheets-plugin-numfmt)         | -           | [![npm version](https://badge.fury.io/js/@univerjs%2Fcore.svg)](https://badge.fury.io/js/@univerjs%2Fsheets-plugin-numfmt) |
+| [ui-plugin-docs](./packages/ui-plugin-docs)                     | -           | [![npm version](https://badge.fury.io/js/@univerjs%2Fcore.svg)](https://badge.fury.io/js/@univerjs%2Fui-plugin-docs) |
+| [ui-plugin-sheets](./packages/ui-plugin-sheets)                 | -           | [![npm version](https://badge.fury.io/js/@univerjs%2Fcore.svg)](https://badge.fury.io/js/@univerjs%2Fui-plugin-sheets) |
 
 ## Contribution
 

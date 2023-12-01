@@ -119,18 +119,30 @@ export function FormulaBar() {
             <div className={styles.nameRanges}>
                 <div className={styles.nameRangesInput} />
             </div>
+
             <div className={styles.formulaBar}>
                 <div className={styles.formulaIcon}>
-                    <span className={clsx(styles.iconContainer, state.iconStyle)} onClick={handleCloseBtnClick}>
-                        <CloseSingle />
-                    </span>
-                    <span className={clsx(styles.iconContainer, state.iconStyle)} onClick={handleConfirmBtnClick}>
-                        <CheckMarkSingle />
-                    </span>
-                    <span className={clsx(styles.iconContainer, state.iconStyle)} onClick={handlerFxBtnClick}>
-                        <FxSingle />
-                    </span>
+                    <div className={styles.formulaIconWrapper}>
+                        <span
+                            className={clsx(styles.iconContainer, styles.iconContainerError, state.iconStyle)}
+                            onClick={handleCloseBtnClick}
+                        >
+                            <CloseSingle />
+                        </span>
+
+                        <span
+                            className={clsx(styles.iconContainer, styles.iconContainerSuccess, state.iconStyle)}
+                            onClick={handleConfirmBtnClick}
+                        >
+                            <CheckMarkSingle />
+                        </span>
+
+                        <span className={styles.iconContainer} onClick={handlerFxBtnClick}>
+                            <FxSingle />
+                        </span>
+                    </div>
                 </div>
+
                 <div className={styles.formulaInput}>
                     <div className={styles.formulaContent} ref={editorRef} />
                     <div className={styles.arrowContainer} onClick={handleArrowClick}>

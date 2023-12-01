@@ -27,38 +27,46 @@
         height: 100%;
 
         .formula-icon {
-            position: relative;
-
-            display: flex;
-            gap: var(--margin-xs);
-            align-items: center;
-            justify-content: center;
-
-            box-sizing: border-box;
-            width: 80px;
-            height: 100%;
             padding: 6px 0;
 
-            font-size: var(--font-size-xs);
-
-            border-right: 1px solid rgb(var(--border-color));
-
-            .icon-container {
-                cursor: pointer;
+            &-wrapper {
+                position: relative;
 
                 display: flex;
+                gap: var(--margin-xs);
                 align-items: center;
                 justify-content: center;
 
-                font-size: var(--font-size-lg);
-            }
+                box-sizing: border-box;
+                width: 80px;
+                height: 100%;
 
-            .formula-grey {
-                color: rgb(var(--gray-5));
-            }
+                font-size: var(--font-size-xs);
 
-            .formula-active {
-                color: rgb(var(--primary-color));
+                border-right: 1px solid rgb(var(--border-color));
+
+
+                .icon-container {
+                    cursor: pointer;
+
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+
+                    font-size: var(--font-size-lg);
+
+                    &-success {
+                        &.formula-active {
+                            color: rgb(var(--success-color));
+                        }
+                    }
+
+                    &-error {
+                        &.formula-active {
+                            color: rgb(var(--error-color));
+                        }
+                    }
+                }
             }
         }
 
@@ -66,7 +74,6 @@
             overflow: hidden;
             display: flex;
             flex: 1;
-            align-items: top;
 
             width: 100%;
             padding: 0 0 0 10px;

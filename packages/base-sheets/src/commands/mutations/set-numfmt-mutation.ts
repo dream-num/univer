@@ -1,15 +1,16 @@
-import { CommandType, ICommand } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { ICommand } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
 
-import { FormatType } from '../../base/types';
-import { INumfmtService } from '../../service/type';
+import type { FormatType } from '../../services/numfmt/type';
+import { INumfmtService } from '../../services/numfmt/type';
 
 export const factorySetNumfmtUndoMutation = (
     accessor: IAccessor,
-    option: SetNumfmtMutationParams
-): SetNumfmtMutationParams => {
+    option: ISetNumfmtMutationParams
+): ISetNumfmtMutationParams => {
     const numfmtService = accessor.get(INumfmtService);
-    const undos: SetNumfmtMutationParams = {
+    const undos: ISetNumfmtMutationParams = {
         ...option,
         values: option.values
             .map((item) => {
@@ -25,13 +26,13 @@ export const factorySetNumfmtUndoMutation = (
     return undos;
 };
 
-export type SetNumfmtMutationParams = {
+export interface ISetNumfmtMutationParams {
     values: Array<{ pattern?: string; row: number; col: number; type?: FormatType }>;
     workbookId: string;
     worksheetId: string;
-};
+}
 
-export const SetNumfmtMutation: ICommand<SetNumfmtMutationParams> = {
+export const SetNumfmtMutation: ICommand<ISetNumfmtMutationParams> = {
     id: 'sheet.mutation.set.numfmt',
     type: CommandType.MUTATION,
     handler: (accessor: IAccessor, params) => {

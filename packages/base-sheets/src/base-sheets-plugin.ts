@@ -1,10 +1,13 @@
 import { ICommandService, LocaleService, Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
-import { Dependency, Inject, Injector } from '@wendellhu/redi';
+import type { Dependency } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 
 import { BasicWorksheetController } from './controllers/basic-worksheet.controller';
 import { MergeCellController } from './controllers/merge-cell.controller';
 import { enUS } from './locale';
 import { BorderStyleManagerService } from './services/border-style-manager.service';
+import { NumfmtService } from './services/numfmt/numfmt.service';
+import { INumfmtService } from './services/numfmt/type';
 import { SheetPermissionService } from './services/permission';
 import { RefRangeService } from './services/ref-range/ref-range.service';
 import { SelectionManagerService } from './services/selection-manager.service';
@@ -39,6 +42,8 @@ export class SheetPlugin extends Plugin {
             [SelectionManagerService],
             [RefRangeService],
             [SheetPermissionService],
+            [INumfmtService, { useClass: NumfmtService }],
+
             // controllers
             [BasicWorksheetController],
             [MergeCellController],

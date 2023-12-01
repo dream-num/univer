@@ -1,10 +1,11 @@
-import { SelectionManagerService } from '@univerjs/base-sheets';
-import { CommandType, ICommand, ICommandService, IUniverInstanceService, Range } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import { INumfmtService, SelectionManagerService } from '@univerjs/base-sheets';
+import type { ICommand } from '@univerjs/core';
+import { CommandType, ICommandService, IUniverInstanceService, Range } from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
 
-import { INumfmtService } from '../../service/type';
 import { getDecimalFromPattern, isPatternEqualWithoutDecimal, setPatternDecimal } from '../../utils/decimal';
-import { SetNumfmtCommand, SetNumfmtCommandParams } from './set.numfmt.command';
+import type { ISetNumfmtCommandParams } from './set.numfmt.command';
+import { SetNumfmtCommand } from './set.numfmt.command';
 
 export const AddDecimalCommand: ICommand = {
     id: 'sheet.command.numfmt.add.decimal.command',
@@ -37,7 +38,7 @@ export const AddDecimalCommand: ICommand = {
         });
         const decimals = maxDecimals + 1;
         const pattern = setPatternDecimal(`0${decimals > 0 ? '.0' : ''}`, decimals);
-        const values: SetNumfmtCommandParams['values'] = [];
+        const values: ISetNumfmtCommandParams['values'] = [];
 
         selections.forEach((selection) => {
             Range.foreach(selection.range, (row, col) => {

@@ -1,6 +1,7 @@
-import { IRowAutoHeightInfo } from '@univerjs/base-render';
-import { CommandType, IMutation, IRange, IUniverInstanceService, Nullable, ObjectArray } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { IRowAutoHeightInfo } from '@univerjs/base-render';
+import type { IMutation, IRange, Nullable } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, ObjectArray } from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
 
 const MAXIMUM_ROW_HEIGHT = 2000;
 

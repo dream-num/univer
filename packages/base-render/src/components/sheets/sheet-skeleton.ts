@@ -1,9 +1,4 @@
-import {
-    BooleanNumber,
-    DEFAULT_EMPTY_DOCUMENT_VALUE,
-    DocumentDataModel,
-    getColorStyle,
-    HorizontalAlign,
+import type {
     IBorderStyleData,
     ICellData,
     IColumnData,
@@ -13,7 +8,6 @@ import {
     IRange,
     IRowData,
     ISelectionCellWithCoord,
-    isEmptyCell,
     IStyleBase,
     IStyleData,
     ITextRotation,
@@ -22,19 +16,27 @@ import {
     LocaleService,
     Nullable,
     ObjectArrayType,
-    ObjectMatrix,
-    searchArray,
     Styles,
     TextDirection,
+    Worksheet,
+} from '@univerjs/core';
+import {
+    BooleanNumber,
+    DEFAULT_EMPTY_DOCUMENT_VALUE,
+    DocumentDataModel,
+    getColorStyle,
+    HorizontalAlign,
+    isEmptyCell,
+    ObjectMatrix,
+    searchArray,
     Tools,
     VerticalAlign,
-    Worksheet,
     WrapStrategy,
 } from '@univerjs/core';
 
 import { BORDER_TYPE, COLOR_BLACK_RGB, MAXIMUM_ROW_HEIGHT, ORIENTATION_TYPE } from '../../basics/const';
 import { getRotateOffsetAndFarthestHypotenuse, getRotateOrientation } from '../../basics/draw';
-import { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-cached';
+import type { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-cached';
 import {
     degToRad,
     fixLineWidthByScale,
@@ -46,12 +48,12 @@ import {
     isRectIntersect,
     mergeInfoOffset,
 } from '../../basics/tools';
-import { IBoundRect } from '../../basics/vector2';
+import type { IBoundRect } from '../../basics/vector2';
 import { columnIterator } from '../docs/common/tools';
 import { DocumentSkeleton } from '../docs/doc-skeleton';
 import { DocumentViewModel } from '../docs/view-model/document-view-model';
 import { Skeleton } from '../skeleton';
-import { BorderCache, IStylesCache } from './interfaces';
+import type { BorderCache, IStylesCache } from './interfaces';
 
 /**
  * Obtain the height and width of a cell's text, taking into account scenarios with rotated text.
@@ -207,6 +209,8 @@ export class SpreadsheetSkeleton extends Skeleton {
         border: new ObjectMatrix<BorderCache>(),
     };
 
+    private _renderedCellCache = new ObjectMatrix<boolean>();
+
     private _showGridlines: BooleanNumber = BooleanNumber.TRUE;
 
     private _marginTop: number = 0;
@@ -340,7 +344,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         this._marginTop = top;
     }
 
-    calculate(bounds?: IBoundRect) {
+    calculateSegment(bounds?: IBoundRect) {
         if (!this._config) {
             return;
         }
@@ -351,13 +355,32 @@ export class SpreadsheetSkeleton extends Skeleton {
             return;
         }
 
-        const { mergeData } = this._config;
         if (bounds != null) {
             this._rowColumnSegment = this.getRowColumnSegment(bounds);
         }
+
+        return true;
+    }
+
+    calculateWithoutClearingCache(bounds?: IBoundRect) {
+        if (!this.calculateSegment(bounds)) {
+            return;
+        }
+
+        const { mergeData } = this._config;
+
         this._dataMergeCache = mergeData && this._getMergeCells(mergeData, this._rowColumnSegment);
+
         this._calculateStylesCache();
-        // this._overflowCache = this._calculateOverflowCache();
+
+        return this;
+    }
+
+    calculate(bounds?: IBoundRect) {
+        this._resetCache();
+
+        this.calculateWithoutClearingCache(bounds);
+
         return this;
     }
 
@@ -1391,8 +1414,6 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     // eslint-disable-next-line max-lines-per-function
     private _calculateStylesCache() {
-        this._resetCache();
-
         const dataMergeCache = this._dataMergeCache;
         const rowColumnSegment = this._rowColumnSegment;
         const columnWidthAccumulation = this.columnWidthAccumulation;
@@ -1440,9 +1461,19 @@ export class SpreadsheetSkeleton extends Skeleton {
             font: {},
             border: new ObjectMatrix<BorderCache>(),
         };
+
+        this._renderedCellCache = new ObjectMatrix<boolean>();
     }
 
     private _setCellCache(r: number, c: number, skipBackgroundAndBorder: boolean) {
+        const needsRendering = this._renderedCellCache.getValue(r, c);
+
+        if (needsRendering || r === -1 || c === -1) {
+            return true;
+        }
+
+        this._renderedCellCache.setValue(r, c, true);
+
         if (!this._worksheet) {
             return true;
         }

@@ -1,7 +1,7 @@
 export * from './base-sheets-plugin';
 
 // #region services
-export { COMMAND_LISTENER_SKELETON_CHANGE } from './basics/const/command-listener-const';
+export { COMMAND_LISTENER_SKELETON_CHANGE, COMMAND_LISTENER_VALUE_CHANGE } from './basics/const/command-listener-const';
 export {
     type IAddWorksheetMergeMutationParams,
     type IDeleteRangeMutationParams,

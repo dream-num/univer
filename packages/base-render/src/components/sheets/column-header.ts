@@ -1,10 +1,10 @@
 import { getTranslateInSpreadContextWithPixelRatio } from '../../basics/draw';
 import { fixLineWidthByScale, getScale } from '../../basics/tools';
-import { IBoundRect, Vector2 } from '../../basics/vector2';
+import type { IBoundRect, Vector2 } from '../../basics/vector2';
 import { SheetColumnHeaderExtensionRegistry } from '../extension';
-import { ColumnHeaderLayout } from './extensions/column-header-layout';
+import type { ColumnHeaderLayout } from './extensions/column-header-layout';
 import { SpreadsheetHeader } from './sheet-component';
-import { SpreadsheetSkeleton } from './sheet-skeleton';
+import type { SpreadsheetSkeleton } from './sheet-skeleton';
 
 export class SpreadsheetColumnHeader extends SpreadsheetHeader {
     private _columnHeaderLayoutExtension!: ColumnHeaderLayout;
@@ -28,7 +28,7 @@ export class SpreadsheetColumnHeader extends SpreadsheetHeader {
         }
         const parentScale = this.getParentScale();
 
-        spreadsheetSkeleton.calculate(bounds);
+        spreadsheetSkeleton.calculateSegment(bounds);
 
         const segment = spreadsheetSkeleton.rowColumnSegment;
 

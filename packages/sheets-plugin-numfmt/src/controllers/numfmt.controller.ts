@@ -1,9 +1,9 @@
 import numfmt from '@univerjs/base-numfmt-engine';
 import { IRenderManagerService } from '@univerjs/base-render';
+import type { EffectRefRangeParams } from '@univerjs/base-sheets';
 import {
     ClearSelectionAllCommand,
     ClearSelectionFormatCommand,
-    EffectRefRangeParams,
     EffectRefRangId,
     handleDeleteRangeMoveLeft,
     handleDeleteRangeMoveUp,
@@ -20,19 +20,16 @@ import {
     SetRangeValuesCommand,
 } from '@univerjs/base-sheets';
 import { ComponentManager, IMenuService, ISidebarService } from '@univerjs/base-ui';
+import type { ICellData, IMutationInfo, IRange, Nullable } from '@univerjs/core';
 import {
     CellValueType,
     Disposable,
     DisposableCollection,
-    ICellData,
     ICommandService,
-    IMutationInfo,
     INTERCEPTOR_POINT,
-    IRange,
     IUniverInstanceService,
     LocaleService,
     LocaleType,
-    Nullable,
     ObjectMatrix,
     Range,
     Rectangle,
@@ -40,44 +37,40 @@ import {
     ThemeService,
     toDisposable,
 } from '@univerjs/core';
-import {
-    APPLY_TYPE,
-    getRepeatRange,
-    IAutoFillHook,
-    IAutoFillService,
-    SheetSkeletonManagerService,
-} from '@univerjs/ui-plugin-sheets';
-import { IDisposable, Inject, Injector } from '@wendellhu/redi';
+import type { IAutoFillHook } from '@univerjs/ui-plugin-sheets';
+import { APPLY_TYPE, getRepeatRange, IAutoFillService, SheetSkeletonManagerService } from '@univerjs/ui-plugin-sheets';
+import type { IDisposable } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 import { combineLatest, Observable } from 'rxjs';
 import { bufferTime, distinctUntilChanged, filter, map, switchMap, tap } from 'rxjs/operators';
 
 import { SHEET_NUMFMT_PLUGIN } from '../base/const/PLUGIN_NAME';
 import { AddDecimalCommand } from '../commands/commands/add.decimal.command';
 import { SetCurrencyCommand } from '../commands/commands/set.currency.command';
-import { SetNumfmtCommand, SetNumfmtCommandParams } from '../commands/commands/set.numfmt.command';
+import type { SetNumfmtCommandParams } from '../commands/commands/set.numfmt.command';
+import { SetNumfmtCommand } from '../commands/commands/set.numfmt.command';
 import { SubtractDecimalCommand } from '../commands/commands/subtract.decimal.command';
-import {
-    factorySetNumfmtUndoMutation,
-    SetNumfmtMutation,
-    SetNumfmtMutationParams,
-} from '../commands/mutations/set.numfmt.mutation';
+import type { SetNumfmtMutationParams } from '../commands/mutations/set.numfmt.mutation';
+import { factorySetNumfmtUndoMutation, SetNumfmtMutation } from '../commands/mutations/set.numfmt.mutation';
 import { CloseNumfmtPanelOperator } from '../commands/operators/close.numfmt.panel.operator';
 import { OpenNumfmtPanelOperator } from '../commands/operators/open.numfmt.panel.operator';
-import { SheetNumfmtPanel, SheetNumfmtPanelProps } from '../components/index';
+import type { SheetNumfmtPanelProps } from '../components/index';
+import { SheetNumfmtPanel } from '../components/index';
 import { zhCn } from '../locale/zh-CN';
 import { AddDecimalMenuItem, CurrencyMenuItem, FactoryOtherMenuItem, SubtractDecimalMenuItem } from '../menu/menu';
-import { INumfmtService, NumfmtItemWithCache } from '../service/type';
+import type { NumfmtItemWithCache } from '../service/type';
+import { INumfmtService } from '../service/type';
 import { getPatternPreview, getPatternType } from '../utils/pattern';
 import type { INumfmtController } from './type';
 
 const createCollectEffectMutation = () => {
-    type Config = {
+    interface Config {
         workbookId: string;
         worksheetId: string;
         row: number;
         col: number;
         value: Nullable<NumfmtItemWithCache>;
-    };
+    }
     let list: Config[] = [];
     const add = (
         workbookId: string,
@@ -129,6 +122,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
         this._initPanel();
         this._initCommands();
         this._initAutoFill();
+        this._commandExecutedListener();
     }
 
     openPanel = () => {
@@ -166,6 +160,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
             onChange: (config) => {
                 if (config.type === 'change') {
                     this._previewPattern = config.value;
+                    this._sheetSkeletonManagerService.reCalculate();
                     this._renderManagerService.getRenderById(workbook.getUnitId())?.mainComponent?.makeDirty();
                 } else if (config.type === 'confirm') {
                     const selections = selectionManagerService.getSelectionRanges() || [];
@@ -708,6 +703,18 @@ export class NumfmtController extends Disposable implements INumfmtController {
                     }
                     return next(value);
                 },
+            })
+        );
+    }
+
+    private _commandExecutedListener() {
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((command) => {
+                if (SetNumfmtCommand.id === command.id) {
+                    this._sheetSkeletonManagerService.reCalculate();
+                    // TODO: @Gggpound The command requires the parameters unitId and sheetId to be passed in.
+                    // this._renderManagerService.getRenderById(unitId)?.mainComponent?.makeDirty();
+                }
             })
         );
     }

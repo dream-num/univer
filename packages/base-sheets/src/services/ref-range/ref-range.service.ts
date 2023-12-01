@@ -39,7 +39,7 @@ export class RefRangeService extends Disposable {
 
     private _refRangeManagerMap = new Map<string, Map<string, Set<RefRangCallback>>>();
 
-    private serializer = createRangeSerializer();
+    private _serializer = createRangeSerializer();
 
     private _onRefRangeChange = () => {
         this._sheetInterceptorService.interceptCommand({
@@ -147,6 +147,8 @@ export class RefRangeService extends Disposable {
                         },
                         { redos: [], undos: [] }
                     );
+                // TODO@gggpound: The mutations need to be merge by mutation.id
+
                 return result;
             },
         });
@@ -162,7 +164,7 @@ export class RefRangeService extends Disposable {
 
             keyList.forEach((key) => {
                 const cbList = manager.get(key);
-                const range = this.serializer.deserialize(key);
+                const range = this._serializer.deserialize(key);
                 // Todo@Gggpound : How to reduce this calculation
                 if (effectRanges.some((item) => Rectangle.intersects(item, range))) {
                     cbList &&
@@ -185,7 +187,7 @@ export class RefRangeService extends Disposable {
         const workbookId = _workbookId || getWorkbookId(this._univerInstanceService);
         const worksheetId = _worksheetId || getWorksheetId(this._univerInstanceService);
         const refRangeManagerId = getRefRangId(workbookId, worksheetId);
-        const rangeString = this.serializer.serialize(range);
+        const rangeString = this._serializer.serialize(range);
 
         let manager = this._refRangeManagerMap.get(refRangeManagerId) as Map<string, Set<RefRangCallback>>;
         if (!manager) {

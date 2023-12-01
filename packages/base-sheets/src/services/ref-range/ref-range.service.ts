@@ -189,6 +189,14 @@ export class RefRangeService extends Disposable {
         return [];
     };
 
+    /**
+     * Listens to an area and triggers a fall back when movement occurs
+     * @param {IRange} range the area that needs to be monitored
+     * @param {RefRangCallback} callback the callback function that is executed when the range changes
+     * @param {string} [_workbookId]
+     * @param {string} [_worksheetId]
+     * @memberof RefRangeService
+     */
     registerRefRange = (
         range: IRange,
         callback: RefRangCallback,
@@ -232,6 +240,20 @@ export class RefRangeService extends Disposable {
         return composeInterceptors(interceptors || []);
     }
 
+    /**
+     * Create a intercept to squash mutations
+     * @param {typeof refRangeCommandsMerge} interceptor
+     * const disposeIntercept = refRangeService.intercept({
+            handler: (mutations, currentMutation, next) => {
+                // todo something
+                return next(list);
+            },
+        })
+     * mutations mean the operation generated before.
+     * currentMutation mean the operation of the current iteration.
+     * @return {*}
+     * @memberof RefRangeService
+     */
     intercept(interceptor: typeof refRangeCommandsMerge) {
         const key = refRangeCommandsMerge as unknown as string;
         const interceptors = this._interceptorsByName.get(key)! || [];

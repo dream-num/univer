@@ -3,14 +3,13 @@ import {
     CoverContentCommand,
     DocSkeletonManagerService,
     DocViewModelManagerService,
-    getDocObject,
     RichTextEditingMutation,
     SetTextSelectionsOperation,
     TextSelectionManagerService,
     VIEWPORT_KEY,
 } from '@univerjs/base-docs';
 import type { IMouseEvent, IPointerEvent, ITextRangeWithStyle, RenderComponentType } from '@univerjs/base-render';
-import { DeviceInputEventType, IRenderManagerService } from '@univerjs/base-render';
+import { DeviceInputEventType, IRenderManagerService, ScrollBar } from '@univerjs/base-render';
 import type { ICommandInfo, IParagraph, Nullable, Observer } from '@univerjs/core';
 import {
     Disposable,
@@ -247,8 +246,6 @@ export class FormulaEditorController extends Disposable {
                         const dataStream = editorDocDataModel?.getBody()?.dataStream;
                         const paragraphs = editorDocDataModel?.getBody()?.paragraphs;
 
-                        console.log(paragraphs);
-
                         const syncId =
                             unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY
                                 ? DOCS_NORMAL_EDITOR_UNIT_ID_KEY
@@ -308,9 +305,40 @@ export class FormulaEditorController extends Disposable {
         }
     }
 
-    private _autoScroll() {}
+    private _autoScroll() {
+        const skeleton = this._docSkeletonManagerService.getSkeletonByUnitId(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY)
+            ?.skeleton;
+        const position = this._formulaEditorManagerService.getPosition();
 
-    private _getDocObject() {
-        return getDocObject(this._univerInstanceService, this._renderManagerService);
+        const editorObject = this._renderManagerService.getRenderById(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
+
+        if (skeleton == null || position == null || editorObject == null) {
+            return;
+        }
+
+        const { scene, mainComponent } = editorObject;
+
+        const { actualWidth, actualHeight } = skeleton.getActualSize();
+        const { height } = position;
+        const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+        let scrollBar = viewportMain?.getScrollBar() as Nullable<ScrollBar>;
+
+        if (actualHeight > height) {
+            if (scrollBar == null) {
+                viewportMain && new ScrollBar(viewportMain, { enableHorizontal: false });
+            } else {
+                viewportMain?.resetSizeAndScrollBar();
+            }
+        } else {
+            scrollBar = null;
+            viewportMain?.getScrollBar()?.dispose();
+        }
+
+        scene.transformByState({
+            width: actualWidth + (scrollBar?.barSize || 0),
+            height: actualHeight,
+        });
+
+        mainComponent?.resize(actualWidth + (scrollBar?.barSize || 0), actualHeight);
     }
 }

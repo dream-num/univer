@@ -118,7 +118,7 @@ export class StartEditController extends Disposable {
                 return;
             }
 
-            const { document: documentComponent, scene } = editorObject;
+            const { document: documentComponent } = editorObject;
 
             const { startX, endX } = position;
 

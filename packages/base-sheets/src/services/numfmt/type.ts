@@ -33,7 +33,13 @@ export type INumfmtItemWithCache = INumfmtItem & {
 export type IRefItem = INumfmtItem & { count: number; numfmtId: string; type: FormatType };
 
 export interface INumfmtService {
-    getValue(workbookId: string, worksheetId: string, row: number, col: number): Nullable<INumfmtItemWithCache>;
+    getValue(
+        workbookId: string,
+        worksheetId: string,
+        row: number,
+        col: number,
+        model?: ObjectMatrix<INumfmtItem>
+    ): Nullable<INumfmtItemWithCache>;
     getModel(workbookId: string, worksheetId: string): Nullable<ObjectMatrix<INumfmtItem>>;
     setValues(
         workbookId: string,

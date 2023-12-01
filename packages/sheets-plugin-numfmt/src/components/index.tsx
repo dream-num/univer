@@ -75,7 +75,7 @@ export const SheetNumfmtPanel: FC<ISheetNumfmtPanelProps> = (props) => {
         if (currency) {
             mark(currency);
         }
-        if (pattern.current) props.onChange({ type: 'confirm', value: pattern.current });
+        props.onChange({ type: 'confirm', value: pattern.current });
     };
     const handleCancel = () => {
         props.onChange({ type: 'cancel', value: pattern.current });

@@ -1,7 +1,6 @@
+import type { IMutationInfo, IRange } from '@univerjs/core';
 import {
     Disposable,
-    IMutationInfo,
-    IRange,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
@@ -9,12 +8,17 @@ import {
     SheetInterceptorService,
     toDisposable,
 } from '@univerjs/core';
-import { IDisposable, Inject } from '@wendellhu/redi';
+import type { IDisposable } from '@wendellhu/redi';
+import { Inject } from '@wendellhu/redi';
 
 import { SelectionManagerService } from '../selection-manager.service';
-import { EffectRefRangeParams, EffectRefRangId } from './type';
+import type { EffectRefRangeParams } from './type';
+import { EffectRefRangId } from './type';
 
-type RefRangCallback = (params: EffectRefRangeParams) => {
+type RefRangCallback = (
+    params: EffectRefRangeParams,
+    preValues: Array<{ redos: IMutationInfo[]; undos: IMutationInfo[] }>
+) => {
     redos: IMutationInfo[];
     undos: IMutationInfo[];
 };
@@ -127,7 +131,14 @@ export class RefRangeService extends Disposable {
                 };
                 const cbList = getEffectsCbList() || [];
                 const result = cbList
-                    .map((cb) => cb(command))
+                    .reduce(
+                        (result, currentFn) => {
+                            const v = currentFn(command, result);
+                            result.push(v);
+                            return result;
+                        },
+                        [] as Array<{ redos: IMutationInfo[]; undos: IMutationInfo[] }>
+                    )
                     .reduce(
                         (result, currentValue) => {
                             result.redos.push(...currentValue.redos);

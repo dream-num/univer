@@ -741,7 +741,12 @@ export class NumfmtController extends Disposable implements INumfmtController {
                             .getSheetId();
                         const model = this._numfmtService.getModel(workbookId, worksheetId);
                         const disposableMap: Map<string, IDisposable> = new Map();
-                        const register = (commandInfo: EffectRefRangeParams, row: number, col: number) => {
+                        const register = (
+                            commandInfo: EffectRefRangeParams,
+                            preValues: Array<{ redos: IMutationInfo[]; undos: IMutationInfo[] }>,
+                            row: number,
+                            col: number
+                        ) => {
                             const targetRange = {
                                 startRow: row,
                                 startColumn: col,
@@ -787,9 +792,23 @@ export class NumfmtController extends Disposable implements INumfmtController {
                                     break;
                                 }
                             }
-                            const result = runRefRangeMutations(operators, targetRange);
-                            if (!result) {
-                                // 删除
+                            const resultRange = runRefRangeMutations(operators, targetRange);
+                            /**
+                             * Each registry area is modified to generate a pair of delete and set operations,
+                             * which should not  generate delete operation if another registry area has previously generate set operations.
+                             */
+                            const isPreSetNumfmt = preValues
+                                .reduce((list, item) => {
+                                    list.push(...item.redos);
+                                    return list;
+                                }, [] as IMutationInfo[])
+                                .filter((item) => item.id === SetNumfmtMutation.id)
+                                .some((mutation) =>
+                                    (mutation.params as ISetNumfmtMutationParams).values!.some(
+                                        (item) => item.row === row && item.col === col && !!item.pattern
+                                    )
+                                );
+                            if (!resultRange && !isPreSetNumfmt) {
                                 const redoParams: ISetNumfmtMutationParams = {
                                     workbookId,
                                     worksheetId,
@@ -813,15 +832,17 @@ export class NumfmtController extends Disposable implements INumfmtController {
                             }
                             const numfmtValue = this._numfmtService.getValue(workbookId, worksheetId, row, col);
 
-                            if (numfmtValue) {
+                            if (numfmtValue && resultRange) {
                                 const redoParams: ISetNumfmtMutationParams = {
                                     workbookId,
                                     worksheetId,
                                     values: [
-                                        { row, col },
-                                        { ...numfmtValue, row: result.startRow, col: result.startColumn },
+                                        { ...numfmtValue, row: resultRange.startRow, col: resultRange.startColumn },
                                     ],
                                 };
+                                if (!isPreSetNumfmt) {
+                                    redoParams.values.unshift({ row, col });
+                                }
                                 const undoParams = factorySetNumfmtUndoMutation(this._injector, redoParams);
                                 return {
                                     redos: [
@@ -848,8 +869,9 @@ export class NumfmtController extends Disposable implements INumfmtController {
                                     endRow: row,
                                     endColumn: col,
                                 };
-                                const disposable = this._refRangeService.registerRefRange(targetRange, (commandInfo) =>
-                                    register(commandInfo, row, col)
+                                const disposable = this._refRangeService.registerRefRange(
+                                    targetRange,
+                                    (commandInfo, preValues) => register(commandInfo, preValues, row, col)
                                 );
                                 disposableMap.set(`${row}_${col}`, disposable);
                                 disposableCollection.add(disposable);
@@ -890,9 +912,8 @@ export class NumfmtController extends Disposable implements INumfmtController {
                                             const key = `${row}_${col}`;
                                             const disposable = disposableMap.get(key);
                                             disposableMap.delete(key);
-                                            if (!value.pattern) {
-                                                disposable && disposable.dispose();
-                                            } else {
+                                            disposable && disposable.dispose();
+                                            if (value.pattern) {
                                                 const targetRange = {
                                                     startRow: row,
                                                     startColumn: col,
@@ -901,7 +922,8 @@ export class NumfmtController extends Disposable implements INumfmtController {
                                                 };
                                                 const disposable = this._refRangeService.registerRefRange(
                                                     targetRange,
-                                                    (commandInfo) => register(commandInfo, row, col)
+                                                    (commandInfo, preValues) =>
+                                                        register(commandInfo, preValues, row, col)
                                                 );
                                                 disposableMap.set(key, disposable);
                                                 disposableCollection.add(disposable);

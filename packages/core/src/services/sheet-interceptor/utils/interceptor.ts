@@ -1,6 +1,6 @@
-import { Nullable } from '../../../common/type-utils';
-import { Workbook } from '../../../sheets/workbook';
-import { Worksheet } from '../../../sheets/worksheet';
+import type { Nullable } from '../../../common/type-utils';
+import type { Workbook } from '../../../sheets/workbook';
+import type { Worksheet } from '../../../sheets/worksheet';
 
 export type InterceptorHandler<M = unknown, C = ISheetLocation> = (
     value: Nullable<M>,
@@ -8,10 +8,10 @@ export type InterceptorHandler<M = unknown, C = ISheetLocation> = (
     next: (value: Nullable<M>) => Nullable<M>
 ) => Nullable<M>;
 
-export type IInterceptor<M, C> = {
+export interface IInterceptor<M, C> {
     priority?: number;
     handler: InterceptorHandler<M, C>;
-};
+}
 export interface ISheetLocation {
     workbook: Workbook;
     worksheet: Worksheet;

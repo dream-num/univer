@@ -78,6 +78,7 @@ export * from './shared';
 
 // #region sheet
 
+export { composeInterceptors, createInterceptorKey } from './services/sheet-interceptor/utils/interceptor';
 export { Range } from './sheets/range';
 export {
     deserializeRangeWithSheet,

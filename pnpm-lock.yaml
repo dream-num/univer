@@ -951,8 +951,8 @@ importers:
         specifier: ^0.34.6
         version: 0.34.6(vitest@0.34.6)
       esbuild:
-        specifier: ^0.19.7
-        version: 0.19.7
+        specifier: ^0.19.8
+        version: 0.19.8
       happy-dom:
         specifier: ^12.10.3
         version: 12.10.3

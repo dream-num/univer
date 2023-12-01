@@ -1,15 +1,10 @@
-import {
-    FormulaEngineService,
-    FormulaExecutedStateType,
-    IAllRuntimeData,
-    isInDirtyRange,
-    UnitArrayFormulaDataType,
-} from '@univerjs/base-formula-engine';
+import type { IAllRuntimeData, UnitArrayFormulaDataType } from '@univerjs/base-formula-engine';
+import { FormulaEngineService, FormulaExecutedStateType, isInDirtyRange } from '@univerjs/base-formula-engine';
+import type { ISetRangeValuesMutationParams } from '@univerjs/base-sheets';
 import {
     AddWorksheetMergeMutation,
     DeleteRangeMutation,
     InsertRangeMutation,
-    ISetRangeValuesMutationParams,
     MoveColsMutation,
     MoveRangeMutation,
     MoveRowsMutation,
@@ -19,12 +14,11 @@ import {
     SetRangeValuesMutation,
     SetWorksheetNameMutation,
 } from '@univerjs/base-sheets';
+import type { ICommandInfo, IUnitRange } from '@univerjs/core';
 import {
     Disposable,
-    ICommandInfo,
     ICommandService,
     IConfigService,
-    IUnitRange,
     IUniverInstanceService,
     LifecycleStages,
     ObjectMatrix,
@@ -34,6 +28,8 @@ import { Inject } from '@wendellhu/redi';
 
 import { SetFormulaDataMutation } from '../commands/mutations/set-formula-data.mutation';
 import { FormulaDataModel } from '../models/formula-data.model';
+import type { FormulaService } from '../services/formula.service';
+import { IFormulaService } from '../services/formula.service';
 
 @OnLifecycle(LifecycleStages.Starting, CalculateController)
 export class CalculateController extends Disposable {
@@ -44,6 +40,8 @@ export class CalculateController extends Disposable {
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService,
+
+        @Inject(IFormulaService) private readonly _formulaService: FormulaService,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
     ) {
         super();
@@ -53,8 +51,8 @@ export class CalculateController extends Disposable {
 
     private _initialize(): void {
         this._commandExecutedListener();
-
         this._initialExecuteFormulaListener();
+        this._registerFunctions();
     }
 
     private _commandExecutedListener() {
@@ -277,5 +275,9 @@ export class CalculateController extends Disposable {
         });
 
         return redoMutationsInfo;
+    }
+
+    private _registerFunctions() {
+        this._formulaService.registerFunctions();
     }
 }

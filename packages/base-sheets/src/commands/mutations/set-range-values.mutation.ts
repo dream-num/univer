@@ -153,7 +153,10 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
                 cellMatrix?.setValue(row, col, {});
             } else {
                 const oldVal = cellMatrix.getValue(row, col) || {};
-                const type = newVal.t ? newVal.t : checkCellValueType(newVal.v === undefined ? oldVal.v : newVal.v);
+                const type =
+                    newVal.t === CellValueType.FORCE_STRING
+                        ? newVal.t
+                        : checkCellValueType(newVal.v === undefined ? oldVal.v : newVal.v);
 
                 if (newVal.f !== undefined) {
                     oldVal.f = newVal.f;
@@ -177,9 +180,7 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
                     oldVal.m = newVal.m;
                 }
 
-                if (newVal.t !== undefined) {
-                    oldVal.t = newVal.t;
-                } else if (oldVal.v !== undefined) {
+                if (oldVal.v !== undefined) {
                     oldVal.t = type;
                 }
 

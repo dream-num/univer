@@ -79,14 +79,16 @@ export function FormulaBar() {
             className={styles.formulaBox}
             style={{ height: ArrowDirection.Down === state.arrowDirection ? '28px' : '82px' }}
         >
-            <div className={styles.nameRanges} />
+            <div className={styles.nameRanges}>
+                <div className={styles.nameRangesInput} />
+            </div>
             <div className={styles.formulaBar}>
                 <div className={styles.formulaIcon}>
                     <span className={styles.iconContainer}>
-                        <CloseSingle />
+                        <CloseSingle style={{ color: 'rgb(var(--error-color))' }} />
                     </span>
                     <span className={styles.iconContainer}>
-                        <CheckMarkSingle />
+                        <CheckMarkSingle style={{ color: 'rgb(var(--success-color))' }} />
                     </span>
                     <span className={styles.iconContainer}>
                         <FxSingle />

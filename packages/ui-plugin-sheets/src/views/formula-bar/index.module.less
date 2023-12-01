@@ -8,41 +8,38 @@
     border-bottom: 1px solid rgb(var(--border-color));
 
     .name-ranges {
+        box-sizing: border-box;
         width: 80px;
-        height: 27px;
-        border: 1px solid rgb(var(--border-color));
+        height: 100%;
+        padding: 6px 0;
+
+        &-input {
+            height: 100%;
+            border-right: 1px solid rgb(var(--border-color));
+        }
     }
 
     .formula-bar {
         display: flex;
         width: 100%;
+        height: 100%;
 
         .formula-icon {
             position: relative;
 
             display: flex;
+            gap: var(--margin-xs);
             align-items: center;
-            justify-content: space-between;
+            justify-content: center;
 
-            width: 100px;
-            height: 27px;
-            padding: 0 5px;
+            box-sizing: border-box;
+            width: 80px;
+            height: 100%;
+            padding: 6px 0;
 
             font-size: var(--font-size-xs);
-            color: var(--gray-5);
 
-            &::before {
-                content: '';
-
-                position: absolute;
-                top: 4px;
-                right: 0;
-
-                width: 1px;
-                height: 17px;
-
-                background-color: rgb(var(--border-color));
-            }
+            border-right: 1px solid rgb(var(--border-color));
 
             .icon-container {
                 cursor: pointer;
@@ -51,22 +48,22 @@
                 align-items: center;
                 justify-content: center;
 
-                width: 25px;
-                height: 25px;
+                font-size: var(--font-size-lg);
             }
 
             .formula-grey {
-                color: var(--gray-5);
+                // color: var(--gray-5);
             }
 
             .formula-black {
-                color: var(--text-color);
+                color: rgb(var(--text-color));
             }
         }
 
         .formula-input {
             overflow: hidden;
             display: flex;
+            flex: 1;
             align-items: top;
 
             width: 100%;
@@ -91,7 +88,7 @@
                 justify-content: center;
 
                 width: 20px;
-                height: 27px;
+                height: 100%;
 
                 font-size: var(--font-size-xs);
                 color: var(--gray-5);

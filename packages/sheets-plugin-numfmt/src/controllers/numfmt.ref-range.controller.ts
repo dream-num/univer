@@ -44,6 +44,39 @@ export class NumfmtRefRangeController extends Disposable {
     ) {
         super();
         this._registerRefRange();
+        this._mergeRefMutations();
+    }
+
+    private _mergeRefMutations() {
+        this.disposeWithMe(
+            this._refRangeService.intercept({
+                handler: (list, current, next) => {
+                    if (!list || !list.length || !current.length) {
+                        return next(list);
+                    }
+                    const theLastMutation = list[list.length - 1];
+                    const theFirstMutation = current[0];
+                    if (theLastMutation.id === SetNumfmtMutation.id && theFirstMutation.id === SetNumfmtMutation.id) {
+                        const theLastMutationParams = theLastMutation.params as ISetNumfmtMutationParams;
+                        const theFirstMutationParams = theFirstMutation.params as ISetNumfmtMutationParams;
+                        if (
+                            theLastMutationParams.workbookId === theFirstMutationParams.workbookId &&
+                            theLastMutationParams.worksheetId === theFirstMutationParams.worksheetId
+                        ) {
+                            const values = theLastMutationParams.values;
+                            current.forEach((mutation) => {
+                                const params = mutation.params as ISetNumfmtMutationParams;
+                                params.values.forEach((item) => {
+                                    values.push(item);
+                                });
+                            });
+                            return list;
+                        }
+                    }
+                    return next(list);
+                },
+            })
+        );
     }
 
     private _registerRefRange() {
@@ -193,7 +226,8 @@ export class NumfmtRefRangeController extends Disposable {
                             }
                             return { redos: [], undos: [] };
                         };
-                        if (model) {
+
+                        model &&
                             model.forValue((row, col) => {
                                 const targetRange = {
                                     startRow: row,
@@ -208,7 +242,6 @@ export class NumfmtRefRangeController extends Disposable {
                                 disposableMap.set(`${row}_${col}`, disposable);
                                 disposableCollection.add(disposable);
                             });
-                        }
 
                         // on change
                         disposableCollection.add(

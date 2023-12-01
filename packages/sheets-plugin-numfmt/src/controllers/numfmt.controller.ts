@@ -32,7 +32,7 @@ import type { IAutoFillHook } from '@univerjs/ui-plugin-sheets';
 import { APPLY_TYPE, getRepeatRange, IAutoFillService, SheetSkeletonManagerService } from '@univerjs/ui-plugin-sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 import { combineLatest, Observable } from 'rxjs';
-import { distinctUntilChanged, map, switchMap, tap } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, map, switchMap, tap } from 'rxjs/operators';
 
 import { SHEET_NUMFMT_PLUGIN } from '../base/const/PLUGIN_NAME';
 import { AddDecimalCommand } from '../commands/commands/add.decimal.command';
@@ -529,13 +529,23 @@ export class NumfmtController extends Disposable implements INumfmtController {
 
     private _commandExecutedListener() {
         this.disposeWithMe(
-            this._commandService.onCommandExecuted((command) => {
-                if (SetNumfmtCommand.id === command.id) {
-                    this._sheetSkeletonManagerService.reCalculate();
-                    // TODO: @Gggpound The command requires the parameters unitId and sheetId to be passed in.
-                    // this._renderManagerService.getRenderById(unitId)?.mainComponent?.makeDirty();
-                }
-            })
+            toDisposable(
+                new Observable<ISetNumfmtMutationParams>((subscribe) => {
+                    const disposable = this._commandService.onCommandExecuted((command) => {
+                        if (SetNumfmtMutation.id === command.id) {
+                            subscribe.next(command.params as ISetNumfmtMutationParams);
+                        }
+                    });
+                    return () => {
+                        disposable.dispose();
+                    };
+                })
+                    .pipe(debounceTime(16))
+                    .subscribe((params) => {
+                        this._sheetSkeletonManagerService.reCalculate();
+                        this._renderManagerService.getRenderById(params.workbookId)?.mainComponent?.makeDirty();
+                    })
+            )
         );
     }
 }

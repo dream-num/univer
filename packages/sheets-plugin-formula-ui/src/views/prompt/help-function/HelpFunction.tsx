@@ -34,9 +34,6 @@ export function HelpFunction() {
                 return;
             }
 
-            const selection = cellEditorManagerService.getState();
-            if (!selection) return;
-
             const isFocusFormulaEditor = contextService.getContextValue(FOCUSING_FORMULA_EDITOR);
 
             const position = isFocusFormulaEditor
@@ -63,12 +60,10 @@ export function HelpFunction() {
                 })),
             };
 
-            const { startX = 0, startY = 0 } = selection;
             setOffset([left, top + height]);
             setParamIndex(paramIndex);
             setFunctionInfo(localeInfo);
-            // TODO: @Dushusir update position of decorator.
-            setDecoratorPosition({ left: startX, top: startY });
+            setDecoratorPosition({ left, top });
             setVisible(visible);
         });
 

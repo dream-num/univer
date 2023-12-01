@@ -18,19 +18,21 @@ import {
     InsertRangeMoveRightCommandParams,
     InsertRowCommand,
     IRemoveRowColCommandParams,
+    ISelectionWithStyle,
     MoveColsCommand,
     MoveRangeCommand,
     MoveRowsCommand,
     RemoveColCommand,
     RemoveRowCommand,
 } from '@univerjs/base-sheets';
-import { Dimension, ICommandInfo, ObjectMatrix } from '@univerjs/core';
+import { Dimension, ICommandInfo, Nullable, ObjectMatrix, RANGE_TYPE } from '@univerjs/core';
 
 export function offsetFormula(
     formulaData: IFormulaData,
     command: ICommandInfo,
     unitId: string,
-    sheetId: string
+    sheetId: string,
+    selections?: Readonly<Nullable<ISelectionWithStyle[]>>
 ): IFormulaData {
     const { id } = command;
 
@@ -41,10 +43,10 @@ export function offsetFormula(
             handleMoveRange(formulaMatrix, command as ICommandInfo<IMoveRangeCommandParams>);
             break;
         case MoveRowsCommand.id:
-            handleMoveRows(formulaMatrix, command as ICommandInfo<IMoveRowsCommandParams>);
+            handleMoveRows(formulaMatrix, command as ICommandInfo<IMoveRowsCommandParams>, selections);
             break;
         case MoveColsCommand.id:
-            handleMoveCols(formulaMatrix, command as ICommandInfo<IMoveColsCommandParams>);
+            handleMoveCols(formulaMatrix, command as ICommandInfo<IMoveColsCommandParams>, selections);
             break;
         case InsertRowCommand.id:
             handleInsertRow(formulaMatrix, command as ICommandInfo<IInsertRowCommandParams>);
@@ -78,11 +80,89 @@ export function offsetFormula(
 function handleMoveRange(
     formulaMatrix: ObjectMatrix<IFormulaDataItem>,
     command: ICommandInfo<IMoveRangeCommandParams>
-) {}
+) {
+    const { params } = command;
+    if (!params) return;
 
-function handleMoveRows(formulaMatrix: ObjectMatrix<IFormulaDataItem>, command: ICommandInfo<IMoveRowsCommandParams>) {}
+    const { fromRange, toRange } = params;
+    const {
+        startRow: fromStartRow,
+        endRow: fromEndRow,
+        startColumn: fromStartColumn,
+        endColumn: fromEndColumn,
+    } = fromRange;
+    const { startRow: toStartRow, endRow: toEndRow, startColumn: toStartColumn, endColumn: toEndColumn } = toRange;
 
-function handleMoveCols(formulaMatrix: ObjectMatrix<IFormulaDataItem>, command: ICommandInfo<IMoveColsCommandParams>) {}
+    const cacheMatrix = new ObjectMatrix<IFormulaDataItem>();
+
+    for (let r = fromStartRow; r <= fromEndRow; r++) {
+        for (let c = fromStartColumn; c <= fromEndColumn; c++) {
+            const cacheValue = formulaMatrix.getValue(r, c);
+            cacheMatrix.setValue(r - fromStartRow, c - fromStartColumn, cacheValue);
+
+            formulaMatrix.setValue(r, c, null);
+        }
+    }
+
+    for (let r = toStartRow; r <= toEndRow; r++) {
+        for (let c = toStartColumn; c <= toEndColumn; c++) {
+            const cacheValue = cacheMatrix.getValue(r - toStartRow, c - toStartColumn);
+            formulaMatrix.setValue(r, c, cacheValue);
+        }
+    }
+}
+
+function handleMoveRows(
+    formulaMatrix: ObjectMatrix<IFormulaDataItem>,
+    command: ICommandInfo<IMoveRowsCommandParams>,
+    selections?: Readonly<Nullable<ISelectionWithStyle[]>>
+) {
+    const { params } = command;
+    if (!params) return;
+
+    const { fromRow, toRow } = params;
+
+    const filteredSelections = selections?.filter(
+        (selection) =>
+            selection.range.rangeType === RANGE_TYPE.ROW &&
+            selection.range.startRow <= fromRow &&
+            fromRow <= selection.range.endRow
+    );
+
+    if (filteredSelections?.length !== 1) return;
+
+    const rangeToMove = filteredSelections[0].range;
+    const fromRowNumber = rangeToMove.startRow;
+    const count = rangeToMove.endRow - rangeToMove.startRow + 1;
+
+    formulaMatrix.moveRows(fromRowNumber, count, toRow);
+}
+
+function handleMoveCols(
+    formulaMatrix: ObjectMatrix<IFormulaDataItem>,
+    command: ICommandInfo<IMoveColsCommandParams>,
+    selections?: Readonly<Nullable<ISelectionWithStyle[]>>
+) {
+    const { params } = command;
+    if (!params) return;
+
+    const { fromCol, toCol } = params;
+
+    const filteredSelections = selections?.filter(
+        (selection) =>
+            selection.range.rangeType === RANGE_TYPE.COLUMN &&
+            selection.range.startColumn <= fromCol &&
+            fromCol <= selection.range.endColumn
+    );
+
+    if (filteredSelections?.length !== 1) return;
+
+    const rangeToMove = filteredSelections[0].range;
+    const fromColNumber = rangeToMove.startColumn;
+    const count = rangeToMove.endColumn - rangeToMove.startColumn + 1;
+
+    formulaMatrix.moveColumns(fromColNumber, count, toCol);
+}
 
 function handleInsertRow(
     formulaMatrix: ObjectMatrix<IFormulaDataItem>,

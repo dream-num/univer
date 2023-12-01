@@ -9,6 +9,7 @@ import {
     RANGE_TYPE,
     Rectangle,
     sequenceExecute,
+    SheetInterceptorService,
     Tools,
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
@@ -60,6 +61,7 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
             return false;
         }
 
+        const sheetInterceptorService = accessor.get(SheetInterceptorService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         if (!workbook) {
@@ -166,32 +168,33 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
         };
 
         const commandService = accessor.get(ICommandService);
-        const result = sequenceExecute(
-            [
-                { id: MoveRowsMutation.id, params: moveRowsParams },
-                { id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams },
-                { id: AddWorksheetMergeMutation.id, params: addMergeParams },
-                { id: SetSelectionsOperation.id, params: setSelectionsParam },
-            ],
-            commandService
-        );
+
+        const interceptorCommands = sheetInterceptorService.onCommandExecute({ id: MoveRowsCommand.id, params });
+
+        const redos = [
+            { id: MoveRowsMutation.id, params: moveRowsParams },
+            { id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams },
+            { id: AddWorksheetMergeMutation.id, params: addMergeParams },
+            { id: SetSelectionsOperation.id, params: setSelectionsParam },
+            ...interceptorCommands.redos,
+        ];
+
+        const undos = [
+            { id: MoveRowsMutation.id, params: undoMoveRowsParams },
+            { id: RemoveWorksheetMergeMutation.id, params: undoAddMergeParams },
+            { id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams },
+            { id: SetSelectionsOperation.id, params: undoSetSelectionsParam },
+            ...interceptorCommands.undos,
+        ];
+
+        const result = sequenceExecute(redos, commandService);
 
         if (result.result) {
             const undoRedoService = accessor.get(IUndoRedoService);
             undoRedoService.pushUndoRedo({
                 unitID: workbookId,
-                undoMutations: [
-                    { id: MoveRowsMutation.id, params: undoMoveRowsParams },
-                    { id: RemoveWorksheetMergeMutation.id, params: undoAddMergeParams },
-                    { id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams },
-                    { id: SetSelectionsOperation.id, params: undoSetSelectionsParam },
-                ],
-                redoMutations: [
-                    { id: MoveRowsMutation.id, params: moveRowsParams },
-                    { id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams },
-                    { id: AddWorksheetMergeMutation.id, params: addMergeParams },
-                    { id: SetSelectionsOperation.id, params: setSelectionsParam },
-                ],
+                undoMutations: undos,
+                redoMutations: redos,
             });
             return true;
         }
@@ -222,6 +225,7 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
             return false;
         }
 
+        const sheetInterceptorService = accessor.get(SheetInterceptorService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         if (!workbook) {
@@ -330,32 +334,33 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
         };
 
         const commandService = accessor.get(ICommandService);
-        const result = sequenceExecute(
-            [
-                { id: MoveColsMutation.id, params: moveColsParams },
-                { id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams },
-                { id: AddWorksheetMergeMutation.id, params: addMergeParams },
-                { id: SetSelectionsOperation.id, params: setSelectionsParam },
-            ],
-            commandService
-        );
+
+        const interceptorCommands = sheetInterceptorService.onCommandExecute({ id: MoveColsCommand.id, params });
+
+        const redos = [
+            { id: MoveColsMutation.id, params: moveColsParams },
+            { id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams },
+            { id: AddWorksheetMergeMutation.id, params: addMergeParams },
+            { id: SetSelectionsOperation.id, params: setSelectionsParam },
+            ...interceptorCommands.redos,
+        ];
+
+        const undos = [
+            { id: MoveColsMutation.id, params: undoMoveColsParams },
+            { id: RemoveWorksheetMergeMutation.id, params: undoAddMergeParams },
+            { id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams },
+            { id: SetSelectionsOperation.id, params: undoSetSelectionsParam },
+            ...interceptorCommands.undos,
+        ];
+
+        const result = sequenceExecute(redos, commandService);
 
         if (result.result) {
             const undoRedoService = accessor.get(IUndoRedoService);
             undoRedoService.pushUndoRedo({
                 unitID: workbookId,
-                undoMutations: [
-                    { id: MoveColsMutation.id, params: undoMoveColsParams },
-                    { id: RemoveWorksheetMergeMutation.id, params: undoAddMergeParams },
-                    { id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams },
-                    { id: SetSelectionsOperation.id, params: undoSetSelectionsParam },
-                ],
-                redoMutations: [
-                    { id: MoveColsMutation.id, params: moveColsParams },
-                    { id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams },
-                    { id: AddWorksheetMergeMutation.id, params: addMergeParams },
-                    { id: SetSelectionsOperation.id, params: setSelectionsParam },
-                ],
+                undoMutations: undos,
+                redoMutations: redos,
             });
             return true;
         }

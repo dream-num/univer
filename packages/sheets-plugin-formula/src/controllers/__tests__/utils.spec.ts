@@ -5,6 +5,9 @@ import {
     InsertRangeMoveDownCommand,
     InsertRangeMoveRightCommand,
     InsertRowCommand,
+    MoveColsCommand,
+    MoveRangeCommand,
+    MoveRowsCommand,
     RemoveColCommand,
     RemoveRowCommand,
 } from '@univerjs/base-sheets';
@@ -14,6 +17,213 @@ import { offsetFormula } from '../utils';
 
 describe('utils test', () => {
     describe('function offsetFormula', () => {
+        it('move range', () => {
+            const unitId = 'workbook-01';
+            const sheetId = 'sheet-0011';
+            const formulaData = {
+                [unitId]: {
+                    [sheetId]: {
+                        '0': {
+                            '3': {
+                                f: '=SUM(A5)',
+                            },
+                        },
+                    },
+                },
+            };
+
+            const command = {
+                id: MoveRangeCommand.id,
+                params: {
+                    fromRange: {
+                        startRow: 0,
+                        startColumn: 3,
+                        endRow: 0,
+                        endColumn: 3,
+                    },
+                    toRange: {
+                        startRow: 3,
+                        startColumn: 3,
+                        endRow: 3,
+                        endColumn: 3,
+                    },
+                },
+            };
+
+            const newFormulaData = offsetFormula(formulaData, command, unitId, sheetId);
+            expect(newFormulaData).toStrictEqual({
+                [unitId]: {
+                    [sheetId]: {
+                        '0': {
+                            '3': null,
+                        },
+                        '3': {
+                            '3': {
+                                f: '=SUM(A5)',
+                            },
+                        },
+                    },
+                },
+            });
+        });
+        it('move rows', () => {
+            const unitId = 'workbook-01';
+            const sheetId = 'sheet-0011';
+            const formulaData = {
+                [unitId]: {
+                    [sheetId]: {
+                        '0': {
+                            '3': {
+                                f: '=SUM(A5)',
+                            },
+                        },
+                    },
+                },
+            };
+
+            const command = {
+                id: MoveRowsCommand.id,
+                params: {
+                    fromRow: 0,
+                    toRow: 4,
+                },
+            };
+
+            const selections = [
+                {
+                    range: {
+                        startRow: 0,
+                        startColumn: 0,
+                        endRow: 0,
+                        endColumn: 19,
+                        rangeType: 1,
+                    },
+                    primary: {
+                        actualRow: 0,
+                        actualColumn: 0,
+                        isMerged: false,
+                        isMergedMainCell: false,
+                        startRow: 0,
+                        startColumn: 0,
+                        endRow: 0,
+                        endColumn: 0,
+                    },
+                    style: {
+                        strokeWidth: 2,
+                        stroke: '#409f11',
+                        fill: 'rgba(53, 50, 43, 0.1)',
+                        widgets: {},
+                        widgetSize: 6,
+                        widgetStrokeWidth: 1,
+                        widgetStroke: '#ffffff',
+                        hasAutoFill: true,
+                        AutofillSize: 6,
+                        AutofillStrokeWidth: 1,
+                        AutofillStroke: '#ffffff',
+                        hasRowHeader: true,
+                        rowHeaderFill: 'rgba(53, 50, 43, 0.1)',
+                        rowHeaderStroke: '#409f11',
+                        rowHeaderStrokeWidth: 1,
+                        hasColumnHeader: true,
+                        columnHeaderFill: 'rgba(53, 50, 43, 0.1)',
+                        columnHeaderStroke: '#409f11',
+                        columnHeaderStrokeWidth: 1,
+                    },
+                },
+            ];
+
+            const newFormulaData = offsetFormula(formulaData, command, unitId, sheetId, selections);
+            expect(newFormulaData).toStrictEqual({
+                [unitId]: {
+                    [sheetId]: {
+                        '3': {
+                            '3': {
+                                f: '=SUM(A5)',
+                            },
+                        },
+                    },
+                },
+            });
+        });
+        it('move columns', () => {
+            const unitId = 'workbook-01';
+            const sheetId = 'sheet-0011';
+            const formulaData = {
+                [unitId]: {
+                    [sheetId]: {
+                        '0': {
+                            '0': {
+                                f: '=SUM(E2)',
+                            },
+                        },
+                    },
+                },
+            };
+
+            const command = {
+                id: MoveColsCommand.id,
+                params: {
+                    fromCol: 0,
+                    toCol: 4,
+                },
+            };
+
+            const selections = [
+                {
+                    range: {
+                        startRow: 0,
+                        startColumn: 0,
+                        endRow: 999,
+                        endColumn: 0,
+                        rangeType: 2,
+                    },
+                    primary: {
+                        actualRow: 0,
+                        actualColumn: 0,
+                        isMerged: false,
+                        isMergedMainCell: false,
+                        startRow: 0,
+                        startColumn: 0,
+                        endRow: 0,
+                        endColumn: 0,
+                    },
+                    style: {
+                        strokeWidth: 2,
+                        stroke: '#409f11',
+                        fill: 'rgba(53, 50, 43, 0.1)',
+                        widgets: {},
+                        widgetSize: 6,
+                        widgetStrokeWidth: 1,
+                        widgetStroke: '#ffffff',
+                        hasAutoFill: true,
+                        AutofillSize: 6,
+                        AutofillStrokeWidth: 1,
+                        AutofillStroke: '#ffffff',
+                        hasRowHeader: true,
+                        rowHeaderFill: 'rgba(53, 50, 43, 0.1)',
+                        rowHeaderStroke: '#409f11',
+                        rowHeaderStrokeWidth: 1,
+                        hasColumnHeader: true,
+                        columnHeaderFill: 'rgba(53, 50, 43, 0.1)',
+                        columnHeaderStroke: '#409f11',
+                        columnHeaderStrokeWidth: 1,
+                    },
+                },
+            ];
+
+            const newFormulaData = offsetFormula(formulaData, command, unitId, sheetId, selections);
+            expect(newFormulaData).toStrictEqual({
+                [unitId]: {
+                    [sheetId]: {
+                        '0': {
+                            '3': {
+                                f: '=SUM(E2)',
+                            },
+                        },
+                    },
+                },
+            });
+        });
         it('insert row', () => {
             const unitId = 'workbook-01';
             const sheetId = 'sheet-0011';

@@ -41,6 +41,7 @@ import {
     RemoveColCommand,
     RemoveRowCommand,
     runRefRangeMutations,
+    SelectionManagerService,
     SetRangeValuesMutation,
     SetRangeValuesUndoMutationFactory,
 } from '@univerjs/base-sheets';
@@ -114,6 +115,7 @@ export class UpdateFormulaController extends Disposable {
         @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
+        @Inject(SelectionManagerService) private _selectionManagerService: SelectionManagerService,
         @Inject(Injector) readonly _injector: Injector
     ) {
         super();
@@ -187,14 +189,15 @@ export class UpdateFormulaController extends Disposable {
 
         if (result) {
             const { unitSheetNameMap } = this._formulaDataModel.getCalculateData();
-            const oldFormulaData = Tools.deepClone(this._formulaDataModel.getFormulaData());
+            let oldFormulaData = this._formulaDataModel.getFormulaData();
             const formulaData = this._getFormulaReferenceMoveInfo(oldFormulaData, unitSheetNameMap, result);
 
             const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
             const unitId = workbook.getUnitId();
             const sheetId = workbook.getActiveSheet().getSheetId();
-            const offsetFormulaData = offsetFormula(formulaData, command, unitId, sheetId);
-            console.info('offsetFormulaData', offsetFormulaData);
+            const selections = this._selectionManagerService.getSelections();
+            oldFormulaData = offsetFormula(oldFormulaData, command, unitId, sheetId, selections);
+            const offsetFormulaData = offsetFormula(formulaData, command, unitId, sheetId, selections);
 
             return this._getUpdateFormulaMutations(oldFormulaData, offsetFormulaData);
         }
@@ -429,13 +432,11 @@ export class UpdateFormulaController extends Disposable {
 
                 formulaMatrix.forValue((r, c, formulaItem) => {
                     const formulaString = formulaItem?.f || '';
-
-                    const oldFormulaItem = oldFormulaMatrix.getRow(r)?.get(c);
-                    const oldFormulaString = oldFormulaItem?.f || '';
+                    const oldFormulaString = oldFormulaMatrix.getRow(r)?.get(c)?.f || '';
 
                     if (isFormulaString(formulaString)) {
                         // formula with formula id
-                        if (isFormulaString(oldFormulaString)) {
+                        if (isFormulaString(oldFormulaString) && formulaString !== oldFormulaString) {
                             cellMatrix.setValue(r, c, { f: formulaString });
                         } else {
                             // formula with only id

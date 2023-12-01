@@ -7,18 +7,41 @@ import {
     SetRangeValuesMutation,
     SetSelectionsOperation,
 } from '@univerjs/base-sheets';
-import { ICellData, ICommandService, IUniverInstanceService, Nullable, RANGE_TYPE, Univer } from '@univerjs/core';
-import { AutoFillCommand, AutoFillService, IAutoFillService } from '@univerjs/ui-plugin-sheets';
+import {
+    ICellData,
+    ICommandService,
+    IUniverInstanceService,
+    Nullable,
+    RANGE_TYPE,
+    RedoCommand,
+    ThemeService,
+    UndoCommand,
+    Univer,
+} from '@univerjs/core';
+import {
+    AutoFillCommand,
+    AutoFillController,
+    AutoFillService,
+    IAutoFillService,
+    ISelectionRenderService,
+    SelectionRenderService,
+} from '@univerjs/ui-plugin-sheets';
 import { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { FormulaAutoFillController } from '../formula-auto-fill.controller';
 import { createCommandTestBed } from './create-command-test-bed';
 
+const theme = {
+    colorBlack: '#35322b',
+};
+
 describe('Test clear selection content commands', () => {
     let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
+    let autoFillController: AutoFillController;
+    let themeService: ThemeService;
     let getValues: (
         startRow: number,
         startColumn: number,
@@ -28,14 +51,18 @@ describe('Test clear selection content commands', () => {
 
     beforeEach(() => {
         const testBed = createCommandTestBed(undefined, [
-            [FormulaAutoFillController],
-            [IAutoFillService, { useClass: AutoFillService }],
+            [ISelectionRenderService, { useClass: SelectionRenderService }],
+            [AutoFillController],
             [FormulaEngineService],
+            [IAutoFillService, { useClass: AutoFillService }],
+            [FormulaAutoFillController],
         ]);
         univer = testBed.univer;
         get = testBed.get;
         commandService = get(ICommandService);
-        commandService.registerCommand(AutoFillCommand);
+        themeService = get(ThemeService);
+        themeService.setTheme(theme);
+        autoFillController = get(AutoFillController);
         commandService.registerCommand(SetRangeValuesMutation);
         commandService.registerCommand(SetSelectionsOperation);
         commandService.registerCommand(AddWorksheetMergeMutation);
@@ -75,26 +102,55 @@ describe('Test clear selection content commands', () => {
                     },
                 ]);
 
-                function getValue(): Nullable<ICellData> {
-                    return get(IUniverInstanceService)
-                        .getUniverSheetInstance('test')
-                        ?.getSheetBySheetId('sheet1')
-                        ?.getRange(0, 1, 0, 1)
-                        .getValue();
-                }
+                (autoFillController as any)._handleFill(
+                    {
+                        startColumn: 1,
+                        endColumn: 1,
+                        startRow: 0,
+                        endRow: 0,
+                    },
+                    {
+                        startColumn: 1,
+                        endColumn: 1,
+                        startRow: 0,
+                        endRow: 2,
+                    }
+                );
 
-                // expect(getValue()).toStrictEqual({});
-                // // undo
-                // expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
-                // expect(getValue()).toStrictEqual({
-                //     v: 'A1',
-                // });
-                // // redo
-                // expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
-                // expect(getValue()).toStrictEqual({});
+                // values will be in the following format
+                // [
+                //     [ { f: '=SUM(A1)' } ],
+                //     [ { f: '=SUM(A2)', si: '1ZMZWH' } ],
+                //     [ { si: '1ZMZWH' } ]
+                //   ]
+                let values = getValues(0, 1, 2, 1);
+                let B2 = values && values[1][0];
+                let B3 = values && values[2][0];
 
-                // // Restore the original data
-                // expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(B2?.f).toStrictEqual('=SUM(A2)');
+                expect(B2?.si).toEqual(B3?.si);
+
+                // undo
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+
+                values = getValues(0, 1, 2, 1);
+                B2 = values && values[1][0];
+                B3 = values && values[2][0];
+
+                expect(B2).toStrictEqual({});
+                expect(B3).toStrictEqual({});
+
+                // redo
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+                values = getValues(0, 1, 2, 1);
+                B2 = values && values[1][0];
+                B3 = values && values[2][0];
+
+                expect(B2?.f).toStrictEqual('=SUM(A2)');
+                expect(B2?.si).toEqual(B3?.si);
+
+                // Restore the original data
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
             });
         });
 

@@ -510,7 +510,13 @@ export class ObjectArray<T> {
 
         // move all items after toIndex in backward order
         for (let i = fromIndex - 1; i >= toIndex; i--) {
-            array[i + count] = array[i];
+            const item = array[i];
+            array[i + count] = item;
+
+            // Prevent undefined, otherwise the forValue loop will report an error
+            if (item == null) {
+                delete array[i + count];
+            }
         }
 
         // insert cached items to toIndex
@@ -530,7 +536,13 @@ export class ObjectArray<T> {
 
         // move all items after toIndex in forward order
         for (let i = fromIndex + count; i < toIndex; i++) {
-            array[i - count] = array[i];
+            const item = array[i];
+            array[i - count] = item;
+
+            // Prevent undefined, otherwise the forValue loop will report an error
+            if (item == null) {
+                delete array[i - count];
+            }
         }
 
         // insert cached items to toIndex

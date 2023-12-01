@@ -1,9 +1,11 @@
-import { Disposable, IConfigService, IUnitRange, LifecycleStages, ObjectMatrix, OnLifecycle } from '@univerjs/core';
-import { Ctor, Dependency, Inject, Injector } from '@wendellhu/redi';
+import type { IUnitRange } from '@univerjs/core';
+import { Disposable, IConfigService, LifecycleStages, ObjectMatrix, OnLifecycle } from '@univerjs/core';
+import type { Ctor, Dependency } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 import { Subject } from 'rxjs';
 
 import { LexerTreeBuilder } from '../analysis/lexer';
-import { LexerNode } from '../analysis/lexer-node';
+import type { LexerNode } from '../analysis/lexer-node';
 import { AstTreeBuilder } from '../analysis/parser';
 import { AstRootNodeFactory } from '../ast-node/ast-root-node';
 import { ErrorNode } from '../ast-node/base-ast-node';
@@ -16,9 +18,10 @@ import { ReferenceNodeFactory } from '../ast-node/reference-node';
 import { SuffixNodeFactory } from '../ast-node/suffix-node';
 import { UnionNodeFactory } from '../ast-node/union-node';
 import { ValueNodeFactory } from '../ast-node/value-node';
-import { IFormulaDatasetConfig, IUnitExcludedCell, UnitArrayFormulaDataType } from '../basics/common';
+import type { IFormulaDatasetConfig, IUnitArrayFormulaDataType, IUnitExcludedCell } from '../basics/common';
 import { ErrorType } from '../basics/error-type';
-import { FUNCTION_NAMES, IFunctionInfo } from '../basics/function';
+import type { IFunctionInfo } from '../basics/function';
+import { FUNCTION_NAMES } from '../basics/function';
 import { FormulaDependencyGenerator } from '../dependency/formula-dependency';
 import {
     Average,
@@ -37,24 +40,21 @@ import {
     Sum,
     Union,
 } from '../functions';
-import { BaseFunction } from '../functions/base-function';
+import type { BaseFunction } from '../functions/base-function';
 import { Interpreter } from '../interpreter/interpreter';
-import { FunctionVariantType } from '../reference-object/base-reference-object';
+import type { FunctionVariantType } from '../reference-object/base-reference-object';
 import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from './current-data.service';
 import { DefinedNamesService, IDefinedNamesService } from './defined-names.service';
 import { FunctionService, IFunctionService } from './function.service';
-import {
-    FormulaExecuteStageType,
-    FormulaRuntimeService,
-    IAllRuntimeData,
-    IExecutionInProgressParams,
-    IFormulaRuntimeService,
-} from './runtime.service';
+import type { IAllRuntimeData, IExecutionInProgressParams } from './runtime.service';
+import { FormulaExecuteStageType, FormulaRuntimeService, IFormulaRuntimeService } from './runtime.service';
 import { ISuperTableService, SuperTableService } from './super-table.service';
 
 export const DEFAULT_CYCLE_REFERENCE_COUNT = 1;
 
 export const CYCLE_REFERENCE_COUNT = 'cycleReferenceCount';
+
+export const EVERY_N_FUNCTION_EXECUTION_PAUSE = 100;
 
 @OnLifecycle(LifecycleStages.Rendered, FormulaEngineService)
 export class FormulaEngineService extends Disposable {
@@ -248,13 +248,13 @@ export class FormulaEngineService extends Disposable {
         return true;
     }
 
-    private _getArrayFormulaDirtyRangeAndExcludedRange(unitArrayFormulaData: UnitArrayFormulaDataType) {
+    private _getArrayFormulaDirtyRangeAndExcludedRange(unitArrayFormulaData: IUnitArrayFormulaDataType) {
         const dirtyRanges: IUnitRange[] = [];
         const excludedCell: IUnitExcludedCell = {};
         Object.keys(unitArrayFormulaData).forEach((unitId) => {
             const sheetArrayFormulaData = unitArrayFormulaData[unitId];
             Object.keys(sheetArrayFormulaData).forEach((sheetId) => {
-                const cellValue = sheetArrayFormulaData[sheetId];
+                const cellValue = new ObjectMatrix(sheetArrayFormulaData[sheetId]);
 
                 if (cellValue == null) {
                     return true;
@@ -279,15 +279,6 @@ export class FormulaEngineService extends Disposable {
         return { dirtyRanges, excludedCell };
     }
 
-    /**
-     *
-     * @param unitId
-     * @param formulaData
-     * @param interpreterDatasetConfig
-     * @param forceCalculate force calculate all formula, and ignore dependency relationship
-     * @param dirtyRanges input external unit data for multi workbook
-     * @returns
-     */
     private async _apply(isArrayFormulaState = false) {
         if (isArrayFormulaState) {
             this.runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.START_DEPENDENCY_ARRAY_FORMULA);
@@ -328,6 +319,15 @@ export class FormulaEngineService extends Disposable {
                 value = await interpreter.executeAsync(astNode);
             } else {
                 value = interpreter.execute(astNode);
+            }
+
+            /**
+             * For every 100 functions, execute a setTimeout to wait for external command input.
+             */
+            if (i % EVERY_N_FUNCTION_EXECUTION_PAUSE === 0) {
+                await new Promise((resolve) => {
+                    setTimeout(resolve, 0);
+                });
             }
 
             if (this.runtimeService.isStopExecution()) {

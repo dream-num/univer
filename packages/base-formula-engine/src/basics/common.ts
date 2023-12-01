@@ -1,8 +1,23 @@
-import { BooleanNumber, ICellData, IRange, IUnitRange, ObjectMatrix, ObjectMatrixPrimitiveType } from '@univerjs/core';
+import type {
+    BooleanNumber,
+    ICellData,
+    IRange,
+    IUnitRange,
+    ObjectMatrix,
+    ObjectMatrixPrimitiveType,
+} from '@univerjs/core';
 
-export type ArrayFormulaDataType = { [sheetId: string]: ObjectMatrix<IRange> };
+export interface IArrayFormulaDataType {
+    [sheetId: string]: ObjectMatrixPrimitiveType<IRange>;
+}
 
-export type UnitArrayFormulaDataType = { [unitId: string]: ArrayFormulaDataType };
+export interface IUnitArrayFormulaDataType {
+    [unitId: string]: IArrayFormulaDataType;
+}
+
+export interface IArrayFormulaUnitDataType {
+    [unitId: string]: { [sheetId: string]: ObjectMatrixPrimitiveType<ICellData> };
+}
 
 export const ERROR_VALUE_OBJECT_CLASS_TYPE = 'errorValueObject';
 
@@ -22,11 +37,11 @@ export enum AstNodePromiseType {
     ERROR,
 }
 
-export type ISheetItem = {
+export interface ISheetItem {
     cellData: ObjectMatrix<ICellData>;
     rowCount: number;
     columnCount: number;
-};
+}
 
 export interface ISheetData {
     [sheetId: string]: ISheetItem;
@@ -98,6 +113,7 @@ export interface IUnitExcludedCell {
 
 export interface IFormulaDatasetConfig {
     formulaData: IFormulaData;
+    arrayFormulaUnitData: IArrayFormulaUnitDataType;
     forceCalculate: boolean;
     dirtyRanges: IUnitRange[];
     excludedCell?: IUnitExcludedCell;

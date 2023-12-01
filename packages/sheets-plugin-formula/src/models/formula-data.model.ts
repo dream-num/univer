@@ -1,20 +1,21 @@
-import {
+import type {
+    IArrayFormulaUnitDataType,
     IFormulaData,
     IFormulaDataItem,
+    IRuntimeUnitDataType,
     ISheetData,
+    IUnitArrayFormulaDataType,
     IUnitData,
     IUnitSheetNameMap,
-    UnitArrayFormulaDataType,
 } from '@univerjs/base-formula-engine';
+import type { ICellData, IRange, ObjectMatrixPrimitiveType } from '@univerjs/core';
 import {
     Disposable,
-    ICellData,
     ICommandService,
     isFormulaId,
     isFormulaString,
     IUniverInstanceService,
     ObjectMatrix,
-    ObjectMatrixPrimitiveType,
 } from '@univerjs/core';
 
 export interface IFormulaConfig {
@@ -26,13 +27,68 @@ export interface IFormulaConfig {
 export class FormulaDataModel extends Disposable {
     private _formulaData: IFormulaData = {};
 
-    private _arrayFormulaData: UnitArrayFormulaDataType = {};
+    private _arrayFormulaData: IUnitArrayFormulaDataType = {};
+
+    private _arrayFormulaUnitData: IArrayFormulaUnitDataType = {};
 
     constructor(
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
+    }
+
+    mergeArrayFormulaUnitData(unitData: IRuntimeUnitDataType) {
+        Object.keys(unitData).forEach((unitId) => {
+            const sheetData = unitData[unitId];
+            if (this._arrayFormulaData[unitId] == null) {
+                this._arrayFormulaData[unitId] = {};
+            }
+
+            if (this._arrayFormulaUnitData[unitId] == null) {
+                this._arrayFormulaUnitData[unitId] = {};
+            }
+
+            Object.keys(sheetData).forEach((sheetId) => {
+                const cellMatrixData = sheetData[sheetId];
+
+                let arrayFormulaDataMatrix = new ObjectMatrix<IRange>();
+
+                let arrayFormulaCellMatrixData = new ObjectMatrix<ICellData>();
+
+                if (this._arrayFormulaData[unitId][sheetId] != null) {
+                    arrayFormulaDataMatrix = new ObjectMatrix<IRange>(this._arrayFormulaData[unitId][sheetId]);
+                }
+
+                if (this._arrayFormulaUnitData[unitId][sheetId] != null) {
+                    arrayFormulaCellMatrixData = new ObjectMatrix<ICellData>(
+                        this._arrayFormulaUnitData[unitId][sheetId]
+                    );
+                }
+
+                /**
+                 * If the calculated value of the array formula is updated, clear the values within the original data formula range.
+                 */
+                cellMatrixData.forValue((row, column) => {
+                    const arrayFormulaRange = arrayFormulaDataMatrix?.getValue(row, column);
+                    if (arrayFormulaRange == null) {
+                        return true;
+                    }
+                    const { startRow, startColumn, endRow, endColumn } = arrayFormulaRange;
+                    for (let r = startRow; r <= endRow; r++) {
+                        for (let c = startColumn; c <= endColumn; c++) {
+                            arrayFormulaCellMatrixData.setValue(r, c, null);
+                        }
+                    }
+                });
+
+                cellMatrixData.forValue((row, column, cellData) => {
+                    arrayFormulaCellMatrixData.setValue(row, column, cellData);
+                });
+
+                this._arrayFormulaUnitData[unitId][sheetId] = arrayFormulaCellMatrixData.getData();
+            });
+        });
     }
 
     getFormulaData() {
@@ -43,11 +99,23 @@ export class FormulaDataModel extends Disposable {
         this._formulaData = value;
     }
 
-    getArrayFormulaData(): UnitArrayFormulaDataType {
+    setArrayFormulaData(value: IUnitArrayFormulaDataType) {
+        this._arrayFormulaData = value;
+    }
+
+    getArrayFormulaData(): IUnitArrayFormulaDataType {
         return this._arrayFormulaData;
     }
 
-    setArrayFormulaData(formulaData: UnitArrayFormulaDataType) {
+    setArrayFormulaUnitData(value: IArrayFormulaUnitDataType) {
+        this._arrayFormulaUnitData = value;
+    }
+
+    getArrayFormulaUnitData() {
+        return this._arrayFormulaUnitData;
+    }
+
+    mergeArrayFormulaData(formulaData: IUnitArrayFormulaDataType) {
         Object.keys(formulaData).forEach((unitId) => {
             const sheetData = formulaData[unitId];
 
@@ -56,16 +124,34 @@ export class FormulaDataModel extends Disposable {
             }
 
             Object.keys(sheetData).forEach((sheetId) => {
-                const arrayFormula = sheetData[sheetId];
+                const arrayFormula = new ObjectMatrix(sheetData[sheetId]);
+
+                let rangeMatrix = new ObjectMatrix<IRange>();
 
                 if (!this._arrayFormulaData[unitId][sheetId]) {
-                    this._arrayFormulaData[unitId][sheetId] = new ObjectMatrix();
+                    rangeMatrix = new ObjectMatrix(this._arrayFormulaData[unitId][sheetId]);
                 }
+
                 arrayFormula.forValue((r, c, v) => {
-                    this._arrayFormulaData[unitId][sheetId].setValue(r, c, v);
+                    rangeMatrix.setValue(r, c, v);
                 });
+
+                this._arrayFormulaData[unitId][sheetId] = rangeMatrix.getData();
             });
         });
+    }
+
+    deleteArrayFormulaData(unitId: string, sheetId: string, row: number, column: number) {
+        const cellMatrixData = this._arrayFormulaData[unitId]?.[sheetId];
+        if (cellMatrixData == null) {
+            return;
+        }
+        const rangeMatrixData = new ObjectMatrix(cellMatrixData);
+        if (rangeMatrixData.getValue(row, column)) {
+            rangeMatrixData.realDeleteValue(row, column);
+
+            this._arrayFormulaData[unitId][sheetId] = rangeMatrixData.getData();
+        }
     }
 
     initFormulaData() {

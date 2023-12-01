@@ -1,11 +1,12 @@
-import { CellValueType, ICellData, IRange, Nullable } from '@univerjs/core';
+import type { ICellData, IRange, Nullable } from '@univerjs/core';
+import { CellValueType } from '@univerjs/core';
 
-import { IRuntimeUnitDataType, IUnitData, IUnitSheetNameMap } from '../basics/common';
+import type { IRuntimeUnitDataType, IUnitData, IUnitSheetNameMap } from '../basics/common';
 import { ERROR_TYPE_SET, ErrorType } from '../basics/error-type';
 import { ObjectClassType } from '../basics/object-class-type';
 import { ErrorValueObject } from '../other-object/error-value-object';
 import { ArrayValueObject } from '../value-object/array-value-object';
-import { BaseValueObject, CalculateValueType, IArrayValueObject } from '../value-object/base-value-object';
+import type { BaseValueObject, CalculateValueType, IArrayValueObject } from '../value-object/base-value-object';
 import { BooleanValueObject, NumberValueObject, StringValueObject } from '../value-object/primitive-object';
 
 export type NodeValueType = BaseValueObject | BaseReferenceObject | ErrorValueObject | AsyncObject;
@@ -37,6 +38,8 @@ export class BaseReferenceObject extends ObjectClassType {
     private _forcedUnitId: string = '';
 
     private _runtimeData: IRuntimeUnitDataType = {};
+
+    private _arrayFormulaUnitData: IRuntimeUnitDataType = {};
 
     private _refOffsetX = 0;
 
@@ -207,6 +210,14 @@ export class BaseReferenceObject extends ObjectClassType {
         this._runtimeData = runtimeData;
     }
 
+    getArrayFormulaUnitData() {
+        return this._arrayFormulaUnitData;
+    }
+
+    setArrayFormulaUnitData(unitData: IRuntimeUnitDataType) {
+        this._arrayFormulaUnitData = unitData;
+    }
+
     getRowCount() {
         return this.getCurrentActiveSheetData().rowCount;
     }
@@ -280,12 +291,22 @@ export class BaseReferenceObject extends ObjectClassType {
         return this._runtimeData?.[this.getUnitId()]?.[this.getSheetId()];
     }
 
+    getCurrentActiveArrayFormulaData() {
+        return this._arrayFormulaUnitData?.[this.getUnitId()]?.[this.getSheetId()];
+    }
+
     getCellData(row: number, column: number) {
         const activeSheetData = this.getCurrentActiveSheetData();
 
         const activeRuntimeData = this.getCurrentRuntimeSheetData();
 
-        return activeRuntimeData?.getValue(row, column) || activeSheetData.cellData.getValue(row, column);
+        const activeArrayFormulaData = this.getCurrentActiveArrayFormulaData();
+
+        return (
+            activeRuntimeData?.getValue(row, column) ||
+            activeArrayFormulaData?.getValue(row, column) ||
+            activeSheetData.cellData.getValue(row, column)
+        );
     }
 
     getCellByPosition(row?: number, column?: number) {

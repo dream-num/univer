@@ -1,5 +1,5 @@
-import type { IAllRuntimeData, UnitArrayFormulaDataType } from '@univerjs/base-formula-engine';
-import { FormulaEngineService, FormulaExecutedStateType, isInDirtyRange } from '@univerjs/base-formula-engine';
+import type { IAllRuntimeData } from '@univerjs/base-formula-engine';
+import { FormulaEngineService, FormulaExecutedStateType } from '@univerjs/base-formula-engine';
 import type { ISetRangeValuesMutationParams } from '@univerjs/base-sheets';
 import {
     AddWorksheetMergeMutation,
@@ -14,7 +14,7 @@ import {
     SetRangeValuesMutation,
     SetWorksheetNameMutation,
 } from '@univerjs/base-sheets';
-import type { ICommandInfo, IUnitRange } from '@univerjs/core';
+import type { ICommandInfo, IRange, IUnitRange } from '@univerjs/core';
 import {
     Disposable,
     ICommandService,
@@ -26,6 +26,7 @@ import {
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
+import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
 import { SetFormulaDataMutation } from '../commands/mutations/set-formula-data.mutation';
 import { FormulaDataModel } from '../models/formula-data.model';
 import type { FormulaService } from '../services/formula.service';
@@ -112,7 +113,7 @@ export class CalculateController extends Disposable {
 
         const arrayFormulaData = this._formulaDataModel.getArrayFormulaData();
 
-        const cellRangeData = arrayFormulaData?.[unitId]?.[sheetId];
+        const cellRangeData = new ObjectMatrix<IRange>(arrayFormulaData?.[unitId]?.[sheetId]);
 
         if (cellRangeData) {
             cellMatrix.forValue((row, column) => {
@@ -146,11 +147,14 @@ export class CalculateController extends Disposable {
 
         const formulaData = this._formulaDataModel.getFormulaData();
 
+        const arrayFormulaUnitData = this._formulaDataModel.getArrayFormulaUnitData();
+
         // Synchronous to the main thread
         this._commandService.executeCommand(SetFormulaDataMutation.id, formulaData);
 
         return this._formulaEngineService.execute({
             formulaData,
+            arrayFormulaUnitData,
             forceCalculate: false,
             dirtyRanges,
         });
@@ -177,24 +181,31 @@ export class CalculateController extends Disposable {
     }
 
     private async _applyFormula(data: IAllRuntimeData) {
-        const { unitData, unitArrayFormulaData } = data;
+        const { unitData, unitArrayFormulaData, arrayFormulaUnitData } = data;
 
         if (!unitData) {
             console.error('No sheetData from Formula Engine!');
             return;
         }
 
-        const deleteMutationInfo = this._deletePreviousArrayFormulaValue(unitArrayFormulaData);
+        // const deleteMutationInfo = this._deletePreviousArrayFormulaValue(unitArrayFormulaData);
 
         if (unitArrayFormulaData) {
-            // TODO@Dushusir: refresh array formula view
-            this._formulaDataModel.setArrayFormulaData(unitArrayFormulaData);
+            this._formulaDataModel.mergeArrayFormulaUnitData(arrayFormulaUnitData);
+
+            this._formulaDataModel.mergeArrayFormulaData(unitArrayFormulaData);
+
+            // Synchronous to the main thread
+            this._commandService.executeCommand(SetArrayFormulaDataMutation.id, {
+                arrayFormulaData: this._formulaDataModel.getArrayFormulaData(),
+                arrayFormulaUnitData: this._formulaDataModel.getArrayFormulaUnitData(),
+            });
         }
 
         const unitIds = Object.keys(unitData);
 
         // Update each calculated value, possibly involving all cells
-        const redoMutationsInfo: ICommandInfo[] = [...deleteMutationInfo];
+        const redoMutationsInfo: ICommandInfo[] = [];
 
         unitIds.forEach((unitId) => {
             const sheetData = unitData[unitId];
@@ -222,59 +233,6 @@ export class CalculateController extends Disposable {
 
         const result = redoMutationsInfo.every((m) => this._commandService.executeCommand(m.id, m.params));
         return result;
-    }
-
-    private _deletePreviousArrayFormulaValue(unitArrayFormulaData: UnitArrayFormulaDataType) {
-        const oldArrayFormulaData = this._formulaDataModel.getArrayFormulaData();
-
-        const redoMutationsInfo: ICommandInfo[] = [];
-
-        Object.keys(oldArrayFormulaData).forEach((oldUnitId) => {
-            const oldSheetData = oldArrayFormulaData[oldUnitId];
-
-            const oldSheetIds = Object.keys(oldSheetData);
-
-            oldSheetIds.forEach((oldSheetId) => {
-                const oldCellData = oldSheetData[oldSheetId];
-                const oldCellValue = new ObjectMatrix<null>();
-                oldCellData.forValue((oldRow, oldColumn, oldRange) => {
-                    const newCellData = unitArrayFormulaData?.[oldUnitId]?.[oldSheetId].getValue(oldRow, oldColumn);
-
-                    if (newCellData == null) {
-                        return false;
-                    }
-
-                    const { startRow, startColumn, endRow, endColumn } = oldRange;
-
-                    for (let r = startRow; r <= endRow; r++) {
-                        for (let c = startColumn; c <= endColumn; c++) {
-                            if (r === oldRow && c === oldColumn) {
-                                continue;
-                            }
-
-                            if (isInDirtyRange(this._previousDirtyRanges, oldUnitId, oldSheetId, r, c)) {
-                                continue;
-                            }
-
-                            oldCellValue.setValue(r, c, null);
-                        }
-                    }
-                });
-                const setRangeValuesMutation: ISetRangeValuesMutationParams = {
-                    worksheetId: oldSheetId,
-                    workbookId: oldUnitId,
-                    cellValue: oldCellValue.getData(),
-                    isFormulaUpdate: true,
-                };
-
-                redoMutationsInfo.push({
-                    id: SetRangeValuesMutation.id,
-                    params: setRangeValuesMutation,
-                });
-            });
-        });
-
-        return redoMutationsInfo;
     }
 
     private _registerFunctions() {

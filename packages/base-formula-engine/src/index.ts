@@ -1,13 +1,15 @@
 export { LexerNode } from './analysis/lexer-node';
 export type {
-    ArrayFormulaDataType,
+    IArrayFormulaDataType,
+    IArrayFormulaUnitDataType,
     IFormulaData,
     IFormulaDataItem,
     IFormulaDatasetConfig,
+    IRuntimeUnitDataType,
     ISheetData,
+    IUnitArrayFormulaDataType,
     IUnitData,
     IUnitSheetNameMap,
-    UnitArrayFormulaDataType,
 } from './basics/common';
 export { isInDirtyRange } from './basics/dirty';
 export { ErrorType } from './basics/error-type';

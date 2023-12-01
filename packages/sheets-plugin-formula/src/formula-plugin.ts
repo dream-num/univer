@@ -3,6 +3,7 @@ import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { FORMULA_PLUGIN_NAME } from './common/plugin-name';
+import { ArrayFormulaDisplayController } from './controllers/array-formula-display.controller';
 import { CalculateController } from './controllers/calculate.controller';
 import { FormulaController } from './controllers/formula.controller';
 import { UpdateFormulaController } from './controllers/update-formula.controller';
@@ -33,6 +34,7 @@ export class FormulaPlugin extends Plugin {
             // controllers
             [FormulaController],
             [UpdateFormulaController],
+            [ArrayFormulaDisplayController],
         ];
 
         // only worker

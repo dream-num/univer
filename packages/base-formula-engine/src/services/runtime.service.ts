@@ -1,20 +1,21 @@
-import { CellValueType, Disposable, ICellData, IRange, isNullCell, Nullable, ObjectMatrix } from '@univerjs/core';
+import type { ICellData, IRange, Nullable } from '@univerjs/core';
+import { CellValueType, Disposable, isNullCell, ObjectMatrix } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 
-import { BaseAstNode } from '../ast-node/base-ast-node';
-import {
-    ArrayFormulaDataType,
+import type { BaseAstNode } from '../ast-node/base-ast-node';
+import type {
+    IArrayFormulaDataType,
     IRuntimeOtherUnitDataType,
     IRuntimeSheetData,
     IRuntimeUnitDataType,
-    UnitArrayFormulaDataType,
+    IUnitArrayFormulaDataType,
 } from '../basics/common';
 import { isInDirtyRange } from '../basics/dirty';
 import { ErrorType } from '../basics/error-type';
 import { ErrorValueObject } from '../other-object/error-value-object';
-import { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
-import { ArrayValueObject } from '../value-object/array-value-object';
-import { BaseValueObject, CalculateValueType } from '../value-object/base-value-object';
+import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
+import type { ArrayValueObject } from '../value-object/array-value-object';
+import type { BaseValueObject, CalculateValueType } from '../value-object/base-value-object';
 import { IFormulaCurrentConfigService } from './current-data.service';
 
 /**
@@ -46,9 +47,10 @@ export enum FormulaExecutedStateType {
 
 export interface IAllRuntimeData {
     unitData: IRuntimeUnitDataType;
-    unitArrayFormulaData: UnitArrayFormulaDataType;
+    unitArrayFormulaData: IUnitArrayFormulaDataType;
     unitOtherData: IRuntimeOtherUnitDataType;
     functionsExecutedState: FormulaExecutedStateType;
+    arrayFormulaUnitData: IRuntimeUnitDataType;
 }
 
 export interface IExecutionInProgressParams {
@@ -84,11 +86,11 @@ export interface IFormulaRuntimeService {
 
     getSheetData(unitId: string): IRuntimeSheetData;
 
-    getSheetArrayFormula(unitId: string): ArrayFormulaDataType;
+    getSheetArrayFormula(unitId: string): IArrayFormulaDataType;
 
     getUnitData(): IRuntimeUnitDataType;
 
-    getUnitArrayFormula(): UnitArrayFormulaDataType;
+    getUnitArrayFormula(): IUnitArrayFormulaDataType;
 
     stopExecution(): void;
 
@@ -135,6 +137,8 @@ export interface IFormulaRuntimeService {
     disableCycleDependency(): void;
 
     isCycleDependency(): boolean;
+
+    getRuntimeArrayFormulaUnitData(): IRuntimeUnitDataType;
 }
 
 export class FormulaRuntimeService extends Disposable implements IFormulaRuntimeService {
@@ -151,7 +155,9 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
     private _runtimeOtherData: IRuntimeOtherUnitDataType = {}; // Data returned by other businesses through formula calculation, excluding the sheet.
 
-    private _unitArrayFormulaData: UnitArrayFormulaDataType = {};
+    private _unitArrayFormulaData: IUnitArrayFormulaDataType = {};
+
+    private _runtimeArrayFormulaUnitData: IRuntimeUnitDataType = {};
 
     private _functionsExecutedState: FormulaExecutedStateType = FormulaExecutedStateType.INITIAL;
 
@@ -275,6 +281,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         this._runtimeData = {};
         this._runtimeOtherData = {};
         this._unitArrayFormulaData = {};
+        this._runtimeArrayFormulaUnitData = {};
         this._functionDefinitionPrivacyVar.clear();
         this.markedAsInitialFunctionsExecuted();
 
@@ -328,28 +335,42 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         const sheetId = this._currentSubComponentId;
         const unitId = this._currentUnitId;
 
-        if (this._runtimeData[unitId] === undefined) {
+        if (this._runtimeData[unitId] == null) {
             this._runtimeData[unitId] = {};
         }
 
         const unitData = this._runtimeData[unitId];
 
-        if (unitData[sheetId] === undefined) {
+        if (unitData[sheetId] == null) {
             unitData[sheetId] = new ObjectMatrix<ICellData>();
         }
 
-        if (this._unitArrayFormulaData[unitId] === undefined) {
+        if (this._unitArrayFormulaData[unitId] == null) {
             this._unitArrayFormulaData[unitId] = {};
         }
 
         const arrayFormulaData = this._unitArrayFormulaData[unitId];
 
-        if (arrayFormulaData[sheetId] === undefined) {
-            arrayFormulaData[sheetId] = new ObjectMatrix<IRange>();
+        let arrayData = new ObjectMatrix<IRange>();
+
+        if (!arrayFormulaData[sheetId]) {
+            arrayData = new ObjectMatrix(arrayFormulaData[sheetId]);
+        }
+
+        if (this._runtimeArrayFormulaUnitData[unitId] === undefined) {
+            this._runtimeArrayFormulaUnitData[unitId] = {};
+        }
+
+        const arrayFormulaUnitData = this._runtimeArrayFormulaUnitData[unitId];
+
+        if (arrayFormulaUnitData[sheetId] == null) {
+            arrayFormulaUnitData[sheetId] = new ObjectMatrix<ICellData>();
         }
 
         const sheetData = unitData[sheetId];
-        const arrayData = arrayFormulaData[sheetId];
+
+        const arrayUnitData = arrayFormulaUnitData[sheetId];
+
         if (
             functionVariant.isReferenceObject() ||
             (functionVariant.isValueObject() && (functionVariant as BaseValueObject).isArray())
@@ -369,14 +390,16 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                 sheetData.setValue(row, column, this._objectValueToCellValue(new ErrorValueObject(ErrorType.SPILL)));
             } else {
                 objectValueRefOrArray.iterator((valueObject, rowIndex, columnIndex) => {
-                    sheetData.setValue(
-                        rowIndex - startRow + row,
-                        columnIndex - startColumn + column,
-                        this._objectValueToCellValue(valueObject)
-                    );
+                    const value = this._objectValueToCellValue(valueObject);
+                    if (rowIndex === startRow && columnIndex === startColumn) {
+                        sheetData.setValue(row, column, { ...value });
+                    }
+                    arrayUnitData.setValue(rowIndex - startRow + row, columnIndex - startColumn + column, value);
                 });
             }
             arrayData.setValue(row, column, arrayRange);
+
+            arrayFormulaData[sheetId] = arrayData.getData();
         } else {
             sheetData.setValue(row, column, this._objectValueToCellValue(functionVariant as CalculateValueType));
         }
@@ -402,12 +425,17 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         return this._runtimeOtherData;
     }
 
+    getRuntimeArrayFormulaUnitData() {
+        return this._runtimeArrayFormulaUnitData;
+    }
+
     getAllRuntimeData(): IAllRuntimeData {
         return {
             unitData: this.getUnitData(),
             unitArrayFormulaData: this.getUnitArrayFormula(),
             unitOtherData: this.getRuntimeOtherData(),
             functionsExecutedState: this._functionsExecutedState,
+            arrayFormulaUnitData: this.getRuntimeArrayFormulaUnitData(),
         };
     }
 

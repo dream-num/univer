@@ -1,4 +1,5 @@
-import { deserializeRangeWithSheet, IRange } from '@univerjs/core';
+import type { IRange } from '@univerjs/core';
+import { deserializeRangeWithSheet } from '@univerjs/core';
 
 import { ErrorType } from '../basics/error-type';
 import { ErrorValueObject } from '../other-object/error-value-object';
@@ -78,6 +79,8 @@ export class CellReferenceObject extends BaseReferenceObject {
         rangeReferenceObject.setDefaultUnitId(this.getDefaultUnitId());
 
         rangeReferenceObject.setRuntimeData(this.getRuntimeData());
+
+        rangeReferenceObject.setArrayFormulaUnitData(this.getArrayFormulaUnitData());
 
         const { x, y } = this.getRefOffset();
 

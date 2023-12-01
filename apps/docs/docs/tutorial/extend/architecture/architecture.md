@@ -1,10 +1,7 @@
-<<<<<<< HEAD
 ---
 sidebar_position: 1
 ---
 
-=======
->>>>>>> e9c626cb (docs: init doc fold structure)
 # 架构概要
 
 ## Univer 架构简介
@@ -23,11 +20,7 @@ Univer 通过插件化的方式组织代码，这使得用户可以按照其实�
 
 ## 插件和依赖注入
 
-<<<<<<< HEAD
 <img width="962" alt="" src="/img/architecture.png" />
-=======
-<!-- <img width="962" alt="" src="https://github.com/dream-num/univer/assets/12122021/2102f948-4ede-49b2-ac7d-45adf943a5b5" /> -->
->>>>>>> e9c626cb (docs: init doc fold structure)
 
 ### 插件
 
@@ -107,15 +100,9 @@ export class YourService {
 
 ## 层次结构
 
-<<<<<<< HEAD
 ![image](/img/layers.png)
 
 插件内部的模块应当归属于以下层次：
-=======
-<!-- ![image](../img/layers.png) -->
-
-插件内部的模块基本应当归属于以下层次：
->>>>>>> e9c626cb (docs: init doc fold structure)
 
 * View 处理渲染和交互，包括 canvas 渲染和 React 组件
 * Controller 封装业务逻辑（特别是功能逻辑），派发 Command 等

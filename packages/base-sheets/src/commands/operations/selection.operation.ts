@@ -1,6 +1,7 @@
-import { CommandType, IOperation } from '@univerjs/core';
+import type { IOperation } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
 
-import { ISelectionWithStyle } from '../../basics/selection';
+import type { ISelectionWithStyle } from '../../basics/selection';
 import { SelectionManagerService } from '../../services/selection-manager.service';
 
 export interface ISetSelectionsOperationParams {

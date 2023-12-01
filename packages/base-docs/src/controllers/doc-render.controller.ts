@@ -137,8 +137,7 @@ export class DocRenderController extends Disposable {
                 height = Math.max(height, pageHeight);
             }
         }
-        console.log(docsComponent.pageMarginTop);
-        console.log(width, height);
+
         docsComponent.resize(width, height);
     }
 

@@ -2,7 +2,7 @@ import { MoveCursorOperation, MoveSelectionOperation } from '@univerjs/base-docs
 import { FormulaEngineService, matchToken } from '@univerjs/base-formula-engine';
 import type { IMouseEvent, IPointerEvent } from '@univerjs/base-render';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/base-render';
-import { SetRangeValuesCommand } from '@univerjs/base-sheets';
+import { SelectionManagerService, SetRangeValuesCommand, SetSelectionsOperation } from '@univerjs/base-sheets';
 import { KeyCode } from '@univerjs/base-ui';
 import type { DocumentDataModel, ICellData, ICommandInfo, Nullable, Observer } from '@univerjs/core';
 import {
@@ -12,6 +12,7 @@ import {
     FOCUSING_EDITOR,
     FOCUSING_EDITOR_BUT_HIDDEN,
     FOCUSING_EDITOR_INPUT_FORMULA,
+    FOCUSING_FORMULA_EDITOR,
     ICommandService,
     IContextService,
     INTERCEPTOR_POINT,
@@ -62,7 +63,8 @@ export class EndEditController extends Disposable {
         @ICellEditorManagerService private readonly _cellEditorManagerService: ICellEditorManagerService,
         @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService,
         @IUndoRedoService private _undoRedoService: IUndoRedoService,
-        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService
+        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
+        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService
     ) {
         super();
 
@@ -111,9 +113,26 @@ export class EndEditController extends Disposable {
 
             this._isCursorChange = CursorChange.InitialState;
 
+            const selections = this._selectionManagerService.getSelections();
+            const currentSelection = this._selectionManagerService.getCurrent();
+
+            if (currentSelection == null) {
+                return;
+            }
+
+            const { unitId: workbookId, sheetId: worksheetId, pluginName } = currentSelection;
+
             this._exitInput(param);
 
             if (keycode === KeyCode.ESC) {
+                // Reselect the current selections, when exist cell editor by press ESC.
+                this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
+                    workbookId,
+                    worksheetId,
+                    pluginName,
+                    selections,
+                });
+
                 return;
             }
 
@@ -207,6 +226,7 @@ export class EndEditController extends Disposable {
         this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
         this._contextService.setContextValue(FOCUSING_EDITOR, false);
         this._contextService.setContextValue(FOCUSING_EDITOR_BUT_HIDDEN, false);
+        this._contextService.setContextValue(FOCUSING_FORMULA_EDITOR, false);
 
         this._cellEditorManagerService.setState({
             show: param.visible,

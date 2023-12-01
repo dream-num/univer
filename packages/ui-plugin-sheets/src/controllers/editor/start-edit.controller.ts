@@ -401,8 +401,6 @@ export class StartEditController extends Disposable {
         this._onInputActivateSubscription = this._editorBridgeService.visible$.subscribe((param) => {
             const { visible, eventType, keycode } = param;
 
-            console.log('_initialStartEdit', param);
-
             if (visible === this._editorVisiblePrevious) {
                 return;
             }

@@ -1,10 +1,13 @@
-import { IRenderManagerService } from '@univerjs/base-render';
+import { DeviceInputEventType, IRenderManagerService } from '@univerjs/base-render';
+import { KeyCode } from '@univerjs/base-ui';
 import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY } from '@univerjs/core';
 import { CheckMarkSingle, CloseSingle, DownTriangleSingle, FxSingle, UpTriangleSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
+import clsx from 'clsx';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
+import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import styles from './index.module.less';
 
 enum ArrowDirection {
@@ -36,6 +39,8 @@ export function FormulaBar() {
 
     const formulaEditorManagerService = useDependency(IFormulaEditorManagerService);
 
+    const editorBridgeService = useDependency(IEditorBridgeService);
+
     useEffect(() => {
         const editor = editorRef.current;
 
@@ -60,6 +65,13 @@ export function FormulaBar() {
 
         resizeObserver.observe(editor);
 
+        editorBridgeService.visible$.subscribe((visibleInfo) => {
+            setState({
+                ...state,
+                iconStyle: visibleInfo.visible ? styles.formulaActive : styles.formulaGrey,
+            });
+        });
+
         // Clean up on unmount
         return () => {
             resizeObserver.unobserve(editor);
@@ -74,6 +86,29 @@ export function FormulaBar() {
         });
     }
 
+    function handleCloseBtnClick() {
+        const visibleState = editorBridgeService.isVisible();
+        if (visibleState.visible) {
+            editorBridgeService.changeVisible({
+                visible: false,
+                eventType: DeviceInputEventType.Keyboard,
+                keycode: KeyCode.ESC,
+            });
+        }
+    }
+
+    function handleConfirmBtnClick() {
+        const visibleState = editorBridgeService.isVisible();
+        if (visibleState.visible) {
+            editorBridgeService.changeVisible({
+                visible: false,
+                eventType: DeviceInputEventType.PointerDown,
+            });
+        }
+    }
+
+    function handlerFxBtnClick() {}
+
     return (
         <div
             className={styles.formulaBox}
@@ -84,13 +119,13 @@ export function FormulaBar() {
             </div>
             <div className={styles.formulaBar}>
                 <div className={styles.formulaIcon}>
-                    <span className={styles.iconContainer}>
-                        <CloseSingle style={{ color: 'rgb(var(--error-color))' }} />
+                    <span className={clsx(styles.iconContainer, state.iconStyle)} onClick={handleCloseBtnClick}>
+                        <CloseSingle />
                     </span>
-                    <span className={styles.iconContainer}>
-                        <CheckMarkSingle style={{ color: 'rgb(var(--success-color))' }} />
+                    <span className={clsx(styles.iconContainer, state.iconStyle)} onClick={handleConfirmBtnClick}>
+                        <CheckMarkSingle />
                     </span>
-                    <span className={styles.iconContainer}>
+                    <span className={clsx(styles.iconContainer, state.iconStyle)} onClick={handlerFxBtnClick}>
                         <FxSingle />
                     </span>
                 </div>

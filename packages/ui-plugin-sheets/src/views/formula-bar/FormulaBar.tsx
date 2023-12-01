@@ -16,22 +16,13 @@ enum ArrowDirection {
 }
 
 interface IFormulaState {
-    namedRanges: any[];
     iconStyle: string;
     arrowDirection: ArrowDirection;
 }
 
 export function FormulaBar() {
-    const [state, setState] = useState<IFormulaState>({
-        namedRanges: [
-            {
-                value: '1',
-                label: '1',
-            },
-        ],
-        iconStyle: styles.formulaGrey,
-        arrowDirection: ArrowDirection.Down,
-    });
+    const [iconStyle, setIconStyle] = useState<string>(styles.formulaGrey);
+    const [arrowDirection, setArrowDirection] = useState<ArrowDirection>(ArrowDirection.Down);
 
     const editorRef = useRef<HTMLDivElement>(null);
 
@@ -44,7 +35,7 @@ export function FormulaBar() {
     useEffect(() => {
         const editor = editorRef.current;
 
-        if (editor == null) {
+        if (!editor) {
             return;
         }
 
@@ -66,10 +57,7 @@ export function FormulaBar() {
         resizeObserver.observe(editor);
 
         editorBridgeService.visible$.subscribe((visibleInfo) => {
-            setState({
-                ...state,
-                iconStyle: visibleInfo.visible ? styles.formulaActive : styles.formulaGrey,
-            });
+            setIconStyle(visibleInfo.visible ? styles.formulaActive : styles.formulaGrey);
         });
 
         // Clean up on unmount
@@ -80,10 +68,7 @@ export function FormulaBar() {
     }, []); // Empty dependency array means this effect runs once on mount and clean up on unmount
 
     function handleArrowClick() {
-        setState({
-            ...state,
-            arrowDirection: state.arrowDirection === ArrowDirection.Down ? ArrowDirection.Up : ArrowDirection.Down,
-        });
+        setArrowDirection(arrowDirection === ArrowDirection.Down ? ArrowDirection.Up : ArrowDirection.Down);
     }
 
     function handleCloseBtnClick() {
@@ -112,10 +97,7 @@ export function FormulaBar() {
     }
 
     return (
-        <div
-            className={styles.formulaBox}
-            style={{ height: ArrowDirection.Down === state.arrowDirection ? '28px' : '82px' }}
-        >
+        <div className={styles.formulaBox} style={{ height: ArrowDirection.Down === arrowDirection ? '28px' : '82px' }}>
             <div className={styles.nameRanges}>
                 <div className={styles.nameRangesInput} />
             </div>
@@ -124,14 +106,14 @@ export function FormulaBar() {
                 <div className={styles.formulaIcon}>
                     <div className={styles.formulaIconWrapper}>
                         <span
-                            className={clsx(styles.iconContainer, styles.iconContainerError, state.iconStyle)}
+                            className={clsx(styles.iconContainer, styles.iconContainerError, iconStyle)}
                             onClick={handleCloseBtnClick}
                         >
                             <CloseSingle />
                         </span>
 
                         <span
-                            className={clsx(styles.iconContainer, styles.iconContainerSuccess, state.iconStyle)}
+                            className={clsx(styles.iconContainer, styles.iconContainerSuccess, iconStyle)}
                             onClick={handleConfirmBtnClick}
                         >
                             <CheckMarkSingle />
@@ -146,7 +128,7 @@ export function FormulaBar() {
                 <div className={styles.formulaInput}>
                     <div className={styles.formulaContent} ref={editorRef} />
                     <div className={styles.arrowContainer} onClick={handleArrowClick}>
-                        {state.arrowDirection === ArrowDirection.Down ? <DownTriangleSingle /> : <UpTriangleSingle />}
+                        {arrowDirection === ArrowDirection.Down ? <DownTriangleSingle /> : <UpTriangleSingle />}
                     </div>
                 </div>
             </div>

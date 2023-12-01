@@ -51,7 +51,7 @@ export class NumfmtRefRangeController extends Disposable {
         this.disposeWithMe(
             this._refRangeService.intercept({
                 handler: (list, current, next) => {
-                    if (!list || !list.length) {
+                    if (!list || !list.length || !current.length) {
                         return next(list);
                     }
                     const theLastMutation = list[list.length - 1];

@@ -7,7 +7,7 @@
     "license": "MIT",
     "main": "./lib/cjs/index.js",
     "module": "./lib/esm/index.js",
-    "types": "./lib/index.d.ts",
+    "types": "./lib/types/index.d.ts",
     "publishConfig": {
         "access": "public",
         "main": "./lib/cjs/index.js",
@@ -27,7 +27,8 @@
     },
     "exports": {
         ".": "./src/index.ts",
-        "./*": "./src/*"
+        "./*": "./src/*",
+        "./typedoc/*": "./typedoc/*.json"
     },
     "directories": {
         "lib": "lib"
@@ -40,7 +41,8 @@
         "test": "vitest run",
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
-        "esbuild": "node ./esbuild.config.mjs && tsc -p tsconfig.esbuild.json"
+        "esbuild": "node ./esbuild.config.mjs && tsc -p tsconfig.esbuild.json",
+        "typedoc": "typedoc"
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
@@ -52,6 +54,7 @@
         "esbuild": "^0.19.8",
         "less": "^4.2.0",
         "ts-node": "^10.9.1",
+        "typedoc": "^0.25.4",
         "typescript": "^5.3.2",
         "vitest": "^0.34.6"
     }

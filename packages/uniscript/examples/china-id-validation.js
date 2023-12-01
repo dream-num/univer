@@ -1,4 +1,4 @@
-/* eslint-disable no-magic-numbers */
+/* eslint-disable */
 
 const mutliNum = (function generate() {
     const obj = {};

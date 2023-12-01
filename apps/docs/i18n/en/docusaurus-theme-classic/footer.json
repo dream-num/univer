@@ -1,0 +1,38 @@
+{
+  "link.title.文档": {
+    "message": "Documentation",
+    "description": "The title of the footer links column with title=文档 in the footer"
+  },
+  "link.title.社区": {
+    "message": "Community",
+    "description": "The title of the footer links column with title=社区 in the footer"
+  },
+  "link.title.其他": {
+    "message": "Others",
+    "description": "The title of the footer links column with title=其他 in the footer"
+  },
+  "link.item.label.指南": {
+    "message": "Tutorial",
+    "description": "The label of footer link with label=指南 linking to /docs/tutorial/intro"
+  },
+  "link.item.label.API": {
+    "message": "API",
+    "description": "The label of footer link with label=API linking to /docs/api/intro"
+  },
+  "link.item.label.Github Discussions": {
+    "message": "Github Discussions",
+    "description": "The label of footer link with label=Github Discussions linking to https://github.com/dream-num/univer/discussions"
+  },
+  "link.item.label.Discord": {
+    "message": "Discord",
+    "description": "The label of footer link with label=Discord linking to https://discord.gg/z3NKNT6D2f"
+  },
+  "link.item.label.GitHub": {
+    "message": "GitHub",
+    "description": "The label of footer link with label=GitHub linking to https://github.com/dream-num/univer"
+  },
+  "copyright": {
+    "message": "Copyright © 2023 Dream-num, Inc.",
+    "description": "The footer copyright"
+  }
+}

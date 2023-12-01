@@ -1,4 +1,5 @@
 packages:
-  # all packages in sub dirs of packages/ and Components/
-  - 'packages/**'
-  - 'examples/**'
+    # all packages in sub dirs of packages/ and Components/
+    - 'packages/**'
+    - 'examples/**'
+    - 'apps/**'

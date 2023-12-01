@@ -1,0 +1,9 @@
+{
+    "entryPoints": ["packages/*"],
+    "name": "Packages Example",
+    "entryPointStrategy": "packages",
+    "includeVersion": false,
+
+    "json": "./typedoc/docs.json",
+    "logLevel": "Verbose"
+}

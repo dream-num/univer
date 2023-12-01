@@ -2,17 +2,17 @@
     "$schema": "https://turbo.build/schema.json",
     "extends": ["//"],
     "pipeline": {
-        "test": {
-        },
-        "coverage": {
-        },
-        "esbuild": {
-        },
-        "esbuild:demo": {
-        },
+        "typedoc": {},
+        "test": {},
+        "coverage": {},
+        "esbuild": {},
+        "esbuild:demo": {},
         "dev:demo": {
             "cache": false,
             "persistent": true
+        },
+        "dev:docusaurus": {
+            "dependsOn": ["typedoc"]
         }
     }
 }

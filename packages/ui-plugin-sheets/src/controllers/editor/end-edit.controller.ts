@@ -9,6 +9,7 @@ import {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     Direction,
     Disposable,
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     FOCUSING_EDITOR,
     FOCUSING_EDITOR_BUT_HIDDEN,
     FOCUSING_EDITOR_INPUT_FORMULA,
@@ -236,6 +237,7 @@ export class EndEditController extends Disposable {
             return;
         }
         this._undoRedoService.clearUndoRedo(editorUnitId);
+        this._undoRedoService.clearUndoRedo(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
     }
 
     private _moveCursor(keycode?: KeyCode) {

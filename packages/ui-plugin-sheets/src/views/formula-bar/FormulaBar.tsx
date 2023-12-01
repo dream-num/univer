@@ -107,7 +107,9 @@ export function FormulaBar() {
         }
     }
 
-    function handlerFxBtnClick() {}
+    function handlerFxBtnClick() {
+        formulaEditorManagerService.handleFxBtnClick(true);
+    }
 
     return (
         <div

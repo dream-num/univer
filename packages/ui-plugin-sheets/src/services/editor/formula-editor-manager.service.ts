@@ -7,6 +7,7 @@ import { BehaviorSubject } from 'rxjs';
 export interface IFormulaEditorManagerService {
     position$: Observable<Nullable<DOMRect>>;
     focus$: Observable<boolean>;
+    fxBtnClick$: Observable<boolean>;
     dispose(): void;
     setPosition(param: DOMRect): void;
     getPosition(): Readonly<Nullable<DOMRect>>;
@@ -25,6 +26,10 @@ export class FormulaEditorManagerService implements IDisposable {
     private readonly _focus$ = new BehaviorSubject<boolean>(this._focus);
 
     readonly focus$ = this._focus$.asObservable();
+
+    private readonly _fxBtnClick$ = new BehaviorSubject<boolean>(false);
+
+    readonly fxBtnClick$ = this._fxBtnClick$.asObservable();
 
     dispose(): void {
         this._position$.complete();
@@ -46,6 +51,10 @@ export class FormulaEditorManagerService implements IDisposable {
     setFocus(param: boolean = false) {
         this._focus = param;
         this._focus$.next(param);
+    }
+
+    handleFxBtnClick(params: boolean) {
+        this._fxBtnClick$.next(params);
     }
 
     private _refresh(param: DOMRect): void {

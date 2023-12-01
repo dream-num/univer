@@ -1,22 +1,27 @@
 import type { IRichTextEditingMutationParams, ISetTextSelectionsOperationParams } from '@univerjs/base-docs';
 import {
+    CoverContentCommand,
     DocSkeletonManagerService,
     DocViewModelManagerService,
     getDocObject,
     RichTextEditingMutation,
     SetTextSelectionsOperation,
+    TextSelectionManagerService,
     VIEWPORT_KEY,
 } from '@univerjs/base-docs';
-import type { IMouseEvent, IPointerEvent, RenderComponentType } from '@univerjs/base-render';
+import type { IMouseEvent, IPointerEvent, ITextRangeWithStyle, RenderComponentType } from '@univerjs/base-render';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/base-render';
 import type { ICommandInfo, IParagraph, Nullable, Observer } from '@univerjs/core';
 import {
     Disposable,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    FOCUSING_EDITOR,
+    FOCUSING_EDITOR_BUT_HIDDEN,
     FOCUSING_FORMULA_EDITOR,
     ICommandService,
     IContextService,
+    IUndoRedoService,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
@@ -47,7 +52,9 @@ export class FormulaEditorController extends Disposable {
         @Inject(DocViewModelManagerService) private readonly _docViewModelManagerService: DocViewModelManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @IContextService private readonly _contextService: IContextService,
-        @IFormulaEditorManagerService private readonly _formulaEditorManagerService: IFormulaEditorManagerService
+        @IFormulaEditorManagerService private readonly _formulaEditorManagerService: IFormulaEditorManagerService,
+        @IUndoRedoService private readonly _undoRedoService: IUndoRedoService,
+        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService
     ) {
         super();
 
@@ -66,6 +73,7 @@ export class FormulaEditorController extends Disposable {
         this._syncFormulaEditorContent();
         this._commandExecutedListener();
         this._syncEditorSize();
+        this._listenFxBtnClick();
 
         this._renderManagerService.currentRender$.subscribe((unitId) => {
             if (unitId !== DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
@@ -75,6 +83,62 @@ export class FormulaEditorController extends Disposable {
             if (!this._loadedMap.has(unitId)) {
                 this._initialMain(unitId);
                 this._loadedMap.add(unitId);
+            }
+        });
+    }
+
+    private _listenFxBtnClick() {
+        this._formulaEditorManagerService.fxBtnClick$.subscribe(() => {
+            const isFocusButHidden =
+                this._contextService.getContextValue(FOCUSING_EDITOR_BUT_HIDDEN) &&
+                !this._contextService.getContextValue(FOCUSING_EDITOR);
+
+            if (isFocusButHidden) {
+                this._univerInstanceService.setCurrentUniverDocInstance(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
+
+                this._contextService.setContextValue(FOCUSING_FORMULA_EDITOR, true);
+
+                const formulaEditorDataModel = this._univerInstanceService.getUniverDocInstance(
+                    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY
+                );
+
+                const visibleState = this._editorBridgeService.isVisible();
+                if (visibleState.visible === false) {
+                    this._editorBridgeService.changeVisible({
+                        visible: true,
+                        eventType: DeviceInputEventType.PointerDown,
+                    });
+                }
+
+                const content = formulaEditorDataModel?.getBody()?.dataStream;
+
+                if (content == null) {
+                    return;
+                }
+
+                let newContent = content.startsWith('=') ? content : `=${content}`;
+
+                newContent = newContent.replace(/\r\n$/, '');
+
+                const textRanges: ITextRangeWithStyle[] = [
+                    {
+                        startOffset: newContent.length,
+                        endOffset: newContent.length,
+                        collapsed: true,
+                    },
+                ];
+
+                const coverContentParams = {
+                    unitId: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+                    body: {
+                        dataStream: newContent,
+                    },
+                    segmentId: '',
+                };
+
+                this._commandService.executeCommand(CoverContentCommand.id, coverContentParams);
+
+                this._textSelectionManagerService.replaceTextRanges(textRanges);
             }
         });
     }
@@ -93,8 +157,9 @@ export class FormulaEditorController extends Disposable {
 
         this._documentComponent = documentComponent;
 
-        this._downObserver = documentComponent.onPointerDownObserver.add((params) => {
+        this._downObserver = documentComponent.onPointerDownObserver.add(() => {
             this._contextService.setContextValue(FOCUSING_FORMULA_EDITOR, true);
+            this._undoRedoService.clearUndoRedo(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
 
             const visibleState = this._editorBridgeService.isVisible();
             if (visibleState.visible === false) {
@@ -205,6 +270,7 @@ export class FormulaEditorController extends Disposable {
                     const { unitId } = command.params as ISetTextSelectionsOperationParams;
                     if (unitId !== DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
                         this._contextService.setContextValue(FOCUSING_FORMULA_EDITOR, false);
+                        this._undoRedoService.clearUndoRedo(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
                     }
                 }
             })

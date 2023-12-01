@@ -49,6 +49,7 @@
         "@ctrl/tinycolor": "^4.0.2",
         "@univerjs/base-docs": "workspace:*",
         "@univerjs/base-formula-engine": "workspace:*",
+        "@univerjs/sheets-plugin-formula": "workspace:*",
         "@univerjs/base-render": "workspace:*",
         "@univerjs/base-sheets": "workspace:*",
         "@univerjs/base-ui": "workspace:*",

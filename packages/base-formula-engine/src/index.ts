@@ -16,6 +16,7 @@ export { FUNCTION_NAMES, FunctionType, type IFunctionInfo, type IFunctionParam }
 export { includeFormulaLexerToken, isFormulaLexerToken, normalizeSheetName } from './basics/match-token';
 export { generateStringWithSequence, type ISequenceNode, sequenceNodeType } from './basics/sequence';
 export { matchToken } from './basics/token';
+export { compareToken } from './basics/token';
 export { BaseFunction } from './functions/base-function';
 export { ErrorValueObject } from './other-object/error-value-object';
 export { BaseFormulaEnginePlugin } from './plugin';
@@ -27,3 +28,5 @@ export { FormulaExecutedStateType, type IAllRuntimeData } from './services/runti
 export { ArrayValueObject } from './value-object/array-value-object';
 export { BaseValueObject } from './value-object/base-value-object';
 export { NumberValueObject } from './value-object/primitive-object';
+export { BooleanValueObject } from './value-object/primitive-object';
+export { StringValueObject } from './value-object/primitive-object';

@@ -1001,6 +1001,9 @@ importers:
       '@univerjs/icons':
         specifier: ^0.1.14
         version: 0.1.14(react-dom@18.2.0)(react@18.2.0)
+      '@univerjs/sheets-plugin-formula':
+        specifier: workspace:*
+        version: link:../sheets-plugin-formula
       '@univerjs/ui-plugin-sheets':
         specifier: workspace:*
         version: link:../ui-plugin-sheets

@@ -1,8 +1,8 @@
-import { IKeyType, Nullable } from '../../shared/types';
-import { LocaleType } from '../enum';
-import { IExtraModelData } from './i-extra-model-data';
-import { IStyleData } from './i-style-data';
-import { IWorksheetData } from './i-worksheet-data';
+import type { IKeyType, Nullable } from '../../shared/types';
+import type { LocaleType } from '../enum';
+import type { IExtraModelData } from './i-extra-model-data';
+import type { IStyleData } from './i-style-data';
+import type { IWorksheetData } from './i-worksheet-data';
 
 /**
  * Properties of a workbook's configuration
@@ -23,5 +23,5 @@ export interface IWorkbookData extends IExtraModelData {
     sheets: { [sheetId: string]: Partial<IWorksheetData> };
 
     // The type of data depends on how the plug-in is defined
-    resources: Array<{ id?: string; name: string; data: string }>;
+    resources?: Array<{ id?: string; name: string; data: string }>;
 }

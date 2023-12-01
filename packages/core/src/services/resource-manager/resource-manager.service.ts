@@ -1,7 +1,7 @@
 import { Subject } from 'rxjs';
 
 import { Disposable, toDisposable } from '../../shared/lifecycle';
-import { IResourceHook, IResourceManagerService } from './type';
+import type { IResourceHook, IResourceManagerService } from './type';
 
 export class ResourceManagerService extends Disposable implements IResourceManagerService {
     private _resourceMap = new Map<string, Map<string, IResourceHook>>();
@@ -35,7 +35,7 @@ export class ResourceManagerService extends Disposable implements IResourceManag
      * @param {string} pluginName
      * @param {ResourceHook<T>} hook
      */
-    registerPluginResource(unitID: string, resourceName: string, hook: IResourceHook) {
+    registerPluginResource<T = any>(unitID: string, resourceName: string, hook: IResourceHook<T>) {
         const resourceMap = this._resourceMap.get(unitID) || new Map<string, IResourceHook>();
         if (resourceMap.has(resourceName)) {
             throw new Error('the pluginName is registered');

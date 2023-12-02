@@ -66,9 +66,9 @@
     {
       "id": "pointer:pointer",
       "typeName": "pointer",
-      "x": 1469.4338452953873,
-      "y": 1033.0663352269876,
-      "lastActivityTimestamp": 1699691160036,
+      "x": 1673.1699628165932,
+      "y": 1147.2103120574357,
+      "lastActivityTimestamp": 1701479356741,
       "meta": {}
     },
     {
@@ -79,9 +79,9 @@
       "typeName": "page"
     },
     {
-      "x": -748.7844080347506,
-      "y": -124.83076304122028,
-      "z": 0.6903495295731004,
+      "x": 895.6202263404195,
+      "y": 1174.7091316481237,
+      "z": 0.44962800188014995,
       "meta": {},
       "id": "camera:page:page",
       "typeName": "camera"
@@ -113,26 +113,21 @@
         "tldraw:size": "l",
         "tldraw:color": "black"
       },
-      "brush": {
-        "x": 1469.4338452953873,
-        "y": 1033.0663352269876,
-        "w": 322.3005020914404,
-        "h": 25.34947769258497
-      },
+      "brush": null,
       "scribbles": [],
       "cursor": {
         "type": "default",
         "rotation": 0
       },
-      "isFocusMode": true,
+      "isFocusMode": false,
       "exportBackground": true,
       "isDebugMode": false,
       "isToolLocked": false,
       "screenBounds": {
         "x": 0,
         "y": 0,
-        "w": 1114,
-        "h": 738
+        "w": 2211.33349609375,
+        "h": 1278
       },
       "zoomBrush": null,
       "isGridMode": false,
@@ -1282,8 +1277,8 @@
       "props": {
         "color": "black",
         "size": "l",
-        "w": 1583.4609375,
-        "text": "1. Univer in Web Worker is also a Univer instance with a different set of plugins.\n2. @univerjs/rpc packages provides remote process calling via different\nchannels (message on websocket / inteprocess / remote server) for upper \nlevel modules such as DataSyncService / FormulaClientController. Thanks, VS Code! ❤️",
+        "w": 1473.947998046875,
+        "text": "1. Univer in Web Worker is also a Univer instance with a different set of plugins.\n2. @univerjs/rpc packages provides remote process calling via different\nchannels (message on websocket / inteprocess / remote server) for upper \nlevel modules such as DataSyncService / FormulaClientController.",
         "font": "draw",
         "align": "start",
         "autoSize": true,

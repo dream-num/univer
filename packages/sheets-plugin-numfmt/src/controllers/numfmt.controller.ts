@@ -359,7 +359,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
                     if (!numfmtValue) {
                         return next(cell);
                     }
-                    const originCellValue = location.worksheet.getCellRaw(location.row, location.col);
+                    const originCellValue = cell;
                     if (!originCellValue) {
                         return next(cell);
                     }

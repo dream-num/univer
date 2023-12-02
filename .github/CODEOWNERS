@@ -1,5 +1,7 @@
 # core
 packages/core @DR-Univer @wzhudev
+packages/core/src/services/resource-manager @Gggpound
+packages/core/src/services/permission @Gggpound
 
 # rendering
 packages/base-render @DR-Univer @wzhudev
@@ -8,6 +10,8 @@ packages/base-render @DR-Univer @wzhudev
 packages/base-docs @DR-Univer @Jocs
 packages/base-sheets @wzhudev @DR-Univer
 packages/base-slides @wzhudev @DR-Univer @jikkai
+packages/base-sheets/src/services/numfmt @Gggpound
+packages/base-sheets/src/services/ref-range @Gggpound
 
 # ui
 packages/base-ui @jikkai @wzhudev @Jocs
@@ -24,6 +28,8 @@ packages/ui-plugin-sheets/src/controllers/editor @Jocs
 packages/ui-plugin-sheets/src/services/clipboard @yuhongz
 packages/ui-plugin-sheets/src/services/editor @Jocs
 packages/ui-plugin-sheets/src/services/editor-bridge.service.ts @Jocs
+packages/sheets-plugin-numfmt @Gggpound
+
 
 # slides
 packages/ui-plugin-slides @jikkai @wzhudev

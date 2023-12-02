@@ -3,59 +3,104 @@
 
     box-sizing: border-box;
     height: 28px;
-    padding: 0 var(--padding-xl);
 
     background: rgb(var(--bg-color-secondary));
     border-bottom: 1px solid rgb(var(--border-color));
 
-    .select-button .tooltip-group .tooltip-body {
-        display: flex;
+    transition: height .15s;
 
-        input {
-            width: 85px;
+    .name-ranges {
+        box-sizing: border-box;
+        width: 80px;
+        height: 100%;
+        padding: 6px 0;
+
+        &-input {
             height: 100%;
-        }
-
-        svg {
-            vertical-align: text-bottom;
+            border-right: 1px solid rgb(var(--border-color));
         }
     }
 
     .formula-bar {
         display: flex;
         width: 100%;
+        height: 100%;
 
         .formula-icon {
-            display: flex;
-            align-items: center;
-            font-size: var(--font-size-xs);
-            border-right: 1px solid var(--gray-15);
+            padding: 6px 0;
 
-            span[role='img'] {
-                font-size: 24px;
-            }
+            &-wrapper {
+                position: relative;
 
-            .formula-grey {
-                color: var(--gray-5);
-            }
+                display: flex;
+                gap: var(--margin-xs);
+                align-items: center;
+                justify-content: center;
 
-            .formula-black {
-                color: var(--text-color);
+                box-sizing: border-box;
+                width: 80px;
+                height: 100%;
+
+                font-size: var(--font-size-xs);
+
+                border-right: 1px solid rgb(var(--border-color));
+
+
+                .icon-container {
+                    cursor: pointer;
+
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+
+                    font-size: var(--font-size-lg);
+
+                    &-success {
+                        &.formula-active {
+                            color: rgb(var(--success-color));
+                        }
+                    }
+
+                    &-error {
+                        &.formula-active {
+                            color: rgb(var(--error-color));
+                        }
+                    }
+                }
             }
         }
 
         .formula-input {
             overflow: hidden;
             display: flex;
-            align-items: center;
+            flex: 1;
 
             width: 100%;
-            padding: 0 10px;
+            padding: 0 0 0 10px;
 
             .formula-content {
+                position: relative;
+
                 width: 100%;
+                height: 100%;
+
                 word-wrap: break-word;
+
                 outline: none;
+            }
+
+            .arrow-container {
+                cursor: pointer;
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                width: 20px;
+                height: 100%;
+
+                font-size: var(--font-size-xs);
+                color: rgb(var(--text-color-secondary));
             }
         }
     }

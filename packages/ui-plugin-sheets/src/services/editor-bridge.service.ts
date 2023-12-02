@@ -1,8 +1,11 @@
-import { DeviceInputEventType, IDocumentLayoutObject } from '@univerjs/base-render';
-import { KeyCode } from '@univerjs/base-ui';
-import { IPosition, Nullable } from '@univerjs/core';
-import { createIdentifier, IDisposable } from '@wendellhu/redi';
-import { BehaviorSubject, Observable } from 'rxjs';
+import type { IDocumentLayoutObject } from '@univerjs/base-render';
+import { DeviceInputEventType } from '@univerjs/base-render';
+import type { KeyCode } from '@univerjs/base-ui';
+import type { IPosition, Nullable } from '@univerjs/core';
+import type { IDisposable } from '@wendellhu/redi';
+import { createIdentifier } from '@wendellhu/redi';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 export interface IEditorBridgeServiceVisibleParam {
     visible: boolean;

@@ -1,16 +1,17 @@
-import { Nullable, PageOrientType } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
+import { PageOrientType } from '@univerjs/core';
 
-import {
-    BreakType,
+import type {
     IDocumentSkeletonFooter,
     IDocumentSkeletonHeader,
     IDocumentSkeletonPage,
     ISkeletonResourceReference,
 } from '../../../basics/i-document-skeleton-cached';
-import { ISectionBreakConfig } from '../../../basics/interfaces';
+import { BreakType } from '../../../basics/i-document-skeleton-cached';
+import type { ISectionBreakConfig } from '../../../basics/interfaces';
 // eslint-disable-next-line import/no-cycle
 import { dealWithSections } from '../block/section';
-import { DocumentViewModel } from '../view-model/document-view-model';
+import type { DocumentViewModel } from '../view-model/document-view-model';
 import { createSkeletonSection } from './section';
 import { updateBlockIndex } from './tools';
 

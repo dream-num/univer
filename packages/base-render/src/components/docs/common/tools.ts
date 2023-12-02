@@ -1,34 +1,36 @@
+import type {
+    INumberUnit,
+    IParagraphStyle,
+    ITextStyle,
+    Nullable,
+    ObjectPositionH,
+    ObjectPositionV,
+} from '@univerjs/core';
 import {
     AlignTypeH,
     AlignTypeV,
     BooleanNumber,
     GridType,
-    INumberUnit,
-    IParagraphStyle,
-    ITextStyle,
-    Nullable,
     NumberUnitType,
     ObjectMatrix,
-    ObjectPositionH,
-    ObjectPositionV,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     SpacingRule,
 } from '@univerjs/core';
 
 import { DEFAULT_DOCUMENT_FONTSIZE } from '../../../basics/const';
-import {
+import type {
     IDocumentSkeletonColumn,
     IDocumentSkeletonDivide,
     IDocumentSkeletonLine,
     IDocumentSkeletonPage,
     IDocumentSkeletonSpan,
-    SpanType,
 } from '../../../basics/i-document-skeleton-cached';
-import { IParagraphConfig, ISectionBreakConfig } from '../../../basics/interfaces';
+import { SpanType } from '../../../basics/i-document-skeleton-cached';
+import type { IParagraphConfig, ISectionBreakConfig } from '../../../basics/interfaces';
 import { getFontStyleString, isFunction } from '../../../basics/tools';
-import { DataStreamTreeNode } from '../view-model/data-stream-tree-node';
-import { DocumentViewModel } from '../view-model/document-view-model';
+import type { DataStreamTreeNode } from '../view-model/data-stream-tree-node';
+import type { DocumentViewModel } from '../view-model/document-view-model';
 
 export function getLastPage(pages: IDocumentSkeletonPage[]) {
     return pages?.[pages.length - 1];

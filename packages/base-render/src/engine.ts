@@ -147,6 +147,7 @@ export class Engine extends ThinEngine<Scene> {
         }
 
         const { width, height } = getSizeForDom(this._container);
+
         this.resizeBySize(width, height);
     }
 

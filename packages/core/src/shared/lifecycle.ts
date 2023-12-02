@@ -1,9 +1,11 @@
-import { IDisposable } from '@wendellhu/redi';
-import { Subject, Subscription, SubscriptionLike } from 'rxjs';
+import type { IDisposable } from '@wendellhu/redi';
+import type { Subscription, SubscriptionLike } from 'rxjs';
+import { Subject } from 'rxjs';
 import { isSubscription } from 'rxjs/internal/Subscription';
 
-import { Nullable } from '../common/type-utils';
-import { isObserver, Observer } from '../observer/observable';
+import type { Nullable } from '../common/type-utils';
+import type { Observer } from '../observer/observable';
+import { isObserver } from '../observer/observable';
 
 export function toDisposable(observer: Nullable<Observer<any>>): IDisposable;
 export function toDisposable(subscription: SubscriptionLike): IDisposable;

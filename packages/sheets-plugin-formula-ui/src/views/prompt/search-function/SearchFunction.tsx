@@ -1,6 +1,6 @@
-import { Direction } from '@univerjs/core';
+import { Direction, FOCUSING_FORMULA_EDITOR, IContextService } from '@univerjs/core';
 import { Popup } from '@univerjs/design';
-import { ICellEditorManagerService } from '@univerjs/ui-plugin-sheets';
+import { ICellEditorManagerService, IFormulaEditorManagerService } from '@univerjs/ui-plugin-sheets';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
@@ -17,22 +17,31 @@ export function SearchFunction() {
     const [searchText, setSearchText] = useState<string>('');
     const promptService = useDependency(IFormulaPromptService);
     const cellEditorManagerService = useDependency(ICellEditorManagerService);
+    const formulaEditorManagerService = useDependency(IFormulaEditorManagerService);
+    const contextService = useDependency(IContextService);
 
     useEffect(() => {
         // TODO@Dushusir: How to get updated values in subscribe callback better
         let updatedSearchList: ISearchItem[] = [];
         let updatedActive = 0;
         const subscribeSearch = promptService.search$.subscribe((params: ISearchFunctionOperationParams) => {
-            const rect = cellEditorManagerService.getRect();
-            if (!rect) return;
-
             const { visible, searchText, searchList } = params;
             if (!visible) {
                 setVisible(visible);
                 return;
             }
 
-            const { left, top, height } = rect;
+            const isFocusFormulaEditor = contextService.getContextValue(FOCUSING_FORMULA_EDITOR);
+
+            const position = isFocusFormulaEditor
+                ? formulaEditorManagerService.getPosition()
+                : cellEditorManagerService.getRect();
+
+            if (position == null) {
+                return;
+            }
+
+            const { left, top, height } = position;
 
             setSearchText(searchText);
             setSearchList(searchList);

@@ -1,13 +1,19 @@
 import { BreakLineCommand, DeleteLeftCommand } from '@univerjs/base-docs';
 import { DeviceInputEventType } from '@univerjs/base-render';
-import { IShortcutItem, KeyCode, MetaKeys } from '@univerjs/base-ui';
+import type { IShortcutItem } from '@univerjs/base-ui';
+import { KeyCode, MetaKeys } from '@univerjs/base-ui';
 import { FOCUSING_EDITOR } from '@univerjs/core';
 
 import {
     SetCellEditVisibleArrowOperation,
     SetCellEditVisibleOperation,
 } from '../../commands/operations/cell-edit.operation';
-import { whenEditorActivatedIsVisible, whenEditorDidNotInputFormulaActivated, whenEditorFocusIsHidden } from './utils';
+import {
+    whenEditorActivatedIsVisible,
+    whenEditorDidNotInputFormulaActivated,
+    whenEditorFocusIsHidden,
+    whenFormulaEditorFocused,
+} from './utils';
 
 export const ARROW_SELECTION_KEYCODE_LIST = [
     KeyCode.ARROW_DOWN,
@@ -91,13 +97,15 @@ export const EditorBreakLineShortcut: IShortcutItem = {
 
 export const EditorDeleteLeftShortcut: IShortcutItem = {
     id: DeleteLeftCommand.id,
-    preconditions: (contextService) => whenEditorActivatedIsVisible(contextService),
+    preconditions: (contextService) =>
+        whenEditorActivatedIsVisible(contextService) || whenFormulaEditorFocused(contextService),
     binding: KeyCode.BACKSPACE,
 };
 
 export const EditorDeleteLeftShortcutInActive: IShortcutItem = {
     id: SetCellEditVisibleOperation.id,
-    preconditions: (contextService) => whenEditorFocusIsHidden(contextService),
+    preconditions: (contextService) =>
+        whenEditorFocusIsHidden(contextService) && !whenFormulaEditorFocused(contextService),
     binding: KeyCode.BACKSPACE,
     staticParameters: {
         visible: true,

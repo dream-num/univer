@@ -1,16 +1,18 @@
-import { Documents, DocumentSkeleton, IRender, IRenderManagerService, PageLayoutType } from '@univerjs/base-render';
+import type { Documents, DocumentSkeleton, IRender } from '@univerjs/base-render';
+import { IRenderManagerService, PageLayoutType } from '@univerjs/base-render';
+import type { ICommandInfo } from '@univerjs/core';
 import {
     Disposable,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-    ICommandInfo,
     ICommandService,
     LifecycleStages,
     OnLifecycle,
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
-import { IRichTextEditingMutationParams, RichTextEditingMutation } from '../commands/mutations/core-editing.mutation';
+import type { IRichTextEditingMutationParams } from '../commands/mutations/core-editing.mutation';
+import { RichTextEditingMutation } from '../commands/mutations/core-editing.mutation';
 import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
 
 @OnLifecycle(LifecycleStages.Rendered, DocRenderController)
@@ -102,13 +104,12 @@ export class DocRenderController extends Disposable {
 
         const docsComponent = mainComponent as Documents;
 
-        const data = skeleton.getSkeletonData();
+        const pages = skeleton.getSkeletonData()?.pages;
 
-        if (data == null) {
+        if (pages == null) {
             return;
         }
 
-        const pages = data.pages;
         let width = 0;
         let height = 0;
 
@@ -120,6 +121,7 @@ export class DocRenderController extends Disposable {
                 if (i !== len - 1) {
                     height += docsComponent.pageMarginTop;
                 }
+
                 width = Math.max(width, pageWidth);
             } else if (docsComponent.pageLayoutType === PageLayoutType.HORIZONTAL) {
                 width += pageWidth;
@@ -142,19 +144,15 @@ export class DocRenderController extends Disposable {
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (updateCommandList.includes(command.id)) {
                     const params = command.params as IRichTextEditingMutationParams;
-                    const { unitId: commandUnitId } = params;
+                    const { unitId } = params;
 
-                    const docsSkeletonObject = this._docSkeletonManagerService.getCurrent();
+                    const docsSkeletonObject = this._docSkeletonManagerService.getSkeletonByUnitId(unitId);
 
                     if (docsSkeletonObject == null) {
                         return;
                     }
 
-                    const { unitId, skeleton } = docsSkeletonObject;
-
-                    if (commandUnitId !== unitId) {
-                        return;
-                    }
+                    const { skeleton } = docsSkeletonObject;
 
                     const currentRender = this._renderManagerService.getRenderById(unitId);
 

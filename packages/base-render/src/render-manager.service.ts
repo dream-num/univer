@@ -1,11 +1,12 @@
-import { Nullable } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
-import { BehaviorSubject, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
-import { BaseObject } from './base-object';
-import { DocComponent } from './components/docs/doc-component';
-import { SheetComponent } from './components/sheets/sheet-component';
-import { Slide } from './components/slides/slide';
+import type { BaseObject } from './base-object';
+import type { DocComponent } from './components/docs/doc-component';
+import type { SheetComponent } from './components/sheets/sheet-component';
+import type { Slide } from './components/slides/slide';
 import { Engine } from './engine';
 import { Scene } from './scene';
 import { SceneViewer } from './scene-viewer';

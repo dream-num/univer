@@ -1,5 +1,5 @@
 import { DocumentSkeleton, DocumentViewModel } from '@univerjs/base-render';
-import { LocaleService, Nullable } from '@univerjs/core';
+import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, LocaleService, Nullable } from '@univerjs/core';
 import { IDisposable, Inject } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 
@@ -54,7 +54,7 @@ export class DocSkeletonManagerService implements IDisposable {
     }
 
     getCurrent(): Nullable<IDocSkeletonManagerParam> {
-        return this._getCurrentByUnitId(this._currentSkeletonUnitId);
+        return this.getSkeletonByUnitId(this._currentSkeletonUnitId);
     }
 
     makeDirtyCurrent(state: boolean = true) {
@@ -62,7 +62,7 @@ export class DocSkeletonManagerService implements IDisposable {
     }
 
     makeDirty(unitId: string, state: boolean = true) {
-        const param = this._getCurrentByUnitId(unitId);
+        const param = this.getSkeletonByUnitId(unitId);
         if (param == null) {
             return;
         }
@@ -73,15 +73,24 @@ export class DocSkeletonManagerService implements IDisposable {
     private _setCurrent(docViewModelParam: IDocumentViewModelManagerParam): Nullable<IDocSkeletonManagerParam> {
         const { unitId } = docViewModelParam;
 
-        const skeleton = this._buildSkeleton(docViewModelParam.docViewModel);
+        // Only cell editor need to rebuild skeleton when edit cell content every time.
+        const REBUILD_SKELETON_LIST = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY];
 
-        skeleton.calculate();
+        if (REBUILD_SKELETON_LIST.includes(unitId) || !this._docSkeletonMap.has(unitId)) {
+            const skeleton = this._buildSkeleton(docViewModelParam.docViewModel);
 
-        this._docSkeletonMap.set(unitId, {
-            unitId,
-            skeleton,
-            dirty: false,
-        });
+            skeleton.calculate();
+
+            this._docSkeletonMap.set(unitId, {
+                unitId,
+                skeleton,
+                dirty: false,
+            });
+        } else {
+            const skeletonParam = this.getSkeletonByUnitId(unitId)!;
+            skeletonParam.skeleton.calculate();
+            skeletonParam.dirty = true;
+        }
 
         this._currentSkeletonUnitId = unitId;
 
@@ -92,7 +101,7 @@ export class DocSkeletonManagerService implements IDisposable {
         return this.getCurrent();
     }
 
-    private _getCurrentByUnitId(unitId: string): Nullable<IDocSkeletonManagerParam> {
+    getSkeletonByUnitId(unitId: string): Nullable<IDocSkeletonManagerParam> {
         return this._docSkeletonMap.get(unitId);
     }
 

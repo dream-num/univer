@@ -1,7 +1,7 @@
 import { ITextSelectionRenderManager, TextSelectionRenderManager } from '@univerjs/base-render';
 import { IShortcutService } from '@univerjs/base-ui';
+import type { ICommand } from '@univerjs/core';
 import {
-    ICommand,
     ICommandService,
     IConfigService,
     IUniverInstanceService,
@@ -10,7 +10,8 @@ import {
     PLUGIN_NAMES,
     PluginType,
 } from '@univerjs/core';
-import { Dependency, Inject, Injector } from '@wendellhu/redi';
+import type { Dependency } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 
 import {
     BreakLineCommand,
@@ -31,7 +32,7 @@ import {
     SetInlineFormatTextColorCommand,
     SetInlineFormatUnderlineCommand,
 } from './commands/commands/inline-format.command';
-import { ReplaceContentCommand } from './commands/commands/replace-content.command';
+import { CoverContentCommand, ReplaceContentCommand } from './commands/commands/replace-content.command';
 import { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';
 import { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
 import { MoveCursorOperation, MoveSelectionOperation } from './commands/operations/cursor.operation';
@@ -127,6 +128,7 @@ export class DocPlugin extends Plugin {
                 IMEInputCommand,
                 RichTextEditingMutation,
                 ReplaceContentCommand,
+                CoverContentCommand,
                 SetDocZoomRatioCommand,
                 SetDocZoomRatioOperation,
                 SetTextSelectionsOperation,

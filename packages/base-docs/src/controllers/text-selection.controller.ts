@@ -1,28 +1,13 @@
-import {
-    CURSOR_TYPE,
-    IMouseEvent,
-    IPointerEvent,
-    IRenderManagerService,
-    ITextSelectionRenderManager,
-} from '@univerjs/base-render';
-import {
-    Disposable,
-    ICommandInfo,
-    ICommandService,
-    IUniverInstanceService,
-    LifecycleStages,
-    Nullable,
-    Observer,
-    OnLifecycle,
-} from '@univerjs/core';
+import type { Documents, IMouseEvent, IPointerEvent } from '@univerjs/base-render';
+import { CURSOR_TYPE, IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/base-render';
+import type { ICommandInfo, Nullable, Observer } from '@univerjs/core';
+import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { getDocObjectById } from '../basics/component-tools';
 import { NORMAL_TEXT_SELECTION_PLUGIN_NAME, VIEWPORT_KEY } from '../basics/docs-view-key';
-import {
-    ISetDocZoomRatioOperationParams,
-    SetDocZoomRatioOperation,
-} from '../commands/operations/set-doc-zoom-ratio.operation';
+import type { ISetDocZoomRatioOperationParams } from '../commands/operations/set-doc-zoom-ratio.operation';
+import { SetDocZoomRatioOperation } from '../commands/operations/set-doc-zoom-ratio.operation';
 import { SetTextSelectionsOperation } from '../commands/operations/text-selection.operation';
 import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
 import { TextSelectionManagerService } from '../services/text-selection-manager.service';
@@ -119,6 +104,8 @@ export class TextSelectionController extends Disposable {
         });
 
         this._downObserver = document?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+            this._currentUniverService.setCurrentUniverDocInstance(unitId);
+
             this._textSelectionRenderManager.eventTrigger(evt, document.getOffsetConfig(), viewportMain);
 
             if (evt.button !== 2) {
@@ -207,6 +194,7 @@ export class TextSelectionController extends Disposable {
     }
 
     private _skeletonListener() {
+        // Change text selection runtime(skeleton, scene) and update text selection manager current selection.
         this._docSkeletonManagerService.currentSkeleton$.subscribe((param) => {
             if (param == null) {
                 return;
@@ -219,9 +207,15 @@ export class TextSelectionController extends Disposable {
                 return;
             }
 
-            const { scene } = currentRender;
+            const { scene, mainComponent } = currentRender;
+            const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
 
-            this._textSelectionRenderManager.changeRuntime(skeleton, scene);
+            this._textSelectionRenderManager.changeRuntime(
+                skeleton,
+                scene,
+                viewportMain,
+                (mainComponent as Documents).getOffsetConfig()
+            );
 
             this._textSelectionManagerService.setCurrentSelectionNotRefresh({
                 pluginName: NORMAL_TEXT_SELECTION_PLUGIN_NAME,

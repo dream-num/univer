@@ -1,21 +1,19 @@
-import { TextRange } from '@univerjs/base-render';
+import type { TextRange } from '@univerjs/base-render';
+import type { ICommand, IDocumentBody, IMutationInfo, IStyleBase, ITextDecoration, ITextRun } from '@univerjs/core';
 import {
     BooleanNumber,
     CommandType,
-    ICommand,
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     ICommandService,
-    IDocumentBody,
-    IMutationInfo,
-    IStyleBase,
-    ITextDecoration,
-    ITextRun,
     IUndoRedoService,
     IUniverInstanceService,
     MemoryCursor,
 } from '@univerjs/core';
 
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
-import { IRichTextEditingMutationParams, RichTextEditingMutation } from '../mutations/core-editing.mutation';
+import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
+import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
 
 export interface ISetInlineFormatCommandParams {
     segmentId: string;
@@ -81,8 +79,15 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
             return false;
         }
 
-        const docsModel = currentUniverService.getCurrentUniverDocInstance();
-        const unitId = docsModel.getUnitId();
+        let docsModel = currentUniverService.getCurrentUniverDocInstance();
+        let unitId = docsModel.getUnitId();
+
+        // When setting the formula bar style, the effect will be displayed in the cell editor,
+        // and the formula bar only displays plain text.
+        if (unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
+            docsModel = currentUniverService.getUniverDocInstance(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)!;
+            unitId = docsModel.getUnitId();
+        }
 
         let formatValue;
 

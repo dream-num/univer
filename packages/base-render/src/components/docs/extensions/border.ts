@@ -1,8 +1,9 @@
-import { BorderStyleTypes, getColorStyle, IBorderData, IBorderStyleData, IScale, Nullable } from '@univerjs/core';
+import type { BorderStyleTypes, IBorderData, IBorderStyleData, IScale, Nullable } from '@univerjs/core';
+import { getColorStyle } from '@univerjs/core';
 
 import { BORDER_TYPE, COLOR_BLACK_RGB } from '../../../basics/const';
 import { drawLineByBorderType, getLineWidth, setLineType } from '../../../basics/draw';
-import { IDocumentSkeletonSpan } from '../../../basics/i-document-skeleton-cached';
+import type { IDocumentSkeletonSpan } from '../../../basics/i-document-skeleton-cached';
 import { Vector2 } from '../../../basics/vector2';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
 import { docExtension } from '../doc-extension';

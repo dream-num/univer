@@ -1,13 +1,16 @@
-import { EventState, IPosition, Nullable, Observable } from '@univerjs/core';
+import type { EventState, IPosition, Nullable } from '@univerjs/core';
+import { Observable } from '@univerjs/core';
 
 import { RENDER_CLASS_TYPE } from './basics/const';
-import { IWheelEvent, PointerInput } from './basics/i-events';
+import type { IWheelEvent } from './basics/i-events';
+import { PointerInput } from './basics/i-events';
 import { toPx } from './basics/tools';
 import { Transform } from './basics/transform';
-import { IBoundRect, Vector2 } from './basics/vector2';
+import type { IBoundRect } from './basics/vector2';
+import { Vector2 } from './basics/vector2';
 import { Canvas } from './canvas';
-import { BaseScrollBar } from './shape/base-scroll-bar';
-import { ThinScene } from './thin-scene';
+import type { BaseScrollBar } from './shape/base-scroll-bar';
+import type { ThinScene } from './thin-scene';
 
 interface IViewPosition {
     top?: number;
@@ -382,6 +385,7 @@ export class Viewport {
     getBarScroll(actualX: number, actualY: number) {
         let x = actualX - this._paddingStartX;
         let y = actualY - this._paddingStartY;
+
         if (this._scrollBar) {
             x *= this._scrollBar.ratioScrollX; // convert to scroll coord
             y *= this._scrollBar.ratioScrollY;
@@ -397,6 +401,7 @@ export class Viewport {
                 y = this.scrollY;
             }
         }
+
         return {
             x,
             y,

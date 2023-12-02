@@ -2,7 +2,6 @@ import { LocaleService, ThemeService } from '@univerjs/core';
 import type { ILocale } from '@univerjs/design';
 import { ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import clsx from 'clsx';
 import type { ComponentType } from 'react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
@@ -93,30 +92,28 @@ export function App(props: IUniverAppProps) {
 
                 {/* content */}
                 <section className={styles.appContainer}>
-                    <section
-                        className={clsx(styles.appContainerMain, { [styles.appContainerMainCollapsed]: mainCollapsed })}
-                    >
-                        <header className={styles.appContainerHeader}>
-                            {props.toolbar && <Toolbar />}
+                    <header className={styles.appContainerHeader}>{props.toolbar && <Toolbar />}</header>
 
-                            <ComponentContainer components={headerComponents} />
-                        </header>
+                    <section className={styles.appContainerWrapper}>
+                        <section className={styles.appContainerContent}>
+                            <header>
+                                <ComponentContainer components={headerComponents} />
+                            </header>
 
-                        {/* <ComponentContainer components={sidebarComponents} /> */}
-
-                        <section
-                            ref={contentRef}
-                            className={styles.appContainerContent}
-                            data-range-selector
-                            onContextMenu={(e) => e.preventDefault()}
-                        >
-                            <ComponentContainer components={contentComponents} />
+                            <section
+                                className={styles.appContainerCanvas}
+                                ref={contentRef}
+                                data-range-selector
+                                onContextMenu={(e) => e.preventDefault()}
+                            >
+                                <ComponentContainer components={contentComponents} />
+                            </section>
                         </section>
-                    </section>
 
-                    <aside className={styles.appContainerSidebar}>
-                        <Sidebar />
-                    </aside>
+                        <aside className={styles.appContainerSidebar}>
+                            <Sidebar />
+                        </aside>
+                    </section>
                 </section>
 
                 {/* footer */}

@@ -1,36 +1,31 @@
 /* eslint-disable no-magic-numbers */
+import type { ISectionBreak, ISectionColumnProperties, LocaleService, Nullable } from '@univerjs/core';
 import {
     ColumnSeparatorType,
     GridType,
     HorizontalAlign,
-    ISectionBreak,
-    ISectionColumnProperties,
-    LocaleService,
-    Nullable,
     PageOrientType,
     SectionType,
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
 
-import {
+import type {
     IDocumentSkeletonCached,
     IDocumentSkeletonPage,
     IDocumentSkeletonSpan,
     ISkeletonResourceReference,
-    LineType,
-    PageLayoutType,
-    SpanType,
 } from '../../basics/i-document-skeleton-cached';
-import { IDocsConfig, INodeInfo, INodePosition, INodeSearch, ISectionBreakConfig } from '../../basics/interfaces';
-import { IBoundRect, Vector2 } from '../../basics/vector2';
+import { LineType, PageLayoutType, SpanType } from '../../basics/i-document-skeleton-cached';
+import type { IDocsConfig, INodeInfo, INodePosition, INodeSearch, ISectionBreakConfig } from '../../basics/interfaces';
+import type { IBoundRect, Vector2 } from '../../basics/vector2';
 import { Skeleton } from '../skeleton';
 import { dealWithSections } from './block/section';
 import { Liquid } from './common/liquid';
 import { createSkeletonPage } from './common/page';
 import { createSkeletonSection } from './common/section';
 import { getLastPage, updateBlockIndex } from './common/tools';
-import { DocumentViewModel } from './view-model/document-view-model';
+import type { DocumentViewModel } from './view-model/document-view-model';
 
 const DEFAULT_SECTION_BREAK: ISectionBreak = {
     columnProperties: [],

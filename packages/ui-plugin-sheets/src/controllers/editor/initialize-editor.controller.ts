@@ -1,15 +1,19 @@
 import { getDocObject } from '@univerjs/base-docs';
 import { IRenderManagerService } from '@univerjs/base-render';
+import type { Nullable } from '@univerjs/core';
 import {
+    DEFAULT_EMPTY_DOCUMENT_VALUE,
     Disposable,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    HorizontalAlign,
     IUniverInstanceService,
     LifecycleStages,
-    Nullable,
     OnLifecycle,
+    VerticalAlign,
+    WrapStrategy,
 } from '@univerjs/core';
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 
 @OnLifecycle(LifecycleStages.Rendered, InitializeEditorController)
 export class InitializeEditorController extends Disposable {
@@ -41,10 +45,38 @@ export class InitializeEditorController extends Disposable {
         });
 
         // create univer doc formula bar editor instance
-        this._currentUniverService.createDoc({
+        const INITIAL_SNAPSHOT = {
             id: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
-            documentStyle: {},
-        });
+            body: {
+                dataStream: `${DEFAULT_EMPTY_DOCUMENT_VALUE}`,
+                textRuns: [],
+                paragraphs: [
+                    {
+                        startIndex: 0,
+                    },
+                ],
+            },
+            documentStyle: {
+                pageSize: {
+                    width: Infinity,
+                    height: Infinity,
+                },
+                marginTop: 5,
+                marginBottom: 5,
+                marginRight: 0,
+                marginLeft: 0,
+                paragraphLineGapDefault: 0,
+                renderConfig: {
+                    horizontalAlign: HorizontalAlign.UNSPECIFIED,
+                    verticalAlign: VerticalAlign.UNSPECIFIED,
+                    centerAngle: 0,
+                    vertexAngle: 0,
+                    wrapStrategy: WrapStrategy.WRAP,
+                },
+            },
+        };
+
+        this._currentUniverService.createDoc(INITIAL_SNAPSHOT);
     }
 
     private _commandExecutedListener() {}

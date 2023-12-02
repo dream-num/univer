@@ -1,18 +1,32 @@
 import { handleStringToStyle } from '@univerjs/base-ui';
-import { ITextStyle, ObjectMatrix } from '@univerjs/core';
+import type { IDocumentBody, ITextRun, ITextStyle, Nullable } from '@univerjs/core';
+import { ObjectMatrix } from '@univerjs/core';
 
-import { ICellDataWithSpanInfo, IClipboardPropertyItem, IParsedCellValue, IUniverSheetCopyDataModel } from '../type';
+import { genId } from '../copy-content-cache';
+import type {
+    ICellDataWithSpanInfo,
+    IClipboardPropertyItem,
+    IParsedCellValue,
+    IUniverSheetCopyDataModel,
+} from '../type';
+import { extractNodeStyle } from './parse-node-style';
+import type { IAfterProcessRule } from './paste-plugins/type';
+import parseToDom from './utils';
 
 export interface IStyleRule {
     filter: string | string[] | ((node: HTMLElement) => boolean);
     getStyle(node: HTMLElement): ITextStyle;
 }
 
+export interface IParsedTablesInfo {
+    index: number;
+}
+
 export interface IPasteExtension {
     name: string;
     checkPasteType(html: string): boolean;
     stylesRules: IStyleRule[];
-    // afterProcessRules: IAfterProcessRule[];
+    afterProcessRules: IAfterProcessRule[];
 }
 
 function matchFilter(node: HTMLElement, filter: IStyleRule['filter']) {
@@ -30,28 +44,135 @@ function matchFilter(node: HTMLElement, filter: IStyleRule['filter']) {
 }
 
 export class HtmlToUSMService {
-    private static extensionList: IPasteExtension[] = [];
+    private static pluginList: IPasteExtension[] = [];
 
-    static use(extension: IPasteExtension) {
-        if (this.extensionList.includes(extension)) {
-            throw new Error(`Univer paste extension ${extension.name} already added`);
+    static use(plugin: IPasteExtension) {
+        if (this.pluginList.includes(plugin)) {
+            throw new Error(`Univer paste plugin ${plugin.name} already added`);
         }
 
-        this.extensionList.push(extension);
+        this.pluginList.push(plugin);
     }
 
     private styleCache: Map<ChildNode, ITextStyle> = new Map();
 
     private styleRules: IStyleRule[] = [];
 
-    // private afterProcessRules: IAfterProcessRule[] = [];
+    private afterProcessRules: IAfterProcessRule[] = [];
 
     convert(html: string): IUniverSheetCopyDataModel {
+        const pastePlugin = HtmlToUSMService.pluginList.find((plugin) => plugin.checkPasteType(html));
+        if (pastePlugin) {
+            this.styleRules = [...pastePlugin.stylesRules];
+            this.afterProcessRules = [...pastePlugin.afterProcessRules];
+        }
         const valueMatrix = new ObjectMatrix<ICellDataWithSpanInfo>();
+        const dom = parseToDom(html);
+        const newDocBody: IDocumentBody = {
+            dataStream: '',
+            textRuns: [],
+        };
 
+        const rowProperties: IClipboardPropertyItem[] = [];
+        let colProperties: IClipboardPropertyItem[] = [];
+        // pick tables
+        const tableStrings = html.match(/<table.*?>([\s\S]*?)<\/table>/gi);
+
+        const tables: IParsedTablesInfo[] = [];
+        this.process(null, dom?.childNodes!, newDocBody, tables);
+        const { paragraphs, dataStream, textRuns } = newDocBody;
+
+        // use paragraph to split rows
+        if (paragraphs) {
+            const starts = paragraphs.map((p) => p.startIndex + 1);
+            starts.unshift(0);
+            for (let i = 0; i < starts.length; i++) {
+                let cellDataStream;
+                if (i === starts.length - 1) {
+                    cellDataStream = `${dataStream.substring(starts[i])}\r\n`;
+                } else {
+                    cellDataStream = `${dataStream.substring(starts[i], starts[i + 1] - 1)}\r\n`;
+                }
+                const cellTextRuns: ITextRun[] = [];
+                textRuns?.forEach((t) => {
+                    if (t.st >= starts[i] && t.ed <= starts[i + 1]) {
+                        cellTextRuns.push({
+                            st: t.st - starts[i],
+                            ed: t.ed - starts[i],
+                            ts: t.ts,
+                        });
+                    }
+                });
+                // set rich format
+                valueMatrix.setValue(valueMatrix.getLength(), 0, {
+                    v: cellDataStream,
+                    p: {
+                        id: genId(),
+                        body: {
+                            dataStream: cellDataStream,
+                            textRuns: cellTextRuns,
+                        },
+                        documentStyle: { textStyle: cellTextRuns[0]?.ts },
+                    },
+                });
+                rowProperties.push({}); // TODO@yuhongz
+
+                if (tableStrings) {
+                    tables.forEach((t) => {
+                        const curRow = valueMatrix.getLength();
+                        if (t.index === i) {
+                            const tableString = tableStrings.shift();
+                            const {
+                                cellMatrix,
+                                colProperties: tableColProp,
+                                rowProperties: tableRowProp,
+                            } = this._parseTable(tableString!);
+
+                            if (tableColProp) {
+                                colProperties = tableColProp;
+                            }
+                            cellMatrix &&
+                                cellMatrix.forValue((row, col, value) => {
+                                    valueMatrix.setValue(curRow + row, col, value);
+                                });
+                            rowProperties.push(...tableRowProp);
+                        }
+                    });
+                }
+            }
+        } else {
+            if (dataStream) {
+                valueMatrix.setValue(0, 0, {
+                    v: dataStream,
+                    p: { id: genId(), body: newDocBody, documentStyle: {} },
+                });
+                rowProperties.push({}); // TODO@yuhongz
+            }
+
+            if (tableStrings) {
+                tableStrings.forEach((t) => {
+                    const curRow = valueMatrix.getLength();
+                    const { cellMatrix } = this._parseTable(t!);
+
+                    cellMatrix &&
+                        cellMatrix.forValue((row, col, value) => {
+                            valueMatrix.setValue(curRow + row, col, value);
+                        });
+                    rowProperties.push(...rowProperties);
+                });
+            }
+        }
+        return {
+            rowProperties: [],
+            colProperties: [],
+            cellMatrix: valueMatrix,
+        };
+    }
+
+    private _parseTable(html: string) {
+        const valueMatrix = new ObjectMatrix<ICellDataWithSpanInfo>();
         const colProperties = parseColGroup(html);
         const { rowProperties, rowCount, cellMatrix: parsedCellMatrix } = parseTableRows(html);
-
         parsedCellMatrix &&
             parsedCellMatrix.forValue((row, col, value) => {
                 // TODO@Dushusir Temporarily use handleStringToStyle. After all replication and paste function is completed, fix the handleStringToStyle method
@@ -65,10 +186,72 @@ export class HtmlToUSMService {
                 });
             });
         return {
-            rowProperties,
-            colProperties,
+            rowProperties: [],
+            colProperties: [],
             cellMatrix: valueMatrix,
         };
+    }
+
+    private process(
+        parent: Nullable<ChildNode>,
+        nodes: NodeListOf<ChildNode>,
+        doc: IDocumentBody,
+        tables: IParsedTablesInfo[]
+    ) {
+        for (const node of nodes) {
+            if (node.nodeName.toLowerCase() === 'table') {
+                tables.push({
+                    index: doc?.paragraphs?.length || 0,
+                });
+            } else if (node.nodeType === Node.TEXT_NODE) {
+                // TODO: @JOCS, More characters need to be replaced, like `\b`
+                const text = node.nodeValue?.replace(/[\r\n]/g, '');
+                let style;
+
+                if (parent && this.styleCache.has(parent)) {
+                    style = this.styleCache.get(parent);
+                }
+                const newDoc: IDocumentBody = {
+                    dataStream: '',
+                    textRuns: [],
+                };
+
+                doc.dataStream += text;
+                newDoc.dataStream += text;
+                if (style && Object.getOwnPropertyNames(style).length) {
+                    doc.textRuns!.push({
+                        st: doc.dataStream.length - text!.length,
+                        ed: doc.dataStream.length,
+                        ts: style,
+                    });
+                    newDoc.textRuns!.push({
+                        st: doc.dataStream.length - text!.length,
+                        ed: doc.dataStream.length,
+                        ts: style,
+                    });
+                }
+            } else if (node.nodeType === Node.ELEMENT_NODE) {
+                const parentStyles = parent ? this.styleCache.get(parent) : {};
+                const styleRule = this.styleRules.find(({ filter }) => matchFilter(node as HTMLElement, filter));
+                const nodeStyles = styleRule
+                    ? styleRule.getStyle(node as HTMLElement)
+                    : extractNodeStyle(node as HTMLElement);
+
+                this.styleCache.set(node, { ...parentStyles, ...nodeStyles });
+
+                const { childNodes } = node;
+
+                this.process(node, childNodes, doc, tables);
+
+                const afterProcessRule = this.afterProcessRules.find(({ filter }) =>
+                    matchFilter(node as HTMLElement, filter)
+                );
+
+                if (afterProcessRule) {
+                    afterProcessRule.handler(doc, node as HTMLElement);
+                }
+            }
+        }
     }
 }
 
@@ -211,4 +394,10 @@ function parseColGroup(raw: string): IClipboardPropertyItem[] | null {
     }
 
     return Array.from(colMatches).map((colMatch) => parseProperties(colMatch[1]));
+}
+
+function childNodeToHTML(node: ChildNode) {
+    const serializer = new XMLSerializer();
+    const htmlString = serializer.serializeToString(node);
+    return htmlString;
 }

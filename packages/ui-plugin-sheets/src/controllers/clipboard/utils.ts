@@ -210,6 +210,15 @@ export function getSetCellValueMutations(
         valueMatrix.setValue(row + startRow, col + startColumn, {
             v: value.v,
         });
+        // if (value.p?.body) {
+        //     valueMatrix.setValue(row + startRow, col + startColumn, {
+        //         p: {
+        //             body: {
+        //                 dataStream: value.p.body.dataStream,
+        //             },
+        //         },
+        //     });
+        // }
     });
     // set cell value and style
     const setValuesMutation: ISetRangeValuesMutationParams = {
@@ -255,6 +264,11 @@ export function getSetCellStyleMutations(
         valueMatrix.setValue(row + startRow, col + startColumn, {
             s: value.s,
         });
+        if (value.p?.body) {
+            valueMatrix.setValue(row + startRow, col + startColumn, {
+                p: value.p,
+            });
+        }
     });
     // set cell style
     const setValuesMutation: ISetRangeValuesMutationParams = {

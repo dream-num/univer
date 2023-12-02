@@ -227,7 +227,10 @@ export class SheetClipboardController extends Disposable {
                 if (addingRowsCount > 0) {
                     const rowInfo = new ObjectArray<IRowData>();
                     rowProperties.slice(existingRowsCount).forEach((property, index) => {
-                        const style = property.style;
+                        const style = property?.style;
+                        if (!style) {
+                            return;
+                        }
                         const cssTextArray = style.split(';');
                         let height = DEFAULT_WORKSHEET_ROW_HEIGHT;
 
@@ -265,6 +268,9 @@ export class SheetClipboardController extends Disposable {
                 const rowHeight = new ObjectArray<number>();
                 rowProperties.slice(0, existingRowsCount).forEach((property, index) => {
                     const style = property.style;
+                    if (!style) {
+                        return;
+                    }
                     const cssTextArray = style.split(';');
                     let height = DEFAULT_WORKSHEET_ROW_HEIGHT;
 

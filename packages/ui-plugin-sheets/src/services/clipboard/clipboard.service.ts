@@ -40,6 +40,8 @@ import { ISelectionRenderService } from '../selection/selection-render.service';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { copyContentCache, extractId, genId } from './copy-content-cache';
 import { HtmlToUSMService } from './html-to-usm/converter';
+import PastePluginLark from './html-to-usm/paste-plugins/plugin-lark';
+import PastePluginWord from './html-to-usm/paste-plugins/plugin-word';
 import type {
     ICellDataWithSpanInfo,
     IPasteSource,
@@ -62,6 +64,9 @@ export const PREDEFINED_HOOK_NAME = {
 /**
  * This service provide hooks for sheet features to supplement content or modify behavior of clipboard.
  */
+
+HtmlToUSMService.use(PastePluginWord);
+HtmlToUSMService.use(PastePluginLark);
 export interface ISheetClipboardService {
     copy(): Promise<boolean>;
     cut(): Promise<boolean>;
@@ -172,7 +177,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                 ? await item.getType(HTML_CLIPBOARD_MIME_TYPE).then((blob) => blob && blob.text())
                 : '';
 
-        if (html && isLegalSpreadsheetHTMLContent(html)) {
+        if (html) {
             // Firstly see if the html content is in good format.
             // In another word, if it is copied from any spreadsheet apps (including Univer itself).
             return this._pasteHTML(html, pasteType);

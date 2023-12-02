@@ -1,16 +1,27 @@
-import { CommandType, ICommand, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { ICommand } from '@univerjs/core';
+import {
+    CommandType,
+    ICommandService,
+    IUndoRedoService,
+    IUniverInstanceService,
+    sequenceExecute,
+    SheetInterceptorService,
+} from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
 
-import { IInsertSheetMutationParams, IRemoveSheetMutationParams } from '../../basics/interfaces/mutation-interface';
+import type {
+    IInsertSheetMutationParams,
+    IRemoveSheetMutationParams,
+} from '../../basics/interfaces/mutation-interface';
 import { InsertSheetMutation } from '../mutations/insert-sheet.mutation';
 import { RemoveSheetMutation, RemoveSheetUndoMutationFactory } from '../mutations/remove-sheet.mutation';
+import type { ISetWorksheetActivateMutationParams } from '../mutations/set-worksheet-activate.mutation';
 import {
-    ISetWorksheetActivateMutationParams,
     SetWorksheetActivateMutation,
     SetWorksheetUnActivateMutationFactory,
 } from '../mutations/set-worksheet-activate.mutation';
 
-export interface RemoveSheetCommandParams {
+export interface IRemoveSheetCommandParams {
     workbookId?: string;
     worksheetId?: string;
 }
@@ -21,10 +32,11 @@ export interface RemoveSheetCommandParams {
 export const RemoveSheetCommand: ICommand = {
     id: 'sheet.command.remove-sheet',
     type: CommandType.COMMAND,
-    handler: async (accessor: IAccessor, params?: RemoveSheetCommandParams) => {
+    handler: async (accessor: IAccessor, params?: IRemoveSheetCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
+        const sheetInterceptorService = accessor.get(SheetInterceptorService);
         let workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
         let worksheetId = univerInstanceService
             .getCurrentUniverSheetInstance()
@@ -69,20 +81,27 @@ export const RemoveSheetCommand: ICommand = {
             accessor,
             RemoveSheetMutationParams
         );
-        // execute do mutations and add undo mutations to undo stack if completed
-        const result = commandService.syncExecuteCommand(RemoveSheetMutation.id, RemoveSheetMutationParams);
+        const intercepted = sheetInterceptorService.onCommandExecute({
+            id: RemoveSheetCommand.id,
+            params: { workbookId, worksheetId },
+        });
+        const redos = [
+            { id: RemoveSheetMutation.id, params: RemoveSheetMutationParams },
+            { id: SetWorksheetActivateMutation.id, params: activeSheetMutationParams },
+            ...intercepted.redos,
+        ];
+        const undos = [
+            ...intercepted.undos,
+            { id: InsertSheetMutation.id, params: InsertSheetMutationParams },
+            { id: SetWorksheetActivateMutation.id, params: activeMutationParams },
+        ];
+        const result = sequenceExecute(redos, commandService);
 
         if (result && activeResult) {
             undoRedoService.pushUndoRedo({
                 unitID: workbookId,
-                undoMutations: [
-                    { id: InsertSheetMutation.id, params: InsertSheetMutationParams },
-                    { id: SetWorksheetActivateMutation.id, params: activeMutationParams },
-                ],
-                redoMutations: [
-                    { id: RemoveSheetMutation.id, params: RemoveSheetMutationParams },
-                    { id: SetWorksheetActivateMutation.id, params: activeSheetMutationParams },
-                ],
+                undoMutations: undos,
+                redoMutations: redos,
             });
 
             return true;

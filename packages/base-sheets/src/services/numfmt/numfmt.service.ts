@@ -12,6 +12,7 @@ import {
     toDisposable,
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
+import { Subject } from 'rxjs';
 
 import { SetNumfmtMutation } from '../../commands/mutations/set-numfmt-mutation';
 import type { FormatType, INumfmtItem, INumfmtService, IRefItem, ISnapshot } from './type';
@@ -27,6 +28,9 @@ export class NumfmtService extends Disposable implements INumfmtService {
     private _numfmtModel: Map<string, Map<string, ObjectMatrix<INumfmtItem>>> = new Map();
 
     private _refAliasModel: Map<string, RefAlias<IRefItem, 'numfmtId' | 'pattern'>> = new Map();
+
+    private _modelReplace$ = new Subject<string>();
+    modelReplace$ = this._modelReplace$.asObservable();
 
     constructor(
         @Inject(ICommandService) private _commandService: ICommandService,
@@ -67,6 +71,7 @@ export class NumfmtService extends Disposable implements INumfmtService {
                             new RefAlias<IRefItem, 'numfmtId' | 'pattern'>(refModel, ['numfmtId', 'pattern'])
                         );
                     }
+                    this._modelReplace$.next(unitID);
                 },
             });
         };

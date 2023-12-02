@@ -43,7 +43,7 @@ export class ResourceManagerService extends Disposable implements IResourceManag
         resourceMap.set(resourceName, hook);
         this._resourceMap.set(unitID, resourceMap);
         this._register$.next({ unitID, resourceName, hook });
-        return toDisposable(() => this._resourceMap.delete(resourceName));
+        return toDisposable(() => resourceMap.delete(resourceName));
     }
 
     disposePluginResource(unitID: string, pluginName: string) {

@@ -1,6 +1,7 @@
 import type { ICellData, Nullable, ObjectMatrix, ObjectMatrixPrimitiveType, RefAlias } from '@univerjs/core';
 import { LifecycleStages, runOnLifecycle } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
+import type { Observable } from 'rxjs';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type INumfmtItem = {
@@ -47,6 +48,7 @@ export interface INumfmtService {
         values: Array<{ row: number; col: number; pattern?: string; type: FormatType }>
     ): void;
     getRefModel(workbookId: string): Nullable<RefAlias<IRefItem, 'numfmtId' | 'pattern'>>;
+    modelReplace$: Observable<string>;
 }
 
 export interface ISnapshot {

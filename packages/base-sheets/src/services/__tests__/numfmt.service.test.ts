@@ -19,7 +19,9 @@ describe('test numfmt service', () => {
         univer = testBed.univer;
         get = testBed.get;
         commandService = get(ICommandService);
+        commandService.registerCommand(SetNumfmtMutation);
     });
+
     afterEach(() => {
         univer.dispose();
     });

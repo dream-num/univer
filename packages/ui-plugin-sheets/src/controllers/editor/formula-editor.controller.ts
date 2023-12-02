@@ -271,6 +271,11 @@ export class FormulaEditorController extends RxDisposable {
         docDataModel.getBody()!.dataStream = dataStream;
         docDataModel.getBody()!.paragraphs = paragraphs;
 
+        // Need to empty textRuns(previous formula highlight) every time when sync content(change selection or edit cell or edit formula bar).
+        if (unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
+            docDataModel.getBody()!.textRuns = [];
+        }
+
         docViewModel.reset(docDataModel);
 
         const { skeleton } = docsSkeletonObject;

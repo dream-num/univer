@@ -2,4 +2,4 @@
 sidebar_position: 2
 ---
 
-# 撰写新插件
+# 自定义插件

@@ -6,7 +6,7 @@ sidebar_position: 1
 
 TODO: Logo Here
 
-Univer 是一套企业协同办公文档与数据解决方案。
+Univer 是一套企业协同办公文档与数据解决方案，
 
 [![npm version](https://badge.fury.io/js/@univerjs%2Fcore.svg)](https://badge.fury.io/js/@univerjs%2Fcore)
 
@@ -21,36 +21,11 @@ Univer 是一套企业协同办公文档与数据解决方案。
     * 🧮 高性能的公式引擎，支持 web worker
 * 🌍 国际化支持
 
-## 安装
-
-Univer 的前端通过多个 npm 包发布，你可以通过以下命令安装核心包：
-
-```bash
-npm install @univerjs/core
-```
-
-然后可以根据你的实际需要安装其它包。例如想要创建一个基本的电子表格，可以以如下命令安装相关的包：
-
-```zsh
-npm install @univerjs/base-docs \
-    @univerjs/base-formula-engine \
-    @univerjs/base-render \
-    @univerjs/base-sheets \
-    @univerjs/base-ui \
-    @univerjs/design \
-    @univerjs/sheets-plugin-formula \
-    @univerjs/sheets-plugin-formula-ui \
-    @univerjs/ui-plugin-sheets
-```
-
 ## 如何使用
 
-请参考[快速上手](/docs/category/quick-start)。
+如果你不想在本地设置开发环境，我们准备了一个在线 IDE 来帮助你快速体验使用 Univer 开发，点击[这里](/playground)访问。
 
-## 在线 demo
-
-我们准备了一个在线 IDE 来帮助你快速体验如何使用 Univer 开发，点击[这里](/playground)访问。
-
+如果你喜欢本地的开发方式，请参考[快速上手](/docs/category/quick-start)。
 
 ## 链接
 
@@ -58,11 +33,9 @@ npm install @univerjs/base-docs \
 * [GitHub](https://github.com/dream-num/univer)
 * [知乎专栏](https://www.zhihu.com/org/meng-shu-ke-ji)
 
-## 谁在使用
-
 ## 如何贡献
 
-请在参与 Univer 的开发之前阅读[贡献指南](https://github.com/dream-num/univer/contributingguide)。
+我们欢迎任何形式的贡献，包括但不限于[提交 issue](https://github.com/dream-num/univer/issues/new/choose)、提交 PR、参与讨论等。请在参与 Univer 的开发之前阅读[贡献指南](https://github.com/dream-num/univer/contributingguide)。
 
 ## 社区
 
@@ -72,14 +45,14 @@ npm install @univerjs/base-docs \
 1. [GitHub Discussions](https://github.com/dream-num/univer/discussions)
 1. 加入 Univer 中文社群
 
-你也可以在以下技术社区提出问题，建议带上 univer 标签：
+## 授权协议
 
-1. stackoverflow
-1. segmentfault
+Univer 的核心代码在 MIT 协议下开源。Univer 同时提供商业授权，如果你的产品需要进阶功能或者部署方面的支持，可以联系我们获取商业授权。Univer 商业授权包括以下内容：
 
-## 商业授权
+* 👨‍💻 多人协同编辑和协同浏览
+* 🛜 数据连接器
+* 🎚️ 私有化部署咨询服务
 
-* 👨‍💻 支持多人协同编辑和协同浏览
-*
+可以通过以下方式咨询商业授权：
 
-## 联系方式
+*  商务合作邮箱 sales@univer.ai

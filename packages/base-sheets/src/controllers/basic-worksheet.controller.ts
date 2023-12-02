@@ -208,7 +208,6 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetWorksheetRowIsAutoHeightCommand,
             SetWorksheetRowIsAutoHeightMutation,
             SetWorksheetShowCommand,
-            TrimWhitespaceCommand,
             SetNumfmtMutation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
 

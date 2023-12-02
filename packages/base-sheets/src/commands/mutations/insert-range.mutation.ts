@@ -1,15 +1,11 @@
-import {
-    CommandType,
-    Dimension,
-    IMutation,
-    IRange,
-    IUniverInstanceService,
-    ObjectMatrix,
-    ObjectMatrixPrimitiveType,
-} from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { IMutation, IRange, ObjectMatrix, ObjectMatrixPrimitiveType } from '@univerjs/core';
+import { CommandType, Dimension, IUniverInstanceService } from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
 
-import { IDeleteRangeMutationParams, IInsertRangeMutationParams } from '../../basics/interfaces/mutation-interface';
+import type {
+    IDeleteRangeMutationParams,
+    IInsertRangeMutationParams,
+} from '../../basics/interfaces/mutation-interface';
 
 /**
  * Generate undo mutation of a `InsertRangeMutation`

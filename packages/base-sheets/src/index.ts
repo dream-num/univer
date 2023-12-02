@@ -166,7 +166,7 @@ export {
 } from './commands/mutations/insert-row-col.mutation';
 export { InsertSheetMutation, InsertSheetUndoMutationFactory } from './commands/mutations/insert-sheet.mutation';
 export { MoveRangeMutation } from './commands/mutations/move-range.mutation';
-export { type MoveRangeMutationParams } from './commands/mutations/move-range.mutation';
+export { type IMoveRangeMutationParams } from './commands/mutations/move-range.mutation';
 export { type IMoveColumnsMutationParams } from './commands/mutations/move-rows-cols.mutation';
 export { type IMoveRowsMutationParams, MoveRowsMutation } from './commands/mutations/move-rows-cols.mutation';
 export { MoveColsMutation } from './commands/mutations/move-rows-cols.mutation';

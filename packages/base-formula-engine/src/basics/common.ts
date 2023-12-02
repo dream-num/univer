@@ -3,6 +3,7 @@ import type {
     ICellData,
     IRange,
     IUnitRange,
+    Nullable,
     ObjectMatrix,
     ObjectMatrixPrimitiveType,
 } from '@univerjs/core';
@@ -53,6 +54,10 @@ export interface IRuntimeOtherUnitDataType {
 
 export interface IUnitSheetNameMap {
     [unitId: string]: { [sheetName: string]: string };
+}
+
+export interface IDirtyUnitSheetNameMap {
+    [unitId: string]: { [sheetId: string]: Nullable<string> };
 }
 
 export interface IArrayFormulaRangeType {
@@ -108,6 +113,7 @@ export interface IFormulaDatasetConfig {
     arrayFormulaCellData: IArrayFormulaUnitCellType;
     forceCalculate: boolean;
     dirtyRanges: IUnitRange[];
+    dirtyNameMap: IDirtyUnitSheetNameMap;
     excludedCell?: IUnitExcludedCell;
 }
 

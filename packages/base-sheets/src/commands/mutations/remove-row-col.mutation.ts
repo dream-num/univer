@@ -1,15 +1,8 @@
-import {
-    CommandType,
-    IColumnData,
-    IMutation,
-    IRowData,
-    IUniverInstanceService,
-    ObjectArray,
-    Worksheet,
-} from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { IColumnData, IMutation, IRowData, Worksheet } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, ObjectArray } from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
 
-import {
+import type {
     IInsertColMutationParams,
     IInsertRowMutationParams,
     IRemoveColMutationParams,

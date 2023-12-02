@@ -4,6 +4,7 @@ import { createIdentifier } from '@wendellhu/redi';
 
 import type {
     IArrayFormulaUnitCellType,
+    IDirtyUnitSheetNameMap,
     IFormulaData,
     IFormulaDatasetConfig,
     IOtherFormulaData,
@@ -54,6 +55,8 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
     private _forceCalculate: boolean = false;
 
     private _dirtyRanges: IUnitRange[] = [];
+
+    private _dirtyNameMap: IDirtyUnitSheetNameMap = {};
 
     private _excludedCell: Nullable<IUnitExcludedCell>;
 
@@ -118,6 +121,8 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         this._forceCalculate = config.forceCalculate;
 
         this._dirtyRanges = config.dirtyRanges;
+
+        this._dirtyNameMap = config.dirtyNameMap;
 
         this._excludedCell = config.excludedCell;
     }

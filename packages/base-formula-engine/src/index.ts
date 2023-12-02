@@ -2,6 +2,7 @@ export { LexerNode } from './analysis/lexer-node';
 export type {
     IArrayFormulaRangeType,
     IArrayFormulaUnitCellType,
+    IDirtyUnitSheetNameMap,
     IFormulaData,
     IFormulaDataItem,
     IFormulaDatasetConfig,

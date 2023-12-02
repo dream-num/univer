@@ -1,12 +1,18 @@
-import {
-    FormulaEngineService,
-    generateStringWithSequence,
-    IFormulaData,
-    IFormulaDataItem,
-    ISequenceNode,
-    IUnitSheetNameMap,
-    sequenceNodeType,
-} from '@univerjs/base-formula-engine';
+import type { IFormulaData, IFormulaDataItem, ISequenceNode, IUnitSheetNameMap } from '@univerjs/base-formula-engine';
+import { FormulaEngineService, generateStringWithSequence, sequenceNodeType } from '@univerjs/base-formula-engine';
+import type {
+    IDeleteRangeMoveLeftCommandParams,
+    IDeleteRangeMoveUpCommandParams,
+    IInsertColCommandParams,
+    IInsertRowCommandParams,
+    IMoveColsCommandParams,
+    IMoveRangeCommandParams,
+    IMoveRowsCommandParams,
+    InsertRangeMoveDownCommandParams,
+    InsertRangeMoveRightCommandParams,
+    IRemoveRowColCommandParams,
+    ISetRangeValuesMutationParams,
+} from '@univerjs/base-sheets';
 import {
     DeleteRangeMoveLeftCommand,
     DeleteRangeMoveUpCommand,
@@ -20,21 +26,10 @@ import {
     handleIRemoveCol,
     handleIRemoveRow,
     handleMoveRange,
-    IDeleteRangeMoveLeftCommandParams,
-    IDeleteRangeMoveUpCommandParams,
-    IInsertColCommandParams,
-    IInsertRowCommandParams,
-    IMoveColsCommandParams,
-    IMoveRangeCommandParams,
-    IMoveRowsCommandParams,
     InsertColCommand,
     InsertRangeMoveDownCommand,
-    InsertRangeMoveDownCommandParams,
     InsertRangeMoveRightCommand,
-    InsertRangeMoveRightCommandParams,
     InsertRowCommand,
-    IRemoveRowColCommandParams,
-    ISetRangeValuesMutationParams,
     MoveColsCommand,
     MoveRangeCommand,
     MoveRowsCommand,
@@ -45,19 +40,15 @@ import {
     SetRangeValuesMutation,
     SetRangeValuesUndoMutationFactory,
 } from '@univerjs/base-sheets';
+import type { ICellData, ICommandInfo, IRange, IUnitRange, Nullable } from '@univerjs/core';
 import {
     deserializeRangeWithSheet,
     Direction,
     Disposable,
-    ICellData,
-    ICommandInfo,
     ICommandService,
-    IRange,
     isFormulaString,
-    IUnitRange,
     IUniverInstanceService,
     LifecycleStages,
-    Nullable,
     ObjectMatrix,
     OnLifecycle,
     RANGE_TYPE,
@@ -68,9 +59,10 @@ import {
 } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
+import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
 import { SetFormulaDataMutation } from '../commands/mutations/set-formula-data.mutation';
 import { FormulaDataModel } from '../models/formula-data.model';
-import { offsetFormula } from './utils';
+import { offsetArrayFormula, offsetFormula } from './utils';
 
 interface IUnitRangeWithOffset extends IUnitRange {
     refOffsetX: number;
@@ -190,12 +182,36 @@ export class UpdateFormulaController extends Disposable {
         if (result) {
             const { unitSheetNameMap } = this._formulaDataModel.getCalculateData();
             let oldFormulaData = this._formulaDataModel.getFormulaData();
+
+            // change formula reference
             const formulaData = this._getFormulaReferenceMoveInfo(oldFormulaData, unitSheetNameMap, result);
 
             const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
             const unitId = workbook.getUnitId();
             const sheetId = workbook.getActiveSheet().getSheetId();
             const selections = this._selectionManagerService.getSelections();
+
+            // offset arrayFormula
+            const arrayFormulaRange = this._formulaDataModel.getArrayFormulaRange();
+            const arrayFormulaCellData = this._formulaDataModel.getArrayFormulaCellData();
+
+            let offsetArrayFormulaRange = offsetFormula(arrayFormulaRange, command, unitId, sheetId, selections);
+            offsetArrayFormulaRange = offsetArrayFormula(offsetArrayFormulaRange, unitId, sheetId);
+            const offsetArrayFormulaCellData = offsetFormula(
+                arrayFormulaCellData,
+                command,
+                unitId,
+                sheetId,
+                selections
+            );
+
+            // Synchronous to the worker thread
+            this._commandService.executeCommand(SetArrayFormulaDataMutation.id, {
+                arrayFormulaRange: offsetArrayFormulaRange,
+                arrayFormulaCellData: offsetArrayFormulaCellData,
+            });
+
+            // offset formulaData
             oldFormulaData = offsetFormula(oldFormulaData, command, unitId, sheetId, selections);
             const offsetFormulaData = offsetFormula(formulaData, command, unitId, sheetId, selections);
 

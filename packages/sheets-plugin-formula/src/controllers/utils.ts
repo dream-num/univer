@@ -1,9 +1,5 @@
-import { IFormulaData, IFormulaDataItem } from '@univerjs/base-formula-engine';
-import {
-    DeleteRangeMoveLeftCommand,
-    DeleteRangeMoveUpCommand,
-    handleDeleteRangeMutation,
-    handleInsertRangeMutation,
+import type { IArrayFormulaRangeType } from '@univerjs/base-formula-engine';
+import type {
     IDeleteRangeMoveLeftCommandParams,
     IDeleteRangeMoveUpCommandParams,
     IInsertColCommandParams,
@@ -11,76 +7,84 @@ import {
     IMoveColsCommandParams,
     IMoveRangeCommandParams,
     IMoveRowsCommandParams,
-    InsertColCommand,
-    InsertRangeMoveDownCommand,
     InsertRangeMoveDownCommandParams,
-    InsertRangeMoveRightCommand,
     InsertRangeMoveRightCommandParams,
-    InsertRowCommand,
     IRemoveRowColCommandParams,
     ISelectionWithStyle,
+} from '@univerjs/base-sheets';
+import {
+    DeleteRangeMoveLeftCommand,
+    DeleteRangeMoveUpCommand,
+    handleDeleteRangeMutation,
+    handleInsertRangeMutation,
+    InsertColCommand,
+    InsertRangeMoveDownCommand,
+    InsertRangeMoveRightCommand,
+    InsertRowCommand,
     MoveColsCommand,
     MoveRangeCommand,
     MoveRowsCommand,
     RemoveColCommand,
     RemoveRowCommand,
 } from '@univerjs/base-sheets';
-import { Dimension, ICommandInfo, Nullable, ObjectMatrix, RANGE_TYPE } from '@univerjs/core';
+import type { ICommandInfo, Nullable, ObjectMatrixPrimitiveType } from '@univerjs/core';
+import { Dimension, ObjectMatrix, RANGE_TYPE } from '@univerjs/core';
 
-export function offsetFormula(
-    formulaData: IFormulaData,
+interface IFormulaDataGenerics<T> {
+    [unitId: string]: { [sheetId: string]: ObjectMatrixPrimitiveType<T> };
+}
+
+export function offsetFormula<T>(
+    formulaData: IFormulaDataGenerics<T>,
     command: ICommandInfo,
     unitId: string,
     sheetId: string,
     selections?: Readonly<Nullable<ISelectionWithStyle[]>>
-): IFormulaData {
+): IFormulaDataGenerics<T> {
     const { id } = command;
 
     const formulaMatrix = new ObjectMatrix(formulaData[unitId][sheetId]);
 
     switch (id) {
         case MoveRangeCommand.id:
-            handleMoveRange(formulaMatrix, command as ICommandInfo<IMoveRangeCommandParams>);
+            handleMoveRange<T>(formulaMatrix, command as ICommandInfo<IMoveRangeCommandParams>);
             break;
         case MoveRowsCommand.id:
-            handleMoveRows(formulaMatrix, command as ICommandInfo<IMoveRowsCommandParams>, selections);
+            handleMoveRows<T>(formulaMatrix, command as ICommandInfo<IMoveRowsCommandParams>, selections);
             break;
         case MoveColsCommand.id:
-            handleMoveCols(formulaMatrix, command as ICommandInfo<IMoveColsCommandParams>, selections);
+            handleMoveCols<T>(formulaMatrix, command as ICommandInfo<IMoveColsCommandParams>, selections);
             break;
         case InsertRowCommand.id:
-            handleInsertRow(formulaMatrix, command as ICommandInfo<IInsertRowCommandParams>);
+            handleInsertRow<T>(formulaMatrix, command as ICommandInfo<IInsertRowCommandParams>);
             break;
         case InsertColCommand.id:
-            handleInsertCol(formulaMatrix, command as ICommandInfo<IInsertColCommandParams>);
+            handleInsertCol<T>(formulaMatrix, command as ICommandInfo<IInsertColCommandParams>);
             break;
         case InsertRangeMoveRightCommand.id:
-            handleInsertRangeMoveRight(formulaMatrix, command as ICommandInfo<InsertRangeMoveRightCommandParams>);
+            handleInsertRangeMoveRight<T>(formulaMatrix, command as ICommandInfo<InsertRangeMoveRightCommandParams>);
             break;
         case InsertRangeMoveDownCommand.id:
-            handleInsertRangeMoveDown(formulaMatrix, command as ICommandInfo<InsertRangeMoveDownCommandParams>);
+            handleInsertRangeMoveDown<T>(formulaMatrix, command as ICommandInfo<InsertRangeMoveDownCommandParams>);
             break;
         case RemoveRowCommand.id:
-            handleRemoveRow(formulaMatrix, command as ICommandInfo<IRemoveRowColCommandParams>);
+            handleRemoveRow<T>(formulaMatrix, command as ICommandInfo<IRemoveRowColCommandParams>);
             break;
         case RemoveColCommand.id:
-            handleRemoveCol(formulaMatrix, command as ICommandInfo<IRemoveRowColCommandParams>);
+            handleRemoveCol<T>(formulaMatrix, command as ICommandInfo<IRemoveRowColCommandParams>);
             break;
         case DeleteRangeMoveUpCommand.id:
-            handleDeleteRangeMoveUp(formulaMatrix, command as ICommandInfo<IDeleteRangeMoveUpCommandParams>);
+            handleDeleteRangeMoveUp<T>(formulaMatrix, command as ICommandInfo<IDeleteRangeMoveUpCommandParams>);
             break;
         case DeleteRangeMoveLeftCommand.id:
-            handleDeleteRangeMoveLeft(formulaMatrix, command as ICommandInfo<IDeleteRangeMoveLeftCommandParams>);
+            handleDeleteRangeMoveLeft<T>(formulaMatrix, command as ICommandInfo<IDeleteRangeMoveLeftCommandParams>);
             break;
     }
 
     return formulaData;
 }
 
-function handleMoveRange(
-    formulaMatrix: ObjectMatrix<IFormulaDataItem>,
-    command: ICommandInfo<IMoveRangeCommandParams>
-) {
+function handleMoveRange<T>(formulaMatrix: ObjectMatrix<T>, command: ICommandInfo<IMoveRangeCommandParams>) {
     const { params } = command;
     if (!params) return;
 
@@ -93,7 +97,7 @@ function handleMoveRange(
     } = fromRange;
     const { startRow: toStartRow, endRow: toEndRow, startColumn: toStartColumn, endColumn: toEndColumn } = toRange;
 
-    const cacheMatrix = new ObjectMatrix<IFormulaDataItem>();
+    const cacheMatrix = new ObjectMatrix<T>();
 
     for (let r = fromStartRow; r <= fromEndRow; r++) {
         for (let c = fromStartColumn; c <= fromEndColumn; c++) {
@@ -112,8 +116,8 @@ function handleMoveRange(
     }
 }
 
-function handleMoveRows(
-    formulaMatrix: ObjectMatrix<IFormulaDataItem>,
+function handleMoveRows<T>(
+    formulaMatrix: ObjectMatrix<T>,
     command: ICommandInfo<IMoveRowsCommandParams>,
     selections?: Readonly<Nullable<ISelectionWithStyle[]>>
 ) {
@@ -138,8 +142,8 @@ function handleMoveRows(
     formulaMatrix.moveRows(fromRowNumber, count, toRow);
 }
 
-function handleMoveCols(
-    formulaMatrix: ObjectMatrix<IFormulaDataItem>,
+function handleMoveCols<T>(
+    formulaMatrix: ObjectMatrix<T>,
     command: ICommandInfo<IMoveColsCommandParams>,
     selections?: Readonly<Nullable<ISelectionWithStyle[]>>
 ) {
@@ -164,10 +168,7 @@ function handleMoveCols(
     formulaMatrix.moveColumns(fromColNumber, count, toCol);
 }
 
-function handleInsertRow(
-    formulaMatrix: ObjectMatrix<IFormulaDataItem>,
-    command: ICommandInfo<IInsertRowCommandParams>
-) {
+function handleInsertRow<T>(formulaMatrix: ObjectMatrix<T>, command: ICommandInfo<IInsertRowCommandParams>) {
     const { params } = command;
     if (!params) return;
 
@@ -178,10 +179,7 @@ function handleInsertRow(
     handleInsertRangeMutation(formulaMatrix, [range], lastEndRow, lastEndColumn, Dimension.ROWS);
 }
 
-function handleInsertCol(
-    formulaMatrix: ObjectMatrix<IFormulaDataItem>,
-    command: ICommandInfo<IInsertColCommandParams>
-) {
+function handleInsertCol<T>(formulaMatrix: ObjectMatrix<T>, command: ICommandInfo<IInsertColCommandParams>) {
     const { params } = command;
     if (!params) return;
 
@@ -192,8 +190,8 @@ function handleInsertCol(
     handleInsertRangeMutation(formulaMatrix, [range], lastEndRow, lastEndColumn, Dimension.COLUMNS);
 }
 
-function handleInsertRangeMoveRight(
-    formulaMatrix: ObjectMatrix<IFormulaDataItem>,
+function handleInsertRangeMoveRight<T>(
+    formulaMatrix: ObjectMatrix<T>,
     command: ICommandInfo<InsertRangeMoveRightCommandParams>
 ) {
     const { params } = command;
@@ -206,8 +204,8 @@ function handleInsertRangeMoveRight(
     handleInsertRangeMutation(formulaMatrix, ranges, lastEndRow, lastEndColumn, Dimension.COLUMNS);
 }
 
-function handleInsertRangeMoveDown(
-    formulaMatrix: ObjectMatrix<IFormulaDataItem>,
+function handleInsertRangeMoveDown<T>(
+    formulaMatrix: ObjectMatrix<T>,
     command: ICommandInfo<InsertRangeMoveDownCommandParams>
 ) {
     const { params } = command;
@@ -220,10 +218,7 @@ function handleInsertRangeMoveDown(
     handleInsertRangeMutation(formulaMatrix, ranges, lastEndRow, lastEndColumn, Dimension.ROWS);
 }
 
-function handleRemoveRow(
-    formulaMatrix: ObjectMatrix<IFormulaDataItem>,
-    command: ICommandInfo<IRemoveRowColCommandParams>
-) {
+function handleRemoveRow<T>(formulaMatrix: ObjectMatrix<T>, command: ICommandInfo<IRemoveRowColCommandParams>) {
     const { params } = command;
     if (!params) return;
 
@@ -234,10 +229,7 @@ function handleRemoveRow(
     handleDeleteRangeMutation(formulaMatrix, ranges, lastEndRow, lastEndColumn, Dimension.ROWS);
 }
 
-function handleRemoveCol(
-    formulaMatrix: ObjectMatrix<IFormulaDataItem>,
-    command: ICommandInfo<IRemoveRowColCommandParams>
-) {
+function handleRemoveCol<T>(formulaMatrix: ObjectMatrix<T>, command: ICommandInfo<IRemoveRowColCommandParams>) {
     const { params } = command;
     if (!params) return;
 
@@ -248,8 +240,8 @@ function handleRemoveCol(
     handleDeleteRangeMutation(formulaMatrix, ranges, lastEndRow, lastEndColumn, Dimension.COLUMNS);
 }
 
-function handleDeleteRangeMoveUp(
-    formulaMatrix: ObjectMatrix<IFormulaDataItem>,
+function handleDeleteRangeMoveUp<T>(
+    formulaMatrix: ObjectMatrix<T>,
     command: ICommandInfo<IDeleteRangeMoveUpCommandParams>
 ) {
     const { params } = command;
@@ -262,8 +254,8 @@ function handleDeleteRangeMoveUp(
     handleDeleteRangeMutation(formulaMatrix, ranges, lastEndRow, lastEndColumn, Dimension.ROWS);
 }
 
-function handleDeleteRangeMoveLeft(
-    formulaMatrix: ObjectMatrix<IFormulaDataItem>,
+function handleDeleteRangeMoveLeft<T>(
+    formulaMatrix: ObjectMatrix<T>,
     command: ICommandInfo<IDeleteRangeMoveLeftCommandParams>
 ) {
     const { params } = command;
@@ -274,4 +266,28 @@ function handleDeleteRangeMoveLeft(
     const lastEndColumn = formulaMatrix.getRange().endColumn;
 
     handleDeleteRangeMutation(formulaMatrix, ranges, lastEndRow, lastEndColumn, Dimension.COLUMNS);
+}
+
+export function offsetArrayFormula(arrayFormulaRange: IArrayFormulaRangeType, unitId: string, sheetId: string) {
+    const arrayFormulaRangeMatrix = new ObjectMatrix(arrayFormulaRange[unitId][sheetId]);
+    arrayFormulaRangeMatrix.forValue((row, column, range) => {
+        const { startRow, startColumn, endRow, endColumn } = range;
+        if (row === startRow && column === startColumn) {
+            return;
+        }
+
+        const rows = endRow - startRow;
+        const columns = endColumn - startColumn;
+
+        const newRange = {
+            startRow: row,
+            startColumn: column,
+            endRow: row + rows,
+            endColumn: column + columns,
+        };
+
+        arrayFormulaRangeMatrix.setValue(row, column, newRange);
+    });
+
+    return arrayFormulaRange;
 }

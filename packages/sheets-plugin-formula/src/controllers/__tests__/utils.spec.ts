@@ -13,7 +13,7 @@ import {
 } from '@univerjs/base-sheets';
 import { describe, expect, it } from 'vitest';
 
-import { offsetFormula } from '../utils';
+import { offsetArrayFormula, offsetFormula } from '../utils';
 
 describe('utils test', () => {
     describe('function offsetFormula', () => {
@@ -628,6 +628,54 @@ describe('utils test', () => {
                             },
                             '2': {
                                 f: '=SUM(C2)',
+                            },
+                        },
+                    },
+                },
+            });
+        });
+    });
+    describe('function offsetArrayFormula', () => {
+        it('offset array formula data', () => {
+            const unitId = 'workbook-01';
+            const sheetId = 'sheet-0011';
+            const arrayFormulaData = {
+                [unitId]: {
+                    [sheetId]: {
+                        '7': {
+                            '0': {
+                                startRow: 6,
+                                startColumn: 0,
+                                endRow: 9,
+                                endColumn: 3,
+                            },
+                            '5': {
+                                startRow: 6,
+                                startColumn: 5,
+                                endRow: 9,
+                                endColumn: 8,
+                            },
+                        },
+                    },
+                },
+            };
+
+            const newArrayFormulaData = offsetArrayFormula(arrayFormulaData, unitId, sheetId);
+            expect(newArrayFormulaData).toStrictEqual({
+                [unitId]: {
+                    [sheetId]: {
+                        '7': {
+                            '0': {
+                                startRow: 7,
+                                startColumn: 0,
+                                endRow: 10,
+                                endColumn: 3,
+                            },
+                            '5': {
+                                startRow: 7,
+                                startColumn: 5,
+                                endRow: 10,
+                                endColumn: 8,
                             },
                         },
                     },

@@ -32,7 +32,7 @@ univer.registerPlugin(DocPlugin, {
 // univer.registerPlugin(DocUIPlugin);
 univer.registerPlugin(RenderEngine);
 univer.registerPlugin(UIPlugin, {
-    container: 'univer-container',
+    container: 'app',
     header: true,
     toolbar: true,
     footer: true,

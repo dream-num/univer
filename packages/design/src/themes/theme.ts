@@ -1,3 +1,5 @@
+import styles from './theme-root.module.less';
+
 function convertToDashCase(input: string): string {
     const dashCase = input.replace(/([A-Z])/g, (match) => `-${match.toLowerCase()}`).replace(/(\d+)/g, '-$1');
 
@@ -18,43 +20,32 @@ function convertHexToRgb(input: string): string {
 }
 
 class Theme {
-    private styleSheet;
+    private _styleSheet: HTMLStyleElement | null = null;
+
+    private _themeRootName = styles.theme;
 
     constructor() {
         const $style = document.createElement('style');
+        $style.id = this._themeRootName;
         document.head.appendChild($style);
 
-        const index = document.styleSheets.length - 1;
-        this.styleSheet = document.styleSheets[index];
+        this._styleSheet = $style;
     }
 
     setTheme(root: HTMLElement, theme: Record<string, string>) {
-        // 1. remove old theme
-        if (this.styleSheet) {
-            let index = 0;
-            for (let i = 0; i < this.styleSheet.cssRules.length; i++) {
-                const rule = this.styleSheet.cssRules[i];
+        if (!this._styleSheet) return;
 
-                if (rule instanceof CSSStyleRule) {
-                    index = i;
-                    this.styleSheet.deleteRule(index);
-                    break;
-                }
-            }
-        }
+        // 1. set theme root class
+        root.classList.remove(this._themeRootName);
+        root.classList.add(this._themeRootName);
 
-        // 2. convert new theme to css style
-        /**
-         *  covert object to style, remove " and replace , to ;
-         *  Example:
-         *  before: {--primary-color:"#0188fb",--primary-color-hover:"#5391ff"}
-         *  after:  {--primary-color:#0188fb;--primary-color-hover:#5391ff;}
-         */
-        Object.keys(theme).forEach((key) => {
-            const property = convertToDashCase(key);
-            const value = convertHexToRgb(theme[key]);
-            root.style.setProperty(property, value);
-        });
+        // 2. remove old theme
+        this._styleSheet.innerHTML = '';
+
+        // 3. set new theme
+        this._styleSheet.innerHTML = `.${this._themeRootName} {${Object.keys(theme)
+            .map((key) => `${convertToDashCase(key)}: ${convertHexToRgb(theme[key])};`)
+            .join('')}}`;
     }
 }
 

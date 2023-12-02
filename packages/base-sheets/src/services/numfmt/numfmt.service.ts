@@ -138,6 +138,11 @@ export class NumfmtService extends Disposable implements INumfmtService {
             model.setValue(row, col, value);
         } else {
             model.realDeleteValue(row, col);
+            const size = model.getSizeOf();
+            if (!size) {
+                const workbookModel = this._numfmtModel.get(workbookId);
+                workbookModel?.delete(worksheetId);
+            }
         }
     }
 

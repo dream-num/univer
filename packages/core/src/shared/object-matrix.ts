@@ -1,13 +1,14 @@
-import { IRange } from '../types/interfaces/i-range';
-import { ObjectArray, ObjectArrayPrimitiveType, PredicateFunction } from './object-array';
-import { Nullable } from './types';
+import type { IRange } from '../types/interfaces/i-range';
+import type { ObjectArrayPrimitiveType, PredicateFunction } from './object-array';
+import { ObjectArray } from './object-array';
+import type { Nullable } from './types';
 
 /**
  * Object Matrix Primitive Type
  */
-export type ObjectMatrixPrimitiveType<T> = {
+export interface ObjectMatrixPrimitiveType<T> {
     [key: number]: { [key: number]: T };
-};
+}
 
 // TODO: this is not a good name
 
@@ -149,6 +150,10 @@ export class ObjectMatrix<T> {
         const objectArray = this.getRow(row);
         if (objectArray) {
             objectArray.realDelete(column);
+            const size = objectArray.getSizeOf();
+            if (!size) {
+                this._option.realDelete(row);
+            }
         }
     }
 

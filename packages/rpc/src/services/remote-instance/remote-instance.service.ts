@@ -1,11 +1,5 @@
-import {
-    DocumentType,
-    ICommandService,
-    IExecutionOptions,
-    IMutationInfo,
-    IUniverInstanceService,
-    IWorkbookData,
-} from '@univerjs/core';
+import type { IExecutionOptions, IMutationInfo, IWorkbookData } from '@univerjs/core';
+import { DocumentType, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 
 export interface IRemoteSyncMutationOptions extends IExecutionOptions {

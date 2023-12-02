@@ -6,12 +6,14 @@ import { UIPlugin } from '@univerjs/base-ui';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '@univerjs/common-plugin-data';
 import { LocaleType, Univer } from '@univerjs/core';
 import { greenTheme } from '@univerjs/design';
-import { IUniverRPCMainThreadPluginConfig, UniverRPCMainThreadPlugin } from '@univerjs/rpc';
+import type { IUniverRPCMainThreadPluginConfig } from '@univerjs/rpc';
+import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
 import { FormulaPlugin } from '@univerjs/sheets-plugin-formula';
 import { FormulaUIPlugin } from '@univerjs/sheets-plugin-formula-ui';
 import { NumfmtPlugin } from '@univerjs/sheets-plugin-numfmt';
 import { SheetUIPlugin } from '@univerjs/ui-plugin-sheets';
-import { IUniscriptPluginConfig, UniscriptPlugin } from '@univerjs/uniscript';
+import type { IUniscriptPluginConfig } from '@univerjs/uniscript';
+import { UniscriptPlugin } from '@univerjs/uniscript';
 
 import { locales } from './locales';
 import { DebuggerPlugin } from './sheets-plugin-debugger';

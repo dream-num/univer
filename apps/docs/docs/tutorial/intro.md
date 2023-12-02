@@ -18,7 +18,7 @@ Univer 是一套企业协同办公文档与数据解决方案，
     * 💄 提供组件库和图标
 * ⚡ 高性能
     * ✏️ 统一高效的渲染引擎和公式引擎，基于 Canvas
-    * 🧮 高性能的公式引擎，支持 web worker
+    * 🧮 高性能的公式引擎，支持 Web Worker
 * 🌍 国际化支持
 
 ## 如何使用
@@ -55,4 +55,8 @@ Univer 的核心代码在 MIT 协议下开源。Univer 同时提供商业授权�
 
 可以通过以下方式咨询商业授权：
 
-*  商务合作邮箱 sales@univer.ai
+* 商务合作邮箱 sales@univer.ai
+* 商务电话 +(86) 186 0163 9309
+* 添加企业微信
+
+<img width="300" src="/img/business-qr-code.jpg" />

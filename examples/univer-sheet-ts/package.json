@@ -18,21 +18,18 @@
         "@univerjs/base-render": "workspace:*",
         "@univerjs/base-sheets": "workspace:*",
         "@univerjs/base-ui": "workspace:*",
-        "univer-data": "workspace:*",
-        "@univerjs/common-plugin-image": "workspace:*",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/rpc": "workspace:*",
-        "@univerjs/sheets-plugin-find": "workspace:*",
         "@univerjs/sheets-plugin-formula": "workspace:*",
         "@univerjs/sheets-plugin-formula-ui": "workspace:*",
-        "@univerjs/sheets-plugin-import-xlsx": "workspace:*",
         "@univerjs/sheets-plugin-numfmt": "workspace:*",
         "@univerjs/ui-plugin-docs": "workspace:*",
         "@univerjs/ui-plugin-sheets": "workspace:*",
         "@univerjs/uniscript": "workspace:*",
         "@wendellhu/redi": "^0.12.11",
-        "monaco-editor": "0.44.0"
+        "monaco-editor": "0.44.0",
+        "univer-data": "workspace:*"
     },
     "devDependencies": {
         "esbuild": "^0.19.8",

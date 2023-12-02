@@ -65,7 +65,7 @@
         "rxjs": "^7.8.1"
     },
     "devDependencies": {
-        "@types/react": "^18.2.38",
+        "@types/react": "^18.2.40",
         "@vitest/coverage-istanbul": "^0.34.6",
         "esbuild": "^0.19.8",
         "happy-dom": "^12.10.3",

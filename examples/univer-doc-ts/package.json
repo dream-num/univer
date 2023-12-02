@@ -1,6 +1,5 @@
 {
     "name": "univer-doc-ts",
-    "version": "0.0.1",
     "description": "Univer vanilla ts demo project",
     "keywords": [],
     "author": "DreamNum <developer@univer.ai>",
@@ -20,11 +19,10 @@
         "@univerjs/base-docs": "workspace:*",
         "@univerjs/base-render": "workspace:*",
         "@univerjs/base-ui": "workspace:*",
-        "@univerjs/common-plugin-data": "workspace:*",
-        "@univerjs/common-plugin-image": "workspace:*",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
-        "@univerjs/ui-plugin-docs": "workspace:*"
+        "@univerjs/ui-plugin-docs": "workspace:*",
+        "univer-data": "workspace:*"
     },
     "devDependencies": {
         "esbuild": "^0.19.8",

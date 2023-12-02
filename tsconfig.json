@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+        "forceConsistentCasingInFileNames": true,
         "lib": ["ESNext", "DOM", "WebWorker", "dom.iterable"],
         "target": "ESNext",
         "module": "ESNext",
@@ -9,8 +10,8 @@
         "allowSyntheticDefaultImports": true,
         "downlevelIteration": true,
         "sourceMap": true,
-        "moduleResolution": "Bundler",
         "resolveJsonModule": true,
+        "moduleResolution": "Bundler",
         "strict": true,
         "strictPropertyInitialization": true,
         "noImplicitOverride": true,

@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/ui-plugin-slides",
-    "version": "0.0.1",
+    "version": "0.1.0-alpha.0",
     "description": "Univer normal ui-plugin-slides",
     "keywords": [],
     "author": "DreamNum <developer@univer.ai>",
@@ -34,7 +34,7 @@
         "@wendellhu/redi": "^0.12.11"
     },
     "devDependencies": {
-        "@types/react": "^18.2.38",
+        "@types/react": "^18.2.40",
         "@vitest/coverage-istanbul": "^0.34.6",
         "less": "^4.2.0",
         "react": "^18.2.0",

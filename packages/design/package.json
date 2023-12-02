@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/design",
-    "version": "0.0.1",
+    "version": "0.1.0-alpha.0",
     "description": "UI component library for building exceptional Univer.",
     "keywords": [],
     "author": "DreamNum <developer@univer.ai>",
@@ -66,9 +66,9 @@
         "react-transition-group": "^4.4.5"
     },
     "devDependencies": {
-        "@testing-library/react": "^14.1.0",
-        "@types/react": "^18.2.38",
-        "@types/react-dom": "^18.2.15",
+        "@testing-library/react": "^14.1.2",
+        "@types/react": "^18.2.40",
+        "@types/react-dom": "^18.2.17",
         "@types/react-transition-group": "^4.4.9",
         "@vitest/coverage-istanbul": "^0.34.6",
         "esbuild": "^0.19.8",

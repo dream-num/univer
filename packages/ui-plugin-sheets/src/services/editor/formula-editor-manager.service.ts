@@ -17,18 +17,15 @@ export interface IFormulaEditorManagerService {
 export class FormulaEditorManagerService implements IDisposable {
     private _position: Nullable<DOMRect> = null;
 
-    private _focus: boolean = false;
-
     private readonly _position$ = new BehaviorSubject<Nullable<DOMRect>>(null);
-
     readonly position$ = this._position$.asObservable();
 
-    private readonly _focus$ = new BehaviorSubject<boolean>(this._focus);
+    private _focus: boolean = false;
 
+    private readonly _focus$ = new BehaviorSubject<boolean>(this._focus);
     readonly focus$ = this._focus$.asObservable();
 
     private readonly _fxBtnClick$ = new BehaviorSubject<boolean>(false);
-
     readonly fxBtnClick$ = this._fxBtnClick$.asObservable();
 
     dispose(): void {

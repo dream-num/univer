@@ -29,7 +29,7 @@ import {
 import { SheetSkeletonManagerService } from '@univerjs/ui-plugin-sheets';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
-import { Observable } from 'rxjs';
+import { merge, Observable } from 'rxjs';
 import { bufferTime, distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
 
 @OnLifecycle(LifecycleStages.Rendered, NumfmtRefRangeController)
@@ -82,10 +82,14 @@ export class NumfmtRefRangeController extends Disposable {
     private _registerRefRange() {
         this.disposeWithMe(
             toDisposable(
-                this._sheetSkeletonManagerService.currentSkeleton$
-                    .pipe(
+                merge(
+                    this._sheetSkeletonManagerService.currentSkeleton$.pipe(
                         map((skeleton) => skeleton?.sheetId),
-                        distinctUntilChanged(),
+                        distinctUntilChanged()
+                    ),
+                    this._numfmtService.modelReplace$
+                )
+                    .pipe(
                         switchMap(
                             () =>
                                 new Observable<DisposableCollection>((subscribe) => {

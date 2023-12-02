@@ -31,7 +31,7 @@ import {
 import type { IAutoFillHook } from '@univerjs/ui-plugin-sheets';
 import { APPLY_TYPE, getRepeatRange, IAutoFillService, SheetSkeletonManagerService } from '@univerjs/ui-plugin-sheets';
 import { Inject, Injector } from '@wendellhu/redi';
-import { combineLatest, Observable } from 'rxjs';
+import { combineLatest, merge, Observable } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map, switchMap, tap } from 'rxjs/operators';
 
 import { SHEET_NUMFMT_PLUGIN } from '../base/const/PLUGIN_NAME';
@@ -359,7 +359,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
                     if (!numfmtValue) {
                         return next(cell);
                     }
-                    const originCellValue = location.worksheet.getCellRaw(location.row, location.col);
+                    const originCellValue = cell;
                     if (!originCellValue) {
                         return next(cell);
                     }
@@ -530,20 +530,24 @@ export class NumfmtController extends Disposable implements INumfmtController {
     private _commandExecutedListener() {
         this.disposeWithMe(
             toDisposable(
-                new Observable<ISetNumfmtMutationParams>((subscribe) => {
-                    const disposable = this._commandService.onCommandExecuted((command) => {
-                        if (SetNumfmtMutation.id === command.id) {
-                            subscribe.next(command.params as ISetNumfmtMutationParams);
-                        }
-                    });
-                    return () => {
-                        disposable.dispose();
-                    };
-                })
+                merge(
+                    new Observable<string>((subscribe) => {
+                        const disposable = this._commandService.onCommandExecuted((command) => {
+                            if (SetNumfmtMutation.id === command.id) {
+                                const params = command.params as ISetNumfmtMutationParams;
+                                subscribe.next(params.workbookId);
+                            }
+                        });
+                        return () => {
+                            disposable.dispose();
+                        };
+                    }),
+                    this._numfmtService.modelReplace$
+                )
                     .pipe(debounceTime(16))
-                    .subscribe((params) => {
+                    .subscribe((workbookId) => {
                         this._sheetSkeletonManagerService.reCalculate();
-                        this._renderManagerService.getRenderById(params.workbookId)?.mainComponent?.makeDirty();
+                        this._renderManagerService.getRenderById(workbookId)?.mainComponent?.makeDirty();
                     })
             )
         );

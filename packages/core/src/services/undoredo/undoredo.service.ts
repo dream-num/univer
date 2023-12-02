@@ -1,10 +1,13 @@
-import { createIdentifier, IAccessor, IDisposable } from '@wendellhu/redi';
-import { BehaviorSubject, Observable } from 'rxjs';
+import type { IAccessor, IDisposable } from '@wendellhu/redi';
+import { createIdentifier } from '@wendellhu/redi';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY } from '../../common/const';
 import { Disposable, toDisposable } from '../../shared/lifecycle';
-import { CommandType, ICommand, ICommandService, IMutationInfo, sequenceExecute } from '../command/command.service';
-import { FOCUSING_EDITOR, FOCUSING_EDITOR_INPUT_FORMULA } from '../context/context';
+import type { ICommand, IMutationInfo } from '../command/command.service';
+import { CommandType, ICommandService, sequenceExecute } from '../command/command.service';
+import { FOCUSING_EDITOR, FOCUSING_FORMULA_EDITOR } from '../context/context';
 import { IContextService } from '../context/context.service';
 import { IUniverInstanceService } from '../instance/instance.service';
 
@@ -206,10 +209,10 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
     private _getFocusedUniverInstanceId() {
         let unitID: string = '';
 
-        if (this._contextService.getContextValue(FOCUSING_EDITOR)) {
-            unitID = DOCS_NORMAL_EDITOR_UNIT_ID_KEY;
-        } else if (this._contextService.getContextValue(FOCUSING_EDITOR_INPUT_FORMULA)) {
+        if (this._contextService.getContextValue(FOCUSING_FORMULA_EDITOR)) {
             unitID = DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY;
+        } else if (this._contextService.getContextValue(FOCUSING_EDITOR)) {
+            unitID = DOCS_NORMAL_EDITOR_UNIT_ID_KEY;
         } else {
             unitID = this._univerInstanceService.getFocusedUniverInstance()?.getUnitId() ?? '';
         }

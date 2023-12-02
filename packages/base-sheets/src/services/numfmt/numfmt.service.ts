@@ -13,7 +13,6 @@ import {
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
-import { SetNumfmtMutation } from '../../commands/mutations/set-numfmt-mutation';
 import type { FormatType, INumfmtItem, INumfmtService, IRefItem, ISnapshot } from './type';
 
 const SHEET_NUMFMT_PLUGIN = 'SHEET_NUMFMT_PLUGIN';
@@ -35,8 +34,8 @@ export class NumfmtService extends Disposable implements INumfmtService {
         @Inject(ILogService) private _logService: ILogService
     ) {
         super();
+
         this._initModel();
-        this._initCommands();
         this.disposeWithMe(
             toDisposable(() => {
                 this._numfmtModel.clear();
@@ -119,10 +118,6 @@ export class NumfmtService extends Disposable implements INumfmtService {
         } catch (err) {
             return { model: {}, refModel: [] };
         }
-    }
-
-    private _initCommands() {
-        [SetNumfmtMutation].forEach((config) => this.disposeWithMe(this._commandService.registerCommand(config)));
     }
 
     private _setValue(workbookId: string, worksheetId: string, row: number, col: number, value: Nullable<INumfmtItem>) {

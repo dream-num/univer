@@ -1,11 +1,12 @@
 import { forwardRef, Inject, Injector } from '@wendellhu/redi';
 import { Subject } from 'rxjs';
 
-import { GenName, Nullable, Tools } from '../shared';
+import type { Nullable } from '../shared';
+import { GenName, Tools } from '../shared';
 import { Disposable } from '../shared/lifecycle';
 import { DEFAULT_RANGE_ARRAY, DEFAULT_WORKBOOK, DEFAULT_WORKSHEET } from '../types/const';
 import { BooleanNumber } from '../types/enum';
-import {
+import type {
     IColumnStartEndData,
     IGridRange,
     IRangeArrayData,
@@ -80,6 +81,10 @@ export class Workbook extends Disposable {
 
         this._sheetCreated$.complete();
         this._sheetDisposed$.complete();
+    }
+
+    save(): IWorkbookData {
+        return this._snapshot;
     }
 
     static isIRangeType(range: IRangeType | IRangeType[]): Boolean {

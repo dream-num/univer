@@ -1,7 +1,7 @@
+import type { IDocumentData } from '@univerjs/core';
 import {
     BooleanNumber,
     ColumnSeparatorType,
-    IDocumentData,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PositionedObjectLayoutType,

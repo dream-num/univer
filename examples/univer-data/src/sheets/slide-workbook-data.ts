@@ -1,4 +1,5 @@
-import { BooleanNumber, BorderStyleTypes, IWorkbookData, LocaleType, SheetTypes } from '@univerjs/core';
+import type { IWorkbookData } from '@univerjs/core';
+import { BooleanNumber, BorderStyleTypes, LocaleType, SheetTypes } from '@univerjs/core';
 
 import { PAGE5_RICHTEXT_1 } from '../slides/rich-text/page5-richtext1';
 

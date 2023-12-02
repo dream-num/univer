@@ -1,4 +1,5 @@
-import { IWorkbookData, LocaleType } from '@univerjs/core';
+import type { IWorkbookData } from '@univerjs/core';
+import { LocaleType } from '@univerjs/core';
 
 export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
     id: 'workbook-01',

@@ -7,8 +7,5 @@
         "esModuleInterop": true,
         "types": ["./src/types/index.d.ts"]
     },
-    "include": [
-        "src/**/*",
-        "test/**/*.test.(ts|tsx|js)"
-    ]
+    "include": ["src/**/*"]
 }

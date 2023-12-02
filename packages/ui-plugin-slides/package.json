@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/ui-plugin-slides",
-    "version": "0.0.1",
+    "version": "0.1.0-alpha.0",
     "description": "Univer normal ui-plugin-slides",
     "keywords": [],
     "author": "DreamNum <developer@univer.ai>",

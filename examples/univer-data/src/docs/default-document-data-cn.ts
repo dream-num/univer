@@ -1,4 +1,5 @@
-import { BooleanNumber, IDocumentData, TextDecoration } from '@univerjs/core';
+import type { IDocumentData } from '@univerjs/core';
+import { BooleanNumber, TextDecoration } from '@univerjs/core';
 
 import { DEFAULT_LIST_TEST } from './default-list';
 

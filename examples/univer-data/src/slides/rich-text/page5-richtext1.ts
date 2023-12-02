@@ -1,4 +1,5 @@
-import { BooleanNumber, ColumnSeparatorType, IDocumentData, SectionType } from '@univerjs/core';
+import type { IDocumentData } from '@univerjs/core';
+import { BooleanNumber, ColumnSeparatorType, SectionType } from '@univerjs/core';
 
 import { DEFAULT_LIST_TEST } from '../../docs/default-list';
 

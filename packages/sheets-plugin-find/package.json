@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-plugin-find",
-    "version": "0.0.1",
+    "version": "0.1.0-alpha.0",
     "description": "UniverSheet normal plugin find",
     "keywords": [],
     "author": "DreamNum <developer@univer.ai>",
@@ -31,7 +31,6 @@
         "@univerjs/base-render": "workspace:*",
         "@univerjs/base-sheets": "workspace:*",
         "@univerjs/base-ui": "workspace:*",
-        "@univerjs/common-plugin-data": "workspace:*",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/ui-plugin-sheets": "workspace:*",

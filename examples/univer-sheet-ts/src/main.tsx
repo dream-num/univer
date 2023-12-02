@@ -3,7 +3,6 @@ import { BaseFormulaEnginePlugin } from '@univerjs/base-formula-engine';
 import { RenderEngine } from '@univerjs/base-render';
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { UIPlugin } from '@univerjs/base-ui';
-import { DEFAULT_WORKBOOK_DATA_DEMO } from '@univerjs/common-plugin-data';
 import { LocaleType, Univer } from '@univerjs/core';
 import { greenTheme } from '@univerjs/design';
 import type { IUniverRPCMainThreadPluginConfig } from '@univerjs/rpc';
@@ -14,6 +13,7 @@ import { NumfmtPlugin } from '@univerjs/sheets-plugin-numfmt';
 import { SheetUIPlugin } from '@univerjs/ui-plugin-sheets';
 import type { IUniscriptPluginConfig } from '@univerjs/uniscript';
 import { UniscriptPlugin } from '@univerjs/uniscript';
+import { DEFAULT_WORKBOOK_DATA_DEMO } from 'univer-data';
 
 import { locales } from './locales';
 import { DebuggerPlugin } from './sheets-plugin-debugger';

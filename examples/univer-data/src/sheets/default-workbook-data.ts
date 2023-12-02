@@ -1,3 +1,4 @@
+import type { IDocumentData, IWorkbookData } from '@univerjs/core';
 import {
     BaselineOffset,
     BooleanNumber,
@@ -6,8 +7,6 @@ import {
     ColumnSeparatorType,
     GlyphType,
     HorizontalAlign,
-    IDocumentData,
-    IWorkbookData,
     LocaleType,
     ObjectRelativeFromH,
     ObjectRelativeFromV,

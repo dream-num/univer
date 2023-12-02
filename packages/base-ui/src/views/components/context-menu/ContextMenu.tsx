@@ -44,14 +44,16 @@ export function ContextMenu() {
 
     return (
         <Popup visible={visible} offset={offset}>
-            <Menu
-                menuType={[menuType]}
-                onOptionSelect={(params) => {
-                    const { label: commandId, value } = params;
-                    commandService && commandService.executeCommand(commandId as string, { value });
-                    setVisible(false);
-                }}
-            />
+            <section onPointerDown={(e) => e.stopPropagation()}>
+                <Menu
+                    menuType={[menuType]}
+                    onOptionSelect={(params) => {
+                        const { label: commandId, value } = params;
+                        commandService && commandService.executeCommand(commandId as string, { value });
+                        setVisible(false);
+                    }}
+                />
+            </section>
         </Popup>
     );
 }

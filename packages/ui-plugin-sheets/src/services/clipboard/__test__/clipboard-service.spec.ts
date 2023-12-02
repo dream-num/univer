@@ -8,23 +8,15 @@ import {
     SetWorksheetColWidthMutation,
     SetWorksheetRowHeightMutation,
 } from '@univerjs/base-sheets';
-import {
-    ICellData,
-    ICommandService,
-    IRange,
-    IStyleData,
-    IUniverInstanceService,
-    Nullable,
-    RANGE_TYPE,
-    Rectangle,
-    Univer,
-} from '@univerjs/core';
-import { Injector } from '@wendellhu/redi';
+import type { ICellData, IRange, IStyleData, Nullable, Univer } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, RANGE_TYPE, Rectangle } from '@univerjs/core';
+import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ISheetClipboardService } from '../clipboard.service';
 import { clipboardTestBed } from './clipboard-test-bed';
-import { IClipboardItem, MockClipboard } from './mock-clipboard';
+import type { IClipboardItem } from './mock-clipboard';
+import { MockClipboard } from './mock-clipboard';
 
 describe('Test clipboard', () => {
     let univer: Univer;
@@ -129,7 +121,7 @@ describe('Test clipboard', () => {
     });
 
     afterEach(() => {
-        univer.dispose();
+        univer?.dispose();
     });
 
     describe('Test paste, the original data is a merged cell of 1 row and 2 columns, the current selection consists only of ordinary cells', () => {

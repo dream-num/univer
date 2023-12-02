@@ -1,4 +1,3 @@
-import { IRenderManagerService } from '@univerjs/base-render';
 import type { ISetRangeValuesMutationParams, ISetSelectionsOperationParams } from '@univerjs/base-sheets';
 import {
     getPrimaryForRange,
@@ -27,7 +26,6 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
     Rectangle,
-    ThemeService,
     toDisposable,
     Tools,
 } from '@univerjs/core';
@@ -36,8 +34,6 @@ import { createIdentifier, Inject } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 
 import { IMarkSelectionService } from '../mark-selection/mark-selection.service';
-import { ISelectionRenderService } from '../selection/selection-render.service';
-import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { copyContentCache, extractId, genId } from './copy-content-cache';
 import { HtmlToUSMService } from './html-to-usm/converter';
 import PastePluginLark from './html-to-usm/paste-plugins/plugin-lark';
@@ -95,10 +91,6 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         @IClipboardInterfaceService private readonly _clipboardInterfaceService: IClipboardInterfaceService,
         @IUndoRedoService private readonly _undoRedoService: IUndoRedoService,
         @ICommandService private readonly _commandService: ICommandService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
-        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @Inject(ThemeService) private readonly _themeService: ThemeService,
         @IMarkSelectionService private readonly _markSelectionService: IMarkSelectionService
     ) {
         super();

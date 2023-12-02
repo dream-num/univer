@@ -45,7 +45,7 @@ export class InitializeEditorController extends Disposable {
         });
 
         // create univer doc formula bar editor instance
-        this._currentUniverService.createDoc({
+        const INITIAL_SNAPSHOT = {
             id: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
             body: {
                 dataStream: `${DEFAULT_EMPTY_DOCUMENT_VALUE}`,
@@ -74,7 +74,9 @@ export class InitializeEditorController extends Disposable {
                     wrapStrategy: WrapStrategy.WRAP,
                 },
             },
-        });
+        };
+
+        this._currentUniverService.createDoc(INITIAL_SNAPSHOT);
     }
 
     private _commandExecutedListener() {}

@@ -187,21 +187,12 @@ export class FormulaEditorController extends Disposable {
 
             const { width, height } = position;
 
-            const { document: documentComponent, scene, engine } = editorObject;
-
-            const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+            const { engine } = editorObject;
 
             // Update page size when container resized.
             formulaEditorDataModel.updateDocumentDataPageSize(width);
 
-            viewportMain?.getScrollBar()?.dispose();
-
-            scene.transformByState({
-                width,
-                height,
-            });
-
-            documentComponent.resize(width, height);
+            this._autoScroll();
 
             // resize canvas
             requestIdleCallback(() => {
@@ -226,6 +217,9 @@ export class FormulaEditorController extends Disposable {
             }
 
             this._syncContentAndRender(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, dataStream, paragraphs);
+
+            // Also need to resize document and scene after sync content.
+            this._autoScroll();
         });
     }
 
@@ -312,15 +306,25 @@ export class FormulaEditorController extends Disposable {
 
         const editorObject = this._renderManagerService.getRenderById(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
 
-        if (skeleton == null || position == null || editorObject == null) {
+        const formulaEditorDataModel = this._univerInstanceService.getUniverDocInstance(
+            DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY
+        );
+
+        if (skeleton == null || position == null || editorObject == null || formulaEditorDataModel == null) {
             return;
         }
 
+        const { marginTop = 0, marginBottom = 0 } = formulaEditorDataModel.getSnapshot().documentStyle;
+
         const { scene, mainComponent } = editorObject;
 
-        const { actualWidth, actualHeight } = skeleton.getActualSize();
-        const { height } = position;
+        let { actualHeight } = skeleton.getActualSize();
+        // page actual height also need to include page margin top and margin bottom.
+        actualHeight += marginTop + marginBottom;
+
+        const { width, height } = position;
         const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+
         let scrollBar = viewportMain?.getScrollBar() as Nullable<ScrollBar>;
 
         if (actualHeight > height) {
@@ -331,14 +335,15 @@ export class FormulaEditorController extends Disposable {
             }
         } else {
             scrollBar = null;
+            viewportMain?.scrollTo({ x: 0, y: 0 });
             viewportMain?.getScrollBar()?.dispose();
         }
 
         scene.transformByState({
-            width: actualWidth + (scrollBar?.barSize || 0),
+            width,
             height: actualHeight,
         });
 
-        mainComponent?.resize(actualWidth + (scrollBar?.barSize || 0), actualHeight);
+        mainComponent?.resize(width, actualHeight);
     }
 }

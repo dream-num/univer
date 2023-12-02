@@ -1,6 +1,6 @@
 import { transformFile } from '@swc/core';
 import stylePlugin from 'esbuild-style-plugin';
-import { writeFileSync } from 'fs';
+import { existsSync, renameSync, writeFileSync } from 'fs';
 
 /** @type {import('esbuild').BuildOptions} */
 export default {
@@ -36,4 +36,9 @@ export async function postBuild(format) {
     const { code } = await transformFile(`${process.cwd()}/lib/${format}/index.js`, transformOptions);
 
     writeFileSync(`${process.cwd()}/lib/${format}/index.js`, code, 'utf-8');
+
+    const isExist = existsSync(`${process.cwd()}/lib/${format}/index.css`);
+    if (isExist) {
+        renameSync(`${process.cwd()}/lib/${format}/index.css`, `${process.cwd()}/lib/index.css`);
+    }
 }

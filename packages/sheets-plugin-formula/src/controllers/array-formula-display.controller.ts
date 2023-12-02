@@ -47,9 +47,9 @@ export class ArrayFormulaDisplayController extends Disposable {
                     return;
                 }
 
-                const { arrayFormulaData, arrayFormulaUnitData } = params;
-                this._formulaDataModel.setArrayFormulaData(arrayFormulaData);
-                this._formulaDataModel.setArrayFormulaUnitData(arrayFormulaUnitData);
+                const { arrayFormulaRange, arrayFormulaCellData } = params;
+                this._formulaDataModel.setArrayFormulaRange(arrayFormulaRange);
+                this._formulaDataModel.setArrayFormulaCellData(arrayFormulaCellData);
             })
         );
     }
@@ -60,13 +60,19 @@ export class ArrayFormulaDisplayController extends Disposable {
                 priority: 100,
                 handler: (cell, location, next) => {
                     const { workbookId, worksheetId, row, col } = location;
-                    const arrayFormulaUnitData = this._formulaDataModel.getArrayFormulaUnitData();
-                    const cellData = arrayFormulaUnitData?.[workbookId]?.[worksheetId]?.[row]?.[col];
+                    const arrayFormulaCellData = this._formulaDataModel.getArrayFormulaCellData();
+                    const arrayFormulaRange = this._formulaDataModel.getArrayFormulaRange();
+                    const cellData = arrayFormulaCellData?.[workbookId]?.[worksheetId]?.[row]?.[col];
+                    const cellRange = arrayFormulaRange?.[workbookId]?.[worksheetId]?.[row]?.[col];
                     if (cellData == null) {
-                        return next();
+                        return next(cell);
                     }
 
-                    return { ...cell, ...cellData };
+                    if (cellRange != null && cellRange.startRow === row && cellRange.startColumn === col) {
+                        return next(cell);
+                    }
+
+                    return next({ ...cell, ...cellData });
                 },
             })
         );

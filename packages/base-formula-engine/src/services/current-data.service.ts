@@ -3,7 +3,7 @@ import { Disposable, IUniverInstanceService, ObjectMatrix } from '@univerjs/core
 import { createIdentifier } from '@wendellhu/redi';
 
 import type {
-    IArrayFormulaUnitDataType,
+    IArrayFormulaUnitCellType,
     IFormulaData,
     IFormulaDatasetConfig,
     IOtherFormulaData,
@@ -43,7 +43,7 @@ export interface IFormulaCurrentConfigService {
 export class FormulaCurrentConfigService extends Disposable implements IFormulaCurrentConfigService {
     private _unitData: IUnitData = {};
 
-    private _arrayFormulaUnitData: IRuntimeUnitDataType = {};
+    private _arrayFormulaCellData: IRuntimeUnitDataType = {};
 
     private _otherFormulaData: IOtherFormulaData = {};
 
@@ -64,7 +64,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
     override dispose(): void {
         this._unitData = {};
         this._formulaData = {};
-        this._arrayFormulaUnitData = {};
+        this._arrayFormulaCellData = {};
         this._sheetNameMap = {};
         this._dirtyRanges = [];
         this._excludedCell = {};
@@ -82,8 +82,8 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         return this._formulaData;
     }
 
-    getArrayFormulaUnitData() {
-        return this._arrayFormulaUnitData;
+    getArrayFormulaCellData() {
+        return this._arrayFormulaCellData;
     }
 
     getOtherFormulaData() {
@@ -109,7 +109,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
         this._formulaData = config.formulaData;
 
-        this._arrayFormulaUnitData = this._dataToRuntime(config.arrayFormulaUnitData);
+        this._arrayFormulaCellData = this._dataToRuntime(config.arrayFormulaCellData);
 
         this._sheetNameMap = unitSheetNameMap;
 
@@ -140,23 +140,23 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         this._sheetNameMap = sheetNameMap;
     }
 
-    private _dataToRuntime(unitData: IArrayFormulaUnitDataType) {
-        const arrayFormulaUnitData: IRuntimeUnitDataType = {};
+    private _dataToRuntime(unitData: IArrayFormulaUnitCellType) {
+        const arrayFormulaCellData: IRuntimeUnitDataType = {};
         Object.keys(unitData).forEach((unitId) => {
             const sheetData = unitData[unitId];
 
-            if (arrayFormulaUnitData[unitId] == null) {
-                arrayFormulaUnitData[unitId] = {};
+            if (arrayFormulaCellData[unitId] == null) {
+                arrayFormulaCellData[unitId] = {};
             }
 
             Object.keys(sheetData).forEach((sheetId) => {
                 const cellData = sheetData[sheetId];
 
-                arrayFormulaUnitData[unitId][sheetId] = new ObjectMatrix(cellData);
+                arrayFormulaCellData[unitId][sheetId] = new ObjectMatrix(cellData);
             });
         });
 
-        return arrayFormulaUnitData;
+        return arrayFormulaCellData;
     }
 
     private _loadOtherFormulaData() {

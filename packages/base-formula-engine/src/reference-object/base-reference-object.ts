@@ -39,7 +39,9 @@ export class BaseReferenceObject extends ObjectClassType {
 
     private _runtimeData: IRuntimeUnitDataType = {};
 
-    private _arrayFormulaUnitData: IRuntimeUnitDataType = {};
+    private _arrayFormulaCellData: IRuntimeUnitDataType = {};
+
+    private _runtimeArrayFormulaCellData: IRuntimeUnitDataType = {};
 
     private _refOffsetX = 0;
 
@@ -210,12 +212,20 @@ export class BaseReferenceObject extends ObjectClassType {
         this._runtimeData = runtimeData;
     }
 
-    getArrayFormulaUnitData() {
-        return this._arrayFormulaUnitData;
+    getArrayFormulaCellData() {
+        return this._arrayFormulaCellData;
     }
 
-    setArrayFormulaUnitData(unitData: IRuntimeUnitDataType) {
-        this._arrayFormulaUnitData = unitData;
+    setArrayFormulaCellData(unitData: IRuntimeUnitDataType) {
+        this._arrayFormulaCellData = unitData;
+    }
+
+    getRuntimeArrayFormulaCellData() {
+        return this._runtimeArrayFormulaCellData;
+    }
+
+    setRuntimeArrayFormulaCellData(unitData: IRuntimeUnitDataType) {
+        this._runtimeArrayFormulaCellData = unitData;
     }
 
     getRowCount() {
@@ -291,8 +301,12 @@ export class BaseReferenceObject extends ObjectClassType {
         return this._runtimeData?.[this.getUnitId()]?.[this.getSheetId()];
     }
 
-    getCurrentActiveArrayFormulaData() {
-        return this._arrayFormulaUnitData?.[this.getUnitId()]?.[this.getSheetId()];
+    getCurrentActiveArrayFormulaCellData() {
+        return this._arrayFormulaCellData?.[this.getUnitId()]?.[this.getSheetId()];
+    }
+
+    getCurrentRuntimeActiveArrayFormulaCellData() {
+        return this._runtimeArrayFormulaCellData?.[this.getUnitId()]?.[this.getSheetId()];
     }
 
     getCellData(row: number, column: number) {
@@ -300,11 +314,14 @@ export class BaseReferenceObject extends ObjectClassType {
 
         const activeRuntimeData = this.getCurrentRuntimeSheetData();
 
-        const activeArrayFormulaData = this.getCurrentActiveArrayFormulaData();
+        const activeArrayFormulaCellData = this.getCurrentActiveArrayFormulaCellData();
+
+        const activeRuntimeArrayFormulaCellData = this.getCurrentRuntimeActiveArrayFormulaCellData();
 
         return (
             activeRuntimeData?.getValue(row, column) ||
-            activeArrayFormulaData?.getValue(row, column) ||
+            activeRuntimeArrayFormulaCellData?.getValue(row, column) ||
+            activeArrayFormulaCellData?.getValue(row, column) ||
             activeSheetData.cellData.getValue(row, column)
         );
     }

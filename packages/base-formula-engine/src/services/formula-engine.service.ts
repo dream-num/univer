@@ -18,7 +18,7 @@ import { ReferenceNodeFactory } from '../ast-node/reference-node';
 import { SuffixNodeFactory } from '../ast-node/suffix-node';
 import { UnionNodeFactory } from '../ast-node/union-node';
 import { ValueNodeFactory } from '../ast-node/value-node';
-import type { IFormulaDatasetConfig, IUnitArrayFormulaDataType, IUnitExcludedCell } from '../basics/common';
+import type { IArrayFormulaRangeType, IFormulaDatasetConfig, IUnitExcludedCell } from '../basics/common';
 import { ErrorType } from '../basics/error-type';
 import type { IFunctionInfo } from '../basics/function';
 import { FUNCTION_NAMES } from '../basics/function';
@@ -153,13 +153,6 @@ export class FormulaEngineService extends Disposable {
         return this.functionService.getDescriptions();
     }
 
-    getRunTimeData(unitId: string) {
-        return {
-            sheetData: this.runtimeService.getSheetData(unitId),
-            arrayFormulaData: this.runtimeService.getSheetArrayFormula(unitId),
-        };
-    }
-
     builderLexerTree(formulaString: string) {
         const lexerNode = this.lexerTreeBuilder.treeBuilder(formulaString, false);
 
@@ -233,9 +226,9 @@ export class FormulaEngineService extends Disposable {
             return;
         }
 
-        const { unitArrayFormulaData } = executeState;
+        const { arrayFormulaRange } = executeState;
 
-        const { dirtyRanges, excludedCell } = this._getArrayFormulaDirtyRangeAndExcludedRange(unitArrayFormulaData);
+        const { dirtyRanges, excludedCell } = this._getArrayFormulaDirtyRangeAndExcludedRange(arrayFormulaRange);
 
         if (dirtyRanges == null || dirtyRanges.length === 0) {
             return true;
@@ -248,13 +241,13 @@ export class FormulaEngineService extends Disposable {
         return true;
     }
 
-    private _getArrayFormulaDirtyRangeAndExcludedRange(unitArrayFormulaData: IUnitArrayFormulaDataType) {
+    private _getArrayFormulaDirtyRangeAndExcludedRange(arrayFormulaRange: IArrayFormulaRangeType) {
         const dirtyRanges: IUnitRange[] = [];
         const excludedCell: IUnitExcludedCell = {};
-        Object.keys(unitArrayFormulaData).forEach((unitId) => {
-            const sheetArrayFormulaData = unitArrayFormulaData[unitId];
-            Object.keys(sheetArrayFormulaData).forEach((sheetId) => {
-                const cellValue = new ObjectMatrix(sheetArrayFormulaData[sheetId]);
+        Object.keys(arrayFormulaRange).forEach((unitId) => {
+            const sheetArrayFormulaRange = arrayFormulaRange[unitId];
+            Object.keys(sheetArrayFormulaRange).forEach((sheetId) => {
+                const cellValue = new ObjectMatrix(sheetArrayFormulaRange[sheetId]);
 
                 if (cellValue == null) {
                     return true;

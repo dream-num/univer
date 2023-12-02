@@ -15,15 +15,7 @@ import {
     SetWorksheetNameMutation,
 } from '@univerjs/base-sheets';
 import type { ICommandInfo, IRange, IUnitRange } from '@univerjs/core';
-import {
-    Disposable,
-    ICommandService,
-    IConfigService,
-    IUniverInstanceService,
-    LifecycleStages,
-    ObjectMatrix,
-    OnLifecycle,
-} from '@univerjs/core';
+import { Disposable, ICommandService, LifecycleStages, ObjectMatrix, OnLifecycle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
@@ -34,11 +26,7 @@ import { IFormulaService } from '../services/formula.service';
 
 @OnLifecycle(LifecycleStages.Starting, CalculateController)
 export class CalculateController extends Disposable {
-    private _previousDirtyRanges: IUnitRange[] = [];
-
     constructor(
-        @IConfigService private readonly _configService: IConfigService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService,
 
@@ -111,10 +99,14 @@ export class CalculateController extends Disposable {
             dirtyRanges.push({ unitId, sheetId, range });
         });
 
-        const arrayFormulaData = this._formulaDataModel.getArrayFormulaData();
+        const arrayFormulaRange = this._formulaDataModel.getArrayFormulaRange();
 
-        const cellRangeData = new ObjectMatrix<IRange>(arrayFormulaData?.[unitId]?.[sheetId]);
+        const cellRangeData = new ObjectMatrix<IRange>(arrayFormulaRange?.[unitId]?.[sheetId]);
 
+        /**
+         * The array formula is a range where only the top-left corner contains the formula value.
+         * All other positions, apart from the top-left corner, need to be marked as dirty.
+         */
         if (cellRangeData) {
             cellMatrix.forValue((row, column) => {
                 cellRangeData.forValue((arrayFormulaRow, arrayFormulaColumn, arrayFormulaRange) => {
@@ -143,18 +135,16 @@ export class CalculateController extends Disposable {
     private async _calculate(dirtyRanges: IUnitRange[]) {
         if (dirtyRanges.length === 0) return;
 
-        this._previousDirtyRanges = dirtyRanges;
-
         const formulaData = this._formulaDataModel.getFormulaData();
 
-        const arrayFormulaUnitData = this._formulaDataModel.getArrayFormulaUnitData();
+        const arrayFormulaCellData = this._formulaDataModel.getArrayFormulaCellData();
 
         // Synchronous to the main thread
         this._commandService.executeCommand(SetFormulaDataMutation.id, formulaData);
 
         return this._formulaEngineService.execute({
             formulaData,
-            arrayFormulaUnitData,
+            arrayFormulaCellData,
             forceCalculate: false,
             dirtyRanges,
         });
@@ -181,24 +171,26 @@ export class CalculateController extends Disposable {
     }
 
     private async _applyFormula(data: IAllRuntimeData) {
-        const { unitData, unitArrayFormulaData, arrayFormulaUnitData } = data;
+        const { unitData, arrayFormulaRange, arrayFormulaCellData, clearArrayFormulaCellData } = data;
 
         if (!unitData) {
             console.error('No sheetData from Formula Engine!');
             return;
         }
 
-        // const deleteMutationInfo = this._deletePreviousArrayFormulaValue(unitArrayFormulaData);
+        // const deleteMutationInfo = this._deletePreviousArrayFormulaValue(arrayFormulaRange);
 
-        if (unitArrayFormulaData) {
-            this._formulaDataModel.mergeArrayFormulaUnitData(arrayFormulaUnitData);
+        if (arrayFormulaRange) {
+            this._formulaDataModel.clearPreviousArrayFormulaCellData(clearArrayFormulaCellData);
 
-            this._formulaDataModel.mergeArrayFormulaData(unitArrayFormulaData);
+            this._formulaDataModel.mergeArrayFormulaCellData(arrayFormulaCellData);
+
+            this._formulaDataModel.mergeArrayFormulaRange(arrayFormulaRange);
 
             // Synchronous to the main thread
             this._commandService.executeCommand(SetArrayFormulaDataMutation.id, {
-                arrayFormulaData: this._formulaDataModel.getArrayFormulaData(),
-                arrayFormulaUnitData: this._formulaDataModel.getArrayFormulaUnitData(),
+                arrayFormulaRange: this._formulaDataModel.getArrayFormulaRange(),
+                arrayFormulaCellData: this._formulaDataModel.getArrayFormulaCellData(),
             });
         }
 
@@ -215,7 +207,7 @@ export class CalculateController extends Disposable {
             sheetIds.forEach((sheetId) => {
                 const cellData = sheetData[sheetId];
 
-                // const arrayFormula = unitArrayFormulaData[unitId][sheetId];
+                // const arrayFormula = arrayFormulaRange[unitId][sheetId];
 
                 const setRangeValuesMutation: ISetRangeValuesMutationParams = {
                     worksheetId: sheetId,

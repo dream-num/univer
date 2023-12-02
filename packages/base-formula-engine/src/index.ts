@@ -1,13 +1,12 @@
 export { LexerNode } from './analysis/lexer-node';
 export type {
-    IArrayFormulaDataType,
-    IArrayFormulaUnitDataType,
+    IArrayFormulaRangeType,
+    IArrayFormulaUnitCellType,
     IFormulaData,
     IFormulaDataItem,
     IFormulaDatasetConfig,
     IRuntimeUnitDataType,
     ISheetData,
-    IUnitArrayFormulaDataType,
     IUnitData,
     IUnitSheetNameMap,
 } from './basics/common';

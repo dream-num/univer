@@ -1,10 +1,10 @@
 import type {
-    IArrayFormulaUnitDataType,
+    IArrayFormulaRangeType,
+    IArrayFormulaUnitCellType,
     IFormulaData,
     IFormulaDataItem,
     IRuntimeUnitDataType,
     ISheetData,
-    IUnitArrayFormulaDataType,
     IUnitData,
     IUnitSheetNameMap,
 } from '@univerjs/base-formula-engine';
@@ -27,9 +27,9 @@ export interface IFormulaConfig {
 export class FormulaDataModel extends Disposable {
     private _formulaData: IFormulaData = {};
 
-    private _arrayFormulaData: IUnitArrayFormulaDataType = {};
+    private _arrayFormulaRange: IArrayFormulaRangeType = {};
 
-    private _arrayFormulaUnitData: IArrayFormulaUnitDataType = {};
+    private _arrayFormulaCellData: IArrayFormulaUnitCellType = {};
 
     constructor(
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
@@ -38,31 +38,67 @@ export class FormulaDataModel extends Disposable {
         super();
     }
 
-    mergeArrayFormulaUnitData(unitData: IRuntimeUnitDataType) {
+    clearPreviousArrayFormulaCellData(clearArrayFormulaCellData: IRuntimeUnitDataType) {
+        Object.keys(clearArrayFormulaCellData).forEach((unitId) => {
+            const sheetData = clearArrayFormulaCellData[unitId];
+            Object.keys(sheetData).forEach((sheetId) => {
+                const cellMatrixData = sheetData[sheetId];
+                const rangeMatrix = this._arrayFormulaRange?.[unitId]?.[sheetId];
+                if (rangeMatrix == null) {
+                    return true;
+                }
+
+                let arrayFormulaCellMatrixData = new ObjectMatrix<ICellData>(); // Original array formula cell data.
+
+                if (this._arrayFormulaCellData[unitId][sheetId] != null) {
+                    arrayFormulaCellMatrixData = new ObjectMatrix<ICellData>(
+                        this._arrayFormulaCellData[unitId][sheetId]
+                    );
+                }
+
+                cellMatrixData.forValue((row, column) => {
+                    const range = rangeMatrix?.[row]?.[column];
+                    if (range == null) {
+                        return true;
+                    }
+                    const { startRow, startColumn, endRow, endColumn } = range;
+                    for (let r = startRow; r <= endRow; r++) {
+                        for (let c = startColumn; c <= endColumn; c++) {
+                            arrayFormulaCellMatrixData.setValue(r, c, null);
+                        }
+                    }
+                });
+
+                this._arrayFormulaCellData[unitId][sheetId] = arrayFormulaCellMatrixData.getData();
+            });
+        });
+    }
+
+    mergeArrayFormulaCellData(unitData: IRuntimeUnitDataType) {
         Object.keys(unitData).forEach((unitId) => {
             const sheetData = unitData[unitId];
-            if (this._arrayFormulaData[unitId] == null) {
-                this._arrayFormulaData[unitId] = {};
+            if (this._arrayFormulaRange[unitId] == null) {
+                this._arrayFormulaRange[unitId] = {};
             }
 
-            if (this._arrayFormulaUnitData[unitId] == null) {
-                this._arrayFormulaUnitData[unitId] = {};
+            if (this._arrayFormulaCellData[unitId] == null) {
+                this._arrayFormulaCellData[unitId] = {};
             }
 
             Object.keys(sheetData).forEach((sheetId) => {
-                const cellMatrixData = sheetData[sheetId];
+                const cellMatrixData = sheetData[sheetId]; // The runtime data for array formula value calculated by the formula engine.
 
-                let arrayFormulaDataMatrix = new ObjectMatrix<IRange>();
+                let arrayFormulaRangeMatrix = new ObjectMatrix<IRange>(); // Original array formula range.
 
-                let arrayFormulaCellMatrixData = new ObjectMatrix<ICellData>();
+                let arrayFormulaCellMatrixData = new ObjectMatrix<ICellData>(); // Original array formula cell data.
 
-                if (this._arrayFormulaData[unitId][sheetId] != null) {
-                    arrayFormulaDataMatrix = new ObjectMatrix<IRange>(this._arrayFormulaData[unitId][sheetId]);
+                if (this._arrayFormulaRange[unitId][sheetId] != null) {
+                    arrayFormulaRangeMatrix = new ObjectMatrix<IRange>(this._arrayFormulaRange[unitId][sheetId]);
                 }
 
-                if (this._arrayFormulaUnitData[unitId][sheetId] != null) {
+                if (this._arrayFormulaCellData[unitId][sheetId] != null) {
                     arrayFormulaCellMatrixData = new ObjectMatrix<ICellData>(
-                        this._arrayFormulaUnitData[unitId][sheetId]
+                        this._arrayFormulaCellData[unitId][sheetId]
                     );
                 }
 
@@ -70,7 +106,7 @@ export class FormulaDataModel extends Disposable {
                  * If the calculated value of the array formula is updated, clear the values within the original data formula range.
                  */
                 cellMatrixData.forValue((row, column) => {
-                    const arrayFormulaRange = arrayFormulaDataMatrix?.getValue(row, column);
+                    const arrayFormulaRange = arrayFormulaRangeMatrix?.getValue(row, column);
                     if (arrayFormulaRange == null) {
                         return true;
                     }
@@ -86,7 +122,7 @@ export class FormulaDataModel extends Disposable {
                     arrayFormulaCellMatrixData.setValue(row, column, cellData);
                 });
 
-                this._arrayFormulaUnitData[unitId][sheetId] = arrayFormulaCellMatrixData.getData();
+                this._arrayFormulaCellData[unitId][sheetId] = arrayFormulaCellMatrixData.getData();
             });
         });
     }
@@ -99,28 +135,28 @@ export class FormulaDataModel extends Disposable {
         this._formulaData = value;
     }
 
-    setArrayFormulaData(value: IUnitArrayFormulaDataType) {
-        this._arrayFormulaData = value;
+    setArrayFormulaRange(value: IArrayFormulaRangeType) {
+        this._arrayFormulaRange = value;
     }
 
-    getArrayFormulaData(): IUnitArrayFormulaDataType {
-        return this._arrayFormulaData;
+    getArrayFormulaRange(): IArrayFormulaRangeType {
+        return this._arrayFormulaRange;
     }
 
-    setArrayFormulaUnitData(value: IArrayFormulaUnitDataType) {
-        this._arrayFormulaUnitData = value;
+    setArrayFormulaCellData(value: IArrayFormulaUnitCellType) {
+        this._arrayFormulaCellData = value;
     }
 
-    getArrayFormulaUnitData() {
-        return this._arrayFormulaUnitData;
+    getArrayFormulaCellData() {
+        return this._arrayFormulaCellData;
     }
 
-    mergeArrayFormulaData(formulaData: IUnitArrayFormulaDataType) {
+    mergeArrayFormulaRange(formulaData: IArrayFormulaRangeType) {
         Object.keys(formulaData).forEach((unitId) => {
             const sheetData = formulaData[unitId];
 
-            if (!this._arrayFormulaData[unitId]) {
-                this._arrayFormulaData[unitId] = {};
+            if (!this._arrayFormulaRange[unitId]) {
+                this._arrayFormulaRange[unitId] = {};
             }
 
             Object.keys(sheetData).forEach((sheetId) => {
@@ -128,21 +164,21 @@ export class FormulaDataModel extends Disposable {
 
                 let rangeMatrix = new ObjectMatrix<IRange>();
 
-                if (!this._arrayFormulaData[unitId][sheetId]) {
-                    rangeMatrix = new ObjectMatrix(this._arrayFormulaData[unitId][sheetId]);
+                if (this._arrayFormulaRange[unitId][sheetId]) {
+                    rangeMatrix = new ObjectMatrix(this._arrayFormulaRange[unitId][sheetId]);
                 }
 
                 arrayFormula.forValue((r, c, v) => {
                     rangeMatrix.setValue(r, c, v);
                 });
 
-                this._arrayFormulaData[unitId][sheetId] = rangeMatrix.getData();
+                this._arrayFormulaRange[unitId][sheetId] = rangeMatrix.getData();
             });
         });
     }
 
-    deleteArrayFormulaData(unitId: string, sheetId: string, row: number, column: number) {
-        const cellMatrixData = this._arrayFormulaData[unitId]?.[sheetId];
+    deleteArrayFormulaRange(unitId: string, sheetId: string, row: number, column: number) {
+        const cellMatrixData = this._arrayFormulaRange[unitId]?.[sheetId];
         if (cellMatrixData == null) {
             return;
         }
@@ -150,7 +186,7 @@ export class FormulaDataModel extends Disposable {
         if (rangeMatrixData.getValue(row, column)) {
             rangeMatrixData.realDeleteValue(row, column);
 
-            this._arrayFormulaData[unitId][sheetId] = rangeMatrixData.getData();
+            this._arrayFormulaRange[unitId][sheetId] = rangeMatrixData.getData();
         }
     }
 

@@ -1,4 +1,4 @@
-import type { IArrayFormulaUnitDataType, IUnitArrayFormulaDataType } from '@univerjs/base-formula-engine';
+import type { IArrayFormulaRangeType, IArrayFormulaUnitCellType } from '@univerjs/base-formula-engine';
 import type { IMutation } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
@@ -6,8 +6,8 @@ import type { IAccessor } from '@wendellhu/redi';
 import { FormulaDataModel } from '../../models/formula-data.model';
 
 export interface ISetArrayFormulaDataMutationParams {
-    arrayFormulaData: IUnitArrayFormulaDataType;
-    arrayFormulaUnitData: IArrayFormulaUnitDataType;
+    arrayFormulaRange: IArrayFormulaRangeType;
+    arrayFormulaCellData: IArrayFormulaUnitCellType;
 }
 
 export const SetArrayFormulaDataMutation: IMutation<ISetArrayFormulaDataMutationParams> = {
@@ -15,8 +15,8 @@ export const SetArrayFormulaDataMutation: IMutation<ISetArrayFormulaDataMutation
     type: CommandType.MUTATION,
     handler: (accessor: IAccessor, params: ISetArrayFormulaDataMutationParams) => {
         const formulaDataModel = accessor.get(FormulaDataModel);
-        formulaDataModel.setArrayFormulaData(params.arrayFormulaData);
-        formulaDataModel.setArrayFormulaUnitData(params.arrayFormulaUnitData);
+        formulaDataModel.setArrayFormulaRange(params.arrayFormulaRange);
+        formulaDataModel.setArrayFormulaCellData(params.arrayFormulaCellData);
         return true;
     },
 };

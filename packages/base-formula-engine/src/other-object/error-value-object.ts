@@ -1,4 +1,4 @@
-import { ErrorType } from '../basics/error-type';
+import type { ErrorType } from '../basics/error-type';
 import { ObjectClassType } from '../basics/object-class-type';
 
 export class ErrorValueObject extends ObjectClassType {
@@ -19,6 +19,13 @@ export class ErrorValueObject extends ObjectClassType {
 
     getErrorType() {
         return this._errorType;
+    }
+
+    override isEqual(object: ObjectClassType) {
+        if ((object as ErrorValueObject).getErrorType() === this.getErrorType()) {
+            return true;
+        }
+        return false;
     }
 
     override isErrorObject() {

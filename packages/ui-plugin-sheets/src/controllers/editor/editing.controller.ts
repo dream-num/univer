@@ -1,16 +1,11 @@
 import { getDocObject } from '@univerjs/base-docs';
-import { FormulaEngineService, ISheetData } from '@univerjs/base-formula-engine';
+import type { ISheetData } from '@univerjs/base-formula-engine';
+import { FormulaEngineService } from '@univerjs/base-formula-engine';
 import { IRenderManagerService } from '@univerjs/base-render';
-import {
-    Disposable,
-    IUniverInstanceService,
-    LifecycleStages,
-    Nullable,
-    ObjectMatrix,
-    OnLifecycle,
-} from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 
 @OnLifecycle(LifecycleStages.Steady, EditingController)
 export class EditingController extends Disposable {
@@ -101,7 +96,7 @@ export class EditingController extends Disposable {
         //         dirtyRanges: [],
         //     })
         //     .then((res) => {
-        //         console.log(res.sheetData, res.arrayFormulaData);
+        //         console.log(res.sheetData, res.arrayFormulaRange);
         //     });
 
         // console.log(

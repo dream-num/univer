@@ -480,6 +480,8 @@ export class StartEditController extends Disposable {
                     },
                 ]);
             }
+
+            this._renderManagerService.getRenderById(unitId)?.scene.resetCursor();
         });
     }
 

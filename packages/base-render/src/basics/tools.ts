@@ -1,6 +1,4 @@
-import {
-    BaselineOffset,
-    FontStyleType,
+import type {
     IRange,
     IRangeWithCoord,
     IScale,
@@ -9,12 +7,12 @@ import {
     IStyleBase,
     LocaleService,
     Nullable,
-    Tools,
 } from '@univerjs/core';
+import { BaselineOffset, FontStyleType, Tools } from '@univerjs/core';
 
 import { DEFAULT_FONTFACE_PLANE } from './const';
 import { FontCache } from './font-cache';
-import { IBoundRectNoAngle } from './vector2';
+import type { IBoundRectNoAngle } from './vector2';
 
 const DEG180 = 180;
 
@@ -249,7 +247,7 @@ export function getFontStyleString(textStyle?: IStyleBase, localeService?: Local
     // TODO: @jikkai @DR-Univer should read default font from configuration, not from locale service
     const defaultFont = 'Arial';
 
-    const defaultFontSize = 14;
+    const defaultFontSize = 13;
 
     // const { fontList, defaultFontSize } = fontLocale;
 

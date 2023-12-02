@@ -7,18 +7,6 @@ import type {
     ObjectMatrixPrimitiveType,
 } from '@univerjs/core';
 
-export interface IArrayFormulaDataType {
-    [sheetId: string]: ObjectMatrixPrimitiveType<IRange>;
-}
-
-export interface IUnitArrayFormulaDataType {
-    [unitId: string]: IArrayFormulaDataType;
-}
-
-export interface IArrayFormulaUnitDataType {
-    [unitId: string]: { [sheetId: string]: ObjectMatrixPrimitiveType<ICellData> };
-}
-
 export const ERROR_VALUE_OBJECT_CLASS_TYPE = 'errorValueObject';
 
 export const ASYNC_OBJECT_CLASS_TYPE = 'asyncObject';
@@ -55,12 +43,8 @@ export interface IUnitData {
     [unitId: string]: ISheetData;
 }
 
-export interface IRuntimeSheetData {
-    [sheetId: string]: ObjectMatrix<ICellData>;
-}
-
 export interface IRuntimeUnitDataType {
-    [unitId: string]: IRuntimeSheetData;
+    [unitId: string]: { [sheetId: string]: ObjectMatrix<ICellData> };
 }
 
 export interface IRuntimeOtherUnitDataType {
@@ -69,6 +53,22 @@ export interface IRuntimeOtherUnitDataType {
 
 export interface IUnitSheetNameMap {
     [unitId: string]: { [sheetName: string]: string };
+}
+
+export interface IArrayFormulaRangeType {
+    [unitId: string]: { [sheetId: string]: ObjectMatrixPrimitiveType<IRange> };
+}
+
+export interface IArrayFormulaUnitCellType {
+    [unitId: string]: { [sheetId: string]: ObjectMatrixPrimitiveType<ICellData> };
+}
+
+export interface IFormulaData {
+    [unitId: string]: { [sheetId: string]: ObjectMatrixPrimitiveType<IFormulaDataItem> };
+}
+
+export interface IOtherFormulaData {
+    [unitId: string]: { [subComponentId: string]: { [formulaId: string]: IFormulaDataItem } };
 }
 
 /**
@@ -83,14 +83,6 @@ export interface IFormulaDataItem {
     // row: number;
     // column: number;
     // sheetId: string;
-}
-
-export interface IFormulaData {
-    [unitId: string]: { [sheetId: string]: ObjectMatrixPrimitiveType<IFormulaDataItem> };
-}
-
-export interface IOtherFormulaData {
-    [unitId: string]: { [subComponentId: string]: { [formulaId: string]: IFormulaDataItem } };
 }
 
 export interface ISuperTable {
@@ -113,7 +105,7 @@ export interface IUnitExcludedCell {
 
 export interface IFormulaDatasetConfig {
     formulaData: IFormulaData;
-    arrayFormulaUnitData: IArrayFormulaUnitDataType;
+    arrayFormulaCellData: IArrayFormulaUnitCellType;
     forceCalculate: boolean;
     dirtyRanges: IUnitRange[];
     excludedCell?: IUnitExcludedCell;

@@ -881,27 +881,27 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         // top *= scaleY;
 
         const { tl, tr, bl } = this._activeViewport.getBounding();
-        const constantOffsetWidth = (width * 2) / scaleX;
-        const constantOffsetHeight = (height * 2) / scaleY;
+        const constantOffsetWidth = width / scaleX;
+        const constantOffsetHeight = height / scaleY;
         let offsetY = 0;
         let offsetX = 0;
 
         const boundTop = tl.y;
         const boundBottom = bl.y;
 
-        if (top < boundTop + constantOffsetHeight) {
-            offsetY = top - boundTop - constantOffsetHeight * 2;
+        if (top < boundTop) {
+            offsetY = top - boundTop;
         } else if (top > boundBottom - constantOffsetHeight) {
-            offsetY = top - boundBottom + constantOffsetHeight * 2;
+            offsetY = top - boundBottom + constantOffsetHeight;
         }
 
         const boundLeft = tl.x;
         const boundRight = tr.x;
 
-        if (left < boundLeft + constantOffsetWidth) {
-            offsetX = left - boundLeft - constantOffsetWidth * 2;
+        if (left < boundLeft) {
+            offsetX = left - boundLeft;
         } else if (left > boundRight - constantOffsetWidth) {
-            offsetX = left - boundRight + constantOffsetWidth * 2;
+            offsetX = left - boundRight + constantOffsetWidth;
         }
 
         const config = this._activeViewport.getBarScroll(offsetX, offsetY);

@@ -1,5 +1,5 @@
-import { UpdateDocsAttributeType } from '../../shared/command-enum';
-import { IDocumentBody } from '../../types/interfaces/i-document-data';
+import type { UpdateDocsAttributeType } from '../../shared/command-enum';
+import type { IDocumentBody } from '../../types/interfaces/i-document-data';
 
 /**
  * Retain mutation is used to move the cursor or to update properties of the text in the given range.
@@ -7,9 +7,9 @@ import { IDocumentBody } from '../../types/interfaces/i-document-data';
 export interface IRetainMutationParams {
     t: 'r';
     len: number;
-    segmentId?: string;
     body?: IDocumentBody;
     coverType?: UpdateDocsAttributeType;
+    segmentId?: string;
 }
 
 /**

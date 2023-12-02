@@ -1,5 +1,6 @@
-import { Disposable, ICommandService, IConfigService, IStyleData, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { IDisposable } from '@wendellhu/redi';
+import type { IStyleData } from '@univerjs/core';
+import { Disposable, ICommandService, IConfigService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import type { IDisposable } from '@wendellhu/redi';
 
 import {
     AddWorksheetMergeAllCommand,
@@ -86,6 +87,7 @@ import { RemoveSheetMutation } from '../commands/mutations/remove-sheet.mutation
 import { RemoveWorksheetMergeMutation } from '../commands/mutations/remove-worksheet-merge.mutation';
 import { SetColHiddenMutation, SetColVisibleMutation } from '../commands/mutations/set-col-visible.mutation';
 import { SetFrozenMutation } from '../commands/mutations/set-frozen.mutation';
+import { SetNumfmtMutation } from '../commands/mutations/set-numfmt-mutation';
 import { SetRangeFormattedValueMutation } from '../commands/mutations/set-range-formatted-value.mutation';
 import { SetRangeValuesMutation } from '../commands/mutations/set-range-values.mutation';
 import { SetRowHiddenMutation, SetRowVisibleMutation } from '../commands/mutations/set-row-visible.mutation';
@@ -210,6 +212,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetWorksheetRowIsAutoHeightMutation,
             SetWorksheetShowCommand,
             TrimWhitespaceCommand,
+            SetNumfmtMutation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
 
         this._configService.setConfig(MAX_CELL_PER_SHEET_KEY, MAX_CELL_PER_SHEET_DEFAULT);

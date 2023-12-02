@@ -42,7 +42,7 @@ describe('test numfmt service', () => {
         const numfmtValue = numfmtService.getValue(workbookId, worksheetId, 1, 1);
         expect(numfmtValue).toEqual({ pattern: 'asdws', type: undefined });
         const model = numfmtService.getModel(workbookId, worksheetId);
-        expect(model?.getValue(1, 1)).toEqual({ pattern: '1' });
+        expect(model?.getValue(1, 1)).toEqual({ i: '1' });
     });
 
     it('model delete', () => {
@@ -79,7 +79,7 @@ describe('test numfmt service', () => {
         };
         commandService.executeCommand(SetNumfmtMutation.id, params);
         const refModel = numfmtService.getRefModel(workbookId);
-        expect(refModel?.getKeyMap('numfmtId')).toEqual(['1']);
+        expect(refModel?.getKeyMap('i')).toEqual(['1']);
         expect(refModel?.getKeyMap('pattern')).toEqual(['asdws']);
         expect(refModel?.getValue('asdws')?.count).toEqual(1);
         expect(refModel?.getValue('1')?.count).toEqual(1);
@@ -127,8 +127,8 @@ describe('test numfmt service', () => {
         const model1 = numfmtService.getModel(workbookId, sheets[0].getSheetId());
         const model2 = numfmtService.getModel(workbookId, sheets[1].getSheetId());
         expect(refModel?.getValue(pattern)?.count).toBe(2);
-        expect(model1?.getValue(1, 1)?.pattern).toBe('1');
-        expect(model2?.getValue(1, 1)?.pattern).toBe('1');
-        expect(refModel?.getValue(model2?.getValue(1, 1)?.pattern!)?.pattern).toBe(pattern);
+        expect(model1?.getValue(1, 1)?.i).toBe('1');
+        expect(model2?.getValue(1, 1)?.i).toBe('1');
+        expect(refModel?.getValue(model2?.getValue(1, 1)?.i!)?.pattern).toBe(pattern);
     });
 });

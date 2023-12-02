@@ -1,19 +1,22 @@
-name: 🥷 Release Nightly
+name: 🍰 Release Unstable
 
 on:
-    schedule:
-        - cron: '0 16 * * *'
+    push:
+        tags:
+            - 'v*.*.*-alpha.*'
+            - 'v*.*.*-beta.*'
+            - 'v*.*.*-rc.*'
 
 permissions:
     contents: read
 
 jobs:
-    release-nightly:
+    release-unstable:
         if: github.repository == 'dream-num/univer'
         runs-on: ubuntu-latest
 
         outputs:
-            version: ${{ steps.nightly-version.outputs.version }}
+            release_type: ${{ steps.release-type.outputs.release_type }}
 
         steps:
             - name: Checkout
@@ -23,7 +26,6 @@ jobs:
               uses: actions/setup-node@v3
               with:
                   node-version: 18
-                  registry-url: ${{ secrets.VERDACCIO_URL }}
 
             - name: Install pnpm
               uses: pnpm/action-setup@v2
@@ -44,28 +46,13 @@ jobs:
                   restore-keys: |
                       ${{ runner.os }}-pnpm-
 
-            - name: 📌 Get package version (version + date)
-              id: nightly-version
+            - name: 🚚 Get release type
+              id: release-type
               run: |
-                  echo "version=$(node -p "require('./package.json').version")-nightly.$(date +%Y%m%d%H%M)" >> $GITHUB_OUTPUT
-
-            # - name: Create tag
-            #   uses: actions/github-script@v5
-            #   with:
-            #       github-token: ${{ secrets.GITHUB_TOKEN }}
-            #       script: |
-            #           github.rest.git.createRef({
-            #             owner: context.repo.owner,
-            #             repo: context.repo.repo,
-            #             ref: 'refs/tags/${{ steps.nightly-version.outputs.version }}',
-            #             sha: context.sha
-            #           })
-
-            - name: 🔏 Set all monorepo's package version
-              run: |
-                  for package in $(ls packages); do
-                      node -e "const fs = require('fs'); const package = JSON.parse(fs.readFileSync('./packages/$package/package.json')); package.version = '${{ steps.nightly-version.outputs.version }}'; fs.writeFileSync('./packages/$package/package.json', JSON.stringify(package, null, 4));"
-                  done
+                  if [[ ${{ github.ref_name }} =~ -(rc|beta|alpha)\. ]]; then
+                      extracted_type="${BASH_REMATCH[1]}"
+                      echo "release_type=$extracted_type" >> $GITHUB_OUTPUT
+                  fi
 
             - name: 🚚 Install dependencies
               run: pnpm install
@@ -74,13 +61,14 @@ jobs:
               run: pnpm run build
 
             - name: 🐙 Publish
-              run: pnpm publish --access public --tag nightly -r
+              if: ${{ steps.release-type.outputs.release_type == 'alpha' || steps.release-type.outputs.release_type == 'beta' || steps.release-type.outputs.release_type == 'rc' }}
+              run: pnpm publish --access public --tag ${{ steps.release-type.outputs.release_type }} -r
               env:
-                  NODE_AUTH_TOKEN: ${{ secrets.VERDACCIO_TOKEN }}
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
     build-demo:
         runs-on: ubuntu-latest
-        needs: [release-nightly]
+        needs: [release-unstable]
 
         outputs:
             preview-url: ${{ steps.vercel-demo.outputs.preview-url }}
@@ -136,7 +124,7 @@ jobs:
 
     build-storybook:
         runs-on: ubuntu-latest
-        needs: [release-nightly]
+        needs: [release-unstable]
 
         outputs:
             preview-url: ${{ steps.vercel-storybook.outputs.preview-url }}
@@ -185,7 +173,7 @@ jobs:
                   vercel-project-id: ${{ secrets.PROJECT_ID_STORYBOOK}}
 
     notify:
-        needs: [release-nightly, build-demo, build-storybook]
+        needs: [release-unstable, build-demo, build-storybook]
         runs-on: ubuntu-latest
         if: ${{ always() }}
 
@@ -198,10 +186,10 @@ jobs:
                   webhook: ${{ secrets.DISCORD_WEBHOOK }}
                   status: ${{ job.status }}
                   description: |
-                      🌝 Nightly release: Successful
+                      🎉 Unstable release: Successful
 
                       🎉 🎉 🎉 🎉 🎉 🎉 🎉 🎉 🎉
-                      Release version: ${{ needs.release-nightly.outputs.version }}
+                      Release version: ${{ github.ref_name }}
 
                       **[View Deployment]**
                       - [📑 Doc](${{ needs.build-demo.outputs.preview-url }}/doc/)
@@ -218,7 +206,7 @@ jobs:
                   nocontext: false
                   noprefix: true
                   color: 0x00b894
-                  username: Nightly Release
+                  username: Unstable Release
 
             - name: 👾 Discord Notification
               uses: sarisia/actions-status-discord@v1
@@ -227,16 +215,16 @@ jobs:
                   webhook: ${{ secrets.DISCORD_WEBHOOK }}
                   status: ${{ job.status }}
                   description: |
-                      🌚 Nightly release: Unsuccessful 💩
+                      💥 Ustable release: Unsuccessful 💩
 
                       👿 👿 👿 👿 👿 👿 👿 👿 👿
-                      Failed version: ${{ needs.release-nightly.outputs.version }}
+                      Failed version: ${{ github.ref_name }}
                       👿 👿 👿 👿 👿 👿 👿 👿 👿
 
-                      Don't worry, tomorrow will be better! 🌞
+                      Oops! Something went wrong. 😭
                   nofail: false
                   nodetail: false
                   nocontext: false
                   noprefix: true
                   color: 0xd63031
-                  username: Nightly Release
+                  username: Unstable Release

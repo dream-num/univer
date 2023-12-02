@@ -5,7 +5,7 @@ import type { Observable } from 'rxjs';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type INumfmtItem = {
-    pattern: string;
+    i: string;
 };
 
 export type FormatType =
@@ -23,15 +23,16 @@ export type FormatType =
     | 'time'
     | 'unknown';
 
-export type INumfmtItemWithCache = INumfmtItem & {
+export interface INumfmtItemWithCache {
     // when change parameters or pattern, the cache is cleared follow mutation execute
     _cache?: {
         result: ICellData;
         parameters: number; // The parameter that was last calculated
     };
+    pattern: string;
     type: FormatType;
-};
-export type IRefItem = INumfmtItem & { count: number; numfmtId: string; type: FormatType };
+}
+export type IRefItem = INumfmtItem & { count: number; type: FormatType; pattern: string };
 
 export interface INumfmtService {
     getValue(
@@ -45,9 +46,9 @@ export interface INumfmtService {
     setValues(
         workbookId: string,
         worksheetId: string,
-        values: Array<{ row: number; col: number; pattern?: string; type: FormatType }>
+        values: Array<{ row: number; col: number; pattern?: string; type?: FormatType }>
     ): void;
-    getRefModel(workbookId: string): Nullable<RefAlias<IRefItem, 'numfmtId' | 'pattern'>>;
+    getRefModel(workbookId: string): Nullable<RefAlias<IRefItem, 'i' | 'pattern'>>;
     modelReplace$: Observable<string>;
 }
 

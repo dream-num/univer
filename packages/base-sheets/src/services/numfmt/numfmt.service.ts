@@ -27,7 +27,7 @@ export class NumfmtService extends Disposable implements INumfmtService {
      */
     private _numfmtModel: Map<string, Map<string, ObjectMatrix<INumfmtItem>>> = new Map();
 
-    private _refAliasModel: Map<string, RefAlias<IRefItem, 'numfmtId' | 'pattern'>> = new Map();
+    private _refAliasModel: Map<string, RefAlias<IRefItem, 'pattern' | 'i'>> = new Map();
 
     private _modelReplace$ = new Subject<string>();
     modelReplace$ = this._modelReplace$.asObservable();
@@ -68,7 +68,7 @@ export class NumfmtService extends Disposable implements INumfmtService {
                     if (refModel) {
                         this._refAliasModel.set(
                             unitID,
-                            new RefAlias<IRefItem, 'numfmtId' | 'pattern'>(refModel, ['numfmtId', 'pattern'])
+                            new RefAlias<IRefItem, 'pattern' | 'i'>(refModel, ['pattern', 'i'])
                         );
                     }
                     this._modelReplace$.next(unitID);
@@ -169,8 +169,8 @@ export class NumfmtService extends Disposable implements INumfmtService {
         if (!refModel) {
             return '0';
         }
-        const keyList = refModel.getKeyMap('numfmtId') as string[];
-        const maxId = Math.max(...keyList.map(Number), 0);
+        const keyList = refModel.getKeyMap('i') as string[];
+        const maxId = Math.max(...keyList.map((item) => Number(item || 0)), 0);
         return `${maxId + 1}`;
     }
 
@@ -182,7 +182,7 @@ export class NumfmtService extends Disposable implements INumfmtService {
         const refMode = this._refAliasModel.get(workbookId);
         const value = _model.getValue(row, col);
         if (value && refMode) {
-            const refValue = refMode.getValue(value?.pattern);
+            const refValue = refMode.getValue(value?.i);
             if (!refValue) {
                 this._logService.error('[Numfmt Service]:', 'RefAliasModel is not match model');
                 return null;
@@ -205,7 +205,7 @@ export class NumfmtService extends Disposable implements INumfmtService {
         const model = this.getModel(workbookId, worksheetId);
         let refModel = this._refAliasModel.get(workbookId)!;
         if (!refModel) {
-            refModel = new RefAlias<IRefItem, 'numfmtId' | 'pattern'>([], ['pattern', 'numfmtId']);
+            refModel = new RefAlias<IRefItem, 'i' | 'pattern'>([], ['pattern', 'i']);
             this._refAliasModel.set(workbookId, refModel);
         }
         Object.keys(group).forEach((pattern: string) => {
@@ -243,7 +243,7 @@ export class NumfmtService extends Disposable implements INumfmtService {
                 if (!refPattern) {
                     refPattern = {
                         count: 0,
-                        numfmtId: this._getUniqueRefId(workbookId),
+                        i: this._getUniqueRefId(workbookId),
                         pattern,
                         type: values[0].type,
                     };
@@ -264,7 +264,7 @@ export class NumfmtService extends Disposable implements INumfmtService {
                         }
                     }
                     this._setValue(workbookId, worksheetId, row, col, {
-                        pattern: refPattern?.numfmtId || pattern!,
+                        i: refPattern!.i,
                     });
                     refPattern!.count++;
                 });

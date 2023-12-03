@@ -47,7 +47,9 @@ jobs:
             - name: 📌 Get package version (version + date)
               id: nightly-version
               run: |
-                  echo "version=$(node -p "require('./package.json').version")-nightly.$(date +%Y%m%d%H%M)" >> $GITHUB_OUTPUT
+                  original_version=$(node -p "require('./package.json').version")
+                  version_number=$(echo "$original_version" | sed -E 's/^([0-9]+\.[0-9]+\.[0-9]+).*$/\1/')
+                  echo "version=$version_number-nightly.$(date +%Y%m%d%H%M)" >> $GITHUB_OUTPUT
 
             # - name: Create tag
             #   uses: actions/github-script@v5

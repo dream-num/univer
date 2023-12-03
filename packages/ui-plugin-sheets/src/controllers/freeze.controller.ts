@@ -1,34 +1,27 @@
 import { TinyColor } from '@ctrl/tinycolor';
-import {
-    CURSOR_TYPE,
-    IMouseEvent,
-    IPointerEvent,
-    IRenderManagerService,
-    IScrollObserverParam,
-    Rect,
-} from '@univerjs/base-render';
-import {
-    DeltaColumnWidthCommand,
-    DeltaRowHeightCommand,
+import type { IMouseEvent, IPointerEvent, IScrollObserverParam } from '@univerjs/base-render';
+import { CURSOR_TYPE, IRenderManagerService, Rect } from '@univerjs/base-render';
+import type {
     IDeltaColumnWidthCommandParams,
     IDeltaRowHeightCommand,
     ISetFrozenMutationParams,
     ISetWorksheetRowAutoHeightMutationParams,
+} from '@univerjs/base-sheets';
+import {
+    DeltaColumnWidthCommand,
+    DeltaRowHeightCommand,
     SelectionManagerService,
     SetFrozenCommand,
     SetFrozenMutation,
     SetWorksheetActivateMutation,
     SetWorksheetRowAutoHeightMutation,
 } from '@univerjs/base-sheets';
+import type { ICommandInfo, IStyleSheet, Nullable, Observer } from '@univerjs/core';
 import {
     Disposable,
-    ICommandInfo,
     ICommandService,
-    IStyleSheet,
     IUniverInstanceService,
     LifecycleStages,
-    Nullable,
-    Observer,
     OnLifecycle,
     ThemeService,
     toDisposable,
@@ -320,6 +313,39 @@ export class FreezeController extends Disposable {
         );
     }
 
+    private _getCurrentLastRow() {
+        const sheetObject = this._getSheetObject();
+        if (sheetObject == null) {
+            return;
+        }
+
+        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        if (skeleton == null) {
+            return;
+        }
+
+        const currentScroll = this._scrollManagerService.getCurrentScroll();
+
+        const canvasHeight = sheetObject.engine.height - skeleton.columnHeaderHeight;
+
+        const start = currentScroll?.sheetViewStartRow ?? 0;
+        const startHeight =
+            start === 0
+                ? -(currentScroll?.offsetY ?? 0)
+                : skeleton.rowHeightAccumulation[start - 1] - (currentScroll?.offsetY ?? 0);
+        let lastRow = 0;
+        for (let i = start, len = skeleton.rowHeightAccumulation.length; i < len; i++) {
+            const height = skeleton.rowHeightAccumulation[i];
+
+            if (height - startHeight > canvasHeight) {
+                lastRow = i;
+                break;
+            }
+        }
+
+        return lastRow - 1;
+    }
+
     private _FreezeDown(
         evt: IPointerEvent | IMouseEvent,
         freezeObjectHeaderRect: Rect,
@@ -342,9 +368,11 @@ export class FreezeController extends Disposable {
 
         scene.disableEvent();
 
+        const lastRow = this._getCurrentLastRow();
+        const lastRowY = lastRow === undefined ? Infinity : skeleton.rowHeightAccumulation[lastRow];
+
         this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
             const { startX, startY, row, column } = getCoordByOffset(moveEvt.offsetX, moveEvt.offsetY, scene, skeleton);
-
             scene.setCursor(CURSOR_TYPE.GRABBING);
 
             const FREEZE_SIZE = FREEZE_SIZE_NORMAL / Math.max(scene.scaleX, scene.scaleY);
@@ -352,20 +380,20 @@ export class FreezeController extends Disposable {
             if (freezeDirectionType === FREEZE_DIRECTION_TYPE.ROW) {
                 freezeObjectHeaderRect
                     .transformByState({
-                        top: startY - FREEZE_SIZE / 2,
+                        top: Math.min(startY, lastRowY) - FREEZE_SIZE / 2,
                     })
                     ?.setProps({
                         fill: this._freeze_active_color,
                     });
                 freezeObjectMainRect
                     .transformByState({
-                        top: startY - FREEZE_SIZE / 2,
+                        top: Math.min(startY, lastRowY) - FREEZE_SIZE / 2,
                     })
                     ?.setProps({
                         fill: this._freeze_normal_header_color,
                     });
-                this._changeToRow = row;
-                this._changeToOffsetY = startY;
+                this._changeToRow = lastRow === undefined ? row : Math.min(row, lastRow);
+                this._changeToOffsetY = Math.min(startY, lastRowY);
             } else {
                 freezeObjectHeaderRect
                     .transformByState({

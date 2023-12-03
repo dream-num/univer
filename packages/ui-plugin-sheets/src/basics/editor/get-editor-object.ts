@@ -1,5 +1,5 @@
-import { Documents, Engine, IRenderManagerService, Scene } from '@univerjs/base-render';
-import { Nullable } from '@univerjs/core';
+import type { Documents, Engine, IRenderManagerService, Scene } from '@univerjs/base-render';
+import type { Nullable } from '@univerjs/core';
 
 export interface IDocObjectParam {
     document: Documents;
@@ -21,7 +21,7 @@ export function getEditorObject(
         return;
     }
 
-    const { components, mainComponent, scene, engine } = currentRender;
+    const { mainComponent, scene, engine } = currentRender;
 
     const document = mainComponent as Documents;
 

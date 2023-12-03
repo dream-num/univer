@@ -1,5 +1,5 @@
 import { BorderStyleTypes, BorderType } from '@univerjs/core';
-import { IDisposable } from '@wendellhu/redi';
+import type { IDisposable } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 
 export interface IBorderInfo {

@@ -1,3 +1,7 @@
+import type { IDisposable } from '@wendellhu/redi';
+
+import { remove } from '../../common/array';
+import { toDisposable } from '../lifecycle';
 import { LRUHelper } from './lru-helper';
 
 const NEWER = Symbol('newer');
@@ -92,7 +96,7 @@ export class Entry<K, V> {
 }
 
 export class LRUMap<K, V> {
-    _keymap!: Map<K, Entry<K, V>>;
+    private _keymap!: Map<K, Entry<K, V>>;
 
     size: number = 0;
 
@@ -101,6 +105,18 @@ export class LRUMap<K, V> {
     oldest: Entry<K, V> | undefined;
 
     newest: Entry<K, V> | undefined;
+
+    private readonly _onShiftListeners: Array<(entry: Entry<K, V>) => void> = [];
+
+    onShift(callback: (entry: Entry<K, V>) => void): IDisposable {
+        if (this._onShiftListeners.indexOf(callback) === -1) {
+            this._onShiftListeners.push(callback);
+
+            return toDisposable(() => remove(this._onShiftListeners, callback));
+        }
+
+        throw new Error('[LRUMap]: the listener has been registered!');
+    }
 
     constructor(entries: Iterable<[K, V]>);
     constructor(limit: number);
@@ -241,6 +257,7 @@ export class LRUMap<K, V> {
             entry[NEWER] = entry[OLDER] = undefined;
             this._keymap.delete(entry.key);
             --this.size;
+            this._onShiftListeners.forEach((callback) => callback(entry));
             return [entry.key, entry.value];
         }
     }
@@ -264,6 +281,7 @@ export class LRUMap<K, V> {
     }
 
     delete(key: K): V | undefined {
+        console.log('delete');
         const entry = this._keymap.get(key);
         if (!entry) return;
         this._keymap.delete(entry.key);

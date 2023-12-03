@@ -1,29 +1,37 @@
+import type { IInterceptor, IMutationInfo, IRange } from '@univerjs/core';
 import {
+    composeInterceptors,
+    createInterceptorKey,
     Disposable,
-    IMutationInfo,
-    IRange,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
     Rectangle,
+    remove,
     SheetInterceptorService,
     toDisposable,
 } from '@univerjs/core';
-import { IDisposable, Inject } from '@wendellhu/redi';
+import type { IDisposable } from '@wendellhu/redi';
+import { Inject } from '@wendellhu/redi';
 
 import { SelectionManagerService } from '../selection-manager.service';
-import { EffectRefRangeParams, EffectRefRangId } from './type';
+import type { EffectRefRangeParams } from './type';
+import { EffectRefRangId } from './type';
 
-type RefRangCallback = (params: EffectRefRangeParams) => {
+type RefRangCallback = (
+    params: EffectRefRangeParams,
+    preValues: Array<{ redos: IMutationInfo[]; undos: IMutationInfo[] }>
+) => {
     redos: IMutationInfo[];
     undos: IMutationInfo[];
 };
-
+const refRangeCommandsMerge = createInterceptorKey<IMutationInfo[], IMutationInfo[]>('refRangeCommandsMerge');
 /**
  * Collect side effects caused by ref range change
  */
 @OnLifecycle(LifecycleStages.Steady, RefRangeService)
 export class RefRangeService extends Disposable {
+    private _interceptorsByName: Map<string, Array<IInterceptor<IMutationInfo[], IMutationInfo[]>>> = new Map();
     constructor(
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
@@ -31,11 +39,19 @@ export class RefRangeService extends Disposable {
     ) {
         super();
         this._onRefRangeChange();
+        this.intercept({
+            priority: -1,
+            handler: (list, currentValue) => {
+                const _list = list || [];
+                _list.push(...currentValue);
+                return _list;
+            },
+        });
     }
 
     private _refRangeManagerMap = new Map<string, Map<string, Set<RefRangCallback>>>();
 
-    private serializer = createRangeSerializer();
+    private _serializer = createRangeSerializer();
 
     private _onRefRangeChange = () => {
         this._sheetInterceptorService.interceptCommand({
@@ -127,12 +143,20 @@ export class RefRangeService extends Disposable {
                 };
                 const cbList = getEffectsCbList() || [];
                 const result = cbList
-                    .map((cb) => cb(command))
+                    .reduce(
+                        (result, currentFn) => {
+                            const v = currentFn(command, result);
+                            result.push(v);
+                            return result;
+                        },
+                        [] as Array<{ redos: IMutationInfo[]; undos: IMutationInfo[] }>
+                    )
                     .reduce(
                         (result, currentValue) => {
-                            result.redos.push(...currentValue.redos);
-                            result.undos.push(...currentValue.undos);
-                            return result;
+                            const intercept = this._fetchThroughInterceptors();
+                            const redos = intercept(result.redos, currentValue.redos) || [];
+                            const undos = intercept(result.undos, currentValue.undos) || [];
+                            return { redos, undos };
                         },
                         { redos: [], undos: [] }
                     );
@@ -151,7 +175,7 @@ export class RefRangeService extends Disposable {
 
             keyList.forEach((key) => {
                 const cbList = manager.get(key);
-                const range = this.serializer.deserialize(key);
+                const range = this._serializer.deserialize(key);
                 // Todo@Gggpound : How to reduce this calculation
                 if (effectRanges.some((item) => Rectangle.intersects(item, range))) {
                     cbList &&
@@ -165,6 +189,14 @@ export class RefRangeService extends Disposable {
         return [];
     };
 
+    /**
+     * Listens to an area and triggers a fall back when movement occurs
+     * @param {IRange} range the area that needs to be monitored
+     * @param {RefRangCallback} callback the callback function that is executed when the range changes
+     * @param {string} [_workbookId]
+     * @param {string} [_worksheetId]
+     * @memberof RefRangeService
+     */
     registerRefRange = (
         range: IRange,
         callback: RefRangCallback,
@@ -174,7 +206,7 @@ export class RefRangeService extends Disposable {
         const workbookId = _workbookId || getWorkbookId(this._univerInstanceService);
         const worksheetId = _worksheetId || getWorksheetId(this._univerInstanceService);
         const refRangeManagerId = getRefRangId(workbookId, worksheetId);
-        const rangeString = this.serializer.serialize(range);
+        const rangeString = this._serializer.serialize(range);
 
         let manager = this._refRangeManagerMap.get(refRangeManagerId) as Map<string, Set<RefRangCallback>>;
         if (!manager) {
@@ -201,6 +233,38 @@ export class RefRangeService extends Disposable {
             }
         });
     };
+
+    private _fetchThroughInterceptors() {
+        const key = refRangeCommandsMerge as unknown as string;
+        const interceptors = this._interceptorsByName.get(key) as unknown as Array<typeof refRangeCommandsMerge>;
+        return composeInterceptors(interceptors || []);
+    }
+
+    /**
+     * Create a intercept to squash mutations
+     * @param {typeof refRangeCommandsMerge} interceptor
+     * const disposeIntercept = refRangeService.intercept({
+            handler: (mutations, currentMutation, next) => {
+                // todo something
+                return next(list);
+            },
+        })
+     * mutations mean the operation generated before.
+     * currentMutation mean the operation of the current iteration.
+     * @return {*}
+     * @memberof RefRangeService
+     */
+    intercept(interceptor: typeof refRangeCommandsMerge) {
+        const key = refRangeCommandsMerge as unknown as string;
+        const interceptors = this._interceptorsByName.get(key)! || [];
+        interceptors.push(interceptor);
+        this._interceptorsByName.set(
+            key,
+            interceptors.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))
+        );
+
+        return this.disposeWithMe(toDisposable(() => remove(this._interceptorsByName.get(key)!, interceptor)));
+    }
 }
 
 function getWorkbookId(univerInstanceService: IUniverInstanceService) {

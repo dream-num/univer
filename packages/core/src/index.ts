@@ -17,6 +17,8 @@ export {
 export * from './observer';
 export { Plugin, PluginType } from './plugin/plugin';
 export {
+    type CommandListener,
+    CommandService,
     CommandType,
     type ICommand,
     type ICommandInfo,
@@ -56,6 +58,9 @@ export {
     UniverEditablePermissionPoint,
     UniverPermissionService,
 } from './services/permission';
+export { ResourceManagerService } from './services/resource-manager/resource-manager.service';
+export type { IResourceHook } from './services/resource-manager/type';
+export { IResourceManagerService } from './services/resource-manager/type';
 export { INTERCEPTOR_POINT } from './services/sheet-interceptor/interceptor-const';
 export { SheetInterceptorService } from './services/sheet-interceptor/sheet-interceptor.service';
 export type { IInterceptor, ISheetLocation } from './services/sheet-interceptor/utils/interceptor';
@@ -73,6 +78,7 @@ export * from './shared';
 
 // #region sheet
 
+export { composeInterceptors, createInterceptorKey } from './services/sheet-interceptor/utils/interceptor';
 export { Range } from './sheets/range';
 export {
     deserializeRangeWithSheet,

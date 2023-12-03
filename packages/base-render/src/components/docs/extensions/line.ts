@@ -1,8 +1,9 @@
-import { BooleanNumber, getColorStyle, IScale, TextDecoration } from '@univerjs/core';
+import type { IScale } from '@univerjs/core';
+import { BooleanNumber, getColorStyle, TextDecoration } from '@univerjs/core';
 
 import { COLOR_BLACK_RGB, DEFAULT_OFFSET_SPACING } from '../../../basics/const';
 import { calculateRectRotate } from '../../../basics/draw';
-import { IDocumentSkeletonSpan } from '../../../basics/i-document-skeleton-cached';
+import type { IDocumentSkeletonSpan } from '../../../basics/i-document-skeleton-cached';
 import { fixLineWidthByScale, getScale } from '../../../basics/tools';
 import { Vector2 } from '../../../basics/vector2';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';

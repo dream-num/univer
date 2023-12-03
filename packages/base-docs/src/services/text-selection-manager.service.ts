@@ -1,6 +1,6 @@
-import { ITextRangeWithStyle, TextRange } from '@univerjs/base-render';
-import { ISelectionCell, Nullable } from '@univerjs/core';
-import { IDisposable } from '@wendellhu/redi';
+import type { ITextRangeWithStyle, TextRange } from '@univerjs/base-render';
+import type { ISelectionCell, Nullable } from '@univerjs/core';
+import type { IDisposable } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 
 import { NORMAL_TEXT_SELECTION_PLUGIN_NAME } from '../basics/docs-view-key';

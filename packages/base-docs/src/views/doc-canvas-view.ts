@@ -1,23 +1,12 @@
 /* eslint-disable no-magic-numbers */
+import type { IRender, IWheelEvent, RenderManagerService, Scene } from '@univerjs/base-render';
+import { Documents, EVENT_TYPE, IRenderManagerService, Layer, ScrollBar, Viewport } from '@univerjs/base-render';
+import type { DocumentDataModel, EventState, Nullable } from '@univerjs/core';
 import {
-    Documents,
-    EVENT_TYPE,
-    IRender,
-    IRenderManagerService,
-    IWheelEvent,
-    Layer,
-    RenderManagerService,
-    Scene,
-    ScrollBar,
-    Viewport,
-} from '@univerjs/base-render';
-import {
-    DocumentDataModel,
-    EventState,
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     IConfigService,
     IUniverInstanceService,
     LifecycleStages,
-    Nullable,
     OnLifecycle,
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
@@ -134,7 +123,8 @@ export class DocCanvasView {
         });
 
         const hasScroll = this._configService.getConfig('hasScroll') as Nullable<boolean>;
-        if (hasScroll !== false) {
+        // TODO: @JOCS, do not show scroll bar when initialize formula editor, any better way?
+        if (hasScroll !== false && unitId !== DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
             new ScrollBar(viewMain);
         }
 

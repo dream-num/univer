@@ -3,9 +3,9 @@ import { LocaleService } from '@univerjs/core';
 import { SelectList } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { FC } from 'react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
-import type { BusinessComponentProps } from '../../base/types';
+import type { IBusinessComponentProps } from '../../base/types';
 import { getDateFormatOptions } from '../../utils/options';
 
 export const isDatePanel = (pattern: string) => {
@@ -17,7 +17,7 @@ export const isDatePanel = (pattern: string) => {
     );
 };
 
-export const DatePanel: FC<BusinessComponentProps> = (props) => {
+export const DatePanel: FC<IBusinessComponentProps> = (props) => {
     const options = useMemo(getDateFormatOptions, []);
     const localeService = useDependency(LocaleService);
     const t = localeService.t;
@@ -31,14 +31,18 @@ export const DatePanel: FC<BusinessComponentProps> = (props) => {
         return options[0].value;
     });
 
-    useEffect(() => {
-        props.onChange(suffix);
-    }, [suffix]);
+    props.action.current = () => suffix;
+
+    const onChange = (v: string) => {
+        suffixSet(v);
+        props.onChange(v);
+    };
+
     return (
         <div>
             <div className="m-t-16 label">{t('sheet.numfmt.dateType')}</div>
             <div className="m-t-8">
-                <SelectList value={suffix} options={options} onChange={suffixSet} />
+                <SelectList value={suffix} options={options} onChange={onChange} />
             </div>
             <div className="describe m-t-14">{t('sheet.numfmt.dateDes')}</div>
         </div>

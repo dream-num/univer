@@ -1,3 +1,4 @@
+import { IRenderManagerService, RenderManagerService } from '@univerjs/base-render';
 import { SelectionManagerService } from '@univerjs/base-sheets';
 import {
     BrowserClipboardService,
@@ -5,18 +6,15 @@ import {
     IClipboardInterfaceService,
     IMessageService,
 } from '@univerjs/base-ui';
-import {
-    ILogService,
-    IUniverInstanceService,
-    IWorkbookData,
-    LocaleType,
-    Plugin,
-    PluginType,
-    Univer,
-} from '@univerjs/core';
-import { Dependency, Inject, Injector } from '@wendellhu/redi';
+import type { IWorkbookData } from '@univerjs/core';
+import { ILogService, IUniverInstanceService, LocaleType, Plugin, PluginType, Univer } from '@univerjs/core';
+import type { Dependency } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 
 import { SheetClipboardController } from '../../../controllers/clipboard/clipboard.controller';
+import { IMarkSelectionService } from '../../mark-selection/mark-selection.service';
+import { ISelectionRenderService, SelectionRenderService } from '../../selection/selection-render.service';
+import { SheetSkeletonManagerService } from '../../sheet-skeleton-manager.service';
 import { ISheetClipboardService, SheetClipboardService } from '../clipboard.service';
 
 const cellData = {
@@ -491,6 +489,16 @@ const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
     styles,
 };
 
+export class testMarkSelectionService {
+    addShape(): string | null {
+        return null;
+    }
+
+    removeShape(id: string): void {}
+
+    removeAllShapes(): void {}
+}
+
 export function clipboardTestBed(workbookConfig?: IWorkbookData, dependencies?: Dependency[]) {
     const univer = new Univer();
 
@@ -513,11 +521,19 @@ export function clipboardTestBed(workbookConfig?: IWorkbookData, dependencies?: 
         }
 
         override onStarting(injector: Injector): void {
+            injector.add([SheetSkeletonManagerService]);
             injector.add([SelectionManagerService]);
             injector.add([IClipboardInterfaceService, { useClass: BrowserClipboardService, lazy: true }]);
             injector.add([ISheetClipboardService, { useClass: SheetClipboardService }]);
             injector.add([IMessageService, { useClass: DesktopMessageService, lazy: true }]);
-
+            injector.add([
+                IMarkSelectionService,
+                {
+                    useClass: testMarkSelectionService,
+                },
+            ]);
+            injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+            injector.add([ISelectionRenderService, { useClass: SelectionRenderService }]);
             // Because SheetClipboardController is initialized in the rendered life cycle, here we need to initialize it manually
             const sheetClipboardController = injector.createInstance(SheetClipboardController);
             injector.add([SheetClipboardController, { useValue: sheetClipboardController }]);

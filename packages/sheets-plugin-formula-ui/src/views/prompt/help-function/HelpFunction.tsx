@@ -1,8 +1,8 @@
 import type { IFunctionInfo, IFunctionParam } from '@univerjs/base-formula-engine';
-import { LocaleService } from '@univerjs/core';
-import { Dropdown } from '@univerjs/design';
+import { FOCUSING_FORMULA_EDITOR, IContextService, LocaleService } from '@univerjs/core';
+import { Popup } from '@univerjs/design';
 import { CloseSingle, DetailsSingle, MoreSingle } from '@univerjs/icons';
-import { ICellEditorManagerService } from '@univerjs/ui-plugin-sheets';
+import { ICellEditorManagerService, IFormulaEditorManagerService } from '@univerjs/ui-plugin-sheets';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
@@ -15,25 +15,36 @@ export function HelpFunction() {
     const [contentVisible, setContentVisible] = useState(true);
     const [helpVisible, setHelpVisible] = useState(true);
     const [paramIndex, setParamIndex] = useState(0);
-    const [offset, setOffset] = useState<number[]>([0, 0]);
+    const [offset, setOffset] = useState<[number, number]>([0, 0]);
     const [decoratorPosition, setDecoratorPosition] = useState({ left: 0, top: 0 });
     const [functionInfo, setFunctionInfo] = useState<IFunctionInfo | null>(null);
     const promptService = useDependency(IFormulaPromptService);
     const cellEditorManagerService = useDependency(ICellEditorManagerService);
     const localeService = useDependency(LocaleService);
+    const formulaEditorManagerService = useDependency(IFormulaEditorManagerService);
+    const contextService = useDependency(IContextService);
     const required = localeService.t('formula.prompt.required');
     const optional = localeService.t('formula.prompt.optional');
 
     useEffect(() => {
         const subscription = promptService.help$.subscribe((params: IHelpFunctionOperationParams) => {
-            const selection = cellEditorManagerService.getState();
-            if (!selection) return;
-
             const { visible, paramIndex, functionInfo } = params;
             if (!visible) {
                 setVisible(visible);
                 return;
             }
+
+            const isFocusFormulaEditor = contextService.getContextValue(FOCUSING_FORMULA_EDITOR);
+
+            const position = isFocusFormulaEditor
+                ? formulaEditorManagerService.getPosition()
+                : cellEditorManagerService.getRect();
+
+            if (position == null) {
+                return;
+            }
+
+            const { left, top, height } = position;
 
             const localeInfo: IFunctionInfo = {
                 functionName: functionInfo.functionName,
@@ -48,11 +59,11 @@ export function HelpFunction() {
                     repeat: item.repeat,
                 })),
             };
-            const { startX = 0, startY = 0, endY = 0 } = selection;
-            setOffset([startX, endY]);
+
+            setOffset([left, top + height]);
             setParamIndex(paramIndex);
             setFunctionInfo(localeInfo);
-            setDecoratorPosition({ left: startX, top: startY });
+            setDecoratorPosition({ left, top });
             setVisible(visible);
         });
 
@@ -68,71 +79,65 @@ export function HelpFunction() {
     return (
         <>
             {helpVisible ? (
-                <Dropdown
-                    visible={visible}
-                    align={{ offset }}
-                    overlay={
-                        functionInfo ? (
-                            <div className={styles.formulaHelpFunction}>
-                                <div className={styles.formulaHelpFunctionTitle}>
-                                    <Help
-                                        prefix={functionInfo.functionName}
-                                        value={functionInfo.functionParameter}
-                                        active={paramIndex}
-                                        onClick={handleSwitchActive}
-                                    />
-                                    <div className={styles.formulaHelpFunctionTitleIcons}>
-                                        <div
-                                            className={styles.formulaHelpFunctionTitleIcon}
-                                            style={{ transform: contentVisible ? 'rotateZ(-90deg)' : 'rotateZ(90deg)' }}
-                                            onClick={() => setContentVisible(!contentVisible)}
-                                        >
-                                            <MoreSingle />
-                                        </div>
-                                        <div
-                                            className={styles.formulaHelpFunctionTitleIcon}
-                                            onClick={() => setHelpVisible(!helpVisible)}
-                                        >
-                                            <CloseSingle />
-                                        </div>
+                <Popup visible={visible} offset={offset}>
+                    {functionInfo ? (
+                        <div className={styles.formulaHelpFunction}>
+                            <div className={styles.formulaHelpFunctionTitle}>
+                                <Help
+                                    prefix={functionInfo.functionName}
+                                    value={functionInfo.functionParameter}
+                                    active={paramIndex}
+                                    onClick={handleSwitchActive}
+                                />
+                                <div className={styles.formulaHelpFunctionTitleIcons}>
+                                    <div
+                                        className={styles.formulaHelpFunctionTitleIcon}
+                                        style={{ transform: contentVisible ? 'rotateZ(-90deg)' : 'rotateZ(90deg)' }}
+                                        onClick={() => setContentVisible(!contentVisible)}
+                                    >
+                                        <MoreSingle />
                                     </div>
-                                </div>
-
-                                <div
-                                    className={styles.formulaHelpFunctionContent}
-                                    style={{ height: contentVisible ? 'unset' : 0 }}
-                                >
-                                    <div className={styles.formulaHelpFunctionContentInner}>
-                                        <Params
-                                            title={localeService.t('formula.prompt.helpExample')}
-                                            value={`${functionInfo.functionName}(${functionInfo.functionParameter
-                                                .map((item) => item.example)
-                                                .join(',')})`}
-                                        />
-                                        <Params
-                                            title={localeService.t('formula.prompt.helpAbstract')}
-                                            value={functionInfo.description}
-                                        />
-                                        {functionInfo &&
-                                            functionInfo.functionParameter &&
-                                            functionInfo.functionParameter.map((item: IFunctionParam, i: number) => (
-                                                <Params
-                                                    key={i}
-                                                    className={paramIndex === i ? styles.formulaHelpFunctionActive : ''}
-                                                    title={item.name}
-                                                    value={`${item.require ? required : optional} ${item.detail}`}
-                                                />
-                                            ))}
+                                    <div
+                                        className={styles.formulaHelpFunctionTitleIcon}
+                                        onClick={() => setHelpVisible(!helpVisible)}
+                                    >
+                                        <CloseSingle />
                                     </div>
                                 </div>
                             </div>
-                        ) : (
-                            <></>
-                        )
-                    }
-                >
-                    <span />
-                </Dropdown>
+
+                            <div
+                                className={styles.formulaHelpFunctionContent}
+                                style={{ height: contentVisible ? 'unset' : 0 }}
+                            >
+                                <div className={styles.formulaHelpFunctionContentInner}>
+                                    <Params
+                                        title={localeService.t('formula.prompt.helpExample')}
+                                        value={`${functionInfo.functionName}(${functionInfo.functionParameter
+                                            .map((item) => item.example)
+                                            .join(',')})`}
+                                    />
+                                    <Params
+                                        title={localeService.t('formula.prompt.helpAbstract')}
+                                        value={functionInfo.description}
+                                    />
+                                    {functionInfo &&
+                                        functionInfo.functionParameter &&
+                                        functionInfo.functionParameter.map((item: IFunctionParam, i: number) => (
+                                            <Params
+                                                key={i}
+                                                className={paramIndex === i ? styles.formulaHelpFunctionActive : ''}
+                                                title={item.name}
+                                                value={`${item.require ? required : optional} ${item.detail}`}
+                                            />
+                                        ))}
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <></>
+                    )}
+                </Popup>
             ) : visible ? (
                 <div
                     className={styles.formulaHelpDecorator}

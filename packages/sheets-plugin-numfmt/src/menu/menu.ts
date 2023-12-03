@@ -1,8 +1,9 @@
-import { SelectionManagerService } from '@univerjs/base-sheets';
-import { ComponentManager, IMenuButtonItem, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/base-ui';
+import { INumfmtService, SelectionManagerService } from '@univerjs/base-sheets';
+import type { ComponentManager, IMenuButtonItem } from '@univerjs/base-ui';
+import { MenuGroup, MenuItemType, MenuPosition } from '@univerjs/base-ui';
 import { IUniverInstanceService } from '@univerjs/core';
 import { AddDigitsSingle, MoreDownSingle, ReduceDigitsSingle, RmbSingle } from '@univerjs/icons';
-import { IAccessor } from '@wendellhu/redi';
+import type { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 
 import { AddDecimalCommand } from '../commands/commands/add.decimal.command';
@@ -14,7 +15,6 @@ import { isCurrencyPanel } from '../components/currency';
 import { isDatePanel } from '../components/date';
 import { MoreNumfmtType } from '../components/more-numfmt-type/MoreNumfmtType';
 import { isThousandthPercentilePanel } from '../components/thousandth-percentile';
-import { INumfmtService } from '../service/type';
 
 export const CurrencyMenuItem = (componentManager: ComponentManager) => {
     const iconKey = 'icon-rmbSingle';

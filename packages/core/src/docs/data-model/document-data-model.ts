@@ -1,13 +1,14 @@
 import { MemoryCursor } from '../../common/memory-cursor';
-import { getDocsUpdateBody, Nullable } from '../../shared';
+import type { Nullable } from '../../shared';
+import { getDocsUpdateBody } from '../../shared';
 import { UpdateDocsAttributeType } from '../../shared/command-enum';
 import { Tools } from '../../shared/tools';
-import { IDocumentBody, IDocumentData, IDocumentRenderConfig } from '../../types/interfaces/i-document-data';
-import { IPaddingData } from '../../types/interfaces/i-style-data';
+import type { IDocumentBody, IDocumentData, IDocumentRenderConfig } from '../../types/interfaces/i-document-data';
+import { type IPaddingData } from '../../types/interfaces/i-style-data';
 import { updateAttributeByDelete } from './apply-utils/delete-apply';
 import { updateAttributeByInsert } from './apply-utils/insert-apply';
 import { updateAttribute } from './apply-utils/update-apply';
-import { DocMutationParams } from './mutation-types';
+import { type DocMutationParams } from './mutation-types';
 
 export const DEFAULT_DOC = {
     id: 'default_doc',
@@ -117,6 +118,7 @@ class DocumentDataModelSimple {
         if (!documentStyle.pageSize) {
             width = width ?? Infinity;
             height = height ?? Infinity;
+
             documentStyle.pageSize = {
                 width,
                 height,

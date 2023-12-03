@@ -1,5 +1,5 @@
-import { ICellData } from '../../types/interfaces/i-cell-data';
-import { ICommandInfo } from '../command/command.service';
+import type { ICellData } from '../../types/interfaces/i-cell-data';
+import type { ICommandInfo } from '../command/command.service';
 import type { ISheetLocation } from './utils/interceptor';
 import { createInterceptorKey } from './utils/interceptor';
 

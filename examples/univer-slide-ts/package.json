@@ -1,6 +1,5 @@
 {
     "name": "univer-slide-ts",
-    "version": "0.0.1",
     "description": "Univer vanilla ts demo project",
     "keywords": [],
     "author": "DreamNum <developer@univer.ai>",
@@ -17,7 +16,7 @@
         "@univerjs/base-render": "workspace:*",
         "@univerjs/base-slides": "workspace:*",
         "@univerjs/base-ui": "workspace:*",
-        "@univerjs/common-plugin-data": "workspace:*",
+        "univer-data": "workspace:*",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/ui-plugin-slides": "workspace:*"

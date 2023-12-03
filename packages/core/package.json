@@ -1,12 +1,12 @@
 {
     "name": "@univerjs/core",
-    "version": "0.0.1",
+    "version": "0.1.0-alpha.0",
     "description": "Univer core",
     "keywords": [],
     "author": "DreamNum <developer@univer.ai>",
     "main": "./lib/cjs/index.js",
     "module": "./lib/esm/index.js",
-    "types": "./lib/index.d.ts",
+    "types": "./lib/types/index.d.ts",
     "publishConfig": {
         "access": "public",
         "main": "./lib/cjs/index.js",
@@ -26,7 +26,8 @@
     },
     "exports": {
         ".": "./src/index.ts",
-        "./*": "./src/*"
+        "./*": "./src/*",
+        "./typedoc/*": "./typedoc/*.json"
     },
     "directories": {
         "lib": "lib"
@@ -39,7 +40,8 @@
         "test": "vitest run",
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
-        "esbuild": "node ./esbuild.config.mjs && tsc -p tsconfig.esbuild.json"
+        "esbuild": "node ./esbuild.config.mjs && tsc -p tsconfig.esbuild.json",
+        "typedoc": "typedoc"
     },
     "license": "MIT",
     "homepage": "https://github.com/dream-num/univer",
@@ -59,6 +61,7 @@
         "@vitest/coverage-istanbul": "^0.34.6",
         "esbuild": "^0.19.8",
         "ts-node": "^10.9.1",
+        "typedoc": "^0.25.4",
         "typescript": "^5.3.2",
         "vitest": "^0.34.6"
     }

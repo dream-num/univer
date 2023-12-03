@@ -10,5 +10,5 @@
         "emitDecoratorMetadata": true,
         "strictPropertyInitialization": false
     },
-    "include": ["src/**/*", "test/**/*"]
+    "include": ["src/**/*"]
 }

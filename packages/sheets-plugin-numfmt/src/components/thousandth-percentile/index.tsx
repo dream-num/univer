@@ -1,8 +1,8 @@
 import { InputNumber, SelectList } from '@univerjs/design';
 import type { FC } from 'react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
-import type { BusinessComponentProps } from '../../base/types';
+import type { IBusinessComponentProps } from '../../base/types';
 import {
     getDecimalFromPattern,
     isPatternEqualWithoutDecimal,
@@ -14,7 +14,7 @@ import { getNumberFormatOptions } from '../../utils/options';
 export const isThousandthPercentilePanel = (pattern: string) =>
     getNumberFormatOptions().some((item) => isPatternEqualWithoutDecimal(item.value, pattern));
 
-export const ThousandthPercentilePanel: FC<BusinessComponentProps> = (props) => {
+export const ThousandthPercentilePanel: FC<IBusinessComponentProps> = (props) => {
     const options = useMemo(getNumberFormatOptions, []);
     const [decimal, decimalSet] = useState(() => getDecimalFromPattern(props.defaultPattern || '', 0));
 
@@ -32,9 +32,7 @@ export const ThousandthPercentilePanel: FC<BusinessComponentProps> = (props) => 
         suffixSet(v);
     };
 
-    useEffect(() => {
-        props.onChange(pattern);
-    }, [pattern]);
+    props.action.current = () => pattern;
 
     return (
         <div>
@@ -52,7 +50,9 @@ export const ThousandthPercentilePanel: FC<BusinessComponentProps> = (props) => 
             <div className="m-t-8">
                 <SelectList onChange={handleClick} options={options} value={suffix} />
             </div>
-            <div className="describe m-t-14">货币格式用于表示一般货币数值。会计格式可以对一列数值进行小数点对齐。</div>
+            <div className="describe m-t-14">
+                数值格式用于一般数字的表示。货币和会计格式则提供货币值计算的专用格式。
+            </div>
         </div>
     );
 };

@@ -1,8 +1,8 @@
+import type { IMutationInfo } from '@univerjs/core';
 import {
     CommandType,
     DocumentType,
     ICommandService,
-    IMutationInfo,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
@@ -10,10 +10,8 @@ import {
 } from '@univerjs/core';
 import { takeUntil } from 'rxjs/operators';
 
-import {
-    IRemoteInstanceService,
-    IRemoteSyncMutationOptions,
-} from '../../services/remote-instance/remote-instance.service';
+import type { IRemoteSyncMutationOptions } from '../../services/remote-instance/remote-instance.service';
+import { IRemoteInstanceService } from '../../services/remote-instance/remote-instance.service';
 
 /**
  * This controller is responsible for syncing data from the primary thread to

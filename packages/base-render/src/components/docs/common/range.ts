@@ -1,21 +1,18 @@
-import { ITextRange, Nullable, Tools } from '@univerjs/core';
+import type { ITextRange, Nullable } from '@univerjs/core';
+import { Tools } from '@univerjs/core';
 
 import { COLORS } from '../../../basics/const';
-import { INodePosition } from '../../../basics/interfaces';
-import {
-    ITextRangeWithStyle,
-    ITextSelectionStyle,
-    NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
-    RANGE_DIRECTION,
-} from '../../../basics/range';
+import type { INodePosition } from '../../../basics/interfaces';
+import type { ITextRangeWithStyle, ITextSelectionStyle } from '../../../basics/range';
+import { NORMAL_TEXT_SELECTION_PLUGIN_STYLE, RANGE_DIRECTION } from '../../../basics/range';
 import { getColor } from '../../../basics/tools';
-import { IPoint } from '../../../basics/vector2';
-import { Scene } from '../../../scene';
+import type { IPoint } from '../../../basics/vector2';
+import type { Scene } from '../../../scene';
 import { Rect } from '../../../shape/rect';
 import { RegularPolygon } from '../../../shape/regular-polygon';
-import { ThinScene } from '../../../thin-scene';
-import { DocumentSkeleton } from '../doc-skeleton';
-import { IDocumentOffsetConfig } from '../document';
+import type { ThinScene } from '../../../thin-scene';
+import type { DocumentSkeleton } from '../doc-skeleton';
+import type { IDocumentOffsetConfig } from '../document';
 import {
     compareNodePosition,
     compareNodePositionLogic,

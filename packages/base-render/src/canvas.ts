@@ -82,6 +82,7 @@ export class Canvas {
         // this.setWidth(width || 0);
         // this.setHeight(height || 0);
         this._pixelRatio = pixelRatioParam || getDevicePixelRatio();
+
         if (width) {
             this._width = width;
             this._canvasEle.width = width * this._pixelRatio;

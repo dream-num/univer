@@ -1,3 +1,4 @@
+/* eslint-disable no-magic-numbers */
 import { IRenderManagerService } from '@univerjs/base-render';
 import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
@@ -39,11 +40,13 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
         if (editor == null) {
             return;
         }
+
         const renderSubscription = renderManagerService.currentRender$
             .pipe(
                 switchMap(() => {
                     const engine = renderManagerService.getRenderById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)?.engine;
                     engine?.setContainer(editor);
+
                     return cellEditorManagerService.state$;
                 })
             )
@@ -71,6 +74,13 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                         left: startX - 1.5,
                         top: startY - 1.5,
                     });
+
+                    // update editor's rect
+                    const editor = editorRef.current;
+                    if (!editor) return;
+
+                    const { left, top, width, height } = editor.getBoundingClientRect();
+                    cellEditorManagerService.setRect({ left, top, width, height });
                 }
             });
 

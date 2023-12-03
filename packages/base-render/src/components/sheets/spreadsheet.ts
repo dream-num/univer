@@ -1,32 +1,27 @@
-import {
-    CellValueType,
-    HorizontalAlign,
-    IRange,
-    Nullable,
-    ObjectMatrix,
-    sortRules,
-    WrapStrategy,
-} from '@univerjs/core';
+import type { IRange, Nullable } from '@univerjs/core';
+import { CellValueType, HorizontalAlign, ObjectMatrix, sortRules, WrapStrategy } from '@univerjs/core';
 
-import { BaseObject } from '../../base-object';
+import type { BaseObject } from '../../base-object';
 import { RENDER_CLASS_TYPE } from '../../basics/const';
 import { getTranslateInSpreadContextWithPixelRatio } from '../../basics/draw';
-import { ITransformChangeState } from '../../basics/interfaces';
+import type { ITransformChangeState } from '../../basics/interfaces';
 import { fixLineWidthByScale, getCellByIndex, getCellPositionByIndex, getScale } from '../../basics/tools';
-import { IBoundRect, Vector2 } from '../../basics/vector2';
+import type { IBoundRect } from '../../basics/vector2';
+import { Vector2 } from '../../basics/vector2';
 import { Canvas } from '../../canvas';
-import { Engine } from '../../engine';
-import { Scene } from '../../scene';
-import { SceneViewer } from '../../scene-viewer';
-import { Viewport } from '../../viewport';
+import type { Engine } from '../../engine';
+import type { Scene } from '../../scene';
+import type { SceneViewer } from '../../scene-viewer';
+import type { Viewport } from '../../viewport';
 import { Documents } from '../docs/document';
 import { SpreadsheetExtensionRegistry } from '../extension';
-import { Background } from './extensions/background';
-import { Border } from './extensions/border';
-import { BorderAuxiliary } from './extensions/border-auxiliary';
-import { Font } from './extensions/font';
+import type { Background } from './extensions/background';
+import type { Border } from './extensions/border';
+import type { BorderAuxiliary } from './extensions/border-auxiliary';
+import type { Font } from './extensions/font';
 import { SheetComponent } from './sheet-component';
-import { getDocsSkeletonPageSize, SpreadsheetSkeleton } from './sheet-skeleton';
+import type { SpreadsheetSkeleton } from './sheet-skeleton';
+import { getDocsSkeletonPageSize } from './sheet-skeleton';
 
 const OBJECT_KEY = '__SHEET_EXTENSION_FONT_DOCUMENT_INSTANCE__';
 
@@ -108,7 +103,7 @@ export class Spreadsheet extends SheetComponent {
         }
         const parentScale = this.getParentScale();
 
-        spreadsheetSkeleton.calculate(bounds);
+        spreadsheetSkeleton.calculateWithoutClearingCache(bounds);
 
         const segment = spreadsheetSkeleton.rowColumnSegment;
 

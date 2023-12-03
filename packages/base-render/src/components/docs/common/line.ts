@@ -1,6 +1,7 @@
-import { IDrawing, Nullable, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
+import type { IDrawing, Nullable } from '@univerjs/core';
+import { PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
 
-import {
+import type {
     IDocumentSkeletonDivide,
     IDocumentSkeletonDrawing,
     IDocumentSkeletonDrawingAnchor,

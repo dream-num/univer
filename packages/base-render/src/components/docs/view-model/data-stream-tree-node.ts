@@ -1,10 +1,10 @@
+import type { Nullable } from '@univerjs/core';
 import {
     DataStreamTreeNodeType,
     DataStreamTreeTokenType,
     deleteContent,
     horizontalLineSegmentsSubtraction,
     insertTextToContent,
-    Nullable,
 } from '@univerjs/core';
 
 export class DataStreamTreeNode {

@@ -1,29 +1,28 @@
-import { DataStreamTreeTokenType, Nullable, Observer, RxDisposable } from '@univerjs/core';
+import type { Nullable, Observer } from '@univerjs/core';
+import { DataStreamTreeTokenType, RxDisposable } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
-import { BehaviorSubject, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 import { CURSOR_TYPE } from '../../basics/const';
-import { IDocumentSkeletonSpan, PageLayoutType } from '../../basics/i-document-skeleton-cached';
-import { IMouseEvent, IPointerEvent } from '../../basics/i-events';
-import { INodeInfo, INodePosition } from '../../basics/interfaces';
+import type { IDocumentSkeletonSpan } from '../../basics/i-document-skeleton-cached';
+import { PageLayoutType } from '../../basics/i-document-skeleton-cached';
+import type { IMouseEvent, IPointerEvent } from '../../basics/i-events';
+import type { INodeInfo, INodePosition } from '../../basics/interfaces';
 import { getOffsetRectForDom, transformBoundingCoord } from '../../basics/position';
-import {
-    ITextRangeWithStyle,
-    ITextSelectionStyle,
-    NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
-    RANGE_DIRECTION,
-} from '../../basics/range';
+import type { ITextRangeWithStyle, ITextSelectionStyle, RANGE_DIRECTION } from '../../basics/range';
+import { NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '../../basics/range';
 import { getCurrentScrollXY } from '../../basics/scroll-xy';
 import { checkStyle, injectStyle } from '../../basics/tools';
 import { Transform } from '../../basics/transform';
 import { Vector2 } from '../../basics/vector2';
-import { Engine } from '../../engine';
-import { Scene } from '../../scene';
+import type { Engine } from '../../engine';
+import type { Scene } from '../../scene';
 import { ScrollTimer } from '../../scroll-timer';
-import { IScrollObserverParam, Viewport } from '../../viewport';
+import type { IScrollObserverParam, Viewport } from '../../viewport';
 import { cursorConvertToTextRange, TextRange } from './common/range';
-import { DocumentSkeleton } from './doc-skeleton';
-import { IDocumentOffsetConfig } from './document';
+import type { DocumentSkeleton } from './doc-skeleton';
+import type { IDocumentOffsetConfig } from './document';
 
 export function getCanvasOffsetByEngine(engine: Nullable<Engine>) {
     const canvas = engine?.getCanvasElement();
@@ -126,7 +125,12 @@ export interface ITextSelectionRenderManager {
 
     deactivate(): void;
 
-    changeRuntime(docSkeleton: DocumentSkeleton, scene: Scene): void;
+    changeRuntime(
+        docSkeleton: DocumentSkeleton,
+        scene: Scene,
+        viewport?: Nullable<Viewport>,
+        documentOffsetConfig?: IDocumentOffsetConfig
+    ): void;
 
     dispose(): void;
 
@@ -352,6 +356,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         this._scrollToSelection();
     }
 
+    // Sync canvas selection to dom selection.
     sync() {
         this._syncDomToSelection();
     }
@@ -391,6 +396,11 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         documentOffsetConfig?: IDocumentOffsetConfig
     ) {
         // this._docSkeleton?.onRecalculateChangeObservable.remove(this._skeletonObserver);
+
+        // Need to empty text ranges when change doc.
+        if (docSkeleton !== this._docSkeleton) {
+            this.removeAllTextRanges();
+        }
 
         this._docSkeleton = docSkeleton;
 
@@ -871,27 +881,27 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         // top *= scaleY;
 
         const { tl, tr, bl } = this._activeViewport.getBounding();
-        const constantOffsetWidth = (width * 2) / scaleX;
-        const constantOffsetHeight = (height * 2) / scaleY;
+        const constantOffsetWidth = width / scaleX;
+        const constantOffsetHeight = height / scaleY;
         let offsetY = 0;
         let offsetX = 0;
 
         const boundTop = tl.y;
         const boundBottom = bl.y;
 
-        if (top < boundTop + constantOffsetHeight) {
-            offsetY = top - boundTop - constantOffsetHeight * 2;
+        if (top < boundTop) {
+            offsetY = top - boundTop;
         } else if (top > boundBottom - constantOffsetHeight) {
-            offsetY = top - boundBottom + constantOffsetHeight * 2;
+            offsetY = top - boundBottom + constantOffsetHeight;
         }
 
         const boundLeft = tl.x;
         const boundRight = tr.x;
 
-        if (left < boundLeft + constantOffsetWidth) {
-            offsetX = left - boundLeft - constantOffsetWidth * 2;
+        if (left < boundLeft) {
+            offsetX = left - boundLeft;
         } else if (left > boundRight - constantOffsetWidth) {
-            offsetX = left - boundRight + constantOffsetWidth * 2;
+            offsetX = left - boundRight + constantOffsetWidth;
         }
 
         const config = this._activeViewport.getBarScroll(offsetX, offsetY);

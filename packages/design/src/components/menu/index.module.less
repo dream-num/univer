@@ -82,6 +82,7 @@
         position: relative;
 
         box-sizing: border-box;
+        min-height: 28px;
         margin: 0;
         padding: var(--padding-xs);
 
@@ -89,7 +90,6 @@
         list-style: none;
 
         border-radius: var(--border-radius-base);
-
         // Disabled state sets text to gray and nukes hover/tab effects
         &.menu-item-disabled,
         &.menu-submenu-disabled {
@@ -110,6 +110,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            height: 100%;
         }
     }
 
@@ -157,7 +158,7 @@
             box-sizing: border-box;
             width: 100%;
             min-height: 28px;
-            padding: var(--padding-xs) var(--padding-sm);
+            padding: var(--padding-xs);
         }
 
         .menu-submenu-arrow {

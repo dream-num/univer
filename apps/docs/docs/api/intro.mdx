@@ -1,0 +1,16 @@
+# API Intro
+
+hello
+
+import doc from '@univerjs/core/typedoc/docs';
+
+export const Home = () => {
+    console.log(doc)
+    return (
+        <pre>{JSON.stringify(doc, null, 2)}</pre>
+    )
+};
+
+<Home />
+
+world

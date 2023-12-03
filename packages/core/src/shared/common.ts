@@ -19,12 +19,14 @@ export function makeCellToSelection(cellInfo: Nullable<ISelectionCellWithCoord>)
     if (!cellInfo) {
         return;
     }
+
     const { actualRow, actualColumn, isMerged, isMergedMainCell, mergeInfo } = cellInfo;
     let { startY, endY, startX, endX } = cellInfo;
     let startRow = actualRow;
     let startColumn = actualColumn;
     let endRow = actualRow;
     let endColumn = actualColumn;
+
     if (isMerged && mergeInfo) {
         const {
             startRow: mergeStartRow,

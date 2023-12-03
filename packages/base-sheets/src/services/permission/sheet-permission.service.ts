@@ -35,14 +35,14 @@ export class SheetPermissionService extends Disposable {
         workbook.getSheets().forEach((worksheet) => {
             const subComponentId = worksheet.getSheetId();
             const sheetPermission = new SheetEditablePermission(unitId, subComponentId);
-            this._permissionService.addPermissionPoint(sheetPermission);
+            this._permissionService.addPermissionPoint(workbook.getUnitId(), sheetPermission);
         });
         this.disposeWithMe(
             toDisposable(
                 workbook.sheetCreated$.subscribe((worksheet) => {
                     const subComponentId = worksheet.getSheetId();
                     const sheetPermission = new SheetEditablePermission(unitId, subComponentId);
-                    this._permissionService.addPermissionPoint(sheetPermission);
+                    this._permissionService.addPermissionPoint(workbook.getUnitId(), sheetPermission);
                 })
             )
         );
@@ -51,7 +51,7 @@ export class SheetPermissionService extends Disposable {
                 workbook.sheetDisposed$.subscribe((worksheet) => {
                     const subComponentId = worksheet.getSheetId();
                     const sheetPermission = new SheetEditablePermission(unitId, subComponentId);
-                    this._permissionService.deletePermissionPoint(sheetPermission.id);
+                    this._permissionService.deletePermissionPoint(workbook.getUnitId(), sheetPermission.id);
                 })
             )
         );
@@ -86,13 +86,15 @@ export class SheetPermissionService extends Disposable {
         const sheet = workbook.getActiveSheet();
         const _sheetId = sheetId || sheet.getSheetId();
         const sheetPermission = new SheetEditablePermission(_workbookId, _sheetId);
-        return this._permissionService.composePermission$([UniverEditablePermissionPoint, sheetPermission.id]).pipe(
-            map(([univerEditable, sheetEditable]) => {
-                const editable = univerEditable.value && sheetEditable.value;
-                const status = getTypeFromPermissionItemList([univerEditable, sheetEditable]);
-                return { value: editable, status };
-            })
-        );
+        return this._permissionService
+            .composePermission$(_workbookId, [UniverEditablePermissionPoint, sheetPermission.id])
+            .pipe(
+                map(([univerEditable, sheetEditable]) => {
+                    const editable = univerEditable.value && sheetEditable.value;
+                    const status = getTypeFromPermissionItemList([univerEditable, sheetEditable]);
+                    return { value: editable, status };
+                })
+            );
     }
 
     getSheetEditable(workbookId?: string, sheetId?: string) {
@@ -102,7 +104,7 @@ export class SheetPermissionService extends Disposable {
         const _sheetId = sheetId || sheet.getSheetId();
         const sheetPermission = new SheetEditablePermission(_workbookId, _sheetId);
         return this._permissionService
-            .composePermission([UniverEditablePermissionPoint, sheetPermission.id])
+            .composePermission(_workbookId, [UniverEditablePermissionPoint, sheetPermission.id])
             .every((item) => item.value);
     }
 
@@ -112,6 +114,6 @@ export class SheetPermissionService extends Disposable {
         const sheet = workbook.getActiveSheet();
         const _sheetId = sheetId || sheet.getSheetId();
         const sheetPermission = new SheetEditablePermission(_workbookId, _sheetId);
-        this._permissionService.updatePermissionPoint(sheetPermission.id, v);
+        this._permissionService.updatePermissionPoint(_workbookId, sheetPermission.id, v);
     }
 }

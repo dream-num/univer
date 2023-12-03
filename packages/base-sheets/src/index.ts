@@ -1,7 +1,7 @@
 export * from './base-sheets-plugin';
 
 // #region services
-export { COMMAND_LISTENER_SKELETON_CHANGE } from './basics/const/command-listener-const';
+export { COMMAND_LISTENER_SKELETON_CHANGE, COMMAND_LISTENER_VALUE_CHANGE } from './basics/const/command-listener-const';
 export {
     type IAddWorksheetMergeMutationParams,
     type IDeleteRangeMutationParams,
@@ -76,6 +76,7 @@ export {
     MoveRowsCommand,
 } from './commands/commands/move-rows-cols.command';
 export { RemoveColCommand, RemoveRowCommand } from './commands/commands/remove-row-col.command';
+export type { IRemoveSheetCommandParams } from './commands/commands/remove-sheet.command';
 export { RemoveSheetCommand } from './commands/commands/remove-sheet.command';
 export { RemoveWorksheetMergeCommand } from './commands/commands/remove-worksheet-merge.command';
 export type {
@@ -97,8 +98,7 @@ export {
     SetSpecificColsVisibleCommand,
 } from './commands/commands/set-col-visible.command';
 export { SetFrozenCommand } from './commands/commands/set-frozen.command';
-export type { ISetRangeValuesCommandParams } from './commands/commands/set-range-values.command';
-export { SetRangeValuesCommand } from './commands/commands/set-range-values.command';
+export { type ISetRangeValuesCommandParams, SetRangeValuesCommand } from './commands/commands/set-range-values.command';
 export {
     type ISetSpecificRowsVisibleCommandParams,
     SetRowHiddenCommand,
@@ -106,7 +106,7 @@ export {
     SetSpecificRowsVisibleCommand,
 } from './commands/commands/set-row-visible.command';
 export {
-    type ISetStyleParams,
+    type ISetStyleCommandParams,
     ResetBackgroundColorCommand,
     ResetTextColorCommand,
     SetBackgroundColorCommand,
@@ -180,6 +180,8 @@ export {
     SetFrozenMutation,
     SetFrozenMutationFactory,
 } from './commands/mutations/set-frozen.mutation';
+export type { ISetNumfmtMutationParams } from './commands/mutations/set-numfmt-mutation';
+export { factorySetNumfmtUndoMutation, SetNumfmtMutation } from './commands/mutations/set-numfmt-mutation';
 export type { ISetRangeValuesMutationParams } from './commands/mutations/set-range-values.mutation';
 export { SetRangeValuesMutation } from './commands/mutations/set-range-values.mutation';
 export { SetRangeValuesUndoMutationFactory } from './commands/mutations/set-range-values.mutation';
@@ -213,6 +215,8 @@ export {
 } from './commands/mutations/set-worksheet-row-height.mutation';
 export { type ISetSelectionsOperationParams, SetSelectionsOperation } from './commands/operations/selection.operation';
 export { type ISheetCommandSharedParams } from './commands/utils/interface';
+export type { FormatType, INumfmtItem, INumfmtItemWithCache } from './services/numfmt/type';
+export { INumfmtService } from './services/numfmt/type';
 export { RefRangeService } from './services/ref-range/ref-range.service';
 export type { EffectRefRangeParams } from './services/ref-range/type';
 export { EffectRefRangId, OperatorType } from './services/ref-range/type';

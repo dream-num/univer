@@ -1,17 +1,15 @@
 import { IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/base-render';
+import type { ICommandInfo, IParagraph, Nullable } from '@univerjs/core';
 import {
     DataStreamTreeTokenType,
     Disposable,
-    ICommandInfo,
     ICommandService,
-    IParagraph,
     IUniverInstanceService,
     LifecycleStages,
-    Nullable,
     OnLifecycle,
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 
 import { getDocObject } from '../basics/component-tools';
 import { BreakLineCommand, InsertCommand } from '../commands/commands/core-editing.command';
@@ -70,12 +68,12 @@ export class LineBreakInputController extends Disposable {
                     return;
                 }
 
-                this._breakLineFunction();
+                this._handleBreakLine();
             })
         );
     }
 
-    private _breakLineFunction() {
+    private _handleBreakLine() {
         const skeleton = this._docSkeletonManagerService.getCurrent()?.skeleton;
 
         const activeRange = this._textSelectionRenderManager.getActiveRange();
@@ -84,8 +82,8 @@ export class LineBreakInputController extends Disposable {
             return;
         }
 
-        const docsModel = this._currentUniverService.getCurrentUniverDocInstance();
-        const unitId = docsModel.getUnitId();
+        const docDataModel = this._currentUniverService.getCurrentUniverDocInstance();
+        const unitId = docDataModel.getUnitId();
 
         const { startOffset, segmentId, style } = activeRange;
         // move selection

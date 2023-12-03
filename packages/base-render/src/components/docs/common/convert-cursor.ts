@@ -1,17 +1,17 @@
-import { IPosition, ITextRange, Nullable } from '@univerjs/core';
+import type { IPosition, ITextRange, Nullable } from '@univerjs/core';
 
-import {
+import type {
     IDocumentSkeletonColumn,
     IDocumentSkeletonDivide,
     IDocumentSkeletonLine,
     IDocumentSkeletonPage,
     IDocumentSkeletonSection,
-    SpanType,
 } from '../../../basics/i-document-skeleton-cached';
-import { INodePosition } from '../../../basics/interfaces';
-import { IPoint } from '../../../basics/vector2';
-import { DocumentSkeleton } from '../doc-skeleton';
-import { IDocumentOffsetConfig } from '../document';
+import { SpanType } from '../../../basics/i-document-skeleton-cached';
+import type { INodePosition } from '../../../basics/interfaces';
+import type { IPoint } from '../../../basics/vector2';
+import type { DocumentSkeleton } from '../doc-skeleton';
+import type { IDocumentOffsetConfig } from '../document';
 import { Liquid } from './liquid';
 
 export enum NodePositionStateType {

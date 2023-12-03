@@ -72,7 +72,6 @@ jobs:
                       🚧 🚧 🚧 🚧 🚧 🚧 🚧 🚧 🚧 🚧 🚧 🚧 🚧 🚧 🚧
                   edit-mode: replace
 
-
     build-demo:
         runs-on: ubuntu-latest
         needs: [setup]
@@ -198,7 +197,7 @@ jobs:
                   description: |
                       Ref: ${{ needs.setup.outputs.ref }}
 
-                      CI Pipeline: Success 🏆
+                      🏆 CI Pipeline: Success
                       **[View Deployment]**
                       - [Doc](${{ needs.build-demo.outputs.preview-url }}/doc/)
                       - [Sheet](${{ needs.build-demo.outputs.preview-url }}/sheet/)
@@ -208,9 +207,10 @@ jobs:
                       - [Storybook](${{ needs.build-storybook.outputs.preview-url }}/)
                   nofail: false
                   nodetail: false
+                  nocontext: false
+                  noprefix: true
                   color: 0x00b894
                   username: GitHub Actions
-                  nocontext: false
 
             - name: 👾 Discord Notification
               uses: sarisia/actions-status-discord@v1
@@ -221,14 +221,15 @@ jobs:
                   description: |
                       Ref: ${{ needs.setup.outputs.ref }}
 
-                      CI Pipeline: Unsuccessful 📛
+                      📛 CI Pipeline: Unsuccessful
                       **[PR ID]**
                       #${{ needs.setup.outputs.id }}
                   nofail: false
                   nodetail: false
+                  nocontext: false
+                  noprefix: true
                   color: 0xd63031
                   username: GitHub Actions
-                  nocontext: false
 
             # ================= Create Comment =================
             - name: 🧽 Find And Delete Comment

@@ -64,15 +64,15 @@ export class EditorBridgeController extends Disposable {
                 return;
             }
 
-            const currentSkeletonManager = this._sheetSkeletonManagerService.getCurrent();
+            const currentSkeleton = this._sheetSkeletonManagerService.getCurrent();
 
             const sheetObject = this._getSheetObject();
 
-            if (currentSkeletonManager == null || sheetObject == null) {
+            if (currentSkeleton == null || sheetObject == null) {
                 return;
             }
 
-            const { skeleton, unitId, sheetId } = currentSkeletonManager;
+            const { skeleton, unitId, sheetId } = currentSkeleton;
 
             const { scene, engine } = sheetObject;
 
@@ -105,6 +105,7 @@ export class EditorBridgeController extends Disposable {
             let { startX, startY, endX, endY } = actualRangeWithCoord;
 
             const { scaleX, scaleY } = scene.getAncestorScale();
+
             const scrollXY = scene.getScrollXY(this._selectionRenderService.getViewPort());
 
             startX = skeleton.convertTransformToOffsetX(startX, scaleX, scrollXY);
@@ -114,8 +115,11 @@ export class EditorBridgeController extends Disposable {
             endX = skeleton.convertTransformToOffsetX(endX, scaleX, scrollXY);
 
             endY = skeleton.convertTransformToOffsetY(endY, scaleY, scrollXY);
+
             const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+
             const worksheet = workbook.getActiveSheet();
+
             const location = {
                 workbook,
                 worksheet,
@@ -124,6 +128,7 @@ export class EditorBridgeController extends Disposable {
                 row: startRow,
                 col: startColumn,
             };
+
             const cell = this._sheetInterceptorService.fetchThroughInterceptors(INTERCEPTOR_POINT.BEFORE_CELL_EDIT)(
                 worksheet.getCell(startRow, startColumn),
                 location

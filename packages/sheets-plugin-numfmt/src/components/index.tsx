@@ -7,22 +7,29 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { FC } from 'react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-import type { BusinessComponentProps } from '../base/types';
+import type { IBusinessComponentProps } from '../base/types';
+import { UserHabitCurrencyContext } from '../context/user-habit';
+import { useCurrencyOptions } from '../hooks/useCurrencyOptions';
+import { useNextTick } from '../hooks/useNextTick';
+import { getCurrencyType } from '../utils/currency';
 import { AccountingPanel, isAccountingPanel } from './accounting';
 import { CurrencyPanel, isCurrencyPanel } from './currency';
 import { DatePanel, isDatePanel } from './date';
 import { GeneralPanel, isGeneralPanel } from './general';
 import { isThousandthPercentilePanel, ThousandthPercentilePanel } from './thousandth-percentile';
 
-export interface SheetNumfmtPanelProps {
-    value: { defaultValue: number; defaultPattern: string };
+export interface ISheetNumfmtPanelProps {
+    value: { defaultValue: number; defaultPattern: string; row: number; col: number };
     onChange: (config: { type: 'change' | 'cancel' | 'confirm'; value: string }) => void;
 }
-export const SheetNumfmtPanel: FC<SheetNumfmtPanelProps> = (props) => {
-    const { defaultValue, defaultPattern } = props.value;
+export const SheetNumfmtPanel: FC<ISheetNumfmtPanelProps> = (props) => {
+    const { defaultValue, defaultPattern, row, col } = props.value;
     const localeService = useDependency(LocaleService);
+    const getCurrentPattern = useRef<() => string | null>(() => '');
     const t = localeService.t;
-    const options = useMemo(
+    const nextTick = useNextTick();
+    const pattern = useRef('');
+    const typeOptions = useMemo(
         () =>
             [
                 { label: 'sheet.numfmt.general', component: GeneralPanel },
@@ -33,44 +40,58 @@ export const SheetNumfmtPanel: FC<SheetNumfmtPanelProps> = (props) => {
             ].map((item) => ({ ...item, label: t(item.label) })),
         []
     );
-    const findDefaultType = () => {
+    const [type, typeSet] = useState(findDefaultType);
+    const [key, keySet] = useState(() => `${row}_${col}`);
+    const { mark, userHabitCurrency } = useCurrencyOptions(() => keySet(`${row}_${col}_userCurrency'`));
+
+    const BusinessComponent = useMemo(() => typeOptions.find((item) => item.label === type)?.component, [type]);
+
+    function findDefaultType() {
         const list = [isGeneralPanel, isAccountingPanel, isCurrencyPanel, isDatePanel, isThousandthPercentilePanel];
         return (
-            list.reduce((pre, curFn, index) => pre || (curFn(defaultPattern) ? options[index].label : ''), '') ||
-            options[0].label
+            list.reduce((pre, curFn, index) => pre || (curFn(defaultPattern) ? typeOptions[index].label : ''), '') ||
+            typeOptions[0].label
         );
-    };
-    const [type, typeSet] = useState(findDefaultType);
-    const pattern = useRef('');
-    const BusinessComponent = useMemo(() => options.find((item) => item.label === type)?.component, [type]);
+    }
 
-    const selectOptions: ISelectProps['options'] = options.map((option) => ({
+    const selectOptions: ISelectProps['options'] = typeOptions.map((option) => ({
         label: option.label,
         value: option.label,
     }));
+
     const handleSelect: ISelectProps['onChange'] = (value) => {
         typeSet(value);
+        // after the BusinessComponent render.
+        nextTick(() => props.onChange({ type: 'change', value: getCurrentPattern.current() || '' }));
     };
+
     const handleChange = (v: string) => {
         pattern.current = v;
         props.onChange({ type: 'change', value: v });
     };
+
     const handleConfirm = () => {
+        const currency = getCurrencyType(pattern.current);
+        if (currency) {
+            mark(currency);
+        }
         props.onChange({ type: 'confirm', value: pattern.current });
     };
     const handleCancel = () => {
         props.onChange({ type: 'cancel', value: pattern.current });
     };
 
-    const subProps: BusinessComponentProps = {
+    const subProps: IBusinessComponentProps = {
         onChange: handleChange,
         defaultValue,
         defaultPattern,
+        action: getCurrentPattern,
     };
 
     useEffect(() => {
         typeSet(findDefaultType());
-    }, [defaultPattern, defaultValue]);
+        keySet(`${row}_${col}`);
+    }, [row, col]);
 
     return (
         <div className="numfmt-panel p-b-20">
@@ -79,7 +100,13 @@ export const SheetNumfmtPanel: FC<SheetNumfmtPanelProps> = (props) => {
                 <div className="m-t-8">
                     <Select onChange={handleSelect} options={selectOptions} value={type} />
                 </div>
-                <div>{BusinessComponent && <BusinessComponent {...subProps} />}</div>
+                <div>
+                    {BusinessComponent && (
+                        <UserHabitCurrencyContext.Provider value={userHabitCurrency}>
+                            <BusinessComponent {...subProps} key={key} />
+                        </UserHabitCurrencyContext.Provider>
+                    )}
+                </div>
             </div>
 
             <div className="btn-list m-t-14 m-b-20">

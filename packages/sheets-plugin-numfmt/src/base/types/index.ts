@@ -1,23 +1,8 @@
-export type BusinessComponentProps = {
+import type { MutableRefObject } from 'react';
+
+export interface IBusinessComponentProps {
     onChange: (result: string) => void;
     defaultValue: number;
     defaultPattern: string;
-};
-export type NumfmtItem = {
-    pattern: string;
-};
-
-export type FormatType =
-    | 'currency'
-    | 'date'
-    | 'datetime'
-    | 'error'
-    | 'fraction'
-    | 'general'
-    | 'grouped'
-    | 'number'
-    | 'percent'
-    | 'scientific'
-    | 'text'
-    | 'time'
-    | 'unknown';
+    action: MutableRefObject<() => string | null>;
+}

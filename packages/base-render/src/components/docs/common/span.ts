@@ -1,13 +1,13 @@
 import { BooleanNumber, BulletAlignment, DataStreamTreeTokenType as DT, GridType } from '@univerjs/core';
 
 import { FontCache } from '../../../basics/font-cache';
-import {
+import type {
     IDocumentSkeletonBullet,
     IDocumentSkeletonDivide,
     IDocumentSkeletonSpan,
-    SpanType,
 } from '../../../basics/i-document-skeleton-cached';
-import { IFontCreateConfig } from '../../../basics/interfaces';
+import { SpanType } from '../../../basics/i-document-skeleton-cached';
+import type { IFontCreateConfig } from '../../../basics/interfaces';
 import { hasCJK } from '../../../basics/tools';
 import { validationGrid } from './tools';
 

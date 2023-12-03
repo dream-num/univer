@@ -11,7 +11,7 @@ permissions:
     pull-requests: write
 
 jobs:
-    build:
+    test:
         runs-on: ubuntu-latest
 
         strategy:

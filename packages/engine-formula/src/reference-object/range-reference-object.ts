@@ -1,4 +1,4 @@
-import { IRange } from '@univerjs/core';
+import type { IRange } from '@univerjs/core';
 
 import { BaseReferenceObject } from './base-reference-object';
 

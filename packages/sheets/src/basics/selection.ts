@@ -1,14 +1,14 @@
 import { TinyColor } from '@ctrl/tinycolor';
-import { getCellInfoInMergeData } from '@univerjs/engine-render';
-import {
+import type {
     IRange,
     ISelection,
     ISelectionCellWithCoord,
     ISelectionWithCoord,
-    makeCellRangeToRangeData,
     Nullable,
     ThemeService,
 } from '@univerjs/core';
+import { makeCellRangeToRangeData } from '@univerjs/core';
+import { getCellInfoInMergeData } from '@univerjs/engine-render';
 
 export const SELECTION_CONTROL_BORDER_BUFFER_WIDTH = 2; // The draggable range of the selection is too thin, making it easy for users to miss. Therefore, a buffer gap is provided to make it easier for users to select.
 

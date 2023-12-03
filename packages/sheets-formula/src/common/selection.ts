@@ -1,6 +1,6 @@
 import { TinyColor } from '@ctrl/tinycolor';
-import { ISelectionStyle } from '@univerjs/sheets';
-import { ThemeService } from '@univerjs/core';
+import type { ThemeService } from '@univerjs/core';
+import type { ISelectionStyle } from '@univerjs/sheets';
 
 export const FORMULA_REF_SELECTION_PLUGIN_NAME = 'formula_reference_selection_plugin_name';
 

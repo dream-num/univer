@@ -1,9 +1,10 @@
 // import { IShapeProps, Shape, IObjectFullState, Group, Scene } from '.';
 
-import { IKeyValue } from '@univerjs/core';
+import type { IKeyValue } from '@univerjs/core';
 
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '../basics/interfaces';
-import { IShapeProps, Shape } from './shape';
+import type { IShapeProps } from './shape';
+import { Shape } from './shape';
 
 export interface ICircleProps extends IShapeProps {
     radius: number;

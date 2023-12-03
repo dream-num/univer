@@ -1,10 +1,11 @@
 import { LexerNode } from '../analysis/lexer-node';
 import { ErrorType } from '../basics/error-type';
 import { FUNCTION_NAMES } from '../basics/function';
-import { compareToken, OPERATOR_TOKEN_COMPARE_SET, OPERATOR_TOKEN_SET, operatorToken } from '../basics/token';
-import { BaseFunction } from '../functions/base-function';
-import { Compare } from '../functions/meta/compare';
-import { FunctionVariantType } from '../reference-object/base-reference-object';
+import type { compareToken } from '../basics/token';
+import { OPERATOR_TOKEN_COMPARE_SET, OPERATOR_TOKEN_SET, operatorToken } from '../basics/token';
+import type { BaseFunction } from '../functions/base-function';
+import type { Compare } from '../functions/meta/compare';
+import type { FunctionVariantType } from '../reference-object/base-reference-object';
 import { IFunctionService } from '../services/function.service';
 import { BaseAstNode, ErrorNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';

@@ -190,13 +190,13 @@ importers:
         specifier: ^5.3.2
         version: 5.3.2
 
-  examples/univer-data:
+  examples/data:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../../packages/core
 
-  examples/univer-doc-ts:
+  examples/docs:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -216,9 +216,9 @@ importers:
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../../packages/ui
-      univer-data:
+      data:
         specifier: workspace:*
-        version: link:../univer-data
+        version: link:../data
     devDependencies:
       esbuild:
         specifier: ^0.19.8
@@ -245,7 +245,7 @@ importers:
         specifier: ^5.3.2
         version: 5.3.2
 
-  examples/univer-sheet-ts:
+  examples/sheets:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -292,12 +292,12 @@ importers:
       '@wendellhu/redi':
         specifier: ^0.12.11
         version: 0.12.11
+      data:
+        specifier: workspace:*
+        version: link:../data
       monaco-editor:
         specifier: 0.44.0
         version: 0.44.0
-      univer-data:
-        specifier: workspace:*
-        version: link:../univer-data
     devDependencies:
       esbuild:
         specifier: ^0.19.8
@@ -324,7 +324,7 @@ importers:
         specifier: ^5.3.2
         version: 5.3.2
 
-  examples/univer-slide-ts:
+  examples/slides:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -344,9 +344,9 @@ importers:
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../../packages/ui
-      univer-data:
+      data:
         specifier: workspace:*
-        version: link:../univer-data
+        version: link:../data
     devDependencies:
       esbuild:
         specifier: ^0.19.8

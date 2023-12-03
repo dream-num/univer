@@ -1,5 +1,5 @@
-import { IFunctionInfo } from '@univerjs/engine-formula';
-import { LocaleService } from '@univerjs/core';
+import type { LocaleService } from '@univerjs/core';
+import type { IFunctionInfo } from '@univerjs/engine-formula';
 
 export function getFunctionTypeValues(
     enumObj: any,

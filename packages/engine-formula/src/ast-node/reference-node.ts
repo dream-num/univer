@@ -1,4 +1,5 @@
-import { IAccessor, Inject, Injector } from '@wendellhu/redi';
+import type { IAccessor } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 
 import { LexerTreeBuilder } from '../analysis/lexer';
 import { LexerNode } from '../analysis/lexer-node';
@@ -9,7 +10,7 @@ import {
     REFERENCE_REGEX_SINGLE_ROW,
     REFERENCE_SINGLE_RANGE_REGEX,
 } from '../basics/regex';
-import { BaseReferenceObject } from '../reference-object/base-reference-object';
+import type { BaseReferenceObject } from '../reference-object/base-reference-object';
 import { CellReferenceObject } from '../reference-object/cell-reference-object';
 import { ColumnReferenceObject } from '../reference-object/column-reference-object';
 import { RowReferenceObject } from '../reference-object/row-reference-object';

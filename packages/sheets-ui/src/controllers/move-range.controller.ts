@@ -1,10 +1,4 @@
 import {
-    IMoveRangeCommandParams,
-    MoveRangeCommand,
-    NORMAL_SELECTION_PLUGIN_NAME,
-    SelectionManagerService,
-} from '@univerjs/sheets';
-import {
     Disposable,
     DisposableCollection,
     ICommandService,
@@ -12,6 +6,8 @@ import {
     OnLifecycle,
     toDisposable,
 } from '@univerjs/core';
+import type { IMoveRangeCommandParams } from '@univerjs/sheets';
+import { MoveRangeCommand, NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
 import { ISelectionRenderService } from '../services/selection/selection-render.service';

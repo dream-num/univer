@@ -1,34 +1,25 @@
-import { getCellInfoInMergeData } from '@univerjs/engine-render';
-import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '@univerjs/sheets';
+import type { ICellData, IMutationInfo, IRange, Nullable } from '@univerjs/core';
 import {
     Direction,
     Disposable,
     DisposableCollection,
-    ICellData,
     ICommandService,
-    IMutationInfo,
-    IRange,
     IUniverInstanceService,
     LifecycleStages,
-    Nullable,
     OnLifecycle,
     toDisposable,
     Tools,
 } from '@univerjs/core';
+import { getCellInfoInMergeData } from '@univerjs/engine-render';
+import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
 import { AutoClearContentCommand, AutoFillCommand } from '../commands/commands/auto-fill.command';
 import { IAutoFillService } from '../services/auto-fill/auto-fill.service';
 import { otherRule } from '../services/auto-fill/rules';
 import { fillCopy, fillCopyStyles, getDataIndex, getLenS } from '../services/auto-fill/tools';
-import {
-    APPLY_FUNCTIONS,
-    APPLY_TYPE,
-    DATA_TYPE,
-    ICopyDataInType,
-    ICopyDataPiece,
-    IRuleConfirmedData,
-} from '../services/auto-fill/type';
+import type { APPLY_FUNCTIONS, ICopyDataInType, ICopyDataPiece, IRuleConfirmedData } from '../services/auto-fill/type';
+import { APPLY_TYPE, DATA_TYPE } from '../services/auto-fill/type';
 import { ISelectionRenderService } from '../services/selection/selection-render.service';
 
 @OnLifecycle(LifecycleStages.Steady, AutoFillController)

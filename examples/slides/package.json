@@ -1,12 +1,8 @@
 {
-    "name": "univer-slide-ts",
+    "name": "slides",
     "description": "Univer vanilla ts demo project",
-    "keywords": [],
     "author": "DreamNum <developer@univer.ai>",
     "license": "MIT",
-    "directories": {
-        "lib": "lib"
-    },
     "private": true,
     "scripts": {
         "esbuild:demo": "node ./esbuild.config.mjs",
@@ -16,10 +12,10 @@
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/slides": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "univer-data": "workspace:*",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
-        "@univerjs/slides-ui": "workspace:*"
+        "@univerjs/slides-ui": "workspace:*",
+        "data": "workspace:*"
     },
     "devDependencies": {
         "esbuild": "^0.19.8",

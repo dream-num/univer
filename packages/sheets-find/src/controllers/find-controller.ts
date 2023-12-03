@@ -1,6 +1,7 @@
-import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Disposable, ICommandService } from '@univerjs/core';
-import { IDisposable, Inject, Injector } from '@wendellhu/redi';
+import { ComponentManager, IMenuService } from '@univerjs/ui';
+import type { IDisposable } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 
 import { HideModalOperation, ShowModalOperation } from '../commands/operations/show-modal.operation';
 import { FindModalController } from './find-modal-controller';

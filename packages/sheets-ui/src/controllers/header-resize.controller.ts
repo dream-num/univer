@@ -1,20 +1,9 @@
-import { CURSOR_TYPE, IMouseEvent, IPointerEvent, IRenderManagerService, Rect, Vector2 } from '@univerjs/engine-render';
-import {
-    DeltaColumnWidthCommand,
-    DeltaRowHeightCommand,
-    IDeltaColumnWidthCommandParams,
-    IDeltaRowHeightCommand,
-    SetWorksheetRowIsAutoHeightCommand,
-} from '@univerjs/sheets';
-import {
-    Disposable,
-    ICommandService,
-    IUniverInstanceService,
-    LifecycleStages,
-    Nullable,
-    Observer,
-    OnLifecycle,
-} from '@univerjs/core';
+import type { Nullable, Observer } from '@univerjs/core';
+import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import type { IMouseEvent, IPointerEvent } from '@univerjs/engine-render';
+import { CURSOR_TYPE, IRenderManagerService, Rect, Vector2 } from '@univerjs/engine-render';
+import type { IDeltaColumnWidthCommandParams, IDeltaRowHeightCommand } from '@univerjs/sheets';
+import { DeltaColumnWidthCommand, DeltaRowHeightCommand, SetWorksheetRowIsAutoHeightCommand } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX, VIEWPORT_KEY } from '../common/keys';

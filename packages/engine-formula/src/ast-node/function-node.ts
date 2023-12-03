@@ -1,13 +1,13 @@
-import { Nullable } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { LexerNode } from '../analysis/lexer-node';
+import type { LexerNode } from '../analysis/lexer-node';
 import { AstNodePromiseType } from '../basics/common';
 import { ErrorType } from '../basics/error-type';
 import { FUNCTION_NAMES } from '../basics/function';
 import { prefixToken } from '../basics/token';
-import { BaseFunction } from '../functions/base-function';
-import { AsyncObject, FunctionVariantType } from '../reference-object/base-reference-object';
+import type { BaseFunction } from '../functions/base-function';
+import type { AsyncObject, FunctionVariantType } from '../reference-object/base-reference-object';
 import { IFunctionService } from '../services/function.service';
 import { BaseAstNode, ErrorNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';

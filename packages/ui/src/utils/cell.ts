@@ -1,6 +1,4 @@
-import { ptToPx, pxToPt } from '@univerjs/engine-render';
-import {
-    getBorderStyleType,
+import type {
     IBorderData,
     ICellData,
     IDocumentData,
@@ -9,8 +7,9 @@ import {
     IStyleData,
     ITextDecoration,
     ITextRun,
-    Tools,
 } from '@univerjs/core';
+import { getBorderStyleType, Tools } from '@univerjs/core';
+import { ptToPx, pxToPt } from '@univerjs/engine-render';
 
 import { textTrim } from './util';
 

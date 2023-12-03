@@ -1,5 +1,6 @@
-import { IShortcutItem, KeyCode, MetaKeys } from '@univerjs/ui';
 import { Direction, FOCUSING_DOC, FOCUSING_EDITOR } from '@univerjs/core';
+import type { IShortcutItem } from '@univerjs/ui';
+import { KeyCode, MetaKeys } from '@univerjs/ui';
 
 import { MoveCursorOperation, MoveSelectionOperation } from '../commands/operations/cursor.operation';
 import { SelectAllOperation } from '../commands/operations/select-all.operation';

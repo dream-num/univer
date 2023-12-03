@@ -1,26 +1,18 @@
+import type { Workbook, Worksheet } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import type { IRender, IWheelEvent, Scene } from '@univerjs/engine-render';
 import {
-    IRender,
     IRenderManagerService,
-    IWheelEvent,
     Layer,
     PointerInput,
     Rect,
     RENDER_CLASS_TYPE,
-    Scene,
     ScrollBar,
     Spreadsheet,
     SpreadsheetColumnHeader,
     SpreadsheetRowHeader,
     Viewport,
 } from '@univerjs/engine-render';
-import {
-    ICommandService,
-    IUniverInstanceService,
-    LifecycleStages,
-    OnLifecycle,
-    Workbook,
-    Worksheet,
-} from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { SetScrollRelativeCommand } from '../commands/commands/set-scroll.command';

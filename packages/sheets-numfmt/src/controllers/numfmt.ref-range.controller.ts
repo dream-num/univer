@@ -1,3 +1,13 @@
+import type { IMutationInfo } from '@univerjs/core';
+import {
+    Disposable,
+    DisposableCollection,
+    ICommandService,
+    IUniverInstanceService,
+    LifecycleStages,
+    OnLifecycle,
+    toDisposable,
+} from '@univerjs/core';
 import type { EffectRefRangeParams, ISetNumfmtMutationParams } from '@univerjs/sheets';
 import {
     EffectRefRangId,
@@ -16,16 +26,6 @@ import {
     runRefRangeMutations,
     SetNumfmtMutation,
 } from '@univerjs/sheets';
-import type { IMutationInfo } from '@univerjs/core';
-import {
-    Disposable,
-    DisposableCollection,
-    ICommandService,
-    IUniverInstanceService,
-    LifecycleStages,
-    OnLifecycle,
-    toDisposable,
-} from '@univerjs/core';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';

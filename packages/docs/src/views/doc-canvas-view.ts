@@ -1,6 +1,4 @@
 /* eslint-disable no-magic-numbers */
-import type { IRender, IWheelEvent, RenderManagerService, Scene } from '@univerjs/engine-render';
-import { Documents, EVENT_TYPE, IRenderManagerService, Layer, ScrollBar, Viewport } from '@univerjs/engine-render';
 import type { DocumentDataModel, EventState, Nullable } from '@univerjs/core';
 import {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
@@ -9,6 +7,8 @@ import {
     LifecycleStages,
     OnLifecycle,
 } from '@univerjs/core';
+import type { IRender, IWheelEvent, RenderManagerService, Scene } from '@univerjs/engine-render';
+import { Documents, EVENT_TYPE, IRenderManagerService, Layer, ScrollBar, Viewport } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 
 import {

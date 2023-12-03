@@ -1,10 +1,13 @@
-import { Disposable, Nullable, sortRules } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
+import { Disposable, sortRules } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { AstRootNode, AstRootNodeFactory } from '../ast-node/ast-root-node';
-import { BaseAstNode, ErrorNode } from '../ast-node/base-ast-node';
+import type { BaseAstNode } from '../ast-node/base-ast-node';
+import { ErrorNode } from '../ast-node/base-ast-node';
 import { FunctionNodeFactory } from '../ast-node/function-node';
-import { LambdaNode, LambdaNodeFactory } from '../ast-node/lambda-node';
+import type { LambdaNode } from '../ast-node/lambda-node';
+import { LambdaNodeFactory } from '../ast-node/lambda-node';
 import { LambdaParameterNodeFactory } from '../ast-node/lambda-parameter-node';
 import { NodeType } from '../ast-node/node-type';
 import { NullNode } from '../ast-node/null-node';

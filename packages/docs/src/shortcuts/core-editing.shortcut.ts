@@ -1,5 +1,6 @@
-import { IShortcutItem, KeyCode } from '@univerjs/ui';
 import { FOCUSING_DOC } from '@univerjs/core';
+import type { IShortcutItem } from '@univerjs/ui';
+import { KeyCode } from '@univerjs/ui';
 
 import { BreakLineCommand, DeleteLeftCommand, DeleteRightCommand } from '../commands/commands/core-editing.command';
 

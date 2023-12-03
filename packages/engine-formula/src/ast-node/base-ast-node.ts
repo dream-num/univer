@@ -1,9 +1,10 @@
-import { Disposable, Nullable } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
+import { Disposable } from '@univerjs/core';
 
 import { AstNodePromiseType } from '../basics/common';
-import { ErrorType } from '../basics/error-type';
+import type { ErrorType } from '../basics/error-type';
 import { ErrorValueObject } from '../other-object/error-value-object';
-import { FunctionVariantType } from '../reference-object/base-reference-object';
+import type { FunctionVariantType } from '../reference-object/base-reference-object';
 import { NodeType } from './node-type';
 
 interface IAstNodeNodeJson {

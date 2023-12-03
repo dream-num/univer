@@ -1,7 +1,7 @@
-import { Nullable } from '../../shared/types';
+import type { Nullable } from '../../shared/types';
 import { CellValueType } from '../enum/text-style';
-import { IDocumentData } from './i-document-data';
-import { IStyleData } from './i-style-data';
+import type { IDocumentData } from './i-document-data';
+import type { IStyleData } from './i-style-data';
 
 /**
  * Cell value type

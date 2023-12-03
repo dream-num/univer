@@ -1,7 +1,7 @@
-import type { Documents, IMouseEvent, IPointerEvent } from '@univerjs/engine-render';
-import { CURSOR_TYPE, IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/engine-render';
 import type { ICommandInfo, Nullable, Observer } from '@univerjs/core';
 import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import type { Documents, IMouseEvent, IPointerEvent } from '@univerjs/engine-render';
+import { CURSOR_TYPE, IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 
 import { getDocObjectById } from '../basics/component-tools';

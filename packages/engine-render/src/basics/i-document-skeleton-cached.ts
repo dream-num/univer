@@ -1,4 +1,4 @@
-import {
+import type {
     BulletAlignment,
     ColumnSeparatorType,
     DataStreamTreeTokenType,

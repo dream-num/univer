@@ -1,5 +1,5 @@
-import { ArrayFormulaDataType, IFormulaData, IFormulaDataItem } from '@univerjs/engine-formula';
 import { Disposable, isFormulaId, isFormulaString, IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
+import type { ArrayFormulaDataType, IFormulaData, IFormulaDataItem } from '@univerjs/engine-formula';
 
 export interface IFormulaConfig {
     notExecuteFormula?: boolean;

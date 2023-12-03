@@ -1,6 +1,8 @@
+import type { Nullable, Workbook, Worksheet } from '@univerjs/core';
+import { IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { SpreadsheetSkeleton } from '@univerjs/engine-render';
-import { IUniverInstanceService, LocaleService, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import { IDisposable, Inject } from '@wendellhu/redi';
+import type { IDisposable } from '@wendellhu/redi';
+import { Inject } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 
 export interface ISheetSkeletonManagerParam {

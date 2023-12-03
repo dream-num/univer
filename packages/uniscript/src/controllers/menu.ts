@@ -1,4 +1,5 @@
-import { IMenuButtonItem, MenuItemType, MenuPosition } from '@univerjs/ui';
+import type { IMenuButtonItem } from '@univerjs/ui';
+import { MenuItemType, MenuPosition } from '@univerjs/ui';
 
 import { ToggleScriptPanelOperation } from '../commands/operations/panel.operation';
 

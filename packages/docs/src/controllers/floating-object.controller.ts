@@ -1,20 +1,21 @@
-import { Documents, DocumentSkeleton, IRender, IRenderManagerService, Liquid } from '@univerjs/engine-render';
+import type { ICommandInfo, IFloatingObjectManagerParam } from '@univerjs/core';
 import {
     DEFAULT_DOCUMENT_SUB_COMPONENT_ID,
     Disposable,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-    ICommandInfo,
     ICommandService,
-    IFloatingObjectManagerParam,
     IFloatingObjectManagerService,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
 } from '@univerjs/core';
+import type { Documents, DocumentSkeleton, IRender } from '@univerjs/engine-render';
+import { IRenderManagerService, Liquid } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 
-import { IRichTextEditingMutationParams, RichTextEditingMutation } from '../commands/mutations/core-editing.mutation';
+import type { IRichTextEditingMutationParams } from '../commands/mutations/core-editing.mutation';
+import { RichTextEditingMutation } from '../commands/mutations/core-editing.mutation';
 import { SetDocZoomRatioOperation } from '../commands/operations/set-doc-zoom-ratio.operation';
 import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
 

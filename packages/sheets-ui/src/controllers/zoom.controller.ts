@@ -1,14 +1,15 @@
-import { IRenderManagerService, IWheelEvent } from '@univerjs/engine-render';
-import { SelectionManagerService } from '@univerjs/sheets';
+import type { ICommandInfo } from '@univerjs/core';
 import {
     Disposable,
-    ICommandInfo,
     ICommandService,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
     toDisposable,
 } from '@univerjs/core';
+import type { IWheelEvent } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { SelectionManagerService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
 import { SetZoomRatioCommand } from '../commands/commands/set-zoom-ratio.command';

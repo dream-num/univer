@@ -1,9 +1,9 @@
-import { ITextRangeWithStyle } from '@univerjs/engine-render';
-import { Nullable } from '@univerjs/core';
-import { IDisposable } from '@wendellhu/redi';
+import type { Nullable } from '@univerjs/core';
+import type { ITextRangeWithStyle } from '@univerjs/engine-render';
+import type { IDisposable } from '@wendellhu/redi';
 
 import { getRetainAndDeleteFromReplace } from '../basics/retain-delete-params';
-import { IRichTextEditingMutationParams } from '../commands/mutations/core-editing.mutation';
+import type { IRichTextEditingMutationParams } from '../commands/mutations/core-editing.mutation';
 
 // Used to record all intermediate states when typing with IME,
 // and then output the entire undo and redo operations.

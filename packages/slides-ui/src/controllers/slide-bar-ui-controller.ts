@@ -1,8 +1,9 @@
+import type { ISlidePage } from '@univerjs/core';
+import { IUniverInstanceService } from '@univerjs/core';
 import { CanvasView } from '@univerjs/slides';
-import { ISlidePage, IUniverInstanceService } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
-import { SlideBar } from '../views/slide-bar/SlideBar';
+import type { SlideBar } from '../views/slide-bar/SlideBar';
 
 export class SlideBarUIController {
     private _slideBar?: SlideBar;

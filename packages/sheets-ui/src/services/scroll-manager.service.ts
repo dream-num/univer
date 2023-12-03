@@ -1,4 +1,4 @@
-import { Nullable } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 
 export interface IScrollManagerParam {

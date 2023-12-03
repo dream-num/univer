@@ -1,17 +1,12 @@
-import {
-    deserializeRangeWithSheet,
-    Disposable,
-    Nullable,
-    Rectangle,
-    serializeRangeToRefString,
-    Tools,
-} from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
+import { deserializeRangeWithSheet, Disposable, Rectangle, serializeRangeToRefString, Tools } from '@univerjs/core';
 
 import { FormulaAstLRU } from '../basics/cache-lru';
 import { ErrorType } from '../basics/error-type';
 import { isFormulaLexerToken } from '../basics/match-token';
 import { isReferenceString, REFERENCE_SINGLE_RANGE_REGEX } from '../basics/regex';
-import { generateStringWithSequence, ISequenceArray, ISequenceNode, sequenceNodeType } from '../basics/sequence';
+import type { ISequenceArray, ISequenceNode } from '../basics/sequence';
+import { generateStringWithSequence, sequenceNodeType } from '../basics/sequence';
 import {
     matchToken,
     OPERATOR_TOKEN_PRIORITY,

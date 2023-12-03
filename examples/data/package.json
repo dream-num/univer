@@ -1,14 +1,14 @@
 {
-    "name": "univer-data",
+    "name": "data",
     "description": "",
-    "author": "",
+    "author": "DreamNum <developer@univer.ai>",
+    "license": "MIT",
+    "private": true,
     "main": "./src/index.ts",
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*"
     },
-    "private": true,
-    "license": "MIT",
     "dependencies": {
         "@univerjs/core": "workspace:*"
     }

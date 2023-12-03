@@ -1,33 +1,31 @@
+import type { ICommandInfo, Nullable } from '@univerjs/core';
 import {
+    Direction,
+    Disposable,
+    ICommandService,
+    IUniverInstanceService,
+    LifecycleStages,
+    OnLifecycle,
+} from '@univerjs/core';
+import type {
     DocumentSkeleton,
     IDocumentSkeletonLine,
     IDocumentSkeletonSpan,
     INodePosition,
     INodeSearch,
+} from '@univerjs/engine-render';
+import {
     IRenderManagerService,
     ITextSelectionRenderManager,
     NodePositionConvertToCursor,
     RANGE_DIRECTION,
 } from '@univerjs/engine-render';
-import {
-    Direction,
-    Disposable,
-    ICommandInfo,
-    ICommandService,
-    IUniverInstanceService,
-    LifecycleStages,
-    Nullable,
-    OnLifecycle,
-} from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 
 import { getDocObject } from '../basics/component-tools';
-import {
-    IMoveCursorOperationParams,
-    MoveCursorOperation,
-    MoveSelectionOperation,
-} from '../commands/operations/cursor.operation';
+import type { IMoveCursorOperationParams } from '../commands/operations/cursor.operation';
+import { MoveCursorOperation, MoveSelectionOperation } from '../commands/operations/cursor.operation';
 import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
 import { TextSelectionManagerService } from '../services/text-selection-manager.service';
 

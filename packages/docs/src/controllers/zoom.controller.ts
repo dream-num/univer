@@ -1,19 +1,21 @@
 /* eslint-disable no-magic-numbers */
-import { IRenderManagerService, IWheelEvent } from '@univerjs/engine-render';
+import type { ICommandInfo } from '@univerjs/core';
 import {
     Disposable,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-    ICommandInfo,
     ICommandService,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
     toDisposable,
 } from '@univerjs/core';
+import type { IWheelEvent } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 
-import { getDocObject, IDocObjectParam } from '../basics/component-tools';
+import type { IDocObjectParam } from '../basics/component-tools';
+import { getDocObject } from '../basics/component-tools';
 import { VIEWPORT_KEY } from '../basics/docs-view-key';
 import { SetDocZoomRatioCommand } from '../commands/commands/set-doc-zoom-ratio.command';
 import { SetDocZoomRatioOperation } from '../commands/operations/set-doc-zoom-ratio.operation';

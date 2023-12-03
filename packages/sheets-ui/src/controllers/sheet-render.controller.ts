@@ -1,11 +1,3 @@
-import type { Rect, Spreadsheet, SpreadsheetColumnHeader, SpreadsheetRowHeader } from '@univerjs/engine-render';
-import { IRenderManagerService } from '@univerjs/engine-render';
-import {
-    COMMAND_LISTENER_SKELETON_CHANGE,
-    COMMAND_LISTENER_VALUE_CHANGE,
-    SelectionManagerService,
-    SetWorksheetActivateMutation,
-} from '@univerjs/sheets';
 import type { ICommandInfo } from '@univerjs/core';
 import {
     Disposable,
@@ -15,6 +7,14 @@ import {
     OnLifecycle,
     toDisposable,
 } from '@univerjs/core';
+import type { Rect, Spreadsheet, SpreadsheetColumnHeader, SpreadsheetRowHeader } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import {
+    COMMAND_LISTENER_SKELETON_CHANGE,
+    COMMAND_LISTENER_VALUE_CHANGE,
+    SelectionManagerService,
+    SetWorksheetActivateMutation,
+} from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
 import { SHEET_VIEW_KEY } from '../common/keys';

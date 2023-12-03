@@ -1,12 +1,6 @@
+import type { ICommandInfo } from '@univerjs/core';
+import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { ITextSelectionRenderManager } from '@univerjs/engine-render';
-import {
-    Disposable,
-    ICommandInfo,
-    ICommandService,
-    IUniverInstanceService,
-    LifecycleStages,
-    OnLifecycle,
-} from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import {

@@ -1,13 +1,13 @@
 import { Disposable } from '@univerjs/core';
 
-import { FunctionNode } from '../ast-node';
-import { BaseAstNode } from '../ast-node/base-ast-node';
+import type { FunctionNode } from '../ast-node';
+import type { BaseAstNode } from '../ast-node/base-ast-node';
 import { NodeType } from '../ast-node/node-type';
 import { AstNodePromiseType } from '../basics/common';
 import { ErrorType } from '../basics/error-type';
-import { PreCalculateNodeType } from '../basics/node-type';
+import type { PreCalculateNodeType } from '../basics/node-type';
 import { ErrorValueObject } from '../other-object/error-value-object';
-import { FunctionVariantType } from '../reference-object/base-reference-object';
+import type { FunctionVariantType } from '../reference-object/base-reference-object';
 
 export class Interpreter extends Disposable {
     override dispose(): void {}

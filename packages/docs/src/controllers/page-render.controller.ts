@@ -1,4 +1,3 @@
-import { Documents, IPageRenderConfig, IRenderManagerService, Rect } from '@univerjs/engine-render';
 import {
     Disposable,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
@@ -6,6 +5,8 @@ import {
     LifecycleStages,
     OnLifecycle,
 } from '@univerjs/core';
+import type { Documents, IPageRenderConfig } from '@univerjs/engine-render';
+import { IRenderManagerService, Rect } from '@univerjs/engine-render';
 
 const PAGE_STROKE_COLOR = 'rgba(198,198,198, 1)';
 

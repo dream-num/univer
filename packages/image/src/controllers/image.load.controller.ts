@@ -1,15 +1,15 @@
-import { IRenderManagerService, Picture, Scene } from '@univerjs/engine-render';
+import type { ICommandInfo, IFloatingObjectManagerParam } from '@univerjs/core';
 import {
     Disposable,
-    ICommandInfo,
     ICommandService,
-    IFloatingObjectManagerParam,
     IFloatingObjectManagerService,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
     toDisposable,
 } from '@univerjs/core';
+import type { Scene } from '@univerjs/engine-render';
+import { IRenderManagerService, Picture } from '@univerjs/engine-render';
 
 import { IImageManagerService } from '../services/image-manager.service';
 import { IImageRenderService } from '../services/image-render.service';

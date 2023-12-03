@@ -1,7 +1,8 @@
-import { LocaleService, LocaleType } from '@univerjs/core';
+import type { LocaleType } from '@univerjs/core';
+import { LocaleService } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { IDocUIPluginConfig } from '../basics';
+import type { IDocUIPluginConfig } from '../basics';
 import { DocContainerUIController } from './doc-container-ui-controller';
 
 export class AppUIController {

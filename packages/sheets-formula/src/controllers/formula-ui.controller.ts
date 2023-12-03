@@ -1,11 +1,6 @@
-import {
-    ComponentManager,
-    IDesktopUIController,
-    IMenuService,
-    IShortcutService,
-    IUIController,
-} from '@univerjs/ui';
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import type { IDesktopUIController } from '@univerjs/ui';
+import { ComponentManager, IMenuService, IShortcutService, IUIController } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 

@@ -1,22 +1,17 @@
-import {
-    FormulaEngineService,
-    IFormulaData,
-    ISheetData,
-    IUnitData,
-    IUnitSheetNameMap,
-} from '@univerjs/engine-formula';
-import { ISetRangeValuesMutationParams, SetRangeValuesMutation } from '@univerjs/sheets';
+import type { ICommandInfo, IUnitRange } from '@univerjs/core';
 import {
     Disposable,
-    ICommandInfo,
     ICommandService,
     IConfigService,
-    IUnitRange,
     IUniverInstanceService,
     LifecycleStages,
     ObjectMatrix,
     OnLifecycle,
 } from '@univerjs/core';
+import type { IFormulaData, ISheetData, IUnitData, IUnitSheetNameMap } from '@univerjs/engine-formula';
+import { FormulaEngineService } from '@univerjs/engine-formula';
+import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
+import { SetRangeValuesMutation } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
 import { FormulaDataModel } from '../models/formula-data.model';

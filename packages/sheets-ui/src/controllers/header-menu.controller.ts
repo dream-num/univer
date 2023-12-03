@@ -1,7 +1,9 @@
-import { CURSOR_TYPE, IMouseEvent, IPointerEvent, IRenderManagerService, Rect } from '@univerjs/engine-render';
+import type { Nullable, Observer } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import type { IMouseEvent, IPointerEvent } from '@univerjs/engine-render';
+import { CURSOR_TYPE, IRenderManagerService, Rect } from '@univerjs/engine-render';
 import { SelectionManagerService } from '@univerjs/sheets';
 import { IContextMenuService } from '@univerjs/ui';
-import { Disposable, IUniverInstanceService, LifecycleStages, Nullable, Observer, OnLifecycle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX } from '../common/keys';

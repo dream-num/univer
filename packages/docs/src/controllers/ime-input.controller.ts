@@ -1,20 +1,16 @@
-import {
-    IEditorInputConfig,
-    IRenderManagerService,
-    ITextRangeWithStyle,
-    ITextSelectionRenderManager,
-} from '@univerjs/engine-render';
+import type { Nullable } from '@univerjs/core';
 import {
     Disposable,
     ICommandService,
     IUniverInstanceService,
     LifecycleStages,
-    Nullable,
     OnLifecycle,
     Tools,
 } from '@univerjs/core';
+import type { IEditorInputConfig, ITextRangeWithStyle } from '@univerjs/engine-render';
+import { IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 
 import { getDocObject } from '../basics/component-tools';
 import { IMEInputCommand } from '../commands/commands/ime-input.command';

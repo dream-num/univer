@@ -13,7 +13,7 @@ import { NumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { SheetUIPlugin } from '@univerjs/sheets-ui';
 import type { IUniscriptPluginConfig } from '@univerjs/uniscript';
 import { UniscriptPlugin } from '@univerjs/uniscript';
-import { DEFAULT_WORKBOOK_DATA_DEMO } from 'univer-data';
+import { DEFAULT_WORKBOOK_DATA_DEMO } from 'data';
 
 import { locales } from './locales';
 import { DebuggerPlugin } from './sheets-plugin-debugger';

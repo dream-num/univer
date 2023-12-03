@@ -1,13 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Ctor, Dependency, IDisposable, Inject, Injector } from '@wendellhu/redi';
+import type { Ctor, Dependency, IDisposable } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 
-import { Plugin, PluginCtor, PluginStore } from '../plugin/plugin';
+import type { Plugin, PluginCtor } from '../plugin/plugin';
+import { PluginStore } from '../plugin/plugin';
 import { LifecycleStages } from '../services/lifecycle/lifecycle';
 import { LifecycleInitializerService, LifecycleService } from '../services/lifecycle/lifecycle.service';
 import { SheetInterceptorService } from '../services/sheet-interceptor/sheet-interceptor.service';
 import { Disposable, toDisposable } from '../shared/lifecycle';
 import { Workbook } from '../sheets/workbook';
-import { IWorkbookData } from '../types/interfaces/i-workbook-data';
+import type { IWorkbookData } from '../types/interfaces/i-workbook-data';
 
 /**
  * Externally provided UniverSheet root instance

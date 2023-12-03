@@ -1,5 +1,5 @@
-import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 
 import { ScriptPanelComponentName, ToggleScriptPanelOperation } from '../commands/operations/panel.operation';

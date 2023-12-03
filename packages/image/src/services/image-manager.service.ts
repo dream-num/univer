@@ -1,8 +1,10 @@
-import { Nullable } from '@univerjs/core';
-import { createIdentifier, IDisposable } from '@wendellhu/redi';
-import { Observable, Subject } from 'rxjs';
+import type { Nullable } from '@univerjs/core';
+import type { IDisposable } from '@wendellhu/redi';
+import { createIdentifier } from '@wendellhu/redi';
+import type { Observable } from 'rxjs';
+import { Subject } from 'rxjs';
 
-import { ImageModel } from '../models/image-model';
+import type { ImageModel } from '../models/image-model';
 
 export interface IImageManagerSearchParam {
     unitId: string;

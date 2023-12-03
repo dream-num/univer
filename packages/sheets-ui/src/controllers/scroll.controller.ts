@@ -1,7 +1,5 @@
-import { IRenderManagerService } from '@univerjs/engine-render';
-import { SelectionManagerService } from '@univerjs/sheets';
+import type { Direction } from '@univerjs/core';
 import {
-    Direction,
     Disposable,
     ICommandService,
     IUniverInstanceService,
@@ -9,12 +7,15 @@ import {
     OnLifecycle,
     toDisposable,
 } from '@univerjs/core';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { SelectionManagerService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
 import { ScrollCommand } from '../commands/commands/set-scroll.command';
 import { VIEWPORT_KEY } from '../common/keys';
 import { ScrollManagerService } from '../services/scroll-manager.service';
-import { ISheetSkeletonManagerParam, SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
+import type { ISheetSkeletonManagerParam } from '../services/sheet-skeleton-manager.service';
+import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 import { getSheetObject } from './utils/component-tools';
 
 @OnLifecycle(LifecycleStages.Rendered, ScrollController)

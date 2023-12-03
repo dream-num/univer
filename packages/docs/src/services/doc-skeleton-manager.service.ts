@@ -1,9 +1,13 @@
-import { DocumentSkeleton, DocumentViewModel } from '@univerjs/engine-render';
-import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, LocaleService, Nullable } from '@univerjs/core';
-import { IDisposable, Inject } from '@wendellhu/redi';
+import type { Nullable } from '@univerjs/core';
+import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, LocaleService } from '@univerjs/core';
+import type { DocumentViewModel } from '@univerjs/engine-render';
+import { DocumentSkeleton } from '@univerjs/engine-render';
+import type { IDisposable } from '@wendellhu/redi';
+import { Inject } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 
-import { DocViewModelManagerService, IDocumentViewModelManagerParam } from './doc-view-model-manager.service';
+import type { IDocumentViewModelManagerParam } from './doc-view-model-manager.service';
+import { DocViewModelManagerService } from './doc-view-model-manager.service';
 
 export interface IDocSkeletonManagerParam {
     unitId: string;

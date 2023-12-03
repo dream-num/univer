@@ -4,7 +4,7 @@ import { UIPlugin } from '@univerjs/ui';
 import { LocaleType, Univer } from '@univerjs/core';
 import { greenTheme } from '@univerjs/design';
 import { SlideUIPlugin } from '@univerjs/slides-ui';
-import { DEFAULT_SLIDE_DATA } from 'univer-data';
+import { DEFAULT_SLIDE_DATA } from 'data';
 
 // univer
 const univer = new Univer({

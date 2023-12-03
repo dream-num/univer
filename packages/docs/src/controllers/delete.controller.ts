@@ -1,3 +1,12 @@
+import type { ICommandInfo, IParagraph } from '@univerjs/core';
+import {
+    Disposable,
+    ICommandService,
+    IUniverInstanceService,
+    LifecycleStages,
+    OnLifecycle,
+    UpdateDocsAttributeType,
+} from '@univerjs/core';
 import {
     getParagraphBySpan,
     hasListSpan,
@@ -6,16 +15,6 @@ import {
     isSameLine,
     ITextSelectionRenderManager,
 } from '@univerjs/engine-render';
-import {
-    Disposable,
-    ICommandInfo,
-    ICommandService,
-    IParagraph,
-    IUniverInstanceService,
-    LifecycleStages,
-    OnLifecycle,
-    UpdateDocsAttributeType,
-} from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { CutContentCommand } from '../commands/commands/clipboard.inner.command';

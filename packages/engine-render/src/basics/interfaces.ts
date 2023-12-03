@@ -1,4 +1,4 @@
-import {
+import type {
     BooleanNumber,
     GridType,
     IDocStyleBase,
@@ -14,8 +14,8 @@ import {
     LocaleService,
 } from '@univerjs/core';
 
-import { DocumentViewModel } from '../components/docs/view-model/document-view-model';
-import {
+import type { DocumentViewModel } from '../components/docs/view-model/document-view-model';
+import type {
     IDocumentSkeletonBullet,
     IDocumentSkeletonDrawing,
     IDocumentSkeletonDrawingAnchor,
@@ -24,7 +24,7 @@ import {
     IDocumentSkeletonHeader,
     IDocumentSkeletonSpan,
 } from './i-document-skeleton-cached';
-import { Vector2 } from './vector2';
+import type { Vector2 } from './vector2';
 
 export interface IObjectFullState extends ITransformState {
     strokeWidth?: number;

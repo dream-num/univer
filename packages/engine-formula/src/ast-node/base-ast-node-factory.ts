@@ -1,4 +1,5 @@
-import { Disposable, Nullable } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
+import { Disposable } from '@univerjs/core';
 
 import { LexerNode } from '../analysis/lexer-node';
 import { BaseAstNode } from './base-ast-node';

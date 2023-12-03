@@ -1,3 +1,24 @@
+import type { ICommandInfo, IRange, IRangeWithCoord, ITextRun, Nullable } from '@univerjs/core';
+import {
+    deserializeRangeWithSheet,
+    Direction,
+    Disposable,
+    DisposableCollection,
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    FOCUSING_EDITOR_INPUT_FORMULA,
+    ICommandService,
+    IContextService,
+    isFormulaString,
+    IUniverInstanceService,
+    LifecycleStages,
+    LocaleService,
+    OnLifecycle,
+    serializeRangeToRefString,
+    ThemeService,
+    toDisposable,
+    Tools,
+} from '@univerjs/core';
 import {
     DocViewModelManagerService,
     MoveCursorOperation,
@@ -22,28 +43,6 @@ import {
     NORMAL_SELECTION_PLUGIN_NAME,
     SelectionManagerService,
 } from '@univerjs/sheets';
-import { KeyCode, MetaKeys } from '@univerjs/ui';
-import type { ICommandInfo, IRange, IRangeWithCoord, ITextRun, Nullable } from '@univerjs/core';
-import {
-    deserializeRangeWithSheet,
-    Direction,
-    Disposable,
-    DisposableCollection,
-    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
-    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-    FOCUSING_EDITOR_INPUT_FORMULA,
-    ICommandService,
-    IContextService,
-    isFormulaString,
-    IUniverInstanceService,
-    LifecycleStages,
-    LocaleService,
-    OnLifecycle,
-    serializeRangeToRefString,
-    ThemeService,
-    toDisposable,
-    Tools,
-} from '@univerjs/core';
 import type { EditorBridgeService, SelectionShape } from '@univerjs/sheets-ui';
 import {
     ExpandSelectionCommand,
@@ -55,6 +54,7 @@ import {
     SetEditorResizeOperation,
     SheetSkeletonManagerService,
 } from '@univerjs/sheets-ui';
+import { KeyCode, MetaKeys } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 
 import type { ISelectEditorFormulaOperationParam } from '../commands/operations/editor-formula.operation';

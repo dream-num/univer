@@ -1,14 +1,3 @@
-import { IRenderManagerService } from '@univerjs/engine-render';
-import type { ISetNumfmtMutationParams } from '@univerjs/sheets';
-import {
-    ClearSelectionAllCommand,
-    ClearSelectionFormatCommand,
-    factorySetNumfmtUndoMutation,
-    INumfmtService,
-    SelectionManagerService,
-    SetNumfmtMutation,
-} from '@univerjs/sheets';
-import { ComponentManager, IMenuService, ISidebarService } from '@univerjs/ui';
 import type { ICellData, IMutationInfo, IRange } from '@univerjs/core';
 import {
     CellValueType,
@@ -28,8 +17,19 @@ import {
     ThemeService,
     toDisposable,
 } from '@univerjs/core';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import type { ISetNumfmtMutationParams } from '@univerjs/sheets';
+import {
+    ClearSelectionAllCommand,
+    ClearSelectionFormatCommand,
+    factorySetNumfmtUndoMutation,
+    INumfmtService,
+    SelectionManagerService,
+    SetNumfmtMutation,
+} from '@univerjs/sheets';
 import type { IAutoFillHook } from '@univerjs/sheets-ui';
 import { APPLY_TYPE, getRepeatRange, IAutoFillService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { ComponentManager, IMenuService, ISidebarService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { combineLatest, merge, Observable } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map, switchMap, tap } from 'rxjs/operators';

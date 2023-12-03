@@ -1,8 +1,9 @@
 import { Disposable, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { Ctor, Dependency, Inject, Injector } from '@wendellhu/redi';
+import type { Ctor, Dependency } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 
 import { LexerTreeBuilder } from '../analysis/lexer';
-import { LexerNode } from '../analysis/lexer-node';
+import type { LexerNode } from '../analysis/lexer-node';
 import { AstTreeBuilder } from '../analysis/parser';
 import { AstRootNodeFactory } from '../ast-node/ast-root-node';
 import { ErrorNode } from '../ast-node/base-ast-node';
@@ -15,9 +16,10 @@ import { ReferenceNodeFactory } from '../ast-node/reference-node';
 import { SuffixNodeFactory } from '../ast-node/suffix-node';
 import { UnionNodeFactory } from '../ast-node/union-node';
 import { ValueNodeFactory } from '../ast-node/value-node';
-import { IFormulaDatasetConfig } from '../basics/common';
+import type { IFormulaDatasetConfig } from '../basics/common';
 import { ErrorType } from '../basics/error-type';
-import { FUNCTION_NAMES, IFunctionInfo } from '../basics/function';
+import type { IFunctionInfo } from '../basics/function';
+import { FUNCTION_NAMES } from '../basics/function';
 import { FormulaDependencyGenerator } from '../dependency/formula-dependency';
 import {
     Average,
@@ -36,9 +38,9 @@ import {
     Sum,
     Union,
 } from '../functions';
-import { BaseFunction } from '../functions/base-function';
+import type { BaseFunction } from '../functions/base-function';
 import { Interpreter } from '../interpreter/interpreter';
-import { FunctionVariantType } from '../reference-object/base-reference-object';
+import type { FunctionVariantType } from '../reference-object/base-reference-object';
 import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from './current-data.service';
 import { DefinedNamesService, IDefinedNamesService } from './defined-names.service';
 import { FunctionService, IFunctionService } from './function.service';

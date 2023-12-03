@@ -1,8 +1,8 @@
+import { IUniverInstanceService } from '@univerjs/core';
+import { AddDigitsSingle, MoreDownSingle, ReduceDigitsSingle, RmbSingle } from '@univerjs/icons';
 import { INumfmtService, SelectionManagerService } from '@univerjs/sheets';
 import type { ComponentManager, IMenuButtonItem } from '@univerjs/ui';
 import { MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
-import { IUniverInstanceService } from '@univerjs/core';
-import { AddDigitsSingle, MoreDownSingle, ReduceDigitsSingle, RmbSingle } from '@univerjs/icons';
 import type { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 

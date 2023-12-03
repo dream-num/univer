@@ -1,4 +1,3 @@
-import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import type { ICommandInfo, IDocumentBody, IParagraph, ITextRun } from '@univerjs/core';
 import {
     Disposable,
@@ -12,6 +11,7 @@ import {
     OnLifecycle,
     Tools,
 } from '@univerjs/core';
+import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 
 import { DocCopyCommand, DocCutCommand, DocPasteCommand } from '../commands/commands/clipboard.command';
 import { CutContentCommand, InnerPasteCommand } from '../commands/commands/clipboard.inner.command';

@@ -1,7 +1,7 @@
+import type { IPosition, Nullable } from '@univerjs/core';
 import type { IDocumentLayoutObject } from '@univerjs/engine-render';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import type { KeyCode } from '@univerjs/ui';
-import type { IPosition, Nullable } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';

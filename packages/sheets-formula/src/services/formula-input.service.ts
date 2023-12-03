@@ -1,6 +1,9 @@
-import { FormulaEngineService, ISequenceNode, sequenceNodeType } from '@univerjs/engine-formula';
-import { createIdentifier, IDisposable, Inject } from '@wendellhu/redi';
-import { Observable, Subject } from 'rxjs';
+import type { ISequenceNode } from '@univerjs/engine-formula';
+import { FormulaEngineService, sequenceNodeType } from '@univerjs/engine-formula';
+import type { IDisposable } from '@wendellhu/redi';
+import { createIdentifier, Inject } from '@wendellhu/redi';
+import type { Observable } from 'rxjs';
+import { Subject } from 'rxjs';
 
 export interface ISyncToEditorParam {
     textSelectionOffset: number;

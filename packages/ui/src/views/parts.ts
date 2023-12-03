@@ -1,4 +1,4 @@
-import { ComponentType } from 'react';
+import type { ComponentType } from 'react';
 
 import { Notification } from '../components/notification/Notification';
 import { ConfirmPart } from './components/confirm-part/ConfirmPart';

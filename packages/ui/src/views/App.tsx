@@ -7,7 +7,6 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import type { IWorkbenchOptions } from '../controllers/ui/ui.controller';
 import { IMessageService } from '../services/message/message.service';
-import { ISidebarService } from '../services/sidebar/sidebar.service';
 import styles from './app.module.less';
 import { ComponentContainer } from './components/ComponentContainer';
 import { MenuBar } from './components/doc-bars/MenuBar';
@@ -28,7 +27,6 @@ export interface IUniverAppProps extends IWorkbenchOptions {
 export function App(props: IUniverAppProps) {
     const localeService = useDependency(LocaleService);
     const themeService = useDependency(ThemeService);
-    const sidebarService = useDependency(ISidebarService);
     const messageService = useDependency(IMessageService);
 
     const contentRef = useRef<HTMLDivElement>(null);
@@ -56,7 +54,6 @@ export function App(props: IUniverAppProps) {
     }, [onRendered]);
 
     const [locale, setLocale] = useState<ILocale>(localeService.getLocales() as unknown as ILocale);
-    const [mainCollapsed, setMainCollapsed] = useState<boolean>(false);
 
     // Create a portal container for injecting global component themes.
     const portalContainer = useMemo<HTMLElement>(() => document.createElement('div'), []);
@@ -72,9 +69,6 @@ export function App(props: IUniverAppProps) {
             themeService.currentTheme$.subscribe((theme) => {
                 themeInstance.setTheme(mountContainer, theme);
                 portalContainer && themeInstance.setTheme(portalContainer, theme);
-            }),
-            sidebarService.getObservableSidebar().subscribe((sidebar) => {
-                setMainCollapsed(sidebar?.visible ?? false);
             }),
         ];
 

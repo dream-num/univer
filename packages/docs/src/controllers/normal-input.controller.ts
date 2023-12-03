@@ -1,14 +1,8 @@
+import type { Nullable } from '@univerjs/core';
+import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/engine-render';
-import {
-    Disposable,
-    ICommandService,
-    IUniverInstanceService,
-    LifecycleStages,
-    Nullable,
-    OnLifecycle,
-} from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 
 import { getDocObject } from '../basics/component-tools';
 import { InsertCommand } from '../commands/commands/core-editing.command';

@@ -1,4 +1,4 @@
-import { Nullable } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
 
 export interface IImageData {
     imageId: string;

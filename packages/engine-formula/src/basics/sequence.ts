@@ -1,4 +1,4 @@
-import { LexerNode } from '../analysis/lexer-node';
+import type { LexerNode } from '../analysis/lexer-node';
 
 export enum sequenceNodeType {
     NORMAL,

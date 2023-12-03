@@ -9,7 +9,7 @@
             "request": "launch",
             "type": "chrome",
             "url": "http://localhost:3003",
-            "webRoot": "${workspaceFolder}/examples/univer-doc-ts/local/",
+            "webRoot": "${workspaceFolder}/examples/docs/local/",
             "presentation": {
                 "group": "0_example",
                 "order": 1
@@ -20,7 +20,7 @@
             "request": "launch",
             "type": "msedge",
             "url": "http://localhost:3003",
-            "webRoot": "${workspaceFolder}/examples/univer-doc-ts/local/",
+            "webRoot": "${workspaceFolder}/examples/docs/local/",
             "presentation": {
                 "group": "0_example",
                 "order": 2
@@ -31,7 +31,7 @@
             "request": "launch",
             "type": "chrome",
             "url": "http://localhost:3002",
-            "webRoot": "${workspaceFolder}/examples/univer-sheet-ts/local/",
+            "webRoot": "${workspaceFolder}/examples/sheets/local/",
             "presentation": {
                 "group": "0_example",
                 "order": 3
@@ -42,7 +42,7 @@
             "request": "launch",
             "type": "msedge",
             "url": "http://localhost:3002",
-            "webRoot": "${workspaceFolder}/examples/univer-sheet-ts/local/",
+            "webRoot": "${workspaceFolder}/examples/sheets/local/",
             "presentation": {
                 "group": "0_example",
                 "order": 4
@@ -53,7 +53,7 @@
             "request": "launch",
             "type": "chrome",
             "url": "http://localhost:3004",
-            "webRoot": "${workspaceFolder}/examples/univer-slide-ts/local/",
+            "webRoot": "${workspaceFolder}/examples/slides/local/",
             "presentation": {
                 "group": "0_example",
                 "order": 5
@@ -64,7 +64,7 @@
             "request": "launch",
             "type": "msedge",
             "url": "http://localhost:3004",
-            "webRoot": "${workspaceFolder}/examples/univer-slide-ts/local/",
+            "webRoot": "${workspaceFolder}/examples/slides/local/",
             "presentation": {
                 "group": "0_example",
                 "order": 6

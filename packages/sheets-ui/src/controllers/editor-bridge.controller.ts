@@ -1,14 +1,7 @@
-import { DeviceInputEventType, getCanvasOffsetByEngine, IRenderManagerService } from '@univerjs/engine-render';
-import {
-    COMMAND_LISTENER_SKELETON_CHANGE,
-    NORMAL_SELECTION_PLUGIN_NAME,
-    SelectionManagerService,
-    SetWorksheetActivateMutation,
-} from '@univerjs/sheets';
+import type { ICommandInfo } from '@univerjs/core';
 import {
     Disposable,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-    ICommandInfo,
     ICommandService,
     INTERCEPTOR_POINT,
     IUniverInstanceService,
@@ -17,6 +10,13 @@ import {
     OnLifecycle,
     SheetInterceptorService,
 } from '@univerjs/core';
+import { DeviceInputEventType, getCanvasOffsetByEngine, IRenderManagerService } from '@univerjs/engine-render';
+import {
+    COMMAND_LISTENER_SKELETON_CHANGE,
+    NORMAL_SELECTION_PLUGIN_NAME,
+    SelectionManagerService,
+    SetWorksheetActivateMutation,
+} from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
 import { SetActivateCellEditOperation } from '../commands/operations/activate-cell-edit.operation';

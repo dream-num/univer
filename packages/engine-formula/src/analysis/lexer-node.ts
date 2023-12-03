@@ -1,6 +1,6 @@
-import { Nullable, Observable } from '@univerjs/core';
+import type { Nullable, Observable } from '@univerjs/core';
 
-import { LambdaPrivacyVarType } from '../ast-node/base-ast-node';
+import type { LambdaPrivacyVarType } from '../ast-node/base-ast-node';
 import { DEFAULT_TOKEN_TYPE_ROOT } from '../basics/token-type';
 
 interface LexerNodeJson {
@@ -8,10 +8,10 @@ interface LexerNodeJson {
     children: Array<LexerNodeJson | string>;
 }
 
-export type FormulaEnginePluginObserver = {
+export interface FormulaEnginePluginObserver {
     onBeforeFormulaCalculateObservable: Observable<string>;
     onAfterFormulaLexerObservable: Observable<LexerNode>;
-};
+}
 
 export class LexerNode {
     private _parent: Nullable<LexerNode>;

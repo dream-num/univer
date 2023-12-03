@@ -1,36 +1,23 @@
-import {
-    CURSOR_TYPE,
-    IMouseEvent,
-    IPointerEvent,
-    IRenderManagerService,
-    Rect,
-    ScrollTimer,
-    Vector2,
-} from '@univerjs/engine-render';
-import {
-    IMoveColsCommandParams,
-    IMoveRowsCommandParams,
-    ISelectionWithStyle,
-    MoveColsCommand,
-    MoveRowsCommand,
-    SelectionManagerService,
-} from '@univerjs/sheets';
+import type { Nullable, Observer } from '@univerjs/core';
 import {
     Disposable,
     ICommandService,
     IUniverInstanceService,
     LifecycleStages,
-    Nullable,
-    Observer,
     OnLifecycle,
     RANGE_TYPE,
 } from '@univerjs/core';
+import type { IMouseEvent, IPointerEvent } from '@univerjs/engine-render';
+import { CURSOR_TYPE, IRenderManagerService, Rect, ScrollTimer, Vector2 } from '@univerjs/engine-render';
+import type { IMoveColsCommandParams, IMoveRowsCommandParams, ISelectionWithStyle } from '@univerjs/sheets';
+import { MoveColsCommand, MoveRowsCommand, SelectionManagerService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX, VIEWPORT_KEY } from '../common/keys';
 import { ISelectionRenderService } from '../services/selection/selection-render.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
-import { getCoordByOffset, getSheetObject, ISheetObjectParam } from './utils/component-tools';
+import type { ISheetObjectParam } from './utils/component-tools';
+import { getCoordByOffset, getSheetObject } from './utils/component-tools';
 
 const HEADER_MOVE_CONTROLLER_BACKGROUND = '__SpreadsheetHeaderMoveControllerBackground__';
 

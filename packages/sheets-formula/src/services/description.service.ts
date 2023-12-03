@@ -1,6 +1,8 @@
-import { FormulaEngineService, IFunctionInfo } from '@univerjs/engine-formula';
 import { LocaleService } from '@univerjs/core';
-import { createIdentifier, IDisposable, Inject } from '@wendellhu/redi';
+import type { IFunctionInfo } from '@univerjs/engine-formula';
+import { FormulaEngineService } from '@univerjs/engine-formula';
+import type { IDisposable } from '@wendellhu/redi';
+import { createIdentifier, Inject } from '@wendellhu/redi';
 
 import { FUNCTION_LIST } from './function-list/function-list';
 import { getFunctionName } from './utils';

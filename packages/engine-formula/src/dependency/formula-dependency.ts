@@ -1,19 +1,21 @@
-import { Disposable, IRange, IUnitRange, LifecycleStages, Nullable, ObjectMatrix, OnLifecycle } from '@univerjs/core';
+import type { IRange, IUnitRange, Nullable } from '@univerjs/core';
+import { Disposable, LifecycleStages, ObjectMatrix, OnLifecycle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { LexerTreeBuilder } from '../analysis/lexer';
-import { LexerNode } from '../analysis/lexer-node';
+import type { LexerNode } from '../analysis/lexer-node';
 import { AstTreeBuilder } from '../analysis/parser';
-import { AstRootNode, FunctionNode, PrefixNode, SuffixNode } from '../ast-node';
-import { BaseAstNode, ErrorNode } from '../ast-node/base-ast-node';
+import type { AstRootNode, FunctionNode, PrefixNode, SuffixNode } from '../ast-node';
+import type { BaseAstNode } from '../ast-node/base-ast-node';
+import { ErrorNode } from '../ast-node/base-ast-node';
 import { NodeType } from '../ast-node/node-type';
 import { FormulaAstLRU } from '../basics/cache-lru';
-import { IFormulaData } from '../basics/common';
+import type { IFormulaData } from '../basics/common';
 import { ErrorType } from '../basics/error-type';
-import { PreCalculateNodeType } from '../basics/node-type';
+import type { PreCalculateNodeType } from '../basics/node-type';
 import { prefixToken, suffixToken } from '../basics/token';
 import { Interpreter } from '../interpreter/interpreter';
-import { BaseReferenceObject } from '../reference-object/base-reference-object';
+import type { BaseReferenceObject } from '../reference-object/base-reference-object';
 import { IFormulaCurrentConfigService } from '../services/current-data.service';
 import { IFormulaRuntimeService } from '../services/runtime.service';
 import { FormulaDependencyTree } from './dependency-tree';

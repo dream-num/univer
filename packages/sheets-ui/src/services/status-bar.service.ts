@@ -1,7 +1,9 @@
+import type { Nullable } from '@univerjs/core';
 import { FUNCTION_NAMES } from '@univerjs/engine-formula';
-import { Nullable } from '@univerjs/core';
-import { createIdentifier, IDisposable } from '@wendellhu/redi';
-import { BehaviorSubject, Observable } from 'rxjs';
+import type { IDisposable } from '@wendellhu/redi';
+import { createIdentifier } from '@wendellhu/redi';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 export interface IStatusBarService {
     state$: Observable<Nullable<IStatusBarServiceStatus>>;

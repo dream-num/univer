@@ -1,17 +1,18 @@
-import { CellValueType, Disposable, ICellData, IRange, Nullable, ObjectMatrix } from '@univerjs/core';
+import type { ICellData, IRange, Nullable } from '@univerjs/core';
+import { CellValueType, Disposable, ObjectMatrix } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 
-import { BaseAstNode } from '../ast-node/base-ast-node';
-import {
+import type { BaseAstNode } from '../ast-node/base-ast-node';
+import type {
     ArrayFormulaDataType,
     IRuntimeSheetData,
     IRuntimeUnitDataType,
     UnitArrayFormulaDataType,
 } from '../basics/common';
-import { ErrorValueObject } from '../other-object/error-value-object';
-import { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
-import { ArrayValueObject } from '../value-object/array-value-object';
-import { BaseValueObject, CalculateValueType } from '../value-object/base-value-object';
+import type { ErrorValueObject } from '../other-object/error-value-object';
+import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
+import type { ArrayValueObject } from '../value-object/array-value-object';
+import type { BaseValueObject, CalculateValueType } from '../value-object/base-value-object';
 
 export interface IFormulaRuntimeService {
     currentRow: number;

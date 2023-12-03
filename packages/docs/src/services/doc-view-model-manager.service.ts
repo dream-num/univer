@@ -1,6 +1,7 @@
+import type { DocumentDataModel, Nullable } from '@univerjs/core';
+import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, IUniverInstanceService } from '@univerjs/core';
 import { DocumentViewModel } from '@univerjs/engine-render';
-import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DocumentDataModel, IUniverInstanceService, Nullable } from '@univerjs/core';
-import { IDisposable } from '@wendellhu/redi';
+import type { IDisposable } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 
 export interface IDocumentViewModelManagerParam {

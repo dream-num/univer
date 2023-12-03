@@ -1,14 +1,15 @@
-import { IAccessor, Inject, Injector } from '@wendellhu/redi';
+import type { IAccessor } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 
 import { LexerTreeBuilder } from '../analysis/lexer';
 import { LexerNode } from '../analysis/lexer-node';
 import { ErrorType } from '../basics/error-type';
 import { FUNCTION_NAMES } from '../basics/function';
 import { suffixToken } from '../basics/token';
-import { BaseFunction } from '../functions/base-function';
+import type { BaseFunction } from '../functions/base-function';
 import { ErrorValueObject } from '../other-object/error-value-object';
-import { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
-import { CellReferenceObject } from '../reference-object/cell-reference-object';
+import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
+import type { CellReferenceObject } from '../reference-object/cell-reference-object';
 import { IFormulaCurrentConfigService } from '../services/current-data.service';
 import { IFunctionService } from '../services/function.service';
 import { NumberValueObject } from '../value-object/primitive-object';

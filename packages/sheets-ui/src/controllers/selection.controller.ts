@@ -1,21 +1,6 @@
-import {
-    IMouseEvent,
-    IPointerEvent,
-    IRenderManagerService,
-    ScrollTimerType,
-    SpreadsheetSkeleton,
-} from '@univerjs/engine-render';
-import {
-    convertSelectionDataToRange,
-    getNormalSelectionStyle,
-    NORMAL_SELECTION_PLUGIN_NAME,
-    SelectionManagerService,
-    SetSelectionsOperation,
-    transformCellDataToSelectionData,
-} from '@univerjs/sheets';
+import type { ICommandInfo } from '@univerjs/core';
 import {
     Disposable,
-    ICommandInfo,
     ICommandService,
     IUniverInstanceService,
     LifecycleStages,
@@ -24,13 +9,25 @@ import {
     ThemeService,
     toDisposable,
 } from '@univerjs/core';
+import type { IMouseEvent, IPointerEvent, SpreadsheetSkeleton } from '@univerjs/engine-render';
+import { IRenderManagerService, ScrollTimerType } from '@univerjs/engine-render';
+import {
+    convertSelectionDataToRange,
+    getNormalSelectionStyle,
+    NORMAL_SELECTION_PLUGIN_NAME,
+    SelectionManagerService,
+    SetSelectionsOperation,
+    transformCellDataToSelectionData,
+} from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
-import { ISetZoomRatioOperationParams, SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
+import type { ISetZoomRatioOperationParams } from '../commands/operations/set-zoom-ratio.operation';
+import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import { VIEWPORT_KEY } from '../common/keys';
 import { ISelectionRenderService } from '../services/selection/selection-render.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
-import { getSheetObject, ISheetObjectParam } from './utils/component-tools';
+import type { ISheetObjectParam } from './utils/component-tools';
+import { getSheetObject } from './utils/component-tools';
 
 @OnLifecycle(LifecycleStages.Rendered, SelectionController)
 export class SelectionController extends Disposable {

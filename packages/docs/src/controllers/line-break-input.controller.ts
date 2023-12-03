@@ -1,4 +1,3 @@
-import { IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/engine-render';
 import type { ICommandInfo, IParagraph, Nullable } from '@univerjs/core';
 import {
     DataStreamTreeTokenType,
@@ -8,6 +7,7 @@ import {
     LifecycleStages,
     OnLifecycle,
 } from '@univerjs/core';
+import { IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import type { Subscription } from 'rxjs';
 

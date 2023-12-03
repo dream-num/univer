@@ -1,9 +1,11 @@
-import { IFunctionInfo } from '@univerjs/engine-formula';
-import { Direction } from '@univerjs/core';
-import { createIdentifier, IDisposable } from '@wendellhu/redi';
-import { Observable, Subject } from 'rxjs';
+import type { Direction } from '@univerjs/core';
+import type { IFunctionInfo } from '@univerjs/engine-formula';
+import type { IDisposable } from '@wendellhu/redi';
+import { createIdentifier } from '@wendellhu/redi';
+import type { Observable } from 'rxjs';
+import { Subject } from 'rxjs';
 
-import { ISearchItem } from './description.service';
+import type { ISearchItem } from './description.service';
 
 export interface ISearchFunctionOperationParams {
     /**

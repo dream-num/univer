@@ -1,5 +1,6 @@
-import { IDesktopUIController, IUIController } from '@univerjs/ui';
 import { Disposable, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import type { IDesktopUIController } from '@univerjs/ui';
+import { IUIController } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
 /**

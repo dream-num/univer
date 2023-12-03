@@ -1,12 +1,6 @@
-import {
-    ComponentManager,
-    IDesktopUIController,
-    IMenuItemFactory,
-    IMenuService,
-    IShortcutService,
-    IUIController,
-} from '@univerjs/ui';
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import type { IDesktopUIController, IMenuItemFactory } from '@univerjs/ui';
+import { ComponentManager, IMenuService, IShortcutService, IUIController } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import {

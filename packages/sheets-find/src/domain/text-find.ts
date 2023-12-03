@@ -1,18 +1,10 @@
+import type { ICellData, IGridRange, Nullable, Range, Worksheet } from '@univerjs/core';
+import { FormatType, IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
 import { SelectionManagerService, transformCellDataToSelectionData } from '@univerjs/sheets';
-import {
-    FormatType,
-    ICellData,
-    IGridRange,
-    IUniverInstanceService,
-    Nullable,
-    ObjectMatrix,
-    Range,
-    Worksheet,
-} from '@univerjs/core';
 import { ISelectionRenderService } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
 
-import { FindType } from '../i-data';
+import type { FindType } from '../i-data';
 import { getRegExpStr } from '../util/util';
 import { SelectSearch } from '../views/ui/FindModal';
 

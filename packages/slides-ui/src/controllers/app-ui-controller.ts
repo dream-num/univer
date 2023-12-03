@@ -1,8 +1,9 @@
+import type { LocaleType } from '@univerjs/core';
+import { LocaleService } from '@univerjs/core';
 import { ComponentManager } from '@univerjs/ui';
-import { LocaleService, LocaleType } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { ISlideUIPluginConfig } from '../basics';
+import type { ISlideUIPluginConfig } from '../basics';
 import { SlideContainerUIController } from './slide-container-ui-controller';
 
 export class AppUIController {

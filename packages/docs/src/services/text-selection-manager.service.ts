@@ -1,5 +1,5 @@
-import type { ITextRangeWithStyle, TextRange } from '@univerjs/engine-render';
 import type { ISelectionCell, Nullable } from '@univerjs/core';
+import type { ITextRangeWithStyle, TextRange } from '@univerjs/engine-render';
 import type { IDisposable } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 

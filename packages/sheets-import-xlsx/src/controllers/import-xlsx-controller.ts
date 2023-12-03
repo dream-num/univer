@@ -1,5 +1,5 @@
-import { IMenuService } from '@univerjs/ui';
 import { Disposable, ICommandService } from '@univerjs/core';
+import { IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { UploadOperation } from '../commands/operations/upload.operation';

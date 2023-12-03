@@ -1,18 +1,11 @@
-import { ComponentManager } from '@univerjs/ui';
-import {
-    BorderType,
-    HorizontalAlign,
-    IKeyValue,
-    IUniverInstanceService,
-    Tools,
-    UIObserver,
-    VerticalAlign,
-    WrapStrategy,
-} from '@univerjs/core';
+import type { HorizontalAlign, IKeyValue, UIObserver, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { BorderType, IUniverInstanceService, Tools } from '@univerjs/core';
 import { ColorPicker } from '@univerjs/design';
+import { ComponentManager } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 
-import { DefaultToolbarConfig, SLIDE_UI_PLUGIN_NAME, SlideToolbarConfig } from '../basics';
+import type { SlideToolbarConfig } from '../basics';
+import { DefaultToolbarConfig, SLIDE_UI_PLUGIN_NAME } from '../basics';
 import type { Toolbar } from '../views/toolbar';
 import styles from '../views/toolbar/index.module.less';
 

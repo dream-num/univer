@@ -1,6 +1,8 @@
-import { ISetRangeValuesCommandParams, SetRangeValuesCommand } from '@univerjs/sheets';
-import { CommandType, ICellData, ICommand, ICommandService, IRange, ObjectMatrix, Tools } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { ICellData, ICommand, IRange } from '@univerjs/core';
+import { CommandType, ICommandService, ObjectMatrix, Tools } from '@univerjs/core';
+import type { ISetRangeValuesCommandParams } from '@univerjs/sheets';
+import { SetRangeValuesCommand } from '@univerjs/sheets';
+import type { IAccessor } from '@wendellhu/redi';
 
 export interface IInsertFunction {
     /**

@@ -1,11 +1,3 @@
-import numfmt from '@univerjs/engine-numfmt';
-import type { INumfmtItemWithCache, ISetNumfmtMutationParams } from '@univerjs/sheets';
-import {
-    factorySetNumfmtUndoMutation,
-    INumfmtService,
-    SetNumfmtMutation,
-    SetRangeValuesCommand,
-} from '@univerjs/sheets';
 import type { Nullable } from '@univerjs/core';
 import {
     CellValueType,
@@ -16,6 +8,14 @@ import {
     OnLifecycle,
     SheetInterceptorService,
 } from '@univerjs/core';
+import numfmt from '@univerjs/engine-numfmt';
+import type { INumfmtItemWithCache, ISetNumfmtMutationParams } from '@univerjs/sheets';
+import {
+    factorySetNumfmtUndoMutation,
+    INumfmtService,
+    SetNumfmtMutation,
+    SetRangeValuesCommand,
+} from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { getPatternType } from '../utils/pattern';

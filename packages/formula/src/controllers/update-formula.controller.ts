@@ -1,14 +1,34 @@
+import type { ICellData, ICommandInfo, IRange, IUnitRange, Nullable, ObjectMatrixPrimitiveType } from '@univerjs/core';
 import {
-    FormulaEngineService,
-    generateStringWithSequence,
+    deserializeRangeWithSheet,
+    Dimension,
+    Direction,
+    Disposable,
+    ICommandService,
+    IUniverInstanceService,
+    LifecycleStages,
+    ObjectMatrix,
+    OnLifecycle,
+    Rectangle,
+    serializeRangeToRefString,
+} from '@univerjs/core';
+import type {
     IFormulaData,
     IFormulaDataItem,
     ISequenceNode,
     ISheetData,
     IUnitData,
     IUnitSheetNameMap,
-    sequenceNodeType,
 } from '@univerjs/engine-formula';
+import { FormulaEngineService, generateStringWithSequence, sequenceNodeType } from '@univerjs/engine-formula';
+import type {
+    IDeleteRangeMutationParams,
+    IInsertRangeMutationParams,
+    IMoveColumnsMutationParams,
+    IMoveRowsMutationParams,
+    ISetRangeValuesMutationParams,
+    MoveRangeMutationParams,
+} from '@univerjs/sheets';
 import {
     DeleteRangeMutation,
     EffectRefRangId,
@@ -21,42 +41,17 @@ import {
     handleIRemoveCol,
     handleIRemoveRow,
     handleMoveRange,
-    IDeleteRangeMutationParams,
-    IInsertRangeMutationParams,
-    IMoveColumnsMutationParams,
-    IMoveRowsMutationParams,
     InsertColMutation,
     InsertRangeMutation,
     InsertRowMutation,
-    ISetRangeValuesMutationParams,
     MoveColsMutation,
     MoveRangeMutation,
-    MoveRangeMutationParams,
     MoveRowsMutation,
     RemoveColMutation,
     RemoveRowMutation,
     runRefRangeMutations,
     SetRangeValuesMutation,
 } from '@univerjs/sheets';
-import {
-    deserializeRangeWithSheet,
-    Dimension,
-    Direction,
-    Disposable,
-    ICellData,
-    ICommandInfo,
-    ICommandService,
-    IRange,
-    IUnitRange,
-    IUniverInstanceService,
-    LifecycleStages,
-    Nullable,
-    ObjectMatrix,
-    ObjectMatrixPrimitiveType,
-    OnLifecycle,
-    Rectangle,
-    serializeRangeToRefString,
-} from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { FormulaDataModel } from '../models/formula-data.model';

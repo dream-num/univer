@@ -1,5 +1,3 @@
-import type { Documents, DocumentSkeleton, IRender } from '@univerjs/engine-render';
-import { IRenderManagerService, PageLayoutType } from '@univerjs/engine-render';
 import type { ICommandInfo } from '@univerjs/core';
 import {
     Disposable,
@@ -9,6 +7,8 @@ import {
     LifecycleStages,
     OnLifecycle,
 } from '@univerjs/core';
+import type { Documents, DocumentSkeleton, IRender } from '@univerjs/engine-render';
+import { IRenderManagerService, PageLayoutType } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 
 import type { IRichTextEditingMutationParams } from '../commands/mutations/core-editing.mutation';

@@ -1,9 +1,13 @@
-import { BaseValueObject, FormulaEngineService, ISheetData, RangeReferenceObject } from '@univerjs/engine-formula';
-import { ISelectionWithStyle, SelectionManagerService } from '@univerjs/sheets';
-import { Disposable, IRange, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle } from '@univerjs/core';
+import type { IRange } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle } from '@univerjs/core';
+import type { BaseValueObject, ISheetData } from '@univerjs/engine-formula';
+import { FormulaEngineService, RangeReferenceObject } from '@univerjs/engine-formula';
+import type { ISelectionWithStyle } from '@univerjs/sheets';
+import { SelectionManagerService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
-import { IStatusBarService, IStatusBarServiceStatus } from '../services/status-bar.service';
+import type { IStatusBarServiceStatus } from '../services/status-bar.service';
+import { IStatusBarService } from '../services/status-bar.service';
 
 @OnLifecycle(LifecycleStages.Ready, StatusBarController)
 export class StatusBarController extends Disposable {

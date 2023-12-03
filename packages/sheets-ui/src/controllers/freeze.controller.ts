@@ -1,38 +1,31 @@
 import { TinyColor } from '@ctrl/tinycolor';
+import type { ICommandInfo, IStyleSheet, Nullable, Observer } from '@univerjs/core';
 import {
-    CURSOR_TYPE,
-    IMouseEvent,
-    IPointerEvent,
-    IRenderManagerService,
-    IScrollObserverParam,
-    Rect,
-} from '@univerjs/engine-render';
-import {
-    DeltaColumnWidthCommand,
-    DeltaRowHeightCommand,
+    Disposable,
+    ICommandService,
+    IUniverInstanceService,
+    LifecycleStages,
+    OnLifecycle,
+    ThemeService,
+    toDisposable,
+} from '@univerjs/core';
+import type { IMouseEvent, IPointerEvent, IScrollObserverParam } from '@univerjs/engine-render';
+import { CURSOR_TYPE, IRenderManagerService, Rect } from '@univerjs/engine-render';
+import type {
     IDeltaColumnWidthCommandParams,
     IDeltaRowHeightCommand,
     ISetFrozenMutationParams,
     ISetWorksheetRowAutoHeightMutationParams,
+} from '@univerjs/sheets';
+import {
+    DeltaColumnWidthCommand,
+    DeltaRowHeightCommand,
     SelectionManagerService,
     SetFrozenCommand,
     SetFrozenMutation,
     SetWorksheetActivateMutation,
     SetWorksheetRowAutoHeightMutation,
 } from '@univerjs/sheets';
-import {
-    Disposable,
-    ICommandInfo,
-    ICommandService,
-    IStyleSheet,
-    IUniverInstanceService,
-    LifecycleStages,
-    Nullable,
-    Observer,
-    OnLifecycle,
-    ThemeService,
-    toDisposable,
-} from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { ScrollCommand } from '../commands/commands/set-scroll.command';

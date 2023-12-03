@@ -1,7 +1,15 @@
-import { IRenderManagerService } from '@univerjs/engine-render';
+import type { IKeyValue, Workbook, Worksheet } from '@univerjs/core';
 import {
-    ISetSpecificColsVisibleCommandParams,
-    ISetSpecificRowsVisibleCommandParams,
+    getWorksheetUID,
+    ICommandService,
+    IUniverInstanceService,
+    LifecycleStages,
+    OnLifecycle,
+    RxDisposable,
+} from '@univerjs/core';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import type { ISetSpecificColsVisibleCommandParams, ISetSpecificRowsVisibleCommandParams } from '@univerjs/sheets';
+import {
     SetColHiddenMutation,
     SetColVisibleMutation,
     SetRowHiddenMutation,
@@ -9,17 +17,6 @@ import {
     SetSpecificColsVisibleCommand,
     SetSpecificRowsVisibleCommand,
 } from '@univerjs/sheets';
-import {
-    getWorksheetUID,
-    ICommandService,
-    IKeyValue,
-    IUniverInstanceService,
-    LifecycleStages,
-    OnLifecycle,
-    RxDisposable,
-    Workbook,
-    Worksheet,
-} from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import { takeUntil } from 'rxjs';
 

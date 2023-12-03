@@ -1,14 +1,15 @@
 /* eslint-disable no-magic-numbers */
-import { Injector } from '@wendellhu/redi';
+import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { Univer } from '../../../basics/univer';
-import { Nullable } from '../../../common/type-utils';
-import { ICellData } from '../../../types/interfaces/i-cell-data';
+import type { Univer } from '../../../basics/univer';
+import type { Nullable } from '../../../common/type-utils';
+import type { ICellData } from '../../../types/interfaces/i-cell-data';
 import { IUniverInstanceService } from '../../instance/instance.service';
 import { INTERCEPTOR_POINT } from '../interceptor-const';
 import { SheetInterceptorService } from '../sheet-interceptor.service';
-import { createInterceptorKey, ISheetLocation } from '../utils/interceptor';
+import type { ISheetLocation } from '../utils/interceptor';
+import { createInterceptorKey } from '../utils/interceptor';
 import { createCoreTestBed } from './create-core-test-bed';
 
 describe('Test SheetInterceptorService', () => {

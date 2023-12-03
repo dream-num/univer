@@ -1,5 +1,5 @@
 import { deleteContent } from '../../../shared';
-import { IDocumentBody } from '../../../types/interfaces';
+import type { IDocumentBody } from '../../../types/interfaces';
 import {
     deleteCustomBlocks,
     deleteCustomRanges,

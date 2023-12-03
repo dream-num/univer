@@ -1,6 +1,7 @@
-import { IFormulaData } from '@univerjs/engine-formula';
-import { CommandType, IMutation } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { IMutation } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
+import type { IFormulaData } from '@univerjs/engine-formula';
+import type { IAccessor } from '@wendellhu/redi';
 
 import { FormulaDataModel } from '../../models/formula-data.model';
 

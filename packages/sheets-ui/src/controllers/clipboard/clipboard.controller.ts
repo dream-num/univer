@@ -1,20 +1,3 @@
-import type {
-    IInsertColMutationParams,
-    IInsertRowMutationParams,
-    ISetRangeValuesMutationParams,
-    ISetWorksheetColWidthMutationParams,
-    ISetWorksheetRowHeightMutationParams,
-} from '@univerjs/sheets';
-import {
-    InsertColMutation,
-    InsertRowMutation,
-    MAX_CELL_PER_SHEET_KEY,
-    SetRangeValuesMutation,
-    SetRangeValuesUndoMutationFactory,
-    SetWorksheetColWidthMutation,
-    SetWorksheetRowHeightMutation,
-} from '@univerjs/sheets';
-import { IMessageService, textTrim } from '@univerjs/ui';
 import type { ICellData, IMutationInfo, IRange, IRowData, ObjectMatrixPrimitiveType, Worksheet } from '@univerjs/core';
 import {
     BooleanNumber,
@@ -32,6 +15,23 @@ import {
     OnLifecycle,
 } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
+import type {
+    IInsertColMutationParams,
+    IInsertRowMutationParams,
+    ISetRangeValuesMutationParams,
+    ISetWorksheetColWidthMutationParams,
+    ISetWorksheetRowHeightMutationParams,
+} from '@univerjs/sheets';
+import {
+    InsertColMutation,
+    InsertRowMutation,
+    MAX_CELL_PER_SHEET_KEY,
+    SetRangeValuesMutation,
+    SetRangeValuesUndoMutationFactory,
+    SetWorksheetColWidthMutation,
+    SetWorksheetRowHeightMutation,
+} from '@univerjs/sheets';
+import { IMessageService, textTrim } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import {

@@ -1,10 +1,10 @@
-import { Nullable } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
 
 import { RENDER_CLASS_TYPE } from '../../basics/const';
-import { IBoundRect, Vector2 } from '../../basics/vector2';
+import type { IBoundRect, Vector2 } from '../../basics/vector2';
 import { RenderComponent } from '../component';
-import { SHEET_EXTENSION_TYPE } from './extensions/sheet-extension';
-import { SpreadsheetSkeleton } from './sheet-skeleton';
+import type { SHEET_EXTENSION_TYPE } from './extensions/sheet-extension';
+import type { SpreadsheetSkeleton } from './sheet-skeleton';
 
 export class SheetComponent extends RenderComponent<SpreadsheetSkeleton, SHEET_EXTENSION_TYPE> {
     // protected _cacheCanvas = new Canvas();

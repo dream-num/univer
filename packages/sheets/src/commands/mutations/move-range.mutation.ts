@@ -1,11 +1,5 @@
-import {
-    CommandType,
-    ICellData,
-    IMutation,
-    IUniverInstanceService,
-    ObjectMatrix,
-    ObjectMatrixPrimitiveType,
-} from '@univerjs/core';
+import type { ICellData, IMutation, ObjectMatrixPrimitiveType } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
 
 export interface MoveRangeMutationParams {
     workbookId: string;

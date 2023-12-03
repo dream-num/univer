@@ -1,7 +1,9 @@
-import { CommandType, ICommand } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { ICommand } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
 
-import { IFormulaPromptService, ISearchFunctionOperationParams } from '../../services/prompt.service';
+import type { ISearchFunctionOperationParams } from '../../services/prompt.service';
+import { IFormulaPromptService } from '../../services/prompt.service';
 
 export const SearchFunctionOperation: ICommand = {
     id: 'formula-ui.operation.search-function',

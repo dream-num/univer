@@ -1,6 +1,6 @@
-import { handleStringToStyle } from '@univerjs/ui';
 import type { IDocumentBody, ITextRun, ITextStyle, Nullable } from '@univerjs/core';
 import { ObjectMatrix } from '@univerjs/core';
+import { handleStringToStyle } from '@univerjs/ui';
 
 import { genId } from '../copy-content-cache';
 import type {

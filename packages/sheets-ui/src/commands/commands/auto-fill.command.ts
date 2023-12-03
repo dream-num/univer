@@ -1,29 +1,21 @@
+import type { ICellData, ICommand, IMutationInfo, IRange, ObjectMatrixPrimitiveType } from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
+import type {
+    IAddWorksheetMergeMutationParams,
+    IRemoveWorksheetMergeMutationParams,
+    ISetRangeValuesMutationParams,
+} from '@univerjs/sheets';
 import {
     AddMergeUndoMutationFactory,
     AddWorksheetMergeMutation,
     getAddMergeMutationRangeByType,
-    IAddWorksheetMergeMutationParams,
-    IRemoveWorksheetMergeMutationParams,
-    ISetRangeValuesMutationParams,
     RemoveMergeUndoMutationFactory,
     RemoveWorksheetMergeMutation,
     SetRangeValuesMutation,
     SetRangeValuesUndoMutationFactory,
     SetSelectionsOperation,
 } from '@univerjs/sheets';
-import {
-    CommandType,
-    ICellData,
-    ICommand,
-    ICommandService,
-    IMutationInfo,
-    IRange,
-    IUndoRedoService,
-    IUniverInstanceService,
-    ObjectMatrix,
-    ObjectMatrixPrimitiveType,
-} from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { IAccessor } from '@wendellhu/redi';
 
 export interface IAutoFillCommandParams {
     worksheetId?: string;

@@ -1,10 +1,12 @@
 // import { IShapeProps, Shape, IObjectFullState, Group, Scene } from '.';
 
-import { IKeyValue } from '@univerjs/core';
+import type { IKeyValue } from '@univerjs/core';
 
-import { IObjectFullState, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '../basics/interfaces';
-import { IPoint } from '../basics/vector2';
-import { IShapeProps, Shape } from './shape';
+import type { IObjectFullState } from '../basics/interfaces';
+import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '../basics/interfaces';
+import type { IPoint } from '../basics/vector2';
+import type { IShapeProps } from './shape';
+import { Shape } from './shape';
 
 export interface IRegularPolygonProps extends IShapeProps {
     pointsGroup: IPoint[][];

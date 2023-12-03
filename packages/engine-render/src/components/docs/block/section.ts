@@ -1,9 +1,9 @@
 import { DataStreamTreeNodeType } from '@univerjs/core';
 
-import { IDocumentSkeletonPage, ISkeletonResourceReference } from '../../../basics/i-document-skeleton-cached';
-import { ISectionBreakConfig } from '../../../basics/interfaces';
-import { DataStreamTreeNode } from '../view-model/data-stream-tree-node';
-import { DocumentViewModel } from '../view-model/document-view-model';
+import type { IDocumentSkeletonPage, ISkeletonResourceReference } from '../../../basics/i-document-skeleton-cached';
+import type { ISectionBreakConfig } from '../../../basics/interfaces';
+import type { DataStreamTreeNode } from '../view-model/data-stream-tree-node';
+import type { DocumentViewModel } from '../view-model/document-view-model';
 import { dealWithBlockError } from './block-error';
 // eslint-disable-next-line import/no-cycle
 import { dealWidthParagraph } from './paragraph';

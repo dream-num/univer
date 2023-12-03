@@ -1,6 +1,8 @@
-import { checkParagraphHasIndentByStyle, DataStreamTreeTokenType, IDocumentBody, Nullable } from '@univerjs/core';
+import type { IDocumentBody, Nullable } from '@univerjs/core';
+import { checkParagraphHasIndentByStyle, DataStreamTreeTokenType } from '@univerjs/core';
 
-import { IDocumentSkeletonSpan, SpanType } from './i-document-skeleton-cached';
+import type { IDocumentSkeletonSpan } from './i-document-skeleton-cached';
+import { SpanType } from './i-document-skeleton-cached';
 
 export function hasListSpan(span: Nullable<IDocumentSkeletonSpan>) {
     const divide = span?.parent;

@@ -1,7 +1,9 @@
-import { CommandType, ICommand, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { ICommand } from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
 
-import { IInsertDrawingMutation, InsertDrawingMutation } from '../mutations/insert-floating-object.mutation';
+import type { IInsertDrawingMutation } from '../mutations/insert-floating-object.mutation';
+import { InsertDrawingMutation } from '../mutations/insert-floating-object.mutation';
 import { RemoveDrawingMutation } from '../mutations/remove-floating-object.mutation';
 
 export const InsertDrawingCommand: ICommand = {

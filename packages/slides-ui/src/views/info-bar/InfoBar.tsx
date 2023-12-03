@@ -1,6 +1,6 @@
-import type { BaseComponentProps } from '@univerjs/ui';
 import type { Nullable } from '@univerjs/core';
 import { Container, Input, Tooltip } from '@univerjs/design';
+import type { BaseComponentProps } from '@univerjs/ui';
 import React, { Component } from 'react';
 
 import type { BaseInfoBarProps } from '../../controllers/info-bar-ui-controller';

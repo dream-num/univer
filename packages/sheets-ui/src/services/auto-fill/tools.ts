@@ -1,4 +1,5 @@
-import { Direction, ICellData, IRange, Nullable, Tools } from '@univerjs/core';
+import type { ICellData, IRange, Nullable } from '@univerjs/core';
+import { Direction, Tools } from '@univerjs/core';
 
 export const chnNumChar = { 零: 0, 一: 1, 二: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9 };
 export const chnNumChar2 = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九'];

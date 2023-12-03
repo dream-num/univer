@@ -1,6 +1,7 @@
-import { Disposable, IRange, IUnitRange, Nullable } from '@univerjs/core';
+import type { IRange, IUnitRange, Nullable } from '@univerjs/core';
+import { Disposable } from '@univerjs/core';
 
-import { BaseAstNode } from '../ast-node/base-ast-node';
+import type { BaseAstNode } from '../ast-node/base-ast-node';
 
 export enum FDtreeStateType {
     DEFAULT,

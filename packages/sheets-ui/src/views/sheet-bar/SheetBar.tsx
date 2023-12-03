@@ -1,6 +1,6 @@
-import { InsertSheetCommand } from '@univerjs/sheets';
 import { ICommandService } from '@univerjs/core';
 import { IncreaseSingle, MoreSingle } from '@univerjs/icons';
+import { InsertSheetCommand } from '@univerjs/sheets';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 

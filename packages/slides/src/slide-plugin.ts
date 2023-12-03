@@ -1,6 +1,8 @@
-import { Engine, IRenderingEngine } from '@univerjs/engine-render';
 import { IUniverInstanceService, LocaleService, Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
-import { Dependency, Inject, Injector } from '@wendellhu/redi';
+import type { Engine } from '@univerjs/engine-render';
+import { IRenderingEngine } from '@univerjs/engine-render';
+import type { Dependency } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 
 import { enUS } from './locale';
 import { CanvasView } from './views/render';

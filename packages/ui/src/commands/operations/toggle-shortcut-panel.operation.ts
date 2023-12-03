@@ -1,5 +1,6 @@
-import { CommandType, IOperation } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { IOperation } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
 
 import { ShortcutPanelService } from '../../services/shortcut/shortcut-panel.service';
 import { ISidebarService } from '../../services/sidebar/sidebar.service';

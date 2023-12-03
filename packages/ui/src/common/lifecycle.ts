@@ -1,5 +1,5 @@
 import { toDisposable } from '@univerjs/core';
-import { IDisposable } from '@wendellhu/redi';
+import type { IDisposable } from '@wendellhu/redi';
 
 export function fromDocumentEvent<K extends keyof DocumentEventMap>(
     type: K,

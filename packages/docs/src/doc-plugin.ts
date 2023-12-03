@@ -1,5 +1,3 @@
-import { ITextSelectionRenderManager, TextSelectionRenderManager } from '@univerjs/engine-render';
-import { IShortcutService } from '@univerjs/ui';
 import type { ICommand } from '@univerjs/core';
 import {
     ICommandService,
@@ -10,6 +8,8 @@ import {
     PLUGIN_NAMES,
     PluginType,
 } from '@univerjs/core';
+import { ITextSelectionRenderManager, TextSelectionRenderManager } from '@univerjs/engine-render';
+import { IShortcutService } from '@univerjs/ui';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 

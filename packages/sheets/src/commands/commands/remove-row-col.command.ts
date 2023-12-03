@@ -1,19 +1,17 @@
+import type { ICommand, IRange, Nullable } from '@univerjs/core';
 import {
     CommandType,
     Dimension,
-    ICommand,
     ICommandService,
-    IRange,
     IUndoRedoService,
     IUniverInstanceService,
-    Nullable,
     Rectangle,
     sequenceExecute,
     SheetInterceptorService,
 } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { IAccessor } from '@wendellhu/redi';
 
-import {
+import type {
     IDeleteRangeMutationParams,
     IInsertColMutationParams,
     IInsertRangeMutationParams,

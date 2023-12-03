@@ -1,11 +1,11 @@
-import { IKeyValue, Nullable } from '@univerjs/core';
+import type { IKeyValue, Nullable } from '@univerjs/core';
 
 import { BaseObject } from './base-object';
 import { RENDER_CLASS_TYPE } from './basics/const';
-import { IObjectFullState } from './basics/interfaces';
+import type { IObjectFullState } from './basics/interfaces';
 import { transformBoundingCoord } from './basics/position';
-import { IBoundRect, Vector2 } from './basics/vector2';
-import { ThinScene } from './thin-scene';
+import type { IBoundRect, Vector2 } from './basics/vector2';
+import type { ThinScene } from './thin-scene';
 
 export class SceneViewer extends BaseObject {
     private _subScenes = new Map<string, ThinScene>();

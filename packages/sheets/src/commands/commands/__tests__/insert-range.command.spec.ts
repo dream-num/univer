@@ -1,19 +1,14 @@
+import type { ICellData, IRange, IStyleData, IWorkbookData, Nullable, Univer } from '@univerjs/core';
 import {
-    ICellData,
     ICommandService,
-    IRange,
-    IStyleData,
     IUniverInstanceService,
-    IWorkbookData,
     LocaleType,
-    Nullable,
     RANGE_TYPE,
     Rectangle,
     RedoCommand,
     UndoCommand,
-    Univer,
 } from '@univerjs/core';
-import { Injector } from '@wendellhu/redi';
+import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { MergeCellController } from '../../../controllers/merge-cell.controller';

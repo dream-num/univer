@@ -1,3 +1,11 @@
+import type { Univer } from '@univerjs/core';
+import {
+    DisposableCollection,
+    ICommandService,
+    IUniverInstanceService,
+    RANGE_TYPE,
+    toDisposable,
+} from '@univerjs/core';
 import {
     NORMAL_SELECTION_PLUGIN_NAME,
     SelectionManagerService,
@@ -13,15 +21,7 @@ import {
     SetSpecificColsVisibleCommand,
     SetSpecificRowsVisibleCommand,
 } from '@univerjs/sheets';
-import { ISetSelectionsOperationParams } from '@univerjs/sheets/commands/operations/selection.operation.js';
-import {
-    DisposableCollection,
-    ICommandService,
-    IUniverInstanceService,
-    RANGE_TYPE,
-    toDisposable,
-    Univer,
-} from '@univerjs/core';
+import type { ISetSelectionsOperationParams } from '@univerjs/sheets/commands/operations/selection.operation.js';
 import { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 

@@ -1,4 +1,4 @@
-import { BooleanNumber } from '@univerjs/core';
+import type { BooleanNumber } from '@univerjs/core';
 
 /**
  * Function type, refer to https://support.microsoft.com/en-us/office/excel-functions-by-category-5f91f4e9-7b42-46d2-9bd1-63f26a86c0eb

@@ -1,15 +1,8 @@
 /* eslint-disable no-magic-numbers */
 
-import {
-    ICommand,
-    ICommandService,
-    IDocumentData,
-    IUniverInstanceService,
-    RedoCommand,
-    UndoCommand,
-    Univer,
-} from '@univerjs/core';
-import { Injector } from '@wendellhu/redi';
+import type { ICommand, IDocumentData, Univer } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, RedoCommand, UndoCommand } from '@univerjs/core';
+import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { NORMAL_TEXT_SELECTION_PLUGIN_NAME } from '../../../basics/docs-view-key';

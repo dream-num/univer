@@ -1,5 +1,5 @@
-import { IRenderManagerService } from '@univerjs/engine-render';
 import { Disposable, LifecycleService, LifecycleStages, toDisposable } from '@univerjs/core';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';

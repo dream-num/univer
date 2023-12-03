@@ -1,5 +1,6 @@
-import { Nullable, Tools, UpdateDocsAttributeType } from '../../../shared';
-import {
+import type { Nullable } from '../../../shared';
+import { Tools, UpdateDocsAttributeType } from '../../../shared';
+import type {
     ICustomBlock,
     ICustomRange,
     IDocumentBody,

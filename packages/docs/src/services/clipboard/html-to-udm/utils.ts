@@ -1,4 +1,4 @@
-import { IParagraphStyle, Nullable } from '@univerjs/core';
+import type { IParagraphStyle, Nullable } from '@univerjs/core';
 
 // TODO: @JOCS, Complete other missing attributes that exist in IParagraphStyle
 export function getParagraphStyle(el: HTMLElement): Nullable<IParagraphStyle> {

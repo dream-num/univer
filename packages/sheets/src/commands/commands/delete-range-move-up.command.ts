@@ -1,19 +1,19 @@
+import type { ICommand, IMutationInfo, IRange, Nullable } from '@univerjs/core';
 import {
     CommandType,
     Dimension,
-    ICommand,
     ICommandService,
-    IMutationInfo,
-    IRange,
     IUndoRedoService,
     IUniverInstanceService,
-    Nullable,
     sequenceExecute,
     SheetInterceptorService,
 } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { IAccessor } from '@wendellhu/redi';
 
-import { IDeleteRangeMutationParams, IInsertRangeMutationParams } from '../../basics/interfaces/mutation-interface';
+import type {
+    IDeleteRangeMutationParams,
+    IInsertRangeMutationParams,
+} from '../../basics/interfaces/mutation-interface';
 import { SelectionManagerService } from '../../services/selection-manager.service';
 import { DeleteRangeMutation, DeleteRangeUndoMutationFactory } from '../mutations/delete-range.mutation';
 import { InsertRangeMutation } from '../mutations/insert-range.mutation';

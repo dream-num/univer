@@ -1,11 +1,11 @@
-import { BorderStyleTypes, IRange, IScale, ObjectMatrix } from '@univerjs/core';
+import type { BorderStyleTypes, IRange, IScale, ObjectMatrix } from '@univerjs/core';
 
 import { BORDER_TYPE, COLOR_BLACK_RGB } from '../../../basics/const';
 import { drawLineByBorderType, getLineWidth, setLineType } from '../../../basics/draw';
 import { fixLineWidthByScale } from '../../../basics/tools';
 import { SpreadsheetExtensionRegistry } from '../../extension';
-import { BorderCacheItem } from '../interfaces';
-import { SpreadsheetSkeleton } from '../sheet-skeleton';
+import type { BorderCacheItem } from '../interfaces';
+import type { SpreadsheetSkeleton } from '../sheet-skeleton';
 import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultBorderExtension';

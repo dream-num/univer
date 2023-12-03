@@ -1,8 +1,9 @@
-import { CommandType, ICommand } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { ICommand } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
 
 import { IAutoFillService } from '../../services/auto-fill/auto-fill.service';
-import { APPLY_TYPE } from '../../services/auto-fill/type';
+import type { APPLY_TYPE } from '../../services/auto-fill/type';
 
 interface IRefillCommandParams {
     type: APPLY_TYPE;

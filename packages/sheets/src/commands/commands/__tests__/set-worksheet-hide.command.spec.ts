@@ -1,12 +1,6 @@
-import {
-    BooleanNumber,
-    ICommandService,
-    IUniverInstanceService,
-    RedoCommand,
-    UndoCommand,
-    Univer,
-} from '@univerjs/core';
-import { Injector } from '@wendellhu/redi';
+import type { Univer } from '@univerjs/core';
+import { BooleanNumber, ICommandService, IUniverInstanceService, RedoCommand, UndoCommand } from '@univerjs/core';
+import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { InsertSheetMutation } from '../../mutations/insert-sheet.mutation';

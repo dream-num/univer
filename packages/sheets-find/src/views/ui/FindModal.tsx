@@ -1,5 +1,5 @@
-import type { BaseComponentProps } from '@univerjs/ui';
 import type { ICheckboxGroupProps } from '@univerjs/design';
+import type { BaseComponentProps } from '@univerjs/ui';
 import React, { Component } from 'react';
 
 interface searchResult {

@@ -1,7 +1,7 @@
-import type { FormatType } from '@univerjs/sheets';
-import { factorySetNumfmtUndoMutation, SetNumfmtMutation } from '@univerjs/sheets';
 import type { ICommand } from '@univerjs/core';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
+import type { FormatType } from '@univerjs/sheets';
+import { factorySetNumfmtUndoMutation, SetNumfmtMutation } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 
 export interface ISetNumfmtCommandParams {

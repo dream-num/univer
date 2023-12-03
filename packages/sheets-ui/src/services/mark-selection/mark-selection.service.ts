@@ -1,8 +1,8 @@
+import type { ICommandInfo } from '@univerjs/core';
+import { Disposable, ICommandService, IUniverInstanceService, ThemeService, Tools } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import { SelectionManagerService } from '@univerjs/sheets';
-import type { ICommandInfo } from '@univerjs/core';
-import { Disposable, ICommandService, IUniverInstanceService, ThemeService, Tools } from '@univerjs/core';
 import { createIdentifier, Inject } from '@wendellhu/redi';
 
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';

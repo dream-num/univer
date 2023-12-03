@@ -1,8 +1,10 @@
-import { ICommandService, IUniverInstanceService, Univer, UniverPermissionService } from '@univerjs/core';
-import { Injector } from '@wendellhu/redi';
+import type { Univer } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, UniverPermissionService } from '@univerjs/core';
+import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { ISetRangeValuesCommandParams, SetRangeValuesCommand } from '../../commands/commands/set-range-values.command';
+import type { ISetRangeValuesCommandParams } from '../../commands/commands/set-range-values.command';
+import { SetRangeValuesCommand } from '../../commands/commands/set-range-values.command';
 import { SetRangeValuesMutation } from '../../commands/mutations/set-range-values.mutation';
 import { SheetEditablePermission, SheetPermissionService } from '../permission';
 import { SelectionManagerService } from '../selection-manager.service';

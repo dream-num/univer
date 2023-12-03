@@ -1,8 +1,9 @@
 /* eslint-disable no-magic-numbers */
 
+import type { IWorkbookData, Univer } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, RANGE_TYPE } from '@univerjs/core';
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '@univerjs/sheets';
-import { ICommandService, IUniverInstanceService, IWorkbookData, RANGE_TYPE, Univer } from '@univerjs/core';
-import { Injector } from '@wendellhu/redi';
+import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import {

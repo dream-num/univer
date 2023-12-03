@@ -1,35 +1,22 @@
-import {
-    IMouseEvent,
-    IPointerEvent,
-    Scene,
-    ScrollTimer,
-    ScrollTimerType,
-    SpreadsheetSkeleton,
-    Vector2,
-    Viewport,
-} from '@univerjs/engine-render';
-import {
-    getNormalSelectionStyle,
-    ISelectionStyle,
-    ISelectionWithCoordAndStyle,
-    ISelectionWithStyle,
-} from '@univerjs/sheets';
-import {
+import type {
     IRange,
     IRangeWithCoord,
     ISelectionCell,
     ISelectionCellWithCoord,
     ISelectionWithCoord,
-    makeCellToSelection,
     Nullable,
     Observer,
-    RANGE_TYPE,
-    ThemeService,
 } from '@univerjs/core';
+import { makeCellToSelection, RANGE_TYPE, ThemeService } from '@univerjs/core';
+import type { IMouseEvent, IPointerEvent, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
+import { ScrollTimer, ScrollTimerType, Vector2 } from '@univerjs/engine-render';
+import type { ISelectionStyle, ISelectionWithCoordAndStyle, ISelectionWithStyle } from '@univerjs/sheets';
+import { getNormalSelectionStyle } from '@univerjs/sheets';
 import { createIdentifier, Inject } from '@wendellhu/redi';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
-import { SelectionRenderModel } from './selection-render-model';
+import type { SelectionRenderModel } from './selection-render-model';
 import { SelectionShape } from './selection-shape';
 import { SelectionShapeExtension } from './selection-shape-extension';
 

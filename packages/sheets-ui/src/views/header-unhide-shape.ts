@@ -1,4 +1,5 @@
-import { IShapeProps, Rect, RegularPolygon, Shape } from '@univerjs/engine-render';
+import type { IShapeProps } from '@univerjs/engine-render';
+import { Rect, RegularPolygon, Shape } from '@univerjs/engine-render';
 
 import { HEADER_MENU_BACKGROUND_COLOR, HEADER_MENU_SHAPE_TRIANGLE_FILL } from './header-menu-shape';
 

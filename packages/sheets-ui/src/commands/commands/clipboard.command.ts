@@ -1,6 +1,6 @@
-import { CopyCommand, CutCommand, IClipboardInterfaceService, PasteCommand } from '@univerjs/ui';
 import type { ICommand, IMultiCommand } from '@univerjs/core';
 import { CommandType, ICommandService, ILogService } from '@univerjs/core';
+import { CopyCommand, CutCommand, IClipboardInterfaceService, PasteCommand } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 
 import { whenEditorNotActivated } from '../../controllers/shortcuts/utils';

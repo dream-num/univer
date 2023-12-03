@@ -1,4 +1,5 @@
-import { CommandType, Direction, IOperation } from '@univerjs/core';
+import type { Direction, IOperation } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
 
 export interface IMoveCursorOperationParams {
     direction: Direction;

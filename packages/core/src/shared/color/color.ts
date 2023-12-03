@@ -1,6 +1,7 @@
-import { Nullable } from '../../common/type-utils';
+import type { Nullable } from '../../common/type-utils';
 import { THEME_COLORS } from '../../types/const/theme-color-map';
-import { ColorType, ThemeColors, ThemeColorType } from '../../types/enum';
+import type { ThemeColors, ThemeColorType } from '../../types/enum';
+import { ColorType } from '../../types/enum';
 import { ColorBuilder } from './color-builder';
 
 export class Color {

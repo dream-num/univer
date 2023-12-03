@@ -1,4 +1,4 @@
-import { IKeyValue, Nullable } from './types';
+import type { IKeyValue, Nullable } from './types';
 
 /**
  * Predicate Function type
@@ -18,7 +18,10 @@ export type UnaryOperatorFunction<T> = (value: T) => T;
 /**
  * Object Array Primitive Type
  */
-export type ObjectArrayPrimitiveType<T> = { [key: number]: T; length?: number };
+export interface ObjectArrayPrimitiveType<T> {
+    [key: number]: T;
+    length?: number;
+}
 
 /**
  * Object Array Type

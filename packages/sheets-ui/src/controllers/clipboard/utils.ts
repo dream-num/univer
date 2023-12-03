@@ -1,3 +1,5 @@
+import type { ICellData, IMutationInfo, IRange } from '@univerjs/core';
+import { IUniverInstanceService, ObjectMatrix, Rectangle, SheetInterceptorService } from '@univerjs/core';
 import type {
     IAddWorksheetMergeMutationParams,
     IRemoveWorksheetMergeMutationParams,
@@ -16,8 +18,6 @@ import {
     SetRangeValuesUndoMutationFactory,
     SetSelectionsOperation,
 } from '@univerjs/sheets';
-import type { ICellData, IMutationInfo, IRange } from '@univerjs/core';
-import { IUniverInstanceService, ObjectMatrix, Rectangle, SheetInterceptorService } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
 import type { ICellDataWithSpanInfo } from '../../services/clipboard/type';

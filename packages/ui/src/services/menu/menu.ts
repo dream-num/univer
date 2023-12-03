@@ -1,5 +1,5 @@
-import { IAccessor } from '@wendellhu/redi';
-import { Observable } from 'rxjs';
+import type { IAccessor } from '@wendellhu/redi';
+import type { Observable } from 'rxjs';
 
 export type OneOrMany<T> = T | T[];
 

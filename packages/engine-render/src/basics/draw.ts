@@ -1,8 +1,9 @@
 /* eslint-disable no-magic-numbers */
-import { BorderStyleTypes, IPosition } from '@univerjs/core';
+import type { IPosition } from '@univerjs/core';
+import { BorderStyleTypes } from '@univerjs/core';
 
 import { BORDER_TYPE, ORIENTATION_TYPE } from './const';
-import { IDocumentSkeletonLine } from './i-document-skeleton-cached';
+import type { IDocumentSkeletonLine } from './i-document-skeleton-cached';
 import { createCanvasElement } from './tools';
 import { Vector2 } from './vector2';
 

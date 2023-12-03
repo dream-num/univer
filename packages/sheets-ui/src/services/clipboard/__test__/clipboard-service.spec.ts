@@ -1,3 +1,5 @@
+import type { ICellData, IRange, IStyleData, Nullable, Univer } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, RANGE_TYPE, Rectangle } from '@univerjs/core';
 import {
     AddWorksheetMergeMutation,
     NORMAL_SELECTION_PLUGIN_NAME,
@@ -8,8 +10,6 @@ import {
     SetWorksheetColWidthMutation,
     SetWorksheetRowHeightMutation,
 } from '@univerjs/sheets';
-import type { ICellData, IRange, IStyleData, Nullable, Univer } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, RANGE_TYPE, Rectangle } from '@univerjs/core';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, it, vi } from 'vitest';
 

@@ -1,23 +1,14 @@
-import {
-    BooleanNumber,
-    CommandType,
-    ICommand,
-    ICommandService,
-    IUndoRedoService,
-    IUniverInstanceService,
-} from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { ICommand } from '@univerjs/core';
+import { BooleanNumber, CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
 
+import type { ISetWorksheetActivateMutationParams } from '../mutations/set-worksheet-activate.mutation';
 import {
-    ISetWorksheetActivateMutationParams,
     SetWorksheetActivateMutation,
     SetWorksheetUnActivateMutationFactory,
 } from '../mutations/set-worksheet-activate.mutation';
-import {
-    ISetWorksheetHideMutationParams,
-    SetWorksheetHideMutation,
-    SetWorksheetHideMutationFactory,
-} from '../mutations/set-worksheet-hide.mutation';
+import type { ISetWorksheetHideMutationParams } from '../mutations/set-worksheet-hide.mutation';
+import { SetWorksheetHideMutation, SetWorksheetHideMutationFactory } from '../mutations/set-worksheet-hide.mutation';
 
 export interface ISetWorksheetHiddenCommandParams {
     worksheetId?: string;

@@ -1,8 +1,9 @@
+import type { EventState, ICellData, IPageElement } from '@univerjs/core';
+import { LocaleService, ObjectMatrix, PageElementType, Styles } from '@univerjs/core';
+import type { IScrollObserverParam, IWheelEvent } from '@univerjs/engine-render';
 import {
     EVENT_TYPE,
     getColor,
-    IScrollObserverParam,
-    IWheelEvent,
     Rect,
     Scene,
     SceneViewer,
@@ -13,16 +14,8 @@ import {
     SpreadsheetSkeleton,
     Viewport,
 } from '@univerjs/engine-render';
-import {
-    EventState,
-    ICellData,
-    IPageElement,
-    LocaleService,
-    ObjectMatrix,
-    PageElementType,
-    Styles,
-} from '@univerjs/core';
-import { Inject, Injector } from '@wendellhu/redi';
+import type { Injector } from '@wendellhu/redi';
+import { Inject } from '@wendellhu/redi';
 
 import { CanvasObjectProviderRegistry, ObjectAdaptor } from '../adaptor';
 

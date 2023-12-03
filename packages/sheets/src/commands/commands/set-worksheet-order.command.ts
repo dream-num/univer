@@ -1,8 +1,9 @@
-import { CommandType, ICommand, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { ICommand } from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
 
+import type { ISetWorksheetOrderMutationParams } from '../mutations/set-worksheet-order.mutation';
 import {
-    ISetWorksheetOrderMutationParams,
     SetWorksheetOrderMutation,
     SetWorksheetOrderUndoMutationFactory,
 } from '../mutations/set-worksheet-order.mutation';

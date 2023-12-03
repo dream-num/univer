@@ -1,9 +1,9 @@
 import { ErrorType } from '../basics/error-type';
 import { FUNCTION_NAMES } from '../basics/function';
 import { ErrorValueObject } from '../other-object/error-value-object';
-import { FunctionVariantType } from '../reference-object/base-reference-object';
+import type { FunctionVariantType } from '../reference-object/base-reference-object';
 import { IFunctionService } from '../services/function.service';
-import { BaseValueObject } from '../value-object/base-value-object';
+import type { BaseValueObject } from '../value-object/base-value-object';
 import { BaseFunction } from './base-function';
 
 export class Average extends BaseFunction {

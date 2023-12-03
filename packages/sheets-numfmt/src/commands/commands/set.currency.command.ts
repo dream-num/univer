@@ -1,6 +1,6 @@
-import { SelectionManagerService } from '@univerjs/sheets';
 import type { ICommand } from '@univerjs/core';
 import { CommandType, ICommandService, Range } from '@univerjs/core';
+import { SelectionManagerService } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 
 import { CURRENCYFORMAT } from '../../base/const/FORMATDETAIL';

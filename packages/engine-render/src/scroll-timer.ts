@@ -1,4 +1,4 @@
-import { IPaddingData, Nullable } from '@univerjs/core';
+import type { IPaddingData, Nullable } from '@univerjs/core';
 
 import { RENDER_CLASS_TYPE } from './basics/const';
 import { cancelRequestFrame, requestNewFrame } from './basics/tools';

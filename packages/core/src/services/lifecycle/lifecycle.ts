@@ -1,4 +1,4 @@
-import { Ctor, DependencyIdentifier } from '@wendellhu/redi';
+import type { Ctor, DependencyIdentifier } from '@wendellhu/redi';
 
 /**
  * This enum defines multiple lifecycle stages in Univer SDK.

@@ -1,5 +1,6 @@
-import { CommandType, IMutation, IUniverInstanceService, Tools } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { IMutation } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, Tools } from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
 
 export interface ISetTabColorMutationParams {
     color: string;

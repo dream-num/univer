@@ -1,10 +1,11 @@
 // This file provides operations to change formula selection of sheets.
 
-import { DeviceInputEventType } from '@univerjs/engine-render';
-import { KeyCode, MetaKeys } from '@univerjs/ui';
-import { CommandType, IOperation } from '@univerjs/core';
+import type { IOperation } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
+import type { DeviceInputEventType } from '@univerjs/engine-render';
+import type { KeyCode, MetaKeys } from '@univerjs/ui';
 
-import { META_KEY_CTRL_AND_SHIFT } from '../../common/prompt';
+import type { META_KEY_CTRL_AND_SHIFT } from '../../common/prompt';
 
 export interface ISelectEditorFormulaOperationParam {
     eventType: DeviceInputEventType;

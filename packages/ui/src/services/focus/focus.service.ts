@@ -1,14 +1,8 @@
-import {
-    ContextService,
-    Disposable,
-    IContextService,
-    LifecycleStages,
-    OnLifecycle,
-    toDisposable,
-} from '@univerjs/core';
+import type { ContextService } from '@univerjs/core';
+import { Disposable, IContextService, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 import { fromEvent } from 'rxjs';
-import { Nullable } from 'vitest';
+import type { Nullable } from 'vitest';
 
 /**
  * FocusService manages focusing state of the Univer application instance.

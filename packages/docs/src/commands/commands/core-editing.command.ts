@@ -1,6 +1,5 @@
-import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import type {
-    ICommand, 
+    ICommand,
     IDocumentBody,
     IDocumentData,
     IMutationInfo,
@@ -8,6 +7,7 @@ import type {
     UpdateDocsAttributeType,
 } from '@univerjs/core';
 import { CommandType, ICommandService, IUndoRedoService } from '@univerjs/core';
+import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 
 import { getRetainAndDeleteFromReplace } from '../../basics/retain-delete-params';
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';

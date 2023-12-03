@@ -1,4 +1,4 @@
-import { Observable } from '../observer';
+import type { Observable } from '../observer';
 
 /**
  * Get the type of the generic type of T

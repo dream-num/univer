@@ -1,8 +1,9 @@
 import { toDisposable } from '@univerjs/core';
-import { IMessageMethodOptions, IMessageProps, Message } from '@univerjs/design';
-import { IDisposable } from '@wendellhu/redi';
+import type { IMessageMethodOptions, IMessageProps } from '@univerjs/design';
+import { Message } from '@univerjs/design';
+import type { IDisposable } from '@wendellhu/redi';
 
-import { IMessageService } from './message.service';
+import type { IMessageService } from './message.service';
 
 export class DesktopMessageService implements IMessageService {
     portalContainer: HTMLElement = document.body;

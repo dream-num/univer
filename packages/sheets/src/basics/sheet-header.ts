@@ -1,4 +1,4 @@
-import { Worksheet } from '@univerjs/core';
+import type { Worksheet } from '@univerjs/core';
 
 export function rowHeightByHeader(worksheet: Worksheet) {
     const config = worksheet?.getConfig();

@@ -1,29 +1,28 @@
-import {
+import type {
     BorderStyleTypes,
-    BorderType,
-    CommandType,
     IBorderData,
     IBorderStyleData,
     ICellData,
     ICommand,
-    ICommandService,
     IRange,
     IStyleData,
+} from '@univerjs/core';
+import {
+    BorderType,
+    CommandType,
+    ICommandService,
     IUndoRedoService,
     IUniverInstanceService,
     ObjectMatrix,
     Rectangle,
     Tools,
 } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { IAccessor } from '@wendellhu/redi';
 
 import { BorderStyleManagerService, type IBorderInfo } from '../../services/border-style-manager.service';
 import { SelectionManagerService } from '../../services/selection-manager.service';
-import {
-    ISetRangeValuesMutationParams,
-    SetRangeValuesMutation,
-    SetRangeValuesUndoMutationFactory,
-} from '../mutations/set-range-values.mutation';
+import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
+import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 
 function forEach(range: IRange, action: (row: number, column: number) => void): void {
     const { startRow, startColumn, endRow, endColumn } = range;

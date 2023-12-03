@@ -1,15 +1,3 @@
-import type { IRichTextEditingMutationParams, ISetTextSelectionsOperationParams } from '@univerjs/docs';
-import {
-    CoverContentCommand,
-    DocSkeletonManagerService,
-    DocViewModelManagerService,
-    RichTextEditingMutation,
-    SetTextSelectionsOperation,
-    TextSelectionManagerService,
-    VIEWPORT_KEY,
-} from '@univerjs/docs';
-import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import { DeviceInputEventType, IRenderManagerService, ScrollBar } from '@univerjs/engine-render';
 import type { ICommandInfo, IParagraph, Nullable } from '@univerjs/core';
 import {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
@@ -26,6 +14,18 @@ import {
     RxDisposable,
     toDisposable,
 } from '@univerjs/core';
+import type { IRichTextEditingMutationParams, ISetTextSelectionsOperationParams } from '@univerjs/docs';
+import {
+    CoverContentCommand,
+    DocSkeletonManagerService,
+    DocViewModelManagerService,
+    RichTextEditingMutation,
+    SetTextSelectionsOperation,
+    TextSelectionManagerService,
+    VIEWPORT_KEY,
+} from '@univerjs/docs';
+import type { ITextRangeWithStyle } from '@univerjs/engine-render';
+import { DeviceInputEventType, IRenderManagerService, ScrollBar } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import { takeUntil } from 'rxjs';
 

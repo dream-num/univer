@@ -1,11 +1,12 @@
-import { CellValueType, ICellData, IRange, Nullable } from '@univerjs/core';
+import type { ICellData, IRange, Nullable } from '@univerjs/core';
+import { CellValueType } from '@univerjs/core';
 
-import { IRuntimeUnitDataType, IUnitData, IUnitSheetNameMap } from '../basics/common';
+import type { IRuntimeUnitDataType, IUnitData, IUnitSheetNameMap } from '../basics/common';
 import { ERROR_TYPE_SET, ErrorType } from '../basics/error-type';
 import { ObjectClassType } from '../basics/object-class-type';
 import { ErrorValueObject } from '../other-object/error-value-object';
 import { ArrayValueObject } from '../value-object/array-value-object';
-import { BaseValueObject, CalculateValueType, IArrayValueObject } from '../value-object/base-value-object';
+import type { BaseValueObject, CalculateValueType, IArrayValueObject } from '../value-object/base-value-object';
 import { BooleanValueObject, NumberValueObject, StringValueObject } from '../value-object/primitive-object';
 
 export type NodeValueType = BaseValueObject | BaseReferenceObject | ErrorValueObject | AsyncObject;

@@ -1,15 +1,9 @@
-import {
-    CommandType,
-    ICommand,
-    ICommandService,
-    IUndoRedoService,
-    IUniverInstanceService,
-    Tools,
-} from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { ICommand } from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, Tools } from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
 
+import type { ISetWorksheetConfigMutationParams } from '../mutations/set-worksheet-config.mutation';
 import {
-    ISetWorksheetConfigMutationParams,
     SetWorksheetConfigMutation,
     SetWorksheetConfigUndoMutationFactory,
 } from '../mutations/set-worksheet-config.mutation';

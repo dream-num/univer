@@ -1,9 +1,10 @@
-import { createIdentifier, IAccessor, IDisposable, Inject, Injector } from '@wendellhu/redi';
+import type { IAccessor, IDisposable } from '@wendellhu/redi';
+import { createIdentifier, Inject, Injector } from '@wendellhu/redi';
 
 import { findLast, remove } from '../../common/array';
 import { sequence, sequenceAsync } from '../../common/sequence';
 import { toDisposable } from '../../shared/lifecycle';
-import { IKeyValue } from '../../shared/types';
+import type { IKeyValue } from '../../shared/types';
 import { IContextService } from '../context/context.service';
 import { ILogService } from '../log/log.service';
 

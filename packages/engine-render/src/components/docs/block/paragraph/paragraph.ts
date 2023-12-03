@@ -1,25 +1,21 @@
+import type { IBullet, ICustomBlock, IDrawing, IDrawings, Nullable } from '@univerjs/core';
 import {
     BooleanNumber,
     DataStreamTreeTokenType,
     GridType,
     HorizontalAlign,
-    IBullet,
-    ICustomBlock,
-    IDrawing,
-    IDrawings,
-    Nullable,
     PositionedObjectLayoutType,
 } from '@univerjs/core';
 
-import {
-    BreakType,
+import type {
     IDocumentSkeletonBullet,
     IDocumentSkeletonDrawing,
     IDocumentSkeletonLine,
     IDocumentSkeletonPage,
     ISkeletonResourceReference,
 } from '../../../../basics/i-document-skeleton-cached';
-import { IParagraphConfig, ISectionBreakConfig } from '../../../../basics/interfaces';
+import { BreakType } from '../../../../basics/i-document-skeleton-cached';
+import type { IParagraphConfig, ISectionBreakConfig } from '../../../../basics/interfaces';
 // eslint-disable-next-line import/no-cycle
 import { createSkeletonPage } from '../../common/page';
 import { setColumnFullState } from '../../common/section';
@@ -32,8 +28,8 @@ import {
     getSpanGroupWidth,
     lineIterator,
 } from '../../common/tools';
-import { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
-import { DocumentViewModel } from '../../view-model/document-view-model';
+import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
+import type { DocumentViewModel } from '../../view-model/document-view-model';
 import { dealWidthBullet } from './bullet';
 import { dealWidthInlineDrawing } from './inline-drawing';
 import { composeCharForLanguage } from './language-ruler';

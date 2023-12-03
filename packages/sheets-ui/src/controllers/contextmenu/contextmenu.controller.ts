@@ -1,6 +1,3 @@
-import { IRenderManagerService } from '@univerjs/engine-render';
-import { SelectionManagerService } from '@univerjs/sheets';
-import { IContextMenuService, MenuPosition } from '@univerjs/ui';
 import {
     Disposable,
     IUniverInstanceService,
@@ -9,6 +6,9 @@ import {
     RANGE_TYPE,
     toDisposable,
 } from '@univerjs/core';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { SelectionManagerService } from '@univerjs/sheets';
+import { IContextMenuService, MenuPosition } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 
 import { ISelectionRenderService } from '../../services/selection/selection-render.service';

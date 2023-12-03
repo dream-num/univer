@@ -1,11 +1,12 @@
-import { Nullable } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
 
 import { BooleanValue } from '../basics/common';
 import { ErrorType } from '../basics/error-type';
 import { $ARRAY_VALUE_REGEX } from '../basics/regex';
-import { compareToken } from '../basics/token';
+import type { compareToken } from '../basics/token';
 import { ErrorValueObject } from '../other-object/error-value-object';
-import { BaseValueObject, CalculateValueType, IArrayValueObject } from './base-value-object';
+import type { CalculateValueType, IArrayValueObject } from './base-value-object';
+import { BaseValueObject } from './base-value-object';
 import { BooleanValueObject, NumberValueObject, StringValueObject } from './primitive-object';
 
 enum BatchOperatorType {

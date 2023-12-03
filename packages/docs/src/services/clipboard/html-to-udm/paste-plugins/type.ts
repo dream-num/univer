@@ -1,4 +1,4 @@
-import { IDocumentBody, ITextStyle } from '@univerjs/core';
+import type { IDocumentBody, ITextStyle } from '@univerjs/core';
 
 export interface IStyleRule {
     filter: string | string[] | ((node: HTMLElement) => boolean);

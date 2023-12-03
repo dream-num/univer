@@ -1,3 +1,12 @@
+import type { Univer } from '@univerjs/core';
+import {
+    DisposableCollection,
+    ICommandService,
+    IUniverInstanceService,
+    RANGE_TYPE,
+    toDisposable,
+    UniverPermissionService,
+} from '@univerjs/core';
 import {
     NORMAL_SELECTION_PLUGIN_NAME,
     SelectionManagerService,
@@ -6,15 +15,6 @@ import {
     SetStyleCommand,
     SheetPermissionService,
 } from '@univerjs/sheets';
-import {
-    DisposableCollection,
-    ICommandService,
-    IUniverInstanceService,
-    RANGE_TYPE,
-    toDisposable,
-    Univer,
-    UniverPermissionService,
-} from '@univerjs/core';
 import { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 

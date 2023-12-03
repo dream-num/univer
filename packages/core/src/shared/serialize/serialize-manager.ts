@@ -1,6 +1,6 @@
 import { Tools } from '../tools';
-import { Sequence } from './sequence';
-import { Serialize } from './serialize';
+import type { Sequence } from './sequence';
+import type { Serialize } from './serialize';
 
 type SerializeClassType<T extends typeof Serialize = typeof Serialize> = T;
 type SerializeInstance<I extends Serialize = Serialize> = I;

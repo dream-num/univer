@@ -1,3 +1,4 @@
+import { ICommandService, IUniverInstanceService } from '@univerjs/core';
 import {
     CopySheetCommand,
     RemoveSheetCommand,
@@ -5,9 +6,9 @@ import {
     SetWorksheetHideCommand,
     SetWorksheetShowCommand,
 } from '@univerjs/sheets';
-import { IMenuButtonItem, IMenuSelectorItem, MenuItemType } from '@univerjs/ui';
-import { ICommandService, IUniverInstanceService } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
+import { MenuItemType } from '@univerjs/ui';
+import type { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 
 import { RenameSheetOperation } from '../../commands/commands/rename.command';

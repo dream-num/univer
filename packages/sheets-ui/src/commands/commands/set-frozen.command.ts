@@ -1,19 +1,9 @@
 // TODO@wzhudev: some logic here should be moved to the controller
 
-import {
-    ISetFrozenMutationParams,
-    SelectionManagerService,
-    SetFrozenMutation,
-    SetFrozenMutationFactory,
-} from '@univerjs/sheets';
-import {
-    CommandType,
-    ICommand,
-    ICommandService,
-    IUndoRedoService,
-    IUniverInstanceService,
-    RANGE_TYPE,
-} from '@univerjs/core';
+import type { ICommand } from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, RANGE_TYPE } from '@univerjs/core';
+import type { ISetFrozenMutationParams } from '@univerjs/sheets';
+import { SelectionManagerService, SetFrozenMutation, SetFrozenMutationFactory } from '@univerjs/sheets';
 
 import { ScrollManagerService } from '../../services/scroll-manager.service';
 
@@ -23,9 +13,9 @@ export enum SetSelectionFrozenType {
     Column = 2,
 }
 
-export type ISetSelectionFrozenCommandParams = {
+export interface ISetSelectionFrozenCommandParams {
     type?: SetSelectionFrozenType;
-};
+}
 
 export const SetSelectionFrozenCommand: ICommand<ISetSelectionFrozenCommandParams> = {
     type: CommandType.COMMAND,

@@ -1,4 +1,15 @@
 import {
+    FontItalic,
+    FontWeight,
+    HorizontalAlign,
+    ICommandService,
+    IUniverInstanceService,
+    RANGE_TYPE,
+    ThemeService,
+    VerticalAlign,
+    WrapStrategy,
+} from '@univerjs/core';
+import {
     ResetBackgroundColorCommand,
     ResetTextColorCommand,
     SelectionManagerService,
@@ -22,28 +33,9 @@ import {
     SetWorksheetRowIsAutoHeightCommand,
     SheetPermissionService,
 } from '@univerjs/sheets';
-import {
-    CopyCommand,
-    CutCommand,
-    IMenuButtonItem,
-    IMenuSelectorItem,
-    MenuGroup,
-    MenuItemType,
-    MenuPosition,
-    PasteCommand,
-} from '@univerjs/ui';
-import {
-    FontItalic,
-    FontWeight,
-    HorizontalAlign,
-    ICommandService,
-    IUniverInstanceService,
-    RANGE_TYPE,
-    ThemeService,
-    VerticalAlign,
-    WrapStrategy,
-} from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
+import { CopyCommand, CutCommand, MenuGroup, MenuItemType, MenuPosition, PasteCommand } from '@univerjs/ui';
+import type { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 
 import {

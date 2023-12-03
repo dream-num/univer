@@ -1,4 +1,4 @@
-import { BooleanNumber } from '@univerjs/core';
+import type { BooleanNumber } from '@univerjs/core';
 
 /**
  * Column ruler data type

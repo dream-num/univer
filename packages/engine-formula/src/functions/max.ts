@@ -1,8 +1,9 @@
 import { compareToken } from '../basics/token';
-import { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
-import { ArrayValueObject } from '../value-object/array-value-object';
-import { BaseValueObject } from '../value-object/base-value-object';
-import { BooleanValueObject, NumberValueObject } from '../value-object/primitive-object';
+import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
+import type { ArrayValueObject } from '../value-object/array-value-object';
+import type { BaseValueObject } from '../value-object/base-value-object';
+import type { BooleanValueObject } from '../value-object/primitive-object';
+import { NumberValueObject } from '../value-object/primitive-object';
 import { BaseFunction } from './base-function';
 
 export class Max extends BaseFunction {

@@ -1,5 +1,6 @@
-import { IMenuItem, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
-import { IAccessor } from '@wendellhu/redi';
+import type { IMenuItem } from '@univerjs/ui';
+import { MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
+import type { IAccessor } from '@wendellhu/redi';
 
 import { InsertFunctionOperation } from '../commands/operations/insert-function.operation';
 import { MoreFunctionsOperation } from '../commands/operations/more-functions.operation';

@@ -1,5 +1,7 @@
-import { Engine, Rect, Scene, Slide, Viewport } from '@univerjs/engine-render';
-import { getColorStyle, IColorStyle, IPageElement, ISlidePage, PageElementType, Slide as SlideM } from '@univerjs/core';
+import type { IColorStyle, IPageElement, ISlidePage } from '@univerjs/core';
+import { getColorStyle, PageElementType, Slide as SlideM } from '@univerjs/core';
+import type { Engine } from '@univerjs/engine-render';
+import { Rect, Scene, Slide, Viewport } from '@univerjs/engine-render';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { CanvasObjectProviderRegistry, ObjectAdaptor } from '../adaptor';

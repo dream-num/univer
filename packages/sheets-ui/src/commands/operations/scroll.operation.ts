@@ -1,8 +1,10 @@
 // This file provide operations to change selection of sheets.
 
-import { CommandType, IOperation, IUniverInstanceService } from '@univerjs/core';
+import type { IOperation } from '@univerjs/core';
+import { CommandType, IUniverInstanceService } from '@univerjs/core';
 
-import { IScrollManagerInsertParam, ScrollManagerService } from '../../services/scroll-manager.service';
+import type { IScrollManagerInsertParam } from '../../services/scroll-manager.service';
+import { ScrollManagerService } from '../../services/scroll-manager.service';
 
 export const SetScrollOperation: IOperation<IScrollManagerInsertParam> = {
     id: 'sheet.operation.set-scroll',

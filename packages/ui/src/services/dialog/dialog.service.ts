@@ -1,4 +1,5 @@
-import { createIdentifier, IDisposable } from '@wendellhu/redi';
+import type { IDisposable } from '@wendellhu/redi';
+import { createIdentifier } from '@wendellhu/redi';
 import { type Subject } from 'rxjs';
 
 import { type IDialogPartMethodOptions } from '../../views/components/dialog-part/interface';

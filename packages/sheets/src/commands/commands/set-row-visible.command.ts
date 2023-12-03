@@ -1,26 +1,25 @@
+import type { ICommand, IRange } from '@univerjs/core';
 import {
     CommandType,
-    ICommand,
     ICommandService,
-    IRange,
     IUndoRedoService,
     IUniverInstanceService,
     RANGE_TYPE,
     sequenceExecute,
 } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
-import { Nullable } from 'vitest';
+import type { IAccessor } from '@wendellhu/redi';
+import type { Nullable } from 'vitest';
 
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../services/selection-manager.service';
+import type { ISetRowHiddenMutationParams, ISetRowVisibleMutationParams } from '../mutations/set-row-visible.mutation';
 import {
-    ISetRowHiddenMutationParams,
-    ISetRowVisibleMutationParams,
     SetRowHiddenMutation,
     SetRowHiddenUndoMutationFactory,
     SetRowVisibleMutation,
     SetRowVisibleUndoMutationFactory,
 } from '../mutations/set-row-visible.mutation';
-import { ISetSelectionsOperationParams, SetSelectionsOperation } from '../operations/selection.operation';
+import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
+import { SetSelectionsOperation } from '../operations/selection.operation';
 import { getPrimaryForRange } from './utils/selection-util';
 
 export interface ISetSpecificRowsVisibleCommandParams {

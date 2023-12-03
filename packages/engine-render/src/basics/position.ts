@@ -1,5 +1,5 @@
-import { BaseObject } from '../base-object';
-import { IBoundRect } from './vector2';
+import type { BaseObject } from '../base-object';
+import type { IBoundRect } from './vector2';
 
 export function getOffsetRectForDom(ele: HTMLElement) {
     const box = ele.getBoundingClientRect();

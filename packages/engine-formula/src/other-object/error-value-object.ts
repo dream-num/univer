@@ -1,4 +1,4 @@
-import { ErrorType } from '../basics/error-type';
+import type { ErrorType } from '../basics/error-type';
 import { ObjectClassType } from '../basics/object-class-type';
 
 export class ErrorValueObject extends ObjectClassType {

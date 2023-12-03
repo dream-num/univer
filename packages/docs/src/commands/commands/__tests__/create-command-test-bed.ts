@@ -1,13 +1,7 @@
-import {
-    BooleanNumber,
-    IDocumentData,
-    ILogService,
-    IUniverInstanceService,
-    Plugin,
-    PluginType,
-    Univer,
-} from '@univerjs/core';
-import { Dependency, Inject, Injector } from '@wendellhu/redi';
+import type { IDocumentData } from '@univerjs/core';
+import { BooleanNumber, ILogService, IUniverInstanceService, Plugin, PluginType, Univer } from '@univerjs/core';
+import type { Dependency } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 
 import { DocViewModelManagerService } from '../../../services/doc-view-model-manager.service';
 import { TextSelectionManagerService } from '../../../services/text-selection-manager.service';

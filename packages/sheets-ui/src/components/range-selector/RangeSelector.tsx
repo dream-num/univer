@@ -1,7 +1,7 @@
-import { SelectionManagerService } from '@univerjs/sheets';
 import { LocaleService } from '@univerjs/core';
 import { Tooltip } from '@univerjs/design';
 import { SelectRangeSingle } from '@univerjs/icons';
+import { SelectionManagerService } from '@univerjs/sheets';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useRef, useState } from 'react';
 

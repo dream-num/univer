@@ -1,5 +1,6 @@
-import { CommandType, ICommand } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { ICommand } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
 
 import { ISheetBarService } from '../../services/sheet-bar/sheet-bar.service';
 

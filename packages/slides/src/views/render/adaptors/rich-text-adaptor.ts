@@ -1,6 +1,9 @@
-import { IRichTextProps, RichText, Scene } from '@univerjs/engine-render';
-import { IPageElement, LocaleService, PageElementType } from '@univerjs/core';
-import { Inject, Injector } from '@wendellhu/redi';
+import type { IPageElement } from '@univerjs/core';
+import { LocaleService, PageElementType } from '@univerjs/core';
+import type { IRichTextProps, Scene } from '@univerjs/engine-render';
+import { RichText } from '@univerjs/engine-render';
+import type { Injector } from '@wendellhu/redi';
+import { Inject } from '@wendellhu/redi';
 
 import { CanvasObjectProviderRegistry, ObjectAdaptor } from '../adaptor';
 

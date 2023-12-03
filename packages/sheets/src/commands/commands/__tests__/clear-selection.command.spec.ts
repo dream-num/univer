@@ -1,16 +1,6 @@
-import {
-    ICellData,
-    ICommandService,
-    IRange,
-    IStyleData,
-    IUniverInstanceService,
-    Nullable,
-    RANGE_TYPE,
-    RedoCommand,
-    UndoCommand,
-    Univer,
-} from '@univerjs/core';
-import { Injector } from '@wendellhu/redi';
+import type { ICellData, IRange, IStyleData, Nullable, Univer } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, RANGE_TYPE, RedoCommand, UndoCommand } from '@univerjs/core';
+import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { MergeCellController } from '../../../controllers/merge-cell.controller';
@@ -23,7 +13,8 @@ import { AddWorksheetMergeAllCommand, AddWorksheetMergeCommand } from '../add-wo
 import { ClearSelectionAllCommand } from '../clear-selection-all.command';
 import { ClearSelectionContentCommand } from '../clear-selection-content.command';
 import { ClearSelectionFormatCommand } from '../clear-selection-format.command';
-import { ISetRangeValuesCommandParams, SetRangeValuesCommand } from '../set-range-values.command';
+import type { ISetRangeValuesCommandParams } from '../set-range-values.command';
+import { SetRangeValuesCommand } from '../set-range-values.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('Test clear selection content commands', () => {

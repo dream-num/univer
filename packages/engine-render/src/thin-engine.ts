@@ -1,10 +1,11 @@
 import { Disposable, Observable } from '@univerjs/core';
-import { IDisposable } from '@wendellhu/redi';
+import type { IDisposable } from '@wendellhu/redi';
 
-import { CURSOR_TYPE, RENDER_CLASS_TYPE } from './basics/const';
-import { IEvent } from './basics/i-events';
-import { ITransformChangeState } from './basics/interfaces';
-import { Canvas } from './canvas';
+import type { CURSOR_TYPE } from './basics/const';
+import { RENDER_CLASS_TYPE } from './basics/const';
+import type { IEvent } from './basics/i-events';
+import type { ITransformChangeState } from './basics/interfaces';
+import type { Canvas } from './canvas';
 
 // FIXME: T should extends something that is disposable
 export abstract class ThinEngine<T extends IDisposable> extends Disposable {

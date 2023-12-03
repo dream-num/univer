@@ -1,5 +1,6 @@
 import { ClearSelectionContentCommand } from '@univerjs/sheets';
-import { IShortcutItem, KeyCode } from '@univerjs/ui';
+import type { IShortcutItem } from '@univerjs/ui';
+import { KeyCode } from '@univerjs/ui';
 
 import { whenEditorNotActivated } from './utils';
 

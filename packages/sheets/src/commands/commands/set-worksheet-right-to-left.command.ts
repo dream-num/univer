@@ -1,15 +1,9 @@
-import {
-    BooleanNumber,
-    CommandType,
-    ICommand,
-    ICommandService,
-    IUndoRedoService,
-    IUniverInstanceService,
-} from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { ICommand } from '@univerjs/core';
+import { BooleanNumber, CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
 
+import type { ISetWorksheetRightToLeftMutationParams } from '../mutations/set-worksheet-right-to-left.mutation';
 import {
-    ISetWorksheetRightToLeftMutationParams,
     SetWorksheetRightToLeftMutation,
     SetWorksheetRightToLeftUndoMutationFactory,
 } from '../mutations/set-worksheet-right-to-left.mutation';

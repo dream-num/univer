@@ -1,10 +1,11 @@
-import { BooleanNumber, IRange, IScale } from '@univerjs/core';
+import type { IRange, IScale } from '@univerjs/core';
+import { BooleanNumber } from '@univerjs/core';
 
 import { clearLineByBorderType, getLineWith } from '../../../basics/draw';
 import { fixLineWidthByScale, getColor } from '../../../basics/tools';
 import { SpreadsheetExtensionRegistry } from '../../extension';
-import { BorderCacheItem } from '../interfaces';
-import { SpreadsheetSkeleton } from '../sheet-skeleton';
+import type { BorderCacheItem } from '../interfaces';
+import type { SpreadsheetSkeleton } from '../sheet-skeleton';
 import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultBorderAuxiliaryExtension';

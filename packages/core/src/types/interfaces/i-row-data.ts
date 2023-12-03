@@ -1,4 +1,4 @@
-import { BooleanNumber } from '../enum';
+import type { BooleanNumber } from '../enum';
 
 /**
  * Properties of row data

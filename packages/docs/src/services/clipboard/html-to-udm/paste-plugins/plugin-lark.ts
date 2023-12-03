@@ -1,7 +1,7 @@
 import { BooleanNumber } from '@univerjs/core';
 
 import { extractNodeStyle as getInlineStyle } from '../parse-node-style';
-import { IPastePlugin } from './type';
+import type { IPastePlugin } from './type';
 
 const wordPastePlugin: IPastePlugin = {
     name: 'univer-doc-paste-plugin-lark',

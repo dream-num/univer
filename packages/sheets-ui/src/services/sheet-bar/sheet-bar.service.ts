@@ -1,8 +1,10 @@
 import { Disposable, toDisposable } from '@univerjs/core';
-import { createIdentifier, IDisposable } from '@wendellhu/redi';
-import { Observable, Subject } from 'rxjs';
+import type { IDisposable } from '@wendellhu/redi';
+import { createIdentifier } from '@wendellhu/redi';
+import type { Observable } from 'rxjs';
+import { Subject } from 'rxjs';
 
-import { IScrollState } from '../../views/sheet-bar/sheet-bar-tabs/utils/slide-tab-bar';
+import type { IScrollState } from '../../views/sheet-bar/sheet-bar-tabs/utils/slide-tab-bar';
 
 export interface ISheetBarMenuHandler {
     handleSheetBarMenu(): void;

@@ -1,17 +1,9 @@
-import {
-    CommandType,
-    ICommand,
-    ICommandService,
-    ISize,
-    IUndoRedoService,
-    IUniverInstanceService,
-    ObjectPositionH,
-    ObjectPositionV,
-} from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { ICommand, ISize, ObjectPositionH, ObjectPositionV } from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
 
+import type { IDrawingTransformMutation } from '../mutations/set-floating-object.mutation';
 import {
-    IDrawingTransformMutation,
     SetDrawingTransformMutation,
     SetDrawingTransformMutationFactory,
 } from '../mutations/set-floating-object.mutation';

@@ -1,6 +1,7 @@
 import { IUniverInstanceService, LocaleService, Plugin, PluginType } from '@univerjs/core';
 // import { TextFinder } from './domain/text-find';
-import { Dependency, Inject, Injector } from '@wendellhu/redi';
+import type { Dependency } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 
 import { FIND_PLUGIN_NAME } from './const/plugin-name';
 import { FindController } from './controllers/find-controller';

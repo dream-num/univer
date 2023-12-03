@@ -1,19 +1,10 @@
 import { TinyColor } from '@ctrl/tinycolor';
-import {
-    CURSOR_TYPE,
-    IMouseEvent,
-    IPointerEvent,
-    isRectIntersect,
-    Rect,
-    Scene,
-    ScrollTimer,
-    SpreadsheetSkeleton,
-    Vector2,
-} from '@univerjs/engine-render';
+import type { IRangeWithCoord, Nullable, Observer, ThemeService } from '@univerjs/core';
+import type { IMouseEvent, IPointerEvent, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
+import { CURSOR_TYPE, isRectIntersect, Rect, ScrollTimer, Vector2 } from '@univerjs/engine-render';
 import { getNormalSelectionStyle, SELECTION_CONTROL_BORDER_BUFFER_WIDTH } from '@univerjs/sheets';
-import { IRangeWithCoord, Nullable, Observer, ThemeService } from '@univerjs/core';
 
-import { SelectionShape } from './selection-shape';
+import type { SelectionShape } from './selection-shape';
 
 const HELPER_SELECTION_TEMP_NAME = '__SpreadsheetHelperSelectionTempRect';
 

@@ -1,4 +1,4 @@
-import { Nullable } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
 
 /**
  * Alias type for number that are floats
@@ -66,9 +66,9 @@ interface DeepImmutableArray<T> extends ReadonlyArray<DeepImmutable<T>> {}
 /** @hidden */
 /* interface DeepImmutableMap<K, V> extends ReadonlyMap<DeepImmutable<K>,  DeepImmutable<V>> {} // es2015+ only */
 
-export type Class<T> = {
+export interface Class<T> {
     new (...param: any): T;
-};
+}
 
 /**
  * Event Types

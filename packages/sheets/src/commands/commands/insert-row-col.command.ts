@@ -1,26 +1,20 @@
+import type { ICellData, IColumnData, ICommand, IRange, IRowData, IStyleData, Nullable } from '@univerjs/core';
 import {
     BooleanNumber,
     CommandType,
     Dimension,
     Direction,
-    ICellData,
-    IColumnData,
-    ICommand,
     ICommandService,
-    IRange,
-    IRowData,
-    IStyleData,
     IUndoRedoService,
     IUniverInstanceService,
-    Nullable,
     ObjectArray,
     ObjectMatrix,
     sequenceExecute,
     SheetInterceptorService,
 } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { IAccessor } from '@wendellhu/redi';
 
-import {
+import type {
     IDeleteRangeMutationParams,
     IInsertColMutationParams,
     IInsertRangeMutationParams,

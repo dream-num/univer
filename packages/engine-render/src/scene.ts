@@ -1,25 +1,24 @@
-import { IKeyValue, Nullable, sortRules, sortRulesByDesc } from '@univerjs/core';
+import type { IKeyValue, Nullable } from '@univerjs/core';
+import { sortRules, sortRulesByDesc } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 
-import { BaseObject } from './base-object';
+import type { BaseObject } from './base-object';
 import { CURSOR_TYPE, RENDER_CLASS_TYPE } from './basics/const';
-import { IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
-import {
-    IObjectFullState,
-    ISceneTransformState,
-    ITransformChangeState,
-    TRANSFORM_CHANGE_OBSERVABLE_TYPE,
-} from './basics/interfaces';
+import type { IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
+import type { IObjectFullState, ISceneTransformState, ITransformChangeState } from './basics/interfaces';
+import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './basics/interfaces';
 import { precisionTo, requestNewFrame } from './basics/tools';
 import { Transform } from './basics/transform';
-import { IBoundRect, Vector2 } from './basics/vector2';
+import type { IBoundRect } from './basics/vector2';
+import { Vector2 } from './basics/vector2';
 import { Layer } from './layer';
-import { ITransformerConfig, Transformer } from './scene.-transformer';
+import type { ITransformerConfig } from './scene.-transformer';
+import { Transformer } from './scene.-transformer';
 import { InputManager } from './scene.input-manager';
-import { SceneViewer } from './scene-viewer';
-import { ThinEngine } from './thin-engine';
+import type { SceneViewer } from './scene-viewer';
+import type { ThinEngine } from './thin-engine';
 import { ThinScene } from './thin-scene';
-import { Viewport } from './viewport';
+import type { Viewport } from './viewport';
 
 export class Scene extends ThinScene {
     private _layers: Layer[] = [];

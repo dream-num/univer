@@ -1,5 +1,6 @@
-import { CommandType, IMutation, IRange, IUniverInstanceService, Rectangle } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { IMutation, IRange } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, Rectangle } from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
 
 // TODO@wzhudev: maybe we should do some error handling in these mutators
 

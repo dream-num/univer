@@ -1,4 +1,5 @@
-import { createIdentifier, IDisposable } from '@wendellhu/redi';
+import type { IDisposable } from '@wendellhu/redi';
+import { createIdentifier } from '@wendellhu/redi';
 import { type Subject } from 'rxjs';
 
 import { type ISidebarMethodOptions } from '../../views/components/sidebar/interface';

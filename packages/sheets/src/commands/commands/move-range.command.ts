@@ -1,19 +1,18 @@
+import type { ICellData, ICommand, IRange } from '@univerjs/core';
 import {
     CommandType,
-    ICellData,
-    ICommand,
     ICommandService,
-    IRange,
     IUndoRedoService,
     IUniverInstanceService,
     ObjectMatrix,
     sequenceExecute,
     SheetInterceptorService,
 } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { IAccessor } from '@wendellhu/redi';
 
 import { NORMAL_SELECTION_PLUGIN_NAME } from '../../services/selection-manager.service';
-import { MoveRangeMutation, MoveRangeMutationParams } from '../mutations/move-range.mutation';
+import type { MoveRangeMutationParams } from '../mutations/move-range.mutation';
+import { MoveRangeMutation } from '../mutations/move-range.mutation';
 import { SetSelectionsOperation } from '../operations/selection.operation';
 
 export interface IMoveRangeCommandParams {

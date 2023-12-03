@@ -1,6 +1,7 @@
 import { DeviceInputEventType } from '@univerjs/engine-render';
-import { IShortcutItem, KeyCode, MetaKeys } from '@univerjs/ui';
 import { whenEditorInputFormulaActivated } from '@univerjs/sheets-ui';
+import type { IShortcutItem } from '@univerjs/ui';
+import { KeyCode, MetaKeys } from '@univerjs/ui';
 
 import { SelectEditorFormulaOperation } from '../../commands/operations/editor-formula.operation';
 import { ReferenceAbsoluteOperation } from '../../commands/operations/reference-absolute.operation';

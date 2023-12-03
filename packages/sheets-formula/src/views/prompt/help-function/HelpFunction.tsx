@@ -1,6 +1,6 @@
-import type { IFunctionInfo, IFunctionParam } from '@univerjs/engine-formula';
 import { FOCUSING_FORMULA_EDITOR, IContextService, LocaleService } from '@univerjs/core';
 import { Popup } from '@univerjs/design';
+import type { IFunctionInfo, IFunctionParam } from '@univerjs/engine-formula';
 import { CloseSingle, DetailsSingle, MoreSingle } from '@univerjs/icons';
 import { ICellEditorManagerService, IFormulaEditorManagerService } from '@univerjs/sheets-ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';

@@ -1,21 +1,3 @@
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import {
-    DOCS_COMPONENT_MAIN_LAYER_INDEX,
-    DocSkeletonManagerService,
-    DocViewModelManagerService,
-    RichTextEditingMutation,
-    TextSelectionManagerService,
-    VIEWPORT_KEY,
-} from '@univerjs/docs';
-import type { DocumentSkeleton, IDocumentLayoutObject, IEditorInputConfig, Scene } from '@univerjs/engine-render';
-import {
-    DeviceInputEventType,
-    IRenderManagerService,
-    ITextSelectionRenderManager,
-    Rect,
-    ScrollBar,
-} from '@univerjs/engine-render';
-import { KeyCode } from '@univerjs/ui';
 import type { ICommandInfo, IDocumentBody, IDocumentData, IPosition, ITextRotation, Nullable } from '@univerjs/core';
 import {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
@@ -36,6 +18,24 @@ import {
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import {
+    DOCS_COMPONENT_MAIN_LAYER_INDEX,
+    DocSkeletonManagerService,
+    DocViewModelManagerService,
+    RichTextEditingMutation,
+    TextSelectionManagerService,
+    VIEWPORT_KEY,
+} from '@univerjs/docs';
+import type { DocumentSkeleton, IDocumentLayoutObject, IEditorInputConfig, Scene } from '@univerjs/engine-render';
+import {
+    DeviceInputEventType,
+    IRenderManagerService,
+    ITextSelectionRenderManager,
+    Rect,
+    ScrollBar,
+} from '@univerjs/engine-render';
+import { KeyCode } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 import type { Subscription } from 'rxjs';
 

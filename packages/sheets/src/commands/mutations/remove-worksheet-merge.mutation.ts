@@ -1,7 +1,8 @@
-import { CommandType, IMutation, IUniverInstanceService, Rectangle } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { IMutation } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, Rectangle } from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
 
-import {
+import type {
     IAddWorksheetMergeMutationParams,
     IRemoveWorksheetMergeMutationParams,
 } from '../../basics/interfaces/mutation-interface';

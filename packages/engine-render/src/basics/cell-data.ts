@@ -1,4 +1,4 @@
-import { ICellData, IStyleData } from '@univerjs/core';
+import type { ICellData, IStyleData } from '@univerjs/core';
 
 export interface ITempCellData extends ICellData {
     style: IStyleData;

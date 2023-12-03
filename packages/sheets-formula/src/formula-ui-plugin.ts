@@ -1,6 +1,7 @@
-import { IFunctionInfo } from '@univerjs/engine-formula';
 import { IUniverInstanceService, LocaleService, Plugin, PluginType } from '@univerjs/core';
-import { Dependency, Inject, Injector } from '@wendellhu/redi';
+import type { IFunctionInfo } from '@univerjs/engine-formula';
+import type { Dependency } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 
 import { FORMULA_UI_PLUGIN_NAME } from './common/plugin-name';
 import { FormulaInputController } from './controllers/formula-input.controller';

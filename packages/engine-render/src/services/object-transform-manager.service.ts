@@ -1,5 +1,5 @@
-import { Nullable } from '@univerjs/core';
-import { IDisposable } from '@wendellhu/redi';
+import type { Nullable } from '@univerjs/core';
+import type { IDisposable } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 
 export interface ITransformObject {

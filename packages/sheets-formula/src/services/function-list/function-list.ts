@@ -1,4 +1,4 @@
-import { IFunctionInfo } from '@univerjs/engine-formula';
+import type { IFunctionInfo } from '@univerjs/engine-formula';
 
 import { FUNCTION_LIST_ARRAY } from './array';
 import { FUNCTION_LIST_COMPATIBILITY } from './compatibility';

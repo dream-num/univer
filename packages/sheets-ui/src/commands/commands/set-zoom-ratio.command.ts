@@ -1,4 +1,5 @@
-import { CommandType, ICommand, ICommandService, IUniverInstanceService } from '@univerjs/core';
+import type { ICommand } from '@univerjs/core';
+import { CommandType, ICommandService, IUniverInstanceService } from '@univerjs/core';
 
 import { SHEET_ZOOM_RANGE } from '../../common/keys';
 import { SetZoomRatioOperation } from '../operations/set-zoom-ratio.operation';

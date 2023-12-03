@@ -1,21 +1,8 @@
+import type { ICellData, ICommandInfo, IRange } from '@univerjs/core';
+import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { CURSOR_TYPE, IRenderManagerService } from '@univerjs/engine-render';
-import {
-    ISetRangeValuesCommandParams,
-    ISetSelectionsOperationParams,
-    SelectionManagerService,
-    SetRangeValuesCommand,
-    SetSelectionsOperation,
-} from '@univerjs/sheets';
-import {
-    Disposable,
-    ICellData,
-    ICommandInfo,
-    ICommandService,
-    IRange,
-    IUniverInstanceService,
-    LifecycleStages,
-    OnLifecycle,
-} from '@univerjs/core';
+import type { ISetRangeValuesCommandParams, ISetSelectionsOperationParams } from '@univerjs/sheets';
+import { SelectionManagerService, SetRangeValuesCommand, SetSelectionsOperation } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
 import { SetOnceFormatPainterCommand } from '../../commands/commands/set-format-painter.command';

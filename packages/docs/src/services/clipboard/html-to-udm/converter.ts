@@ -1,8 +1,8 @@
-import { IDocumentBody, ITextStyle, Nullable } from '@univerjs/core';
+import type { IDocumentBody, ITextStyle, Nullable } from '@univerjs/core';
 
 import { extractNodeStyle } from './parse-node-style';
 import parseToDom from './parse-to-dom';
-import { IAfterProcessRule, IPastePlugin, IStyleRule } from './paste-plugins/type';
+import type { IAfterProcessRule, IPastePlugin, IStyleRule } from './paste-plugins/type';
 
 function matchFilter(node: HTMLElement, filter: IStyleRule['filter']) {
     const tagName = node.tagName.toLowerCase();

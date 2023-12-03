@@ -1,4 +1,5 @@
-import { IKeyValue, IUniverInstanceService, migrate, Tools } from '@univerjs/core';
+import type { IKeyValue } from '@univerjs/core';
+import { IUniverInstanceService, migrate, Tools } from '@univerjs/core';
 // @ts-ignore
 import * as LuckyExcel from 'luckyexcel'; // no type definition for package luckyexcel
 

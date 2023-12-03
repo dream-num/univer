@@ -1,8 +1,8 @@
-import { Nullable } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
 
-import { Vector2 } from '../basics/vector2';
-import { ThinScene } from '../thin-scene';
-import { Rect } from './rect';
+import type { Vector2 } from '../basics/vector2';
+import type { ThinScene } from '../thin-scene';
+import type { Rect } from './rect';
 
 export interface IScrollBarProps {
     thumbMargin?: number;

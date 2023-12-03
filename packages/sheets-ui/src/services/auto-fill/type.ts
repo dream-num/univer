@@ -1,4 +1,4 @@
-import { Direction, ICellData, IMutationInfo, IRange, Nullable } from '@univerjs/core';
+import type { Direction, ICellData, IMutationInfo, IRange, Nullable } from '@univerjs/core';
 
 export enum DATA_TYPE {
     NUMBER = 'number',
@@ -12,9 +12,9 @@ export enum DATA_TYPE {
     OTHER = 'other',
 }
 
-export type ICopyDataPiece = {
+export interface ICopyDataPiece {
     [key: string]: ICopyDataInType[];
-};
+}
 
 export interface ICopyDataInType {
     data: Array<Nullable<ICellData>>;

@@ -1,9 +1,9 @@
-import { IScale } from '@univerjs/core';
+import type { IScale } from '@univerjs/core';
 
 import { DEFAULT_FONTFACE_PLANE, MIDDLE_CELL_POS_MAGIC_NUMBER } from '../../../basics/const';
 import { fixLineWidthByScale, getColor } from '../../../basics/tools';
 import { SheetRowHeaderExtensionRegistry } from '../../extension';
-import { SpreadsheetSkeleton } from '../sheet-skeleton';
+import type { SpreadsheetSkeleton } from '../sheet-skeleton';
 import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultRowHeaderLayoutExtension';

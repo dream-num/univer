@@ -1,12 +1,14 @@
-import { Nullable, Observable, toDisposable } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
+import { Observable, toDisposable } from '@univerjs/core';
 
-import { CURSOR_TYPE } from './basics/const';
-import { DeviceType, IKeyboardEvent, IPointerEvent, PointerInput } from './basics/i-events';
+import type { CURSOR_TYPE } from './basics/const';
+import type { IKeyboardEvent, IPointerEvent } from './basics/i-events';
+import { DeviceType, PointerInput } from './basics/i-events';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './basics/interfaces';
 import { PerformanceMonitor } from './basics/performance-monitor';
 import { getPointerPrefix, getSizeForDom, IsSafari, requestNewFrame } from './basics/tools';
 import { Canvas } from './canvas';
-import { Scene } from './scene';
+import type { Scene } from './scene';
 import { ThinEngine } from './thin-engine';
 
 export class Engine extends ThinEngine<Scene> {

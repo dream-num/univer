@@ -1,17 +1,5 @@
-import {
-    Direction,
-    getReverseDirection,
-    ICellData,
-    IRange,
-    ISelection,
-    ISelectionCell,
-    Nullable,
-    ObjectMatrix,
-    RANGE_TYPE,
-    Rectangle,
-    selectionToArray,
-    Worksheet,
-} from '@univerjs/core';
+import type { ICellData, IRange, ISelection, ISelectionCell, Nullable, ObjectMatrix, Worksheet } from '@univerjs/core';
+import { Direction, getReverseDirection, RANGE_TYPE, Rectangle, selectionToArray } from '@univerjs/core';
 
 export interface IExpandParams {
     left?: boolean;

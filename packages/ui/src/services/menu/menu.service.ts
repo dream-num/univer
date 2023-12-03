@@ -1,9 +1,11 @@
 import { Disposable, toDisposable } from '@univerjs/core';
-import { createIdentifier, IDisposable } from '@wendellhu/redi';
-import { BehaviorSubject, Observable } from 'rxjs';
+import type { IDisposable } from '@wendellhu/redi';
+import { createIdentifier } from '@wendellhu/redi';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 import { IShortcutService } from '../shortcut/shortcut.service';
-import { IDisplayMenuItem, IMenuItem, MenuPosition } from './menu';
+import type { IDisplayMenuItem, IMenuItem, MenuPosition } from './menu';
 
 export const IMenuService = createIdentifier<IMenuService>('univer.menu-service');
 

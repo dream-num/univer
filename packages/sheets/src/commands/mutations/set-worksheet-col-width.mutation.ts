@@ -1,5 +1,6 @@
-import { CommandType, IMutation, IRange, IUniverInstanceService, ObjectArray } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { IMutation, IRange } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, ObjectArray } from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
 
 export interface ISetWorksheetColWidthMutationParams {
     workbookId: string;

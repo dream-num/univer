@@ -1,14 +1,7 @@
-import {
-    ILogService,
-    IUniverInstanceService,
-    IWorkbookData,
-    LocaleType,
-    Plugin,
-    PluginType,
-    Univer,
-    Workbook,
-} from '@univerjs/core';
-import { Dependency, Inject, Injector } from '@wendellhu/redi';
+import type { IWorkbookData, Workbook } from '@univerjs/core';
+import { ILogService, IUniverInstanceService, LocaleType, Plugin, PluginType, Univer } from '@univerjs/core';
+import type { Dependency } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 
 import { BorderStyleManagerService } from '../../../services/border-style-manager.service';
 import { SelectionManagerService } from '../../../services/selection-manager.service';

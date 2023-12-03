@@ -1,12 +1,15 @@
-import { IShortcutItem, KeyCode, MetaKeys } from '@univerjs/ui';
 import { Direction } from '@univerjs/core';
+import type { IShortcutItem } from '@univerjs/ui';
+import { KeyCode, MetaKeys } from '@univerjs/ui';
 
-import {
-    ExpandSelectionCommand,
+import type {
     IExpandSelectionCommandParams,
     IMoveSelectionCommandParams,
     IMoveSelectionEnterAndTabCommandParams,
     ISelectAllCommandParams,
+} from '../../commands/commands/set-selection.command';
+import {
+    ExpandSelectionCommand,
     JumpOver,
     MoveSelectionCommand,
     MoveSelectionEnterAndTabCommand,

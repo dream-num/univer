@@ -1,11 +1,12 @@
-import { HorizontalAlign, IColorStyle, IScale, ObjectMatrix, WrapStrategy } from '@univerjs/core';
+import type { IColorStyle, IScale } from '@univerjs/core';
+import { HorizontalAlign, ObjectMatrix, WrapStrategy } from '@univerjs/core';
 
 import { fixLineWidthByScale } from '../../../basics/tools';
 import type { Documents } from '../../docs/document';
 import { SpreadsheetExtensionRegistry } from '../../extension';
-import { IFontCacheItem } from '../interfaces';
-import { SheetComponent } from '../sheet-component';
-import { SpreadsheetSkeleton } from '../sheet-skeleton';
+import type { IFontCacheItem } from '../interfaces';
+import type { SheetComponent } from '../sheet-component';
+import type { SpreadsheetSkeleton } from '../sheet-skeleton';
 import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultFontExtension';

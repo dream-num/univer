@@ -1,8 +1,19 @@
-import { BooleanNumber, ICellData, IRange, IUnitRange, ObjectMatrix, ObjectMatrixPrimitiveType } from '@univerjs/core';
+import type {
+    BooleanNumber,
+    ICellData,
+    IRange,
+    IUnitRange,
+    ObjectMatrix,
+    ObjectMatrixPrimitiveType,
+} from '@univerjs/core';
 
-export type ArrayFormulaDataType = { [sheetId: string]: ObjectMatrix<IRange> };
+export interface ArrayFormulaDataType {
+    [sheetId: string]: ObjectMatrix<IRange>;
+}
 
-export type UnitArrayFormulaDataType = { [unitId: string]: ArrayFormulaDataType };
+export interface UnitArrayFormulaDataType {
+    [unitId: string]: ArrayFormulaDataType;
+}
 
 export const ERROR_VALUE_OBJECT_CLASS_TYPE = 'errorValueObject';
 
@@ -22,11 +33,11 @@ export enum AstNodePromiseType {
     ERROR,
 }
 
-export type ISheetItem = {
+export interface ISheetItem {
     cellData: ObjectMatrix<ICellData>;
     rowCount: number;
     columnCount: number;
-};
+}
 
 export interface ISheetData {
     [sheetId: string]: ISheetItem;

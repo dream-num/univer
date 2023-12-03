@@ -1,8 +1,8 @@
-import { IRange } from '@univerjs/core';
+import type { IRange } from '@univerjs/core';
 
 import { getCellByIndex } from '../../../basics/tools';
 import { ComponentExtension } from '../../extension';
-import { SpreadsheetSkeleton } from '../sheet-skeleton';
+import type { SpreadsheetSkeleton } from '../sheet-skeleton';
 
 export enum SHEET_EXTENSION_TYPE {
     GRID,

@@ -1,8 +1,8 @@
 // This file provide operations to change selection of sheets.
 
-import type { TextRange } from '@univerjs/engine-render';
 import type { IOperation } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
+import type { TextRange } from '@univerjs/engine-render';
 
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 

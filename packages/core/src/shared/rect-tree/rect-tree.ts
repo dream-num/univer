@@ -1,5 +1,6 @@
-import { Nullable } from '../types';
-import { Compare, QuickSelect } from './quick-select';
+import type { Nullable } from '../types';
+import type { Compare } from './quick-select';
+import { QuickSelect } from './quick-select';
 
 const defaultCompareNodeMinX = (a: RectTree.Node, b: RectTree.Node) => a.minX - b.minX;
 const defaultCompareNodeMinY = (a: RectTree.Node, b: RectTree.Node) => a.minY - b.minY;

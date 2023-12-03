@@ -1,17 +1,10 @@
-import {
-    CommandType,
-    ICellV,
-    ICommand,
-    ICommandService,
-    IUndoRedoService,
-    IUniverInstanceService,
-    ObjectMatrix,
-} from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { ICellV, ICommand } from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
 
 import { SelectionManagerService } from '../../services/selection-manager.service';
+import type { ISetRangeFormattedValueMutationParams } from '../mutations/set-range-formatted-value.mutation';
 import {
-    ISetRangeFormattedValueMutationParams,
     SetRangeFormattedValueMutation,
     SetRangeFormattedValueUndoMutationFactory,
 } from '../mutations/set-range-formatted-value.mutation';

@@ -1,12 +1,6 @@
 /* eslint-disable no-magic-numbers */
 
-import {
-    AddWorksheetMergeMutation,
-    RemoveWorksheetMergeMutation,
-    SetRangeValuesMutation,
-    SetSelectionsOperation,
-} from '@univerjs/sheets';
-import { createCommandTestBed } from '@univerjs/sheets/commands/commands/__tests__/create-command-test-bed.js';
+import type { Univer } from '@univerjs/core';
 import {
     CellValueType,
     ICommandService,
@@ -15,9 +9,15 @@ import {
     RedoCommand,
     ThemeService,
     UndoCommand,
-    Univer,
 } from '@univerjs/core';
-import { Injector } from '@wendellhu/redi';
+import {
+    AddWorksheetMergeMutation,
+    RemoveWorksheetMergeMutation,
+    SetRangeValuesMutation,
+    SetSelectionsOperation,
+} from '@univerjs/sheets';
+import { createCommandTestBed } from '@univerjs/sheets/commands/commands/__tests__/create-command-test-bed.js';
+import type { Injector } from '@wendellhu/redi';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { AutoFillController } from '../../../controllers/auto-fill.controller';

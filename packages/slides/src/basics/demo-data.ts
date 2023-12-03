@@ -1,10 +1,10 @@
+import type { IDocumentData } from '@univerjs/core';
 import {
     BaselineOffset,
     BooleanNumber,
     BulletAlignment,
     ColumnSeparatorType,
     GlyphType,
-    IDocumentData,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PositionedObjectLayoutType,

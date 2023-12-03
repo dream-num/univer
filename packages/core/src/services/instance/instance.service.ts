@@ -1,12 +1,13 @@
 import { createIdentifier } from '@wendellhu/redi';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 import { DocumentDataModel } from '../../docs/data-model/document-data-model';
-import { Nullable } from '../../shared';
+import type { Nullable } from '../../shared';
 import { Disposable } from '../../shared/lifecycle';
 import { Workbook } from '../../sheets/workbook';
 import { Slide } from '../../slides/domain/slide-model';
-import { IDocumentData, ISlideData, IWorkbookData } from '../../types/interfaces';
+import type { IDocumentData, ISlideData, IWorkbookData } from '../../types/interfaces';
 import { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE } from '../context/context';
 import { IContextService } from '../context/context.service';
 

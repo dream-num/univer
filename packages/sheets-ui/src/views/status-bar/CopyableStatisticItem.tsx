@@ -1,7 +1,7 @@
-import { FUNCTION_NAMES } from '@univerjs/engine-formula';
-import { IClipboardInterfaceService, IMessageService } from '@univerjs/ui';
 import { LocaleService } from '@univerjs/core';
 import { MessageType, Tooltip } from '@univerjs/design';
+import { FUNCTION_NAMES } from '@univerjs/engine-formula';
+import { IClipboardInterfaceService, IMessageService } from '@univerjs/ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React from 'react';
 

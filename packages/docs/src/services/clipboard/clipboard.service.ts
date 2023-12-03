@@ -1,10 +1,8 @@
-import {
-    HTML_CLIPBOARD_MIME_TYPE,
-    IClipboardInterfaceService,
-    PLAIN_TEXT_CLIPBOARD_MIME_TYPE,
-} from '@univerjs/ui';
-import { Disposable, IDocumentBody, IUniverInstanceService, toDisposable } from '@univerjs/core';
-import { createIdentifier, IDisposable } from '@wendellhu/redi';
+import type { IDocumentBody } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, toDisposable } from '@univerjs/core';
+import { HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
+import type { IDisposable } from '@wendellhu/redi';
+import { createIdentifier } from '@wendellhu/redi';
 
 import { copyContentCache, extractId, genId } from './copy-content-cache';
 import { HtmlToUDMService } from './html-to-udm/converter';

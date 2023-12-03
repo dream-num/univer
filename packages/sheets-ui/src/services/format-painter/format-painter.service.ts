@@ -1,7 +1,9 @@
+import type { ICellData, IStyleData } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
 import { SelectionManagerService } from '@univerjs/sheets';
-import { Disposable, ICellData, IStyleData, IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
 import { createIdentifier, Inject } from '@wendellhu/redi';
-import { BehaviorSubject, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 export interface IFormatPainterService {
     status$: Observable<FormatPainterStatus>;

@@ -4,7 +4,8 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { CopyCommand, CutCommand, PasteCommand } from '../services/clipboard/clipboard.command';
 import { IMenuService } from '../services/menu/menu.service';
 import { KeyCode, MetaKeys } from '../services/shortcut/keycode';
-import { IShortcutItem, IShortcutService } from '../services/shortcut/shortcut.service';
+import type { IShortcutItem } from '../services/shortcut/shortcut.service';
+import { IShortcutService } from '../services/shortcut/shortcut.service';
 import { RedoMenuItemFactory, UndoMenuItemFactory } from './menus/menus';
 
 export const CopyShortcutItem: IShortcutItem = {

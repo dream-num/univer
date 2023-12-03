@@ -1,6 +1,7 @@
-import { CommandType, IDrawing, IMutation, IUniverInstanceService } from '@univerjs/core';
+import type { IDrawing, IMutation } from '@univerjs/core';
+import { CommandType, IUniverInstanceService } from '@univerjs/core';
 
-import { ISeachDrawingMutation } from './set-floating-object.mutation';
+import type { ISeachDrawingMutation } from './set-floating-object.mutation';
 
 export interface IInsertDrawingMutation extends ISeachDrawingMutation {
     drawing: IDrawing;

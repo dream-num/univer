@@ -1,11 +1,9 @@
-import { CommandType, ICommand, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { ICommand } from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
 
-import {
-    ISetFrozenMutationParams,
-    SetFrozenMutation,
-    SetFrozenMutationFactory,
-} from '../mutations/set-frozen.mutation';
+import type { ISetFrozenMutationParams } from '../mutations/set-frozen.mutation';
+import { SetFrozenMutation, SetFrozenMutationFactory } from '../mutations/set-frozen.mutation';
 
 export const SetFrozenCancelCommand: ICommand = {
     type: CommandType.COMMAND,

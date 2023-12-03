@@ -1,4 +1,5 @@
-import { ISuperTable, TableOptionType } from '../basics/common';
+import type { ISuperTable } from '../basics/common';
+import { TableOptionType } from '../basics/common';
 import { $SUPER_TABLE_COLUMN_REGEX } from '../basics/regex';
 import { matchToken } from '../basics/token';
 import { BaseReferenceObject } from './base-reference-object';

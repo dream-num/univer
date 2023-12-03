@@ -1,17 +1,17 @@
+import type { EventState, IColorStyle, ISlidePage, Nullable } from '@univerjs/core';
+import { getColorStyle, IUniverInstanceService } from '@univerjs/core';
+import type { IWheelEvent, RenderManagerService } from '@univerjs/engine-render';
 import {
     Engine,
     EVENT_TYPE,
     IRenderingEngine,
     IRenderManagerService,
-    IWheelEvent,
     Rect,
-    RenderManagerService,
     Scene,
     ScrollBar,
     Slide,
     Viewport,
 } from '@univerjs/engine-render';
-import { EventState, getColorStyle, IColorStyle, ISlidePage, IUniverInstanceService, Nullable } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { ObjectProvider } from './object-provider';

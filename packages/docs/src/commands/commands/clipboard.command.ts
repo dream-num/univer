@@ -1,5 +1,6 @@
+import type { IMultiCommand } from '@univerjs/core';
+import { CommandType, FOCUSING_DOC, FOCUSING_EDITOR } from '@univerjs/core';
 import { CopyCommand, CutCommand, PasteCommand } from '@univerjs/ui';
-import { CommandType, FOCUSING_DOC, FOCUSING_EDITOR, IMultiCommand } from '@univerjs/core';
 
 export const DocCopyCommand: IMultiCommand = {
     id: CopyCommand.id,

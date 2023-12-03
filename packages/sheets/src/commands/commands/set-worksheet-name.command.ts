@@ -1,11 +1,9 @@
-import { CommandType, ICommand, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { ICommand } from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
 
-import {
-    ISetWorksheetNameMutationParams,
-    SetWorksheetNameMutation,
-    SetWorksheetNameMutationFactory,
-} from '../mutations/set-worksheet-name.mutation';
+import type { ISetWorksheetNameMutationParams } from '../mutations/set-worksheet-name.mutation';
+import { SetWorksheetNameMutation, SetWorksheetNameMutationFactory } from '../mutations/set-worksheet-name.mutation';
 
 export interface SetWorksheetNameCommandParams {
     name: string;

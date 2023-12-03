@@ -1,10 +1,9 @@
-import { CommandType, ICommand, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { ICommand } from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
 
-import {
-    ISetWorksheetActivateMutationParams,
-    SetWorksheetActivateMutation,
-} from '../mutations/set-worksheet-activate.mutation';
+import type { ISetWorksheetActivateMutationParams } from '../mutations/set-worksheet-activate.mutation';
+import { SetWorksheetActivateMutation } from '../mutations/set-worksheet-activate.mutation';
 
 export interface ISetWorksheetActivateCommandParams {
     workbookId?: string;

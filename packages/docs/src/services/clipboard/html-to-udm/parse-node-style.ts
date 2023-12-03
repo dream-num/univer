@@ -1,5 +1,6 @@
 import { TinyColor } from '@ctrl/tinycolor';
-import { BaselineOffset, BooleanNumber, ITextStyle } from '@univerjs/core';
+import type { ITextStyle } from '@univerjs/core';
+import { BaselineOffset, BooleanNumber } from '@univerjs/core';
 
 import { ptToPixel } from './utils';
 

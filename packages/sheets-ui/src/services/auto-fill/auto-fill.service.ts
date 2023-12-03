@@ -1,15 +1,17 @@
-import { SelectionManagerService } from '@univerjs/sheets';
+import type { IRange } from '@univerjs/core';
 import {
     Disposable,
-    IRange,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
     SheetInterceptorService,
     toDisposable,
 } from '@univerjs/core';
-import { createIdentifier, IDisposable, Inject } from '@wendellhu/redi';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { SelectionManagerService } from '@univerjs/sheets';
+import type { IDisposable } from '@wendellhu/redi';
+import { createIdentifier, Inject } from '@wendellhu/redi';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 import {
     chnNumberRule,
@@ -21,7 +23,8 @@ import {
     numberRule,
     otherRule,
 } from './rules';
-import { APPLY_TYPE, IAutoFillHook, IAutoFillRule } from './type';
+import type { IAutoFillHook, IAutoFillRule } from './type';
+import { APPLY_TYPE } from './type';
 
 export interface IAutoFillService {
     getRules(): IAutoFillRule[];

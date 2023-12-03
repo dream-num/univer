@@ -1,15 +1,8 @@
-import {
-    CommandType,
-    Dimension,
-    ICommand,
-    ICommandService,
-    IRange,
-    IUndoRedoService,
-    IUniverInstanceService,
-} from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { ICommand, IRange } from '@univerjs/core';
+import { CommandType, Dimension, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
 
-import {
+import type {
     IAddWorksheetMergeMutationParams,
     IRemoveWorksheetMergeMutationParams,
 } from '../../basics/interfaces/mutation-interface';

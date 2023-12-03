@@ -1,9 +1,8 @@
+import type { ICommand, IRange } from '@univerjs/core';
 import {
     CommandType,
     ErrorService,
-    ICommand,
     ICommandService,
-    IRange,
     IUndoRedoService,
     IUniverInstanceService,
     RANGE_TYPE,
@@ -11,17 +10,16 @@ import {
     sequenceExecute,
     Tools,
 } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { IAccessor } from '@wendellhu/redi';
 
-import {
+import type {
     IAddWorksheetMergeMutationParams,
     IRemoveWorksheetMergeMutationParams,
 } from '../../basics/interfaces/mutation-interface';
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../services/selection-manager.service';
 import { AddMergeUndoMutationFactory, AddWorksheetMergeMutation } from '../mutations/add-worksheet-merge.mutation';
+import type { IMoveColumnsMutationParams, IMoveRowsMutationParams } from '../mutations/move-rows-cols.mutation';
 import {
-    IMoveColumnsMutationParams,
-    IMoveRowsMutationParams,
     MoveColsMutation,
     MoveColsMutationUndoFactory,
     MoveRowsMutation,
@@ -31,7 +29,8 @@ import {
     RemoveMergeUndoMutationFactory,
     RemoveWorksheetMergeMutation,
 } from '../mutations/remove-worksheet-merge.mutation';
-import { ISetSelectionsOperationParams, SetSelectionsOperation } from '../operations/selection.operation';
+import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
+import { SetSelectionsOperation } from '../operations/selection.operation';
 import { columnAcrossMergedCell, rowAcrossMergedCell } from './utils/merged-cell-util';
 import { alignToMergedCellsBorders, getPrimaryForRange } from './utils/selection-util';
 

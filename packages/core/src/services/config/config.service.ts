@@ -1,6 +1,6 @@
 import { createIdentifier } from '@wendellhu/redi';
 
-import { Nullable } from '../../shared/types';
+import type { Nullable } from '../../shared/types';
 
 // NOTE: WARNING!! Do not set per unit config here! You can definitely find a better place to do that.
 

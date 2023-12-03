@@ -1,10 +1,12 @@
 /* eslint-disable no-magic-numbers */
 // import { IShapeProps, Shape, IObjectFullState, Group, Scene } from '.';
 
-import { IKeyValue, Nullable } from '@univerjs/core';
+import type { IKeyValue, Nullable } from '@univerjs/core';
 
-import { IObjectFullState, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '../basics/interfaces';
-import { IShapeProps, Shape } from './shape';
+import type { IObjectFullState } from '../basics/interfaces';
+import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '../basics/interfaces';
+import type { IShapeProps } from './shape';
+import { Shape } from './shape';
 
 interface IPathDataArray {
     command: string;

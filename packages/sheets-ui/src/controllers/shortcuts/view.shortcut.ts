@@ -1,4 +1,5 @@
-import { IShortcutItem, KeyCode, MetaKeys } from '@univerjs/ui';
+import type { IShortcutItem } from '@univerjs/ui';
+import { KeyCode, MetaKeys } from '@univerjs/ui';
 
 import { ChangeZoomRatioCommand } from '../../commands/commands/set-zoom-ratio.command';
 

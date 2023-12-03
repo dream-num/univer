@@ -1,6 +1,6 @@
-import type { ISetNumfmtMutationParams } from '@univerjs/sheets';
 import type { Univer } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService } from '@univerjs/core';
+import type { ISetNumfmtMutationParams } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 

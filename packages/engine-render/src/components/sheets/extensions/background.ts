@@ -1,9 +1,9 @@
 // import { fixLineWidthByScale, getColor, IScale } from '@Basics';
-import { IScale } from '@univerjs/core';
+import type { IScale } from '@univerjs/core';
 
 import { fixLineWidthByScale, getColor } from '../../../basics/tools';
 import { SpreadsheetExtensionRegistry } from '../../extension';
-import { SpreadsheetSkeleton } from '../sheet-skeleton';
+import type { SpreadsheetSkeleton } from '../sheet-skeleton';
 import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultBackgroundExtension';

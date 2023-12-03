@@ -1,20 +1,10 @@
 // TODO@wzhudev: some logic here should be moved to the controller
 
-import {
-    ISetFrozenMutationParams,
-    SelectionManagerService,
-    SetFrozenMutation,
-    SetFrozenMutationFactory,
-} from '@univerjs/sheets';
-import {
-    CommandType,
-    ICommand,
-    ICommandService,
-    IUndoRedoService,
-    IUniverInstanceService,
-    RANGE_TYPE,
-} from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { ICommand } from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, RANGE_TYPE } from '@univerjs/core';
+import type { ISetFrozenMutationParams } from '@univerjs/sheets';
+import { SelectionManagerService, SetFrozenMutation, SetFrozenMutationFactory } from '@univerjs/sheets';
+import type { IAccessor } from '@wendellhu/redi';
 
 import { ScrollManagerService } from '../../services/scroll-manager.service';
 

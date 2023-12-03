@@ -1,6 +1,7 @@
-import { CommandType, IMutation, IUniverInstanceService } from '@univerjs/core';
+import type { IMutation } from '@univerjs/core';
+import { CommandType, IUniverInstanceService } from '@univerjs/core';
 
-import { ISeachDrawingMutation } from './set-floating-object.mutation';
+import type { ISeachDrawingMutation } from './set-floating-object.mutation';
 
 export const RemoveDrawingMutation: IMutation<ISeachDrawingMutation> = {
     id: 'doc.mutation.remove-drawing',

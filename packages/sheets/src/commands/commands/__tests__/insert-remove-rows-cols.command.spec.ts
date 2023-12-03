@@ -1,20 +1,15 @@
 /* eslint-disable no-magic-numbers */
+import type { ICellData, IRange, IStyleData, IWorkbookData, Nullable, Univer } from '@univerjs/core';
 import {
-    ICellData,
     ICommandService,
-    IRange,
-    IStyleData,
     IUniverInstanceService,
-    IWorkbookData,
     LocaleType,
-    Nullable,
     RANGE_TYPE,
     RedoCommand,
     Tools,
     UndoCommand,
-    Univer,
 } from '@univerjs/core';
-import { Injector } from '@wendellhu/redi';
+import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { MergeCellController } from '../../../controllers/merge-cell.controller';
@@ -34,7 +29,8 @@ import {
     InsertRowBeforeCommand,
     InsertRowCommand,
 } from '../insert-row-col.command';
-import { RemoveColCommand, RemoveRowColCommandParams, RemoveRowCommand } from '../remove-row-col.command';
+import type { RemoveRowColCommandParams } from '../remove-row-col.command';
+import { RemoveColCommand, RemoveRowCommand } from '../remove-row-col.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('Test insert and remove rows cols commands', () => {

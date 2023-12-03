@@ -1,17 +1,18 @@
-import { IDisposable } from '@wendellhu/redi';
+import type { IDisposable } from '@wendellhu/redi';
 
 import { remove } from '../../common/array';
-import { Nullable } from '../../common/type-utils';
+import type { Nullable } from '../../common/type-utils';
 import { Disposable, DisposableCollection, toDisposable } from '../../shared/lifecycle';
 import type { Workbook } from '../../sheets/workbook';
-import { Worksheet } from '../../sheets/worksheet';
-import { ICellData } from '../../types/interfaces/i-cell-data';
-import { ICommandInfo } from '../command/command.service';
+import type { Worksheet } from '../../sheets/worksheet';
+import type { ICellData } from '../../types/interfaces/i-cell-data';
+import type { ICommandInfo } from '../command/command.service';
 import { IUniverInstanceService } from '../instance/instance.service';
 import { LifecycleStages, OnLifecycle } from '../lifecycle/lifecycle';
-import { IUndoRedoCommandInfos } from '../undoredo/undoredo.service';
+import type { IUndoRedoCommandInfos } from '../undoredo/undoredo.service';
 import { INTERCEPTOR_POINT } from './interceptor-const';
-import { composeInterceptors, IInterceptor } from './utils/interceptor';
+import type { IInterceptor } from './utils/interceptor';
+import { composeInterceptors } from './utils/interceptor';
 
 export interface ICommandInterceptor {
     priority?: number;

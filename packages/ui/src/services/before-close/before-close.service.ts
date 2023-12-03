@@ -1,4 +1,5 @@
-import { createIdentifier, IDisposable } from '@wendellhu/redi';
+import type { IDisposable } from '@wendellhu/redi';
+import { createIdentifier } from '@wendellhu/redi';
 
 import { INotificationService } from '../notification/notification.service';
 

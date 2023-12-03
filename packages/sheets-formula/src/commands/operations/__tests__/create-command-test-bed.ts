@@ -1,15 +1,9 @@
+import type { IWorkbookData } from '@univerjs/core';
+import { ILogService, IUniverInstanceService, LocaleType, Plugin, PluginType, Univer } from '@univerjs/core';
 import { FormulaEngineService } from '@univerjs/engine-formula';
 import { SelectionManagerService } from '@univerjs/sheets';
-import {
-    ILogService,
-    IUniverInstanceService,
-    IWorkbookData,
-    LocaleType,
-    Plugin,
-    PluginType,
-    Univer,
-} from '@univerjs/core';
-import { Dependency, Inject, Injector } from '@wendellhu/redi';
+import type { Dependency } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 
 import { FormulaInputService, IFormulaInputService } from '../../../services/formula-input.service';
 

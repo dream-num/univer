@@ -1,6 +1,6 @@
 import { type ICustomLabelProps } from '../../../components/custom-label/CustomLabel';
 
-export type ISidebarMethodOptions = {
+export interface ISidebarMethodOptions {
     header?: ICustomLabelProps;
 
     children?: ICustomLabelProps;
@@ -14,4 +14,4 @@ export type ISidebarMethodOptions = {
     onClose?: () => void;
 
     onOpen?: () => void;
-};
+}

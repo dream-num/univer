@@ -1,8 +1,8 @@
-import { IRange, ISelectionCell, Nullable } from '@univerjs/core';
-import { IDisposable } from '@wendellhu/redi';
+import type { IRange, ISelectionCell, Nullable } from '@univerjs/core';
+import type { IDisposable } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 
-import { ISelectionStyle, ISelectionWithStyle } from '../basics/selection';
+import type { ISelectionStyle, ISelectionWithStyle } from '../basics/selection';
 
 export const NORMAL_SELECTION_PLUGIN_NAME = 'normalSelectionPluginName';
 

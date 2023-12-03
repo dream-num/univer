@@ -1,5 +1,6 @@
 /* eslint-disable no-magic-numbers */
-import { IShapeProps, Rect, RegularPolygon, Shape } from '@univerjs/engine-render';
+import type { IShapeProps } from '@univerjs/engine-render';
+import { Rect, RegularPolygon, Shape } from '@univerjs/engine-render';
 
 export interface IHeaderMenuShapeProps extends IShapeProps {
     size?: number;

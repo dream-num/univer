@@ -1,7 +1,7 @@
-import { LocaleType } from '@univerjs/core';
+import type { LocaleType } from '@univerjs/core';
 
-import { SlideContainerConfig } from './slide-container-config';
-import { SlideToolbarConfig } from './toolbar-config';
+import type { SlideContainerConfig } from './slide-container-config';
+import type { SlideToolbarConfig } from './toolbar-config';
 
 export interface ILayout {
     slideContainerConfig?: SlideContainerConfig;

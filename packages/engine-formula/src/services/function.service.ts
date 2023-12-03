@@ -1,8 +1,9 @@
-import { Disposable, Nullable } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
+import { Disposable } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 
-import { FUNCTION_NAMES, IFunctionInfo } from '../basics/function';
-import { BaseFunction } from '../functions/base-function';
+import type { FUNCTION_NAMES, IFunctionInfo } from '../basics/function';
+import type { BaseFunction } from '../functions/base-function';
 
 export interface IFunctionService {
     registerExecutors(...functions: BaseFunction[]): void;

@@ -1,6 +1,7 @@
 /* eslint-disable no-magic-numbers */
-import { ICommandService, IUniverInstanceService, RANGE_TYPE, RedoCommand, UndoCommand, Univer } from '@univerjs/core';
-import { Injector } from '@wendellhu/redi';
+import type { Univer } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, RANGE_TYPE, RedoCommand, UndoCommand } from '@univerjs/core';
+import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../../services/selection-manager.service';

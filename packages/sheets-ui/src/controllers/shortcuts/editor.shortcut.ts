@@ -1,8 +1,8 @@
+import { FOCUSING_EDITOR } from '@univerjs/core';
 import { BreakLineCommand, DeleteLeftCommand } from '@univerjs/docs';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import type { IShortcutItem } from '@univerjs/ui';
 import { KeyCode, MetaKeys } from '@univerjs/ui';
-import { FOCUSING_EDITOR } from '@univerjs/core';
 
 import {
     SetCellEditVisibleArrowOperation,

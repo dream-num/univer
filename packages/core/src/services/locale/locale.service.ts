@@ -1,8 +1,8 @@
 import { Subject } from 'rxjs';
 
-import { Nullable } from '../../common/type-utils';
+import type { Nullable } from '../../common/type-utils';
 import { Disposable, toDisposable } from '../../shared/lifecycle';
-import { ILocales } from '../../shared/locale';
+import type { ILocales } from '../../shared/locale';
 import { Tools } from '../../shared/tools';
 import { LocaleType } from '../../types/enum/locale-type';
 

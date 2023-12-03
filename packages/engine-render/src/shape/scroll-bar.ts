@@ -1,12 +1,13 @@
-import { EventState, IKeyValue, Nullable, Observer } from '@univerjs/core';
+import type { EventState, IKeyValue, Nullable, Observer } from '@univerjs/core';
 
 import { EVENT_TYPE } from '../basics/const';
-import { IMouseEvent, IPointerEvent } from '../basics/i-events';
+import type { IMouseEvent, IPointerEvent } from '../basics/i-events';
 import { Transform } from '../basics/transform';
-import { Vector2 } from '../basics/vector2';
-import { ThinScene } from '../thin-scene';
-import { Viewport } from '../viewport';
-import { BaseScrollBar, IScrollBarProps } from './base-scroll-bar';
+import type { Vector2 } from '../basics/vector2';
+import type { ThinScene } from '../thin-scene';
+import type { Viewport } from '../viewport';
+import type { IScrollBarProps } from './base-scroll-bar';
+import { BaseScrollBar } from './base-scroll-bar';
 import { Rect } from './rect';
 
 const MINI_THUMB_SIZE = 17;

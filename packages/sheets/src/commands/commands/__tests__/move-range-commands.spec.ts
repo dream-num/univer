@@ -1,18 +1,7 @@
 /* eslint-disable no-magic-numbers */
-import {
-    ICellData,
-    ICommandService,
-    IRange,
-    IUniverInstanceService,
-    IWorkbookData,
-    LocaleType,
-    Nullable,
-    Rectangle,
-    Tools,
-    UndoCommand,
-    Univer,
-} from '@univerjs/core';
-import { Injector } from '@wendellhu/redi';
+import type { ICellData, IRange, IWorkbookData, Nullable, Univer } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LocaleType, Rectangle, Tools, UndoCommand } from '@univerjs/core';
+import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { MergeCellController } from '../../../controllers/merge-cell.controller';

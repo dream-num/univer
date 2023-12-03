@@ -1,14 +1,6 @@
-import {
-    BorderStyleTypes,
-    BorderType,
-    IBorderData,
-    ICommandService,
-    IRange,
-    IUniverInstanceService,
-    RANGE_TYPE,
-    Univer,
-} from '@univerjs/core';
-import { Injector } from '@wendellhu/redi';
+import type { IBorderData, IRange, Univer } from '@univerjs/core';
+import { BorderStyleTypes, BorderType, ICommandService, IUniverInstanceService, RANGE_TYPE } from '@univerjs/core';
+import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { SetRangeValuesMutation } from '../../..';

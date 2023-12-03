@@ -1,8 +1,10 @@
 import { nanoid } from 'nanoid';
 
-import { ObjectArray, ObjectArrayPrimitiveType } from './object-array';
-import { ObjectMatrix, ObjectMatrixPrimitiveType } from './object-matrix';
-import { Class, IKeyValue } from './types';
+import type { ObjectArrayPrimitiveType } from './object-array';
+import { ObjectArray } from './object-array';
+import type { ObjectMatrixPrimitiveType } from './object-matrix';
+import { ObjectMatrix } from './object-matrix';
+import type { Class, IKeyValue } from './types';
 
 const rmsPrefix = /^-ms-/;
 const rDashAlpha = /-([a-z])/g;

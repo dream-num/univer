@@ -1,6 +1,7 @@
-import { Nullable } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
 
-import { IShapeProps, Shape } from './shape';
+import type { IShapeProps } from './shape';
+import { Shape } from './shape';
 
 export interface IPictureProps extends IShapeProps {
     image?: HTMLImageElement;

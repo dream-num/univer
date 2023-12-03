@@ -1,3 +1,4 @@
+import type { PermissionService } from '@univerjs/core';
 import {
     Disposable,
     getTypeFromPermissionItemList,
@@ -6,7 +7,6 @@ import {
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
-    PermissionService,
     SheetInterceptorService,
     toDisposable,
     UniverEditablePermissionPoint,

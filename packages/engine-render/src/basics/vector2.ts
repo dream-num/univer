@@ -1,4 +1,4 @@
-import { DeepImmutable, FloatArray } from './i-events';
+import type { DeepImmutable, FloatArray } from './i-events';
 
 export interface IPoint {
     x: number;

@@ -1,6 +1,8 @@
-import { CommandType, IOperation } from '@univerjs/core';
+import type { IOperation } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
 
-import { FormatPainterStatus, IFormatPainterService } from '../../services/format-painter/format-painter.service';
+import type { FormatPainterStatus } from '../../services/format-painter/format-painter.service';
+import { IFormatPainterService } from '../../services/format-painter/format-painter.service';
 
 export interface ISetFormatPainterOperationParams {
     status: FormatPainterStatus;

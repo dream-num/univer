@@ -1,7 +1,8 @@
-import { CommandType, IMutation, IUniverInstanceService, ObjectArray, Rectangle } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { IMutation } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, ObjectArray, Rectangle } from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
 
-import {
+import type {
     IInsertColMutationParams,
     IInsertRowMutationParams,
     IRemoveColMutationParams,

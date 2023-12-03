@@ -1,6 +1,6 @@
-import { INumfmtService, SelectionManagerService } from '@univerjs/sheets';
 import type { ICommand } from '@univerjs/core';
 import { CommandType, ICommandService, IUniverInstanceService, Range } from '@univerjs/core';
+import { INumfmtService, SelectionManagerService } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 
 import { getDecimalFromPattern, isPatternEqualWithoutDecimal, setPatternDecimal } from '../../utils/decimal';

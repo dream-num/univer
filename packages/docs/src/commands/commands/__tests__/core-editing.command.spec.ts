@@ -1,7 +1,8 @@
 /* eslint-disable no-magic-numbers */
 
-import { ICommandService, Univer } from '@univerjs/core';
-import { Injector } from '@wendellhu/redi';
+import type { Univer } from '@univerjs/core';
+import { ICommandService } from '@univerjs/core';
+import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { SetInlineFormatBoldCommand } from '../inline-format.command';

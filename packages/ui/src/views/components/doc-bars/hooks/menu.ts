@@ -1,6 +1,7 @@
 import { BehaviorSubject } from 'rxjs';
 
-import { IDisplayMenuItem, IMenuItem, MenuPosition } from '../../../../services/menu/menu';
+import type { IDisplayMenuItem, IMenuItem } from '../../../../services/menu/menu';
+import { MenuPosition } from '../../../../services/menu/menu';
 
 export interface IMenuGroup {
     name: MenuPosition;

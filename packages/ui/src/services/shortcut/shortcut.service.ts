@@ -1,6 +1,8 @@
 import { Disposable, ICommandService, IContextService, toDisposable } from '@univerjs/core';
-import { createIdentifier, IDisposable } from '@wendellhu/redi';
-import { Observable, Subject } from 'rxjs';
+import type { IDisposable } from '@wendellhu/redi';
+import { createIdentifier } from '@wendellhu/redi';
+import type { Observable } from 'rxjs';
+import { Subject } from 'rxjs';
 
 import { fromDocumentEvent } from '../../common/lifecycle';
 import { IPlatformService } from '../platform/platform.service';

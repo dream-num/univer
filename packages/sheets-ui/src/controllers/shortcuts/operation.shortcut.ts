@@ -1,5 +1,6 @@
 import { SetColHiddenCommand, SetRowHiddenCommand } from '@univerjs/sheets';
-import { IShortcutItem, KeyCode, MetaKeys } from '@univerjs/ui';
+import type { IShortcutItem } from '@univerjs/ui';
+import { KeyCode, MetaKeys } from '@univerjs/ui';
 
 import { whenEditorNotActivated } from './utils';
 

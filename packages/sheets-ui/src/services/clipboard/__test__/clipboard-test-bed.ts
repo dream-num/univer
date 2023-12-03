@@ -1,3 +1,5 @@
+import type { IWorkbookData } from '@univerjs/core';
+import { ILogService, IUniverInstanceService, LocaleType, Plugin, PluginType, Univer } from '@univerjs/core';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { SelectionManagerService } from '@univerjs/sheets';
 import {
@@ -6,8 +8,6 @@ import {
     IClipboardInterfaceService,
     IMessageService,
 } from '@univerjs/ui';
-import type { IWorkbookData } from '@univerjs/core';
-import { ILogService, IUniverInstanceService, LocaleType, Plugin, PluginType, Univer } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 

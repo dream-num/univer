@@ -1,6 +1,7 @@
-import { IRange, Nullable, Rectangle } from '@univerjs/core';
+import type { IRange, Nullable } from '@univerjs/core';
+import { Rectangle } from '@univerjs/core';
 
-import {
+import type {
     IDeleteOperator,
     IDeleteRangeMoveLeftCommand,
     IDeleteRangeMoveUpCommand,
@@ -13,8 +14,8 @@ import {
     IOperator,
     IRemoveRowColCommand,
     IVerticalMoveOperator,
-    OperatorType,
 } from './type';
+import { OperatorType } from './type';
 
 const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER;
 export const handleMoveRange = (param: IMoveRangeCommand, targetRange: IRange) => {

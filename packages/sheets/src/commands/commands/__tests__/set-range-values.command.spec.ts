@@ -1,23 +1,20 @@
+import type { ICellData, IDocumentData, IStyleData, Nullable, Univer } from '@univerjs/core';
 import {
     CellValueType,
-    ICellData,
     ICommandService,
-    IDocumentData,
-    IStyleData,
     IUniverInstanceService,
-    Nullable,
     RANGE_TYPE,
     RedoCommand,
     Tools,
     UndoCommand,
-    Univer,
 } from '@univerjs/core';
-import { Injector } from '@wendellhu/redi';
+import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../../services/selection-manager.service';
 import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
-import { ISetRangeValuesCommandParams, SetRangeValuesCommand } from '../set-range-values.command';
+import type { ISetRangeValuesCommandParams } from '../set-range-values.command';
+import { SetRangeValuesCommand } from '../set-range-values.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('Test set range values commands', () => {

@@ -1,19 +1,12 @@
-import { Nullable, Observer } from '@univerjs/core';
+import type { Nullable, Observer } from '@univerjs/core';
 
-import { BaseObject } from './base-object';
+import type { BaseObject } from './base-object';
 import { RENDER_CLASS_TYPE } from './basics/const';
-import {
-    DeviceType,
-    IEvent,
-    IKeyboardEvent,
-    IMouseEvent,
-    IPointerEvent,
-    IWheelEvent,
-    PointerInput,
-} from './basics/i-events';
+import type { IEvent, IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
+import { DeviceType, PointerInput } from './basics/i-events';
 import { Vector2 } from './basics/vector2';
-import { ThinScene } from './thin-scene';
-import { Viewport } from './viewport';
+import type { ThinScene } from './thin-scene';
+import type { Viewport } from './viewport';
 
 export class InputManager {
     /** The distance in pixel that you have to move to prevent some events */

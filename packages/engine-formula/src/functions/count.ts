@@ -1,6 +1,6 @@
-import { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
-import { ArrayValueObject } from '../value-object/array-value-object';
-import { BaseValueObject } from '../value-object/base-value-object';
+import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
+import type { ArrayValueObject } from '../value-object/array-value-object';
+import type { BaseValueObject } from '../value-object/base-value-object';
 import { NumberValueObject } from '../value-object/primitive-object';
 import { BaseFunction } from './base-function';
 

@@ -72,7 +72,7 @@ import {
     VerticalIntegrationSingle,
     VerticalTextSingle,
 } from '@univerjs/icons';
-import { IDisposable } from '@wendellhu/redi';
+import type { IDisposable } from '@wendellhu/redi';
 
 export interface ICustomComponent {
     name: string;

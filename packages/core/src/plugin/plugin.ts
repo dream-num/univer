@@ -1,4 +1,4 @@
-import { Ctor, Injector } from '@wendellhu/redi';
+import type { Ctor, Injector } from '@wendellhu/redi';
 
 export type PluginCtor<T extends Plugin> = Ctor<T> & { type: PluginType };
 

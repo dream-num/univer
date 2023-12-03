@@ -1,12 +1,13 @@
-import { DataStreamTreeTokenType, IParagraphStyle, Nullable } from '@univerjs/core';
+import type { IParagraphStyle, Nullable } from '@univerjs/core';
+import { DataStreamTreeTokenType } from '@univerjs/core';
 
-import { IDocumentSkeletonSpan } from '../../../../basics/i-document-skeleton-cached';
-import { ISectionBreakConfig } from '../../../../basics/interfaces';
+import type { IDocumentSkeletonSpan } from '../../../../basics/i-document-skeleton-cached';
+import type { ISectionBreakConfig } from '../../../../basics/interfaces';
 import { hasArabic, hasCJK, hasSpaceAndTab, hasTibetan } from '../../../../basics/tools';
 import { createSkeletonLetterSpan, createSkeletonWordSpan } from '../../common/span';
 import { getFontCreateConfig } from '../../common/tools';
-import { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
-import { DocumentViewModel } from '../../view-model/document-view-model';
+import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
+import type { DocumentViewModel } from '../../view-model/document-view-model';
 
 interface LanguageResult {
     charIndex: number;

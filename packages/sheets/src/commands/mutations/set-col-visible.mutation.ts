@@ -1,5 +1,6 @@
-import { BooleanNumber, CommandType, IMutation, IRange, IUniverInstanceService } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { IMutation, IRange } from '@univerjs/core';
+import { BooleanNumber, CommandType, IUniverInstanceService } from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
 
 export interface ISetColHiddenMutationParams {
     workbookId: string;

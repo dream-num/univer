@@ -1,8 +1,9 @@
-import { BooleanNumber, IParagraph } from '@univerjs/core';
+import type { IParagraph } from '@univerjs/core';
+import { BooleanNumber } from '@univerjs/core';
 
 import { extractNodeStyle as getInlineStyle } from '../parse-node-style';
 import { getParagraphStyle } from '../utils';
-import { IPastePlugin } from './type';
+import type { IPastePlugin } from './type';
 
 const wordPastePlugin: IPastePlugin = {
     name: 'univer-doc-paste-plugin-word',

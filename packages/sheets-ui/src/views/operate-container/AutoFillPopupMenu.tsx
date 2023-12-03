@@ -1,9 +1,9 @@
-import { IRenderManagerService } from '@univerjs/engine-render';
-import { SetRangeValuesMutation } from '@univerjs/sheets';
 import type { ICommandInfo } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleService, toDisposable } from '@univerjs/core';
 import { Dropdown } from '@univerjs/design';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { Autofill, CheckMarkSingle, MoreDownSingle } from '@univerjs/icons';
+import { SetRangeValuesMutation } from '@univerjs/sheets';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
 import React, { useCallback, useEffect, useState } from 'react';

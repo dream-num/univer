@@ -1,6 +1,6 @@
 import numeral from 'numeral';
 
-import { IKeyType } from './types';
+import type { IKeyType } from './types';
 
 export const error: IKeyType<string> = {
     v: '#VALUE!', // 错误的参数或运算符

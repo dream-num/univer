@@ -1,4 +1,5 @@
-import { CommandType, IMultiCommand } from '@univerjs/core';
+import type { IMultiCommand } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
 
 const CopyCommandName = 'univer.command.copy';
 export const CopyCommand: IMultiCommand = {

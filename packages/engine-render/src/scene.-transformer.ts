@@ -1,13 +1,14 @@
-import { IKeyValue, Nullable, Observable, Observer } from '@univerjs/core';
+import type { IKeyValue, Nullable, Observer } from '@univerjs/core';
+import { Observable } from '@univerjs/core';
 
-import { BaseObject } from './base-object';
+import type { BaseObject } from './base-object';
 import { CURSOR_TYPE } from './basics/const';
-import { IMouseEvent, IPointerEvent } from './basics/i-events';
+import type { IMouseEvent, IPointerEvent } from './basics/i-events';
 import { getCurrentScrollXY } from './basics/scroll-xy';
 import { Group } from './group';
 import { ScrollTimer } from './scroll-timer';
 import { Rect } from './shape/rect';
-import { ThinScene } from './thin-scene';
+import type { ThinScene } from './thin-scene';
 
 enum TransformerManagerType {
     RESIZE_LT = '__SpreadsheetTransformerResizeLT__',

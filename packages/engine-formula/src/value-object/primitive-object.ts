@@ -3,7 +3,8 @@ import { BooleanValue, ConcatenateType } from '../basics/common';
 import { ErrorType } from '../basics/error-type';
 import { compareToken } from '../basics/token';
 import { ErrorValueObject } from '../other-object/error-value-object';
-import { BaseValueObject, CalculateValueType } from './base-value-object';
+import type { CalculateValueType } from './base-value-object';
+import { BaseValueObject } from './base-value-object';
 
 export class NullValueObject extends BaseValueObject {
     override isNull(): boolean {

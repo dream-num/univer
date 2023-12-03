@@ -1,7 +1,8 @@
+import type { IWorkbookData } from '@univerjs/core';
+import { ICommandService, LocaleType } from '@univerjs/core';
 import { SetFrozenMutation, SetSelectionsOperation } from '@univerjs/sheets';
 import { createCommandTestBed } from '@univerjs/sheets/commands/commands/__tests__/create-command-test-bed.js';
 import { ShortcutExperienceService } from '@univerjs/ui';
-import { ICommandService, IWorkbookData, LocaleType } from '@univerjs/core';
 
 import { ScrollManagerService } from '../../../services/scroll-manager.service';
 import {

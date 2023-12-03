@@ -1,6 +1,6 @@
 /* eslint-disable no-magic-numbers */
-import { IRenderManagerService } from '@univerjs/engine-render';
 import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY } from '@univerjs/core';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useRef, useState } from 'react';
 import { switchMap } from 'rxjs/operators';

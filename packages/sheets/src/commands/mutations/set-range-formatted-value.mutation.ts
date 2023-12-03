@@ -1,16 +1,6 @@
-import {
-    CommandType,
-    ICellData,
-    ICellV,
-    IMutation,
-    IRange,
-    IUniverInstanceService,
-    Nullable,
-    ObjectMatrix,
-    ObjectMatrixPrimitiveType,
-    Tools,
-} from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { ICellData, ICellV, IMutation, IRange, Nullable, ObjectMatrixPrimitiveType } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, ObjectMatrix, Tools } from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
 
 export interface ISetRangeFormattedValueMutationParams {
     workbookId: string;

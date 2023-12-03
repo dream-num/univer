@@ -1,5 +1,6 @@
-import { CommandType, IMutation, IUniverInstanceService } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { IMutation } from '@univerjs/core';
+import { CommandType, IUniverInstanceService } from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
 
 export interface ISetFrozenMutationParams {
     workbookId: string;

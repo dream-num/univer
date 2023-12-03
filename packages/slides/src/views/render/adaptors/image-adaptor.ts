@@ -1,6 +1,7 @@
+import type { IPageElement } from '@univerjs/core';
+import { PageElementType } from '@univerjs/core';
 import { Picture } from '@univerjs/engine-render';
-import { IPageElement, PageElementType } from '@univerjs/core';
-import { Injector } from '@wendellhu/redi';
+import type { Injector } from '@wendellhu/redi';
 
 import { CanvasObjectProviderRegistry, ObjectAdaptor } from '../adaptor';
 

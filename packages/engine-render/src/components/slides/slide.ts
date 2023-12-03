@@ -1,10 +1,11 @@
-import { Nullable, Observable } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
+import { Observable } from '@univerjs/core';
 
 import { COLORS, CURSOR_TYPE } from '../../basics/const';
-import { IMouseEvent, IPointerEvent } from '../../basics/i-events';
+import type { IMouseEvent, IPointerEvent } from '../../basics/i-events';
 import { attachObjectHover } from '../../basics/quick-event';
 import { getColor } from '../../basics/tools';
-import { Scene } from '../../scene';
+import type { Scene } from '../../scene';
 import { SceneViewer } from '../../scene-viewer';
 import { Path } from '../../shape/path';
 

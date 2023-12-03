@@ -1,6 +1,7 @@
+import type { ICommand } from '@univerjs/core';
+import { CommandType, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '@univerjs/sheets';
-import { CommandType, ICommand, ICommandService, IUniverInstanceService } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { IAccessor } from '@wendellhu/redi';
 
 import { FormatPainterStatus, IFormatPainterService } from '../../services/format-painter/format-painter.service';
 import { FORMAT_PAINTER_SELECTION_PLUGIN_NAME, SetCopySelectionsOperation } from '../operations/selection.operation';

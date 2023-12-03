@@ -1,11 +1,5 @@
-import {
-    IRangeWithCoord,
-    ISelectionCellWithCoord,
-    ISelectionWithCoord,
-    makeCellToSelection,
-    Nullable,
-    RANGE_TYPE,
-} from '@univerjs/core';
+import type { IRangeWithCoord, ISelectionCellWithCoord, ISelectionWithCoord, Nullable } from '@univerjs/core';
+import { makeCellToSelection, RANGE_TYPE } from '@univerjs/core';
 
 export class SelectionRenderModel implements IRangeWithCoord {
     private _startColumn: number = -1;

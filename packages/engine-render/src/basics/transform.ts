@@ -1,7 +1,7 @@
 /* eslint-disable no-magic-numbers */
-import { ITransformState } from '@univerjs/core';
+import type { ITransformState } from '@univerjs/core';
 
-import { IRect } from './interfaces';
+import type { IRect } from './interfaces';
 import { degToRad, precisionTo, radToDeg } from './tools';
 import { Vector2 } from './vector2';
 

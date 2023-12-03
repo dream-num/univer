@@ -1,16 +1,11 @@
+import type { Nullable } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle } from '@univerjs/core';
 import { getDocObject } from '@univerjs/docs';
-import { FormulaEngineService, ISheetData } from '@univerjs/engine-formula';
+import type { ISheetData } from '@univerjs/engine-formula';
+import { FormulaEngineService } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import {
-    Disposable,
-    IUniverInstanceService,
-    LifecycleStages,
-    Nullable,
-    ObjectMatrix,
-    OnLifecycle,
-} from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 
 @OnLifecycle(LifecycleStages.Steady, EditingController)
 export class EditingController extends Disposable {

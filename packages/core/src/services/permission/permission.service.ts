@@ -1,9 +1,11 @@
 import { createIdentifier, Inject } from '@wendellhu/redi';
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { Disposable, PermissionPoint, PermissionStatus, toDisposable } from '../../shared';
-import { Nullable } from '../../shared/types';
+import type { PermissionPoint } from '../../shared';
+import { Disposable, PermissionStatus, toDisposable } from '../../shared';
+import type { Nullable } from '../../shared/types';
 import { IUniverInstanceService } from '../instance/instance.service';
 import { LifecycleStages, OnLifecycle } from '../lifecycle/lifecycle';
 import { IResourceManagerService } from '../resource-manager/type';

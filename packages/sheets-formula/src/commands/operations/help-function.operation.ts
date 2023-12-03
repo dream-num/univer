@@ -1,7 +1,9 @@
-import { CommandType, ICommand } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { ICommand } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
 
-import { IFormulaPromptService, IHelpFunctionOperationParams } from '../../services/prompt.service';
+import type { IHelpFunctionOperationParams } from '../../services/prompt.service';
+import { IFormulaPromptService } from '../../services/prompt.service';
 
 export const HelpFunctionOperation: ICommand = {
     id: 'formula-ui.operation.help-function',

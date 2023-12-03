@@ -1,11 +1,13 @@
 import { Plugin, PluginType } from '@univerjs/core';
-import { Dependency, Inject, Injector } from '@wendellhu/redi';
+import type { Dependency } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 
 import { FORMULA_PLUGIN_NAME } from './common/plugin-name';
 import { CalculateController } from './controllers/calculate.controller';
 import { FormulaController } from './controllers/formula.controller';
 import { UpdateFormulaController } from './controllers/update-formula.controller';
-import { FormulaDataModel, IFormulaConfig } from './models/formula-data.model';
+import type { IFormulaConfig } from './models/formula-data.model';
+import { FormulaDataModel } from './models/formula-data.model';
 
 export class FormulaPlugin extends Plugin {
     static override type = PluginType.Sheet;

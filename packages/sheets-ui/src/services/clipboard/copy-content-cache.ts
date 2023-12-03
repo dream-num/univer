@@ -1,6 +1,7 @@
-import { IRange, LRUMap, ObjectMatrix, Tools } from '@univerjs/core';
+import type { IRange, ObjectMatrix } from '@univerjs/core';
+import { LRUMap, Tools } from '@univerjs/core';
 
-import { COPY_TYPE, ICellDataWithSpanInfo } from './type';
+import type { COPY_TYPE, ICellDataWithSpanInfo } from './type';
 
 const COPY_CONTENT_CACHE_LIMIT = 10;
 const ID_LENGTH = 6;

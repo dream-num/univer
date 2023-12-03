@@ -1,8 +1,9 @@
-import { CommandType, ICommand, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { ICommand } from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
 
+import type { ISetDocZoomRatioOperationParams } from '../operations/set-doc-zoom-ratio.operation';
 import {
-    ISetDocZoomRatioOperationParams,
     SetDocZoomRatioOperation,
     SetDocZoomRatioUndoMutationFactory,
 } from '../operations/set-doc-zoom-ratio.operation';

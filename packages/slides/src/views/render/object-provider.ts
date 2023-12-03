@@ -1,10 +1,12 @@
 import './adaptors';
 
-import { BaseObject, Scene } from '@univerjs/engine-render';
-import { IPageElement, sortRules } from '@univerjs/core';
+import type { IPageElement } from '@univerjs/core';
+import { sortRules } from '@univerjs/core';
+import type { BaseObject, Scene } from '@univerjs/engine-render';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { CanvasObjectProviderRegistry, ObjectAdaptor } from './adaptor';
+import type { ObjectAdaptor } from './adaptor';
+import { CanvasObjectProviderRegistry } from './adaptor';
 
 export class ObjectProvider {
     private _adaptors: ObjectAdaptor[] = [];

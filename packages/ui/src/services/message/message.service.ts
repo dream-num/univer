@@ -1,5 +1,6 @@
-import { IMessageMethodOptions, IMessageProps } from '@univerjs/design';
-import { createIdentifier, IDisposable } from '@wendellhu/redi';
+import type { IMessageMethodOptions, IMessageProps } from '@univerjs/design';
+import type { IDisposable } from '@wendellhu/redi';
+import { createIdentifier } from '@wendellhu/redi';
 
 export const IMessageService = createIdentifier<IMessageService>('univer.message-service');
 

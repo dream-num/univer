@@ -1,7 +1,7 @@
-import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
-import { KeyCode } from '@univerjs/ui';
 import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY } from '@univerjs/core';
+import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import { CheckMarkSingle, CloseSingle, DownTriangleSingle, FxSingle, UpTriangleSingle } from '@univerjs/icons';
+import { KeyCode } from '@univerjs/ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
 import React, { useEffect, useRef, useState } from 'react';

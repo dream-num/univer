@@ -1,3 +1,5 @@
+import type { ICommand } from '@univerjs/core';
+import { CommandType, FOCUSING_EDITOR, ICommandService, IContextService } from '@univerjs/core';
 import {
     SetInlineFormatBoldCommand,
     SetInlineFormatFontFamilyCommand,
@@ -16,8 +18,6 @@ import {
     SetTextColorCommand,
     SetUnderlineCommand,
 } from '@univerjs/sheets';
-import type { ICommand } from '@univerjs/core';
-import { CommandType, FOCUSING_EDITOR, ICommandService, IContextService } from '@univerjs/core';
 
 /**
  * It is used to set the bold style of selections or one cell, need to distinguish between

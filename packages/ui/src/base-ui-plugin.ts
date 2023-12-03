@@ -1,12 +1,14 @@
 import { ILocalStorageService, LocaleService, Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
-import { Dependency, Inject, Injector } from '@wendellhu/redi';
+import type { Dependency } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 
 import { ComponentManager } from './common/component-manager';
 import { ZIndexManager } from './common/z-index-manager';
 import { ErrorController } from './controllers/error/error.controller';
 import { SharedController } from './controllers/shared-shortcut.controller';
 import { ShortcutPanelController } from './controllers/shortcut-display/shortcut-panel.controller';
-import { IUIController, IWorkbenchOptions } from './controllers/ui/ui.controller';
+import type { IWorkbenchOptions } from './controllers/ui/ui.controller';
+import { IUIController } from './controllers/ui/ui.controller';
 import { DesktopUIController } from './controllers/ui/ui-desktop.controller';
 import { enUS } from './locale';
 import { DesktopBeforeCloseService, IBeforeCloseService } from './services/before-close/before-close.service';

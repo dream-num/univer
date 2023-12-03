@@ -1,9 +1,9 @@
 import { toDisposable } from '@univerjs/core';
-import { IDisposable } from '@wendellhu/redi';
+import type { IDisposable } from '@wendellhu/redi';
 import { Subject } from 'rxjs';
 
 import { type ISidebarMethodOptions } from '../../views/components/sidebar/interface';
-import { ISidebarService } from './sidebar.service';
+import type { ISidebarService } from './sidebar.service';
 
 export class DesktopSidebarService implements ISidebarService {
     private sidebarOptions: ISidebarMethodOptions = {};

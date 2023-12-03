@@ -1,5 +1,3 @@
-import { getDocObject } from '@univerjs/docs';
-import { IRenderManagerService } from '@univerjs/engine-render';
 import type { Nullable } from '@univerjs/core';
 import {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
@@ -13,6 +11,8 @@ import {
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
+import { getDocObject } from '@univerjs/docs';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import type { Subscription } from 'rxjs';
 
 @OnLifecycle(LifecycleStages.Rendered, InitializeEditorController)

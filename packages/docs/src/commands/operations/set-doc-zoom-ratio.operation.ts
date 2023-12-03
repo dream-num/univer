@@ -1,5 +1,6 @@
-import { CommandType, IOperation, IUniverInstanceService, Tools } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { IOperation } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, Tools } from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
 
 export interface ISetDocZoomRatioOperationParams {
     zoomRatio: number;

@@ -1,10 +1,11 @@
-import { ComponentManager } from '@univerjs/ui';
 import { IUniverInstanceService, LocaleService, Plugin, PluginType, Tools } from '@univerjs/core';
+import { ComponentManager } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { DefaultSlideUIConfig, ISlideUIPluginConfig } from './basics';
+import type { ISlideUIPluginConfig } from './basics';
+import { DefaultSlideUIConfig } from './basics';
 import { SLIDE_UI_PLUGIN_NAME } from './basics/const/plugin-name';
-import { IToolbarItemProps } from './controllers';
+import type { IToolbarItemProps } from './controllers';
 import { AppUIController } from './controllers/app-ui-controller';
 import { SlideUIController } from './controllers/slide-ui.controller';
 import { enUS } from './locale';

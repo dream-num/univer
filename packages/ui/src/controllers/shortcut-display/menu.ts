@@ -1,5 +1,6 @@
 import { ToggleShortcutPanelOperation } from '../../commands/operations/toggle-shortcut-panel.operation';
-import { IMenuButtonItem, MenuItemType, MenuPosition } from '../../services/menu/menu';
+import type { IMenuButtonItem } from '../../services/menu/menu';
+import { MenuItemType, MenuPosition } from '../../services/menu/menu';
 
 export function ShortcutPanelMenuItemFactory(): IMenuButtonItem {
     return {

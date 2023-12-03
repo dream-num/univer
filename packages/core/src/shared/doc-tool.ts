@@ -1,4 +1,4 @@
-import { IParagraph, IParagraphStyle } from '../types/interfaces/i-document-data';
+import type { IParagraph, IParagraphStyle } from '../types/interfaces/i-document-data';
 
 export function horizontalLineSegmentsSubtraction(A1: number, A2: number, B1: number, B2: number) {
     // 确保A1 < A2, B1 < B2

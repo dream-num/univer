@@ -1,10 +1,11 @@
-import { Nullable } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
 
 import { LexerNode } from '../analysis/lexer-node';
 import { ErrorType } from '../basics/error-type';
 import { DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER } from '../basics/token-type';
 import { ErrorValueObject } from '../other-object/error-value-object';
-import { BaseAstNode, ErrorNode, LambdaPrivacyVarType } from './base-ast-node';
+import type { LambdaPrivacyVarType } from './base-ast-node';
+import { BaseAstNode, ErrorNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
 import { NODE_ORDER_MAP, NodeType } from './node-type';
 

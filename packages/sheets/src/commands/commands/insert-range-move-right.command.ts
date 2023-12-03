@@ -1,14 +1,10 @@
+import type { ICellData, IColumnData, ICommand, IMutationInfo, IRange } from '@univerjs/core';
 import {
     BooleanNumber,
     CommandType,
     Dimension,
-    ICellData,
-    IColumnData,
-    ICommand,
     ICommandService,
     ILogService,
-    IMutationInfo,
-    IRange,
     IUndoRedoService,
     IUniverInstanceService,
     ObjectArray,
@@ -16,9 +12,9 @@ import {
     sequenceExecute,
     SheetInterceptorService,
 } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { IAccessor } from '@wendellhu/redi';
 
-import {
+import type {
     IDeleteRangeMutationParams,
     IInsertColMutationParams,
     IInsertRangeMutationParams,
@@ -29,7 +25,8 @@ import { DeleteRangeMutation } from '../mutations/delete-range.mutation';
 import { InsertRangeMutation, InsertRangeUndoMutationFactory } from '../mutations/insert-range.mutation';
 import { InsertColMutation, InsertColMutationUndoFactory } from '../mutations/insert-row-col.mutation';
 import { RemoveColMutation } from '../mutations/remove-row-col.mutation';
-import { calculateTotalLength, IInterval } from './utils/selection-util';
+import type { IInterval } from './utils/selection-util';
+import { calculateTotalLength } from './utils/selection-util';
 
 export interface InsertRangeMoveRightCommandParams {
     ranges: IRange[];

@@ -1,4 +1,4 @@
-import { IRange } from '@univerjs/core';
+import type { IRange } from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { EffectRefRangId } from '../type';

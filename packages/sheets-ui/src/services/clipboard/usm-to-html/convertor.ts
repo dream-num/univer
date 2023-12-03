@@ -1,6 +1,6 @@
-import { ICellData, IRange, ObjectMatrix } from '@univerjs/core';
+import type { ICellData, IRange, ObjectMatrix } from '@univerjs/core';
 
-import { ICellDataWithSpanInfo, IClipboardPropertyItem, ISheetClipboardHook } from '../type';
+import type { ICellDataWithSpanInfo, IClipboardPropertyItem, ISheetClipboardHook } from '../type';
 
 /**
  *

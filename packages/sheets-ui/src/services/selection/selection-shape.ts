@@ -1,14 +1,14 @@
 import { TinyColor } from '@ctrl/tinycolor';
-import { DEFAULT_SELECTION_LAYER_INDEX, Group, Rect, Scene } from '@univerjs/engine-render';
+import type { IRangeWithCoord, ISelectionCellWithCoord, Nullable, ThemeService } from '@univerjs/core';
+import { RANGE_TYPE } from '@univerjs/core';
+import type { Scene } from '@univerjs/engine-render';
+import { DEFAULT_SELECTION_LAYER_INDEX, Group, Rect } from '@univerjs/engine-render';
+import type { ISelectionStyle, ISelectionWidgetConfig, ISelectionWithCoordAndStyle } from '@univerjs/sheets';
 import {
     getNormalSelectionStyle,
-    ISelectionStyle,
-    ISelectionWidgetConfig,
-    ISelectionWithCoordAndStyle,
     SELECTION_CONTROL_BORDER_BUFFER_COLOR,
     SELECTION_CONTROL_BORDER_BUFFER_WIDTH,
 } from '@univerjs/sheets';
-import { IRangeWithCoord, ISelectionCellWithCoord, Nullable, RANGE_TYPE, ThemeService } from '@univerjs/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 import { SelectionRenderModel } from './selection-render-model';

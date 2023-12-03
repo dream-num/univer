@@ -1,7 +1,7 @@
 import { ConcatenateType } from '../basics/common';
 import { ErrorType } from '../basics/error-type';
 import { ObjectClassType } from '../basics/object-class-type';
-import { compareToken } from '../basics/token';
+import type { compareToken } from '../basics/token';
 import { ErrorValueObject } from '../other-object/error-value-object';
 
 export type CalculateValueType = BaseValueObject | ErrorValueObject;

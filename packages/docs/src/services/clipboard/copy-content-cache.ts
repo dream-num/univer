@@ -1,4 +1,5 @@
-import { IDocumentBody, LRUMap, Tools } from '@univerjs/core';
+import type { IDocumentBody } from '@univerjs/core';
+import { LRUMap, Tools } from '@univerjs/core';
 
 const COPY_CONTENT_CACHE_LIMIT = 10;
 const ID_LENGTH = 6;

@@ -1,7 +1,7 @@
-import { BorderStyleTypes, HorizontalAlign, ObjectMatrix, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import type { BorderStyleTypes, HorizontalAlign, ObjectMatrix, VerticalAlign, WrapStrategy } from '@univerjs/core';
 
-import { BORDER_TYPE } from '../../basics/const';
-import { DocumentSkeleton } from '../docs/doc-skeleton';
+import type { BORDER_TYPE } from '../../basics/const';
+import type { DocumentSkeleton } from '../docs/doc-skeleton';
 
 export interface BorderCache {
     [key: string]: BorderCacheItem | {};

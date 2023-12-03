@@ -1,6 +1,7 @@
-import { IMouseEvent, IPointerEvent } from '@univerjs/engine-render';
 import { Disposable, toDisposable } from '@univerjs/core';
-import { createIdentifier, IDisposable } from '@wendellhu/redi';
+import type { IMouseEvent, IPointerEvent } from '@univerjs/engine-render';
+import type { IDisposable } from '@wendellhu/redi';
+import { createIdentifier } from '@wendellhu/redi';
 
 export interface IContextMenuHandler {
     /** A callback to open context menu with given position and menu type. */

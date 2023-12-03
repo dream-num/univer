@@ -1,4 +1,5 @@
-import {
+import type { IUniverInstanceService, Nullable } from '@univerjs/core';
+import type {
     Engine,
     IRenderManagerService,
     Rect,
@@ -7,9 +8,8 @@ import {
     SpreadsheetColumnHeader,
     SpreadsheetHeader,
     SpreadsheetSkeleton,
-    Vector2,
 } from '@univerjs/engine-render';
-import { IUniverInstanceService, Nullable } from '@univerjs/core';
+import { Vector2 } from '@univerjs/engine-render';
 
 import { SHEET_VIEW_KEY, VIEWPORT_KEY } from '../../common/keys';
 

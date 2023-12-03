@@ -1,6 +1,7 @@
 // test for copy sheet command
-import { ICommandService, IUniverInstanceService, RedoCommand, UndoCommand, Univer, Worksheet } from '@univerjs/core';
-import { Injector } from '@wendellhu/redi';
+import type { Univer, Worksheet } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, RedoCommand, UndoCommand } from '@univerjs/core';
+import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { InsertSheetMutation } from '../../mutations/insert-sheet.mutation';

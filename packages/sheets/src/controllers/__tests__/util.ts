@@ -1,13 +1,7 @@
-import {
-    ILogService,
-    IUniverInstanceService,
-    IWorkbookData,
-    LocaleType,
-    Plugin,
-    PluginType,
-    Univer,
-} from '@univerjs/core';
-import { Dependency, Inject, Injector } from '@wendellhu/redi';
+import type { IWorkbookData } from '@univerjs/core';
+import { ILogService, IUniverInstanceService, LocaleType, Plugin, PluginType, Univer } from '@univerjs/core';
+import type { Dependency } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 
 const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
     id: 'test',

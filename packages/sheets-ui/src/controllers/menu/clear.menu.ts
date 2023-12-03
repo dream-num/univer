@@ -1,9 +1,6 @@
-import {
-    ClearSelectionAllCommand,
-    ClearSelectionContentCommand,
-    ClearSelectionFormatCommand,
-} from '@univerjs/sheets';
-import { IMenuButtonItem, IMenuSelectorItem, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
+import { ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand } from '@univerjs/sheets';
+import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
+import { MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 
 import { SheetMenuPosition } from './menu';
 

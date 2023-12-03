@@ -1,6 +1,7 @@
-import { Scene } from '@univerjs/engine-render';
-import { IPageElement, PageElementType, Registry } from '@univerjs/core';
-import { Injector } from '@wendellhu/redi';
+import type { IPageElement, PageElementType } from '@univerjs/core';
+import { Registry } from '@univerjs/core';
+import type { Scene } from '@univerjs/engine-render';
+import type { Injector } from '@wendellhu/redi';
 
 export class ObjectAdaptor {
     zIndex = 0;

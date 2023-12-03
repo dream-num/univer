@@ -1,4 +1,4 @@
-import { ITextRangeParam } from '@univerjs/core';
+import type { ITextRangeParam } from '@univerjs/core';
 
 export interface ITextSelectionStyle {
     strokeWidth: number;

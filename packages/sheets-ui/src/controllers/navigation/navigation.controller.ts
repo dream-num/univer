@@ -1,11 +1,8 @@
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
-import {
-    IMoveSelectionCommandParams,
-    MoveSelectionCommand,
-    MoveSelectionEnterAndTabCommand,
-} from '../../commands/commands/set-selection.command';
+import type { IMoveSelectionCommandParams } from '../../commands/commands/set-selection.command';
+import { MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../commands/commands/set-selection.command';
 import { ScrollController } from '../scroll.controller';
 
 const SHEET_NAVIGATION_COMMANDS = [MoveSelectionCommand.id, MoveSelectionEnterAndTabCommand.id];

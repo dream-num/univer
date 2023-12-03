@@ -1,6 +1,7 @@
-import { horizontalLineSegmentsSubtraction, Nullable, sortRulesFactory, Tools } from '../../../shared';
+import type { Nullable } from '../../../shared';
+import { horizontalLineSegmentsSubtraction, sortRulesFactory, Tools } from '../../../shared';
 import { isSameStyleTextRun } from '../../../shared/compare';
-import {
+import type {
     ICustomBlock,
     ICustomRange,
     IDocumentBody,

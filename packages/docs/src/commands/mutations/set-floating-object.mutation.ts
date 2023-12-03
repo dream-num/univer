@@ -1,15 +1,14 @@
-import {
+import type {
     BooleanNumber,
-    CommandType,
     IMutation,
     ISize,
-    IUniverInstanceService,
     ObjectPositionH,
     ObjectPositionV,
     PositionedObjectLayoutType,
     WrapTextType,
 } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import { CommandType, IUniverInstanceService } from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
 
 export interface ISeachDrawingMutation {
     documentId: string;

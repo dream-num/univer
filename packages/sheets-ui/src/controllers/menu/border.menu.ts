@@ -1,7 +1,9 @@
-import { BorderStyleManagerService, IBorderInfo, SetBorderBasicCommand } from '@univerjs/sheets';
-import { IMenuSelectorItem, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import { ICommandService } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { IBorderInfo } from '@univerjs/sheets';
+import { BorderStyleManagerService, SetBorderBasicCommand } from '@univerjs/sheets';
+import type { IMenuSelectorItem } from '@univerjs/ui';
+import { MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
+import type { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 
 import { BORDER_LINE_CHILDREN, BORDER_PANEL_COMPONENT } from '../../components/border-panel/interface';

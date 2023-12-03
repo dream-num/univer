@@ -1,4 +1,5 @@
-import { BaselineOffset, BooleanNumber, IDocumentBody, ITextRun } from '@univerjs/core';
+import type { IDocumentBody, ITextRun } from '@univerjs/core';
+import { BaselineOffset, BooleanNumber } from '@univerjs/core';
 
 function covertTextRunToHtml(dataStream: string, textRun: ITextRun): string {
     const { st: start, ed, ts = {} } = textRun;

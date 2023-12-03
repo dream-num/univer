@@ -1,16 +1,3 @@
-import type { ISetRangeValuesMutationParams, ISetSelectionsOperationParams } from '@univerjs/sheets';
-import {
-    getPrimaryForRange,
-    NORMAL_SELECTION_PLUGIN_NAME,
-    SelectionManagerService,
-    SetRangeValuesMutation,
-    SetSelectionsOperation,
-} from '@univerjs/sheets';
-import {
-    HTML_CLIPBOARD_MIME_TYPE,
-    IClipboardInterfaceService,
-    PLAIN_TEXT_CLIPBOARD_MIME_TYPE,
-} from '@univerjs/ui';
 import type {
     ICellData,
     IMutationInfo,
@@ -29,6 +16,15 @@ import {
     toDisposable,
     Tools,
 } from '@univerjs/core';
+import type { ISetRangeValuesMutationParams, ISetSelectionsOperationParams } from '@univerjs/sheets';
+import {
+    getPrimaryForRange,
+    NORMAL_SELECTION_PLUGIN_NAME,
+    SelectionManagerService,
+    SetRangeValuesMutation,
+    SetSelectionsOperation,
+} from '@univerjs/sheets';
+import { HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier, Inject } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';

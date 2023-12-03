@@ -1,3 +1,7 @@
+import type { ICommandInfo } from '@univerjs/core';
+import { BooleanNumber, DisposableCollection, ICommandService, IUniverInstanceService } from '@univerjs/core';
+import { Dropdown } from '@univerjs/design';
+import { CheckMarkSingle, ConvertSingle, EyelashSingle } from '@univerjs/icons';
 import {
     InsertSheetMutation,
     RemoveSheetMutation,
@@ -8,10 +12,6 @@ import {
     SetWorksheetOrderMutation,
     SetWorksheetShowCommand,
 } from '@univerjs/sheets';
-import type { ICommandInfo } from '@univerjs/core';
-import { BooleanNumber, DisposableCollection, ICommandService, IUniverInstanceService } from '@univerjs/core';
-import { Dropdown } from '@univerjs/design';
-import { CheckMarkSingle, ConvertSingle, EyelashSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 

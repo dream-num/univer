@@ -1,20 +1,18 @@
+import type { IMutationInfo, IRange, Workbook } from '@univerjs/core';
 import {
     Disposable,
     DisposableCollection,
     ICommandService,
-    IMutationInfo,
-    IRange,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
     Rectangle,
     SheetInterceptorService,
     Tools,
-    Workbook,
 } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import {
+import type {
     IAddWorksheetMergeMutationParams,
     IRemoveColMutationParams,
     IRemoveRowsMutationParams,
@@ -23,34 +21,21 @@ import {
 import { getAddMergeMutationRangeByType } from '../commands/commands/add-worksheet-merge.command';
 import { ClearSelectionAllCommand } from '../commands/commands/clear-selection-all.command';
 import { ClearSelectionFormatCommand } from '../commands/commands/clear-selection-format.command';
-import {
-    DeleteRangeMoveLeftCommand,
-    DeleteRangeMoveLeftCommandParams,
-} from '../commands/commands/delete-range-move-left.command';
-import {
-    DeleteRangeMoveUpCommand,
-    DeleteRangeMoveUpCommandParams,
-} from '../commands/commands/delete-range-move-up.command';
-import {
-    InsertRangeMoveDownCommand,
-    InsertRangeMoveDownCommandParams,
-} from '../commands/commands/insert-range-move-down.command';
-import {
-    InsertRangeMoveRightCommand,
-    InsertRangeMoveRightCommandParams,
-} from '../commands/commands/insert-range-move-right.command';
-import {
-    IInsertColCommandParams,
-    IInsertRowCommandParams,
-    InsertColCommand,
-    InsertRowCommand,
-} from '../commands/commands/insert-row-col.command';
-import { IMoveRangeCommandParams, MoveRangeCommand } from '../commands/commands/move-range.command';
+import type { DeleteRangeMoveLeftCommandParams } from '../commands/commands/delete-range-move-left.command';
+import { DeleteRangeMoveLeftCommand } from '../commands/commands/delete-range-move-left.command';
+import type { DeleteRangeMoveUpCommandParams } from '../commands/commands/delete-range-move-up.command';
+import { DeleteRangeMoveUpCommand } from '../commands/commands/delete-range-move-up.command';
+import type { InsertRangeMoveDownCommandParams } from '../commands/commands/insert-range-move-down.command';
+import { InsertRangeMoveDownCommand } from '../commands/commands/insert-range-move-down.command';
+import type { InsertRangeMoveRightCommandParams } from '../commands/commands/insert-range-move-right.command';
+import { InsertRangeMoveRightCommand } from '../commands/commands/insert-range-move-right.command';
+import type { IInsertColCommandParams, IInsertRowCommandParams } from '../commands/commands/insert-row-col.command';
+import { InsertColCommand, InsertRowCommand } from '../commands/commands/insert-row-col.command';
+import type { IMoveRangeCommandParams } from '../commands/commands/move-range.command';
+import { MoveRangeCommand } from '../commands/commands/move-range.command';
 import { RemoveColCommand, RemoveRowCommand } from '../commands/commands/remove-row-col.command';
-import {
-    ISetWorksheetActivateCommandParams,
-    SetWorksheetActivateCommand,
-} from '../commands/commands/set-worksheet-activate.command';
+import type { ISetWorksheetActivateCommandParams } from '../commands/commands/set-worksheet-activate.command';
+import { SetWorksheetActivateCommand } from '../commands/commands/set-worksheet-activate.command';
 import {
     AddMergeUndoMutationFactory,
     AddWorksheetMergeMutation,
@@ -60,7 +45,7 @@ import {
     RemoveWorksheetMergeMutation,
 } from '../commands/mutations/remove-worksheet-merge.mutation';
 import { RefRangeService } from '../services/ref-range/ref-range.service';
-import { EffectRefRangeParams } from '../services/ref-range/type';
+import type { EffectRefRangeParams } from '../services/ref-range/type';
 import { SelectionManagerService } from '../services/selection-manager.service';
 
 @OnLifecycle(LifecycleStages.Steady, MergeCellController)

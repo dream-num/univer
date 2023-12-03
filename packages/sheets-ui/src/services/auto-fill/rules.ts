@@ -17,7 +17,8 @@ import {
     isLoopSeries,
     matchExtendNumber,
 } from './tools';
-import { APPLY_TYPE, DATA_TYPE, IAutoFillRule } from './type';
+import type { IAutoFillRule } from './type';
+import { APPLY_TYPE, DATA_TYPE } from './type';
 
 export const numberRule: IAutoFillRule = {
     type: DATA_TYPE.NUMBER,

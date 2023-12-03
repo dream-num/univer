@@ -1,10 +1,10 @@
 import { Disposable } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { IAccessor } from '@wendellhu/redi';
 
 import { ErrorType } from '../basics/error-type';
 import { ErrorValueObject } from '../other-object/error-value-object';
-import { FunctionVariantType, NodeValueType } from '../reference-object/base-reference-object';
-import { BaseValueObject } from '../value-object/base-value-object';
+import type { FunctionVariantType, NodeValueType } from '../reference-object/base-reference-object';
+import type { BaseValueObject } from '../value-object/base-value-object';
 
 export class BaseFunction extends Disposable {
     constructor(

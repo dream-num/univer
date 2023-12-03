@@ -1,8 +1,10 @@
 // This file provide operations to change selection of sheets.
 
-import { CommandType, IOperation } from '@univerjs/core';
+import type { IOperation } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
 
-import { IEditorBridgeService, IEditorBridgeServiceParam } from '../../services/editor-bridge.service';
+import type { IEditorBridgeServiceParam } from '../../services/editor-bridge.service';
+import { IEditorBridgeService } from '../../services/editor-bridge.service';
 
 export const SetActivateCellEditOperation: IOperation<IEditorBridgeServiceParam> = {
     id: 'sheet.operation.set-activate-cell-edit',

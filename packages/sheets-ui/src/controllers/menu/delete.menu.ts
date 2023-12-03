@@ -4,7 +4,8 @@ import {
     RemoveColCommand,
     RemoveRowCommand,
 } from '@univerjs/sheets';
-import { IMenuButtonItem, IMenuSelectorItem, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
+import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
+import { MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 
 import { SheetMenuPosition } from './menu';
 

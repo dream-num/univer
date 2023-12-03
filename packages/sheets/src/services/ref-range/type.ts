@@ -1,33 +1,19 @@
-import { ICommandInfo, IRange } from '@univerjs/core';
+import type { ICommandInfo, IRange } from '@univerjs/core';
 
-import {
-    DeleteRangeMoveLeftCommandId,
-    DeleteRangeMoveLeftCommandParams,
-} from '../../commands/commands/delete-range-move-left.command';
-import {
-    DeleteRangeMoveUpCommandId,
-    DeleteRangeMoveUpCommandParams,
-} from '../../commands/commands/delete-range-move-up.command';
-import {
-    InsertRangeMoveDownCommandId,
-    InsertRangeMoveDownCommandParams,
-} from '../../commands/commands/insert-range-move-down.command';
-import {
-    InsertRangeMoveRightCommandId,
-    InsertRangeMoveRightCommandParams,
-} from '../../commands/commands/insert-range-move-right.command';
-import {
-    IInsertColCommandParams,
-    IInsertRowCommandParams,
-    InsertColCommandId,
-    InsertRowCommandId,
-} from '../../commands/commands/insert-row-col.command';
-import { IMoveRangeCommandParams, MoveRangeCommandId } from '../../commands/commands/move-range.command';
-import {
-    RemoveColCommandId,
-    RemoveRowColCommandParams,
-    RemoveRowCommandId,
-} from '../../commands/commands/remove-row-col.command';
+import type { DeleteRangeMoveLeftCommandParams } from '../../commands/commands/delete-range-move-left.command';
+import { DeleteRangeMoveLeftCommandId } from '../../commands/commands/delete-range-move-left.command';
+import type { DeleteRangeMoveUpCommandParams } from '../../commands/commands/delete-range-move-up.command';
+import { DeleteRangeMoveUpCommandId } from '../../commands/commands/delete-range-move-up.command';
+import type { InsertRangeMoveDownCommandParams } from '../../commands/commands/insert-range-move-down.command';
+import { InsertRangeMoveDownCommandId } from '../../commands/commands/insert-range-move-down.command';
+import type { InsertRangeMoveRightCommandParams } from '../../commands/commands/insert-range-move-right.command';
+import { InsertRangeMoveRightCommandId } from '../../commands/commands/insert-range-move-right.command';
+import type { IInsertColCommandParams, IInsertRowCommandParams } from '../../commands/commands/insert-row-col.command';
+import { InsertColCommandId, InsertRowCommandId } from '../../commands/commands/insert-row-col.command';
+import type { IMoveRangeCommandParams } from '../../commands/commands/move-range.command';
+import { MoveRangeCommandId } from '../../commands/commands/move-range.command';
+import type { RemoveRowColCommandParams } from '../../commands/commands/remove-row-col.command';
+import { RemoveColCommandId, RemoveRowCommandId } from '../../commands/commands/remove-row-col.command';
 
 export type IMoveRangeCommand = ICommandInfo<IMoveRangeCommandParams> & { id: typeof MoveRangeCommandId };
 export type IInsertRowCommand = ICommandInfo<IInsertRowCommandParams> & { id: typeof InsertRowCommandId };

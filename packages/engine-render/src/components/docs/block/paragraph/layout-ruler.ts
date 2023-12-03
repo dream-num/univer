@@ -1,25 +1,23 @@
+import type { INumberUnit, IParagraphStyle } from '@univerjs/core';
 import {
     BooleanNumber,
     DataStreamTreeTokenType,
     GridType,
     HorizontalAlign,
-    INumberUnit,
-    IParagraphStyle,
     NamedStyleType,
     SpacingRule,
 } from '@univerjs/core';
 
-import {
+import type {
     IDocumentSkeletonBullet,
     IDocumentSkeletonColumn,
     IDocumentSkeletonDrawing,
     IDocumentSkeletonLine,
     IDocumentSkeletonPage,
     IDocumentSkeletonSpan,
-    LineType,
-    SpanType,
 } from '../../../../basics/i-document-skeleton-cached';
-import { IParagraphConfig, ISectionBreakConfig } from '../../../../basics/interfaces';
+import { LineType, SpanType } from '../../../../basics/i-document-skeleton-cached';
+import type { IParagraphConfig, ISectionBreakConfig } from '../../../../basics/interfaces';
 import {
     calculateLineTopByDrawings,
     createAndUpdateBlockAnchor,

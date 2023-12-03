@@ -1,13 +1,12 @@
 /* eslint-disable no-magic-numbers */
+import type { EventState, IPageElement } from '@univerjs/core';
+import { DocumentDataModel, LocaleService, PageElementType } from '@univerjs/core';
+import type { BaseObject, IDocumentSkeletonDrawing, IPageRenderConfig, IWheelEvent } from '@univerjs/engine-render';
 import {
-    BaseObject,
     Documents,
     DocumentSkeleton,
     DocumentViewModel,
     EVENT_TYPE,
-    IDocumentSkeletonDrawing,
-    IPageRenderConfig,
-    IWheelEvent,
     Liquid,
     Picture,
     Rect,
@@ -16,8 +15,8 @@ import {
     ScrollBar,
     Viewport,
 } from '@univerjs/engine-render';
-import { DocumentDataModel, EventState, IPageElement, LocaleService, PageElementType } from '@univerjs/core';
-import { Inject, Injector } from '@wendellhu/redi';
+import type { Injector } from '@wendellhu/redi';
+import { Inject } from '@wendellhu/redi';
 
 import { CanvasObjectProviderRegistry, ObjectAdaptor } from '../adaptor';
 

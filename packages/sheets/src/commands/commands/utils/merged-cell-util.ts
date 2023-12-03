@@ -1,4 +1,4 @@
-import { Worksheet } from '@univerjs/core';
+import type { Worksheet } from '@univerjs/core';
 
 /**
  * @param row after this row

@@ -1,8 +1,8 @@
-import { ITextRun } from '../types/interfaces/i-document-data';
+import type { ITextRun } from '../types/interfaces/i-document-data';
 
-type AnyObject = {
+interface AnyObject {
     [key: number | string]: AnyObject | AnyObject[] | Array<[number | string]> | any;
-};
+}
 
 export function deepCompare(arg1: AnyObject, arg2: AnyObject): boolean {
     if (Object.prototype.toString.call(arg1) === Object.prototype.toString.call(arg2)) {

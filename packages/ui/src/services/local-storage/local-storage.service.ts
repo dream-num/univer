@@ -1,4 +1,4 @@
-import { ILocalStorageService } from '@univerjs/core';
+import type { ILocalStorageService } from '@univerjs/core';
 import localforage from 'localforage';
 
 export class DesktopLocalStorageService implements ILocalStorageService {

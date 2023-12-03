@@ -1,21 +1,18 @@
-import { SelectionManagerService } from '@univerjs/sheets';
+import type { ICellData, ICommand, IRange, Nullable, ObjectMatrix } from '@univerjs/core';
 import {
     CellValueType,
     CommandType,
     getCellValueType,
-    ICellData,
-    ICommand,
     ICommandService,
-    IRange,
     IUniverInstanceService,
-    Nullable,
-    ObjectMatrix,
     serializeRange,
 } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import { SelectionManagerService } from '@univerjs/sheets';
+import type { IAccessor } from '@wendellhu/redi';
 
 import { IFormulaInputService } from '../../services/formula-input.service';
-import { IInsertFunction, InsertFunctionCommand } from '../commands/insert-function.command';
+import type { IInsertFunction } from '../commands/insert-function.command';
+import { InsertFunctionCommand } from '../commands/insert-function.command';
 
 export interface IInsertFunctionOperationParams {
     /**

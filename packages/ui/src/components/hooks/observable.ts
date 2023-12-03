@@ -1,5 +1,6 @@
-import React, { useRef, useState } from 'react';
-import { Observable, Subscription } from 'rxjs';
+import type React from 'react';
+import { useRef, useState } from 'react';
+import type { Observable, Subscription } from 'rxjs';
 
 export function useObservable<T>(observable: Observable<T>, defaultValue?: T): T | undefined;
 export function useObservable<T>(observable: Observable<T>, defaultValue?: T, shouldHaveSyncValue?: true): T;

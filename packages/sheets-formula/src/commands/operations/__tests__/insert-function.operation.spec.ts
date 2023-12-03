@@ -1,15 +1,17 @@
+import type { ICellData, Nullable, Univer } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, RANGE_TYPE } from '@univerjs/core';
 import {
     NORMAL_SELECTION_PLUGIN_NAME,
     SelectionManagerService,
     SetRangeValuesCommand,
     SetRangeValuesMutation,
 } from '@univerjs/sheets';
-import { ICellData, ICommandService, IUniverInstanceService, Nullable, RANGE_TYPE, Univer } from '@univerjs/core';
-import { Injector } from '@wendellhu/redi';
+import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { InsertFunctionCommand } from '../../commands/insert-function.command';
-import { IInsertFunctionOperationParams, InsertFunctionOperation } from '../insert-function.operation';
+import type { IInsertFunctionOperationParams } from '../insert-function.operation';
+import { InsertFunctionOperation } from '../insert-function.operation';
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('Test insert function operation', () => {

@@ -1,6 +1,7 @@
+import type { ICommand } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
 import { ISidebarService } from '@univerjs/ui';
-import { CommandType, ICommand } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { IAccessor } from '@wendellhu/redi';
 
 import { MORE_FUNCTIONS_COMPONENT } from '../../views/more-functions/interface';
 

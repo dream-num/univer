@@ -1,5 +1,6 @@
 /* eslint-disable no-magic-numbers */
-import { BooleanNumber, IDocumentBody, Nullable } from '@univerjs/core';
+import type { IDocumentBody, Nullable } from '@univerjs/core';
+import { BooleanNumber } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { HtmlToUDMService } from '../html-to-udm/converter';

@@ -1,6 +1,6 @@
+import type { ICommand } from '@univerjs/core';
 import {
     CommandType,
-    ICommand,
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,
@@ -9,12 +9,14 @@ import {
     sequenceExecute,
     SheetInterceptorService,
 } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { IAccessor } from '@wendellhu/redi';
 
 import { SelectionManagerService } from '../../services/selection-manager.service';
-import {
+import type {
     ISetWorksheetRowHeightMutationParams,
     ISetWorksheetRowIsAutoHeightMutationParams,
+} from '../mutations/set-worksheet-row-height.mutation';
+import {
     SetWorksheetRowHeightMutation,
     SetWorksheetRowHeightMutationFactory,
     SetWorksheetRowIsAutoHeightMutation,

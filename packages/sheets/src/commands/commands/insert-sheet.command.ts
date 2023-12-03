@@ -1,20 +1,22 @@
+import type { ICommand, IWorksheetData } from '@univerjs/core';
 import {
     CommandType,
     DEFAULT_WORKSHEET,
-    ICommand,
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,
-    IWorksheetData,
     Tools,
 } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { IAccessor } from '@wendellhu/redi';
 
-import { IInsertSheetMutationParams, IRemoveSheetMutationParams } from '../../basics/interfaces/mutation-interface';
+import type {
+    IInsertSheetMutationParams,
+    IRemoveSheetMutationParams,
+} from '../../basics/interfaces/mutation-interface';
 import { InsertSheetMutation, InsertSheetUndoMutationFactory } from '../mutations/insert-sheet.mutation';
 import { RemoveSheetMutation } from '../mutations/remove-sheet.mutation';
+import type { ISetWorksheetActivateMutationParams } from '../mutations/set-worksheet-activate.mutation';
 import {
-    ISetWorksheetActivateMutationParams,
     SetWorksheetActivateMutation,
     SetWorksheetUnActivateMutationFactory,
 } from '../mutations/set-worksheet-activate.mutation';

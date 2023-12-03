@@ -1,11 +1,9 @@
-import { CommandType, ICommand, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { ICommand } from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
 
-import {
-    ISetTabColorMutationParams,
-    SetTabColorMutation,
-    SetTabColorUndoMutationFactory,
-} from '../mutations/set-tab-color.mutation';
+import type { ISetTabColorMutationParams } from '../mutations/set-tab-color.mutation';
+import { SetTabColorMutation, SetTabColorUndoMutationFactory } from '../mutations/set-tab-color.mutation';
 
 export interface ISetTabColorCommandParams {
     value: string;

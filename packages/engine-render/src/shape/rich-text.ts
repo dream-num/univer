@@ -1,9 +1,6 @@
 // import { IShapeProps, Shape, IObjectFullState, Group, Scene } from '.';
 
-import {
-    BooleanNumber,
-    DEFAULT_EMPTY_DOCUMENT_VALUE,
-    DocumentDataModel,
+import type {
     IBorderData,
     IColorStyle,
     IDocumentData,
@@ -14,11 +11,12 @@ import {
     LocaleService,
     Nullable,
 } from '@univerjs/core';
+import { BooleanNumber, DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentDataModel } from '@univerjs/core';
 
 import { BaseObject } from '../base-object';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '../basics/interfaces';
 import { transformBoundingCoord } from '../basics/position';
-import { IBoundRect } from '../basics/vector2';
+import type { IBoundRect } from '../basics/vector2';
 import { Canvas } from '../canvas';
 import { DocumentSkeleton } from '../components/docs/doc-skeleton';
 import { Documents } from '../components/docs/document';

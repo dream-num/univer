@@ -1,6 +1,6 @@
-import type { IMouseEvent } from '@univerjs/engine-render';
 import { ICommandService } from '@univerjs/core';
 import { Popup } from '@univerjs/design';
+import type { IMouseEvent } from '@univerjs/engine-render';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 

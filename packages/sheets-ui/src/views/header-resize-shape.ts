@@ -1,5 +1,6 @@
 /* eslint-disable no-magic-numbers */
-import { IShapeProps, Rect, Shape } from '@univerjs/engine-render';
+import type { IShapeProps } from '@univerjs/engine-render';
+import { Rect, Shape } from '@univerjs/engine-render';
 
 export interface IHeaderMenuShapeResizeProps extends IShapeProps {
     size?: number;

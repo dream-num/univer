@@ -1,10 +1,12 @@
-import { Nullable, sortRules } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
+import { sortRules } from '@univerjs/core';
 
 import { BaseObject } from './base-object';
-import { CURSOR_TYPE, RENDER_CLASS_TYPE } from './basics/const';
+import type { CURSOR_TYPE } from './basics/const';
+import { RENDER_CLASS_TYPE } from './basics/const';
 import { isString } from './basics/tools';
-import { IBoundRect, Vector2 } from './basics/vector2';
-import { ThinScene } from './thin-scene';
+import type { IBoundRect, Vector2 } from './basics/vector2';
+import type { ThinScene } from './thin-scene';
 
 export class Group extends BaseObject {
     private _objects: BaseObject[] = [];

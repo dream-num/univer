@@ -1,14 +1,7 @@
 // test for set frozen command
-import {
-    ICommandService,
-    IUniverInstanceService,
-    IWorkbookData,
-    LocaleType,
-    RedoCommand,
-    UndoCommand,
-    Univer,
-} from '@univerjs/core';
-import { Injector } from '@wendellhu/redi';
+import type { IWorkbookData, Univer } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LocaleType, RedoCommand, UndoCommand } from '@univerjs/core';
+import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { SetFrozenMutation } from '../../mutations/set-frozen.mutation';

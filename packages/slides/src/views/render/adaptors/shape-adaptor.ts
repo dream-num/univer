@@ -1,6 +1,7 @@
+import type { IPageElement } from '@univerjs/core';
+import { getColorStyle, PageElementType, ShapeType } from '@univerjs/core';
 import { Rect } from '@univerjs/engine-render';
-import { getColorStyle, IPageElement, PageElementType, ShapeType } from '@univerjs/core';
-import { Injector } from '@wendellhu/redi';
+import type { Injector } from '@wendellhu/redi';
 
 import { CanvasObjectProviderRegistry, ObjectAdaptor } from '../adaptor';
 

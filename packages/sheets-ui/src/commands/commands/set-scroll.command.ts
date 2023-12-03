@@ -1,4 +1,5 @@
-import { CommandType, ICommand, ICommandService, IUniverInstanceService } from '@univerjs/core';
+import type { ICommand } from '@univerjs/core';
+import { CommandType, ICommandService, IUniverInstanceService } from '@univerjs/core';
 
 import { ScrollManagerService } from '../../services/scroll-manager.service';
 import { SetScrollOperation } from '../operations/scroll.operation';

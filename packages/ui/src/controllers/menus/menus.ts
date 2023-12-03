@@ -1,8 +1,9 @@
 import { IUndoRedoService, RedoCommand, UndoCommand } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { IAccessor } from '@wendellhu/redi';
 import { map } from 'rxjs/operators';
 
-import { IMenuButtonItem, MenuGroup, MenuItemType, MenuPosition } from '../../services/menu/menu';
+import type { IMenuButtonItem } from '../../services/menu/menu';
+import { MenuGroup, MenuItemType, MenuPosition } from '../../services/menu/menu';
 
 export function UndoMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const undoRedoService = accessor.get(IUndoRedoService);

@@ -1,3 +1,5 @@
+import type { Direction, ICommand, IRange } from '@univerjs/core';
+import { CommandType, ICommandService, IUniverInstanceService, RANGE_TYPE, Rectangle, Tools } from '@univerjs/core';
 import {
     checkIfShrink,
     expandToContinuousRange,
@@ -15,17 +17,6 @@ import {
     shrinkToNextGapRange,
 } from '@univerjs/sheets';
 import { KeyCode, ShortcutExperienceService } from '@univerjs/ui';
-import {
-    CommandType,
-    Direction,
-    ICommand,
-    ICommandService,
-    IRange,
-    IUniverInstanceService,
-    RANGE_TYPE,
-    Rectangle,
-    Tools,
-} from '@univerjs/core';
 
 // TODO@wzhudev: we also need to handle when the current selection is the whole spreadsheet, whole rows or whole columns
 // TODO@DR-UNIVER: moveStepPage and moveStepEnd implement

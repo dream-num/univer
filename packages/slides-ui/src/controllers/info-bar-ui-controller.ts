@@ -1,10 +1,10 @@
 import { InfoBarModel } from '../model/info-bar-model';
 import type { InfoBar } from '../views/info-bar';
 
-type IProps = {
+interface IProps {
     label?: string;
     onBlur?: (e: FocusEvent) => void;
-};
+}
 
 export interface BaseInfoBarProps {
     back: IProps;

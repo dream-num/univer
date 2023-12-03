@@ -1,7 +1,8 @@
-import { Disposable, IUnitRange } from '@univerjs/core';
+import type { IUnitRange } from '@univerjs/core';
+import { Disposable } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 
-import { IFormulaData, IFormulaDatasetConfig, IUnitData, IUnitSheetNameMap } from '../basics/common';
+import type { IFormulaData, IFormulaDatasetConfig, IUnitData, IUnitSheetNameMap } from '../basics/common';
 
 export interface IFormulaCurrentConfigService {
     getUnitData(): IUnitData;

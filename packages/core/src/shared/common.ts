@@ -6,14 +6,14 @@ import {
     VerticalAlign,
     WrapStrategy,
 } from '../types/enum';
-import { IRange } from '../types/interfaces';
-import { ICellData } from '../types/interfaces/i-cell-data';
-import { IDocumentData } from '../types/interfaces/i-document-data';
-import { IRangeWithCoord, ISelectionCell, ISelectionCellWithCoord } from '../types/interfaces/i-selection-data';
-import { IColorStyle, IStyleData } from '../types/interfaces/i-style-data';
+import type { IRange } from '../types/interfaces';
+import type { ICellData } from '../types/interfaces/i-cell-data';
+import type { IDocumentData } from '../types/interfaces/i-document-data';
+import type { IRangeWithCoord, ISelectionCell, ISelectionCellWithCoord } from '../types/interfaces/i-selection-data';
+import type { IColorStyle, IStyleData } from '../types/interfaces/i-style-data';
 import { ColorBuilder } from './color/color-builder';
 import { Tools } from './tools';
-import { Nullable } from './types';
+import type { Nullable } from './types';
 
 export function makeCellToSelection(cellInfo: Nullable<ISelectionCellWithCoord>): Nullable<IRangeWithCoord> {
     if (!cellInfo) {

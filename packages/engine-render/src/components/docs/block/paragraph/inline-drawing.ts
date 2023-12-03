@@ -1,7 +1,7 @@
-import { IDrawing, LocaleService } from '@univerjs/core';
+import type { IDrawing, LocaleService } from '@univerjs/core';
 
-import { IDocumentSkeletonPage } from '../../../../basics/i-document-skeleton-cached';
-import { IParagraphConfig, ISectionBreakConfig } from '../../../../basics/interfaces';
+import type { IDocumentSkeletonPage } from '../../../../basics/i-document-skeleton-cached';
+import type { IParagraphConfig, ISectionBreakConfig } from '../../../../basics/interfaces';
 
 export function dealWidthInlineDrawing(
     drawing: IDrawing,

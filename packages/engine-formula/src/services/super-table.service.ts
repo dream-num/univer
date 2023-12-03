@@ -1,7 +1,7 @@
 import { Disposable } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 
-import { ISuperTable, TableOptionType } from '../basics/common';
+import type { ISuperTable, TableOptionType } from '../basics/common';
 
 export interface ISuperTableService {
     getTableMap(): Map<string, ISuperTable>;

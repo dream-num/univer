@@ -2,7 +2,7 @@ import { sortRules } from '@univerjs/core';
 
 import { BaseObject } from './base-object';
 import { RENDER_CLASS_TYPE } from './basics/const';
-import { ThinScene } from './thin-scene';
+import type { ThinScene } from './thin-scene';
 
 export class Layer {
     private _objects: BaseObject[] = [];

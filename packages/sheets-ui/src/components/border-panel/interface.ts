@@ -1,5 +1,5 @@
 import { type IBorderInfo } from '@univerjs/sheets';
-import { ICustomComponentProps } from '@univerjs/ui';
+import type { ICustomComponentProps } from '@univerjs/ui';
 
 import { COMPONENT_PREFIX } from '../const';
 

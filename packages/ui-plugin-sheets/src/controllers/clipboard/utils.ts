@@ -1,8 +1,8 @@
 import type {
     IAddWorksheetMergeMutationParams,
+    IMoveRangeMutationParams,
     IRemoveWorksheetMergeMutationParams,
     ISetRangeValuesMutationParams,
-    MoveRangeMutationParams,
 } from '@univerjs/base-sheets';
 import {
     AddMergeUndoMutationFactory,
@@ -142,13 +142,13 @@ export function getMoveRangeMutations(
                     return res;
                 }, new ObjectMatrix<ICellData | null>());
 
-            const doMoveRangeMutation: MoveRangeMutationParams = {
+            const doMoveRangeMutation: IMoveRangeMutationParams = {
                 from: newFromCellValues.getMatrix(),
                 to: newToCellValues.getMatrix(),
                 workbookId,
                 worksheetId,
             };
-            const undoMoveRangeMutation: MoveRangeMutationParams = {
+            const undoMoveRangeMutation: IMoveRangeMutationParams = {
                 from: currentFromCellValues.getMatrix(),
                 to: currentToCellValues.getMatrix(),
                 workbookId,

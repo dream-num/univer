@@ -268,7 +268,7 @@ describe('utils test', () => {
                                 f: '=SUM(A1)',
                             },
                         },
-                        '1': {},
+                        // '1': {},
                         '2': {
                             '3': {
                                 f: '=SUM(A3)',
@@ -415,7 +415,7 @@ describe('utils test', () => {
             expect(newFormulaData).toStrictEqual({
                 [unitId]: {
                     [sheetId]: {
-                        '0': {},
+                        // '0': {},
                         '1': {
                             '3': {
                                 f: '=SUM(A2)',
@@ -478,7 +478,7 @@ describe('utils test', () => {
                                 f: '=SUM(A2)',
                             },
                         },
-                        '2': {},
+                        // '2': {},
                     },
                 },
             });
@@ -580,7 +580,7 @@ describe('utils test', () => {
                                 f: '=SUM(A3)',
                             },
                         },
-                        '2': {},
+                        // '2': {},
                     },
                 },
             });

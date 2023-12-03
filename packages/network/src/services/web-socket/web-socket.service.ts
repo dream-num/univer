@@ -1,4 +1,5 @@
-import { Disposable, DisposableCollection, Nullable, toDisposable } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
+import { Disposable, DisposableCollection, toDisposable } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 import { share } from 'rxjs/operators';

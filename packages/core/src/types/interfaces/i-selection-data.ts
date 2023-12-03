@@ -1,5 +1,5 @@
-import { Nullable } from '../../shared/types';
-import { IRange } from './i-range';
+import type { Nullable } from '../../shared/types';
+import type { IRange } from './i-range';
 
 /**
  * Properties of selection data

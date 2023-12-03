@@ -1,12 +1,14 @@
-import { Nullable, ObjectMatrix, Rectangle, Tools } from '../shared';
+import type { Nullable } from '../shared';
+import { ObjectMatrix, Rectangle, Tools } from '../shared';
 import { createRowColIter } from '../shared/row-col-iter';
 import { DEFAULT_WORKSHEET } from '../types/const';
-import { BooleanNumber, SheetTypes } from '../types/enum';
-import { ICellData, IFreeze, IRange, IWorksheetData } from '../types/interfaces';
+import type { SheetTypes } from '../types/enum';
+import { BooleanNumber } from '../types/enum';
+import type { ICellData, IFreeze, IRange, IWorksheetData } from '../types/interfaces';
 import { ColumnManager } from './column-manager';
 import { Range } from './range';
 import { RowManager } from './row-manager';
-import { Styles } from './styles';
+import type { Styles } from './styles';
 import { SheetViewModel } from './view-model';
 
 /**

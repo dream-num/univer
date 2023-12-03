@@ -1,5 +1,5 @@
-import { BorderStyleTypes } from '../enum/border-style-types';
-import { IColorStyle } from './i-style-data';
+import type { BorderStyleTypes } from '../enum/border-style-types';
+import type { IColorStyle } from './i-style-data';
 
 /**
  * ShapeProperties

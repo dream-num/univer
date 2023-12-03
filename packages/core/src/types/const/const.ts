@@ -7,7 +7,7 @@ import {
     VerticalAlign,
     WrapStrategy,
 } from '../enum';
-import { IWorkbookData, IWorksheetData } from '../interfaces';
+import type { IWorkbookData, IWorksheetData } from '../interfaces';
 
 /**
  * Used as an illegal range array return value

@@ -1,4 +1,4 @@
-import { Sequence } from './sequence';
+import type { Sequence } from './sequence';
 
 export declare class Serialize {
     static newInstance(sequence: Sequence): Serialize;

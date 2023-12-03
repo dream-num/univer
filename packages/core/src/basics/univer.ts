@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Ctor, Injector } from '@wendellhu/redi';
+import type { Ctor } from '@wendellhu/redi';
+import { Injector } from '@wendellhu/redi';
 
-import { DocumentDataModel } from '../docs/data-model/document-data-model';
-import { Plugin, PluginCtor, PluginRegistry, PluginStore, PluginType } from '../plugin/plugin';
+import type { DocumentDataModel } from '../docs/data-model/document-data-model';
+import type { Plugin, PluginCtor } from '../plugin/plugin';
+import { PluginRegistry, PluginStore, PluginType } from '../plugin/plugin';
 import { CommandService, ICommandService } from '../services/command/command.service';
 import { ConfigService, IConfigService } from '../services/config/config.service';
 import { ContextService, IContextService } from '../services/context/context.service';
@@ -23,10 +25,10 @@ import { IResourceManagerService } from '../services/resource-manager/type';
 import { ThemeService } from '../services/theme/theme.service';
 import { IUndoRedoService, LocalUndoRedoService } from '../services/undoredo/undoredo.service';
 import { GenName } from '../shared/gen-name';
-import { Workbook } from '../sheets/workbook';
-import { Slide } from '../slides/domain/slide-model';
-import { LocaleType } from '../types/enum/locale-type';
-import { IDocumentData, ISlideData, IUniverData, IWorkbookData } from '../types/interfaces';
+import type { Workbook } from '../sheets/workbook';
+import type { Slide } from '../slides/domain/slide-model';
+import type { LocaleType } from '../types/enum/locale-type';
+import type { IDocumentData, ISlideData, IUniverData, IWorkbookData } from '../types/interfaces';
 import { UniverDoc } from './univer-doc';
 import { UniverSheet } from './univer-sheet';
 import { UniverSlide } from './univer-slide';

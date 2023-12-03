@@ -1,0 +1,40 @@
+{
+    "name": "sheets",
+    "description": "Univer vanilla ts demo project",
+    "author": "DreamNum <developer@univer.ai>",
+    "license": "MIT",
+    "private": true,
+    "scripts": {
+        "esbuild:demo": "node ./esbuild.config.mjs",
+        "dev:demo": "node ./esbuild.config.mjs --watch"
+    },
+    "dependencies": {
+        "@univerjs/docs": "workspace:*",
+        "@univerjs/engine-formula": "workspace:*",
+        "@univerjs/engine-render": "workspace:*",
+        "@univerjs/sheets": "workspace:*",
+        "@univerjs/ui": "workspace:*",
+        "@univerjs/core": "workspace:*",
+        "@univerjs/design": "workspace:*",
+        "@univerjs/rpc": "workspace:*",
+        "@univerjs/formula": "workspace:*",
+        "@univerjs/sheets-formula": "workspace:*",
+        "@univerjs/sheets-numfmt": "workspace:*",
+        "@univerjs/docs-ui": "workspace:*",
+        "@univerjs/sheets-ui": "workspace:*",
+        "@univerjs/uniscript": "workspace:*",
+        "@wendellhu/redi": "^0.12.11",
+        "data": "workspace:*",
+        "monaco-editor": "0.44.0"
+    },
+    "devDependencies": {
+        "esbuild": "^0.19.8",
+        "esbuild-plugin-clean": "^1.0.1",
+        "esbuild-plugin-copy": "^2.1.1",
+        "esbuild-style-plugin": "^1.6.3",
+        "less": "^4.2.0",
+        "minimist": "^1.2.8",
+        "ts-node": "^10.9.1",
+        "typescript": "^5.3.2"
+    }
+}

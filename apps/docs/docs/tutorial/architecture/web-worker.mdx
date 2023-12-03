@@ -17,7 +17,7 @@ sidebar_position: 6
 ```ts
 import type { IUniverRPCMainThreadPluginConfig } from '@univerjs/rpc';
 import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
-import { FormulaPlugin } from '@univerjs/sheets-plugin-formula';
+import { FormulaPlugin } from '@univerjs/formula';
 
 // ...
 
@@ -34,11 +34,11 @@ univer.registerPlugin(UniverRPCMainThreadPlugin, {
 在 Web Worker 的入口文件中实例化另一个 Univer 实例，并注册需要的插件：
 
 ```ts
-import { BaseFormulaEnginePlugin } from '@univerjs/base-formula-engine';
-import { SheetPlugin } from '@univerjs/base-sheets';
+import { BaseFormulaEnginePlugin } from '@univerjs/engine-formula';
+import { SheetPlugin } from '@univerjs/sheets';
 import { LocaleType, Univer } from '@univerjs/core';
 import { UniverRPCWorkerThreadPlugin } from '@univerjs/rpc';
-import { FormulaPlugin } from '@univerjs/sheets-plugin-formula';
+import { FormulaPlugin } from '@univerjs/formula';
 
 const univer = new Univer();
 
@@ -54,7 +54,7 @@ univer.registerPlugin(FormulaPlugin);
 可以看到因为在 Web Worker 中无需关心 UI 和渲染，所以引入的 plugin 比主线程中少很多，这就是插件化架构带来的好处之一：在任何环境中 Univer 都能做到以最小的资源运行。
 :::
 
-详细内容请参考 [examples/univer-sheet-ts](https://github.com/dream-num/univer/tree/dev/examples/univer-sheet-ts)。
+详细内容请参考 [examples/sheets](https://github.com/dream-num/univer/tree/dev/examples/sheets)。
 
 ## 整体架构
 

@@ -11,9 +11,9 @@ export type NoNeedCheckedType = any;
 /**
  * Class type
  */
-export type Class<T> = {
+export interface Class<T> {
     new (...param: any): T;
-};
+}
 
 /**
  * Key value object
@@ -27,8 +27,8 @@ export interface IKeyValue {
 /**
  * Custom type of key
  */
-export type IKeyType<T> = {
+export interface IKeyType<T> {
     [key: string]: T;
-};
+}
 
 export type AsyncFunction<T = void, R = void> = (value: T) => Promise<R>;

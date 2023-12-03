@@ -1,5 +1,6 @@
-import { BooleanNumber, HorizontalAlign, VerticalAlign, WrapStrategy } from '../../types/enum';
-import {
+import type { BooleanNumber } from '../../types/enum';
+import { HorizontalAlign, VerticalAlign, WrapStrategy } from '../../types/enum';
+import type {
     ICellData,
     IColumnData,
     IRowData,
@@ -9,9 +10,9 @@ import {
     IWorkbookData,
     IWorksheetData,
 } from '../../types/interfaces';
-import { ObjectArrayPrimitiveType } from '../object-array';
+import type { ObjectArrayPrimitiveType } from '../object-array';
 import { Tools } from '../tools';
-import { IKeyValue } from '../types';
+import type { IKeyValue } from '../types';
 import { border } from './border';
 
 export function migrate(config: any): Partial<IWorkbookData> {

@@ -1,5 +1,5 @@
-import { Nullable } from '../common/type-utils';
-import { IKeyValue } from './types';
+import type { Nullable } from '../common/type-utils';
+import type { IKeyValue } from './types';
 
 function isDef(v: any) {
     return v !== undefined && v !== null;

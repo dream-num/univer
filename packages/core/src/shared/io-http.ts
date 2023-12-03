@@ -1,4 +1,4 @@
-import { IKeyType, IKeyValue } from './types';
+import type { IKeyType, IKeyValue } from './types';
 
 function deleteEmpty(object: IKeyValue) {
     if (object) {
@@ -121,9 +121,9 @@ export enum IOHttpResponseType {
 /**
  * IOHTTP header type
  */
-export type IOHttpHeaderType = {
+export interface IOHttpHeaderType {
     [key: string]: string;
-};
+}
 
 /**
  * IOHTTP request body type

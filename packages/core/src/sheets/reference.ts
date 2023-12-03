@@ -1,5 +1,6 @@
 import { Tools } from '../shared/tools';
-import { AbsoluteRefType, IRange } from '../types/interfaces/i-range';
+import type { IRange } from '../types/interfaces/i-range';
+import { AbsoluteRefType } from '../types/interfaces/i-range';
 
 const UNIT_NAME_REGEX = '\'?\\[((?![\\/?:"<>|*\\\\]).)*\\]';
 const $ROW_REGEX = /[^0-9]/g;

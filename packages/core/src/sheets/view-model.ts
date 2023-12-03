@@ -1,9 +1,9 @@
-import { IDisposable } from '@wendellhu/redi';
+import type { IDisposable } from '@wendellhu/redi';
 
 import { remove } from '../common/array';
-import { Nullable } from '../common/type-utils';
+import type { Nullable } from '../common/type-utils';
 import { Disposable, toDisposable } from '../shared/lifecycle';
-import { ICellData } from '../types/interfaces/i-cell-data';
+import type { ICellData } from '../types/interfaces/i-cell-data';
 
 export interface ICellContentInterceptor {
     getCell(row: number, col: number): Nullable<ICellData>;

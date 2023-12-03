@@ -1,6 +1,6 @@
-import { IStyleSheet } from '../../services/theme/theme.service';
-import { ILocales } from '../../shared/locale';
-import { LocaleType } from '../enum';
+import type { IStyleSheet } from '../../services/theme/theme.service';
+import type { ILocales } from '../../shared/locale';
+import type { LocaleType } from '../enum';
 
 export interface IUniverData {
     theme: IStyleSheet;

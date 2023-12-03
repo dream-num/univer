@@ -1,5 +1,6 @@
-import { IRange, RANGE_TYPE } from '../types/interfaces/i-range';
-import { Nullable } from './types';
+import type { IRange } from '../types/interfaces/i-range';
+import { RANGE_TYPE } from '../types/interfaces/i-range';
+import type { Nullable } from './types';
 
 /**
  * This class provides a set of methods to calculate `IRange`.

@@ -1,11 +1,13 @@
-import { Ctor, Inject, Injector } from '@wendellhu/redi';
+import type { Ctor } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 
 import { DocumentDataModel } from '../docs/data-model/document-data-model';
-import { Plugin, PluginCtor, PluginStore } from '../plugin/plugin';
+import type { Plugin, PluginCtor } from '../plugin/plugin';
+import { PluginStore } from '../plugin/plugin';
 import { LifecycleStages } from '../services/lifecycle/lifecycle';
 import { LifecycleInitializerService, LifecycleService } from '../services/lifecycle/lifecycle.service';
 import { Disposable, toDisposable } from '../shared/lifecycle';
-import { IDocumentData } from '../types/interfaces/i-document-data';
+import type { IDocumentData } from '../types/interfaces/i-document-data';
 
 /**
  * Externally provided UniverDoc root instance

@@ -1,5 +1,5 @@
-import { SelectionManagerService } from '@univerjs/base-sheets';
 import type { IRange, Workbook, Worksheet } from '@univerjs/core';
+import { SelectionManagerService } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { FRange } from './f-range';

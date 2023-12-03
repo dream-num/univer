@@ -1,9 +1,11 @@
 import { LocaleService, Plugin, PluginType } from '@univerjs/core';
-import { Dependency, Inject, Injector } from '@wendellhu/redi';
+import type { Dependency } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 
 import { UniscriptController } from './controllers/uniscript.controller';
 import { enUS } from './locale';
-import { IScriptEditorServiceConfig, ScriptEditorService } from './services/script-editor.service';
+import type { IScriptEditorServiceConfig } from './services/script-editor.service';
+import { ScriptEditorService } from './services/script-editor.service';
 import { UniscriptExecutionService } from './services/script-execution.service';
 import { ScriptPanelService } from './services/script-panel.service';
 

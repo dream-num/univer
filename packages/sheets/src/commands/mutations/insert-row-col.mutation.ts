@@ -1,0 +1,138 @@
+import type { IMutation } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, ObjectArray, Rectangle } from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
+
+import type {
+    IInsertColMutationParams,
+    IInsertRowMutationParams,
+    IRemoveColMutationParams,
+    IRemoveRowsMutationParams,
+} from '../../basics/interfaces/mutation-interface';
+
+export const InsertRowMutationUndoFactory = (
+    accessor: IAccessor,
+    params: IInsertRowMutationParams
+): IRemoveRowsMutationParams => {
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
+
+    if (universheet == null) {
+        throw new Error('universheet is null error!');
+    }
+
+    return {
+        workbookId: params.workbookId,
+        worksheetId: params.worksheetId,
+        ranges: params.ranges.map((r) => Rectangle.clone(r)),
+    };
+};
+
+export const InsertRowMutation: IMutation<IInsertRowMutationParams> = {
+    id: 'sheet.mutation.insert-row',
+    type: CommandType.MUTATION,
+    handler: (accessor, params) => {
+        const { workbookId, worksheetId, ranges, rowInfo } = params;
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+
+        const universheet = univerInstanceService.getUniverSheetInstance(workbookId);
+        if (universheet == null) {
+            throw new Error('universheet is null error!');
+        }
+
+        const worksheet = universheet.getSheetBySheetId(worksheetId);
+        if (worksheet == null) {
+            throw new Error('worksheet is null error!');
+        }
+
+        // TODO@wzhudev: should not expose row data and let outside modules to modify it directly
+        // the correct way to do this is to provide a method from RowManager to modify row data
+        const rowWrapper = worksheet.getRowManager().getRowData();
+        const defaultRowInfo = {
+            h: worksheet.getConfig().defaultRowHeight,
+            hd: 0,
+        };
+
+        for (let i = 0; i < ranges.length; i++) {
+            const range = ranges[i];
+            const rowIndex = range.startRow;
+            const rowCount = range.endRow - range.startRow + 1;
+
+            for (let j = rowIndex; j < rowIndex + rowCount; j++) {
+                if (rowInfo) {
+                    rowWrapper.insert(j, rowInfo.get(j - range.startRow) ?? defaultRowInfo);
+                } else {
+                    rowWrapper.insert(j, defaultRowInfo);
+                }
+            }
+        }
+
+        worksheet.setRowCount(
+            worksheet.getRowCount() + ranges.reduce((acc, cur) => acc + cur.endRow - cur.startRow + 1, 0)
+        );
+
+        return true;
+    },
+};
+
+export const InsertColMutationUndoFactory = (
+    accessor: IAccessor,
+    params: IInsertColMutationParams
+): IRemoveColMutationParams => {
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
+
+    if (universheet == null) {
+        throw new Error('universheet is null error!');
+    }
+
+    return {
+        workbookId: params.workbookId,
+        worksheetId: params.worksheetId,
+        ranges: params.ranges.map((r) => Rectangle.clone(r)),
+    };
+};
+
+export const InsertColMutation: IMutation<IInsertColMutationParams> = {
+    id: 'sheet.mutation.insert-col',
+    type: CommandType.MUTATION,
+    handler: (accessor, params) => {
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
+
+        if (universheet == null) {
+            throw new Error('universheet is null error!');
+        }
+
+        const worksheet = universheet.getSheetBySheetId(params.worksheetId);
+        if (!worksheet) return false;
+        const manager = worksheet.getColumnManager();
+        const { ranges, colInfo } = params;
+        const columnPrimitive = manager.getColumnData().toJSON();
+        const columnWrapper = new ObjectArray(columnPrimitive);
+
+        for (let i = 0; i < ranges.length; i++) {
+            const range = ranges[i];
+            const colIndex = range.startColumn;
+            const colCount = range.endColumn - range.startColumn + 1;
+            const defaultColWidth = worksheet.getConfig().defaultColumnWidth;
+
+            for (let j = colIndex; j < colIndex + colCount; j++) {
+                const defaultColInfo = {
+                    w: defaultColWidth,
+                    hd: 0,
+                };
+                if (colInfo) {
+                    columnWrapper.insert(j, colInfo.get(j - range.startColumn) ?? defaultColInfo);
+                } else {
+                    columnWrapper.insert(j, defaultColInfo);
+                }
+            }
+        }
+
+        worksheet.setColumnCount(
+            worksheet.getColumnCount() + ranges.reduce((acc, cur) => acc + cur.endColumn - cur.startColumn + 1, 0)
+        );
+
+        return true;
+    },
+};

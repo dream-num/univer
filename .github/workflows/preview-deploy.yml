@@ -119,8 +119,8 @@ jobs:
             - name: Copy demo to workspace
               run: |
                   mkdir .workspace
-                  cp -r ./examples/univer-doc-ts/local .workspace/doc
-                  cp -r ./examples/univer-sheet-ts/local .workspace/sheet
+                  cp -r ./examples/docs/local .workspace/doc
+                  cp -r ./examples/sheets/local .workspace/sheet
 
             - name: 🚀 Deploy to Vercel (demo)
               uses: amondnet/vercel-action@v25

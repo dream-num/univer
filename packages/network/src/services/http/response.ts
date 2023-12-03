@@ -1,4 +1,4 @@
-import { HTTPHeaders } from './headers';
+import type { HTTPHeaders } from './headers';
 
 /**
  * There are multiple events could be resolved from the HTTP server.

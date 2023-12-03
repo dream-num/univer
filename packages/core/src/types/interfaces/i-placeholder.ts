@@ -1,4 +1,4 @@
-import { PlaceholderType } from '../enum/place-holder-type';
+import type { PlaceholderType } from '../enum/place-holder-type';
 
 export interface IPlaceholder {
     type: PlaceholderType;

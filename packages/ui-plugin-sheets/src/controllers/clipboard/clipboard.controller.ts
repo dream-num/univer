@@ -393,16 +393,18 @@ export class SheetClipboardController extends Disposable {
             get: this._injector.get.bind(this._injector),
         };
         const self = this;
-        const workbook = this._currentUniverSheet.getCurrentUniverSheetInstance();
-        const workbookId = workbook.getUnitId();
-        const worksheetId = workbook.getActiveSheet().getSheetId();
+
         const specialPasteValueHook: ISheetClipboardHook = {
             hookName: PREDEFINED_HOOK_NAME.SPECIAL_PASTE_VALUE,
             specialPasteInfo: {
                 label: 'specialPaste.value',
             },
-            onPasteCells: (pastedRange, matrix, pasteType, copyInfo) =>
-                getSetCellValueMutations(workbookId, worksheetId, pastedRange, matrix, accessor),
+            onPasteCells: (pastedRange, matrix, pasteType, copyInfo) => {
+                const workbook = self._currentUniverSheet.getCurrentUniverSheetInstance();
+                const workbookId = workbook.getUnitId();
+                const worksheetId = workbook.getActiveSheet().getSheetId();
+                return getSetCellValueMutations(workbookId, worksheetId, pastedRange, matrix, accessor);
+            },
         };
         const specialPasteFormatHook: ISheetClipboardHook = {
             hookName: PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMAT,
@@ -410,6 +412,9 @@ export class SheetClipboardController extends Disposable {
                 label: 'specialPaste.format',
             },
             onPasteCells(pastedRange, matrix, pasteType, copyInfo) {
+                const workbook = self._currentUniverSheet.getCurrentUniverSheetInstance();
+                const workbookId = workbook.getUnitId();
+                const worksheetId = workbook.getActiveSheet().getSheetId();
                 const redoMutationsInfo: IMutationInfo[] = [];
                 const undoMutationsInfo: IMutationInfo[] = [];
 
@@ -465,6 +470,9 @@ export class SheetClipboardController extends Disposable {
                 };
             },
             onPasteColumns(range, colProperties, pasteType) {
+                const workbook = self._currentUniverSheet.getCurrentUniverSheetInstance();
+                const workbookId = workbook.getUnitId();
+                const worksheetId = workbook.getActiveSheet().getSheetId();
                 const redoMutations: IMutationInfo[] = [];
                 const undoMutations: IMutationInfo[] = [];
                 const currentSheet = self._getWorksheet(workbookId, worksheetId);
@@ -509,6 +517,9 @@ export class SheetClipboardController extends Disposable {
                 label: 'specialPaste.besidesBorder',
             },
             onPasteCells(pastedRange, matrix, pasteType, copyInfo) {
+                const workbook = self._currentUniverSheet.getCurrentUniverSheetInstance();
+                const workbookId = workbook.getUnitId();
+                const worksheetId = workbook.getActiveSheet().getSheetId();
                 const redoMutationsInfo: IMutationInfo[] = [];
                 const undoMutationsInfo: IMutationInfo[] = [];
                 const { startColumn, startRow, endColumn, endRow } = pastedRange;

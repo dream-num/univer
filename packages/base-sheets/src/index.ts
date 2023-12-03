@@ -78,6 +78,7 @@ export {
     MoveColsCommand,
     MoveRowsCommand,
 } from './commands/commands/move-rows-cols.command';
+export type { IRemoveRowColCommandParams } from './commands/commands/remove-row-col.command';
 export { RemoveColCommand, RemoveRowCommand } from './commands/commands/remove-row-col.command';
 export type { IRemoveSheetCommandParams } from './commands/commands/remove-sheet.command';
 export { RemoveSheetCommand } from './commands/commands/remove-sheet.command';

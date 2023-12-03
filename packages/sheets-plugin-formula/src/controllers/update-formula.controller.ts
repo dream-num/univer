@@ -99,7 +99,7 @@ enum OriginRangeEdgeType {
     ALL,
 }
 
-@OnLifecycle(LifecycleStages.Starting, UpdateFormulaController)
+@OnLifecycle(LifecycleStages.Ready, UpdateFormulaController)
 export class UpdateFormulaController extends Disposable {
     constructor(
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
@@ -129,12 +129,21 @@ export class UpdateFormulaController extends Disposable {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 // Synchronous data from worker
-                if (command.id !== SetFormulaDataMutation.id) {
-                    return;
-                }
+                if (command.id === SetRangeValuesMutation.id) {
+                    const params = command.params as ISetRangeValuesMutationParams;
 
-                const formulaData = command.params as IFormulaData;
-                this._formulaDataModel.setFormulaData(formulaData);
+                    const { worksheetId: sheetId, workbookId: unitId, cellValue, isFormulaUpdate } = params;
+
+                    if (isFormulaUpdate === true || cellValue == null) {
+                        return;
+                    }
+
+                    this._formulaDataModel.updateFormulaData(unitId, sheetId, cellValue);
+
+                    this._commandService.executeCommand(SetFormulaDataMutation.id, {
+                        formulaData: this._formulaDataModel.getFormulaData(),
+                    });
+                }
             })
         );
     }

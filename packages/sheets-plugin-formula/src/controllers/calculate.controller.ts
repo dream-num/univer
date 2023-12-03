@@ -1,4 +1,4 @@
-import type { IAllRuntimeData, IDirtyUnitSheetNameMap } from '@univerjs/base-formula-engine';
+import type { IAllRuntimeData, IDirtyUnitSheetNameMap, IFormulaData } from '@univerjs/base-formula-engine';
 import { FormulaEngineService, FormulaExecutedStateType } from '@univerjs/base-formula-engine';
 import type {
     IAddWorksheetMergeMutationParams,
@@ -38,13 +38,17 @@ import {
 import { Inject } from '@wendellhu/redi';
 import type { Nullable } from 'vitest';
 
+import type { ISetArrayFormulaDataMutationParams } from '../commands/mutations/set-array-formula-data.mutation';
 import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
+import type { ISetFormulaCalculationStartMutation } from '../commands/mutations/set-formula-calculation.mutation';
+import { setFormulaCalculationStartMutation } from '../commands/mutations/set-formula-calculation.mutation';
+import type { ISetFormulaDataMutationParams } from '../commands/mutations/set-formula-data.mutation';
 import { SetFormulaDataMutation } from '../commands/mutations/set-formula-data.mutation';
 import { FormulaDataModel } from '../models/formula-data.model';
 import type { FormulaService } from '../services/formula.service';
 import { IFormulaService } from '../services/formula.service';
 
-@OnLifecycle(LifecycleStages.Starting, CalculateController)
+@OnLifecycle(LifecycleStages.Ready, CalculateController)
 export class CalculateController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
@@ -65,68 +69,75 @@ export class CalculateController extends Disposable {
     }
 
     private _commandExecutedListener() {
-        const updateCommandList = [
-            // ClearSelectionAllCommand.id,
-            // ClearSelectionContentCommand.id,
-            // SetRangeValuesCommand.id,
-            SetRangeValuesMutation.id,
-            MoveRangeMutation.id,
-            MoveRowsMutation.id,
-            MoveColsMutation.id,
-            DeleteRangeMutation.id,
-            InsertRangeMutation.id,
-            RemoveRowMutation.id,
-            RemoveColMutation.id,
-            RemoveSheetMutation.id,
-            SetWorksheetNameMutation.id,
-            AddWorksheetMergeMutation.id,
-        ];
-
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (!updateCommandList.includes(command.id)) {
-                    return;
-                }
+                if (command.id === SetFormulaDataMutation.id) {
+                    const formulaData = (command.params as ISetFormulaDataMutationParams).formulaData as IFormulaData;
+                    this._formulaDataModel.setFormulaData(formulaData);
+                } else if (command.id === setFormulaCalculationStartMutation.id) {
+                    const params = command.params as ISetFormulaCalculationStartMutation;
+                    const { dirtyRanges, dirtyNameMap } = this._generateDirty(params.commands);
 
-                let dirtyRanges: IUnitRange[] = [];
-                let dirtyNameMap: IDirtyUnitSheetNameMap = {};
-                if (command.id === SetRangeValuesMutation.id) {
-                    const params = command.params as ISetRangeValuesMutationParams;
-                    /**
-                     * Changes in the cell value caused by the formula or style
-                     * will not trigger the formula to be marked as dirty for calculation.
-                     */
-                    if (params.isFormulaUpdate === true || params.trigger === SetStyleCommand.id) {
+                    this._calculate(dirtyRanges, dirtyNameMap);
+                } else if (command.id === SetArrayFormulaDataMutation.id) {
+                    const params = command.params as ISetArrayFormulaDataMutationParams;
+
+                    if (params == null) {
                         return;
                     }
-                    dirtyRanges = this._getSetRangeValuesMutationDirtyRange(params);
-                } else if (command.id === MoveRangeMutation.id) {
-                    const params = command.params as IMoveRangeMutationParams;
-                    dirtyRanges = this._getMoveRangeMutationDirtyRange(params);
-                } else if (command.id === MoveRowsMutation.id || command.id === MoveColsMutation.id) {
-                    const params = command.params as IMoveRowsMutationParams | IMoveColumnsMutationParams;
-                    dirtyRanges = this._getMoveRowsMutationDirtyRange(params);
-                } else if (command.id === DeleteRangeMutation.id || command.id === InsertRangeMutation.id) {
-                    const params = command.params as IDeleteRangeMutationParams;
-                    dirtyRanges = this._getDeleteRangeMutationDirtyRange(params);
-                } else if (command.id === RemoveRowMutation.id || command.id === RemoveColMutation.id) {
-                    const params = command.params as IRemoveRowsMutationParams;
-                    const isRow = command.id === RemoveRowMutation.id;
-                    dirtyRanges = this._getRemoveRowOrColumnMutation(params, isRow);
-                } else if (command.id === RemoveSheetMutation.id) {
-                    const params = command.params as IRemoveSheetMutationParams;
-                    dirtyNameMap = this._getSheetMutationDirtyName(params);
-                } else if (command.id === SetWorksheetNameMutation.id) {
-                    const params = command.params as ISetWorksheetNameMutationParams;
-                    dirtyNameMap = this._getSheetMutationDirtyName(params, params.name);
-                } else if (command.id === AddWorksheetMergeMutation.id) {
-                    const params = command.params as IAddWorksheetMergeMutationParams;
-                    dirtyNameMap = this._getSheetMutationDirtyName(params);
-                }
 
-                this._calculate(dirtyRanges, dirtyNameMap);
+                    const { arrayFormulaRange, arrayFormulaCellData } = params;
+                    this._formulaDataModel.setArrayFormulaRange(arrayFormulaRange);
+                    this._formulaDataModel.setArrayFormulaCellData(arrayFormulaCellData);
+                }
             })
         );
+    }
+
+    private _generateDirty(commands: ICommandInfo[]) {
+        const dirtyRanges: IUnitRange[] = [];
+        const dirtyNameMap: IDirtyUnitSheetNameMap = {};
+
+        for (const command of commands) {
+            if (command.id === SetRangeValuesMutation.id) {
+                const params = command.params as ISetRangeValuesMutationParams;
+                /**
+                 * Changes in the cell value caused by the formula or style
+                 * will not trigger the formula to be marked as dirty for calculation.
+                 */
+                if (params.isFormulaUpdate === true || params.trigger === SetStyleCommand.id) {
+                    continue;
+                }
+                dirtyRanges.push(...this._getSetRangeValuesMutationDirtyRange(params));
+            } else if (command.id === MoveRangeMutation.id) {
+                const params = command.params as IMoveRangeMutationParams;
+                dirtyRanges.push(...this._getMoveRangeMutationDirtyRange(params));
+            } else if (command.id === MoveRowsMutation.id || command.id === MoveColsMutation.id) {
+                const params = command.params as IMoveRowsMutationParams | IMoveColumnsMutationParams;
+                dirtyRanges.push(...this._getMoveRowsMutationDirtyRange(params));
+            } else if (command.id === DeleteRangeMutation.id || command.id === InsertRangeMutation.id) {
+                const params = command.params as IDeleteRangeMutationParams;
+                dirtyRanges.push(...this._getDeleteRangeMutationDirtyRange(params));
+            } else if (command.id === RemoveRowMutation.id || command.id === RemoveColMutation.id) {
+                const params = command.params as IRemoveRowsMutationParams;
+                const isRow = command.id === RemoveRowMutation.id;
+                dirtyRanges.push(...this._getRemoveRowOrColumnMutation(params, isRow));
+            } else if (command.id === RemoveSheetMutation.id) {
+                const params = command.params as IRemoveSheetMutationParams;
+                this._getSheetMutationDirtyName(dirtyNameMap, params);
+            } else if (command.id === SetWorksheetNameMutation.id) {
+                const params = command.params as ISetWorksheetNameMutationParams;
+                this._getSheetMutationDirtyName(dirtyNameMap, params, params.name);
+            } else if (command.id === AddWorksheetMergeMutation.id) {
+                const params = command.params as IAddWorksheetMergeMutationParams;
+                this._getSheetMutationDirtyName(dirtyNameMap, params);
+            }
+        }
+
+        return {
+            dirtyRanges,
+            dirtyNameMap,
+        };
     }
 
     private _getSetRangeValuesMutationDirtyRange(params: ISetRangeValuesMutationParams) {
@@ -141,13 +152,6 @@ export class CalculateController extends Disposable {
         dirtyRanges.push(...this._getDirtyRangesByCellValue(unitId, sheetId, cellValue));
 
         dirtyRanges.push(...this._getDirtyRangesForArrayFormula(unitId, sheetId, cellValue));
-
-        /**
-         * TODO: @Dushusir
-         *
-         * @deprecated This method will be removed in future versions.
-         */
-        this._formulaDataModel.updateFormulaData(unitId, sheetId, cellValue);
 
         return dirtyRanges;
     }
@@ -281,40 +285,22 @@ export class CalculateController extends Disposable {
         return dirtyRanges;
     }
 
-    private _getSheetMutationDirtyName(params: IRemoveSheetMutationParams, name?: Nullable<string>) {
+    private _getSheetMutationDirtyName(
+        dirtyNameMap: IDirtyUnitSheetNameMap,
+        params: IRemoveSheetMutationParams,
+        name?: Nullable<string>
+    ) {
         const { worksheetId: sheetId, workbookId: unitId } = params;
 
-        const dirtyNameMap: IDirtyUnitSheetNameMap = {};
+        // const dirtyNameMap: IDirtyUnitSheetNameMap = {};
 
-        dirtyNameMap[unitId] = {};
+        if (dirtyNameMap[unitId] == null) {
+            dirtyNameMap[unitId] = {};
+        }
 
         dirtyNameMap[unitId][sheetId] = name;
 
         return dirtyNameMap;
-    }
-
-    private _rangeToMatrixWithMove(unitId: string, sheetId: string, range: IRange) {
-        const workbook = this._currentUniverService.getUniverSheetInstance(unitId);
-        const worksheet = workbook?.getSheetBySheetId(sheetId);
-        const cellData = worksheet?.getCellMatrix();
-
-        const matrix = new ObjectMatrix<ICellData | null>();
-
-        if (cellData == null) {
-            return matrix;
-        }
-
-        const { startRow, startColumn, endRow, endColumn } = range;
-
-        for (let r = startRow; r <= endRow; r++) {
-            for (let c = startColumn; c <= endColumn; c++) {
-                if (cellData.getValue(r, c) != null) {
-                    matrix.setValue(r, c, {});
-                }
-            }
-        }
-
-        return matrix;
     }
 
     private _rangeToMatrix(range: IRange) {
@@ -408,9 +394,8 @@ export class CalculateController extends Disposable {
         const arrayFormulaCellData = this._formulaDataModel.getArrayFormulaCellData();
 
         // Synchronous to the main thread
-        this._commandService.executeCommand(SetFormulaDataMutation.id, formulaData);
-
-        return this._formulaEngineService.execute({
+        // this._commandService.executeCommand(SetFormulaDataMutation.id, { formulaData });
+        this._formulaEngineService.execute({
             formulaData,
             arrayFormulaCellData,
             forceCalculate: false,

@@ -6,6 +6,7 @@ import { FORMULA_PLUGIN_NAME } from './common/plugin-name';
 import { ArrayFormulaDisplayController } from './controllers/array-formula-display.controller';
 import { CalculateController } from './controllers/calculate.controller';
 import { FormulaController } from './controllers/formula.controller';
+import { TriggerCalculationController } from './controllers/trigger-calculation.controller';
 import { UpdateFormulaController } from './controllers/update-formula.controller';
 import type { IFormulaConfig } from './models/formula-data.model';
 import { FormulaDataModel } from './models/formula-data.model';
@@ -35,6 +36,7 @@ export class FormulaPlugin extends Plugin {
             [FormulaController],
             [UpdateFormulaController],
             [ArrayFormulaDisplayController],
+            [TriggerCalculationController],
         ];
 
         // only worker

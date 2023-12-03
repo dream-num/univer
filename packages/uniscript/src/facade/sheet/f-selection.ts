@@ -1,4 +1,4 @@
-import type { ISelectionWithStyle } from '@univerjs/base-sheets';
+import type { ISelectionWithStyle } from '@univerjs/sheets';
 import type { Workbook, Worksheet } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 

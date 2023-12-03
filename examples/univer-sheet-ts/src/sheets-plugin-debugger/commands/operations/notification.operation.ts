@@ -1,4 +1,4 @@
-import { INotificationService } from '@univerjs/base-ui';
+import { INotificationService } from '@univerjs/ui';
 import { CommandType, ICommand } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 

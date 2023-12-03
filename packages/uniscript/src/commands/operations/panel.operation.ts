@@ -1,4 +1,4 @@
-import { ISidebarService } from '@univerjs/base-ui';
+import { ISidebarService } from '@univerjs/ui';
 import { CommandType, IOperation } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 

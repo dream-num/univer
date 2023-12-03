@@ -1,4 +1,4 @@
-import { ComponentManager, IMenuService } from '@univerjs/base-ui';
+import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 

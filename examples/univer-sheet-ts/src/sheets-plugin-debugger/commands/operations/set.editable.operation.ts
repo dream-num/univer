@@ -1,5 +1,5 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { SheetPermissionService } from '@univerjs/base-sheets';
+import { SheetPermissionService } from '@univerjs/sheets';
 import { CommandType, ICommand, IUniverInstanceService, UniverPermissionService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 

@@ -1,7 +1,7 @@
-import DocPluginZhCN from '@univerjs/base-docs/locale/zh-CN';
-import BaseUiZhCN from '@univerjs/base-ui/locale/zh-CN';
+import DocPluginZhCN from '@univerjs/docs/locale/zh-CN';
+import BaseUiZhCN from '@univerjs/ui/locale/zh-CN';
 import DeisgnZH from '@univerjs/design/locale/zh-CN';
-import DocUIPluginZhCN from '@univerjs/ui-plugin-docs/locale/zh-CN';
+import DocUIPluginZhCN from '@univerjs/docs-ui/locale/zh-CN';
 
 export const locales = {
     zhCN: {

@@ -17,7 +17,7 @@ sidebar_position: 6
 ```ts
 import type { IUniverRPCMainThreadPluginConfig } from '@univerjs/rpc';
 import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
-import { FormulaPlugin } from '@univerjs/sheets-plugin-formula';
+import { FormulaPlugin } from '@univerjs/formula';
 
 // ...
 
@@ -34,11 +34,11 @@ univer.registerPlugin(UniverRPCMainThreadPlugin, {
 在 Web Worker 的入口文件中实例化另一个 Univer 实例，并注册需要的插件：
 
 ```ts
-import { BaseFormulaEnginePlugin } from '@univerjs/base-formula-engine';
-import { SheetPlugin } from '@univerjs/base-sheets';
+import { BaseFormulaEnginePlugin } from '@univerjs/engine-formula';
+import { SheetPlugin } from '@univerjs/sheets';
 import { LocaleType, Univer } from '@univerjs/core';
 import { UniverRPCWorkerThreadPlugin } from '@univerjs/rpc';
-import { FormulaPlugin } from '@univerjs/sheets-plugin-formula';
+import { FormulaPlugin } from '@univerjs/formula';
 
 const univer = new Univer();
 

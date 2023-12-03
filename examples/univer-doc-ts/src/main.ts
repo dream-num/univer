@@ -1,9 +1,9 @@
-import { DocPlugin } from '@univerjs/base-docs';
-import { RenderEngine } from '@univerjs/base-render';
-import { UIPlugin } from '@univerjs/base-ui';
+import { DocPlugin } from '@univerjs/docs';
+import { RenderEngine } from '@univerjs/engine-render';
+import { UIPlugin } from '@univerjs/ui';
 import { LocaleType, Univer } from '@univerjs/core';
 import { defaultTheme } from '@univerjs/design';
-import { DocUIPlugin } from '@univerjs/ui-plugin-docs';
+import { DocUIPlugin } from '@univerjs/docs-ui';
 import { DEFAULT_DOCUMENT_DATA_CN } from 'univer-data';
 
 import { locales } from './locales';

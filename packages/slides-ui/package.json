@@ -1,0 +1,48 @@
+{
+    "name": "@univerjs/slides-ui",
+    "version": "0.1.0-alpha.0",
+    "description": "Univer normal ui-plugin-slides",
+    "keywords": [],
+    "author": "DreamNum <developer@univer.ai>",
+    "license": "MIT",
+    "main": "./src/index.ts",
+    "publishConfig": {
+        "access": "public",
+        "exports": {
+            ".": "./lib/index.js",
+            "./*": "./lib/*"
+        }
+    },
+    "exports": {
+        ".": "./src/index.ts",
+        "./*": "./src/*"
+    },
+    "directories": {
+        "lib": "lib"
+    },
+    "files": [
+        "lib"
+    ],
+    "private": true,
+    "scripts": {},
+    "dependencies": {
+        "@univerjs/engine-render": "workspace:*",
+        "@univerjs/slides": "workspace:*",
+        "@univerjs/ui": "workspace:*",
+        "@univerjs/core": "workspace:*",
+        "@univerjs/design": "workspace:*",
+        "@wendellhu/redi": "^0.12.11"
+    },
+    "devDependencies": {
+        "@types/react": "^18.2.40",
+        "@vitest/coverage-istanbul": "^0.34.6",
+        "less": "^4.2.0",
+        "react": "^18.2.0",
+        "ts-node": "^10.9.1",
+        "typescript": "^5.3.2",
+        "vitest": "^0.34.6"
+    },
+    "peerDependencies": {
+        "react": ">=16.9.0"
+    }
+}

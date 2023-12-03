@@ -2,7 +2,7 @@
 sidebar_position: 5
 ---
 
-# @univerjs/sheets-plugin-numfmt
+# @univerjs/sheets-numfmt
 
 提供数字格式的编辑能力。
 

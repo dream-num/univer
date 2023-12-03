@@ -1,4 +1,4 @@
-import { SelectionManagerService } from '@univerjs/base-sheets';
+import { SelectionManagerService } from '@univerjs/sheets';
 import type { IRange, Workbook, Worksheet } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 

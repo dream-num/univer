@@ -1,4 +1,4 @@
-import { IMenuService } from '@univerjs/base-ui';
+import { IMenuService } from '@univerjs/ui';
 import { Disposable, ICommandService } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 

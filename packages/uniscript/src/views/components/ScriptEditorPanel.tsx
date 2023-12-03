@@ -1,4 +1,4 @@
-import { IMessageService, IShortcutService } from '@univerjs/base-ui';
+import { IMessageService, IShortcutService } from '@univerjs/ui';
 import type { Nullable } from '@univerjs/core';
 import { DisposableCollection, LocaleService, toDisposable } from '@univerjs/core';
 import { Button, MessageType } from '@univerjs/design';

@@ -1,4 +1,4 @@
-import { IConfirmService } from '@univerjs/base-ui';
+import { IConfirmService } from '@univerjs/ui';
 import { CommandType, ICommand } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 

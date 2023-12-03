@@ -1,4 +1,4 @@
-import { IMenuSelectorItem, MenuItemType, MenuPosition } from '@univerjs/base-ui';
+import { IMenuSelectorItem, MenuItemType, MenuPosition } from '@univerjs/ui';
 import { LocaleType } from '@univerjs/core';
 import { defaultTheme, greenTheme } from '@univerjs/design';
 import { IAccessor } from '@wendellhu/redi';

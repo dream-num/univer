@@ -1,0 +1,72 @@
+{
+    "name": "@univerjs/docs",
+    "version": "0.1.0-alpha.0",
+    "description": "UniverSheet normal base-docs",
+    "keywords": [],
+    "author": "DreamNum <developer@univer.ai>",
+    "license": "MIT",
+    "main": "./lib/cjs/index.js",
+    "module": "./lib/esm/index.js",
+    "types": "./lib/types/index.d.ts",
+    "publishConfig": {
+        "access": "public",
+        "main": "./lib/cjs/index.js",
+        "module": "./lib/esm/index.js",
+        "exports": {
+            ".": {
+                "import": "./lib/esm/index.js",
+                "require": "./lib/cjs/index.js",
+                "types": "./lib/types/index.d.ts"
+            },
+            "./*": {
+                "import": "./lib/esm/*",
+                "require": "./lib/cjs/*",
+                "types": "./lib/types/index.d.ts"
+            },
+            "./locale/*": {
+                "import": "./lib/esm/locale/*.js",
+                "require": "./lib/cjs/locale/*.js",
+                "types": "./lib/types/index.d.ts"
+            }
+        }
+    },
+    "exports": {
+        ".": "./src/index.ts",
+        "./*": "./src/*",
+        "./typedoc/*": "./typedoc/*.json",
+        "./locale/*": "./src/locale/*.ts"
+    },
+    "directories": {
+        "lib": "lib"
+    },
+    "files": [
+        "lib"
+    ],
+    "private": false,
+    "scripts": {
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "coverage": "vitest run --coverage",
+        "esbuild": "node ./esbuild.config.mjs && tsc -p tsconfig.esbuild.json",
+        "typedoc": "typedoc"
+    },
+    "dependencies": {
+        "@ctrl/tinycolor": "^4.0.2",
+        "@univerjs/engine-render": "workspace:*",
+        "@univerjs/sheets": "workspace:*",
+        "@univerjs/ui": "workspace:*",
+        "@univerjs/core": "workspace:*",
+        "@wendellhu/redi": "^0.12.11",
+        "rxjs": "^7.8.1"
+    },
+    "devDependencies": {
+        "@vitest/coverage-istanbul": "^0.34.6",
+        "esbuild": "^0.19.8",
+        "happy-dom": "^12.10.3",
+        "less": "^4.2.0",
+        "ts-node": "^10.9.1",
+        "typedoc": "^0.25.4",
+        "typescript": "^5.3.2",
+        "vitest": "^0.34.6"
+    }
+}

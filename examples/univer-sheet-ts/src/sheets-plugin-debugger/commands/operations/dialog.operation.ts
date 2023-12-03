@@ -1,4 +1,4 @@
-import { IDialogService } from '@univerjs/base-ui';
+import { IDialogService } from '@univerjs/ui';
 import { CommandType, ICommand } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 

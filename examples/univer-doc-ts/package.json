@@ -16,12 +16,12 @@
         "dev:demo": "node ./esbuild.config.mjs --watch"
     },
     "dependencies": {
-        "@univerjs/base-docs": "workspace:*",
-        "@univerjs/base-render": "workspace:*",
-        "@univerjs/base-ui": "workspace:*",
+        "@univerjs/docs": "workspace:*",
+        "@univerjs/engine-render": "workspace:*",
+        "@univerjs/ui": "workspace:*",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
-        "@univerjs/ui-plugin-docs": "workspace:*",
+        "@univerjs/docs-ui": "workspace:*",
         "univer-data": "workspace:*"
     },
     "devDependencies": {

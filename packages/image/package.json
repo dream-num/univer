@@ -1,0 +1,25 @@
+{
+    "name": "@univerjs/image",
+    "version": "0.1.0-alpha.0",
+    "description": "Univer's public plugins can be shared among multiple businesses.",
+    "author": "DreamNum <developer@univer.ai>",
+    "license": "MIT",
+    "main": "./src/index.ts",
+    "module": "./src/index.ts",
+    "private": true,
+    "dependencies": {
+        "@univerjs/engine-render": "workspace:*",
+        "@univerjs/sheets": "workspace:*",
+        "@univerjs/ui": "workspace:*",
+        "@univerjs/core": "workspace:*",
+        "@wendellhu/redi": "^0.12.11",
+        "rxjs": "^7.8.1"
+    },
+    "devDependencies": {
+        "@vitest/coverage-istanbul": "^0.34.6",
+        "less": "^4.2.0",
+        "ts-node": "^10.9.1",
+        "typescript": "^5.3.2",
+        "vitest": "^0.34.6"
+    }
+}

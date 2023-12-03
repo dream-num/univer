@@ -1,5 +1,5 @@
-import type { ISetStyleCommandParams } from '@univerjs/base-sheets';
-import { SetStyleCommand } from '@univerjs/base-sheets';
+import type { ISetStyleCommandParams } from '@univerjs/sheets';
+import { SetStyleCommand } from '@univerjs/sheets';
 import type { ICellV, IColorStyle, IRange, Workbook, Worksheet } from '@univerjs/core';
 import { ICommandService } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';

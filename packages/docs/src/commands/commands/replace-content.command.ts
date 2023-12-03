@@ -1,6 +1,6 @@
-import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { ICommand, IDocumentBody, IMutationInfo } from '@univerjs/core';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
+import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';

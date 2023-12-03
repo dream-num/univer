@@ -1,5 +1,6 @@
-import { ITextRangeWithStyle } from '@univerjs/engine-render';
-import { CommandType, ICommand, IUniverInstanceService } from '@univerjs/core';
+import type { ICommand } from '@univerjs/core';
+import { CommandType, IUniverInstanceService } from '@univerjs/core';
+import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 

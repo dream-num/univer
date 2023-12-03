@@ -1,10 +1,12 @@
-import { ITextRangeWithStyle } from '@univerjs/engine-render';
-import { CommandType, ICommand, ICommandInfo, ICommandService, ITextRange, IUndoRedoService } from '@univerjs/core';
+import type { ICommand, ICommandInfo, ITextRange } from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService } from '@univerjs/core';
+import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 
 import { getRetainAndDeleteFromReplace } from '../../basics/retain-delete-params';
 import { IMEInputManagerService } from '../../services/ime-input-manager.service';
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
-import { IRichTextEditingMutationParams, RichTextEditingMutation } from '../mutations/core-editing.mutation';
+import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
+import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
 
 export interface IIMEInputCommandParams {
     unitId: string;

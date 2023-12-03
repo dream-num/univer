@@ -1,4 +1,4 @@
-import { ILocale } from './interface';
+import type { ILocale } from './interface';
 
 const locale: ILocale = {
     design: {

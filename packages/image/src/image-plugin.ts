@@ -1,5 +1,6 @@
 import { DEFAULT_DOCUMENT_SUB_COMPONENT_ID, LocaleService, Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
-import { Dependency, Inject, Injector } from '@wendellhu/redi';
+import type { Dependency } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 
 import { ImageLoadController } from './controllers/image.load.controller';
 import { ImageModel } from './models/image-model';

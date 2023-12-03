@@ -1,5 +1,6 @@
-import { Nullable } from '@univerjs/core';
-import { createIdentifier, IDisposable } from '@wendellhu/redi';
+import type { Nullable } from '@univerjs/core';
+import type { IDisposable } from '@wendellhu/redi';
+import { createIdentifier } from '@wendellhu/redi';
 
 export interface IImageRenderParam {
     unitId: string;

@@ -7,9 +7,11 @@ import {
     PluginType,
     Tools,
 } from '@univerjs/core';
-import { Dependency, Inject, Injector } from '@wendellhu/redi';
+import type { Dependency } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 
-import { DefaultDocUiConfig, IDocUIPluginConfig } from './basics';
+import type { IDocUIPluginConfig } from './basics';
+import { DefaultDocUiConfig } from './basics';
 import { DOC_UI_PLUGIN_NAME } from './basics/const/plugin-name';
 import { AppUIController } from './controllers';
 import { DocUIController } from './controllers/doc-ui.controller';

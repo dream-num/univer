@@ -4,8 +4,9 @@ import {
     SetInlineFormatStrikethroughCommand,
     SetInlineFormatUnderlineCommand,
 } from '@univerjs/docs';
-import { IMenuButtonItem, MenuItemType, MenuPosition } from '@univerjs/ui';
-import { IAccessor } from '@wendellhu/redi';
+import type { IMenuButtonItem } from '@univerjs/ui';
+import { MenuItemType, MenuPosition } from '@univerjs/ui';
+import type { IAccessor } from '@wendellhu/redi';
 
 // TODO @Dushusir: use for test, change id later
 export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {

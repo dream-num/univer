@@ -1,6 +1,6 @@
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import type {
-    ICommand,
+    ICommand, 
     IDocumentBody,
     IDocumentData,
     IMutationInfo,

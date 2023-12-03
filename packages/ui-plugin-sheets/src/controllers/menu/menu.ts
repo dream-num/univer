@@ -47,6 +47,12 @@ import { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 
 import {
+    SheetPasteBesidesBorderCommand,
+    SheetPasteColWidthCommand,
+    SheetPasteFormatCommand,
+    SheetPasteValueCommand,
+} from '../../commands/commands/clipboard.command';
+import {
     SetRangeBoldCommand,
     SetRangeFontFamilyCommand,
     SetRangeFontSizeCommand,
@@ -898,6 +904,58 @@ export function PasteMenuItemFactory(): IMenuButtonItem {
             SheetMenuPosition.COL_HEADER_CONTEXT_MENU,
             SheetMenuPosition.ROW_HEADER_CONTEXT_MENU,
         ],
+    };
+}
+
+const PASTE_SPECIAL_MENU_ID = 'sheet.menu.paste-special';
+export function PasteSpacialMenuItemFactory(): IMenuSelectorItem {
+    return {
+        id: PASTE_SPECIAL_MENU_ID,
+        group: MenuGroup.CONTEXT_MENU_FORMAT,
+        type: MenuItemType.SUBITEMS,
+        icon: 'PasteSpecial',
+        title: 'rightClick.pasteSpecial',
+        positions: [
+            MenuPosition.CONTEXT_MENU,
+            SheetMenuPosition.COL_HEADER_CONTEXT_MENU,
+            SheetMenuPosition.ROW_HEADER_CONTEXT_MENU,
+        ],
+    };
+}
+
+export function PasteValueMenuItemFactory(): IMenuButtonItem<string> {
+    return {
+        id: SheetPasteValueCommand.id,
+        type: MenuItemType.BUTTON,
+        title: 'rightClick.pasteValue',
+        positions: [PASTE_SPECIAL_MENU_ID],
+    };
+}
+
+export function PasteFormatMenuItemFactory(): IMenuButtonItem<string> {
+    return {
+        id: SheetPasteFormatCommand.id,
+        type: MenuItemType.BUTTON,
+        title: 'rightClick.pasteFormat',
+        positions: [PASTE_SPECIAL_MENU_ID],
+    };
+}
+
+export function PasteColWidthMenuItemFactory(): IMenuButtonItem<string> {
+    return {
+        id: SheetPasteColWidthCommand.id,
+        type: MenuItemType.BUTTON,
+        title: 'rightClick.pasteColWidth',
+        positions: [PASTE_SPECIAL_MENU_ID],
+    };
+}
+
+export function PasteBesidesBorderMenuItemFactory(): IMenuButtonItem<string> {
+    return {
+        id: SheetPasteBesidesBorderCommand.id,
+        type: MenuItemType.BUTTON,
+        title: 'rightClick.pasteBesidesBorder',
+        positions: [PASTE_SPECIAL_MENU_ID],
     };
 }
 

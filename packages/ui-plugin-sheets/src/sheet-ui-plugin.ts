@@ -38,6 +38,7 @@ import {
 } from './services/editor/formula-editor-manager.service';
 import { EditorBridgeService, IEditorBridgeService } from './services/editor-bridge.service';
 import { FormatPainterService, IFormatPainterService } from './services/format-painter/format-painter.service';
+import { IMarkSelectionService, MarkSelectionService } from './services/mark-selection/mark-selection.service';
 import { ScrollManagerService } from './services/scroll-manager.service';
 import { ISelectionRenderService, SelectionRenderService } from './services/selection/selection-render.service';
 import { ISheetBarService, SheetBarService } from './services/sheet-bar/sheet-bar.service';
@@ -84,6 +85,7 @@ export class SheetUIPlugin extends Plugin {
                     },
                 ],
                 [IStatusBarService, { useClass: StatusBarService }],
+                [IMarkSelectionService, { useClass: MarkSelectionService }],
 
                 // controllers
                 [AutoHeightController],

@@ -9,4 +9,5 @@ export const ClearSelectionValueShortcutItem: IShortcutItem = {
     // when focusing on any other input tag do not trigger this shortcut
     preconditions: (contextService) => whenEditorNotActivated(contextService),
     binding: KeyCode.DELETE,
+    mac: KeyCode.BACKSPACE,
 };

@@ -1,5 +1,12 @@
 import type { ICellData, ICommand, IMutationInfo, IRange, ObjectMatrixPrimitiveType } from '@univerjs/core';
-import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
+import {
+    CommandType,
+    ICommandService,
+    IUndoRedoService,
+    IUniverInstanceService,
+    ObjectMatrix,
+    RANGE_TYPE,
+} from '@univerjs/core';
 import type {
     IAddWorksheetMergeMutationParams,
     IRemoveWorksheetMergeMutationParams,
@@ -80,9 +87,12 @@ export const AutoFillCommand: ICommand = {
                 {
                     primary: {
                         ...selectionRange,
+                        endColumn: selectionRange.startColumn,
+                        endRow: selectionRange.startRow,
                     },
                     range: {
                         ...selectionRange,
+                        rangeType: RANGE_TYPE.NORMAL,
                     },
                 },
             ],

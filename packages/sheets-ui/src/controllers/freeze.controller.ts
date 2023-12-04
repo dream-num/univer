@@ -313,6 +313,40 @@ export class FreezeController extends Disposable {
         );
     }
 
+    private _getCurrentLastVisibleRow() {
+        const sheetObject = this._getSheetObject();
+        if (sheetObject == null) {
+            return;
+        }
+
+        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        if (skeleton == null) {
+            return;
+        }
+        const scene = sheetObject.scene;
+
+        const scale = Math.max(scene.scaleX, scene.scaleY);
+        const currentScroll = this._scrollManagerService.getCurrentScroll();
+
+        const skeletonViewHeight = (sheetObject.engine.height - skeleton.columnHeaderHeight) / scale;
+
+        const start = currentScroll?.sheetViewStartRow ?? 0;
+        const startHeight =
+            start === 0
+                ? -(currentScroll?.offsetY ?? 0)
+                : skeleton.rowHeightAccumulation[start - 1] - (currentScroll?.offsetY ?? 0);
+        let lastRow = 0;
+        for (let i = start, len = skeleton.rowHeightAccumulation.length; i < len; i++) {
+            const height = skeleton.rowHeightAccumulation[i];
+
+            if (height - startHeight > skeletonViewHeight) {
+                lastRow = i;
+                break;
+            }
+        }
+        return lastRow;
+    }
+
     private _FreezeDown(
         evt: IPointerEvent | IMouseEvent,
         freezeObjectHeaderRect: Rect,
@@ -335,9 +369,18 @@ export class FreezeController extends Disposable {
 
         scene.disableEvent();
 
-        this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
-            const { startX, startY, row, column } = getCoordByOffset(moveEvt.offsetX, moveEvt.offsetY, scene, skeleton);
+        const lastRow = this._getCurrentLastVisibleRow();
+        const lastRowY = lastRow === undefined ? Infinity : skeleton.rowHeightAccumulation[lastRow];
+        const viewMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
 
+        this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
+            const { startX, startY, row, column } = getCoordByOffset(
+                moveEvt.offsetX,
+                moveEvt.offsetY,
+                scene,
+                skeleton,
+                viewMain
+            );
             scene.setCursor(CURSOR_TYPE.GRABBING);
 
             const FREEZE_SIZE = FREEZE_SIZE_NORMAL / Math.max(scene.scaleX, scene.scaleY);
@@ -345,20 +388,20 @@ export class FreezeController extends Disposable {
             if (freezeDirectionType === FREEZE_DIRECTION_TYPE.ROW) {
                 freezeObjectHeaderRect
                     .transformByState({
-                        top: startY - FREEZE_SIZE / 2,
+                        top: Math.min(startY, lastRowY) - FREEZE_SIZE / 2,
                     })
                     ?.setProps({
                         fill: this._freeze_active_color,
                     });
                 freezeObjectMainRect
                     .transformByState({
-                        top: startY - FREEZE_SIZE / 2,
+                        top: Math.min(startY, lastRowY) - FREEZE_SIZE / 2,
                     })
                     ?.setProps({
                         fill: this._freeze_normal_header_color,
                     });
-                this._changeToRow = row;
-                this._changeToOffsetY = startY;
+                this._changeToRow = lastRow === undefined ? row : Math.min(row, lastRow);
+                this._changeToOffsetY = Math.min(startY, lastRowY);
             } else {
                 freezeObjectHeaderRect
                     .transformByState({
@@ -497,14 +540,17 @@ export class FreezeController extends Disposable {
 
         const { rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop } = skeleton;
 
+        // column header
         const viewColumnLeft = scene.getViewport(VIEWPORT_KEY.VIEW_COLUMN_LEFT);
         const viewColumnRight = scene.getViewport(VIEWPORT_KEY.VIEW_COLUMN_RIGHT);
 
+        // row header
         const viewRowTop = scene.getViewport(VIEWPORT_KEY.VIEW_ROW_TOP);
         const viewRowBottom = scene.getViewport(VIEWPORT_KEY.VIEW_ROW_BOTTOM);
 
         const viewLeftTop = scene.getViewport(VIEWPORT_KEY.VIEW_LEFT_TOP);
 
+        // skeleton
         const viewMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
         const viewMainLeftTop = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP);
         const viewMainLeft = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN_LEFT);
@@ -585,12 +631,14 @@ export class FreezeController extends Disposable {
             isLeftView = false;
         }
 
+        // freeze start
         const startSheetView = skeleton.getNoMergeCellPositionByIndexWithNoHeader(
             row - ySplit,
             column - xSplit,
             scaleX,
             scaleY
         );
+        // freeze end
         const endSheetView = skeleton.getNoMergeCellPositionByIndexWithNoHeader(row, column, scaleX, scaleY);
 
         viewMainLeftTop.disable();
@@ -605,6 +653,8 @@ export class FreezeController extends Disposable {
         viewRowTop.resetPadding();
         viewColumnLeft.resetPadding();
 
+        const currentScroll = this._scrollManagerService.getCurrentScroll();
+
         if (isTopView === false && isLeftView === false) {
             viewMain.resize({
                 left: rowHeaderWidthAndMarginLeft,
@@ -613,12 +663,16 @@ export class FreezeController extends Disposable {
                 right: 0,
             });
             viewMain.resetPadding();
-            this._commandService.executeCommand(ScrollCommand.id, {
-                sheetViewStartRow: 0,
-                sheetViewStartColumn: 0,
-                offsetX: 0,
-                offsetY: 0,
-            });
+
+            this._commandService.executeCommand(
+                ScrollCommand.id,
+                currentScroll ?? {
+                    sheetViewStartRow: 0,
+                    sheetViewStartColumn: 0,
+                    offsetX: 0,
+                    offsetY: 0,
+                }
+            );
         } else if (isTopView === true && isLeftView === false) {
             const topGap = endSheetView.startY - startSheetView.startY;
             viewMain.resize({
@@ -633,10 +687,13 @@ export class FreezeController extends Disposable {
                 startX: 0,
                 endX: 0,
             });
-            this._commandService.executeCommand(ScrollCommand.id, {
-                sheetViewStartRow: 0,
-                offsetY: 0,
-            });
+            this._commandService.executeCommand(
+                ScrollCommand.id,
+                currentScroll ?? {
+                    sheetViewStartRow: 0,
+                    offsetY: 0,
+                }
+            );
             viewMainTop.resize({
                 left: rowHeaderWidthAndMarginLeft,
                 top: columnHeaderHeightAndMarginTop,
@@ -697,10 +754,13 @@ export class FreezeController extends Disposable {
                 startY: 0,
                 endY: 0,
             });
-            this._commandService.executeCommand(ScrollCommand.id, {
-                sheetViewStartColumn: 0,
-                offsetX: 0,
-            });
+            this._commandService.executeCommand(
+                ScrollCommand.id,
+                currentScroll ?? {
+                    sheetViewStartColumn: 0,
+                    offsetX: 0,
+                }
+            );
             viewMainLeft.resize({
                 left: rowHeaderWidthAndMarginLeft,
                 top: columnHeaderHeightAndMarginTop,

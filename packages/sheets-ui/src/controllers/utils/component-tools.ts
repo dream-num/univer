@@ -8,6 +8,7 @@ import type {
     SpreadsheetColumnHeader,
     SpreadsheetHeader,
     SpreadsheetSkeleton,
+    Viewport,
 } from '@univerjs/engine-render';
 import { Vector2 } from '@univerjs/engine-render';
 
@@ -59,12 +60,18 @@ export function getCoordByCell(row: number, col: number, scene: Scene, skeleton:
     return { startX, startY, endX, endY };
 }
 
-export function getCoordByOffset(evtOffsetX: number, evtOffsetY: number, scene: Scene, skeleton: SpreadsheetSkeleton) {
+export function getCoordByOffset(
+    evtOffsetX: number,
+    evtOffsetY: number,
+    scene: Scene,
+    skeleton: SpreadsheetSkeleton,
+    viewport?: Viewport
+) {
     const relativeCoords = scene.getRelativeCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
 
     const { x: newEvtOffsetX, y: newEvtOffsetY } = relativeCoords;
 
-    const scrollXY = scene.getScrollXYByRelativeCoords(relativeCoords);
+    const scrollXY = scene.getScrollXYByRelativeCoords(relativeCoords, viewport);
 
     const { scaleX, scaleY } = scene.getAncestorScale();
 

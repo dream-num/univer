@@ -1,3 +1,4 @@
+import type { IRange } from '@univerjs/core';
 import {
     Disposable,
     DisposableCollection,
@@ -50,19 +51,21 @@ export class MoveRangeController extends Disposable {
                                     if (!_toRange) {
                                         return;
                                     }
-
                                     const _fromRange = controlSelection.model.getRange();
-                                    const fromRange = {
+                                    const fromRange: IRange = {
                                         startRow: _fromRange.startRow,
                                         startColumn: _fromRange.startColumn,
                                         endRow: _fromRange.endRow,
                                         endColumn: _fromRange.endColumn,
+                                        rangeType: _fromRange.rangeType,
                                     };
-                                    const toRange = {
+                                    const toRange: IRange = {
                                         startRow: _toRange.startRow,
                                         startColumn: _toRange.startColumn,
                                         endRow: _toRange.endRow,
                                         endColumn: _toRange.endColumn,
+                                        // rangeType must equal to fromRange
+                                        rangeType: _fromRange.rangeType,
                                     };
 
                                     if (

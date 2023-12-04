@@ -313,7 +313,7 @@ export class FreezeController extends Disposable {
         );
     }
 
-    private _getCurrentLastRow() {
+    private _getCurrentLastVisibleRow() {
         const sheetObject = this._getSheetObject();
         if (sheetObject == null) {
             return;
@@ -323,10 +323,12 @@ export class FreezeController extends Disposable {
         if (skeleton == null) {
             return;
         }
+        const scene = sheetObject.scene;
 
+        const scale = Math.max(scene.scaleX, scene.scaleY);
         const currentScroll = this._scrollManagerService.getCurrentScroll();
 
-        const canvasHeight = sheetObject.engine.height - skeleton.columnHeaderHeight;
+        const skeletonViewHeight = (sheetObject.engine.height - skeleton.columnHeaderHeight) / scale;
 
         const start = currentScroll?.sheetViewStartRow ?? 0;
         const startHeight =
@@ -337,13 +339,13 @@ export class FreezeController extends Disposable {
         for (let i = start, len = skeleton.rowHeightAccumulation.length; i < len; i++) {
             const height = skeleton.rowHeightAccumulation[i];
 
-            if (height - startHeight > canvasHeight) {
+            if (height - startHeight > skeletonViewHeight) {
                 lastRow = i;
                 break;
             }
         }
 
-        return lastRow - 1;
+        return lastRow;
     }
 
     private _FreezeDown(
@@ -368,7 +370,7 @@ export class FreezeController extends Disposable {
 
         scene.disableEvent();
 
-        const lastRow = this._getCurrentLastRow();
+        const lastRow = this._getCurrentLastVisibleRow();
         const lastRowY = lastRow === undefined ? Infinity : skeleton.rowHeightAccumulation[lastRow];
 
         this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {

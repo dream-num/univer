@@ -125,8 +125,9 @@ jobs:
             - name: Copy demo to workspace
               run: |
                   mkdir .workspace
-                  cp -r ./examples/docs/local .workspace/doc
-                  cp -r ./examples/sheets/local .workspace/sheet
+                  cp -r ./examples/docs/local .workspace/docs
+                  cp -r ./examples/sheets/local .workspace/sheets
+                  cp -r ./examples/slides/local .workspace/slides
 
             - name: 🚀 Deploy to Vercel (demo)
               uses: amondnet/vercel-action@v25
@@ -183,11 +184,66 @@ jobs:
               id: vercel-storybook
               with:
                   vercel-token: ${{ secrets.VERCEL_TOKEN }}
-                  vercel-org-id: ${{ secrets.ORG_ID}}
-                  vercel-project-id: ${{ secrets.PROJECT_ID_STORYBOOK}}
+                  vercel-org-id: ${{ secrets.ORG_ID }}
+                  vercel-project-id: ${{ secrets.PROJECT_ID_STORYBOOK }}
+
+    build-docs:
+        runs-on: ubuntu-latest
+        needs: [release-nightly]
+
+        outputs:
+            preview-url: ${{ steps.vercel-docusaurus.outputs.preview-url }}
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3
+
+            - name: Install Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 18
+
+            - name: Install pnpm
+              uses: pnpm/action-setup@v2
+              with:
+                  version: 8
+                  run_install: false
+
+            - name: Get pnpm store directory
+              shell: bash
+              run: |
+                  echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+            - name: Setup pnpm cache
+              uses: actions/cache@v3
+              with:
+                  path: ${{ env.STORE_PATH }}
+                  key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+                  restore-keys: |
+                      ${{ runner.os }}-pnpm-
+
+            - name: Install dependencies
+              run: pnpm install
+
+            # ================= Deploy Docusaurus =================
+            - name: 📦 Build documantation
+              run: pnpm run build:site
+
+            - name: Copy docs to workspace
+              run: |
+                    mkdir .workspace
+                    cp -r ./apps/docs/build .workspace
+
+            - name: 🚀 Deploy to Vercel (docusaurus)
+              uses: amondnet/vercel-action@v25
+              id: vercel-docusaurus
+              with:
+                  vercel-token: ${{ secrets.VERCEL_TOKEN }}
+                  vercel-org-id: ${{ secrets.ORG_ID }}
+                  vercel-project-id: ${{ secrets.PROJECT_ID_DOCUSAURUS }}
 
     notify:
-        needs: [release-nightly, build-demo, build-storybook]
+        needs: [release-nightly, build-demo, build-storybook, build-docs]
         runs-on: ubuntu-latest
         if: ${{ always() }}
 
@@ -206,12 +262,13 @@ jobs:
                       Release version: ${{ needs.release-nightly.outputs.version }}
 
                       **[View Deployment]**
-                      - [📑 Doc](${{ needs.build-demo.outputs.preview-url }}/doc/)
-                      - [📊 Sheet](${{ needs.build-demo.outputs.preview-url }}/sheet/)
-                      - [📽️ Slide](${{ needs.build-demo.outputs.preview-url }}/slide/)
+                      - [📑 Doc](${{ needs.build-demo.outputs.preview-url }}/docs/)
+                      - [📊 Sheet](${{ needs.build-demo.outputs.preview-url }}/sheets/)
+                      - [📽️ Slide](${{ needs.build-demo.outputs.preview-url }}/slides/)
 
                       **[View Docs]**
-                      - [📚 Storybook](${{ needs.build-storybook.outputs.preview-url }}/)
+                      - [📚 Storybook](${{ needs.build-docs.outputs.preview-url }}/)
+                      - [📚 Documantation](${{ needs.build-docs.outputs.preview-url }}/)
                       🎉 🎉 🎉 🎉 🎉 🎉 🎉 🎉 🎉
 
                       Have a good dream! 🌙

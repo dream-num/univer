@@ -1,13 +1,12 @@
 /* eslint-disable no-magic-numbers */
 import type { ICellData, Nullable, Univer } from '@univerjs/core';
-import { IUniverInstanceService } from '@univerjs/core';
+import { createInterceptorKey, IUniverInstanceService } from '@univerjs/core';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { INTERCEPTOR_POINT } from '../interceptor-const';
 import { SheetInterceptorService } from '../sheet-interceptor.service';
 import type { ISheetLocation } from '../utils/interceptor';
-import { createInterceptorKey } from '../utils/interceptor';
 import { createCoreTestBed } from './create-core-test-bed';
 
 describe('Test SheetInterceptorService', () => {

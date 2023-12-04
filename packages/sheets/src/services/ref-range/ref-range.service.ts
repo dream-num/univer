@@ -1,5 +1,7 @@
-import type { IMutationInfo, IRange } from '@univerjs/core';
+import type { IInterceptor, IMutationInfo, IRange } from '@univerjs/core';
 import {
+    composeInterceptors,
+    createInterceptorKey,
     Disposable,
     IUniverInstanceService,
     LifecycleStages,
@@ -13,8 +15,6 @@ import { Inject } from '@wendellhu/redi';
 
 import { SelectionManagerService } from '../selection-manager.service';
 import { SheetInterceptorService } from '../sheet-interceptor/sheet-interceptor.service';
-import type { IInterceptor } from '../sheet-interceptor/utils/interceptor';
-import { composeInterceptors, createInterceptorKey } from '../sheet-interceptor/utils/interceptor';
 import type { EffectRefRangeParams } from './type';
 import { EffectRefRangId } from './type';
 

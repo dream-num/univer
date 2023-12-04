@@ -1,5 +1,14 @@
-import type { ICellData, ICommandInfo, IUndoRedoCommandInfos, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type {
+    ICellData,
+    ICommandInfo,
+    IInterceptor,
+    IUndoRedoCommandInfos,
+    Nullable,
+    Workbook,
+    Worksheet,
+} from '@univerjs/core';
 import {
+    composeInterceptors,
     Disposable,
     DisposableCollection,
     IUniverInstanceService,
@@ -11,8 +20,6 @@ import {
 import type { IDisposable } from '@wendellhu/redi';
 
 import { INTERCEPTOR_POINT } from './interceptor-const';
-import type { IInterceptor } from './utils/interceptor';
-import { composeInterceptors } from './utils/interceptor';
 
 export interface ICommandInterceptor {
     priority?: number;

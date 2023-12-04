@@ -505,37 +505,25 @@ export class SelectionRenderService implements ISelectionRenderService {
 
             const bounding = skeleton.getMergeBounding(newStartRow, newStartColumn, newEndRow, newEndColumn);
 
-            // TODO startCell position calculate error
-            const startCell = skeleton.getCellByIndex(bounding.startRow, bounding.startColumn, scaleX, scaleY);
+            const startCell = skeleton.getNoMergeCellPositionByIndex(
+                bounding.startRow,
+                bounding.startColumn,
+                scaleX,
+                scaleY
+            );
 
-            const endCell = skeleton.getCellByIndex(bounding.endRow, bounding.endColumn, scaleX, scaleY);
-
-            const finalStartRow = Math.min(startCell.mergeInfo.startRow, endCell.mergeInfo.startRow);
-
-            const finalEndRow = Math.max(startCell.mergeInfo.endRow, endCell.mergeInfo.endRow);
-
-            const finalStartColumn = Math.min(startCell.mergeInfo.startColumn, endCell.mergeInfo.startColumn);
-
-            const finalEndColumn = Math.max(startCell.mergeInfo.endColumn, endCell.mergeInfo.endColumn);
-
-            const startY = Math.min(startCell?.mergeInfo.startY, endCell?.mergeInfo.startY);
-
-            const endY = Math.max(startCell?.mergeInfo.endY, endCell?.mergeInfo.endY);
-
-            const startX = Math.min(startCell?.mergeInfo.startX, endCell?.mergeInfo.startX);
-
-            const endX = Math.max(startCell?.mergeInfo.endX, endCell?.mergeInfo.endX);
+            const endCell = skeleton.getNoMergeCellPositionByIndex(bounding.endRow, bounding.endColumn, scaleX, scaleY);
 
             const newSelectionRange = {
-                startColumn: finalStartColumn,
-                startRow: finalStartRow,
-                endColumn: finalEndColumn,
-                endRow: finalEndRow,
+                startColumn: bounding.startColumn,
+                startRow: bounding.startRow,
+                endColumn: bounding.endColumn,
+                endRow: bounding.endRow,
 
-                startY,
-                endY,
-                startX,
-                endX,
+                startY: startCell.startY,
+                endY: endCell.endY,
+                startX: startCell.startX,
+                endX: endCell.endX,
 
                 rangeType,
             };

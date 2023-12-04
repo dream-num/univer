@@ -1,8 +1,11 @@
 # @univerjs/network
 
+[![npm version](https://img.shields.io/npm/v/@univerjs/network)](https://npmjs.org/packages/@univerjs/network)
+[![license](https://img.shields.io/npm/l/@univerjs/network)](https://img.shields.io/npm/l/@univerjs/network)
+
 ## Introduction
 
-This plugin provides network services to other modules of Univer.
+> This plugin provides network services to other modules of Univer.
 
 ## Usage
 
@@ -11,7 +14,3 @@ This plugin provides network services to other modules of Univer.
 ```shell
 npm i @univerjs/network
 ```
-
-### API
-
-Check [Univer](https://github.com/dream-num/univer/)

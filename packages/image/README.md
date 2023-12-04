@@ -1,14 +1,16 @@
 # @univerjs/image
 
+[![npm version](https://img.shields.io/npm/v/@univerjs/image)](https://npmjs.org/packages/@univerjs/image)
+[![license](https://img.shields.io/npm/l/@univerjs/image)](https://img.shields.io/npm/l/@univerjs/image)
+
 ## Introduction
 
-Univer common-plugin-image
+> Image plugin for Univer.
 
 ## Usage
+
 ### Installation
+
 ```shell
 npm i @univerjs/image
 ```
-
-### API
-Check [Univer](https://github.com/dream-num/univer/)

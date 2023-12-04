@@ -1,14 +1,16 @@
 # @univerjs/ui
 
+[![npm version](https://img.shields.io/npm/v/@univerjs/ui)](https://npmjs.org/packages/@univerjs/ui)
+[![license](https://img.shields.io/npm/l/@univerjs/ui)](https://img.shields.io/npm/l/@univerjs/ui)
+
 ## Introduction
 
-Univer base UI plugin
+> UI plugin for Univer.
 
 ## Usage
+
 ### Installation
+
 ```shell
 npm i @univerjs/ui
 ```
-
-### API
-Check [Univer](https://github.com/dream-num/univer/)

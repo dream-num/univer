@@ -1,14 +1,16 @@
 # @univerjs/core
 
+[![npm version](https://img.shields.io/npm/v/@univerjs/core)](https://npmjs.org/packages/@univerjs/core)
+[![license](https://img.shields.io/npm/l/@univerjs/core)](https://img.shields.io/npm/l/@univerjs/core)
+
 ## Introduction
 
-Univer core
+> Core library for Univer.
 
 ## Usage
+
 ### Installation
+
 ```shell
 npm i @univerjs/core
 ```
-
-### API
-Check [Univer](https://github.com/dream-num/univer/)

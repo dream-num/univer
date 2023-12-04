@@ -1,8 +1,11 @@
 # @univerjs/engine-render
 
+[![npm version](https://img.shields.io/npm/v/@univerjs/engine-render)](https://npmjs.org/packages/@univerjs/engine-render)
+[![license](https://img.shields.io/npm/l/@univerjs/engine-render)](https://img.shields.io/npm/l/@univerjs/engine-render)
+
 ## Introduction
 
-Univer base render
+> This plugin provides render services to other modules of Univer.
 
 ## Usage
 
@@ -11,7 +14,3 @@ Univer base render
 ```shell
 npm i @univerjs/engine-render
 ```
-
-### API
-
-Check [Univer](https://github.com/dream-num/univer/)

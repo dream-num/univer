@@ -10,6 +10,7 @@
             "cache": false,
             "persistent": true
         },
-        "dev:docusaurus": {}
+        "dev:docusaurus": {},
+        "build:docusaurus": {}
     }
 }

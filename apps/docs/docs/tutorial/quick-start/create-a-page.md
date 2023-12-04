@@ -8,7 +8,7 @@ sidebar_position: 1
 
 Univer 的前端通过多个 npm 包发布，你可以通过以下命令安装核心包：
 
-```bash
+```shell
 npm install @univerjs/core
 ```
 

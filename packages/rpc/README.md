@@ -1,8 +1,11 @@
 # @univerjs/rpc
 
+[![npm version](https://img.shields.io/npm/v/@univerjs/rpc)](https://npmjs.org/packages/@univerjs/rpc)
+[![license](https://img.shields.io/npm/l/@univerjs/rpc)](https://img.shields.io/npm/l/@univerjs/rpc)
+
 ## Introduction
 
-Univer RPC provides RPC framework for Univer.
+> Univer RPC provides RPC framework for Univer.
 
 ## Usage
 

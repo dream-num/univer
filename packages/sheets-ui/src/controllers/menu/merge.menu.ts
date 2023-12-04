@@ -1,13 +1,14 @@
+import { RemoveWorksheetMergeCommand } from '@univerjs/sheets';
+import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
+import { MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
+import type { IAccessor } from '@wendellhu/redi';
+
 import {
     AddWorksheetMergeAllCommand,
     AddWorksheetMergeCommand,
     AddWorksheetMergeHorizontalCommand,
     AddWorksheetMergeVerticalCommand,
-    RemoveWorksheetMergeCommand,
-} from '@univerjs/sheets';
-import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
-import { MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
-import type { IAccessor } from '@wendellhu/redi';
+} from '../../commands/commands/add-worksheet-merge.command';
 
 export function CellMergeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     return {

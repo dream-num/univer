@@ -42,13 +42,6 @@ export { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from './service
 
 // #region commands
 
-export {
-    AddWorksheetMergeAllCommand,
-    AddWorksheetMergeCommand,
-    AddWorksheetMergeHorizontalCommand,
-    AddWorksheetMergeVerticalCommand,
-    getAddMergeMutationRangeByType,
-} from './commands/commands/add-worksheet-merge.command';
 export { ClearSelectionAllCommand } from './commands/commands/clear-selection-all.command';
 export { ClearSelectionContentCommand } from './commands/commands/clear-selection-content.command';
 export { ClearSelectionFormatCommand } from './commands/commands/clear-selection-format.command';
@@ -224,6 +217,7 @@ export {
 } from './commands/mutations/set-worksheet-row-height.mutation';
 export { type ISetSelectionsOperationParams, SetSelectionsOperation } from './commands/operations/selection.operation';
 export { type ISheetCommandSharedParams } from './commands/utils/interface';
+export { getAddMergeMutationRangeByType } from './controllers/merge-cell.controller';
 export type { FormatType, INumfmtItem, INumfmtItemWithCache } from './services/numfmt/type';
 export { INumfmtService } from './services/numfmt/type';
 export { RefRangeService } from './services/ref-range/ref-range.service';

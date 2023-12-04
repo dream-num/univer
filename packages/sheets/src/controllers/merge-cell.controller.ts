@@ -1,5 +1,6 @@
 import type { IMutationInfo, IRange, Workbook } from '@univerjs/core';
 import {
+    Dimension,
     Disposable,
     DisposableCollection,
     ICommandService,
@@ -17,7 +18,6 @@ import type {
     IRemoveRowsMutationParams,
     IRemoveWorksheetMergeMutationParams,
 } from '../basics/interfaces/mutation-interface';
-import { getAddMergeMutationRangeByType } from '../commands/commands/add-worksheet-merge.command';
 import { ClearSelectionAllCommand } from '../commands/commands/clear-selection-all.command';
 import { ClearSelectionFormatCommand } from '../commands/commands/clear-selection-format.command';
 import type { IDeleteRangeMoveLeftCommandParams } from '../commands/commands/delete-range-move-left.command';
@@ -47,6 +47,45 @@ import { RefRangeService } from '../services/ref-range/ref-range.service';
 import type { EffectRefRangeParams } from '../services/ref-range/type';
 import { SelectionManagerService } from '../services/selection-manager.service';
 import { SheetInterceptorService } from '../services/sheet-interceptor/sheet-interceptor.service';
+
+/**
+ * calculates the selection based on the merged cell type
+ * @param {IRange[]} selection
+ * @param {Dimension} [type]
+ * @return {*}
+ */
+export function getAddMergeMutationRangeByType(selection: IRange[], type?: Dimension) {
+    let ranges = selection;
+    if (type !== undefined) {
+        const rectangles: IRange[] = [];
+        for (let i = 0; i < ranges.length; i++) {
+            const { startRow, endRow, startColumn, endColumn } = ranges[i];
+            if (type === Dimension.ROWS) {
+                for (let r = startRow; r <= endRow; r++) {
+                    const data = {
+                        startRow: r,
+                        endRow: r,
+                        startColumn,
+                        endColumn,
+                    };
+                    rectangles.push(data);
+                }
+            } else if (type === Dimension.COLUMNS) {
+                for (let c = startColumn; c <= endColumn; c++) {
+                    const data = {
+                        startRow,
+                        endRow,
+                        startColumn: c,
+                        endColumn: c,
+                    };
+                    rectangles.push(data);
+                }
+            }
+        }
+        ranges = rectangles;
+    }
+    return ranges;
+}
 
 @OnLifecycle(LifecycleStages.Steady, MergeCellController)
 export class MergeCellController extends Disposable {

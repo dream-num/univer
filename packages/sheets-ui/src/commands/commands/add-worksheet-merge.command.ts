@@ -1,17 +1,15 @@
 import type { ICommand, IRange } from '@univerjs/core';
 import { CommandType, Dimension, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
-
-import type {
-    IAddWorksheetMergeMutationParams,
-    IRemoveWorksheetMergeMutationParams,
-} from '../../basics/interfaces/mutation-interface';
-import { SelectionManagerService } from '../../services/selection-manager.service';
-import { AddMergeUndoMutationFactory, AddWorksheetMergeMutation } from '../mutations/add-worksheet-merge.mutation';
+import type { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams } from '@univerjs/sheets';
 import {
+    AddMergeUndoMutationFactory,
+    AddWorksheetMergeMutation,
+    getAddMergeMutationRangeByType,
     RemoveMergeUndoMutationFactory,
     RemoveWorksheetMergeMutation,
-} from '../mutations/remove-worksheet-merge.mutation';
+    SelectionManagerService,
+} from '@univerjs/sheets';
+import type { IAccessor } from '@wendellhu/redi';
 
 export interface IAddMergeCommandParams {
     value?: Dimension.ROWS | Dimension.COLUMNS;
@@ -104,6 +102,7 @@ export const AddWorksheetMergeAllCommand: ICommand = {
         } as IAddMergeCommandParams);
     },
 };
+
 export const AddWorksheetMergeVerticalCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.add-worksheet-merge-vertical',
@@ -161,43 +160,4 @@ export const AddWorksheetMergeHorizontalCommand: ICommand = {
             worksheetId,
         } as IAddMergeCommandParams);
     },
-};
-
-/**
- * calculates the selection based on the merged cell type
- * @param {IRange[]} selection
- * @param {Dimension} [type]
- * @return {*}
- */
-export const getAddMergeMutationRangeByType = (selection: IRange[], type?: Dimension) => {
-    let ranges = selection;
-    if (type !== undefined) {
-        const rectangles: IRange[] = [];
-        for (let i = 0; i < ranges.length; i++) {
-            const { startRow, endRow, startColumn, endColumn } = ranges[i];
-            if (type === Dimension.ROWS) {
-                for (let r = startRow; r <= endRow; r++) {
-                    const data = {
-                        startRow: r,
-                        endRow: r,
-                        startColumn,
-                        endColumn,
-                    };
-                    rectangles.push(data);
-                }
-            } else if (type === Dimension.COLUMNS) {
-                for (let c = startColumn; c <= endColumn; c++) {
-                    const data = {
-                        startRow,
-                        endRow,
-                        startColumn: c,
-                        endColumn: c,
-                    };
-                    rectangles.push(data);
-                }
-            }
-        }
-        ranges = rectangles;
-    }
-    return ranges;
 };

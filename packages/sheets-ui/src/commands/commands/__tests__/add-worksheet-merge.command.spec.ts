@@ -1,19 +1,22 @@
 import type { IRange, Univer } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, RANGE_TYPE, RedoCommand, UndoCommand } from '@univerjs/core';
+import {
+    AddWorksheetMergeMutation,
+    NORMAL_SELECTION_PLUGIN_NAME,
+    RemoveWorksheetMergeCommand,
+    RemoveWorksheetMergeMutation,
+    SelectionManagerService,
+} from '@univerjs/sheets';
+import { createCommandTestBed } from '@univerjs/sheets/commands/commands/__tests__/create-command-test-bed.js';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../../services/selection-manager.service';
-import { AddWorksheetMergeMutation } from '../../mutations/add-worksheet-merge.mutation';
-import { RemoveWorksheetMergeMutation } from '../../mutations/remove-worksheet-merge.mutation';
 import {
     AddWorksheetMergeAllCommand,
     AddWorksheetMergeCommand,
     AddWorksheetMergeHorizontalCommand,
     AddWorksheetMergeVerticalCommand,
 } from '../add-worksheet-merge.command';
-import { RemoveWorksheetMergeCommand } from '../remove-worksheet-merge.command';
-import { createCommandTestBed } from './create-command-test-bed';
 
 describe('Test style commands', () => {
     let univer: Univer;

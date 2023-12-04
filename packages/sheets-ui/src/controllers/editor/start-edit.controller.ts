@@ -417,7 +417,7 @@ export class StartEditController extends Disposable {
                 return;
             }
 
-            const { position, documentLayoutObject, canvasOffset, scaleX, scaleY, editorUnitId } = state;
+            const { position, documentLayoutObject, canvasOffset, scaleX, scaleY, editorUnitId, unitId } = state;
 
             const editorObject = this._getEditorObject();
 
@@ -480,6 +480,8 @@ export class StartEditController extends Disposable {
                     },
                 ]);
             }
+
+            this._renderManagerService.getRenderById(unitId)?.scene.resetCursor();
         });
     }
 

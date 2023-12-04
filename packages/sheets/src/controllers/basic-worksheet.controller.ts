@@ -44,7 +44,6 @@ import {
 } from '../commands/commands/set-col-visible.command';
 import { SetFrozenCommand } from '../commands/commands/set-frozen.command';
 import { SetFrozenCancelCommand } from '../commands/commands/set-frozen-cancel.command';
-import { SetRangeFormattedValueCommand } from '../commands/commands/set-range-formatted-value.command';
 import { SetRangeValuesCommand } from '../commands/commands/set-range-values.command';
 import {
     SetRowHiddenCommand,
@@ -74,7 +73,6 @@ import {
     SetWorksheetRowIsAutoHeightCommand,
 } from '../commands/commands/set-worksheet-row-height.command';
 import { SetWorksheetShowCommand } from '../commands/commands/set-worksheet-show.command';
-import { TrimWhitespaceCommand } from '../commands/commands/trim-whitespace.command';
 import { AddWorksheetMergeMutation } from '../commands/mutations/add-worksheet-merge.mutation';
 import { DeleteRangeMutation } from '../commands/mutations/delete-range.mutation';
 import { InsertRangeMutation } from '../commands/mutations/insert-range.mutation';
@@ -178,7 +176,6 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetFrozenCommand,
             SetFrozenMutation,
             SetHorizontalTextAlignCommand,
-            SetRangeFormattedValueCommand,
             SetRangeFormattedValueMutation,
             SetRangeValuesCommand,
             SetRangeValuesMutation,
@@ -211,7 +208,6 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetWorksheetRowIsAutoHeightCommand,
             SetWorksheetRowIsAutoHeightMutation,
             SetWorksheetShowCommand,
-            TrimWhitespaceCommand,
             SetNumfmtMutation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
 

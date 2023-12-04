@@ -30,7 +30,7 @@ import {
     RemoveRowsUndoMutationFactory,
 } from '../mutations/remove-row-col.mutation';
 
-export interface RemoveRowColCommandParams {
+export interface IRemoveRowColCommandParams {
     ranges: IRange[];
 }
 export const RemoveRowCommandId = 'sheet.command.remove-row';
@@ -40,7 +40,7 @@ export const RemoveRowCommandId = 'sheet.command.remove-row';
 export const RemoveRowCommand: ICommand = {
     type: CommandType.COMMAND,
     id: RemoveRowCommandId,
-    handler: async (accessor: IAccessor, params?: RemoveRowColCommandParams) => {
+    handler: async (accessor: IAccessor, params?: IRemoveRowColCommandParams) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
@@ -92,7 +92,7 @@ export const RemoveRowCommand: ICommand = {
 
         const intercepted = sheetInterceptorService.onCommandExecute({
             id: RemoveRowCommand.id,
-            params: { ranges } as RemoveRowColCommandParams,
+            params: { ranges } as IRemoveRowColCommandParams,
         });
 
         const commandService = accessor.get(ICommandService);
@@ -133,7 +133,7 @@ export const RemoveColCommand: ICommand = {
     type: CommandType.COMMAND,
     id: RemoveColCommandId,
     // eslint-disable-next-line max-lines-per-function
-    handler: async (accessor: IAccessor, params?: RemoveRowColCommandParams) => {
+    handler: async (accessor: IAccessor, params?: IRemoveRowColCommandParams) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
         let ranges = params?.ranges;
@@ -182,7 +182,7 @@ export const RemoveColCommand: ICommand = {
 
         const intercepted = sheetInterceptorService.onCommandExecute({
             id: RemoveColCommand.id,
-            params: { ranges } as RemoveRowColCommandParams,
+            params: { ranges } as IRemoveRowColCommandParams,
         });
         const commandService = accessor.get(ICommandService);
         const result = sequenceExecute(

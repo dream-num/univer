@@ -1,5 +1,10 @@
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 
+import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
+import {
+    setFormulaCalculationStartMutation,
+    setFormulaCalculationStopMutation,
+} from '../commands/mutations/set-formula-calculation.mutation';
 import { SetFormulaDataMutation } from '../commands/mutations/set-formula-data.mutation';
 
 @OnLifecycle(LifecycleStages.Ready, FormulaController)
@@ -15,8 +20,11 @@ export class FormulaController extends Disposable {
     }
 
     private _registerCommands(): void {
-        [SetFormulaDataMutation].forEach((command) =>
-            this.disposeWithMe(this._commandService.registerCommand(command))
-        );
+        [
+            SetFormulaDataMutation,
+            SetArrayFormulaDataMutation,
+            setFormulaCalculationStartMutation,
+            setFormulaCalculationStopMutation,
+        ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 }

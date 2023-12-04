@@ -126,6 +126,7 @@ describe('Test set range values commands', () => {
                 expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
                 expect(getValue()).toStrictEqual({
                     v: 'A1',
+                    t: CellValueType.STRING,
                 });
 
                 // redo

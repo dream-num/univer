@@ -1,5 +1,5 @@
 import type { ICellData, Nullable, Univer } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, RANGE_TYPE } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, RANGE_TYPE, RedoCommand, UndoCommand } from '@univerjs/core';
 import {
     NORMAL_SELECTION_PLUGIN_NAME,
     SelectionManagerService,
@@ -64,17 +64,17 @@ describe('Test insert function operation', () => {
                     value: 'SUM',
                 };
 
-                // expect(await commandService.executeCommand(InsertFunctionOperation.id, params)).toBeTruthy();
-                // expect(getValue()?.f).toStrictEqual('=SUM(B2)');
-                // // undo
-                // expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
-                // expect(getValue()).toStrictEqual({});
-                // // redo
-                // expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
-                // expect(getValue()?.f).toStrictEqual('=SUM(B2)');
+                expect(await commandService.executeCommand(InsertFunctionOperation.id, params)).toBeTruthy();
+                expect(getValue()?.f).toStrictEqual('=SUM(B2)');
+                // undo
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getValue()).toStrictEqual({});
+                // redo
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+                expect(getValue()?.f).toStrictEqual('=SUM(B2)');
 
-                // // Restore the original data
-                // expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                // Restore the original data
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
             });
 
             it('insert function, match the data range left', async () => {
@@ -104,17 +104,17 @@ describe('Test insert function operation', () => {
                     value: 'SUM',
                 };
 
-                // expect(await commandService.executeCommand(InsertFunctionOperation.id, params)).toBeTruthy();
-                // expect(getValue()?.f).toStrictEqual('=SUM(B2)');
-                // // undo
-                // expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
-                // expect(getValue()).toStrictEqual({});
-                // // redo
-                // expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
-                // expect(getValue()?.f).toStrictEqual('=SUM(B2)');
+                expect(await commandService.executeCommand(InsertFunctionOperation.id, params)).toBeTruthy();
+                expect(getValue()?.f).toStrictEqual('=SUM(B2)');
+                // undo
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getValue()).toStrictEqual({});
+                // redo
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+                expect(getValue()?.f).toStrictEqual('=SUM(B2)');
 
-                // // Restore the original data
-                // expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                // Restore the original data
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
             });
         });
 

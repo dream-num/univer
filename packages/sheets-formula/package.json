@@ -49,6 +49,7 @@
         "@ctrl/tinycolor": "^4.0.2",
         "@univerjs/docs": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
+        "@univerjs/formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/ui": "workspace:*",

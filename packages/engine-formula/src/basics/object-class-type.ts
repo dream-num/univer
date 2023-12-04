@@ -16,4 +16,8 @@ export class ObjectClassType extends Disposable {
     isValueObject() {
         return false;
     }
+
+    isEqual(object: ObjectClassType) {
+        return false;
+    }
 }

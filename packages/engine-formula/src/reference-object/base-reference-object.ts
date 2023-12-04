@@ -39,6 +39,10 @@ export class BaseReferenceObject extends ObjectClassType {
 
     private _runtimeData: IRuntimeUnitDataType = {};
 
+    private _arrayFormulaCellData: IRuntimeUnitDataType = {};
+
+    private _runtimeArrayFormulaCellData: IRuntimeUnitDataType = {};
+
     private _refOffsetX = 0;
 
     private _refOffsetY = 0;
@@ -208,6 +212,22 @@ export class BaseReferenceObject extends ObjectClassType {
         this._runtimeData = runtimeData;
     }
 
+    getArrayFormulaCellData() {
+        return this._arrayFormulaCellData;
+    }
+
+    setArrayFormulaCellData(unitData: IRuntimeUnitDataType) {
+        this._arrayFormulaCellData = unitData;
+    }
+
+    getRuntimeArrayFormulaCellData() {
+        return this._runtimeArrayFormulaCellData;
+    }
+
+    setRuntimeArrayFormulaCellData(unitData: IRuntimeUnitDataType) {
+        this._runtimeArrayFormulaCellData = unitData;
+    }
+
     getRowCount() {
         return this.getCurrentActiveSheetData().rowCount;
     }
@@ -281,12 +301,29 @@ export class BaseReferenceObject extends ObjectClassType {
         return this._runtimeData?.[this.getUnitId()]?.[this.getSheetId()];
     }
 
+    getCurrentActiveArrayFormulaCellData() {
+        return this._arrayFormulaCellData?.[this.getUnitId()]?.[this.getSheetId()];
+    }
+
+    getCurrentRuntimeActiveArrayFormulaCellData() {
+        return this._runtimeArrayFormulaCellData?.[this.getUnitId()]?.[this.getSheetId()];
+    }
+
     getCellData(row: number, column: number) {
         const activeSheetData = this.getCurrentActiveSheetData();
 
         const activeRuntimeData = this.getCurrentRuntimeSheetData();
 
-        return activeRuntimeData?.getValue(row, column) || activeSheetData.cellData.getValue(row, column);
+        const activeArrayFormulaCellData = this.getCurrentActiveArrayFormulaCellData();
+
+        const activeRuntimeArrayFormulaCellData = this.getCurrentRuntimeActiveArrayFormulaCellData();
+
+        return (
+            activeRuntimeData?.getValue(row, column) ||
+            activeRuntimeArrayFormulaCellData?.getValue(row, column) ||
+            activeArrayFormulaCellData?.getValue(row, column) ||
+            activeSheetData.cellData.getValue(row, column)
+        );
     }
 
     getCellByPosition(row?: number, column?: number) {

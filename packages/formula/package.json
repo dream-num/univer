@@ -37,7 +37,10 @@
     "private": false,
     "scripts": {
         "esbuild": "node ./esbuild.config.mjs && tsc -p tsconfig.esbuild.json",
-        "typedoc": "typedoc"
+        "typedoc": "typedoc",
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "coverage": "vitest run --coverage"
     },
     "dependencies": {
         "@univerjs/engine-formula": "workspace:*",
@@ -46,8 +49,13 @@
         "@wendellhu/redi": "^0.12.11"
     },
     "devDependencies": {
-        "esbuild": "^0.19.5",
+        "@vitest/coverage-istanbul": "^0.34.6",
         "typedoc": "^0.25.4",
-        "typescript": "^5.3.2"
+        "esbuild": "^0.19.8",
+        "happy-dom": "^12.10.3",
+        "less": "^4.2.0",
+        "ts-node": "^10.9.1",
+        "typescript": "^5.3.2",
+        "vitest": "^0.34.6"
     }
 }

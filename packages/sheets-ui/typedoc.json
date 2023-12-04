@@ -1,7 +1,0 @@
-{
-    "extends": ["../../typedoc.base.json"],
-    "entryPoints": ["src/index.ts"],
-
-    "json": "./typedoc/docs.json",
-    "logLevel": "Verbose"
-}

@@ -5,9 +5,9 @@
  * SpreadsheetProperties contain a SpreadsheetTheme that defines a mapping of these theme color types to concrete colors.
  *
  * Reference: https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets/other#ThemeColor
- * 
+ *
  * 17.18.97 ST_ThemeColor (Theme Color)
- * 
+ *
  * <xsd:enumeration value="dark1"/>
     2703 <xsd:enumeration value="light1"/>
     2704 <xsd:enumeration value="dark2"/>
@@ -19,7 +19,7 @@
     2710 <xsd:enumeration value="accent5"/>
     2711 <xsd:enumeration value="accent6"/>
     2712 <xsd:enumeration value="hyperlink"/>
-    2713 <xsd:enumeration value="followedHyperlink"/
+    2713 <xsd:enumeration value="followedHyperlink"/>
  */
 export enum ThemeColorType {
     /**

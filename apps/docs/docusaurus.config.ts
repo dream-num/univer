@@ -29,6 +29,40 @@ const config: Config = {
         locales: ['zh-Hans', 'en'],
     },
 
+    markdown: {
+        format: 'detect',
+    },
+
+    plugins: [
+        [
+            'docusaurus-plugin-typedoc',
+            {
+                entryPoints: [
+                    '../../packages/core',
+                    '../../packages/design',
+                    '../../packages/docs',
+                    '../../packages/docs-ui',
+                    '../../packages/engine-formula',
+                    '../../packages/engine-numfmt',
+                    '../../packages/engine-render',
+                    '../../packages/formula',
+                    '../../packages/network',
+                    '../../packages/rpc',
+                    '../../packages/sheets',
+                    '../../packages/sheets-formula',
+                    '../../packages/sheets-numfmt',
+                    '../../packages/sheets-ui',
+                    '../../packages/ui',
+                    '../../packages/uniscript',
+                ],
+                entryPointStrategy: 'packages',
+                sidebar: {
+                    fullNames: true,
+                },
+            },
+        ],
+    ],
+
     presets: [
         [
             'classic',

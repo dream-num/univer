@@ -187,63 +187,63 @@ jobs:
                   vercel-org-id: ${{ secrets.ORG_ID }}
                   vercel-project-id: ${{ secrets.PROJECT_ID_STORYBOOK }}
 
-    build-docs:
-        runs-on: ubuntu-latest
-        needs: [release-nightly]
+    # build-docs:
+    #     runs-on: ubuntu-latest
+    #     needs: [release-nightly]
 
-        outputs:
-            preview-url: ${{ steps.vercel-docusaurus.outputs.preview-url }}
+    #     outputs:
+    #         preview-url: ${{ steps.vercel-docusaurus.outputs.preview-url }}
 
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v3
+    #     steps:
+    #         - name: Checkout
+    #           uses: actions/checkout@v3
 
-            - name: Install Node.js
-              uses: actions/setup-node@v3
-              with:
-                  node-version: 18
+    #         - name: Install Node.js
+    #           uses: actions/setup-node@v3
+    #           with:
+    #               node-version: 18
 
-            - name: Install pnpm
-              uses: pnpm/action-setup@v2
-              with:
-                  version: 8
-                  run_install: false
+    #         - name: Install pnpm
+    #           uses: pnpm/action-setup@v2
+    #           with:
+    #               version: 8
+    #               run_install: false
 
-            - name: Get pnpm store directory
-              shell: bash
-              run: |
-                  echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+    #         - name: Get pnpm store directory
+    #           shell: bash
+    #           run: |
+    #               echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
 
-            - name: Setup pnpm cache
-              uses: actions/cache@v3
-              with:
-                  path: ${{ env.STORE_PATH }}
-                  key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
-                  restore-keys: |
-                      ${{ runner.os }}-pnpm-
+    #         - name: Setup pnpm cache
+    #           uses: actions/cache@v3
+    #           with:
+    #               path: ${{ env.STORE_PATH }}
+    #               key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+    #               restore-keys: |
+    #                   ${{ runner.os }}-pnpm-
 
-            - name: Install dependencies
-              run: pnpm install
+    #         - name: Install dependencies
+    #           run: pnpm install
 
-            # ================= Deploy Docusaurus =================
-            - name: 📦 Build documantation
-              run: pnpm run build:site
+    #         # ================= Deploy Docusaurus =================
+    #         - name: 📦 Build documantation
+    #           run: pnpm run build:site
 
-            - name: Copy docs to workspace
-              run: |
-                    mkdir .workspace
-                    cp -r ./apps/docs/build .workspace
+    #         - name: Copy docs to workspace
+    #           run: |
+    #                 mkdir .workspace
+    #                 cp -r ./apps/docs/build .workspace
 
-            - name: 🚀 Deploy to Vercel (docusaurus)
-              uses: amondnet/vercel-action@v25
-              id: vercel-docusaurus
-              with:
-                  vercel-token: ${{ secrets.VERCEL_TOKEN }}
-                  vercel-org-id: ${{ secrets.ORG_ID }}
-                  vercel-project-id: ${{ secrets.PROJECT_ID_DOCUSAURUS }}
+    #         - name: 🚀 Deploy to Vercel (docusaurus)
+    #           uses: amondnet/vercel-action@v25
+    #           id: vercel-docusaurus
+    #           with:
+    #               vercel-token: ${{ secrets.VERCEL_TOKEN }}
+    #               vercel-org-id: ${{ secrets.ORG_ID }}
+    #               vercel-project-id: ${{ secrets.PROJECT_ID_DOCUSAURUS }}
 
     notify:
-        needs: [release-nightly, build-demo, build-storybook, build-docs]
+        needs: [release-nightly, build-demo, build-storybook]
         runs-on: ubuntu-latest
         if: ${{ always() }}
 
@@ -268,7 +268,6 @@ jobs:
 
                       **[View Docs]**
                       - [📚 Storybook](${{ needs.build-docs.outputs.preview-url }}/)
-                      - [📚 Documantation](${{ needs.build-docs.outputs.preview-url }}/)
                       🎉 🎉 🎉 🎉 🎉 🎉 🎉 🎉 🎉
 
                       Have a good dream! 🌙

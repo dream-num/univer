@@ -1,6 +1,8 @@
-import type { IPosition, Nullable } from '@univerjs/core';
+import type { ICellData, IPosition, Nullable } from '@univerjs/core';
+import { createInterceptorKey, Disposable, InterceptorManager, toDisposable } from '@univerjs/core';
 import type { IDocumentLayoutObject } from '@univerjs/engine-render';
 import { DeviceInputEventType } from '@univerjs/engine-render';
+import type { ISheetLocation } from '@univerjs/sheets';
 import type { KeyCode } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier } from '@wendellhu/redi';
@@ -25,10 +27,15 @@ export interface IEditorBridgeServiceParam {
     scaleY: number;
     editorUnitId: string;
 }
-
+const BEFORE_CELL_EDIT = createInterceptorKey<ICellData, ISheetLocation>('BEFORE_CELL_EDIT');
+const AFTER_CELL_EDIT = createInterceptorKey<ICellData, ISheetLocation>('AFTER_CELL_EDIT');
 export interface IEditorBridgeService {
     state$: Observable<Nullable<IEditorBridgeServiceParam>>;
     visible$: Observable<IEditorBridgeServiceVisibleParam>;
+    interceptor: InterceptorManager<{
+        BEFORE_CELL_EDIT: typeof BEFORE_CELL_EDIT;
+        AFTER_CELL_EDIT: typeof AFTER_CELL_EDIT;
+    }>;
     dispose(): void;
     setState(param: IEditorBridgeServiceParam): void;
     getState(): Readonly<Nullable<IEditorBridgeServiceParam>>;
@@ -40,7 +47,7 @@ export interface IEditorBridgeService {
     getCurrentEditorId(): Nullable<string>;
 }
 
-export class EditorBridgeService implements IEditorBridgeService, IDisposable {
+export class EditorBridgeService extends Disposable implements IEditorBridgeService, IDisposable {
     private _state: Nullable<IEditorBridgeServiceParam> = null;
 
     private _isForceKeepVisible: boolean = false;
@@ -59,9 +66,36 @@ export class EditorBridgeService implements IEditorBridgeService, IDisposable {
     private readonly _afterVisible$ = new BehaviorSubject<IEditorBridgeServiceVisibleParam>(this._visible);
     readonly afterVisible$ = this._afterVisible$.asObservable();
 
-    dispose(): void {
-        this._state$.complete();
-        this._state = null;
+    interceptor = new InterceptorManager({
+        BEFORE_CELL_EDIT,
+        AFTER_CELL_EDIT,
+    });
+
+    constructor() {
+        super();
+        this.disposeWithMe(
+            toDisposable(() => {
+                this._state$.complete();
+                this._state = null;
+            })
+        );
+        this.disposeWithMe(
+            toDisposable(
+                this.interceptor.intercept(this.interceptor.getInterceptPoints().AFTER_CELL_EDIT, {
+                    priority: -1,
+                    handler: (_value) => _value,
+                })
+            )
+        );
+
+        this.disposeWithMe(
+            toDisposable(
+                this.interceptor.intercept(this.interceptor.getInterceptPoints().BEFORE_CELL_EDIT, {
+                    priority: -1,
+                    handler: (_value) => _value,
+                })
+            )
+        );
     }
 
     setState(param: IEditorBridgeServiceParam) {

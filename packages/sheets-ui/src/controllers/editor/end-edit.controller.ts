@@ -22,7 +22,6 @@ import { FormulaEngineService, matchToken } from '@univerjs/engine-formula';
 import type { IMouseEvent, IPointerEvent } from '@univerjs/engine-render';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import {
-    INTERCEPTOR_POINT,
     SelectionManagerService,
     SetRangeValuesCommand,
     SetSelectionsOperation,
@@ -213,10 +212,9 @@ export class EndEditController extends Disposable {
                 row,
                 col: column,
             };
-            const cell = this._sheetInterceptorService.fetchThroughInterceptors(INTERCEPTOR_POINT.AFTER_CELL_EDIT)(
-                cellData,
-                context
-            );
+            const cell = this._editorBridgeService.interceptor.fetchThroughInterceptors(
+                this._editorBridgeService.interceptor.getInterceptPoints().AFTER_CELL_EDIT
+            )(cellData, context);
             this._commandService.executeCommand(SetRangeValuesCommand.id, {
                 worksheetId: sheetId,
                 workbookId: unitId,

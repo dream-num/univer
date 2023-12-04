@@ -74,8 +74,8 @@ export {
 export * from './shared';
 
 // #region sheet
-export type { IInterceptor, InterceptorHandler } from './common/interceptor';
-export { composeInterceptors, createInterceptorKey } from './common/interceptor';
+export type { IComposeInterceptors, IInterceptor, InterceptorHandler } from './common/interceptor';
+export { composeInterceptors, createInterceptorKey, InterceptorManager } from './common/interceptor';
 export { Range } from './sheets/range';
 export {
     deserializeRangeWithSheet,

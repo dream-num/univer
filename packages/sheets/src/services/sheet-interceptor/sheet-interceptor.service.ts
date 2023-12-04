@@ -76,16 +76,6 @@ export class SheetInterceptorService extends Disposable {
             priority: -1,
             handler: () => true,
         });
-
-        this.intercept(INTERCEPTOR_POINT.BEFORE_CELL_EDIT, {
-            priority: -1,
-            handler: (_value) => _value,
-        });
-
-        this.intercept(INTERCEPTOR_POINT.AFTER_CELL_EDIT, {
-            priority: -1,
-            handler: (_value) => _value,
-        });
     }
 
     override dispose(): void {

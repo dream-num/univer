@@ -344,7 +344,6 @@ export class FreezeController extends Disposable {
                 break;
             }
         }
-
         return lastRow;
     }
 
@@ -372,9 +371,16 @@ export class FreezeController extends Disposable {
 
         const lastRow = this._getCurrentLastVisibleRow();
         const lastRowY = lastRow === undefined ? Infinity : skeleton.rowHeightAccumulation[lastRow];
+        const viewMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
 
         this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
-            const { startX, startY, row, column } = getCoordByOffset(moveEvt.offsetX, moveEvt.offsetY, scene, skeleton);
+            const { startX, startY, row, column } = getCoordByOffset(
+                moveEvt.offsetX,
+                moveEvt.offsetY,
+                scene,
+                skeleton,
+                viewMain
+            );
             scene.setCursor(CURSOR_TYPE.GRABBING);
 
             const FREEZE_SIZE = FREEZE_SIZE_NORMAL / Math.max(scene.scaleX, scene.scaleY);

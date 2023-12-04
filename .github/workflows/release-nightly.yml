@@ -267,7 +267,7 @@ jobs:
                       - [📽️ Slide](${{ needs.build-demo.outputs.preview-url }}/slides/)
 
                       **[View Docs]**
-                      - [📚 Storybook](${{ needs.build-docs.outputs.preview-url }}/)
+                      - [📚 Storybook](${{ needs.build-storybook.outputs.preview-url }}/)
                       🎉 🎉 🎉 🎉 🎉 🎉 🎉 🎉 🎉
 
                       Have a good dream! 🌙

@@ -59,6 +59,12 @@ const config: Config = {
                 id: `api/${name}`,
                 entryPoints: [`../../packages/${name}/src/index.ts`],
                 tsconfig: `../../packages/${name}/tsconfig.json`,
+                exclude: ['node_modules/**/*', "**/*+(.spec|.e2e|.test).ts"],
+                excludePrivate: true,
+                excludeExternals: true,
+                excludeInternal: true,
+                cleanOutputDir: true,
+                skipErrorChecking: true,
                 out: `api/${name}`,
                 sidebar: {
                     categoryLabel: name,
@@ -76,16 +82,15 @@ const config: Config = {
                     sidebarPath: './sidebars.ts',
                     // Please change this to your repo.
                     // Remove this to remove the "edit this page" links.
-                    editUrl:
-                        'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
+                    editUrl: 'https://github.com/dream-num/univer/edit/dev/apps/docs/docs/',
                 },
-                blog: {
-                    showReadingTime: true,
-                    // Please change this to your repo.
-                    // Remove this to remove the "edit this page" links.
-                    editUrl:
-                        'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
-                },
+                // blog: {
+                //     showReadingTime: true,
+                //     // Please change this to your repo.
+                //     // Remove this to remove the "edit this page" links.
+                //     editUrl:
+                //         'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
+                // },
                 theme: {
                     customCss: './src/css/custom.css',
                 },

@@ -495,6 +495,10 @@ export class SelectionRenderService implements ISelectionRenderService {
         if (selectionControl && evt.shiftKey && currentCell) {
             const { actualRow, actualColumn, mergeInfo: actualMergeInfo } = currentCell;
 
+            /**
+             * Get the maximum range selected based on the two cells selected with Shift.
+             */
+
             const newStartRow = Math.min(actualRow, startSelectionRange.startRow, actualMergeInfo.startRow);
 
             const newEndRow = Math.max(actualRow, startSelectionRange.endRow, actualMergeInfo.endRow);
@@ -503,6 +507,9 @@ export class SelectionRenderService implements ISelectionRenderService {
 
             const newEndColumn = Math.max(actualColumn, startSelectionRange.endColumn, actualMergeInfo.endColumn);
 
+            /**
+             * Calculate whether there are merged cells within the range. If there are, recursively expand the selection again.
+             */
             const bounding = skeleton.getMergeBounding(newStartRow, newStartColumn, newEndRow, newEndColumn);
 
             const startCell = skeleton.getNoMergeCellPositionByIndex(
@@ -528,6 +535,11 @@ export class SelectionRenderService implements ISelectionRenderService {
                 rangeType,
             };
 
+            /**
+             * When expanding the selection with the Shift key,
+             * the original highlighted cell should remain unchanged.
+             * If the highlighted cell is a merged cell, the selection needs to be expanded.
+             */
             const activeCell = skeleton.getCellByIndex(actualRow, actualColumn, scaleX, scaleY);
 
             this._startSelectionRange = {

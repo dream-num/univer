@@ -96,7 +96,7 @@ export class EditingController extends Disposable {
         //         dirtyRanges: [],
         //     })
         //     .then((res) => {
-        //         console.log(res.sheetData, res.arrayFormulaData);
+        //         console.log(res.sheetData, res.arrayFormulaRange);
         //     });
 
         // console.log(

@@ -13,4 +13,22 @@ export default {
             },
         },
     },
+    SUMIF: {
+        description: 'Sum the values in a range that meet criteria that you specify.',
+        abstract: 'Adds the cells specified by a given criteria',
+        functionParameter: {
+            range: {
+                name: 'range',
+                detail: 'The range of cells that you want evaluated by criteria.',
+            },
+            criteria: {
+                name: 'criteria',
+                detail: 'The criteria in the form of a number, expression, a cell reference, text, or a function that defines which cells will be added. Wildcard characters can be included - a question mark (?) to match any single character, an asterisk (*) to match any sequence of characters. If you want to find an actual question mark or asterisk, type a tilde (~) preceding the character.',
+            },
+            sum_range: {
+                name: 'sum_range',
+                detail: 'The actual cells to add, if you want to add cells other than those specified in the range argument. If the sum_range argument is omitted, Excel adds the cells that are specified in the range argument (the same cells to which the criteria is applied).',
+            },
+        },
+    },
 };

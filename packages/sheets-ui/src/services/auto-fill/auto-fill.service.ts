@@ -18,7 +18,6 @@ import {
     chnWeek2Rule,
     chnWeek3Rule,
     extendNumberRule,
-    formulaRule,
     loopSeriesRule,
     numberRule,
     otherRule,
@@ -93,7 +92,6 @@ export class AutoFillService extends Disposable implements IAutoFillService {
 
     private _init() {
         this._rules = [
-            formulaRule,
             numberRule,
             extendNumberRule,
             chnNumberRule,

@@ -54,7 +54,8 @@ export type APPLY_FUNCTIONS = {
     [key in APPLY_TYPE]?: (
         dataWithIndex: ICopyDataInType,
         len: number,
-        direction: Direction
+        direction: Direction,
+        copyDataPiece: ICopyDataPiece
     ) => Array<Nullable<ICellData>>;
 };
 

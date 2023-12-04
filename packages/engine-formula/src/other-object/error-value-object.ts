@@ -21,6 +21,13 @@ export class ErrorValueObject extends ObjectClassType {
         return this._errorType;
     }
 
+    override isEqual(object: ObjectClassType) {
+        if ((object as ErrorValueObject).getErrorType() === this.getErrorType()) {
+            return true;
+        }
+        return false;
+    }
+
     override isErrorObject() {
         return true;
     }

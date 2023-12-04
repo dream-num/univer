@@ -3,17 +3,10 @@ import type {
     ICellData,
     IRange,
     IUnitRange,
+    Nullable,
     ObjectMatrix,
     ObjectMatrixPrimitiveType,
 } from '@univerjs/core';
-
-export interface ArrayFormulaDataType {
-    [sheetId: string]: ObjectMatrix<IRange>;
-}
-
-export interface UnitArrayFormulaDataType {
-    [unitId: string]: ArrayFormulaDataType;
-}
 
 export const ERROR_VALUE_OBJECT_CLASS_TYPE = 'errorValueObject';
 
@@ -51,16 +44,36 @@ export interface IUnitData {
     [unitId: string]: ISheetData;
 }
 
-export interface IRuntimeSheetData {
-    [sheetId: string]: ObjectMatrix<ICellData>;
+export interface IRuntimeUnitDataType {
+    [unitId: string]: { [sheetId: string]: ObjectMatrix<ICellData> };
 }
 
-export interface IRuntimeUnitDataType {
-    [unitId: string]: IRuntimeSheetData;
+export interface IRuntimeOtherUnitDataType {
+    [unitId: string]: { [sheetId: string]: { [formulaId: string]: ICellData } };
 }
 
 export interface IUnitSheetNameMap {
     [unitId: string]: { [sheetName: string]: string };
+}
+
+export interface IDirtyUnitSheetNameMap {
+    [unitId: string]: { [sheetId: string]: Nullable<string> };
+}
+
+export interface IArrayFormulaRangeType {
+    [unitId: string]: { [sheetId: string]: ObjectMatrixPrimitiveType<IRange> };
+}
+
+export interface IArrayFormulaUnitCellType {
+    [unitId: string]: { [sheetId: string]: ObjectMatrixPrimitiveType<ICellData> };
+}
+
+export interface IFormulaData {
+    [unitId: string]: { [sheetId: string]: ObjectMatrixPrimitiveType<IFormulaDataItem> };
+}
+
+export interface IOtherFormulaData {
+    [unitId: string]: { [subComponentId: string]: { [formulaId: string]: IFormulaDataItem } };
 }
 
 /**
@@ -77,10 +90,6 @@ export interface IFormulaDataItem {
     // sheetId: string;
 }
 
-export interface IFormulaData {
-    [unitId: string]: { [sheetId: string]: ObjectMatrixPrimitiveType<IFormulaDataItem> };
-}
-
 export interface ISuperTable {
     sheetId: string;
     hasCustomTitle: BooleanNumber;
@@ -95,12 +104,17 @@ export enum TableOptionType {
     TOTALS = '#Totals',
 }
 
+export interface IUnitExcludedCell {
+    [unitId: string]: { [sheetId: string]: ObjectMatrix<boolean> };
+}
+
 export interface IFormulaDatasetConfig {
-    unitData: IUnitData;
     formulaData: IFormulaData;
-    sheetNameMap: IUnitSheetNameMap;
+    arrayFormulaCellData: IArrayFormulaUnitCellType;
     forceCalculate: boolean;
     dirtyRanges: IUnitRange[];
+    dirtyNameMap: IDirtyUnitSheetNameMap;
+    excludedCell?: IUnitExcludedCell;
 }
 
 export enum ConcatenateType {

@@ -1,5 +1,12 @@
 import type { ICellData, IRange, IStyleData, Nullable, Univer } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, RANGE_TYPE, RedoCommand, UndoCommand } from '@univerjs/core';
+import {
+    CellValueType,
+    ICommandService,
+    IUniverInstanceService,
+    RANGE_TYPE,
+    RedoCommand,
+    UndoCommand,
+} from '@univerjs/core';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -74,6 +81,7 @@ describe('Test clear selection content commands', () => {
                 expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
                 expect(getValue()).toStrictEqual({
                     v: 'A1',
+                    t: CellValueType.STRING,
                 });
                 // redo
                 expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();

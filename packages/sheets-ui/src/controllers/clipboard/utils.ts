@@ -2,9 +2,9 @@ import type { ICellData, IMutationInfo, IRange } from '@univerjs/core';
 import { IUniverInstanceService, ObjectMatrix, Rectangle, SheetInterceptorService } from '@univerjs/core';
 import type {
     IAddWorksheetMergeMutationParams,
+    IMoveRangeMutationParams,
     IRemoveWorksheetMergeMutationParams,
     ISetRangeValuesMutationParams,
-    MoveRangeMutationParams,
 } from '@univerjs/sheets';
 import {
     AddMergeUndoMutationFactory,
@@ -142,13 +142,13 @@ export function getMoveRangeMutations(
                     return res;
                 }, new ObjectMatrix<ICellData | null>());
 
-            const doMoveRangeMutation: MoveRangeMutationParams = {
+            const doMoveRangeMutation: IMoveRangeMutationParams = {
                 from: newFromCellValues.getMatrix(),
                 to: newToCellValues.getMatrix(),
                 workbookId,
                 worksheetId,
             };
-            const undoMoveRangeMutation: MoveRangeMutationParams = {
+            const undoMoveRangeMutation: IMoveRangeMutationParams = {
                 from: currentFromCellValues.getMatrix(),
                 to: currentToCellValues.getMatrix(),
                 workbookId,

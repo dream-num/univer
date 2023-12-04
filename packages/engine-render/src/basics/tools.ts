@@ -247,7 +247,7 @@ export function getFontStyleString(textStyle?: IStyleBase, localeService?: Local
     // TODO: @jikkai @DR-Univer should read default font from configuration, not from locale service
     const defaultFont = 'Arial';
 
-    const defaultFontSize = 14;
+    const defaultFontSize = 13;
 
     // const { fontList, defaultFontSize } = fontLocale;
 

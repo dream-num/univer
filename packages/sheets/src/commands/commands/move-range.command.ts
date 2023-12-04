@@ -11,7 +11,7 @@ import {
 import type { IAccessor } from '@wendellhu/redi';
 
 import { NORMAL_SELECTION_PLUGIN_NAME } from '../../services/selection-manager.service';
-import type { MoveRangeMutationParams } from '../mutations/move-range.mutation';
+import type { IMoveRangeMutationParams } from '../mutations/move-range.mutation';
 import { MoveRangeMutation } from '../mutations/move-range.mutation';
 import { SetSelectionsOperation } from '../operations/selection.operation';
 
@@ -63,13 +63,13 @@ export const MoveRangeCommand: ICommand = {
                 return res;
             }, new ObjectMatrix<ICellData | null>());
 
-        const doMoveRangeMutation: MoveRangeMutationParams = {
+        const doMoveRangeMutation: IMoveRangeMutationParams = {
             from: newFromCellValues.getMatrix(),
             to: newToCellValues.getMatrix(),
             workbookId,
             worksheetId,
         };
-        const undoMoveRangeMutation: MoveRangeMutationParams = {
+        const undoMoveRangeMutation: IMoveRangeMutationParams = {
             from: currentFromCellValues.getMatrix(),
             to: currentToCellValues.getMatrix(),
             workbookId,

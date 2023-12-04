@@ -54,10 +54,13 @@ export { ClearSelectionContentCommand } from './commands/commands/clear-selectio
 export { ClearSelectionFormatCommand } from './commands/commands/clear-selection-format.command';
 export { CopySheetCommand } from './commands/commands/copy-worksheet.command';
 export { DeleteRangeMoveLeftCommand } from './commands/commands/delete-range-move-left.command';
-export { type DeleteRangeMoveLeftCommandParams } from './commands/commands/delete-range-move-left.command';
+export { type IDeleteRangeMoveLeftCommandParams } from './commands/commands/delete-range-move-left.command';
 export { DeleteRangeMoveUpCommand } from './commands/commands/delete-range-move-up.command';
+export { type IDeleteRangeMoveUpCommandParams } from './commands/commands/delete-range-move-up.command';
 export { InsertRangeMoveDownCommand } from './commands/commands/insert-range-move-down.command';
+export { type InsertRangeMoveDownCommandParams } from './commands/commands/insert-range-move-down.command';
 export { InsertRangeMoveRightCommand } from './commands/commands/insert-range-move-right.command';
+export { type InsertRangeMoveRightCommandParams } from './commands/commands/insert-range-move-right.command';
 export type { IInsertColCommandParams, IInsertRowCommandParams } from './commands/commands/insert-row-col.command';
 export {
     InsertColAfterCommand,
@@ -75,6 +78,7 @@ export {
     MoveColsCommand,
     MoveRowsCommand,
 } from './commands/commands/move-rows-cols.command';
+export type { IRemoveRowColCommandParams } from './commands/commands/remove-row-col.command';
 export { RemoveColCommand, RemoveRowCommand } from './commands/commands/remove-row-col.command';
 export type { IRemoveSheetCommandParams } from './commands/commands/remove-sheet.command';
 export { RemoveSheetCommand } from './commands/commands/remove-sheet.command';
@@ -152,7 +156,9 @@ export {
     AddWorksheetMergeMutation,
 } from './commands/mutations/add-worksheet-merge.mutation';
 export { DeleteRangeMutation } from './commands/mutations/delete-range.mutation';
+export { handleDeleteRangeMutation } from './commands/mutations/delete-range.mutation';
 export { InsertRangeMutation } from './commands/mutations/insert-range.mutation';
+export { handleInsertRangeMutation } from './commands/mutations/insert-range.mutation';
 export {
     InsertColMutation,
     InsertColMutationUndoFactory,
@@ -161,7 +167,7 @@ export {
 } from './commands/mutations/insert-row-col.mutation';
 export { InsertSheetMutation, InsertSheetUndoMutationFactory } from './commands/mutations/insert-sheet.mutation';
 export { MoveRangeMutation } from './commands/mutations/move-range.mutation';
-export { type MoveRangeMutationParams } from './commands/mutations/move-range.mutation';
+export { type IMoveRangeMutationParams } from './commands/mutations/move-range.mutation';
 export { type IMoveColumnsMutationParams } from './commands/mutations/move-rows-cols.mutation';
 export { type IMoveRowsMutationParams, MoveRowsMutation } from './commands/mutations/move-rows-cols.mutation';
 export { MoveColsMutation } from './commands/mutations/move-rows-cols.mutation';

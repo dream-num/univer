@@ -21,9 +21,9 @@ import type {
 import { getAddMergeMutationRangeByType } from '../commands/commands/add-worksheet-merge.command';
 import { ClearSelectionAllCommand } from '../commands/commands/clear-selection-all.command';
 import { ClearSelectionFormatCommand } from '../commands/commands/clear-selection-format.command';
-import type { DeleteRangeMoveLeftCommandParams } from '../commands/commands/delete-range-move-left.command';
+import type { IDeleteRangeMoveLeftCommandParams } from '../commands/commands/delete-range-move-left.command';
 import { DeleteRangeMoveLeftCommand } from '../commands/commands/delete-range-move-left.command';
-import type { DeleteRangeMoveUpCommandParams } from '../commands/commands/delete-range-move-up.command';
+import type { IDeleteRangeMoveUpCommandParams } from '../commands/commands/delete-range-move-up.command';
 import { DeleteRangeMoveUpCommand } from '../commands/commands/delete-range-move-up.command';
 import type { InsertRangeMoveDownCommandParams } from '../commands/commands/insert-range-move-down.command';
 import { InsertRangeMoveDownCommand } from '../commands/commands/insert-range-move-down.command';
@@ -155,11 +155,11 @@ export class MergeCellController extends Disposable {
                         return this._handleInsertRangeMoveDownCommand(params, workbookId, worksheetId);
                     }
                     case DeleteRangeMoveUpCommand.id: {
-                        const params = config.params as unknown as DeleteRangeMoveUpCommandParams;
+                        const params = config.params as unknown as IDeleteRangeMoveUpCommandParams;
                         return this._handleDeleteRangeMoveUpCommand(params, workbookId, worksheetId);
                     }
                     case DeleteRangeMoveLeftCommand.id: {
-                        const params = config.params as unknown as DeleteRangeMoveLeftCommandParams;
+                        const params = config.params as unknown as IDeleteRangeMoveLeftCommandParams;
                         return this._handleDeleteRangeMoveLeftCommand(params, workbookId, worksheetId);
                     }
                 }
@@ -695,7 +695,7 @@ export class MergeCellController extends Disposable {
     }
 
     private _handleDeleteRangeMoveUpCommand(
-        config: DeleteRangeMoveUpCommandParams,
+        config: IDeleteRangeMoveUpCommandParams,
         workbookId: string,
         worksheetId: string
     ) {
@@ -770,7 +770,7 @@ export class MergeCellController extends Disposable {
     }
 
     private _handleDeleteRangeMoveLeftCommand(
-        config: DeleteRangeMoveLeftCommandParams,
+        config: IDeleteRangeMoveLeftCommandParams,
         workbookId: string,
         worksheetId: string
     ) {

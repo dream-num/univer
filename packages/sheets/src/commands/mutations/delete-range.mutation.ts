@@ -1,4 +1,4 @@
-import type { ICellData, IMutation, Nullable } from '@univerjs/core';
+import type { ICellData, IMutation, IRange, Nullable } from '@univerjs/core';
 import { CommandType, Dimension, IUniverInstanceService, ObjectMatrix, Tools } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
@@ -72,44 +72,63 @@ export const DeleteRangeMutation: IMutation<IDeleteRangeMutationParams, boolean>
     id: 'sheet.mutation.delete-range',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
+        const { workbookId, worksheetId, ranges, shiftDimension } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getUniverSheetInstance(params.workbookId);
+        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
         if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(params.worksheetId);
+        const worksheet = workbook.getSheetBySheetId(worksheetId);
         if (!worksheet) return false;
 
         const cellMatrix = worksheet.getCellMatrix();
         const lastEndRow = worksheet.getLastRowWithContent();
         const lastEndColumn = worksheet.getLastColumnWithContent();
 
-        for (let i = 0; i < params.ranges.length; i++) {
-            const { startRow, endRow, startColumn, endColumn } = params.ranges[i];
-
-            const rows = endRow - startRow + 1;
-            const columns = endColumn - startColumn + 1;
-
-            if (params.shiftDimension === Dimension.ROWS) {
-                // build new data
-                for (let r = startRow; r <= lastEndRow; r++) {
-                    for (let c = startColumn; c <= endColumn; c++) {
-                        // get value blow current range
-                        const value = cellMatrix.getValue(r + rows, c);
-                        cellMatrix.setValue(r, c, value || {});
-                    }
-                }
-            } else if (params.shiftDimension === Dimension.COLUMNS) {
-                // build new data
-                for (let r = startRow; r <= endRow; r++) {
-                    for (let c = startColumn; c <= lastEndColumn; c++) {
-                        // get value blow current range
-
-                        const value = cellMatrix.getValue(r, c + columns);
-                        cellMatrix.setValue(r, c, value || {});
-                    }
-                }
-            }
-        }
+        handleDeleteRangeMutation(cellMatrix, ranges, lastEndRow, lastEndColumn, shiftDimension);
 
         return true;
     },
 };
+
+export function handleDeleteRangeMutation<T>(
+    cellMatrix: ObjectMatrix<T>,
+    ranges: IRange[],
+    lastEndRow: number,
+    lastEndColumn: number,
+    shiftDimension: Dimension
+) {
+    for (let i = 0; i < ranges.length; i++) {
+        const { startRow, endRow, startColumn, endColumn } = ranges[i];
+
+        const rows = endRow - startRow + 1;
+        const columns = endColumn - startColumn + 1;
+
+        if (shiftDimension === Dimension.ROWS) {
+            // build new data
+            for (let r = startRow; r <= lastEndRow; r++) {
+                for (let c = startColumn; c <= endColumn; c++) {
+                    // get value blow current range
+                    const value = cellMatrix.getValue(r + rows, c);
+                    if (value == null) {
+                        cellMatrix.realDeleteValue(r, c);
+                    } else {
+                        cellMatrix.setValue(r, c, value);
+                    }
+                }
+            }
+        } else if (shiftDimension === Dimension.COLUMNS) {
+            // build new data
+            for (let r = startRow; r <= endRow; r++) {
+                for (let c = startColumn; c <= lastEndColumn; c++) {
+                    // get value blow current range
+
+                    const value = cellMatrix.getValue(r, c + columns);
+                    if (value == null) {
+                        cellMatrix.realDeleteValue(r, c);
+                    } else {
+                        cellMatrix.setValue(r, c, value);
+                    }
+                }
+            }
+        }
+    }
+}

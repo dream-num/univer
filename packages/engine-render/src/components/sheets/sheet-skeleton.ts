@@ -1085,7 +1085,7 @@ export class SpreadsheetSkeleton extends Skeleton {
                     wrapStrategy,
                 }
             );
-        } else if (cell.v) {
+        } else if (cell.v != null) {
             const textStyle = this._getFontFormat(style);
             fontString = getFontStyleString(textStyle, this._localService).fontCache;
 

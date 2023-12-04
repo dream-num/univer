@@ -1,15 +1,12 @@
 /* eslint-disable no-magic-numbers */
+import type { ICellData, Nullable, Univer } from '@univerjs/core';
+import { createInterceptorKey, IUniverInstanceService } from '@univerjs/core';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import type { Univer } from '../../../basics/univer';
-import type { Nullable } from '../../../common/type-utils';
-import type { ICellData } from '../../../types/interfaces/i-cell-data';
-import { IUniverInstanceService } from '../../instance/instance.service';
 import { INTERCEPTOR_POINT } from '../interceptor-const';
 import { SheetInterceptorService } from '../sheet-interceptor.service';
 import type { ISheetLocation } from '../utils/interceptor';
-import { createInterceptorKey } from '../utils/interceptor';
 import { createCoreTestBed } from './create-core-test-bed';
 
 describe('Test SheetInterceptorService', () => {
@@ -19,7 +16,7 @@ describe('Test SheetInterceptorService', () => {
     const numberIntercept = createInterceptorKey<number, { step: number }>('numberIntercept');
 
     beforeEach(() => {
-        const testBed = createCoreTestBed();
+        const testBed = createCoreTestBed(undefined, [[SheetInterceptorService]]);
         univer = testBed.univer;
         get = testBed.get;
     });
@@ -142,4 +139,17 @@ describe('Test SheetInterceptorService', () => {
             expect(result).toBe('zero');
         });
     });
+
+    // it('Test SheetInterceptorService', () => {
+    //     it('getLastRowWithContent', () => {
+    //         const univerInstanceService = get(IUniverInstanceService);
+    //         const sheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet()!;
+    //         expect(sheet.getLastRowWithContent()).toBe(3);
+    //     });
+    //     it('getLastColumnWithContent', () => {
+    //         const univerInstanceService = get(IUniverInstanceService);
+    //         const sheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet()!;
+    //         expect(sheet.getLastColumnWithContent()).toBe(3);
+    //     });
+    // });
 });

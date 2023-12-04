@@ -8,13 +8,13 @@ import {
     OnLifecycle,
     Rectangle,
     remove,
-    SheetInterceptorService,
     toDisposable,
 } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
 
 import { SelectionManagerService } from '../selection-manager.service';
+import { SheetInterceptorService } from '../sheet-interceptor/sheet-interceptor.service';
 import type { EffectRefRangeParams } from './type';
 import { EffectRefRangId } from './type';
 

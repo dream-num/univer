@@ -10,20 +10,23 @@ import {
     FOCUSING_FORMULA_EDITOR,
     ICommandService,
     IContextService,
-    INTERCEPTOR_POINT,
     isFormulaString,
     IUndoRedoService,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
-    SheetInterceptorService,
     Tools,
 } from '@univerjs/core';
 import { MoveCursorOperation, MoveSelectionOperation } from '@univerjs/docs';
 import { FormulaEngineService, matchToken } from '@univerjs/engine-formula';
 import type { IMouseEvent, IPointerEvent } from '@univerjs/engine-render';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
-import { SelectionManagerService, SetRangeValuesCommand, SetSelectionsOperation } from '@univerjs/sheets';
+import {
+    SelectionManagerService,
+    SetRangeValuesCommand,
+    SetSelectionsOperation,
+    SheetInterceptorService,
+} from '@univerjs/sheets';
 import { KeyCode } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 import type { Subscription } from 'rxjs';
@@ -209,10 +212,9 @@ export class EndEditController extends Disposable {
                 row,
                 col: column,
             };
-            const cell = this._sheetInterceptorService.fetchThroughInterceptors(INTERCEPTOR_POINT.AFTER_CELL_EDIT)(
-                cellData,
-                context
-            );
+            const cell = this._editorBridgeService.interceptor.fetchThroughInterceptors(
+                this._editorBridgeService.interceptor.getInterceptPoints().AFTER_CELL_EDIT
+            )(cellData, context);
             this._commandService.executeCommand(SetRangeValuesCommand.id, {
                 worksheetId: sheetId,
                 workbookId: unitId,

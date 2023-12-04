@@ -1,5 +1,5 @@
 import type { IRange, Univer, Workbook, Worksheet } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, SheetInterceptorService } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService } from '@univerjs/core';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -8,6 +8,7 @@ import { MoveRangeCommand } from '../../commands/commands/move-range.command';
 import { MoveRangeMutation } from '../../commands/mutations/move-range.mutation';
 import { RefRangeService } from '../ref-range/ref-range.service';
 import { SelectionManagerService } from '../selection-manager.service';
+import { SheetInterceptorService } from '../sheet-interceptor/sheet-interceptor.service';
 import { createTestBase, TEST_WORKBOOK_DATA_DEMO } from './util';
 
 const originRange: IRange = {
@@ -32,7 +33,11 @@ describe('Test ref-range.service', () => {
     let worksheet: Worksheet;
 
     beforeEach(() => {
-        const testBed = createTestBase(TEST_WORKBOOK_DATA_DEMO, [[SelectionManagerService], [RefRangeService]]);
+        const testBed = createTestBase(TEST_WORKBOOK_DATA_DEMO, [
+            [SelectionManagerService],
+            [RefRangeService],
+            [SheetInterceptorService],
+        ]);
         get = testBed.get;
         univer = testBed.univer;
         sheetInterceptorService = get(SheetInterceptorService);

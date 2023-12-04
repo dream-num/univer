@@ -3,12 +3,10 @@ import {
     Disposable,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     ICommandService,
-    INTERCEPTOR_POINT,
     IUniverInstanceService,
     LifecycleStages,
     makeCellToSelection,
     OnLifecycle,
-    SheetInterceptorService,
 } from '@univerjs/core';
 import { DeviceInputEventType, getCanvasOffsetByEngine, IRenderManagerService } from '@univerjs/engine-render';
 import {
@@ -35,8 +33,7 @@ export class EditorBridgeController extends Disposable {
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
-        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
-        @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService
+        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService
     ) {
         super();
 
@@ -128,11 +125,9 @@ export class EditorBridgeController extends Disposable {
                 row: startRow,
                 col: startColumn,
             };
-
-            const cell = this._sheetInterceptorService.fetchThroughInterceptors(INTERCEPTOR_POINT.BEFORE_CELL_EDIT)(
-                worksheet.getCell(startRow, startColumn),
-                location
-            );
+            const cell = this._editorBridgeService.interceptor.fetchThroughInterceptors(
+                this._editorBridgeService.interceptor.getInterceptPoints().BEFORE_CELL_EDIT
+            )(worksheet.getCell(startRow, startColumn), location);
 
             let documentLayoutObject = cell && skeleton.getCellDocumentModelWithFormula(cell);
 

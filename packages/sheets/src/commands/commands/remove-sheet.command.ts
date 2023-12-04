@@ -5,7 +5,6 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
     sequenceExecute,
-    SheetInterceptorService,
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
@@ -13,6 +12,7 @@ import type {
     IInsertSheetMutationParams,
     IRemoveSheetMutationParams,
 } from '../../basics/interfaces/mutation-interface';
+import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { InsertSheetMutation } from '../mutations/insert-sheet.mutation';
 import { RemoveSheetMutation, RemoveSheetUndoMutationFactory } from '../mutations/remove-sheet.mutation';
 import type { ISetWorksheetActivateMutationParams } from '../mutations/set-worksheet-activate.mutation';

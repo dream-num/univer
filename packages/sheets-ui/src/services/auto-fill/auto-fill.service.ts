@@ -1,13 +1,6 @@
 import type { IRange } from '@univerjs/core';
-import {
-    Disposable,
-    IUniverInstanceService,
-    LifecycleStages,
-    OnLifecycle,
-    SheetInterceptorService,
-    toDisposable,
-} from '@univerjs/core';
-import { SelectionManagerService } from '@univerjs/sheets';
+import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
+import { SelectionManagerService, SheetInterceptorService } from '@univerjs/sheets';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier, Inject } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';

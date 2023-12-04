@@ -8,6 +8,7 @@ import { SetRangeValuesCommand } from '../../commands/commands/set-range-values.
 import { SetRangeValuesMutation } from '../../commands/mutations/set-range-values.mutation';
 import { SheetEditablePermission, SheetPermissionService } from '../permission';
 import { SelectionManagerService } from '../selection-manager.service';
+import { SheetInterceptorService } from '../sheet-interceptor/sheet-interceptor.service';
 import { createTestBase, TEST_WORKBOOK_DATA_DEMO } from './util';
 
 describe('test sheet permission service', () => {
@@ -15,7 +16,11 @@ describe('test sheet permission service', () => {
     let commandService: ICommandService;
     let get: Injector['get'];
     beforeEach(() => {
-        const testBed = createTestBase(TEST_WORKBOOK_DATA_DEMO, [[SheetPermissionService], [SelectionManagerService]]);
+        const testBed = createTestBase(TEST_WORKBOOK_DATA_DEMO, [
+            [SheetPermissionService],
+            [SelectionManagerService],
+            [SheetInterceptorService],
+        ]);
         get = testBed.get;
         univer = testBed.univer;
         commandService = testBed.get(ICommandService);

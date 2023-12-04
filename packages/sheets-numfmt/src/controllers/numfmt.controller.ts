@@ -4,7 +4,6 @@ import {
     Disposable,
     DisposableCollection,
     ICommandService,
-    INTERCEPTOR_POINT,
     IUniverInstanceService,
     LifecycleStages,
     LocaleService,
@@ -13,7 +12,6 @@ import {
     OnLifecycle,
     Range,
     Rectangle,
-    SheetInterceptorService,
     ThemeService,
     toDisposable,
 } from '@univerjs/core';
@@ -23,9 +21,11 @@ import {
     ClearSelectionAllCommand,
     ClearSelectionFormatCommand,
     factorySetNumfmtUndoMutation,
+    INTERCEPTOR_POINT,
     INumfmtService,
     SelectionManagerService,
     SetNumfmtMutation,
+    SheetInterceptorService,
 } from '@univerjs/sheets';
 import type { IAutoFillHook } from '@univerjs/sheets-ui';
 import { APPLY_TYPE, getRepeatRange, IAutoFillService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';

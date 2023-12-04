@@ -2,11 +2,10 @@ import type { Nullable } from '@univerjs/core';
 import {
     CellValueType,
     Disposable,
-    INTERCEPTOR_POINT,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
-    SheetInterceptorService,
+    toDisposable,
 } from '@univerjs/core';
 import numfmt from '@univerjs/engine-numfmt';
 import type { INumfmtItemWithCache, ISetNumfmtMutationParams } from '@univerjs/sheets';
@@ -15,7 +14,9 @@ import {
     INumfmtService,
     SetNumfmtMutation,
     SetRangeValuesCommand,
+    SheetInterceptorService,
 } from '@univerjs/sheets';
+import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { getPatternType } from '../utils/pattern';
@@ -55,7 +56,8 @@ export class NumfmtEditorController extends Disposable {
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @Inject(INumfmtService) private _numfmtService: INumfmtService,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
-        @Inject(Injector) private _injector: Injector
+        @Inject(Injector) private _injector: Injector,
+        @Inject(IEditorBridgeService) private _editorBridgeService: IEditorBridgeService
     ) {
         super();
         this._initInterceptorEditorStart();
@@ -65,34 +67,44 @@ export class NumfmtEditorController extends Disposable {
 
     private _initInterceptorEditorStart() {
         this.disposeWithMe(
-            this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.BEFORE_CELL_EDIT, {
-                handler: (value, context, next) => {
-                    const row = context.row;
-                    const col = context.col;
-                    const numfmtCell = this._numfmtService.getValue(context.workbookId, context.worksheetId, row, col);
-                    if (numfmtCell) {
-                        const type = getPatternType(numfmtCell.pattern);
-                        switch (type) {
-                            case 'scientific':
-                            case 'percent':
-                            case 'currency':
-                            case 'grouped':
-                            case 'number': {
-                                // remove the style atr
-                                const cell = context.worksheet.getCellRaw(row, col);
-                                return cell ? filterAtr(cell, ['s']) : cell;
+            toDisposable(
+                this._editorBridgeService.interceptor.intercept(
+                    this._editorBridgeService.interceptor.getInterceptPoints().BEFORE_CELL_EDIT,
+                    {
+                        handler: (value, context, next) => {
+                            const row = context.row;
+                            const col = context.col;
+                            const numfmtCell = this._numfmtService.getValue(
+                                context.workbookId,
+                                context.worksheetId,
+                                row,
+                                col
+                            );
+                            if (numfmtCell) {
+                                const type = getPatternType(numfmtCell.pattern);
+                                switch (type) {
+                                    case 'scientific':
+                                    case 'percent':
+                                    case 'currency':
+                                    case 'grouped':
+                                    case 'number': {
+                                        // remove the style atr
+                                        const cell = context.worksheet.getCellRaw(row, col);
+                                        return cell ? filterAtr(cell, ['s']) : cell;
+                                    }
+                                    case 'date':
+                                    case 'time':
+                                    case 'datetime':
+                                    default: {
+                                        return next && next(value);
+                                    }
+                                }
                             }
-                            case 'date':
-                            case 'time':
-                            case 'datetime':
-                            default: {
-                                return next && next(value);
-                            }
-                        }
+                            return next(value);
+                        },
                     }
-                    return next(value);
-                },
-            })
+                )
+            )
         );
     }
 
@@ -103,59 +115,64 @@ export class NumfmtEditorController extends Disposable {
      */
     private _initInterceptorEditorEnd() {
         this.disposeWithMe(
-            this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.AFTER_CELL_EDIT, {
-                handler: (value, context, next) => {
-                    // clear the effect
-                    this._collectEffectMutation.clean();
-                    const currentNumfmtValue = this._numfmtService.getValue(
-                        context.workbookId,
-                        context.worksheetId,
-                        context.row,
-                        context.col
-                    );
-                    const clean = () => {
-                        currentNumfmtValue &&
-                            this._collectEffectMutation.add(
+            toDisposable(
+                this._editorBridgeService.interceptor.intercept(
+                    this._editorBridgeService.interceptor.getInterceptPoints().AFTER_CELL_EDIT,
+                    {
+                        handler: (value, context, next) => {
+                            // clear the effect
+                            this._collectEffectMutation.clean();
+                            const currentNumfmtValue = this._numfmtService.getValue(
                                 context.workbookId,
                                 context.worksheetId,
                                 context.row,
-                                context.col,
-                                null
+                                context.col
                             );
-                    };
-                    if (!value?.v) {
-                        clean();
-                        return next(value);
-                    }
+                            const clean = () => {
+                                currentNumfmtValue &&
+                                    this._collectEffectMutation.add(
+                                        context.workbookId,
+                                        context.worksheetId,
+                                        context.row,
+                                        context.col,
+                                        null
+                                    );
+                            };
+                            if (!value?.v) {
+                                clean();
+                                return next(value);
+                            }
 
-                    const content = String(value.v);
+                            const content = String(value.v);
 
-                    const dateInfo = numfmt.parseDate(content) || numfmt.parseTime(content);
-                    const isTranslateDate = !!dateInfo;
-                    if (isTranslateDate) {
-                        if (dateInfo && dateInfo.z) {
-                            const v = Number(dateInfo.v);
-                            this._collectEffectMutation.add(
-                                context.workbookId,
-                                context.worksheetId,
-                                context.row,
-                                context.col,
-                                {
-                                    type: 'date',
-                                    pattern: dateInfo.z,
+                            const dateInfo = numfmt.parseDate(content) || numfmt.parseTime(content);
+                            const isTranslateDate = !!dateInfo;
+                            if (isTranslateDate) {
+                                if (dateInfo && dateInfo.z) {
+                                    const v = Number(dateInfo.v);
+                                    this._collectEffectMutation.add(
+                                        context.workbookId,
+                                        context.worksheetId,
+                                        context.row,
+                                        context.col,
+                                        {
+                                            type: 'date',
+                                            pattern: dateInfo.z,
+                                        }
+                                    );
+                                    return { ...value, v, t: CellValueType.NUMBER };
                                 }
-                            );
-                            return { ...value, v, t: CellValueType.NUMBER };
-                        }
-                    } else if (
-                        ['date', 'time', 'datetime'].includes(currentNumfmtValue?.type || '') ||
-                        !isNumeric(content)
-                    ) {
-                        clean();
+                            } else if (
+                                ['date', 'time', 'datetime'].includes(currentNumfmtValue?.type || '') ||
+                                !isNumeric(content)
+                            ) {
+                                clean();
+                            }
+                            return next(value);
+                        },
                     }
-                    return next(value);
-                },
-            })
+                )
+            )
         );
     }
 

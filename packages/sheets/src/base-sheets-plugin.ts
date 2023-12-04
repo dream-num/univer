@@ -11,6 +11,7 @@ import { INumfmtService } from './services/numfmt/type';
 import { SheetPermissionService } from './services/permission';
 import { RefRangeService } from './services/ref-range/ref-range.service';
 import { SelectionManagerService } from './services/selection-manager.service';
+import { SheetInterceptorService } from './services/sheet-interceptor/sheet-interceptor.service';
 
 /**
  * The main sheet base, construct the sheet container and layout, mount the rendering engine
@@ -43,6 +44,7 @@ export class SheetPlugin extends Plugin {
             [RefRangeService],
             [SheetPermissionService],
             [INumfmtService, { useClass: NumfmtService }],
+            [SheetInterceptorService],
 
             // controllers
             [BasicWorksheetController],

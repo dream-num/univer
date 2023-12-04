@@ -4,7 +4,7 @@ import { themes as prismThemes } from 'prism-react-renderer';
 
 const config: Config = {
     title: 'Univer',
-    tagline: 'A website for Univerjs',
+    tagline: 'An open source collaborative solution.',
     favicon: 'img/favicon.ico',
 
     // Set the production url of your site here

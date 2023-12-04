@@ -1,6 +1,11 @@
 # Build
 dist
 lib
+local
+.turbo
+.docusaurus
+typedoc
+
 
 # Coverage
 coverage-report/

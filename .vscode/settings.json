@@ -76,5 +76,6 @@
         "Xingkai",
         "Xinwei"
     ],
-    "vsicons.presets.angular": false
+    "vsicons.presets.angular": false,
+    "eslint.codeActionsOnSave.mode": "problems"
 }

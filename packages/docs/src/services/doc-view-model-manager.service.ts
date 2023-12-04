@@ -46,8 +46,6 @@ export class DocViewModelManagerService implements IDisposable {
             return;
         }
 
-        console.log(unitId, documentDataModel);
-
         if (!this._docViewModelMap.has(unitId)) {
             const docViewModel = this._buildDocViewModel(documentDataModel);
 

@@ -49,13 +49,6 @@ export class DocRenderController extends Disposable {
 
             docsComponent.changeSkeleton(documentSkeleton);
 
-            // const excludeUnitList = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];
-
-            // if (excludeUnitList.includes(unitId)) {
-            //     currentRender.mainComponent?.makeDirty();
-            //     return;
-            // }
-
             this._recalculateSizeBySkeleton(currentRender, documentSkeleton);
         });
     }

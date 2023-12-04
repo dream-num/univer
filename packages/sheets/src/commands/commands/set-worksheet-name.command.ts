@@ -5,10 +5,10 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
     sequenceExecute,
-    SheetInterceptorService,
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
+import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import type { ISetWorksheetNameMutationParams } from '../mutations/set-worksheet-name.mutation';
 import { SetWorksheetNameMutation, SetWorksheetNameMutationFactory } from '../mutations/set-worksheet-name.mutation';
 

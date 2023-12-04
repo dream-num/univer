@@ -1,5 +1,5 @@
 import type { IUnitRange } from '@univerjs/core';
-import { Disposable, IConfigService, LifecycleStages, ObjectMatrix, OnLifecycle } from '@univerjs/core';
+import { Disposable, IConfigService, LifecycleStages, ObjectMatrix, OnLifecycle, setZeroTimeout } from '@univerjs/core';
 import type { Ctor, Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { Subject } from 'rxjs';
@@ -306,6 +306,13 @@ export class FormulaEngineService extends Disposable {
                 throw new Error('astNode is null');
             }
 
+            /**
+             * For every functions, execute a setTimeout to wait for external command input.
+             */
+            await new Promise((resolve) => {
+                setZeroTimeout(resolve);
+            });
+
             this.runtimeService.setCurrent(tree.row, tree.column, tree.subComponentId, tree.unitId);
 
             if (interpreter.checkAsyncNode(astNode)) {
@@ -314,14 +321,7 @@ export class FormulaEngineService extends Disposable {
                 value = interpreter.execute(astNode);
             }
 
-            /**
-             * For every 100 functions, execute a setTimeout to wait for external command input.
-             */
-            if (i % EVERY_N_FUNCTION_EXECUTION_PAUSE === 0) {
-                await new Promise((resolve) => {
-                    setTimeout(resolve, 0);
-                });
-            }
+            // this.runtimeService.setCurrent(tree.row, tree.column, tree.subComponentId, tree.unitId);
 
             if (this.runtimeService.isStopExecution()) {
                 this.runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.IDLE);
@@ -368,7 +368,7 @@ export class FormulaEngineService extends Disposable {
         }
 
         // this.lexerTreeBuilder.suffixExpressionHandler(lexerNode); // suffix Express, 1+(3*4=4)*5+1 convert to 134*4=5*1++
-        // console.log('lexerNode', (lexerNode as LexerNode).serialize());
+        console.log('lexerNode', (lexerNode as LexerNode).serialize());
 
         // console.log('sequence', this.lexerTreeBuilder.sequenceNodesBuilder(formulaString));
 
@@ -378,7 +378,7 @@ export class FormulaEngineService extends Disposable {
 
         const astNode = this.astTreeBuilder.parse(lexerNode as LexerNode);
 
-        // console.log('astNode', astNode?.serialize());
+        console.log('astNode', astNode?.serialize());
 
         // const interpreter = Interpreter.create();
 

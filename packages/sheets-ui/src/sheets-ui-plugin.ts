@@ -89,7 +89,6 @@ export class SheetsUIPlugin extends Plugin {
 
                 // controllers
                 [AutoHeightController],
-                [EditingController],
                 [EditorBridgeController],
                 [EndEditController],
                 [FormulaEditorController],
@@ -112,6 +111,7 @@ export class SheetsUIPlugin extends Plugin {
                 [ZoomController],
                 [AutoFillController],
                 [StatusBarController],
+                [EditingController],
             ] as Dependency[]
         ).forEach((d) => injector.add(d));
     }

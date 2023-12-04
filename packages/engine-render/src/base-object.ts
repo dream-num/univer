@@ -1,5 +1,5 @@
 import type { EventState, IKeyValue, Nullable, Observer } from '@univerjs/core';
-import { Observable } from '@univerjs/core';
+import { Observable, setZeroTimeout } from '@univerjs/core';
 
 import type { EVENT_TYPE } from './basics/const';
 import { CURSOR_TYPE, RENDER_CLASS_TYPE } from './basics/const';
@@ -325,12 +325,19 @@ export abstract class BaseObject {
 
                 return;
             }
-            window.clearTimeout(scene.debounceParentTimeout);
+            // window.clearTimeout(scene.debounceParentTimeout);
+            // // To prevent multiple refreshes caused by setting values for multiple object instances at once.
+            // scene.debounceParentTimeout = window.setTimeout(() => {
+            //     this._parent?.makeDirty(state);
+            // }, 0);
+
+            if (typeof scene.debounceParentTimeout === 'function') {
+                scene.debounceParentTimeout();
+            }
             // To prevent multiple refreshes caused by setting values for multiple object instances at once.
-            scene.debounceParentTimeout = window.setTimeout(() => {
+            scene.debounceParentTimeout = setZeroTimeout(() => {
                 this._parent?.makeDirty(state);
-            }, 0);
-            // this.parent?.makeDirty(state);
+            });
         }
 
         return this;

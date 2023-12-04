@@ -135,7 +135,10 @@ export {
     SetColWidthCommand,
 } from './commands/commands/set-worksheet-col-width.command';
 export { SetWorksheetHideCommand } from './commands/commands/set-worksheet-hide.command';
-export { SetWorksheetNameCommand } from './commands/commands/set-worksheet-name.command';
+export {
+    type ISetWorksheetNameCommandParams,
+    SetWorksheetNameCommand,
+} from './commands/commands/set-worksheet-name.command';
 export { SetWorksheetOrderCommand } from './commands/commands/set-worksheet-order.command';
 export {
     DeltaRowHeightCommand,

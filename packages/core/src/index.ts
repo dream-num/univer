@@ -7,6 +7,7 @@ export {
 } from './common/const';
 export { MemoryCursor } from './common/memory-cursor';
 export { type ISequenceExecuteResult, sequence, sequenceAsync } from './common/sequence';
+export { setZeroTimeout } from './common/set-zero-time-out';
 export * from './docs/data-model';
 export {
     type DocMutationParams,

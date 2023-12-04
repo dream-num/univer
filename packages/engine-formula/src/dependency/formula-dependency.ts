@@ -219,7 +219,7 @@ export class FormulaDependencyGenerator extends Disposable {
     }
 
     private _generateAstNode(formulaString: string, refOffsetX: number = 0, refOffsetY: number = 0) {
-        let astNode: Nullable<AstRootNode> = FormulaASTCache.get(formulaString);
+        let astNode: Nullable<AstRootNode> = FormulaASTCache.get(`${formulaString}##${refOffsetX}${refOffsetY}`);
 
         if (astNode) {
             return astNode;
@@ -239,7 +239,7 @@ export class FormulaDependencyGenerator extends Disposable {
             throw new Error('astNode is null');
         }
 
-        FormulaASTCache.set(formulaString, astNode);
+        FormulaASTCache.set(`${formulaString}##${refOffsetX}${refOffsetY}`, astNode);
 
         return astNode;
     }

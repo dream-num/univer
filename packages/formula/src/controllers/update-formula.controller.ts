@@ -28,6 +28,7 @@ import type {
     InsertRangeMoveRightCommandParams,
     IRemoveRowColCommandParams,
     ISetRangeValuesMutationParams,
+    ISetWorksheetNameCommandParams,
 } from '@univerjs/sheets';
 import {
     DeleteRangeMoveLeftCommand,
@@ -55,6 +56,7 @@ import {
     SelectionManagerService,
     SetRangeValuesMutation,
     SetRangeValuesUndoMutationFactory,
+    SetWorksheetNameCommand,
     SheetInterceptorService,
 } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -80,6 +82,7 @@ enum FormulaReferenceMoveType {
     DeleteMoveUp, // range
     InsertMoveDown, // range
     InsertMoveRight, // range
+    SetName,
 }
 
 interface IFormulaReferenceMoveParam {
@@ -89,6 +92,7 @@ interface IFormulaReferenceMoveParam {
     ranges?: IRange[];
     from?: IRange;
     to?: IRange;
+    sheetName?: string;
 }
 
 enum OriginRangeEdgeType {
@@ -185,6 +189,9 @@ export class UpdateFormulaController extends Disposable {
                 break;
             case DeleteRangeMoveLeftCommand.id:
                 result = this._handleDeleteRangeMoveLeft(command as ICommandInfo<IDeleteRangeMoveLeftCommandParams>);
+                break;
+            case SetWorksheetNameCommand.id:
+                result = this._handleSetWorksheetName(command as ICommandInfo<ISetWorksheetNameCommandParams>);
                 break;
         }
 
@@ -437,6 +444,22 @@ export class UpdateFormulaController extends Disposable {
         };
     }
 
+    private _handleSetWorksheetName(command: ICommandInfo<ISetWorksheetNameCommandParams>) {
+        const { params } = command;
+        if (!params) return null;
+
+        const { workbookId, worksheetId, name } = params;
+
+        const { unitId, sheetId } = this._getCurrentSheetInfo();
+
+        return {
+            type: FormulaReferenceMoveType.SetName,
+            unitId: workbookId || unitId,
+            sheetId: worksheetId || sheetId,
+            sheetName: name,
+        };
+    }
+
     private _getUpdateFormulaMutations(oldFormulaData: IFormulaData, formulaData: IFormulaData) {
         const redos = [];
         const undos = [];
@@ -545,7 +568,10 @@ export class UpdateFormulaController extends Disposable {
 
                         const { range, sheetName, unitId: sequenceUnitId } = sequenceGrid;
 
-                        const sequenceSheetId = unitSheetNameMap?.[sequenceUnitId]?.[sheetName];
+                        const mapUnitId =
+                            sequenceUnitId == null || sequenceUnitId.length === 0 ? unitId : sequenceUnitId;
+
+                        const sequenceSheetId = unitSheetNameMap?.[mapUnitId]?.[sheetName];
 
                         const sequenceUnitRangeWidthOffset = {
                             range,
@@ -556,12 +582,39 @@ export class UpdateFormulaController extends Disposable {
                             refOffsetY: y || 0,
                         };
 
-                        const newRefString = this._getNewRangeByMoveParam(
-                            sequenceUnitRangeWidthOffset,
-                            formulaReferenceMoveParam,
-                            unitId,
-                            sheetId
-                        );
+                        let newRefString: Nullable<string> = null;
+
+                        if (formulaReferenceMoveParam.type === FormulaReferenceMoveType.SetName) {
+                            const {
+                                unitId: userUnitId,
+                                sheetId: userSheetId,
+                                sheetName: newSheetName,
+                            } = formulaReferenceMoveParam;
+                            if (newSheetName == null) {
+                                continue;
+                            }
+
+                            if (sequenceSheetId == null || sequenceSheetId.length === 0) {
+                                continue;
+                            }
+
+                            if (userSheetId !== sequenceSheetId) {
+                                continue;
+                            }
+
+                            newRefString = serializeRangeToRefString({
+                                range,
+                                sheetName: newSheetName,
+                                unitId: sequenceUnitId,
+                            });
+                        } else {
+                            newRefString = this._getNewRangeByMoveParam(
+                                sequenceUnitRangeWidthOffset,
+                                formulaReferenceMoveParam,
+                                unitId,
+                                sheetId
+                            );
+                        }
 
                         if (newRefString != null) {
                             sequenceNodes[i] = {

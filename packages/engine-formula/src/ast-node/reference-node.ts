@@ -40,12 +40,16 @@ export class ReferenceNode extends BaseAstNode {
         const currentConfigService = this._accessor.get(IFormulaCurrentConfigService);
         const runtimeService = this._accessor.get(IFormulaRuntimeService);
 
-        this._referenceObject.setUnitData(currentConfigService.getUnitData());
-        this._referenceObject.setForcedSheetId(currentConfigService.getSheetNameMap());
-        this._referenceObject.setArrayFormulaCellData(currentConfigService.getArrayFormulaCellData());
+        this._referenceObject.setDefaultUnitId(runtimeService.currentUnitId);
 
         this._referenceObject.setDefaultSheetId(runtimeService.currentSubComponentId);
-        this._referenceObject.setDefaultUnitId(runtimeService.currentUnitId);
+
+        this._referenceObject.setForcedSheetId(currentConfigService.getSheetNameMap());
+
+        this._referenceObject.setUnitData(currentConfigService.getUnitData());
+
+        this._referenceObject.setArrayFormulaCellData(currentConfigService.getArrayFormulaCellData());
+
         this._referenceObject.setRuntimeData(runtimeService.getUnitData());
         this._referenceObject.setRuntimeArrayFormulaCellData(runtimeService.getRuntimeArrayFormulaCellData());
 

@@ -88,10 +88,12 @@ export class CellReferenceObject extends BaseReferenceObject {
 
         rangeReferenceObject.setRefOffset(x, y);
 
-        const forceId = this.getForcedUnitId();
+        const forceSheetId = this.getForcedSheetId();
 
-        if (forceId != null) {
-            rangeReferenceObject.setForcedSheetIdDirect(this.getForcedUnitId());
+        rangeReferenceObject.setForcedSheetName(this.getForcedSheetName());
+
+        if (forceSheetId != null) {
+            rangeReferenceObject.setForcedSheetIdDirect(forceSheetId);
         }
 
         // const forcedSheetID = this.getForcedSheetId();
@@ -99,10 +101,10 @@ export class CellReferenceObject extends BaseReferenceObject {
         //     rangeReferenceObject.setForcedSheetIdDirect(forcedSheetID);
         // }
 
-        // const forcedUnitId = this.getForcedUnitId();
-        // if (forcedUnitId) {
-        //     rangeReferenceObject.setForcedUnitIdDirect(forcedUnitId);
-        // }
+        const forcedUnitId = this.getForcedUnitId();
+        if (forcedUnitId) {
+            rangeReferenceObject.setForcedUnitIdDirect(forcedUnitId);
+        }
 
         return rangeReferenceObject;
     }

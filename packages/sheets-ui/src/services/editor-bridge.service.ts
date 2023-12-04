@@ -33,6 +33,8 @@ export interface IEditorBridgeService {
     setState(param: IEditorBridgeServiceParam): void;
     getState(): Readonly<Nullable<IEditorBridgeServiceParam>>;
     changeVisible(param: IEditorBridgeServiceVisibleParam): void;
+    changeEditorDirty(dirtyStatus: boolean): void;
+    getEditorDirty(): boolean;
     isVisible(): IEditorBridgeServiceVisibleParam;
     enableForceKeepVisible(): void;
     disableForceKeepVisible(): void;
@@ -44,6 +46,8 @@ export class EditorBridgeService implements IEditorBridgeService, IDisposable {
     private _state: Nullable<IEditorBridgeServiceParam> = null;
 
     private _isForceKeepVisible: boolean = false;
+
+    private _editorIsDirty: boolean = false;
 
     private _visible: IEditorBridgeServiceVisibleParam = {
         visible: false,
@@ -81,6 +85,11 @@ export class EditorBridgeService implements IEditorBridgeService, IDisposable {
     changeVisible(param: IEditorBridgeServiceVisibleParam) {
         this._visible = param;
 
+        // Reset the dirty status when the editor is visible.
+        if (param.visible) {
+            this._editorIsDirty = false;
+        }
+
         this._visible$.next(this._visible);
         this._afterVisible$.next(this._visible);
     }
@@ -99,6 +108,14 @@ export class EditorBridgeService implements IEditorBridgeService, IDisposable {
 
     isForceKeepVisible(): boolean {
         return this._isForceKeepVisible;
+    }
+
+    changeEditorDirty(dirtyStatus: boolean) {
+        this._editorIsDirty = dirtyStatus;
+    }
+
+    getEditorDirty() {
+        return this._editorIsDirty;
     }
 }
 

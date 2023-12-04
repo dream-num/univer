@@ -1,4 +1,4 @@
-import { IKeyValue, Nullable } from './types';
+import type { IKeyValue, Nullable } from './types';
 
 /**
  * Predicate Function type
@@ -18,7 +18,10 @@ export type UnaryOperatorFunction<T> = (value: T) => T;
 /**
  * Object Array Primitive Type
  */
-export type ObjectArrayPrimitiveType<T> = { [key: number]: T; length?: number };
+export interface ObjectArrayPrimitiveType<T> {
+    [key: number]: T;
+    length?: number;
+}
 
 /**
  * Object Array Type
@@ -510,7 +513,13 @@ export class ObjectArray<T> {
 
         // move all items after toIndex in backward order
         for (let i = fromIndex - 1; i >= toIndex; i--) {
-            array[i + count] = array[i];
+            const item = array[i];
+            array[i + count] = item;
+
+            // Prevent undefined, otherwise the forValue loop will report an error
+            if (item == null) {
+                delete array[i + count];
+            }
         }
 
         // insert cached items to toIndex
@@ -530,7 +539,13 @@ export class ObjectArray<T> {
 
         // move all items after toIndex in forward order
         for (let i = fromIndex + count; i < toIndex; i++) {
-            array[i - count] = array[i];
+            const item = array[i];
+            array[i - count] = item;
+
+            // Prevent undefined, otherwise the forValue loop will report an error
+            if (item == null) {
+                delete array[i - count];
+            }
         }
 
         // insert cached items to toIndex

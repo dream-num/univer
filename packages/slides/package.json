@@ -1,0 +1,42 @@
+{
+    "name": "@univerjs/slides",
+    "version": "0.1.0-alpha.0",
+    "description": "UniverSheet normal base-slides",
+    "keywords": [],
+    "author": "DreamNum <developer@univer.ai>",
+    "license": "MIT",
+    "main": "./src/index.ts",
+    "publishConfig": {
+        "access": "public",
+        "exports": {
+            ".": "./lib/index.js",
+            "./*": "./lib/*"
+        }
+    },
+    "exports": {
+        ".": "./src/index.ts",
+        "./*": "./src/*"
+    },
+    "directories": {
+        "lib": "lib"
+    },
+    "files": [
+        "lib"
+    ],
+    "private": true,
+    "scripts": {},
+    "dependencies": {
+        "@univerjs/engine-render": "workspace:*",
+        "@univerjs/ui": "workspace:*",
+        "@univerjs/core": "workspace:*",
+        "@wendellhu/redi": "^0.12.11"
+    },
+    "devDependencies": {
+        "@vitest/coverage-istanbul": "^0.34.6",
+        "less": "^4.2.0",
+        "ts-node": "^10.9.1",
+        "typedoc": "^0.25.4",
+        "typescript": "^5.3.2",
+        "vitest": "^0.34.6"
+    }
+}

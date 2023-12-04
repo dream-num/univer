@@ -1,7 +1,9 @@
 import { Tools } from '../tools';
-import { Sequence } from './sequence';
+import type { Sequence } from './sequence';
 
-type SerializerNewInstanceType = { newInstance: (sequence: Sequence) => Serializer };
+interface SerializerNewInstanceType {
+    newInstance: (sequence: Sequence) => Serializer;
+}
 
 export abstract class Serializer {
     static fromSequence<T extends Serializer>(sequence: Sequence[]): T[];

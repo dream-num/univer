@@ -119,7 +119,7 @@ export type IColumnStartEndData = [startColumn: number, endColumn: number] | num
  true false 枚举
  * means "A1:B2"
  */
-export type IRangeArrayData = {
+export interface IRangeArrayData {
     /**
      * row
      */
@@ -128,12 +128,12 @@ export type IRangeArrayData = {
      * column
      */
     column: IColumnStartEndData;
-};
+}
 
 /**
  * The row and column numbers represent a cell
  */
-export type IRangeCellData = {
+export interface IRangeCellData {
     /**
      * row
      */
@@ -142,7 +142,7 @@ export type IRangeCellData = {
      * column
      */
     column: number;
-};
+}
 
 /**
  * range types

@@ -1,6 +1,7 @@
-import { Nullable } from '../../common/type-utils';
+import type { Nullable } from '../../common/type-utils';
 import { ColorType, ThemeColors, ThemeColorType } from '../../types/enum';
-import { Color, RgbColor, ThemeColor } from './color';
+import type { Color } from './color';
+import { RgbColor, ThemeColor } from './color';
 
 export class ColorBuilder {
     private _themeValue: ThemeColorType = ThemeColorType.LIGHT1;

@@ -1,6 +1,8 @@
-import { Nullable, ObjectArray, ObjectArrayType, Tools } from '../shared';
+import type { Nullable, ObjectArrayType } from '../shared';
+import { ObjectArray, Tools } from '../shared';
 import { BooleanNumber } from '../types/enum';
-import { IRange, IRowData, IWorksheetData, RANGE_TYPE } from '../types/interfaces';
+import type { IRange, IRowData, IWorksheetData } from '../types/interfaces';
+import { RANGE_TYPE } from '../types/interfaces';
 
 /**
  * Manage configuration information of all rows, get row height, row length, set row height, etc.

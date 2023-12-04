@@ -20,5 +20,6 @@
         "isolatedModules": true,
         "types": ["node", "esbuild-style-plugin"]
     },
-    "include": ["packages/*/src", "examples/*/src"]
+    "include": ["packages/*/src", "examples/*/src"],
+    "exclude": ["**/node_modules"]
 }

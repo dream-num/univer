@@ -1,9 +1,11 @@
 /* eslint-disable no-magic-numbers */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Observable, of, Subject } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { ChannelClient, ChannelServer, fromModule, IMessageProtocol, toModule } from '../rpc.service';
+import type { IMessageProtocol } from '../rpc.service';
+import { ChannelClient, ChannelServer, fromModule, toModule } from '../rpc.service';
 
 describe('Test ChannelClient & ChannelServer', () => {
     let clientProtocol: TestMessageProtocolForClient;

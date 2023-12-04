@@ -1,11 +1,13 @@
-import { Ctor, Inject, Injector } from '@wendellhu/redi';
+import type { Ctor } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 
-import { Plugin, PluginCtor, PluginStore } from '../plugin/plugin';
+import type { Plugin, PluginCtor } from '../plugin/plugin';
+import { PluginStore } from '../plugin/plugin';
 import { LifecycleStages } from '../services/lifecycle/lifecycle';
 import { LifecycleInitializerService, LifecycleService } from '../services/lifecycle/lifecycle.service';
 import { Disposable, toDisposable } from '../shared/lifecycle';
 import { Slide } from '../slides/domain/slide-model';
-import { ISlideData } from '../types/interfaces/i-slide-data';
+import type { ISlideData } from '../types/interfaces/i-slide-data';
 
 /**
  * Externally provided UniverSlide root instance

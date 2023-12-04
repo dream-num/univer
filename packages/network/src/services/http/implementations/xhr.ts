@@ -1,13 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { Nullable } from '@univerjs/core';
-import { Observable, Observer } from 'rxjs';
+import type { Nullable } from '@univerjs/core';
+import type { Observer } from 'rxjs';
+import { Observable } from 'rxjs';
 
 import { HTTPHeaders } from '../headers';
 import { ErrorStatusCodeLowerBound, HTTPStatusCode, SuccessStatusCodeLowerBound } from '../http';
-import { HTTPRequest } from '../request';
-import { HTTPEvent, HTTPResponse, HTTPResponseError, ResponseHeader } from '../response';
-import { IHTTPImplementation } from './implementation';
+import type { HTTPRequest } from '../request';
+import type { HTTPEvent } from '../response';
+import { HTTPResponse, HTTPResponseError, ResponseHeader } from '../response';
+import type { IHTTPImplementation } from './implementation';
 
 /**
  * A HTTP implementation using XHR. XHR could only be async.

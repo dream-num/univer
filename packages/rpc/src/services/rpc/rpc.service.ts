@@ -3,7 +3,8 @@
 
 import { RxDisposable } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
-import { BehaviorSubject, firstValueFrom, isObservable, Observable, of, Subscriber, Subscription } from 'rxjs';
+import type { Subscriber, Subscription } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, isObservable, Observable, of } from 'rxjs';
 import { filter, take, takeUntil } from 'rxjs/operators';
 
 /** This protocol is for transferring data from the two peer univer instance running in different locations. */

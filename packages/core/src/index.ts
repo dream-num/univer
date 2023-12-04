@@ -61,9 +61,6 @@ export {
 export { ResourceManagerService } from './services/resource-manager/resource-manager.service';
 export type { IResourceHook } from './services/resource-manager/type';
 export { IResourceManagerService } from './services/resource-manager/type';
-export { INTERCEPTOR_POINT } from './services/sheet-interceptor/interceptor-const';
-export { SheetInterceptorService } from './services/sheet-interceptor/sheet-interceptor.service';
-export type { IInterceptor, ISheetLocation } from './services/sheet-interceptor/utils/interceptor';
 export { type IStyleSheet, ThemeService } from './services/theme/theme.service';
 export {
     type IUndoRedoCommandInfos,
@@ -77,8 +74,8 @@ export {
 export * from './shared';
 
 // #region sheet
-
-export { composeInterceptors, createInterceptorKey } from './services/sheet-interceptor/utils/interceptor';
+export type { IComposeInterceptors, IInterceptor, InterceptorHandler } from './common/interceptor';
+export { composeInterceptors, createInterceptorKey, InterceptorManager } from './common/interceptor';
 export { Range } from './sheets/range';
 export {
     deserializeRangeWithSheet,

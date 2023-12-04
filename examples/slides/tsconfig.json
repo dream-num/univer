@@ -1,0 +1,14 @@
+{
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "rootDir": "./",
+        "outDir": "lib",
+        "downlevelIteration": true,
+        "baseUrl": "./",
+        "esModuleInterop": true,
+        "emitDecoratorMetadata": true,
+
+        "strictPropertyInitialization": false,
+    },
+    "include": ["src/**/*"]
+}

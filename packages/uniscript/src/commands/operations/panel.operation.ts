@@ -1,6 +1,7 @@
-import { ISidebarService } from '@univerjs/base-ui';
-import { CommandType, IOperation } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { IOperation } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
+import { ISidebarService } from '@univerjs/ui';
+import type { IAccessor } from '@wendellhu/redi';
 
 import { ScriptPanelService } from '../../services/script-panel.service';
 

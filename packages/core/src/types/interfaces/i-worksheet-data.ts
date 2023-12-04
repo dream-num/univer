@@ -1,12 +1,12 @@
-import { ObjectArrayType } from '../../shared/object-array';
-import { ObjectMatrixPrimitiveType } from '../../shared/object-matrix';
-import { IKeyValue } from '../../shared/types';
-import { BooleanNumber, SheetTypes } from '../enum';
-import { ICellData } from './i-cell-data';
-import { IColumnData } from './i-column-data';
-import { IFreeze } from './i-freeze';
-import { IRange, IRangeType } from './i-range';
-import { IRowData } from './i-row-data';
+import type { ObjectArrayType } from '../../shared/object-array';
+import type { ObjectMatrixPrimitiveType } from '../../shared/object-matrix';
+import type { IKeyValue } from '../../shared/types';
+import type { BooleanNumber, SheetTypes } from '../enum';
+import type { ICellData } from './i-cell-data';
+import type { IColumnData } from './i-column-data';
+import type { IFreeze } from './i-freeze';
+import type { IRange, IRangeType } from './i-range';
+import type { IRowData } from './i-row-data';
 
 // type MetaData = {
 //     metadataId?: string;

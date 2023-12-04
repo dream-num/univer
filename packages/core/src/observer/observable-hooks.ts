@@ -1,5 +1,6 @@
-import { Nullable } from '../shared/types';
-import { EventState, Observable, Observer } from './observable';
+import type { Nullable } from '../shared/types';
+import type { EventState } from './observable';
+import { Observable, Observer } from './observable';
 
 /**
  * Observable Hooks

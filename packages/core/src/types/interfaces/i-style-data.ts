@@ -1,6 +1,6 @@
-import { Nullable } from '../../shared/types';
-import { BorderStyleTypes } from '../enum/border-style-types';
-import {
+import type { Nullable } from '../../shared/types';
+import type { BorderStyleTypes } from '../enum/border-style-types';
+import type {
     BaselineOffset,
     BooleanNumber,
     HorizontalAlign,
@@ -9,7 +9,7 @@ import {
     VerticalAlign,
     WrapStrategy,
 } from '../enum/text-style';
-import { ThemeColorType } from '../enum/theme-color-type';
+import type { ThemeColorType } from '../enum/theme-color-type';
 
 /**
  * Properties of text decoration

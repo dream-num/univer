@@ -1,7 +1,7 @@
-import { Nullable } from '../../shared/types';
+import type { Nullable } from '../../shared/types';
 import { CellValueType } from '../enum/text-style';
-import { IDocumentData } from './i-document-data';
-import { IStyleData } from './i-style-data';
+import type { IDocumentData } from './i-document-data';
+import type { IStyleData } from './i-style-data';
 
 /**
  * Cell value type
@@ -28,7 +28,7 @@ export interface ICellData {
      */
     m?: Nullable<string>; // formatted value
     // Usually the type is automatically determined based on the data, or the user directly specifies
-    t?: Nullable<CellValueType>; // 0 string, 1 number, 2 boolean, 3 force string, green icon, set null for cell clear all
+    t?: Nullable<CellValueType>; // 1 string, 2 number, 3 boolean, 4 force string, green icon, set null for cell clear all
     f?: Nullable<string>; // formula '=SUM(1)'
     si?: Nullable<string>; // formula id
     /**
@@ -62,7 +62,8 @@ export function isICellData(value: any): value is ICellData {
             ((value as ICellData).s !== undefined ||
                 (value as ICellData).p !== undefined ||
                 (value as ICellData).v !== undefined)) ||
-        (value as ICellData).f !== undefined
+        (value as ICellData).f !== undefined ||
+        (value as ICellData).si !== undefined
     );
 }
 
@@ -79,4 +80,26 @@ export function getCellValueType(cell: ICellData) {
     if (typeof cell.v === 'boolean') {
         return CellValueType.BOOLEAN;
     }
+}
+
+export function isNullCell(cell: Nullable<ICellData>) {
+    if (cell == null) {
+        return true;
+    }
+
+    const { v, f, si, p, s } = cell;
+
+    if (!(v == null || (typeof v === 'string' && v.length === 0))) {
+        return false;
+    }
+
+    if ((f != null && f.length > 0) || (si != null && si.length > 0)) {
+        return false;
+    }
+
+    if (p != null) {
+        return false;
+    }
+
+    return true;
 }

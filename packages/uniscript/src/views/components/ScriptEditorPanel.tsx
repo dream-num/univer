@@ -1,7 +1,7 @@
-import { IMessageService, IShortcutService } from '@univerjs/base-ui';
 import type { Nullable } from '@univerjs/core';
 import { DisposableCollection, LocaleService, toDisposable } from '@univerjs/core';
 import { Button, MessageType } from '@univerjs/design';
+import { IMessageService, IShortcutService } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { editor } from 'monaco-editor';

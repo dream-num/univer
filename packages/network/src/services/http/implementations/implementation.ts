@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createIdentifier } from '@wendellhu/redi';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
-import { HTTPRequest } from '../request';
-import { HTTPEvent } from '../response';
+import type { HTTPRequest } from '../request';
+import type { HTTPEvent } from '../response';
 
 /**
  * HTTP service could be implemented differently on platforms.

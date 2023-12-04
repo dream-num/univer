@@ -1,5 +1,5 @@
-import type { ISelectionWithStyle } from '@univerjs/base-sheets';
 import type { Workbook, Worksheet } from '@univerjs/core';
+import type { ISelectionWithStyle } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { FRange } from './f-range';

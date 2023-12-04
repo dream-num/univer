@@ -1,14 +1,15 @@
+import type { IMutationInfo } from '@univerjs/core';
 import {
     CommandType,
     Disposable,
     ICommandService,
-    IMutationInfo,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
 } from '@univerjs/core';
 
-import { IRemoteSyncMutationOptions, IRemoteSyncService } from '../../services/remote-instance/remote-instance.service';
+import type { IRemoteSyncMutationOptions } from '../../services/remote-instance/remote-instance.service';
+import { IRemoteSyncService } from '../../services/remote-instance/remote-instance.service';
 
 /**
  * This controller is responsible for syncing data from the worker thread to

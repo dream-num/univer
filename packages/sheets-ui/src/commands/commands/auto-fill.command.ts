@@ -15,6 +15,7 @@ import type {
 import {
     AddMergeUndoMutationFactory,
     AddWorksheetMergeMutation,
+    getAddMergeMutationRangeByType,
     RemoveMergeUndoMutationFactory,
     RemoveWorksheetMergeMutation,
     SetRangeValuesMutation,
@@ -22,8 +23,6 @@ import {
     SetSelectionsOperation,
 } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
-
-import { getAddMergeMutationRangeByType } from './add-worksheet-merge.command';
 
 export interface IAutoFillCommandParams {
     worksheetId?: string;

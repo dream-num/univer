@@ -175,6 +175,9 @@ export class Worksheet {
 
     /**
      * Get cell matrix from a given range and pick out non-first cells of merged cells.
+     *
+     * Notice that `ICellData` here is not after copying. In another word, the object matrix here should be
+     * considered as a slice of the original worksheet data matrix.
      */
     // PERF: we could not skip indexes with merged cells, because we have already known the merged cells' range
     getMatrixWithMergedCells(
@@ -196,7 +199,6 @@ export class Worksheet {
         createRowColIter(row, endRow, col, endCol).forEach((row, col) => {
             const v = matrix.getValue(row, col);
             if (v) {
-                // ICellData should combine merge info
                 ret.setValue(row, col, v);
             }
         });
@@ -446,5 +448,9 @@ export class Worksheet {
      */
     getLastColumnWithContent(): number {
         return this._cellData.getRange().endColumn;
+    }
+
+    cellHasValue(value: ICellData) {
+        return value && (value.v !== undefined || value.f !== undefined || value.p !== undefined);
     }
 }

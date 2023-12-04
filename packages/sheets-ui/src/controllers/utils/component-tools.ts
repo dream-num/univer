@@ -8,6 +8,7 @@ import type {
     SpreadsheetColumnHeader,
     SpreadsheetHeader,
     SpreadsheetSkeleton,
+    Viewport,
 } from '@univerjs/engine-render';
 import { Vector2 } from '@univerjs/engine-render';
 

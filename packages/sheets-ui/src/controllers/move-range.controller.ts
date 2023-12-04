@@ -1,3 +1,4 @@
+import type { IRange } from '@univerjs/core';
 import {
     Disposable,
     DisposableCollection,

@@ -1,5 +1,12 @@
 import type { ICellData, ICommand, IMutationInfo, IRange, ObjectMatrixPrimitiveType } from '@univerjs/core';
-import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
+import {
+    CommandType,
+    ICommandService,
+    IUndoRedoService,
+    IUniverInstanceService,
+    ObjectMatrix,
+    RANGE_TYPE,
+} from '@univerjs/core';
 import type {
     IAddWorksheetMergeMutationParams,
     IRemoveWorksheetMergeMutationParams,

@@ -7,11 +7,11 @@ import {
     RANGE_TYPE,
     Rectangle,
     sequenceExecute,
-    SheetInterceptorService,
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
 import { SelectionManagerService } from '../../services/selection-manager.service';
+import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import type {
     ISetWorksheetRowHeightMutationParams,
     ISetWorksheetRowIsAutoHeightMutationParams,

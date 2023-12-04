@@ -19,12 +19,12 @@ import {
     IUniverInstanceService,
     ObjectMatrix,
     sequenceExecute,
-    SheetInterceptorService,
     Tools,
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
 import { SelectionManagerService } from '../../services/selection-manager.service';
+import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 

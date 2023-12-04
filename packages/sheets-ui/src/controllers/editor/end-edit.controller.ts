@@ -10,20 +10,24 @@ import {
     FOCUSING_FORMULA_EDITOR,
     ICommandService,
     IContextService,
-    INTERCEPTOR_POINT,
     isFormulaString,
     IUndoRedoService,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
-    SheetInterceptorService,
     Tools,
 } from '@univerjs/core';
 import { MoveCursorOperation, MoveSelectionOperation } from '@univerjs/docs';
 import { FormulaEngineService, matchToken } from '@univerjs/engine-formula';
 import type { IMouseEvent, IPointerEvent } from '@univerjs/engine-render';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
-import { SelectionManagerService, SetRangeValuesCommand, SetSelectionsOperation } from '@univerjs/sheets';
+import {
+    INTERCEPTOR_POINT,
+    SelectionManagerService,
+    SetRangeValuesCommand,
+    SetSelectionsOperation,
+    SheetInterceptorService,
+} from '@univerjs/sheets';
 import { KeyCode } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 import type { Subscription } from 'rxjs';

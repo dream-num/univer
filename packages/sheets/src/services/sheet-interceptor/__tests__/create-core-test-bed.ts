@@ -1,12 +1,7 @@
+import type { IWorkbookData } from '@univerjs/core';
+import { ILogService, IUniverInstanceService, LocaleType, Plugin, PluginType, Univer } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
-
-import { Univer } from '../../../basics/univer';
-import { Plugin, PluginType } from '../../../plugin/plugin';
-import { LocaleType } from '../../../types/enum/locale-type';
-import type { IWorkbookData } from '../../../types/interfaces/i-workbook-data';
-import { IUniverInstanceService } from '../../instance/instance.service';
-import { ILogService } from '../../log/log.service';
 
 const TEST_WORKBOOK_DATA: IWorkbookData = {
     id: 'test',
@@ -48,6 +43,10 @@ export function createCoreTestBed(workbookConfig?: IWorkbookData, dependencies?:
 
             this._injector = _injector;
             get = this._injector.get.bind(_injector);
+        }
+
+        override onStarting(injector: Injector): void {
+            dependencies?.forEach((d) => injector.add(d));
         }
 
         override onDestroy(): void {

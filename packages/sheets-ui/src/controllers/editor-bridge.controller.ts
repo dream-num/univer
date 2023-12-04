@@ -3,19 +3,19 @@ import {
     Disposable,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     ICommandService,
-    INTERCEPTOR_POINT,
     IUniverInstanceService,
     LifecycleStages,
     makeCellToSelection,
     OnLifecycle,
-    SheetInterceptorService,
 } from '@univerjs/core';
 import { DeviceInputEventType, getCanvasOffsetByEngine, IRenderManagerService } from '@univerjs/engine-render';
 import {
     COMMAND_LISTENER_SKELETON_CHANGE,
+    INTERCEPTOR_POINT,
     NORMAL_SELECTION_PLUGIN_NAME,
     SelectionManagerService,
     SetWorksheetActivateMutation,
+    SheetInterceptorService,
 } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 

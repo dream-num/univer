@@ -1,20 +1,14 @@
 import type { Nullable } from '@univerjs/core';
-import {
-    CellValueType,
-    Disposable,
-    INTERCEPTOR_POINT,
-    IUniverInstanceService,
-    LifecycleStages,
-    OnLifecycle,
-    SheetInterceptorService,
-} from '@univerjs/core';
+import { CellValueType, Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import numfmt from '@univerjs/engine-numfmt';
 import type { INumfmtItemWithCache, ISetNumfmtMutationParams } from '@univerjs/sheets';
 import {
     factorySetNumfmtUndoMutation,
+    INTERCEPTOR_POINT,
     INumfmtService,
     SetNumfmtMutation,
     SetRangeValuesCommand,
+    SheetInterceptorService,
 } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 

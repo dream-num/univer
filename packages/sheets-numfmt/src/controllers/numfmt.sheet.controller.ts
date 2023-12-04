@@ -1,12 +1,12 @@
-import {
-    Disposable,
-    IUniverInstanceService,
-    LifecycleStages,
-    OnLifecycle,
-    SheetInterceptorService,
-} from '@univerjs/core';
+import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import type { IRemoveSheetCommandParams, ISetNumfmtMutationParams } from '@univerjs/sheets';
-import { factorySetNumfmtUndoMutation, INumfmtService, RemoveSheetCommand, SetNumfmtMutation } from '@univerjs/sheets';
+import {
+    factorySetNumfmtUndoMutation,
+    INumfmtService,
+    RemoveSheetCommand,
+    SetNumfmtMutation,
+    SheetInterceptorService,
+} from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 
 @OnLifecycle(LifecycleStages.Rendered, NumfmtSheetController)

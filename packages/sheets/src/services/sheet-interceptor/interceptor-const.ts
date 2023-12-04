@@ -1,6 +1,5 @@
-import type { ICellData } from '../../types/interfaces/i-cell-data';
-import type { ICommandInfo } from '../command/command.service';
-import type { ISheetLocation } from './utils/interceptor';
+import type { ICellData, ICommandInfo, ISheetLocation } from '@univerjs/core';
+
 import { createInterceptorKey } from './utils/interceptor';
 
 const CELL_CONTENT = createInterceptorKey<ICellData, ISheetLocation>('CELL_CONTENT');

@@ -6,11 +6,11 @@ import {
     IUniverInstanceService,
     ObjectMatrix,
     sequenceExecute,
-    SheetInterceptorService,
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
 import { NORMAL_SELECTION_PLUGIN_NAME } from '../../services/selection-manager.service';
+import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import type { IMoveRangeMutationParams } from '../mutations/move-range.mutation';
 import { MoveRangeMutation } from '../mutations/move-range.mutation';
 import { SetSelectionsOperation } from '../operations/selection.operation';

@@ -238,3 +238,7 @@ export {
     handleMoveRange,
     runRefRangeMutations,
 } from './services/ref-range/util';
+export { INTERCEPTOR_POINT } from './services/sheet-interceptor/interceptor-const';
+export { SheetInterceptorService } from './services/sheet-interceptor/sheet-interceptor.service';
+export type { IInterceptor, ISheetLocation } from './services/sheet-interceptor/utils/interceptor';
+export { composeInterceptors, createInterceptorKey } from './services/sheet-interceptor/utils/interceptor';

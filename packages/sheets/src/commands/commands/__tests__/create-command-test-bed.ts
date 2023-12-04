@@ -5,6 +5,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 
 import { BorderStyleManagerService } from '../../../services/border-style-manager.service';
 import { SelectionManagerService } from '../../../services/selection-manager.service';
+import { SheetInterceptorService } from '../../../services/sheet-interceptor/sheet-interceptor.service';
 
 const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
     id: 'test',
@@ -55,6 +56,7 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
         override onStarting(injector: Injector): void {
             injector.add([SelectionManagerService]);
             injector.add([BorderStyleManagerService]);
+            injector.add([SheetInterceptorService]);
 
             dependencies?.forEach((d) => injector.add(d));
         }

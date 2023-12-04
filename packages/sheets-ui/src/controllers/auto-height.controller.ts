@@ -1,5 +1,5 @@
 import type { IRange } from '@univerjs/core';
-import { IUniverInstanceService, LifecycleStages, OnLifecycle, SheetInterceptorService } from '@univerjs/core';
+import { IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import type {
     ISetRangeValuesRangeMutationParams,
     ISetStyleCommandParams,
@@ -16,6 +16,7 @@ import {
     SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowAutoHeightMutationFactory,
     SetWorksheetRowIsAutoHeightCommand,
+    SheetInterceptorService,
 } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 

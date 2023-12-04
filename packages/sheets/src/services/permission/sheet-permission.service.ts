@@ -2,12 +2,10 @@ import type { PermissionService } from '@univerjs/core';
 import {
     Disposable,
     getTypeFromPermissionItemList,
-    INTERCEPTOR_POINT,
     IPermissionService,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
-    SheetInterceptorService,
     toDisposable,
     UniverEditablePermissionPoint,
 } from '@univerjs/core';
@@ -15,6 +13,8 @@ import { Inject } from '@wendellhu/redi';
 import { map } from 'rxjs/operators';
 
 import { SetRangeValuesCommand } from '../../commands/commands/set-range-values.command';
+import { INTERCEPTOR_POINT } from '../sheet-interceptor/interceptor-const';
+import { SheetInterceptorService } from '../sheet-interceptor/sheet-interceptor.service';
 import { SheetEditablePermission } from './permission-point';
 
 @OnLifecycle(LifecycleStages.Ready, SheetPermissionService)

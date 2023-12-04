@@ -7,7 +7,6 @@ import {
     LifecycleStages,
     OnLifecycle,
     Rectangle,
-    SheetInterceptorService,
     Tools,
 } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -47,6 +46,7 @@ import {
 import { RefRangeService } from '../services/ref-range/ref-range.service';
 import type { EffectRefRangeParams } from '../services/ref-range/type';
 import { SelectionManagerService } from '../services/selection-manager.service';
+import { SheetInterceptorService } from '../services/sheet-interceptor/sheet-interceptor.service';
 
 @OnLifecycle(LifecycleStages.Steady, MergeCellController)
 export class MergeCellController extends Disposable {

@@ -1,6 +1,4 @@
-import type { Nullable } from '../../../common/type-utils';
-import type { Workbook } from '../../../sheets/workbook';
-import type { Worksheet } from '../../../sheets/worksheet';
+import type { Nullable, Workbook, Worksheet } from '@univerjs/core';
 
 export type InterceptorHandler<M = unknown, C = ISheetLocation> = (
     value: Nullable<M>,

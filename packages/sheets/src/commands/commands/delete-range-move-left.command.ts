@@ -6,7 +6,6 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
     sequenceExecute,
-    SheetInterceptorService,
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
@@ -15,6 +14,7 @@ import type {
     IInsertRangeMutationParams,
 } from '../../basics/interfaces/mutation-interface';
 import { SelectionManagerService } from '../../services/selection-manager.service';
+import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { DeleteRangeMutation, DeleteRangeUndoMutationFactory } from '../mutations/delete-range.mutation';
 import { InsertRangeMutation } from '../mutations/insert-range.mutation';
 

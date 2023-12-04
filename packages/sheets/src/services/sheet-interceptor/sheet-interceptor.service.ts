@@ -1,15 +1,15 @@
+import type { ICellData, ICommandInfo, IUndoRedoCommandInfos, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import {
+    Disposable,
+    DisposableCollection,
+    IUniverInstanceService,
+    LifecycleStages,
+    OnLifecycle,
+    remove,
+    toDisposable,
+} from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 
-import { remove } from '../../common/array';
-import type { Nullable } from '../../common/type-utils';
-import { Disposable, DisposableCollection, toDisposable } from '../../shared/lifecycle';
-import type { Workbook } from '../../sheets/workbook';
-import type { Worksheet } from '../../sheets/worksheet';
-import type { ICellData } from '../../types/interfaces/i-cell-data';
-import type { ICommandInfo } from '../command/command.service';
-import { IUniverInstanceService } from '../instance/instance.service';
-import { LifecycleStages, OnLifecycle } from '../lifecycle/lifecycle';
-import type { IUndoRedoCommandInfos } from '../undoredo/undoredo.service';
 import { INTERCEPTOR_POINT } from './interceptor-const';
 import type { IInterceptor } from './utils/interceptor';
 import { composeInterceptors } from './utils/interceptor';

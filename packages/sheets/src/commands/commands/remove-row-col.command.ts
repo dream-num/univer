@@ -7,7 +7,6 @@ import {
     IUniverInstanceService,
     Rectangle,
     sequenceExecute,
-    SheetInterceptorService,
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
@@ -20,6 +19,7 @@ import type {
     IRemoveRowsMutationParams,
 } from '../../basics/interfaces/mutation-interface';
 import { SelectionManagerService } from '../../services/selection-manager.service';
+import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { DeleteRangeMutation, DeleteRangeUndoMutationFactory } from '../mutations/delete-range.mutation';
 import { InsertRangeMutation } from '../mutations/insert-range.mutation';
 import { InsertColMutation, InsertRowMutation } from '../mutations/insert-row-col.mutation';

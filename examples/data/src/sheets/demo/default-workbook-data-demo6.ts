@@ -2720,7 +2720,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO6: IWorkbookData = {
                     },
                     '1': {
                         v: '一月',
-                        m: '一月',
                         s: 'c27I5b',
                     },
                     '2': {
@@ -2754,37 +2753,30 @@ export const DEFAULT_WORKBOOK_DATA_DEMO6: IWorkbookData = {
                     },
                     '1': {
                         v: '日',
-                        m: '日',
                         s: 'AeAego',
                     },
                     '2': {
                         v: '一',
-                        m: '一',
                         s: 'YYhEgD',
                     },
                     '3': {
                         v: '二',
-                        m: '二',
                         s: 'YYhEgD',
                     },
                     '4': {
                         v: '三',
-                        m: '三',
                         s: 'YYhEgD',
                     },
                     '5': {
                         v: '四',
-                        m: '四',
                         s: 'YYhEgD',
                     },
                     '6': {
                         v: '五',
-                        m: '五',
                         s: 'YYhEgD',
                     },
                     '7': {
                         v: '六',
-                        m: '六',
                         s: 'YYhEgD',
                     },
                     '8': {
@@ -2800,37 +2792,30 @@ export const DEFAULT_WORKBOOK_DATA_DEMO6: IWorkbookData = {
                     },
                     '1': {
                         v: '27',
-                        m: '27',
                         s: '4i0fZ-',
                     },
                     '2': {
                         v: '28',
-                        m: '28',
                         s: 'WsPcQD',
                     },
                     '3': {
                         v: '29',
-                        m: '29',
                         s: 'WsPcQD',
                     },
                     '4': {
                         v: '30',
-                        m: '30',
                         s: 'WsPcQD',
                     },
                     '5': {
                         v: '31',
-                        m: '31',
                         s: 'WsPcQD',
                     },
                     '6': {
                         v: '1',
-                        m: '1',
                         s: 'njh8Q5',
                     },
                     '7': {
                         v: '2',
-                        m: '2',
                         s: 'njh8Q5',
                     },
                     '8': {
@@ -2846,37 +2831,30 @@ export const DEFAULT_WORKBOOK_DATA_DEMO6: IWorkbookData = {
                     },
                     '1': {
                         v: '3',
-                        m: '3',
                         s: 'hBtso7',
                     },
                     '2': {
                         v: '4',
-                        m: '4',
                         s: 'njh8Q5',
                     },
                     '3': {
                         v: '5',
-                        m: '5',
                         s: 'njh8Q5',
                     },
                     '4': {
                         v: '6',
-                        m: '6',
                         s: 'njh8Q5',
                     },
                     '5': {
                         v: '7',
-                        m: '7',
                         s: 'njh8Q5',
                     },
                     '6': {
                         v: '8',
-                        m: '8',
                         s: 'njh8Q5',
                     },
                     '7': {
                         v: '9',
-                        m: '9',
                         s: 'njh8Q5',
                     },
                     '8': {
@@ -2892,37 +2870,30 @@ export const DEFAULT_WORKBOOK_DATA_DEMO6: IWorkbookData = {
                     },
                     '1': {
                         v: '10',
-                        m: '10',
                         s: 'hBtso7',
                     },
                     '2': {
                         v: '11',
-                        m: '11',
                         s: 'njh8Q5',
                     },
                     '3': {
                         v: '12',
-                        m: '12',
                         s: 'njh8Q5',
                     },
                     '4': {
                         v: '13',
-                        m: '13',
                         s: 'njh8Q5',
                     },
                     '5': {
                         v: '14',
-                        m: '14',
                         s: 'njh8Q5',
                     },
                     '6': {
                         v: '15',
-                        m: '15',
                         s: 'njh8Q5',
                     },
                     '7': {
                         v: '16',
-                        m: '16',
                         s: 'njh8Q5',
                     },
                     '8': {
@@ -2938,37 +2909,30 @@ export const DEFAULT_WORKBOOK_DATA_DEMO6: IWorkbookData = {
                     },
                     '1': {
                         v: '17',
-                        m: '17',
                         s: 'hBtso7',
                     },
                     '2': {
                         v: '18',
-                        m: '18',
                         s: 'njh8Q5',
                     },
                     '3': {
                         v: '19',
-                        m: '19',
                         s: 'njh8Q5',
                     },
                     '4': {
                         v: '20',
-                        m: '20',
                         s: 'njh8Q5',
                     },
                     '5': {
                         v: '21',
-                        m: '21',
                         s: 'njh8Q5',
                     },
                     '6': {
                         v: '22',
-                        m: '22',
                         s: 'njh8Q5',
                     },
                     '7': {
                         v: '23',
-                        m: '23',
                         s: 'njh8Q5',
                     },
                     '8': {
@@ -2984,37 +2948,30 @@ export const DEFAULT_WORKBOOK_DATA_DEMO6: IWorkbookData = {
                     },
                     '1': {
                         v: '24',
-                        m: '24',
                         s: 'hBtso7',
                     },
                     '2': {
                         v: '25',
-                        m: '25',
                         s: 'njh8Q5',
                     },
                     '3': {
                         v: '26',
-                        m: '26',
                         s: 'njh8Q5',
                     },
                     '4': {
                         v: '27',
-                        m: '27',
                         s: 'njh8Q5',
                     },
                     '5': {
                         v: '28',
-                        m: '28',
                         s: 'njh8Q5',
                     },
                     '6': {
                         v: '29',
-                        m: '29',
                         s: 'njh8Q5',
                     },
                     '7': {
                         v: '30',
-                        m: '30',
                         s: 'njh8Q5',
                     },
                     '8': {
@@ -3030,37 +2987,30 @@ export const DEFAULT_WORKBOOK_DATA_DEMO6: IWorkbookData = {
                     },
                     '1': {
                         v: '31',
-                        m: '31',
                         s: 'hBtso7',
                     },
                     '2': {
                         v: '1',
-                        m: '1',
                         s: 'WsPcQD',
                     },
                     '3': {
                         v: '2',
-                        m: '2',
                         s: 'WsPcQD',
                     },
                     '4': {
                         v: '3',
-                        m: '3',
                         s: 'WsPcQD',
                     },
                     '5': {
                         v: '4',
-                        m: '4',
                         s: 'WsPcQD',
                     },
                     '6': {
                         v: '5',
-                        m: '5',
                         s: 'WsPcQD',
                     },
                     '7': {
                         v: '6',
-                        m: '6',
                         s: 'WsPcQD',
                     },
                     '8': {
@@ -3076,37 +3026,30 @@ export const DEFAULT_WORKBOOK_DATA_DEMO6: IWorkbookData = {
                     },
                     '1': {
                         v: '本月工作日共20天',
-                        m: '本月工作日共20天',
                         s: 'EY_PQ9',
                     },
                     '2': {
                         v: '',
-                        m: '',
                         s: 'EY_PQ9',
                     },
                     '3': {
                         v: '',
-                        m: '',
                         s: 'EY_PQ9',
                     },
                     '4': {
                         v: '',
-                        m: '',
                         s: 'EY_PQ9',
                     },
                     '5': {
                         v: '',
-                        m: '',
                         s: 'EY_PQ9',
                     },
                     '6': {
                         v: '',
-                        m: '',
                         s: 'EY_PQ9',
                     },
                     '7': {
                         v: '',
-                        m: '',
                         s: 'EY_PQ9',
                     },
                     '8': {

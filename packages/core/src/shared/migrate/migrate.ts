@@ -251,13 +251,6 @@ export function migrate(config: any): Partial<IWorkbookData> {
                             newCell.v = cell.v;
                         }
 
-                        // 显示值
-                        if (cell.hasOwnProperty('m')) {
-                            newCell.m = cell.m;
-                        } else {
-                            newCell.m = String(cell.v || '');
-                        }
-
                         const cellStyle: IStyleData = {};
 
                         // 背景颜色

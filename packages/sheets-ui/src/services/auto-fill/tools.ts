@@ -376,7 +376,6 @@ export function fillSeries(data: Array<Nullable<ICellData>>, len: number, direct
 
             if (d) {
                 d.v = num;
-                d.m = `${num}`;
                 applyData.push(d);
             }
         }
@@ -395,7 +394,6 @@ export function fillSeries(data: Array<Nullable<ICellData>>, len: number, direct
 
             if (d) {
                 d.v = y;
-                d.m = `${y}`;
                 applyData.push(d);
             }
         }
@@ -444,7 +442,7 @@ export function fillExtendNumber(data: Array<Nullable<ICellData>>, len: number, 
         const index = (i - 1) % data.length;
         const d = Tools.deepClone(data[index]);
 
-        const last = data[data.length - 1]?.m;
+        const last = `${data[data.length - 1]?.v}`;
         const match = last?.match(reg);
         const lastTxt = match?.[match.length - 1];
 
@@ -455,7 +453,6 @@ export function fillExtendNumber(data: Array<Nullable<ICellData>>, len: number, 
 
         if (d) {
             d.v = valueTxt;
-            d.m = valueTxt;
 
             applyData.push(d);
         }
@@ -471,7 +468,6 @@ export function fillOnlyFormat(data: Array<Nullable<ICellData>>, len: number) {
         const d = Tools.deepClone(data[index]);
 
         if (d) {
-            delete d.m;
             delete d.v;
 
             applyData.push(d);
@@ -497,10 +493,10 @@ export function fillChnWeek(data: Array<Nullable<ICellData>>, len: number, step:
         const d = Tools.deepClone(data[index]);
 
         let num = 0;
-        if (data[data.length - 1]?.m === keyword[0]) {
+        if (data[data.length - 1]?.v === keyword[0]) {
             num = 7 + step * i;
         } else {
-            const last = data[data.length - 1]?.m;
+            const last = `${data[data.length - 1]?.v}`;
             if (last) {
                 const txt = last.substr(last.length - 1, 1);
                 num = chineseToNumber(txt) + step * i;
@@ -513,7 +509,6 @@ export function fillChnWeek(data: Array<Nullable<ICellData>>, len: number, step:
 
         const rsd = num % 7;
         if (d) {
-            d.m = keyword[rsd];
             d.v = keyword[rsd];
 
             applyData.push(d);
@@ -530,7 +525,7 @@ export function fillChnNumber(data: Array<Nullable<ICellData>>, len: number, ste
         const index = (i - 1) % data.length;
         const d = Tools.deepClone(data[index]);
 
-        const formattedValue = data[data.length - 1]?.m;
+        const formattedValue = `${data[data.length - 1]?.v}`;
         const num = chineseToNumber(formattedValue) + step * i;
         let txt;
         if (num <= 0) {
@@ -541,7 +536,6 @@ export function fillChnNumber(data: Array<Nullable<ICellData>>, len: number, ste
 
         if (d) {
             d.v = txt;
-            d.m = txt.toString();
             applyData.push(d);
         }
     }
@@ -606,12 +600,11 @@ export function fillLoopSeries(data: Array<Nullable<ICellData>>, len: number, st
         const index = (i - 1) % data.length;
         const d = Tools.deepClone(data[index]);
 
-        const last = data[data.length - 1]?.m;
-        const num = series.indexOf(last as string) + step * i;
+        const last = `${data[data.length - 1]?.v}`;
+        const num = series.indexOf(last) + step * i;
 
         const rsd = num % seriesLen;
         if (d) {
-            d.m = series[rsd];
             d.v = series[rsd];
 
             applyData.push(d);

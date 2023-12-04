@@ -76,7 +76,7 @@ export const InsertRangeMoveRightCommand: ICommand = {
 
             for (let r = startRow; r <= endRow; r++) {
                 for (let c = startColumn; c <= endColumn; c++) {
-                    cellValue.setValue(r, c, { m: '', v: '' });
+                    cellValue.setValue(r, c, { v: '' });
                 }
             }
         }

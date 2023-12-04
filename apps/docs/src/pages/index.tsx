@@ -4,6 +4,7 @@ import Heading from '@theme/Heading';
 import Layout from '@theme/Layout';
 import { DiscordSingle24, GithubSingle24 } from '@univerjs/icons';
 import clsx from 'clsx';
+import React from 'react';
 
 import styles from './index.module.css';
 

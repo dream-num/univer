@@ -3,8 +3,8 @@
     "version": "0.0.0",
     "private": true,
     "scripts": {
-        "dev:docusaurus": "docusaurus start",
-        "build": "docusaurus build",
+        "dev:docusaurus": "docusaurus start --no-open",
+        "build:docusaurus": "NODE_OPTIONS=--max-old-space-size=10240 docusaurus build",
         "swizzle": "docusaurus swizzle",
         "deploy": "docusaurus deploy",
         "clear": "docusaurus clear",
@@ -29,6 +29,9 @@
         "@docusaurus/plugin-content-docs": "^3.0.1",
         "@docusaurus/tsconfig": "3.0.1",
         "@docusaurus/types": "3.0.1",
+        "docusaurus-plugin-typedoc": "^0.21.0",
+        "typedoc": "^0.25.4",
+        "typedoc-plugin-markdown": "^3.17.1",
         "typescript": "^5.3.2"
     },
     "browserslist": {

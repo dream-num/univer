@@ -1,6 +1,9 @@
 # Univer
 
+[![github actions](https://github.com/apitable/apitable/actions/workflows/build.yaml/badge.svg)](https://github.com/dream-num/univer/actions/workflows/build.yaml)
+[![github release](https://img.shields.io/github/v/release/dream-num/univer)](https://github.com/apitable/apitable/releases/latest)
 [![codecov](https://codecov.io/gh/dream-num/univer/graph/badge.svg?token=aPfyW2pIMN)](https://codecov.io/gh/dream-num/univer)
+[![discord](https://img.shields.io/discord/1136129819961217077?label=discord&logo=discord&style=social)](https://discord.gg/z3NKNT6D2f)
 
 English | [简体中文](./README-zh.md)
 
@@ -47,34 +50,17 @@ Welcome to join our [Discord community](https://discord.gg/z3NKNT6D2f).
 
 Please file an issue at [Issues](http://github.com/dream-num/univer/issues).
 
-## Stargazers
-
-[![Stargazers repo roster for @dream-num/univer](https://reporoster.com/stars/dream-num/univer)](https://github.com/dream-num/univer/stargazers)
-
 ## Architecture
 
 Univer is written in typescript and designed according to the plugin architecture. The functions outside the core are developed in the form of plugins.
 
-![image](./docs/source/overall.png)
-
 ## Rendering engine
 
 Univer sheet, document, and slide adopt the same rendering engine architecture, which abstracts the application into text flow, table, canvas, and core part triggers rendering, and object is the renderer.
-![image](./docs/source/Render%20Engine.png)
-
-1. Achieve the nesting and operation between applications.
-2. Sheet cells support embedding doc text
-3. Support inserting sheet, doc, slide in slide
-
-|     slide 10-layer embedding      |         Sheet in slide and doc in cell         |   wrap text around a picture    |
-| :-------------------------------: | :--------------------------------------------: | :-----------------------------: |
-| ![image](./docs/source/Slide.png) | ![image](./docs/source/Sheet%20in%20slide.png) | ![image](./docs/source/doc.png) |
 
 ## Formula engine
 
 Univer formula engine, supports asynchronous calculation, lambda function and range naming
-
-![image](./docs/source/Formula%20Engine.png)
 
 ---
 

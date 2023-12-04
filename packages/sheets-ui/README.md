@@ -1,8 +1,11 @@
 # @univerjs/sheets-ui
 
+[![npm version](https://img.shields.io/npm/v/@univerjs/sheets-ui)](https://npmjs.org/packages/@univerjs/sheets-ui)
+[![license](https://img.shields.io/npm/l/@univerjs/sheets-ui)](https://img.shields.io/npm/l/@univerjs/sheets-ui)
+
 ## Introduction
 
-Univer ui plugin sheets
+> UI plugin for Univer Sheets.
 
 ## Usage
 
@@ -11,7 +14,3 @@ Univer ui plugin sheets
 ```shell
 npm i @univerjs/sheets-ui
 ```
-
-### API
-
-Check [Univer](https://github.com/dream-num/univer/)

@@ -1,14 +1,16 @@
 # @univerjs/formula
 
+[![npm version](https://img.shields.io/npm/v/@univerjs/formula)](https://npmjs.org/packages/@univerjs/formula)
+[![license](https://img.shields.io/npm/l/@univerjs/formula)](https://img.shields.io/npm/l/@univerjs/formula)
+
 ## Introduction
 
-Univer sheets-plugin-formula
+> Formula plugin for Univer.
 
 ## Usage
+
 ### Installation
+
 ```shell
 npm i @univerjs/formula
 ```
-
-### API
-Check [Univer](https://github.com/dream-num/univer/)

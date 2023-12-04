@@ -36,25 +36,25 @@ pnpm i
 
 启动全部
 
-```bash
+```shell
 npm run dev
 ```
 
 启动 sheets
 
-```bash
+```shell
 npm run dev:sheet
 ```
 
 启动 docs
 
-```bash
+```shell
 npm run dev:doc
 ```
 
 启动 slides
 
-```bash
+```shell
 npm run dev:slide
 ```
 

@@ -33,8 +33,7 @@
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*",
-        "./locale/*": "./src/locale/*.ts",
-        "./typedoc/*": "./typedoc/*.json"
+        "./locale/*": "./src/locale/*.ts"
     },
     "directories": {
         "lib": "lib"
@@ -47,8 +46,7 @@
         "test": "vitest run",
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
-        "esbuild": "node ./esbuild.config.mjs && tsc -p tsconfig.esbuild.json",
-        "typedoc": "typedoc"
+        "esbuild": "node ./esbuild.config.mjs && tsc -p tsconfig.esbuild.json"
     },
     "dependencies": {
         "@ctrl/tinycolor": "^4.0.2",
@@ -63,7 +61,6 @@
         "happy-dom": "^12.10.3",
         "less": "^4.2.0",
         "ts-node": "^10.9.1",
-        "typedoc": "^0.25.4",
         "typescript": "^5.3.2",
         "vitest": "^0.34.6"
     }

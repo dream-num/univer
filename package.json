@@ -3,23 +3,29 @@
     "version": "0.1.0-alpha.0",
     "private": true,
     "scripts": {
+        "prepare": "husky install",
+
         "test": "turbo test -- --passWithNoTests",
         "coverage": "turbo coverage -- --passWithNoTests",
+
         "dev:sheet": "turbo dev:demo --filter ./examples/sheets",
         "dev:slide": "turbo dev:demo --filter ./examples/slides",
         "dev:doc": "turbo dev:demo --filter ./examples/docs",
         "dev": "turbo dev:demo --filter ./examples/docs --filter ./examples/sheets --filter ./examples/slides",
+
         "build": "turbo esbuild",
         "build:demo": "turbo esbuild:demo",
-        "prepare": "husky install",
+
         "pre-commit": "lint-staged",
         "lint": "eslint --cache packages/**/src/**/*.{tsx,ts}",
         "lint:style": "stylelint **/*.less",
         "lint:fix": "eslint packages/**/src/**/*.{tsx,ts} --fix",
-        "storybook": "storybook dev -p 6006 --no-open",
+
+        "dev:storybook": "storybook dev -p 6006 --no-open",
         "build:storybook": "storybook build",
-        "typedoc": "typedoc && turbo typedoc",
-        "dev:site": "turbo dev:docusaurus"
+
+        "dev:site": "turbo dev:docusaurus",
+        "build:site": "turbo build:docusaurus"
     },
     "engines": {
         "node": "^18.17.0",
@@ -41,8 +47,8 @@
         "@storybook/testing-library": "^0.2.2",
         "@swc/cli": "^0.1.63",
         "@swc/core": "^1.3.100",
-        "@types/node": "^20.10.2",
-        "@types/react": "^18.2.40",
+        "@types/node": "^20.10.3",
+        "@types/react": "^18.2.41",
         "@typescript-eslint/eslint-plugin": "^6.13.1",
         "@typescript-eslint/parser": "^6.13.1",
         "@univerjs/design": "workspace:*",
@@ -52,7 +58,7 @@
         "eslint": "^8.55.0",
         "eslint-config-airbnb-base": "^15.0.0",
         "eslint-config-airbnb-typescript": "^17.1.0",
-        "eslint-config-prettier": "^9.0.0",
+        "eslint-config-prettier": "^9.1.0",
         "eslint-import-resolver-typescript": "^3.6.1",
         "eslint-plugin-import-newlines": "^1.3.4",
         "eslint-plugin-prettier": "^5.0.1",
@@ -60,7 +66,7 @@
         "eslint-plugin-simple-import-sort": "^10.0.0",
         "eslint-plugin-unused-imports": "^3.0.0",
         "husky": "^8.0.3",
-        "lint-staged": "^15.1.0",
+        "lint-staged": "^15.2.0",
         "prettier": "^3.1.0",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
@@ -72,7 +78,6 @@
         "stylelint-config-standard-less": "^2.0.0",
         "ts-node": "^10.9.1",
         "turbo": "^1.10.16",
-        "typedoc": "^0.25.4",
         "typescript": "^5.3.2"
     },
     "lint-staged": {

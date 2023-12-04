@@ -1,5 +1,8 @@
 # @univerjs/design
 
+[![npm version](https://img.shields.io/npm/v/@univerjs/design)](https://npmjs.org/packages/@univerjs/design)
+[![license](https://img.shields.io/npm/l/@univerjs/design)](https://img.shields.io/npm/l/@univerjs/design)
+
 ## Introduction
 
 > UI component library for building exceptional Univer.
@@ -8,6 +11,6 @@
 
 ### Installation
 
-```bash
+```shell
 npm i @univerjs/design
 ```

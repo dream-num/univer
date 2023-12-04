@@ -2,6 +2,24 @@ import type * as Preset from '@docusaurus/preset-classic';
 import type { Config } from '@docusaurus/types';
 import { themes as prismThemes } from 'prism-react-renderer';
 
+const packages = [
+    'core',
+    'design',
+    'docs',
+    'docs-ui',
+    'engine-formula',
+    'engine-numfmt',
+    'engine-render',
+    'formula',
+    'rpc',
+    'sheets',
+    'sheets-formula',
+    'sheets-numfmt',
+    'sheets-ui',
+    'ui',
+    'uniscript',
+];
+
 const config: Config = {
     title: 'Univer',
     tagline: 'An open source collaborative solution.',
@@ -18,7 +36,7 @@ const config: Config = {
     organizationName: 'Dream-num', // Usually your GitHub org/user name.
     projectName: 'Univer', // Usually your repo name.
 
-    onBrokenLinks: 'throw',
+    onBrokenLinks: 'warn',
     onBrokenMarkdownLinks: 'warn',
 
     // Even if you don't use internationalization, you can use this field to set
@@ -26,8 +44,29 @@ const config: Config = {
     // may want to replace "en" with "zh-Hans".
     i18n: {
         defaultLocale: 'zh-Hans',
-        locales: ['zh-Hans', 'en'],
+        // locales: ['zh-Hans', 'en'],
+        locales: ['zh-Hans'],
     },
+
+    markdown: {
+        format: 'detect',
+    },
+
+    plugins: [
+        ...packages.map((name) => [
+            'docusaurus-plugin-typedoc',
+            {
+                id: `api/${name}`,
+                entryPoints: [`../../packages/${name}/src/index.ts`],
+                tsconfig: `../../packages/${name}/tsconfig.json`,
+                out: `api/${name}`,
+                sidebar: {
+                    categoryLabel: name,
+                    fullNames: true,
+                },
+            },
+        ]),
+    ],
 
     presets: [
         [
@@ -104,7 +143,7 @@ const config: Config = {
                         },
                         {
                             label: 'API',
-                            to: '/docs/api/intro',
+                            to: '/docs/api',
                         },
                     ],
                 },

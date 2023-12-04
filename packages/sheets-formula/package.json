@@ -31,8 +31,7 @@
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*",
-        "./locale/*": "./src/locale/*.ts",
-        "./typedoc/*": "./typedoc/*.json"
+        "./locale/*": "./src/locale/*.ts"
     },
     "directories": {
         "lib": "lib"
@@ -42,8 +41,7 @@
     ],
     "private": false,
     "scripts": {
-        "esbuild": "node ./esbuild.config.mjs && tsc -p tsconfig.esbuild.json",
-        "typedoc": "typedoc"
+        "esbuild": "node ./esbuild.config.mjs && tsc -p tsconfig.esbuild.json"
     },
     "dependencies": {
         "@ctrl/tinycolor": "^4.0.2",
@@ -61,7 +59,7 @@
         "rxjs": "^7.8.1"
     },
     "devDependencies": {
-        "@types/react": "^18.2.40",
+        "@types/react": "^18.2.41",
         "@vitest/coverage-istanbul": "^0.34.6",
         "esbuild": "^0.19.8",
         "happy-dom": "^12.10.3",
@@ -69,7 +67,6 @@
         "react": "^18.2.0",
         "ts-node": "^10.9.1",
         "typescript": "^5.3.2",
-        "typedoc": "^0.25.4",
         "vitest": "^0.34.6"
     },
     "peerDependencies": {

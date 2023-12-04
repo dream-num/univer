@@ -33,8 +33,7 @@
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*",
-        "./locale/*": "./src/locale/*.ts",
-        "./typedoc/*": "./typedoc/*.json"
+        "./locale/*": "./src/locale/*.ts"
     },
     "directories": {
         "lib": "lib"

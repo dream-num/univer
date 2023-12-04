@@ -25,8 +25,7 @@
     },
     "exports": {
         ".": "./src/index.ts",
-        "./*": "./src/*",
-        "./typedoc/*": "./typedoc/*.json"
+        "./*": "./src/*"
     },
     "directories": {
         "lib": "lib"
@@ -37,7 +36,6 @@
     "private": false,
     "scripts": {
         "esbuild": "node ./esbuild.config.mjs && tsc -p tsconfig.esbuild.json",
-        "typedoc": "typedoc",
         "test": "vitest run",
         "test:watch": "vitest",
         "coverage": "vitest run --coverage"
@@ -50,12 +48,11 @@
     },
     "devDependencies": {
         "@vitest/coverage-istanbul": "^0.34.6",
-        "typedoc": "^0.25.4",
         "esbuild": "^0.19.8",
         "happy-dom": "^12.10.3",
         "less": "^4.2.0",
         "ts-node": "^10.9.1",
-        "typescript": "^5.3.2",
-        "vitest": "^0.34.6"
+        "vitest": "^0.34.6",
+        "typescript": "^5.3.2"
     }
 }

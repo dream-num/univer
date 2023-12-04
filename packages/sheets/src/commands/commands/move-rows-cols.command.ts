@@ -8,7 +8,6 @@ import {
     RANGE_TYPE,
     Rectangle,
     sequenceExecute,
-    SheetInterceptorService,
     Tools,
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
@@ -18,6 +17,7 @@ import type {
     IRemoveWorksheetMergeMutationParams,
 } from '../../basics/interfaces/mutation-interface';
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../services/selection-manager.service';
+import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { AddMergeUndoMutationFactory, AddWorksheetMergeMutation } from '../mutations/add-worksheet-merge.mutation';
 import type { IMoveColumnsMutationParams, IMoveRowsMutationParams } from '../mutations/move-rows-cols.mutation';
 import {

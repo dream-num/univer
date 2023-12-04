@@ -1,13 +1,6 @@
 import type { ICommandInfo } from '@univerjs/core';
-import {
-    Disposable,
-    ICommandService,
-    INTERCEPTOR_POINT,
-    IUniverInstanceService,
-    LifecycleStages,
-    OnLifecycle,
-    SheetInterceptorService,
-} from '@univerjs/core';
+import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
 import type { ISetArrayFormulaDataMutationParams } from '../commands/mutations/set-array-formula-data.mutation';
@@ -19,8 +12,7 @@ export class ArrayFormulaDisplayController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
-        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
-        @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService
+        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
     ) {
         super();
 

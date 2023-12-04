@@ -12,7 +12,6 @@ import {
     RANGE_TYPE,
     Rectangle,
     serializeRangeToRefString,
-    SheetInterceptorService,
     Tools,
 } from '@univerjs/core';
 import type { IFormulaData, IFormulaDataItem, ISequenceNode, IUnitSheetNameMap } from '@univerjs/engine-formula';
@@ -56,6 +55,7 @@ import {
     SelectionManagerService,
     SetRangeValuesMutation,
     SetRangeValuesUndoMutationFactory,
+    SheetInterceptorService,
 } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 

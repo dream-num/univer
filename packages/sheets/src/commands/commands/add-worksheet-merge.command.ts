@@ -1,3 +1,6 @@
+// The file is for tests only.
+// Please refer to packages/sheets-ui/src/commands/commands/add-worksheet-merge.command.ts
+
 import type { ICommand, IMutationInfo, IRange, Worksheet } from '@univerjs/core';
 import {
     CommandType,
@@ -24,7 +27,6 @@ import {
     SetRangeValuesMutation,
     SetRangeValuesUndoMutationFactory,
 } from '@univerjs/sheets';
-import { IDialogService } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 
 export interface IAddMergeCommandParams {
@@ -112,7 +114,6 @@ export const AddWorksheetMergeCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const dialogService = accessor.get(IDialogService);
 
         const workbookId = params.workbookId;
         const worksheetId = params.worksheetId;
@@ -125,9 +126,6 @@ export const AddWorksheetMergeCommand: ICommand = {
 
         // First we should check if there are values in the going-to-be-merged cells.
         const willRemoveSomeCell = checkCellContentInRanges(worksheet, ranges);
-        if (willRemoveSomeCell) {
-            console.log('debug will remove some cell');
-        }
 
         // prepare redo mutations
         const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {

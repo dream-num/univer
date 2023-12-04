@@ -3,10 +3,10 @@ import { BorderStyleTypes, BorderType, ICommandService, IUniverInstanceService, 
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { SetRangeValuesMutation } from '../../..';
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../../services/selection-manager.service';
 import { AddWorksheetMergeMutation } from '../../mutations/add-worksheet-merge.mutation';
 import { RemoveWorksheetMergeMutation } from '../../mutations/remove-worksheet-merge.mutation';
+import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
 import { AddWorksheetMergeAllCommand, AddWorksheetMergeCommand } from '../add-worksheet-merge.command';
 import { RemoveWorksheetMergeCommand } from '../remove-worksheet-merge.command';
 import {

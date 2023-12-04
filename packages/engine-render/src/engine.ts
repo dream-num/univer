@@ -82,9 +82,9 @@ export class Engine extends ThinEngine<Scene> {
     /** previous pointer position */
     private pointer: { [deviceSlot: number]: number } = {};
 
-    private __mouseId = -1;
+    private _mouseId = -1;
 
-    private __isUsingFirefox = navigator.userAgent.indexOf('Firefox') !== -1;
+    private _isUsingFirefox = navigator.userAgent.indexOf('Firefox') !== -1;
 
     constructor(elemWidth: number = 100, elemHeight: number = 100) {
         super();
@@ -372,7 +372,7 @@ export class Engine extends ThinEngine<Scene> {
         const eventPrefix = getPointerPrefix();
 
         this._pointerMoveEvent = (evt: any) => {
-            const deviceType = this.__getPointerType(evt);
+            const deviceType = this._getPointerType(evt);
             // Store previous values for event
             const previousHorizontal = this.pointer[PointerInput.Horizontal];
             const previousVertical = this.pointer[PointerInput.Vertical];
@@ -383,7 +383,7 @@ export class Engine extends ThinEngine<Scene> {
             this.pointer[PointerInput.Vertical] = evt.clientY;
             this.pointer[PointerInput.DeltaHorizontal] = evt.movementX;
             this.pointer[PointerInput.DeltaVertical] = evt.movementY;
-            // console.log('pointerMoveEvent_1', previousHorizontal, evt.clientX, previousVertical, evt.clientY, this.__pointer);
+            // console.log('pointerMoveEvent_1', previousHorizontal, evt.clientX, previousVertical, evt.clientY, this._pointer);
             const deviceEvent = evt as IPointerEvent;
             deviceEvent.deviceType = deviceType;
 
@@ -430,23 +430,23 @@ export class Engine extends ThinEngine<Scene> {
             const evt = nativeEvent as IPointerEvent;
             // TODO: maybe we should wrap the native event to an CustomEvent
 
-            const deviceType = this.__getPointerType(evt);
+            const deviceType = this._getPointerType(evt);
             const previousHorizontal = this.pointer[PointerInput.Horizontal];
             const previousVertical = this.pointer[PointerInput.Vertical];
             const previousButton = this.pointer[evt.button + 2];
 
             if (deviceType === DeviceType.Mouse) {
                 // Mouse; Among supported browsers, value is either 1 or 0 for mouse
-                if (this.__mouseId === -1) {
+                if (this._mouseId === -1) {
                     if (evt.pointerId === undefined) {
                         // If there is no pointerId (eg. manually dispatched MouseEvent)
-                        this.__mouseId = this.__isUsingFirefox ? 0 : 1;
+                        this._mouseId = this._isUsingFirefox ? 0 : 1;
                     } else {
-                        this.__mouseId = evt.pointerId;
+                        this._mouseId = evt.pointerId;
                     }
                 }
                 if (!document.pointerLockElement) {
-                    this._canvasEle.setPointerCapture(this.__mouseId);
+                    this._canvasEle.setPointerCapture(this._mouseId);
                 }
             } else {
                 // Touch; Since touches are dynamically assigned, only set capture if we have an id
@@ -483,13 +483,13 @@ export class Engine extends ThinEngine<Scene> {
             deviceEvent.previousState = previousButton;
             deviceEvent.currentState = this.pointer[evt.button + 2];
             this.onInputChangedObservable.notifyObservers(deviceEvent);
-            // console.log('pointerDownEvent_2', previousHorizontal, evt.clientX, previousVertical, evt.clientY, this.__pointer);
+            // console.log('pointerDownEvent_2', previousHorizontal, evt.clientX, previousVertical, evt.clientY, this._pointer);
         };
 
         this._pointerUpEvent = (_evt: Event) => {
             const evt = _evt as PointerEvent | MouseEvent;
 
-            const deviceType = this.__getPointerType(evt);
+            const deviceType = this._getPointerType(evt);
             const previousHorizontal = this.pointer[PointerInput.Horizontal];
             const previousVertical = this.pointer[PointerInput.Vertical];
             const previousButton = this.pointer[evt.button + 2];
@@ -522,10 +522,10 @@ export class Engine extends ThinEngine<Scene> {
 
             if (
                 deviceType === DeviceType.Mouse &&
-                this.__mouseId >= 0 &&
-                this._canvasEle.hasPointerCapture(this.__mouseId)
+                this._mouseId >= 0 &&
+                this._canvasEle.hasPointerCapture(this._mouseId)
             ) {
-                this._canvasEle.releasePointerCapture(this.__mouseId);
+                this._canvasEle.releasePointerCapture(this._mouseId);
             } else if (deviceEvent.pointerId && this._canvasEle.hasPointerCapture(deviceEvent.pointerId)) {
                 this._canvasEle.releasePointerCapture(deviceEvent.pointerId);
             }
@@ -539,7 +539,7 @@ export class Engine extends ThinEngine<Scene> {
         };
 
         this._pointerEnterEvent = (evt: any) => {
-            const deviceType = this.__getPointerType(evt);
+            const deviceType = this._getPointerType(evt);
             // Store previous values for event
             const deviceEvent = evt as IPointerEvent;
             deviceEvent.deviceType = deviceType;
@@ -550,7 +550,7 @@ export class Engine extends ThinEngine<Scene> {
         };
 
         this._pointerLeaveEvent = (evt: any) => {
-            const deviceType = this.__getPointerType(evt);
+            const deviceType = this._getPointerType(evt);
             // Store previous values for event
             const deviceEvent = evt as IPointerEvent;
             deviceEvent.deviceType = deviceType;
@@ -561,9 +561,9 @@ export class Engine extends ThinEngine<Scene> {
         };
 
         this._pointerBlurEvent = (evt: any) => {
-            if (this.__mouseId >= 0 && this._canvasEle.hasPointerCapture(this.__mouseId)) {
-                this._canvasEle.releasePointerCapture(this.__mouseId);
-                this.__mouseId = -1;
+            if (this._mouseId >= 0 && this._canvasEle.hasPointerCapture(this._mouseId)) {
+                this._canvasEle.releasePointerCapture(this._mouseId);
+                this._mouseId = -1;
             }
 
             this.pointer = {};
@@ -652,7 +652,7 @@ export class Engine extends ThinEngine<Scene> {
         return passiveSupported;
     }
 
-    private __getPointerType(evt: any): DeviceType {
+    private _getPointerType(evt: any): DeviceType {
         let deviceType = DeviceType.Mouse;
 
         if (evt.pointerType === 'touch' || evt.pointerType === 'pen' || evt.touches) {

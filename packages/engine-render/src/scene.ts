@@ -134,8 +134,8 @@ export class Scene extends ThinScene {
         return this;
     }
 
-    makeDirty(state: boolean = true) {
-        this._viewports.forEach((vp) => {
+    override makeDirty(state: boolean = true) {
+        this._layers.forEach((vp) => {
             vp.makeDirty(state);
         });
         if (this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
@@ -499,7 +499,11 @@ export class Scene extends ThinScene {
             return;
         }
         !parentCtx && this.getEngine()?.clearCanvas();
-        this.getViewports()?.forEach((vp: Viewport) => vp.render(parentCtx));
+
+        this._layers.sort(sortRules).forEach((layer) => {
+            layer.render(parentCtx);
+        });
+        // this.getViewports()?.forEach((vp: Viewport) => vp.render(parentCtx));
     }
 
     async requestRender(parentCtx?: CanvasRenderingContext2D) {

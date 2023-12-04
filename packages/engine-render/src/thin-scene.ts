@@ -202,6 +202,10 @@ export abstract class ThinScene {
         return this;
     }
 
+    makeDirty(state: boolean = true) {
+        return this;
+    }
+
     pick(coord: Vector2): Nullable<BaseObject | ThinScene> {}
 
     getViewports(): any[] {

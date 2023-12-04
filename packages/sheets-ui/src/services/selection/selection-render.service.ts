@@ -493,21 +493,64 @@ export class SelectionRenderService implements ISelectionRenderService {
         const currentCell = selectionControl && selectionControl.model.currentCell;
 
         if (selectionControl && evt.shiftKey && currentCell) {
-            const { actualRow, actualColumn } = currentCell;
+            const { actualRow, actualColumn, mergeInfo: actualMergeInfo } = currentCell;
+
+            const newStartRow = Math.min(actualRow, startSelectionRange.startRow, actualMergeInfo.startRow);
+
+            const newEndRow = Math.max(actualRow, startSelectionRange.endRow, actualMergeInfo.endRow);
+
+            const newStartColumn = Math.min(actualColumn, startSelectionRange.startColumn, actualMergeInfo.startColumn);
+
+            const newEndColumn = Math.max(actualColumn, startSelectionRange.endColumn, actualMergeInfo.endColumn);
+
+            const bounding = skeleton.getMergeBounding(newStartRow, newStartColumn, newEndRow, newEndColumn);
 
             // TODO startCell position calculate error
-            const startCell = skeleton.getNoMergeCellPositionByIndex(actualRow, actualColumn, scaleX, scaleY);
-            const endCell = skeleton.getNoMergeCellPositionByIndex(endRow, endColumn, scaleX, scaleY);
+            const startCell = skeleton.getCellByIndex(bounding.startRow, bounding.startColumn, scaleX, scaleY);
+
+            const endCell = skeleton.getCellByIndex(bounding.endRow, bounding.endColumn, scaleX, scaleY);
+
+            const finalStartRow = Math.min(startCell.mergeInfo.startRow, endCell.mergeInfo.startRow);
+
+            const finalEndRow = Math.max(startCell.mergeInfo.endRow, endCell.mergeInfo.endRow);
+
+            const finalStartColumn = Math.min(startCell.mergeInfo.startColumn, endCell.mergeInfo.startColumn);
+
+            const finalEndColumn = Math.max(startCell.mergeInfo.endColumn, endCell.mergeInfo.endColumn);
+
+            const startY = Math.min(startCell?.mergeInfo.startY, endCell?.mergeInfo.startY);
+
+            const endY = Math.max(startCell?.mergeInfo.endY, endCell?.mergeInfo.endY);
+
+            const startX = Math.min(startCell?.mergeInfo.startX, endCell?.mergeInfo.startX);
+
+            const endX = Math.max(startCell?.mergeInfo.endX, endCell?.mergeInfo.endX);
 
             const newSelectionRange = {
-                startColumn: actualColumn,
-                startRow: actualRow,
-                endColumn: startSelectionRange.startColumn,
-                endRow: startSelectionRange.startRow,
-                startY: startCell?.startY || 0,
-                endY: endCell?.endY || 0,
-                startX: startCell?.startX || 0,
-                endX: endCell?.endX || 0,
+                startColumn: finalStartColumn,
+                startRow: finalStartRow,
+                endColumn: finalEndColumn,
+                endRow: finalEndRow,
+
+                startY,
+                endY,
+                startX,
+                endX,
+
+                rangeType,
+            };
+
+            const activeCell = skeleton.getCellByIndex(actualRow, actualColumn, scaleX, scaleY);
+
+            this._startSelectionRange = {
+                startColumn: activeCell.mergeInfo.startColumn,
+                startRow: activeCell.mergeInfo.startRow,
+                endColumn: activeCell.mergeInfo.endColumn,
+                endRow: activeCell.mergeInfo.endRow,
+                startY: activeCell.mergeInfo.startY || 0,
+                endY: activeCell.mergeInfo.endY || 0,
+                startX: activeCell.mergeInfo.startX || 0,
+                endX: activeCell.mergeInfo.endX || 0,
                 rangeType,
             };
 

@@ -3,7 +3,7 @@
     "version": "0.0.0",
     "private": true,
     "scripts": {
-        "dev:docusaurus": "docusaurus start",
+        "dev:docusaurus": "docusaurus start --no-open",
         "build:docusaurus": "docusaurus build",
         "swizzle": "docusaurus swizzle",
         "deploy": "docusaurus deploy",

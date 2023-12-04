@@ -2,6 +2,24 @@ import type * as Preset from '@docusaurus/preset-classic';
 import type { Config } from '@docusaurus/types';
 import { themes as prismThemes } from 'prism-react-renderer';
 
+const packages = [
+    'core',
+    'design',
+    'docs',
+    'docs-ui',
+    'engine-formula',
+    'engine-numfmt',
+    'engine-render',
+    'formula',
+    'rpc',
+    'sheets',
+    'sheets-formula',
+    'sheets-numfmt',
+    'sheets-ui',
+    'ui',
+    'uniscript',
+];
+
 const config: Config = {
     title: 'Univer',
     tagline: 'An open source collaborative solution.',
@@ -35,33 +53,19 @@ const config: Config = {
     },
 
     plugins: [
-        [
+        ...packages.map((name) => [
             'docusaurus-plugin-typedoc',
             {
-                entryPoints: [
-                    '../../packages/core',
-                    '../../packages/design',
-                    '../../packages/docs',
-                    '../../packages/docs-ui',
-                    '../../packages/engine-formula',
-                    '../../packages/engine-numfmt',
-                    '../../packages/engine-render',
-                    '../../packages/formula',
-                    '../../packages/network',
-                    '../../packages/rpc',
-                    '../../packages/sheets',
-                    '../../packages/sheets-formula',
-                    '../../packages/sheets-numfmt',
-                    '../../packages/sheets-ui',
-                    '../../packages/ui',
-                    '../../packages/uniscript',
-                ],
-                entryPointStrategy: 'packages',
+                id: `api/${name}`,
+                entryPoints: [`../../packages/${name}/src/index.ts`],
+                tsconfig: `../../packages/${name}/tsconfig.json`,
+                out: `api/${name}`,
                 sidebar: {
+                    categoryLabel: name,
                     fullNames: true,
                 },
             },
-        ],
+        ]),
     ],
 
     presets: [

@@ -18,11 +18,9 @@ import type { IKeyValue, IScale, Nullable } from '@univerjs/core';
 
 import { BASE_OBJECT_ARRAY, BaseObject } from '../base-object';
 import { SHAPE_TYPE } from '../basics/const';
-import { getDevicePixelRatio } from '../basics/draw';
 import type { IObjectFullState } from '../basics/interfaces';
 import { transformBoundingCoord } from '../basics/position';
 import type { IBoundRect, Vector2 } from '../basics/vector2';
-import { Canvas } from '../canvas';
 
 export type LineJoin = 'round' | 'bevel' | 'miter';
 export type LineCap = 'butt' | 'round' | 'square';
@@ -89,8 +87,6 @@ export const SHAPE_OBJECT_ARRAY = [
 ];
 
 export abstract class Shape<T> extends BaseObject {
-    protected _cacheCanvas: Nullable<Canvas>;
-
     private _hoverCursor: Nullable<string>;
 
     private _moveCursor: string | null = null;
@@ -98,8 +94,6 @@ export abstract class Shape<T> extends BaseObject {
     private _fillRule: string = 'nonzero';
 
     private _globalCompositeOperation: string = 'source-over';
-
-    private _allowCache: boolean = false;
 
     private _paintFirst: PaintFirst = 'fill';
 
@@ -144,12 +138,6 @@ export abstract class Shape<T> extends BaseObject {
     constructor(key?: string, props?: T) {
         super(key);
 
-        if (this._allowCache) {
-            this._cacheCanvas = new Canvas();
-            this.onTransformChangeObservable.add(() => {
-                this.resizeCacheCanvas();
-            });
-        }
         this._initialProps(props);
     }
 
@@ -167,10 +155,6 @@ export abstract class Shape<T> extends BaseObject {
 
     get globalCompositeOperation() {
         return this._globalCompositeOperation;
-    }
-
-    get allowCache() {
-        return this._allowCache;
     }
 
     get paintFirst() {
@@ -355,22 +339,7 @@ export abstract class Shape<T> extends BaseObject {
         mainCtx.save();
         // eslint-disable-next-line no-magic-numbers
         mainCtx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
-        if (this._allowCache) {
-            if (this.isDirty()) {
-                if (this._cacheCanvas == null) {
-                    throw new Error('cache canvas is null');
-                }
-                const ctx = this._cacheCanvas.getContext();
-                this._cacheCanvas.clear();
-                ctx.save();
-                ctx.translate(this.strokeWidth / 2, this.strokeWidth / 2); // 边框会按照宽度画在边界上，分别占据内外二分之一
-                this._draw(ctx);
-                ctx.restore();
-            }
-            this._applyCache(mainCtx);
-        } else {
-            this._draw(mainCtx);
-        }
+        this._draw(mainCtx);
         mainCtx.restore();
         this.makeDirty(false);
         return this;
@@ -398,19 +367,6 @@ export abstract class Shape<T> extends BaseObject {
         return this;
     }
 
-    override resizeCacheCanvas() {
-        this._cacheCanvas?.setSize(this.width + this.strokeWidth, this.height + this.strokeWidth);
-        this.makeDirty(true);
-    }
-
-    override scaleCacheCanvas() {
-        const scaleX = this.getParent()?.ancestorScaleX || 1;
-        const scaleY = this.getParent()?.ancestorScaleX || 1;
-
-        this._cacheCanvas?.setPixelRatio(Math.max(scaleX, scaleY) * getDevicePixelRatio());
-        this.makeDirty(true);
-    }
-
     override toJson() {
         const props: IKeyValue = {};
         SHAPE_OBJECT_ARRAY.forEach((key) => {
@@ -422,26 +378,6 @@ export abstract class Shape<T> extends BaseObject {
             ...super.toJson(),
             ...props,
         };
-    }
-
-    protected _applyCache(ctx?: CanvasRenderingContext2D) {
-        if (!ctx || !this._cacheCanvas) {
-            return;
-        }
-        const pixelRatio = this._cacheCanvas.getPixelRatio();
-        const width = this._cacheCanvas.getWidth() * pixelRatio;
-        const height = this._cacheCanvas.getHeight() * pixelRatio;
-        ctx.drawImage(
-            this._cacheCanvas.getCanvasEle(),
-            0,
-            0,
-            width,
-            height,
-            -this.strokeWidth / 2,
-            -this.strokeWidth / 2,
-            this.width + this.strokeWidth,
-            this.height + this.strokeWidth
-        );
     }
 
     protected _draw(ctx: CanvasRenderingContext2D) {

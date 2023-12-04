@@ -1,5 +1,5 @@
 import type { Nullable } from '@univerjs/core';
-import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, LocaleService } from '@univerjs/core';
+import { LocaleService } from '@univerjs/core';
 import type { DocumentViewModel } from '@univerjs/engine-render';
 import { DocumentSkeleton } from '@univerjs/engine-render';
 import type { IDisposable } from '@wendellhu/redi';
@@ -77,10 +77,7 @@ export class DocSkeletonManagerService implements IDisposable {
     private _setCurrent(docViewModelParam: IDocumentViewModelManagerParam): Nullable<IDocSkeletonManagerParam> {
         const { unitId } = docViewModelParam;
 
-        // Only cell editor need to rebuild skeleton when edit cell content every time.
-        const REBUILD_SKELETON_LIST = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY];
-
-        if (REBUILD_SKELETON_LIST.includes(unitId) || !this._docSkeletonMap.has(unitId)) {
+        if (!this._docSkeletonMap.has(unitId)) {
             const skeleton = this._buildSkeleton(docViewModelParam.docViewModel);
 
             skeleton.calculate();

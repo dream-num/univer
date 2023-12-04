@@ -92,7 +92,7 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
             for (let i = 0; i < ranges.length; i++) {
                 const { startRow, endRow, startColumn, endColumn } = ranges[i];
 
-                const colorObj: ICellData = {
+                const styleObj: ICellData = {
                     s: {
                         [style.type]: style.value,
                     },
@@ -100,7 +100,7 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
 
                 for (let r = startRow; r <= endRow; r++) {
                     for (let c = startColumn; c <= endColumn; c++) {
-                        cellValue.setValue(r, c, colorObj);
+                        cellValue.setValue(r, c, styleObj);
                     }
                 }
             }

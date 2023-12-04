@@ -73,6 +73,7 @@ export function getDocsSkeletonPageSize(documentSkeleton: DocumentSkeleton, angl
 
     if (angle === 0) {
         const { width, height } = lastPage;
+
         return { width, height };
     }
 

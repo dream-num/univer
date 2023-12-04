@@ -101,6 +101,7 @@ export class Spreadsheet extends SheetComponent {
         if (!spreadsheetSkeleton) {
             return;
         }
+
         const parentScale = this.getParentScale();
 
         spreadsheetSkeleton.calculateWithoutClearingCache(bounds);
@@ -474,13 +475,15 @@ export class Spreadsheet extends SheetComponent {
         if (!spreadsheetSkeleton) {
             return;
         }
+
         const columnCount = spreadsheetSkeleton.getColumnCount();
-        const { stylesCache, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache, mergeData } =
-            spreadsheetSkeleton;
+        const { stylesCache, rowHeightAccumulation, columnWidthAccumulation, mergeData } = spreadsheetSkeleton;
         const { font: fontList } = stylesCache;
+
         fontList &&
             Object.keys(fontList).forEach((fontFormat: string) => {
                 const fontObjectArray = fontList[fontFormat];
+
                 fontObjectArray.forValue((row, column, docsConfig) => {
                     // Merged cells do not support overflow.
                     if (spreadsheetSkeleton.intersectMergeRange(row, column)) {

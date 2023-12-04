@@ -534,14 +534,17 @@ export class FreezeController extends Disposable {
 
         const { rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop } = skeleton;
 
+        // column header
         const viewColumnLeft = scene.getViewport(VIEWPORT_KEY.VIEW_COLUMN_LEFT);
         const viewColumnRight = scene.getViewport(VIEWPORT_KEY.VIEW_COLUMN_RIGHT);
 
+        // row header
         const viewRowTop = scene.getViewport(VIEWPORT_KEY.VIEW_ROW_TOP);
         const viewRowBottom = scene.getViewport(VIEWPORT_KEY.VIEW_ROW_BOTTOM);
 
         const viewLeftTop = scene.getViewport(VIEWPORT_KEY.VIEW_LEFT_TOP);
 
+        // skeleton
         const viewMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
         const viewMainLeftTop = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP);
         const viewMainLeft = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN_LEFT);
@@ -622,12 +625,14 @@ export class FreezeController extends Disposable {
             isLeftView = false;
         }
 
+        // freeze start
         const startSheetView = skeleton.getNoMergeCellPositionByIndexWithNoHeader(
             row - ySplit,
             column - xSplit,
             scaleX,
             scaleY
         );
+        // freeze end
         const endSheetView = skeleton.getNoMergeCellPositionByIndexWithNoHeader(row, column, scaleX, scaleY);
 
         viewMainLeftTop.disable();
@@ -642,6 +647,8 @@ export class FreezeController extends Disposable {
         viewRowTop.resetPadding();
         viewColumnLeft.resetPadding();
 
+        const currentScroll = this._scrollManagerService.getCurrentScroll();
+
         if (isTopView === false && isLeftView === false) {
             viewMain.resize({
                 left: rowHeaderWidthAndMarginLeft,
@@ -650,12 +657,16 @@ export class FreezeController extends Disposable {
                 right: 0,
             });
             viewMain.resetPadding();
-            this._commandService.executeCommand(ScrollCommand.id, {
-                sheetViewStartRow: 0,
-                sheetViewStartColumn: 0,
-                offsetX: 0,
-                offsetY: 0,
-            });
+
+            this._commandService.executeCommand(
+                ScrollCommand.id,
+                currentScroll ?? {
+                    sheetViewStartRow: 0,
+                    sheetViewStartColumn: 0,
+                    offsetX: 0,
+                    offsetY: 0,
+                }
+            );
         } else if (isTopView === true && isLeftView === false) {
             const topGap = endSheetView.startY - startSheetView.startY;
             viewMain.resize({
@@ -670,10 +681,13 @@ export class FreezeController extends Disposable {
                 startX: 0,
                 endX: 0,
             });
-            this._commandService.executeCommand(ScrollCommand.id, {
-                sheetViewStartRow: 0,
-                offsetY: 0,
-            });
+            this._commandService.executeCommand(
+                ScrollCommand.id,
+                currentScroll ?? {
+                    sheetViewStartRow: 0,
+                    offsetY: 0,
+                }
+            );
             viewMainTop.resize({
                 left: rowHeaderWidthAndMarginLeft,
                 top: columnHeaderHeightAndMarginTop,
@@ -734,10 +748,13 @@ export class FreezeController extends Disposable {
                 startY: 0,
                 endY: 0,
             });
-            this._commandService.executeCommand(ScrollCommand.id, {
-                sheetViewStartColumn: 0,
-                offsetX: 0,
-            });
+            this._commandService.executeCommand(
+                ScrollCommand.id,
+                currentScroll ?? {
+                    sheetViewStartColumn: 0,
+                    offsetX: 0,
+                }
+            );
             viewMainLeft.resize({
                 left: rowHeaderWidthAndMarginLeft,
                 top: columnHeaderHeightAndMarginTop,

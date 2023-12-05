@@ -1,29 +1,23 @@
 {
     "name": "univer",
-    "version": "0.1.0-alpha.0",
+    "version": "0.1.0-alpha.1",
     "private": true,
     "scripts": {
         "prepare": "husky install",
-
         "test": "turbo test -- --passWithNoTests",
         "coverage": "turbo coverage -- --passWithNoTests",
-
         "dev:sheet": "turbo dev:demo --filter ./examples/sheets",
         "dev:slide": "turbo dev:demo --filter ./examples/slides",
         "dev:doc": "turbo dev:demo --filter ./examples/docs",
         "dev": "turbo dev:demo --filter ./examples/docs --filter ./examples/sheets --filter ./examples/slides",
-
         "build": "turbo esbuild",
         "build:demo": "turbo esbuild:demo",
-
         "pre-commit": "lint-staged",
         "lint": "eslint --cache packages/**/src/**/*.{tsx,ts}",
         "lint:style": "stylelint **/*.less",
         "lint:fix": "eslint packages/**/src/**/*.{tsx,ts} --fix",
-
         "dev:storybook": "storybook dev -p 6006 --no-open",
         "build:storybook": "storybook build",
-
         "dev:site": "turbo dev:docusaurus",
         "build:site": "turbo build:docusaurus"
     },

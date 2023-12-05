@@ -377,9 +377,6 @@ export class BaseReferenceObject extends ObjectClassType {
             range: this._rangeData,
             sheetId: this.getSheetId(),
             unitId: this.getUnitId(),
-            forcedSheetId: this.getForcedSheetId(),
-            forcedSheetName: this.getForcedSheetName(),
-            forcedUnitId: this.getForcedUnitId(),
         };
     }
 

@@ -67,6 +67,10 @@ export class Univer {
         this._rootInjector.dispose();
     }
 
+    start(): void {
+        this._tryStart();
+    }
+
     /** Register a plugin into univer. */
     registerPlugin<T extends Plugin>(plugin: PluginCtor<T>, configs?: any): void {
         if (plugin.type === PluginType.Univer) {

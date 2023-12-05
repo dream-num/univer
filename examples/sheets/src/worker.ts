@@ -16,5 +16,7 @@ univer.registerPlugin(BaseFormulaEnginePlugin);
 univer.registerPlugin(UniverRPCWorkerThreadPlugin);
 univer.registerPlugin(FormulaPlugin);
 
+univer.start();
+
 declare let self: WorkerGlobalScope & typeof globalThis & { univer: Univer };
 self.univer = univer;

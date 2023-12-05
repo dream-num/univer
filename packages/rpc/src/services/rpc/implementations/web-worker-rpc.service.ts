@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Observable, shareReplay } from 'rxjs';
 
-import type { IMessageProtocol } from '../rpc/rpc.service';
+import type { IMessageProtocol } from '../rpc.service';
 
 /**
  * Generate an `IMessageProtocol` on the web worker.

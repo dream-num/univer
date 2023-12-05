@@ -11,7 +11,15 @@ import {
 import { takeUntil } from 'rxjs/operators';
 
 import type { IRemoteSyncMutationOptions } from '../../services/remote-instance/remote-instance.service';
-import { IRemoteInstanceService } from '../../services/remote-instance/remote-instance.service';
+import {
+    IRemoteInstanceService,
+    IRemoteSyncService,
+    RemoteInstanceServiceName,
+    RemoteSyncServiceName,
+} from '../../services/remote-instance/remote-instance.service';
+import { Inject, Injector } from '@wendellhu/redi';
+import { fromModule, toModule } from '../../services/rpc/rpc.service';
+import { IRPChannelService } from '../../services/rpc/channel.service';
 
 /**
  * This controller is responsible for syncing data from the primary thread to
@@ -19,15 +27,36 @@ import { IRemoteInstanceService } from '../../services/remote-instance/remote-in
  */
 @OnLifecycle(LifecycleStages.Starting, DataSyncPrimaryController)
 export class DataSyncPrimaryController extends RxDisposable {
+    private _remoteInstanceService: IRemoteInstanceService;
+
     constructor(
         private readonly _unsyncMutations: Set<string>,
+        @Inject(Injector) private readonly _injector: Injector,
+        @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @IRemoteInstanceService private readonly _remoteInstanceService: IRemoteInstanceService,
-        @ICommandService private readonly _commandService: ICommandService
+        @IRPChannelService private readonly _rpcChannelService: IRPChannelService,
+        @IRemoteSyncService private readonly _remoteSyncService: IRemoteSyncService
     ) {
         super();
 
+        this._initRPCChannels();
         this._init();
+    }
+
+    private _initRPCChannels(): void{
+        this._rpcChannelService.registerChannel(RemoteSyncServiceName, fromModule(this._remoteSyncService));
+
+        this._injector.add([
+            IRemoteInstanceService,
+            {
+                useFactory: () =>
+                    toModule<IRemoteInstanceService>(this._rpcChannelService.requestChannel(RemoteInstanceServiceName)),
+            },
+        ]);
+
+        this._remoteInstanceService = this._injector.get(IRemoteInstanceService);
+
+
     }
 
     private _init(): void {

@@ -402,9 +402,3 @@ export class ChannelServer extends RxDisposable implements IChannelServer {
         this._protocol.send(response);
     }
 }
-
-/**
- * This service is for other service to register channels to the RPC framework.
- */
-export interface IRPCService {}
-export const IRPCService = createIdentifier<IRPCService>('IRPCService');

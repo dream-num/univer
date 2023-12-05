@@ -1,4 +1,3 @@
-// @index('./*.ts', f => `export * from '${f.path}'`)
 export * from './auto-fill-series';
 export * from './border-style-types';
 export * from './color-type';
@@ -17,4 +16,3 @@ export * from './shape-type';
 export * from './sheet-types';
 export * from './text-style';
 export * from './theme-color-type';
-// @endindex

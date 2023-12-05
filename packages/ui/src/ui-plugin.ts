@@ -1,4 +1,4 @@
-import { ILocalStorageService, LocaleService, Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
+import { ILocalStorageService, LocaleService, Plugin, PluginType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -32,6 +32,8 @@ import { ShortcutPanelService } from './services/shortcut/shortcut-panel.service
 import { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
 import { ISidebarService } from './services/sidebar/sidebar.service';
 
+const PLUGIN_NAME = 'ui';
+
 export interface IUIPluginConfig extends IWorkbenchOptions {}
 
 const DEFAULT_SLIDE_PLUGIN_DATA = {};
@@ -49,7 +51,7 @@ export class UIPlugin extends Plugin {
         @Inject(Injector) protected readonly _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
-        super(PLUGIN_NAMES.BASE_UI);
+        super(PLUGIN_NAME);
 
         this._config = Object.assign(DEFAULT_SLIDE_PLUGIN_DATA, config);
 

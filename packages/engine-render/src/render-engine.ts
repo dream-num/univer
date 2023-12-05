@@ -1,4 +1,4 @@
-import { Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
+import { Plugin, PluginType } from '@univerjs/core';
 import { createIdentifier, Inject, Injector } from '@wendellhu/redi';
 
 import { Engine } from './engine';
@@ -9,6 +9,8 @@ import { IRenderManagerService, RenderManagerService } from './render-manager.se
  */
 export const IRenderingEngine = createIdentifier<Engine>('univer.render-engine');
 
+const PLUGIN_NAME = 'render-engine';
+
 export class RenderEngine extends Plugin {
     static override type = PluginType.Univer;
 
@@ -16,7 +18,7 @@ export class RenderEngine extends Plugin {
         _config: undefined,
         @Inject(Injector) override readonly _injector: Injector
     ) {
-        super(PLUGIN_NAMES.BASE_RENDER);
+        super(PLUGIN_NAME);
 
         this._injector.add([IRenderingEngine, { useFactory: () => new Engine() }]);
 

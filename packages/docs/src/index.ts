@@ -33,7 +33,7 @@ export {
     type ISetTextSelectionsOperationParams,
     SetTextSelectionsOperation,
 } from './commands/operations/text-selection.operation';
-export { DocPlugin, type IDocPluginConfig } from './doc-plugin';
+export { DocsPlugin, type IDocsPluginConfig } from './doc-plugin';
 export { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
 export { DocViewModelManagerService } from './services/doc-view-model-manager.service';
 export { TextSelectionManagerService } from './services/text-selection-manager.service';

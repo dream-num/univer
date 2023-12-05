@@ -8,7 +8,7 @@ export interface ILayout {
     toolbarConfig?: SheetToolbarConfig;
 }
 
-export interface ISheetUIPluginConfig {
+export interface ISheetsUIPluginConfig {
     container?: HTMLElement | string;
     layout?: ILayout;
     locale?: LocaleType;

@@ -23,21 +23,21 @@ Univer's modules should be considered from the perspective of **business type (S
 For example, you could create a standard Spreadsheet application like this:
 
 ```ts
-import { DocPlugin } from '@univerjs/docs';
+import { DocsPlugin } from '@univerjs/docs';
 import { RenderEngine } from '@univerjs/engine-render';
 import { SheetPlugin } from '@univerjs/sheets';
 import { UIPlugin } from '@univerjs/ui';
 import { LocaleType, Univer } from '@univerjs/core';
 import { greenTheme } from '@univerjs/design';
 import { FormulaPlugin } from '@univerjs/sheets-formula';
-import { SheetUIPlugin } from '@univerjs/sheets-ui';
+import { SheetsUIPlugin } from '@univerjs/sheets-ui';
 
 const univer = new Univer({
     theme: greenTheme,
     locale: LocaleType.EN_US,
 });
 
-univer.registerPlugin(DocPlugin, {
+univer.registerPlugin(DocsPlugin, {
     hasScroll: false,
 });
 univer.registerPlugin(RenderEngine);
@@ -48,7 +48,7 @@ univer.registerPlugin(UIPlugin, {
     footer: true,
 });
 univer.registerPlugin(SheetPlugin);
-univer.registerPlugin(SheetUIPlugin);
+univer.registerPlugin(SheetsUIPlugin);
 univer.registerPlugin(FormulaPlugin);
 
 // call univer.createUniverSheet() to create a spreadsheet

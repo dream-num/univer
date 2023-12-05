@@ -2,14 +2,14 @@ import type { LocaleType } from '@univerjs/core';
 import { LocaleService } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import type { IDocUIPluginConfig } from '../basics';
+import type { IDocsUIPluginConfig } from '../basics';
 import type { DocContainer } from '../views/doc-container/DocContainer';
 
 export class DocContainerUIController {
     private _docContainer?: DocContainer;
 
     constructor(
-        private readonly _config: IDocUIPluginConfig,
+        private readonly _config: IDocsUIPluginConfig,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(Injector) private readonly _injector: Injector
     ) {}

@@ -74,7 +74,7 @@ export class Univer {
         } else if (plugin.type === PluginType.Sheet) {
             this._registerSheetPlugin(plugin, configs);
         } else if (plugin.type === PluginType.Doc) {
-            this._registerDocPlugin(plugin, configs);
+            this._registerDocsPlugin(plugin, configs);
         } else if (plugin.type === PluginType.Slide) {
             this._registerSlidePlugin(plugin, configs);
         } else {
@@ -232,7 +232,7 @@ export class Univer {
         // }
     }
 
-    private _registerDocPlugin<T extends Plugin>(pluginCtor: PluginCtor<T>, options?: any) {
+    private _registerDocsPlugin<T extends Plugin>(pluginCtor: PluginCtor<T>, options?: any) {
         this._univerPluginRegistry.registerPlugin(pluginCtor, options);
         // const docs = this._currentUniverService.getAllUniverDocsInstance();
         // if (docs.length) {

@@ -1,7 +1,7 @@
 // The entry of web worker scripts
 
 import { BaseFormulaEnginePlugin } from '@univerjs/engine-formula';
-import { SheetPlugin } from '@univerjs/sheets';
+import { SheetsPlugin } from '@univerjs/sheets';
 import { LocaleType, Univer } from '@univerjs/core';
 import { UniverRPCWorkerThreadPlugin } from '@univerjs/rpc';
 import { FormulaPlugin } from '@univerjs/formula';
@@ -11,7 +11,7 @@ const univer = new Univer({
     locale: LocaleType.EN_US,
 });
 
-univer.registerPlugin(SheetPlugin);
+univer.registerPlugin(SheetsPlugin);
 univer.registerPlugin(BaseFormulaEnginePlugin);
 univer.registerPlugin(UniverRPCWorkerThreadPlugin);
 univer.registerPlugin(FormulaPlugin);

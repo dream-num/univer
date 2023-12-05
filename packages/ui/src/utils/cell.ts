@@ -630,11 +630,9 @@ export function handelTableToJson(table: string) {
             const txt = td.innerText;
             if (txt.trim().length === 0) {
                 cell.v = '';
-                cell.m = '';
             } else {
                 // Todo,处理格式
                 cell.v = txt;
-                cell.m = txt;
             }
             const style = handleStringToStyle(td);
             if (Tools.isPlainObject(style)) {
@@ -783,11 +781,9 @@ export function handelExcelToJson(html: string) {
             const txt = td.innerText;
             if (txt.trim().length === 0) {
                 cell.v = '';
-                cell.m = '';
             } else {
                 // Todo,处理格式
                 cell.v = txt;
-                cell.m = txt;
             }
 
             let cssText = '';

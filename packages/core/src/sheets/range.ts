@@ -185,43 +185,6 @@ export class Range {
     }
 
     /**
-     * Returns the displayed value of the top-left cell in the range. The value is a String. The displayed value takes into account date, time and currency formatting formatting, including formats applied automatically by the spreadsheet's Locale setting. Empty cells return an empty string.
-     *
-     * @returns  The displayed value in this cell.
-     */
-    getDisplayValue(): string | IDocumentData {
-        const value = this.getValue();
-        if (value && value.p) {
-            return value.p;
-        }
-        if (value && value.m) {
-            return value.m;
-        }
-        return '';
-    }
-
-    /**
-     * Returns the rectangular grid of values for this range.
-     *
-     * Returns a two-dimensional array of displayed values, indexed by row, then by column. The values are String objects. The displayed value takes into account date, time and currency formatting, including formats applied automatically by the spreadsheet's Locale setting. Empty cells are represented by an empty string in the array. Remember that while a range index starts at 0, 0, same as the JavaScript array is indexed from [0][0].
-     *
-     * @returns  — A two-dimensional array of values.
-     */
-    getDisplayValues(): Array<Array<string | IDocumentData>> {
-        return this.getValues().map((row) =>
-            row.map((value: Nullable<ICellData>) => {
-                if (value && value.p) {
-                    return value.p;
-                }
-                if (value && value.m) {
-                    return value.m;
-                }
-                return '';
-            })
-        );
-    }
-
-    /**
      * Returns a string description of the range, in A1 notation.
      *
      * @returns The string description of the range in A1 notation.

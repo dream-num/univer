@@ -56,11 +56,11 @@ export const otherRule: IAutoFillRule = {
 export const extendNumberRule: IAutoFillRule = {
     type: DATA_TYPE.EXTEND_NUMBER,
     priority: 900,
-    match: (cellData) => matchExtendNumber(cellData?.m || '').isExtendNumber,
+    match: (cellData) => matchExtendNumber(`${cellData?.v}` || '').isExtendNumber,
     isContinue: (prev, cur) => {
         if (prev.type === DATA_TYPE.EXTEND_NUMBER) {
-            const { beforeTxt, afterTxt } = matchExtendNumber(prev.cellData?.m || '');
-            const { beforeTxt: curBeforeTxt, afterTxt: curAfterTxt } = matchExtendNumber(cur?.m || '');
+            const { beforeTxt, afterTxt } = matchExtendNumber(`${prev.cellData?.v}` || '');
+            const { beforeTxt: curBeforeTxt, afterTxt: curAfterTxt } = matchExtendNumber(`${cur?.v}` || '');
             if (beforeTxt === curBeforeTxt && afterTxt === curAfterTxt) {
                 return true;
             }
@@ -79,7 +79,7 @@ export const extendNumberRule: IAutoFillRule = {
             const dataNumArr = [];
 
             for (let i = 0; i < data.length; i++) {
-                const txt = data[i]?.m;
+                const txt = `${data[i]?.v}`;
                 txt && dataNumArr.push(Number(matchExtendNumber(txt).matchTxt));
             }
 
@@ -101,7 +101,7 @@ export const chnNumberRule: IAutoFillRule = {
     type: DATA_TYPE.CHN_NUMBER,
     priority: 830,
     match: (cellData) => {
-        if (isChnNumber(cellData?.m || '')) {
+        if (isChnNumber(`${cellData?.v}` || '')) {
             return true;
         }
         return false;
@@ -118,7 +118,7 @@ export const chnNumberRule: IAutoFillRule = {
 
             const isReverse = direction === Direction.LEFT || direction === Direction.UP;
             if (data.length === 1) {
-                const formattedValue = data[0]?.m;
+                const formattedValue = `${data[0]?.v}`;
                 let step;
                 if (!isReverse) {
                     step = 1;
@@ -133,7 +133,7 @@ export const chnNumberRule: IAutoFillRule = {
             }
             let hasWeek = false;
             for (let i = 0; i < data.length; i++) {
-                const formattedValue = data[i]?.m;
+                const formattedValue = data[i]?.v;
 
                 if (formattedValue === '日') {
                     hasWeek = true;
@@ -144,7 +144,7 @@ export const chnNumberRule: IAutoFillRule = {
             const dataNumArr = [];
             let weekIndex = 0;
             for (let i = 0; i < data.length; i++) {
-                const formattedValue = data[i]?.m;
+                const formattedValue = `${data[i]?.v}`;
                 if (formattedValue === '日') {
                     if (i === 0) {
                         dataNumArr.push(0);
@@ -188,7 +188,7 @@ export const chnWeek2Rule: IAutoFillRule = {
     type: DATA_TYPE.CHN_WEEK2,
     priority: 820,
     match: (cellData) => {
-        if (isChnWeek2(cellData?.m || '')) {
+        if (isChnWeek2(`${cellData?.v}` || '')) {
             return true;
         }
         return false;
@@ -213,7 +213,7 @@ export const chnWeek2Rule: IAutoFillRule = {
             let weekIndex = 0;
 
             for (let i = 0; i < data.length; i++) {
-                const formattedValue = data[i]?.m;
+                const formattedValue = `${data[i]?.v}`;
                 const lastTxt = formattedValue?.substr(formattedValue.length - 1, 1);
                 if (formattedValue === '周日') {
                     if (i === 0) {
@@ -244,7 +244,7 @@ export const chnWeek2Rule: IAutoFillRule = {
 export const chnWeek3Rule: IAutoFillRule = {
     type: DATA_TYPE.CHN_WEEK3,
     priority: 810,
-    match: (cellData) => isChnWeek3(cellData?.m || ''),
+    match: (cellData) => isChnWeek3(`${cellData?.v}` || ''),
     isContinue: (prev, cur) => prev.type === DATA_TYPE.CHN_WEEK3,
     applyFunctions: {
         [APPLY_TYPE.SERIES]: (dataWithIndex, len, direction) => {
@@ -265,7 +265,7 @@ export const chnWeek3Rule: IAutoFillRule = {
             let weekIndex = 0;
 
             for (let i = 0; i < data.length; i++) {
-                const formattedValue = data[i]?.m;
+                const formattedValue = `${data[i]?.v}`;
                 if (formattedValue) {
                     const lastTxt = formattedValue.substr(formattedValue.length - 1, 1);
                     if (formattedValue === '星期日') {
@@ -298,10 +298,10 @@ export const chnWeek3Rule: IAutoFillRule = {
 export const loopSeriesRule: IAutoFillRule = {
     type: DATA_TYPE.LOOP_SERIES,
     priority: 800,
-    match: (cellData) => isLoopSeries(cellData?.m || ''),
+    match: (cellData) => isLoopSeries(`${cellData?.v}` || ''),
     isContinue: (prev, cur) => {
         if (prev.type === DATA_TYPE.LOOP_SERIES) {
-            return getLoopSeriesInfo(prev.cellData?.m || '').name === getLoopSeriesInfo(cur?.m || '').name;
+            return getLoopSeriesInfo(`${prev.cellData?.v}` || '').name === getLoopSeriesInfo(`${cur?.v}` || '').name;
         }
         return false;
     },
@@ -309,7 +309,7 @@ export const loopSeriesRule: IAutoFillRule = {
         [APPLY_TYPE.SERIES]: (dataWithIndex, len, direction) => {
             const { data } = dataWithIndex;
             const isReverse = direction === Direction.LEFT || direction === Direction.UP;
-            const { series } = getLoopSeriesInfo(data[0]?.m || '');
+            const { series } = getLoopSeriesInfo(`${data[0]?.v}` || '');
             if (data.length === 1) {
                 let step;
                 if (!isReverse) {
@@ -323,7 +323,7 @@ export const loopSeriesRule: IAutoFillRule = {
             const dataNumArr = [];
             let cycleIndex = 0;
             for (let i = 0; i < data.length; i++) {
-                const formattedValue = data[i]?.m;
+                const formattedValue = `${data[i]?.v}`;
                 if (formattedValue) {
                     if (formattedValue === series[0]) {
                         if (i === 0) {

@@ -267,10 +267,10 @@ export class TextFinder {
 
             if (this._matchEntire) {
                 matrix.forValue((row, col, value) => {
-                    if (!value.m) return;
+                    if (!value.v) return;
                     if (
-                        (this._matchCase && value.m === this._text) ||
-                        (this._text as string).toLowerCase() === value.m.toLowerCase()
+                        (this._matchCase && value.v === this._text) ||
+                        (this._text as string).toLowerCase() === `${value.v}`.toLowerCase()
                     ) {
                         range.push({
                             sheetId: this._rangeData[i].sheetId,
@@ -300,8 +300,8 @@ export class TextFinder {
                 const reg = new RegExp(getRegExpStr(this._text as string), this._matchCase ? 'g' : 'ig');
 
                 matrix.forValue((row, col, value) => {
-                    if (!value.m) return;
-                    if (reg.test(value.m)) {
+                    if (!value.v) return;
+                    if (reg.test(`${value.v}`)) {
                         reg.lastIndex = 0;
                         range.push({
                             sheetId: this._rangeData[i].sheetId,
@@ -346,7 +346,7 @@ export class TextFinder {
 
     private _replaceText(sheet: Worksheet, range: IGridRange, text: string) {
         const value = sheet.getRange(range.range).getValue();
-        if (!value || !value.m) return 0;
+        if (!value || !value.v) return 0;
         if (!this._matchEntire) {
             let match;
             match = 'ig';

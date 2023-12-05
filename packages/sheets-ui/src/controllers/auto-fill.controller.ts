@@ -584,7 +584,6 @@ export class AutoFillController extends Disposable {
                 for (let j = 0; j < untransformedApplyDatas.length; j++) {
                     row.push({
                         v: null,
-                        m: null,
                         s: null,
                         ...this._beforeApplyData[i][j],
                         ...untransformedApplyDatas[j][i],
@@ -601,7 +600,6 @@ export class AutoFillController extends Disposable {
                 for (let j = 0; j < applyData.length; j++) {
                     row.push({
                         v: null,
-                        m: null,
                         s: null,
                         ...this._beforeApplyData[i - applyStartRow][j],
                         ...applyData[j],

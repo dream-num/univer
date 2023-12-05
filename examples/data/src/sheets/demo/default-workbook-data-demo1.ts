@@ -1226,15 +1226,15 @@ export const DEFAULT_WORKBOOK_DATA_DEMO1: IWorkbookData = {
             cellData: {
                 '0': {
                     '1': {
-                        m: 'Purchase Orders ',
                         s: '56',
+                        v: 'Purchase Orders ',
                     },
                     '4': {
                         s: '31',
                     },
                     '5': {
-                        m: 'Number:',
                         s: '32',
+                        v: 'Number:',
                     },
                     '6': {
                         s: '31',
@@ -1247,8 +1247,8 @@ export const DEFAULT_WORKBOOK_DATA_DEMO1: IWorkbookData = {
                 },
                 '2': {
                     '4': {
-                        m: '[Company]:',
                         s: '33',
+                        v: '[Company]:',
                     },
                     '5': {
                         s: '34',
@@ -1256,8 +1256,8 @@ export const DEFAULT_WORKBOOK_DATA_DEMO1: IWorkbookData = {
                 },
                 '3': {
                     '4': {
-                        m: '[Adress]:',
                         s: '33',
+                        v: '[Adress]:',
                     },
                     '5': {
                         s: '34',
@@ -1265,8 +1265,8 @@ export const DEFAULT_WORKBOOK_DATA_DEMO1: IWorkbookData = {
                 },
                 '4': {
                     '4': {
-                        m: '[TEL]:',
                         s: '33',
+                        v: '[TEL]:',
                     },
                     '5': {
                         s: '34',
@@ -1274,8 +1274,8 @@ export const DEFAULT_WORKBOOK_DATA_DEMO1: IWorkbookData = {
                 },
                 '5': {
                     '4': {
-                        m: '[FAX]:',
                         s: '33',
+                        v: '[FAX]:',
                     },
                     '5': {
                         s: '34',
@@ -1288,22 +1288,22 @@ export const DEFAULT_WORKBOOK_DATA_DEMO1: IWorkbookData = {
                 },
                 '7': {
                     '1': {
-                        m: 'Subscriber:',
                         s: '32',
+                        v: 'Subscriber:',
                     },
                     '2': {
                         s: '34',
                     },
                     '3': {
-                        m: 'Order Date:',
                         s: '32',
+                        v: 'Order Date:',
                     },
                     '4': {
                         s: '34',
                     },
                     '5': {
-                        m: 'Telephone:',
                         s: '32',
+                        v: 'Telephone:',
                     },
                     '6': {
                         s: '34',
@@ -1311,15 +1311,15 @@ export const DEFAULT_WORKBOOK_DATA_DEMO1: IWorkbookData = {
                 },
                 '8': {
                     '1': {
-                        m: 'Payment:',
                         s: '32',
+                        v: 'Payment:',
                     },
                     '2': {
                         s: '34',
                     },
                     '3': {
-                        m: 'Delivery:',
                         s: '32',
+                        v: 'Delivery:',
                     },
                     '4': {
                         s: '34',
@@ -1338,24 +1338,24 @@ export const DEFAULT_WORKBOOK_DATA_DEMO1: IWorkbookData = {
                 },
                 '10': {
                     '1': {
-                        m: 'SKU',
                         s: '35',
+                        v: 'SKU',
                     },
                     '2': {
-                        m: 'Product name ',
                         s: '35',
+                        v: 'Product name ',
                     },
                     '4': {
-                        m: 'Quantity',
                         s: '35',
+                        v: 'Quantity',
                     },
                     '5': {
-                        m: 'Price',
                         s: '35',
+                        v: 'Price',
                     },
                     '6': {
-                        m: 'Amount',
                         s: '35',
+                        v: 'Amount',
                     },
                 },
                 '11': {
@@ -1370,17 +1370,14 @@ export const DEFAULT_WORKBOOK_DATA_DEMO1: IWorkbookData = {
                     },
                     '4': {
                         s: '36',
-                        m: '1',
                         v: '1',
                     },
                     '5': {
                         s: '36',
-                        m: '10',
                         v: '10',
                     },
                     '6': {
                         s: '36',
-                        m: '10',
                         v: '10',
                     },
                 },
@@ -1396,17 +1393,14 @@ export const DEFAULT_WORKBOOK_DATA_DEMO1: IWorkbookData = {
                     },
                     '4': {
                         s: '36',
-                        m: '2',
                         v: '2',
                     },
                     '5': {
                         s: '36',
-                        m: '10',
                         v: '10',
                     },
                     '6': {
                         s: '36',
-                        m: '20',
                         v: '20',
                     },
                 },
@@ -1422,12 +1416,10 @@ export const DEFAULT_WORKBOOK_DATA_DEMO1: IWorkbookData = {
                     },
                     '4': {
                         s: '36',
-                        m: '2',
                         v: '2',
                     },
                     '5': {
                         s: '36',
-                        m: '2',
                         v: '2',
                     },
                     '6': {
@@ -1536,16 +1528,16 @@ export const DEFAULT_WORKBOOK_DATA_DEMO1: IWorkbookData = {
                 },
                 '19': {
                     '1': {
-                        m: 'Remark ',
                         s: '37',
+                        v: 'Remark ',
                     },
                     '2': {
-                        m: 'If there is any problem, please list the specific reasons in writing and fax to contact the company.',
                         s: '38',
+                        v: 'If there is any problem, please list the specific reasons in writing and fax to contact the company.',
                     },
                     '5': {
-                        m: 'Subtotal',
                         s: '39',
+                        v: 'Subtotal',
                     },
                     '6': {
                         s: '36',
@@ -1553,8 +1545,8 @@ export const DEFAULT_WORKBOOK_DATA_DEMO1: IWorkbookData = {
                 },
                 '20': {
                     '5': {
-                        m: 'Tax',
                         s: '39',
+                        v: 'Tax',
                     },
                     '6': {
                         s: '36',
@@ -1562,8 +1554,8 @@ export const DEFAULT_WORKBOOK_DATA_DEMO1: IWorkbookData = {
                 },
                 '21': {
                     '5': {
-                        m: 'Freight',
                         s: '39',
+                        v: 'Freight',
                     },
                     '6': {
                         s: '36',
@@ -1571,8 +1563,8 @@ export const DEFAULT_WORKBOOK_DATA_DEMO1: IWorkbookData = {
                 },
                 '22': {
                     '5': {
-                        m: 'Total ',
                         s: '39',
+                        v: 'Total ',
                     },
                     '6': {
                         s: '36',
@@ -1585,22 +1577,22 @@ export const DEFAULT_WORKBOOK_DATA_DEMO1: IWorkbookData = {
                 },
                 '24': {
                     '1': {
-                        m: 'Approval of Responsible Person:',
                         s: '55',
+                        v: 'Approval of Responsible Person:',
                     },
                     '2': {
                         s: '34',
                     },
                     '3': {
-                        m: 'Accountant:',
                         s: '55',
+                        v: 'Accountant:',
                     },
                     '4': {
                         s: '34',
                     },
                     '5': {
-                        m: 'Responsible Person:',
                         s: '55',
+                        v: 'Responsible Person:',
                     },
                     '6': {
                         s: '34',
@@ -1608,8 +1600,8 @@ export const DEFAULT_WORKBOOK_DATA_DEMO1: IWorkbookData = {
                 },
                 '25': {
                     '1': {
-                        m: 'Company:',
                         s: '55',
+                        v: 'Company:',
                     },
                     '2': {
                         s: '34',
@@ -1621,8 +1613,8 @@ export const DEFAULT_WORKBOOK_DATA_DEMO1: IWorkbookData = {
                         s: '32',
                     },
                     '5': {
-                        m: 'Date:',
                         s: '55',
+                        v: 'Date:',
                     },
                     '6': {
                         s: '34',

@@ -35,14 +35,14 @@ describe('Test SheetInterceptorService', () => {
                 priority: 100,
                 handler(_cell, location: ISheetLocation, next: (v: Nullable<ICellData>) => Nullable<ICellData>) {
                     if (location.row === 0 && location.col === 0) {
-                        return next({ m: 'intercepted' });
+                        return next({ v: 'intercepted' });
                     }
 
                     return next();
                 },
             });
 
-            expect(getCell(0, 0)).toEqual({ m: 'intercepted', v: 'A1' });
+            expect(getCell(0, 0)).toEqual({ v: 'intercepted' });
             expect(getCell(0, 1)).toEqual({ v: 'A2' });
         });
 
@@ -51,14 +51,14 @@ describe('Test SheetInterceptorService', () => {
                 priority: 100,
                 handler(_cell, location: ISheetLocation, next: (v: Nullable<ICellData>) => Nullable<ICellData>) {
                     if (location.row === 0 && location.col === 0) {
-                        return { m: 'intercepted' };
+                        return { v: 'intercepted' };
                     }
 
                     return next();
                 },
             });
 
-            expect(getCell(0, 0)).toEqual({ m: 'intercepted' });
+            expect(getCell(0, 0)).toEqual({ v: 'intercepted' });
             expect(getCell(0, 1)).toEqual({ v: 'A2' });
         });
     });

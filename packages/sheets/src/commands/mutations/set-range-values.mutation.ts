@@ -112,10 +112,6 @@ function setNull(value: Nullable<ICellData>) {
         value.v = null;
     }
 
-    if (value.m === undefined) {
-        value.m = null;
-    }
-
     if (value.t === undefined) {
         value.t = null;
     }
@@ -173,11 +169,6 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
                 // Set to null, clear content
                 if (newVal.v !== undefined) {
                     oldVal.v = type === CellValueType.NUMBER ? Number(newVal.v) : newVal.v;
-                    oldVal.m = String(oldVal.v);
-                }
-
-                if (newVal.m !== undefined) {
-                    oldVal.m = newVal.m;
                 }
 
                 if (oldVal.v !== undefined) {

@@ -86,7 +86,6 @@ import { RemoveWorksheetMergeMutation } from '../commands/mutations/remove-works
 import { SetColHiddenMutation, SetColVisibleMutation } from '../commands/mutations/set-col-visible.mutation';
 import { SetFrozenMutation } from '../commands/mutations/set-frozen.mutation';
 import { SetNumfmtMutation } from '../commands/mutations/set-numfmt-mutation';
-import { SetRangeFormattedValueMutation } from '../commands/mutations/set-range-formatted-value.mutation';
 import { SetRangeValuesMutation } from '../commands/mutations/set-range-values.mutation';
 import { SetRowHiddenMutation, SetRowVisibleMutation } from '../commands/mutations/set-row-visible.mutation';
 import { SetTabColorMutation } from '../commands/mutations/set-tab-color.mutation';
@@ -176,7 +175,6 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetFrozenCommand,
             SetFrozenMutation,
             SetHorizontalTextAlignCommand,
-            SetRangeFormattedValueMutation,
             SetRangeValuesCommand,
             SetRangeValuesMutation,
             SetRowHeightCommand,

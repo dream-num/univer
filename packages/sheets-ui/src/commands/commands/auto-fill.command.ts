@@ -230,7 +230,7 @@ export const AutoClearContentCommand: ICommand = {
     },
 };
 
-// Generate cellValue from range and set v/m to null
+// Generate cellValue from range and set v/p/f/si to null
 function generateNullCellValue(range: IRange[]): ObjectMatrixPrimitiveType<ICellData> {
     const cellValue = new ObjectMatrix<ICellData>();
     range.forEach((r: IRange) => {
@@ -239,7 +239,9 @@ function generateNullCellValue(range: IRange[]): ObjectMatrixPrimitiveType<ICell
             for (let j = startColumn; j <= endColumn; j++) {
                 cellValue.setValue(i, j, {
                     v: null,
-                    m: null,
+                    p: null,
+                    f: null,
+                    si: null,
                 });
             }
         }

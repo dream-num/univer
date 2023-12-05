@@ -112,7 +112,6 @@ describe('Test set range values commands', () => {
                         value: {
                             p: richTextDemo,
                             v: 'a1',
-                            m: 'a1',
                             t: CellValueType.STRING,
                         },
                     };

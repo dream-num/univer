@@ -1,2 +1,2 @@
 export * from './basics';
-export * from './slide-ui-plugin';
+export * from './slides-ui-plugin';

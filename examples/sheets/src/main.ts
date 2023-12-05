@@ -1,7 +1,7 @@
-import { DocPlugin, RichTextEditingMutation } from '@univerjs/docs';
+import { DocsPlugin, RichTextEditingMutation } from '@univerjs/docs';
 import { BaseFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { RenderEngine } from '@univerjs/engine-render';
-import { SheetPlugin } from '@univerjs/sheets';
+import { SheetsPlugin } from '@univerjs/sheets';
 import { UIPlugin } from '@univerjs/ui';
 import { LocaleType, Univer } from '@univerjs/core';
 import { greenTheme } from '@univerjs/design';
@@ -10,7 +10,7 @@ import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
 import { FormulaPlugin } from '@univerjs/formula';
 import { FormulaUIPlugin } from '@univerjs/sheets-formula';
 import { NumfmtPlugin } from '@univerjs/sheets-numfmt';
-import { SheetUIPlugin } from '@univerjs/sheets-ui';
+import { SheetsUIPlugin } from '@univerjs/sheets-ui';
 import type { IUniscriptPluginConfig } from '@univerjs/uniscript';
 import { UniscriptPlugin } from '@univerjs/uniscript';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from 'data';
@@ -26,10 +26,10 @@ const univer = new Univer({
 });
 
 // core plugins
-univer.registerPlugin(DocPlugin, {
+univer.registerPlugin(DocsPlugin, {
     hasScroll: false,
 });
-// univer.registerPlugin(DocUIPlugin);
+// univer.registerPlugin(DocsUIPlugin);
 univer.registerPlugin(RenderEngine);
 univer.registerPlugin(UIPlugin, {
     container: 'app',
@@ -37,8 +37,8 @@ univer.registerPlugin(UIPlugin, {
     toolbar: true,
     footer: true,
 });
-univer.registerPlugin(SheetPlugin);
-univer.registerPlugin(SheetUIPlugin);
+univer.registerPlugin(SheetsPlugin);
+univer.registerPlugin(SheetsUIPlugin);
 
 // sheet feature plugins
 

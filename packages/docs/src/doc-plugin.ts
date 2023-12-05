@@ -5,7 +5,6 @@ import {
     IUniverInstanceService,
     LocaleService,
     Plugin,
-    PLUGIN_NAMES,
     PluginType,
 } from '@univerjs/core';
 import { ITextSelectionRenderManager, TextSelectionRenderManager } from '@univerjs/engine-render';
@@ -71,7 +70,7 @@ import {
 } from './shortcuts/cursor.shortcut';
 import { DocCanvasView } from './views/doc-canvas-view';
 
-export interface IDocPluginConfig {
+export interface IDocsPluginConfig {
     hasScroll?: boolean;
 }
 
@@ -79,19 +78,21 @@ const DEFAULT_DOCUMENT_PLUGIN_DATA = {
     hasScroll: true,
 };
 
-export class DocPlugin extends Plugin {
+const PLUGIN_NAME = 'docs';
+
+export class DocsPlugin extends Plugin {
     static override type = PluginType.Doc;
 
-    private _config: IDocPluginConfig;
+    private _config: IDocsPluginConfig;
 
     constructor(
-        config: Partial<IDocPluginConfig> = {},
+        config: Partial<IDocsPluginConfig> = {},
         @Inject(Injector) override _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @IConfigService private readonly _configService: IConfigService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService
     ) {
-        super(PLUGIN_NAMES.DOCUMENT);
+        super(PLUGIN_NAME);
 
         this._config = Object.assign(DEFAULT_DOCUMENT_PLUGIN_DATA, config);
 
@@ -166,7 +167,7 @@ export class DocPlugin extends Plugin {
                 // [
                 //     CanvasView,
                 //     { useFactory: () => docInjector.createInstance(CanvasView, this._config.standalone ?? true) },
-                // ], // FIXME: CanvasView shouldn't be a dependency of DocPlugin. Because it maybe created dynamically.
+                // ], // FIXME: CanvasView shouldn't be a dependency of DocsPlugin. Because it maybe created dynamically.
                 //views
                 [DocCanvasView],
 

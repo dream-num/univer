@@ -2,7 +2,7 @@ import { Button, Container, Tooltip } from '@univerjs/design';
 import type { BaseComponentProps } from '@univerjs/ui';
 import React, { Component, createRef } from 'react';
 
-import type { SlideUIPlugin } from '../..';
+import type { SlidesUIPlugin } from '../..';
 import { SLIDE_UI_PLUGIN_NAME } from '../../basics';
 import type { IToolbarItemProps } from '../../controllers';
 import styles from './index.module.less';
@@ -167,7 +167,7 @@ export class Toolbar extends Component<IProps, IState> {
         // @ts-ignore
         const wrapper = this.context()
             .getPluginManager()
-            .getPluginByName<SlideUIPlugin>(SLIDE_UI_PLUGIN_NAME)
+            .getPluginByName<SlidesUIPlugin>(SLIDE_UI_PLUGIN_NAME)
             ?.getAppUIController()
             .getSlideContainerController()
             .getContentRef().current!;

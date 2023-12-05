@@ -72,11 +72,11 @@ export class Univer {
         if (plugin.type === PluginType.Univer) {
             this._registerUniverPlugin(plugin, configs);
         } else if (plugin.type === PluginType.Sheet) {
-            this._registerSheetPlugin(plugin, configs);
+            this._registerSheetsPlugin(plugin, configs);
         } else if (plugin.type === PluginType.Doc) {
-            this._registerDocPlugin(plugin, configs);
+            this._registerDocsPlugin(plugin, configs);
         } else if (plugin.type === PluginType.Slide) {
-            this._registerSlidePlugin(plugin, configs);
+            this._registerSlidesPlugin(plugin, configs);
         } else {
             throw new Error(`Unimplemented plugin system for business: "${plugin.type}".`);
         }
@@ -220,7 +220,7 @@ export class Univer {
         this._univerPluginStore.addPlugin(pluginInstance);
     }
 
-    private _registerSheetPlugin<T extends Plugin>(pluginCtor: PluginCtor<T>, options?: any) {
+    private _registerSheetsPlugin<T extends Plugin>(pluginCtor: PluginCtor<T>, options?: any) {
         this._univerPluginRegistry.registerPlugin(pluginCtor, options);
         // TODO: implement add plugin when Univer business object is created
         // Add plugins to the plugin registration. And for each initialized UniverSheet, instantiate these dependencies immediately.
@@ -232,7 +232,7 @@ export class Univer {
         // }
     }
 
-    private _registerDocPlugin<T extends Plugin>(pluginCtor: PluginCtor<T>, options?: any) {
+    private _registerDocsPlugin<T extends Plugin>(pluginCtor: PluginCtor<T>, options?: any) {
         this._univerPluginRegistry.registerPlugin(pluginCtor, options);
         // const docs = this._currentUniverService.getAllUniverDocsInstance();
         // if (docs.length) {
@@ -242,7 +242,7 @@ export class Univer {
         // }
     }
 
-    private _registerSlidePlugin<T extends Plugin>(pluginCtor: PluginCtor<T>, options?: any) {
+    private _registerSlidesPlugin<T extends Plugin>(pluginCtor: PluginCtor<T>, options?: any) {
         this._univerPluginRegistry.registerPlugin(pluginCtor, options);
         // const slides = this._currentUniverService.getAllUniverSlidesInstance();
         // if (slides.length) {

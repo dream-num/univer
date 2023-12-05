@@ -1,4 +1,4 @@
-import { IUniverInstanceService, LocaleService, Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
+import { IUniverInstanceService, LocaleService, Plugin, PluginType } from '@univerjs/core';
 import type { Engine } from '@univerjs/engine-render';
 import { IRenderingEngine } from '@univerjs/engine-render';
 import type { Dependency } from '@wendellhu/redi';
@@ -7,26 +7,28 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { enUS } from './locale';
 import { CanvasView } from './views/render';
 
-export interface ISlidePluginConfig {}
+export interface ISlidesPluginConfig {}
 
 const DEFAULT_SLIDE_PLUGIN_DATA = {};
 
-export class SlidePlugin extends Plugin {
+const PLUGIN_NAME = 'slides';
+
+export class SlidesPlugin extends Plugin {
     static override type = PluginType.Slide;
 
-    private _config: ISlidePluginConfig;
+    private _config: ISlidesPluginConfig;
 
     private _canvasEngine: Engine | null = null;
 
     private _canvasView: CanvasView | null = null;
 
     constructor(
-        config: Partial<ISlidePluginConfig> = {},
+        config: Partial<ISlidesPluginConfig> = {},
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(Injector) override readonly _injector: Injector
     ) {
-        super(PLUGIN_NAMES.SLIDE);
+        super(PLUGIN_NAME);
 
         this._config = Object.assign(DEFAULT_SLIDE_PLUGIN_DATA, config);
         this._initializeDependencies(this._injector);

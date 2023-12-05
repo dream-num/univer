@@ -1,9 +1,9 @@
-import { DocPlugin } from '@univerjs/docs';
+import { DocsPlugin } from '@univerjs/docs';
 import { RenderEngine } from '@univerjs/engine-render';
 import { UIPlugin } from '@univerjs/ui';
 import { LocaleType, Univer } from '@univerjs/core';
 import { defaultTheme } from '@univerjs/design';
-import { DocUIPlugin } from '@univerjs/docs-ui';
+import { DocsUIPlugin } from '@univerjs/docs-ui';
 import { DEFAULT_DOCUMENT_DATA_CN } from 'data';
 
 import { locales } from './locales';
@@ -22,10 +22,10 @@ univer.registerPlugin(UIPlugin, {
     header: true,
     toolbar: true,
 });
-univer.registerPlugin(DocPlugin, {
+univer.registerPlugin(DocsPlugin, {
     standalone: true,
 });
-univer.registerPlugin(DocUIPlugin, {
+univer.registerPlugin(DocsUIPlugin, {
     container: 'univerdoc',
     layout: {
         docContainerConfig: {

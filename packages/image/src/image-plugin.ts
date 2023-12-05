@@ -1,4 +1,4 @@
-import { DEFAULT_DOCUMENT_SUB_COMPONENT_ID, LocaleService, Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
+import { DEFAULT_DOCUMENT_SUB_COMPONENT_ID, LocaleService, Plugin, PluginType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -6,6 +6,8 @@ import { ImageLoadController } from './controllers/image.load.controller';
 import { ImageModel } from './models/image-model';
 import { IImageManagerService, ImageManagerService } from './services/image-manager.service';
 import { IImageRenderService, ImageRenderService } from './services/image-render.service';
+
+const PLUGIN_NAME = 'image';
 
 export class ImagePlugin extends Plugin {
     static override type = PluginType.Univer;
@@ -15,7 +17,7 @@ export class ImagePlugin extends Plugin {
         @Inject(Injector) protected readonly _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
-        super(PLUGIN_NAMES.BASE_COMPONENT);
+        super(PLUGIN_NAME);
     }
 
     override onStarting(_injector: Injector): void {

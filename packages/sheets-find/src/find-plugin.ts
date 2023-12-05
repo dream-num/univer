@@ -47,10 +47,10 @@ export class FindPlugin extends Plugin {
     //     this._findController = new FindController(this);
 
     //     const context = this.getContext();
-    //     let sheetPlugin = context.getUniver().getGlobalContext().getPluginManager().getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME);
-    //     sheetPlugin?.UIDidMount(() => {
-    //         sheetPlugin.getComponentManager().register('SearchIcon', Icon.SearchIcon);
-    //         sheetPlugin.addToolButton(this._findController.getFindList());
+    //     let sheetsPlugin = context.getUniver().getGlobalContext().getPluginManager().getRequirePluginByName<SheetsUIPlugin>(SHEET_UI_PLUGIN_NAME);
+    //     sheetsPlugin?.UIDidMount(() => {
+    //         sheetsPlugin.getComponentManager().register('SearchIcon', Icon.SearchIcon);
+    //         sheetsPlugin.addToolButton(this._findController.getFindList());
     //     });
     // }
 

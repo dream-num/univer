@@ -1,9 +1,9 @@
 import { RenderEngine } from '@univerjs/engine-render';
-import { SlidePlugin } from '@univerjs/slides';
+import { SlidesPlugin } from '@univerjs/slides';
 import { UIPlugin } from '@univerjs/ui';
 import { LocaleType, Univer } from '@univerjs/core';
 import { greenTheme } from '@univerjs/design';
-import { SlideUIPlugin } from '@univerjs/slides-ui';
+import { SlidesUIPlugin } from '@univerjs/slides-ui';
 import { DEFAULT_SLIDE_DATA } from 'data';
 
 // univer
@@ -21,8 +21,8 @@ univer.registerPlugin(UIPlugin, {
     footer: true,
     innerLeft: true,
 });
-univer.registerPlugin(SlidePlugin);
-univer.registerPlugin(SlideUIPlugin);
+univer.registerPlugin(SlidesPlugin);
+univer.registerPlugin(SlidesUIPlugin);
 
 univer.createUniverSlide(DEFAULT_SLIDE_DATA);
 

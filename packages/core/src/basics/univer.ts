@@ -76,7 +76,7 @@ export class Univer {
         } else if (plugin.type === PluginType.Doc) {
             this._registerDocsPlugin(plugin, configs);
         } else if (plugin.type === PluginType.Slide) {
-            this._registerSlidePlugin(plugin, configs);
+            this._registerSlidesPlugin(plugin, configs);
         } else {
             throw new Error(`Unimplemented plugin system for business: "${plugin.type}".`);
         }
@@ -242,7 +242,7 @@ export class Univer {
         // }
     }
 
-    private _registerSlidePlugin<T extends Plugin>(pluginCtor: PluginCtor<T>, options?: any) {
+    private _registerSlidesPlugin<T extends Plugin>(pluginCtor: PluginCtor<T>, options?: any) {
         this._univerPluginRegistry.registerPlugin(pluginCtor, options);
         // const slides = this._currentUniverService.getAllUniverSlidesInstance();
         // if (slides.length) {

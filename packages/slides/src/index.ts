@@ -1,2 +1,2 @@
-export * from './slide-plugin';
+export * from './slides-plugin';
 export * from './views/render';

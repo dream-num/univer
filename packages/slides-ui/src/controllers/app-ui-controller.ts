@@ -3,14 +3,14 @@ import { LocaleService } from '@univerjs/core';
 import { ComponentManager } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import type { ISlideUIPluginConfig } from '../basics';
+import type { ISlidesUIPluginConfig } from '../basics';
 import { SlideContainerUIController } from './slide-container-ui-controller';
 
 export class AppUIController {
     private _slideContainerUIController: SlideContainerUIController;
 
     constructor(
-        config: ISlideUIPluginConfig,
+        config: ISlidesUIPluginConfig,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager

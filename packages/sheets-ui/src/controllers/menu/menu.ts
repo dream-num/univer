@@ -899,7 +899,7 @@ export function PasteMenuItemFactory(): IMenuButtonItem {
     };
 }
 
-const PASTE_SPECIAL_MENU_ID = 'sheet.menu.paste-special';
+export const PASTE_SPECIAL_MENU_ID = 'sheet.menu.paste-special';
 export function PasteSpacialMenuItemFactory(): IMenuSelectorItem {
     return {
         id: PASTE_SPECIAL_MENU_ID,

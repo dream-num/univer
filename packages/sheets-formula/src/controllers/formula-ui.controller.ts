@@ -4,6 +4,7 @@ import { ComponentManager, IMenuService, IShortcutService, IUIController } from 
 import { Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 
+import { SheetOnlyPasteFormulaCommand } from '../commands/commands/formula-clipboard.command';
 import { InsertFunctionCommand } from '../commands/commands/insert-function.command';
 import { SelectEditorFormulaOperation } from '../commands/operations/editor-formula.operation';
 import { HelpFunctionOperation } from '../commands/operations/help-function.operation';
@@ -14,7 +15,7 @@ import { SearchFunctionOperation } from '../commands/operations/search-function.
 import { RenderFormulaPromptContent } from '../views/FormulaPromptContainer';
 import { MORE_FUNCTIONS_COMPONENT } from '../views/more-functions/interface';
 import { MoreFunctions } from '../views/more-functions/MoreFunctions';
-import { InsertFunctionMenuItemFactory, MoreFunctionsMenuItemFactory } from './menu';
+import { InsertFunctionMenuItemFactory, MoreFunctionsMenuItemFactory, PasteFormulaMenuItemFactory } from './menu';
 import {
     ChangeRefToAbsoluteShortcut,
     promptSelectionShortcutItem,
@@ -46,14 +47,17 @@ export class FormulaUIController extends Disposable {
     }
 
     private _registerMenus(): void {
-        [InsertFunctionMenuItemFactory, MoreFunctionsMenuItemFactory].forEach((factory) => {
-            this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
-        });
+        [InsertFunctionMenuItemFactory, MoreFunctionsMenuItemFactory, PasteFormulaMenuItemFactory].forEach(
+            (factory) => {
+                this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
+            }
+        );
     }
 
     private _registerCommands(): void {
         [
             InsertFunctionCommand,
+            SheetOnlyPasteFormulaCommand,
             InsertFunctionOperation,
             MoreFunctionsOperation,
             SearchFunctionOperation,

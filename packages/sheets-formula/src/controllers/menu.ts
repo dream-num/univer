@@ -1,7 +1,9 @@
+import { PASTE_SPECIAL_MENU_ID } from '@univerjs/sheets-ui';
 import type { IMenuItem } from '@univerjs/ui';
 import { MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 
+import { SheetOnlyPasteFormulaCommand } from '../commands/commands/formula-clipboard.command';
 import { InsertFunctionOperation } from '../commands/operations/insert-function.operation';
 import { MoreFunctionsOperation } from '../commands/operations/more-functions.operation';
 
@@ -49,5 +51,14 @@ export function MoreFunctionsMenuItemFactory(accessor: IAccessor): IMenuItem {
         title: 'formula.insert.more',
         positions: InsertFunctionOperation.id,
         type: MenuItemType.BUTTON,
+    };
+}
+
+export function PasteFormulaMenuItemFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: SheetOnlyPasteFormulaCommand.id,
+        type: MenuItemType.BUTTON,
+        title: 'formula.operation.pasteFormula',
+        positions: [PASTE_SPECIAL_MENU_ID],
     };
 }

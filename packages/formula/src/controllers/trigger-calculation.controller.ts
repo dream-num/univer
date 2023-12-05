@@ -46,6 +46,8 @@ export class TriggerCalculationController extends Disposable {
         this._commandExecutedListener();
 
         this._initialExecuteFormulaProcessListener();
+
+        this._initialExecuteFormula();
     }
 
     private _commandExecutedListener() {
@@ -145,5 +147,12 @@ export class TriggerCalculationController extends Disposable {
                 }
             })
         );
+    }
+
+    private _initialExecuteFormula() {
+        this._commandService.executeCommand(setFormulaCalculationStartMutation.id, {
+            commands: [],
+            forceCalculation: true,
+        });
     }
 }

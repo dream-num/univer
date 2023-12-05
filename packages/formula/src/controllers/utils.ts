@@ -43,6 +43,8 @@ export function offsetFormula<T>(
 ): IFormulaDataGenerics<T> {
     const { id } = command;
 
+    if (checkFormulaDataNull(formulaData, unitId, sheetId)) return formulaData;
+
     const formulaMatrix = new ObjectMatrix(formulaData[unitId][sheetId]);
 
     switch (id) {
@@ -269,6 +271,8 @@ function handleDeleteRangeMoveLeft<T>(
 }
 
 export function offsetArrayFormula(arrayFormulaRange: IArrayFormulaRangeType, unitId: string, sheetId: string) {
+    if (checkFormulaDataNull(arrayFormulaRange, unitId, sheetId)) return arrayFormulaRange;
+
     const arrayFormulaRangeMatrix = new ObjectMatrix(arrayFormulaRange[unitId][sheetId]);
     arrayFormulaRangeMatrix.forValue((row, column, range) => {
         const { startRow, startColumn, endRow, endColumn } = range;
@@ -290,4 +294,12 @@ export function offsetArrayFormula(arrayFormulaRange: IArrayFormulaRangeType, un
     });
 
     return arrayFormulaRange;
+}
+
+function checkFormulaDataNull<T>(formulaData: IFormulaDataGenerics<T>, unitId: string, sheetId: string) {
+    if (formulaData == null || formulaData[unitId] == null || formulaData[unitId][sheetId] == null) {
+        return true;
+    }
+
+    return false;
 }

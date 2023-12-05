@@ -73,5 +73,8 @@ export default {
             allFunctions: 'All Functions',
             syntax: 'SYNTAX',
         },
+        operation: {
+            pasteFormula: 'Paste Formula',
+        },
     },
 };

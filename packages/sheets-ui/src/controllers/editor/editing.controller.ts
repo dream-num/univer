@@ -1,24 +1,21 @@
-import type { Nullable } from '@univerjs/core';
 import {
-    Disposable,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     IUndoRedoService,
     IUniverInstanceService,
     LifecycleStages,
     ObjectMatrix,
     OnLifecycle,
+    RxDisposable,
 } from '@univerjs/core';
 import { getDocObject } from '@univerjs/docs';
 import type { ISheetData } from '@univerjs/engine-formula';
 import { FormulaEngineService } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
-import type { Subscription } from 'rxjs';
+import { takeUntil } from 'rxjs';
 
 @OnLifecycle(LifecycleStages.Steady, EditingController)
-export class EditingController extends Disposable {
-    private _onInputSubscription: Nullable<Subscription>;
-
+export class EditingController extends RxDisposable {
     constructor(
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
@@ -32,17 +29,13 @@ export class EditingController extends Disposable {
         this._commandExecutedListener();
     }
 
-    override dispose(): void {
-        this._onInputSubscription?.unsubscribe();
-    }
-
     private _initialize() {
         this._initialNormalInput();
         this._listenEditorBlur();
     }
 
     private _listenEditorBlur() {
-        this._currentUniverService.currentDoc$.subscribe((docDataModel) => {
+        this._currentUniverService.currentDoc$.pipe(takeUntil(this.dispose$)).subscribe((docDataModel) => {
             if (docDataModel == null) {
                 return;
             }

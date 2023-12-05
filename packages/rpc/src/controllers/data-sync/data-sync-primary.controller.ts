@@ -27,7 +27,7 @@ import { fromModule, toModule } from '../../services/rpc/rpc.service';
  */
 @OnLifecycle(LifecycleStages.Starting, DataSyncPrimaryController)
 export class DataSyncPrimaryController extends RxDisposable {
-    private _remoteInstanceService: IRemoteInstanceService;
+    private _remoteInstanceService!: IRemoteInstanceService;
 
     constructor(
         private readonly _unsyncMutations: Set<string>,

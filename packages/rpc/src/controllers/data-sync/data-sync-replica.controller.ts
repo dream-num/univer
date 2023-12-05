@@ -18,7 +18,7 @@ import { fromModule, toModule } from '../../services/rpc/rpc.service';
  */
 @OnLifecycle(LifecycleStages.Starting, DataSyncReplicaController)
 export class DataSyncReplicaController extends Disposable {
-    private _remoteSyncService: IRemoteSyncService;
+    private _remoteSyncService!: IRemoteSyncService;
 
     constructor(
         @Inject(Injector) private readonly _injector: Injector,

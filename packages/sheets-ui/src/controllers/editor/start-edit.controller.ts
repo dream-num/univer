@@ -567,6 +567,8 @@ export class StartEditController extends Disposable {
                         return;
                     }
 
+                    this._editorBridgeService.changeEditorDirty(true);
+
                     const skeleton = this._docSkeletonManagerService.getSkeletonByUnitId(unitId)?.skeleton;
 
                     if (skeleton == null) {

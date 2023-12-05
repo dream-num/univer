@@ -154,6 +154,13 @@ export class EndEditController extends Disposable {
 
             this._moveCursor(keycode);
 
+            // If neither the formula bar editor nor the cell editor has been edited,
+            // it is considered that the content has not changed and returns directly.
+            const editorIsDirty = this._editorBridgeService.getEditorDirty();
+            if (editorIsDirty === false) {
+                return;
+            }
+
             const workbook = this._currentUniverService.getUniverSheetInstance(unitId);
 
             const worksheet = workbook?.getSheetBySheetId(sheetId);

@@ -79,9 +79,8 @@ export class FormulaClipboardController extends Disposable {
                 const workbookId = workbook.getUnitId();
                 const worksheetId = workbook.getActiveSheet().getSheetId();
 
-                const a = this._injector.invoke((accessor) => {
-                    console.info(
-                        'a======22',
+                return this._injector.invoke((accessor) =>
+                    getSetCellFormulaMutations(
                         workbookId,
                         worksheetId,
                         pastedRange,
@@ -89,20 +88,8 @@ export class FormulaClipboardController extends Disposable {
                         accessor,
                         copyInfo,
                         this._formulaEngineService
-                    );
-                    return getSetCellFormulaMutations(
-                        workbookId,
-                        worksheetId,
-                        pastedRange,
-                        matrix,
-                        accessor,
-                        copyInfo,
-                        this._formulaEngineService
-                    );
-                });
-
-                console.info('a======11', a);
-                return a;
+                    )
+                );
             },
         };
 

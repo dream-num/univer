@@ -317,7 +317,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     private async _pasteInternal(copyId: string, pasteType: string): Promise<boolean> {
         const target = this._getPastingTarget();
         const { selection, workbookId, worksheetId } = target;
-        const cachedData = copyContentCache.get(copyId);
+        const cachedData = Tools.deepClone(copyContentCache.get(copyId));
         const { range, matrix: cellMatrix } = cachedData || {};
         if (!selection || !cellMatrix || !cachedData || !range) {
             return false;

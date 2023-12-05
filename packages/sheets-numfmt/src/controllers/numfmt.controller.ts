@@ -517,7 +517,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
                                             t: CellValueType.STRING,
                                         };
                                     }
-                                    return next();
+                                    return next(cell);
                                 },
                             })
                         );

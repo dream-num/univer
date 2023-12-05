@@ -2,7 +2,7 @@ import type { ICommandInfo } from '@univerjs/core';
 import { Disposable, ICommandService, IUniverInstanceService, ThemeService, Tools } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
-import { SelectionManagerService } from '@univerjs/sheets';
+import { SelectionManagerService, SetWorksheetActivateMutation } from '@univerjs/sheets';
 import { createIdentifier, Inject } from '@wendellhu/redi';
 
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
@@ -16,11 +16,19 @@ export interface IMarkSelectionService {
     removeAllShapes(): void;
 }
 
+interface IMarkSelectionInfo {
+    workbookId: string;
+    worksheetId: string;
+    selection: ISelectionWithStyle;
+    zIndex: number;
+    control: SelectionShape | null;
+}
+
 const DEFAULT_Z_INDEX = 10000;
 export const IMarkSelectionService = createIdentifier<IMarkSelectionService>('univer.mark-selection-service');
 
 export class MarkSelectionService extends Disposable implements IMarkSelectionService {
-    private _shapeMap: Map<string, SelectionShape> = new Map();
+    private _shapeMap: Map<string, IMarkSelectionInfo> = new Map();
 
     constructor(
         @IUniverInstanceService private readonly _currentService: IUniverInstanceService,
@@ -33,37 +41,60 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
     ) {
         super();
         this._addRemoveListener();
+        this._addRefreshListener();
     }
 
     addShape(selection: ISelectionWithStyle, zIndex: number = DEFAULT_Z_INDEX): string | null {
         const workbook = this._currentService.getCurrentUniverSheetInstance();
-        const { style } = selection;
-        const { scene } = this._renderManagerService.getRenderById(workbook.getUnitId()) || {};
-
-        const { rangeWithCoord, primaryWithCoord } =
-            this._selectionRenderService.convertSelectionRangeToData(selection);
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-        if (!scene || !skeleton) return null;
-        const { rowHeaderWidth, columnHeaderHeight } = skeleton;
-
-        const control = new SelectionShape(scene, zIndex, false, this._themeService);
-
-        control.update(rangeWithCoord, rowHeaderWidth, columnHeaderHeight, style, primaryWithCoord);
+        const worksheetId = workbook.getActiveSheet().getSheetId();
         const id = Tools.generateRandomId();
-        this._shapeMap.set(id, control);
+        this._shapeMap.set(id, {
+            selection,
+            worksheetId,
+            workbookId: workbook.getUnitId(),
+            zIndex,
+            control: null,
+        });
+        this.refreshShapes();
         return id;
     }
 
+    refreshShapes() {
+        const currentWorkbookId = this._currentService.getCurrentUniverSheetInstance().getUnitId();
+        const currentWorksheetId = this._currentService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+        setTimeout(() => {
+            this._shapeMap.forEach((shape) => {
+                const { workbookId, worksheetId, selection, control: oldControl, zIndex } = shape;
+                if (workbookId !== currentWorkbookId || worksheetId !== currentWorksheetId) {
+                    oldControl && oldControl.dispose();
+                    return;
+                }
+                const { style } = selection;
+                const { scene } = this._renderManagerService.getRenderById(workbookId) || {};
+                const { rangeWithCoord, primaryWithCoord } =
+                    this._selectionRenderService.convertSelectionRangeToData(selection);
+                const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+                if (!scene || !skeleton) return;
+                const { rowHeaderWidth, columnHeaderHeight } = skeleton;
+                const control = new SelectionShape(scene, zIndex, false, this._themeService);
+                control.update(rangeWithCoord, rowHeaderWidth, columnHeaderHeight, style, primaryWithCoord);
+                shape.control = control;
+            });
+        }, 0);
+    }
+
     removeShape(id: string): void {
-        const shape = this._shapeMap.get(id);
-        if (!shape) return;
-        shape.dispose();
+        const shapeInfo = this._shapeMap.get(id);
+        if (!shapeInfo) return;
+        const { control } = shapeInfo;
+        control && control.dispose();
         this._shapeMap.delete(id);
     }
 
     removeAllShapes(): void {
         for (const shape of this._shapeMap.values()) {
-            shape.dispose();
+            const { control } = shape;
+            control && control.dispose();
         }
         this._shapeMap.clear();
     }
@@ -74,6 +105,17 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (removeCommands.includes(command.id)) {
                     this.removeAllShapes();
+                }
+            })
+        );
+    }
+
+    private _addRefreshListener() {
+        const refreshCommands = [SetWorksheetActivateMutation.id];
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                if (refreshCommands.includes(command.id)) {
+                    this.refreshShapes();
                 }
             })
         );

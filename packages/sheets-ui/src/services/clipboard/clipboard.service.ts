@@ -1,17 +1,11 @@
-import type {
-    ICellData,
-    IMutationInfo,
-    IRange,
-    ObjectMatrix,
-    ObjectMatrixPrimitiveType,
-    Worksheet,
-} from '@univerjs/core';
+import type { ICellData, IMutationInfo, IRange, ObjectMatrixPrimitiveType, Worksheet } from '@univerjs/core';
 import {
     Disposable,
     ICommandService,
     ILogService,
     IUndoRedoService,
     IUniverInstanceService,
+    ObjectMatrix,
     Rectangle,
     toDisposable,
     Tools,
@@ -112,7 +106,15 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
         const matrix = worksheet.getMatrixWithMergedCells(startRow, startColumn, endRow, endColumn);
-        const matrixFragment = matrix.getFragments(startRow, endRow, startColumn, endColumn);
+        const matrixFragment = new ObjectMatrix<ICellDataWithSpanInfo>();
+        for (let r = startRow; r <= endRow; r++) {
+            for (let c = startColumn; c <= endColumn; c++) {
+                const cellData = matrix.getValue(r, c);
+                if (cellData) {
+                    matrixFragment.setValue(r - startRow, c - startColumn, Tools.deepClone(cellData));
+                }
+            }
+        }
 
         // 4. use filteredRows into to remove rows for the matrix
         // TODO: filtering
@@ -142,6 +144,9 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
         // 9. mark the copy range
         const style = this._selectionManagerService.createCopyPasteSelection();
+        if (this._copyMarkId) {
+            this._markSelectionService.removeShape(this._copyMarkId);
+        }
         this._copyMarkId = this._markSelectionService.addShape({ ...selection, style });
 
         // tell hooks to clean up
@@ -185,7 +190,15 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             this._logService.error('[SheetClipboardService]', 'hook already exists', hook.hookName);
             return { dispose: () => {} };
         }
-        this._clipboardHooks.push(hook);
+        // hook added should be ordered at meaning while
+        const insertIndex = this._clipboardHooks.findIndex((existingHook) => {
+            const existingHookPriority = existingHook.priority || 0;
+            const hookPriority = hook.priority || 0;
+            return hookPriority < existingHookPriority;
+        });
+
+        this._clipboardHooks.splice(insertIndex !== -1 ? insertIndex : this._clipboardHooks.length, 0, hook);
+
         this._notifyClipboardHook();
         return toDisposable(() => {
             const index = this._clipboardHooks.indexOf(hook);
@@ -319,7 +332,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             }
         });
 
-        const { startColumn, endColumn, startRow, endRow } = cellMatrix.getDataRange();
+        const { startColumn, endColumn, startRow, endRow } = range;
         const pastedRange = this._transformPastedData(
             endRow - startRow + 1,
             endColumn - startColumn + 1,
@@ -379,7 +392,14 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         }
         if (!cellMatrix) return false;
 
-        const copyInfo = source ? { copyRange: source.range, copyType: source.copyType } : { copyType: COPY_TYPE.COPY };
+        const copyInfo = source
+            ? {
+                  copyRange: source.range,
+                  copyType: source.copyType,
+                  workbookId: source.workbookId,
+                  worksheetId: source.worksheetId,
+              }
+            : { copyType: COPY_TYPE.COPY };
 
         const redoMutationsInfo: IMutationInfo[] = [];
         const undoMutationsInfo: IMutationInfo[] = [];
@@ -388,7 +408,8 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         // other hooks will be executed only when the paste type is the same as the hook name, including the default one
         const filteredHooks: ISheetClipboardHook[] = hooks.filter(
             (h) =>
-                (!h.specialPasteInfo && h.hookName !== PREDEFINED_HOOK_NAME.DEFAULT_PASTE) || h.hookName === pasteType
+                (h.specialPasteInfo && pasteType === h.hookName) ||
+                (!h.specialPasteInfo && pasteType === PREDEFINED_HOOK_NAME.DEFAULT_PASTE)
         );
         filteredHooks.forEach((h) => {
             if (rowProperties) {

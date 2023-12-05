@@ -114,6 +114,8 @@ export interface ISheetClipboardHook {
         copyInfo: {
             copyType: COPY_TYPE;
             copyRange?: IRange;
+            worksheetId?: string;
+            workbookId?: string;
         }
     ): {
         undos: IMutationInfo[];

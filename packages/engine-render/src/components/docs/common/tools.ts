@@ -33,11 +33,11 @@ import type { DataStreamTreeNode } from '../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../view-model/document-view-model';
 
 export function getLastPage(pages: IDocumentSkeletonPage[]) {
-    return pages?.[pages.length - 1];
+    return pages[pages.length - 1];
 }
 
 export function getLastSection(page: IDocumentSkeletonPage) {
-    return page?.sections?.[page.sections.length - 1];
+    return page.sections?.[page.sections.length - 1];
 }
 
 export function getLastColumn(page: IDocumentSkeletonPage) {

@@ -426,9 +426,8 @@ export class Documents extends DocComponent {
     }
 
     changeSkeleton(newSkeleton: DocumentSkeleton) {
-        // this._disposeSkeletonChangeObserver(this.getSkeleton());
         this.setSkeleton(newSkeleton);
-        // this._addSkeletonChangeObserver(newSkeleton);
+
         return this;
     }
 

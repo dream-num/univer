@@ -203,33 +203,9 @@ export class FormulaDataModel extends Disposable {
         const worksheets = workbook.getSheets();
         worksheets.forEach((worksheet) => {
             const cellMatrix = worksheet.getCellMatrix();
-            const sheetFormulaDataMatrix = new ObjectMatrix<IFormulaDataItem>();
-            cellMatrix.forValue((r, c, cell) => {
-                const formulaString = cell?.f || '';
-                const formulaId = cell?.si || '';
-
-                const checkFormulaString = isFormulaString(formulaString);
-                const checkFormulaId = isFormulaId(formulaId);
-
-                if (checkFormulaString && checkFormulaId) {
-                    sheetFormulaDataMatrix.setValue(r, c, {
-                        f: formulaString,
-                        si: formulaId,
-                    });
-                } else if (checkFormulaString && !checkFormulaId) {
-                    sheetFormulaDataMatrix.setValue(r, c, {
-                        f: formulaString,
-                    });
-                } else if (!checkFormulaString && checkFormulaId) {
-                    sheetFormulaDataMatrix.setValue(r, c, {
-                        f: '',
-                        si: formulaId,
-                    });
-                }
-            });
-
             const sheetId = worksheet.getSheetId();
-            this._formulaData[unitId][sheetId] = sheetFormulaDataMatrix.getData();
+
+            initSheetFormulaData(this._formulaData, unitId, sheetId, cellMatrix);
         });
     }
 
@@ -363,4 +339,38 @@ export class FormulaDataModel extends Disposable {
             }
         });
     }
+}
+
+export function initSheetFormulaData(
+    formulaData: IFormulaData,
+    unitId: string,
+    sheetId: string,
+    cellMatrix: ObjectMatrix<ICellData>
+) {
+    const sheetFormulaDataMatrix = new ObjectMatrix<IFormulaDataItem>();
+    cellMatrix.forValue((r, c, cell) => {
+        const formulaString = cell?.f || '';
+        const formulaId = cell?.si || '';
+
+        const checkFormulaString = isFormulaString(formulaString);
+        const checkFormulaId = isFormulaId(formulaId);
+
+        if (checkFormulaString && checkFormulaId) {
+            sheetFormulaDataMatrix.setValue(r, c, {
+                f: formulaString,
+                si: formulaId,
+            });
+        } else if (checkFormulaString && !checkFormulaId) {
+            sheetFormulaDataMatrix.setValue(r, c, {
+                f: formulaString,
+            });
+        } else if (!checkFormulaString && checkFormulaId) {
+            sheetFormulaDataMatrix.setValue(r, c, {
+                f: '',
+                si: formulaId,
+            });
+        }
+    });
+
+    formulaData[unitId][sheetId] = sheetFormulaDataMatrix.getData();
 }

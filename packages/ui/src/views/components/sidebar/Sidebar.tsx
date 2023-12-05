@@ -14,8 +14,7 @@ export function Sidebar() {
     const [sidebarOptions, setSidebarOptions] = useState<ISidebarMethodOptions>({});
 
     useEffect(() => {
-        const sidebar$ = sidebarService.getObservableSidebar();
-        const subscribtion = sidebar$.subscribe((options: ISidebarMethodOptions) => {
+        const subscribtion = sidebarService.sidebarOptions$.subscribe((options: ISidebarMethodOptions) => {
             setSidebarOptions(options);
         });
 
@@ -62,8 +61,7 @@ export function Sidebar() {
         };
 
         setSidebarOptions(options);
-        const sidebar$ = sidebarService.getObservableSidebar();
-        sidebar$.next(options);
+        sidebarService.sidebarOptions$.next(options);
         options?.onClose?.();
     }
 

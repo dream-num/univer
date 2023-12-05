@@ -24,7 +24,7 @@ import {
     SetRangeValuesMutation,
     SetRangeValuesUndoMutationFactory,
 } from '@univerjs/sheets';
-import { IDialogService } from '@univerjs/ui';
+import { IConfirmService } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 
 export interface IAddMergeCommandParams {
@@ -112,7 +112,7 @@ export const AddWorksheetMergeCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const dialogService = accessor.get(IDialogService);
+        const confirmService = accessor.get(IConfirmService);
 
         const workbookId = params.workbookId;
         const worksheetId = params.worksheetId;
@@ -124,9 +124,18 @@ export const AddWorksheetMergeCommand: ICommand = {
         const undoMutations: IMutationInfo[] = [];
 
         // First we should check if there are values in the going-to-be-merged cells.
-        const willRemoveSomeCell = checkCellContentInRanges(worksheet, ranges);
-        if (willRemoveSomeCell) {
-            console.log('debug will remove some cell');
+        const willClearSomeCell = checkCellContentInRanges(worksheet, ranges);
+        if (willClearSomeCell) {
+            const result = await confirmService.confirm({
+                id: 'sheet.confirm.add-worksheet-merge',
+                title: {
+                    value: 'sheet.confirm.add-worksheet-merge.title',
+                },
+            });
+
+            if (!result) {
+                return false;
+            }
         }
 
         // prepare redo mutations
@@ -150,7 +159,7 @@ export const AddWorksheetMergeCommand: ICommand = {
         undoMutations.push({ id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams });
 
         // add set range values mutations to undo redo mutations
-        if (willRemoveSomeCell) {
+        if (willClearSomeCell) {
             const data = getClearContentMutationParamsForRanges(accessor, workbookId, worksheet, ranges);
             redoMutations.unshift(...data.redos);
             undoMutations.push(...data.undos);

@@ -388,7 +388,14 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         }
         if (!cellMatrix) return false;
 
-        const copyInfo = source ? { copyRange: source.range, copyType: source.copyType } : { copyType: COPY_TYPE.COPY };
+        const copyInfo = source
+            ? {
+                  copyRange: source.range,
+                  copyType: source.copyType,
+                  workbookId: source.workbookId,
+                  worksheetId: source.worksheetId,
+              }
+            : { copyType: COPY_TYPE.COPY };
 
         const redoMutationsInfo: IMutationInfo[] = [];
         const undoMutationsInfo: IMutationInfo[] = [];

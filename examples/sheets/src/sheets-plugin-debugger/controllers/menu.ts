@@ -1,7 +1,8 @@
-import { IMenuSelectorItem, MenuItemType, MenuPosition } from '@univerjs/ui';
 import { LocaleType } from '@univerjs/core';
 import { defaultTheme, greenTheme } from '@univerjs/design';
-import { IAccessor } from '@wendellhu/redi';
+import type { IMenuSelectorItem } from '@univerjs/ui';
+import { MenuItemType, MenuPosition } from '@univerjs/ui';
+import type { IAccessor } from '@wendellhu/redi';
 
 import { ConfirmOperation } from '../commands/operations/confirm.operation';
 import { DialogOperation } from '../commands/operations/dialog.operation';

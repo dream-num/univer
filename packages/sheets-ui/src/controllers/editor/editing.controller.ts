@@ -1,20 +1,26 @@
-import type { Nullable } from '@univerjs/core';
-import { Disposable, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle } from '@univerjs/core';
+import {
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    IUndoRedoService,
+    IUniverInstanceService,
+    LifecycleStages,
+    ObjectMatrix,
+    OnLifecycle,
+    RxDisposable,
+} from '@univerjs/core';
 import { getDocObject } from '@univerjs/docs';
 import type { ISheetData } from '@univerjs/engine-formula';
 import { FormulaEngineService } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
-import type { Subscription } from 'rxjs';
+import { takeUntil } from 'rxjs';
 
 @OnLifecycle(LifecycleStages.Steady, EditingController)
-export class EditingController extends Disposable {
-    private _onInputSubscription: Nullable<Subscription>;
-
+export class EditingController extends RxDisposable {
     constructor(
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService
+        @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService,
+        @Inject(IUndoRedoService) private readonly _undoRedoService: IUndoRedoService
     ) {
         super();
 
@@ -23,12 +29,24 @@ export class EditingController extends Disposable {
         this._commandExecutedListener();
     }
 
-    override dispose(): void {
-        this._onInputSubscription?.unsubscribe();
-    }
-
     private _initialize() {
         this._initialNormalInput();
+        this._listenEditorBlur();
+    }
+
+    private _listenEditorBlur() {
+        this._currentUniverService.currentDoc$.pipe(takeUntil(this.dispose$)).subscribe((docDataModel) => {
+            if (docDataModel == null) {
+                return;
+            }
+
+            const unitId = docDataModel.getUnitId();
+
+            // Clear undo redo stack of cell editor when lose focus.
+            if (unitId !== DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
+                this._undoRedoService.clearUndoRedo(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+            }
+        });
     }
 
     private _initialNormalInput() {

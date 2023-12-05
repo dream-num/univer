@@ -6,38 +6,48 @@ import { type IConfirmPartMethodOptions } from '../../views/components/confirm-p
 import type { IConfirmService } from './confirm.service';
 
 export class DesktopConfirmService implements IConfirmService {
-    private confirmOptions: IConfirmPartMethodOptions[] = [];
-    private readonly confirmOptions$ = new Subject<IConfirmPartMethodOptions[]>();
+    private _confirmOptions: IConfirmPartMethodOptions[] = [];
+    readonly confirmOptions$ = new Subject<IConfirmPartMethodOptions[]>();
 
     open(option: IConfirmPartMethodOptions): IDisposable {
-        if (this.confirmOptions.find((item) => item.id === option.id)) {
-            this.confirmOptions = this.confirmOptions.map((item) => ({
+        if (this._confirmOptions.find((item) => item.id === option.id)) {
+            this._confirmOptions = this._confirmOptions.map((item) => ({
                 ...(item.id === option.id ? option : item),
                 visible: true,
             }));
         } else {
-            this.confirmOptions.push({
+            this._confirmOptions.push({
                 ...option,
                 visible: true,
             });
         }
-        this.confirmOptions$.next(this.confirmOptions);
+        this.confirmOptions$.next(this._confirmOptions);
 
         return toDisposable(() => {
-            this.confirmOptions = [];
+            this._confirmOptions = [];
             this.confirmOptions$.next([]);
         });
     }
 
+    confirm(params: IConfirmPartMethodOptions): Promise<boolean> {
+        return new Promise((resolve) => {
+            this.open({
+                ...params,
+                onConfirm: () => {
+                    resolve(true);
+                },
+                onClose: () => {
+                    resolve(false);
+                },
+            });
+        });
+    }
+
     close(id: string): void {
-        this.confirmOptions = this.confirmOptions.map((item) => ({
+        this._confirmOptions = this._confirmOptions.map((item) => ({
             ...item,
             visible: item.id === id ? false : item.visible,
         }));
-        this.confirmOptions$.next([...this.confirmOptions]);
-    }
-
-    getObservableConfirm() {
-        return this.confirmOptions$;
+        this.confirmOptions$.next([...this._confirmOptions]);
     }
 }

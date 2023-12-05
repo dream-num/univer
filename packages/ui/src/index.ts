@@ -1,4 +1,3 @@
-export { UIPlugin } from './ui-plugin';
 export * from './BaseComponent';
 export * from './common';
 export * from './components';
@@ -53,4 +52,5 @@ export { DesktopShortcutService, type IShortcutItem, IShortcutService } from './
 export { ShortcutExperienceService } from './services/shortcut/shortcut-experience.service';
 export { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
 export { ISidebarService } from './services/sidebar/sidebar.service';
+export { UIPlugin } from './ui-plugin';
 export * from './utils';

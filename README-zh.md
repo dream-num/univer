@@ -1,6 +1,10 @@
 # Univer
 
+![GitHub License](https://img.shields.io/github/license/dream-num/univer)
+![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/dream-num/univer/build.yml)
+[![github release](https://img.shields.io/github/v/release/dream-num/univer)](https://github.com/apitable/apitable/releases/latest)
 [![codecov](https://codecov.io/gh/dream-num/univer/graph/badge.svg?token=aPfyW2pIMN)](https://codecov.io/gh/dream-num/univer)
+[![discord](https://img.shields.io/discord/1136129819961217077?label=discord&logo=discord&style=social)](https://discord.gg/z3NKNT6D2f)
 
 简体中文 | [English](./README.md)
 
@@ -15,6 +19,24 @@ Univer 是一个开源的协作解决方案，旨在将协作能力赋能所有�
 ## Demo
 
 -   [Univer Demo](https://dream-num.github.io/univer-demo/)
+
+## Packages
+
+| Name                                        | Description | Version                                                                                                                     |
+| :------------------------------------------ | :---------- | :-------------------------------------------------------------------------------------------------------------------------- |
+| [core](./packages/core)                     | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/core)](https://npmjs.org/package/@univerjs/core)                     |
+| [design](./packages/design)                 | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/design)](https://npmjs.org/package/@univerjs/design)                 |
+| [docs](./packages/docs)                     | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/docs)](https://npmjs.org/package/@univerjs/docs)                     |
+| [docs-ui](./packages/docs-ui)               | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/docs-ui)](https://npmjs.org/package/@univerjs/docs-ui)               |
+| [engine-formula](./packages/engine-formula) | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/engine-formula)](https://npmjs.org/package/@univerjs/engine-formula) |
+| [engine-numfmt](./packages/engine-numfmt)   | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/engine-numfmt)](https://npmjs.org/package/@univerjs/engine-numfmt)   |
+| [engine-render](./packages/engine-render)   | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/engine-render)](https://npmjs.org/package/@univerjs/engine-render)   |
+| [formula](./packages/formula)               | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/formula)](https://npmjs.org/package/@univerjs/formula)               |
+| [rpc](./packages/rpc)                       | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/rpc)](https://npmjs.org/package/@univerjs/rpc)                       |
+| [sheets-formula](./packages/sheets-formula) | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-formula)](https://npmjs.org/package/@univerjs/sheets-formula) |
+| [sheets-numfmt](./packages/sheets-numfmt)   | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-numfmt)](https://npmjs.org/package/@univerjs/sheets-numfmt)   |
+| [sheets](./packages/sheets)                 | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets)](https://npmjs.org/package/@univerjs/sheets)                 |
+| [ui](./packages/ui)                         | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/ui)](https://npmjs.org/package/@univerjs/ui)                         |
 
 ## 开发
 

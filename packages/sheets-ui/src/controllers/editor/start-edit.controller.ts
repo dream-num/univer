@@ -14,6 +14,7 @@ import {
     LifecycleStages,
     LocaleService,
     OnLifecycle,
+    toDisposable,
     Tools,
     VerticalAlign,
     WrapStrategy,
@@ -106,27 +107,31 @@ export class StartEditController extends Disposable {
             return;
         }
 
-        renderConfig.document.onPointerDownObserver.add(() => {
-            // fix https://github.com/dream-num/univer/issues/628, need to recalculate the cell editor size after it acquire focus.
-            if (this._editorBridgeService.isVisible()) {
-                const param = this._editorBridgeService.getState();
-                const unitId = this._editorBridgeService.getCurrentEditorId();
+        this.disposeWithMe(
+            toDisposable(
+                renderConfig.document.onPointerDownObserver.add(() => {
+                    // fix https://github.com/dream-num/univer/issues/628, need to recalculate the cell editor size after it acquire focus.
+                    if (this._editorBridgeService.isVisible()) {
+                        const param = this._editorBridgeService.getState();
+                        const unitId = this._editorBridgeService.getCurrentEditorId();
 
-                if (param == null || unitId == null) {
-                    return;
-                }
+                        if (param == null || unitId == null) {
+                            return;
+                        }
 
-                const skeleton = this._docSkeletonManagerService.getSkeletonByUnitId(unitId)?.skeleton;
+                        const skeleton = this._docSkeletonManagerService.getSkeletonByUnitId(unitId)?.skeleton;
 
-                if (skeleton == null) {
-                    return;
-                }
+                        if (skeleton == null) {
+                            return;
+                        }
 
-                const { position, documentLayoutObject, canvasOffset, scaleX, scaleY } = param;
+                        const { position, documentLayoutObject, canvasOffset, scaleX, scaleY } = param;
 
-                this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject, scaleX, scaleY);
-            }
-        });
+                        this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject, scaleX, scaleY);
+                    }
+                })
+            )
+        );
     }
 
     private _initialCursorSync() {

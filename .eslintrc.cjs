@@ -18,6 +18,7 @@ module.exports = {
         'airbnb-base', // https://www.npmjs.com/package/eslint-config-airbnb-base
         'airbnb-typescript/base', // https://www.npmjs.com/package/eslint-config-airbnb-typescript
         // "plugin:@typescript-eslint/recommended",// no need https://typescript-eslint.io/
+        'plugin:prettier/recommended',
         'prettier',
     ],
     parserOptions: {
@@ -29,12 +30,6 @@ module.exports = {
     rules: {
         'no-cond-assign': 'off',
         'no-restricted-globals': 'off',
-        'prettier/prettier': [
-            'error',
-            {
-                endOfLine: 'auto',
-            },
-        ],
         'import/prefer-default-export': 'off',
         'import/no-extraneous-dependencies': [
             'error',

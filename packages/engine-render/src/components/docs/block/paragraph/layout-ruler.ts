@@ -95,13 +95,13 @@ function _divideOperator(
         const pageContentWidth = getPageContentWidth(lastPage);
 
         // Last span is western char and the current span is Chinese word or vice verse.
-        const isMixedChineseWesternTextLayout = hasMixedTextLayout(lastSpan, spanGroup[0]);
+        const isMixedCJKWesternTextLayout = hasMixedTextLayout(lastSpan, spanGroup[0]);
         let wordSpaceWidth = 0;
         let preOffsetLeft = preWidth + preLeft;
 
         // Only add word space between Chinese text and Western text when processing span for the first time,
         // otherwise it will be added multiple times during recursion.
-        if (isMixedChineseWesternTextLayout && isOutMost) {
+        if (isMixedCJKWesternTextLayout && isOutMost) {
             const lastSpanIsChineseWord = hasChineseText(lastSpan.content!);
             const WORD_INNER_SPACE = '\u0020';
 

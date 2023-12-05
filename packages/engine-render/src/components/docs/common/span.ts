@@ -9,7 +9,7 @@ import type {
 } from '../../../basics/i-document-skeleton-cached';
 import { SpanType } from '../../../basics/i-document-skeleton-cached';
 import type { IFontCreateConfig } from '../../../basics/interfaces';
-import { hasChineseText, hasCJK } from '../../../basics/tools';
+import { hasCJKText } from '../../../basics/tools';
 import { validationGrid } from './tools';
 
 export function createSkeletonWordSpan(
@@ -93,7 +93,7 @@ export function _createSkeletonWordOrLetter(
     if (validationGrid(gridType, snapToGrid)) {
         // 当文字也需要对齐到网格式，进行处理
         // const multiple = Math.ceil(contentWidth / charSpace);
-        width = contentWidth + (hasCJK(content) ? charSpace : charSpace / 2);
+        width = contentWidth + (hasCJKText(content) ? charSpace : charSpace / 2);
         if (gridType === GridType.SNAP_TO_CHARS) {
             paddingLeft = (width - contentWidth) / 2;
         }
@@ -232,7 +232,7 @@ export function hasMixedTextLayout(preSpan: Nullable<IDocumentSkeletonSpan>, spa
     const ENG_NUMBERS_REG = /[a-z\d]/i;
 
     return (
-        (ENG_NUMBERS_REG.test(preContent) && hasChineseText(curContent)) ||
-        (hasChineseText(preContent) && ENG_NUMBERS_REG.test(curContent))
+        (ENG_NUMBERS_REG.test(preContent) && hasCJKText(curContent)) ||
+        (hasCJKText(preContent) && ENG_NUMBERS_REG.test(curContent))
     );
 }

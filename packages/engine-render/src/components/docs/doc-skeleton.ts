@@ -69,6 +69,7 @@ export class DocumentSkeleton extends Skeleton {
         }
 
         this._skeletonData = this._createSkeleton(bounds);
+        console.log(this._skeletonData);
     }
 
     getSkeletonData() {

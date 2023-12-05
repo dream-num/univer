@@ -343,22 +343,23 @@ export function hasChineseTextWithPunctuation(text: string) {
 
 // 是否有日文
 export function hasJapaneseText(text: string) {
-    const pattern = /[一-龠]+|[ぁ-ゔ]+|[ァ-ヴー]+|[a-zA-Z0-9]+|[ａ-ｚＡ-Ｚ０-９]+|[々〆〤]+/giu;
+    // const pattern = /[一-龠]+|[ぁ-ゔ]+|[ァ-ヴー]+|[a-zA-Z0-9]+|[ａ-ｚＡ-Ｚ０-９]+|[々〆〤]+/giu;
+    const pattern = /[\u0800-\u4e00]/gi;
 
-    if (!pattern.exec(text)) {
-        return false;
-    }
-    return true;
+    return pattern.test(text);
 }
 
 // 是否有韩文
 export function hasKoreanText(text: string) {
-    const pattern = /[^a-zA-Z0-9\p{Hangul}]/gi;
+    // const pattern = /[^a-zA-Z0-9\p{Hangul}]/gi;
+    const pattern = /[\uac00-\ud7ff]/gi;
 
-    if (!pattern.exec(text)) {
-        return false;
-    }
-    return true;
+    return pattern.test(text);
+}
+
+// 是否有中文、日文、韩文等，不包括符号
+export function hasCJKText(text: string) {
+    return hasChineseText(text) || hasJapaneseText(text) || hasKoreanText(text);
 }
 
 // 是否有中文、日文、韩文等可以垂直布局的文字，东亚文字

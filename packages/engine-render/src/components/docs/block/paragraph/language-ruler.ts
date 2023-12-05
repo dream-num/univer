@@ -3,7 +3,7 @@ import { DataStreamTreeTokenType } from '@univerjs/core';
 
 import type { IDocumentSkeletonSpan } from '../../../../basics/i-document-skeleton-cached';
 import type { ISectionBreakConfig } from '../../../../basics/interfaces';
-import { hasArabic, hasCJK, hasSpaceAndTab, hasTibetan } from '../../../../basics/tools';
+import { hasArabic, hasCJKText, hasSpaceAndTab, hasTibetan } from '../../../../basics/tools';
 import { createSkeletonLetterSpan, createSkeletonWordSpan } from '../../common/span';
 import { getFontCreateConfig } from '../../common/tools';
 import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
@@ -35,7 +35,7 @@ export function composeCharForLanguage(
         return TibetanHandler(char, index, charArray, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
     }
 
-    if (!hasCJK(char)) {
+    if (!hasCJKText(char)) {
         return notCJKHandler(char, index, charArray, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
     }
 }
@@ -60,7 +60,7 @@ function notCJKHandler(
 
     for (let i = index + 1; i < charArray.length; i++) {
         const newChar = charArray[i];
-        if (!hasCJK(newChar) && !hasSpaceAndTab(newChar)) {
+        if (!hasCJKText(newChar) && !hasSpaceAndTab(newChar)) {
             const newConfig = getFontCreateConfig(i, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
             const newSpan = createSkeletonLetterSpan(newChar, newConfig);
             const newCharWidth = newSpan.width;

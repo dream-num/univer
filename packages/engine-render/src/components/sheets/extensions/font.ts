@@ -83,7 +83,6 @@ export class Font extends SheetExtension {
                         const cellHeight = endY - startY;
 
                         const overflowRectangle = overflowCache.getValue(rowIndex, columnIndex);
-
                         const { horizontalAlign } = docsConfig;
 
                         ctx.save();

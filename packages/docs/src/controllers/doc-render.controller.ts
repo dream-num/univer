@@ -49,7 +49,7 @@ export class DocRenderController extends Disposable {
 
             docsComponent.changeSkeleton(documentSkeleton);
 
-            this.recalculateSizeBySkeleton(currentRender, documentSkeleton);
+            this._recalculateSizeBySkeleton(currentRender, documentSkeleton);
         });
     }
 
@@ -99,7 +99,7 @@ export class DocRenderController extends Disposable {
     //     return this;
     // }
 
-    recalculateSizeBySkeleton(currentRender: IRender, skeleton: DocumentSkeleton) {
+    private _recalculateSizeBySkeleton(currentRender: IRender, skeleton: DocumentSkeleton) {
         const { mainComponent } = currentRender;
 
         const docsComponent = mainComponent as Documents;
@@ -167,7 +167,7 @@ export class DocRenderController extends Disposable {
                         return;
                     }
 
-                    this.recalculateSizeBySkeleton(currentRender, skeleton);
+                    this._recalculateSizeBySkeleton(currentRender, skeleton);
                 }
             })
         );

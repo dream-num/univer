@@ -46,16 +46,24 @@ export class DocViewModelManagerService implements IDisposable {
             return;
         }
 
-        // Only cell editor need to rebuild view model when edit cell content every time.
-        const REBUILD_VIEW_MODEL_LIST = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY];
-
-        if (REBUILD_VIEW_MODEL_LIST.includes(unitId) || !this._docViewModelMap.has(unitId)) {
+        if (!this._docViewModelMap.has(unitId)) {
             const docViewModel = this._buildDocViewModel(documentDataModel);
 
             this._docViewModelMap.set(unitId, {
                 unitId,
                 docViewModel,
             });
+        }
+
+        // Always need to reset document data model, because cell editor change doc instance every time.
+        if (unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
+            const docViewModel = this._docViewModelMap.get(unitId)?.docViewModel;
+
+            if (docViewModel == null) {
+                return;
+            }
+
+            docViewModel.reset(documentDataModel);
         }
 
         this._currentViewModelUnitId = unitId;

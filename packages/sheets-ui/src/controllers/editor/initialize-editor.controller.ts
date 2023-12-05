@@ -41,6 +41,15 @@ export class InitializeEditorController extends Disposable {
         // create univer doc sheet cell editor instance
         this._currentUniverService.createDoc({
             id: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+            body: {
+                dataStream: `${DEFAULT_EMPTY_DOCUMENT_VALUE}`,
+                textRuns: [],
+                paragraphs: [
+                    {
+                        startIndex: 0,
+                    },
+                ],
+            },
             documentStyle: {},
         });
 

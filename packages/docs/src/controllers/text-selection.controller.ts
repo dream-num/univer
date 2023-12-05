@@ -104,7 +104,11 @@ export class TextSelectionController extends Disposable {
         });
 
         this._downObserver = document?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
-            this._currentUniverService.setCurrentUniverDocInstance(unitId);
+            const currentDocInstance = this._currentUniverService.getCurrentUniverDocInstance();
+
+            if (currentDocInstance.getUnitId() !== unitId) {
+                this._currentUniverService.setCurrentUniverDocInstance(unitId);
+            }
 
             this._textSelectionRenderManager.eventTrigger(evt, document.getOffsetConfig(), viewportMain);
 

@@ -778,5 +778,9 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
         marginBottom: 50,
         marginRight: 40,
         marginLeft: 40,
+        renderConfig: {
+            vertexAngle: 0,
+            centerAngle: 0,
+        },
     },
 };

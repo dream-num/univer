@@ -14,6 +14,7 @@ import {
     LifecycleStages,
     LocaleService,
     OnLifecycle,
+    toDisposable,
     Tools,
     VerticalAlign,
     WrapStrategy,
@@ -96,6 +97,41 @@ export class StartEditController extends Disposable {
         this._initialStartEdit();
         this._initialKeyboardListener();
         this._initialCursorSync();
+        this._listenEditorFocus();
+    }
+
+    private _listenEditorFocus() {
+        const renderConfig = this._getEditorObject();
+
+        if (renderConfig == null) {
+            return;
+        }
+
+        this.disposeWithMe(
+            toDisposable(
+                renderConfig.document.onPointerDownObserver.add(() => {
+                    // fix https://github.com/dream-num/univer/issues/628, need to recalculate the cell editor size after it acquire focus.
+                    if (this._editorBridgeService.isVisible()) {
+                        const param = this._editorBridgeService.getState();
+                        const unitId = this._editorBridgeService.getCurrentEditorId();
+
+                        if (param == null || unitId == null) {
+                            return;
+                        }
+
+                        const skeleton = this._docSkeletonManagerService.getSkeletonByUnitId(unitId)?.skeleton;
+
+                        if (skeleton == null) {
+                            return;
+                        }
+
+                        const { position, documentLayoutObject, canvasOffset, scaleX, scaleY } = param;
+
+                        this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject, scaleX, scaleY);
+                    }
+                })
+            )
+        );
     }
 
     private _initialCursorSync() {
@@ -118,8 +154,6 @@ export class StartEditController extends Disposable {
                 return;
             }
 
-            const { document: documentComponent } = editorObject;
-
             const { startX, endX } = position;
 
             const { textRotation, wrapStrategy, documentModel } = documentLayoutObject;
@@ -135,16 +169,6 @@ export class StartEditController extends Disposable {
             }
 
             this._currentUniverService.changeDoc(editorUnitId, documentModel!);
-
-            const docParam = this._docSkeletonManagerService.getCurrent();
-
-            if (docParam == null) {
-                return;
-            }
-
-            const documentSkeleton = docParam.skeleton;
-
-            documentComponent.changeSkeleton(documentSkeleton);
 
             this._contextService.setContextValue(FOCUSING_EDITOR_BUT_HIDDEN, true);
 

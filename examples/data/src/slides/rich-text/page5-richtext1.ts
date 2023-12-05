@@ -121,7 +121,12 @@ export const PAGE5_RICHTEXT_1: IDocumentData = {
         sectionBreaks: [
             {
                 startIndex: 517,
-                columnProperties: [],
+                columnProperties: [
+                    {
+                        width: 150,
+                        paddingEnd: 5,
+                    },
+                ],
                 columnSeparatorType: ColumnSeparatorType.NONE,
                 sectionType: SectionType.SECTION_TYPE_UNSPECIFIED,
                 // textDirection: textDirectionDocument,

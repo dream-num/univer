@@ -157,9 +157,11 @@ export function createSkeletonBulletSpan(
     };
 }
 
+// Set the left value of the current span based on the width of pre span and the left value of the previous span.
 export function setSpanGroupLeft(spanGroup: IDocumentSkeletonSpan[], left: number = 0) {
     const spanGroupLen = spanGroup.length;
     let preSpan;
+
     for (let i = 0; i < spanGroupLen; i++) {
         const span = spanGroup[i];
         span.left = preSpan ? preSpan.left + preSpan.width : left;
@@ -197,6 +199,7 @@ export function addSpanToDivide(
 
     setSpanGroupLeft(spanGroup, offsetLeft);
 
+    // Set span parent pointer.
     for (const span of spanGroup) {
         span.parent = divide;
     }

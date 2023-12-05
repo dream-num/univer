@@ -1,12 +1,5 @@
 import type { INumberUnit, IParagraphStyle } from '@univerjs/core';
-import {
-    BooleanNumber,
-    DataStreamTreeTokenType,
-    GridType,
-    HorizontalAlign,
-    NamedStyleType,
-    SpacingRule,
-} from '@univerjs/core';
+import { BooleanNumber, DataStreamTreeTokenType, GridType, SpacingRule } from '@univerjs/core';
 
 import type {
     IDocumentSkeletonBullet,
@@ -69,17 +62,16 @@ export function calculateParagraphLayout(
 
             const bulletSpan = createSkeletonBulletSpan(spanGroup[0], bulletSkeleton, charSpaceApply);
             _lineOperator([bulletSpan, ...spanGroup], pages, sectionBreakConfig, paragraphConfig, paragraphStart);
-            // _divideOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, elementIndex, isFirstSpan);
         } else {
             _lineOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart);
         }
     } else {
         _divideOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart);
     }
+
     return [...pages];
 }
 
-// eslint-disable-next-line max-lines-per-function
 function _divideOperator(
     spanGroup: IDocumentSkeletonSpan[],
     pages: IDocumentSkeletonPage[],
@@ -93,12 +85,10 @@ function _divideOperator(
 
     if (divideInfo) {
         const width = __getSpanGroupWidth(spanGroup);
-        const divide = divideInfo.divide;
+        const { divide } = divideInfo;
         const lastSpan = divide?.spanGroup?.[divide.spanGroup.length - 1];
-        // const { w: preWidth = 0, l: preLeft = 0 } = lastSpan;
         const preWidth = lastSpan?.width || 0;
         const preLeft = lastSpan?.left || 0;
-        // const { width: pageWidth, marginLeft: pageMarginLeft, marginRight: pageMarginRight } = lastPage;
         const pageContentWidth = getPageContentWidth(lastPage);
 
         const preOffsetLeft = preWidth + preLeft;
@@ -171,9 +161,10 @@ function _divideOperator(
                 );
             }
         } else {
-            // w不超过div宽度，加入到divide中去
+            // w 不超过 divide 宽度，加入到 divide 中去
             const currentLine = divide.parent;
             const maxBox = __maxFontBoundingBoxBySpanGroup(spanGroup);
+
             if (currentLine && maxBox && !__isNullLine(currentLine)) {
                 const { paragraphLineGapDefault, linePitch, lineSpacing, spacingRule, snapToGrid, gridType } =
                     getLineHeightConfig(sectionBreakConfig, paragraphConfig);
@@ -188,13 +179,17 @@ function _divideOperator(
                     spacingRule,
                     snapToGrid
                 );
+
                 if (currentLine.contentHeight < contentHeight) {
                     // 如果新内容的高度超过其加入行的高度，为了处理图文混排，整行都需要按照新高度重新计算
-                    // If the height of the new content exceeds the height of the added row, the entire row needs to be recalculated according to the new height in order to handle the mixing of graphics and text
+                    // If the height of the new content exceeds the height of the added row,
+                    // the entire row needs to be recalculated according to the new height
+                    // in order to handle the mixing of graphics and text
                     const spanGroupCached = __getSpanGroupByLine(currentLine);
                     const spanGroupCachedLen = spanGroupCached.length;
                     let newSpanGroup = [];
                     let startIndex = 1;
+
                     if (spanGroupCachedLen > 2 && spanGroupCached[0].spanType === SpanType.LIST) {
                         newSpanGroup = [spanGroupCached[0], spanGroupCached[1]];
                         startIndex = 2;
@@ -203,6 +198,7 @@ function _divideOperator(
                     }
                     const column = currentLine.parent;
                     column?.lines.pop(); // Delete the previous line and recalculate according to the maximum content height
+
                     _lineOperator(
                         newSpanGroup,
                         pages,
@@ -225,16 +221,13 @@ function _divideOperator(
                 }
             }
 
-            // console.log('spanGroup', spanGroup, spanGroup.length, spanGroup[0].content);
             addSpanToDivide(divide, spanGroup, preOffsetLeft);
-            // divide.spanGroup.push(...spanGroup);
         }
     } else {
         _lineOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
     }
 }
 
-// eslint-disable-next-line max-lines-per-function
 function _lineOperator(
     spanGroup: IDocumentSkeletonSpan[],
     pages: IDocumentSkeletonPage[],
@@ -270,30 +263,30 @@ function _lineOperator(
     } = paragraphConfig;
 
     const {
-        namedStyleType = NamedStyleType.NAMED_STYLE_TYPE_UNSPECIFIED,
-        horizontalAlign = HorizontalAlign.UNSPECIFIED,
+        // namedStyleType = NamedStyleType.NAMED_STYLE_TYPE_UNSPECIFIED,
+        // horizontalAlign = HorizontalAlign.UNSPECIFIED,
 
-        direction,
+        // direction,
         spaceAbove = 0,
         spaceBelow = 0,
 
-        borderBetween,
-        borderTop,
-        borderBottom,
-        borderLeft,
-        borderRight,
+        // borderBetween,
+        // borderTop,
+        // borderBottom,
+        // borderLeft,
+        // borderRight,
 
         indentFirstLine = 0,
         hanging = 0,
         indentStart = 0,
         indentEnd = 0,
-        tabStops = [],
+        // tabStops = [],
 
-        keepLines = BooleanNumber.FALSE,
-        keepNext = BooleanNumber.FALSE,
-        wordWrap = BooleanNumber.FALSE,
-        widowControl = BooleanNumber.FALSE,
-        shading,
+        // keepLines = BooleanNumber.FALSE,
+        // keepNext = BooleanNumber.FALSE,
+        // wordWrap = BooleanNumber.FALSE,
+        // widowControl = BooleanNumber.FALSE,
+        // shading,
     } = paragraphStyle;
 
     const { paragraphLineGapDefault, linePitch, lineSpacing, spacingRule, snapToGrid, gridType } = getLineHeightConfig(
@@ -519,6 +512,7 @@ function __getParagraphSpace(
 function __makeColumnsFull(columns: IDocumentSkeletonColumn[] = []) {
     for (let i = 0; i < columns.length; i++) {
         const column = columns[i];
+
         setColumnFullState(column, true);
     }
 }
@@ -664,6 +658,7 @@ function __checkPageBreak(column: IDocumentSkeletonColumn) {
 function __getSpanGroupWidth(spanGroup: IDocumentSkeletonSpan[]) {
     const spanGroupLen = spanGroup.length;
     let width = 0;
+
     for (let i = 0; i < spanGroupLen; i++) {
         const span = spanGroup[i];
         width += span.width;
@@ -675,14 +670,18 @@ function __maxFontBoundingBoxBySpanGroup(spanGroup: IDocumentSkeletonSpan[]) {
     const spanGroupLen = spanGroup.length;
     let height = -Infinity;
     let maxBox;
+
     for (let i = 0; i < spanGroupLen; i++) {
         const span = spanGroup[i];
         const { ba: boundingBoxAscent, bd: boundingBoxDescent } = span.bBox;
+
         if (height < boundingBoxAscent + boundingBoxDescent) {
             maxBox = { boundingBoxAscent, boundingBoxDescent };
         }
+
         height = boundingBoxAscent + boundingBoxDescent;
     }
+
     return maxBox;
 }
 
@@ -690,10 +689,12 @@ function __getSpanGroupByLine(line: IDocumentSkeletonLine) {
     const divides = line.divides;
     const dividesLen = divides.length;
     const spanGroup = [];
+
     for (let i = 0; i < dividesLen; i++) {
         const divide = divides[i];
         spanGroup.push(...divide.spanGroup);
     }
+
     return spanGroup;
 }
 
@@ -718,8 +719,5 @@ function __bulletIndentHandler(
 }
 
 function __isNullLine(line: IDocumentSkeletonLine) {
-    if (line.divides[0].spanGroup[0]) {
-        return false;
-    }
-    return true;
+    return !line.divides[0].spanGroup[0];
 }

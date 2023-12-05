@@ -237,22 +237,14 @@ export function fixLineWidthByScale(num: number, scale: number) {
 export function getFontStyleString(textStyle?: IStyleBase, localeService?: LocaleService) {
     // 获取字体配置
 
-    // if (!fontLocale) {
-    //     fontLocale = {
-    //         fontList: ['Arial'],
-    //         defaultFontSize: 14,
-    //     };
-    // }
-
     // TODO: @jikkai @DR-Univer should read default font from configuration, not from locale service
     const defaultFont = 'Arial';
 
     const defaultFontSize = 13;
 
-    // const { fontList, defaultFontSize } = fontLocale;
-
     if (!textStyle) {
         const fontString = `${defaultFontSize}px  ${defaultFont}`;
+
         return {
             fontCache: fontString,
             fontString,

@@ -379,8 +379,8 @@ export class Documents extends DocComponent {
 
                                     const spanPointWithFont = calculateRectRotate(
                                         originTranslate.addByPoint(
-                                            fixLineWidthByScale(spanLeft + maxLineAscSin + paddingLeft, scale),
-                                            fixLineWidthByScale(maxLineAscCos, scale)
+                                            spanLeft + maxLineAscSin + paddingLeft,
+                                            maxLineAscCos
                                         ),
                                         centerPoint,
                                         centerAngle,

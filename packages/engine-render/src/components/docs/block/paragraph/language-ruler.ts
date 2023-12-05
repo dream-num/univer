@@ -9,7 +9,7 @@ import { getFontCreateConfig } from '../../common/tools';
 import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../view-model/document-view-model';
 
-interface LanguageResult {
+interface ILanguageResult {
     charIndex: number;
     spanGroup: IDocumentSkeletonSpan[];
 }
@@ -22,7 +22,7 @@ export function composeCharForLanguage(
     paragraphNode: DataStreamTreeNode,
     sectionBreakConfig: ISectionBreakConfig,
     paragraphStyle: IParagraphStyle
-): Nullable<LanguageResult> {
+): Nullable<ILanguageResult> {
     if (char === DataStreamTreeTokenType.SPACE) {
         return;
     }
@@ -54,6 +54,7 @@ function notCJKHandler(
     const spanGroup = [charSke];
     let allWidth = charSke.width;
     let newCharIndex = index;
+
     for (let i = index + 1; i < charArray.length; i++) {
         const newChar = charArray[i];
         if (!hasCJK(newChar) && !hasSpaceAndTab(newChar)) {
@@ -71,6 +72,7 @@ function notCJKHandler(
             break;
         }
     }
+
     return {
         charIndex: newCharIndex,
         spanGroup,

@@ -29,7 +29,7 @@ export class DocumentViewModel implements IDisposable {
         }
 
         this.children = this._transformToTree(_documentDataModel.getBody()!.dataStream);
-        console.log(this.children);
+
         this._buildHeaderFooterViewModel();
     }
 

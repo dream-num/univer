@@ -1,10 +1,10 @@
 // The entry of web worker scripts
 
-import { BaseFormulaEnginePlugin } from '@univerjs/engine-formula';
-import { SheetsPlugin } from '@univerjs/sheets';
 import { LocaleType, Univer } from '@univerjs/core';
-import { UniverRPCWorkerThreadPlugin } from '@univerjs/rpc';
+import { BaseFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { FormulaPlugin } from '@univerjs/formula';
+import { UniverRPCWorkerThreadPlugin } from '@univerjs/rpc';
+import { SheetsPlugin } from '@univerjs/sheets';
 
 // Univer web worker is also a univer application.
 const univer = new Univer({

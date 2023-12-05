@@ -2,7 +2,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { RxDisposable } from '@univerjs/core';
-import { createIdentifier } from '@wendellhu/redi';
 import type { Subscriber, Subscription } from 'rxjs';
 import { BehaviorSubject, firstValueFrom, isObservable, Observable, of } from 'rxjs';
 import { filter, take, takeUntil } from 'rxjs/operators';
@@ -402,9 +401,3 @@ export class ChannelServer extends RxDisposable implements IChannelServer {
         this._protocol.send(response);
     }
 }
-
-/**
- * This service is for other service to register channels to the RPC framework.
- */
-export interface IRPCService {}
-export const IRPCService = createIdentifier<IRPCService>('IRPCService');

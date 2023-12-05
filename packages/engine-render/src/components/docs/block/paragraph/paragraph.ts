@@ -354,9 +354,9 @@ function horizontalAlignHandler(line: IDocumentSkeletonLine, horizontalAlign: Ho
     const divideLength = divides.length;
     for (let i = 0; i < divideLength; i++) {
         const divide = divides[i];
-        const { width, spanGroup } = divide;
+        const { width } = divide;
         const spanGroupWidth = getSpanGroupWidth(divide);
-        // console.log(spanGroup, spanGroupWidth, width);
+
         if (width === Infinity) {
             continue;
         }

@@ -26,12 +26,15 @@ export function composeCharForLanguage(
     if (char === DataStreamTreeTokenType.SPACE) {
         return;
     }
+
     if (hasArabic(char)) {
         return ArabicHandler(char, index, charArray, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
     }
+
     if (hasTibetan(char)) {
         return TibetanHandler(char, index, charArray, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
     }
+
     if (!hasCJK(char)) {
         return notCJKHandler(char, index, charArray, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
     }

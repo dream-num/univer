@@ -323,8 +323,15 @@ export function isSupportBoundingBox(ctx: CanvasRenderingContext2D) {
     return true;
 }
 
-// 是否有中文
+// has Chinese string in text?
 export function hasChineseText(text: string) {
+    const pattern = /[\u4E00-\u9FA5]/gi;
+
+    return pattern.test(text);
+}
+
+// 是否有中文包括中文符号
+export function hasChineseTextWithPunctuation(text: string) {
     const pattern = /[\u4E00-\u9FA5]|[\uFE30-\uFFA0]/gi;
     // /^([^\p{Han}]*?)(?:\s+([\p{Han}].*))?$/gim;
 
@@ -357,15 +364,17 @@ export function hasKoreanText(text: string) {
 // 是否有中文、日文、韩文等可以垂直布局的文字，东亚文字
 export function hasCJK(text: string) {
     const pattern = /[\u2E80-\uA4CF]|[\uF900-\uFAFF]|[\uFE30-\uFE4F]|[\uFF00-\uFFEF]/gi;
+
     if (!pattern.exec(text)) {
         return false;
     }
+
     return true;
 }
 
-// 是否有中文、日文等不会存在单词文字，即：单字可以换行，不像hellow world 一样，world的单字必须连在一起。目前只发现中文、日文有这个特性，以后还可以再补充
+// 是否有中文、日文等不会存在单词文字，即：单字可以换行，不像hello world 一样，world的单字必须连在一起。目前只发现中文、日文有这个特性，以后还可以再补充
 export function hasWrappableText(text: string) {
-    return hasChineseText(text) || hasJapaneseText(text);
+    return hasChineseTextWithPunctuation(text) || hasJapaneseText(text);
 }
 
 export function hasAllLatin(text: string) {

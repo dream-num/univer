@@ -1,6 +1,8 @@
 import type { INumberUnit, IParagraphStyle } from '@univerjs/core';
 import { BooleanNumber, DataStreamTreeTokenType, GridType, SpacingRule } from '@univerjs/core';
 
+import { hasChineseText } from '../../../../basics';
+import { FontCache } from '../../../../basics/font-cache';
 import type {
     IDocumentSkeletonBullet,
     IDocumentSkeletonColumn,
@@ -20,7 +22,7 @@ import {
 // eslint-disable-next-line import/no-cycle
 import { createSkeletonPage } from '../../common/page';
 import { setColumnFullState } from '../../common/section';
-import { addSpanToDivide, createSkeletonBulletSpan } from '../../common/span';
+import { addSpanToDivide, createSkeletonBulletSpan, hasMixedTextLayout } from '../../common/span';
 import {
     getCharSpaceApply,
     getCharSpaceConfig,
@@ -77,11 +79,12 @@ function _divideOperator(
     pages: IDocumentSkeletonPage[],
     sectionBreakConfig: ISectionBreakConfig,
     paragraphConfig: IParagraphConfig,
-    paragraphStart: boolean = false,
+    paragraphStart = false,
+    isOutMost = true,
     defaultSpanLineHeight?: number
 ) {
     const lastPage = getLastPage(pages);
-    const divideInfo = getLastNotFullDivideInfo(lastPage); // 取得最新一行里内容未满的第一个divide
+    const divideInfo = getLastNotFullDivideInfo(lastPage); // 取得最新一行里内容未满的第一个 divide.
 
     if (divideInfo) {
         const width = __getSpanGroupWidth(spanGroup);
@@ -91,10 +94,29 @@ function _divideOperator(
         const preLeft = lastSpan?.left || 0;
         const pageContentWidth = getPageContentWidth(lastPage);
 
-        const preOffsetLeft = preWidth + preLeft;
+        // Last span is western char and the current span is Chinese word or vice verse.
+        const isMixedChineseWesternTextLayout = hasMixedTextLayout(lastSpan, spanGroup[0]);
+        let wordSpaceWidth = 0;
+        let preOffsetLeft = preWidth + preLeft;
+
+        // Only add word space between Chinese text and Western text when processing span for the first time,
+        // otherwise it will be added multiple times during recursion.
+        if (isMixedChineseWesternTextLayout && isOutMost) {
+            const lastSpanIsChineseWord = hasChineseText(lastSpan.content!);
+            const WORD_INNER_SPACE = '\u0020';
+
+            wordSpaceWidth = FontCache.getTextSize(
+                WORD_INNER_SPACE, // word space.
+                lastSpanIsChineseWord ? spanGroup[0].fontStyle! : lastSpan.fontStyle!
+            ).width;
+
+            preOffsetLeft += wordSpaceWidth;
+
+            lastSpan.width += wordSpaceWidth;
+        }
 
         if (preOffsetLeft + width > divide.width) {
-            // w超过div宽度
+            // width 超过 divide 宽度
             setDivideFullState(divide, true);
             const column = getColumnByDivide(divide);
 
@@ -102,7 +124,6 @@ function _divideOperator(
                 // 一个字符超页内容宽
                 if (isBlankPage(lastPage)) {
                     addSpanToDivide(divide, spanGroup, preOffsetLeft);
-                    // divide.spanGroup.push(...spanGroup);
                     __makeColumnsFull(column?.parent?.columns);
                 } else {
                     _pageOperator(
@@ -120,7 +141,6 @@ function _divideOperator(
 
                 if (isBlankColumn(column)) {
                     addSpanToDivide(divide, spanGroup, preOffsetLeft);
-                    // divide.spanGroup.push(...spanGroup);
                 } else {
                     _columnOperator(
                         spanGroup,
@@ -157,6 +177,7 @@ function _divideOperator(
                     sectionBreakConfig,
                     paragraphConfig,
                     paragraphStart,
+                    false,
                     defaultSpanLineHeight
                 );
             }
@@ -207,16 +228,20 @@ function _divideOperator(
                         paragraphStart,
                         boundingBoxAscent + boundingBoxDescent
                     );
+
                     for (let i = startIndex; i < spanGroupCached.length; i++) {
                         _divideOperator(
                             [spanGroupCached[i]],
                             pages,
                             sectionBreakConfig,
                             paragraphConfig,
-                            paragraphStart
+                            paragraphStart,
+                            false
                         );
                     }
-                    _divideOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart);
+
+                    _divideOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, false);
+
                     return;
                 }
             }
@@ -387,10 +412,11 @@ function _lineOperator(
         headersDrawings,
         footersDrawings
     );
+
     column.lines.push(newLine);
     newLine.parent = column;
     createAndUpdateBlockAnchor(paragraphIndex, newLine, lineTop, drawingAnchor);
-    _divideOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
+    _divideOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, true, defaultSpanLineHeight);
 }
 
 function _columnOperator(
@@ -402,8 +428,9 @@ function _columnOperator(
     defaultSpanLineHeight?: number
 ) {
     const lastPage = getLastPage(pages);
-    const column = isColumnFull(lastPage);
-    if (column === true) {
+    const columnIsFull = isColumnFull(lastPage);
+
+    if (columnIsFull === true) {
         _pageOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
     } else {
         _lineOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
@@ -420,6 +447,7 @@ function _pageOperator(
 ) {
     const curSkeletonPage: IDocumentSkeletonPage = getLastPage(pages);
     const { skeHeaders, skeFooters } = paragraphConfig;
+
     pages.push(createSkeletonPage(sectionBreakConfig, { skeHeaders, skeFooters }, curSkeletonPage?.pageNumber));
     _columnOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
 }

@@ -1,3 +1,4 @@
+import type { Nullable } from '@univerjs/core';
 import { BooleanNumber, BulletAlignment, DataStreamTreeTokenType as DT, GridType } from '@univerjs/core';
 
 import { FontCache } from '../../../basics/font-cache';
@@ -8,7 +9,7 @@ import type {
 } from '../../../basics/i-document-skeleton-cached';
 import { SpanType } from '../../../basics/i-document-skeleton-cached';
 import type { IFontCreateConfig } from '../../../basics/interfaces';
-import { hasCJK } from '../../../basics/tools';
+import { hasChineseText, hasCJK } from '../../../basics/tools';
 import { validationGrid } from './tools';
 
 export function createSkeletonWordSpan(
@@ -215,4 +216,23 @@ function _getMaxBoundingBox(span: IDocumentSkeletonSpan, bulletSkeleton: IDocume
         return span.bBox;
     }
     return bulletSkeleton.bBox;
+}
+
+export function hasMixedTextLayout(preSpan: Nullable<IDocumentSkeletonSpan>, span: IDocumentSkeletonSpan) {
+    if (preSpan == null) {
+        return false;
+    }
+    const { content: preContent } = preSpan;
+    const { content: curContent } = span;
+
+    if (preContent == null || curContent == null) {
+        return false;
+    }
+
+    const ENG_NUMBERS_REG = /[a-z\d]/i;
+
+    return (
+        (ENG_NUMBERS_REG.test(preContent) && hasChineseText(curContent)) ||
+        (hasChineseText(preContent) && ENG_NUMBERS_REG.test(curContent))
+    );
 }

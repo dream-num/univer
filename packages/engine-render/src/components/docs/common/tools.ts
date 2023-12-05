@@ -57,9 +57,8 @@ export function getLastLineByColumn(column: IDocumentSkeletonColumn) {
 
 export function getPageContentWidth(page: IDocumentSkeletonPage) {
     const { pageWidth, marginLeft: pageMarginLeft, marginRight: pageMarginRight } = page;
-    const pageContentWidth = pageWidth - pageMarginLeft - pageMarginRight;
 
-    return pageContentWidth;
+    return pageWidth - pageMarginLeft - pageMarginRight;
 }
 
 export function getPreLine(line: IDocumentSkeletonLine) {

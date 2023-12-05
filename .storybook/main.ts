@@ -17,12 +17,12 @@ const config: StorybookConfig = {
             titlePrefix: 'Design'
         },
         {
-            directory: '../packages/base-ui/src/**',
+            directory: '../packages/ui/src/**',
             files: '*.stories.@(js|jsx|mjs|ts|tsx)',
             titlePrefix: 'Base UI'
         },
         {
-            directory: '../packages/sheets-plugin-numfmt/src/**',
+            directory: '../packages/sheets-numfmt/src/**',
             files: '*.stories.@(js|jsx|mjs|ts|tsx)',
             titlePrefix: 'Numfmt'
         },

@@ -6,32 +6,37 @@ import { type ISidebarMethodOptions } from '../../views/components/sidebar/inter
 import type { ISidebarService } from './sidebar.service';
 
 export class DesktopSidebarService implements ISidebarService {
-    private sidebarOptions: ISidebarMethodOptions = {};
-    private readonly sidebarOptions$ = new Subject<ISidebarMethodOptions>();
+    private _sidebarOptions: ISidebarMethodOptions = {};
+    readonly sidebarOptions$ = new Subject<ISidebarMethodOptions>();
 
-    open(option: ISidebarMethodOptions): IDisposable {
-        this.sidebarOptions = {
-            ...option,
+    open(params: ISidebarMethodOptions): IDisposable {
+        this._sidebarOptions = {
+            ...params,
             visible: true,
         };
 
-        this.sidebarOptions$.next(this.sidebarOptions);
+        this.sidebarOptions$.next(this._sidebarOptions);
 
         return toDisposable(() => {
-            this.sidebarOptions$.next({});
+            this.sidebarOptions$.complete();
         });
     }
 
-    close() {
-        this.sidebarOptions = {
-            ...this.sidebarOptions,
-            visible: false,
+    set(params: ISidebarMethodOptions): void {
+        this._sidebarOptions = {
+            ...params,
         };
-        this.sidebarOptions$.next(this.sidebarOptions);
-        this.sidebarOptions.onClose && this.sidebarOptions.onClose();
+
+        this.sidebarOptions$.next(this._sidebarOptions);
     }
 
-    getObservableSidebar() {
-        return this.sidebarOptions$;
+    close() {
+        this._sidebarOptions = {
+            ...this._sidebarOptions,
+            visible: false,
+        };
+
+        this.sidebarOptions$.next(this._sidebarOptions);
+        this._sidebarOptions.onClose && this._sidebarOptions.onClose();
     }
 }

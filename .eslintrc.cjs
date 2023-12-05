@@ -143,7 +143,6 @@ module.exports = {
             'error',
             {
                 component: true,
-                html: true,
             },
         ],
     },

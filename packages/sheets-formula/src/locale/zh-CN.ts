@@ -76,5 +76,9 @@ export default {
             allFunctions: '全部函数',
             syntax: '语法',
         },
+
+        operation: {
+            pasteFormula: '仅粘贴公式',
+        },
     },
 };

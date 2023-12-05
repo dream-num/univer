@@ -5,6 +5,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 
 import { FORMULA_UI_PLUGIN_NAME } from './common/plugin-name';
 import { FormulaAutoFillController } from './controllers/formula-auto-fill.controller';
+import { FormulaClipboardController } from './controllers/formula-clipboard.controller';
 import { FormulaInputController } from './controllers/formula-input.controller';
 import { FormulaUIController } from './controllers/formula-ui.controller';
 import { PromptController } from './controllers/prompt.controller';
@@ -50,6 +51,7 @@ export class FormulaUIPlugin extends Plugin {
             [PromptController],
             [FormulaInputController],
             [FormulaAutoFillController],
+            [FormulaClipboardController],
         ];
 
         dependencies.forEach((dependency) => this._injector.add(dependency));

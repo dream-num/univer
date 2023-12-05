@@ -5,10 +5,16 @@ import {
     getCellValueType,
     ICommandService,
     IUniverInstanceService,
+    Rectangle,
     serializeRange,
     Tools,
 } from '@univerjs/core';
-import { SelectionManagerService } from '@univerjs/sheets';
+import {
+    getCellAtRowCol,
+    NORMAL_SELECTION_PLUGIN_NAME,
+    SelectionManagerService,
+    SetSelectionsOperation,
+} from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 
 import { IFormulaInputService } from '../../services/formula-input.service';
@@ -33,18 +39,25 @@ export const InsertFunctionOperation: ICommand = {
             return false;
         }
 
-        const univerInstanceService = accessor.get(IUniverInstanceService);
-        const cellMatrix = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getCellMatrix();
+        const workbook = accessor.get(IUniverInstanceService).getCurrentUniverSheetInstance();
+        const worksheet = workbook.getActiveSheet();
+
+        const unitId = workbook.getUnitId();
+        const sheetId = worksheet.getSheetId();
+        const cellMatrix = worksheet.getCellMatrix();
 
         const { value } = params;
         const commandService = accessor.get(ICommandService);
 
-        // TODO@Dushusir: no match refRange situation, enter edit mode
-
+        // No match refRange situation, enter edit mode
         // In each range, first take the judgment result of the primary position (if there is no primary, take the upper left corner),
         // If there is a range, set the formula range directly, and then set the formula id of other positions.
         // If the range cannot be found, enter the edit mode.
         const list: IInsertFunction[] = [];
+        let editRange: IRange | null = null;
+        let editRow = 0;
+        let editColumn = 0;
+
         currentSelections.some((selection) => {
             const { range, primary } = selection;
 
@@ -54,8 +67,9 @@ export const InsertFunctionOperation: ICommand = {
             const refRange = findRefRange(cellMatrix, row, column);
 
             if (!refRange) {
-                // TODO@Dushusir: set current position
-                formulaInputService.inputFormula(`=${value}(`);
+                editRange = range;
+                editRow = row;
+                editColumn = column;
                 return true;
             }
 
@@ -73,6 +87,39 @@ export const InsertFunctionOperation: ICommand = {
 
             return false;
         });
+
+        if (editRange) {
+            // set current position
+            const destRange = getCellAtRowCol(editRow, editColumn, worksheet);
+
+            const resultRange = {
+                range: Rectangle.clone(editRange),
+                primary: {
+                    startRow: destRange.startRow,
+                    startColumn: destRange.startColumn,
+                    endRow: destRange.endRow,
+                    endColumn: destRange.endColumn,
+                    actualRow: editRow,
+                    actualColumn: editColumn,
+                    isMerged: destRange.isMerged,
+                    isMergedMainCell: destRange.startRow === editRow && destRange.startColumn === editColumn,
+                },
+            };
+
+            const setSelectionParams = {
+                unitId,
+                sheetId,
+                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+                selections: [resultRange],
+            };
+            await commandService.executeCommand(SetSelectionsOperation.id, setSelectionParams);
+
+            // TODO@DR-Univer: Maybe setTimeout can be removed
+            setTimeout(() => {
+                // edit cell
+                formulaInputService.inputFormula(`=${value}(`);
+            }, 0);
+        }
 
         if (list.length === 0) return false;
 

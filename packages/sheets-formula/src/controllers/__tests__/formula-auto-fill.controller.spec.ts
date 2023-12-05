@@ -34,7 +34,7 @@ const theme = {
     colorBlack: '#35322b',
 };
 
-describe('Test clear selection content commands', () => {
+describe('Test auto fill with formula', () => {
     let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
@@ -83,80 +83,78 @@ describe('Test clear selection content commands', () => {
         univer.dispose();
     });
 
-    describe('auto fill with formula', () => {
-        describe('correct situations', () => {
-            it('one cell with formula', async () => {
-                const selectionManager = get(SelectionManagerService);
-                selectionManager.setCurrentSelection({
-                    pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-                    unitId: 'test',
-                    sheetId: 'sheet1',
-                });
-                selectionManager.add([
-                    {
-                        range: { startRow: 0, startColumn: 1, endRow: 0, endColumn: 1, rangeType: RANGE_TYPE.NORMAL },
-                        primary: null,
-                        style: null,
-                    },
-                ]);
-
-                (autoFillController as any)._handleFill(
-                    {
-                        startColumn: 1,
-                        endColumn: 1,
-                        startRow: 0,
-                        endRow: 0,
-                    },
-                    {
-                        startColumn: 1,
-                        endColumn: 1,
-                        startRow: 0,
-                        endRow: 2,
-                    }
-                );
-
-                // values will be in the following format
-                // [
-                //     [ { f: '=SUM(A1)' } ],
-                //     [ { f: '=SUM(A2)', si: '1ZMZWH' } ],
-                //     [ { si: '1ZMZWH' } ]
-                //   ]
-                let values = getValues(0, 1, 2, 1);
-                let B2 = values && values[1][0];
-                let B3 = values && values[2][0];
-
-                expect(B2?.f).toStrictEqual('=SUM(A2)');
-                expect(B2?.si).toEqual(B3?.si);
-
-                // undo
-                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
-
-                values = getValues(0, 1, 2, 1);
-                B2 = values && values[1][0];
-                B3 = values && values[2][0];
-
-                expect(B2).toStrictEqual({});
-                expect(B3).toStrictEqual({});
-
-                // redo
-                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
-                values = getValues(0, 1, 2, 1);
-                B2 = values && values[1][0];
-                B3 = values && values[2][0];
-
-                expect(B2?.f).toStrictEqual('=SUM(A2)');
-                expect(B2?.si).toEqual(B3?.si);
-
-                // Restore the original data
-                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+    describe('correct situations', () => {
+        it('one cell with formula', async () => {
+            const selectionManager = get(SelectionManagerService);
+            selectionManager.setCurrentSelection({
+                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+                unitId: 'test',
+                sheetId: 'sheet1',
             });
+            selectionManager.add([
+                {
+                    range: { startRow: 0, startColumn: 1, endRow: 0, endColumn: 1, rangeType: RANGE_TYPE.NORMAL },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+
+            (autoFillController as any)._handleFill(
+                {
+                    startColumn: 1,
+                    endColumn: 1,
+                    startRow: 0,
+                    endRow: 0,
+                },
+                {
+                    startColumn: 1,
+                    endColumn: 1,
+                    startRow: 0,
+                    endRow: 2,
+                }
+            );
+
+            // values will be in the following format
+            // [
+            //     [ { f: '=SUM(A1)' } ],
+            //     [ { f: '=SUM(A2)', si: '1ZMZWH' } ],
+            //     [ { si: '1ZMZWH' } ]
+            //   ]
+            let values = getValues(0, 1, 2, 1);
+            let B2 = values && values[1][0];
+            let B3 = values && values[2][0];
+
+            expect(B2?.f).toStrictEqual('=SUM(A2)');
+            expect(B2?.si).toEqual(B3?.si);
+
+            // undo
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+
+            values = getValues(0, 1, 2, 1);
+            B2 = values && values[1][0];
+            B3 = values && values[2][0];
+
+            expect(B2).toStrictEqual({});
+            expect(B3).toStrictEqual({});
+
+            // redo
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            values = getValues(0, 1, 2, 1);
+            B2 = values && values[1][0];
+            B3 = values && values[2][0];
+
+            expect(B2?.f).toStrictEqual('=SUM(A2)');
+            expect(B2?.si).toEqual(B3?.si);
+
+            // Restore the original data
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
         });
+    });
 
-        describe('fault situations', () => {
-            it('will not apply when there is no selected ranges', async () => {
-                const result = await commandService.executeCommand(AutoFillCommand.id);
-                expect(result).toBeFalsy();
-            });
+    describe('fault situations', () => {
+        it('will not apply when there is no selected ranges', async () => {
+            const result = await commandService.executeCommand(AutoFillCommand.id);
+            expect(result).toBeFalsy();
         });
     });
 });

@@ -2,6 +2,7 @@ import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univ
 
 import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
 import {
+    setFormulaCalculationNotificationMutation,
     setFormulaCalculationStartMutation,
     setFormulaCalculationStopMutation,
 } from '../commands/mutations/set-formula-calculation.mutation';
@@ -25,6 +26,7 @@ export class FormulaController extends Disposable {
             SetArrayFormulaDataMutation,
             setFormulaCalculationStartMutation,
             setFormulaCalculationStopMutation,
+            setFormulaCalculationNotificationMutation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 }

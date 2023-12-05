@@ -10,7 +10,7 @@ import type { BaseAstNode } from '../ast-node/base-ast-node';
 import { ErrorNode } from '../ast-node/base-ast-node';
 import { NodeType } from '../ast-node/node-type';
 import { FormulaAstLRU } from '../basics/cache-lru';
-import type { IFormulaData, IOtherFormulaData } from '../basics/common';
+import type { IDirtyUnitSheetNameMap, IFormulaData, IOtherFormulaData } from '../basics/common';
 import { ErrorType } from '../basics/error-type';
 import type { PreCalculateNodeType } from '../basics/node-type';
 import { prefixToken, suffixToken } from '../basics/token';
@@ -28,6 +28,8 @@ export const FormulaASTCache = new FormulaAstLRU<AstRootNode>(FORMULA_CACHE_LRU_
 export class FormulaDependencyGenerator extends Disposable {
     private _updateRangeFlattenCache = new Map<string, Map<string, IRange[]>>();
 
+    private _dirtyUnitSheetNameMap: IDirtyUnitSheetNameMap = {};
+
     constructor(
         @IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService,
         @IFormulaRuntimeService private readonly _runtimeService: IFormulaRuntimeService,
@@ -41,6 +43,7 @@ export class FormulaDependencyGenerator extends Disposable {
     override dispose(): void {
         this._updateRangeFlattenCache.clear();
         FormulaASTCache.clear();
+        this._dirtyUnitSheetNameMap = {};
     }
 
     async generate() {
@@ -216,6 +219,8 @@ export class FormulaDependencyGenerator extends Disposable {
 
             this._addFlattenCache(unitId, sheetId, range);
         }
+
+        this._dirtyUnitSheetNameMap = this._currentConfigService.getDirtyNameMap();
     }
 
     private _generateAstNode(formulaString: string, refOffsetX: number = 0, refOffsetY: number = 0) {
@@ -407,6 +412,7 @@ export class FormulaDependencyGenerator extends Disposable {
                 (forceCalculate ||
                     tree.dependencyRange(
                         this._updateRangeFlattenCache,
+                        this._dirtyUnitSheetNameMap,
                         this._currentConfigService.getExcludedRange()
                     ) ||
                     this._includeTree(tree)) &&
@@ -448,6 +454,14 @@ export class FormulaDependencyGenerator extends Disposable {
             return false;
         }
 
+        /**
+         * When the name of a worksheet is changed, or a worksheet is inserted or deleted,
+         * the formulas within it may not need to be calculated.
+         */
+        // if (this._dirtyUnitSheetNameMap[unitId][subComponentId] != null) {
+        //     return true;
+        // }
+
         if (!this._updateRangeFlattenCache.has(unitId)) {
             return false;
         }
@@ -461,7 +475,7 @@ export class FormulaDependencyGenerator extends Disposable {
         const ranges = sheetRangeMap.get(subComponentId)!;
 
         for (const range of ranges) {
-            if (tree.compareRangeData(range)) {
+            if (tree.inRangeData(range)) {
                 return true;
             }
         }

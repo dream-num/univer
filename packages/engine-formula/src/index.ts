@@ -25,6 +25,7 @@ export { BaseReferenceObject, type FunctionVariantType } from './reference-objec
 export { RangeReferenceObject } from './reference-object/range-reference-object';
 export { FormulaEngineService } from './services/formula-engine.service';
 export { IFunctionService } from './services/function.service';
+export { FormulaExecuteStageType, type IExecutionInProgressParams } from './services/runtime.service';
 export { FormulaExecutedStateType, type IAllRuntimeData } from './services/runtime.service';
 export { ArrayValueObject } from './value-object/array-value-object';
 export { BaseValueObject } from './value-object/base-value-object';

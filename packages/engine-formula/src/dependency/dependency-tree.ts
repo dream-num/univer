@@ -2,7 +2,7 @@ import type { IRange, IUnitRange, Nullable } from '@univerjs/core';
 import { Disposable } from '@univerjs/core';
 
 import type { BaseAstNode } from '../ast-node/base-ast-node';
-import type { IUnitExcludedCell } from '../basics/common';
+import type { IDirtyUnitSheetNameMap, IUnitExcludedCell } from '../basics/common';
 
 export enum FDtreeStateType {
     DEFAULT,
@@ -60,7 +60,7 @@ export class FormulaDependencyTree extends Disposable {
         return this._state === FDtreeStateType.SKIP;
     }
 
-    compareRangeData(range: IRange) {
+    inRangeData(range: IRange) {
         const startRow = range.startRow;
         const startColumn = range.startColumn;
         const endRow = range.endRow;
@@ -81,6 +81,7 @@ export class FormulaDependencyTree extends Disposable {
      */
     dependencyRange(
         dependencyRangeList: Map<string, Map<string, IRange[]>>,
+        dirtyUnitSheetNameMap: IDirtyUnitSheetNameMap,
         unitExcludedCell: Nullable<IUnitExcludedCell>
     ) {
         if (this.rangeList.length === 0) {
@@ -89,9 +90,7 @@ export class FormulaDependencyTree extends Disposable {
 
         for (let r = 0, len = this.rangeList.length; r < len; r++) {
             const unitRange = this.rangeList[r];
-            const unitId = unitRange.unitId;
-            const sheetId = unitRange.sheetId;
-            const range = unitRange.range;
+            const { unitId, sheetId, range } = unitRange;
 
             if (!dependencyRangeList.has(unitId)) {
                 continue;
@@ -140,6 +139,14 @@ export class FormulaDependencyTree extends Disposable {
                     }
                 }
             }
+
+            /**
+             * When a worksheet is inserted or deleted,
+             * the formulas that depend on these worksheets need to be calculated.
+             */
+            if (dirtyUnitSheetNameMap[unitId]?.[sheetId] != null) {
+                return true;
+            }
         }
 
         return false;
@@ -177,7 +184,7 @@ export class FormulaDependencyTree extends Disposable {
             if (
                 dependenceTree.unitId === unitId &&
                 dependenceTree.subComponentId === sheetId &&
-                dependenceTree.compareRangeData(range)
+                dependenceTree.inRangeData(range)
             ) {
                 return true;
             }

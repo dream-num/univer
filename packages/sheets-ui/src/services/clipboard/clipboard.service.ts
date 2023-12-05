@@ -191,7 +191,11 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             return { dispose: () => {} };
         }
         // hook added should be ordered at meaning while
-        const insertIndex = this._clipboardHooks.findIndex((existingHook) => existingHook.priority >= hook.priority);
+        const insertIndex = this._clipboardHooks.findIndex((existingHook) => {
+            const existingHookPriority = existingHook.priority || 0;
+            const hookPriority = hook.priority || 0;
+            return hookPriority < existingHookPriority;
+        });
 
         this._clipboardHooks.splice(insertIndex !== -1 ? insertIndex : this._clipboardHooks.length, 0, hook);
 

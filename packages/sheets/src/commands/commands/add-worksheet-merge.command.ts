@@ -12,22 +12,23 @@ import {
     ObjectMatrix,
     sequenceExecute,
 } from '@univerjs/core';
-import type {
-    IAddWorksheetMergeMutationParams,
-    IRemoveWorksheetMergeMutationParams,
-    ISetRangeValuesMutationParams,
-} from '@univerjs/sheets';
+import type { IAccessor } from '@wendellhu/redi';
 import {
-    AddMergeUndoMutationFactory,
-    AddWorksheetMergeMutation,
-    getAddMergeMutationRangeByType,
-    RemoveMergeUndoMutationFactory,
-    RemoveWorksheetMergeMutation,
-    SelectionManagerService,
+    ISetRangeValuesMutationParams,
     SetRangeValuesMutation,
     SetRangeValuesUndoMutationFactory,
-} from '@univerjs/sheets';
-import type { IAccessor } from '@wendellhu/redi';
+} from '../mutations/set-range-values.mutation';
+import { getAddMergeMutationRangeByType } from '../../controllers/merge-cell.controller';
+import {
+    IAddWorksheetMergeMutationParams,
+    IRemoveWorksheetMergeMutationParams,
+} from '../../basics/interfaces/mutation-interface';
+import {
+    RemoveMergeUndoMutationFactory,
+    RemoveWorksheetMergeMutation,
+} from '../mutations/remove-worksheet-merge.mutation';
+import { AddMergeUndoMutationFactory, AddWorksheetMergeMutation } from '../mutations/add-worksheet-merge.mutation';
+import { SelectionManagerService } from '../../services/selection-manager.service';
 
 export interface IAddMergeCommandParams {
     value?: Dimension.ROWS | Dimension.COLUMNS;
@@ -155,7 +156,7 @@ export const AddWorksheetMergeCommand: ICommand = {
         }
 
         const result = sequenceExecute(redoMutations, commandService);
-        if (result) {
+        if (result.result) {
             undoRedoService.pushUndoRedo({
                 unitID: workbookId,
                 undoMutations,

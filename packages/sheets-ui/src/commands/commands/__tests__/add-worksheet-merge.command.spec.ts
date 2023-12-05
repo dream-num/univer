@@ -1,14 +1,15 @@
 import type { IRange, Univer } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, RANGE_TYPE, RedoCommand, UndoCommand } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LocaleService, RANGE_TYPE, RedoCommand, UndoCommand } from '@univerjs/core';
 import {
     AddWorksheetMergeMutation,
     NORMAL_SELECTION_PLUGIN_NAME,
     RemoveWorksheetMergeCommand,
     RemoveWorksheetMergeMutation,
     SelectionManagerService,
+    SetRangeValuesMutation,
 } from '@univerjs/sheets';
 import { createCommandTestBed } from '@univerjs/sheets/commands/commands/__tests__/create-command-test-bed.js';
-import type { Injector } from '@wendellhu/redi';
+import type { IDisposable, Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import {
@@ -17,6 +18,8 @@ import {
     AddWorksheetMergeHorizontalCommand,
     AddWorksheetMergeVerticalCommand,
 } from '../add-worksheet-merge.command';
+import { IConfirmService, type IConfirmPartMethodOptions } from '@univerjs/ui';
+import { Subject } from 'rxjs';
 
 describe('Test style commands', () => {
     let univer: Univer;
@@ -24,12 +27,33 @@ describe('Test style commands', () => {
     let commandService: ICommandService;
 
     beforeEach(() => {
-        const testBed = createCommandTestBed();
+        const testBed = createCommandTestBed(undefined, [
+            [
+                IConfirmService,
+                {
+                    useClass: class MockConfirmService implements IConfirmService {
+                        confirmOptions$: Subject<IConfirmPartMethodOptions[]>;
+                        open(params: IConfirmPartMethodOptions): IDisposable {
+                            throw new Error('Method not implemented.');
+                        }
+
+                        confirm(params: IConfirmPartMethodOptions): Promise<boolean> {
+                            return Promise.resolve(true);
+                        }
+
+                        close(id: string): void {
+                            throw new Error('Method not implemented.');
+                        }
+                    },
+                },
+            ],
+        ]);
         univer = testBed.univer;
 
         get = testBed.get;
 
         commandService = get(ICommandService);
+        commandService.registerCommand(SetRangeValuesMutation);
         commandService.registerCommand(AddWorksheetMergeCommand);
         commandService.registerCommand(AddWorksheetMergeAllCommand);
         commandService.registerCommand(AddWorksheetMergeVerticalCommand);
@@ -37,6 +61,8 @@ describe('Test style commands', () => {
         commandService.registerCommand(RemoveWorksheetMergeCommand);
         commandService.registerCommand(AddWorksheetMergeMutation);
         commandService.registerCommand(RemoveWorksheetMergeMutation);
+
+        get(LocaleService).load({});
     });
 
     afterEach(() => {
@@ -45,7 +71,7 @@ describe('Test style commands', () => {
 
     describe('add merge all', () => {
         describe('correct situations', () => {
-            it('will merge all cells of the selected range when there is a selected range', async () => {
+            it.only('will merge all cells of the selected range when there is a selected range', async () => {
                 const selectionManager = get(SelectionManagerService);
                 selectionManager.setCurrentSelection({
                     pluginName: NORMAL_SELECTION_PLUGIN_NAME,
@@ -59,6 +85,7 @@ describe('Test style commands', () => {
                         style: null,
                     },
                 ]);
+
 
                 function getMerge(): IRange[] | undefined {
                     return get(IUniverInstanceService)

@@ -41,6 +41,7 @@ export const AddWorksheetMergeMutation: IMutation<IAddWorksheetMergeMutationPara
         const config = worksheet.getConfig()!;
         const mergeConfigData = config.mergeData;
         const mergeAppendData = params.ranges;
+        console.log('config merge data', mergeAppendData);
         for (let i = 0; i < mergeAppendData.length; i++) {
             mergeConfigData.push(mergeAppendData[i]);
         }

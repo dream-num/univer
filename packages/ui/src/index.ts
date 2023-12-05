@@ -54,3 +54,4 @@ export { DesktopSidebarService } from './services/sidebar/desktop-sidebar.servic
 export { ISidebarService } from './services/sidebar/sidebar.service';
 export { UIPlugin } from './ui-plugin';
 export * from './utils';
+export { type IConfirmPartMethodOptions } from './views/components/confirm-part/interface';

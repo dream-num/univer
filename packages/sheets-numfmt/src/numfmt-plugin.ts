@@ -3,6 +3,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 
 import { SHEET_NUMFMT_PLUGIN } from './base/const/PLUGIN_NAME';
 import { NumfmtController } from './controllers/numfmt.controller';
+import { NumfmtCopyPasteController } from './controllers/numfmt.copy-paste.controller';
 import { NumfmtEditorController } from './controllers/numfmt.editor.controller';
 import { NumfmtRefRangeController } from './controllers/numfmt.ref-range.controller';
 import { NumfmtSheetController } from './controllers/numfmt.sheet.controller';
@@ -21,5 +22,6 @@ export class NumfmtPlugin extends Plugin {
         this._injector.add([UserHabitController]);
         this._injector.add([NumfmtRefRangeController]);
         this._injector.add([NumfmtSheetController]);
+        this._injector.add([NumfmtCopyPasteController]);
     }
 }

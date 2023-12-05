@@ -7,5 +7,6 @@ export default {
         dialog: 'Dialog',
         confirm: 'Confirm',
         sidebar: 'Sidebar',
+        editable: 'Editable',
     },
 };

@@ -7,7 +7,6 @@ import { DialogOperation } from '../commands/operations/dialog.operation';
 import { LocaleOperation } from '../commands/operations/locale.operation';
 import { MessageOperation } from '../commands/operations/message.operation';
 import { NotificationOperation } from '../commands/operations/notification.operation';
-import { NumfmtOperation } from '../commands/operations/numfmt.operations';
 import { SetEditable } from '../commands/operations/set.editable.operation';
 import { SidebarOperation } from '../commands/operations/sidebar.operation';
 import { ThemeOperation } from '../commands/operations/theme.operation';
@@ -17,7 +16,6 @@ import {
     LocaleMenuItemFactory,
     MessageMenuItemFactory,
     NotificationMenuItemFactory,
-    NumfmtMenuItemFactory,
     SetEditableMenuItemFactory,
     SidebarMenuItemFactory,
     ThemeMenuItemFactory,
@@ -41,7 +39,6 @@ export class DebuggerController extends Disposable {
             MessageOperation,
             SidebarOperation,
             SetEditable,
-            NumfmtOperation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 
@@ -51,7 +48,6 @@ export class DebuggerController extends Disposable {
             ThemeMenuItemFactory,
             NotificationMenuItemFactory,
             MessageMenuItemFactory,
-            NumfmtMenuItemFactory,
             DialogMenuItemFactory,
             ConfirmMenuItemFactory,
             SidebarMenuItemFactory,

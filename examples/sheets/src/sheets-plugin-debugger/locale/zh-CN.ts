@@ -7,5 +7,6 @@ export default {
         dialog: '对话框',
         confirm: '确认框',
         sidebar: '侧边栏',
+        editable: '编辑权限',
     },
 };

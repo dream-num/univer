@@ -1,5 +1,5 @@
 import type { ISelectionsConfig } from './selection-config';
 
-export interface ISheetPluginConfig {
+export interface ISheetsPluginConfig {
     selections: ISelectionsConfig;
 }

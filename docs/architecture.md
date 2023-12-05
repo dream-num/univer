@@ -25,7 +25,7 @@ For example, you could create a standard Spreadsheet application like this:
 ```ts
 import { DocsPlugin } from '@univerjs/docs';
 import { RenderEngine } from '@univerjs/engine-render';
-import { SheetPlugin } from '@univerjs/sheets';
+import { sheetsPlugin } from '@univerjs/sheets';
 import { UIPlugin } from '@univerjs/ui';
 import { LocaleType, Univer } from '@univerjs/core';
 import { greenTheme } from '@univerjs/design';
@@ -47,7 +47,7 @@ univer.registerPlugin(UIPlugin, {
     toolbar: true,
     footer: true,
 });
-univer.registerPlugin(SheetPlugin);
+univer.registerPlugin(sheetsPlugin);
 univer.registerPlugin(SheetsUIPlugin);
 univer.registerPlugin(FormulaPlugin);
 

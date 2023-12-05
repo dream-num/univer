@@ -35,7 +35,7 @@ univer.registerPlugin(UniverRPCMainThreadPlugin, {
 
 ```ts
 import { BaseFormulaEnginePlugin } from '@univerjs/engine-formula';
-import { SheetPlugin } from '@univerjs/sheets';
+import { sheetsPlugin } from '@univerjs/sheets';
 import { LocaleType, Univer } from '@univerjs/core';
 import { UniverRPCWorkerThreadPlugin } from '@univerjs/rpc';
 import { FormulaPlugin } from '@univerjs/formula';
@@ -43,7 +43,7 @@ import { FormulaPlugin } from '@univerjs/formula';
 const univer = new Univer();
 
 univer.registerPlugin(UniverRPCWorkerThreadPlugin);
-univer.registerPlugin(SheetPlugin);
+univer.registerPlugin(sheetsPlugin);
 univer.registerPlugin(BaseFormulaEnginePlugin);
 univer.registerPlugin(FormulaPlugin);
 ```

@@ -3,7 +3,7 @@ import { Disposable, IUniverInstanceService, Range, Rectangle } from '@univerjs/
 import type { ISetNumfmtMutationParams } from '@univerjs/sheets';
 import { factorySetNumfmtUndoMutation, INumfmtService, SetNumfmtMutation } from '@univerjs/sheets';
 import type { IAutoFillHook } from '@univerjs/sheets-ui';
-import { APPLY_TYPE, getRepeatRange, IAutoFillService } from '@univerjs/sheets-ui';
+import { APPLY_TYPE, getAutoFillRepeatRange, IAutoFillService } from '@univerjs/sheets-ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { SHEET_NUMFMT_PLUGIN } from '../base/const/PLUGIN_NAME';
@@ -112,7 +112,7 @@ export class NumfmtAutoFillController extends Disposable {
                 row: sourceRange.startRow,
                 col: sourceRange.startColumn,
             };
-            const repeats = getRepeatRange(sourceRange, targetRange);
+            const repeats = getAutoFillRepeatRange(sourceRange, targetRange);
             repeats.forEach((repeat) => {
                 const { undos, redos } = loopFunc(sourceStartCell, repeat.repeatStartCell, repeat.relativeRange);
                 totalUndos.push(...undos);

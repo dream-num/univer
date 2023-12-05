@@ -614,7 +614,7 @@ export function fillLoopSeries(data: Array<Nullable<ICellData>>, len: number, st
     return applyData;
 }
 
-export function getRepeatRange(sourceRange: IRange, targetRange: IRange) {
+export function getAutoFillRepeatRange(sourceRange: IRange, targetRange: IRange) {
     const repeats: Array<{
         repeatStartCell: { col: number; row: number };
         relativeRange: IRange;

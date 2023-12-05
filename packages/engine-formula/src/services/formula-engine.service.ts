@@ -193,6 +193,13 @@ export class FormulaEngineService extends Disposable {
     }
 
     /**
+     * Stop the execution of the formula.
+     */
+    stopFormulaExecution() {
+        this.runtimeService.stopExecution();
+    }
+
+    /**
      *
      * @param unitId
      * @param formulaData

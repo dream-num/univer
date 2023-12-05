@@ -11,7 +11,6 @@ import {
 import type { IAllRuntimeData, IDirtyUnitSheetNameMap, IFormulaData } from '@univerjs/engine-formula';
 import { FormulaEngineService, FormulaExecutedStateType } from '@univerjs/engine-formula';
 import type {
-    IAddWorksheetMergeMutationParams,
     IDeleteRangeMutationParams,
     IMoveColumnsMutationParams,
     IMoveRangeMutationParams,
@@ -19,12 +18,11 @@ import type {
     IRemoveRowsMutationParams,
     IRemoveSheetMutationParams,
     ISetRangeValuesMutationParams,
-    ISetWorksheetNameMutationParams,
 } from '@univerjs/sheets';
 import {
-    AddWorksheetMergeMutation,
     DeleteRangeMutation,
     InsertRangeMutation,
+    InsertSheetMutation,
     MoveColsMutation,
     MoveRangeMutation,
     MoveRowsMutation,
@@ -33,7 +31,6 @@ import {
     RemoveSheetMutation,
     SetRangeValuesMutation,
     SetStyleCommand,
-    SetWorksheetNameMutation,
 } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 import type { Nullable } from 'vitest';
@@ -41,7 +38,11 @@ import type { Nullable } from 'vitest';
 import type { ISetArrayFormulaDataMutationParams } from '../commands/mutations/set-array-formula-data.mutation';
 import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
 import type { ISetFormulaCalculationStartMutation } from '../commands/mutations/set-formula-calculation.mutation';
-import { setFormulaCalculationStartMutation } from '../commands/mutations/set-formula-calculation.mutation';
+import {
+    setFormulaCalculationNotificationMutation,
+    setFormulaCalculationStartMutation,
+    setFormulaCalculationStopMutation,
+} from '../commands/mutations/set-formula-calculation.mutation';
 import type { ISetFormulaDataMutationParams } from '../commands/mutations/set-formula-data.mutation';
 import { SetFormulaDataMutation } from '../commands/mutations/set-formula-data.mutation';
 import { FormulaDataModel } from '../models/formula-data.model';
@@ -66,19 +67,27 @@ export class CalculateController extends Disposable {
         this._commandExecutedListener();
         this._initialExecuteFormulaListener();
         this._registerFunctions();
+        this._initialExecuteFormulaProcessListener();
     }
 
     private _commandExecutedListener() {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (command.id === SetFormulaDataMutation.id) {
+                if (command.id === setFormulaCalculationStopMutation.id) {
+                    this._formulaEngineService.stopFormulaExecution();
+                } else if (command.id === SetFormulaDataMutation.id) {
                     const formulaData = (command.params as ISetFormulaDataMutationParams).formulaData as IFormulaData;
                     this._formulaDataModel.setFormulaData(formulaData);
                 } else if (command.id === setFormulaCalculationStartMutation.id) {
                     const params = command.params as ISetFormulaCalculationStartMutation;
-                    const { dirtyRanges, dirtyNameMap } = this._generateDirty(params.commands);
 
-                    this._calculate(dirtyRanges, dirtyNameMap);
+                    if (params.forceCalculation === true) {
+                        this._calculate(true);
+                    } else {
+                        const { dirtyRanges, dirtyNameMap } = this._generateDirty(params.commands);
+
+                        this._calculate(false, dirtyRanges, dirtyNameMap);
+                    }
                 } else if (command.id === SetArrayFormulaDataMutation.id) {
                     const params = command.params as ISetArrayFormulaDataMutationParams;
 
@@ -125,13 +134,14 @@ export class CalculateController extends Disposable {
             } else if (command.id === RemoveSheetMutation.id) {
                 const params = command.params as IRemoveSheetMutationParams;
                 this._getSheetMutationDirtyName(dirtyNameMap, params);
-            } else if (command.id === SetWorksheetNameMutation.id) {
-                const params = command.params as ISetWorksheetNameMutationParams;
-                this._getSheetMutationDirtyName(dirtyNameMap, params, params.name);
-            } else if (command.id === AddWorksheetMergeMutation.id) {
-                const params = command.params as IAddWorksheetMergeMutationParams;
+            } else if (command.id === InsertSheetMutation.id) {
+                const params = command.params as IRemoveSheetMutationParams;
                 this._getSheetMutationDirtyName(dirtyNameMap, params);
             }
+            // else if (command.id === SetWorksheetNameMutation.id) {
+            //     const params = command.params as ISetWorksheetNameMutationParams;
+            //     this._getSheetMutationDirtyName(dirtyNameMap, params, params.name);
+            // }
         }
 
         return {
@@ -386,9 +396,11 @@ export class CalculateController extends Disposable {
         return dirtyRanges;
     }
 
-    private async _calculate(dirtyRanges: IUnitRange[], dirtyNameMap: IDirtyUnitSheetNameMap) {
-        if (dirtyRanges.length === 0) return;
-
+    private async _calculate(
+        forceCalculate: boolean = false,
+        dirtyRanges: IUnitRange[] = [],
+        dirtyNameMap: IDirtyUnitSheetNameMap = {}
+    ) {
         const formulaData = this._formulaDataModel.getFormulaData();
 
         const arrayFormulaCellData = this._formulaDataModel.getArrayFormulaCellData();
@@ -398,12 +410,13 @@ export class CalculateController extends Disposable {
         this._formulaEngineService.execute({
             formulaData,
             arrayFormulaCellData,
-            forceCalculate: false,
+            forceCalculate,
             dirtyRanges,
             dirtyNameMap,
         });
     }
 
+    // Notification
     private _initialExecuteFormulaListener() {
         /**
          * Assignment operation after formula calculation.
@@ -421,6 +434,39 @@ export class CalculateController extends Disposable {
                 case FormulaExecutedStateType.INITIAL:
                     break;
             }
+
+            this._commandService.executeCommand(setFormulaCalculationNotificationMutation.id, {
+                functionsExecutedState,
+            });
+        });
+    }
+
+    private _initialExecuteFormulaProcessListener() {
+        /**
+         * Assignment operation after formula calculation.
+         */
+        this._formulaEngineService.executionInProgressListener$.subscribe((data) => {
+            const {
+                totalFormulasToCalculate,
+                completedFormulasCount,
+                totalArrayFormulasToCalculate,
+                completedArrayFormulasCount,
+                stage,
+            } = data;
+
+            if (totalArrayFormulasToCalculate > 0) {
+                console.log(
+                    `Stage ${stage} Array formula.There are ${totalArrayFormulasToCalculate} functions to be executed, ${completedArrayFormulasCount} complete.`
+                );
+            } else {
+                console.log(
+                    `Stage ${stage} .There are ${totalFormulasToCalculate} functions to be executed, ${completedFormulasCount} complete.`
+                );
+            }
+
+            this._commandService.executeCommand(setFormulaCalculationNotificationMutation.id, {
+                stageInfo: data,
+            });
         });
     }
 

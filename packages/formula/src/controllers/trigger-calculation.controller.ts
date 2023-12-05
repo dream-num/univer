@@ -3,9 +3,9 @@ import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univ
 import { FormulaEngineService, FormulaExecutedStateType } from '@univerjs/engine-formula';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import {
-    AddWorksheetMergeMutation,
     DeleteRangeMutation,
     InsertRangeMutation,
+    InsertSheetMutation,
     MoveColsMutation,
     MoveRangeMutation,
     MoveRowsMutation,
@@ -14,11 +14,14 @@ import {
     RemoveSheetMutation,
     SetRangeValuesMutation,
     SetStyleCommand,
-    SetWorksheetNameMutation,
 } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
-import { setFormulaCalculationStartMutation } from '../commands/mutations/set-formula-calculation.mutation';
+import type { ISetFormulaCalculationNotificationMutation } from '../commands/mutations/set-formula-calculation.mutation';
+import {
+    setFormulaCalculationNotificationMutation,
+    setFormulaCalculationStartMutation,
+} from '../commands/mutations/set-formula-calculation.mutation';
 
 const globalObject = typeof self !== 'undefined' ? self : window;
 
@@ -27,6 +30,8 @@ export class TriggerCalculationController extends Disposable {
     private _waitingCommandQueue: ICommandInfo[] = [];
 
     private _setTimeoutKey: number = -1;
+
+    private _startExecutionTime: number = 0;
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
@@ -39,8 +44,6 @@ export class TriggerCalculationController extends Disposable {
 
     private _initialize(): void {
         this._commandExecutedListener();
-
-        this._initialExecuteFormulaResultListener();
 
         this._initialExecuteFormulaProcessListener();
     }
@@ -56,8 +59,8 @@ export class TriggerCalculationController extends Disposable {
             RemoveRowMutation.id,
             RemoveColMutation.id,
             RemoveSheetMutation.id,
-            SetWorksheetNameMutation.id,
-            AddWorksheetMergeMutation.id,
+            // SetWorksheetNameMutation.id,
+            InsertSheetMutation.id,
         ];
 
         this.disposeWithMe(
@@ -82,54 +85,65 @@ export class TriggerCalculationController extends Disposable {
                     this._commandService.executeCommand(setFormulaCalculationStartMutation.id, {
                         commands: this._waitingCommandQueue,
                     });
+
+                    this._startExecutionTime = performance.now();
                 }, 100);
             })
         );
-    }
-
-    private _initialExecuteFormulaResultListener() {
-        /**
-         * Assignment operation after formula calculation.
-         */
-        this._formulaEngineService.executionCompleteListener$.subscribe((data) => {
-            const functionsExecutedState = data.functionsExecutedState;
-            switch (functionsExecutedState) {
-                case FormulaExecutedStateType.NOT_EXECUTED:
-                    break;
-                case FormulaExecutedStateType.STOP_EXECUTION:
-                    break;
-                case FormulaExecutedStateType.SUCCESS:
-                    this._waitingCommandQueue = [];
-                    console.log(`functions execute complete.`);
-                    break;
-                case FormulaExecutedStateType.INITIAL:
-                    break;
-            }
-        });
     }
 
     private _initialExecuteFormulaProcessListener() {
         /**
          * Assignment operation after formula calculation.
          */
-        this._formulaEngineService.executionInProgressListener$.subscribe((data) => {
-            const {
-                totalFormulasToCalculate,
-                completedFormulasCount,
-                totalArrayFormulasToCalculate,
-                completedArrayFormulasCount,
-                stage,
-            } = data;
 
-            if (totalArrayFormulasToCalculate > 0) {
-                console.log(
-                    `Stage ${stage} Array formula.There are ${totalArrayFormulasToCalculate} functions to be executed, ${completedArrayFormulasCount} complete.`
-                );
-            } else {
-                console.log(
-                    `Stage ${stage} .There are ${totalFormulasToCalculate} functions to be executed, ${completedFormulasCount} complete.`
-                );
-            }
-        });
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                if (command.id !== setFormulaCalculationNotificationMutation.id) {
+                    return;
+                }
+
+                const params = command.params as ISetFormulaCalculationNotificationMutation;
+
+                if (params.stageInfo != null) {
+                    const {
+                        totalFormulasToCalculate,
+                        completedFormulasCount,
+                        totalArrayFormulasToCalculate,
+                        completedArrayFormulasCount,
+                        stage,
+                    } = params.stageInfo;
+                    if (totalArrayFormulasToCalculate > 0) {
+                        console.log(
+                            `Stage ${stage} Array formula.There are ${totalArrayFormulasToCalculate} functions to be executed, ${completedArrayFormulasCount} complete.`
+                        );
+                    } else {
+                        console.log(
+                            `Stage ${stage} .There are ${totalFormulasToCalculate} functions to be executed, ${completedFormulasCount} complete.`
+                        );
+                    }
+                } else {
+                    const state = params.functionsExecutedState;
+                    let result = '';
+                    switch (state) {
+                        case FormulaExecutedStateType.NOT_EXECUTED:
+                            result = 'No tasks are being executed anymore';
+                            break;
+                        case FormulaExecutedStateType.STOP_EXECUTION:
+                            result = 'The execution of the formula has been stopped';
+                            break;
+                        case FormulaExecutedStateType.SUCCESS:
+                            result = `Formula calculation succeeded, Total time consumed: ${
+                                performance.now() - this._startExecutionTime
+                            } ms`;
+                            break;
+                        case FormulaExecutedStateType.INITIAL:
+                            result = 'Waiting for calculation';
+                            break;
+                    }
+                    console.log(`execution result${result}`);
+                }
+            })
+        );
     }
 }

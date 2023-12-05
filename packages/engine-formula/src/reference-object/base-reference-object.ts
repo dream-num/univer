@@ -106,6 +106,10 @@ export class BaseReferenceObject extends ObjectClassType {
     iterator(callback: (valueObject: CalculateValueType, rowIndex: number, columnIndex: number) => Nullable<boolean>) {
         const { startRow, endRow, startColumn, endColumn } = this.getRangePosition();
 
+        if (this._checkIfComponentMiss()) {
+            return callback(new ErrorValueObject(ErrorType.VALUE), startRow, startColumn);
+        }
+
         for (let r = startRow; r <= endRow; r++) {
             for (let c = startColumn; c <= endColumn; c++) {
                 const cell = this.getCellData(r + this._refOffsetY, c + this._refOffsetX);
@@ -374,6 +378,13 @@ export class BaseReferenceObject extends ObjectClassType {
             sheetId: this.getSheetId(),
             unitId: this.getUnitId(),
         };
+    }
+
+    private _checkIfComponentMiss() {
+        if ((this._forcedSheetId == null || this._forcedSheetId.length === 0) && this._forcedSheetName.length > 0) {
+            return true;
+        }
+        return false;
     }
 }
 

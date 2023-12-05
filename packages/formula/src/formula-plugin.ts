@@ -34,15 +34,17 @@ export class FormulaPlugin extends Plugin {
             [FormulaDataModel, { useValue: this._formulaDataModel }],
             // controllers
             [FormulaController],
-            [UpdateFormulaController],
-            [ArrayFormulaDisplayController],
-            [TriggerCalculationController],
         ];
 
-        // only worker
         if (!this._config?.notExecuteFormula) {
+            // only worker
             dependencies.push([IFormulaService, { useClass: FormulaService }]);
             dependencies.push([CalculateController]);
+        } else {
+            // only main thread
+            dependencies.push([UpdateFormulaController]);
+            dependencies.push([ArrayFormulaDisplayController]);
+            dependencies.push([TriggerCalculationController]);
         }
 
         dependencies.forEach((dependency) => this._injector.add(dependency));

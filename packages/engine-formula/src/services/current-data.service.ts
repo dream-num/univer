@@ -30,6 +30,8 @@ export interface IFormulaCurrentConfigService {
 
     getDirtyRanges(): IUnitRange[];
 
+    getDirtyNameMap(): IDirtyUnitSheetNameMap;
+
     registerUnitData(unitData: IUnitData): void;
 
     registerFormulaData(formulaData: IFormulaData): void;
@@ -103,6 +105,10 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
     getDirtyRanges() {
         return this._dirtyRanges;
+    }
+
+    getDirtyNameMap() {
+        return this._dirtyNameMap;
     }
 
     load(config: IFormulaDatasetConfig) {

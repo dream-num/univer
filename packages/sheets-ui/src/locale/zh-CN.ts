@@ -243,6 +243,11 @@ export default {
         cancel: '取消合并',
         overlappingError: '不能合并重叠区域',
         partiallyError: '无法对部分合并单元格执行此操作',
+        confirm: {
+            title: '合并单元格仅保存左上角单元格的值，是否继续？',
+            cancel: '取消合并',
+            confirm: '继续合并',
+        },
     },
     textWrap: {
         overflow: '溢出',

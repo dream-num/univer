@@ -12,7 +12,11 @@ import { UserHabitController } from './controllers/user-habit.controller';
 
 export class NumfmtPlugin extends Plugin {
     static override type = PluginType.Sheet;
-    constructor(@Inject(Injector) override readonly _injector: Injector) {
+
+    constructor(
+        _config: unknown,
+        @Inject(Injector) override readonly _injector: Injector
+    ) {
         super(SHEET_NUMFMT_PLUGIN);
     }
 

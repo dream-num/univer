@@ -1,31 +1,32 @@
-// The file is for tests only.
-// Please refer to packages/sheets-ui/src/commands/commands/add-worksheet-merge.command.ts
-
-import type { ICellData, ICommand, IMutationInfo, IRange, Worksheet } from '@univerjs/core';
+import type { ICommand, IMutationInfo, IRange, Worksheet } from '@univerjs/core';
 import {
     CommandType,
     Dimension,
+    ICellData,
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,
+    LocaleService,
     ObjectMatrix,
     sequenceExecute,
 } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
-
 import type {
     IAddWorksheetMergeMutationParams,
     IRemoveWorksheetMergeMutationParams,
-} from '../../basics/interfaces/mutation-interface';
-import { getAddMergeMutationRangeByType } from '../../controllers/merge-cell.controller';
-import { SelectionManagerService } from '../../services/selection-manager.service';
-import { AddMergeUndoMutationFactory, AddWorksheetMergeMutation } from '../mutations/add-worksheet-merge.mutation';
+    ISetRangeValuesMutationParams,
+} from '@univerjs/sheets';
 import {
+    AddMergeUndoMutationFactory,
+    AddWorksheetMergeMutation,
+    getAddMergeMutationRangeByType,
     RemoveMergeUndoMutationFactory,
     RemoveWorksheetMergeMutation,
-} from '../mutations/remove-worksheet-merge.mutation';
-import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
-import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
+    SelectionManagerService,
+    SetRangeValuesMutation,
+    SetRangeValuesUndoMutationFactory,
+} from '@univerjs/sheets';
+import { IConfirmService } from '@univerjs/ui';
+import type { IAccessor } from '@wendellhu/redi';
 
 export interface IAddMergeCommandParams {
     value?: Dimension.ROWS | Dimension.COLUMNS;
@@ -112,6 +113,8 @@ export const AddWorksheetMergeCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
+        const confirmService = accessor.get(IConfirmService);
+        const localeService = accessor.get(LocaleService);
 
         const workbookId = params.workbookId;
         const worksheetId = params.worksheetId;
@@ -123,7 +126,21 @@ export const AddWorksheetMergeCommand: ICommand = {
         const undoMutations: IMutationInfo[] = [];
 
         // First we should check if there are values in the going-to-be-merged cells.
-        const willRemoveSomeCell = checkCellContentInRanges(worksheet, ranges);
+        const willClearSomeCell = checkCellContentInRanges(worksheet, ranges);
+        if (willClearSomeCell) {
+            const result = await confirmService.confirm({
+                id: 'merge.confirm.add-worksheet-merge',
+                title: {
+                    title: 'merge.confirm.title',
+                },
+                cancelText: localeService.t('merge.confirm.cancel'),
+                confirmText: localeService.t('merge.confirm.confirm'),
+            });
+
+            if (!result) {
+                return false;
+            }
+        }
 
         // prepare redo mutations
         const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
@@ -146,7 +163,7 @@ export const AddWorksheetMergeCommand: ICommand = {
         undoMutations.push({ id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams });
 
         // add set range values mutations to undo redo mutations
-        if (willRemoveSomeCell) {
+        if (willClearSomeCell) {
             const data = getClearContentMutationParamsForRanges(accessor, workbookId, worksheet, ranges);
             redoMutations.unshift(...data.redos);
             undoMutations.push(...data.undos);

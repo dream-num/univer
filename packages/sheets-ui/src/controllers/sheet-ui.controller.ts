@@ -14,6 +14,12 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 
 import {
+    AddWorksheetMergeAllCommand,
+    AddWorksheetMergeCommand,
+    AddWorksheetMergeHorizontalCommand,
+    AddWorksheetMergeVerticalCommand,
+} from '../commands/commands/add-worksheet-merge.command';
+import {
     SetRangeBoldCommand,
     SetRangeFontFamilyCommand,
     SetRangeFontSizeCommand,
@@ -215,6 +221,10 @@ export class SheetUIController extends Disposable {
 
         // init commands
         [
+            AddWorksheetMergeAllCommand,
+            AddWorksheetMergeCommand,
+            AddWorksheetMergeHorizontalCommand,
+            AddWorksheetMergeVerticalCommand,
             ChangeZoomRatioCommand,
             ExpandSelectionCommand,
             MoveSelectionCommand,

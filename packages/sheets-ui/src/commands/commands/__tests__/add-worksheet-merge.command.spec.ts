@@ -1,19 +1,32 @@
 import type { IRange, Univer } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, RANGE_TYPE, RedoCommand, UndoCommand } from '@univerjs/core';
-import type { Injector } from '@wendellhu/redi';
+import {
+    ICommandService,
+    IUniverInstanceService,
+    LocaleService,
+    RANGE_TYPE,
+    RedoCommand,
+    UndoCommand,
+} from '@univerjs/core';
+import {
+    AddWorksheetMergeMutation,
+    NORMAL_SELECTION_PLUGIN_NAME,
+    RemoveWorksheetMergeCommand,
+    RemoveWorksheetMergeMutation,
+    SelectionManagerService,
+    SetRangeValuesMutation,
+} from '@univerjs/sheets';
+import { createCommandTestBed } from '@univerjs/sheets/commands/commands/__tests__/create-command-test-bed.js';
+import { type IConfirmPartMethodOptions, IConfirmService } from '@univerjs/ui';
+import type { IDisposable, Injector } from '@wendellhu/redi';
+import { Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../../services/selection-manager.service';
-import { AddWorksheetMergeMutation } from '../../mutations/add-worksheet-merge.mutation';
-import { RemoveWorksheetMergeMutation } from '../../mutations/remove-worksheet-merge.mutation';
 import {
     AddWorksheetMergeAllCommand,
     AddWorksheetMergeCommand,
     AddWorksheetMergeHorizontalCommand,
     AddWorksheetMergeVerticalCommand,
 } from '../add-worksheet-merge.command';
-import { RemoveWorksheetMergeCommand } from '../remove-worksheet-merge.command';
-import { createCommandTestBed } from './create-command-test-bed';
 
 describe('Test style commands', () => {
     let univer: Univer;
@@ -21,12 +34,34 @@ describe('Test style commands', () => {
     let commandService: ICommandService;
 
     beforeEach(() => {
-        const testBed = createCommandTestBed();
+        const testBed = createCommandTestBed(undefined, [
+            [
+                IConfirmService,
+                {
+                    useClass: class MockConfirmService implements IConfirmService {
+                        confirmOptions$: Subject<IConfirmPartMethodOptions[]> = new Subject();
+
+                        open(params: IConfirmPartMethodOptions): IDisposable {
+                            throw new Error('Method not implemented.');
+                        }
+
+                        confirm(params: IConfirmPartMethodOptions): Promise<boolean> {
+                            return Promise.resolve(true);
+                        }
+
+                        close(id: string): void {
+                            throw new Error('Method not implemented.');
+                        }
+                    },
+                },
+            ],
+        ]);
         univer = testBed.univer;
 
         get = testBed.get;
 
         commandService = get(ICommandService);
+        commandService.registerCommand(SetRangeValuesMutation);
         commandService.registerCommand(AddWorksheetMergeCommand);
         commandService.registerCommand(AddWorksheetMergeAllCommand);
         commandService.registerCommand(AddWorksheetMergeVerticalCommand);
@@ -34,6 +69,8 @@ describe('Test style commands', () => {
         commandService.registerCommand(RemoveWorksheetMergeCommand);
         commandService.registerCommand(AddWorksheetMergeMutation);
         commandService.registerCommand(RemoveWorksheetMergeMutation);
+
+        get(LocaleService).load({});
     });
 
     afterEach(() => {

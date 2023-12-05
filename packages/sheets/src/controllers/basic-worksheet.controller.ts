@@ -2,12 +2,6 @@ import type { IStyleData } from '@univerjs/core';
 import { Disposable, ICommandService, IConfigService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 
-import {
-    AddWorksheetMergeAllCommand,
-    AddWorksheetMergeCommand,
-    AddWorksheetMergeHorizontalCommand,
-    AddWorksheetMergeVerticalCommand,
-} from '../commands/commands/add-worksheet-merge.command';
 import { ClearSelectionAllCommand } from '../commands/commands/clear-selection-all.command';
 import { ClearSelectionContentCommand } from '../commands/commands/clear-selection-content.command';
 import { ClearSelectionFormatCommand } from '../commands/commands/clear-selection-format.command';
@@ -118,11 +112,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
         super();
 
         [
-            AddWorksheetMergeAllCommand,
-            AddWorksheetMergeCommand,
-            AddWorksheetMergeHorizontalCommand,
             AddWorksheetMergeMutation,
-            AddWorksheetMergeVerticalCommand,
             ClearSelectionAllCommand,
             ClearSelectionContentCommand,
             ClearSelectionFormatCommand,

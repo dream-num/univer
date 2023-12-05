@@ -379,6 +379,11 @@ export default {
         cancel: 'Cancel merge',
         overlappingError: 'Cannot merge overlapping areas',
         partiallyError: 'Cannot perform this operation on partially merged cells',
+        confirm: {
+            title: 'Continue merging would only keep the upper-left cell value, discard other values. Are you sure to continue?',
+            cancel: 'Cancel merging',
+            confirm: 'Continue merging',
+        },
     },
     textWrap: {
         overflow: 'Overflow',

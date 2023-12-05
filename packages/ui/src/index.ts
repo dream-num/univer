@@ -1,4 +1,4 @@
-export { UIPlugin } from './base-ui-plugin';
+export { UIPlugin } from './ui-plugin';
 export * from './BaseComponent';
 export * from './common';
 export * from './components';

@@ -31,12 +31,14 @@ export class DesktopConfirmService implements IConfirmService {
 
     confirm(params: IConfirmPartMethodOptions): Promise<boolean> {
         return new Promise((resolve) => {
-            this.open({
+            const disposeHandler = this.open({
                 ...params,
                 onConfirm: () => {
+                    disposeHandler.dispose();
                     resolve(true);
                 },
                 onClose: () => {
+                    disposeHandler.dispose();
                     resolve(false);
                 },
             });

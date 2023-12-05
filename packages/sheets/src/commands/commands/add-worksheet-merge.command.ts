@@ -1,11 +1,10 @@
 // The file is for tests only.
 // Please refer to packages/sheets-ui/src/commands/commands/add-worksheet-merge.command.ts
 
-import type { ICommand, IMutationInfo, IRange, Worksheet } from '@univerjs/core';
+import type { ICellData, ICommand, IMutationInfo, IRange, Worksheet } from '@univerjs/core';
 import {
     CommandType,
     Dimension,
-    ICellData,
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,
@@ -13,22 +12,20 @@ import {
     sequenceExecute,
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
-import {
-    ISetRangeValuesMutationParams,
-    SetRangeValuesMutation,
-    SetRangeValuesUndoMutationFactory,
-} from '../mutations/set-range-values.mutation';
-import { getAddMergeMutationRangeByType } from '../../controllers/merge-cell.controller';
-import {
+
+import type {
     IAddWorksheetMergeMutationParams,
     IRemoveWorksheetMergeMutationParams,
 } from '../../basics/interfaces/mutation-interface';
+import { getAddMergeMutationRangeByType } from '../../controllers/merge-cell.controller';
+import { SelectionManagerService } from '../../services/selection-manager.service';
+import { AddMergeUndoMutationFactory, AddWorksheetMergeMutation } from '../mutations/add-worksheet-merge.mutation';
 import {
     RemoveMergeUndoMutationFactory,
     RemoveWorksheetMergeMutation,
 } from '../mutations/remove-worksheet-merge.mutation';
-import { AddMergeUndoMutationFactory, AddWorksheetMergeMutation } from '../mutations/add-worksheet-merge.mutation';
-import { SelectionManagerService } from '../../services/selection-manager.service';
+import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
+import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 
 export interface IAddMergeCommandParams {
     value?: Dimension.ROWS | Dimension.COLUMNS;

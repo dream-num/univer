@@ -1,5 +1,12 @@
 import type { IRange, Univer } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LocaleService, RANGE_TYPE, RedoCommand, UndoCommand } from '@univerjs/core';
+import {
+    ICommandService,
+    IUniverInstanceService,
+    LocaleService,
+    RANGE_TYPE,
+    RedoCommand,
+    UndoCommand,
+} from '@univerjs/core';
 import {
     AddWorksheetMergeMutation,
     NORMAL_SELECTION_PLUGIN_NAME,
@@ -9,7 +16,9 @@ import {
     SetRangeValuesMutation,
 } from '@univerjs/sheets';
 import { createCommandTestBed } from '@univerjs/sheets/commands/commands/__tests__/create-command-test-bed.js';
+import { type IConfirmPartMethodOptions, IConfirmService } from '@univerjs/ui';
 import type { IDisposable, Injector } from '@wendellhu/redi';
+import { Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import {
@@ -18,8 +27,6 @@ import {
     AddWorksheetMergeHorizontalCommand,
     AddWorksheetMergeVerticalCommand,
 } from '../add-worksheet-merge.command';
-import { IConfirmService, type IConfirmPartMethodOptions } from '@univerjs/ui';
-import { Subject } from 'rxjs';
 
 describe('Test style commands', () => {
     let univer: Univer;
@@ -32,7 +39,8 @@ describe('Test style commands', () => {
                 IConfirmService,
                 {
                     useClass: class MockConfirmService implements IConfirmService {
-                        confirmOptions$: Subject<IConfirmPartMethodOptions[]>;
+                        confirmOptions$: Subject<IConfirmPartMethodOptions[]> = new Subject();
+
                         open(params: IConfirmPartMethodOptions): IDisposable {
                             throw new Error('Method not implemented.');
                         }
@@ -85,7 +93,6 @@ describe('Test style commands', () => {
                         style: null,
                     },
                 ]);
-
 
                 function getMerge(): IRange[] | undefined {
                     return get(IUniverInstanceService)

@@ -76,7 +76,7 @@
     },
     "lint-staged": {
         "**/*.{js,ts,tsx}": [
-            "node --max_old_space_size=4096 node_modules/eslint/bin/eslint.js --quiet --fix"
+            "eslint --fix"
         ],
         "**/*.less": [
             "stylelint --fix"

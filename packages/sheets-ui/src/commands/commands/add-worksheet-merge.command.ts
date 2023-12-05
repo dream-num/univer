@@ -6,6 +6,7 @@ import {
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,
+    LocaleService,
     ObjectMatrix,
     sequenceExecute,
 } from '@univerjs/core';
@@ -113,6 +114,7 @@ export const AddWorksheetMergeCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const confirmService = accessor.get(IConfirmService);
+        const localeService = accessor.get(LocaleService);
 
         const workbookId = params.workbookId;
         const worksheetId = params.worksheetId;
@@ -127,10 +129,12 @@ export const AddWorksheetMergeCommand: ICommand = {
         const willClearSomeCell = checkCellContentInRanges(worksheet, ranges);
         if (willClearSomeCell) {
             const result = await confirmService.confirm({
-                id: 'sheet.confirm.add-worksheet-merge',
+                id: 'merge.confirm.add-worksheet-merge',
                 title: {
-                    value: 'sheet.confirm.add-worksheet-merge.title',
+                    title: 'merge.confirm.title',
                 },
+                cancelText: localeService.t('merge.confirm.cancel'),
+                confirmText: localeService.t('merge.confirm.confirm'),
             });
 
             if (!result) {

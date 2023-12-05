@@ -13,12 +13,12 @@ export function ConfirmPart() {
     const [confirmOptions, setConfirmOptions] = useState<IConfirmPartMethodOptions[]>([]);
 
     useEffect(() => {
-        const subscribtion = confirmService.confirmOptions$.subscribe((options: IConfirmPartMethodOptions[]) => {
+        const subscription = confirmService.confirmOptions$.subscribe((options: IConfirmPartMethodOptions[]) => {
             setConfirmOptions(options);
         });
 
         return () => {
-            subscribtion.unsubscribe();
+            subscription.unsubscribe();
         };
     }, []);
 

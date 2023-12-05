@@ -2,7 +2,6 @@
 
 ![GitHub License](https://img.shields.io/github/license/dream-num/univer)
 ![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/dream-num/univer/build.yml)
-[![github release](https://img.shields.io/github/v/release/dream-num/univer)](https://github.com/apitable/apitable/releases/latest)
 [![codecov](https://codecov.io/gh/dream-num/univer/graph/badge.svg?token=aPfyW2pIMN)](https://codecov.io/gh/dream-num/univer)
 [![discord](https://img.shields.io/discord/1136129819961217077?label=discord&logo=discord&style=social)](https://discord.gg/z3NKNT6D2f)
 
@@ -15,7 +14,6 @@ Univer is an open source collaborative solution that aims to empower the collabo
 We provide JavaScript part of code in the repository, including a canvas-based framework for building documents, spreadsheets, slides.
 
 > ⚠️ This project is still in heavy development.
-
 ## Demo
 
 -   [Univer Demo](https://dream-num.github.io/univer-demo/)
@@ -33,10 +31,12 @@ We provide JavaScript part of code in the repository, including a canvas-based f
 | [engine-render](./packages/engine-render)   | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/engine-render)](https://npmjs.org/package/@univerjs/engine-render)   |
 | [formula](./packages/formula)               | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/formula)](https://npmjs.org/package/@univerjs/formula)               |
 | [rpc](./packages/rpc)                       | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/rpc)](https://npmjs.org/package/@univerjs/rpc)                       |
+| [sheets](./packages/sheets)                 | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets)](https://npmjs.org/package/@univerjs/sheets)                 |
 | [sheets-formula](./packages/sheets-formula) | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-formula)](https://npmjs.org/package/@univerjs/sheets-formula) |
 | [sheets-numfmt](./packages/sheets-numfmt)   | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-numfmt)](https://npmjs.org/package/@univerjs/sheets-numfmt)   |
-| [sheets](./packages/sheets)                 | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets)](https://npmjs.org/package/@univerjs/sheets)                 |
+| [sheets-ui](./packages/sheets-ui)           | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-ui)](https://npmjs.org/package/@univerjs/sheets-ui)           |
 | [ui](./packages/ui)                         | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/ui)](https://npmjs.org/package/@univerjs/ui)                         |
+| [uniscript](./packages/uniscript)           | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/uniscript)](https://npmjs.org/package/@univerjs/uniscript)           |
 
 ## Contribution
 

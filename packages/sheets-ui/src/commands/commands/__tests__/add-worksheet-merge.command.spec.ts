@@ -79,7 +79,7 @@ describe('Test style commands', () => {
 
     describe('add merge all', () => {
         describe('correct situations', () => {
-            it.only('will merge all cells of the selected range when there is a selected range', async () => {
+            it('will merge all cells of the selected range when there is a selected range', async () => {
                 const selectionManager = get(SelectionManagerService);
                 selectionManager.setCurrentSelection({
                     pluginName: NORMAL_SELECTION_PLUGIN_NAME,

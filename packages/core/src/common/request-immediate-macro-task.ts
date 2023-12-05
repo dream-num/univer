@@ -1,4 +1,4 @@
-export function setZeroTimeout(callback: any): () => void {
+export function requestImmediateMacroTask(callback: (value?: unknown) => void): () => void {
     const channel = new MessageChannel();
     let cancelled = false;
 

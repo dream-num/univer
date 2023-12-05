@@ -1,5 +1,12 @@
 import type { IUnitRange } from '@univerjs/core';
-import { Disposable, IConfigService, LifecycleStages, ObjectMatrix, OnLifecycle, setZeroTimeout } from '@univerjs/core';
+import {
+    Disposable,
+    IConfigService,
+    LifecycleStages,
+    ObjectMatrix,
+    OnLifecycle,
+    requestImmediateMacroTask,
+} from '@univerjs/core';
 import type { Ctor, Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { Subject } from 'rxjs';
@@ -298,6 +305,20 @@ export class FormulaEngineService extends Disposable {
         this._executionInProgressListener$.next(this.runtimeService.getRuntimeState());
 
         for (let i = 0, len = treeList.length; i < len; i++) {
+            /**
+             * For every functions, execute a setTimeout to wait for external command input.
+             */
+            await new Promise((resolve) => {
+                requestImmediateMacroTask(resolve);
+            });
+
+            if (this.runtimeService.isStopExecution()) {
+                this.runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.IDLE);
+                this.runtimeService.markedAsStopFunctionsExecuted();
+                this._executionCompleteListener$.next(this.runtimeService.getAllRuntimeData());
+                return;
+            }
+
             const tree = treeList[i];
             const astNode = tree.node;
             let value: FunctionVariantType;
@@ -305,13 +326,6 @@ export class FormulaEngineService extends Disposable {
             if (astNode == null) {
                 throw new Error('astNode is null');
             }
-
-            /**
-             * For every functions, execute a setTimeout to wait for external command input.
-             */
-            await new Promise((resolve) => {
-                setZeroTimeout(resolve);
-            });
 
             this.runtimeService.setCurrent(tree.row, tree.column, tree.subComponentId, tree.unitId);
 
@@ -322,13 +336,6 @@ export class FormulaEngineService extends Disposable {
             }
 
             // this.runtimeService.setCurrent(tree.row, tree.column, tree.subComponentId, tree.unitId);
-
-            if (this.runtimeService.isStopExecution()) {
-                this.runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.IDLE);
-                this.runtimeService.markedAsStopFunctionsExecuted();
-                this._executionCompleteListener$.next(this.runtimeService.getAllRuntimeData());
-                return;
-            }
 
             if (tree.formulaId != null) {
                 this.runtimeService.setRuntimeOtherData(tree.formulaId, value);

@@ -53,6 +53,10 @@ import type { FunctionVariantType } from '../reference-object/base-reference-obj
 import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from './current-data.service';
 import { DefinedNamesService, IDefinedNamesService } from './defined-names.service';
 import { FunctionService, IFunctionService } from './function.service';
+import {
+    IReferenceExecutorManagerService,
+    ReferenceExecutorManagerService,
+} from './reference-executor-manager.service';
 import type { IAllRuntimeData, IExecutionInProgressParams } from './runtime.service';
 import { FormulaExecuteStageType, FormulaRuntimeService, IFormulaRuntimeService } from './runtime.service';
 import { ISuperTableService, SuperTableService } from './super-table.service';
@@ -328,26 +332,29 @@ export class FormulaEngineService extends Disposable {
 
             const tree = treeList[i];
             const astNode = tree.node;
+            const executor = tree.executor;
             let value: FunctionVariantType;
 
-            if (astNode == null) {
-                throw new Error('astNode is null');
+            if (astNode == null && executor == null) {
+                throw new Error('AstNode or executor is null');
             }
 
             this.runtimeService.setCurrent(tree.row, tree.column, tree.subComponentId, tree.unitId);
 
-            if (interpreter.checkAsyncNode(astNode)) {
-                value = await interpreter.executeAsync(astNode);
-            } else {
-                value = interpreter.execute(astNode);
-            }
+            if (executor != null) {
+                executor(tree);
+            } else if (astNode != null) {
+                if (interpreter.checkAsyncNode(astNode)) {
+                    value = await interpreter.executeAsync(astNode);
+                } else {
+                    value = interpreter.execute(astNode);
+                }
 
-            // this.runtimeService.setCurrent(tree.row, tree.column, tree.subComponentId, tree.unitId);
-
-            if (tree.formulaId != null) {
-                this.runtimeService.setRuntimeOtherData(tree.formulaId, value);
-            } else {
-                this.runtimeService.setRuntimeData(value);
+                if (tree.formulaId != null) {
+                    this.runtimeService.setRuntimeOtherData(tree.formulaId, value);
+                } else {
+                    this.runtimeService.setRuntimeData(value);
+                }
             }
 
             if (isArrayFormulaState) {
@@ -420,6 +427,8 @@ export class FormulaEngineService extends Disposable {
             [ISuperTableService, { useClass: SuperTableService }],
             [IDefinedNamesService, { useClass: DefinedNamesService }],
             [IFunctionService, { useClass: FunctionService }],
+
+            [IReferenceExecutorManagerService, { useClass: ReferenceExecutorManagerService }],
 
             // Calculation engine
             [FormulaDependencyGenerator],

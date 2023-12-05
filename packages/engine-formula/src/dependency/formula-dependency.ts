@@ -17,6 +17,10 @@ import { prefixToken, suffixToken } from '../basics/token';
 import { Interpreter } from '../interpreter/interpreter';
 import type { BaseReferenceObject } from '../reference-object/base-reference-object';
 import { IFormulaCurrentConfigService } from '../services/current-data.service';
+import {
+    IReferenceExecutorManagerService,
+    type ReferenceExecutorManagerService,
+} from '../services/reference-executor-manager.service';
 import { IFormulaRuntimeService } from '../services/runtime.service';
 import { FormulaDependencyTree } from './dependency-tree';
 
@@ -33,6 +37,8 @@ export class FormulaDependencyGenerator extends Disposable {
     constructor(
         @IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService,
         @IFormulaRuntimeService private readonly _runtimeService: IFormulaRuntimeService,
+        @IReferenceExecutorManagerService
+        private readonly _referenceExecutorManagerService: ReferenceExecutorManagerService,
         @Inject(Interpreter) private readonly _interpreter: Interpreter,
         @Inject(AstTreeBuilder) private readonly _astTreeBuilder: AstTreeBuilder,
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder
@@ -123,6 +129,9 @@ export class FormulaDependencyGenerator extends Disposable {
 
         const treeList: FormulaDependencyTree[] = [];
 
+        /**
+         * Register formulas in the sheet.
+         */
         for (const unitId of formulaDataKeys) {
             const sheetData = formulaData[unitId];
 
@@ -150,6 +159,9 @@ export class FormulaDependencyGenerator extends Disposable {
             }
         }
 
+        /**
+         * Register formulas in doc, slide, and other types of applications.
+         */
         for (const unitId of otherFormulaDataKeys) {
             const subComponentData = otherFormulaData[unitId];
 
@@ -181,13 +193,32 @@ export class FormulaDependencyGenerator extends Disposable {
             }
         }
 
+        /**
+         * Register the external application relying on 'ref' into the formula system,
+         * which can determine the execution timing of the external application
+         * registration Executor based on the dependency relationship.
+         */
+        this._referenceExecutorManagerService.getReferenceExecutorMap().forEach((params, featureId) => {
+            const { unitId, subComponentId, dependencyRanges, executor } = params;
+            const FDtree = new FormulaDependencyTree();
+
+            FDtree.unitId = unitId;
+            FDtree.subComponentId = subComponentId;
+
+            FDtree.executor = executor;
+
+            FDtree.rangeList = dependencyRanges;
+
+            treeList.push(FDtree);
+        });
+
         for (let i = 0, len = treeList.length; i < len; i++) {
             const tree = treeList[i];
 
             this._runtimeService.setCurrent(tree.row, tree.column, tree.subComponentId, tree.unitId);
 
             if (tree.node == null) {
-                throw new Error('tree node is null');
+                continue;
             }
 
             const rangeList = await this._getRangeListByNode(tree.node);

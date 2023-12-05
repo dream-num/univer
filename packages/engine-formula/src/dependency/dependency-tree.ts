@@ -10,6 +10,10 @@ export enum FDtreeStateType {
     SKIP,
 }
 
+/**
+ * A dependency tree, capable of calculating mutual dependencies,
+ * is used to determine the order of formula calculations.
+ */
 export class FormulaDependencyTree extends Disposable {
     node: Nullable<BaseAstNode>;
 
@@ -30,6 +34,8 @@ export class FormulaDependencyTree extends Disposable {
     rangeList: IUnitRange[] = [];
 
     formulaId: Nullable<string>;
+
+    executor: Nullable<(tree: FormulaDependencyTree) => void>;
 
     private _state = FDtreeStateType.DEFAULT;
 

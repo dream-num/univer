@@ -109,8 +109,8 @@ export class SheetClipboardController extends Disposable {
                 currentSheet = self._getWorksheet(workbookId, worksheetId);
             },
             onCopyCellContent(row: number, col: number): string {
-                const v = currentSheet!.getCell(row, col);
-                return `${v?.v}` || ''; // @Dushusir or @yuhongz: get render value, consider p/f/si/v, number format
+                const cell = currentSheet!.getCell(row, col);
+                return `${cell?.v}` || '';
             },
             onCopyCellStyle: (row: number, col: number, rowSpan?: number, colSpan?: number) => {
                 const properties: IClipboardPropertyItem = {};

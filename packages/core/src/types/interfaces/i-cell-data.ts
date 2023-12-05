@@ -20,10 +20,6 @@ export interface ICellData {
      * Origin value
      */
     v?: Nullable<ICellV>;
-    /**
-     * @deprecated
-     */
-    m?: Nullable<string>; // formatted value
     // Usually the type is automatically determined based on the data, or the user directly specifies
     t?: Nullable<CellValueType>; // 1 string, 2 number, 3 boolean, 4 force string, green icon, set null for cell clear all
     f?: Nullable<string>; // formula '=SUM(1)'

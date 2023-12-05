@@ -1,24 +1,20 @@
 import { Plugin, PluginType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
-import { createIdentifier, Inject, Injector } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 
 import { DataSyncPrimaryController } from './controllers/data-sync/data-sync-primary.controller';
 import { DataSyncReplicaController } from './controllers/data-sync/data-sync-replica.controller';
 import {
-    createWebWorkerMessagePortOnMain,
-    createWebWorkerMessagePortOnWorker,
-} from './services/rpc/implementations/web-worker-rpc.service';
-import {
     IRemoteInstanceService,
     IRemoteSyncService,
     RemoteInstanceReplicaService,
-    RemoteInstanceServiceName,
     RemoteSyncPrimaryService,
-    RemoteSyncServiceName,
 } from './services/remote-instance/remote-instance.service';
-import { fromModule, toModule } from './services/rpc/rpc.service';
-import { IRPChannelService } from '.';
-import { ChannelService } from './services/rpc/channel.service';
+import { ChannelService, IRPChannelService } from './services/rpc/channel.service';
+import {
+    createWebWorkerMessagePortOnMain,
+    createWebWorkerMessagePortOnWorker,
+} from './services/rpc/implementations/web-worker-rpc.service';
 
 export interface IUniverRPCMainThreadPluginConfig {
     workerURL: string | URL;
@@ -78,16 +74,19 @@ export class UniverRPCWorkerThreadPlugin extends Plugin {
     }
 
     override onStarting(injector: Injector): void {
-        const dependencies: Dependency[] = [
-            [DataSyncReplicaController],
+        (
             [
-                IRPChannelService,
-                {
-                    useFactory: () => new ChannelService(createWebWorkerMessagePortOnWorker()),
-                },
-            ],
-            [IRemoteInstanceService, { useClass: RemoteInstanceReplicaService }],
-        ];
-        dependencies.forEach((dependency) => injector.add(dependency));
+                [DataSyncReplicaController],
+                [
+                    IRPChannelService,
+                    {
+                        useFactory: () => new ChannelService(createWebWorkerMessagePortOnWorker()),
+                    },
+                ],
+                [IRemoteInstanceService, { useClass: RemoteInstanceReplicaService }],
+            ] as Dependency[]
+        ).forEach((dependency) => injector.add(dependency));
+
+        injector.get(DataSyncReplicaController);
     }
 }

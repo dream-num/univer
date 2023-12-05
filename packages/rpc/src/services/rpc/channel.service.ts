@@ -1,5 +1,7 @@
-import { IDisposable, createIdentifier } from '@wendellhu/redi';
-import { ChannelClient, ChannelServer, IChannel, IMessageProtocol } from './rpc.service';
+import { createIdentifier } from '@wendellhu/redi';
+
+import type { IChannel, IMessageProtocol } from './rpc.service';
+import { ChannelClient, ChannelServer } from './rpc.service';
 
 export interface IRPChannelService {
     requestChannel(name: string): IChannel;

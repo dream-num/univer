@@ -2,7 +2,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { RxDisposable } from '@univerjs/core';
-import { createIdentifier } from '@wendellhu/redi';
 import type { Subscriber, Subscription } from 'rxjs';
 import { BehaviorSubject, firstValueFrom, isObservable, Observable, of } from 'rxjs';
 import { filter, take, takeUntil } from 'rxjs/operators';

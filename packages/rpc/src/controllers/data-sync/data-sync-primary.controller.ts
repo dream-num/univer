@@ -8,6 +8,7 @@ import {
     OnLifecycle,
     RxDisposable,
 } from '@univerjs/core';
+import { Inject, Injector } from '@wendellhu/redi';
 import { takeUntil } from 'rxjs/operators';
 
 import type { IRemoteSyncMutationOptions } from '../../services/remote-instance/remote-instance.service';
@@ -17,9 +18,8 @@ import {
     RemoteInstanceServiceName,
     RemoteSyncServiceName,
 } from '../../services/remote-instance/remote-instance.service';
-import { Inject, Injector } from '@wendellhu/redi';
-import { fromModule, toModule } from '../../services/rpc/rpc.service';
 import { IRPChannelService } from '../../services/rpc/channel.service';
+import { fromModule, toModule } from '../../services/rpc/rpc.service';
 
 /**
  * This controller is responsible for syncing data from the primary thread to
@@ -43,7 +43,7 @@ export class DataSyncPrimaryController extends RxDisposable {
         this._init();
     }
 
-    private _initRPCChannels(): void{
+    private _initRPCChannels(): void {
         this._rpcChannelService.registerChannel(RemoteSyncServiceName, fromModule(this._remoteSyncService));
 
         this._injector.add([
@@ -55,8 +55,6 @@ export class DataSyncPrimaryController extends RxDisposable {
         ]);
 
         this._remoteInstanceService = this._injector.get(IRemoteInstanceService);
-
-
     }
 
     private _init(): void {

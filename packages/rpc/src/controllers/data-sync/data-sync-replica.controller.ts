@@ -1,13 +1,14 @@
 import type { IMutationInfo } from '@univerjs/core';
 import { CommandType, Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Inject, Injector } from '@wendellhu/redi';
 
-import { IRemoteInstanceService, IRemoteSyncMutationOptions } from '../../services/remote-instance/remote-instance.service';
+import type { IRemoteSyncMutationOptions } from '../../services/remote-instance/remote-instance.service';
 import {
+    IRemoteInstanceService,
     IRemoteSyncService,
     RemoteInstanceServiceName,
     RemoteSyncServiceName,
 } from '../../services/remote-instance/remote-instance.service';
-import { Inject, Injector } from '@wendellhu/redi';
 import { IRPChannelService } from '../../services/rpc/channel.service';
 import { fromModule, toModule } from '../../services/rpc/rpc.service';
 

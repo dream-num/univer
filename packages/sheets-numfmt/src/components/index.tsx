@@ -28,7 +28,6 @@ export const SheetNumfmtPanel: FC<ISheetNumfmtPanelProps> = (props) => {
     const getCurrentPattern = useRef<() => string | null>(() => '');
     const t = localeService.t;
     const nextTick = useNextTick();
-    const pattern = useRef('');
     const typeOptions = useMemo(
         () =>
             [
@@ -66,19 +65,19 @@ export const SheetNumfmtPanel: FC<ISheetNumfmtPanelProps> = (props) => {
     };
 
     const handleChange = (v: string) => {
-        pattern.current = v;
         props.onChange({ type: 'change', value: v });
     };
 
     const handleConfirm = () => {
-        const currency = getCurrencyType(pattern.current);
+        const pattern = getCurrentPattern.current() || '';
+        const currency = getCurrencyType(pattern);
         if (currency) {
             mark(currency);
         }
-        props.onChange({ type: 'confirm', value: pattern.current });
+        props.onChange({ type: 'confirm', value: pattern });
     };
     const handleCancel = () => {
-        props.onChange({ type: 'cancel', value: pattern.current });
+        props.onChange({ type: 'cancel', value: '' });
     };
 
     const subProps: IBusinessComponentProps = {

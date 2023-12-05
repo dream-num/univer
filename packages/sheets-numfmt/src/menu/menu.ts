@@ -1,20 +1,18 @@
-import { IUniverInstanceService } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { AddDigitsSingle, MoreDownSingle, ReduceDigitsSingle, RmbSingle } from '@univerjs/icons';
-import { INumfmtService, SelectionManagerService } from '@univerjs/sheets';
-import type { ComponentManager, IMenuButtonItem } from '@univerjs/ui';
+import { INumfmtService, SelectionManagerService, SetNumfmtMutation } from '@univerjs/sheets';
+import type { ComponentManager, IMenuSelectorItem } from '@univerjs/ui';
 import { MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
-import { Observable } from 'rxjs';
+import { merge, Observable } from 'rxjs';
 
+import { MENU_OPTIONS } from '../base/const/MENU-OPTIONS';
 import { AddDecimalCommand } from '../commands/commands/add.decimal.command';
 import { SetCurrencyCommand } from '../commands/commands/set.currency.command';
 import { SubtractDecimalCommand } from '../commands/commands/subtract.decimal.command';
 import { OpenNumfmtPanelOperator } from '../commands/operators/open.numfmt.panel.operator';
-import { isAccountingPanel } from '../components/accounting';
-import { isCurrencyPanel } from '../components/currency';
-import { isDatePanel } from '../components/date';
-import { MoreNumfmtType } from '../components/more-numfmt-type/MoreNumfmtType';
-import { isThousandthPercentilePanel } from '../components/thousandth-percentile';
+import { MoreNumfmtType, Options } from '../components/more-numfmt-type/MoreNumfmtType';
+import { isPatternEqualWithoutDecimal } from '../utils/decimal';
 
 export const CurrencyMenuItem = (componentManager: ComponentManager) => {
     const iconKey = 'icon-rmbSingle';
@@ -60,12 +58,27 @@ export const SubtractDecimalMenuItem = (componentManager: ComponentManager) => {
 
 export const FactoryOtherMenuItem = (componentManager: ComponentManager) => {
     componentManager.register('sheet.numfmt.moreNumfmtType', MoreNumfmtType);
+    componentManager.register('sheet.numfmt.moreNumfmtType.options', Options);
+
     return (_accessor: IAccessor) => {
         const numfmtService = _accessor.get(INumfmtService);
         const univerInstanceService = _accessor.get(IUniverInstanceService);
+        const commandService = _accessor.get(ICommandService);
+
         const selectionManagerService = _accessor.get(SelectionManagerService);
         const value$ = new Observable((subscribe) =>
-            selectionManagerService.selectionInfo$.subscribe((selections) => {
+            merge(
+                selectionManagerService.selectionInfo$,
+                new Observable<null>((commandSubscribe) => {
+                    const disposable = commandService.onCommandExecuted((commandInfo) => {
+                        if (commandInfo.id === SetNumfmtMutation.id) {
+                            commandSubscribe.next(null);
+                        }
+                    });
+                    return () => disposable.dispose();
+                })
+            ).subscribe(() => {
+                const selections = selectionManagerService.getSelections();
                 if (selections && selections[0]) {
                     const workbook = univerInstanceService.getCurrentUniverSheetInstance();
                     const worksheet = workbook.getActiveSheet();
@@ -77,19 +90,11 @@ export const FactoryOtherMenuItem = (componentManager: ComponentManager) => {
 
                     if (numfmtValue) {
                         const pattern = numfmtValue.pattern;
-                        if (isAccountingPanel(pattern)) {
-                            value = '会计';
-                        }
-
-                        if (isCurrencyPanel(pattern)) {
-                            value = '货币';
-                        }
-
-                        if (isDatePanel(pattern)) {
-                            value = '日期';
-                        }
-                        if (isThousandthPercentilePanel(pattern)) {
-                            value = '千分位';
+                        const item = MENU_OPTIONS.filter((item) => typeof item === 'object' && item.pattern).find(
+                            (item) => isPatternEqualWithoutDecimal(pattern, (item as { pattern: string }).pattern)
+                        );
+                        if (item && typeof item === 'object' && item.pattern) {
+                            value = item.label;
                         }
                     }
                     subscribe.next(value);
@@ -102,10 +107,18 @@ export const FactoryOtherMenuItem = (componentManager: ComponentManager) => {
             id: OpenNumfmtPanelOperator.id,
             // title: 'numfmt.menu.preview',
             tooltip: 'numfmt.menu.preview',
-            type: MenuItemType.BUTTON,
+            type: MenuItemType.SELECTOR,
             group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
             positions: [MenuPosition.TOOLBAR_START],
+            selections: [
+                {
+                    label: {
+                        name: 'sheet.numfmt.moreNumfmtType.options',
+                        hoverable: false,
+                    },
+                },
+            ],
             value$,
-        } as IMenuButtonItem;
+        } as IMenuSelectorItem;
     };
 };

@@ -135,14 +135,14 @@ export class BaseReferenceObject extends ObjectClassType {
     }
 
     getUnitId() {
-        if (this._forcedUnitId) {
+        if (this._forcedUnitId && this._forcedUnitId.length > 0) {
             return this._forcedUnitId;
         }
         return this._defaultUnitId;
     }
 
     getSheetId() {
-        if (this._forcedSheetId) {
+        if (this._forcedSheetId && this._forcedSheetId.length > 0) {
             return this._forcedSheetId;
         }
         return this._defaultSheetId;
@@ -188,8 +188,8 @@ export class BaseReferenceObject extends ObjectClassType {
         return this._defaultSheetId;
     }
 
-    setDefaultUnitId(sheetId: string) {
-        this._defaultUnitId = sheetId;
+    setDefaultUnitId(unitId: string) {
+        this._defaultUnitId = unitId;
     }
 
     getDefaultUnitId() {

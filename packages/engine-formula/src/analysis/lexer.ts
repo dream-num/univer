@@ -738,7 +738,8 @@ export class LexerTreeBuilder extends Disposable {
         if (
             OPERATOR_TOKEN_SET.has(prevString) ||
             prevString === matchToken.OPEN_BRACKET ||
-            prevString === matchToken.COMMA
+            prevString === matchToken.COMMA ||
+            prevString === ''
         ) {
             return true;
         }
@@ -965,13 +966,19 @@ export class LexerTreeBuilder extends Disposable {
                     let subLexerNode_minus: Nullable<LexerNode>;
                     let subLexerNode_at: Nullable<LexerNode>;
                     let sliceLength = 0;
-                    if (new RegExp(prefixToken.MINUS, 'g').test(this._segment)) {
+                    const segmentTrim = this._segment.trim();
+                    const lastString = segmentTrim[0];
+                    const twoLastString = segmentTrim[1];
+
+                    // new RegExp(prefixToken.MINUS, 'g').test(this._segment)
+                    if (lastString === prefixToken.MINUS) {
                         subLexerNode_minus = new LexerNode();
                         subLexerNode_minus.setToken(prefixToken.MINUS);
                         sliceLength++;
                     }
 
-                    if (new RegExp(prefixToken.AT, 'g').test(this._segment)) {
+                    // new RegExp(prefixToken.AT, 'g').test(this._segment)
+                    if (lastString === prefixToken.AT || twoLastString === prefixToken.AT) {
                         subLexerNode_at = new LexerNode();
                         subLexerNode_at.setToken(prefixToken.AT);
 
@@ -984,7 +991,7 @@ export class LexerTreeBuilder extends Disposable {
                     }
 
                     if (sliceLength > 0) {
-                        this._segment = this._segment.slice(sliceLength);
+                        this._segment = segmentTrim.slice(sliceLength);
                     }
 
                     upLevel = sliceLength;

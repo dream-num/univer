@@ -25,6 +25,7 @@ import {
     SelectionManagerService,
     SetRangeValuesCommand,
     SetSelectionsOperation,
+    SetWorksheetActivateCommand,
     SheetInterceptorService,
 } from '@univerjs/sheets';
 import { KeyCode } from '@univerjs/ui';
@@ -233,6 +234,16 @@ export class EndEditController extends Disposable {
                 },
                 value: cell,
             });
+
+            /**
+             * When closing the editor, switch to the current tab of the editor.
+             */
+            if (workbookId === unitId && sheetId !== worksheetId) {
+                this._commandService.executeCommand(SetWorksheetActivateCommand.id, {
+                    worksheetId: sheetId,
+                    workbookId: unitId,
+                });
+            }
         });
     }
 

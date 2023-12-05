@@ -6,6 +6,7 @@ export {
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
 } from './common/const';
 export { MemoryCursor } from './common/memory-cursor';
+export { requestImmediateMacroTask } from './common/request-immediate-macro-task';
 export { type ISequenceExecuteResult, sequence, sequenceAsync } from './common/sequence';
 export * from './docs/data-model';
 export {

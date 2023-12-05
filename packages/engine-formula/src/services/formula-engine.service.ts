@@ -1,5 +1,12 @@
 import type { IUnitRange } from '@univerjs/core';
-import { Disposable, IConfigService, LifecycleStages, ObjectMatrix, OnLifecycle } from '@univerjs/core';
+import {
+    Disposable,
+    IConfigService,
+    LifecycleStages,
+    ObjectMatrix,
+    OnLifecycle,
+    requestImmediateMacroTask,
+} from '@univerjs/core';
 import type { Ctor, Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { Subject } from 'rxjs';
@@ -298,6 +305,20 @@ export class FormulaEngineService extends Disposable {
         this._executionInProgressListener$.next(this.runtimeService.getRuntimeState());
 
         for (let i = 0, len = treeList.length; i < len; i++) {
+            /**
+             * For every functions, execute a setTimeout to wait for external command input.
+             */
+            await new Promise((resolve) => {
+                requestImmediateMacroTask(resolve);
+            });
+
+            if (this.runtimeService.isStopExecution()) {
+                this.runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.IDLE);
+                this.runtimeService.markedAsStopFunctionsExecuted();
+                this._executionCompleteListener$.next(this.runtimeService.getAllRuntimeData());
+                return;
+            }
+
             const tree = treeList[i];
             const astNode = tree.node;
             let value: FunctionVariantType;
@@ -314,21 +335,7 @@ export class FormulaEngineService extends Disposable {
                 value = interpreter.execute(astNode);
             }
 
-            /**
-             * For every 100 functions, execute a setTimeout to wait for external command input.
-             */
-            if (i % EVERY_N_FUNCTION_EXECUTION_PAUSE === 0) {
-                await new Promise((resolve) => {
-                    setTimeout(resolve, 0);
-                });
-            }
-
-            if (this.runtimeService.isStopExecution()) {
-                this.runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.IDLE);
-                this.runtimeService.markedAsStopFunctionsExecuted();
-                this._executionCompleteListener$.next(this.runtimeService.getAllRuntimeData());
-                return;
-            }
+            // this.runtimeService.setCurrent(tree.row, tree.column, tree.subComponentId, tree.unitId);
 
             if (tree.formulaId != null) {
                 this.runtimeService.setRuntimeOtherData(tree.formulaId, value);
@@ -368,7 +375,7 @@ export class FormulaEngineService extends Disposable {
         }
 
         // this.lexerTreeBuilder.suffixExpressionHandler(lexerNode); // suffix Express, 1+(3*4=4)*5+1 convert to 134*4=5*1++
-        // console.log('lexerNode', (lexerNode as LexerNode).serialize());
+        console.log('lexerNode', (lexerNode as LexerNode).serialize());
 
         // console.log('sequence', this.lexerTreeBuilder.sequenceNodesBuilder(formulaString));
 
@@ -378,7 +385,7 @@ export class FormulaEngineService extends Disposable {
 
         const astNode = this.astTreeBuilder.parse(lexerNode as LexerNode);
 
-        // console.log('astNode', astNode?.serialize());
+        console.log('astNode', astNode?.serialize());
 
         // const interpreter = Interpreter.create();
 

@@ -7,9 +7,11 @@ import { type IConfirmPartMethodOptions } from '../../views/components/confirm-p
 export const IConfirmService = createIdentifier<IConfirmService>('univer.confirm-service');
 
 export interface IConfirmService {
+    readonly confirmOptions$: Subject<IConfirmPartMethodOptions[]>;
+
     open(params: IConfirmPartMethodOptions): IDisposable;
 
-    close(id: string): void;
+    confirm(params: IConfirmPartMethodOptions): Promise<boolean>;
 
-    getObservableConfirm(): Subject<IConfirmPartMethodOptions[]>;
+    close(id: string): void;
 }

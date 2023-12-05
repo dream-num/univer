@@ -1,6 +1,7 @@
+import type { ICommand } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
 import { IConfirmService } from '@univerjs/ui';
-import { CommandType, ICommand } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { IAccessor } from '@wendellhu/redi';
 
 export interface IUIComponentCommandParams {
     value: string;
@@ -16,6 +17,8 @@ export const ConfirmOperation: ICommand = {
             id: 'confirm1',
             children: { title: 'Confirm Content' },
             title: { title: 'Confirm Title' },
+            confirmText: 'hello',
+            cancelText: 'world',
             onClose() {
                 confirmService.close('confirm1');
             },

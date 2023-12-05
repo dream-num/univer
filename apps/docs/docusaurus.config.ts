@@ -59,7 +59,7 @@ const config: Config = {
                 id: `api/${name}`,
                 entryPoints: [`../../packages/${name}/src/index.ts`],
                 tsconfig: `../../packages/${name}/tsconfig.json`,
-                exclude: ['node_modules/**/*', "**/*+(.spec|.e2e|.test).ts"],
+                exclude: ['node_modules/**/*', '**/*+(.spec|.e2e|.test).ts'],
                 excludePrivate: true,
                 excludeExternals: true,
                 excludeInternal: true,
@@ -82,7 +82,7 @@ const config: Config = {
                     sidebarPath: './sidebars.ts',
                     // Please change this to your repo.
                     // Remove this to remove the "edit this page" links.
-                    editUrl: 'https://github.com/dream-num/univer/edit/dev/apps/docs/docs/',
+                    editUrl: 'https://github.com/dream-num/univer/edit/dev/apps/docs/',
                 },
                 // blog: {
                 //     showReadingTime: true,

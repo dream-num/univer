@@ -20,6 +20,16 @@ export interface IConfirmProps {
     title?: React.ReactNode;
 
     /**
+     * The text of the Confirm's confirm button.
+     */
+    cancelText?: string;
+
+    /**
+     * The text of the Confirm's cancel button.
+     */
+    confirmText?: string;
+
+    /**
      * Callback when the Confirm is closed.
      */
     onClose?: () => void;
@@ -31,16 +41,16 @@ export interface IConfirmProps {
 }
 
 export function Confirm(props: IConfirmProps) {
-    const { children, visible = false, title, onClose, onConfirm } = props;
+    const { children, visible = false, title, cancelText, confirmText, onClose, onConfirm } = props;
 
     const { locale } = useContext(ConfigContext);
 
     function Footer() {
         return (
             <footer className={styles.confirmFooter}>
-                <Button onClick={onClose}>{locale.design.Confirm.cancel}</Button>
+                <Button onClick={onClose}>{cancelText ?? locale.design.Confirm.cancel}</Button>
                 <Button type="primary" onClick={onConfirm}>
-                    {locale.design.Confirm.confirm}
+                    {confirmText ?? locale.design.Confirm.confirm}
                 </Button>
             </footer>
         );

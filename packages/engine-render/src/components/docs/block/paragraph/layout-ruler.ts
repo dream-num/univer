@@ -340,7 +340,7 @@ function _lineOperator(
         lastPage.skeDrawings,
         headersDrawings,
         footersDrawings
-    ); // WRAP_TOP_AND_BOTTOM的drawing会改变行的起始top
+    ); // WRAP_TOP_AND_BOTTOM 的 drawing 会改变行的起始 top
 
     if (lineHeight + newLineTop > section.height && column.lines.length > 0 && lastPage.sections.length > 0) {
         // 行高超过Col高度，且列中已存在一行以上，且section大于一个；
@@ -528,6 +528,7 @@ function __getLineHeight(
 ) {
     let paddingTop = paragraphLineGapDefault;
     let paddingBottom = paragraphLineGapDefault;
+
     if (gridType === GridType.DEFAULT || snapToGrid === BooleanNumber.FALSE) {
         // 不应用doc grid网格的场景，根据字符高度和宽度决定布局
         if (spacingRule === SpacingRule.AUTO) {
@@ -539,6 +540,7 @@ function __getLineHeight(
                 lineSpacingApply: spanLineHeight,
             };
         }
+
         return {
             paddingTop,
             paddingBottom,

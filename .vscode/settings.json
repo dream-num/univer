@@ -1,7 +1,10 @@
+
 {
+
     "editor.codeActionsOnSave": {
+        "mode": "explicit",
         "source.fixAll.eslint": true,
-        "source.fixAll.stylelint": true
+        "source.fixAll.stylelint": true,
     },
     "editor.formatOnSave": false,
     "javascript.preferences.importModuleSpecifier": "relative",
@@ -83,5 +86,4 @@
         "Xinwei"
     ],
     "vsicons.presets.angular": false,
-    "eslint.codeActionsOnSave.mode": "problems"
 }

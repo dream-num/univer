@@ -1,35 +1,5 @@
 const { resolve } = require('node:path');
-
-const allPackages = [
-    'packages/core',
-    'packages/design',
-    'packages/docs',
-    'packages/docs-ui',
-    'packages/engine-formula',
-    'packages/engine-numfmt',
-    'packages/engine-render',
-    'packages/formula',
-    'packages/image',
-    'packages/network',
-    'packages/rpc',
-    'packages/sheets',
-    'packages/sheets-find',
-    'packages/sheets-formula',
-    'packages/sheets-import-xlsx',
-    'packages/sheets-numfmt',
-    'packages/sheets-ui',
-    'packages/slides',
-    'packages/slides-ui',
-    'packages/ui',
-    'packages/uniscript',
-
-    'examples/data',
-    'examples/docs',
-    'examples/sheets',
-    'examples/slides',
-
-    'apps/docs',
-];
+const tsConfig = require('./tsconfig.json')
 
 /**
  * @type {import('eslint').Linter.Config}
@@ -199,12 +169,14 @@ const config = {
     },
 
     overrides: [
-        ...allPackages.map((pkg) => ({
-            files: [`${pkg}/src/**/*.ts`, `${pkg}/src/**/*.tsx`],
-            parserOptions: {
-                project: resolve(__dirname, './tsconfig.eslint.json'),
-            },
-        })),
+        ...tsConfig.references.map(({ path }) => {
+            return {
+                files: [`${path}/src/**/*.ts`, `${path}/src/**/*.tsx`],
+                parserOptions: {
+                    project: resolve(__dirname, './tsconfig.eslint.json'),
+                },
+            }
+        }),
     ],
 };
 

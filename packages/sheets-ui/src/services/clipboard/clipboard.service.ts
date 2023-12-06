@@ -111,11 +111,12 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             for (let c = startColumn; c <= endColumn; c++) {
                 const cellData = matrix.getValue(r, c);
                 if (cellData) {
-                    matrixFragment.setValue(r - startRow, c - startColumn, Tools.deepClone(cellData));
-                } else {
                     matrixFragment.setValue(r - startRow, c - startColumn, {
-                        v: null,
+                        ...getEmptyCell(),
+                        ...Tools.deepClone(cellData),
                     });
+                } else {
+                    matrixFragment.setValue(r - startRow, c - startColumn, getEmptyCell());
                 }
             }
         }
@@ -801,4 +802,15 @@ function isMultipleCells(cellMatrix: ObjectMatrix<ICellDataWithSpanInfo>): boole
 
 function isLegalSpreadsheetHTMLContent(html: string): boolean {
     return html.indexOf('<table') !== -1; // NOTE: This is just a temporary implementation. Definitely would be changed later.
+}
+
+function getEmptyCell(): ICellData {
+    return {
+        p: null,
+        v: null,
+        s: null,
+        f: null,
+        si: null,
+        t: null,
+    };
 }

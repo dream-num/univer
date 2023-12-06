@@ -207,19 +207,17 @@ export class SheetUIController extends Disposable {
         this._init();
     }
 
-    private _init(): void {
-        // init custom component
+    private _initCustomComponents(): void {
         const componentManager = this._componentManager;
+        this.disposeWithMe(componentManager.register(MENU_ITEM_INPUT_COMPONENT, MenuItemInput));
+        this.disposeWithMe(componentManager.register(BORDER_PANEL_COMPONENT, BorderPanel));
+        this.disposeWithMe(componentManager.register(COLOR_PICKER_COMPONENT, ColorPicker));
+        this.disposeWithMe(componentManager.register(FONT_FAMILY_COMPONENT, FontFamily));
+        this.disposeWithMe(componentManager.register(FONT_FAMILY_ITEM_COMPONENT, FontFamilyItem));
+        this.disposeWithMe(componentManager.register(FONT_SIZE_COMPONENT, FontSize));
+    }
 
-        // FIXME: no dispose logic
-        componentManager.register(MENU_ITEM_INPUT_COMPONENT, MenuItemInput);
-        componentManager.register(BORDER_PANEL_COMPONENT, BorderPanel);
-        componentManager.register(COLOR_PICKER_COMPONENT, ColorPicker);
-        componentManager.register(FONT_FAMILY_COMPONENT, FontFamily);
-        componentManager.register(FONT_FAMILY_ITEM_COMPONENT, FontFamilyItem);
-        componentManager.register(FONT_SIZE_COMPONENT, FontSize);
-
-        // init commands
+    private _initCommands(): void {
         [
             AddWorksheetMergeAllCommand,
             AddWorksheetMergeCommand,
@@ -268,8 +266,9 @@ export class SheetUIController extends Disposable {
         ].forEach((c) => {
             this.disposeWithMe(this._commandService.registerCommand(c));
         });
+    }
 
-        // init menus
+    private _initMenus(): void {
         (
             [
                 // context menu
@@ -346,8 +345,9 @@ export class SheetUIController extends Disposable {
         ).forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
         });
+    }
 
-        // init shortcuts
+    private _initShortcuts(): void {
         [
             // selection shortcuts
             MoveSelectionDownShortcutItem,
@@ -400,7 +400,9 @@ export class SheetUIController extends Disposable {
         ].forEach((item) => {
             this.disposeWithMe(this._shortcutService.registerShortcut(item));
         });
+    }
 
+    private _initWorkbenchParts(): void {
         this.disposeWithMe(
             this._uiController.registerHeaderComponent(() => connectInjector(RenderSheetHeader, this._injector))
         );
@@ -412,5 +414,13 @@ export class SheetUIController extends Disposable {
         this.disposeWithMe(
             this._uiController.registerContentComponent(() => connectInjector(RenderSheetContent, this._injector))
         );
+    }
+
+    private _init(): void {
+        this._initCustomComponents();
+        this._initCommands();
+        this._initMenus();
+        this._initShortcuts();
+        this._initWorkbenchParts();
     }
 }

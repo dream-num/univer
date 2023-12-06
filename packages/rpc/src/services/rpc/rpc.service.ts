@@ -1,4 +1,3 @@
-/* eslint-disable no-magic-numbers */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { RxDisposable } from '@univerjs/core';
@@ -138,8 +137,6 @@ const enum ResponseType {
     SUBSCRIBE_ERROR = 201,
     SUBSCRIBE_COMPLETE = 202,
 }
-
-// TODO@wzhudev:
 
 interface IRPCResponse {
     /** It should be the same as its corresponding requests' `seq`. */

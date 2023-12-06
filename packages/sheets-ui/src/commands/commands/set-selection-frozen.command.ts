@@ -1,5 +1,3 @@
-// TODO@wzhudev: some logic here should be moved to the controller
-
 import type { ICommand } from '@univerjs/core';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, RANGE_TYPE } from '@univerjs/core';
 import type { ISetFrozenMutationParams } from '@univerjs/sheets';

@@ -374,10 +374,9 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
         if (cachedData.copyType === COPY_TYPE.CUT) {
             copyContentCache.del(copyId);
+            this._copyMarkId && this._markSelectionService.removeShape(this._copyMarkId);
+            this._copyMarkId = null;
         }
-
-        this._copyMarkId && this._markSelectionService.removeShape(this._copyMarkId);
-        this._copyMarkId = null;
 
         return pasteRes;
     }

@@ -88,10 +88,17 @@ export class NumfmtCopyPasteController extends Disposable {
         const sheet = workbook.getActiveSheet();
         const workbookId = workbook.getUnitId();
         const worksheetId = sheet.getSheetId();
-
+        if (copyInfo.copyType === COPY_TYPE.CUT) {
+            // This do not need to deal with clipping.
+            // move range had handle this case .
+            // to see numfmt.ref-range.controller.ts
+            this._copyInfo = null;
+            return { redos: [], undos: [] };
+        }
         if (!this._copyInfo || !this._copyInfo.matrix.getSizeOf() || !copyInfo.copyRange) {
             return { redos: [], undos: [] };
         }
+
         const repeatRange = getRepeatRange(copyInfo.copyRange, pastedRange, true);
         const redos: ISetNumfmtMutationParams = { workbookId, worksheetId, values: [] };
 
@@ -121,26 +128,6 @@ export class NumfmtCopyPasteController extends Disposable {
                     });
                 });
         });
-
-        // If is clipping,  need to clear the data format of the original area
-        if (copyInfo.copyType === COPY_TYPE.CUT) {
-            this._copyInfo.matrix.forValue((row, col) => {
-                const range = Rectangle.getPositionRange(
-                    {
-                        startRow: row,
-                        endRow: row,
-                        startColumn: col,
-                        endColumn: col,
-                    },
-                    copyInfo.copyRange!
-                );
-                redos.values.unshift({
-                    row: range.startRow,
-                    col: range.startColumn,
-                });
-            });
-            this._copyInfo = null;
-        }
 
         const undos: ISetNumfmtMutationParams = factorySetNumfmtUndoMutation(this._injector, redos);
 

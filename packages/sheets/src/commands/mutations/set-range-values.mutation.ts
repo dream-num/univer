@@ -149,6 +149,7 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
                 cellMatrix?.setValue(row, col, {});
             } else {
                 const oldVal = cellMatrix.getValue(row, col) || {};
+
                 const type =
                     newVal.t === CellValueType.FORCE_STRING
                         ? newVal.t
@@ -201,8 +202,8 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
                         oldVal.s = styles.setValue(merge);
                     }
 
-                    // When the rich text sets the cell style, you need to modify the style of all rich text
-                    if (oldVal.p) {
+                    // Only need to copy newValue.s to oldValue.p when you modify the cell style, not when you modify the cell value.
+                    if (!newVal.p && oldVal.p) {
                         mergeRichTextStyle(oldVal.p, newVal.s ? (newVal.s as Nullable<IStyleData>) : null);
                     }
                 }

@@ -12,44 +12,53 @@ export const PAGE5_RICHTEXT_1: IDocumentData = {
         textRuns: [
             {
                 st: 0,
-                ed: 66,
+                ed: 67,
                 ts: {
                     bl: BooleanNumber.TRUE,
                     fs: 24,
                     cl: {
-                        rgb: 'rgb(0,40,86)',
+                        rgb: 'rgb(205, 40, 86)',
                     },
                 },
             },
             {
                 st: 68,
-                ed: 252,
+                ed: 253,
                 ts: {
-                    fs: 18,
+                    fs: 16,
                     cl: {
-                        rgb: 'rgb(0,40,86)',
+                        rgb: 'rgb(0, 255, 86)',
                     },
                 },
             },
             {
                 st: 254,
-                ed: 403,
+                ed: 404,
                 ts: {
-                    fs: 16,
+                    fs: 14,
+                    cl: {
+                        rgb: 'rgb(0, 255, 255)',
+                    },
                 },
             },
             {
                 st: 405,
-                ed: 432,
+                ed: 433,
                 ts: {
                     fs: 16,
+                    cl: {
+                        rgb: 'rgb(255, 255, 86)',
+                    },
                 },
             },
             {
                 st: 434,
-                ed: 483,
+                ed: 484,
                 ts: {
                     fs: 16,
+                    cl: {
+                        rgb: 'rgb(0, 255, 186)',
+                    },
                 },
             },
             {
@@ -57,6 +66,9 @@ export const PAGE5_RICHTEXT_1: IDocumentData = {
                 ed: 515,
                 ts: {
                     fs: 16,
+                    cl: {
+                        rgb: 'rgb(60, 255, 86)',
+                    },
                 },
             },
         ],
@@ -123,7 +135,7 @@ export const PAGE5_RICHTEXT_1: IDocumentData = {
                 startIndex: 517,
                 columnProperties: [
                     {
-                        width: 150,
+                        width: 200,
                         paddingEnd: 5,
                     },
                 ],

@@ -509,6 +509,7 @@ export class Spreadsheet extends SheetComponent {
                         horizontalAlign !== HorizontalAlign.JUSTIFIED
                     ) {
                         let contentSize = getDocsSkeletonPageSize(documentSkeleton, angle);
+                        console.log(contentSize);
 
                         if (!contentSize) {
                             return true;
@@ -567,6 +568,7 @@ export class Spreadsheet extends SheetComponent {
                         documentSkeleton.getViewModel().getDataModel().updateDocumentDataPageSize(cellHeight);
                         documentSkeleton.calculate();
                         const contentSize = getDocsSkeletonPageSize(documentSkeleton, angle);
+                        console.log(contentSize);
 
                         if (!contentSize) {
                             return true;

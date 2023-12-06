@@ -49,9 +49,9 @@
         {
             "path": "./packages/formula"
         },
-        // {
-        //     "path": "./packages/image"
-        // },
+        {
+            "path": "./packages/image"
+        },
         {
             "path": "./packages/network"
         },
@@ -88,14 +88,20 @@
         {
             "path": "./packages/uniscript"
         },
-    ],
-    "files": [],
-    "exclude": ["node_modules", "target", "lib", "test-results"],
-    "ts-node": {
-      "esm": true,
-      "compilerOptions": {
-        "module": "ESNext",
-        "moduleResolution": "Node"
-      }
-    }
+        {
+            "path": "./examples/data"
+        },
+        {
+            "path": "./examples/docs"
+        },
+        {
+            "path": "./examples/sheets"
+        },
+        {
+            "path": "./examples/slides"
+        },
+        {
+            "path": "./apps/docs"
+        }
+    ]
 }

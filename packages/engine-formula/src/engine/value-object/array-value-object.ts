@@ -107,6 +107,12 @@ export class ArrayValueObject extends BaseValueObject {
         }
     }
 
+    getFirstCell() {
+        const { startRow, startColumn } = this.getRangePosition();
+        const valueList = this.getArrayValue();
+        return valueList[startRow][startColumn];
+    }
+
     override plus(valueObject: BaseValueObject): CalculateValueType {
         return this._batchOperator(valueObject, BatchOperatorType.PLUS);
     }

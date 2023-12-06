@@ -15,7 +15,7 @@ export interface IReferenceExecutorManagerParams {
     };
 }
 
-export interface IReferenceExecutorManagerService {
+export interface IPassiveDirtyManagerService {
     dispose(): void;
 
     remove(featureId: string): void;
@@ -35,7 +35,7 @@ export interface IReferenceExecutorManagerService {
  * causing the formula to be marked dirty again,
  * thereby completing the calculation of the entire dependency tree.
  */
-export class ReferenceExecutorManagerService extends Disposable implements IReferenceExecutorManagerService {
+export class PassiveDirtyManagerService extends Disposable implements IPassiveDirtyManagerService {
     private _referenceExecutorMap: Map<string, IReferenceExecutorManagerParams> = new Map();
 
     override dispose(): void {
@@ -63,6 +63,6 @@ export class ReferenceExecutorManagerService extends Disposable implements IRefe
     }
 }
 
-export const IReferenceExecutorManagerService = createIdentifier<ReferenceExecutorManagerService>(
+export const IPassiveDirtyManagerService = createIdentifier<PassiveDirtyManagerService>(
     'univer.formula.reference-executor-manager.service'
 );

@@ -13,7 +13,7 @@ export interface IDirtyConversionManagerParams {
     };
 }
 
-export interface IDirtyConversionManagerService {
+export interface IActiveDirtyManagerService {
     dispose(): void;
 
     remove(commandId: string): void;
@@ -31,7 +31,7 @@ export interface IDirtyConversionManagerService {
  * Actively mark as dirty, calculate the dirty area based on the command,
  * and plugins can register the ref range they affect into the formula engine.
  */
-export class DirtyConversionManagerService extends Disposable implements IDirtyConversionManagerService {
+export class ActiveDirtyManagerService extends Disposable implements IActiveDirtyManagerService {
     private _dirtyConversionMap: Map<string, IDirtyConversionManagerParams> = new Map();
 
     override dispose(): void {
@@ -59,6 +59,6 @@ export class DirtyConversionManagerService extends Disposable implements IDirtyC
     }
 }
 
-export const IDirtyConversionManagerService = createIdentifier<DirtyConversionManagerService>(
+export const IActiveDirtyManagerService = createIdentifier<ActiveDirtyManagerService>(
     'univer.formula.dirty-conversion-manager.service'
 );

@@ -9,9 +9,9 @@ import type { PreCalculateNodeType } from '../../basics/node-type';
 import { prefixToken, suffixToken } from '../../basics/token';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import {
-    IReferenceExecutorManagerService,
-    type ReferenceExecutorManagerService,
-} from '../../services/reference-executor-manager.service';
+    IPassiveDirtyManagerService,
+    type PassiveDirtyManagerService,
+} from '../../services/passive-dirty-manager.service';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
 import { LexerTreeBuilder } from '../analysis/lexer';
 import type { LexerNode } from '../analysis/lexer-node';
@@ -37,8 +37,8 @@ export class FormulaDependencyGenerator extends Disposable {
     constructor(
         @IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService,
         @IFormulaRuntimeService private readonly _runtimeService: IFormulaRuntimeService,
-        @IReferenceExecutorManagerService
-        private readonly _referenceExecutorManagerService: ReferenceExecutorManagerService,
+        @IPassiveDirtyManagerService
+        private readonly _PassiveDirtyManagerService: PassiveDirtyManagerService,
         @Inject(Interpreter) private readonly _interpreter: Interpreter,
         @Inject(AstTreeBuilder) private readonly _astTreeBuilder: AstTreeBuilder,
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder
@@ -198,7 +198,7 @@ export class FormulaDependencyGenerator extends Disposable {
          * which can determine the execution timing of the external application
          * registration Executor based on the dependency relationship.
          */
-        this._referenceExecutorManagerService.getReferenceExecutorMap().forEach((params, featureId) => {
+        this._PassiveDirtyManagerService.getReferenceExecutorMap().forEach((params, featureId) => {
             const { unitId, subComponentId, dependencyRanges, getDirtyData } = params;
             const FDtree = new FormulaDependencyTree();
 

@@ -407,6 +407,17 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
             const { startRow, startColumn, endRow, endColumn } = objectValueRefOrArray.getRangePosition();
 
+            /**
+             * If the referenced range or array only contains a single value, such as A5,
+             * then it is not treated as an array range and is directly assigned.
+             */
+            if (startRow === endRow && startColumn === endColumn) {
+                const valueObject = this._objectValueToCellValue(objectValueRefOrArray.getFirstCell());
+                sheetData.setValue(row, column, valueObject);
+                clearArrayUnitData.setValue(row, column, valueObject);
+                return;
+            }
+
             const arrayRange = {
                 startRow: row,
                 startColumn: column,

@@ -132,6 +132,17 @@ export class BaseReferenceObject extends ObjectClassType {
         }
     }
 
+    getFirstCell() {
+        const { startRow, startColumn } = this.getRangePosition();
+        const cell = this.getCellData(startRow + this._refOffsetY, startColumn + this._refOffsetX);
+
+        if (!cell) {
+            return new NumberValueObject(0, true);
+        }
+
+        return this.getCellValueObject(cell);
+    }
+
     getRangeData() {
         return this._rangeData;
     }

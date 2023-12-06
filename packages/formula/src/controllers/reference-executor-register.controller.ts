@@ -6,7 +6,7 @@ import {
     ObjectMatrix,
     OnLifecycle,
 } from '@univerjs/core';
-import { IDirtyConversionManagerService, IReferenceExecutorManagerService } from '@univerjs/engine-formula';
+import { IActiveDirtyManagerService, IPassiveDirtyManagerService } from '@univerjs/engine-formula';
 import { Inject } from '@wendellhu/redi';
 
 import { FormulaDataModel } from '../models/formula-data.model';
@@ -15,9 +15,9 @@ import { FormulaDataModel } from '../models/formula-data.model';
 export class ReferenceExecutorRegisterController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @IReferenceExecutorManagerService
-        private readonly _referenceExecutorManagerService: IReferenceExecutorManagerService,
-        @IDirtyConversionManagerService private readonly _dirtyConversionManagerService: IDirtyConversionManagerService,
+        @IPassiveDirtyManagerService
+        private readonly _PassiveDirtyManagerService: IPassiveDirtyManagerService,
+        @IActiveDirtyManagerService private readonly _ActiveDirtyManagerService: IActiveDirtyManagerService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
     ) {
@@ -59,7 +59,7 @@ export class ReferenceExecutorRegisterController extends Disposable {
             },
         };
 
-        this._referenceExecutorManagerService.register(featureId, {
+        this._PassiveDirtyManagerService.register(featureId, {
             unitId,
             subComponentId,
             dependencyRanges: [

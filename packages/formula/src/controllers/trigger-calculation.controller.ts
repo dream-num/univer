@@ -1,6 +1,6 @@
 import type { ICommandInfo } from '@univerjs/core';
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { FormulaExecutedStateType, IDirtyConversionManagerService } from '@univerjs/engine-formula';
+import { FormulaExecutedStateType, IActiveDirtyManagerService } from '@univerjs/engine-formula';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { SetRangeValuesMutation, SetStyleCommand } from '@univerjs/sheets';
 
@@ -22,7 +22,7 @@ export class TriggerCalculationController extends Disposable {
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @IDirtyConversionManagerService private readonly _dirtyConversionManagerService: IDirtyConversionManagerService
+        @IActiveDirtyManagerService private readonly _ActiveDirtyManagerService: IActiveDirtyManagerService
     ) {
         super();
 
@@ -54,7 +54,7 @@ export class TriggerCalculationController extends Disposable {
 
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (!this._dirtyConversionManagerService.get(command.id)) {
+                if (!this._ActiveDirtyManagerService.get(command.id)) {
                     return;
                 }
 

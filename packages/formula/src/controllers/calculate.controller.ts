@@ -6,11 +6,7 @@ import type {
     IDirtyUnitSheetNameMap,
     IFormulaData,
 } from '@univerjs/engine-formula';
-import {
-    FormulaEngineService,
-    FormulaExecutedStateType,
-    IDirtyConversionManagerService,
-} from '@univerjs/engine-formula';
+import { FormulaEngineService, FormulaExecutedStateType, IActiveDirtyManagerService } from '@univerjs/engine-formula';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { SetRangeValuesMutation } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
@@ -37,7 +33,7 @@ export class CalculateController extends Disposable {
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @Inject(IFormulaService) private readonly _formulaService: FormulaService,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
-        @IDirtyConversionManagerService private readonly _dirtyConversionManagerService: IDirtyConversionManagerService
+        @IActiveDirtyManagerService private readonly _ActiveDirtyManagerService: IActiveDirtyManagerService
     ) {
         super();
 
@@ -90,7 +86,7 @@ export class CalculateController extends Disposable {
         const allDirtyUnitFeatureMap: IDirtyUnitFeatureMap = {};
 
         for (const command of commands) {
-            const conversion = this._dirtyConversionManagerService.get(command.id);
+            const conversion = this._ActiveDirtyManagerService.get(command.id);
 
             if (conversion == null) {
                 continue;

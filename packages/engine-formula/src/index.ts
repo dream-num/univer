@@ -29,12 +29,9 @@ export { BooleanValueObject } from './engine/value-object/primitive-object';
 export { StringValueObject } from './engine/value-object/primitive-object';
 export { BaseFunction } from './functions/base-function';
 export { BaseFormulaEnginePlugin } from './plugin';
-export { IDirtyConversionManagerService } from './services/dirty-conversion-manager.service';
+export { IActiveDirtyManagerService } from './services/active-dirty-manager.service';
 export { FormulaEngineService } from './services/formula-engine.service';
 export { IFunctionService } from './services/function.service';
-export {
-    IReferenceExecutorManagerService,
-    ReferenceExecutorManagerService,
-} from './services/reference-executor-manager.service';
+export { IPassiveDirtyManagerService, PassiveDirtyManagerService } from './services/passive-dirty-manager.service';
 export { FormulaExecuteStageType, type IExecutionInProgressParams } from './services/runtime.service';
 export { FormulaExecutedStateType, type IAllRuntimeData } from './services/runtime.service';

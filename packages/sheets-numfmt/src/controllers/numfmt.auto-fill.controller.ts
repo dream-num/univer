@@ -1,5 +1,5 @@
 import type { IMutationInfo, IRange } from '@univerjs/core';
-import { Disposable, IUniverInstanceService, Range, Rectangle } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, Range, Rectangle } from '@univerjs/core';
 import type { ISetNumfmtMutationParams } from '@univerjs/sheets';
 import { factorySetNumfmtUndoMutation, INumfmtService, SetNumfmtMutation } from '@univerjs/sheets';
 import type { IAutoFillHook } from '@univerjs/sheets-ui';
@@ -8,6 +8,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 
 import { SHEET_NUMFMT_PLUGIN } from '../base/const/PLUGIN_NAME';
 
+@OnLifecycle(LifecycleStages.Rendered, NumfmtAutoFillController)
 export class NumfmtAutoFillController extends Disposable {
     constructor(
         @Inject(Injector) private _injector: Injector,

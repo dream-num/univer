@@ -33,6 +33,8 @@ export interface IFormulaCurrentConfigService {
 
     getDirtyNameMap(): IDirtyUnitSheetNameMap;
 
+    getDirtyUnitFeatureMap(): IDirtyUnitFeatureMap;
+
     registerUnitData(unitData: IUnitData): void;
 
     registerFormulaData(formulaData: IFormulaData): void;

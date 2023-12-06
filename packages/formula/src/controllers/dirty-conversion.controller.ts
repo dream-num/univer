@@ -41,7 +41,7 @@ import { FormulaDataModel } from '../models/formula-data.model';
 @OnLifecycle(LifecycleStages.Ready, DirtyConversionController)
 export class DirtyConversionController extends Disposable {
     constructor(
-        @IActiveDirtyManagerService private readonly _ActiveDirtyManagerService: IActiveDirtyManagerService,
+        @IActiveDirtyManagerService private readonly _activeDirtyManagerService: IActiveDirtyManagerService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
     ) {
@@ -69,7 +69,7 @@ export class DirtyConversionController extends Disposable {
         //     // SetWorksheetNameMutation.id,
         // ];
 
-        this._ActiveDirtyManagerService.register(SetRangeValuesMutation.id, {
+        this._activeDirtyManagerService.register(SetRangeValuesMutation.id, {
             commandId: SetRangeValuesMutation.id,
             getDirtyData: (command: ICommandInfo) => {
                 const params = command.params as ISetRangeValuesMutationParams;
@@ -87,7 +87,7 @@ export class DirtyConversionController extends Disposable {
             },
         });
 
-        this._ActiveDirtyManagerService.register(MoveRangeMutation.id, {
+        this._activeDirtyManagerService.register(MoveRangeMutation.id, {
             commandId: MoveRangeMutation.id,
             getDirtyData: (command: ICommandInfo) => {
                 const params = command.params as IMoveRangeMutationParams;
@@ -97,7 +97,7 @@ export class DirtyConversionController extends Disposable {
             },
         });
 
-        this._ActiveDirtyManagerService.register(MoveRowsMutation.id, {
+        this._activeDirtyManagerService.register(MoveRowsMutation.id, {
             commandId: MoveRowsMutation.id,
             getDirtyData: (command: ICommandInfo) => {
                 const params = command.params as IMoveRowsMutationParams;
@@ -107,7 +107,7 @@ export class DirtyConversionController extends Disposable {
             },
         });
 
-        this._ActiveDirtyManagerService.register(MoveColsMutation.id, {
+        this._activeDirtyManagerService.register(MoveColsMutation.id, {
             commandId: MoveColsMutation.id,
             getDirtyData: (command: ICommandInfo) => {
                 const params = command.params as IMoveColumnsMutationParams;
@@ -117,7 +117,7 @@ export class DirtyConversionController extends Disposable {
             },
         });
 
-        this._ActiveDirtyManagerService.register(DeleteRangeMutation.id, {
+        this._activeDirtyManagerService.register(DeleteRangeMutation.id, {
             commandId: DeleteRangeMutation.id,
             getDirtyData: (command: ICommandInfo) => {
                 const params = command.params as IDeleteRangeMutationParams;
@@ -127,7 +127,7 @@ export class DirtyConversionController extends Disposable {
             },
         });
 
-        this._ActiveDirtyManagerService.register(InsertRangeMutation.id, {
+        this._activeDirtyManagerService.register(InsertRangeMutation.id, {
             commandId: InsertRangeMutation.id,
             getDirtyData: (command: ICommandInfo) => {
                 const params = command.params as IInsertRangeMutationParams;
@@ -137,7 +137,7 @@ export class DirtyConversionController extends Disposable {
             },
         });
 
-        this._ActiveDirtyManagerService.register(RemoveRowMutation.id, {
+        this._activeDirtyManagerService.register(RemoveRowMutation.id, {
             commandId: RemoveRowMutation.id,
             getDirtyData: (command: ICommandInfo) => {
                 const params = command.params as IRemoveRowsMutationParams;
@@ -147,7 +147,7 @@ export class DirtyConversionController extends Disposable {
             },
         });
 
-        this._ActiveDirtyManagerService.register(RemoveColMutation.id, {
+        this._activeDirtyManagerService.register(RemoveColMutation.id, {
             commandId: RemoveColMutation.id,
             getDirtyData: (command: ICommandInfo) => {
                 const params = command.params as IRemoveColMutationParams;
@@ -157,7 +157,7 @@ export class DirtyConversionController extends Disposable {
             },
         });
 
-        this._ActiveDirtyManagerService.register(RemoveSheetMutation.id, {
+        this._activeDirtyManagerService.register(RemoveSheetMutation.id, {
             commandId: RemoveSheetMutation.id,
             getDirtyData: (command: ICommandInfo) => {
                 const params = command.params as IRemoveSheetMutationParams;
@@ -165,7 +165,7 @@ export class DirtyConversionController extends Disposable {
             },
         });
 
-        this._ActiveDirtyManagerService.register(InsertSheetMutation.id, {
+        this._activeDirtyManagerService.register(InsertSheetMutation.id, {
             commandId: InsertSheetMutation.id,
             getDirtyData: (command: ICommandInfo) => {
                 const params = command.params as IInsertSheetMutationParams;
@@ -173,7 +173,7 @@ export class DirtyConversionController extends Disposable {
             },
         });
 
-        // this._ActiveDirtyManagerService.register(SetWorksheetNameMutation.id, {
+        // this._activeDirtyManagerService.register(SetWorksheetNameMutation.id, {
         //     commandId: SetWorksheetNameMutation.id,
         //     getDirtyData: (command: ICommandInfo) => {
         //         const params = command.params as ISetWorksheetNameMutationParams;

@@ -16,8 +16,8 @@ export class ReferenceExecutorRegisterController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IPassiveDirtyManagerService
-        private readonly _PassiveDirtyManagerService: IPassiveDirtyManagerService,
-        @IActiveDirtyManagerService private readonly _ActiveDirtyManagerService: IActiveDirtyManagerService,
+        private readonly _passiveDirtyManagerService: IPassiveDirtyManagerService,
+        @IActiveDirtyManagerService private readonly _activeDirtyManagerService: IActiveDirtyManagerService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
     ) {
@@ -59,7 +59,7 @@ export class ReferenceExecutorRegisterController extends Disposable {
             },
         };
 
-        this._PassiveDirtyManagerService.register(featureId, {
+        this._passiveDirtyManagerService.register(featureId, {
             unitId,
             subComponentId,
             dependencyRanges: [

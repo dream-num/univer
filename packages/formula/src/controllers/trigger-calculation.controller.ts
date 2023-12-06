@@ -22,7 +22,7 @@ export class TriggerCalculationController extends Disposable {
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @IActiveDirtyManagerService private readonly _ActiveDirtyManagerService: IActiveDirtyManagerService
+        @IActiveDirtyManagerService private readonly _activeDirtyManagerService: IActiveDirtyManagerService
     ) {
         super();
 
@@ -54,7 +54,7 @@ export class TriggerCalculationController extends Disposable {
 
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (!this._ActiveDirtyManagerService.get(command.id)) {
+                if (!this._activeDirtyManagerService.get(command.id)) {
                     return;
                 }
 

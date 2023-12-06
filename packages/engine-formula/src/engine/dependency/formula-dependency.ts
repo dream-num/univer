@@ -38,7 +38,7 @@ export class FormulaDependencyGenerator extends Disposable {
         @IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService,
         @IFormulaRuntimeService private readonly _runtimeService: IFormulaRuntimeService,
         @IPassiveDirtyManagerService
-        private readonly _PassiveDirtyManagerService: PassiveDirtyManagerService,
+        private readonly _passiveDirtyManagerService: PassiveDirtyManagerService,
         @Inject(Interpreter) private readonly _interpreter: Interpreter,
         @Inject(AstTreeBuilder) private readonly _astTreeBuilder: AstTreeBuilder,
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder
@@ -198,7 +198,7 @@ export class FormulaDependencyGenerator extends Disposable {
          * which can determine the execution timing of the external application
          * registration Executor based on the dependency relationship.
          */
-        this._PassiveDirtyManagerService.getReferenceExecutorMap().forEach((params, featureId) => {
+        this._passiveDirtyManagerService.getReferenceExecutorMap().forEach((params, featureId) => {
             const { unitId, subComponentId, dependencyRanges, getDirtyData } = params;
             const FDtree = new FormulaDependencyTree();
 
@@ -468,6 +468,18 @@ export class FormulaDependencyGenerator extends Disposable {
     private _includeTree(tree: FormulaDependencyTree) {
         const unitId = tree.unitId;
         const subComponentId = tree.subComponentId;
+
+        /**
+         * Perform active dirty detection for the feature.
+         */
+        const featureId = tree.featureId;
+        if (featureId != null) {
+            const featureMap = this._currentConfigService.getDirtyUnitFeatureMap();
+            const state = featureMap[unitId][subComponentId][featureId];
+            if (state != null) {
+                return true;
+            }
+        }
 
         const excludedCell = this._currentConfigService.getExcludedRange()?.[unitId]?.[subComponentId];
 

@@ -33,7 +33,7 @@ export class CalculateController extends Disposable {
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @Inject(IFormulaService) private readonly _formulaService: FormulaService,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
-        @IActiveDirtyManagerService private readonly _ActiveDirtyManagerService: IActiveDirtyManagerService
+        @IActiveDirtyManagerService private readonly _activeDirtyManagerService: IActiveDirtyManagerService
     ) {
         super();
 
@@ -86,7 +86,7 @@ export class CalculateController extends Disposable {
         const allDirtyUnitFeatureMap: IDirtyUnitFeatureMap = {};
 
         for (const command of commands) {
-            const conversion = this._ActiveDirtyManagerService.get(command.id);
+            const conversion = this._activeDirtyManagerService.get(command.id);
 
             if (conversion == null) {
                 continue;

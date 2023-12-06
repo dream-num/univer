@@ -9,6 +9,7 @@ import type {
     Nullable,
 } from '@univerjs/core';
 import { BaselineOffset, FontStyleType, Tools } from '@univerjs/core';
+import * as cjk from 'cjk-regex';
 
 import { DEFAULT_FONTFACE_PLANE } from './const';
 import { FontCache } from './font-cache';
@@ -323,59 +324,14 @@ export function isSupportBoundingBox(ctx: CanvasRenderingContext2D) {
     return true;
 }
 
-// has Chinese string in text?
-export function hasChineseText(text: string) {
-    const pattern = /[\u4E00-\u9FA5]/gi;
-
-    return pattern.test(text);
-}
-
-// 是否有中文包括中文符号
-export function hasChineseTextWithPunctuation(text: string) {
-    const pattern = /[\u4E00-\u9FA5]|[\uFE30-\uFFA0]/gi;
-    // /^([^\p{Han}]*?)(?:\s+([\p{Han}].*))?$/gim;
-
-    if (!pattern.exec(text)) {
-        return false;
-    }
-    return true;
-}
-
-// 是否有日文
-export function hasJapaneseText(text: string) {
-    // const pattern = /[一-龠]+|[ぁ-ゔ]+|[ァ-ヴー]+|[a-zA-Z0-9]+|[ａ-ｚＡ-Ｚ０-９]+|[々〆〤]+/giu;
-    const pattern = /[\u0800-\u4e00]/gi;
-
-    return pattern.test(text);
-}
-
-// 是否有韩文
-export function hasKoreanText(text: string) {
-    // const pattern = /[^a-zA-Z0-9\p{Hangul}]/gi;
-    const pattern = /[\uac00-\ud7ff]/gi;
-
-    return pattern.test(text);
-}
-
 // 是否有中文、日文、韩文等，不包括符号
 export function hasCJKText(text: string) {
-    return hasChineseText(text) || hasJapaneseText(text) || hasKoreanText(text);
+    return cjk.letters().toRegExp().test(text);
 }
 
-// 是否有中文、日文、韩文等可以垂直布局的文字，东亚文字
+// 是否有中文、日文、韩文等可以垂直布局的文字，包括标点符号
 export function hasCJK(text: string) {
-    const pattern = /[\u2E80-\uA4CF]|[\uF900-\uFAFF]|[\uFE30-\uFE4F]|[\uFF00-\uFFEF]/gi;
-
-    if (!pattern.exec(text)) {
-        return false;
-    }
-
-    return true;
-}
-
-// 是否有中文、日文等不会存在单词文字，即：单字可以换行，不像hello world 一样，world的单字必须连在一起。目前只发现中文、日文有这个特性，以后还可以再补充
-export function hasWrappableText(text: string) {
-    return hasChineseTextWithPunctuation(text) || hasJapaneseText(text);
+    return cjk.all().toRegExp().test(text);
 }
 
 export function hasAllLatin(text: string) {
@@ -436,10 +392,8 @@ export function hasTibetan(text: string) {
 
 export function hasSpaceAndTab(text: string) {
     const pattern = /\s+|\t+/g;
-    if (!pattern.exec(text)) {
-        return false;
-    }
-    return true;
+
+    return pattern.test(text);
 }
 
 const one_thousand = 1000;

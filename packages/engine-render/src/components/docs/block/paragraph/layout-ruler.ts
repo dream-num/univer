@@ -1,7 +1,7 @@
 import type { INumberUnit, IParagraphStyle } from '@univerjs/core';
 import { BooleanNumber, DataStreamTreeTokenType, GridType, SpacingRule } from '@univerjs/core';
 
-import { hasChineseText } from '../../../../basics';
+import { hasCJKText } from '../../../../basics';
 import { FontCache } from '../../../../basics/font-cache';
 import type {
     IDocumentSkeletonBullet,
@@ -102,12 +102,12 @@ function _divideOperator(
         // Only add word space between Chinese text and Western text when processing span for the first time,
         // otherwise it will be added multiple times during recursion.
         if (isMixedCJKWesternTextLayout && isOutMost) {
-            const lastSpanIsChineseWord = hasChineseText(lastSpan.content!);
+            const lastSpanIsCJKWord = hasCJKText(lastSpan.content!);
             const WORD_INNER_SPACE = '\u0020';
 
             wordSpaceWidth = FontCache.getTextSize(
                 WORD_INNER_SPACE, // word space.
-                lastSpanIsChineseWord ? spanGroup[0].fontStyle! : lastSpan.fontStyle!
+                lastSpanIsCJKWord ? spanGroup[0].fontStyle! : lastSpan.fontStyle!
             ).width;
 
             preOffsetLeft += wordSpaceWidth;

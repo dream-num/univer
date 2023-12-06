@@ -44,6 +44,7 @@ export interface IShortcutService {
     getShortcutDisplay(shortcut: IShortcutItem): string;
     getShortcutDisplayOfCommand(id: string): string | null;
     getAllShortcuts(): IShortcutItem[];
+    setDisable(disable: boolean): void;
 }
 
 export const IShortcutService = createIdentifier<IShortcutService>('univer.shortcut');
@@ -56,6 +57,8 @@ export class DesktopShortcutService extends Disposable implements IShortcutServi
     readonly shortcutChanged$ = this._shortcutChanged$.asObservable();
 
     private _forceEscaped = false;
+
+    private _disable = false;
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
@@ -70,6 +73,10 @@ export class DesktopShortcutService extends Disposable implements IShortcutServi
                 this._resolveKeyboardEvent(e);
             })
         );
+    }
+
+    setDisable(disable: boolean): void {
+        this._disable = disable;
     }
 
     getAllShortcuts(): IShortcutItem[] {
@@ -152,6 +159,10 @@ export class DesktopShortcutService extends Disposable implements IShortcutServi
         // Also we should check through escape list and force catching list.
         // if the target is not focused on the univer instance we should ingore the keyboard event
         if (this._forceEscaped) {
+            return;
+        }
+
+        if (this._disable) {
             return;
         }
 

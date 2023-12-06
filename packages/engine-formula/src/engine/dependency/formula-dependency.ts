@@ -475,7 +475,7 @@ export class FormulaDependencyGenerator extends Disposable {
         const featureId = tree.featureId;
         if (featureId != null) {
             const featureMap = this._currentConfigService.getDirtyUnitFeatureMap();
-            const state = featureMap[unitId][subComponentId][featureId];
+            const state = featureMap?.[unitId]?.[subComponentId]?.[featureId];
             if (state != null) {
                 return true;
             }

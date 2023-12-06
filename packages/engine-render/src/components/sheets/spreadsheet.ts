@@ -68,7 +68,7 @@ export class Spreadsheet extends SheetComponent {
     constructor(
         oKey: string,
         spreadsheetSkeleton?: SpreadsheetSkeleton,
-        private _allowCache: boolean = true
+        private _allowCache: boolean = false
     ) {
         super(oKey, spreadsheetSkeleton);
 

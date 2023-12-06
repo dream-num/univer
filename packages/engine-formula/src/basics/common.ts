@@ -60,8 +60,16 @@ export interface IDirtyUnitSheetNameMap {
     [unitId: string]: { [sheetId: string]: Nullable<string> };
 }
 
+export interface IDirtyUnitFeatureMap {
+    [unitId: string]: { [sheetId: string]: { [featureId: string]: boolean } };
+}
+
 export interface IArrayFormulaRangeType {
     [unitId: string]: { [sheetId: string]: ObjectMatrixPrimitiveType<IRange> };
+}
+
+export interface IFeatureDirtyRangeType {
+    [unitId: string]: { [sheetId: string]: IRange[] };
 }
 
 export interface IArrayFormulaUnitCellType {
@@ -114,6 +122,7 @@ export interface IFormulaDatasetConfig {
     forceCalculate: boolean;
     dirtyRanges: IUnitRange[];
     dirtyNameMap: IDirtyUnitSheetNameMap;
+    dirtyUnitFeatureMap: IDirtyUnitFeatureMap;
     excludedCell?: IUnitExcludedCell;
 }
 

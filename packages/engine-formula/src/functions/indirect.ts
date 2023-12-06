@@ -1,5 +1,5 @@
-import type { FunctionVariantType } from '../reference-object/base-reference-object';
-import { CellReferenceObject } from '../reference-object/cell-reference-object';
+import type { FunctionVariantType } from '../engine/reference-object/base-reference-object';
+import { CellReferenceObject } from '../engine/reference-object/cell-reference-object';
 import { BaseFunction } from './base-function';
 
 export class Indirect extends BaseFunction {

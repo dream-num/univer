@@ -2,14 +2,19 @@ import type { ICellData, IRange, Nullable } from '@univerjs/core';
 import { CellValueType, Disposable, isNullCell, ObjectMatrix } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 
-import type { BaseAstNode } from '../ast-node/base-ast-node';
-import type { IArrayFormulaRangeType, IRuntimeOtherUnitDataType, IRuntimeUnitDataType } from '../basics/common';
+import type {
+    IArrayFormulaRangeType,
+    IFeatureDirtyRangeType,
+    IRuntimeOtherUnitDataType,
+    IRuntimeUnitDataType,
+} from '../basics/common';
 import { isInDirtyRange } from '../basics/dirty';
 import { ErrorType } from '../basics/error-type';
-import { ErrorValueObject } from '../other-object/error-value-object';
-import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
-import type { ArrayValueObject } from '../value-object/array-value-object';
-import type { BaseValueObject, CalculateValueType } from '../value-object/base-value-object';
+import type { BaseAstNode } from '../engine/ast-node/base-ast-node';
+import { ErrorValueObject } from '../engine/other-object/error-value-object';
+import type { BaseReferenceObject, FunctionVariantType } from '../engine/reference-object/base-reference-object';
+import type { ArrayValueObject } from '../engine/value-object/array-value-object';
+import type { BaseValueObject, CalculateValueType } from '../engine/value-object/base-value-object';
 import { IFormulaCurrentConfigService } from './current-data.service';
 
 /**
@@ -46,6 +51,9 @@ export interface IAllRuntimeData {
     functionsExecutedState: FormulaExecutedStateType;
     arrayFormulaCellData: IRuntimeUnitDataType;
     clearArrayFormulaCellData: IRuntimeUnitDataType;
+
+    runtimeFeatureRange: { [featureId: string]: IFeatureDirtyRangeType };
+    runtimeFeatureCellData: { [featureId: string]: IRuntimeUnitDataType };
 }
 
 export interface IExecutionInProgressParams {
@@ -130,6 +138,10 @@ export interface IFormulaRuntimeService {
     isCycleDependency(): boolean;
 
     getRuntimeArrayFormulaCellData(): IRuntimeUnitDataType;
+
+    getRuntimeFeatureRange(): { [featureId: string]: IFeatureDirtyRangeType };
+
+    getRuntimeFeatureCellData(): { [featureId: string]: IRuntimeUnitDataType };
 }
 
 export class FormulaRuntimeService extends Disposable implements IFormulaRuntimeService {
@@ -151,6 +163,10 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
     private _runtimeArrayFormulaCellData: IRuntimeUnitDataType = {};
 
     private _runtimeClearArrayFormulaCellData: IRuntimeUnitDataType = {};
+
+    private _runtimeFeatureRange: { [featureId: string]: IFeatureDirtyRangeType } = {};
+
+    private _runtimeFeatureCellData: { [featureId: string]: IRuntimeUnitDataType } = {};
 
     private _functionsExecutedState: FormulaExecutedStateType = FormulaExecutedStateType.INITIAL;
 
@@ -189,6 +205,8 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
     override dispose(): void {
         this.reset();
+        this._runtimeFeatureCellData = {};
+        this._runtimeFeatureRange = {};
     }
 
     enableCycleDependency() {
@@ -276,6 +294,10 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         this._unitArrayFormulaRange = {};
         this._runtimeArrayFormulaCellData = {};
         this._runtimeClearArrayFormulaCellData = {};
+
+        // this._runtimeFeatureCellData = {};
+        // this._runtimeFeatureRange = {};
+
         this._functionDefinitionPrivacyVar.clear();
         this.markedAsInitialFunctionsExecuted();
 
@@ -446,6 +468,22 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         return this._runtimeClearArrayFormulaCellData;
     }
 
+    getRuntimeFeatureRange() {
+        return this._runtimeFeatureRange;
+    }
+
+    setRuntimeFeatureRange(featureId: string, featureRange: IFeatureDirtyRangeType) {
+        this._runtimeFeatureRange[featureId] = featureRange;
+    }
+
+    getRuntimeFeatureCellData() {
+        return this._runtimeFeatureCellData;
+    }
+
+    setRuntimeFeatureCellData(featureId: string, featureData: IRuntimeUnitDataType) {
+        this._runtimeFeatureCellData[featureId] = featureData;
+    }
+
     getAllRuntimeData(): IAllRuntimeData {
         return {
             unitData: this.getUnitData(),
@@ -454,6 +492,9 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
             functionsExecutedState: this._functionsExecutedState,
             arrayFormulaCellData: this.getRuntimeArrayFormulaCellData(),
             clearArrayFormulaCellData: this.getRuntimeClearArrayFormulaCellData(),
+
+            runtimeFeatureRange: this.getRuntimeFeatureRange(),
+            runtimeFeatureCellData: this.getRuntimeFeatureCellData(),
         };
     }
 

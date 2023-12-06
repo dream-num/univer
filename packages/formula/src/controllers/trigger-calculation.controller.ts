@@ -1,26 +1,13 @@
 import type { ICommandInfo } from '@univerjs/core';
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { FormulaEngineService, FormulaExecutedStateType } from '@univerjs/engine-formula';
+import { FormulaExecutedStateType, IDirtyConversionManagerService } from '@univerjs/engine-formula';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import {
-    DeleteRangeMutation,
-    InsertRangeMutation,
-    InsertSheetMutation,
-    MoveColsMutation,
-    MoveRangeMutation,
-    MoveRowsMutation,
-    RemoveColMutation,
-    RemoveRowMutation,
-    RemoveSheetMutation,
-    SetRangeValuesMutation,
-    SetStyleCommand,
-} from '@univerjs/sheets';
-import { Inject } from '@wendellhu/redi';
+import { SetRangeValuesMutation, SetStyleCommand } from '@univerjs/sheets';
 
 import type { ISetFormulaCalculationNotificationMutation } from '../commands/mutations/set-formula-calculation.mutation';
 import {
-    setFormulaCalculationNotificationMutation,
-    setFormulaCalculationStartMutation,
+    SetFormulaCalculationNotificationMutation,
+    SetFormulaCalculationStartMutation,
 } from '../commands/mutations/set-formula-calculation.mutation';
 
 const globalObject = typeof self !== 'undefined' ? self : window;
@@ -35,7 +22,7 @@ export class TriggerCalculationController extends Disposable {
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService
+        @IDirtyConversionManagerService private readonly _dirtyConversionManagerService: IDirtyConversionManagerService
     ) {
         super();
 
@@ -51,23 +38,23 @@ export class TriggerCalculationController extends Disposable {
     }
 
     private _commandExecutedListener() {
-        const updateCommandList = [
-            SetRangeValuesMutation.id,
-            MoveRangeMutation.id,
-            MoveRowsMutation.id,
-            MoveColsMutation.id,
-            DeleteRangeMutation.id,
-            InsertRangeMutation.id,
-            RemoveRowMutation.id,
-            RemoveColMutation.id,
-            RemoveSheetMutation.id,
-            // SetWorksheetNameMutation.id,
-            InsertSheetMutation.id,
-        ];
+        // const updateCommandList = [
+        //     SetRangeValuesMutation.id,
+        //     MoveRangeMutation.id,
+        //     MoveRowsMutation.id,
+        //     MoveColsMutation.id,
+        //     DeleteRangeMutation.id,
+        //     InsertRangeMutation.id,
+        //     RemoveRowMutation.id,
+        //     RemoveColMutation.id,
+        //     RemoveSheetMutation.id,
+        //     // SetWorksheetNameMutation.id,
+        //     InsertSheetMutation.id,
+        // ];
 
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (!updateCommandList.includes(command.id)) {
+                if (!this._dirtyConversionManagerService.get(command.id)) {
                     return;
                 }
 
@@ -84,7 +71,7 @@ export class TriggerCalculationController extends Disposable {
                 globalObject.clearTimeout(this._setTimeoutKey);
 
                 this._setTimeoutKey = globalObject.setTimeout(() => {
-                    this._commandService.executeCommand(setFormulaCalculationStartMutation.id, {
+                    this._commandService.executeCommand(SetFormulaCalculationStartMutation.id, {
                         commands: this._waitingCommandQueue,
                     });
 
@@ -101,7 +88,7 @@ export class TriggerCalculationController extends Disposable {
 
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (command.id !== setFormulaCalculationNotificationMutation.id) {
+                if (command.id !== SetFormulaCalculationNotificationMutation.id) {
                     return;
                 }
 
@@ -150,7 +137,7 @@ export class TriggerCalculationController extends Disposable {
     }
 
     private _initialExecuteFormula() {
-        this._commandService.executeCommand(setFormulaCalculationStartMutation.id, {
+        this._commandService.executeCommand(SetFormulaCalculationStartMutation.id, {
             commands: [],
             forceCalculation: true,
         });

@@ -2,19 +2,23 @@ import type { IUnitRange, Nullable } from '@univerjs/core';
 import { Disposable } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 
-import type { FormulaDependencyTree } from '../dependency/dependency-tree';
+import type { IFeatureDirtyRangeType, IRuntimeUnitDataType } from '../basics/common';
+import type { FormulaDependencyTree } from '../engine/dependency/dependency-tree';
 
 export interface IReferenceExecutorManagerParams {
     unitId: string;
     subComponentId: string;
     dependencyRanges: IUnitRange[];
-    executor: (currentDependencyTree: FormulaDependencyTree) => void;
+    getDirtyData: (currentDependencyTree: FormulaDependencyTree) => {
+        runtimeCellData: IRuntimeUnitDataType;
+        dirtyRanges: IFeatureDirtyRangeType;
+    };
 }
 
 export interface IReferenceExecutorManagerService {
     dispose(): void;
 
-    delete(featureId: string): void;
+    remove(featureId: string): void;
 
     get(featureId: string): Nullable<IReferenceExecutorManagerParams>;
 
@@ -25,6 +29,12 @@ export interface IReferenceExecutorManagerService {
     getReferenceExecutorMap(): Map<string, IReferenceExecutorManagerParams>;
 }
 
+/**
+ * Passively marked as dirty, register the reference and execution actions of the feature plugin.
+ * After execution, a dirty area and calculated data will be returned,
+ * causing the formula to be marked dirty again,
+ * thereby completing the calculation of the entire dependency tree.
+ */
 export class ReferenceExecutorManagerService extends Disposable implements IReferenceExecutorManagerService {
     private _referenceExecutorMap: Map<string, IReferenceExecutorManagerParams> = new Map();
 
@@ -32,7 +42,7 @@ export class ReferenceExecutorManagerService extends Disposable implements IRefe
         this._referenceExecutorMap.clear();
     }
 
-    delete(featureId: string) {
+    remove(featureId: string) {
         this._referenceExecutorMap.delete(featureId);
     }
 

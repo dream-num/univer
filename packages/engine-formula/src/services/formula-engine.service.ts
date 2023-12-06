@@ -11,25 +11,33 @@ import type { Ctor, Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { Subject } from 'rxjs';
 
-import { LexerTreeBuilder } from '../analysis/lexer';
-import type { LexerNode } from '../analysis/lexer-node';
-import { AstTreeBuilder } from '../analysis/parser';
-import { AstRootNodeFactory } from '../ast-node/ast-root-node';
-import { ErrorNode } from '../ast-node/base-ast-node';
-import { FunctionNodeFactory } from '../ast-node/function-node';
-import { LambdaNodeFactory } from '../ast-node/lambda-node';
-import { LambdaParameterNodeFactory } from '../ast-node/lambda-parameter-node';
-import { OperatorNodeFactory } from '../ast-node/operator-node';
-import { PrefixNodeFactory } from '../ast-node/prefix-node';
-import { ReferenceNodeFactory } from '../ast-node/reference-node';
-import { SuffixNodeFactory } from '../ast-node/suffix-node';
-import { UnionNodeFactory } from '../ast-node/union-node';
-import { ValueNodeFactory } from '../ast-node/value-node';
-import type { IArrayFormulaRangeType, IFormulaDatasetConfig, IUnitExcludedCell } from '../basics/common';
+import type {
+    IArrayFormulaRangeType,
+    IFeatureDirtyRangeType,
+    IFormulaDatasetConfig,
+    IRuntimeUnitDataType,
+    IUnitExcludedCell,
+} from '../basics/common';
 import { ErrorType } from '../basics/error-type';
 import type { IFunctionInfo } from '../basics/function';
 import { FUNCTION_NAMES } from '../basics/function';
-import { FormulaDependencyGenerator } from '../dependency/formula-dependency';
+import { LexerTreeBuilder } from '../engine/analysis/lexer';
+import type { LexerNode } from '../engine/analysis/lexer-node';
+import { AstTreeBuilder } from '../engine/analysis/parser';
+import { AstRootNodeFactory } from '../engine/ast-node/ast-root-node';
+import { ErrorNode } from '../engine/ast-node/base-ast-node';
+import { FunctionNodeFactory } from '../engine/ast-node/function-node';
+import { LambdaNodeFactory } from '../engine/ast-node/lambda-node';
+import { LambdaParameterNodeFactory } from '../engine/ast-node/lambda-parameter-node';
+import { OperatorNodeFactory } from '../engine/ast-node/operator-node';
+import { PrefixNodeFactory } from '../engine/ast-node/prefix-node';
+import { ReferenceNodeFactory } from '../engine/ast-node/reference-node';
+import { SuffixNodeFactory } from '../engine/ast-node/suffix-node';
+import { UnionNodeFactory } from '../engine/ast-node/union-node';
+import { ValueNodeFactory } from '../engine/ast-node/value-node';
+import { FormulaDependencyGenerator } from '../engine/dependency/formula-dependency';
+import { Interpreter } from '../engine/interpreter/interpreter';
+import type { FunctionVariantType } from '../engine/reference-object/base-reference-object';
 import {
     Average,
     Compare,
@@ -48,8 +56,6 @@ import {
     Union,
 } from '../functions';
 import type { BaseFunction } from '../functions/base-function';
-import { Interpreter } from '../interpreter/interpreter';
-import type { FunctionVariantType } from '../reference-object/base-reference-object';
 import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from './current-data.service';
 import { DefinedNamesService, IDefinedNamesService } from './defined-names.service';
 import { FunctionService, IFunctionService } from './function.service';
@@ -128,6 +134,10 @@ export class FormulaEngineService extends Disposable {
         return this._injector.get(LexerTreeBuilder);
     }
 
+    get referenceExecutorManagerService() {
+        return this._injector.get(IReferenceExecutorManagerService);
+    }
+
     /**
      * Use register to register a function, new CustomFunction(inject, name)
      */
@@ -204,6 +214,21 @@ export class FormulaEngineService extends Disposable {
     }
 
     /**
+     * When the feature is loading,
+     * the pre-calculated content needs to be input to the formula engine in advance,
+     * so that the formula can read the correct values.
+     * @param featureId
+     * @param featureData
+     */
+    setRuntimeFeatureCellData(featureId: string, featureData: IRuntimeUnitDataType) {
+        this.runtimeService.setRuntimeFeatureCellData(featureId, featureData);
+    }
+
+    setRuntimeFeatureRange(featureId: string, featureRange: IFeatureDirtyRangeType) {
+        this.runtimeService.setRuntimeFeatureRange(featureId, featureRange);
+    }
+
+    /**
      *
      * @param unitId
      * @param formulaData
@@ -244,9 +269,12 @@ export class FormulaEngineService extends Disposable {
             return;
         }
 
-        const { arrayFormulaRange } = executeState;
+        const { arrayFormulaRange, runtimeFeatureRange } = executeState;
 
-        const { dirtyRanges, excludedCell } = this._getArrayFormulaDirtyRangeAndExcludedRange(arrayFormulaRange);
+        const { dirtyRanges, excludedCell } = this._getArrayFormulaDirtyRangeAndExcludedRange(
+            arrayFormulaRange,
+            runtimeFeatureRange
+        );
 
         if (dirtyRanges == null || dirtyRanges.length === 0) {
             return true;
@@ -259,7 +287,10 @@ export class FormulaEngineService extends Disposable {
         return true;
     }
 
-    private _getArrayFormulaDirtyRangeAndExcludedRange(arrayFormulaRange: IArrayFormulaRangeType) {
+    private _getArrayFormulaDirtyRangeAndExcludedRange(
+        arrayFormulaRange: IArrayFormulaRangeType,
+        runtimeFeatureRange: { [featureId: string]: IFeatureDirtyRangeType }
+    ) {
         const dirtyRanges: IUnitRange[] = [];
         const excludedCell: IUnitExcludedCell = {};
         Object.keys(arrayFormulaRange).forEach((unitId) => {
@@ -284,6 +315,24 @@ export class FormulaEngineService extends Disposable {
                 }
 
                 excludedCell[unitId][sheetId] = newCellData;
+            });
+        });
+
+        Object.keys(runtimeFeatureRange).forEach((featureId) => {
+            const arrayRange = runtimeFeatureRange[featureId];
+            Object.keys(arrayRange).forEach((unitId) => {
+                const sheetArrayFormulaRange = arrayRange[unitId];
+                Object.keys(sheetArrayFormulaRange).forEach((sheetId) => {
+                    const ranges = sheetArrayFormulaRange[sheetId];
+
+                    if (ranges == null) {
+                        return true;
+                    }
+
+                    for (const range of ranges) {
+                        dirtyRanges.push({ unitId, sheetId, range });
+                    }
+                });
             });
         });
 
@@ -332,17 +381,26 @@ export class FormulaEngineService extends Disposable {
 
             const tree = treeList[i];
             const astNode = tree.node;
-            const executor = tree.executor;
+            const getDirtyData = tree.getDirtyData;
             let value: FunctionVariantType;
 
-            if (astNode == null && executor == null) {
+            if (astNode == null && getDirtyData == null) {
                 throw new Error('AstNode or executor is null');
             }
 
             this.runtimeService.setCurrent(tree.row, tree.column, tree.subComponentId, tree.unitId);
 
-            if (executor != null) {
-                executor(tree);
+            if (getDirtyData != null && tree.featureId != null) {
+                /**
+                 * Execute the dependencies registered by the feature,
+                 * and return the dirty area marked by the feature,
+                 * so as to allow the formulas depending on the dirty area to continue the calculation.
+                 */
+                const { runtimeCellData, dirtyRanges } = getDirtyData(tree);
+
+                this.runtimeService.setRuntimeFeatureCellData(tree.featureId, runtimeCellData);
+
+                this.runtimeService.setRuntimeFeatureRange(tree.featureId, dirtyRanges);
             } else if (astNode != null) {
                 if (interpreter.checkAsyncNode(astNode)) {
                     value = await interpreter.executeAsync(astNode);
@@ -427,8 +485,9 @@ export class FormulaEngineService extends Disposable {
             [ISuperTableService, { useClass: SuperTableService }],
             [IDefinedNamesService, { useClass: DefinedNamesService }],
             [IFunctionService, { useClass: FunctionService }],
-
             [IReferenceExecutorManagerService, { useClass: ReferenceExecutorManagerService }],
+
+            // [IReferenceExecutorManagerService, { useClass: ReferenceExecutorManagerService }],
 
             // Calculation engine
             [FormulaDependencyGenerator],

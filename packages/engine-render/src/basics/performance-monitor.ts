@@ -91,8 +91,8 @@ export class PerformanceMonitor {
     }
 
     Now(): number {
-        if (window.performance && window.performance.now) {
-            return window.performance.now();
+        if (performance && performance.now) {
+            return performance.now();
         }
 
         return Date.now();

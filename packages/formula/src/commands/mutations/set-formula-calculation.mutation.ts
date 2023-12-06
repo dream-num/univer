@@ -11,7 +11,7 @@ export interface ISetFormulaCalculationStartMutation {
  * TODO: @DR-Univer
  * Trigger the calculation of the formula and stop the formula
  */
-export const setFormulaCalculationStartMutation: IMutation<ISetFormulaCalculationStartMutation> = {
+export const SetFormulaCalculationStartMutation: IMutation<ISetFormulaCalculationStartMutation> = {
     id: 'formula.mutation.set-formula-calculation-start',
     type: CommandType.MUTATION,
     handler: (accessor: IAccessor, params: ISetFormulaCalculationStartMutation) => true,
@@ -19,7 +19,7 @@ export const setFormulaCalculationStartMutation: IMutation<ISetFormulaCalculatio
 
 export interface ISetFormulaCalculationStopMutation {}
 
-export const setFormulaCalculationStopMutation: IMutation<ISetFormulaCalculationStopMutation> = {
+export const SetFormulaCalculationStopMutation: IMutation<ISetFormulaCalculationStopMutation> = {
     id: 'formula.mutation.set-formula-calculation-stop',
     type: CommandType.MUTATION,
     handler: (accessor: IAccessor, params: ISetFormulaCalculationStopMutation) => true,
@@ -30,7 +30,7 @@ export interface ISetFormulaCalculationNotificationMutation {
     stageInfo?: IExecutionInProgressParams;
 }
 
-export const setFormulaCalculationNotificationMutation: IMutation<ISetFormulaCalculationNotificationMutation> = {
+export const SetFormulaCalculationNotificationMutation: IMutation<ISetFormulaCalculationNotificationMutation> = {
     id: 'formula.mutation.set-formula-calculation-notification',
     type: CommandType.MUTATION,
     handler: (accessor: IAccessor, params: ISetFormulaCalculationNotificationMutation) => true,

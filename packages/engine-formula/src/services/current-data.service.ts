@@ -4,6 +4,7 @@ import { createIdentifier } from '@wendellhu/redi';
 
 import type {
     IArrayFormulaUnitCellType,
+    IDirtyUnitFeatureMap,
     IDirtyUnitSheetNameMap,
     IFormulaData,
     IFormulaDatasetConfig,
@@ -60,6 +61,8 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
     private _dirtyNameMap: IDirtyUnitSheetNameMap = {};
 
+    private _dirtyUnitFeatureMap: IDirtyUnitFeatureMap = {};
+
     private _excludedCell: Nullable<IUnitExcludedCell>;
 
     constructor(@IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService) {
@@ -72,6 +75,8 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         this._arrayFormulaCellData = {};
         this._sheetNameMap = {};
         this._dirtyRanges = [];
+        this._dirtyNameMap = {};
+        this._dirtyUnitFeatureMap = {};
         this._excludedCell = {};
     }
 
@@ -111,6 +116,10 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         return this._dirtyNameMap;
     }
 
+    getDirtyUnitFeatureMap() {
+        return this._dirtyUnitFeatureMap;
+    }
+
     load(config: IFormulaDatasetConfig) {
         const { allUnitData, unitSheetNameMap } = this._loadSheetData();
 
@@ -129,6 +138,8 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         this._dirtyRanges = config.dirtyRanges;
 
         this._dirtyNameMap = config.dirtyNameMap;
+
+        this._dirtyUnitFeatureMap = config.dirtyUnitFeatureMap;
 
         this._excludedCell = config.excludedCell;
     }

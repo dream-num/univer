@@ -150,6 +150,8 @@ export class NumfmtController extends Disposable implements INumfmtController {
                 ...(props as any), // need passthrough to react props.
             },
             onClose: () => {
+                this._sheetSkeletonManagerService.reCalculate();
+                this._renderManagerService.getRenderById(workbook.getUnitId())?.mainComponent?.makeDirty();
                 commandService.executeCommand(CloseNumfmtPanelOperator.id);
             },
         });

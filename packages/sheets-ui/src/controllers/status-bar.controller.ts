@@ -1,11 +1,18 @@
 import type { IRange } from '@univerjs/core';
-import { Disposable, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle } from '@univerjs/core';
+import {
+    Disposable,
+    IUniverInstanceService,
+    LifecycleStages,
+    ObjectMatrix,
+    OnLifecycle,
+    toDisposable,
+} from '@univerjs/core';
 import type { BaseValueObject, ISheetData } from '@univerjs/engine-formula';
 import { FormulaEngineService, RangeReferenceObject } from '@univerjs/engine-formula';
-import type { ISelectionWithStyle } from '@univerjs/sheets';
 import { SelectionManagerService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
+import { ISelectionRenderService } from '..';
 import type { IStatusBarServiceStatus } from '../services/status-bar.service';
 import { IStatusBarService } from '../services/status-bar.service';
 
@@ -15,7 +22,8 @@ export class StatusBarController extends Disposable {
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService,
-        @IStatusBarService private readonly _statusBarService: IStatusBarService
+        @IStatusBarService private readonly _statusBarService: IStatusBarService,
+        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService
     ) {
         super();
 
@@ -27,14 +35,27 @@ export class StatusBarController extends Disposable {
     }
 
     private _registerSelectionListener(): void {
-        this._selectionManagerService.selectionInfo$.subscribe((selectionRangeWithStyle) => {
-            if (selectionRangeWithStyle) {
-                this._calculateSelection(selectionRangeWithStyle);
-            }
-        });
+        this.disposeWithMe(
+            toDisposable(
+                this._selectionRenderService.selectionMoving$.subscribe((selections) => {
+                    if (selections) {
+                        this._calculateSelection(selections);
+                    }
+                })
+            )
+        );
+        this.disposeWithMe(
+            toDisposable(
+                this._selectionManagerService.selectionInfo$.subscribe((selections) => {
+                    if (selections) {
+                        this._calculateSelection(selections.map((selection) => selection.range));
+                    }
+                })
+            )
+        );
     }
 
-    private _calculateSelection(selections: ISelectionWithStyle[]) {
+    private _calculateSelection(selections: IRange[]) {
         const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
         const unitId = workbook.getUnitId();
         const sheetId = workbook.getActiveSheet().getSheetId();
@@ -50,8 +71,8 @@ export class StatusBarController extends Disposable {
                     columnCount: sheetConfig.columnCount,
                 };
             });
-        if (selections?.length && (selections?.length > 1 || !this._isSingleCell(selections[0].range))) {
-            const refs = selections.map((s) => new RangeReferenceObject(s.range, sheetId, unitId));
+        if (selections?.length && (selections?.length > 1 || !this._isSingleCell(selections[0]))) {
+            const refs = selections.map((s) => new RangeReferenceObject(s, sheetId, unitId));
             refs.forEach((ref) =>
                 ref.setUnitData({
                     [unitId]: sheetData,

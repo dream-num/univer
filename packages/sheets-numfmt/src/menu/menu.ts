@@ -21,8 +21,8 @@ export const CurrencyMenuItem = (componentManager: ComponentManager) => {
     return () => ({
         icon: iconKey,
         id: SetCurrencyCommand.id,
-        title: 'numfmt.menu.currency',
-        tooltip: 'numfmt.menu.currency',
+        title: 'sheet.numfmt.currency',
+        tooltip: 'sheet.numfmt.currency',
         type: MenuItemType.BUTTON,
         group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
         positions: [MenuPosition.TOOLBAR_START],
@@ -35,8 +35,8 @@ export const AddDecimalMenuItem = (componentManager: ComponentManager) => {
     return () => ({
         icon: iconKey,
         id: AddDecimalCommand.id,
-        title: 'numfmt.menu.add.decimal',
-        tooltip: 'numfmt.menu.add.decimal',
+        title: 'sheet.numfmt.addDecimal',
+        tooltip: 'sheet.numfmt.addDecimal',
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.TOOLBAR_START],
         group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
@@ -48,8 +48,8 @@ export const SubtractDecimalMenuItem = (componentManager: ComponentManager) => {
     return () => ({
         icon: iconKey,
         id: SubtractDecimalCommand.id,
-        title: 'numfmt.menu.subtract.decimal',
-        tooltip: 'numfmt.menu.subtract.decimal',
+        title: 'sheet.numfmt.subtractDecimal',
+        tooltip: 'sheet.numfmt.subtractDecimal',
         type: MenuItemType.BUTTON,
         group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
         positions: [MenuPosition.TOOLBAR_START],
@@ -57,8 +57,11 @@ export const SubtractDecimalMenuItem = (componentManager: ComponentManager) => {
 };
 
 export const FactoryOtherMenuItem = (componentManager: ComponentManager) => {
-    componentManager.register('sheet.numfmt.moreNumfmtType', MoreNumfmtType);
-    componentManager.register('sheet.numfmt.moreNumfmtType.options', Options);
+    const moreTypeKey = 'sheet.numfmt.moreNumfmtType';
+    const optionsKey = 'sheet.numfmt.moreNumfmtType.options';
+
+    componentManager.register(moreTypeKey, MoreNumfmtType);
+    componentManager.register(optionsKey, Options);
 
     return (_accessor: IAccessor) => {
         const numfmtService = _accessor.get(INumfmtService);
@@ -104,17 +107,16 @@ export const FactoryOtherMenuItem = (componentManager: ComponentManager) => {
         );
         return {
             // icon: 'MoreDownSingle',
-            label: 'sheet.numfmt.moreNumfmtType',
+            label: moreTypeKey,
             id: OpenNumfmtPanelOperator.id,
-            // title: 'numfmt.menu.preview',
-            tooltip: 'numfmt.menu.preview',
+            tooltip: 'sheet.numfmt.title',
             type: MenuItemType.SELECTOR,
             group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
             positions: [MenuPosition.TOOLBAR_START],
             selections: [
                 {
                     label: {
-                        name: 'sheet.numfmt.moreNumfmtType.options',
+                        name: optionsKey,
                         hoverable: false,
                     },
                 },

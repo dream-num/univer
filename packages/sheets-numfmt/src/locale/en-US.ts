@@ -28,6 +28,8 @@ export const enUs = {
             negType: '负数类型',
             generalDes: '常规格式不包含任何特定的数字格式。',
             thousandthPercentileDes: '千分位符格式用于一般数字的表示。货币和会计格式则提供货币值计算的专用格式。',
+            addDecimal: '增加小数位',
+            subtractDecimal: '减少小数位',
         },
     },
 };

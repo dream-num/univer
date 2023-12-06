@@ -1,4 +1,4 @@
-export const zhCn = {
+export const enUs = {
     sheet: {
         numfmt: {
             title: '数据格式',
@@ -7,12 +7,20 @@ export const zhCn = {
             confirm: '确认',
             general: '常规',
             accounting: '会计',
+            text: '文本',
+            number: '数值',
             currency: '货币',
             date: '日期',
+            time: '时间',
             thousandthPercentile: '千分位符',
             preview: '示例',
+            dateTime: '日期时间',
             decimalLength: '小数位数',
             currencyType: '货币类型',
+            moreFmt: '更多格式',
+            financialValue: '财务数值',
+            roundingCurrency: '货币取整',
+            timeDuration: '持续时间',
             currencyDes: '货币格式用于表示一般货币数值。会计格式可以对一列数值进行小数点对齐',
             accountingDes: '会计数字格式可对一列数值进行货币符号和小数点对齐',
             dateType: '日期类型',

@@ -1,4 +1,4 @@
-import { ICommandService, IUniverInstanceService } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { AddDigitsSingle, MoreDownSingle, ReduceDigitsSingle, RmbSingle } from '@univerjs/icons';
 import { INumfmtService, SelectionManagerService, SetNumfmtMutation } from '@univerjs/sheets';
 import type { ComponentManager, IMenuSelectorItem } from '@univerjs/ui';
@@ -64,6 +64,7 @@ export const FactoryOtherMenuItem = (componentManager: ComponentManager) => {
         const numfmtService = _accessor.get(INumfmtService);
         const univerInstanceService = _accessor.get(IUniverInstanceService);
         const commandService = _accessor.get(ICommandService);
+        const localeService = _accessor.get(LocaleService);
 
         const selectionManagerService = _accessor.get(SelectionManagerService);
         const value$ = new Observable((subscribe) =>
@@ -86,7 +87,7 @@ export const FactoryOtherMenuItem = (componentManager: ComponentManager) => {
                     const row = range.startRow;
                     const col = range.startColumn;
                     const numfmtValue = numfmtService.getValue(workbook.getUnitId(), worksheet.getSheetId(), row, col);
-                    let value: string = '常规';
+                    let value: string = localeService.t('sheet.numfmt.general');
 
                     if (numfmtValue) {
                         const pattern = numfmtValue.pattern;
@@ -94,7 +95,7 @@ export const FactoryOtherMenuItem = (componentManager: ComponentManager) => {
                             (item) => isPatternEqualWithoutDecimal(pattern, (item as { pattern: string }).pattern)
                         );
                         if (item && typeof item === 'object' && item.pattern) {
-                            value = item.label;
+                            value = localeService.t(item.label);
                         }
                     }
                     subscribe.next(value);

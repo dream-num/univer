@@ -1,4 +1,6 @@
+import { LocaleService } from '@univerjs/core';
 import { InputNumber, SelectList } from '@univerjs/design';
+import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { FC } from 'react';
 import React, { useMemo, useState } from 'react';
 
@@ -15,6 +17,8 @@ export const isThousandthPercentilePanel = (pattern: string) =>
     getNumberFormatOptions().some((item) => isPatternEqualWithoutDecimal(item.value, pattern));
 
 export const ThousandthPercentilePanel: FC<IBusinessComponentProps> = (props) => {
+    const localeService = useDependency(LocaleService);
+
     const options = useMemo(getNumberFormatOptions, []);
     const [decimal, decimalSet] = useState(() => getDecimalFromPattern(props.defaultPattern || '', 0));
 
@@ -36,7 +40,7 @@ export const ThousandthPercentilePanel: FC<IBusinessComponentProps> = (props) =>
 
     return (
         <div>
-            <div className="m-t-16 label">小数位数</div>
+            <div className="m-t-16 label">{localeService.t('sheet.numfmt.decimalLength')}</div>
             <div className="m-t-8">
                 <InputNumber
                     disabled={isInputDisable}
@@ -46,13 +50,11 @@ export const ThousandthPercentilePanel: FC<IBusinessComponentProps> = (props) =>
                     onChange={(value) => decimalSet(value || 0)}
                 />
             </div>
-            <div className="m-t-16 label"> 负数类型</div>
+            <div className="m-t-16 label"> {localeService.t('sheet.numfmt.negType')}</div>
             <div className="m-t-8">
                 <SelectList onChange={handleClick} options={options} value={suffix} />
             </div>
-            <div className="describe m-t-14">
-                数值格式用于一般数字的表示。货币和会计格式则提供货币值计算的专用格式。
-            </div>
+            <div className="describe m-t-14">{localeService.t('sheet.numfmt.thousandthPercentileDes')}</div>
         </div>
     );
 };

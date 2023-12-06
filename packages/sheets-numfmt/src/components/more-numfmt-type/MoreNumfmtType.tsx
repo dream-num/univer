@@ -1,6 +1,6 @@
 import './index.less';
 
-import { ICommandService, Range } from '@univerjs/core';
+import { ICommandService, LocaleService, Range } from '@univerjs/core';
 import numfmt from '@univerjs/engine-numfmt';
 import type { FormatType } from '@univerjs/sheets';
 import { SelectionManagerService } from '@univerjs/sheets';
@@ -13,12 +13,15 @@ import { OpenNumfmtPanelOperator } from '../../commands/operators/open.numfmt.pa
 import { getPatternType } from '../../utils/pattern';
 
 export const MoreNumfmtType = (props: { value?: string }) => {
-    const value = props.value ?? '常规';
+    const localeService = useDependency(LocaleService);
+    const value = props.value ?? localeService.t('sheet.numfmt.general');
     return <span className="more-numfmt-type">{value}</span>;
 };
 
 export const Options = () => {
     const commandService = useDependency(ICommandService);
+    const localeService = useDependency(LocaleService);
+
     const selectionManagerService = useDependency(SelectionManagerService);
     const setNumfmt = (pattern: string | null) => {
         const selection = selectionManagerService.getLast();
@@ -63,7 +66,7 @@ export const Options = () => {
                             handleOnclick(index);
                         }}
                     >
-                        <div>{item.label}</div>
+                        <div>{localeService.t(item.label)}</div>
                         <div className="m-l-26">
                             {item.pattern ? numfmt.format(item.pattern || '', defaultValue, { locale: 'zh-CN' }) : ''}
                         </div>

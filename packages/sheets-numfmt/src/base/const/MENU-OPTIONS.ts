@@ -1,54 +1,54 @@
 export const MENU_OPTIONS: Array<{ label: string; pattern: string | null } | '|'> = [
     {
-        label: '常规',
+        label: 'sheet.numfmt.general',
         pattern: null,
     },
     {
-        label: '文本',
+        label: 'sheet.numfmt.text',
         pattern: '@@@',
     },
     '|',
     {
-        label: '数字',
+        label: 'sheet.numfmt.number',
         pattern: '0',
     },
     '|',
     {
-        label: '会计',
+        label: 'sheet.numfmt.accounting',
         pattern: '"¥" #,##0.00_);[Red]("¥"#,##0.00)',
     },
     {
-        label: '财务数值',
+        label: 'sheet.numfmt.financialValue',
         pattern: '#,##0.00;[Red]#,##0.00',
     },
     {
-        label: '货币',
+        label: 'sheet.numfmt.currency',
         pattern: '"¥"#,##0.00_);[Red]("¥"#,##0.00)',
     },
     {
-        label: '货币取整',
+        label: 'sheet.numfmt.roundingCurrency',
         pattern: '"¥"#,##0;[Red]"¥"#,##0',
     },
     '|',
     {
-        label: '日期',
+        label: 'sheet.numfmt.date',
         pattern: 'yyyy-mm-dd;@',
     },
     {
-        label: '时间',
+        label: 'sheet.numfmt.time',
         pattern: 'am/pm h":"mm":"ss',
     },
     {
-        label: '日期时间',
+        label: 'sheet.numfmt.dateTime',
         pattern: 'yyyy-m-d am/pm h:mm',
     },
     {
-        label: '持续时间',
+        label: 'sheet.numfmt.timeDuration',
         pattern: 'h:mm:ss',
     },
     '|',
     {
-        label: '更多格式',
+        label: 'sheet.numfmt.moreFmt',
         pattern: '',
     },
 ];

@@ -6,7 +6,7 @@ import baseConfig, { postBuild } from '../../esbuild.config.mjs';
 for (const format of ['cjs', 'esm']) {
     await esbuild.build({
         ...baseConfig,
-        globalName: 'UniverUiPluginDocs',
+        globalName: 'UniverDocsUi',
         entryPoints: {
             index: './src/index.ts',
             'locale/en-US': './src/locale/en-US.ts',

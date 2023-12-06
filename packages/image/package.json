@@ -17,6 +17,7 @@
     },
     "devDependencies": {
         "@vitest/coverage-istanbul": "^0.34.6",
+        "esbuild": "^0.19.8",
         "less": "^4.2.0",
         "ts-node": "^10.9.1",
         "typescript": "^5.3.2",

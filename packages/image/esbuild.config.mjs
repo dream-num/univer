@@ -6,7 +6,7 @@ import baseConfig, { postBuild } from '../../esbuild.config.mjs';
 for (const format of ['cjs', 'esm']) {
     await esbuild.build({
         ...baseConfig,
-        globalName: 'UniverEngineNumfmt',
+        globalName: 'UniverImage',
         entryPoints: {
             index: './src/index.ts',
         },

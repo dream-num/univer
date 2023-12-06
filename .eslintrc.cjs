@@ -1,4 +1,40 @@
-module.exports = {
+const { resolve } = require('node:path');
+
+const allPackages = [
+    'packages/core',
+    'packages/design',
+    'packages/docs',
+    'packages/docs-ui',
+    'packages/engine-formula',
+    'packages/engine-numfmt',
+    'packages/engine-render',
+    'packages/formula',
+    'packages/image',
+    'packages/network',
+    'packages/rpc',
+    'packages/sheets',
+    'packages/sheets-find',
+    'packages/sheets-formula',
+    'packages/sheets-import-xlsx',
+    'packages/sheets-numfmt',
+    'packages/sheets-ui',
+    'packages/slides',
+    'packages/slides-ui',
+    'packages/ui',
+    'packages/uniscript',
+
+    'examples/data',
+    'examples/docs',
+    'examples/sheets',
+    'examples/slides',
+
+    'apps/docs',
+];
+
+/**
+ * @type {import('eslint').Linter.Config}
+ */
+const config = {
     root: true,
     env: {
         browser: true,
@@ -21,12 +57,17 @@ module.exports = {
         'plugin:prettier/recommended',
         'prettier',
     ],
-    parserOptions: {
-        ecmaVersion: 12,
-        sourceType: 'module',
-        // https://typescript-eslint.io/linting/troubleshooting/#i-get-errors-telling-me-eslint-was-configured-to-run--however-that-tsconfig-does-not--none-of-those-tsconfigs-include-this-file
-        project: './tsconfig.eslint.json',
-    },
+    // parserOptions: {
+    //     ecmaVersion: 12,
+    //     sourceType: 'module',
+    //     // https://typescript-eslint.io/linting/troubleshooting/#i-get-errors-telling-me-eslint-was-configured-to-run--however-that-tsconfig-does-not--none-of-those-tsconfigs-include-this-file
+    //     project: [
+    //         './tsconfig.eslint.json',
+    //         './packages/*/tsconfig.json',
+    //         './examples/*/tsconfig.json',
+    //         './apps/*/tsconfig.json',
+    //     ],
+    // },
     rules: {
         'no-cond-assign': 'off',
         'no-restricted-globals': 'off',
@@ -156,4 +197,15 @@ module.exports = {
             },
         },
     },
+
+    overrides: [
+        ...allPackages.map((pkg) => ({
+            files: [`${pkg}/src/**/*.ts`, `${pkg}/src/**/*.tsx`],
+            parserOptions: {
+                project: resolve(__dirname, './tsconfig.eslint.json'),
+            },
+        })),
+    ],
 };
+
+module.exports = config;

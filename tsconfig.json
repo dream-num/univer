@@ -1,5 +1,7 @@
 {
     "compilerOptions": {
+        "rootDir": ".",
+        "outDir": "lib",
         "forceConsistentCasingInFileNames": true,
         "lib": ["ESNext", "DOM", "WebWorker", "dom.iterable"],
         "target": "ESNext",
@@ -15,11 +17,85 @@
         "strict": true,
         "strictPropertyInitialization": true,
         "noImplicitOverride": true,
-        "allowJs": true,
+        "allowJs": false,
+        "checkJs": false,
         "skipLibCheck": true,
         "isolatedModules": true,
         "types": ["node", "esbuild-style-plugin"]
     },
-    "include": ["packages/*/src", "examples/*/src"],
-    "exclude": ["**/node_modules"]
+    "include": [],
+    "references": [
+        {
+            "path": "./packages/core"
+        },
+        {
+            "path": "./packages/design"
+        },
+        {
+            "path": "./packages/docs"
+        },
+        {
+            "path": "./packages/docs-ui"
+        },
+        {
+            "path": "./packages/engine-formula"
+        },
+        {
+            "path": "./packages/engine-numfmt"
+        },
+        {
+            "path": "./packages/engine-render"
+        },
+        {
+            "path": "./packages/formula"
+        },
+        // {
+        //     "path": "./packages/image"
+        // },
+        {
+            "path": "./packages/network"
+        },
+        {
+            "path": "./packages/rpc"
+        },
+        {
+            "path": "./packages/sheets"
+        },
+        {
+            "path": "./packages/sheets-find"
+        },
+        {
+            "path": "./packages/sheets-formula"
+        },
+        {
+            "path": "./packages/sheets-import-xlsx"
+        },
+        {
+            "path": "./packages/sheets-numfmt"
+        },
+        {
+            "path": "./packages/sheets-ui"
+        },
+        {
+            "path": "./packages/slides"
+        },
+        {
+            "path": "./packages/slides-ui"
+        },
+        {
+            "path": "./packages/ui"
+        },
+        {
+            "path": "./packages/uniscript"
+        },
+    ],
+    "files": [],
+    "exclude": ["node_modules", "target", "lib", "test-results"],
+    "ts-node": {
+      "esm": true,
+      "compilerOptions": {
+        "module": "ESNext",
+        "moduleResolution": "Node"
+      }
+    }
 }

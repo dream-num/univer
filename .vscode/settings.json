@@ -3,6 +3,7 @@
         "source.fixAll.eslint": true,
         "source.fixAll.stylelint": true
     },
+    "editor.formatOnSave": false,
     "javascript.preferences.importModuleSpecifier": "relative",
     "typescript.preferences.importModuleSpecifier": "relative",
     "commentTranslate.targetLanguage": "zh-CN",

@@ -1,12 +1,13 @@
 {
     "extends": "./tsconfig.json",
-    "compilerOptions": {},
-    "include": [
-        "packages/**/*",
-        "examples/**/*",
-        "apps/**/*",
-        ".eslintrc.cjs",
-        "./vitest.workspace.ts",
-        "./storybook/**/*"
+    "compilerOptions": {
+        "allowJs": true
+    },
+    "include": ["."],
+    "exclude": [
+        "./apps/docs/docs",
+        "**/node_modules",
+        "**/local",
+        "**/lib",
     ]
 }

@@ -1,9 +1,8 @@
 {
     "extends": "../../tsconfig.json",
     "compilerOptions": {
-        "rootDir": "./",
+        "rootDir": "./src",
         "outDir": "lib",
-        "baseUrl": "./",
         "esModuleInterop": true,
         "strictPropertyInitialization": false,
     },

@@ -64,5 +64,5 @@ export class PassiveDirtyManagerService extends Disposable implements IPassiveDi
 }
 
 export const IPassiveDirtyManagerService = createIdentifier<PassiveDirtyManagerService>(
-    'univer.formula.reference-executor-manager.service'
+    'univer.formula.passive-dirty-manager.service'
 );

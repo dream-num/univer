@@ -29,6 +29,7 @@ export class DocumentViewModel implements IDisposable {
         }
 
         this.children = this._transformToTree(_documentDataModel.getBody()!.dataStream);
+
         this._buildHeaderFooterViewModel();
     }
 
@@ -216,6 +217,7 @@ export class DocumentViewModel implements IDisposable {
             const sectionBreak = sectionBreaks[i];
             if (sectionBreak.startIndex === index) {
                 this._sectionBreakCurrentIndex = i;
+
                 return sectionBreak;
             }
         }
@@ -376,11 +378,7 @@ export class DocumentViewModel implements IDisposable {
             if (char === DataStreamTreeTokenType.PARAGRAPH) {
                 content += DataStreamTreeTokenType.PARAGRAPH;
 
-                const node = DataStreamTreeNode.create(
-                    DataStreamTreeNodeType.PARAGRAPH,
-
-                    content
-                );
+                const node = DataStreamTreeNode.create(DataStreamTreeNodeType.PARAGRAPH, content);
 
                 // const isBullet = this._checkParagraphBullet(paragraphIndex);
                 // const isIndent = isBullet === true ? true : this._checkParagraphIndent(paragraphIndex);

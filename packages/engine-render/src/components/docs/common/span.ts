@@ -1,3 +1,4 @@
+import type { Nullable } from '@univerjs/core';
 import { BooleanNumber, BulletAlignment, DataStreamTreeTokenType as DT, GridType } from '@univerjs/core';
 
 import { FontCache } from '../../../basics/font-cache';
@@ -8,7 +9,7 @@ import type {
 } from '../../../basics/i-document-skeleton-cached';
 import { SpanType } from '../../../basics/i-document-skeleton-cached';
 import type { IFontCreateConfig } from '../../../basics/interfaces';
-import { hasCJK } from '../../../basics/tools';
+import { hasCJKText } from '../../../basics/tools';
 import { validationGrid } from './tools';
 
 export function createSkeletonWordSpan(
@@ -92,7 +93,7 @@ export function _createSkeletonWordOrLetter(
     if (validationGrid(gridType, snapToGrid)) {
         // 当文字也需要对齐到网格式，进行处理
         // const multiple = Math.ceil(contentWidth / charSpace);
-        width = contentWidth + (hasCJK(content) ? charSpace : charSpace / 2);
+        width = contentWidth + (hasCJKText(content) ? charSpace : charSpace / 2);
         if (gridType === GridType.SNAP_TO_CHARS) {
             paddingLeft = (width - contentWidth) / 2;
         }
@@ -157,9 +158,11 @@ export function createSkeletonBulletSpan(
     };
 }
 
+// Set the left value of the current span based on the width of pre span and the left value of the previous span.
 export function setSpanGroupLeft(spanGroup: IDocumentSkeletonSpan[], left: number = 0) {
     const spanGroupLen = spanGroup.length;
     let preSpan;
+
     for (let i = 0; i < spanGroupLen; i++) {
         const span = spanGroup[i];
         span.left = preSpan ? preSpan.left + preSpan.width : left;
@@ -197,6 +200,7 @@ export function addSpanToDivide(
 
     setSpanGroupLeft(spanGroup, offsetLeft);
 
+    // Set span parent pointer.
     for (const span of spanGroup) {
         span.parent = divide;
     }
@@ -212,4 +216,23 @@ function _getMaxBoundingBox(span: IDocumentSkeletonSpan, bulletSkeleton: IDocume
         return span.bBox;
     }
     return bulletSkeleton.bBox;
+}
+
+export function hasMixedTextLayout(preSpan: Nullable<IDocumentSkeletonSpan>, span: IDocumentSkeletonSpan) {
+    if (preSpan == null) {
+        return false;
+    }
+    const { content: preContent } = preSpan;
+    const { content: curContent } = span;
+
+    if (preContent == null || curContent == null) {
+        return false;
+    }
+
+    const ENG_NUMBERS_REG = /[a-z\d]/i;
+
+    return (
+        (ENG_NUMBERS_REG.test(preContent) && hasCJKText(curContent)) ||
+        (hasCJKText(preContent) && ENG_NUMBERS_REG.test(curContent))
+    );
 }

@@ -31,13 +31,13 @@ enum AxisType {
 interface ILineBoundingBox {
     lineHeight: number;
     lineTop: number;
+    contentHeight: number;
     paddingLeft?: number;
     paddingRight?: number;
     paddingTop?: number;
     paddingBottom?: number;
     marginTop?: number;
     spaceBelowApply?: number;
-    contentHeight: number;
 }
 
 // 处理divides， divideLen， lineIndex， 无序和有序列表标题， drawingTBIds 影响行的元素id集合
@@ -65,6 +65,7 @@ export function createSkeletonLine(
     } = lineBoundingBox;
 
     const lineSke = _getLineSke(lineType, paragraphIndex);
+
     lineSke.lineIndex = lineIndex;
     lineSke.paragraphStart = isParagraphStart; // 是否段落开始的第一行
     lineSke.contentHeight = contentHeight;
@@ -405,9 +406,11 @@ function _calculateDivideByDrawings(columnWidth: number, drawingSplit: IDrawings
     const divideSkeleton: IDocumentSkeletonDivide[] = [];
     let start = 0;
     const splitLength = drawingSplit.length;
+
     for (let i = 0; i < splitLength; i++) {
         const split = drawingSplit[i];
         const { left, width } = split;
+
         if (left > start) {
             // 插入start到left的间隔divide
             let width = left - start;

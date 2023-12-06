@@ -125,6 +125,7 @@ export function dealWidthParagraph(
         if (customBlock == null) {
             continue;
         }
+
         customBlockCache.set(charIndex, customBlock);
         const blockId = customBlock.blockId;
         const drawingOrigin = drawings[blockId];
@@ -145,6 +146,7 @@ export function dealWidthParagraph(
             const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
             const tabSpan = createSkeletonTabSpan(fontCreateConfig, charSpaceApply); // measureText收敛到create中执行
             allPages = calculateParagraphLayout([tabSpan], allPages, sectionBreakConfig, paragraphConfig, true);
+
             continue;
         } else if (char === DataStreamTreeTokenType.CUSTOM_BLOCK) {
             let customBlock = customBlockCache.get(charIndex);
@@ -204,6 +206,7 @@ export function dealWidthParagraph(
             paragraphStyle
         ); // Handling special languages such as Tibetan, Arabic
         let newSpanGroup = [];
+
         if (languageHandlerResult) {
             const { charIndex: newCharIndex, spanGroup } = languageHandlerResult;
             i = newCharIndex;
@@ -351,9 +354,9 @@ function horizontalAlignHandler(line: IDocumentSkeletonLine, horizontalAlign: Ho
     const divideLength = divides.length;
     for (let i = 0; i < divideLength; i++) {
         const divide = divides[i];
-        const { width, spanGroup } = divide;
+        const { width } = divide;
         const spanGroupWidth = getSpanGroupWidth(divide);
-        // console.log(spanGroup, spanGroupWidth, width);
+
         if (width === Infinity) {
             continue;
         }

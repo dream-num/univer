@@ -18,6 +18,7 @@ export function dealWithSections(
 ) {
     const allCurrentSkeletonPages: IDocumentSkeletonPage[] = [];
     const renderedBlockIdMap = new Map<string, boolean>();
+
     for (const node of sectionNode.children) {
         // const { paragraph, table, tableOfContents, blockType, customBlock, blockId } = block;
         // if (preRenderedBlockIdMap?.get(blockId)) {

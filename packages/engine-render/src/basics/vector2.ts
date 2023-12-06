@@ -1,3 +1,4 @@
+/* eslint-disable no-magic-numbers */
 import type { DeepImmutable, FloatArray } from './i-events';
 
 export interface IPoint {
@@ -13,9 +14,9 @@ export class Vector2 implements IPoint {
      */
     constructor(
         /** defines the first coordinate */
-        public x: number = 0,
+        public x = 0,
         /** defines the second coordinate */
-        public y: number = 0
+        public y = 0
     ) {}
 
     // Statics
@@ -750,13 +751,15 @@ export class Vector2 implements IPoint {
         return this;
     }
 
-    rotateByPoint(angle: number, originPoint: Vector2 = Vector2.create(0, 0)) {
+    rotateByPoint(angle: number, originPoint = Vector2.create(0, 0)) {
         const cosA = Math.cos(angle);
         const sinA = Math.sin(angle);
         const rx = originPoint.x + (this.x - originPoint.x) * cosA - (this.y - originPoint.y) * sinA;
         const ry = originPoint.y + (this.x - originPoint.x) * sinA + (this.y - originPoint.y) * cosA;
+
         this.x = rx;
         this.y = ry;
+
         return this;
     }
 

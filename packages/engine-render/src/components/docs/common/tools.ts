@@ -1,3 +1,4 @@
+/* eslint-disable no-magic-numbers */
 import type {
     INumberUnit,
     IParagraphStyle,
@@ -33,11 +34,11 @@ import type { DataStreamTreeNode } from '../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../view-model/document-view-model';
 
 export function getLastPage(pages: IDocumentSkeletonPage[]) {
-    return pages?.[pages.length - 1];
+    return pages[pages.length - 1];
 }
 
 export function getLastSection(page: IDocumentSkeletonPage) {
-    return page?.sections?.[page.sections.length - 1];
+    return page.sections?.[page.sections.length - 1];
 }
 
 export function getLastColumn(page: IDocumentSkeletonPage) {
@@ -56,8 +57,8 @@ export function getLastLineByColumn(column: IDocumentSkeletonColumn) {
 
 export function getPageContentWidth(page: IDocumentSkeletonPage) {
     const { pageWidth, marginLeft: pageMarginLeft, marginRight: pageMarginRight } = page;
-    const pageContentWidth = pageWidth - pageMarginLeft - pageMarginRight;
-    return pageContentWidth;
+
+    return pageWidth - pageMarginLeft - pageMarginRight;
 }
 
 export function getPreLine(line: IDocumentSkeletonLine) {
@@ -156,12 +157,12 @@ export function isBlankPage(page: IDocumentSkeletonPage) {
     }
 
     const section = getLastSection(page);
-
     const columnsLen = section.columns.length;
 
     for (let i = 0; i < columnsLen; i++) {
         const column = section.columns[i];
         const state = isBlankColumn(column);
+
         if (!state) {
             return false;
         }
@@ -245,9 +246,7 @@ export function validationGrid(gridType = GridType.LINES, snapToGrid = BooleanNu
 
 export function getLineHeightConfig(sectionBreakConfig: ISectionBreakConfig, paragraphConfig: IParagraphConfig) {
     const { paragraphStyle = {} } = paragraphConfig;
-
     const { linePitch = 15.6, gridType = GridType.LINES, paragraphLineGapDefault = 0 } = sectionBreakConfig;
-
     const { lineSpacing = 1, spacingRule = SpacingRule.AUTO, snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
 
     return { paragraphLineGapDefault, linePitch, gridType, lineSpacing, spacingRule, snapToGrid };
@@ -652,16 +651,18 @@ export function getPositionVertical(
     }
 }
 
-export function getPositionHorizonBySpan(positionH: ObjectPositionH, span: IDocumentSkeletonSpan) {
-    const { relativeFrom, align, posOffset, percent } = positionH;
-}
+// export function getPositionHorizonBySpan(positionH: ObjectPositionH, span: IDocumentSkeletonSpan) {
+//     const { relativeFrom, align, posOffset, percent } = positionH;
+// }
 
 export function getSpanGroupWidth(divide: IDocumentSkeletonDivide) {
     const spanGroup = divide.spanGroup;
     let width = 0;
+
     for (const span of spanGroup) {
         width += span.width;
     }
+
     return width;
 }
 

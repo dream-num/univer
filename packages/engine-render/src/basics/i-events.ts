@@ -1,3 +1,4 @@
+/* eslint-disable no-magic-numbers */
 import type { Nullable } from '@univerjs/core';
 
 /**
@@ -50,7 +51,7 @@ export type Immutable<T> = T extends Primitive
 export type DeepImmutable<T> = T extends Primitive
     ? T
     : T extends Array<infer U>
-      ? DeepImmutableArray<U>
+      ? IDeepImmutableArray<U>
       : /* T extends Map<infer K, infer V> ? DeepImmutableMap<K, V> : // es2015+ only */
         DeepImmutableObject<T>;
 
@@ -62,13 +63,9 @@ export type DeepImmutableObject<T> = {
 };
 
 /** @hidden */
-interface DeepImmutableArray<T> extends ReadonlyArray<DeepImmutable<T>> {}
+interface IDeepImmutableArray<T> extends ReadonlyArray<DeepImmutable<T>> {}
 /** @hidden */
 /* interface DeepImmutableMap<K, V> extends ReadonlyMap<DeepImmutable<K>,  DeepImmutable<V>> {} // es2015+ only */
-
-export interface Class<T> {
-    new (...param: any): T;
-}
 
 /**
  * Event Types

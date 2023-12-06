@@ -42,20 +42,17 @@ export enum DocumentSkeletonState {
 }
 
 export class DocumentSkeleton extends Skeleton {
-    // onRecalculateChangeObservable = new Observable<IDocumentSkeletonCached>();
-
-    private _docViewModel!: DocumentViewModel;
-
     private _skeletonData: Nullable<IDocumentSkeletonCached>;
 
     private _renderedBlockIdMap = new Map<string, boolean>();
 
     private _findLiquid: Liquid = new Liquid();
 
-    constructor(docViewModel: DocumentViewModel, localeService: LocaleService) {
+    constructor(
+        private _docViewModel: DocumentViewModel,
+        localeService: LocaleService
+    ) {
         super(localeService);
-
-        this._docViewModel = docViewModel;
     }
 
     static create(docViewModel: DocumentViewModel, localeService: LocaleService) {
@@ -72,6 +69,7 @@ export class DocumentSkeleton extends Skeleton {
         }
 
         this._skeletonData = this._createSkeleton(bounds);
+        console.log(this._skeletonData);
     }
 
     getSkeletonData() {
@@ -620,7 +618,7 @@ export class DocumentSkeleton extends Skeleton {
                 );
             }
 
-            // 计算页内布局，block结构
+            // 计算页内布局，block 结构
             const blockInfo = dealWithSections(
                 bodyModel,
                 sectionNode,
@@ -630,7 +628,7 @@ export class DocumentSkeleton extends Skeleton {
                 this._renderedBlockIdMap
             );
 
-            // todo: 当本节有多个列，且下一节为连续节类型的时候，需要按照列数分割，重新计算lines
+            // todo: 当本节有多个列，且下一节为连续节类型的时候，需要按照列数分割，重新计算 lines
             if (sectionTypeNext === SectionType.CONTINUOUS && columnProperties.length > 0) {
                 // TODO
             }

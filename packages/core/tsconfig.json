@@ -10,5 +10,5 @@
         "emitDecoratorMetadata": true,
         "strictPropertyInitialization": false
     },
-    "include": ["src/**/*"]
+    "include": ["src/**/*", "../sheets-import-xlsx/src/services/border.ts"]
 }

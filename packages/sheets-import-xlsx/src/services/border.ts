@@ -1,4 +1,4 @@
-import type { IBorderData, IStyleData, IWorksheetData } from '../../types/interfaces';
+import type { IBorderData, IStyleData, IWorksheetData } from '@univerjs/core/types/interfaces/index.js';
 
 export function border(newSheet: Partial<IWorksheetData>, sheet: any) {
     newSheet.cellData = {};

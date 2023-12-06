@@ -7,6 +7,7 @@ import {
     IUniverInstanceService,
     ObjectMatrix,
 } from '@univerjs/core';
+
 import type {
     IArrayFormulaRangeType,
     IArrayFormulaUnitCellType,
@@ -16,7 +17,7 @@ import type {
     ISheetData,
     IUnitData,
     IUnitSheetNameMap,
-} from '@univerjs/engine-formula';
+} from '../basics/common';
 
 export interface IFormulaConfig {
     notExecuteFormula?: boolean;

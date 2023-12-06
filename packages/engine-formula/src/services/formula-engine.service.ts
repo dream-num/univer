@@ -59,7 +59,6 @@ import type { BaseFunction } from '../functions/base-function';
 import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from './current-data.service';
 import { DefinedNamesService, IDefinedNamesService } from './defined-names.service';
 import { FunctionService, IFunctionService } from './function.service';
-import { IPassiveDirtyManagerService, PassiveDirtyManagerService } from './passive-dirty-manager.service';
 import type { IAllRuntimeData, IExecutionInProgressParams } from './runtime.service';
 import { FormulaExecuteStageType, FormulaRuntimeService, IFormulaRuntimeService } from './runtime.service';
 import { ISuperTableService, SuperTableService } from './super-table.service';
@@ -129,10 +128,6 @@ export class FormulaEngineService extends Disposable {
 
     get lexerTreeBuilder() {
         return this._injector.get(LexerTreeBuilder);
-    }
-
-    get PassiveDirtyManagerService() {
-        return this._injector.get(IPassiveDirtyManagerService);
     }
 
     /**
@@ -482,7 +477,6 @@ export class FormulaEngineService extends Disposable {
             [ISuperTableService, { useClass: SuperTableService }],
             [IDefinedNamesService, { useClass: DefinedNamesService }],
             [IFunctionService, { useClass: FunctionService }],
-            [IPassiveDirtyManagerService, { useClass: PassiveDirtyManagerService }],
 
             // [IPassiveDirtyManagerService, { useClass: PassiveDirtyManagerService }],
 

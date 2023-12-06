@@ -52,6 +52,7 @@
         "@ctrl/tinycolor": "^4.0.2",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/core": "workspace:*",
+        "@univerjs/engine-formula": "workspace:*",
         "@wendellhu/redi": "^0.12.11",
         "rxjs": "^7.8.1"
     },

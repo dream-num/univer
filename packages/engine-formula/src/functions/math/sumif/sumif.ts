@@ -1,12 +1,12 @@
-import type {
-    ArrayValueObject,
-    BaseReferenceObject,
-    BaseValueObject,
-    BooleanValueObject,
-    compareToken,
-    FunctionVariantType,
-} from '@univerjs/engine-formula';
-import { BaseFunction, ErrorType, ErrorValueObject, NumberValueObject } from '@univerjs/engine-formula';
+import { ErrorType } from '../../../basics/error-type';
+import type { compareToken } from '../../../basics/token';
+import { ErrorValueObject } from '../../../engine/other-object/error-value-object';
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import type { BooleanValueObject } from '../../../engine/value-object/primitive-object';
+import { NumberValueObject } from '../../../engine/value-object/primitive-object';
+import { BaseFunction } from '../../base-function';
 
 export class Sumif extends BaseFunction {
     override calculate(...variants: FunctionVariantType[]) {

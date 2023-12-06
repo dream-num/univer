@@ -876,7 +876,7 @@ export class PromptController extends Disposable {
 
             const refSheetId = this._getSheetIdByName(unitId, sheetName.trim());
 
-            if (refSheetId !== sheetId) {
+            if (sheetName.length !== 0 && refSheetId !== sheetId) {
                 continue;
             }
 

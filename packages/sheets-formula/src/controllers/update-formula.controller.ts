@@ -15,7 +15,14 @@ import {
     Tools,
 } from '@univerjs/core';
 import type { IFormulaData, IFormulaDataItem, ISequenceNode, IUnitSheetNameMap } from '@univerjs/engine-formula';
-import { FormulaEngineService, generateStringWithSequence, sequenceNodeType } from '@univerjs/engine-formula';
+import {
+    FormulaDataModel,
+    FormulaEngineService,
+    generateStringWithSequence,
+    sequenceNodeType,
+    SetArrayFormulaDataMutation,
+    SetFormulaDataMutation,
+} from '@univerjs/engine-formula';
 import type {
     IDeleteRangeMoveLeftCommandParams,
     IDeleteRangeMoveUpCommandParams,
@@ -61,9 +68,6 @@ import {
 } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
-import { SetFormulaDataMutation } from '../commands/mutations/set-formula-data.mutation';
-import { FormulaDataModel } from '../models/formula-data.model';
 import { offsetArrayFormula, offsetFormula } from './utils';
 
 interface IUnitRangeWithOffset extends IUnitRange {

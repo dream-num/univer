@@ -1,6 +1,5 @@
 import type { IFunctionInfo } from '@univerjs/engine-formula';
-import { FUNCTION_NAMES, FunctionType } from '@univerjs/engine-formula';
-import { FUNCTION_NAMES_MATH } from '@univerjs/formula';
+import { FUNCTION_NAMES, FUNCTION_NAMES_MATH, FunctionType } from '@univerjs/engine-formula';
 
 export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {

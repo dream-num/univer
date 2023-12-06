@@ -2,7 +2,6 @@
 
 import { LocaleType, Univer } from '@univerjs/core';
 import { BaseFormulaEnginePlugin } from '@univerjs/engine-formula';
-import { FormulaPlugin } from '@univerjs/formula';
 import { UniverRPCWorkerThreadPlugin } from '@univerjs/rpc';
 import { SheetsPlugin } from '@univerjs/sheets';
 
@@ -14,7 +13,7 @@ const univer = new Univer({
 univer.registerPlugin(SheetsPlugin);
 univer.registerPlugin(BaseFormulaEnginePlugin);
 univer.registerPlugin(UniverRPCWorkerThreadPlugin);
-univer.registerPlugin(FormulaPlugin);
+// univer.registerPlugin(FormulaPlugin);
 
 declare let self: WorkerGlobalScope & typeof globalThis & { univer: Univer };
 self.univer = univer;

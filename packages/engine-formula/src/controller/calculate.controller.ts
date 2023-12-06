@@ -1,16 +1,8 @@
 import type { ICommandInfo, IUnitRange } from '@univerjs/core';
 import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import type {
-    IAllRuntimeData,
-    IDirtyUnitFeatureMap,
-    IDirtyUnitSheetNameMap,
-    IFormulaData,
-} from '@univerjs/engine-formula';
-import { FormulaEngineService, FormulaExecutedStateType, IActiveDirtyManagerService } from '@univerjs/engine-formula';
-import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { SetRangeValuesMutation } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
+import type { IDirtyUnitFeatureMap, IDirtyUnitSheetNameMap, IFormulaData } from '../basics/common';
 import type { ISetArrayFormulaDataMutationParams } from '../commands/mutations/set-array-formula-data.mutation';
 import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
 import type { ISetFormulaCalculationStartMutation } from '../commands/mutations/set-formula-calculation.mutation';
@@ -22,8 +14,10 @@ import {
 import type { ISetFormulaDataMutationParams } from '../commands/mutations/set-formula-data.mutation';
 import { SetFormulaDataMutation } from '../commands/mutations/set-formula-data.mutation';
 import { FormulaDataModel } from '../models/formula-data.model';
-import type { FormulaService } from '../services/formula.service';
-import { IFormulaService } from '../services/formula.service';
+import { IActiveDirtyManagerService } from '../services/active-dirty-manager.service';
+import { FormulaEngineService } from '../services/formula-engine.service';
+import type { IAllRuntimeData } from '../services/runtime.service';
+import { FormulaExecutedStateType } from '../services/runtime.service';
 
 @OnLifecycle(LifecycleStages.Ready, CalculateController)
 export class CalculateController extends Disposable {
@@ -31,7 +25,6 @@ export class CalculateController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
-        @Inject(IFormulaService) private readonly _formulaService: FormulaService,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
         @IActiveDirtyManagerService private readonly _activeDirtyManagerService: IActiveDirtyManagerService
     ) {
@@ -43,7 +36,7 @@ export class CalculateController extends Disposable {
     private _initialize(): void {
         this._commandExecutedListener();
         this._initialExecuteFormulaListener();
-        this._registerFunctions();
+
         this._initialExecuteFormulaProcessListener();
     }
 
@@ -271,7 +264,7 @@ export class CalculateController extends Disposable {
 
                 // const arrayFormula = arrayFormulaRange[unitId][sheetId];
 
-                const setRangeValuesMutation: ISetRangeValuesMutationParams = {
+                const setRangeValuesMutation = {
                     worksheetId: sheetId,
                     workbookId: unitId,
                     cellValue: cellData.getData(),
@@ -279,7 +272,7 @@ export class CalculateController extends Disposable {
                 };
 
                 redoMutationsInfo.push({
-                    id: SetRangeValuesMutation.id,
+                    id: 'sheet.mutation.set-range-values', // SetRangeValuesMutation.id,
                     params: setRangeValuesMutation,
                 });
             });
@@ -287,9 +280,5 @@ export class CalculateController extends Disposable {
 
         const result = redoMutationsInfo.every((m) => this._commandService.executeCommand(m.id, m.params));
         return result;
-    }
-
-    private _registerFunctions() {
-        this._formulaService.registerFunctions();
     }
 }

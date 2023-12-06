@@ -1,7 +1,8 @@
 import type { ICommandInfo, IMutation } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
-import type { FormulaExecutedStateType, IExecutionInProgressParams } from '@univerjs/engine-formula';
 import type { IAccessor } from '@wendellhu/redi';
+
+import type { FormulaExecutedStateType, IExecutionInProgressParams } from '../../services/runtime.service';
 
 export interface ISetFormulaCalculationStartMutation {
     commands: ICommandInfo[];

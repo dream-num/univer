@@ -34,8 +34,8 @@ import {
     WrapStrategy,
 } from '@univerjs/core';
 
-import { BORDER_TYPE, COLOR_BLACK_RGB, MAXIMUM_ROW_HEIGHT, ORIENTATION_TYPE } from '../../basics/const';
-import { getRotateOffsetAndFarthestHypotenuse, getRotateOrientation } from '../../basics/draw';
+import { BORDER_TYPE, COLOR_BLACK_RGB, MAXIMUM_ROW_HEIGHT } from '../../basics/const';
+import { getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
 import type { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-cached';
 import {
     degToRad,
@@ -80,7 +80,6 @@ export function getDocsSkeletonPageSize(documentSkeleton: DocumentSkeleton, angl
     let allRotatedWidth = 0;
     let allRotatedHeight = 0;
 
-    const orientation = getRotateOrientation(angle);
     const widthArray: Array<{ rotatedWidth: number; spaceWidth: number }> = [];
 
     columnIterator([lastPage], (column: IDocumentSkeletonColumn) => {
@@ -93,23 +92,13 @@ export function getDocsSkeletonPageSize(documentSkeleton: DocumentSkeleton, angl
         widthArray.push({ rotatedWidth, spaceWidth });
     });
 
-    const tanTheta = Math.tan(angle);
-    const sinTheta = Math.sin(angle);
-
     const widthCount = widthArray.length;
 
     for (let i = 0; i < widthCount; i++) {
-        const { rotatedWidth, spaceWidth } = widthArray[i];
+        const { rotatedWidth } = widthArray[i];
 
         if (i === 0) {
             allRotatedWidth += rotatedWidth;
-        }
-
-        if (
-            (orientation === ORIENTATION_TYPE.UP && i === 0) ||
-            (orientation === ORIENTATION_TYPE.DOWN && i === widthCount - 1)
-        ) {
-            allRotatedWidth += (rotatedWidth + spaceWidth / sinTheta) / tanTheta;
         }
     }
 

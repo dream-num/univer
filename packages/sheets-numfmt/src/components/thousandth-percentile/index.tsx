@@ -31,9 +31,14 @@ export const ThousandthPercentilePanel: FC<IBusinessComponentProps> = (props) =>
 
     const isInputDisable = useMemo(() => !isPatternHasDecimal(suffix), [suffix]);
 
+    const handleDecimalChange = (decimal: number | null) => {
+        decimalSet(decimal || 0);
+        props.onChange(setPatternDecimal(suffix, Number(decimal || 0)));
+    };
     const handleClick = (v: string) => {
         decimalSet(getDecimalFromPattern(v, 0));
         suffixSet(v);
+        props.onChange(v);
     };
 
     props.action.current = () => pattern;
@@ -47,7 +52,7 @@ export const ThousandthPercentilePanel: FC<IBusinessComponentProps> = (props) =>
                     value={decimal}
                     max={20}
                     min={0}
-                    onChange={(value) => decimalSet(value || 0)}
+                    onChange={handleDecimalChange}
                 />
             </div>
             <div className="m-t-16 label"> {localeService.t('sheet.numfmt.negType')}</div>

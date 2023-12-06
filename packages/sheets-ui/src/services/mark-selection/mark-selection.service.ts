@@ -11,7 +11,7 @@ import { SelectionShape } from '../selection/selection-shape';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 
 export interface IMarkSelectionService {
-    addShape(selection: ISelectionWithStyle): string | null;
+    addShape(selection: ISelectionWithStyle, zIndex?: number): string | null;
     removeShape(id: string): void;
     removeAllShapes(): void;
 }

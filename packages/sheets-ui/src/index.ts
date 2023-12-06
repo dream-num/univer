@@ -28,6 +28,7 @@ export { SheetClipboardService } from './services/clipboard/clipboard.service';
 export { type ISheetClipboardHook } from './services/clipboard/type';
 export { type ICellDataWithSpanInfo } from './services/clipboard/type';
 export { COPY_TYPE } from './services/clipboard/type';
+export { getRepeatRange } from './services/clipboard/utils';
 export { CellEditorManagerService, ICellEditorManagerService } from './services/editor/cell-editor-manager.service';
 export { IFormulaEditorManagerService } from './services/editor/formula-editor-manager.service';
 export {

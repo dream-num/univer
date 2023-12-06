@@ -5,8 +5,6 @@ import { FormulaAstLRU } from '../../basics/cache-lru';
 import { ErrorType } from '../../basics/error-type';
 import { isFormulaLexerToken } from '../../basics/match-token';
 import { isReferenceString, REFERENCE_SINGLE_RANGE_REGEX } from '../../basics/regex';
-import type { ISequenceArray, ISequenceNode } from '../../basics/sequence';
-import { generateStringWithSequence, sequenceNodeType } from '../../basics/sequence';
 import {
     matchToken,
     OPERATOR_TOKEN_PRIORITY,
@@ -20,6 +18,8 @@ import {
     DEFAULT_TOKEN_TYPE_PARAMETER,
     DEFAULT_TOKEN_TYPE_ROOT,
 } from '../../basics/token-type';
+import type { ISequenceArray, ISequenceNode } from '../utils/sequence';
+import { generateStringWithSequence, sequenceNodeType } from '../utils/sequence';
 import { LexerNode } from './lexer-node';
 
 enum bracketType {

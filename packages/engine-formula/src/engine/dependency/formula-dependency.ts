@@ -5,7 +5,6 @@ import { Inject } from '@wendellhu/redi';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import type { IDirtyUnitSheetNameMap, IFormulaData, IOtherFormulaData } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
-import type { PreCalculateNodeType } from '../../basics/node-type';
 import { prefixToken, suffixToken } from '../../basics/token';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import {
@@ -22,6 +21,7 @@ import { ErrorNode } from '../ast-node/base-ast-node';
 import { NodeType } from '../ast-node/node-type';
 import { Interpreter } from '../interpreter/interpreter';
 import type { BaseReferenceObject } from '../reference-object/base-reference-object';
+import type { PreCalculateNodeType } from '../utils/node-type';
 import { FormulaDependencyTree } from './dependency-tree';
 
 const FORMULA_CACHE_LRU_COUNT = 100000;

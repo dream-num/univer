@@ -2,13 +2,13 @@ import { Disposable } from '@univerjs/core';
 
 import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
-import type { PreCalculateNodeType } from '../../basics/node-type';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
 import type { FunctionNode } from '../ast-node';
 import type { BaseAstNode } from '../ast-node/base-ast-node';
 import { NodeType } from '../ast-node/node-type';
 import { ErrorValueObject } from '../other-object/error-value-object';
 import type { FunctionVariantType } from '../reference-object/base-reference-object';
+import type { PreCalculateNodeType } from '../utils/node-type';
 
 export class Interpreter extends Disposable {
     constructor(@IFormulaRuntimeService private readonly _runtimeService: IFormulaRuntimeService) {

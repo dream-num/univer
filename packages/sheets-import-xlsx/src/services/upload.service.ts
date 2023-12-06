@@ -14,6 +14,7 @@ import type {
 import { HorizontalAlign, IUniverInstanceService, Tools, VerticalAlign, WrapStrategy } from '@univerjs/core';
 // @ts-ignore
 import * as LuckyExcel from 'luckyexcel'; // no type definition for package luckyexcel
+
 import { border } from './border';
 
 export function migrate(config: any): Partial<IWorkbookData> {

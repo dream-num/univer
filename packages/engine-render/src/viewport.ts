@@ -521,7 +521,7 @@ export class Viewport {
 
         if (!applyCanvasState && this._renderClipState) {
             ctx.beginPath();
-            // DEPT: left is set by upper views but width and height is not
+            // DEBT: left is set by upper views but width and height is not
             const { scaleX, scaleY } = this._getBoundScale(m[0], m[3]);
             ctx.rect(this.left, this.top, (this.width || 0) * scaleX, (this.height || 0) * scaleY);
             ctx.clip();

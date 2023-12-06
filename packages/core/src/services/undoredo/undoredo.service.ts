@@ -86,7 +86,6 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
         // redo stack should be cleared when pushing an undo
         redoStack.length = 0;
 
-        // TODO: undo element maybe merge-able
         // TODO: undo redo stack should have a maximum capacity, maybe we should get the config from IConfigService?
         undoStack.push(item);
 
@@ -94,7 +93,6 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
             undoStack.splice(0, 1);
         }
 
-        // TODO: update status with unitID, the UI doesn't have to update perhaps
         this._updateStatus();
     }
 

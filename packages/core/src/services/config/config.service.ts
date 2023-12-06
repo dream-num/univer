@@ -2,7 +2,7 @@ import { createIdentifier } from '@wendellhu/redi';
 
 import type { Nullable } from '../../shared/types';
 
-// NOTE: WARNING!! Do not set per unit config here! You can definitely find a better place to do that.
+// WARNING!!! Do not set per unit config here! You can definitely find a better place to do that.
 
 /**
  * IConfig provides universal configuration for the whole application.

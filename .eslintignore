@@ -5,6 +5,8 @@ local
 .turbo
 .docusaurus
 
+apps
+
 # Coverage
 coverage-report/
 

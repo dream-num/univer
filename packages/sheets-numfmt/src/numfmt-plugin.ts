@@ -2,6 +2,7 @@ import { Plugin, PluginType } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { SHEET_NUMFMT_PLUGIN } from './base/const/PLUGIN_NAME';
+import { NumfmtAutoFillController } from './controllers/numfmt.auto-fill.controller';
 import { NumfmtController } from './controllers/numfmt.controller';
 import { NumfmtCopyPasteController } from './controllers/numfmt.copy-paste.controller';
 import { NumfmtEditorController } from './controllers/numfmt.editor.controller';
@@ -27,5 +28,6 @@ export class NumfmtPlugin extends Plugin {
         this._injector.add([NumfmtRefRangeController]);
         this._injector.add([NumfmtSheetController]);
         this._injector.add([NumfmtCopyPasteController]);
+        this._injector.add([NumfmtAutoFillController]);
     }
 }

@@ -10,7 +10,7 @@ import {
 } from '@univerjs/core';
 import type { FormatType, ISetNumfmtMutationParams } from '@univerjs/sheets';
 import { factorySetNumfmtUndoMutation, INumfmtService, SetNumfmtMutation } from '@univerjs/sheets';
-import { COPY_TYPE, ISheetClipboardService } from '@univerjs/sheets-ui';
+import { COPY_TYPE, getRepeatRange, ISheetClipboardService } from '@univerjs/sheets-ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
 @OnLifecycle(LifecycleStages.Rendered, NumfmtCopyPasteController)
@@ -88,11 +88,18 @@ export class NumfmtCopyPasteController extends Disposable {
         const sheet = workbook.getActiveSheet();
         const workbookId = workbook.getUnitId();
         const worksheetId = sheet.getSheetId();
-
-        if (!this._copyInfo || !this._copyInfo.matrix.getSizeOf()) {
+        if (copyInfo.copyType === COPY_TYPE.CUT) {
+            // This do not need to deal with clipping.
+            // move range had handle this case .
+            // to see numfmt.ref-range.controller.ts
+            this._copyInfo = null;
+            return { redos: [], undos: [] };
+        }
+        if (!this._copyInfo || !this._copyInfo.matrix.getSizeOf() || !copyInfo.copyRange) {
             return { redos: [], undos: [] };
         }
 
+        const repeatRange = getRepeatRange(copyInfo.copyRange, pastedRange, true);
         const redos: ISetNumfmtMutationParams = { workbookId, worksheetId, values: [] };
 
         // Clears the destination area data format
@@ -101,43 +108,26 @@ export class NumfmtCopyPasteController extends Disposable {
         });
 
         // Set up according to the data collected. This will overlap with the cleanup, but that's okay
-        this._copyInfo.matrix.forValue((row, col, value) => {
-            const range = Rectangle.getPositionRange(
-                {
-                    startRow: row,
-                    endRow: row,
-                    startColumn: col,
-                    endColumn: col,
-                },
-                pastedRange
-            );
-            redos.values.push({
-                row: range.startRow,
-                col: range.startColumn,
-                pattern: value.pattern,
-                type: value.type,
-            });
-        });
-
-        // If is clipping,  need to clear the data format of the original area
-        if (copyInfo.copyType === COPY_TYPE.CUT && copyInfo.copyRange) {
-            this._copyInfo.matrix.forValue((row, col) => {
-                const range = Rectangle.getPositionRange(
-                    {
-                        startRow: row,
-                        endRow: row,
-                        startColumn: col,
-                        endColumn: col,
-                    },
-                    copyInfo.copyRange!
-                );
-                redos.values.unshift({
-                    row: range.startRow,
-                    col: range.startColumn,
+        repeatRange.forEach((item) => {
+            this._copyInfo &&
+                this._copyInfo.matrix.forValue((row, col, value) => {
+                    const range = Rectangle.getPositionRange(
+                        {
+                            startRow: row,
+                            endRow: row,
+                            startColumn: col,
+                            endColumn: col,
+                        },
+                        item.startRange
+                    );
+                    redos.values.push({
+                        row: range.startRow,
+                        col: range.startColumn,
+                        pattern: value.pattern,
+                        type: value.type,
+                    });
                 });
-            });
-            this._copyInfo = null;
-        }
+        });
 
         const undos: ISetNumfmtMutationParams = factorySetNumfmtUndoMutation(this._injector, redos);
 

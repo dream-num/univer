@@ -9,7 +9,6 @@ import { DialogOperation } from '../commands/operations/dialog.operation';
 import { LocaleOperation } from '../commands/operations/locale.operation';
 import { MessageOperation } from '../commands/operations/message.operation';
 import { NotificationOperation } from '../commands/operations/notification.operation';
-import { NumfmtOperation } from '../commands/operations/numfmt.operations';
 import { SetEditable } from '../commands/operations/set.editable.operation';
 import { SidebarOperation } from '../commands/operations/sidebar.operation';
 import { ThemeOperation } from '../commands/operations/theme.operation';
@@ -153,38 +152,18 @@ export function SidebarMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
 export function SetEditableMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {
         id: SetEditable.id,
-        title: 'Editable',
-        tooltip: 'Editable',
+        title: 'debugger.editable',
+        tooltip: 'debugger.editable',
         type: MenuItemType.SELECTOR,
         positions: [MenuPosition.TOOLBAR_OTHERS],
         selections: [
             {
-                label: 'univer',
+                label: 'changeUniverEditable',
                 value: 'univer',
             },
             {
-                label: 'sheet',
+                label: 'changeSheetEditable',
                 value: 'sheet',
-            },
-        ],
-    };
-}
-
-export function NumfmtMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
-    return {
-        id: NumfmtOperation.id,
-        title: 'Numfmt',
-        tooltip: 'Numfmt',
-        type: MenuItemType.SELECTOR,
-        positions: [MenuPosition.TOOLBAR_OTHERS],
-        selections: [
-            {
-                label: 'Open numfmt',
-                value: 'open',
-            },
-            {
-                label: 'Close numfmt',
-                value: 'close',
             },
         ],
     };

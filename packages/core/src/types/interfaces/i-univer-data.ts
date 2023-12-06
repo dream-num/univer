@@ -6,6 +6,7 @@ export interface IUniverData {
     theme: IStyleSheet;
     locale: LocaleType;
     locales: ILocales;
+    enableLog: boolean;
     id: string;
 }
 

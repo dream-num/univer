@@ -53,10 +53,12 @@ export class Univer {
     constructor(univerData: Partial<IUniverData> = {}) {
         this._rootInjector = this._initDependencies();
 
-        const { theme, locale, locales } = univerData;
+        const { theme, locale, locales, enableLog = false } = univerData;
+
         theme && this._rootInjector.get(ThemeService).setTheme(theme);
         locales && this._rootInjector.get(LocaleService).load(locales);
         locale && this._rootInjector.get(LocaleService).setLocale(locale);
+        this._rootInjector.get(ILogService).toggleLogEnabled(enableLog);
     }
 
     __getInjector(): Injector {

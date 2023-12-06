@@ -30,6 +30,7 @@ const univer = new Univer({
     theme: greenTheme,
     locale: LocaleType.EN_US,
     locales,
+    enableLog: true,
 });
 
 // core plugins

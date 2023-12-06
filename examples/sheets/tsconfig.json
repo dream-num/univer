@@ -1,14 +1,13 @@
 {
     "extends": "../../tsconfig.json",
     "compilerOptions": {
-        "rootDir": "./",
-        "outDir": "lib",
-        "module": "commonjs",
+        "rootDir": "./src",
+        "outDir": "local",
         "downlevelIteration": true,
-        "baseUrl": "./",
         "esModuleInterop": true,
         "emitDecoratorMetadata": true,
         "strictPropertyInitialization": false
     },
-    "include": ["src/**/*"]
+    "include": ["src/**/*"],
+    "exclude": ["node_modules", "local"]
 }

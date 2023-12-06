@@ -1,14 +1,11 @@
 {
     "extends": "../../tsconfig.json",
     "compilerOptions": {
-        "rootDir": "./",
+        "rootDir": "./src",
         "outDir": "lib",
-        "baseUrl": "./",
         "esModuleInterop": true,
         "strictPropertyInitialization": false
     },
-    "include": [
-        "src/**/*",
-        "examples/**/*"
-    ]
+    "include": ["src/**/*"],
+    "exclude": ["./examples/china-id-validation.js"]
 }

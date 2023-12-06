@@ -58,7 +58,7 @@ export class Animate {
 
     protected _handle: number = 0;
 
-    protected _delayHandle: number | null = null;
+    protected _delayHandle: NodeJS.Timeout | number | null = null;
 
     constructor(config: Partial<AnimateConfig>) {
         this._config = {
@@ -105,8 +105,8 @@ export class Animate {
             this._start = Date.now();
             this._fakeHandle();
         } else {
-            this._delayHandle && window.clearTimeout(this._delayHandle);
-            this._delayHandle = window.setTimeout(() => {
+            this._delayHandle && clearTimeout(this._delayHandle);
+            this._delayHandle = setTimeout(() => {
                 this._status = AnimateStatus.Request;
                 this._start = Date.now();
                 this._fakeHandle();
@@ -116,7 +116,7 @@ export class Animate {
 
     cancel(): void {
         this._status = AnimateStatus.Cancel;
-        this._delayHandle && window.clearTimeout(this._delayHandle);
+        this._delayHandle && clearTimeout(this._delayHandle);
         cancelAnimationFrame(this._handle);
     }
 

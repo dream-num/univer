@@ -325,9 +325,9 @@ export abstract class BaseObject {
 
                 return;
             }
-            // window.clearTimeout(scene.debounceParentTimeout);
+            // clearTimeout(scene.debounceParentTimeout);
             // // To prevent multiple refreshes caused by setting values for multiple object instances at once.
-            // scene.debounceParentTimeout = window.setTimeout(() => {
+            // scene.debounceParentTimeout = setTimeout(() => {
             //     this._parent?.makeDirty(state);
             // }, 0);
 

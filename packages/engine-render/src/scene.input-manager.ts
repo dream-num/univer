@@ -53,7 +53,7 @@ export class InputManager {
 
     private _startingPosition = new Vector2(Infinity, Infinity);
 
-    private _delayedTimeout: number = -1;
+    private _delayedTimeout: NodeJS.Timeout | number = -1;
 
     private _doubleClickOccurred = 0;
 
@@ -337,7 +337,7 @@ export class InputManager {
 
         this._doubleClickOccurred += 1;
 
-        this._delayedTimeout = window.setTimeout(() => {
+        this._delayedTimeout = setTimeout(() => {
             this._resetDoubleClickParam();
         }, InputManager.DoubleOrTripleClickDelay);
 
@@ -380,6 +380,6 @@ export class InputManager {
         this._doubleClickOccurred = 0;
         this._startingPosition.x = Infinity;
         this._startingPosition.y = Infinity;
-        window.clearTimeout(this._delayedTimeout);
+        clearTimeout(this._delayedTimeout);
     }
 }

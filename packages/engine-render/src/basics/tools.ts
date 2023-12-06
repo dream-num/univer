@@ -86,7 +86,7 @@ export const requestNewFrame = (func: Function, requester?: any): number => {
     if (requester.oRequestAnimationFrame) {
         return requester.oRequestAnimationFrame(func);
     }
-    return window.setTimeout(func, ONE_FRAME_NUMBER);
+    return setTimeout(func, ONE_FRAME_NUMBER);
 };
 
 export const cancelRequestFrame = (requestID: number, requester?: any) => {
@@ -112,7 +112,7 @@ export const cancelRequestFrame = (requestID: number, requester?: any) => {
     if (requester.oRequestAnimationFrame) {
         return requester.oCancelAnimationFrame(requestID);
     }
-    return window.clearTimeout(requestID);
+    return clearTimeout(requestID);
 };
 
 export const createCanvasElement = (): HTMLCanvasElement => {

@@ -5,7 +5,9 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { FORMULA_PLUGIN_NAME } from './common/plugin-name';
 import { ArrayFormulaDisplayController } from './controllers/array-formula-display.controller';
 import { CalculateController } from './controllers/calculate.controller';
+import { DirtyConversionController } from './controllers/dirty-conversion.controller';
 import { FormulaController } from './controllers/formula.controller';
+import { ReferenceExecutorRegisterController } from './controllers/reference-executor-register.controller';
 import { TriggerCalculationController } from './controllers/trigger-calculation.controller';
 import { UpdateFormulaController } from './controllers/update-formula.controller';
 import type { IFormulaConfig } from './models/formula-data.model';
@@ -34,12 +36,14 @@ export class FormulaPlugin extends Plugin {
             [FormulaDataModel, { useValue: this._formulaDataModel }],
             // controllers
             [FormulaController],
+            [DirtyConversionController],
         ];
 
         if (!this._config?.notExecuteFormula) {
             // only worker
             dependencies.push([IFormulaService, { useClass: FormulaService }]);
             dependencies.push([CalculateController]);
+            dependencies.push([ReferenceExecutorRegisterController]);
         } else {
             // only main thread
             dependencies.push([UpdateFormulaController]);

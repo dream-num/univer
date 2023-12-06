@@ -118,7 +118,7 @@ export class Viewport {
 
     private _allowCache: boolean = false;
 
-    private _scrollStopNum: number = 0;
+    private _scrollStopNum: NodeJS.Timeout | number = 0;
 
     private _preScrollX: Nullable<number> = 0;
 
@@ -832,8 +832,8 @@ export class Viewport {
         y?: number,
         isTrigger = true
     ) {
-        window.clearTimeout(this._scrollStopNum);
-        this._scrollStopNum = window.setTimeout(() => {
+        clearTimeout(this._scrollStopNum);
+        this._scrollStopNum = setTimeout(() => {
             this.onScrollStopObserver.notifyObservers({
                 viewport: this,
                 scrollX: this.scrollX,

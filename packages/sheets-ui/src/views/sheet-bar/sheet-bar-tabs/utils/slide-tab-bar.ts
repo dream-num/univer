@@ -390,7 +390,7 @@ export class SlideTabBar {
 
     protected _slideScrollbar: SlideScrollbar;
 
-    protected _longPressTimer: number | null = null;
+    protected _longPressTimer: NodeJS.Timeout | number | null = null;
 
     /**
      * left border line
@@ -493,7 +493,7 @@ export class SlideTabBar {
             lastTime = current;
 
             // Set a timer to delay dragging for 300 milliseconds
-            this._longPressTimer = window.setTimeout(() => {
+            this._longPressTimer = setTimeout(() => {
                 this._activeTabItem?.enableFixed();
                 this._startAutoScroll();
                 if (!activeSlideItemElement) return;

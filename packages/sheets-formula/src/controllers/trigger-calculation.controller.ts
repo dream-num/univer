@@ -10,13 +10,11 @@ import {
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { SetRangeValuesMutation, SetStyleCommand } from '@univerjs/sheets';
 
-const globalObject = typeof self !== 'undefined' ? self : window;
-
 @OnLifecycle(LifecycleStages.Ready, TriggerCalculationController)
 export class TriggerCalculationController extends Disposable {
     private _waitingCommandQueue: ICommandInfo[] = [];
 
-    private _setTimeoutKey: number = -1;
+    private _setTimeoutKey: NodeJS.Timeout | number = -1;
 
     private _startExecutionTime: number = 0;
 
@@ -68,9 +66,9 @@ export class TriggerCalculationController extends Disposable {
 
                 this._waitingCommandQueue.push(command);
 
-                globalObject.clearTimeout(this._setTimeoutKey);
+                clearTimeout(this._setTimeoutKey);
 
-                this._setTimeoutKey = globalObject.setTimeout(() => {
+                this._setTimeoutKey = setTimeout(() => {
                     this._commandService.executeCommand(
                         SetFormulaCalculationStartMutation.id,
                         {

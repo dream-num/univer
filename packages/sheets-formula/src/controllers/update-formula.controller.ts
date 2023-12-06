@@ -303,6 +303,11 @@ export class UpdateFormulaController extends Disposable {
             oldFormulaData = offsetFormula(oldFormulaData, command, unitId, sheetId, selections);
             const offsetFormulaData = offsetFormula(formulaData, command, unitId, sheetId, selections);
 
+            // Synchronous to the worker thread
+            this._commandService.executeCommand(SetFormulaDataMutation.id, {
+                formulaData: this._formulaDataModel.getFormulaData(),
+            });
+
             return this._getUpdateFormulaMutations(oldFormulaData, offsetFormulaData);
         }
 
@@ -619,6 +624,8 @@ export class UpdateFormulaController extends Disposable {
                 const newFormulaDataItem = new ObjectMatrix<IFormulaDataItem>();
 
                 matrixData.forValue((row, column, formulaDataItem) => {
+                    if (!formulaDataItem) return true;
+
                     const { f: formulaString, x, y, si } = formulaDataItem;
 
                     const sequenceNodes = this._formulaEngineService.buildSequenceNodes(formulaString);

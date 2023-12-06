@@ -35,8 +35,8 @@ import { RemoveSheetMutation } from '../commands/mutations/remove-sheet.mutation
 import type { ISetRangeValuesMutationParams } from '../commands/mutations/set-range-values.mutation';
 import { SetRangeValuesMutation } from '../commands/mutations/set-range-values.mutation';
 
-@OnLifecycle(LifecycleStages.Ready, DirtyConversionController)
-export class DirtyConversionController extends Disposable {
+@OnLifecycle(LifecycleStages.Ready, ActiveDirtyController)
+export class ActiveDirtyController extends Disposable {
     constructor(
         @IActiveDirtyManagerService private readonly _activeDirtyManagerService: IActiveDirtyManagerService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,

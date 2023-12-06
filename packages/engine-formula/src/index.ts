@@ -24,8 +24,10 @@ export {
 } from './commands/mutations/set-array-formula-data.mutation';
 export {
     type ISetFormulaCalculationNotificationMutation,
+    type ISetFormulaCalculationResultMutation,
     type ISetFormulaCalculationStartMutation,
     SetFormulaCalculationNotificationMutation,
+    SetFormulaCalculationResultMutation,
     SetFormulaCalculationStartMutation,
     SetFormulaCalculationStopMutation,
 } from './commands/mutations/set-formula-calculation.mutation';

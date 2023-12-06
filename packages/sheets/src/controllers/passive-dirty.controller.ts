@@ -9,8 +9,8 @@ import {
 import { FormulaDataModel, IActiveDirtyManagerService, IPassiveDirtyManagerService } from '@univerjs/engine-formula';
 import { Inject } from '@wendellhu/redi';
 
-@OnLifecycle(LifecycleStages.Ready, ReferenceExecutorRegisterController)
-export class ReferenceExecutorRegisterController extends Disposable {
+@OnLifecycle(LifecycleStages.Ready, PassiveDirtyController)
+export class PassiveDirtyController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IPassiveDirtyManagerService

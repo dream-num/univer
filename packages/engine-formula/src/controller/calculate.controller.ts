@@ -8,6 +8,7 @@ import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-for
 import type { ISetFormulaCalculationStartMutation } from '../commands/mutations/set-formula-calculation.mutation';
 import {
     SetFormulaCalculationNotificationMutation,
+    SetFormulaCalculationResultMutation,
     SetFormulaCalculationStartMutation,
     SetFormulaCalculationStopMutation,
 } from '../commands/mutations/set-formula-calculation.mutation';
@@ -226,7 +227,7 @@ export class CalculateController extends Disposable {
     }
 
     private async _applyFormula(data: IAllRuntimeData) {
-        const { unitData, arrayFormulaRange, arrayFormulaCellData, clearArrayFormulaCellData } = data;
+        const { unitData, unitOtherData, arrayFormulaRange, arrayFormulaCellData, clearArrayFormulaCellData } = data;
 
         if (!unitData) {
             console.error('No sheetData from Formula Engine!');
@@ -249,36 +250,9 @@ export class CalculateController extends Disposable {
             });
         }
 
-        const unitIds = Object.keys(unitData);
-
-        // Update each calculated value, possibly involving all cells
-        const redoMutationsInfo: ICommandInfo[] = [];
-
-        unitIds.forEach((unitId) => {
-            const sheetData = unitData[unitId];
-
-            const sheetIds = Object.keys(sheetData);
-
-            sheetIds.forEach((sheetId) => {
-                const cellData = sheetData[sheetId];
-
-                // const arrayFormula = arrayFormulaRange[unitId][sheetId];
-
-                const setRangeValuesMutation = {
-                    worksheetId: sheetId,
-                    workbookId: unitId,
-                    cellValue: cellData.getData(),
-                    isFormulaUpdate: true,
-                };
-
-                redoMutationsInfo.push({
-                    id: 'sheet.mutation.set-range-values', // SetRangeValuesMutation.id,
-                    params: setRangeValuesMutation,
-                });
-            });
+        this._commandService.executeCommand(SetFormulaCalculationResultMutation.id, {
+            unitData,
+            unitOtherData,
         });
-
-        const result = redoMutationsInfo.every((m) => this._commandService.executeCommand(m.id, m.params));
-        return result;
     }
 }

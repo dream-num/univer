@@ -17,8 +17,6 @@ describe('Scrollbar', () => {
 
         const scrollbar = container.querySelector('[role=scrollbar]');
 
-        console.log(scrollbar?.innerHTML);
-
         expect(scrollbar).toBeNull();
     });
 });

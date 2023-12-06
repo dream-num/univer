@@ -248,7 +248,7 @@ export class LexerTreeBuilder extends Disposable {
 
         for (let i = 0, len = sequenceArray.length; i < len; i++) {
             const item = sequenceArray[i];
-            // console.log('item', item);
+
             const preItem = sequenceArray[i - 1];
 
             const { segment, currentString, cur } = item;

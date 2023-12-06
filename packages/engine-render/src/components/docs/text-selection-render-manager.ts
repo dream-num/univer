@@ -554,8 +554,6 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         const position = this._getNodePosition(startNode);
 
-        console.log('startNode', startNode, position, evtOffsetX, evtOffsetY);
-
         if (position == null) {
             this._removeAllTextRanges();
             return;
@@ -927,8 +925,6 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         this._cursor.style.height = `${height * scaleY}px`;
 
-        // console.log('_syncDomToSelection', left, top, absoluteCoord?.x || 0, absoluteCoord?.y || 0);
-
         let { left: canvasLeft, top: canvasTop } = this._getCanvasOffset();
 
         canvasLeft += x;
@@ -946,8 +942,6 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         const endNode = this._findNodeByCoord(moveOffsetX, moveOffsetY);
 
         const focusNodePosition = this._getNodePosition(endNode);
-
-        // console.log('endNode', endNode, focusNodePosition, { moveOffsetX, moveOffsetY, _viewportScrollY: this._viewportScrollY, scrollX });
 
         if (!focusNodePosition) {
             return;

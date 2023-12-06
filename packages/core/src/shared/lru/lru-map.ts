@@ -281,7 +281,6 @@ export class LRUMap<K, V> {
     }
 
     delete(key: K): V | undefined {
-        console.log('delete');
         const entry = this._keymap.get(key);
         if (!entry) return;
         this._keymap.delete(entry.key);

@@ -137,10 +137,6 @@ export function getOneTextSelectionRange(rangeList: ITextRange[]): Nullable<ITex
 export class NodePositionConvertToCursor {
     private _liquid = new Liquid();
 
-    private _documentOffsetConfig: Nullable<IDocumentOffsetConfig>;
-
-    private _docSkeleton: Nullable<DocumentSkeleton>;
-
     private _currentStartState: ICurrentNodePositionState = {
         page: NodePositionStateType.NORMAL,
         section: NodePositionStateType.NORMAL,
@@ -159,11 +155,10 @@ export class NodePositionConvertToCursor {
         span: NodePositionStateType.NORMAL,
     };
 
-    constructor(documentOffsetConfig: IDocumentOffsetConfig, docSkeleton: DocumentSkeleton) {
-        this._documentOffsetConfig = documentOffsetConfig;
-
-        this._docSkeleton = docSkeleton;
-    }
+    constructor(
+        private _documentOffsetConfig: IDocumentOffsetConfig,
+        private _docSkeleton: DocumentSkeleton
+    ) {}
 
     getRangePointData(startOrigin: Nullable<INodePosition>, endOrigin: Nullable<INodePosition>) {
         const borderBoxPointGroup: IPoint[][] = [];
@@ -181,8 +176,8 @@ export class NodePositionConvertToCursor {
 
         const { start, end } = compareNodePosition(startOrigin, endOrigin);
 
-        this._selectionIterator(start!, end!, (start_sp, end_sp, isFirst, isLast, divide, line) => {
-            const { lineHeight, marginTop, paddingTop, contentHeight } = line;
+        this._selectionIterator(start, end, (start_sp, end_sp, isFirst, isLast, divide, line) => {
+            const { lineHeight, marginTop, contentHeight } = line;
 
             const { spanGroup, st } = divide;
 
@@ -233,15 +228,9 @@ export class NodePositionConvertToCursor {
             } else {
                 const isStartBackFin = isStartBack && !isCurrentList;
 
-                // isEndBackFin = isEndBack;
+                startOffset -= hasList ? 1 : 0;
 
-                // startOffset += isStartBackFin ? 0 : 1;
-
-                startOffset -= hasList && !isCurrentList ? 1 : 0;
-
-                // endOffset += isEndBackFin ? 0 : 1;
-
-                endOffset -= hasList && !isCurrentList ? 1 : 0;
+                endOffset -= hasList ? 1 : 0;
 
                 borderBoxPosition = {
                     startX: startX + firstSpanLeft + (isStartBackFin ? 0 : firstSpanWidth),
@@ -256,11 +245,6 @@ export class NodePositionConvertToCursor {
                     endX: startX + lastSpanLeft + (isEndBack ? 0 : lastSpanWidth),
                     endY: startY + marginTop + contentHeight,
                 };
-
-                // for (let sp = start_sp; sp <= end_sp; sp++) {
-                //     const span = spanGroup[sp];
-                //     const { width: spanWidth, left: spanLeft } = span;
-                // }
             }
 
             borderBoxPointGroup.push(this._pushToPoints(borderBoxPosition));
@@ -508,7 +492,7 @@ export class NodePositionConvertToCursor {
 
                     for (let l = start_l; l <= end_l; l++) {
                         const line = lines[l];
-                        const { divides, type, lineHeight = 0 } = line;
+                        const { divides } = line;
                         const { start_next: start_d, end_next: end_d } = this._getSelectionRuler(
                             NodePositionMap.line,
                             startPosition,
@@ -521,8 +505,6 @@ export class NodePositionConvertToCursor {
 
                         for (let d = start_d; d <= end_d; d++) {
                             const divide = divides[d];
-
-                            // console.log('div', divides, divide, startPosition, endPosition, start_d, end_d, d);
 
                             this._liquid.translateSave();
                             this._liquid.translateDivide(divide);

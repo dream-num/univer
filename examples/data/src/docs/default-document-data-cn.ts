@@ -729,8 +729,14 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
             },
             {
                 startIndex: 126,
+                bullet: {
+                    listId: 'testBullet',
+                    nestingLevel: 0,
+                    textStyle: {
+                        fs: 20,
+                    },
+                },
                 paragraphStyle: {
-                    indentStart: 20,
                     spaceAbove: 20,
                     lineSpacing: 2,
                     spaceBelow: 0,

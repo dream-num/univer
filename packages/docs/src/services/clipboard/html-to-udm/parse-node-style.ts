@@ -127,7 +127,6 @@ export function extractNodeStyle(node: HTMLElement): ITextStyle {
             }
 
             default: {
-                // console.log(`Unhandled css rule ${cssRule}`);
                 break;
             }
         }

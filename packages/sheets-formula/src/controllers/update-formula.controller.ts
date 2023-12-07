@@ -911,7 +911,10 @@ export class UpdateFormulaController extends Disposable {
             if (userUnitId === currentFormulaUnitId && userSheetId === currentFormulaSheetId) {
                 return true;
             }
-        } else if (userUnitId === sequenceRangeUnitId && userSheetId === sequenceRangeSheetId) {
+        } else if (
+            (userUnitId === sequenceRangeUnitId || sequenceRangeUnitId == null || sequenceRangeUnitId.length === 0) &&
+            userSheetId === sequenceRangeSheetId
+        ) {
             return true;
         }
 

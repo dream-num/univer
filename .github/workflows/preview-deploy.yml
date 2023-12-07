@@ -193,7 +193,7 @@ jobs:
               uses: sarisia/actions-status-discord@v1
               if: ${{ success() }}
               with:
-                  webhook: ${{ secrets.DISCORD_WEBHOOK }}
+                  webhook: ${{ secrets.DISCORD_WEBHOOK }}?thread_id=${{ needs.setup.outputs.ref != '' && secrets.DISCORD_CI_PR || secrets.DISCORD_CI_DEV }}
                   status: ${{ job.status }}
                   description: |
                       Ref: ${{ needs.setup.outputs.ref }}
@@ -217,7 +217,7 @@ jobs:
               uses: sarisia/actions-status-discord@v1
               if: ${{ failure() }}
               with:
-                  webhook: ${{ secrets.DISCORD_WEBHOOK }}
+                  webhook: ${{ secrets.DISCORD_WEBHOOK }}?thread_id=${{ needs.setup.outputs.ref != '' && secrets.DISCORD_CI_PR || secrets.DISCORD_CI_DEV }}
                   status: ${{ job.status }}
                   description: |
                       Ref: ${{ needs.setup.outputs.ref }}

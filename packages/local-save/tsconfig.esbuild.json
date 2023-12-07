@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+      "rootDir": "./src",
+      "outDir": "./lib/types",
+      "declaration": true,
+      "declarationDir": "./lib/types",
+      "declarationMap": true,
+      "emitDeclarationOnly": true,
+      "isolatedModules": false
+  },
+  "exclude": ["**/*.test.ts", "**/*.test.tsx", "**/*.stories.tsx"]
+}

@@ -9,6 +9,7 @@ import { DialogOperation } from '../commands/operations/dialog.operation';
 import { LocaleOperation } from '../commands/operations/locale.operation';
 import { MessageOperation } from '../commands/operations/message.operation';
 import { NotificationOperation } from '../commands/operations/notification.operation';
+import { SaveSnapshotOptions } from '../commands/operations/saveSnapshot.operations';
 import { SetEditable } from '../commands/operations/set.editable.operation';
 import { SidebarOperation } from '../commands/operations/sidebar.operation';
 import { ThemeOperation } from '../commands/operations/theme.operation';
@@ -164,6 +165,29 @@ export function SetEditableMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
             {
                 label: 'changeSheetEditable',
                 value: 'sheet',
+            },
+        ],
+    };
+}
+
+export function SaveSnapshotSetEditableMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+    return {
+        id: SaveSnapshotOptions.id,
+        type: MenuItemType.SELECTOR,
+        title: 'debugger.snapshot',
+        positions: [MenuPosition.TOOLBAR_OTHERS],
+        selections: [
+            {
+                label: 'saveWorkbook',
+                value: 'workbook',
+            },
+            {
+                label: 'saveSheet',
+                value: 'sheet',
+            },
+            {
+                label: 'record',
+                value: 'record',
             },
         ],
     };

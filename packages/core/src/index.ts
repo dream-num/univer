@@ -61,7 +61,7 @@ export {
 } from './services/permission';
 export { ResourceManagerService } from './services/resource-manager/resource-manager.service';
 export type { IResourceHook } from './services/resource-manager/type';
-export { IResourceManagerService } from './services/resource-manager/type';
+export { IResourceManagerService, ISnapshotPersistenceService } from './services/resource-manager/type';
 export { type IStyleSheet, ThemeService } from './services/theme/theme.service';
 export {
     type IUndoRedoCommandInfos,

@@ -29,7 +29,7 @@ export class PermissionService extends Disposable implements IPermissionService 
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService
     ) {
         super();
-        this._init();
+        // this._init();
     }
 
     private _init() {

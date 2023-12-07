@@ -66,7 +66,7 @@ export function createCoreTestBed(workbookConfig?: IWorkbookData, dependencies?:
     univerInstanceService.focusUniverInstance('test');
 
     const logService = get(ILogService);
-    logService.setLogLevel(LogLevel.SLIENT);
+    logService.setLogLevel(LogLevel.SILENT);
 
     return {
         univer,

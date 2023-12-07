@@ -117,7 +117,7 @@ export function createCommandTestBed(workbookConfig?: IDocumentData, dependencie
     univerInstanceService.focusUniverInstance('test-doc');
 
     const logService = get(ILogService);
-    logService.setLogLevel(LogLevel.SLIENT); // change this to `LogLevel.VERBOSE` to debug tests via logs
+    logService.setLogLevel(LogLevel.SILENT); // change this to `LogLevel.VERBOSE` to debug tests via logs
 
     return {
         univer,

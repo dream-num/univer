@@ -119,8 +119,9 @@ jobs:
             - name: Copy demo to workspace
               run: |
                   mkdir .workspace
-                  cp -r ./examples/docs/local .workspace/doc
-                  cp -r ./examples/sheets/local .workspace/sheet
+                  cp -r ./examples/docs/local .workspace/docs
+                  cp -r ./examples/sheets/local .workspace/sheets
+                  cp -r ./examples/slides/local .workspace/slides
 
             - name: 🚀 Deploy to Vercel (demo)
               uses: amondnet/vercel-action@v25
@@ -199,12 +200,12 @@ jobs:
 
                       🏆 CI Pipeline: Success
                       **[View Deployment]**
-                      - [Doc](${{ needs.build-demo.outputs.preview-url }}/doc/)
-                      - [Sheet](${{ needs.build-demo.outputs.preview-url }}/sheet/)
-                      - [Slide](${{ needs.build-demo.outputs.preview-url }}/slide/)
+                      - [📑 Doc](${{ needs.build-demo.outputs.preview-url }}/docs/)
+                      - [📊 Sheet](${{ needs.build-demo.outputs.preview-url }}/sheets/)
+                      - [📽️ Slide](${{ needs.build-demo.outputs.preview-url }}/slides/)
 
                       **[View Storybook]**
-                      - [Storybook](${{ needs.build-storybook.outputs.preview-url }}/)
+                      - [📚 Storybook](${{ needs.build-storybook.outputs.preview-url }}/)
                   nofail: false
                   nodetail: false
                   nocontext: false
@@ -251,7 +252,7 @@ jobs:
                       ## View Deployment
                       | 📝 Doc | 📊 Sheet | 📽️ Slide |
                       | --- | --- | --- |
-                      | [🔗 Preview link](${{ needs.build-demo.outputs.preview-url }}/doc/) | [🔗 Preview link](${{ needs.build-demo.outputs.preview-url }}/sheet/) | [🔗 Preview link](${{ needs.build-demo.outputs.preview-url }}/slide/) |
+                      | [🔗 Preview link](${{ needs.build-demo.outputs.preview-url }}/docs/) | [🔗 Preview link](${{ needs.build-demo.outputs.preview-url }}/sheets/) | [🔗 Preview link](${{ needs.build-demo.outputs.preview-url }}/slides/) |
 
                       ## View Storybook
                       | 📚 Storybook |

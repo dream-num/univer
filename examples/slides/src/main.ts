@@ -9,6 +9,7 @@ import { DEFAULT_SLIDE_DATA } from 'data';
 // package info
 console.table({
     NODE_ENV: process.env.NODE_ENV,
+    GIT_COMMIT_HASH: process.env.GIT_COMMIT_HASH,
     GIT_REF_NAME: process.env.GIT_REF_NAME,
     BUILD_TIME: process.env.BUILD_TIME,
 });

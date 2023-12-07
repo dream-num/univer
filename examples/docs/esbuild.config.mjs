@@ -47,7 +47,6 @@ const ctx = await esbuild[args.watch ? 'context' : 'build']({
     outdir: './local',
 
     define: {
-        'process.env.NODE_ENV': '"production"',
         'process.env.GIT_COMMIT_HASH': `"${gitCommitHash}"`,
         'process.env.GIT_REF_NAME': `"${gitRefName}"`,
         'process.env.BUILD_TIME': `"${new Date().toISOString()}"`,

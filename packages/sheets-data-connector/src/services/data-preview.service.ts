@@ -3,20 +3,31 @@ import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier } from '@wendellhu/redi';
 import { type Observable, Subject } from 'rxjs';
 
+export interface IDataTree {
+    id: string;
+    name: string;
+    children: IDataTree[];
+}
+
 export interface IDataInfo {
     cellValue: ObjectMatrixPrimitiveType<ICellData>;
 }
 
 export interface IDataPreviewService {
     /**
-     * Data source information
+     * Select new data source
      */
-    dataInfo$: Observable<IDataInfo>;
+    dataInfo$: Observable<void>;
 
     /**
      * Whether to preview
      */
     state$: Observable<boolean>;
+
+    /**
+     * Get data source information
+     */
+    getDataInfo(): IDataInfo | null;
 
     /**
      * Set data source information
@@ -34,7 +45,7 @@ export interface IDataPreviewService {
 export const IDataPreviewService = createIdentifier<IDataPreviewService>('data-connector.data-preview-service');
 
 export class DataPreviewService implements IDataPreviewService, IDisposable {
-    private readonly _dataInfo$ = new Subject<IDataInfo>();
+    private readonly _dataInfo$ = new Subject<void>();
 
     private readonly _state$ = new Subject<boolean>();
 
@@ -42,9 +53,18 @@ export class DataPreviewService implements IDataPreviewService, IDisposable {
 
     readonly state$ = this._state$.asObservable();
 
+    private _dataInfo: IDataInfo | null;
+
+    private _dataTree: IDataTree | null;
+
     dispose(): void {
         this._dataInfo$.complete();
         this._state$.complete();
+        this._dataInfo = null;
+    }
+
+    getDataInfo(): IDataInfo | null {
+        return this._dataInfo;
     }
 
     setDataInfo(dataId: string) {
@@ -67,10 +87,24 @@ export class DataPreviewService implements IDataPreviewService, IDisposable {
         const param: IDataInfo = {
             cellValue: data[dataId],
         };
-        this._dataInfo$.next(param);
+
+        this._dataInfo = param;
+        this._dataInfo$.next();
     }
 
     setState(state: boolean) {
         this._state$.next(state);
     }
+
+    getDataTree() {
+        if (!this._dataTree) {
+            this._requestDataTree();
+        }
+
+        return this._dataTree;
+    }
+
+    private _requestDataTree() {}
+
+    private _requestDataById(dataId: string) {}
 }

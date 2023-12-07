@@ -1,26 +1,29 @@
 import {
     Disposable,
+    DisposableCollection,
     ICommandService,
     IUniverInstanceService,
     LifecycleStages,
+    ObjectMatrix,
     OnLifecycle,
     toDisposable,
 } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
-import type { IDisposable } from '@wendellhu/redi';
+import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { Inject, Injector } from '@wendellhu/redi';
+import { map, Observable, switchMap } from 'rxjs';
 
 import { IDataPreviewService } from '../services/data-preview.service';
 
 @OnLifecycle(LifecycleStages.Ready, DataPreviewController)
 export class DataPreviewController extends Disposable {
-    private _sheetIntercept: IDisposable;
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
+        @Inject(SheetSkeletonManagerService) private _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(IRenderManagerService) private _renderManagerService: IRenderManagerService,
         @IDataPreviewService private _dataPreviewService: IDataPreviewService
     ) {
@@ -34,49 +37,59 @@ export class DataPreviewController extends Disposable {
     }
 
     private _initDataPreviewListener() {
+        const sidebarState = this._dataPreviewService.state$.pipe(map((state) => state));
+
         this.disposeWithMe(
             toDisposable(
-                this._dataPreviewService.dataInfo$.subscribe((data) => {
-                    console.info('data-====', data);
-                    const { cellValue } = data;
+                sidebarState
+                    .pipe(
+                        switchMap(
+                            (sidebarState) =>
+                                new Observable<{
+                                    disposableCollection: DisposableCollection;
+                                }>((subscribe) => {
+                                    const disposableCollection = new DisposableCollection();
 
-                    if (!this._sheetIntercept) {
-                        this._sheetIntercept = this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
-                            priority: 101,
-                            handler: (cell, location, next) => {
-                                const { workbookId, worksheetId, row, col } = location;
-                                if (row >= 10 && row <= 15 && col >= 10 && col <= 15) {
-                                    return {
-                                        v: row * col,
+                                    if (sidebarState) {
+                                        subscribe.next({ disposableCollection });
+                                    } else {
+                                        this._refreshRender();
+                                    }
+
+                                    return () => {
+                                        disposableCollection.dispose();
                                     };
-                                }
-                                console.info(
-                                    '_initInterceptorCellContent in data-preview=====',
-                                    row,
-                                    col,
-                                    cell,
-                                    location,
-                                    next
-                                );
+                                })
+                        )
+                    )
+                    .subscribe(({ disposableCollection }) => {
+                        disposableCollection.add(
+                            this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
+                                priority: 101,
+                                handler: (cell, location, next) => {
+                                    const { row, col } = location;
+                                    const dataInfo = this._dataPreviewService.getDataInfo();
 
-                                return next(cell);
-                            },
-                        });
-                    }
+                                    if (!dataInfo) return next(cell);
 
-                    // this._updateCellValue(cellValue);
+                                    const { cellValue } = dataInfo;
+                                    const cellMatrix = new ObjectMatrix(cellValue);
+                                    const currentCell = cellMatrix.getValue(row, col);
 
-                    this._refreshRender();
-                })
+                                    if (!currentCell) return next(cell);
+
+                                    return next(currentCell);
+                                },
+                            })
+                        );
+                    })
             )
         );
+
         this.disposeWithMe(
             toDisposable(
-                this._dataPreviewService.state$.subscribe((state) => {
-                    if (state) return;
-
-                    // TODO@Dushusir: why not work?
-                    this._sheetIntercept.dispose();
+                this._dataPreviewService.dataInfo$.subscribe(() => {
+                    this._refreshRender();
                 })
             )
         );
@@ -84,6 +97,7 @@ export class DataPreviewController extends Disposable {
 
     private _refreshRender() {
         const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+        this._sheetSkeletonManagerService.reCalculate();
         this._renderManagerService.getRenderById(workbook.getUnitId())?.mainComponent?.makeDirty();
     }
 }

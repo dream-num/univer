@@ -13,6 +13,8 @@ export const DataConnectorSidebarOperation: ICommand = {
         const sidebarService = accessor.get(ISidebarService);
         const dataPreviewService = accessor.get(IDataPreviewService);
 
+        dataPreviewService.setState(true);
+
         sidebarService.open({
             header: { title: 'dataConnector.insert.tooltip' },
             children: { label: DATA_CONNECTOR_SIDEBAR_COMPONENT },

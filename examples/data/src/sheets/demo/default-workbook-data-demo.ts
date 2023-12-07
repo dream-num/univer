@@ -23165,7 +23165,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                     h: 60,
                 },
                 3: {
-                    h: 100,
+                    h: 600,
                 },
             },
             status: 1,
@@ -23203,7 +23203,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                 },
                 3: {
                     0: {
-                        v: '(CHILDREN)',
+                        v: '中文：(Children)中文',
                         s: {
                             tr: {
                                 a: 90,

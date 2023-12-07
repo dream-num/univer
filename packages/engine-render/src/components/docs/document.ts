@@ -6,7 +6,7 @@ import { HorizontalAlign, Observable, VerticalAlign, WrapStrategy } from '@unive
 import { calculateRectRotate, getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
 import type { IDocumentSkeletonCached, IDocumentSkeletonPage } from '../../basics/i-document-skeleton-cached';
 import { LineType, PageLayoutType } from '../../basics/i-document-skeleton-cached';
-import { degToRad, fixLineWidthByScale, getScale } from '../../basics/tools';
+import { degToRad, getScale } from '../../basics/tools';
 import type { Transform } from '../../basics/transform';
 import type { IBoundRect } from '../../basics/vector2';
 import { Vector2 } from '../../basics/vector2';
@@ -340,20 +340,15 @@ export class Documents extends DocComponent {
                                     }
 
                                     const { width: spanWidth, left: spanLeft, paddingLeft } = span;
+
                                     const { x: translateX, y: translateY } = this._drawLiquid;
-                                    const originTranslate = Vector2.create(
-                                        fixLineWidthByScale(translateX, scale),
-                                        fixLineWidthByScale(translateY, scale)
-                                    );
-                                    const centerPoint = Vector2.create(
-                                        fixLineWidthByScale(spanWidth / 2, scale),
-                                        fixLineWidthByScale(lineHeight / 2, scale)
-                                    );
+
+                                    const originTranslate = Vector2.create(translateX, translateY);
+
+                                    const centerPoint = Vector2.create(spanWidth / 2, lineHeight / 2);
+
                                     const spanStartPoint = calculateRectRotate(
-                                        originTranslate.addByPoint(
-                                            fixLineWidthByScale(spanLeft + paddingLeft, scale),
-                                            0
-                                        ),
+                                        originTranslate.addByPoint(spanLeft + paddingLeft, 0),
                                         centerPoint,
                                         centerAngle,
                                         vertexAngle,

@@ -1,6 +1,7 @@
 import type { IScale } from '@univerjs/core';
 import { BaselineOffset, getColorStyle } from '@univerjs/core';
 
+import { hasCJK } from '../../../basics';
 import { COLOR_BLACK_RGB } from '../../../basics/const';
 import type { IDocumentSkeletonSpan } from '../../../basics/i-document-skeleton-cached';
 import { Vector2 } from '../../../basics/vector2';
@@ -25,19 +26,19 @@ export class FontAndBaseLine extends docExtension {
         }
 
         const { asc = 0, marginTop: lineMarginTop = 0, paddingTop: linePaddingTop = 0 } = line;
+
         const maxLineAsc = asc + lineMarginTop + linePaddingTop;
+
         const { ts: textStyle, content, fontStyle, bBox } = span;
+
         const { spanPointWithFont = Vector2.create(0, 0) } = this.extensionOffset;
 
-        if (!textStyle) {
-            if (content != null) {
-                ctx.fillText(content, spanPointWithFont.x, spanPointWithFont.y);
-            }
-
+        if (content == null) {
             return;
         }
 
-        if (content == null) {
+        if (!textStyle) {
+            this._fillText(ctx, span, spanPointWithFont);
             return;
         }
 
@@ -71,8 +72,34 @@ export class FontAndBaseLine extends docExtension {
         }
 
         // console.log(content, spanPointWithFont.x, spanPointWithFont.y, startX, startY);
+        this._fillText(ctx, span, spanPointWithFont);
+    }
 
-        ctx.fillText(content, spanPointWithFont.x, spanPointWithFont.y);
+    private _fillText(ctx: CanvasRenderingContext2D, span: IDocumentSkeletonSpan, spanPointWithFont: Vector2) {
+        const { renderConfig, spanStartPoint, centerPoint } = this.extensionOffset;
+        const { content, width, bBox } = span;
+        const { aba, abd } = bBox;
+
+        if (content == null || spanStartPoint == null || centerPoint == null) {
+            return;
+        }
+
+        const { vertexAngle, centerAngle } = renderConfig ?? {};
+
+        const VERTICAL_DEG = 90;
+
+        const isVertical = vertexAngle === VERTICAL_DEG && centerAngle === VERTICAL_DEG;
+
+        if (isVertical && !hasCJK(content)) {
+            ctx.save();
+            ctx.translate(spanStartPoint.x + centerPoint.x, spanStartPoint.y + centerPoint.y);
+            ctx.rotate(Math.PI / 2);
+            ctx.translate(-width / 2, (aba + abd) / 2 - abd);
+            ctx.fillText(content, 0, 0);
+            ctx.restore();
+        } else {
+            ctx.fillText(content, spanPointWithFont.x, spanPointWithFont.y);
+        }
     }
 
     override clearCache() {

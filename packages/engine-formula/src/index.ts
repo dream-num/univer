@@ -48,6 +48,7 @@ export { StringValueObject } from './engine/value-object/primitive-object';
 export { BaseFunction } from './functions/base-function';
 export { FUNCTION_NAMES_MATH } from './functions/math/function-names';
 export { FormulaDataModel } from './models/formula-data.model';
+export { initSheetFormulaData } from './models/formula-data.model';
 export { BaseFormulaEnginePlugin } from './plugin';
 export { IActiveDirtyManagerService } from './services/active-dirty-manager.service';
 export { FormulaEngineService } from './services/formula-engine.service';

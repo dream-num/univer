@@ -19,6 +19,7 @@ import {
     FormulaDataModel,
     FormulaEngineService,
     generateStringWithSequence,
+    initSheetFormulaData,
     sequenceNodeType,
     SetArrayFormulaDataMutation,
     SetFormulaDataMutation,
@@ -72,9 +73,6 @@ import {
 } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
-import { SetFormulaDataMutation } from '../commands/mutations/set-formula-data.mutation';
-import { FormulaDataModel, initSheetFormulaData } from '../models/formula-data.model';
 import { offsetArrayFormula, offsetFormula } from './utils';
 
 interface IUnitRangeWithOffset extends IUnitRange {

@@ -1,17 +1,14 @@
 import type { IWorkbookData } from '@univerjs/core';
 import { ILogService, IUniverInstanceService, LocaleType, Plugin, PluginType, Univer } from '@univerjs/core';
-import { FormulaEngineService } from '@univerjs/engine-formula';
-import { SelectionManagerService, SheetInterceptorService } from '@univerjs/sheets';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { ArrayFormulaDisplayController } from '../../../../../controllers/array-formula-display.controller';
-import { CalculateController } from '../../../../../controllers/calculate.controller';
-import { FormulaController } from '../../../../../controllers/formula.controller';
-import { TriggerCalculationController } from '../../../../../controllers/trigger-calculation.controller';
-import { UpdateFormulaController } from '../../../../../controllers/update-formula.controller';
-import { FormulaDataModel } from '../../../../../models/formula-data.model';
-import { FormulaService, IFormulaService } from '../../../../formula.service';
+import { CalculateController } from '../../controller/calculate.controller';
+import { FormulaController } from '../../controller/formula.controller';
+import { FormulaDataModel } from '../../models/formula-data.model';
+import { ActiveDirtyManagerService, IActiveDirtyManagerService } from '../../services/active-dirty-manager.service';
+import { FormulaService, IFormulaService } from '../../services/formula.service';
+import { FormulaEngineService } from '../../services/formula-engine.service';
 
 const TEST_WORKBOOK_DATA: IWorkbookData = {
     id: 'test',
@@ -72,17 +69,14 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
         }
 
         override onStarting(injector: Injector): void {
+            injector.add([IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }]);
             injector.add([FormulaEngineService]);
             this._formulaDataModel = this._injector.createInstance(FormulaDataModel);
-            injector.add([SelectionManagerService]);
-            injector.add([SheetInterceptorService]);
+
             injector.add([FormulaDataModel, { useValue: this._formulaDataModel }]);
             injector.add([FormulaController]);
             injector.add([IFormulaService, { useClass: FormulaService }]);
             injector.add([CalculateController]);
-            injector.add([UpdateFormulaController]);
-            injector.add([ArrayFormulaDisplayController]);
-            injector.add([TriggerCalculationController]);
 
             dependencies?.forEach((d) => injector.add(d));
         }

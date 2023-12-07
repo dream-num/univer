@@ -1,10 +1,9 @@
 import type { IWorkbookData } from '@univerjs/core';
 import { ILogService, IUniverInstanceService, LocaleType, Plugin, PluginType, Univer } from '@univerjs/core';
-import { FormulaEngineService } from '@univerjs/engine-formula';
-import { SelectionManagerService } from '@univerjs/sheets';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
+import { FormulaEngineService } from '../../services/formula-engine.service';
 import { FormulaDataModel } from '../formula-data.model';
 
 const TEST_WORKBOOK_DATA: IWorkbookData = {
@@ -52,7 +51,6 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
         }
 
         override onStarting(injector: Injector): void {
-            injector.add([SelectionManagerService]);
             injector.add([FormulaEngineService]);
             injector.add([FormulaDataModel]);
 

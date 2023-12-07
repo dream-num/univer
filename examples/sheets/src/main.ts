@@ -3,7 +3,6 @@ import { greenTheme } from '@univerjs/design';
 import { DocsPlugin, RichTextEditingMutation } from '@univerjs/docs';
 import { BaseFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { RenderEngine } from '@univerjs/engine-render';
-import { FormulaPlugin } from '@univerjs/formula';
 import type { IUniverRPCMainThreadPluginConfig } from '@univerjs/rpc';
 import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
 import { SheetsPlugin } from '@univerjs/sheets';
@@ -37,17 +36,21 @@ univer.registerPlugin(UIPlugin, {
     toolbar: true,
     footer: true,
 });
-univer.registerPlugin(SheetsPlugin);
+univer.registerPlugin(SheetsPlugin, {
+    notExecuteFormula: true,
+});
 univer.registerPlugin(SheetsUIPlugin);
 
 // sheet feature plugins
 
 univer.registerPlugin(NumfmtPlugin);
 univer.registerPlugin(DebuggerPlugin);
-univer.registerPlugin(BaseFormulaEnginePlugin);
-univer.registerPlugin(FormulaPlugin, {
+univer.registerPlugin(BaseFormulaEnginePlugin, {
     notExecuteFormula: true,
 });
+// univer.registerPlugin(FormulaPlugin, {
+//     notExecuteFormula: true,
+// });
 univer.registerPlugin(FormulaUIPlugin);
 univer.registerPlugin(UniverRPCMainThreadPlugin, {
     workerURL: './worker.js',

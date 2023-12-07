@@ -31,10 +31,10 @@ export interface ISetRangeValuesMutationParams extends IMutationCommonParams {
      */
     options?: ICopyToOptionsData;
 
-    /**
-     * for formula calculate
-     */
-    isFormulaUpdate?: boolean;
+    // /**
+    //  * for formula calculate
+    //  */
+    // isFormulaUpdate?: boolean;
 }
 
 export interface ISetRangeValuesRangeMutationParams extends ISetRangeValuesMutationParams {

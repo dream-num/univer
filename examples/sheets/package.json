@@ -17,7 +17,6 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/rpc": "workspace:*",
-        "@univerjs/formula": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",
         "@univerjs/sheets-numfmt": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",

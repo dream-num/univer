@@ -1,8 +1,8 @@
 import type { IMutation } from '@univerjs/core';
 import { CommandType, Tools } from '@univerjs/core';
-import type { IArrayFormulaRangeType, IArrayFormulaUnitCellType } from '@univerjs/engine-formula';
 import type { IAccessor } from '@wendellhu/redi';
 
+import type { IArrayFormulaRangeType, IArrayFormulaUnitCellType } from '../../basics/common';
 import { FormulaDataModel } from '../../models/formula-data.model';
 
 export interface ISetArrayFormulaDataMutationParams {

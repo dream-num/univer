@@ -1,10 +1,13 @@
-import type { ICommandInfo, IMutation } from '@univerjs/core';
+import type { ICommandInfo, IExecutionOptions, IMutation, Nullable } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
-import type { FormulaExecutedStateType, IExecutionInProgressParams } from '@univerjs/engine-formula';
 import type { IAccessor } from '@wendellhu/redi';
+
+import type { IRuntimeOtherUnitDataType, IRuntimeUnitDataType } from '../../basics/common';
+import type { FormulaExecutedStateType, IExecutionInProgressParams } from '../../services/runtime.service';
 
 export interface ISetFormulaCalculationStartMutation {
     commands: ICommandInfo[];
+    options: Nullable<IExecutionOptions>;
     forceCalculation?: boolean;
 }
 /**
@@ -34,4 +37,15 @@ export const SetFormulaCalculationNotificationMutation: IMutation<ISetFormulaCal
     id: 'formula.mutation.set-formula-calculation-notification',
     type: CommandType.MUTATION,
     handler: (accessor: IAccessor, params: ISetFormulaCalculationNotificationMutation) => true,
+};
+
+export interface ISetFormulaCalculationResultMutation {
+    unitData: IRuntimeUnitDataType;
+    unitOtherData: IRuntimeOtherUnitDataType;
+}
+
+export const SetFormulaCalculationResultMutation: IMutation<ISetFormulaCalculationResultMutation> = {
+    id: 'formula.mutation.set-formula-calculation-result',
+    type: CommandType.MUTATION,
+    handler: (accessor: IAccessor, params: ISetFormulaCalculationResultMutation) => true,
 };

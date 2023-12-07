@@ -1,29 +1,24 @@
 import type { ICommandInfo, IUnitRange } from '@univerjs/core';
 import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import type {
-    IAllRuntimeData,
-    IDirtyUnitFeatureMap,
-    IDirtyUnitSheetNameMap,
-    IFormulaData,
-} from '@univerjs/engine-formula';
-import { FormulaEngineService, FormulaExecutedStateType, IActiveDirtyManagerService } from '@univerjs/engine-formula';
-import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { SetRangeValuesMutation } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
+import type { IDirtyUnitFeatureMap, IDirtyUnitSheetNameMap, IFormulaData } from '../basics/common';
 import type { ISetArrayFormulaDataMutationParams } from '../commands/mutations/set-array-formula-data.mutation';
 import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
 import type { ISetFormulaCalculationStartMutation } from '../commands/mutations/set-formula-calculation.mutation';
 import {
     SetFormulaCalculationNotificationMutation,
+    SetFormulaCalculationResultMutation,
     SetFormulaCalculationStartMutation,
     SetFormulaCalculationStopMutation,
 } from '../commands/mutations/set-formula-calculation.mutation';
 import type { ISetFormulaDataMutationParams } from '../commands/mutations/set-formula-data.mutation';
 import { SetFormulaDataMutation } from '../commands/mutations/set-formula-data.mutation';
 import { FormulaDataModel } from '../models/formula-data.model';
-import type { FormulaService } from '../services/formula.service';
-import { IFormulaService } from '../services/formula.service';
+import { IActiveDirtyManagerService } from '../services/active-dirty-manager.service';
+import { FormulaEngineService } from '../services/formula-engine.service';
+import type { IAllRuntimeData } from '../services/runtime.service';
+import { FormulaExecutedStateType } from '../services/runtime.service';
 
 @OnLifecycle(LifecycleStages.Ready, CalculateController)
 export class CalculateController extends Disposable {
@@ -31,7 +26,6 @@ export class CalculateController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
-        @Inject(IFormulaService) private readonly _formulaService: FormulaService,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
         @IActiveDirtyManagerService private readonly _activeDirtyManagerService: IActiveDirtyManagerService
     ) {
@@ -43,13 +37,13 @@ export class CalculateController extends Disposable {
     private _initialize(): void {
         this._commandExecutedListener();
         this._initialExecuteFormulaListener();
-        this._registerFunctions();
+
         this._initialExecuteFormulaProcessListener();
     }
 
     private _commandExecutedListener() {
         this.disposeWithMe(
-            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+            this._commandService.onCommandExecuted((command: ICommandInfo, options) => {
                 if (command.id === SetFormulaCalculationStopMutation.id) {
                     this._formulaEngineService.stopFormulaExecution();
                 } else if (command.id === SetFormulaDataMutation.id) {
@@ -197,9 +191,15 @@ export class CalculateController extends Disposable {
                     break;
             }
 
-            this._commandService.executeCommand(SetFormulaCalculationNotificationMutation.id, {
-                functionsExecutedState,
-            });
+            this._commandService.executeCommand(
+                SetFormulaCalculationNotificationMutation.id,
+                {
+                    functionsExecutedState,
+                },
+                {
+                    local: true,
+                }
+            );
         });
     }
 
@@ -226,14 +226,20 @@ export class CalculateController extends Disposable {
                 );
             }
 
-            this._commandService.executeCommand(SetFormulaCalculationNotificationMutation.id, {
-                stageInfo: data,
-            });
+            this._commandService.executeCommand(
+                SetFormulaCalculationNotificationMutation.id,
+                {
+                    stageInfo: data,
+                },
+                {
+                    local: true,
+                }
+            );
         });
     }
 
     private async _applyFormula(data: IAllRuntimeData) {
-        const { unitData, arrayFormulaRange, arrayFormulaCellData, clearArrayFormulaCellData } = data;
+        const { unitData, unitOtherData, arrayFormulaRange, arrayFormulaCellData, clearArrayFormulaCellData } = data;
 
         if (!unitData) {
             console.error('No sheetData from Formula Engine!');
@@ -250,46 +256,27 @@ export class CalculateController extends Disposable {
             this._formulaDataModel.mergeArrayFormulaRange(arrayFormulaRange);
 
             // Synchronous to the main thread
-            this._commandService.executeCommand(SetArrayFormulaDataMutation.id, {
-                arrayFormulaRange: this._formulaDataModel.getArrayFormulaRange(),
-                arrayFormulaCellData: this._formulaDataModel.getArrayFormulaCellData(),
-            });
+            this._commandService.executeCommand(
+                SetArrayFormulaDataMutation.id,
+                {
+                    arrayFormulaRange: this._formulaDataModel.getArrayFormulaRange(),
+                    arrayFormulaCellData: this._formulaDataModel.getArrayFormulaCellData(),
+                },
+                {
+                    local: true,
+                }
+            );
         }
 
-        const unitIds = Object.keys(unitData);
-
-        // Update each calculated value, possibly involving all cells
-        const redoMutationsInfo: ICommandInfo[] = [];
-
-        unitIds.forEach((unitId) => {
-            const sheetData = unitData[unitId];
-
-            const sheetIds = Object.keys(sheetData);
-
-            sheetIds.forEach((sheetId) => {
-                const cellData = sheetData[sheetId];
-
-                // const arrayFormula = arrayFormulaRange[unitId][sheetId];
-
-                const setRangeValuesMutation: ISetRangeValuesMutationParams = {
-                    worksheetId: sheetId,
-                    workbookId: unitId,
-                    cellValue: cellData.getData(),
-                    isFormulaUpdate: true,
-                };
-
-                redoMutationsInfo.push({
-                    id: SetRangeValuesMutation.id,
-                    params: setRangeValuesMutation,
-                });
-            });
-        });
-
-        const result = redoMutationsInfo.every((m) => this._commandService.executeCommand(m.id, m.params));
-        return result;
-    }
-
-    private _registerFunctions() {
-        this._formulaService.registerFunctions();
+        this._commandService.executeCommand(
+            SetFormulaCalculationResultMutation.id,
+            {
+                unitData,
+                unitOtherData,
+            },
+            {
+                local: true,
+            }
+        );
     }
 }

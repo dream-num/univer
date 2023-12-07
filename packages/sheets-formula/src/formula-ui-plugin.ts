@@ -4,11 +4,14 @@ import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { FORMULA_UI_PLUGIN_NAME } from './common/plugin-name';
+import { ArrayFormulaDisplayController } from './controllers/array-formula-display.controller';
 import { FormulaAutoFillController } from './controllers/formula-auto-fill.controller';
 import { FormulaClipboardController } from './controllers/formula-clipboard.controller';
 import { FormulaInputController } from './controllers/formula-input.controller';
 import { FormulaUIController } from './controllers/formula-ui.controller';
 import { PromptController } from './controllers/prompt.controller';
+import { TriggerCalculationController } from './controllers/trigger-calculation.controller';
+import { UpdateFormulaController } from './controllers/update-formula.controller';
 import { enUS } from './locale';
 import { DescriptionService, IDescriptionService } from './services/description.service';
 import { FormulaInputService, IFormulaInputService } from './services/formula-input.service';
@@ -52,6 +55,9 @@ export class FormulaUIPlugin extends Plugin {
             [FormulaInputController],
             [FormulaAutoFillController],
             [FormulaClipboardController],
+            [ArrayFormulaDisplayController],
+            [TriggerCalculationController],
+            [UpdateFormulaController],
         ];
 
         dependencies.forEach((dependency) => this._injector.add(dependency));

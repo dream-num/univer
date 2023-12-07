@@ -274,9 +274,6 @@ importers:
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../../packages/engine-render
-      '@univerjs/formula':
-        specifier: workspace:*
-        version: link:../../packages/formula
       '@univerjs/rpc':
         specifier: workspace:*
         version: link:../../packages/rpc
@@ -689,46 +686,6 @@ importers:
         specifier: ^0.34.6
         version: 0.34.6(happy-dom@12.10.3)(less@4.2.0)
 
-  packages/formula:
-    dependencies:
-      '@univerjs/core':
-        specifier: workspace:*
-        version: link:../core
-      '@univerjs/engine-formula':
-        specifier: workspace:*
-        version: link:../engine-formula
-      '@univerjs/sheets':
-        specifier: workspace:*
-        version: link:../sheets
-      '@wendellhu/redi':
-        specifier: ^0.12.11
-        version: 0.12.11
-      rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
-    devDependencies:
-      '@vitest/coverage-istanbul':
-        specifier: ^0.34.6
-        version: 0.34.6(vitest@0.34.6)
-      esbuild:
-        specifier: ^0.19.8
-        version: 0.19.8
-      happy-dom:
-        specifier: ^12.10.3
-        version: 12.10.3
-      less:
-        specifier: ^4.2.0
-        version: 4.2.0
-      ts-node:
-        specifier: ^10.9.1
-        version: 10.9.1(@swc/core@1.3.100)(@types/node@20.10.3)(typescript@5.3.2)
-      typescript:
-        specifier: ^5.3.2
-        version: 5.3.2
-      vitest:
-        specifier: ^0.34.6
-        version: 0.34.6(happy-dom@12.10.3)(less@4.2.0)
-
   packages/image:
     dependencies:
       '@univerjs/core':
@@ -824,6 +781,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
+      '@univerjs/engine-formula':
+        specifier: workspace:*
+        version: link:../engine-formula
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../engine-render
@@ -925,9 +885,6 @@ importers:
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../engine-render
-      '@univerjs/formula':
-        specifier: workspace:*
-        version: link:../formula
       '@univerjs/icons':
         specifier: ^0.1.14
         version: 0.1.14(react-dom@18.2.0)(react@18.2.0)

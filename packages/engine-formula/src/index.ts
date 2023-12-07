@@ -17,6 +17,24 @@ export { FUNCTION_NAMES, FunctionType, type IFunctionInfo, type IFunctionParam }
 export { includeFormulaLexerToken, isFormulaLexerToken, normalizeSheetName } from './basics/match-token';
 export { matchToken } from './basics/token';
 export { compareToken } from './basics/token';
+export {
+    type ISetArrayFormulaDataMutationParams,
+    SetArrayFormulaDataMutation,
+    SetArrayFormulaDataUndoMutationFactory,
+} from './commands/mutations/set-array-formula-data.mutation';
+export {
+    type ISetFormulaCalculationNotificationMutation,
+    type ISetFormulaCalculationResultMutation,
+    type ISetFormulaCalculationStartMutation,
+    SetFormulaCalculationNotificationMutation,
+    SetFormulaCalculationResultMutation,
+    SetFormulaCalculationStartMutation,
+    SetFormulaCalculationStopMutation,
+} from './commands/mutations/set-formula-calculation.mutation';
+export {
+    type ISetFormulaDataMutationParams,
+    SetFormulaDataMutation,
+} from './commands/mutations/set-formula-data.mutation';
 export { LexerNode } from './engine/analysis/lexer-node';
 export { ErrorValueObject } from './engine/other-object/error-value-object';
 export { BaseReferenceObject, type FunctionVariantType } from './engine/reference-object/base-reference-object';
@@ -28,6 +46,8 @@ export { NumberValueObject } from './engine/value-object/primitive-object';
 export { BooleanValueObject } from './engine/value-object/primitive-object';
 export { StringValueObject } from './engine/value-object/primitive-object';
 export { BaseFunction } from './functions/base-function';
+export { FUNCTION_NAMES_MATH } from './functions/math/function-names';
+export { FormulaDataModel } from './models/formula-data.model';
 export { BaseFormulaEnginePlugin } from './plugin';
 export { IActiveDirtyManagerService } from './services/active-dirty-manager.service';
 export { FormulaEngineService } from './services/formula-engine.service';

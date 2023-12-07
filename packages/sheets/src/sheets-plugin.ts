@@ -2,8 +2,11 @@ import { ICommandService, LocaleService, Plugin, PluginType } from '@univerjs/co
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
+import { ActiveDirtyController } from './controllers/active-dirty.controller';
 import { BasicWorksheetController } from './controllers/basic-worksheet.controller';
+import { CalculateResultApplyController } from './controllers/calculate-result-apply.controller';
 import { MergeCellController } from './controllers/merge-cell.controller';
+import { PassiveDirtyController } from './controllers/passive-dirty.controller';
 import { enUS } from './locale';
 import { BorderStyleManagerService } from './services/border-style-manager.service';
 import { NumfmtService } from './services/numfmt/numfmt.service';
@@ -15,6 +18,10 @@ import { SheetInterceptorService } from './services/sheet-interceptor/sheet-inte
 
 const PLUGIN_NAME = 'sheet';
 
+interface ISheetsPluginConfig {
+    notExecuteFormula?: boolean;
+}
+
 /**
  * The main sheet base, construct the sheet container and layout, mount the rendering engine
  */
@@ -22,7 +29,7 @@ export class SheetsPlugin extends Plugin {
     static override type = PluginType.Sheet;
 
     constructor(
-        config: undefined,
+        private _config: ISheetsPluginConfig,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(Injector) override readonly _injector: Injector
@@ -51,7 +58,13 @@ export class SheetsPlugin extends Plugin {
             // controllers
             [BasicWorksheetController],
             [MergeCellController],
+            [ActiveDirtyController],
+            [PassiveDirtyController],
         ];
+
+        if (!this._config?.notExecuteFormula) {
+            dependencies.push([CalculateResultApplyController]);
+        }
 
         dependencies.forEach((d) => {
             sheetInjector.add(d);

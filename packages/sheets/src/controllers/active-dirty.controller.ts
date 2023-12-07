@@ -8,38 +8,35 @@ import {
     OnLifecycle,
 } from '@univerjs/core';
 import type { IDirtyUnitSheetNameMap } from '@univerjs/engine-formula';
-import { IActiveDirtyManagerService } from '@univerjs/engine-formula';
+import { FormulaDataModel, IActiveDirtyManagerService } from '@univerjs/engine-formula';
+import { Inject } from '@wendellhu/redi';
+
 import type {
     IDeleteRangeMutationParams,
     IInsertRangeMutationParams,
     IInsertSheetMutationParams,
-    IMoveColumnsMutationParams,
-    IMoveRangeMutationParams,
-    IMoveRowsMutationParams,
     IRemoveColMutationParams,
     IRemoveRowsMutationParams,
     IRemoveSheetMutationParams,
-    ISetRangeValuesMutationParams,
-} from '@univerjs/sheets';
-import {
-    DeleteRangeMutation,
-    InsertRangeMutation,
-    InsertSheetMutation,
-    MoveColsMutation,
-    MoveRangeMutation,
-    MoveRowsMutation,
-    RemoveColMutation,
-    RemoveRowMutation,
-    RemoveSheetMutation,
-    SetRangeValuesMutation,
-    SetStyleCommand,
-} from '@univerjs/sheets';
-import { Inject } from '@wendellhu/redi';
+} from '../basics/interfaces/mutation-interface';
+import { SetStyleCommand } from '../commands/commands/set-style.command';
+import { DeleteRangeMutation } from '../commands/mutations/delete-range.mutation';
+import { InsertRangeMutation } from '../commands/mutations/insert-range.mutation';
+import { InsertSheetMutation } from '../commands/mutations/insert-sheet.mutation';
+import type { IMoveRangeMutationParams } from '../commands/mutations/move-range.mutation';
+import { MoveRangeMutation } from '../commands/mutations/move-range.mutation';
+import type {
+    IMoveColumnsMutationParams,
+    IMoveRowsMutationParams,
+} from '../commands/mutations/move-rows-cols.mutation';
+import { MoveColsMutation, MoveRowsMutation } from '../commands/mutations/move-rows-cols.mutation';
+import { RemoveColMutation, RemoveRowMutation } from '../commands/mutations/remove-row-col.mutation';
+import { RemoveSheetMutation } from '../commands/mutations/remove-sheet.mutation';
+import type { ISetRangeValuesMutationParams } from '../commands/mutations/set-range-values.mutation';
+import { SetRangeValuesMutation } from '../commands/mutations/set-range-values.mutation';
 
-import { FormulaDataModel } from '../models/formula-data.model';
-
-@OnLifecycle(LifecycleStages.Ready, DirtyConversionController)
-export class DirtyConversionController extends Disposable {
+@OnLifecycle(LifecycleStages.Ready, ActiveDirtyController)
+export class ActiveDirtyController extends Disposable {
     constructor(
         @IActiveDirtyManagerService private readonly _activeDirtyManagerService: IActiveDirtyManagerService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
@@ -77,7 +74,7 @@ export class DirtyConversionController extends Disposable {
                  * Changes in the cell value caused by the formula or style
                  * will not trigger the formula to be marked as dirty for calculation.
                  */
-                if (params.isFormulaUpdate === true || params.trigger === SetStyleCommand.id) {
+                if (params.trigger === SetStyleCommand.id) {
                     return {};
                 }
 

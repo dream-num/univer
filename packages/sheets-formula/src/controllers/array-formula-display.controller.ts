@@ -1,11 +1,9 @@
 import type { ICommandInfo } from '@univerjs/core';
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import type { ISetArrayFormulaDataMutationParams } from '@univerjs/engine-formula';
+import { FormulaDataModel, SetArrayFormulaDataMutation } from '@univerjs/engine-formula';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
-
-import type { ISetArrayFormulaDataMutationParams } from '../commands/mutations/set-array-formula-data.mutation';
-import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
-import { FormulaDataModel } from '../models/formula-data.model';
 
 @OnLifecycle(LifecycleStages.Ready, ArrayFormulaDisplayController)
 export class ArrayFormulaDisplayController extends Disposable {

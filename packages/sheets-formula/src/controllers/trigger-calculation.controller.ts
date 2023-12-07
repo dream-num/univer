@@ -1,14 +1,14 @@
 import type { ICommandInfo } from '@univerjs/core';
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { FormulaExecutedStateType, IActiveDirtyManagerService } from '@univerjs/engine-formula';
-import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { SetRangeValuesMutation, SetStyleCommand } from '@univerjs/sheets';
-
-import type { ISetFormulaCalculationNotificationMutation } from '../commands/mutations/set-formula-calculation.mutation';
+import type { ISetFormulaCalculationNotificationMutation } from '@univerjs/engine-formula';
 import {
+    FormulaExecutedStateType,
+    IActiveDirtyManagerService,
     SetFormulaCalculationNotificationMutation,
     SetFormulaCalculationStartMutation,
-} from '../commands/mutations/set-formula-calculation.mutation';
+} from '@univerjs/engine-formula';
+import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
+import { SetRangeValuesMutation, SetStyleCommand } from '@univerjs/sheets';
 
 const globalObject = typeof self !== 'undefined' ? self : window;
 
@@ -53,7 +53,7 @@ export class TriggerCalculationController extends Disposable {
         // ];
 
         this.disposeWithMe(
-            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+            this._commandService.onCommandExecuted((command: ICommandInfo, options) => {
                 if (!this._activeDirtyManagerService.get(command.id)) {
                     return;
                 }
@@ -61,7 +61,7 @@ export class TriggerCalculationController extends Disposable {
                 if (command.id === SetRangeValuesMutation.id) {
                     const params = command.params as ISetRangeValuesMutationParams;
 
-                    if (params.isFormulaUpdate === true || params.trigger === SetStyleCommand.id) {
+                    if ((options && options.local === true) || params.trigger === SetStyleCommand.id) {
                         return;
                     }
                 }
@@ -71,9 +71,15 @@ export class TriggerCalculationController extends Disposable {
                 globalObject.clearTimeout(this._setTimeoutKey);
 
                 this._setTimeoutKey = globalObject.setTimeout(() => {
-                    this._commandService.executeCommand(SetFormulaCalculationStartMutation.id, {
-                        commands: this._waitingCommandQueue,
-                    });
+                    this._commandService.executeCommand(
+                        SetFormulaCalculationStartMutation.id,
+                        {
+                            commands: this._waitingCommandQueue,
+                        },
+                        {
+                            local: true,
+                        }
+                    );
 
                     this._startExecutionTime = performance.now();
                 }, 100);
@@ -137,9 +143,15 @@ export class TriggerCalculationController extends Disposable {
     }
 
     private _initialExecuteFormula() {
-        this._commandService.executeCommand(SetFormulaCalculationStartMutation.id, {
-            commands: [],
-            forceCalculation: true,
-        });
+        this._commandService.executeCommand(
+            SetFormulaCalculationStartMutation.id,
+            {
+                commands: [],
+                forceCalculation: true,
+            },
+            {
+                local: true,
+            }
+        );
     }
 }

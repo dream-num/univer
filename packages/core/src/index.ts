@@ -51,7 +51,7 @@ export { LifecycleStages, OnLifecycle, runOnLifecycle } from './services/lifecyc
 export { LifecycleService } from './services/lifecycle/lifecycle.service';
 export { ILocalStorageService } from './services/local-storage/local-storage.service';
 export { LocaleService } from './services/locale/locale.service';
-export { DesktopLogService, ILogService } from './services/log/log.service';
+export { DesktopLogService, ILogService, LogLevel } from './services/log/log.service';
 export {
     IPermissionService,
     PermissionService,

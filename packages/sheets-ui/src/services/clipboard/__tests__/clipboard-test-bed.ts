@@ -1,5 +1,5 @@
 import type { IWorkbookData } from '@univerjs/core';
-import { ILogService, IUniverInstanceService, LocaleType, Plugin, PluginType, Univer } from '@univerjs/core';
+import { ILogService, IUniverInstanceService, LocaleType, LogLevel, Plugin, PluginType, Univer } from '@univerjs/core';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { SelectionManagerService } from '@univerjs/sheets';
 import {
@@ -557,7 +557,7 @@ export function clipboardTestBed(workbookConfig?: IWorkbookData, dependencies?: 
     univerInstanceService.focusUniverInstance('test');
 
     const logService = get(ILogService);
-    logService.toggleLogEnabled(false); // change this to `true` to debug tests via logs
+    logService.setLogLevel(LogLevel.SILENT); // change this to `LogLevel.VERBOSE` to debug tests via logs
 
     return {
         univer,

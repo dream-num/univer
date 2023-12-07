@@ -4,7 +4,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { Univer } from '../../basics/univer';
 import { Plugin, PluginType } from '../../plugin/plugin';
 import { IUniverInstanceService } from '../../services/instance/instance.service';
-import { ILogService } from '../../services/log/log.service';
+import { ILogService, LogLevel } from '../../services/log/log.service';
 import { LocaleType } from '../../types/enum/locale-type';
 import type { IWorkbookData } from '../../types/interfaces/i-workbook-data';
 
@@ -66,7 +66,7 @@ export function createCoreTestBed(workbookConfig?: IWorkbookData, dependencies?:
     univerInstanceService.focusUniverInstance('test');
 
     const logService = get(ILogService);
-    logService.toggleLogEnabled(false);
+    logService.setLogLevel(LogLevel.SILENT);
 
     return {
         univer,

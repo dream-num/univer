@@ -4,22 +4,28 @@ import { createIdentifier } from '@wendellhu/redi';
 
 import { Disposable } from '../../shared/lifecycle';
 
+export enum LogLevel {
+    VERBOSE = 'verbose',
+    WARN = 'warn',
+    ERROR = 'error',
+    SLIENT = 'slient',
+}
+
 export interface ILogService {
     log(...args: any[]): void;
     warn(...args: any[]): void;
     error(...args: any[]): void;
 
-    toggleLogEnabled(enabled: boolean): void;
-    getLogEnabled(): boolean;
+    setLogLevel(enabled: LogLevel): void;
 }
 
 export const ILogService = createIdentifier<ILogService>('univer.log');
 
 export class DesktopLogService extends Disposable implements ILogService {
-    private _logEnabled = true;
+    private _logLevel: LogLevel = LogLevel.SLIENT;
 
     log(...args: any[]): void {
-        if (!this._logEnabled || !args.length) {
+        if (this._logLevel !== LogLevel.SLIENT || !args.length) {
             return;
         }
 
@@ -33,22 +39,18 @@ export class DesktopLogService extends Disposable implements ILogService {
     }
 
     warn(...args: any[]): void {
-        if (this._logEnabled) {
+        if (this._logLevel === LogLevel.VERBOSE || this._logLevel === LogLevel.WARN) {
             console.warn(...args);
         }
     }
 
     error(...args: any[]): void {
-        if (this._logEnabled) {
+        if (this._logLevel === LogLevel.VERBOSE || this._logLevel === LogLevel.ERROR) {
             console.error(...args);
         }
     }
 
-    toggleLogEnabled(enabled: boolean): void {
-        this._logEnabled = enabled;
-    }
-
-    getLogEnabled(): boolean {
-        return this._logEnabled;
+    setLogLevel(logLevel: LogLevel): void {
+        this._logLevel = logLevel;
     }
 }

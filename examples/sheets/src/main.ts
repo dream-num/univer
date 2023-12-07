@@ -1,4 +1,4 @@
-import { LocaleType, Univer } from '@univerjs/core';
+import { LocaleType, LogLevel, Univer } from '@univerjs/core';
 import { greenTheme } from '@univerjs/design';
 import { DocsPlugin, RichTextEditingMutation } from '@univerjs/docs';
 import { BaseFormulaEnginePlugin } from '@univerjs/engine-formula';
@@ -30,7 +30,7 @@ const univer = new Univer({
     theme: greenTheme,
     locale: LocaleType.EN_US,
     locales,
-    enableLog: true,
+    logLevel: LogLevel.VERBOSE,
 });
 
 // core plugins

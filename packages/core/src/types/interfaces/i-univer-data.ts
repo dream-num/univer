@@ -1,3 +1,4 @@
+import type { LogLevel } from '../../services/log/log.service';
 import type { IStyleSheet } from '../../services/theme/theme.service';
 import type { ILocales } from '../../shared/locale';
 import type { LocaleType } from '../enum';
@@ -6,7 +7,7 @@ export interface IUniverData {
     theme: IStyleSheet;
     locale: LocaleType;
     locales: ILocales;
-    enableLog: boolean;
+    logLevel: LogLevel;
     id: string;
 }
 

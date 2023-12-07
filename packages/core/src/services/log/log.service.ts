@@ -1,3 +1,4 @@
+/* eslint-disable no-magic-numbers */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { createIdentifier } from '@wendellhu/redi';
@@ -5,10 +6,10 @@ import { createIdentifier } from '@wendellhu/redi';
 import { Disposable } from '../../shared/lifecycle';
 
 export enum LogLevel {
-    VERBOSE = 'verbose',
-    WARN = 'warn',
-    ERROR = 'error',
-    SLIENT = 'slient',
+    VERBOSE = 0,
+    WARN = 1,
+    ERROR = 2,
+    SILENT = 3,
 }
 
 export interface ILogService {
@@ -22,10 +23,10 @@ export interface ILogService {
 export const ILogService = createIdentifier<ILogService>('univer.log');
 
 export class DesktopLogService extends Disposable implements ILogService {
-    private _logLevel: LogLevel = LogLevel.SLIENT;
+    private _logLevel: LogLevel = LogLevel.SILENT;
 
     log(...args: any[]): void {
-        if (this._logLevel !== LogLevel.SLIENT || !args.length) {
+        if (this._logLevel >= LogLevel.SILENT || !args.length) {
             return;
         }
 
@@ -39,13 +40,13 @@ export class DesktopLogService extends Disposable implements ILogService {
     }
 
     warn(...args: any[]): void {
-        if (this._logLevel === LogLevel.VERBOSE || this._logLevel === LogLevel.WARN) {
+        if (this._logLevel <= LogLevel.WARN) {
             console.warn(...args);
         }
     }
 
     error(...args: any[]): void {
-        if (this._logLevel === LogLevel.VERBOSE || this._logLevel === LogLevel.ERROR) {
+        if (this._logLevel <= LogLevel.ERROR) {
             console.error(...args);
         }
     }

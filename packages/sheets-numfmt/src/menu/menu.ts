@@ -72,7 +72,7 @@ export const FactoryOtherMenuItem = (componentManager: ComponentManager) => {
         const selectionManagerService = _accessor.get(SelectionManagerService);
         const value$ = new Observable((subscribe) =>
             merge(
-                selectionManagerService.selectionInfo$,
+                selectionManagerService.selectionMoveEnd$,
                 new Observable<null>((commandSubscribe) => {
                     const disposable = commandService.onCommandExecuted((commandInfo) => {
                         if (commandInfo.id === SetNumfmtMutation.id) {

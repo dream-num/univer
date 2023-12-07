@@ -323,7 +323,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
         });
         const combineOpenAndSelection$ = combineLatest([
             isPanelOpenObserver,
-            this._selectionManagerService.selectionInfo$.pipe(
+            this._selectionManagerService.selectionMoveEnd$.pipe(
                 map((selectionInfos) => {
                     if (!selectionInfos) {
                         return [];

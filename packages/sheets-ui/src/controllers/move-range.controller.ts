@@ -29,7 +29,7 @@ export class MoveRangeController extends Disposable {
 
         this.disposeWithMe(
             toDisposable(
-                this._selectionManagerService.selectionInfo$.subscribe(() => {
+                this._selectionManagerService.selectionMoveEnd$.subscribe(() => {
                     // Each range change requires re-listening
                     disposableCollection.dispose();
 

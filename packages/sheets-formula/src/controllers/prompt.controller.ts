@@ -1,4 +1,4 @@
-import type { ICommandInfo, IRange, IRangeWithCoord, ITextRun, Nullable } from '@univerjs/core';
+import type { ICommandInfo, IRangeWithCoord, ITextRun, Nullable } from '@univerjs/core';
 import {
     deserializeRangeWithSheet,
     Direction,
@@ -35,7 +35,12 @@ import {
     normalizeSheetName,
     sequenceNodeType,
 } from '@univerjs/engine-formula';
-import { DeviceInputEventType, IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/engine-render';
+import {
+    DeviceInputEventType,
+    getCellInfoInMergeData,
+    IRenderManagerService,
+    ITextSelectionRenderManager,
+} from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import {
     convertSelectionDataToRange,
@@ -327,7 +332,7 @@ export class PromptController extends Disposable {
 
         this.disposeWithMe(
             toDisposable(
-                this._selectionManagerService.selectionInfo$.subscribe(() => {
+                this._selectionManagerService.selectionMoveEnd$.subscribe(() => {
                     // Each range change requires re-listening
                     disposableCollection.dispose();
 
@@ -393,8 +398,8 @@ export class PromptController extends Disposable {
         );
     }
 
-    private _selectionChanging(ranges: Nullable<IRange[]>, isSync: boolean = false) {
-        if (ranges == null) {
+    private _selectionChanging(selectionWithStyles: ISelectionWithStyle[], isSync: boolean = false) {
+        if (selectionWithStyles.length === 0) {
             return;
         }
 
@@ -404,24 +409,37 @@ export class PromptController extends Disposable {
 
         this._formulaInputService.enableSelectionMoving();
 
-        this._inertControlSelection(ranges);
+        this._inertControlSelection(selectionWithStyles);
 
-        if (ranges == null || isSync === false) {
+        if (isSync === false) {
             return;
         }
-        const currentRange = ranges[ranges.length - 1];
-        this._inertControlSelectionReplace(currentRange);
+        const currentSelection = selectionWithStyles[selectionWithStyles.length - 1];
+        this._inertControlSelectionReplace(currentSelection);
     }
 
     private _initialRefSelectionInsertEvent() {
         this.disposeWithMe(
-            toDisposable(this._selectionRenderService.selectionMoving$.subscribe(this._selectionChanging.bind(this)))
+            toDisposable(
+                this._selectionRenderService.selectionMoving$.subscribe((selectionWithCoordAndStyles) => {
+                    this._selectionChanging(
+                        selectionWithCoordAndStyles.map((selectionDataWithStyle) =>
+                            convertSelectionDataToRange(selectionDataWithStyle)
+                        )
+                    );
+                })
+            )
         );
 
         this.disposeWithMe(
             toDisposable(
-                this._selectionRenderService.selectionMoveStart$.subscribe((ranges) => {
-                    this._selectionChanging(ranges, true);
+                this._selectionRenderService.selectionMoveStart$.subscribe((selectionWithCoordAndStyles) => {
+                    this._selectionChanging(
+                        selectionWithCoordAndStyles.map((selectionDataWithStyle) =>
+                            convertSelectionDataToRange(selectionDataWithStyle)
+                        ),
+                        true
+                    );
                 })
             )
         );
@@ -890,11 +908,39 @@ export class PromptController extends Disposable {
                 ) {
                     return true;
                 }
+                if (
+                    startRow === range.startRow &&
+                    startColumn === range.startColumn &&
+                    range.startRow === range.endRow &&
+                    range.startColumn === range.endColumn
+                ) {
+                    return true;
+                }
 
                 return false;
             })?.primary;
 
             if (primary != null) {
+                const {
+                    isMerged,
+                    isMergedMainCell,
+                    startRow: mergeStartRow,
+                    endRow: mergeEndRow,
+                    startColumn: mergeStartColumn,
+                    endColumn: mergeEndColumn,
+                } = primary;
+
+                if (
+                    (isMerged || isMergedMainCell) &&
+                    mergeStartRow === range.startRow &&
+                    mergeStartColumn === range.startColumn &&
+                    range.startRow === range.endRow &&
+                    range.startColumn === range.endColumn
+                ) {
+                    range.endRow = mergeEndRow;
+                    range.endColumn = mergeEndColumn;
+                }
+
                 lastRange = {
                     range,
                     primary,
@@ -952,11 +998,12 @@ export class PromptController extends Disposable {
             };
         }
 
-        const { unitId, sheetId } = current;
+        const { unitId, sheetId, skeleton } = current;
 
         return {
             unitId,
             sheetId,
+            skeleton,
         };
     }
 
@@ -965,7 +1012,7 @@ export class PromptController extends Disposable {
      * @param range
      * @returns
      */
-    private _getRefString(range: IRange) {
+    private _getRefString(currentSelection: ISelectionWithStyle) {
         const { unitId, sheetId } = this._getCurrentUnitIdAndSheetId();
 
         let refUnitId = '';
@@ -983,7 +1030,34 @@ export class PromptController extends Disposable {
             refSheetName = this._getSheetNameById(unitId, sheetId);
         }
 
-        const { startRow, endRow, startColumn, endColumn } = range;
+        const { range, primary } = currentSelection;
+
+        let { startRow, endRow, startColumn, endColumn } = range;
+
+        if (primary) {
+            const {
+                isMerged,
+                isMergedMainCell,
+                startRow: mergeStartRow,
+                endRow: mergeEndRow,
+                startColumn: mergeStartColumn,
+                endColumn: mergeEndColumn,
+            } = primary;
+
+            if (
+                (isMerged || isMergedMainCell) &&
+                mergeStartRow === startRow &&
+                mergeStartColumn === startColumn &&
+                mergeEndRow === endRow &&
+                mergeEndColumn === endColumn
+            ) {
+                startRow = mergeStartRow;
+                startColumn = mergeStartColumn;
+                endRow = mergeStartRow;
+                endColumn = mergeStartColumn;
+            }
+        }
+
         return serializeRangeToRefString({
             sheetName: refSheetName,
             unitId: refUnitId,
@@ -1099,7 +1173,7 @@ export class PromptController extends Disposable {
         docViewModel.reset(documentDataModel);
     }
 
-    private _inertControlSelectionReplace(currentRange: IRange) {
+    private _inertControlSelectionReplace(currentSelection: ISelectionWithStyle) {
         if (this._previousSequenceNodes == null) {
             this._previousSequenceNodes = this._formulaInputService.getSequenceNodes();
         }
@@ -1114,7 +1188,7 @@ export class PromptController extends Disposable {
             return;
         }
 
-        const refString = this._getRefString(currentRange);
+        const refString = this._getRefString(currentSelection);
 
         this._formulaInputService.setSequenceNodes(insertNodes);
 
@@ -1138,14 +1212,14 @@ export class PromptController extends Disposable {
         // }
     }
 
-    private _inertControlSelection(ranges: IRange[]) {
-        const currentRange = ranges[ranges.length - 1];
+    private _inertControlSelection(selectionWithStyles: ISelectionWithStyle[]) {
+        const currentSelection = selectionWithStyles[selectionWithStyles.length - 1];
 
         if (
-            (ranges.length === this._previousRangesCount || this._previousRangesCount === 0) &&
+            (selectionWithStyles.length === this._previousRangesCount || this._previousRangesCount === 0) &&
             this._previousSequenceNodes != null
         ) {
-            this._inertControlSelectionReplace(currentRange);
+            this._inertControlSelectionReplace(currentSelection);
         } else {
             // Holding down ctrl causes an addition, requiring the ref string to be increased.
             let insertNodes = this._formulaInputService.getSequenceNodes();
@@ -1172,7 +1246,7 @@ export class PromptController extends Disposable {
 
             this._previousSequenceNodes = Tools.deepClone(insertNodes);
 
-            const refString = this._getRefString(currentRange);
+            const refString = this._getRefString(currentSelection);
 
             this._formulaInputService.setSequenceNodes(insertNodes);
 
@@ -1185,7 +1259,7 @@ export class PromptController extends Disposable {
 
         this._arrowMoveActionState = ArrowMoveAction.moveRefReady;
 
-        this._previousRangesCount = ranges.length;
+        this._previousRangesCount = selectionWithStyles.length;
     }
 
     private _updateRefSelectionStyle(refSelections: IRefSelection[]) {
@@ -1222,6 +1296,14 @@ export class PromptController extends Disposable {
                 ) {
                     return true;
                 }
+                if (
+                    startRow === range.startRow &&
+                    startColumn === range.startColumn &&
+                    range.startRow === range.endRow &&
+                    range.startColumn === range.endColumn
+                ) {
+                    return true;
+                }
 
                 return false;
             });
@@ -1241,6 +1323,8 @@ export class PromptController extends Disposable {
             return;
         }
 
+        const { unitId, sheetId, skeleton } = this._getCurrentUnitIdAndSheetId();
+
         this._formulaInputService.enableLockedSelectionChange();
 
         const id = controlSelection.selectionStyle?.id;
@@ -1249,12 +1333,43 @@ export class PromptController extends Disposable {
             return;
         }
 
-        const { startRow, endRow, startColumn, endColumn } = toRange;
+        let { startRow, endRow, startColumn, endColumn } = toRange;
+
+        const primary = getCellInfoInMergeData(startRow, startColumn, skeleton?.mergeData);
+
+        if (primary) {
+            const {
+                isMerged,
+                isMergedMainCell,
+                startRow: mergeStartRow,
+                endRow: mergeEndRow,
+                startColumn: mergeStartColumn,
+                endColumn: mergeEndColumn,
+            } = primary;
+
+            if (
+                (isMerged || isMergedMainCell) &&
+                mergeStartRow === startRow &&
+                mergeStartColumn === startColumn &&
+                mergeEndRow === endRow &&
+                mergeEndColumn === endColumn
+            ) {
+                startRow = mergeStartRow;
+                startColumn = mergeStartColumn;
+                endRow = mergeStartRow;
+                endColumn = mergeStartColumn;
+            }
+        }
+
         const refString = this._getRefString({
-            startRow,
-            endRow,
-            startColumn,
-            endColumn,
+            range: {
+                startRow,
+                endRow,
+                startColumn,
+                endColumn,
+            },
+            primary,
+            style: null,
         });
 
         const nodeIndex = Number(id);
@@ -1427,11 +1542,11 @@ export class PromptController extends Disposable {
                         });
                     }
 
-                    const ranges = this._selectionManagerService.getSelectionRanges() || [];
+                    const selectionWithStyles = this._selectionManagerService.getSelections() || [];
 
-                    const currentRange = ranges[ranges.length - 1];
+                    const currentSelection = selectionWithStyles[selectionWithStyles.length - 1];
 
-                    this._inertControlSelectionReplace(currentRange);
+                    this._inertControlSelectionReplace(currentSelection);
                 }
             })
         );

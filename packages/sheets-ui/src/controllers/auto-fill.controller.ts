@@ -145,7 +145,7 @@ export class AutoFillController extends Disposable {
         const disposableCollection = new DisposableCollection();
         this.disposeWithMe(
             toDisposable(
-                this._selectionManagerService.selectionInfo$.subscribe(() => {
+                this._selectionManagerService.selectionMoveEnd$.subscribe(() => {
                     // Each range change requires re-listening
                     disposableCollection.dispose();
 

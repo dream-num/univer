@@ -127,32 +127,32 @@ export interface ISelectionWithStyle extends ISelection {
 
 // The default configuration of the selection.
 export function getNormalSelectionStyle(themeService: ThemeService): ISelectionStyle {
-    const style = themeService.getCurrentTheme();
-    const fill = new TinyColor(style.colorBlack).setAlpha(0.1).toString();
+    const styleSheet = themeService.getCurrentTheme();
+    const fill = new TinyColor(styleSheet.colorBlack).setAlpha(0.1).toString();
     return {
         strokeWidth: 2,
-        stroke: style.primaryColor,
+        stroke: styleSheet.primaryColor,
         // strokeDash: 8,
         fill,
         // widgets: { tl: true, tc: true, tr: true, ml: true, mr: true, bl: true, bc: true, br: true },
         widgets: {},
         widgetSize: 6,
         widgetStrokeWidth: 1,
-        widgetStroke: style.colorWhite,
+        widgetStroke: styleSheet.colorWhite,
 
         hasAutoFill: true,
         AutofillSize: 6,
         AutofillStrokeWidth: 1,
-        AutofillStroke: style.colorWhite,
+        AutofillStroke: styleSheet.colorWhite,
 
         hasRowHeader: true,
         rowHeaderFill: fill,
-        rowHeaderStroke: style.primaryColor,
+        rowHeaderStroke: styleSheet.primaryColor,
         rowHeaderStrokeWidth: 1,
 
         hasColumnHeader: true,
         columnHeaderFill: fill,
-        columnHeaderStroke: style.primaryColor,
+        columnHeaderStroke: styleSheet.primaryColor,
         columnHeaderStrokeWidth: 1,
     };
 }

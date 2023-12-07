@@ -22,7 +22,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
     useEffect(() => {
         if (active) {
             onActive(active);
-            const subscribe = textSelectionManagerService.selectionInfo$.subscribe((selectionInfo) => {
+            const subscribe = textSelectionManagerService.selectionMoveEnd$.subscribe((selectionInfo) => {
                 // TODO@Dushusir: get range text info from selectionInfo
                 const rangeTextList = ['A1', 'B2:C3', 'Sheet2!A1:B2', 'D10:E11,F1:G2,H3:I4'];
                 const randomIndex = Math.floor(Math.random() * rangeTextList.length);

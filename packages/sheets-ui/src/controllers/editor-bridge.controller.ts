@@ -1,4 +1,4 @@
-import type { ICommandInfo } from '@univerjs/core';
+import type { ICommandInfo, Nullable } from '@univerjs/core';
 import {
     Disposable,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
@@ -9,6 +9,7 @@ import {
     OnLifecycle,
 } from '@univerjs/core';
 import { DeviceInputEventType, getCanvasOffsetByEngine, IRenderManagerService } from '@univerjs/engine-render';
+import type { ISelectionWithStyle } from '@univerjs/sheets';
 import {
     COMMAND_LISTENER_SKELETON_CHANGE,
     NORMAL_SELECTION_PLUGIN_NAME,
@@ -51,109 +52,116 @@ export class EditorBridgeController extends Disposable {
     }
 
     private _initialSelectionListener() {
-        this._selectionManagerService.selectionInfo$.subscribe((params) => {
-            const current = this._selectionManagerService.getCurrent();
+        this._selectionManagerService.selectionMoveEnd$.subscribe((params) => {
+            this._selectionListener(params);
+        });
+        this._selectionManagerService.selectionMoveStart$.subscribe((params) => {
+            this._selectionListener(params);
+        });
+    }
 
-            /**
-             * The editor only responds to regular selections.
-             */
-            if (current?.pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
-                return;
-            }
+    private _selectionListener(params: Nullable<ISelectionWithStyle[]>) {
+        const current = this._selectionManagerService.getCurrent();
 
-            const currentSkeleton = this._sheetSkeletonManagerService.getCurrent();
+        /**
+         * The editor only responds to regular selections.
+         */
+        if (current?.pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
+            return;
+        }
 
-            const sheetObject = this._getSheetObject();
+        const currentSkeleton = this._sheetSkeletonManagerService.getCurrent();
 
-            if (currentSkeleton == null || sheetObject == null) {
-                return;
-            }
+        const sheetObject = this._getSheetObject();
 
-            const { skeleton, unitId, sheetId } = currentSkeleton;
+        if (currentSkeleton == null || sheetObject == null) {
+            return;
+        }
 
-            const { scene, engine } = sheetObject;
+        const { skeleton, unitId, sheetId } = currentSkeleton;
 
-            if (params == null || params.length === 0 || skeleton == null || params[params.length - 1] == null) {
-                return;
-            }
+        const { scene, engine } = sheetObject;
 
-            const { primary } = params[params.length - 1];
+        if (params == null || params.length === 0 || skeleton == null || params[params.length - 1] == null) {
+            return;
+        }
 
-            if (primary == null) {
-                return;
-            }
+        const { primary } = params[params.length - 1];
 
-            const { startRow, startColumn } = primary;
+        if (primary == null) {
+            return;
+        }
 
-            const primaryWithCoord = this._selectionRenderService.convertCellRangeToInfo(primary);
+        const { startRow, startColumn } = primary;
 
-            if (primaryWithCoord == null) {
-                return;
-            }
+        const primaryWithCoord = this._selectionRenderService.convertCellRangeToInfo(primary);
 
-            const actualRangeWithCoord = makeCellToSelection(primaryWithCoord);
+        if (primaryWithCoord == null) {
+            return;
+        }
 
-            if (actualRangeWithCoord == null) {
-                return;
-            }
+        const actualRangeWithCoord = makeCellToSelection(primaryWithCoord);
 
-            const canvasOffset = getCanvasOffsetByEngine(engine);
+        if (actualRangeWithCoord == null) {
+            return;
+        }
 
-            let { startX, startY, endX, endY } = actualRangeWithCoord;
+        const canvasOffset = getCanvasOffsetByEngine(engine);
 
-            const { scaleX, scaleY } = scene.getAncestorScale();
+        let { startX, startY, endX, endY } = actualRangeWithCoord;
 
-            const scrollXY = scene.getScrollXY(this._selectionRenderService.getViewPort());
+        const { scaleX, scaleY } = scene.getAncestorScale();
 
-            startX = skeleton.convertTransformToOffsetX(startX, scaleX, scrollXY);
+        const scrollXY = scene.getScrollXY(this._selectionRenderService.getViewPort());
 
-            startY = skeleton.convertTransformToOffsetY(startY, scaleY, scrollXY);
+        startX = skeleton.convertTransformToOffsetX(startX, scaleX, scrollXY);
 
-            endX = skeleton.convertTransformToOffsetX(endX, scaleX, scrollXY);
+        startY = skeleton.convertTransformToOffsetY(startY, scaleY, scrollXY);
 
-            endY = skeleton.convertTransformToOffsetY(endY, scaleY, scrollXY);
+        endX = skeleton.convertTransformToOffsetX(endX, scaleX, scrollXY);
 
-            const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+        endY = skeleton.convertTransformToOffsetY(endY, scaleY, scrollXY);
 
-            const worksheet = workbook.getActiveSheet();
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
 
-            const location = {
-                workbook,
-                worksheet,
-                workbookId: workbook.getUnitId(),
-                worksheetId: worksheet.getSheetId(),
-                row: startRow,
-                col: startColumn,
-            };
-            const cell = this._editorBridgeService.interceptor.fetchThroughInterceptors(
-                this._editorBridgeService.interceptor.getInterceptPoints().BEFORE_CELL_EDIT
-            )(worksheet.getCell(startRow, startColumn), location);
+        const worksheet = workbook.getActiveSheet();
 
-            let documentLayoutObject = cell && skeleton.getCellDocumentModelWithFormula(cell);
+        const location = {
+            workbook,
+            worksheet,
+            workbookId: workbook.getUnitId(),
+            worksheetId: worksheet.getSheetId(),
+            row: startRow,
+            col: startColumn,
+        };
+        const cell = this._editorBridgeService.interceptor.fetchThroughInterceptors(
+            this._editorBridgeService.interceptor.getInterceptPoints().BEFORE_CELL_EDIT
+        )(worksheet.getCell(startRow, startColumn), location);
 
-            if (!documentLayoutObject || documentLayoutObject.documentModel == null) {
-                documentLayoutObject = skeleton.getBlankCellDocumentModel(cell);
-            }
+        let documentLayoutObject = cell && skeleton.getCellDocumentModelWithFormula(cell);
 
-            documentLayoutObject.documentModel?.setZoomRatio(Math.max(scaleX, scaleY));
+        if (!documentLayoutObject || documentLayoutObject.documentModel == null) {
+            documentLayoutObject = skeleton.getBlankCellDocumentModel(cell);
+        }
 
-            this._commandService.executeCommand(SetActivateCellEditOperation.id, {
-                position: {
-                    startX,
-                    startY,
-                    endX,
-                    endY,
-                },
-                scaleX,
-                scaleY,
-                canvasOffset,
-                row: startRow,
-                column: startColumn,
-                unitId,
-                sheetId,
-                documentLayoutObject,
-                editorUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-            });
+        documentLayoutObject.documentModel?.setZoomRatio(Math.max(scaleX, scaleY));
+
+        this._commandService.executeCommand(SetActivateCellEditOperation.id, {
+            position: {
+                startX,
+                startY,
+                endX,
+                endY,
+            },
+            scaleX,
+            scaleY,
+            canvasOffset,
+            row: startRow,
+            column: startColumn,
+            unitId,
+            sheetId,
+            documentLayoutObject,
+            editorUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
         });
     }
 

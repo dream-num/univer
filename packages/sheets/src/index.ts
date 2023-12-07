@@ -38,7 +38,11 @@ export {
 export { MAX_CELL_PER_SHEET_KEY } from './controllers/config/config';
 export { BorderStyleManagerService, type IBorderInfo } from './services/border-style-manager.service';
 export { SheetEditablePermission, SheetPermissionService } from './services/permission';
-export { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from './services/selection-manager.service';
+export {
+    NORMAL_SELECTION_PLUGIN_NAME,
+    SelectionManagerService,
+    SelectionMoveType,
+} from './services/selection-manager.service';
 
 // #region commands
 

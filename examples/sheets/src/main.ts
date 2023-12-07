@@ -6,6 +6,7 @@ import { RenderEngine } from '@univerjs/engine-render';
 import type { IUniverRPCMainThreadPluginConfig } from '@univerjs/rpc';
 import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
 import { SheetsPlugin } from '@univerjs/sheets';
+import { DataConnectorPlugin } from '@univerjs/sheets-data-connector';
 import { FormulaUIPlugin } from '@univerjs/sheets-formula';
 import { NumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { SheetsUIPlugin } from '@univerjs/sheets-ui';
@@ -56,6 +57,7 @@ univer.registerPlugin(DebuggerPlugin);
 univer.registerPlugin(BaseFormulaEnginePlugin, {
     notExecuteFormula: true,
 });
+univer.registerPlugin(DataConnectorPlugin);
 univer.registerPlugin(FormulaUIPlugin);
 univer.registerPlugin(UniverRPCMainThreadPlugin, {
     workerURL: './worker.js',

@@ -34,6 +34,7 @@ We provide JavaScript part of code in the repository, including a canvas-based f
 | [rpc](./packages/rpc)                       | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/rpc)](https://npmjs.org/package/@univerjs/rpc)                       |
 | [sheets](./packages/sheets)                 | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets)](https://npmjs.org/package/@univerjs/sheets)                 |
 | [sheets-formula](./packages/sheets-formula) | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-formula)](https://npmjs.org/package/@univerjs/sheets-formula) |
+| [sheets-data-connector](./packages/sheets-data-connector) | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-data-connector)](https://npmjs.org/package/@univerjs/sheets-data-connector) |
 | [sheets-numfmt](./packages/sheets-numfmt)   | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-numfmt)](https://npmjs.org/package/@univerjs/sheets-numfmt)   |
 | [sheets-ui](./packages/sheets-ui)           | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-ui)](https://npmjs.org/package/@univerjs/sheets-ui)           |
 | [ui](./packages/ui)                         | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/ui)](https://npmjs.org/package/@univerjs/ui)                         |

@@ -7,13 +7,14 @@ import { Inject } from '@wendellhu/redi';
 
 import { SetOnceFormatPainterCommand } from '../../commands/commands/set-format-painter.command';
 import { FormatPainterStatus, IFormatPainterService } from '../../services/format-painter/format-painter.service';
+import { getSheetObject } from '../utils/component-tools';
 
 @OnLifecycle(LifecycleStages.Rendered, FormatPainterController)
 export class FormatPainterController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IFormatPainterService private readonly _formatPainterService: IFormatPainterService,
-        @IUniverInstanceService private readonly _currentService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService
     ) {
@@ -29,7 +30,7 @@ export class FormatPainterController extends Disposable {
 
     private _bindFormatPainterStatus() {
         this._formatPainterService.status$.subscribe((status) => {
-            const scene = this._renderManagerService.getCurrent()?.scene;
+            const { scene } = this._getSheetObject() || {};
             if (!scene) return;
             if (status !== FormatPainterStatus.OFF) {
                 scene.setDefaultCursor(CURSOR_TYPE.CELL);
@@ -60,8 +61,8 @@ export class FormatPainterController extends Disposable {
 
     private _applyFormatPainter(range: IRange) {
         const stylesMatrix = this._formatPainterService.getSelectionStyles();
-        const workbookId = this._currentService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = this._currentService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+        const workbookId = this._currentUniverService.getCurrentUniverSheetInstance().getUnitId();
+        const worksheetId = this._currentUniverService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
         if (!stylesMatrix) return;
 
         const { startRow, startColumn, endRow, endColumn } = stylesMatrix.getDataRange();
@@ -91,5 +92,9 @@ export class FormatPainterController extends Disposable {
         };
 
         this._commandService.executeCommand(SetRangeValuesCommand.id, setRangeValuesCommandParams);
+    }
+
+    private _getSheetObject() {
+        return getSheetObject(this._currentUniverService, this._renderManagerService);
     }
 }

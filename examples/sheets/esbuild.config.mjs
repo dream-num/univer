@@ -37,7 +37,8 @@ const ctx = await esbuild[args.watch ? 'context' : 'build']({
     bundle: true,
     color: true,
     loader: { '.svg': 'file', '.ttf': 'file' },
-    sourcemap: true,
+    sourcemap: args.watch,
+    minify: !args.watch,
     plugins: [
         copyPlugin({
             assets: {
@@ -62,6 +63,7 @@ const ctx = await esbuild[args.watch ? 'context' : 'build']({
     outdir: './local',
 
     define: {
+        'process.env.NODE_ENV': args.watch ? '"development"' : '"production"',
         'process.env.GIT_COMMIT_HASH': `"${gitCommitHash}"`,
         'process.env.GIT_REF_NAME': `"${gitRefName}"`,
         'process.env.BUILD_TIME': `"${new Date().toISOString()}"`,

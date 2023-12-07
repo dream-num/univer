@@ -4,16 +4,21 @@ import {
     ICommandService,
     IUniverInstanceService,
     LifecycleStages,
+    LocaleService,
     ObjectMatrix,
     OnLifecycle,
     toDisposable,
 } from '@univerjs/core';
+import { MessageType } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
+import type { ISetRangeValuesCommandParams } from '@univerjs/sheets';
+import { INTERCEPTOR_POINT, SetRangeValuesCommand, SheetInterceptorService } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { IMessageService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { map, Observable, switchMap } from 'rxjs';
 
+import { DataConnectorSidebarOperation } from '../commands/operations/data-connector-sidebar.operation';
 import { IDataPreviewService } from '../services/data-preview.service';
 
 @OnLifecycle(LifecycleStages.Ready, DataPreviewController)
@@ -25,7 +30,9 @@ export class DataPreviewController extends Disposable {
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
         @Inject(SheetSkeletonManagerService) private _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(IRenderManagerService) private _renderManagerService: IRenderManagerService,
-        @IDataPreviewService private _dataPreviewService: IDataPreviewService
+        @IDataPreviewService private _dataPreviewService: IDataPreviewService,
+        @IMessageService private readonly _messageService: IMessageService,
+        @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super();
 
@@ -34,6 +41,7 @@ export class DataPreviewController extends Disposable {
 
     private _initialize(): void {
         this._initDataPreviewListener();
+        this._initDataImportListener();
     }
 
     private _initDataPreviewListener() {
@@ -68,7 +76,7 @@ export class DataPreviewController extends Disposable {
                                 priority: 101,
                                 handler: (cell, location, next) => {
                                     const { row, col } = location;
-                                    const dataInfo = this._dataPreviewService.getDataInfo();
+                                    const dataInfo = this._dataPreviewService.getPreviewDataInfo();
 
                                     if (!dataInfo) return next(cell);
 
@@ -88,8 +96,39 @@ export class DataPreviewController extends Disposable {
 
         this.disposeWithMe(
             toDisposable(
-                this._dataPreviewService.dataInfo$.subscribe(() => {
+                this._dataPreviewService.previewDataInfo$.subscribe(() => {
+                    // notification
+                    this._messageService.show({
+                        type: MessageType.Success,
+                        content: this._localeService.t('dataConnector.message.previewSuccess'),
+                    });
+
                     this._refreshRender();
+                })
+            )
+        );
+    }
+
+    private _initDataImportListener() {
+        this.disposeWithMe(
+            toDisposable(
+                this._dataPreviewService.dataInfo$.subscribe(() => {
+                    const dataInfo = this._dataPreviewService.getDataInfo();
+
+                    if (!dataInfo) return;
+
+                    // execute command
+                    const setRangeValuesCommandParams: ISetRangeValuesCommandParams = {
+                        value: dataInfo.cellValue,
+                    };
+                    this._commandService.executeCommand(SetRangeValuesCommand.id, setRangeValuesCommandParams);
+                    this._commandService.executeCommand(DataConnectorSidebarOperation.id);
+
+                    // notification
+                    this._messageService.show({
+                        type: MessageType.Success,
+                        content: this._localeService.t('dataConnector.message.importSuccess'),
+                    });
                 })
             )
         );

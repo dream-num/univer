@@ -1,4 +1,4 @@
-import { LocaleService as _LocaleService, Plugin, PluginType } from '@univerjs/core';
+import { LocaleService, Plugin, PluginType } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { DebuggerController } from './controllers/debugger.controller';
@@ -14,7 +14,7 @@ export class DebuggerPlugin extends Plugin {
     constructor(
         config: IDebuggerPluginConfig,
         @Inject(Injector) override readonly _injector: Injector,
-        @Inject(_LocaleService) private readonly _localeService: _LocaleService
+        @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super('debugger');
     }
@@ -38,7 +38,7 @@ export class DebuggerPlugin extends Plugin {
 
     override onDestroy(): void {}
 
-    getdebuggerController() {
+    getDebuggerController() {
         return this._debuggerController;
     }
 }

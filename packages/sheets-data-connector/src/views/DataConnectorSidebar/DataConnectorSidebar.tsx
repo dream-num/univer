@@ -1,26 +1,46 @@
 import { LocaleService } from '@univerjs/core';
-import { Button, Input } from '@univerjs/design';
+import { Button, Input, MessageType } from '@univerjs/design';
+import { IMessageService } from '@univerjs/ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { IDataPreviewService } from '../../services/data-preview.service';
+import type { IDataTree } from '../../services/interface';
 import styles from './index.module.less';
 
 export function DataConnectorSidebar() {
     const localeService = useDependency(LocaleService);
+    const messageService = useDependency(IMessageService);
     const [searchText, setSearchText] = useState<string>('');
+    const [dataId, setDataId] = useState<string>('');
     const dataPreviewService = useDependency(IDataPreviewService);
+    const [dataTree, setDataTree] = useState<IDataTree | null>(null);
+
+    useEffect(() => {
+        dataPreviewService.getDataTree().then((data) => {
+            setDataTree(data);
+        });
+    }, []);
 
     function handleSearchInputChange(value: string) {
         setSearchText(value);
     }
 
     function handleConfirm() {
-        // console.log('handleConfirm');
+        if (dataId === '') {
+            messageService.show({
+                type: MessageType.Warning,
+                content: localeService.t('dataConnector.message.select'),
+            });
+            return;
+        }
+
+        dataPreviewService.setDataInfo(dataId);
     }
 
     function handleSelectData(params: string) {
-        dataPreviewService.setDataInfo(params);
+        setDataId(params);
+        dataPreviewService.setPreviewDataInfo(params);
     }
 
     return (
@@ -40,10 +60,11 @@ export function DataConnectorSidebar() {
                         />
                     </div>
                     <div className={styles.dataConnectorSidebarTree}>
-                        <Button type="primary" onClick={() => handleSelectData('1')}>
+                        {JSON.stringify(dataTree)}
+                        <Button type="primary" onClick={() => handleSelectData('0c4334e4-85a9-46f3-b214-b14693e07bea')}>
                             {'data 1'}
                         </Button>
-                        <Button type="primary" onClick={() => handleSelectData('2')}>
+                        <Button type="primary" onClick={() => handleSelectData('0c4334e4-85a9-46f3-b214-b14693e07bea')}>
                             {'data 2'}
                         </Button>
                     </div>

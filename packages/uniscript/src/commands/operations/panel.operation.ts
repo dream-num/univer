@@ -9,7 +9,7 @@ export const ScriptPanelComponentName = 'ScriptPanel';
 
 export const ToggleScriptPanelOperation: IOperation = {
     type: CommandType.OPERATION,
-    id: 'univer.operation.toggle-sscript-panel',
+    id: 'univer.operation.toggle-script-panel',
     handler: (accessor: IAccessor) => {
         const scriptPanelService = accessor.get(ScriptPanelService);
         const sidebarService = accessor.get(ISidebarService);

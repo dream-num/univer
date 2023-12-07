@@ -1,4 +1,4 @@
-import { IUniverInstanceService, LocaleService, Plugin, PluginType } from '@univerjs/core';
+import { LocaleService, Plugin, PluginType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -7,16 +7,20 @@ import { DataConnectorController } from './controllers/data-connector.controller
 import { DataPreviewController } from './controllers/data-preview.controller';
 import { enUS } from './locale';
 import { DataPreviewService, IDataPreviewService } from './services/data-preview.service';
+import type { IRequestUrl } from './services/data-request.service';
+import { DataRequestService, IDataRequestService } from './services/data-request.service';
 
-interface IDataConnectorConfig {}
+export interface IDataConnectorConfig {
+    url: IRequestUrl;
+}
+
 export class DataConnectorPlugin extends Plugin {
     static override type = PluginType.Sheet;
 
     constructor(
         private _config: Partial<IDataConnectorConfig>,
         @Inject(Injector) override readonly _injector: Injector,
-        @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService
+        @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super(DATA_CONNECTOR_PLUGIN_NAME);
     }
@@ -28,6 +32,12 @@ export class DataConnectorPlugin extends Plugin {
 
         const dependencies: Dependency[] = [
             // services
+            [
+                IDataRequestService,
+                {
+                    useFactory: () => this._injector.createInstance(DataRequestService, this._config?.url || null),
+                },
+            ],
             [IDataPreviewService, { useClass: DataPreviewService }],
             // controllers
             [DataConnectorController],

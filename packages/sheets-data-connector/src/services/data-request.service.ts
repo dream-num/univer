@@ -1,5 +1,6 @@
 import { LocaleService } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
+import { HTTPService } from '@univerjs/network';
 import { IMessageService } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier, Inject } from '@wendellhu/redi';
@@ -7,157 +8,6 @@ import { createIdentifier, Inject } from '@wendellhu/redi';
 import type { IBackendResponseDataForm, IBackendResponseDataTree } from './interface';
 import { replaceViewID } from './utils';
 
-// used for test
-export const MOCK_DATA_TREE = {
-    error: {
-        code: 'OK',
-        message: 'success',
-    },
-    display: {
-        type: 'tree',
-        name: '金融连接器11111111111111111111111111111111111',
-        uuid: '',
-        nodes: [
-            {
-                name: 'A',
-                child: [
-                    {
-                        name: 'B',
-                        child: [],
-                        views: [
-                            {
-                                viewID: '0c4334e4-85a9-46f3-b214-b14693e07bea',
-                                name: '2023的数据',
-                            },
-                        ],
-                    },
-                ],
-                views: [],
-            },
-            {
-                name: 'C',
-                child: [],
-                views: [
-                    {
-                        viewID: '0c4334e4-85a9-46f3-b214-b14693e07bea',
-                        name: '2022的数据',
-                    },
-                ],
-            },
-        ],
-    },
-};
-
-export const MOCK_DATA_SOURCE_1: IBackendResponseDataForm = {
-    error: {
-        code: 'OK',
-        message: 'success',
-    },
-    nextCursor: '1:10',
-    dataformID: '',
-    columns: ['姓名', '年份'],
-    celldatas: [
-        {
-            rowNumber: 1,
-            cells: {
-                '1': {
-                    v: {
-                        strV: 'abc',
-                    },
-                    t: 'STRING',
-                },
-                '2': {
-                    v: {
-                        numV: 100,
-                    },
-                    t: 'NUMBER',
-                },
-            },
-        },
-        {
-            rowNumber: 2,
-            cells: {
-                '1': {
-                    v: {
-                        strV: 'cad',
-                    },
-                    t: 'STRING',
-                },
-                '2': {
-                    v: {
-                        numV: 200,
-                    },
-                    t: 'NUMBER',
-                },
-            },
-        },
-    ],
-};
-
-export const MOCK_DATA_SOURCE_2: IBackendResponseDataForm = {
-    error: {
-        code: 'OK',
-        message: 'success',
-    },
-    nextCursor: '1:10',
-    dataformID: '',
-    columns: ['学历', '年龄', '成绩'],
-    celldatas: [
-        {
-            rowNumber: 1,
-            cells: {
-                '1': {
-                    v: {
-                        strV: '大专',
-                    },
-                    t: 'STRING',
-                },
-                '2': {
-                    v: {
-                        numV: 23,
-                    },
-                    t: 'NUMBER',
-                },
-                '3': {
-                    v: {
-                        numV: 99,
-                    },
-                    t: 'NUMBER',
-                },
-            },
-        },
-        {
-            rowNumber: 2,
-            cells: {
-                '1': {
-                    v: {
-                        strV: '本科',
-                    },
-                    t: 'STRING',
-                },
-                '2': {
-                    v: {
-                        numV: 25,
-                    },
-                    t: 'NUMBER',
-                },
-                '3': {
-                    v: {
-                        numV: 98,
-                    },
-                    t: 'NUMBER',
-                },
-            },
-        },
-    ],
-};
-
-export const postRequestOptions: RequestInit = {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json',
-    },
-};
 export interface IRequestUrl {
     /**
      * get all data tree
@@ -204,7 +54,8 @@ export class DataRequestService implements IDataRequestService, IDisposable {
     constructor(
         private _url: IRequestUrl | null,
         @IMessageService private readonly _messageService: IMessageService,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @Inject(HTTPService) private readonly _http: HTTPService
     ) {}
 
     dispose(): void {}
@@ -216,8 +67,8 @@ export class DataRequestService implements IDataRequestService, IDisposable {
         }
 
         try {
-            const response = await fetch(dataTreeUrl);
-            const data = await response.json();
+            const response = await this._http.get<IBackendResponseDataTree>(dataTreeUrl);
+            const data = response.body;
 
             if (data.error && data.error.code === 'OK') {
                 return data;
@@ -243,8 +94,8 @@ export class DataRequestService implements IDataRequestService, IDisposable {
         previewDataForm = replaceViewID(previewDataForm, dataId);
 
         try {
-            const response = await fetch(previewDataForm, postRequestOptions);
-            const data = await response.json();
+            const response = await this._http.post<IBackendResponseDataForm>(previewDataForm);
+            const data = response.body;
 
             if (data.error && data.error.code === 'OK') {
                 return data;
@@ -270,8 +121,8 @@ export class DataRequestService implements IDataRequestService, IDisposable {
         dataForm = replaceViewID(dataForm, dataId);
 
         try {
-            const response = await fetch(dataForm, postRequestOptions);
-            const data = await response.json();
+            const response = await this._http.post<IBackendResponseDataForm>(dataForm);
+            const data = response.body;
 
             if (data.error && data.error.code === 'OK') {
                 return data;
@@ -299,6 +150,4 @@ export class DataRequestService implements IDataRequestService, IDisposable {
 
         return null;
     }
-
-    private _requestDataById(dataId: string) {}
 }

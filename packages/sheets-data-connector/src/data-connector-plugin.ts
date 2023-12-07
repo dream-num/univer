@@ -1,4 +1,5 @@
 import { LocaleService, Plugin, PluginType } from '@univerjs/core';
+import { HTTPService, IHTTPImplementation, XHRHTTPImplementation } from '@univerjs/network';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -32,6 +33,8 @@ export class DataConnectorPlugin extends Plugin {
 
         const dependencies: Dependency[] = [
             // services
+            [IHTTPImplementation, { useClass: XHRHTTPImplementation }],
+            [HTTPService],
             [
                 IDataRequestService,
                 {

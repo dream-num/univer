@@ -18,6 +18,7 @@ export interface IDisplay {
     type: string;
     name: string;
     nodes: IDisplayNode[];
+    uuid: string;
 }
 
 export interface IDisplayNode {

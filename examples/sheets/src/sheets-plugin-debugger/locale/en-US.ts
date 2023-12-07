@@ -8,6 +8,5 @@ export default {
         confirm: 'Confirm',
         sidebar: 'Sidebar',
         editable: 'Editable',
-        snapshot: 'Snapshot',
     },
 };

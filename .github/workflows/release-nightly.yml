@@ -253,7 +253,7 @@ jobs:
               uses: sarisia/actions-status-discord@v1
               if: ${{ success() }}
               with:
-                  webhook: ${{ secrets.DISCORD_WEBHOOK }}
+                  webhook: ${{ secrets.DISCORD_WEBHOOK }}?thread_id=${{ secrets.DISCORD_CI_NIGHTLY_RELEASE }}
                   status: ${{ job.status }}
                   description: |
                       🌝 Nightly release: Successful
@@ -282,7 +282,7 @@ jobs:
               uses: sarisia/actions-status-discord@v1
               if: ${{ failure() }}
               with:
-                  webhook: ${{ secrets.DISCORD_WEBHOOK }}
+                  webhook: ${{ secrets.DISCORD_WEBHOOK }}?thread_id=${{ secrets.DISCORD_CI_NIGHTLY_RELEASE }}
                   status: ${{ job.status }}
                   description: |
                       🌚 Nightly release: Unsuccessful 💩

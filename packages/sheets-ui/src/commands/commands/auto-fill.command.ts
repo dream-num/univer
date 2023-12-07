@@ -107,7 +107,7 @@ export const AutoFillCommand: ICommand = {
         let addMergeResult = true;
 
         // add worksheet merge
-        if (applyMergeRanges) {
+        if (applyMergeRanges?.length) {
             const ranges = getAddMergeMutationRangeByType(applyMergeRanges);
             const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
                 workbookId,

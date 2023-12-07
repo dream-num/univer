@@ -117,7 +117,7 @@ export class EditingController extends RxDisposable {
         //         console.log(res.sheetData, res.arrayFormulaRange);
         //     });
 
-        console.log('calculate', this._formulaEngineService.calculate(`=  -@A4:B5`, false));
+        // console.log('calculate', this._formulaEngineService.calculate(`=  -@A4:B5`, false));
     }
 
     private _commandExecutedListener() {}

@@ -223,6 +223,7 @@ export class EndEditController extends Disposable {
             const cell = this._editorBridgeService.interceptor.fetchThroughInterceptors(
                 this._editorBridgeService.interceptor.getInterceptPoints().AFTER_CELL_EDIT
             )(cellData, context);
+
             this._commandService.executeCommand(SetRangeValuesCommand.id, {
                 worksheetId: sheetId,
                 workbookId: unitId,

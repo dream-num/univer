@@ -9,7 +9,7 @@ import type {
 } from '../../../basics/i-document-skeleton-cached';
 import { SpanType } from '../../../basics/i-document-skeleton-cached';
 import type { IFontCreateConfig } from '../../../basics/interfaces';
-import { hasCJKText } from '../../../basics/tools';
+import { hasCJK, hasCJKText } from '../../../basics/tools';
 import { validationGrid } from './tools';
 
 export function createSkeletonWordSpan(
@@ -93,7 +93,7 @@ export function _createSkeletonWordOrLetter(
     if (validationGrid(gridType, snapToGrid)) {
         // 当文字也需要对齐到网格式，进行处理
         // const multiple = Math.ceil(contentWidth / charSpace);
-        width = contentWidth + (hasCJKText(content) ? charSpace : charSpace / 2);
+        width = contentWidth + (hasCJK(content) ? charSpace : charSpace / 2);
         if (gridType === GridType.SNAP_TO_CHARS) {
             paddingLeft = (width - contentWidth) / 2;
         }

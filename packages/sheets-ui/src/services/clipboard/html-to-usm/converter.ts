@@ -1,8 +1,8 @@
-import type { IDocumentBody, ITextRun, ITextStyle, Nullable } from '@univerjs/core';
+import type { IDocumentBody, IDocumentData, ITextRun, ITextStyle, Nullable } from '@univerjs/core';
 import { ObjectMatrix } from '@univerjs/core';
 import { handleStringToStyle } from '@univerjs/ui';
 
-import { genId } from '../copy-content-cache';
+import type { ISheetSkeletonManagerParam } from '../../sheet-skeleton-manager.service';
 import type {
     ICellDataWithSpanInfo,
     IClipboardPropertyItem,
@@ -43,6 +43,10 @@ function matchFilter(node: HTMLElement, filter: IStyleRule['filter']) {
     return filter(node);
 }
 
+interface IHtmlToUSMServiceProps {
+    getCurrentSkeleton: () => Nullable<ISheetSkeletonManagerParam>;
+}
+
 export class HtmlToUSMService {
     private static pluginList: IPasteExtension[] = [];
 
@@ -59,6 +63,12 @@ export class HtmlToUSMService {
     private styleRules: IStyleRule[] = [];
 
     private afterProcessRules: IAfterProcessRule[] = [];
+
+    private getCurrentSkeleton: () => Nullable<ISheetSkeletonManagerParam>;
+
+    constructor(props: IHtmlToUSMServiceProps) {
+        this.getCurrentSkeleton = props.getCurrentSkeleton;
+    }
 
     convert(html: string): IUniverSheetCopyDataModel {
         const pastePlugin = HtmlToUSMService.pluginList.find((plugin) => plugin.checkPasteType(html));
@@ -104,16 +114,15 @@ export class HtmlToUSMService {
                     }
                 });
                 // set rich format
+                const p = this._generateDocumentDataModelSnapshot({
+                    body: {
+                        dataStream: cellDataStream,
+                        textRuns: cellTextRuns,
+                    },
+                });
                 valueMatrix.setValue(valueMatrix.getLength(), 0, {
                     v: cellDataStream,
-                    p: {
-                        id: genId(),
-                        body: {
-                            dataStream: cellDataStream,
-                            textRuns: cellTextRuns,
-                        },
-                        documentStyle: { textStyle: cellTextRuns[0]?.ts },
-                    },
+                    p,
                 });
                 rowProperties.push({}); // TODO@yuhongz
 
@@ -142,9 +151,12 @@ export class HtmlToUSMService {
             }
         } else {
             if (dataStream) {
+                const p = this._generateDocumentDataModelSnapshot({
+                    body: newDocBody,
+                });
                 valueMatrix.setValue(0, 0, {
                     v: dataStream,
-                    p: { id: genId(), body: newDocBody, documentStyle: {} },
+                    p,
                 });
                 rowProperties.push({}); // TODO@yuhongz
             }
@@ -190,6 +202,19 @@ export class HtmlToUSMService {
             colProperties: [],
             cellMatrix: valueMatrix,
         };
+    }
+
+    private _generateDocumentDataModelSnapshot(snapshot: Partial<IDocumentData>) {
+        const currentSkeleton = this.getCurrentSkeleton();
+        if (currentSkeleton == null) {
+            return null;
+        }
+        const { skeleton } = currentSkeleton;
+        const documentModel = skeleton.getBlankCellDocumentModel()?.documentModel;
+        const p = documentModel?.getSnapshot();
+        const documentData = { ...p, ...snapshot };
+        documentModel?.reset(documentData);
+        return documentModel?.getSnapshot();
     }
 
     private process(

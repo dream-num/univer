@@ -5,6 +5,8 @@ import { createIdentifier, Inject } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 
+import { IMarkSelectionService } from '../mark-selection/mark-selection.service';
+
 export interface IFormatPainterService {
     status$: Observable<FormatPainterStatus>;
     setStatus(status: FormatPainterStatus): void;
@@ -23,12 +25,13 @@ export const IFormatPainterService = createIdentifier<IFormatPainterService>('un
 export class FormatPainterService extends Disposable implements IFormatPainterService {
     readonly status$: Observable<FormatPainterStatus>;
     private _selectionStyles: ObjectMatrix<IStyleData>;
-
+    private _markId: string | null = null;
     private readonly _status$: BehaviorSubject<FormatPainterStatus>;
 
     constructor(
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
-        @IUniverInstanceService private readonly _currentService: IUniverInstanceService
+        @IUniverInstanceService private readonly _currentService: IUniverInstanceService,
+        @IMarkSelectionService private readonly _markSelectionService: IMarkSelectionService
     ) {
         super();
 
@@ -41,11 +44,26 @@ export class FormatPainterService extends Disposable implements IFormatPainterSe
         if (status !== FormatPainterStatus.OFF) {
             this._getSelectionRangeStyle();
         }
+        this._updateRangeMark(status);
         this._status$.next(status);
     }
 
     getStatus(): FormatPainterStatus {
         return this._status$.getValue();
+    }
+
+    private _updateRangeMark(status: FormatPainterStatus) {
+        if (this._markId) {
+            this._markSelectionService.removeShape(this._markId);
+            this._markId = null;
+        }
+        if (status !== FormatPainterStatus.OFF) {
+            const selection = this._selectionManagerService.getLast();
+            if (selection) {
+                const style = this._selectionManagerService.createCopyPasteSelection();
+                this._markId = this._markSelectionService.addShape({ ...selection, style });
+            }
+        }
     }
 
     private _getSelectionRangeStyle() {
@@ -56,14 +74,16 @@ export class FormatPainterService extends Disposable implements IFormatPainterSe
         const workbook = this._currentService.getCurrentUniverSheetInstance();
         const worksheet = workbook?.getActiveSheet();
         const cellData = worksheet.getCellMatrix();
-        const value = cellData.getFragments(startRow, endRow, startColumn, endColumn);
+        // const value = cellData.getFragments(startRow, endRow, startColumn, endColumn);
 
         const styles = workbook.getStyles();
         const stylesMatrix = new ObjectMatrix<IStyleData>();
-        value.forValue((r, c, cell) => {
-            cell = cell as ICellData;
-            stylesMatrix.setValue(r, c, styles.getStyleByCell(cell) || {});
-        });
+        for (let r = startRow; r <= endRow; r++) {
+            for (let c = startColumn; c <= endColumn; c++) {
+                const cell = cellData.getValue(r, c) as ICellData;
+                stylesMatrix.setValue(r, c, styles.getStyleByCell(cell) || {});
+            }
+        }
         this._selectionStyles = stylesMatrix;
     }
 

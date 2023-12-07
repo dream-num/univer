@@ -24,6 +24,7 @@ import { createIdentifier, Inject } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 
 import { IMarkSelectionService } from '../mark-selection/mark-selection.service';
+import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { copyContentCache, extractId, genId } from './copy-content-cache';
 import { HtmlToUSMService } from './html-to-usm/converter';
 import PastePluginLark from './html-to-usm/paste-plugins/plugin-lark';
@@ -69,8 +70,8 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     private readonly _clipboardHooks$ = new BehaviorSubject<ISheetClipboardHook[]>([]);
     readonly clipboardHooks$ = this._clipboardHooks$.asObservable();
 
-    private _htmlToUSM = new HtmlToUSMService();
-    private _usmToHtml = new USMToHtmlService();
+    private _htmlToUSM;
+    private _usmToHtml;
     private _copyMarkId: string | null = null;
     private _pasteType = PREDEFINED_HOOK_NAME.DEFAULT_PASTE;
 
@@ -81,9 +82,14 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         @IClipboardInterfaceService private readonly _clipboardInterfaceService: IClipboardInterfaceService,
         @IUndoRedoService private readonly _undoRedoService: IUndoRedoService,
         @ICommandService private readonly _commandService: ICommandService,
-        @IMarkSelectionService private readonly _markSelectionService: IMarkSelectionService
+        @IMarkSelectionService private readonly _markSelectionService: IMarkSelectionService,
+        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
     ) {
         super();
+        this._htmlToUSM = new HtmlToUSMService({
+            getCurrentSkeleton: () => this._sheetSkeletonManagerService.getCurrent(),
+        });
+        this._usmToHtml = new USMToHtmlService();
     }
 
     async copy(copyType = COPY_TYPE.COPY): Promise<boolean> {
@@ -111,11 +117,12 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             for (let c = startColumn; c <= endColumn; c++) {
                 const cellData = matrix.getValue(r, c);
                 if (cellData) {
-                    matrixFragment.setValue(r - startRow, c - startColumn, Tools.deepClone(cellData));
-                } else {
                     matrixFragment.setValue(r - startRow, c - startColumn, {
-                        v: null,
+                        ...getEmptyCell(),
+                        ...Tools.deepClone(cellData),
                     });
+                } else {
+                    matrixFragment.setValue(r - startRow, c - startColumn, getEmptyCell());
                 }
             }
         }
@@ -367,10 +374,9 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
         if (cachedData.copyType === COPY_TYPE.CUT) {
             copyContentCache.del(copyId);
+            this._copyMarkId && this._markSelectionService.removeShape(this._copyMarkId);
+            this._copyMarkId = null;
         }
-
-        this._copyMarkId && this._markSelectionService.removeShape(this._copyMarkId);
-        this._copyMarkId = null;
 
         return pasteRes;
     }
@@ -801,4 +807,15 @@ function isMultipleCells(cellMatrix: ObjectMatrix<ICellDataWithSpanInfo>): boole
 
 function isLegalSpreadsheetHTMLContent(html: string): boolean {
     return html.indexOf('<table') !== -1; // NOTE: This is just a temporary implementation. Definitely would be changed later.
+}
+
+function getEmptyCell(): ICellData {
+    return {
+        p: null,
+        v: null,
+        s: null,
+        f: null,
+        si: null,
+        t: null,
+    };
 }

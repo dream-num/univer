@@ -31,7 +31,6 @@ import {
 import { RefillCommand } from '../commands/commands/refill.command';
 import { RenameSheetOperation } from '../commands/commands/rename.command';
 import {
-    SetCopySelectionCommand,
     SetInfiniteFormatPainterCommand,
     SetOnceFormatPainterCommand,
 } from '../commands/commands/set-format-painter.command';
@@ -56,7 +55,6 @@ import {
     SetCellEditVisibleOperation,
 } from '../commands/operations/cell-edit.operation';
 import { SetScrollOperation } from '../commands/operations/scroll.operation';
-import { SetCopySelectionsOperation } from '../commands/operations/selection.operation';
 import { SetEditorResizeOperation } from '../commands/operations/set-editor-resize.operation';
 import { SetFormatPainterOperation } from '../commands/operations/set-format-painter.operation';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
@@ -235,8 +233,6 @@ export class SheetUIController extends Disposable {
             SetBoldCommand,
             SetCellEditVisibleArrowOperation,
             SetCellEditVisibleOperation,
-            SetCopySelectionCommand,
-            SetCopySelectionsOperation,
             SetRangeBoldCommand,
             SetRangeItalicCommand,
             SetRangeUnderlineCommand,

@@ -6,7 +6,6 @@ import { SelectionManagerService, SetRangeValuesCommand, SetSelectionsOperation 
 import { Inject } from '@wendellhu/redi';
 
 import { SetOnceFormatPainterCommand } from '../../commands/commands/set-format-painter.command';
-import { FORMAT_PAINTER_SELECTION_PLUGIN_NAME } from '../../commands/operations/selection.operation';
 import { FormatPainterStatus, IFormatPainterService } from '../../services/format-painter/format-painter.service';
 
 @OnLifecycle(LifecycleStages.Rendered, FormatPainterController)
@@ -45,14 +44,15 @@ export class FormatPainterController extends Disposable {
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (
                     command.id === SetSelectionsOperation.id &&
-                    (command.params as ISetSelectionsOperationParams)?.pluginName ===
-                        FORMAT_PAINTER_SELECTION_PLUGIN_NAME
+                    this._formatPainterService.getStatus() !== FormatPainterStatus.OFF
                 ) {
-                    const isFormatPainterOn = this._formatPainterService.getStatus() !== FormatPainterStatus.OFF;
-                    if (!isFormatPainterOn) return;
                     const { selections } = command.params as ISetSelectionsOperationParams;
                     const { range } = selections[selections.length - 1];
                     this._applyFormatPainter(range);
+                    // if once, turn off the format painter
+                    if (this._formatPainterService.getStatus() === FormatPainterStatus.ONCE) {
+                        this._commandService.executeCommand(SetOnceFormatPainterCommand.id);
+                    }
                 }
             })
         );
@@ -64,16 +64,17 @@ export class FormatPainterController extends Disposable {
         const worksheetId = this._currentService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
         if (!stylesMatrix) return;
 
-        const styleRowsNum = stylesMatrix.getLength();
-        const styleColsNum = stylesMatrix.getSizeOf();
+        const { startRow, startColumn, endRow, endColumn } = stylesMatrix.getDataRange();
+        const styleRowsNum = endRow - startRow + 1;
+        const styleColsNum = endColumn - startColumn + 1;
         const styleValues: ICellData[][] = Array.from({ length: range.endRow - range.startRow + 1 }, () =>
             Array.from({ length: range.endColumn - range.startColumn + 1 }, () => ({}))
         );
 
         styleValues.forEach((row, rowIndex) => {
             row.forEach((col, colIndex) => {
-                const mappedRowIndex = rowIndex % styleRowsNum;
-                const mappedColIndex = colIndex % styleColsNum;
+                const mappedRowIndex = (rowIndex % styleRowsNum) + startRow;
+                const mappedColIndex = (colIndex % styleColsNum) + startColumn;
                 const style = stylesMatrix.getValue(mappedRowIndex, mappedColIndex);
 
                 if (style) {
@@ -90,10 +91,5 @@ export class FormatPainterController extends Disposable {
         };
 
         this._commandService.executeCommand(SetRangeValuesCommand.id, setRangeValuesCommandParams);
-
-        // if the format painter is once, turn it off
-        if (this._formatPainterService.getStatus() === FormatPainterStatus.ONCE) {
-            this._commandService.executeCommand(SetOnceFormatPainterCommand.id);
-        }
     }
 }

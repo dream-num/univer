@@ -12,6 +12,7 @@ import type { IMouseEvent, IPointerEvent, Scene, SpreadsheetSkeleton, Viewport }
 import { ScrollTimer, ScrollTimerType, Vector2 } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISelectionWithCoordAndStyle, ISelectionWithStyle } from '@univerjs/sheets';
 import { getNormalSelectionStyle } from '@univerjs/sheets';
+import { IShortcutService } from '@univerjs/ui';
 import { createIdentifier, Inject } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -161,7 +162,10 @@ export class SelectionRenderService implements ISelectionRenderService {
 
     private _activeViewport!: Viewport;
 
-    constructor(@Inject(ThemeService) private readonly _themeService: ThemeService) {
+    constructor(
+        @Inject(ThemeService) private readonly _themeService: ThemeService,
+        @IShortcutService private readonly _shortcutService: IShortcutService
+    ) {
         this._selectionStyle = getNormalSelectionStyle(this._themeService);
     }
 
@@ -640,7 +644,13 @@ export class SelectionRenderService implements ISelectionRenderService {
         this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {
             this._endSelection();
             this._selectionRangeWithStyle$.next(this.getSelectionDataWithStyle());
+
+            // when selection mouse up, enable the short cut service
+            this._shortcutService.setDisable(false);
         });
+
+        // when selection mouse down, disable the short cut service
+        this._shortcutService.setDisable(true);
     }
 
     convertSelectionRangeToData(selectionWithStyle: ISelectionWithStyle): ISelectionWithCoordAndStyle {

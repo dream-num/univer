@@ -325,13 +325,15 @@ export function isSupportBoundingBox(ctx: CanvasRenderingContext2D) {
 }
 
 // 是否有中文、日文、韩文等，不包括符号
+const CJK_LETTER_REG = cjk.letters().toRegExp();
 export function hasCJKText(text: string) {
-    return cjk.letters().toRegExp().test(text);
+    return CJK_LETTER_REG.test(text);
 }
 
 // 是否有中文、日文、韩文等可以垂直布局的文字，包括标点符号
+const CJK_ALL_REG = cjk.all().toRegExp();
 export function hasCJK(text: string) {
-    return cjk.all().toRegExp().test(text);
+    return CJK_ALL_REG.test(text);
 }
 
 export function hasAllLatin(text: string) {

@@ -59,12 +59,18 @@ export const SaveSnapshotOptions: ICommand = {
                 break;
             }
             case 'record': {
-                const endCommands = recordController.startSaveCommands();
-                recordController.record().then((blob) => {
-                    exportController.exportWebm(blob, `${preName} video`);
-                    const commands = endCommands();
-                    const commandsText = JSON.stringify(commands, null, 2);
-                    exportController.exportJson(commandsText, `${preName} commands`);
+                let endCommands = () => [];
+
+                recordController.record().subscribe((v) => {
+                    if (v.type === 'start') {
+                        endCommands = recordController.startSaveCommands() as any;
+                    }
+                    if (v.type === 'finish') {
+                        const commands = endCommands();
+                        exportController.exportWebm(v.data, `${preName} video`);
+                        const commandsText = JSON.stringify(commands, null, 2);
+                        exportController.exportJson(commandsText, `${preName} commands`);
+                    }
                 });
             }
         }

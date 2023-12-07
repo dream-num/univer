@@ -86,6 +86,9 @@
             "path": "./packages/uniscript"
         },
         {
+            "path": "./packages/local-save"
+        },
+        {
             "path": "./examples/data"
         },
         {

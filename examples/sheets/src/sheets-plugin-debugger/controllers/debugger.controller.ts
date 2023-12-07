@@ -1,4 +1,5 @@
-import { Disposable, ICommandService } from '@univerjs/core';
+import { Disposable, ICommandService, ISnapshotPersistenceService } from '@univerjs/core';
+import { ExportController, LocalSnapshotService, RecordController } from '@univerjs/local-save';
 import { IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -7,6 +8,7 @@ import { DialogOperation } from '../commands/operations/dialog.operation';
 import { LocaleOperation } from '../commands/operations/locale.operation';
 import { MessageOperation } from '../commands/operations/message.operation';
 import { NotificationOperation } from '../commands/operations/notification.operation';
+import { SaveSnapshotOptions } from '../commands/operations/saveSnapshot.operations';
 import { SetEditable } from '../commands/operations/set.editable.operation';
 import { SidebarOperation } from '../commands/operations/sidebar.operation';
 import { ThemeOperation } from '../commands/operations/theme.operation';
@@ -16,6 +18,7 @@ import {
     LocaleMenuItemFactory,
     MessageMenuItemFactory,
     NotificationMenuItemFactory,
+    SaveSnapshotSetEditableMenuItemFactory,
     SetEditableMenuItemFactory,
     SidebarMenuItemFactory,
     ThemeMenuItemFactory,
@@ -39,7 +42,12 @@ export class DebuggerController extends Disposable {
             MessageOperation,
             SidebarOperation,
             SetEditable,
+            SaveSnapshotOptions,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
+
+        this._injector.add([ISnapshotPersistenceService, { useClass: LocalSnapshotService }]);
+        this._injector.add([ExportController]);
+        this._injector.add([RecordController]);
     }
 
     private _initializeContextMenu() {
@@ -52,6 +60,7 @@ export class DebuggerController extends Disposable {
             ConfirmMenuItemFactory,
             SidebarMenuItemFactory,
             SetEditableMenuItemFactory,
+            SaveSnapshotSetEditableMenuItemFactory,
         ].forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
         });

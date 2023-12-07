@@ -17,7 +17,7 @@ import { Subject } from 'rxjs';
 import type { FormatType, INumfmtItem, INumfmtService, IRefItem, ISnapshot } from './type';
 
 const SHEET_NUMFMT_PLUGIN = 'SHEET_NUMFMT_PLUGIN';
-@OnLifecycle(LifecycleStages.Ready, NumfmtService)
+@OnLifecycle(LifecycleStages.Starting, NumfmtService)
 export class NumfmtService extends Disposable implements INumfmtService {
     /**
      * Map<unitID ,<sheetId ,ObjectMatrix>>

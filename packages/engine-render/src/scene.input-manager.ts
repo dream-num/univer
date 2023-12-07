@@ -358,8 +358,6 @@ export class InputManager {
             if (this._scene.onDblclickObserver.hasObservers()) {
                 this._scene.onDblclickObserver.notifyObservers(evt);
             }
-
-            console.log('_prePointerDoubleClick', evt);
         }
 
         // eslint-disable-next-line no-magic-numbers
@@ -371,8 +369,6 @@ export class InputManager {
             }
 
             this._resetDoubleClickParam();
-
-            console.log('_prePointerTripleClick', evt);
         }
     }
 

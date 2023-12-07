@@ -336,8 +336,6 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                             // lineEndIndex += increaseValue;
                             divEndIndex += increaseValue;
 
-                            // console.log('span', span, increaseValue, divEndIndex);
-
                             const bBox = span.bBox;
                             const { ba } = bBox;
 
@@ -365,7 +363,6 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                         divide.st = divStartIndex === 0 ? 0 : divStartIndex + 1;
                         divide.ed = divEndIndex >= divide.st ? divEndIndex : divide.st;
                         preDivideStartIndex = divide.ed;
-                        // console.log('divide', divide, divide.st, divide.ed);
                     }
                     line.st = lineStartIndex === 0 ? 0 : lineStartIndex + 1;
                     line.ed = preDivideStartIndex >= line.st ? preDivideStartIndex : line.st;

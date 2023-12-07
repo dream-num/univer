@@ -197,6 +197,7 @@ export class MoveCursorController extends Disposable {
         }
 
         const { startOffset, endOffset, style, collapsed } = activeRange;
+
         const dataStreamLength = docDataModel.getBody()!.dataStream.length ?? Infinity;
 
         if (direction === Direction.LEFT || direction === Direction.RIGHT) {

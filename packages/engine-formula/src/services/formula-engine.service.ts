@@ -444,7 +444,6 @@ export class FormulaEngineService extends Disposable {
         }
 
         // this.lexerTreeBuilder.suffixExpressionHandler(lexerNode); // suffix Express, 1+(3*4=4)*5+1 convert to 134*4=5*1++
-        console.log('lexerNode', (lexerNode as LexerNode).serialize());
 
         // console.log('sequence', this.lexerTreeBuilder.sequenceNodesBuilder(formulaString));
 

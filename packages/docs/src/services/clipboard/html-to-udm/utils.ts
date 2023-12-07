@@ -25,7 +25,6 @@ export function getParagraphStyle(el: HTMLElement): Nullable<IParagraphStyle> {
             }
 
             default: {
-                // console.log(`Unhandled css rule ${cssRule} in getParagraphStyle`);
                 break;
             }
         }

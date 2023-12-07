@@ -69,7 +69,6 @@ export class DocumentSkeleton extends Skeleton {
         }
 
         this._skeletonData = this._createSkeleton(bounds);
-        console.log(this._skeletonData);
     }
 
     getSkeletonData() {
@@ -175,7 +174,7 @@ export class DocumentSkeleton extends Skeleton {
         const { span, divide, line, column, section, page } = nodes;
 
         return {
-            span: divide.spanGroup.filter((span) => span.spanType !== SpanType.LIST).indexOf(span),
+            span: divide.spanGroup.indexOf(span),
             divide: line.divides.indexOf(divide),
             line: column.lines.indexOf(line),
             column: section.columns.indexOf(column),

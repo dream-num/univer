@@ -53,10 +53,9 @@ export class FormatPainterService extends Disposable implements IFormatPainterSe
     }
 
     private _updateRangeMark(status: FormatPainterStatus) {
-        if (this._markId) {
-            this._markSelectionService.removeShape(this._markId);
-            this._markId = null;
-        }
+        this._markSelectionService.removeAllShapes();
+        this._markId = null;
+
         if (status !== FormatPainterStatus.OFF) {
             const selection = this._selectionManagerService.getLast();
             if (selection) {

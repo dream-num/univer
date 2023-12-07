@@ -154,10 +154,9 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         await this._clipboardInterfaceService.write(plain, html);
 
         // 9. mark the copy range
+        this._markSelectionService.removeAllShapes();
+
         const style = this._selectionManagerService.createCopyPasteSelection();
-        if (this._copyMarkId) {
-            this._markSelectionService.removeShape(this._copyMarkId);
-        }
         this._copyMarkId = this._markSelectionService.addShape({ ...selection, style });
 
         // tell hooks to clean up

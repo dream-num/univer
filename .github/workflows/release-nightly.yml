@@ -242,13 +242,57 @@ jobs:
     #               vercel-org-id: ${{ secrets.ORG_ID }}
     #               vercel-project-id: ${{ secrets.PROJECT_ID_DOCUSAURUS }}
 
+    settlement:
+        if: github.repository == 'dream-num/univer'
+        runs-on: ubuntu-latest
+        outputs:
+            stars: ${{ steps.repo-status.outputs.stars }}
+            forks: ${{ steps.repo-status.outputs.forks }}
+            issues: ${{ steps.repo-status.outputs.issues }}
+
+        env:
+            TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+            TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+
+        steps:
+            - name: ✨ Fetch repo status
+              id: repo-status
+              run: |
+                  status=$(curl -s https://api.github.com/repos/${{ github.repository }})
+                  stars=$(echo $status | jq .stargazers_count)
+                  forks=$(echo $status  | jq .forks_count)
+                  issues=$(echo $status  | jq .open_issues_count)
+
+                  echo "release_type=$stars" >> $GITHUB_OUTPUT
+                  echo "release_type=$forks" >> $GITHUB_OUTPUT
+                  echo "release_type=$issues" >> $GITHUB_OUTPUT
+
     notify:
-        needs: [release-nightly, build-demo, build-storybook]
+        needs: [release-nightly, build-demo, build-storybook, settlement]
         runs-on: ubuntu-latest
         if: ${{ always() }}
 
         steps:
             # ================= Notify Discord =================
+
+            - name: 👾 Daily settlement
+              uses: sarisia/actions-status-discord@v1
+              with:
+                    webhook: ${{ secrets.DISCORD_WEBHOOK }}?thread_id=${{ secrets.DISCORD_CI_NIGHTLY_RELEASE }}
+                    status: ${{ job.status }}
+                    description: |
+                        🚀 Daily settlement
+
+                        - 🌟 Stars: ${{ needs.settlement.outputs.stars }}
+                        - 🍴 Forks: ${{ needs.settlement.outputs.forks }}
+                        - 🤖 Issues: ${{ needs.settlement.outputs.issues }}
+                    nofail: false
+                    nodetail: true
+                    nocontext: true
+                    noprefix: true
+                    color: 0x0984e3
+                    username: Daily Settlement
+
             - name: 👾 Discord Notification
               uses: sarisia/actions-status-discord@v1
               if: ${{ success() }}

@@ -8,5 +8,6 @@ export default {
         confirm: '确认框',
         sidebar: '侧边栏',
         editable: '编辑权限',
+        snapshot: '快照',
     },
 };

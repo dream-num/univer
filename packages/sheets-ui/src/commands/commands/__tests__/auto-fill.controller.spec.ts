@@ -17,7 +17,7 @@ import {
     SetSelectionsOperation,
 } from '@univerjs/sheets';
 import { createCommandTestBed } from '@univerjs/sheets/commands/commands/__tests__/create-command-test-bed.js';
-import { IShortcutService, ShortcutService } from '@univerjs/ui';
+import { DesktopShortcutService, IShortcutService } from '@univerjs/ui';
 import type { Injector } from '@wendellhu/redi';
 import { beforeEach, describe, expect, it } from 'vitest';
 
@@ -223,7 +223,7 @@ describe('Test auto fill rules in controller', () => {
         const testBed = createCommandTestBed(TEST_WORKBOOK_DATA, [
             [ISelectionRenderService, { useClass: SelectionRenderService }],
             [IAutoFillService, { useClass: AutoFillService }],
-            [IShortcutService, { useClass: ShortcutService }],
+            [IShortcutService, { useClass: DesktopShortcutService }],
             [AutoFillController],
         ]);
         univer = testBed.univer;

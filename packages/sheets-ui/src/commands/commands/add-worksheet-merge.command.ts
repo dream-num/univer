@@ -34,11 +34,11 @@ export interface IAddMergeCommandParams {
     worksheetId: string;
 }
 
-function checkCellContentInRanges(worksheet: Worksheet, ranges: IRange[]): boolean {
+export function checkCellContentInRanges(worksheet: Worksheet, ranges: IRange[]): boolean {
     return ranges.some((range) => checkCellContentInRange(worksheet, range));
 }
 
-function checkCellContentInRange(worksheet: Worksheet, range: IRange): boolean {
+export function checkCellContentInRange(worksheet: Worksheet, range: IRange): boolean {
     const { startRow, startColumn, endColumn, endRow } = range;
     const cellMatrix = worksheet.getMatrixWithMergedCells(startRow, startColumn, endRow, endColumn);
 
@@ -52,7 +52,7 @@ function checkCellContentInRange(worksheet: Worksheet, range: IRange): boolean {
     return someCellGoingToBeRemoved;
 }
 
-function getClearContentMutationParamsForRanges(
+export function getClearContentMutationParamsForRanges(
     accessor: IAccessor,
     workbookId: string,
     worksheet: Worksheet,
@@ -91,7 +91,7 @@ function getClearContentMutationParamsForRanges(
     };
 }
 
-function getClearContentMutationParamForRange(worksheet: Worksheet, range: IRange): ObjectMatrix<ICellData> {
+export function getClearContentMutationParamForRange(worksheet: Worksheet, range: IRange): ObjectMatrix<ICellData> {
     const { startRow, startColumn, endColumn, endRow } = range;
     const cellMatrix = worksheet.getMatrixWithMergedCells(startRow, startColumn, endRow, endColumn);
     const redoMatrix = new ObjectMatrix<ICellData>();

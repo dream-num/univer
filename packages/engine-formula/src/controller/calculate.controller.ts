@@ -43,7 +43,7 @@ export class CalculateController extends Disposable {
 
     private _commandExecutedListener() {
         this.disposeWithMe(
-            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+            this._commandService.onCommandExecuted((command: ICommandInfo, options) => {
                 if (command.id === SetFormulaCalculationStopMutation.id) {
                     this._formulaEngineService.stopFormulaExecution();
                 } else if (command.id === SetFormulaDataMutation.id) {
@@ -191,9 +191,15 @@ export class CalculateController extends Disposable {
                     break;
             }
 
-            this._commandService.executeCommand(SetFormulaCalculationNotificationMutation.id, {
-                functionsExecutedState,
-            });
+            this._commandService.executeCommand(
+                SetFormulaCalculationNotificationMutation.id,
+                {
+                    functionsExecutedState,
+                },
+                {
+                    local: true,
+                }
+            );
         });
     }
 
@@ -220,9 +226,15 @@ export class CalculateController extends Disposable {
                 );
             }
 
-            this._commandService.executeCommand(SetFormulaCalculationNotificationMutation.id, {
-                stageInfo: data,
-            });
+            this._commandService.executeCommand(
+                SetFormulaCalculationNotificationMutation.id,
+                {
+                    stageInfo: data,
+                },
+                {
+                    local: true,
+                }
+            );
         });
     }
 
@@ -244,15 +256,27 @@ export class CalculateController extends Disposable {
             this._formulaDataModel.mergeArrayFormulaRange(arrayFormulaRange);
 
             // Synchronous to the main thread
-            this._commandService.executeCommand(SetArrayFormulaDataMutation.id, {
-                arrayFormulaRange: this._formulaDataModel.getArrayFormulaRange(),
-                arrayFormulaCellData: this._formulaDataModel.getArrayFormulaCellData(),
-            });
+            this._commandService.executeCommand(
+                SetArrayFormulaDataMutation.id,
+                {
+                    arrayFormulaRange: this._formulaDataModel.getArrayFormulaRange(),
+                    arrayFormulaCellData: this._formulaDataModel.getArrayFormulaCellData(),
+                },
+                {
+                    local: true,
+                }
+            );
         }
 
-        this._commandService.executeCommand(SetFormulaCalculationResultMutation.id, {
-            unitData,
-            unitOtherData,
-        });
+        this._commandService.executeCommand(
+            SetFormulaCalculationResultMutation.id,
+            {
+                unitData,
+                unitOtherData,
+            },
+            {
+                local: true,
+            }
+        );
     }
 }

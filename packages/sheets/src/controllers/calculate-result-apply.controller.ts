@@ -51,7 +51,6 @@ export class CalculateResultApplyController extends Disposable {
                             worksheetId: sheetId,
                             workbookId: unitId,
                             cellValue: cellData.getData(),
-                            isFormulaUpdate: true,
                         };
 
                         redoMutationsInfo.push({
@@ -61,7 +60,11 @@ export class CalculateResultApplyController extends Disposable {
                     });
                 });
 
-                const result = redoMutationsInfo.every((m) => this._commandService.executeCommand(m.id, m.params));
+                const result = redoMutationsInfo.every((m) =>
+                    this._commandService.executeCommand(m.id, m.params, {
+                        local: true,
+                    })
+                );
                 return result;
             })
         );

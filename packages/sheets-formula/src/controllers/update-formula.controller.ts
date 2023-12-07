@@ -135,22 +135,28 @@ export class UpdateFormulaController extends Disposable {
         );
 
         this.disposeWithMe(
-            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+            this._commandService.onCommandExecuted((command: ICommandInfo, options) => {
                 // Synchronous data from worker
                 if (command.id === SetRangeValuesMutation.id) {
                     const params = command.params as ISetRangeValuesMutationParams;
 
-                    const { worksheetId: sheetId, workbookId: unitId, cellValue, isFormulaUpdate } = params;
+                    const { worksheetId: sheetId, workbookId: unitId, cellValue } = params;
 
-                    if (isFormulaUpdate === true || cellValue == null) {
+                    if ((options && options.local === true) || cellValue == null) {
                         return;
                     }
 
                     this._formulaDataModel.updateFormulaData(unitId, sheetId, cellValue);
 
-                    this._commandService.executeCommand(SetFormulaDataMutation.id, {
-                        formulaData: this._formulaDataModel.getFormulaData(),
-                    });
+                    this._commandService.executeCommand(
+                        SetFormulaDataMutation.id,
+                        {
+                            formulaData: this._formulaDataModel.getFormulaData(),
+                        },
+                        {
+                            local: true,
+                        }
+                    );
                 }
             })
         );
@@ -226,10 +232,16 @@ export class UpdateFormulaController extends Disposable {
             );
 
             // Synchronous to the worker thread
-            this._commandService.executeCommand(SetArrayFormulaDataMutation.id, {
-                arrayFormulaRange: offsetArrayFormulaRange,
-                arrayFormulaCellData: offsetArrayFormulaCellData,
-            });
+            this._commandService.executeCommand(
+                SetArrayFormulaDataMutation.id,
+                {
+                    arrayFormulaRange: offsetArrayFormulaRange,
+                    arrayFormulaCellData: offsetArrayFormulaCellData,
+                },
+                {
+                    local: true,
+                }
+            );
 
             // offset formulaData
             oldFormulaData = offsetFormula(oldFormulaData, command, unitId, sheetId, selections);

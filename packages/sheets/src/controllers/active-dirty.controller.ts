@@ -74,7 +74,7 @@ export class ActiveDirtyController extends Disposable {
                  * Changes in the cell value caused by the formula or style
                  * will not trigger the formula to be marked as dirty for calculation.
                  */
-                if (params.isFormulaUpdate === true || params.trigger === SetStyleCommand.id) {
+                if (params.trigger === SetStyleCommand.id) {
                     return {};
                 }
 

@@ -1,4 +1,4 @@
-import type { ICommandInfo, IMutation } from '@univerjs/core';
+import type { ICommandInfo, IExecutionOptions, IMutation, Nullable } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
@@ -7,6 +7,7 @@ import type { FormulaExecutedStateType, IExecutionInProgressParams } from '../..
 
 export interface ISetFormulaCalculationStartMutation {
     commands: ICommandInfo[];
+    options: Nullable<IExecutionOptions>;
     forceCalculation?: boolean;
 }
 /**

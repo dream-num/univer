@@ -158,7 +158,7 @@ export interface IDocumentLayoutObject {
     fill?: Nullable<string>;
 }
 
-const DEFAULT_ROTATE_ANGLE = 90;
+const VERTICAL_ROTATE_ANGLE = 90;
 
 const DEFAULT_PADDING_DATA = {
     t: 0,
@@ -448,7 +448,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             const { v: isVertical = BooleanNumber.FALSE } = textRotation as ITextRotation;
 
             if (isVertical === BooleanNumber.TRUE) {
-                angle = DEFAULT_ROTATE_ANGLE;
+                angle = VERTICAL_ROTATE_ANGLE;
             }
 
             const colWidth = data.get(i)?.w;
@@ -1061,8 +1061,8 @@ export class SpreadsheetSkeleton extends Skeleton {
             let centerAngle = 0;
             let vertexAngle = angle;
             if (isVertical === BooleanNumber.TRUE) {
-                centerAngle = DEFAULT_ROTATE_ANGLE;
-                vertexAngle = DEFAULT_ROTATE_ANGLE;
+                centerAngle = VERTICAL_ROTATE_ANGLE;
+                vertexAngle = VERTICAL_ROTATE_ANGLE;
             }
             documentModel = this._updateConfigAndGetDocumentModel(
                 isDeepClone ? Tools.deepClone(cell.p) : cell.p,
@@ -1526,14 +1526,11 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         const { v: isVertical = BooleanNumber.FALSE } = textRotation as ITextRotation;
         if (isVertical === BooleanNumber.TRUE) {
-            angle = DEFAULT_ROTATE_ANGLE;
+            angle = VERTICAL_ROTATE_ANGLE;
         }
 
         if (documentViewModel) {
             const documentSkeleton = DocumentSkeleton.create(documentViewModel, this._localService);
-            if (angle === 0 || wrapStrategy !== WrapStrategy.WRAP) {
-                documentSkeleton.calculate();
-            }
 
             fontCache.setValue(r, c, {
                 documentSkeleton,
@@ -1597,8 +1594,8 @@ export class SpreadsheetSkeleton extends Skeleton {
         let centerAngle = 0;
         let vertexAngle = angle;
         if (isVertical === BooleanNumber.TRUE) {
-            centerAngle = DEFAULT_ROTATE_ANGLE;
-            vertexAngle = DEFAULT_ROTATE_ANGLE;
+            centerAngle = VERTICAL_ROTATE_ANGLE;
+            vertexAngle = VERTICAL_ROTATE_ANGLE;
         }
         const documentData: IDocumentData = {
             id: 'd',

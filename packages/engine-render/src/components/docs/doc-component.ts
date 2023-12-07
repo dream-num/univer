@@ -62,6 +62,7 @@ export class DocComponent extends RenderComponent<IDocumentSkeletonSpan | IDocum
         // this._cacheCanvas.clear();
         const m = this.transform.getMatrix();
         mainCtx.save();
+        // eslint-disable-next-line no-magic-numbers
         mainCtx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
         // ctx.setTransform(mainCtx.getTransform());
         this._draw(mainCtx, bounds);

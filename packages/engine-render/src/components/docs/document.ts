@@ -1,7 +1,7 @@
 import './extensions';
 
 import type { Nullable, Observer } from '@univerjs/core';
-import { BooleanNumber, HorizontalAlign, Observable, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { HorizontalAlign, Observable, VerticalAlign, WrapStrategy } from '@univerjs/core';
 
 import { calculateRectRotate, getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
 import type { IDocumentSkeletonCached, IDocumentSkeletonPage } from '../../basics/i-document-skeleton-cached';
@@ -43,8 +43,6 @@ export interface IDocumentOffsetConfig extends IPageMarginLayout {
 }
 
 export class Documents extends DocComponent {
-    isCalculateSkeleton = true;
-
     onPageRenderObservable = new Observable<IPageRenderConfig>();
 
     docsLeft: number = 0;
@@ -164,29 +162,20 @@ export class Documents extends DocComponent {
         return (this.getScene() as Scene).getEngine();
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     override draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
-        const documentSkeleton = this.getSkeleton();
-
-        if (!documentSkeleton) {
-            return;
-        }
-
-        // if (this.isCalculateSkeleton) {
-        //     documentSkeleton.calculate(bounds);
-        // }
-
-        this._drawLiquid.reset();
-
-        const skeletonData = documentSkeleton.getSkeletonData();
+        const skeletonData = this.getSkeleton()?.getSkeletonData();
 
         if (skeletonData == null) {
             return;
         }
 
+        this._drawLiquid.reset();
+
         const { pages } = skeletonData;
         const parentScale = this.getParentScale();
-        const extensions = this.getExtensionsByOrder();
         const scale = getScale(parentScale);
+        const extensions = this.getExtensionsByOrder();
 
         for (const extension of extensions) {
             extension.clearCache();
@@ -214,7 +203,7 @@ export class Documents extends DocComponent {
                 centerAngle: centerAngleDeg = 0,
                 vertexAngle: vertexAngleDeg = 0,
                 wrapStrategy = WrapStrategy.UNSPECIFIED,
-                isRotateNonEastAsian = BooleanNumber.FALSE,
+                // isRotateNonEastAsian = BooleanNumber.FALSE,
             } = renderConfig;
 
             const horizontalOffsetNoAngle = this._horizontalHandler(
@@ -313,13 +302,7 @@ export class Documents extends DocComponent {
 
                     for (let i = 0; i < linesCount; i++) {
                         const line = lines[i];
-                        const {
-                            divides,
-
-                            asc = 0,
-                            type,
-                            lineHeight = 0,
-                        } = line;
+                        const { divides, asc = 0, type, lineHeight = 0 } = line;
 
                         const maxLineAsc = asc;
 
@@ -347,8 +330,8 @@ export class Documents extends DocComponent {
                             for (let i = 0; i < divideLength; i++) {
                                 const divide = divides[i];
                                 const { spanGroup } = divide;
-                                this._drawLiquid.translateSave();
 
+                                this._drawLiquid.translateSave();
                                 this._drawLiquid.translateDivide(divide);
 
                                 for (const span of spanGroup) {

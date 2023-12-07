@@ -23153,8 +23153,19 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
             id: 'sheet-0011',
             name: 'sheet11',
             columnData: {
+                0: {
+                    w: 100,
+                },
                 1: {
                     hd: BooleanNumber.FALSE,
+                },
+            },
+            rowData: {
+                2: {
+                    h: 60,
+                },
+                3: {
+                    h: 100,
                 },
             },
             status: 1,
@@ -23182,12 +23193,23 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                 },
                 2: {
                     0: {
-                        v: 44,
+                        v: '我是一段中文字',
+                        s: {
+                            tr: {
+                                a: 30,
+                            },
+                        },
                     },
                 },
                 3: {
                     0: {
-                        v: 444,
+                        v: '(CHILDREN)',
+                        s: {
+                            tr: {
+                                a: 90,
+                                v: 1,
+                            },
+                        },
                     },
                 },
             },

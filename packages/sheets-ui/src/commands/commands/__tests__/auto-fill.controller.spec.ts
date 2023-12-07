@@ -17,7 +17,7 @@ import {
     SetSelectionsOperation,
 } from '@univerjs/sheets';
 import { createCommandTestBed } from '@univerjs/sheets/commands/commands/__tests__/create-command-test-bed.js';
-import { IShortcutService } from '@univerjs/ui';
+import { IShortcutService, ShortcutService } from '@univerjs/ui';
 import type { Injector } from '@wendellhu/redi';
 import { beforeEach, describe, expect, it } from 'vitest';
 

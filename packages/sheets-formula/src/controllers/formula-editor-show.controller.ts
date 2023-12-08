@@ -49,9 +49,16 @@ export class FormulaEditorShowController extends Disposable {
                             const { row, col, workbookId, worksheetId } = context;
                             const arrayFormulaMatrixRange = this._formulaDataModel.getArrayFormulaRange();
 
+                            const arrayFormulaMatrixCell = this._formulaDataModel.getArrayFormulaCellData();
+
                             this._removeArrayFormulaRangeShape();
 
-                            if (value == null || (value.v != null && value.v !== '')) {
+                            if (
+                                value == null ||
+                                (value.v != null &&
+                                    value.v !== '' &&
+                                    arrayFormulaMatrixCell[workbookId]?.[worksheetId]?.[row]?.[col] == null)
+                            ) {
                                 return next(value);
                             }
 

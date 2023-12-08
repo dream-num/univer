@@ -41,7 +41,7 @@
         "react": "^18.2.0",
         "ts-node": "^10.9.1",
         "typescript": "^5.3.3",
-        "vite": "^5.0.6",
+        "vite": "^5.0.7",
         "vite-plugin-dts": "^3.6.4",
         "vitest": "^1.0.2"
     },

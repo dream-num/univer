@@ -393,7 +393,7 @@ importers:
         version: 2.0.5
       '@vitejs/plugin-react':
         specifier: ^4.2.1
-        version: 4.2.1(vite@5.0.6)
+        version: 4.2.1(vite@5.0.7)
       '@vitest/coverage-istanbul':
         specifier: ^1.0.2
         version: 1.0.2(vitest@1.0.2)
@@ -404,11 +404,11 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       vite:
-        specifier: ^5.0.6
-        version: 5.0.6(@types/node@20.10.4)(less@4.2.0)
+        specifier: ^5.0.7
+        version: 5.0.7(@types/node@20.10.4)(less@4.2.0)
       vite-plugin-dts:
         specifier: ^3.6.4
-        version: 3.6.4(@types/node@20.10.4)(typescript@5.3.3)(vite@5.0.6)
+        version: 3.6.4(@types/node@20.10.4)(typescript@5.3.3)(vite@5.0.7)
       vitest:
         specifier: ^1.0.2
         version: 1.0.2(@types/node@20.10.4)
@@ -472,7 +472,7 @@ importers:
         version: 4.4.10
       '@vitejs/plugin-react':
         specifier: ^4.2.1
-        version: 4.2.1(vite@5.0.6)
+        version: 4.2.1(vite@5.0.7)
       '@vitest/coverage-istanbul':
         specifier: ^1.0.2
         version: 1.0.2(vitest@1.0.2)
@@ -495,11 +495,11 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       vite:
-        specifier: ^5.0.6
-        version: 5.0.6(@types/node@20.10.4)(less@4.2.0)
+        specifier: ^5.0.7
+        version: 5.0.7(@types/node@20.10.4)(less@4.2.0)
       vite-plugin-dts:
         specifier: ^3.6.4
-        version: 3.6.4(@types/node@20.10.4)(typescript@5.3.3)(vite@5.0.6)
+        version: 3.6.4(@types/node@20.10.4)(typescript@5.3.3)(vite@5.0.7)
       vitest:
         specifier: ^1.0.2
         version: 1.0.2(@types/node@20.10.4)(happy-dom@12.10.3)(less@4.2.0)
@@ -544,11 +544,11 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       vite:
-        specifier: ^5.0.6
-        version: 5.0.6(@types/node@20.10.4)(less@4.2.0)
+        specifier: ^5.0.7
+        version: 5.0.7(@types/node@20.10.4)(less@4.2.0)
       vite-plugin-dts:
         specifier: ^3.6.4
-        version: 3.6.4(@types/node@20.10.4)(typescript@5.3.3)(vite@5.0.6)
+        version: 3.6.4(@types/node@20.10.4)(typescript@5.3.3)(vite@5.0.7)
       vitest:
         specifier: ^1.0.2
         version: 1.0.2(@types/node@20.10.4)(happy-dom@12.10.3)(less@4.2.0)
@@ -596,11 +596,11 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       vite:
-        specifier: ^5.0.6
-        version: 5.0.6(@types/node@20.10.4)(less@4.2.0)
+        specifier: ^5.0.7
+        version: 5.0.7(@types/node@20.10.4)(less@4.2.0)
       vite-plugin-dts:
         specifier: ^3.6.4
-        version: 3.6.4(@types/node@20.10.4)(typescript@5.3.3)(vite@5.0.6)
+        version: 3.6.4(@types/node@20.10.4)(typescript@5.3.3)(vite@5.0.7)
       vitest:
         specifier: ^1.0.2
         version: 1.0.2(@types/node@20.10.4)(happy-dom@12.10.3)(less@4.2.0)
@@ -630,11 +630,11 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       vite:
-        specifier: ^5.0.6
-        version: 5.0.6(@types/node@20.10.4)(less@4.2.0)
+        specifier: ^5.0.7
+        version: 5.0.7(@types/node@20.10.4)(less@4.2.0)
       vite-plugin-dts:
         specifier: ^3.6.4
-        version: 3.6.4(@types/node@20.10.4)(typescript@5.3.3)(vite@5.0.6)
+        version: 3.6.4(@types/node@20.10.4)(typescript@5.3.3)(vite@5.0.7)
       vitest:
         specifier: ^1.0.2
         version: 1.0.2(@types/node@20.10.4)(happy-dom@12.10.3)(less@4.2.0)
@@ -658,11 +658,11 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       vite:
-        specifier: ^5.0.6
-        version: 5.0.6(@types/node@20.10.4)(less@4.2.0)
+        specifier: ^5.0.7
+        version: 5.0.7(@types/node@20.10.4)(less@4.2.0)
       vite-plugin-dts:
         specifier: ^3.6.4
-        version: 3.6.4(@types/node@20.10.4)(typescript@5.3.3)(vite@5.0.6)
+        version: 3.6.4(@types/node@20.10.4)(typescript@5.3.3)(vite@5.0.7)
       vitest:
         specifier: ^1.0.2
         version: 1.0.2(@types/node@20.10.4)
@@ -695,11 +695,11 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       vite:
-        specifier: ^5.0.6
-        version: 5.0.6(@types/node@20.10.4)(less@4.2.0)
+        specifier: ^5.0.7
+        version: 5.0.7(@types/node@20.10.4)(less@4.2.0)
       vite-plugin-dts:
         specifier: ^3.6.4
-        version: 3.6.4(@types/node@20.10.4)(typescript@5.3.3)(vite@5.0.6)
+        version: 3.6.4(@types/node@20.10.4)(typescript@5.3.3)(vite@5.0.7)
       vitest:
         specifier: ^1.0.2
         version: 1.0.2(@types/node@20.10.4)(happy-dom@12.10.3)(less@4.2.0)
@@ -738,11 +738,11 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       vite:
-        specifier: ^5.0.6
-        version: 5.0.6(@types/node@20.10.4)(less@4.2.0)
+        specifier: ^5.0.7
+        version: 5.0.7(@types/node@20.10.4)(less@4.2.0)
       vite-plugin-dts:
         specifier: ^3.6.4
-        version: 3.6.4(@types/node@20.10.4)(typescript@5.3.3)(vite@5.0.6)
+        version: 3.6.4(@types/node@20.10.4)(typescript@5.3.3)(vite@5.0.7)
       vitest:
         specifier: ^1.0.2
         version: 1.0.2(@types/node@20.10.4)(happy-dom@12.10.3)(less@4.2.0)
@@ -769,11 +769,11 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       vite:
-        specifier: ^5.0.6
-        version: 5.0.6(@types/node@20.10.4)(less@4.2.0)
+        specifier: ^5.0.7
+        version: 5.0.7(@types/node@20.10.4)(less@4.2.0)
       vite-plugin-dts:
         specifier: ^3.6.4
-        version: 3.6.4(@types/node@20.10.4)(typescript@5.3.3)(vite@5.0.6)
+        version: 3.6.4(@types/node@20.10.4)(typescript@5.3.3)(vite@5.0.7)
       vitest:
         specifier: ^1.0.2
         version: 1.0.2(@types/node@20.10.4)
@@ -819,11 +819,11 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       vite:
-        specifier: ^5.0.6
-        version: 5.0.6(@types/node@20.10.4)(less@4.2.0)
+        specifier: ^5.0.7
+        version: 5.0.7(@types/node@20.10.4)(less@4.2.0)
       vite-plugin-dts:
         specifier: ^3.6.4
-        version: 3.6.4(@types/node@20.10.4)(typescript@5.3.3)(vite@5.0.6)
+        version: 3.6.4(@types/node@20.10.4)(typescript@5.3.3)(vite@5.0.7)
       vitest:
         specifier: ^1.0.2
         version: 1.0.2(@types/node@20.10.4)
@@ -865,11 +865,11 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       vite:
-        specifier: ^5.0.6
-        version: 5.0.6(@types/node@20.10.4)(less@4.2.0)
+        specifier: ^5.0.7
+        version: 5.0.7(@types/node@20.10.4)(less@4.2.0)
       vite-plugin-dts:
         specifier: ^3.6.4
-        version: 3.6.4(@types/node@20.10.4)(typescript@5.3.3)(vite@5.0.6)
+        version: 3.6.4(@types/node@20.10.4)(typescript@5.3.3)(vite@5.0.7)
       vitest:
         specifier: ^1.0.2
         version: 1.0.2(@types/node@20.10.4)(happy-dom@12.10.3)(less@4.2.0)
@@ -917,11 +917,11 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       vite:
-        specifier: ^5.0.6
-        version: 5.0.6(@types/node@20.10.4)(less@4.2.0)
+        specifier: ^5.0.7
+        version: 5.0.7(@types/node@20.10.4)(less@4.2.0)
       vite-plugin-dts:
         specifier: ^3.6.4
-        version: 3.6.4(@types/node@20.10.4)(typescript@5.3.3)(vite@5.0.6)
+        version: 3.6.4(@types/node@20.10.4)(typescript@5.3.3)(vite@5.0.7)
       vitest:
         specifier: ^1.0.2
         version: 1.0.2(@types/node@20.10.4)(happy-dom@12.10.3)(less@4.2.0)
@@ -987,11 +987,11 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       vite:
-        specifier: ^5.0.6
-        version: 5.0.6(@types/node@20.10.4)(less@4.2.0)
+        specifier: ^5.0.7
+        version: 5.0.7(@types/node@20.10.4)(less@4.2.0)
       vite-plugin-dts:
         specifier: ^3.6.4
-        version: 3.6.4(@types/node@20.10.4)(typescript@5.3.3)(vite@5.0.6)
+        version: 3.6.4(@types/node@20.10.4)(typescript@5.3.3)(vite@5.0.7)
       vitest:
         specifier: ^1.0.2
         version: 1.0.2(@types/node@20.10.4)(happy-dom@12.10.3)(less@4.2.0)
@@ -1033,11 +1033,11 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       vite:
-        specifier: ^5.0.6
-        version: 5.0.6(@types/node@20.10.4)(less@4.2.0)
+        specifier: ^5.0.7
+        version: 5.0.7(@types/node@20.10.4)(less@4.2.0)
       vite-plugin-dts:
         specifier: ^3.6.4
-        version: 3.6.4(@types/node@20.10.4)(typescript@5.3.3)(vite@5.0.6)
+        version: 3.6.4(@types/node@20.10.4)(typescript@5.3.3)(vite@5.0.7)
       vitest:
         specifier: ^1.0.2
         version: 1.0.2(@types/node@20.10.4)(happy-dom@12.10.3)(less@4.2.0)
@@ -1094,11 +1094,11 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       vite:
-        specifier: ^5.0.6
-        version: 5.0.6(@types/node@20.10.4)(less@4.2.0)
+        specifier: ^5.0.7
+        version: 5.0.7(@types/node@20.10.4)(less@4.2.0)
       vite-plugin-dts:
         specifier: ^3.6.4
-        version: 3.6.4(@types/node@20.10.4)(typescript@5.3.3)(vite@5.0.6)
+        version: 3.6.4(@types/node@20.10.4)(typescript@5.3.3)(vite@5.0.7)
       vitest:
         specifier: ^1.0.2
         version: 1.0.2(@types/node@20.10.4)(happy-dom@12.10.3)(less@4.2.0)
@@ -1164,11 +1164,11 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       vite:
-        specifier: ^5.0.6
-        version: 5.0.6(@types/node@20.10.4)(less@4.2.0)
+        specifier: ^5.0.7
+        version: 5.0.7(@types/node@20.10.4)(less@4.2.0)
       vite-plugin-dts:
         specifier: ^3.6.4
-        version: 3.6.4(@types/node@20.10.4)(typescript@5.3.3)(vite@5.0.6)
+        version: 3.6.4(@types/node@20.10.4)(typescript@5.3.3)(vite@5.0.7)
       vitest:
         specifier: ^1.0.2
         version: 1.0.2(@types/node@20.10.4)(happy-dom@12.10.3)(less@4.2.0)
@@ -1201,11 +1201,11 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       vite:
-        specifier: ^5.0.6
-        version: 5.0.6(@types/node@20.10.4)(less@4.2.0)
+        specifier: ^5.0.7
+        version: 5.0.7(@types/node@20.10.4)(less@4.2.0)
       vite-plugin-dts:
         specifier: ^3.6.4
-        version: 3.6.4(@types/node@20.10.4)(typescript@5.3.3)(vite@5.0.6)
+        version: 3.6.4(@types/node@20.10.4)(typescript@5.3.3)(vite@5.0.7)
       vitest:
         specifier: ^1.0.2
         version: 1.0.2(@types/node@20.10.4)(happy-dom@12.10.3)(less@4.2.0)
@@ -1236,7 +1236,7 @@ importers:
         version: 18.2.42
       '@vitejs/plugin-react':
         specifier: ^4.2.1
-        version: 4.2.1(vite@5.0.6)
+        version: 4.2.1(vite@5.0.7)
       '@vitest/coverage-istanbul':
         specifier: ^1.0.2
         version: 1.0.2(vitest@1.0.2)
@@ -1253,11 +1253,11 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       vite:
-        specifier: ^5.0.6
-        version: 5.0.6(@types/node@20.10.4)(less@4.2.0)
+        specifier: ^5.0.7
+        version: 5.0.7(@types/node@20.10.4)(less@4.2.0)
       vite-plugin-dts:
         specifier: ^3.6.4
-        version: 3.6.4(@types/node@20.10.4)(typescript@5.3.3)(vite@5.0.6)
+        version: 3.6.4(@types/node@20.10.4)(typescript@5.3.3)(vite@5.0.7)
       vitest:
         specifier: ^1.0.2
         version: 1.0.2(@types/node@20.10.4)(happy-dom@12.10.3)(less@4.2.0)
@@ -1312,7 +1312,7 @@ importers:
         version: 4.4.10
       '@vitejs/plugin-react':
         specifier: ^4.2.1
-        version: 4.2.1(vite@5.0.6)
+        version: 4.2.1(vite@5.0.7)
       '@vitest/coverage-istanbul':
         specifier: ^1.0.2
         version: 1.0.2(vitest@1.0.2)
@@ -1335,11 +1335,11 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       vite:
-        specifier: ^5.0.6
-        version: 5.0.6(@types/node@20.10.4)(less@4.2.0)
+        specifier: ^5.0.7
+        version: 5.0.7(@types/node@20.10.4)(less@4.2.0)
       vite-plugin-dts:
         specifier: ^3.6.4
-        version: 3.6.4(@types/node@20.10.4)(typescript@5.3.3)(vite@5.0.6)
+        version: 3.6.4(@types/node@20.10.4)(typescript@5.3.3)(vite@5.0.7)
       vitest:
         specifier: ^1.0.2
         version: 1.0.2(@types/node@20.10.4)(happy-dom@12.10.3)(less@4.2.0)
@@ -1364,9 +1364,6 @@ importers:
       '@wendellhu/redi':
         specifier: ^0.12.11
         version: 0.12.11
-      monaco-editor:
-        specifier: 0.44.0
-        version: 0.44.0
       react:
         specifier: '>=16.9.0'
         version: 18.2.0
@@ -1379,22 +1376,25 @@ importers:
         version: 18.2.42
       '@vitejs/plugin-react':
         specifier: ^4.2.1
-        version: 4.2.1(vite@5.0.6)
+        version: 4.2.1(vite@5.0.7)
       '@vitest/coverage-istanbul':
         specifier: ^1.0.2
         version: 1.0.2(vitest@1.0.2)
       less:
         specifier: ^4.2.0
         version: 4.2.0
+      monaco-editor:
+        specifier: 0.45.0
+        version: 0.45.0
       typescript:
         specifier: ^5.3.3
         version: 5.3.3
       vite:
-        specifier: ^5.0.6
-        version: 5.0.6(@types/node@20.10.4)(less@4.2.0)
+        specifier: ^5.0.7
+        version: 5.0.7(@types/node@20.10.4)(less@4.2.0)
       vite-plugin-dts:
         specifier: ^3.6.4
-        version: 3.6.4(@types/node@20.10.4)(typescript@5.3.3)(vite@5.0.6)
+        version: 3.6.4(@types/node@20.10.4)(typescript@5.3.3)(vite@5.0.7)
       vitest:
         specifier: ^1.0.2
         version: 1.0.2(@types/node@20.10.4)(happy-dom@12.10.3)(less@4.2.0)
@@ -8116,7 +8116,7 @@ packages:
       - supports-color
     dev: true
 
-  /@vitejs/plugin-react@4.2.1(vite@5.0.6):
+  /@vitejs/plugin-react@4.2.1(vite@5.0.7):
     resolution: {integrity: sha512-oojO9IDc4nCUUi8qIR11KoQm0XFFLIwsRBwHRR4d/88IWghn1y6ckz/bJ8GHDCsYEJee8mDzqtJxh15/cisJNQ==}
     engines: {node: ^14.18.0 || >=16.0.0}
     peerDependencies:
@@ -8127,7 +8127,7 @@ packages:
       '@babel/plugin-transform-react-jsx-source': 7.23.3(@babel/core@7.23.5)
       '@types/babel__core': 7.20.5
       react-refresh: 0.14.0
-      vite: 5.0.6(@types/node@20.10.4)(less@4.2.0)
+      vite: 5.0.7(@types/node@20.10.4)(less@4.2.0)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -14287,6 +14287,10 @@ packages:
     resolution: {integrity: sha512-5SmjNStN6bSuSE5WPT2ZV+iYn1/yI9sd4Igtk23ChvqB7kDk9lZbB9F5frsuvpB+2njdIeGGFf2G4gbE6rCC9Q==}
     dev: false
 
+  /monaco-editor@0.45.0:
+    resolution: {integrity: sha512-mjv1G1ZzfEE3k9HZN0dQ2olMdwIfaeAAjFiwNprLfYNRSz7ctv9XuCT7gPtBGrMUeV1/iZzYKj17Khu1hxoHOA==}
+    dev: true
+
   /mri@1.2.0:
     resolution: {integrity: sha512-tzzskb3bG8LvYGFF/mDTpq3jpI6Q9wc3LEmBaghu+DdCssd1FakN7Bc0hVNmEyGq1bq3RgfkCb3cmQLpNPOroA==}
     engines: {node: '>=4'}
@@ -15367,7 +15371,6 @@ packages:
       nanoid: 3.3.7
       picocolors: 1.0.0
       source-map-js: 1.0.2
-    dev: true
 
   /preferred-pm@3.1.2:
     resolution: {integrity: sha512-nk7dKrcW8hfCZ4H6klWcdRknBOXWzNQByJ0oJyX97BOupsYD+FzLS4hflgEu/uPUEHZCuRfMxzCBsuWd7OzT8Q==}
@@ -16574,7 +16577,7 @@ packages:
     dependencies:
       escalade: 3.1.1
       picocolors: 1.0.0
-      postcss: 8.4.31
+      postcss: 8.4.32
       strip-json-comments: 3.1.1
     dev: false
 
@@ -18347,7 +18350,7 @@ packages:
       debug: 4.3.4
       pathe: 1.1.1
       picocolors: 1.0.0
-      vite: 5.0.6(@types/node@20.10.4)(less@4.2.0)
+      vite: 5.0.7(@types/node@20.10.4)(less@4.2.0)
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -18359,7 +18362,7 @@ packages:
       - terser
     dev: true
 
-  /vite-plugin-dts@3.6.4(@types/node@20.10.4)(typescript@5.3.3)(vite@5.0.6):
+  /vite-plugin-dts@3.6.4(@types/node@20.10.4)(typescript@5.3.3)(vite@5.0.7):
     resolution: {integrity: sha512-yOVhUI/kQhtS6lCXRYYLv2UUf9bftcwQK9ROxCX2ul17poLQs02ctWX7+vXB8GPRzH8VCK3jebEFtPqqijXx6w==}
     engines: {node: ^14.18.0 || >=16.0.0}
     peerDependencies:
@@ -18375,7 +18378,7 @@ packages:
       debug: 4.3.4
       kolorist: 1.8.0
       typescript: 5.3.3
-      vite: 5.0.6(@types/node@20.10.4)(less@4.2.0)
+      vite: 5.0.7(@types/node@20.10.4)(less@4.2.0)
       vue-tsc: 1.8.25(typescript@5.3.3)
     transitivePeerDependencies:
       - '@types/node'
@@ -18419,8 +18422,8 @@ packages:
       fsevents: 2.3.3
     dev: true
 
-  /vite@5.0.6(@types/node@20.10.4)(less@4.2.0):
-    resolution: {integrity: sha512-MD3joyAEBtV7QZPl2JVVUai6zHms3YOmLR+BpMzLlX2Yzjfcc4gTgNi09d/Rua3F4EtC8zdwPU8eQYyib4vVMQ==}
+  /vite@5.0.7(@types/node@20.10.4)(less@4.2.0):
+    resolution: {integrity: sha512-B4T4rJCDPihrQo2B+h1MbeGL/k/GMAHzhQ8S0LjQ142s6/+l3hHTT095ORvsshj4QCkoWu3Xtmob5mazvakaOw==}
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
     peerDependencies:
@@ -18500,7 +18503,7 @@ packages:
       strip-literal: 1.3.0
       tinybench: 2.5.1
       tinypool: 0.8.1
-      vite: 5.0.6(@types/node@20.10.4)(less@4.2.0)
+      vite: 5.0.7(@types/node@20.10.4)(less@4.2.0)
       vite-node: 1.0.2(@types/node@20.10.4)(less@4.2.0)
       why-is-node-running: 2.2.2
     transitivePeerDependencies:
@@ -18558,7 +18561,7 @@ packages:
       strip-literal: 1.3.0
       tinybench: 2.5.1
       tinypool: 0.8.1
-      vite: 5.0.6(@types/node@20.10.4)(less@4.2.0)
+      vite: 5.0.7(@types/node@20.10.4)(less@4.2.0)
       vite-node: 1.0.2(@types/node@20.10.4)(less@4.2.0)
       why-is-node-running: 2.2.2
     transitivePeerDependencies:

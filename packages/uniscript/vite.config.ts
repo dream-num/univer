@@ -8,7 +8,7 @@ const libName = name
     .replace('@univerjs/', 'univer-')
     .split('-')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join('')
+    .join('');
 
 export default defineConfig({
     plugins: [
@@ -17,6 +17,15 @@ export default defineConfig({
             outDir: 'lib/types',
         }),
     ],
+
+    resolve: {
+        alias: [
+            {
+                find: /^monaco-editor$/,
+                replacement: __dirname + '/node_modules/monaco-editor/esm/vs/editor/editor.api',
+            },
+        ],
+    },
     css: {
         modules: {
             localsConvention: 'camelCaseOnly',

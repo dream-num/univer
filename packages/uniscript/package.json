@@ -56,13 +56,14 @@
         "@vitejs/plugin-react": "^4.2.1",
         "@vitest/coverage-istanbul": "^1.0.2",
         "less": "^4.2.0",
+        "monaco-editor": "0.45.0",
         "typescript": "^5.3.3",
-        "vite": "^5.0.6",
+        "vite": "^5.0.7",
         "vite-plugin-dts": "^3.6.4",
         "vitest": "^1.0.2"
     },
     "peerDependencies": {
-        "monaco-editor": "0.44.0",
+        "monaco-editor": ">=0.44.0",
         "react": ">=16.9.0"
     }
 }

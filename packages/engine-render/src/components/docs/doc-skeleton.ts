@@ -752,8 +752,7 @@ export class DocumentSkeleton extends Skeleton {
                             // Some span.content's length maybe great than 1, so the charIndex is not equal to spanIndex.
                             let delta = charIndex - st;
 
-                            for (let spanIndex = 0; spanIndex < spanGroup.length; spanIndex++) {
-                                const span = spanGroup[spanIndex];
+                            for (const span of spanGroup) {
                                 delta -= span.count;
 
                                 if (delta < 0) {

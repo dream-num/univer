@@ -128,6 +128,7 @@ export interface IDeleteCommandParams {
     range: ITextRange;
     direction: DeleteDirection;
     textRanges: ITextRangeWithStyle[];
+    len?: number;
     segmentId?: string;
 }
 
@@ -144,7 +145,8 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
 
-        const { range, segmentId, unitId, direction, textRanges } = params;
+        const { range, segmentId, unitId, direction, textRanges, len = 1 } = params;
+
         const { collapsed, startOffset } = range;
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
@@ -158,14 +160,14 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
             if (startOffset > 0) {
                 doMutation.params!.mutations.push({
                     t: 'r',
-                    len: direction === DeleteDirection.LEFT ? startOffset - 1 : startOffset,
+                    len: direction === DeleteDirection.LEFT ? startOffset - len : startOffset,
                     segmentId,
                 });
             }
 
             doMutation.params!.mutations.push({
                 t: 'd',
-                len: 1,
+                len,
                 line: 0,
                 segmentId,
             });

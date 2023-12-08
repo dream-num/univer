@@ -329,7 +329,7 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                         let divEndIndex = divStartIndex;
 
                         for (const span of spanGroup) {
-                            const increaseValue = span.spanType === SpanType.LIST ? 0 : span.count || 1;
+                            const increaseValue = span.spanType === SpanType.LIST ? 0 : span.count;
                             // pageEndIndex += increaseValue;
                             // sectionEndIndex += increaseValue;
                             // columnEndIndex += increaseValue;

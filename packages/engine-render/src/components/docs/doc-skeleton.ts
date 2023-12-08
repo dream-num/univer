@@ -749,21 +749,23 @@ export class DocumentSkeleton extends Skeleton {
                                 continue;
                             }
 
-                            if (spanGroup[0].spanType === SpanType.LIST) {
-                                charIndex++;
-                            }
+                            // Some span.content's length maybe great than 1, so the charIndex is not equal to spanIndex.
+                            let delta = charIndex - st;
 
-                            const span = spanGroup[charIndex - st];
+                            for (let spanIndex = 0; spanIndex < spanGroup.length; spanIndex++) {
+                                const span = spanGroup[spanIndex];
+                                delta -= span.count;
 
-                            if (span) {
-                                return {
-                                    page,
-                                    section,
-                                    column,
-                                    line,
-                                    divide,
-                                    span,
-                                };
+                                if (delta < 0) {
+                                    return {
+                                        page,
+                                        section,
+                                        column,
+                                        line,
+                                        divide,
+                                        span,
+                                    };
+                                }
                             }
                         }
                     }

@@ -153,8 +153,8 @@ export interface IDocumentSkeletonSpan {
     bBox: IDocumentSkeletonBoundingBox; // bBox: size of Span
     paddingLeft: number; // paddingLeft, adjust text align in span
     left: number; // left
-    count?: number; // count, content，default 1
-    content?: string; // content
+    count: number; // count, content length，default 1
+    content: string; // content
     ts?: ITextStyle; // text style
     fontStyle?: IDocumentSkeletonFontStyle; // fontStyle : ITextStyle convert to canvas font
     parent?: IDocumentSkeletonDivide;

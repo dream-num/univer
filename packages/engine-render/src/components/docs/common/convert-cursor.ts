@@ -6,6 +6,7 @@ import type {
     IDocumentSkeletonLine,
     IDocumentSkeletonPage,
     IDocumentSkeletonSection,
+    IDocumentSkeletonSpan,
 } from '../../../basics/i-document-skeleton-cached';
 import { SpanType } from '../../../basics/i-document-skeleton-cached';
 import type { INodePosition } from '../../../basics/interfaces';
@@ -134,6 +135,34 @@ export function getOneTextSelectionRange(rangeList: ITextRange[]): Nullable<ITex
     };
 }
 
+function getOffsetInDivide(
+    spanGroup: IDocumentSkeletonSpan[],
+    startSpanIndex: number,
+    endSpanIndex: number,
+    st: number
+) {
+    let startOffset = st;
+    let endOffset = st;
+
+    for (let i = 0; i < spanGroup.length; i++) {
+        const span = spanGroup[i];
+        const contentLength = span.count;
+
+        if (i < startSpanIndex) {
+            startOffset += contentLength;
+        }
+
+        if (i < endSpanIndex) {
+            endOffset += contentLength;
+        }
+    }
+
+    return {
+        startOffset,
+        endOffset,
+    };
+}
+
 export class NodePositionConvertToCursor {
     private _liquid = new Liquid();
 
@@ -197,11 +226,7 @@ export class NodePositionConvertToCursor {
 
             const isCurrentList = firstSpan?.spanType === SpanType.LIST;
 
-            const hasList = spanGroup[0]?.spanType === SpanType.LIST;
-
-            let startOffset = start_sp + st;
-
-            let endOffset = end_sp + st;
+            const { startOffset, endOffset } = getOffsetInDivide(spanGroup, start_sp, end_sp, st);
 
             const isStartBack = start.span === start_sp && isFirst ? start.isBack : true;
 
@@ -210,8 +235,6 @@ export class NodePositionConvertToCursor {
             const collapsed = start === end;
 
             if (start_sp === 0 && end_sp === spanGroup.length - 1) {
-                endOffset -= hasList ? 1 : 0;
-
                 borderBoxPosition = {
                     startX: startX + firstSpanLeft + (isCurrentList ? firstSpanWidth : 0),
                     startY,
@@ -227,10 +250,6 @@ export class NodePositionConvertToCursor {
                 };
             } else {
                 const isStartBackFin = isStartBack && !isCurrentList;
-
-                startOffset -= hasList ? 1 : 0;
-
-                endOffset -= hasList ? 1 : 0;
 
                 borderBoxPosition = {
                     startX: startX + firstSpanLeft + (isStartBackFin ? 0 : firstSpanWidth),
@@ -251,8 +270,8 @@ export class NodePositionConvertToCursor {
             contentBoxPointGroup.push(this._pushToPoints(contentBoxPosition));
 
             cursorList.push({
-                startOffset: isStartBack ? startOffset : startOffset + 1,
-                endOffset: isEndBack ? endOffset : endOffset + 1,
+                startOffset: isStartBack ? startOffset : startOffset + firstSpan.count,
+                endOffset: isEndBack ? endOffset : endOffset + lastSpan.count,
                 collapsed,
             });
         });

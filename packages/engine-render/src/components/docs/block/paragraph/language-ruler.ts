@@ -3,7 +3,7 @@ import { DataStreamTreeTokenType } from '@univerjs/core';
 
 import type { IDocumentSkeletonSpan } from '../../../../basics/i-document-skeleton-cached';
 import type { ISectionBreakConfig } from '../../../../basics/interfaces';
-import { hasArabic, hasCJK, hasSpaceAndTab, hasTibetan } from '../../../../basics/tools';
+import { EMOJI_REG, hasArabic, hasCJK, hasSpaceAndTab, hasTibetan, startWithEmoji } from '../../../../basics/tools';
 import { createSkeletonLetterSpan, createSkeletonWordSpan } from '../../common/span';
 import { getFontCreateConfig } from '../../common/tools';
 import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
@@ -25,6 +25,10 @@ export function composeCharForLanguage(
 ): Nullable<ILanguageResult> {
     if (char === DataStreamTreeTokenType.SPACE) {
         return;
+    }
+    const subCharArray = charArray.substring(index);
+    if (startWithEmoji(subCharArray)) {
+        return emojiHandler(index, subCharArray, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
     }
 
     if (hasArabic(char)) {
@@ -110,6 +114,23 @@ function ArabicHandler(
     return {
         charIndex: newCharIndex,
         spanGroup: [createSkeletonLetterSpan(span.join(''), config)],
+    };
+}
+
+function emojiHandler(
+    index: number,
+    charArray: string,
+    bodyModel: DocumentViewModel,
+    paragraphNode: DataStreamTreeNode,
+    sectionBreakConfig: ISectionBreakConfig,
+    paragraphStyle: IParagraphStyle
+) {
+    const config = getFontCreateConfig(index, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
+    const match = charArray.match(EMOJI_REG);
+
+    return {
+        charIndex: match![0].length + index - 1,
+        spanGroup: [createSkeletonLetterSpan(match![0], config)],
     };
 }
 

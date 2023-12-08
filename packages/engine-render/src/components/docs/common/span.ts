@@ -78,6 +78,7 @@ export function _createSkeletonWordOrLetter(
             left: 0,
             spanType: SpanType.PLACEHOLDER,
             streamType: content as DT,
+            count: 0,
         };
     }
 
@@ -109,6 +110,7 @@ export function _createSkeletonWordOrLetter(
         left: 0,
         spanType,
         streamType,
+        count: content.length,
     };
 }
 
@@ -155,6 +157,8 @@ export function createSkeletonBulletSpan(
         left,
         spanType: SpanType.LIST,
         streamType: DT.LETTER,
+        // Deliberately set to 0 so that there is no need to count when calculating the cursor.
+        count: 0,
     };
 }
 

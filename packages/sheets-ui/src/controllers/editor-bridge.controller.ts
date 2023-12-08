@@ -7,6 +7,7 @@ import {
     LifecycleStages,
     makeCellToSelection,
     OnLifecycle,
+    ThemeService,
 } from '@univerjs/core';
 import { DeviceInputEventType, getCanvasOffsetByEngine, IRenderManagerService } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
@@ -34,7 +35,8 @@ export class EditorBridgeController extends Disposable {
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
-        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService
+        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
+        @Inject(ThemeService) private readonly _themeService: ThemeService
     ) {
         super();
 
@@ -146,6 +148,23 @@ export class EditorBridgeController extends Disposable {
 
         documentLayoutObject.documentModel?.setZoomRatio(Math.max(scaleX, scaleY));
 
+        if (cell?.isInArrayFormulaRange === true) {
+            const body = documentLayoutObject.documentModel?.getBody();
+            if (body) {
+                body.textRuns = [
+                    {
+                        st: 0,
+                        ed: body.dataStream.length,
+                        ts: {
+                            cl: {
+                                rgb: this._themeService.getCurrentTheme().textColorSecondary,
+                            },
+                        },
+                    },
+                ];
+            }
+        }
+
         this._commandService.executeCommand(SetActivateCellEditOperation.id, {
             position: {
                 startX,
@@ -162,6 +181,7 @@ export class EditorBridgeController extends Disposable {
             sheetId,
             documentLayoutObject,
             editorUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+            isInArrayFormulaRange: cell?.isInArrayFormulaRange,
         });
     }
 

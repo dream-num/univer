@@ -10,13 +10,13 @@ import type { Viewport } from './viewport';
 
 export class InputManager {
     /** The distance in pixel that you have to move to prevent some events */
-    static DragMovementThreshold = 10; // in pixels
+    static DragMovementThreshold = 2; // in pixels
 
     /** Time in milliseconds to wait to raise long press events if button is still pressed */
     static LongPressDelay = 500; // in milliseconds
 
     /** Time in milliseconds with two consecutive clicks will be considered as a double or triple click */
-    static DoubleOrTripleClickDelay = 600; // in milliseconds
+    static DoubleOrTripleClickDelay = 400; // in milliseconds
 
     /** If you need to check double click without raising a single click at first click, enable this flag */
     static ExclusiveDoubleClickMode = false;
@@ -330,27 +330,17 @@ export class InputManager {
     private _prePointerDoubleOrTripleClick(evt: IPointerEvent) {
         const { clientX, clientY } = evt;
 
-        if (this._doubleClickOccurred === 0) {
-            this._startingPosition.x = clientX;
-            this._startingPosition.y = clientY;
-        }
-
-        this._doubleClickOccurred += 1;
-
         this._delayedTimeout = setTimeout(() => {
             this._resetDoubleClickParam();
         }, InputManager.DoubleOrTripleClickDelay);
-
-        if (this._doubleClickOccurred < 2) {
-            return;
-        }
 
         const isMoveThreshold = this._isPointerSwiping(clientX, clientY);
 
         if (isMoveThreshold) {
             this._resetDoubleClickParam();
-            return;
         }
+
+        this._doubleClickOccurred += 1;
 
         if (this._doubleClickOccurred === 2) {
             this._scene?.pick(Vector2.FromArray([evt.offsetX, evt.offsetY]))?.triggerDblclick(evt);
@@ -358,6 +348,8 @@ export class InputManager {
             if (this._scene.onDblclickObserver.hasObservers()) {
                 this._scene.onDblclickObserver.notifyObservers(evt);
             }
+
+            this._resetDoubleClickParam();
         }
 
         // eslint-disable-next-line no-magic-numbers
@@ -370,12 +362,13 @@ export class InputManager {
 
             this._resetDoubleClickParam();
         }
+
+        this._startingPosition.x = clientX;
+        this._startingPosition.y = clientY;
     }
 
     private _resetDoubleClickParam() {
         this._doubleClickOccurred = 0;
-        this._startingPosition.x = Infinity;
-        this._startingPosition.y = Infinity;
         clearTimeout(this._delayedTimeout);
     }
 }

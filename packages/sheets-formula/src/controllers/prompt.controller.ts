@@ -843,7 +843,7 @@ export class PromptController extends Disposable {
                 themeColor = this._stringColor;
             }
 
-            if (themeColor.length > 0) {
+            if (themeColor && themeColor.length > 0) {
                 textRuns.push({
                     st: startIndex + 1,
                     ed: endIndex + 2,

@@ -1,19 +1,18 @@
 import { TinyColor } from '@ctrl/tinycolor';
-import type { ICellData, IRange, Nullable } from '@univerjs/core';
+import type { ICellDataForSheetInterceptor, ICommandInfo, IRange, Nullable } from '@univerjs/core';
 import {
     Disposable,
-    IUniverInstanceService,
+    ICommandService,
     LifecycleStages,
     ObjectMatrix,
     OnLifecycle,
     ThemeService,
     toDisposable,
 } from '@univerjs/core';
-import { FormulaDataModel, FormulaEngineService } from '@univerjs/engine-formula';
+import { FormulaDataModel, FormulaEngineService, SetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     IEditorBridgeService,
-    IMarkSelectionService,
     ISelectionRenderService,
     SelectionShape,
     SheetSkeletonManagerService,
@@ -25,19 +24,19 @@ export class FormulaEditorShowController extends Disposable {
     private _previousShape: Nullable<SelectionShape>;
 
     constructor(
-        @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
         @Inject(IEditorBridgeService) private _editorBridgeService: IEditorBridgeService,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
         @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService,
-        @IMarkSelectionService private readonly _markSelectionService: IMarkSelectionService,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
-        @IUniverInstanceService private readonly _currentService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
-        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
+        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
         this._initInterceptorEditorStart();
+
+        this._commandExecutedListener();
     }
 
     private _initInterceptorEditorStart() {
@@ -56,7 +55,7 @@ export class FormulaEditorShowController extends Disposable {
                                 return next(value);
                             }
 
-                            let cellInfo: Nullable<ICellData> = null;
+                            let cellInfo: Nullable<ICellDataForSheetInterceptor> = null;
 
                             const formulaDataItem = this._formulaDataModel.getFormulaDataItem(
                                 row,
@@ -99,6 +98,9 @@ export class FormulaEditorShowController extends Disposable {
                             const matrixRange = arrayFormulaMatrixRange?.[workbookId]?.[worksheetId];
                             if (matrixRange != null) {
                                 new ObjectMatrix(matrixRange).forValue((rowIndex, columnIndex, range) => {
+                                    if (range == null) {
+                                        return true;
+                                    }
                                     const { startRow, startColumn, endRow, endColumn } = range;
                                     if (rowIndex === row && columnIndex === col) {
                                         this._createArrayFormulaRangeShape(range, workbookId);
@@ -119,6 +121,7 @@ export class FormulaEditorShowController extends Disposable {
                                         if (cellInfo == null) {
                                             cellInfo = {
                                                 f: formulaDataItem.f,
+                                                isInArrayFormulaRange: true,
                                             };
                                         }
 
@@ -137,6 +140,16 @@ export class FormulaEditorShowController extends Disposable {
                     }
                 )
             )
+        );
+    }
+
+    private _commandExecutedListener() {
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                if (command.id === SetFormulaCalculationResultMutation.id) {
+                    this._removeArrayFormulaRangeShape();
+                }
+            })
         );
     }
 

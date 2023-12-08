@@ -175,8 +175,6 @@ export function calculateRectRotate(
     radiusVertex: number,
     offsetPoint: Vector2 = Vector2.create(0, 0)
 ) {
-    // const centerOffset = Vector2.create(width / 2, height / 2);
-
     const rotationVector = startPoint.add(centerPoint).rotateByPoint(radiusVertex);
 
     const newVector = rotationVector.subtract(centerPoint);
@@ -195,7 +193,6 @@ export function getRotateOrientation(angle: number) {
 }
 
 // rotate calculate logic https://www.processon.com/view/link/630df928f346fb0714c9c4ec
-// eslint-disable-next-line max-lines-per-function
 export function getRotateOffsetAndFarthestHypotenuse(
     lines: IDocumentSkeletonLine[],
     rectWidth: number,

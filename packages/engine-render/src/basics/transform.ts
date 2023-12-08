@@ -61,9 +61,11 @@ export class Transform {
         const m = this._m;
         const xNew = m[0] * point.x + m[2] * point.y;
         const yNew = m[1] * point.x + m[3] * point.y;
+
         if (ignoreOffset) {
             return new Vector2(xNew, yNew);
         }
+
         return new Vector2(xNew + m[4], yNew + m[5]);
     }
 

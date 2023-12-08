@@ -16,7 +16,9 @@ export class InputManager {
     static LongPressDelay = 500; // in milliseconds
 
     /** Time in milliseconds with two consecutive clicks will be considered as a double or triple click */
-    static DoubleOrTripleClickDelay = 500; // in milliseconds
+    static DoubleClickDelay = 500; // in milliseconds
+
+    static TripleClickDelay = 300; // in milliseconds
 
     /** If you need to check double click without raising a single click at first click, enable this flag */
     static ExclusiveDoubleClickMode = false;
@@ -54,6 +56,8 @@ export class InputManager {
     private _startingPosition = new Vector2(Infinity, Infinity);
 
     private _delayedTimeout: NodeJS.Timeout | number = -1;
+
+    private _delayedTripeTimeout: NodeJS.Timeout | number = -1;
 
     private _doubleClickOccurred = 0;
 
@@ -334,7 +338,7 @@ export class InputManager {
 
         this._delayedTimeout = setTimeout(() => {
             this._resetDoubleClickParam();
-        }, InputManager.DoubleOrTripleClickDelay);
+        }, InputManager.DoubleClickDelay);
 
         const isMoveThreshold = this._isPointerSwiping(clientX, clientY);
 
@@ -361,9 +365,10 @@ export class InputManager {
             }
             this._resetDoubleClickParam();
             this._tripleClickState = true;
-            setTimeout(() => {
+            clearTimeout(this._delayedTripeTimeout);
+            this._delayedTripeTimeout = setTimeout(() => {
                 this._tripleClickState = false;
-            }, InputManager.DoubleOrTripleClickDelay);
+            }, InputManager.TripleClickDelay);
         }
 
         this._startingPosition.x = clientX;

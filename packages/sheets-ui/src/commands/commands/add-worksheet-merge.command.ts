@@ -1,8 +1,7 @@
-import type { ICommand, IMutationInfo, IRange, Worksheet } from '@univerjs/core';
+import type { ICellData, ICommand, IMutationInfo, IRange, Worksheet } from '@univerjs/core';
 import {
     CommandType,
     Dimension,
-    ICellData,
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,

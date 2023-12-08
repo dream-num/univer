@@ -31,7 +31,7 @@ export class BaseFormulaEnginePlugin extends Plugin {
     }
 
     private _initialize() {
-        this._formulaDataModel = this._injector.createInstance(FormulaDataModel);
+        // this._formulaDataModel = this._injector.createInstance(FormulaDataModel);
 
         const dependencies: Dependency[] = [
             // Services
@@ -41,7 +41,7 @@ export class BaseFormulaEnginePlugin extends Plugin {
             // [IFormulaService, { useClass: FormulaService }],
 
             // Models
-            [FormulaDataModel, { useValue: this._formulaDataModel }],
+            [FormulaDataModel],
 
             //Controllers
             [FormulaController],
@@ -57,7 +57,7 @@ export class BaseFormulaEnginePlugin extends Plugin {
     }
 
     override onReady(): void {
-        this._formulaDataModel?.initFormulaData();
+        this._injector.get(FormulaDataModel).initFormulaData();
 
         if (!this._config?.notExecuteFormula) {
             this._injector.get(IFormulaService).registerFunctions();

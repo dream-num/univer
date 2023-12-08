@@ -1,4 +1,4 @@
-import type { ICellData, ICommandInfo, IRange, IUnitRange, Nullable } from '@univerjs/core';
+import type { ICellData, ICommandInfo, IExecutionOptions, IRange, IUnitRange, Nullable } from '@univerjs/core';
 import {
     deserializeRangeWithSheet,
     Direction,
@@ -19,6 +19,7 @@ import {
     FormulaDataModel,
     FormulaEngineService,
     generateStringWithSequence,
+    initSheetFormulaData,
     sequenceNodeType,
     SetArrayFormulaDataMutation,
     SetFormulaDataMutation,
@@ -28,12 +29,14 @@ import type {
     IDeleteRangeMoveUpCommandParams,
     IInsertColCommandParams,
     IInsertRowCommandParams,
+    IInsertSheetMutationParams,
     IMoveColsCommandParams,
     IMoveRangeCommandParams,
     IMoveRowsCommandParams,
     InsertRangeMoveDownCommandParams,
     InsertRangeMoveRightCommandParams,
     IRemoveRowColCommandParams,
+    IRemoveSheetMutationParams,
     ISetRangeValuesMutationParams,
     ISetWorksheetNameCommandParams,
 } from '@univerjs/sheets';
@@ -54,11 +57,13 @@ import {
     InsertRangeMoveDownCommand,
     InsertRangeMoveRightCommand,
     InsertRowCommand,
+    InsertSheetMutation,
     MoveColsCommand,
     MoveRangeCommand,
     MoveRowsCommand,
     RemoveColCommand,
     RemoveRowCommand,
+    RemoveSheetMutation,
     runRefRangeMutations,
     SelectionManagerService,
     SetRangeValuesMutation,
@@ -136,30 +141,79 @@ export class UpdateFormulaController extends Disposable {
 
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo, options) => {
-                // Synchronous data from worker
-                if (command.id === SetRangeValuesMutation.id) {
-                    const params = command.params as ISetRangeValuesMutationParams;
+                const { id, params } = command;
+                if (!params) return;
 
-                    const { worksheetId: sheetId, workbookId: unitId, cellValue } = params;
+                switch (id) {
+                    case SetRangeValuesMutation.id:
+                        this._handleSetRangeValuesMutation(params as ISetRangeValuesMutationParams, options);
+                        break;
+                    case RemoveSheetMutation.id:
+                        this._handleRemoveSheetMutation(params as IRemoveSheetMutationParams);
+                        break;
+                    case InsertSheetMutation.id:
+                        this._handleInsertSheetMutation(params as IInsertSheetMutationParams);
+                        break;
 
-                    if ((options && options.local === true) || cellValue == null) {
-                        return;
-                    }
-
-                    this._formulaDataModel.updateFormulaData(unitId, sheetId, cellValue);
-
-                    this._commandService.executeCommand(
-                        SetFormulaDataMutation.id,
-                        {
-                            formulaData: this._formulaDataModel.getFormulaData(),
-                        },
-                        {
-                            local: true,
-                        }
-                    );
+                    default:
+                        break;
                 }
             })
         );
+    }
+
+    private _handleSetRangeValuesMutation(params: ISetRangeValuesMutationParams, options?: IExecutionOptions) {
+        const { worksheetId: sheetId, workbookId: unitId, cellValue } = params;
+
+        if ((options && options.local === true) || cellValue == null) {
+            return;
+        }
+
+        this._formulaDataModel.updateFormulaData(unitId, sheetId, cellValue);
+
+        this._commandService.executeCommand(
+            SetFormulaDataMutation.id,
+            {
+                formulaData: this._formulaDataModel.getFormulaData(),
+            },
+            {
+                local: true,
+            }
+        );
+    }
+
+    private _handleRemoveSheetMutation(params: IRemoveSheetMutationParams) {
+        const { worksheetId: sheetId, workbookId: unitId } = params;
+
+        const formulaData = this._formulaDataModel.getFormulaData();
+        delete formulaData[unitId][sheetId];
+
+        const arrayFormulaRange = this._formulaDataModel.getArrayFormulaRange();
+        delete arrayFormulaRange[unitId][sheetId];
+
+        const arrayFormulaCellData = this._formulaDataModel.getArrayFormulaCellData();
+        delete arrayFormulaCellData[unitId][sheetId];
+
+        this._commandService.executeCommand(SetFormulaDataMutation.id, {
+            formulaData,
+        });
+        this._commandService.executeCommand(SetArrayFormulaDataMutation.id, {
+            arrayFormulaRange,
+            arrayFormulaCellData,
+        });
+    }
+
+    private _handleInsertSheetMutation(params: IInsertSheetMutationParams) {
+        const { sheet, workbookId: unitId } = params;
+
+        const formulaData = this._formulaDataModel.getFormulaData();
+        const { id: sheetId, cellData } = sheet;
+        const cellMatrix = new ObjectMatrix(cellData);
+        initSheetFormulaData(formulaData, unitId, sheetId, cellMatrix);
+
+        this._commandService.executeCommand(SetFormulaDataMutation.id, {
+            formulaData,
+        });
     }
 
     private _getUpdateFormula(command: ICommandInfo) {
@@ -246,6 +300,11 @@ export class UpdateFormulaController extends Disposable {
             // offset formulaData
             oldFormulaData = offsetFormula(oldFormulaData, command, unitId, sheetId, selections);
             const offsetFormulaData = offsetFormula(formulaData, command, unitId, sheetId, selections);
+
+            // Synchronous to the worker thread
+            this._commandService.executeCommand(SetFormulaDataMutation.id, {
+                formulaData: this._formulaDataModel.getFormulaData(),
+            });
 
             return this._getUpdateFormulaMutations(oldFormulaData, offsetFormulaData);
         }
@@ -563,6 +622,8 @@ export class UpdateFormulaController extends Disposable {
                 const newFormulaDataItem = new ObjectMatrix<IFormulaDataItem>();
 
                 matrixData.forValue((row, column, formulaDataItem) => {
+                    if (!formulaDataItem) return true;
+
                     const { f: formulaString, x, y, si } = formulaDataItem;
 
                     const sequenceNodes = this._formulaEngineService.buildSequenceNodes(formulaString);

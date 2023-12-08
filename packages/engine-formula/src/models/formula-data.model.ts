@@ -7,6 +7,7 @@ import {
     IUniverInstanceService,
     ObjectMatrix,
 } from '@univerjs/core';
+import { Inject } from '@wendellhu/redi';
 
 import type {
     IArrayFormulaRangeType,
@@ -18,6 +19,7 @@ import type {
     IUnitData,
     IUnitSheetNameMap,
 } from '../basics/common';
+import { FormulaEngineService } from '../services/formula-engine.service';
 
 export interface IFormulaConfig {
     notExecuteFormula?: boolean;
@@ -34,7 +36,8 @@ export class FormulaDataModel extends Disposable {
 
     constructor(
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService
     ) {
         super();
     }
@@ -203,33 +206,9 @@ export class FormulaDataModel extends Disposable {
         const worksheets = workbook.getSheets();
         worksheets.forEach((worksheet) => {
             const cellMatrix = worksheet.getCellMatrix();
-            const sheetFormulaDataMatrix = new ObjectMatrix<IFormulaDataItem>();
-            cellMatrix.forValue((r, c, cell) => {
-                const formulaString = cell?.f || '';
-                const formulaId = cell?.si || '';
-
-                const checkFormulaString = isFormulaString(formulaString);
-                const checkFormulaId = isFormulaId(formulaId);
-
-                if (checkFormulaString && checkFormulaId) {
-                    sheetFormulaDataMatrix.setValue(r, c, {
-                        f: formulaString,
-                        si: formulaId,
-                    });
-                } else if (checkFormulaString && !checkFormulaId) {
-                    sheetFormulaDataMatrix.setValue(r, c, {
-                        f: formulaString,
-                    });
-                } else if (!checkFormulaString && checkFormulaId) {
-                    sheetFormulaDataMatrix.setValue(r, c, {
-                        f: '',
-                        si: formulaId,
-                    });
-                }
-            });
-
             const sheetId = worksheet.getSheetId();
-            this._formulaData[unitId][sheetId] = sheetFormulaDataMatrix.getData();
+
+            initSheetFormulaData(this._formulaData, unitId, sheetId, cellMatrix);
         });
     }
 
@@ -329,30 +308,32 @@ export class FormulaDataModel extends Disposable {
 
         // Convert the formula ID to formula string
         sheetFormulaDataMatrix.forValue((r, c, cell) => {
+            const formulaString = cell?.f || '';
             const formulaId = cell?.si || '';
 
             if (isFormulaId(formulaId)) {
                 const formulaInfo = formulaIdMap.get(formulaId);
                 const deleteFormula = deleteFormulaIdMap.get(formulaId);
-                if (formulaInfo) {
+
+                if (formulaInfo && !isFormulaString(formulaString)) {
                     const f = formulaInfo.f;
                     const x = c - formulaInfo.c;
                     const y = r - formulaInfo.r;
-
                     sheetFormulaDataMatrix.setValue(r, c, { f, si: formulaId, x, y });
                 } else if (typeof deleteFormula === 'string') {
+                    const x = cell.x || 0;
+                    const y = cell.y || 0;
+                    const offsetFormula = this._formulaEngineService.moveFormulaRefOffset(deleteFormula, x, y);
                     deleteFormulaIdMap.set(formulaId, {
                         r,
                         c,
-                        f: deleteFormula,
+                        f: offsetFormula,
                     });
 
-                    sheetFormulaDataMatrix.setValue(r, c, { f: deleteFormula, si: formulaId });
+                    sheetFormulaDataMatrix.setValue(r, c, { f: offsetFormula, si: formulaId });
                 } else if (typeof deleteFormula === 'object') {
                     const x = c - deleteFormula.c;
                     const y = r - deleteFormula.r;
-                    // TODO@Dushusir: Calculate the new formula based on the offset
-                    // let f = '';
                     sheetFormulaDataMatrix.setValue(r, c, {
                         f: deleteFormula.f,
                         si: formulaId,
@@ -363,4 +344,56 @@ export class FormulaDataModel extends Disposable {
             }
         });
     }
+}
+
+export function initSheetFormulaData(
+    formulaData: IFormulaData,
+    unitId: string,
+    sheetId: string,
+    cellMatrix: ObjectMatrix<ICellData>
+) {
+    const formulaIdMap = new Map<string, { f: string; r: number; c: number }>(); // Connect the formula and ID
+    const sheetFormulaDataMatrix = new ObjectMatrix<IFormulaDataItem>();
+    cellMatrix.forValue((r, c, cell) => {
+        const formulaString = cell?.f || '';
+        const formulaId = cell?.si || '';
+
+        const checkFormulaString = isFormulaString(formulaString);
+        const checkFormulaId = isFormulaId(formulaId);
+
+        if (checkFormulaString && checkFormulaId) {
+            sheetFormulaDataMatrix.setValue(r, c, {
+                f: formulaString,
+                si: formulaId,
+            });
+            formulaIdMap.set(formulaId, { f: formulaString, r, c });
+        } else if (checkFormulaString && !checkFormulaId) {
+            sheetFormulaDataMatrix.setValue(r, c, {
+                f: formulaString,
+            });
+        } else if (!checkFormulaString && checkFormulaId) {
+            sheetFormulaDataMatrix.setValue(r, c, {
+                f: '',
+                si: formulaId,
+            });
+        }
+    });
+
+    sheetFormulaDataMatrix.forValue((r, c, cell) => {
+        const formulaString = cell?.f || '';
+        const formulaId = cell?.si || '';
+
+        if (isFormulaId(formulaId) && !isFormulaString(formulaString)) {
+            const formulaInfo = formulaIdMap.get(formulaId);
+            if (formulaInfo) {
+                const f = formulaInfo.f;
+                const x = c - formulaInfo.c;
+                const y = r - formulaInfo.r;
+
+                sheetFormulaDataMatrix.setValue(r, c, { f, si: formulaId, x, y });
+            }
+        }
+    });
+
+    formulaData[unitId][sheetId] = sheetFormulaDataMatrix.getData();
 }

@@ -1,6 +1,6 @@
 import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY } from '@univerjs/core';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
-import { CheckMarkSingle, CloseSingle, DownTriangleSingle, FxSingle, UpTriangleSingle } from '@univerjs/icons';
+import { CheckMarkSingle, CloseSingle, DropdownSingle, FxSingle } from '@univerjs/icons';
 import { KeyCode } from '@univerjs/ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
@@ -128,7 +128,11 @@ export function FormulaBar() {
                 <div className={styles.formulaInput}>
                     <div className={styles.formulaContent} ref={editorRef} />
                     <div className={styles.arrowContainer} onClick={handleArrowClick}>
-                        {arrowDirection === ArrowDirection.Down ? <DownTriangleSingle /> : <UpTriangleSingle />}
+                        {arrowDirection === ArrowDirection.Down ? (
+                            <DropdownSingle />
+                        ) : (
+                            <DropdownSingle style={{ transform: 'rotateZ(180deg)' }} />
+                        )}
                     </div>
                 </div>
             </div>

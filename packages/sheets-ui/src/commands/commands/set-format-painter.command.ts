@@ -29,9 +29,9 @@ import {
 } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 
+import { checkCellContentInRanges, getClearContentMutationParamsForRanges } from '../../common/utils';
 import { FormatPainterStatus, IFormatPainterService } from '../../services/format-painter/format-painter.service';
 import { SetFormatPainterOperation } from '../operations/set-format-painter.operation';
-import { checkCellContentInRanges, getClearContentMutationParamsForRanges } from './add-worksheet-merge.command';
 
 export interface ISetFormatPainterCommandParams {
     status: FormatPainterStatus;

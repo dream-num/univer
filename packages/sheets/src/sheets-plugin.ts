@@ -18,7 +18,7 @@ import { SheetInterceptorService } from './services/sheet-interceptor/sheet-inte
 
 const PLUGIN_NAME = 'sheet';
 
-interface ISheetsPluginConfig {
+export interface ISheetsPluginConfig {
     notExecuteFormula?: boolean;
 }
 

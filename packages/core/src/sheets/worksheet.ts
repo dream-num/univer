@@ -74,6 +74,10 @@ export class Worksheet {
         callback(this._viewModel);
     }
 
+    getSnapshot(): IWorksheetData {
+        return this._snapshot;
+    }
+
     /**
      * Returns WorkSheet Cell Data Matrix
      * @returns

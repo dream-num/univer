@@ -1,4 +1,4 @@
-export { SheetsPlugin } from './sheets-plugin';
+export { type ISheetsPluginConfig, SheetsPlugin } from './sheets-plugin';
 
 // #region services
 export { COMMAND_LISTENER_SKELETON_CHANGE, COMMAND_LISTENER_VALUE_CHANGE } from './basics/const/command-listener-const';

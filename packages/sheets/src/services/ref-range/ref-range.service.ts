@@ -1,13 +1,12 @@
-import type { IInterceptor, IMutationInfo, IRange } from '@univerjs/core';
+import type { IMutationInfo, IRange } from '@univerjs/core';
 import {
-    composeInterceptors,
     createInterceptorKey,
     Disposable,
+    InterceptorManager,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
     Rectangle,
-    remove,
     toDisposable,
 } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
@@ -25,13 +24,16 @@ type RefRangCallback = (
     redos: IMutationInfo[];
     undos: IMutationInfo[];
 };
-const refRangeCommandsMerge = createInterceptorKey<IMutationInfo[], IMutationInfo[]>('refRangeCommandsMerge');
+const MERGE_REDO = createInterceptorKey<IMutationInfo[], null>('MERGE_REDO');
+const MERGE_UNDO = createInterceptorKey<IMutationInfo[], null>('MERGE_UNDO');
+
 /**
  * Collect side effects caused by ref range change
  */
 @OnLifecycle(LifecycleStages.Steady, RefRangeService)
 export class RefRangeService extends Disposable {
-    private _interceptorsByName: Map<string, Array<IInterceptor<IMutationInfo[], IMutationInfo[]>>> = new Map();
+    interceptor = new InterceptorManager({ MERGE_REDO, MERGE_UNDO });
+
     constructor(
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
@@ -39,13 +41,13 @@ export class RefRangeService extends Disposable {
     ) {
         super();
         this._onRefRangeChange();
-        this.intercept({
+        this.interceptor.intercept(this.interceptor.getInterceptPoints().MERGE_REDO, {
             priority: -1,
-            handler: (list, currentValue) => {
-                const _list = list || [];
-                _list.push(...currentValue);
-                return _list;
-            },
+            handler: (list) => list,
+        });
+        this.interceptor.intercept(this.interceptor.getInterceptPoints().MERGE_UNDO, {
+            priority: -1,
+            handler: (list) => list,
         });
     }
 
@@ -153,14 +155,25 @@ export class RefRangeService extends Disposable {
                     )
                     .reduce(
                         (result, currentValue) => {
-                            const intercept = this._fetchThroughInterceptors();
-                            const redos = intercept(result.redos, currentValue.redos) || [];
-                            const undos = intercept(result.undos, currentValue.undos) || [];
-                            return { redos, undos };
+                            result.redos.push(...currentValue.redos);
+                            result.undos.push(...currentValue.undos);
+                            return result;
                         },
                         { redos: [], undos: [] }
                     );
-                return result;
+                const redos =
+                    this.interceptor.fetchThroughInterceptors(this.interceptor.getInterceptPoints().MERGE_REDO)(
+                        result.redos,
+                        null
+                    ) || [];
+
+                const undos =
+                    this.interceptor.fetchThroughInterceptors(this.interceptor.getInterceptPoints().MERGE_UNDO)(
+                        result.undos,
+                        null
+                    ) || [];
+
+                return { redos, undos };
             },
         });
     };
@@ -233,38 +246,6 @@ export class RefRangeService extends Disposable {
             }
         });
     };
-
-    private _fetchThroughInterceptors() {
-        const key = refRangeCommandsMerge as unknown as string;
-        const interceptors = this._interceptorsByName.get(key) as unknown as Array<typeof refRangeCommandsMerge>;
-        return composeInterceptors(interceptors || []);
-    }
-
-    /**
-     * Create a intercept to squash mutations
-     * @param {typeof refRangeCommandsMerge} interceptor
-     * const disposeIntercept = refRangeService.intercept({
-            handler: (mutations, currentMutation, next) => {
-                // todo something
-                return next(list);
-            },
-        })
-     * mutations mean the operation generated before.
-     * currentMutation mean the operation of the current iteration.
-     * @return {*}
-     * @memberof RefRangeService
-     */
-    intercept(interceptor: typeof refRangeCommandsMerge) {
-        const key = refRangeCommandsMerge as unknown as string;
-        const interceptors = this._interceptorsByName.get(key)! || [];
-        interceptors.push(interceptor);
-        this._interceptorsByName.set(
-            key,
-            interceptors.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))
-        );
-
-        return this.disposeWithMe(toDisposable(() => remove(this._interceptorsByName.get(key)!, interceptor)));
-    }
 }
 
 function getWorkbookId(univerInstanceService: IUniverInstanceService) {

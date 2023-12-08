@@ -1,10 +1,10 @@
-import type { IScale } from '@univerjs/core';
+import type { IScale, ITextDecoration } from '@univerjs/core';
 import { BooleanNumber, getColorStyle, TextDecoration } from '@univerjs/core';
 
 import { COLOR_BLACK_RGB, DEFAULT_OFFSET_SPACING } from '../../../basics/const';
 import { calculateRectRotate } from '../../../basics/draw';
 import type { IDocumentSkeletonSpan } from '../../../basics/i-document-skeleton-cached';
-import { fixLineWidthByScale, getScale } from '../../../basics/tools';
+import { degToRad, fixLineWidthByScale, getScale } from '../../../basics/tools';
 import { Vector2 } from '../../../basics/vector2';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
 import { docExtension } from '../doc-extension';
@@ -24,8 +24,8 @@ export class Line extends docExtension {
             return;
         }
 
-        const { asc: maxLineAsc = 0, contentHeight = 0 } = line;
-        const { ts: textStyle, left, width, bBox } = span;
+        const { contentHeight = 0 } = line;
+        const { ts: textStyle, bBox } = span;
         if (!textStyle) {
             return;
         }
@@ -34,114 +34,78 @@ export class Line extends docExtension {
 
         const scale = getScale(parentScale);
 
+        const DELTA = 0.5;
+
         const { ul: underline, st: strikethrough, ol: overline } = textStyle;
 
-        const {
-            originTranslate = Vector2.create(0, 0),
-            centerPoint = Vector2.create(0, 0),
-            alignOffset = Vector2.create(0, 0),
-            renderConfig = {},
-        } = this.extensionOffset;
-
-        const { centerAngle = 0, vertexAngle = 0 } = renderConfig;
-
         if (underline) {
-            const { s: show, cl: colorStyle, t: lineType } = underline;
+            const startY = fixLineWidthByScale(contentHeight + DEFAULT_OFFSET_SPACING - DELTA, scale);
 
-            if (show === BooleanNumber.TRUE) {
-                ctx.beginPath();
-                const color = getColorStyle(colorStyle) || COLOR_BLACK_RGB;
-                ctx.strokeStyle = color;
-                this._setLineType(ctx, lineType || TextDecoration.SINGLE);
-
-                const startY = fixLineWidthByScale(contentHeight + DEFAULT_OFFSET_SPACING - 0.5, scale);
-
-                const start = calculateRectRotate(
-                    originTranslate.addByPoint(left, startY),
-                    centerPoint,
-                    centerAngle,
-                    vertexAngle,
-                    alignOffset
-                );
-                const end = calculateRectRotate(
-                    originTranslate.addByPoint(left + width, startY),
-                    centerPoint,
-                    centerAngle,
-                    vertexAngle,
-                    alignOffset
-                );
-
-                ctx.moveTo(start.x, start.y);
-                ctx.lineTo(end.x, end.y);
-                ctx.stroke();
-            }
+            this._drawLine(ctx, span, underline, startY);
         }
 
         if (strikethrough) {
-            const { s: show, cl: colorStyle, t: lineType } = strikethrough;
-            if (show === BooleanNumber.TRUE) {
-                ctx.beginPath();
-                const color = getColorStyle(colorStyle) || COLOR_BLACK_RGB;
-                ctx.strokeStyle = color;
-                this._setLineType(ctx, lineType || TextDecoration.SINGLE);
+            const startY = fixLineWidthByScale(strikeoutPosition - DELTA, scale);
 
-                const startY = fixLineWidthByScale(strikeoutPosition - 0.5, scale);
-
-                const start = calculateRectRotate(
-                    originTranslate.addByPoint(left, startY),
-                    centerPoint,
-                    centerAngle,
-                    vertexAngle,
-                    alignOffset
-                );
-                const end = calculateRectRotate(
-                    originTranslate.addByPoint(left + width, startY),
-                    centerPoint,
-                    centerAngle,
-                    vertexAngle,
-                    alignOffset
-                );
-
-                ctx.moveTo(start.x, start.y);
-                ctx.lineTo(end.x, end.y);
-                ctx.stroke();
-            }
+            this._drawLine(ctx, span, strikethrough, startY);
         }
 
         if (overline) {
-            const { s: show, cl: colorStyle, t: lineType } = overline;
-            if (show === BooleanNumber.TRUE) {
-                ctx.beginPath();
-                const color = getColorStyle(colorStyle) || COLOR_BLACK_RGB;
-                ctx.strokeStyle = color;
-                this._setLineType(ctx, lineType || TextDecoration.SINGLE);
+            const startY = fixLineWidthByScale(-DEFAULT_OFFSET_SPACING - DELTA, scale);
 
-                const startY = fixLineWidthByScale(-DEFAULT_OFFSET_SPACING - 0.5, scale);
-
-                const start = calculateRectRotate(
-                    originTranslate.addByPoint(left, startY),
-                    centerPoint,
-                    centerAngle,
-                    vertexAngle,
-                    alignOffset
-                );
-                const end = calculateRectRotate(
-                    originTranslate.addByPoint(left + width, startY),
-                    centerPoint,
-                    centerAngle,
-                    vertexAngle,
-                    alignOffset
-                );
-
-                ctx.moveTo(start.x, start.y);
-                ctx.lineTo(end.x, end.y);
-                ctx.stroke();
-            }
+            this._drawLine(ctx, span, overline, startY);
         }
     }
 
     override clearCache() {
         this._preBackgroundColor = '';
+    }
+
+    private _drawLine(
+        ctx: CanvasRenderingContext2D,
+        span: IDocumentSkeletonSpan,
+        line: ITextDecoration,
+        startY: number
+    ) {
+        const { s: show, cl: colorStyle, t: lineType } = line;
+        if (show === BooleanNumber.TRUE) {
+            const {
+                originTranslate = Vector2.create(0, 0),
+                alignOffset = Vector2.create(0, 0),
+                renderConfig = {},
+            } = this.extensionOffset;
+
+            const { left, width } = span;
+
+            const { centerAngle: centerAngleDeg = 0, vertexAngle: vertexAngleDeg = 0 } = renderConfig;
+
+            const centerAngle = degToRad(centerAngleDeg);
+            const vertexAngle = degToRad(vertexAngleDeg);
+
+            ctx.beginPath();
+            const color = getColorStyle(colorStyle) || COLOR_BLACK_RGB;
+            ctx.strokeStyle = color;
+            this._setLineType(ctx, lineType || TextDecoration.SINGLE);
+
+            const start = calculateRectRotate(
+                originTranslate.addByPoint(left, startY),
+                Vector2.create(0, 0),
+                centerAngle,
+                vertexAngle,
+                alignOffset
+            );
+            const end = calculateRectRotate(
+                originTranslate.addByPoint(left + width, startY),
+                Vector2.create(0, 0),
+                centerAngle,
+                vertexAngle,
+                alignOffset
+            );
+
+            ctx.moveTo(start.x, start.y);
+            ctx.lineTo(end.x, end.y);
+            ctx.stroke();
+        }
     }
 
     private _setLineType(ctx: CanvasRenderingContext2D, style: TextDecoration) {

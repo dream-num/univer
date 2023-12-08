@@ -67,8 +67,6 @@ export class FontAndBaseLine extends docExtension {
             // const offsetCos = offset * Math.cos(centerAngle);
 
             spanPointWithFont.y += offset;
-
-            // spanPointWithFont = calculateRectRotate(originTranslate.addByPoint(span.left + offsetSin, offsetCos), centerPoint, centerAngle, vertexAngle, alignOffset);
         }
 
         // console.log(content, spanPointWithFont.x, spanPointWithFont.y, startX, startY);

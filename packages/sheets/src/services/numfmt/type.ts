@@ -1,4 +1,4 @@
-import type { ICellData, Nullable, ObjectMatrix, ObjectMatrixPrimitiveType, RefAlias } from '@univerjs/core';
+import type { ICellData, IRange, Nullable, ObjectMatrix, ObjectMatrixPrimitiveType, RefAlias } from '@univerjs/core';
 import { LifecycleStages, runOnLifecycle } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
@@ -46,8 +46,9 @@ export interface INumfmtService {
     setValues(
         workbookId: string,
         worksheetId: string,
-        values: Array<{ row: number; col: number; pattern?: string; type?: FormatType }>
+        values: Array<{ ranges: IRange[]; pattern: string; type: FormatType }>
     ): void;
+    deleteValues(workbookId: string, worksheetId: string, values: IRange[]): void;
     getRefModel(workbookId: string): Nullable<RefAlias<IRefItem, 'i' | 'pattern'>>;
     modelReplace$: Observable<string>;
 }

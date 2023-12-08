@@ -1,7 +1,24 @@
-import type { ICommand } from '@univerjs/core';
-import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
-import type { FormatType } from '@univerjs/sheets';
-import { factorySetNumfmtUndoMutation, SetNumfmtMutation } from '@univerjs/sheets';
+import type { ICommand, IMutationInfo } from '@univerjs/core';
+import {
+    CommandType,
+    ICommandService,
+    IUndoRedoService,
+    IUniverInstanceService,
+    sequenceExecute,
+} from '@univerjs/core';
+import type {
+    FormatType,
+    IRemoveNumfmtMutationParams,
+    ISetCellsNumfmt,
+    ISetNumfmtMutationParams,
+} from '@univerjs/sheets';
+import {
+    factoryRemoveNumfmtUndoMutation,
+    factorySetNumfmtUndoMutation,
+    RemoveNumfmtMutation,
+    SetNumfmtMutation,
+    transformCellsToRange,
+} from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 
 export interface ISetNumfmtCommandParams {
@@ -23,14 +40,44 @@ export const SetNumfmtCommand: ICommand<ISetNumfmtCommandParams> = {
         const workbookId = workbook.getUnitId();
         const worksheet = workbook.getActiveSheet();
         const worksheetId = worksheet.getSheetId();
-        const redoOption = { ...params, workbookId, worksheetId };
-        const undoOption = factorySetNumfmtUndoMutation(accessor, redoOption);
-        const result = commandService.syncExecuteCommand(SetNumfmtMutation.id, redoOption);
+        const setCells = params.values.filter((value) => !!value.pattern) as ISetCellsNumfmt;
+        const removeCells = params.values.filter((value) => !value.pattern);
+        const setRedos = transformCellsToRange(workbookId, worksheetId, setCells);
+        const removeRedos: IRemoveNumfmtMutationParams = {
+            workbookId,
+            worksheetId,
+            ranges: removeCells.map((cell) => ({
+                startColumn: cell.col,
+                startRow: cell.row,
+                endColumn: cell.col,
+                endRow: cell.row,
+            })),
+        };
+        const redos: Array<IMutationInfo<IRemoveNumfmtMutationParams | ISetNumfmtMutationParams>> = [];
+        const undos: Array<IMutationInfo<IRemoveNumfmtMutationParams | ISetNumfmtMutationParams>> = [];
+        if (setCells.length) {
+            redos.push({
+                id: SetNumfmtMutation.id,
+                params: setRedos,
+            });
+            const undo = factorySetNumfmtUndoMutation(accessor, setRedos);
+            undos.push(...undo);
+        }
+        if (removeCells.length) {
+            redos.push({
+                id: RemoveNumfmtMutation.id,
+                params: removeRedos,
+            });
+            const undo = factoryRemoveNumfmtUndoMutation(accessor, removeRedos);
+            undos.push(...undo);
+        }
+
+        const result = sequenceExecute(redos, commandService).result;
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: workbookId,
-                undoMutations: [{ id: SetNumfmtMutation.id, params: undoOption }],
-                redoMutations: [{ id: SetNumfmtMutation.id, params: redoOption }],
+                undoMutations: undos,
+                redoMutations: redos,
             });
         }
         return result;

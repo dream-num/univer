@@ -74,12 +74,12 @@ import { InsertColMutation, InsertRowMutation } from '../commands/mutations/inse
 import { InsertSheetMutation } from '../commands/mutations/insert-sheet.mutation';
 import { MoveRangeMutation } from '../commands/mutations/move-range.mutation';
 import { MoveColsMutation, MoveRowsMutation } from '../commands/mutations/move-rows-cols.mutation';
+import { RemoveNumfmtMutation, SetNumfmtMutation } from '../commands/mutations/numfmt-mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../commands/mutations/remove-row-col.mutation';
 import { RemoveSheetMutation } from '../commands/mutations/remove-sheet.mutation';
 import { RemoveWorksheetMergeMutation } from '../commands/mutations/remove-worksheet-merge.mutation';
 import { SetColHiddenMutation, SetColVisibleMutation } from '../commands/mutations/set-col-visible.mutation';
 import { SetFrozenMutation } from '../commands/mutations/set-frozen.mutation';
-import { SetNumfmtMutation } from '../commands/mutations/set-numfmt-mutation';
 import { SetRangeValuesMutation } from '../commands/mutations/set-range-values.mutation';
 import { SetRowHiddenMutation, SetRowVisibleMutation } from '../commands/mutations/set-row-visible.mutation';
 import { SetTabColorMutation } from '../commands/mutations/set-tab-color.mutation';
@@ -197,6 +197,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetWorksheetRowIsAutoHeightMutation,
             SetWorksheetShowCommand,
             SetNumfmtMutation,
+            RemoveNumfmtMutation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
 
         this._configService.setConfig(MAX_CELL_PER_SHEET_KEY, MAX_CELL_PER_SHEET_DEFAULT);

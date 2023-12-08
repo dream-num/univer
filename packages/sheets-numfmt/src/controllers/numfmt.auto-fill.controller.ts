@@ -1,7 +1,12 @@
 import type { IMutationInfo, IRange } from '@univerjs/core';
 import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, Range, Rectangle } from '@univerjs/core';
-import type { ISetNumfmtMutationParams } from '@univerjs/sheets';
-import { factorySetNumfmtUndoMutation, INumfmtService, SetNumfmtMutation } from '@univerjs/sheets';
+import type { ISetCellsNumfmt, ISetNumfmtMutationParams } from '@univerjs/sheets';
+import {
+    factorySetNumfmtUndoMutation,
+    INumfmtService,
+    SetNumfmtMutation,
+    transformCellsToRange,
+} from '@univerjs/sheets';
 import type { IAutoFillHook } from '@univerjs/sheets-ui';
 import { APPLY_TYPE, getAutoFillRepeatRange, IAutoFillService } from '@univerjs/sheets-ui';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -46,7 +51,7 @@ export class NumfmtAutoFillController extends Disposable {
                 endRow: targetStartCell.row,
             };
 
-            const values: ISetNumfmtMutationParams['values'] = [];
+            const values: ISetCellsNumfmt = [];
 
             Range.foreach(relativeRange, (row, col) => {
                 const sourcePositionRange = Rectangle.getPositionRange(
@@ -85,23 +90,12 @@ export class NumfmtAutoFillController extends Disposable {
             if (values.length) {
                 const redo: IMutationInfo<ISetNumfmtMutationParams> = {
                     id: SetNumfmtMutation.id,
-                    params: {
-                        values,
-                        workbookId,
-                        worksheetId,
-                    },
+                    params: transformCellsToRange(workbookId, worksheetId, values),
                 };
-                const undo = {
-                    id: SetNumfmtMutation.id,
-                    params: {
-                        values: factorySetNumfmtUndoMutation(this._injector, redo.params),
-                        workbookId,
-                        worksheetId,
-                    },
-                };
+                const undos = factorySetNumfmtUndoMutation(this._injector, redo.params);
                 return {
                     redos: [redo],
-                    undos: [undo],
+                    undos,
                 };
             }
             return { redos: [], undos: [] };

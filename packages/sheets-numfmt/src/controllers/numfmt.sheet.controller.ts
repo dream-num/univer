@@ -1,10 +1,11 @@
+import type { IRange } from '@univerjs/core';
 import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import type { IRemoveSheetCommandParams, ISetNumfmtMutationParams } from '@univerjs/sheets';
+import type { IRemoveNumfmtMutationParams, IRemoveSheetCommandParams } from '@univerjs/sheets';
 import {
-    factorySetNumfmtUndoMutation,
+    factoryRemoveNumfmtUndoMutation,
     INumfmtService,
+    RemoveNumfmtMutation,
     RemoveSheetCommand,
-    SetNumfmtMutation,
     SheetInterceptorService,
 } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -33,19 +34,19 @@ export class NumfmtSheetController extends Disposable {
                         if (!model) {
                             return { redos: [], undos: [] };
                         }
-                        const values: Array<{ row: number; col: number }> = [];
+                        const ranges: IRange[] = [];
                         model.forValue((row, col) => {
-                            values.push({ row, col });
+                            ranges.push({ startColumn: col, endColumn: col, startRow: row, endRow: row });
                         });
-                        const redoParams: ISetNumfmtMutationParams = {
+                        const redoParams: IRemoveNumfmtMutationParams = {
                             workbookId,
                             worksheetId,
-                            values,
+                            ranges,
                         };
-                        const undoParams = factorySetNumfmtUndoMutation(this._injector, redoParams);
+                        const undoParams = factoryRemoveNumfmtUndoMutation(this._injector, redoParams);
                         return {
-                            redos: [{ id: SetNumfmtMutation.id, params: redoParams }],
-                            undos: [{ id: SetNumfmtMutation.id, params: undoParams }],
+                            redos: [{ id: RemoveNumfmtMutation.id, params: redoParams }],
+                            undos: undoParams,
                         };
                     }
                     return { redos: [], undos: [] };

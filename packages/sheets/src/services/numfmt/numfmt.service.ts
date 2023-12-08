@@ -1,4 +1,4 @@
-import type { Nullable, ObjectMatrixPrimitiveType, Workbook } from '@univerjs/core';
+import type { IRange, Nullable, ObjectMatrixPrimitiveType, Workbook } from '@univerjs/core';
 import {
     Disposable,
     ICommandService,
@@ -8,6 +8,7 @@ import {
     LifecycleStages,
     ObjectMatrix,
     OnLifecycle,
+    Range,
     RefAlias,
     toDisposable,
 } from '@univerjs/core';
@@ -146,24 +147,6 @@ export class NumfmtService extends Disposable implements INumfmtService {
         }
     }
 
-    private _groupByKey<T = Record<string, unknown>>(arr: T[], key: string, blankKey = '') {
-        return arr.reduce(
-            (result, current) => {
-                const pattern = current && ((current as Record<string, unknown>)[key] as string);
-                if (pattern) {
-                    if (!result[pattern]) {
-                        result[pattern] = [];
-                    }
-                    result[pattern].push(current);
-                } else {
-                    result[blankKey].push(current);
-                }
-                return result;
-            },
-            { [blankKey]: [] } as Record<string, T[]>
-        );
-    }
-
     private _getUniqueRefId(unitID: string) {
         const refModel = this._refAliasModel.get(unitID);
         if (!refModel) {
@@ -195,71 +178,58 @@ export class NumfmtService extends Disposable implements INumfmtService {
         return null;
     }
 
+    deleteValues(workbookId: string, worksheetId: string, values: IRange[]) {
+        let refModel = this._refAliasModel.get(workbookId)!;
+        const model = this.getModel(workbookId, worksheetId);
+        if (!refModel) {
+            refModel = new RefAlias<IRefItem, 'i' | 'pattern'>([], ['pattern', 'i']);
+            this._refAliasModel.set(workbookId, refModel);
+        }
+        values.forEach((range) => {
+            Range.foreach(range, (row, col) => {
+                const oldValue = this.getValue(workbookId, worksheetId, row, col, model);
+                if (oldValue && oldValue.pattern) {
+                    const oldRefPattern = refModel.getValue(oldValue.pattern);
+                    if (oldRefPattern) {
+                        oldRefPattern.count--;
+                    }
+                }
+                this._setValue(workbookId, worksheetId, row, col, null);
+            });
+        });
+    }
+
     setValues(
         workbookId: string,
         worksheetId: string,
-        values: Array<{ row: number; col: number; pattern?: string; type: FormatType }>
+        values: Array<{ ranges: IRange[]; pattern: string; type: FormatType }>
     ) {
-        const ___delete___ = '___delete___';
-        const group = this._groupByKey(values, 'pattern', ___delete___);
         const model = this.getModel(workbookId, worksheetId);
         let refModel = this._refAliasModel.get(workbookId)!;
         if (!refModel) {
             refModel = new RefAlias<IRefItem, 'i' | 'pattern'>([], ['pattern', 'i']);
             this._refAliasModel.set(workbookId, refModel);
         }
-        Object.keys(group).forEach((pattern: string) => {
-            const values = group[pattern];
-            const length = values.length;
-            if (!length) {
-                return;
+        values.forEach((value) => {
+            let refPattern = refModel.getValue(value.pattern);
+            if (!refPattern) {
+                refPattern = {
+                    count: 0,
+                    i: this._getUniqueRefId(workbookId),
+                    pattern: value.pattern,
+                    type: values[0].type,
+                };
+                refModel.addValue(refPattern);
             }
-            let refPattern = refModel.getValue(pattern);
-            if (pattern === ___delete___) {
-                values.forEach((item) => {
-                    const { row, col } = item;
-                    const oldValue = this.getValue(workbookId, worksheetId, row, col, model);
-                    if (oldValue && oldValue.pattern) {
-                        const oldRefPattern = refModel.getValue(oldValue.pattern);
-                        if (oldRefPattern) {
-                            oldRefPattern.count--;
-                            // if (oldRefPattern.count <= 0) {
-                            // this._refAliasModel.deleteValue(oldValue.pattern);
-                            // }
-                        }
-                    }
-                    this._setValue(workbookId, worksheetId, row, col, null);
-                });
-                if (refPattern) {
-                    const count = refPattern.count - length;
-                    if (count > 0) {
-                        refModel.setValue(pattern, 'count', count);
-                    }
-                    //else {
-                    // this._refAliasModel.deleteValue(pattern);
-                    // }
-                }
-            } else {
-                if (!refPattern) {
-                    refPattern = {
-                        count: 0,
-                        i: this._getUniqueRefId(workbookId),
-                        pattern,
-                        type: values[0].type,
-                    };
-                    refModel.addValue(refPattern);
-                }
-                values.forEach((item) => {
-                    const { row, col } = item;
+
+            value.ranges.forEach((range) => {
+                Range.foreach(range, (row, col) => {
                     if (model) {
                         const oldValue = this.getValue(workbookId, worksheetId, row, col, model);
                         if (oldValue && oldValue.pattern) {
                             const oldRefPattern = refModel.getValue(oldValue.pattern);
                             if (oldRefPattern) {
                                 oldRefPattern.count--;
-                                // if (oldRefPattern.count <= 0) {
-                                //     this._refAliasModel.deleteValue(oldValue.pattern);
-                                // }
                             }
                         }
                     }
@@ -268,7 +238,7 @@ export class NumfmtService extends Disposable implements INumfmtService {
                     });
                     refPattern!.count++;
                 });
-            }
+            });
         });
     }
 

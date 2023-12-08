@@ -15,11 +15,11 @@ import {
     toDisposable,
 } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import type { ISetNumfmtMutationParams } from '@univerjs/sheets';
+import type { IRemoveNumfmtMutationParams, ISetNumfmtMutationParams } from '@univerjs/sheets';
 import {
     ClearSelectionAllCommand,
     ClearSelectionFormatCommand,
-    factorySetNumfmtUndoMutation,
+    factoryRemoveNumfmtUndoMutation,
     INTERCEPTOR_POINT,
     INumfmtService,
     SelectionManagerService,
@@ -202,23 +202,20 @@ export class NumfmtController extends Disposable implements INumfmtController {
                             if (!selections?.length) {
                                 break;
                             }
-                            const redos: ISetNumfmtMutationParams = {
+                            const redos: IRemoveNumfmtMutationParams = {
                                 workbookId,
                                 worksheetId,
-                                values: [],
+                                ranges: [],
                             };
                             selections.forEach((range) => {
                                 Range.foreach(range, (row, col) => {
-                                    redos.values.push({
-                                        row,
-                                        col,
-                                    });
+                                    redos.ranges.push({ startColumn: col, endColumn: col, startRow: row, endRow: row });
                                 });
                             });
-                            const undos = factorySetNumfmtUndoMutation(self._injector, redos);
+                            const undos = factoryRemoveNumfmtUndoMutation(self._injector, redos);
                             return {
                                 redos: [{ id: SetNumfmtMutation.id, params: redos }],
-                                undos: [{ id: SetNumfmtMutation.id, params: undos }],
+                                undos,
                             };
                         }
                     }
@@ -288,11 +285,14 @@ export class NumfmtController extends Disposable implements INumfmtController {
             this._commandService.onCommandExecuted((commandInfo) => {
                 if (commandInfo.id === SetNumfmtMutation.id) {
                     const params = commandInfo.params as ISetNumfmtMutationParams;
-                    params.values
-                        .map((value) => ({ row: value.row, col: value.col }))
-                        .forEach(({ row, col }) => {
-                            renderCache.realDeleteValue(row, col);
+                    Object.keys(params.values).forEach((key) => {
+                        const v = params.values[key];
+                        v.ranges.forEach((range) => {
+                            Range.foreach(range, (row, col) => {
+                                renderCache.realDeleteValue(row, col);
+                            });
                         });
+                    });
                 }
             })
         );

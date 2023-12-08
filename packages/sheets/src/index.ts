@@ -171,6 +171,18 @@ export { type IMoveRangeMutationParams } from './commands/mutations/move-range.m
 export { type IMoveColumnsMutationParams } from './commands/mutations/move-rows-cols.mutation';
 export { type IMoveRowsMutationParams, MoveRowsMutation } from './commands/mutations/move-rows-cols.mutation';
 export { MoveColsMutation } from './commands/mutations/move-rows-cols.mutation';
+export type {
+    IRemoveNumfmtMutationParams,
+    ISetCellsNumfmt,
+    ISetNumfmtMutationParams,
+} from './commands/mutations/numfmt-mutation';
+export {
+    factoryRemoveNumfmtUndoMutation,
+    factorySetNumfmtUndoMutation,
+    RemoveNumfmtMutation,
+    SetNumfmtMutation,
+    transformCellsToRange,
+} from './commands/mutations/numfmt-mutation';
 export { RemoveColMutation, RemoveRowMutation } from './commands/mutations/remove-row-col.mutation';
 export { RemoveSheetMutation, RemoveSheetUndoMutationFactory } from './commands/mutations/remove-sheet.mutation';
 export { RemoveWorksheetMergeMutation } from './commands/mutations/remove-worksheet-merge.mutation';
@@ -186,8 +198,6 @@ export {
     SetFrozenMutation,
     SetFrozenMutationFactory,
 } from './commands/mutations/set-frozen.mutation';
-export type { ISetNumfmtMutationParams } from './commands/mutations/set-numfmt-mutation';
-export { factorySetNumfmtUndoMutation, SetNumfmtMutation } from './commands/mutations/set-numfmt-mutation';
 export type { ISetRangeValuesMutationParams } from './commands/mutations/set-range-values.mutation';
 export { SetRangeValuesMutation } from './commands/mutations/set-range-values.mutation';
 export { SetRangeValuesUndoMutationFactory } from './commands/mutations/set-range-values.mutation';

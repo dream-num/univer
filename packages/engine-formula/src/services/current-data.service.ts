@@ -8,7 +8,6 @@ import type {
     IDirtyUnitSheetNameMap,
     IFormulaData,
     IFormulaDatasetConfig,
-    IOtherFormulaData,
     IRuntimeUnitDataType,
     ISheetData,
     IUnitData,
@@ -19,11 +18,11 @@ import type {
 export const DEFAULT_DOCUMENT_SUB_COMPONENT_ID = '__default_document_sub_component_id20231101__';
 
 export interface IFormulaCurrentConfigService {
+    load(config: IFormulaDatasetConfig): void;
+
     getUnitData(): IUnitData;
 
     getFormulaData(): IFormulaData;
-
-    getOtherFormulaData(): IOtherFormulaData;
 
     getSheetNameMap(): IUnitSheetNameMap;
 
@@ -50,8 +49,6 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
     private _unitData: IUnitData = {};
 
     private _arrayFormulaCellData: IRuntimeUnitDataType = {};
-
-    private _otherFormulaData: IOtherFormulaData = {};
 
     private _formulaData: IFormulaData = {};
 
@@ -98,10 +95,6 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         return this._arrayFormulaCellData;
     }
 
-    getOtherFormulaData() {
-        return this._otherFormulaData;
-    }
-
     getSheetNameMap() {
         return this._sheetNameMap;
     }
@@ -132,8 +125,6 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         this._arrayFormulaCellData = this._dataToRuntime(config.arrayFormulaCellData);
 
         this._sheetNameMap = unitSheetNameMap;
-
-        this._otherFormulaData = this._loadOtherFormulaData();
 
         this._forceCalculate = config.forceCalculate;
 
@@ -183,82 +174,82 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         return arrayFormulaCellData;
     }
 
-    private _loadOtherFormulaData() {
-        const unitAllDoc = this._currentUniverService.getAllUniverDocsInstance();
+    // private _loadOtherFormulaData() {
+    //     const unitAllDoc = this._currentUniverService.getAllUniverDocsInstance();
 
-        const unitAllSlide = this._currentUniverService.getAllUniverSlidesInstance();
+    //     const unitAllSlide = this._currentUniverService.getAllUniverSlidesInstance();
 
-        const otherFormulaData: IOtherFormulaData = {};
+    //     const otherFormulaData: IOtherFormulaData = {};
 
-        for (const documentDataModel of unitAllDoc) {
-            const unitId = documentDataModel.getUnitId();
+    //     for (const documentDataModel of unitAllDoc) {
+    //         const unitId = documentDataModel.getUnitId();
 
-            if (otherFormulaData[unitId] == null) {
-                otherFormulaData[unitId] = {};
-            }
+    //         if (otherFormulaData[unitId] == null) {
+    //             otherFormulaData[unitId] = {};
+    //         }
 
-            if (otherFormulaData[unitId][DEFAULT_DOCUMENT_SUB_COMPONENT_ID] == null) {
-                otherFormulaData[unitId][DEFAULT_DOCUMENT_SUB_COMPONENT_ID] = {};
-            }
+    //         if (otherFormulaData[unitId][DEFAULT_DOCUMENT_SUB_COMPONENT_ID] == null) {
+    //             otherFormulaData[unitId][DEFAULT_DOCUMENT_SUB_COMPONENT_ID] = {};
+    //         }
 
-            const subComponent = otherFormulaData[unitId][DEFAULT_DOCUMENT_SUB_COMPONENT_ID];
+    //         const subComponent = otherFormulaData[unitId][DEFAULT_DOCUMENT_SUB_COMPONENT_ID];
 
-            const customRanges = documentDataModel.getBody()?.customRanges;
+    //         const customRanges = documentDataModel.getBody()?.customRanges;
 
-            if (customRanges == null) {
-                continue;
-            }
+    //         if (customRanges == null) {
+    //             continue;
+    //         }
 
-            for (const customRange of customRanges) {
-                subComponent[customRange.rangeId] = {
-                    f: customRange.endIndex.toString(),
-                };
-            }
-        }
+    //         for (const customRange of customRanges) {
+    //             subComponent[customRange.rangeId] = {
+    //                 f: customRange.endIndex.toString(),
+    //             };
+    //         }
+    //     }
 
-        for (const slide of unitAllSlide) {
-            const unitId = slide.getUnitId();
+    //     for (const slide of unitAllSlide) {
+    //         const unitId = slide.getUnitId();
 
-            if (otherFormulaData[unitId] == null) {
-                otherFormulaData[unitId] = {};
-            }
+    //         if (otherFormulaData[unitId] == null) {
+    //             otherFormulaData[unitId] = {};
+    //         }
 
-            if (otherFormulaData[unitId][DEFAULT_DOCUMENT_SUB_COMPONENT_ID] == null) {
-                otherFormulaData[unitId][DEFAULT_DOCUMENT_SUB_COMPONENT_ID] = {};
-            }
+    //         if (otherFormulaData[unitId][DEFAULT_DOCUMENT_SUB_COMPONENT_ID] == null) {
+    //             otherFormulaData[unitId][DEFAULT_DOCUMENT_SUB_COMPONENT_ID] = {};
+    //         }
 
-            const pages = slide.getPages();
+    //         const pages = slide.getPages();
 
-            if (pages == null) {
-                continue;
-            }
+    //         if (pages == null) {
+    //             continue;
+    //         }
 
-            const pageIds = Object.keys(pages);
+    //         const pageIds = Object.keys(pages);
 
-            for (const pageId of pageIds) {
-                const page = pages[pageId];
+    //         for (const pageId of pageIds) {
+    //             const page = pages[pageId];
 
-                const subComponent = otherFormulaData[unitId][pageId];
+    //             const subComponent = otherFormulaData[unitId][pageId];
 
-                const pageElements = page.pageElements;
+    //             const pageElements = page.pageElements;
 
-                if (pageElements == null) {
-                    continue;
-                }
+    //             if (pageElements == null) {
+    //                 continue;
+    //             }
 
-                const pageElementIds = Object.keys(pageElements);
+    //             const pageElementIds = Object.keys(pageElements);
 
-                for (const pageElementId of pageElementIds) {
-                    const pageElement = pageElements[pageElementId];
-                    subComponent[pageElementId] = {
-                        f: pageElement.title,
-                    };
-                }
-            }
-        }
+    //             for (const pageElementId of pageElementIds) {
+    //                 const pageElement = pageElements[pageElementId];
+    //                 subComponent[pageElementId] = {
+    //                     f: pageElement.title,
+    //                 };
+    //             }
+    //         }
+    //     }
 
-        return otherFormulaData;
-    }
+    //     return otherFormulaData;
+    // }
 
     private _loadSheetData() {
         const unitAllSheet = this._currentUniverService.getAllUniverSheetsInstance();

@@ -3,7 +3,7 @@ import { ILogService, IUniverInstanceService, LocaleType, LogLevel, Plugin, Plug
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { FormulaEngineService } from '../../services/formula-engine.service';
+import { CalculateFormulaService } from '../../services/calculate-formula.service';
 import { FormulaDataModel } from '../formula-data.model';
 
 const TEST_WORKBOOK_DATA: IWorkbookData = {
@@ -51,7 +51,7 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
         }
 
         override onStarting(injector: Injector): void {
-            injector.add([FormulaEngineService]);
+            injector.add([CalculateFormulaService]);
             injector.add([FormulaDataModel]);
 
             dependencies?.forEach((d) => injector.add(d));

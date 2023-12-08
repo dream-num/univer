@@ -57,6 +57,8 @@ export class InputManager {
 
     private _doubleClickOccurred = 0;
 
+    private _tripleClickState = false;
+
     private _currentObject: Nullable<BaseObject | ThinScene>;
 
     constructor(scene: ThinScene) {
@@ -342,23 +344,26 @@ export class InputManager {
 
         this._doubleClickOccurred += 1;
 
+        // eslint-disable-next-line no-magic-numbers
+        if (this._tripleClickState) {
+            this._scene?.pick(Vector2.FromArray([evt.offsetX, evt.offsetY]))?.triggerTripleClick(evt);
+
+            if (this._scene.onTripleClickObserver.hasObservers()) {
+                this._scene.onTripleClickObserver.notifyObservers(evt);
+            }
+        }
+
         if (this._doubleClickOccurred === 2) {
             this._scene?.pick(Vector2.FromArray([evt.offsetX, evt.offsetY]))?.triggerDblclick(evt);
 
             if (this._scene.onDblclickObserver.hasObservers()) {
                 this._scene.onDblclickObserver.notifyObservers(evt);
             }
-        }
-
-        // eslint-disable-next-line no-magic-numbers
-        if (this._doubleClickOccurred === 3) {
-            this._scene?.pick(Vector2.FromArray([evt.offsetX, evt.offsetY]))?.triggerTripleClick(evt);
-
-            if (this._scene.onTripleClickObserver.hasObservers()) {
-                this._scene.onTripleClickObserver.notifyObservers(evt);
-            }
-
             this._resetDoubleClickParam();
+            this._tripleClickState = true;
+            setTimeout(() => {
+                this._tripleClickState = false;
+            }, InputManager.DoubleOrTripleClickDelay);
         }
 
         this._startingPosition.x = clientX;

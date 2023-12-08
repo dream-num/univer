@@ -7,8 +7,7 @@ import { CalculateController } from '../../controller/calculate.controller';
 import { FormulaController } from '../../controller/formula.controller';
 import { FormulaDataModel } from '../../models/formula-data.model';
 import { ActiveDirtyManagerService, IActiveDirtyManagerService } from '../../services/active-dirty-manager.service';
-import { FormulaService, IFormulaService } from '../../services/formula.service';
-import { FormulaEngineService } from '../../services/formula-engine.service';
+import { CalculateFormulaService } from '../../services/calculate-formula.service';
 
 const TEST_WORKBOOK_DATA: IWorkbookData = {
     id: 'test',
@@ -70,12 +69,11 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
 
         override onStarting(injector: Injector): void {
             injector.add([IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }]);
-            injector.add([FormulaEngineService]);
+            injector.add([CalculateFormulaService]);
             this._formulaDataModel = this._injector.createInstance(FormulaDataModel);
 
             injector.add([FormulaDataModel, { useValue: this._formulaDataModel }]);
             injector.add([FormulaController]);
-            injector.add([IFormulaService, { useClass: FormulaService }]);
             injector.add([CalculateController]);
 
             dependencies?.forEach((d) => injector.add(d));

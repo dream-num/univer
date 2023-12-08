@@ -9,7 +9,6 @@ import {
 } from '@univerjs/core';
 import { getDocObject } from '@univerjs/docs';
 import type { ISheetData } from '@univerjs/engine-formula';
-import { FormulaEngineService } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import { takeUntil } from 'rxjs';
@@ -19,7 +18,6 @@ export class EditingController extends RxDisposable {
     constructor(
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService,
         @Inject(IUndoRedoService) private readonly _undoRedoService: IUndoRedoService
     ) {
         super();

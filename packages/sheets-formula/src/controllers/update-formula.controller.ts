@@ -17,9 +17,9 @@ import {
 import type { IFormulaData, IFormulaDataItem, ISequenceNode, IUnitSheetNameMap } from '@univerjs/engine-formula';
 import {
     FormulaDataModel,
-    FormulaEngineService,
     generateStringWithSequence,
     initSheetFormulaData,
+    LexerTreeBuilder,
     sequenceNodeType,
     SetArrayFormulaDataMutation,
     SetFormulaDataMutation,
@@ -117,7 +117,7 @@ export class UpdateFormulaController extends Disposable {
     constructor(
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService,
+        @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @Inject(SelectionManagerService) private _selectionManagerService: SelectionManagerService,
@@ -626,7 +626,7 @@ export class UpdateFormulaController extends Disposable {
 
                     const { f: formulaString, x, y, si } = formulaDataItem;
 
-                    const sequenceNodes = this._formulaEngineService.buildSequenceNodes(formulaString);
+                    const sequenceNodes = this._lexerTreeBuilder.sequenceNodesBuilder(formulaString);
 
                     if (sequenceNodes == null) {
                         return true;

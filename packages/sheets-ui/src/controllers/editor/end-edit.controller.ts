@@ -18,7 +18,7 @@ import {
     Tools,
 } from '@univerjs/core';
 import { MoveCursorOperation, MoveSelectionOperation } from '@univerjs/docs';
-import { FormulaEngineService, matchToken } from '@univerjs/engine-formula';
+import { LexerTreeBuilder, matchToken } from '@univerjs/engine-formula';
 import type { IMouseEvent, IPointerEvent } from '@univerjs/engine-render';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import {
@@ -66,7 +66,7 @@ export class EndEditController extends Disposable {
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @IContextService private readonly _contextService: IContextService,
         @ICellEditorManagerService private readonly _cellEditorManagerService: ICellEditorManagerService,
-        @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService,
+        @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
         @IUndoRedoService private _undoRedoService: IUndoRedoService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService
@@ -190,7 +190,7 @@ export class EndEditController extends Disposable {
                 if (cellData.f === newDataStream) {
                     return;
                 }
-                const bracketCount = this._formulaEngineService.checkIfAddBracket(newDataStream);
+                const bracketCount = this._lexerTreeBuilder.checkIfAddBracket(newDataStream);
                 for (let i = 0; i < bracketCount; i++) {
                     newDataStream += matchToken.CLOSE_BRACKET;
                 }

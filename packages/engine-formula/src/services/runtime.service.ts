@@ -142,6 +142,10 @@ export interface IFormulaRuntimeService {
     getRuntimeFeatureRange(): { [featureId: string]: IFeatureDirtyRangeType };
 
     getRuntimeFeatureCellData(): { [featureId: string]: IRuntimeUnitDataType };
+
+    setRuntimeFeatureCellData(featureId: string, featureData: IRuntimeUnitDataType): void;
+
+    setRuntimeFeatureRange(featureId: string, featureRange: IFeatureDirtyRangeType): void;
 }
 
 export class FormulaRuntimeService extends Disposable implements IFormulaRuntimeService {

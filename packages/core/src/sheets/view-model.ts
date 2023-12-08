@@ -3,10 +3,10 @@ import type { IDisposable } from '@wendellhu/redi';
 import { remove } from '../common/array';
 import type { Nullable } from '../common/type-utils';
 import { Disposable, toDisposable } from '../shared/lifecycle';
-import type { ICellData } from '../types/interfaces/i-cell-data';
+import type { ICellDataForSheetInterceptor } from '../types/interfaces/i-cell-data';
 
 export interface ICellContentInterceptor {
-    getCell(row: number, col: number): Nullable<ICellData>;
+    getCell(row: number, col: number): Nullable<ICellDataForSheetInterceptor>;
 }
 
 export interface IRowFilteredInterceptor {}
@@ -21,7 +21,7 @@ export interface ISheetViewModel {
     registerRowVisibleInterceptor(interceptor: IRowVisibleInterceptor): IDisposable;
     registerColVisibleInterceptor(interceptor: IColVisibleInterceptor): IDisposable;
 
-    getCell(row: number, col: number): Nullable<ICellData>;
+    getCell(row: number, col: number): Nullable<ICellDataForSheetInterceptor>;
 }
 
 /**
@@ -42,7 +42,7 @@ export class SheetViewModel extends Disposable implements ISheetViewModel {
         this._colVisibleInterceptors.length = 0;
     }
 
-    getCell(row: number, col: number): Nullable<ICellData> {
+    getCell(row: number, col: number): Nullable<ICellDataForSheetInterceptor> {
         for (const interceptor of this._cellContentInterceptors) {
             const result = interceptor.getCell(row, col);
             if (typeof result !== 'undefined') {

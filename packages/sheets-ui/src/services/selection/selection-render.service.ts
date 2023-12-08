@@ -1,6 +1,7 @@
 import type {
     IRange,
     IRangeWithCoord,
+    ISelection,
     ISelectionCell,
     ISelectionCellWithCoord,
     ISelectionWithCoord,
@@ -27,10 +28,10 @@ export interface IControlFillConfig {
 }
 
 export interface ISelectionRenderService {
-    readonly selectionRangeWithStyle$: Observable<ISelectionWithCoordAndStyle[]>;
+    readonly selectionMoveEnd$: Observable<ISelectionWithCoordAndStyle[]>;
     readonly controlFillConfig$: Observable<IControlFillConfig | null>;
-    readonly selectionMoving$: Observable<Nullable<IRange[]>>;
-    readonly selectionMoveStart$: Observable<Nullable<IRange[]>>;
+    readonly selectionMoving$: Observable<ISelectionWithCoordAndStyle[]>;
+    readonly selectionMoveStart$: Observable<ISelectionWithCoordAndStyle[]>;
 
     enableHeaderHighlight(): void;
     disableHeaderHighlight(): void;
@@ -51,7 +52,7 @@ export interface ISelectionRenderService {
     changeRuntime(skeleton: SpreadsheetSkeleton, scene: Scene, viewport?: Viewport): void;
     getViewPort(): Viewport;
     getCurrentControls(): SelectionShape[];
-    getActiveRangeList(): Nullable<IRange[]>;
+    getActiveSelections(): Nullable<ISelection[]>;
     getActiveRange(): Nullable<IRange>;
     getActiveSelection(): Nullable<SelectionShape>;
     getSelectionDataWithStyle(): ISelectionWithCoordAndStyle[];
@@ -141,19 +142,19 @@ export class SelectionRenderService implements ISelectionRenderService {
 
     private _isSkipRemainLastEnable: boolean = false;
 
-    private readonly _selectionRangeWithStyle$ = new BehaviorSubject<ISelectionWithCoordAndStyle[]>([]);
+    private readonly _selectionMoveEnd$ = new BehaviorSubject<ISelectionWithCoordAndStyle[]>([]);
 
     // When the user draws a selection area in the canvas content area, this event is broadcasted when the drawing ends.
-    readonly selectionRangeWithStyle$ = this._selectionRangeWithStyle$.asObservable();
+    readonly selectionMoveEnd$ = this._selectionMoveEnd$.asObservable();
 
-    private readonly _selectionMoving$ = new Subject<Nullable<IRange[]>>();
+    private readonly _selectionMoving$ = new Subject<ISelectionWithCoordAndStyle[]>();
 
     /**
      * Triggered during the drawing of the selection area.
      */
     readonly selectionMoving$ = this._selectionMoving$.asObservable();
 
-    private readonly _selectionMoveStart$ = new Subject<Nullable<IRange[]>>();
+    private readonly _selectionMoveStart$ = new Subject<ISelectionWithCoordAndStyle[]>();
 
     /**
      * Triggered during the start draw the selection area.
@@ -318,16 +319,33 @@ export class SelectionRenderService implements ISelectionRenderService {
      *
      * @returns
      */
-    getActiveRangeList(): Nullable<IRange[]> {
+    getActiveSelections(): Nullable<ISelection[]> {
         const controls = this.getCurrentControls();
         if (controls && controls.length > 0) {
             const selections = controls?.map((control: SelectionShape) => {
                 const model: SelectionRenderModel = control.model;
+                const currentCell = model.currentCell;
+                let primary: Nullable<ISelectionCell> = null;
+                if (currentCell) {
+                    primary = {
+                        actualRow: currentCell.actualRow,
+                        actualColumn: currentCell.actualColumn,
+                        isMerged: currentCell.isMerged,
+                        isMergedMainCell: currentCell.isMergedMainCell,
+                        startRow: currentCell.mergeInfo.startRow,
+                        startColumn: currentCell.mergeInfo.startColumn,
+                        endRow: currentCell.mergeInfo.endRow,
+                        endColumn: currentCell.mergeInfo.endColumn,
+                    };
+                }
                 return {
-                    startRow: model.startRow,
-                    startColumn: model.startColumn,
-                    endRow: model.endRow,
-                    endColumn: model.endColumn,
+                    range: {
+                        startRow: model.startRow,
+                        startColumn: model.startColumn,
+                        endRow: model.endRow,
+                        endColumn: model.endColumn,
+                    },
+                    primary,
                 };
             });
             return selections;
@@ -608,7 +626,7 @@ export class SelectionRenderService implements ISelectionRenderService {
             curControls.push(selectionControl);
         }
 
-        this._selectionMoveStart$.next([...(this.getActiveRangeList() || [])]);
+        this._selectionMoveStart$.next(this.getSelectionDataWithStyle());
 
         this.hasSelection = true;
 
@@ -643,7 +661,7 @@ export class SelectionRenderService implements ISelectionRenderService {
 
         this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {
             this._endSelection();
-            this._selectionRangeWithStyle$.next(this.getSelectionDataWithStyle());
+            this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
 
             // when selection mouse up, enable the short cut service
             this._shortcutService.setDisable(false);
@@ -849,7 +867,7 @@ export class SelectionRenderService implements ISelectionRenderService {
         ) {
             selectionControl.update(newSelectionRange, rowHeaderWidth, columnHeaderHeight);
 
-            this._selectionMoving$.next(this.getActiveRangeList());
+            this._selectionMoving$.next(this.getSelectionDataWithStyle());
         }
     }
 

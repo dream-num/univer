@@ -441,7 +441,16 @@ export class StartEditController extends Disposable {
                 return;
             }
 
-            const { position, documentLayoutObject, canvasOffset, scaleX, scaleY, editorUnitId, unitId } = state;
+            const {
+                position,
+                documentLayoutObject,
+                canvasOffset,
+                scaleX,
+                scaleY,
+                editorUnitId,
+                unitId,
+                isInArrayFormulaRange = false,
+            } = state;
 
             const editorObject = this._getEditorObject();
 
@@ -466,7 +475,10 @@ export class StartEditController extends Disposable {
             this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject, scaleX, scaleY);
 
             // move selection
-            if (eventType === DeviceInputEventType.Keyboard) {
+            if (
+                eventType === DeviceInputEventType.Keyboard ||
+                (eventType === DeviceInputEventType.Dblclick && isInArrayFormulaRange)
+            ) {
                 const snapshot = Tools.deepClone(documentDataModel.snapshot) as IDocumentData;
                 const documentViewModel = this._docViewModelManagerService.getCurrent()?.docViewModel!;
                 this._resetBodyStyle(snapshot.body!);
@@ -477,7 +489,7 @@ export class StartEditController extends Disposable {
                 document.makeDirty();
 
                 // @JOCS, Why calculate here?
-                if (keycode === KeyCode.BACKSPACE) {
+                if (keycode === KeyCode.BACKSPACE || eventType === DeviceInputEventType.Dblclick) {
                     skeleton.calculate();
                 }
 

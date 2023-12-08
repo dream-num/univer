@@ -12,7 +12,6 @@ import { FormulaEngineService, RangeReferenceObject } from '@univerjs/engine-for
 import { SelectionManagerService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
-import { ISelectionRenderService } from '..';
 import type { IStatusBarServiceStatus } from '../services/status-bar.service';
 import { IStatusBarService } from '../services/status-bar.service';
 
@@ -22,8 +21,7 @@ export class StatusBarController extends Disposable {
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService,
-        @IStatusBarService private readonly _statusBarService: IStatusBarService,
-        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService
+        @IStatusBarService private readonly _statusBarService: IStatusBarService
     ) {
         super();
 
@@ -37,16 +35,16 @@ export class StatusBarController extends Disposable {
     private _registerSelectionListener(): void {
         this.disposeWithMe(
             toDisposable(
-                this._selectionRenderService.selectionMoving$.subscribe((selections) => {
+                this._selectionManagerService.selectionMoving$.subscribe((selections) => {
                     if (selections) {
-                        this._calculateSelection(selections);
+                        this._calculateSelection(selections.map((selection) => selection.range));
                     }
                 })
             )
         );
         this.disposeWithMe(
             toDisposable(
-                this._selectionManagerService.selectionInfo$.subscribe((selections) => {
+                this._selectionManagerService.selectionMoveEnd$.subscribe((selections) => {
                     if (selections) {
                         this._calculateSelection(selections.map((selection) => selection.range));
                     }

@@ -1,4 +1,4 @@
-import type { ICommandInfo, IParagraph, Nullable } from '@univerjs/core';
+import type { ICommandInfo, IParagraph, ITextRun, Nullable } from '@univerjs/core';
 import {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
@@ -32,6 +32,7 @@ import { takeUntil } from 'rxjs';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { SetEditorResizeOperation } from '../../commands/operations/set-editor-resize.operation';
 import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
+import type { IEditorBridgeServiceParam } from '../../services/editor-bridge.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 
 @OnLifecycle(LifecycleStages.Steady, FormulaEditorController)
@@ -197,19 +198,53 @@ export class FormulaEditorController extends RxDisposable {
                 return;
             }
 
-            const body = param.documentLayoutObject.documentModel?.getBody();
-            const dataStream = body?.dataStream;
-            const paragraphs = body?.paragraphs;
+            this._editorSyncHandler(param);
+        });
 
-            if (dataStream == null || paragraphs == null) {
+        this._editorBridgeService.visible$.pipe(takeUntil(this.dispose$)).subscribe((state) => {
+            if (state == null || state.visible === false || this._editorBridgeService.isForceKeepVisible()) {
                 return;
             }
 
-            this._syncContentAndRender(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, dataStream, paragraphs);
+            const param = this._editorBridgeService.getState();
 
-            // Also need to resize document and scene after sync content.
-            this._autoScroll();
+            if (param == null) {
+                return;
+            }
+
+            this._editorSyncHandler(param);
         });
+    }
+
+    private _editorSyncHandler(param: IEditorBridgeServiceParam) {
+        const body = param.documentLayoutObject.documentModel?.getBody();
+
+        let dataStream = body?.dataStream;
+        let paragraphs = body?.paragraphs;
+        let textRuns: ITextRun[] = [];
+
+        if (dataStream == null || paragraphs == null) {
+            return;
+        }
+
+        if (
+            param.isInArrayFormulaRange === true &&
+            this._editorBridgeService.isVisible().eventType === DeviceInputEventType.Dblclick
+        ) {
+            dataStream = '\r\n';
+            paragraphs = [
+                {
+                    startIndex: 0,
+                },
+            ];
+        } else if (param.isInArrayFormulaRange === true) {
+            textRuns = body?.textRuns || [];
+        }
+
+        this._syncContentAndRender(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, dataStream, paragraphs, textRuns);
+
+        // Also need to resize document and scene after sync content.
+        this._autoScroll();
     }
 
     private _commandExecutedListener() {
@@ -257,7 +292,12 @@ export class FormulaEditorController extends RxDisposable {
         );
     }
 
-    private _syncContentAndRender(unitId: string, dataStream: string, paragraphs: IParagraph[]) {
+    private _syncContentAndRender(
+        unitId: string,
+        dataStream: string,
+        paragraphs: IParagraph[],
+        textRuns: ITextRun[] = []
+    ) {
         const INCLUDE_LIST = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];
 
         const docsSkeletonObject = this._docSkeletonManagerService.getSkeletonByUnitId(unitId);
@@ -274,6 +314,10 @@ export class FormulaEditorController extends RxDisposable {
         // Need to empty textRuns(previous formula highlight) every time when sync content(change selection or edit cell or edit formula bar).
         if (unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
             docDataModel.getBody()!.textRuns = [];
+        }
+
+        if (textRuns.length > 0) {
+            docDataModel.getBody()!.textRuns = textRuns;
         }
 
         docViewModel.reset(docDataModel);

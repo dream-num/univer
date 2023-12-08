@@ -1,6 +1,6 @@
 import type { IKeyType, Nullable } from '../shared';
 import { Tools } from '../shared';
-import type { ICellData, IStyleData } from '../types/interfaces';
+import type { ICellDataForSheetInterceptor, IStyleData } from '../types/interfaces';
 
 /**
  * Styles in a workbook, cells locate styles based on style IDs
@@ -88,12 +88,21 @@ export class Styles {
         return this._styles;
     }
 
-    getStyleByCell(cell: Nullable<ICellData>): Nullable<IStyleData> {
+    getStyleByCell(cell: Nullable<ICellDataForSheetInterceptor>): Nullable<IStyleData> {
         let style;
         if (cell && Tools.isObject(cell.s)) {
             style = cell.s as IStyleData;
         } else {
             style = cell?.s && this.get(cell.s);
+        }
+
+        const interceptStyle = cell?.interceptorStyle;
+
+        if (interceptStyle) {
+            return {
+                ...style,
+                ...interceptStyle,
+            } as IStyleData;
         }
 
         return style as IStyleData;

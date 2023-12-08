@@ -1,4 +1,4 @@
-import type { ICommandInfo } from '@univerjs/core';
+import type { ICommandInfo, Nullable } from '@univerjs/core';
 import {
     Disposable,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
@@ -7,8 +7,10 @@ import {
     LifecycleStages,
     makeCellToSelection,
     OnLifecycle,
+    ThemeService,
 } from '@univerjs/core';
 import { DeviceInputEventType, getCanvasOffsetByEngine, IRenderManagerService } from '@univerjs/engine-render';
+import type { ISelectionWithStyle } from '@univerjs/sheets';
 import {
     COMMAND_LISTENER_SKELETON_CHANGE,
     NORMAL_SELECTION_PLUGIN_NAME,
@@ -33,7 +35,8 @@ export class EditorBridgeController extends Disposable {
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
-        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService
+        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
+        @Inject(ThemeService) private readonly _themeService: ThemeService
     ) {
         super();
 
@@ -51,109 +54,134 @@ export class EditorBridgeController extends Disposable {
     }
 
     private _initialSelectionListener() {
-        this._selectionManagerService.selectionInfo$.subscribe((params) => {
-            const current = this._selectionManagerService.getCurrent();
+        this._selectionManagerService.selectionMoveEnd$.subscribe((params) => {
+            this._selectionListener(params);
+        });
+        this._selectionManagerService.selectionMoveStart$.subscribe((params) => {
+            this._selectionListener(params);
+        });
+    }
 
-            /**
-             * The editor only responds to regular selections.
-             */
-            if (current?.pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
-                return;
+    private _selectionListener(params: Nullable<ISelectionWithStyle[]>) {
+        const current = this._selectionManagerService.getCurrent();
+
+        /**
+         * The editor only responds to regular selections.
+         */
+        if (current?.pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
+            return;
+        }
+
+        const currentSkeleton = this._sheetSkeletonManagerService.getCurrent();
+
+        const sheetObject = this._getSheetObject();
+
+        if (currentSkeleton == null || sheetObject == null) {
+            return;
+        }
+
+        const { skeleton, unitId, sheetId } = currentSkeleton;
+
+        const { scene, engine } = sheetObject;
+
+        if (params == null || params.length === 0 || skeleton == null || params[params.length - 1] == null) {
+            return;
+        }
+
+        const { primary } = params[params.length - 1];
+
+        if (primary == null) {
+            return;
+        }
+
+        const { startRow, startColumn } = primary;
+
+        const primaryWithCoord = this._selectionRenderService.convertCellRangeToInfo(primary);
+
+        if (primaryWithCoord == null) {
+            return;
+        }
+
+        const actualRangeWithCoord = makeCellToSelection(primaryWithCoord);
+
+        if (actualRangeWithCoord == null) {
+            return;
+        }
+
+        const canvasOffset = getCanvasOffsetByEngine(engine);
+
+        let { startX, startY, endX, endY } = actualRangeWithCoord;
+
+        const { scaleX, scaleY } = scene.getAncestorScale();
+
+        const scrollXY = scene.getScrollXY(this._selectionRenderService.getViewPort());
+
+        startX = skeleton.convertTransformToOffsetX(startX, scaleX, scrollXY);
+
+        startY = skeleton.convertTransformToOffsetY(startY, scaleY, scrollXY);
+
+        endX = skeleton.convertTransformToOffsetX(endX, scaleX, scrollXY);
+
+        endY = skeleton.convertTransformToOffsetY(endY, scaleY, scrollXY);
+
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+
+        const worksheet = workbook.getActiveSheet();
+
+        const location = {
+            workbook,
+            worksheet,
+            workbookId: workbook.getUnitId(),
+            worksheetId: worksheet.getSheetId(),
+            row: startRow,
+            col: startColumn,
+        };
+        const cell = this._editorBridgeService.interceptor.fetchThroughInterceptors(
+            this._editorBridgeService.interceptor.getInterceptPoints().BEFORE_CELL_EDIT
+        )(worksheet.getCell(startRow, startColumn), location);
+
+        let documentLayoutObject = cell && skeleton.getCellDocumentModelWithFormula(cell);
+
+        if (!documentLayoutObject || documentLayoutObject.documentModel == null) {
+            documentLayoutObject = skeleton.getBlankCellDocumentModel(cell);
+        }
+
+        documentLayoutObject.documentModel?.setZoomRatio(Math.max(scaleX, scaleY));
+
+        if (cell?.isInArrayFormulaRange === true) {
+            const body = documentLayoutObject.documentModel?.getBody();
+            if (body) {
+                body.textRuns = [
+                    {
+                        st: 0,
+                        ed: body.dataStream.length - 2,
+                        ts: {
+                            cl: {
+                                rgb: this._themeService.getCurrentTheme().textColorSecondary,
+                            },
+                        },
+                    },
+                ];
             }
+        }
 
-            const currentSkeleton = this._sheetSkeletonManagerService.getCurrent();
-
-            const sheetObject = this._getSheetObject();
-
-            if (currentSkeleton == null || sheetObject == null) {
-                return;
-            }
-
-            const { skeleton, unitId, sheetId } = currentSkeleton;
-
-            const { scene, engine } = sheetObject;
-
-            if (params == null || params.length === 0 || skeleton == null || params[params.length - 1] == null) {
-                return;
-            }
-
-            const { primary } = params[params.length - 1];
-
-            if (primary == null) {
-                return;
-            }
-
-            const { startRow, startColumn } = primary;
-
-            const primaryWithCoord = this._selectionRenderService.convertCellRangeToInfo(primary);
-
-            if (primaryWithCoord == null) {
-                return;
-            }
-
-            const actualRangeWithCoord = makeCellToSelection(primaryWithCoord);
-
-            if (actualRangeWithCoord == null) {
-                return;
-            }
-
-            const canvasOffset = getCanvasOffsetByEngine(engine);
-
-            let { startX, startY, endX, endY } = actualRangeWithCoord;
-
-            const { scaleX, scaleY } = scene.getAncestorScale();
-
-            const scrollXY = scene.getScrollXY(this._selectionRenderService.getViewPort());
-
-            startX = skeleton.convertTransformToOffsetX(startX, scaleX, scrollXY);
-
-            startY = skeleton.convertTransformToOffsetY(startY, scaleY, scrollXY);
-
-            endX = skeleton.convertTransformToOffsetX(endX, scaleX, scrollXY);
-
-            endY = skeleton.convertTransformToOffsetY(endY, scaleY, scrollXY);
-
-            const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
-
-            const worksheet = workbook.getActiveSheet();
-
-            const location = {
-                workbook,
-                worksheet,
-                workbookId: workbook.getUnitId(),
-                worksheetId: worksheet.getSheetId(),
-                row: startRow,
-                col: startColumn,
-            };
-            const cell = this._editorBridgeService.interceptor.fetchThroughInterceptors(
-                this._editorBridgeService.interceptor.getInterceptPoints().BEFORE_CELL_EDIT
-            )(worksheet.getCell(startRow, startColumn), location);
-
-            let documentLayoutObject = cell && skeleton.getCellDocumentModelWithFormula(cell);
-
-            if (!documentLayoutObject || documentLayoutObject.documentModel == null) {
-                documentLayoutObject = skeleton.getBlankCellDocumentModel(cell);
-            }
-
-            documentLayoutObject.documentModel?.setZoomRatio(Math.max(scaleX, scaleY));
-
-            this._commandService.executeCommand(SetActivateCellEditOperation.id, {
-                position: {
-                    startX,
-                    startY,
-                    endX,
-                    endY,
-                },
-                scaleX,
-                scaleY,
-                canvasOffset,
-                row: startRow,
-                column: startColumn,
-                unitId,
-                sheetId,
-                documentLayoutObject,
-                editorUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-            });
+        this._commandService.executeCommand(SetActivateCellEditOperation.id, {
+            position: {
+                startX,
+                startY,
+                endX,
+                endY,
+            },
+            scaleX,
+            scaleY,
+            canvasOffset,
+            row: startRow,
+            column: startColumn,
+            unitId,
+            sheetId,
+            documentLayoutObject,
+            editorUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+            isInArrayFormulaRange: cell?.isInArrayFormulaRange,
         });
     }
 

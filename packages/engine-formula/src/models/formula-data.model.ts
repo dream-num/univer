@@ -1,4 +1,4 @@
-import type { ICellData, IRange, ObjectMatrixPrimitiveType } from '@univerjs/core';
+import type { ICellData, IRange, Nullable, ObjectMatrixPrimitiveType } from '@univerjs/core';
 import {
     Disposable,
     ICommandService,
@@ -20,12 +20,6 @@ import type {
     IUnitSheetNameMap,
 } from '../basics/common';
 import { FormulaEngineService } from '../services/formula-engine.service';
-
-export interface IFormulaConfig {
-    notExecuteFormula?: boolean;
-
-    formulaData: IFormulaData;
-}
 
 export class FormulaDataModel extends Disposable {
     private _formulaData: IFormulaData = {};
@@ -343,6 +337,37 @@ export class FormulaDataModel extends Disposable {
                 }
             }
         });
+    }
+
+    getFormulaItemBySId(sId: string, sheetId: string, unitId: string): Nullable<IFormulaDataItem> {
+        const formulaData = this._formulaData;
+        if (formulaData[unitId] == null) {
+            return null;
+        }
+        const workbookFormulaData = formulaData[unitId];
+
+        if (workbookFormulaData[sheetId] == null) {
+            return null;
+        }
+
+        const cellMatrix = new ObjectMatrix(workbookFormulaData[sheetId]);
+
+        let formulaDataItem: Nullable<IFormulaDataItem> = null;
+
+        cellMatrix.forValue((row, column, item) => {
+            const { f, si } = item;
+
+            if (si === sId && f.length > 0) {
+                formulaDataItem = item;
+                return false;
+            }
+        });
+
+        return formulaDataItem;
+    }
+
+    getFormulaDataItem(row: number, column: number, sheetId: string, unitId: string) {
+        return this._formulaData?.[unitId]?.[sheetId]?.[row]?.[column];
     }
 }
 

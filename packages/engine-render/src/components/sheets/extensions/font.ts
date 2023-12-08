@@ -186,10 +186,16 @@ export class Font extends SheetExtension {
         columnWidthAccumulation: number[]
     ) {
         const startY = fixLineWidthByScale(rowHeightAccumulation[startRow - 1] || 0, scale);
-        const endY = fixLineWidthByScale(rowHeightAccumulation[endRow], scale);
+        const endY = fixLineWidthByScale(
+            rowHeightAccumulation[endRow] || rowHeightAccumulation[rowHeightAccumulation.length - 1],
+            scale
+        );
 
         const startX = fixLineWidthByScale(columnWidthAccumulation[startColumn - 1] || 0, scale);
-        const endX = fixLineWidthByScale(columnWidthAccumulation[endColumn], scale);
+        const endX = fixLineWidthByScale(
+            columnWidthAccumulation[endColumn] || columnWidthAccumulation[columnWidthAccumulation.length - 1],
+            scale
+        );
 
         ctx.rect(startX, startY, endX - startX, endY - startY);
     }

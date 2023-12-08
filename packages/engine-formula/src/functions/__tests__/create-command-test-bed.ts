@@ -1,5 +1,5 @@
 import type { IWorkbookData } from '@univerjs/core';
-import { ILogService, IUniverInstanceService, LocaleType, Plugin, PluginType, Univer } from '@univerjs/core';
+import { ILogService, IUniverInstanceService, LocaleType, LogLevel, Plugin, PluginType, Univer } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -101,7 +101,7 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
     univerInstanceService.focusUniverInstance('test');
 
     const logService = get(ILogService);
-    logService.toggleLogEnabled(false); // change this to `true` to debug tests via logs
+    logService.setLogLevel(LogLevel.SILENT); // change this to `true` to debug tests via logs
 
     return {
         univer,

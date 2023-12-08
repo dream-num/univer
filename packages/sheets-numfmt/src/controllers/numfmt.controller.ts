@@ -1,4 +1,4 @@
-import type { ICellData, IRange } from '@univerjs/core';
+import type { ICellData, ICellDataForSheetInterceptor, IRange } from '@univerjs/core';
 import {
     CellValueType,
     Disposable,
@@ -265,13 +265,13 @@ export class NumfmtController extends Disposable implements INumfmtController {
                         return next(cell);
                     }
 
-                    const res: ICellData = { v: numfmtRes };
+                    const res: ICellDataForSheetInterceptor = { v: numfmtRes };
 
                     if (info.color) {
                         const color = this._themeService.getCurrentTheme()[`${info.color}500`];
 
                         if (color) {
-                            res.s = { cl: { rgb: color } };
+                            res.interceptorStyle = { cl: { rgb: color } };
                         }
                     }
 
@@ -323,7 +323,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
         });
         const combineOpenAndSelection$ = combineLatest([
             isPanelOpenObserver,
-            this._selectionManagerService.selectionInfo$.pipe(
+            this._selectionManagerService.selectionMoveEnd$.pipe(
                 map((selectionInfos) => {
                     if (!selectionInfos) {
                         return [];

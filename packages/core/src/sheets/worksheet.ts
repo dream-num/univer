@@ -4,7 +4,7 @@ import { createRowColIter } from '../shared/row-col-iter';
 import { DEFAULT_WORKSHEET } from '../types/const';
 import type { SheetTypes } from '../types/enum';
 import { BooleanNumber } from '../types/enum';
-import type { ICellData, IFreeze, IRange, IWorksheetData } from '../types/interfaces';
+import type { ICellData, ICellDataForSheetInterceptor, IFreeze, IRange, IWorksheetData } from '../types/interfaces';
 import { ColumnManager } from './column-manager';
 import { Range } from './range';
 import { RowManager } from './row-manager';
@@ -165,7 +165,7 @@ export class Worksheet {
         return null;
     }
 
-    getCell(row: number, col: number): Nullable<ICellData> {
+    getCell(row: number, col: number): Nullable<ICellDataForSheetInterceptor> {
         if (row < 0 || col < 0) {
             return null;
         }

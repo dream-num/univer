@@ -1,4 +1,4 @@
-import type { ICellData, IPosition, Nullable } from '@univerjs/core';
+import type { ICellDataForSheetInterceptor, IPosition, Nullable } from '@univerjs/core';
 import { createInterceptorKey, Disposable, InterceptorManager, toDisposable } from '@univerjs/core';
 import type { IDocumentLayoutObject } from '@univerjs/engine-render';
 import { DeviceInputEventType } from '@univerjs/engine-render';
@@ -26,9 +26,10 @@ export interface IEditorBridgeServiceParam {
     scaleX: number;
     scaleY: number;
     editorUnitId: string;
+    isInArrayFormulaRange?: Nullable<boolean>;
 }
-const BEFORE_CELL_EDIT = createInterceptorKey<ICellData, ISheetLocation>('BEFORE_CELL_EDIT');
-const AFTER_CELL_EDIT = createInterceptorKey<ICellData, ISheetLocation>('AFTER_CELL_EDIT');
+const BEFORE_CELL_EDIT = createInterceptorKey<ICellDataForSheetInterceptor, ISheetLocation>('BEFORE_CELL_EDIT');
+const AFTER_CELL_EDIT = createInterceptorKey<ICellDataForSheetInterceptor, ISheetLocation>('AFTER_CELL_EDIT');
 export interface IEditorBridgeService {
     state$: Observable<Nullable<IEditorBridgeServiceParam>>;
     visible$: Observable<IEditorBridgeServiceVisibleParam>;

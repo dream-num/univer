@@ -11,11 +11,13 @@ import {
 } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { IRenderManagerService, ScrollTimerType } from '@univerjs/engine-render';
+import type { ISelectionWithCoordAndStyle } from '@univerjs/sheets';
 import {
     convertSelectionDataToRange,
     getNormalSelectionStyle,
     NORMAL_SELECTION_PLUGIN_NAME,
     SelectionManagerService,
+    SelectionMoveType,
     SetSelectionsOperation,
     transformCellDataToSelectionData,
 } from '@univerjs/sheets';
@@ -174,7 +176,7 @@ export class SelectionController extends Disposable {
     private _initSelectionChangeListener() {
         this.disposeWithMe(
             toDisposable(
-                this._selectionManagerService.selectionInfo$.subscribe((param) => {
+                this._selectionManagerService.selectionMoveEnd$.subscribe((param) => {
                     this._selectionRenderService.reset();
                     if (param == null) {
                         return;
@@ -194,24 +196,37 @@ export class SelectionController extends Disposable {
     }
 
     private _initUserActionSyncListener() {
-        this._selectionRenderService.selectionRangeWithStyle$.subscribe((selectionDataWithStyleList) => {
-            const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
-            const unitId = workbook.getUnitId();
-            const sheetId = workbook.getActiveSheet().getSheetId();
-            const current = this._selectionManagerService.getCurrent();
+        this._selectionRenderService.selectionMoveStart$.subscribe((params) => {
+            this._move(params, SelectionMoveType.MOVE_START);
+        });
 
-            if (selectionDataWithStyleList == null || selectionDataWithStyleList.length === 0) {
-                return;
-            }
+        this._selectionRenderService.selectionMoving$.subscribe((params) => {
+            this._move(params, SelectionMoveType.MOVING);
+        });
 
-            this._commandService.executeCommand(SetSelectionsOperation.id, {
-                unitId,
-                sheetId,
-                pluginName: current?.pluginName || NORMAL_SELECTION_PLUGIN_NAME,
-                selections: selectionDataWithStyleList.map((selectionDataWithStyle) =>
-                    convertSelectionDataToRange(selectionDataWithStyle)
-                ),
-            });
+        this._selectionRenderService.selectionMoveEnd$.subscribe((params) => {
+            this._move(params, SelectionMoveType.MOVE_END);
+        });
+    }
+
+    private _move(selectionDataWithStyleList: ISelectionWithCoordAndStyle[], type: SelectionMoveType) {
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+        const unitId = workbook.getUnitId();
+        const sheetId = workbook.getActiveSheet().getSheetId();
+        const current = this._selectionManagerService.getCurrent();
+
+        if (selectionDataWithStyleList == null || selectionDataWithStyleList.length === 0) {
+            return;
+        }
+
+        this._commandService.executeCommand(SetSelectionsOperation.id, {
+            unitId,
+            sheetId,
+            type,
+            pluginName: current?.pluginName || NORMAL_SELECTION_PLUGIN_NAME,
+            selections: selectionDataWithStyleList.map((selectionDataWithStyle) =>
+                convertSelectionDataToRange(selectionDataWithStyle)
+            ),
         });
     }
 

@@ -8,8 +8,15 @@ import {
     Range,
     Rectangle,
 } from '@univerjs/core';
-import type { FormatType, ISetNumfmtMutationParams } from '@univerjs/sheets';
-import { factorySetNumfmtUndoMutation, INumfmtService, SetNumfmtMutation } from '@univerjs/sheets';
+import type { FormatType, IRemoveNumfmtMutationParams, ISetCellsNumfmt } from '@univerjs/sheets';
+import {
+    factoryRemoveNumfmtUndoMutation,
+    factorySetNumfmtUndoMutation,
+    INumfmtService,
+    RemoveNumfmtMutation,
+    SetNumfmtMutation,
+    transformCellsToRange,
+} from '@univerjs/sheets';
 import { COPY_TYPE, getRepeatRange, ISheetClipboardService } from '@univerjs/sheets-ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -100,12 +107,11 @@ export class NumfmtCopyPasteController extends Disposable {
         }
 
         const repeatRange = getRepeatRange(copyInfo.copyRange, pastedRange, true);
-        const redos: ISetNumfmtMutationParams = { workbookId, worksheetId, values: [] };
+        const cells: ISetCellsNumfmt = [];
+        const removeRedos: IRemoveNumfmtMutationParams = { workbookId, worksheetId, ranges: [] };
 
         // Clears the destination area data format
-        Range.foreach(pastedRange, (row, col) => {
-            redos.values.push({ row, col });
-        });
+        removeRedos.ranges.push(pastedRange);
 
         // Set up according to the data collected. This will overlap with the cleanup, but that's okay
         repeatRange.forEach((item) => {
@@ -120,7 +126,7 @@ export class NumfmtCopyPasteController extends Disposable {
                         },
                         item.startRange
                     );
-                    redos.values.push({
+                    cells.push({
                         row: range.startRow,
                         col: range.startColumn,
                         pattern: value.pattern,
@@ -128,12 +134,18 @@ export class NumfmtCopyPasteController extends Disposable {
                     });
                 });
         });
-
-        const undos: ISetNumfmtMutationParams = factorySetNumfmtUndoMutation(this._injector, redos);
+        const setRedos = transformCellsToRange(workbookId, worksheetId, cells);
+        const undos = [
+            ...factorySetNumfmtUndoMutation(this._injector, setRedos),
+            ...factoryRemoveNumfmtUndoMutation(this._injector, removeRedos),
+        ];
 
         return {
-            redos: [{ id: SetNumfmtMutation.id, params: redos }],
-            undos: [{ id: SetNumfmtMutation.id, params: undos }],
+            redos: [
+                { id: RemoveNumfmtMutation.id, params: removeRedos },
+                { id: SetNumfmtMutation.id, params: setRedos },
+            ],
+            undos,
         };
     }
 }

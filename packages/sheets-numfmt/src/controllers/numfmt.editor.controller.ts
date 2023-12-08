@@ -1,4 +1,4 @@
-import type { Nullable } from '@univerjs/core';
+import type { IRange, Nullable } from '@univerjs/core';
 import {
     CellValueType,
     Disposable,
@@ -8,13 +8,21 @@ import {
     toDisposable,
 } from '@univerjs/core';
 import numfmt from '@univerjs/engine-numfmt';
-import type { INumfmtItemWithCache, ISetNumfmtMutationParams } from '@univerjs/sheets';
+import type {
+    INumfmtItemWithCache,
+    IRemoveNumfmtMutationParams,
+    ISetCellsNumfmt,
+    ISetNumfmtMutationParams,
+} from '@univerjs/sheets';
 import {
+    factoryRemoveNumfmtUndoMutation,
     factorySetNumfmtUndoMutation,
     INumfmtService,
+    RemoveNumfmtMutation,
     SetNumfmtMutation,
     SetRangeValuesCommand,
     SheetInterceptorService,
+    transformCellsToRange,
 } from '@univerjs/sheets';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -195,20 +203,51 @@ export class NumfmtEditorController extends Disposable {
                                     undos: [],
                                 };
                             }
-                            const redos: ISetNumfmtMutationParams = {
-                                workbookId,
-                                worksheetId,
-                                values: list.map((item) => ({
-                                    pattern: item.value ? item.value.pattern : '',
+                            const cells: ISetCellsNumfmt = list
+                                .filter((item) => !!item.value?.pattern)
+                                .map((item) => ({
                                     row: item.row,
                                     col: item.col,
-                                    type: item.value?.type,
-                                })),
-                            };
-                            const undos = factorySetNumfmtUndoMutation(self._injector, redos);
+                                    pattern: item.value!.pattern,
+                                    type: item.value!.type,
+                                }));
+                            const removeCells: IRange[] = list
+                                .filter((item) => !item.value?.pattern)
+                                .map((item) => ({
+                                    startRow: item.row,
+                                    endColumn: item.col,
+                                    startColumn: item.col,
+                                    endRow: item.row,
+                                }));
+                            const redos = [];
+                            const undos = [];
+                            if (cells) {
+                                const redo = {
+                                    id: SetNumfmtMutation.id,
+                                    params: transformCellsToRange(
+                                        workbookId,
+                                        worksheetId,
+                                        cells
+                                    ) as ISetNumfmtMutationParams,
+                                };
+                                redos.push(redo);
+                                undos.push(...factorySetNumfmtUndoMutation(self._injector, redo.params));
+                            }
+                            if (removeCells) {
+                                const redo = {
+                                    id: RemoveNumfmtMutation.id,
+                                    params: {
+                                        workbookId,
+                                        worksheetId,
+                                        ranges: removeCells,
+                                    } as IRemoveNumfmtMutationParams,
+                                };
+                                redos.push(redo);
+                                undos.push(...factoryRemoveNumfmtUndoMutation(self._injector, redo.params));
+                            }
                             return {
-                                redos: [{ id: SetNumfmtMutation.id, params: redos }],
-                                undos: [{ id: SetNumfmtMutation.id, params: undos }],
+                                redos,
+                                undos: undos.reverse(),
                             };
                         }
                     }

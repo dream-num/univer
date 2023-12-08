@@ -127,24 +127,35 @@ describe('Test ref-range.service', () => {
         refRangeService.registerRefRange(getRangeByCell(3, 2), mockFn2);
         refRangeService.registerRefRange(getRangeByCell(4, 2), mockFn3);
         // will squash mutations to one.
-        const disposeIntercept = refRangeService.intercept({
-            handler: (list, result, next) => {
-                if (list && list.length) {
-                    const lastOne = list[list.length - 1] as any;
-                    const firstOne = result[0] as any;
-                    if (lastOne.id === redoMutationId && firstOne.id === redoMutationId) {
-                        // [1,2,3],[1,2,3],[1,2,3]
-                        // after squash to be
-                        // [1,2,3,1,2,3,1,2,3]
-                        result.map((item) =>
-                            (item as any).params.values.forEach((v: number) => lastOne.params.values.push(v))
+        // [1,2,3],[1,2,3],[1,2,3]
+        // after squash to be
+        // [1,2,3,1,2,3,1,2,3]
+        const disposeIntercept = refRangeService.interceptor.intercept(
+            refRangeService.interceptor.getInterceptPoints().MERGE_REDO,
+            {
+                handler: (list, _c, next) => {
+                    const redo = list?.filter((item) => item.id === redoMutationId) || [];
+                    const result = list?.filter((item) => item.id !== redoMutationId) || [];
+                    if (redo.length) {
+                        result.push(
+                            redo.reduce(
+                                (_result, current) => {
+                                    const params = current.params as any;
+                                    _result.params.values.push(...params.values);
+                                    return _result;
+                                },
+                                {
+                                    id: redoMutationId,
+                                    params: { values: [] },
+                                } as { id: string; params: { values: any[] } }
+                            )
                         );
-                        return list;
                     }
-                }
-                return next(list);
-            },
-        });
+                    return next(result);
+                },
+            }
+        );
+
         const params: IMoveRangeCommandParams = {
             fromRange: { startRow: 2, endRow: 4, startColumn: 2, endColumn: 2 },
             toRange: { startRow: 3, endRow: 5, startColumn: 2, endColumn: 2 },
@@ -155,7 +166,7 @@ describe('Test ref-range.service', () => {
         expect((result as any).redos[0].params.values.length).toBe(9);
 
         // if dispose, the mutations will not be squash.
-        disposeIntercept.dispose();
+        disposeIntercept();
         commandService.executeCommand(MoveRangeCommand.id, params);
         const resultWithoutInterceptor = sheetInterceptorService.onCommandExecute({ id: MoveRangeCommand.id, params });
         expect((resultWithoutInterceptor as any).redos.length).toBe(3);

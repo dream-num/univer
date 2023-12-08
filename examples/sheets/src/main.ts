@@ -37,7 +37,6 @@ const univer = new Univer({
 univer.registerPlugin(DocsPlugin, {
     hasScroll: false,
 });
-// univer.registerPlugin(DocsUIPlugin);
 univer.registerPlugin(RenderEngine);
 univer.registerPlugin(UIPlugin, {
     container: 'app',
@@ -57,9 +56,6 @@ univer.registerPlugin(DebuggerPlugin);
 univer.registerPlugin(BaseFormulaEnginePlugin, {
     notExecuteFormula: true,
 });
-// univer.registerPlugin(FormulaPlugin, {
-//     notExecuteFormula: true,
-// });
 univer.registerPlugin(FormulaUIPlugin);
 univer.registerPlugin(UniverRPCMainThreadPlugin, {
     workerURL: './worker.js',

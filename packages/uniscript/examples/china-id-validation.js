@@ -38,11 +38,7 @@ function validIDNum(szID) {
     }
 
     const xCode = getXCode(szID);
-    if (xCode === szID[17]) {
-        return true;
-    }
-
-    return false;
+    return xCode === szID[17];
 }
 
 const redColor = 'rgb(240, 55, 31)';

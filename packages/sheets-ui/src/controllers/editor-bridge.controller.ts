@@ -154,7 +154,7 @@ export class EditorBridgeController extends Disposable {
                 body.textRuns = [
                     {
                         st: 0,
-                        ed: body.dataStream.length,
+                        ed: body.dataStream.length - 2,
                         ts: {
                             cl: {
                                 rgb: this._themeService.getCurrentTheme().textColorSecondary,

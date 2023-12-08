@@ -16,7 +16,7 @@ export class InputManager {
     static LongPressDelay = 500; // in milliseconds
 
     /** Time in milliseconds with two consecutive clicks will be considered as a double or triple click */
-    static DoubleOrTripleClickDelay = 400; // in milliseconds
+    static DoubleOrTripleClickDelay = 500; // in milliseconds
 
     /** If you need to check double click without raising a single click at first click, enable this flag */
     static ExclusiveDoubleClickMode = false;
@@ -348,8 +348,6 @@ export class InputManager {
             if (this._scene.onDblclickObserver.hasObservers()) {
                 this._scene.onDblclickObserver.notifyObservers(evt);
             }
-
-            this._resetDoubleClickParam();
         }
 
         // eslint-disable-next-line no-magic-numbers

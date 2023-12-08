@@ -10,14 +10,12 @@
         "access": "public",
         "exports": {
             ".": "./lib/index.js",
-            "./*": "./lib/*",
-            "./locale/*": "./lib/locale/*.js"
+            "./*": "./lib/*"
         }
     },
     "exports": {
         ".": "./src/index.ts",
-        "./*": "./src/*",
-        "./locale/*": "./src/locale/*.ts"
+        "./*": "./src/*"
     },
     "directories": {
         "lib": "lib"

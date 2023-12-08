@@ -174,7 +174,7 @@ const TEST_ROW_COL_INSERTION_DEMO: IWorkbookData = {
             columnCount: 20,
         },
     },
-    locale: LocaleType.EN_US,
+    locale: LocaleType.ZH_CN,
     name: '',
     sheetOrder: [],
     styles: {},

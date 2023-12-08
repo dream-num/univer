@@ -50,7 +50,6 @@ import { NormalInputController } from './controllers/normal-input.controller';
 import { PageRenderController } from './controllers/page-render.controller';
 import { TextSelectionController } from './controllers/text-selection.controller';
 import { ZoomController } from './controllers/zoom.controller';
-import { enUS } from './locale';
 import { DocClipboardService, IDocClipboardService } from './services/clipboard/clipboard.service';
 import { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
 import { DocViewModelManagerService } from './services/doc-view-model-manager.service';
@@ -101,11 +100,7 @@ export class DocsPlugin extends Plugin {
         this._initializeCommands();
     }
 
-    initialize(): void {
-        this._localeService.load({
-            enUS,
-        });
-    }
+    initialize(): void {}
 
     private _initializeCommands(): void {
         (

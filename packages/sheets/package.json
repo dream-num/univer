@@ -22,18 +22,12 @@
                 "import": "./lib/esm/*",
                 "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
-            },
-            "./locale/*": {
-                "import": "./lib/esm/locale/*.js",
-                "require": "./lib/cjs/locale/*.js",
-                "types": "./lib/types/index.d.ts"
             }
         }
     },
     "exports": {
         ".": "./src/index.ts",
-        "./*": "./src/*",
-        "./locale/*": "./src/locale/*.ts"
+        "./*": "./src/*"
     },
     "directories": {
         "lib": "lib"

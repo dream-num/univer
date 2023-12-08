@@ -19,7 +19,7 @@ console.table({
 // univer
 const univer = new Univer({
     theme: defaultTheme,
-    locale: LocaleType.EN_US,
+    locale: LocaleType.ZH_CN,
     locales,
 });
 

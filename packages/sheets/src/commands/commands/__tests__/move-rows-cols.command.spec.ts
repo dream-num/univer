@@ -369,7 +369,7 @@ const TEST_ROWS_COLS_MOVE_DEMO: IWorkbookData = {
             columnCount: 20,
         },
     },
-    locale: LocaleType.EN_US,
+    locale: LocaleType.ZH_CN,
     name: '',
     sheetOrder: [],
     styles: {},

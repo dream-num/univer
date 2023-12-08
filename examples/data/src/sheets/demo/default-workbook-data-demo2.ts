@@ -3,7 +3,7 @@ import { BooleanNumber, BorderStyleTypes, LocaleType, SheetTypes } from '@univer
 
 export const DEFAULT_WORKBOOK_DATA_DEMO2: IWorkbookData = {
     id: 'workbook-01',
-    locale: LocaleType.EN_US,
+    locale: LocaleType.ZH_CN,
     name: 'universheet',
     sheetOrder: ['sheet-0002'],
     styles: {

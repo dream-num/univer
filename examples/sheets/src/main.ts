@@ -28,7 +28,7 @@ console.table({
 // univer
 const univer = new Univer({
     theme: greenTheme,
-    locale: LocaleType.EN_US,
+    locale: LocaleType.ZH_CN,
     locales,
     logLevel: LogLevel.VERBOSE,
 });

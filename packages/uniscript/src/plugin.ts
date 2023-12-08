@@ -3,7 +3,7 @@ import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { UniscriptController } from './controllers/uniscript.controller';
-import { enUS } from './locale';
+import { zhCN } from './locale';
 import type { IScriptEditorServiceConfig } from './services/script-editor.service';
 import { ScriptEditorService } from './services/script-editor.service';
 import { UniscriptExecutionService } from './services/script-execution.service';
@@ -38,7 +38,7 @@ export class UniscriptPlugin extends Plugin {
         dependencies.forEach((d) => injector.add(d));
 
         this._localeService.load({
-            enUS,
+            zhCN,
         });
     }
 }

@@ -8,7 +8,7 @@ import { SLIDE_UI_PLUGIN_NAME } from './basics/const/plugin-name';
 import type { IToolbarItemProps } from './controllers';
 import { AppUIController } from './controllers/app-ui-controller';
 import { SlideUIController } from './controllers/slide-ui.controller';
-import { enUS } from './locale';
+import { zhCN } from './locale';
 
 export class SlidesUIPlugin extends Plugin {
     static override type = PluginType.Slide;
@@ -37,7 +37,7 @@ export class SlidesUIPlugin extends Plugin {
 
     override onStarting(): void {
         this._localeService.load({
-            enUS,
+            zhCN,
         });
     }
 

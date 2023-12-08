@@ -31,7 +31,7 @@ const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
             },
         },
     },
-    locale: LocaleType.EN_US,
+    locale: LocaleType.ZH_CN,
     name: '',
     sheetOrder: [],
     styles: {},

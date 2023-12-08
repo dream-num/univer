@@ -13,7 +13,7 @@ import { FormulaUIController } from './controllers/formula-ui.controller';
 import { PromptController } from './controllers/prompt.controller';
 import { TriggerCalculationController } from './controllers/trigger-calculation.controller';
 import { UpdateFormulaController } from './controllers/update-formula.controller';
-import { enUS } from './locale';
+import { zhCN } from './locale';
 import { DescriptionService, IDescriptionService } from './services/description.service';
 import { FormulaInputService, IFormulaInputService } from './services/formula-input.service';
 import { FormulaPromptService, IFormulaPromptService } from './services/prompt.service';
@@ -36,7 +36,7 @@ export class FormulaUIPlugin extends Plugin {
 
     initialize(): void {
         this._localeService.load({
-            enUS,
+            zhCN,
         });
 
         const dependencies: Dependency[] = [

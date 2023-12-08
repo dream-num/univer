@@ -3,7 +3,7 @@ import { BorderStyleTypes, LocaleType } from '@univerjs/core';
 
 export const DEFAULT_WORKBOOK_DATA_DEMO6: IWorkbookData = {
     id: 'workbook-01',
-    locale: LocaleType.EN_US,
+    locale: LocaleType.ZH_CN,
     name: 'universheet',
     sheetOrder: ['sheet-0006'],
     styles: {

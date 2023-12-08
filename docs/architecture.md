@@ -34,7 +34,7 @@ import { SheetsUIPlugin } from '@univerjs/sheets-ui';
 
 const univer = new Univer({
     theme: greenTheme,
-    locale: LocaleType.EN_US,
+    locale: LocaleType.ZH_CN,
 });
 
 univer.registerPlugin(DocsPlugin, {

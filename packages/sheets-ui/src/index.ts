@@ -18,6 +18,7 @@ export {
     getSheetObject,
     getTransformCoord,
 } from './controllers/utils/component-tools';
+export { enUS, zhCN } from './locale';
 export { AutoFillService, IAutoFillService } from './services/auto-fill/auto-fill.service';
 export { getAutoFillRepeatRange } from './services/auto-fill/tools';
 export type { IAutoFillHook, ICopyDataPiece } from './services/auto-fill/type';

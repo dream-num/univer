@@ -1,4 +1,4 @@
-export const enUs = {
+export default {
     sheet: {
         numfmt: {
             title: '数据格式',

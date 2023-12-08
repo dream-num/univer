@@ -7,7 +7,7 @@ import { BasicWorksheetController } from './controllers/basic-worksheet.controll
 import { CalculateResultApplyController } from './controllers/calculate-result-apply.controller';
 import { MergeCellController } from './controllers/merge-cell.controller';
 import { PassiveDirtyController } from './controllers/passive-dirty.controller';
-import { enUS } from './locale';
+import { zhCN } from './locale';
 import { BorderStyleManagerService } from './services/border-style-manager.service';
 import { NumfmtService } from './services/numfmt/numfmt.service';
 import { INumfmtService } from './services/numfmt/type';
@@ -41,7 +41,7 @@ export class SheetsPlugin extends Plugin {
 
     override onRendered(): void {
         this._localeService.load({
-            enUS,
+            zhCN,
         });
     }
 

@@ -21,5 +21,6 @@ export { type ISelectProps, Select } from './components/select';
 export { type ISelectListProps, SelectList } from './components/select-list';
 export { type ISliderProps, Slider } from './components/slider';
 export { type ITooltipProps, Tooltip } from './components/tooltip';
+export { enUS, zhCN } from './locale';
 export { type ILocale } from './locale/interface';
 export { defaultTheme, greenTheme, themeInstance } from './themes';

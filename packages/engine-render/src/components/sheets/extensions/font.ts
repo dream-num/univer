@@ -163,11 +163,10 @@ export class Font extends SheetExtension {
 
         if (wrapStrategy === WrapStrategy.WRAP && angle === 0) {
             documentSkeleton.getViewModel().getDataModel().updateDocumentDataPageSize(cellWidth);
+            documentSkeleton.calculate();
         } else {
             documentSkeleton.getViewModel().getDataModel().updateDocumentDataPageSize(Infinity);
         }
-
-        documentSkeleton.calculate();
 
         documentSkeleton.makeDirty(false);
 

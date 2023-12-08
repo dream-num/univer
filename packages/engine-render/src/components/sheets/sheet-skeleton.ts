@@ -1531,6 +1531,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         if (documentViewModel) {
             const documentSkeleton = DocumentSkeleton.create(documentViewModel, this._localService);
+            documentSkeleton.calculate();
 
             fontCache.setValue(r, c, {
                 documentSkeleton,

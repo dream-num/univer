@@ -96,7 +96,7 @@ export class DeleteController extends Disposable {
         let cursor = startOffset;
 
         // Get the deleted span.
-        const span = skeleton.findNodeByCharIndex(startOffset - 1);
+        const span = skeleton.findNodeByCharIndex(startOffset - 1)!;
 
         const isUpdateParagraph =
             isFirstSpan(preSpan) && span !== preSpan && (preIsBullet === true || preIsIndent === true);
@@ -169,7 +169,7 @@ export class DeleteController extends Disposable {
             }
 
             if (collapsed === true) {
-                cursor -= span!.count;
+                cursor -= span.count;
 
                 const textRanges = [
                     {
@@ -184,7 +184,7 @@ export class DeleteController extends Disposable {
                     range: activeRange,
                     segmentId,
                     direction: DeleteDirection.LEFT,
-                    len: span!.count,
+                    len: span.count,
                     textRanges,
                 });
             } else {
@@ -230,7 +230,7 @@ export class DeleteController extends Disposable {
                 },
             ];
 
-            const needDeleteSpan = skeleton.findNodeByCharIndex(startOffset);
+            const needDeleteSpan = skeleton.findNodeByCharIndex(startOffset)!;
 
             this._commandService.executeCommand(DeleteCommand.id, {
                 unitId: docDataModel.getUnitId(),
@@ -238,7 +238,7 @@ export class DeleteController extends Disposable {
                 segmentId,
                 direction: DeleteDirection.RIGHT,
                 textRanges,
-                len: needDeleteSpan!.count,
+                len: needDeleteSpan.count,
             });
         } else {
             const textRanges = this._getTextRangesWhenDelete();

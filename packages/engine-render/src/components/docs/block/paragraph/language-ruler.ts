@@ -127,7 +127,7 @@ function emojiHandler(
     paragraphStyle: IParagraphStyle
 ) {
     const config = getFontCreateConfig(index, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
-    const match = EMOJI_REG.exec(charArray);
+    const match = charArray.match(EMOJI_REG); // NOSONAR
 
     return {
         charIndex: match![0].length + index - 1,

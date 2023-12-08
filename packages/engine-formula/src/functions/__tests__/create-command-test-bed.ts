@@ -3,12 +3,26 @@ import { ILogService, IUniverInstanceService, LocaleType, LogLevel, Plugin, Plug
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { CalculateController } from '../../controller/calculate.controller';
-import { FormulaController } from '../../controller/formula.controller';
-import { FormulaDataModel } from '../../models/formula-data.model';
-import { ActiveDirtyManagerService, IActiveDirtyManagerService } from '../../services/active-dirty-manager.service';
-import { FormulaService, IFormulaService } from '../../services/formula.service';
-import { FormulaEngineService } from '../../services/formula-engine.service';
+import { LexerTreeBuilder } from '../../engine/analysis/lexer';
+import { AstTreeBuilder } from '../../engine/analysis/parser';
+import { AstRootNodeFactory } from '../../engine/ast-node/ast-root-node';
+import { FunctionNodeFactory } from '../../engine/ast-node/function-node';
+import { LambdaNodeFactory } from '../../engine/ast-node/lambda-node';
+import { LambdaParameterNodeFactory } from '../../engine/ast-node/lambda-parameter-node';
+import { OperatorNodeFactory } from '../../engine/ast-node/operator-node';
+import { PrefixNodeFactory } from '../../engine/ast-node/prefix-node';
+import { ReferenceNodeFactory } from '../../engine/ast-node/reference-node';
+import { SuffixNodeFactory } from '../../engine/ast-node/suffix-node';
+import { UnionNodeFactory } from '../../engine/ast-node/union-node';
+import { ValueNodeFactory } from '../../engine/ast-node/value-node';
+import { FormulaDependencyGenerator } from '../../engine/dependency/formula-dependency';
+import { Interpreter } from '../../engine/interpreter/interpreter';
+import type { FormulaDataModel } from '../../models/formula-data.model';
+import { CalculateFormulaService } from '../../services/calculate-formula.service';
+import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from '../../services/current-data.service';
+import { FunctionService, IFunctionService } from '../../services/function.service';
+import { IOtherFormulaManagerService, OtherFormulaManagerService } from '../../services/other-formula-manager.service';
+import { FormulaRuntimeService, IFormulaRuntimeService } from '../../services/runtime.service';
 
 const TEST_WORKBOOK_DATA: IWorkbookData = {
     id: 'test',
@@ -69,14 +83,28 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
         }
 
         override onStarting(injector: Injector): void {
-            injector.add([IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }]);
-            injector.add([FormulaEngineService]);
-            this._formulaDataModel = this._injector.createInstance(FormulaDataModel);
+            injector.add([CalculateFormulaService]);
+            injector.add([LexerTreeBuilder]);
 
-            injector.add([FormulaDataModel, { useValue: this._formulaDataModel }]);
-            injector.add([FormulaController]);
-            injector.add([IFormulaService, { useClass: FormulaService }]);
-            injector.add([CalculateController]);
+            injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
+            injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
+            injector.add([IFunctionService, { useClass: FunctionService }]);
+            injector.add([IOtherFormulaManagerService, { useClass: OtherFormulaManagerService }]);
+
+            injector.add([FormulaDependencyGenerator]);
+            injector.add([Interpreter]);
+            injector.add([AstTreeBuilder]);
+
+            injector.add([AstRootNodeFactory]);
+            injector.add([FunctionNodeFactory]);
+            injector.add([LambdaNodeFactory]);
+            injector.add([LambdaParameterNodeFactory]);
+            injector.add([OperatorNodeFactory]);
+            injector.add([PrefixNodeFactory]);
+            injector.add([ReferenceNodeFactory]);
+            injector.add([SuffixNodeFactory]);
+            injector.add([UnionNodeFactory]);
+            injector.add([ValueNodeFactory]);
 
             dependencies?.forEach((d) => injector.add(d));
         }

@@ -1,12 +1,5 @@
 import type { ICellData, IRange, Nullable, ObjectMatrixPrimitiveType } from '@univerjs/core';
-import {
-    Disposable,
-    ICommandService,
-    isFormulaId,
-    isFormulaString,
-    IUniverInstanceService,
-    ObjectMatrix,
-} from '@univerjs/core';
+import { Disposable, isFormulaId, isFormulaString, IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import type {
@@ -19,7 +12,7 @@ import type {
     IUnitData,
     IUnitSheetNameMap,
 } from '../basics/common';
-import { FormulaEngineService } from '../services/formula-engine.service';
+import { LexerTreeBuilder } from '../engine/analysis/lexer';
 
 export class FormulaDataModel extends Disposable {
     private _formulaData: IFormulaData = {};
@@ -30,8 +23,7 @@ export class FormulaDataModel extends Disposable {
 
     constructor(
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
-        @ICommandService private readonly _commandService: ICommandService,
-        @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService
+        @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder
     ) {
         super();
     }
@@ -317,7 +309,7 @@ export class FormulaDataModel extends Disposable {
                 } else if (typeof deleteFormula === 'string') {
                     const x = cell.x || 0;
                     const y = cell.y || 0;
-                    const offsetFormula = this._formulaEngineService.moveFormulaRefOffset(deleteFormula, x, y);
+                    const offsetFormula = this._lexerTreeBuilder.moveFormulaRefOffset(deleteFormula, x, y);
                     deleteFormulaIdMap.set(formulaId, {
                         r,
                         c,

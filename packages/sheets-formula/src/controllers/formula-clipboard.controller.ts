@@ -8,7 +8,7 @@ import {
     OnLifecycle,
     Tools,
 } from '@univerjs/core';
-import { FormulaEngineService } from '@univerjs/engine-formula';
+import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
 import type { ICellDataWithSpanInfo, ISheetClipboardHook } from '@univerjs/sheets-ui';
@@ -24,7 +24,7 @@ export const DEFAULT_PASTE_FORMULA = 'default-paste-formula';
 export class FormulaClipboardController extends Disposable {
     constructor(
         @IUniverInstanceService private readonly _currentUniverSheet: IUniverInstanceService,
-        @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService,
+        @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
         @ISheetClipboardService private readonly _sheetClipboardService: ISheetClipboardService,
         @Inject(Injector) private readonly _injector: Injector
     ) {
@@ -61,7 +61,7 @@ export class FormulaClipboardController extends Disposable {
                         matrix,
                         accessor,
                         copyInfo,
-                        this._formulaEngineService,
+                        this._lexerTreeBuilder,
                         true
                     )
                 );
@@ -87,7 +87,7 @@ export class FormulaClipboardController extends Disposable {
                         matrix,
                         accessor,
                         copyInfo,
-                        this._formulaEngineService
+                        this._lexerTreeBuilder
                     )
                 );
             },
@@ -107,7 +107,7 @@ export function getSetCellFormulaMutations(
         copyType: COPY_TYPE;
         copyRange?: IRange;
     },
-    formulaEngineService: FormulaEngineService,
+    lexerTreeBuilder: LexerTreeBuilder,
     isSpecialPaste = false
 ) {
     const redoMutationsInfo: IMutationInfo[] = [];
@@ -155,7 +155,7 @@ export function getSetCellFormulaMutations(
 
                 const offsetX = col + startColumn - (copyRangeStartColumn + colIndex);
                 const offsetY = row + startRow - (copyRangeStartRow + rowIndex);
-                const shiftedFormula = formulaEngineService.moveFormulaRefOffset(originalFormula, offsetX, offsetY);
+                const shiftedFormula = lexerTreeBuilder.moveFormulaRefOffset(originalFormula, offsetX, offsetY);
 
                 valueObject.si = formulaId;
                 valueObject.f = shiftedFormula;

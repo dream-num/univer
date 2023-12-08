@@ -35,6 +35,7 @@ export {
     type ISetFormulaDataMutationParams,
     SetFormulaDataMutation,
 } from './commands/mutations/set-formula-data.mutation';
+export { LexerTreeBuilder } from './engine/analysis/lexer';
 export { LexerNode } from './engine/analysis/lexer-node';
 export { ErrorValueObject } from './engine/other-object/error-value-object';
 export { BaseReferenceObject, type FunctionVariantType } from './engine/reference-object/base-reference-object';
@@ -51,8 +52,10 @@ export { FormulaDataModel } from './models/formula-data.model';
 export { initSheetFormulaData } from './models/formula-data.model';
 export { BaseFormulaEnginePlugin } from './plugin';
 export { IActiveDirtyManagerService } from './services/active-dirty-manager.service';
-export { FormulaEngineService } from './services/formula-engine.service';
+export { CalculateFormulaService } from './services/calculate-formula.service';
+export { FunctionService } from './services/function.service';
 export { IFunctionService } from './services/function.service';
+export { type IOtherFormulaManagerService, OtherFormulaManagerService } from './services/other-formula-manager.service';
 export { IPassiveDirtyManagerService, PassiveDirtyManagerService } from './services/passive-dirty-manager.service';
 export { FormulaExecuteStageType, type IExecutionInProgressParams } from './services/runtime.service';
 export { FormulaExecutedStateType, type IAllRuntimeData } from './services/runtime.service';

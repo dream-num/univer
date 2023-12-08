@@ -1,7 +1,7 @@
 import type { ISequenceNode } from '@univerjs/engine-formula';
-import { FormulaEngineService, sequenceNodeType } from '@univerjs/engine-formula';
+import { sequenceNodeType } from '@univerjs/engine-formula';
 import type { IDisposable } from '@wendellhu/redi';
-import { createIdentifier, Inject } from '@wendellhu/redi';
+import { createIdentifier } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 
@@ -80,8 +80,6 @@ export class FormulaInputService implements IFormulaInputService, IDisposable {
     private readonly _inputFormula$ = new Subject<string>();
 
     readonly inputFormula$ = this._inputFormula$.asObservable();
-
-    constructor(@Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService) {}
 
     dispose(): void {
         this._sequenceNodes = [];

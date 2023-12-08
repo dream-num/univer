@@ -1,6 +1,6 @@
 import { LocaleService } from '@univerjs/core';
 import type { IFunctionInfo } from '@univerjs/engine-formula';
-import { FormulaEngineService } from '@univerjs/engine-formula';
+import { IFunctionService } from '@univerjs/engine-formula';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier, Inject } from '@wendellhu/redi';
 
@@ -46,7 +46,7 @@ export const IDescriptionService = createIdentifier<IDescriptionService>('formul
 export class DescriptionService implements IDescriptionService, IDisposable {
     constructor(
         private _description: IFunctionInfo[],
-        @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService,
+        @IFunctionService private readonly _functionService: IFunctionService,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         this._initialize();
@@ -58,22 +58,22 @@ export class DescriptionService implements IDescriptionService, IDisposable {
     }
 
     getDescriptions() {
-        return this._formulaEngineService.getDescriptions();
+        return this._functionService.getDescriptions();
     }
 
     hasFunction(searchText: string) {
-        const functionList = this._formulaEngineService.getDescriptions();
+        const functionList = this._functionService.getDescriptions();
         return functionList.get(searchText.toLocaleUpperCase()) !== undefined;
     }
 
     getFunctionInfo(searchText: string) {
-        const functionList = this._formulaEngineService.getDescriptions();
+        const functionList = this._functionService.getDescriptions();
         return functionList.get(searchText.toLocaleUpperCase());
     }
 
     getSearchListByName(searchText: string) {
         const searchList: ISearchItem[] = [];
-        const functionList = this._formulaEngineService.getDescriptions();
+        const functionList = this._functionService.getDescriptions();
         searchText = searchText.toLocaleUpperCase();
         functionList.forEach((item) => {
             const { functionName, abstract } = item;
@@ -87,7 +87,7 @@ export class DescriptionService implements IDescriptionService, IDisposable {
 
     getSearchListByType(type: number) {
         const searchList: ISearchItem[] = [];
-        const functionList = this._formulaEngineService.getDescriptions();
+        const functionList = this._functionService.getDescriptions();
         functionList.forEach((item) => {
             const { functionName, functionType, abstract } = item;
             if (functionType === type || type === -1) {
@@ -120,6 +120,6 @@ export class DescriptionService implements IDescriptionService, IDisposable {
                 repeat: item.repeat,
             })),
         }));
-        this._formulaEngineService.registerDescription(...functionListLocale);
+        this._functionService.registerDescriptions(...functionListLocale);
     }
 }

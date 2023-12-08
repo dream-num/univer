@@ -7,6 +7,7 @@ import type { IDirtyUnitSheetNameMap, IFormulaData, IOtherFormulaData } from '..
 import { ErrorType } from '../../basics/error-type';
 import { prefixToken, suffixToken } from '../../basics/token';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
+import { IOtherFormulaManagerService } from '../../services/other-formula-manager.service';
 import {
     IPassiveDirtyManagerService,
     type PassiveDirtyManagerService,
@@ -37,6 +38,7 @@ export class FormulaDependencyGenerator extends Disposable {
     constructor(
         @IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService,
         @IFormulaRuntimeService private readonly _runtimeService: IFormulaRuntimeService,
+        @IOtherFormulaManagerService private readonly _otherFormulaManagerService: IOtherFormulaManagerService,
         @IPassiveDirtyManagerService
         private readonly _passiveDirtyManagerService: PassiveDirtyManagerService,
         @Inject(Interpreter) private readonly _interpreter: Interpreter,
@@ -59,7 +61,7 @@ export class FormulaDependencyGenerator extends Disposable {
 
         const formulaData = this._currentConfigService.getFormulaData();
 
-        const otherFormulaData = this._currentConfigService.getOtherFormulaData();
+        const otherFormulaData = this._otherFormulaManagerService.getOtherFormulaData();
 
         const treeList = await this._generateTreeList(formulaData, otherFormulaData);
 

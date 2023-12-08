@@ -3,14 +3,16 @@ import { ICommandService, IUniverInstanceService } from '@univerjs/core';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, it } from 'vitest';
 
-import type { FormulaEngineService } from '../../../../services/formula-engine.service';
+import type { LexerTreeBuilder } from '../../../../engine/analysis/lexer';
+import type { CalculateFormulaService } from '../../../../services/calculate-formula.service';
 import { createCommandTestBed } from '../../../__tests__/create-command-test-bed';
 
 describe('test sumif', () => {
     let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
-    let formulaEngineService: FormulaEngineService;
+    let calculateFormulaService: CalculateFormulaService;
+    let lexerTreeBuilder: LexerTreeBuilder;
     let getValue: (
         startRow: number,
         startColumn: number,

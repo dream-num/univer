@@ -27,10 +27,10 @@ import {
 } from '@univerjs/docs';
 import type { ISequenceNode } from '@univerjs/engine-formula';
 import {
-    FormulaEngineService,
     generateStringWithSequence,
     includeFormulaLexerToken,
     isFormulaLexerToken,
+    LexerTreeBuilder,
     matchToken,
     normalizeSheetName,
     sequenceNodeType,
@@ -128,7 +128,7 @@ export class PromptController extends Disposable {
         @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
         @Inject(IEditorBridgeService) private readonly _editorBridgeService: EditorBridgeService,
         @Inject(IFormulaPromptService) private readonly _formulaPromptService: IFormulaPromptService,
-        @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService,
+        @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
@@ -554,7 +554,7 @@ export class PromptController extends Disposable {
 
         const dataStream = currentBody?.dataStream || '';
 
-        const functionAndParameter = this._formulaEngineService.getFunctionAndParameter(dataStream, startOffset - 1);
+        const functionAndParameter = this._lexerTreeBuilder.getFunctionAndParameter(dataStream, startOffset - 1);
 
         if (functionAndParameter == null) {
             this._hideFunctionPanel();
@@ -713,9 +713,8 @@ export class PromptController extends Disposable {
             this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, true);
 
             const lastSequenceNodes =
-                this._formulaEngineService.buildSequenceNodes(
-                    currentInputValue.replace(/\r/g, '').replace(/\n/g, '')
-                ) || [];
+                this._lexerTreeBuilder.sequenceNodesBuilder(currentInputValue.replace(/\r/g, '').replace(/\n/g, '')) ||
+                [];
 
             this._formulaInputService.setSequenceNodes(lastSequenceNodes);
 
@@ -783,7 +782,7 @@ export class PromptController extends Disposable {
 
         // const dataStream = body.dataStream;
 
-        // const sequenceNodes = this._formulaEngineService.buildSequenceNodes(
+        // const sequenceNodes = this._lexerTreeBuilder.buildSequenceNodes(
         //     dataStream.replace(/\r/g, '').replace(/\n/g, '')
         // );
 

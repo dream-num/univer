@@ -16,7 +16,7 @@ import type { ISetFormulaDataMutationParams } from '../commands/mutations/set-fo
 import { SetFormulaDataMutation } from '../commands/mutations/set-formula-data.mutation';
 import { FormulaDataModel } from '../models/formula-data.model';
 import { IActiveDirtyManagerService } from '../services/active-dirty-manager.service';
-import { FormulaEngineService } from '../services/formula-engine.service';
+import { CalculateFormulaService } from '../services/calculate-formula.service';
 import type { IAllRuntimeData } from '../services/runtime.service';
 import { FormulaExecutedStateType } from '../services/runtime.service';
 
@@ -24,7 +24,7 @@ import { FormulaExecutedStateType } from '../services/runtime.service';
 export class CalculateController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService,
+        @Inject(CalculateFormulaService) private readonly _calculateFormulaService: CalculateFormulaService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
         @IActiveDirtyManagerService private readonly _activeDirtyManagerService: IActiveDirtyManagerService
@@ -45,7 +45,7 @@ export class CalculateController extends Disposable {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo, options) => {
                 if (command.id === SetFormulaCalculationStopMutation.id) {
-                    this._formulaEngineService.stopFormulaExecution();
+                    this._calculateFormulaService.stopFormulaExecution();
                 } else if (command.id === SetFormulaDataMutation.id) {
                     const formulaData = (command.params as ISetFormulaDataMutationParams).formulaData as IFormulaData;
                     this._formulaDataModel.setFormulaData(formulaData);
@@ -162,7 +162,7 @@ export class CalculateController extends Disposable {
 
         // Synchronous to the main thread
         // this._commandService.executeCommand(SetFormulaDataMutation.id, { formulaData });
-        this._formulaEngineService.execute({
+        this._calculateFormulaService.execute({
             formulaData,
             arrayFormulaCellData,
             forceCalculate,
@@ -177,7 +177,7 @@ export class CalculateController extends Disposable {
         /**
          * Assignment operation after formula calculation.
          */
-        this._formulaEngineService.executionCompleteListener$.subscribe((data) => {
+        this._calculateFormulaService.executionCompleteListener$.subscribe((data) => {
             const functionsExecutedState = data.functionsExecutedState;
             switch (functionsExecutedState) {
                 case FormulaExecutedStateType.NOT_EXECUTED:
@@ -207,7 +207,7 @@ export class CalculateController extends Disposable {
         /**
          * Assignment operation after formula calculation.
          */
-        this._formulaEngineService.executionInProgressListener$.subscribe((data) => {
+        this._calculateFormulaService.executionInProgressListener$.subscribe((data) => {
             const {
                 totalFormulasToCalculate,
                 completedFormulasCount,

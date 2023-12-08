@@ -7,6 +7,7 @@ import {
     ThemeService,
     UndoCommand,
 } from '@univerjs/core';
+import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import {
     AddWorksheetMergeMutation,
     NORMAL_SELECTION_PLUGIN_NAME,
@@ -53,6 +54,7 @@ describe('Test auto fill with formula', () => {
             [SheetInterceptorService],
             [ISelectionRenderService, { useClass: SelectionRenderService }],
             [AutoFillController],
+            [LexerTreeBuilder],
             [IAutoFillService, { useClass: AutoFillService }],
             [IShortcutService, { useClass: DesktopShortcutService }],
             [IPlatformService, { useClass: DesktopPlatformService }],

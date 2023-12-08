@@ -1,6 +1,6 @@
 import type { ICellData, IMutationInfo, Nullable, Univer } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
-import { FormulaEngineService } from '@univerjs/engine-formula';
+import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { type ISetRangeValuesMutationParams, SetRangeValuesMutation } from '@univerjs/sheets';
 import type { ICellDataWithSpanInfo } from '@univerjs/sheets-ui';
 import { COPY_TYPE, ISelectionRenderService, SelectionRenderService } from '@univerjs/sheets-ui';
@@ -14,7 +14,7 @@ describe('Test paste with formula', () => {
     let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
-    let formulaEngineService: FormulaEngineService;
+    let lexerTreeBuilder: LexerTreeBuilder;
     let getValues: (
         startRow: number,
         startColumn: number,
@@ -25,11 +25,12 @@ describe('Test paste with formula', () => {
     beforeEach(() => {
         const testBed = createCommandTestBed(undefined, [
             [ISelectionRenderService, { useClass: SelectionRenderService }],
+            [LexerTreeBuilder],
         ]);
         univer = testBed.univer;
         get = testBed.get;
         commandService = get(ICommandService);
-        formulaEngineService = get(FormulaEngineService);
+        lexerTreeBuilder = get(LexerTreeBuilder);
 
         getValues = (
             startRow: number,
@@ -146,7 +147,7 @@ describe('Test paste with formula', () => {
                 matrix,
                 accessor,
                 copyInfo,
-                formulaEngineService
+                lexerTreeBuilder
             );
             removeFormulaId(redoUndoList.redos as Array<IMutationInfo<ISetRangeValuesMutationParams>>);
             expect(redoUndoList).toStrictEqual(result);

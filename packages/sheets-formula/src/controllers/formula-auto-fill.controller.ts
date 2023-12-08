@@ -8,7 +8,7 @@ import {
     OnLifecycle,
     Tools,
 } from '@univerjs/core';
-import { FormulaEngineService } from '@univerjs/engine-formula';
+import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import type { AutoFillService, IAutoFillRule, ICopyDataInTypeIndexInfo, ICopyDataPiece } from '@univerjs/sheets-ui';
 import { APPLY_TYPE, DATA_TYPE, IAutoFillService } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
@@ -17,7 +17,7 @@ import { Inject } from '@wendellhu/redi';
 export class FormulaAutoFillController extends Disposable {
     constructor(
         @IAutoFillService private readonly _autoFillService: AutoFillService,
-        @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService
+        @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder
     ) {
         super();
 
@@ -80,7 +80,7 @@ export class FormulaAutoFillController extends Disposable {
                         formulaIdMap.set(index, formulaId);
 
                         const { offsetX, offsetY } = directionToOffset(step, direction);
-                        const shiftedFormula = this._formulaEngineService.moveFormulaRefOffset(
+                        const shiftedFormula = this._lexerTreeBuilder.moveFormulaRefOffset(
                             originalFormula,
                             offsetX,
                             offsetY

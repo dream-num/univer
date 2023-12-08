@@ -1,6 +1,6 @@
 import type { IWorkbookData } from '@univerjs/core';
 import { ILogService, IUniverInstanceService, LocaleType, LogLevel, Plugin, PluginType, Univer } from '@univerjs/core';
-import { FormulaEngineService } from '@univerjs/engine-formula';
+import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SelectionManagerService } from '@univerjs/sheets';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -51,7 +51,7 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
 
         override onStarting(injector: Injector): void {
             injector.add([SelectionManagerService]);
-            injector.add([FormulaEngineService]);
+            injector.add([LexerTreeBuilder]);
             injector.add([IFormulaInputService, { useClass: FormulaInputService }]);
 
             dependencies?.forEach((d) => injector.add(d));

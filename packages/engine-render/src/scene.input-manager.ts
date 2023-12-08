@@ -16,7 +16,9 @@ export class InputManager {
     static LongPressDelay = 500; // in milliseconds
 
     /** Time in milliseconds with two consecutive clicks will be considered as a double or triple click */
-    static DoubleOrTripleClickDelay = 500; // in milliseconds
+    static DoubleClickDelay = 500; // in milliseconds
+
+    static TripleClickDelay = 300; // in milliseconds
 
     /** If you need to check double click without raising a single click at first click, enable this flag */
     static ExclusiveDoubleClickMode = false;
@@ -55,7 +57,11 @@ export class InputManager {
 
     private _delayedTimeout: NodeJS.Timeout | number = -1;
 
+    private _delayedTripeTimeout: NodeJS.Timeout | number = -1;
+
     private _doubleClickOccurred = 0;
+
+    private _tripleClickState = false;
 
     private _currentObject: Nullable<BaseObject | ThinScene>;
 
@@ -332,7 +338,7 @@ export class InputManager {
 
         this._delayedTimeout = setTimeout(() => {
             this._resetDoubleClickParam();
-        }, InputManager.DoubleOrTripleClickDelay);
+        }, InputManager.DoubleClickDelay);
 
         const isMoveThreshold = this._isPointerSwiping(clientX, clientY);
 
@@ -342,23 +348,27 @@ export class InputManager {
 
         this._doubleClickOccurred += 1;
 
+        // eslint-disable-next-line no-magic-numbers
+        if (this._tripleClickState) {
+            this._scene?.pick(Vector2.FromArray([evt.offsetX, evt.offsetY]))?.triggerTripleClick(evt);
+
+            if (this._scene.onTripleClickObserver.hasObservers()) {
+                this._scene.onTripleClickObserver.notifyObservers(evt);
+            }
+        }
+
         if (this._doubleClickOccurred === 2) {
             this._scene?.pick(Vector2.FromArray([evt.offsetX, evt.offsetY]))?.triggerDblclick(evt);
 
             if (this._scene.onDblclickObserver.hasObservers()) {
                 this._scene.onDblclickObserver.notifyObservers(evt);
             }
-        }
-
-        // eslint-disable-next-line no-magic-numbers
-        if (this._doubleClickOccurred === 3) {
-            this._scene?.pick(Vector2.FromArray([evt.offsetX, evt.offsetY]))?.triggerTripleClick(evt);
-
-            if (this._scene.onTripleClickObserver.hasObservers()) {
-                this._scene.onTripleClickObserver.notifyObservers(evt);
-            }
-
             this._resetDoubleClickParam();
+            this._tripleClickState = true;
+            clearTimeout(this._delayedTripeTimeout);
+            this._delayedTripeTimeout = setTimeout(() => {
+                this._tripleClickState = false;
+            }, InputManager.TripleClickDelay);
         }
 
         this._startingPosition.x = clientX;

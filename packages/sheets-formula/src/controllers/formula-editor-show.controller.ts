@@ -9,7 +9,7 @@ import {
     ThemeService,
     toDisposable,
 } from '@univerjs/core';
-import { FormulaDataModel, FormulaEngineService, SetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
+import { FormulaDataModel, LexerTreeBuilder, SetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     IEditorBridgeService,
@@ -26,7 +26,7 @@ export class FormulaEditorShowController extends Disposable {
     constructor(
         @Inject(IEditorBridgeService) private _editorBridgeService: IEditorBridgeService,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
-        @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService,
+        @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
@@ -49,9 +49,16 @@ export class FormulaEditorShowController extends Disposable {
                             const { row, col, workbookId, worksheetId } = context;
                             const arrayFormulaMatrixRange = this._formulaDataModel.getArrayFormulaRange();
 
+                            const arrayFormulaMatrixCell = this._formulaDataModel.getArrayFormulaCellData();
+
                             this._removeArrayFormulaRangeShape();
 
-                            if (value == null) {
+                            if (
+                                value == null ||
+                                (value.v != null &&
+                                    value.v !== '' &&
+                                    arrayFormulaMatrixCell[workbookId]?.[worksheetId]?.[row]?.[col] == null)
+                            ) {
                                 return next(value);
                             }
 
@@ -85,7 +92,7 @@ export class FormulaEditorShowController extends Disposable {
                                         formulaString = originItem.f;
                                     }
 
-                                    const newFormulaString = this._formulaEngineService.moveFormulaRefOffset(
+                                    const newFormulaString = this._lexerTreeBuilder.moveFormulaRefOffset(
                                         formulaString,
                                         x,
                                         y

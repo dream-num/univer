@@ -9,7 +9,7 @@ import {
     serializeRange,
     toDisposable,
 } from '@univerjs/core';
-import { FormulaEngineService, matchToken, sequenceNodeType } from '@univerjs/engine-formula';
+import { LexerTreeBuilder, matchToken, sequenceNodeType } from '@univerjs/engine-formula';
 import { DeviceInputEventType, IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/engine-render';
 import type { EditorBridgeService } from '@univerjs/sheets-ui';
 import { getEditorObject, IEditorBridgeService } from '@univerjs/sheets-ui';
@@ -27,7 +27,7 @@ export class FormulaInputController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
         @Inject(IEditorBridgeService) private readonly _editorBridgeService: EditorBridgeService,
-        @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService,
+        @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IFormulaInputService private readonly _formulaInputService: IFormulaInputService
     ) {
@@ -91,7 +91,7 @@ export class FormulaInputController extends Disposable {
                         });
                     }
 
-                    const lastSequenceNodes = this._formulaEngineService.buildSequenceNodes(formulaString) || [];
+                    const lastSequenceNodes = this._lexerTreeBuilder.sequenceNodesBuilder(formulaString) || [];
 
                     this._formulaInputService.setSequenceNodes(lastSequenceNodes);
 

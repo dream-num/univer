@@ -59,11 +59,10 @@ export class SheetsPlugin extends Plugin {
             [BasicWorksheetController],
             [MergeCellController],
             [ActiveDirtyController],
-            [PassiveDirtyController],
         ];
 
         if (!this._config?.notExecuteFormula) {
-            dependencies.push([CalculateResultApplyController]);
+            dependencies.push([CalculateResultApplyController], [PassiveDirtyController]);
         }
 
         dependencies.forEach((d) => {

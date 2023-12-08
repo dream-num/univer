@@ -6,10 +6,23 @@ import type { FUNCTION_NAMES, IFunctionInfo } from '../basics/function';
 import type { BaseFunction } from '../functions/base-function';
 
 export interface IFunctionService {
+    /**
+     * Use register to register a function, new CustomFunction(inject, name)
+     */
     registerExecutors(...functions: BaseFunction[]): void;
 
     getExecutors(): Map<string, BaseFunction>;
 
+    /**
+     * Obtain the operator of the function to reuse the calculation logic.
+     * The argument type accepted by the function is: FunctionVariantType.
+     * For instance, the sum formula capability is needed for the statistics bar.
+     * You can obtain the calculation result by using
+     * const sum = formulaService.getExecutor(FUNCTION_NAMES.SUM);
+     * sum.calculate(new RangeReferenceObject(range, sheetId, unitId), ref2, re3).
+     * @param functionName Function name, which can be obtained through the FUNCTION_NAMES enumeration.
+     * @returns
+     */
     getExecutor(functionToken: string): Nullable<BaseFunction>;
 
     hasExecutor(functionToken: string): boolean;

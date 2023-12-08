@@ -100,8 +100,6 @@ export class DocClipboardController extends Disposable {
         try {
             const body = await clipboard.queryClipboardData();
 
-            console.log(body);
-
             // When doc has multiple selections, the cursor moves to the last pasted content's end.
             let cursor = activeEndOffset;
             for (const range of ranges) {

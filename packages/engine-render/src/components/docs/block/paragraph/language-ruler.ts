@@ -1,5 +1,4 @@
 import type { IParagraphStyle, Nullable } from '@univerjs/core';
-import { DataStreamTreeTokenType } from '@univerjs/core';
 
 import type { IDocumentSkeletonSpan } from '../../../../basics/i-document-skeleton-cached';
 import type { ISectionBreakConfig } from '../../../../basics/interfaces';
@@ -23,10 +22,12 @@ export function composeCharForLanguage(
     sectionBreakConfig: ISectionBreakConfig,
     paragraphStyle: IParagraphStyle
 ): Nullable<ILanguageResult> {
-    if (char === DataStreamTreeTokenType.SPACE) {
+    if (hasSpaceAndTab(char)) {
         return;
     }
+
     const subCharArray = charArray.substring(index);
+
     if (startWithEmoji(subCharArray)) {
         return emojiHandler(index, subCharArray, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
     }

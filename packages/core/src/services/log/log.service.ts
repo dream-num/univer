@@ -26,7 +26,7 @@ export class DesktopLogService extends Disposable implements ILogService {
     private _logLevel: LogLevel = LogLevel.SILENT;
 
     log(...args: any[]): void {
-        if (this._logLevel >= LogLevel.VERBOSE || !args.length) {
+        if (this._logLevel < LogLevel.VERBOSE || !args.length) {
             return;
         }
 

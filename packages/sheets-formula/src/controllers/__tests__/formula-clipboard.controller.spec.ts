@@ -25,7 +25,6 @@ describe('Test paste with formula', () => {
     beforeEach(() => {
         const testBed = createCommandTestBed(undefined, [
             [ISelectionRenderService, { useClass: SelectionRenderService }],
-            [FormulaEngineService],
         ]);
         univer = testBed.univer;
         get = testBed.get;
@@ -103,7 +102,6 @@ describe('Test paste with formula', () => {
                                         si: null,
                                         p: null,
                                         v: null,
-                                        m: null,
                                         t: null,
                                     },
                                     '3': {
@@ -112,7 +110,6 @@ describe('Test paste with formula', () => {
                                         si: null,
                                         p: null,
                                         v: null,
-                                        m: null,
                                         t: null,
                                     },
                                 },

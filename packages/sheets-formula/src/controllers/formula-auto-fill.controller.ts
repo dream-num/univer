@@ -1,5 +1,13 @@
 import type { ICellData, Nullable } from '@univerjs/core';
-import { Direction, Disposable, isFormulaString, LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
+import {
+    Direction,
+    Disposable,
+    isFormulaId,
+    isFormulaString,
+    LifecycleStages,
+    OnLifecycle,
+    Tools,
+} from '@univerjs/core';
 import { FormulaEngineService } from '@univerjs/engine-formula';
 import type { AutoFillService, IAutoFillRule, ICopyDataInTypeIndexInfo, ICopyDataPiece } from '@univerjs/sheets-ui';
 import { APPLY_TYPE, DATA_TYPE, IAutoFillService } from '@univerjs/sheets-ui';
@@ -24,7 +32,7 @@ export class FormulaAutoFillController extends Disposable {
         const formulaRule: IAutoFillRule = {
             type: DATA_TYPE.FORMULA,
             priority: 1001,
-            match: (cellData) => isFormulaString(cellData?.f),
+            match: (cellData) => isFormulaString(cellData?.f) || isFormulaId(cellData?.si),
             isContinue: (prev, cur) => {
                 if (prev.type === DATA_TYPE.FORMULA) {
                     return true;
@@ -57,14 +65,18 @@ export class FormulaAutoFillController extends Disposable {
             const d = Tools.deepClone(data[index]);
 
             if (d) {
-                const originalFormula = data[index]?.f;
+                const originalFormula = data[index]?.f || '';
+                const originalFormulaId = data[index]?.si || '';
 
-                if (originalFormula) {
+                const checkFormula = isFormulaString(originalFormula);
+                const checkFormulaId = isFormulaId(originalFormulaId);
+
+                if (checkFormula) {
                     // The first position setting formula and formulaId
                     let formulaId = formulaIdMap.get(index);
 
                     if (!formulaId) {
-                        formulaId = Tools.generateRandomId(6);
+                        formulaId = checkFormulaId ? originalFormulaId : Tools.generateRandomId(6);
                         formulaIdMap.set(index, formulaId);
 
                         const { offsetX, offsetY } = directionToOffset(step, direction);
@@ -85,6 +97,17 @@ export class FormulaAutoFillController extends Disposable {
                         d.v = null;
                         d.p = null;
                     }
+
+                    if (direction === Direction.DOWN || direction === Direction.RIGHT) {
+                        applyData.push(d);
+                    } else {
+                        applyData.unshift(d);
+                    }
+                } else if (checkFormulaId) {
+                    d.si = originalFormulaId;
+                    d.f = null;
+                    d.v = null;
+                    d.p = null;
 
                     if (direction === Direction.DOWN || direction === Direction.RIGHT) {
                         applyData.push(d);

@@ -4,66 +4,77 @@ sidebar_position: 1
 
 # Univer 架构
 
-## Univer 架构设计的核心需求
+这篇文档介绍 Univer 的整体架构。
 
-1. **100% 拥抱 web 技术栈**。Univer 需要运行在相当多的环境里，要满足快速的迭代需求并让客户、ISV、社区拥有二次开发的能力，能同时满足这些需求的只有以 web 技术为核心的技术栈。
-2. **插件化和高度可扩展性**。Univer 的各个模块应当尽可能地以插件的方式存在，尽可能解耦插件之间的耦合关系，做到降低适配不同的用户需求、不同的运行环境的成本，同时降低二次开发的门槛。
-3. **层次结构和单向依赖**。Univer 的模块之间不允许循环依赖，这使得我们可以按照不同环境的需要加载所需的层次和模块。
-4. **面向多平台做设计**。解耦代码和具体运行环境的耦合关系，方便迁移到不同的运行环境当中。
-5. **面向高可测试性做设计**。各个模块直接尽可能基于接口建立依赖关系，方便独立测试。
-
-
-## 插件和依赖注入
+## Univer 代码的组织方式
 
 <img width="962" alt="" src="/img/architecture.png" />
 
 ### 插件
 
-Univer 的模块需按照 **业务类型（Sheet / Doc / Slide）、关注面（配置管理 / UI / 快捷键 / canvas 渲染）、功能（Sheet 基本操作 / Sheet 条件格式 / Sheet 筛选、运行环境（桌面端 / 移动端 / Node.js 等）** 等因素综合考虑，拆分成各个插件（plugin），组合成为一个 Univer 应用。
+Univer 的模块按照多种因素综合考虑拆分成了各个插件（plugin），多个插件组合成为一个 Univer 应用。
 
-基于插件的设计能够使得 Univer 能够满足多样的运行环境（PC browser / Node / 移动端）、不同的功能需求、不同的配置要求、二次开发、三方插件等需要。
+插件化架构为 Univer 带来这些以下优势：
 
-典型的插件及扩展能力可以参考文档 [Plugin 扩展能力](https://github.com/dream-num/univer/wiki/%5BWIP%5D-Plugin-%E6%89%A9%E5%B1%95%E8%83%BD%E5%8A%9B)。
+1. 无论运行在什么环境下，Univer 都可以通过加载不同的插件来满足不同的需求（例如在 Node.js 环境下，可以不加载 UI 相关的插件）从而减少冗余代码带来的开销
+2. 你可以按照自己的需要选择加载哪些插件，减少不必要的代码。
+3. 插件化架构使得 Univer 更容易修改和扩展，你可以自行开发插件来满足自己的需求，而不必更改 Univer 本身的代码。
+4. 插件化架构可以让 Univer 各个模块的职责及依赖关系更加明确，更易于理解、修改、测试和维护。
+
+### 拆分插件的考虑因素
+
+插件的划分是相当灵活的，你完全可以有自己的一套依据。不过以下是我们（Univer 核心团队）所使用的一些依据：
+
+* 是否存在在某些环境下需要加载而在另一环境下不需要加载的模块，如果存在这样的模块，这些模块适宜放在一个单独的插件中。例如 Node.js 中不需要加载 UI 相关的模块，因此 sheet 基本功能中和 UI 相关的部分被拆分到 @univerjs/sheet-ui 中。
+* 可以按照不同的文档类型划分，例如 @univerjs/sheet 和 @univerjs/doc 就是按照文档类型划分的。
+* 一些复杂的功能可以单独划分成一个插件，例如 @univerjs/sheet-numfmt 就是一个单独的插件，它提供了修改数字格式的功能。
+* 一些通用的底层能力可以单独划分成一个插件，例如 @univerjs/design 提供设计系统相关的能力，例如主题、颜色、组件等等、@univerjs/rpc 提供 RPC 能力等等
+
+### 插件的类型
+
+Univer 对插件的类型做了区分，这使得 Univer 能够在最合适的时机初始化插件，从而尽可能节约插件的内存占用。
+
+目前有以下几种类型：
+
+* `PluginType.Univer` Univer 核心插件，这些插件会在 Univer 实例创建的时候就开始加载并触发 `onStarting` 生命周期
+* `PluginType.Doc` Doc 文档类型插件
+* `PluginType.Sheet` Sheet 文档类型插件
+
+除了 `PluginType.Univer` 之外的插件只会在对应类型的文件第一次被创建的时候开始加载并经历其生命周期。
+
+:::note
+关于生命周期的介绍请参考下面的 “插件生命周期” 一节。
+:::
 
 ### 依赖注入
 
-插件内部可以根据实际需要将代码划分为下面 “层次结构” 一节中介绍的各个层次的模块，这些模块中的 service 和 controller 需要加入 Univer 的依赖注入系统，这样 Univer 就能自动解析这些模块之间的依赖关系并实例化这些模块。依赖注入系统的文档参考 [redi - redi](https://redi.wendell.fun/zh-CN)。
+插件内部可以划分为多个模块（划分的方式可参考下面 “层次结构” 的介绍）这些模块中可以加入 Univer 的依赖注入系统，这样 Univer 就能自动解析这些模块之间的依赖关系并实例化这些模块，从而大大降低在一个复杂系统中管理依赖的复杂度。目前 Univer 官方插件均接入了依赖注入系统。
+
+我们使用的依赖注入工具为 [redi](https://redi.wendell.fun/zh-CN)，可以参考 redi 的文档了解依赖注入的基本概念，以及如何使用它。
 
 ### 插件的公有私有模块
 
-可以通过在每个插件的 index.ts 文件中导出这些模块的依赖注入标识符 identifier。如果一个模块的 identifier 被导出，那么其它的插件就可以 import 这些模块的 identifier，从而建立对这些模块的依赖关系，这些模块也就成为前一个插件的公有模块，反之就是私有模块。如果你熟悉 Angular 的话，很容易发现这跟 NgModule 的概念非常相似，只不过我们不用申明 exports 字段，而是用 es module 的 export 来区分公有模块。
+如果一个插件想要暴露一些接口给其他插件使用，插件可以在它的模块出口文件（一般是 index.ts 文件）中导出这些模块的依赖注入标识符（identifier）。如果一个模块的 identifier 被导出，那么其它的插件就可以注入这些模块的 identifier，从而建立对这些模块的依赖关系，这些模块也就成为前一个插件的公有模块，反之就是私有模块。如果你熟悉 Angular 的话，很容易发现这跟 NgModule 的概念非常相似，只不过我们不用 exports 字段来声明一个模块的公有模块，而是用 es module 的 export 来暴露模块并将其视为公有模块。
 
 ### 插件生命周期
 
-插件有如下四个生命周期
+Univer 的插件存在生命周期，通过使用生命周期，Univer 使得插件的行为更好预测，避免时序相关的逻辑错误。
 
-```ts
-export const enum LifecycleStages {
-    Starting,
-    Ready,
-    Rendered,
-    Steady,
-}
-```
+插件有如下四个生命周期：
 
 * `Starting` plugin 挂载到 Univer 实例上的第一个生命周期，此时 Univer 业务实例尚未被创建。Plugin 在此生命周期中应该将自己模块加入到依赖注入系统当中。不建议在此生命周期之外初始化插件内部模块。
 * `Ready` Univer 的第一个业务实例已经创建，plugin 可以在此生命周期做大部分初始化工作。
 * `Rendered` 第一次渲染已经完成，plugin 可以在此生命周期进行需要依赖 DOM 的初始化工作。
 * `Steady` 在 `Rendered` 一段时间之后触发，plugin 可以在此生命周期进行非首屏必须的工作，以提升加载性能。
 
-对应的，Plugin 类型上有四个生命周期勾子
+对应的，Plugin 类型上有四个生命周期勾子，各个 plugin 可以通过覆盖这些方法来在各个声明周期执行相应的逻辑.
+
 
 ```ts
-/**
- * Plug-in base class, all plug-ins must inherit from this base class. Provide basic methods.
- */
 export abstract class Plugin {
     onStarting(_injector: Injector): void {}
-
     onReady(): void {}
-
     onRendered(): void {}
-
     onSteady(): void {}
 }
 ```
@@ -89,17 +100,13 @@ export class YourService {
 }
 ```
 
-### 划分插件的依据
-
-插件划分的主要依据是：在某些场景下，一些模块是否需要加载。例如在 Node.js 端运行时，可能不需要加载 UI 相关的模块，这样就可以将 UI 相关的模块放在一个插件中，然后在 Node.js 端不加载这个插件；又例如想让用户自行选择是否加载一个功能，那么就可以将这个功能放在一个插件中。
-
-## 层次结构
+### 模块分层
 
 ![image](/img/layers.png)
 
 插件内部的模块应当归属于以下层次：
 
-* View 处理渲染和交互，包括 canvas 渲染和 React 组件
+* View 处理渲染和交互，包括 Canvas 渲染和 React 组件
 * Controller 封装业务逻辑（特别是功能逻辑），派发 Command 等
 * Command 通过命令模式执行逻辑，修改下面 Service / Model 等层次的状态或数据
 * Service 按照关注点封装功能给上层模块使用，存储应用内部状态，操作底层数据等等
@@ -107,64 +114,34 @@ export class YourService {
 
 层次之间需要保持单向依赖关系，除部分 Controller 作为 MVVM 中的 view-model 之外可能持有对 UI 层对象的引用，其他层次禁止引用上层模块的代码。
 
-注意：插件的代码并非只能属于一个层次，例如一个插件可能同时提供 View 和 Controller。
+通过模块分层和限制单向依赖，再搭配良好的模块划分，Univer 能够最大程度的做到在不同宿主中的代码复用。
 
-## 命令系统 Command
+:::info
+如果你使用 Univer CLI 来初始化插件，Univer CLI 将会帮你划分目录。
+:::
 
-对应用状态和数据的变更需要通过命令系统执行。Univer core 中提供了命令服务，其依赖注入 token 为 `ICommandService`。上层模块可以将业务逻辑封装在 Command 里，并通过命令系统获取到其他 services 从而执行业务逻辑。基于命令系统，Univer 可以通过简单的方式实现协同编辑、宏录制、撤销重做、跟随浏览等能力。
+## 命令系统
 
-plugin 可以通过 `ICommandService` 提供的 `registerCommand` 接口注册命令，并通过 `executeCommand` 接口执行命令：
+在 Univer 当中，对应用状态和数据的变更需要通过命令系统执行。命令系统本身是对应用逻辑的抽象，解耦逻辑的执行过程和其参数，Univer 在此基础上实现协同编辑、宏录制、撤销重做、跟随浏览等能力。
 
-```ts
-export interface ICommand<P extends object = object, R = boolean> {
-    /**
-     * ${businessName}.${type}.${name}
-     */
-    readonly id: string;
-    readonly type: CommandType;
+@univerjs/core 中提供了命令服务，插件可以将业务逻辑封装在命令里，并通过依赖注入系统获取到其他模块从而执行业务逻辑。
 
-    handler(accessor: IAccessor, params?: P): Promise<R>;
+插件可以通过 `ICommandService` 提供的 `registerCommand` 接口注册命令，并通过 `executeCommand` 接口执行命令：
 
-    /** When this command is unregistered, this function would be called. */
-    onDispose?: () => void;
-}
-
-export interface ICommandService {
-    registerCommand(command: ICommand): IDisposable;
-
-    executeCommand<P extends object = object, R = boolean>(
-        id: string,
-        params?: P,
-        options?: IExecutionOptions
-    ): Promise<R> | R;
-}
-```
-
-`Command` 一共有三种类型
-
-```ts
-export const enum CommandType {
-    /** Command could generate some operations or mutations. */
-    COMMAND = 0,
-    /** An operation that do not require conflict resolve.  */
-    OPERATION = 1,
-    /** An operation that need to be resolved before applied on peer client. */
-    MUTATION = 2,
-}
-```
+`Command` 一共有三种类型：
 
 * `COMMAND` 负责根据特定的业务逻辑创建、编排和执行 `MUTATION` 或 `OPERATION`，例如一个 **删除行 `COMMAND`** 会生成一个 **删除行 `MUTATION`** 和用于 undo 的一个 **插入行 `MUTATION`** 及一个 **设置单元格内容 `MUTATION`**
   * `COMMAND` 是业务逻辑的主要承载者，如果对于一个 _用户操作行为_ 需要根据应用的状态来触发不同的 _底层行为_ —— 例如 _用户点击加粗文字按钮_ 时 需要根据当前选区范围来决定 _加粗操作的生效范围_ —— 相应的判断应该由 `COMMAND` 完成
   * 可以派发其他 `COMMAND` `OPERATION` `MUTATION`
   * 允许异步执行
-* `MUTATION` 是对落盘数据所做的变更，涉及协同编辑的冲突处理，例如插入行列，修改单元格内容，修改筛选范围等等操作
+* `MUTATION` 是对落盘数据所做的变更，例如插入行列，修改单元格内容，修改筛选范围等等操作。如果你想给 Univer 加入协同编辑的能力，那么它就是冲突处理的最小单元。
   * 不可以再派发其他任何命令
   * **必须同步执行**
 * `OPERATION` 是对不落盘数据（或称应用状态）所做的变更，不涉及冲突处理，例如修改滚动位置、修改侧边栏状态等等
   * 不可以再派发其他任何命令
   * **必须同步执行**
 
-### 协同编辑
+### 事件监听
 
 `ICommandService` 提供事件监听接口，插件可监听哪些命令被执行了，以及执行的参数是什么。实际上，命令执行后会派发这样一个事件：
 
@@ -184,96 +161,21 @@ export interface ICommandInfo<T extends object = object> {
 }
 ```
 
-对于协同编辑而言 collaboration-plugin 可以监听所有 `MUTATION` 类型命令，并通过协同编辑算法将 `MUTATION` 发送到其他协同端，再通过 `ICommandService` 重新执行这些 `MUTATION`。
+通过监听事件的执行，可以以非侵入式的方式扩展 Univer 的能力，例如：
 
-### 操作录制和回放
-
-通过监听 `OPERATION` 和 `MUTATION` 的执行，插件可以将用户的操作行为记录下来，并且可以在此基础上实现：
-
-* 协同光标
-* 类似于飞书视频的 Magic Share
+* **协同编辑**：一个协同编辑插件可以监听所有 `MUTATION` 类型命令，并通过协同编辑算法将 `MUTATION` 发送到其他协同端，再通过 `ICommandService` 重新执行这些 `MUTATION`。
+* **协同光标**：监听选区变化的 `OPERATION` 并发送到其他端，其他端通过解析参数来绘制协同光标
+* **Live Share**：监听滚动和缩放 `OPERATION` 并发送到观众端，观众可以同步演示者的浏览位置
 * 宏录制
-* AppScript
 
 等等。
 
-## 交互
+## 服务化
 
-Univer 提供了一些机制简化 UI 的开发，降低菜单、快捷键等在不同的设备以及交互组件内的工作量。功能插件无需关心 UI 上的细节，只需要专注于业务逻辑即可。
+### 关注点分离
 
-### ShortcutService
+在介绍“模块分层”时，我们提到的 Univer 模块层次中有一层名为 service，这一层的模块被称为服务，它们的职责是封装一些通用的功能。Univer 在架构上鼓励按照[关注点分离](https://zh.wikipedia.org/zh-sg/%E5%85%B3%E6%B3%A8%E7%82%B9%E5%88%86%E7%A6%BB)的原则将功能封装到不同的服务中，这样可以使得服务更加专注于某一特定的功能，从而使得服务更加易于理解、修改、测试和维护。
 
-通过向 `IShortcutService` 注入 `IShortcutItem` 可以注册一个快捷键，并且配置它的键位、优先级、触发条件、执行的 Command 等。
+### 抽象依赖
 
-```ts
-export interface IShortcutItem<P extends object = object> {
-    /** This should reuse the corresponding command's id. */
-    id: string;
-    description?: string;
-
-    priority?: number;
-    /** A callback that will be triggered to examine if the shortcut should be invoked. */
-    preconditions?: (contextService: IContextService) => boolean;
-
-    /** A command can be bound to several bindings, with different static parameters perhaps. */
-    binding: number;
-    mac?: number;
-    win?: number;
-    linux?: number;
-
-    /** Static parameters of this shortcut. Would be send to `CommandService.executeCommand`. */
-    staticParameters?: P;
-}
-
-export interface IShortcutService {
-    registerShortcut(shortcut: IShortcutItem): IDisposable;
-
-    getCommandShortcut(id: string): string | null;
-}
-```
-
-### MenuService
-
-通过向 `IMenuService` 注册 `IMenuItem` 可以配置一个菜单项。
-
-```ts
-interface IMenuItemBase<V> {
-    /** ID of the menu item. Normally it should be the same as the ID of the command that it would invoke.  */
-    id: string;
-    title: string;
-    description?: string;
-    icon?: string;
-    tooltip?: string;
-
-    /** In what menu should the item display. */
-    positions: OneOrMany<MenuPosition | string>;
-
-    /** @deprecated this type seems unnecessary */
-    type: MenuItemType;
-    /**
-     * Custom label component id.
-     * */
-    label?:
-        | string
-        | {
-              name: string;
-              props?: Record<string, string | number>;
-          };
-
-    hidden$?: Observable<boolean>;
-    disabled$?: Observable<boolean>;
-
-    /** On observable value that should emit the value of the corresponding selection component. */
-    value$?: Observable<V>;
-}
-
-export interface IMenuService {
-    menuChanged$: Observable<void>;
-
-    addMenuItem(item: IMenuItem): IDisposable;
-
-    /** Get menu items for display at a given position or a submenu. */
-    getMenuItems(position: MenuPosition | string): Array<IDisplayMenuItem<IMenuItem>>;
-    getMenuItem(id: string): IMenuItem | null;
-}
-```
+在封装服务时，可以采用抽象依赖的原则，将服务对其他服务的依赖抽象为接口，从而使得服务更加易于测试和维护。

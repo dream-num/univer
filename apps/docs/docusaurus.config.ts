@@ -53,25 +53,25 @@ const config: Config = {
     },
 
     plugins: [
-        ...packages.map((name) => [
-            'docusaurus-plugin-typedoc',
-            {
-                id: `api/${name}`,
-                entryPoints: [`../../packages/${name}/src/index.ts`],
-                tsconfig: `../../packages/${name}/tsconfig.json`,
-                exclude: ['node_modules/**/*', '**/*+(.spec|.e2e|.test).ts'],
-                excludePrivate: true,
-                excludeExternals: true,
-                excludeInternal: true,
-                cleanOutputDir: true,
-                skipErrorChecking: true,
-                out: `api/${name}`,
-                sidebar: {
-                    categoryLabel: name,
-                    fullNames: true,
-                },
-            },
-        ]),
+        // ...packages.map((name) => [
+        //     'docusaurus-plugin-typedoc',
+        //     {
+        //         id: `api/${name}`,
+        //         entryPoints: [`../../packages/${name}/src/index.ts`],
+        //         tsconfig: `../../packages/${name}/tsconfig.json`,
+        //         exclude: ['node_modules/**/*', '**/*+(.spec|.e2e|.test).ts'],
+        //         excludePrivate: true,
+        //         excludeExternals: true,
+        //         excludeInternal: true,
+        //         cleanOutputDir: true,
+        //         skipErrorChecking: true,
+        //         out: `api/${name}`,
+        //         sidebar: {
+        //             categoryLabel: name,
+        //             fullNames: true,
+        //         },
+        //     },
+        // ]),
     ],
 
     presets: [
@@ -114,12 +114,12 @@ const config: Config = {
                     position: 'left',
                     label: '指南',
                 },
-                {
-                    type: 'docSidebar',
-                    sidebarId: 'apiSidebar',
-                    position: 'left',
-                    label: 'API',
-                },
+                // {
+                //     type: 'docSidebar',
+                //     sidebarId: 'apiSidebar',
+                //     position: 'left',
+                //     label: 'API',
+                // },
                 {
                     to: 'playground',
                     position: 'left',

@@ -65,9 +65,6 @@
             "path": "./packages/sheets-formula"
         },
         {
-            "path": "./packages/sheets-data-connector"
-        },
-        {
             "path": "./packages/sheets-import-xlsx"
         },
         {

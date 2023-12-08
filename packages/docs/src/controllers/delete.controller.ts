@@ -95,12 +95,8 @@ export class DeleteController extends Disposable {
 
         let cursor = startOffset;
 
-        console.log(startOffset);
-
         // Get the deleted span.
         const span = skeleton.findNodeByCharIndex(startOffset - 1);
-
-        console.log(preSpan, span);
 
         const isUpdateParagraph =
             isFirstSpan(preSpan) && span !== preSpan && (preIsBullet === true || preIsIndent === true);
@@ -146,8 +142,6 @@ export class DeleteController extends Disposable {
                     style,
                 },
             ];
-
-            console.log(startOffset);
 
             this._commandService.executeCommand(UpdateCommand.id, {
                 unitId: docDataModel.getUnitId(),

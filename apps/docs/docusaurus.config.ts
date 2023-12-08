@@ -104,7 +104,7 @@ const config: Config = {
                     label: '指南',
                 },
                 {
-                    to: 'docs/api/',
+                    to: 'docs/api/core',
                     activeBasePath: 'docs',
                     // type: 'docSidebar',
                     // sidebarId: 'apiSidebar',

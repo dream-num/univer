@@ -1,24 +1,11 @@
 import type * as Preset from '@docusaurus/preset-classic';
 import type { Config } from '@docusaurus/types';
 import { themes as prismThemes } from 'prism-react-renderer';
+import rootTsConfig from '../../tsconfig.json';
 
-const packages = [
-    'core',
-    'design',
-    'docs',
-    'docs-ui',
-    'engine-formula',
-    'engine-numfmt',
-    'engine-render',
-    'formula',
-    'rpc',
-    'sheets',
-    'sheets-formula',
-    'sheets-numfmt',
-    'sheets-ui',
-    'ui',
-    'uniscript',
-];
+const packages = rootTsConfig.references
+    .filter((ref) => ref.path.startsWith('./packages/'))
+    .map((ref) => ref.path.replace('./packages/', ''));
 
 const config: Config = {
     title: 'Univer',
@@ -53,25 +40,27 @@ const config: Config = {
     },
 
     plugins: [
-        // ...packages.map((name) => [
-        //     'docusaurus-plugin-typedoc',
-        //     {
-        //         id: `api/${name}`,
-        //         entryPoints: [`../../packages/${name}/src/index.ts`],
-        //         tsconfig: `../../packages/${name}/tsconfig.json`,
-        //         exclude: ['node_modules/**/*', '**/*+(.spec|.e2e|.test).ts'],
-        //         excludePrivate: true,
-        //         excludeExternals: true,
-        //         excludeInternal: true,
-        //         cleanOutputDir: true,
-        //         skipErrorChecking: true,
-        //         out: `api/${name}`,
-        //         sidebar: {
-        //             categoryLabel: name,
-        //             fullNames: true,
-        //         },
-        //     },
-        // ]),
+        ...packages.map((name) => [
+            'docusaurus-plugin-typedoc',
+            {
+                id: `api/${name}`,
+                entryPoints: [`../../packages/${name}/src/index.ts`],
+                tsconfig: `../../packages/${name}/tsconfig.json`,
+                typeDeclarationFormat: 'table',
+                expandObjects: true,
+                exclude: ['node_modules/**/*', '**/*+(.spec|.e2e|.test).ts'],
+                excludePrivate: true,
+                excludeExternals: true,
+                excludeInternal: true,
+                cleanOutputDir: true,
+                skipErrorChecking: true,
+                out: `docs/api/${name}`,
+                entryFileName: "index.md",
+                sidebar: {
+                    pretty: false
+                }
+            },
+        ]),
     ],
 
     presets: [
@@ -114,12 +103,14 @@ const config: Config = {
                     position: 'left',
                     label: '指南',
                 },
-                // {
-                //     type: 'docSidebar',
-                //     sidebarId: 'apiSidebar',
-                //     position: 'left',
-                //     label: 'API',
-                // },
+                {
+                    to: 'docs/api/',
+                    activeBasePath: 'docs',
+                    // type: 'docSidebar',
+                    // sidebarId: 'apiSidebar',
+                    position: 'left',
+                    label: 'API',
+                },
                 {
                     to: 'playground',
                     position: 'left',

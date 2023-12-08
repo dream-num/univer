@@ -3,7 +3,7 @@
 ![GitHub License](https://img.shields.io/github/license/dream-num/univer)
 ![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/dream-num/univer/build.yml)
 [![codecov](https://codecov.io/gh/dream-num/univer/graph/badge.svg?token=aPfyW2pIMN)](https://codecov.io/gh/dream-num/univer)
-[![discord](https://img.shields.io/discord/1136129819961217077?label=discord&logo=discord&style=social)](https://discord.gg/z3NKNT6D2f)
+[![discord](https://img.shields.io/discord/1136129819961217077?logo=discord&logoColor=FFFFFF&label=discord&color=5865F2)](https://discord.gg/z3NKNT6D2f)
 
 简体中文 | [English](./README.md)
 

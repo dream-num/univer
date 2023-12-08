@@ -36,7 +36,7 @@ export function orderSearchArray(arr: number[], pos: number) {
             cur_pre = arr[i_ed - 1];
         }
 
-        if (pos >= cur_pre && pos < cur) {
+        if (pos >= cur_pre && pos <= cur) {
             cur_index = i_ed;
             break;
         }

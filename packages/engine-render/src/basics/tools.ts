@@ -458,10 +458,10 @@ export function getCellPositionByIndex(
     const startColumn = column - 1;
 
     const startY = rowHeightAccumulation[startRow] || 0;
-    const endY = rowHeightAccumulation[row];
+    const endY = rowHeightAccumulation[row] || rowHeightAccumulation[rowHeightAccumulation.length - 1];
 
     const startX = columnWidthAccumulation[startColumn] || 0;
-    const endX = columnWidthAccumulation[column];
+    const endX = columnWidthAccumulation[column] || columnWidthAccumulation[columnWidthAccumulation.length - 1];
 
     return {
         startY,
@@ -503,12 +503,17 @@ export function getCellByIndex(
         startX: 0,
         endX: 0,
     };
+
+    const rowAccumulationCount = rowHeightAccumulation.length - 1;
+
+    const columnAccumulationCount = columnWidthAccumulation.length - 1;
+
     if (isMerged && startRow !== -1 && startColumn !== -1) {
         const mergeStartY = rowHeightAccumulation[startRow - 1] || 0;
-        const mergeEndY = rowHeightAccumulation[endRow];
+        const mergeEndY = rowHeightAccumulation[endRow] || rowHeightAccumulation[rowAccumulationCount];
 
         const mergeStartX = columnWidthAccumulation[startColumn - 1] || 0;
-        const mergeEndX = columnWidthAccumulation[endColumn];
+        const mergeEndX = columnWidthAccumulation[endColumn] || columnWidthAccumulation[columnAccumulationCount];
         mergeInfo = {
             ...mergeInfo,
             startY: mergeStartY,
@@ -517,8 +522,8 @@ export function getCellByIndex(
             endX: mergeEndX,
         };
     } else if (!isMerged && endRow !== -1 && endColumn !== -1) {
-        const mergeEndY = rowHeightAccumulation[endRow] || 0;
-        const mergeEndX = columnWidthAccumulation[endColumn] || 0;
+        const mergeEndY = rowHeightAccumulation[endRow] || rowHeightAccumulation[rowAccumulationCount];
+        const mergeEndX = columnWidthAccumulation[endColumn] || columnWidthAccumulation[columnAccumulationCount];
 
         mergeInfo = {
             ...mergeInfo,

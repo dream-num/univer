@@ -159,8 +159,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/core
       '@univerjs/icons':
-        specifier: ^0.1.14
-        version: 0.1.14(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^0.1.18
+        version: 0.1.18(react-dom@18.2.0)(react@18.2.0)
       clsx:
         specifier: ^2.0.0
         version: 2.0.0
@@ -187,14 +187,14 @@ importers:
         specifier: 3.0.1
         version: 3.0.1(@swc/core@1.3.100)(esbuild@0.19.8)(react-dom@18.2.0)(react@18.2.0)
       docusaurus-plugin-typedoc:
-        specifier: ^0.21.0
-        version: 0.21.0(typedoc-plugin-markdown@3.17.1)(typedoc@0.25.4)
+        specifier: 1.0.0-next.23
+        version: 1.0.0-next.23(typedoc-plugin-markdown@4.0.0-next.36)
       typedoc:
         specifier: ^0.25.4
         version: 0.25.4(typescript@5.3.2)
       typedoc-plugin-markdown:
-        specifier: ^3.17.1
-        version: 3.17.1(typedoc@0.25.4)
+        specifier: 4.0.0-next.36
+        version: 4.0.0-next.36(typedoc@0.25.4)
       typescript:
         specifier: ^5.3.2
         version: 5.3.2
@@ -7231,6 +7231,16 @@ packages:
       react-dom: 18.2.0(react@18.2.0)
     dev: false
 
+  /@univerjs/icons@0.1.18(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-5XLXzltYcLi4ilnoT1AQN+ef90Vux4XbePr+C54bpm/PN9QYtH7c0L51xEVrH9DE+R0bkqma3gyE0RIydCiK+A==}
+    peerDependencies:
+      react: '*'
+      react-dom: '*'
+    dependencies:
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+    dev: false
+
   /@vitejs/plugin-react@3.1.0(vite@4.5.0):
     resolution: {integrity: sha512-AfgcRL8ZBhAlc3BFdigClmTUMISmmzHn7sB2h9U1odvc5U/MjWXsAaz18b/WoppUTDBzxOJwo2VdClfUcItu9g==}
     engines: {node: ^14.18.0 || >=16.0.0}
@@ -9303,14 +9313,12 @@ packages:
     dependencies:
       esutils: 2.0.3
 
-  /docusaurus-plugin-typedoc@0.21.0(typedoc-plugin-markdown@3.17.1)(typedoc@0.25.4):
-    resolution: {integrity: sha512-7DLFrf0JP+L5vSRQHVKIbndjbksd2MlxPqNmmdxzLFiRINgrY23s9waduWM9t24PUsf5JZ0tlGKlE3sK4uZ72Q==}
+  /docusaurus-plugin-typedoc@1.0.0-next.23(typedoc-plugin-markdown@4.0.0-next.36):
+    resolution: {integrity: sha512-n/0CWVmN5KgChx7tbA2wJkpD1sroE0kdul4nGeMTwFZ3CB9jaX7eV/682jxKFyiYaIJs6UmlgHbiYP2lAwu7yw==}
     peerDependencies:
-      typedoc: '>=0.24.0'
-      typedoc-plugin-markdown: '>=3.15.0'
+      typedoc-plugin-markdown: '>=4.0.0-next.30'
     dependencies:
-      typedoc: 0.25.4(typescript@5.3.2)
-      typedoc-plugin-markdown: 3.17.1(typedoc@0.25.4)
+      typedoc-plugin-markdown: 4.0.0-next.36(typedoc@0.25.4)
     dev: true
 
   /dom-accessibility-api@0.5.16:
@@ -17213,12 +17221,11 @@ packages:
     resolution: {integrity: sha512-/aCDEGatGvZ2BIk+HmLf4ifCJFwvKFNb9/JeZPMulfgFracn9QFcAf5GO8B/mweUjSoblS5In0cWhqpfs/5PQA==}
     dev: true
 
-  /typedoc-plugin-markdown@3.17.1(typedoc@0.25.4):
-    resolution: {integrity: sha512-QzdU3fj0Kzw2XSdoL15ExLASt2WPqD7FbLeaqwT70+XjKyTshBnUlQA5nNREO1C2P8Uen0CDjsBLMsCQ+zd0lw==}
+  /typedoc-plugin-markdown@4.0.0-next.36(typedoc@0.25.4):
+    resolution: {integrity: sha512-p2kA4hVlEcJvGffvL/Mn5V7o6qufMQNGnYCXIiXEtqKFZdJCsJ1nehNAEaeS0X0aenA7O+hu6f6U+pgbth7D/g==}
     peerDependencies:
-      typedoc: '>=0.24.0'
+      typedoc: 0.25.x
     dependencies:
-      handlebars: 4.7.8
       typedoc: 0.25.4(typescript@5.3.2)
     dev: true
 

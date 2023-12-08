@@ -6,20 +6,20 @@
     "author": "DreamNum <developer@univer.ai>",
     "license": "MIT",
     "main": "./lib/cjs/index.js",
-    "module": "./lib/esm/index.js",
+    "module": "./lib/es/index.js",
     "types": "./lib/types/index.d.ts",
     "publishConfig": {
         "access": "public",
         "main": "./lib/cjs/index.js",
-        "module": "./lib/esm/index.js",
+        "module": "./lib/es/index.js",
         "exports": {
             ".": {
-                "import": "./lib/esm/index.js",
+                "import": "./lib/es/index.js",
                 "require": "./lib/cjs/index.js",
                 "types": "./lib/types/index.d.ts"
             },
             "./*": {
-                "import": "./lib/esm/*",
+                "import": "./lib/es/*",
                 "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
             }
@@ -40,7 +40,7 @@
         "test": "vitest run",
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
-        "esbuild": "node ./esbuild.config.mjs && tsc -p tsconfig.esbuild.json"
+        "build": "tsc && vite build"
     },
     "dependencies": {
         "@rc-component/color-picker": "^1.4.1",
@@ -51,7 +51,7 @@
         "rc-dropdown": "^4.1.0",
         "rc-input": "^1.3.6",
         "rc-input-number": "^8.5.0",
-        "rc-menu": "^9.12.2",
+        "rc-menu": "^9.12.4",
         "rc-select": "^14.10.0",
         "rc-tooltip": "^6.1.2",
         "rc-util": "^5.38.1",
@@ -60,18 +60,20 @@
     },
     "devDependencies": {
         "@testing-library/react": "^14.1.2",
-        "@types/react": "^18.2.40",
+        "@types/react": "^18.2.42",
         "@types/react-dom": "^18.2.17",
-        "@types/react-transition-group": "^4.4.9",
-        "@vitest/coverage-istanbul": "^0.34.6",
-        "esbuild": "^0.19.8",
+        "@types/react-transition-group": "^4.4.10",
+        "@vitejs/plugin-react": "^4.2.1",
+        "@vitest/coverage-istanbul": "^1.0.2",
         "happy-dom": "^12.10.3",
         "less": "^4.2.0",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "ts-node": "^10.9.1",
-        "typescript": "^5.3.2",
-        "vitest": "^0.34.6"
+        "typescript": "^5.3.3",
+        "vite": "^5.0.6",
+        "vite-plugin-dts": "^3.6.4",
+        "vitest": "^1.0.2"
     },
     "peerDependencies": {
         "react": ">=16.9.0",

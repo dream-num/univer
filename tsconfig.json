@@ -21,7 +21,7 @@
         "checkJs": false,
         "skipLibCheck": true,
         "isolatedModules": true,
-        "types": ["node", "esbuild-style-plugin"]
+        "types": ["node"]
     },
     "include": [],
     "references": [
@@ -48,6 +48,9 @@
         },
         {
             "path": "./packages/image"
+        },
+        {
+            "path": "./packages/local-save"
         },
         {
             "path": "./packages/network"
@@ -84,9 +87,6 @@
         },
         {
             "path": "./packages/uniscript"
-        },
-        {
-            "path": "./packages/local-save"
         },
         {
             "path": "./examples/data"

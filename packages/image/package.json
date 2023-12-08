@@ -16,11 +16,12 @@
         "rxjs": "^7.8.1"
     },
     "devDependencies": {
-        "@vitest/coverage-istanbul": "^0.34.6",
-        "esbuild": "^0.19.8",
+        "@vitest/coverage-istanbul": "^1.0.2",
         "less": "^4.2.0",
         "ts-node": "^10.9.1",
-        "typescript": "^5.3.2",
-        "vitest": "^0.34.6"
+        "typescript": "^5.3.3",
+        "vite": "^5.0.6",
+        "vite-plugin-dts": "^3.6.4",
+        "vitest": "^1.0.2"
     }
 }

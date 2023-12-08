@@ -7,7 +7,7 @@ import type { IUniverRPCMainThreadPluginConfig } from '@univerjs/rpc';
 import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
 import { SheetsPlugin } from '@univerjs/sheets';
 import { FormulaUIPlugin } from '@univerjs/sheets-formula';
-import { NumfmtPlugin } from '@univerjs/sheets-numfmt';
+import { SheetsNumfmt } from '@univerjs/sheets-numfmt';
 import { SheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UIPlugin } from '@univerjs/ui';
 import type { IUniscriptPluginConfig } from '@univerjs/uniscript';
@@ -51,7 +51,7 @@ univer.registerPlugin(SheetsUIPlugin);
 
 // sheet feature plugins
 
-univer.registerPlugin(NumfmtPlugin);
+univer.registerPlugin(SheetsNumfmt);
 univer.registerPlugin(DebuggerPlugin);
 univer.registerPlugin(BaseFormulaEnginePlugin, {
     notExecuteFormula: true,

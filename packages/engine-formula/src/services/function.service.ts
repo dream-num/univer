@@ -2,7 +2,7 @@ import type { Nullable } from '@univerjs/core';
 import { Disposable } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 
-import type { IFunctionInfo } from '../basics/function';
+import type { IFunctionInfo, IFunctionNames } from '../basics/function';
 import type { BaseFunction } from '../functions/base-function';
 
 export interface IFunctionService {
@@ -11,7 +11,7 @@ export interface IFunctionService {
      */
     registerExecutors(...functions: BaseFunction[]): void;
 
-    getExecutors(): Map<string, BaseFunction>;
+    getExecutors(): Map<IFunctionNames, BaseFunction>;
 
     /**
      * Obtain the operator of the function to reuse the calculation logic.
@@ -23,23 +23,23 @@ export interface IFunctionService {
      * @param functionName Function name, which can be obtained through the FUNCTION_NAMES enumeration.
      * @returns
      */
-    getExecutor(functionToken: string): Nullable<BaseFunction>;
+    getExecutor(functionToken: IFunctionNames): Nullable<BaseFunction>;
 
-    hasExecutor(functionToken: string): boolean;
+    hasExecutor(functionToken: IFunctionNames): boolean;
 
     registerDescriptions(...functions: IFunctionInfo[]): void;
 
-    getDescriptions(): Map<string, IFunctionInfo>;
+    getDescriptions(): Map<IFunctionNames, IFunctionInfo>;
 
-    getDescription(functionToken: string): Nullable<IFunctionInfo>;
+    getDescription(functionToken: IFunctionNames): Nullable<IFunctionInfo>;
 
-    hasDescription(functionToken: string): boolean;
+    hasDescription(functionToken: IFunctionNames): boolean;
 }
 
 export class FunctionService extends Disposable implements IFunctionService {
-    private _functionExecutors: Map<string, BaseFunction> = new Map();
+    private _functionExecutors: Map<IFunctionNames, BaseFunction> = new Map();
 
-    private _functionDescriptions: Map<string, IFunctionInfo> = new Map();
+    private _functionDescriptions: Map<IFunctionNames, IFunctionInfo> = new Map();
 
     override dispose(): void {
         this._functionExecutors.clear();
@@ -57,11 +57,11 @@ export class FunctionService extends Disposable implements IFunctionService {
         return this._functionExecutors;
     }
 
-    getExecutor(functionToken: string) {
+    getExecutor(functionToken: IFunctionNames) {
         return this._functionExecutors.get(functionToken);
     }
 
-    hasExecutor(functionToken: string) {
+    hasExecutor(functionToken: IFunctionNames) {
         return this._functionExecutors.has(functionToken);
     }
 
@@ -76,11 +76,11 @@ export class FunctionService extends Disposable implements IFunctionService {
         return this._functionDescriptions;
     }
 
-    getDescription(functionToken: string) {
+    getDescription(functionToken: IFunctionNames) {
         return this._functionDescriptions.get(functionToken);
     }
 
-    hasDescription(functionToken: string) {
+    hasDescription(functionToken: IFunctionNames) {
         return this._functionDescriptions.has(functionToken);
     }
 }

@@ -163,6 +163,7 @@ export interface IFunctionInfo {
 }
 
 export type IFunctionNames =
+    | string
     | FUNCTION_NAMES_ARRAY
     | FUNCTION_NAMES_COMPATIBILITY
     | FUNCTION_NAMES_CUBE

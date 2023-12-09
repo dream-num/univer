@@ -125,9 +125,15 @@ export interface ICommandService {
     syncExecuteCommand<P extends object = object, R = boolean>(id: string, params?: P, options?: IExecutionOptions): R;
 
     /**
-     * Register a callback function that will be executed when a command is executed.
+     * Register a callback function that will be executed after a command is executed.
      */
     onCommandExecuted(listener: CommandListener): IDisposable;
+
+    /**
+     * Register a callback function that will be executed before a command is executed.
+     * @param listener
+     */
+    beforeCommandExecuted(listener: CommandListener): IDisposable;
 }
 
 export const ICommandService = createIdentifier<ICommandService>('anywhere.command-service');
@@ -167,6 +173,7 @@ interface ICommandExecutionStackItem extends ICommandInfo {}
 export class CommandService implements ICommandService {
     private readonly _commandRegistry: CommandRegistry;
 
+    private readonly _beforeCommandExecutionListeners: CommandListener[] = [];
     private readonly _commandExecutedListeners: CommandListener[] = [];
 
     private _multiCommandDisposables = new Map<string, IDisposable>();
@@ -188,6 +195,19 @@ export class CommandService implements ICommandService {
 
     registerAsMultipleCommand(command: ICommand): IDisposable {
         return this._registerMultiCommand(command);
+    }
+
+    beforeCommandExecuted(listener: CommandListener): IDisposable {
+        if (this._beforeCommandExecutionListeners.indexOf(listener) === -1) {
+            this._beforeCommandExecutionListeners.push(listener);
+
+            return toDisposable(() => {
+                const index = this._beforeCommandExecutionListeners.indexOf(listener);
+                this._beforeCommandExecutionListeners.splice(index, 1);
+            });
+        }
+
+        throw new Error('Could not add a listener twice.');
     }
 
     onCommandExecuted(listener: (commandInfo: ICommandInfo) => void): IDisposable {
@@ -218,10 +238,12 @@ export class CommandService implements ICommandService {
             };
 
             const stackItemDisposable = this._pushCommandExecutionStack(commandInfo);
-            const result = await this._execute<P, R>(command as ICommand<P, R>, params);
-            stackItemDisposable.dispose();
 
+            this._beforeCommandExecutionListeners.forEach((listener) => listener(commandInfo, options));
+            const result = await this._execute<P, R>(command as ICommand<P, R>, params);
             this._commandExecutedListeners.forEach((listener) => listener(commandInfo, options));
+
+            stackItemDisposable.dispose();
 
             return result;
         }

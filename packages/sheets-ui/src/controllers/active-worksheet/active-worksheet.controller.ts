@@ -20,11 +20,23 @@ import {
  */
 @OnLifecycle(LifecycleStages.Ready, ActiveWorksheetController)
 export class ActiveWorksheetController extends Disposable {
+    private _previousSheetIndex = -1;
+
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
+
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((command, options) => {
+                if (command.id === RemoveSheetMutation.id) {
+                    return this._beforeAdjustActiveSheetOnRemoveSheet(
+                        command as IMutationInfo<IRemoveSheetMutationParams>
+                    );
+                }
+            })
+        );
 
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command, options) => {
@@ -82,13 +94,32 @@ export class ActiveWorksheetController extends Disposable {
         this._switchToNextSheet(workbookId, nextId);
     }
 
+    private _beforeAdjustActiveSheetOnRemoveSheet(mutation: IMutationInfo<IRemoveSheetMutationParams>) {
+        const { workbookId, worksheetId } = mutation.params;
+        const workbook = this._univerInstanceService.getUniverSheetInstance(workbookId);
+        if (!workbook) {
+            return;
+        }
+
+        const worksheet = workbook.getSheetBySheetId(worksheetId);
+        if (!worksheet) {
+            return;
+        }
+
+        this._previousSheetIndex = workbook.getSheetIndex(worksheet);
+    }
+
     private _adjustActiveSheetOnRemoveSheet(mutation: IMutationInfo<IRemoveSheetMutationParams>) {
+        if (this._previousSheetIndex === -1) {
+            return;
+        }
+
         // If the active sheet is removed, we need to change the active sheet to the previous sheet.
         // But how to decide which one is the previous sheet? We store the deleted sheet' index
         // in the `IRemoteSheetMutationParams` and use it to decide the previous sheet.
 
         // If the selected sheet is not the deleted one, we don't have to do things.
-        const { previousIndex, workbookId } = mutation.params;
+        const { workbookId } = mutation.params;
         const workbook = this._univerInstanceService.getUniverSheetInstance(workbookId);
         if (!workbook) {
             return;
@@ -100,6 +131,7 @@ export class ActiveWorksheetController extends Disposable {
             return;
         }
 
+        const previousIndex = this._previousSheetIndex;
         const nextIndex = previousIndex >= 1 ? previousIndex - 1 : 0;
         const nextSheet = workbook.getSheetByIndex(nextIndex);
         if (!nextSheet) {

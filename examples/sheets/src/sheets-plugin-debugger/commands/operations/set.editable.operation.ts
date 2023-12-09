@@ -1,7 +1,8 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
+import type { ICommand } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, UniverPermissionService } from '@univerjs/core';
 import { SheetPermissionService } from '@univerjs/sheets';
-import { CommandType, ICommand, IUniverInstanceService, UniverPermissionService } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { IAccessor } from '@wendellhu/redi';
 
 export interface ISetEditableCommandParams {
     value: 'sheet' | 'univer';

@@ -84,11 +84,11 @@ export function Slider(props: ISliderProps) {
 
                 if (offsetX <= 0) {
                     offsetX = 0;
-                } else if (offsetX >= styles.sliderWidth) {
-                    offsetX = styles.sliderWidth;
+                } else if (offsetX >= +styles.sliderWidth) {
+                    offsetX = +styles.sliderWidth;
                 }
 
-                const ratio = offsetX / styles.sliderWidth;
+                const ratio = offsetX / +styles.sliderWidth;
 
                 let result = 0;
                 if (ratio <= 0.5) {

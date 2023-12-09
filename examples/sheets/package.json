@@ -9,23 +9,23 @@
         "dev:demo": "node ./esbuild.config.mjs --watch"
     },
     "dependencies": {
-        "@univerjs/docs": "workspace:*",
-        "@univerjs/engine-formula": "workspace:*",
-        "@univerjs/engine-render": "workspace:*",
-        "@univerjs/sheets": "workspace:*",
-        "@univerjs/ui": "workspace:*",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
+        "@univerjs/docs": "workspace:*",
+        "@univerjs/docs-ui": "workspace:*",
+        "@univerjs/engine-formula": "workspace:*",
+        "@univerjs/engine-render": "workspace:*",
+        "@univerjs/local-save": "workspace:*",
         "@univerjs/rpc": "workspace:*",
+        "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",
         "@univerjs/sheets-numfmt": "workspace:*",
-        "@univerjs/docs-ui": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
+        "@univerjs/ui": "workspace:*",
         "@univerjs/uniscript": "workspace:*",
-        "@univerjs/local-save": "workspace:*",
         "@wendellhu/redi": "^0.12.11",
         "data": "workspace:*",
-        "monaco-editor": "0.44.0"
+        "monaco-editor": "0.45.0"
     },
     "devDependencies": {
         "esbuild": "^0.19.8",
@@ -34,7 +34,6 @@
         "esbuild-style-plugin": "^1.6.3",
         "less": "^4.2.0",
         "minimist": "^1.2.8",
-        "ts-node": "^10.9.1",
-        "typescript": "^5.3.2"
+        "typescript": "^5.3.3"
     }
 }

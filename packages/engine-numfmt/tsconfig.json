@@ -1,7 +1,7 @@
 {
     "extends": "../../tsconfig.json",
     "compilerOptions": {
-        "rootDir": "./src",
+        "rootDir": ".",
         "outDir": "lib",
         "esModuleInterop": true,
         "types": ["./src/types/index.d.ts"]

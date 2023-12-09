@@ -1,5 +1,6 @@
-import { CommandType, ICommand, LocaleService, LocaleType } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
+import type { ICommand, LocaleType } from '@univerjs/core';
+import { CommandType, LocaleService } from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
 
 export interface ILocaleCommandParams {
     value: LocaleType;

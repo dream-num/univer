@@ -2,9 +2,9 @@ import type { IAccessor } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { ErrorType } from '../../basics/error-type';
-import { FUNCTION_NAMES } from '../../basics/function';
 import { suffixToken } from '../../basics/token';
 import type { BaseFunction } from '../../functions/base-function';
+import { FUNCTION_NAMES_META } from '../../functions/meta/function-names';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { IFunctionService } from '../../services/function.service';
 import { LexerTreeBuilder } from '../analysis/lexer';
@@ -109,7 +109,7 @@ export class SuffixNodeFactory extends BaseAstNodeFactory {
 
         let functionName = '';
         if (tokenTrim === suffixToken.PERCENTAGE) {
-            functionName = FUNCTION_NAMES.DIVIDED;
+            functionName = FUNCTION_NAMES_META.DIVIDED;
         } else if (tokenTrim === suffixToken.POUND) {
             return new SuffixNode(this._injector, tokenTrim);
         } else {

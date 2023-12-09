@@ -1,9 +1,9 @@
-import { ErrorType } from '../../basics/error-type';
-import { compareToken } from '../../basics/token';
-import { ErrorValueObject } from '../../engine/other-object/error-value-object';
-import type { BaseReferenceObject, FunctionVariantType } from '../../engine/reference-object/base-reference-object';
-import type { BaseValueObject } from '../../engine/value-object/base-value-object';
-import { BaseFunction } from '../base-function';
+import { ErrorType } from '../../../basics/error-type';
+import { compareToken } from '../../../basics/token';
+import { ErrorValueObject } from '../../../engine/other-object/error-value-object';
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { BaseFunction } from '../../base-function';
 
 export class Compare extends BaseFunction {
     private _compareType: compareToken = compareToken.EQUALS;

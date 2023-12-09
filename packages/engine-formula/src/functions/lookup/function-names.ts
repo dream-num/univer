@@ -1,3 +1,4 @@
-export enum FUNCTION_NAMES_LOOKUP {}
-
-export const functionLookup = [];
+export enum FUNCTION_NAMES_LOOKUP {
+    INDIRECT = 'INDIRECT',
+    OFFSET = 'OFFSET',
+}

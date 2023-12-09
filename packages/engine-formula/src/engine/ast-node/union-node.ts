@@ -1,7 +1,7 @@
 import { ErrorType } from '../../basics/error-type';
-import { FUNCTION_NAMES } from '../../basics/function';
 import { matchToken } from '../../basics/token';
 import type { BaseFunction } from '../../functions/base-function';
+import { FUNCTION_NAMES_META } from '../../functions/meta/function-names';
 import { IFunctionService } from '../../services/function.service';
 import { LexerNode } from '../analysis/lexer-node';
 import { ErrorValueObject } from '../other-object/error-value-object';
@@ -53,7 +53,7 @@ export class UnionNodeFactory extends BaseAstNodeFactory {
     }
 
     override create(param: string): BaseAstNode {
-        const functionExecutor = this._functionService.getExecutor(FUNCTION_NAMES.UNION);
+        const functionExecutor = this._functionService.getExecutor(FUNCTION_NAMES_META.UNION);
         if (!functionExecutor) {
             console.error(`No function ${param}`);
             return ErrorNode.create(ErrorType.NAME);

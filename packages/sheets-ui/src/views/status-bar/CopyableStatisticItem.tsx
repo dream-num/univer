@@ -1,6 +1,11 @@
 import { LocaleService } from '@univerjs/core';
 import { MessageType, Tooltip } from '@univerjs/design';
-import { FUNCTION_NAMES } from '@univerjs/engine-formula';
+import type { IFunctionNames } from '@univerjs/engine-formula';
+import {
+    FUNCTION_NAMES_COMPATIBILITY,
+    FUNCTION_NAMES_MATH,
+    FUNCTION_NAMES_STATISTICAL,
+} from '@univerjs/engine-formula';
 import { IClipboardInterfaceService, IMessageService } from '@univerjs/ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React from 'react';
@@ -8,18 +13,18 @@ import React from 'react';
 import styles from './index.module.less';
 
 export interface IStatisticItem {
-    name: FUNCTION_NAMES;
+    name: IFunctionNames;
     value: number;
     show: boolean;
 }
 
 export const functionDisplayNames: FunctionNameMap = {
-    [FUNCTION_NAMES.SUM]: 'statusbar.sum',
-    [FUNCTION_NAMES.AVERAGE]: 'statusbar.average',
-    [FUNCTION_NAMES.MIN]: 'statusbar.min',
-    [FUNCTION_NAMES.MAX]: 'statusbar.max',
-    [FUNCTION_NAMES.COUNT]: 'statusbar.count',
-    [FUNCTION_NAMES.CONCATENATE]: 'concatenate',
+    [FUNCTION_NAMES_MATH.SUM]: 'statusbar.sum',
+    [FUNCTION_NAMES_STATISTICAL.AVERAGE]: 'statusbar.average',
+    [FUNCTION_NAMES_STATISTICAL.MIN]: 'statusbar.min',
+    [FUNCTION_NAMES_STATISTICAL.MAX]: 'statusbar.max',
+    [FUNCTION_NAMES_STATISTICAL.COUNT]: 'statusbar.count',
+    [FUNCTION_NAMES_COMPATIBILITY.CONCATENATE]: 'concatenate',
 };
 interface FunctionNameMap {
     [key: string]: string;
@@ -41,7 +46,9 @@ export const CopyableStatisticItem: React.FC<IStatisticItem> = (item: IStatistic
     return (
         <Tooltip title={localeService.t('statusbar.clickToCopy')} placement="top">
             <div key={item.name} className={styles.statisticItem} onClick={copyToClipboard}>
-                <span>{`${localeService.t(functionDisplayNames?.[item.name] || item.name)}: ${formateValue}`}</span>
+                <span>{`${localeService.t(
+                    functionDisplayNames?.[item.name as string] || (item.name as string)
+                )}: ${formateValue}`}</span>
             </div>
         </Tooltip>
     );

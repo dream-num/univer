@@ -71,12 +71,23 @@ export class FormulaAutoFillController extends Disposable {
                 const checkFormula = isFormulaString(originalFormula);
                 const checkFormulaId = isFormulaId(originalFormulaId);
 
-                if (checkFormula) {
+                if (checkFormulaId) {
+                    d.si = originalFormulaId;
+                    d.f = null;
+                    d.v = null;
+                    d.p = null;
+
+                    if (direction === Direction.DOWN || direction === Direction.RIGHT) {
+                        applyData.push(d);
+                    } else {
+                        applyData.unshift(d);
+                    }
+                } else if (checkFormula) {
                     // The first position setting formula and formulaId
                     let formulaId = formulaIdMap.get(index);
 
                     if (!formulaId) {
-                        formulaId = checkFormulaId ? originalFormulaId : Tools.generateRandomId(6);
+                        formulaId = Tools.generateRandomId(6);
                         formulaIdMap.set(index, formulaId);
 
                         const { offsetX, offsetY } = directionToOffset(step, direction);
@@ -97,17 +108,6 @@ export class FormulaAutoFillController extends Disposable {
                         d.v = null;
                         d.p = null;
                     }
-
-                    if (direction === Direction.DOWN || direction === Direction.RIGHT) {
-                        applyData.push(d);
-                    } else {
-                        applyData.unshift(d);
-                    }
-                } else if (checkFormulaId) {
-                    d.si = originalFormulaId;
-                    d.f = null;
-                    d.v = null;
-                    d.p = null;
 
                     if (direction === Direction.DOWN || direction === Direction.RIGHT) {
                         applyData.push(d);

@@ -1,5 +1,6 @@
 import type { Nullable } from '@univerjs/core';
-import { FUNCTION_NAMES } from '@univerjs/engine-formula';
+import type { IFunctionNames } from '@univerjs/engine-formula';
+import { FUNCTION_NAMES_MATH, FUNCTION_NAMES_STATISTICAL } from '@univerjs/engine-formula';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
@@ -10,21 +11,21 @@ export interface IStatusBarService {
     dispose(): void;
     setState(param: IStatusBarServiceStatus | null): void;
     getState(): Readonly<Nullable<IStatusBarServiceStatus>>;
-    getFunctions(): Readonly<FUNCTION_NAMES[]>;
+    getFunctions(): Readonly<IFunctionNames[]>;
 }
 
 export type IStatusBarServiceStatus = Array<{
-    func: FUNCTION_NAMES;
+    func: IFunctionNames;
     value: number;
 }>;
 
 export class StatusBarService implements IStatusBarService, IDisposable {
     private readonly _functions = [
-        FUNCTION_NAMES.SUM,
-        FUNCTION_NAMES.MAX,
-        FUNCTION_NAMES.MIN,
-        FUNCTION_NAMES.AVERAGE,
-        FUNCTION_NAMES.COUNT,
+        FUNCTION_NAMES_MATH.SUM,
+        FUNCTION_NAMES_STATISTICAL.MAX,
+        FUNCTION_NAMES_STATISTICAL.MIN,
+        FUNCTION_NAMES_STATISTICAL.AVERAGE,
+        FUNCTION_NAMES_STATISTICAL.COUNT,
     ];
     private readonly _state$ = new BehaviorSubject<Nullable<IStatusBarServiceStatus>>(null);
     readonly state$ = this._state$.asObservable();
@@ -41,7 +42,7 @@ export class StatusBarService implements IStatusBarService, IDisposable {
         return this._state$.getValue();
     }
 
-    getFunctions(): Readonly<FUNCTION_NAMES[]> {
+    getFunctions(): Readonly<IFunctionNames[]> {
         return this._functions;
     }
 }

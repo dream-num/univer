@@ -3,9 +3,9 @@ import type { IAccessor } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { ErrorType } from '../../basics/error-type';
-import { FUNCTION_NAMES } from '../../basics/function';
 import { prefixToken } from '../../basics/token';
 import type { BaseFunction } from '../../functions/base-function';
+import { FUNCTION_NAMES_META } from '../../functions/meta/function-names';
 import { IFunctionService } from '../../services/function.service';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
 import { LexerNode } from '../analysis/lexer-node';
@@ -106,7 +106,7 @@ export class PrefixNodeFactory extends BaseAstNodeFactory {
 
         let functionName = '';
         if (tokenTrim === prefixToken.MINUS) {
-            functionName = FUNCTION_NAMES.MINUS;
+            functionName = FUNCTION_NAMES_META.MINUS;
         } else if (tokenTrim === prefixToken.AT) {
             return new PrefixNode(this._injector, tokenTrim);
         } else {

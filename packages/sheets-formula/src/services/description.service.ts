@@ -1,5 +1,5 @@
 import { LocaleService } from '@univerjs/core';
-import type { IFunctionInfo } from '@univerjs/engine-formula';
+import type { IFunctionInfo, IFunctionNames } from '@univerjs/engine-formula';
 import { IFunctionService } from '@univerjs/engine-formula';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier, Inject } from '@wendellhu/redi';
@@ -16,7 +16,7 @@ export interface IDescriptionService {
     /**
      * get all descriptions
      */
-    getDescriptions(): Map<string, IFunctionInfo>;
+    getDescriptions(): Map<IFunctionNames, IFunctionInfo>;
 
     hasFunction(searchText: string): boolean;
 

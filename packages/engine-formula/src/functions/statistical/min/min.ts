@@ -1,10 +1,10 @@
-import { compareToken } from '../basics/token';
-import type { BaseReferenceObject, FunctionVariantType } from '../engine/reference-object/base-reference-object';
-import type { ArrayValueObject } from '../engine/value-object/array-value-object';
-import type { BaseValueObject } from '../engine/value-object/base-value-object';
-import type { BooleanValueObject } from '../engine/value-object/primitive-object';
-import { NumberValueObject } from '../engine/value-object/primitive-object';
-import { BaseFunction } from './base-function';
+import { compareToken } from '../../../basics/token';
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import type { BooleanValueObject } from '../../../engine/value-object/primitive-object';
+import { NumberValueObject } from '../../../engine/value-object/primitive-object';
+import { BaseFunction } from '../../base-function';
 
 export class Min extends BaseFunction {
     override calculate(...variants: FunctionVariantType[]) {

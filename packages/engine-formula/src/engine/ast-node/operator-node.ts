@@ -1,9 +1,11 @@
 import { ErrorType } from '../../basics/error-type';
-import { FUNCTION_NAMES } from '../../basics/function';
 import type { compareToken } from '../../basics/token';
 import { OPERATOR_TOKEN_COMPARE_SET, OPERATOR_TOKEN_SET, operatorToken } from '../../basics/token';
 import type { BaseFunction } from '../../functions/base-function';
-import type { Compare } from '../../functions/meta/compare';
+import { FUNCTION_NAMES_COMPATIBILITY } from '../../functions/compatibility/function-names';
+import { FUNCTION_NAMES_MATH } from '../../functions/math/function-names';
+import type { Compare } from '../../functions/meta/compare/compare';
+import { FUNCTION_NAMES_META } from '../../functions/meta/function-names';
 import { IFunctionService } from '../../services/function.service';
 import { LexerNode } from '../analysis/lexer-node';
 import type { FunctionVariantType } from '../reference-object/base-reference-object';
@@ -25,7 +27,7 @@ export class OperatorNode extends BaseAstNode {
 
     override execute() {
         const children = this.getChildren();
-        if (this._functionExecutor.name === FUNCTION_NAMES.COMPARE) {
+        if (this._functionExecutor.name === FUNCTION_NAMES_META.COMPARE) {
             (this._functionExecutor as Compare).setCompareType(this.getToken() as compareToken);
         }
         const object1 = children[0].getValue();
@@ -50,19 +52,19 @@ export class OperatorNodeFactory extends BaseAstNodeFactory {
         let functionName = '';
         const tokenTrim = param;
         if (tokenTrim === operatorToken.PLUS) {
-            functionName = FUNCTION_NAMES.PLUS;
+            functionName = FUNCTION_NAMES_META.PLUS;
         } else if (tokenTrim === operatorToken.MINUS) {
-            functionName = FUNCTION_NAMES.MINUS;
+            functionName = FUNCTION_NAMES_META.MINUS;
         } else if (tokenTrim === operatorToken.MULTIPLY) {
-            functionName = FUNCTION_NAMES.MULTIPLY;
+            functionName = FUNCTION_NAMES_META.MULTIPLY;
         } else if (tokenTrim === operatorToken.DIVIDED) {
-            functionName = FUNCTION_NAMES.DIVIDED;
+            functionName = FUNCTION_NAMES_META.DIVIDED;
         } else if (tokenTrim === operatorToken.CONCATENATE) {
-            functionName = FUNCTION_NAMES.CONCATENATE;
+            functionName = FUNCTION_NAMES_COMPATIBILITY.CONCATENATE;
         } else if (tokenTrim === operatorToken.POWER) {
-            functionName = FUNCTION_NAMES.POWER;
+            functionName = FUNCTION_NAMES_MATH.POWER;
         } else if (OPERATOR_TOKEN_COMPARE_SET.has(tokenTrim)) {
-            functionName = FUNCTION_NAMES.COMPARE;
+            functionName = FUNCTION_NAMES_META.COMPARE;
         }
 
         const functionExecutor = this._functionService.getExecutor(functionName);

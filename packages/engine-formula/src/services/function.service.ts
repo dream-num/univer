@@ -2,7 +2,7 @@ import type { Nullable } from '@univerjs/core';
 import { Disposable } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 
-import type { FUNCTION_NAMES, IFunctionInfo } from '../basics/function';
+import type { IFunctionInfo, IFunctionNames } from '../basics/function';
 import type { BaseFunction } from '../functions/base-function';
 
 export interface IFunctionService {
@@ -11,35 +11,35 @@ export interface IFunctionService {
      */
     registerExecutors(...functions: BaseFunction[]): void;
 
-    getExecutors(): Map<string, BaseFunction>;
+    getExecutors(): Map<IFunctionNames, BaseFunction>;
 
     /**
      * Obtain the operator of the function to reuse the calculation logic.
      * The argument type accepted by the function is: FunctionVariantType.
      * For instance, the sum formula capability is needed for the statistics bar.
      * You can obtain the calculation result by using
-     * const sum = formulaService.getExecutor(FUNCTION_NAMES.SUM);
+     * const sum = formulaService.getExecutor(FUNCTION_NAMES_MATH.SUM);
      * sum.calculate(new RangeReferenceObject(range, sheetId, unitId), ref2, re3).
      * @param functionName Function name, which can be obtained through the FUNCTION_NAMES enumeration.
      * @returns
      */
-    getExecutor(functionToken: string): Nullable<BaseFunction>;
+    getExecutor(functionToken: IFunctionNames): Nullable<BaseFunction>;
 
-    hasExecutor(functionToken: string): boolean;
+    hasExecutor(functionToken: IFunctionNames): boolean;
 
     registerDescriptions(...functions: IFunctionInfo[]): void;
 
-    getDescriptions(): Map<string, IFunctionInfo>;
+    getDescriptions(): Map<IFunctionNames, IFunctionInfo>;
 
-    getDescription(functionToken: string): Nullable<IFunctionInfo>;
+    getDescription(functionToken: IFunctionNames): Nullable<IFunctionInfo>;
 
-    hasDescription(functionToken: string): boolean;
+    hasDescription(functionToken: IFunctionNames): boolean;
 }
 
 export class FunctionService extends Disposable implements IFunctionService {
-    private _functionExecutors: Map<string, BaseFunction> = new Map();
+    private _functionExecutors: Map<IFunctionNames, BaseFunction> = new Map();
 
-    private _functionDescriptions: Map<string, IFunctionInfo> = new Map();
+    private _functionDescriptions: Map<IFunctionNames, IFunctionInfo> = new Map();
 
     override dispose(): void {
         this._functionExecutors.clear();
@@ -57,11 +57,11 @@ export class FunctionService extends Disposable implements IFunctionService {
         return this._functionExecutors;
     }
 
-    getExecutor(functionToken: string | FUNCTION_NAMES) {
+    getExecutor(functionToken: IFunctionNames) {
         return this._functionExecutors.get(functionToken);
     }
 
-    hasExecutor(functionToken: string | FUNCTION_NAMES) {
+    hasExecutor(functionToken: IFunctionNames) {
         return this._functionExecutors.has(functionToken);
     }
 
@@ -76,11 +76,11 @@ export class FunctionService extends Disposable implements IFunctionService {
         return this._functionDescriptions;
     }
 
-    getDescription(functionToken: string) {
+    getDescription(functionToken: IFunctionNames) {
         return this._functionDescriptions.get(functionToken);
     }
 
-    hasDescription(functionToken: string) {
+    hasDescription(functionToken: IFunctionNames) {
         return this._functionDescriptions.has(functionToken);
     }
 }

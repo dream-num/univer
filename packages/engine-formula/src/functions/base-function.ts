@@ -1,6 +1,7 @@
 import { Disposable } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
+import type { IFunctionNames } from '..';
 import { ErrorType } from '../basics/error-type';
 import { ErrorValueObject } from '../engine/other-object/error-value-object';
 import type { FunctionVariantType, NodeValueType } from '../engine/reference-object/base-reference-object';
@@ -9,7 +10,7 @@ import type { BaseValueObject } from '../engine/value-object/base-value-object';
 export class BaseFunction extends Disposable {
     constructor(
         readonly accessor: IAccessor,
-        private _name: string
+        private _name: IFunctionNames
     ) {
         super();
     }

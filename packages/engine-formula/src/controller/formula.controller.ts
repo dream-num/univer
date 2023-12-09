@@ -2,7 +2,6 @@ import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univ
 import type { Ctor } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { FUNCTION_NAMES } from '../basics/function';
 import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
 import {
     SetFormulaCalculationNotificationMutation,
@@ -11,39 +10,23 @@ import {
     SetFormulaCalculationStopMutation,
 } from '../commands/mutations/set-formula-calculation.mutation';
 import { SetFormulaDataMutation } from '../commands/mutations/set-formula-data.mutation';
-import {
-    Average,
-    Compare,
-    Concatenate,
-    Count,
-    Divided,
-    Indirect,
-    Max,
-    Min,
-    Minus,
-    Multiply,
-    Offset,
-    Plus,
-    Power,
-    Sum,
-    Union,
-} from '../functions';
-import { functionArray } from '../functions/array/function-names';
+import { functionArray } from '../functions/array/function-map';
 import type { BaseFunction } from '../functions/base-function';
-import { functionCompatibility } from '../functions/compatibility/function-names';
-import { functionCube } from '../functions/cube/function-names';
-import { functionDatabase } from '../functions/database/function-names';
-import { functionDate } from '../functions/date/function-names';
-import { functionEngineering } from '../functions/engineering/function-names';
-import { functionFinancial } from '../functions/financial/function-names';
-import { functionInformation } from '../functions/information/function-names';
-import { functionLogical } from '../functions/logical/function-names';
-import { functionLookup } from '../functions/lookup/function-names';
-import { functionMath } from '../functions/math/function-names';
-import { functionStatistical } from '../functions/statistical/function-names';
-import { functionText } from '../functions/text/function-names';
-import { functionUniver } from '../functions/univer/function-names';
-import { functionWeb } from '../functions/web/function-names';
+import { functionCompatibility } from '../functions/compatibility/function-map';
+import { functionCube } from '../functions/cube/function-map';
+import { functionDatabase } from '../functions/database/function-map';
+import { functionDate } from '../functions/date/function-map';
+import { functionEngineering } from '../functions/engineering/function-map';
+import { functionFinancial } from '../functions/financial/function-map';
+import { functionInformation } from '../functions/information/function-map';
+import { functionLogical } from '../functions/logical/function-map';
+import { functionLookup } from '../functions/lookup/function-map';
+import { functionMath } from '../functions/math/function-map';
+import { functionMeta } from '../functions/meta/function-map';
+import { functionStatistical } from '../functions/statistical/function-map';
+import { functionText } from '../functions/text/function-map';
+import { functionUniver } from '../functions/univer/function-map';
+import { functionWeb } from '../functions/web/function-map';
 import { IFunctionService } from '../services/function.service';
 
 @OnLifecycle(LifecycleStages.Ready, FormulaController)
@@ -60,10 +43,7 @@ export class FormulaController extends Disposable {
 
     private _initialize(): void {
         this._registerCommands();
-
         this._registerFunctions();
-
-        this._initializeFunctions();
     }
 
     private _registerCommands(): void {
@@ -90,41 +70,11 @@ export class FormulaController extends Disposable {
             ...functionLogical,
             ...functionLookup,
             ...functionMath,
+            ...functionMeta,
             ...functionStatistical,
             ...functionText,
             ...functionUniver,
             ...functionWeb,
-        ].map((registerObject) => {
-            const Func = registerObject[0] as Ctor<BaseFunction>;
-            const name = registerObject[1] as string;
-
-            return new Func(this._injector, name);
-        });
-
-        this._functionService.registerExecutors(...functions);
-    }
-
-    private _initializeFunctions() {
-        // new Sum(this._injector, FUNCTION_NAMES.SUM)
-        const functions: BaseFunction[] = [
-            // base function
-            [Compare, FUNCTION_NAMES.COMPARE],
-            [Divided, FUNCTION_NAMES.DIVIDED],
-            [Minus, FUNCTION_NAMES.MINUS],
-            [Multiply, FUNCTION_NAMES.MULTIPLY],
-            [Plus, FUNCTION_NAMES.PLUS],
-            [Union, FUNCTION_NAMES.UNION],
-
-            // static
-            [Average, FUNCTION_NAMES.AVERAGE],
-            [Concatenate, FUNCTION_NAMES.CONCATENATE],
-            [Count, FUNCTION_NAMES.COUNT],
-            [Indirect, FUNCTION_NAMES.INDIRECT],
-            [Max, FUNCTION_NAMES.MAX],
-            [Min, FUNCTION_NAMES.MIN],
-            [Offset, FUNCTION_NAMES.OFFSET],
-            [Power, FUNCTION_NAMES.POWER],
-            [Sum, FUNCTION_NAMES.SUM],
         ].map((registerObject) => {
             const Func = registerObject[0] as Ctor<BaseFunction>;
             const name = registerObject[1] as string;

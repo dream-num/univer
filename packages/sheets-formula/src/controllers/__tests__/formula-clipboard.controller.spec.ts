@@ -25,7 +25,6 @@ describe('Test paste with formula', () => {
     beforeEach(() => {
         const testBed = createCommandTestBed(undefined, [
             [ISelectionRenderService, { useClass: SelectionRenderService }],
-            [LexerTreeBuilder],
         ]);
         univer = testBed.univer;
         get = testBed.get;

@@ -1,9 +1,9 @@
 import type { IFunctionInfo } from '@univerjs/engine-formula';
-import { FUNCTION_NAMES, FunctionType } from '@univerjs/engine-formula';
+import { FUNCTION_NAMES_STATISTICAL, FunctionType } from '@univerjs/engine-formula';
 
 export const FUNCTION_LIST_STATISTICAL: IFunctionInfo[] = [
     {
-        functionName: FUNCTION_NAMES.AVERAGE,
+        functionName: FUNCTION_NAMES_STATISTICAL.AVERAGE,
         aliasFunctionName: 'formula.functionList.AVERAGE.aliasFunctionName',
         functionType: FunctionType.Statistical,
         description: 'formula.functionList.AVERAGE.description',
@@ -26,7 +26,7 @@ export const FUNCTION_LIST_STATISTICAL: IFunctionInfo[] = [
         ],
     },
     {
-        functionName: FUNCTION_NAMES.MAX,
+        functionName: FUNCTION_NAMES_STATISTICAL.MAX,
         aliasFunctionName: 'formula.functionList.MAX.aliasFunctionName',
         functionType: FunctionType.Statistical,
         description: 'formula.functionList.MAX.description',
@@ -49,7 +49,7 @@ export const FUNCTION_LIST_STATISTICAL: IFunctionInfo[] = [
         ],
     },
     {
-        functionName: FUNCTION_NAMES.COUNT,
+        functionName: FUNCTION_NAMES_STATISTICAL.COUNT,
         aliasFunctionName: 'formula.functionList.COUNT.aliasFunctionName',
         functionType: FunctionType.Statistical,
         description: 'formula.functionList.COUNT.description',
@@ -72,7 +72,7 @@ export const FUNCTION_LIST_STATISTICAL: IFunctionInfo[] = [
         ],
     },
     {
-        functionName: FUNCTION_NAMES.MIN,
+        functionName: FUNCTION_NAMES_STATISTICAL.MIN,
         aliasFunctionName: 'formula.functionList.MIN.aliasFunctionName',
         functionType: FunctionType.Statistical,
         description: 'formula.functionList.MIN.description',

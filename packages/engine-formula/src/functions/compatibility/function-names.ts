@@ -1,3 +1,3 @@
-export enum FUNCTION_NAMES_COMPATIBILITY {}
-
-export const functionCompatibility = [];
+export enum FUNCTION_NAMES_COMPATIBILITY {
+    CONCATENATE = 'CONCATENATE',
+}

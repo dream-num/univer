@@ -2,7 +2,7 @@ import type { Nullable } from '@univerjs/core';
 import { Disposable } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 
-import type { FUNCTION_NAMES, IFunctionInfo } from '../basics/function';
+import type { IFunctionInfo } from '../basics/function';
 import type { BaseFunction } from '../functions/base-function';
 
 export interface IFunctionService {
@@ -18,7 +18,7 @@ export interface IFunctionService {
      * The argument type accepted by the function is: FunctionVariantType.
      * For instance, the sum formula capability is needed for the statistics bar.
      * You can obtain the calculation result by using
-     * const sum = formulaService.getExecutor(FUNCTION_NAMES.SUM);
+     * const sum = formulaService.getExecutor(FUNCTION_NAMES_MATH.SUM);
      * sum.calculate(new RangeReferenceObject(range, sheetId, unitId), ref2, re3).
      * @param functionName Function name, which can be obtained through the FUNCTION_NAMES enumeration.
      * @returns
@@ -57,11 +57,11 @@ export class FunctionService extends Disposable implements IFunctionService {
         return this._functionExecutors;
     }
 
-    getExecutor(functionToken: string | FUNCTION_NAMES) {
+    getExecutor(functionToken: string) {
         return this._functionExecutors.get(functionToken);
     }
 
-    hasExecutor(functionToken: string | FUNCTION_NAMES) {
+    hasExecutor(functionToken: string) {
         return this._functionExecutors.has(functionToken);
     }
 

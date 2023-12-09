@@ -1,6 +1,11 @@
 import { LocaleService } from '@univerjs/core';
 import { MessageType, Tooltip } from '@univerjs/design';
-import { FUNCTION_NAMES } from '@univerjs/engine-formula';
+import type { FUNCTION_NAMES } from '@univerjs/engine-formula';
+import {
+    FUNCTION_NAMES_COMPATIBILITY,
+    FUNCTION_NAMES_MATH,
+    FUNCTION_NAMES_STATISTICAL,
+} from '@univerjs/engine-formula';
 import { IClipboardInterfaceService, IMessageService } from '@univerjs/ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React from 'react';
@@ -14,12 +19,12 @@ export interface IStatisticItem {
 }
 
 export const functionDisplayNames: FunctionNameMap = {
-    [FUNCTION_NAMES.SUM]: 'statusbar.sum',
-    [FUNCTION_NAMES.AVERAGE]: 'statusbar.average',
-    [FUNCTION_NAMES.MIN]: 'statusbar.min',
-    [FUNCTION_NAMES.MAX]: 'statusbar.max',
-    [FUNCTION_NAMES.COUNT]: 'statusbar.count',
-    [FUNCTION_NAMES.CONCATENATE]: 'concatenate',
+    [FUNCTION_NAMES_MATH.SUM]: 'statusbar.sum',
+    [FUNCTION_NAMES_STATISTICAL.AVERAGE]: 'statusbar.average',
+    [FUNCTION_NAMES_STATISTICAL.MIN]: 'statusbar.min',
+    [FUNCTION_NAMES_STATISTICAL.MAX]: 'statusbar.max',
+    [FUNCTION_NAMES_STATISTICAL.COUNT]: 'statusbar.count',
+    [FUNCTION_NAMES_COMPATIBILITY.CONCATENATE]: 'concatenate',
 };
 interface FunctionNameMap {
     [key: string]: string;

@@ -144,21 +144,3 @@ export interface IFunctionInfo {
      */
     functionParameter: IFunctionParam[];
 }
-
-export enum FUNCTION_NAMES {
-    AVERAGE = 'AVERAGE',
-    CONCATENATE = 'CONCATENATE',
-    COUNT = 'COUNT',
-    INDIRECT = 'INDIRECT',
-    MAX = 'MAX',
-    MIN = 'MIN',
-    OFFSET = 'OFFSET',
-    POWER = 'POWER',
-    SUM = 'SUM',
-    COMPARE = 'COMPARE',
-    DIVIDED = 'DIVIDED',
-    MINUS = 'MINUS',
-    MULTIPLY = 'MULTIPLY',
-    PLUS = 'PLUS',
-    UNION = 'UNION',
-}

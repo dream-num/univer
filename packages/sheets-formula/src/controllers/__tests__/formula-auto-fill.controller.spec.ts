@@ -7,7 +7,6 @@ import {
     ThemeService,
     UndoCommand,
 } from '@univerjs/core';
-import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import {
     AddWorksheetMergeMutation,
     NORMAL_SELECTION_PLUGIN_NAME,
@@ -54,7 +53,6 @@ describe('Test auto fill with formula', () => {
             [SheetInterceptorService],
             [ISelectionRenderService, { useClass: SelectionRenderService }],
             [AutoFillController],
-            [LexerTreeBuilder],
             [IAutoFillService, { useClass: AutoFillService }],
             [IShortcutService, { useClass: DesktopShortcutService }],
             [IPlatformService, { useClass: DesktopPlatformService }],
@@ -190,7 +188,6 @@ describe('Test auto fill with formula', () => {
             //             "si": "d4_488"
             //         },
             //         {
-            //             "f": "=SUM(B2)",
             //             "si": "d4_488"
             //         },
             //         {
@@ -218,7 +215,7 @@ describe('Test auto fill with formula', () => {
             let D3 = values && values[2][2];
 
             expect(C1?.f).toStrictEqual('=SUM(B1)');
-            expect(C2?.f).toStrictEqual('=SUM(B2)');
+            expect(C2?.f).toBeUndefined();
             expect(C1?.si).toEqual(D1?.si);
 
             expect(B2?.si).toEqual(C2?.si);
@@ -256,7 +253,7 @@ describe('Test auto fill with formula', () => {
             D3 = values && values[2][2];
 
             expect(C1?.f).toStrictEqual('=SUM(B1)');
-            expect(C2?.f).toStrictEqual('=SUM(B2)');
+            expect(C2?.f).toBeUndefined();
             expect(C1?.si).toEqual(D1?.si);
 
             expect(B2?.si).toEqual(C2?.si);

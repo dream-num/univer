@@ -14,6 +14,12 @@ import type {
 } from '../basics/common';
 import { LexerTreeBuilder } from '../engine/analysis/lexer';
 
+export interface IFormulaIdMap {
+    f: string;
+    r: number;
+    c: number;
+}
+
 export class FormulaDataModel extends Disposable {
     private _formulaData: IFormulaData = {};
 
@@ -240,8 +246,8 @@ export class FormulaDataModel extends Disposable {
     updateFormulaData(unitId: string, sheetId: string, cellValue: ObjectMatrixPrimitiveType<ICellData | null>) {
         const cellMatrix = new ObjectMatrix(cellValue);
 
-        const formulaIdMap = new Map<string, { f: string; r: number; c: number }>(); // Connect the formula and ID
-        const deleteFormulaIdMap = new Map<string, string | { f: string; r: number; c: number }>();
+        const formulaIdMap = this.getFormulaIdMap(unitId, sheetId); // Connect the formula and ID
+        const deleteFormulaIdMap = new Map<string, string | IFormulaIdMap>();
 
         const formulaData = this._formulaData;
         if (formulaData[unitId] == null) {
@@ -360,6 +366,33 @@ export class FormulaDataModel extends Disposable {
 
     getFormulaDataItem(row: number, column: number, sheetId: string, unitId: string) {
         return this._formulaData?.[unitId]?.[sheetId]?.[row]?.[column];
+    }
+
+    getFormulaIdMap(unitId: string, sheetId: string): Map<string, IFormulaIdMap> {
+        const formulaIdMap = new Map<string, IFormulaIdMap>(); // Connect the formula and ID
+
+        const formulaData = this._formulaData;
+        if (formulaData[unitId] == null) {
+            return formulaIdMap;
+        }
+        const workbookFormulaData = formulaData[unitId];
+
+        if (workbookFormulaData[sheetId] == null) {
+            return formulaIdMap;
+        }
+
+        const sheetFormulaDataMatrix = new ObjectMatrix(workbookFormulaData[sheetId]);
+
+        sheetFormulaDataMatrix.forValue((r, c, cell) => {
+            const formulaString = cell?.f || '';
+            const formulaId = cell?.si || '';
+
+            if (isFormulaString(formulaString) && isFormulaId(formulaId)) {
+                formulaIdMap.set(formulaId, { f: formulaString, r, c });
+            }
+        });
+
+        return formulaIdMap;
     }
 }
 

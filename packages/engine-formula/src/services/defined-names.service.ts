@@ -10,6 +10,8 @@ export interface IDefinedNamesService {
     getValue(unitId: string, name: string): Nullable<string>;
 
     removeDefinedName(unitId: string, name: string): void;
+
+    hasDefinedName(unitId: string): boolean;
 }
 
 export class DefinedNamesService extends Disposable implements IDefinedNamesService {
@@ -40,6 +42,11 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
 
     getValue(unitId: string, name: string) {
         return this._definedNameMap.get(unitId)?.get(name);
+    }
+
+    hasDefinedName(unitId: string) {
+        const size = this._definedNameMap.get(unitId)?.size || 0;
+        return size !== 0;
     }
 }
 

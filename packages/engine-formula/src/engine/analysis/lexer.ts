@@ -18,6 +18,8 @@ import {
     DEFAULT_TOKEN_TYPE_PARAMETER,
     DEFAULT_TOKEN_TYPE_ROOT,
 } from '../../basics/token-type';
+import { IDefinedNamesService } from '../../services/defined-names.service';
+import { IFormulaRuntimeService } from '../../services/runtime.service';
 import type { ISequenceArray, ISequenceNode } from '../utils/sequence';
 import { generateStringWithSequence, sequenceNodeType } from '../utils/sequence';
 import { LexerNode } from './lexer-node';
@@ -56,6 +58,13 @@ export class LexerTreeBuilder extends Disposable {
     private _colonState = false; // :
 
     private _tableBracketState = false; // Table3[[#All],[Column1]:[Column2]]
+
+    constructor(
+        @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,
+        @IFormulaRuntimeService private readonly _runtimeService: IFormulaRuntimeService
+    ) {
+        super();
+    }
 
     override dispose(): void {
         this._resetTemp();
@@ -250,6 +259,24 @@ export class LexerTreeBuilder extends Disposable {
             return;
         }
 
+        const newSequenceNodes = this._getSequenceNode(sequenceArray);
+
+        // let sequenceString = '';
+        // for (const node of newSequenceNodes) {
+        //     if (typeof node === 'string') {
+        //         sequenceString += node;
+        //     } else {
+        //         sequenceString += node.token;
+        //     }
+        // }
+        // console.log('sequenceString', sequenceString);
+
+        FormulaSequenceNodeCache.set(formulaString, [...newSequenceNodes]);
+
+        return newSequenceNodes;
+    }
+
+    private _getSequenceNode(sequenceArray: ISequenceArray[]) {
         const sequenceNodes: Array<ISequenceNode | string> = [];
 
         let maybeString = false;
@@ -345,21 +372,7 @@ export class LexerTreeBuilder extends Disposable {
             }
         }
 
-        const newSequenceNodes = this._mergeSequenceNodeReference(sequenceNodes);
-
-        // let sequenceString = '';
-        // for (const node of newSequenceNodes) {
-        //     if (typeof node === 'string') {
-        //         sequenceString += node;
-        //     } else {
-        //         sequenceString += node.token;
-        //     }
-        // }
-        // console.log('sequenceString', sequenceString);
-
-        FormulaSequenceNodeCache.set(formulaString, [...newSequenceNodes]);
-
-        return newSequenceNodes;
+        return this._mergeSequenceNodeReference(sequenceNodes);
     }
 
     private _getCurrentParamIndex(formulaString: string, index: number) {
@@ -461,10 +474,30 @@ export class LexerTreeBuilder extends Disposable {
 
         this._currentLexerNode.setToken(DEFAULT_TOKEN_TYPE_ROOT);
 
-        const state = this._nodeMaker(formulaString);
+        const sequenceArray: ISequenceArray[] = [];
 
-        if (state === ErrorType.VALUE) {
+        let state = this._nodeMaker(formulaString, sequenceArray);
+
+        if (state === ErrorType.VALUE || sequenceArray.length === 0) {
             return state;
+        }
+
+        const { hasDefinedName, sequenceString } = this._injectDefinedName(sequenceArray);
+
+        /**
+         * If there is a custom name in the formula string,
+         * replace the custom name with the corresponding character content and rebuild the formula.
+         */
+        if (hasDefinedName) {
+            this._resetCurrentLexerNode();
+
+            this._currentLexerNode.setToken(DEFAULT_TOKEN_TYPE_ROOT);
+
+            state = this._nodeMaker(`=${sequenceString}`);
+
+            if (state === ErrorType.VALUE) {
+                return state;
+            }
         }
 
         const node = this._getTopNode(this._currentLexerNode);
@@ -479,6 +512,48 @@ export class LexerTreeBuilder extends Disposable {
         }
 
         return this._currentLexerNode;
+    }
+
+    private _injectDefinedName(sequenceArray: ISequenceArray[]) {
+        const unitId = this._runtimeService.currentUnitId;
+
+        if (!this._definedNamesService.hasDefinedName(unitId)) {
+            return {
+                sequenceString: '',
+                hasDefinedName: false,
+            };
+        }
+
+        const sequenceNodes = this._getSequenceNode(sequenceArray);
+        let sequenceString = '';
+        let hasDefinedName = false;
+
+        for (let i = 0, len = sequenceNodes.length; i < len; i++) {
+            const node = sequenceNodes[i];
+            if (typeof node === 'string') {
+                sequenceString += node;
+                continue;
+            }
+
+            const { nodeType, token } = node;
+
+            if (nodeType === sequenceNodeType.REFERENCE || nodeType === sequenceNodeType.FUNCTION) {
+                const definedContent = this._definedNamesService.getDefinedNameMap(unitId)?.get(token);
+                if (definedContent) {
+                    sequenceString += definedContent;
+                    hasDefinedName = true;
+                } else {
+                    sequenceString += token;
+                }
+            } else {
+                sequenceString += token;
+            }
+        }
+
+        return {
+            sequenceString,
+            hasDefinedName,
+        };
     }
 
     private _suffixExpressionHandler(lexerNode: LexerNode) {

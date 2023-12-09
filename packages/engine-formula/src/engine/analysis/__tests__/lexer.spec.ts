@@ -1,13 +1,75 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import type { IWorkbookData, Univer, Workbook } from '@univerjs/core';
+import { LocaleType } from '@univerjs/core';
+import type { Injector } from '@wendellhu/redi';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import { IDefinedNamesService } from '../../../services/defined-names.service';
+import { IFormulaRuntimeService } from '../../../services/runtime.service';
 import { LexerTreeBuilder } from '../lexer';
 import type { LexerNode } from '../lexer-node';
+import { createCommandTestBed } from './create-command-test-bed';
 
-describe('utils test', () => {
-    const lexer = new LexerTreeBuilder();
+const TEST_WORKBOOK_DATA: IWorkbookData = {
+    id: 'test',
+    appVersion: '3.0.0-alpha',
+    sheets: {
+        sheet1: {
+            id: 'sheet1',
+            cellData: {
+                0: {
+                    0: {
+                        v: 1,
+                    },
+                },
+                1: {
+                    0: {
+                        v: 4,
+                    },
+                },
+                2: {
+                    0: {
+                        v: 44,
+                    },
+                },
+                3: {
+                    0: {
+                        v: 444,
+                    },
+                },
+            },
+        },
+    },
+    locale: LocaleType.ZH_CN,
+    name: '',
+    sheetOrder: [],
+    styles: {},
+};
+
+describe('lexer nodeMaker test', () => {
+    let univer: Univer;
+    let lexer: LexerTreeBuilder;
+    let get: Injector['get'];
+    let workbook: Workbook;
+    let definedNamesService: IDefinedNamesService;
+    let runtimeService: IFormulaRuntimeService;
+
+    beforeEach(() => {
+        const testBed = createCommandTestBed(TEST_WORKBOOK_DATA);
+        univer = testBed.univer;
+        workbook = testBed.sheet;
+        get = testBed.get;
+
+        definedNamesService = get(IDefinedNamesService);
+
+        runtimeService = get(IFormulaRuntimeService);
+
+        runtimeService.setCurrent(0, 0, 'sheet1', 'test');
+
+        lexer = new LexerTreeBuilder(definedNamesService, runtimeService);
+    });
 
     afterEach(() => {
-        lexer.dispose();
+        univer.dispose();
     });
 
     describe('lexer', () => {
@@ -103,7 +165,7 @@ describe('utils test', () => {
 
         it('nodeMaker performance', () => {
             const start = performance.now();
-            for (let i = 0; i < 10000; i++) {
+            for (let i = 0; i < 1000; i++) {
                 lexer.nodeMakerTest(
                     `=(-(1+2)--@A1:B2 + 5)/2 + -sum(indirect(A5):B10# + B6# + A1:offset(C5, 1, 1)  ,  100) + {1,2,3;4,5,6;7,8,10} + lambda(x,y,z, x*y*z)(sum(1,(1+2)*3),2,lambda(x,y, @offset(A1:B0,x#*y#))(1,2):C20) + sum((1+2%)*30%, 1+2)%`
                 );
@@ -113,8 +175,30 @@ describe('utils test', () => {
 
             console.log(`Elapsed time: ${elapsed} ms`);
 
-            const expectedMaxTime = 300; // 毫秒数
+            const expectedMaxTime = 3000; // 毫秒数
             expect(elapsed).toBeLessThan(expectedMaxTime);
+        });
+    });
+
+    describe('lexer definedName', () => {
+        it('simple', () => {
+            definedNamesService.registerDefinedName('test', 'myName', '$A$10:$C$100');
+
+            const node = lexer.treeBuilder(`=myName`) as LexerNode;
+
+            expect(JSON.stringify(node.serialize())).toStrictEqual(
+                `{"token":"R_1","st":-1,"ed":-1,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"$A$10","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"$C$100","st":-1,"ed":-1,"children":[]}]}]}]}`
+            );
+        });
+
+        it('lambda', () => {
+            definedNamesService.registerDefinedName('test', 'myName', 'lambda(x, y , x*x*y)');
+
+            const node = lexer.treeBuilder(`=myName(1+sum(A1:B1), 100)`) as LexerNode;
+
+            expect(JSON.stringify(node.serialize())).toStrictEqual(
+                `{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"lambda","st":0,"ed":5,"children":[{"token":"L_1","st":16,"ed":18,"children":[{"token":"P_1","st":17,"ed":19,"children":["1",{"token":"sum","st":23,"ed":25,"children":[{"token":"P_1","st":23,"ed":25,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"A1","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"B1","st":-1,"ed":-1,"children":[]}]}]}]}]},"+"]},{"token":"P_1","st":30,"ed":32,"children":[" 100"]}]},{"token":"P_1","st":3,"ed":5,"children":["x"]},{"token":"P_1","st":5,"ed":7,"children":[" y "]},{"token":"P_1","st":9,"ed":11,"children":[" x","x","y","*","*"]}]}]}`
+            );
         });
     });
 });

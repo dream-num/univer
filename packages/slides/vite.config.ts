@@ -10,7 +10,7 @@ const libName = name
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join('');
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
     plugins: [
         react(),
         dts({
@@ -19,7 +19,7 @@ export default defineConfig({
         }),
     ],
     define: {
-        'process.env.NODE_ENV': JSON.stringify('production'),
+        'process.env.NODE_ENV': JSON.stringify(mode),
     },
     build: {
         outDir: 'lib',
@@ -51,4 +51,4 @@ export default defineConfig({
             provider: 'istanbul',
         },
     },
-});
+}));

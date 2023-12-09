@@ -12,9 +12,9 @@ import type {
     ObjectArrayPrimitiveType,
 } from '@univerjs/core';
 import { HorizontalAlign, IUniverInstanceService, Tools, VerticalAlign, WrapStrategy } from '@univerjs/core';
-// @ts-ignore
-import * as LuckyExcel from 'luckyexcel'; // no type definition for package luckyexcel
 
+// @ts-ignore
+// import * as LuckyExcel from 'luckyexcel'; // no type definition for package luckyexcel
 import { border } from './border';
 
 export function migrate(config: any): Partial<IWorkbookData> {
@@ -469,6 +469,7 @@ export class UploadService {
             console.error('Currently only supports the import of xlsx files');
             return;
         }
+        // @ts-ignore
         const transformExcelToLucky = LuckyExcel.default.transformExcelToLucky;
 
         transformExcelToLucky(files[0], (exportJson: IKeyValue) => {

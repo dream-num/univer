@@ -100,7 +100,11 @@ export interface IOperationInfo<T extends object = object> {
 
 export interface IExecutionOptions {
     /** This mutation should only be executed on the local machine. */
+    // TODO@wzhudev: remove to `onlyLocal`
     local?: boolean;
+
+    /** From collaboration peers. */
+    fromCollab?: boolean;
 
     [key: PropertyKey]: string | number | boolean | undefined;
 }

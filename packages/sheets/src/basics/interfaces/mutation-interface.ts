@@ -13,6 +13,7 @@ import type {
 export interface IRemoveSheetMutationParams {
     worksheetId: string;
     workbookId: string;
+    previousIndex: number;
 }
 
 /** Params of `InsertSheetMutation` */

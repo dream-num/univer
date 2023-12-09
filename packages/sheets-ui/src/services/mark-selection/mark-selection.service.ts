@@ -2,7 +2,7 @@ import type { ICommandInfo } from '@univerjs/core';
 import { Disposable, ICommandService, IUniverInstanceService, ThemeService, Tools } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
-import { SelectionManagerService, SetRangeValuesMutation, SetWorksheetActivateMutation } from '@univerjs/sheets';
+import { SelectionManagerService, SetRangeValuesMutation, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { createIdentifier, Inject } from '@wendellhu/redi';
 
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
@@ -111,7 +111,7 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
     }
 
     private _addRefreshListener() {
-        const refreshCommands = [SetWorksheetActivateMutation.id];
+        const refreshCommands = [SetWorksheetActiveOperation.id];
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (refreshCommands.includes(command.id)) {

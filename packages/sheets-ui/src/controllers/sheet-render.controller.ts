@@ -13,7 +13,7 @@ import {
     COMMAND_LISTENER_SKELETON_CHANGE,
     COMMAND_LISTENER_VALUE_CHANGE,
     SelectionManagerService,
-    SetWorksheetActivateMutation,
+    SetWorksheetActiveOperation,
 } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
@@ -111,7 +111,7 @@ export class SheetRenderController extends Disposable {
                         return;
                     }
 
-                    if (command.id !== SetWorksheetActivateMutation.id) {
+                    if (command.id !== SetWorksheetActiveOperation.id) {
                         this._sheetSkeletonManagerService.makeDirty(
                             {
                                 unitId,

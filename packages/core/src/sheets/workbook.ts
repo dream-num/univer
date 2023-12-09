@@ -159,15 +159,24 @@ export class Workbook extends Disposable {
         return sheetOrder.findIndex((id) => id === sheetId);
     }
 
-    getActiveSheet(): Worksheet {
+    getRawActiveSheet(): Nullable<string> {
         const { sheetOrder } = this._snapshot;
         const activeSheetId = sheetOrder.find((sheetId) => {
             const worksheet = this._worksheets.get(sheetId) as Worksheet;
             return worksheet.getStatus() === BooleanNumber.TRUE;
         });
+
+        return activeSheetId;
+    }
+
+    getActiveSheet(): Worksheet {
+        const { sheetOrder } = this._snapshot;
+        const activeSheetId = this.getRawActiveSheet();
+
         if (!activeSheetId) {
             return this._worksheets.get(sheetOrder[0]) as Worksheet;
         }
+
         return this._worksheets.get(activeSheetId) as Worksheet;
     }
 
@@ -223,6 +232,11 @@ export class Workbook extends Disposable {
 
     getSheetBySheetId(sheetId: string): Nullable<Worksheet> {
         return this._worksheets.get(sheetId);
+    }
+
+    getSheetByIndex(index: number): Nullable<Worksheet> {
+        const { sheetOrder } = this._snapshot;
+        return this._worksheets.get(sheetOrder[index]);
     }
 
     getHiddenWorksheets(): string[] {

@@ -2,13 +2,13 @@ import type { ICommand } from '@univerjs/core';
 import { BooleanNumber, CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
-import type { ISetWorksheetActivateMutationParams } from '../mutations/set-worksheet-activate.mutation';
-import {
-    SetWorksheetActivateMutation,
-    SetWorksheetUnActivateMutationFactory,
-} from '../mutations/set-worksheet-activate.mutation';
 import type { ISetWorksheetHideMutationParams } from '../mutations/set-worksheet-hide.mutation';
 import { SetWorksheetHideMutation, SetWorksheetHideMutationFactory } from '../mutations/set-worksheet-hide.mutation';
+import type { ISetWorksheetActiveOperationParams } from '../operations/set-worksheet-active.operation';
+import {
+    SetWorksheetActiveOperation,
+    // SetWorksheetUnActivateMutationFactory,
+} from '../operations/set-worksheet-active.operation';
 
 export interface ISetWorksheetShowCommandParams {
     value?: string;
@@ -51,14 +51,14 @@ export const SetWorksheetShowCommand: ICommand = {
         const undoMutationParams = SetWorksheetHideMutationFactory(accessor, redoMutationParams);
         const result = commandService.syncExecuteCommand(SetWorksheetHideMutation.id, redoMutationParams);
 
-        const activeSheetMutationParams: ISetWorksheetActivateMutationParams = {
+        const activeSheetMutationParams: ISetWorksheetActiveOperationParams = {
             workbookId,
             worksheetId,
         };
 
-        const unActiveMutationParams = SetWorksheetUnActivateMutationFactory(accessor, activeSheetMutationParams);
+        // const unActiveMutationParams = SetWorksheetUnActivateMutationFactory(accessor, activeSheetMutationParams);
         const activeResult = commandService.syncExecuteCommand(
-            SetWorksheetActivateMutation.id,
+            SetWorksheetActiveOperation.id,
             activeSheetMutationParams
         );
 
@@ -67,10 +67,10 @@ export const SetWorksheetShowCommand: ICommand = {
                 unitID: workbookId,
                 undoMutations: [
                     { id: SetWorksheetHideMutation.id, params: undoMutationParams },
-                    { id: SetWorksheetActivateMutation.id, params: unActiveMutationParams },
+                    // { id: SetWorksheetActiveOperation.id, params: unActiveMutationParams },
                 ],
                 redoMutations: [
-                    { id: SetWorksheetActivateMutation.id, params: activeSheetMutationParams },
+                    // { id: SetWorksheetActiveOperation.id, params: activeSheetMutationParams },
                     { id: SetWorksheetHideMutation.id, params: redoMutationParams },
                 ],
             });

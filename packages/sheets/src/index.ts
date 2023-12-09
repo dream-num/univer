@@ -205,8 +205,6 @@ export { type ISetRangeValuesRangeMutationParams } from './commands/mutations/se
 export { SetRowHiddenMutation, SetRowVisibleMutation } from './commands/mutations/set-row-visible.mutation';
 export { SetTabColorMutation } from './commands/mutations/set-tab-color.mutation';
 export { type ISetTabColorMutationParams } from './commands/mutations/set-tab-color.mutation';
-export { SetWorksheetActivateMutation } from './commands/mutations/set-worksheet-activate.mutation';
-export { type ISetWorksheetActivateMutationParams } from './commands/mutations/set-worksheet-activate.mutation';
 export {
     type ISetWorksheetColWidthMutationParams,
     SetWorksheetColWidthMutation,
@@ -230,6 +228,8 @@ export {
     SetWorksheetRowIsAutoHeightMutation,
 } from './commands/mutations/set-worksheet-row-height.mutation';
 export { type ISetSelectionsOperationParams, SetSelectionsOperation } from './commands/operations/selection.operation';
+export { SetWorksheetActiveOperation } from './commands/operations/set-worksheet-active.operation';
+export { type ISetWorksheetActiveOperationParams } from './commands/operations/set-worksheet-active.operation';
 export { type ISheetCommandSharedParams } from './commands/utils/interface';
 export { getAddMergeMutationRangeByType } from './controllers/merge-cell.controller';
 export { enUS, zhCN } from './locale';

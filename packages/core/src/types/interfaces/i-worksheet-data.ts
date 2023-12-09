@@ -53,6 +53,10 @@ export interface IWorksheetData {
     mergeData: IRange[];
     hideRow: [];
     hideColumn: [];
+    /**
+     * If the worksheet is the active one.
+     * @deprecated this should be removed
+     */
     status: BooleanNumber;
     cellData: ObjectMatrixPrimitiveType<ICellData>;
     rowData: ObjectArrayType<Partial<IRowData>>; // TODO:配置文件不能为ObjectArray实例，应该是纯json配置 @jerry

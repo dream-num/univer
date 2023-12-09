@@ -3,8 +3,8 @@
 
     "editor.codeActionsOnSave": {
         "mode": "explicit",
-        "source.fixAll.eslint": true,
-        "source.fixAll.stylelint": true,
+        "source.fixAll.eslint": "explicit",
+        "source.fixAll.stylelint": "explicit"
     },
     "editor.formatOnSave": false,
     "javascript.preferences.importModuleSpecifier": "relative",

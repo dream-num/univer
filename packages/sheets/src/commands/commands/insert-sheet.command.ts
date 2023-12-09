@@ -15,11 +15,6 @@ import type {
 } from '../../basics/interfaces/mutation-interface';
 import { InsertSheetMutation, InsertSheetUndoMutationFactory } from '../mutations/insert-sheet.mutation';
 import { RemoveSheetMutation } from '../mutations/remove-sheet.mutation';
-import type { ISetWorksheetActivateMutationParams } from '../mutations/set-worksheet-activate.mutation';
-import {
-    SetWorksheetActivateMutation,
-    SetWorksheetUnActivateMutationFactory,
-} from '../mutations/set-worksheet-activate.mutation';
 
 export interface InsertSheetCommandParams {
     workbookId?: string;
@@ -75,30 +70,11 @@ export const InsertSheetCommand: ICommand = {
         // execute do mutations and add undo mutations to undo stack if completed
         const result = commandService.syncExecuteCommand(InsertSheetMutation.id, insertSheetMutationParams);
 
-        const setSheetActiveMutationParams: ISetWorksheetActivateMutationParams = {
-            workbookId,
-            worksheetId: sheetConfig.id,
-        };
-        const undoMutationParams: ISetWorksheetActivateMutationParams = SetWorksheetUnActivateMutationFactory(
-            accessor,
-            setSheetActiveMutationParams
-        );
-        const activateResult = commandService.syncExecuteCommand(
-            SetWorksheetActivateMutation.id,
-            setSheetActiveMutationParams
-        );
-
-        if (result && activateResult) {
+        if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: workbookId,
-                undoMutations: [
-                    { id: SetWorksheetActivateMutation.id, params: undoMutationParams },
-                    { id: RemoveSheetMutation.id, params: removeSheetMutationParams },
-                ],
-                redoMutations: [
-                    { id: InsertSheetMutation.id, params: insertSheetMutationParams },
-                    { id: SetWorksheetActivateMutation.id, params: setSheetActiveMutationParams },
-                ],
+                undoMutations: [{ id: RemoveSheetMutation.id, params: removeSheetMutationParams }],
+                redoMutations: [{ id: InsertSheetMutation.id, params: insertSheetMutationParams }],
             });
 
             return true;

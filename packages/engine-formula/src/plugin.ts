@@ -4,6 +4,10 @@ import { Inject, Injector } from '@wendellhu/redi';
 
 import { CalculateController } from './controller/calculate.controller';
 import { FormulaController } from './controller/formula.controller';
+import { SetDefinedNameController } from './controller/set-defined-name.controller';
+import { SetFeatureCalculationController } from './controller/set-feature-calculation.controller';
+import { SetOtherFormulaController } from './controller/set-other-formula.controller';
+import { SetSuperTableController } from './controller/set-super-table.controller';
 import { LexerTreeBuilder } from './engine/analysis/lexer';
 import { AstTreeBuilder } from './engine/analysis/parser';
 import { AstRootNodeFactory } from './engine/ast-node/ast-root-node';
@@ -50,8 +54,7 @@ export class FormulaEnginePlugin extends Plugin {
     }
 
     private _initialize() {
-        // this._formulaDataModel = this._injector.createInstance(FormulaDataModel);
-
+        // worker and main thread
         const dependencies: Dependency[] = [
             // Services
             [LexerTreeBuilder],
@@ -63,6 +66,7 @@ export class FormulaEnginePlugin extends Plugin {
 
             //Controllers
             [FormulaController],
+            [SetFeatureCalculationController],
         ];
 
         if (!this._config?.notExecuteFormula) {
@@ -70,13 +74,17 @@ export class FormulaEnginePlugin extends Plugin {
             dependencies.push(
                 // Services
                 [CalculateFormulaService],
-                [CalculateController],
-                // [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
                 [IOtherFormulaManagerService, { useClass: OtherFormulaManagerService }],
                 [ISuperTableService, { useClass: SuperTableService }],
                 [IDefinedNamesService, { useClass: DefinedNamesService }],
                 [IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }],
                 [IFormulaRuntimeService, { useClass: FormulaRuntimeService }],
+
+                //Controller
+                [CalculateController],
+                [SetDefinedNameController],
+                [SetOtherFormulaController],
+                [SetSuperTableController],
 
                 // Calculation engine
                 [FormulaDependencyGenerator],

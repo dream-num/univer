@@ -43,6 +43,8 @@ export class LexerTreeBuilder extends Disposable {
 
     private _bracketState: bracketType[] = []; // ()
 
+    private _squareBracketState: number = 0;
+
     private _bracesState = 0; // {}
 
     private _singleQuotationState = 0; // ''
@@ -52,6 +54,8 @@ export class LexerTreeBuilder extends Disposable {
     private _lambdaState = false; // Lambda
 
     private _colonState = false; // :
+
+    private _tableBracketState = false; // Table3[[#All],[Column1]:[Column2]]
 
     override dispose(): void {
         this._resetTemp();
@@ -96,6 +100,10 @@ export class LexerTreeBuilder extends Disposable {
 
     isBracketClose() {
         return this._bracketState.length === 0;
+    }
+
+    isSquareBracketClose() {
+        return this._squareBracketState === 0;
     }
 
     getCurrentLexerNode() {
@@ -557,6 +565,14 @@ export class LexerTreeBuilder extends Disposable {
         this._bracketState.pop();
     }
 
+    private _openSquareBracket() {
+        this._squareBracketState += 1;
+    }
+
+    private _closeSquareBracket() {
+        this._squareBracketState -= 1;
+    }
+
     private _getCurrentBracket() {
         const bracketState = this._bracketState;
         return bracketState[bracketState.length - 1];
@@ -602,6 +618,18 @@ export class LexerTreeBuilder extends Disposable {
     private _closeColon() {
         this._upLevel = 0;
         this._colonState = false;
+    }
+
+    private _isTableBracket() {
+        return this._tableBracketState;
+    }
+
+    private _openTableBracket() {
+        this._tableBracketState = true;
+    }
+
+    private _closeTableBracket() {
+        this._tableBracketState = false;
     }
 
     private _getLastChildCurrentLexerNode() {
@@ -879,9 +907,36 @@ export class LexerTreeBuilder extends Disposable {
                 this._resetSegment();
                 this._closeBraces();
             } else if (
+                currentString === matchToken.OPEN_SQUARE_BRACKET &&
+                this.isSingleQuotationClose() &&
+                this.isDoubleQuotationClose()
+            ) {
+                if (this._segment.length > 0) {
+                    this._openTableBracket();
+                }
+                this._pushSegment(currentString);
+                this._openSquareBracket();
+            } else if (
+                currentString === matchToken.CLOSE_SQUARE_BRACKET &&
+                this.isSingleQuotationClose() &&
+                this.isDoubleQuotationClose()
+            ) {
+                this._closeSquareBracket();
+                if (this.isSquareBracketClose()) {
+                    this._pushSegment(currentString);
+                    if (this._isTableBracket()) {
+                        this._pushNodeToChildren(this._segment);
+                        this._resetSegment();
+                    }
+                    this._closeTableBracket();
+                } else {
+                    this._pushSegment(currentString);
+                }
+            } else if (
                 currentString === matchToken.DOUBLE_QUOTATION &&
                 this.isSingleQuotationClose() &&
-                this.isBracesClose()
+                this.isBracesClose() &&
+                this.isSquareBracketClose()
             ) {
                 if (this.isDoubleQuotationClose()) {
                     this._openDoubleQuotation();
@@ -912,7 +967,8 @@ export class LexerTreeBuilder extends Disposable {
                 currentString === matchToken.COMMA &&
                 this.isSingleQuotationClose() &&
                 this.isDoubleQuotationClose() &&
-                this.isBracesClose()
+                this.isBracesClose() &&
+                this.isSquareBracketClose()
             ) {
                 const currentBracket = this._getCurrentBracket();
                 /**
@@ -941,7 +997,8 @@ export class LexerTreeBuilder extends Disposable {
                 currentString === matchToken.COLON &&
                 this.isSingleQuotationClose() &&
                 this.isDoubleQuotationClose() &&
-                this.isBracesClose()
+                this.isBracesClose() &&
+                this.isSquareBracketClose()
             ) {
                 // const subLexerNode = new LexerNode();
                 // subLexerNode.token = currentString;
@@ -1037,7 +1094,8 @@ export class LexerTreeBuilder extends Disposable {
             } else if (
                 SUFFIX_TOKEN_SET.has(currentString) &&
                 this.isSingleQuotationClose() &&
-                this.isDoubleQuotationClose()
+                this.isDoubleQuotationClose() &&
+                this.isSquareBracketClose()
             ) {
                 this._pushNodeToChildren(this._segment);
 
@@ -1061,7 +1119,8 @@ export class LexerTreeBuilder extends Disposable {
             } else if (
                 OPERATOR_TOKEN_SET.has(currentString) &&
                 this.isSingleQuotationClose() &&
-                this.isDoubleQuotationClose()
+                this.isDoubleQuotationClose() &&
+                this.isSquareBracketClose()
             ) {
                 let trimSegment = this._segment.trim();
 

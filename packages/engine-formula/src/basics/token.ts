@@ -57,6 +57,8 @@ export enum matchToken {
     OPEN_BRACES = '{',
     CLOSE_BRACES = '}',
     COLON = ':',
+    OPEN_SQUARE_BRACKET = '[',
+    CLOSE_SQUARE_BRACKET = ']',
 }
 
 export enum suffixToken {

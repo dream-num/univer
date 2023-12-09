@@ -5,7 +5,7 @@ import { createIdentifier } from '@wendellhu/redi';
 import type { IFeatureDirtyRangeType, IRuntimeUnitDataType } from '../basics/common';
 import type { FormulaDependencyTree } from '../engine/dependency/dependency-tree';
 
-export interface IReferenceExecutorManagerParams {
+export interface IFeatureCalculationManagerParam {
     unitId: string;
     subComponentId: string;
     dependencyRanges: IUnitRange[];
@@ -20,13 +20,13 @@ export interface IFeatureCalculationManagerService {
 
     remove(featureId: string): void;
 
-    get(featureId: string): Nullable<IReferenceExecutorManagerParams>;
+    get(featureId: string): Nullable<IFeatureCalculationManagerParam>;
 
     has(featureId: string): boolean;
 
-    register(featureId: string, referenceExecutor: IReferenceExecutorManagerParams): void;
+    register(featureId: string, referenceExecutor: IFeatureCalculationManagerParam): void;
 
-    getReferenceExecutorMap(): Map<string, IReferenceExecutorManagerParams>;
+    getReferenceExecutorMap(): Map<string, IFeatureCalculationManagerParam>;
 }
 
 /**
@@ -36,7 +36,7 @@ export interface IFeatureCalculationManagerService {
  * thereby completing the calculation of the entire dependency tree.
  */
 export class FeatureCalculationManagerService extends Disposable implements IFeatureCalculationManagerService {
-    private _referenceExecutorMap: Map<string, IReferenceExecutorManagerParams> = new Map();
+    private _referenceExecutorMap: Map<string, IFeatureCalculationManagerParam> = new Map();
 
     override dispose(): void {
         this._referenceExecutorMap.clear();
@@ -54,7 +54,7 @@ export class FeatureCalculationManagerService extends Disposable implements IFea
         return this._referenceExecutorMap.has(featureId);
     }
 
-    register(featureId: string, referenceExecutor: IReferenceExecutorManagerParams) {
+    register(featureId: string, referenceExecutor: IFeatureCalculationManagerParam) {
         this._referenceExecutorMap.set(featureId, referenceExecutor);
     }
 

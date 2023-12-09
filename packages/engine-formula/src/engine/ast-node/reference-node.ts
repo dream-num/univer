@@ -68,6 +68,7 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
     constructor(
         @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,
         @ISuperTableService private readonly _superTableService: ISuperTableService,
+        @IFormulaRuntimeService private readonly _formulaRuntimeService: IFormulaRuntimeService,
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
         @Inject(Injector) private readonly _injector: Injector
     ) {
@@ -109,9 +110,10 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
             return new ReferenceNode(this._injector, tokenTrim, new ColumnReferenceObject(tokenTrim));
         }
 
-        const nameMap = this._definedNamesService.getDefinedNameMap();
+        const unitId = this._formulaRuntimeService.currentUnitId;
+        const nameMap = this._definedNamesService.getDefinedNameMap(unitId);
 
-        if (!isLexerNode && nameMap.has(tokenTrim)) {
+        if (!isLexerNode && nameMap?.has(tokenTrim)) {
             const nameString = nameMap.get(tokenTrim)!;
             const lexerNode = this._lexerTreeBuilder.treeBuilder(nameString);
             /** todo */
@@ -120,10 +122,10 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
 
         // parserDataLoader.get
 
-        const tableMap = this._superTableService.getTableMap();
+        const tableMap = this._superTableService.getTableMap(unitId);
         const $regex = $SUPER_TABLE_COLUMN_REGEX;
         const tableName = tokenTrim.replace($regex, '');
-        if (!isLexerNode && tableMap.has(tableName)) {
+        if (!isLexerNode && tableMap?.has(tableName)) {
             const columnResult = $regex.exec(tokenTrim);
             let columnDataString = '';
             if (columnResult) {

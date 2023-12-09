@@ -87,6 +87,20 @@ describe('utils test', () => {
             );
         });
 
+        it('table', () => {
+            const node = lexer.treeBuilder(`=SUM(Table3[[#All],[Column1]:[Column2]])`) as LexerNode;
+            expect(JSON.stringify(node.serialize())).toStrictEqual(
+                `{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"SUM","st":0,"ed":2,"children":[{"token":"P_1","st":0,"ed":2,"children":["Table3[[#All],[Column1]:[Column2]]"]}]}]}`
+            );
+        });
+
+        it('import range', () => {
+            const node = lexer.treeBuilder(`=[asdfasdfasdf]'sheet-1'!A3:B10`) as LexerNode;
+            expect(JSON.stringify(node.serialize())).toStrictEqual(
+                `{"token":"R_1","st":-1,"ed":-1,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"[asdfasdfasdf]'sheet-1'!A3","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"B10","st":-1,"ed":-1,"children":[]}]}]}]}`
+            );
+        });
+
         it('nodeMaker performance', () => {
             const start = performance.now();
             for (let i = 0; i < 10000; i++) {

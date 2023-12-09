@@ -3,11 +3,13 @@ import { Disposable } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 
 export interface IDefinedNamesService {
-    registerDefinedName(unitId: string, name: string, reference: string): void;
+    registerDefinedName(unitId: string, name: string, formulaOrRefString: string): void;
 
     getDefinedNameMap(unitId: string): Nullable<Map<string, string>>;
 
     getValue(unitId: string, name: string): Nullable<string>;
+
+    removeDefinedName(unitId: string, name: string): void;
 }
 
 export class DefinedNamesService extends Disposable implements IDefinedNamesService {
@@ -18,14 +20,18 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
         this._definedNameMap.clear();
     }
 
-    registerDefinedName(unitId: string, name: string, reference: string) {
+    registerDefinedName(unitId: string, name: string, formulaOrRefString: string) {
         const unitMap = this._definedNameMap.get(unitId);
 
         if (unitMap == null) {
             this._definedNameMap.set(unitId, new Map());
         }
 
-        this._definedNameMap.get(unitId)?.set(name, reference);
+        this._definedNameMap.get(unitId)?.set(name, formulaOrRefString);
+    }
+
+    removeDefinedName(unitId: string, name: string) {
+        this._definedNameMap.get(unitId)?.delete(name);
     }
 
     getDefinedNameMap(unitId: string) {

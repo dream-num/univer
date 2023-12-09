@@ -94,33 +94,16 @@ export class ColumnManager {
      * @param columnPos column index
      * @returns
      */
-    getColumnWidth(columnPos: number): number;
-    /**
-     * Get the width of column
-     * @param columnPos column index
-     * @param numColumns column count
-     * @returns
-     */
-    getColumnWidth(columnPos: number, numColumns: number): number;
-    getColumnWidth(...argument: any): number {
+    getColumnWidth(columnPos: number): number {
         const { _columnData } = this;
         const config = this._config;
         let width: number = 0;
-        if (argument.length === 1) {
-            const column = _columnData.obtain(argument[0], {
-                hd: BooleanNumber.FALSE,
-                w: config.defaultColumnWidth,
-            });
-            width = column.w;
-        } else if (argument.length === 2) {
-            for (let i = argument[0]; i < argument[0] + argument[1]; i++) {
-                const column = _columnData.obtain(i, {
-                    hd: BooleanNumber.FALSE,
-                    w: config.defaultColumnWidth,
-                });
-                width += column.w;
-            }
-        }
+
+        const column = _columnData.obtain(columnPos, {
+            hd: BooleanNumber.FALSE,
+            w: config.defaultColumnWidth,
+        });
+        width = column.w || config.defaultColumnWidth;
 
         return width;
     }

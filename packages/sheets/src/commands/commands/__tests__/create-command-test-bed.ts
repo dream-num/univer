@@ -1,5 +1,14 @@
 import type { IWorkbookData, Workbook } from '@univerjs/core';
-import { ILogService, IUniverInstanceService, LocaleType, LogLevel, Plugin, PluginType, Univer } from '@univerjs/core';
+import {
+    BooleanNumber,
+    ILogService,
+    IUniverInstanceService,
+    LocaleType,
+    LogLevel,
+    Plugin,
+    PluginType,
+    Univer,
+} from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -21,6 +30,16 @@ const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
                     '1': {
                         v: 'A2',
                     },
+                },
+            },
+            columnData: {
+                1: {
+                    hd: BooleanNumber.FALSE,
+                },
+            },
+            rowData: {
+                1: {
+                    hd: BooleanNumber.FALSE,
                 },
             },
         },

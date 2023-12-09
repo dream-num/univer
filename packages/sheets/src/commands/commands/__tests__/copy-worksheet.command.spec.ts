@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { InsertSheetMutation } from '../../mutations/insert-sheet.mutation';
 import { RemoveSheetMutation } from '../../mutations/remove-sheet.mutation';
-import { SetWorksheetActivateMutation } from '../../mutations/set-worksheet-activate.mutation';
+import { SetWorksheetActiveOperation } from '../../operations/set-worksheet-active.operation';
 import { CopySheetCommand } from '../copy-worksheet.command';
 import { RemoveSheetCommand } from '../remove-sheet.command';
 import { SetWorksheetActivateCommand } from '../set-worksheet-activate.command';
@@ -25,7 +25,7 @@ describe('Test copy worksheet commands', () => {
         commandService = get(ICommandService);
         commandService.registerCommand(CopySheetCommand);
         commandService.registerCommand(InsertSheetMutation);
-        commandService.registerCommand(SetWorksheetActivateMutation);
+        commandService.registerCommand(SetWorksheetActiveOperation);
         commandService.registerCommand(SetWorksheetActivateCommand);
         commandService.registerCommand(RemoveSheetCommand);
         commandService.registerCommand(RemoveSheetMutation);

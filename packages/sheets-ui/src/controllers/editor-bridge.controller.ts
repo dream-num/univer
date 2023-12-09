@@ -15,7 +15,7 @@ import {
     COMMAND_LISTENER_SKELETON_CHANGE,
     NORMAL_SELECTION_PLUGIN_NAME,
     SelectionManagerService,
-    SetWorksheetActivateMutation,
+    SetWorksheetActiveOperation,
 } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
@@ -254,7 +254,7 @@ export class EditorBridgeController extends Disposable {
 
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (command.id === SetWorksheetActivateMutation.id) {
+                if (command.id === SetWorksheetActiveOperation.id) {
                     this._keepVisibleHideEditor();
                 } else if (updateCommandList.includes(command.id)) {
                     this._hideEditor();

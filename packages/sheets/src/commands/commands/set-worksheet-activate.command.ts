@@ -1,9 +1,9 @@
 import type { ICommand } from '@univerjs/core';
-import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
+import { CommandType, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
-import type { ISetWorksheetActivateMutationParams } from '../mutations/set-worksheet-activate.mutation';
-import { SetWorksheetActivateMutation } from '../mutations/set-worksheet-activate.mutation';
+import type { ISetWorksheetActiveOperationParams } from '../operations/set-worksheet-active.operation';
+import { SetWorksheetActiveOperation } from '../operations/set-worksheet-active.operation';
 
 export interface ISetWorksheetActivateCommandParams {
     workbookId?: string;
@@ -16,7 +16,6 @@ export const SetWorksheetActivateCommand: ICommand = {
 
     handler: async (accessor: IAccessor, params?: ISetWorksheetActivateCommandParams) => {
         const commandService = accessor.get(ICommandService);
-        const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
         let workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
@@ -31,11 +30,11 @@ export const SetWorksheetActivateCommand: ICommand = {
             worksheetId = params.worksheetId ?? worksheetId;
         }
 
-        const redoMutationParams: ISetWorksheetActivateMutationParams = {
+        const redoMutationParams: ISetWorksheetActiveOperationParams = {
             workbookId,
             worksheetId,
         };
 
-        return commandService.syncExecuteCommand(SetWorksheetActivateMutation.id, redoMutationParams);
+        return commandService.syncExecuteCommand(SetWorksheetActiveOperation.id, redoMutationParams);
     },
 };

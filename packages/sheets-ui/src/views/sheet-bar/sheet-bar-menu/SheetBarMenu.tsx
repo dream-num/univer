@@ -6,7 +6,7 @@ import {
     InsertSheetMutation,
     RemoveSheetMutation,
     SetWorksheetActivateCommand,
-    SetWorksheetActivateMutation,
+    SetWorksheetActiveOperation,
     SetWorksheetHideMutation,
     SetWorksheetNameMutation,
     SetWorksheetOrderMutation,
@@ -86,7 +86,7 @@ export function SheetBarMenu(props: ISheetBarMenuProps) {
                 case SetWorksheetNameMutation.id:
                 case InsertSheetMutation.id:
                 case SetWorksheetOrderMutation.id:
-                case SetWorksheetActivateMutation.id:
+                case SetWorksheetActiveOperation.id:
                     statusInit();
                     break;
                 default:

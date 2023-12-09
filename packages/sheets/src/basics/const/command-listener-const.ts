@@ -5,20 +5,20 @@ import { RemoveColMutation, RemoveRowMutation } from '../../commands/mutations/r
 import { SetColHiddenMutation, SetColVisibleMutation } from '../../commands/mutations/set-col-visible.mutation';
 import { SetRangeValuesMutation } from '../../commands/mutations/set-range-values.mutation';
 import { SetRowHiddenMutation, SetRowVisibleMutation } from '../../commands/mutations/set-row-visible.mutation';
-import { SetWorksheetActivateMutation } from '../../commands/mutations/set-worksheet-activate.mutation';
 import { SetWorksheetColWidthMutation } from '../../commands/mutations/set-worksheet-col-width.mutation';
 import {
     SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowHeightMutation,
     SetWorksheetRowIsAutoHeightMutation,
 } from '../../commands/mutations/set-worksheet-row-height.mutation';
+import { SetWorksheetActiveOperation } from '../../commands/operations/set-worksheet-active.operation';
 
 export const COMMAND_LISTENER_SKELETON_CHANGE = [
     SetWorksheetRowHeightMutation.id,
     SetWorksheetRowIsAutoHeightMutation.id,
     SetWorksheetRowAutoHeightMutation.id,
     SetWorksheetColWidthMutation.id,
-    SetWorksheetActivateMutation.id,
+    SetWorksheetActiveOperation.id,
     InsertRowMutation.id,
     RemoveRowMutation.id,
     InsertColMutation.id,

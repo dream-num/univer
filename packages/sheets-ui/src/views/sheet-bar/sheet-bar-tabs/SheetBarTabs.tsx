@@ -5,7 +5,7 @@ import {
     RemoveSheetMutation,
     SetTabColorMutation,
     SetWorksheetActivateCommand,
-    SetWorksheetActivateMutation,
+    SetWorksheetActiveOperation,
     SetWorksheetHideMutation,
     SetWorksheetNameCommand,
     SetWorksheetNameMutation,
@@ -127,7 +127,7 @@ export function SheetBarTabs() {
                 case SetWorksheetNameMutation.id:
                 case InsertSheetMutation.id:
                 case SetWorksheetOrderMutation.id:
-                case SetWorksheetActivateMutation.id:
+                case SetWorksheetActiveOperation.id:
                     statusInit();
                     break;
                 default:

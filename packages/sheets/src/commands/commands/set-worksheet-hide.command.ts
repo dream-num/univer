@@ -1,12 +1,14 @@
 import type { ICommand } from '@univerjs/core';
-import { BooleanNumber, CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
+import {
+    BooleanNumber,
+    CommandType,
+    ErrorService,
+    ICommandService,
+    IUndoRedoService,
+    IUniverInstanceService,
+} from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
-import type { ISetWorksheetActivateMutationParams } from '../mutations/set-worksheet-activate.mutation';
-import {
-    SetWorksheetActivateMutation,
-    SetWorksheetUnActivateMutationFactory,
-} from '../mutations/set-worksheet-activate.mutation';
 import type { ISetWorksheetHideMutationParams } from '../mutations/set-worksheet-hide.mutation';
 import { SetWorksheetHideMutation, SetWorksheetHideMutationFactory } from '../mutations/set-worksheet-hide.mutation';
 
@@ -22,6 +24,7 @@ export const SetWorksheetHideCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
+        const errorService = accessor.get(ErrorService);
 
         const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
         let worksheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
@@ -46,35 +49,20 @@ export const SetWorksheetHideCommand: ICommand = {
 
         const undoMutationParams = SetWorksheetHideMutationFactory(accessor, redoMutationParams);
 
-        const index = workbook.getSheetIndex(worksheet);
-        const activateSheetId = workbook.getConfig().sheetOrder[index + 1];
-
-        if (!activateSheetId) return false;
+        const worksheets = workbook.getSheets();
+        const visibleWorksheets = worksheets.filter((sheet) => sheet.getConfig().hidden === BooleanNumber.FALSE);
+        if (visibleWorksheets.length === 1) {
+            errorService.emit('No visible sheet after you hide this.');
+            return false;
+        }
 
         const result = commandService.syncExecuteCommand(SetWorksheetHideMutation.id, redoMutationParams);
 
-        const activeSheetMutationParams: ISetWorksheetActivateMutationParams = {
-            workbookId,
-            worksheetId: activateSheetId,
-        };
-
-        const unActiveMutationParams = SetWorksheetUnActivateMutationFactory(accessor, activeSheetMutationParams);
-        const activeResult = commandService.syncExecuteCommand(
-            SetWorksheetActivateMutation.id,
-            activeSheetMutationParams
-        );
-
-        if (result && activeResult) {
+        if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: workbookId,
-                undoMutations: [
-                    { id: SetWorksheetActivateMutation.id, params: unActiveMutationParams },
-                    { id: SetWorksheetHideMutation.id, params: undoMutationParams },
-                ],
-                redoMutations: [
-                    { id: SetWorksheetActivateMutation.id, params: activeSheetMutationParams },
-                    { id: SetWorksheetHideMutation.id, params: redoMutationParams },
-                ],
+                undoMutations: [{ id: SetWorksheetHideMutation.id, params: undoMutationParams }],
+                redoMutations: [{ id: SetWorksheetHideMutation.id, params: redoMutationParams }],
             });
             return true;
         }

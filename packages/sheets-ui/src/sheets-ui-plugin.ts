@@ -4,6 +4,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { filter } from 'rxjs/operators';
 
 import { SHEET_UI_PLUGIN_NAME } from './basics';
+import { ActiveWorksheetController } from './controllers/active-worksheet/active-worksheet.controller';
 import { AutoFillController } from './controllers/auto-fill.controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
 import { SheetClipboardController } from './controllers/clipboard/clipboard.controller';
@@ -88,6 +89,7 @@ export class SheetsUIPlugin extends Plugin {
                 [IMarkSelectionService, { useClass: MarkSelectionService }],
 
                 // controllers
+                [ActiveWorksheetController],
                 [AutoHeightController],
                 [EditorBridgeController],
                 [EndEditController],

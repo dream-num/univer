@@ -5,8 +5,8 @@ import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { InsertSheetMutation } from '../../mutations/insert-sheet.mutation';
-import { SetWorksheetActivateMutation } from '../../mutations/set-worksheet-activate.mutation';
 import { SetWorksheetHideMutation } from '../../mutations/set-worksheet-hide.mutation';
+import { SetWorksheetActiveOperation } from '../../operations/set-worksheet-active.operation';
 import { InsertSheetCommand } from '../insert-sheet.command';
 import { SetWorksheetActivateCommand } from '../set-worksheet-activate.command';
 import { SetWorksheetHideCommand } from '../set-worksheet-hide.command';
@@ -25,7 +25,7 @@ describe('Test set worksheet show commands', () => {
         commandService = get(ICommandService);
         commandService.registerCommand(InsertSheetCommand);
         commandService.registerCommand(InsertSheetMutation);
-        commandService.registerCommand(SetWorksheetActivateMutation);
+        commandService.registerCommand(SetWorksheetActiveOperation);
         commandService.registerCommand(SetWorksheetActivateCommand);
         commandService.registerCommand(SetWorksheetHideCommand);
         commandService.registerCommand(SetWorksheetHideMutation);

@@ -23,7 +23,7 @@ import {
     SelectionManagerService,
     SetFrozenCommand,
     SetFrozenMutation,
-    SetWorksheetActivateMutation,
+    SetWorksheetActiveOperation,
     SetWorksheetRowAutoHeightMutation,
 } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
@@ -965,7 +965,7 @@ export class FreezeController extends Disposable {
         this.disposeWithMe(
             toDisposable(
                 this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
-                    if (![SetWorksheetActivateMutation.id].includes(param?.commandId || '')) {
+                    if (![SetWorksheetActiveOperation.id].includes(param?.commandId || '')) {
                         return;
                     }
                     this._refreshCurrent();

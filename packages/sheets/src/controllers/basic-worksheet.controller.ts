@@ -83,7 +83,6 @@ import { SetFrozenMutation } from '../commands/mutations/set-frozen.mutation';
 import { SetRangeValuesMutation } from '../commands/mutations/set-range-values.mutation';
 import { SetRowHiddenMutation, SetRowVisibleMutation } from '../commands/mutations/set-row-visible.mutation';
 import { SetTabColorMutation } from '../commands/mutations/set-tab-color.mutation';
-import { SetWorksheetActivateMutation } from '../commands/mutations/set-worksheet-activate.mutation';
 import { SetWorksheetColWidthMutation } from '../commands/mutations/set-worksheet-col-width.mutation';
 import { SetWorksheetHideMutation } from '../commands/mutations/set-worksheet-hide.mutation';
 import { SetWorksheetNameMutation } from '../commands/mutations/set-worksheet-name.mutation';
@@ -93,6 +92,7 @@ import {
     SetWorksheetRowHeightMutation,
     SetWorksheetRowIsAutoHeightMutation,
 } from '../commands/mutations/set-worksheet-row-height.mutation';
+import { SetWorksheetActiveOperation } from '../commands/operations/set-worksheet-active.operation';
 import { MAX_CELL_PER_SHEET_DEFAULT, MAX_CELL_PER_SHEET_KEY } from './config/config';
 
 export interface IStyleTypeValue<T> {
@@ -183,7 +183,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetTextWrapCommand,
             SetVerticalTextAlignCommand,
             SetWorksheetActivateCommand,
-            SetWorksheetActivateMutation,
+            SetWorksheetActiveOperation,
             SetWorksheetColWidthMutation,
             SetWorksheetHideCommand,
             SetWorksheetHideMutation,

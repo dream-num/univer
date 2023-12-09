@@ -31,6 +31,7 @@ import {
 import { RefillCommand } from '../commands/commands/refill.command';
 import { RenameSheetOperation } from '../commands/commands/rename.command';
 import {
+    ApplyFormatPainterCommand,
     SetInfiniteFormatPainterCommand,
     SetOnceFormatPainterCommand,
 } from '../commands/commands/set-format-painter.command';
@@ -247,6 +248,7 @@ export class SheetUIController extends Disposable {
             SetFormatPainterOperation,
             SetInfiniteFormatPainterCommand,
             SetOnceFormatPainterCommand,
+            ApplyFormatPainterCommand,
             SetScrollOperation,
             SetScrollRelativeCommand,
             SetSelectionFrozenCommand,

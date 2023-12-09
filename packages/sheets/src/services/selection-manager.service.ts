@@ -1,5 +1,5 @@
-import type { IRange, ISelectionCell, Nullable } from '@univerjs/core';
-import type { IDisposable } from '@wendellhu/redi';
+import { type IRange, type ISelectionCell, type Nullable, ThemeService } from '@univerjs/core';
+import { type IDisposable, Inject } from '@wendellhu/redi';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 import type { ISelectionStyle, ISelectionWithStyle } from '../basics/selection';
@@ -57,6 +57,16 @@ export class SelectionManagerService implements IDisposable {
     readonly selectionMoveEnd$ = this._selectionMoveEnd$.asObservable();
 
     private _dirty: boolean = true;
+
+    // get isSelectionEnabled() {
+    //     return this._isSelectionEnabled;
+    // }
+
+    // get currentStyle() {
+    //     return this._currentStyle;
+    // }
+
+    constructor(@Inject(ThemeService) private readonly _themeService: ThemeService) {}
 
     getCurrent() {
         return this._currentSelection;
@@ -258,8 +268,8 @@ export class SelectionManagerService implements IDisposable {
     createCopyPasteSelection(): ISelectionStyle {
         return {
             strokeWidth: 2,
-            stroke: '#FFF000',
-            fill: 'rgba(0, 0, 0, 0.2)',
+            stroke: this._themeService.getCurrentTheme().primaryColor,
+            fill: 'rgba(178, 178, 178, 0.10)',
             widgets: {},
             hasAutoFill: false,
             strokeDash: 8,

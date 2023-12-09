@@ -23,6 +23,11 @@ export {
     SetArrayFormulaDataMutation,
     SetArrayFormulaDataUndoMutationFactory,
 } from './commands/mutations/set-array-formula-data.mutation';
+export { RemoveDefinedNameMutation, SetDefinedNameMutation } from './commands/mutations/set-defined-name.mutation';
+export {
+    RemoveFeatureCalculationMutation,
+    SetFeatureCalculationMutation,
+} from './commands/mutations/set-feature-calculation.mutation';
 export {
     type ISetFormulaCalculationNotificationMutation,
     type ISetFormulaCalculationResultMutation,
@@ -36,6 +41,12 @@ export {
     type ISetFormulaDataMutationParams,
     SetFormulaDataMutation,
 } from './commands/mutations/set-formula-data.mutation';
+export { RemoveOtherFormulaMutation, SetOtherFormulaMutation } from './commands/mutations/set-other-formula.mutation';
+export {
+    RemoveSuperTableMutation,
+    SetSuperTableMutation,
+    SetSuperTableOptionMutation,
+} from './commands/mutations/set-super-table.mutation';
 export { LexerTreeBuilder } from './engine/analysis/lexer';
 export { LexerNode } from './engine/analysis/lexer-node';
 export { ErrorValueObject } from './engine/other-object/error-value-object';

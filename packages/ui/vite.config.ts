@@ -3,7 +3,6 @@ import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import dts from 'vite-plugin-dts';
 import { name } from './package.json';
-import { viteExternalsPlugin } from 'vite-plugin-externals'
 
 const libName = name
     .replace('@univerjs/', 'univer-')
@@ -15,15 +14,8 @@ export default defineConfig({
     plugins: [
         react(),
         dts({
+            entryRoot: 'src',
             outDir: 'lib/types',
-        }),
-        viteExternalsPlugin({
-            "@ctrl/tinycolor": "tinycolor",
-            '@univerjs/core': 'UniverCore',
-            '@univerjs/design': 'UniverDesign',
-            "@univerjs/engine-render": "UniverEngineRender",
-            'rxjs': 'rxjs',
-            '@wendellhu/redi': '@wendellhu/redi',
         }),
     ],
     css: {
@@ -31,6 +23,9 @@ export default defineConfig({
             localsConvention: 'camelCaseOnly',
             generateScopedName: 'univer-[local]',
         },
+    },
+    define: {
+        'process.env.NODE_ENV': JSON.stringify('production'),
     },
     build: {
         outDir: 'lib',
@@ -41,8 +36,30 @@ export default defineConfig({
             formats: ['es', 'umd', 'cjs'],
         },
         rollupOptions: {
+            external: [
+                '@ctrl/tinycolor',
+                '@univerjs/core',
+                '@univerjs/design',
+                '@univerjs/engine-render',
+                '@wendellhu/redi',
+                '@wendellhu/redi/react-bindings',
+                'react',
+                'react-dom',
+                'rxjs',
+            ],
             output: {
                 assetFileNames: 'index.css',
+                globals: {
+                    '@ctrl/tinycolor': 'tinycolor',
+                    '@univerjs/core': 'UniverCore',
+                    '@univerjs/design': 'UniverDesign',
+                    '@univerjs/engine-render': 'UniverEngineRender',
+                    '@wendellhu/redi': '@wendellhu/redi',
+                    '@wendellhu/redi/react-bindings': 'react-bindings',
+                    react: 'React',
+                    'react-dom': 'ReactDOM',
+                    rxjs: 'rxjs',
+                },
             },
         },
     },

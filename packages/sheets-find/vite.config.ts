@@ -3,7 +3,6 @@ import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import dts from 'vite-plugin-dts';
 import { name } from './package.json';
-import { viteExternalsPlugin } from 'vite-plugin-externals';
 
 const libName = name
     .replace('@univerjs/', 'univer-')
@@ -15,17 +14,8 @@ export default defineConfig({
     plugins: [
         react(),
         dts({
+            entryRoot: 'src',
             outDir: 'lib/types',
-        }),
-        viteExternalsPlugin({
-            '@univerjs/core': 'UniverCore',
-            '@univerjs/design': 'UniverDesign',
-            '@univerjs/engine-render': 'UniverEngineRender',
-            '@univerjs/sheets': 'UniverSheets',
-            '@univerjs/sheets-ui': 'UniverSheetsUi',
-            '@univerjs/ui': 'UniverUi',
-            '@wendellhu/redi': '@wendellhu/redi',
-            react: 'React',
         }),
     ],
     css: {
@@ -33,6 +23,9 @@ export default defineConfig({
             localsConvention: 'camelCaseOnly',
             generateScopedName: 'univer-[local]',
         },
+    },
+    define: {
+        'process.env.NODE_ENV': JSON.stringify('production'),
     },
     build: {
         outDir: 'lib',
@@ -43,8 +36,30 @@ export default defineConfig({
             formats: ['es', 'umd', 'cjs'],
         },
         rollupOptions: {
+            external: [
+                '@univerjs/core',
+                '@univerjs/design',
+                '@univerjs/engine-render',
+                '@univerjs/sheets',
+                '@univerjs/sheets-ui',
+                '@univerjs/ui',
+                '@wendellhu/redi',
+                '@wendellhu/redi/react-bindings',
+                'react',
+            ],
             output: {
                 assetFileNames: 'index.css',
+                globals: {
+                    '@univerjs/core': 'UniverCore',
+                    '@univerjs/design': 'UniverDesign',
+                    '@univerjs/engine-render': 'UniverEngineRender',
+                    '@univerjs/sheets': 'UniverSheets',
+                    '@univerjs/sheets-ui': 'UniverSheetsUi',
+                    '@univerjs/ui': 'UniverUi',
+                    '@wendellhu/redi': '@wendellhu/redi',
+                    '@wendellhu/redi/react-bindings': 'react-bindings',
+                    react: 'React',
+                },
             },
         },
     },

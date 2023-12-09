@@ -22,7 +22,8 @@
                 "import": "./lib/es/*",
                 "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
-            }
+            },
+            "./lib/*": "./lib/*"
         }
     },
     "exports": {
@@ -34,6 +35,9 @@
     },
     "files": [
         "lib"
+    ],
+    "sideEffects": [
+        "**/*.css"
     ],
     "private": false,
     "scripts": {

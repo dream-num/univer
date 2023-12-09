@@ -7,17 +7,15 @@
     "main": "./src/index.ts",
     "module": "./src/index.ts",
     "private": true,
-    "dependencies": {
+    "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/sheets": "workspace:*",
-        "@univerjs/ui": "workspace:*"
-    },
-    "devDependencies": {
-        "@vitejs/plugin-react": "^4.2.1",
+        "@univerjs/ui": "workspace:*",
         "@vitest/coverage-istanbul": "^1.0.2",
         "@wendellhu/redi": "^0.12.11",
         "less": "^4.2.0",
+        "react": "^18.2.0",
         "rxjs": "^7.8.1",
         "typescript": "^5.3.3",
         "vite": "^5.0.7",
@@ -26,7 +24,12 @@
         "vitest": "^1.0.2"
     },
     "peerDependencies": {
+        "@univerjs/core": "workspace:*",
+        "@univerjs/engine-render": "workspace:*",
+        "@univerjs/sheets": "workspace:*",
+        "@univerjs/ui": "workspace:*",
         "@wendellhu/redi": ">=0.12.11",
+        "react": ">=16.9.0",
         "rxjs": ">=7.0.0"
     }
 }

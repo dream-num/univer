@@ -22,7 +22,8 @@
                 "import": "./lib/es/*",
                 "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
-            }
+            },
+            "./lib/*": "./lib/*"
         }
     },
     "exports": {
@@ -35,23 +36,24 @@
     "files": [
         "lib"
     ],
+    "sideEffects": [
+        "**/*.css"
+    ],
     "private": false,
     "scripts": {
         "test": "vitest run",
         "build": "tsc && vite build"
     },
-    "dependencies": {
+    "devDependencies": {
+        "@types/react": "^18.2.42",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/docs": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "^0.12.11"
-    },
-    "devDependencies": {
-        "@types/react": "^18.2.42",
         "@vitejs/plugin-react": "^4.2.1",
         "@vitest/coverage-istanbul": "^1.0.2",
+        "@wendellhu/redi": "^0.12.11",
         "happy-dom": "^12.10.3",
         "less": "^4.2.0",
         "react": "^18.2.0",
@@ -62,6 +64,12 @@
         "vitest": "^1.0.2"
     },
     "peerDependencies": {
+        "@univerjs/core": "workspace:*",
+        "@univerjs/design": "workspace:*",
+        "@univerjs/docs": "workspace:*",
+        "@univerjs/engine-render": "workspace:*",
+        "@univerjs/ui": "workspace:*",
+        "@wendellhu/redi": ">=0.12.11",
         "react": ">=16.9.0"
     }
 }

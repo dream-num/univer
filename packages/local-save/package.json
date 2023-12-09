@@ -22,7 +22,8 @@
                 "import": "./lib/es/*",
                 "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
-            }
+            },
+            "./lib/*": "./lib/*"
         }
     },
     "exports": {
@@ -35,6 +36,9 @@
     "files": [
         "lib"
     ],
+    "sideEffects": [
+        "**/*.css"
+    ],
     "private": false,
     "scripts": {
         "test": "vitest run",
@@ -42,10 +46,8 @@
         "coverage": "vitest run --coverage",
         "build": "tsc && vite build"
     },
-    "dependencies": {
-        "@univerjs/core": "workspace:*"
-    },
     "devDependencies": {
+        "@univerjs/core": "workspace:*",
         "@vitest/coverage-istanbul": "^1.0.2",
         "@wendellhu/redi": "^0.12.11",
         "rxjs": "^7.8.1",
@@ -56,6 +58,7 @@
         "vitest": "^1.0.2"
     },
     "peerDependencies": {
+        "@univerjs/core": "workspace:*",
         "@wendellhu/redi": ">=0.12.11",
         "rxjs": ">=7.0.0"
     }

@@ -2,7 +2,6 @@ import { resolve } from 'path';
 import { defineConfig } from 'vitest/config';
 import dts from 'vite-plugin-dts';
 import { name } from './package.json';
-import { viteExternalsPlugin } from 'vite-plugin-externals';
 
 const libName = name
     .replace('@univerjs/', 'univer-')
@@ -13,12 +12,13 @@ const libName = name
 export default defineConfig({
     plugins: [
         dts({
+            entryRoot: 'src',
             outDir: 'lib/types',
         }),
-        viteExternalsPlugin({
-            '@univerjs/core': 'UniverCore',
-        }),
     ],
+    define: {
+        'process.env.NODE_ENV': JSON.stringify('production'),
+    },
     build: {
         outDir: 'lib',
         lib: {
@@ -26,6 +26,14 @@ export default defineConfig({
             name: libName,
             fileName: (format) => `${format}/index.js`,
             formats: ['es', 'umd', 'cjs'],
+        },
+        rollupOptions: {
+            external: ['@univerjs/core'],
+            output: {
+                globals: {
+                    '@univerjs/core': 'UniverCore',
+                },
+            },
         },
     },
     test: {

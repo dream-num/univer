@@ -42,10 +42,8 @@
         "coverage": "vitest run --coverage",
         "build": "tsc && vite build"
     },
-    "dependencies": {
-        "@univerjs/core": "workspace:*"
-    },
     "devDependencies": {
+        "@univerjs/core": "workspace:*",
         "@vitest/coverage-istanbul": "^1.0.2",
         "@wendellhu/redi": "^0.12.11",
         "less": "^4.2.0",
@@ -57,6 +55,7 @@
         "vitest": "^1.0.2"
     },
     "peerDependencies": {
+        "@univerjs/core": "workspace:*",
         "@wendellhu/redi": ">=0.12.11",
         "rxjs": ">=7.0.0"
     }

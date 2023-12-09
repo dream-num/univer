@@ -42,14 +42,12 @@
         "coverage": "vitest run --coverage",
         "build": "tsc && vite build"
     },
-    "dependencies": {
+    "devDependencies": {
         "@ctrl/tinycolor": "^4.0.2",
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/sheets": "workspace:*",
-        "@univerjs/ui": "workspace:*"
-    },
-    "devDependencies": {
+        "@univerjs/ui": "workspace:*",
         "@vitest/coverage-istanbul": "^1.0.2",
         "@wendellhu/redi": "^0.12.11",
         "happy-dom": "^12.10.3",
@@ -62,6 +60,11 @@
         "vitest": "^1.0.2"
     },
     "peerDependencies": {
+        "@ctrl/tinycolor": ">=4.0.0",
+        "@univerjs/core": "workspace:*",
+        "@univerjs/engine-render": "workspace:*",
+        "@univerjs/sheets": "workspace:*",
+        "@univerjs/ui": "workspace:*",
         "@wendellhu/redi": ">=0.12.11",
         "rxjs": ">=7.0.0"
     }

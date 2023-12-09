@@ -5,12 +5,25 @@
     "keywords": [],
     "author": "DreamNum <developer@univer.ai>",
     "license": "MIT",
-    "main": "./src/index.ts",
+    "main": "./lib/cjs/index.js",
+    "module": "./lib/es/index.js",
+    "types": "./lib/types/index.d.ts",
     "publishConfig": {
         "access": "public",
+        "main": "./lib/cjs/index.js",
+        "module": "./lib/es/index.js",
         "exports": {
-            ".": "./lib/index.js",
-            "./*": "./lib/*"
+            ".": {
+                "import": "./lib/es/index.js",
+                "require": "./lib/cjs/index.js",
+                "types": "./lib/types/index.d.ts"
+            },
+            "./*": {
+                "import": "./lib/es/*",
+                "require": "./lib/cjs/*",
+                "types": "./lib/types/index.d.ts"
+            },
+            "./lib/*": "./lib/*"
         }
     },
     "exports": {
@@ -23,20 +36,21 @@
     "files": [
         "lib"
     ],
+    "sideEffects": [
+        "**/*.css"
+    ],
     "private": true,
     "scripts": {},
-    "dependencies": {
+    "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
-        "@univerjs/ui": "workspace:*"
-    },
-    "devDependencies": {
-        "@vitejs/plugin-react": "^4.2.1",
+        "@univerjs/ui": "workspace:*",
         "@vitest/coverage-istanbul": "^1.0.2",
         "@wendellhu/redi": "^0.12.11",
         "less": "^4.2.0",
+        "react": "^18.2.0",
         "typescript": "^5.3.3",
         "vite": "^5.0.7",
         "vite-plugin-dts": "^3.6.4",
@@ -44,6 +58,12 @@
         "vitest": "^1.0.2"
     },
     "peerDependencies": {
-        "@wendellhu/redi": ">=0.12.11"
+        "@univerjs/core": "workspace:*",
+        "@univerjs/engine-render": "workspace:*",
+        "@univerjs/sheets": "workspace:*",
+        "@univerjs/sheets-ui": "workspace:*",
+        "@univerjs/ui": "workspace:*",
+        "@wendellhu/redi": ">=0.12.11",
+        "react": ">=16.9.0"
     }
 }

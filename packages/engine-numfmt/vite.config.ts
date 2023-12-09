@@ -1,6 +1,5 @@
 import { resolve } from 'path';
 import { defineConfig } from 'vitest/config';
-import react from '@vitejs/plugin-react';
 import dts from 'vite-plugin-dts';
 import { name } from './package.json';
 
@@ -8,11 +7,10 @@ const libName = name
     .replace('@univerjs/', 'univer-')
     .split('-')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join('')
+    .join('');
 
 export default defineConfig({
     plugins: [
-        react(),
         dts({
             outDir: 'lib/types',
         }),

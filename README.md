@@ -14,7 +14,8 @@ Univer is an open source collaborative solution that aims to empower the collabo
 
 We provide JavaScript part of code in the repository, including a canvas-based framework for building documents, spreadsheets, slides.
 
-> ⚠️ This project is still in heavy development.
+> ⚠️ This project is still in heavy development. Use it at your own risk.
+
 ## Demo
 
 -   [Univer Demo](https://dream-num.github.io/univer-demo/)

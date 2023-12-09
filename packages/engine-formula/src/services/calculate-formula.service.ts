@@ -85,15 +85,6 @@ export class CalculateFormulaService extends Disposable {
         this._runtimeService.setRuntimeFeatureRange(featureId, featureRange);
     }
 
-    /**
-     *
-     * @param unitId
-     * @param formulaData
-     * @param interpreterDatasetConfig
-     * @param forceCalculate force calculate all formula, and ignore dependency relationship
-     * @param dirtyRanges input external unit data for multi workbook
-     * @returns
-     */
     async execute(formulaDatasetConfig: IFormulaDatasetConfig) {
         this._executionStartListener$.next(true);
 

@@ -1,12 +1,19 @@
-import type { ICommandInfo, IExecutionOptions, IMutation, Nullable } from '@univerjs/core';
+import type { IExecutionOptions, IMutation, IUnitRange, Nullable } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
-import type { IRuntimeOtherUnitDataType, IRuntimeUnitDataType } from '../../basics/common';
+import type {
+    IDirtyUnitFeatureMap,
+    IDirtyUnitSheetNameMap,
+    IRuntimeOtherUnitDataType,
+    IRuntimeUnitDataType,
+} from '../../basics/common';
 import type { FormulaExecutedStateType, IExecutionInProgressParams } from '../../services/runtime.service';
 
 export interface ISetFormulaCalculationStartMutation {
-    commands: ICommandInfo[];
+    dirtyRanges: IUnitRange[];
+    dirtyNameMap: IDirtyUnitSheetNameMap;
+    dirtyUnitFeatureMap: IDirtyUnitFeatureMap;
     options: Nullable<IExecutionOptions>;
     forceCalculation?: boolean;
 }

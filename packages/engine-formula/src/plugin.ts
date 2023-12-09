@@ -19,25 +19,27 @@ import { ValueNodeFactory } from './engine/ast-node/value-node';
 import { FormulaDependencyGenerator } from './engine/dependency/formula-dependency';
 import { Interpreter } from './engine/interpreter/interpreter';
 import { FormulaDataModel } from './models/formula-data.model';
-import { ActiveDirtyManagerService, IActiveDirtyManagerService } from './services/active-dirty-manager.service';
 import { CalculateFormulaService } from './services/calculate-formula.service';
 import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from './services/current-data.service';
 import { DefinedNamesService, IDefinedNamesService } from './services/defined-names.service';
+import {
+    FeatureCalculationManagerService,
+    IFeatureCalculationManagerService,
+} from './services/feature-calculation-manager.service';
 import { FunctionService, IFunctionService } from './services/function.service';
 import { IOtherFormulaManagerService, OtherFormulaManagerService } from './services/other-formula-manager.service';
-import { IPassiveDirtyManagerService, PassiveDirtyManagerService } from './services/passive-dirty-manager.service';
 import { FormulaRuntimeService, IFormulaRuntimeService } from './services/runtime.service';
 import { ISuperTableService, SuperTableService } from './services/super-table.service';
 
 const PLUGIN_NAME = 'base-formula-engine';
 
-interface IBaseFormulaEnginePlugin {
+interface IFormulaEnginePlugin {
     notExecuteFormula?: boolean;
 }
 
-export class BaseFormulaEnginePlugin extends Plugin {
+export class FormulaEnginePlugin extends Plugin {
     constructor(
-        private _config: IBaseFormulaEnginePlugin,
+        private _config: IFormulaEnginePlugin,
         @Inject(Injector) protected override _injector: Injector
     ) {
         super(PLUGIN_NAME);
@@ -54,7 +56,8 @@ export class BaseFormulaEnginePlugin extends Plugin {
             // Services
             [LexerTreeBuilder],
             [IFunctionService, { useClass: FunctionService }],
-            [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
+            [IFeatureCalculationManagerService, { useClass: FeatureCalculationManagerService }],
+
             // Models
             [FormulaDataModel],
 
@@ -68,7 +71,7 @@ export class BaseFormulaEnginePlugin extends Plugin {
                 // Services
                 [CalculateFormulaService],
                 [CalculateController],
-                [IPassiveDirtyManagerService, { useClass: PassiveDirtyManagerService }],
+                // [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
                 [IOtherFormulaManagerService, { useClass: OtherFormulaManagerService }],
                 [ISuperTableService, { useClass: SuperTableService }],
                 [IDefinedNamesService, { useClass: DefinedNamesService }],

@@ -65,12 +65,14 @@ export { FUNCTION_NAMES_UNIVER } from './functions/univer/function-names';
 export { FUNCTION_NAMES_WEB } from './functions/web/function-names';
 export { FormulaDataModel } from './models/formula-data.model';
 export { initSheetFormulaData } from './models/formula-data.model';
-export { BaseFormulaEnginePlugin } from './plugin';
-export { IActiveDirtyManagerService } from './services/active-dirty-manager.service';
+export { FormulaEnginePlugin } from './plugin';
 export { CalculateFormulaService } from './services/calculate-formula.service';
+export {
+    FeatureCalculationManagerService,
+    IFeatureCalculationManagerService,
+} from './services/feature-calculation-manager.service';
 export { FunctionService } from './services/function.service';
 export { IFunctionService } from './services/function.service';
 export { type IOtherFormulaManagerService, OtherFormulaManagerService } from './services/other-formula-manager.service';
-export { IPassiveDirtyManagerService, PassiveDirtyManagerService } from './services/passive-dirty-manager.service';
 export { FormulaExecuteStageType, type IExecutionInProgressParams } from './services/runtime.service';
 export { FormulaExecutedStateType, type IAllRuntimeData } from './services/runtime.service';

@@ -1,14 +1,19 @@
-import type { ICommandInfo } from '@univerjs/core';
+import type { ICommandInfo, IUnitRange } from '@univerjs/core';
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import type { ISetFormulaCalculationNotificationMutation } from '@univerjs/engine-formula';
+import type {
+    IDirtyUnitFeatureMap,
+    IDirtyUnitSheetNameMap,
+    ISetFormulaCalculationNotificationMutation,
+} from '@univerjs/engine-formula';
 import {
     FormulaExecutedStateType,
-    IActiveDirtyManagerService,
     SetFormulaCalculationNotificationMutation,
     SetFormulaCalculationStartMutation,
 } from '@univerjs/engine-formula';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { SetRangeValuesMutation, SetStyleCommand } from '@univerjs/sheets';
+
+import { IActiveDirtyManagerService } from '../services/active-dirty-manager.service';
 
 @OnLifecycle(LifecycleStages.Ready, TriggerCalculationController)
 export class TriggerCalculationController extends Disposable {
@@ -72,7 +77,7 @@ export class TriggerCalculationController extends Disposable {
                     this._commandService.executeCommand(
                         SetFormulaCalculationStartMutation.id,
                         {
-                            commands: this._waitingCommandQueue,
+                            ...this._generateDirty(this._waitingCommandQueue),
                         },
                         {
                             local: true,
@@ -83,6 +88,73 @@ export class TriggerCalculationController extends Disposable {
                 }, 100);
             })
         );
+    }
+
+    private _generateDirty(commands: ICommandInfo[]) {
+        const allDirtyRanges: IUnitRange[] = [];
+        const allDirtyNameMap: IDirtyUnitSheetNameMap = {};
+        const allDirtyUnitFeatureMap: IDirtyUnitFeatureMap = {};
+
+        for (const command of commands) {
+            const conversion = this._activeDirtyManagerService.get(command.id);
+
+            if (conversion == null) {
+                continue;
+            }
+
+            const params = conversion.getDirtyData(command);
+
+            const { dirtyRanges, dirtyNameMap, dirtyUnitFeatureMap } = params;
+
+            if (dirtyRanges != null) {
+                allDirtyRanges.push(...dirtyRanges);
+            }
+
+            if (dirtyNameMap != null) {
+                this._mergeDirtyNameMap(allDirtyNameMap, dirtyNameMap);
+            }
+
+            if (dirtyUnitFeatureMap != null) {
+                this._mergeDirtyUnitFeatureMap(allDirtyUnitFeatureMap, dirtyUnitFeatureMap);
+            }
+        }
+
+        return {
+            dirtyRanges: allDirtyRanges,
+            dirtyNameMap: allDirtyNameMap,
+            dirtyUnitFeatureMap: allDirtyUnitFeatureMap,
+        };
+    }
+
+    private _mergeDirtyNameMap(allDirtyNameMap: IDirtyUnitSheetNameMap, dirtyNameMap: IDirtyUnitSheetNameMap) {
+        Object.keys(dirtyNameMap).forEach((unitId) => {
+            if (allDirtyNameMap[unitId] == null) {
+                allDirtyNameMap[unitId] = {};
+            }
+            Object.keys(dirtyNameMap[unitId]).forEach((sheetId) => {
+                allDirtyNameMap[unitId][sheetId] = dirtyNameMap[unitId][sheetId];
+            });
+        });
+    }
+
+    private _mergeDirtyUnitFeatureMap(
+        allDirtyUnitFeatureMap: IDirtyUnitFeatureMap,
+        dirtyUnitFeatureMap: IDirtyUnitFeatureMap
+    ) {
+        Object.keys(dirtyUnitFeatureMap).forEach((unitId) => {
+            if (allDirtyUnitFeatureMap[unitId] == null) {
+                allDirtyUnitFeatureMap[unitId] = {};
+            }
+            Object.keys(dirtyUnitFeatureMap[unitId]).forEach((sheetId) => {
+                if (allDirtyUnitFeatureMap[unitId][sheetId] == null) {
+                    allDirtyUnitFeatureMap[unitId][sheetId] = {};
+                }
+                Object.keys(dirtyUnitFeatureMap[unitId][sheetId]).forEach((featureId) => {
+                    allDirtyUnitFeatureMap[unitId][sheetId][featureId] =
+                        dirtyUnitFeatureMap[unitId][sheetId][featureId];
+                });
+            });
+        });
     }
 
     private _initialExecuteFormulaProcessListener() {

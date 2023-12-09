@@ -86,5 +86,21 @@ describe('utils test', () => {
                 `{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"-","st":-1,"ed":-1,"children":[{"token":"@","st":-1,"ed":-1,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"A4","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"B5","st":-1,"ed":-1,"children":[]}]}]}]}]}]}`
             );
         });
+
+        it('nodeMaker performance', () => {
+            const start = performance.now();
+            for (let i = 0; i < 10000; i++) {
+                lexer.nodeMakerTest(
+                    `=(-(1+2)--@A1:B2 + 5)/2 + -sum(indirect(A5):B10# + B6# + A1:offset(C5, 1, 1)  ,  100) + {1,2,3;4,5,6;7,8,10} + lambda(x,y,z, x*y*z)(sum(1,(1+2)*3),2,lambda(x,y, @offset(A1:B0,x#*y#))(1,2):C20) + sum((1+2%)*30%, 1+2)%`
+                );
+            }
+            const end = performance.now();
+            const elapsed = end - start; // 毫秒数
+
+            console.log(`Elapsed time: ${elapsed} ms`);
+
+            const expectedMaxTime = 300; // 毫秒数
+            expect(elapsed).toBeLessThan(expectedMaxTime);
+        });
     });
 });

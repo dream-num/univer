@@ -2,11 +2,10 @@ import { ICommandService, LocaleService, Plugin, PluginType } from '@univerjs/co
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { ActiveDirtyController } from './controllers/active-dirty.controller';
 import { BasicWorksheetController } from './controllers/basic-worksheet.controller';
 import { CalculateResultApplyController } from './controllers/calculate-result-apply.controller';
+import { FeatureCalculationController } from './controllers/feature-calculation.controller';
 import { MergeCellController } from './controllers/merge-cell.controller';
-import { PassiveDirtyController } from './controllers/passive-dirty.controller';
 import { zhCN } from './locale';
 import { BorderStyleManagerService } from './services/border-style-manager.service';
 import { NumfmtService } from './services/numfmt/numfmt.service';
@@ -58,11 +57,10 @@ export class SheetsPlugin extends Plugin {
             // controllers
             [BasicWorksheetController],
             [MergeCellController],
-            [ActiveDirtyController],
         ];
 
         if (!this._config?.notExecuteFormula) {
-            dependencies.push([CalculateResultApplyController], [PassiveDirtyController]);
+            dependencies.push([CalculateResultApplyController], [FeatureCalculationController]);
         }
 
         dependencies.forEach((d) => {

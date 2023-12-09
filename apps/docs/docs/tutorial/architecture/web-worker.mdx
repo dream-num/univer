@@ -34,7 +34,7 @@ univer.registerPlugin(UniverRPCMainThreadPlugin, {
 在 Web Worker 的入口文件中实例化另一个 Univer 实例，并注册需要的插件：
 
 ```ts
-import { BaseFormulaEnginePlugin } from '@univerjs/engine-formula';
+import { FormulaEnginePlugin } from '@univerjs/engine-formula';
 import { sheetsPlugin } from '@univerjs/sheets';
 import { LocaleType, Univer } from '@univerjs/core';
 import { UniverRPCWorkerThreadPlugin } from '@univerjs/rpc';
@@ -44,7 +44,7 @@ const univer = new Univer();
 
 univer.registerPlugin(UniverRPCWorkerThreadPlugin);
 univer.registerPlugin(sheetsPlugin);
-univer.registerPlugin(BaseFormulaEnginePlugin);
+univer.registerPlugin(FormulaEnginePlugin);
 univer.registerPlugin(FormulaPlugin);
 ```
 

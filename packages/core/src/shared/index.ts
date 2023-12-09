@@ -1,4 +1,5 @@
 export * from './array-search';
+export * from './blob';
 export * from './color/color';
 export * from './color/color-builder';
 export * from './command-enum';

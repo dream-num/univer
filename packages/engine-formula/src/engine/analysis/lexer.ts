@@ -437,6 +437,10 @@ export class LexerTreeBuilder extends Disposable {
         return token.replace(new RegExp(prefixToken.AT, 'g'), '').replace(new RegExp(prefixToken.MINUS, 'g'), '');
     }
 
+    nodeMakerTest(formulaString: string) {
+        return this._nodeMaker(formulaString);
+    }
+
     treeBuilder(formulaString: string, transformSuffix = true) {
         if (transformSuffix === true) {
             const lexerNode = FormulaLexerNodeCache.get(formulaString);

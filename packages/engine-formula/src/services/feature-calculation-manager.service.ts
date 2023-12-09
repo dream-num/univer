@@ -15,7 +15,7 @@ export interface IReferenceExecutorManagerParams {
     };
 }
 
-export interface IPassiveDirtyManagerService {
+export interface IFeatureCalculationManagerService {
     dispose(): void;
 
     remove(featureId: string): void;
@@ -35,7 +35,7 @@ export interface IPassiveDirtyManagerService {
  * causing the formula to be marked dirty again,
  * thereby completing the calculation of the entire dependency tree.
  */
-export class PassiveDirtyManagerService extends Disposable implements IPassiveDirtyManagerService {
+export class FeatureCalculationManagerService extends Disposable implements IFeatureCalculationManagerService {
     private _referenceExecutorMap: Map<string, IReferenceExecutorManagerParams> = new Map();
 
     override dispose(): void {
@@ -63,6 +63,6 @@ export class PassiveDirtyManagerService extends Disposable implements IPassiveDi
     }
 }
 
-export const IPassiveDirtyManagerService = createIdentifier<PassiveDirtyManagerService>(
-    'univer.formula.passive-dirty-manager.service'
+export const IFeatureCalculationManagerService = createIdentifier<FeatureCalculationManagerService>(
+    'univer.formula.feature-calculation-manager.service'
 );

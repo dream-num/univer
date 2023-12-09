@@ -15,7 +15,6 @@ import {
 import type { ISetFormulaDataMutationParams } from '../commands/mutations/set-formula-data.mutation';
 import { SetFormulaDataMutation } from '../commands/mutations/set-formula-data.mutation';
 import { FormulaDataModel } from '../models/formula-data.model';
-import { IActiveDirtyManagerService } from '../services/active-dirty-manager.service';
 import { CalculateFormulaService } from '../services/calculate-formula.service';
 import type { IAllRuntimeData } from '../services/runtime.service';
 import { FormulaExecutedStateType } from '../services/runtime.service';
@@ -26,8 +25,7 @@ export class CalculateController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(CalculateFormulaService) private readonly _calculateFormulaService: CalculateFormulaService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
-        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
-        @IActiveDirtyManagerService private readonly _activeDirtyManagerService: IActiveDirtyManagerService
+        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
     ) {
         super();
 
@@ -55,7 +53,7 @@ export class CalculateController extends Disposable {
                     if (params.forceCalculation === true) {
                         this._calculate(true);
                     } else {
-                        const { dirtyRanges, dirtyNameMap, dirtyUnitFeatureMap } = this._generateDirty(params.commands);
+                        const { dirtyRanges, dirtyNameMap, dirtyUnitFeatureMap } = params;
 
                         this._calculate(false, dirtyRanges, dirtyNameMap, dirtyUnitFeatureMap);
                     }
@@ -72,73 +70,6 @@ export class CalculateController extends Disposable {
                 }
             })
         );
-    }
-
-    private _generateDirty(commands: ICommandInfo[]) {
-        const allDirtyRanges: IUnitRange[] = [];
-        const allDirtyNameMap: IDirtyUnitSheetNameMap = {};
-        const allDirtyUnitFeatureMap: IDirtyUnitFeatureMap = {};
-
-        for (const command of commands) {
-            const conversion = this._activeDirtyManagerService.get(command.id);
-
-            if (conversion == null) {
-                continue;
-            }
-
-            const params = conversion.getDirtyData(command);
-
-            const { dirtyRanges, dirtyNameMap, dirtyUnitFeatureMap } = params;
-
-            if (dirtyRanges != null) {
-                allDirtyRanges.push(...dirtyRanges);
-            }
-
-            if (dirtyNameMap != null) {
-                this._mergeDirtyNameMap(allDirtyNameMap, dirtyNameMap);
-            }
-
-            if (dirtyUnitFeatureMap != null) {
-                this._mergeDirtyUnitFeatureMap(allDirtyUnitFeatureMap, dirtyUnitFeatureMap);
-            }
-        }
-
-        return {
-            dirtyRanges: allDirtyRanges,
-            dirtyNameMap: allDirtyNameMap,
-            dirtyUnitFeatureMap: allDirtyUnitFeatureMap,
-        };
-    }
-
-    private _mergeDirtyNameMap(allDirtyNameMap: IDirtyUnitSheetNameMap, dirtyNameMap: IDirtyUnitSheetNameMap) {
-        Object.keys(dirtyNameMap).forEach((unitId) => {
-            if (allDirtyNameMap[unitId] == null) {
-                allDirtyNameMap[unitId] = {};
-            }
-            Object.keys(dirtyNameMap[unitId]).forEach((sheetId) => {
-                allDirtyNameMap[unitId][sheetId] = dirtyNameMap[unitId][sheetId];
-            });
-        });
-    }
-
-    private _mergeDirtyUnitFeatureMap(
-        allDirtyUnitFeatureMap: IDirtyUnitFeatureMap,
-        dirtyUnitFeatureMap: IDirtyUnitFeatureMap
-    ) {
-        Object.keys(dirtyUnitFeatureMap).forEach((unitId) => {
-            if (allDirtyUnitFeatureMap[unitId] == null) {
-                allDirtyUnitFeatureMap[unitId] = {};
-            }
-            Object.keys(dirtyUnitFeatureMap[unitId]).forEach((sheetId) => {
-                if (allDirtyUnitFeatureMap[unitId][sheetId] == null) {
-                    allDirtyUnitFeatureMap[unitId][sheetId] = {};
-                }
-                Object.keys(dirtyUnitFeatureMap[unitId][sheetId]).forEach((featureId) => {
-                    allDirtyUnitFeatureMap[unitId][sheetId][featureId] =
-                        dirtyUnitFeatureMap[unitId][sheetId][featureId];
-                });
-            });
-        });
     }
 
     private async _calculate(

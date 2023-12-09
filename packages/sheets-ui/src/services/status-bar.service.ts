@@ -1,5 +1,5 @@
 import type { Nullable } from '@univerjs/core';
-import type { FUNCTION_NAMES } from '@univerjs/engine-formula';
+import type { IFunctionNames } from '@univerjs/engine-formula';
 import { FUNCTION_NAMES_MATH, FUNCTION_NAMES_STATISTICAL } from '@univerjs/engine-formula';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier } from '@wendellhu/redi';
@@ -11,11 +11,11 @@ export interface IStatusBarService {
     dispose(): void;
     setState(param: IStatusBarServiceStatus | null): void;
     getState(): Readonly<Nullable<IStatusBarServiceStatus>>;
-    getFunctions(): Readonly<FUNCTION_NAMES[]>;
+    getFunctions(): Readonly<IFunctionNames[]>;
 }
 
 export type IStatusBarServiceStatus = Array<{
-    func: FUNCTION_NAMES;
+    func: IFunctionNames;
     value: number;
 }>;
 
@@ -42,7 +42,7 @@ export class StatusBarService implements IStatusBarService, IDisposable {
         return this._state$.getValue();
     }
 
-    getFunctions(): Readonly<FUNCTION_NAMES[]> {
+    getFunctions(): Readonly<IFunctionNames[]> {
         return this._functions;
     }
 }

@@ -14,6 +14,7 @@ export type {
 export { isInDirtyRange } from './basics/dirty';
 export { ErrorType } from './basics/error-type';
 export { FunctionType, type IFunctionInfo, type IFunctionParam } from './basics/function';
+export { type IFunctionNames } from './basics/function';
 export { includeFormulaLexerToken, isFormulaLexerToken, normalizeSheetName } from './basics/match-token';
 export { matchToken } from './basics/token';
 export { compareToken } from './basics/token';

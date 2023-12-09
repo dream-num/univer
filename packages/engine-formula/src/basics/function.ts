@@ -1,5 +1,22 @@
 import type { BooleanNumber } from '@univerjs/core';
 
+import type { FUNCTION_NAMES_ARRAY } from '../functions/array/function-names';
+import type { FUNCTION_NAMES_COMPATIBILITY } from '../functions/compatibility/function-names';
+import type { FUNCTION_NAMES_CUBE } from '../functions/cube/function-names';
+import type { FUNCTION_NAMES_DATABASE } from '../functions/database/function-names';
+import type { FUNCTION_NAMES_DATE } from '../functions/date/function-names';
+import type { FUNCTION_NAMES_ENGINEERING } from '../functions/engineering/function-names';
+import type { FUNCTION_NAMES_FINANCIAL } from '../functions/financial/function-names';
+import type { FUNCTION_NAMES_INFORMATION } from '../functions/information/function-names';
+import type { FUNCTION_NAMES_LOGICAL } from '../functions/logical/function-names';
+import type { FUNCTION_NAMES_LOOKUP } from '../functions/lookup/function-names';
+import type { FUNCTION_NAMES_MATH } from '../functions/math/function-names';
+import type { FUNCTION_NAMES_META } from '../functions/meta/function-names';
+import type { FUNCTION_NAMES_STATISTICAL } from '../functions/statistical/function-names';
+import type { FUNCTION_NAMES_TEXT } from '../functions/text/function-names';
+import type { FUNCTION_NAMES_UNIVER } from '../functions/univer/function-names';
+import type { FUNCTION_NAMES_WEB } from '../functions/web/function-names';
+
 /**
  * Function type, refer to https://support.microsoft.com/en-us/office/excel-functions-by-category-5f91f4e9-7b42-46d2-9bd1-63f26a86c0eb
  */
@@ -144,3 +161,21 @@ export interface IFunctionInfo {
      */
     functionParameter: IFunctionParam[];
 }
+
+export type IFunctionNames =
+    | FUNCTION_NAMES_ARRAY
+    | FUNCTION_NAMES_COMPATIBILITY
+    | FUNCTION_NAMES_CUBE
+    | FUNCTION_NAMES_DATABASE
+    | FUNCTION_NAMES_DATE
+    | FUNCTION_NAMES_ENGINEERING
+    | FUNCTION_NAMES_FINANCIAL
+    | FUNCTION_NAMES_INFORMATION
+    | FUNCTION_NAMES_LOGICAL
+    | FUNCTION_NAMES_LOOKUP
+    | FUNCTION_NAMES_MATH
+    | FUNCTION_NAMES_META
+    | FUNCTION_NAMES_STATISTICAL
+    | FUNCTION_NAMES_TEXT
+    | FUNCTION_NAMES_UNIVER
+    | FUNCTION_NAMES_WEB;

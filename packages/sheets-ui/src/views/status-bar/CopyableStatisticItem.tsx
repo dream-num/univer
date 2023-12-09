@@ -1,6 +1,6 @@
 import { LocaleService } from '@univerjs/core';
 import { MessageType, Tooltip } from '@univerjs/design';
-import type { FUNCTION_NAMES } from '@univerjs/engine-formula';
+import type { IFunctionNames } from '@univerjs/engine-formula';
 import {
     FUNCTION_NAMES_COMPATIBILITY,
     FUNCTION_NAMES_MATH,
@@ -13,7 +13,7 @@ import React from 'react';
 import styles from './index.module.less';
 
 export interface IStatisticItem {
-    name: FUNCTION_NAMES;
+    name: IFunctionNames;
     value: number;
     show: boolean;
 }
@@ -46,7 +46,9 @@ export const CopyableStatisticItem: React.FC<IStatisticItem> = (item: IStatistic
     return (
         <Tooltip title={localeService.t('statusbar.clickToCopy')} placement="top">
             <div key={item.name} className={styles.statisticItem} onClick={copyToClipboard}>
-                <span>{`${localeService.t(functionDisplayNames?.[item.name] || item.name)}: ${formateValue}`}</span>
+                <span>{`${localeService.t(
+                    functionDisplayNames?.[item.name as string] || (item.name as string)
+                )}: ${formateValue}`}</span>
             </div>
         </Tooltip>
     );

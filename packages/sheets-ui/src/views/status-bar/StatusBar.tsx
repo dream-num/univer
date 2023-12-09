@@ -126,7 +126,7 @@ export const StatusBar = () => {
                                         onChange={() => onChange && onChange(item)}
                                     />
                                     <span>{`${localeService.t(
-                                        functionDisplayNames?.[item.name] || item.name
+                                        functionDisplayNames?.[item.name as string] || (item.name as string)
                                     )}: ${formatNumber(item.value)}`}</span>
                                 </a>
                             ))}

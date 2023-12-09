@@ -46,7 +46,6 @@ export class TextSelectionManagerService implements IDisposable {
 
     setCurrentSelection(param: ITextSelectionManagerSearchParam) {
         this._currentSelection = param;
-
         this._refresh(param);
     }
 

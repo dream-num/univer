@@ -128,7 +128,10 @@ export class MoveCursorController extends Disposable {
         const dataStreamLength = docDataModel.getBody()!.dataStream.length ?? Infinity;
 
         if (direction === Direction.LEFT || direction === Direction.RIGHT) {
-            focusOffset = direction === Direction.RIGHT ? ++focusOffset : --focusOffset;
+            const preSpan = skeleton.findNodeByCharIndex(focusOffset - 1)!;
+            const curSpan = skeleton.findNodeByCharIndex(focusOffset)!;
+
+            focusOffset = direction === Direction.RIGHT ? focusOffset + curSpan.count : focusOffset - preSpan.count;
 
             focusOffset = Math.min(dataStreamLength - 2, Math.max(0, focusOffset));
 
@@ -214,11 +217,14 @@ export class MoveCursorController extends Disposable {
 
                 cursor = direction === Direction.LEFT ? min : max;
             } else {
+                const preSpan = skeleton.findNodeByCharIndex(startOffset - 1)!;
+                const curSpan = skeleton.findNodeByCharIndex(startOffset)!;
+
                 if (direction === Direction.LEFT) {
-                    cursor = Math.max(0, startOffset - 1);
+                    cursor = Math.max(0, startOffset - preSpan.count);
                 } else {
                     // -1 because the length of the string will be 1 larger than the index, and the reason for subtracting another 1 is because it ends in \n
-                    cursor = Math.min(dataStreamLength - 2, endOffset + 1);
+                    cursor = Math.min(dataStreamLength - 2, endOffset + curSpan.count);
                 }
             }
 

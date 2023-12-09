@@ -6,7 +6,7 @@ import { BehaviorSubject } from 'rxjs';
 
 import { CURSOR_TYPE } from '../../basics/const';
 import type { IDocumentSkeletonSpan } from '../../basics/i-document-skeleton-cached';
-import { PageLayoutType } from '../../basics/i-document-skeleton-cached';
+import { PageLayoutType, SpanType } from '../../basics/i-document-skeleton-cached';
 import type { IMouseEvent, IPointerEvent } from '../../basics/i-events';
 import type { INodeInfo, INodePosition } from '../../basics/interfaces';
 import { getOffsetRectForDom, transformBoundingCoord } from '../../basics/position';
@@ -64,6 +64,10 @@ function getParagraphInfoBySpan(node: IDocumentSkeletonSpan) {
                 }
                 if (span === node) {
                     hasFound = true;
+                }
+
+                if (span.spanType === SpanType.LIST) {
+                    continue;
                 }
 
                 content += span.content;

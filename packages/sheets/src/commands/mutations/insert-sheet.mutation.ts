@@ -20,7 +20,6 @@ export const InsertSheetUndoMutationFactory = (
 ): IRemoveSheetMutationParams => ({
     worksheetId: params.sheet.id,
     workbookId: params.workbookId,
-    previousIndex: params.index,
 });
 
 export const InsertSheetMutation: IMutation<IInsertSheetMutationParams, boolean> = {

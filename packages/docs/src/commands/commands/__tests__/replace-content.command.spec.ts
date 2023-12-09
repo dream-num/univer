@@ -79,8 +79,6 @@ describe('replace or cover content of document', () => {
             {
                 startOffset: 5,
                 endOffset: 5,
-                collapsed: false,
-                segmentId: '',
             },
         ]);
     });

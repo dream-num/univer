@@ -76,8 +76,6 @@ describe('Test inline format commands', () => {
             {
                 startOffset: 0,
                 endOffset: 5,
-                collapsed: false,
-                segmentId: '',
             },
         ]);
 
@@ -85,8 +83,6 @@ describe('Test inline format commands', () => {
             {
                 startOffset: 20,
                 endOffset: 30,
-                collapsed: false,
-                segmentId: '',
             },
         ]);
     });

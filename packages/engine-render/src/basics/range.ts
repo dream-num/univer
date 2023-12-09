@@ -34,6 +34,13 @@ export interface ITextRangeWithStyle extends ITextRangeParam {
     style?: ITextSelectionStyle;
 }
 
+// Only use in add/replaceTextRanges methods.
+export interface ISuccinctTextRangeParam {
+    startOffset: number;
+    endOffset: number;
+    style?: ITextSelectionStyle;
+}
+
 export enum RANGE_DIRECTION {
     NONE = 'none',
     BACKWARD = 'backward',

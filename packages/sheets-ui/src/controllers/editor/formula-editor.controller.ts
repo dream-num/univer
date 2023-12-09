@@ -40,7 +40,6 @@ import {
     TextSelectionManagerService,
     VIEWPORT_KEY,
 } from '@univerjs/docs';
-import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import { DeviceInputEventType, IRenderManagerService, ScrollBar } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import { takeUntil } from 'rxjs';
@@ -123,11 +122,10 @@ export class FormulaEditorController extends RxDisposable {
 
                 newContent = newContent.replace(/\r\n$/, '');
 
-                const textRanges: ITextRangeWithStyle[] = [
+                const textRanges = [
                     {
                         startOffset: newContent.length,
                         endOffset: newContent.length,
-                        collapsed: true,
                     },
                 ];
 
@@ -297,6 +295,7 @@ export class FormulaEditorController extends RxDisposable {
                 }
 
                 // Mark formula editor as non-focused, when current selection is not in formula editor.
+                // Refactor: use textSelectionManager.textSelection$ to replace.
                 if (command.id === SetTextSelectionsOperation.id) {
                     const { unitId } = command.params as ISetTextSelectionsOperationParams;
                     if (unitId !== DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {

@@ -23,14 +23,7 @@ import {
     OnLifecycle,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
-import {
-    getParagraphBySpan,
-    hasListSpan,
-    isFirstSpan,
-    isIndentBySpan,
-    isSameLine,
-    ITextSelectionRenderManager,
-} from '@univerjs/engine-render';
+import { getParagraphBySpan, hasListSpan, isFirstSpan, isIndentBySpan, isSameLine } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 
 import { CutContentCommand } from '../commands/commands/clipboard.inner.command';
@@ -42,14 +35,15 @@ import {
     UpdateCommand,
 } from '../commands/commands/core-editing.command';
 import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
+import { TextSelectionManagerService } from '../services/text-selection-manager.service';
 
 @OnLifecycle(LifecycleStages.Rendered, DeleteController)
 export class DeleteController extends Disposable {
     constructor(
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
-        @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService
     ) {
         super();
 
@@ -85,7 +79,7 @@ export class DeleteController extends Disposable {
 
     // Use BACKSPACE to delete left.
     private _handleDeleteLeft() {
-        const activeRange = this._textSelectionRenderManager.getActiveRange();
+        const activeRange = this._textSelectionManagerService.getActiveRange();
 
         const skeleton = this._docSkeletonManagerService.getCurrent()?.skeleton;
 
@@ -154,7 +148,6 @@ export class DeleteController extends Disposable {
                 {
                     startOffset: cursor,
                     endOffset: cursor,
-                    collapsed: true,
                     style,
                 },
             ];
@@ -168,7 +161,6 @@ export class DeleteController extends Disposable {
                 range: {
                     startOffset: paragraphIndex,
                     endOffset: paragraphIndex + 1,
-                    collapsed: false,
                 },
                 textRanges,
                 coverType: UpdateDocsAttributeType.REPLACE,
@@ -191,7 +183,6 @@ export class DeleteController extends Disposable {
                     {
                         startOffset: cursor,
                         endOffset: cursor,
-                        collapsed: true,
                         style,
                     },
                 ];
@@ -219,7 +210,7 @@ export class DeleteController extends Disposable {
 
     // Use DELETE to delete right.
     private _handleDeleteRight() {
-        const activeRange = this._textSelectionRenderManager.getActiveRange();
+        const activeRange = this._textSelectionManagerService.getActiveRange();
 
         const skeleton = this._docSkeletonManagerService.getCurrent()?.skeleton;
 
@@ -241,7 +232,6 @@ export class DeleteController extends Disposable {
                 {
                     startOffset,
                     endOffset: startOffset,
-                    collapsed: true,
                     style,
                 },
             ];
@@ -271,8 +261,8 @@ export class DeleteController extends Disposable {
 
     // get cursor position when BACKSPACE/DELETE excuse the CutContentCommand.
     private _getTextRangesWhenDelete() {
-        const activeRange = this._textSelectionRenderManager.getActiveRange()!;
-        const ranges = this._textSelectionRenderManager.getAllTextRanges();
+        const activeRange = this._textSelectionManagerService.getActiveRange()!;
+        const ranges = this._textSelectionManagerService.getSelections()!;
 
         let cursor = activeRange.endOffset;
 
@@ -292,7 +282,6 @@ export class DeleteController extends Disposable {
             {
                 startOffset: cursor,
                 endOffset: cursor,
-                collapsed: true,
                 style: activeRange.style,
             },
         ];

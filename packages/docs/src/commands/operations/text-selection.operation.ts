@@ -16,13 +16,13 @@
 
 import type { IOperation } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
-import type { TextRange } from '@univerjs/engine-render';
-
-import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
+import type { ITextSelectionStyle, TextRange } from '@univerjs/engine-render';
 
 export interface ISetTextSelectionsOperationParams {
     unitId: string;
-    pluginName: string;
+    subUnitId: string;
+    segmentId: string;
+    style: ITextSelectionStyle;
     ranges: TextRange[];
 }
 
@@ -31,11 +31,8 @@ export const SetTextSelectionsOperation: IOperation<ISetTextSelectionsOperationP
 
     type: CommandType.OPERATION,
 
-    handler: (accessor, params) => {
-        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
-
-        textSelectionManagerService.replaceTextRangesWithNoRefresh(params!.ranges);
-
+    handler: (accessor, prams) => {
+        // for live share only.
         return true;
     },
 };

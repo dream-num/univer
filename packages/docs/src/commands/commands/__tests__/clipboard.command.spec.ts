@@ -131,8 +131,6 @@ describe('test cases in clipboard', () => {
             {
                 startOffset: 0,
                 endOffset: 5,
-                collapsed: false,
-                segmentId: '',
             },
         ]);
 
@@ -140,8 +138,6 @@ describe('test cases in clipboard', () => {
             {
                 startOffset: 10,
                 endOffset: 15,
-                collapsed: false,
-                segmentId: '',
             },
         ]);
     });

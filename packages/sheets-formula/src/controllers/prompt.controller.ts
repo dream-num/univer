@@ -28,7 +28,6 @@ import {
     isFormulaString,
     IUniverInstanceService,
     LifecycleStages,
-    LocaleService,
     OnLifecycle,
     serializeRangeToRefString,
     ThemeService,
@@ -139,7 +138,6 @@ export class PromptController extends Disposable {
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(LocaleService) private readonly _localeService: LocaleService,
         @IContextService private readonly _contextService: IContextService,
         @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
         @Inject(IEditorBridgeService) private readonly _editorBridgeService: EditorBridgeService,
@@ -230,7 +228,7 @@ export class PromptController extends Disposable {
     private _initialCursorSync() {
         this.disposeWithMe(
             toDisposable(
-                this._textSelectionRenderManager.textSelection$.subscribe(() => {
+                this._textSelectionManagerService.textSelection$.subscribe(() => {
                     if (
                         this._editorBridgeService.isVisible().visible === false ||
                         this._formulaInputService.isSelectionMoving()
@@ -465,7 +463,7 @@ export class PromptController extends Disposable {
         this.disposeWithMe(
             toDisposable(
                 this._formulaPromptService.acceptFormulaName$.subscribe((formulaString: string) => {
-                    const activeRange = this._textSelectionRenderManager.getActiveRange();
+                    const activeRange = this._textSelectionManagerService.getActiveRange();
 
                     if (activeRange == null) {
                         this._hideFunctionPanel();
@@ -527,7 +525,7 @@ export class PromptController extends Disposable {
     }
 
     private _changeFunctionPanelState() {
-        const activeRange = this._textSelectionRenderManager.getActiveRange();
+        const activeRange = this._textSelectionManagerService.getActiveRange();
 
         if (activeRange == null) {
             this._hideFunctionPanel();
@@ -662,7 +660,7 @@ export class PromptController extends Disposable {
      * @returns Return the character under the current cursor in the editor.
      */
     private _getCurrentChar() {
-        const activeRange = this._textSelectionRenderManager.getActiveRange();
+        const activeRange = this._textSelectionManagerService.getActiveRange();
 
         if (activeRange == null) {
             return;
@@ -734,7 +732,7 @@ export class PromptController extends Disposable {
 
             this._formulaInputService.setSequenceNodes(lastSequenceNodes);
 
-            const activeRange = this._textSelectionRenderManager.getActiveRange();
+            const activeRange = this._textSelectionManagerService.getActiveRange();
 
             if (activeRange == null) {
                 return;

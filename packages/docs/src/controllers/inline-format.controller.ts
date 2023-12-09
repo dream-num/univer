@@ -15,8 +15,7 @@
  */
 
 import type { ICommandInfo } from '@univerjs/core';
-import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { ITextSelectionRenderManager } from '@univerjs/engine-render';
+import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import {
@@ -39,8 +38,6 @@ import { TextSelectionManagerService } from '../services/text-selection-manager.
 @OnLifecycle(LifecycleStages.Rendered, InlineFormatController)
 export class InlineFormatController extends Disposable {
     constructor(
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
-        @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @ICommandService private readonly _commandService: ICommandService
     ) {
@@ -72,7 +69,7 @@ export class InlineFormatController extends Disposable {
     }
 
     private _handleInlineFormat(command: ICommandInfo) {
-        const { segmentId } = this._textSelectionRenderManager.getActiveRange() ?? {};
+        const { segmentId } = this._textSelectionManagerService.getActiveRange() ?? {};
 
         if (segmentId == null) {
             return;

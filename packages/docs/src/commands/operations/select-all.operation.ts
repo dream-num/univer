@@ -16,7 +16,6 @@
 
 import type { ICommand } from '@univerjs/core';
 import { CommandType, IUniverInstanceService } from '@univerjs/core';
-import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 
@@ -37,11 +36,10 @@ export const SelectAllOperation: ICommand<ISelectAllOperationParams> = {
             return false;
         }
 
-        const textRanges: ITextRangeWithStyle[] = [
+        const textRanges = [
             {
                 startOffset: 0,
                 endOffset: prevBody.dataStream.length - 2,
-                collapsed: false,
             },
         ];
 

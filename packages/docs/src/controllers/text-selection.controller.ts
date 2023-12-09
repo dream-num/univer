@@ -21,10 +21,9 @@ import { CURSOR_TYPE, IRenderManagerService, ITextSelectionRenderManager } from 
 import { Inject } from '@wendellhu/redi';
 
 import { getDocObjectById } from '../basics/component-tools';
-import { NORMAL_TEXT_SELECTION_PLUGIN_NAME, VIEWPORT_KEY } from '../basics/docs-view-key';
+import { VIEWPORT_KEY } from '../basics/docs-view-key';
 import type { ISetDocZoomRatioOperationParams } from '../commands/operations/set-doc-zoom-ratio.operation';
 import { SetDocZoomRatioOperation } from '../commands/operations/set-doc-zoom-ratio.operation';
-import { SetTextSelectionsOperation } from '../commands/operations/text-selection.operation';
 import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
 import { TextSelectionManagerService } from '../services/text-selection-manager.service';
 
@@ -71,6 +70,12 @@ export class TextSelectionController extends Disposable {
         this._initialize();
     }
 
+    private _initialize() {
+        this._skeletonListener();
+
+        this._commandExecutedListener();
+    }
+
     override dispose(): void {
         this._renderManagerService.getRenderAll().forEach((docObject) => {
             const { mainComponent } = docObject;
@@ -84,21 +89,6 @@ export class TextSelectionController extends Disposable {
             mainComponent.onDblclickObserver.remove(this._dblClickObserver);
             mainComponent.onTripleClickObserver.remove(this._tripleClickObserver);
         });
-    }
-
-    private _initialize() {
-        this._onChangeListener();
-
-        this._skeletonListener();
-
-        this._userActionSyncListener();
-
-        this._commandExecutedListener();
-
-        // this._textSelectionManagerService.setCurrentSelection({
-        //     pluginName: NORMAL_TEXT_SELECTION_PLUGIN_NAME,
-        //     unitId,
-        // });
     }
 
     private _initialMain(unitId: string) {
@@ -140,56 +130,6 @@ export class TextSelectionController extends Disposable {
         this._tripleClickObserver = document?.onTripleClickObserver.add((evt: IPointerEvent | IMouseEvent) => {
             this._textSelectionRenderManager.handleTripleClick(evt, document.getOffsetConfig(), viewportMain);
         });
-    }
-
-    private _onChangeListener() {
-        this._textSelectionManagerService.textSelectionInfo$.subscribe((param) => {
-            const unitId = this._textSelectionManagerService.getCurrentSelection()?.unitId;
-            // Remove all textRanges.
-            this._textSelectionRenderManager.removeAllTextRanges();
-
-            if (param == null || unitId == null) {
-                return;
-            }
-
-            const docSkeleton = this._docSkeletonManagerService.getCurrent()?.skeleton;
-
-            const currentRender = this._getDocObjectById(unitId);
-
-            if (currentRender == null || docSkeleton == null) {
-                return;
-            }
-
-            const { scene, document } = currentRender;
-
-            this._textSelectionRenderManager.addTextRanges(param, {
-                scene,
-                skeleton: docSkeleton,
-                documentOffsetConfig: document.getOffsetConfig(),
-            });
-        });
-    }
-
-    private _userActionSyncListener() {
-        this._textSelectionRenderManager.textSelection$.subscribe((textRanges) => {
-            const docsObject = this._docSkeletonManagerService.getCurrent();
-
-            if (docsObject == null) {
-                return;
-            }
-
-            const { unitId } = docsObject;
-
-            this._commandService.executeCommand(SetTextSelectionsOperation.id, {
-                unitId,
-                pluginName: NORMAL_TEXT_SELECTION_PLUGIN_NAME,
-                ranges: textRanges,
-            });
-        });
-    }
-
-    private _getDocObjectById(unitId: string) {
-        return getDocObjectById(unitId, this._renderManagerService);
     }
 
     private _commandExecutedListener() {
@@ -238,9 +178,13 @@ export class TextSelectionController extends Disposable {
             );
 
             this._textSelectionManagerService.setCurrentSelectionNotRefresh({
-                pluginName: NORMAL_TEXT_SELECTION_PLUGIN_NAME,
                 unitId,
+                subUnitId: '',
             });
         });
+    }
+
+    private _getDocObjectById(unitId: string) {
+        return getDocObjectById(unitId, this._renderManagerService);
     }
 }

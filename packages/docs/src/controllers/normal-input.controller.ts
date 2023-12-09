@@ -23,7 +23,6 @@ import type { Subscription } from 'rxjs';
 import { getDocObject } from '../basics/component-tools';
 import { InsertCommand } from '../commands/commands/core-editing.command';
 import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
-import { TextSelectionManagerService } from '../services/text-selection-manager.service';
 
 @OnLifecycle(LifecycleStages.Rendered, NormalInputController)
 export class NormalInputController extends Disposable {
@@ -34,7 +33,6 @@ export class NormalInputController extends Disposable {
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
@@ -82,7 +80,6 @@ export class NormalInputController extends Disposable {
                 {
                     startOffset: startOffset + len,
                     endOffset: startOffset + len,
-                    collapsed: true,
                     style,
                 },
             ];

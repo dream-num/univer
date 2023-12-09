@@ -23,7 +23,7 @@ import {
     LifecycleStages,
     OnLifecycle,
 } from '@univerjs/core';
-import { IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import type { Subscription } from 'rxjs';
 
@@ -58,7 +58,6 @@ export class LineBreakInputController extends Disposable {
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @ICommandService private readonly _commandService: ICommandService
     ) {
@@ -92,7 +91,7 @@ export class LineBreakInputController extends Disposable {
     private _handleBreakLine() {
         const skeleton = this._docSkeletonManagerService.getCurrent()?.skeleton;
 
-        const activeRange = this._textSelectionRenderManager.getActiveRange();
+        const activeRange = this._textSelectionManagerService.getActiveRange();
 
         if (activeRange == null || skeleton == null) {
             return;
@@ -107,7 +106,6 @@ export class LineBreakInputController extends Disposable {
             {
                 startOffset: startOffset + 1,
                 endOffset: startOffset + 1,
-                collapsed: true,
                 style,
             },
         ];

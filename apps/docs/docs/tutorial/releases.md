@@ -6,8 +6,9 @@ sidebar_position: 2
 
 ### 0.1.0
 
-2023-12-yy
+2023-12-20
 
-首个公开测试版本
+> 首个公开版本
 
-* 发布 Univer Sheet
+* 发布 Univer Sheet 以及官方文档
+

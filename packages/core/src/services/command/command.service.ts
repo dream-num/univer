@@ -26,7 +26,11 @@ export interface ICommand<P extends object = object, R = boolean> {
 
     handler(accessor: IAccessor, params?: P): Promise<R> | R;
 
-    /** When this command is unregistered, this function would be called. */
+    /**
+     * When this command is unregistered, this function would be called.
+     *
+     * @deprecated
+     */
     onDispose?: () => void;
 }
 

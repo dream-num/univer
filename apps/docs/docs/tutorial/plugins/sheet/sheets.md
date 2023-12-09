@@ -4,14 +4,17 @@ sidebar_position: 1
 
 # @univerjs/sheets
 
+[![npm version](https://badge.fury.io/js/@univerjs%2Fsheets.svg)](https://badge.fury.io/js/@univerjs%2Fsheets)
+
 @univerjs/sheet 承载 sheet 的主要（基础）业务逻辑，base-sheets 被设计为 UI 无关，因此也可以运行在 Node.js 环境中，借此可以实现协同编辑等功能。
 
 @univerjs/sheets 为 Univer Sheet 提供了以下能力：
 
 * 提供核心能力，例如数字格式、选区管理、权限等等
 * 更改电子表格数据的 commands / mutations
-
-
+* 公式核心能力
+* 数字格式核心能力
+* 电子表格的 canvas 绘制
 
 ## `SheetInterceptorService`
 

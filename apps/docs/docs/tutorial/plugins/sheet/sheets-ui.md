@@ -4,6 +4,8 @@ sidebar_position: 2
 
 # @univerjs/sheets-ui
 
+[![npm version](https://badge.fury.io/js/@univerjs%2Fsheets-ui.svg)](https://badge.fury.io/js/@univerjs%2Fsheets-ui)
+
 @univerjs/sheets-ui 提供了 sheet 的 UI，包括：
 
 * sheet 基础功能的快捷键

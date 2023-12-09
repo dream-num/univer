@@ -40,7 +40,7 @@ const richTextDemo: IDocumentData = {
 
 export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
     id: 'workbook-01',
-    locale: LocaleType.EN_US,
+    locale: LocaleType.ZH_CN,
     name: 'universheet',
     sheetOrder: ['sheet-0001'],
     styles: {

@@ -9,8 +9,6 @@ for (const format of ['cjs', 'esm']) {
         globalName: 'UniverSheetsUi',
         entryPoints: {
             index: './src/index.ts',
-            'locale/en-US': './src/locale/en-US.ts',
-            'locale/zh-CN': './src/locale/zh-CN.ts',
         },
         outdir: `./lib/${format}`,
         format,

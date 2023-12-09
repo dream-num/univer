@@ -4,7 +4,7 @@ import { IRenderingEngine } from '@univerjs/engine-render';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { enUS } from './locale';
+import { zhCN } from './locale';
 import { CanvasView } from './views/render';
 
 export interface ISlidesPluginConfig {}
@@ -36,7 +36,7 @@ export class SlidesPlugin extends Plugin {
 
     initialize(): void {
         this._localeService.load({
-            enUS,
+            zhCN,
         });
         this.initCanvasEngine();
     }

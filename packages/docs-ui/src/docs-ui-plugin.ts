@@ -15,7 +15,7 @@ import { DefaultDocUiConfig } from './basics';
 import { DOC_UI_PLUGIN_NAME } from './basics/const/plugin-name';
 import { AppUIController } from './controllers';
 import { DocUIController } from './controllers/doc-ui.controller';
-import { enUS } from './locale';
+import { zhCN } from './locale';
 
 export class DocsUIPlugin extends Plugin {
     static override type = PluginType.Doc;
@@ -28,7 +28,7 @@ export class DocsUIPlugin extends Plugin {
         super(DOC_UI_PLUGIN_NAME);
 
         this._localeService.load({
-            enUS,
+            zhCN,
         });
 
         this._config = Tools.deepMerge({}, DefaultDocUiConfig, this._config);

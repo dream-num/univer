@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { LocaleService, LocaleType, ThemeService } from '@univerjs/core';
+import { LocaleService, ThemeService } from '@univerjs/core';
 import { Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 import React, { useMemo } from 'react';
 
-import { zhCn } from '../../locale/zh-CN';
+import { zhCN } from '../../locale';
 import type { ISheetNumfmtPanelProps } from '../index';
 import { SheetNumfmtPanel } from '../index';
 
@@ -14,7 +14,7 @@ const Index = (props: any) => {
 
     useMemo(() => {
         const localeService = inject.get(LocaleService);
-        localeService.load({ [LocaleType.ZH_CN]: zhCn, [LocaleType.EN_US]: zhCn });
+        localeService.load({ zhCN });
     }, []);
 
     return <Wrap {...props} />;

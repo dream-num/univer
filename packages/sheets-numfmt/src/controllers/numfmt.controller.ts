@@ -7,7 +7,6 @@ import {
     IUniverInstanceService,
     LifecycleStages,
     LocaleService,
-    LocaleType,
     ObjectMatrix,
     OnLifecycle,
     Range,
@@ -42,7 +41,7 @@ import { CloseNumfmtPanelOperator } from '../commands/operators/close.numfmt.pan
 import { OpenNumfmtPanelOperator } from '../commands/operators/open.numfmt.panel.operator';
 import type { ISheetNumfmtPanelProps } from '../components/index';
 import { SheetNumfmtPanel } from '../components/index';
-import { zhCn } from '../locale/zh-CN';
+import { zhCN } from '../locale';
 import { AddDecimalMenuItem, CurrencyMenuItem, FactoryOtherMenuItem, SubtractDecimalMenuItem } from '../menu/menu';
 import { getPatternPreview, getPatternType } from '../utils/pattern';
 import type { INumfmtController } from './type';
@@ -174,7 +173,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
         this._componentManager.register(SHEET_NUMFMT_PLUGIN, SheetNumfmtPanel);
     }
     private _initLocal = () => {
-        this._localeService.load({ [LocaleType.ZH_CN]: zhCn, [LocaleType.EN_US]: zhCn });
+        this._localeService.load({ zhCN });
     };
 
     private _initMenu() {

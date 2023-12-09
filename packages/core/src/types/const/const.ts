@@ -57,7 +57,7 @@ export const DEFAULT_WORKBOOK: IWorkbookData = {
     sheetOrder: [],
     name: '',
     appVersion: '',
-    locale: LocaleType.EN_US,
+    locale: LocaleType.ZH_CN,
     styles: {},
     sheets: {},
     resources: [],

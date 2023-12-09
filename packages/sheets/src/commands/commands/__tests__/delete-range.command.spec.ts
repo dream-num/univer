@@ -129,7 +129,7 @@ const WORKBOOK_DATA_DEMO: IWorkbookData = {
             mergeData,
         },
     },
-    locale: LocaleType.EN_US,
+    locale: LocaleType.ZH_CN,
     name: '',
     sheetOrder: [],
     styles: {},

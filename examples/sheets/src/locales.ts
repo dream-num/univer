@@ -1,20 +1,16 @@
-import DocsPluginZhCN from '@univerjs/docs/locale/zh-CN';
-import sheetsPluginZhCN from '@univerjs/sheets/locale/zh-CN';
-import BaseUiZhCN from '@univerjs/ui/locale/zh-CN';
-import DesignZH from '@univerjs/design/locale/zh-CN';
-import DocsUIPluginZhCN from '@univerjs/docs-ui/locale/zh-CN';
-import SheetsUIPluginZhCN from '@univerjs/sheets-ui/locale/zh-CN';
-
-import SheetDebuggerPluginZhCN from './sheets-plugin-debugger/locale/zh-CN';
+import { LocaleType } from '@univerjs/core';
+import { enUS as DesignEnUS } from '@univerjs/design';
+import { enUS as DocsUIPluginEnUS } from '@univerjs/docs-ui';
+import { enUS as sheetsPluginEnUS } from '@univerjs/sheets';
+import { enUS as SheetsUIPluginEnUS } from '@univerjs/sheets-ui';
+import { enUS as BaseUiEnUS } from '@univerjs/ui';
 
 export const locales = {
-    zhCN: {
-        ...DocsPluginZhCN,
-        ...sheetsPluginZhCN,
-        ...DocsUIPluginZhCN,
-        ...SheetsUIPluginZhCN,
-        ...SheetDebuggerPluginZhCN,
-        ...BaseUiZhCN,
-        ...DesignZH,
+    [LocaleType.EN_US]: {
+        ...sheetsPluginEnUS,
+        ...DocsUIPluginEnUS,
+        ...SheetsUIPluginEnUS,
+        ...BaseUiEnUS,
+        ...DesignEnUS,
     },
 };

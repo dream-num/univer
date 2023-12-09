@@ -232,6 +232,7 @@ export {
 export { type ISetSelectionsOperationParams, SetSelectionsOperation } from './commands/operations/selection.operation';
 export { type ISheetCommandSharedParams } from './commands/utils/interface';
 export { getAddMergeMutationRangeByType } from './controllers/merge-cell.controller';
+export { enUS, zhCN } from './locale';
 export type { FormatType, INumfmtItem, INumfmtItemWithCache } from './services/numfmt/type';
 export { INumfmtService } from './services/numfmt/type';
 export { RefRangeService } from './services/ref-range/ref-range.service';

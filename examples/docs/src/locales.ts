@@ -1,13 +1,12 @@
-import DocsPluginZhCN from '@univerjs/docs/locale/zh-CN';
-import BaseUiZhCN from '@univerjs/ui/locale/zh-CN';
-import DesignZH from '@univerjs/design/locale/zh-CN';
-import DocsUIPluginZhCN from '@univerjs/docs-ui/locale/zh-CN';
+import { LocaleType } from '@univerjs/core';
+import { enUS as DesignEnUS } from '@univerjs/design';
+import { enUS as DocsUIPluginEnUS } from '@univerjs/docs-ui';
+import { enUS as BaseUiEnUS } from '@univerjs/ui';
 
 export const locales = {
-    zhCN: {
-        ...DocsPluginZhCN,
-        ...DocsUIPluginZhCN,
-        ...BaseUiZhCN,
-        ...DesignZH,
+    [LocaleType.EN_US]: {
+        ...DocsUIPluginEnUS,
+        ...BaseUiEnUS,
+        ...DesignEnUS,
     },
 };

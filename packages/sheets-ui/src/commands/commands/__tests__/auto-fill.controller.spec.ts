@@ -205,7 +205,7 @@ const TEST_WORKBOOK_DATA = {
     createdTime: '',
     creator: '',
     lastModifiedBy: '',
-    locale: LocaleType.EN_US,
+    locale: LocaleType.ZH_CN,
     modifiedTime: '',
     name: '',
     sheetOrder: [],

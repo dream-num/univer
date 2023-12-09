@@ -2,7 +2,6 @@ import { LocaleService, Plugin, PluginType } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { DebuggerController } from './controllers/debugger.controller';
-import { enUS } from './locale';
 
 export interface IDebuggerPluginConfig {}
 
@@ -20,10 +19,6 @@ export class DebuggerPlugin extends Plugin {
     }
 
     initialize(): void {
-        this._localeService.load({
-            enUS,
-        });
-
         this._debuggerController = this._injector.createInstance(DebuggerController);
         this._injector.add([DebuggerController, { useValue: this._debuggerController }]);
 

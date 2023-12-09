@@ -10,7 +10,7 @@ import { ShortcutPanelController } from './controllers/shortcut-display/shortcut
 import type { IWorkbenchOptions } from './controllers/ui/ui.controller';
 import { IUIController } from './controllers/ui/ui.controller';
 import { DesktopUIController } from './controllers/ui/ui-desktop.controller';
-import { enUS } from './locale';
+import { zhCN } from './locale';
 import { DesktopBeforeCloseService, IBeforeCloseService } from './services/before-close/before-close.service';
 import { BrowserClipboardService, IClipboardInterfaceService } from './services/clipboard/clipboard-interface.service';
 import { IConfirmService } from './services/confirm/confirm.service';
@@ -56,7 +56,7 @@ export class UIPlugin extends Plugin {
         this._config = Object.assign(DEFAULT_SLIDE_PLUGIN_DATA, config);
 
         this._localeService.load({
-            enUS,
+            zhCN,
         });
     }
 

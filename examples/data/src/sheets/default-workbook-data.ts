@@ -302,7 +302,7 @@ const richTextTest: IDocumentData = {
  */
 export const DEFAULT_WORKBOOK_DATA: IWorkbookData = {
     id: 'workbook-01',
-    locale: LocaleType.EN_US,
+    locale: LocaleType.ZH_CN,
     name: 'universheet',
     sheetOrder: ['sheet-01', 'sheet-02', 'sheet-03', 'sheet-04', 'sheet-05', 'sheet-06'],
     styles: {
@@ -707,7 +707,7 @@ export const DEFAULT_WORKBOOK_DATA: IWorkbookData = {
  */
 export const DEFAULT_WORKBOOK_DATA_DOWN: IWorkbookData = {
     id: 'workbook-02',
-    locale: LocaleType.EN_US,
+    locale: LocaleType.ZH_CN,
     name: 'universheet',
     sheetOrder: [],
     styles: {

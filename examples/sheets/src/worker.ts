@@ -7,7 +7,7 @@ import { SheetsPlugin } from '@univerjs/sheets';
 
 // Univer web worker is also a univer application.
 const univer = new Univer({
-    locale: LocaleType.EN_US,
+    locale: LocaleType.ZH_CN,
 });
 
 univer.registerPlugin(SheetsPlugin);

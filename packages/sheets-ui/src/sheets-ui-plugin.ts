@@ -28,7 +28,7 @@ import { SheetRenderController } from './controllers/sheet-render.controller';
 import { SheetUIController } from './controllers/sheet-ui.controller';
 import { StatusBarController } from './controllers/status-bar.controller';
 import { ZoomController } from './controllers/zoom.controller';
-import { enUS } from './locale';
+import { zhCN } from './locale';
 import { AutoFillService, IAutoFillService } from './services/auto-fill/auto-fill.service';
 import { ISheetClipboardService, SheetClipboardService } from './services/clipboard/clipboard.service';
 import { CellEditorManagerService, ICellEditorManagerService } from './services/editor/cell-editor-manager.service';
@@ -58,7 +58,7 @@ export class SheetsUIPlugin extends Plugin {
         super(SHEET_UI_PLUGIN_NAME);
 
         this._localeService.load({
-            enUS,
+            zhCN,
         });
     }
 

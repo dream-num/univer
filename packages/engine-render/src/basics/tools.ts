@@ -385,22 +385,18 @@ export function startWithEmoji(text: string) {
 
 export function hasArabic(text: string) {
     const pattern = /[\u0600-\u06FF]|[\u0750-\u0750]|[\u0870-\u08FF]|[\uFB50-\uFDFF]|[\uFE70-\uFEFF]/gi;
-    if (!pattern.exec(text)) {
-        return false;
-    }
-    return true;
+
+    return pattern.test(text);
 }
 
 export function hasTibetan(text: string) {
     const pattern = /[\u0180-\u024F]/gi;
-    if (!pattern.exec(text)) {
-        return false;
-    }
-    return true;
+
+    return pattern.test(text);
 }
 
-export function hasSpaceAndTab(text: string) {
-    const pattern = /\s+|\t+/g;
+export function hasSpace(text: string) {
+    const pattern = /\s+/g;
 
     return pattern.test(text);
 }

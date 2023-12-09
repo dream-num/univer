@@ -1,52 +1,96 @@
-import type { IParagraphStyle, Nullable } from '@univerjs/core';
+import type { IParagraphStyle } from '@univerjs/core';
 
 import type { IDocumentSkeletonSpan } from '../../../../basics/i-document-skeleton-cached';
 import type { ISectionBreakConfig } from '../../../../basics/interfaces';
-import { EMOJI_REG, hasArabic, hasCJK, hasSpaceAndTab, hasTibetan, startWithEmoji } from '../../../../basics/tools';
+import { EMOJI_REG, hasArabic, hasSpace, hasTibetan, startWithEmoji } from '../../../../basics/tools';
 import { createSkeletonLetterSpan, createSkeletonWordSpan } from '../../common/span';
 import { getFontCreateConfig } from '../../common/tools';
 import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../view-model/document-view-model';
 
-interface ILanguageResult {
-    charIndex: number;
-    spanGroup: IDocumentSkeletonSpan[];
-}
-
-export function composeCharForLanguage(
-    char: string,
+export function composeWordForLayout(
+    word: string,
     index: number,
-    charArray: string,
     bodyModel: DocumentViewModel,
     paragraphNode: DataStreamTreeNode,
     sectionBreakConfig: ISectionBreakConfig,
     paragraphStyle: IParagraphStyle
-): Nullable<ILanguageResult> {
-    if (hasSpaceAndTab(char)) {
-        return;
+) {
+    let src = word;
+    let i = index;
+    const spanGroup: IDocumentSkeletonSpan[] = [];
+
+    while (src.length > 0) {
+        const char = src[0];
+
+        if (/\s/.test(char)) {
+            const config = getFontCreateConfig(i, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
+            const newSpan = createSkeletonLetterSpan(char, config);
+
+            spanGroup.push(newSpan);
+            i++;
+            src = src.substring(1);
+        } else if (startWithEmoji(src)) {
+            const { step, spanGroup: sGroup } = emojiHandler(
+                i,
+                src,
+                bodyModel,
+                paragraphNode,
+                sectionBreakConfig,
+                paragraphStyle
+            );
+            spanGroup.push(...sGroup);
+            i += step;
+
+            src = src.substring(step);
+        } else if (hasArabic(char)) {
+            const { step, spanGroup: sGroup } = ArabicHandler(
+                i,
+                src,
+                bodyModel,
+                paragraphNode,
+                sectionBreakConfig,
+                paragraphStyle
+            );
+            spanGroup.push(...sGroup);
+            i += step;
+
+            src = src.substring(step);
+        } else if (hasTibetan(char)) {
+            const { step, spanGroup: sGroup } = TibetanHandler(
+                i,
+                src,
+                bodyModel,
+                paragraphNode,
+                sectionBreakConfig,
+                paragraphStyle
+            );
+            spanGroup.push(...sGroup);
+            i += step;
+
+            src = src.substring(step);
+        } else {
+            const { step, spanGroup: sGroup } = otherHandler(
+                i,
+                src,
+                bodyModel,
+                paragraphNode,
+                sectionBreakConfig,
+                paragraphStyle
+            );
+            spanGroup.push(...sGroup);
+            i += step;
+
+            src = src.substring(step);
+        }
     }
 
-    const subCharArray = charArray.substring(index);
-
-    if (startWithEmoji(subCharArray)) {
-        return emojiHandler(index, subCharArray, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
-    }
-
-    if (hasArabic(char)) {
-        return ArabicHandler(char, index, charArray, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
-    }
-
-    if (hasTibetan(char)) {
-        return TibetanHandler(char, index, charArray, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
-    }
-
-    if (!hasCJK(char)) {
-        return notCJKHandler(char, index, charArray, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
-    }
+    return spanGroup;
 }
 
-function notCJKHandler(
-    char: string,
+// Handle Chinese, Japanese, Korean (CJK), English word, number characters.
+// https://en.wikipedia.org/wiki/CJK_characters
+function otherHandler(
     index: number,
     charArray: string,
     bodyModel: DocumentViewModel,
@@ -54,44 +98,30 @@ function notCJKHandler(
     sectionBreakConfig: ISectionBreakConfig,
     paragraphStyle: IParagraphStyle
 ) {
-    // Chinese, Japanese, and Korean (CJK) characters.
-    // https://en.wikipedia.org/wiki/CJK_characters
-    const config = getFontCreateConfig(index, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
-    const { pageWidth = Infinity } = config;
-    const charSke = createSkeletonLetterSpan(char, config);
-    const spanGroup = [charSke];
-    let allWidth = charSke.width;
-    let newCharIndex = index;
+    const spanGroup = [];
+    let step = 0;
 
-    for (let i = index + 1; i < charArray.length; i++) {
+    for (let i = 0; i < charArray.length; i++) {
         const newChar = charArray[i];
 
-        if (!hasCJK(newChar) && !hasSpaceAndTab(newChar)) {
-            const newConfig = getFontCreateConfig(i, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
-            const newSpan = createSkeletonLetterSpan(newChar, newConfig);
-            const newCharWidth = newSpan.width;
-
-            if (allWidth + newCharWidth > pageWidth) {
-                // 如果一连串的非cjk文字超过了一行宽度，直接绘制，不用自动换行了
-                break;
-            }
-
-            spanGroup.push(newSpan);
-            allWidth += newCharWidth;
-            newCharIndex = i;
-        } else {
+        if (hasSpace(newChar)) {
             break;
         }
+
+        const config = getFontCreateConfig(index + i, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
+        const span = createSkeletonLetterSpan(newChar, config);
+
+        spanGroup.push(span);
+        step++;
     }
 
     return {
-        charIndex: newCharIndex,
+        step,
         spanGroup,
     };
 }
 
 function ArabicHandler(
-    char: string,
     index: number,
     charArray: string,
     bodyModel: DocumentViewModel,
@@ -101,19 +131,21 @@ function ArabicHandler(
 ) {
     // 组合阿拉伯语的词组
     const config = getFontCreateConfig(index, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
-    const span = [char];
-    let newCharIndex = index;
-    for (let i = index + 1; i < charArray.length; i++) {
+    const span = [];
+    let step = 0;
+
+    for (let i = 0; i < charArray.length; i++) {
         const newChar = charArray[i];
         if (hasArabic(newChar)) {
             span.unshift(newChar);
-            newCharIndex = i;
+            step++;
         } else {
             break;
         }
     }
+
     return {
-        charIndex: newCharIndex,
+        step,
         spanGroup: [createSkeletonLetterSpan(span.join(''), config)],
     };
 }
@@ -130,13 +162,12 @@ function emojiHandler(
     const match = charArray.match(EMOJI_REG); // NOSONAR
 
     return {
-        charIndex: match![0].length + index - 1,
+        step: match![0].length,
         spanGroup: [createSkeletonLetterSpan(match![0], config)],
     };
 }
 
 function TibetanHandler(
-    char: string,
     index: number,
     charArray: string,
     bodyModel: DocumentViewModel,
@@ -146,19 +177,20 @@ function TibetanHandler(
 ) {
     // 组合藏语词组
     const config = getFontCreateConfig(index, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
-    const span = [char];
-    let newCharIndex = index;
-    for (let i = index + 1; i < charArray.length; i++) {
+    const span = [];
+    let step = 0;
+    for (let i = 0; i < charArray.length; i++) {
         const newChar = charArray[i];
         if (hasTibetan(newChar)) {
             span.push(newChar);
-            newCharIndex = i;
+            step++;
         } else {
             break;
         }
     }
+
     return {
-        charIndex: newCharIndex,
+        step,
         spanGroup: [createSkeletonWordSpan(span.join(''), config)],
     };
 }

@@ -43,7 +43,11 @@
         "build": "tsc && vite build"
     },
     "dependencies": {
-        "cjk-regex": "^3.1.0"
+        "@univerjs/core": "workspace:*",
+        "@wendellhu/redi": "^0.12.11",
+        "cjk-regex": "^3.1.0",
+        "linebreak": "^1.1.0",
+        "rxjs": "^7.8.1"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",

@@ -6,6 +6,7 @@ import {
     HorizontalAlign,
     PositionedObjectLayoutType,
 } from '@univerjs/core';
+import LineBreaker from 'linebreak';
 
 import type {
     IDocumentSkeletonBullet,
@@ -32,10 +33,9 @@ import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node'
 import type { DocumentViewModel } from '../../view-model/document-view-model';
 import { dealWidthBullet } from './bullet';
 import { dealWidthInlineDrawing } from './inline-drawing';
-import { composeCharForLanguage } from './language-ruler';
+import { composeWordForLayout } from './language-ruler';
 import { calculateParagraphLayout } from './layout-ruler';
 
-// eslint-disable-next-line max-lines-per-function
 export function dealWidthParagraph(
     bodyModel: DocumentViewModel,
     paragraphNode: DataStreamTreeNode,
@@ -136,19 +136,31 @@ export function dealWidthParagraph(
 
     clearFontCreateConfigCache();
 
-    for (let i = 0, len = content.length; i < len; i++) {
-        const charIndex = i + startIndex;
-        const char = content[i];
+    const breaker = new LineBreaker(content);
+    let last = 0;
+    let bk;
 
-        const fontCreateConfig = getFontCreateConfig(i, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle); // Get the style of the text.
+    while ((bk = breaker.nextBreak())) {
+        // get the string between the last break and this one
+        const word = content.slice(last, bk.position);
 
-        if (char === DataStreamTreeTokenType.TAB) {
+        const charIndex = last + startIndex;
+
+        const fontCreateConfig = getFontCreateConfig(
+            last,
+            bodyModel,
+            paragraphNode,
+            sectionBreakConfig,
+            paragraphStyle
+        ); // Get the style of the text.
+
+        if (word === DataStreamTreeTokenType.TAB) {
             const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
             const tabSpan = createSkeletonTabSpan(fontCreateConfig, charSpaceApply); // measureText收敛到create中执行
             allPages = calculateParagraphLayout([tabSpan], allPages, sectionBreakConfig, paragraphConfig, true);
 
             continue;
-        } else if (char === DataStreamTreeTokenType.CUSTOM_BLOCK) {
+        } else if (word === DataStreamTreeTokenType.CUSTOM_BLOCK) {
             let customBlock = customBlockCache.get(charIndex);
             if (customBlock == null) {
                 customBlock = bodyModel.getCustomBlock(charIndex);
@@ -166,7 +178,7 @@ export function dealWidthParagraph(
                     );
                 }
             }
-        } else if (char === DataStreamTreeTokenType.PAGE_BREAK) {
+        } else if (word === DataStreamTreeTokenType.PAGE_BREAK) {
             allPages.push(
                 createSkeletonPage(
                     sectionBreakConfig,
@@ -176,7 +188,7 @@ export function dealWidthParagraph(
                 )
             );
             paragraphAffectSkeDrawings.clear();
-        } else if (char === DataStreamTreeTokenType.COLUMN_BREAK) {
+        } else if (word === DataStreamTreeTokenType.COLUMN_BREAK) {
             // 换列标识，还在同一个节内
             const lastPage = allPages[allPages.length - 1];
             const columnInfo = getLastNotFullColumnInfo(lastPage);
@@ -195,25 +207,22 @@ export function dealWidthParagraph(
             }
         }
 
-        const paragraphStart = i === 0;
-        const languageHandlerResult = composeCharForLanguage(
-            char,
-            i,
-            content,
-            bodyModel,
-            paragraphNode,
-            sectionBreakConfig,
-            paragraphStyle
-        ); // Handling special languages such as Tibetan, Arabic
+        const paragraphStart = last === 0;
+
         let newSpanGroup = [];
 
-        if (languageHandlerResult) {
-            const { charIndex: newCharIndex, spanGroup } = languageHandlerResult;
-            i = newCharIndex;
-            newSpanGroup = spanGroup;
+        if (word.length > 1) {
+            newSpanGroup = composeWordForLayout(
+                word,
+                last,
+                bodyModel,
+                paragraphNode,
+                sectionBreakConfig,
+                paragraphStyle
+            ); // Handling special languages such as Tibetan, Arabic, emoji, English word and Chinese word with punctuations.
         } else {
-            const span = createSkeletonWordSpan(char, fontCreateConfig); // measureText 收敛到 create 中执行
-            newSpanGroup.push(span);
+            const span = createSkeletonWordSpan(word, fontCreateConfig); // measureText 收敛到 create 中执行
+            newSpanGroup = [span];
         }
 
         allPages = calculateParagraphLayout(
@@ -223,6 +232,8 @@ export function dealWidthParagraph(
             paragraphConfig,
             paragraphStart
         );
+
+        last = bk.position;
     }
 
     lineIterator(allPages, (line: IDocumentSkeletonLine) => {

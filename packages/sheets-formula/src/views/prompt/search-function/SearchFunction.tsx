@@ -49,6 +49,7 @@ export function SearchFunction() {
             setOffset([left, top + height]);
             setVisible(visible);
             setActive(0); // Reset active state
+            updatedActive = 0;
         });
 
         const subscribeNavigate = promptService.navigate$.subscribe((params: INavigateParam) => {

@@ -1,5 +1,6 @@
-@width: 340px;
-@max-height: 300px;
+@width: 250px;
+@max-height: 350px;
+@icon-size: 24px;
 
 .formula-help-function {
     user-select: none;
@@ -23,7 +24,7 @@
         justify-content: space-between;
 
         box-sizing: border-box;
-        padding: var(--padding-base) var(--padding-xl);
+        padding: var(--padding-base) var(--padding-lg);
 
         font-size: var(--font-size-xs);
         font-weight: 500;
@@ -42,14 +43,16 @@
             align-items: center;
             justify-content: center;
 
-            box-sizing: border-box;
-            width: fit-content;
-            height: fit-content;
-            margin-left: var(--margin-sm);
-            padding: var(--padding-base) var(--padding-xs);
+            width: @icon-size;
+            height: @icon-size;
+            margin-left: var(--margin-xs);
+            padding: 0;
 
+            font-size: var(--font-size-lg);
             color: rgb(var(--text-color-secondary));
 
+            background-color: transparent;
+            border: none;
             border-radius: var(--border-radius-base);
             outline: none;
 
@@ -66,10 +69,10 @@
         overflow-y: auto;
         box-sizing: border-box;
         max-height: @max-height;
-        padding: 0 var(--padding-xl) var(--padding-xl);
+        padding: 0 var(--padding-lg) var(--padding-base) var(--padding-lg);
 
         &-inner {
-            margin-top: var(--padding-xl);
+            margin-top: var(--margin-sm);
         }
 
         &-params {

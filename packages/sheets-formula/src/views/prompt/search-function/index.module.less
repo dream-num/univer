@@ -1,10 +1,15 @@
-@width: 340px;
+@width: 250px;
+@max-height: 400px;
+    
 
 .formula-search-function {
+    overflow-y: auto;
+
     box-sizing: border-box;
     width: @width;
+    max-height: @max-height;
     margin: 0;
-    padding: var(--padding-base);
+    padding: var(--padding-sm);
 
     line-height: 20px;
     list-style: none;

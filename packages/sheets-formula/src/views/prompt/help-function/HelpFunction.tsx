@@ -108,7 +108,10 @@ export function HelpFunction() {
 
                             <div
                                 className={styles.formulaHelpFunctionContent}
-                                style={{ height: contentVisible ? 'unset' : 0 }}
+                                style={{
+                                    height: contentVisible ? 'unset' : 0,
+                                    padding: contentVisible ? 'revert-layer' : 0,
+                                }}
                             >
                                 <div className={styles.formulaHelpFunctionContentInner}>
                                     <Params

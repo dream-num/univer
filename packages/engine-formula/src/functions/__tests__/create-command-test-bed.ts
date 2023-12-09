@@ -1,8 +1,18 @@
 import type { IWorkbookData } from '@univerjs/core';
-import { ILogService, IUniverInstanceService, LocaleType, LogLevel, Plugin, PluginType, Univer } from '@univerjs/core';
+import {
+    ILogService,
+    IUniverInstanceService,
+    LocaleType,
+    LogLevel,
+    ObjectMatrix,
+    Plugin,
+    PluginType,
+    Univer,
+} from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
+import type { ISheetData } from '../../basics/common';
 import { LexerTreeBuilder } from '../../engine/analysis/lexer';
 import { AstTreeBuilder } from '../../engine/analysis/parser';
 import { AstRootNodeFactory } from '../../engine/ast-node/ast-root-node';
@@ -34,21 +44,6 @@ const TEST_WORKBOOK_DATA: IWorkbookData = {
                 0: {
                     0: {
                         v: 1,
-                    },
-                },
-                1: {
-                    0: {
-                        v: 4,
-                    },
-                },
-                2: {
-                    0: {
-                        v: 44,
-                    },
-                },
-                3: {
-                    0: {
-                        v: 444,
                     },
                 },
             },
@@ -131,9 +126,25 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
     const logService = get(ILogService);
     logService.setLogLevel(LogLevel.SILENT); // change this to `true` to debug tests via logs
 
+    const sheetData: ISheetData = {};
+    const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+    const unitId = workbook.getUnitId();
+    const sheetId = workbook.getActiveSheet().getSheetId();
+    workbook.getSheets().forEach((sheet) => {
+        const sheetConfig = sheet.getConfig();
+        sheetData[sheet.getSheetId()] = {
+            cellData: new ObjectMatrix(sheetConfig.cellData),
+            rowCount: sheetConfig.rowCount,
+            columnCount: sheetConfig.columnCount,
+        };
+    });
+
     return {
         univer,
         get,
         sheet,
+        unitId,
+        sheetId,
+        sheetData,
     };
 }

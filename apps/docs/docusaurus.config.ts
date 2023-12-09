@@ -40,27 +40,27 @@ const config: Config = {
     },
 
     plugins: [
-        // ...packages.map((name) => [
-        //     'docusaurus-plugin-typedoc',
-        //     {
-        //         id: `api/${name}`,
-        //         entryPoints: [`../../packages/${name}/src/index.ts`],
-        //         tsconfig: `../../packages/${name}/tsconfig.json`,
-        //         typeDeclarationFormat: 'table',
-        //         expandObjects: true,
-        //         exclude: ['node_modules/**/*', '**/*+(.spec|.e2e|.test).ts'],
-        //         excludePrivate: true,
-        //         excludeExternals: true,
-        //         excludeInternal: true,
-        //         cleanOutputDir: true,
-        //         skipErrorChecking: true,
-        //         out: `docs/api/${name}`,
-        //         entryFileName: "index.md",
-        //         sidebar: {
-        //             pretty: false
-        //         }
-        //     },
-        // ]),
+        ...packages.map((name) => [
+            'docusaurus-plugin-typedoc',
+            {
+                id: `api/${name}`,
+                entryPoints: [`../../packages/${name}/src/index.ts`],
+                tsconfig: `../../packages/${name}/tsconfig.json`,
+                typeDeclarationFormat: 'table',
+                expandObjects: true,
+                exclude: ['node_modules/**/*', '**/*+(.spec|.e2e|.test).ts'],
+                excludePrivate: true,
+                excludeExternals: true,
+                excludeInternal: true,
+                cleanOutputDir: true,
+                skipErrorChecking: true,
+                out: `docs/api/${name}`,
+                entryFileName: "index.md",
+                sidebar: {
+                    pretty: false
+                }
+            },
+        ]),
     ],
 
     presets: [
@@ -103,14 +103,14 @@ const config: Config = {
                     position: 'left',
                     label: '指南',
                 },
-                // {
-                //     to: 'docs/api/core',
-                //     activeBasePath: 'docs',
-                //     // type: 'docSidebar',
-                //     // sidebarId: 'apiSidebar',
-                //     position: 'left',
-                //     label: 'API',
-                // },
+                {
+                    to: 'docs/api/core',
+                    activeBasePath: 'docs',
+                    // type: 'docSidebar',
+                    // sidebarId: 'apiSidebar',
+                    position: 'left',
+                    label: 'API',
+                },
                 {
                     to: 'playground',
                     position: 'left',

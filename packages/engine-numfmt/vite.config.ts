@@ -2,6 +2,7 @@ import { resolve } from 'path';
 import { defineConfig } from 'vitest/config';
 import dts from 'vite-plugin-dts';
 import { name } from './package.json';
+import { viteExternalsPlugin } from 'vite-plugin-externals';
 
 const libName = name
     .replace('@univerjs/', 'univer-')
@@ -13,6 +14,9 @@ export default defineConfig({
     plugins: [
         dts({
             outDir: 'lib/types',
+        }),
+        viteExternalsPlugin({
+            '@univerjs/core': 'UniverCore',
         }),
     ],
     build: {

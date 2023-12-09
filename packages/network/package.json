@@ -4,11 +4,16 @@
     "main": "./src/index.ts",
     "module": "./src/index.ts",
     "dependencies": {
-        "@univerjs/core": "workspace:*",
-        "@wendellhu/redi": "^0.12.11",
-        "rxjs": "^7.8.1"
+        "@univerjs/core": "workspace:*"
     },
     "devDependencies": {
-        "typescript": "^5.3.3"
+        "@wendellhu/redi": "^0.12.11",
+        "rxjs": "^7.8.1",
+        "typescript": "^5.3.3",
+        "vite-plugin-externals": "^0.6.2"
+    },
+    "peerDependencies": {
+        "@wendellhu/redi": ">=0.12.11",
+        "rxjs": ">=7.0.0"
     }
 }

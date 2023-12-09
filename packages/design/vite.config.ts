@@ -3,6 +3,7 @@ import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import dts from 'vite-plugin-dts';
 import { name } from './package.json';
+import { viteExternalsPlugin } from 'vite-plugin-externals';
 
 const libName = name
     .replace('@univerjs/', 'univer-')
@@ -15,6 +16,10 @@ export default defineConfig({
         react(),
         dts({
             outDir: 'lib/types',
+        }),
+        viteExternalsPlugin({
+            react: 'React',
+            'react-dom': 'ReactDOM',
         }),
     ],
     css: {

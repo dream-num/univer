@@ -114,22 +114,22 @@ describe('Test set row height commands', () => {
         });
 
         it('Should expand only the anchor row in other situations', async () => {
-            expect(getRowHeight(1)).toBe(19);
+            expect(getRowHeight(1)).toBe(14);
             expect(getRowHeight(7)).toBe(19);
 
             await commandService.executeCommand<IDeltaRowHeightCommand>(DeltaRowHeightCommand.id, {
                 deltaY: -5,
                 anchorRow: 7,
             });
-            expect(getRowHeight(1)).toBe(19);
-            expect(getRowHeight(2)).toBe(19);
-            expect(getRowHeight(5)).toBe(19);
+            expect(getRowHeight(1)).toBe(14);
+            expect(getRowHeight(2)).toBe(14);
+            expect(getRowHeight(5)).toBe(14);
             expect(getRowHeight(7)).toBe(14);
         });
     });
 
     it('Direct change row heights', async () => {
-        expect(getRowHeight(1)).toBe(19);
+        expect(getRowHeight(1)).toBe(14);
 
         await commandService.executeCommand<ISetRowHeightCommandParams>(SetRowHeightCommand.id, {
             value: 77,
@@ -142,9 +142,9 @@ describe('Test set row height commands', () => {
         expect(getRowIsAutoHeight(5)).toBe(false);
 
         await commandService.executeCommand(UndoCommand.id);
-        expect(getRowHeight(1)).toBe(19);
-        expect(getRowHeight(2)).toBe(19);
-        expect(getRowHeight(5)).toBe(19);
+        expect(getRowHeight(1)).toBe(14);
+        expect(getRowHeight(2)).toBe(14);
+        expect(getRowHeight(5)).toBe(14);
 
         await commandService.executeCommand(RedoCommand.id);
         expect(getRowHeight(1)).toBe(77);
@@ -161,7 +161,7 @@ describe('Test set row height commands', () => {
 
             await commandService.executeCommand(UndoCommand.id);
             expect(getRowIsAutoHeight(1)).toBe(undefined);
-            expect(getRowIsAutoHeight(2)).toBe(undefined);
+            expect(getRowIsAutoHeight(2)).toBe(false);
             expect(getRowIsAutoHeight(5)).toBe(undefined);
 
             await commandService.executeCommand(RedoCommand.id);

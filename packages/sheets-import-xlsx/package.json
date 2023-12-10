@@ -48,7 +48,7 @@
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@vitest/coverage-istanbul": "^1.0.2",
-        "@wendellhu/redi": "^0.12.11",
+        "@wendellhu/redi": "^0.12.12",
         "less": "^4.2.0",
         "react": "^18.2.0",
         "typescript": "^5.3.3",
@@ -63,7 +63,7 @@
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": ">=0.12.11",
+        "@wendellhu/redi": ">=0.12.12",
         "react": ">=16.9.0"
     }
 }

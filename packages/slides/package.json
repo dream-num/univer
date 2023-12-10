@@ -32,7 +32,7 @@
         "@univerjs/ui": "workspace:*",
         "@vitejs/plugin-react": "^4.2.1",
         "@vitest/coverage-istanbul": "^1.0.2",
-        "@wendellhu/redi": "^0.12.11",
+        "@wendellhu/redi": "^0.12.12",
         "less": "^4.2.0",
         "typescript": "^5.3.3",
         "vite": "^5.0.7",
@@ -44,6 +44,6 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": ">=0.12.11"
+        "@wendellhu/redi": ">=0.12.12"
     }
 }

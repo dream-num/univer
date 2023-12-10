@@ -13,7 +13,7 @@ import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import type { ISheetData } from '../../basics/common';
-import { LexerTreeBuilder } from '../../engine/analysis/lexer';
+import { Lexer } from '../../engine/analysis/lexer';
 import { AstTreeBuilder } from '../../engine/analysis/parser';
 import { AstRootNodeFactory } from '../../engine/ast-node/ast-root-node';
 import { FunctionNodeFactory } from '../../engine/ast-node/function-node';
@@ -79,7 +79,7 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
 
         override onStarting(injector: Injector): void {
             injector.add([CalculateFormulaService]);
-            injector.add([LexerTreeBuilder]);
+            injector.add([Lexer]);
 
             injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
             injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);

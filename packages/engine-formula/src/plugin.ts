@@ -8,7 +8,8 @@ import { SetDefinedNameController } from './controller/set-defined-name.controll
 import { SetFeatureCalculationController } from './controller/set-feature-calculation.controller';
 import { SetOtherFormulaController } from './controller/set-other-formula.controller';
 import { SetSuperTableController } from './controller/set-super-table.controller';
-import { LexerTreeBuilder } from './engine/analysis/lexer';
+import { Lexer } from './engine/analysis/lexer';
+import { LexerTreeBuilder } from './engine/analysis/lexer-tree-builder';
 import { AstTreeBuilder } from './engine/analysis/parser';
 import { AstRootNodeFactory } from './engine/ast-node/ast-root-node';
 import { FunctionNodeFactory } from './engine/ast-node/function-node';
@@ -57,12 +58,15 @@ export class FormulaEnginePlugin extends Plugin {
         // worker and main thread
         const dependencies: Dependency[] = [
             // Services
-            [LexerTreeBuilder],
             [IFunctionService, { useClass: FunctionService }],
             [IFeatureCalculationManagerService, { useClass: FeatureCalculationManagerService }],
+            [IDefinedNamesService, { useClass: DefinedNamesService }],
 
             // Models
             [FormulaDataModel],
+
+            // Engine
+            [LexerTreeBuilder],
 
             //Controllers
             [FormulaController],
@@ -76,7 +80,6 @@ export class FormulaEnginePlugin extends Plugin {
                 [CalculateFormulaService],
                 [IOtherFormulaManagerService, { useClass: OtherFormulaManagerService }],
                 [ISuperTableService, { useClass: SuperTableService }],
-                [IDefinedNamesService, { useClass: DefinedNamesService }],
                 [IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }],
                 [IFormulaRuntimeService, { useClass: FormulaRuntimeService }],
 
@@ -90,6 +93,7 @@ export class FormulaEnginePlugin extends Plugin {
                 [FormulaDependencyGenerator],
                 [Interpreter],
                 [AstTreeBuilder],
+                [Lexer],
 
                 // AstNode factory
                 [AstRootNodeFactory],

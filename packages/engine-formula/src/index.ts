@@ -47,8 +47,8 @@ export {
     SetSuperTableMutation,
     SetSuperTableOptionMutation,
 } from './commands/mutations/set-super-table.mutation';
-export { LexerTreeBuilder } from './engine/analysis/lexer';
 export { LexerNode } from './engine/analysis/lexer-node';
+export { LexerTreeBuilder } from './engine/analysis/lexer-tree-builder';
 export { ErrorValueObject } from './engine/other-object/error-value-object';
 export { BaseReferenceObject, type FunctionVariantType } from './engine/reference-object/base-reference-object';
 export { RangeReferenceObject } from './engine/reference-object/range-reference-object';

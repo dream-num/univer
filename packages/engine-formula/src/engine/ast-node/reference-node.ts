@@ -12,7 +12,7 @@ import { IFormulaCurrentConfigService } from '../../services/current-data.servic
 import { IDefinedNamesService } from '../../services/defined-names.service';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
 import { ISuperTableService } from '../../services/super-table.service';
-import { LexerTreeBuilder } from '../analysis/lexer';
+import { Lexer } from '../analysis/lexer';
 import { LexerNode } from '../analysis/lexer-node';
 import type { BaseReferenceObject } from '../reference-object/base-reference-object';
 import { CellReferenceObject } from '../reference-object/cell-reference-object';
@@ -69,7 +69,7 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
         @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,
         @ISuperTableService private readonly _superTableService: ISuperTableService,
         @IFormulaRuntimeService private readonly _formulaRuntimeService: IFormulaRuntimeService,
-        @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
+        @Inject(Lexer) private readonly _lexer: Lexer,
         @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
@@ -115,7 +115,7 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
 
         if (!isLexerNode && nameMap?.has(tokenTrim)) {
             const nameString = nameMap.get(tokenTrim)!;
-            const lexerNode = this._lexerTreeBuilder.treeBuilder(nameString);
+            const lexerNode = this._lexer.treeBuilder(nameString);
             /** todo */
             return new ErrorNode(ErrorType.VALUE);
         }

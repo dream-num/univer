@@ -12,7 +12,7 @@ import type {
     IUnitData,
     IUnitSheetNameMap,
 } from '../basics/common';
-import { LexerTreeBuilder } from '../engine/analysis/lexer';
+import { LexerTreeBuilder } from '../engine/analysis/lexer-tree-builder';
 
 export interface IFormulaIdMap {
     f: string;

@@ -16,6 +16,7 @@ import { ReferenceNodeFactory } from '../../ast-node/reference-node';
 import { SuffixNodeFactory } from '../../ast-node/suffix-node';
 import { UnionNodeFactory } from '../../ast-node/union-node';
 import { ValueNodeFactory } from '../../ast-node/value-node';
+import { LexerTreeBuilder } from '../lexer-tree-builder';
 import { AstTreeBuilder } from '../parser';
 
 const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
@@ -65,6 +66,7 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
             injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
             injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
             injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
+            injector.add([LexerTreeBuilder]);
             injector.add([AstRootNodeFactory]);
             injector.add([FunctionNodeFactory]);
             injector.add([LambdaNodeFactory]);

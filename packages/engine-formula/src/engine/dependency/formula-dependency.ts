@@ -10,7 +10,7 @@ import { IFormulaCurrentConfigService } from '../../services/current-data.servic
 import { IFeatureCalculationManagerService } from '../../services/feature-calculation-manager.service';
 import { IOtherFormulaManagerService } from '../../services/other-formula-manager.service';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
-import { LexerTreeBuilder } from '../analysis/lexer';
+import { Lexer } from '../analysis/lexer';
 import type { LexerNode } from '../analysis/lexer-node';
 import { AstTreeBuilder } from '../analysis/parser';
 import type { AstRootNode, FunctionNode, PrefixNode, SuffixNode } from '../ast-node';
@@ -40,7 +40,7 @@ export class FormulaDependencyGenerator extends Disposable {
         private readonly _featureCalculationManagerService: IFeatureCalculationManagerService,
         @Inject(Interpreter) private readonly _interpreter: Interpreter,
         @Inject(AstTreeBuilder) private readonly _astTreeBuilder: AstTreeBuilder,
-        @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder
+        @Inject(Lexer) private readonly _lexer: Lexer
     ) {
         super();
     }
@@ -262,7 +262,7 @@ export class FormulaDependencyGenerator extends Disposable {
             return astNode;
         }
 
-        const lexerNode = this._lexerTreeBuilder.treeBuilder(formulaString);
+        const lexerNode = this._lexer.treeBuilder(formulaString);
 
         if ((lexerNode as ErrorType) in ErrorType) {
             return ErrorNode.create(lexerNode as ErrorType);

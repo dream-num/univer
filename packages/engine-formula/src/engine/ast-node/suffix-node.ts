@@ -7,7 +7,7 @@ import type { BaseFunction } from '../../functions/base-function';
 import { FUNCTION_NAMES_META } from '../../functions/meta/function-names';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { IFunctionService } from '../../services/function.service';
-import { LexerTreeBuilder } from '../analysis/lexer';
+import { Lexer } from '../analysis/lexer';
 import { LexerNode } from '../analysis/lexer-node';
 import { ErrorValueObject } from '../other-object/error-value-object';
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
@@ -63,7 +63,7 @@ export class SuffixNode extends BaseAstNode {
 
         const currentConfigService = this._accessor.get(IFormulaCurrentConfigService);
 
-        const lexerTreeBuilder = this._accessor.get(LexerTreeBuilder);
+        const lexer = this._accessor.get(Lexer);
 
         const cellValue = value as CellReferenceObject;
         const range = cellValue.getRangeData();
@@ -77,7 +77,7 @@ export class SuffixNode extends BaseAstNode {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const lexerNode = lexerTreeBuilder.treeBuilder(formulaString);
+        const lexerNode = lexer.treeBuilder(formulaString);
 
         return ErrorValueObject.create(ErrorType.VALUE);
         /** todo */

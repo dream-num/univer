@@ -3,7 +3,7 @@ import { ILogService, IUniverInstanceService, LocaleType, LogLevel, Plugin, Plug
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { LexerTreeBuilder } from '../../engine/analysis/lexer';
+import { LexerTreeBuilder } from '../../engine/analysis/lexer-tree-builder';
 import { CalculateFormulaService } from '../../services/calculate-formula.service';
 import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { DefinedNamesService, IDefinedNamesService } from '../../services/defined-names.service';

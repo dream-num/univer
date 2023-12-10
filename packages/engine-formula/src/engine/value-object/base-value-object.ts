@@ -106,6 +106,21 @@ export class BaseValueObject extends ObjectClassType {
         return ErrorValueObject.create(ErrorType.VALUE);
     }
 
+    pow(valueObject: BaseValueObject): CalculateValueType {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    sqrt(valueObject: BaseValueObject): CalculateValueType {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    mod(valueObject: BaseValueObject): CalculateValueType {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
     compare(valueObject: BaseValueObject, operator: compareToken): CalculateValueType {
         /** abstract */
         return ErrorValueObject.create(ErrorType.VALUE);

@@ -43,6 +43,8 @@
         "build": "tsc && vite build"
     },
     "devDependencies": {
+        "@types/big.js": "^6.2.2",
+        "big.js": "^6.2.1",
         "@univerjs/core": "workspace:*",
         "@vitest/coverage-istanbul": "^1.0.2",
         "@wendellhu/redi": "^0.12.12",

@@ -1,12 +1,18 @@
-import type { ICommandInfo, IExecutionOptions, IMutation, Nullable } from '@univerjs/core';
+import type { IExecutionOptions, IMutation, IUnitRange, Nullable } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
 
-import type { IRuntimeOtherUnitDataType, IRuntimeUnitDataType } from '../../basics/common';
+import type {
+    IDirtyUnitFeatureMap,
+    IDirtyUnitSheetNameMap,
+    IRuntimeOtherUnitDataType,
+    IRuntimeUnitDataType,
+} from '../../basics/common';
 import type { FormulaExecutedStateType, IExecutionInProgressParams } from '../../services/runtime.service';
 
 export interface ISetFormulaCalculationStartMutation {
-    commands: ICommandInfo[];
+    dirtyRanges: IUnitRange[];
+    dirtyNameMap: IDirtyUnitSheetNameMap;
+    dirtyUnitFeatureMap: IDirtyUnitFeatureMap;
     options: Nullable<IExecutionOptions>;
     forceCalculation?: boolean;
 }
@@ -17,7 +23,7 @@ export interface ISetFormulaCalculationStartMutation {
 export const SetFormulaCalculationStartMutation: IMutation<ISetFormulaCalculationStartMutation> = {
     id: 'formula.mutation.set-formula-calculation-start',
     type: CommandType.MUTATION,
-    handler: (accessor: IAccessor, params: ISetFormulaCalculationStartMutation) => true,
+    handler: () => true,
 };
 
 export interface ISetFormulaCalculationStopMutation {}
@@ -25,7 +31,7 @@ export interface ISetFormulaCalculationStopMutation {}
 export const SetFormulaCalculationStopMutation: IMutation<ISetFormulaCalculationStopMutation> = {
     id: 'formula.mutation.set-formula-calculation-stop',
     type: CommandType.MUTATION,
-    handler: (accessor: IAccessor, params: ISetFormulaCalculationStopMutation) => true,
+    handler: () => true,
 };
 
 export interface ISetFormulaCalculationNotificationMutation {
@@ -36,7 +42,7 @@ export interface ISetFormulaCalculationNotificationMutation {
 export const SetFormulaCalculationNotificationMutation: IMutation<ISetFormulaCalculationNotificationMutation> = {
     id: 'formula.mutation.set-formula-calculation-notification',
     type: CommandType.MUTATION,
-    handler: (accessor: IAccessor, params: ISetFormulaCalculationNotificationMutation) => true,
+    handler: () => true,
 };
 
 export interface ISetFormulaCalculationResultMutation {
@@ -47,5 +53,5 @@ export interface ISetFormulaCalculationResultMutation {
 export const SetFormulaCalculationResultMutation: IMutation<ISetFormulaCalculationResultMutation> = {
     id: 'formula.mutation.set-formula-calculation-result',
     type: CommandType.MUTATION,
-    handler: (accessor: IAccessor, params: ISetFormulaCalculationResultMutation) => true,
+    handler: () => true,
 };

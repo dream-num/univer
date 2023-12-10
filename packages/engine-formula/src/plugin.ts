@@ -4,7 +4,12 @@ import { Inject, Injector } from '@wendellhu/redi';
 
 import { CalculateController } from './controller/calculate.controller';
 import { FormulaController } from './controller/formula.controller';
-import { LexerTreeBuilder } from './engine/analysis/lexer';
+import { SetDefinedNameController } from './controller/set-defined-name.controller';
+import { SetFeatureCalculationController } from './controller/set-feature-calculation.controller';
+import { SetOtherFormulaController } from './controller/set-other-formula.controller';
+import { SetSuperTableController } from './controller/set-super-table.controller';
+import { Lexer } from './engine/analysis/lexer';
+import { LexerTreeBuilder } from './engine/analysis/lexer-tree-builder';
 import { AstTreeBuilder } from './engine/analysis/parser';
 import { AstRootNodeFactory } from './engine/ast-node/ast-root-node';
 import { FunctionNodeFactory } from './engine/ast-node/function-node';
@@ -19,25 +24,27 @@ import { ValueNodeFactory } from './engine/ast-node/value-node';
 import { FormulaDependencyGenerator } from './engine/dependency/formula-dependency';
 import { Interpreter } from './engine/interpreter/interpreter';
 import { FormulaDataModel } from './models/formula-data.model';
-import { ActiveDirtyManagerService, IActiveDirtyManagerService } from './services/active-dirty-manager.service';
 import { CalculateFormulaService } from './services/calculate-formula.service';
 import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from './services/current-data.service';
 import { DefinedNamesService, IDefinedNamesService } from './services/defined-names.service';
+import {
+    FeatureCalculationManagerService,
+    IFeatureCalculationManagerService,
+} from './services/feature-calculation-manager.service';
 import { FunctionService, IFunctionService } from './services/function.service';
 import { IOtherFormulaManagerService, OtherFormulaManagerService } from './services/other-formula-manager.service';
-import { IPassiveDirtyManagerService, PassiveDirtyManagerService } from './services/passive-dirty-manager.service';
 import { FormulaRuntimeService, IFormulaRuntimeService } from './services/runtime.service';
 import { ISuperTableService, SuperTableService } from './services/super-table.service';
 
 const PLUGIN_NAME = 'base-formula-engine';
 
-interface IBaseFormulaEnginePlugin {
+interface IFormulaEnginePlugin {
     notExecuteFormula?: boolean;
 }
 
-export class BaseFormulaEnginePlugin extends Plugin {
+export class FormulaEnginePlugin extends Plugin {
     constructor(
-        private _config: IBaseFormulaEnginePlugin,
+        private _config: IFormulaEnginePlugin,
         @Inject(Injector) protected override _injector: Injector
     ) {
         super(PLUGIN_NAME);
@@ -48,18 +55,22 @@ export class BaseFormulaEnginePlugin extends Plugin {
     }
 
     private _initialize() {
-        // this._formulaDataModel = this._injector.createInstance(FormulaDataModel);
-
+        // worker and main thread
         const dependencies: Dependency[] = [
             // Services
-            [LexerTreeBuilder],
             [IFunctionService, { useClass: FunctionService }],
-            [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
+            [IFeatureCalculationManagerService, { useClass: FeatureCalculationManagerService }],
+            [IDefinedNamesService, { useClass: DefinedNamesService }],
+
             // Models
             [FormulaDataModel],
 
+            // Engine
+            [LexerTreeBuilder],
+
             //Controllers
             [FormulaController],
+            [SetFeatureCalculationController],
         ];
 
         if (!this._config?.notExecuteFormula) {
@@ -67,18 +78,22 @@ export class BaseFormulaEnginePlugin extends Plugin {
             dependencies.push(
                 // Services
                 [CalculateFormulaService],
-                [CalculateController],
-                [IPassiveDirtyManagerService, { useClass: PassiveDirtyManagerService }],
                 [IOtherFormulaManagerService, { useClass: OtherFormulaManagerService }],
                 [ISuperTableService, { useClass: SuperTableService }],
-                [IDefinedNamesService, { useClass: DefinedNamesService }],
                 [IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }],
                 [IFormulaRuntimeService, { useClass: FormulaRuntimeService }],
+
+                //Controller
+                [CalculateController],
+                [SetDefinedNameController],
+                [SetOtherFormulaController],
+                [SetSuperTableController],
 
                 // Calculation engine
                 [FormulaDependencyGenerator],
                 [Interpreter],
                 [AstTreeBuilder],
+                [Lexer],
 
                 // AstNode factory
                 [AstRootNodeFactory],

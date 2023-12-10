@@ -18,7 +18,7 @@ import type {
     IUnitExcludedCell,
 } from '../basics/common';
 import { ErrorType } from '../basics/error-type';
-import { LexerTreeBuilder } from '../engine/analysis/lexer';
+import { Lexer } from '../engine/analysis/lexer';
 import type { LexerNode } from '../engine/analysis/lexer-node';
 import { AstTreeBuilder } from '../engine/analysis/parser';
 import { ErrorNode } from '../engine/ast-node/base-ast-node';
@@ -51,7 +51,7 @@ export class CalculateFormulaService extends Disposable {
 
     constructor(
         @IConfigService private readonly _configService: IConfigService,
-        @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
+        @Inject(Lexer) private readonly _lexer: Lexer,
         @IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService,
         @IFormulaRuntimeService private readonly _runtimeService: IFormulaRuntimeService,
         @Inject(FormulaDependencyGenerator) private readonly _formulaDependencyGenerator: FormulaDependencyGenerator,
@@ -85,15 +85,6 @@ export class CalculateFormulaService extends Disposable {
         this._runtimeService.setRuntimeFeatureRange(featureId, featureRange);
     }
 
-    /**
-     *
-     * @param unitId
-     * @param formulaData
-     * @param interpreterDatasetConfig
-     * @param forceCalculate force calculate all formula, and ignore dependency relationship
-     * @param dirtyRanges input external unit data for multi workbook
-     * @returns
-     */
     async execute(formulaDatasetConfig: IFormulaDatasetConfig) {
         this._executionStartListener$.next(true);
 
@@ -299,7 +290,7 @@ export class CalculateFormulaService extends Disposable {
     calculate(formulaString: string, transformSuffix: boolean = true) {
         // TODO how to observe @alex
         // this.getObserver('onBeforeFormulaCalculateObservable')?.notifyObservers(formulaString);
-        const lexerNode = this._lexerTreeBuilder.treeBuilder(formulaString, transformSuffix);
+        const lexerNode = this._lexer.treeBuilder(formulaString, transformSuffix);
 
         if (Object.values(ErrorType).includes(lexerNode as ErrorType)) {
             return ErrorNode.create(lexerNode as ErrorType);

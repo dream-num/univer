@@ -6,16 +6,15 @@ import {
     ObjectMatrix,
     OnLifecycle,
 } from '@univerjs/core';
-import { FormulaDataModel, IActiveDirtyManagerService, IPassiveDirtyManagerService } from '@univerjs/engine-formula';
+import { FormulaDataModel, IFeatureCalculationManagerService } from '@univerjs/engine-formula';
 import { Inject } from '@wendellhu/redi';
 
-@OnLifecycle(LifecycleStages.Ready, PassiveDirtyController)
-export class PassiveDirtyController extends Disposable {
+@OnLifecycle(LifecycleStages.Ready, FeatureCalculationController)
+export class FeatureCalculationController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @IPassiveDirtyManagerService
-        private readonly _passiveDirtyManagerService: IPassiveDirtyManagerService,
-        @IActiveDirtyManagerService private readonly _activeDirtyManagerService: IActiveDirtyManagerService,
+        @IFeatureCalculationManagerService
+        private readonly _featureCalculationManagerService: IFeatureCalculationManagerService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
     ) {
@@ -57,7 +56,7 @@ export class PassiveDirtyController extends Disposable {
             },
         };
 
-        this._passiveDirtyManagerService.register(featureId, {
+        this._featureCalculationManagerService.register(featureId, {
             unitId,
             subComponentId,
             dependencyRanges: [

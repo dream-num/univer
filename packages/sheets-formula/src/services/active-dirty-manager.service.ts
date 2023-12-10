@@ -1,8 +1,7 @@
 import type { ICommandInfo, IUnitRange, Nullable } from '@univerjs/core';
 import { Disposable } from '@univerjs/core';
+import type { IDirtyUnitFeatureMap, IDirtyUnitSheetNameMap } from '@univerjs/engine-formula';
 import { createIdentifier } from '@wendellhu/redi';
-
-import type { IDirtyUnitFeatureMap, IDirtyUnitSheetNameMap } from '../basics/common';
 
 export interface IDirtyConversionManagerParams {
     commandId: string;

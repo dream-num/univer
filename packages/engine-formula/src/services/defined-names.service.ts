@@ -1,26 +1,52 @@
+import type { Nullable } from '@univerjs/core';
 import { Disposable } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 
 export interface IDefinedNamesService {
-    registerDefinedName(name: string, reference: string): void;
+    registerDefinedName(unitId: string, name: string, formulaOrRefString: string): void;
 
-    getDefinedNameMap(): Map<string, string>;
+    getDefinedNameMap(unitId: string): Nullable<Map<string, string>>;
+
+    getValue(unitId: string, name: string): Nullable<string>;
+
+    removeDefinedName(unitId: string, name: string): void;
+
+    hasDefinedName(unitId: string): boolean;
 }
 
 export class DefinedNamesService extends Disposable implements IDefinedNamesService {
     // 18.2.6 definedNames (Defined Names)
-    private _definedNameMap: Map<string, string> = new Map();
+    private _definedNameMap: Map<string, Map<string, string>> = new Map();
 
     override dispose(): void {
         this._definedNameMap.clear();
     }
 
-    registerDefinedName(name: string, reference: string) {
-        this._definedNameMap.set(name, reference);
+    registerDefinedName(unitId: string, name: string, formulaOrRefString: string) {
+        const unitMap = this._definedNameMap.get(unitId);
+
+        if (unitMap == null) {
+            this._definedNameMap.set(unitId, new Map());
+        }
+
+        this._definedNameMap.get(unitId)?.set(name, formulaOrRefString);
     }
 
-    getDefinedNameMap() {
-        return this._definedNameMap;
+    removeDefinedName(unitId: string, name: string) {
+        this._definedNameMap.get(unitId)?.delete(name);
+    }
+
+    getDefinedNameMap(unitId: string) {
+        return this._definedNameMap.get(unitId);
+    }
+
+    getValue(unitId: string, name: string) {
+        return this._definedNameMap.get(unitId)?.get(name);
+    }
+
+    hasDefinedName(unitId: string) {
+        const size = this._definedNameMap.get(unitId)?.size || 0;
+        return size !== 0;
     }
 }
 

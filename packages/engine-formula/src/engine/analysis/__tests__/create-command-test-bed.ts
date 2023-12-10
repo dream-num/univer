@@ -3,6 +3,8 @@ import { ILogService, IUniverInstanceService, LocaleType, LogLevel, Plugin, Plug
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
+import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from '../../../services/current-data.service';
+import { DefinedNamesService, IDefinedNamesService } from '../../../services/defined-names.service';
 import { FormulaRuntimeService, IFormulaRuntimeService } from '../../../services/runtime.service';
 import { AstRootNodeFactory } from '../../ast-node/ast-root-node';
 import { FunctionNodeFactory } from '../../ast-node/function-node';
@@ -14,6 +16,7 @@ import { ReferenceNodeFactory } from '../../ast-node/reference-node';
 import { SuffixNodeFactory } from '../../ast-node/suffix-node';
 import { UnionNodeFactory } from '../../ast-node/union-node';
 import { ValueNodeFactory } from '../../ast-node/value-node';
+import { LexerTreeBuilder } from '../lexer-tree-builder';
 import { AstTreeBuilder } from '../parser';
 
 const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
@@ -60,7 +63,10 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
 
         override onStarting(injector: Injector): void {
             injector.add([AstTreeBuilder]);
+            injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
             injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
+            injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
+            injector.add([LexerTreeBuilder]);
             injector.add([AstRootNodeFactory]);
             injector.add([FunctionNodeFactory]);
             injector.add([LambdaNodeFactory]);

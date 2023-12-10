@@ -1,7 +1,7 @@
 import { LocaleType, LogLevel, Univer } from '@univerjs/core';
 import { greenTheme } from '@univerjs/design';
 import { DocsPlugin, RichTextEditingMutation } from '@univerjs/docs';
-import { BaseFormulaEnginePlugin } from '@univerjs/engine-formula';
+import { FormulaEnginePlugin } from '@univerjs/engine-formula';
 import { RenderEngine } from '@univerjs/engine-render';
 import type { IUniverRPCMainThreadPluginConfig } from '@univerjs/rpc';
 import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
@@ -53,7 +53,7 @@ univer.registerPlugin(SheetsUIPlugin);
 
 univer.registerPlugin(SheetsNumfmt);
 univer.registerPlugin(DebuggerPlugin);
-univer.registerPlugin(BaseFormulaEnginePlugin, {
+univer.registerPlugin(FormulaEnginePlugin, {
     notExecuteFormula: true,
 });
 univer.registerPlugin(FormulaUIPlugin);

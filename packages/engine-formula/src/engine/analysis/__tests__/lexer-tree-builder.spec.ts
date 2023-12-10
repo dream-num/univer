@@ -1,25 +1,23 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
-import { LexerTreeBuilder } from '../lexer';
 import type { LexerNode } from '../lexer-node';
+import { LexerTreeBuilder } from '../lexer-tree-builder';
 
-describe('utils test', () => {
-    const lexer = new LexerTreeBuilder();
-
-    afterEach(() => {
-        lexer.dispose();
-    });
+describe('lexer nodeMaker test', () => {
+    const lexerTreeBuilder = new LexerTreeBuilder();
 
     describe('lexer', () => {
         it('lambda simple1', () => {
-            const node = lexer.treeBuilder(`=lambda(x,y, x*y*x)(sum(1,(1+2)*3),2)+1-max(100,200)`) as LexerNode;
+            const node = lexerTreeBuilder.treeBuilder(
+                `=lambda(x,y, x*y*x)(sum(1,(1+2)*3),2)+1-max(100,200)`
+            ) as LexerNode;
             expect(JSON.stringify(node.serialize())).toStrictEqual(
                 `{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"lambda","st":0,"ed":5,"children":[{"token":"L_1","st":14,"ed":16,"children":[{"token":"P_1","st":15,"ed":17,"children":[{"token":"sum","st":19,"ed":21,"children":[{"token":"P_1","st":19,"ed":21,"children":["1"]},{"token":"P_1","st":21,"ed":23,"children":["1","2","+","3","*"]}]}]},{"token":"P_1","st":30,"ed":32,"children":["2"]}]},{"token":"P_1","st":3,"ed":5,"children":["x"]},{"token":"P_1","st":5,"ed":7,"children":["y"]},{"token":"P_1","st":7,"ed":9,"children":[" x","y","x","*","*"]}]},"1",{"token":"max","st":39,"ed":41,"children":[{"token":"P_1","st":39,"ed":41,"children":["100"]},{"token":"P_1","st":43,"ed":45,"children":["200"]}]},"-","+"]}`
             );
         });
 
         it('lambda mixed2', () => {
-            const node = lexer.treeBuilder(
+            const node = lexerTreeBuilder.treeBuilder(
                 `=(-(1+2)--@A1:B2 + 5)/2 + -sum(indirect(A5):B10# + B6# + A1:offset(C5, 1, 1)  ,  100) + {1,2,3;4,5,6;7,8,10} + lambda(x,y,z, x*y*z)(sum(1,(1+2)*3),2,lambda(x,y, @offset(A1:B0,x#*y#))(1,2):C20) + sum((1+2%)*30%, 1+2)%`
             ) as LexerNode;
             expect(JSON.stringify(node.serialize())).toStrictEqual(
@@ -28,7 +26,7 @@ describe('utils test', () => {
         });
 
         it('normal', () => {
-            const node = lexer.treeBuilder(
+            const node = lexerTreeBuilder.treeBuilder(
                 `=(sum(max(B1:C10,10)*5-100,((1+1)*2+5)/2,10)+count(B1:C10,10*5-100))*5-100`
             ) as LexerNode;
             expect(JSON.stringify(node.serialize())).toStrictEqual(
@@ -37,7 +35,7 @@ describe('utils test', () => {
         });
 
         it('normal', () => {
-            const node = lexer.treeBuilder(
+            const node = lexerTreeBuilder.treeBuilder(
                 `=(sum(max(B1:C10,10)*5-100,((1+1)*2+5)/2,10, lambda(x,y, x*y*x)(sum(1,(1+2)*3),2))+lambda(x,y, x*y*x)(sum(1,(1+2)*3),2)+count(B1:C10,10*5-100))*5-100`
             ) as LexerNode;
             expect(JSON.stringify(node.serialize())).toStrictEqual(
@@ -46,45 +44,75 @@ describe('utils test', () => {
         });
 
         it('let', () => {
-            const node = lexer.treeBuilder(`=let(x,5,y,4,sum(x,y)+x)`) as LexerNode;
+            const node = lexerTreeBuilder.treeBuilder(`=let(x,5,y,4,sum(x,y)+x)`) as LexerNode;
             expect(JSON.stringify(node.serialize())).toStrictEqual(
                 `{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"let","st":0,"ed":2,"children":[{"token":"P_1","st":0,"ed":2,"children":["x"]},{"token":"P_1","st":2,"ed":4,"children":["5"]},{"token":"P_1","st":4,"ed":6,"children":["y"]},{"token":"P_1","st":6,"ed":8,"children":["4"]},{"token":"P_1","st":8,"ed":10,"children":[{"token":"sum","st":12,"ed":14,"children":[{"token":"P_1","st":12,"ed":14,"children":["x"]},{"token":"P_1","st":14,"ed":16,"children":["y"]}]},"x","+"]}]}]}`
             );
         });
 
         it('REDUCE', () => {
-            const node = lexer.treeBuilder(`=REDUCE(1, A1:C2, LAMBDA(a,b,a+b^2))`) as LexerNode;
+            const node = lexerTreeBuilder.treeBuilder(`=REDUCE(1, A1:C2, LAMBDA(a,b,a+b^2))`) as LexerNode;
             expect(JSON.stringify(node.serialize())).toStrictEqual(
                 `{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"REDUCE","st":0,"ed":5,"children":[{"token":"P_1","st":3,"ed":5,"children":["1"]},{"token":"P_1","st":5,"ed":7,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":" A1","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"C2","st":-1,"ed":-1,"children":[]}]}]}]},{"token":"P_1","st":12,"ed":14,"children":[{"token":" LAMBDA","st":16,"ed":22,"children":[{"token":"P_1","st":20,"ed":22,"children":["a"]},{"token":"P_1","st":22,"ed":24,"children":["b"]},{"token":"P_1","st":24,"ed":26,"children":["a","b","2","^","+"]}]}]}]}]}`
             );
         });
 
         it('missing default arguments', () => {
-            const node = lexer.treeBuilder(`=SUM(, A1:B1)`) as LexerNode;
+            const node = lexerTreeBuilder.treeBuilder(`=SUM(, A1:B1)`) as LexerNode;
             expect(JSON.stringify(node.serialize())).toStrictEqual(
                 `{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"SUM","st":0,"ed":2,"children":[{"token":"P_1","st":0,"ed":2,"children":[]},{"token":"P_1","st":1,"ed":3,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":" A1","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"B1","st":-1,"ed":-1,"children":[]}]}]}]}]}]}`
             );
         });
 
         it('negative and percentage', () => {
-            const node = lexer.treeBuilder(`=0.1 -- 0.2%`) as LexerNode;
+            const node = lexerTreeBuilder.treeBuilder(`=0.1 -- 0.2%`) as LexerNode;
             expect(JSON.stringify(node.serialize())).toStrictEqual(
                 `{"token":"R_1","st":-1,"ed":-1,"children":["0.1 ",{"token":"%","st":-1,"ed":-1,"children":["- 0.2"]},"-"]}`
             );
         });
 
         it('negative and percentage', () => {
-            const node = lexer.treeBuilder(`=1+(3*4=4)*5+1`) as LexerNode;
+            const node = lexerTreeBuilder.treeBuilder(`=1+(3*4=4)*5+1`) as LexerNode;
             expect(JSON.stringify(node.serialize())).toStrictEqual(
                 `{"token":"R_1","st":-1,"ed":-1,"children":["1","3","4","*","4","=","5","*","1","+","+"]}`
             );
         });
 
         it('prefixToken', () => {
-            const node = lexer.treeBuilder(`=  -@A4:B5`) as LexerNode;
+            const node = lexerTreeBuilder.treeBuilder(`=  -@A4:B5`) as LexerNode;
             expect(JSON.stringify(node.serialize())).toStrictEqual(
                 `{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"-","st":-1,"ed":-1,"children":[{"token":"@","st":-1,"ed":-1,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"A4","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"B5","st":-1,"ed":-1,"children":[]}]}]}]}]}]}`
             );
+        });
+
+        it('table', () => {
+            const node = lexerTreeBuilder.treeBuilder(`=SUM(Table3[[#All],[Column1]:[Column2]])`) as LexerNode;
+            expect(JSON.stringify(node.serialize())).toStrictEqual(
+                `{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"SUM","st":0,"ed":2,"children":[{"token":"P_1","st":0,"ed":2,"children":["Table3[[#All],[Column1]:[Column2]]"]}]}]}`
+            );
+        });
+
+        it('import range', () => {
+            const node = lexerTreeBuilder.treeBuilder(`=[asdfasdfasdf]'sheet-1'!A3:B10`) as LexerNode;
+            expect(JSON.stringify(node.serialize())).toStrictEqual(
+                `{"token":"R_1","st":-1,"ed":-1,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"[asdfasdfasdf]'sheet-1'!A3","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"B10","st":-1,"ed":-1,"children":[]}]}]}]}`
+            );
+        });
+
+        it('nodeMaker performance', () => {
+            const start = performance.now();
+            for (let i = 0; i < 1000; i++) {
+                lexerTreeBuilder.nodeMakerTest(
+                    `=(-(1+2)--@A1:B2 + 5)/2 + -sum(indirect(A5):B10# + B6# + A1:offset(C5, 1, 1)  ,  100) + {1,2,3;4,5,6;7,8,10} + lambda(x,y,z, x*y*z)(sum(1,(1+2)*3),2,lambda(x,y, @offset(A1:B0,x#*y#))(1,2):C20) + sum((1+2%)*30%, 1+2)%`
+                );
+            }
+            const end = performance.now();
+            const elapsed = end - start; // 毫秒数
+
+            console.log(`Elapsed time: ${elapsed} ms`);
+
+            const expectedMaxTime = 3000; // 毫秒数
+            expect(elapsed).toBeLessThan(expectedMaxTime);
         });
     });
 });

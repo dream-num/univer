@@ -4,6 +4,7 @@ import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { FORMULA_UI_PLUGIN_NAME } from './common/plugin-name';
+import { ActiveDirtyController } from './controllers/active-dirty.controller';
 import { ArrayFormulaDisplayController } from './controllers/array-formula-display.controller';
 import { FormulaAutoFillController } from './controllers/formula-auto-fill.controller';
 import { FormulaClipboardController } from './controllers/formula-clipboard.controller';
@@ -14,6 +15,7 @@ import { PromptController } from './controllers/prompt.controller';
 import { TriggerCalculationController } from './controllers/trigger-calculation.controller';
 import { UpdateFormulaController } from './controllers/update-formula.controller';
 import { zhCN } from './locale';
+import { ActiveDirtyManagerService, IActiveDirtyManagerService } from './services/active-dirty-manager.service';
 import { DescriptionService, IDescriptionService } from './services/description.service';
 import { FormulaInputService, IFormulaInputService } from './services/formula-input.service';
 import { FormulaPromptService, IFormulaPromptService } from './services/prompt.service';
@@ -50,6 +52,7 @@ export class FormulaUIPlugin extends Plugin {
                         this._injector.createInstance(DescriptionService, this._config?.description || []), // TODO@Dusuhir: initialize config with asynchronous method?
                 },
             ],
+            [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
             // controllers
             [FormulaUIController],
             [PromptController],
@@ -60,6 +63,7 @@ export class FormulaUIPlugin extends Plugin {
             [TriggerCalculationController],
             [UpdateFormulaController],
             [FormulaEditorShowController],
+            [ActiveDirtyController],
         ];
 
         dependencies.forEach((dependency) => this._injector.add(dependency));

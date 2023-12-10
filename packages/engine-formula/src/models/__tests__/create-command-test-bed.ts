@@ -3,8 +3,11 @@ import { ILogService, IUniverInstanceService, LocaleType, LogLevel, Plugin, Plug
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { LexerTreeBuilder } from '../../engine/analysis/lexer';
+import { LexerTreeBuilder } from '../../engine/analysis/lexer-tree-builder';
 import { CalculateFormulaService } from '../../services/calculate-formula.service';
+import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from '../../services/current-data.service';
+import { DefinedNamesService, IDefinedNamesService } from '../../services/defined-names.service';
+import { FormulaRuntimeService, IFormulaRuntimeService } from '../../services/runtime.service';
 import { FormulaDataModel } from '../formula-data.model';
 
 const TEST_WORKBOOK_DATA: IWorkbookData = {
@@ -55,6 +58,10 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
             injector.add([CalculateFormulaService]);
             injector.add([FormulaDataModel]);
             injector.add([LexerTreeBuilder]);
+            injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
+            injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
+            injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
+
             dependencies?.forEach((d) => injector.add(d));
         }
 

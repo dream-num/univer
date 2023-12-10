@@ -1,21 +1,29 @@
+import type { Nullable } from '@univerjs/core';
 import { Disposable } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 
 import type { ISuperTable, TableOptionType } from '../basics/common';
 
+export interface ISuperTableOptionParam {
+    tableOption: string;
+    tableOptionType: TableOptionType;
+}
+
 export interface ISuperTableService {
-    getTableMap(): Map<string, ISuperTable>;
+    getTableMap(unitId: string): Nullable<Map<string, ISuperTable>>;
 
     getTableOptionMap(): Map<string, TableOptionType>;
 
-    registerTable(tableName: string, reference: ISuperTable): void;
+    registerTable(unitId: string, tableName: string, reference: ISuperTable): void;
 
     registerTableOptionMap(tableOption: string, tableOptionType: TableOptionType): void;
+
+    remove(unitId: string, tableName: string): void;
 }
 
 export class SuperTableService extends Disposable implements ISuperTableService {
     // 18.5.1.2 table (Table)
-    private _tableMap: Map<string, ISuperTable> = new Map();
+    private _tableMap: Map<string, Map<string, ISuperTable>> = new Map();
 
     // 18.5.1.2 table (Table) for I18N
     private _tableOptionMap: Map<string, TableOptionType> = new Map();
@@ -26,16 +34,23 @@ export class SuperTableService extends Disposable implements ISuperTableService 
         this._tableOptionMap.clear();
     }
 
-    getTableMap() {
-        return this._tableMap;
+    remove(unitId: string, tableName: string) {
+        this._tableMap.get(unitId)?.delete(tableName);
+    }
+
+    getTableMap(unitId: string) {
+        return this._tableMap.get(unitId);
     }
 
     getTableOptionMap() {
         return this._tableOptionMap;
     }
 
-    registerTable(tableName: string, reference: ISuperTable) {
-        this._tableMap.set(tableName, reference);
+    registerTable(unitId: string, tableName: string, reference: ISuperTable) {
+        if (this._tableMap.get(unitId) == null) {
+            this._tableMap.set(unitId, new Map());
+        }
+        this._tableMap.get(unitId)?.set(tableName, reference);
     }
 
     registerTableOptionMap(tableOption: string, tableOptionType: TableOptionType) {

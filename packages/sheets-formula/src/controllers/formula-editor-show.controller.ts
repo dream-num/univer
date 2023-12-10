@@ -53,12 +53,7 @@ export class FormulaEditorShowController extends Disposable {
 
                             this._removeArrayFormulaRangeShape();
 
-                            if (
-                                value == null ||
-                                (value.v != null &&
-                                    value.v !== '' &&
-                                    arrayFormulaMatrixCell[workbookId]?.[worksheetId]?.[row]?.[col] == null)
-                            ) {
+                            if (value == null) {
                                 return next(value);
                             }
 
@@ -102,6 +97,24 @@ export class FormulaEditorShowController extends Disposable {
                                 }
                             }
 
+                            /**
+                             * If the display conditions for the array formula are not met, return the range directly.
+                             */
+                            if (
+                                value.v != null &&
+                                value.v !== '' &&
+                                arrayFormulaMatrixCell[workbookId]?.[worksheetId]?.[row]?.[col] == null
+                            ) {
+                                if (cellInfo) {
+                                    return cellInfo;
+                                }
+
+                                return next(value);
+                            }
+
+                            /**
+                             * Mark the array formula for special display in subsequent processing
+                             */
                             const matrixRange = arrayFormulaMatrixRange?.[workbookId]?.[worksheetId];
                             if (matrixRange != null) {
                                 new ObjectMatrix(matrixRange).forValue((rowIndex, columnIndex, range) => {

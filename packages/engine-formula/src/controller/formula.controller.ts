@@ -3,6 +3,11 @@ import type { Ctor } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
+import { RemoveDefinedNameMutation, SetDefinedNameMutation } from '../commands/mutations/set-defined-name.mutation';
+import {
+    RemoveFeatureCalculationMutation,
+    SetFeatureCalculationMutation,
+} from '../commands/mutations/set-feature-calculation.mutation';
 import {
     SetFormulaCalculationNotificationMutation,
     SetFormulaCalculationResultMutation,
@@ -10,6 +15,12 @@ import {
     SetFormulaCalculationStopMutation,
 } from '../commands/mutations/set-formula-calculation.mutation';
 import { SetFormulaDataMutation } from '../commands/mutations/set-formula-data.mutation';
+import { RemoveOtherFormulaMutation, SetOtherFormulaMutation } from '../commands/mutations/set-other-formula.mutation';
+import {
+    RemoveSuperTableMutation,
+    SetSuperTableMutation,
+    SetSuperTableOptionMutation,
+} from '../commands/mutations/set-super-table.mutation';
 import { functionArray } from '../functions/array/function-map';
 import type { BaseFunction } from '../functions/base-function';
 import { functionCompatibility } from '../functions/compatibility/function-map';
@@ -54,6 +65,17 @@ export class FormulaController extends Disposable {
             SetFormulaCalculationStopMutation,
             SetFormulaCalculationNotificationMutation,
             SetFormulaCalculationResultMutation,
+
+            SetDefinedNameMutation,
+            RemoveDefinedNameMutation,
+            SetFeatureCalculationMutation,
+            RemoveFeatureCalculationMutation,
+
+            SetOtherFormulaMutation,
+            RemoveOtherFormulaMutation,
+            SetSuperTableMutation,
+            RemoveSuperTableMutation,
+            SetSuperTableOptionMutation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 

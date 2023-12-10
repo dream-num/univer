@@ -373,7 +373,9 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         this._cursor.style.animation = 'univer_cursor_blinkStyle 1s steps(1) infinite';
         this._cursor.style.display = 'revert';
 
-        requestAnimationFrame(() => this.focus());
+        this.focus();
+
+        // requestAnimationFrame(() => this.focus());
     }
 
     focus(): void {

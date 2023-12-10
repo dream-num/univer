@@ -12,7 +12,7 @@ import { IFormulaCurrentConfigService } from '../../services/current-data.servic
 import { IDefinedNamesService } from '../../services/defined-names.service';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
 import { ISuperTableService } from '../../services/super-table.service';
-import { LexerTreeBuilder } from '../analysis/lexer';
+import { Lexer } from '../analysis/lexer';
 import { LexerNode } from '../analysis/lexer-node';
 import type { BaseReferenceObject } from '../reference-object/base-reference-object';
 import { CellReferenceObject } from '../reference-object/cell-reference-object';
@@ -68,7 +68,8 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
     constructor(
         @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,
         @ISuperTableService private readonly _superTableService: ISuperTableService,
-        @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
+        @IFormulaRuntimeService private readonly _formulaRuntimeService: IFormulaRuntimeService,
+        @Inject(Lexer) private readonly _lexer: Lexer,
         @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
@@ -109,21 +110,22 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
             return new ReferenceNode(this._injector, tokenTrim, new ColumnReferenceObject(tokenTrim));
         }
 
-        const nameMap = this._definedNamesService.getDefinedNameMap();
+        const unitId = this._formulaRuntimeService.currentUnitId;
+        const nameMap = this._definedNamesService.getDefinedNameMap(unitId);
 
-        if (!isLexerNode && nameMap.has(tokenTrim)) {
+        if (!isLexerNode && nameMap?.has(tokenTrim)) {
             const nameString = nameMap.get(tokenTrim)!;
-            const lexerNode = this._lexerTreeBuilder.treeBuilder(nameString);
+            const lexerNode = this._lexer.treeBuilder(nameString);
             /** todo */
             return new ErrorNode(ErrorType.VALUE);
         }
 
         // parserDataLoader.get
 
-        const tableMap = this._superTableService.getTableMap();
+        const tableMap = this._superTableService.getTableMap(unitId);
         const $regex = $SUPER_TABLE_COLUMN_REGEX;
         const tableName = tokenTrim.replace($regex, '');
-        if (!isLexerNode && tableMap.has(tableName)) {
+        if (!isLexerNode && tableMap?.has(tableName)) {
             const columnResult = $regex.exec(tokenTrim);
             let columnDataString = '';
             if (columnResult) {

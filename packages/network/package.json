@@ -5,14 +5,14 @@
     "module": "./src/index.ts",
     "devDependencies": {
         "@univerjs/core": "workspace:*",
-        "@wendellhu/redi": "^0.12.11",
+        "@wendellhu/redi": "^0.12.12",
         "rxjs": "^7.8.1",
         "typescript": "^5.3.3",
         "vite-plugin-externals": "^0.6.2"
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
-        "@wendellhu/redi": ">=0.12.11",
+        "@wendellhu/redi": ">=0.12.12",
         "rxjs": ">=7.0.0"
     }
 }

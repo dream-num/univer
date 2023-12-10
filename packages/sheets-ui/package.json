@@ -62,7 +62,7 @@
         "@univerjs/ui": "workspace:*",
         "@vitejs/plugin-react": "^4.2.1",
         "@vitest/coverage-istanbul": "^1.0.2",
-        "@wendellhu/redi": "^0.12.11",
+        "@wendellhu/redi": "^0.12.12",
         "happy-dom": "^12.10.3",
         "less": "^4.2.0",
         "react": "^18.2.0",
@@ -82,7 +82,7 @@
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": ">=0.12.11",
+        "@wendellhu/redi": ">=0.12.12",
         "react": ">=16.9.0",
         "rxjs": ">=7.0.0"
     }

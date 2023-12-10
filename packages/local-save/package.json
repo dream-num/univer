@@ -49,7 +49,7 @@
     "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@vitest/coverage-istanbul": "^1.0.2",
-        "@wendellhu/redi": "^0.12.11",
+        "@wendellhu/redi": "^0.12.12",
         "rxjs": "^7.8.1",
         "typescript": "^5.3.3",
         "vite": "^5.0.7",
@@ -59,7 +59,7 @@
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
-        "@wendellhu/redi": ">=0.12.11",
+        "@wendellhu/redi": ">=0.12.12",
         "rxjs": ">=7.0.0"
     }
 }

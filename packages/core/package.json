@@ -55,7 +55,7 @@
     "devDependencies": {
         "@types/numeral": "^2.0.5",
         "@vitest/coverage-istanbul": "^1.0.2",
-        "@wendellhu/redi": "^0.12.11",
+        "@wendellhu/redi": "^0.12.12",
         "rxjs": "^7.8.1",
         "typescript": "^5.3.3",
         "vite": "^5.0.7",
@@ -64,7 +64,7 @@
         "vitest": "^1.0.2"
     },
     "peerDependencies": {
-        "@wendellhu/redi": ">=0.12.11",
+        "@wendellhu/redi": ">=0.12.12",
         "rxjs": ">=7.0.0"
     }
 }

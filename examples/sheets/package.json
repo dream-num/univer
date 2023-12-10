@@ -23,7 +23,7 @@
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@univerjs/uniscript": "workspace:*",
-        "@wendellhu/redi": "^0.12.11",
+        "@wendellhu/redi": "^0.12.12",
         "data": "workspace:*",
         "monaco-editor": "0.45.0"
     },

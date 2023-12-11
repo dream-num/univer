@@ -17,14 +17,27 @@
 import type { ICommand, IDocumentData, IStyleBase, Univer } from '@univerjs/core';
 import { BooleanNumber, ICommandService, IUniverInstanceService, UndoCommand } from '@univerjs/core';
 import type { Injector } from '@wendellhu/redi';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { NORMAL_TEXT_SELECTION_PLUGIN_NAME } from '../../../basics/docs-view-key';
 import { TextSelectionManagerService } from '../../../services/text-selection-manager.service';
 import { RichTextEditingMutation } from '../../mutations/core-editing.mutation';
+import { SetTextSelectionsOperation } from '../../operations/text-selection.operation';
 import type { IInnerCutCommandParams, IInnerPasteCommandParams } from '../clipboard.inner.command';
 import { CutContentCommand, InnerPasteCommand } from '../clipboard.inner.command';
 import { createCommandTestBed } from './create-command-test-bed';
+
+vi.mock('@univerjs/engine-render', async () => {
+    const actual = await vi.importActual('@univerjs/engine-render');
+    const { ITextSelectionRenderManager, TextSelectionRenderManager } = await import(
+        './mock-text-selection-render-manager'
+    );
+
+    return {
+        ...actual,
+        ITextSelectionRenderManager,
+        TextSelectionRenderManager,
+    };
+});
 
 const TEST_DOCUMENT_DATA_EN: IDocumentData = {
     id: 'test-doc',
@@ -118,13 +131,14 @@ describe('test cases in clipboard', () => {
         commandService = get(ICommandService);
         commandService.registerCommand(InnerPasteCommand);
         commandService.registerCommand(CutContentCommand);
+        commandService.registerCommand(SetTextSelectionsOperation);
         commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
 
         const selectionManager = get(TextSelectionManagerService);
 
         selectionManager.setCurrentSelection({
-            pluginName: NORMAL_TEXT_SELECTION_PLUGIN_NAME,
             unitId: 'test-doc',
+            subUnitId: '',
         });
 
         selectionManager.add([

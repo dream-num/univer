@@ -59,6 +59,8 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { merge, Observable } from 'rxjs';
 import { bufferTime, distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
 
+import { mergeNumfmtMutations } from '../utils/mutation';
+
 const numfmtMutation = [SetNumfmtMutation.id, RemoveNumfmtMutation.id];
 @OnLifecycle(LifecycleStages.Rendered, NumfmtRefRangeController)
 export class NumfmtRefRangeController extends Disposable {
@@ -153,56 +155,14 @@ export class NumfmtRefRangeController extends Disposable {
     private _mergeRefMutations() {
         this._refRangeService.interceptor.intercept(this._refRangeService.interceptor.getInterceptPoints().MERGE_REDO, {
             handler: (list, _c, next) => {
-                const result = list?.filter((item) => !numfmtMutation.includes(item.id)) || [];
-                const numfmtSetMutation = (list?.filter((item) => item.id === SetNumfmtMutation.id) || []).map(
-                    (item) => item.params
-                ) as unknown as ISetNumfmtMutationParams[];
-                const numfmtRemoveMutation = (list?.filter((item) => item.id === RemoveNumfmtMutation.id) || []).map(
-                    (item) => item.params
-                ) as unknown as IRemoveNumfmtMutationParams[];
-
-                if (numfmtRemoveMutation.length) {
-                    const params = this._mergeNumfmtRemoveMutation(numfmtRemoveMutation);
-                    result.push({ id: RemoveNumfmtMutation.id, params });
+                if (!list) {
+                    return next(list);
                 }
-                if (numfmtSetMutation.length) {
-                    const params = this._mergeNumfmtSetMutation(numfmtSetMutation);
-                    result.push({ id: SetNumfmtMutation.id, params });
-                }
+                const result = list.filter((item) => !numfmtMutation.includes(item.id));
+                result.push(...mergeNumfmtMutations(list));
                 return next(result);
             },
         });
-        // this.disposeWithMe(
-        //     this._refRangeService.intercept({
-        //         handler: (list, current, next) => {
-        //             if (!list || !list.length || !current.length) {
-        //                 return next(list);
-        //             }
-        //             const theLastMutation = list[list.length - 1];
-        //             const theFirstMutation = current[0];
-        //             if (theLastMutation.id === SetNumfmtMutation.id && theFirstMutation.id === SetNumfmtMutation.id) {
-        //                 const theLastMutationParams = theLastMutation.params as ISetNumfmtMutationParams;
-        //                 const theFirstMutationParams = theFirstMutation.params as ISetNumfmtMutationParams;
-        //                 if (
-        //                     theLastMutationParams.workbookId === theFirstMutationParams.workbookId &&
-        //                     theLastMutationParams.worksheetId === theFirstMutationParams.worksheetId
-        //                 ) {
-        //                     const values = theLastMutationParams.values;
-        //                     current.forEach((mutation) => {
-        //                         const params = mutation.params as ISetNumfmtMutationParams;
-        //                         Object.keys(params.values).forEach((id) => {
-        //                             if (values[id]) {
-        //                                 values[id].ranges.push(...params.values[id].ranges);
-        //                             }
-        //                         });
-        //                     });
-        //                     return list;
-        //                 }
-        //             }
-        //             return next(list);
-        //         },
-        //     })
-        // );
     }
 
     private _registerRefRange() {

@@ -526,7 +526,7 @@ export function expandToContinuousRange(startRange: IRange, directions: IExpandP
             });
         }
 
-        if (left && destRange.startRow !== 0) {
+        if (left && destRange.startColumn !== 0) {
             const destCol = destRange.startColumn - 1;
             const matrixFromLastCol = worksheet.getMatrixWithMergedCells(
                 destRange.startRow,

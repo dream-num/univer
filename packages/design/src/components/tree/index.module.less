@@ -1,0 +1,53 @@
+.tree {
+    position: relative;
+    color: rgb(var(--text-color));
+
+    &-icon {
+        position: absolute;
+        top: 7px;
+        left: 0;
+        transform: rotate(-90deg);
+
+        margin-right: 8px;
+
+        font-size: 8px;
+
+        &-expand {
+            transform: rotate(0deg);
+        }
+    }
+
+    &-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+
+        .tree-list {
+            overflow: hidden;
+            height: 0;
+
+            &-expand {
+                height: inherit;
+            }
+        }
+
+        &-item {
+            position: relative;
+            padding-left: var(--padding-lg);
+
+            > a {
+                 cursor: pointer;
+                 display: block;
+            }
+
+            &-content {
+                margin-bottom: 8px;
+
+                &-selected {
+                    font-weight: 500;
+                    color: rgb(var(--primary-color));
+                }
+            }
+        }
+    }
+}

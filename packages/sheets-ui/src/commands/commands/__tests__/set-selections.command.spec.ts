@@ -643,7 +643,7 @@ describe('Test commands used for change selections', () => {
             });
         });
 
-        describe('select to different directions', () => {
+        describe('Expand to different directions', () => {
             it('Should expand to left', async () => {
                 select(0, 1, 0, 1, 0, 1, false, false);
 

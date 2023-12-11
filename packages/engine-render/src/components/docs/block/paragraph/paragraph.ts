@@ -22,6 +22,7 @@ import {
     HorizontalAlign,
     PositionedObjectLayoutType,
 } from '@univerjs/core';
+// @ts-ignore
 import LineBreaker from 'linebreak';
 
 import { hasArabic, hasCJK, hasTibetan, startWithEmoji } from '../../../../basics';

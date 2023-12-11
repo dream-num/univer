@@ -6,7 +6,7 @@ sidebar_position: 1
 
 [![npm version](https://badge.fury.io/js/@univerjs%2Fcore.svg)](https://badge.fury.io/js/@univerjs%2Fcore)
 
-@univerjs/core 是 Univer 的核心仓库，它提供的基础能力包括：
+@univerjs/core 是 Univer 的核心包，它提供的基础能力包括：
 
 -   提供作为应用入口和其他 plugin 挂载点的 `Univer` 类型，以及管理不同类型文档的 `UniverDoc` 和 `UniverSheet` 类型
 -   各个类型文档的基本模型

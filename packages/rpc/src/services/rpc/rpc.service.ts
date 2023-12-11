@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-magic-numbers */
+
 import { RxDisposable } from '@univerjs/core';
 import type { Subscriber, Subscription } from 'rxjs';
 import { BehaviorSubject, firstValueFrom, isObservable, Observable, of } from 'rxjs';
@@ -144,12 +147,12 @@ const enum ResponseType {
      */
     INITIALIZE = 0,
 
-    CALL_SUCCESS = 100,
-    CALL_FAILURE = 101,
+    CALL_SUCCESS = 201,
+    CALL_FAILURE = 202,
 
-    SUBSCRIBE_NEXT = 200,
-    SUBSCRIBE_ERROR = 201,
-    SUBSCRIBE_COMPLETE = 202,
+    SUBSCRIBE_NEXT = 300,
+    SUBSCRIBE_ERROR = 301,
+    SUBSCRIBE_COMPLETE = 302,
 }
 
 interface IRPCResponse {
@@ -178,7 +181,7 @@ export class ChannelClient extends RxDisposable implements IChannelClient {
 
         // TODO: subscribe to the state of the protocol and see if it is connected \
         // and initialized.
-        this._protocol.onMessage.pipe(takeUntil(this.dispose$)).subscribe((message) => this._onResponse(message));
+        this._protocol.onMessage.pipe(takeUntil(this.dispose$)).subscribe((message) => this._onMessage(message));
     }
 
     getChannel<T extends IChannel>(channelName: string): T {
@@ -294,7 +297,7 @@ export class ChannelClient extends RxDisposable implements IChannelClient {
         this._protocol.send(request);
     }
 
-    private _onResponse(response: IRPCResponse): void {
+    private _onMessage(response: IRPCResponse): void {
         switch (response.type) {
             case ResponseType.INITIALIZE:
                 this._initialized.next(true);
@@ -343,14 +346,15 @@ export class ChannelServer extends RxDisposable implements IChannelServer {
     }
 
     private _onMethodCall(request: IRPCRequest): void {
-        const channel = this._channels.get(request.channelName);
+        const { channelName, method, args } = request;
+        const channel = this._channels.get(channelName);
 
         let promise: Promise<any>;
         try {
             if (!channel) {
-                throw new Error('[ChannelServer]: Channel not found!');
+                throw new Error(`[ChannelServer]: Channel ${channelName} not found!`);
             }
-            promise = channel.call(request.method, request.args);
+            promise = channel.call(method, args);
         } catch (err: unknown) {
             promise = Promise.reject(err);
         }
@@ -369,24 +373,25 @@ export class ChannelServer extends RxDisposable implements IChannelServer {
     }
 
     private _onSubscribe(request: IRPCRequest): void {
-        const channel = this._channels.get(request.channelName);
+        const { channelName, seq } = request;
+        const channel = this._channels.get(channelName);
 
         try {
             if (!channel) {
-                throw new Error('[ChannelServer]: Channel not found!');
+                throw new Error(`[ChannelServer]: Channel ${channelName} not found!`);
             }
 
             const observable = channel.subscribe(request.method, request.args);
             const subscription = observable.subscribe({
                 next: (data) => {
-                    this._sendResponse({ seq: request.seq, type: ResponseType.SUBSCRIBE_NEXT, data });
+                    this._sendResponse({ seq, type: ResponseType.SUBSCRIBE_NEXT, data });
                 },
                 error: (err) => {
-                    this._sendResponse({ seq: request.seq, type: ResponseType.SUBSCRIBE_ERROR, data: err.message });
-                    this._sendResponse({ seq: request.seq, type: ResponseType.SUBSCRIBE_COMPLETE });
+                    this._sendResponse({ seq, type: ResponseType.SUBSCRIBE_ERROR, data: err.message });
+                    this._sendResponse({ seq, type: ResponseType.SUBSCRIBE_COMPLETE });
                 },
                 complete: () => {
-                    this._sendResponse({ seq: request.seq, type: ResponseType.SUBSCRIBE_COMPLETE });
+                    this._sendResponse({ seq, type: ResponseType.SUBSCRIBE_COMPLETE });
                 },
             });
 

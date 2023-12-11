@@ -153,23 +153,6 @@ export function isFormulaId(value: any): boolean {
 }
 
 /**
- * move to Styles.getStyleByCell
- */
-// export function getStyle(
-//     styles: Nullable<Styles>,
-//     cell: Nullable<ICellData>
-// ): Nullable<IStyleData> {
-//     let style;
-//     if (cell && Tools.isObject(cell.s)) {
-//         style = cell.s as IStyleData;
-//     } else {
-//         style = cell?.s && styles?.get(cell.s);
-//     }
-
-//     return style as IStyleData;
-// }
-
-/**
  * Convert rich text json to DOM
  * @param p
  */
@@ -533,4 +516,13 @@ export function getDocsUpdateBody(model: IDocumentData, segmentId?: string) {
     }
 
     return body;
+}
+
+export function isValidRange(range: IRange): boolean {
+    const { startRow, endRow, startColumn, endColumn } = range;
+    if (startRow < 0 || startColumn < 0 || endRow < 0 || endColumn < 0) {
+        return false;
+    }
+
+    return true;
 }

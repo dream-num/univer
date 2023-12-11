@@ -15,7 +15,14 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { deserializeRangeWithSheet, Disposable, Rectangle, serializeRangeToRefString, Tools } from '@univerjs/core';
+import {
+    deserializeRangeWithSheet,
+    Disposable,
+    isValidRange,
+    Rectangle,
+    serializeRangeToRefString,
+    Tools,
+} from '@univerjs/core';
 
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { ErrorType } from '../../basics/error-type';
@@ -187,13 +194,20 @@ export class LexerTreeBuilder extends Disposable {
 
             const newRange = Rectangle.moveOffset(range, refOffsetX, refOffsetY);
 
-            newSequenceNodes.push({
-                ...node,
-                token: serializeRangeToRefString({
+            let newToken = '';
+            if (isValidRange(newRange)) {
+                newToken = serializeRangeToRefString({
                     range: newRange,
                     unitId: sequenceUnitId,
                     sheetName,
-                }),
+                });
+            } else {
+                newToken = ErrorType.REF;
+            }
+
+            newSequenceNodes.push({
+                ...node,
+                token: newToken,
             });
         }
 

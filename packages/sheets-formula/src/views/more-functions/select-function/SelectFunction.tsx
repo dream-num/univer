@@ -63,6 +63,8 @@ export function SelectFunction(props: ISelectFunctionProps) {
     }, [selectList]);
 
     const highlightSearchText = (text: string) => {
+        if (searchText.trim() === '') return text;
+
         const regex = new RegExp(`(${searchText.toLocaleUpperCase()})`);
         const parts = text.split(regex).filter(Boolean);
 

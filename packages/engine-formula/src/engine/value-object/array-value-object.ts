@@ -21,7 +21,12 @@ import { ErrorType } from '../../basics/error-type';
 import { $ARRAY_VALUE_REGEX } from '../../basics/regex';
 import type { compareToken } from '../../basics/token';
 import { ErrorValueObject } from '../other-object/error-value-object';
-import type { CalculateValueType, IArrayValueObject } from './base-value-object';
+import type {
+    CalculateValueType,
+    callbackMapFnType,
+    callbackProductFnType,
+    IArrayValueObject,
+} from './base-value-object';
 import { BaseValueObject } from './base-value-object';
 import { BooleanValueObject, NumberValueObject, StringValueObject } from './primitive-object';
 
@@ -33,6 +38,7 @@ enum BatchOperatorType {
     COMPARE,
     CONCATENATE_FRONT,
     CONCATENATE_BACK,
+    PRODUCT,
 }
 
 export function fromObjectToString(array: IArrayValueObject) {
@@ -47,7 +53,7 @@ export class ArrayValueObject extends BaseValueObject {
     private _columnCount: number = -1;
 
     constructor(rawValue: string | IArrayValueObject) {
-        if (rawValue instanceof String) {
+        if (typeof rawValue === 'string') {
             super(rawValue as string);
         } else {
             const rawString = fromObjectToString(rawValue as IArrayValueObject);
@@ -157,11 +163,45 @@ export class ArrayValueObject extends BaseValueObject {
         return this._batchOperator(valueObject, BatchOperatorType.CONCATENATE_BACK);
     }
 
-    // eslint-disable-next-line max-lines-per-function
+    override product(valueObject: BaseValueObject, callbackFn: callbackProductFnType): CalculateValueType {
+        return this._batchOperator(valueObject, BatchOperatorType.PRODUCT, callbackFn);
+    }
+
+    override map(callbackFn: callbackMapFnType): CalculateValueType {
+        const rowCount = this._rowCount;
+        const columnCount = this._columnCount;
+
+        const result: CalculateValueType[][] = [];
+
+        for (let r = 0; r < rowCount; r++) {
+            const rowList: CalculateValueType[] = [];
+            for (let c = 0; c < columnCount; c++) {
+                const currentValue = this._value?.[r]?.[c];
+
+                if (currentValue) {
+                    if (currentValue.isErrorObject()) {
+                        rowList[c] = currentValue as ErrorValueObject;
+                    } else {
+                        rowList[c] = callbackFn(currentValue, r, c);
+                    }
+                } else {
+                    rowList[c] = ErrorValueObject.create(ErrorType.VALUE);
+                }
+            }
+            result.push(rowList);
+        }
+
+        this.setArrayValue(result);
+        this.setRowCount(rowCount);
+        this.setColumnCount(columnCount);
+
+        return this;
+    }
+
     private _batchOperator(
         valueObject: BaseValueObject,
         batchOperatorType: BatchOperatorType,
-        operator?: compareToken
+        operator?: compareToken | callbackProductFnType
     ): CalculateValueType {
         if (valueObject.isArray()) {
             let rowCount = (valueObject as ArrayValueObject).getRowCount();
@@ -187,8 +227,10 @@ export class ArrayValueObject extends BaseValueObject {
                     const opValue = valueObjectList?.[r]?.[c];
 
                     if (currentValue && opValue) {
-                        if (currentValue.isErrorObject() || opValue.isErrorObject()) {
-                            rowList[c] = ErrorValueObject.create(ErrorType.VALUE);
+                        if (currentValue.isErrorObject()) {
+                            rowList[c] = currentValue as ErrorValueObject;
+                        } else if (opValue.isErrorObject()) {
+                            rowList[c] = opValue as ErrorValueObject;
                         } else {
                             switch (batchOperatorType) {
                                 case BatchOperatorType.PLUS:
@@ -209,7 +251,7 @@ export class ArrayValueObject extends BaseValueObject {
                                     } else {
                                         rowList[c] = (currentValue as BaseValueObject).compare(
                                             opValue as BaseValueObject,
-                                            operator
+                                            operator as compareToken
                                         );
                                     }
                                     break;
@@ -222,6 +264,17 @@ export class ArrayValueObject extends BaseValueObject {
                                     rowList[c] = (currentValue as BaseValueObject).concatenateBack(
                                         opValue as BaseValueObject
                                     );
+                                    break;
+                                case BatchOperatorType.PRODUCT:
+                                    if (!operator) {
+                                        rowList[c] = ErrorValueObject.create(ErrorType.VALUE);
+                                    } else {
+                                        rowList[c] = (currentValue as BaseValueObject).product(
+                                            opValue as BaseValueObject,
+                                            operator as callbackProductFnType
+                                        );
+                                    }
+
                                     break;
                             }
                         }
@@ -254,7 +307,9 @@ export class ArrayValueObject extends BaseValueObject {
                 const currentValue = this._value?.[r]?.[c];
 
                 if (currentValue && valueObject) {
-                    if (currentValue.isErrorObject() || valueObject.isErrorObject()) {
+                    if (currentValue.isErrorObject()) {
+                        rowList[c] = currentValue as ErrorValueObject;
+                    } else if (valueObject.isErrorObject()) {
                         rowList[c] = ErrorValueObject.create(ErrorType.VALUE);
                     } else {
                         switch (batchOperatorType) {
@@ -274,7 +329,10 @@ export class ArrayValueObject extends BaseValueObject {
                                 if (!operator) {
                                     rowList[c] = ErrorValueObject.create(ErrorType.VALUE);
                                 } else {
-                                    rowList[c] = (currentValue as BaseValueObject).compare(valueObject, operator);
+                                    rowList[c] = (currentValue as BaseValueObject).compare(
+                                        valueObject,
+                                        operator as compareToken
+                                    );
                                 }
                                 break;
                             case BatchOperatorType.CONCATENATE_FRONT:
@@ -282,6 +340,17 @@ export class ArrayValueObject extends BaseValueObject {
                                 break;
                             case BatchOperatorType.CONCATENATE_BACK:
                                 rowList[c] = (currentValue as BaseValueObject).concatenateBack(valueObject);
+                                break;
+                            case BatchOperatorType.PRODUCT:
+                                if (!operator) {
+                                    rowList[c] = ErrorValueObject.create(ErrorType.VALUE);
+                                } else {
+                                    rowList[c] = (currentValue as BaseValueObject).product(
+                                        valueObject,
+                                        operator as callbackProductFnType
+                                    );
+                                }
+
                                 break;
                         }
                     }
@@ -304,7 +373,7 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     private _formatValue(rawValue: string | IArrayValueObject) {
-        if (!(rawValue instanceof String)) {
+        if (typeof rawValue !== 'string') {
             rawValue = rawValue as IArrayValueObject;
 
             this._rowCount = rawValue.rowCount;
@@ -356,7 +425,7 @@ export class ValueObjectFactory {
             if (!isNaN(Number(rawValue))) {
                 return new NumberValueObject(rawValue);
             }
-            if ($ARRAY_VALUE_REGEX.test(rawValue)) {
+            if (new RegExp($ARRAY_VALUE_REGEX, 'g').test(rawValue)) {
                 return new ArrayValueObject(rawValue);
             }
             return new StringValueObject(rawValue);

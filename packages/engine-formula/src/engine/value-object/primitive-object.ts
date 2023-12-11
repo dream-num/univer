@@ -299,7 +299,11 @@ export class NumberValueObject extends BaseValueObject {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
         if (typeof value === 'number') {
-            this.setValue(Big(currentValue).plus(value).toNumber());
+            if (Math.abs(currentValue) === Infinity || Math.abs(value) === Infinity) {
+                this.setValue(currentValue + value);
+            } else {
+                this.setValue(Big(currentValue).plus(value).toNumber());
+            }
         } else if (typeof value === 'boolean') {
             this.setValue(
                 Big(currentValue)
@@ -316,7 +320,11 @@ export class NumberValueObject extends BaseValueObject {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
         if (typeof value === 'number') {
-            this.setValue(Big(currentValue).minus(value).toNumber());
+            if (Math.abs(currentValue) === Infinity || Math.abs(value) === Infinity) {
+                this.setValue(currentValue - value);
+            } else {
+                this.setValue(Big(currentValue).minus(value).toNumber());
+            }
         } else if (typeof value === 'boolean') {
             this.setValue(
                 Big(currentValue)
@@ -333,7 +341,11 @@ export class NumberValueObject extends BaseValueObject {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
         if (typeof value === 'number') {
-            this.setValue(Big(currentValue).times(value).toNumber());
+            if (Math.abs(currentValue) === Infinity || Math.abs(value) === Infinity) {
+                this.setValue(currentValue * value);
+            } else {
+                this.setValue(Big(currentValue).times(value).toNumber());
+            }
         } else if (typeof value === 'boolean') {
             this.setValue(
                 Big(currentValue)
@@ -353,7 +365,11 @@ export class NumberValueObject extends BaseValueObject {
             if (value === 0) {
                 return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
             }
-            this.setValue(Big(currentValue).div(value).toNumber());
+            if (Math.abs(currentValue) === Infinity || Math.abs(value) === Infinity) {
+                this.setValue(currentValue / value);
+            } else {
+                this.setValue(Big(currentValue).div(value).toNumber());
+            }
         } else if (typeof value === 'boolean') {
             if (value === false) {
                 return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
@@ -380,25 +396,29 @@ export class NumberValueObject extends BaseValueObject {
                     break;
             }
         } else if (typeof value === 'number') {
-            switch (operator) {
-                case compareToken.EQUALS:
-                    result = Big(currentValue).eq(value);
-                    break;
-                case compareToken.GREATER_THAN:
-                    result = Big(currentValue).gt(value);
-                    break;
-                case compareToken.GREATER_THAN_OR_EQUAL:
-                    result = Big(currentValue).gte(value);
-                    break;
-                case compareToken.LESS_THAN:
-                    result = Big(currentValue).lt(value);
-                    break;
-                case compareToken.LESS_THAN_OR_EQUAL:
-                    result = Big(currentValue).lte(value);
-                    break;
-                case compareToken.NOT_EQUAL:
-                    result = !Big(currentValue).eq(value);
-                    break;
+            if (Math.abs(currentValue) === Infinity || Math.abs(value) === Infinity) {
+                result = this._compareInfinity(currentValue, value, operator);
+            } else {
+                switch (operator) {
+                    case compareToken.EQUALS:
+                        result = Big(currentValue).eq(value);
+                        break;
+                    case compareToken.GREATER_THAN:
+                        result = Big(currentValue).gt(value);
+                        break;
+                    case compareToken.GREATER_THAN_OR_EQUAL:
+                        result = Big(currentValue).gte(value);
+                        break;
+                    case compareToken.LESS_THAN:
+                        result = Big(currentValue).lt(value);
+                        break;
+                    case compareToken.LESS_THAN_OR_EQUAL:
+                        result = Big(currentValue).lte(value);
+                        break;
+                    case compareToken.NOT_EQUAL:
+                        result = !Big(currentValue).eq(value);
+                        break;
+                }
             }
         } else if (typeof value === 'boolean') {
             switch (operator) {
@@ -415,6 +435,32 @@ export class NumberValueObject extends BaseValueObject {
             }
         }
         return new BooleanValueObject(result);
+    }
+
+    private _compareInfinity(currentValue: number, value: number, operator: compareToken) {
+        let result = false;
+        switch (operator) {
+            case compareToken.EQUALS:
+                result = currentValue === value;
+                break;
+            case compareToken.GREATER_THAN:
+                result = currentValue > value;
+                break;
+            case compareToken.GREATER_THAN_OR_EQUAL:
+                result = currentValue >= value;
+                break;
+            case compareToken.LESS_THAN:
+                result = currentValue < value;
+                break;
+            case compareToken.LESS_THAN_OR_EQUAL:
+                result = currentValue <= value;
+                break;
+            case compareToken.NOT_EQUAL:
+                result = currentValue !== value;
+                break;
+        }
+
+        return result;
     }
 }
 

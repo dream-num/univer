@@ -19,7 +19,6 @@ import { Disposable, IUniverInstanceService, ObjectMatrix } from '@univerjs/core
 import { createIdentifier } from '@wendellhu/redi';
 
 import type {
-    IArrayFormulaUnitCellType,
     IDirtyUnitFeatureMap,
     IDirtyUnitSheetNameMap,
     IFormulaData,
@@ -30,6 +29,7 @@ import type {
     IUnitExcludedCell,
     IUnitSheetNameMap,
 } from '../basics/common';
+import { convertUnitDataToRuntime } from '../basics/runtime';
 
 export const DEFAULT_DOCUMENT_SUB_COMPONENT_ID = '__default_document_sub_component_id20231101__';
 
@@ -138,7 +138,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
         this._formulaData = config.formulaData;
 
-        this._arrayFormulaCellData = this._dataToRuntime(config.arrayFormulaCellData);
+        this._arrayFormulaCellData = convertUnitDataToRuntime(config.arrayFormulaCellData);
 
         this._sheetNameMap = unitSheetNameMap;
 
@@ -169,25 +169,6 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
     registerSheetNameMap(sheetNameMap: IUnitSheetNameMap) {
         this._sheetNameMap = sheetNameMap;
-    }
-
-    private _dataToRuntime(unitData: IArrayFormulaUnitCellType) {
-        const arrayFormulaCellData: IRuntimeUnitDataType = {};
-        Object.keys(unitData).forEach((unitId) => {
-            const sheetData = unitData[unitId];
-
-            if (arrayFormulaCellData[unitId] == null) {
-                arrayFormulaCellData[unitId] = {};
-            }
-
-            Object.keys(sheetData).forEach((sheetId) => {
-                const cellData = sheetData[sheetId];
-
-                arrayFormulaCellData[unitId][sheetId] = new ObjectMatrix(cellData);
-            });
-        });
-
-        return arrayFormulaCellData;
     }
 
     // private _loadOtherFormulaData() {

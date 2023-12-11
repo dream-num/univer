@@ -27,7 +27,7 @@ export class BaseAstNodeFactory extends Disposable {
         return 0;
     }
 
-    create(param: LexerNode | string): BaseAstNode {
+    create(param: LexerNode | string, currentRow?: number, currentColumn?: number): BaseAstNode {
         let token;
         if (param instanceof LexerNode) {
             token = param.getToken();

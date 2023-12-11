@@ -22,6 +22,12 @@ import { ErrorValueObject } from '../other-object/error-value-object';
 
 export type CalculateValueType = BaseValueObject | ErrorValueObject;
 
+export type callbackMapFnType = (currentValue: CalculateValueType, row: number, column: number) => CalculateValueType;
+
+export type callbackProductFnType = (
+    currentValue: CalculateValueType,
+    operationValue: CalculateValueType
+) => CalculateValueType;
 export interface IArrayValueObject {
     calculateValueList: CalculateValueType[][];
     rowCount: number;
@@ -106,19 +112,13 @@ export class BaseValueObject extends ObjectClassType {
         return ErrorValueObject.create(ErrorType.VALUE);
     }
 
-    pow(valueObject: BaseValueObject): CalculateValueType {
+    map(callbackFn: callbackMapFnType): CalculateValueType {
         /** abstract */
         return ErrorValueObject.create(ErrorType.VALUE);
     }
 
-    sqrt(valueObject: BaseValueObject): CalculateValueType {
-        /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
-    }
-
-    mod(valueObject: BaseValueObject): CalculateValueType {
-        /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+    product(valueObject: BaseValueObject, callbackFn: callbackProductFnType): CalculateValueType {
+        return callbackFn(this, valueObject);
     }
 
     compare(valueObject: BaseValueObject, operator: compareToken): CalculateValueType {

@@ -27,6 +27,7 @@ import {
 } from '@univerjs/core';
 import { FormulaDataModel, LexerTreeBuilder, SetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import {
     IEditorBridgeService,
     ISelectionRenderService,
@@ -47,12 +48,15 @@ export class FormulaEditorShowController extends Disposable {
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService
     ) {
         super();
         this._initInterceptorEditorStart();
 
         this._commandExecutedListener();
+
+        this._initInterceptorCell();
     }
 
     private _initInterceptorEditorStart() {
@@ -176,6 +180,26 @@ export class FormulaEditorShowController extends Disposable {
                     }
                 )
             )
+        );
+    }
+
+    private _initInterceptorCell() {
+        this.disposeWithMe(
+            this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
+                handler: (cell, location, next) => {
+                    const { row, col, workbookId, worksheetId } = location;
+
+                    const arrayFormulaMatrixCell = this._formulaDataModel.getArrayFormulaCellData();
+
+                    const arrayValue = arrayFormulaMatrixCell?.[workbookId]?.[worksheetId]?.[row]?.[col];
+
+                    if (arrayValue) {
+                        return next({ ...cell, ...arrayValue });
+                    }
+
+                    return next(cell);
+                },
+            })
         );
     }
 

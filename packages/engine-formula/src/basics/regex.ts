@@ -52,9 +52,9 @@ export const REFERENCE_TABLE_SINGLE_COLUMN_REGEX = `^(${UNIT_NAME_REGEX})?${TABL
 
 export const REFERENCE_TABLE_MULTIPLE_COLUMN_REGEX = `^(${UNIT_NAME_REGEX})?${TABLE_NAME_REGEX}(\\[${TABLE_MULTIPLE_COLUMN_REGEX}\\])?$|^${TABLE_NAME_REGEX}(\\[${TABLE_TITLE_REGEX}${TABLE_MULTIPLE_COLUMN_REGEX}\\])?$`; // =Table1[[#Title],[Column1]:[Column2]] | =Table1[[Column1]:[Column2]]
 
-export const $SUPER_TABLE_COLUMN_REGEX = /[.*?]/g;
+export const $SUPER_TABLE_COLUMN_REGEX = `[.*?]`;
 
-export const $ARRAY_VALUE_REGEX = /{.*?}/g;
+export const $ARRAY_VALUE_REGEX = `{.*?}`;
 
 export function isReferenceString(refString: string) {
     return (

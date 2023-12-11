@@ -32,6 +32,7 @@ export { ErrorType } from './basics/error-type';
 export { FunctionType, type IFunctionInfo, type IFunctionParam } from './basics/function';
 export { type IFunctionNames } from './basics/function';
 export { includeFormulaLexerToken, isFormulaLexerToken, normalizeSheetName } from './basics/match-token';
+export { convertUnitDataToRuntime } from './basics/runtime';
 export { matchToken } from './basics/token';
 export { compareToken } from './basics/token';
 export {

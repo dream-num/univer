@@ -126,9 +126,13 @@ export class NumfmtCopyPasteController extends Disposable {
         const repeatRange = getRepeatRange(copyInfo.copyRange, pastedRange, true);
         const cells: ISetCellsNumfmt = [];
         const removeRedos: IRemoveNumfmtMutationParams = { workbookId, worksheetId, ranges: [] };
-
+        const numfmtModel = this._numfmtService.getModel(workbookId, worksheetId);
         // Clears the destination area data format
-        removeRedos.ranges.push(pastedRange);
+        Range.foreach(pastedRange, (row, col) => {
+            if (this._numfmtService.getValue(workbookId, worksheetId, row, col, numfmtModel!)) {
+                removeRedos.ranges.push({ startRow: row, startColumn: col, endRow: row, endColumn: col });
+            }
+        });
 
         // Set up according to the data collected. This will overlap with the cleanup, but that's okay
         repeatRange.forEach((item) => {

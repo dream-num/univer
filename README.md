@@ -1,8 +1,6 @@
 <p align="center">
-  <img src="./docs/img/logo.jpg" />
+  <img alt="Univer Logo" src="./docs/img/logo.jpg" />
 </p>
-
-# Univer
 
 ![GitHub License](https://img.shields.io/github/license/dream-num/univer)
 ![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/dream-num/univer/build.yml)

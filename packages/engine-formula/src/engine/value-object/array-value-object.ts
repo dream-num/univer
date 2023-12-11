@@ -557,7 +557,7 @@ export class ArrayValueObject extends BaseValueObject {
 
             const row: CalculateValueType[] = [];
             for (let c = 0; c < columnArrayCount; c++) {
-                const cellRaw = columnArray[c];
+                const cellRaw = columnArray[c].trim();
                 row.push(ValueObjectFactory.create(cellRaw));
             }
             result.push(row);

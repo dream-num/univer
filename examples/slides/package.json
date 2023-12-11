@@ -2,7 +2,7 @@
     "name": "slides",
     "description": "Univer vanilla ts demo project",
     "author": "DreamNum <developer@univer.ai>",
-    "license": "MIT",
+    "license": "Apache-2.0",
     "private": true,
     "scripts": {
         "esbuild:demo": "node ./esbuild.config.mjs",

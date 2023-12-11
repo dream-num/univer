@@ -46,7 +46,7 @@ Univer 是一套企业文档与数据协同解决方案，包括电子表格、�
 
 ## 授权协议
 
-[Univer 的核心代码](https://github.com/dream-num/univer)在 MIT 协议下开源，任何组织和个人都可以免费使用其源代码和 npm 包。
+[Univer 的核心代码](https://github.com/dream-num/univer)在 Apache-2.0 协议下开源，任何组织和个人都可以免费使用其源代码和 npm 包。
 
 [本文档](https://github.com/dream-num/univer/tree/dev/apps/docs)在 CC-BY-NC-SA 4.0 协议下开源，任何组织和个人都可以免费使用，但不允许用于商业目的。
 

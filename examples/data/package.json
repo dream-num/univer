@@ -2,7 +2,7 @@
     "name": "data",
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
-    "license": "MIT",
+    "license": "Apache-2.0",
     "private": true,
     "main": "./src/index.ts",
     "exports": {

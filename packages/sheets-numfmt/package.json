@@ -4,7 +4,7 @@
     "description": "UniverSheet numfmt plugin",
     "keywords": [],
     "author": "DreamNum <developer@univer.ai>",
-    "license": "MIT",
+    "license": "Apache-2.0",
     "main": "./lib/cjs/index.js",
     "module": "./lib/es/index.js",
     "types": "./lib/types/index.d.ts",

@@ -2,7 +2,7 @@
     "name": "@univerjs/sheets-formula",
     "version": "0.1.0-alpha.1",
     "author": "DreamNum <developer@univer.ai>",
-    "license": "MIT",
+    "license": "Apache-2.0",
     "main": "./lib/cjs/index.js",
     "module": "./lib/es/index.js",
     "types": "./lib/types/index.d.ts",

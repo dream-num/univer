@@ -4,7 +4,7 @@
     "description": "UniverSheet normal base-slides",
     "keywords": [],
     "author": "DreamNum <developer@univer.ai>",
-    "license": "MIT",
+    "license": "Apache-2.0",
     "main": "./src/index.ts",
     "publishConfig": {
         "access": "public",

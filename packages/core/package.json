@@ -41,7 +41,7 @@
         "coverage": "vitest run --coverage",
         "build": "tsc && vite build"
     },
-    "license": "MIT",
+    "license": "Apache-2.0",
     "homepage": "https://github.com/dream-num/univer",
     "repository": {
         "type": "git",

@@ -1,3 +1,5 @@
+<!-- Logo here. -->
+
 # Univer
 
 ![GitHub License](https://img.shields.io/github/license/dream-num/univer)
@@ -8,17 +10,29 @@
 
 English | [简体中文](./README-zh.md)
 
+<!-- A introduction photo here. -->
+
+> ⚠️ This project is still in heavy development.
+
 ## Introduction
 
-Univer is an open source collaborative solution that aims to empower the collaboration capability into all systems. With Univer, users can synchronously edit the file content, making files flowing smoothly within different types of systems and avoid downloading and uploading Microsoft Office files anymore.
+Univer is a set of enterprise document and data collaboration solutions, including spreadsheets, documents, and slides. The highly extensible design allows developers to customize personalized functions based on Univer.
 
-We provide JavaScript part of code in the repository, including a canvas-based framework for building documents, spreadsheets, slides.
+-   📈 Univer supports spreadsheets. Documents and slides will be supported in the future
+-   🌌 Highly extensible architecture design
+    -   🔌 Plug-in architecture, the capabilities of documents can be combined on demand, support third-party plug-ins, and facilitate customization development
+    -   💄 Provide component library and icons to help developers present a consistent user experience
+-   ⚡ High performance
+    -   ✏️ Unified and efficient rendering engine and formula engine, based on Canvas
+    -   🧮 High-performance formula engine, supports Web Worker
+-   🌍 Internationalization support
 
-> ⚠️ This project is still in heavy development. Use it at your own risk.
+## Links
 
-## Demo
-
--   [Univer Demo](https://dream-num.github.io/univer-demo/)
+-   [Online Playground]()
+-   [Documentation]()
+-   [Official Website]()
+-   [Legacy Univer Demo](https://dream-num.github.io/univer-demo/)
 
 ## Packages
 

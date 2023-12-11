@@ -37,3 +37,6 @@ node_modules
 
 # yarn v2
 .yarn
+
+# Vite
+vite-env.d.ts

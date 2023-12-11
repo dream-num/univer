@@ -1,13 +1,19 @@
 /**
- * Enter an object, indexed by the keys in the object
- * example:
- * object a is {a:'a',b:'b',c:'c'}
- * object b is {a:'aa',b:'bb',c:'cc'}
- * object b is {a:'aaa',b:'bbb',c:'ccc'}
- * const model = new RefAlias([a,b,c],['a','b']) // the index is 'a' and 'b'.
- * we can use model.getValue('aa') or model.getValue('bb') get the object b
- * but can't use model.getValue('cc') to get the object b ,because model([a,b,c],['a','b']) is not set 'c' in the second parameter array
+ * Copyright 2023 DreamNum Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 export class RefAlias<T extends Record<string, unknown>, K extends keyof T = keyof T> {
     private _values: T[] = [];
     private _keys: K[] = [];

@@ -25,7 +25,7 @@ import {
     serializeRange,
     toDisposable,
 } from '@univerjs/core';
-import { TextSelectionManagerService } from '@univerjs/docs/services/text-selection-manager.service.js';
+import { TextSelectionManagerService } from '@univerjs/docs';
 import { LexerTreeBuilder, matchToken, sequenceNodeType } from '@univerjs/engine-formula';
 import { DeviceInputEventType, IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/engine-render';
 import type { EditorBridgeService } from '@univerjs/sheets-ui';

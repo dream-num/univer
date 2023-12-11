@@ -39,7 +39,7 @@
     "sideEffects": [
         "**/*.css"
     ],
-    "private": false,
+    "private": true,
     "scripts": {
         "test": "vitest run",
         "test:watch": "vitest",

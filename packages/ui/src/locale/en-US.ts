@@ -34,4 +34,5 @@ export default {
         paste: 'Paste',
     },
     'common-edit': 'Common Editing Shortcuts',
+    'toggle-shortcut-panel': 'Toggle Shortcut Panel',
 };

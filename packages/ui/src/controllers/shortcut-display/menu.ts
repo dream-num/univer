@@ -25,6 +25,6 @@ export function ShortcutPanelMenuItemFactory(): IMenuButtonItem {
         tooltip: 'toggle-shortcut-panel',
         icon: 'KeyboardSingle',
         type: MenuItemType.BUTTON,
-        positions: [MenuPosition.TOOLBAR_OTHERS],
+        positions: [MenuPosition.TOOLBAR_START],
     };
 }

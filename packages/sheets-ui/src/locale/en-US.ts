@@ -611,8 +611,17 @@ export default {
             'expand-selection-to-right-gap': 'Expand selection to the right gap',
             'expand-selection-to-up-gap': 'Expand selection to the up gap',
             'select-all': 'Select all',
+            'toggle-editing': 'Toggle editing',
+            'delete-and-start-editing': 'Clear and start editing',
+            'abort-editing': 'Abort editing',
+            'break-line': 'Break line',
+            'set-bold': 'Toggle bold',
+            'set-italic': 'Toggle italic',
+            'set-underline': 'Toggle underline',
+            'set-strike-through': 'Toggle strike through',
         },
     },
 
     'sheet-view': 'Sheet View',
+    'sheet-edit': 'Sheet Edit',
 };

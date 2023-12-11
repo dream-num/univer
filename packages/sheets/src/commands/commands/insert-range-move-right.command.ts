@@ -41,8 +41,8 @@ import { DeleteRangeMutation } from '../mutations/delete-range.mutation';
 import { InsertRangeMutation, InsertRangeUndoMutationFactory } from '../mutations/insert-range.mutation';
 import { InsertColMutation, InsertColMutationUndoFactory } from '../mutations/insert-row-col.mutation';
 import { RemoveColMutation } from '../mutations/remove-row-col.mutation';
-import type { IInterval } from './utils/selection-util';
-import { calculateTotalLength } from './utils/selection-util';
+import type { IInterval } from './utils/selection-utils';
+import { calculateTotalLength } from './utils/selection-utils';
 
 export interface InsertRangeMoveRightCommandParams {
     ranges: IRange[];

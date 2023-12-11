@@ -642,5 +642,23 @@ describe('Test commands used for change selections', () => {
                 rangeType: RANGE_TYPE.NORMAL,
             });
         });
+
+        describe('Expand to different directions', () => {
+            it('Should expand to left', async () => {
+                select(0, 1, 0, 1, 0, 1, false, false);
+
+                await commandService.executeCommand<ISelectAllCommandParams>(SelectAllCommand.id, {
+                    loop: true,
+                    expandToGapFirst: true,
+                });
+                expect(selectionManagerService.getLast()!.range).toEqual({
+                    startRow: 0,
+                    startColumn: 0,
+                    endRow: 1,
+                    endColumn: 1,
+                    rangeType: RANGE_TYPE.NORMAL,
+                });
+            });
+        });
     });
 });

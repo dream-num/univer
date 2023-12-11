@@ -36,7 +36,7 @@ import {
 } from '../mutations/set-row-visible.mutation';
 import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 import { SetSelectionsOperation } from '../operations/selection.operation';
-import { getPrimaryForRange } from './utils/selection-util';
+import { getPrimaryForRange } from './utils/selection-utils';
 
 export interface ISetSpecificRowsVisibleCommandParams {
     workbookId: string;

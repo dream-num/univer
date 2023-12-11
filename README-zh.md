@@ -1,18 +1,37 @@
 <p align="center">
-  <img alt="Univer Log" src="./docs/img/logo.jpg" />
+    <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="./docs/img/banner-light.png">
+        <img src="./docs/img/banner-dark.png" alt="Storybook" width="400" />
+    </picture>
 </p>
 
-![GitHub License](https://img.shields.io/github/license/dream-num/univer)
-![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/dream-num/univer/build.yml)
-[![codecov](https://codecov.io/gh/dream-num/univer/graph/badge.svg?token=aPfyW2pIMN)](https://codecov.io/gh/dream-num/univer)
-[![CodeFactor](https://www.codefactor.io/repository/github/dream-num/univer/badge/dev)](https://www.codefactor.io/repository/github/dream-num/univer/overview/dev)
-[![discord](https://img.shields.io/discord/1136129819961217077?logo=discord&logoColor=FFFFFF&label=discord&color=5865F2)](https://discord.gg/z3NKNT6D2f)
+<p align="center">
+  <a href="./LICENSE.txt">
+    <img src="https://img.shields.io/github/license/dream-num/univer" alt="GitHub License" />
+  </a>
+  <a href="https://github.com/dream-num/univer/actions/workflows/build.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/dream-num/univer/build.yml" alt="GitHub Workflow Status" />
+  </a>
+  <a href="https://codecov.io/gh/dream-num/univer">
+    <img src="https://codecov.io/gh/dream-num/univer/graph/badge.svg?token=aPfyW2pIMN" alt="codecov" />
+  </a>
+  <a href="https://www.codefactor.io/repository/github/dream-num/univer/overview/dev">
+    <img src="https://www.codefactor.io/repository/github/dream-num/univer/badge/dev" alt="CodeFactor" />
+  </a>
+  <a href="https://discord.gg/z3NKNT6D2f">
+    <img src="https://img.shields.io/discord/1136129819961217077?logo=discord&logoColor=FFFFFF&label=discord&color=5865F2" alt="Discord" />
+  </a>
+</p>
 
-简体中文 | [English](./README.md)
+<p align="center">
+  <a href="./README.md">English</a>
+  |
+  简体中文
+</p>
 
 <!-- An introduction photo here. -->
 
-> ⚠️ 该项目仍在开发中，请注意可能会有较大的 API 变更。欢迎向我们提交问题以及建议。
+> 🚧 该项目仍在开发中，请注意可能会有较大的 API 变更。欢迎向我们提交问题以及建议。
 
 ## 介绍
 

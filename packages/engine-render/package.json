@@ -43,7 +43,8 @@
         "build": "tsc && vite build"
     },
     "dependencies": {
-        "cjk-regex": "^3.1.0"
+        "cjk-regex": "^3.1.0",
+        "linebreak": "^1.1.0"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",

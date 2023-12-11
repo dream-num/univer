@@ -1100,7 +1100,7 @@ export class PromptController extends Disposable {
 
         this._isSelectionMovingRefSelections = refSelections;
 
-        const activeRange = this._textSelectionManagerService.getLast();
+        const activeRange = this._textSelectionManagerService.getActiveRange();
 
         if (activeRange == null) {
             return;
@@ -1135,7 +1135,6 @@ export class PromptController extends Disposable {
                 {
                     startOffset: textSelectionOffset + 1,
                     endOffset: textSelectionOffset + 1,
-                    collapsed,
                     style,
                 },
             ]);

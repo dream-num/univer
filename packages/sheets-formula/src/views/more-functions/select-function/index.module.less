@@ -1,6 +1,7 @@
 @result-height: 364px;
 @result-item-padding-left: 28px;
 @selected-icon-left: 6px;
+@description-height: 307px;
 
 .formula-select-function {
     &-select {
@@ -70,6 +71,8 @@
 
     &-content {
         overflow-y: auto;
+        max-height: @description-height;
+        margin: var(--margin-xs) 0;
     }
 
 }

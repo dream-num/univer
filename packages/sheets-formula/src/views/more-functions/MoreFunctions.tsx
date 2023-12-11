@@ -57,15 +57,17 @@ export function MoreFunctions() {
             <div className={styles.formulaMoreFunctionsOperation}>
                 {/* TODO@Dushusir: open input params after range selector refactor */}
                 {inputParams && (
-                    <Button type="primary" onClick={handleClickNextPrev}>
+                    <Button type="primary" size="small" onClick={handleClickNextPrev}>
                         {localeService.t('formula.moreFunctions.next')}
                     </Button>
                 )}
                 {inputParams && (
-                    <Button onClick={handleClickNextPrev}>{localeService.t('formula.moreFunctions.prev')}</Button>
+                    <Button size="small" onClick={handleClickNextPrev}>
+                        {localeService.t('formula.moreFunctions.prev')}
+                    </Button>
                 )}
                 {selectFunction && (
-                    <Button type="primary" onClick={handleConfirm}>
+                    <Button type="primary" size="small" onClick={handleConfirm}>
                         {localeService.t('formula.moreFunctions.confirm')}
                     </Button>
                 )}

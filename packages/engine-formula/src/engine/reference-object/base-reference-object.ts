@@ -130,7 +130,14 @@ export class BaseReferenceObject extends ObjectClassType {
 
         for (let r = startRow; r <= endRow; r++) {
             for (let c = startColumn; c <= endColumn; c++) {
-                const cell = this.getCellData(r + this._refOffsetY, c + this._refOffsetX);
+                const row = r + this._refOffsetY;
+                const column = c + this._refOffsetX;
+
+                if (row < 0 || column < 0) {
+                    return callback(new ErrorValueObject(ErrorType.REF), r, c);
+                }
+
+                const cell = this.getCellData(row, column);
                 let result: Nullable<boolean> = false;
                 if (!cell) {
                     result = callback(new NumberValueObject(0, true), r, c);

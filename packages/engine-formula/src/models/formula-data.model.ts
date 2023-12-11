@@ -369,9 +369,9 @@ export class FormulaDataModel extends Disposable {
         let formulaDataItem: Nullable<IFormulaDataItem> = null;
 
         cellMatrix.forValue((row, column, item) => {
-            const { f, si } = item;
+            const { f, si, x = 0, y = 0 } = item;
 
-            if (si === sId && f.length > 0) {
+            if (si === sId && f.length > 0 && x === 0 && y === 0) {
                 formulaDataItem = item;
                 return false;
             }
@@ -402,8 +402,10 @@ export class FormulaDataModel extends Disposable {
         sheetFormulaDataMatrix.forValue((r, c, cell) => {
             const formulaString = cell?.f || '';
             const formulaId = cell?.si || '';
+            const x = cell.x || 0;
+            const y = cell.y || 0;
 
-            if (isFormulaString(formulaString) && isFormulaId(formulaId)) {
+            if (isFormulaString(formulaString) && isFormulaId(formulaId) && x === 0 && y === 0) {
                 formulaIdMap.set(formulaId, { f: formulaString, r, c });
             }
         });

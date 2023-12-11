@@ -46,6 +46,7 @@ import {
     handleIRemoveRow,
     handleMoveRange,
     INumfmtService,
+    rangeMerge,
     RefRangeService,
     RemoveNumfmtMutation,
     runRefRangeMutations,
@@ -125,7 +126,7 @@ export class NumfmtRefRangeController extends Disposable {
             const id = `${index + 1}`;
             const item = patternMap[key];
             refMap[id] = { pattern: item.pattern, type: item.type };
-            values[id] = { ranges: item.ranges };
+            values[id] = { ranges: rangeMerge(item.ranges) };
         });
         return {
             ...firstOne,
@@ -145,7 +146,7 @@ export class NumfmtRefRangeController extends Disposable {
         const firstOne = list[0];
         return {
             ...firstOne,
-            ranges,
+            ranges: rangeMerge(ranges),
         };
     }
 
@@ -235,12 +236,7 @@ export class NumfmtRefRangeController extends Disposable {
                             .getSheetId();
                         const model = this._numfmtService.getModel(workbookId, worksheetId);
                         const disposableMap: Map<string, IDisposable> = new Map();
-                        const register = (
-                            commandInfo: EffectRefRangeParams,
-                            preValues: Array<{ redos: IMutationInfo[]; undos: IMutationInfo[] }>,
-                            row: number,
-                            col: number
-                        ) => {
+                        const register = (commandInfo: EffectRefRangeParams, row: number, col: number) => {
                             const targetRange = {
                                 startRow: row,
                                 startColumn: col,
@@ -353,9 +349,8 @@ export class NumfmtRefRangeController extends Disposable {
                                     endRow: row,
                                     endColumn: col,
                                 };
-                                const disposable = this._refRangeService.registerRefRange(
-                                    targetRange,
-                                    (commandInfo, preValues) => register(commandInfo, preValues, row, col)
+                                const disposable = this._refRangeService.registerRefRange(targetRange, (commandInfo) =>
+                                    register(commandInfo, row, col)
                                 );
                                 disposableMap.set(`${row}_${col}`, disposable);
                                 disposableCollection.add(disposable);
@@ -425,8 +420,7 @@ export class NumfmtRefRangeController extends Disposable {
                                                     };
                                                     const disposable = this._refRangeService.registerRefRange(
                                                         targetRange,
-                                                        (commandInfo, preValues) =>
-                                                            register(commandInfo, preValues, row, col)
+                                                        (commandInfo) => register(commandInfo, row, col)
                                                     );
                                                     disposableMap.set(key, disposable);
                                                     disposableCollection.add(disposable);

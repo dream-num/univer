@@ -37,6 +37,8 @@ import {
     factoryRemoveNumfmtUndoMutation,
     INTERCEPTOR_POINT,
     INumfmtService,
+    rangeMerge,
+    RemoveNumfmtMutation,
     SelectionManagerService,
     SetNumfmtMutation,
     SheetInterceptorService,
@@ -227,9 +229,10 @@ export class NumfmtController extends Disposable implements INumfmtController {
                                     redos.ranges.push({ startColumn: col, endColumn: col, startRow: row, endRow: row });
                                 });
                             });
+                            redos.ranges = rangeMerge(redos.ranges);
                             const undos = factoryRemoveNumfmtUndoMutation(self._injector, redos);
                             return {
-                                redos: [{ id: SetNumfmtMutation.id, params: redos }],
+                                redos: [{ id: RemoveNumfmtMutation.id, params: redos }],
                                 undos,
                             };
                         }

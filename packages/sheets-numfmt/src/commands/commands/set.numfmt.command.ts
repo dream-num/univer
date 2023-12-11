@@ -31,6 +31,7 @@ import type {
 import {
     factoryRemoveNumfmtUndoMutation,
     factorySetNumfmtUndoMutation,
+    rangeMerge,
     RemoveNumfmtMutation,
     SetNumfmtMutation,
     transformCellsToRange,
@@ -72,6 +73,10 @@ export const SetNumfmtCommand: ICommand<ISetNumfmtCommandParams> = {
         const redos: Array<IMutationInfo<IRemoveNumfmtMutationParams | ISetNumfmtMutationParams>> = [];
         const undos: Array<IMutationInfo<IRemoveNumfmtMutationParams | ISetNumfmtMutationParams>> = [];
         if (setCells.length) {
+            Object.keys(setRedos.values).forEach((key) => {
+                const v = setRedos.values[key];
+                v.ranges = rangeMerge(v.ranges);
+            });
             redos.push({
                 id: SetNumfmtMutation.id,
                 params: setRedos,
@@ -80,6 +85,7 @@ export const SetNumfmtCommand: ICommand<ISetNumfmtCommandParams> = {
             undos.push(...undo);
         }
         if (removeCells.length) {
+            removeRedos.ranges = rangeMerge(removeRedos.ranges);
             redos.push({
                 id: RemoveNumfmtMutation.id,
                 params: removeRedos,

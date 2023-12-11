@@ -18,6 +18,7 @@ import type { ICommand, IMutationInfo, IRange } from '@univerjs/core';
 import { CommandType, Range } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
+import { rangeMerge } from '../../basics/rangeMerge';
 import { createUniqueKey, groupByKey } from '../../basics/utils';
 import type { FormatType } from '../../services/numfmt/type';
 import { INumfmtService } from '../../services/numfmt/type';
@@ -48,6 +49,11 @@ export const factorySetNumfmtUndoMutation = (accessor: IAccessor, option: ISetNu
     });
     const result: Array<IMutationInfo<ISetNumfmtMutationParams | IRemoveNumfmtMutationParams>> = [];
     if (cells) {
+        const params = transformCellsToRange(workbookId, worksheetId, cells);
+        Object.keys(params.values).forEach((key) => {
+            const v = params.values[key];
+            v.ranges = rangeMerge(v.ranges);
+        });
         result.push({
             id: SetNumfmtMutation.id,
             params: transformCellsToRange(workbookId, worksheetId, cells),
@@ -148,7 +154,12 @@ export const factoryRemoveNumfmtUndoMutation = (accessor: IAccessor, option: IRe
             }
         });
     });
-    return [{ id: SetNumfmtMutation.id, params: transformCellsToRange(workbookId, worksheetId, cells) }];
+    const params = transformCellsToRange(workbookId, worksheetId, cells);
+    Object.keys(params.values).forEach((key) => {
+        const v = params.values[key];
+        v.ranges = rangeMerge(v.ranges);
+    });
+    return [{ id: SetNumfmtMutation.id, params }];
 };
 export type ISetCellsNumfmt = Array<{ pattern: string; type: FormatType; row: number; col: number }>;
 export const transformCellsToRange = (
@@ -174,7 +185,6 @@ export const transformCellsToRange = (
             }
             values[key].ranges.push(cellToRange(item.row, item.col));
         });
-        // TODO@gggpound:  ranges to be merge.
     });
     return { workbookId, worksheetId, refMap, values };
 };

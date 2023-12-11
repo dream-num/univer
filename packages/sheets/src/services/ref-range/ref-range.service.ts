@@ -33,10 +33,7 @@ import { SheetInterceptorService } from '../sheet-interceptor/sheet-interceptor.
 import type { EffectRefRangeParams } from './type';
 import { EffectRefRangId } from './type';
 
-type RefRangCallback = (
-    params: EffectRefRangeParams,
-    preValues: Array<{ redos: IMutationInfo[]; undos: IMutationInfo[] }>
-) => {
+type RefRangCallback = (params: EffectRefRangeParams) => {
     redos: IMutationInfo[];
     undos: IMutationInfo[];
 };
@@ -163,7 +160,7 @@ export class RefRangeService extends Disposable {
                 const result = cbList
                     .reduce(
                         (result, currentFn) => {
-                            const v = currentFn(command, result);
+                            const v = currentFn(command);
                             result.push(v);
                             return result;
                         },

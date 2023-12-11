@@ -14,5 +14,18 @@
  * limitations under the License.
  */
 
-export * from '../index';
-declare module '@univerjs/engine-render' {}
+declare module 'linebreak' {
+    export = class linebreak {
+        constructor(...args: any[]);
+
+        getPairTableBreak(...args: any[]): any;
+
+        getSimpleBreak(...args: any[]): any;
+
+        nextBreak(...args: any[]): any;
+
+        nextCharClass(...args: any[]): any;
+
+        nextCodePoint(...args: any[]): any;
+    };
+}

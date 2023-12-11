@@ -16,10 +16,10 @@
 
 import { LocaleType, Univer } from '@univerjs/core';
 import { defaultTheme } from '@univerjs/design';
-import { UniverDocs } from '@univerjs/docs';
-import { UniverDocsUI } from '@univerjs/docs-ui';
-import { UniverRenderEngine } from '@univerjs/engine-render';
-import { UniverUI } from '@univerjs/ui';
+import { UniverDocsPlugin } from '@univerjs/docs';
+import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
+import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import { UniverUIPlugin } from '@univerjs/ui';
 import { DEFAULT_DOCUMENT_DATA_CN } from 'data';
 
 import { locales } from './locales';
@@ -40,16 +40,16 @@ const univer = new Univer({
 });
 
 // core plugins
-univer.registerPlugin(UniverRenderEngine);
-univer.registerPlugin(UniverUI, {
+univer.registerPlugin(UniverRenderEnginePlugin);
+univer.registerPlugin(UniverUIPlugin, {
     container: 'univer-container',
     header: true,
     toolbar: true,
 });
-univer.registerPlugin(UniverDocs, {
+univer.registerPlugin(UniverDocsPlugin, {
     standalone: true,
 });
-univer.registerPlugin(UniverDocsUI, {
+univer.registerPlugin(UniverDocsUIPlugin, {
     container: 'univerdoc',
     layout: {
         docContainerConfig: {

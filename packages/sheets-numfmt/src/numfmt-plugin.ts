@@ -27,7 +27,7 @@ import { NumfmtSheetController } from './controllers/numfmt.sheet.controller';
 import { INumfmtController } from './controllers/type';
 import { UserHabitController } from './controllers/user-habit.controller';
 
-export class UniverSheetsNumfmt extends Plugin {
+export class UniverSheetsNumfmtPlugin extends Plugin {
     static override type = PluginType.Sheet;
 
     constructor(

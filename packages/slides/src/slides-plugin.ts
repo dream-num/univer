@@ -29,7 +29,7 @@ const DEFAULT_SLIDE_PLUGIN_DATA = {};
 
 const PLUGIN_NAME = 'slides';
 
-export class UniverSlides extends Plugin {
+export class UniverSlidesPlugin extends Plugin {
     static override type = PluginType.Slide;
 
     private _config: IUniverSlidesConfig;

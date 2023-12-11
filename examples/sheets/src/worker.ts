@@ -15,17 +15,17 @@
  */
 
 import { LocaleType, Univer } from '@univerjs/core';
-import { UniverFormulaEngine } from '@univerjs/engine-formula';
+import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRPCWorkerThreadPlugin } from '@univerjs/rpc';
-import { UniverSheets } from '@univerjs/sheets';
+import { UniverSheetsPlugin } from '@univerjs/sheets';
 
 // Univer web worker is also a univer application.
 const univer = new Univer({
     locale: LocaleType.ZH_CN,
 });
 
-univer.registerPlugin(UniverSheets);
-univer.registerPlugin(UniverFormulaEngine);
+univer.registerPlugin(UniverSheetsPlugin);
+univer.registerPlugin(UniverFormulaEnginePlugin);
 univer.registerPlugin(UniverRPCWorkerThreadPlugin);
 
 declare let self: WorkerGlobalScope & typeof globalThis & { univer: Univer };

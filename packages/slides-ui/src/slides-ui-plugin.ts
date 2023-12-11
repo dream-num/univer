@@ -26,7 +26,7 @@ import { AppUIController } from './controllers/app-ui-controller';
 import { SlideUIController } from './controllers/slide-ui.controller';
 import { zhCN } from './locale';
 
-export class UniverSlidesUI extends Plugin {
+export class UniverSlidesUIPlugin extends Plugin {
     static override type = PluginType.Slide;
 
     private _appUIController?: AppUIController;

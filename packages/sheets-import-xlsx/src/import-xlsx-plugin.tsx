@@ -24,7 +24,7 @@ import { UploadService } from './services/upload.service';
 
 export interface IImportXlsxPluginConfig {}
 
-export class ImportXlsxPlugin extends Plugin {
+export class UniverSheetsImportXlsxPlugin extends Plugin {
     static override type = PluginType.Sheet;
 
     private _importXlsxController!: ImportXlsxController;

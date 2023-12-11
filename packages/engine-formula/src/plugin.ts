@@ -58,7 +58,7 @@ interface IUniverFormulaEngine {
     notExecuteFormula?: boolean;
 }
 
-export class UniverFormulaEngine extends Plugin {
+export class UniverFormulaEnginePlugin extends Plugin {
     constructor(
         private _config: IUniverFormulaEngine,
         @Inject(Injector) protected override _injector: Injector

@@ -95,7 +95,7 @@ const DEFAULT_DOCUMENT_PLUGIN_DATA = {
 
 const PLUGIN_NAME = 'docs';
 
-export class UniverDocs extends Plugin {
+export class UniverDocsPlugin extends Plugin {
     static override type = PluginType.Doc;
 
     private _config: IUniverDocsConfig;

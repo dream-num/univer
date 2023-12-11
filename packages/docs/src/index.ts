@@ -49,7 +49,7 @@ export {
     type ISetTextSelectionsOperationParams,
     SetTextSelectionsOperation,
 } from './commands/operations/text-selection.operation';
-export { type IUniverDocsConfig, UniverDocs } from './doc-plugin';
+export { type IUniverDocsConfig, UniverDocsPlugin } from './doc-plugin';
 export { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
 export { DocViewModelManagerService } from './services/doc-view-model-manager.service';
 export { TextSelectionManagerService } from './services/text-selection-manager.service';

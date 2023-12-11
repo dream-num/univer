@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-export { FindPlugin } from './find-plugin';
+export { UniverSheetsFindPlugin } from './find-plugin';
 export { enUS, zhCN } from './locale';

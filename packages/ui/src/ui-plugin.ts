@@ -57,7 +57,7 @@ const DEFAULT_SLIDE_PLUGIN_DATA = {};
 /**
  * UI plugin provides basic interaction with users. Including workbench (menus, UI parts, notifications etc.), copy paste, shortcut.
  */
-export class UniverUI extends Plugin {
+export class UniverUIPlugin extends Plugin {
     static override type = PluginType.Univer;
 
     private _config: IUniverUIConfig;

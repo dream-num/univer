@@ -16,10 +16,10 @@
 
 import { LocaleType, Univer } from '@univerjs/core';
 import { greenTheme } from '@univerjs/design';
-import { UniverRenderEngine } from '@univerjs/engine-render';
-import { UniverSlides } from '@univerjs/slides';
-import { UniverSlidesUI } from '@univerjs/slides-ui';
-import { UniverUI } from '@univerjs/ui';
+import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import { UniverSlidesPlugin } from '@univerjs/slides';
+import { UniverSlidesUIPlugin } from '@univerjs/slides-ui';
+import { UniverUIPlugin } from '@univerjs/ui';
 import { DEFAULT_SLIDE_DATA } from 'data';
 
 // package info
@@ -37,16 +37,16 @@ const univer = new Univer({
 });
 
 // base-render
-univer.registerPlugin(UniverRenderEngine);
-univer.registerPlugin(UniverUI, {
+univer.registerPlugin(UniverRenderEnginePlugin);
+univer.registerPlugin(UniverUIPlugin, {
     container: 'univer-container',
     header: true,
     toolbar: true,
     footer: true,
     innerLeft: true,
 });
-univer.registerPlugin(UniverSlides);
-univer.registerPlugin(UniverSlidesUI);
+univer.registerPlugin(UniverSlidesPlugin);
+univer.registerPlugin(UniverSlidesUIPlugin);
 
 univer.createUniverSlide(DEFAULT_SLIDE_DATA);
 

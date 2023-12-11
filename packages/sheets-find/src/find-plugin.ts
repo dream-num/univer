@@ -31,7 +31,7 @@ import { FindService } from './services/find.service';
 
 export interface IFindPluginConfig {}
 
-export class FindPlugin extends Plugin {
+export class UniverSheetsFindPlugin extends Plugin {
     static override type = PluginType.Sheet;
 
     private _config: IFindPluginConfig = {};

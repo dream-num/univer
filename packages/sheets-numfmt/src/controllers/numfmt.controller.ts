@@ -224,9 +224,17 @@ export class NumfmtController extends Disposable implements INumfmtController {
                                 worksheetId,
                                 ranges: [],
                             };
+                            const numfmtModel = self._numfmtService.getModel(workbookId, worksheetId);
                             selections.forEach((range) => {
                                 Range.foreach(range, (row, col) => {
-                                    redos.ranges.push({ startColumn: col, endColumn: col, startRow: row, endRow: row });
+                                    if (numfmtModel?.getValue(row, col)) {
+                                        redos.ranges.push({
+                                            startColumn: col,
+                                            endColumn: col,
+                                            startRow: row,
+                                            endRow: row,
+                                        });
+                                    }
                                 });
                             });
                             redos.ranges = rangeMerge(redos.ranges);

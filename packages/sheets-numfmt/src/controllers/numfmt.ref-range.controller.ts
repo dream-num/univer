@@ -27,7 +27,6 @@ import {
 } from '@univerjs/core';
 import type {
     EffectRefRangeParams,
-    FormatType,
     IRemoveNumfmtMutationParams,
     ISetCellsNumfmt,
     ISetNumfmtMutationParams,
@@ -46,7 +45,6 @@ import {
     handleIRemoveRow,
     handleMoveRange,
     INumfmtService,
-    rangeMerge,
     RefRangeService,
     RemoveNumfmtMutation,
     runRefRangeMutations,
@@ -75,81 +73,6 @@ export class NumfmtRefRangeController extends Disposable {
         super();
         this._registerRefRange();
         this._mergeRefMutations();
-    }
-
-    private _refToReal(values: ISetNumfmtMutationParams['values'], refMap: ISetNumfmtMutationParams['refMap']) {
-        const patternMap: {
-            [pattern: string]: {
-                pattern: string;
-                ranges: IRange[];
-                type: FormatType;
-            };
-        } = {};
-
-        Object.keys(values).forEach((id) => {
-            const v = refMap[id];
-            if (!v) {
-                return;
-            }
-            const ranges = values[id].ranges;
-            const pattern = v.pattern;
-            const type = v.type;
-            patternMap[pattern] = { ranges, pattern, type };
-        });
-        return patternMap;
-    }
-
-    private _mergeNumfmtSetMutation(list: ISetNumfmtMutationParams[]) {
-        if (!list.length) {
-            return [];
-        }
-        const firstOne = list[0];
-        const patternMap: {
-            [pattern: string]: {
-                pattern: string;
-                ranges: IRange[];
-                type: FormatType;
-            };
-        } = {};
-        const refMap: ISetNumfmtMutationParams['refMap'] = {};
-        const values: ISetNumfmtMutationParams['values'] = {};
-        list.forEach((item) => {
-            const { refMap, values } = item;
-            const value = this._refToReal(values, refMap);
-            Object.keys(value).forEach((key) => {
-                if (patternMap[key]) {
-                    patternMap[key].ranges.push(...value[key].ranges);
-                } else {
-                    patternMap[key] = value[key];
-                }
-            });
-        });
-        Object.keys(patternMap).forEach((key, index) => {
-            const id = `${index + 1}`;
-            const item = patternMap[key];
-            refMap[id] = { pattern: item.pattern, type: item.type };
-            values[id] = { ranges: rangeMerge(item.ranges) };
-        });
-        return {
-            ...firstOne,
-            refMap,
-            values,
-        };
-    }
-
-    private _mergeNumfmtRemoveMutation(list: IRemoveNumfmtMutationParams[]) {
-        if (!list.length) {
-            return [];
-        }
-        const ranges: IRange[] = [];
-        list.forEach((item) => {
-            ranges.push(...item.ranges);
-        });
-        const firstOne = list[0];
-        return {
-            ...firstOne,
-            ranges: rangeMerge(ranges),
-        };
     }
 
     private _mergeRefMutations() {

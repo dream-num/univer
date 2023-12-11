@@ -17,7 +17,7 @@
 import { LocaleService, Plugin, PluginType } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { IMPORT_XLSX_PLUGIN_NAME } from './basics';
+import { IMPORT_XLSX_PLUGIN_NAME } from './common/plugin-name';
 import { ImportXlsxController } from './controllers/import-xlsx-controller';
 import { zhCN } from './locale';
 import { UploadService } from './services/upload.service';

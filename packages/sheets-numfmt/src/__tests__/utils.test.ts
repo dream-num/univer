@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { IRange } from '@univerjs/core';
+import { RemoveNumfmtMutation, SetNumfmtMutation } from '@univerjs/sheets';
 import { describe, expect, it } from 'vitest';
 
 import { currencySymbols } from '../base/const/CURRENCY-SYMBOLS';
@@ -24,7 +26,10 @@ import {
     isPatternEqualWithoutDecimal,
     setPatternDecimal,
 } from '../utils/decimal';
+import { mergeNumfmtMutations } from '../utils/mutation';
 
+const cellToRange = (row: number, col: number) =>
+    ({ startRow: row, endRow: row, startColumn: col, endColumn: col }) as IRange;
 describe('test numfmt utils function', () => {
     it('getCurrencyType', () => {
         expect(getCurrencyType(`_(${currencySymbols[3]} 123123`)).toBe(currencySymbols[3]);
@@ -53,5 +58,65 @@ describe('test numfmt utils function', () => {
         expect(setPatternDecimal('.', 4)).toBe('.0000'); // the positive color ignored
         expect(setPatternDecimal('0.0', 4)).toBe('0.0000'); // the positive color ignored
         expect(setPatternDecimal('0.0', 0)).toBe('0'); // the positive color ignored
+    });
+
+    it('mergeNumfmtMutations', () => {
+        const result = mergeNumfmtMutations([
+            {
+                id: SetNumfmtMutation.id,
+                params: {
+                    values: {
+                        a: { ranges: [cellToRange(2, 3), cellToRange(2, 4), cellToRange(4, 5)] },
+                    },
+                    refMap: { a: { pattern: '', type: '' } },
+                },
+            },
+            {
+                id: RemoveNumfmtMutation.id,
+                params: {
+                    ranges: [cellToRange(2, 3), cellToRange(2, 4), cellToRange(4, 5)],
+                },
+            },
+            {
+                id: SetNumfmtMutation.id,
+                params: {
+                    values: {
+                        a: { ranges: [cellToRange(4, 6), cellToRange(4, 5)] },
+                    },
+                    refMap: { a: { pattern: '', type: '' } },
+                },
+            },
+        ]);
+
+        expect(result[0].id === RemoveNumfmtMutation.id).toBeTruthy();
+        expect(result[1].id === SetNumfmtMutation.id).toBeTruthy();
+        expect((result as any)[0].params.ranges).toEqual([
+            {
+                startRow: 2,
+                endRow: 2,
+                startColumn: 3,
+                endColumn: 4,
+            },
+            {
+                startRow: 4,
+                endRow: 4,
+                startColumn: 5,
+                endColumn: 5,
+            },
+        ]);
+        expect((result as any)[1].params.values.a.ranges).toEqual([
+            {
+                startRow: 2,
+                endRow: 2,
+                startColumn: 3,
+                endColumn: 4,
+            },
+            {
+                startRow: 4,
+                endRow: 4,
+                startColumn: 5,
+                endColumn: 6,
+            },
+        ]);
     });
 });

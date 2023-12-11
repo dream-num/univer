@@ -29,6 +29,7 @@ import {
     factoryRemoveNumfmtUndoMutation,
     factorySetNumfmtUndoMutation,
     INumfmtService,
+    rangeMerge,
     RemoveNumfmtMutation,
     SetNumfmtMutation,
     transformCellsToRange,
@@ -151,6 +152,13 @@ export class NumfmtCopyPasteController extends Disposable {
                 });
         });
         const setRedos = transformCellsToRange(workbookId, worksheetId, cells);
+
+        Object.keys(setRedos.values).forEach((key) => {
+            const v = setRedos.values[key];
+            v.ranges = rangeMerge(v.ranges);
+        });
+
+        removeRedos.ranges = rangeMerge(removeRedos.ranges);
         const undos = [
             ...factorySetNumfmtUndoMutation(this._injector, setRedos),
             ...factoryRemoveNumfmtUndoMutation(this._injector, removeRedos),

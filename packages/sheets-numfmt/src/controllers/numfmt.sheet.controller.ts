@@ -20,6 +20,7 @@ import type { IRemoveNumfmtMutationParams, IRemoveSheetCommandParams } from '@un
 import {
     factoryRemoveNumfmtUndoMutation,
     INumfmtService,
+    rangeMerge,
     RemoveNumfmtMutation,
     RemoveSheetCommand,
     SheetInterceptorService,
@@ -57,7 +58,7 @@ export class NumfmtSheetController extends Disposable {
                         const redoParams: IRemoveNumfmtMutationParams = {
                             workbookId,
                             worksheetId,
-                            ranges,
+                            ranges: rangeMerge(ranges),
                         };
                         const undoParams = factoryRemoveNumfmtUndoMutation(this._injector, redoParams);
                         return {

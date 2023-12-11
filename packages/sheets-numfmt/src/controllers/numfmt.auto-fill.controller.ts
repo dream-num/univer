@@ -28,6 +28,7 @@ import { APPLY_TYPE, getAutoFillRepeatRange, IAutoFillService } from '@univerjs/
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { SHEET_NUMFMT_PLUGIN } from '../base/const/PLUGIN_NAME';
+import { mergeNumfmtMutations } from '../utils/mutation';
 
 @OnLifecycle(LifecycleStages.Rendered, NumfmtAutoFillController)
 export class NumfmtAutoFillController extends Disposable {
@@ -130,8 +131,8 @@ export class NumfmtAutoFillController extends Disposable {
                 totalRedos.push(...redos);
             });
             return {
-                undos: totalUndos,
-                redos: totalRedos,
+                undos: mergeNumfmtMutations(totalUndos),
+                redos: mergeNumfmtMutations(totalRedos),
             };
         };
         const hook: IAutoFillHook = {

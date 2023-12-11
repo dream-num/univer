@@ -26,24 +26,18 @@ export class Divided extends BaseFunction {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        if ((variant2 as BaseValueObject).getValue() === 0) {
+        if (variant1.isReferenceObject()) {
+            variant1 = (variant1 as BaseReferenceObject).toArrayValueObject();
+        }
+
+        if (variant2.isReferenceObject()) {
+            variant2 = (variant2 as BaseReferenceObject).toArrayValueObject();
+        }
+
+        if (!(variant2 as BaseValueObject).isArray() && (variant2 as BaseValueObject).getValue() === 0) {
             return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
         }
 
-        let result;
-
-        if (this.checkArrayType(variant1) && this.checkArrayType(variant2)) {
-            result = (variant1 as BaseReferenceObject)
-                .toArrayValueObject()
-                .divided((variant2 as BaseReferenceObject).toArrayValueObject());
-        } else if (this.checkArrayType(variant1)) {
-            result = (variant1 as BaseReferenceObject).toArrayValueObject().divided(variant2 as BaseValueObject);
-        } else if (this.checkArrayType(variant2)) {
-            result = (variant1 as BaseValueObject).divided((variant2 as BaseReferenceObject).toArrayValueObject());
-        } else {
-            result = (variant1 as BaseValueObject).divided(variant2 as BaseValueObject);
-        }
-
-        return result;
+        return (variant1 as BaseValueObject).divided(variant2 as BaseValueObject);
     }
 }

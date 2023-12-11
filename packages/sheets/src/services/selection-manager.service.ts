@@ -376,7 +376,11 @@ export class SelectionManagerService implements IDisposable {
         if (!sheetSelectionData.has(sheetId)) {
             sheetSelectionData.set(sheetId, [...selectionDatas]);
         } else {
-            const OldSelectionDatas = sheetSelectionData.get(sheetId)!;
+            let OldSelectionDatas = sheetSelectionData.get(sheetId);
+            if (OldSelectionDatas == null) {
+                OldSelectionDatas = [];
+                sheetSelectionData.set(sheetId, OldSelectionDatas);
+            }
             OldSelectionDatas.push(...selectionDatas);
         }
 

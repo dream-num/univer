@@ -32,6 +32,10 @@ export interface IArrayValueObject {
     calculateValueList: CalculateValueType[][];
     rowCount: number;
     columnCount: number;
+    unitId: string;
+    sheetId: string;
+    row: number;
+    column: number;
 }
 export class BaseValueObject extends ObjectClassType {
     constructor(private _rawValue: string | number | boolean) {

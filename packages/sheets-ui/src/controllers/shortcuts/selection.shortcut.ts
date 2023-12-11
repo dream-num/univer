@@ -255,7 +255,7 @@ export const ExpandSelectionEndDownShortcutItem: IShortcutItem<IExpandSelectionC
 
 export const ExpandSelectionEndUpShortcutItem: IShortcutItem<IExpandSelectionCommandParams> = {
     id: ExpandSelectionCommand.id,
-    description: 'shortcut.sheet.expand-selection-to-above-gap',
+    description: 'shortcut.sheet.expand-selection-to-up-gap',
     group: '3_sheet-view',
     binding: KeyCode.ARROW_UP | MetaKeys.SHIFT | MetaKeys.CTRL_COMMAND,
     preconditions: whenEditorNotActivated,

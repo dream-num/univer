@@ -23,4 +23,16 @@ export default {
         view: '视图',
         others: '其他',
     },
+    'shortcut-panel': {
+        title: '快捷键面板',
+    },
+    shortcut: {
+        undo: '撤销',
+        redo: '重做',
+        cut: '剪切',
+        copy: '复制',
+        paste: '粘贴',
+    },
+    'common-edit': '常用编辑',
+    'toggle-shortcut-panel': '打开收起快捷键面板',
 };

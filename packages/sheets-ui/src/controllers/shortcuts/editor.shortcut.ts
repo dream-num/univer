@@ -75,6 +75,8 @@ export function generateArrowSelectionShortCutItem() {
 export const EditorCursorEnterShortcut: IShortcutItem = {
     id: SetCellEditVisibleOperation.id,
     binding: KeyCode.ENTER,
+    description: 'shortcut.sheet.toggle-editing',
+    group: '4_sheet-edit',
     preconditions: (contextService) => whenEditorDidNotInputFormulaActivated(contextService),
     staticParameters: {
         visible: false,
@@ -97,6 +99,8 @@ export const EditorCursorTabShortcut: IShortcutItem = {
 export const EditorCursorEscShortcut: IShortcutItem = {
     id: SetCellEditVisibleOperation.id,
     binding: KeyCode.ESC,
+    description: 'shortcut.sheet.abort-editing',
+    group: '4_sheet-edit',
     preconditions: (contextService) => contextService.getContextValue(FOCUSING_EDITOR),
     staticParameters: {
         visible: false,
@@ -107,6 +111,8 @@ export const EditorCursorEscShortcut: IShortcutItem = {
 
 export const EditorBreakLineShortcut: IShortcutItem = {
     id: BreakLineCommand.id,
+    description: 'shortcut.sheet.break-line',
+    group: '4_sheet-edit',
     preconditions: (contextService) => contextService.getContextValue(FOCUSING_EDITOR),
     binding: KeyCode.ENTER | MetaKeys.ALT,
 };
@@ -120,6 +126,8 @@ export const EditorDeleteLeftShortcut: IShortcutItem = {
 
 export const EditorDeleteLeftShortcutInActive: IShortcutItem = {
     id: SetCellEditVisibleOperation.id,
+    description: 'shortcut.sheet.delete-and-start-editing',
+    group: '4_sheet-edit',
     preconditions: (contextService) =>
         whenEditorFocusIsHidden(contextService) && !whenFormulaEditorFocused(contextService),
     binding: KeyCode.BACKSPACE,

@@ -22,24 +22,32 @@ import { whenEditorNotActivated } from './utils';
 
 export const SetBoldShortcutItem: IShortcutItem = {
     id: SetBoldCommand.id,
+    description: 'shortcut.sheet.set-bold',
+    group: '4_sheet-edit',
     preconditions: (contextService) => whenEditorNotActivated(contextService),
     binding: KeyCode.B | MetaKeys.CTRL_COMMAND,
 };
 
 export const SetItalicShortcutItem: IShortcutItem = {
     id: SetItalicCommand.id,
+    description: 'shortcut.sheet.set-italic',
+    group: '4_sheet-edit',
     preconditions: (contextService) => whenEditorNotActivated(contextService),
     binding: KeyCode.I | MetaKeys.CTRL_COMMAND,
 };
 
 export const SetUnderlineShortcutItem: IShortcutItem = {
     id: SetUnderlineCommand.id,
+    description: 'shortcut.sheet.set-underline',
+    group: '4_sheet-edit',
     preconditions: (contextService) => whenEditorNotActivated(contextService),
     binding: KeyCode.U | MetaKeys.CTRL_COMMAND,
 };
 
 export const SetStrikeThroughShortcutItem: IShortcutItem = {
     id: SetStrikeThroughCommand.id,
+    description: 'shortcut.sheet.set-strike-through',
+    group: '4_sheet-edit',
     preconditions: (contextService) => whenEditorNotActivated(contextService),
     binding: KeyCode.X | MetaKeys.SHIFT | MetaKeys.CTRL_COMMAND,
 };

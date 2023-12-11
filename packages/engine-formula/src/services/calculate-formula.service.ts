@@ -34,6 +34,7 @@ import type {
     IUnitExcludedCell,
 } from '../basics/common';
 import { ErrorType } from '../basics/error-type';
+import { CELL_INVERTED_INDEX_CACHE } from '../basics/inverted-index-cache';
 import { Lexer } from '../engine/analysis/lexer';
 import type { LexerNode } from '../engine/analysis/lexer-node';
 import { AstTreeBuilder } from '../engine/analysis/parser';
@@ -126,6 +127,8 @@ export class CalculateFormulaService extends Disposable {
         this._executionCompleteListener$.next(this._runtimeService.getAllRuntimeData());
 
         FORMULA_REF_TO_ARRAY_CACHE.clear();
+
+        CELL_INVERTED_INDEX_CACHE.clear();
     }
 
     private async _execute() {

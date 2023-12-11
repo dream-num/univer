@@ -1,26 +1,19 @@
 /**
- * Theme color types.
+ * Copyright 2023 DreamNum Inc.
  *
- * @remarks
- * SpreadsheetProperties contain a SpreadsheetTheme that defines a mapping of these theme color types to concrete colors.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Reference: https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets/other#ThemeColor
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * 17.18.97 ST_ThemeColor (Theme Color)
- *
- * <xsd:enumeration value="dark1"/>
-    2703 <xsd:enumeration value="light1"/>
-    2704 <xsd:enumeration value="dark2"/>
-    2705 <xsd:enumeration value="light2"/>
-    2706 <xsd:enumeration value="accent1"/>
-    2707 <xsd:enumeration value="accent2"/>
-    2708 <xsd:enumeration value="accent3"/>
-    2709 <xsd:enumeration value="accent4"/>
-    2710 <xsd:enumeration value="accent5"/>
-    2711 <xsd:enumeration value="accent6"/>
-    2712 <xsd:enumeration value="hyperlink"/>
-    2713 <xsd:enumeration value="followedHyperlink"/>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 export enum ThemeColorType {
     /**
      * TEXT

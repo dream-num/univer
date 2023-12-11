@@ -64,11 +64,11 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "storybook": "^7.6.4",
-    "stylelint": "^15.11.0",
     "stylelint-config-clean-order": "^5.2.0",
     "stylelint-config-prettier": "^9.0.5",
-    "stylelint-config-standard": "^34.0.0",
     "stylelint-config-standard-less": "^2.0.0",
+    "stylelint-config-standard": "^34.0.0",
+    "stylelint": "^15.11.0",
     "turbo": "^1.11.1",
     "typescript": "^5.3.3"
   },

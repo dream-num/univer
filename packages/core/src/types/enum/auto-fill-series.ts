@@ -1,11 +1,19 @@
 /**
- * Auto-fill series
+ * Copyright 2023 DreamNum Inc.
  *
- * @remarks
- * An enumeration of the types of series used to calculate auto-filled values. The manner in which these series affect calculated values differs depending on the type and amount of source data.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Reference: {@link https://developers.google.com/apps-script/reference/spreadsheet/auto-fill-series | Google Sheets Enum AutoFillSeries}
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 export enum AutoFillSeries {
     /**
      * Default. Auto-filling with this setting results in the empty cells in the expanded range being filled with increments of the existing values.

@@ -290,7 +290,7 @@ export class Range {
         const { startRow, endRow, startColumn, endColumn } = this._range;
 
         // get object values from sheet matrix, or use this.getMatrix() create a new matrix then this.getMatrix().getData()
-        const values = this._worksheet.getCellMatrix().getFragments(startRow, endRow, startColumn, endColumn).getData();
+        const values = this._worksheet.getCellMatrix().getFragment(startRow, endRow, startColumn, endColumn).getData();
 
         if (options.isIncludeStyle) {
             const style = this._deps.getStyles();

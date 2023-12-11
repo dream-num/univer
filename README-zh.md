@@ -1,4 +1,6 @@
-<!-- Logo here -->
+<p align="center">
+  <img src="./docs/img/logo.jpg" />
+</p>
 
 # Univer
 

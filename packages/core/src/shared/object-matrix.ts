@@ -17,6 +17,7 @@
 import type { IRange } from '../types/interfaces/i-range';
 import type { ObjectArrayPrimitiveType, PredicateFunction } from './object-array';
 import { ObjectArray } from './object-array';
+import { Tools } from './tools';
 import type { Nullable } from './types';
 
 /**
@@ -259,7 +260,17 @@ export class ObjectMatrix<T> {
         });
     }
 
-    getFragments(startRow: number, endRow: number, startColumn: number, endColumn: number): ObjectMatrix<T> {
+    /**
+     * Return a fragment of the original data matrix. Note that the returned matrix's row matrix would start from
+     * 0 not `startRow`. Neither does its column matrix. If you want to get the original matrix, use `getSlice`.
+     *
+     * @param startRow
+     * @param endRow
+     * @param startColumn
+     * @param endColumn
+     * @returns
+     */
+    getFragment(startRow: number, endRow: number, startColumn: number, endColumn: number): ObjectMatrix<T> {
         const objectMatrix = new ObjectMatrix<T>();
         for (let r = startRow; r <= endRow; r++) {
             const row = new ObjectArray<T>();
@@ -268,6 +279,30 @@ export class ObjectMatrix<T> {
                 row.push(value);
             }
             objectMatrix.pushRow(row);
+        }
+        return objectMatrix;
+    }
+
+    /**
+     * Return a slice of the original data matrix. Note that the returned matrix's row matrix would start from
+     * `startRow` not 0, and the same does its column index. You may be looking for `getFragment` if you want
+     * both of the indexes start from 0.
+     *
+     * @param startRow
+     * @param endRow
+     * @param startColumn
+     * @param endColumn
+     * @returns
+     */
+    getSlice(startRow: number, endRow: number, startColumn: number, endColumn: number): ObjectMatrix<T> {
+        const objectMatrix = new ObjectMatrix<T>();
+        for (let r = startRow; r <= endRow; r++) {
+            for (let c = startColumn; c <= endColumn; c++) {
+                const value = this.getValue(r, c);
+                if (value) {
+                    objectMatrix.setValue(r, c, Tools.deepClone(value));
+                }
+            }
         }
         return objectMatrix;
     }

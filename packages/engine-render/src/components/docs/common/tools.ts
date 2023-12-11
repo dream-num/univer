@@ -249,6 +249,7 @@ export function getCharSpaceApply(
         charSpaceApply = charSpace;
     }
     charSpaceApply *= defaultTabStop; // 乘以defaultTabStop设置的数值
+
     return charSpaceApply;
 }
 

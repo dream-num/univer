@@ -164,14 +164,13 @@ export function dealWidthParagraph(
 
         let src = word;
         let i = last;
-        const spanGroup: IDocumentSkeletonSpan[] = [];
+        let spanGroup: IDocumentSkeletonSpan[] = [];
+        let paragraphStart = last === 0;
 
         const pushPending = () => {
             if (spanGroup.length === 0) {
                 return;
             }
-
-            const paragraphStart = last === 0;
 
             allPages = calculateParagraphLayout(
                 spanGroup,
@@ -180,6 +179,9 @@ export function dealWidthParagraph(
                 paragraphConfig,
                 paragraphStart
             );
+
+            spanGroup = [];
+            paragraphStart = false;
         };
 
         while (src.length > 0) {
@@ -195,14 +197,84 @@ export function dealWidthParagraph(
                     paragraphStyle
                 );
                 const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
-                const tabSpan = createSkeletonTabSpan(fontCreateConfig, charSpaceApply); // measureText收敛到create中执行
+                const tabSpan = createSkeletonTabSpan(fontCreateConfig, charSpaceApply);
                 pushPending();
-                allPages = calculateParagraphLayout([tabSpan], allPages, sectionBreakConfig, paragraphConfig, true);
+                allPages = calculateParagraphLayout(
+                    [tabSpan],
+                    allPages,
+                    sectionBreakConfig,
+                    paragraphConfig,
+                    paragraphStart
+                );
 
                 i++;
                 src = src.substring(1);
                 continue;
-            } else if (char === DataStreamTreeTokenType.CUSTOM_BLOCK) {
+            }
+
+            if (/\s/.test(char) || hasCJK(char)) {
+                const config = getFontCreateConfig(i, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
+                const newSpan = createSkeletonLetterSpan(char, config);
+
+                spanGroup.push(newSpan);
+                i++;
+                src = src.substring(1);
+            } else if (startWithEmoji(src)) {
+                const { step, spanGroup: sGroup } = emojiHandler(
+                    i,
+                    src,
+                    bodyModel,
+                    paragraphNode,
+                    sectionBreakConfig,
+                    paragraphStyle
+                );
+                spanGroup.push(...sGroup);
+                i += step;
+
+                src = src.substring(step);
+            } else if (hasArabic(char)) {
+                const { step, spanGroup: sGroup } = ArabicHandler(
+                    i,
+                    src,
+                    bodyModel,
+                    paragraphNode,
+                    sectionBreakConfig,
+                    paragraphStyle
+                );
+                spanGroup.push(...sGroup);
+                i += step;
+
+                src = src.substring(step);
+            } else if (hasTibetan(char)) {
+                const { step, spanGroup: sGroup } = TibetanHandler(
+                    i,
+                    src,
+                    bodyModel,
+                    paragraphNode,
+                    sectionBreakConfig,
+                    paragraphStyle
+                );
+                spanGroup.push(...sGroup);
+                i += step;
+
+                src = src.substring(step);
+            } else {
+                // TODO: 处理一个单词超过 page width 情况
+                const { step, spanGroup: sGroup } = otherHandler(
+                    i,
+                    src,
+                    bodyModel,
+                    paragraphNode,
+                    sectionBreakConfig,
+                    paragraphStyle
+                );
+                spanGroup.push(...sGroup);
+                i += step;
+
+                src = src.substring(step);
+            }
+
+            if (char === DataStreamTreeTokenType.CUSTOM_BLOCK) {
                 let customBlock = customBlockCache.get(charIndex);
                 if (customBlock == null) {
                     customBlock = bodyModel.getCustomBlock(charIndex);
@@ -250,82 +322,6 @@ export function dealWidthParagraph(
                     );
                 }
             }
-
-            if (/\s/.test(char) || hasCJK(char)) {
-                const config = getFontCreateConfig(i, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
-                const newSpan = createSkeletonLetterSpan(char, config);
-
-                spanGroup.push(newSpan);
-                i++;
-                src = src.substring(1);
-
-                continue;
-            }
-
-            if (startWithEmoji(src)) {
-                const { step, spanGroup: sGroup } = emojiHandler(
-                    i,
-                    src,
-                    bodyModel,
-                    paragraphNode,
-                    sectionBreakConfig,
-                    paragraphStyle
-                );
-                spanGroup.push(...sGroup);
-                i += step;
-
-                src = src.substring(step);
-
-                continue;
-            }
-
-            if (hasArabic(char)) {
-                const { step, spanGroup: sGroup } = ArabicHandler(
-                    i,
-                    src,
-                    bodyModel,
-                    paragraphNode,
-                    sectionBreakConfig,
-                    paragraphStyle
-                );
-                spanGroup.push(...sGroup);
-                i += step;
-
-                src = src.substring(step);
-
-                continue;
-            }
-
-            if (hasTibetan(char)) {
-                const { step, spanGroup: sGroup } = TibetanHandler(
-                    i,
-                    src,
-                    bodyModel,
-                    paragraphNode,
-                    sectionBreakConfig,
-                    paragraphStyle
-                );
-                spanGroup.push(...sGroup);
-                i += step;
-
-                src = src.substring(step);
-
-                continue;
-            }
-
-            // TODO: 处理一个单词超过 page width 情况
-            const { step, spanGroup: sGroup } = otherHandler(
-                i,
-                src,
-                bodyModel,
-                paragraphNode,
-                sectionBreakConfig,
-                paragraphStyle
-            );
-            spanGroup.push(...sGroup);
-            i += step;
-
-            src = src.substring(step);
         }
 
         pushPending();

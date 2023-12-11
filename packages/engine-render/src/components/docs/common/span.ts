@@ -94,7 +94,7 @@ export function _createSkeletonWordOrLetter(
             left: 0,
             spanType: SpanType.PLACEHOLDER,
             streamType: content as DT,
-            count: 0,
+            count: 1,
         };
     }
 

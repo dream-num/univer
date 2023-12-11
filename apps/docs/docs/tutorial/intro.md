@@ -6,7 +6,6 @@ sidebar_position: 1
 
 TODO: Logo Here
 
-
 Univer 是一套企业文档与数据协同解决方案，包括电子表格、文档和幻灯片三大文档类型，高可扩展性设计使得开发者可以在 Univer 的基础上定制个性化功能。
 
 ## 特性

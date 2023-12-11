@@ -1,117 +1,86 @@
+<!-- Logo here -->
+
 # Univer
 
 ![GitHub License](https://img.shields.io/github/license/dream-num/univer)
 ![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/dream-num/univer/build.yml)
 [![codecov](https://codecov.io/gh/dream-num/univer/graph/badge.svg?token=aPfyW2pIMN)](https://codecov.io/gh/dream-num/univer)
+[![CodeFactor](https://www.codefactor.io/repository/github/dream-num/univer/badge/dev)](https://www.codefactor.io/repository/github/dream-num/univer/overview/dev)
 [![discord](https://img.shields.io/discord/1136129819961217077?logo=discord&logoColor=FFFFFF&label=discord&color=5865F2)](https://discord.gg/z3NKNT6D2f)
 
 简体中文 | [English](./README.md)
 
+<!-- An introduction photo here. -->
+
+> ⚠️ 该项目仍在开发中，请注意可能会有较大的 API 变更。欢迎向我们提交问题以及建议。
+
 ## 介绍
 
-Univer 是一个开源的协作解决方案，旨在将协作能力赋能所有系统。 接入我们之后，用户可以同步在自己的系统中查看和编辑 Microsoft Office 文件，避免上传和下载 PPT、Word、Excel。
+Univer 是一套企业文档与数据协同解决方案，包括电子表格、文档和幻灯片三大文档类型，高可扩展性设计使得开发者可以在 Univer 的基础上定制个性化功能。
 
-我们在本仓库中提供了 Univer 前端代码，一套基于 Canvas 的框架，用于构建文档、电子表格和幻灯片。
+Univer 的功能特性包括：
 
-> ⚠️ 该项目仍在开发中
+-   📈 支持电子表格，后续还会支持文档和幻灯片
+-   🌌 高度可扩展的架构设计
+    -   🔌 插件化架构，文档的能力可按需组合，支持自定义插件，方便二次开发
+    -   💄 提供组件库和图标以帮助开发者呈现一致的用户体验
+-   ⚡ 高性能
+    -   ✏️ 统一高效的渲染引擎和公式引擎，基于 Canvas
+    -   🧮 高性能的公式引擎，支持 Web Worker
+-   🌍 国际化支持
 
-## Demo
+## 使用
 
--   [Univer Demo](https://dream-num.github.io/univer-demo/)
+我们建议通过将 Univer 作为 npm 包使用，请参考文档上的[快速开始]()小节。我们还准备了一个[在线 playground]()，你无需在本地安装 Univer 就可以体验使用 Univer 开发。
 
-## Packages
+Univer 基于插件化架构设计，你可以安装以下包来增强 Univer 的功能。
 
-| 包名                                         | 描述         | 版本                                                                                                                        |
-| :------------------------------------------ | :---------- | :-------------------------------------------------------------------------------------------------------------------------- |
-| [core](./packages/core)                     | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/core)](https://npmjs.org/package/@univerjs/core)                     |
-| [design](./packages/design)                 | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/design)](https://npmjs.org/package/@univerjs/design)                 |
-| [docs](./packages/docs)                     | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/docs)](https://npmjs.org/package/@univerjs/docs)                     |
-| [docs-ui](./packages/docs-ui)               | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/docs-ui)](https://npmjs.org/package/@univerjs/docs-ui)               |
-| [engine-formula](./packages/engine-formula) | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/engine-formula)](https://npmjs.org/package/@univerjs/engine-formula) |
-| [engine-numfmt](./packages/engine-numfmt)   | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/engine-numfmt)](https://npmjs.org/package/@univerjs/engine-numfmt)   |
-| [engine-render](./packages/engine-render)   | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/engine-render)](https://npmjs.org/package/@univerjs/engine-render)   |
-| [rpc](./packages/rpc)                       | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/rpc)](https://npmjs.org/package/@univerjs/rpc)                       |
-| [sheets](./packages/sheets)                 | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets)](https://npmjs.org/package/@univerjs/sheets)                 |
-| [sheets-formula](./packages/sheets-formula) | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-formula)](https://npmjs.org/package/@univerjs/sheets-formula) |
-| [sheets-numfmt](./packages/sheets-numfmt)   | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-numfmt)](https://npmjs.org/package/@univerjs/sheets-numfmt)   |
-| [sheets-ui](./packages/sheets-ui)           | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-ui)](https://npmjs.org/package/@univerjs/sheets-ui)           |
-| [ui](./packages/ui)                         | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/ui)](https://npmjs.org/package/@univerjs/ui)                         |
-| [uniscript](./packages/uniscript)           | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/uniscript)](https://npmjs.org/package/@univerjs/uniscript)           |
+### Packages
 
-## 开发
+| 包名                                         | 描述                                                                                    | 版本                                                                                                                        |
+| :------------------------------------------- | :-------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------- |
+| [core](./packages/core)                      | Univer 核心包，实现 Univer 架构和插件机制、基础服务，以及各个文档类型的基本模型         | [![npm version](https://img.shields.io/npm/v/@univerjs/core)](https://npmjs.org/package/@univerjs/core)                     |
+| [design](./packages/design)                  | 实现 Univer 设计语言，提供了一套 CSS 以及一套基于 React 的组件                          | [![npm version](https://img.shields.io/npm/v/@univerjs/design)](https://npmjs.org/package/@univerjs/design)                 |
+| [docs](./packages/docs)                      | 实现了富文本文档的基本业务，同时支持其他业务的文本编辑                                  | [![npm version](https://img.shields.io/npm/v/@univerjs/docs)](https://npmjs.org/package/@univerjs/docs)                     |
+| [docs-ui](./packages/docs-ui)                | 实现了富文本文档的用户交互                                                              | [![npm version](https://img.shields.io/npm/v/@univerjs/docs-ui)](https://npmjs.org/package/@univerjs/docs-ui)               |
+| [engine-formula](./packages/engine-formula)  | 实现公式引擎                                                                            | [![npm version](https://img.shields.io/npm/v/@univerjs/engine-formula)](https://npmjs.org/package/@univerjs/engine-formula) |
+| [engine-numfmt](./packages/engine-numfmt)    | 实现数字格式引擎                                                                        | [![npm version](https://img.shields.io/npm/v/@univerjs/engine-numfmt)](https://npmjs.org/package/@univerjs/engine-numfmt)   |
+| [engine-render](./packages/engine-render)    | 实现渲染引擎                                                                            | [![npm version](https://img.shields.io/npm/v/@univerjs/engine-render)](https://npmjs.org/package/@univerjs/engine-render)   |
+| [rpc](./packages/rpc)                        | 实现 RPC 机制，以及在主从文档副本之间同步数据的方法，方便 web worker 等跨线程场景的开发 | [![npm version](https://img.shields.io/npm/v/@univerjs/rpc)](https://npmjs.org/package/@univerjs/rpc)                       |
+| [sheets](./packages/sheets)                  | 实现电子表格的基本业务                                                                  | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets)](https://npmjs.org/package/@univerjs/sheets)                 |
+| [sheets-formula](./packages/sheets-formula)  | 实现电子表格的公式编辑                                                                  | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-formula)](https://npmjs.org/package/@univerjs/sheets-formula) |
+| [sheets-numfmt](./packages/sheets-numfmt)    | 实现电子表格中的数字格式编辑                                                            | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-numfmt)](https://npmjs.org/package/@univerjs/sheets-numfmt)   |
+| [sheets-ui](./packages/sheets-ui)            | 实现电子表格的用户交互                                                                  | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-ui)](https://npmjs.org/package/@univerjs/sheets-ui)           |
+| [ui](./packages/ui)                          | 实现基本的用户交互服务，并基于 React 提供了一套桌面端的交互布局                         | [![npm version](https://img.shields.io/npm/v/@univerjs/ui)](https://npmjs.org/package/@univerjs/ui)                         |
+| [uniscript](./packages/uniscript) （实验性） | 一套基于 TypeScript 的 DSL，让用户可以通过脚本语言操纵 Univer 完成更复杂的任务          | [![npm version](https://img.shields.io/npm/v/@univerjs/uniscript)](https://npmjs.org/package/@univerjs/uniscript)           |
 
-### 环境
+## 贡献
 
--   [node.js](https://nodejs.org) version 16.20.0
--   [pnpm](https://pnpm.io) version 8.6.2
+我们欢迎各种形式的贡献，你可以向我们提交[问题或功能请求](https://github.com/dream-num/univer/issues)。请先阅读我们的[贡献指南](./CONTRIBUTING.md)。
 
-### 安装
-
-```
-git clone http://github.com/dream-num/univer
-cd univer
-npm i -g pnpm # MacOS : sudo npm i -g pnpm
-pnpm i
-```
-
-### 开发
-
-启动全部
-
-```shell
-npm run dev
-```
-
-启动 sheets
-
-```shell
-npm run dev:sheet
-```
-
-启动 docs
-
-```shell
-npm run dev:doc
-```
-
-启动 slides
-
-```shell
-npm run dev:slide
-```
-
-## 社区
-
-欢迎加入我们的 [Discord 社区](https://discord.gg/z3NKNT6D2f)。
-
-## 问题反馈
-
-请到 [Issues](http://github.com/dream-num/univer/issues) 提交问题。
+如果你想要提交代码，也请先阅读贡献指南，它会指导你如何在本地搭建开发环境以及提交 pull request。
 
 ## 关注者
 
-[![Stargazers repo roster for @dream-num/univer](https://reporoster.com/stars/dream-num/univer)](https://github.com/dream-num/univer/stargazers)
+[![Stargazers repo roster for @dream-num/univer](https://bytecrank.com/nastyox/reporoster/php/stargazersSVG.php?user=dream-num&repo=univer)](https://github.com/dream-num/univer/stargazers)
 
-## 整体架构
+## 链接
 
-Univer 采用 typescript 编写，按照插件化架构进行设计，核心外的功能都以插件的形式进行开发，今后会建设插件市场，满足更加个性化的需求
-![image](./docs/source/overall.png)
+-   [文档]()
+-   [在线 Playground]()
+-   [官方网站]()
+-   [Legacy Univer Demo](https://dream-num.github.io/univer-demo/)
 
-## 渲染引擎
+### 社区
 
-Univer sheet, document, slide 采用同一套渲染引擎架构，把应用抽象为文本流，表格，画布，core 部分触发渲染，object 为渲染器。
-![image](./docs/source/Render%20Engine.png)
+-   [Discord 社区](https://discord.gg/XPGnMBmpd6)
+-   [Github Discussions](https://github.com/dream-num/univer/discussions)
+-   加入 Univer 中文社群
 
-1. 做到了应用互相间的嵌套和操作。
-2. sheet 单元格支持嵌入 doc 文字
-3. slide 中支持插入 sheet，doc，slide
+## 授权
 
-|     slide 10-layer embedding      |         Sheet in slide and doc in cell         |   wrap text around a picture    |
-| :-------------------------------: | :--------------------------------------------: | :-----------------------------: |
-| ![image](./docs/source/Slide.png) | ![image](./docs/source/Sheet%20in%20slide.png) | ![image](./docs/source/doc.png) |
+Univer 基于 Apache-2.0 协议分发。
 
-## 公式引擎
+---
 
-Univer 自研公式引擎，支持异步计算, lambda 函数及范围命名
-
-![image](./docs/source/Formula%20Engine.png)
+上海梦数科技有限公司 2023 版权所有

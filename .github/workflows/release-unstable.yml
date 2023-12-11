@@ -81,6 +81,7 @@ jobs:
               uses: actions/setup-node@v3
               with:
                   node-version: 18
+                  registry-url: https://registry.npmjs.org
 
             - name: Install pnpm
               uses: pnpm/action-setup@v2

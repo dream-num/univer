@@ -1,6 +1,6 @@
 import React from 'react';
 
-import type { ISheetsUIPluginConfig } from '../../basics';
+import type { IUniverSheetsUIConfig } from '../../basics';
 import { CountBar } from '../count-bar/CountBar';
 import { EditorContainer } from '../editor-container/EditorContainer';
 import { FormulaBar } from '../formula-bar/FormulaBar';
@@ -10,7 +10,7 @@ import { StatusBar } from '../status-bar/StatusBar';
 import styles from './index.module.less';
 
 export interface IBaseSheetContainerProps {
-    config: ISheetsUIPluginConfig;
+    config: IUniverSheetsUIConfig;
     changeLocale: (locale: string) => void;
     methods?: any;
 }

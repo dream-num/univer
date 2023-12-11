@@ -1,11 +1,11 @@
 import type { BaseComponentProps } from '@univerjs/ui';
 import React, { Component, createRef } from 'react';
 
-import type { IDocsUIPluginConfig } from '../../basics';
+import type { IUniverDocsUIConfig } from '../../basics';
 import style from './index.module.less';
 
 export interface BaseDocContainerProps extends BaseComponentProps {
-    config: IDocsUIPluginConfig;
+    config: IUniverDocsUIConfig;
     changeLocale: (locale: string) => void;
     methods?: any;
 }

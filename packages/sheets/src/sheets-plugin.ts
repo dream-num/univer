@@ -17,18 +17,18 @@ import { SheetInterceptorService } from './services/sheet-interceptor/sheet-inte
 
 const PLUGIN_NAME = 'sheet';
 
-export interface ISheetsPluginConfig {
+export interface IUniverSheetsConfig {
     notExecuteFormula?: boolean;
 }
 
 /**
  * The main sheet base, construct the sheet container and layout, mount the rendering engine
  */
-export class SheetsPlugin extends Plugin {
+export class UniverSheets extends Plugin {
     static override type = PluginType.Sheet;
 
     constructor(
-        private _config: ISheetsPluginConfig,
+        private _config: IUniverSheetsConfig,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(Injector) override readonly _injector: Injector

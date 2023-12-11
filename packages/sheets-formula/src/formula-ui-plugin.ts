@@ -24,7 +24,7 @@ import { FormulaPromptService, IFormulaPromptService } from './services/prompt.s
 interface IFormulaUIConfig {
     description: IFunctionInfo[];
 }
-export class FormulaUIPlugin extends Plugin {
+export class UniverSheetsFormula extends Plugin {
     static override type = PluginType.Sheet;
 
     constructor(

@@ -1,9 +1,9 @@
 import { LocaleType, Univer } from '@univerjs/core';
 import { greenTheme } from '@univerjs/design';
-import { RenderEngine } from '@univerjs/engine-render';
-import { SlidesPlugin } from '@univerjs/slides';
-import { SlidesUIPlugin } from '@univerjs/slides-ui';
-import { UIPlugin } from '@univerjs/ui';
+import { UniverRenderEngine } from '@univerjs/engine-render';
+import { UniverSlides } from '@univerjs/slides';
+import { UniverSlidesUI } from '@univerjs/slides-ui';
+import { UniverUI } from '@univerjs/ui';
 import { DEFAULT_SLIDE_DATA } from 'data';
 
 // package info
@@ -21,16 +21,16 @@ const univer = new Univer({
 });
 
 // base-render
-univer.registerPlugin(RenderEngine);
-univer.registerPlugin(UIPlugin, {
+univer.registerPlugin(UniverRenderEngine);
+univer.registerPlugin(UniverUI, {
     container: 'univer-container',
     header: true,
     toolbar: true,
     footer: true,
     innerLeft: true,
 });
-univer.registerPlugin(SlidesPlugin);
-univer.registerPlugin(SlidesUIPlugin);
+univer.registerPlugin(UniverSlides);
+univer.registerPlugin(UniverSlidesUI);
 
 univer.createUniverSlide(DEFAULT_SLIDE_DATA);
 

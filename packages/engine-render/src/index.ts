@@ -7,7 +7,7 @@ export * from './custom';
 export * from './engine';
 export * from './group';
 export * from './layer';
-export { IRenderingEngine, RenderEngine } from './render-engine';
+export { IRenderingEngine, UniverRenderEngine } from './render-engine';
 export * from './render-manager.service';
 export * from './scene';
 export * from './scene-viewer';

@@ -55,7 +55,7 @@ export default defineConfig(({ mode }) => ({
                     '@univerjs/sheets-ui': 'UniverSheetsUi',
                     '@univerjs/ui': 'UniverUi',
                     '@wendellhu/redi': '@wendellhu/redi',
-                    '@wendellhu/redi/react-bindings': 'react-bindings',
+                    '@wendellhu/redi/react-bindings': '@wendellhu/redi/react-bindings',
                     react: 'React',
                 },
             },

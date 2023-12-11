@@ -2,7 +2,7 @@ import { IUniverInstanceService, LocaleService, Plugin, PluginType, Tools } from
 import { ComponentManager } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import type { ISlidesUIPluginConfig } from './basics';
+import type { IUniverSlidesUIConfig } from './basics';
 import { DefaultSlideUIConfig } from './basics';
 import { SLIDE_UI_PLUGIN_NAME } from './basics/const/plugin-name';
 import type { IToolbarItemProps } from './controllers';
@@ -10,17 +10,17 @@ import { AppUIController } from './controllers/app-ui-controller';
 import { SlideUIController } from './controllers/slide-ui.controller';
 import { zhCN } from './locale';
 
-export class SlidesUIPlugin extends Plugin {
+export class UniverSlidesUI extends Plugin {
     static override type = PluginType.Slide;
 
     private _appUIController?: AppUIController;
 
-    private _config: ISlidesUIPluginConfig;
+    private _config: IUniverSlidesUIConfig;
 
     private _componentManager?: ComponentManager;
 
     constructor(
-        config: Partial<ISlidesUIPluginConfig> = {},
+        config: Partial<IUniverSlidesUIConfig> = {},
         @Inject(Injector) override readonly _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService

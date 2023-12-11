@@ -16,7 +16,7 @@ import {
     createWebWorkerMessagePortOnWorker,
 } from './services/rpc/implementations/web-worker-rpc.service';
 
-export interface IUniverRPCMainThreadPluginConfig {
+export interface IUniverRPCMainThreadConfig {
     workerURL: string | URL;
     unsyncMutations?: Set<string>;
 }
@@ -25,11 +25,11 @@ export interface IUniverRPCMainThreadPluginConfig {
  * This plugin is used to register the RPC services on the main thread. It
  * is also responsible for booting up the Web Worker instance of Univer.
  */
-export class UniverRPCMainThreadPlugin extends Plugin {
+export class UniverRPCMainThread extends Plugin {
     static override type = PluginType.Univer;
 
     constructor(
-        private readonly _config: IUniverRPCMainThreadPluginConfig,
+        private readonly _config: IUniverRPCMainThreadConfig,
         @Inject(Injector) protected readonly _injector: Injector
     ) {
         super('UNIVER_RPC_MAIN_THREAD_PLUGIN');

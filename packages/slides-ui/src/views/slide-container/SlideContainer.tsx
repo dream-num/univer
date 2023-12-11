@@ -1,14 +1,14 @@
 import type { BaseComponentProps } from '@univerjs/ui';
 import React, { Component, createRef } from 'react';
 
-import type { ISlidesUIPluginConfig } from '../../basics';
+import type { IUniverSlidesUIConfig } from '../../basics';
 import { InfoBar } from '../info-bar';
 import { SlideBar } from '../slide-bar/SlideBar';
 import { Toolbar } from '../toolbar';
 import style from './index.module.less';
 
 export interface BaseSlideContainerProps extends BaseComponentProps {
-    config: ISlidesUIPluginConfig;
+    config: IUniverSlidesUIConfig;
     changeLocale: (locale: string) => void;
     methods?: any;
 }

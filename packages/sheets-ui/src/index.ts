@@ -43,4 +43,4 @@ export { ISelectionRenderService } from './services/selection/selection-render.s
 export { SelectionRenderService } from './services/selection/selection-render.service';
 export { SelectionShape } from './services/selection/selection-shape';
 export { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
-export { SheetsUIPlugin } from './sheets-ui-plugin';
+export { UniverSheetsUI } from './sheets-ui-plugin';

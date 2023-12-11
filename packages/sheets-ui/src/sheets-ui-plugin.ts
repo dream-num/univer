@@ -47,7 +47,7 @@ import { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.s
 import { IStatusBarService, StatusBarService } from './services/status-bar.service';
 import { SheetCanvasView } from './views/sheet-canvas-view';
 
-export class SheetsUIPlugin extends Plugin {
+export class UniverSheetsUI extends Plugin {
     static override type = PluginType.Sheet;
 
     constructor(

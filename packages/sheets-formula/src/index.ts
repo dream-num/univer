@@ -1,2 +1,2 @@
-export { FormulaUIPlugin } from './formula-ui-plugin';
+export { UniverSheetsFormula } from './formula-ui-plugin';
 export { enUS, zhCN } from './locale';

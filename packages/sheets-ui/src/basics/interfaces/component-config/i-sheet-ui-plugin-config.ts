@@ -8,7 +8,7 @@ export interface ILayout {
     toolbarConfig?: SheetToolbarConfig;
 }
 
-export interface ISheetsUIPluginConfig {
+export interface IUniverSheetsUIConfig {
     container?: HTMLElement | string;
     layout?: ILayout;
     locale?: LocaleType;

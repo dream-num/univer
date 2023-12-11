@@ -76,7 +76,7 @@ export { FUNCTION_NAMES_UNIVER } from './functions/univer/function-names';
 export { FUNCTION_NAMES_WEB } from './functions/web/function-names';
 export { FormulaDataModel } from './models/formula-data.model';
 export { initSheetFormulaData } from './models/formula-data.model';
-export { FormulaEnginePlugin } from './plugin';
+export { UniverFormulaEngine } from './plugin';
 export { CalculateFormulaService } from './services/calculate-formula.service';
 export {
     FeatureCalculationManagerService,

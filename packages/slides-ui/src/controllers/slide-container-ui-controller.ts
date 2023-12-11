@@ -3,7 +3,7 @@ import { LocaleService } from '@univerjs/core';
 import { ComponentManager } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import type { ISlidesUIPluginConfig } from '../basics';
+import type { IUniverSlidesUIConfig } from '../basics';
 import type { SlideContainer } from '../views/slide-container';
 import { InfoBarUIController } from './info-bar-ui-controller';
 import { SlideBarUIController } from './slide-bar-ui-controller';
@@ -18,10 +18,10 @@ export class SlideContainerUIController {
 
     private _slideBarController: SlideBarUIController;
 
-    private _config: ISlidesUIPluginConfig;
+    private _config: IUniverSlidesUIConfig;
 
     constructor(
-        config: ISlidesUIPluginConfig,
+        config: IUniverSlidesUIConfig,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager

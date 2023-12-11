@@ -21,7 +21,6 @@ npm install @univerjs/docs \
     @univerjs/sheets \
     @univerjs/ui \
     @univerjs/design \
-    @univerjs/formula \
     @univerjs/sheets-formula \
     @univerjs/sheets-ui
 ```

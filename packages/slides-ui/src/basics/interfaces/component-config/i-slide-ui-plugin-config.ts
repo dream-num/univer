@@ -8,7 +8,7 @@ export interface ILayout {
     toolbarConfig?: SlideToolbarConfig;
 }
 
-export interface ISlidesUIPluginConfig {
+export interface IUniverSlidesUIConfig {
     container?: HTMLElement | string;
     layout?: ILayout;
     locale?: LocaleType;

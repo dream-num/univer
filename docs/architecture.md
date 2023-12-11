@@ -23,32 +23,32 @@ Univer's modules should be considered from the perspective of **business type (S
 For example, you could create a standard Spreadsheet application like this:
 
 ```ts
-import { DocsPlugin } from '@univerjs/docs';
-import { RenderEngine } from '@univerjs/engine-render';
+import { UniverDocs } from '@univerjs/docs';
+import { UniverRenderEngine } from '@univerjs/engine-render';
 import { sheetsPlugin } from '@univerjs/sheets';
-import { UIPlugin } from '@univerjs/ui';
+import { UniverUI } from '@univerjs/ui';
 import { LocaleType, Univer } from '@univerjs/core';
 import { greenTheme } from '@univerjs/design';
 import { FormulaPlugin } from '@univerjs/sheets-formula';
-import { SheetsUIPlugin } from '@univerjs/sheets-ui';
+import { UniverSheetsUI } from '@univerjs/sheets-ui';
 
 const univer = new Univer({
     theme: greenTheme,
     locale: LocaleType.ZH_CN,
 });
 
-univer.registerPlugin(DocsPlugin, {
+univer.registerPlugin(UniverDocs, {
     hasScroll: false,
 });
-univer.registerPlugin(RenderEngine);
-univer.registerPlugin(UIPlugin, {
+univer.registerPlugin(UniverRenderEngine);
+univer.registerPlugin(UniverUI, {
     container: 'univer-container', // where to mount the UI
     header: true,
     toolbar: true,
     footer: true,
 });
 univer.registerPlugin(sheetsPlugin);
-univer.registerPlugin(SheetsUIPlugin);
+univer.registerPlugin(UniverSheetsUI);
 univer.registerPlugin(FormulaPlugin);
 
 // call univer.createUniverSheet() to create a spreadsheet

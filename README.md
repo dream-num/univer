@@ -31,7 +31,6 @@ We provide JavaScript part of code in the repository, including a canvas-based f
 | [engine-formula](./packages/engine-formula) | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/engine-formula)](https://npmjs.org/package/@univerjs/engine-formula) |
 | [engine-numfmt](./packages/engine-numfmt)   | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/engine-numfmt)](https://npmjs.org/package/@univerjs/engine-numfmt)   |
 | [engine-render](./packages/engine-render)   | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/engine-render)](https://npmjs.org/package/@univerjs/engine-render)   |
-| [formula](./packages/formula)               | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/formula)](https://npmjs.org/package/@univerjs/formula)               |
 | [rpc](./packages/rpc)                       | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/rpc)](https://npmjs.org/package/@univerjs/rpc)                       |
 | [sheets](./packages/sheets)                 | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets)](https://npmjs.org/package/@univerjs/sheets)                 |
 | [sheets-formula](./packages/sheets-formula) | -           | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-formula)](https://npmjs.org/package/@univerjs/sheets-formula) |

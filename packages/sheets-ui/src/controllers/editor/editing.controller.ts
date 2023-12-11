@@ -49,7 +49,7 @@ export class EditingController extends RxDisposable {
 
     private _initialNormalInput() {
         /**
-         * const formulaEngine = this.getPluginByName<FormulaPlugin>('formula')?.getFormulaEngine();
+         * const formulaEngine = this.getPluginByName<FormulaPlugin>('formula')?.getUniverFormulaEngine();
          * =(sum(max(B1:C10,10)*5-100,((1+1)*2+5)/2,10)+count(B1:C10,10*5-100))*5-100
          * =(sum(max(B1:C10,10)*5-100,((1+1)*2+5)/2,10, lambda(x,y, x*y*x)(sum(1,(1+2)*3),2))+lambda(x,y, x*y*x)(sum(1,(1+2)*3),2)+count(B1:C10,10*5-100))*5-100
          * =((1+2)-A1:B2 + 5)/2 + sum(indirect("A5"):B10 + A1:offset("C5", 1, 1), 100)

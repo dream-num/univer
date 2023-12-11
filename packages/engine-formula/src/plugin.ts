@@ -38,13 +38,13 @@ import { ISuperTableService, SuperTableService } from './services/super-table.se
 
 const PLUGIN_NAME = 'base-formula-engine';
 
-interface IFormulaEnginePlugin {
+interface IUniverFormulaEngine {
     notExecuteFormula?: boolean;
 }
 
-export class FormulaEnginePlugin extends Plugin {
+export class UniverFormulaEngine extends Plugin {
     constructor(
-        private _config: IFormulaEnginePlugin,
+        private _config: IUniverFormulaEngine,
         @Inject(Injector) protected override _injector: Injector
     ) {
         super(PLUGIN_NAME);

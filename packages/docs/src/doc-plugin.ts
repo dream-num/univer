@@ -69,7 +69,7 @@ import {
 } from './shortcuts/cursor.shortcut';
 import { DocCanvasView } from './views/doc-canvas-view';
 
-export interface IDocsPluginConfig {
+export interface IUniverDocsConfig {
     hasScroll?: boolean;
 }
 
@@ -79,13 +79,13 @@ const DEFAULT_DOCUMENT_PLUGIN_DATA = {
 
 const PLUGIN_NAME = 'docs';
 
-export class DocsPlugin extends Plugin {
+export class UniverDocs extends Plugin {
     static override type = PluginType.Doc;
 
-    private _config: IDocsPluginConfig;
+    private _config: IUniverDocsConfig;
 
     constructor(
-        config: Partial<IDocsPluginConfig> = {},
+        config: Partial<IUniverDocsConfig> = {},
         @Inject(Injector) override _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @IConfigService private readonly _configService: IConfigService,
@@ -162,7 +162,7 @@ export class DocsPlugin extends Plugin {
                 // [
                 //     CanvasView,
                 //     { useFactory: () => docInjector.createInstance(CanvasView, this._config.standalone ?? true) },
-                // ], // FIXME: CanvasView shouldn't be a dependency of DocsPlugin. Because it maybe created dynamically.
+                // ], // FIXME: CanvasView shouldn't be a dependency of UniverDocs. Because it maybe created dynamically.
                 //views
                 [DocCanvasView],
 

@@ -15,17 +15,17 @@ sidebar_position: 4
 在主线程的 Univer 实例中引入 @univerjs/rpc 插件，指定要加载的 Web Worker 入口文件的路径，并将主线程中的公式插件配置为无需计算公式：
 
 ```ts
-import type { IUniverRPCMainThreadPluginConfig } from '@univerjs/rpc';
-import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
-import { FormulaPlugin } from '@univerjs/formula';
+import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
+import { UniverRPCMainThread } from '@univerjs/rpc';
+import { UniverSheetsFormula } from '@univerjs/sheets-formula';
 
 // ...
 
-univer.registerPlugin(FormulaPlugin, {
+univer.registerPlugin(UniverSheetsFormula, {
     notExecuteFormula: true,
 })
 
-univer.registerPlugin(UniverRPCMainThreadPlugin, {
+univer.registerPlugin(UniverRPCMainThread, {
     workerURL: './worker.js',
     unsyncMutations: new Set([RichTextEditingMutation.id])
 });
@@ -34,18 +34,18 @@ univer.registerPlugin(UniverRPCMainThreadPlugin, {
 在 Web Worker 的入口文件中实例化另一个 Univer 实例，并注册需要的插件：
 
 ```ts
-import { FormulaEnginePlugin } from '@univerjs/engine-formula';
-import { sheetsPlugin } from '@univerjs/sheets';
+import { UniverFormulaEngine } from '@univerjs/engine-formula';
+import { UniverSheets } from '@univerjs/sheets';
 import { LocaleType, Univer } from '@univerjs/core';
 import { UniverRPCWorkerThreadPlugin } from '@univerjs/rpc';
-import { FormulaPlugin } from '@univerjs/formula';
+import { UniverSheetsFormula } from '@univerjs/sheets-formula';
 
 const univer = new Univer();
 
 univer.registerPlugin(UniverRPCWorkerThreadPlugin);
-univer.registerPlugin(sheetsPlugin);
-univer.registerPlugin(FormulaEnginePlugin);
-univer.registerPlugin(FormulaPlugin);
+univer.registerPlugin(UniverSheets);
+univer.registerPlugin(UniverFormulaEngine);
+univer.registerPlugin(UniverSheetsFormula);
 ```
 
 运行之后，就会看到 Web Worker 线程，并且公式计算会在其中进行。
@@ -80,7 +80,7 @@ Web Worker 的公式计算结果如何写回主线程：
 以主线程调用 Web Worker 线程中 `IRemoteInstanceService` 为例。在作为客户端的主线程中，需要声明一个 `IRemoteInstanceService` 接口作为依赖，而这个依赖的具体实现，则是 RPC 模块提供的 `toModule` 方法，该方法接受一个 `Channel` 作为参数，返回一个实现了 `IRemoteInstanceService` 接口的对象，该对象实际上是一个 `Proxy`，对该对象的方法的调用会被 `Proxy` 拦截，channel 名称，方法名称和参数会被 RPC 模块序列化之后发送到 Web Worker 线程。
 
 ```ts
-export class UniverRPCMainThreadPlugin extends Plugin {
+export class UniverRPCMainThread extends Plugin {
     override async onStarting(injector: Injector): Promise<void> {
         const worker = new Worker(this._config.workerURL);
         const messageProtocol = createWebWorkerMessagePortOnMain(worker);

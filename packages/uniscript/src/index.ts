@@ -1,2 +1,2 @@
 export { enUS, zhCN } from './locale';
-export { type IUniscriptPluginConfig, UniscriptPlugin } from './plugin';
+export { type IUniscriptConfig, UniverUniscript } from './plugin';

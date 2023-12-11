@@ -34,20 +34,20 @@ import { ISidebarService } from './services/sidebar/sidebar.service';
 
 const PLUGIN_NAME = 'ui';
 
-export interface IUIPluginConfig extends IWorkbenchOptions {}
+export interface IUniverUIConfig extends IWorkbenchOptions {}
 
 const DEFAULT_SLIDE_PLUGIN_DATA = {};
 
 /**
  * UI plugin provides basic interaction with users. Including workbench (menus, UI parts, notifications etc.), copy paste, shortcut.
  */
-export class UIPlugin extends Plugin {
+export class UniverUI extends Plugin {
     static override type = PluginType.Univer;
 
-    private _config: IUIPluginConfig;
+    private _config: IUniverUIConfig;
 
     constructor(
-        config: Partial<IUIPluginConfig> = {},
+        config: Partial<IUniverUIConfig> = {},
         @Inject(Injector) protected readonly _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {

@@ -3,7 +3,7 @@ export interface ILayout {
     toolbarConfig?: DocToolbarConfig;
 }
 
-export interface IDocsUIPluginConfig {
+export interface IUniverDocsUIConfig {
     container?: HTMLElement | string;
     layout?: ILayout;
 }

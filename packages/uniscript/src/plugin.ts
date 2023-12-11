@@ -11,13 +11,13 @@ import { ScriptPanelService } from './services/script-panel.service';
 
 const PLUGIN_NAME = 'uniscript';
 
-export interface IUniscriptPluginConfig extends IScriptEditorServiceConfig {}
+export interface IUniscriptConfig extends IScriptEditorServiceConfig {}
 
-export class UniscriptPlugin extends Plugin {
+export class UniverUniscript extends Plugin {
     static override type = PluginType.Univer;
 
     constructor(
-        private readonly _config: IUniscriptPluginConfig,
+        private readonly _config: IUniscriptConfig,
         @Inject(Injector) protected override _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {

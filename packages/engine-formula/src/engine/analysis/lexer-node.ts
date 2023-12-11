@@ -8,7 +8,7 @@ interface LexerNodeJson {
     children: Array<LexerNodeJson | string>;
 }
 
-export interface FormulaEnginePluginObserver {
+export interface UniverFormulaEngineObserver {
     onBeforeFormulaCalculateObservable: Observable<string>;
     onAfterFormulaLexerObservable: Observable<LexerNode>;
 }

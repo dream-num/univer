@@ -47,7 +47,7 @@ export class FindPlugin extends Plugin {
     //     this._findController = new FindController(this);
 
     //     const context = this.getContext();
-    //     let sheetsPlugin = context.getUniver().getGlobalContext().getPluginManager().getRequirePluginByName<SheetsUIPlugin>(SHEET_UI_PLUGIN_NAME);
+    //     let sheetsPlugin = context.getUniver().getGlobalContext().getPluginManager().getRequirePluginByName<UniverSheetsUI>(SHEET_UI_PLUGIN_NAME);
     //     sheetsPlugin?.UIDidMount(() => {
     //         sheetsPlugin.getComponentManager().register('SearchIcon', Icon.SearchIcon);
     //         sheetsPlugin.addToolButton(this._findController.getFindList());

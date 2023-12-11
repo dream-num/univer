@@ -36,10 +36,11 @@ export default defineConfig(({ mode }) => ({
             formats: ['es', 'umd', 'cjs'],
         },
         rollupOptions: {
-            external: ['react', 'react-dom'],
+            external: ['clsx', 'react', 'react-dom'],
             output: {
                 assetFileNames: 'index.css',
                 globals: {
+                    clsx: 'clsx',
                     react: 'React',
                     'react-dom': 'ReactDOM',
                 },

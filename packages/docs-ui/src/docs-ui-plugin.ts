@@ -10,18 +10,18 @@ import {
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import type { IDocsUIPluginConfig } from './basics';
+import type { IUniverDocsUIConfig } from './basics';
 import { DefaultDocUiConfig } from './basics';
 import { DOC_UI_PLUGIN_NAME } from './basics/const/plugin-name';
 import { AppUIController } from './controllers';
 import { DocUIController } from './controllers/doc-ui.controller';
 import { zhCN } from './locale';
 
-export class DocsUIPlugin extends Plugin {
+export class UniverDocsUI extends Plugin {
     static override type = PluginType.Doc;
 
     constructor(
-        private readonly _config: IDocsUIPluginConfig,
+        private readonly _config: IUniverDocsUIConfig,
         @Inject(Injector) override _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {

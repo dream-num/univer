@@ -33,7 +33,7 @@ import { AppUIController } from './controllers';
 import { DocUIController } from './controllers/doc-ui.controller';
 import { zhCN } from './locale';
 
-export class UniverDocsUI extends Plugin {
+export class UniverDocsUIPlugin extends Plugin {
     static override type = PluginType.Doc;
 
     constructor(

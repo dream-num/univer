@@ -41,7 +41,7 @@ export interface IUniverRPCMainThreadConfig {
  * This plugin is used to register the RPC services on the main thread. It
  * is also responsible for booting up the Web Worker instance of Univer.
  */
-export class UniverRPCMainThread extends Plugin {
+export class UniverRPCMainThreadPlugin extends Plugin {
     static override type = PluginType.Univer;
 
     constructor(

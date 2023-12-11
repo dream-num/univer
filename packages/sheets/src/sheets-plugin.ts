@@ -40,7 +40,7 @@ export interface IUniverSheetsConfig {
 /**
  * The main sheet base, construct the sheet container and layout, mount the rendering engine
  */
-export class UniverSheets extends Plugin {
+export class UniverSheetsPlugin extends Plugin {
     static override type = PluginType.Sheet;
 
     constructor(

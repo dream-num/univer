@@ -69,6 +69,6 @@ export { DesktopShortcutService, type IShortcutItem, IShortcutService } from './
 export { ShortcutExperienceService } from './services/shortcut/shortcut-experience.service';
 export { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
 export { ISidebarService } from './services/sidebar/sidebar.service';
-export { UniverUI } from './ui-plugin';
+export { UniverUIPlugin } from './ui-plugin';
 export * from './utils';
 export { type IConfirmPartMethodOptions } from './views/components/confirm-part/interface';

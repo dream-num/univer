@@ -25,7 +25,7 @@ import { IImageRenderService, ImageRenderService } from './services/image-render
 
 const PLUGIN_NAME = 'image';
 
-export class ImagePlugin extends Plugin {
+export class UniverImagePlugin extends Plugin {
     static override type = PluginType.Univer;
 
     constructor(

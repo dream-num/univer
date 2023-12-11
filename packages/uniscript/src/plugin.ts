@@ -29,7 +29,7 @@ const PLUGIN_NAME = 'uniscript';
 
 export interface IUniscriptConfig extends IScriptEditorServiceConfig {}
 
-export class UniverUniscript extends Plugin {
+export class UniverUniscriptPlugin extends Plugin {
     static override type = PluginType.Univer;
 
     constructor(

@@ -40,7 +40,7 @@ import { FormulaPromptService, IFormulaPromptService } from './services/prompt.s
 interface IFormulaUIConfig {
     description: IFunctionInfo[];
 }
-export class UniverSheetsFormula extends Plugin {
+export class UniverSheetsFormulaPlugin extends Plugin {
     static override type = PluginType.Sheet;
 
     constructor(

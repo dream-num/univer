@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export { type IUniverSheetsConfig, UniverSheets } from './sheets-plugin';
+export { type IUniverSheetsConfig, UniverSheetsPlugin } from './sheets-plugin';
 
 // #region services
 export { COMMAND_LISTENER_SKELETON_CHANGE, COMMAND_LISTENER_VALUE_CHANGE } from './basics/const/command-listener-const';

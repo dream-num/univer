@@ -16,18 +16,18 @@
 
 import { LocaleType, LogLevel, Univer } from '@univerjs/core';
 import { greenTheme } from '@univerjs/design';
-import { RichTextEditingMutation, UniverDocs } from '@univerjs/docs';
-import { UniverFormulaEngine } from '@univerjs/engine-formula';
-import { UniverRenderEngine } from '@univerjs/engine-render';
+import { RichTextEditingMutation, UniverDocsPlugin } from '@univerjs/docs';
+import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
+import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
-import { UniverRPCMainThread } from '@univerjs/rpc';
-import { UniverSheets } from '@univerjs/sheets';
-import { UniverSheetsFormula } from '@univerjs/sheets-formula';
-import { UniverSheetsNumfmt } from '@univerjs/sheets-numfmt';
-import { UniverSheetsUI } from '@univerjs/sheets-ui';
-import { UniverUI } from '@univerjs/ui';
+import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
+import { UniverSheetsPlugin } from '@univerjs/sheets';
+import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
+import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
+import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
+import { UniverUIPlugin } from '@univerjs/ui';
 import type { IUniscriptConfig } from '@univerjs/uniscript';
-import { UniverUniscript } from '@univerjs/uniscript';
+import { UniverUniscriptPlugin } from '@univerjs/uniscript';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from 'data';
 
 import { locales } from './locales';
@@ -50,35 +50,35 @@ const univer = new Univer({
 });
 
 // core plugins
-univer.registerPlugin(UniverDocs, {
+univer.registerPlugin(UniverDocsPlugin, {
     hasScroll: false,
 });
-univer.registerPlugin(UniverRenderEngine);
-univer.registerPlugin(UniverUI, {
+univer.registerPlugin(UniverRenderEnginePlugin);
+univer.registerPlugin(UniverUIPlugin, {
     container: 'app',
     header: true,
     toolbar: true,
     footer: true,
 });
-univer.registerPlugin(UniverSheets, {
+univer.registerPlugin(UniverSheetsPlugin, {
     notExecuteFormula: true,
 });
-univer.registerPlugin(UniverSheetsUI);
+univer.registerPlugin(UniverSheetsUIPlugin);
 
 // sheet feature plugins
 
-univer.registerPlugin(UniverSheetsNumfmt);
+univer.registerPlugin(UniverSheetsNumfmtPlugin);
 univer.registerPlugin(DebuggerPlugin);
-univer.registerPlugin(UniverFormulaEngine, {
+univer.registerPlugin(UniverFormulaEnginePlugin, {
     notExecuteFormula: true,
 });
-univer.registerPlugin(UniverSheetsFormula);
-univer.registerPlugin(UniverRPCMainThread, {
+univer.registerPlugin(UniverSheetsFormulaPlugin);
+univer.registerPlugin(UniverRPCMainThreadPlugin, {
     workerURL: './worker.js',
     unsyncMutations: new Set([RichTextEditingMutation.id]),
 } as IUniverRPCMainThreadConfig);
 
-univer.registerPlugin(UniverUniscript, {
+univer.registerPlugin(UniverUniscriptPlugin, {
     getWorkerUrl(moduleID, label) {
         if (label === 'typescript' || label === 'javascript') {
             return './vs/language/typescript/ts.worker.js';

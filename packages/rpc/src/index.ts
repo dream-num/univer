@@ -17,7 +17,7 @@
 export {
     type IUniverRPCMainThreadConfig,
     type IUniverRPCWorkerThreadPluginConfig,
-    UniverRPCMainThread,
+    UniverRPCMainThreadPlugin,
     UniverRPCWorkerThreadPlugin,
 } from './plugin';
 export { IRPChannelService } from './services/rpc/channel.service';

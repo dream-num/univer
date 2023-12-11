@@ -27,7 +27,7 @@ export const IRenderingEngine = createIdentifier<Engine>('univer.render-engine')
 
 const PLUGIN_NAME = 'render-engine';
 
-export class UniverRenderEngine extends Plugin {
+export class UniverRenderEnginePlugin extends Plugin {
     static override type = PluginType.Univer;
 
     constructor(

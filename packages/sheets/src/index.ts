@@ -42,15 +42,7 @@ export {
     SELECTION_CONTROL_BORDER_BUFFER_WIDTH,
     transformCellDataToSelectionData,
 } from './basics/selection';
-export {
-    checkIfShrink,
-    expandToContinuousRange,
-    expandToNextCell,
-    expandToNextGapRange,
-    expandToWholeSheet,
-    shrinkToNextCell,
-    shrinkToNextGapRange,
-} from './commands/commands/utils/selection-util';
+export { alignToMergedCellsBorders, getCellAtRowCol } from './commands/commands/utils/selection-utils';
 export { MAX_CELL_PER_SHEET_KEY } from './controllers/config/config';
 export { BorderStyleManagerService, type IBorderInfo } from './services/border-style-manager.service';
 export { SheetEditablePermission, SheetPermissionService } from './services/permission';
@@ -161,13 +153,7 @@ export {
     SetWorksheetRowIsAutoHeightCommand,
 } from './commands/commands/set-worksheet-row-height.command';
 export { SetWorksheetShowCommand } from './commands/commands/set-worksheet-show.command';
-export { getPrimaryForRange } from './commands/commands/utils/selection-util';
-export {
-    findNextGapRange,
-    findNextRange,
-    getCellAtRowCol,
-    getStartRange,
-} from './commands/commands/utils/selection-util';
+export { getPrimaryForRange } from './commands/commands/utils/selection-utils';
 export {
     AddMergeUndoMutationFactory,
     AddWorksheetMergeMutation,

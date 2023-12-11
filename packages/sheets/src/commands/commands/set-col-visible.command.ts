@@ -35,7 +35,7 @@ import {
 } from '../mutations/set-col-visible.mutation';
 import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 import { SetSelectionsOperation } from '../operations/selection.operation';
-import { getPrimaryForRange } from './utils/selection-util';
+import { getPrimaryForRange } from './utils/selection-utils';
 
 export interface ISetSpecificColsVisibleCommandParams {
     workbookId: string;

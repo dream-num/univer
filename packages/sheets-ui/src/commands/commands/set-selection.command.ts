@@ -17,6 +17,14 @@
 import type { Direction, ICommand, IRange } from '@univerjs/core';
 import { CommandType, ICommandService, IUniverInstanceService, RANGE_TYPE, Rectangle, Tools } from '@univerjs/core';
 import {
+    getCellAtRowCol,
+    NORMAL_SELECTION_PLUGIN_NAME,
+    SelectionManagerService,
+    SetSelectionsOperation,
+} from '@univerjs/sheets';
+import { KeyCode, ShortcutExperienceService } from '@univerjs/ui';
+
+import {
     checkIfShrink,
     expandToContinuousRange,
     expandToNextCell,
@@ -24,15 +32,10 @@ import {
     expandToWholeSheet,
     findNextGapRange,
     findNextRange,
-    getCellAtRowCol,
     getStartRange,
-    NORMAL_SELECTION_PLUGIN_NAME,
-    SelectionManagerService,
-    SetSelectionsOperation,
     shrinkToNextCell,
     shrinkToNextGapRange,
-} from '@univerjs/sheets';
-import { KeyCode, ShortcutExperienceService } from '@univerjs/ui';
+} from './utils/selection-utils';
 
 // TODO@wzhudev: we also need to handle when the current selection is the whole spreadsheet, whole rows or whole columns
 // TODO@DR-UNIVER: moveStepPage and moveStepEnd implement

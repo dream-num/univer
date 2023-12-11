@@ -49,7 +49,7 @@ import {
 import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 import { SetSelectionsOperation } from '../operations/selection.operation';
 import { columnAcrossMergedCell, rowAcrossMergedCell } from './utils/merged-cell-util';
-import { alignToMergedCellsBorders, getPrimaryForRange } from './utils/selection-util';
+import { alignToMergedCellsBorders, getPrimaryForRange } from './utils/selection-utils';
 
 export interface IMoveRowsCommandParams {
     fromRow: number;

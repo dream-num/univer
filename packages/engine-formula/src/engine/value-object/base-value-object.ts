@@ -165,7 +165,7 @@ export class BaseValueObject extends ObjectClassType {
         return ErrorValueObject.create(ErrorType.VALUE);
     }
 
-    concatenate(value: string | number | boolean, concatenateType = ConcatenateType.FRONT): CalculateValueType {
+    concatenate(value: string | number | boolean, concatenateType = ConcatenateType.FRONT): string {
         let currentValue = this.getValue().toString();
         if (typeof value === 'string') {
             if (concatenateType === ConcatenateType.FRONT) {
@@ -187,7 +187,7 @@ export class BaseValueObject extends ObjectClassType {
                 currentValue += booleanString;
             }
         }
-        this.setValue(currentValue);
-        return this;
+
+        return currentValue;
     }
 }

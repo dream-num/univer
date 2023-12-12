@@ -59,14 +59,14 @@ export class NullValueObject extends BaseValueObject {
         if (valueObject.isArray()) {
             return valueObject.concatenateBack(new StringValueObject(''));
         }
-        return new StringValueObject('').concatenate(valueObject.getValue(), ConcatenateType.FRONT);
+        return new StringValueObject(this.concatenate(valueObject.getValue(), ConcatenateType.FRONT));
     }
 
     override concatenateBack(valueObject: BaseValueObject): CalculateValueType {
         if (valueObject.isArray()) {
             return valueObject.concatenateFront(new StringValueObject(''));
         }
-        return new StringValueObject('').concatenate(valueObject.getValue(), ConcatenateType.BACK);
+        return new StringValueObject(this.concatenate(valueObject.getValue(), ConcatenateType.BACK));
     }
 
     override plusBy(value: string | number | boolean): CalculateValueType {
@@ -273,23 +273,23 @@ export class NumberValueObject extends BaseValueObject {
         if (valueObject.isArray()) {
             return valueObject.concatenateBack(this);
         }
-        return this.concatenate(valueObject.getValue(), ConcatenateType.FRONT);
+        return new StringValueObject(this.concatenate(valueObject.getValue(), ConcatenateType.FRONT));
     }
 
     override concatenateBack(valueObject: BaseValueObject): CalculateValueType {
         if (valueObject.isArray()) {
             return valueObject.concatenateFront(this);
         }
-        return this.concatenate(valueObject.getValue(), ConcatenateType.BACK);
+        return new StringValueObject(this.concatenate(valueObject.getValue(), ConcatenateType.BACK));
     }
 
     override compare(valueObject: BaseValueObject, operator: compareToken): CalculateValueType {
         if (valueObject.isArray()) {
-            const o = valueObject.getReciprocal();
-            if (o.isErrorObject()) {
-                return o;
-            }
-            return (o as BaseValueObject).compare(this, reverseCompareOperator(operator));
+            // const o = valueObject.getReciprocal();
+            // if (o.isErrorObject()) {
+            //     return o;
+            // }
+            return (valueObject as BaseValueObject).compare(this, reverseCompareOperator(operator));
         }
         return this.compareBy(valueObject.getValue(), operator);
     }
@@ -301,12 +301,12 @@ export class NumberValueObject extends BaseValueObject {
         }
         if (typeof value === 'number') {
             if (Math.abs(currentValue) === Infinity || Math.abs(value) === Infinity) {
-                this.setValue(currentValue + value);
-            } else {
-                this.setValue(Big(currentValue).plus(value).toNumber());
+                return new NumberValueObject(currentValue + value);
             }
-        } else if (typeof value === 'boolean') {
-            this.setValue(
+            return new NumberValueObject(Big(currentValue).plus(value).toNumber());
+        }
+        if (typeof value === 'boolean') {
+            return new NumberValueObject(
                 Big(currentValue)
                     .plus(value ? 1 : 0)
                     .toNumber()
@@ -322,12 +322,12 @@ export class NumberValueObject extends BaseValueObject {
         }
         if (typeof value === 'number') {
             if (Math.abs(currentValue) === Infinity || Math.abs(value) === Infinity) {
-                this.setValue(currentValue - value);
-            } else {
-                this.setValue(Big(currentValue).minus(value).toNumber());
+                return new NumberValueObject(currentValue - value);
             }
-        } else if (typeof value === 'boolean') {
-            this.setValue(
+            return new NumberValueObject(Big(currentValue).minus(value).toNumber());
+        }
+        if (typeof value === 'boolean') {
+            return new NumberValueObject(
                 Big(currentValue)
                     .minus(value ? 1 : 0)
                     .toNumber()
@@ -343,12 +343,12 @@ export class NumberValueObject extends BaseValueObject {
         }
         if (typeof value === 'number') {
             if (Math.abs(currentValue) === Infinity || Math.abs(value) === Infinity) {
-                this.setValue(currentValue * value);
-            } else {
-                this.setValue(Big(currentValue).times(value).toNumber());
+                return new NumberValueObject(currentValue * value);
             }
-        } else if (typeof value === 'boolean') {
-            this.setValue(
+            return new NumberValueObject(Big(currentValue).times(value).toNumber());
+        }
+        if (typeof value === 'boolean') {
+            return new NumberValueObject(
                 Big(currentValue)
                     .times(value ? 1 : 0)
                     .toNumber()
@@ -367,15 +367,15 @@ export class NumberValueObject extends BaseValueObject {
                 return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
             }
             if (Math.abs(currentValue) === Infinity || Math.abs(value) === Infinity) {
-                this.setValue(currentValue / value);
-            } else {
-                this.setValue(Big(currentValue).div(value).toNumber());
+                return new NumberValueObject(currentValue / value);
             }
-        } else if (typeof value === 'boolean') {
+            return new NumberValueObject(Big(currentValue).div(value).toNumber());
+        }
+        if (typeof value === 'boolean') {
             if (value === false) {
                 return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
             }
-            this.setValue(Big(currentValue).div(1).toNumber());
+            return new NumberValueObject(Big(currentValue).div(1).toNumber());
         }
         return this;
     }
@@ -496,23 +496,23 @@ export class StringValueObject extends BaseValueObject {
         if (valueObject.isArray()) {
             return valueObject.concatenateBack(this);
         }
-        return this.concatenate(valueObject.getValue(), ConcatenateType.FRONT);
+        return new StringValueObject(this.concatenate(valueObject.getValue(), ConcatenateType.FRONT));
     }
 
     override concatenateBack(valueObject: BaseValueObject): CalculateValueType {
         if (valueObject.isArray()) {
             return valueObject.concatenateFront(this);
         }
-        return this.concatenate(valueObject.getValue(), ConcatenateType.BACK);
+        return new StringValueObject(this.concatenate(valueObject.getValue(), ConcatenateType.BACK));
     }
 
     override compare(valueObject: BaseValueObject, operator: compareToken): CalculateValueType {
         if (valueObject.isArray()) {
-            const o = valueObject.getReciprocal();
-            if (o.isErrorObject()) {
-                return o;
-            }
-            return (o as BaseValueObject).compare(this, reverseCompareOperator(operator));
+            // const o = valueObject.getReciprocal();
+            // if (o.isErrorObject()) {
+            //     return o;
+            // }
+            return (valueObject as BaseValueObject).compare(this, reverseCompareOperator(operator));
         }
         return this.compareBy(valueObject.getValue(), operator);
     }

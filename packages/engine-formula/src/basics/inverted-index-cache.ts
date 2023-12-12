@@ -20,12 +20,8 @@ export class InvertedIndexCache {
      *    unitId:{
      *       sheetId:{
      *          'columnIndex': {
-     *              'operatorToken':{ //'=*10'
-     *                 '10':{
-     *                      row:1,
-     *                      column:1,
-     *                  }
-     *              }
+     *              10:[1,3,4,5],
+     *              5:[2,6,11,22]
      *          }
      *       }
      *    }

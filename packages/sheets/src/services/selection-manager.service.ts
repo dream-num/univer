@@ -376,12 +376,12 @@ export class SelectionManagerService implements IDisposable {
         if (!sheetSelectionData.has(sheetId)) {
             sheetSelectionData.set(sheetId, [...selectionDatas]);
         } else {
-            let OldSelectionDatas = sheetSelectionData.get(sheetId);
-            if (OldSelectionDatas == null) {
-                OldSelectionDatas = [];
-                sheetSelectionData.set(sheetId, OldSelectionDatas);
+            let oldSelectionDatas = sheetSelectionData.get(sheetId);
+            if (oldSelectionDatas == null) {
+                oldSelectionDatas = [];
+                sheetSelectionData.set(sheetId, oldSelectionDatas);
             }
-            OldSelectionDatas.push(...selectionDatas);
+            oldSelectionDatas.push(...selectionDatas);
         }
 
         if (isRefresh) {
@@ -407,8 +407,12 @@ export class SelectionManagerService implements IDisposable {
         if (!sheetSelectionData.has(sheetId)) {
             sheetSelectionData.set(sheetId, selectionDatas);
         } else {
-            const OldSelectionDatas = sheetSelectionData.get(sheetId)!;
-            OldSelectionDatas.splice(0, OldSelectionDatas.length, ...selectionDatas);
+            let oldSelectionDatas = sheetSelectionData.get(sheetId);
+            if (oldSelectionDatas == null) {
+                oldSelectionDatas = [];
+                sheetSelectionData.set(sheetId, oldSelectionDatas);
+            }
+            oldSelectionDatas.splice(0, oldSelectionDatas.length, ...selectionDatas);
         }
 
         // this.refresh({ pluginName, unitId, sheetId });

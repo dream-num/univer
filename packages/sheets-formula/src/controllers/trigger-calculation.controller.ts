@@ -35,6 +35,8 @@ import { IActiveDirtyManagerService } from '../services/active-dirty-manager.ser
 export class TriggerCalculationController extends Disposable {
     private _waitingCommandQueue: ICommandInfo[] = [];
 
+    private _executingCommandQueue: ICommandInfo[] = [];
+
     private _setTimeoutKey: NodeJS.Timeout | number = -1;
 
     private _startExecutionTime: number = 0;
@@ -101,6 +103,10 @@ export class TriggerCalculationController extends Disposable {
                     );
 
                     this._startExecutionTime = performance.now();
+
+                    this._executingCommandQueue = this._waitingCommandQueue;
+
+                    this._waitingCommandQueue = [];
                 }, 100);
             })
         );
@@ -209,17 +215,23 @@ export class TriggerCalculationController extends Disposable {
                     switch (state) {
                         case FormulaExecutedStateType.NOT_EXECUTED:
                             result = 'No tasks are being executed anymore';
+                            this._waitingCommandQueue.unshift(...this._executingCommandQueue);
+                            this._executingCommandQueue = [];
                             break;
                         case FormulaExecutedStateType.STOP_EXECUTION:
                             result = 'The execution of the formula has been stopped';
+                            this._waitingCommandQueue.unshift(...this._executingCommandQueue);
+                            this._executingCommandQueue = [];
                             break;
                         case FormulaExecutedStateType.SUCCESS:
                             result = `Formula calculation succeeded, Total time consumed: ${
                                 performance.now() - this._startExecutionTime
                             } ms`;
+                            this._executingCommandQueue = [];
                             break;
                         case FormulaExecutedStateType.INITIAL:
                             result = 'Waiting for calculation';
+                            this._executingCommandQueue = [];
                             break;
                     }
                     console.log(`execution result${result}`);

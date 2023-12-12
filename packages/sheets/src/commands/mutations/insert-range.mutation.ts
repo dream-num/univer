@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IMutation, IRange, ObjectMatrix, ObjectMatrixPrimitiveType } from '@univerjs/core';
+import type { IMutation, IObjectMatrixPrimitiveType, IRange, ObjectMatrix } from '@univerjs/core';
 import { CommandType, Dimension, IUniverInstanceService } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
@@ -67,7 +67,7 @@ export function handleInsertRangeMutation<T>(
     lastEndRow: number,
     lastEndColumn: number,
     shiftDimension: Dimension,
-    cellValue?: ObjectMatrixPrimitiveType<T>
+    cellValue?: IObjectMatrixPrimitiveType<T>
 ) {
     for (let i = 0; i < ranges.length; i++) {
         const { startRow, endRow, startColumn, endColumn } = ranges[i];

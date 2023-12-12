@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICommand, IMutationInfo, IRange, ObjectMatrixPrimitiveType } from '@univerjs/core';
+import type { ICellData, ICommand, IMutationInfo, IObjectMatrixPrimitiveType, IRange } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
@@ -119,7 +119,7 @@ export const ApplyFormatPainterCommand: ICommand = {
         }
 
         const cellValue = new ObjectMatrix<ICellData>();
-        let realCellValue: ObjectMatrixPrimitiveType<ICellData> | undefined;
+        let realCellValue: IObjectMatrixPrimitiveType<ICellData> | undefined;
 
         if (Tools.isArray(value)) {
             for (let i = 0; i < currentSelections.length; i++) {
@@ -138,7 +138,7 @@ export const ApplyFormatPainterCommand: ICommand = {
                 cellValue.setValue(startRow, startColumn, value);
             }
         } else {
-            realCellValue = value as ObjectMatrixPrimitiveType<ICellData>;
+            realCellValue = value as IObjectMatrixPrimitiveType<ICellData>;
         }
 
         const setRangeValuesMutationParams: ISetRangeValuesMutationParams = {

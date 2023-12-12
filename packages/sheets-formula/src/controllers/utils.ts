@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, Nullable, ObjectMatrixPrimitiveType } from '@univerjs/core';
+import type { ICommandInfo, IObjectMatrixPrimitiveType, Nullable } from '@univerjs/core';
 import { Dimension, ObjectMatrix, RANGE_TYPE } from '@univerjs/core';
 import type { IArrayFormulaRangeType } from '@univerjs/engine-formula';
 import type {
@@ -47,7 +47,7 @@ import {
 } from '@univerjs/sheets';
 
 interface IFormulaDataGenerics<T> {
-    [unitId: string]: { [sheetId: string]: ObjectMatrixPrimitiveType<T> };
+    [unitId: string]: { [sheetId: string]: IObjectMatrixPrimitiveType<T> };
 }
 
 export function offsetFormula<T>(

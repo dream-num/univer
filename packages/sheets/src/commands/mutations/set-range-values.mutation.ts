@@ -23,11 +23,11 @@ import type {
     IKeyValue,
     IMutation,
     IMutationCommonParams,
+    IObjectMatrixPrimitiveType,
     IRange,
     IStyleData,
     ITextStyle,
     Nullable,
-    ObjectMatrixPrimitiveType,
 } from '@univerjs/core';
 import { CellValueType, CommandType, IUniverInstanceService, ObjectMatrix, Tools } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
@@ -40,7 +40,7 @@ export interface ISetRangeValuesMutationParams extends IMutationCommonParams {
     /**
      * null for clear all
      */
-    cellValue?: ObjectMatrixPrimitiveType<ICellData | null>;
+    cellValue?: IObjectMatrixPrimitiveType<ICellData | null>;
 
     /**
      * @deprecated not a good design

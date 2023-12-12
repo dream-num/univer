@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Nullable, ObjectMatrixPrimitiveType } from '../shared';
+import type { IObjectMatrixPrimitiveType, Nullable } from '../shared';
 import { ObjectMatrix, Tools } from '../shared';
 import { DEFAULT_STYLES } from '../types/const';
 import type { HorizontalAlign, VerticalAlign, WrapStrategy } from '../types/enum';
@@ -286,7 +286,7 @@ export class Range {
      * @param options set whether to include style
      * @returns Returns a value in object format
      */
-    getObjectValues(options: IValueOptionsType = {}): ObjectMatrixPrimitiveType<ICellData> {
+    getObjectValues(options: IValueOptionsType = {}): IObjectMatrixPrimitiveType<ICellData> {
         const { startRow, endRow, startColumn, endColumn } = this._range;
 
         // get object values from sheet matrix, or use this.getMatrix() create a new matrix then this.getMatrix().getData()

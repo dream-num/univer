@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IMutationInfo, IRange, ObjectMatrixPrimitiveType, Worksheet } from '@univerjs/core';
+import type { ICellData, IMutationInfo, IObjectMatrixPrimitiveType, IRange, Worksheet } from '@univerjs/core';
 import {
     Disposable,
     ICommandService,
@@ -253,7 +253,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         }
 
         const range = target.selection.range;
-        const cellValue: ObjectMatrixPrimitiveType<ICellData> = {
+        const cellValue: IObjectMatrixPrimitiveType<ICellData> = {
             [range.startRow]: {
                 [range.endColumn]: {
                     v: text,

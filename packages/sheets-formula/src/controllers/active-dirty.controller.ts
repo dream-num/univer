@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICommandInfo, IRange, IUnitRange, Nullable, ObjectMatrixPrimitiveType } from '@univerjs/core';
+import type { ICellData, ICommandInfo, IObjectMatrixPrimitiveType, IRange, IUnitRange, Nullable } from '@univerjs/core';
 import {
     Dimension,
     Disposable,
@@ -388,7 +388,7 @@ export class ActiveDirtyController extends Disposable {
     private _getDirtyRangesByCellValue(
         unitId: string,
         sheetId: string,
-        cellValue?: ObjectMatrixPrimitiveType<ICellData | null>
+        cellValue?: IObjectMatrixPrimitiveType<ICellData | null>
     ) {
         const dirtyRanges: IUnitRange[] = [];
 
@@ -414,7 +414,7 @@ export class ActiveDirtyController extends Disposable {
     private _getDirtyRangesForArrayFormula(
         unitId: string,
         sheetId: string,
-        cellValue: ObjectMatrixPrimitiveType<ICellData | null>
+        cellValue: IObjectMatrixPrimitiveType<ICellData | null>
     ) {
         const dirtyRanges: IUnitRange[] = [];
 

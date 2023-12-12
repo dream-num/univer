@@ -18,11 +18,11 @@ import type {
     Dimension,
     ICellData,
     IColumnData,
+    IObjectMatrixPrimitiveType,
     IRange,
     IRowData,
     IWorksheetData,
     ObjectArray,
-    ObjectMatrixPrimitiveType,
 } from '@univerjs/core';
 
 /** Params of `RemoveSheetMutation` */
@@ -82,7 +82,7 @@ export interface IInsertRangeMutationParams {
     worksheetId: string;
     ranges: IRange[];
     shiftDimension: Dimension;
-    cellValue: ObjectMatrixPrimitiveType<ICellData>;
+    cellValue: IObjectMatrixPrimitiveType<ICellData>;
 }
 
 /** Params of RemoveWorksheetMergeMutation */

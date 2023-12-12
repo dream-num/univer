@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICommand, IRange, ObjectMatrixPrimitiveType } from '@univerjs/core';
+import type { ICellData, ICommand, IObjectMatrixPrimitiveType, IRange } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
@@ -41,9 +41,9 @@ export interface ISetRangeValuesCommandParams {
     /**
      * 1. ICellData: Normal cell data
      * 2. ICellData[][]: The two-dimensional array indicates the data of multiple cells
-     * 3. ObjectMatrixPrimitiveType<ICellData>: Bring the row/column information MATRIX, indicating the data of multiple cells
+     * 3. IObjectMatrixPrimitiveType<ICellData>: Bring the row/column information MATRIX, indicating the data of multiple cells
      */
-    value: ICellData | ICellData[][] | ObjectMatrixPrimitiveType<ICellData>;
+    value: ICellData | ICellData[][] | IObjectMatrixPrimitiveType<ICellData>;
 }
 
 /**
@@ -71,7 +71,7 @@ export const SetRangeValuesCommand: ICommand = {
         }
 
         const cellValue = new ObjectMatrix<ICellData>();
-        let realCellValue: ObjectMatrixPrimitiveType<ICellData> | undefined;
+        let realCellValue: IObjectMatrixPrimitiveType<ICellData> | undefined;
 
         if (Tools.isArray(value)) {
             for (let i = 0; i < currentSelections.length; i++) {
@@ -90,7 +90,7 @@ export const SetRangeValuesCommand: ICommand = {
                 cellValue.setValue(startRow, startColumn, value);
             }
         } else {
-            realCellValue = value as ObjectMatrixPrimitiveType<ICellData>;
+            realCellValue = value as IObjectMatrixPrimitiveType<ICellData>;
         }
 
         const setRangeValuesMutationParams: ISetRangeValuesMutationParams = {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IMutationInfo, IRange, IRowData, ObjectMatrixPrimitiveType, Worksheet } from '@univerjs/core';
+import type { ICellData, IMutationInfo, IObjectMatrixPrimitiveType, IRange, IRowData, Worksheet } from '@univerjs/core';
 import {
     BooleanNumber,
     DEFAULT_WORKSHEET_COLUMN_WIDTH,
@@ -609,7 +609,7 @@ export class SheetClipboardController extends Disposable {
 }
 
 // Generate cellValue from range and set null
-function generateNullCellValue(range: IRange[]): ObjectMatrixPrimitiveType<ICellData> {
+function generateNullCellValue(range: IRange[]): IObjectMatrixPrimitiveType<ICellData> {
     const cellValue = new ObjectMatrix<ICellData>();
     range.forEach((range: IRange) => {
         const { startRow, startColumn, endRow, endColumn } = range;

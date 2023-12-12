@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IRange, Nullable, ObjectMatrixPrimitiveType } from '@univerjs/core';
+import type { ICellData, IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
 import { Disposable, isFormulaId, isFormulaString, IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
@@ -259,7 +259,7 @@ export class FormulaDataModel extends Disposable {
         };
     }
 
-    updateFormulaData(unitId: string, sheetId: string, cellValue: ObjectMatrixPrimitiveType<ICellData | null>) {
+    updateFormulaData(unitId: string, sheetId: string, cellValue: IObjectMatrixPrimitiveType<ICellData | null>) {
         const cellMatrix = new ObjectMatrix(cellValue);
 
         const formulaIdMap = this.getFormulaIdMap(unitId, sheetId); // Connect the formula and ID

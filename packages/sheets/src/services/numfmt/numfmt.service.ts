@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange, Nullable, ObjectMatrixPrimitiveType, Workbook } from '@univerjs/core';
+import type { IObjectMatrixPrimitiveType, IRange, Nullable, Workbook } from '@univerjs/core';
 import {
     Disposable,
     ICommandService,
@@ -123,7 +123,7 @@ export class NumfmtService extends Disposable implements INumfmtService {
                 result[key] = object.toJSON();
                 return result;
             },
-            {} as Record<string, ObjectMatrixPrimitiveType<INumfmtItem>>
+            {} as Record<string, IObjectMatrixPrimitiveType<INumfmtItem>>
         );
         // Filter the count equal 0 when snapshot save.
         // It is typically cleaned up once every 100 versions.

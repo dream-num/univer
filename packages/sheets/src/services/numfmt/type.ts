@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IRange, Nullable, ObjectMatrix, ObjectMatrixPrimitiveType, RefAlias } from '@univerjs/core';
+import type { ICellData, IObjectMatrixPrimitiveType, IRange, Nullable, ObjectMatrix, RefAlias } from '@univerjs/core';
 import { LifecycleStages, runOnLifecycle } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
@@ -70,7 +70,7 @@ export interface INumfmtService {
 }
 
 export interface ISnapshot {
-    model: Record<string, ObjectMatrixPrimitiveType<INumfmtItem>>;
+    model: Record<string, IObjectMatrixPrimitiveType<INumfmtItem>>;
     refModel: IRefItem[];
 }
 

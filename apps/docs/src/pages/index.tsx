@@ -34,7 +34,7 @@ export default function Home() {
                 <section>
                     <button
                         className="button button--primary margin-right--sm"
-                        onClick={() => handleRedirect(false, '/docs/tutorial/intro')}
+                        onClick={() => handleRedirect(false, '/docs/guides/intro')}
                     >
                         Get Started
                     </button>

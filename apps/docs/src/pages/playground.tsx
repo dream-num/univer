@@ -12,7 +12,7 @@ export default function Home(): JSX.Element {
             >
                 <iframe
                     style={{ width: '100% ' }}
-                    src="https://stackblitz.com/edit/univerjs-sheet-online-demo-010-alpha1?file=index.ts"
+                    src="https://stackblitz.com/edit/vite-univer-sheets?embed=1&file=src%2Fmain.ts"
                 />
             </div>
         </Layout>

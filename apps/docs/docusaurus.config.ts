@@ -1,10 +1,20 @@
+import fs from 'node:fs';
 import type * as Preset from '@docusaurus/preset-classic';
 import type { Config } from '@docusaurus/types';
 import { themes as prismThemes } from 'prism-react-renderer';
 import rootTsConfig from '../../tsconfig.json';
 
 const packages = rootTsConfig.references
-    .filter((ref) => ref.path.startsWith('./packages/'))
+    .filter((ref) => {
+        // read package.json
+        try {
+            const pkg = fs.readFileSync(`../../${ref.path}/package.json`, 'utf-8');
+            const { private: p } = JSON.parse(pkg);
+            return !p;
+        } catch (e) {
+            console.error(e)
+        }
+    })
     .map((ref) => ref.path.replace('./packages/', ''));
 
 const config: Config = {
@@ -13,7 +23,7 @@ const config: Config = {
     favicon: 'img/favicon.ico',
 
     // Set the production url of your site here
-    url: 'https://your-docusaurus-site.example.com',
+    url: 'https://univer-docs.vercel.app',
     // Set the /<baseUrl>/ pathname under which your site is served
     // For GitHub pages deployment, it is often '/<projectName>/'
     baseUrl: '/',
@@ -99,7 +109,7 @@ const config: Config = {
             items: [
                 {
                     type: 'docSidebar',
-                    sidebarId: 'tutorialSidebar',
+                    sidebarId: 'guidesSidebar',
                     position: 'left',
                     label: '指南',
                 },
@@ -135,11 +145,11 @@ const config: Config = {
                     items: [
                         {
                             label: '指南',
-                            to: '/docs/tutorial/intro',
+                            to: '/docs/guides/intro',
                         },
                         {
                             label: 'API',
-                            to: '/docs/api',
+                            to: '/docs/api/core',
                         },
                     ],
                 },

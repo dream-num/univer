@@ -34,6 +34,20 @@ export enum AbsoluteRefType {
     ALL,
 }
 
+export interface IRowRange {
+    /**
+     * The start row (inclusive) of the range
+     * startRow
+     */
+    startRow: number;
+
+    /**
+     * The end row (exclusive) of the range
+     * endRow
+     */
+    endRow: number;
+}
+
 /**
  * Range data structure
  *
@@ -49,25 +63,12 @@ export enum AbsoluteRefType {
  *
  * means "A1:B2"
  */
-export interface IRange {
-    /**
-     * The start row (inclusive) of the range
-     * startRow
-     */
-    startRow: number;
-
+export interface IRange extends IRowRange {
     /**
      * The start column (inclusive) of the range
      * startColumn
      */
     startColumn: number;
-
-    /**
-     * The end row (exclusive) of the range
-     * endRow
-     */
-    endRow: number;
-
     /**
      * The end column (exclusive) of the range
      * endColumn

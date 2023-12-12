@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IMutation, IRange, Nullable } from '@univerjs/core';
+import type { IMutation, IRange, Nullable, ObjectArrayPrimitiveType } from '@univerjs/core';
 import { CommandType, IUniverInstanceService, ObjectArray } from '@univerjs/core';
 import type { IRowAutoHeightInfo } from '@univerjs/engine-render';
 import type { IAccessor } from '@wendellhu/redi';
@@ -32,7 +32,7 @@ export interface ISetWorksheetRowIsAutoHeightMutationParams {
     workbookId: string;
     worksheetId: string;
     ranges: IRange[];
-    autoHeightInfo: boolean | ObjectArray<Nullable<boolean>>;
+    autoHeightInfo: boolean | ObjectArrayPrimitiveType<Nullable<boolean>>;
 }
 
 export interface ISetWorksheetRowAutoHeightMutationParams {
@@ -79,17 +79,17 @@ export const SetWorksheetRowIsAutoHeightMutationFactory = (
     const { workbookId, worksheetId, ranges } = params;
 
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
-    const worksheet = workbook!.getSheetBySheetId(worksheetId);
+    const workbook = univerInstanceService.getUniverSheetInstance(workbookId)!;
+    const worksheet = workbook.getSheetBySheetId(worksheetId)!;
 
-    const autoHeightInfo = new ObjectArray<Nullable<boolean>>();
-    const manager = worksheet!.getRowManager();
+    const autoHeightHash = new ObjectArray<Nullable<boolean>>();
+    const manager = worksheet.getRowManager();
 
     for (const { startRow, endRow } of ranges) {
         for (let rowIndex = startRow; rowIndex <= endRow; rowIndex++) {
             const row = manager.getRowOrCreate(rowIndex);
 
-            autoHeightInfo.set(rowIndex, row.isAutoHeight);
+            autoHeightHash.set(rowIndex, row.isAutoHeight);
         }
     }
 
@@ -97,7 +97,7 @@ export const SetWorksheetRowIsAutoHeightMutationFactory = (
         workbookId,
         worksheetId,
         ranges,
-        autoHeightInfo,
+        autoHeightInfo: autoHeightHash.toJSON(),
     };
 };
 
@@ -187,7 +187,8 @@ export const SetWorksheetRowIsAutoHeightMutation: IMutation<ISetWorksheetRowIsAu
                 if (typeof autoHeightInfo === 'boolean') {
                     row.isAutoHeight = autoHeightInfo;
                 } else {
-                    row.isAutoHeight = autoHeightInfo.get(rowIndex - startRow) ?? defaultRowIsAutoHeight;
+                    row.isAutoHeight =
+                        new ObjectArray(autoHeightInfo).get(rowIndex - startRow) ?? defaultRowIsAutoHeight;
                 }
             }
         }

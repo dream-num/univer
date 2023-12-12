@@ -149,6 +149,7 @@ export { SetWorksheetOrderCommand } from './commands/commands/set-worksheet-orde
 export {
     DeltaRowHeightCommand,
     type IDeltaRowHeightCommand,
+    type ISetWorksheetRowIsAutoHeightCommandParams,
     SetRowHeightCommand,
     SetWorksheetRowIsAutoHeightCommand,
 } from './commands/commands/set-worksheet-row-height.command';

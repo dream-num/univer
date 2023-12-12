@@ -854,9 +854,18 @@ importers:
       typescript:
         specifier: ^5.3.3
         version: 5.3.3
+      vite:
+        specifier: ^5.0.7
+        version: 5.0.7(@types/node@20.10.4)(less@4.2.0)
+      vite-plugin-dts:
+        specifier: ^3.6.4
+        version: 3.6.4(@types/node@20.10.4)(typescript@5.3.3)(vite@5.0.7)
       vite-plugin-externals:
         specifier: ^0.6.2
         version: 0.6.2(vite@5.0.7)
+      vitest:
+        specifier: ^1.0.2
+        version: 1.0.2(@types/node@20.10.4)
 
   packages/rpc:
     devDependencies:

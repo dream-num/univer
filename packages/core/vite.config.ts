@@ -28,11 +28,12 @@ export default defineConfig(({ mode }) => ({
             formats: ['es', 'umd', 'cjs'],
         },
         rollupOptions: {
-            external: ['@wendellhu/redi', 'rxjs'],
+            external: ['@wendellhu/redi', 'rxjs', 'rxjs/operators'],
             output: {
                 globals: {
                     '@wendellhu/redi': '@wendellhu/redi',
                     rxjs: 'rxjs',
+                    'rxjs/operators': 'rxjs.operators',
                 },
             },
         },

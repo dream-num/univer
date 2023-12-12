@@ -47,6 +47,7 @@ export default defineConfig(({ mode }) => ({
                 'react',
                 'react-dom',
                 'rxjs',
+                'rxjs/operators',
             ],
             output: {
                 assetFileNames: 'index.css',
@@ -61,6 +62,7 @@ export default defineConfig(({ mode }) => ({
                     react: 'React',
                     'react-dom': 'ReactDOM',
                     rxjs: 'rxjs',
+                    'rxjs/operators': 'rxjs.operators',
                 },
             },
         },

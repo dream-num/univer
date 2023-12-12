@@ -48,6 +48,7 @@ export default defineConfig(({ mode }) => ({
                 '@wendellhu/redi/react-bindings',
                 'react',
                 'rxjs',
+                'rxjs/operators',
             ],
             output: {
                 assetFileNames: 'index.css',
@@ -63,6 +64,7 @@ export default defineConfig(({ mode }) => ({
                     '@wendellhu/redi/react-bindings': '@wendellhu/redi/react-bindings',
                     react: 'React',
                     rxjs: 'rxjs',
+                    'rxjs/operators': 'rxjs.operators',
                 },
             },
         },

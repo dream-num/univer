@@ -14,9 +14,7 @@
         "@univerjs/docs": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/local-save": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "^0.12.12",
         "data": "workspace:*",
         "univer-plugin-debugger": "workspace:*"
     },

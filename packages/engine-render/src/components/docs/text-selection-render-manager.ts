@@ -22,11 +22,16 @@ import { BehaviorSubject } from 'rxjs';
 
 import { CURSOR_TYPE } from '../../basics/const';
 import type { IDocumentSkeletonSpan } from '../../basics/i-document-skeleton-cached';
-import { PageLayoutType, SpanType } from '../../basics/i-document-skeleton-cached';
+import { PageLayoutType } from '../../basics/i-document-skeleton-cached';
 import type { IMouseEvent, IPointerEvent } from '../../basics/i-events';
 import type { INodeInfo, INodePosition } from '../../basics/interfaces';
 import { getOffsetRectForDom, transformBoundingCoord } from '../../basics/position';
-import type { ITextRangeWithStyle, ITextSelectionStyle, RANGE_DIRECTION } from '../../basics/range';
+import type {
+    ISuccinctTextRangeParam,
+    ITextRangeWithStyle,
+    ITextSelectionStyle,
+    RANGE_DIRECTION,
+} from '../../basics/range';
 import { NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '../../basics/range';
 import { getCurrentScrollXY } from '../../basics/scroll-xy';
 import { checkStyle, injectStyle } from '../../basics/tools';
@@ -82,11 +87,7 @@ function getParagraphInfoBySpan(node: IDocumentSkeletonSpan) {
                     hasFound = true;
                 }
 
-                if (span.spanType === SpanType.LIST) {
-                    continue;
-                }
-
-                content += span.content;
+                content += span.count > 0 ? span.content : '';
             }
         }
     }
@@ -105,6 +106,23 @@ interface IAddTextRangesConfig {
     documentOffsetConfig: IDocumentOffsetConfig;
 }
 
+export interface ITextSelectionInnerParam {
+    textRanges: TextRange[];
+    segmentId: string;
+    style: ITextSelectionStyle;
+}
+
+export interface IActiveTextRange {
+    startOffset: number;
+    endOffset: number;
+    collapsed: boolean;
+    startNodePosition: Nullable<INodePosition>;
+    endNodePosition: Nullable<INodePosition>;
+    direction: RANGE_DIRECTION;
+    segmentId: string;
+    style: ITextSelectionStyle;
+}
+
 export interface ITextSelectionRenderManager {
     readonly onInputBefore$: Observable<Nullable<IEditorInputConfig>>;
     readonly onKeydown$: Observable<Nullable<IEditorInputConfig>>;
@@ -114,8 +132,7 @@ export interface ITextSelectionRenderManager {
     readonly onCompositionend$: Observable<Nullable<IEditorInputConfig>>;
     readonly onSelectionStart$: Observable<Nullable<INodePosition>>;
     readonly onPaste$: Observable<Nullable<IEditorInputConfig>>;
-
-    readonly textSelection$: Observable<TextRange[]>;
+    readonly textSelectionInner$: Observable<Nullable<ITextSelectionInnerParam>>;
 
     getViewPort(): Viewport;
 
@@ -129,11 +146,9 @@ export interface ITextSelectionRenderManager {
 
     resetStyle(): void;
 
-    getAllTextRanges(): TextRange[];
-
     removeAllTextRanges(): void;
 
-    addTextRanges(ranges: ITextRangeWithStyle[], config?: IAddTextRangesConfig): void;
+    addTextRanges(ranges: ISuccinctTextRangeParam[], config?: IAddTextRangesConfig): void;
 
     sync(): void;
 
@@ -153,14 +168,6 @@ export interface ITextSelectionRenderManager {
     ): void;
 
     dispose(): void;
-
-    getActiveRange(): Nullable<
-        ITextRangeWithStyle & {
-            startNodePosition: Nullable<INodePosition>;
-            endNodePosition: Nullable<INodePosition>;
-            direction: RANGE_DIRECTION;
-        }
-    >;
 
     handleDblClick(
         evt: IPointerEvent | IMouseEvent,
@@ -233,9 +240,9 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
     readonly onPaste$ = this._onPaste$.asObservable();
 
-    private readonly _textSelection$ = new BehaviorSubject<TextRange[]>([]);
+    private readonly _textSelectionInner$ = new BehaviorSubject<Nullable<ITextSelectionInnerParam>>(null);
 
-    readonly textSelection$ = this._textSelection$.asObservable();
+    readonly textSelectionInner$ = this._textSelectionInner$.asObservable();
 
     private _container!: HTMLDivElement;
 
@@ -322,54 +329,20 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         this._isSelectionEnabled = false;
     }
 
-    getActiveRange() {
-        const activeRange = this._rangeList.find((range) => range.isActive());
-
-        if (activeRange == null) {
-            return null;
-        }
-
-        const { startOffset, endOffset, collapsed, startNodePosition, endNodePosition, direction } = activeRange;
-
-        if (startOffset == null || endOffset == null) {
-            return null;
-        }
-
-        return {
-            startOffset,
-            endOffset,
-            collapsed,
-            startNodePosition,
-            endNodePosition,
-            direction,
-            segmentId: this._currentSegmentId,
-            style: this._selectionStyle,
-        };
-    }
-
-    getAllTextRanges() {
-        return this._rangeList;
-    }
-
-    addTextRanges(ranges: ITextRangeWithStyle[], config?: IAddTextRangesConfig) {
-        if (config != null) {
-            const { scene, skeleton, documentOffsetConfig } = config;
-
-            this.changeRuntime(skeleton, scene, null, documentOffsetConfig);
-        }
+    addTextRanges(ranges: ISuccinctTextRangeParam[]) {
+        const { _scene: scene, _docSkeleton: docSkeleton, _documentOffsetConfig: documentOffsetConfig } = this;
 
         for (const range of ranges) {
-            const textSelection = cursorConvertToTextRange(
-                this._scene!,
-                range,
-                this._docSkeleton!,
-                this._documentOffsetConfig
-            );
+            const textSelection = cursorConvertToTextRange(scene!, range, docSkeleton!, documentOffsetConfig);
 
             this._add(textSelection);
         }
 
-        this._textSelection$.next(this.getAllTextRanges());
+        this._textSelectionInner$.next({
+            textRanges: this._getAllTextRanges(),
+            segmentId: this._currentSegmentId,
+            style: this._selectionStyle,
+        });
 
         this._syncDomToSelection();
 
@@ -494,11 +467,10 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         if (Number.isFinite(startOffset) && Number.isFinite(endOffset)) {
             this.removeAllTextRanges();
 
-            const textRanges: ITextRangeWithStyle[] = [
+            const textRanges = [
                 {
                     startOffset,
                     endOffset,
-                    collapsed: startOffset === endOffset,
                 },
             ];
 
@@ -629,13 +601,17 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             preMoveOffsetY = moveOffsetY;
         });
 
-        this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {
+        this._upObserver = scene.onPointerUpObserver.add(() => {
             scene.onPointerMoveObserver.remove(this._moveObserver);
             scene.onPointerUpObserver.remove(this._upObserver);
 
             scene.enableEvent();
 
-            this._textSelection$.next(this.getAllTextRanges());
+            this._textSelectionInner$.next({
+                textRanges: this._getAllTextRanges(),
+                segmentId: this._currentSegmentId,
+                style: this._selectionStyle,
+            });
 
             scrollTimer.dispose();
             this._syncDomToSelection();
@@ -645,6 +621,35 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
     removeAllTextRanges() {
         this._removeAllTextRanges();
         this.deactivate();
+    }
+
+    private _getAllTextRanges() {
+        return this._rangeList;
+    }
+
+    private _getActiveRange(): Nullable<IActiveTextRange> {
+        const activeRange = this._rangeList.find((range) => range.isActive());
+
+        if (activeRange == null) {
+            return null;
+        }
+
+        const { startOffset, endOffset, collapsed, startNodePosition, endNodePosition, direction } = activeRange;
+
+        if (startOffset == null || endOffset == null) {
+            return null;
+        }
+
+        return {
+            startOffset,
+            endOffset,
+            collapsed,
+            startNodePosition,
+            endNodePosition,
+            direction,
+            segmentId: this._currentSegmentId,
+            style: this._selectionStyle,
+        };
     }
 
     private _add(textRange: Nullable<TextRange>) {
@@ -1103,8 +1108,8 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         this._input.innerHTML = '';
 
-        const activeRange = this.getActiveRange();
-        const rangeList = this.getAllTextRanges();
+        const activeRange = this._getActiveRange();
+        const rangeList = this._getAllTextRanges();
 
         func({
             event: e,

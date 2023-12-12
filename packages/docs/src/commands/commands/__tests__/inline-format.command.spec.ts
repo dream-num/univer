@@ -17,11 +17,11 @@
 import type { ICommand, IStyleBase, Univer } from '@univerjs/core';
 import { BooleanNumber, ICommandService, IUniverInstanceService, RedoCommand, UndoCommand } from '@univerjs/core';
 import type { Injector } from '@wendellhu/redi';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { NORMAL_TEXT_SELECTION_PLUGIN_NAME } from '../../../basics/docs-view-key';
 import { TextSelectionManagerService } from '../../../services/text-selection-manager.service';
 import { RichTextEditingMutation } from '../../mutations/core-editing.mutation';
+import { SetTextSelectionsOperation } from '../../operations/text-selection.operation';
 import {
     SetInlineFormatBoldCommand,
     SetInlineFormatCommand,
@@ -33,6 +33,19 @@ import {
     SetInlineFormatUnderlineCommand,
 } from '../inline-format.command';
 import { createCommandTestBed } from './create-command-test-bed';
+
+vi.mock('@univerjs/engine-render', async () => {
+    const actual = await vi.importActual('@univerjs/engine-render');
+    const { ITextSelectionRenderManager, TextSelectionRenderManager } = await import(
+        './mock-text-selection-render-manager'
+    );
+
+    return {
+        ...actual,
+        ITextSelectionRenderManager,
+        TextSelectionRenderManager,
+    };
+});
 
 describe('Test inline format commands', () => {
     let univer: Univer;
@@ -63,21 +76,20 @@ describe('Test inline format commands', () => {
 
         commandService = get(ICommandService);
         commandService.registerCommand(SetInlineFormatCommand);
+        commandService.registerCommand(SetTextSelectionsOperation);
         commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
 
         const selectionManager = get(TextSelectionManagerService);
 
         selectionManager.setCurrentSelection({
-            pluginName: NORMAL_TEXT_SELECTION_PLUGIN_NAME,
             unitId: 'test-doc',
+            subUnitId: '',
         });
 
         selectionManager.add([
             {
                 startOffset: 0,
                 endOffset: 5,
-                collapsed: false,
-                segmentId: '',
             },
         ]);
 
@@ -85,8 +97,6 @@ describe('Test inline format commands', () => {
             {
                 startOffset: 20,
                 endOffset: 30,
-                collapsed: false,
-                segmentId: '',
             },
         ]);
     });

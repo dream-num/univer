@@ -25,6 +25,7 @@ import {
     serializeRange,
     toDisposable,
 } from '@univerjs/core';
+import { TextSelectionManagerService } from '@univerjs/docs';
 import { LexerTreeBuilder, matchToken, sequenceNodeType } from '@univerjs/engine-formula';
 import { DeviceInputEventType, IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/engine-render';
 import type { EditorBridgeService } from '@univerjs/sheets-ui';
@@ -45,7 +46,8 @@ export class FormulaInputController extends Disposable {
         @Inject(IEditorBridgeService) private readonly _editorBridgeService: EditorBridgeService,
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @IFormulaInputService private readonly _formulaInputService: IFormulaInputService
+        @IFormulaInputService private readonly _formulaInputService: IFormulaInputService,
+        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService
     ) {
         super();
 
@@ -118,7 +120,7 @@ export class FormulaInputController extends Disposable {
     }
 
     private _changeRefString() {
-        const activeRange = this._textSelectionRenderManager.getActiveRange();
+        const activeRange = this._textSelectionManagerService.getActiveRange();
 
         if (activeRange == null) {
             return;

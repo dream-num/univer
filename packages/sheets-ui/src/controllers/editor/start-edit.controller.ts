@@ -192,7 +192,6 @@ export class StartEditController extends Disposable {
                 {
                     startOffset: 0,
                     endOffset: 0,
-                    collapsed: true,
                 },
             ]);
 
@@ -513,7 +512,6 @@ export class StartEditController extends Disposable {
                     {
                         startOffset: 0,
                         endOffset: 0,
-                        collapsed: true,
                     },
                 ]);
             } else if (eventType === DeviceInputEventType.Dblclick) {
@@ -528,7 +526,6 @@ export class StartEditController extends Disposable {
                     {
                         startOffset: cursor,
                         endOffset: cursor,
-                        collapsed: true,
                     },
                 ]);
             }

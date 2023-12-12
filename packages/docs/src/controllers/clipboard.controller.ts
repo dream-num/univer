@@ -27,11 +27,12 @@ import {
     OnLifecycle,
     Tools,
 } from '@univerjs/core';
-import { ITextSelectionRenderManager } from '@univerjs/engine-render';
+import { Inject } from '@wendellhu/redi';
 
 import { DocCopyCommand, DocCutCommand, DocPasteCommand } from '../commands/commands/clipboard.command';
 import { CutContentCommand, InnerPasteCommand } from '../commands/commands/clipboard.inner.command';
 import { IDocClipboardService } from '../services/clipboard/clipboard.service';
+import { TextSelectionManagerService } from '../services/text-selection-manager.service';
 
 @OnLifecycle(LifecycleStages.Rendered, DocClipboardController)
 export class DocClipboardController extends Disposable {
@@ -40,7 +41,7 @@ export class DocClipboardController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @IDocClipboardService private readonly _docClipboardService: IDocClipboardService,
-        @ITextSelectionRenderManager private _textSelectionRenderManager: ITextSelectionRenderManager,
+        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @IContextService private readonly _contextService: IContextService
     ) {
         super();
@@ -102,14 +103,14 @@ export class DocClipboardController extends Disposable {
             segmentId,
             endOffset: activeEndOffset,
             style,
-        } = this._textSelectionRenderManager.getActiveRange() ?? {};
-        const ranges = this._textSelectionRenderManager.getAllTextRanges();
+        } = this._textSelectionManagerService.getActiveRange() ?? {};
+        const ranges = this._textSelectionManagerService.getSelections();
 
         if (segmentId == null) {
             this._logService.error('[DocClipboardController] segmentId is not existed');
         }
 
-        if (activeEndOffset == null) {
+        if (activeEndOffset == null || ranges == null) {
             return;
         }
 
@@ -134,7 +135,6 @@ export class DocClipboardController extends Disposable {
                 {
                     startOffset: cursor,
                     endOffset: cursor,
-                    collapsed: true,
                     style,
                 },
             ];
@@ -146,12 +146,16 @@ export class DocClipboardController extends Disposable {
     }
 
     private _getDocumentBodyInRanges(): IDocumentBody[] {
-        const ranges = this._textSelectionRenderManager.getAllTextRanges();
+        const ranges = this._textSelectionManagerService.getSelections();
         const docDataModel = this._currentUniverService.getCurrentUniverDocInstance();
 
         const { dataStream, textRuns = [], paragraphs = [] } = docDataModel.getBody()!;
 
         const results: IDocumentBody[] = [];
+
+        if (ranges == null) {
+            return results;
+        }
 
         for (const range of ranges) {
             const { startOffset, endOffset, collapsed } = range;
@@ -241,14 +245,14 @@ export class DocClipboardController extends Disposable {
             segmentId,
             endOffset: activeEndOffset,
             style,
-        } = this._textSelectionRenderManager.getActiveRange() ?? {};
-        const ranges = this._textSelectionRenderManager.getAllTextRanges();
+        } = this._textSelectionManagerService.getActiveRange() ?? {};
+        const ranges = this._textSelectionManagerService.getSelections();
 
         if (segmentId == null) {
             this._logService.error('[DocClipboardController] segmentId is not existed');
         }
 
-        if (activeEndOffset == null) {
+        if (activeEndOffset == null || ranges == null) {
             return;
         }
 
@@ -273,7 +277,6 @@ export class DocClipboardController extends Disposable {
                 {
                     startOffset: cursor,
                     endOffset: cursor,
-                    collapsed: true,
                     style,
                 },
             ];

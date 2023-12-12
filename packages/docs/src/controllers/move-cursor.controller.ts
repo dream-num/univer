@@ -30,12 +30,7 @@ import type {
     INodePosition,
     INodeSearch,
 } from '@univerjs/engine-render';
-import {
-    IRenderManagerService,
-    ITextSelectionRenderManager,
-    NodePositionConvertToCursor,
-    RANGE_DIRECTION,
-} from '@univerjs/engine-render';
+import { IRenderManagerService, NodePositionConvertToCursor, RANGE_DIRECTION } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import type { Subscription } from 'rxjs';
 
@@ -53,7 +48,6 @@ export class MoveCursorController extends Disposable {
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @ICommandService private readonly _commandService: ICommandService
     ) {
@@ -99,8 +93,8 @@ export class MoveCursorController extends Disposable {
     }
 
     private _handleShiftMoveSelection(direction: Direction) {
-        const activeRange = this._textSelectionRenderManager.getActiveRange();
-        const allRanges = this._textSelectionRenderManager.getAllTextRanges();
+        const activeRange = this._textSelectionManagerService.getActiveRange();
+        const allRanges = this._textSelectionManagerService.getSelections()!;
         const docDataModel = this._currentUniverService.getCurrentUniverDocInstance();
 
         const skeleton = this._docSkeletonManagerService.getCurrent()?.skeleton;
@@ -126,7 +120,6 @@ export class MoveCursorController extends Disposable {
                 {
                     startOffset: direction === Direction.LEFT || direction === Direction.UP ? max : min,
                     endOffset: direction === Direction.LEFT || direction === Direction.UP ? min : max,
-                    collapsed: false,
                     style,
                 },
             ]);
@@ -155,7 +148,6 @@ export class MoveCursorController extends Disposable {
                 {
                     startOffset: anchorOffset,
                     endOffset: focusOffset,
-                    collapsed: anchorOffset === focusOffset,
                     style,
                 },
             ]);
@@ -177,7 +169,6 @@ export class MoveCursorController extends Disposable {
                     {
                         startOffset: anchorOffset,
                         endOffset: newFocusOffset,
-                        collapsed: anchorOffset === newFocusOffset,
                         style,
                     },
                 ]);
@@ -195,7 +186,6 @@ export class MoveCursorController extends Disposable {
                 {
                     startOffset: anchorOffset,
                     endOffset: newActiveRange.endOffset,
-                    collapsed: anchorOffset === newActiveRange.endOffset,
                     style,
                 },
             ]);
@@ -203,15 +193,15 @@ export class MoveCursorController extends Disposable {
     }
 
     private _handleMoveCursor(direction: Direction) {
-        const activeRange = this._textSelectionRenderManager.getActiveRange();
-        const allRanges = this._textSelectionRenderManager.getAllTextRanges();
+        const activeRange = this._textSelectionManagerService.getActiveRange();
+        const allRanges = this._textSelectionManagerService.getSelections();
         const docDataModel = this._currentUniverService.getCurrentUniverDocInstance();
 
         const skeleton = this._docSkeletonManagerService.getCurrent()?.skeleton;
 
         const docObject = this._getDocObject();
 
-        if (activeRange == null || skeleton == null || docObject == null) {
+        if (activeRange == null || skeleton == null || docObject == null || allRanges == null) {
             return;
         }
 
@@ -248,7 +238,6 @@ export class MoveCursorController extends Disposable {
                 {
                     startOffset: cursor,
                     endOffset: cursor,
-                    collapsed: true,
                     style,
                 },
             ]);
@@ -281,7 +270,6 @@ export class MoveCursorController extends Disposable {
                     {
                         startOffset: cursor,
                         endOffset: cursor,
-                        collapsed: true,
                         style,
                     },
                 ]);

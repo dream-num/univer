@@ -22,10 +22,20 @@ import { ErrorValueObject } from '../other-object/error-value-object';
 
 export type CalculateValueType = BaseValueObject | ErrorValueObject;
 
+export type callbackMapFnType = (currentValue: CalculateValueType, row: number, column: number) => CalculateValueType;
+
+export type callbackProductFnType = (
+    currentValue: CalculateValueType,
+    operationValue: CalculateValueType
+) => CalculateValueType;
 export interface IArrayValueObject {
     calculateValueList: CalculateValueType[][];
     rowCount: number;
     columnCount: number;
+    unitId: string;
+    sheetId: string;
+    row: number;
+    column: number;
 }
 export class BaseValueObject extends ObjectClassType {
     constructor(private _rawValue: string | number | boolean) {
@@ -104,6 +114,15 @@ export class BaseValueObject extends ObjectClassType {
     divided(valueObject: BaseValueObject): CalculateValueType {
         /** abstract */
         return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    map(callbackFn: callbackMapFnType): CalculateValueType {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    product(valueObject: BaseValueObject, callbackFn: callbackProductFnType): CalculateValueType {
+        return callbackFn(this, valueObject);
     }
 
     compare(valueObject: BaseValueObject, operator: compareToken): CalculateValueType {

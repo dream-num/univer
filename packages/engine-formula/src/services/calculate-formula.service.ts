@@ -34,13 +34,14 @@ import type {
     IUnitExcludedCell,
 } from '../basics/common';
 import { ErrorType } from '../basics/error-type';
+import { CELL_INVERTED_INDEX_CACHE } from '../basics/inverted-index-cache';
 import { Lexer } from '../engine/analysis/lexer';
 import type { LexerNode } from '../engine/analysis/lexer-node';
 import { AstTreeBuilder } from '../engine/analysis/parser';
 import { ErrorNode } from '../engine/ast-node/base-ast-node';
 import { FormulaDependencyGenerator } from '../engine/dependency/formula-dependency';
 import { Interpreter } from '../engine/interpreter/interpreter';
-import type { FunctionVariantType } from '../engine/reference-object/base-reference-object';
+import { FORMULA_REF_TO_ARRAY_CACHE, type FunctionVariantType } from '../engine/reference-object/base-reference-object';
 import { IFormulaCurrentConfigService } from './current-data.service';
 import type { IAllRuntimeData, IExecutionInProgressParams } from './runtime.service';
 import { FormulaExecuteStageType, IFormulaRuntimeService } from './runtime.service';
@@ -124,6 +125,10 @@ export class CalculateFormulaService extends Disposable {
         this._executionInProgressListener$.next(this._runtimeService.getRuntimeState());
 
         this._executionCompleteListener$.next(this._runtimeService.getAllRuntimeData());
+
+        FORMULA_REF_TO_ARRAY_CACHE.clear();
+
+        CELL_INVERTED_INDEX_CACHE.clear();
     }
 
     private async _execute() {

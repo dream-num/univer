@@ -24,7 +24,12 @@ import {
     toDisposable,
 } from '@univerjs/core';
 import type { BaseValueObject, ISheetData } from '@univerjs/engine-formula';
-import { IFunctionService, RangeReferenceObject } from '@univerjs/engine-formula';
+import {
+    convertUnitDataToRuntime,
+    FormulaDataModel,
+    IFunctionService,
+    RangeReferenceObject,
+} from '@univerjs/engine-formula';
 import { SelectionManagerService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
@@ -37,7 +42,8 @@ export class StatusBarController extends Disposable {
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @IFunctionService private readonly _functionService: IFunctionService,
-        @IStatusBarService private readonly _statusBarService: IStatusBarService
+        @IStatusBarService private readonly _statusBarService: IStatusBarService,
+        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
     ) {
         super();
 
@@ -74,6 +80,7 @@ export class StatusBarController extends Disposable {
         const unitId = workbook.getUnitId();
         const sheetId = workbook.getActiveSheet().getSheetId();
         const sheetData: ISheetData = {};
+        const arrayFormulaMatrixCell = this._formulaDataModel.getArrayFormulaCellData();
         this._univerInstanceService
             .getCurrentUniverSheetInstance()
             .getSheets()
@@ -87,11 +94,13 @@ export class StatusBarController extends Disposable {
             });
         if (selections?.length && (selections?.length > 1 || !this._isSingleCell(selections[0]))) {
             const refs = selections.map((s) => new RangeReferenceObject(s, sheetId, unitId));
-            refs.forEach((ref) =>
+            refs.forEach((ref) => {
                 ref.setUnitData({
                     [unitId]: sheetData,
-                })
-            );
+                });
+
+                arrayFormulaMatrixCell && ref.setArrayFormulaCellData(convertUnitDataToRuntime(arrayFormulaMatrixCell));
+            });
 
             const functions = this._statusBarService.getFunctions();
             const calcResult = functions.map((f) => {

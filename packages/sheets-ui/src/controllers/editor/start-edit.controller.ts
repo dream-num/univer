@@ -506,6 +506,7 @@ export class StartEditController extends Disposable {
                 // @JOCS, Why calculate here?
                 if (keycode === KeyCode.BACKSPACE || eventType === DeviceInputEventType.Dblclick) {
                     skeleton.calculate();
+                    this._editorBridgeService.changeEditorDirty(true);
                 }
 
                 this._textSelectionManagerService.replaceTextRanges([

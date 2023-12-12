@@ -18,10 +18,16 @@ import type { Nullable } from '@univerjs/core';
 
 import { BooleanValue } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
+import { CELL_INVERTED_INDEX_CACHE } from '../../basics/inverted-index-cache';
 import { $ARRAY_VALUE_REGEX } from '../../basics/regex';
-import type { compareToken } from '../../basics/token';
+import { compareToken } from '../../basics/token';
 import { ErrorValueObject } from '../other-object/error-value-object';
-import type { CalculateValueType, IArrayValueObject } from './base-value-object';
+import type {
+    CalculateValueType,
+    callbackMapFnType,
+    callbackProductFnType,
+    IArrayValueObject,
+} from './base-value-object';
 import { BaseValueObject } from './base-value-object';
 import { BooleanValueObject, NumberValueObject, StringValueObject } from './primitive-object';
 
@@ -33,6 +39,14 @@ enum BatchOperatorType {
     COMPARE,
     CONCATENATE_FRONT,
     CONCATENATE_BACK,
+    PRODUCT,
+}
+
+enum ArrayCalculateType {
+    PRODUCT,
+    ROW,
+    COLUMN,
+    SINGLE,
 }
 
 export function fromObjectToString(array: IArrayValueObject) {
@@ -46,8 +60,16 @@ export class ArrayValueObject extends BaseValueObject {
 
     private _columnCount: number = -1;
 
+    private _unitId: string = '';
+
+    private _sheetId: string = '';
+
+    private _currentRow: number = -1;
+
+    private _currentColumn: number = -1;
+
     constructor(rawValue: string | IArrayValueObject) {
-        if (rawValue instanceof String) {
+        if (typeof rawValue === 'string') {
             super(rawValue as string);
         } else {
             const rawString = fromObjectToString(rawValue as IArrayValueObject);
@@ -81,6 +103,35 @@ export class ArrayValueObject extends BaseValueObject {
 
     setColumnCount(columnCount: number) {
         this._columnCount = columnCount;
+    }
+
+    setCurrent(row: number, column: number) {
+        this._currentRow = row;
+        this._currentColumn = column;
+    }
+
+    setUnitId(unitId: string) {
+        this._unitId = unitId;
+    }
+
+    getUnitId() {
+        return this._unitId;
+    }
+
+    setSheetId(sheetId: string) {
+        this._sheetId = sheetId;
+    }
+
+    getSheetId() {
+        return this._sheetId;
+    }
+
+    getCurrentRow() {
+        return this._currentRow;
+    }
+
+    getCurrentColumn() {
+        return this._currentColumn;
     }
 
     override getArrayValue() {
@@ -157,92 +208,11 @@ export class ArrayValueObject extends BaseValueObject {
         return this._batchOperator(valueObject, BatchOperatorType.CONCATENATE_BACK);
     }
 
-    // eslint-disable-next-line max-lines-per-function
-    private _batchOperator(
-        valueObject: BaseValueObject,
-        batchOperatorType: BatchOperatorType,
-        operator?: compareToken
-    ): CalculateValueType {
-        if (valueObject.isArray()) {
-            let rowCount = (valueObject as ArrayValueObject).getRowCount();
-            let columnCount = (valueObject as ArrayValueObject).getColumnCount();
+    override product(valueObject: BaseValueObject, callbackFn: callbackProductFnType): CalculateValueType {
+        return this._batchOperator(valueObject, BatchOperatorType.PRODUCT, callbackFn);
+    }
 
-            if (rowCount < this._rowCount) {
-                rowCount = this._rowCount;
-            }
-
-            if (columnCount < this._columnCount) {
-                columnCount = this._columnCount;
-            }
-
-            const result: CalculateValueType[][] = [];
-
-            const valueObjectList = (valueObject as ArrayValueObject).getArrayValue();
-
-            for (let r = 0; r < rowCount; r++) {
-                const rowList: CalculateValueType[] = [];
-                for (let c = 0; c < columnCount; c++) {
-                    const currentValue = this._value?.[r]?.[c];
-
-                    const opValue = valueObjectList?.[r]?.[c];
-
-                    if (currentValue && opValue) {
-                        if (currentValue.isErrorObject() || opValue.isErrorObject()) {
-                            rowList[c] = ErrorValueObject.create(ErrorType.VALUE);
-                        } else {
-                            switch (batchOperatorType) {
-                                case BatchOperatorType.PLUS:
-                                    rowList[c] = (currentValue as BaseValueObject).plus(opValue as BaseValueObject);
-                                    break;
-                                case BatchOperatorType.MINUS:
-                                    rowList[c] = (currentValue as BaseValueObject).minus(opValue as BaseValueObject);
-                                    break;
-                                case BatchOperatorType.MULTIPLY:
-                                    rowList[c] = (currentValue as BaseValueObject).multiply(opValue as BaseValueObject);
-                                    break;
-                                case BatchOperatorType.DIVIDED:
-                                    rowList[c] = (currentValue as BaseValueObject).divided(opValue as BaseValueObject);
-                                    break;
-                                case BatchOperatorType.COMPARE:
-                                    if (!operator) {
-                                        rowList[c] = ErrorValueObject.create(ErrorType.VALUE);
-                                    } else {
-                                        rowList[c] = (currentValue as BaseValueObject).compare(
-                                            opValue as BaseValueObject,
-                                            operator
-                                        );
-                                    }
-                                    break;
-                                case BatchOperatorType.CONCATENATE_FRONT:
-                                    rowList[c] = (currentValue as BaseValueObject).concatenateFront(
-                                        opValue as BaseValueObject
-                                    );
-                                    break;
-                                case BatchOperatorType.CONCATENATE_BACK:
-                                    rowList[c] = (currentValue as BaseValueObject).concatenateBack(
-                                        opValue as BaseValueObject
-                                    );
-                                    break;
-                            }
-                        }
-                    } else if (currentValue) {
-                        rowList[c] = currentValue;
-                    } else if (opValue) {
-                        rowList[c] = opValue;
-                    } else {
-                        rowList[c] = ErrorValueObject.create(ErrorType.VALUE);
-                    }
-                }
-                result.push(rowList);
-            }
-
-            this.setArrayValue(result);
-            this.setRowCount(rowCount);
-            this.setColumnCount(columnCount);
-
-            return this;
-        }
-
+    override map(callbackFn: callbackMapFnType): CalculateValueType {
         const rowCount = this._rowCount;
         const columnCount = this._columnCount;
 
@@ -253,42 +223,12 @@ export class ArrayValueObject extends BaseValueObject {
             for (let c = 0; c < columnCount; c++) {
                 const currentValue = this._value?.[r]?.[c];
 
-                if (currentValue && valueObject) {
-                    if (currentValue.isErrorObject() || valueObject.isErrorObject()) {
-                        rowList[c] = ErrorValueObject.create(ErrorType.VALUE);
+                if (currentValue) {
+                    if (currentValue.isErrorObject()) {
+                        rowList[c] = currentValue as ErrorValueObject;
                     } else {
-                        switch (batchOperatorType) {
-                            case BatchOperatorType.PLUS:
-                                rowList[c] = (currentValue as BaseValueObject).plus(valueObject);
-                                break;
-                            case BatchOperatorType.MINUS:
-                                rowList[c] = (currentValue as BaseValueObject).minus(valueObject);
-                                break;
-                            case BatchOperatorType.MULTIPLY:
-                                rowList[c] = (currentValue as BaseValueObject).multiply(valueObject);
-                                break;
-                            case BatchOperatorType.DIVIDED:
-                                rowList[c] = (currentValue as BaseValueObject).divided(valueObject);
-                                break;
-                            case BatchOperatorType.COMPARE:
-                                if (!operator) {
-                                    rowList[c] = ErrorValueObject.create(ErrorType.VALUE);
-                                } else {
-                                    rowList[c] = (currentValue as BaseValueObject).compare(valueObject, operator);
-                                }
-                                break;
-                            case BatchOperatorType.CONCATENATE_FRONT:
-                                rowList[c] = (currentValue as BaseValueObject).concatenateFront(valueObject);
-                                break;
-                            case BatchOperatorType.CONCATENATE_BACK:
-                                rowList[c] = (currentValue as BaseValueObject).concatenateBack(valueObject);
-                                break;
-                        }
+                        rowList[c] = callbackFn(currentValue, r, c);
                     }
-                } else if (currentValue) {
-                    rowList[c] = currentValue;
-                } else if (valueObject) {
-                    rowList[c] = valueObject;
                 } else {
                     rowList[c] = ErrorValueObject.create(ErrorType.VALUE);
                 }
@@ -303,13 +243,301 @@ export class ArrayValueObject extends BaseValueObject {
         return this;
     }
 
+    private _batchOperator(
+        valueObject: BaseValueObject,
+        batchOperatorType: BatchOperatorType,
+        operator?: compareToken | callbackProductFnType
+    ): CalculateValueType {
+        if (valueObject.isArray()) {
+            this._batchOperatorArray(valueObject, batchOperatorType, operator);
+
+            return this;
+        }
+
+        const rowCount = this._rowCount;
+        const columnCount = this._columnCount;
+
+        const result: CalculateValueType[][] = [];
+        const cacheColumns = [];
+        const unitId = this.getUnitId();
+        const sheetId = this.getSheetId();
+        const startRow = this.getCurrentRow();
+        const startColumn = this.getCurrentColumn();
+        /**
+         * If comparison operations are conducted for a single numerical value,
+         * then retrieve the judgment from the inverted index. This enhances performance.
+         */
+        if (batchOperatorType === BatchOperatorType.COMPARE && operator === compareToken.EQUALS) {
+            for (let c = 0; c < columnCount; c++) {
+                const canUseCache = CELL_INVERTED_INDEX_CACHE.canUseCache(
+                    unitId,
+                    sheetId,
+                    c + startColumn,
+                    startRow,
+                    startRow + rowCount - 1
+                );
+                cacheColumns.push(canUseCache);
+                if (canUseCache === false) {
+                    continue;
+                }
+
+                const rows = CELL_INVERTED_INDEX_CACHE.getCellPositions(
+                    unitId,
+                    sheetId,
+                    c + startColumn,
+                    operator as compareToken,
+                    valueObject.getValue()
+                );
+
+                if (rows == null) {
+                    continue;
+                }
+
+                for (let r = 0; r < rowCount; r++) {
+                    if (result[r] == null) {
+                        result[r] = [];
+                    }
+                    if (rows.includes(r + startRow)) {
+                        result[r][c] = new BooleanValueObject(true);
+                    } else {
+                        result[r][c] = new BooleanValueObject(false);
+                    }
+                }
+            }
+        }
+
+        for (let c = 0; c < columnCount; c++) {
+            if (batchOperatorType === BatchOperatorType.COMPARE && operator === compareToken.EQUALS) {
+                CELL_INVERTED_INDEX_CACHE.setContinueBuildingCache(
+                    unitId,
+                    sheetId,
+                    c + startColumn,
+                    startRow,
+                    startRow + rowCount - 1
+                );
+
+                if (cacheColumns[c] === true) {
+                    continue;
+                }
+            }
+
+            for (let r = 0; r < rowCount; r++) {
+                const currentValue = this._value?.[r]?.[c];
+                if (result[r] == null) {
+                    result[r] = [];
+                }
+                if (currentValue && valueObject) {
+                    if (currentValue.isErrorObject()) {
+                        result[r][c] = currentValue as ErrorValueObject;
+                    } else if (valueObject.isErrorObject()) {
+                        result[r][c] = ErrorValueObject.create(ErrorType.VALUE);
+                    } else {
+                        switch (batchOperatorType) {
+                            case BatchOperatorType.PLUS:
+                                result[r][c] = (currentValue as BaseValueObject).plus(valueObject);
+                                break;
+                            case BatchOperatorType.MINUS:
+                                result[r][c] = (currentValue as BaseValueObject).minus(valueObject);
+                                break;
+                            case BatchOperatorType.MULTIPLY:
+                                result[r][c] = (currentValue as BaseValueObject).multiply(valueObject);
+                                break;
+                            case BatchOperatorType.DIVIDED:
+                                result[r][c] = (currentValue as BaseValueObject).divided(valueObject);
+                                break;
+                            case BatchOperatorType.COMPARE:
+                                if (!operator) {
+                                    result[r][c] = ErrorValueObject.create(ErrorType.VALUE);
+                                } else {
+                                    result[r][c] = (currentValue as BaseValueObject).compare(
+                                        valueObject,
+                                        operator as compareToken
+                                    );
+
+                                    /**
+                                     * Inverted indexing enhances matching performance.
+                                     */
+                                    if (operator === compareToken.EQUALS) {
+                                        CELL_INVERTED_INDEX_CACHE.set(
+                                            unitId,
+                                            sheetId,
+                                            c + startColumn,
+                                            operator as compareToken,
+                                            (currentValue as BaseValueObject).getValue(),
+                                            r + startRow
+                                        );
+                                    }
+                                }
+                                break;
+                            case BatchOperatorType.CONCATENATE_FRONT:
+                                result[r][c] = (currentValue as BaseValueObject).concatenateFront(valueObject);
+                                break;
+                            case BatchOperatorType.CONCATENATE_BACK:
+                                result[r][c] = (currentValue as BaseValueObject).concatenateBack(valueObject);
+                                break;
+                            case BatchOperatorType.PRODUCT:
+                                if (!operator) {
+                                    result[r][c] = ErrorValueObject.create(ErrorType.VALUE);
+                                } else {
+                                    result[r][c] = (currentValue as BaseValueObject).product(
+                                        valueObject,
+                                        operator as callbackProductFnType
+                                    );
+                                }
+
+                                break;
+                        }
+                    }
+                } else {
+                    result[r][c] = ErrorValueObject.create(ErrorType.VALUE);
+                }
+            }
+        }
+
+        this.setArrayValue(result);
+        this.setRowCount(rowCount);
+        this.setColumnCount(columnCount);
+
+        return this;
+    }
+
+    private _batchOperatorArray(
+        valueObject: BaseValueObject,
+        batchOperatorType: BatchOperatorType,
+        operator?: compareToken | callbackProductFnType
+    ) {
+        let rowCount = (valueObject as ArrayValueObject).getRowCount();
+        let columnCount = (valueObject as ArrayValueObject).getColumnCount();
+
+        if (rowCount < this._rowCount) {
+            rowCount = this._rowCount;
+        }
+
+        if (columnCount < this._columnCount) {
+            columnCount = this._columnCount;
+        }
+
+        const result: CalculateValueType[][] = [];
+
+        const valueObjectList = (valueObject as ArrayValueObject).getArrayValue();
+
+        const arrayCalculateType = this._checkArrayCalculateType(valueObject as ArrayValueObject);
+
+        for (let r = 0; r < rowCount; r++) {
+            const rowList: CalculateValueType[] = [];
+            for (let c = 0; c < columnCount; c++) {
+                const currentValue = this._value?.[r]?.[c];
+                let opValue: Nullable<CalculateValueType>;
+                if (arrayCalculateType === ArrayCalculateType.SINGLE) {
+                    opValue = valueObjectList?.[0]?.[0];
+                } else if (arrayCalculateType === ArrayCalculateType.ROW) {
+                    opValue = valueObjectList?.[0]?.[c];
+                } else if (arrayCalculateType === ArrayCalculateType.COLUMN) {
+                    opValue = valueObjectList?.[r]?.[0];
+                } else {
+                    opValue = valueObjectList?.[r]?.[c];
+                }
+
+                if (currentValue && opValue) {
+                    if (currentValue.isErrorObject()) {
+                        rowList[c] = currentValue as ErrorValueObject;
+                    } else if (opValue.isErrorObject()) {
+                        rowList[c] = opValue as ErrorValueObject;
+                    } else {
+                        switch (batchOperatorType) {
+                            case BatchOperatorType.PLUS:
+                                rowList[c] = (currentValue as BaseValueObject).plus(opValue as BaseValueObject);
+                                break;
+                            case BatchOperatorType.MINUS:
+                                rowList[c] = (currentValue as BaseValueObject).minus(opValue as BaseValueObject);
+                                break;
+                            case BatchOperatorType.MULTIPLY:
+                                rowList[c] = (currentValue as BaseValueObject).multiply(opValue as BaseValueObject);
+                                break;
+                            case BatchOperatorType.DIVIDED:
+                                rowList[c] = (currentValue as BaseValueObject).divided(opValue as BaseValueObject);
+                                break;
+                            case BatchOperatorType.COMPARE:
+                                if (!operator) {
+                                    rowList[c] = ErrorValueObject.create(ErrorType.VALUE);
+                                } else {
+                                    rowList[c] = (currentValue as BaseValueObject).compare(
+                                        opValue as BaseValueObject,
+                                        operator as compareToken
+                                    );
+                                }
+                                break;
+                            case BatchOperatorType.CONCATENATE_FRONT:
+                                rowList[c] = (currentValue as BaseValueObject).concatenateFront(
+                                    opValue as BaseValueObject
+                                );
+                                break;
+                            case BatchOperatorType.CONCATENATE_BACK:
+                                rowList[c] = (currentValue as BaseValueObject).concatenateBack(
+                                    opValue as BaseValueObject
+                                );
+                                break;
+                            case BatchOperatorType.PRODUCT:
+                                if (!operator) {
+                                    rowList[c] = ErrorValueObject.create(ErrorType.VALUE);
+                                } else {
+                                    rowList[c] = (currentValue as BaseValueObject).product(
+                                        opValue as BaseValueObject,
+                                        operator as callbackProductFnType
+                                    );
+                                }
+
+                                break;
+                        }
+                    }
+                } else if (currentValue) {
+                    rowList[c] = currentValue;
+                } else if (opValue) {
+                    rowList[c] = opValue;
+                } else {
+                    rowList[c] = ErrorValueObject.create(ErrorType.VALUE);
+                }
+            }
+            result.push(rowList);
+        }
+
+        this.setArrayValue(result);
+        this.setRowCount(rowCount);
+        this.setColumnCount(columnCount);
+
+        return this;
+    }
+
+    private _checkArrayCalculateType(valueObject: ArrayValueObject) {
+        if (valueObject.getRowCount() === 1 && valueObject.getColumnCount() === 1) {
+            return ArrayCalculateType.SINGLE;
+        }
+
+        if (valueObject.getRowCount() === 1) {
+            return ArrayCalculateType.ROW;
+        }
+        if (valueObject.getColumnCount() === 1) {
+            return ArrayCalculateType.COLUMN;
+        }
+
+        return ArrayCalculateType.PRODUCT;
+    }
+
     private _formatValue(rawValue: string | IArrayValueObject) {
-        if (!(rawValue instanceof String)) {
+        if (typeof rawValue !== 'string') {
             rawValue = rawValue as IArrayValueObject;
 
             this._rowCount = rawValue.rowCount;
 
             this._columnCount = rawValue.columnCount;
+
+            this._unitId = rawValue.unitId;
+
+            this._sheetId = rawValue.sheetId;
+
+            this._currentRow = rawValue.row;
+
+            this._currentColumn = rawValue.column;
 
             return rawValue.calculateValueList;
         }
@@ -329,7 +557,7 @@ export class ArrayValueObject extends BaseValueObject {
 
             const row: CalculateValueType[] = [];
             for (let c = 0; c < columnArrayCount; c++) {
-                const cellRaw = columnArray[c];
+                const cellRaw = columnArray[c].trim();
                 row.push(ValueObjectFactory.create(cellRaw));
             }
             result.push(row);
@@ -356,7 +584,7 @@ export class ValueObjectFactory {
             if (!isNaN(Number(rawValue))) {
                 return new NumberValueObject(rawValue);
             }
-            if ($ARRAY_VALUE_REGEX.test(rawValue)) {
+            if (new RegExp($ARRAY_VALUE_REGEX, 'g').test(rawValue)) {
                 return new ArrayValueObject(rawValue);
             }
             return new StringValueObject(rawValue);

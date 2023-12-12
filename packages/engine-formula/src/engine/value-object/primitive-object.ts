@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import Big from 'big.js';
+
 import { reverseCompareOperator } from '../../basics/calculate';
 import { BooleanValue, ConcatenateType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
@@ -298,9 +300,17 @@ export class NumberValueObject extends BaseValueObject {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
         if (typeof value === 'number') {
-            this.setValue(currentValue + value);
+            if (Math.abs(currentValue) === Infinity || Math.abs(value) === Infinity) {
+                this.setValue(currentValue + value);
+            } else {
+                this.setValue(Big(currentValue).plus(value).toNumber());
+            }
         } else if (typeof value === 'boolean') {
-            this.setValue(currentValue + (value ? 1 : 0));
+            this.setValue(
+                Big(currentValue)
+                    .plus(value ? 1 : 0)
+                    .toNumber()
+            );
         }
         return this;
     }
@@ -311,9 +321,17 @@ export class NumberValueObject extends BaseValueObject {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
         if (typeof value === 'number') {
-            this.setValue(currentValue - value);
+            if (Math.abs(currentValue) === Infinity || Math.abs(value) === Infinity) {
+                this.setValue(currentValue - value);
+            } else {
+                this.setValue(Big(currentValue).minus(value).toNumber());
+            }
         } else if (typeof value === 'boolean') {
-            this.setValue(currentValue - (value ? 1 : 0));
+            this.setValue(
+                Big(currentValue)
+                    .minus(value ? 1 : 0)
+                    .toNumber()
+            );
         }
         return this;
     }
@@ -324,9 +342,17 @@ export class NumberValueObject extends BaseValueObject {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
         if (typeof value === 'number') {
-            this.setValue(currentValue * value);
+            if (Math.abs(currentValue) === Infinity || Math.abs(value) === Infinity) {
+                this.setValue(currentValue * value);
+            } else {
+                this.setValue(Big(currentValue).times(value).toNumber());
+            }
         } else if (typeof value === 'boolean') {
-            this.setValue(currentValue * (value ? 1 : 0));
+            this.setValue(
+                Big(currentValue)
+                    .times(value ? 1 : 0)
+                    .toNumber()
+            );
         }
         return this;
     }
@@ -340,12 +366,16 @@ export class NumberValueObject extends BaseValueObject {
             if (value === 0) {
                 return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
             }
-            this.setValue(currentValue / value);
+            if (Math.abs(currentValue) === Infinity || Math.abs(value) === Infinity) {
+                this.setValue(currentValue / value);
+            } else {
+                this.setValue(Big(currentValue).div(value).toNumber());
+            }
         } else if (typeof value === 'boolean') {
             if (value === false) {
                 return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
             }
-            this.setValue(currentValue / 1);
+            this.setValue(Big(currentValue).div(1).toNumber());
         }
         return this;
     }
@@ -367,25 +397,29 @@ export class NumberValueObject extends BaseValueObject {
                     break;
             }
         } else if (typeof value === 'number') {
-            switch (operator) {
-                case compareToken.EQUALS:
-                    result = currentValue === value;
-                    break;
-                case compareToken.GREATER_THAN:
-                    result = currentValue > value;
-                    break;
-                case compareToken.GREATER_THAN_OR_EQUAL:
-                    result = currentValue >= value;
-                    break;
-                case compareToken.LESS_THAN:
-                    result = currentValue < value;
-                    break;
-                case compareToken.LESS_THAN_OR_EQUAL:
-                    result = currentValue <= value;
-                    break;
-                case compareToken.NOT_EQUAL:
-                    result = currentValue !== value;
-                    break;
+            if (Math.abs(currentValue) === Infinity || Math.abs(value) === Infinity) {
+                result = this._compareInfinity(currentValue, value, operator);
+            } else {
+                switch (operator) {
+                    case compareToken.EQUALS:
+                        result = Big(currentValue).eq(value);
+                        break;
+                    case compareToken.GREATER_THAN:
+                        result = Big(currentValue).gt(value);
+                        break;
+                    case compareToken.GREATER_THAN_OR_EQUAL:
+                        result = Big(currentValue).gte(value);
+                        break;
+                    case compareToken.LESS_THAN:
+                        result = Big(currentValue).lt(value);
+                        break;
+                    case compareToken.LESS_THAN_OR_EQUAL:
+                        result = Big(currentValue).lte(value);
+                        break;
+                    case compareToken.NOT_EQUAL:
+                        result = !Big(currentValue).eq(value);
+                        break;
+                }
             }
         } else if (typeof value === 'boolean') {
             switch (operator) {
@@ -402,6 +436,32 @@ export class NumberValueObject extends BaseValueObject {
             }
         }
         return new BooleanValueObject(result);
+    }
+
+    private _compareInfinity(currentValue: number, value: number, operator: compareToken) {
+        let result = false;
+        switch (operator) {
+            case compareToken.EQUALS:
+                result = currentValue === value;
+                break;
+            case compareToken.GREATER_THAN:
+                result = currentValue > value;
+                break;
+            case compareToken.GREATER_THAN_OR_EQUAL:
+                result = currentValue >= value;
+                break;
+            case compareToken.LESS_THAN:
+                result = currentValue < value;
+                break;
+            case compareToken.LESS_THAN_OR_EQUAL:
+                result = currentValue <= value;
+                break;
+            case compareToken.NOT_EQUAL:
+                result = currentValue !== value;
+                break;
+        }
+
+        return result;
     }
 }
 

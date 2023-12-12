@@ -17,6 +17,7 @@
 import type { ICellData, IRange, Nullable } from '@univerjs/core';
 import { CellValueType } from '@univerjs/core';
 
+import { FormulaAstLRU } from '../../basics/cache-lru';
 import type { IRuntimeUnitDataType, IUnitData, IUnitSheetNameMap } from '../../basics/common';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { ObjectClassType } from '../../basics/object-class-type';
@@ -29,6 +30,9 @@ export type NodeValueType = BaseValueObject | BaseReferenceObject | ErrorValueOb
 
 export type FunctionVariantType = BaseValueObject | BaseReferenceObject | ErrorValueObject;
 
+const FORMULA_CACHE_LRU_COUNT = 100000;
+
+export const FORMULA_REF_TO_ARRAY_CACHE = new FormulaAstLRU<ArrayValueObject>(FORMULA_CACHE_LRU_COUNT);
 export class BaseReferenceObject extends ObjectClassType {
     private _forcedSheetId: string = '';
 
@@ -415,6 +419,17 @@ export class BaseReferenceObject extends ObjectClassType {
 
     toArrayValueObject(): ArrayValueObject {
         const { startRow, endRow, startColumn, endColumn } = this.getRangePosition();
+
+        const key = `${this.getUnitId()}_${this.getSheetId()}_${startRow + this._refOffsetX}_${
+            endRow + this._refOffsetX
+        }_${startColumn + this._refOffsetX}_${endColumn + this._refOffsetX}`;
+
+        const array = FORMULA_REF_TO_ARRAY_CACHE.get(key);
+
+        if (array) {
+            return array;
+        }
+
         const rowSize = endRow - startRow + 1;
         const columnSize = endColumn - startColumn + 1;
         const arrayValueList: CalculateValueType[][] = new Array(rowSize);
@@ -428,13 +443,21 @@ export class BaseReferenceObject extends ObjectClassType {
             arrayValueList[row][column] = valueObject;
         });
 
-        const arrayValueObject: IArrayValueObject = {
+        const arrayValueObjectData: IArrayValueObject = {
             calculateValueList: arrayValueList,
             rowCount: arrayValueList.length,
             columnCount: arrayValueList[0].length,
+            unitId: this.getUnitId(),
+            sheetId: this.getSheetId(),
+            row: startRow,
+            column: startColumn,
         };
 
-        return new ArrayValueObject(arrayValueObject);
+        const arrayValueObject = new ArrayValueObject(arrayValueObjectData);
+
+        FORMULA_REF_TO_ARRAY_CACHE.set(key, arrayValueObject);
+
+        return arrayValueObject;
     }
 
     toUnitRange() {

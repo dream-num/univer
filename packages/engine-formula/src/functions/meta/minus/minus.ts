@@ -16,7 +16,7 @@
 
 import { ErrorType } from '../../../basics/error-type';
 import { ErrorValueObject } from '../../../engine/other-object/error-value-object';
-import type { FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 
@@ -24,6 +24,14 @@ export class Minus extends BaseFunction {
     override calculate(variant1: FunctionVariantType, variant2: FunctionVariantType) {
         if (variant1.isErrorObject() || variant2.isErrorObject()) {
             return ErrorValueObject.create(ErrorType.VALUE);
+        }
+
+        if (variant1.isReferenceObject()) {
+            variant1 = (variant1 as BaseReferenceObject).toArrayValueObject();
+        }
+
+        if (variant2.isReferenceObject()) {
+            variant2 = (variant2 as BaseReferenceObject).toArrayValueObject();
         }
 
         return (variant1 as BaseValueObject).minus(variant2 as BaseValueObject);

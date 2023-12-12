@@ -17,7 +17,6 @@
 import type { IAccessor } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { ErrorType } from '../../basics/error-type';
 import {
     $SUPER_TABLE_COLUMN_REGEX,
     REFERENCE_REGEX_SINGLE_COLUMN,
@@ -35,7 +34,7 @@ import { CellReferenceObject } from '../reference-object/cell-reference-object';
 import { ColumnReferenceObject } from '../reference-object/column-reference-object';
 import { RowReferenceObject } from '../reference-object/row-reference-object';
 import { TableReferenceObject } from '../reference-object/table-reference-object';
-import { BaseAstNode, ErrorNode } from './base-ast-node';
+import { BaseAstNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
 import { NODE_ORDER_MAP, NodeType } from './node-type';
 
@@ -127,19 +126,10 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
         }
 
         const unitId = this._formulaRuntimeService.currentUnitId;
-        const nameMap = this._definedNamesService.getDefinedNameMap(unitId);
-
-        if (!isLexerNode && nameMap?.has(tokenTrim)) {
-            const nameString = nameMap.get(tokenTrim)!;
-            const lexerNode = this._lexer.treeBuilder(nameString);
-            /** todo */
-            return new ErrorNode(ErrorType.VALUE);
-        }
-
         // parserDataLoader.get
 
         const tableMap = this._superTableService.getTableMap(unitId);
-        const $regex = $SUPER_TABLE_COLUMN_REGEX;
+        const $regex = new RegExp($SUPER_TABLE_COLUMN_REGEX, 'g');
         const tableName = tokenTrim.replace($regex, '');
         if (!isLexerNode && tableMap?.has(tableName)) {
             const columnResult = $regex.exec(tokenTrim);

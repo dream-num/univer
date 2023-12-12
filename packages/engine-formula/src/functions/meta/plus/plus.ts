@@ -26,20 +26,14 @@ export class Plus extends BaseFunction {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        let result;
-
-        if (this.checkArrayType(variant1) && this.checkArrayType(variant2)) {
-            result = (variant1 as BaseReferenceObject)
-                .toArrayValueObject()
-                .plus((variant2 as BaseReferenceObject).toArrayValueObject());
-        } else if (this.checkArrayType(variant1)) {
-            result = (variant1 as BaseReferenceObject).toArrayValueObject().plus(variant2 as BaseValueObject);
-        } else if (this.checkArrayType(variant2)) {
-            result = (variant1 as BaseValueObject).plus((variant2 as BaseReferenceObject).toArrayValueObject());
-        } else {
-            result = (variant1 as BaseValueObject).plus(variant2 as BaseValueObject);
+        if (variant1.isReferenceObject()) {
+            variant1 = (variant1 as BaseReferenceObject).toArrayValueObject();
         }
 
-        return result;
+        if (variant2.isReferenceObject()) {
+            variant2 = (variant2 as BaseReferenceObject).toArrayValueObject();
+        }
+
+        return (variant1 as BaseValueObject).plus(variant2 as BaseValueObject);
     }
 }

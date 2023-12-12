@@ -18,23 +18,24 @@ import type { ErrorType } from '../../basics/error-type';
 import { ObjectClassType } from '../../basics/object-class-type';
 
 export class ErrorValueObject extends ObjectClassType {
-    static errorMap: Map<ErrorType, ErrorValueObject> = new Map();
-
-    constructor(private _errorType: ErrorType) {
+    constructor(
+        private _errorType: ErrorType,
+        private _errorContent: string = ''
+    ) {
         super();
     }
 
-    static create(errorType: ErrorType) {
-        if (this.errorMap.has(errorType)) {
-            return this.errorMap.get(errorType)!;
-        }
-        const errorValueObject = new ErrorValueObject(errorType);
-        this.errorMap.set(errorType, errorValueObject);
+    static create(errorType: ErrorType, errorContent?: string) {
+        const errorValueObject = new ErrorValueObject(errorType, errorContent);
         return errorValueObject;
     }
 
     getErrorType() {
         return this._errorType;
+    }
+
+    getErrorContent() {
+        return this._errorContent;
     }
 
     override isEqual(object: ObjectClassType) {

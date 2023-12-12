@@ -115,7 +115,7 @@ const config: Config = {
                 },
                 {
                     to: 'docs/api/core',
-                    activeBasePath: 'docs',
+                    activeBasePath: 'docs/api',
                     // type: 'docSidebar',
                     // sidebarId: 'apiSidebar',
                     position: 'left',

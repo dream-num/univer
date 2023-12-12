@@ -264,7 +264,7 @@ export const SetWorksheetRowIsAutoHeightCommand: ICommand = {
         const workSheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
         const worksheetId = workSheet.getSheetId();
 
-        const { anchorRow } = params;
+        const { anchorRow } = params ?? {};
 
         const ranges =
             anchorRow != null

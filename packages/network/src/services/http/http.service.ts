@@ -24,6 +24,7 @@ import { concatMap } from 'rxjs/operators';
 import { HTTPHeaders } from './headers';
 import type { HTTPResponseType } from './http';
 import { IHTTPImplementation } from './implementations/implementation';
+import type { HTTPHandlerFn, HTTPInterceptorFn, RequestPipe } from './interceptor';
 import { HTTPParams } from './params';
 import type { HTTPRequestMethod } from './request';
 import { HTTPRequest } from './request';
@@ -44,11 +45,6 @@ export interface IPostRequestParams extends IRequestParams {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     body?: any;
 }
-
-type HTTPHandlerFn = (request: HTTPRequest) => Observable<HTTPEvent<unknown>>;
-type HTTPInterceptorFn = (request: HTTPRequest, next: HTTPHandlerFn) => Observable<HTTPEvent<unknown>>;
-type RequestPipe<T> = (req: HTTPRequest, finalHandlerFn: HTTPHandlerFn) => Observable<HTTPEvent<T>>;
-
 /**
  * Register an HTTP interceptor. Interceptor could modify requests, responses, headers or errors.
  */

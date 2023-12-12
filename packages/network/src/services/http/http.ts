@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/* eslint-disable no-magic-numbers */
+
 export type HTTPResponseType = 'arraybuffer' | 'blob' | 'json' | 'text';
 
 export const SuccessStatusCodeLowerBound = 200;

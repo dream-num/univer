@@ -785,6 +785,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
+      '@vitest/coverage-istanbul':
+        specifier: ^1.0.2
+        version: 1.0.2(vitest@1.0.2)
       '@wendellhu/redi':
         specifier: ^0.12.12
         version: 0.12.12
@@ -797,6 +800,9 @@ importers:
       vite-plugin-externals:
         specifier: ^0.6.2
         version: 0.6.2(vite@5.0.7)
+      vitest:
+        specifier: ^1.0.2
+        version: 1.0.2(@types/node@20.10.4)
 
   packages/rpc:
     devDependencies:

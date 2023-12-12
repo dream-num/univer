@@ -3,12 +3,20 @@
     "private": true,
     "main": "./src/index.ts",
     "module": "./src/index.ts",
+    "scripts": {
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "coverage": "vitest run --coverage",
+        "build": "tsc && vite build"
+    },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
+        "@vitest/coverage-istanbul": "^1.0.2",
         "@wendellhu/redi": "^0.12.12",
         "rxjs": "^7.8.1",
         "typescript": "^5.3.3",
-        "vite-plugin-externals": "^0.6.2"
+        "vite-plugin-externals": "^0.6.2",
+        "vitest": "^1.0.2"
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",

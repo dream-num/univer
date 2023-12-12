@@ -29,21 +29,21 @@ export const SetFrozenCancelCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = univerInstanceService
+        const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+        const subUnitId = univerInstanceService
             .getCurrentUniverSheetInstance()
 
             .getActiveSheet()
             .getSheetId();
 
-        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
+        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
         if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(worksheetId);
+        const worksheet = workbook.getSheetBySheetId(subUnitId);
         if (!worksheet) return false;
 
         const redoMutationParams: ISetFrozenMutationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             startRow: -1,
             startColumn: -1,
             ySplit: 0,
@@ -55,7 +55,7 @@ export const SetFrozenCancelCommand: ICommand = {
 
         if (result) {
             undoRedoService.pushUndoRedo({
-                unitID: workbookId,
+                unitID: unitId,
                 undoMutations: [{ id: SetFrozenMutation.id, params: undoMutationParams }],
                 redoMutations: [{ id: SetFrozenMutation.id, params: redoMutationParams }],
             });

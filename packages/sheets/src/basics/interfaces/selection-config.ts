@@ -22,5 +22,5 @@ export interface ISelectionConfig {
 }
 
 export interface ISelectionsConfig {
-    [worksheetId: string]: ISelectionConfig[];
+    [subUnitId: string]: ISelectionConfig[];
 }

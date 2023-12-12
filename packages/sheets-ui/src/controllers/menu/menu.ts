@@ -124,7 +124,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const sheetPermissionService = accessor.get(SheetPermissionService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
-    const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+    const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
     const sheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
     return {
         id: SetRangeBoldCommand.id,
@@ -135,7 +135,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         tooltip: 'toolbar.bold',
         positions: [MenuPosition.TOOLBAR_START],
         disabled$: new Observable<boolean>((subscriber) => {
-            const permission$ = sheetPermissionService.getEditable$(workbookId, sheetId)?.subscribe((e) => {
+            const permission$ = sheetPermissionService.getEditable$(unitId, sheetId)?.subscribe((e) => {
                 subscriber.next(!e.value);
             });
             return () => {
@@ -173,7 +173,7 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
     const sheetPermissionService = accessor.get(SheetPermissionService);
-    const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+    const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
     const sheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
     return {
         id: SetRangeItalicCommand.id,
@@ -184,7 +184,7 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         tooltip: 'toolbar.italic',
         positions: [MenuPosition.TOOLBAR_START],
         disabled$: new Observable<boolean>((subscriber) => {
-            const permission$ = sheetPermissionService.getEditable$(workbookId, sheetId)?.subscribe((e) => {
+            const permission$ = sheetPermissionService.getEditable$(unitId, sheetId)?.subscribe((e) => {
                 subscriber.next(!e.value);
             });
             return () => {
@@ -220,7 +220,7 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
     const sheetPermissionService = accessor.get(SheetPermissionService);
-    const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+    const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
     const sheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
     return {
         id: SetRangeUnderlineCommand.id,
@@ -231,7 +231,7 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         tooltip: 'toolbar.underline',
         positions: [MenuPosition.TOOLBAR_START],
         disabled$: new Observable<boolean>((subscriber) => {
-            const permission$ = sheetPermissionService.getEditable$(workbookId, sheetId)?.subscribe((e) => {
+            const permission$ = sheetPermissionService.getEditable$(unitId, sheetId)?.subscribe((e) => {
                 subscriber.next(!e.value);
             });
             return () => {
@@ -267,7 +267,7 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
     const sheetPermissionService = accessor.get(SheetPermissionService);
-    const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+    const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
     const sheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
     return {
         id: SetRangeStrickThroughCommand.id,
@@ -278,7 +278,7 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
         tooltip: 'toolbar.strikethrough',
         positions: [MenuPosition.TOOLBAR_START],
         disabled$: new Observable<boolean>((subscriber) => {
-            const permission$ = sheetPermissionService.getEditable$(workbookId, sheetId)?.subscribe((e) => {
+            const permission$ = sheetPermissionService.getEditable$(unitId, sheetId)?.subscribe((e) => {
                 subscriber.next(!e.value);
             });
             return () => {
@@ -449,7 +449,7 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
     const sheetPermissionService = accessor.get(SheetPermissionService);
-    const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+    const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
     const sheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
     return {
         id: SetRangeFontFamilyCommand.id,
@@ -460,7 +460,7 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
         positions: [MenuPosition.TOOLBAR_START],
         selections: FONT_FAMILY_CHILDREN,
         disabled$: new Observable((subscriber) => {
-            const permission$ = sheetPermissionService.getEditable$(workbookId, sheetId)?.subscribe((e) => {
+            const permission$ = sheetPermissionService.getEditable$(unitId, sheetId)?.subscribe((e) => {
                 subscriber.next(!e.value);
             });
             return () => {
@@ -498,7 +498,7 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
     const sheetPermissionService = accessor.get(SheetPermissionService);
-    const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+    const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
     const sheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
     return {
         id: SetRangeFontSizeCommand.id,
@@ -515,7 +515,7 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
         positions: [MenuPosition.TOOLBAR_START],
         selections: FONT_SIZE_CHILDREN,
         disabled$: new Observable<boolean>((subscriber) => {
-            const permission$ = sheetPermissionService.getEditable$(workbookId, sheetId)?.subscribe((e) => {
+            const permission$ = sheetPermissionService.getEditable$(unitId, sheetId)?.subscribe((e) => {
                 subscriber.next(!e.value);
             });
             return () => {

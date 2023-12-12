@@ -39,8 +39,8 @@ import { SetSelectionsOperation } from '../operations/selection.operation';
 import { getPrimaryForRange } from './utils/selection-utils';
 
 export interface ISetSpecificRowsVisibleCommandParams {
-    workbookId: string;
-    worksheetId: string;
+    unitId: string;
+    subUnitId: string;
     ranges: IRange[];
 }
 
@@ -48,24 +48,24 @@ export const SetSpecificRowsVisibleCommand: ICommand<ISetSpecificRowsVisibleComm
     type: CommandType.COMMAND,
     id: 'sheet.command.set-specific-rows-visible',
     handler: async (accessor: IAccessor, params: ISetSpecificRowsVisibleCommandParams) => {
-        const { workbookId, worksheetId, ranges } = params;
+        const { unitId, subUnitId, ranges } = params;
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
 
         const worksheet = accessor
             .get(IUniverInstanceService)
-            .getUniverSheetInstance(workbookId)!
-            .getSheetBySheetId(worksheetId)!;
+            .getUniverSheetInstance(unitId)!
+            .getSheetBySheetId(subUnitId)!;
 
         const redoMutationParams: ISetRowVisibleMutationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             ranges,
         };
         const undoMutationParams = SetRowVisibleUndoMutationFactory(accessor, redoMutationParams);
         const setSelectionOperationParams: ISetSelectionsOperationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             selections: ranges.map((range) => ({
                 range,
@@ -74,8 +74,8 @@ export const SetSpecificRowsVisibleCommand: ICommand<ISetSpecificRowsVisibleComm
             })),
         };
         const undoSetSelectionsOperationParams: ISetSelectionsOperationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             selections: getSelectionsAfterHiding(ranges).map((range) => ({
                 range,
@@ -94,7 +94,7 @@ export const SetSpecificRowsVisibleCommand: ICommand<ISetSpecificRowsVisibleComm
 
         if (result.result) {
             undoRedoService.pushUndoRedo({
-                unitID: workbookId,
+                unitID: unitId,
                 undoMutations: [
                     { id: SetRowHiddenMutation.id, params: undoMutationParams },
                     { id: SetSelectionsOperation.id, params: undoSetSelectionsOperationParams },
@@ -131,14 +131,14 @@ export const SetSelectedRowsVisibleCommand: ICommand = {
         const worksheet = workbook.getActiveSheet();
         if (!worksheet) return false;
 
-        const workbookId = workbook.getUnitId();
-        const worksheetId = worksheet.getSheetId();
+        const unitId = workbook.getUnitId();
+        const subUnitId = worksheet.getSheetId();
         const hiddenRanges = ranges.map((r) => worksheet.getHiddenRows(r.startRow, r.endRow)).flat();
         return accessor
             .get(ICommandService)
             .executeCommand<ISetSpecificRowsVisibleCommandParams>(SetSpecificRowsVisibleCommand.id, {
-                workbookId,
-                worksheetId,
+                unitId,
+                subUnitId,
                 ranges: hiddenRanges,
             });
     },
@@ -161,21 +161,21 @@ export const SetRowHiddenCommand: ICommand = {
             return false;
         }
 
-        const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
-        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
+        const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+        const subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
         if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(worksheetId);
+        const worksheet = workbook.getSheetBySheetId(subUnitId);
         if (!worksheet) return false;
 
         const redoMutationParams: ISetRowHiddenMutationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             ranges,
         };
         const setSelectionOperationParams: ISetSelectionsOperationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             selections: getSelectionsAfterHiding(ranges).map((range) => ({
                 range,
@@ -184,8 +184,8 @@ export const SetRowHiddenCommand: ICommand = {
             })),
         };
         const undoSetSelectionsOperationParams: ISetSelectionsOperationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             selections: ranges.map((range) => ({
                 range,
@@ -204,7 +204,7 @@ export const SetRowHiddenCommand: ICommand = {
         );
         if (result.result) {
             undoRedoService.pushUndoRedo({
-                unitID: workbookId,
+                unitID: unitId,
                 undoMutations: [
                     { id: SetRowVisibleMutation.id, params: undoMutationParams },
                     { id: SetSelectionsOperation.id, params: undoSetSelectionsOperationParams },

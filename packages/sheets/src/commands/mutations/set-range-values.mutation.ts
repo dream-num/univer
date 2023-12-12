@@ -34,8 +34,8 @@ import type { IAccessor } from '@wendellhu/redi';
 
 /** Params of `SetRangeValuesMutation` */
 export interface ISetRangeValuesMutationParams extends IMutationCommonParams {
-    worksheetId: string;
-    workbookId: string;
+    subUnitId: string;
+    unitId: string;
 
     /**
      * null for clear all
@@ -68,15 +68,15 @@ export const SetRangeValuesUndoMutationFactory = (
     accessor: IAccessor,
     params: ISetRangeValuesMutationParams
 ): ISetRangeValuesMutationParams => {
-    const { workbookId, worksheetId, cellValue } = params;
+    const { unitId, subUnitId, cellValue } = params;
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
+    const workbook = univerInstanceService.getUniverSheetInstance(unitId);
 
     if (workbook == null) {
         throw new Error('workbook is null error!');
     }
 
-    const worksheet = workbook.getSheetBySheetId(worksheetId);
+    const worksheet = workbook.getSheetBySheetId(subUnitId);
     if (worksheet == null) {
         throw new Error('worksheet is null error!');
     }
@@ -143,14 +143,14 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
     id: 'sheet.mutation.set-range-values',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
-        const { cellValue, worksheetId, workbookId } = params;
+        const { cellValue, subUnitId, unitId } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
+        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
         if (!workbook) {
             return false;
         }
 
-        const worksheet = workbook.getSheetBySheetId(worksheetId);
+        const worksheet = workbook.getSheetBySheetId(subUnitId);
         if (!worksheet) {
             return false;
         }

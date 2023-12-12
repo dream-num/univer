@@ -19,22 +19,22 @@ import { CommandType, IUniverInstanceService } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
 export interface ISetRowVisibleMutationParams {
-    workbookId: string;
-    worksheetId: string;
+    unitId: string;
+    subUnitId: string;
     ranges: IRange[];
 }
 
 export const SetRowVisibleUndoMutationFactory = (accessor: IAccessor, params: ISetRowVisibleMutationParams) => {
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
+    const universheet = univerInstanceService.getUniverSheetInstance(params.unitId);
 
     if (universheet == null) {
         throw new Error('universheet is null error!');
     }
 
     return {
-        workbookId: params.workbookId,
-        worksheetId: params.worksheetId,
+        unitId: params.unitId,
+        subUnitId: params.subUnitId,
         ranges: params.ranges,
     };
 };
@@ -44,13 +44,13 @@ export const SetRowVisibleMutation: IMutation<ISetRowVisibleMutationParams> = {
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
+        const universheet = univerInstanceService.getUniverSheetInstance(params.unitId);
 
         if (universheet == null) {
             throw new Error('universheet is null error!');
         }
 
-        const manager = universheet.getSheetBySheetId(params.worksheetId)!.getRowManager();
+        const manager = universheet.getSheetBySheetId(params.subUnitId)!.getRowManager();
         for (let i = 0; i < params.ranges.length; i++) {
             const range = params.ranges[i];
             for (let j = range.startRow; j < range.endRow + 1; j++) {
@@ -66,22 +66,22 @@ export const SetRowVisibleMutation: IMutation<ISetRowVisibleMutationParams> = {
 };
 
 export interface ISetRowHiddenMutationParams {
-    workbookId: string;
-    worksheetId: string;
+    unitId: string;
+    subUnitId: string;
     ranges: IRange[];
 }
 
 export const SetRowHiddenUndoMutationFactory = (accessor: IAccessor, params: ISetRowHiddenMutationParams) => {
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
+    const universheet = univerInstanceService.getUniverSheetInstance(params.unitId);
 
     if (universheet == null) {
         throw new Error('universheet is null error!');
     }
 
     return {
-        workbookId: params.workbookId,
-        worksheetId: params.worksheetId,
+        unitId: params.unitId,
+        subUnitId: params.subUnitId,
         ranges: params.ranges,
     };
 };
@@ -91,13 +91,13 @@ export const SetRowHiddenMutation: IMutation<ISetRowHiddenMutationParams> = {
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
+        const universheet = univerInstanceService.getUniverSheetInstance(params.unitId);
 
         if (universheet == null) {
             throw new Error('universheet is null error!');
         }
 
-        const manager = universheet.getSheetBySheetId(params.worksheetId)!.getRowManager();
+        const manager = universheet.getSheetBySheetId(params.subUnitId)!.getRowManager();
 
         for (let i = 0; i < params.ranges.length; i++) {
             const range = params.ranges[i];

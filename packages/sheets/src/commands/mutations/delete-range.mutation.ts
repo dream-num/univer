@@ -38,7 +38,7 @@ export const DeleteRangeUndoMutationFactory = (
     const worksheet = univerInstanceService
         .getCurrentUniverSheetInstance()
 
-        .getSheetBySheetId(params.worksheetId);
+        .getSheetBySheetId(params.subUnitId);
     if (!worksheet) return null;
     const cellMatrix = worksheet.getCellMatrix();
 
@@ -88,11 +88,11 @@ export const DeleteRangeMutation: IMutation<IDeleteRangeMutationParams, boolean>
     id: 'sheet.mutation.delete-range',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
-        const { workbookId, worksheetId, ranges, shiftDimension } = params;
+        const { unitId, subUnitId, ranges, shiftDimension } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
+        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
         if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(worksheetId);
+        const worksheet = workbook.getSheetBySheetId(subUnitId);
         if (!worksheet) return false;
 
         const cellMatrix = worksheet.getCellMatrix();

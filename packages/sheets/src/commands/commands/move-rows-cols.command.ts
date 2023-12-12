@@ -87,8 +87,8 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
             return false;
         }
 
-        const workbookId = workbook.getUnitId();
-        const worksheetId = worksheet.getSheetId();
+        const unitId = workbook.getUnitId();
+        const subUnitId = worksheet.getSheetId();
 
         const errorService = accessor.get(ErrorService);
         // Forbid action when some parts of a merged cell are selected.
@@ -111,8 +111,8 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
             endRow: toRow + rangeToMove.endRow - rangeToMove.startRow,
         };
         const moveRowsParams: IMoveRowsMutationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             sourceRange: rangeToMove,
             targetRange: destinationRange,
         };
@@ -149,14 +149,14 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
             }
         }
         const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             ranges: Tools.deepClone(worksheet.getMergeData()),
         };
         const undoRemoveMergeMutationParams = RemoveMergeUndoMutationFactory(accessor, removeMergeMutationParams);
         const addMergeParams: IAddWorksheetMergeMutationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             ranges: mergedCells,
         };
         const undoAddMergeParams = AddMergeUndoMutationFactory(accessor, addMergeParams);
@@ -170,14 +170,14 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
                   endRow: destinationRange.endRow - count,
               };
         const setSelectionsParam: ISetSelectionsOperationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             selections: [{ range: destSelection, primary: getPrimaryForRange(destSelection, worksheet), style: null }],
         };
         const undoSetSelectionsParam: ISetSelectionsOperationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             selections: [{ range: rangeToMove, primary: beforePrimary, style: null }],
         };
@@ -207,7 +207,7 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
         if (result.result) {
             const undoRedoService = accessor.get(IUndoRedoService);
             undoRedoService.pushUndoRedo({
-                unitID: workbookId,
+                unitID: unitId,
                 undoMutations: undos,
                 redoMutations: redos,
             });
@@ -251,8 +251,8 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
             return false;
         }
 
-        const workbookId = workbook.getUnitId();
-        const worksheetId = worksheet.getSheetId();
+        const unitId = workbook.getUnitId();
+        const subUnitId = worksheet.getSheetId();
 
         const errorService = accessor.get(ErrorService);
         // Forbid action when some parts of a merged cell are selected.
@@ -275,8 +275,8 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
             endColumn: toCol + rangeToMove.endColumn - rangeToMove.startColumn,
         };
         const moveColsParams: IMoveColumnsMutationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             sourceRange: rangeToMove,
             targetRange: destinationRange,
         };
@@ -315,14 +315,14 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
         }
 
         const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             ranges: Tools.deepClone(worksheet.getMergeData()),
         };
         const undoRemoveMergeMutationParams = RemoveMergeUndoMutationFactory(accessor, removeMergeMutationParams);
         const addMergeParams: IAddWorksheetMergeMutationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             ranges: mergedCells,
         };
         const undoAddMergeParams = AddMergeUndoMutationFactory(accessor, addMergeParams);
@@ -336,14 +336,14 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
                   endColumn: destinationRange.endColumn - count,
               };
         const setSelectionsParam: ISetSelectionsOperationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             selections: [{ range: destSelection, primary: getPrimaryForRange(destSelection, worksheet), style: null }],
         };
         const undoSetSelectionsParam: ISetSelectionsOperationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             selections: [{ range: rangeToMove, primary: beforePrimary, style: null }],
         };
@@ -373,7 +373,7 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
         if (result.result) {
             const undoRedoService = accessor.get(IUndoRedoService);
             undoRedoService.pushUndoRedo({
-                unitID: workbookId,
+                unitID: unitId,
                 undoMutations: undos,
                 redoMutations: redos,
             });

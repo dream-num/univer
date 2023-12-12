@@ -42,8 +42,8 @@ export class NumfmtCopyPasteController extends Disposable {
     private _copyInfo: Nullable<{
         matrix: ObjectMatrix<{ pattern: string; type: FormatType }>;
         info: {
-            workbookId: string;
-            worksheetId: string;
+            unitId: string;
+            subUnitId: string;
         };
     }>;
 
@@ -61,27 +61,27 @@ export class NumfmtCopyPasteController extends Disposable {
         this.disposeWithMe(
             this._sheetClipboardService.addClipboardHook({
                 hookName: 'numfmt',
-                onBeforeCopy: (workbookId, worksheetId, range) => this._collectNumfmt(workbookId, worksheetId, range),
+                onBeforeCopy: (unitId, subUnitId, range) => this._collectNumfmt(unitId, subUnitId, range),
                 onPasteCells: (pastedRange, _m, _p, _copyInfo) => this._generateNumfmtMutations(pastedRange, _copyInfo),
             })
         );
     }
 
-    private _collectNumfmt(workbookId: string, worksheetId: string, range: IRange) {
+    private _collectNumfmt(unitId: string, subUnitId: string, range: IRange) {
         const matrix = new ObjectMatrix<{ pattern: string; type: FormatType }>();
         this._copyInfo = {
             matrix,
             info: {
-                workbookId,
-                worksheetId,
+                unitId,
+                subUnitId,
             },
         };
-        const model = this._numfmtService.getModel(workbookId, worksheetId);
+        const model = this._numfmtService.getModel(unitId, subUnitId);
         if (!model) {
             return;
         }
         Range.foreach(range, (row, col) => {
-            const numfmtValue = this._numfmtService.getValue(workbookId, worksheetId, row, col, model);
+            const numfmtValue = this._numfmtService.getValue(unitId, subUnitId, row, col, model);
             if (!numfmtValue) {
                 return;
             }
@@ -110,8 +110,8 @@ export class NumfmtCopyPasteController extends Disposable {
     ) {
         const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
         const sheet = workbook.getActiveSheet();
-        const workbookId = workbook.getUnitId();
-        const worksheetId = sheet.getSheetId();
+        const unitId = workbook.getUnitId();
+        const subUnitId = sheet.getSheetId();
         if (copyInfo.copyType === COPY_TYPE.CUT) {
             // This do not need to deal with clipping.
             // move range had handle this case .
@@ -125,11 +125,11 @@ export class NumfmtCopyPasteController extends Disposable {
 
         const repeatRange = getRepeatRange(copyInfo.copyRange, pastedRange, true);
         const cells: ISetCellsNumfmt = [];
-        const removeRedos: IRemoveNumfmtMutationParams = { workbookId, worksheetId, ranges: [] };
-        const numfmtModel = this._numfmtService.getModel(workbookId, worksheetId);
+        const removeRedos: IRemoveNumfmtMutationParams = { unitId, subUnitId, ranges: [] };
+        const numfmtModel = this._numfmtService.getModel(unitId, subUnitId);
         // Clears the destination area data format
         Range.foreach(pastedRange, (row, col) => {
-            if (this._numfmtService.getValue(workbookId, worksheetId, row, col, numfmtModel!)) {
+            if (this._numfmtService.getValue(unitId, subUnitId, row, col, numfmtModel!)) {
                 removeRedos.ranges.push({ startRow: row, startColumn: col, endRow: row, endColumn: col });
             }
         });
@@ -155,7 +155,7 @@ export class NumfmtCopyPasteController extends Disposable {
                     });
                 });
         });
-        const setRedos = transformCellsToRange(workbookId, worksheetId, cells);
+        const setRedos = transformCellsToRange(unitId, subUnitId, cells);
 
         Object.keys(setRedos.values).forEach((key) => {
             const v = setRedos.values[key];

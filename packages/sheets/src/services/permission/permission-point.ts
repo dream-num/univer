@@ -24,11 +24,11 @@ export class SheetEditablePermission extends PermissionPoint<boolean> {
     unitID: string;
 
     constructor(
-        private _workbookId: string,
-        private _worksheetId: string
+        private _unitId: string,
+        private _subUnitId: string
     ) {
         super();
-        this.unitID = _workbookId;
-        this.id = `${SheetEditablePermissionPoint}_${_workbookId}_${_worksheetId}`;
+        this.unitID = _unitId;
+        this.id = `${SheetEditablePermissionPoint}_${_unitId}_${_subUnitId}`;
     }
 }

@@ -60,7 +60,7 @@ describe('Test set worksheet order commands', () => {
                 const targetSheetId = targetActiveSheet?.getSheetId();
 
                 expect(
-                    await commandService.executeCommand(SetWorksheetActivateCommand.id, { worksheetId: targetSheetId })
+                    await commandService.executeCommand(SetWorksheetActivateCommand.id, { subUnitId: targetSheetId })
                 ).toBeTruthy();
 
                 expect(await commandService.executeCommand(InsertSheetCommand.id, {})).toBeTruthy();
@@ -71,8 +71,8 @@ describe('Test set worksheet order commands', () => {
                 expect(
                     await commandService.executeCommand(SetWorksheetOrderCommand.id, {
                         order: 2,
-                        workbookId: 'test',
-                        worksheetId: 'sheet1',
+                        unitId: 'test',
+                        subUnitId: 'sheet1',
                     })
                 ).toBeTruthy();
 

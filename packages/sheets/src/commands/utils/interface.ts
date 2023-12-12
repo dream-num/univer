@@ -15,6 +15,6 @@
  */
 
 export interface ISheetCommandSharedParams {
-    workbookId: string;
-    worksheetId: string;
+    unitId: string;
+    subUnitId: string;
 }

@@ -50,11 +50,8 @@ export class NumfmtAutoFillController extends Disposable {
             targetStartCell: { row: number; col: number },
             relativeRange: IRange
         ) => {
-            const workbookId = this._univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-            const worksheetId = this._univerInstanceService
-                .getCurrentUniverSheetInstance()
-                .getActiveSheet()
-                .getSheetId();
+            const unitId = this._univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+            const subUnitId = this._univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
             const sourceRange = {
                 startRow: sourceStartCell.row,
                 startColumn: sourceStartCell.col,
@@ -81,8 +78,8 @@ export class NumfmtAutoFillController extends Disposable {
                     sourceRange
                 );
                 const oldNumfmtValue = this._numfmtService.getValue(
-                    workbookId,
-                    worksheetId,
+                    unitId,
+                    subUnitId,
                     sourcePositionRange.startRow,
                     sourcePositionRange.startColumn
                 );
@@ -107,7 +104,7 @@ export class NumfmtAutoFillController extends Disposable {
             if (values.length) {
                 const redo: IMutationInfo<ISetNumfmtMutationParams> = {
                     id: SetNumfmtMutation.id,
-                    params: transformCellsToRange(workbookId, worksheetId, values),
+                    params: transformCellsToRange(unitId, subUnitId, values),
                 };
                 const undos = factorySetNumfmtUndoMutation(this._injector, redo.params);
                 return {

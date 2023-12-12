@@ -20,8 +20,8 @@ import type { IAccessor } from '@wendellhu/redi';
 
 export interface ISetWorksheetHideMutationParams {
     hidden: BooleanNumber;
-    workbookId: string;
-    worksheetId: string;
+    unitId: string;
+    subUnitId: string;
 }
 
 export const SetWorksheetHideMutationFactory = (
@@ -29,14 +29,14 @@ export const SetWorksheetHideMutationFactory = (
     params: ISetWorksheetHideMutationParams
 ): ISetWorksheetHideMutationParams => {
     const universheet = accessor.get(IUniverInstanceService).getCurrentUniverSheetInstance();
-    const worksheet = universheet.getSheetBySheetId(params.worksheetId);
+    const worksheet = universheet.getSheetBySheetId(params.subUnitId);
     if (worksheet == null) {
         throw new Error('worksheet is null error!');
     }
     return {
         hidden: worksheet.isSheetHidden(),
-        workbookId: params.workbookId,
-        worksheetId: worksheet.getSheetId(),
+        unitId: params.unitId,
+        subUnitId: worksheet.getSheetId(),
     };
 };
 
@@ -44,13 +44,13 @@ export const SetWorksheetHideMutation: IMutation<ISetWorksheetHideMutationParams
     id: 'sheet.mutation.set-worksheet-hidden',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
-        const universheet = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.workbookId);
+        const universheet = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.unitId);
 
         if (universheet == null) {
             return false;
         }
 
-        const worksheet = universheet.getSheetBySheetId(params.worksheetId);
+        const worksheet = universheet.getSheetBySheetId(params.subUnitId);
 
         if (!worksheet) {
             return false;

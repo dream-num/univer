@@ -33,7 +33,7 @@ import { InsertSheetMutation, InsertSheetUndoMutationFactory } from '../mutation
 import { RemoveSheetMutation } from '../mutations/remove-sheet.mutation';
 
 export interface InsertSheetCommandParams {
-    workbookId?: string;
+    unitId?: string;
     index?: number;
     sheet?: IWorksheetData;
 }
@@ -49,13 +49,13 @@ export const InsertSheetCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        let workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+        let unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
 
         if (params) {
-            workbookId = params.workbookId ?? workbookId;
+            unitId = params.unitId ?? unitId;
         }
 
-        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
+        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
         if (!workbook) return false;
 
         let index = workbook.getSheets().length;
@@ -77,7 +77,7 @@ export const InsertSheetCommand: ICommand = {
         const insertSheetMutationParams: IInsertSheetMutationParams = {
             index,
             sheet: sheetConfig,
-            workbookId,
+            unitId,
         };
         const removeSheetMutationParams: IRemoveSheetMutationParams = InsertSheetUndoMutationFactory(
             accessor,
@@ -88,7 +88,7 @@ export const InsertSheetCommand: ICommand = {
 
         if (result) {
             undoRedoService.pushUndoRedo({
-                unitID: workbookId,
+                unitID: unitId,
                 undoMutations: [{ id: RemoveSheetMutation.id, params: removeSheetMutationParams }],
                 redoMutations: [{ id: InsertSheetMutation.id, params: insertSheetMutationParams }],
             });

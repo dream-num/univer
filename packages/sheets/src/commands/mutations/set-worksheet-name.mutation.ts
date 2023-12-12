@@ -20,8 +20,8 @@ import type { IAccessor } from '@wendellhu/redi';
 
 export interface ISetWorksheetNameMutationParams {
     name: string;
-    workbookId: string;
-    worksheetId: string;
+    unitId: string;
+    subUnitId: string;
 }
 
 export const SetWorksheetNameMutationFactory = (
@@ -29,14 +29,14 @@ export const SetWorksheetNameMutationFactory = (
     params: ISetWorksheetNameMutationParams
 ): ISetWorksheetNameMutationParams => {
     const universheet = accessor.get(IUniverInstanceService).getCurrentUniverSheetInstance();
-    const worksheet = universheet.getSheetBySheetId(params.worksheetId);
+    const worksheet = universheet.getSheetBySheetId(params.subUnitId);
     if (worksheet == null) {
         throw new Error('worksheet is null error!');
     }
     return {
-        workbookId: params.workbookId,
+        unitId: params.unitId,
         name: worksheet.getName(),
-        worksheetId: worksheet.getSheetId(),
+        subUnitId: worksheet.getSheetId(),
     };
 };
 
@@ -44,13 +44,13 @@ export const SetWorksheetNameMutation: IMutation<ISetWorksheetNameMutationParams
     id: 'sheet.mutation.set-worksheet-name',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
-        const universheet = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.workbookId);
+        const universheet = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.unitId);
 
         if (universheet == null) {
             return false;
         }
 
-        const worksheet = universheet.getSheetBySheetId(params.worksheetId);
+        const worksheet = universheet.getSheetBySheetId(params.subUnitId);
 
         if (!worksheet) {
             return false;

@@ -105,8 +105,8 @@ describe('Test row col menu items', () => {
         const worksheet = workbook.getActiveSheet();
         const endColumn = getColCount() - 1;
         return commandService.executeCommand<ISetSelectionsOperationParams, boolean>(SetSelectionsOperation.id, {
-            workbookId: workbook.getUnitId(),
-            worksheetId: worksheet.getSheetId(),
+            unitId: workbook.getUnitId(),
+            subUnitId: worksheet.getSheetId(),
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             selections: [
                 {
@@ -133,8 +133,8 @@ describe('Test row col menu items', () => {
         const worksheet = workbook.getActiveSheet();
         const endRow = getRowCount() - 1;
         return commandService.executeCommand<ISetSelectionsOperationParams, boolean>(SetSelectionsOperation.id, {
-            workbookId: workbook.getUnitId(),
-            worksheetId: worksheet.getSheetId(),
+            unitId: workbook.getUnitId(),
+            subUnitId: worksheet.getSheetId(),
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             selections: [
                 {

@@ -199,7 +199,7 @@ export class ActiveDirtyController extends Disposable {
     }
 
     private _getSetRangeValuesMutationDirtyRange(params: ISetRangeValuesMutationParams) {
-        const { worksheetId: sheetId, workbookId: unitId, cellValue } = params;
+        const { subUnitId: sheetId, unitId, cellValue } = params;
 
         const dirtyRanges: IUnitRange[] = [];
 
@@ -215,7 +215,7 @@ export class ActiveDirtyController extends Disposable {
     }
 
     private _getMoveRangeMutationDirtyRange(params: IMoveRangeMutationParams) {
-        const { worksheetId: sheetId, workbookId: unitId, from, to } = params;
+        const { subUnitId: sheetId, unitId, from, to } = params;
 
         const dirtyRanges: IUnitRange[] = [];
 
@@ -229,7 +229,7 @@ export class ActiveDirtyController extends Disposable {
     }
 
     private _getMoveRowsMutationDirtyRange(params: IMoveRowsMutationParams) {
-        const { worksheetId: sheetId, workbookId: unitId, sourceRange, targetRange } = params;
+        const { subUnitId: sheetId, unitId, sourceRange, targetRange } = params;
 
         const dirtyRanges: IUnitRange[] = [];
 
@@ -247,7 +247,7 @@ export class ActiveDirtyController extends Disposable {
     }
 
     private _getDeleteRangeMutationDirtyRange(params: IDeleteRangeMutationParams) {
-        const { worksheetId: sheetId, workbookId: unitId, ranges, shiftDimension } = params;
+        const { subUnitId: sheetId, unitId, ranges, shiftDimension } = params;
 
         const dirtyRanges: IUnitRange[] = [];
 
@@ -295,7 +295,7 @@ export class ActiveDirtyController extends Disposable {
     }
 
     private _getRemoveRowOrColumnMutation(params: IRemoveRowsMutationParams, isRow: boolean = true) {
-        const { worksheetId: sheetId, workbookId: unitId, ranges } = params;
+        const { subUnitId: sheetId, unitId, ranges } = params;
 
         const dirtyRanges: IUnitRange[] = [];
 
@@ -345,7 +345,7 @@ export class ActiveDirtyController extends Disposable {
 
     private _getRemoveSheetMutation(params: IRemoveSheetMutationParams, name?: Nullable<string>) {
         const dirtyNameMap: IDirtyUnitSheetNameMap = {};
-        const { worksheetId: sheetId, workbookId: unitId } = params;
+        const { subUnitId: sheetId, unitId } = params;
 
         // const dirtyNameMap: IDirtyUnitSheetNameMap = {};
 
@@ -360,7 +360,7 @@ export class ActiveDirtyController extends Disposable {
 
     private _getInsertSheetMutation(params: IInsertSheetMutationParams, name?: Nullable<string>) {
         const dirtyNameMap: IDirtyUnitSheetNameMap = {};
-        const { sheet, workbookId: unitId } = params;
+        const { sheet, unitId } = params;
 
         if (dirtyNameMap[unitId] == null) {
             dirtyNameMap[unitId] = {};

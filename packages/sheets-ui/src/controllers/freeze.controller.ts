@@ -536,8 +536,8 @@ export class FreezeController extends Disposable {
                 startColumn: this._changeToColumn,
                 ySplit,
                 xSplit,
-                workbookId: workbook.getUnitId(),
-                worksheetId: worksheet.getSheetId(),
+                unitId: workbook.getUnitId(),
+                subUnitId: worksheet.getSheetId(),
             });
         });
     }
@@ -1036,8 +1036,8 @@ export class FreezeController extends Disposable {
                     const worksheet = workbook.getActiveSheet();
 
                     const params = command.params as ISetFrozenMutationParams;
-                    const { workbookId, worksheetId } = params;
-                    if (!(workbookId === workbook.getUnitId() && worksheetId === worksheet.getSheetId())) {
+                    const { unitId, subUnitId } = params;
+                    if (!(unitId === workbook.getUnitId() && subUnitId === worksheet.getSheetId())) {
                         return;
                     }
 

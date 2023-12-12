@@ -142,13 +142,13 @@ export class NumfmtService extends Disposable implements INumfmtService {
         }
     }
 
-    private _setValue(workbookId: string, worksheetId: string, row: number, col: number, value: Nullable<INumfmtItem>) {
-        let model = this.getModel(workbookId, worksheetId);
+    private _setValue(unitId: string, subUnitId: string, row: number, col: number, value: Nullable<INumfmtItem>) {
+        let model = this.getModel(unitId, subUnitId);
         if (!model) {
-            const worksheetMap = this._numfmtModel.get(workbookId) || new Map<string, ObjectMatrix<INumfmtItem>>();
-            const worksheetModel = worksheetMap.get(worksheetId) || new ObjectMatrix<INumfmtItem>();
-            worksheetMap.set(worksheetId, worksheetModel);
-            this._numfmtModel.set(workbookId, worksheetMap);
+            const worksheetMap = this._numfmtModel.get(unitId) || new Map<string, ObjectMatrix<INumfmtItem>>();
+            const worksheetModel = worksheetMap.get(subUnitId) || new ObjectMatrix<INumfmtItem>();
+            worksheetMap.set(subUnitId, worksheetModel);
+            this._numfmtModel.set(unitId, worksheetMap);
             model = worksheetModel;
         }
         if (value) {
@@ -157,8 +157,8 @@ export class NumfmtService extends Disposable implements INumfmtService {
             model.realDeleteValue(row, col);
             const size = model.getSizeOf();
             if (!size) {
-                const workbookModel = this._numfmtModel.get(workbookId);
-                workbookModel?.delete(worksheetId);
+                const workbookModel = this._numfmtModel.get(unitId);
+                workbookModel?.delete(subUnitId);
             }
         }
     }
@@ -173,12 +173,12 @@ export class NumfmtService extends Disposable implements INumfmtService {
         return `${maxId + 1}`;
     }
 
-    getValue(workbookId: string, worksheetId: string, row: number, col: number, model?: ObjectMatrix<INumfmtItem>) {
-        const _model: Nullable<ObjectMatrix<INumfmtItem>> = model || this.getModel(workbookId, worksheetId);
+    getValue(unitId: string, subUnitId: string, row: number, col: number, model?: ObjectMatrix<INumfmtItem>) {
+        const _model: Nullable<ObjectMatrix<INumfmtItem>> = model || this.getModel(unitId, subUnitId);
         if (!_model) {
             return null;
         }
-        const refMode = this._refAliasModel.get(workbookId);
+        const refMode = this._refAliasModel.get(unitId);
         const value = _model.getValue(row, col);
         if (value && refMode) {
             const refValue = refMode.getValue(value?.i);
@@ -194,44 +194,44 @@ export class NumfmtService extends Disposable implements INumfmtService {
         return null;
     }
 
-    deleteValues(workbookId: string, worksheetId: string, values: IRange[]) {
-        let refModel = this._refAliasModel.get(workbookId)!;
-        const model = this.getModel(workbookId, worksheetId);
+    deleteValues(unitId: string, subUnitId: string, values: IRange[]) {
+        let refModel = this._refAliasModel.get(unitId)!;
+        const model = this.getModel(unitId, subUnitId);
         if (!refModel) {
             refModel = new RefAlias<IRefItem, 'i' | 'pattern'>([], ['pattern', 'i']);
-            this._refAliasModel.set(workbookId, refModel);
+            this._refAliasModel.set(unitId, refModel);
         }
         values.forEach((range) => {
             Range.foreach(range, (row, col) => {
-                const oldValue = this.getValue(workbookId, worksheetId, row, col, model);
+                const oldValue = this.getValue(unitId, subUnitId, row, col, model);
                 if (oldValue && oldValue.pattern) {
                     const oldRefPattern = refModel.getValue(oldValue.pattern);
                     if (oldRefPattern) {
                         oldRefPattern.count--;
                     }
                 }
-                this._setValue(workbookId, worksheetId, row, col, null);
+                this._setValue(unitId, subUnitId, row, col, null);
             });
         });
     }
 
     setValues(
-        workbookId: string,
-        worksheetId: string,
+        unitId: string,
+        subUnitId: string,
         values: Array<{ ranges: IRange[]; pattern: string; type: FormatType }>
     ) {
-        const model = this.getModel(workbookId, worksheetId);
-        let refModel = this._refAliasModel.get(workbookId)!;
+        const model = this.getModel(unitId, subUnitId);
+        let refModel = this._refAliasModel.get(unitId)!;
         if (!refModel) {
             refModel = new RefAlias<IRefItem, 'i' | 'pattern'>([], ['pattern', 'i']);
-            this._refAliasModel.set(workbookId, refModel);
+            this._refAliasModel.set(unitId, refModel);
         }
         values.forEach((value) => {
             let refPattern = refModel.getValue(value.pattern);
             if (!refPattern) {
                 refPattern = {
                     count: 0,
-                    i: this._getUniqueRefId(workbookId),
+                    i: this._getUniqueRefId(unitId),
                     pattern: value.pattern,
                     type: values[0].type,
                 };
@@ -241,7 +241,7 @@ export class NumfmtService extends Disposable implements INumfmtService {
             value.ranges.forEach((range) => {
                 Range.foreach(range, (row, col) => {
                     if (model) {
-                        const oldValue = this.getValue(workbookId, worksheetId, row, col, model);
+                        const oldValue = this.getValue(unitId, subUnitId, row, col, model);
                         if (oldValue && oldValue.pattern) {
                             const oldRefPattern = refModel.getValue(oldValue.pattern);
                             if (oldRefPattern) {
@@ -249,7 +249,7 @@ export class NumfmtService extends Disposable implements INumfmtService {
                             }
                         }
                     }
-                    this._setValue(workbookId, worksheetId, row, col, {
+                    this._setValue(unitId, subUnitId, row, col, {
                         i: refPattern!.i,
                     });
                     refPattern!.count++;
@@ -258,14 +258,14 @@ export class NumfmtService extends Disposable implements INumfmtService {
         });
     }
 
-    getModel(workbookId: string, worksheetId: string) {
-        const workbookModel = this._numfmtModel.get(workbookId);
-        const sheetModel = workbookModel?.get(worksheetId);
+    getModel(unitId: string, subUnitId: string) {
+        const workbookModel = this._numfmtModel.get(unitId);
+        const sheetModel = workbookModel?.get(subUnitId);
         return sheetModel;
     }
 
-    getRefModel(workbookId: string) {
-        const refModel = this._refAliasModel.get(workbookId);
+    getRefModel(unitId: string) {
+        const refModel = this._refAliasModel.get(unitId);
         return refModel;
     }
 }

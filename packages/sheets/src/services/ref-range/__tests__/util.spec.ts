@@ -223,7 +223,7 @@ describe('test ref-range move', () => {
             const operators = handleInsertCol(
                 {
                     id: EffectRefRangId.InsertColCommandId,
-                    params: { range, workbookId: '', worksheetId: '', direction: '' as any },
+                    params: { range, unitId: '', subUnitId: '', direction: '' as any },
                 },
                 targetRange
             );
@@ -235,7 +235,7 @@ describe('test ref-range move', () => {
             const operators = handleInsertCol(
                 {
                     id: EffectRefRangId.InsertColCommandId,
-                    params: { range, workbookId: '', worksheetId: '', direction: '' as any },
+                    params: { range, unitId: '', subUnitId: '', direction: '' as any },
                 },
                 targetRange
             );
@@ -247,7 +247,7 @@ describe('test ref-range move', () => {
             const operators = handleInsertCol(
                 {
                     id: EffectRefRangId.InsertColCommandId,
-                    params: { range, workbookId: '', worksheetId: '', direction: '' as any },
+                    params: { range, unitId: '', subUnitId: '', direction: '' as any },
                 },
                 targetRange
             );
@@ -259,7 +259,7 @@ describe('test ref-range move', () => {
             const operators = handleInsertCol(
                 {
                     id: EffectRefRangId.InsertColCommandId,
-                    params: { range, workbookId: '', worksheetId: '', direction: '' as any },
+                    params: { range, unitId: '', subUnitId: '', direction: '' as any },
                 },
                 targetRange
             );
@@ -272,7 +272,7 @@ describe('test ref-range move', () => {
             const operators = handleInsertCol(
                 {
                     id: EffectRefRangId.InsertColCommandId,
-                    params: { range, workbookId: '', worksheetId: '', direction: '' as any },
+                    params: { range, unitId: '', subUnitId: '', direction: '' as any },
                 },
                 targetRange
             );
@@ -290,7 +290,7 @@ describe('test ref-range move', () => {
             const operators = handleInsertRow(
                 {
                     id: EffectRefRangId.InsertRowCommandId,
-                    params: { range, workbookId: '', worksheetId: '', direction: '' as any },
+                    params: { range, unitId: '', subUnitId: '', direction: '' as any },
                 },
                 targetRange
             );
@@ -302,7 +302,7 @@ describe('test ref-range move', () => {
             const operators = handleInsertRow(
                 {
                     id: EffectRefRangId.InsertRowCommandId,
-                    params: { range, workbookId: '', worksheetId: '', direction: '' as any },
+                    params: { range, unitId: '', subUnitId: '', direction: '' as any },
                 },
                 targetRange
             );
@@ -314,7 +314,7 @@ describe('test ref-range move', () => {
             const operators = handleInsertRow(
                 {
                     id: EffectRefRangId.InsertRowCommandId,
-                    params: { range, workbookId: '', worksheetId: '', direction: '' as any },
+                    params: { range, unitId: '', subUnitId: '', direction: '' as any },
                 },
                 targetRange
             );
@@ -326,7 +326,7 @@ describe('test ref-range move', () => {
             const operators = handleInsertRow(
                 {
                     id: EffectRefRangId.InsertRowCommandId,
-                    params: { range, workbookId: '', worksheetId: '', direction: '' as any },
+                    params: { range, unitId: '', subUnitId: '', direction: '' as any },
                 },
                 targetRange
             );
@@ -338,7 +338,7 @@ describe('test ref-range move', () => {
             const operators = handleInsertRow(
                 {
                     id: EffectRefRangId.InsertRowCommandId,
-                    params: { range, workbookId: '', worksheetId: '', direction: '' as any },
+                    params: { range, unitId: '', subUnitId: '', direction: '' as any },
                 },
                 targetRange
             );

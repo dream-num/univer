@@ -36,15 +36,15 @@ export const RemoveSheetUndoMutationFactory = (
 ): IInsertSheetMutationParams => {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-    const { worksheetId, workbookId } = params;
-    const sheet = workbook.getSheetBySheetId(worksheetId)!.getConfig();
+    const { subUnitId, unitId } = params;
+    const sheet = workbook.getSheetBySheetId(subUnitId)!.getConfig();
     const config = workbook!.getConfig();
-    const index = config.sheetOrder.findIndex((id) => id === worksheetId);
+    const index = config.sheetOrder.findIndex((id) => id === subUnitId);
 
     return {
         index,
         sheet,
-        workbookId,
+        unitId,
     };
 };
 
@@ -53,8 +53,8 @@ export const RemoveSheetMutation: IMutation<IRemoveSheetMutationParams, boolean>
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const { worksheetId, workbookId } = params;
-        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
+        const { subUnitId, unitId } = params;
+        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
 
         if (!workbook) {
             return false;
@@ -64,14 +64,14 @@ export const RemoveSheetMutation: IMutation<IRemoveSheetMutationParams, boolean>
         const config = workbook.getConfig();
 
         const { sheets } = config;
-        if (sheets[worksheetId] == null) {
-            throw new Error(`Remove sheet fail ${worksheetId} does not exist`);
+        if (sheets[subUnitId] == null) {
+            throw new Error(`Remove sheet fail ${subUnitId} does not exist`);
         }
-        const findIndex = config.sheetOrder.findIndex((id) => id === worksheetId);
-        delete sheets[worksheetId];
+        const findIndex = config.sheetOrder.findIndex((id) => id === subUnitId);
+        delete sheets[subUnitId];
 
         config.sheetOrder.splice(findIndex, 1);
-        worksheets.delete(worksheetId);
+        worksheets.delete(subUnitId);
 
         return true;
     },

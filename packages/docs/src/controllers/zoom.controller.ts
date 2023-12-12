@@ -115,7 +115,7 @@ export class ZoomController extends Disposable {
 
                         this._commandService.executeCommand(SetDocZoomRatioCommand.id, {
                             zoomRatio: nextRatio,
-                            workbookId: documentModel.getUnitId(),
+                            unitId: documentModel.getUnitId(),
                         });
 
                         e.preventDefault();

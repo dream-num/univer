@@ -23,8 +23,8 @@ const COPY_CONTENT_CACHE_LIMIT = 10;
 const ID_LENGTH = 6;
 
 export interface ICopyContentCacheData {
-    worksheetId: string;
-    workbookId: string;
+    subUnitId: string;
+    unitId: string;
     range: IRange;
     copyType: COPY_TYPE;
     matrix: ObjectMatrix<ICellDataWithSpanInfo>;

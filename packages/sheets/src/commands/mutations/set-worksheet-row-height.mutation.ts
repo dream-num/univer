@@ -22,22 +22,22 @@ import type { IAccessor } from '@wendellhu/redi';
 const MAXIMUM_ROW_HEIGHT = 2000;
 
 export interface ISetWorksheetRowHeightMutationParams {
-    workbookId: string;
-    worksheetId: string;
+    unitId: string;
+    subUnitId: string;
     ranges: IRange[];
     rowHeight: number | ObjectArray<number>;
 }
 
 export interface ISetWorksheetRowIsAutoHeightMutationParams {
-    workbookId: string;
-    worksheetId: string;
+    unitId: string;
+    subUnitId: string;
     ranges: IRange[];
     autoHeightInfo: boolean | ObjectArrayPrimitiveType<Nullable<boolean>>;
 }
 
 export interface ISetWorksheetRowAutoHeightMutationParams {
-    workbookId: string;
-    worksheetId: string;
+    unitId: string;
+    subUnitId: string;
     rowsAutoHeightInfo: IRowAutoHeightInfo[];
 }
 
@@ -45,10 +45,10 @@ export const SetWorksheetRowHeightMutationFactory = (
     accessor: IAccessor,
     params: ISetWorksheetRowHeightMutationParams
 ): ISetWorksheetRowHeightMutationParams => {
-    const { workbookId, worksheetId, ranges } = params;
+    const { unitId, subUnitId, ranges } = params;
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
-    const worksheet = workbook?.getSheetBySheetId(worksheetId);
+    const workbook = univerInstanceService.getUniverSheetInstance(unitId);
+    const worksheet = workbook?.getSheetBySheetId(subUnitId);
 
     if (worksheet == null) {
         throw new Error('worksheet is null error!');
@@ -65,8 +65,8 @@ export const SetWorksheetRowHeightMutationFactory = (
     }
 
     return {
-        workbookId,
-        worksheetId,
+        unitId,
+        subUnitId,
         ranges,
         rowHeight,
     };
@@ -76,11 +76,11 @@ export const SetWorksheetRowIsAutoHeightMutationFactory = (
     accessor: IAccessor,
     params: ISetWorksheetRowIsAutoHeightMutationParams
 ): ISetWorksheetRowIsAutoHeightMutationParams => {
-    const { workbookId, worksheetId, ranges } = params;
+    const { unitId, subUnitId, ranges } = params;
 
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const workbook = univerInstanceService.getUniverSheetInstance(workbookId)!;
-    const worksheet = workbook.getSheetBySheetId(worksheetId)!;
+    const workbook = univerInstanceService.getUniverSheetInstance(unitId)!;
+    const worksheet = workbook.getSheetBySheetId(subUnitId)!;
 
     const autoHeightHash = new ObjectArray<Nullable<boolean>>();
     const manager = worksheet.getRowManager();
@@ -94,8 +94,8 @@ export const SetWorksheetRowIsAutoHeightMutationFactory = (
     }
 
     return {
-        workbookId,
-        worksheetId,
+        unitId,
+        subUnitId,
         ranges,
         autoHeightInfo: autoHeightHash.toJSON(),
     };
@@ -105,10 +105,10 @@ export const SetWorksheetRowAutoHeightMutationFactory = (
     accessor: IAccessor,
     params: ISetWorksheetRowAutoHeightMutationParams
 ): ISetWorksheetRowAutoHeightMutationParams => {
-    const { workbookId, worksheetId, rowsAutoHeightInfo } = params;
+    const { unitId, subUnitId, rowsAutoHeightInfo } = params;
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
-    const worksheet = workbook?.getSheetBySheetId(worksheetId);
+    const workbook = univerInstanceService.getUniverSheetInstance(unitId);
+    const worksheet = workbook?.getSheetBySheetId(subUnitId);
 
     const results: IRowAutoHeightInfo[] = [];
     const manager = worksheet!.getRowManager();
@@ -124,8 +124,8 @@ export const SetWorksheetRowAutoHeightMutationFactory = (
     }
 
     return {
-        workbookId,
-        worksheetId,
+        unitId,
+        subUnitId,
         rowsAutoHeightInfo: results,
     };
 };
@@ -134,11 +134,11 @@ export const SetWorksheetRowHeightMutation: IMutation<ISetWorksheetRowHeightMuta
     id: 'sheet.mutation.set-worksheet-row-height',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
-        const { workbookId, worksheetId, ranges, rowHeight } = params;
+        const { unitId, subUnitId, ranges, rowHeight } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
+        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
 
-        const worksheet = workbook?.getSheetBySheetId(worksheetId);
+        const worksheet = workbook?.getSheetBySheetId(subUnitId);
         if (!worksheet) {
             return false;
         }
@@ -168,11 +168,11 @@ export const SetWorksheetRowIsAutoHeightMutation: IMutation<ISetWorksheetRowIsAu
     id: 'sheet.mutation.set-worksheet-row-is-auto-height',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
-        const { workbookId, worksheetId, ranges, autoHeightInfo } = params;
+        const { unitId, subUnitId, ranges, autoHeightInfo } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
+        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
 
-        const worksheet = workbook?.getSheetBySheetId(worksheetId);
+        const worksheet = workbook?.getSheetBySheetId(subUnitId);
         if (!worksheet) {
             return false;
         }
@@ -201,10 +201,10 @@ export const SetWorksheetRowAutoHeightMutation: IMutation<ISetWorksheetRowAutoHe
     id: 'sheet.mutation.set-worksheet-row-auto-height',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
-        const { workbookId, worksheetId, rowsAutoHeightInfo } = params;
+        const { unitId, subUnitId, rowsAutoHeightInfo } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
-        const worksheet = workbook?.getSheetBySheetId(worksheetId);
+        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
+        const worksheet = workbook?.getSheetBySheetId(subUnitId);
 
         if (!worksheet || !workbook) {
             return false;

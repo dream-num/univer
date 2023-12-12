@@ -38,8 +38,8 @@ import { ISelectionRenderService } from '../services/selection/selection-render.
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
 interface ISetWorksheetMutationParams {
-    workbookId: string;
-    worksheetId: string;
+    unitId: string;
+    subUnitId: string;
 }
 
 @OnLifecycle(LifecycleStages.Rendered, SheetRenderController)
@@ -122,8 +122,8 @@ export class SheetRenderController extends Disposable {
                     const worksheet = workbook.getActiveSheet();
                     const sheetId = worksheet.getSheetId();
                     const params = command.params;
-                    const { workbookId, worksheetId } = params as ISetWorksheetMutationParams;
-                    if (!(workbookId === workbook.getUnitId() && worksheetId === worksheet.getSheetId())) {
+                    const { unitId, subUnitId } = params as ISetWorksheetMutationParams;
+                    if (!(unitId === workbook.getUnitId() && subUnitId === worksheet.getSheetId())) {
                         return;
                     }
 

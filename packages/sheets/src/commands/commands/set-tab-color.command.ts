@@ -34,22 +34,22 @@ export const SetTabColorCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = univerInstanceService
+        const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+        const subUnitId = univerInstanceService
             .getCurrentUniverSheetInstance()
 
             .getActiveSheet()
             .getSheetId();
 
-        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
+        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
         if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(worksheetId);
+        const worksheet = workbook.getSheetBySheetId(subUnitId);
         if (!worksheet) return false;
 
         const setTabColorMutationParams: ISetTabColorMutationParams = {
             color: params.value,
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
         };
 
         const undoMutationParams = SetTabColorUndoMutationFactory(accessor, setTabColorMutationParams);
@@ -57,7 +57,7 @@ export const SetTabColorCommand: ICommand = {
 
         if (result) {
             undoRedoService.pushUndoRedo({
-                unitID: workbookId,
+                unitID: unitId,
                 undoMutations: [{ id: SetTabColorMutation.id, params: undoMutationParams }],
                 redoMutations: [{ id: SetTabColorMutation.id, params: setTabColorMutationParams }],
             });

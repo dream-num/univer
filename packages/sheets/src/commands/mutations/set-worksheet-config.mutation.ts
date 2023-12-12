@@ -20,8 +20,8 @@ import type { IAccessor } from '@wendellhu/redi';
 
 /** @deprecated */
 export interface ISetWorksheetConfigMutationParams {
-    workbookId: string;
-    worksheetId: string;
+    unitId: string;
+    subUnitId: string;
     config: IWorksheetData;
 }
 
@@ -30,13 +30,13 @@ export const SetWorksheetConfigUndoMutationFactory = (
     accessor: IAccessor,
     params: ISetWorksheetConfigMutationParams
 ): ISetWorksheetConfigMutationParams => {
-    const workbook = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.workbookId);
-    const worksheet = workbook!.getSheetBySheetId(params.worksheetId)!;
+    const workbook = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.unitId);
+    const worksheet = workbook!.getSheetBySheetId(params.subUnitId)!;
     const config = Tools.deepClone(worksheet.getConfig());
 
     return {
-        workbookId: params.workbookId,
-        worksheetId: params.worksheetId,
+        unitId: params.unitId,
+        subUnitId: params.subUnitId,
         config,
     };
 };
@@ -46,9 +46,9 @@ export const SetWorksheetConfigMutation: IMutation<ISetWorksheetConfigMutationPa
     id: 'sheet.mutation.set-worksheet-config',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
-        const workbook = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.workbookId);
+        const workbook = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.unitId);
         if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(params.worksheetId);
+        const worksheet = workbook.getSheetBySheetId(params.subUnitId);
         if (!worksheet) return false;
 
         // TODO: setConfig is going to be deprecated

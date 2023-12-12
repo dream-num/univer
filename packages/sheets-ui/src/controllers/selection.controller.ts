@@ -260,8 +260,8 @@ export class SelectionController extends Disposable {
                     const worksheet = workbook.getActiveSheet();
 
                     const params = command.params as ISetZoomRatioOperationParams;
-                    const { workbookId, worksheetId } = params;
-                    if (!(workbookId === workbook.getUnitId() && worksheetId === worksheet.getSheetId())) {
+                    const { unitId, subUnitId } = params;
+                    if (!(unitId === workbook.getUnitId() && subUnitId === worksheet.getSheetId())) {
                         return;
                     }
 

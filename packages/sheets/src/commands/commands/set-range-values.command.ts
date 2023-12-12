@@ -34,8 +34,8 @@ import type { ISetRangeValuesMutationParams } from '../mutations/set-range-value
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 
 export interface ISetRangeValuesCommandParams {
-    worksheetId?: string;
-    workbookId?: string;
+    subUnitId?: string;
+    unitId?: string;
     range?: IRange;
 
     /**
@@ -61,8 +61,8 @@ export const SetRangeValuesCommand: ICommand = {
         const {
             value,
             range,
-            workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId(),
-            worksheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId(),
+            unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId(),
+            subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId(),
         } = params;
 
         const currentSelections = range ? [range] : selectionManagerService.getSelectionRanges();
@@ -94,8 +94,8 @@ export const SetRangeValuesCommand: ICommand = {
         }
 
         const setRangeValuesMutationParams: ISetRangeValuesMutationParams = {
-            worksheetId,
-            workbookId,
+            subUnitId,
+            unitId,
             cellValue: realCellValue ?? cellValue.getMatrix(),
         };
         const undoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
@@ -126,7 +126,7 @@ export const SetRangeValuesCommand: ICommand = {
 
         if (setValueMutationResult && result.result) {
             undoRedoService.pushUndoRedo({
-                unitID: workbookId,
+                unitID: unitId,
                 undoMutations: [{ id: SetRangeValuesMutation.id, params: undoSetRangeValuesMutationParams }, ...undos],
                 redoMutations: [{ id: SetRangeValuesMutation.id, params: setRangeValuesMutationParams }, ...redos],
             });

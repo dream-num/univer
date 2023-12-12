@@ -46,8 +46,8 @@ export const MoveRangeCommand: ICommand = {
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
         const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
-        const workbookId = workbook.getUnitId();
-        const worksheetId = worksheet.getSheetId();
+        const unitId = workbook.getUnitId();
+        const subUnitId = worksheet.getSheetId();
         const fromValues = worksheet.getRange(params.fromRange).getValues();
 
         const newFromCellValues = fromValues.reduce((res, row, rowIndex) => {
@@ -82,14 +82,14 @@ export const MoveRangeCommand: ICommand = {
         const doMoveRangeMutation: IMoveRangeMutationParams = {
             from: newFromCellValues.getMatrix(),
             to: newToCellValues.getMatrix(),
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
         };
         const undoMoveRangeMutation: IMoveRangeMutationParams = {
             from: currentFromCellValues.getMatrix(),
             to: currentToCellValues.getMatrix(),
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
         };
         const interceptorCommands = sheetInterceptorService.onCommandExecute({ id: MoveRangeCommand.id, params });
 
@@ -99,8 +99,8 @@ export const MoveRangeCommand: ICommand = {
             {
                 id: SetSelectionsOperation.id,
                 params: {
-                    unitId: workbookId,
-                    sheetId: worksheetId,
+                    unitId,
+                    sheetId: subUnitId,
                     pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                     selections: [{ range: params.toRange }],
                 },
@@ -110,8 +110,8 @@ export const MoveRangeCommand: ICommand = {
             {
                 id: SetSelectionsOperation.id,
                 params: {
-                    unitId: workbookId,
-                    sheetId: worksheetId,
+                    unitId,
+                    sheetId: subUnitId,
                     pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                     selections: [{ range: params.fromRange }],
                 },
@@ -123,7 +123,7 @@ export const MoveRangeCommand: ICommand = {
         const result = await sequenceExecute(redos, commandService).result;
         if (result) {
             undoRedoService.pushUndoRedo({
-                unitID: workbookId,
+                unitID: unitId,
                 undoMutations: undos,
                 redoMutations: redos,
             });

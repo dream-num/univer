@@ -25,9 +25,9 @@ import {
 } from '../mutations/set-worksheet-config.mutation';
 
 export interface ICopySheetToCommandParams {
-    workbookId?: string;
-    worksheetId?: string;
-    copyToWorkbookId?: string;
+    unitId?: string;
+    subUnitId?: string;
+    copyTounitId?: string;
     copyToSheetId?: string;
 }
 
@@ -39,27 +39,27 @@ export const CopySheetToCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const workbookId = params.workbookId || univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId =
-            params.worksheetId || univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
-        const copyToWorkbookId = params.workbookId || univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+        const unitId = params.unitId || univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+        const subUnitId =
+            params.subUnitId || univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+        const copyTounitId = params.unitId || univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
         const copyToSheetId =
             params.copyToSheetId || univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
-        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
+        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
         if (!workbook) return false;
-        const copyToWorkbook = univerInstanceService.getUniverSheetInstance(copyToWorkbookId);
+        const copyToWorkbook = univerInstanceService.getUniverSheetInstance(copyTounitId);
         if (!copyToWorkbook) return false;
-        const worksheet = workbook.getSheetBySheetId(worksheetId);
+        const worksheet = workbook.getSheetBySheetId(subUnitId);
         if (!worksheet) return false;
         const copyToWorksheet = workbook.getSheetBySheetId(copyToSheetId);
         if (!copyToWorksheet) return false;
-        if (workbookId === copyToWorkbookId && worksheetId === copyToSheetId) return false;
+        if (unitId === copyTounitId && subUnitId === copyToSheetId) return false;
 
         const config = Tools.deepClone(worksheet.getConfig());
 
         const setWorksheetConfigMutationParams: ISetWorksheetConfigMutationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             config,
         };
 
@@ -75,7 +75,7 @@ export const CopySheetToCommand: ICommand = {
 
         if (result) {
             undoRedoService.pushUndoRedo({
-                unitID: workbookId,
+                unitID: unitId,
                 undoMutations: [{ id: SetWorksheetConfigMutation.id, params: undoMutationParams }],
                 redoMutations: [{ id: SetWorksheetConfigMutation.id, params: setWorksheetConfigMutationParams }],
             });

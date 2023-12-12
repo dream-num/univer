@@ -263,8 +263,8 @@ describe('utils test', () => {
             const command = {
                 id: InsertRowCommand.id,
                 params: {
-                    workbookId: unitId,
-                    worksheetId: sheetId,
+                    unitId,
+                    subUnitId: sheetId,
                     direction: 2,
                     range: {
                         startRow: 1,
@@ -315,8 +315,8 @@ describe('utils test', () => {
             const command = {
                 id: InsertColCommand.id,
                 params: {
-                    workbookId: unitId,
-                    worksheetId: sheetId,
+                    unitId,
+                    subUnitId: sheetId,
                     direction: 1,
                     range: {
                         startColumn: 1,

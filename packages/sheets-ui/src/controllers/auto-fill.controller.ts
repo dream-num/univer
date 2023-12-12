@@ -665,8 +665,8 @@ export class AutoFillController extends Disposable {
             selectionRange: destRange,
             applyRange,
             applyDatas,
-            workbookId: this._univerInstanceService.getCurrentUniverSheetInstance().getUnitId(),
-            worksheetId: this._univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId(),
+            unitId: this._univerInstanceService.getCurrentUniverSheetInstance().getUnitId(),
+            subUnitId: this._univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId(),
             extendMutations: { undo: extendUndos, redo: extendRedos },
             applyMergeRanges,
         });

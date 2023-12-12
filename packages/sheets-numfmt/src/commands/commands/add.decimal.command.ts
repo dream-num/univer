@@ -38,13 +38,13 @@ export const AddDecimalCommand: ICommand = {
         }
         const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         const sheet = workbook.getActiveSheet();
-        const workbookId = workbook.getUnitId();
-        const worksheetId = sheet.getSheetId();
+        const unitId = workbook.getUnitId();
+        const subUnitId = sheet.getSheetId();
 
         let maxDecimals = 0;
         selections.forEach((selection) => {
             Range.foreach(selection.range, (row, col) => {
-                const numfmtValue = numfmtService.getValue(workbookId, worksheetId, row, col);
+                const numfmtValue = numfmtService.getValue(unitId, subUnitId, row, col);
                 if (!numfmtValue) {
                     return;
                 }
@@ -58,7 +58,7 @@ export const AddDecimalCommand: ICommand = {
 
         selections.forEach((selection) => {
             Range.foreach(selection.range, (row, col) => {
-                const numfmtValue = numfmtService.getValue(workbookId, worksheetId, row, col);
+                const numfmtValue = numfmtService.getValue(unitId, subUnitId, row, col);
                 if (!numfmtValue || isPatternEqualWithoutDecimal(numfmtValue.pattern, '0.0')) {
                     values.push({
                         row,

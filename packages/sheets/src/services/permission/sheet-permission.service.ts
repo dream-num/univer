@@ -80,14 +80,14 @@ export class SheetPermissionService extends Disposable {
                 handler: (_value, commandInfo, next) => {
                     const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
                     const sheet = workbook?.getActiveSheet();
-                    const workbookId = workbook?.getUnitId();
+                    const unitId = workbook?.getUnitId();
                     const sheetId = sheet?.getSheetId();
-                    if (!workbookId || !sheetId) {
+                    if (!unitId || !sheetId) {
                         return false;
                     }
                     switch (commandInfo.id) {
                         case SetRangeValuesCommand.id: {
-                            return this.getSheetEditable(workbookId, sheetId);
+                            return this.getSheetEditable(unitId, sheetId);
                         }
                     }
                     return next();
@@ -96,14 +96,14 @@ export class SheetPermissionService extends Disposable {
         );
     }
 
-    getEditable$(workbookId?: string, sheetId?: string) {
+    getEditable$(unitId?: string, sheetId?: string) {
         const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
-        const _workbookId = workbookId || workbook.getUnitId();
+        const _unitId = unitId || workbook.getUnitId();
         const sheet = workbook.getActiveSheet();
         const _sheetId = sheetId || sheet.getSheetId();
-        const sheetPermission = new SheetEditablePermission(_workbookId, _sheetId);
+        const sheetPermission = new SheetEditablePermission(_unitId, _sheetId);
         return this._permissionService
-            .composePermission$(_workbookId, [UniverEditablePermissionPoint, sheetPermission.id])
+            .composePermission$(_unitId, [UniverEditablePermissionPoint, sheetPermission.id])
             .pipe(
                 map(([univerEditable, sheetEditable]) => {
                     const editable = univerEditable.value && sheetEditable.value;
@@ -113,23 +113,23 @@ export class SheetPermissionService extends Disposable {
             );
     }
 
-    getSheetEditable(workbookId?: string, sheetId?: string) {
+    getSheetEditable(unitId?: string, sheetId?: string) {
         const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
-        const _workbookId = workbookId || workbook.getUnitId();
+        const _unitId = unitId || workbook.getUnitId();
         const sheet = workbook.getActiveSheet();
         const _sheetId = sheetId || sheet.getSheetId();
-        const sheetPermission = new SheetEditablePermission(_workbookId, _sheetId);
+        const sheetPermission = new SheetEditablePermission(_unitId, _sheetId);
         return this._permissionService
-            .composePermission(_workbookId, [UniverEditablePermissionPoint, sheetPermission.id])
+            .composePermission(_unitId, [UniverEditablePermissionPoint, sheetPermission.id])
             .every((item) => item.value);
     }
 
-    setSheetEditable(v: boolean, workbookId?: string, sheetId?: string) {
+    setSheetEditable(v: boolean, unitId?: string, sheetId?: string) {
         const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
-        const _workbookId = workbookId || workbook.getUnitId();
+        const _unitId = unitId || workbook.getUnitId();
         const sheet = workbook.getActiveSheet();
         const _sheetId = sheetId || sheet.getSheetId();
-        const sheetPermission = new SheetEditablePermission(_workbookId, _sheetId);
-        this._permissionService.updatePermissionPoint(_workbookId, sheetPermission.id, v);
+        const sheetPermission = new SheetEditablePermission(_unitId, _sheetId);
+        this._permissionService.updatePermissionPoint(_unitId, sheetPermission.id, v);
     }
 }

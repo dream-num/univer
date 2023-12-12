@@ -20,17 +20,17 @@ import type { IAccessor } from '@wendellhu/redi';
 
 export interface ISetWorksheetOrderMutationParams {
     order: number;
-    workbookId: string;
-    worksheetId: string;
+    unitId: string;
+    subUnitId: string;
 }
 
 export const SetWorksheetOrderUndoMutationFactory = (
     accessor: IAccessor,
     params: ISetWorksheetOrderMutationParams
 ): ISetWorksheetOrderMutationParams => {
-    const workbook = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.workbookId);
+    const workbook = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.unitId);
     const config = workbook!.getConfig();
-    const oldIndex = config.sheetOrder.findIndex((current: string) => current === params.worksheetId);
+    const oldIndex = config.sheetOrder.findIndex((current: string) => current === params.subUnitId);
     return {
         ...Tools.deepClone(params),
         order: oldIndex,
@@ -41,11 +41,11 @@ export const SetWorksheetOrderMutation: IMutation<ISetWorksheetOrderMutationPara
     id: 'sheet.mutation.set-worksheet-order',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
-        const workbook = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.workbookId);
+        const workbook = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.unitId);
         if (!workbook) return false;
         const config = workbook.getConfig();
-        const exclude = config.sheetOrder.filter((currentId: string) => currentId !== params.worksheetId);
-        exclude.splice(params.order, 0, params.worksheetId);
+        const exclude = config.sheetOrder.filter((currentId: string) => currentId !== params.subUnitId);
+        exclude.splice(params.order, 0, params.subUnitId);
         config.sheetOrder = exclude;
         return true;
     },

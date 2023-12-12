@@ -58,8 +58,8 @@ export function ZoomSlider() {
         const zoomRatio = value / 100;
 
         commandService.executeCommand(SetZoomRatioCommand.id, {
-            workbookId: workbook.getUnitId(),
-            worksheetId: worksheet.getSheetId(),
+            unitId: workbook.getUnitId(),
+            subUnitId: worksheet.getSheetId(),
             zoomRatio,
         });
     }

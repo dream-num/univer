@@ -47,20 +47,15 @@ import { getPatternType } from '../utils/pattern';
 
 const createCollectEffectMutation = () => {
     interface IConfig {
-        workbookId: string;
-        worksheetId: string;
+        unitId: string;
+        subUnitId: string;
         row: number;
         col: number;
         value: Nullable<INumfmtItemWithCache>;
     }
     let list: IConfig[] = [];
-    const add = (
-        workbookId: string,
-        worksheetId: string,
-        row: number,
-        col: number,
-        value: Nullable<INumfmtItemWithCache>
-    ) => list.push({ workbookId, worksheetId, row, col, value });
+    const add = (unitId: string, subUnitId: string, row: number, col: number, value: Nullable<INumfmtItemWithCache>) =>
+        list.push({ unitId, subUnitId, row, col, value });
     const getEffects = () => list;
     const clean = () => {
         list = [];
@@ -99,8 +94,8 @@ export class NumfmtEditorController extends Disposable {
                             const row = context.row;
                             const col = context.col;
                             const numfmtCell = this._numfmtService.getValue(
-                                context.workbookId,
-                                context.worksheetId,
+                                context.unitId,
+                                context.subUnitId,
                                 row,
                                 col
                             );
@@ -147,16 +142,16 @@ export class NumfmtEditorController extends Disposable {
                             // clear the effect
                             this._collectEffectMutation.clean();
                             const currentNumfmtValue = this._numfmtService.getValue(
-                                context.workbookId,
-                                context.worksheetId,
+                                context.unitId,
+                                context.subUnitId,
                                 context.row,
                                 context.col
                             );
                             const clean = () => {
                                 currentNumfmtValue &&
                                     this._collectEffectMutation.add(
-                                        context.workbookId,
-                                        context.worksheetId,
+                                        context.unitId,
+                                        context.subUnitId,
                                         context.row,
                                         context.col,
                                         null
@@ -175,8 +170,8 @@ export class NumfmtEditorController extends Disposable {
                                 if (dateInfo && dateInfo.z) {
                                     const v = Number(dateInfo.v);
                                     this._collectEffectMutation.add(
-                                        context.workbookId,
-                                        context.worksheetId,
+                                        context.unitId,
+                                        context.subUnitId,
                                         context.row,
                                         context.col,
                                         {
@@ -207,8 +202,8 @@ export class NumfmtEditorController extends Disposable {
                 getMutations(command) {
                     switch (command.id) {
                         case SetRangeValuesCommand.id: {
-                            const workbookId = self._univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-                            const worksheetId = self._univerInstanceService
+                            const unitId = self._univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+                            const subUnitId = self._univerInstanceService
                                 .getCurrentUniverSheetInstance()
                                 .getActiveSheet()
                                 .getSheetId();
@@ -240,11 +235,7 @@ export class NumfmtEditorController extends Disposable {
                             if (cells) {
                                 const redo = {
                                     id: SetNumfmtMutation.id,
-                                    params: transformCellsToRange(
-                                        workbookId,
-                                        worksheetId,
-                                        cells
-                                    ) as ISetNumfmtMutationParams,
+                                    params: transformCellsToRange(unitId, subUnitId, cells) as ISetNumfmtMutationParams,
                                 };
                                 redos.push(redo);
                                 undos.push(...factorySetNumfmtUndoMutation(self._injector, redo.params));
@@ -253,8 +244,8 @@ export class NumfmtEditorController extends Disposable {
                                 const redo = {
                                     id: RemoveNumfmtMutation.id,
                                     params: {
-                                        workbookId,
-                                        worksheetId,
+                                        unitId,
+                                        subUnitId,
                                         ranges: removeCells,
                                     } as IRemoveNumfmtMutationParams,
                                 };

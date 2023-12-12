@@ -65,11 +65,11 @@ export class ArrayFormulaDisplayController extends Disposable {
             this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
                 priority: 100,
                 handler: (cell, location, next) => {
-                    const { workbookId, worksheetId, row, col } = location;
+                    const { unitId, subUnitId, row, col } = location;
                     const arrayFormulaCellData = this._formulaDataModel.getArrayFormulaCellData();
                     const arrayFormulaRange = this._formulaDataModel.getArrayFormulaRange();
-                    const cellData = arrayFormulaCellData?.[workbookId]?.[worksheetId]?.[row]?.[col];
-                    const cellRange = arrayFormulaRange?.[workbookId]?.[worksheetId]?.[row]?.[col];
+                    const cellData = arrayFormulaCellData?.[unitId]?.[subUnitId]?.[row]?.[col];
+                    const cellRange = arrayFormulaRange?.[unitId]?.[subUnitId]?.[row]?.[col];
                     if (cellData == null) {
                         return next(cell);
                     }

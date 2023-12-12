@@ -41,8 +41,8 @@ export const RemoveRowsUndoMutationFactory = (
     }
 
     return {
-        workbookId: params.workbookId,
-        worksheetId: params.worksheetId,
+        unitId: params.unitId,
+        subUnitId: params.subUnitId,
         ranges: params.ranges,
         rowInfo,
     };
@@ -53,13 +53,13 @@ export const RemoveRowMutation: IMutation<IRemoveRowsMutationParams> = {
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
+        const universheet = univerInstanceService.getUniverSheetInstance(params.unitId);
 
         if (universheet == null) {
             throw new Error('universheet is null error!');
         }
 
-        const worksheet = universheet.getSheetBySheetId(params.worksheetId);
+        const worksheet = universheet.getSheetBySheetId(params.subUnitId);
         if (!worksheet) return false;
 
         const manager = worksheet.getRowManager();
@@ -89,13 +89,13 @@ export const RemoveColMutationFactory = (
     params: IRemoveColMutationParams
 ): IInsertColMutationParams => {
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
+    const universheet = univerInstanceService.getUniverSheetInstance(params.unitId);
 
     if (universheet == null) {
         throw new Error('universheet is null error!');
     }
 
-    const worksheet = universheet.getSheetBySheetId(params.worksheetId);
+    const worksheet = universheet.getSheetBySheetId(params.subUnitId);
 
     if (worksheet == null) {
         throw new Error('worksheet is null error!');
@@ -114,8 +114,8 @@ export const RemoveColMutationFactory = (
     }
 
     return {
-        workbookId: params.workbookId,
-        worksheetId: params.worksheetId,
+        unitId: params.unitId,
+        subUnitId: params.subUnitId,
         ranges: params.ranges,
         colInfo,
     };
@@ -126,13 +126,13 @@ export const RemoveColMutation: IMutation<IRemoveColMutationParams> = {
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
+        const universheet = univerInstanceService.getUniverSheetInstance(params.unitId);
 
         if (universheet == null) {
             throw new Error('universheet is null error!');
         }
 
-        const worksheet = universheet.getSheetBySheetId(params.worksheetId);
+        const worksheet = universheet.getSheetBySheetId(params.subUnitId);
         if (!worksheet) return false;
 
         const manager = worksheet.getColumnManager();

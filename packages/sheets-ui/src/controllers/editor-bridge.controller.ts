@@ -147,8 +147,8 @@ export class EditorBridgeController extends Disposable {
         const location = {
             workbook,
             worksheet,
-            workbookId: workbook.getUnitId(),
-            worksheetId: worksheet.getSheetId(),
+            unitId: workbook.getUnitId(),
+            subUnitId: worksheet.getSheetId(),
             row: startRow,
             col: startColumn,
         };

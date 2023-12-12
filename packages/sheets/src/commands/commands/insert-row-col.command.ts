@@ -50,8 +50,8 @@ import {
 import { RemoveColMutation, RemoveRowMutation } from '../mutations/remove-row-col.mutation';
 
 export interface IInsertRowCommandParams {
-    workbookId: string;
-    worksheetId: string;
+    unitId: string;
+    subUnitId: string;
 
     /**
      * whether it is inserting row after (DOWN) or inserting before (UP)
@@ -78,18 +78,18 @@ export const InsertRowCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const workbook = univerInstanceService.getUniverSheetInstance(params.workbookId)!;
-        const worksheet = workbook.getSheetBySheetId(params.worksheetId)!;
+        const workbook = univerInstanceService.getUniverSheetInstance(params.unitId)!;
+        const worksheet = workbook.getSheetBySheetId(params.subUnitId)!;
 
-        const { range, direction, workbookId, worksheetId } = params;
+        const { range, direction, unitId, subUnitId } = params;
         const { startRow, endRow, startColumn, endColumn } = range;
         const anchorRow = direction === Direction.UP ? startRow : startRow - 1;
         const height = worksheet.getRowHeight(anchorRow);
 
         // insert row properties & undos
         const insertRowParams: IInsertRowMutationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             ranges: [range],
             rowInfo: new ObjectArray<IRowData>(
                 // row height should inherit from the anchor row
@@ -118,8 +118,8 @@ export const InsertRowCommand: ICommand = {
             }
         }
         const insertRangeMutationParams: IInsertRangeMutationParams = {
-            workbookId: params.workbookId,
-            worksheetId: params.worksheetId,
+            unitId: params.unitId,
+            subUnitId: params.subUnitId,
             ranges: [params.range],
             shiftDimension: Dimension.ROWS,
             cellValue: cellValue.getData(),
@@ -142,7 +142,7 @@ export const InsertRowCommand: ICommand = {
 
         if (result.result) {
             undoRedoService.pushUndoRedo({
-                unitID: params.workbookId,
+                unitID: params.unitId,
                 undoMutations: [
                     ...intercepted.undos,
                     { id: DeleteRangeMutation.id, params: undoInsertRangeMutationParams },
@@ -189,13 +189,13 @@ export const InsertRowBeforeCommand: ICommand = {
             return false;
         }
 
-        const workbookId = workbook.getUnitId();
-        const worksheetId = worksheet.getSheetId();
+        const unitId = workbook.getUnitId();
+        const subUnitId = worksheet.getSheetId();
         const rowCount = range.endRow - range.startRow + 1;
 
         const insertRowParams: IInsertRowCommandParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             direction: Direction.UP,
             range: {
                 startRow: range.startRow,
@@ -236,13 +236,13 @@ export const InsertRowAfterCommand: ICommand = {
             return false;
         }
 
-        const workbookId = workbook.getUnitId();
-        const worksheetId = worksheet.getSheetId();
+        const unitId = workbook.getUnitId();
+        const subUnitId = worksheet.getSheetId();
         const count = range.endRow - range.startRow + 1;
 
         const insertRowParams: IInsertRowCommandParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             direction: Direction.DOWN,
             range: {
                 startRow: range.endRow + 1,
@@ -257,8 +257,8 @@ export const InsertRowAfterCommand: ICommand = {
 };
 
 export interface IInsertColCommandParams {
-    workbookId: string;
-    worksheetId: string;
+    unitId: string;
+    subUnitId: string;
     range: IRange;
     direction: Direction.LEFT | Direction.RIGHT;
 }
@@ -273,17 +273,17 @@ export const InsertColCommand: ICommand<IInsertColCommandParams> = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
-        const { range, direction, worksheetId, workbookId } = params;
+        const { range, direction, subUnitId, unitId } = params;
         const { startRow, endRow, startColumn, endColumn } = params.range;
-        const workbook = univerInstanceService.getUniverSheetInstance(params.workbookId)!;
-        const worksheet = workbook.getSheetBySheetId(params.worksheetId)!;
+        const workbook = univerInstanceService.getUniverSheetInstance(params.unitId)!;
+        const worksheet = workbook.getSheetBySheetId(params.subUnitId)!;
         const anchorCol = direction === Direction.LEFT ? startColumn : startColumn - 1;
         const width = worksheet.getColumnWidth(anchorCol);
 
         // insert cols & undos
         const insertColParams: IInsertColMutationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             ranges: [range],
             colInfo: new ObjectArray<IColumnData>(
                 new Array(endColumn - startColumn + 1).fill(undefined).map(() => ({
@@ -312,8 +312,8 @@ export const InsertColCommand: ICommand<IInsertColCommandParams> = {
             }
         }
         const insertRangeMutationParams: IInsertRangeMutationParams = {
-            workbookId: params.workbookId,
-            worksheetId: params.worksheetId,
+            unitId: params.unitId,
+            subUnitId: params.subUnitId,
             ranges: [params.range],
             shiftDimension: Dimension.COLUMNS,
             cellValue: cellValue.getData(),
@@ -337,7 +337,7 @@ export const InsertColCommand: ICommand<IInsertColCommandParams> = {
 
         if (result.result) {
             undoRedoService.pushUndoRedo({
-                unitID: params.workbookId,
+                unitID: params.unitId,
                 undoMutations: [
                     ...intercepted.undos,
                     { id: DeleteRangeMutation.id, params: undoInsertRangeParams },
@@ -384,13 +384,13 @@ export const InsertColBeforeCommand: ICommand = {
             return false;
         }
 
-        const workbookId = workbook.getUnitId();
-        const worksheetId = worksheet.getSheetId();
+        const unitId = workbook.getUnitId();
+        const subUnitId = worksheet.getSheetId();
         const count = range.endColumn - range.startColumn + 1;
 
         const insertColParams: IInsertColCommandParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             direction: Direction.LEFT,
             range: {
                 startColumn: range.startColumn,
@@ -429,13 +429,13 @@ export const InsertColAfterCommand: ICommand = {
             return false;
         }
 
-        const workbookId = workbook.getUnitId();
-        const worksheetId = worksheet.getSheetId();
+        const unitId = workbook.getUnitId();
+        const subUnitId = worksheet.getSheetId();
         const count = range.endColumn - range.startColumn + 1;
 
         const insertColParams: IInsertColCommandParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             direction: Direction.RIGHT,
             range: {
                 startColumn: range.endColumn + 1,

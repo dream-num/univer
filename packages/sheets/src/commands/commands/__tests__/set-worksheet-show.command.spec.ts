@@ -59,7 +59,7 @@ describe('Test set worksheet show commands', () => {
                 const targetActiveSheet = workbook.getActiveSheet();
                 const targetSheetId = targetActiveSheet?.getSheetId();
                 expect(
-                    await commandService.executeCommand(SetWorksheetActivateCommand.id, { worksheetId: targetSheetId })
+                    await commandService.executeCommand(SetWorksheetActivateCommand.id, { subUnitId: targetSheetId })
                 ).toBeTruthy();
 
                 expect(await commandService.executeCommand(InsertSheetCommand.id, {})).toBeTruthy();
@@ -67,7 +67,7 @@ describe('Test set worksheet show commands', () => {
                 expect(await commandService.executeCommand(InsertSheetCommand.id, {})).toBeTruthy();
                 expect(await commandService.executeCommand(InsertSheetCommand.id, {})).toBeTruthy();
                 expect(
-                    await commandService.executeCommand(SetWorksheetHideCommand.id, { worksheetId: targetSheetId })
+                    await commandService.executeCommand(SetWorksheetHideCommand.id, { subUnitId: targetSheetId })
                 ).toBeTruthy();
 
                 expect(workbook.getSheetBySheetId(targetSheetId)?.getConfig().hidden).toBeTruthy();

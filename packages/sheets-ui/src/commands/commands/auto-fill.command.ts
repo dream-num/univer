@@ -41,8 +41,8 @@ import {
 import type { IAccessor } from '@wendellhu/redi';
 
 export interface IAutoFillCommandParams {
-    worksheetId?: string;
-    workbookId?: string;
+    subUnitId?: string;
+    unitId?: string;
     applyRange: IRange;
     selectionRange: IRange;
     applyDatas: ICellData[][];
@@ -63,8 +63,8 @@ export const AutoFillCommand: ICommand = {
             applyRange,
             selectionRange,
             applyDatas,
-            workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId(),
-            worksheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId(),
+            unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId(),
+            subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId(),
             applyMergeRanges,
         } = params || {};
         if (!applyRange || !applyDatas || !selectionRange) {
@@ -82,8 +82,8 @@ export const AutoFillCommand: ICommand = {
         }
 
         const setRangeValuesMutationParams: ISetRangeValuesMutationParams = {
-            worksheetId,
-            workbookId,
+            subUnitId,
+            unitId,
             cellValue: cellValue.getMatrix(),
         };
 
@@ -112,8 +112,8 @@ export const AutoFillCommand: ICommand = {
                     },
                 },
             ],
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
         });
 
         const undoSeq: IMutationInfo[] = [{ id: SetRangeValuesMutation.id, params: undoSetRangeValuesMutationParams }];
@@ -126,8 +126,8 @@ export const AutoFillCommand: ICommand = {
         if (applyMergeRanges?.length) {
             const ranges = getAddMergeMutationRangeByType(applyMergeRanges);
             const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
-                workbookId,
-                worksheetId,
+                unitId,
+                subUnitId,
                 ranges,
             };
             const undoRemoveMergeMutationParams: IAddWorksheetMergeMutationParams = RemoveMergeUndoMutationFactory(
@@ -139,8 +139,8 @@ export const AutoFillCommand: ICommand = {
                 removeMergeMutationParams
             );
             const addMergeMutationParams: IAddWorksheetMergeMutationParams = {
-                workbookId,
-                worksheetId,
+                unitId,
+                subUnitId,
                 ranges,
             };
             const undoRemoveMutationParams: IRemoveWorksheetMergeMutationParams = AddMergeUndoMutationFactory(
@@ -169,7 +169,7 @@ export const AutoFillCommand: ICommand = {
 
         if (setRangeResult && removeMergeResult && addMergeResult && selectionResult && extendResult) {
             undoRedoService.pushUndoRedo({
-                unitID: workbookId,
+                unitID: unitId,
                 undoMutations: undoSeq,
                 redoMutations: redoSeq,
             });
@@ -194,14 +194,14 @@ export const AutoClearContentCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
 
         const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-        const workbookId = workbook.getUnitId();
+        const unitId = workbook.getUnitId();
         const worksheet = workbook.getActiveSheet();
-        const worksheetId = worksheet.getSheetId();
+        const subUnitId = worksheet.getSheetId();
         const { clearRange, selectionRange } = params;
 
         const clearMutationParams: ISetRangeValuesMutationParams = {
-            worksheetId,
-            workbookId,
+            subUnitId,
+            unitId,
             cellValue: generateNullCellValue([clearRange]),
         };
         const undoClearMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
@@ -219,8 +219,8 @@ export const AutoClearContentCommand: ICommand = {
                     },
                 },
             ],
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
         });
 
         const result = commandService.syncExecuteCommand(SetRangeValuesMutation.id, clearMutationParams);
@@ -228,7 +228,7 @@ export const AutoClearContentCommand: ICommand = {
             undoRedoService.pushUndoRedo({
                 // If there are multiple mutations that form an encapsulated project, they must be encapsulated in the same undo redo element.
                 // Hooks can be used to hook the code of external controllers to add new actions.
-                unitID: workbookId,
+                unitID: unitId,
                 undoMutations: [{ id: SetRangeValuesMutation.id, params: undoClearMutationParams }],
                 redoMutations: [{ id: SetRangeValuesMutation.id, params: clearMutationParams }],
                 undo() {

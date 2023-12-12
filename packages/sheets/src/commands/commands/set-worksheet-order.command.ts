@@ -26,8 +26,8 @@ import {
 
 export interface ISetWorksheetOrderCommandParams {
     order: number;
-    workbookId?: string;
-    worksheetId?: string;
+    unitId?: string;
+    subUnitId?: string;
 }
 
 export const SetWorksheetOrderCommand: ICommand = {
@@ -39,19 +39,19 @@ export const SetWorksheetOrderCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const workbookId = params.workbookId || univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId =
-            params.worksheetId || univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+        const unitId = params.unitId || univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+        const subUnitId =
+            params.subUnitId || univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
 
-        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
+        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
         if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(worksheetId);
+        const worksheet = workbook.getSheetBySheetId(subUnitId);
         if (!worksheet) return false;
 
         const setWorksheetOrderMutationParams: ISetWorksheetOrderMutationParams = {
             order: params.order,
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
         };
 
         const undoMutationParams = SetWorksheetOrderUndoMutationFactory(accessor, setWorksheetOrderMutationParams);
@@ -59,7 +59,7 @@ export const SetWorksheetOrderCommand: ICommand = {
 
         if (result) {
             undoRedoService.pushUndoRedo({
-                unitID: workbookId,
+                unitID: unitId,
                 undoMutations: [{ id: SetWorksheetOrderMutation.id, params: undoMutationParams }],
                 redoMutations: [{ id: SetWorksheetOrderMutation.id, params: setWorksheetOrderMutationParams }],
             });

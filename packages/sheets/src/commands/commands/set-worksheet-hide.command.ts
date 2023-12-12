@@ -29,7 +29,7 @@ import type { ISetWorksheetHideMutationParams } from '../mutations/set-worksheet
 import { SetWorksheetHideMutation, SetWorksheetHideMutationFactory } from '../mutations/set-worksheet-hide.mutation';
 
 export interface ISetWorksheetHiddenCommandParams {
-    worksheetId?: string;
+    subUnitId?: string;
 }
 
 export const SetWorksheetHideCommand: ICommand = {
@@ -42,24 +42,24 @@ export const SetWorksheetHideCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const errorService = accessor.get(ErrorService);
 
-        const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        let worksheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+        const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+        let subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
 
         if (params) {
-            worksheetId = params.worksheetId ?? worksheetId;
+            subUnitId = params.subUnitId ?? subUnitId;
         }
 
-        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
+        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
         if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(worksheetId);
+        const worksheet = workbook.getSheetBySheetId(subUnitId);
         if (!worksheet) return false;
 
         const hidden = worksheet.getConfig().hidden;
         if (hidden === BooleanNumber.TRUE) return false;
 
         const redoMutationParams: ISetWorksheetHideMutationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             hidden: BooleanNumber.TRUE,
         };
 
@@ -76,7 +76,7 @@ export const SetWorksheetHideCommand: ICommand = {
 
         if (result) {
             undoRedoService.pushUndoRedo({
-                unitID: workbookId,
+                unitID: unitId,
                 undoMutations: [{ id: SetWorksheetHideMutation.id, params: undoMutationParams }],
                 redoMutations: [{ id: SetWorksheetHideMutation.id, params: redoMutationParams }],
             });

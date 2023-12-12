@@ -41,8 +41,8 @@ import { checkCellContentInRanges, getClearContentMutationParamsForRanges } from
 export interface IAddMergeCommandParams {
     value?: Dimension.ROWS | Dimension.COLUMNS;
     selections: IRange[];
-    workbookId: string;
-    worksheetId: string;
+    unitId: string;
+    subUnitId: string;
 }
 
 export const AddWorksheetMergeCommand: ICommand = {
@@ -56,11 +56,11 @@ export const AddWorksheetMergeCommand: ICommand = {
         const confirmService = accessor.get(IConfirmService);
         const localeService = accessor.get(LocaleService);
 
-        const workbookId = params.workbookId;
-        const worksheetId = params.worksheetId;
+        const unitId = params.unitId;
+        const subUnitId = params.subUnitId;
         const selections = params.selections;
         const ranges = getAddMergeMutationRangeByType(selections, params.value);
-        const worksheet = univerInstanceService.getUniverSheetInstance(workbookId)!.getSheetBySheetId(worksheetId)!;
+        const worksheet = univerInstanceService.getUniverSheetInstance(unitId)!.getSheetBySheetId(subUnitId)!;
 
         const redoMutations: IMutationInfo[] = [];
         const undoMutations: IMutationInfo[] = [];
@@ -84,13 +84,13 @@ export const AddWorksheetMergeCommand: ICommand = {
 
         // prepare redo mutations
         const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             ranges,
         };
         const addMergeMutationParams: IAddWorksheetMergeMutationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             ranges,
         };
         redoMutations.push({ id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams });
@@ -104,7 +104,7 @@ export const AddWorksheetMergeCommand: ICommand = {
 
         // add set range values mutations to undo redo mutations
         if (willClearSomeCell) {
-            const data = getClearContentMutationParamsForRanges(accessor, workbookId, worksheet, ranges);
+            const data = getClearContentMutationParamsForRanges(accessor, unitId, worksheet, ranges);
             redoMutations.unshift(...data.redos);
             undoMutations.push(...data.undos);
         }
@@ -112,7 +112,7 @@ export const AddWorksheetMergeCommand: ICommand = {
         const result = sequenceExecute(redoMutations, commandService);
         if (result.result) {
             undoRedoService.pushUndoRedo({
-                unitID: workbookId,
+                unitID: unitId,
                 undoMutations,
                 redoMutations,
             });
@@ -140,13 +140,13 @@ export const AddWorksheetMergeAllCommand: ICommand = {
         const workSheet = workbook.getActiveSheet();
         if (!workSheet) return false;
 
-        const workbookId = workbook.getUnitId();
-        const worksheetId = workSheet.getSheetId();
+        const unitId = workbook.getUnitId();
+        const subUnitId = workSheet.getSheetId();
 
         return commandService.executeCommand(AddWorksheetMergeCommand.id, {
             selections,
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
         } as IAddMergeCommandParams);
     },
 };
@@ -169,14 +169,14 @@ export const AddWorksheetMergeVerticalCommand: ICommand = {
         const workSheet = workbook.getActiveSheet();
         if (!workSheet) return false;
 
-        const workbookId = workbook.getUnitId();
-        const worksheetId = workSheet.getSheetId();
+        const unitId = workbook.getUnitId();
+        const subUnitId = workSheet.getSheetId();
 
         return commandService.executeCommand(AddWorksheetMergeCommand.id, {
             value: Dimension.COLUMNS,
             selections,
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
         } as IAddMergeCommandParams);
     },
 };
@@ -199,13 +199,13 @@ export const AddWorksheetMergeHorizontalCommand: ICommand = {
         const workSheet = workbook.getActiveSheet();
         if (!workSheet) return false;
 
-        const workbookId = workbook.getUnitId();
-        const worksheetId = workSheet.getSheetId();
+        const unitId = workbook.getUnitId();
+        const subUnitId = workSheet.getSheetId();
         return commandService.executeCommand(AddWorksheetMergeCommand.id, {
             value: Dimension.ROWS,
             selections,
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
         } as IAddMergeCommandParams);
     },
 };

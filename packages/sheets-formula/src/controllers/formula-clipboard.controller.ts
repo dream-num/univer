@@ -66,13 +66,13 @@ export class FormulaClipboardController extends Disposable {
             },
             onPasteCells: (pastedRange, matrix, pasteType, copyInfo) => {
                 const workbook = this._currentUniverSheet.getCurrentUniverSheetInstance();
-                const workbookId = workbook.getUnitId();
-                const worksheetId = workbook.getActiveSheet().getSheetId();
+                const unitId = workbook.getUnitId();
+                const subUnitId = workbook.getActiveSheet().getSheetId();
 
                 return this._injector.invoke((accessor) =>
                     getSetCellFormulaMutations(
-                        workbookId,
-                        worksheetId,
+                        unitId,
+                        subUnitId,
                         pastedRange,
                         matrix,
                         accessor,
@@ -92,13 +92,13 @@ export class FormulaClipboardController extends Disposable {
             hookName: DEFAULT_PASTE_FORMULA,
             onPasteCells: (pastedRange, matrix, pasteType, copyInfo) => {
                 const workbook = this._currentUniverSheet.getCurrentUniverSheetInstance();
-                const workbookId = workbook.getUnitId();
-                const worksheetId = workbook.getActiveSheet().getSheetId();
+                const unitId = workbook.getUnitId();
+                const subUnitId = workbook.getActiveSheet().getSheetId();
 
                 return this._injector.invoke((accessor) =>
                     getSetCellFormulaMutations(
-                        workbookId,
-                        worksheetId,
+                        unitId,
+                        subUnitId,
                         pastedRange,
                         matrix,
                         accessor,
@@ -114,8 +114,8 @@ export class FormulaClipboardController extends Disposable {
 }
 
 export function getSetCellFormulaMutations(
-    workbookId: string,
-    worksheetId: string,
+    unitId: string,
+    subUnitId: string,
     range: IRange,
     matrix: ObjectMatrix<ICellDataWithSpanInfo>,
     accessor: IAccessor,
@@ -190,8 +190,8 @@ export function getSetCellFormulaMutations(
     });
     // set cell value and style
     const setValuesMutation: ISetRangeValuesMutationParams = {
-        workbookId,
-        worksheetId,
+        unitId,
+        subUnitId,
         cellValue: valueMatrix.getData(),
     };
 

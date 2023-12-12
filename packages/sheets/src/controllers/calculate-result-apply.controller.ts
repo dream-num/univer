@@ -64,8 +64,8 @@ export class CalculateResultApplyController extends Disposable {
                         }
 
                         const setRangeValuesMutation = {
-                            worksheetId: sheetId,
-                            workbookId: unitId,
+                            subUnitId: sheetId,
+                            unitId,
                             cellValue: cellData.getData(),
                         };
 

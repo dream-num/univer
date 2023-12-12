@@ -61,12 +61,12 @@ export class AutoHeightController {
         const rowsAutoHeightInfo = skeleton.calculateAutoHeightInRange(ranges);
 
         const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-        const workbookId = workbook.getUnitId();
-        const worksheetId = workbook.getActiveSheet().getSheetId();
+        const unitId = workbook.getUnitId();
+        const subUnitId = workbook.getActiveSheet().getSheetId();
 
         const redoParams: ISetWorksheetRowAutoHeightMutationParams = {
-            worksheetId,
-            workbookId,
+            subUnitId,
+            unitId,
             rowsAutoHeightInfo,
         };
 

@@ -52,20 +52,20 @@ export type IRefItem = INumfmtItem & { count: number; type: FormatType; pattern:
 
 export interface INumfmtService {
     getValue(
-        workbookId: string,
-        worksheetId: string,
+        unitId: string,
+        subUnitId: string,
         row: number,
         col: number,
         model?: ObjectMatrix<INumfmtItem>
     ): Nullable<INumfmtItemWithCache>;
-    getModel(workbookId: string, worksheetId: string): Nullable<ObjectMatrix<INumfmtItem>>;
+    getModel(unitId: string, subUnitId: string): Nullable<ObjectMatrix<INumfmtItem>>;
     setValues(
-        workbookId: string,
-        worksheetId: string,
+        unitId: string,
+        subUnitId: string,
         values: Array<{ ranges: IRange[]; pattern: string; type: FormatType }>
     ): void;
-    deleteValues(workbookId: string, worksheetId: string, values: IRange[]): void;
-    getRefModel(workbookId: string): Nullable<RefAlias<IRefItem, 'i' | 'pattern'>>;
+    deleteValues(unitId: string, subUnitId: string, values: IRange[]): void;
+    getRefModel(unitId: string): Nullable<RefAlias<IRefItem, 'i' | 'pattern'>>;
     modelReplace$: Observable<string>;
 }
 

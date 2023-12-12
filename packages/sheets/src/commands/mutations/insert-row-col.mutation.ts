@@ -30,15 +30,15 @@ export const InsertRowMutationUndoFactory = (
     params: IInsertRowMutationParams
 ): IRemoveRowsMutationParams => {
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
+    const universheet = univerInstanceService.getUniverSheetInstance(params.unitId);
 
     if (universheet == null) {
         throw new Error('universheet is null error!');
     }
 
     return {
-        workbookId: params.workbookId,
-        worksheetId: params.worksheetId,
+        unitId: params.unitId,
+        subUnitId: params.subUnitId,
         ranges: params.ranges.map((r) => Rectangle.clone(r)),
     };
 };
@@ -47,15 +47,15 @@ export const InsertRowMutation: IMutation<IInsertRowMutationParams> = {
     id: 'sheet.mutation.insert-row',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
-        const { workbookId, worksheetId, ranges, rowInfo } = params;
+        const { unitId, subUnitId, ranges, rowInfo } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const universheet = univerInstanceService.getUniverSheetInstance(workbookId);
+        const universheet = univerInstanceService.getUniverSheetInstance(unitId);
         if (universheet == null) {
             throw new Error('universheet is null error!');
         }
 
-        const worksheet = universheet.getSheetBySheetId(worksheetId);
+        const worksheet = universheet.getSheetBySheetId(subUnitId);
         if (worksheet == null) {
             throw new Error('worksheet is null error!');
         }
@@ -95,15 +95,15 @@ export const InsertColMutationUndoFactory = (
     params: IInsertColMutationParams
 ): IRemoveColMutationParams => {
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
+    const universheet = univerInstanceService.getUniverSheetInstance(params.unitId);
 
     if (universheet == null) {
         throw new Error('universheet is null error!');
     }
 
     return {
-        workbookId: params.workbookId,
-        worksheetId: params.worksheetId,
+        unitId: params.unitId,
+        subUnitId: params.subUnitId,
         ranges: params.ranges.map((r) => Rectangle.clone(r)),
     };
 };
@@ -113,13 +113,13 @@ export const InsertColMutation: IMutation<IInsertColMutationParams> = {
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
+        const universheet = univerInstanceService.getUniverSheetInstance(params.unitId);
 
         if (universheet == null) {
             throw new Error('universheet is null error!');
         }
 
-        const worksheet = universheet.getSheetBySheetId(params.worksheetId);
+        const worksheet = universheet.getSheetBySheetId(params.subUnitId);
         if (!worksheet) return false;
         const manager = worksheet.getColumnManager();
         const { ranges, colInfo } = params;

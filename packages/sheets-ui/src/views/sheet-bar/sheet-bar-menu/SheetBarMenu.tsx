@@ -68,8 +68,8 @@ export function SheetBarMenu(props: ISheetBarMenuProps) {
             });
         } else if (!item.selected) {
             commandService.executeCommand(SetWorksheetActivateCommand.id, {
-                workbookId: workbook.getUnitId(),
-                worksheetId: sheetId,
+                unitId: workbook.getUnitId(),
+                subUnitId: sheetId,
             });
         }
 

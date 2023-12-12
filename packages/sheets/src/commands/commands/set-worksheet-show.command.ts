@@ -39,28 +39,28 @@ export const SetWorksheetShowCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        let worksheetId = univerInstanceService
+        const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+        let subUnitId = univerInstanceService
             .getCurrentUniverSheetInstance()
 
             .getActiveSheet()
             .getSheetId();
 
         if (params) {
-            worksheetId = params.value ?? worksheetId;
+            subUnitId = params.value ?? subUnitId;
         }
 
-        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
+        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
         if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(worksheetId);
+        const worksheet = workbook.getSheetBySheetId(subUnitId);
         if (!worksheet) return false;
 
         const hidden = worksheet.getConfig().hidden;
         if (hidden === BooleanNumber.FALSE) return false;
 
         const redoMutationParams: ISetWorksheetHideMutationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             hidden: BooleanNumber.FALSE,
         };
 
@@ -68,8 +68,8 @@ export const SetWorksheetShowCommand: ICommand = {
         const result = commandService.syncExecuteCommand(SetWorksheetHideMutation.id, redoMutationParams);
 
         const activeSheetMutationParams: ISetWorksheetActiveOperationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
         };
 
         // const unActiveMutationParams = SetWorksheetUnActivateMutationFactory(accessor, activeSheetMutationParams);
@@ -80,7 +80,7 @@ export const SetWorksheetShowCommand: ICommand = {
 
         if (result && activeResult) {
             undoRedoService.pushUndoRedo({
-                unitID: workbookId,
+                unitID: unitId,
                 undoMutations: [
                     { id: SetWorksheetHideMutation.id, params: undoMutationParams },
                     // { id: SetWorksheetActiveOperation.id, params: unActiveMutationParams },

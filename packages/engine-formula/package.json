@@ -43,7 +43,7 @@
         "build": "tsc && vite build"
     },
     "dependencies": {
-        "big.js": "^6.2.1",
+        "big.js": "^6.2.1"
     },
     "devDependencies": {
         "@types/big.js": "^6.2.2",

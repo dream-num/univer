@@ -21,10 +21,12 @@ import {
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
+    RxDisposable,
 } from '@univerjs/core';
 import type { IRender, IWheelEvent, RenderManagerService, Scene } from '@univerjs/engine-render';
 import { Documents, EVENT_TYPE, IRenderManagerService, Layer, ScrollBar, Viewport } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
+import { BehaviorSubject } from 'rxjs';
 
 import {
     DOCS_COMPONENT_DEFAULT_Z_INDEX,
@@ -36,12 +38,16 @@ import {
 import { DocViewModelManagerService } from '../services/doc-view-model-manager.service';
 
 @OnLifecycle(LifecycleStages.Ready, DocCanvasView)
-export class DocCanvasView {
+export class DocCanvasView extends RxDisposable {
     private _scene!: Scene;
 
     private _currentDocumentModel!: DocumentDataModel;
 
     private _loadedMap = new Set();
+
+    private readonly _fps$ = new BehaviorSubject<string>('');
+
+    readonly fps$ = this._fps$.asObservable();
 
     constructor(
         @IRenderManagerService private readonly _renderManagerService: RenderManagerService,
@@ -49,6 +55,7 @@ export class DocCanvasView {
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @Inject(DocViewModelManagerService) private readonly _docViewModelManagerService: DocViewModelManagerService
     ) {
+        super();
         this._initialize();
     }
 
@@ -69,6 +76,10 @@ export class DocCanvasView {
                 this._loadedMap.add(unitId);
             }
         });
+    }
+
+    override dispose(): void {
+        this._fps$.complete();
     }
 
     private _addNewRender() {
@@ -157,10 +168,7 @@ export class DocCanvasView {
         if (should) {
             engine.runRenderLoop(() => {
                 scene.render();
-                // const app = document.getElementById('app');
-                // if (app) {
-                //     app.innerText = `fps:${Math.round(engine.getFps()).toString()}`;
-                // }
+                this._fps$.next(Math.round(engine.getFps()).toString());
             });
         }
 

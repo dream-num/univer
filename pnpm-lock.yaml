@@ -219,6 +219,9 @@ importers:
       data:
         specifier: workspace:*
         version: link:../data
+      univer-plugin-debugger:
+        specifier: workspace:*
+        version: link:../univer-plugin-debugger
     devDependencies:
       esbuild:
         specifier: ^0.19.8
@@ -295,6 +298,9 @@ importers:
       monaco-editor:
         specifier: 0.45.0
         version: 0.45.0
+      univer-plugin-debugger:
+        specifier: workspace:*
+        version: link:../univer-plugin-debugger
     devDependencies:
       esbuild:
         specifier: ^0.19.8
@@ -363,6 +369,60 @@ importers:
       typescript:
         specifier: ^5.3.3
         version: 5.3.3
+
+  examples/univer-plugin-debugger:
+    dependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../../packages/design
+      '@univerjs/docs':
+        specifier: workspace:*
+        version: link:../../packages/docs
+      '@univerjs/docs-ui':
+        specifier: workspace:*
+        version: link:../../packages/docs-ui
+      '@univerjs/engine-formula':
+        specifier: workspace:*
+        version: link:../../packages/engine-formula
+      '@univerjs/engine-render':
+        specifier: workspace:*
+        version: link:../../packages/engine-render
+      '@univerjs/local-save':
+        specifier: workspace:*
+        version: link:../../packages/local-save
+      '@univerjs/rpc':
+        specifier: workspace:*
+        version: link:../../packages/rpc
+      '@univerjs/sheets':
+        specifier: workspace:*
+        version: link:../../packages/sheets
+      '@univerjs/sheets-formula':
+        specifier: workspace:*
+        version: link:../../packages/sheets-formula
+      '@univerjs/sheets-numfmt':
+        specifier: workspace:*
+        version: link:../../packages/sheets-numfmt
+      '@univerjs/sheets-ui':
+        specifier: workspace:*
+        version: link:../../packages/sheets-ui
+      '@univerjs/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+      '@univerjs/uniscript':
+        specifier: workspace:*
+        version: link:../../packages/uniscript
+      '@wendellhu/redi':
+        specifier: ^0.12.12
+        version: 0.12.12
+      monaco-editor:
+        specifier: 0.45.0
+        version: 0.45.0
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
 
   packages/core:
     dependencies:
@@ -16591,7 +16651,6 @@ packages:
     resolution: {integrity: sha512-AA3TVj+0A2iuIoQkWEK/tqFjBq2j+6PO6Y0zJcvzLAFhEFIO3HL0vls9hWLncZbAAbK0mar7oZ4V079I/qPMxg==}
     dependencies:
       tslib: 2.6.2
-    dev: true
 
   /safe-array-concat@1.0.1:
     resolution: {integrity: sha512-6XbUAseYE2KtOuGueyeobCySj9L4+66Tn6KQMOPQJrAJEowYKW/YR/MGJZl7FdydUdaFu4LYyDZjxf4/Nmo23Q==}

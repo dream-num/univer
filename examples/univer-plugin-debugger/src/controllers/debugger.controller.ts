@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, ISnapshotPersistenceService } from '@univerjs/core';
+import { Disposable, ICommandService, ISnapshotPersistenceService, IUniverInstanceService } from '@univerjs/core';
 import { ExportController, LocalSnapshotService, RecordController } from '@univerjs/local-save';
 import { IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -44,7 +44,8 @@ export class DebuggerController extends Disposable {
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
         @IMenuService private readonly _menuService: IMenuService,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService
     ) {
         super();
         this._initializeContextMenu();

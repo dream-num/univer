@@ -15,7 +15,8 @@
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "data": "workspace:*"
+        "data": "workspace:*",
+        "univer-plugin-debugger": "workspace:*"
     },
     "devDependencies": {
         "esbuild": "^0.19.8",

@@ -44,15 +44,36 @@ const TEST_WORKBOOK_DATA: IWorkbookData = {
                     0: {
                         v: 4,
                     },
+                    1: {
+                        v: 'test1',
+                        t: 1,
+                    },
+                    2: {
+                        v: 1,
+                    },
                 },
                 2: {
                     0: {
                         v: 44,
                     },
+                    1: {
+                        v: 'test2',
+                        t: 1,
+                    },
+                    2: {
+                        v: 1,
+                    },
                 },
                 3: {
                     0: {
                         v: 444,
+                    },
+                    1: {
+                        v: 'mock',
+                        t: 1,
+                    },
+                    2: {
+                        v: 1,
                     },
                 },
             },
@@ -91,27 +112,66 @@ describe('test sumif', () => {
         univer.dispose();
     });
 
-    it('range and criteria', async () => {
-        // range A1:A4
-        const range = {
-            startRow: 0,
-            startColumn: 0,
-            endRow: 3,
-            endColumn: 0,
-        };
+    describe('sumif', () => {
+        it('range and criteria', async () => {
+            // range A1:A4
+            const range = {
+                startRow: 0,
+                startColumn: 0,
+                endRow: 3,
+                endColumn: 0,
+            };
 
-        const rangeRef = new RangeReferenceObject(range, sheetId, unitId);
-        rangeRef.setUnitData({
-            [unitId]: sheetData,
+            const rangeRef = new RangeReferenceObject(range, sheetId, unitId);
+            rangeRef.setUnitData({
+                [unitId]: sheetData,
+            });
+
+            // criteria >40
+            const criteriaRef = ValueObjectFactory.create('>40');
+
+            // calculate
+            const executor = functionService.getExecutor(FUNCTION_NAMES_MATH.SUMIF);
+            const resultObject = executor?.calculate(rangeRef, criteriaRef) as BaseValueObject;
+            const value = resultObject?.getValue();
+            expect(value).toBe(488);
         });
 
-        // criteria >40
-        const criteriaRef = ValueObjectFactory.create('>40');
+        it('sum range with wildcard', async () => {
+            // range
+            const range = {
+                startRow: 1,
+                startColumn: 1,
+                endRow: 3,
+                endColumn: 1,
+            };
 
-        // calculate
-        const executor = functionService.getExecutor(FUNCTION_NAMES_MATH.SUMIF);
-        const resultObject = executor?.calculate(rangeRef, criteriaRef) as BaseValueObject;
-        const value = resultObject?.getValue();
-        expect(value).toBe(488);
+            const rangeRef = new RangeReferenceObject(range, sheetId, unitId);
+            rangeRef.setUnitData({
+                [unitId]: sheetData,
+            });
+
+            // criteria
+            const criteriaRef = ValueObjectFactory.create('test*');
+
+            // sum range
+            const sumRange = {
+                startRow: 1,
+                startColumn: 2,
+                endRow: 3,
+                endColumn: 2,
+            };
+
+            const sumRangeRef = new RangeReferenceObject(sumRange, sheetId, unitId);
+            sumRangeRef.setUnitData({
+                [unitId]: sheetData,
+            });
+
+            // calculate
+            const executor = functionService.getExecutor(FUNCTION_NAMES_MATH.SUMIF);
+            const resultObject = executor?.calculate(rangeRef, criteriaRef, sumRangeRef) as BaseValueObject;
+            const value = resultObject?.getValue();
+            expect(value).toBe(2);
+        });
     });
 });

@@ -18,7 +18,8 @@ import { ErrorType } from '../../../basics/error-type';
 import type { compareToken } from '../../../basics/token';
 import { ErrorValueObject } from '../../../engine/other-object/error-value-object';
 import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
-import { type ArrayValueObject, ValueObjectFactory } from '../../../engine/value-object/array-value-object';
+import { valueObjectCompare } from '../../../engine/utils/object-compare';
+import { type ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import type { BooleanValueObject } from '../../../engine/value-object/primitive-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
@@ -45,25 +46,22 @@ export class Sumif extends BaseFunction {
 
         if (range.isReferenceObject() || (range.isValueObject() && (range as BaseValueObject).isArray())) {
             // TODO@Dushusir: criteria is referenceObject
-            const criteriaValueString = (criteria as BaseValueObject).getValue();
-            if (criteriaValueString) {
-                const token = (criteriaValueString as string).substring(0, 1) as compareToken;
-                const criteriaString = (criteriaValueString as string).substring(1);
-                const resultArrayObject = (range as BaseReferenceObject)
-                    .toArrayValueObject()
-                    .compare(ValueObjectFactory.create(criteriaString) as BaseValueObject, token);
-                const resultArrayValue = (resultArrayObject as ArrayValueObject).getArrayValue();
+            const resultArrayObject = valueObjectCompare(range as BaseReferenceObject, criteria as BaseValueObject);
 
-                (range as BaseReferenceObject | ArrayValueObject).iterator((valueObject, row, column) => {
-                    if (valueObject != null && !valueObject.isErrorObject()) {
-                        const arrayValue = resultArrayValue[row][column] as BaseValueObject;
-                        const accumulator = arrayValue.getValue()
-                            ? (valueObject as BaseValueObject)
-                            : new NumberValueObject(0);
-                        accumulatorAll = accumulatorAll.plus(accumulator) as BaseValueObject;
-                    }
-                });
-            }
+            const resultArrayValue = (resultArrayObject as ArrayValueObject).getArrayValue();
+
+            const sumRangeValue = (sumRange || range) as BaseReferenceObject | ArrayValueObject;
+            const { startRow, startColumn } = sumRangeValue.getRangePosition();
+
+            sumRangeValue.iterator((valueObject, row, column) => {
+                if (!valueObject.isErrorObject()) {
+                    const arrayValue = resultArrayValue[row - startRow][column - startColumn] as BaseValueObject;
+                    const accumulator = arrayValue.getValue()
+                        ? (valueObject as BaseValueObject)
+                        : new NumberValueObject(0);
+                    accumulatorAll = accumulatorAll.plus(accumulator) as BaseValueObject;
+                }
+            });
         } else if (criteria.isValueObject()) {
             // TODO@Dushusir: criteria is referenceObject
             accumulatorAll = this._validator(range as BaseValueObject, criteria as BaseValueObject);

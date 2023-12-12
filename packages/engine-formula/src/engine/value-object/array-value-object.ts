@@ -41,6 +41,7 @@ enum BatchOperatorType {
     CONCATENATE_FRONT,
     CONCATENATE_BACK,
     PRODUCT,
+    LIKE,
 }
 
 enum ArrayCalculateType {
@@ -375,6 +376,10 @@ export class ArrayValueObject extends BaseValueObject {
         return this._batchOperator(valueObject, BatchOperatorType.COMPARE, operator);
     }
 
+    override wildcard(valueObject: BaseValueObject, operator: compareToken): CalculateValueType {
+        return this._batchOperator(valueObject, BatchOperatorType.LIKE, operator);
+    }
+
     override concatenateFront(valueObject: BaseValueObject): CalculateValueType {
         return this._batchOperator(valueObject, BatchOperatorType.CONCATENATE_FRONT);
     }
@@ -655,6 +660,17 @@ export class ArrayValueObject extends BaseValueObject {
                                 result[r][column] = (currentValue as BaseValueObject).product(
                                     valueObject,
                                     operator as callbackProductFnType
+                                );
+                            }
+
+                            break;
+                        case BatchOperatorType.LIKE:
+                            if (!operator) {
+                                result[r][c] = ErrorValueObject.create(ErrorType.VALUE);
+                            } else {
+                                result[r][c] = (currentValue as BaseValueObject).wildcard(
+                                    valueObject,
+                                    operator as compareToken
                                 );
                             }
 

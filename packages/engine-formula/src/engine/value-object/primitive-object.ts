@@ -513,6 +513,17 @@ export class StringValueObject extends BaseValueObject {
         return this.compareBy(valueObject.getValue(), operator);
     }
 
+    override wildcard(valueObject: BaseValueObject, operator: compareToken): CalculateValueType {
+        if (valueObject.isArray()) {
+            const o = valueObject.getReciprocal();
+            if (o.isErrorObject()) {
+                return o;
+            }
+            return (o as BaseValueObject).wildcard(this, reverseCompareOperator(operator));
+        }
+        return this.checkWildcard(valueObject.getValue(), operator);
+    }
+
     override compareBy(value: string | number | boolean, operator: compareToken): CalculateValueType {
         const currentValue = this.getValue();
         let result = false;
@@ -564,6 +575,43 @@ export class StringValueObject extends BaseValueObject {
                     break;
             }
         }
+        return new BooleanValueObject(result);
+    }
+
+    checkWildcard(value: string | number | boolean, operator: compareToken) {
+        const currentValue = this.getValue();
+        let result = false;
+        // TODO@Dushusir: supports number and boolean
+        // TODO@Dushusir: supports > >= < <= <>
+        if (typeof value === 'string') {
+            let str = '';
+            for (let i = 0; i < value.length; i++) {
+                const v = value.charAt(i);
+
+                if (v === '*') {
+                    str += '.*';
+                } else if (v === '?') {
+                    str += '.';
+                } else if (v === '~') {
+                    if (value.charAt(i + 1) === '*') {
+                        str += '\\*';
+                        i++;
+                    } else if (value.charAt(i + 1) === '?') {
+                        str += '\\?';
+                        i++;
+                    } else {
+                        str += '~';
+                    }
+                } else {
+                    str += v;
+                }
+            }
+
+            const reg = new RegExp(`^${str}$`, 'g');
+
+            result = !!currentValue.match(reg);
+        }
+
         return new BooleanValueObject(result);
     }
 }

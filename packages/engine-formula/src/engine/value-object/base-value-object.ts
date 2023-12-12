@@ -129,6 +129,10 @@ export class BaseValueObject extends ObjectClassType {
         /** abstract */
         return ErrorValueObject.create(ErrorType.VALUE);
     }
+    wildcard(valueObject: BaseValueObject, operator: compareToken): CalculateValueType {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
 
     isEqual(valueObject: BaseValueObject): CalculateValueType {
         return this.compare(valueObject as BaseValueObject, compareToken.EQUALS);

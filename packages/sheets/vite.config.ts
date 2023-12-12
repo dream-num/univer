@@ -35,6 +35,7 @@ export default defineConfig(({ mode }) => ({
                 '@univerjs/engine-render',
                 '@wendellhu/redi',
                 'rxjs',
+                'rxjs/operators',
             ],
             output: {
                 globals: {
@@ -44,6 +45,7 @@ export default defineConfig(({ mode }) => ({
                     '@univerjs/engine-render': 'UniverEngineRender',
                     '@wendellhu/redi': '@wendellhu/redi',
                     rxjs: 'rxjs',
+                    'rxjs/operators': 'rxjs.operators',
                 },
             },
         },

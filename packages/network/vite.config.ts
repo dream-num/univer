@@ -17,7 +17,7 @@ export default defineConfig(({ mode }) => ({
         }),
     ],
     define: {
-        'process.env.NODE_ENV': JSON.stringify(mode),
+        // 'process.env.NODE_ENV': JSON.stringify(mode),
     },
     build: {
         outDir: 'lib',
@@ -27,6 +27,7 @@ export default defineConfig(({ mode }) => ({
             fileName: (format) => `${format}/index.js`,
             formats: ['es', 'umd', 'cjs'],
         },
+        minify: false,
         rollupOptions: {
             external: ['@univerjs/core', '@wendellhu/redi', 'rxjs', 'rxjs/operators'],
             output: {

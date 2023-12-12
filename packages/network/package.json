@@ -1,14 +1,52 @@
 {
     "name": "@univerjs/network",
-    "private": true,
-    "main": "./src/index.ts",
-    "module": "./src/index.ts",
+    "version": "0.1.0-alpha.2",
+    "keywords": [],
+    "author": "DreamNum <developer@univer.ai>",
+    "license": "Apache-2.0",
+    "main": "./lib/cjs/index.js",
+    "module": "./lib/es/index.js",
+    "types": "./lib/types/index.d.ts",
+    "publishConfig": {
+        "access": "public",
+        "main": "./lib/cjs/index.js",
+        "module": "./lib/es/index.js",
+        "exports": {
+            ".": {
+                "import": "./lib/es/index.js",
+                "require": "./lib/cjs/index.js",
+                "types": "./lib/types/index.d.ts"
+            },
+            "./*": {
+                "import": "./lib/es/*",
+                "require": "./lib/cjs/*",
+                "types": "./lib/types/index.d.ts"
+            }
+        }
+    },
+    "exports": {
+        ".": "./src/index.ts",
+        "./*": "./src/*"
+    },
+    "directories": {
+        "lib": "lib"
+    },
+    "files": [
+        "lib"
+    ],
+    "private": false,
+    "scripts": {
+        "build": "tsc && vite build"
+    },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@wendellhu/redi": "^0.12.12",
         "rxjs": "^7.8.1",
         "typescript": "^5.3.3",
-        "vite-plugin-externals": "^0.6.2"
+        "vite": "^5.0.7",
+        "vite-plugin-dts": "^3.6.4",
+        "vite-plugin-externals": "^0.6.2",
+        "vitest": "^1.0.2"
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",

@@ -61,9 +61,9 @@ export class DesktopMenuService extends Disposable implements IMenuService {
         this._menuItemMap.set(item.id, item);
 
         if (Array.isArray(item.positions)) {
-            item.positions.forEach((menu) => this.appendMenuToPosition(item, menu));
+            item.positions.forEach((menu) => this._appendMenuToPosition(item, menu));
         } else {
-            this.appendMenuToPosition(item, item.positions);
+            this._appendMenuToPosition(item, item.positions);
         }
 
         this._menuChanged$.next();
@@ -105,22 +105,7 @@ export class DesktopMenuService extends Disposable implements IMenuService {
             const menuItems = this._menuByPositions.get(positions);
 
             if (menuItems) {
-                // const _this = this;
-                // const result = menuItems.map(function walk([id, item]) {
-                //     const menuItem = _this.getDisplayMenuItems(item);
-                //
-                //     const subMenu = _this._menuByPositions.get(id);
-                //     if (subMenu) {
-                //         menuItem.children = subMenu.map(walk);
-                //         return menuItem;
-                //     }
-                //
-                //     return menuItem;
-                // });
-                //
-                // console.log(result);
-
-                return [...menuItems.values()].map((menu) => this.getDisplayMenuItems(menu[1]));
+                return [...menuItems.values()].map((menu) => this._getDisplayMenuItems(menu[1]));
             }
         }
 
@@ -135,7 +120,7 @@ export class DesktopMenuService extends Disposable implements IMenuService {
         return null;
     }
 
-    private getDisplayMenuItems(menuItem: IMenuItem): IDisplayMenuItem<IMenuItem> {
+    private _getDisplayMenuItems(menuItem: IMenuItem): IDisplayMenuItem<IMenuItem> {
         const shortcut = this._shortcutService.getShortcutDisplayOfCommand(menuItem.id);
         if (!shortcut) {
             return menuItem;
@@ -147,7 +132,7 @@ export class DesktopMenuService extends Disposable implements IMenuService {
         };
     }
 
-    private appendMenuToPosition(menu: IMenuItem, position: MenuPosition | string) {
+    private _appendMenuToPosition(menu: IMenuItem, position: MenuPosition | string) {
         if (!this._menuByPositions.has(position)) {
             this._menuByPositions.set(position, []);
         }

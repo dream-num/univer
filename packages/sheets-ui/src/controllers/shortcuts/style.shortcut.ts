@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
-import { SetBoldCommand, SetItalicCommand, SetStrikeThroughCommand, SetUnderlineCommand } from '@univerjs/sheets';
 import type { IShortcutItem } from '@univerjs/ui';
 import { KeyCode, MetaKeys } from '@univerjs/ui';
 
+import {
+    SetRangeBoldCommand,
+    SetRangeItalicCommand,
+    SetRangeStrickThroughCommand,
+    SetRangeUnderlineCommand,
+} from '../../commands/commands/inline-format.command';
 import { whenEditorNotActivated } from './utils';
 
 export const SetBoldShortcutItem: IShortcutItem = {
-    id: SetBoldCommand.id,
+    id: SetRangeBoldCommand.id,
     description: 'shortcut.sheet.set-bold',
     group: '4_sheet-edit',
     preconditions: (contextService) => whenEditorNotActivated(contextService),
@@ -29,7 +34,7 @@ export const SetBoldShortcutItem: IShortcutItem = {
 };
 
 export const SetItalicShortcutItem: IShortcutItem = {
-    id: SetItalicCommand.id,
+    id: SetRangeItalicCommand.id,
     description: 'shortcut.sheet.set-italic',
     group: '4_sheet-edit',
     preconditions: (contextService) => whenEditorNotActivated(contextService),
@@ -37,7 +42,7 @@ export const SetItalicShortcutItem: IShortcutItem = {
 };
 
 export const SetUnderlineShortcutItem: IShortcutItem = {
-    id: SetUnderlineCommand.id,
+    id: SetRangeUnderlineCommand.id,
     description: 'shortcut.sheet.set-underline',
     group: '4_sheet-edit',
     preconditions: (contextService) => whenEditorNotActivated(contextService),
@@ -45,7 +50,7 @@ export const SetUnderlineShortcutItem: IShortcutItem = {
 };
 
 export const SetStrikeThroughShortcutItem: IShortcutItem = {
-    id: SetStrikeThroughCommand.id,
+    id: SetRangeStrickThroughCommand.id,
     description: 'shortcut.sheet.set-strike-through',
     group: '4_sheet-edit',
     preconditions: (contextService) => whenEditorNotActivated(contextService),

@@ -29,7 +29,7 @@ export default {
         numberIncrease: '增加小数位数',
         moreFormats: '更多格式',
         font: '字体',
-        fontSize: '字号大小',
+        fontSize: '字号',
         bold: '粗体',
         italic: '斜体',
         strikethrough: '删除线',

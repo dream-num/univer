@@ -213,15 +213,9 @@ importers:
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../../packages/engine-render
-      '@univerjs/local-save':
-        specifier: workspace:*
-        version: link:../../packages/local-save
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../../packages/ui
-      '@wendellhu/redi':
-        specifier: ^0.12.12
-        version: 0.12.12
       data:
         specifier: workspace:*
         version: link:../data

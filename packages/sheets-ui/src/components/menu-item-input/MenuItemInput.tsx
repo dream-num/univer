@@ -45,10 +45,11 @@ export const MenuItemInput = (props: IMenuItemInputProps) => {
     }
 
     return (
-        <div className={styles.uiPluginSheetsContextMenuInput}>
+        <div className={styles.sheetsUiContextMenuInput}>
             {localeService.t(prefix)}
-            <span className={styles.uiPluginSheetsContextMenuInputContainer} onClick={(e) => e.stopPropagation()}>
+            <span className={styles.sheetsUiContextMenuInputContainer} onClick={(e) => e.stopPropagation()}>
                 <InputNumber
+                    className={styles.sheetsUiContextMenuInputNumber}
                     value={Number(inputValue)}
                     precision={0}
                     onKeyDown={handleKeyDown}

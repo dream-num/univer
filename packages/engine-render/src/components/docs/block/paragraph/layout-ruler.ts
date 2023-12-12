@@ -137,7 +137,7 @@ function _divideOperator(
             const column = getColumnByDivide(divide);
 
             if (width > pageContentWidth) {
-                // 一个字符超页内容宽
+                // 一个字符 or word超页内容宽
                 if (isBlankPage(lastPage)) {
                     addSpanToDivide(divide, spanGroup, preOffsetLeft);
                     __makeColumnsFull(column?.parent?.columns);
@@ -152,7 +152,7 @@ function _divideOperator(
                     );
                 }
             } else if (column && width > column.width) {
-                // 一个字符超列宽
+                // 一个字符 or word超列宽
                 setColumnFullState(column, true);
 
                 if (isBlankColumn(column)) {

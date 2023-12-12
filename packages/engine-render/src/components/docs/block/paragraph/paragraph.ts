@@ -22,12 +22,16 @@ import {
     HorizontalAlign,
     PositionedObjectLayoutType,
 } from '@univerjs/core';
+// @ts-ignore
+import LineBreaker from 'linebreak';
 
+import { hasArabic, hasCJK, hasTibetan, startWithEmoji } from '../../../../basics';
 import type {
     IDocumentSkeletonBullet,
     IDocumentSkeletonDrawing,
     IDocumentSkeletonLine,
     IDocumentSkeletonPage,
+    IDocumentSkeletonSpan,
     ISkeletonResourceReference,
 } from '../../../../basics/i-document-skeleton-cached';
 import { BreakType } from '../../../../basics/i-document-skeleton-cached';
@@ -35,7 +39,7 @@ import type { IParagraphConfig, ISectionBreakConfig } from '../../../../basics/i
 // eslint-disable-next-line import/no-cycle
 import { createSkeletonPage } from '../../common/page';
 import { setColumnFullState } from '../../common/section';
-import { createSkeletonTabSpan, createSkeletonWordSpan } from '../../common/span';
+import { createSkeletonLetterSpan, createSkeletonTabSpan } from '../../common/span';
 import {
     clearFontCreateConfigCache,
     getCharSpaceApply,
@@ -48,10 +52,9 @@ import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node'
 import type { DocumentViewModel } from '../../view-model/document-view-model';
 import { dealWidthBullet } from './bullet';
 import { dealWidthInlineDrawing } from './inline-drawing';
-import { composeCharForLanguage } from './language-ruler';
+import { ArabicHandler, emojiHandler, otherHandler, TibetanHandler } from './language-ruler';
 import { calculateParagraphLayout } from './layout-ruler';
 
-// eslint-disable-next-line max-lines-per-function
 export function dealWidthParagraph(
     bodyModel: DocumentViewModel,
     paragraphNode: DataStreamTreeNode,
@@ -152,93 +155,179 @@ export function dealWidthParagraph(
 
     clearFontCreateConfigCache();
 
-    for (let i = 0, len = content.length; i < len; i++) {
-        const charIndex = i + startIndex;
-        const char = content[i];
+    const breaker = new LineBreaker(content);
+    let last = 0;
+    let bk;
 
-        const fontCreateConfig = getFontCreateConfig(i, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle); // Get the style of the text.
+    while ((bk = breaker.nextBreak())) {
+        // get the string between the last break and this one
+        const word = content.slice(last, bk.position);
 
-        if (char === DataStreamTreeTokenType.TAB) {
-            const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
-            const tabSpan = createSkeletonTabSpan(fontCreateConfig, charSpaceApply); // measureText收敛到create中执行
-            allPages = calculateParagraphLayout([tabSpan], allPages, sectionBreakConfig, paragraphConfig, true);
+        let src = word;
+        let i = last;
+        let spanGroup: IDocumentSkeletonSpan[] = [];
+        let paragraphStart = last === 0;
 
-            continue;
-        } else if (char === DataStreamTreeTokenType.CUSTOM_BLOCK) {
-            let customBlock = customBlockCache.get(charIndex);
-            if (customBlock == null) {
-                customBlock = bodyModel.getCustomBlock(charIndex);
+        const pushPending = () => {
+            if (spanGroup.length === 0) {
+                return;
             }
-            if (customBlock != null) {
-                const blockId = customBlock.blockId;
-                const drawingOrigin = drawings[blockId];
-                if (drawingOrigin.layoutType === PositionedObjectLayoutType.INLINE) {
-                    allPages = dealWidthInlineDrawing(
-                        drawingOrigin,
-                        sectionBreakConfig,
-                        allPages,
-                        paragraphConfig,
-                        localeService
-                    );
-                }
-            }
-        } else if (char === DataStreamTreeTokenType.PAGE_BREAK) {
-            allPages.push(
-                createSkeletonPage(
-                    sectionBreakConfig,
-                    skeletonResourceReference,
-                    _getNextPageNumber(allPages[allPages.length - 1]),
-                    BreakType.PAGE
-                )
+
+            allPages = calculateParagraphLayout(
+                spanGroup,
+                allPages,
+                sectionBreakConfig,
+                paragraphConfig,
+                paragraphStart
             );
-            paragraphAffectSkeDrawings.clear();
-        } else if (char === DataStreamTreeTokenType.COLUMN_BREAK) {
-            // 换列标识，还在同一个节内
-            const lastPage = allPages[allPages.length - 1];
-            const columnInfo = getLastNotFullColumnInfo(lastPage);
 
-            if (columnInfo && !columnInfo.isLast) {
-                setColumnFullState(columnInfo.column, true);
+            spanGroup = [];
+            paragraphStart = false;
+        };
+
+        while (src.length > 0) {
+            const char = src[0];
+            const charIndex = i + startIndex;
+
+            if (char === DataStreamTreeTokenType.TAB) {
+                const fontCreateConfig = getFontCreateConfig(
+                    i,
+                    bodyModel,
+                    paragraphNode,
+                    sectionBreakConfig,
+                    paragraphStyle
+                );
+                const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
+                const tabSpan = createSkeletonTabSpan(fontCreateConfig, charSpaceApply);
+                pushPending();
+                allPages = calculateParagraphLayout(
+                    [tabSpan],
+                    allPages,
+                    sectionBreakConfig,
+                    paragraphConfig,
+                    paragraphStart
+                );
+
+                i++;
+                src = src.substring(1);
+                continue;
+            }
+
+            if (/\s/.test(char) || hasCJK(char)) {
+                const config = getFontCreateConfig(i, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
+                const newSpan = createSkeletonLetterSpan(char, config);
+
+                spanGroup.push(newSpan);
+                i++;
+                src = src.substring(1);
+            } else if (startWithEmoji(src)) {
+                const { step, spanGroup: sGroup } = emojiHandler(
+                    i,
+                    src,
+                    bodyModel,
+                    paragraphNode,
+                    sectionBreakConfig,
+                    paragraphStyle
+                );
+                spanGroup.push(...sGroup);
+                i += step;
+
+                src = src.substring(step);
+            } else if (hasArabic(char)) {
+                const { step, spanGroup: sGroup } = ArabicHandler(
+                    i,
+                    src,
+                    bodyModel,
+                    paragraphNode,
+                    sectionBreakConfig,
+                    paragraphStyle
+                );
+                spanGroup.push(...sGroup);
+                i += step;
+
+                src = src.substring(step);
+            } else if (hasTibetan(char)) {
+                const { step, spanGroup: sGroup } = TibetanHandler(
+                    i,
+                    src,
+                    bodyModel,
+                    paragraphNode,
+                    sectionBreakConfig,
+                    paragraphStyle
+                );
+                spanGroup.push(...sGroup);
+                i += step;
+
+                src = src.substring(step);
             } else {
+                // TODO: 处理一个单词超过 page width 情况
+                const { step, spanGroup: sGroup } = otherHandler(
+                    i,
+                    src,
+                    bodyModel,
+                    paragraphNode,
+                    sectionBreakConfig,
+                    paragraphStyle
+                );
+                spanGroup.push(...sGroup);
+                i += step;
+
+                src = src.substring(step);
+            }
+
+            if (char === DataStreamTreeTokenType.CUSTOM_BLOCK) {
+                let customBlock = customBlockCache.get(charIndex);
+                if (customBlock == null) {
+                    customBlock = bodyModel.getCustomBlock(charIndex);
+                }
+                if (customBlock != null) {
+                    const blockId = customBlock.blockId;
+                    const drawingOrigin = drawings[blockId];
+                    if (drawingOrigin.layoutType === PositionedObjectLayoutType.INLINE) {
+                        allPages = dealWidthInlineDrawing(
+                            drawingOrigin,
+                            sectionBreakConfig,
+                            allPages,
+                            paragraphConfig,
+                            localeService
+                        );
+                    }
+                }
+            } else if (char === DataStreamTreeTokenType.PAGE_BREAK) {
+                pushPending();
                 allPages.push(
                     createSkeletonPage(
                         sectionBreakConfig,
                         skeletonResourceReference,
-                        _getNextPageNumber(lastPage),
-                        BreakType.COLUMN
+                        _getNextPageNumber(allPages[allPages.length - 1]),
+                        BreakType.PAGE
                     )
                 );
+                paragraphAffectSkeDrawings.clear();
+            } else if (char === DataStreamTreeTokenType.COLUMN_BREAK) {
+                pushPending();
+                // 换列标识，还在同一个节内
+                const lastPage = allPages[allPages.length - 1];
+                const columnInfo = getLastNotFullColumnInfo(lastPage);
+
+                if (columnInfo && !columnInfo.isLast) {
+                    setColumnFullState(columnInfo.column, true);
+                } else {
+                    allPages.push(
+                        createSkeletonPage(
+                            sectionBreakConfig,
+                            skeletonResourceReference,
+                            _getNextPageNumber(lastPage),
+                            BreakType.COLUMN
+                        )
+                    );
+                }
             }
         }
 
-        const paragraphStart = i === 0;
-        const languageHandlerResult = composeCharForLanguage(
-            char,
-            i,
-            content,
-            bodyModel,
-            paragraphNode,
-            sectionBreakConfig,
-            paragraphStyle
-        ); // Handling special languages such as Tibetan, Arabic
-        let newSpanGroup = [];
+        pushPending();
 
-        if (languageHandlerResult) {
-            const { charIndex: newCharIndex, spanGroup } = languageHandlerResult;
-            i = newCharIndex;
-            newSpanGroup = spanGroup;
-        } else {
-            const span = createSkeletonWordSpan(char, fontCreateConfig); // measureText 收敛到 create 中执行
-            newSpanGroup.push(span);
-        }
-
-        allPages = calculateParagraphLayout(
-            newSpanGroup,
-            allPages,
-            sectionBreakConfig,
-            paragraphConfig,
-            paragraphStart
-        );
+        last = bk.position;
     }
 
     lineIterator(allPages, (line: IDocumentSkeletonLine) => {

@@ -15,14 +15,16 @@
  */
 
 import { LocaleService, Plugin, PluginType } from '@univerjs/core';
+import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { DebuggerController } from './controllers/debugger.controller';
+import { PerformanceMonitorController } from './controllers/performance-monitor.controller';
 
 export interface IDebuggerPluginConfig {}
 
 export class DebuggerPlugin extends Plugin {
-    static override type = PluginType.Sheet;
+    static override type = PluginType.Doc;
 
     private _debuggerController!: DebuggerController;
 
@@ -32,6 +34,7 @@ export class DebuggerPlugin extends Plugin {
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super('debugger');
+        this._initializeDependencies(_injector);
     }
 
     initialize(): void {
@@ -42,6 +45,10 @@ export class DebuggerPlugin extends Plugin {
     }
 
     registerExtension() {}
+
+    private _initializeDependencies(injector: Injector) {
+        ([[PerformanceMonitorController]] as Dependency[]).forEach((d) => injector.add(d));
+    }
 
     override onRendered(): void {
         this.initialize();

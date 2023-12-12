@@ -92,6 +92,9 @@
             "path": "./examples/data"
         },
         {
+            "path": "./examples/univer-plugin-debugger"
+        },
+        {
             "path": "./examples/docs"
         },
         {

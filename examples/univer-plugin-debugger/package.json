@@ -1,12 +1,13 @@
 {
-    "name": "sheets",
-    "description": "Univer vanilla ts demo project",
+    "name": "univer-plugin-debugger",
+    "description": "Used for debugger",
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
     "private": true,
-    "scripts": {
-        "esbuild:demo": "node ./esbuild.config.mjs",
-        "dev:demo": "node ./esbuild.config.mjs --watch"
+    "main": "./src/index.ts",
+    "exports": {
+        ".": "./src/index.ts",
+        "./*": "./src/*"
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
@@ -24,17 +25,7 @@
         "@univerjs/ui": "workspace:*",
         "@univerjs/uniscript": "workspace:*",
         "@wendellhu/redi": "^0.12.12",
-        "data": "workspace:*",
         "monaco-editor": "0.45.0",
-        "univer-plugin-debugger": "workspace:*"
-    },
-    "devDependencies": {
-        "esbuild": "^0.19.8",
-        "esbuild-plugin-clean": "^1.0.1",
-        "esbuild-plugin-copy": "^2.1.1",
-        "esbuild-style-plugin": "^1.6.3",
-        "less": "^4.2.0",
-        "minimist": "^1.2.8",
-        "typescript": "^5.3.3"
+        "rxjs": "^7.8.1"
     }
 }

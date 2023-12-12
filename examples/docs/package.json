@@ -14,8 +14,11 @@
         "@univerjs/docs": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
+        "@univerjs/local-save": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "data": "workspace:*"
+        "@wendellhu/redi": "^0.12.12",
+        "data": "workspace:*",
+        "univer-plugin-debugger": "workspace:*"
     },
     "devDependencies": {
         "esbuild": "^0.19.8",

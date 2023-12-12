@@ -15,10 +15,21 @@
  */
 
 import type { Nullable, Observer } from '@univerjs/core';
-import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import {
+    Disposable,
+    ICommandService,
+    IUniverInstanceService,
+    LifecycleStages,
+    OnLifecycle,
+    toDisposable,
+} from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent } from '@univerjs/engine-render';
 import { CURSOR_TYPE, IRenderManagerService, Rect, Vector2 } from '@univerjs/engine-render';
-import type { IDeltaColumnWidthCommandParams, IDeltaRowHeightCommand } from '@univerjs/sheets';
+import type {
+    IDeltaColumnWidthCommandParams,
+    IDeltaRowHeightCommand,
+    ISetWorksheetRowIsAutoHeightCommandParams,
+} from '@univerjs/sheets';
 import { DeltaColumnWidthCommand, DeltaRowHeightCommand, SetWorksheetRowIsAutoHeightCommand } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
@@ -58,7 +69,7 @@ export class HeaderResizeController extends Disposable {
 
     private _columnResizeRect: Nullable<HeaderMenuResizeShape>;
 
-    private _Observers: Array<Nullable<Observer<IPointerEvent | IMouseEvent>>> = [];
+    private _observers: Array<Nullable<Observer<IPointerEvent | IMouseEvent>>> = [];
 
     private _moveObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 
@@ -97,14 +108,14 @@ export class HeaderResizeController extends Disposable {
 
         const { spreadsheetRowHeader, spreadsheetColumnHeader } = sheetObject;
 
-        this._Observers.forEach((observer) => {
+        this._observers.forEach((observer) => {
             spreadsheetRowHeader.onPointerMoveObserver.remove(observer);
             spreadsheetRowHeader.onPointerLeaveObserver.remove(observer);
             spreadsheetColumnHeader.onPointerMoveObserver.remove(observer);
             spreadsheetColumnHeader.onPointerLeaveObserver.remove(observer);
         });
 
-        this._Observers = [];
+        this._observers = [];
     }
 
     private _initialize() {
@@ -149,7 +160,7 @@ export class HeaderResizeController extends Disposable {
         const eventBindingObject =
             initialType === HEADER_RESIZE_TYPE.ROW ? spreadsheetRowHeader : spreadsheetColumnHeader;
 
-        this._Observers.push(
+        this._observers.push(
             eventBindingObject?.onPointerMoveObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
                 const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
                 if (skeleton == null || this._rowResizeRect == null || this._columnResizeRect == null) {
@@ -245,7 +256,7 @@ export class HeaderResizeController extends Disposable {
             })
         );
 
-        this._Observers.push(
+        this._observers.push(
             eventBindingObject?.onPointerLeaveObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
                 this._rowResizeRect?.hide();
                 this._columnResizeRect?.hide();
@@ -273,236 +284,265 @@ export class HeaderResizeController extends Disposable {
         const canvasMaxWidth = engine?.width || 0;
         const canvasMaxHeight = engine?.height || 0;
 
-        eventBindingObject.onPointerEnterObserver.add(() => {
-            if (eventBindingObject == null) {
-                return;
-            }
-
-            eventBindingObject.show();
-
-            scene.setCursor(
-                initialType === HEADER_RESIZE_TYPE.ROW ? CURSOR_TYPE.ROW_RESIZE : CURSOR_TYPE.COLUMN_RESIZE
-            );
-        });
-
-        eventBindingObject.onPointerLeaveObserver.add(() => {
-            if (eventBindingObject == null) {
-                return;
-            }
-
-            eventBindingObject.hide();
-
-            scene.resetCursor();
-        });
-
-        eventBindingObject.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
-            const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-
-            if (skeleton == null) {
-                return;
-            }
-
-            const sheetObject = this._getSheetObject();
-
-            if (sheetObject == null) {
-                return;
-            }
-
-            const { scene } = sheetObject;
-
-            const viewPort = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
-
-            const scrollBarHorizontalHeight = (viewPort?.getScrollBar()?.horizonBarRect?.height || 0) + 10;
-
-            const scrollBarVerticalWidth = (viewPort?.getScrollBar()?.verticalBarRect?.width || 0) + 10;
-
-            const transformCoord = getTransformCoord(evt.offsetX, evt.offsetY, scene, skeleton);
-
-            const { scaleX, scaleY } = scene.getAncestorScale();
-
-            this._startOffsetX = transformCoord.x;
-
-            this._startOffsetY = transformCoord.y;
-
-            const currentOffsetX = skeleton.getOffsetByPositionX(this._currentColumn);
-
-            const currentOffsetY = skeleton.getOffsetByPositionY(this._currentRow);
-
-            const cell = skeleton.getNoMergeCellPositionByIndex(this._currentRow, this._currentColumn, scaleX, scaleY);
-
-            let isStartMove = false;
-
-            let moveChangeX = 0;
-
-            let moveChangeY = 0;
-
-            const { columnTotalWidth, rowHeaderWidth, rowTotalHeight, columnHeaderHeight } = skeleton;
-
-            const shapeWidth =
-                canvasMaxWidth > columnTotalWidth + rowHeaderWidth ? canvasMaxWidth : columnTotalWidth + rowHeaderWidth;
-
-            const shapeHeight =
-                canvasMaxHeight > rowTotalHeight + columnHeaderHeight
-                    ? canvasMaxHeight
-                    : rowTotalHeight + columnHeaderHeight;
-
-            const scale = Math.max(scaleX, scaleY);
-
-            const HEADER_MENU_SHAPE_THUMB_SIZE_SCALE = HEADER_MENU_SHAPE_THUMB_SIZE / scale;
-
-            if (initialType === HEADER_RESIZE_TYPE.ROW) {
-                this._resizeHelperShape = new Rect(HEADER_RESIZE_CONTROLLER_SHAPE_HELPER, {
-                    width: shapeWidth,
-                    height: HEADER_MENU_SHAPE_THUMB_SIZE_SCALE,
-                    fill: HEADER_RESIZE_CONTROLLER_SHAPE_HELPER_COLOR,
-                    left: 0,
-                    top: currentOffsetY - HEADER_MENU_SHAPE_THUMB_SIZE_SCALE / 2,
-                });
-            } else {
-                this._resizeHelperShape = new Rect(HEADER_RESIZE_CONTROLLER_SHAPE_HELPER, {
-                    width: HEADER_MENU_SHAPE_THUMB_SIZE_SCALE,
-                    height: shapeHeight,
-                    fill: HEADER_RESIZE_CONTROLLER_SHAPE_HELPER_COLOR,
-                    left: currentOffsetX - HEADER_MENU_SHAPE_THUMB_SIZE_SCALE / 2,
-                    top: 0,
-                });
-            }
-
-            const rowResizeRectX = this._columnResizeRect?.left || 0;
-
-            const rowResizeRectY = this._rowResizeRect?.top || 0;
-
-            scene.addObject(this._resizeHelperShape, SHEET_COMPONENT_HEADER_LAYER_INDEX);
-
-            scene.disableEvent();
-
-            this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
-                const relativeCoords = scene.getRelativeCoord(
-                    Vector2.FromArray([this._startOffsetX, this._startOffsetY])
-                );
-
-                const scrollXY = scene.getScrollXYByRelativeCoords(relativeCoords, viewPort);
-
-                const transformCoord = getTransformCoord(moveEvt.offsetX, moveEvt.offsetY, scene, skeleton);
-
-                const { x: moveOffsetX, y: moveOffsetY } = transformCoord;
-
-                const { scaleX, scaleY } = scene.getAncestorScale();
-
-                const scale = Math.max(scaleX, scaleY);
-
-                const HEADER_MENU_SHAPE_THUMB_SIZE_SCALE = HEADER_MENU_SHAPE_THUMB_SIZE / scale;
-
-                moveChangeX = moveOffsetX - this._startOffsetX - HEADER_MENU_SHAPE_THUMB_SIZE_SCALE / 2;
-
-                moveChangeY = moveOffsetY - this._startOffsetY - HEADER_MENU_SHAPE_THUMB_SIZE_SCALE / 2;
-
-                if (Math.abs(initialType === HEADER_RESIZE_TYPE.ROW ? moveChangeY : moveChangeX) >= MINIMAL_OFFSET) {
-                    isStartMove = true;
-                }
-
-                if (initialType === HEADER_RESIZE_TYPE.ROW) {
-                    if (moveChangeY < -(cell.endY - cell.startY) + 2) {
-                        moveChangeY = -(cell.endY - cell.startY) + 2;
+        this.disposeWithMe(
+            toDisposable(
+                eventBindingObject.onPointerEnterObserver.add(() => {
+                    if (eventBindingObject == null) {
+                        return;
                     }
 
-                    if (moveChangeY > canvasMaxHeight - scrollBarHorizontalHeight + scrollXY.y - cell.startY) {
-                        moveChangeY = canvasMaxHeight - scrollBarHorizontalHeight + scrollXY.y - cell.startY;
+                    eventBindingObject.show();
+
+                    scene.setCursor(
+                        initialType === HEADER_RESIZE_TYPE.ROW ? CURSOR_TYPE.ROW_RESIZE : CURSOR_TYPE.COLUMN_RESIZE
+                    );
+                })
+            )
+        );
+
+        this.disposeWithMe(
+            toDisposable(
+                eventBindingObject.onPointerLeaveObserver.add(() => {
+                    if (eventBindingObject == null) {
+                        return;
                     }
 
-                    if (isStartMove) {
-                        this._resizeHelperShape?.transformByState({
-                            top: currentOffsetY + moveChangeY,
-                        });
+                    eventBindingObject.hide();
 
-                        this._rowResizeRect?.transformByState({
-                            top: rowResizeRectY + moveChangeY + HEADER_MENU_SHAPE_THUMB_SIZE_SCALE / 2,
-                        });
-
-                        this._rowResizeRect?.show();
-
-                        scene.setCursor(CURSOR_TYPE.ROW_RESIZE);
-                    }
-                } else {
-                    if (moveChangeX < -(cell.endX - cell.startX) + 2) {
-                        moveChangeX = -(cell.endX - cell.startX) + 2;
-                    }
-                    if (moveChangeX > canvasMaxWidth - scrollBarVerticalWidth + scrollXY.x - cell.startX) {
-                        moveChangeX = canvasMaxWidth - scrollBarVerticalWidth + scrollXY.x - cell.startX;
-                    }
-
-                    if (isStartMove) {
-                        this._resizeHelperShape?.transformByState({
-                            left: currentOffsetX + moveChangeX,
-                        });
-
-                        this._columnResizeRect?.transformByState({
-                            left: rowResizeRectX + moveChangeX + HEADER_MENU_SHAPE_THUMB_SIZE_SCALE / 2,
-                        });
-
-                        this._columnResizeRect?.show();
-
-                        scene.setCursor(CURSOR_TYPE.COLUMN_RESIZE);
-                    }
-                }
-            });
-
-            this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {
-                const sheetObject = getSheetObject(this._currentUniverService, this._renderManagerService);
-
-                if (sheetObject == null) {
-                    return;
-                }
-
-                this._clearObserverEvent();
-                this._resizeHelperShape?.dispose();
-                this._resizeHelperShape = null;
-
-                const { scene } = sheetObject;
-                scene.enableEvent();
-
-                if (isStartMove) {
                     scene.resetCursor();
+                })
+            )
+        );
 
-                    this._rowResizeRect?.hide();
-                    this._columnResizeRect?.hide();
+        this.disposeWithMe(
+            toDisposable(
+                eventBindingObject.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+                    const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+
+                    if (skeleton == null) {
+                        return;
+                    }
+
+                    const sheetObject = this._getSheetObject();
+
+                    if (sheetObject == null) {
+                        return;
+                    }
+
+                    const { scene } = sheetObject;
+
+                    const viewPort = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+
+                    const scrollBarHorizontalHeight = (viewPort?.getScrollBar()?.horizonBarRect?.height || 0) + 10;
+
+                    const scrollBarVerticalWidth = (viewPort?.getScrollBar()?.verticalBarRect?.width || 0) + 10;
+
+                    const transformCoord = getTransformCoord(evt.offsetX, evt.offsetY, scene, skeleton);
+
+                    const { scaleX, scaleY } = scene.getAncestorScale();
+
+                    this._startOffsetX = transformCoord.x;
+
+                    this._startOffsetY = transformCoord.y;
+
+                    const currentOffsetX = skeleton.getOffsetByPositionX(this._currentColumn);
+
+                    const currentOffsetY = skeleton.getOffsetByPositionY(this._currentRow);
+
+                    const cell = skeleton.getNoMergeCellPositionByIndex(
+                        this._currentRow,
+                        this._currentColumn,
+                        scaleX,
+                        scaleY
+                    );
+
+                    let isStartMove = false;
+
+                    let moveChangeX = 0;
+
+                    let moveChangeY = 0;
+
+                    const { columnTotalWidth, rowHeaderWidth, rowTotalHeight, columnHeaderHeight } = skeleton;
+
+                    const shapeWidth =
+                        canvasMaxWidth > columnTotalWidth + rowHeaderWidth
+                            ? canvasMaxWidth
+                            : columnTotalWidth + rowHeaderWidth;
+
+                    const shapeHeight =
+                        canvasMaxHeight > rowTotalHeight + columnHeaderHeight
+                            ? canvasMaxHeight
+                            : rowTotalHeight + columnHeaderHeight;
+
+                    const scale = Math.max(scaleX, scaleY);
+
+                    const HEADER_MENU_SHAPE_THUMB_SIZE_SCALE = HEADER_MENU_SHAPE_THUMB_SIZE / scale;
 
                     if (initialType === HEADER_RESIZE_TYPE.ROW) {
-                        this._commandService.executeCommand<IDeltaRowHeightCommand>(DeltaRowHeightCommand.id, {
-                            deltaY: moveChangeY,
-                            anchorRow: this._currentRow,
+                        this._resizeHelperShape = new Rect(HEADER_RESIZE_CONTROLLER_SHAPE_HELPER, {
+                            width: shapeWidth,
+                            height: HEADER_MENU_SHAPE_THUMB_SIZE_SCALE,
+                            fill: HEADER_RESIZE_CONTROLLER_SHAPE_HELPER_COLOR,
+                            left: 0,
+                            top: currentOffsetY - HEADER_MENU_SHAPE_THUMB_SIZE_SCALE / 2,
                         });
                     } else {
-                        this._commandService.executeCommand<IDeltaColumnWidthCommandParams>(
-                            DeltaColumnWidthCommand.id,
+                        this._resizeHelperShape = new Rect(HEADER_RESIZE_CONTROLLER_SHAPE_HELPER, {
+                            width: HEADER_MENU_SHAPE_THUMB_SIZE_SCALE,
+                            height: shapeHeight,
+                            fill: HEADER_RESIZE_CONTROLLER_SHAPE_HELPER_COLOR,
+                            left: currentOffsetX - HEADER_MENU_SHAPE_THUMB_SIZE_SCALE / 2,
+                            top: 0,
+                        });
+                    }
+
+                    const rowResizeRectX = this._columnResizeRect?.left || 0;
+
+                    const rowResizeRectY = this._rowResizeRect?.top || 0;
+
+                    scene.addObject(this._resizeHelperShape, SHEET_COMPONENT_HEADER_LAYER_INDEX);
+
+                    scene.disableEvent();
+
+                    this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
+                        const relativeCoords = scene.getRelativeCoord(
+                            Vector2.FromArray([this._startOffsetX, this._startOffsetY])
+                        );
+
+                        const scrollXY = scene.getScrollXYByRelativeCoords(relativeCoords, viewPort);
+
+                        const transformCoord = getTransformCoord(moveEvt.offsetX, moveEvt.offsetY, scene, skeleton);
+
+                        const { x: moveOffsetX, y: moveOffsetY } = transformCoord;
+
+                        const { scaleX, scaleY } = scene.getAncestorScale();
+
+                        const scale = Math.max(scaleX, scaleY);
+
+                        const HEADER_MENU_SHAPE_THUMB_SIZE_SCALE = HEADER_MENU_SHAPE_THUMB_SIZE / scale;
+
+                        moveChangeX = moveOffsetX - this._startOffsetX - HEADER_MENU_SHAPE_THUMB_SIZE_SCALE / 2;
+
+                        moveChangeY = moveOffsetY - this._startOffsetY - HEADER_MENU_SHAPE_THUMB_SIZE_SCALE / 2;
+
+                        if (
+                            Math.abs(initialType === HEADER_RESIZE_TYPE.ROW ? moveChangeY : moveChangeX) >=
+                            MINIMAL_OFFSET
+                        ) {
+                            isStartMove = true;
+                        }
+
+                        if (initialType === HEADER_RESIZE_TYPE.ROW) {
+                            if (moveChangeY < -(cell.endY - cell.startY) + 2) {
+                                moveChangeY = -(cell.endY - cell.startY) + 2;
+                            }
+
+                            if (moveChangeY > canvasMaxHeight - scrollBarHorizontalHeight + scrollXY.y - cell.startY) {
+                                moveChangeY = canvasMaxHeight - scrollBarHorizontalHeight + scrollXY.y - cell.startY;
+                            }
+
+                            if (isStartMove) {
+                                this._resizeHelperShape?.transformByState({
+                                    top: currentOffsetY + moveChangeY,
+                                });
+
+                                this._rowResizeRect?.transformByState({
+                                    top: rowResizeRectY + moveChangeY + HEADER_MENU_SHAPE_THUMB_SIZE_SCALE / 2,
+                                });
+
+                                this._rowResizeRect?.show();
+
+                                scene.setCursor(CURSOR_TYPE.ROW_RESIZE);
+                            }
+                        } else {
+                            if (moveChangeX < -(cell.endX - cell.startX) + 2) {
+                                moveChangeX = -(cell.endX - cell.startX) + 2;
+                            }
+                            if (moveChangeX > canvasMaxWidth - scrollBarVerticalWidth + scrollXY.x - cell.startX) {
+                                moveChangeX = canvasMaxWidth - scrollBarVerticalWidth + scrollXY.x - cell.startX;
+                            }
+
+                            if (isStartMove) {
+                                this._resizeHelperShape?.transformByState({
+                                    left: currentOffsetX + moveChangeX,
+                                });
+
+                                this._columnResizeRect?.transformByState({
+                                    left: rowResizeRectX + moveChangeX + HEADER_MENU_SHAPE_THUMB_SIZE_SCALE / 2,
+                                });
+
+                                this._columnResizeRect?.show();
+
+                                scene.setCursor(CURSOR_TYPE.COLUMN_RESIZE);
+                            }
+                        }
+                    });
+
+                    this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {
+                        const sheetObject = getSheetObject(this._currentUniverService, this._renderManagerService);
+
+                        if (sheetObject == null) {
+                            return;
+                        }
+
+                        this._clearObserverEvent();
+                        this._resizeHelperShape?.dispose();
+                        this._resizeHelperShape = null;
+
+                        const { scene } = sheetObject;
+                        scene.enableEvent();
+
+                        if (isStartMove) {
+                            scene.resetCursor();
+
+                            this._rowResizeRect?.hide();
+                            this._columnResizeRect?.hide();
+
+                            if (initialType === HEADER_RESIZE_TYPE.ROW) {
+                                this._commandService.executeCommand<IDeltaRowHeightCommand>(DeltaRowHeightCommand.id, {
+                                    deltaY: moveChangeY,
+                                    anchorRow: this._currentRow,
+                                });
+                            } else {
+                                this._commandService.executeCommand<IDeltaColumnWidthCommandParams>(
+                                    DeltaColumnWidthCommand.id,
+                                    {
+                                        deltaX: moveChangeX,
+                                        anchorCol: this._currentColumn,
+                                    }
+                                );
+                            }
+                        }
+                    });
+                })
+            )
+        );
+
+        this.disposeWithMe(
+            toDisposable(
+                eventBindingObject.onDblclickObserver.add(() => {
+                    if (initialType === HEADER_RESIZE_TYPE.ROW) {
+                        const sheetObject = this._getSheetObject();
+                        if (sheetObject == null) {
+                            return;
+                        }
+
+                        const { scene } = sheetObject;
+
+                        scene.resetCursor();
+
+                        this._commandService.executeCommand<ISetWorksheetRowIsAutoHeightCommandParams>(
+                            SetWorksheetRowIsAutoHeightCommand.id,
                             {
-                                deltaX: moveChangeX,
-                                anchorCol: this._currentColumn,
+                                anchorRow: this._currentRow,
                             }
                         );
+
+                        this._rowResizeRect?.hide();
                     }
-                }
-            });
-        });
-
-        eventBindingObject.onDblclickObserver.add(() => {
-            if (initialType === HEADER_RESIZE_TYPE.ROW) {
-                const sheetObject = this._getSheetObject();
-                if (sheetObject == null) {
-                    return;
-                }
-
-                const { scene } = sheetObject;
-
-                scene.resetCursor();
-
-                this._commandService.executeCommand<IDeltaColumnWidthCommandParams>(
-                    SetWorksheetRowIsAutoHeightCommand.id
-                );
-
-                this._rowResizeRect?.hide();
-            }
-        });
+                })
+            )
+        );
     }
 
     private _clearObserverEvent() {

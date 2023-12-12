@@ -248,24 +248,39 @@ export const SetRowHeightCommand: ICommand = {
     },
 };
 
-export interface ISetRowAutoHeightCommandParams {}
+export interface ISetWorksheetRowIsAutoHeightCommandParams {
+    anchorRow?: number;
+}
 
 export const SetWorksheetRowIsAutoHeightCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-row-is-auto-height',
-    handler: async (accessor: IAccessor) => {
+    handler: async (accessor: IAccessor, params: ISetWorksheetRowIsAutoHeightCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const selectionManagerService = accessor.get(SelectionManagerService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+        const workSheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
+        const worksheetId = workSheet.getSheetId();
 
-        const ranges = selectionManagerService.getSelectionRanges();
+        const { anchorRow } = params ?? {};
+
+        const ranges =
+            anchorRow != null
+                ? [
+                      {
+                          startRow: anchorRow,
+                          endRow: anchorRow,
+                          startColumn: 0,
+                          endColumn: workSheet.getMaxColumns() - 1,
+                      },
+                  ]
+                : selectionManagerService.getSelectionRanges();
+
         if (!ranges?.length) {
             return false;
         }
-
-        const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
 
         const redoMutationParams: ISetWorksheetRowIsAutoHeightMutationParams = {
             workbookId,

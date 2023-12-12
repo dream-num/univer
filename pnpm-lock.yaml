@@ -598,6 +598,10 @@ importers:
         version: 1.0.2(@types/node@20.10.4)(happy-dom@12.10.3)(less@4.2.0)
 
   packages/engine-formula:
+    dependencies:
+      big.js:
+        specifier: ^6.2.1
+        version: 6.2.1
     devDependencies:
       '@types/big.js':
         specifier: ^6.2.2
@@ -611,9 +615,6 @@ importers:
       '@wendellhu/redi':
         specifier: ^0.12.12
         version: 0.12.12
-      big.js:
-        specifier: ^6.2.1
-        version: 6.2.1
       less:
         specifier: ^4.2.0
         version: 4.2.0
@@ -8146,7 +8147,7 @@ packages:
       magicast: 0.3.2
       picocolors: 1.0.0
       test-exclude: 6.0.0
-      vitest: 1.0.2(@types/node@20.10.4)(happy-dom@12.10.3)(less@4.2.0)
+      vitest: 1.0.2(@types/node@20.10.4)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -8929,7 +8930,7 @@ packages:
 
   /big.js@6.2.1:
     resolution: {integrity: sha512-bCtHMwL9LeDIozFn+oNhhFoq+yQ3BNdnsLSASUxLciOb1vgvpHsIO1dsENiGMgbb4SkP5TrzWzRiLddn8ahVOQ==}
-    dev: true
+    dev: false
 
   /binary-extensions@2.2.0:
     resolution: {integrity: sha512-jDctJ/IVQbZoJykoeHbhXpOlNBqGNcwXJKJog42E5HDPUwQTSdjCHdihjj0DlnheQ7blbT6dHOafNAiS8ooQKA==}

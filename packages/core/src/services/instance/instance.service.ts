@@ -46,7 +46,11 @@ export interface IUniverHandler {
  * the focused univer instance.
  */
 export interface IUniverInstanceService {
+    // What's the difference between focused univer instance and active univer instance?
+    // For example, if you are currently editing a cell,
+    // the cell is active, but the focus is still sheet.
     focused$: Observable<Nullable<string>>;
+    active$: Observable<Nullable<string>>;
 
     currentSheet$: Observable<Nullable<Workbook>>;
     currentDoc$: Observable<Nullable<DocumentDataModel>>;
@@ -61,6 +65,7 @@ export interface IUniverInstanceService {
     slideDisposed$: Observable<Slide>;
 
     focusUniverInstance(id: string | null): void;
+    activeUniverInstance(id: Nullable<string>): void;
     getFocusedUniverInstance(): Workbook | DocumentDataModel | Slide | null;
 
     createDoc(data: Partial<IDocumentData>): DocumentDataModel;
@@ -87,15 +92,18 @@ export interface IUniverInstanceService {
     getAllUniverDocsInstance(): DocumentDataModel[];
     getAllUniverSlidesInstance(): Slide[];
 
-    getDocumentType(unitID: string): DocumentType;
+    getDocumentType(unitId: string): DocumentType;
     disposeDocument(unitId: string): boolean;
 }
 
 export const IUniverInstanceService = createIdentifier<IUniverInstanceService>('univer.current');
 export class UniverInstanceService extends Disposable implements IUniverInstanceService {
-    private readonly _focused$ = new BehaviorSubject<Nullable<string>>(null);
     private _focused: DocumentDataModel | Workbook | Slide | null = null;
+    private readonly _focused$ = new BehaviorSubject<Nullable<string>>(null);
     readonly focused$ = this._focused$.asObservable();
+
+    private readonly _active$ = new BehaviorSubject<Nullable<string>>(null);
+    readonly active$ = this._active$.asObservable();
 
     private readonly _currentSheet$ = new BehaviorSubject<Nullable<Workbook>>(null);
     readonly currentSheet$ = this._currentSheet$.asObservable();
@@ -133,6 +141,7 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         super.dispose();
 
         this._focused$.complete();
+        this._active$.complete();
 
         this._currentDoc$.complete();
         this._currentSheet$.complete();
@@ -272,22 +281,28 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         }
     }
 
+    activeUniverInstance(id: Nullable<string>) {
+        this._active$.next(id);
+    }
+
     getFocusedUniverInstance(): Workbook | DocumentDataModel | Slide | null {
         return this._focused;
     }
 
-    getDocumentType(unitID: string): DocumentType {
-        if (this.getUniverDocInstance(unitID)) {
+    getDocumentType(unitId: string): DocumentType {
+        if (this.getUniverDocInstance(unitId)) {
             return DocumentType.DOC;
         }
-        if (this.getUniverSheetInstance(unitID)) {
+
+        if (this.getUniverSheetInstance(unitId)) {
             return DocumentType.SHEET;
         }
-        if (this.getUniverSlideInstance(unitID)) {
+
+        if (this.getUniverSlideInstance(unitId)) {
             return DocumentType.SLIDE;
         }
 
-        throw new Error(`[UniverInstanceService]: No document with unitID ${unitID}`);
+        throw new Error(`[UniverInstanceService]: No document with unitId ${unitId}`);
     }
 
     disposeDocument(unitId: string): boolean {

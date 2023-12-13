@@ -1,19 +1,22 @@
 .tree {
+    user-select: none;
     position: relative;
     color: rgb(var(--text-color));
 
     &-icon {
         position: absolute;
-        top: 7px;
-        left: 0;
-        transform: rotate(-90deg);
+        top: 50%;
+        left: calc(-1 * var(--padding-lg));
+        transform: translateY(-50%) rotateZ(-90deg) ;
 
-        margin-right: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
 
         font-size: 8px;
 
         &-expand {
-            transform: rotate(0deg);
+            transform: translateY(-50%);
         }
     }
 
@@ -33,10 +36,11 @@
 
         &-item {
             position: relative;
-            padding-left: var(--padding-lg);
+            padding-left: var(--padding-xl);
 
             > a {
                  cursor: pointer;
+                 position: relative;
                  display: block;
             }
 
@@ -46,7 +50,22 @@
                 &-selected {
                     font-weight: 500;
                     color: rgb(var(--primary-color));
+
+                    &-icon {
+                        position: absolute;
+                        top: 50%;
+                        left: calc(-1 * var(--padding-xl));
+                        transform: translateY(-50%);
+
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+
+                        font-size: var(--font-size-lg);
+                    }
                 }
+
+                
             }
         }
     }

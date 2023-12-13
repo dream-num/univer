@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export { type ITreeProps, Tree, TreeSelectionMode } from './Tree';
+export { type ITreeNodeProps, type ITreeProps, Tree, TreeSelectionMode } from './Tree';

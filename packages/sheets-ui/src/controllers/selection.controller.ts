@@ -237,7 +237,7 @@ export class SelectionController extends Disposable {
 
         this._commandService.executeCommand(SetSelectionsOperation.id, {
             unitId,
-            sheetId,
+            subUnitId: sheetId,
             type,
             pluginName: current?.pluginName || NORMAL_SELECTION_PLUGIN_NAME,
             selections: selectionDataWithStyleList.map((selectionDataWithStyle) =>

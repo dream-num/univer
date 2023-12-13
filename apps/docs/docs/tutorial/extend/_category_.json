@@ -1,9 +1,0 @@
-{
-    "label": "扩展 Univer",
-    "position": 5,
-    "link": {
-        "type": "generated-index",
-        "description": "Univer 在设计时就以高可扩展性作为目标，方便用户根据业务需求进行二次开发。你可以在 Univer 的基础上搭建个人知识库、CRM 系统、协同文档等等。这一小节将会介绍 Univer 的架构设计，以及如何在 Univer 基础上开发自定义插件。"
-    }
-}
-

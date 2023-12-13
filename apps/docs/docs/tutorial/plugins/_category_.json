@@ -1,9 +1,0 @@
-{
-    "label": "插件",
-    "position": 4,
-    "link": {
-        "type": "generated-index",
-        "description": "Univer 的能力可以通过插件来扩展，这里列出了所有可用的官方插件并简要介绍了它们提供的能力。了解如何使用这些插件提供的能力，请参考 \"扩展 Univer\" 小节。了解这些 plugin 暴露的模块和其 API，请参考插件对应的 API 文档。"
-    }
-}
-

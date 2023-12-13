@@ -1,6 +1,6 @@
 # @univerjs/network
 
-[![npm version](https://img.shields.io/npm/v/@univerjs/network)](https://npmjs.org/packages/@univerjs/network)
+[![npm version](https://img.shields.io/npm/v/@univerjs/network)](https://npmjs.org/package/@univerjs/network)
 [![license](https://img.shields.io/npm/l/@univerjs/network)](https://img.shields.io/npm/l/@univerjs/network)
 
 ## Introduction

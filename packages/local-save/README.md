@@ -1,6 +1,6 @@
 # @univerjs/
 
-[![npm version](https://img.shields.io/npm/v/@univerjs/)](https://npmjs.org/packages/@univerjs/)
+[![npm version](https://img.shields.io/npm/v/@univerjs/)](https://npmjs.org/package/@univerjs/)
 [![license](https://img.shields.io/npm/l/@univerjs/)](https://img.shields.io/npm/l/@univerjs/)
 
 ## Introduction

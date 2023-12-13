@@ -1,3 +1,5 @@
+/* stylelint-disable selector-class-pattern */
+
 /**
  * Any CSS included here will be global. The classic template
  * bundles Infima by default. Infima is a CSS framework designed to
@@ -17,6 +19,7 @@
   --docusaurus-highlighted-code-line-bg: rgb(0 0 0 / 10%); */
 
   --ifm-code-padding-horizontal: 0.3rem;
+  --ifm-heading-color: #35322b;
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
@@ -37,4 +40,17 @@ code {
 
 body {
     font-family: Inter, -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "noto sans", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.markdown h1:first-child {
+    --ifm-h1-font-size: 2.2rem;
+}
+
+.markdown > h2 {
+    --ifm-h2-font-size: 1.8rem;
+}
+
+.footer__bottom {
+    margin-top: 3rem;
+    font-size: 14px;
 }

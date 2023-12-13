@@ -1,32 +1,32 @@
 <p align="center">
     <picture>
         <source media="(prefers-color-scheme: dark)" srcset="./docs/img/banner-light.png">
-        <img src="./docs/img/banner-dark.png" alt="Storybook" width="400" />
+        <img src="./docs/img/banner-dark.png" alt="Univer" width="400" />
     </picture>
 </p>
 
 <p align="center">
-  <a href="./LICENSE.txt">
-    <img src="https://img.shields.io/github/license/dream-num/univer" alt="GitHub License" />
-  </a>
-  <a href="https://github.com/dream-num/univer/actions/workflows/build.yml">
-    <img src="https://img.shields.io/github/actions/workflow/status/dream-num/univer/build.yml" alt="GitHub Workflow Status" />
-  </a>
-  <a href="https://codecov.io/gh/dream-num/univer">
-    <img src="https://codecov.io/gh/dream-num/univer/graph/badge.svg?token=aPfyW2pIMN" alt="codecov" />
-  </a>
-  <a href="https://www.codefactor.io/repository/github/dream-num/univer/overview/dev">
-    <img src="https://www.codefactor.io/repository/github/dream-num/univer/badge/dev" alt="CodeFactor" />
-  </a>
-  <a href="https://discord.gg/z3NKNT6D2f">
-    <img src="https://img.shields.io/discord/1136129819961217077?logo=discord&logoColor=FFFFFF&label=discord&color=5865F2" alt="Discord" />
-  </a>
+    <a href="./LICENSE.txt">
+        <img src="https://img.shields.io/github/license/dream-num/univer" alt="GitHub License" />
+    </a>
+    <a href="https://github.com/dream-num/univer/actions/workflows/build.yml">
+        <img src="https://img.shields.io/github/actions/workflow/status/dream-num/univer/build.yml" alt="GitHub Workflow Status" />
+    </a>
+    <a href="https://codecov.io/gh/dream-num/univer">
+        <img src="https://codecov.io/gh/dream-num/univer/graph/badge.svg?token=aPfyW2pIMN" alt="codecov" />
+    </a>
+    <a href="https://www.codefactor.io/repository/github/dream-num/univer/overview/dev">
+        <img src="https://www.codefactor.io/repository/github/dream-num/univer/badge/dev" alt="CodeFactor" />
+    </a>
+    <a href="https://discord.gg/z3NKNT6D2f">
+        <img src="https://img.shields.io/discord/1136129819961217077?logo=discord&logoColor=FFFFFF&label=discord&color=5865F2" alt="Discord" />
+    </a>
 </p>
 
 <p align="center">
-  English
-  |
-  <a href="./README-zh.md">简体中文</a>
+    English
+    |
+    <a href="./README-zh.md">简体中文</a>
 </p>
 
 <!-- An introduction photo here. -->
@@ -65,6 +65,7 @@ Univer bases on a plugin architecture. You can install the following packages to
 | [engine-formula](./packages/engine-formula)      | It implements a rendering engine based on Canvas and is extensible for                                                           | [![npm version](https://img.shields.io/npm/v/@univerjs/engine-formula)](https://npmjs.org/package/@univerjs/engine-formula) |
 | [engine-numfmt](./packages/engine-numfmt)        | It implements a number format engine.                                                                                            | [![npm version](https://img.shields.io/npm/v/@univerjs/engine-numfmt)](https://npmjs.org/package/@univerjs/engine-numfmt)   |
 | [engine-render](./packages/engine-render)        | It implements a rendering engine based on canvas context2d.                                                                      | [![npm version](https://img.shields.io/npm/v/@univerjs/engine-render)](https://npmjs.org/package/@univerjs/engine-render)   |
+| [network](./packages/network)                    | It implements network services based on WebSocket and HTTP.                                                                      | [![npm version](https://img.shields.io/npm/v/@univerjs/network)](https://npmjs.org/package/@univerjs/network)               |
 | [rpc](./packages/rpc)                            | It implements a RPC mechanism and methods to sync data between different replicas of Univer documents.                           | [![npm version](https://img.shields.io/npm/v/@univerjs/rpc)](https://npmjs.org/package/@univerjs/rpc)                       |
 | [sheets](./packages/sheets)                      | Basic logics of spreadsheet features.                                                                                            | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets)](https://npmjs.org/package/@univerjs/sheets)                 |
 | [sheets-formula](./packages/sheets-formula)      | It implements formula in spreadsheets.                                                                                           | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-formula)](https://npmjs.org/package/@univerjs/sheets-formula) |

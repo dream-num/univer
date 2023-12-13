@@ -12,8 +12,8 @@
     "description": "The title of the footer links column with title=其他 in the footer"
   },
   "link.item.label.指南": {
-    "message": "Tutorial",
-    "description": "The label of footer link with label=指南 linking to /docs/tutorial/intro"
+    "message": "guides",
+    "description": "The label of footer link with label=指南 linking to /docs/guides/intro"
   },
   "link.item.label.API": {
     "message": "API",

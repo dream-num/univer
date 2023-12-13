@@ -1,17 +1,30 @@
 .header {
     margin-top: 6rem;
     margin-bottom: 8rem;
+    text-align: center;
 }
 
 .h1 {
-    font-size: 40px;
-    font-weight: 500;
+    max-width: 960px;
+    margin: 0 auto;
+
+    font-size: 70px;
+    font-weight: 900;
+    line-height: 86px;
     color: var(--ifm-heading-color);
+
+    background: linear-gradient(45deg, #0b01d0 0%, #0395e5 50%, #00b099 100%);
+    background-clip: text;
+
+    -webkit-text-fill-color: transparent;
 }
 
 .h2 {
-    font-size: 32px;
+    margin-bottom: 26px;
+
+    font-size: 23px;
     font-weight: normal;
+    line-height: 34px;
     color: var(--ifm-hero-text-color);
 }
 

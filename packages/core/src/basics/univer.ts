@@ -39,7 +39,6 @@ import { ResourceManagerService } from '../services/resource-manager/resource-ma
 import { IResourceManagerService } from '../services/resource-manager/type';
 import { ThemeService } from '../services/theme/theme.service';
 import { IUndoRedoService, LocalUndoRedoService } from '../services/undoredo/undoredo.service';
-import { GenName } from '../shared/gen-name';
 import type { Workbook } from '../sheets/workbook';
 import type { Slide } from '../slides/domain/slide-model';
 import type { LocaleType } from '../types/enum/locale-type';
@@ -203,7 +202,6 @@ export class Univer {
             [ErrorService],
             [LocaleService],
             [ThemeService],
-            [GenName],
             [LifecycleService],
             [LifecycleInitializerService],
             [IPermissionService, { useClass: PermissionService }],

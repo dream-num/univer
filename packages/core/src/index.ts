@@ -93,6 +93,7 @@ export * from './shared';
 // #region sheet
 export type { IComposeInterceptors, IInterceptor, InterceptorHandler } from './common/interceptor';
 export { composeInterceptors, createInterceptorKey, InterceptorManager } from './common/interceptor';
+export type { PluginCtor } from './plugin/plugin';
 export { Range } from './sheets/range';
 export {
     deserializeRangeWithSheet,

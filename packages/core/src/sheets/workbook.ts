@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { forwardRef, Inject, Injector } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 import { Subject } from 'rxjs';
 
 import type { Nullable } from '../shared';
@@ -49,6 +49,8 @@ export class Workbook extends Disposable {
     private readonly _sheetDisposed$ = new Subject<Worksheet>();
     readonly sheetDisposed$ = this._sheetDisposed$.asObservable();
 
+    private readonly _genName = new GenName();
+
     /**
      * sheets list
      * @private
@@ -73,7 +75,6 @@ export class Workbook extends Disposable {
 
     constructor(
         workbookData: Partial<IWorkbookData> = {},
-        @Inject(forwardRef(() => GenName)) private readonly _genName: GenName,
         @Inject(Injector) readonly _injector: Injector
     ) {
         super();

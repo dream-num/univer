@@ -33,7 +33,7 @@ export class ObjectClassType extends Disposable {
         return false;
     }
 
-    isEqual(object: ObjectClassType) {
+    isEqualType(object: ObjectClassType) {
         return false;
     }
 }

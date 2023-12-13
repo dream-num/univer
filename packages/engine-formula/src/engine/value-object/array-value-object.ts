@@ -229,9 +229,8 @@ export class ArrayValueObject extends BaseValueObject {
                 return true; // continue
             }
 
-            const result = (accumulatorAll as BaseValueObject).compare(
-                valueObject as BaseValueObject,
-                compareToken.LESS_THAN
+            const result = (accumulatorAll as BaseValueObject).isLessThan(
+                valueObject as BaseValueObject
             ) as BooleanValueObject;
 
             if (result.getValue()) {
@@ -259,9 +258,8 @@ export class ArrayValueObject extends BaseValueObject {
                 return true; // continue
             }
 
-            const result = (accumulatorAll as BaseValueObject).compare(
-                valueObject as BaseValueObject,
-                compareToken.GREATER_THAN
+            const result = (accumulatorAll as BaseValueObject).isGreaterThan(
+                valueObject as BaseValueObject
             ) as BooleanValueObject;
 
             if (result.getValue()) {

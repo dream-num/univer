@@ -458,7 +458,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                          * If the referenced range contains an error in the spill of the array formula,
                          * then the current array formula should report an error together.
                          */
-                        if (valueObject != null && valueObject.isErrorObject() && valueObject.isEqual(spillError)) {
+                        if (valueObject != null && valueObject.isErrorObject() && valueObject.isEqualType(spillError)) {
                             clearArrayUnitData.setValue(row, column, {});
                             sheetData.setValue(row, column, { ...this._objectValueToCellValue(spillError) });
                             return false;

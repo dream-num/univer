@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { compareToken } from '../../../basics/token';
 import type { ErrorValueObject } from '../../../engine/other-object/error-value-object';
 import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
@@ -62,10 +61,7 @@ export class Min extends BaseFunction {
     }
 
     private _validator(accumulatorAll: BaseValueObject, valueObject: BaseValueObject) {
-        const validator = accumulatorAll.compare(
-            valueObject as BaseValueObject,
-            compareToken.GREATER_THAN
-        ) as BooleanValueObject;
+        const validator = accumulatorAll.isGreaterThan(valueObject as BaseValueObject) as BooleanValueObject;
         if (validator.getValue()) {
             accumulatorAll = valueObject as BaseValueObject;
         }

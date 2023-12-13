@@ -285,10 +285,6 @@ export class NumberValueObject extends BaseValueObject {
 
     override compare(valueObject: BaseValueObject, operator: compareToken): CalculateValueType {
         if (valueObject.isArray()) {
-            // const o = valueObject.getReciprocal();
-            // if (o.isErrorObject()) {
-            //     return o;
-            // }
             return (valueObject as BaseValueObject).compare(this, reverseCompareOperator(operator));
         }
         return this.compareBy(valueObject.getValue(), operator);

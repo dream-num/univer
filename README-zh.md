@@ -6,27 +6,27 @@
 </p>
 
 <p align="center">
-  <a href="./LICENSE.txt">
-    <img src="https://img.shields.io/github/license/dream-num/univer" alt="GitHub License" />
-  </a>
-  <a href="https://github.com/dream-num/univer/actions/workflows/build.yml">
-    <img src="https://img.shields.io/github/actions/workflow/status/dream-num/univer/build.yml" alt="GitHub Workflow Status" />
-  </a>
-  <a href="https://codecov.io/gh/dream-num/univer">
-    <img src="https://codecov.io/gh/dream-num/univer/graph/badge.svg?token=aPfyW2pIMN" alt="codecov" />
-  </a>
-  <a href="https://www.codefactor.io/repository/github/dream-num/univer/overview/dev">
-    <img src="https://www.codefactor.io/repository/github/dream-num/univer/badge/dev" alt="CodeFactor" />
-  </a>
-  <a href="https://discord.gg/z3NKNT6D2f">
-    <img src="https://img.shields.io/discord/1136129819961217077?logo=discord&logoColor=FFFFFF&label=discord&color=5865F2" alt="Discord" />
-  </a>
+    <a href="./LICENSE.txt">
+        <img src="https://img.shields.io/github/license/dream-num/univer" alt="GitHub License" />
+    </a>
+    <a href="https://github.com/dream-num/univer/actions/workflows/build.yml">
+        <img src="https://img.shields.io/github/actions/workflow/status/dream-num/univer/build.yml" alt="GitHub Workflow Status" />
+    </a>
+    <a href="https://codecov.io/gh/dream-num/univer">
+        <img src="https://codecov.io/gh/dream-num/univer/graph/badge.svg?token=aPfyW2pIMN" alt="codecov" />
+    </a>
+    <a href="https://www.codefactor.io/repository/github/dream-num/univer/overview/dev">
+        <img src="https://www.codefactor.io/repository/github/dream-num/univer/badge/dev" alt="CodeFactor" />
+    </a>
+    <a href="https://discord.gg/z3NKNT6D2f">
+        <img src="https://img.shields.io/discord/1136129819961217077?logo=discord&logoColor=FFFFFF&label=discord&color=5865F2" alt="Discord" />
+    </a>
 </p>
 
 <p align="center">
-  <a href="./README.md">English</a>
-  |
-  简体中文
+    <a href="./README.md">English</a>
+    |
+    简体中文
 </p>
 
 <!-- An introduction photo here. -->
@@ -65,6 +65,7 @@ Univer 基于插件化架构设计，你可以安装以下包来增强 Univer �
 | [engine-formula](./packages/engine-formula)  | 实现公式引擎                                                                            | [![npm version](https://img.shields.io/npm/v/@univerjs/engine-formula)](https://npmjs.org/package/@univerjs/engine-formula) |
 | [engine-numfmt](./packages/engine-numfmt)    | 实现数字格式引擎                                                                        | [![npm version](https://img.shields.io/npm/v/@univerjs/engine-numfmt)](https://npmjs.org/package/@univerjs/engine-numfmt)   |
 | [engine-render](./packages/engine-render)    | 实现渲染引擎                                                                            | [![npm version](https://img.shields.io/npm/v/@univerjs/engine-render)](https://npmjs.org/package/@univerjs/engine-render)   |
+| [network](./packages/network)                | 实现了 Univer 的网络服务，包括 WebSocket 和 HTTP。                                      | [![npm version](https://img.shields.io/npm/v/@univerjs/network)](https://npmjs.org/package/@univerjs/network)               |
 | [rpc](./packages/rpc)                        | 实现 RPC 机制，以及在主从文档副本之间同步数据的方法，方便 web worker 等跨线程场景的开发 | [![npm version](https://img.shields.io/npm/v/@univerjs/rpc)](https://npmjs.org/package/@univerjs/rpc)                       |
 | [sheets](./packages/sheets)                  | 实现电子表格的基本业务                                                                  | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets)](https://npmjs.org/package/@univerjs/sheets)                 |
 | [sheets-formula](./packages/sheets-formula)  | 实现电子表格的公式编辑                                                                  | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-formula)](https://npmjs.org/package/@univerjs/sheets-formula) |

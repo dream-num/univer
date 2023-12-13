@@ -12,7 +12,7 @@ const packages = rootTsConfig.references
             const { private: p } = JSON.parse(pkg);
             return !p;
         } catch (e) {
-            console.error(e)
+            console.error(e);
         }
     })
     .map((ref) => ref.path.replace('./packages/', ''));
@@ -50,6 +50,8 @@ const config: Config = {
     },
 
     plugins: [
+        'docusaurus-plugin-image-zoom',
+
         ...packages.map((name) => [
             'docusaurus-plugin-typedoc',
             {
@@ -65,10 +67,10 @@ const config: Config = {
                 cleanOutputDir: true,
                 skipErrorChecking: true,
                 out: `docs/api/${name}`,
-                entryFileName: "index.md",
+                entryFileName: 'index.md',
                 sidebar: {
-                    pretty: false
-                }
+                    pretty: false,
+                },
             },
         ]),
     ],
@@ -137,6 +139,7 @@ const config: Config = {
                 },
             ],
         },
+
         footer: {
             style: 'dark',
             links: [
@@ -182,9 +185,21 @@ const config: Config = {
             ],
             copyright: `Copyright © ${new Date().getFullYear()} Dream-num, Inc.`,
         },
+
         prism: {
             theme: prismThemes.github,
             darkTheme: prismThemes.dracula,
+            additionalLanguages: []
+        },
+
+        zoom: {
+            selector: '.markdown :not(em) > img',
+            config: {
+                background: {
+                    light: 'rgba(255, 255, 255, 0.7)',
+                    dark: 'rgba(50, 50, 50, 0.7)',
+                },
+            },
         },
     } satisfies Preset.ThemeConfig,
 };

@@ -47,12 +47,12 @@
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
-        "@vitest/coverage-istanbul": "^1.0.2",
+        "@vitest/coverage-istanbul": "^1.0.4",
         "typescript": "^5.3.3",
-        "vite": "^5.0.7",
+        "vite": "^5.0.8",
         "vite-plugin-dts": "^3.6.4",
         "vite-plugin-externals": "^0.6.2",
-        "vitest": "^1.0.2"
+        "vitest": "^1.0.4"
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*"

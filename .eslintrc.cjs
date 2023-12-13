@@ -58,7 +58,7 @@ const config = {
                 ' * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.',
                 ' * See the License for the specific language governing permissions and',
                 ' * limitations under the License.',
-                ' '
+                ' ',
             ],
             2,
         ],
@@ -192,14 +192,12 @@ const config = {
     },
 
     overrides: [
-        ...tsConfig.references.map(({ path }) => {
-            return {
-                files: [`${path}/src/**/*.ts`, `${path}/src/**/*.tsx`],
-                parserOptions: {
-                    project: resolve(__dirname, './tsconfig.eslint.json'),
-                },
-            };
-        }),
+        ...tsConfig.references.map(({ path }) => ({
+            files: [`${path}/src/**/*.ts`, `${path}/src/**/*.tsx`],
+            parserOptions: {
+                project: resolve(__dirname, './tsconfig.eslint.json'),
+            },
+        })),
     ],
 };
 

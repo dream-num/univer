@@ -13,5 +13,5 @@ sidebar_position: 9
 ![](/img/design.jpeg)
 
 :::note
-如果你只需要扩展工具栏、右键菜单等，可以直接使用 @univerjs/ui 提供的扩展接口，无需自行实现 UI。请参考[扩展 UI](/docs/turorial/plugins/extend/ui)。
+如果你只需要扩展工具栏、右键菜单等，可以直接使用 @univerjs/ui 提供的扩展接口，无需自行实现 UI。请参考[扩展 UI](/docs/guides/extend/ui)。
 :::

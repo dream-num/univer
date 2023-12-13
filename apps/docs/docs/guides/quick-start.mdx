@@ -1,0 +1,127 @@
+---
+sidebar_position: 1
+---
+
+# 快速上手
+
+我们推荐使用 [Vite](https://vitejs.dev/)、[esbuild](https://esbuild.github.io/) 或 [Webpack 5](https://webpack.js.org/) 等对 ES Module 支持较好的构建工具来构建 Univer 应用。如果你使用了其它构建工具（例如 Webpack 4），可能会需要一些额外的配置。请阅读 [FAQ](/docs/guides/faq) 获取更多信息。
+
+## 安装
+
+Univer 的前端通过多个 npm 包发布，你可以根据需要安装对应的包。
+
+安装 Sheets 所需的包：
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<Tabs>
+    <TabItem value="npm" label="npm">
+        ```sh
+        npm install @univerjs/core \
+            @univerjs/design \
+            @univerjs/docs \
+            @univerjs/engine-formula \
+            @univerjs/engine-render \
+            @univerjs/rpc \
+            @univerjs/rpc \
+            @univerjs/sheets \
+            @univerjs/sheets-formula \
+            @univerjs/sheets-numfmt \
+            @univerjs/sheets-ui \
+            @univerjs/ui
+        ```
+    </TabItem>
+
+    <TabItem value="yarn" label="yarn">
+        ```sh
+        yarn install @univerjs/core \
+            @univerjs/design \
+            @univerjs/docs \
+            @univerjs/engine-formula \
+            @univerjs/engine-render \
+            @univerjs/rpc \
+            @univerjs/rpc \
+            @univerjs/sheets \
+            @univerjs/sheets-formula \
+            @univerjs/sheets-numfmt \
+            @univerjs/sheets-ui \
+            @univerjs/ui
+        ```
+    </TabItem>
+
+    <TabItem value="pnpm" label="pnpm">
+        ```sh
+        pnpm install @univerjs/core \
+            @univerjs/design \
+            @univerjs/docs \
+            @univerjs/engine-formula \
+            @univerjs/engine-render \
+            @univerjs/rpc \
+            @univerjs/rpc \
+            @univerjs/sheets \
+            @univerjs/sheets-formula \
+            @univerjs/sheets-numfmt \
+            @univerjs/sheets-ui \
+            @univerjs/ui
+        ```
+    </TabItem>
+</Tabs>
+
+
+```ts title="main.ts"
+import '@univerjs/design/lib/index.css';
+import '@univerjs/ui/lib/index.css';
+import '@univerjs/sheets-ui/lib/index.css';
+import '@univerjs/sheets-formula/lib/index.css';
+import '@univerjs/sheets-numfmt/lib/index.css';
+
+import { LocaleType, LogLevel, Univer } from '@univerjs/core';
+import { greenTheme } from '@univerjs/design';
+import { RichTextEditingMutation, UniverDocsPlugin } from '@univerjs/docs';
+import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
+import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
+import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
+import { UniverSheetsPlugin } from '@univerjs/sheets';
+import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
+import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
+import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
+import { UniverUIPlugin } from '@univerjs/ui';
+import { DEFAULT_WORKBOOK_DATA_DEMO } from './data';
+
+// univer
+const univer = new Univer({
+  theme: greenTheme,
+  locale: LocaleType.ZH_CN,
+  logLevel: LogLevel.VERBOSE,
+});
+
+// core plugins
+univer.registerPlugin(UniverDocsPlugin, {
+  hasScroll: false,
+});
+univer.registerPlugin(UniverRenderEnginePlugin);
+univer.registerPlugin(UniverUIPlugin, {
+  container: 'app',
+  header: true,
+  toolbar: true,
+  footer: true,
+});
+univer.registerPlugin(UniverSheetsPlugin, {
+  notExecuteFormula: true,
+});
+univer.registerPlugin(UniverSheetsUIPlugin);
+
+// sheet feature plugins
+
+univer.registerPlugin(UniverSheetsNumfmtPlugin);
+univer.registerPlugin(UniverFormulaEnginePlugin, {
+  notExecuteFormula: true,
+});
+univer.registerPlugin(UniverSheetsFormulaPlugin);
+univer.registerPlugin(UniverRPCMainThreadPlugin, {
+  workerURL: './worker.js',
+  unsyncMutations: new Set([RichTextEditingMutation.id]),
+} as IUniverRPCMainThreadConfig);
+```

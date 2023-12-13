@@ -79,6 +79,7 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
 export function SubscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: SetInlineFormatSubscriptCommand.id,
+        menuType: [DocumentType.DOC],
         type: MenuItemType.BUTTON,
         icon: 'FontSizeReduceSingleSingle',
         tooltip: 'toolbar.subscript',
@@ -89,6 +90,7 @@ export function SubscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 export function SuperscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: SetInlineFormatSuperscriptCommand.id,
+        menuType: [DocumentType.DOC],
         type: MenuItemType.BUTTON,
         icon: 'FontSizeIncreaseSingle',
         tooltip: 'toolbar.superscript',

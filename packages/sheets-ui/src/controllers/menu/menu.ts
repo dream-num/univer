@@ -67,8 +67,6 @@ import {
     SetRangeFontSizeCommand,
     SetRangeItalicCommand,
     SetRangeStrickThroughCommand,
-    SetRangeSubscriptCommand,
-    SetRangeSuperscriptCommand,
     SetRangeTextColorCommand,
     SetRangeUnderlineCommand,
 } from '../../commands/commands/inline-format.command';
@@ -309,72 +307,6 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
                 }
 
                 subscriber.next(!!(st && st.s));
-            });
-
-            subscriber.next(false);
-            return disposable.dispose;
-        }),
-    };
-}
-
-export function SubScriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
-    const commandService = accessor.get(ICommandService);
-    const univerInstanceService = accessor.get(IUniverInstanceService);
-    const sheetPermissionService = accessor.get(SheetPermissionService);
-    const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-    const sheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
-    return {
-        id: SetRangeSubscriptCommand.id,
-        group: MenuGroup.TOOLBAR_FORMAT,
-        type: MenuItemType.BUTTON,
-        icon: 'FontSizeReduceSingleSingle',
-        tooltip: 'toolbar.subscript',
-        positions: [MenuPosition.TOOLBAR_START],
-        disabled$: new Observable<boolean>((subscriber) => {
-            const permission$ = sheetPermissionService.getEditable$(unitId, sheetId)?.subscribe((e) => {
-                subscriber.next(!e.value);
-            });
-
-            return () => {
-                permission$?.unsubscribe();
-            };
-        }),
-        activated$: new Observable<boolean>((subscriber) => {
-            const disposable = commandService.onCommandExecuted((c) => {
-                // TODO
-            });
-
-            subscriber.next(false);
-            return disposable.dispose;
-        }),
-    };
-}
-
-export function SuperScriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
-    const commandService = accessor.get(ICommandService);
-    const univerInstanceService = accessor.get(IUniverInstanceService);
-    const sheetPermissionService = accessor.get(SheetPermissionService);
-    const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-    const sheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
-    return {
-        id: SetRangeSuperscriptCommand.id,
-        group: MenuGroup.TOOLBAR_FORMAT,
-        type: MenuItemType.BUTTON,
-        icon: 'FontSizeIncreaseSingle',
-        tooltip: 'toolbar.superscript',
-        positions: [MenuPosition.TOOLBAR_START],
-        disabled$: new Observable<boolean>((subscriber) => {
-            const permission$ = sheetPermissionService.getEditable$(unitId, sheetId)?.subscribe((e) => {
-                subscriber.next(!e.value);
-            });
-
-            return () => {
-                permission$?.unsubscribe();
-            };
-        }),
-        activated$: new Observable<boolean>((subscriber) => {
-            const disposable = commandService.onCommandExecuted((c) => {
-                // TODO
             });
 
             subscriber.next(false);

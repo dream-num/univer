@@ -39,7 +39,7 @@ export function Toolbar() {
     const univerInstanceService = useDependency(IUniverInstanceService);
 
     useEffect(() => {
-        const subscription = univerInstanceService.focused$.subscribe((unitId) => {
+        const subscription = univerInstanceService.actived$.subscribe((unitId) => {
             if (unitId) {
                 const docType = univerInstanceService.getDocumentType(unitId);
                 setDocType(docType);

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DocumentType } from '@univerjs/core';
 import type { IMenuButtonItem } from '@univerjs/ui';
 import { MenuItemType, MenuPosition } from '@univerjs/ui';
 
@@ -22,6 +23,7 @@ import { ToggleScriptPanelOperation } from '../commands/operations/panel.operati
 export function UniscriptMenuItemFactory(): IMenuButtonItem {
     return {
         id: ToggleScriptPanelOperation.id,
+        menuType: [DocumentType.SHEET],
         title: 'toggle-script-panel',
         tooltip: 'script-panel.tooltip.menu-button',
         icon: 'CodeSingle',

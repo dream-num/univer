@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { DocumentType } from '@univerjs/core';
+
 import { ToggleShortcutPanelOperation } from '../../commands/operations/toggle-shortcut-panel.operation';
 import type { IMenuButtonItem } from '../../services/menu/menu';
 import { MenuItemType, MenuPosition } from '../../services/menu/menu';
@@ -21,6 +23,7 @@ import { MenuItemType, MenuPosition } from '../../services/menu/menu';
 export function ShortcutPanelMenuItemFactory(): IMenuButtonItem {
     return {
         id: ToggleShortcutPanelOperation.id,
+        menuType: [DocumentType.SHEET, DocumentType.DOC, DocumentType.SLIDE],
         title: 'toggle-shortcut-panel',
         tooltip: 'toggle-shortcut-panel',
         icon: 'KeyboardSingle',

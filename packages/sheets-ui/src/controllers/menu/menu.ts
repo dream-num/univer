@@ -66,6 +66,8 @@ import {
     SetRangeFontSizeCommand,
     SetRangeItalicCommand,
     SetRangeStrickThroughCommand,
+    SetRangeSubscriptCommand,
+    SetRangeSuperscriptCommand,
     SetRangeTextColorCommand,
     SetRangeUnderlineCommand,
 } from '../../commands/commands/inline-format.command';
@@ -316,7 +318,7 @@ export function SubScriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
     const sheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
     return {
-        id: 'xx',
+        id: SetRangeSubscriptCommand.id,
         group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
         icon: 'FontSizeReduceSingleSingle',
@@ -326,6 +328,7 @@ export function SubScriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
             const permission$ = sheetPermissionService.getEditable$(unitId, sheetId)?.subscribe((e) => {
                 subscriber.next(!e.value);
             });
+
             return () => {
                 permission$?.unsubscribe();
             };
@@ -348,7 +351,7 @@ export function SuperScriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem
     const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
     const sheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
     return {
-        id: 'x',
+        id: SetRangeSuperscriptCommand.id,
         group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
         icon: 'FontSizeIncreaseSingle',
@@ -358,6 +361,7 @@ export function SuperScriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem
             const permission$ = sheetPermissionService.getEditable$(unitId, sheetId)?.subscribe((e) => {
                 subscriber.next(!e.value);
             });
+
             return () => {
                 permission$?.unsubscribe();
             };

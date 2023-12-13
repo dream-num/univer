@@ -41,6 +41,8 @@ import {
     SetRangeFontSizeCommand,
     SetRangeItalicCommand,
     SetRangeStrickThroughCommand,
+    SetRangeSubscriptCommand,
+    SetRangeSuperscriptCommand,
     SetRangeTextColorCommand,
     SetRangeUnderlineCommand,
 } from '../commands/commands/inline-format.command';
@@ -256,6 +258,8 @@ export class SheetUIController extends Disposable {
             SetRangeItalicCommand,
             SetRangeUnderlineCommand,
             SetRangeStrickThroughCommand,
+            SetRangeSubscriptCommand,
+            SetRangeSuperscriptCommand,
             SetRangeFontSizeCommand,
             SetRangeFontFamilyCommand,
             SetRangeTextColorCommand,

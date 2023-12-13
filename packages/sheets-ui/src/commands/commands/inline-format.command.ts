@@ -22,6 +22,8 @@ import {
     SetInlineFormatFontSizeCommand,
     SetInlineFormatItalicCommand,
     SetInlineFormatStrikethroughCommand,
+    SetInlineFormatSubscriptCommand,
+    SetInlineFormatSuperscriptCommand,
     SetInlineFormatTextColorCommand,
     SetInlineFormatUnderlineCommand,
 } from '@univerjs/docs';
@@ -102,6 +104,38 @@ export const SetRangeStrickThroughCommand: ICommand = {
         }
 
         return commandService.executeCommand(SetStrikeThroughCommand.id);
+    },
+};
+
+export const SetRangeSubscriptCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.set-range-subscript',
+    handler: async (accessor) => {
+        const commandService = accessor.get(ICommandService);
+        const contextService = accessor.get(IContextService);
+        const isCellEditorFocus = contextService.getContextValue(FOCUSING_EDITOR);
+
+        if (isCellEditorFocus) {
+            return commandService.executeCommand(SetInlineFormatSubscriptCommand.id);
+        }
+
+        return false;
+    },
+};
+
+export const SetRangeSuperscriptCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.set-range-superscript',
+    handler: async (accessor) => {
+        const commandService = accessor.get(ICommandService);
+        const contextService = accessor.get(IContextService);
+        const isCellEditorFocus = contextService.getContextValue(FOCUSING_EDITOR);
+
+        if (isCellEditorFocus) {
+            return commandService.executeCommand(SetInlineFormatSuperscriptCommand.id);
+        }
+
+        return false;
     },
 };
 

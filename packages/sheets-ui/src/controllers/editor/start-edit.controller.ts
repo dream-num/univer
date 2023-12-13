@@ -477,6 +477,9 @@ export class StartEditController extends Disposable {
 
             this._contextService.setContextValue(FOCUSING_EDITOR, true);
 
+            // Active the cell editor, mainly used in active the doc menu.
+            this._currentUniverService.activeUniverInstance(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+
             const { documentModel: documentDataModel } = documentLayoutObject;
 
             const docParam = this._docSkeletonManagerService.getSkeletonByUnitId(editorUnitId);

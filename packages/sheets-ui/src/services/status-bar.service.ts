@@ -42,6 +42,7 @@ export class StatusBarService implements IStatusBarService, IDisposable {
         FUNCTION_NAMES_STATISTICAL.MIN,
         FUNCTION_NAMES_STATISTICAL.AVERAGE,
         FUNCTION_NAMES_STATISTICAL.COUNT,
+        FUNCTION_NAMES_STATISTICAL.COUNTA,
     ];
     private readonly _state$ = new BehaviorSubject<Nullable<IStatusBarServiceStatus>>(null);
     readonly state$ = this._state$.asObservable();

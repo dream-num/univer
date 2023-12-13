@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-export enum FUNCTION_NAMES_STATISTICAL {
-    AVERAGE = 'AVERAGE',
-    COUNT = 'COUNT',
-    MAX = 'MAX',
-    MIN = 'MIN',
-    COUNTA = 'COUNTA',
+export function getCompare() {
+    return new Intl.Collator('zh', { numeric: true }).compare;
 }

@@ -14,30 +14,44 @@
  * limitations under the License.
  */
 
-import { ErrorType } from '../../../basics/error-type';
-import { ErrorValueObject } from '../../../engine/other-object/error-value-object';
-import type { FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { IFunctionService } from '../../../services/function.service';
+import type { ErrorValueObject } from '../../../engine/other-object/error-value-object';
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import type { BaseValueObject, CalculateValueType } from '../../../engine/value-object/base-value-object';
+import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import { FUNCTION_NAMES_MATH } from '../../math/function-names';
-import { FUNCTION_NAMES_STATISTICAL } from '../function-names';
 
 export class Average extends BaseFunction {
     override calculate(...variants: FunctionVariantType[]) {
-        const functionService = this.accessor.get(IFunctionService);
+        let accumulatorSum: CalculateValueType = new NumberValueObject(0);
+        let accumulatorCount: CalculateValueType = new NumberValueObject(0);
+        for (let i = 0; i < variants.length; i++) {
+            let variant = variants[i];
 
-        const accumulatorSum = functionService.getExecutor(FUNCTION_NAMES_MATH.SUM)?.calculate(...variants);
-        const accumulatorCount = functionService.getExecutor(FUNCTION_NAMES_STATISTICAL.COUNT)?.calculate(...variants);
-        //TODO@DR-Univer: accumulatorCount should be calculated by numeric type count instead of all counts
+            if (variant.isErrorObject()) {
+                return variant as ErrorValueObject;
+            }
 
-        if (
-            accumulatorSum == null ||
-            accumulatorCount == null ||
-            accumulatorSum.isErrorObject() ||
-            accumulatorCount.isErrorObject()
-        ) {
-            return ErrorValueObject.create(ErrorType.VALUE);
+            if (accumulatorSum.isErrorObject()) {
+                return accumulatorSum as ErrorValueObject;
+            }
+
+            if (variant.isReferenceObject()) {
+                variant = (variant as BaseReferenceObject).toArrayValueObject();
+            }
+
+            if ((variant as ArrayValueObject).isArray()) {
+                accumulatorSum = (accumulatorSum as BaseValueObject).plus(
+                    (variant as ArrayValueObject).sum() as BaseValueObject
+                );
+                accumulatorCount = (accumulatorCount as BaseValueObject).plus(
+                    (variant as ArrayValueObject).count() as BaseValueObject
+                );
+            } else {
+                if (!(variant as BaseValueObject).isNull()) {
+                    accumulatorCount = (accumulatorCount as BaseValueObject).plus(new NumberValueObject(1));
+                }
+            }
         }
 
         return (accumulatorSum as BaseValueObject).divided(accumulatorCount as BaseValueObject);

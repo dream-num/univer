@@ -15,7 +15,7 @@
  */
 
 import type { ICellData, IRange, Nullable } from '@univerjs/core';
-import { CellValueType } from '@univerjs/core';
+import { CellValueType, isNullCell } from '@univerjs/core';
 
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import type { IRuntimeUnitDataType, IUnitData, IUnitSheetNameMap } from '../../basics/common';
@@ -24,7 +24,12 @@ import { ObjectClassType } from '../../basics/object-class-type';
 import { ErrorValueObject } from '../other-object/error-value-object';
 import { ArrayValueObject } from '../value-object/array-value-object';
 import type { BaseValueObject, CalculateValueType, IArrayValueObject } from '../value-object/base-value-object';
-import { BooleanValueObject, NumberValueObject, StringValueObject } from '../value-object/primitive-object';
+import {
+    BooleanValueObject,
+    NullValueObject,
+    NumberValueObject,
+    StringValueObject,
+} from '../value-object/primitive-object';
 
 export type NodeValueType = BaseValueObject | BaseReferenceObject | ErrorValueObject | AsyncObject;
 
@@ -125,7 +130,13 @@ export class BaseReferenceObject extends ObjectClassType {
         return true;
     }
 
-    iterator(callback: (valueObject: CalculateValueType, rowIndex: number, columnIndex: number) => Nullable<boolean>) {
+    iterator(
+        callback: (
+            valueObject: Nullable<CalculateValueType>,
+            rowIndex: number,
+            columnIndex: number
+        ) => Nullable<boolean>
+    ) {
         const { startRow, endRow, startColumn, endColumn } = this.getRangePosition();
 
         if (this._checkIfWorksheetMiss()) {
@@ -143,8 +154,8 @@ export class BaseReferenceObject extends ObjectClassType {
 
                 const cell = this.getCellData(row, column);
                 let result: Nullable<boolean> = false;
-                if (!cell) {
-                    result = callback(new NumberValueObject(0, true), r, c);
+                if (cell == null || isNullCell(cell)) {
+                    result = callback(null, r, c);
                     continue;
                 }
 
@@ -433,11 +444,15 @@ export class BaseReferenceObject extends ObjectClassType {
         const rowSize = endRow - startRow + 1;
         const columnSize = endColumn - startColumn + 1;
         const arrayValueList: CalculateValueType[][] = new Array(rowSize);
-        this.iterator((valueObject: CalculateValueType, rowIndex: number, columnIndex: number) => {
+        this.iterator((valueObject: Nullable<CalculateValueType>, rowIndex: number, columnIndex: number) => {
             const row = rowIndex - startRow;
             const column = columnIndex - startColumn;
             if (!arrayValueList[row]) {
                 arrayValueList[row] = new Array(columnSize);
+            }
+
+            if (valueObject == null) {
+                valueObject = new NullValueObject(0);
             }
 
             arrayValueList[row][column] = valueObject;

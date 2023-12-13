@@ -146,7 +146,7 @@ export function getNormalSelectionStyle(themeService: ThemeService): ISelectionS
     const styleSheet = themeService.getCurrentTheme();
     const fill = new TinyColor(styleSheet.colorBlack).setAlpha(0.1).toString();
     return {
-        strokeWidth: 2,
+        strokeWidth: 1.5,
         stroke: styleSheet.primaryColor,
         // strokeDash: 8,
         fill,

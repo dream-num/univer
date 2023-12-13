@@ -65,6 +65,8 @@ enum SELECTION_MANAGER_KEY {
 
 const SELECTION_TITLE_HIGHLIGHT_ALPHA = 0.3;
 
+// const SELECTION_BORDER_OFFSET_FIX = 0.5;
+
 /**
  * The main selection canvas component
  */
@@ -400,6 +402,8 @@ export class SelectionShape {
         strokeWidth /= scale;
         AutofillSize /= scale;
         AutofillStrokeWidth /= scale;
+
+        // const selectBorderOffsetFix = SELECTION_BORDER_OFFSET_FIX / scale;
 
         const borderBuffer = SELECTION_CONTROL_BORDER_BUFFER_WIDTH / scale;
 

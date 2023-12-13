@@ -22,6 +22,7 @@ import { CELL_INVERTED_INDEX_CACHE } from '../../basics/inverted-index-cache';
 import { $ARRAY_VALUE_REGEX } from '../../basics/regex';
 import { compareToken } from '../../basics/token';
 import { ErrorValueObject } from '../other-object/error-value-object';
+import { getCompare } from '../utils/compare';
 import type {
     CalculateValueType,
     callbackMapFnType,
@@ -160,7 +161,13 @@ export class ArrayValueObject extends BaseValueObject {
         };
     }
 
-    iterator(callback: (valueObject: CalculateValueType, rowIndex: number, columnIndex: number) => Nullable<boolean>) {
+    iterator(
+        callback: (
+            valueObject: Nullable<CalculateValueType>,
+            rowIndex: number,
+            columnIndex: number
+        ) => Nullable<boolean>
+    ) {
         const { startRow, endRow, startColumn, endColumn } = this.getRangePosition();
 
         const valueList = this.getArrayValue();
@@ -178,6 +185,163 @@ export class ArrayValueObject extends BaseValueObject {
         const { startRow, startColumn } = this.getRangePosition();
         const valueList = this.getArrayValue();
         return valueList[startRow][startColumn];
+    }
+
+    /**
+     * Referring to matrix calculations,
+     * extract the matching values from a true/false matrix based on parameters and store them in a one-dimensional array.
+     * @param takeArray
+     */
+    take(takeArray: ArrayValueObject) {}
+
+    sum() {
+        let accumulatorAll: CalculateValueType = new NumberValueObject(0);
+        this.iterator((valueObject) => {
+            if (valueObject == null) {
+                return true; // continue
+            }
+
+            if (valueObject.isErrorObject()) {
+                accumulatorAll = valueObject;
+                return false; // break
+            }
+            accumulatorAll = (accumulatorAll as NumberValueObject).plus(
+                valueObject as BaseValueObject
+            ) as BaseValueObject;
+        });
+
+        return accumulatorAll;
+    }
+
+    max() {
+        let accumulatorAll: CalculateValueType = new NumberValueObject(-Infinity);
+        this.iterator((valueObject) => {
+            if (valueObject == null) {
+                return true; // continue
+            }
+
+            if (valueObject.isErrorObject()) {
+                accumulatorAll = valueObject;
+                return false; // break
+            }
+
+            if ((valueObject as BaseValueObject).isString() || (valueObject as BaseValueObject).isNull()) {
+                return true; // continue
+            }
+
+            const result = (accumulatorAll as BaseValueObject).compare(
+                valueObject as BaseValueObject,
+                compareToken.LESS_THAN
+            ) as BooleanValueObject;
+
+            if (result.getValue()) {
+                accumulatorAll = valueObject as NumberValueObject;
+            }
+        });
+
+        return accumulatorAll;
+    }
+
+    min() {
+        let accumulatorAll: CalculateValueType = new NumberValueObject(Infinity);
+
+        this.iterator((valueObject) => {
+            if (valueObject == null) {
+                return true; // continue
+            }
+
+            if (valueObject.isErrorObject()) {
+                accumulatorAll = valueObject;
+                return false; // break
+            }
+
+            if ((valueObject as BaseValueObject).isString() || (valueObject as BaseValueObject).isNull()) {
+                return true; // continue
+            }
+
+            const result = (accumulatorAll as BaseValueObject).compare(
+                valueObject as BaseValueObject,
+                compareToken.GREATER_THAN
+            ) as BooleanValueObject;
+
+            if (result.getValue()) {
+                accumulatorAll = valueObject as NumberValueObject;
+            }
+        });
+
+        return accumulatorAll;
+    }
+
+    count() {
+        let accumulatorAll: BaseValueObject = new NumberValueObject(0);
+        this.iterator((valueObject) => {
+            if (valueObject == null) {
+                return true; // continue
+            }
+
+            if (
+                valueObject.isErrorObject() ||
+                (valueObject as BaseValueObject).isString() ||
+                (valueObject as BaseValueObject).isNull()
+            ) {
+                return true; // continue
+            }
+            accumulatorAll = accumulatorAll.plusBy(1) as BaseValueObject;
+        });
+
+        return accumulatorAll;
+    }
+
+    countA() {
+        let accumulatorAll: BaseValueObject = new NumberValueObject(0);
+        this.iterator((valueObject) => {
+            if (valueObject == null) {
+                return true; // continue
+            }
+
+            if ((valueObject as BaseValueObject).isNull()) {
+                return true; // continue
+            }
+
+            accumulatorAll = accumulatorAll.plusBy(1) as BaseValueObject;
+        });
+
+        return accumulatorAll;
+    }
+
+    countBlank() {
+        let accumulatorAll: BaseValueObject = new NumberValueObject(0);
+        this.iterator((valueObject) => {
+            if (valueObject != null) {
+                return true; // continue
+            }
+
+            accumulatorAll = accumulatorAll.plusBy(1) as BaseValueObject;
+        });
+
+        return accumulatorAll;
+    }
+
+    sortByRow(index: number) {
+        // new Intl.Collator('zh', { numeric: true }).compare;
+        const result: CalculateValueType[][] = this._transposeArray(this._value);
+
+        result.sort(this._sort(index));
+
+        this._value = this._transposeArray(result);
+    }
+
+    sortByColumn(index: number) {
+        this._value.sort(this._sort(index));
+    }
+
+    transpose() {
+        const transposeArray = this._transposeArray(this._value);
+
+        const rowCount = this._rowCount;
+        const columnCount = this._columnCount;
+
+        return this._createNewArray(transposeArray, columnCount, rowCount);
     }
 
     override getNegative(): CalculateValueType {
@@ -252,18 +416,62 @@ export class ArrayValueObject extends BaseValueObject {
         return this._createNewArray(result, rowCount, columnCount);
     }
 
+    private _sort(index: number) {
+        const compare = getCompare();
+        return (a: CalculateValueType[], b: CalculateValueType[]) => {
+            const columnA = a[index];
+            const columnB = b[index];
+            if (columnA.isErrorObject() && columnA.isErrorObject()) {
+                return 0;
+            }
+            if (columnA.isErrorObject()) {
+                return 1;
+            }
+            if (columnB.isErrorObject()) {
+                return -1;
+            }
+            return compare(
+                (columnA as BaseValueObject).getValue() as string,
+                (columnB as BaseValueObject).getValue() as string
+            );
+        };
+    }
+
+    private _transposeArray(array: CalculateValueType[][]) {
+        // 创建一个新的二维数组作为转置后的矩阵
+        const rows = array.length;
+        const cols = array[0].length;
+        const transposedArray: CalculateValueType[][] = [];
+
+        // 遍历原二维数组的列
+        for (let col = 0; col < cols; col++) {
+            // 创建新的行
+            transposedArray[col] = [] as CalculateValueType[];
+
+            // 遍历原二维数组的行
+            for (let row = 0; row < rows; row++) {
+                // 将元素赋值到新的行
+                transposedArray[col][row] = array[row][col];
+            }
+        }
+
+        return transposedArray;
+    }
+
     private _batchOperator(
         valueObject: BaseValueObject,
         batchOperatorType: BatchOperatorType,
         operator?: compareToken | callbackProductFnType
     ): CalculateValueType {
+        const valueRowCount = (valueObject as ArrayValueObject).getRowCount();
+        const valueColumnCount = (valueObject as ArrayValueObject).getColumnCount();
+
         const valueList: BaseValueObject[] = [];
-        const columnCount = this._columnCount;
-        const rowCount = this._rowCount;
+
+        const rowCount = Math.max(valueRowCount, this._rowCount);
+        const columnCount = Math.max(valueColumnCount, this._columnCount);
 
         if (valueObject.isArray()) {
-            const valueRowCount = (valueObject as ArrayValueObject).getRowCount();
-            const valueColumnCount = (valueObject as ArrayValueObject).getColumnCount();
             /**
              * For computational scenarios where the array contains a single value,
              * adopting calculations between the array and the value can effectively utilize an inverted index.
@@ -273,7 +481,7 @@ export class ArrayValueObject extends BaseValueObject {
                 for (let c = 0; c < columnCount; c++) {
                     valueList.push(v);
                 }
-            } else if (valueRowCount === 1) {
+            } else if (valueRowCount === 1 && this._columnCount > 1) {
                 const list = (valueObject as ArrayValueObject).getArrayValue();
                 for (let c = 0; c < columnCount; c++) {
                     valueList.push(list[0][c] as BaseValueObject);
@@ -316,7 +524,7 @@ export class ArrayValueObject extends BaseValueObject {
          * If comparison operations are conducted for a single numerical value,
          * then retrieve the judgment from the inverted index. This enhances performance.
          */
-        if (batchOperatorType === BatchOperatorType.COMPARE && operator === compareToken.EQUALS) {
+        if (batchOperatorType === BatchOperatorType.COMPARE) {
             canUseCache = CELL_INVERTED_INDEX_CACHE.canUseCache(
                 unitId,
                 sheetId,
@@ -326,42 +534,79 @@ export class ArrayValueObject extends BaseValueObject {
             );
 
             if (canUseCache === true) {
-                const rows = CELL_INVERTED_INDEX_CACHE.getCellPositions(
-                    unitId,
-                    sheetId,
-                    column + startColumn,
-                    operator as compareToken,
-                    valueObject.getValue()
-                );
+                if (operator === compareToken.EQUALS) {
+                    const rowPositions = CELL_INVERTED_INDEX_CACHE.getCellPositions(
+                        unitId,
+                        sheetId,
+                        column + startColumn,
+                        valueObject.getValue()
+                    );
 
-                if (rows != null) {
-                    for (let r = 0; r < rowCount; r++) {
-                        if (result[r] == null) {
-                            result[r] = [];
-                        }
-                        if (rows.includes(r + startRow)) {
-                            result[r][column] = new BooleanValueObject(true);
-                        } else {
-                            result[r][column] = new BooleanValueObject(false);
+                    if (rowPositions != null) {
+                        for (let r = 0; r < rowCount; r++) {
+                            if (result[r] == null) {
+                                result[r] = [];
+                            }
+                            if (rowPositions.includes(r + startRow)) {
+                                result[r][column] = new BooleanValueObject(true);
+                            } else {
+                                result[r][column] = new BooleanValueObject(false);
+                            }
                         }
                     }
+                } else {
+                    const rowValuePositions = CELL_INVERTED_INDEX_CACHE.getCellValuePositions(
+                        unitId,
+                        sheetId,
+                        column + startColumn
+                    );
+
+                    if (rowValuePositions != null) {
+                        rowValuePositions.forEach((rowPositions, rowValue) => {
+                            let currentValue: Nullable<BaseValueObject>;
+                            if (typeof rowValue === 'string') {
+                                currentValue = new StringValueObject(rowValue);
+                            } else if (typeof rowValue === 'number') {
+                                currentValue = new NumberValueObject(rowValue);
+                            } else if (typeof rowValue === 'boolean') {
+                                currentValue = new BooleanValueObject(rowValue);
+                            }
+
+                            if (currentValue == null) {
+                                return true;
+                            }
+
+                            const matchResult = (currentValue as BaseValueObject).compare(
+                                valueObject,
+                                operator as compareToken
+                            );
+                            if (matchResult) {
+                                for (let r = 0; r < rowCount; r++) {
+                                    if (result[r] == null) {
+                                        result[r] = [];
+                                    }
+                                    if (rowPositions.includes(r + startRow)) {
+                                        result[r][column] = new BooleanValueObject(true);
+                                    } else {
+                                        result[r][column] = new BooleanValueObject(false);
+                                    }
+                                }
+                            }
+                        });
+                    }
                 }
-            }
-        }
 
-        if (batchOperatorType === BatchOperatorType.COMPARE && operator === compareToken.EQUALS) {
-            CELL_INVERTED_INDEX_CACHE.setContinueBuildingCache(
-                unitId,
-                sheetId,
-                column + startColumn,
-                startRow,
-                startRow + rowCount - 1
-            );
-
-            if (canUseCache === true) {
                 return;
             }
         }
+
+        CELL_INVERTED_INDEX_CACHE.setContinueBuildingCache(
+            unitId,
+            sheetId,
+            column + startColumn,
+            startRow,
+            startRow + rowCount - 1
+        );
 
         for (let r = 0; r < rowCount; r++) {
             const currentValue = this._value?.[r]?.[column];
@@ -395,20 +640,6 @@ export class ArrayValueObject extends BaseValueObject {
                                     valueObject,
                                     operator as compareToken
                                 );
-
-                                /**
-                                 * Inverted indexing enhances matching performance.
-                                 */
-                                if (operator === compareToken.EQUALS) {
-                                    CELL_INVERTED_INDEX_CACHE.set(
-                                        unitId,
-                                        sheetId,
-                                        column + startColumn,
-                                        operator as compareToken,
-                                        (currentValue as BaseValueObject).getValue(),
-                                        r + startRow
-                                    );
-                                }
                             }
                             break;
                         case BatchOperatorType.CONCATENATE_FRONT:
@@ -431,7 +662,31 @@ export class ArrayValueObject extends BaseValueObject {
                     }
                 }
             } else {
-                result[r][column] = ErrorValueObject.create(ErrorType.VALUE);
+                result[r][column] = ErrorValueObject.create(ErrorType.NA);
+            }
+
+            /**
+             * Inverted indexing enhances matching performance.
+             */
+            if (currentValue == null) {
+                continue;
+            }
+            if (currentValue.isErrorObject()) {
+                CELL_INVERTED_INDEX_CACHE.set(
+                    unitId,
+                    sheetId,
+                    column + startColumn,
+                    (currentValue as ErrorValueObject).getErrorType(),
+                    r + startRow
+                );
+            } else {
+                CELL_INVERTED_INDEX_CACHE.set(
+                    unitId,
+                    sheetId,
+                    column + startColumn,
+                    (currentValue as BaseValueObject).getValue(),
+                    r + startRow
+                );
             }
         }
     }
@@ -537,12 +792,14 @@ export class ArrayValueObject extends BaseValueObject {
                                 break;
                         }
                     }
-                } else if (currentValue) {
-                    rowList[c] = currentValue;
-                } else if (opValue) {
-                    rowList[c] = opValue;
-                } else {
-                    rowList[c] = ErrorValueObject.create(ErrorType.VALUE);
+                }
+                // else if (currentValue) {
+                //     rowList[c] = currentValue;
+                // } else if (opValue) {
+                //     rowList[c] = opValue;
+                // }
+                else {
+                    rowList[c] = ErrorValueObject.create(ErrorType.NA);
                 }
             }
             result.push(rowList);

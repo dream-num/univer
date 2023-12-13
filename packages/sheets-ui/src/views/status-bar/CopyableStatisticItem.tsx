@@ -40,6 +40,7 @@ export const functionDisplayNames: FunctionNameMap = {
     [FUNCTION_NAMES_STATISTICAL.MIN]: 'statusbar.min',
     [FUNCTION_NAMES_STATISTICAL.MAX]: 'statusbar.max',
     [FUNCTION_NAMES_STATISTICAL.COUNT]: 'statusbar.count',
+    [FUNCTION_NAMES_STATISTICAL.COUNTA]: 'statusbar.countA',
     [FUNCTION_NAMES_COMPATIBILITY.CONCATENATE]: 'concatenate',
 };
 interface FunctionNameMap {

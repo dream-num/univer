@@ -14,25 +14,21 @@
  * limitations under the License.
  */
 
-import type { ErrorValueObject } from '../../../engine/other-object/error-value-object';
 import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject, CalculateValueType } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
-export class Sum extends BaseFunction {
+export class CountA extends BaseFunction {
     override calculate(...variants: FunctionVariantType[]) {
         let accumulatorAll: CalculateValueType = new NumberValueObject(0);
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];
 
             if (variant.isErrorObject()) {
-                return variant as ErrorValueObject;
-            }
-
-            if (accumulatorAll.isErrorObject()) {
-                return accumulatorAll as ErrorValueObject;
+                accumulatorAll = (accumulatorAll as BaseValueObject).plus(new NumberValueObject(1));
+                continue;
             }
 
             if (variant.isReferenceObject()) {
@@ -40,10 +36,13 @@ export class Sum extends BaseFunction {
             }
 
             if ((variant as ArrayValueObject).isArray()) {
-                variant = (variant as ArrayValueObject).sum();
+                variant = (variant as ArrayValueObject).countA();
+                accumulatorAll = (accumulatorAll as BaseValueObject).plus(variant as BaseValueObject);
+            } else {
+                if (!(variant as BaseValueObject).isNull()) {
+                    accumulatorAll = (accumulatorAll as BaseValueObject).plus(new NumberValueObject(1));
+                }
             }
-
-            accumulatorAll = (accumulatorAll as BaseValueObject).plus(variant as BaseValueObject);
         }
 
         return accumulatorAll;

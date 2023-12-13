@@ -44,6 +44,8 @@ import {
     SetInlineFormatFontSizeCommand,
     SetInlineFormatItalicCommand,
     SetInlineFormatStrikethroughCommand,
+    SetInlineFormatSubscriptCommand,
+    SetInlineFormatSuperscriptCommand,
     SetInlineFormatTextColorCommand,
     SetInlineFormatUnderlineCommand,
 } from './commands/commands/inline-format.command';
@@ -129,6 +131,8 @@ export class UniverDocsPlugin extends Plugin {
                 SetInlineFormatItalicCommand,
                 SetInlineFormatUnderlineCommand,
                 SetInlineFormatStrikethroughCommand,
+                SetInlineFormatSubscriptCommand,
+                SetInlineFormatSuperscriptCommand,
                 SetInlineFormatFontSizeCommand,
                 SetInlineFormatFontFamilyCommand,
                 SetInlineFormatTextColorCommand,

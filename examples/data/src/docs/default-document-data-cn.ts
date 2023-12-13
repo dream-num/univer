@@ -15,7 +15,7 @@
  */
 
 import type { IDocumentData } from '@univerjs/core';
-import { BooleanNumber, TextDecoration } from '@univerjs/core';
+import { BaselineOffset, BooleanNumber, TextDecoration } from '@univerjs/core';
 
 import { DEFAULT_LIST_TEST } from './default-list';
 
@@ -103,7 +103,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
-                    va: 1,
+                    va: BaselineOffset.SUBSCRIPT,
                 },
             },
             {
@@ -126,7 +126,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
-                    va: 2,
+                    va: BaselineOffset.SUPERSCRIPT,
                 },
             },
             {

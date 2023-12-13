@@ -25,6 +25,8 @@ import {
     SetInlineFormatFontSizeCommand,
     SetInlineFormatItalicCommand,
     SetInlineFormatStrikethroughCommand,
+    SetInlineFormatSubscriptCommand,
+    SetInlineFormatSuperscriptCommand,
     SetInlineFormatTextColorCommand,
     SetInlineFormatUnderlineCommand,
 } from '../commands/commands/inline-format.command';
@@ -52,6 +54,8 @@ export class InlineFormatController extends Disposable {
             SetInlineFormatItalicCommand.id,
             SetInlineFormatUnderlineCommand.id,
             SetInlineFormatStrikethroughCommand.id,
+            SetInlineFormatSubscriptCommand.id,
+            SetInlineFormatSuperscriptCommand.id,
             SetInlineFormatFontSizeCommand.id,
             SetInlineFormatFontFamilyCommand.id,
             SetInlineFormatTextColorCommand.id,

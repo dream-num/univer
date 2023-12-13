@@ -41,6 +41,8 @@ import {
     DeleteRow,
     DownBorder,
     FontColor,
+    FontSizeIncreaseSingle,
+    FontSizeReduceSingleSingle,
     FreezeColumnSingle,
     FreezeRowSingle,
     FreezeToSelectedSingle,
@@ -175,6 +177,8 @@ export class ComponentManager {
             FreezeRowSingle,
             FreezeToSelectedSingle,
             CodeSingle,
+            FontSizeIncreaseSingle,
+            FontSizeReduceSingleSingle,
         };
 
         for (const k in iconList) {

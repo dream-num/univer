@@ -23,6 +23,8 @@ import {
     BoldMenuItemFactory,
     ItalicMenuItemFactory,
     StrikeThroughMenuItemFactory,
+    SubscriptMenuItemFactory,
+    SuperscriptMenuItemFactory,
     UnderlineMenuItemFactory,
 } from './menu/menu';
 
@@ -50,6 +52,8 @@ export class DocUIController extends Disposable {
                 ItalicMenuItemFactory,
                 UnderlineMenuItemFactory,
                 StrikeThroughMenuItemFactory,
+                SubscriptMenuItemFactory,
+                SuperscriptMenuItemFactory,
             ] as IMenuItemFactory[]
         ).forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));

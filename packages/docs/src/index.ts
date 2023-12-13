@@ -36,6 +36,8 @@ export {
     SetInlineFormatFontSizeCommand,
     SetInlineFormatItalicCommand,
     SetInlineFormatStrikethroughCommand,
+    SetInlineFormatSubscriptCommand,
+    SetInlineFormatSuperscriptCommand,
     SetInlineFormatTextColorCommand,
     SetInlineFormatUnderlineCommand,
 } from './commands/commands/inline-format.command';

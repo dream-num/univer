@@ -18,6 +18,8 @@ import {
     SetInlineFormatBoldCommand,
     SetInlineFormatItalicCommand,
     SetInlineFormatStrikethroughCommand,
+    SetInlineFormatSubscriptCommand,
+    SetInlineFormatSuperscriptCommand,
     SetInlineFormatUnderlineCommand,
 } from '@univerjs/docs';
 import type { IMenuButtonItem } from '@univerjs/ui';
@@ -65,6 +67,26 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
         icon: 'StrikethroughSingle',
         title: 'Set strike through',
         tooltip: 'toolbar.strikethrough',
+        positions: [MenuPosition.TOOLBAR_START],
+    };
+}
+
+export function SubscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: SetInlineFormatSubscriptCommand.id,
+        type: MenuItemType.BUTTON,
+        icon: 'FontSizeReduceSingleSingle',
+        tooltip: 'toolbar.subscript',
+        positions: [MenuPosition.TOOLBAR_START],
+    };
+}
+
+export function SuperscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: SetInlineFormatSuperscriptCommand.id,
+        type: MenuItemType.BUTTON,
+        icon: 'FontSizeIncreaseSingle',
+        tooltip: 'toolbar.superscript',
         positions: [MenuPosition.TOOLBAR_START],
     };
 }

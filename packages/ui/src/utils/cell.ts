@@ -24,7 +24,7 @@ import type {
     ITextDecoration,
     ITextRun,
 } from '@univerjs/core';
-import { getBorderStyleType, Tools } from '@univerjs/core';
+import { BaselineOffset, getBorderStyleType, Tools } from '@univerjs/core';
 import { ptToPx, pxToPt } from '@univerjs/engine-render';
 
 import { textTrim } from './util';
@@ -296,9 +296,9 @@ export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
 
         if (key === 'vertical-align') {
             if (value === 'sub') {
-                styleList.va = 1;
+                styleList.va = BaselineOffset.SUBSCRIPT;
             } else if (value === 'super') {
-                styleList.va = 2;
+                styleList.va = BaselineOffset.SUPERSCRIPT;
             } else if (value === 'top') {
                 styleList.vt = 1;
             } else if (value === 'middle') {
@@ -306,7 +306,7 @@ export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
             } else if (value === 'bottom') {
                 styleList.vt = 3;
             } else {
-                styleList.va = 0;
+                styleList.va = BaselineOffset.NORMAL;
             }
         }
 

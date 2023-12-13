@@ -133,9 +133,13 @@ function _divideOperator(
             setDivideFullState(divide, true);
 
             // 处理 word 或者数字串超过 divide width 的情况，主要分两种情况
-            // 1. 以段落符号结尾时候，即使超过 divide 宽度，也需要将换行符追加到divide 结尾。
+            // 1. 以段落符号结尾时候，即使超过 divide 宽度，也需要将换行符追加到 divide 结尾。
             // 2. 空行中，英文单词或者连续数字超过 divide 宽度的情况，将把英文单词、数字串拆分，一部分追加到上一行，剩下的放在新的一行中，
             // 有个边界 case，就是一个英文字符宽度超过 divide 宽度，这个时候也需要把这个字符追加到上一行中。
+            // There are two main ways to deal with word or number strings exceeding divide width
+            // 1. If you end with a line break(\r), you need to append a line break(\r) to the end of divide, even if it exceeds the divide width.
+            // 2. In a blank line, if the English word or consecutive number exceeds the width of the divide, the English word and number string will be split, and some of them will be added to the previous line, and the rest will be placed in the new line.
+            // There is a boundary case, that is, the width of the English character exceeds the width of the divide, and this character needs to be appended to the previous line.
             if (
                 divideInfo.isLast &&
                 spanGroup.length === 1 &&

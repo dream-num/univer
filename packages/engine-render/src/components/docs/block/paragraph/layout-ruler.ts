@@ -42,7 +42,6 @@ import { addSpanToDivide, createSkeletonBulletSpan, hasMixedTextLayout } from '.
 import {
     getCharSpaceApply,
     getCharSpaceConfig,
-    getColumnByDivide,
     getLastLineByColumn,
     getLastNotFullColumnInfo,
     getLastNotFullDivideInfo,
@@ -53,8 +52,6 @@ import {
     getPageContentWidth,
     getPositionHorizon,
     getPositionVertical,
-    isBlankColumn,
-    isBlankPage,
     isColumnFull,
 } from '../../common/tools';
 
@@ -134,48 +131,37 @@ function _divideOperator(
         if (preOffsetLeft + width > divide.width) {
             // width 超过 divide 宽度
             setDivideFullState(divide, true);
-            const column = getColumnByDivide(divide);
 
-            if (width > pageContentWidth) {
-                // 一个字符 or word超页内容宽
-                if (isBlankPage(lastPage)) {
-                    addSpanToDivide(divide, spanGroup, preOffsetLeft);
-                    __makeColumnsFull(column?.parent?.columns);
-                } else {
-                    _pageOperator(
-                        spanGroup,
-                        pages,
-                        sectionBreakConfig,
-                        paragraphConfig,
-                        paragraphStart,
-                        defaultSpanLineHeight
-                    );
-                }
-            } else if (column && width > column.width) {
-                // 一个字符 or word超列宽
-                setColumnFullState(column, true);
+            // 处理 word 或者数字串超过 divide width 的情况，主要分两种情况
+            // 1. 以段落符号结尾时候，即使超过 divide 宽度，也需要将换行符追加到 divide 结尾。
+            // 2. 空行中，英文单词或者连续数字超过 divide 宽度的情况，将把英文单词、数字串拆分，一部分追加到上一行，剩下的放在新的一行中，
+            // 有个边界 case，就是一个英文字符宽度超过 divide 宽度，这个时候也需要把这个字符追加到上一行中。
+            // There are two main ways to deal with word or number strings exceeding divide width
+            // 1. If you end with a line break(\r), you need to append a line break(\r) to the end of divide, even if it exceeds the divide width.
+            // 2. In a blank line, if the English word or consecutive number exceeds the width of the divide, the English word and number string will be split, and some of them will be added to the previous line, and the rest will be placed in the new line.
+            // There is a boundary case, that is, the width of the English character exceeds the width of the divide, and this character needs to be appended to the previous line.
+            if (
+                divideInfo.isLast &&
+                spanGroup.length === 1 &&
+                (spanGroup[0].content === DataStreamTreeTokenType.SPACE ||
+                    spanGroup[0].content === DataStreamTreeTokenType.PARAGRAPH)
+            ) {
+                addSpanToDivide(divide, spanGroup, preOffsetLeft);
+            } else if (divide?.spanGroup.length === 0) {
+                const sliceSpanGroup: IDocumentSkeletonSpan[] = [];
 
-                if (isBlankColumn(column)) {
-                    addSpanToDivide(divide, spanGroup, preOffsetLeft);
-                } else {
-                    _columnOperator(
-                        spanGroup,
-                        pages,
-                        sectionBreakConfig,
-                        paragraphConfig,
-                        paragraphStart,
-                        defaultSpanLineHeight
-                    );
+                while (spanGroup.length) {
+                    sliceSpanGroup.push(spanGroup.shift()!);
+
+                    const sliceSpanGroupWidth = __getSpanGroupWidth(sliceSpanGroup);
+                    if (sliceSpanGroupWidth > divide.width) {
+                        break;
+                    }
                 }
-            } else if (divideInfo.isLast) {
-                // 最后一个 divide
-                if (
-                    spanGroup.length === 1 &&
-                    (spanGroup[0].content === DataStreamTreeTokenType.SPACE ||
-                        spanGroup[0].content === DataStreamTreeTokenType.PARAGRAPH)
-                ) {
-                    addSpanToDivide(divide, spanGroup, preOffsetLeft);
-                } else {
+
+                addSpanToDivide(divide, sliceSpanGroup, preOffsetLeft);
+
+                if (spanGroup.length) {
                     _lineOperator(
                         spanGroup,
                         pages,
@@ -186,17 +172,77 @@ function _divideOperator(
                     );
                 }
             } else {
-                // 不是最后一个divide
-                _divideOperator(
+                _lineOperator(
                     spanGroup,
                     pages,
                     sectionBreakConfig,
                     paragraphConfig,
                     paragraphStart,
-                    false,
                     defaultSpanLineHeight
                 );
             }
+
+            // if (width > pageContentWidth) {
+            //     // 一个字符 or word 超页内容宽
+            //     if (isBlankPage(lastPage)) {
+            //         addSpanToDivide(divide, spanGroup, preOffsetLeft);
+            //         __makeColumnsFull(column?.parent?.columns);
+            //     } else {
+            //         _pageOperator(
+            //             spanGroup,
+            //             pages,
+            //             sectionBreakConfig,
+            //             paragraphConfig,
+            //             paragraphStart,
+            //             defaultSpanLineHeight
+            //         );
+            //     }
+            // } else if (column && width > column.width) {
+            //     // 一个字符 or word 超列宽
+            //     setColumnFullState(column, true);
+
+            //     if (isBlankColumn(column)) {
+            //         addSpanToDivide(divide, spanGroup, preOffsetLeft);
+            //     } else {
+            //         _columnOperator(
+            //             spanGroup,
+            //             pages,
+            //             sectionBreakConfig,
+            //             paragraphConfig,
+            //             paragraphStart,
+            //             defaultSpanLineHeight
+            //         );
+            //     }
+            // } else if (divideInfo.isLast) {
+            //     // 最后一个 divide
+            //     if (
+            //         spanGroup.length === 1 &&
+            //         (spanGroup[0].content === DataStreamTreeTokenType.SPACE ||
+            //             spanGroup[0].content === DataStreamTreeTokenType.PARAGRAPH)
+            //     ) {
+            //         addSpanToDivide(divide, spanGroup, preOffsetLeft);
+            //     } else {
+            //         _lineOperator(
+            //             spanGroup,
+            //             pages,
+            //             sectionBreakConfig,
+            //             paragraphConfig,
+            //             paragraphStart,
+            //             defaultSpanLineHeight
+            //         );
+            //     }
+            // } else {
+            //     // 不是最后一个divide
+            //     _divideOperator(
+            //         spanGroup,
+            //         pages,
+            //         sectionBreakConfig,
+            //         paragraphConfig,
+            //         paragraphStart,
+            //         false,
+            //         defaultSpanLineHeight
+            //     );
+            // }
         } else {
             // w 不超过 divide 宽度，加入到 divide 中去
             const currentLine = divide.parent;

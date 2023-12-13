@@ -15,7 +15,7 @@
  */
 
 import type { Workbook, Worksheet } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
 import type { IRender, IWheelEvent, Scene } from '@univerjs/engine-render';
 import {
     IRenderManagerService,
@@ -30,6 +30,7 @@ import {
     Viewport,
 } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
+import { BehaviorSubject } from 'rxjs';
 
 import { SetScrollRelativeCommand } from '../commands/commands/set-scroll.command';
 import {
@@ -42,7 +43,7 @@ import { ISelectionRenderService } from '../services/selection/selection-render.
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
 @OnLifecycle(LifecycleStages.Ready, SheetCanvasView)
-export class SheetCanvasView {
+export class SheetCanvasView extends RxDisposable {
     private _scene!: Scene;
 
     private _currentWorkbook!: Workbook;
@@ -50,6 +51,10 @@ export class SheetCanvasView {
     private _loadedMap = new Set();
 
     private _isLoadedEditor = false;
+
+    private readonly _fps$ = new BehaviorSubject<string>('');
+
+    readonly fps$ = this._fps$.asObservable();
 
     constructor(
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
@@ -59,6 +64,7 @@ export class SheetCanvasView {
         private readonly _selectionRenderService: ISelectionRenderService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
     ) {
+        super();
         this._currentUniverService.currentSheet$.subscribe((workbook) => {
             if (workbook == null) {
                 return;
@@ -72,6 +78,10 @@ export class SheetCanvasView {
                 this._loadedMap.add(unitId);
             }
         });
+    }
+
+    override dispose(): void {
+        this._fps$.complete();
     }
 
     private _addNewRender() {
@@ -117,6 +127,7 @@ export class SheetCanvasView {
             engine.runRenderLoop(() => {
                 // document.getElementById('app')!.innerHTML = engine.getFps().toString();
                 scene.render();
+                this._fps$.next(Math.round(engine.getFps()).toString());
             });
         }
 

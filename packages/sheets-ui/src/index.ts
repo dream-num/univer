@@ -60,3 +60,4 @@ export { SelectionRenderService } from './services/selection/selection-render.se
 export { SelectionShape } from './services/selection/selection-shape';
 export { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
 export { UniverSheetsUIPlugin } from './sheets-ui-plugin';
+export { SheetCanvasView } from './views/sheet-canvas-view';

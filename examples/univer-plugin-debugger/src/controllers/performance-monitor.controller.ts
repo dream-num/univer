@@ -14,24 +14,47 @@
  * limitations under the License.
  */
 
-import { LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
-import { DocCanvasView } from '@univerjs/docs/views/doc-canvas-view.js';
-import { Inject } from '@wendellhu/redi';
+import { DocumentType, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
+import { DocCanvasView } from '@univerjs/docs';
+import { SheetCanvasView } from '@univerjs/sheets-ui';
+import { Inject, Injector } from '@wendellhu/redi';
 import { interval, takeUntil, throttle } from 'rxjs';
 
 @OnLifecycle(LifecycleStages.Rendered, PerformanceMonitorController)
 export class PerformanceMonitorController extends RxDisposable {
-    constructor(@Inject(DocCanvasView) private _docCanvasView: DocCanvasView) {
+    private _documentType: DocumentType = DocumentType.UNKNOWN;
+
+    private _hasWatched = false;
+
+    constructor(
+        @Inject(DocCanvasView) private _docCanvasView: DocCanvasView,
+        @Inject(Injector) private _injector: Injector,
+        @IUniverInstanceService private _instanceService: IUniverInstanceService
+    ) {
         super();
 
-        this._initialize();
+        this._listenDocumentTypeChange();
     }
 
-    private _initialize() {
-        this._showFPS();
+    private _listenDocumentTypeChange() {
+        this._instanceService.focused$.pipe(takeUntil(this.dispose$)).subscribe((unitId) => {
+            if (unitId != null) {
+                const univerType = this._instanceService.getDocumentType(unitId);
+
+                this._documentType = univerType;
+
+                this._listenFPS();
+            }
+        });
     }
 
-    private _showFPS() {
+    private _listenFPS() {
+        if (this._hasWatched) {
+            return;
+        }
+
+        this._hasWatched = true;
+
         const container = document.createElement('div');
         container.classList.add('fps-monitor');
         const THROTTLE_TIME = 500;
@@ -55,11 +78,21 @@ export class PerformanceMonitorController extends RxDisposable {
 
         document.head.appendChild(document.createElement('style')).innerText = style;
 
-        this._docCanvasView.fps$
-            .pipe(takeUntil(this.dispose$))
-            .pipe(throttle(() => interval(THROTTLE_TIME)))
-            .subscribe((fps) => {
-                container.innerText = `FPS: ${fps}`;
-            });
+        if (this._documentType === DocumentType.DOC) {
+            this._docCanvasView.fps$
+                .pipe(takeUntil(this.dispose$))
+                .pipe(throttle(() => interval(THROTTLE_TIME)))
+                .subscribe((fps) => {
+                    container.innerText = `FPS: ${fps}`;
+                });
+        } else if (this._documentType === DocumentType.SHEET) {
+            this._injector
+                .get(SheetCanvasView)
+                .fps$.pipe(takeUntil(this.dispose$))
+                .pipe(throttle(() => interval(THROTTLE_TIME)))
+                .subscribe((fps) => {
+                    container.innerText = `FPS: ${fps}`;
+                });
+        }
     }
 }

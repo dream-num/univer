@@ -81,7 +81,7 @@ function getParagraphInfoBySpan(node: IDocumentSkeletonSpan) {
         for (const divide of line.divides) {
             for (const span of divide.spanGroup) {
                 if (!hasFound) {
-                    nodeIndex++;
+                    nodeIndex += span.count;
                 }
                 if (span === node) {
                     hasFound = true;

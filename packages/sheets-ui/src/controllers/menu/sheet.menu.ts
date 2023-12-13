@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ICommandService, IUniverInstanceService } from '@univerjs/core';
+import { DocumentType, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import {
     CopySheetCommand,
     RemoveSheetCommand,
@@ -35,6 +35,7 @@ import { SheetMenuPosition } from './menu';
 export function DeleteSheetMenuItemFactory(): IMenuButtonItem {
     return {
         id: RemoveSheetCommand.id,
+        menuType: [DocumentType.SHEET],
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.delete',
@@ -44,6 +45,7 @@ export function DeleteSheetMenuItemFactory(): IMenuButtonItem {
 export function CopySheetMenuItemFactory(): IMenuButtonItem {
     return {
         id: CopySheetCommand.id,
+        menuType: [DocumentType.SHEET],
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.copy',
@@ -53,6 +55,7 @@ export function CopySheetMenuItemFactory(): IMenuButtonItem {
 export function RenameSheetMenuItemFactory(): IMenuButtonItem {
     return {
         id: RenameSheetOperation.id,
+        menuType: [DocumentType.SHEET],
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.rename',
@@ -62,6 +65,7 @@ export function RenameSheetMenuItemFactory(): IMenuButtonItem {
 export function ChangeColorSheetMenuItemFactory(): IMenuSelectorItem<string> {
     return {
         id: SetTabColorCommand.id,
+        menuType: [DocumentType.SHEET],
         title: 'sheetConfig.changeColor',
         positions: [SheetMenuPosition.SHEET_BAR],
         type: MenuItemType.SELECTOR,
@@ -79,6 +83,7 @@ export function ChangeColorSheetMenuItemFactory(): IMenuSelectorItem<string> {
 export function HideSheetMenuItemFactory(): IMenuButtonItem {
     return {
         id: SetWorksheetHideCommand.id,
+        menuType: [DocumentType.SHEET],
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.hide',
@@ -96,6 +101,7 @@ export function UnHideSheetMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
 
     return {
         id: SetWorksheetShowCommand.id,
+        menuType: [DocumentType.SHEET],
         type: MenuItemType.SELECTOR,
         positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.unhide',
@@ -130,6 +136,7 @@ export function UnHideSheetMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
 export function ShowMenuItemFactory(): IMenuButtonItem {
     return {
         id: ShowMenuListCommand.id,
+        menuType: [DocumentType.SHEET],
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.unhide',

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DocumentType } from '@univerjs/core';
 import {
     DeleteRangeMoveLeftCommand,
     DeleteRangeMoveUpCommand,
@@ -29,6 +30,7 @@ const DELETE_RANGE_MENU_ID = 'sheet.menu.delete';
 export function DeleteRangeMenuItemFactory(): IMenuSelectorItem<string> {
     return {
         id: DELETE_RANGE_MENU_ID,
+        menuType: [DocumentType.SHEET],
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.SUBITEMS,
         title: 'rightClick.delete',
@@ -40,6 +42,7 @@ export function DeleteRangeMenuItemFactory(): IMenuSelectorItem<string> {
 export function RemoveColMenuItemFactory(): IMenuButtonItem {
     return {
         id: RemoveColCommand.id,
+        menuType: [DocumentType.SHEET],
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
         icon: 'DeleteColumn',
@@ -51,6 +54,7 @@ export function RemoveColMenuItemFactory(): IMenuButtonItem {
 export function RemoveRowMenuItemFactory(): IMenuButtonItem {
     return {
         id: RemoveRowCommand.id,
+        menuType: [DocumentType.SHEET],
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
         icon: 'DeleteRow',
@@ -62,6 +66,7 @@ export function RemoveRowMenuItemFactory(): IMenuButtonItem {
 export function DeleteRangeMoveLeftMenuItemFactory(): IMenuButtonItem {
     return {
         id: DeleteRangeMoveLeftCommand.id,
+        menuType: [DocumentType.SHEET],
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
         title: 'rightClick.moveLeft',
@@ -73,6 +78,7 @@ export function DeleteRangeMoveLeftMenuItemFactory(): IMenuButtonItem {
 export function DeleteRangeMoveUpMenuItemFactory(): IMenuButtonItem {
     return {
         id: DeleteRangeMoveUpCommand.id,
+        menuType: [DocumentType.SHEET],
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
         title: 'rightClick.moveUp',

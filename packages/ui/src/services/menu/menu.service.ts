@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable, toDisposable } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, toDisposable } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
@@ -44,8 +44,18 @@ export class DesktopMenuService extends Disposable implements IMenuService {
 
     menuChanged$: Observable<void> = this._menuChanged$.asObservable();
 
-    constructor(@IShortcutService private readonly _shortcutService: IShortcutService) {
+    constructor(
+        @IShortcutService private readonly _shortcutService: IShortcutService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+    ) {
         super();
+
+        this._univerInstanceService.actived$.subscribe((unitId) => {
+            if (unitId) {
+                const docType = this._univerInstanceService.getDocumentType(unitId);
+                console.log(docType);
+            }
+        });
     }
 
     override dispose(): void {

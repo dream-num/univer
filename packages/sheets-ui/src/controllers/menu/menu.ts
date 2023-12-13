@@ -15,6 +15,7 @@
  */
 
 import {
+    DocumentType,
     FontItalic,
     FontWeight,
     HorizontalAlign,
@@ -98,6 +99,7 @@ export function FormatPainterMenuItemFactory(accessor: IAccessor): IMenuButtonIt
     return {
         id: SetOnceFormatPainterCommand.id,
         subId: SetInfiniteFormatPainterCommand.id,
+        menuType: [DocumentType.SHEET],
         group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
         icon: 'BrushSingle',
@@ -130,6 +132,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const sheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
     return {
         id: SetRangeBoldCommand.id,
+        menuType: [DocumentType.SHEET],
         group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
         icon: 'BoldSingle',
@@ -179,6 +182,7 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const sheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
     return {
         id: SetRangeItalicCommand.id,
+        menuType: [DocumentType.SHEET],
         group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
         icon: 'ItalicSingle',
@@ -226,6 +230,7 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const sheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
     return {
         id: SetRangeUnderlineCommand.id,
+        menuType: [DocumentType.SHEET],
         group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
         icon: 'UnderlineSingle',
@@ -273,6 +278,7 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
     const sheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
     return {
         id: SetRangeStrickThroughCommand.id,
+        menuType: [DocumentType.SHEET],
         group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
         icon: 'StrikethroughSingle',
@@ -494,22 +500,6 @@ export const FONT_FAMILY_CHILDREN = [
         label: FONT_FAMILY_ITEM_COMPONENT,
         value: 'STLiti',
     },
-    // The following 3 fonts do not work, temporarily delete
-    // {
-    //     label: 'fontFamily.HanaleiFill',
-    //     style: { 'font-family': 'HanaleiFill' },
-    //     value: 'HanaleiFill',
-    // },
-    // {
-    //     label: 'fontFamily.Anton',
-    //     style: { 'font-family': 'Anton' },
-    //     value: 'Anton',
-    // },
-    // {
-    //     label: 'fontFamily.Pacifico',
-    //     style: { 'font-family': 'Pacifico' },
-    //     value: 'Pacifico',
-    // },
 ];
 
 export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
@@ -521,6 +511,7 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
     const sheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
     return {
         id: SetRangeFontFamilyCommand.id,
+        menuType: [DocumentType.SHEET],
         tooltip: 'toolbar.font',
         group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.SELECTOR,
@@ -570,6 +561,7 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
     const sheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
     return {
         id: SetRangeFontSizeCommand.id,
+        menuType: [DocumentType.SHEET],
         group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.SELECTOR,
         tooltip: 'toolbar.fontSize',
@@ -619,6 +611,7 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
 export function ResetTextColorMenuItemFactory(): IMenuButtonItem {
     return {
         id: ResetTextColorCommand.id,
+        menuType: [DocumentType.SHEET],
         type: MenuItemType.BUTTON,
         title: 'toolbar.resetColor',
         icon: 'NoColor',
@@ -632,6 +625,7 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
 
     return {
         id: SetRangeTextColorCommand.id,
+        menuType: [DocumentType.SHEET],
         icon: 'FontColor',
         tooltip: 'toolbar.textColor.main',
 
@@ -664,6 +658,7 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
 export function ResetBackgroundColorMenuItemFactory(): IMenuButtonItem {
     return {
         id: ResetBackgroundColorCommand.id,
+        menuType: [DocumentType.SHEET],
         type: MenuItemType.BUTTON,
         title: 'toolbar.resetColor',
         icon: 'NoColor',
@@ -677,6 +672,7 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
 
     return {
         id: SetBackgroundColorCommand.id,
+        menuType: [DocumentType.SHEET],
         tooltip: 'toolbar.fillColor.main',
         group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON_SELECTOR,
@@ -728,6 +724,7 @@ export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelect
     const selectionManagerService = accessor.get(SelectionManagerService);
     return {
         id: SetHorizontalTextAlignCommand.id,
+        menuType: [DocumentType.SHEET],
         icon: HORIZONTAL_ALIGN_CHILDREN[0].icon,
         positions: [MenuPosition.TOOLBAR_START],
         tooltip: 'toolbar.horizontalAlignMode.main',
@@ -782,6 +779,7 @@ export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelector
     const selectionManagerService = accessor.get(SelectionManagerService);
     return {
         id: SetVerticalTextAlignCommand.id,
+        menuType: [DocumentType.SHEET],
         icon: VERTICAL_ALIGN_CHILDREN[0].icon,
         tooltip: 'toolbar.verticalAlignMode.main',
         group: MenuGroup.TOOLBAR_LAYOUT,
@@ -836,6 +834,7 @@ export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<
     const selectionManagerService = accessor.get(SelectionManagerService);
     return {
         id: SetTextWrapCommand.id,
+        menuType: [DocumentType.SHEET],
         tooltip: 'toolbar.textWrapMode.main',
         icon: TEXT_WRAP_CHILDREN[0].icon,
         group: MenuGroup.TOOLBAR_LAYOUT,
@@ -905,6 +904,7 @@ export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
     const selectionManagerService = accessor.get(SelectionManagerService);
     return {
         id: SetTextRotationCommand.id,
+        menuType: [DocumentType.SHEET],
         tooltip: 'toolbar.textRotateMode.main',
         icon: TEXT_ROTATE_CHILDREN[0].icon,
         group: MenuGroup.TOOLBAR_LAYOUT,
@@ -936,12 +936,10 @@ export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
     };
 }
 
-// #region - copy cut paste
-// TODO@wzhudev: maybe we should move these menu factory to base-ui
-
 export function CopyMenuItemFactory(): IMenuButtonItem {
     return {
         id: CopyCommand.id,
+        menuType: [DocumentType.SHEET],
         group: MenuGroup.CONTEXT_MENU_FORMAT,
         type: MenuItemType.BUTTON,
         title: 'rightClick.copy',
@@ -957,6 +955,7 @@ export function CopyMenuItemFactory(): IMenuButtonItem {
 export function CutMenuItemFactory(): IMenuButtonItem {
     return {
         id: CutCommand.id,
+        menuType: [DocumentType.SHEET],
         group: MenuGroup.CONTEXT_MENU_FORMAT,
         type: MenuItemType.BUTTON,
         title: 'contextMenu.cut',
@@ -971,6 +970,7 @@ export function CutMenuItemFactory(): IMenuButtonItem {
 export function PasteMenuItemFactory(): IMenuButtonItem {
     return {
         id: PasteCommand.id,
+        menuType: [DocumentType.SHEET],
         group: MenuGroup.CONTEXT_MENU_FORMAT,
         type: MenuItemType.BUTTON,
         title: 'rightClick.paste',
@@ -987,6 +987,7 @@ export const PASTE_SPECIAL_MENU_ID = 'sheet.menu.paste-special';
 export function PasteSpacialMenuItemFactory(): IMenuSelectorItem {
     return {
         id: PASTE_SPECIAL_MENU_ID,
+        menuType: [DocumentType.SHEET],
         group: MenuGroup.CONTEXT_MENU_FORMAT,
         type: MenuItemType.SUBITEMS,
         icon: 'PasteSpecial',
@@ -1002,6 +1003,7 @@ export function PasteSpacialMenuItemFactory(): IMenuSelectorItem {
 export function PasteValueMenuItemFactory(): IMenuButtonItem<string> {
     return {
         id: SheetPasteValueCommand.id,
+        menuType: [DocumentType.SHEET],
         type: MenuItemType.BUTTON,
         title: 'rightClick.pasteValue',
         positions: [PASTE_SPECIAL_MENU_ID],
@@ -1011,6 +1013,7 @@ export function PasteValueMenuItemFactory(): IMenuButtonItem<string> {
 export function PasteFormatMenuItemFactory(): IMenuButtonItem<string> {
     return {
         id: SheetPasteFormatCommand.id,
+        menuType: [DocumentType.SHEET],
         type: MenuItemType.BUTTON,
         title: 'rightClick.pasteFormat',
         positions: [PASTE_SPECIAL_MENU_ID],
@@ -1020,6 +1023,7 @@ export function PasteFormatMenuItemFactory(): IMenuButtonItem<string> {
 export function PasteColWidthMenuItemFactory(): IMenuButtonItem<string> {
     return {
         id: SheetPasteColWidthCommand.id,
+        menuType: [DocumentType.SHEET],
         type: MenuItemType.BUTTON,
         title: 'rightClick.pasteColWidth',
         positions: [PASTE_SPECIAL_MENU_ID],
@@ -1029,6 +1033,7 @@ export function PasteColWidthMenuItemFactory(): IMenuButtonItem<string> {
 export function PasteBesidesBorderMenuItemFactory(): IMenuButtonItem<string> {
     return {
         id: SheetPasteBesidesBorderCommand.id,
+        menuType: [DocumentType.SHEET],
         type: MenuItemType.BUTTON,
         title: 'rightClick.pasteBesidesBorder',
         positions: [PASTE_SPECIAL_MENU_ID],
@@ -1038,6 +1043,7 @@ export function PasteBesidesBorderMenuItemFactory(): IMenuButtonItem<string> {
 export function FitContentMenuItemFactory(): IMenuButtonItem {
     return {
         id: SetWorksheetRowIsAutoHeightCommand.id,
+        menuType: [DocumentType.SHEET],
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
@@ -1051,6 +1057,7 @@ export const SHEET_FROZEN_MENU_ID = 'sheet.menu.sheet-frozen';
 export function SheetFrozenMenuItemFactory(): IMenuSelectorItem<string> {
     return {
         id: SHEET_FROZEN_MENU_ID,
+        menuType: [DocumentType.SHEET],
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.SUBITEMS,
         title: 'rightClick.freeze',
@@ -1064,6 +1071,7 @@ export const SHEET_FROZEN_HEADER_MENU_ID = 'sheet.header-menu.sheet-frozen';
 export function SheetFrozenHeaderMenuItemFactory(): IMenuSelectorItem<string> {
     return {
         id: SHEET_FROZEN_HEADER_MENU_ID,
+        menuType: [DocumentType.SHEET],
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.SUBITEMS,
         title: 'rightClick.freeze',
@@ -1075,6 +1083,7 @@ export function SheetFrozenHeaderMenuItemFactory(): IMenuSelectorItem<string> {
 export function FrozenMenuItemFactory(): IMenuButtonItem {
     return {
         id: SetSelectionFrozenCommand.id,
+        menuType: [DocumentType.SHEET],
         type: MenuItemType.BUTTON,
         positions: [SHEET_FROZEN_MENU_ID, SHEET_FROZEN_HEADER_MENU_ID],
         title: 'rightClick.freeze',
@@ -1085,6 +1094,7 @@ export function FrozenMenuItemFactory(): IMenuButtonItem {
 export function FrozenRowMenuItemFactory(): IMenuButtonItem {
     return {
         id: SetRowFrozenCommand.id,
+        menuType: [DocumentType.SHEET],
         type: MenuItemType.BUTTON,
         positions: [SHEET_FROZEN_MENU_ID],
         title: 'rightClick.freezeRow',
@@ -1095,6 +1105,7 @@ export function FrozenRowMenuItemFactory(): IMenuButtonItem {
 export function FrozenColMenuItemFactory(): IMenuButtonItem {
     return {
         id: SetColumnFrozenCommand.id,
+        menuType: [DocumentType.SHEET],
         type: MenuItemType.BUTTON,
         positions: [SHEET_FROZEN_MENU_ID],
         title: 'rightClick.freezeCol',
@@ -1105,6 +1116,7 @@ export function FrozenColMenuItemFactory(): IMenuButtonItem {
 export function CancelFrozenMenuItemFactory(): IMenuButtonItem {
     return {
         id: CancelFrozenCommand.id,
+        menuType: [DocumentType.SHEET],
         type: MenuItemType.BUTTON,
         positions: [SHEET_FROZEN_MENU_ID, SHEET_FROZEN_HEADER_MENU_ID],
         title: 'rightClick.cancelFreeze',
@@ -1115,6 +1127,7 @@ export function CancelFrozenMenuItemFactory(): IMenuButtonItem {
 export function HideRowMenuItemFactory(): IMenuButtonItem {
     return {
         id: SetRowHiddenCommand.id,
+        menuType: [DocumentType.SHEET],
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
@@ -1126,6 +1139,7 @@ export function HideRowMenuItemFactory(): IMenuButtonItem {
 export function HideColMenuItemFactory(): IMenuButtonItem {
     return {
         id: SetColHiddenCommand.id,
+        menuType: [DocumentType.SHEET],
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.COL_HEADER_CONTEXT_MENU],
@@ -1160,6 +1174,7 @@ export function ShowRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
     return {
         id: SetSelectedRowsVisibleCommand.id,
+        menuType: [DocumentType.SHEET],
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
@@ -1208,6 +1223,7 @@ export function ShowColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
     return {
         id: SetSelectedColsVisibleCommand.id,
+        menuType: [DocumentType.SHEET],
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.COL_HEADER_CONTEXT_MENU],
@@ -1236,6 +1252,7 @@ export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonIte
 
     return {
         id: SetRowHeightCommand.id,
+        menuType: [DocumentType.SHEET],
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
         icon: 'AdjustHeight',
@@ -1279,6 +1296,7 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem
 
     return {
         id: SetColWidthCommand.id,
+        menuType: [DocumentType.SHEET],
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
         icon: 'AdjustWidth',

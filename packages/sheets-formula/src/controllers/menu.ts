@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DocumentType } from '@univerjs/core';
 import { PASTE_SPECIAL_MENU_ID } from '@univerjs/sheets-ui';
 import type { IMenuItem } from '@univerjs/ui';
 import { MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
@@ -26,6 +27,7 @@ import { MoreFunctionsOperation } from '../commands/operations/more-functions.op
 export function InsertFunctionMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
         id: InsertFunctionOperation.id,
+        menuType: [DocumentType.SHEET],
         icon: 'FunctionSingle',
         tooltip: 'formula.insert.tooltip',
         group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
@@ -64,6 +66,7 @@ export function InsertFunctionMenuItemFactory(accessor: IAccessor): IMenuItem {
 export function MoreFunctionsMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
         id: MoreFunctionsOperation.id,
+        menuType: [DocumentType.SHEET],
         title: 'formula.insert.more',
         positions: InsertFunctionOperation.id,
         type: MenuItemType.BUTTON,
@@ -73,6 +76,7 @@ export function MoreFunctionsMenuItemFactory(accessor: IAccessor): IMenuItem {
 export function PasteFormulaMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
         id: SheetOnlyPasteFormulaCommand.id,
+        menuType: [DocumentType.SHEET],
         type: MenuItemType.BUTTON,
         title: 'formula.operation.pasteFormula',
         positions: [PASTE_SPECIAL_MENU_ID],

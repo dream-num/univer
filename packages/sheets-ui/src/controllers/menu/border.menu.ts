@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ICommandService } from '@univerjs/core';
+import { DocumentType, ICommandService } from '@univerjs/core';
 import type { IBorderInfo } from '@univerjs/sheets';
 import { BorderStyleManagerService, SetBorderBasicCommand } from '@univerjs/sheets';
 import type { IMenuSelectorItem } from '@univerjs/ui';
@@ -30,6 +30,7 @@ export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSel
     const borderStyleManagerService = accessor.get(BorderStyleManagerService);
     return {
         id: SetBorderBasicCommand.id,
+        menuType: [DocumentType.SHEET],
         icon: new Observable<string>((subscriber) => {
             const defaultIcon = 'AllBorderSingle';
             const borderManager = accessor.get(BorderStyleManagerService);

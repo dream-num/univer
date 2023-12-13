@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DocumentType } from '@univerjs/core';
 import {
     InsertColAfterCommand,
     InsertColBeforeCommand,
@@ -34,6 +35,7 @@ const COL_INSERT_MENU_ID = 'sheet.menu.col-insert';
 export function ColInsertMenuItemFactory(): IMenuSelectorItem<string> {
     return {
         id: COL_INSERT_MENU_ID,
+        menuType: [DocumentType.SHEET],
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.SUBITEMS,
         title: 'rightClick.insert',
@@ -45,6 +47,7 @@ const ROW_INSERT_MENU_ID = 'sheet.menu.row-insert';
 export function RowInsertMenuItemFactory(): IMenuSelectorItem<string> {
     return {
         id: ROW_INSERT_MENU_ID,
+        menuType: [DocumentType.SHEET],
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.SUBITEMS,
         title: 'rightClick.insert',
@@ -56,6 +59,7 @@ const CELL_INSERT_MENU_ID = 'sheet.menu.cell-insert';
 export function CellInsertMenuItemFactory(): IMenuSelectorItem<string> {
     return {
         id: CELL_INSERT_MENU_ID,
+        menuType: [DocumentType.SHEET],
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.SUBITEMS,
         title: 'rightClick.insert',
@@ -69,6 +73,7 @@ export function InsertRowBeforeMenuItemFactory(accessor: IAccessor): IMenuButton
 
     return {
         id: InsertRowBeforeCommand.id,
+        menuType: [DocumentType.SHEET],
         type: MenuItemType.BUTTON,
         title: 'rightClick.insertRowBefore',
         icon: 'InsertRowAbove',
@@ -85,6 +90,7 @@ export function InsertRowAfterMenuItemFactory(accessor: IAccessor): IMenuButtonI
     const selectionManager = accessor.get(SelectionManagerService);
     return {
         id: InsertRowAfterCommand.id,
+        menuType: [DocumentType.SHEET],
         type: MenuItemType.BUTTON,
         positions: [ROW_INSERT_MENU_ID],
         title: 'rightClick.insertRow',
@@ -101,6 +107,7 @@ export function InsertColBeforeMenuItemFactory(accessor: IAccessor): IMenuButton
     const selectionManager = accessor.get(SelectionManagerService);
     return {
         id: InsertColBeforeCommand.id,
+        menuType: [DocumentType.SHEET],
         type: MenuItemType.BUTTON,
         positions: [COL_INSERT_MENU_ID, CELL_INSERT_MENU_ID],
         title: 'rightClick.insertColumnBefore',
@@ -117,6 +124,7 @@ export function InsertColAfterMenuItemFactory(accessor: IAccessor): IMenuButtonI
     const selectionManager = accessor.get(SelectionManagerService);
     return {
         id: InsertColAfterCommand.id,
+        menuType: [DocumentType.SHEET],
         type: MenuItemType.BUTTON,
         positions: [COL_INSERT_MENU_ID],
         title: 'rightClick.insertColumn',
@@ -132,6 +140,7 @@ export function InsertColAfterMenuItemFactory(accessor: IAccessor): IMenuButtonI
 export function InsertRangeMoveRightMenuItemFactory(): IMenuButtonItem {
     return {
         id: InsertRangeMoveRightCommand.id,
+        menuType: [DocumentType.SHEET],
         type: MenuItemType.BUTTON,
         title: 'rightClick.moveRight',
         icon: 'InsertCellShiftRight',
@@ -142,6 +151,7 @@ export function InsertRangeMoveRightMenuItemFactory(): IMenuButtonItem {
 export function InsertRangeMoveDownMenuItemFactory(): IMenuButtonItem {
     return {
         id: InsertRangeMoveDownCommand.id,
+        menuType: [DocumentType.SHEET],
         type: MenuItemType.BUTTON,
         title: 'rightClick.moveDown',
         icon: 'InsertCellDown',

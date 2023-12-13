@@ -47,6 +47,8 @@ export interface IUniverHandler {
  */
 export interface IUniverInstanceService {
     focused$: Observable<Nullable<string>>;
+    // TODO: @Jocs
+    actived$: Observable<Nullable<string>>;
 
     currentSheet$: Observable<Nullable<Workbook>>;
     currentDoc$: Observable<Nullable<DocumentDataModel>>;
@@ -94,8 +96,10 @@ export interface IUniverInstanceService {
 export const IUniverInstanceService = createIdentifier<IUniverInstanceService>('univer.current');
 export class UniverInstanceService extends Disposable implements IUniverInstanceService {
     private readonly _focused$ = new BehaviorSubject<Nullable<string>>(null);
+    private readonly _actived$ = new BehaviorSubject<Nullable<string>>(null);
     private _focused: DocumentDataModel | Workbook | Slide | null = null;
     readonly focused$ = this._focused$.asObservable();
+    readonly actived$ = this._actived$.asObservable();
 
     private readonly _currentSheet$ = new BehaviorSubject<Nullable<Workbook>>(null);
     readonly currentSheet$ = this._currentSheet$.asObservable();

@@ -57,6 +57,7 @@ export {
     MenuGroup,
     MenuItemType,
     MenuPosition,
+    type MenuType,
 } from './services/menu/menu';
 export { DesktopMenuService, IMenuService } from './services/menu/menu.service';
 export { DesktopMessageService } from './services/message/desktop-message.service';

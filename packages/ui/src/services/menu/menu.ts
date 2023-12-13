@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
+import type { DocumentType } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 
 export type OneOrMany<T> = T | T[];
+
+export type MenuType = DocumentType[];
 
 export const enum MenuPosition {
     VOID = 'void',
@@ -60,6 +63,7 @@ interface IMenuItemBase<V> {
     /** ID of the menu item. Normally it should be the same as the ID of the command that it would invoke.  */
     id: string;
     subId?: string;
+    menuType?: MenuType;
     title?: string;
     description?: string;
     icon?: string | Observable<string>;

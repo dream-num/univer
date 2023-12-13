@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
+import { DocumentType, ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { AddDigitsSingle, MoreDownSingle, ReduceDigitsSingle, RmbSingle } from '@univerjs/icons';
 import { INumfmtService, SelectionManagerService, SetNumfmtMutation } from '@univerjs/sheets';
 import type { ComponentManager, IMenuSelectorItem } from '@univerjs/ui';
@@ -37,6 +37,7 @@ export const CurrencyMenuItem = (componentManager: ComponentManager) => {
     return () => ({
         icon: iconKey,
         id: SetCurrencyCommand.id,
+        menuType: [DocumentType.SHEET],
         title: 'sheet.numfmt.currency',
         tooltip: 'sheet.numfmt.currency',
         type: MenuItemType.BUTTON,
@@ -51,6 +52,7 @@ export const AddDecimalMenuItem = (componentManager: ComponentManager) => {
     return () => ({
         icon: iconKey,
         id: AddDecimalCommand.id,
+        menuType: [DocumentType.SHEET],
         title: 'sheet.numfmt.addDecimal',
         tooltip: 'sheet.numfmt.addDecimal',
         type: MenuItemType.BUTTON,
@@ -64,6 +66,7 @@ export const SubtractDecimalMenuItem = (componentManager: ComponentManager) => {
     return () => ({
         icon: iconKey,
         id: SubtractDecimalCommand.id,
+        menuType: [DocumentType.SHEET],
         title: 'sheet.numfmt.subtractDecimal',
         tooltip: 'sheet.numfmt.subtractDecimal',
         type: MenuItemType.BUTTON,
@@ -125,6 +128,7 @@ export const FactoryOtherMenuItem = (componentManager: ComponentManager) => {
             // icon: 'MoreDownSingle',
             label: moreTypeKey,
             id: OpenNumfmtPanelOperator.id,
+            menuType: [DocumentType.SHEET],
             tooltip: 'sheet.numfmt.title',
             type: MenuItemType.SELECTOR,
             group: MenuGroup.TOOLBAR_FORMULAS_INSERT,

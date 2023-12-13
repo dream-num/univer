@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { IUndoRedoService, RedoCommand, UndoCommand } from '@univerjs/core';
+import { DocumentType, IUndoRedoService, RedoCommand, UndoCommand } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 import { map } from 'rxjs/operators';
 
@@ -26,6 +26,7 @@ export function UndoMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
     return {
         id: UndoCommand.id,
+        menuType: [DocumentType.SHEET, DocumentType.DOC],
         group: MenuGroup.TOOLBAR_HISTORY,
         type: MenuItemType.BUTTON,
         icon: 'UndoSingle',
@@ -41,6 +42,7 @@ export function RedoMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
     return {
         id: RedoCommand.id,
+        menuType: [DocumentType.SHEET, DocumentType.DOC],
         group: MenuGroup.TOOLBAR_HISTORY,
         type: MenuItemType.BUTTON,
         icon: 'RedoSingle',

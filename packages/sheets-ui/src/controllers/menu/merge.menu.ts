@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DocumentType } from '@univerjs/core';
 import { RemoveWorksheetMergeCommand } from '@univerjs/sheets';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import { MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
@@ -29,6 +30,7 @@ import {
 export function CellMergeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     return {
         id: AddWorksheetMergeCommand.id,
+        menuType: [DocumentType.SHEET],
         icon: 'MergeAllSingle',
         tooltip: 'toolbar.mergeCell.main',
         positions: [MenuPosition.TOOLBAR_START],
@@ -40,6 +42,7 @@ export function CellMergeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem
 export function CellMergeAllMenuItemFactory(accessor: IAccessor): IMenuButtonItem<string> {
     return {
         id: AddWorksheetMergeAllCommand.id,
+        menuType: [DocumentType.SHEET],
         type: MenuItemType.BUTTON,
         title: 'merge.all',
         icon: 'MergeAllSingle',
@@ -49,6 +52,7 @@ export function CellMergeAllMenuItemFactory(accessor: IAccessor): IMenuButtonIte
 export function CellMergeVerticalMenuItemFactory(accessor: IAccessor): IMenuButtonItem<string> {
     return {
         id: AddWorksheetMergeVerticalCommand.id,
+        menuType: [DocumentType.SHEET],
         type: MenuItemType.BUTTON,
         title: 'merge.vertical',
         icon: 'VerticalIntegrationSingle',
@@ -58,6 +62,7 @@ export function CellMergeVerticalMenuItemFactory(accessor: IAccessor): IMenuButt
 export function CellMergeHorizontalMenuItemFactory(accessor: IAccessor): IMenuButtonItem<string> {
     return {
         id: AddWorksheetMergeHorizontalCommand.id,
+        menuType: [DocumentType.SHEET],
         type: MenuItemType.BUTTON,
         title: 'merge.horizontal',
         icon: 'HorizontalMergeSingle',
@@ -67,6 +72,7 @@ export function CellMergeHorizontalMenuItemFactory(accessor: IAccessor): IMenuBu
 export function CellMergeCancelMenuItemFactory(accessor: IAccessor): IMenuButtonItem<string> {
     return {
         id: RemoveWorksheetMergeCommand.id,
+        menuType: [DocumentType.SHEET],
         type: MenuItemType.BUTTON,
         title: 'merge.cancel',
         icon: 'CancelMergeSingle',

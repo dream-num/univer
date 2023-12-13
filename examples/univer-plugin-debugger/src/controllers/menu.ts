@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { LocaleType } from '@univerjs/core';
+import { DocumentType, LocaleType } from '@univerjs/core';
 import { defaultTheme, greenTheme } from '@univerjs/design';
 import type { IMenuSelectorItem } from '@univerjs/ui';
 import { MenuItemType, MenuPosition } from '@univerjs/ui';
@@ -33,6 +33,7 @@ import { ThemeOperation } from '../commands/operations/theme.operation';
 export function LocaleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {
         id: LocaleOperation.id,
+        menuType: [DocumentType.SHEET, DocumentType.DOC],
         title: 'i18n',
         tooltip: 'i18n',
         type: MenuItemType.SELECTOR,
@@ -53,6 +54,7 @@ export function LocaleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
 export function ThemeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {
         id: ThemeOperation.id,
+        menuType: [DocumentType.SHEET, DocumentType.DOC],
         title: 'Theme',
         tooltip: 'Theme',
         type: MenuItemType.SELECTOR,
@@ -73,6 +75,7 @@ export function ThemeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
 export function NotificationMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {
         id: NotificationOperation.id,
+        menuType: [DocumentType.SHEET, DocumentType.DOC],
         title: 'Notification',
         tooltip: 'Notification',
         type: MenuItemType.SELECTOR,
@@ -101,6 +104,7 @@ export function NotificationMenuItemFactory(accessor: IAccessor): IMenuSelectorI
 export function DialogMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {
         id: DialogOperation.id,
+        menuType: [DocumentType.SHEET, DocumentType.DOC],
         title: 'Dialog',
         tooltip: 'Dialog',
         type: MenuItemType.SELECTOR,
@@ -117,6 +121,7 @@ export function DialogMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
 export function ConfirmMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {
         id: ConfirmOperation.id,
+        menuType: [DocumentType.SHEET, DocumentType.DOC],
         title: 'Confirm',
         tooltip: 'Confirm',
         type: MenuItemType.SELECTOR,
@@ -133,6 +138,7 @@ export function ConfirmMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
 export function MessageMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {
         id: MessageOperation.id,
+        menuType: [DocumentType.SHEET, DocumentType.DOC],
         title: 'Message',
         tooltip: 'Message',
         type: MenuItemType.SELECTOR,
@@ -149,6 +155,7 @@ export function MessageMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
 export function SidebarMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {
         id: SidebarOperation.id,
+        menuType: [DocumentType.SHEET],
         title: 'Sidebar',
         tooltip: 'Sidebar',
         type: MenuItemType.SELECTOR,
@@ -169,6 +176,7 @@ export function SidebarMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
 export function SetEditableMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {
         id: SetEditable.id,
+        menuType: [DocumentType.SHEET],
         title: 'Editable',
         tooltip: 'Editable',
         type: MenuItemType.SELECTOR,
@@ -189,6 +197,7 @@ export function SetEditableMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
 export function SaveSnapshotSetEditableMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {
         id: SaveSnapshotOptions.id,
+        menuType: [DocumentType.SHEET],
         type: MenuItemType.SELECTOR,
         title: 'Snapshot',
         positions: [MenuPosition.TOOLBAR_OTHERS],

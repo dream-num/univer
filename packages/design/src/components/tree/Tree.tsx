@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DropdownSingle } from '@univerjs/icons';
+import { CheckMarkSingle, DropdownSingle } from '@univerjs/icons';
 import clsx from 'clsx';
 import React, { useEffect, useMemo, useState } from 'react';
 
@@ -26,7 +26,7 @@ export enum TreeSelectionMode {
     ALL,
 }
 
-interface ITreeNodeProps {
+export interface ITreeNodeProps {
     title: string;
     key: string;
     children?: ITreeNodeProps[];
@@ -138,13 +138,20 @@ export function Tree(props: ITreeProps) {
                         [styles.treeListItemContentSelected]: _selected,
                     })}
                 >
-                    <span
-                        className={clsx(styles.treeIcon, {
-                            [styles.treeIconExpand]: _expand,
-                        })}
-                    >
-                        {children && <DropdownSingle />}
-                    </span>
+                    {children && children.length > 0 && (
+                        <span
+                            className={clsx(styles.treeIcon, {
+                                [styles.treeIconExpand]: _expand,
+                            })}
+                        >
+                            <DropdownSingle />
+                        </span>
+                    )}
+                    {_selected && (
+                        <span className={styles.treeListItemContentSelectedIcon}>
+                            <CheckMarkSingle />
+                        </span>
+                    )}
                     <span>{title}</span>
                 </a>
                 {children && (

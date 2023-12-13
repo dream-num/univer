@@ -80,6 +80,7 @@ export function SubscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: SetInlineFormatSubscriptCommand.id,
         menuType: [DocumentType.DOC],
+        group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
         icon: 'FontSizeReduceSingleSingle',
         tooltip: 'toolbar.subscript',
@@ -91,6 +92,7 @@ export function SuperscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem
     return {
         id: SetInlineFormatSuperscriptCommand.id,
         menuType: [DocumentType.DOC],
+        group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
         icon: 'FontSizeIncreaseSingle',
         tooltip: 'toolbar.superscript',

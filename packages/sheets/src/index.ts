@@ -203,7 +203,7 @@ export {
     SetFrozenMutationFactory,
 } from './commands/mutations/set-frozen.mutation';
 export type { ISetRangeValuesMutationParams } from './commands/mutations/set-range-values.mutation';
-export { SetRangeValuesMutation } from './commands/mutations/set-range-values.mutation';
+export { SetRangeValuesMutation, transformRefStyleFromCells } from './commands/mutations/set-range-values.mutation';
 export { SetRangeValuesUndoMutationFactory } from './commands/mutations/set-range-values.mutation';
 export { type ISetRangeValuesRangeMutationParams } from './commands/mutations/set-range-values.mutation';
 export { SetRowHiddenMutation, SetRowVisibleMutation } from './commands/mutations/set-row-visible.mutation';

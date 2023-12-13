@@ -41,7 +41,7 @@ export interface ISetRangeValuesMutationParams extends IMutationCommonParams {
      * null for clear all
      */
     cellValue?: IObjectMatrixPrimitiveType<ICellData | null>;
-
+    styleRefMap?: Record<string, ICellData['s']>;
     /**
      * @deprecated not a good design
      */
@@ -58,6 +58,60 @@ export interface ISetRangeValuesRangeMutationParams extends ISetRangeValuesMutat
 }
 
 /**
+ * Create ref style to reduce the size at transfer time.
+ * @param {(IObjectMatrixPrimitiveType<ICellData | null>)} matrix
+ */
+export const transformRefStyleFromCells = (matrix: IObjectMatrixPrimitiveType<ICellData | null>) => {
+    const styleRefMap: { [id: string]: ICellData['s'] } = {};
+    if (!matrix) {
+        return {
+            cellValue: matrix,
+            styleRefMap: undefined,
+        };
+    }
+    const styleList: string[] = [];
+    const _matrix = new ObjectMatrix(Tools.deepClone(matrix)).forValue((row, col, value) => {
+        const s = value && value.s;
+        if (s) {
+            const sType = typeof s;
+            if (sType === 'object') {
+                const styleString = JSON.stringify(s);
+                const index = styleList.findIndex((item) => item === styleString);
+                if (index > -1) {
+                    value.s = `${index}`;
+                } else {
+                    const length = styleList.push(styleString) - 1;
+                    styleRefMap[length] = s;
+                    value.s = `${length}`;
+                }
+            }
+        }
+    });
+    return { cellValue: _matrix.getMatrix(), styleRefMap };
+};
+
+export const transformCellsFromRefStyle = (
+    matrix?: IObjectMatrixPrimitiveType<ICellData | null>,
+    styleRefMap?: { [id: string]: ICellData['s'] }
+) => {
+    if (!matrix || !styleRefMap) {
+        return matrix;
+    }
+    const _matrix = new ObjectMatrix(Tools.deepClone(matrix)).forValue((row, col, value) => {
+        const s = value && value.s;
+        if (s) {
+            const sType = typeof s;
+            if (sType === 'string') {
+                const style = styleRefMap[s as string];
+                if (style) {
+                    value.s = style;
+                }
+            }
+        }
+    });
+    return _matrix.getMatrix();
+};
+/**
  * Generate undo mutation of a `SetRangeValuesMutation`
  *
  * @param {IAccessor} accessor - injector accessor
@@ -68,7 +122,7 @@ export const SetRangeValuesUndoMutationFactory = (
     accessor: IAccessor,
     params: ISetRangeValuesMutationParams
 ): ISetRangeValuesMutationParams => {
-    const { unitId, subUnitId, cellValue } = params;
+    const { unitId, subUnitId, cellValue, styleRefMap } = params;
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const workbook = univerInstanceService.getUniverSheetInstance(unitId);
 
@@ -85,7 +139,7 @@ export const SetRangeValuesUndoMutationFactory = (
     const styles = workbook.getStyles();
     const undoData = new ObjectMatrix<ICellData>();
 
-    const newValues = new ObjectMatrix(cellValue);
+    const newValues = new ObjectMatrix(transformCellsFromRefStyle(cellValue, styleRefMap));
 
     newValues.forValue((row, col, newVal) => {
         const cell = Tools.deepClone(cellMatrix?.getValue(row, col)) || {}; // clone cell data，prevent modify the original data
@@ -100,50 +154,15 @@ export const SetRangeValuesUndoMutationFactory = (
     return {
         ...Tools.deepClone(params),
         options: {},
-        cellValue: undoData.getData(),
+        ...transformRefStyleFromCells(undoData.getData()),
     } as ISetRangeValuesMutationParams;
 };
-
-/**
- * Supplement the data of the cell, set the other value to NULL, Used to reset properties when undoing
- * @param value
- * @returns
- */
-function setNull(value: Nullable<ICellData>) {
-    if (value == null) return null;
-
-    if (value.f === undefined) {
-        value.f = null;
-    }
-
-    if (value.si === undefined) {
-        value.si = null;
-    }
-
-    if (value.p === undefined) {
-        value.p = null;
-    }
-
-    if (value.v === undefined) {
-        value.v = null;
-    }
-
-    if (value.t === undefined) {
-        value.t = null;
-    }
-
-    if (value.s === undefined) {
-        value.s = null;
-    }
-
-    return value;
-}
 
 export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, boolean> = {
     id: 'sheet.mutation.set-range-values',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
-        const { cellValue, subUnitId, unitId } = params;
+        const { cellValue, subUnitId, unitId, styleRefMap } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const workbook = univerInstanceService.getUniverSheetInstance(unitId);
         if (!workbook) {
@@ -157,7 +176,9 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
 
         const cellMatrix = worksheet.getCellMatrix();
         const styles = workbook.getStyles();
-        const newValues = new ObjectMatrix(cellValue);
+        const newValues = new ObjectMatrix(
+            styleRefMap ? transformCellsFromRefStyle(cellValue!, styleRefMap) : cellValue
+        );
 
         newValues.forValue((row, col, newVal) => {
             // clear all
@@ -232,6 +253,41 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
     },
 };
 
+/**
+ * Supplement the data of the cell, set the other value to NULL, Used to reset properties when undoing
+ * @param value
+ * @returns
+ */
+function setNull(value: Nullable<ICellData>) {
+    if (value == null) return null;
+
+    if (value.f === undefined) {
+        value.f = null;
+    }
+
+    if (value.si === undefined) {
+        value.si = null;
+    }
+
+    if (value.p === undefined) {
+        value.p = null;
+    }
+
+    if (value.v === undefined) {
+        value.v = null;
+    }
+
+    if (value.t === undefined) {
+        value.t = null;
+    }
+
+    if (value.s === undefined) {
+        value.s = null;
+    }
+
+    return value;
+}
+
 function checkCellValueType(v: Nullable<ICellV>): Nullable<CellValueType> {
     if (v === null) return null;
 
@@ -254,7 +310,7 @@ function checkCellValueType(v: Nullable<ICellV>): Nullable<CellValueType> {
  * Convert old style data for storage
  * @param style
  */
-export function transformStyle(oldStyle: Nullable<IStyleData>, newStyle: Nullable<IStyleData>): Nullable<IStyleData> {
+function transformStyle(oldStyle: Nullable<IStyleData>, newStyle: Nullable<IStyleData>): Nullable<IStyleData> {
     const backupStyle = transformNormalKey(oldStyle, newStyle);
     return backupStyle;
 }
@@ -263,10 +319,7 @@ export function transformStyle(oldStyle: Nullable<IStyleData>, newStyle: Nullabl
  *
  * @param style
  */
-export function transformNormalKey(
-    oldStyle: Nullable<IStyleData>,
-    newStyle: Nullable<IStyleData>
-): Nullable<IStyleData> {
+function transformNormalKey(oldStyle: Nullable<IStyleData>, newStyle: Nullable<IStyleData>): Nullable<IStyleData> {
     // If there is no newly set style, directly store the historical style
     if (!newStyle || !Object.keys(newStyle).length) {
         return oldStyle;
@@ -291,7 +344,7 @@ export function transformNormalKey(
 
  * @param style
  */
-export function transformBorders(oldBorders: IBorderData, newBorders: Nullable<IBorderData>): IBorderData {
+function transformBorders(oldBorders: IBorderData, newBorders: Nullable<IBorderData>): IBorderData {
     // If there is no newly set border, directly store the historical border
     if (!newBorders || !Object.keys(newBorders).length) {
         return oldBorders;
@@ -314,7 +367,7 @@ export function transformBorders(oldBorders: IBorderData, newBorders: Nullable<I
  * @param oldStyle
  * @param newStyle
  */
-export function mergeStyle(
+function mergeStyle(
     oldStyle: Nullable<IStyleData>,
     newStyle: Nullable<IStyleData>,
     isRichText: boolean = false
@@ -369,7 +422,7 @@ export function mergeStyle(
  * @param p
  * @param newStyle
  */
-export function mergeRichTextStyle(p: IDocumentData, newStyle: Nullable<IStyleData>) {
+function mergeRichTextStyle(p: IDocumentData, newStyle: Nullable<IStyleData>) {
     p.body?.textRuns?.forEach((textRun) => {
         if (!textRun.ts) {
             textRun.ts = {};

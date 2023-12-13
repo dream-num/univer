@@ -37,6 +37,7 @@ import {
     SetRangeValuesMutation,
     SetRangeValuesUndoMutationFactory,
     SetSelectionsOperation,
+    transformRefStyleFromCells,
 } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 
@@ -84,7 +85,7 @@ export const AutoFillCommand: ICommand = {
         const setRangeValuesMutationParams: ISetRangeValuesMutationParams = {
             subUnitId,
             unitId,
-            cellValue: cellValue.getMatrix(),
+            ...transformRefStyleFromCells(cellValue.getMatrix()),
         };
 
         const undoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(

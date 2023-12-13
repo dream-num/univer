@@ -26,7 +26,11 @@ import {
 } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
+import {
+    SetRangeValuesMutation,
+    SetRangeValuesUndoMutationFactory,
+    transformRefStyleFromCells,
+} from '@univerjs/sheets';
 import type { ICellDataWithSpanInfo, ISheetClipboardHook } from '@univerjs/sheets-ui';
 import { COPY_TYPE, ISheetClipboardService } from '@univerjs/sheets-ui';
 import type { IAccessor } from '@wendellhu/redi';
@@ -192,7 +196,7 @@ export function getSetCellFormulaMutations(
     const setValuesMutation: ISetRangeValuesMutationParams = {
         unitId,
         subUnitId,
-        cellValue: valueMatrix.getData(),
+        ...transformRefStyleFromCells(valueMatrix.getData()),
     };
 
     redoMutationsInfo.push({

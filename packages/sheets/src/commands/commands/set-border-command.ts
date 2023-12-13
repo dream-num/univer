@@ -38,7 +38,11 @@ import type { IAccessor } from '@wendellhu/redi';
 import { BorderStyleManagerService, type IBorderInfo } from '../../services/border-style-manager.service';
 import { SelectionManagerService } from '../../services/selection-manager.service';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
-import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
+import {
+    SetRangeValuesMutation,
+    SetRangeValuesUndoMutationFactory,
+    transformRefStyleFromCells,
+} from '../mutations/set-range-values.mutation';
 
 function forEach(range: IRange, action: (row: number, column: number) => void): void {
     const { startRow, startColumn, endRow, endColumn } = range;
@@ -430,7 +434,7 @@ export const SetBorderCommand: ICommand = {
         const setRangeValuesMutationParams: ISetRangeValuesMutationParams = {
             unitId,
             subUnitId,
-            cellValue: mr.getData(),
+            ...transformRefStyleFromCells(mr.getData()),
         };
 
         const undoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(

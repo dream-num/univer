@@ -17,7 +17,11 @@
 import type { ICellData, IMutationInfo, IRange, Worksheet } from '@univerjs/core';
 import { ObjectMatrix } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
+import {
+    SetRangeValuesMutation,
+    SetRangeValuesUndoMutationFactory,
+    transformRefStyleFromCells,
+} from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 
 export function checkCellContentInRanges(worksheet: Worksheet, ranges: IRange[]): boolean {
@@ -60,7 +64,7 @@ export function getClearContentMutationParamsForRanges(
         const redoMutationParams: ISetRangeValuesMutationParams = {
             unitId,
             subUnitId,
-            cellValue: redoMatrix.getData(),
+            ...transformRefStyleFromCells(redoMatrix.getData()),
         };
         const undoMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
             accessor,

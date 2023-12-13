@@ -46,6 +46,7 @@ import {
     SetRangeValuesUndoMutationFactory,
     SetWorksheetColWidthMutation,
     SetWorksheetRowHeightMutation,
+    transformRefStyleFromCells,
 } from '@univerjs/sheets';
 import { IMessageService, textTrim } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -556,7 +557,7 @@ export class SheetClipboardController extends Disposable {
                 const setValuesMutation: ISetRangeValuesMutationParams = {
                     unitId,
                     subUnitId,
-                    cellValue: valueMatrix.getData(),
+                    ...transformRefStyleFromCells(valueMatrix.getData()),
                 };
 
                 redoMutationsInfo.push({

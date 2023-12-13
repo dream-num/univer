@@ -34,6 +34,7 @@ import {
     SetRangeValuesUndoMutationFactory,
     SetSelectionsOperation,
     SheetInterceptorService,
+    transformRefStyleFromCells,
 } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 
@@ -241,7 +242,7 @@ export function getSetCellValueMutations(
     const setValuesMutation: ISetRangeValuesMutationParams = {
         unitId,
         subUnitId,
-        cellValue: valueMatrix.getData(),
+        ...transformRefStyleFromCells(valueMatrix.getData()),
     };
 
     redoMutationsInfo.push({
@@ -291,7 +292,7 @@ export function getSetCellStyleMutations(
     const setValuesMutation: ISetRangeValuesMutationParams = {
         unitId,
         subUnitId,
-        cellValue: valueMatrix.getData(),
+        ...transformRefStyleFromCells(valueMatrix.getData()),
     };
 
     redoMutationsInfo.push({

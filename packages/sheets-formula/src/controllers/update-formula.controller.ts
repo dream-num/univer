@@ -86,6 +86,7 @@ import {
     SetRangeValuesUndoMutationFactory,
     SetWorksheetNameCommand,
     SheetInterceptorService,
+    transformRefStyleFromCells,
 } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -590,7 +591,7 @@ export class UpdateFormulaController extends Disposable {
                 const setRangeValuesMutationParams: ISetRangeValuesMutationParams = {
                     subUnitId,
                     unitId,
-                    cellValue,
+                    ...transformRefStyleFromCells(cellValue),
                 };
 
                 redos.push({

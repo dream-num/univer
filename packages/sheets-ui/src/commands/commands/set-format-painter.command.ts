@@ -42,6 +42,7 @@ import {
     SetRangeValuesMutation,
     SetRangeValuesUndoMutationFactory,
     SheetInterceptorService,
+    transformRefStyleFromCells,
 } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 
@@ -144,7 +145,7 @@ export const ApplyFormatPainterCommand: ICommand = {
         const setRangeValuesMutationParams: ISetRangeValuesMutationParams = {
             subUnitId,
             unitId,
-            cellValue: realCellValue ?? cellValue.getMatrix(),
+            ...transformRefStyleFromCells(realCellValue ?? cellValue.getMatrix()),
         };
         const undoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
             accessor,

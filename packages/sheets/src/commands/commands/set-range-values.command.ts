@@ -31,7 +31,11 @@ import { SelectionManagerService } from '../../services/selection-manager.servic
 import { INTERCEPTOR_POINT } from '../../services/sheet-interceptor/interceptor-const';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
-import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
+import {
+    SetRangeValuesMutation,
+    SetRangeValuesUndoMutationFactory,
+    transformRefStyleFromCells,
+} from '../mutations/set-range-values.mutation';
 
 export interface ISetRangeValuesCommandParams {
     subUnitId?: string;
@@ -96,7 +100,7 @@ export const SetRangeValuesCommand: ICommand = {
         const setRangeValuesMutationParams: ISetRangeValuesMutationParams = {
             subUnitId,
             unitId,
-            cellValue: realCellValue ?? cellValue.getMatrix(),
+            ...transformRefStyleFromCells(realCellValue ?? cellValue.getMatrix()),
         };
         const undoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
             accessor,

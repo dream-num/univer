@@ -53,14 +53,21 @@ export interface IBaseMenuProps {
     onOptionSelect?: (option: IValueOption) => void;
 }
 
+function getMenuItems(id: string) {
+    const menuService = useDependency(IMenuService);
+
+    const menuItems = menuService.getMenuItems(id);
+
+    return menuItems;
+}
+
 function MenuWrapper(props: IBaseMenuProps) {
     const { menuType, onOptionSelect } = props;
-    const menuService = useDependency(IMenuService);
 
     if (!menuType) return;
 
     if (Array.isArray(menuType)) {
-        const menuTypes = menuType.map((type) => menuService.getMenuItems(type));
+        const menuTypes = menuType.map((type) => getMenuItems(type));
 
         const group = menuTypes.map((menuItems) =>
             menuItems.reduce(
@@ -99,7 +106,7 @@ function MenuWrapper(props: IBaseMenuProps) {
         );
     }
 
-    const menuItems = menuService.getMenuItems(menuType);
+    const menuItems = getMenuItems(menuType);
 
     return menuItems.map((item: IDisplayMenuItem<IMenuItem>) => (
         <MenuItem
@@ -176,9 +183,7 @@ interface IMenuItemProps {
 }
 
 function MenuItem({ menuItem, onClick }: IMenuItemProps) {
-    const menuService = useDependency(IMenuService);
-
-    const menuItems = menuItem.id ? menuService.getMenuItems(menuItem.id) : [];
+    const menuItems = menuItem.id ? getMenuItems(menuItem.id) : [];
 
     const disabled = useObservable<boolean>(menuItem.disabled$ || of(false), false, true);
     const hidden = useObservable(menuItem.hidden$ || of(false), false, true);

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { DocumentType } from '@univerjs/core';
+import { IUniverInstanceService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
@@ -30,14 +32,33 @@ export function Toolbar() {
     const menuService = useDependency(IMenuService);
 
     const [group, setGroup] = useState<IMenuGroup[]>([]);
+    const [docType, setDocType] = useState<DocumentType>();
 
     const position = useObservable(position$, MenuPosition.TOOLBAR_START, true);
+
+    const univerInstanceService = useDependency(IUniverInstanceService);
+
+    useEffect(() => {
+        const subscription = univerInstanceService.focused$.subscribe((unitId) => {
+            if (unitId) {
+                const docType = univerInstanceService.getDocumentType(unitId);
+                setDocType(docType);
+            }
+        });
+
+        return () => {
+            subscription.unsubscribe();
+        };
+    }, []);
 
     useEffect(() => {
         const listener = menuService.menuChanged$.subscribe(() => {
             const group: IMenuGroup[] = [];
             for (const position of positions) {
-                const menuItems = menuService.getMenuItems(position);
+                let menuItems = menuService.getMenuItems(position);
+                if (docType) {
+                    menuItems = menuItems.filter((item) => item.menuType?.includes(docType));
+                }
 
                 if (menuItems.length) {
                     group.push({
@@ -53,7 +74,7 @@ export function Toolbar() {
         return () => {
             listener.unsubscribe();
         };
-    }, []);
+    }, [docType]);
 
     const activeMenuGroup = group.find((g) => g.name === position);
 

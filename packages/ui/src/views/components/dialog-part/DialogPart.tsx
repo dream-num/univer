@@ -30,12 +30,12 @@ export function DialogPart() {
 
     useEffect(() => {
         const dialog$ = dialogService.getObservableDialog();
-        const subscribtion = dialog$.subscribe((options: IDialogPartMethodOptions[]) => {
+        const subscription = dialog$.subscribe((options: IDialogPartMethodOptions[]) => {
             setDialogOptions(options);
         });
 
         return () => {
-            subscribtion.unsubscribe();
+            subscription.unsubscribe();
         };
     }, []);
 

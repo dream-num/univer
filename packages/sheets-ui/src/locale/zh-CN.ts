@@ -33,6 +33,8 @@ export default {
         bold: '粗体',
         italic: '斜体',
         strikethrough: '删除线',
+        subscript: '下标',
+        superscript: '上标',
         underline: '下划线',
         textColor: {
             main: '文本颜色',

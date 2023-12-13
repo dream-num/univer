@@ -32,6 +32,8 @@ export default {
         bold: 'Bold',
         italic: 'Italic',
         strikethrough: 'Strikethrough',
+        subscript: 'Subscript',
+        superscript: 'Superscript',
         underline: 'Underline',
         textColor: {
             main: 'Text color',

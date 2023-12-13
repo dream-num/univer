@@ -16,6 +16,7 @@
 
 import type { ICommand, IDocumentBody, IMutationInfo, IStyleBase, ITextDecoration, ITextRun } from '@univerjs/core';
 import {
+    BaselineOffset,
     BooleanNumber,
     CommandType,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
@@ -61,6 +62,18 @@ export const SetInlineFormatStrikethroughCommand: ICommand = {
     handler: async () => true,
 };
 
+export const SetInlineFormatSubscriptCommand: ICommand = {
+    id: 'doc.command.set-inline-format-subscript',
+    type: CommandType.COMMAND,
+    handler: async () => true,
+};
+
+export const SetInlineFormatSuperscriptCommand: ICommand = {
+    id: 'doc.command.set-inline-format-superscript',
+    type: CommandType.COMMAND,
+    handler: async () => true,
+};
+
 export const SetInlineFormatFontSizeCommand: ICommand = {
     id: 'doc.command.set-inline-format-fontsize',
     type: CommandType.COMMAND,
@@ -77,6 +90,18 @@ export const SetInlineFormatTextColorCommand: ICommand = {
     id: 'doc.command.set-inline-format-text-color',
     type: CommandType.COMMAND,
     handler: async () => true,
+};
+
+const COMMAND_ID_TO_FORMAT_KEY_MAP: Record<string, keyof IStyleBase> = {
+    [SetInlineFormatBoldCommand.id]: 'bl',
+    [SetInlineFormatItalicCommand.id]: 'it',
+    [SetInlineFormatUnderlineCommand.id]: 'ul',
+    [SetInlineFormatStrikethroughCommand.id]: 'st',
+    [SetInlineFormatFontSizeCommand.id]: 'fs',
+    [SetInlineFormatFontFamilyCommand.id]: 'ff',
+    [SetInlineFormatTextColorCommand.id]: 'cl',
+    [SetInlineFormatSubscriptCommand.id]: 'va',
+    [SetInlineFormatSuperscriptCommand.id]: 'va',
 };
 
 export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
@@ -107,24 +132,16 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
 
         let formatValue;
 
-        const COMMAND_ID_TO_FORMAT_KEY_MAP: Record<string, keyof IStyleBase> = {
-            [SetInlineFormatBoldCommand.id]: 'bl',
-            [SetInlineFormatItalicCommand.id]: 'it',
-            [SetInlineFormatUnderlineCommand.id]: 'ul',
-            [SetInlineFormatStrikethroughCommand.id]: 'st',
-            [SetInlineFormatFontSizeCommand.id]: 'fs',
-            [SetInlineFormatFontFamilyCommand.id]: 'ff',
-            [SetInlineFormatTextColorCommand.id]: 'cl',
-        };
-
         switch (preCommandId) {
             case SetInlineFormatBoldCommand.id: // fallthrough
             case SetInlineFormatItalicCommand.id: // fallthrough
             case SetInlineFormatUnderlineCommand.id: // fallthrough
-            case SetInlineFormatStrikethroughCommand.id: {
+            case SetInlineFormatStrikethroughCommand.id: // fallthrough
+            case SetInlineFormatSubscriptCommand.id: // fallthrough
+            case SetInlineFormatSuperscriptCommand.id: {
                 formatValue = getReverseFormatValueInSelection(
-                    docsModel.body!.textRuns!,
-                    COMMAND_ID_TO_FORMAT_KEY_MAP[preCommandId],
+                    docsModel.getBody()!.textRuns!,
+                    preCommandId,
                     selections
                 );
 
@@ -207,6 +224,8 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
             SetInlineFormatBoldCommand.id,
             SetInlineFormatFontSizeCommand.id,
             SetInlineFormatFontFamilyCommand.id,
+            SetInlineFormatSubscriptCommand.id,
+            SetInlineFormatSuperscriptCommand.id,
         ];
 
         /**
@@ -257,11 +276,12 @@ function isTextDecoration(value: unknown | ITextDecoration): value is ITextDecor
  */
 function getReverseFormatValueInSelection(
     textRuns: ITextRun[],
-    key: keyof IStyleBase,
+    preCommandId: string,
     selections: TextRange[]
-): BooleanNumber | ITextDecoration {
+): BooleanNumber | ITextDecoration | BaselineOffset {
     let ti = 0;
     let si = 0;
+    const key: keyof IStyleBase = COMMAND_ID_TO_FORMAT_KEY_MAP[preCommandId];
 
     while (ti !== textRuns.length && si !== selections.length) {
         const { startOffset, endOffset } = selections[si];
@@ -275,21 +295,39 @@ function getReverseFormatValueInSelection(
             ti++;
         } else {
             if (ts?.[key] == null) {
-                return /bl|it/.test(key)
-                    ? BooleanNumber.TRUE
-                    : {
-                          s: BooleanNumber.TRUE,
-                      };
+                if (/bl|it/.test(key)) {
+                    return BooleanNumber.TRUE;
+                }
+
+                if (/ul|st/.test(key)) {
+                    return {
+                        s: BooleanNumber.TRUE,
+                    };
+                }
+
+                if (/va/.test(key)) {
+                    return preCommandId === SetInlineFormatSubscriptCommand.id
+                        ? BaselineOffset.SUBSCRIPT
+                        : BaselineOffset.SUPERSCRIPT;
+                }
             }
 
-            if (ts[key] === BooleanNumber.FALSE) {
-                return BooleanNumber.TRUE;
-            }
-
-            if (isTextDecoration(ts[key]) && (ts[key] as ITextDecoration).s === BooleanNumber.FALSE) {
+            if (isTextDecoration(ts?.[key]) && (ts[key] as ITextDecoration).s === BooleanNumber.FALSE) {
                 return {
                     s: BooleanNumber.TRUE,
                 };
+            }
+
+            if (preCommandId === SetInlineFormatSubscriptCommand.id && ts?.[key] !== BaselineOffset.SUBSCRIPT) {
+                return BaselineOffset.SUBSCRIPT;
+            }
+
+            if (preCommandId === SetInlineFormatSuperscriptCommand.id && ts?.[key] !== BaselineOffset.SUPERSCRIPT) {
+                return BaselineOffset.SUPERSCRIPT;
+            }
+
+            if (ts?.[key] === BooleanNumber.FALSE) {
+                return BooleanNumber.TRUE;
             }
 
             ti++;
@@ -298,7 +336,9 @@ function getReverseFormatValueInSelection(
 
     return /bl|it/.test(key)
         ? BooleanNumber.FALSE
-        : {
-              s: BooleanNumber.FALSE,
-          };
+        : /ul|st/.test(key)
+          ? {
+                s: BooleanNumber.FALSE,
+            }
+          : BaselineOffset.NORMAL;
 }

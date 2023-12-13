@@ -117,7 +117,7 @@ export enum FontWeight {
 }
 
 export enum BaselineOffset {
-    NORMAL,
+    NORMAL = 1,
     SUBSCRIPT,
     SUPERSCRIPT,
 }

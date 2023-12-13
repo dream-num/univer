@@ -18,83 +18,83 @@ import type {
     Dimension,
     ICellData,
     IColumnData,
+    IObjectMatrixPrimitiveType,
     IRange,
     IRowData,
     IWorksheetData,
     ObjectArray,
-    ObjectMatrixPrimitiveType,
 } from '@univerjs/core';
 
 /** Params of `RemoveSheetMutation` */
 export interface IRemoveSheetMutationParams {
-    worksheetId: string;
-    workbookId: string;
+    subUnitId: string;
+    unitId: string;
 }
 
 /** Params of `InsertSheetMutation` */
 export interface IInsertSheetMutationParams {
     index: number;
     sheet: IWorksheetData;
-    workbookId: string;
+    unitId: string;
 }
 
 /** Params of InsertRowMutation */
 export interface IInsertRowMutationParams {
-    workbookId: string;
-    worksheetId: string;
+    unitId: string;
+    subUnitId: string;
     ranges: IRange[];
     rowInfo?: ObjectArray<IRowData>;
 }
 
 /** Params of InsertColMutation */
 export interface IInsertColMutationParams {
-    workbookId: string;
-    worksheetId: string;
+    unitId: string;
+    subUnitId: string;
     ranges: IRange[];
     colInfo?: ObjectArray<IColumnData>;
 }
 
 /** Params of InsertRowMutation */
 export interface IRemoveRowsMutationParams {
-    workbookId: string;
-    worksheetId: string;
+    unitId: string;
+    subUnitId: string;
     ranges: IRange[];
 }
 
 /** Params of InsertColMutation */
 export interface IRemoveColMutationParams {
-    workbookId: string;
-    worksheetId: string;
+    unitId: string;
+    subUnitId: string;
     ranges: IRange[];
 }
 
 /** Params of DeleteRange */
 export interface IDeleteRangeMutationParams {
-    workbookId: string;
-    worksheetId: string;
+    unitId: string;
+    subUnitId: string;
     ranges: IRange[];
     shiftDimension: Dimension;
 }
 
 /** Params of InsertRange */
 export interface IInsertRangeMutationParams {
-    workbookId: string;
-    worksheetId: string;
+    unitId: string;
+    subUnitId: string;
     ranges: IRange[];
     shiftDimension: Dimension;
-    cellValue: ObjectMatrixPrimitiveType<ICellData>;
+    cellValue: IObjectMatrixPrimitiveType<ICellData>;
 }
 
 /** Params of RemoveWorksheetMergeMutation */
 export interface IRemoveWorksheetMergeMutationParams {
-    workbookId: string;
-    worksheetId: string;
+    unitId: string;
+    subUnitId: string;
     ranges: IRange[];
 }
 
 /** Params of AddWorksheetMergeMutation */
 export interface IAddWorksheetMergeMutationParams {
-    workbookId: string;
-    worksheetId: string;
+    unitId: string;
+    subUnitId: string;
     ranges: IRange[];
 }

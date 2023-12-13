@@ -89,17 +89,17 @@ export function SheetBarTabs() {
             slideTabBarItemAutoSort: true,
             slideTabBarContainer: slideTabBarContainerRef.current,
             currentIndex: 0,
-            onChangeName: (worksheetId: string, worksheetName: string) => {
+            onChangeName: (subUnitId: string, worksheetName: string) => {
                 commandService.executeCommand(SetWorksheetNameCommand.id, {
-                    worksheetId,
+                    subUnitId,
                     name: worksheetName,
                 });
             },
             onSlideEnd: (event: Event, order: number) => {
                 commandService.executeCommand(SetWorksheetOrderCommand.id, { order });
             },
-            onChangeTab: (event: Event, worksheetId: string) => {
-                commandService.executeCommand(SetWorksheetActivateCommand.id, { worksheetId });
+            onChangeTab: (event: Event, subUnitId: string) => {
+                commandService.executeCommand(SetWorksheetActivateCommand.id, { subUnitId });
             },
             onScroll: (state: IScrollState) => {
                 sheetBarService.setScroll(state);
@@ -152,8 +152,8 @@ export function SheetBarTabs() {
         });
 
     const statusInit = () => {
-        const currentWorksheetId = workbook.getActiveSheet().getSheetId();
-        setActiveKey(currentWorksheetId);
+        const currentsubUnitId = workbook.getActiveSheet().getSheetId();
+        setActiveKey(currentsubUnitId);
 
         const sheets = workbook.getSheets();
         const sheetListItems = sheets

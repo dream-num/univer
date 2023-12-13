@@ -151,11 +151,11 @@ export class SheetInterceptorService extends Disposable {
 
     private _interceptWorkbook(workbook: Workbook): void {
         const disposables = new DisposableCollection();
-        const workbookId = workbook.getUnitId();
+        const unitId = workbook.getUnitId();
         const self = this;
 
         const interceptViewModel = (worksheet: Worksheet): void => {
-            const worksheetId = worksheet.getSheetId();
+            const subUnitId = worksheet.getSheetId();
             worksheet.__interceptViewModel((viewModel) => {
                 const sheetDisposables = new DisposableCollection();
                 const cellInterceptorDisposable = viewModel.registerCellContentInterceptor({
@@ -163,8 +163,8 @@ export class SheetInterceptorService extends Disposable {
                         return self.fetchThroughInterceptors(INTERCEPTOR_POINT.CELL_CONTENT)(
                             worksheet.getCellRaw(row, col),
                             {
-                                workbookId,
-                                worksheetId,
+                                unitId,
+                                subUnitId,
                                 row,
                                 col,
                                 worksheet,
@@ -174,7 +174,7 @@ export class SheetInterceptorService extends Disposable {
                     },
                 });
                 sheetDisposables.add(cellInterceptorDisposable);
-                self._worksheetDisposables.set(getWorksheetDisposableID(workbookId, worksheet), sheetDisposables);
+                self._worksheetDisposables.set(getWorksheetDisposableID(unitId, worksheet), sheetDisposables);
             });
         };
 
@@ -184,30 +184,30 @@ export class SheetInterceptorService extends Disposable {
         disposables.add(toDisposable(workbook.sheetCreated$.subscribe((worksheet) => interceptViewModel(worksheet))));
         disposables.add(
             toDisposable(
-                workbook.sheetDisposed$.subscribe((worksheet) => this._disposeSheetInterceptor(workbookId, worksheet))
+                workbook.sheetDisposed$.subscribe((worksheet) => this._disposeSheetInterceptor(unitId, worksheet))
             )
         );
 
         // Dispose all underlying interceptors when workbook is disposed.
         disposables.add(
             toDisposable(() =>
-                workbook.getSheets().forEach((worksheet) => this._disposeSheetInterceptor(workbookId, worksheet))
+                workbook.getSheets().forEach((worksheet) => this._disposeSheetInterceptor(unitId, worksheet))
             )
         );
     }
 
     private _disposeWorkbookInterceptor(workbook: Workbook): void {
-        const workbookId = workbook.getUnitId();
-        const disposable = this._workbookDisposables.get(workbookId);
+        const unitId = workbook.getUnitId();
+        const disposable = this._workbookDisposables.get(unitId);
 
         if (disposable) {
             disposable.dispose();
-            this._workbookDisposables.delete(workbookId);
+            this._workbookDisposables.delete(unitId);
         }
     }
 
-    private _disposeSheetInterceptor(workbookId: string, worksheet: Worksheet): void {
-        const disposableId = getWorksheetDisposableID(workbookId, worksheet);
+    private _disposeSheetInterceptor(unitId: string, worksheet: Worksheet): void {
+        const disposableId = getWorksheetDisposableID(unitId, worksheet);
         const disposable = this._worksheetDisposables.get(disposableId);
 
         if (disposable) {
@@ -217,6 +217,6 @@ export class SheetInterceptorService extends Disposable {
     }
 }
 
-function getWorksheetDisposableID(workbookId: string, worksheet: Worksheet): string {
-    return `${workbookId}|${worksheet.getSheetId()}`;
+function getWorksheetDisposableID(unitId: string, worksheet: Worksheet): string {
+    return `${unitId}|${worksheet.getSheetId()}`;
 }

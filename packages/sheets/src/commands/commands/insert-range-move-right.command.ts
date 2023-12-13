@@ -69,17 +69,17 @@ export const InsertRangeMoveRightCommand: ICommand = {
             return false;
         }
 
-        const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+        const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+        const subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
         let ranges = params?.ranges as IRange[];
         if (!ranges) {
             ranges = selectionManagerService.getSelectionRanges() || [];
         }
         if (!ranges?.length) return false;
 
-        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
+        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
         if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(worksheetId);
+        const worksheet = workbook.getSheetBySheetId(subUnitId);
         if (!worksheet) return false;
 
         const redoMutations: IMutationInfo[] = [];
@@ -99,8 +99,8 @@ export const InsertRangeMoveRightCommand: ICommand = {
 
         const insertRangeMutationParams: IInsertRangeMutationParams = {
             ranges,
-            worksheetId,
-            workbookId,
+            subUnitId,
+            unitId,
             shiftDimension: Dimension.COLUMNS,
             cellValue: cellValue.getData(),
         };
@@ -145,8 +145,8 @@ export const InsertRangeMoveRightCommand: ICommand = {
                 endColumn: lastColumnIndex,
             };
             const insertColParams: IInsertColMutationParams = {
-                workbookId,
-                worksheetId,
+                unitId,
+                subUnitId,
                 ranges: [lastColumnRange],
                 colInfo: new ObjectArray<IColumnData>(
                     new Array(columnsCount).fill(undefined).map(() => ({
@@ -178,7 +178,7 @@ export const InsertRangeMoveRightCommand: ICommand = {
         const result = sequenceExecute(redoMutations, commandService);
         if (result.result) {
             undoRedoService.pushUndoRedo({
-                unitID: workbookId,
+                unitID: unitId,
                 undoMutations: undoMutations.reverse(),
                 redoMutations,
             });

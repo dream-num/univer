@@ -22,8 +22,8 @@ import type { ISetWorksheetActiveOperationParams } from '../operations/set-works
 import { SetWorksheetActiveOperation } from '../operations/set-worksheet-active.operation';
 
 export interface ISetWorksheetActivateCommandParams {
-    workbookId?: string;
-    worksheetId?: string;
+    unitId?: string;
+    subUnitId?: string;
 }
 
 export const SetWorksheetActivateCommand: ICommand = {
@@ -34,21 +34,21 @@ export const SetWorksheetActivateCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        let workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        let worksheetId = univerInstanceService
+        let unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+        let subUnitId = univerInstanceService
             .getCurrentUniverSheetInstance()
 
             .getActiveSheet()
             .getSheetId();
 
         if (params) {
-            workbookId = params.workbookId ?? workbookId;
-            worksheetId = params.worksheetId ?? worksheetId;
+            unitId = params.unitId ?? unitId;
+            subUnitId = params.subUnitId ?? subUnitId;
         }
 
         const redoMutationParams: ISetWorksheetActiveOperationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
         };
 
         return commandService.syncExecuteCommand(SetWorksheetActiveOperation.id, redoMutationParams);

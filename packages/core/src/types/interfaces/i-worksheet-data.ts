@@ -15,7 +15,7 @@
  */
 
 import type { ObjectArrayType } from '../../shared/object-array';
-import type { ObjectMatrixPrimitiveType } from '../../shared/object-matrix';
+import type { IObjectMatrixPrimitiveType } from '../../shared/object-matrix';
 import type { IKeyValue } from '../../shared/types';
 import type { BooleanNumber, SheetTypes } from '../enum';
 import type { ICellData } from './i-cell-data';
@@ -74,7 +74,7 @@ export interface IWorksheetData {
      * @deprecated this should be removed
      */
     status: BooleanNumber;
-    cellData: ObjectMatrixPrimitiveType<ICellData>;
+    cellData: IObjectMatrixPrimitiveType<ICellData>;
     rowData: ObjectArrayType<Partial<IRowData>>; // TODO:配置文件不能为ObjectArray实例，应该是纯json配置 @jerry
     columnData: ObjectArrayType<Partial<IColumnData>>;
     showGridlines: BooleanNumber;

@@ -21,7 +21,7 @@ import type { IAccessor } from '@wendellhu/redi';
 import { ISheetBarService } from '../../services/sheet-bar/sheet-bar.service';
 
 interface IRenameCommandParams {
-    worksheetId: string;
+    subUnitId: string;
 }
 
 export const RenameSheetOperation: ICommand = {
@@ -30,7 +30,7 @@ export const RenameSheetOperation: ICommand = {
     handler: async (accessor: IAccessor, params?: IRenameCommandParams) => {
         const sheetBarService = accessor.get(ISheetBarService);
         if (params) {
-            sheetBarService.setRenameId(params.worksheetId);
+            sheetBarService.setRenameId(params.subUnitId);
         }
         return true;
     },

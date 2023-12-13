@@ -148,8 +148,8 @@ export class EndEditController extends Disposable {
             if (keycode === KeyCode.ESC) {
                 // Reselect the current selections, when exist cell editor by press ESC.
                 this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
-                    workbookId,
-                    worksheetId,
+                    unitId: workbookId,
+                    subUnitId: worksheetId,
                     pluginName,
                     selections,
                 });
@@ -229,8 +229,8 @@ export class EndEditController extends Disposable {
             }
 
             const context = {
-                worksheetId: sheetId,
-                workbookId: unitId,
+                subUnitId: sheetId,
+                unitId,
                 workbook: workbook!,
                 worksheet,
                 row,
@@ -241,8 +241,8 @@ export class EndEditController extends Disposable {
             )(cellData, context);
 
             this._commandService.executeCommand(SetRangeValuesCommand.id, {
-                worksheetId: sheetId,
-                workbookId: unitId,
+                subUnitId: sheetId,
+                unitId,
                 range: {
                     startRow: row,
                     startColumn: column,
@@ -257,8 +257,8 @@ export class EndEditController extends Disposable {
              */
             if (workbookId === unitId && sheetId !== worksheetId) {
                 this._commandService.executeCommand(SetWorksheetActivateCommand.id, {
-                    worksheetId: sheetId,
-                    workbookId: unitId,
+                    subUnitId: sheetId,
+                    unitId,
                 });
             }
         });

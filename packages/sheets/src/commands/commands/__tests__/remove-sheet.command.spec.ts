@@ -55,7 +55,7 @@ describe('Test remove worksheet commands', () => {
             it('will be not working if there is only one sheet', async () => {
                 expect(
                     await commandService.executeCommand(RemoveSheetCommand.id, {
-                        workbookId: 'test',
+                        unitId: 'test',
                         sheetId: 'sheet1',
                     })
                 ).toBeFalsy();
@@ -67,13 +67,13 @@ describe('Test remove worksheet commands', () => {
                 const targetActiveSheet = workbook.getActiveSheet();
                 const targetSheetId = targetActiveSheet?.getSheetId();
                 expect(
-                    await commandService.executeCommand(SetWorksheetActivateCommand.id, { worksheetId: targetSheetId })
+                    await commandService.executeCommand(SetWorksheetActivateCommand.id, { subUnitId: targetSheetId })
                 ).toBeTruthy();
 
                 expect(await commandService.executeCommand(InsertSheetCommand.id, {})).toBeTruthy();
                 expect(
                     await commandService.executeCommand(RemoveSheetCommand.id, {
-                        workbookId: 'test',
+                        unitId: 'test',
                         sheetId: 'sheet1',
                     })
                 ).toBeTruthy();

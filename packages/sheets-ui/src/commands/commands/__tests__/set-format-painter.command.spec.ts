@@ -238,8 +238,8 @@ describe('Test format painter rules in controller', () => {
                 const workbook = get(IUniverInstanceService).getCurrentUniverSheetInstance();
                 if (!workbook) throw new Error('This is an error');
                 await commandService.executeCommand(SetSelectionsOperation.id, {
-                    workbookId: 'workbook-01',
-                    worksheetId: 'sheet-0011',
+                    unitId: 'workbook-01',
+                    subUnitId: 'sheet-0011',
                     pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                     selections: [
                         {

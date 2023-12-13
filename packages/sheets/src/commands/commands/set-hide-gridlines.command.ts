@@ -26,8 +26,8 @@ import {
 
 export interface ISetHideGridlinesCommandParams {
     hideGridlines?: BooleanNumber;
-    workbookId?: string;
-    worksheetId?: string;
+    unitId?: string;
+    subUnitId?: string;
 }
 
 export const SetHideGridlinesCommand: ICommand = {
@@ -39,8 +39,8 @@ export const SetHideGridlinesCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        let workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        let worksheetId = univerInstanceService
+        let unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+        let subUnitId = univerInstanceService
             .getCurrentUniverSheetInstance()
 
             .getActiveSheet()
@@ -48,20 +48,20 @@ export const SetHideGridlinesCommand: ICommand = {
         let hideGridlines = BooleanNumber.FALSE;
 
         if (params) {
-            workbookId = params.workbookId ?? workbookId;
-            worksheetId = params.worksheetId ?? workbookId;
+            unitId = params.unitId ?? unitId;
+            subUnitId = params.subUnitId ?? unitId;
             hideGridlines = params.hideGridlines ?? BooleanNumber.FALSE;
         }
 
-        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
+        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
         if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(worksheetId);
+        const worksheet = workbook.getSheetBySheetId(subUnitId);
         if (!worksheet) return false;
 
         const setHideGridlinesMutationParams: ISetHideGridlinesMutationParams = {
             hideGridlines,
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
         };
 
         const undoMutationParams = SetHideGridlinesUndoMutationFactory(accessor, setHideGridlinesMutationParams);
@@ -69,7 +69,7 @@ export const SetHideGridlinesCommand: ICommand = {
 
         if (result) {
             undoRedoService.pushUndoRedo({
-                unitID: workbookId,
+                unitID: unitId,
                 undoMutations: [{ id: SetHideGridlinesMutation.id, params: undoMutationParams }],
                 redoMutations: [{ id: SetHideGridlinesMutation.id, params: setHideGridlinesMutationParams }],
             });

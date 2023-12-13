@@ -26,8 +26,8 @@ import { InsertSheetMutation, InsertSheetUndoMutationFactory } from '../mutation
 import { RemoveSheetMutation } from '../mutations/remove-sheet.mutation';
 
 export interface ICopySheetCommandParams {
-    workbookId?: string;
-    worksheetId?: string;
+    unitId?: string;
+    subUnitId?: string;
 }
 
 export const CopySheetCommand: ICommand = {
@@ -38,19 +38,19 @@ export const CopySheetCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        let workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        let worksheetId = univerInstanceService
+        let unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+        let subUnitId = univerInstanceService
             .getCurrentUniverSheetInstance()
 
             .getActiveSheet()
             .getSheetId();
         if (params) {
-            workbookId = params.workbookId ?? workbookId;
-            worksheetId = params.worksheetId ?? worksheetId;
+            unitId = params.unitId ?? unitId;
+            subUnitId = params.subUnitId ?? subUnitId;
         }
-        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
+        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
         if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(worksheetId);
+        const worksheet = workbook.getSheetBySheetId(subUnitId);
         if (!worksheet) return false;
 
         const config = Tools.deepClone(worksheet.getConfig());
@@ -61,7 +61,7 @@ export const CopySheetCommand: ICommand = {
         const insertSheetMutationParams: IInsertSheetMutationParams = {
             index: sheetIndex + 1,
             sheet: config,
-            workbookId,
+            unitId,
         };
 
         const removeSheetMutationParams: IRemoveSheetMutationParams = InsertSheetUndoMutationFactory(
@@ -72,7 +72,7 @@ export const CopySheetCommand: ICommand = {
 
         if (insertResult) {
             undoRedoService.pushUndoRedo({
-                unitID: workbookId,
+                unitID: unitId,
                 undoMutations: [{ id: RemoveSheetMutation.id, params: removeSheetMutationParams }],
                 redoMutations: [{ id: InsertSheetMutation.id, params: insertSheetMutationParams }],
             });

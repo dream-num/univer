@@ -51,8 +51,8 @@ export class FRange {
 
     setBackgroundColor(color: string): void {
         this._commandService.executeCommand(SetStyleCommand.id, {
-            workbookId: this._workbook.getUnitId(),
-            worksheetId: this._worksheet.getSheetId(),
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
             range: this._range,
             style: {
                 type: 'bg',

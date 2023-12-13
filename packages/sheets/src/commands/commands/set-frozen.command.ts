@@ -36,16 +36,16 @@ export const SetFrozenCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = univerInstanceService
+        const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+        const subUnitId = univerInstanceService
             .getCurrentUniverSheetInstance()
 
             .getActiveSheet()
             .getSheetId();
 
-        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
+        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
         if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(worksheetId);
+        const worksheet = workbook.getSheetBySheetId(subUnitId);
         if (!worksheet) return false;
 
         const { startColumn, startRow, xSplit, ySplit } = params;
@@ -59,8 +59,8 @@ export const SetFrozenCommand: ICommand = {
             return false;
         }
         const redoMutationParams: ISetFrozenMutationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             ...params,
         };
 
@@ -69,7 +69,7 @@ export const SetFrozenCommand: ICommand = {
 
         if (result) {
             undoRedoService.pushUndoRedo({
-                unitID: workbookId,
+                unitID: unitId,
                 undoMutations: [{ id: SetFrozenMutation.id, params: undoMutationParams }],
                 redoMutations: [{ id: SetFrozenMutation.id, params: redoMutationParams }],
             });

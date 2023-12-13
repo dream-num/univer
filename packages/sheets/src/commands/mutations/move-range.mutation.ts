@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { ICellData, IMutation, ObjectMatrixPrimitiveType } from '@univerjs/core';
+import type { ICellData, IMutation, IObjectMatrixPrimitiveType } from '@univerjs/core';
 import { CommandType, IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
 
 export interface IMoveRangeMutationParams {
-    workbookId: string;
-    worksheetId: string;
-    from: ObjectMatrixPrimitiveType<ICellData | null>;
-    to: ObjectMatrixPrimitiveType<ICellData | null>;
+    unitId: string;
+    subUnitId: string;
+    from: IObjectMatrixPrimitiveType<ICellData | null>;
+    to: IObjectMatrixPrimitiveType<ICellData | null>;
 }
 
 export const MoveRangeMutation: IMutation<IMoveRangeMutationParams, boolean> = {
@@ -40,7 +40,7 @@ export const MoveRangeMutation: IMutation<IMoveRangeMutationParams, boolean> = {
             return false;
         }
 
-        const worksheet = workbook.getSheetBySheetId(params.worksheetId);
+        const worksheet = workbook.getSheetBySheetId(params.subUnitId);
         if (!worksheet) {
             return false;
         }

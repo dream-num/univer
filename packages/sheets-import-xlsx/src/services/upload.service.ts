@@ -512,7 +512,7 @@ export class UploadService {
                 return false;
             }
 
-            const workbookId = workbook.getUnitId();
+            const unitId = workbook.getUnitId();
             const order = Tools.deepClone(workbook.getConfig().sheetOrder);
 
             // add new sheets
@@ -520,14 +520,14 @@ export class UploadService {
                 const sheetData = sheets[sheetId];
                 // workbook.insertSheet(sheetData);
                 const index = order.length - 1 + i;
-                // this._basicWorkbookController.insertSheet(index, sheetData, workbookId);
+                // this._basicWorkbookController.insertSheet(index, sheetData, unitId);
             });
 
             // remove other sheets
             order.forEach((sheetId: string) => {
                 // workbook.removeSheetBySheetId(sheetId);
                 // workbook.removeSheetBySheetId(sheetId);
-                // this._basicWorkbookController.removeSheet(sheetId, workbookId);
+                // this._basicWorkbookController.removeSheet(sheetId, unitId);
             });
         });
     }

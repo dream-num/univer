@@ -55,8 +55,8 @@ export const DeltaColumnWidthCommand: ICommand<IDeltaColumnWidthCommandParams> =
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
-        const workbookId = workbook.getUnitId();
-        const worksheetId = worksheet.getSheetId();
+        const unitId = workbook.getUnitId();
+        const subUnitId = worksheet.getSheetId();
 
         const { anchorCol, deltaX } = params;
         const anchorColWidth = worksheet.getColumnWidth(anchorCol);
@@ -74,15 +74,15 @@ export const DeltaColumnWidthCommand: ICommand<IDeltaColumnWidthCommandParams> =
         let redoMutationParams: ISetWorksheetColWidthMutationParams;
         if (rangeType === RANGE_TYPE.COLUMN) {
             redoMutationParams = {
-                worksheetId,
-                workbookId,
+                subUnitId,
+                unitId,
                 ranges: colSelections.map((s) => Rectangle.clone(s.range)),
                 colWidth: destColumnWidth,
             };
         } else {
             redoMutationParams = {
-                worksheetId,
-                workbookId,
+                subUnitId,
+                unitId,
                 colWidth: destColumnWidth,
                 ranges: [
                     {
@@ -114,7 +114,7 @@ export const DeltaColumnWidthCommand: ICommand<IDeltaColumnWidthCommandParams> =
 
         if (setColWidthResult && result.result) {
             undoRedoService.pushUndoRedo({
-                unitID: workbookId,
+                unitID: unitId,
                 undoMutations: [{ id: SetWorksheetColWidthMutation.id, params: undoMutationParams }, ...undos],
                 redoMutations: [{ id: SetWorksheetColWidthMutation.id, params: redoMutationParams }, ...redos],
             });
@@ -144,12 +144,12 @@ export const SetColWidthCommand: ICommand = {
             return false;
         }
 
-        const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+        const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+        const subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
 
         const redoMutationParams: ISetWorksheetColWidthMutationParams = {
-            worksheetId,
-            workbookId,
+            subUnitId,
+            unitId,
             ranges: selections,
             colWidth: params.value,
         };
@@ -171,7 +171,7 @@ export const SetColWidthCommand: ICommand = {
 
         if (setColWidthResult && result.result) {
             undoRedoService.pushUndoRedo({
-                unitID: workbookId,
+                unitID: unitId,
                 undoMutations: [{ id: SetWorksheetColWidthMutation.id, params: undoMutationParams }, ...undos],
                 redoMutations: [{ id: SetWorksheetColWidthMutation.id, params: redoMutationParams }, ...redos],
             });

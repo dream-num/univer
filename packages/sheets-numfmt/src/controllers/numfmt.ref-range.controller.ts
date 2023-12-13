@@ -112,12 +112,12 @@ export class NumfmtRefRangeController extends Disposable {
                     )
                     .subscribe((disposableCollection) => {
                         const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
-                        const workbookId = workbook.getUnitId();
-                        const worksheetId = this._univerInstanceService
+                        const unitId = workbook.getUnitId();
+                        const subUnitId = this._univerInstanceService
                             .getCurrentUniverSheetInstance()
                             .getActiveSheet()
                             .getSheetId();
-                        const model = this._numfmtService.getModel(workbookId, worksheetId);
+                        const model = this._numfmtService.getModel(unitId, subUnitId);
                         const disposableMap: Map<string, IDisposable> = new Map();
                         const register = (commandInfo: EffectRefRangeParams, row: number, col: number) => {
                             const targetRange = {
@@ -167,13 +167,13 @@ export class NumfmtRefRangeController extends Disposable {
                             }
                             const resultRange = runRefRangeMutations(operators, targetRange);
 
-                            const numfmtValue = this._numfmtService.getValue(workbookId, worksheetId, row, col);
+                            const numfmtValue = this._numfmtService.getValue(unitId, subUnitId, row, col);
                             if (!resultRange && numfmtValue) {
                                 const removeRedo = {
                                     id: RemoveNumfmtMutation.id,
                                     params: {
-                                        workbookId,
-                                        worksheetId,
+                                        unitId,
+                                        subUnitId,
                                         ranges: [{ startColumn: col, startRow: row, endColumn: col, endRow: row }],
                                     },
                                 };
@@ -200,15 +200,15 @@ export class NumfmtRefRangeController extends Disposable {
                                 ];
                                 const setRedo = {
                                     id: SetNumfmtMutation.id,
-                                    params: transformCellsToRange(workbookId, worksheetId, setRedoCells),
+                                    params: transformCellsToRange(unitId, subUnitId, setRedoCells),
                                 };
                                 const undoSet = factorySetNumfmtUndoMutation(this._injector, setRedo.params);
 
                                 const removeRedo = {
                                     id: RemoveNumfmtMutation.id,
                                     params: {
-                                        workbookId,
-                                        worksheetId,
+                                        unitId,
+                                        subUnitId,
                                         ranges: [{ startColumn: col, startRow: row, endColumn: col, endRow: row }],
                                     },
                                 };
@@ -256,8 +256,7 @@ export class NumfmtRefRangeController extends Disposable {
                                     .pipe(
                                         filter(
                                             (commandInfo) =>
-                                                commandInfo.workbookId === workbookId &&
-                                                commandInfo.worksheetId === worksheetId
+                                                commandInfo.unitId === unitId && commandInfo.subUnitId === subUnitId
                                         ),
                                         map((commandInfo) => {
                                             if (commandInfo.ranges) {
@@ -288,12 +287,7 @@ export class NumfmtRefRangeController extends Disposable {
                                                 const disposable = disposableMap.get(key);
                                                 disposableMap.delete(key);
                                                 disposable && disposable.dispose();
-                                                const value = this._numfmtService.getValue(
-                                                    workbookId,
-                                                    worksheetId,
-                                                    row,
-                                                    col
-                                                );
+                                                const value = this._numfmtService.getValue(unitId, subUnitId, row, col);
                                                 if (value) {
                                                     const targetRange = {
                                                         startRow: row,

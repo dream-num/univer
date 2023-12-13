@@ -33,8 +33,8 @@ export interface IMarkSelectionService {
 }
 
 interface IMarkSelectionInfo {
-    workbookId: string;
-    worksheetId: string;
+    unitId: string;
+    subUnitId: string;
     selection: ISelectionWithStyle;
     zIndex: number;
     control: SelectionShape | null;
@@ -62,12 +62,12 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
 
     addShape(selection: ISelectionWithStyle, zIndex: number = DEFAULT_Z_INDEX): string | null {
         const workbook = this._currentService.getCurrentUniverSheetInstance();
-        const worksheetId = workbook.getActiveSheet().getSheetId();
+        const subUnitId = workbook.getActiveSheet().getSheetId();
         const id = Tools.generateRandomId();
         this._shapeMap.set(id, {
             selection,
-            worksheetId,
-            workbookId: workbook.getUnitId(),
+            subUnitId,
+            unitId: workbook.getUnitId(),
             zIndex,
             control: null,
         });
@@ -76,17 +76,17 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
     }
 
     refreshShapes() {
-        const currentWorkbookId = this._currentService.getCurrentUniverSheetInstance().getUnitId();
-        const currentWorksheetId = this._currentService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+        const currentunitId = this._currentService.getCurrentUniverSheetInstance().getUnitId();
+        const currentsubUnitId = this._currentService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
         setTimeout(() => {
             this._shapeMap.forEach((shape) => {
-                const { workbookId, worksheetId, selection, control: oldControl, zIndex } = shape;
-                if (workbookId !== currentWorkbookId || worksheetId !== currentWorksheetId) {
+                const { unitId, subUnitId, selection, control: oldControl, zIndex } = shape;
+                if (unitId !== currentunitId || subUnitId !== currentsubUnitId) {
                     oldControl && oldControl.dispose();
                     return;
                 }
                 const { style } = selection;
-                const { scene } = this._renderManagerService.getRenderById(workbookId) || {};
+                const { scene } = this._renderManagerService.getRenderById(unitId) || {};
                 const { rangeWithCoord, primaryWithCoord } =
                     this._selectionRenderService.convertSelectionRangeToData(selection);
                 const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;

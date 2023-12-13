@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICommand, IMutationInfo, IRange, ObjectMatrixPrimitiveType } from '@univerjs/core';
+import type { ICellData, ICommand, IMutationInfo, IObjectMatrixPrimitiveType, IRange } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
@@ -89,8 +89,8 @@ export const SetOnceFormatPainterCommand: ICommand = {
 };
 
 export interface IApplyFormatPainterCommandParams {
-    worksheetId: string;
-    workbookId: string;
+    subUnitId: string;
+    unitId: string;
     styleRange: IRange;
     styleValues: ICellData[][];
     mergeRanges: IRange[];
@@ -109,8 +109,8 @@ export const ApplyFormatPainterCommand: ICommand = {
             styleValues: value,
             styleRange: range,
             mergeRanges,
-            workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId(),
-            worksheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId(),
+            unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId(),
+            subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId(),
         } = params;
 
         const currentSelections = range ? [range] : selectionManagerService.getSelectionRanges();
@@ -119,7 +119,7 @@ export const ApplyFormatPainterCommand: ICommand = {
         }
 
         const cellValue = new ObjectMatrix<ICellData>();
-        let realCellValue: ObjectMatrixPrimitiveType<ICellData> | undefined;
+        let realCellValue: IObjectMatrixPrimitiveType<ICellData> | undefined;
 
         if (Tools.isArray(value)) {
             for (let i = 0; i < currentSelections.length; i++) {
@@ -138,12 +138,12 @@ export const ApplyFormatPainterCommand: ICommand = {
                 cellValue.setValue(startRow, startColumn, value);
             }
         } else {
-            realCellValue = value as ObjectMatrixPrimitiveType<ICellData>;
+            realCellValue = value as IObjectMatrixPrimitiveType<ICellData>;
         }
 
         const setRangeValuesMutationParams: ISetRangeValuesMutationParams = {
-            worksheetId,
-            workbookId,
+            subUnitId,
+            unitId,
             cellValue: realCellValue ?? cellValue.getMatrix(),
         };
         const undoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
@@ -172,7 +172,7 @@ export const ApplyFormatPainterCommand: ICommand = {
 
         // handle merge
         const ranges = getAddMergeMutationRangeByType(mergeRanges);
-        const worksheet = univerInstanceService.getUniverSheetInstance(workbookId)!.getSheetBySheetId(worksheetId)!;
+        const worksheet = univerInstanceService.getUniverSheetInstance(unitId)!.getSheetBySheetId(subUnitId)!;
 
         const mergeRedos: IMutationInfo[] = [];
         const mergeUndos: IMutationInfo[] = [];
@@ -182,13 +182,13 @@ export const ApplyFormatPainterCommand: ICommand = {
 
         // prepare redo mutations
         const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             ranges,
         };
         const addMergeMutationParams: IAddWorksheetMergeMutationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             ranges,
         };
         mergeRedos.push({ id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams });
@@ -202,7 +202,7 @@ export const ApplyFormatPainterCommand: ICommand = {
 
         // add set range values mutations to undo redo mutations
         if (willRemoveSomeCell) {
-            const data = getClearContentMutationParamsForRanges(accessor, workbookId, worksheet, ranges);
+            const data = getClearContentMutationParamsForRanges(accessor, unitId, worksheet, ranges);
             mergeRedos.unshift(...data.redos);
             mergeUndos.push(...data.undos);
         }
@@ -211,7 +211,7 @@ export const ApplyFormatPainterCommand: ICommand = {
 
         if (setValueMutationResult && result.result) {
             undoRedoService.pushUndoRedo({
-                unitID: workbookId,
+                unitID: unitId,
                 undoMutations: [
                     { id: SetRangeValuesMutation.id, params: undoSetRangeValuesMutationParams },
                     ...interceptorUndos,

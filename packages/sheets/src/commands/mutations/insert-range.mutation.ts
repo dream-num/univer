@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IMutation, IRange, ObjectMatrix, ObjectMatrixPrimitiveType } from '@univerjs/core';
+import type { IMutation, IObjectMatrixPrimitiveType, IRange, ObjectMatrix } from '@univerjs/core';
 import { CommandType, Dimension, IUniverInstanceService } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
@@ -34,8 +34,8 @@ export const InsertRangeUndoMutationFactory = (
     accessor: IAccessor,
     params: IInsertRangeMutationParams
 ): IDeleteRangeMutationParams => ({
-    workbookId: params.workbookId,
-    worksheetId: params.worksheetId,
+    unitId: params.unitId,
+    subUnitId: params.subUnitId,
     ranges: params.ranges,
     shiftDimension: params.shiftDimension,
 });
@@ -44,11 +44,11 @@ export const InsertRangeMutation: IMutation<IInsertRangeMutationParams, boolean>
     id: 'sheet.mutation.insert-range',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
-        const { workbookId, worksheetId, ranges, cellValue, shiftDimension } = params;
+        const { unitId, subUnitId, ranges, cellValue, shiftDimension } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
+        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
         if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(worksheetId);
+        const worksheet = workbook.getSheetBySheetId(subUnitId);
         if (!worksheet) return false;
 
         const cellMatrix = worksheet.getCellMatrix();
@@ -67,7 +67,7 @@ export function handleInsertRangeMutation<T>(
     lastEndRow: number,
     lastEndColumn: number,
     shiftDimension: Dimension,
-    cellValue?: ObjectMatrixPrimitiveType<T>
+    cellValue?: IObjectMatrixPrimitiveType<T>
 ) {
     for (let i = 0; i < ranges.length; i++) {
         const { startRow, endRow, startColumn, endColumn } = ranges[i];

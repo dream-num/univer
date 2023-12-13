@@ -81,8 +81,8 @@ export class FormatPainterController extends Disposable {
 
     private async _applyFormatPainter(range: IRange) {
         const { styles: stylesMatrix, merges } = this._formatPainterService.getSelectionFormat();
-        const workbookId = this._currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = this._currentUniverService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+        const unitId = this._currentUniverService.getCurrentUniverSheetInstance().getUnitId();
+        const subUnitId = this._currentUniverService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
         if (!stylesMatrix) return;
 
         const { startRow, startColumn, endRow, endColumn } = stylesMatrix.getDataRange();
@@ -127,8 +127,8 @@ export class FormatPainterController extends Disposable {
         });
 
         const ApplyFormatPainterCommandParams: IApplyFormatPainterCommandParams = {
-            worksheetId,
-            workbookId,
+            subUnitId,
+            unitId,
             styleRange: range,
             styleValues,
             mergeRanges,

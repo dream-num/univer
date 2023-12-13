@@ -49,11 +49,11 @@ describe('test numfmt service', () => {
         const numfmtService = get(INumfmtService);
         const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         const sheet = workbook.getActiveSheet();
-        const workbookId = workbook.getUnitId();
-        const worksheetId = sheet.getSheetId();
+        const unitId = workbook.getUnitId();
+        const subUnitId = sheet.getSheetId();
         const params: ISetNumfmtMutationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             refMap: {
                 1: {
                     pattern: 'asdws',
@@ -63,9 +63,9 @@ describe('test numfmt service', () => {
             values: { 1: { ranges: [cellToRange(1, 1)] } },
         };
         commandService.executeCommand(SetNumfmtMutation.id, params);
-        const numfmtValue = numfmtService.getValue(workbookId, worksheetId, 1, 1);
+        const numfmtValue = numfmtService.getValue(unitId, subUnitId, 1, 1);
         expect(numfmtValue).toEqual({ pattern: 'asdws', type: 'sss' });
-        const model = numfmtService.getModel(workbookId, worksheetId);
+        const model = numfmtService.getModel(unitId, subUnitId);
         expect(model?.getValue(1, 1)).toEqual({ i: '1' });
     });
 
@@ -74,11 +74,11 @@ describe('test numfmt service', () => {
         const numfmtService = get(INumfmtService);
         const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         const sheet = workbook.getActiveSheet();
-        const workbookId = workbook.getUnitId();
-        const worksheetId = sheet.getSheetId();
+        const unitId = workbook.getUnitId();
+        const subUnitId = sheet.getSheetId();
         const params: ISetNumfmtMutationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             refMap: {
                 1: {
                     pattern: 'asdws',
@@ -88,15 +88,15 @@ describe('test numfmt service', () => {
             values: { 1: { ranges: [cellToRange(1, 1)] } },
         };
         const deleteParams: IRemoveNumfmtMutationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             ranges: [cellToRange(1, 1)],
         };
         commandService.executeCommand(SetNumfmtMutation.id, params);
-        const numfmtValue = numfmtService.getValue(workbookId, worksheetId, 1, 1);
+        const numfmtValue = numfmtService.getValue(unitId, subUnitId, 1, 1);
         expect(numfmtValue).toEqual({ pattern: 'asdws', type: 'sss' });
         commandService.executeCommand(RemoveNumfmtMutation.id, deleteParams);
-        const numfmtValueDelete = numfmtService.getValue(workbookId, worksheetId, 1, 1);
+        const numfmtValueDelete = numfmtService.getValue(unitId, subUnitId, 1, 1);
         expect(numfmtValueDelete).toEqual(null);
     });
 
@@ -105,11 +105,11 @@ describe('test numfmt service', () => {
         const numfmtService = get(INumfmtService);
         const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         const sheet = workbook.getActiveSheet();
-        const workbookId = workbook.getUnitId();
-        const worksheetId = sheet.getSheetId();
+        const unitId = workbook.getUnitId();
+        const subUnitId = sheet.getSheetId();
         const params: ISetNumfmtMutationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             refMap: {
                 1: {
                     pattern: 'asdws',
@@ -119,7 +119,7 @@ describe('test numfmt service', () => {
             values: { 1: { ranges: [cellToRange(1, 1)] } },
         };
         commandService.executeCommand(SetNumfmtMutation.id, params);
-        const refModel = numfmtService.getRefModel(workbookId);
+        const refModel = numfmtService.getRefModel(unitId);
         expect(refModel?.getKeyMap('i')).toEqual(['1']);
         expect(refModel?.getKeyMap('pattern')).toEqual(['asdws']);
         expect(refModel?.getValue('asdws')?.count).toEqual(1);
@@ -131,11 +131,11 @@ describe('test numfmt service', () => {
         const numfmtService = get(INumfmtService);
         const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         const sheet = workbook.getActiveSheet();
-        const workbookId = workbook.getUnitId();
-        const worksheetId = sheet.getSheetId();
+        const unitId = workbook.getUnitId();
+        const subUnitId = sheet.getSheetId();
         const params: ISetNumfmtMutationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             refMap: {
                 1: {
                     pattern: 'asdws',
@@ -145,13 +145,13 @@ describe('test numfmt service', () => {
             values: { 1: { ranges: [cellToRange(1, 1)] } },
         };
         const deleteParams: IRemoveNumfmtMutationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             ranges: [cellToRange(1, 1)],
         };
         commandService.executeCommand(SetNumfmtMutation.id, params);
         commandService.executeCommand(RemoveNumfmtMutation.id, deleteParams);
-        const refModel = numfmtService.getRefModel(workbookId);
+        const refModel = numfmtService.getRefModel(unitId);
         expect(refModel?.getValue('asdws')?.count).toEqual(0);
         expect(refModel?.getValue('1')?.count).toEqual(0);
     });
@@ -160,12 +160,12 @@ describe('test numfmt service', () => {
         const univerInstanceService = get(IUniverInstanceService);
         const numfmtService = get(INumfmtService);
         const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-        const workbookId = workbook.getUnitId();
+        const unitId = workbook.getUnitId();
         const sheets = workbook.getSheets();
         const pattern = 'asdws';
         const params1: ISetNumfmtMutationParams = {
-            workbookId,
-            worksheetId: sheets[0].getSheetId(),
+            unitId,
+            subUnitId: sheets[0].getSheetId(),
             refMap: {
                 1: {
                     pattern,
@@ -176,8 +176,8 @@ describe('test numfmt service', () => {
         };
         commandService.executeCommand(SetNumfmtMutation.id, params1);
         const params2: ISetNumfmtMutationParams = {
-            workbookId,
-            worksheetId: sheets[1].getSheetId(),
+            unitId,
+            subUnitId: sheets[1].getSheetId(),
             refMap: {
                 1: {
                     pattern,
@@ -187,9 +187,9 @@ describe('test numfmt service', () => {
             values: { 1: { ranges: [cellToRange(1, 1)] } },
         };
         commandService.executeCommand(SetNumfmtMutation.id, params2);
-        const refModel = numfmtService.getRefModel(workbookId);
-        const model1 = numfmtService.getModel(workbookId, sheets[0].getSheetId());
-        const model2 = numfmtService.getModel(workbookId, sheets[1].getSheetId());
+        const refModel = numfmtService.getRefModel(unitId);
+        const model1 = numfmtService.getModel(unitId, sheets[0].getSheetId());
+        const model2 = numfmtService.getModel(unitId, sheets[1].getSheetId());
         expect(refModel?.getValue(pattern)?.count).toBe(2);
         expect(model1?.getValue(1, 1)?.i).toBe('1');
         expect(model2?.getValue(1, 1)?.i).toBe('1');

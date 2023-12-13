@@ -70,8 +70,8 @@ export const InsertRangeMoveDownCommand: ICommand = {
             return false;
         }
 
-        const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = univerInstanceService
+        const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+        const subUnitId = univerInstanceService
             .getCurrentUniverSheetInstance()
 
             .getActiveSheet()
@@ -82,9 +82,9 @@ export const InsertRangeMoveDownCommand: ICommand = {
         }
         if (!ranges?.length) return false;
 
-        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
+        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
         if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(worksheetId);
+        const worksheet = workbook.getSheetBySheetId(subUnitId);
         if (!worksheet) return false;
 
         const redoMutations: IMutationInfo[] = [];
@@ -104,8 +104,8 @@ export const InsertRangeMoveDownCommand: ICommand = {
 
         const insertRangeMutationParams: IInsertRangeMutationParams = {
             ranges,
-            worksheetId,
-            workbookId,
+            subUnitId,
+            unitId,
             shiftDimension: Dimension.ROWS,
             cellValue: cellValue.getData(),
         };
@@ -149,8 +149,8 @@ export const InsertRangeMoveDownCommand: ICommand = {
                 endColumn: ranges[0].endColumn,
             };
             const insertRowParams: IInsertRowMutationParams = {
-                workbookId,
-                worksheetId,
+                unitId,
+                subUnitId,
                 ranges: [lastRowRange],
                 rowInfo: new ObjectArray<IRowData>(
                     new Array(rowsCount).fill(undefined).map(() => ({
@@ -184,7 +184,7 @@ export const InsertRangeMoveDownCommand: ICommand = {
         const result = sequenceExecute(redoMutations, commandService);
         if (result) {
             undoRedoService.pushUndoRedo({
-                unitID: workbookId,
+                unitID: unitId,
                 undoMutations: undoMutations.reverse(),
                 redoMutations,
             });

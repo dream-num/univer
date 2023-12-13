@@ -72,16 +72,16 @@ export class RefRangeService extends Disposable {
         this._sheetInterceptorService.interceptCommand({
             getMutations: (command: EffectRefRangeParams) => {
                 const workSheet = this._univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
-                const workbookId = getWorkbookId(this._univerInstanceService);
-                const worksheetId = getWorksheetId(this._univerInstanceService);
+                const unitId = getunitId(this._univerInstanceService);
+                const subUnitId = getsubUnitId(this._univerInstanceService);
                 const getEffectsCbList = () => {
                     switch (command.id) {
                         case EffectRefRangId.MoveRangeCommandId: {
                             const params = command;
                             return this._checkRange(
                                 [params.params!.fromRange, params.params!.toRange],
-                                workbookId,
-                                worksheetId
+                                unitId,
+                                subUnitId
                             );
                         }
                         case EffectRefRangId.InsertRowCommandId: {
@@ -93,7 +93,7 @@ export class RefRangeService extends Disposable {
                                 startColumn: 0,
                                 endColumn: workSheet.getColumnCount() - 1,
                             };
-                            return this._checkRange([range], workbookId, worksheetId);
+                            return this._checkRange([range], unitId, subUnitId);
                         }
                         case EffectRefRangId.InsertColCommandId: {
                             const params = command;
@@ -104,7 +104,7 @@ export class RefRangeService extends Disposable {
                                 startColumn: colStart,
                                 endColumn: workSheet.getColumnCount() - 1,
                             };
-                            return this._checkRange([range], workbookId, worksheetId);
+                            return this._checkRange([range], unitId, subUnitId);
                         }
                         case EffectRefRangId.RemoveRowCommandId: {
                             const params = command;
@@ -116,7 +116,7 @@ export class RefRangeService extends Disposable {
                                 startColumn: 0,
                                 endColumn: workSheet.getColumnCount() - 1,
                             };
-                            return this._checkRange([range], workbookId, worksheetId);
+                            return this._checkRange([range], unitId, subUnitId);
                         }
                         case EffectRefRangId.RemoveColCommandId: {
                             const params = command;
@@ -128,7 +128,7 @@ export class RefRangeService extends Disposable {
                                 startColumn: colStart,
                                 endColumn: workSheet.getColumnCount() - 1,
                             };
-                            return this._checkRange([range], workbookId, worksheetId);
+                            return this._checkRange([range], unitId, subUnitId);
                         }
                         case EffectRefRangId.DeleteRangeMoveUpCommandId:
                         case EffectRefRangId.InsertRangeMoveDownCommandId: {
@@ -140,7 +140,7 @@ export class RefRangeService extends Disposable {
                                 endColumn: range.endColumn,
                                 endRow: workSheet.getRowCount() - 1,
                             }));
-                            return this._checkRange(effectRanges, workbookId, worksheetId);
+                            return this._checkRange(effectRanges, unitId, subUnitId);
                         }
                         case EffectRefRangId.DeleteRangeMoveLeftCommandId:
                         case EffectRefRangId.InsertRangeMoveRightCommandId: {
@@ -152,7 +152,7 @@ export class RefRangeService extends Disposable {
                                 endColumn: workSheet.getColumnCount() - 1,
                                 endRow: range.endRow,
                             }));
-                            return this._checkRange(effectRanges, workbookId, worksheetId);
+                            return this._checkRange(effectRanges, unitId, subUnitId);
                         }
                     }
                 };
@@ -191,8 +191,8 @@ export class RefRangeService extends Disposable {
         });
     };
 
-    private _checkRange = (effectRanges: IRange[], workbookId: string, worksheetId: string) => {
-        const managerId = getRefRangId(workbookId, worksheetId);
+    private _checkRange = (effectRanges: IRange[], unitId: string, subUnitId: string) => {
+        const managerId = getRefRangId(unitId, subUnitId);
         const manager = this._refRangeManagerMap.get(managerId);
         if (manager) {
             const callbackSet = new Set<RefRangCallback>();
@@ -219,19 +219,19 @@ export class RefRangeService extends Disposable {
      * Listens to an area and triggers a fall back when movement occurs
      * @param {IRange} range the area that needs to be monitored
      * @param {RefRangCallback} callback the callback function that is executed when the range changes
-     * @param {string} [_workbookId]
-     * @param {string} [_worksheetId]
+     * @param {string} [_unitId]
+     * @param {string} [_subUnitId]
      * @memberof RefRangeService
      */
     registerRefRange = (
         range: IRange,
         callback: RefRangCallback,
-        _workbookId?: string,
-        _worksheetId?: string
+        _unitId?: string,
+        _subUnitId?: string
     ): IDisposable => {
-        const workbookId = _workbookId || getWorkbookId(this._univerInstanceService);
-        const worksheetId = _worksheetId || getWorksheetId(this._univerInstanceService);
-        const refRangeManagerId = getRefRangId(workbookId, worksheetId);
+        const unitId = _unitId || getunitId(this._univerInstanceService);
+        const subUnitId = _subUnitId || getsubUnitId(this._univerInstanceService);
+        const refRangeManagerId = getRefRangId(unitId, subUnitId);
         const rangeString = this._serializer.serialize(range);
 
         let manager = this._refRangeManagerMap.get(refRangeManagerId) as Map<string, Set<RefRangCallback>>;
@@ -261,11 +261,11 @@ export class RefRangeService extends Disposable {
     };
 }
 
-function getWorkbookId(univerInstanceService: IUniverInstanceService) {
+function getunitId(univerInstanceService: IUniverInstanceService) {
     return univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
 }
 
-function getWorksheetId(univerInstanceService: IUniverInstanceService) {
+function getsubUnitId(univerInstanceService: IUniverInstanceService) {
     return univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
 }
 
@@ -273,8 +273,8 @@ function getSelectionRanges(selectionManagerService: SelectionManagerService) {
     return selectionManagerService.getSelectionRanges() || [];
 }
 
-function getRefRangId(workbookId: string, worksheetId: string) {
-    return `${workbookId}_${worksheetId}`;
+function getRefRangId(unitId: string, subUnitId: string) {
+    return `${unitId}_${subUnitId}`;
 }
 
 function createRangeSerializer() {

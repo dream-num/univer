@@ -38,8 +38,8 @@ import { SetSelectionsOperation } from '../operations/selection.operation';
 import { getPrimaryForRange } from './utils/selection-utils';
 
 export interface ISetSpecificColsVisibleCommandParams {
-    workbookId: string;
-    worksheetId: string;
+    unitId: string;
+    subUnitId: string;
     ranges: IRange[];
 }
 
@@ -47,28 +47,28 @@ export const SetSpecificColsVisibleCommand: ICommand<ISetSpecificColsVisibleComm
     type: CommandType.COMMAND,
     id: 'sheet.command.set-col-visible-on-cols',
     handler: async (accessor, params: ISetSpecificColsVisibleCommandParams) => {
-        const { workbookId, worksheetId, ranges } = params;
+        const { unitId, subUnitId, ranges } = params;
 
         const worksheet = accessor
             .get(IUniverInstanceService)
-            .getUniverSheetInstance(workbookId)!
-            .getSheetBySheetId(worksheetId)!;
+            .getUniverSheetInstance(unitId)!
+            .getSheetBySheetId(subUnitId)!;
 
         const redoMutationParams: ISetColVisibleMutationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             ranges,
         };
         const undoMutationParams = SetColVisibleUndoMutationFactory(accessor, redoMutationParams);
         const setSelectionOperationParams: ISetSelectionsOperationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             selections: ranges.map((r) => ({ range: r, primary: getPrimaryForRange(r, worksheet), style: null })),
         };
         const undoSetSelectionsOperationParams: ISetSelectionsOperationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             selections: getSelectionsAfterHiding(ranges).map((range) => ({
                 range,
@@ -89,7 +89,7 @@ export const SetSpecificColsVisibleCommand: ICommand<ISetSpecificColsVisibleComm
         if (result.result) {
             const undoRedoService = accessor.get(IUndoRedoService);
             undoRedoService.pushUndoRedo({
-                unitID: workbookId,
+                unitID: unitId,
                 undoMutations: [
                     { id: SetColHiddenMutation.id, params: undoMutationParams },
                     { id: SetSelectionsOperation.id, params: undoSetSelectionsOperationParams },
@@ -125,16 +125,16 @@ export const SetSelectedColsVisibleCommand: ICommand = {
         const worksheet = workbook.getActiveSheet();
         if (!worksheet) return false;
 
-        const workbookId = workbook.getUnitId();
-        const worksheetId = worksheet.getSheetId();
+        const unitId = workbook.getUnitId();
+        const subUnitId = worksheet.getSheetId();
         // `ranges` would not overlap each other, so `hiddenRanges` would not overlap each other either
         const hiddenRanges = ranges.map((r) => worksheet.getHiddenCols(r.startColumn, r.endColumn)).flat();
 
         return accessor
             .get(ICommandService)
             .executeCommand<ISetSpecificColsVisibleCommandParams>(SetSpecificColsVisibleCommand.id, {
-                workbookId,
-                worksheetId,
+                unitId,
+                subUnitId,
                 ranges: hiddenRanges,
             });
     },
@@ -159,16 +159,16 @@ export const SetColHiddenCommand: ICommand = {
         const worksheet = workbook.getActiveSheet();
         if (!worksheet) return false;
 
-        const workbookId = workbook.getUnitId();
-        const worksheetId = worksheet.getSheetId();
+        const unitId = workbook.getUnitId();
+        const subUnitId = worksheet.getSheetId();
         const redoMutationParams: ISetColHiddenMutationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             ranges,
         };
         const setSelectionOperationParams: ISetSelectionsOperationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             selections: getSelectionsAfterHiding(ranges).map((range) => ({
                 range,
@@ -177,8 +177,8 @@ export const SetColHiddenCommand: ICommand = {
             })),
         };
         const undoSetSelectionsOperationParams: ISetSelectionsOperationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             selections: ranges.map((range) => ({
                 range,
@@ -199,7 +199,7 @@ export const SetColHiddenCommand: ICommand = {
             const undoRedoService = accessor.get(IUndoRedoService);
             const undoMutationParams = SetColHiddenUndoMutationFactory(accessor, redoMutationParams);
             undoRedoService.pushUndoRedo({
-                unitID: workbookId,
+                unitID: unitId,
                 undoMutations: [
                     { id: SetColVisibleMutation.id, params: undoMutationParams },
                     { id: SetSelectionsOperation.id, params: undoSetSelectionsOperationParams },

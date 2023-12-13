@@ -20,16 +20,16 @@ import type { IAccessor } from '@wendellhu/redi';
 
 export interface ISetTabColorMutationParams {
     color: string;
-    workbookId: string;
-    worksheetId: string;
+    unitId: string;
+    subUnitId: string;
 }
 
 export const SetTabColorUndoMutationFactory = (
     accessor: IAccessor,
     params: ISetTabColorMutationParams
 ): ISetTabColorMutationParams => {
-    const workbook = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.workbookId);
-    const worksheet = workbook!.getSheetBySheetId(params.worksheetId);
+    const workbook = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.unitId);
+    const worksheet = workbook!.getSheetBySheetId(params.subUnitId);
     const config = worksheet!.getConfig();
 
     // store old tab color
@@ -44,9 +44,9 @@ export const SetTabColorMutation: IMutation<ISetTabColorMutationParams> = {
     id: 'sheet.mutation.set-tab-color',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
-        const workbook = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.workbookId);
+        const workbook = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.unitId);
         if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(params.worksheetId);
+        const worksheet = workbook.getSheetBySheetId(params.subUnitId);
         if (!worksheet) return false;
         worksheet.getConfig().tabColor = params.color;
 

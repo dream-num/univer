@@ -52,8 +52,8 @@ export const DeleteRangeMoveUpCommand: ICommand = {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
-        const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = univerInstanceService
+        const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+        const subUnitId = univerInstanceService
             .getCurrentUniverSheetInstance()
 
             .getActiveSheet()
@@ -64,15 +64,15 @@ export const DeleteRangeMoveUpCommand: ICommand = {
         }
         if (!ranges?.length) return false;
 
-        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
+        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
         if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(worksheetId);
+        const worksheet = workbook.getSheetBySheetId(subUnitId);
         if (!worksheet) return false;
 
         const deleteRangeMutationParams: IDeleteRangeMutationParams = {
             ranges,
-            worksheetId,
-            workbookId,
+            subUnitId,
+            unitId,
             shiftDimension: Dimension.ROWS,
         };
 
@@ -94,7 +94,7 @@ export const DeleteRangeMoveUpCommand: ICommand = {
 
         if (result) {
             undoRedoService.pushUndoRedo({
-                unitID: workbookId,
+                unitID: unitId,
                 undoMutations: undos.reverse(),
                 redoMutations: redos,
             });

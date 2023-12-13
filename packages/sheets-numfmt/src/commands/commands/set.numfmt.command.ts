@@ -54,15 +54,15 @@ export const SetNumfmtCommand: ICommand<ISetNumfmtCommandParams> = {
         const undoRedoService = accessor.get(IUndoRedoService);
 
         const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-        const workbookId = workbook.getUnitId();
+        const unitId = workbook.getUnitId();
         const worksheet = workbook.getActiveSheet();
-        const worksheetId = worksheet.getSheetId();
+        const subUnitId = worksheet.getSheetId();
         const setCells = params.values.filter((value) => !!value.pattern) as ISetCellsNumfmt;
         const removeCells = params.values.filter((value) => !value.pattern);
-        const setRedos = transformCellsToRange(workbookId, worksheetId, setCells);
+        const setRedos = transformCellsToRange(unitId, subUnitId, setCells);
         const removeRedos: IRemoveNumfmtMutationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             ranges: removeCells.map((cell) => ({
                 startColumn: cell.col,
                 startRow: cell.row,
@@ -97,7 +97,7 @@ export const SetNumfmtCommand: ICommand<ISetNumfmtCommandParams> = {
         const result = sequenceExecute(redos, commandService).result;
         if (result) {
             undoRedoService.pushUndoRedo({
-                unitID: workbookId,
+                unitID: unitId,
                 undoMutations: undos,
                 redoMutations: redos,
             });

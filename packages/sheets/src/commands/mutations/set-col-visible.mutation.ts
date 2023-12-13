@@ -19,22 +19,22 @@ import { BooleanNumber, CommandType, IUniverInstanceService } from '@univerjs/co
 import type { IAccessor } from '@wendellhu/redi';
 
 export interface ISetColHiddenMutationParams {
-    workbookId: string;
-    worksheetId: string;
+    unitId: string;
+    subUnitId: string;
     ranges: IRange[];
 }
 
 export const SetColHiddenUndoMutationFactory = (accessor: IAccessor, params: ISetColHiddenMutationParams) => {
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
+    const universheet = univerInstanceService.getUniverSheetInstance(params.unitId);
 
     if (universheet == null) {
         throw new Error('universheet is null error!');
     }
 
     return {
-        workbookId: params.workbookId,
-        worksheetId: params.worksheetId,
+        unitId: params.unitId,
+        subUnitId: params.subUnitId,
         ranges: params.ranges,
     };
 };
@@ -44,13 +44,13 @@ export const SetColHiddenMutation: IMutation<ISetColHiddenMutationParams> = {
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
+        const universheet = univerInstanceService.getUniverSheetInstance(params.unitId);
 
         if (!universheet) {
             return false;
         }
 
-        const manager = universheet.getSheetBySheetId(params.worksheetId)!.getColumnManager();
+        const manager = universheet.getSheetBySheetId(params.subUnitId)!.getColumnManager();
         for (let i = 0; i < params.ranges.length; i++) {
             const range = params.ranges[i];
             for (let j = range.startColumn; j < range.endColumn + 1; j++) {
@@ -66,22 +66,22 @@ export const SetColHiddenMutation: IMutation<ISetColHiddenMutationParams> = {
 };
 
 export interface ISetColVisibleMutationParams {
-    workbookId: string;
-    worksheetId: string;
+    unitId: string;
+    subUnitId: string;
     ranges: IRange[];
 }
 
 export const SetColVisibleUndoMutationFactory = (accessor: IAccessor, params: ISetColVisibleMutationParams) => {
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
+    const universheet = univerInstanceService.getUniverSheetInstance(params.unitId);
 
     if (universheet == null) {
         throw new Error('universheet is null error!');
     }
 
     return {
-        workbookId: params.workbookId,
-        worksheetId: params.worksheetId,
+        unitId: params.unitId,
+        subUnitId: params.subUnitId,
         ranges: params.ranges,
     };
 };
@@ -91,13 +91,13 @@ export const SetColVisibleMutation: IMutation<ISetColVisibleMutationParams> = {
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
+        const universheet = univerInstanceService.getUniverSheetInstance(params.unitId);
 
         if (!universheet) {
             return false;
         }
 
-        const manager = universheet.getSheetBySheetId(params.worksheetId)!.getColumnManager();
+        const manager = universheet.getSheetBySheetId(params.subUnitId)!.getColumnManager();
         for (let i = 0; i < params.ranges.length; i++) {
             const range = params.ranges[i];
             for (let j = range.startColumn; j < range.endColumn + 1; j++) {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IMutationInfo, IRange, ObjectMatrixPrimitiveType, Worksheet } from '@univerjs/core';
+import type { ICellData, IMutationInfo, IObjectMatrixPrimitiveType, IRange, Worksheet } from '@univerjs/core';
 import {
     Disposable,
     ICommandService,
@@ -159,8 +159,8 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
         // 7. cache the copy content for internal paste
         copyContentCache.set(copyId, {
-            workbookId: workbook.getUnitId(),
-            worksheetId: worksheet.getSheetId(),
+            unitId: workbook.getUnitId(),
+            subUnitId: worksheet.getSheetId(),
             range: selection.range,
             matrix: matrixFragment,
             copyType,
@@ -253,7 +253,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         }
 
         const range = target.selection.range;
-        const cellValue: ObjectMatrixPrimitiveType<ICellData> = {
+        const cellValue: IObjectMatrixPrimitiveType<ICellData> = {
             [range.startRow]: {
                 [range.endColumn]: {
                     v: text,
@@ -262,8 +262,8 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         };
 
         const setRangeValuesParams: ISetRangeValuesMutationParams = {
-            workbookId: target.workbookId,
-            worksheetId: target.worksheetId,
+            unitId: target.unitId,
+            subUnitId: target.subUnitId,
             cellValue,
         };
 
@@ -287,7 +287,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
         // steps of pasting:
         const target = this._getPastingTarget();
-        const { selection, workbookId, worksheetId } = target;
+        const { selection, unitId, subUnitId } = target;
         if (!selection) {
             return false;
         }
@@ -328,8 +328,8 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                 cellMatrix,
             },
             {
-                workbookId,
-                worksheetId,
+                unitId,
+                subUnitId,
                 pastedRange,
             },
             pasteType
@@ -338,7 +338,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
     private async _pasteInternal(copyId: string, pasteType: string): Promise<boolean> {
         const target = this._getPastingTarget();
-        const { selection, workbookId, worksheetId } = target;
+        const { selection, unitId, subUnitId } = target;
         const cachedData = Tools.deepClone(copyContentCache.get(copyId));
         const { range, matrix: cellMatrix } = cachedData || {};
         if (!selection || !cellMatrix || !cachedData || !range) {
@@ -349,7 +349,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             return false;
         }
 
-        const styles = this._currentUniverService.getUniverSheetInstance(workbookId)?.getStyles();
+        const styles = this._currentUniverService.getUniverSheetInstance(unitId)?.getStyles();
         cellMatrix.forValue((row, col, value) => {
             if (typeof value.s === 'string') {
                 const newValue = Tools.deepClone(value);
@@ -373,15 +373,15 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const pasteRes = this._pasteUSM(
             { cellMatrix }, // paste data
             {
-                workbookId, // paste target
-                worksheetId,
+                unitId, // paste target
+                subUnitId,
                 pastedRange,
             },
             pasteType,
             {
                 range, // paste source
-                workbookId: cachedData.workbookId,
-                worksheetId: cachedData.worksheetId,
+                unitId: cachedData.unitId,
+                subUnitId: cachedData.subUnitId,
                 copyType: cachedData.copyType,
                 copyId,
             }
@@ -403,13 +403,13 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         source?: IPasteSource
     ): boolean {
         const { rowProperties, colProperties, cellMatrix } = data;
-        const { workbookId, worksheetId, pastedRange } = target;
+        const { unitId, subUnitId, pastedRange } = target;
         const { startColumn, endColumn } = pastedRange;
         const colCount = endColumn - startColumn + 1;
         const hooks = this._clipboardHooks;
         const enabledHooks: ISheetClipboardHook[] = [];
         const disableCopying = hooks.some(
-            (h) => enabledHooks.push(h) && h.onBeforePaste?.(workbookId, worksheetId, pastedRange) === false
+            (h) => enabledHooks.push(h) && h.onBeforePaste?.(unitId, subUnitId, pastedRange) === false
         );
         if (disableCopying) {
             enabledHooks.forEach((h) => h.onAfterPaste?.(false));
@@ -421,8 +421,8 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             ? {
                   copyRange: source.range,
                   copyType: source.copyType,
-                  workbookId: source.workbookId,
-                  worksheetId: source.worksheetId,
+                  unitId: source.unitId,
+                  subUnitId: source.subUnitId,
               }
             : { copyType: COPY_TYPE.COPY };
 
@@ -463,7 +463,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         });
 
         // setting the selection should be done separately, regardless of the pasting type.
-        const setSelectionOperation = this._getSetSelectionOperation(workbookId, worksheetId, pastedRange, cellMatrix);
+        const setSelectionOperation = this._getSetSelectionOperation(unitId, subUnitId, pastedRange, cellMatrix);
         if (setSelectionOperation) {
             redoMutationsInfo.push(setSelectionOperation);
         }
@@ -477,7 +477,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         if (result) {
             // add to undo redo services
             this._undoRedoService.pushUndoRedo({
-                unitID: workbookId,
+                unitID: unitId,
                 undoMutations: undoMutationsInfo,
                 redoMutations: redoMutationsInfo,
             });
@@ -487,12 +487,12 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     }
 
     private _getSetSelectionOperation(
-        workbookId: string,
-        worksheetId: string,
+        unitId: string,
+        subUnitId: string,
         range: IRange,
         cellMatrix: ObjectMatrix<ICellDataWithSpanInfo>
     ) {
-        const worksheet = this._currentUniverService.getUniverSheetInstance(workbookId)?.getSheetBySheetId(worksheetId);
+        const worksheet = this._currentUniverService.getUniverSheetInstance(unitId)?.getSheetBySheetId(subUnitId);
         if (!worksheet) {
             return null;
         }
@@ -529,8 +529,8 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
         // selection does not require undo
         const setSelectionsParam: ISetSelectionsOperationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             selections: [{ range, primary, style: null }],
         };
@@ -547,8 +547,8 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const worksheet = workbook.getActiveSheet();
         const selection = this._selectionManagerService.getLast();
         return {
-            workbookId: workbook.getUnitId(),
-            worksheetId: worksheet.getSheetId(),
+            unitId: workbook.getUnitId(),
+            subUnitId: worksheet.getSheetId(),
             selection,
         };
     }

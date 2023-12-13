@@ -70,7 +70,7 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
                     menuType={SheetMenuPosition.SHEET_BAR}
                     onOptionSelect={(params) => {
                         const { label: commandId, value } = params;
-                        commandService.executeCommand(commandId as string, { value, worksheetId: sheetId });
+                        commandService.executeCommand(commandId as string, { value, subUnitId: sheetId });
                         setVisible(false);
                     }}
                 />

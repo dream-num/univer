@@ -66,7 +66,7 @@ export class FormulaEditorShowController extends Disposable {
                     this._editorBridgeService.interceptor.getInterceptPoints().BEFORE_CELL_EDIT,
                     {
                         handler: (value, context, next) => {
-                            const { row, col, workbookId, worksheetId } = context;
+                            const { row, col, unitId, subUnitId } = context;
                             const arrayFormulaMatrixRange = this._formulaDataModel.getArrayFormulaRange();
 
                             const arrayFormulaMatrixCell = this._formulaDataModel.getArrayFormulaCellData();
@@ -82,8 +82,8 @@ export class FormulaEditorShowController extends Disposable {
                             const formulaDataItem = this._formulaDataModel.getFormulaDataItem(
                                 row,
                                 col,
-                                worksheetId,
-                                workbookId
+                                subUnitId,
+                                unitId
                             );
 
                             if (formulaDataItem != null) {
@@ -96,8 +96,8 @@ export class FormulaEditorShowController extends Disposable {
                                     } else {
                                         const originItem = this._formulaDataModel.getFormulaItemBySId(
                                             si,
-                                            worksheetId,
-                                            workbookId
+                                            subUnitId,
+                                            unitId
                                         );
 
                                         if (originItem == null || originItem.f.length === 0) {
@@ -123,7 +123,7 @@ export class FormulaEditorShowController extends Disposable {
                             if (
                                 value.v != null &&
                                 value.v !== '' &&
-                                arrayFormulaMatrixCell[workbookId]?.[worksheetId]?.[row]?.[col] == null
+                                arrayFormulaMatrixCell[unitId]?.[subUnitId]?.[row]?.[col] == null
                             ) {
                                 if (cellInfo) {
                                     return cellInfo;
@@ -135,7 +135,7 @@ export class FormulaEditorShowController extends Disposable {
                             /**
                              * Mark the array formula for special display in subsequent processing
                              */
-                            const matrixRange = arrayFormulaMatrixRange?.[workbookId]?.[worksheetId];
+                            const matrixRange = arrayFormulaMatrixRange?.[unitId]?.[subUnitId];
                             if (matrixRange != null) {
                                 new ObjectMatrix(matrixRange).forValue((rowIndex, columnIndex, range) => {
                                     if (range == null) {
@@ -143,15 +143,15 @@ export class FormulaEditorShowController extends Disposable {
                                     }
                                     const { startRow, startColumn, endRow, endColumn } = range;
                                     if (rowIndex === row && columnIndex === col) {
-                                        this._createArrayFormulaRangeShape(range, workbookId);
+                                        this._createArrayFormulaRangeShape(range, unitId);
                                         return false;
                                     }
                                     if (row >= startRow && row <= endRow && col >= startColumn && col <= endColumn) {
                                         const formulaDataItem = this._formulaDataModel.getFormulaDataItem(
                                             rowIndex,
                                             columnIndex,
-                                            worksheetId,
-                                            workbookId
+                                            subUnitId,
+                                            unitId
                                         );
 
                                         if (formulaDataItem == null || formulaDataItem.f == null) {
@@ -165,7 +165,7 @@ export class FormulaEditorShowController extends Disposable {
                                             };
                                         }
 
-                                        this._createArrayFormulaRangeShape(range, workbookId);
+                                        this._createArrayFormulaRangeShape(range, unitId);
                                         return false;
                                     }
                                 });
@@ -187,11 +187,11 @@ export class FormulaEditorShowController extends Disposable {
         this.disposeWithMe(
             this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
                 handler: (cell, location, next) => {
-                    const { row, col, workbookId, worksheetId } = location;
+                    const { row, col, unitId, subUnitId } = location;
 
                     const arrayFormulaMatrixCell = this._formulaDataModel.getArrayFormulaCellData();
 
-                    const arrayValue = arrayFormulaMatrixCell?.[workbookId]?.[worksheetId]?.[row]?.[col];
+                    const arrayValue = arrayFormulaMatrixCell?.[unitId]?.[subUnitId]?.[row]?.[col];
 
                     if (arrayValue) {
                         return next({ ...cell, ...arrayValue });

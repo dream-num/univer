@@ -62,12 +62,12 @@ describe('Test copy worksheet commands', () => {
                 }
 
                 expect(
-                    await commandService.executeCommand(SetWorksheetActivateCommand.id, { worksheetId: 'sheet1' })
+                    await commandService.executeCommand(SetWorksheetActivateCommand.id, { subUnitId: 'sheet1' })
                 ).toBeTruthy();
                 expect(
                     await commandService.executeCommand(CopySheetCommand.id, {
-                        workbookId: 'test',
-                        worksheetId: 'sheet1',
+                        unitId: 'test',
+                        subUnitId: 'sheet1',
                     })
                 ).toBeTruthy();
 

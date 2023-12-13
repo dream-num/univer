@@ -37,8 +37,8 @@ import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.
 import { getSheetObject } from './utils/component-tools';
 
 interface ISetWorksheetMutationParams {
-    workbookId: string;
-    worksheetId: string;
+    unitId: string;
+    subUnitId: string;
 }
 
 @OnLifecycle(LifecycleStages.Rendered, ZoomController)
@@ -98,8 +98,8 @@ export class ZoomController extends Disposable {
 
                     this._commandService.executeCommand(SetZoomRatioCommand.id, {
                         zoomRatio: nextRatio,
-                        workbookId: workbook.getUnitId(),
-                        worksheetId: sheet.getSheetId(),
+                        unitId: workbook.getUnitId(),
+                        subUnitId: sheet.getSheetId(),
                     });
 
                     e.preventDefault();
@@ -138,8 +138,8 @@ export class ZoomController extends Disposable {
                     const worksheet = workbook.getActiveSheet();
 
                     const params = command.params;
-                    const { workbookId, worksheetId } = params as ISetWorksheetMutationParams;
-                    if (!(workbookId === workbook.getUnitId() && worksheetId === worksheet.getSheetId())) {
+                    const { unitId, subUnitId } = params as ISetWorksheetMutationParams;
+                    if (!(unitId === workbook.getUnitId() && subUnitId === worksheet.getSheetId())) {
                         return;
                     }
 

@@ -40,7 +40,7 @@ export function checkCellContentInRange(worksheet: Worksheet, range: IRange): bo
 
 export function getClearContentMutationParamsForRanges(
     accessor: IAccessor,
-    workbookId: string,
+    unitId: string,
     worksheet: Worksheet,
     ranges: IRange[]
 ): {
@@ -50,7 +50,7 @@ export function getClearContentMutationParamsForRanges(
     const undos: IMutationInfo[] = [];
     const redos: IMutationInfo[] = [];
 
-    const worksheetId = worksheet.getSheetId();
+    const subUnitId = worksheet.getSheetId();
 
     // Use the following file as a reference.
     // packages/sheets/src/commands/commands/clear-selection-all.command.ts
@@ -58,8 +58,8 @@ export function getClearContentMutationParamsForRanges(
     ranges.forEach((range) => {
         const redoMatrix = getClearContentMutationParamForRange(worksheet, range);
         const redoMutationParams: ISetRangeValuesMutationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             cellValue: redoMatrix.getData(),
         };
         const undoMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(

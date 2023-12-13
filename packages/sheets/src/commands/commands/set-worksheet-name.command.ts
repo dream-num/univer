@@ -30,8 +30,8 @@ import { SetWorksheetNameMutation, SetWorksheetNameMutationFactory } from '../mu
 
 export interface ISetWorksheetNameCommandParams {
     name: string;
-    worksheetId?: string;
-    workbookId?: string;
+    subUnitId?: string;
+    unitId?: string;
 }
 
 /**
@@ -47,14 +47,14 @@ export const SetWorksheetNameCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
-        const workbookId = params.workbookId || univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId =
-            params.worksheetId || univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+        const unitId = params.unitId || univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+        const subUnitId =
+            params.subUnitId || univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
 
         const redoMutationParams: ISetWorksheetNameMutationParams = {
-            worksheetId,
+            subUnitId,
             name: params.name,
-            workbookId,
+            unitId,
         };
         const undoMutationParams: ISetWorksheetNameMutationParams = SetWorksheetNameMutationFactory(
             accessor,
@@ -72,7 +72,7 @@ export const SetWorksheetNameCommand: ICommand = {
         const result = await sequenceExecute(redos, commandService).result;
         if (result) {
             undoRedoService.pushUndoRedo({
-                unitID: workbookId,
+                unitID: unitId,
                 undoMutations: undos,
                 redoMutations: redos,
             });
@@ -84,7 +84,7 @@ export const SetWorksheetNameCommand: ICommand = {
 
         // if (result) {
         //     undoRedoService.pushUndoRedo({
-        //         unitID: workbookId,
+        //         unitID: unitId,
         //         undoMutations: [{ id: SetWorksheetNameMutation.id, params: undoMutationParams }],
         //         redoMutations: [{ id: SetWorksheetNameMutation.id, params: redoMutationParams }],
         //     });

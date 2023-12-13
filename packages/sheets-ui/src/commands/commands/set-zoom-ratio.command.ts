@@ -22,8 +22,8 @@ import { SetZoomRatioOperation } from '../operations/set-zoom-ratio.operation';
 
 export interface ISetZoomRatioCommandParams {
     zoomRatio: number;
-    workbookId: string;
-    worksheetId: string;
+    unitId: string;
+    subUnitId: string;
 }
 export interface IChangeZoomRatioCommandParams {
     reset?: boolean;
@@ -44,8 +44,8 @@ export const ChangeZoomRatioCommand: ICommand<IChangeZoomRatioCommandParams> = {
         const { delta, reset } = params;
         const workbook = accessor.get(IUniverInstanceService).getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
-        const workbookId = workbook.getUnitId();
-        const worksheetId = worksheet.getSheetId();
+        const unitId = workbook.getUnitId();
+        const subUnitId = worksheet.getSheetId();
 
         let zoom = reset ? 100 : Math.round((worksheet.getConfig().zoomRatio + delta) * 100);
         zoom = Math.max(SHEET_ZOOM_RANGE[0], zoom);
@@ -53,8 +53,8 @@ export const ChangeZoomRatioCommand: ICommand<IChangeZoomRatioCommandParams> = {
         const zoomRatio = zoom / 100;
 
         return accessor.get(ICommandService).executeCommand(SetZoomRatioOperation.id, {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             zoomRatio,
         });
     },
@@ -67,11 +67,11 @@ export const SetZoomRatioCommand: ICommand<ISetZoomRatioCommandParams> = {
         if (!params) {
             return false;
         }
-        const { workbookId, worksheetId, zoomRatio } = params;
+        const { unitId, subUnitId, zoomRatio } = params;
 
         return accessor.get(ICommandService).executeCommand(SetZoomRatioOperation.id, {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             zoomRatio,
         });
     },

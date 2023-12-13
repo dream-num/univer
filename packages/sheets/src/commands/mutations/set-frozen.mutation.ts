@@ -19,8 +19,8 @@ import { CommandType, IUniverInstanceService } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
 export interface ISetFrozenMutationParams {
-    workbookId: string;
-    worksheetId: string;
+    unitId: string;
+    subUnitId: string;
     startRow: number;
     startColumn: number;
     ySplit: number;
@@ -32,12 +32,12 @@ export const SetFrozenMutationFactory = (
     params: ISetFrozenMutationParams
 ): ISetFrozenMutationParams => {
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
+    const universheet = univerInstanceService.getUniverSheetInstance(params.unitId);
 
     if (universheet == null) {
         throw new Error('universheet is null error!');
     }
-    const worksheet = universheet.getSheetBySheetId(params.worksheetId);
+    const worksheet = universheet.getSheetBySheetId(params.subUnitId);
 
     if (worksheet == null) {
         throw new Error('worksheet is null error!');
@@ -46,8 +46,8 @@ export const SetFrozenMutationFactory = (
     const freeze = config.freeze;
 
     return {
-        workbookId: params.workbookId,
-        worksheetId: params.worksheetId,
+        unitId: params.unitId,
+        subUnitId: params.subUnitId,
         ...freeze,
     };
 };
@@ -57,13 +57,13 @@ export const SetFrozenMutation: IMutation<ISetFrozenMutationParams> = {
     type: CommandType.MUTATION,
     handler: (accessor: IAccessor, params: ISetFrozenMutationParams) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
+        const universheet = univerInstanceService.getUniverSheetInstance(params.unitId);
 
         if (universheet == null) {
             throw new Error('universheet is null error!');
         }
 
-        const worksheet = universheet.getSheetBySheetId(params.worksheetId);
+        const worksheet = universheet.getSheetBySheetId(params.subUnitId);
         if (!worksheet) return false;
         const config = worksheet.getConfig();
         const { startRow, startColumn, ySplit, xSplit } = params;

@@ -34,8 +34,8 @@ export const InsertSheetUndoMutationFactory = (
     _accessor: IAccessor,
     params: IInsertSheetMutationParams
 ): IRemoveSheetMutationParams => ({
-    worksheetId: params.sheet.id,
-    workbookId: params.workbookId,
+    subUnitId: params.sheet.id,
+    unitId: params.unitId,
 });
 
 export const InsertSheetMutation: IMutation<IInsertSheetMutationParams, boolean> = {
@@ -43,8 +43,8 @@ export const InsertSheetMutation: IMutation<IInsertSheetMutationParams, boolean>
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const { sheet, index, workbookId } = params;
-        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
+        const { sheet, index, unitId } = params;
+        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
         if (!workbook) {
             return false;
         }

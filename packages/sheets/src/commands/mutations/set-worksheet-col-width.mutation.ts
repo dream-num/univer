@@ -19,8 +19,8 @@ import { CommandType, IUniverInstanceService, ObjectArray } from '@univerjs/core
 import type { IAccessor } from '@wendellhu/redi';
 
 export interface ISetWorksheetColWidthMutationParams {
-    workbookId: string;
-    worksheetId: string;
+    unitId: string;
+    subUnitId: string;
     ranges: IRange[];
     colWidth: number | ObjectArray<number>;
 }
@@ -30,13 +30,13 @@ export const SetWorksheetColWidthMutationFactory = (
     params: ISetWorksheetColWidthMutationParams
 ): ISetWorksheetColWidthMutationParams => {
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
+    const universheet = univerInstanceService.getUniverSheetInstance(params.unitId);
 
     if (universheet == null) {
         throw new Error('universheet is null error!');
     }
 
-    const worksheet = universheet.getSheetBySheetId(params.worksheetId);
+    const worksheet = universheet.getSheetBySheetId(params.subUnitId);
     if (worksheet == null) {
         throw new Error('universheet is null error!');
     }
@@ -52,8 +52,8 @@ export const SetWorksheetColWidthMutationFactory = (
     }
 
     return {
-        workbookId: params.workbookId,
-        worksheetId: params.worksheetId,
+        unitId: params.unitId,
+        subUnitId: params.subUnitId,
         ranges: params.ranges,
         colWidth,
     };
@@ -64,13 +64,13 @@ export const SetWorksheetColWidthMutation: IMutation<ISetWorksheetColWidthMutati
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
+        const universheet = univerInstanceService.getUniverSheetInstance(params.unitId);
 
         if (universheet == null) {
             throw new Error('universheet is null error!');
         }
 
-        const worksheet = universheet.getSheetBySheetId(params.worksheetId);
+        const worksheet = universheet.getSheetBySheetId(params.subUnitId);
         if (!worksheet) {
             return false;
         }

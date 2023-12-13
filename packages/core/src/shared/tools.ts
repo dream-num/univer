@@ -18,8 +18,6 @@ import { nanoid } from 'nanoid';
 
 import type { ObjectArrayPrimitiveType } from './object-array';
 import { ObjectArray } from './object-array';
-import type { ObjectMatrixPrimitiveType } from './object-matrix';
-import { ObjectMatrix } from './object-matrix';
 import type { Class, IKeyValue } from './types';
 
 const rmsPrefix = /^-ms-/;
@@ -513,15 +511,15 @@ export class Tools {
      * @param value value to be set
      * @returns
      */
-    static fillObjectMatrix<T>(rows: number, columns: number, value: T): ObjectMatrixPrimitiveType<T> {
-        const matrix = new ObjectMatrix<T>();
-        for (let r = 0; r < rows; r++) {
-            for (let c = 0; c < columns; c++) {
-                matrix.setValue(r, c, value);
-            }
-        }
-        return matrix.getData();
-    }
+    // static fillObjectMatrix<T>(rows: number, columns: number, value: T): IObjectMatrixPrimitiveType<T> {
+    //     const matrix = new ObjectMatrix<T>();
+    //     for (let r = 0; r < rows; r++) {
+    //         for (let c = 0; c < columns; c++) {
+    //             matrix.setValue(r, c, value);
+    //         }
+    //     }
+    //     return matrix.getData();
+    // }
 
     static numToWord(x: number) {
         let s = '';

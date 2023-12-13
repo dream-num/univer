@@ -50,8 +50,8 @@ describe('Test set worksheet name commands', () => {
 
                 expect(
                     await commandService.executeCommand(SetWorksheetNameCommand.id, {
-                        workbookId: 'test',
-                        worksheetId: 'sheet1',
+                        unitId: 'test',
+                        subUnitId: 'sheet1',
                         name: 'new name',
                     })
                 ).toBeTruthy();

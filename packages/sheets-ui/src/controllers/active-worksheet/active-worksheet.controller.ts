@@ -93,31 +93,31 @@ export class ActiveWorksheetController extends Disposable {
 
     private _adjustActiveSheetOnHideSheet(mutation: IMutationInfo<ISetWorksheetHideMutationParams>) {
         // If the active sheet is hidden, we need to change the active sheet to the next sheet.
-        const { workbookId, worksheetId } = mutation.params;
-        const workbook = this._univerInstanceService.getUniverSheetInstance(workbookId);
+        const { unitId, subUnitId } = mutation.params;
+        const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
         if (!workbook) {
             return;
         }
 
         const activeSheet = workbook?.getRawActiveSheet();
-        if (activeSheet !== worksheetId) {
+        if (activeSheet !== subUnitId) {
             return;
         }
 
         const activeIndex = workbook.getActiveSheetIndex();
         const nextId = findTheNextUnhiddenSheet(workbook, activeIndex);
 
-        this._switchToNextSheet(workbookId, nextId);
+        this._switchToNextSheet(unitId, nextId);
     }
 
     private _beforeAdjustActiveSheetOnRemoveSheet(mutation: IMutationInfo<IRemoveSheetMutationParams>) {
-        const { workbookId, worksheetId } = mutation.params;
-        const workbook = this._univerInstanceService.getUniverSheetInstance(workbookId);
+        const { unitId, subUnitId } = mutation.params;
+        const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
         if (!workbook) {
             return;
         }
 
-        const worksheet = workbook.getSheetBySheetId(worksheetId);
+        const worksheet = workbook.getSheetBySheetId(subUnitId);
         if (!worksheet) {
             return;
         }
@@ -135,8 +135,8 @@ export class ActiveWorksheetController extends Disposable {
         // in the `IRemoteSheetMutationParams` and use it to decide the previous sheet.
 
         // If the selected sheet is not the deleted one, we don't have to do things.
-        const { workbookId } = mutation.params;
-        const workbook = this._univerInstanceService.getUniverSheetInstance(workbookId);
+        const { unitId } = mutation.params;
+        const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
         if (!workbook) {
             return;
         }
@@ -154,25 +154,25 @@ export class ActiveWorksheetController extends Disposable {
             throw new Error('[ActiveWorksheetController]: cannot find the next sheet!');
         }
 
-        this._switchToNextSheet(workbookId, nextSheet.getSheetId());
+        this._switchToNextSheet(unitId, nextSheet.getSheetId());
     }
 
     private _adjustActiveSheetOnInsertSheet(mutation: IMutationInfo<IInsertSheetMutationParams>) {
         // This is simple, just change the active sheet to the unhidden sheet.
-        const { workbookId, sheet } = mutation.params;
-        this._switchToNextSheet(workbookId, sheet.id);
+        const { unitId, sheet } = mutation.params;
+        this._switchToNextSheet(unitId, sheet.id);
     }
 
     private _adjustActiveSheetOnShowSheet(mutation: IMutationInfo<ISetWorksheetHideMutationParams>) {
         // This is simple, just change the active sheet to the unhidden sheet.
-        const { workbookId, worksheetId } = mutation.params;
-        this._switchToNextSheet(workbookId, worksheetId);
+        const { unitId, subUnitId } = mutation.params;
+        this._switchToNextSheet(unitId, subUnitId);
     }
 
-    private _switchToNextSheet(workbookId: string, worksheetId: string): void {
+    private _switchToNextSheet(unitId: string, subUnitId: string): void {
         this._commandService.executeCommand(SetWorksheetActiveOperation.id, {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
         } as ISetWorksheetActiveOperationParams);
     }
 }

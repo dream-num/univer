@@ -26,8 +26,8 @@ import {
 
 export interface ISetWorksheetRightToLeftCommandParams {
     rightToLeft?: BooleanNumber;
-    workbookId?: string;
-    worksheetId?: string;
+    unitId?: string;
+    subUnitId?: string;
 }
 
 export const SetWorksheetRightToLeftCommand: ICommand = {
@@ -39,8 +39,8 @@ export const SetWorksheetRightToLeftCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        let workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        let worksheetId = univerInstanceService
+        let unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+        let subUnitId = univerInstanceService
             .getCurrentUniverSheetInstance()
 
             .getActiveSheet()
@@ -48,20 +48,20 @@ export const SetWorksheetRightToLeftCommand: ICommand = {
         let rightToLeft = BooleanNumber.FALSE;
 
         if (params) {
-            workbookId = params.workbookId ?? workbookId;
-            worksheetId = params.worksheetId ?? worksheetId;
+            unitId = params.unitId ?? unitId;
+            subUnitId = params.subUnitId ?? subUnitId;
             rightToLeft = params.rightToLeft ?? BooleanNumber.FALSE;
         }
 
-        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
+        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
         if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(worksheetId);
+        const worksheet = workbook.getSheetBySheetId(subUnitId);
         if (!worksheet) return false;
 
         const setWorksheetRightToLeftMutationParams: ISetWorksheetRightToLeftMutationParams = {
             rightToLeft,
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
         };
 
         const undoMutationParams = SetWorksheetRightToLeftUndoMutationFactory(
@@ -75,7 +75,7 @@ export const SetWorksheetRightToLeftCommand: ICommand = {
 
         if (result) {
             undoRedoService.pushUndoRedo({
-                unitID: workbookId,
+                unitID: unitId,
                 undoMutations: [{ id: SetWorksheetRightToLeftMutation.id, params: undoMutationParams }],
                 redoMutations: [
                     { id: SetWorksheetRightToLeftMutation.id, params: setWorksheetRightToLeftMutationParams },

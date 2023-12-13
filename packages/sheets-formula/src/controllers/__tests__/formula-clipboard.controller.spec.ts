@@ -66,8 +66,8 @@ describe('Test paste with formula', () => {
 
     describe('correct situations', () => {
         it('Copy two cells, one of which is the formula', async () => {
-            const workbookId = 'test';
-            const worksheetId = 'sheet1';
+            const unitId = 'test';
+            const subUnitId = 'sheet1';
             const range = {
                 startRow: 12,
                 startColumn: 2,
@@ -108,8 +108,8 @@ describe('Test paste with formula', () => {
                     {
                         id: SetRangeValuesMutation.id,
                         params: {
-                            workbookId,
-                            worksheetId,
+                            unitId,
+                            subUnitId,
                             cellValue: {
                                 '12': {
                                     '2': {
@@ -138,8 +138,8 @@ describe('Test paste with formula', () => {
                     {
                         id: SetRangeValuesMutation.id,
                         params: {
-                            workbookId,
-                            worksheetId,
+                            unitId,
+                            subUnitId,
                             cellValue: {
                                 '12': {
                                     '2': {},
@@ -156,8 +156,8 @@ describe('Test paste with formula', () => {
             };
 
             const redoUndoList = getSetCellFormulaMutations(
-                workbookId,
-                worksheetId,
+                unitId,
+                subUnitId,
                 range,
                 matrix,
                 accessor,

@@ -73,8 +73,8 @@ export const RemoveRowCommand: ICommand = {
         const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
 
-        const workbookId = workbook.getUnitId();
-        const worksheetId = worksheet.getSheetId();
+        const unitId = workbook.getUnitId();
+        const subUnitId = worksheet.getSheetId();
         const lastColumnIndex = worksheet.getMaxColumns() - 1;
         ranges.forEach((item) => {
             item.startColumn = 0;
@@ -83,8 +83,8 @@ export const RemoveRowCommand: ICommand = {
 
         // row count
         const removeRowsParams: IRemoveRowsMutationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             ranges,
         };
         const undoRemoveRowsParams: IInsertRowMutationParams = RemoveRowsUndoMutationFactory(
@@ -94,8 +94,8 @@ export const RemoveRowCommand: ICommand = {
 
         // cells' contents
         const deleteRangeValueParams: IDeleteRangeMutationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             ranges,
             shiftDimension: Dimension.ROWS,
         };
@@ -123,7 +123,7 @@ export const RemoveRowCommand: ICommand = {
 
         if (result.result) {
             accessor.get(IUndoRedoService).pushUndoRedo({
-                unitID: workbookId,
+                unitID: unitId,
                 undoMutations: [
                     ...intercepted.undos,
 
@@ -165,8 +165,8 @@ export const RemoveColCommand: ICommand = {
         const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
 
-        const workbookId = workbook.getUnitId();
-        const worksheetId = worksheet.getSheetId();
+        const unitId = workbook.getUnitId();
+        const subUnitId = worksheet.getSheetId();
         const lastRowIndex = worksheet.getMaxRows() - 1;
         ranges.forEach((item) => {
             item.startRow = 0;
@@ -175,16 +175,16 @@ export const RemoveColCommand: ICommand = {
 
         // col count
         const removeColParams: IRemoveColMutationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             ranges,
         };
         const undoRemoveColParams: IInsertColMutationParams = RemoveColMutationFactory(accessor, removeColParams);
 
         // cells' contents
         const removeRangeValuesParams: IDeleteRangeMutationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             ranges,
             shiftDimension: Dimension.COLUMNS,
         };
@@ -213,7 +213,7 @@ export const RemoveColCommand: ICommand = {
         if (result.result) {
             const undoRedoService = accessor.get(IUndoRedoService);
             undoRedoService.pushUndoRedo({
-                unitID: workbookId,
+                unitID: unitId,
                 undoMutations: [
                     ...intercepted.undos,
                     { id: InsertColMutation.id, params: undoRemoveColParams },

@@ -20,16 +20,16 @@ import type { IAccessor } from '@wendellhu/redi';
 
 export interface ISetWorksheetRightToLeftMutationParams {
     rightToLeft: BooleanNumber;
-    workbookId: string;
-    worksheetId: string;
+    unitId: string;
+    subUnitId: string;
 }
 
 export const SetWorksheetRightToLeftUndoMutationFactory = (
     accessor: IAccessor,
     params: ISetWorksheetRightToLeftMutationParams
 ): ISetWorksheetRightToLeftMutationParams => {
-    const workbook = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.workbookId);
-    const worksheet = workbook!.getSheetBySheetId(params.worksheetId);
+    const workbook = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.unitId);
+    const worksheet = workbook!.getSheetBySheetId(params.subUnitId);
     const config = worksheet!.getConfig();
 
     const oldState = config.rightToLeft;
@@ -44,9 +44,9 @@ export const SetWorksheetRightToLeftMutation: IMutation<ISetWorksheetRightToLeft
     id: 'sheet.mutation.set-worksheet-right-to-left',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
-        const workbook = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.workbookId);
+        const workbook = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.unitId);
         if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(params.worksheetId);
+        const worksheet = workbook.getSheetBySheetId(params.subUnitId);
         if (!worksheet) return false;
         const config = worksheet.getConfig();
 

@@ -44,8 +44,8 @@ import { COPY_TYPE } from '../../services/clipboard/type';
 export function getDefaultOnPasteCellMutations(
     pastedRange: IRange,
     matrix: ObjectMatrix<ICellDataWithSpanInfo>,
-    workbookId: string,
-    worksheetId: string,
+    unitId: string,
+    subUnitId: string,
     copyInfo: {
         copyType: COPY_TYPE;
         copyRange?: IRange;
@@ -55,14 +55,14 @@ export function getDefaultOnPasteCellMutations(
     const redoMutationsInfo: IMutationInfo[] = [];
     const undoMutationsInfo: IMutationInfo[] = [];
     if (copyInfo.copyType === COPY_TYPE.CUT) {
-        const { undos, redos } = getMoveRangeMutations(pastedRange, workbookId, worksheetId, copyInfo, accessor);
+        const { undos, redos } = getMoveRangeMutations(pastedRange, unitId, subUnitId, copyInfo, accessor);
         redoMutationsInfo.push(...redos);
         undoMutationsInfo.push(...undos);
     } else {
         // clear style
         const { undos: clearStyleUndos, redos: clearStyleRedos } = getClearCellStyleMutations(
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             pastedRange,
             matrix,
             accessor
@@ -72,8 +72,8 @@ export function getDefaultOnPasteCellMutations(
 
         // set values
         const { undos: setValuesUndos, redos: setValuesRedos } = getSetCellValueMutations(
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             pastedRange,
             matrix,
             accessor
@@ -83,8 +83,8 @@ export function getDefaultOnPasteCellMutations(
 
         // set styles
         const { undos: setStyleUndos, redos: setStyleRedos } = getSetCellStyleMutations(
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             pastedRange,
             matrix,
             accessor
@@ -94,8 +94,8 @@ export function getDefaultOnPasteCellMutations(
 
         // clear and add merge
         const { undos: clearMergeUndos, redos: clearMergeRedos } = getClearAndSetMergeMutations(
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             pastedRange,
             matrix,
             accessor
@@ -111,8 +111,8 @@ export function getDefaultOnPasteCellMutations(
 
 export function getMoveRangeMutations(
     pastedRange: IRange,
-    workbookId: string,
-    worksheetId: string,
+    unitId: string,
+    subUnitId: string,
     copyInfo: {
         copyType: COPY_TYPE;
         copyRange?: IRange;
@@ -125,8 +125,8 @@ export function getMoveRangeMutations(
     if (copyRange) {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
-        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
-        const worksheet = workbook?.getSheetBySheetId(worksheetId);
+        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
+        const worksheet = workbook?.getSheetBySheetId(subUnitId);
         if (worksheet) {
             const fromValues = worksheet.getRange(copyRange).getValues();
 
@@ -162,14 +162,14 @@ export function getMoveRangeMutations(
             const doMoveRangeMutation: IMoveRangeMutationParams = {
                 from: newFromCellValues.getMatrix(),
                 to: newToCellValues.getMatrix(),
-                workbookId,
-                worksheetId,
+                unitId,
+                subUnitId,
             };
             const undoMoveRangeMutation: IMoveRangeMutationParams = {
                 from: currentFromCellValues.getMatrix(),
                 to: currentToCellValues.getMatrix(),
-                workbookId,
-                worksheetId,
+                unitId,
+                subUnitId,
             };
             const interceptorCommands = sheetInterceptorService.onCommandExecute({
                 id: MoveRangeCommand.id,
@@ -182,8 +182,8 @@ export function getMoveRangeMutations(
                 {
                     id: SetSelectionsOperation.id,
                     params: {
-                        unitId: workbookId,
-                        sheetId: worksheetId,
+                        unitId,
+                        sheetId: subUnitId,
                         pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                         selections: [{ range: pastedRange }],
                     },
@@ -193,8 +193,8 @@ export function getMoveRangeMutations(
                 {
                     id: SetSelectionsOperation.id,
                     params: {
-                        unitId: workbookId,
-                        sheetId: worksheetId,
+                        unitId,
+                        sheetId: subUnitId,
                         pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                         selections: [{ range: copyRange }],
                     },
@@ -212,8 +212,8 @@ export function getMoveRangeMutations(
 }
 
 export function getSetCellValueMutations(
-    workbookId: string,
-    worksheetId: string,
+    unitId: string,
+    subUnitId: string,
     range: IRange,
     matrix: ObjectMatrix<ICellDataWithSpanInfo>,
     accessor: IAccessor
@@ -239,8 +239,8 @@ export function getSetCellValueMutations(
     });
     // set cell value and style
     const setValuesMutation: ISetRangeValuesMutationParams = {
-        workbookId,
-        worksheetId,
+        unitId,
+        subUnitId,
         cellValue: valueMatrix.getData(),
     };
 
@@ -266,8 +266,8 @@ export function getSetCellValueMutations(
 }
 
 export function getSetCellStyleMutations(
-    workbookId: string,
-    worksheetId: string,
+    unitId: string,
+    subUnitId: string,
     range: IRange,
     matrix: ObjectMatrix<ICellDataWithSpanInfo>,
     accessor: IAccessor
@@ -289,8 +289,8 @@ export function getSetCellStyleMutations(
     });
     // set cell style
     const setValuesMutation: ISetRangeValuesMutationParams = {
-        workbookId,
-        worksheetId,
+        unitId,
+        subUnitId,
         cellValue: valueMatrix.getData(),
     };
 
@@ -316,8 +316,8 @@ export function getSetCellStyleMutations(
 }
 
 export function getClearCellStyleMutations(
-    workbookId: string,
-    worksheetId: string,
+    unitId: string,
+    subUnitId: string,
     range: IRange,
     matrix: ObjectMatrix<ICellDataWithSpanInfo>,
     accessor: IAccessor
@@ -338,8 +338,8 @@ export function getClearCellStyleMutations(
     // clear style
     if (clearStyleMatrix.getLength() > 0) {
         const clearMutation: ISetRangeValuesMutationParams = {
-            worksheetId,
-            workbookId,
+            subUnitId,
+            unitId,
             cellValue: clearStyleMatrix.getData(),
         };
         redoMutationsInfo.push({
@@ -363,8 +363,8 @@ export function getClearCellStyleMutations(
 }
 
 export function getClearAndSetMergeMutations(
-    workbookId: string,
-    worksheetId: string,
+    unitId: string,
+    subUnitId: string,
     range: IRange,
     matrix: ObjectMatrix<ICellDataWithSpanInfo>,
     accessor: IAccessor
@@ -404,8 +404,8 @@ export function getClearAndSetMergeMutations(
     if (hasMerge) {
         // get all merged cells
         const currentService = accessor.get(IUniverInstanceService) as IUniverInstanceService;
-        const workbook = currentService.getUniverSheetInstance(workbookId);
-        const worksheet = workbook?.getSheetBySheetId(worksheetId);
+        const workbook = currentService.getUniverSheetInstance(unitId);
+        const worksheet = workbook?.getSheetBySheetId(subUnitId);
         if (workbook && worksheet) {
             const mergeData = worksheet.getMergeData();
             const mergedCellsInRange = mergeData.filter((rect) =>
@@ -413,8 +413,8 @@ export function getClearAndSetMergeMutations(
             );
 
             const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
-                workbookId,
-                worksheetId,
+                unitId,
+                subUnitId,
                 ranges: mergedCellsInRange,
             };
             redoMutationsInfo.push({
@@ -436,8 +436,8 @@ export function getClearAndSetMergeMutations(
 
     // set merged cell info
     const addMergeMutationParams: IAddWorksheetMergeMutationParams = {
-        workbookId,
-        worksheetId,
+        unitId,
+        subUnitId,
         ranges: mergeRangeData,
     };
     redoMutationsInfo.push({

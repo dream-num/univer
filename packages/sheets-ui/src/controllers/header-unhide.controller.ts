@@ -101,16 +101,16 @@ export class HeaderUnhideController extends RxDisposable {
                 if (
                     !RENDER_COMMANDS.includes(command.id) ||
                     !command.params ||
-                    !(command.params as IKeyValue).workbookId ||
-                    !(command.params as IKeyValue).worksheetId
+                    !(command.params as IKeyValue).unitId ||
+                    !(command.params as IKeyValue).subUnitId
                 ) {
                     return;
                 }
 
                 const workbook = this._univerInstanceService.getUniverSheetInstance(
-                    (command.params as IKeyValue).workbookId
+                    (command.params as IKeyValue).unitId
                 );
-                const worksheet = workbook?.getSheetBySheetId((command.params as IKeyValue).worksheetId);
+                const worksheet = workbook?.getSheetBySheetId((command.params as IKeyValue).subUnitId);
                 if (worksheet) {
                     this._updateWorksheet(workbook!, worksheet);
                 }
@@ -159,8 +159,8 @@ export class HeaderUnhideController extends RxDisposable {
                     this._cmdSrv.executeCommand<ISetSpecificRowsVisibleCommandParams>(
                         SetSpecificRowsVisibleCommand.id,
                         {
-                            workbookId: workbook.getUnitId(),
-                            worksheetId: worksheet.getSheetId(),
+                            unitId: workbook.getUnitId(),
+                            subUnitId: worksheet.getSheetId(),
                             ranges: [range],
                         }
                     )
@@ -187,8 +187,8 @@ export class HeaderUnhideController extends RxDisposable {
                     this._cmdSrv.executeCommand<ISetSpecificColsVisibleCommandParams>(
                         SetSpecificColsVisibleCommand.id,
                         {
-                            workbookId: workbook.getUnitId(),
-                            worksheetId: worksheet.getSheetId(),
+                            unitId: workbook.getUnitId(),
+                            subUnitId: worksheet.getSheetId(),
                             ranges: [range],
                         }
                     )

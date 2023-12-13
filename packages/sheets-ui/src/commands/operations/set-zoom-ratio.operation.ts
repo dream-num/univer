@@ -20,16 +20,16 @@ import type { IAccessor } from '@wendellhu/redi';
 
 export interface ISetZoomRatioOperationParams {
     zoomRatio: number;
-    workbookId: string;
-    worksheetId: string;
+    unitId: string;
+    subUnitId: string;
 }
 
 export const SetZoomRatioUndoMutationFactory = (
     accessor: IAccessor,
     params: ISetZoomRatioOperationParams
 ): ISetZoomRatioOperationParams => {
-    const workbook = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.workbookId);
-    const worksheet = workbook!.getSheetBySheetId(params.worksheetId);
+    const workbook = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.unitId);
+    const worksheet = workbook!.getSheetBySheetId(params.subUnitId);
     const old = worksheet!.getConfig().zoomRatio;
     return {
         ...Tools.deepClone(params),
@@ -41,12 +41,12 @@ export const SetZoomRatioOperation: IOperation<ISetZoomRatioOperationParams> = {
     id: 'sheet.operation.set-zoom-ratio',
     type: CommandType.OPERATION,
     handler: (accessor, params: ISetZoomRatioOperationParams) => {
-        const workbook = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.workbookId);
+        const workbook = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.unitId);
         if (!workbook) {
             return false;
         }
 
-        const worksheet = workbook.getSheetBySheetId(params.worksheetId);
+        const worksheet = workbook.getSheetBySheetId(params.subUnitId);
         if (!worksheet) {
             return false;
         }

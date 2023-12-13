@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICommand, IRange, ObjectMatrixPrimitiveType } from '@univerjs/core';
+import type { ICellData, ICommand, IObjectMatrixPrimitiveType, IRange } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
@@ -44,17 +44,17 @@ export const ClearSelectionContentCommand: ICommand = {
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
         const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-        const workbookId = workbook.getUnitId();
+        const unitId = workbook.getUnitId();
         const worksheet = workbook.getActiveSheet();
-        const worksheetId = worksheet.getSheetId();
+        const subUnitId = worksheet.getSheetId();
         const selections = selectionManagerService.getSelectionRanges();
         if (!selections?.length) {
             return false;
         }
 
         const clearMutationParams: ISetRangeValuesMutationParams = {
-            worksheetId,
-            workbookId,
+            subUnitId,
+            unitId,
             cellValue: generateNullCellValue(selections),
         };
         const undoClearMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
@@ -71,7 +71,7 @@ export const ClearSelectionContentCommand: ICommand = {
             undoRedoService.pushUndoRedo({
                 // If there are multiple mutations that form an encapsulated project, they must be encapsulated in the same undo redo element.
                 // Hooks can be used to hook the code of external controllers to add new actions.
-                unitID: workbookId,
+                unitID: unitId,
                 undoMutations: undos,
                 redoMutations: redos,
             });
@@ -84,7 +84,7 @@ export const ClearSelectionContentCommand: ICommand = {
 };
 
 // Generate cellValue from range and set v/p/f/si to null
-function generateNullCellValue(range: IRange[]): ObjectMatrixPrimitiveType<ICellData> {
+function generateNullCellValue(range: IRange[]): IObjectMatrixPrimitiveType<ICellData> {
     const cellValue = new ObjectMatrix<ICellData>();
     range.forEach((range: IRange) => {
         const { startRow, startColumn, endRow, endColumn } = range;

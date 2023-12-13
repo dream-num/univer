@@ -50,8 +50,8 @@ export interface IStyleTypeValue<T> {
 }
 
 export interface ISetStyleCommandParams<T> {
-    worksheetId?: string;
-    workbookId?: string;
+    subUnitId?: string;
+    unitId?: string;
     range?: IRange;
     style: IStyleTypeValue<T>;
 }
@@ -68,8 +68,8 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
         const {
-            workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId(),
-            worksheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId(),
+            unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId(),
+            subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId(),
             range,
             style,
         } = params;
@@ -82,8 +82,8 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
             return false;
         }
 
-        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
-        const worksheet = workbook?.getSheetBySheetId(worksheetId);
+        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
+        const worksheet = workbook?.getSheetBySheetId(subUnitId);
         if (worksheet == null) {
             return false;
         }
@@ -123,8 +123,8 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
         }
 
         const setRangeValuesMutationParams: ISetRangeValuesMutationParams = {
-            worksheetId,
-            workbookId,
+            subUnitId,
+            unitId,
             cellValue: cellValue.getMatrix(),
         };
 
@@ -147,7 +147,7 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
 
         if (setRangeValuesResult && result.result) {
             undoRedoService.pushUndoRedo({
-                unitID: workbookId,
+                unitID: unitId,
                 undoMutations: [{ id: SetRangeValuesMutation.id, params: undoSetRangeValuesMutationParams }, ...undos],
                 redoMutations: [{ id: SetRangeValuesMutation.id, params: setRangeValuesMutationParams }, ...redos],
             });

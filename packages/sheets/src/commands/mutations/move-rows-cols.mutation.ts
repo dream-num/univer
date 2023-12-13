@@ -21,8 +21,8 @@ import type { IAccessor } from '@wendellhu/redi';
 // TODO@wzhudev: maybe we should do some error handling in these mutators
 
 export interface IMoveRowsMutationParams {
-    workbookId: string;
-    worksheetId: string;
+    unitId: string;
+    subUnitId: string;
     /**
      * The rows to be moved.
      */
@@ -42,21 +42,21 @@ export function MoveRowsMutationUndoFactory(
     _accessor: IAccessor,
     params: IMoveRowsMutationParams
 ): IMoveRowsMutationParams {
-    const { workbookId, worksheetId, sourceRange, targetRange } = params;
+    const { unitId, subUnitId, sourceRange, targetRange } = params;
     const movingBackward = sourceRange.startRow > targetRange.startRow;
     const count = sourceRange.endRow - sourceRange.startRow + 1;
     if (movingBackward) {
         // If is moving backward, target range should be `count` offset.
         return {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             sourceRange: Rectangle.clone(targetRange),
             targetRange: { ...sourceRange, endRow: sourceRange.endRow + count, startRow: sourceRange.startRow + count },
         };
     }
     return {
-        workbookId,
-        worksheetId,
+        unitId,
+        subUnitId,
         targetRange: Rectangle.clone(sourceRange),
         sourceRange: Rectangle.clone(targetRange),
     };
@@ -66,15 +66,15 @@ export const MoveRowsMutation: IMutation<IMoveRowsMutationParams> = {
     id: 'sheet.mutation.move-rows',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
-        const { workbookId, worksheetId, sourceRange, targetRange } = params;
+        const { unitId, subUnitId, sourceRange, targetRange } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const univerSheet = univerInstanceService.getUniverSheetInstance(workbookId);
+        const univerSheet = univerInstanceService.getUniverSheetInstance(unitId);
         if (!univerSheet) {
             throw new Error('[MoveRowMutation] univerSheet is null!');
         }
 
-        const worksheet = univerSheet.getSheetBySheetId(worksheetId);
+        const worksheet = univerSheet.getSheetBySheetId(subUnitId);
         if (!worksheet) {
             throw new Error('[MoveRowMutation] worksheet is null!');
         }
@@ -96,8 +96,8 @@ export const MoveRowsMutation: IMutation<IMoveRowsMutationParams> = {
 };
 
 export interface IMoveColumnsMutationParams {
-    workbookId: string;
-    worksheetId: string;
+    unitId: string;
+    subUnitId: string;
     /**
      * The cols to be moved.
      */
@@ -112,14 +112,14 @@ export function MoveColsMutationUndoFactory(
     _accessor: IAccessor,
     params: IMoveColumnsMutationParams
 ): IMoveColumnsMutationParams {
-    const { workbookId, worksheetId, sourceRange, targetRange } = params;
+    const { unitId, subUnitId, sourceRange, targetRange } = params;
     const movingBackward = sourceRange.startColumn > targetRange.startColumn;
     const count = sourceRange.endColumn - sourceRange.startColumn + 1;
     if (movingBackward) {
         // If is moving backward, target range should be `count` offset.
         return {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             sourceRange: Rectangle.clone(targetRange),
             targetRange: {
                 ...sourceRange,
@@ -129,8 +129,8 @@ export function MoveColsMutationUndoFactory(
         };
     }
     return {
-        workbookId,
-        worksheetId,
+        unitId,
+        subUnitId,
         targetRange: Rectangle.clone(sourceRange),
         sourceRange: Rectangle.clone(targetRange),
     };
@@ -140,15 +140,15 @@ export const MoveColsMutation: IMutation<IMoveColumnsMutationParams> = {
     id: 'sheet.mutation.move-columns',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
-        const { workbookId, worksheetId, sourceRange, targetRange } = params;
+        const { unitId, subUnitId, sourceRange, targetRange } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const univerSheet = univerInstanceService.getUniverSheetInstance(workbookId);
+        const univerSheet = univerInstanceService.getUniverSheetInstance(unitId);
         if (!univerSheet) {
             throw new Error('[MoveColumnMutation] univerSheet is null!');
         }
 
-        const worksheet = univerSheet.getSheetBySheetId(worksheetId);
+        const worksheet = univerSheet.getSheetBySheetId(subUnitId);
         if (!worksheet) {
             throw new Error('[MoveColumnMutation] worksheet is null!');
         }

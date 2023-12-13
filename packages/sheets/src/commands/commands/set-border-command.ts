@@ -131,9 +131,9 @@ export const SetBorderCommand: ICommand = {
 
         const selections = selectionManagerService.getSelectionRanges();
         const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-        const workbookId = workbook.getUnitId();
+        const unitId = workbook.getUnitId();
         const worksheet = workbook.getActiveSheet();
-        const worksheetId = worksheet.getSheetId();
+        const subUnitId = worksheet.getSheetId();
         const mergeData = worksheet.getConfig().mergeData;
         if (!selections?.length) {
             return false;
@@ -428,8 +428,8 @@ export const SetBorderCommand: ICommand = {
         }
 
         const setRangeValuesMutationParams: ISetRangeValuesMutationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             cellValue: mr.getData(),
         };
 
@@ -442,7 +442,7 @@ export const SetBorderCommand: ICommand = {
         const result = commandService.syncExecuteCommand(SetRangeValuesMutation.id, setRangeValuesMutationParams);
         if (result) {
             undoRedoService.pushUndoRedo({
-                unitID: workbookId,
+                unitID: unitId,
                 undoMutations: [{ id: SetRangeValuesMutation.id, params: undoSetRangeValuesMutationParams }],
                 redoMutations: [{ id: SetRangeValuesMutation.id, params: setRangeValuesMutationParams }],
             });

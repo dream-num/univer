@@ -35,8 +35,8 @@ export const mergeNumfmtMutations = (list: IMutationInfo[]) => {
             },
             {
                 ranges: [],
-                workbookId: setMutation[0].workbookId,
-                worksheetId: setMutation[0].worksheetId,
+                unitId: setMutation[0].unitId,
+                subUnitId: setMutation[0].subUnitId,
             } as IRemoveNumfmtMutationParams
         );
         params.ranges = rangeMerge(params.ranges);
@@ -62,8 +62,8 @@ export const mergeNumfmtMutations = (list: IMutationInfo[]) => {
             {
                 values: {},
                 refMap: {},
-                workbookId: setMutation[0].workbookId,
-                worksheetId: setMutation[0].worksheetId,
+                unitId: setMutation[0].unitId,
+                subUnitId: setMutation[0].subUnitId,
             } as ISetNumfmtMutationParams
         );
         Object.keys(params.values).forEach((key) => {

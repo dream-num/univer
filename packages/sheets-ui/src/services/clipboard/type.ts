@@ -42,14 +42,14 @@ export interface IUniverSheetCopyDataModel {
 
 export interface IPasteTarget {
     pastedRange: IRange;
-    worksheetId: string;
-    workbookId: string;
+    subUnitId: string;
+    unitId: string;
 }
 
 export interface IPasteSource {
     copyId: string;
-    worksheetId: string;
-    workbookId: string;
+    subUnitId: string;
+    unitId: string;
     range: IRange;
     copyType: COPY_TYPE;
 }
@@ -74,7 +74,7 @@ export interface ISheetClipboardHook {
      * The callback would be called after the clipboard service has decided what region need to be copied.
      * Features could use this hook to build copying cache or any other pre-copy jobs.
      */
-    onBeforeCopy?(workbookId: string, worksheetId: string, range: IRange): void;
+    onBeforeCopy?(unitId: string, subUnitId: string, range: IRange): void;
     /**
      *
      * @param row
@@ -117,7 +117,7 @@ export interface ISheetClipboardHook {
      *
      * @returns if it block copying it should return false
      */
-    onBeforePaste?(workbookId: string, worksheetId: string, range: IRange): boolean;
+    onBeforePaste?(unitId: string, subUnitId: string, range: IRange): boolean;
     /**
      *
      * @param row
@@ -130,8 +130,8 @@ export interface ISheetClipboardHook {
         copyInfo: {
             copyType: COPY_TYPE;
             copyRange?: IRange;
-            worksheetId?: string;
-            workbookId?: string;
+            subUnitId?: string;
+            unitId?: string;
         }
     ): {
         undos: IMutationInfo[];

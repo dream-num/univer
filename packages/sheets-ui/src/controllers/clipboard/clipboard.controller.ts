@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IMutationInfo, IRange, IRowData, ObjectMatrixPrimitiveType, Worksheet } from '@univerjs/core';
+import type { ICellData, IMutationInfo, IObjectMatrixPrimitiveType, IRange, IRowData, Worksheet } from '@univerjs/core';
 import {
     BooleanNumber,
     DEFAULT_WORKSHEET_COLUMN_WIDTH,
@@ -121,8 +121,8 @@ export class SheetClipboardController extends Disposable {
         return {
             hookName: PREDEFINED_HOOK_NAME.DEFAULT_COPY,
             isDefaultHook: true,
-            onBeforeCopy(workbookId, worksheetId) {
-                currentSheet = self._getWorksheet(workbookId, worksheetId);
+            onBeforeCopy(unitId, subUnitId) {
+                currentSheet = self._getWorksheet(unitId, subUnitId);
             },
             onCopyCellContent(row: number, col: number): string {
                 const cell = currentSheet!.getCell(row, col);
@@ -205,17 +205,17 @@ export class SheetClipboardController extends Disposable {
     private _initPastingHook(): ISheetClipboardHook {
         const self = this;
 
-        let workbookId: string | null = null;
-        let worksheetId: string | null = null;
+        let unitId: string | null = null;
+        let subUnitId: string | null = null;
         let currentSheet: Worksheet | null = null;
 
         return {
             hookName: PREDEFINED_HOOK_NAME.DEFAULT_PASTE,
             isDefaultHook: true,
-            onBeforePaste(workbookId_, worksheetId_, range) {
-                currentSheet = self._getWorksheet(workbookId_, worksheetId_);
-                workbookId = workbookId_;
-                worksheetId = worksheetId_;
+            onBeforePaste(unitId_, subUnitId_, range) {
+                currentSheet = self._getWorksheet(unitId_, subUnitId_);
+                unitId = unitId_;
+                subUnitId = subUnitId_;
 
                 // examine if pasting would cause number of cells to exceed the upper limit
                 // this is not implemented yet
@@ -268,8 +268,8 @@ export class SheetClipboardController extends Disposable {
                     });
 
                     const addRowMutation: IInsertRowMutationParams = {
-                        workbookId: workbookId!,
-                        worksheetId: worksheetId!,
+                        unitId: unitId!,
+                        subUnitId: subUnitId!,
                         ranges: [{ ...range, startRow: maxRow }],
                         rowInfo,
                     };
@@ -306,8 +306,8 @@ export class SheetClipboardController extends Disposable {
 
                 // apply row properties to the existing rows
                 const setRowPropertyMutation: ISetWorksheetRowHeightMutationParams = {
-                    workbookId: workbookId!,
-                    worksheetId: worksheetId!,
+                    unitId: unitId!,
+                    subUnitId: subUnitId!,
                     ranges: [{ ...range, endRow: Math.min(range.endRow, maxRow) }],
                     rowHeight,
                 };
@@ -335,8 +335,8 @@ export class SheetClipboardController extends Disposable {
 
                 if (addingColsCount > 0) {
                     const addColMutation: IInsertColMutationParams = {
-                        workbookId: workbookId!,
-                        worksheetId: worksheetId!,
+                        unitId: unitId!,
+                        subUnitId: subUnitId!,
                         ranges: [{ ...range, startColumn: maxColumn }],
                         colInfo: new ObjectArray(
                             colProperties.slice(existingColsCount).map((property) => ({
@@ -352,8 +352,8 @@ export class SheetClipboardController extends Disposable {
                 }
                 // apply col properties to the existing rows
                 const setColPropertyMutation: ISetWorksheetColWidthMutationParams = {
-                    workbookId: workbookId!,
-                    worksheetId: worksheetId!,
+                    unitId: unitId!,
+                    subUnitId: subUnitId!,
                     ranges: [{ ...range, endRow: Math.min(range.endColumn, maxColumn) }],
                     colWidth: new ObjectArray(
                         colProperties
@@ -375,7 +375,7 @@ export class SheetClipboardController extends Disposable {
             },
 
             onPasteCells(range, matrix, pasteType, copyInfo) {
-                return self._onPasteCells(range, matrix, workbookId!, worksheetId!, pasteType, copyInfo);
+                return self._onPasteCells(range, matrix, unitId!, subUnitId!, pasteType, copyInfo);
             },
 
             onAfterPaste(success) {
@@ -387,8 +387,8 @@ export class SheetClipboardController extends Disposable {
     private _onPasteCells(
         pastedRange: IRange,
         matrix: ObjectMatrix<ICellDataWithSpanInfo>,
-        workbookId: string,
-        worksheetId: string,
+        unitId: string,
+        subUnitId: string,
         pasteType: string,
         copyInfo: {
             copyType: COPY_TYPE;
@@ -401,7 +401,7 @@ export class SheetClipboardController extends Disposable {
         const accessor = {
             get: this._injector.get.bind(this._injector),
         };
-        return getDefaultOnPasteCellMutations(pastedRange, matrix, workbookId, worksheetId, copyInfo, accessor);
+        return getDefaultOnPasteCellMutations(pastedRange, matrix, unitId, subUnitId, copyInfo, accessor);
     }
 
     private _initSpecialPasteHooks() {
@@ -417,9 +417,9 @@ export class SheetClipboardController extends Disposable {
             },
             onPasteCells: (pastedRange, matrix, pasteType, copyInfo) => {
                 const workbook = self._currentUniverSheet.getCurrentUniverSheetInstance();
-                const workbookId = workbook.getUnitId();
-                const worksheetId = workbook.getActiveSheet().getSheetId();
-                return getSetCellValueMutations(workbookId, worksheetId, pastedRange, matrix, accessor);
+                const unitId = workbook.getUnitId();
+                const subUnitId = workbook.getActiveSheet().getSheetId();
+                return getSetCellValueMutations(unitId, subUnitId, pastedRange, matrix, accessor);
             },
         };
         const specialPasteFormatHook: ISheetClipboardHook = {
@@ -429,15 +429,15 @@ export class SheetClipboardController extends Disposable {
             },
             onPasteCells(pastedRange, matrix, pasteType, copyInfo) {
                 const workbook = self._currentUniverSheet.getCurrentUniverSheetInstance();
-                const workbookId = workbook.getUnitId();
-                const worksheetId = workbook.getActiveSheet().getSheetId();
+                const unitId = workbook.getUnitId();
+                const subUnitId = workbook.getActiveSheet().getSheetId();
                 const redoMutationsInfo: IMutationInfo[] = [];
                 const undoMutationsInfo: IMutationInfo[] = [];
 
                 // clear cell style
                 const { undos: styleUndos, redos: styleRedos } = getClearCellStyleMutations(
-                    workbookId,
-                    worksheetId,
+                    unitId,
+                    subUnitId,
                     pastedRange,
                     matrix,
                     accessor
@@ -447,8 +447,8 @@ export class SheetClipboardController extends Disposable {
 
                 // clear and set merge
                 const { undos: mergeUndos, redos: mergeRedos } = getClearAndSetMergeMutations(
-                    workbookId,
-                    worksheetId,
+                    unitId,
+                    subUnitId,
                     pastedRange,
                     matrix,
                     accessor
@@ -457,8 +457,8 @@ export class SheetClipboardController extends Disposable {
                 undoMutationsInfo.push(...mergeUndos);
 
                 const { undos: setStyleUndos, redos: setStyleRedos } = getSetCellStyleMutations(
-                    workbookId,
-                    worksheetId,
+                    unitId,
+                    subUnitId,
                     pastedRange,
                     matrix,
                     accessor
@@ -487,11 +487,11 @@ export class SheetClipboardController extends Disposable {
             },
             onPasteColumns(range, colProperties, pasteType) {
                 const workbook = self._currentUniverSheet.getCurrentUniverSheetInstance();
-                const workbookId = workbook.getUnitId();
-                const worksheetId = workbook.getActiveSheet().getSheetId();
+                const unitId = workbook.getUnitId();
+                const subUnitId = workbook.getActiveSheet().getSheetId();
                 const redoMutations: IMutationInfo[] = [];
                 const undoMutations: IMutationInfo[] = [];
-                const currentSheet = self._getWorksheet(workbookId, worksheetId);
+                const currentSheet = self._getWorksheet(unitId, subUnitId);
 
                 // if the range is outside ot the worksheet's boundary, we should add rows
                 const maxColumn = currentSheet!.getMaxColumns();
@@ -499,8 +499,8 @@ export class SheetClipboardController extends Disposable {
                 const existingColsCount = colProperties.length - addingColsCount;
 
                 const setColPropertyMutation: ISetWorksheetColWidthMutationParams = {
-                    workbookId: workbookId!,
-                    worksheetId: worksheetId!,
+                    unitId: unitId!,
+                    subUnitId: subUnitId!,
                     ranges: [{ ...range, endRow: Math.min(range.endColumn, maxColumn) }],
                     colWidth: new ObjectArray(
                         colProperties
@@ -534,8 +534,8 @@ export class SheetClipboardController extends Disposable {
             },
             onPasteCells(pastedRange, matrix, pasteType, copyInfo) {
                 const workbook = self._currentUniverSheet.getCurrentUniverSheetInstance();
-                const workbookId = workbook.getUnitId();
-                const worksheetId = workbook.getActiveSheet().getSheetId();
+                const unitId = workbook.getUnitId();
+                const subUnitId = workbook.getActiveSheet().getSheetId();
                 const redoMutationsInfo: IMutationInfo[] = [];
                 const undoMutationsInfo: IMutationInfo[] = [];
                 const { startColumn, startRow, endColumn, endRow } = pastedRange;
@@ -554,8 +554,8 @@ export class SheetClipboardController extends Disposable {
 
                 // set cell value and style
                 const setValuesMutation: ISetRangeValuesMutationParams = {
-                    workbookId,
-                    worksheetId,
+                    unitId,
+                    subUnitId,
                     cellValue: valueMatrix.getData(),
                 };
 
@@ -575,13 +575,7 @@ export class SheetClipboardController extends Disposable {
                     params: undoSetValuesMutation,
                 });
 
-                const { undos, redos } = getClearAndSetMergeMutations(
-                    workbookId,
-                    worksheetId,
-                    pastedRange,
-                    matrix,
-                    accessor
-                );
+                const { undos, redos } = getClearAndSetMergeMutations(unitId, subUnitId, pastedRange, matrix, accessor);
                 undoMutationsInfo.push(...undos);
                 redoMutationsInfo.push(...redos);
 
@@ -595,12 +589,12 @@ export class SheetClipboardController extends Disposable {
         return [specialPasteValueHook, specialPasteFormatHook, specialPasteColWidthHook, specialPasteBesidesBorder];
     }
 
-    private _getWorksheet(workbookId: string, worksheetId: string): Worksheet {
-        const worksheet = this._currentUniverSheet.getUniverSheetInstance(workbookId)?.getSheetBySheetId(worksheetId);
+    private _getWorksheet(unitId: string, subUnitId: string): Worksheet {
+        const worksheet = this._currentUniverSheet.getUniverSheetInstance(unitId)?.getSheetBySheetId(subUnitId);
 
         if (!worksheet) {
             throw new Error(
-                `[SheetClipboardController]: cannot find a worksheet with workbookId ${workbookId} and worksheetId ${worksheetId}.`
+                `[SheetClipboardController]: cannot find a worksheet with unitId ${unitId} and subUnitId ${subUnitId}.`
             );
         }
 
@@ -609,7 +603,7 @@ export class SheetClipboardController extends Disposable {
 }
 
 // Generate cellValue from range and set null
-function generateNullCellValue(range: IRange[]): ObjectMatrixPrimitiveType<ICellData> {
+function generateNullCellValue(range: IRange[]): IObjectMatrixPrimitiveType<ICellData> {
     const cellValue = new ObjectMatrix<ICellData>();
     range.forEach((range: IRange) => {
         const { startRow, startColumn, endRow, endColumn } = range;

@@ -210,8 +210,8 @@ export class NumfmtController extends Disposable implements INumfmtController {
                     switch (command.id) {
                         case ClearSelectionAllCommand.id:
                         case ClearSelectionFormatCommand.id: {
-                            const workbookId = self._univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-                            const worksheetId = self._univerInstanceService
+                            const unitId = self._univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+                            const subUnitId = self._univerInstanceService
                                 .getCurrentUniverSheetInstance()
                                 .getActiveSheet()
                                 .getSheetId();
@@ -220,11 +220,11 @@ export class NumfmtController extends Disposable implements INumfmtController {
                                 break;
                             }
                             const redos: IRemoveNumfmtMutationParams = {
-                                workbookId,
-                                worksheetId,
+                                unitId,
+                                subUnitId,
                                 ranges: [],
                             };
-                            const numfmtModel = self._numfmtService.getModel(workbookId, worksheetId);
+                            const numfmtModel = self._numfmtService.getModel(unitId, subUnitId);
                             selections.forEach((range) => {
                                 Range.foreach(range, (row, col) => {
                                     if (numfmtModel?.getValue(row, col)) {
@@ -259,9 +259,9 @@ export class NumfmtController extends Disposable implements INumfmtController {
         this.disposeWithMe(
             this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
                 handler: (cell, location, next) => {
-                    const workbookId = location.workbookId;
-                    const sheetId = location.worksheetId;
-                    const numfmtValue = this._numfmtService.getValue(workbookId, sheetId, location.row, location.col);
+                    const unitId = location.unitId;
+                    const sheetId = location.subUnitId;
+                    const numfmtValue = this._numfmtService.getValue(unitId, sheetId, location.row, location.col);
                     if (!numfmtValue) {
                         return next(cell);
                     }
@@ -444,7 +444,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
                         const disposable = this._commandService.onCommandExecuted((command) => {
                             if (SetNumfmtMutation.id === command.id) {
                                 const params = command.params as ISetNumfmtMutationParams;
-                                subscribe.next(params.workbookId);
+                                subscribe.next(params.unitId);
                             }
                         });
                         return () => {
@@ -454,9 +454,9 @@ export class NumfmtController extends Disposable implements INumfmtController {
                     this._numfmtService.modelReplace$
                 )
                     .pipe(debounceTime(16))
-                    .subscribe((workbookId) => {
+                    .subscribe((unitId) => {
                         this._sheetSkeletonManagerService.reCalculate();
-                        this._renderManagerService.getRenderById(workbookId)?.mainComponent?.makeDirty();
+                        this._renderManagerService.getRenderById(unitId)?.mainComponent?.makeDirty();
                     })
             )
         );

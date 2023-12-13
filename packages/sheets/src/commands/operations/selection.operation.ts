@@ -22,8 +22,8 @@ import type { SelectionMoveType } from '../../services/selection-manager.service
 import { SelectionManagerService } from '../../services/selection-manager.service';
 
 export interface ISetSelectionsOperationParams {
-    workbookId: string;
-    worksheetId: string;
+    unitId: string;
+    subUnitId: string;
     pluginName: string;
     selections: ISelectionWithStyle[];
     type?: SelectionMoveType;

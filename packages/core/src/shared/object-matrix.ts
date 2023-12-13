@@ -23,7 +23,7 @@ import type { Nullable } from './types';
 /**
  * Object Matrix Primitive Type
  */
-export interface ObjectMatrixPrimitiveType<T> {
+export interface IObjectMatrixPrimitiveType<T> {
     [key: number]: { [key: number]: T };
 }
 
@@ -37,9 +37,9 @@ export interface ObjectMatrixPrimitiveType<T> {
 export class ObjectMatrix<T> {
     private _option!: ObjectArray<ObjectArrayPrimitiveType<T>>;
 
-    private _matrix!: ObjectMatrixPrimitiveType<T>;
+    private _matrix!: IObjectMatrixPrimitiveType<T>;
 
-    constructor(matrix: ObjectMatrixPrimitiveType<T> = {}) {
+    constructor(matrix: IObjectMatrixPrimitiveType<T> = {}) {
         this._setOriginValue(matrix);
     }
 
@@ -176,12 +176,12 @@ export class ObjectMatrix<T> {
 
     spliceRows(start: number, count: number): ObjectMatrix<T> {
         const splice = this._option.splice(start, count);
-        return new ObjectMatrix(splice.toJSON() as ObjectMatrixPrimitiveType<T>);
+        return new ObjectMatrix(splice.toJSON() as IObjectMatrixPrimitiveType<T>);
     }
 
     sliceRows(start: number, count: number): ObjectMatrix<T> {
         const slice = this._option.slice(start, count);
-        return new ObjectMatrix(slice.toJSON() as ObjectMatrixPrimitiveType<T>);
+        return new ObjectMatrix(slice.toJSON() as IObjectMatrixPrimitiveType<T>);
     }
 
     pushRow(row: ObjectArray<T>): void {
@@ -349,16 +349,16 @@ export class ObjectMatrix<T> {
         return this._option.toArray().map((item) => new ObjectArray(item).toArray()) as T[][];
     }
 
-    toJSON(): ObjectMatrixPrimitiveType<T> {
+    toJSON(): IObjectMatrixPrimitiveType<T> {
         return this._matrix;
     }
 
-    getData(): ObjectMatrixPrimitiveType<T> {
+    getData(): IObjectMatrixPrimitiveType<T> {
         const json = JSON.stringify(this);
         return JSON.parse(json);
     }
 
-    getArrayData(): ObjectMatrixPrimitiveType<T> {
+    getArrayData(): IObjectMatrixPrimitiveType<T> {
         let startRow = 0;
         let startColumn = 0;
 
@@ -470,7 +470,7 @@ export class ObjectMatrix<T> {
         });
     }
 
-    private _setOriginValue(matrix: ObjectMatrixPrimitiveType<T> = {}) {
+    private _setOriginValue(matrix: IObjectMatrixPrimitiveType<T> = {}) {
         this._matrix = matrix;
         this._option = new ObjectArray<ObjectArrayPrimitiveType<T>>(matrix);
     }

@@ -17,11 +17,11 @@
 import type {
     BooleanNumber,
     ICellData,
+    IObjectMatrixPrimitiveType,
     IRange,
     IUnitRange,
     Nullable,
     ObjectMatrix,
-    ObjectMatrixPrimitiveType,
 } from '@univerjs/core';
 
 export const ERROR_VALUE_OBJECT_CLASS_TYPE = 'errorValueObject';
@@ -81,7 +81,7 @@ export interface IDirtyUnitFeatureMap {
 }
 
 export interface IArrayFormulaRangeType {
-    [unitId: string]: { [sheetId: string]: ObjectMatrixPrimitiveType<IRange> };
+    [unitId: string]: { [sheetId: string]: IObjectMatrixPrimitiveType<IRange> };
 }
 
 export interface IFeatureDirtyRangeType {
@@ -89,11 +89,11 @@ export interface IFeatureDirtyRangeType {
 }
 
 export interface IArrayFormulaUnitCellType {
-    [unitId: string]: { [sheetId: string]: ObjectMatrixPrimitiveType<ICellData> };
+    [unitId: string]: { [sheetId: string]: IObjectMatrixPrimitiveType<ICellData> };
 }
 
 export interface IFormulaData {
-    [unitId: string]: { [sheetId: string]: ObjectMatrixPrimitiveType<IFormulaDataItem> };
+    [unitId: string]: { [sheetId: string]: IObjectMatrixPrimitiveType<IFormulaDataItem> };
 }
 
 export interface IOtherFormulaData {

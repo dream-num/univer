@@ -179,7 +179,7 @@ export class UpdateFormulaController extends Disposable {
     }
 
     private _handleSetRangeValuesMutation(params: ISetRangeValuesMutationParams, options?: IExecutionOptions) {
-        const { worksheetId: sheetId, workbookId: unitId, cellValue } = params;
+        const { subUnitId: sheetId, unitId, cellValue } = params;
 
         if ((options && options.local === true) || cellValue == null) {
             return;
@@ -199,7 +199,7 @@ export class UpdateFormulaController extends Disposable {
     }
 
     private _handleRemoveSheetMutation(params: IRemoveSheetMutationParams) {
-        const { worksheetId: sheetId, workbookId: unitId } = params;
+        const { subUnitId: sheetId, unitId } = params;
 
         const formulaData = this._formulaDataModel.getFormulaData();
         delete formulaData[unitId][sheetId];
@@ -220,7 +220,7 @@ export class UpdateFormulaController extends Disposable {
     }
 
     private _handleInsertSheetMutation(params: IInsertSheetMutationParams) {
-        const { sheet, workbookId: unitId } = params;
+        const { sheet, unitId } = params;
 
         const formulaData = this._formulaDataModel.getFormulaData();
         const { id: sheetId, cellData } = sheet;
@@ -423,12 +423,12 @@ export class UpdateFormulaController extends Disposable {
         const { params } = command;
         if (!params) return null;
 
-        const { range, workbookId, worksheetId } = params;
+        const { range, unitId, subUnitId } = params;
         return {
             type: FormulaReferenceMoveType.InsertRow,
             ranges: [range],
-            unitId: workbookId,
-            sheetId: worksheetId,
+            unitId,
+            sheetId: subUnitId,
         };
     }
 
@@ -436,12 +436,12 @@ export class UpdateFormulaController extends Disposable {
         const { params } = command;
         if (!params) return null;
 
-        const { range, workbookId, worksheetId } = params;
+        const { range, unitId, subUnitId } = params;
         return {
             type: FormulaReferenceMoveType.InsertColumn,
             ranges: [range],
-            unitId: workbookId,
-            sheetId: worksheetId,
+            unitId,
+            sheetId: subUnitId,
         };
     }
 
@@ -539,14 +539,14 @@ export class UpdateFormulaController extends Disposable {
         const { params } = command;
         if (!params) return null;
 
-        const { workbookId, worksheetId, name } = params;
+        const { unitId, subUnitId, name } = params;
 
-        const { unitId, sheetId } = this._getCurrentSheetInfo();
+        const { unitId: workbookId, sheetId } = this._getCurrentSheetInfo();
 
         return {
             type: FormulaReferenceMoveType.SetName,
-            unitId: workbookId || unitId,
-            sheetId: worksheetId || sheetId,
+            unitId: unitId || workbookId,
+            sheetId: subUnitId || sheetId,
             sheetName: name,
         };
     }
@@ -560,13 +560,13 @@ export class UpdateFormulaController extends Disposable {
 
         const formulaDataKeys = Object.keys(formulaData);
 
-        for (const workbookId of formulaDataKeys) {
-            const sheetData = formulaData[workbookId];
+        for (const unitId of formulaDataKeys) {
+            const sheetData = formulaData[unitId];
             const sheetDataKeys = Object.keys(sheetData);
 
-            for (const worksheetId of sheetDataKeys) {
-                const oldFormulaMatrix = new ObjectMatrix<IFormulaDataItem>(oldFormulaData[workbookId][worksheetId]);
-                const formulaMatrix = new ObjectMatrix<IFormulaDataItem>(sheetData[worksheetId]);
+            for (const subUnitId of sheetDataKeys) {
+                const oldFormulaMatrix = new ObjectMatrix<IFormulaDataItem>(oldFormulaData[unitId][subUnitId]);
+                const formulaMatrix = new ObjectMatrix<IFormulaDataItem>(sheetData[subUnitId]);
                 const cellMatrix = new ObjectMatrix<ICellData>();
 
                 formulaMatrix.forValue((r, c, formulaItem) => {
@@ -588,8 +588,8 @@ export class UpdateFormulaController extends Disposable {
                 if (Tools.isEmptyObject(cellValue)) continue;
 
                 const setRangeValuesMutationParams: ISetRangeValuesMutationParams = {
-                    worksheetId,
-                    workbookId,
+                    subUnitId,
+                    unitId,
                     cellValue,
                 };
 
@@ -811,7 +811,7 @@ export class UpdateFormulaController extends Disposable {
                 const operators = handleInsertRow(
                     {
                         id: EffectRefRangId.InsertRowCommandId,
-                        params: { range: ranges[0], workbookId: '', worksheetId: '', direction: Direction.DOWN },
+                        params: { range: ranges[0], unitId: '', subUnitId: '', direction: Direction.DOWN },
                     },
                     sequenceRange
                 );
@@ -830,7 +830,7 @@ export class UpdateFormulaController extends Disposable {
                 const operators = handleInsertCol(
                     {
                         id: EffectRefRangId.InsertColCommandId,
-                        params: { range: ranges[0], workbookId: '', worksheetId: '', direction: Direction.RIGHT },
+                        params: { range: ranges[0], unitId: '', subUnitId: '', direction: Direction.RIGHT },
                     },
                     sequenceRange
                 );

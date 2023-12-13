@@ -29,8 +29,8 @@ export const SetSelectionFrozenCommand: ICommand = {
     handler: async (accessor: IAccessor) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+        const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+        const subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
         const commandService = accessor.get(ICommandService);
         const selectionManagerService = accessor.get(SelectionManagerService);
         const selections = selectionManagerService.getSelections();
@@ -69,8 +69,8 @@ export const SetSelectionFrozenCommand: ICommand = {
             return false;
         }
         const redoMutationParams: ISetFrozenMutationParams = {
-            workbookId,
-            worksheetId,
+            unitId,
+            subUnitId,
             startRow,
             startColumn,
             xSplit,
@@ -81,7 +81,7 @@ export const SetSelectionFrozenCommand: ICommand = {
         const result = commandService.syncExecuteCommand(SetFrozenMutation.id, redoMutationParams);
         if (result) {
             undoRedoService.pushUndoRedo({
-                unitID: workbookId,
+                unitID: unitId,
                 undoMutations: [{ id: SetFrozenMutation.id, params: undoMutationParams }],
                 redoMutations: [{ id: SetFrozenMutation.id, params: redoMutationParams }],
             });

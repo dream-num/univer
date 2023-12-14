@@ -43,12 +43,6 @@ export const DeleteRightCommand: ICommand = {
     handler: async () => true,
 };
 
-export const BreakLineCommand: ICommand = {
-    id: 'doc.command.break-line',
-    type: CommandType.COMMAND,
-    handler: async () => true,
-};
-
 export interface IInsertCommandParams {
     unitId: string;
     body: IDocumentBody;
@@ -58,7 +52,7 @@ export interface IInsertCommandParams {
 }
 
 /**
- * The command to insert text. The changed range could be non-collapsed.
+ * The command to insert text. The changed range could be non-collapsed, mainly use in line break and normal input.
  */
 export const InsertCommand: ICommand<IInsertCommandParams> = {
     id: 'doc.command.insert-text',
@@ -164,6 +158,7 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
         const { range, segmentId, unitId, direction, textRanges, len = 1 } = params;
 
         const { collapsed, startOffset } = range;
+
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
             params: {
@@ -174,14 +169,14 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
 
         if (collapsed) {
             if (startOffset > 0) {
-                doMutation.params!.mutations.push({
+                doMutation.params.mutations.push({
                     t: 'r',
                     len: direction === DeleteDirection.LEFT ? startOffset - len : startOffset,
                     segmentId,
                 });
             }
 
-            doMutation.params!.mutations.push({
+            doMutation.params.mutations.push({
                 t: 'd',
                 len,
                 line: 0,

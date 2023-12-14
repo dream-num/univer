@@ -29,7 +29,6 @@ import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import {
-    BreakLineCommand,
     DeleteCommand,
     DeleteLeftCommand,
     DeleteRightCommand,
@@ -49,6 +48,7 @@ import {
     SetInlineFormatTextColorCommand,
     SetInlineFormatUnderlineCommand,
 } from './commands/commands/inline-format.command';
+import { BreakLineCommand } from './commands/commands/line-break.command';
 import { CoverContentCommand, ReplaceContentCommand } from './commands/commands/replace-content.command';
 import { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';
 import { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
@@ -62,7 +62,6 @@ import { DocRenderController } from './controllers/doc-render.controller';
 import { FloatingObjectController } from './controllers/floating-object.controller';
 import { IMEInputController } from './controllers/ime-input.controller';
 import { InlineFormatController } from './controllers/inline-format.controller';
-import { LineBreakInputController } from './controllers/line-break-input.controller';
 import { MoveCursorController } from './controllers/move-cursor.controller';
 import { NormalInputController } from './controllers/normal-input.controller';
 import { PageRenderController } from './controllers/page-render.controller';
@@ -212,7 +211,6 @@ export class UniverDocsPlugin extends Plugin {
                 [DeleteController],
                 [InlineFormatController],
                 [DocClipboardController],
-                [LineBreakInputController],
                 [MoveCursorController],
                 [ZoomController],
                 [FloatingObjectController],

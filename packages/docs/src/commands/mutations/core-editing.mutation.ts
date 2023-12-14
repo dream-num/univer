@@ -35,7 +35,9 @@ export interface IRichTextEditingMutationParams {
  */
 export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, IRichTextEditingMutationParams> = {
     id: 'doc.mutation.rich-text-editing',
+
     type: CommandType.MUTATION,
+
     handler: (accessor, params) => {
         const { unitId, mutations } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);

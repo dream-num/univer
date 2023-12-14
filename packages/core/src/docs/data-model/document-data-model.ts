@@ -344,12 +344,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
             return { dataStream: '' };
         }
 
-        const deletedBody = updateAttributeByDelete(body, textLength, currentIndex);
-
-        // TODO: @JOCS, find why need to recoveryBody and how to trigger remove all the content?
-        // recoveryBody(body, deletedBody); // If the last paragraph in the document is deleted, restore an initial blank document.
-
-        return deletedBody;
+        return updateAttributeByDelete(body, textLength, currentIndex);
     }
 
     private _insertApply(insertBody: IDocumentBody, textLength: number, currentIndex: number, segmentId?: string) {

@@ -48,9 +48,9 @@ interface IHsvColor {
 type Color = IRgbColor | IHslColor | IHsvColor;
 
 export class ColorKit {
-    private _color: Color;
+    private _color!: Color;
 
-    private _rgbColor: IRgbColor;
+    private _rgbColor!: IRgbColor;
 
     private _isValid = false;
 

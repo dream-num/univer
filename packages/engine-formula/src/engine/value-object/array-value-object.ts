@@ -54,6 +54,50 @@ export function fromObjectToString(array: IArrayValueObject) {
     return '';
 }
 
+export function transformToValueObject(array: Array<Array<number | string | boolean>> = []) {
+    const arrayValueList: CalculateValueType[][] = [];
+
+    for (let r = 0; r < array.length; r++) {
+        const row = array[r];
+
+        if (arrayValueList[r] == null) {
+            arrayValueList[r] = [];
+        }
+
+        for (let c = 0; c < row.length; c++) {
+            const cell = row[c];
+
+            arrayValueList[r][c] = ValueObjectFactory.create(cell);
+        }
+    }
+
+    return arrayValueList;
+}
+
+export function transformToValue(array: CalculateValueType[][] = []) {
+    const arrayValueList: Array<Array<string | number | boolean>> = [];
+
+    for (let r = 0; r < array.length; r++) {
+        const row = array[r];
+
+        if (arrayValueList[r] == null) {
+            arrayValueList[r] = [];
+        }
+
+        for (let c = 0; c < row.length; c++) {
+            const cell = row[c];
+
+            if (cell.isErrorObject()) {
+                arrayValueList[r][c] = (cell as ErrorValueObject).getErrorType();
+            } else {
+                arrayValueList[r][c] = (cell as BaseValueObject).getValue();
+            }
+        }
+    }
+
+    return arrayValueList;
+}
+
 export class ArrayValueObject extends BaseValueObject {
     private _value: CalculateValueType[][] = [];
 
@@ -147,6 +191,17 @@ export class ArrayValueObject extends BaseValueObject {
         return true;
     }
 
+    get(row: number, column: number) {
+        return this._value[row][column];
+    }
+
+    set(row: number, column: number, value: CalculateValueType) {
+        if (row >= this._rowCount || column >= this._columnCount) {
+            throw new Error('Exceeding array bounds.');
+        }
+        this._value[row][column] = value;
+    }
+
     getRangePosition() {
         const startRow = 0;
         const rowCount = this.getRowCount();
@@ -189,19 +244,105 @@ export class ArrayValueObject extends BaseValueObject {
 
     /**
      * Referring to matrix calculations,
-     * extract the matching values from a true/false matrix based on parameters and store them in a one-dimensional array.
-     * https://numpy.org/doc/stable/reference/generated/numpy.select.html
+     * extract the matching values from a true/false matrix based on parameters and store them in a two-dimensional array.
+     * implement x[x<10]
+     * https://numpy.org/doc/stable/user/basics.indexing.html
      * @param takeArray
      */
-    select(takeArray: ArrayValueObject) {}
+    pick(takeArray: ArrayValueObject) {
+        const takeArrayRowCount = takeArray.getRowCount();
+        const takeArrayColumnCount = takeArray.getColumnCount();
+
+        if (takeArrayRowCount !== this._rowCount || takeArrayRowCount !== this._rowCount) {
+            return this._createNewArray([[new NumberValueObject(0)]], 1, 1);
+        }
+
+        const newValue: CalculateValueType[][] = [];
+
+        newValue[0] = [];
+
+        for (let r = 0; r < takeArrayRowCount; r++) {
+            for (let c = 0; c < takeArrayColumnCount; c++) {
+                const takeCell = takeArray.get(r, c);
+                const value = this.get(r, c);
+                if (takeCell.isErrorObject()) {
+                    continue;
+                }
+
+                if ((takeCell as BaseValueObject).getValue() === true) {
+                    newValue[0].push(value);
+                }
+            }
+        }
+
+        return this._createNewArray(newValue, 1, newValue[0].length);
+    }
 
     /**
-     * Referring to matrix calculations,
-     * extract the matching values from a true/false matrix based on parameters and store them in a one-dimensional array.
-     * https://numpy.org/doc/stable/reference/generated/numpy.select.html
+     * Flatten a 2D array.
+     * https://numpy.org/doc/stable/reference/generated/numpy.chararray.flatten.html#numpy.chararray.flatten
+     */
+    flatten() {
+        const newValue: CalculateValueType[][] = [];
+        newValue[0] = [];
+        for (let r = 0; r < this._rowCount; r++) {
+            for (let c = 0; c < this._rowCount; c++) {
+                const value = this.get(r, c);
+
+                newValue[0].push(value);
+            }
+        }
+        return this._createNewArray(newValue, 1, newValue[0].length);
+    }
+
+    /**
+     * I'm looking to perform slicing operations on 2D arrays, similar to the functionality provided by NumPy.
+     * https://numpy.org/doc/stable/user/basics.indexing.html
+     * @rowParam start:stop:step
+     * @columnParam start:stop:step
      * @param takeArray
      */
-    slice(takeArray: ArrayValueObject) {}
+    slice(rowParam: Nullable<Array<Nullable<number>>>, columnParam: Nullable<Array<Nullable<number>>>) {
+        let rowStart = 0;
+        let rowStop = this._rowCount - 1;
+        let rowStep = 1;
+
+        let columnStart = 0;
+        let columnStop = this._columnCount - 1;
+        let columnStep = 1;
+
+        if (rowParam != null) {
+            rowStart = rowParam[0] || 0;
+            rowStop = rowParam[1] || this._rowCount - 1;
+            rowStep = rowParam[2] || 1;
+        }
+
+        if (columnParam != null) {
+            columnStart = columnParam[0] || 0;
+            columnStop = columnParam[1] || this._columnCount - 1;
+            columnStep = columnParam[2] || 1;
+        }
+
+        const result: CalculateValueType[][] = [];
+
+        const array = this._value;
+
+        let result_row_index = 0;
+        let result_column_index = 0;
+        for (let r = rowStart; r <= rowStop; r += rowStep) {
+            result_column_index = 0;
+            if (result[result_row_index] == null) {
+                result[result_row_index] = [];
+            }
+            for (let c = columnStart; c <= columnStop; c += columnStep) {
+                result[result_row_index][result_column_index] = array[r][c];
+                result_column_index++;
+            }
+            result_row_index++;
+        }
+
+        return this._createNewArray(result, result.length, result[0].length);
+    }
 
     sum() {
         let accumulatorAll: CalculateValueType = new NumberValueObject(0);
@@ -421,6 +562,10 @@ export class ArrayValueObject extends BaseValueObject {
         }
 
         return this._createNewArray(result, rowCount, columnCount);
+    }
+
+    toValue() {
+        return transformToValue(this._value);
     }
 
     private _sort(index: number) {

@@ -90,15 +90,29 @@ export class TextRange {
     // The start position of the range
     get startOffset() {
         const { startOffset } = getOneTextSelectionRange(this._cursorList) ?? {};
+        const body = this._docSkeleton.getViewModel().getBody();
 
-        return startOffset;
+        if (startOffset == null || body == null) {
+            return startOffset;
+        }
+        // The cursor cannot be placed after the last line break
+        const maxLength = body.dataStream.length - 2;
+
+        return Math.min(maxLength, startOffset);
     }
 
     // The end position of the range
     get endOffset() {
         const { endOffset } = getOneTextSelectionRange(this._cursorList) ?? {};
+        const body = this._docSkeleton.getViewModel().getBody();
 
-        return endOffset;
+        if (endOffset == null || body == null) {
+            return endOffset;
+        }
+        // The cursor cannot be placed after the last line break
+        const maxLength = body.dataStream.length - 2;
+
+        return Math.min(endOffset, maxLength);
     }
 
     get collapsed() {

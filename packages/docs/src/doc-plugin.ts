@@ -28,6 +28,7 @@ import { IShortcutService } from '@univerjs/ui';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
+import { BreakLineCommand } from './commands/commands/break-line.command';
 import {
     DeleteCommand,
     DeleteLeftCommand,
@@ -48,7 +49,6 @@ import {
     SetInlineFormatTextColorCommand,
     SetInlineFormatUnderlineCommand,
 } from './commands/commands/inline-format.command';
-import { BreakLineCommand } from './commands/commands/line-break.command';
 import { CoverContentCommand, ReplaceContentCommand } from './commands/commands/replace-content.command';
 import { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';
 import { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';

@@ -15,13 +15,13 @@
  */
 
 import type { ICommand, IParagraph } from '@univerjs/core';
-import { CommandType, DataStreamTreeTokenType, ICommandService, IUniverInstanceService } from '@univerjs/core';
+import { CommandType, DataStreamTreeTokenType, ICommandService, IUniverInstanceService, Tools } from '@univerjs/core';
 
 import { DocSkeletonManagerService } from '../../services/doc-skeleton-manager.service';
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import { InsertCommand } from './core-editing.command';
 
-function generateParagraphs(dataStream: string) {
+function generateParagraphs(dataStream: string, prevParagraph?: IParagraph): IParagraph[] {
     const paragraphs: IParagraph[] = [];
 
     for (let i = 0, len = dataStream.length; i < len; i++) {
@@ -36,11 +36,18 @@ function generateParagraphs(dataStream: string) {
         });
     }
 
+    if (prevParagraph && prevParagraph.bullet) {
+        for (const paragraph of paragraphs) {
+            paragraph.bullet = Tools.deepClone(prevParagraph.bullet);
+        }
+    }
+
     return paragraphs;
 }
 
 export const BreakLineCommand: ICommand = {
     id: 'doc.command.break-line',
+
     type: CommandType.COMMAND,
     handler: async (accessor) => {
         const docSkeletonManagerService = accessor.get(DocSkeletonManagerService);
@@ -69,12 +76,15 @@ export const BreakLineCommand: ICommand = {
             },
         ];
 
-        // split paragraph
+        const paragraphs = docDataModel.getBody()?.paragraphs ?? [];
+        const prevParagraph = paragraphs.find((p) => p.startIndex === startOffset);
+
+        // split paragraph into two.
         const result = await commandService.executeCommand(InsertCommand.id, {
             unitId,
             body: {
                 dataStream: DataStreamTreeTokenType.PARAGRAPH,
-                paragraphs: generateParagraphs(DataStreamTreeTokenType.PARAGRAPH),
+                paragraphs: generateParagraphs(DataStreamTreeTokenType.PARAGRAPH, prevParagraph),
             },
             range: activeRange,
             textRanges,

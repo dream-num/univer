@@ -362,8 +362,6 @@ function _getListLevelAncestors(
         listLevelAncestors[i] = bs || null;
     }
 
-    // console.log('SymbolByBesting', sameList, listLevelAncestors, level, listId, listLevel);
-
     return listLevelAncestors;
 }
 

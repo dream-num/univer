@@ -761,7 +761,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
             {
                 startIndex: 218,
                 bullet: {
-                    listId: 'testBullet',
+                    listId: 'unorderedTest',
                     nestingLevel: 0,
                     textStyle: {
                         fs: 20,
@@ -775,6 +775,13 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
             },
             {
                 startIndex: 318,
+                bullet: {
+                    listId: 'testOrderList',
+                    nestingLevel: 0,
+                    textStyle: {
+                        fs: 20,
+                    },
+                },
                 paragraphStyle: {
                     spaceAbove: 20,
                     lineSpacing: 2,

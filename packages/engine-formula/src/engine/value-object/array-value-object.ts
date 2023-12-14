@@ -190,9 +190,18 @@ export class ArrayValueObject extends BaseValueObject {
     /**
      * Referring to matrix calculations,
      * extract the matching values from a true/false matrix based on parameters and store them in a one-dimensional array.
+     * https://numpy.org/doc/stable/reference/generated/numpy.select.html
      * @param takeArray
      */
-    take(takeArray: ArrayValueObject) {}
+    select(takeArray: ArrayValueObject) {}
+
+    /**
+     * Referring to matrix calculations,
+     * extract the matching values from a true/false matrix based on parameters and store them in a one-dimensional array.
+     * https://numpy.org/doc/stable/reference/generated/numpy.select.html
+     * @param takeArray
+     */
+    slice(takeArray: ArrayValueObject) {}
 
     sum() {
         let accumulatorAll: CalculateValueType = new NumberValueObject(0);

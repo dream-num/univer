@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { TinyColor } from '@ctrl/tinycolor';
-import { LocaleService } from '@univerjs/core';
+import { ColorKit, LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React from 'react';
 import type { Observable } from 'rxjs';
@@ -59,7 +58,7 @@ export function CustomLabel(props: ICustomLabelProps): JSX.Element | null {
     }
 
     // if value is not valid, use primary color
-    const { isValid } = new TinyColor(realValue);
+    const { isValid } = new ColorKit(realValue?.toString());
 
     if (icon) {
         const Icon = componentManager.get(realIcon ?? '');

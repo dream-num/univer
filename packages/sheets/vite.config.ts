@@ -29,7 +29,6 @@ export default defineConfig(({ mode }) => ({
         },
         rollupOptions: {
             external: [
-                '@ctrl/tinycolor',
                 '@univerjs/core',
                 '@univerjs/engine-formula',
                 '@univerjs/engine-render',
@@ -39,7 +38,6 @@ export default defineConfig(({ mode }) => ({
             ],
             output: {
                 globals: {
-                    '@ctrl/tinycolor': 'tinycolor',
                     '@univerjs/core': 'UniverCore',
                     '@univerjs/engine-formula': 'UniverEngineFormula',
                     '@univerjs/engine-render': 'UniverEngineRender',

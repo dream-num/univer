@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { TinyColor } from '@ctrl/tinycolor';
 import type { ITextStyle } from '@univerjs/core';
-import { BaselineOffset, BooleanNumber } from '@univerjs/core';
+import { BaselineOffset, BooleanNumber, ColorKit } from '@univerjs/core';
 
 import { ptToPixel } from './utils';
 
@@ -119,7 +118,7 @@ export function extractNodeStyle(node: HTMLElement): ITextStyle {
             }
 
             case 'color': {
-                const color = new TinyColor(cssValue);
+                const color = new ColorKit(cssValue);
 
                 if (color.isValid) {
                     docStyles.cl = {
@@ -131,7 +130,7 @@ export function extractNodeStyle(node: HTMLElement): ITextStyle {
             }
 
             case 'background-color': {
-                const color = new TinyColor(cssValue);
+                const color = new ColorKit(cssValue);
 
                 if (color.isValid) {
                     docStyles.bg = {

@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { TinyColor } from '@ctrl/tinycolor';
 import type { IRangeWithCoord, ISelectionCellWithCoord, Nullable, ThemeService } from '@univerjs/core';
-import { RANGE_TYPE } from '@univerjs/core';
+import { ColorKit, RANGE_TYPE } from '@univerjs/core';
 import type { Scene } from '@univerjs/engine-render';
 import { DEFAULT_SELECTION_LAYER_INDEX, Group, Rect } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISelectionWidgetConfig, ISelectionWithCoordAndStyle } from '@univerjs/sheets';
@@ -728,7 +727,7 @@ export class SelectionShape {
         if (hasColumnHeader === true) {
             let highlightTitleColor = columnHeaderFill;
             if (this._isHeaderHighlight && rangeType === RANGE_TYPE.COLUMN) {
-                highlightTitleColor = new TinyColor(stroke).setAlpha(SELECTION_TITLE_HIGHLIGHT_ALPHA).toString();
+                highlightTitleColor = new ColorKit(stroke).setAlpha(SELECTION_TITLE_HIGHLIGHT_ALPHA).toString();
             }
             this._columnHeaderBackground.setProps({
                 fill: highlightTitleColor,
@@ -755,7 +754,7 @@ export class SelectionShape {
         if (hasRowHeader === true) {
             let highlightTitleColor = rowHeaderFill;
             if (this._isHeaderHighlight && rangeType === RANGE_TYPE.ROW) {
-                highlightTitleColor = new TinyColor(stroke).setAlpha(SELECTION_TITLE_HIGHLIGHT_ALPHA).toString();
+                highlightTitleColor = new ColorKit(stroke).setAlpha(SELECTION_TITLE_HIGHLIGHT_ALPHA).toString();
             }
             this._rowHeaderBackground.setProps({
                 fill: highlightTitleColor,

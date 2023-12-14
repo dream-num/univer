@@ -27,7 +27,7 @@ import type { ICellData } from '../types/interfaces/i-cell-data';
 import type { IDocumentData } from '../types/interfaces/i-document-data';
 import type { IRangeWithCoord, ISelectionCell, ISelectionCellWithCoord } from '../types/interfaces/i-selection-data';
 import type { IColorStyle, IStyleData } from '../types/interfaces/i-style-data';
-import { ColorBuilder } from './color/color-builder';
+import { ColorBuilder } from './color/color';
 import { Tools } from './tools';
 import type { Nullable } from './types';
 

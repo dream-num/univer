@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import { TinyColor } from '@ctrl/tinycolor';
-import type { ThemeService } from '@univerjs/core';
+import { ColorKit, type ThemeService } from '@univerjs/core';
 import type { ISelectionStyle } from '@univerjs/sheets';
 
 export const FORMULA_REF_SELECTION_PLUGIN_NAME = 'formula_reference_selection_plugin_name';
 
 export function getFormulaRefSelectionStyle(themeService: ThemeService, refColor: string, id: string): ISelectionStyle {
     const style = themeService.getCurrentTheme();
-    const fill = new TinyColor(refColor).setAlpha(0.05).toString();
+    const fill = new ColorKit(refColor).setAlpha(0.05).toRgbString();
     return {
         id,
         strokeWidth: 1.5,

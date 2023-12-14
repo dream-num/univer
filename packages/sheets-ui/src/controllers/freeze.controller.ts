@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { TinyColor } from '@ctrl/tinycolor';
 import type { ICommandInfo, IStyleSheet, Nullable, Observer } from '@univerjs/core';
 import {
+    ColorKit,
     Disposable,
     ICommandService,
     IUniverInstanceService,
@@ -1017,9 +1017,9 @@ export class FreezeController extends Disposable {
     private _themeChange(style: IStyleSheet) {
         this._freeze_normal_header_color = style.grey400;
 
-        this._freeze_normal_main_color = new TinyColor(style.grey400)
+        this._freeze_normal_main_color = new ColorKit(style.grey400)
             .setAlpha(AUXILIARY_CLICK_HIDDEN_OBJECT_TRANSPARENCY)
-            .toString();
+            .toRgbString();
 
         this._freeze_active_color = style.primaryColor;
 

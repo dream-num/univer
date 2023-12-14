@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { TinyColor } from '@ctrl/tinycolor';
-import type { IRangeWithCoord, Nullable, Observer, ThemeService } from '@univerjs/core';
+import { ColorKit, type IRangeWithCoord, type Nullable, type Observer, type ThemeService } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { CURSOR_TYPE, isRectIntersect, Rect, ScrollTimer, Vector2 } from '@univerjs/engine-render';
 import { getNormalSelectionStyle, SELECTION_CONTROL_BORDER_BUFFER_WIDTH } from '@univerjs/sheets';
@@ -638,9 +637,9 @@ export class SelectionShapeExtension {
 
         if (isLighten) {
             this._controlHandler((o, index) => {
-                const newColor = new TinyColor(this._fillControlColors[index])
+                const newColor = new ColorKit(this._fillControlColors[index])
                     .lighten(SELECTION_CONTROL_DELETING_LIGHTEN)
-                    .toString();
+                    .toRgbString();
                 o.setProps({
                     fill: newColor,
                 });
@@ -730,7 +729,7 @@ export class SelectionShapeExtension {
 
         const SELECTION_CONTROL_BORDER_BUFFER_WIDTH_SCALE = SELECTION_CONTROL_BORDER_BUFFER_WIDTH / scale;
 
-        const darkenColor = new TinyColor(stroke).darken(2).toString();
+        const darkenColor = new ColorKit(stroke).darken(2).toRgbString();
 
         if (this.isHelperSelection) {
             this._helperSelection = new Rect(HELPER_SELECTION_TEMP_NAME, {

@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { TinyColor } from '@ctrl/tinycolor';
 import type { BooleanNumber } from '@univerjs/core';
-import { ICommandService, ThemeService } from '@univerjs/core';
+import { ColorKit, ICommandService, ThemeService } from '@univerjs/core';
 import { Dropdown } from '@univerjs/design';
 import { Menu } from '@univerjs/ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
@@ -58,7 +57,7 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
         const theme = themeService.getCurrentTheme();
         const darkTextColor = theme.textColor;
         const lightTextColor = theme.colorWhite;
-        return new TinyColor(color).isDark() ? lightTextColor : darkTextColor;
+        return new ColorKit(color).isDark() ? lightTextColor : darkTextColor;
     };
 
     return (

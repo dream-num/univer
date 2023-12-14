@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { TinyColor } from '@ctrl/tinycolor';
 import type { ICellDataForSheetInterceptor, ICommandInfo, IRange, Nullable } from '@univerjs/core';
 import {
+    ColorKit,
     Disposable,
     ICommandService,
     LifecycleStages,
@@ -215,7 +215,7 @@ export class FormulaEditorShowController extends Disposable {
 
     private _createArrayFormulaRangeShape(arrayRange: IRange, unitId: string) {
         const styleSheet = this._themeService.getCurrentTheme();
-        const fill = new TinyColor(styleSheet.colorWhite).setAlpha(0).toString();
+        const fill = new ColorKit(styleSheet.colorWhite).setAlpha(0).toString();
         const style = {
             strokeWidth: 1,
             stroke: styleSheet.hyacinth700,

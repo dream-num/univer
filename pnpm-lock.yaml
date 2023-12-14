@@ -560,9 +560,6 @@ importers:
 
   packages/docs:
     devDependencies:
-      '@ctrl/tinycolor':
-        specifier: ^4.0.2
-        version: 4.0.2
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
@@ -905,9 +902,6 @@ importers:
 
   packages/sheets:
     devDependencies:
-      '@ctrl/tinycolor':
-        specifier: ^4.0.2
-        version: 4.0.2
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
@@ -1008,9 +1002,6 @@ importers:
         specifier: ^0.1.18
         version: 0.1.18(react-dom@18.2.0)(react@18.2.0)
     devDependencies:
-      '@ctrl/tinycolor':
-        specifier: ^4.0.2
-        version: 4.0.2
       '@types/react':
         specifier: ^18.2.42
         version: 18.2.42
@@ -1190,9 +1181,6 @@ importers:
         specifier: ^0.1.18
         version: 0.1.18(react-dom@18.2.0)(react@18.2.0)
     devDependencies:
-      '@ctrl/tinycolor':
-        specifier: ^4.0.2
-        version: 4.0.2
       '@types/react':
         specifier: ^18.2.42
         version: 18.2.42
@@ -1368,9 +1356,6 @@ importers:
         specifier: ^5.38.1
         version: 5.38.1(react-dom@18.2.0)(react@18.2.0)
     devDependencies:
-      '@ctrl/tinycolor':
-        specifier: ^4.0.2
-        version: 4.0.2
       '@testing-library/react':
         specifier: ^14.1.2
         version: 14.1.2(react-dom@18.2.0)(react@18.2.0)
@@ -4326,11 +4311,6 @@ packages:
     resolution: {integrity: sha512-SITSV6aIXsuVNV3f3O0f2n/cgyEDWoSqtZMYiAmcsYHydcKrOz3gUxB/iXd/Qf08+IZX4KpgNbvUdMBmWz+kcA==}
     engines: {node: '>=10'}
     dev: false
-
-  /@ctrl/tinycolor@4.0.2:
-    resolution: {integrity: sha512-fKQinXE9pJ83J1n+C3rDl2xNLJwfoYNvXLRy5cYZA9hBJJw2q+sbb/AOSNKmLxnTWyNTmy4994dueSwP4opi5g==}
-    engines: {node: '>=14'}
-    dev: true
 
   /@discoveryjs/json-ext@0.5.7:
     resolution: {integrity: sha512-dBVuXR082gk3jsFp7Rd/JI4kytwGHecnCoTtXFb7DB6CNHp4rg5k1bhg0nWdLGLnOV71lmDzGQaLMy8iPLY0pw==}
@@ -8219,7 +8199,7 @@ packages:
       magicast: 0.3.2
       picocolors: 1.0.0
       test-exclude: 6.0.0
-      vitest: 1.0.4(@types/node@20.10.4)(happy-dom@12.10.3)(less@4.2.0)
+      vitest: 1.0.4(@types/node@20.10.4)
     transitivePeerDependencies:
       - supports-color
     dev: true

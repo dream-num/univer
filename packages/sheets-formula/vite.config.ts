@@ -37,7 +37,6 @@ export default defineConfig(({ mode }) => ({
         },
         rollupOptions: {
             external: [
-                '@ctrl/tinycolor',
                 '@univerjs/core',
                 '@univerjs/design',
                 '@univerjs/docs',
@@ -54,7 +53,6 @@ export default defineConfig(({ mode }) => ({
             output: {
                 assetFileNames: 'index.css',
                 globals: {
-                    '@ctrl/tinycolor': 'tinycolor',
                     '@univerjs/core': 'UniverCore',
                     '@univerjs/design': 'UniverDesign',
                     '@univerjs/docs': 'UniverDocs',

@@ -426,8 +426,8 @@ export class BaseReferenceObject extends ObjectClassType {
     toArrayValueObject(): ArrayValueObject {
         const { startRow, endRow, startColumn, endColumn } = this.getRangePosition();
 
-        const key = `${this.getUnitId()}_${this.getSheetId()}_${startRow + this._refOffsetX}_${
-            endRow + this._refOffsetX
+        const key = `${this.getUnitId()}_${this.getSheetId()}_${startRow + this._refOffsetY}_${
+            endRow + this._refOffsetY
         }_${startColumn + this._refOffsetX}_${endColumn + this._refOffsetX}`;
 
         const array = FORMULA_REF_TO_ARRAY_CACHE.get(key);

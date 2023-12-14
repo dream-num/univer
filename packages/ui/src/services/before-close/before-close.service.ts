@@ -28,29 +28,46 @@ export interface IBeforeCloseService {
      * the web page could be closed safely.
      */
     registerBeforeClose(callback: () => string | undefined): IDisposable;
+
+    /**
+     * Provide a callback to be called when the web page is closed.
+     *
+     * @param callback The callback to be called when the web page is closed.
+     */
+    registerOnClose(callback: () => void): IDisposable;
 }
 
 export const IBeforeCloseService = createIdentifier<IBeforeCloseService>('univer.ui.before-close-service');
 
 export class DesktopBeforeCloseService implements IBeforeCloseService {
-    private _callbacks: Array<() => string | undefined> = [];
+    private _beforeUnloadCallbacks: Array<() => string | undefined> = [];
+    private _onCloseCallbacks: Array<() => void> = [];
 
     constructor(@INotificationService private readonly _notificationService: INotificationService) {
         this._init();
     }
 
     registerBeforeClose(callback: () => string | undefined): IDisposable {
-        this._callbacks.push(callback);
+        this._beforeUnloadCallbacks.push(callback);
         return {
             dispose: () => {
-                this._callbacks = this._callbacks.filter((cb) => cb !== callback);
+                this._beforeUnloadCallbacks = this._beforeUnloadCallbacks.filter((cb) => cb !== callback);
             },
         };
     }
 
+    registerOnClose(callback: () => void): IDisposable {
+        this._onCloseCallbacks.push(callback);
+        return {
+            dispose: () => {
+                this._onCloseCallbacks = this._onCloseCallbacks.filter((cb) => cb !== callback);
+            }
+        }
+    }
+
     private _init(): void {
-        window.onbeforeunload = (event: BeforeUnloadEvent) => {
-            const message = this._callbacks
+        window.addEventListener('beforeunload', (event: BeforeUnloadEvent) => {
+            const message = this._beforeUnloadCallbacks
                 .map((callback) => callback())
                 .filter((m) => !!m)
                 .join('\n');
@@ -69,6 +86,10 @@ export class DesktopBeforeCloseService implements IBeforeCloseService {
                 event.returnValue = message;
                 return message;
             }
-        };
+        });
+
+        window.addEventListener('unload', () => {
+            this._onCloseCallbacks.forEach((callback) => callback());
+        });
     }
 }

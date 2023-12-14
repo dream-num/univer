@@ -21,6 +21,7 @@ import { BooleanValue, ConcatenateType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { compareToken } from '../../basics/token';
 import { ErrorValueObject } from '../other-object/error-value-object';
+import { compareWithWildcard } from '../utils/compare';
 import type { CalculateValueType } from './base-value-object';
 import { BaseValueObject } from './base-value-object';
 
@@ -513,6 +514,17 @@ export class StringValueObject extends BaseValueObject {
         return this.compareBy(valueObject.getValue(), operator);
     }
 
+    override wildcard(valueObject: StringValueObject, operator: compareToken): CalculateValueType {
+        if (valueObject.isArray()) {
+            // const o = valueObject.getReciprocal();
+            // if (o.isErrorObject()) {
+            //     return o;
+            // }
+            return valueObject.wildcard(this, reverseCompareOperator(operator));
+        }
+        return this.checkWildcard(valueObject.getValue(), operator);
+    }
+
     override compareBy(value: string | number | boolean, operator: compareToken): CalculateValueType {
         const currentValue = this.getValue();
         let result = false;
@@ -564,6 +576,13 @@ export class StringValueObject extends BaseValueObject {
                     break;
             }
         }
+        return new BooleanValueObject(result);
+    }
+
+    checkWildcard(value: string, operator: compareToken) {
+        const currentValue = this.getValue().toLocaleLowerCase();
+        const result = compareWithWildcard(currentValue, value, operator);
+
         return new BooleanValueObject(result);
     }
 }

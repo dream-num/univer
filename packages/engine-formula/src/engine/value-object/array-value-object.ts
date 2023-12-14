@@ -41,6 +41,7 @@ enum BatchOperatorType {
     CONCATENATE_FRONT,
     CONCATENATE_BACK,
     PRODUCT,
+    LIKE,
 }
 
 enum ArrayCalculateType {
@@ -525,6 +526,10 @@ export class ArrayValueObject extends BaseValueObject {
         return this._batchOperator(valueObject, BatchOperatorType.COMPARE, operator);
     }
 
+    override wildcard(valueObject: BaseValueObject, operator: compareToken): CalculateValueType {
+        return this._batchOperator(valueObject, BatchOperatorType.LIKE, operator);
+    }
+
     override concatenateFront(valueObject: BaseValueObject): CalculateValueType {
         return this._batchOperator(valueObject, BatchOperatorType.CONCATENATE_FRONT);
     }
@@ -813,6 +818,17 @@ export class ArrayValueObject extends BaseValueObject {
                             }
 
                             break;
+                        case BatchOperatorType.LIKE:
+                            if (!operator) {
+                                result[r][column] = ErrorValueObject.create(ErrorType.VALUE);
+                            } else {
+                                result[r][column] = (currentValue as BaseValueObject).wildcard(
+                                    valueObject as StringValueObject,
+                                    operator as compareToken
+                                );
+                            }
+
+                            break;
                     }
                 }
             } else {
@@ -940,6 +956,17 @@ export class ArrayValueObject extends BaseValueObject {
                                     rowList[c] = (currentValue as BaseValueObject).product(
                                         opValue as BaseValueObject,
                                         operator as callbackProductFnType
+                                    );
+                                }
+
+                                break;
+                            case BatchOperatorType.LIKE:
+                                if (!operator) {
+                                    rowList[c] = ErrorValueObject.create(ErrorType.VALUE);
+                                } else {
+                                    rowList[c] = (currentValue as BaseValueObject).wildcard(
+                                        valueObject as StringValueObject,
+                                        operator as compareToken
                                     );
                                 }
 

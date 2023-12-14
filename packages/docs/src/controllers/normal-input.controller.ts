@@ -95,8 +95,6 @@ export class NormalInputController extends Disposable {
                 textRanges,
                 segmentId,
             });
-
-            skeleton.calculate();
         });
     }
 

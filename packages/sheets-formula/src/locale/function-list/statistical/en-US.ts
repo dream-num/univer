@@ -72,4 +72,19 @@ export default {
             },
         },
     },
+    COUNT_A: {
+        description: 'Counts how many values are in the list of arguments',
+        abstract: `counts cells containing any type of information, including error values and empty text ("")
+        If you do not need to count logical values, text, or error values`,
+        functionParameter: {
+            number1: {
+                name: 'value1',
+                detail: 'Required. The first argument representing the values that you want to count.',
+            },
+            number2: {
+                name: 'value2',
+                detail: 'Optional. Additional arguments representing the values that you want to count, up to a maximum of 255 arguments.',
+            },
+        },
+    },
 };

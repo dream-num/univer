@@ -117,7 +117,7 @@ export class FormulaController extends Disposable {
             const Func = registerObject[0] as Ctor<BaseFunction>;
             const name = registerObject[1] as string;
 
-            return new Func(this._injector, name);
+            return new Func(name);
         });
 
         this._functionService.registerExecutors(...functions);

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { compareToken } from '../../../basics/token';
+import type { ErrorValueObject } from '../../../engine/other-object/error-value-object';
 import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
@@ -26,27 +26,44 @@ export class Max extends BaseFunction {
     override calculate(...variants: FunctionVariantType[]) {
         let accumulatorAll: BaseValueObject = new NumberValueObject(-Infinity);
         for (let i = 0; i < variants.length; i++) {
-            const variant = variants[i];
+            let variant = variants[i];
 
-            if (variant.isReferenceObject() || (variant.isValueObject() && (variant as BaseValueObject).isArray())) {
-                (variant as BaseReferenceObject | ArrayValueObject).iterator((valueObject, row, column) => {
-                    if (!valueObject.isErrorObject() && !(valueObject as BaseValueObject).isString()) {
-                        accumulatorAll = this._validator(accumulatorAll, valueObject as BaseValueObject);
-                    }
-                });
-            } else if (!(variant as BaseValueObject).isString()) {
-                accumulatorAll = this._validator(accumulatorAll, variant as BaseValueObject);
+            if (variant.isErrorObject()) {
+                return variant as ErrorValueObject;
             }
+
+            if (variant.isReferenceObject()) {
+                variant = (variant as BaseReferenceObject).toArrayValueObject();
+            }
+
+            if ((variant as ArrayValueObject).isArray()) {
+                variant = (variant as ArrayValueObject).max();
+            }
+
+            if ((variant as ArrayValueObject).isNull()) {
+                continue;
+            }
+
+            accumulatorAll = this._validator(accumulatorAll, variant as BaseValueObject);
+
+            // const variant = variants[i];
+
+            // if (variant.isReferenceObject() || (variant.isValueObject() && (variant as BaseValueObject).isArray())) {
+            //     (variant as BaseReferenceObject | ArrayValueObject).iterator((valueObject, row, column) => {
+            //         if (!valueObject.isErrorObject() && !(valueObject as BaseValueObject).isString()) {
+            //             accumulatorAll = this._validator(accumulatorAll, valueObject as BaseValueObject);
+            //         }
+            //     });
+            // } else if (!(variant as BaseValueObject).isString()) {
+            //     accumulatorAll = this._validator(accumulatorAll, variant as BaseValueObject);
+            // }
         }
 
         return accumulatorAll;
     }
 
     private _validator(accumulatorAll: BaseValueObject, valueObject: BaseValueObject) {
-        const validator = accumulatorAll.compare(
-            valueObject as BaseValueObject,
-            compareToken.LESS_THAN
-        ) as BooleanValueObject;
+        const validator = accumulatorAll.isLessThan(valueObject as BaseValueObject) as BooleanValueObject;
         if (validator.getValue()) {
             accumulatorAll = valueObject as BaseValueObject;
         }

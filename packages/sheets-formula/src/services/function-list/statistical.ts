@@ -110,4 +110,27 @@ export const FUNCTION_LIST_STATISTICAL: IFunctionInfo[] = [
             },
         ],
     },
+    {
+        functionName: FUNCTION_NAMES_STATISTICAL.COUNTA,
+        aliasFunctionName: 'formula.functionList.COUNTA.aliasFunctionName',
+        functionType: FunctionType.Statistical,
+        description: 'formula.functionList.COUNT_A.description',
+        abstract: 'formula.functionList.COUNT_A.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.COUNT_A.functionParameter.number1.name',
+                detail: 'formula.functionList.COUNT_A.functionParameter.number1.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.COUNT_A.functionParameter.number2.name',
+                detail: 'formula.functionList.COUNT_A.functionParameter.number2.detail',
+                example: 'B2:B10',
+                require: 0,
+                repeat: 1,
+            },
+        ],
+    },
 ];

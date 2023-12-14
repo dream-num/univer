@@ -157,6 +157,9 @@ export class FormulaDependencyGenerator extends Disposable {
 
                 matrixData.forValue((row, column, formulaDataItem) => {
                     // const formulaString = formulaDataItem.f;
+                    if (formulaDataItem == null) {
+                        return true;
+                    }
                     const { f: formulaString, x, y } = formulaDataItem;
                     const node = this._generateAstNode(formulaString, x, y);
 

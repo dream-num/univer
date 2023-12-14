@@ -20,31 +20,19 @@ export class InvertedIndexCache {
      *    unitId:{
      *       sheetId:{
      *          'columnIndex': {
-     *              'operatorToken':{ //'=*10'
-     *                 '10':{
-     *                      row:1,
-     *                      column:1,
-     *                  }
-     *              }
+     *              10:[1,3,4,5],
+     *              5:[2,6,11,22]
      *          }
      *       }
      *    }
      * }
      */
-    private _cache: Map<string, Map<string, Map<number, Map<string, Map<string | number | boolean, number[]>>>>> =
-        new Map();
+    private _cache: Map<string, Map<string, Map<number, Map<string | number | boolean, number[]>>>> = new Map();
 
     private _continueBuildingCache: Map<string, Map<string, Map<number, { startRow: number; endRow: number }>>> =
         new Map();
 
-    set(
-        unitId: string,
-        sheetId: string,
-        column: number,
-        operatorToken: string,
-        value: string | number | boolean,
-        row: number
-    ) {
+    set(unitId: string, sheetId: string, column: number, value: string | number | boolean, row: number) {
         if (!this.shouldContinueBuildingCache(unitId, sheetId, column, row)) {
             return;
         }
@@ -67,41 +55,32 @@ export class InvertedIndexCache {
             sheetMap.set(column, columnMap);
         }
 
-        let operatorMap = columnMap.get(operatorToken);
-        if (operatorMap == null) {
-            operatorMap = new Map();
-            columnMap.set(operatorToken, operatorMap);
-        }
-
-        let cellList = operatorMap.get(value);
+        let cellList = columnMap.get(value);
         if (cellList == null) {
             cellList = [];
-            operatorMap.set(value, cellList);
+            columnMap.set(value, cellList);
         }
 
         cellList.push(row);
     }
 
-    getCellPositions(
-        unitId: string,
-        sheetId: string,
-        column: number,
-        operatorToken: string,
-        value: string | number | boolean
-    ) {
-        return this._cache.get(unitId)?.get(sheetId)?.get(column)?.get(operatorToken)?.get(value);
+    getCellValuePositions(unitId: string, sheetId: string, column: number) {
+        return this._cache.get(unitId)?.get(sheetId)?.get(column);
+    }
+
+    getCellPositions(unitId: string, sheetId: string, column: number, value: string | number | boolean) {
+        return this._cache.get(unitId)?.get(sheetId)?.get(column)?.get(value);
     }
 
     getCellPosition(
         unitId: string,
         sheetId: string,
         column: number,
-        operatorToken: string,
         value: string | number | boolean,
         startRow: number,
         endRow: number
     ) {
-        const rows = this.getCellPositions(unitId, sheetId, column, operatorToken, value);
+        const rows = this.getCellPositions(unitId, sheetId, column, value);
         if (rows == null) {
             return;
         }
@@ -133,9 +112,9 @@ export class InvertedIndexCache {
             return;
         }
 
-        columnMap.startRow = startRow;
+        columnMap.startRow = Math.min(columnMap.startRow, startRow);
 
-        columnMap.endRow = endRow;
+        columnMap.endRow = Math.max(columnMap.endRow, endRow);
     }
 
     shouldContinueBuildingCache(unitId: string, sheetId: string, column: number, row: number) {
@@ -170,6 +149,7 @@ export class InvertedIndexCache {
 
     clear() {
         this._cache.clear();
+        this._continueBuildingCache.clear();
     }
 }
 

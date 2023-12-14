@@ -186,7 +186,7 @@ export class EndEditController extends Disposable {
                 return;
             }
 
-            const cellData: ICellData = Tools.deepClone(worksheet.getCell(row, column) || {});
+            const cellData: ICellData = Tools.deepClone(worksheet.getCellRaw(row, column) || {});
 
             const documentModel = documentLayoutObject.documentModel as DocumentDataModel;
 

@@ -19,4 +19,5 @@ export enum FUNCTION_NAMES_STATISTICAL {
     COUNT = 'COUNT',
     MAX = 'MAX',
     MIN = 'MIN',
+    COUNTA = 'COUNTA',
 }

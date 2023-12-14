@@ -434,6 +434,9 @@ export class ActiveDirtyController extends Disposable {
             const cellRangeData = new ObjectMatrix<IRange>(arrayFormulaRange?.[unitId]?.[sheetId]);
             cellMatrix.forValue((row, column) => {
                 cellRangeData.forValue((arrayFormulaRow, arrayFormulaColumn, arrayFormulaRange) => {
+                    if (arrayFormulaRange == null) {
+                        return true;
+                    }
                     const { startRow, startColumn, endRow, endColumn } = arrayFormulaRange;
                     if (row >= startRow && row <= endRow && column >= startColumn && column <= endColumn) {
                         dirtyRanges.push({

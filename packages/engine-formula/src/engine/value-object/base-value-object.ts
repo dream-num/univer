@@ -17,7 +17,7 @@
 import { ConcatenateType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { ObjectClassType } from '../../basics/object-class-type';
-import type { compareToken } from '../../basics/token';
+import { compareToken } from '../../basics/token';
 import { ErrorValueObject } from '../other-object/error-value-object';
 
 export type CalculateValueType = BaseValueObject | ErrorValueObject;
@@ -130,6 +130,30 @@ export class BaseValueObject extends ObjectClassType {
         return ErrorValueObject.create(ErrorType.VALUE);
     }
 
+    isEqual(valueObject: BaseValueObject): CalculateValueType {
+        return this.compare(valueObject as BaseValueObject, compareToken.EQUALS);
+    }
+
+    isNotEqual(valueObject: BaseValueObject): CalculateValueType {
+        return this.compare(valueObject as BaseValueObject, compareToken.NOT_EQUAL);
+    }
+
+    isGreaterThanOrEqual(valueObject: BaseValueObject): CalculateValueType {
+        return this.compare(valueObject as BaseValueObject, compareToken.GREATER_THAN_OR_EQUAL);
+    }
+
+    isLessThanOrEqual(valueObject: BaseValueObject): CalculateValueType {
+        return this.compare(valueObject as BaseValueObject, compareToken.LESS_THAN_OR_EQUAL);
+    }
+
+    isLessThan(valueObject: BaseValueObject): CalculateValueType {
+        return this.compare(valueObject as BaseValueObject, compareToken.LESS_THAN);
+    }
+
+    isGreaterThan(valueObject: BaseValueObject): CalculateValueType {
+        return this.compare(valueObject as BaseValueObject, compareToken.GREATER_THAN);
+    }
+
     concatenateFront(valueObject: BaseValueObject): CalculateValueType {
         /** abstract */
         return ErrorValueObject.create(ErrorType.VALUE);
@@ -165,7 +189,7 @@ export class BaseValueObject extends ObjectClassType {
         return ErrorValueObject.create(ErrorType.VALUE);
     }
 
-    concatenate(value: string | number | boolean, concatenateType = ConcatenateType.FRONT): CalculateValueType {
+    concatenate(value: string | number | boolean, concatenateType = ConcatenateType.FRONT): string {
         let currentValue = this.getValue().toString();
         if (typeof value === 'string') {
             if (concatenateType === ConcatenateType.FRONT) {
@@ -187,7 +211,7 @@ export class BaseValueObject extends ObjectClassType {
                 currentValue += booleanString;
             }
         }
-        this.setValue(currentValue);
-        return this;
+
+        return currentValue;
     }
 }

@@ -25,7 +25,7 @@ export function getFormulaRefSelectionStyle(themeService: ThemeService, refColor
     const fill = new TinyColor(refColor).setAlpha(0.05).toString();
     return {
         id,
-        strokeWidth: 2,
+        strokeWidth: 1.5,
         stroke: refColor,
         // strokeDash: 10,
         fill,

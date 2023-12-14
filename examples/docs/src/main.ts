@@ -64,6 +64,7 @@ univer.createUniverDoc(DEFAULT_DOCUMENT_DATA_CN);
 
 // use for console test
 declare global {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     interface Window {
         univer?: Univer;
     }

@@ -16,17 +16,17 @@
 
 import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import type { BaseValueObject, CalculateValueType } from '../../../engine/value-object/base-value-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Count extends BaseFunction {
     override calculate(...variants: FunctionVariantType[]) {
-        let accumulatorAll: CalculateValueType = new NumberValueObject(0);
+        let accumulatorAll: BaseValueObject = new NumberValueObject(0);
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];
 
-            if (variant.isErrorObject()) {
+            if (variant.isError()) {
                 continue;
             }
 

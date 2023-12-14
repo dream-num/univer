@@ -28,7 +28,7 @@ export class Union extends BaseFunction {
     }
 
     override calculate(variant1: FunctionVariantType, variant2: FunctionVariantType) {
-        if (variant1.isErrorObject() || variant2.isErrorObject()) {
+        if (variant1.isError() || variant2.isError()) {
             return ErrorValueObject.create(ErrorType.REF);
         }
 

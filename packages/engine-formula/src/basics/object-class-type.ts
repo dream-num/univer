@@ -17,7 +17,7 @@
 import { Disposable } from '@univerjs/core';
 
 export class ObjectClassType extends Disposable {
-    isErrorObject() {
+    isError() {
         return false;
     }
 

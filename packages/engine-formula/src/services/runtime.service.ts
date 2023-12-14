@@ -29,11 +29,7 @@ import { ErrorType } from '../basics/error-type';
 import type { BaseAstNode } from '../engine/ast-node/base-ast-node';
 import { type BaseReferenceObject, type FunctionVariantType } from '../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
-import {
-    type BaseValueObject,
-    type CalculateValueType,
-    ErrorValueObject,
-} from '../engine/value-object/base-value-object';
+import { type BaseValueObject, ErrorValueObject } from '../engine/value-object/base-value-object';
 import { IFormulaCurrentConfigService } from './current-data.service';
 
 /**
@@ -365,7 +361,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
         const subComponentData = unitData[subComponentId];
 
-        subComponentData[formulaId] = this._objectValueToCellValue(functionVariant as CalculateValueType)!;
+        subComponentData[formulaId] = this._objectValueToCellValue(functionVariant as BaseValueObject)!;
     }
 
     setRuntimeData(functionVariant: FunctionVariantType) {
@@ -461,7 +457,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                          * If the referenced range contains an error in the spill of the array formula,
                          * then the current array formula should report an error together.
                          */
-                        if (valueObject != null && valueObject.isErrorObject() && valueObject.isEqualType(spillError)) {
+                        if (valueObject != null && valueObject.isError() && valueObject.isEqualType(spillError)) {
                             clearArrayUnitData.setValue(row, column, {});
                             sheetData.setValue(row, column, { ...this._objectValueToCellValue(spillError) });
                             return false;
@@ -476,7 +472,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                 arrayFormulaRange[sheetId] = arrayData.getData();
             }
         } else {
-            const valueObject = this._objectValueToCellValue(functionVariant as CalculateValueType);
+            const valueObject = this._objectValueToCellValue(functionVariant as BaseValueObject);
             sheetData.setValue(row, column, valueObject);
             clearArrayUnitData.setValue(row, column, valueObject);
         }
@@ -546,14 +542,14 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         };
     }
 
-    private _objectValueToCellValue(objectValue: Nullable<CalculateValueType>) {
+    private _objectValueToCellValue(objectValue: Nullable<BaseValueObject>) {
         if (objectValue == null) {
             return {
                 v: 0,
                 t: CellValueType.NUMBER,
             };
         }
-        if (objectValue.isErrorObject()) {
+        if (objectValue.isError()) {
             return {
                 v: (objectValue as ErrorValueObject).getErrorType() as string,
                 t: CellValueType.STRING,

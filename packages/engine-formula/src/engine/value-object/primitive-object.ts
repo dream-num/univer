@@ -21,7 +21,6 @@ import { BooleanValue, ConcatenateType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { compareToken } from '../../basics/token';
 import { compareWithWildcard } from '../utils/compare';
-import type { CalculateValueType } from './base-value-object';
 import { BaseValueObject, ErrorValueObject } from './base-value-object';
 
 export class NullValueObject extends BaseValueObject {
@@ -29,23 +28,23 @@ export class NullValueObject extends BaseValueObject {
         return true;
     }
 
-    override plus(valueObject: BaseValueObject): CalculateValueType {
+    override plus(valueObject: BaseValueObject): BaseValueObject {
         return new NumberValueObject(0, true).plus(valueObject);
     }
 
-    override minus(valueObject: BaseValueObject): CalculateValueType {
+    override minus(valueObject: BaseValueObject): BaseValueObject {
         return new NumberValueObject(0, true).minus(valueObject);
     }
 
-    override multiply(valueObject: BaseValueObject): CalculateValueType {
+    override multiply(valueObject: BaseValueObject): BaseValueObject {
         return new NumberValueObject(0, true).multiply(valueObject);
     }
 
-    override divided(valueObject: BaseValueObject): CalculateValueType {
+    override divided(valueObject: BaseValueObject): BaseValueObject {
         return new NumberValueObject(0, true).divided(valueObject);
     }
 
-    override compare(valueObject: BaseValueObject, operator: compareToken): CalculateValueType {
+    override compare(valueObject: BaseValueObject, operator: compareToken): BaseValueObject {
         if (valueObject.isString()) {
             return new StringValueObject('').compare(valueObject, operator);
         }
@@ -55,37 +54,37 @@ export class NullValueObject extends BaseValueObject {
         return new NumberValueObject(0, true).compare(valueObject, operator);
     }
 
-    override concatenateFront(valueObject: BaseValueObject): CalculateValueType {
+    override concatenateFront(valueObject: BaseValueObject): BaseValueObject {
         if (valueObject.isArray()) {
             return valueObject.concatenateBack(new StringValueObject(''));
         }
         return new StringValueObject(this.concatenate(valueObject.getValue(), ConcatenateType.FRONT));
     }
 
-    override concatenateBack(valueObject: BaseValueObject): CalculateValueType {
+    override concatenateBack(valueObject: BaseValueObject): BaseValueObject {
         if (valueObject.isArray()) {
             return valueObject.concatenateFront(new StringValueObject(''));
         }
         return new StringValueObject(this.concatenate(valueObject.getValue(), ConcatenateType.BACK));
     }
 
-    override plusBy(value: string | number | boolean): CalculateValueType {
+    override plusBy(value: string | number | boolean): BaseValueObject {
         return new NumberValueObject(0).plusBy(value);
     }
 
-    override minusBy(value: string | number | boolean): CalculateValueType {
+    override minusBy(value: string | number | boolean): BaseValueObject {
         return new NumberValueObject(0).minusBy(value);
     }
 
-    override multiplyBy(value: string | number | boolean): CalculateValueType {
+    override multiplyBy(value: string | number | boolean): BaseValueObject {
         return new NumberValueObject(0).multiplyBy(value);
     }
 
-    override dividedBy(value: string | number | boolean): CalculateValueType {
+    override dividedBy(value: string | number | boolean): BaseValueObject {
         return new NumberValueObject(0).dividedBy(value);
     }
 
-    override compareBy(value: string | number | boolean, operator: compareToken): CalculateValueType {
+    override compareBy(value: string | number | boolean, operator: compareToken): BaseValueObject {
         if (typeof value === 'string') {
             return new StringValueObject('').compareBy(value, operator);
         }
@@ -95,15 +94,15 @@ export class NullValueObject extends BaseValueObject {
         return new NumberValueObject(0, true).compareBy(value, operator);
     }
 
-    override pow(valueObject: BaseValueObject): CalculateValueType {
+    override pow(valueObject: BaseValueObject): BaseValueObject {
         return new NumberValueObject(0, true).pow(valueObject);
     }
 
-    override sqrt(): CalculateValueType {
+    override sqrt(): BaseValueObject {
         return new NumberValueObject(0, true);
     }
 
-    override sin(): CalculateValueType {
+    override sin(): BaseValueObject {
         return new NumberValueObject(0, true);
     }
 }
@@ -144,7 +143,7 @@ export class BooleanValueObject extends BaseValueObject {
         return true;
     }
 
-    override getNegative(): CalculateValueType {
+    override getNegative(): BaseValueObject {
         const currentValue = this.getValue();
         let result = 0;
         if (currentValue) {
@@ -153,7 +152,7 @@ export class BooleanValueObject extends BaseValueObject {
         return new NumberValueObject(-result, true);
     }
 
-    override getReciprocal(): CalculateValueType {
+    override getReciprocal(): BaseValueObject {
         const currentValue = this.getValue();
         if (currentValue) {
             return new NumberValueObject(1, true);
@@ -161,31 +160,31 @@ export class BooleanValueObject extends BaseValueObject {
         return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
     }
 
-    override plus(valueObject: BaseValueObject): CalculateValueType {
+    override plus(valueObject: BaseValueObject): BaseValueObject {
         return this._convertTonNumber().plus(valueObject);
     }
 
-    override minus(valueObject: BaseValueObject): CalculateValueType {
+    override minus(valueObject: BaseValueObject): BaseValueObject {
         return this._convertTonNumber().minus(valueObject);
     }
 
-    override multiply(valueObject: BaseValueObject): CalculateValueType {
+    override multiply(valueObject: BaseValueObject): BaseValueObject {
         return this._convertTonNumber().multiply(valueObject);
     }
 
-    override divided(valueObject: BaseValueObject): CalculateValueType {
+    override divided(valueObject: BaseValueObject): BaseValueObject {
         return this._convertTonNumber().divided(valueObject);
     }
 
-    override compare(valueObject: BaseValueObject, operator: compareToken): CalculateValueType {
+    override compare(valueObject: BaseValueObject, operator: compareToken): BaseValueObject {
         return this._convertTonNumber().compare(valueObject, operator);
     }
 
-    override concatenateFront(valueObject: BaseValueObject): CalculateValueType {
+    override concatenateFront(valueObject: BaseValueObject): BaseValueObject {
         return this._convertTonNumber().concatenateFront(valueObject);
     }
 
-    override concatenateBack(valueObject: BaseValueObject): CalculateValueType {
+    override concatenateBack(valueObject: BaseValueObject): BaseValueObject {
         return this._convertTonNumber().concatenateBack(valueObject);
     }
 
@@ -198,15 +197,15 @@ export class BooleanValueObject extends BaseValueObject {
         return new NumberValueObject(result, true);
     }
 
-    override pow(valueObject: BaseValueObject): CalculateValueType {
+    override pow(valueObject: BaseValueObject): BaseValueObject {
         return this._convertTonNumber().pow(valueObject);
     }
 
-    override sqrt(): CalculateValueType {
+    override sqrt(): BaseValueObject {
         return this._convertTonNumber();
     }
 
-    override sin(): CalculateValueType {
+    override sin(): BaseValueObject {
         return this._convertTonNumber().sin();
     }
 }
@@ -235,20 +234,20 @@ export class NumberValueObject extends BaseValueObject {
         return true;
     }
 
-    override getNegative(): CalculateValueType {
+    override getNegative(): BaseValueObject {
         return new NumberValueObject(0).minus(this);
     }
 
-    override getReciprocal(): CalculateValueType {
+    override getReciprocal(): BaseValueObject {
         return new NumberValueObject(1).divided(this);
     }
 
-    override plus(valueObject: BaseValueObject): CalculateValueType {
+    override plus(valueObject: BaseValueObject): BaseValueObject {
         if (valueObject.isArray()) {
             return valueObject.plus(this);
         }
         const object = this.plusBy(valueObject.getValue());
-        if (object.isErrorObject()) {
+        if (object.isError()) {
             return this;
         }
 
@@ -259,33 +258,33 @@ export class NumberValueObject extends BaseValueObject {
         return this._value === 0;
     }
 
-    override minus(valueObject: BaseValueObject): CalculateValueType {
+    override minus(valueObject: BaseValueObject): BaseValueObject {
         if (valueObject.isArray()) {
             const o = valueObject.getNegative();
-            if (o.isErrorObject()) {
+            if (o.isError()) {
                 return o;
             }
             return (o as BaseValueObject).plus(this);
         }
         const object = this.minusBy(valueObject.getValue());
-        if (object.isErrorObject()) {
+        if (object.isError()) {
             return this;
         }
 
         return object;
     }
 
-    override multiply(valueObject: BaseValueObject): CalculateValueType {
+    override multiply(valueObject: BaseValueObject): BaseValueObject {
         if (valueObject.isArray()) {
             return valueObject.multiply(this);
         }
         return this.multiplyBy(valueObject.getValue());
     }
 
-    override divided(valueObject: BaseValueObject): CalculateValueType {
+    override divided(valueObject: BaseValueObject): BaseValueObject {
         if (valueObject.isArray()) {
             const o = valueObject.getReciprocal();
-            if (o.isErrorObject()) {
+            if (o.isError()) {
                 return o;
             }
             return (o as BaseValueObject).multiply(this);
@@ -293,28 +292,28 @@ export class NumberValueObject extends BaseValueObject {
         return this.dividedBy(valueObject.getValue());
     }
 
-    override concatenateFront(valueObject: BaseValueObject): CalculateValueType {
+    override concatenateFront(valueObject: BaseValueObject): BaseValueObject {
         if (valueObject.isArray()) {
             return valueObject.concatenateBack(this);
         }
         return new StringValueObject(this.concatenate(valueObject.getValue(), ConcatenateType.FRONT));
     }
 
-    override concatenateBack(valueObject: BaseValueObject): CalculateValueType {
+    override concatenateBack(valueObject: BaseValueObject): BaseValueObject {
         if (valueObject.isArray()) {
             return valueObject.concatenateFront(this);
         }
         return new StringValueObject(this.concatenate(valueObject.getValue(), ConcatenateType.BACK));
     }
 
-    override compare(valueObject: BaseValueObject, operator: compareToken): CalculateValueType {
+    override compare(valueObject: BaseValueObject, operator: compareToken): BaseValueObject {
         if (valueObject.isArray()) {
             return (valueObject as BaseValueObject).compare(this, reverseCompareOperator(operator));
         }
         return this.compareBy(valueObject.getValue(), operator);
     }
 
-    override plusBy(value: string | number | boolean): CalculateValueType {
+    override plusBy(value: string | number | boolean): BaseValueObject {
         const currentValue = this.getValue();
         if (typeof value === 'string') {
             return ErrorValueObject.create(ErrorType.VALUE);
@@ -335,7 +334,7 @@ export class NumberValueObject extends BaseValueObject {
         return this;
     }
 
-    override minusBy(value: string | number | boolean): CalculateValueType {
+    override minusBy(value: string | number | boolean): BaseValueObject {
         const currentValue = this.getValue();
         if (typeof value === 'string') {
             return ErrorValueObject.create(ErrorType.VALUE);
@@ -356,7 +355,7 @@ export class NumberValueObject extends BaseValueObject {
         return this;
     }
 
-    override multiplyBy(value: string | number | boolean): CalculateValueType {
+    override multiplyBy(value: string | number | boolean): BaseValueObject {
         const currentValue = this.getValue();
         if (typeof value === 'string') {
             return ErrorValueObject.create(ErrorType.VALUE);
@@ -377,7 +376,7 @@ export class NumberValueObject extends BaseValueObject {
         return this;
     }
 
-    override dividedBy(value: string | number | boolean): CalculateValueType {
+    override dividedBy(value: string | number | boolean): BaseValueObject {
         const currentValue = this.getValue();
         if (typeof value === 'string') {
             return ErrorValueObject.create(ErrorType.VALUE);
@@ -400,7 +399,7 @@ export class NumberValueObject extends BaseValueObject {
         return this;
     }
 
-    override compareBy(value: string | number | boolean, operator: compareToken): CalculateValueType {
+    override compareBy(value: string | number | boolean, operator: compareToken): BaseValueObject {
         const currentValue = this.getValue();
         let result = false;
         if (typeof value === 'string') {
@@ -458,7 +457,7 @@ export class NumberValueObject extends BaseValueObject {
         return new BooleanValueObject(result);
     }
 
-    override pow(valueObject: BaseValueObject): CalculateValueType {
+    override pow(valueObject: BaseValueObject): BaseValueObject {
         if (valueObject.isArray()) {
             return valueObject.powInverse(this);
         }
@@ -486,7 +485,7 @@ export class NumberValueObject extends BaseValueObject {
         return this;
     }
 
-    override sqrt(): CalculateValueType {
+    override sqrt(): BaseValueObject {
         const currentValue = this.getValue();
 
         if (Math.abs(currentValue) === Infinity) {
@@ -495,7 +494,7 @@ export class NumberValueObject extends BaseValueObject {
         return new NumberValueObject(Big(currentValue).sqrt().toNumber());
     }
 
-    override sin(): CalculateValueType {
+    override sin(): BaseValueObject {
         const currentValue = this.getValue();
 
         if (Math.abs(currentValue) === Infinity) {
@@ -558,24 +557,24 @@ export class StringValueObject extends BaseValueObject {
         return true;
     }
 
-    override concatenateFront(valueObject: BaseValueObject): CalculateValueType {
+    override concatenateFront(valueObject: BaseValueObject): BaseValueObject {
         if (valueObject.isArray()) {
             return valueObject.concatenateBack(this);
         }
         return new StringValueObject(this.concatenate(valueObject.getValue(), ConcatenateType.FRONT));
     }
 
-    override concatenateBack(valueObject: BaseValueObject): CalculateValueType {
+    override concatenateBack(valueObject: BaseValueObject): BaseValueObject {
         if (valueObject.isArray()) {
             return valueObject.concatenateFront(this);
         }
         return new StringValueObject(this.concatenate(valueObject.getValue(), ConcatenateType.BACK));
     }
 
-    override compare(valueObject: BaseValueObject, operator: compareToken): CalculateValueType {
+    override compare(valueObject: BaseValueObject, operator: compareToken): BaseValueObject {
         if (valueObject.isArray()) {
             // const o = valueObject.getReciprocal();
-            // if (o.isErrorObject()) {
+            // if (o.isError()) {
             //     return o;
             // }
             return (valueObject as BaseValueObject).compare(this, reverseCompareOperator(operator));
@@ -583,10 +582,10 @@ export class StringValueObject extends BaseValueObject {
         return this.compareBy(valueObject.getValue(), operator);
     }
 
-    override wildcard(valueObject: StringValueObject, operator: compareToken): CalculateValueType {
+    override wildcard(valueObject: StringValueObject, operator: compareToken): BaseValueObject {
         if (valueObject.isArray()) {
             // const o = valueObject.getReciprocal();
-            // if (o.isErrorObject()) {
+            // if (o.isError()) {
             //     return o;
             // }
             return valueObject.wildcard(this, reverseCompareOperator(operator));
@@ -594,7 +593,7 @@ export class StringValueObject extends BaseValueObject {
         return this.checkWildcard(valueObject.getValue(), operator);
     }
 
-    override compareBy(value: string | number | boolean, operator: compareToken): CalculateValueType {
+    override compareBy(value: string | number | boolean, operator: compareToken): BaseValueObject {
         const currentValue = this.getValue();
         let result = false;
         if (typeof value === 'string') {

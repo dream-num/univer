@@ -37,7 +37,7 @@ export class Sumif extends BaseFunction {
         const sumRange = variants[2];
 
         // 2. Check whether all parameter types meet the requirements
-        if (range.isErrorObject() || criteria.isErrorObject() || (sumRange && sumRange.isErrorObject())) {
+        if (range.isError() || criteria.isError() || (sumRange && sumRange.isError())) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
@@ -53,7 +53,7 @@ export class Sumif extends BaseFunction {
             const { startRow, startColumn } = sumRangeValue.getRangePosition();
 
             sumRangeValue.iterator((valueObject, row, column) => {
-                if (!valueObject?.isErrorObject()) {
+                if (!valueObject?.isError()) {
                     const arrayValue = resultArrayValue[row - startRow][column - startColumn] as BaseValueObject;
                     const accumulator = arrayValue.getValue()
                         ? (valueObject as BaseValueObject)

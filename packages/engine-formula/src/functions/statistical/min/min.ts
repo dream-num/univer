@@ -26,7 +26,7 @@ export class Min extends BaseFunction {
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];
 
-            if (variant.isErrorObject()) {
+            if (variant.isError()) {
                 return variant as ErrorValueObject;
             }
 
@@ -46,7 +46,7 @@ export class Min extends BaseFunction {
 
             // if (variant.isReferenceObject() || (variant.isValueObject() && (variant as BaseValueObject).isArray())) {
             //     (variant as BaseReferenceObject | ArrayValueObject).iterator((valueObject, row, column) => {
-            //         if (!valueObject.isErrorObject() && !(valueObject as BaseValueObject).isString()) {
+            //         if (!valueObject.isError() && !(valueObject as BaseValueObject).isString()) {
             //             accumulatorAll = this._validator(accumulatorAll, valueObject as BaseValueObject);
             //         }
             //     });

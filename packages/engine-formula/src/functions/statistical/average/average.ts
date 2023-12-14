@@ -16,22 +16,22 @@
 
 import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import type { BaseValueObject, CalculateValueType } from '../../../engine/value-object/base-value-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Average extends BaseFunction {
     override calculate(...variants: FunctionVariantType[]) {
-        let accumulatorSum: CalculateValueType = new NumberValueObject(0);
-        let accumulatorCount: CalculateValueType = new NumberValueObject(0);
+        let accumulatorSum: BaseValueObject = new NumberValueObject(0);
+        let accumulatorCount: BaseValueObject = new NumberValueObject(0);
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];
 
-            if (variant.isErrorObject()) {
+            if (variant.isError()) {
                 return variant;
             }
 
-            if (accumulatorSum.isErrorObject()) {
+            if (accumulatorSum.isError()) {
                 return accumulatorSum;
             }
 

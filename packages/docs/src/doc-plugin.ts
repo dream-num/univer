@@ -29,13 +29,8 @@ import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { BreakLineCommand } from './commands/commands/break-line.command';
-import {
-    DeleteCommand,
-    DeleteLeftCommand,
-    DeleteRightCommand,
-    InsertCommand,
-    UpdateCommand,
-} from './commands/commands/core-editing.command';
+import { DeleteCommand, InsertCommand, UpdateCommand } from './commands/commands/core-editing.command';
+import { DeleteLeftCommand, DeleteRightCommand } from './commands/commands/delete.command';
 import { IMEInputCommand } from './commands/commands/ime-input.command';
 import {
     SetInlineFormatBoldCommand,
@@ -57,7 +52,6 @@ import { SelectAllOperation } from './commands/operations/select-all.operation';
 import { SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
 import { SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
 import { DocClipboardController } from './controllers/clipboard.controller';
-import { DeleteController } from './controllers/delete.controller';
 import { DocRenderController } from './controllers/doc-render.controller';
 import { FloatingObjectController } from './controllers/floating-object.controller';
 import { IMEInputController } from './controllers/ime-input.controller';
@@ -208,7 +202,6 @@ export class UniverDocsPlugin extends Plugin {
                 [TextSelectionController],
                 [NormalInputController],
                 [IMEInputController],
-                [DeleteController],
                 [InlineFormatController],
                 [DocClipboardController],
                 [MoveCursorController],

@@ -19,7 +19,7 @@ import type { IShortcutItem } from '@univerjs/ui';
 import { KeyCode } from '@univerjs/ui';
 
 import { BreakLineCommand } from '../commands/commands/break-line.command';
-import { DeleteLeftCommand, DeleteRightCommand } from '../commands/commands/core-editing.command';
+import { DeleteLeftCommand, DeleteRightCommand } from '../commands/commands/delete.command';
 
 export const BreakLineShortcut: IShortcutItem = {
     id: BreakLineCommand.id,

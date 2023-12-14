@@ -14,86 +14,45 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IParagraph } from '@univerjs/core';
-import {
-    Disposable,
-    ICommandService,
-    IUniverInstanceService,
-    LifecycleStages,
-    OnLifecycle,
-    UpdateDocsAttributeType,
-} from '@univerjs/core';
+import type { ICommand, IParagraph } from '@univerjs/core';
+import { CommandType, ICommandService, IUniverInstanceService, UpdateDocsAttributeType } from '@univerjs/core';
+import type { TextRange } from '@univerjs/engine-render';
 import { getParagraphBySpan, hasListSpan, isFirstSpan, isIndentBySpan, isSameLine } from '@univerjs/engine-render';
-import { Inject } from '@wendellhu/redi';
 
-import { CutContentCommand } from '../commands/commands/clipboard.inner.command';
-import {
-    DeleteCommand,
-    DeleteDirection,
-    DeleteLeftCommand,
-    DeleteRightCommand,
-    UpdateCommand,
-} from '../commands/commands/core-editing.command';
-import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
-import { TextSelectionManagerService } from '../services/text-selection-manager.service';
+import { DocSkeletonManagerService } from '../../services/doc-skeleton-manager.service';
+import type { ITextActiveRange } from '../../services/text-selection-manager.service';
+import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
+import { CutContentCommand } from './clipboard.inner.command';
+import { DeleteCommand, DeleteDirection, UpdateCommand } from './core-editing.command';
 
-@OnLifecycle(LifecycleStages.Rendered, DeleteController)
-export class DeleteController extends Disposable {
-    constructor(
-        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
-        @ICommandService private readonly _commandService: ICommandService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService
-    ) {
-        super();
+export const DeleteLeftCommand: ICommand = {
+    id: 'doc.command.delete-left',
 
-        this._initialize();
+    type: CommandType.COMMAND,
 
-        this._commandExecutedListener();
-    }
+    handler: async (accessor) => {
+        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+        const docSkeletonManagerService = accessor.get(DocSkeletonManagerService);
+        const currentUniverService = accessor.get(IUniverInstanceService);
+        const commandService = accessor.get(ICommandService);
 
-    private _initialize() {}
+        const activeRange = textSelectionManagerService.getActiveRange();
+        const ranges = textSelectionManagerService.getSelections();
+        const skeleton = docSkeletonManagerService.getCurrent()?.skeleton;
 
-    private _commandExecutedListener() {
-        const updateCommandList = [DeleteLeftCommand.id, DeleteRightCommand.id];
+        let result;
 
-        this.disposeWithMe(
-            this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (!updateCommandList.includes(command.id)) {
-                    return;
-                }
-
-                switch (command.id) {
-                    case DeleteLeftCommand.id:
-                        this._handleDeleteLeft();
-                        break;
-                    case DeleteRightCommand.id:
-                        this._handleDeleteRight();
-                        break;
-                    default:
-                        throw new Error('Unknown command');
-                }
-            })
-        );
-    }
-
-    // Use BACKSPACE to delete left.
-    private _handleDeleteLeft() {
-        const activeRange = this._textSelectionManagerService.getActiveRange();
-
-        const skeleton = this._docSkeletonManagerService.getCurrent()?.skeleton;
-
-        if (activeRange == null || skeleton == null) {
-            return;
+        if (activeRange == null || skeleton == null || ranges == null) {
+            return false;
         }
 
-        const docDataModel = this._currentUniverService.getCurrentUniverDocInstance();
+        const docDataModel = currentUniverService.getCurrentUniverDocInstance();
 
         const { startOffset, collapsed, segmentId, style } = activeRange;
 
         // No need to delete when the cursor is at the first position of the first paragraph.
         if (startOffset === 0 && collapsed) {
-            return;
+            return true;
         }
 
         const preSpan = skeleton.findNodeByCharIndex(startOffset);
@@ -115,7 +74,7 @@ export class DeleteController extends Disposable {
             const paragraph = getParagraphBySpan(preSpan, docDataModel.body);
 
             if (paragraph == null) {
-                return;
+                return false;
             }
 
             const paragraphIndex = paragraph?.startIndex;
@@ -152,7 +111,7 @@ export class DeleteController extends Disposable {
                 },
             ];
 
-            this._commandService.executeCommand(UpdateCommand.id, {
+            result = await commandService.executeCommand(UpdateCommand.id, {
                 unitId: docDataModel.getUnitId(),
                 updateBody: {
                     dataStream: '',
@@ -186,7 +145,7 @@ export class DeleteController extends Disposable {
                         style,
                     },
                 ];
-                this._commandService.executeCommand(DeleteCommand.id, {
+                result = await commandService.executeCommand(DeleteCommand.id, {
                     unitId: docDataModel.getUnitId(),
                     range: activeRange,
                     segmentId,
@@ -195,36 +154,47 @@ export class DeleteController extends Disposable {
                     textRanges,
                 });
             } else {
-                const textRanges = this._getTextRangesWhenDelete();
+                const textRanges = getTextRangesWhenDelete(activeRange, ranges);
                 // If the selection is not closed, the effect of Delete and
                 // BACKSPACE is the same as CUT, so the CUT command is executed.
-                this._commandService.executeCommand(CutContentCommand.id, {
+                result = await commandService.executeCommand(CutContentCommand.id, {
                     segmentId,
                     textRanges,
                 });
             }
         }
 
-        skeleton?.calculate();
-    }
+        return result;
+    },
+};
 
-    // Use DELETE to delete right.
-    private _handleDeleteRight() {
-        const activeRange = this._textSelectionManagerService.getActiveRange();
+export const DeleteRightCommand: ICommand = {
+    id: 'doc.command.delete-right',
+    type: CommandType.COMMAND,
+    handler: async (accessor) => {
+        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+        const docSkeletonManagerService = accessor.get(DocSkeletonManagerService);
+        const currentUniverService = accessor.get(IUniverInstanceService);
+        const commandService = accessor.get(ICommandService);
 
-        const skeleton = this._docSkeletonManagerService.getCurrent()?.skeleton;
+        const activeRange = textSelectionManagerService.getActiveRange();
+        const ranges = textSelectionManagerService.getSelections();
 
-        if (activeRange == null || skeleton == null) {
-            return;
+        const skeleton = docSkeletonManagerService.getCurrent()?.skeleton;
+
+        let result;
+
+        if (activeRange == null || skeleton == null || ranges == null) {
+            return false;
         }
 
-        const docDataModel = this._currentUniverService.getCurrentUniverDocInstance();
+        const docDataModel = currentUniverService.getCurrentUniverDocInstance();
 
         const { startOffset, collapsed, segmentId, style } = activeRange;
 
         // No need to delete when the cursor is at the last position of the last paragraph.
         if (startOffset === docDataModel.getBody()!.dataStream.length - 2 && collapsed) {
-            return;
+            return true;
         }
 
         if (collapsed === true) {
@@ -238,7 +208,7 @@ export class DeleteController extends Disposable {
 
             const needDeleteSpan = skeleton.findNodeByCharIndex(startOffset)!;
 
-            this._commandService.executeCommand(DeleteCommand.id, {
+            result = await commandService.executeCommand(DeleteCommand.id, {
                 unitId: docDataModel.getUnitId(),
                 range: activeRange,
                 segmentId,
@@ -247,45 +217,42 @@ export class DeleteController extends Disposable {
                 len: needDeleteSpan.count,
             });
         } else {
-            const textRanges = this._getTextRangesWhenDelete();
+            const textRanges = getTextRangesWhenDelete(activeRange, ranges);
             // If the selection is not closed, the effect of Delete and
             // BACKSPACE is the same as CUT, so the CUT command is executed.
-            this._commandService.executeCommand(CutContentCommand.id, {
+            result = await commandService.executeCommand(CutContentCommand.id, {
                 segmentId,
                 textRanges,
             });
         }
 
-        skeleton?.calculate();
-    }
+        return result;
+    },
+};
 
-    // get cursor position when BACKSPACE/DELETE excuse the CutContentCommand.
-    private _getTextRangesWhenDelete() {
-        const activeRange = this._textSelectionManagerService.getActiveRange()!;
-        const ranges = this._textSelectionManagerService.getSelections()!;
+// get cursor position when BACKSPACE/DELETE excuse the CutContentCommand.
+function getTextRangesWhenDelete(activeRange: ITextActiveRange, ranges: readonly TextRange[]) {
+    let cursor = activeRange.endOffset;
 
-        let cursor = activeRange.endOffset;
+    for (const range of ranges) {
+        const { startOffset, endOffset } = range;
 
-        for (const range of ranges) {
-            const { startOffset, endOffset } = range;
-
-            if (startOffset == null || endOffset == null) {
-                continue;
-            }
-
-            if (endOffset <= activeRange.endOffset) {
-                cursor -= endOffset - startOffset;
-            }
+        if (startOffset == null || endOffset == null) {
+            continue;
         }
 
-        const textRanges = [
-            {
-                startOffset: cursor,
-                endOffset: cursor,
-                style: activeRange.style,
-            },
-        ];
-
-        return textRanges;
+        if (endOffset <= activeRange.endOffset) {
+            cursor -= endOffset - startOffset;
+        }
     }
+
+    const textRanges = [
+        {
+            startOffset: cursor,
+            endOffset: cursor,
+            style: activeRange.style,
+        },
+    ];
+
+    return textRanges;
 }

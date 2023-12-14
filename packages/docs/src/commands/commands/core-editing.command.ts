@@ -30,19 +30,6 @@ import { TextSelectionManagerService } from '../../services/text-selection-manag
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
 
-// TODO: @JOCS, do not use command as event bus.
-export const DeleteLeftCommand: ICommand = {
-    id: 'doc.command.delete-left',
-    type: CommandType.COMMAND,
-    handler: async () => true,
-};
-
-export const DeleteRightCommand: ICommand = {
-    id: 'doc.command.delete-right',
-    type: CommandType.COMMAND,
-    handler: async () => true,
-};
-
 export interface IInsertCommandParams {
     unitId: string;
     body: IDocumentBody;
@@ -76,16 +63,16 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
         };
 
         if (collapsed) {
-            doMutation.params!.mutations.push({
+            doMutation.params.mutations.push({
                 t: 'r',
                 len: startOffset,
                 segmentId,
             });
         } else {
-            doMutation.params!.mutations.push(...getRetainAndDeleteFromReplace(range, segmentId));
+            doMutation.params.mutations.push(...getRetainAndDeleteFromReplace(range, segmentId));
         }
 
-        doMutation.params!.mutations.push({
+        doMutation.params.mutations.push({
             t: 'i',
             body,
             len: body.dataStream.length,

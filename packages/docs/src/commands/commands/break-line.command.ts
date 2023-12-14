@@ -36,9 +36,15 @@ function generateParagraphs(dataStream: string, prevParagraph?: IParagraph): IPa
         });
     }
 
-    if (prevParagraph && prevParagraph.bullet) {
+    if (prevParagraph) {
         for (const paragraph of paragraphs) {
-            paragraph.bullet = Tools.deepClone(prevParagraph.bullet);
+            if (prevParagraph.bullet) {
+                paragraph.bullet = Tools.deepClone(prevParagraph.bullet);
+            }
+
+            if (prevParagraph.paragraphStyle) {
+                paragraph.paragraphStyle = Tools.deepClone(prevParagraph.paragraphStyle);
+            }
         }
     }
 
@@ -67,6 +73,7 @@ export const BreakLineCommand: ICommand = {
         const unitId = docDataModel.getUnitId();
 
         const { startOffset, segmentId, style } = activeRange;
+
         // move selection
         const textRanges = [
             {

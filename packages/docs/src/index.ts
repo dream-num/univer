@@ -16,11 +16,10 @@
 
 export { getDocObject } from './basics/component-tools';
 export * from './basics/docs-view-key';
+export { BreakLineCommand } from './commands/commands/break-line.command';
 export { DocCopyCommand, DocCutCommand, DocPasteCommand } from './commands/commands/clipboard.command';
 export {
-    BreakLineCommand,
     DeleteCommand,
-    DeleteLeftCommand,
     type ICoverCommandParams,
     type IDeleteCommandParams,
     type IInsertCommandParams,
@@ -28,6 +27,7 @@ export {
     type IUpdateCommandParams,
     UpdateCommand,
 } from './commands/commands/core-editing.command';
+export { DeleteLeftCommand, DeleteRightCommand } from './commands/commands/delete.command';
 export { type IIMEInputCommandParams, IMEInputCommand } from './commands/commands/ime-input.command';
 export {
     SetInlineFormatBoldCommand,

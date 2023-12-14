@@ -61,8 +61,8 @@ export class DesktopBeforeCloseService implements IBeforeCloseService {
         return {
             dispose: () => {
                 this._onCloseCallbacks = this._onCloseCallbacks.filter((cb) => cb !== callback);
-            }
-        }
+            },
+        };
     }
 
     private _init(): void {

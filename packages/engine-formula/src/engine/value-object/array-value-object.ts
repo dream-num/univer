@@ -461,15 +461,17 @@ export class ArrayValueObject extends BaseValueObject {
         batchOperatorType: BatchOperatorType,
         operator?: compareToken | callbackProductFnType
     ): CalculateValueType {
-        const valueRowCount = (valueObject as ArrayValueObject).getRowCount();
-        const valueColumnCount = (valueObject as ArrayValueObject).getColumnCount();
-
         const valueList: BaseValueObject[] = [];
 
-        const rowCount = Math.max(valueRowCount, this._rowCount);
-        const columnCount = Math.max(valueColumnCount, this._columnCount);
+        let rowCount = this._rowCount;
+        let columnCount = this._columnCount;
 
         if (valueObject.isArray()) {
+            const valueRowCount = (valueObject as ArrayValueObject).getRowCount();
+            const valueColumnCount = (valueObject as ArrayValueObject).getColumnCount();
+
+            rowCount = Math.max(valueRowCount, rowCount);
+            columnCount = Math.max(valueColumnCount, columnCount);
             /**
              * For computational scenarios where the array contains a single value,
              * adopting calculations between the array and the value can effectively utilize an inverted index.

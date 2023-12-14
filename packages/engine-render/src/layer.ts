@@ -164,7 +164,7 @@ export class Layer {
         return this._dirty;
     }
 
-    render(parentCtx?: CanvasRenderingContext2D) {
+    render(parentCtx?: CanvasRenderingContext2D, isMaxLayer = false) {
         const mainCtx = parentCtx || this._scene.getEngine()?.getCanvas().getContext();
 
         if (this._allowCache && this._cacheCanvas) {
@@ -175,14 +175,14 @@ export class Layer {
                 ctx.save();
 
                 ctx.setTransform(mainCtx.getTransform());
-                this._draw(ctx);
+                this._draw(ctx, isMaxLayer);
 
                 ctx.restore();
             }
             this._applyCache(mainCtx);
         } else {
             mainCtx.save();
-            this._draw(mainCtx);
+            this._draw(mainCtx, isMaxLayer);
             mainCtx.restore();
         }
 
@@ -190,17 +190,16 @@ export class Layer {
         return this;
     }
 
-    private _draw(mainCtx: CanvasRenderingContext2D) {
-        this._scene.getViewports()?.forEach((vp) => vp.render(mainCtx, this.getObjectsByOrder()));
+    private _draw(mainCtx: CanvasRenderingContext2D, isMaxLayer: boolean) {
+        this._scene.getViewports()?.forEach((vp) => vp.render(mainCtx, this.getObjectsByOrder(), isMaxLayer));
     }
 
     private _applyCache(ctx?: CanvasRenderingContext2D) {
         if (!ctx || this._cacheCanvas == null) {
             return;
         }
-        const pixelRatio = this._cacheCanvas.getPixelRatio();
-        const width = this._cacheCanvas.getWidth() * pixelRatio;
-        const height = this._cacheCanvas.getHeight() * pixelRatio;
+        const width = this._cacheCanvas.getWidth();
+        const height = this._cacheCanvas.getHeight();
         ctx.drawImage(this._cacheCanvas.getCanvasEle(), 0, 0, width, height);
     }
 

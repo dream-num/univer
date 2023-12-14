@@ -20,7 +20,7 @@ import { BASE_OBJECT_ARRAY, BaseObject } from '../base-object';
 import { SHAPE_TYPE } from '../basics/const';
 import type { IObjectFullState } from '../basics/interfaces';
 import { transformBoundingCoord } from '../basics/position';
-import type { IBoundRect, Vector2 } from '../basics/vector2';
+import type { IViewportBound, Vector2 } from '../basics/vector2';
 
 export type LineJoin = 'round' | 'bevel' | 'miter';
 export type LineCap = 'butt' | 'round' | 'square';
@@ -319,7 +319,7 @@ export abstract class Shape<T> extends BaseObject {
 
     private static __setLineDash(ctx: CanvasRenderingContext2D) {}
 
-    override render(mainCtx: CanvasRenderingContext2D, bounds?: IBoundRect) {
+    override render(mainCtx: CanvasRenderingContext2D, bounds?: IViewportBound) {
         if (!this.visible) {
             this.makeDirty(false);
             return this;

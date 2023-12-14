@@ -16,7 +16,7 @@
 
 import { getTranslateInSpreadContextWithPixelRatio } from '../../basics/draw';
 import { fixLineWidthByScale, getScale } from '../../basics/tools';
-import type { IBoundRect, Vector2 } from '../../basics/vector2';
+import type { IViewportBound, Vector2 } from '../../basics/vector2';
 import { SheetColumnHeaderExtensionRegistry } from '../extension';
 import type { ColumnHeaderLayout } from './extensions/column-header-layout';
 import { SpreadsheetHeader } from './sheet-component';
@@ -37,7 +37,7 @@ export class SpreadsheetColumnHeader extends SpreadsheetHeader {
         return this._columnHeaderLayoutExtension;
     }
 
-    override draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
+    override draw(ctx: CanvasRenderingContext2D, bounds?: IViewportBound) {
         const spreadsheetSkeleton = this.getSkeleton();
         if (!spreadsheetSkeleton) {
             return;

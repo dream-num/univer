@@ -23,7 +23,7 @@ import type { IWheelEvent } from './basics/i-events';
 import { PointerInput } from './basics/i-events';
 import { toPx } from './basics/tools';
 import { Transform } from './basics/transform';
-import type { IBoundRect } from './basics/vector2';
+import type { IViewportBound } from './basics/vector2';
 import { Vector2 } from './basics/vector2';
 import type { BaseScrollBar } from './shape/base-scroll-bar';
 import type { ThinScene } from './thin-scene';
@@ -491,7 +491,7 @@ export class Viewport {
         return composeResult;
     }
 
-    render(parentCtx?: CanvasRenderingContext2D, objects: BaseObject[] = []) {
+    render(parentCtx?: CanvasRenderingContext2D, objects: BaseObject[] = [], isMaxLayer = false) {
         if (this.isActive === false) {
             return;
         }
@@ -530,7 +530,7 @@ export class Viewport {
         });
         ctx.restore();
 
-        if (this._scrollBar) {
+        if (this._scrollBar && isMaxLayer) {
             ctx.save();
             ctx.transform(n[0], n[1], n[2], n[3], n[4], n[5]);
             this.drawScrollbar(ctx);
@@ -930,15 +930,22 @@ export class Viewport {
         return limited;
     }
 
-    private _calViewportRelativeBounding() {
+    private _calViewportRelativeBounding(): IViewportBound {
         if (this.isActive === false) {
             return {
-                tl: Vector2.FromArray([-1, -1]),
-                tr: Vector2.FromArray([-1, -1]),
-                bl: Vector2.FromArray([-1, -1]),
-                br: Vector2.FromArray([-1, -1]),
-                dx: -1,
-                dy: -1,
+                // tl: Vector2.FromArray([-1, -1]),
+                // tr: Vector2.FromArray([-1, -1]),
+                // bl: Vector2.FromArray([-1, -1]),
+                // br: Vector2.FromArray([-1, -1]),
+                viewBound: {
+                    left: -1,
+                    top: -1,
+                    right: -1,
+                    bottom: -1,
+                },
+                diffBounds: [],
+                diffX: -1,
+                diffY: -1,
             };
         }
 
@@ -962,21 +969,29 @@ export class Viewport {
             differenceY = (this._preScrollY - this.scrollY) / ratioScrollY;
         }
 
-        const bounding: IBoundRect = {
-            tl: Vector2.FromArray([xFrom, yFrom]),
-            tr: Vector2.FromArray([xTo, yFrom]),
-            bl: Vector2.FromArray([xFrom, yTo]),
-            br: Vector2.FromArray([xTo, yTo]),
-            dx: differenceX,
-            dy: differenceY,
+        // const bounding: IViewportBound = {
+        //     tl: Vector2.FromArray([xFrom, yFrom]),
+        //     tr: Vector2.FromArray([xTo, yFrom]),
+        //     bl: Vector2.FromArray([xFrom, yTo]),
+        //     br: Vector2.FromArray([xTo, yTo]),
+        //     dx: differenceX,
+        //     dy: differenceY,
+        // };
+
+        const topLeft = this.getRelativeVector(Vector2.FromArray([xFrom, yFrom]));
+        const bottomRight = this.getRelativeVector(Vector2.FromArray([xTo, yTo]));
+
+        return {
+            viewBound: {
+                top: topLeft.y,
+                left: topLeft.x,
+                right: bottomRight.x,
+                bottom: bottomRight.y,
+            },
+            diffBounds: [],
+            diffX: differenceX,
+            diffY: differenceY,
         };
-
-        bounding.tl = this.getRelativeVector(bounding.tl);
-        bounding.tr = this.getRelativeVector(bounding.tr);
-        bounding.bl = this.getRelativeVector(bounding.bl);
-        bounding.br = this.getRelativeVector(bounding.br);
-
-        return bounding;
     }
 
     private drawScrollbar(ctx: CanvasRenderingContext2D) {

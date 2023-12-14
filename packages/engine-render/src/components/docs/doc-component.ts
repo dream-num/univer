@@ -20,7 +20,7 @@ import { RENDER_CLASS_TYPE } from '../../basics/const';
 import type { IDocumentSkeletonLine, IDocumentSkeletonSpan } from '../../basics/i-document-skeleton-cached';
 import { PageLayoutType } from '../../basics/i-document-skeleton-cached';
 import type { INodeInfo, ITransformChangeState } from '../../basics/interfaces';
-import type { IBoundRect } from '../../basics/vector2';
+import type { IViewportBound } from '../../basics/vector2';
 import { Canvas } from '../../canvas';
 import type { Scene } from '../../scene';
 import { RenderComponent } from '../component';
@@ -65,7 +65,7 @@ export class DocComponent extends RenderComponent<IDocumentSkeletonSpan | IDocum
         this._skeleton = skeleton;
     }
 
-    override render(mainCtx: CanvasRenderingContext2D, bounds?: IBoundRect) {
+    override render(mainCtx: CanvasRenderingContext2D, bounds?: IViewportBound) {
         if (!this.visible) {
             this.makeDirty(false);
             return this;
@@ -115,9 +115,9 @@ export class DocComponent extends RenderComponent<IDocumentSkeletonSpan | IDocum
 
     findCoordByNode(span: IDocumentSkeletonSpan) {}
 
-    protected _getBounding(bounds?: IBoundRect) {}
+    protected _getBounding(bounds?: IViewportBound) {}
 
-    protected _draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
+    protected _draw(ctx: CanvasRenderingContext2D, bounds?: IViewportBound) {
         /* abstract */
     }
 }

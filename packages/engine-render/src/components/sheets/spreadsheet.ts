@@ -22,7 +22,7 @@ import { RENDER_CLASS_TYPE } from '../../basics/const';
 import { getTranslateInSpreadContextWithPixelRatio } from '../../basics/draw';
 import type { ITransformChangeState } from '../../basics/interfaces';
 import { fixLineWidthByScale, getCellByIndex, getCellPositionByIndex, getScale } from '../../basics/tools';
-import type { IBoundRect } from '../../basics/vector2';
+import type { IViewportBound } from '../../basics/vector2';
 import { Vector2 } from '../../basics/vector2';
 import { Canvas } from '../../canvas';
 import type { Engine } from '../../engine';
@@ -52,7 +52,7 @@ export class Spreadsheet extends SheetComponent {
 
     private _cacheCanvas!: Canvas;
 
-    private _boundsCache: Nullable<IBoundRect>;
+    private _boundsCache: Nullable<IViewportBound>;
 
     private _cacheOffsetX = 0;
 
@@ -109,7 +109,7 @@ export class Spreadsheet extends SheetComponent {
         return this._documents;
     }
 
-    override draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
+    override draw(ctx: CanvasRenderingContext2D, bounds?: IViewportBound) {
         // const { parent = { scaleX: 1, scaleY: 1 } } = this;
         // const mergeData = this.getMergeData();
         // const showGridlines = this.getShowGridlines() || 1;
@@ -238,7 +238,7 @@ export class Spreadsheet extends SheetComponent {
         return this.getSkeleton()?.getMergeBounding(startRow, startColumn, endRow, endColumn);
     }
 
-    override render(mainCtx: CanvasRenderingContext2D, bounds?: IBoundRect) {
+    override render(mainCtx: CanvasRenderingContext2D, bounds?: IViewportBound) {
         if (!this.visible) {
             this.makeDirty(false);
             return this;
@@ -248,14 +248,15 @@ export class Spreadsheet extends SheetComponent {
             this._cacheOffsetX = 0;
             this._cacheOffsetY = 0;
 
-            if (this.isDirty() || this._checkNewBounds(bounds)) {
+            //|| this._checkNewBounds(bounds)
+            if (this.isDirty()) {
                 const newBounds = bounds;
                 const ctx = this._cacheCanvas.getContext();
 
                 if (newBounds) {
-                    const { dx = 0, dy = 0 } = newBounds;
-                    this._cacheOffsetX = dx;
-                    this._cacheOffsetY = dy;
+                    const { diffX = 0, diffY = 0 } = newBounds;
+                    this._cacheOffsetX = diffX;
+                    this._cacheOffsetY = diffY;
                 }
                 this._cacheCanvas.clear();
                 ctx.save();
@@ -322,25 +323,25 @@ export class Spreadsheet extends SheetComponent {
     //     this.makeDirty(true);
     // }
 
-    private _checkNewBounds(bounds?: IBoundRect) {
-        const oldBounds = this._boundsCache;
-        if (oldBounds === bounds) {
-            return false;
-        }
+    // private _checkNewBounds(bounds?: IViewportBound) {
+    //     const oldBounds = this._boundsCache;
+    //     if (oldBounds === bounds) {
+    //         return false;
+    //     }
 
-        if (bounds == null || oldBounds == null) {
-            return true;
-        }
+    //     if (bounds == null || oldBounds == null) {
+    //         return true;
+    //     }
 
-        const { tl, br } = bounds;
-        const { tl: oldTl, br: oldBr } = oldBounds;
+    //     const { tl, br } = bounds;
+    //     const { tl: oldTl, br: oldBr } = oldBounds;
 
-        if (tl.equals(oldTl) && br.equals(oldBr)) {
-            return false;
-        }
+    //     if (tl.equals(oldTl) && br.equals(oldBr)) {
+    //         return false;
+    //     }
 
-        return true;
-    }
+    //     return true;
+    // }
 
     protected _applyCache(ctx?: CanvasRenderingContext2D) {
         if (!ctx) {
@@ -366,7 +367,7 @@ export class Spreadsheet extends SheetComponent {
         ctx.restore();
     }
 
-    protected override _draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
+    protected override _draw(ctx: CanvasRenderingContext2D, bounds?: IViewportBound) {
         this.draw(ctx, bounds);
     }
 
@@ -608,82 +609,82 @@ export class Spreadsheet extends SheetComponent {
         spreadsheetSkeleton.setOverflowCache(overflowCache);
     }
 
-    private _differentBounds(bounds: IBoundRect) {
-        // if (!bounds) {
-        //     return;
-        // }
+    // private _differentBounds(bounds: IViewportBound) {
+    //     // if (!bounds) {
+    //     //     return;
+    //     // }
 
-        if (!this._boundsCache) {
-            return bounds;
-        }
+    //     if (!this._boundsCache) {
+    //         return bounds;
+    //     }
 
-        // if (!this._checkSheetDifferentBounds(bounds, this._boundsCache)) {
-        //     return bounds;
-        // }
+    //     // if (!this._checkSheetDifferentBounds(bounds, this._boundsCache)) {
+    //     //     return bounds;
+    //     // }
 
-        const { tl, tr, bl, br, dx, dy } = bounds;
+    //     const { tl, tr, bl, br, dx, dy } = bounds;
 
-        const { tl: cacheTL, tr: cacheTR, bl: cacheBL, br: cacheBR, dx: cacheDX, dy: cacheDY } = this._boundsCache;
-        const newBounds: IBoundRect = {
-            tl,
-            tr,
-            bl,
-            br,
-            dx: 0,
-            dy: 0,
-        };
+    //     const { tl: cacheTL, tr: cacheTR, bl: cacheBL, br: cacheBR, dx: cacheDX, dy: cacheDY } = this._boundsCache;
+    //     const newBounds: IViewportBound = {
+    //         tl,
+    //         tr,
+    //         bl,
+    //         br,
+    //         dx: 0,
+    //         dy: 0,
+    //     };
 
-        if (tl.x === cacheTL.x) {
-            if (tl.y > cacheTL.y) {
-                newBounds.tl = cacheBL;
-                newBounds.tr = cacheBR;
-            } else {
-                newBounds.bl = cacheTL;
-                newBounds.br = cacheTR;
-            }
-            newBounds.dy = cacheTL.y - tl.y;
-        } else if (tl.y === cacheTL.y) {
-            if (tl.x > cacheTL.x) {
-                newBounds.tl = cacheTR;
-                newBounds.bl = cacheBR;
-            } else {
-                newBounds.tr = cacheTL;
-                newBounds.br = cacheBL;
-            }
-            newBounds.dx = cacheTL.x - tl.x;
-        }
+    //     if (tl.x === cacheTL.x) {
+    //         if (tl.y > cacheTL.y) {
+    //             newBounds.tl = cacheBL;
+    //             newBounds.tr = cacheBR;
+    //         } else {
+    //             newBounds.bl = cacheTL;
+    //             newBounds.br = cacheTR;
+    //         }
+    //         newBounds.dy = cacheTL.y - tl.y;
+    //     } else if (tl.y === cacheTL.y) {
+    //         if (tl.x > cacheTL.x) {
+    //             newBounds.tl = cacheTR;
+    //             newBounds.bl = cacheBR;
+    //         } else {
+    //             newBounds.tr = cacheTL;
+    //             newBounds.br = cacheBL;
+    //         }
+    //         newBounds.dx = cacheTL.x - tl.x;
+    //     }
 
-        return newBounds;
-    }
+    //     return newBounds;
+    // }
 
-    private _checkSheetDifferentBounds(bounds1: IBoundRect, bounds2: IBoundRect) {
-        const { tl, tr, bl, br } = bounds1;
+    // private _checkSheetDifferentBounds(bounds1: IViewportBound, bounds2: IViewportBound) {
+    //     const { tl, tr, bl, br } = bounds1;
 
-        const { tl: cacheTL, tr: cacheTR, bl: cacheBL, br: cacheBR } = bounds2;
+    //     const { tl: cacheTL, tr: cacheTR, bl: cacheBL, br: cacheBR } = bounds2;
 
-        if (tl.x === cacheTL.x && tr.x === cacheTR.x && bl.x === cacheBL.x && br.x === cacheBR.x) {
-            if (tl.y >= cacheTL.y && tl.y <= cacheBL.y) {
-                return true;
-            }
+    //     if (tl.x === cacheTL.x && tr.x === cacheTR.x && bl.x === cacheBL.x && br.x === cacheBR.x) {
+    //         if (tl.y >= cacheTL.y && tl.y <= cacheBL.y) {
+    //             return true;
+    //         }
 
-            if (bl.y >= cacheTL.y && bl.y <= cacheBL.y) {
-                return true;
-            }
+    //         if (bl.y >= cacheTL.y && bl.y <= cacheBL.y) {
+    //             return true;
+    //         }
 
-            return false;
-        }
+    //         return false;
+    //     }
 
-        if (tl.y === cacheTL.y && tr.y === cacheTR.y && bl.y === cacheBL.y && br.y === cacheBR.y) {
-            if (tl.x >= cacheTL.x && tl.x <= cacheTR.x) {
-                return true;
-            }
+    //     if (tl.y === cacheTL.y && tr.y === cacheTR.y && bl.y === cacheBL.y && br.y === cacheBR.y) {
+    //         if (tl.x >= cacheTL.x && tl.x <= cacheTR.x) {
+    //             return true;
+    //         }
 
-            if (tr.x >= cacheTL.x && tr.x <= cacheTR.x) {
-                return true;
-            }
-            return true;
-        }
+    //         if (tr.x >= cacheTL.x && tr.x <= cacheTR.x) {
+    //             return true;
+    //         }
+    //         return true;
+    //     }
 
-        return false;
-    }
+    //     return false;
+    // }
 }

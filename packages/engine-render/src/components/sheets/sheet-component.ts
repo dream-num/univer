@@ -17,7 +17,7 @@
 import type { Nullable } from '@univerjs/core';
 
 import { RENDER_CLASS_TYPE } from '../../basics/const';
-import type { IBoundRect, Vector2 } from '../../basics/vector2';
+import type { IViewportBound, Vector2 } from '../../basics/vector2';
 import { RenderComponent } from '../component';
 import type { SHEET_EXTENSION_TYPE } from './extensions/sheet-extension';
 import type { SpreadsheetSkeleton } from './sheet-skeleton';
@@ -40,7 +40,7 @@ export class SheetComponent extends RenderComponent<SpreadsheetSkeleton, SHEET_E
         this._skeleton = spreadsheetSkeleton;
     }
 
-    override render(mainCtx: CanvasRenderingContext2D, bounds?: IBoundRect) {
+    override render(mainCtx: CanvasRenderingContext2D, bounds?: IViewportBound) {
         if (!this.visible) {
             this.makeDirty(false);
             return this;
@@ -95,13 +95,13 @@ export class SheetComponent extends RenderComponent<SpreadsheetSkeleton, SHEET_E
         endColumn: number;
     }> {}
 
-    protected _draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
+    protected _draw(ctx: CanvasRenderingContext2D, bounds?: IViewportBound) {
         /* abstract */
     }
 }
 
 export class SpreadsheetHeader extends SheetComponent {
-    protected override _draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect): void {
+    protected override _draw(ctx: CanvasRenderingContext2D, bounds?: IViewportBound): void {
         this.draw(ctx, bounds);
     }
 }

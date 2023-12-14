@@ -25,13 +25,14 @@ import type { IDocumentSkeletonSpan } from '../../basics/i-document-skeleton-cac
 import { PageLayoutType } from '../../basics/i-document-skeleton-cached';
 import type { IMouseEvent, IPointerEvent } from '../../basics/i-events';
 import type { INodeInfo, INodePosition } from '../../basics/interfaces';
-import { getOffsetRectForDom, transformBoundingCoord } from '../../basics/position';
+import { getOffsetRectForDom } from '../../basics/position';
 import type {
     ISuccinctTextRangeParam,
     ITextRangeWithStyle,
     ITextSelectionStyle,
     RANGE_DIRECTION,
 } from '../../basics/range';
+
 import { NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '../../basics/range';
 import { getCurrentScrollXY } from '../../basics/scroll-xy';
 import { checkStyle, injectStyle } from '../../basics/tools';
@@ -912,23 +913,22 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         // top *= scaleY;
 
-        const { tl, tr, bl } = this._activeViewport.getBounding();
+        const {
+            left: boundLeft,
+            top: boundTop,
+            right: boundRight,
+            bottom: boundBottom,
+        } = this._activeViewport.getBounding().viewBound;
         const constantOffsetWidth = width / scaleX;
         const constantOffsetHeight = height / scaleY;
         let offsetY = 0;
         let offsetX = 0;
-
-        const boundTop = tl.y;
-        const boundBottom = bl.y;
 
         if (top < boundTop) {
             offsetY = top - boundTop;
         } else if (top > boundBottom - constantOffsetHeight) {
             offsetY = top - boundBottom + constantOffsetHeight;
         }
-
-        const boundLeft = tl.x;
-        const boundRight = tr.x;
 
         if (left < boundLeft) {
             offsetX = left - boundLeft;
@@ -1035,9 +1035,9 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             }
 
             if (bounds) {
-                const { minX, maxX, minY, maxY } = transformBoundingCoord(anchor, bounds);
+                const { left, top, right, bottom } = bounds.viewBound;
 
-                if (anchor.strokeWidth < minX || maxX < 0 || anchor.strokeWidth < minY || maxY < 0) {
+                if (anchor.strokeWidth < left || right < 0 || anchor.strokeWidth < top || bottom < 0) {
                     return;
                 }
             }

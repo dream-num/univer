@@ -24,7 +24,7 @@ import type { IDocumentSkeletonCached, IDocumentSkeletonPage } from '../../basic
 import { LineType, PageLayoutType } from '../../basics/i-document-skeleton-cached';
 import { degToRad, getScale } from '../../basics/tools';
 import type { Transform } from '../../basics/transform';
-import type { IBoundRect } from '../../basics/vector2';
+import type { IViewportBound } from '../../basics/vector2';
 import { Vector2 } from '../../basics/vector2';
 import type { Scene } from '../../scene';
 import type { IExtensionConfig } from '../extension';
@@ -179,7 +179,20 @@ export class Documents extends DocComponent {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    override draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
+
+    override draw(ctx: CanvasRenderingContext2D, bounds?: IViewportBound) {
+        const documentSkeleton = this.getSkeleton();
+
+        if (!documentSkeleton) {
+            return;
+        }
+
+        // if (this.isCalculateSkeleton) {
+        //     documentSkeleton.calculate(bounds);
+        // }
+
+        this._drawLiquid.reset();
+
         const skeletonData = this.getSkeleton()?.getSkeletonData();
 
         if (skeletonData == null) {
@@ -425,7 +438,7 @@ export class Documents extends DocComponent {
         return this;
     }
 
-    protected override _draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
+    protected override _draw(ctx: CanvasRenderingContext2D, bounds?: IViewportBound) {
         this.draw(ctx, bounds);
     }
 

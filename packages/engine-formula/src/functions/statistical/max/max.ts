@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import type { ErrorValueObject } from '../../../engine/other-object/error-value-object';
 import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import type { BooleanValueObject } from '../../../engine/value-object/primitive-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
@@ -29,7 +27,7 @@ export class Max extends BaseFunction {
             let variant = variants[i];
 
             if (variant.isErrorObject()) {
-                return variant as ErrorValueObject;
+                return variant;
             }
 
             if (variant.isReferenceObject()) {
@@ -63,9 +61,9 @@ export class Max extends BaseFunction {
     }
 
     private _validator(accumulatorAll: BaseValueObject, valueObject: BaseValueObject) {
-        const validator = accumulatorAll.isLessThan(valueObject as BaseValueObject) as BooleanValueObject;
+        const validator = accumulatorAll.isLessThan(valueObject);
         if (validator.getValue()) {
-            accumulatorAll = valueObject as BaseValueObject;
+            accumulatorAll = valueObject;
         }
         return accumulatorAll;
     }

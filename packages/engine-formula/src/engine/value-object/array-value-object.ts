@@ -21,7 +21,6 @@ import { ErrorType } from '../../basics/error-type';
 import { CELL_INVERTED_INDEX_CACHE } from '../../basics/inverted-index-cache';
 import { $ARRAY_VALUE_REGEX } from '../../basics/regex';
 import { compareToken } from '../../basics/token';
-import { ErrorValueObject } from '../other-object/error-value-object';
 import { getCompare } from '../utils/compare';
 import type {
     CalculateValueType,
@@ -29,7 +28,7 @@ import type {
     callbackProductFnType,
     IArrayValueObject,
 } from './base-value-object';
-import { BaseValueObject } from './base-value-object';
+import { BaseValueObject, ErrorValueObject } from './base-value-object';
 import { BooleanValueObject, NumberValueObject, StringValueObject } from './primitive-object';
 
 enum BatchOperatorType {
@@ -42,6 +41,7 @@ enum BatchOperatorType {
     CONCATENATE_BACK,
     PRODUCT,
     LIKE,
+    POW,
 }
 
 enum ArrayCalculateType {
@@ -569,6 +569,71 @@ export class ArrayValueObject extends BaseValueObject {
         return this._createNewArray(result, rowCount, columnCount);
     }
 
+    override pow(valueObject: BaseValueObject): CalculateValueType {
+        return this._batchOperator(valueObject, BatchOperatorType.POW);
+    }
+
+    /**
+     *
+     * @param valueObject In the case of an inverse, it is certainly not an array.
+     * @returns
+     */
+    override powInverse(valueObject: BaseValueObject): CalculateValueType {
+        return this.map((currentValue) => {
+            if (currentValue.isErrorObject()) {
+                return currentValue;
+            }
+            return (valueObject as BaseValueObject).pow(currentValue as BaseValueObject);
+        });
+    }
+
+    override sqrt(): CalculateValueType {
+        return this.map((currentValue) => {
+            if (currentValue.isErrorObject()) {
+                return currentValue;
+            }
+            return (currentValue as BaseValueObject).sqrt();
+        });
+    }
+
+    override sin(): CalculateValueType {
+        return this.map((currentValue) => {
+            if (currentValue.isErrorObject()) {
+                return currentValue;
+            }
+            return (currentValue as BaseValueObject).sin();
+        });
+    }
+
+    override mean(): CalculateValueType {
+        const sum = this.sum();
+
+        const count = this.count();
+
+        return sum.divided(count);
+    }
+
+    override median(): CalculateValueType {
+        const allValue = this.flatten();
+
+        const count = allValue.getColumnCount();
+
+        if (count <= 1) {
+            return allValue.get(0, 0);
+        }
+
+        allValue.sortByRow(0);
+
+        if (count % 2 === 0) {
+            const medianRight = allValue.get(0, count / 2);
+            const medianLeft = allValue.get(0, count / 2 - 1);
+
+            return medianRight.plus(medianLeft).divided(new NumberValueObject(2, true));
+        }
+
+        return allValue.get(0, (count - 1) / 2);
+    }
+
     toValue() {
         return transformToValue(this._value);
     }
@@ -816,7 +881,6 @@ export class ArrayValueObject extends BaseValueObject {
                                     operator as callbackProductFnType
                                 );
                             }
-
                             break;
                         case BatchOperatorType.LIKE:
                             if (!operator) {
@@ -827,7 +891,9 @@ export class ArrayValueObject extends BaseValueObject {
                                     operator as compareToken
                                 );
                             }
-
+                            break;
+                        case BatchOperatorType.POW:
+                            result[r][column] = (currentValue as BaseValueObject).pow(valueObject);
                             break;
                     }
                 }
@@ -958,18 +1024,19 @@ export class ArrayValueObject extends BaseValueObject {
                                         operator as callbackProductFnType
                                     );
                                 }
-
                                 break;
                             case BatchOperatorType.LIKE:
                                 if (!operator) {
                                     rowList[c] = ErrorValueObject.create(ErrorType.VALUE);
                                 } else {
                                     rowList[c] = (currentValue as BaseValueObject).wildcard(
-                                        valueObject as StringValueObject,
+                                        opValue as StringValueObject,
                                         operator as compareToken
                                     );
                                 }
-
+                                break;
+                            case BatchOperatorType.POW:
+                                rowList[c] = (currentValue as BaseValueObject).pow(opValue as BaseValueObject);
                                 break;
                         }
                     }

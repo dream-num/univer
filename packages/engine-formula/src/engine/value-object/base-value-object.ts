@@ -18,7 +18,6 @@ import { ConcatenateType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { ObjectClassType } from '../../basics/object-class-type';
 import { compareToken } from '../../basics/token';
-import { ErrorValueObject } from '../other-object/error-value-object';
 import type { StringValueObject } from './primitive-object';
 
 export type CalculateValueType = BaseValueObject | ErrorValueObject;
@@ -90,36 +89,36 @@ export class BaseValueObject extends ObjectClassType {
     }
 
     getNegative(): CalculateValueType {
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.NAME);
     }
 
     getReciprocal(): CalculateValueType {
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.NAME);
     }
 
     plus(valueObject: BaseValueObject): CalculateValueType {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.NAME);
     }
 
     minus(valueObject: BaseValueObject): CalculateValueType {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.NAME);
     }
 
     multiply(valueObject: BaseValueObject): CalculateValueType {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.NAME);
     }
 
     divided(valueObject: BaseValueObject): CalculateValueType {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.NAME);
     }
 
     map(callbackFn: callbackMapFnType): CalculateValueType {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.NAME);
     }
 
     product(valueObject: BaseValueObject, callbackFn: callbackProductFnType): CalculateValueType {
@@ -128,12 +127,12 @@ export class BaseValueObject extends ObjectClassType {
 
     compare(valueObject: BaseValueObject, operator: compareToken): CalculateValueType {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.NAME);
     }
 
     wildcard(valueObject: StringValueObject, operator: compareToken): CalculateValueType {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.NAME);
     }
 
     isEqual(valueObject: BaseValueObject): CalculateValueType {
@@ -162,37 +161,37 @@ export class BaseValueObject extends ObjectClassType {
 
     concatenateFront(valueObject: BaseValueObject): CalculateValueType {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.NAME);
     }
 
     concatenateBack(valueObject: BaseValueObject): CalculateValueType {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.NAME);
     }
 
     plusBy(value: string | number | boolean): CalculateValueType {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.NAME);
     }
 
     minusBy(value: string | number | boolean): CalculateValueType {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.NAME);
     }
 
     multiplyBy(value: string | number | boolean): CalculateValueType {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.NAME);
     }
 
     dividedBy(value: string | number | boolean): CalculateValueType {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.NAME);
     }
 
     compareBy(value: string | number | boolean, operator: compareToken): CalculateValueType {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.NAME);
     }
 
     concatenate(value: string | number | boolean, concatenateType = ConcatenateType.FRONT): string {
@@ -219,5 +218,68 @@ export class BaseValueObject extends ObjectClassType {
         }
 
         return currentValue;
+    }
+
+    pow(valueObject: BaseValueObject): CalculateValueType {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.NAME);
+    }
+
+    powInverse(valueObject: BaseValueObject): CalculateValueType {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.NAME);
+    }
+
+    sqrt(): CalculateValueType {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    sin(): CalculateValueType {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    mean(): CalculateValueType {
+        /** abstract */
+        return this;
+    }
+
+    median(): CalculateValueType {
+        /** abstract */
+        return this;
+    }
+}
+
+export class ErrorValueObject extends BaseValueObject {
+    constructor(
+        private _errorType: ErrorType,
+        private _errorContent: string = ''
+    ) {
+        super(_errorType);
+    }
+
+    static create(errorType: ErrorType, errorContent?: string) {
+        const errorValueObject = new ErrorValueObject(errorType, errorContent);
+        return errorValueObject;
+    }
+
+    getErrorType() {
+        return this._errorType;
+    }
+
+    getErrorContent() {
+        return this._errorContent;
+    }
+
+    override isEqualType(object: ObjectClassType) {
+        if ((object as ErrorValueObject).getErrorType() === this.getErrorType()) {
+            return true;
+        }
+        return false;
+    }
+
+    override isErrorObject() {
+        return true;
     }
 }

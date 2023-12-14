@@ -15,9 +15,8 @@
  */
 
 import { ErrorType } from '../../../basics/error-type';
-import { ErrorValueObject } from '../../../engine/other-object/error-value-object';
 import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 
 export class Plus extends BaseFunction {

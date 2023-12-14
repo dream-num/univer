@@ -36,10 +36,10 @@ export class Count extends BaseFunction {
 
             if ((variant as ArrayValueObject).isArray()) {
                 variant = (variant as ArrayValueObject).count();
-                accumulatorAll = (accumulatorAll as BaseValueObject).plus(variant as BaseValueObject);
+                accumulatorAll = accumulatorAll.plus(variant as BaseValueObject);
             } else {
                 if (!(variant as BaseValueObject).isNull() && !(variant as BaseValueObject).isString()) {
-                    accumulatorAll = (accumulatorAll as BaseValueObject).plus(new NumberValueObject(1));
+                    accumulatorAll = accumulatorAll.plus(new NumberValueObject(1));
                 }
             }
         }

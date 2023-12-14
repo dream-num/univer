@@ -20,10 +20,9 @@ import { reverseCompareOperator } from '../../basics/calculate';
 import { BooleanValue, ConcatenateType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { compareToken } from '../../basics/token';
-import { ErrorValueObject } from '../other-object/error-value-object';
 import { compareWithWildcard } from '../utils/compare';
 import type { CalculateValueType } from './base-value-object';
-import { BaseValueObject } from './base-value-object';
+import { BaseValueObject, ErrorValueObject } from './base-value-object';
 
 export class NullValueObject extends BaseValueObject {
     override isNull(): boolean {
@@ -94,6 +93,18 @@ export class NullValueObject extends BaseValueObject {
             return new BooleanValueObject(false).compareBy(value, operator);
         }
         return new NumberValueObject(0, true).compareBy(value, operator);
+    }
+
+    override pow(valueObject: BaseValueObject): CalculateValueType {
+        return new NumberValueObject(0, true).pow(valueObject);
+    }
+
+    override sqrt(): CalculateValueType {
+        return new NumberValueObject(0, true);
+    }
+
+    override sin(): CalculateValueType {
+        return new NumberValueObject(0, true);
     }
 }
 
@@ -185,6 +196,18 @@ export class BooleanValueObject extends BaseValueObject {
             result = 1;
         }
         return new NumberValueObject(result, true);
+    }
+
+    override pow(valueObject: BaseValueObject): CalculateValueType {
+        return this._convertTonNumber().pow(valueObject);
+    }
+
+    override sqrt(): CalculateValueType {
+        return this._convertTonNumber();
+    }
+
+    override sin(): CalculateValueType {
+        return this._convertTonNumber().sin();
     }
 }
 
@@ -433,6 +456,52 @@ export class NumberValueObject extends BaseValueObject {
             }
         }
         return new BooleanValueObject(result);
+    }
+
+    override pow(valueObject: BaseValueObject): CalculateValueType {
+        if (valueObject.isArray()) {
+            return valueObject.powInverse(this);
+        }
+
+        const currentValue = this.getValue();
+        const value = valueObject.getValue();
+
+        if (typeof value === 'string') {
+            return this;
+        }
+        if (typeof value === 'number') {
+            if (Math.abs(currentValue) === Infinity || Math.abs(value) === Infinity) {
+                return new NumberValueObject(Infinity);
+            }
+            return new NumberValueObject(Big(currentValue).pow(value).toNumber());
+        }
+        if (typeof value === 'boolean') {
+            return new NumberValueObject(
+                Big(currentValue)
+                    .pow(value ? 1 : 0)
+                    .toNumber()
+            );
+        }
+
+        return this;
+    }
+
+    override sqrt(): CalculateValueType {
+        const currentValue = this.getValue();
+
+        if (Math.abs(currentValue) === Infinity) {
+            return new NumberValueObject(Infinity);
+        }
+        return new NumberValueObject(Big(currentValue).sqrt().toNumber());
+    }
+
+    override sin(): CalculateValueType {
+        const currentValue = this.getValue();
+
+        if (Math.abs(currentValue) === Infinity) {
+            return new NumberValueObject(Infinity);
+        }
+        return new NumberValueObject(Math.sin(currentValue));
     }
 
     private _compareInfinity(currentValue: number, value: number, operator: compareToken) {

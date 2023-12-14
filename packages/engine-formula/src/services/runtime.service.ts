@@ -27,10 +27,13 @@ import type {
 import { isInDirtyRange } from '../basics/dirty';
 import { ErrorType } from '../basics/error-type';
 import type { BaseAstNode } from '../engine/ast-node/base-ast-node';
-import { ErrorValueObject } from '../engine/other-object/error-value-object';
 import { type BaseReferenceObject, type FunctionVariantType } from '../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
-import type { BaseValueObject, CalculateValueType } from '../engine/value-object/base-value-object';
+import {
+    type BaseValueObject,
+    type CalculateValueType,
+    ErrorValueObject,
+} from '../engine/value-object/base-value-object';
 import { IFormulaCurrentConfigService } from './current-data.service';
 
 /**

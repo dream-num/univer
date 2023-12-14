@@ -25,9 +25,9 @@ import { IFormulaCurrentConfigService } from '../../services/current-data.servic
 import { IFunctionService } from '../../services/function.service';
 import { Lexer } from '../analysis/lexer';
 import { LexerNode } from '../analysis/lexer-node';
-import { ErrorValueObject } from '../other-object/error-value-object';
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
 import type { CellReferenceObject } from '../reference-object/cell-reference-object';
+import { ErrorValueObject } from '../value-object/base-value-object';
 import { NumberValueObject } from '../value-object/primitive-object';
 import { BaseAstNode, ErrorNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';

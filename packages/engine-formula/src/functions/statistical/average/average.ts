@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { ErrorValueObject } from '../../../engine/other-object/error-value-object';
 import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject, CalculateValueType } from '../../../engine/value-object/base-value-object';
@@ -29,11 +28,11 @@ export class Average extends BaseFunction {
             let variant = variants[i];
 
             if (variant.isErrorObject()) {
-                return variant as ErrorValueObject;
+                return variant;
             }
 
             if (accumulatorSum.isErrorObject()) {
-                return accumulatorSum as ErrorValueObject;
+                return accumulatorSum;
             }
 
             if (variant.isReferenceObject()) {
@@ -41,19 +40,15 @@ export class Average extends BaseFunction {
             }
 
             if ((variant as ArrayValueObject).isArray()) {
-                accumulatorSum = (accumulatorSum as BaseValueObject).plus(
-                    (variant as ArrayValueObject).sum() as BaseValueObject
-                );
-                accumulatorCount = (accumulatorCount as BaseValueObject).plus(
-                    (variant as ArrayValueObject).count() as BaseValueObject
-                );
+                accumulatorSum = accumulatorSum.plus((variant as ArrayValueObject).sum());
+                accumulatorCount = accumulatorCount.plus((variant as ArrayValueObject).count());
             } else {
                 if (!(variant as BaseValueObject).isNull()) {
-                    accumulatorCount = (accumulatorCount as BaseValueObject).plus(new NumberValueObject(1));
+                    accumulatorCount = accumulatorCount.plus(new NumberValueObject(1));
                 }
             }
         }
 
-        return (accumulatorSum as BaseValueObject).divided(accumulatorCount as BaseValueObject);
+        return accumulatorSum.divided(accumulatorCount);
     }
 }

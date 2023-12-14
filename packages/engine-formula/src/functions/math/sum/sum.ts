@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { ErrorValueObject } from '../../../engine/other-object/error-value-object';
 import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject, CalculateValueType } from '../../../engine/value-object/base-value-object';
@@ -28,11 +27,11 @@ export class Sum extends BaseFunction {
             let variant = variants[i];
 
             if (variant.isErrorObject()) {
-                return variant as ErrorValueObject;
+                return variant;
             }
 
             if (accumulatorAll.isErrorObject()) {
-                return accumulatorAll as ErrorValueObject;
+                return accumulatorAll;
             }
 
             if (variant.isReferenceObject()) {
@@ -43,7 +42,7 @@ export class Sum extends BaseFunction {
                 variant = (variant as ArrayValueObject).sum();
             }
 
-            accumulatorAll = (accumulatorAll as BaseValueObject).plus(variant as BaseValueObject);
+            accumulatorAll = accumulatorAll.plus(variant as BaseValueObject);
         }
 
         return accumulatorAll;

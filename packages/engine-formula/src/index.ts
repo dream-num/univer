@@ -66,12 +66,11 @@ export {
 } from './commands/mutations/set-super-table.mutation';
 export { LexerNode } from './engine/analysis/lexer-node';
 export { LexerTreeBuilder } from './engine/analysis/lexer-tree-builder';
-export { ErrorValueObject } from './engine/other-object/error-value-object';
 export { BaseReferenceObject, type FunctionVariantType } from './engine/reference-object/base-reference-object';
 export { RangeReferenceObject } from './engine/reference-object/range-reference-object';
 export { generateStringWithSequence, type ISequenceNode, sequenceNodeType } from './engine/utils/sequence';
 export { ArrayValueObject, ValueObjectFactory } from './engine/value-object/array-value-object';
-export { BaseValueObject } from './engine/value-object/base-value-object';
+export { BaseValueObject, ErrorValueObject } from './engine/value-object/base-value-object';
 export { NumberValueObject } from './engine/value-object/primitive-object';
 export { BooleanValueObject } from './engine/value-object/primitive-object';
 export { StringValueObject } from './engine/value-object/primitive-object';

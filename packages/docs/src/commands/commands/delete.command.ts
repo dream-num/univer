@@ -14,14 +14,22 @@
  * limitations under the License.
  */
 
-import type { ICommand, IParagraph } from '@univerjs/core';
-import { CommandType, ICommandService, IUniverInstanceService, UpdateDocsAttributeType } from '@univerjs/core';
-import type { TextRange } from '@univerjs/engine-render';
+import type { ICommand, IDocumentBody, IMutationInfo, IParagraph, ITextRun } from '@univerjs/core';
+import {
+    CommandType,
+    ICommandService,
+    IUndoRedoService,
+    IUniverInstanceService,
+    UpdateDocsAttributeType,
+} from '@univerjs/core';
+import type { IActiveTextRange, TextRange } from '@univerjs/engine-render';
 import { getParagraphBySpan, hasListSpan, isFirstSpan, isIndentBySpan } from '@univerjs/engine-render';
 
 import { DocSkeletonManagerService } from '../../services/doc-skeleton-manager.service';
 import type { ITextActiveRange } from '../../services/text-selection-manager.service';
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
+import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
+import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
 import { CutContentCommand } from './clipboard.inner.command';
 import { DeleteCommand, DeleteDirection, UpdateCommand } from './core-editing.command';
 
@@ -128,23 +136,30 @@ export const DeleteLeftCommand: ICommand = {
             });
         } else {
             if (collapsed === true) {
-                cursor -= span.count;
+                if (span.content === '\r') {
+                    result = await commandService.executeCommand(MergeTwoParagraphCommand.id, {
+                        direction: DeleteDirection.LEFT,
+                        range: activeRange,
+                    });
+                } else {
+                    cursor -= span.count;
 
-                const textRanges = [
-                    {
-                        startOffset: cursor,
-                        endOffset: cursor,
-                        style,
-                    },
-                ];
-                result = await commandService.executeCommand(DeleteCommand.id, {
-                    unitId: docDataModel.getUnitId(),
-                    range: activeRange,
-                    segmentId,
-                    direction: DeleteDirection.LEFT,
-                    len: span.count,
-                    textRanges,
-                });
+                    const textRanges = [
+                        {
+                            startOffset: cursor,
+                            endOffset: cursor,
+                            style,
+                        },
+                    ];
+                    result = await commandService.executeCommand(DeleteCommand.id, {
+                        unitId: docDataModel.getUnitId(),
+                        range: activeRange,
+                        segmentId,
+                        direction: DeleteDirection.LEFT,
+                        len: span.count,
+                        textRanges,
+                    });
+                }
             } else {
                 const textRanges = getTextRangesWhenDelete(activeRange, ranges);
                 // If the selection is not closed, the effect of Delete and
@@ -225,6 +240,172 @@ export const DeleteRightCommand: ICommand = {
         return result;
     },
 };
+
+interface IMergeTwoParagraphParams {
+    direction: DeleteDirection;
+    range: IActiveTextRange;
+}
+
+export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
+    id: 'doc.command.merge-two-paragraph',
+
+    type: CommandType.COMMAND,
+
+    handler: async (accessor, params: IMergeTwoParagraphParams) => {
+        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+        const currentUniverService = accessor.get(IUniverInstanceService);
+        const commandService = accessor.get(ICommandService);
+        const undoRedoService = accessor.get(IUndoRedoService);
+
+        const { direction, range } = params;
+
+        const activeRange = textSelectionManagerService.getActiveRange();
+        const ranges = textSelectionManagerService.getSelections();
+
+        if (activeRange == null || ranges == null) {
+            return false;
+        }
+
+        const docDataModel = currentUniverService.getCurrentUniverDocInstance();
+
+        const { startOffset, collapsed, segmentId, style } = activeRange;
+
+        if (!collapsed) {
+            return false;
+        }
+
+        const startIndex = direction === DeleteDirection.LEFT ? startOffset : startOffset + 1;
+        const endIndex = docDataModel.getBody()?.paragraphs?.find((p) => p.startIndex >= startIndex)?.startIndex!;
+        const body = getParagraphBody(docDataModel.getBody()!, startIndex, endIndex);
+
+        const cursor = direction === DeleteDirection.LEFT ? startIndex - 1 : endIndex;
+
+        const unitId = docDataModel.getUnitId();
+
+        const textRanges = [
+            {
+                startOffset: cursor,
+                endOffset: cursor,
+                style,
+            },
+        ];
+
+        const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
+            id: RichTextEditingMutation.id,
+            params: {
+                unitId,
+                mutations: [],
+            },
+        };
+
+        doMutation.params.mutations.push({
+            t: 'r',
+            len: direction === DeleteDirection.LEFT ? startOffset - 1 : startOffset,
+            segmentId,
+        });
+
+        if (body.dataStream.length) {
+            doMutation.params.mutations.push({
+                t: 'i',
+                body,
+                len: body.dataStream.length,
+                line: 0,
+                segmentId,
+            });
+        }
+
+        doMutation.params.mutations.push({
+            t: 'r',
+            len: 1,
+            segmentId,
+        });
+
+        doMutation.params.mutations.push({
+            t: 'd',
+            len: endIndex + 1 - startIndex,
+            line: 0,
+            segmentId,
+        });
+
+        const result = commandService.syncExecuteCommand<
+            IRichTextEditingMutationParams,
+            IRichTextEditingMutationParams
+        >(doMutation.id, doMutation.params);
+
+        textSelectionManagerService.replaceTextRanges(textRanges);
+
+        if (result) {
+            undoRedoService.pushUndoRedo({
+                unitID: unitId,
+                undoMutations: [{ id: RichTextEditingMutation.id, params: result }],
+                redoMutations: [{ id: RichTextEditingMutation.id, params: doMutation.params }],
+                undo() {
+                    commandService.syncExecuteCommand(RichTextEditingMutation.id, result);
+
+                    textSelectionManagerService.replaceTextRanges([range]);
+
+                    return true;
+                },
+                redo() {
+                    commandService.syncExecuteCommand(RichTextEditingMutation.id, doMutation.params);
+
+                    textSelectionManagerService.replaceTextRanges(textRanges);
+
+                    return true;
+                },
+            });
+
+            return true;
+        }
+
+        return false;
+    },
+};
+
+function getParagraphBody(body: IDocumentBody, startIndex: number, endIndex: number): IDocumentBody {
+    const { textRuns: originTextRuns } = body;
+    const dataStream = body.dataStream.substring(startIndex, endIndex);
+
+    if (originTextRuns == null) {
+        return {
+            dataStream,
+        };
+    }
+
+    const textRuns: ITextRun[] = [];
+
+    for (const textRun of originTextRuns) {
+        const { st, ed } = textRun;
+        if (ed <= startIndex || st >= endIndex) {
+            continue;
+        }
+
+        if (st < startIndex) {
+            textRuns.push({
+                ...textRun,
+                st: 0,
+                ed: ed - startIndex,
+            });
+        } else if (ed > endIndex) {
+            textRuns.push({
+                ...textRun,
+                st: st - startIndex,
+                ed: endIndex - startIndex,
+            });
+        } else {
+            textRuns.push({
+                ...textRun,
+                st: st - startIndex,
+                ed: ed - startIndex,
+            });
+        }
+    }
+
+    return {
+        dataStream,
+        textRuns,
+    };
+}
 
 // get cursor position when BACKSPACE/DELETE excuse the CutContentCommand.
 function getTextRangesWhenDelete(activeRange: ITextActiveRange, ranges: readonly TextRange[]) {

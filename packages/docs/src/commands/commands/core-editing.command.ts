@@ -130,7 +130,7 @@ export interface IDeleteCommandParams {
 }
 
 /**
- * The command to delete text, mainly used in BACKSPACE and DELETE when collapsed is true.
+ * The command to delete text, mainly used in BACKSPACE and DELETE when collapsed is true. ONLY handle collapsed range!!!
  */
 export const DeleteCommand: ICommand<IDeleteCommandParams> = {
     id: 'doc.command.delete-text',
@@ -144,7 +144,7 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
 
         const { range, segmentId, unitId, direction, textRanges, len = 1 } = params;
 
-        const { collapsed, startOffset } = range;
+        const { startOffset } = range;
 
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
@@ -154,25 +154,20 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
             },
         };
 
-        if (collapsed) {
-            if (startOffset > 0) {
-                doMutation.params.mutations.push({
-                    t: 'r',
-                    len: direction === DeleteDirection.LEFT ? startOffset - len : startOffset,
-                    segmentId,
-                });
-            }
-
+        if (startOffset > 0) {
             doMutation.params.mutations.push({
-                t: 'd',
-                len,
-                line: 0,
+                t: 'r',
+                len: direction === DeleteDirection.LEFT ? startOffset - len : startOffset,
                 segmentId,
             });
-        } else {
-            // Already handle in CutContentCommand, these code bellow will delete later?
-            doMutation.params!.mutations.push(...getRetainAndDeleteFromReplace(range, segmentId));
         }
+
+        doMutation.params.mutations.push({
+            t: 'd',
+            len,
+            line: 0,
+            segmentId,
+        });
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,
@@ -241,13 +236,13 @@ export const UpdateCommand: ICommand<IUpdateCommandParams> = {
 
         const { startOffset, endOffset } = range;
 
-        doMutation.params!.mutations.push({
+        doMutation.params.mutations.push({
             t: 'r',
             len: startOffset,
             segmentId,
         });
 
-        doMutation.params!.mutations.push({
+        doMutation.params.mutations.push({
             t: 'r',
             body: updateBody,
             len: endOffset - startOffset,

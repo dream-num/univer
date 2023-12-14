@@ -60,32 +60,46 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
 
     async queryClipboardData(): Promise<IDocumentBody> {
         const clipboardItems = await this._clipboardInterfaceService.read();
-
         if (clipboardItems.length === 0) {
             return Promise.reject();
         }
-        const clipboardItem = clipboardItems[0];
-        const text = await clipboardItem.getType(PLAIN_TEXT_CLIPBOARD_MIME_TYPE).then((blob) => blob && blob.text());
-        const html = await clipboardItem.getType(HTML_CLIPBOARD_MIME_TYPE).then((blob) => blob && blob.text());
 
-        if (!html) {
-            // TODO: @JOCS, Parsing paragraphs and sections
-            return {
-                dataStream: text,
-            };
-        }
+        try {
+            // TODO: support paste image.
+            let html = '';
+            let text = '';
 
-        const copyId = extractId(html);
-
-        if (copyId) {
-            const copyCache = copyContentCache.get(copyId);
-
-            if (copyCache) {
-                return copyCache;
+            for (const clipboardItem of clipboardItems) {
+                for (const type of clipboardItem.types) {
+                    if (type === PLAIN_TEXT_CLIPBOARD_MIME_TYPE) {
+                        text = await clipboardItem.getType(type).then((blob) => blob && blob.text());
+                    } else if (type === HTML_CLIPBOARD_MIME_TYPE) {
+                        html = await clipboardItem.getType(type).then((blob) => blob && blob.text());
+                    }
+                }
             }
-        }
 
-        return this._htmlToUDM.convert(html);
+            if (!html) {
+                // TODO: @JOCS, Parsing paragraphs and sections
+                return {
+                    dataStream: text,
+                };
+            }
+
+            const copyId = extractId(html);
+
+            if (copyId) {
+                const copyCache = copyContentCache.get(copyId);
+
+                if (copyCache) {
+                    return copyCache;
+                }
+            }
+
+            return this._htmlToUDM.convert(html);
+        } catch (e) {
+            return Promise.reject(e);
+        }
     }
 
     async setClipboardData(documentBodyList: IDocumentBody[]): Promise<void> {

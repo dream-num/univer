@@ -15,9 +15,8 @@
  */
 
 import type { ITextRange, Nullable } from '@univerjs/core';
-import { Tools } from '@univerjs/core';
+import { COLORS, Tools } from '@univerjs/core';
 
-import { COLORS } from '../../../basics/const';
 import type { INodePosition } from '../../../basics/interfaces';
 import type { ISuccinctTextRangeParam, ITextSelectionStyle } from '../../../basics/range';
 import { NORMAL_TEXT_SELECTION_PLUGIN_STYLE, RANGE_DIRECTION } from '../../../basics/range';

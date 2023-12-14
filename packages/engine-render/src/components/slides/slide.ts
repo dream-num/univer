@@ -15,9 +15,9 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { Observable } from '@univerjs/core';
+import { COLORS, Observable } from '@univerjs/core';
 
-import { COLORS, CURSOR_TYPE } from '../../basics/const';
+import { CURSOR_TYPE } from '../../basics/const';
 import type { IMouseEvent, IPointerEvent } from '../../basics/i-events';
 import { attachObjectHover } from '../../basics/quick-event';
 import { getColor } from '../../basics/tools';

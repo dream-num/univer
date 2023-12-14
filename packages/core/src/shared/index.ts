@@ -17,7 +17,7 @@
 export * from './array-search';
 export * from './blob';
 export * from './color/color';
-export { ColorKit } from './color/color-kit';
+export { ColorKit, COLORS, RGB_PAREN, RGBA_PAREN } from './color/color-kit';
 export * from './command-enum';
 export * from './common';
 export * from './compare';

@@ -344,14 +344,14 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             style: this._selectionStyle,
         });
 
-        this._syncDomToSelection();
+        this._updateDomCursorPositionAndSize();
 
         this._scrollToSelection();
     }
 
     // Sync canvas selection to dom selection.
     sync() {
-        this._syncDomToSelection();
+        this._updateDomCursorPositionAndSize();
     }
 
     activate(x: number, y: number) {
@@ -587,6 +587,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
             scene.setCursor(CURSOR_TYPE.TEXT);
 
+            // eslint-disable-next-line no-magic-numbers
             if (Math.sqrt((moveOffsetX - preMoveOffsetX) ** 2 + (moveOffsetY - preMoveOffsetY) ** 2) < 3) {
                 return;
             }
@@ -614,7 +615,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             });
 
             scrollTimer.dispose();
-            this._syncDomToSelection();
+            this._updateDomCursorPositionAndSize();
         });
     }
 
@@ -933,7 +934,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         this._activeViewport.scrollBy(config);
     }
 
-    private _syncDomToSelection() {
+    private _updateDomCursorPositionAndSize() {
         const activeRangeInstance = this._getActiveRangeInstance();
         const anchor = activeRangeInstance?.getAnchor();
 
@@ -1035,7 +1036,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
                 }
             }
 
-            this._syncDomToSelection();
+            this._updateDomCursorPositionAndSize();
 
             activeRangeInstance?.deactivateStatic();
 

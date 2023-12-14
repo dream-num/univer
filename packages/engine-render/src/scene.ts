@@ -25,7 +25,6 @@ import type { IObjectFullState, ISceneTransformState, ITransformChangeState } fr
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './basics/interfaces';
 import { precisionTo, requestNewFrame } from './basics/tools';
 import { Transform } from './basics/transform';
-import type { IBoundRect } from './basics/vector2';
 import { Vector2 } from './basics/vector2';
 import { Layer } from './layer';
 import type { ITransformerConfig } from './scene.-transformer';
@@ -487,12 +486,12 @@ export class Scene extends ThinScene {
 
     changeObjectOrder() {}
 
-    override renderObjects(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
-        this.getAllObjectsByOrder().forEach((o) => {
-            o.render(ctx, bounds);
-        });
-        return this;
-    }
+    // override renderObjects(ctx: CanvasRenderingContext2D, bounds?: IViewportBound) {
+    //     this.getAllObjectsByOrder().forEach((o) => {
+    //         o.render(ctx, bounds);
+    //     });
+    //     return this;
+    // }
 
     override render(parentCtx?: CanvasRenderingContext2D) {
         if (!this.isDirty()) {
@@ -500,9 +499,12 @@ export class Scene extends ThinScene {
         }
         !parentCtx && this.getEngine()?.clearCanvas();
 
-        this._layers.sort(sortRules).forEach((layer) => {
-            layer.render(parentCtx);
-        });
+        const layers = this._layers.sort(sortRules);
+
+        for (let i = 0, len = layers.length; i < len; i++) {
+            layers[i].render(parentCtx, i === len - 1);
+        }
+
         // this.getViewports()?.forEach((vp: Viewport) => vp.render(parentCtx));
     }
 

@@ -16,7 +16,7 @@
 
 import { BaseObject } from '../base-object';
 import { transformBoundingCoord } from '../basics/position';
-import type { IBoundRect, Vector2 } from '../basics/vector2';
+import type { IViewportBound, Vector2 } from '../basics/vector2';
 
 export class CustomObject extends BaseObject {
     constructor(
@@ -33,7 +33,7 @@ export class CustomObject extends BaseObject {
         };
     }
 
-    override render(mainCtx: CanvasRenderingContext2D, bounds?: IBoundRect) {
+    override render(mainCtx: CanvasRenderingContext2D, bounds?: IViewportBound) {
         if (!this.visible) {
             this.makeDirty(false);
             return this;

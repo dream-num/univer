@@ -30,7 +30,7 @@ import { BooleanNumber, DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentDataModel } from '
 import { BaseObject } from '../base-object';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '../basics/interfaces';
 import { transformBoundingCoord } from '../basics/position';
-import type { IBoundRect } from '../basics/vector2';
+import type { IViewportBound } from '../basics/vector2';
 import { Canvas } from '../canvas';
 import { DocumentSkeleton } from '../components/docs/doc-skeleton';
 import { Documents } from '../components/docs/document';
@@ -183,7 +183,7 @@ export class RichText extends BaseObject {
         return this;
     }
 
-    override render(mainCtx: CanvasRenderingContext2D, bounds?: IBoundRect) {
+    override render(mainCtx: CanvasRenderingContext2D, bounds?: IViewportBound) {
         if (!this.visible) {
             this.makeDirty(false);
             return this;

@@ -18,6 +18,7 @@ import { compareToken } from '../../basics/token';
 import type { BaseReferenceObject } from '../reference-object/base-reference-object';
 import { ValueObjectFactory } from '../value-object/array-value-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
+import { isWildcard } from './compare';
 
 export function findCompareToken(str: string): [compareToken, BaseValueObject] {
     const comparisonTokens: compareToken[] = [
@@ -37,10 +38,6 @@ export function findCompareToken(str: string): [compareToken, BaseValueObject] {
     }
 
     return [compareToken.EQUALS, ValueObjectFactory.create(str) as BaseValueObject];
-}
-
-export function isWildcard(str: string) {
-    return str.indexOf('*') > -1 || str.indexOf('?') > -1;
 }
 
 /**

@@ -666,10 +666,10 @@ export class ArrayValueObject extends BaseValueObject {
                             break;
                         case BatchOperatorType.LIKE:
                             if (!operator) {
-                                result[r][c] = ErrorValueObject.create(ErrorType.VALUE);
+                                result[r][column] = ErrorValueObject.create(ErrorType.VALUE);
                             } else {
-                                result[r][c] = (currentValue as BaseValueObject).wildcard(
-                                    valueObject,
+                                result[r][column] = (currentValue as BaseValueObject).wildcard(
+                                    valueObject as StringValueObject,
                                     operator as compareToken
                                 );
                             }
@@ -802,6 +802,17 @@ export class ArrayValueObject extends BaseValueObject {
                                     rowList[c] = (currentValue as BaseValueObject).product(
                                         opValue as BaseValueObject,
                                         operator as callbackProductFnType
+                                    );
+                                }
+
+                                break;
+                            case BatchOperatorType.LIKE:
+                                if (!operator) {
+                                    rowList[c] = ErrorValueObject.create(ErrorType.VALUE);
+                                } else {
+                                    rowList[c] = (currentValue as BaseValueObject).wildcard(
+                                        valueObject as StringValueObject,
+                                        operator as compareToken
                                     );
                                 }
 

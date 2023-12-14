@@ -19,6 +19,7 @@ import { ErrorType } from '../../basics/error-type';
 import { ObjectClassType } from '../../basics/object-class-type';
 import { compareToken } from '../../basics/token';
 import { ErrorValueObject } from '../other-object/error-value-object';
+import type { StringValueObject } from './primitive-object';
 
 export type CalculateValueType = BaseValueObject | ErrorValueObject;
 
@@ -129,7 +130,8 @@ export class BaseValueObject extends ObjectClassType {
         /** abstract */
         return ErrorValueObject.create(ErrorType.VALUE);
     }
-    wildcard(valueObject: BaseValueObject, operator: compareToken): CalculateValueType {
+
+    wildcard(valueObject: StringValueObject, operator: compareToken): CalculateValueType {
         /** abstract */
         return ErrorValueObject.create(ErrorType.VALUE);
     }

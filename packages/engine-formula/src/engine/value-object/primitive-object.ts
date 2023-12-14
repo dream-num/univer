@@ -21,6 +21,7 @@ import { BooleanValue, ConcatenateType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { compareToken } from '../../basics/token';
 import { ErrorValueObject } from '../other-object/error-value-object';
+import { compareWithWildcard } from '../utils/compare';
 import type { CalculateValueType } from './base-value-object';
 import { BaseValueObject } from './base-value-object';
 
@@ -513,13 +514,13 @@ export class StringValueObject extends BaseValueObject {
         return this.compareBy(valueObject.getValue(), operator);
     }
 
-    override wildcard(valueObject: BaseValueObject, operator: compareToken): CalculateValueType {
+    override wildcard(valueObject: StringValueObject, operator: compareToken): CalculateValueType {
         if (valueObject.isArray()) {
-            const o = valueObject.getReciprocal();
-            if (o.isErrorObject()) {
-                return o;
-            }
-            return (o as BaseValueObject).wildcard(this, reverseCompareOperator(operator));
+            // const o = valueObject.getReciprocal();
+            // if (o.isErrorObject()) {
+            //     return o;
+            // }
+            return valueObject.wildcard(this, reverseCompareOperator(operator));
         }
         return this.checkWildcard(valueObject.getValue(), operator);
     }
@@ -578,39 +579,9 @@ export class StringValueObject extends BaseValueObject {
         return new BooleanValueObject(result);
     }
 
-    checkWildcard(value: string | number | boolean, operator: compareToken) {
-        const currentValue = this.getValue();
-        let result = false;
-        // TODO@Dushusir: supports number and boolean
-        // TODO@Dushusir: supports > >= < <= <>
-        if (typeof value === 'string') {
-            let str = '';
-            for (let i = 0; i < value.length; i++) {
-                const v = value.charAt(i);
-
-                if (v === '*') {
-                    str += '.*';
-                } else if (v === '?') {
-                    str += '.';
-                } else if (v === '~') {
-                    if (value.charAt(i + 1) === '*') {
-                        str += '\\*';
-                        i++;
-                    } else if (value.charAt(i + 1) === '?') {
-                        str += '\\?';
-                        i++;
-                    } else {
-                        str += '~';
-                    }
-                } else {
-                    str += v;
-                }
-            }
-
-            const reg = new RegExp(`^${str}$`, 'g');
-
-            result = !!currentValue.match(reg);
-        }
+    checkWildcard(value: string, operator: compareToken) {
+        const currentValue = this.getValue().toLocaleLowerCase();
+        const result = compareWithWildcard(currentValue, value, operator);
 
         return new BooleanValueObject(result);
     }

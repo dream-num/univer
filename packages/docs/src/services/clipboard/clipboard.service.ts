@@ -98,7 +98,6 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
 
             return this._htmlToUDM.convert(html);
         } catch (e) {
-            console.error(e);
             return Promise.reject(e);
         }
     }

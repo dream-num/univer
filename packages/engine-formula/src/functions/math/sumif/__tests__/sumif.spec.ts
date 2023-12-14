@@ -66,7 +66,6 @@ const TEST_WORKBOOK_DATA: IWorkbookData = {
 
 describe('test sumif', () => {
     let univer: Univer;
-    let injector: Injector;
     let get: Injector['get'];
     let functionService: IFunctionService;
     let unitId: string;
@@ -76,7 +75,6 @@ describe('test sumif', () => {
     beforeEach(() => {
         const testBed = createCommandTestBed(TEST_WORKBOOK_DATA);
         univer = testBed.univer;
-        injector = univer.__getInjector();
         get = testBed.get;
         unitId = testBed.unitId;
         sheetId = testBed.sheetId;
@@ -85,7 +83,7 @@ describe('test sumif', () => {
         functionService = get(IFunctionService);
 
         // register sumif
-        const sumif = new Sumif(injector, FUNCTION_NAMES_MATH.SUMIF);
+        const sumif = new Sumif(FUNCTION_NAMES_MATH.SUMIF);
         functionService.registerExecutors(sumif);
     });
 

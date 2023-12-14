@@ -55,7 +55,7 @@ export class Sumif extends BaseFunction {
                 const resultArrayValue = (resultArrayObject as ArrayValueObject).getArrayValue();
 
                 (range as BaseReferenceObject | ArrayValueObject).iterator((valueObject, row, column) => {
-                    if (!valueObject.isErrorObject()) {
+                    if (valueObject != null && !valueObject.isErrorObject()) {
                         const arrayValue = resultArrayValue[row][column] as BaseValueObject;
                         const accumulator = arrayValue.getValue()
                             ? (valueObject as BaseValueObject)

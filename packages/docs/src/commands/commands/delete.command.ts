@@ -208,24 +208,31 @@ export const DeleteRightCommand: ICommand = {
         }
 
         if (collapsed === true) {
-            const textRanges = [
-                {
-                    startOffset,
-                    endOffset: startOffset,
-                    style,
-                },
-            ];
-
             const needDeleteSpan = skeleton.findNodeByCharIndex(startOffset)!;
 
-            result = await commandService.executeCommand(DeleteCommand.id, {
-                unitId: docDataModel.getUnitId(),
-                range: activeRange,
-                segmentId,
-                direction: DeleteDirection.RIGHT,
-                textRanges,
-                len: needDeleteSpan.count,
-            });
+            if (needDeleteSpan.content === '\r') {
+                result = await commandService.executeCommand(MergeTwoParagraphCommand.id, {
+                    direction: DeleteDirection.RIGHT,
+                    range: activeRange,
+                });
+            } else {
+                const textRanges = [
+                    {
+                        startOffset,
+                        endOffset: startOffset,
+                        style,
+                    },
+                ];
+
+                result = await commandService.executeCommand(DeleteCommand.id, {
+                    unitId: docDataModel.getUnitId(),
+                    range: activeRange,
+                    segmentId,
+                    direction: DeleteDirection.RIGHT,
+                    textRanges,
+                    len: needDeleteSpan.count,
+                });
+            }
         } else {
             const textRanges = getTextRangesWhenDelete(activeRange, ranges);
 
@@ -278,7 +285,7 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
         const endIndex = docDataModel.getBody()?.paragraphs?.find((p) => p.startIndex >= startIndex)?.startIndex!;
         const body = getParagraphBody(docDataModel.getBody()!, startIndex, endIndex);
 
-        const cursor = direction === DeleteDirection.LEFT ? startIndex - 1 : endIndex;
+        const cursor = direction === DeleteDirection.LEFT ? startOffset - 1 : startOffset;
 
         const unitId = docDataModel.getUnitId();
 

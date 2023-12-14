@@ -15,5 +15,5 @@
  */
 
 export function getCompare() {
-    return new Intl.Collator('zh', { numeric: true }).compare;
+    return new Intl.Collator(undefined, { numeric: true }).compare;
 }

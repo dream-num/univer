@@ -39,8 +39,8 @@ export interface ITextActiveRange {
     startOffset: number;
     endOffset: number;
     collapsed: boolean;
-    startNodePosition: INodePosition;
-    endNodePosition: INodePosition;
+    startNodePosition: Nullable<INodePosition>;
+    endNodePosition: Nullable<INodePosition>;
     direction: RANGE_DIRECTION;
     segmentId: string;
     style: ITextSelectionStyle;
@@ -131,7 +131,7 @@ export class TextSelectionManagerService extends RxDisposable {
 
         const { startOffset, endOffset, collapsed, startNodePosition, endNodePosition, direction } = activeTextRange;
 
-        if (startOffset == null || endOffset == null || startNodePosition == null || endNodePosition == null) {
+        if (startOffset == null || endOffset == null) {
             return null;
         }
 

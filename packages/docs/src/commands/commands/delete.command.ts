@@ -17,7 +17,7 @@
 import type { ICommand, IParagraph } from '@univerjs/core';
 import { CommandType, ICommandService, IUniverInstanceService, UpdateDocsAttributeType } from '@univerjs/core';
 import type { TextRange } from '@univerjs/engine-render';
-import { getParagraphBySpan, hasListSpan, isFirstSpan, isIndentBySpan, isSameLine } from '@univerjs/engine-render';
+import { getParagraphBySpan, hasListSpan, isFirstSpan, isIndentBySpan } from '@univerjs/engine-render';
 
 import { DocSkeletonManagerService } from '../../services/doc-skeleton-manager.service';
 import type { ITextActiveRange } from '../../services/text-selection-manager.service';
@@ -25,6 +25,7 @@ import { TextSelectionManagerService } from '../../services/text-selection-manag
 import { CutContentCommand } from './clipboard.inner.command';
 import { DeleteCommand, DeleteDirection, UpdateCommand } from './core-editing.command';
 
+// Handle BACKSPACE.
 export const DeleteLeftCommand: ICommand = {
     id: 'doc.command.delete-left',
 
@@ -126,15 +127,6 @@ export const DeleteLeftCommand: ICommand = {
                 segmentId,
             });
         } else {
-            const { endNodePosition } = activeRange;
-
-            if (endNodePosition != null) {
-                const endSpan = skeleton.findSpanByPosition(endNodePosition);
-                if (hasListSpan(endSpan) && !isSameLine(preSpan, endSpan)) {
-                    activeRange.endOffset -= 1;
-                }
-            }
-
             if (collapsed === true) {
                 cursor -= span.count;
 
@@ -168,9 +160,12 @@ export const DeleteLeftCommand: ICommand = {
     },
 };
 
+// handle Delete key
 export const DeleteRightCommand: ICommand = {
     id: 'doc.command.delete-right',
+
     type: CommandType.COMMAND,
+
     handler: async (accessor) => {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const docSkeletonManagerService = accessor.get(DocSkeletonManagerService);
@@ -218,6 +213,7 @@ export const DeleteRightCommand: ICommand = {
             });
         } else {
             const textRanges = getTextRangesWhenDelete(activeRange, ranges);
+
             // If the selection is not closed, the effect of Delete and
             // BACKSPACE is the same as CUT, so the CUT command is executed.
             result = await commandService.executeCommand(CutContentCommand.id, {

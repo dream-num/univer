@@ -50,7 +50,10 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
             throw new Error(`DocumentDataModel not found for unitId: ${unitId}`);
         }
 
-        // Step 1: Update Doc View Model.
+        // Step 1: Update Doc Data Model.
+        const undoMutations = documentDataModel.apply(mutations);
+
+        // Step 2: Update Doc View Model.
         const memoryCursor = new MemoryCursor();
 
         memoryCursor.reset();
@@ -80,14 +83,17 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
                 // this._insertApply(body!, len, memoryCursor.cursor, segmentId);
                 memoryCursor.moveCursor(len);
             } else if (mutation.t === 'd') {
-                segmentViewModel.delete(memoryCursor.cursor, len);
+                // TODO: @JOCS, The DocumentViewModel needs to be rewritten to better support the
+                // large area of updates that are brought about by the paste, abstract the
+                // methods associated with the DocumentViewModel insertion, and support atomic operations
+                const segmentDocumentDataModel = documentDataModel.getSelfOrHeaderFooterModel(segmentId);
+
+                segmentViewModel.reset(segmentDocumentDataModel);
+                // segmentViewModel.delete(memoryCursor.cursor, len);
             } else {
                 throw new Error(`Unknown mutation type for mutation: ${mutation}.`);
             }
         });
-
-        // Step 2: Update Doc Data Model.
-        const undoMutations = documentDataModel.apply(mutations);
 
         return {
             unitId,

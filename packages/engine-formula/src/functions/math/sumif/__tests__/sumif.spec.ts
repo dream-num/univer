@@ -23,7 +23,6 @@ import type { ISheetData } from '../../../../basics/common';
 import { RangeReferenceObject } from '../../../../engine/reference-object/range-reference-object';
 import { ValueObjectFactory } from '../../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../../engine/value-object/base-value-object';
-import { IFunctionService } from '../../../../services/function.service';
 import { createCommandTestBed } from '../../../__tests__/create-command-test-bed';
 import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { Sumif } from '../sumif';
@@ -51,6 +50,10 @@ const TEST_WORKBOOK_DATA: IWorkbookData = {
                     2: {
                         v: 1,
                     },
+                    3: {
+                        v: 'test1',
+                        t: 1,
+                    },
                 },
                 2: {
                     0: {
@@ -62,6 +65,10 @@ const TEST_WORKBOOK_DATA: IWorkbookData = {
                     },
                     2: {
                         v: 1,
+                    },
+                    3: {
+                        v: 'test12',
+                        t: 1,
                     },
                 },
                 3: {
@@ -75,6 +82,10 @@ const TEST_WORKBOOK_DATA: IWorkbookData = {
                     2: {
                         v: 1,
                     },
+                    3: {
+                        v: 'mock',
+                        t: 1,
+                    },
                 },
             },
         },
@@ -87,25 +98,20 @@ const TEST_WORKBOOK_DATA: IWorkbookData = {
 
 describe('test sumif', () => {
     let univer: Univer;
-    let get: Injector['get'];
-    let functionService: IFunctionService;
     let unitId: string;
     let sheetId: string;
     let sheetData: ISheetData = {};
+    let sumif: Sumif;
 
     beforeEach(() => {
         const testBed = createCommandTestBed(TEST_WORKBOOK_DATA);
         univer = testBed.univer;
-        get = testBed.get;
         unitId = testBed.unitId;
         sheetId = testBed.sheetId;
         sheetData = testBed.sheetData;
 
-        functionService = get(IFunctionService);
-
         // register sumif
-        const sumif = new Sumif(FUNCTION_NAMES_MATH.SUMIF);
-        functionService.registerExecutors(sumif);
+        sumif = new Sumif(FUNCTION_NAMES_MATH.SUMIF);
     });
 
     afterEach(() => {
@@ -131,13 +137,12 @@ describe('test sumif', () => {
             const criteriaRef = ValueObjectFactory.create('>40');
 
             // calculate
-            const executor = functionService.getExecutor(FUNCTION_NAMES_MATH.SUMIF);
-            const resultObject = executor?.calculate(rangeRef, criteriaRef) as BaseValueObject;
+            const resultObject = sumif.calculate(rangeRef, criteriaRef) as BaseValueObject;
             const value = resultObject?.getValue();
             expect(value).toBe(488);
         });
 
-        it('sum range with wildcard', async () => {
+        it('sum range with wildcard *', async () => {
             // range
             const range = {
                 startRow: 1,
@@ -168,10 +173,45 @@ describe('test sumif', () => {
             });
 
             // calculate
-            const executor = functionService.getExecutor(FUNCTION_NAMES_MATH.SUMIF);
-            const resultObject = executor?.calculate(rangeRef, criteriaRef, sumRangeRef) as BaseValueObject;
+            const resultObject = sumif.calculate(rangeRef, criteriaRef, sumRangeRef) as BaseValueObject;
             const value = resultObject?.getValue();
             expect(value).toBe(2);
+        });
+
+        it('sum range with wildcard ?', async () => {
+            // range
+            const range = {
+                startRow: 1,
+                startColumn: 3,
+                endRow: 3,
+                endColumn: 3,
+            };
+
+            const rangeRef = new RangeReferenceObject(range, sheetId, unitId);
+            rangeRef.setUnitData({
+                [unitId]: sheetData,
+            });
+
+            // criteria
+            const criteriaRef = ValueObjectFactory.create('test?');
+
+            // sum range
+            const sumRange = {
+                startRow: 1,
+                startColumn: 2,
+                endRow: 3,
+                endColumn: 2,
+            };
+
+            const sumRangeRef = new RangeReferenceObject(sumRange, sheetId, unitId);
+            sumRangeRef.setUnitData({
+                [unitId]: sheetData,
+            });
+
+            // calculate
+            const resultObject = sumif.calculate(rangeRef, criteriaRef, sumRangeRef) as BaseValueObject;
+            const value = resultObject?.getValue();
+            expect(value).toBe(1);
         });
     });
 });

@@ -18,7 +18,8 @@ import { ICommandService, LocaleService } from '@univerjs/core';
 import { Dropdown, Tooltip } from '@univerjs/design';
 import { MoreDownSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import React, { useEffect, useState } from 'react';
+import type { Ref } from 'react';
+import React, { forwardRef, useEffect, useState } from 'react';
 import type { Subscription } from 'rxjs';
 import { isObservable } from 'rxjs';
 
@@ -31,7 +32,7 @@ import { MenuItemType } from '../../../services/menu/menu';
 import { ToolbarButton } from './Button/ToolbarButton';
 import styles from './index.module.less';
 
-export function ToolbarItem(props: IDisplayMenuItem<IMenuItem>) {
+export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: Ref<any>) => {
     const localeService = useDependency(LocaleService);
     const commandService = useDependency(ICommandService);
 
@@ -181,9 +182,10 @@ export function ToolbarItem(props: IDisplayMenuItem<IMenuItem>) {
         }
     }
 
+    // ref component
     return (
-        <Tooltip title={tooltipTitle} placement="bottom">
+        <Tooltip ref={ref} title={tooltipTitle} placement="bottom">
             {renderItem()}
         </Tooltip>
     );
-}
+});

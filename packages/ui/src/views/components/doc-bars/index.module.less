@@ -79,7 +79,6 @@
 
     box-sizing: border-box;
     height: 32px;
-    padding: 0 var(--padding-xl);
 
     font-size: var(--font-size-base);
     color: rgb(var(--text-color));
@@ -94,8 +93,32 @@
         justify-content: center;
 
         box-sizing: border-box;
-        width: 100%;
         height: 100%;
+        margin: 0 auto;
+    }
+
+    &-more {
+        max-width: 80%;
+
+        &-container {
+            display: grid;
+            gap: var(--margin-xs) 0;
+
+            box-sizing: border-box;
+            padding: var(--padding-sm);
+
+            background-color: rgb(var(--bg-color-secondary));
+            border-radius: var(--border-radius-base);
+            box-shadow: var(--box-shadow-base);
+
+            .toolbar-group {
+                flex-wrap: wrap;
+
+                &:not(:last-child)::after {
+                    content: initial;
+                }
+            }
+        }
     }
 
     &-group {

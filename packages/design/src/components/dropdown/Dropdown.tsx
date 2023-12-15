@@ -22,8 +22,10 @@ import React, { useContext } from 'react';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import styles from './index.module.less';
 
-// TODO: @jikkai Need to limit width
 export interface IDropdownProps {
+    /** Semantic DOM class */
+    className?: string;
+
     /**
      * The dropdown content
      */
@@ -69,13 +71,23 @@ export interface IDropdownProps {
 }
 
 export function Dropdown(props: IDropdownProps) {
-    const { trigger = ['click'], placement, children, overlay, alignPoint = false, align, onVisibleChange } = props;
+    const {
+        className,
+        trigger = ['click'],
+        placement,
+        children,
+        overlay,
+        alignPoint = false,
+        align,
+        onVisibleChange,
+    } = props;
 
     const { mountContainer } = useContext(ConfigContext);
 
     return (
         <RcDropdown
             {...props}
+            overlayClassName={className}
             prefixCls={styles.dropdown}
             getPopupContainer={() => mountContainer}
             trigger={trigger}

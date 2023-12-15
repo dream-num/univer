@@ -17,7 +17,7 @@
 import { Disposable, LifecycleService, LifecycleStages, toDisposable } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { IDisposable } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
+import { Inject, Injector, Optional } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 import { render as createRoot, unmount } from 'rc-util/lib/React/render';
 import type { ComponentType } from 'react';
@@ -82,9 +82,9 @@ export class DesktopUIController extends Disposable implements IDesktopUIControl
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService,
-        @Inject(LayoutService) private readonly _layoutService: LayoutService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @IFocusService private readonly _focusService: IFocusService
+        @IFocusService private readonly _focusService: IFocusService,
+        @Optional(LayoutService) private readonly _layoutService?: LayoutService
     ) {
         super();
     }
@@ -95,7 +95,10 @@ export class DesktopUIController extends Disposable implements IDesktopUIControl
                 this._initializeEngine(canvasElement);
                 this._lifecycleService.stage = LifecycleStages.Rendered;
                 this._focusService.setContainerElement(containerElement);
-                this.disposeWithMe(this._layoutService.registerContainer(containerElement));
+
+                if (this._layoutService) {
+                    this.disposeWithMe(this._layoutService.registerContainer(containerElement));
+                }
 
                 setTimeout(() => (this._lifecycleService.stage = LifecycleStages.Steady), STEADY_TIMEOUT);
             })

@@ -19,7 +19,7 @@ import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, O
 import type { Documents, IMouseEvent, IPointerEvent } from '@univerjs/engine-render';
 import { CURSOR_TYPE, IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/engine-render';
 import { LayoutService } from '@univerjs/ui';
-import { Inject } from '@wendellhu/redi';
+import { Inject, Optional } from '@wendellhu/redi';
 
 import { getDocObjectById } from '../basics/component-tools';
 import { VIEWPORT_KEY } from '../basics/docs-view-key';
@@ -50,7 +50,7 @@ export class TextSelectionController extends Disposable {
         @ITextSelectionRenderManager
         private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
-        @Inject(LayoutService) private readonly _layoutService: LayoutService
+        @Optional(LayoutService) private readonly _layoutService?: LayoutService
     ) {
         super();
 
@@ -75,9 +75,12 @@ export class TextSelectionController extends Disposable {
     private _initialize() {
         this._skeletonListener();
         this._commandExecutedListener();
-        this.disposeWithMe(
-            this._layoutService.registerContainer(this._textSelectionRenderManager.__getEditorContainer())
-        );
+
+        if (this._layoutService) {
+            this.disposeWithMe(
+                this._layoutService.registerContainer(this._textSelectionRenderManager.__getEditorContainer())
+            );
+        }
     }
 
     override dispose(): void {

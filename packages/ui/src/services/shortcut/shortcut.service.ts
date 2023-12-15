@@ -16,7 +16,7 @@
 
 import { Disposable, ICommandService, IContextService, toDisposable } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
-import { createIdentifier, Inject } from '@wendellhu/redi';
+import { createIdentifier, Optional } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 
@@ -81,7 +81,7 @@ export class DesktopShortcutService extends Disposable implements IShortcutServi
         @ICommandService private readonly _commandService: ICommandService,
         @IPlatformService private readonly _platformService: IPlatformService,
         @IContextService private readonly _contextService: IContextService,
-        @Inject(LayoutService) private readonly _layoutService: LayoutService
+        @Optional(LayoutService) private readonly _layoutService?: LayoutService
     ) {
         super();
 
@@ -184,7 +184,10 @@ export class DesktopShortcutService extends Disposable implements IShortcutServi
             return;
         }
 
-        if (!this._layoutService.checkElementInCurrentApplicationScope(e.target as HTMLElement)) {
+        if (
+            this._layoutService &&
+            !this._layoutService.checkElementInCurrentApplicationScope(e.target as HTMLElement)
+        ) {
             return;
         }
 

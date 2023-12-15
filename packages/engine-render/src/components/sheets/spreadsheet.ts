@@ -20,7 +20,6 @@ import { CellValueType, HorizontalAlign, ObjectMatrix, sortRules, WrapStrategy }
 import type { BaseObject } from '../../base-object';
 import { RENDER_CLASS_TYPE } from '../../basics/const';
 import { getTranslateInSpreadContextWithPixelRatio } from '../../basics/draw';
-import type { ITransformChangeState } from '../../basics/interfaces';
 import { fixLineWidthByScale, getCellByIndex, getCellPositionByIndex, getScale } from '../../basics/tools';
 import type { IViewportBound } from '../../basics/vector2';
 import { Vector2 } from '../../basics/vector2';
@@ -76,13 +75,13 @@ export class Spreadsheet extends SheetComponent {
             this._cacheCanvas = new Canvas();
         }
 
-        this.onIsAddedToParentObserver.add((parent) => {
-            (parent as Scene)?.getEngine()?.onTransformChangeObservable.add((change: ITransformChangeState) => {
-                this.resizeCacheCanvas();
-            });
-            this.resizeCacheCanvas();
-            this._addMakeDirtyToScroll();
-        });
+        // this.onIsAddedToParentObserver.add((parent) => {
+        //     (parent as Scene)?.getEngine()?.onTransformChangeObservable.add((change: ITransformChangeState) => {
+        //         this.resizeCacheCanvas();
+        //     });
+        //     this.resizeCacheCanvas();
+        //     this._addMakeDirtyToScroll();
+        // });
 
         this._initialDefaultExtension();
 
@@ -244,40 +243,53 @@ export class Spreadsheet extends SheetComponent {
             return this;
         }
 
-        if (this._allowCache) {
-            this._cacheOffsetX = 0;
-            this._cacheOffsetY = 0;
+        // if (this._allowCache) {
+        //     this._cacheOffsetX = 0;
+        //     this._cacheOffsetY = 0;
 
-            //|| this._checkNewBounds(bounds)
-            if (this.isDirty()) {
-                const newBounds = bounds;
-                const ctx = this._cacheCanvas.getContext();
+        //     //|| this._checkNewBounds(bounds)
+        //     if (this.isDirty()) {
+        //         const newBounds = bounds;
+        //         const ctx = this._cacheCanvas.getContext();
 
-                if (newBounds) {
-                    const { diffX = 0, diffY = 0 } = newBounds;
-                    this._cacheOffsetX = diffX;
-                    this._cacheOffsetY = diffY;
-                }
-                this._cacheCanvas.clear();
-                ctx.save();
-                // ctx.globalCompositeOperation = 'copy';
-                // ctx.drawImage(canvasEle, this._cacheOffsetX, this._cacheOffsetY);
-                // ctx.globalCompositeOperation = 'source-over';
-                ctx.setTransform(mainCtx.getTransform());
-                this._draw(ctx, newBounds);
-                // console.log('newBounds', JSON.stringify(newBounds));
-                // console.log('bounds', JSON.stringify(bounds));
-                // console.log('_boundsCache', JSON.stringify(this._boundsCache));
-                ctx.restore();
+        //         if (newBounds) {
+        //             const { diffX = 0, diffY = 0 } = newBounds;
+        //             this._cacheOffsetX = diffX;
+        //             this._cacheOffsetY = diffY;
+        //         }
+        //         this._cacheCanvas.clear();
+        //         ctx.save();
+        //         // ctx.globalCompositeOperation = 'copy';
+        //         // ctx.drawImage(canvasEle, this._cacheOffsetX, this._cacheOffsetY);
+        //         // ctx.globalCompositeOperation = 'source-over';
+        //         ctx.setTransform(mainCtx.getTransform());
+        //         this._draw(ctx, newBounds);
+        //         // console.log('newBounds', JSON.stringify(newBounds));
+        //         // console.log('bounds', JSON.stringify(bounds));
+        //         // console.log('_boundsCache', JSON.stringify(this._boundsCache));
+        //         ctx.restore();
 
-                this._boundsCache = bounds;
-            }
-            this._applyCache(mainCtx);
+        //         this._boundsCache = bounds;
+        //     }
+        //     this._applyCache(mainCtx);
+        // } else {
+        //     mainCtx.save();
+        //     this._draw(mainCtx, bounds);
+        //     mainCtx.restore();
+        // }
+
+        mainCtx.save();
+
+        if (bounds) {
+            const { viewBound, diffBounds, diffX, diffY } = bounds;
+            mainCtx.globalCompositeOperation = 'copy';
+            mainCtx.drawImage(mainCtx.canvas, diffX, diffY);
+            mainCtx.globalCompositeOperation = 'source-over';
         } else {
-            mainCtx.save();
             this._draw(mainCtx, bounds);
-            mainCtx.restore();
         }
+
+        mainCtx.restore();
 
         this.makeDirty(false);
         return this;
@@ -285,23 +297,23 @@ export class Spreadsheet extends SheetComponent {
         // console.log('mainCtx', mainCtx, this.width, this.height);
     }
 
-    override resizeCacheCanvas() {
-        const parentSize = this._getAncestorSize();
-        if (!parentSize || this._cacheCanvas == null) {
-            return;
-        }
-        const { width, height } = parentSize;
-        const skeleton = this.getSkeleton();
-        let rowHeaderWidth = 0;
-        let columnHeaderHeight = 0;
-        if (skeleton) {
-            rowHeaderWidth = skeleton.rowHeaderWidth;
-            columnHeaderHeight = skeleton.columnHeaderHeight;
-        }
+    // override resizeCacheCanvas() {
+    //     const parentSize = this._getAncestorSize();
+    //     if (!parentSize || this._cacheCanvas == null) {
+    //         return;
+    //     }
+    //     const { width, height } = parentSize;
+    //     const skeleton = this.getSkeleton();
+    //     let rowHeaderWidth = 0;
+    //     let columnHeaderHeight = 0;
+    //     if (skeleton) {
+    //         rowHeaderWidth = skeleton.rowHeaderWidth;
+    //         columnHeaderHeight = skeleton.columnHeaderHeight;
+    //     }
 
-        this._cacheCanvas.setSize(width, height);
-        this.makeDirty(true);
-    }
+    //     this._cacheCanvas.setSize(width, height);
+    //     this.makeDirty(true);
+    // }
 
     // enableSelection() {
     //     if (this._hasSelection) {

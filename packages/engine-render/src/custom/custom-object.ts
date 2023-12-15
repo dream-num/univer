@@ -15,7 +15,6 @@
  */
 
 import { BaseObject } from '../base-object';
-import { transformBoundingCoord } from '../basics/position';
 import type { IViewportBound, Vector2 } from '../basics/vector2';
 
 export class CustomObject extends BaseObject {
@@ -41,9 +40,14 @@ export class CustomObject extends BaseObject {
 
         // Temporarily ignore the on-demand display of elements within a group：this.isInGroup
         if (bounds && !this.isInGroup) {
-            const { minX, maxX, minY, maxY } = transformBoundingCoord(this, bounds);
+            const { top, left, bottom, right } = bounds!.viewBound;
 
-            if (this.width + this.strokeWidth < minX || maxX < 0 || this.height + this.strokeWidth < minY || maxY < 0) {
+            if (
+                this.width + this.strokeWidth < left ||
+                right < 0 ||
+                this.height + this.strokeWidth < top ||
+                bottom < 0
+            ) {
                 // console.warn('ignore object', this);
                 return this;
             }

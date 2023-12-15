@@ -41,7 +41,6 @@ interface IPageMarginLayout {
 }
 
 export interface IDocumentsConfig extends IPageMarginLayout {
-    allowCache?: boolean;
     hasEditor?: boolean;
 }
 
@@ -78,7 +77,7 @@ export class Documents extends DocComponent {
     // private _textAngleRotateOffset: number = 0;
 
     constructor(oKey: string, documentSkeleton?: DocumentSkeleton, config?: IDocumentsConfig) {
-        super(oKey, documentSkeleton, config?.allowCache);
+        super(oKey, documentSkeleton);
 
         this.setConfig(config);
 
@@ -107,8 +106,6 @@ export class Documents extends DocComponent {
         this.pageMarginTop = config?.pageMarginTop || 14;
 
         this.pageLayoutType = config?.pageLayoutType || PageLayoutType.VERTICAL;
-
-        this.setAllowCache(config?.allowCache || false);
     }
 
     getOffsetConfig(): IDocumentOffsetConfig {

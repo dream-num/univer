@@ -19,7 +19,6 @@ import type { IKeyValue, IScale, Nullable } from '@univerjs/core';
 import { BASE_OBJECT_ARRAY, BaseObject } from '../base-object';
 import { SHAPE_TYPE } from '../basics/const';
 import type { IObjectFullState } from '../basics/interfaces';
-import { transformBoundingCoord } from '../basics/position';
 import type { IViewportBound, Vector2 } from '../basics/vector2';
 
 export type LineJoin = 'round' | 'bevel' | 'miter';
@@ -33,7 +32,6 @@ export interface IShapeProps extends IObjectFullState {
     globalCompositeOperation?: string;
     evented?: boolean;
     visible?: boolean;
-    allowCache?: boolean;
     paintFirst?: PaintFirst;
 
     stroke?: Nullable<string | CanvasGradient>;
@@ -64,7 +62,6 @@ export const SHAPE_OBJECT_ARRAY = [
     'moveCursor',
     'fillRule',
     'globalCompositeOperation',
-    'allowCache',
     'paintFirst',
     'stroke',
     'strokeScaleEnabled',
@@ -327,9 +324,14 @@ export abstract class Shape<T> extends BaseObject {
 
         // Temporarily ignore the on-demand display of elements within a group：this.isInGroup
         if (this.isRender()) {
-            const { minX, maxX, minY, maxY } = transformBoundingCoord(this, bounds!);
+            const { top, left, bottom, right } = bounds!.viewBound;
 
-            if (this.width + this.strokeWidth < minX || maxX < 0 || this.height + this.strokeWidth < minY || maxY < 0) {
+            if (
+                this.width + this.strokeWidth < left ||
+                right < 0 ||
+                this.height + this.strokeWidth < top ||
+                bottom < 0
+            ) {
                 // console.warn('ignore object', this);
                 return this;
             }

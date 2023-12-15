@@ -40,10 +40,6 @@ export class Scene extends ThinScene {
 
     private _viewports: Viewport[] = [];
 
-    private _isFirstDirty: boolean = true;
-
-    private _maxZIndex: number = 0;
-
     private _cursor: CURSOR_TYPE = CURSOR_TYPE.DEFAULT;
 
     private _defaultCursor: CURSOR_TYPE = CURSOR_TYPE.DEFAULT;
@@ -90,10 +86,6 @@ export class Scene extends ThinScene {
         this._parent?.onTransformChangeObservable.add((change: ITransformChangeState) => {
             this._setTransForm();
         });
-
-        // setTimeout(() => {
-        //     document.querySelector('body')?.appendChild(this.getAllObjects()[0]._cacheCanvas._canvasEle);
-        // }, 500);
     }
 
     get ancestorScaleX() {
@@ -158,6 +150,10 @@ export class Scene extends ThinScene {
             }
         }
         return false;
+    }
+
+    getCursor() {
+        return this._cursor;
     }
 
     resetCursor() {
@@ -325,39 +321,19 @@ export class Scene extends ThinScene {
         this._layers.push(...argument);
     }
 
-    // getBackObjects() {
-    //     return [...this._ObjectsBack];
-    // }
-
-    // getForwardObjects() {
-    //     return [...this._ObjectsForward];
-    // }
-
     override addObject(o: BaseObject, zIndex: number = 1) {
         this.getLayer(zIndex)?.addObject(o);
         this._addObject$.next(this);
         return this;
     }
 
-    // addObjectForward(o: BaseObject) {
-    //     this._ObjectsForward.push(o);
-    //     this._setObjectBehavior(o);
-    //     return this;
-    // }
-
-    // addObjectBack(o: BaseObject) {
-    //     this._ObjectsBack.push(o);
-    //     this._setObjectBehavior(o);
-    //     return this;
-    // }
-
     override setObjectBehavior(o: BaseObject) {
         if (!o.parent) {
             o.parent = this;
         }
-        this.onTransformChangeObservable.add((state: ITransformChangeState) => {
-            o.scaleCacheCanvas();
-        });
+        // this.onTransformChangeObservable.add((state: ITransformChangeState) => {
+        //     o.scaleCacheCanvas();
+        // });
         o.onIsAddedToParentObserver.notifyObservers(this);
     }
 

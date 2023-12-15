@@ -295,12 +295,44 @@ export class BaseValueObject extends ObjectClassType {
         return ErrorValueObject.create(ErrorType.VALUE);
     }
 
+    /**
+     * Calculate the mean of the entire array.
+     *
+     * reference https://numpy.org/doc/stable/reference/generated/numpy.mean.html#numpy.mean
+     *
+     */
     mean(): BaseValueObject {
         /** abstract */
         return this;
     }
 
+    /**
+     * Calculate the median of the entire array.
+     *
+     * https://numpy.org/doc/stable/reference/generated/numpy.median.html
+     *
+     */
     median(): BaseValueObject {
+        /** abstract */
+        return this;
+    }
+
+    /**
+     * Calculate the variance of the entire array.
+     *
+     * https://numpy.org/doc/stable/reference/generated/numpy.var.html
+     */
+    var(): BaseValueObject {
+        /** abstract */
+        return this;
+    }
+
+    /**
+     * Calculate the standard deviation of the entire array.
+     *
+     * https://numpy.org/doc/stable/reference/generated/numpy.std.html
+     */
+    std(): BaseValueObject {
         /** abstract */
         return this;
     }

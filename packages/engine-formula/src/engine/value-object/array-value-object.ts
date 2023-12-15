@@ -732,6 +732,52 @@ export class ArrayValueObject extends BaseValueObject {
         return allValue.get(0, (count - 1) / 2);
     }
 
+    override var(): BaseValueObject {
+        const allValue = this.flatten();
+
+        const mean = this.mean();
+
+        let isError = null;
+        const squaredDifferences: BaseValueObject[][] = [];
+        allValue.iterator((valueObject: Nullable<BaseValueObject>, row: number, column: number) => {
+            let baseValueObject = null;
+
+            if (valueObject && valueObject.isError()) {
+                isError = true;
+                return false; // break
+            }
+
+            if (valueObject == null) {
+                baseValueObject = new NumberValueObject(0);
+            } else {
+                baseValueObject = (valueObject as BaseValueObject).minus(mean).pow(new NumberValueObject(2, true));
+            }
+
+            if (squaredDifferences[row] == null) {
+                squaredDifferences[row] = [];
+            }
+
+            squaredDifferences[row][column] = baseValueObject;
+        });
+
+        if (isError) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+
+        return new ArrayValueObject('').mean();
+
+        // TODO@Dushusir: use squaredDifferences
+        // const sum = new ArrayValueObject({
+        //     calculateValueList: squaredDifferences,
+        //     rowCount: number;
+        //     columnCount: number;
+        //     unitId: string;
+        //     sheetId: string;
+        //     row: number;
+        //     column: number;
+        // }).sum();
+    }
+
     override log(): BaseValueObject {
         return this.map((currentValue) => {
             if (currentValue.isError()) {

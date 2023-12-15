@@ -14,10 +14,4 @@
  * limitations under the License.
  */
 
-export interface ILanguagePack {
-    [key: string]: string | ILanguagePack | ILanguagePack[];
-}
-
-export interface ILocales {
-    [key: string]: ILanguagePack;
-}
+export default {};

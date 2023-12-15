@@ -217,12 +217,12 @@ export class BaseValueObject extends ObjectClassType {
 
     pow(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.NAME);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     powInverse(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.NAME);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     sqrt(): BaseValueObject {
@@ -243,6 +243,21 @@ export class BaseValueObject extends ObjectClassType {
     median(): BaseValueObject {
         /** abstract */
         return this;
+    }
+
+    log10(): BaseValueObject {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    round(valueObject: BaseValueObject): BaseValueObject {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    roundInverse(valueObject: BaseValueObject): BaseValueObject {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 }
 

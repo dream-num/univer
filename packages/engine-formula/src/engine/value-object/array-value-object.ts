@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
+import { isRealNum, type Nullable } from '@univerjs/core';
 
 import { BooleanValue } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
@@ -37,6 +37,7 @@ enum BatchOperatorType {
     PRODUCT,
     LIKE,
     POW,
+    ROUND,
 }
 
 enum ArrayCalculateType {
@@ -625,6 +626,28 @@ export class ArrayValueObject extends BaseValueObject {
         return allValue.get(0, (count - 1) / 2);
     }
 
+    override log10(): BaseValueObject {
+        return this.map((currentValue) => {
+            if (currentValue.isError()) {
+                return currentValue;
+            }
+            return (currentValue as BaseValueObject).log10();
+        });
+    }
+
+    override round(valueObject: BaseValueObject): BaseValueObject {
+        return this._batchOperator(valueObject, BatchOperatorType.ROUND);
+    }
+
+    override roundInverse(valueObject: BaseValueObject): BaseValueObject {
+        return this.map((currentValue) => {
+            if (currentValue.isError()) {
+                return currentValue;
+            }
+            return (valueObject as BaseValueObject).round(currentValue as BaseValueObject);
+        });
+    }
+
     toValue() {
         return transformToValue(this._value);
     }
@@ -886,6 +909,9 @@ export class ArrayValueObject extends BaseValueObject {
                         case BatchOperatorType.POW:
                             result[r][column] = (currentValue as BaseValueObject).pow(valueObject);
                             break;
+                        case BatchOperatorType.ROUND:
+                            result[r][column] = (currentValue as BaseValueObject).round(valueObject);
+                            break;
                     }
                 }
             } else {
@@ -1029,6 +1055,9 @@ export class ArrayValueObject extends BaseValueObject {
                             case BatchOperatorType.POW:
                                 rowList[c] = (currentValue as BaseValueObject).pow(opValue as BaseValueObject);
                                 break;
+                            case BatchOperatorType.ROUND:
+                                rowList[c] = (currentValue as BaseValueObject).round(opValue as BaseValueObject);
+                                break;
                         }
                     }
                 }
@@ -1134,7 +1163,7 @@ export class ValueObjectFactory {
             if (rawValueUpper === BooleanValue.TRUE || rawValueUpper === BooleanValue.FALSE) {
                 return new BooleanValueObject(rawValueUpper);
             }
-            if (!isNaN(Number(rawValue))) {
+            if (isRealNum(rawValue)) {
                 return new NumberValueObject(rawValue);
             }
             if (new RegExp($ARRAY_VALUE_REGEX, 'g').test(rawValue)) {

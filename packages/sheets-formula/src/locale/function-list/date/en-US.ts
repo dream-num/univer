@@ -14,4 +14,355 @@
  * limitations under the License.
  */
 
-export default {};
+export default {
+    DATE: {
+        description: `Returns the serial number of a particular date`,
+        abstract: `Returns the serial number of a particular date`,
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/date-function-e36c0c8c-4104-49da-ab83-82328b832349',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
+    DATEDIF: {
+        description: `Calculates the number of days, months, or years between two dates. This function is useful in formulas where you need to calculate an age.`,
+        abstract: `Calculates the number of days, months, or years between two dates. This function is useful in formulas where you need to calculate an age.`,
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/datedif-function-25dba1a4-2812-480b-84dd-8b32a451b35c',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
+    DATEVALUE: {
+        description: `Converts a date in the form of text to a serial number`,
+        abstract: `Converts a date in the form of text to a serial number`,
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/datevalue-function-df8b07d4-7761-4a93-bc33-b7471bbff252',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
+    DAY: {
+        description: `Converts a serial number to a day of the month`,
+        abstract: `Converts a serial number to a day of the month`,
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/day-function-8a7d1cbb-6c7d-4ba1-8aea-25c134d03101',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
+    DAYS: {
+        description: `Returns the number of days between two dates`,
+        abstract: `Returns the number of days between two dates`,
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/days-function-57740535-d549-4395-8728-0f07bff0b9df',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
+    DAYS360: {
+        description: `Calculates the number of days between two dates based on a 360-day year`,
+        abstract: `Calculates the number of days between two dates based on a 360-day year`,
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/days360-function-b9a509fd-49ef-407e-94df-0cbda5718c2a',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
+    EDATE: {
+        description: `Returns the serial number of the date that is the indicated number of months before or after the start date`,
+        abstract: `Returns the serial number of the date that is the indicated number of months before or after the start date`,
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/edate-function-3c920eb2-6e66-44e7-a1f5-753ae47ee4f5',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
+    EOMONTH: {
+        description: `Returns the serial number of the last day of the month before or after a specified number of months`,
+        abstract: `Returns the serial number of the last day of the month before or after a specified number of months`,
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/eomonth-function-7314ffa1-2bc9-4005-9d66-f49db127d628',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
+    HOUR: {
+        description: `Converts a serial number to an hour`,
+        abstract: `Converts a serial number to an hour`,
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/hour-function-a3afa879-86cb-4339-b1b5-2dd2d7310ac7',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
+    ISOWEEKNUM: {
+        description: `Returns the number of the ISO week number of the year for a given date`,
+        abstract: `Returns the number of the ISO week number of the year for a given date`,
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/isoweeknum-function-1c2d0afe-d25b-4ab1-8894-8d0520e90e0e',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
+    MINUTE: {
+        description: `Converts a serial number to a minute`,
+        abstract: `Converts a serial number to a minute`,
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/minute-function-af728df0-05c4-4b07-9eed-a84801a60589',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
+    MONTH: {
+        description: `Converts a serial number to a month`,
+        abstract: `Converts a serial number to a month`,
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/month-function-579a2881-199b-48b2-ab90-ddba0eba86e8',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
+    NETWORKDAYS: {
+        description: `Returns the number of whole workdays between two dates`,
+        abstract: `Returns the number of whole workdays between two dates`,
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/networkdays-function-48e717bf-a7a3-495f-969e-5005e3eb18e7',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
+    NETWORKDAYS_INTL: {
+        description: `Returns the number of whole workdays between two dates using parameters to indicate which and how many days are weekend days`,
+        abstract: `Returns the number of whole workdays between two dates using parameters to indicate which and how many days are weekend days`,
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/networkdays-intl-function-a9b26239-4f20-46a1-9ab8-4e925bfd5e28',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
+    NOW: {
+        description: `Returns the serial number of the current date and time`,
+        abstract: `Returns the serial number of the current date and time`,
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/now-function-3337fd29-145a-4347-b2e6-20c904739c46',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
+    SECOND: {
+        description: `Converts a serial number to a second`,
+        abstract: `Converts a serial number to a second`,
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/second-function-740d1cfc-553c-4099-b668-80eaa24e8af1',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
+    TIME: {
+        description: `Returns the serial number of a particular time`,
+        abstract: `Returns the serial number of a particular time`,
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/time-function-9a5aff99-8f7d-4611-845e-747d0b8d5457',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
+    TIMEVALUE: {
+        description: `Converts a time in the form of text to a serial number`,
+        abstract: `Converts a time in the form of text to a serial number`,
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/timevalue-function-0b615c12-33d8-4431-bf3d-f3eb6d186645',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
+    TODAY: {
+        description: `Returns the serial number of today's date`,
+        abstract: `Returns the serial number of today's date`,
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/today-function-5eb3078d-a82c-4736-8930-2f51a028fdd9',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
+    WEEKDAY: {
+        description: `Converts a serial number to a day of the week`,
+        abstract: `Converts a serial number to a day of the week`,
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/weekday-function-60e44483-2ed1-439f-8bd0-e404c190949a',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
+    WEEKNUM: {
+        description: `Converts a serial number to a number representing where the week falls numerically with a year`,
+        abstract: `Converts a serial number to a number representing where the week falls numerically with a year`,
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/weeknum-function-e5c43a03-b4ab-426c-b411-b18c13c75340',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
+    WORKDAY: {
+        description: `Returns the serial number of the date before or after a specified number of workdays`,
+        abstract: `Returns the serial number of the date before or after a specified number of workdays`,
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/workday-function-f764a5b7-05fc-4494-9486-60d494efbf33',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
+    WORKDAY_INTL: {
+        description: `Returns the serial number of the date before or after a specified number of workdays using parameters to indicate which and how many days are weekend days`,
+        abstract: `Returns the serial number of the date before or after a specified number of workdays using parameters to indicate which and how many days are weekend days`,
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/workday-intl-function-a378391c-9ba7-4678-8a39-39611a9bf81d',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
+    YEAR: {
+        description: `Converts a serial number to a year`,
+        abstract: `Converts a serial number to a year`,
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/year-function-c64f017a-1354-490d-981f-578e8ec8d3b9',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
+    YEARFRAC: {
+        description: `Returns the year fraction representing the number of whole days between start_date and end_date`,
+        abstract: `Returns the year fraction representing the number of whole days between start_date and end_date`,
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/yearfrac-function-3844141e-c76d-4143-82b6-208454ddc6a8',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
+};

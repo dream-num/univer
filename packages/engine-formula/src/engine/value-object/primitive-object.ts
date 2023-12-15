@@ -21,6 +21,7 @@ import { BooleanValue, ConcatenateType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { compareToken } from '../../basics/token';
 import { compareWithWildcard } from '../utils/compare';
+import { log10, pow, round } from '../utils/math-kit';
 import { BaseValueObject, ErrorValueObject } from './base-value-object';
 
 export class NullValueObject extends BaseValueObject {
@@ -104,6 +105,14 @@ export class NullValueObject extends BaseValueObject {
 
     override sin(): BaseValueObject {
         return new NumberValueObject(0, true);
+    }
+
+    override log10(): BaseValueObject {
+        return ErrorValueObject.create(ErrorType.NUM);
+    }
+
+    override round(valueObject: BaseValueObject): BaseValueObject {
+        return new NumberValueObject(0, true).round(valueObject);
     }
 }
 
@@ -207,6 +216,14 @@ export class BooleanValueObject extends BaseValueObject {
 
     override sin(): BaseValueObject {
         return this._convertTonNumber().sin();
+    }
+
+    override log10(): BaseValueObject {
+        return this._convertTonNumber().log10();
+    }
+
+    override round(valueObject: BaseValueObject): BaseValueObject {
+        return this._convertTonNumber().round(valueObject);
     }
 }
 
@@ -466,20 +483,16 @@ export class NumberValueObject extends BaseValueObject {
         const value = valueObject.getValue();
 
         if (typeof value === 'string') {
-            return this;
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
         if (typeof value === 'number') {
             if (Math.abs(currentValue) === Infinity || Math.abs(value) === Infinity) {
                 return new NumberValueObject(Infinity);
             }
-            return new NumberValueObject(Big(currentValue).pow(value).toNumber());
+            return new NumberValueObject(pow(currentValue, value));
         }
         if (typeof value === 'boolean') {
-            return new NumberValueObject(
-                Big(currentValue)
-                    .pow(value ? 1 : 0)
-                    .toNumber()
-            );
+            return new NumberValueObject(pow(currentValue, value ? 1 : 0));
         }
 
         return this;
@@ -501,6 +514,43 @@ export class NumberValueObject extends BaseValueObject {
             return new NumberValueObject(Infinity);
         }
         return new NumberValueObject(Math.sin(currentValue));
+    }
+
+    override log10(): BaseValueObject {
+        const currentValue = this.getValue();
+
+        if (typeof currentValue === 'number' && currentValue <= 0) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        if (Math.abs(currentValue) === Infinity) {
+            return new NumberValueObject(Infinity);
+        }
+        return new NumberValueObject(log10(currentValue));
+    }
+
+    override round(valueObject: BaseValueObject): BaseValueObject {
+        if (valueObject.isArray()) {
+            return valueObject.roundInverse(this);
+        }
+
+        const currentValue = this.getValue();
+        const value = valueObject.getValue();
+
+        if (typeof value === 'string') {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+        if (typeof value === 'number') {
+            if (Math.abs(currentValue) === Infinity || Math.abs(value) === Infinity) {
+                return new NumberValueObject(Infinity);
+            }
+            return new NumberValueObject(round(currentValue, value));
+        }
+        if (typeof value === 'boolean') {
+            return new NumberValueObject(round(currentValue, value ? 1 : 0));
+        }
+
+        return this;
     }
 
     private _compareInfinity(currentValue: number, value: number, operator: compareToken) {
@@ -590,7 +640,7 @@ export class StringValueObject extends BaseValueObject {
             // }
             return valueObject.wildcard(this, reverseCompareOperator(operator));
         }
-        return this.checkWildcard(valueObject.getValue(), operator);
+        return this._checkWildcard(valueObject.getValue(), operator);
     }
 
     override compareBy(value: string | number | boolean, operator: compareToken): BaseValueObject {
@@ -647,7 +697,7 @@ export class StringValueObject extends BaseValueObject {
         return new BooleanValueObject(result);
     }
 
-    checkWildcard(value: string, operator: compareToken) {
+    private _checkWildcard(value: string, operator: compareToken) {
         const currentValue = this.getValue().toLocaleLowerCase();
         const result = compareWithWildcard(currentValue, value, operator);
 

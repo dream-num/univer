@@ -20,12 +20,12 @@ import { describe, expect, it } from 'vitest';
 import { ArrayValueObject, transformToValueObject } from '../array-value-object';
 import { NumberValueObject } from '../primitive-object';
 
-describe('arrayValueObject pow method test', () => {
+describe('arrayValueObject round method test', () => {
     const originArrayValueObject = new ArrayValueObject({
         calculateValueList: transformToValueObject([
-            [1, 2, 3, 4, 5],
-            [6, 7, 8, 9, 10],
-            [11, 12, 13, 14, 15],
+            [0.1234, 0.9876, 0.5432, 0.6789, 0.4567],
+            [0.2345, 0.8765, 0.321, 0.7654, 0.5432],
+            [0.3456, 0.7654, 0.2109, 0.6543, 0.6789],
         ]),
         rowCount: 3,
         columnCount: 5,
@@ -35,9 +35,9 @@ describe('arrayValueObject pow method test', () => {
         column: 0,
     });
 
-    describe('pow', () => {
+    describe('round', () => {
         it('origin nm, param nm', () => {
-            const powArrayValueObject = new ArrayValueObject({
+            const roundArrayValueObject = new ArrayValueObject({
                 calculateValueList: transformToValueObject([
                     [2, 3, 4],
                     [1, 4, 2],
@@ -50,15 +50,15 @@ describe('arrayValueObject pow method test', () => {
                 column: 0,
             });
 
-            expect((originArrayValueObject.pow(powArrayValueObject) as ArrayValueObject).toValue()).toStrictEqual([
-                [1, 8, 81, '#N/A', '#N/A'],
-                [6, 2401, 64, '#N/A', '#N/A'],
+            expect((originArrayValueObject.round(roundArrayValueObject) as ArrayValueObject).toValue()).toStrictEqual([
+                [0.12, 0.988, 0.5432, '#N/A', '#N/A'],
+                [0.2, 0.8765, 0.32, '#N/A', '#N/A'],
                 ['#N/A', '#N/A', '#N/A', '#N/A', '#N/A'],
             ]);
         });
 
         it('origin nm, param 1m', () => {
-            const powArrayValueObject = new ArrayValueObject({
+            const roundArrayValueObject = new ArrayValueObject({
                 calculateValueList: transformToValueObject([[2, 2, 2, 3, 3]]),
                 rowCount: 1,
                 columnCount: 5,
@@ -68,15 +68,15 @@ describe('arrayValueObject pow method test', () => {
                 column: 0,
             });
 
-            expect((originArrayValueObject.pow(powArrayValueObject) as ArrayValueObject).toValue()).toStrictEqual([
-                [1, 4, 9, 64, 125],
-                [36, 49, 64, 729, 1000],
-                [121, 144, 169, 2744, 3375],
+            expect((originArrayValueObject.round(roundArrayValueObject) as ArrayValueObject).toValue()).toStrictEqual([
+                [0.12, 0.99, 0.54, 0.679, 0.457],
+                [0.23, 0.88, 0.32, 0.765, 0.543],
+                [0.35, 0.77, 0.21, 0.654, 0.679],
             ]);
         });
 
         it('origin nm, param n1', () => {
-            const powArrayValueObject = new ArrayValueObject({
+            const roundArrayValueObject = new ArrayValueObject({
                 calculateValueList: transformToValueObject([[3], [2], [1]]),
                 rowCount: 3,
                 columnCount: 1,
@@ -86,16 +86,16 @@ describe('arrayValueObject pow method test', () => {
                 column: 0,
             });
 
-            expect((originArrayValueObject.pow(powArrayValueObject) as ArrayValueObject).toValue()).toStrictEqual([
-                [1, 8, 27, 64, 125],
-                [36, 49, 64, 81, 100],
-                [11, 12, 13, 14, 15],
+            expect((originArrayValueObject.round(roundArrayValueObject) as ArrayValueObject).toValue()).toStrictEqual([
+                [0.123, 0.988, 0.543, 0.679, 0.457],
+                [0.23, 0.88, 0.32, 0.77, 0.54],
+                [0.3, 0.8, 0.2, 0.7, 0.7],
             ]);
         });
 
         it('origin 1m, param nm', () => {
-            const powArrayValueObject = new ArrayValueObject({
-                calculateValueList: transformToValueObject([[2, 2, 2, 3, 3]]),
+            const originArrayValueObject = new ArrayValueObject({
+                calculateValueList: transformToValueObject([[0.1234, 0.9876, 0.5432, 0.6789, 0.4567]]),
                 rowCount: 1,
                 columnCount: 5,
                 unitId: '',
@@ -103,17 +103,30 @@ describe('arrayValueObject pow method test', () => {
                 row: 0,
                 column: 0,
             });
+            const roundArrayValueObject = new ArrayValueObject({
+                calculateValueList: transformToValueObject([
+                    [2, 2, 2, 3, 3],
+                    [3, 3, 3, 4, 4],
+                    [4, 4, 4, 5, 5],
+                ]),
+                rowCount: 3,
+                columnCount: 5,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
 
-            expect((powArrayValueObject.pow(originArrayValueObject) as ArrayValueObject).toValue()).toStrictEqual([
-                [2, 4, 8, 81, 243],
-                [64, 128, 256, 19683, 59049],
-                [2048, 4096, 8192, 4782969, 14348907],
+            expect((originArrayValueObject.round(roundArrayValueObject) as ArrayValueObject).toValue()).toStrictEqual([
+                [0.12, 0.99, 0.54, 0.679, 0.457],
+                [0.123, 0.988, 0.543, 0.6789, 0.4567],
+                [0.1234, 0.9876, 0.5432, 0.6789, 0.4567],
             ]);
         });
 
         it('origin n1, param nm', () => {
-            const powArrayValueObject = new ArrayValueObject({
-                calculateValueList: transformToValueObject([[3], [2], [1]]),
+            const originArrayValueObject = new ArrayValueObject({
+                calculateValueList: transformToValueObject([[0.1234], [0.2345], [0.3456]]),
                 rowCount: 3,
                 columnCount: 1,
                 unitId: '',
@@ -121,11 +134,24 @@ describe('arrayValueObject pow method test', () => {
                 row: 0,
                 column: 0,
             });
+            const roundArrayValueObject = new ArrayValueObject({
+                calculateValueList: transformToValueObject([
+                    [2, 2, 2, 3, 3],
+                    [3, 3, 3, 4, 4],
+                    [4, 4, 4, 5, 5],
+                ]),
+                rowCount: 3,
+                columnCount: 5,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
 
-            expect((powArrayValueObject.pow(originArrayValueObject) as ArrayValueObject).toValue()).toStrictEqual([
-                [3, 9, 27, 81, 243],
-                [64, 128, 256, 512, 1024],
-                [1, 1, 1, 1, 1],
+            expect((originArrayValueObject.round(roundArrayValueObject) as ArrayValueObject).toValue()).toStrictEqual([
+                [0.12, 0.12, 0.12, 0.123, 0.123],
+                [0.235, 0.235, 0.235, 0.2345, 0.2345],
+                [0.3456, 0.3456, 0.3456, 0.3456, 0.3456],
             ]);
         });
 
@@ -142,11 +168,12 @@ describe('arrayValueObject pow method test', () => {
                 row: 0,
                 column: 0,
             });
+
             const roundValueObject = new NumberValueObject(1);
 
-            expect((originArrayValueObject.pow(roundValueObject) as ArrayValueObject).toValue()).toStrictEqual([
-                [1, '#VALUE!', 1.23, 1, 0],
-                [0, 100, 2.34, '#VALUE!', -3],
+            expect((originArrayValueObject.round(roundValueObject) as ArrayValueObject).toValue()).toStrictEqual([
+                [1, '#VALUE!', 1.2, 1, 0],
+                [0, 100, 2.3, '#VALUE!', -3],
             ]);
         });
 
@@ -165,9 +192,9 @@ describe('arrayValueObject pow method test', () => {
                 column: 0,
             });
 
-            expect((originValueObject.pow(roundArrayValueObject) as ArrayValueObject).toValue()).toStrictEqual([
+            expect((originValueObject.round(roundArrayValueObject) as ArrayValueObject).toValue()).toStrictEqual([
                 [1, '#VALUE!', 1, 1, 1],
-                [1, 1, 1, '#VALUE!', 1],
+                [1, 1, 1, '#VALUE!', 0],
             ]);
         });
     });

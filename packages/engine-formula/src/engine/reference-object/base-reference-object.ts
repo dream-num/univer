@@ -21,7 +21,7 @@ import { FormulaAstLRU } from '../../basics/cache-lru';
 import type { IRuntimeUnitDataType, IUnitData, IUnitSheetNameMap } from '../../basics/common';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { ObjectClassType } from '../../basics/object-class-type';
-import { ArrayValueObject } from '../value-object/array-value-object';
+import { ArrayValueObject, ValueObjectFactory } from '../value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject, type IArrayValueObject } from '../value-object/base-value-object';
 import {
     BooleanValueObject,
@@ -334,13 +334,18 @@ export class BaseReferenceObject extends ObjectClassType {
         if (ERROR_TYPE_SET.has(value as string)) {
             return ErrorValueObject.create(value as ErrorType);
         }
+
+        if (cell.t === CellValueType.NUMBER) {
+            return new NumberValueObject(value);
+        }
+        if (cell.t === CellValueType.STRING || cell.t === CellValueType.FORCE_STRING) {
+            return new StringValueObject(value);
+        }
         if (cell.t === CellValueType.BOOLEAN) {
             return new BooleanValueObject(value);
         }
-        if (cell.t === CellValueType.FORCE_STRING || cell.t === CellValueType.STRING) {
-            return new StringValueObject(value);
-        }
-        return new NumberValueObject(value);
+
+        return ValueObjectFactory.create(value);
     }
 
     getCellByRow(row: number) {

@@ -16,12 +16,12 @@
 
 export default {
     ENCODEURL: {
-        description: `Returns a URL-encoded string`,
-        abstract: `Returns a URL-encoded string`,
+        description: `URL 形式でエンコードされた文字列を返します。`,
+        abstract: `URL 形式でエンコードされた文字列を返します。`,
         links: [
             {
-                title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/encodeurl-function-07c7fb90-7c60-4bff-8687-fac50fe33d0e',
+                title: '指導',
+                url: 'https://support.microsoft.com/ja-jp/office/encodeurl-%E9%96%A2%E6%95%B0-07c7fb90-7c60-4bff-8687-fac50fe33d0e',
             },
         ],
         functionParameter: {
@@ -30,12 +30,12 @@ export default {
         },
     },
     FILTERXML: {
-        description: `Returns specific data from the XML content by using the specified XPath`,
-        abstract: `Returns specific data from the XML content by using the specified XPath`,
+        description: `指定された XPath に基づいて XML コンテンツの特定のデータを返します。`,
+        abstract: `指定された XPath に基づいて XML コンテンツの特定のデータを返します。`,
         links: [
             {
-                title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/filterxml-function-4df72efc-11ec-4951-86f5-c1374812f5b7',
+                title: '指導',
+                url: 'https://support.microsoft.com/ja-jp/office/filterxml-%E9%96%A2%E6%95%B0-4df72efc-11ec-4951-86f5-c1374812f5b7',
             },
         ],
         functionParameter: {
@@ -44,12 +44,12 @@ export default {
         },
     },
     WEBSERVICE: {
-        description: `Returns data from a web service`,
-        abstract: `Returns data from a web service`,
+        description: `Web サービスからのデータを返します。`,
+        abstract: `Web サービスからのデータを返します。`,
         links: [
             {
-                title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/webservice-function-0546a35a-ecc6-4739-aed7-c0b7ce1562c4',
+                title: '指導',
+                url: 'https://support.microsoft.com/ja-jp/office/webservice-%E9%96%A2%E6%95%B0-0546a35a-ecc6-4739-aed7-c0b7ce1562c4',
             },
         ],
         functionParameter: {

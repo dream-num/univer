@@ -14,13 +14,7 @@
  * limitations under the License.
  */
 
-import {
-    CommandType,
-    type DocMutationParams,
-    type IMutation,
-    IUniverInstanceService,
-    MemoryCursor,
-} from '@univerjs/core';
+import { CommandType, type DocMutationParams, type IMutation, IUniverInstanceService } from '@univerjs/core';
 
 import { DocViewModelManagerService } from '../../services/doc-view-model-manager.service';
 
@@ -46,54 +40,19 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         const docViewModelManagerService = accessor.get(DocViewModelManagerService);
         const documentViewModel = docViewModelManagerService.getViewModel(unitId);
 
-        if (!documentDataModel) {
-            throw new Error(`DocumentDataModel not found for unitId: ${unitId}`);
+        if (documentDataModel == null || documentViewModel == null) {
+            throw new Error(`DocumentDataModel or documentViewModel not found for unitId: ${unitId}`);
         }
 
         // Step 1: Update Doc Data Model.
         const undoMutations = documentDataModel.apply(mutations);
 
         // Step 2: Update Doc View Model.
-        const memoryCursor = new MemoryCursor();
+        const segmentId = mutations[0].segmentId;
+        const segmentDocumentDataModel = documentDataModel.getSelfOrHeaderFooterModel(segmentId);
+        const segmentViewModel = documentViewModel.getSelfOrHeaderFooterViewModel(segmentId);
 
-        memoryCursor.reset();
-
-        mutations.forEach((mutation) => {
-            const { segmentId, len } = mutation;
-            const segmentViewModel = documentViewModel?.getSelfOrHeaderFooterViewModel(segmentId)!;
-
-            if (mutation.t === 'r') {
-                const { len } = mutation;
-
-                memoryCursor.moveCursor(len);
-            } else if (mutation.t === 'i') {
-                const { body } = mutation;
-
-                if (body.dataStream.length > 1 && /\r/.test(body.dataStream)) {
-                    // TODO: @JOCS, The DocumentViewModel needs to be rewritten to better support the
-                    // large area of updates that are brought about by the paste, abstract the
-                    // methods associated with the DocumentViewModel insertion, and support atomic operations
-                    const segmentDocumentDataModel = documentDataModel.getSelfOrHeaderFooterModel(segmentId);
-
-                    segmentViewModel.reset(segmentDocumentDataModel);
-                } else {
-                    segmentViewModel.insert(body, memoryCursor.cursor);
-                }
-
-                // this._insertApply(body!, len, memoryCursor.cursor, segmentId);
-                memoryCursor.moveCursor(len);
-            } else if (mutation.t === 'd') {
-                // TODO: @JOCS, The DocumentViewModel needs to be rewritten to better support the
-                // large area of updates that are brought about by the paste, abstract the
-                // methods associated with the DocumentViewModel insertion, and support atomic operations
-                const segmentDocumentDataModel = documentDataModel.getSelfOrHeaderFooterModel(segmentId);
-
-                segmentViewModel.reset(segmentDocumentDataModel);
-                // segmentViewModel.delete(memoryCursor.cursor, len);
-            } else {
-                throw new Error(`Unknown mutation type for mutation: ${mutation}.`);
-            }
-        });
+        segmentViewModel.reset(segmentDocumentDataModel);
 
         return {
             unitId,

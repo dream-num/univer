@@ -151,7 +151,7 @@ function __generateOrderedListSymbol(
     //     <w:lvlText w:val="%1."/>
     //     <w:lvlJc w:val="left"/>
     // </w:lvl>
-    console.log(glyphFormat, nestingLevel, nestings, listLevelAncestors);
+
     const glyphFormatSplit = glyphFormat.split('%');
     const prefix = glyphFormatSplit[0];
     const resultSymbol = [prefix];
@@ -159,7 +159,7 @@ function __generateOrderedListSymbol(
     for (let i = 1; i < glyphFormatSplit.length; i++) {
         const levelAndSuffixPre = glyphFormatSplit[i];
         const { level, suffix } = ___getLevelAndSuffix(levelAndSuffixPre);
-        console.log(level, suffix);
+
         let startIndexItem = listLevelAncestors?.[level]?.startIndexItem || 1;
 
         if (level !== nestingLevel && listLevelAncestors?.[level] !== null) {

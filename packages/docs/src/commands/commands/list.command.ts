@@ -31,6 +31,22 @@ import { TextSelectionManagerService } from '../../services/text-selection-manag
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
 
+interface IBulletListCommandParams {}
+
+export const BulletListCommand: ICommand<IBulletListCommandParams> = {
+    id: 'doc.command.bullet-list',
+
+    type: CommandType.COMMAND,
+
+    handler: (accessor) => {
+        const commandService = accessor.get(ICommandService);
+
+        return commandService.syncExecuteCommand(ListOperationCommand.id, {
+            listType: PresetListType.BULLET_LIST,
+        });
+    },
+};
+
 interface IOrderListCommandParams {}
 
 export const OrderListCommand: ICommand<IOrderListCommandParams> = {
@@ -38,11 +54,31 @@ export const OrderListCommand: ICommand<IOrderListCommandParams> = {
 
     type: CommandType.COMMAND,
 
-    handler: async (accessor) => {
+    handler: (accessor) => {
+        const commandService = accessor.get(ICommandService);
+
+        return commandService.syncExecuteCommand(ListOperationCommand.id, {
+            listType: PresetListType.ORDER_LIST,
+        });
+    },
+};
+
+interface IListOperationCommandParams {
+    listType: PresetListType;
+}
+
+export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
+    id: 'doc.command.list-operation',
+
+    type: CommandType.COMMAND,
+
+    handler: (accessor, params: IListOperationCommandParams) => {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const currentUniverService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
+
+        const { listType } = params;
 
         const dataModel = currentUniverService.getCurrentUniverDocInstance();
 
@@ -59,15 +95,23 @@ export const OrderListCommand: ICommand<IOrderListCommandParams> = {
 
         const unitId = dataModel.getUnitId();
 
-        const isAlreadyOrdered = currentParagraphs.every(
-            (paragraph) => paragraph.bullet?.listType === PresetListType.ORDER_LIST
-        );
+        const isAlreadyOrdered = currentParagraphs.every((paragraph) => paragraph.bullet?.listType === listType);
 
         const ID_LENGTH = 6;
 
-        console.log(currentParagraphs);
+        let listId = Tools.generateRandomId(ID_LENGTH);
 
-        console.log(isAlreadyOrdered);
+        if (currentParagraphs.length === 1) {
+            const curIndex = paragraphs.indexOf(currentParagraphs[0]);
+            const prevParagraph = paragraphs[curIndex - 1];
+            const nextParagraph = paragraphs[curIndex + 1];
+
+            if (prevParagraph && prevParagraph.bullet && prevParagraph.bullet.listType === listType) {
+                listId = prevParagraph.bullet.listId;
+            } else if (nextParagraph && nextParagraph.bullet && nextParagraph.bullet.listType === listType) {
+                listId = nextParagraph.bullet.listId;
+            }
+        }
 
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
@@ -98,7 +142,7 @@ export const OrderListCommand: ICommand<IOrderListCommandParams> = {
                     paragraphs: [
                         isAlreadyOrdered
                             ? {
-                                  ...paragraph,
+                                  paragraphStyle: paragraph.paragraphStyle,
                                   startIndex: 0,
                               }
                             : {
@@ -111,8 +155,8 @@ export const OrderListCommand: ICommand<IOrderListCommandParams> = {
                                               fs: 20,
                                           },
                                       }),
-                                      listType: PresetListType.ORDER_LIST,
-                                      listId: Tools.generateRandomId(ID_LENGTH),
+                                      listType,
+                                      listId,
                                   },
                               },
                     ],
@@ -155,18 +199,6 @@ export const OrderListCommand: ICommand<IOrderListCommandParams> = {
             return true;
         }
 
-        return true;
-    },
-};
-
-interface IBulletListCommandParams {}
-
-export const BulletListCommand: ICommand<IBulletListCommandParams> = {
-    id: 'doc.command.bullet-list',
-
-    type: CommandType.COMMAND,
-
-    handler: async (accessor) => {
         return true;
     },
 };

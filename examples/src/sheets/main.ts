@@ -26,13 +26,12 @@ import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverUIPlugin } from '@univerjs/ui';
-import type { IUniscriptConfig } from '@univerjs/uniscript';
-import { UniverUniscriptPlugin } from '@univerjs/uniscript';
 
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data';
 import { DebuggerPlugin } from '../plugins/debugger';
 import { locales } from './locales';
 
+const LOAD_LAZY_PLUGINS_TIMEOUT = 5_000;
 // univer
 const univer = new Univer({
     theme: defaultTheme,
@@ -70,16 +69,6 @@ univer.registerPlugin(UniverRPCMainThreadPlugin, {
     unsyncMutations: new Set([RichTextEditingMutation.id]),
 } as IUniverRPCMainThreadConfig);
 
-univer.registerPlugin(UniverUniscriptPlugin, {
-    getWorkerUrl(moduleID, label) {
-        if (label === 'typescript' || label === 'javascript') {
-            return './vs/language/typescript/ts.worker.js';
-        }
-
-        return './vs/editor/editor.worker.js';
-    },
-} as IUniscriptConfig);
-
 // create univer sheet instance
 univer.createUniverSheet(DEFAULT_WORKBOOK_DATA_DEMO);
 
@@ -88,5 +77,12 @@ declare global {
         univer?: Univer;
     }
 }
+
+setTimeout(() => {
+    import('./lazy').then((lazy) => {
+        const plugin = lazy.default();
+        univer.registerPlugin(plugin[0], plugin[1]);
+    });
+}, LOAD_LAZY_PLUGINS_TIMEOUT);
 
 window.univer = univer;

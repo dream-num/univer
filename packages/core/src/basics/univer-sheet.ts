@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { Ctor, Dependency, IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -29,48 +31,20 @@ import type { IWorkbookData } from '../types/interfaces/i-workbook-data';
  * Externally provided UniverSheet root instance
  */
 export class UniverSheet extends Disposable implements IDisposable {
-    private readonly _pluginStore = new PluginStore();
+    /** This store stores plugins that are register before `UniverSheet` starts. */
+    private readonly _preRegisteredPluginStore = new PluginStore();
+
+    /** If `UniverSheet` has get started. */
+    private _started: boolean = false;
 
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
-        @Inject(LifecycleInitializerService) private readonly _initService: LifecycleInitializerService
+        @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService,
+        @Inject(LifecycleInitializerService) private readonly _lifecycleInitializerService: LifecycleInitializerService
     ) {
         super();
 
         this._initDependencies(_injector);
-    }
-
-    start(): void {
-        this._pluginStore.forEachPlugin((p) => p.onStarting(this._injector));
-        this._initService.initModulesOnStage(LifecycleStages.Starting);
-    }
-
-    ready(): void {
-        this.disposeWithMe(
-            toDisposable(
-                this._injector
-                    .get(LifecycleService)
-                    .subscribeWithPrevious()
-                    .subscribe((stage) => {
-                        if (stage === LifecycleStages.Ready) {
-                            this._pluginStore.forEachPlugin((p) => p.onReady());
-                            this._initService.initModulesOnStage(LifecycleStages.Ready);
-                            return;
-                        }
-
-                        if (stage === LifecycleStages.Rendered) {
-                            this._pluginStore.forEachPlugin((p) => p.onRendered());
-                            this._initService.initModulesOnStage(LifecycleStages.Rendered);
-                            return;
-                        }
-
-                        if (stage === LifecycleStages.Steady) {
-                            this._pluginStore.forEachPlugin((p) => p.onSteady());
-                            this._initService.initModulesOnStage(LifecycleStages.Steady);
-                        }
-                    })
-            )
-        );
     }
 
     createSheet(workbookConfig: Partial<IWorkbookData>): Workbook {
@@ -81,20 +55,59 @@ export class UniverSheet extends Disposable implements IDisposable {
     override dispose(): void {
         super.dispose();
 
-        this._pluginStore.removePlugins();
+        this._preRegisteredPluginStore.removePlugins();
     }
 
-    /**
-     * Add a plugin into UniverSheet. UniverSheet should add dependencies exposed from this plugin to its DI system.
-     *
-     * @param plugin constructor of the plugin class
-     * @param options options to this plugin
-     *
-     * @internal
-     */
-    addPlugin<T extends Plugin>(plugin: PluginCtor<T>, options: any): void {
+    addPlugins(plugins: Array<[PluginCtor<any>, any]>): void {
+        if (!this._started) {
+            const pluginInstances = plugins.map(([plugin, options]) => this._initPlugin(plugin, options));
+            this._takePluginsThroughLifecycle(pluginInstances);
+            this._started = true;
+        } else {
+            const lazyPlugins = plugins.map(([plugin, options]) => this._initPlugin(plugin, options));
+            this._pluginsRunLifecycle(lazyPlugins, LifecycleStages.Starting);
+            setTimeout(() => this._takePluginsThroughLifecycle(lazyPlugins));
+        }
+    }
+
+    private _initPlugin<T extends Plugin>(plugin: PluginCtor<T>, options: any): Plugin {
         const pluginInstance: Plugin = this._injector.createInstance(plugin as unknown as Ctor<any>, options);
-        this._pluginStore.addPlugin(pluginInstance);
+        return pluginInstance;
+    }
+
+    private _takePluginsThroughLifecycle(plugins: Plugin[], skipStarting = false): void {
+        this.disposeWithMe(
+            toDisposable(
+                this._lifecycleService.subscribeWithPrevious().subscribe((stage) => {
+                    if (skipStarting && stage === LifecycleStages.Starting) {
+                        return;
+                    }
+
+                    this._pluginsRunLifecycle(plugins, stage);
+                })
+            )
+        );
+    }
+
+    private _pluginsRunLifecycle(plugins: Plugin[], lifecycle: LifecycleStages): void {
+        plugins.forEach((p) => {
+            switch (lifecycle) {
+                case LifecycleStages.Starting:
+                    p.onStarting(this._injector);
+                    break;
+                case LifecycleStages.Ready:
+                    p.onReady();
+                    break;
+                case LifecycleStages.Rendered:
+                    p.onRendered();
+                    break;
+                case LifecycleStages.Steady:
+                    p.onSteady();
+                    break;
+            }
+        });
+
+        this._lifecycleInitializerService.initModulesOnStage(lifecycle);
     }
 
     private _initDependencies(injector: Injector): void {

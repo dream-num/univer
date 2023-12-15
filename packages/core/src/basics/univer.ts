@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { Ctor } from '@wendellhu/redi';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { Injector } from '@wendellhu/redi';
 
 import type { DocumentDataModel } from '../docs/data-model/document-data-model';
@@ -47,11 +48,13 @@ import { UniverDoc } from './univer-doc';
 import { UniverSheet } from './univer-sheet';
 import { UniverSlide } from './univer-slide';
 
+const INIT_LAZY_PLUGINS_TIMEOUT = 200;
+
 /**
  * Univer.
  */
 export class Univer {
-    private readonly _rootInjector: Injector;
+    private readonly _injector: Injector;
 
     private readonly _univerPluginStore = new PluginStore();
     private readonly _univerPluginRegistry = new PluginRegistry();
@@ -60,46 +63,41 @@ export class Univer {
     private _univerDoc: UniverDoc | null = null;
     private _univerSlide: UniverSlide | null = null;
 
+    private _started: boolean = false;
+
     private get _univerInstanceService(): IUniverInstanceService {
-        return this._rootInjector.get(IUniverInstanceService);
+        return this._injector.get(IUniverInstanceService);
+    }
+
+    private get _lifecycleService(): LifecycleService {
+        return this._injector.get(LifecycleService);
+    }
+
+    private get _lifecycleInitializerService(): LifecycleInitializerService {
+        return this._injector.get(LifecycleInitializerService);
     }
 
     constructor(univerData: Partial<IUniverData> = {}) {
-        this._rootInjector = this._initDependencies();
+        this._injector = this._initDependencies();
 
         const { theme, locale, locales, logLevel } = univerData;
 
-        theme && this._rootInjector.get(ThemeService).setTheme(theme);
-        locales && this._rootInjector.get(LocaleService).load(locales);
-        locale && this._rootInjector.get(LocaleService).setLocale(locale);
-        logLevel && this._rootInjector.get(ILogService).setLogLevel(logLevel);
+        theme && this._injector.get(ThemeService).setTheme(theme);
+        locales && this._injector.get(LocaleService).load(locales);
+        locale && this._injector.get(LocaleService).setLocale(locale);
+        logLevel && this._injector.get(ILogService).setLogLevel(logLevel);
     }
 
     __getInjector(): Injector {
-        return this._rootInjector;
+        return this._injector;
     }
 
     dispose(): void {
-        this._rootInjector.dispose();
-    }
-
-    /** Register a plugin into univer. */
-    registerPlugin<T extends Plugin>(plugin: PluginCtor<T>, configs?: any): void {
-        if (plugin.type === PluginType.Univer) {
-            this._registerUniverPlugin(plugin, configs);
-        } else if (plugin.type === PluginType.Sheet) {
-            this._registerUniverSheets(plugin, configs);
-        } else if (plugin.type === PluginType.Doc) {
-            this._registerUniverDocs(plugin, configs);
-        } else if (plugin.type === PluginType.Slide) {
-            this._registerUniverSlides(plugin, configs);
-        } else {
-            throw new Error(`Unimplemented plugin system for business: "${plugin.type}".`);
-        }
+        this._injector.dispose();
     }
 
     setLocale(locale: LocaleType) {
-        this._rootInjector.get(LocaleService).setLocale(locale);
+        this._injector.get(LocaleService).setLocale(locale);
     }
 
     /**
@@ -113,17 +111,18 @@ export class Univer {
         };
 
         if (!this._univerSheet) {
-            this._univerSheet = this._rootInjector.createInstance(UniverSheet);
-            this._univerPluginRegistry
+            this._tryProgressToStart();
+
+            const univerSheet = (this._univerSheet = this._injector.createInstance(UniverSheet));
+            const sheetPlugins: Array<[PluginCtor<any>, any]> = this._univerPluginRegistry
                 .getRegisterPlugins(PluginType.Sheet)
-                .forEach((p) => this._univerSheet!.addPlugin(p.plugin as unknown as PluginCtor<any>, p.options));
-            this._tryStart();
-            this._univerSheet.start();
+                .map((p) => [p.plugin, p.options]);
+            this._univerPluginRegistry.clearPluginsOfType(PluginType.Sheet);
+            univerSheet.addPlugins(sheetPlugins);
 
             addSheet();
 
             this._tryProgressToReady();
-            this._univerSheet.ready();
         } else {
             addSheet();
         }
@@ -139,11 +138,11 @@ export class Univer {
         };
 
         if (!this._univerDoc) {
-            this._univerDoc = this._rootInjector.createInstance(UniverDoc);
+            this._univerDoc = this._injector.createInstance(UniverDoc);
             this._univerPluginRegistry
                 .getRegisterPlugins(PluginType.Doc)
                 .forEach((p) => this._univerDoc!.addPlugin(p.plugin as unknown as PluginCtor<any>, p.options));
-            this._tryStart();
+            this._tryProgressToStart();
             this._univerDoc.start();
 
             addDoc();
@@ -165,13 +164,14 @@ export class Univer {
         };
 
         if (!this._univerSlide) {
-            this._univerSlide = this._rootInjector.createInstance(UniverSlide);
-
+            this._univerSlide = this._injector.createInstance(UniverSlide);
             this._univerPluginRegistry
                 .getRegisterPlugins(PluginType.Slide)
                 .forEach((p) => this._univerSlide!.addPlugin(p.plugin as unknown as PluginCtor<any>, p.options));
-            this._tryStart();
+
+            this._tryProgressToStart();
             this._univerSlide.ready();
+
             addSlide();
 
             this._tryProgressToReady();
@@ -216,68 +216,135 @@ export class Univer {
         ]);
     }
 
-    private _tryStart(): void {
-        this._rootInjector.get(LifecycleInitializerService).start();
+    /**
+     * Initialize modules provided by Univer-type plugins.
+     */
+    private _tryProgressToStart(): void {
+        if (this._started) {
+            return;
+        }
+
+        this._injector.get(LifecycleInitializerService).start();
+        this._started = true;
     }
 
     private _tryProgressToReady(): void {
-        const lifecycleService = this._rootInjector.get(LifecycleService);
+        const lifecycleService = this._injector.get(LifecycleService);
         if (lifecycleService.stage < LifecycleStages.Ready) {
-            this._rootInjector.get(LifecycleService).stage = LifecycleStages.Ready;
+            this._injector.get(LifecycleService).stage = LifecycleStages.Ready;
             this._univerPluginStore.forEachPlugin((p) => p.onReady());
         }
     }
 
-    private _registerUniverPlugin<T extends Plugin>(plugin: PluginCtor<T>, options?: any): void {
-        // For plugins at Univer level. Plugins would be initialized immediately so they can register dependencies.
-        const pluginInstance: Plugin = this._rootInjector.createInstance(plugin as unknown as Ctor<any>, options);
-        pluginInstance.onStarting(this._rootInjector);
-        this._univerPluginStore.addPlugin(pluginInstance);
+    // #region register plugins
+
+    /** Register a plugin into univer. */
+    registerPlugin<T extends Plugin>(plugin: PluginCtor<T>, config?: any): void {
+        if (plugin.type === PluginType.Univer) {
+            this._registerUniverPlugin(plugin, config);
+        } else if (plugin.type === PluginType.Sheet) {
+            this._registerSheetsPlugin(plugin, config);
+        } else if (plugin.type === PluginType.Doc) {
+            this._registerDocsPlugin(plugin, config);
+        } else if (plugin.type === PluginType.Slide) {
+            this._registerSlidesPlugin(plugin, config);
+        } else {
+            throw new Error(`Unimplemented plugin system for business: "${plugin.type}".`);
+        }
+
+        // If Univer has already started, we should manually call onStarting for the plugin.
+        // We do that in an asynchronous way, because user may lazy load several plugins at the same time.
+        if (this._started) {
+            return this._scheduleInitPluginAfterStarted();
+        }
     }
 
-    private _registerUniverSheets<T extends Plugin>(pluginCtor: PluginCtor<T>, options?: any) {
+    private _initLazyPluginsTimer?: number;
+
+    private _scheduleInitPluginAfterStarted() {
+        if (this._initLazyPluginsTimer === undefined) {
+            this._initLazyPluginsTimer = setTimeout(
+                () => this._flushLazyPlugins(),
+                INIT_LAZY_PLUGINS_TIMEOUT
+            ) as unknown as number;
+        }
+    }
+
+    private _flushLazyPlugins() {
+        this._initLazyPluginsTimer = undefined;
+
+        const univerLazyPlugins = this._univerPluginRegistry.getRegisterPlugins(PluginType.Univer);
+        if (univerLazyPlugins.length) {
+            this._univerPluginRegistry.clearPluginsOfType(PluginType.Univer);
+            const pluginInstances = univerLazyPlugins.map((p) => this._injector.createInstance(p.plugin, p.options));
+            this._takePluginsThroughLifecycle(pluginInstances);
+        }
+
+        if (this._univerSheet) {
+            const sheetPlugins: Array<[PluginCtor<any>, any]> = this._univerPluginRegistry
+                .getRegisterPlugins(PluginType.Sheet)
+                .map((p) => [p.plugin, p.options]);
+
+            if (sheetPlugins.length) {
+                this._univerSheet.addPlugins(sheetPlugins);
+                this._univerPluginRegistry.clearPluginsOfType(PluginType.Sheet);
+            }
+        }
+    }
+
+    private _registerUniverPlugin<T extends Plugin>(pluginCtor: PluginCtor<T>, options?: any): void {
+        if (this._started) {
+            this._univerPluginRegistry.registerPlugin(pluginCtor, options);
+        } else {
+            // For plugins at Univer level. Plugins would be initialized immediately so they can register dependencies.
+            const pluginInstance: Plugin = this._injector.createInstance(pluginCtor, options);
+            pluginInstance.onStarting(this._injector);
+            this._univerPluginStore.addPlugin(pluginInstance);
+        }
+    }
+
+    private _registerSheetsPlugin<T extends Plugin>(pluginCtor: PluginCtor<T>, options?: any) {
         this._univerPluginRegistry.registerPlugin(pluginCtor, options);
-        // TODO: implement add plugin when Univer business object is created
-        // Add plugins to the plugin registration. And for each initialized UniverSheet, instantiate these dependencies immediately.
-        // const sheets = this._currentUniverService.getAllUniverSheetsInstance();
-        // if (sheets.length) {
-        //     sheets.forEach((sheet) => {
-        //         sheet.addPlugin(pluginCtor, options);
-        //     });
-        // }
     }
 
-    private _registerUniverDocs<T extends Plugin>(pluginCtor: PluginCtor<T>, options?: any) {
+    private _registerDocsPlugin<T extends Plugin>(pluginCtor: PluginCtor<T>, options?: any) {
         this._univerPluginRegistry.registerPlugin(pluginCtor, options);
-        // const docs = this._currentUniverService.getAllUniverDocsInstance();
-        // if (docs.length) {
-        //     docs.forEach((doc) => {
-        //         doc.addPlugin(pluginCtor, options);
-        //     });
-        // }
     }
 
-    private _registerUniverSlides<T extends Plugin>(pluginCtor: PluginCtor<T>, options?: any) {
+    private _registerSlidesPlugin<T extends Plugin>(pluginCtor: PluginCtor<T>, options?: any) {
         this._univerPluginRegistry.registerPlugin(pluginCtor, options);
-        // const slides = this._currentUniverService.getAllUniverSlidesInstance();
-        // if (slides.length) {
-        //     slides.forEach((slide) => {
-        //         slide.addPlugin(pluginCtor, options);
-        //     });
-        // }
     }
 
-    private _initializePluginsForDoc(doc: UniverDoc): void {
-        const plugins = this._univerPluginRegistry.getRegisterPlugins(PluginType.Doc);
-        plugins.forEach((p) => {
-            doc.addPlugin(p.plugin as unknown as PluginCtor<any>, p.options);
+    private _takePluginsThroughLifecycle(plugins: Plugin[], skipStarting = false): void {
+        this._lifecycleService.subscribeWithPrevious().subscribe((stage) => {
+            if (skipStarting && stage === LifecycleStages.Starting) {
+                return;
+            }
+
+            this._pluginsRunLifecycle(plugins, stage);
         });
     }
 
-    private _initializePluginsForSlide(slide: UniverSlide): void {
-        const plugins = this._univerPluginRegistry.getRegisterPlugins(PluginType.Slide);
+    private _pluginsRunLifecycle(plugins: Plugin[], lifecycle: LifecycleStages): void {
         plugins.forEach((p) => {
-            slide.addPlugin(p.plugin as unknown as PluginCtor<any>, p.options);
+            switch (lifecycle) {
+                case LifecycleStages.Starting:
+                    p.onStarting(this._injector);
+                    break;
+                case LifecycleStages.Ready:
+                    p.onReady();
+                    break;
+                case LifecycleStages.Rendered:
+                    p.onRendered();
+                    break;
+                case LifecycleStages.Steady:
+                    p.onSteady();
+                    break;
+            }
         });
+
+        this._lifecycleInitializerService.initModulesOnStage(lifecycle);
     }
+
+    // #endregion
 }

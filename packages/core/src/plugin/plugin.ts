@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { Ctor, Injector } from '@wendellhu/redi';
 
 export type PluginCtor<T extends Plugin> = Ctor<T> & { type: PluginType };
@@ -57,7 +59,7 @@ export abstract class Plugin {
 }
 
 interface IPluginRegistryItem {
-    plugin: typeof Plugin;
+    plugin: PluginCtor<Plugin>;
     options: any;
 }
 
@@ -65,20 +67,20 @@ interface IPluginRegistryItem {
  * Store plugin instances.
  */
 export class PluginStore {
-    private readonly plugins: Plugin[] = [];
+    private readonly _plugins: Plugin[] = [];
 
     addPlugin(plugin: Plugin): void {
-        this.plugins.push(plugin);
+        this._plugins.push(plugin);
     }
 
     removePlugins(): Plugin[] {
-        const plugins = this.plugins.slice();
-        this.plugins.length = 0;
+        const plugins = this._plugins.slice();
+        this._plugins.length = 0;
         return plugins;
     }
 
     forEachPlugin(callback: (plugin: Plugin) => void): void {
-        this.plugins.forEach(callback);
+        this._plugins.forEach(callback);
     }
 }
 
@@ -86,18 +88,22 @@ export class PluginStore {
  * Store plugin registry items.
  */
 export class PluginRegistry {
-    private readonly pluginsRegisteredByBusiness = new Map<PluginType, [IPluginRegistryItem]>();
+    private readonly _pluginsRegisteredByBusiness = new Map<PluginType, [IPluginRegistryItem]>();
 
     registerPlugin(pluginCtor: PluginCtor<any>, options: any) {
         const type = pluginCtor.type;
-        if (!this.pluginsRegisteredByBusiness.has(type)) {
-            this.pluginsRegisteredByBusiness.set(type, [] as unknown[] as [IPluginRegistryItem]);
+        if (!this._pluginsRegisteredByBusiness.has(type)) {
+            this._pluginsRegisteredByBusiness.set(type, [] as unknown[] as [IPluginRegistryItem]);
         }
 
-        this.pluginsRegisteredByBusiness.get(type)!.push({ plugin: pluginCtor, options });
+        this._pluginsRegisteredByBusiness.get(type)!.push({ plugin: pluginCtor, options });
     }
 
     getRegisterPlugins(type: PluginType): [IPluginRegistryItem] {
-        return this.pluginsRegisteredByBusiness.get(type) || ([] as unknown[] as [IPluginRegistryItem]);
+        return this._pluginsRegisteredByBusiness.get(type) || ([] as unknown[] as [IPluginRegistryItem]);
+    }
+
+    clearPluginsOfType(type: PluginType): void {
+        this._pluginsRegisteredByBusiness.delete(type);
     }
 }

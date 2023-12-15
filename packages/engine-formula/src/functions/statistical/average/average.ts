@@ -14,26 +14,25 @@
  * limitations under the License.
  */
 
-import type { ErrorValueObject } from '../../../engine/other-object/error-value-object';
 import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import type { BaseValueObject, CalculateValueType } from '../../../engine/value-object/base-value-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Average extends BaseFunction {
     override calculate(...variants: FunctionVariantType[]) {
-        let accumulatorSum: CalculateValueType = new NumberValueObject(0);
-        let accumulatorCount: CalculateValueType = new NumberValueObject(0);
+        let accumulatorSum: BaseValueObject = new NumberValueObject(0);
+        let accumulatorCount: BaseValueObject = new NumberValueObject(0);
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];
 
-            if (variant.isErrorObject()) {
-                return variant as ErrorValueObject;
+            if (variant.isError()) {
+                return variant;
             }
 
-            if (accumulatorSum.isErrorObject()) {
-                return accumulatorSum as ErrorValueObject;
+            if (accumulatorSum.isError()) {
+                return accumulatorSum;
             }
 
             if (variant.isReferenceObject()) {
@@ -41,19 +40,15 @@ export class Average extends BaseFunction {
             }
 
             if ((variant as ArrayValueObject).isArray()) {
-                accumulatorSum = (accumulatorSum as BaseValueObject).plus(
-                    (variant as ArrayValueObject).sum() as BaseValueObject
-                );
-                accumulatorCount = (accumulatorCount as BaseValueObject).plus(
-                    (variant as ArrayValueObject).count() as BaseValueObject
-                );
+                accumulatorSum = accumulatorSum.plus((variant as ArrayValueObject).sum());
+                accumulatorCount = accumulatorCount.plus((variant as ArrayValueObject).count());
             } else {
                 if (!(variant as BaseValueObject).isNull()) {
-                    accumulatorCount = (accumulatorCount as BaseValueObject).plus(new NumberValueObject(1));
+                    accumulatorCount = accumulatorCount.plus(new NumberValueObject(1));
                 }
             }
         }
 
-        return (accumulatorSum as BaseValueObject).divided(accumulatorCount as BaseValueObject);
+        return accumulatorSum.divided(accumulatorCount);
     }
 }

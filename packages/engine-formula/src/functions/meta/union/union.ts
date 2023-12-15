@@ -16,8 +16,8 @@
 
 import { ErrorType } from '../../../basics/error-type';
 import { compareToken } from '../../../basics/token';
-import { ErrorValueObject } from '../../../engine/other-object/error-value-object';
 import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
+import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 
 export class Union extends BaseFunction {
@@ -28,7 +28,7 @@ export class Union extends BaseFunction {
     }
 
     override calculate(variant1: FunctionVariantType, variant2: FunctionVariantType) {
-        if (variant1.isErrorObject() || variant2.isErrorObject()) {
+        if (variant1.isError() || variant2.isError()) {
             return ErrorValueObject.create(ErrorType.REF);
         }
 

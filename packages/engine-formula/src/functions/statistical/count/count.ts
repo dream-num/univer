@@ -16,17 +16,17 @@
 
 import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import type { BaseValueObject, CalculateValueType } from '../../../engine/value-object/base-value-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Count extends BaseFunction {
     override calculate(...variants: FunctionVariantType[]) {
-        let accumulatorAll: CalculateValueType = new NumberValueObject(0);
+        let accumulatorAll: BaseValueObject = new NumberValueObject(0);
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];
 
-            if (variant.isErrorObject()) {
+            if (variant.isError()) {
                 continue;
             }
 
@@ -36,10 +36,10 @@ export class Count extends BaseFunction {
 
             if ((variant as ArrayValueObject).isArray()) {
                 variant = (variant as ArrayValueObject).count();
-                accumulatorAll = (accumulatorAll as BaseValueObject).plus(variant as BaseValueObject);
+                accumulatorAll = accumulatorAll.plus(variant as BaseValueObject);
             } else {
                 if (!(variant as BaseValueObject).isNull() && !(variant as BaseValueObject).isString()) {
-                    accumulatorAll = (accumulatorAll as BaseValueObject).plus(new NumberValueObject(1));
+                    accumulatorAll = accumulatorAll.plus(new NumberValueObject(1));
                 }
             }
         }

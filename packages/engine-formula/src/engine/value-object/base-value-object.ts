@@ -18,19 +18,13 @@ import { ConcatenateType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { ObjectClassType } from '../../basics/object-class-type';
 import { compareToken } from '../../basics/token';
-import { ErrorValueObject } from '../other-object/error-value-object';
 import type { StringValueObject } from './primitive-object';
 
-export type CalculateValueType = BaseValueObject | ErrorValueObject;
+export type callbackMapFnType = (currentValue: BaseValueObject, row: number, column: number) => BaseValueObject;
 
-export type callbackMapFnType = (currentValue: CalculateValueType, row: number, column: number) => CalculateValueType;
-
-export type callbackProductFnType = (
-    currentValue: CalculateValueType,
-    operationValue: CalculateValueType
-) => CalculateValueType;
+export type callbackProductFnType = (currentValue: BaseValueObject, operationValue: BaseValueObject) => BaseValueObject;
 export interface IArrayValueObject {
-    calculateValueList: CalculateValueType[][];
+    calculateValueList: BaseValueObject[][];
     rowCount: number;
     columnCount: number;
     unitId: string;
@@ -52,7 +46,7 @@ export class BaseValueObject extends ObjectClassType {
         return 0;
     }
 
-    getArrayValue(): CalculateValueType[][] {
+    getArrayValue(): BaseValueObject[][] {
         /** abstract */
         return [];
     }
@@ -61,7 +55,7 @@ export class BaseValueObject extends ObjectClassType {
         /** abstract */
     }
 
-    setArrayValue(value: CalculateValueType[][]) {
+    setArrayValue(value: BaseValueObject[][]) {
         /** abstract */
     }
 
@@ -81,7 +75,7 @@ export class BaseValueObject extends ObjectClassType {
         return false;
     }
 
-    isError() {
+    override isError() {
         return false;
     }
 
@@ -89,110 +83,110 @@ export class BaseValueObject extends ObjectClassType {
         return false;
     }
 
-    getNegative(): CalculateValueType {
-        return ErrorValueObject.create(ErrorType.VALUE);
+    getNegative(): BaseValueObject {
+        return ErrorValueObject.create(ErrorType.NAME);
     }
 
-    getReciprocal(): CalculateValueType {
-        return ErrorValueObject.create(ErrorType.VALUE);
+    getReciprocal(): BaseValueObject {
+        return ErrorValueObject.create(ErrorType.NAME);
     }
 
-    plus(valueObject: BaseValueObject): CalculateValueType {
+    plus(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.NAME);
     }
 
-    minus(valueObject: BaseValueObject): CalculateValueType {
+    minus(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.NAME);
     }
 
-    multiply(valueObject: BaseValueObject): CalculateValueType {
+    multiply(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.NAME);
     }
 
-    divided(valueObject: BaseValueObject): CalculateValueType {
+    divided(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.NAME);
     }
 
-    map(callbackFn: callbackMapFnType): CalculateValueType {
+    map(callbackFn: callbackMapFnType): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.NAME);
     }
 
-    product(valueObject: BaseValueObject, callbackFn: callbackProductFnType): CalculateValueType {
+    product(valueObject: BaseValueObject, callbackFn: callbackProductFnType): BaseValueObject {
         return callbackFn(this, valueObject);
     }
 
-    compare(valueObject: BaseValueObject, operator: compareToken): CalculateValueType {
+    compare(valueObject: BaseValueObject, operator: compareToken): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.NAME);
     }
 
-    wildcard(valueObject: StringValueObject, operator: compareToken): CalculateValueType {
+    wildcard(valueObject: StringValueObject, operator: compareToken): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.NAME);
     }
 
-    isEqual(valueObject: BaseValueObject): CalculateValueType {
+    isEqual(valueObject: BaseValueObject): BaseValueObject {
         return this.compare(valueObject as BaseValueObject, compareToken.EQUALS);
     }
 
-    isNotEqual(valueObject: BaseValueObject): CalculateValueType {
+    isNotEqual(valueObject: BaseValueObject): BaseValueObject {
         return this.compare(valueObject as BaseValueObject, compareToken.NOT_EQUAL);
     }
 
-    isGreaterThanOrEqual(valueObject: BaseValueObject): CalculateValueType {
+    isGreaterThanOrEqual(valueObject: BaseValueObject): BaseValueObject {
         return this.compare(valueObject as BaseValueObject, compareToken.GREATER_THAN_OR_EQUAL);
     }
 
-    isLessThanOrEqual(valueObject: BaseValueObject): CalculateValueType {
+    isLessThanOrEqual(valueObject: BaseValueObject): BaseValueObject {
         return this.compare(valueObject as BaseValueObject, compareToken.LESS_THAN_OR_EQUAL);
     }
 
-    isLessThan(valueObject: BaseValueObject): CalculateValueType {
+    isLessThan(valueObject: BaseValueObject): BaseValueObject {
         return this.compare(valueObject as BaseValueObject, compareToken.LESS_THAN);
     }
 
-    isGreaterThan(valueObject: BaseValueObject): CalculateValueType {
+    isGreaterThan(valueObject: BaseValueObject): BaseValueObject {
         return this.compare(valueObject as BaseValueObject, compareToken.GREATER_THAN);
     }
 
-    concatenateFront(valueObject: BaseValueObject): CalculateValueType {
+    concatenateFront(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.NAME);
     }
 
-    concatenateBack(valueObject: BaseValueObject): CalculateValueType {
+    concatenateBack(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.NAME);
     }
 
-    plusBy(value: string | number | boolean): CalculateValueType {
+    plusBy(value: string | number | boolean): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.NAME);
     }
 
-    minusBy(value: string | number | boolean): CalculateValueType {
+    minusBy(value: string | number | boolean): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.NAME);
     }
 
-    multiplyBy(value: string | number | boolean): CalculateValueType {
+    multiplyBy(value: string | number | boolean): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.NAME);
     }
 
-    dividedBy(value: string | number | boolean): CalculateValueType {
+    dividedBy(value: string | number | boolean): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.NAME);
     }
 
-    compareBy(value: string | number | boolean, operator: compareToken): CalculateValueType {
+    compareBy(value: string | number | boolean, operator: compareToken): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.NAME);
     }
 
     concatenate(value: string | number | boolean, concatenateType = ConcatenateType.FRONT): string {
@@ -219,5 +213,68 @@ export class BaseValueObject extends ObjectClassType {
         }
 
         return currentValue;
+    }
+
+    pow(valueObject: BaseValueObject): BaseValueObject {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.NAME);
+    }
+
+    powInverse(valueObject: BaseValueObject): BaseValueObject {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.NAME);
+    }
+
+    sqrt(): BaseValueObject {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    sin(): BaseValueObject {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    mean(): BaseValueObject {
+        /** abstract */
+        return this;
+    }
+
+    median(): BaseValueObject {
+        /** abstract */
+        return this;
+    }
+}
+
+export class ErrorValueObject extends BaseValueObject {
+    constructor(
+        private _errorType: ErrorType,
+        private _errorContent: string = ''
+    ) {
+        super(_errorType);
+    }
+
+    static create(errorType: ErrorType, errorContent?: string) {
+        const errorValueObject = new ErrorValueObject(errorType, errorContent);
+        return errorValueObject;
+    }
+
+    getErrorType() {
+        return this._errorType;
+    }
+
+    getErrorContent() {
+        return this._errorContent;
+    }
+
+    override isEqualType(object: ObjectClassType) {
+        if ((object as ErrorValueObject).getErrorType() === this.getErrorType()) {
+            return true;
+        }
+        return false;
+    }
+
+    override isError() {
+        return true;
     }
 }

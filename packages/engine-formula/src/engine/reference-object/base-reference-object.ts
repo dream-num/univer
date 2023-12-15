@@ -21,9 +21,8 @@ import { FormulaAstLRU } from '../../basics/cache-lru';
 import type { IRuntimeUnitDataType, IUnitData, IUnitSheetNameMap } from '../../basics/common';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { ObjectClassType } from '../../basics/object-class-type';
-import { ErrorValueObject } from '../other-object/error-value-object';
 import { ArrayValueObject } from '../value-object/array-value-object';
-import type { BaseValueObject, CalculateValueType, IArrayValueObject } from '../value-object/base-value-object';
+import { type BaseValueObject, ErrorValueObject, type IArrayValueObject } from '../value-object/base-value-object';
 import {
     BooleanValueObject,
     NullValueObject,
@@ -31,9 +30,9 @@ import {
     StringValueObject,
 } from '../value-object/primitive-object';
 
-export type NodeValueType = BaseValueObject | BaseReferenceObject | ErrorValueObject | AsyncObject;
+export type NodeValueType = BaseValueObject | BaseReferenceObject | AsyncObject;
 
-export type FunctionVariantType = BaseValueObject | BaseReferenceObject | ErrorValueObject;
+export type FunctionVariantType = BaseValueObject | BaseReferenceObject;
 
 const FORMULA_CACHE_LRU_COUNT = 100000;
 
@@ -131,11 +130,7 @@ export class BaseReferenceObject extends ObjectClassType {
     }
 
     iterator(
-        callback: (
-            valueObject: Nullable<CalculateValueType>,
-            rowIndex: number,
-            columnIndex: number
-        ) => Nullable<boolean>
+        callback: (valueObject: Nullable<BaseValueObject>, rowIndex: number, columnIndex: number) => Nullable<boolean>
     ) {
         const { startRow, endRow, startColumn, endColumn } = this.getRangePosition();
 
@@ -431,8 +426,8 @@ export class BaseReferenceObject extends ObjectClassType {
     toArrayValueObject(): ArrayValueObject {
         const { startRow, endRow, startColumn, endColumn } = this.getRangePosition();
 
-        const key = `${this.getUnitId()}_${this.getSheetId()}_${startRow + this._refOffsetX}_${
-            endRow + this._refOffsetX
+        const key = `${this.getUnitId()}_${this.getSheetId()}_${startRow + this._refOffsetY}_${
+            endRow + this._refOffsetY
         }_${startColumn + this._refOffsetX}_${endColumn + this._refOffsetX}`;
 
         const array = FORMULA_REF_TO_ARRAY_CACHE.get(key);
@@ -443,8 +438,8 @@ export class BaseReferenceObject extends ObjectClassType {
 
         const rowSize = endRow - startRow + 1;
         const columnSize = endColumn - startColumn + 1;
-        const arrayValueList: CalculateValueType[][] = new Array(rowSize);
-        this.iterator((valueObject: Nullable<CalculateValueType>, rowIndex: number, columnIndex: number) => {
+        const arrayValueList: BaseValueObject[][] = new Array(rowSize);
+        this.iterator((valueObject: Nullable<BaseValueObject>, rowIndex: number, columnIndex: number) => {
             const row = rowIndex - startRow;
             const column = columnIndex - startColumn;
             if (!arrayValueList[row]) {

@@ -16,11 +16,10 @@
 
 import { ErrorType } from '../../../basics/error-type';
 import type { compareToken } from '../../../basics/token';
-import { ErrorValueObject } from '../../../engine/other-object/error-value-object';
 import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import { valueObjectCompare } from '../../../engine/utils/object-compare';
 import { type ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import type { BooleanValueObject } from '../../../engine/value-object/primitive-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -38,7 +37,7 @@ export class Sumif extends BaseFunction {
         const sumRange = variants[2];
 
         // 2. Check whether all parameter types meet the requirements
-        if (range.isErrorObject() || criteria.isErrorObject() || (sumRange && sumRange.isErrorObject())) {
+        if (range.isError() || criteria.isError() || (sumRange && sumRange.isError())) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
@@ -54,7 +53,7 @@ export class Sumif extends BaseFunction {
             const { startRow, startColumn } = sumRangeValue.getRangePosition();
 
             sumRangeValue.iterator((valueObject, row, column) => {
-                if (!valueObject?.isErrorObject()) {
+                if (!valueObject?.isError()) {
                     const arrayValue = resultArrayValue[row - startRow][column - startColumn] as BaseValueObject;
                     const accumulator = arrayValue.getValue()
                         ? (valueObject as BaseValueObject)

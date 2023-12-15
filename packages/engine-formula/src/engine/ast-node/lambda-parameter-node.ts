@@ -19,7 +19,7 @@ import type { Nullable } from '@univerjs/core';
 import { ErrorType } from '../../basics/error-type';
 import { DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER } from '../../basics/token-type';
 import { LexerNode } from '../analysis/lexer-node';
-import { ErrorValueObject } from '../other-object/error-value-object';
+import { ErrorValueObject } from '../value-object/base-value-object';
 import type { LambdaPrivacyVarType } from './base-ast-node';
 import { BaseAstNode, ErrorNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';

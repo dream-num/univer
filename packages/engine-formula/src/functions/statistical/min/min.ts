@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import type { ErrorValueObject } from '../../../engine/other-object/error-value-object';
 import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import type { BooleanValueObject } from '../../../engine/value-object/primitive-object';
+import type { BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
@@ -28,7 +26,7 @@ export class Min extends BaseFunction {
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];
 
-            if (variant.isErrorObject()) {
+            if (variant.isError()) {
                 return variant as ErrorValueObject;
             }
 
@@ -48,7 +46,7 @@ export class Min extends BaseFunction {
 
             // if (variant.isReferenceObject() || (variant.isValueObject() && (variant as BaseValueObject).isArray())) {
             //     (variant as BaseReferenceObject | ArrayValueObject).iterator((valueObject, row, column) => {
-            //         if (!valueObject.isErrorObject() && !(valueObject as BaseValueObject).isString()) {
+            //         if (!valueObject.isError() && !(valueObject as BaseValueObject).isString()) {
             //             accumulatorAll = this._validator(accumulatorAll, valueObject as BaseValueObject);
             //         }
             //     });
@@ -61,9 +59,9 @@ export class Min extends BaseFunction {
     }
 
     private _validator(accumulatorAll: BaseValueObject, valueObject: BaseValueObject) {
-        const validator = accumulatorAll.isGreaterThan(valueObject as BaseValueObject) as BooleanValueObject;
+        const validator = accumulatorAll.isGreaterThan(valueObject);
         if (validator.getValue()) {
-            accumulatorAll = valueObject as BaseValueObject;
+            accumulatorAll = valueObject;
         }
         return accumulatorAll;
     }

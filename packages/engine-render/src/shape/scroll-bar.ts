@@ -364,7 +364,7 @@ export class ScrollBar extends BaseScrollBar {
             if (!this._isVerticalMove) {
                 return;
             }
-            this._view.scrollBy({
+            this._view.scrollByBar({
                 y: e.offsetY - this._lastY,
             });
             this._lastY = e.offsetY;
@@ -443,7 +443,7 @@ export class ScrollBar extends BaseScrollBar {
             if (!this._isHorizonMove) {
                 return;
             }
-            this._view.scrollBy({
+            this._view.scrollByBar({
                 x: e.offsetX - this._lastX,
             });
             this._lastX = e.offsetX;

@@ -27,7 +27,7 @@ import {
     SetFormulaCalculationStartMutation,
 } from '@univerjs/engine-formula';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { SetRangeValuesMutation, SetStyleCommand } from '@univerjs/sheets';
+import { SetBorderCommand, SetRangeValuesMutation, SetStyleCommand } from '@univerjs/sheets';
 
 import { IActiveDirtyManagerService } from '../services/active-dirty-manager.service';
 
@@ -82,7 +82,11 @@ export class TriggerCalculationController extends Disposable {
                 if (command.id === SetRangeValuesMutation.id) {
                     const params = command.params as ISetRangeValuesMutationParams;
 
-                    if ((options && options.local === true) || params.trigger === SetStyleCommand.id) {
+                    if (
+                        (options && options.local === true) ||
+                        params.trigger === SetStyleCommand.id ||
+                        params.trigger === SetBorderCommand.id
+                    ) {
                         return;
                     }
                 }

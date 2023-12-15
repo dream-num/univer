@@ -26,21 +26,14 @@ import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultBorderAuxiliaryExtension';
 
+const BORDER_AUXILIARY_Z_INDEX = 10;
 export class BorderAuxiliary extends SheetExtension {
     override uKey = UNIQUE_KEY;
 
-    override zIndex = 10;
+    override zIndex = BORDER_AUXILIARY_Z_INDEX;
 
     override draw(ctx: CanvasRenderingContext2D, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {
-        const {
-            rowColumnSegment,
-            rowHeaderWidth = 0,
-            columnHeaderHeight = 0,
-            dataMergeCache,
-            overflowCache,
-            stylesCache,
-            showGridlines,
-        } = spreadsheetSkeleton;
+        const { rowColumnSegment, dataMergeCache, overflowCache, stylesCache, showGridlines } = spreadsheetSkeleton;
         const { border } = stylesCache;
         const { startRow, endRow, startColumn, endColumn } = rowColumnSegment;
         if (!spreadsheetSkeleton || showGridlines === BooleanNumber.FALSE) {
@@ -89,8 +82,13 @@ export class BorderAuxiliary extends SheetExtension {
         ctx.stroke();
         ctx.closePath();
 
-        const { scaleX = 1, scaleY = 1 } = parentScale;
+        // merge cell
+        this._clearRectangle(ctx, scale, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
 
+        // overflow cell
+        this._clearRectangle(ctx, scale, rowHeightAccumulation, columnWidthAccumulation, overflowCache.toNativeArray());
+
+        const { scaleX = 1, scaleY = 1 } = parentScale;
         // Clearing the dashed line issue caused by overlaid auxiliary lines and strokes
         border?.forValue((rowIndex, columnIndex, borderCaches) => {
             if (!borderCaches) {
@@ -135,11 +133,7 @@ export class BorderAuxiliary extends SheetExtension {
             }
         });
         ctx.closePath();
-        // merge cell
-        this._clearRectangle(ctx, scale, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
 
-        // overflow cell
-        this._clearRectangle(ctx, scale, rowHeightAccumulation, columnWidthAccumulation, overflowCache.toNativeArray());
         ctx.restore();
     }
 
@@ -171,7 +165,7 @@ export class BorderAuxiliary extends SheetExtension {
                 scale
             );
 
-            ctx.clearRect(startX, startY, endX - startX, endY - startY);
+            ctx.clearRect(startX - 1, startY - 1, endX - startX + 2, endY - startY + 2);
 
             // After ClearRect, the lines will become thinner, and the lines will be repaired below.
             ctx.beginPath();
@@ -183,12 +177,6 @@ export class BorderAuxiliary extends SheetExtension {
             ctx.stroke();
             ctx.closePath();
         }
-
-        // dataMergeCache?.forEach((r, dataMergeRow) => {
-        //     dataMergeRow?.forEach((c, dataCache) => {
-
-        //     });
-        // });
     }
 }
 

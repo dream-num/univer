@@ -122,20 +122,20 @@ export function clearLineByBorderType(
         drawEndY = endY;
     }
 
-    ctx.beginPath();
-    ctx.strokeStyle = 'rgb(255,255,255)';
-    ctx.lineWidth = 1.5 / Math.max(scaleX, scaleY);
-    ctx.moveTo(drawStartX, drawStartY);
-    ctx.lineTo(drawEndX, drawEndY);
-    ctx.stroke();
-
     // ctx.beginPath();
-    // ctx.clearRect(
-    //     drawStartX - 1 / scaleX,
-    //     drawStartY - 1 / scaleY,
-    //     drawEndX - drawStartX + 2 / scaleX,
-    //     drawEndY - drawStartY + 2 / scaleY
-    // );
+    // ctx.strokeStyle = 'rgb(255,255,255)';
+    // ctx.lineWidth = 1.5 / Math.max(scaleX, scaleY);
+    // ctx.moveTo(drawStartX, drawStartY);
+    // ctx.lineTo(drawEndX, drawEndY);
+    // ctx.stroke();
+
+    ctx.beginPath();
+    ctx.clearRect(
+        drawStartX - 1 / scaleX,
+        drawStartY - 1 / scaleY,
+        drawEndX - drawStartX + 2 / scaleX,
+        drawEndY - drawStartY + 2 / scaleY
+    );
 }
 
 export function setLineType(ctx: CanvasRenderingContext2D, style: BorderStyleTypes) {

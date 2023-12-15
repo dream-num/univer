@@ -82,8 +82,10 @@ import {
     RemoveSheetMutation,
     runRefRangeMutations,
     SelectionManagerService,
+    SetBorderCommand,
     SetRangeValuesMutation,
     SetRangeValuesUndoMutationFactory,
+    SetStyleCommand,
     SetWorksheetNameCommand,
     SheetInterceptorService,
 } from '@univerjs/sheets';
@@ -157,22 +159,22 @@ export class UpdateFormulaController extends Disposable {
 
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo, options) => {
-                const { id, params } = command;
-                if (!params) return;
+                if (!command.params) return;
 
-                switch (id) {
-                    case SetRangeValuesMutation.id:
-                        this._handleSetRangeValuesMutation(params as ISetRangeValuesMutationParams, options);
-                        break;
-                    case RemoveSheetMutation.id:
-                        this._handleRemoveSheetMutation(params as IRemoveSheetMutationParams);
-                        break;
-                    case InsertSheetMutation.id:
-                        this._handleInsertSheetMutation(params as IInsertSheetMutationParams);
-                        break;
-
-                    default:
-                        break;
+                if (command.id === SetRangeValuesMutation.id) {
+                    const params = command.params as ISetRangeValuesMutationParams;
+                    if (
+                        (options && options.local === true) ||
+                        params.trigger === SetStyleCommand.id ||
+                        params.trigger === SetBorderCommand.id
+                    ) {
+                        return;
+                    }
+                    this._handleSetRangeValuesMutation(params as ISetRangeValuesMutationParams, options);
+                } else if (command.id === RemoveSheetMutation.id) {
+                    this._handleRemoveSheetMutation(command.params as IRemoveSheetMutationParams);
+                } else if (command.id === InsertSheetMutation.id) {
+                    this._handleInsertSheetMutation(command.params as IInsertSheetMutationParams);
                 }
             })
         );

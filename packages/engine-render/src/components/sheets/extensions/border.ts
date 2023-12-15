@@ -26,14 +26,15 @@ import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultBorderExtension';
 
+const BORDER_Z_INDEX = 30;
+
 export class Border extends SheetExtension {
     override uKey = UNIQUE_KEY;
 
-    override zIndex = 30;
+    override zIndex = BORDER_Z_INDEX;
 
     override draw(ctx: CanvasRenderingContext2D, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {
-        const { rowColumnSegment, rowHeaderWidth, columnHeaderHeight, dataMergeCache, stylesCache, overflowCache } =
-            spreadsheetSkeleton;
+        const { dataMergeCache, stylesCache, overflowCache } = spreadsheetSkeleton;
         const { border } = stylesCache;
         if (!spreadsheetSkeleton) {
             return;
@@ -128,24 +129,24 @@ export class Border extends SheetExtension {
         if (type === BORDER_TYPE.TOP || type === BORDER_TYPE.BOTTOM) {
             return isDraw;
         }
-        overflowCache &&
-            overflowCache.forEach((row, rowArray) => {
-                if (row !== borderRow) {
-                    return true;
-                }
-                rowArray.forEach((column, rectangle) => {
-                    const { startColumn, endColumn } = rectangle;
-                    if (type === BORDER_TYPE.LEFT && column > startColumn && column <= endColumn) {
-                        isDraw = true;
-                        return false;
-                    }
 
-                    if (type === BORDER_TYPE.RIGHT && column >= startColumn && column < endColumn) {
-                        isDraw = true;
-                        return false;
-                    }
-                });
+        overflowCache?.forEach((row, rowArray) => {
+            if (row !== borderRow) {
+                return true;
+            }
+            rowArray.forEach((column, rectangle) => {
+                const { startColumn, endColumn } = rectangle;
+                if (type === BORDER_TYPE.LEFT && borderColumn > startColumn && borderColumn <= endColumn) {
+                    isDraw = true;
+                    return false;
+                }
+
+                if (type === BORDER_TYPE.RIGHT && borderColumn >= startColumn && borderColumn < endColumn) {
+                    isDraw = true;
+                    return false;
+                }
             });
+        });
         return isDraw;
     }
 }

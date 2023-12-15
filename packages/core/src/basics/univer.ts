@@ -142,6 +142,7 @@ export class Univer extends PluginHolder {
             const docPlugins: Array<[PluginCtor<any>, any]> = this._univerPluginRegistry
                 .getRegisterPlugins(PluginType.Doc)
                 .map((p) => [p.plugin, p.options]);
+            this._univerPluginRegistry.clearPluginsOfType(PluginType.Doc);
             univerDoc.addPlugins(docPlugins);
 
             addDoc();
@@ -168,6 +169,7 @@ export class Univer extends PluginHolder {
             const slidePlugins: Array<[PluginCtor<any>, any]> = this._univerPluginRegistry
                 .getRegisterPlugins(PluginType.Slide)
                 .map((p) => [p.plugin, p.options]);
+            this._univerPluginRegistry.clearPluginsOfType(PluginType.Slide);
             univerSlide.addPlugins(slidePlugins);
 
             addSlide();

@@ -58,6 +58,7 @@ export class PageRenderController extends Disposable {
 
             const docsComponent = mainComponent as Documents;
 
+            console.log('debug', docsComponent.getSkeleton());
             const pageSize = docsComponent.getSkeleton()?.getPageSize();
 
             docsComponent.onPageRenderObservable.add((config: IPageRenderConfig) => {

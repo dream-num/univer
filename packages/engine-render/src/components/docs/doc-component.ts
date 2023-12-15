@@ -20,12 +20,16 @@ import { RENDER_CLASS_TYPE } from '../../basics/const';
 import type { IDocumentSkeletonLine, IDocumentSkeletonSpan } from '../../basics/i-document-skeleton-cached';
 import { PageLayoutType } from '../../basics/i-document-skeleton-cached';
 import type { INodeInfo } from '../../basics/interfaces';
-import type { IViewportBound } from '../../basics/vector2';
+import type { IBoundRectNoAngle, IViewportBound } from '../../basics/vector2';
 import { RenderComponent } from '../component';
 import type { DOCS_EXTENSION_TYPE } from './doc-extension';
 import type { DocumentSkeleton } from './doc-skeleton';
 
-export class DocComponent extends RenderComponent<IDocumentSkeletonSpan | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE> {
+export class DocComponent extends RenderComponent<
+    IDocumentSkeletonSpan | IDocumentSkeletonLine,
+    DOCS_EXTENSION_TYPE,
+    IBoundRectNoAngle[]
+> {
     pageMarginLeft: number = 0;
 
     pageMarginTop: number = 0;

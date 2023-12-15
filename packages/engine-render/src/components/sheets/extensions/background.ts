@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IScale } from '@univerjs/core';
+import type { IRange, IScale } from '@univerjs/core';
 
 import { fixLineWidthByScale, getColor } from '../../../basics/tools';
 import { SpreadsheetExtensionRegistry } from '../../extension';
@@ -28,7 +28,12 @@ export class Background extends SheetExtension {
 
     override zIndex = 20;
 
-    override draw(ctx: CanvasRenderingContext2D, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {
+    override draw(
+        ctx: CanvasRenderingContext2D,
+        parentScale: IScale,
+        spreadsheetSkeleton: SpreadsheetSkeleton,
+        diffRanges?: IRange[]
+    ) {
         const { rowHeaderWidth, columnHeaderHeight, dataMergeCache, stylesCache } = spreadsheetSkeleton;
         const { background } = stylesCache;
         if (!spreadsheetSkeleton) {
@@ -66,6 +71,13 @@ export class Background extends SheetExtension {
                         let { startY, endY, startX, endX } = cellInfo;
                         const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
                         if (isMerged) {
+                            return true;
+                        }
+
+                        if (
+                            !this.isRenderDiffRangesByRow(mergeInfo.startRow, diffRanges) &&
+                            !this.isRenderDiffRangesByRow(mergeInfo.endRow, diffRanges)
+                        ) {
                             return true;
                         }
 

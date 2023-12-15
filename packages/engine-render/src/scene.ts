@@ -846,7 +846,7 @@ export class Scene extends ThinScene {
     }
 
     private _createDefaultLayer(zIndex: number = 1) {
-        const defaultLayer = Layer.create(this, [], zIndex);
+        const defaultLayer = new Layer(this, [], zIndex);
         this.addLayer(defaultLayer);
         return defaultLayer;
     }

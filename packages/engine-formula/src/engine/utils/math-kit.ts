@@ -15,6 +15,14 @@
  */
 
 export function round(number: number, precision: number): number {
-    const factor = 10 ** precision;
+    const factor = 10 ** Math.floor(precision);
     return Math.round(number * factor) / factor;
+}
+
+export function pow(number: number, precision: number) {
+    return number ** precision;
+}
+
+export function log10(number: number) {
+    return Math.log10(number);
 }

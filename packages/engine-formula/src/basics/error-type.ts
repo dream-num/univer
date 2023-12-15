@@ -22,7 +22,7 @@ export enum ErrorType {
     NAME = '#NAME!',
     VALUE = '#VALUE!',
     NUM = '#NUM!',
-    NA = '#NA!',
+    NA = '#N/A',
 
     /** Cyclic dependency. */
     CYCLE = '#CYCLE!',

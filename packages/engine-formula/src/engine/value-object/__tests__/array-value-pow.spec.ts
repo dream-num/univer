@@ -18,6 +18,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { ArrayValueObject, transformToValueObject } from '../array-value-object';
+import { NumberValueObject } from '../primitive-object';
 
 describe('arrayValueObject pow method test', () => {
     const originArrayValueObject = new ArrayValueObject({
@@ -50,9 +51,9 @@ describe('arrayValueObject pow method test', () => {
             });
 
             expect((originArrayValueObject.pow(powArrayValueObject) as ArrayValueObject).toValue()).toStrictEqual([
-                [1, 8, 81, '#NA!', '#NA!'],
-                [6, 2401, 64, '#NA!', '#NA!'],
-                ['#NA!', '#NA!', '#NA!', '#NA!', '#NA!'],
+                [1, 8, 81, '#N/A', '#N/A'],
+                [6, 2401, 64, '#N/A', '#N/A'],
+                ['#N/A', '#N/A', '#N/A', '#N/A', '#N/A'],
             ]);
         });
 
@@ -125,6 +126,48 @@ describe('arrayValueObject pow method test', () => {
                 [3, 9, 27, 81, 243],
                 [64, 128, 256, 512, 1024],
                 [1, 1, 1, 1, 1],
+            ]);
+        });
+
+        it('origin nm multiple formats, param 1 number', () => {
+            const originArrayValueObject = new ArrayValueObject({
+                calculateValueList: transformToValueObject([
+                    [1, ' ', 1.23, true, false],
+                    [0, '100', '2.34', 'test', -3],
+                ]),
+                rowCount: 2,
+                columnCount: 5,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const roundValueObject = new NumberValueObject(1);
+
+            expect((originArrayValueObject.pow(roundValueObject) as ArrayValueObject).toValue()).toStrictEqual([
+                [1, '#VALUE!', 1.23, 1, 0],
+                [0, 100, 2.34, '#VALUE!', -3],
+            ]);
+        });
+
+        it('origin 1 number, param nm multiple formats', () => {
+            const originValueObject = new NumberValueObject(1);
+            const roundArrayValueObject = new ArrayValueObject({
+                calculateValueList: transformToValueObject([
+                    [1, ' ', 1.23, true, false],
+                    [0, '100', '2.34', 'test', -3],
+                ]),
+                rowCount: 2,
+                columnCount: 5,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+
+            expect((originValueObject.pow(roundArrayValueObject) as ArrayValueObject).toValue()).toStrictEqual([
+                [1, '#VALUE!', 1, 1, 1],
+                [1, 1, 1, '#VALUE!', 1],
             ]);
         });
     });

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
+import { isRealNum, type Nullable } from '@univerjs/core';
 
 import { BooleanValue } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
@@ -626,6 +626,15 @@ export class ArrayValueObject extends BaseValueObject {
         return allValue.get(0, (count - 1) / 2);
     }
 
+    override log10(): BaseValueObject {
+        return this.map((currentValue) => {
+            if (currentValue.isError()) {
+                return currentValue;
+            }
+            return (currentValue as BaseValueObject).log10();
+        });
+    }
+
     override round(valueObject: BaseValueObject): BaseValueObject {
         return this._batchOperator(valueObject, BatchOperatorType.ROUND);
     }
@@ -1154,7 +1163,7 @@ export class ValueObjectFactory {
             if (rawValueUpper === BooleanValue.TRUE || rawValueUpper === BooleanValue.FALSE) {
                 return new BooleanValueObject(rawValueUpper);
             }
-            if (!isNaN(Number(rawValue))) {
+            if (isRealNum(rawValue)) {
                 return new NumberValueObject(rawValue);
             }
             if (new RegExp($ARRAY_VALUE_REGEX, 'g').test(rawValue)) {

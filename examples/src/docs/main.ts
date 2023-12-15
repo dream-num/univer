@@ -25,14 +25,6 @@ import { DEFAULT_DOCUMENT_DATA_CN } from '../data';
 import { DebuggerPlugin } from '../plugins/debugger';
 import { locales } from './locales';
 
-// package info
-console.table({
-    NODE_ENV: process.env.NODE_ENV,
-    GIT_COMMIT_HASH: process.env.GIT_COMMIT_HASH,
-    GIT_REF_NAME: process.env.GIT_REF_NAME,
-    BUILD_TIME: process.env.BUILD_TIME,
-});
-
 // univer
 const univer = new Univer({
     theme: defaultTheme,

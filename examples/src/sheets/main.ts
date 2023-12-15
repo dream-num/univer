@@ -15,7 +15,7 @@
  */
 
 import { LocaleType, LogLevel, Univer } from '@univerjs/core';
-import { greenTheme } from '@univerjs/design';
+import { defaultTheme } from '@univerjs/design';
 import { RichTextEditingMutation, UniverDocsPlugin } from '@univerjs/docs';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
@@ -33,17 +33,9 @@ import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data';
 import { DebuggerPlugin } from '../plugins/debugger';
 import { locales } from './locales';
 
-// package info
-console.table({
-    NODE_ENV: process.env.NODE_ENV,
-    GIT_COMMIT_HASH: process.env.GIT_COMMIT_HASH,
-    GIT_REF_NAME: process.env.GIT_REF_NAME,
-    BUILD_TIME: process.env.BUILD_TIME,
-});
-
 // univer
 const univer = new Univer({
-    theme: greenTheme,
+    theme: defaultTheme,
     locale: LocaleType.ZH_CN,
     locales,
     logLevel: LogLevel.VERBOSE,

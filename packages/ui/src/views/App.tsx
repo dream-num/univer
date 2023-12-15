@@ -96,7 +96,7 @@ export function App(props: IUniverAppProps) {
 
     return (
         <ConfigProvider locale={locale} mountContainer={portalContainer}>
-            <section className={styles.appLayout}>
+            <div className={styles.appLayout}>
                 {/* header */}
                 {props.toolbar && <MenuBar headerMenuComponents={headerMenuComponents} />}
 
@@ -104,33 +104,35 @@ export function App(props: IUniverAppProps) {
                 <section className={styles.appContainer}>
                     <header className={styles.appContainerHeader}>{props.toolbar && <Toolbar />}</header>
 
-                    <section className={styles.appContainerWrapper}>
-                        <section className={styles.appContainerContent}>
-                            <header>
-                                <ComponentContainer components={headerComponents} />
-                            </header>
+                    <div className={styles.appContainerMain}>
+                        <div className={styles.appContainerWrapper}>
+                            <section className={styles.appContainerContent}>
+                                <header>
+                                    <ComponentContainer components={headerComponents} />
+                                </header>
 
-                            <section
-                                className={styles.appContainerCanvas}
-                                ref={contentRef}
-                                data-range-selector
-                                onContextMenu={(e) => e.preventDefault()}
-                            >
-                                <ComponentContainer components={contentComponents} />
+                                <section
+                                    className={styles.appContainerCanvas}
+                                    ref={contentRef}
+                                    data-range-selector
+                                    onContextMenu={(e) => e.preventDefault()}
+                                >
+                                    <ComponentContainer components={contentComponents} />
+                                </section>
                             </section>
-                        </section>
 
-                        <aside className={styles.appContainerSidebar}>
-                            <Sidebar />
-                        </aside>
-                    </section>
+                            <aside className={styles.appContainerSidebar}>
+                                <Sidebar />
+                            </aside>
+                        </div>
+
+                        {/* footer */}
+                        <footer className={styles.appFooter}>
+                            <ComponentContainer components={footerComponents} />
+                        </footer>
+                    </div>
                 </section>
-
-                {/* footer */}
-                <footer className={styles.appFooter}>
-                    <ComponentContainer components={footerComponents} />
-                </footer>
-            </section>
+            </div>
 
             <ComponentContainer components={globalComponents} />
         </ConfigProvider>

@@ -19,14 +19,13 @@ import {
     BaselineOffset,
     BooleanNumber,
     BorderStyleTypes,
-    BulletAlignment,
     ColumnSeparatorType,
-    GlyphType,
     HorizontalAlign,
     LocaleType,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
+    PresetListType,
     SectionType,
     SheetTypes,
     Tools,
@@ -63,84 +62,6 @@ const richTextTestFloat: IDocumentData = {
             layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
             behindDoc: BooleanNumber.FALSE,
             wrapText: WrapTextType.BOTH_SIDES,
-        },
-    },
-    lists: {
-        bulletList: {
-            listId: 'bulletList',
-            nestingLevel: [
-                {
-                    bulletAlignment: BulletAlignment.START,
-                    glyphFormat: ' %0',
-                    textStyle: {
-                        fs: 12,
-                    },
-                    startNumber: 0,
-                    glyphSymbol: '\u25CF',
-                    hanging: 21,
-                    indentStart: 21,
-                },
-                {
-                    bulletAlignment: BulletAlignment.START,
-                    glyphFormat: ' %1',
-                    textStyle: {
-                        fs: 12,
-                    },
-                    startNumber: 0,
-                    glyphSymbol: '\u25A0',
-                    hanging: 21,
-                    indentStart: 42,
-                },
-                {
-                    bulletAlignment: BulletAlignment.START,
-                    glyphFormat: ' %1',
-                    textStyle: {
-                        fs: 12,
-                    },
-                    startNumber: 0,
-                    glyphSymbol: '\u25C6',
-                    hanging: 21,
-                    indentStart: 63,
-                },
-            ],
-        },
-        orderList: {
-            listId: 'orderList',
-            nestingLevel: [
-                {
-                    bulletAlignment: BulletAlignment.START,
-                    glyphFormat: ' %1.',
-                    textStyle: {
-                        fs: 12,
-                    },
-                    startNumber: 0,
-                    glyphType: GlyphType.ROMAN,
-                    hanging: 21,
-                    indentStart: 21,
-                },
-                {
-                    bulletAlignment: BulletAlignment.START,
-                    glyphFormat: ' %1.%2)',
-                    textStyle: {
-                        fs: 12,
-                    },
-                    startNumber: 0,
-                    glyphType: GlyphType.ROMAN,
-                    hanging: 21,
-                    indentStart: 42,
-                },
-                {
-                    bulletAlignment: BulletAlignment.START,
-                    glyphFormat: ' %1.%2.%3.',
-                    textStyle: {
-                        fs: 12,
-                    },
-                    startNumber: 0,
-                    glyphType: GlyphType.ROMAN,
-                    hanging: 21,
-                    indentStart: 63,
-                },
-            ],
         },
     },
     body: {
@@ -192,6 +113,7 @@ const richTextTestFloat: IDocumentData = {
                 startIndex: 60,
                 bullet: {
                     listId: 'orderList',
+                    listType: PresetListType.ORDER_LIST,
                     nestingLevel: 0,
                     textStyle: {
                         fs: 20,
@@ -278,6 +200,7 @@ const richTextTest: IDocumentData = {
                 startIndex: 60,
                 bullet: {
                     listId: 'orderList',
+                    listType: PresetListType.ORDER_LIST,
                     nestingLevel: 0,
                     textStyle: {
                         fs: 20,

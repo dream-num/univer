@@ -14,23 +14,45 @@
  * limitations under the License.
  */
 
+import { LocaleService } from '@univerjs/core';
 import { Dropdown, Tooltip } from '@univerjs/design';
 import { MoreFunctionSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
+import clsx from 'clsx';
+import type { ComponentType } from 'react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-import { useObservable } from '../../../components/hooks/observable';
 import type { IDisplayMenuItem, IMenuItem } from '../../../services/menu/menu';
 import { MenuGroup, MenuPosition } from '../../../services/menu/menu';
 import { IMenuService } from '../../../services/menu/menu.service';
+import { ComponentContainer } from '../ComponentContainer';
 import { ToolbarButton } from './Button/ToolbarButton';
-import type { IMenuGroup } from './hooks/menu';
-import { position$, positions } from './hooks/menu';
 import styles from './index.module.less';
 import { ToolbarItem } from './ToolbarItem';
 
-export function Toolbar() {
+interface IMenuGroup {
+    name: MenuPosition;
+    menuItems: Array<IDisplayMenuItem<IMenuItem>>;
+}
+
+export const positions = [
+    MenuPosition.TOOLBAR_START,
+    MenuPosition.TOOLBAR_INSERT,
+    MenuPosition.TOOLBAR_FORMULAS,
+    MenuPosition.TOOLBAR_DATA,
+    MenuPosition.TOOLBAR_VIEW,
+    MenuPosition.TOOLBAR_OTHERS,
+];
+
+export interface IToolbarProps {
+    headerMenuComponents?: Set<() => ComponentType>;
+}
+
+export function Toolbar(props: IToolbarProps) {
+    const { headerMenuComponents } = props;
+    const localeService = useDependency(LocaleService);
     const menuService = useDependency(IMenuService);
+    const [position, setPosition] = useState<MenuPosition>(MenuPosition.TOOLBAR_START);
 
     const toolbarRef = useRef<HTMLDivElement>(null);
     const toolbarContainerRef = useRef<HTMLDivElement>(null);
@@ -46,8 +68,6 @@ export function Toolbar() {
 
     const [group, setGroup] = useState<IMenuGroup[]>([]);
     const [collapsedId, setCollapsedId] = useState<string[]>([]);
-
-    const position = useObservable(position$, MenuPosition.TOOLBAR_START, true);
 
     useEffect(() => {
         const listener = menuService.menuChanged$.subscribe(() => {
@@ -138,6 +158,26 @@ export function Toolbar() {
 
     return (
         <>
+            <header className={styles.headerbar}>
+                <div className={styles.menubar}>
+                    {group.length > 1 &&
+                        group.map((item, index) => (
+                            <a
+                                key={index}
+                                className={clsx(styles.menubarItem, {
+                                    [styles.menubarItemActive]: item.name === position,
+                                })}
+                                onClick={() => setPosition(item.name)}
+                            >
+                                {localeService.t(item.name)}
+                            </a>
+                        ))}
+                </div>
+                <div className={styles.headerMenu}>
+                    <ComponentContainer components={headerMenuComponents} />
+                </div>
+            </header>
+
             <div ref={toolbarRef} className={styles.toolbar}>
                 <div className={styles.toolbarContainer}>
                     {Object.entries(toolbarGroups).map(

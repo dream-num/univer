@@ -15,7 +15,7 @@
  */
 
 export interface ILanguagePack {
-    [key: string]: string | Array<{ name: string; value: string }> | ILanguagePack;
+    [key: string]: string | ILanguagePack | ILanguagePack[];
 }
 
 export interface ILocales {

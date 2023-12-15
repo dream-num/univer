@@ -32,6 +32,7 @@ export interface IStatisticItem {
     name: IFunctionNames;
     value: number;
     show: boolean;
+    disable: boolean;
 }
 
 export const functionDisplayNames: FunctionNameMap = {

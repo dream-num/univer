@@ -18,11 +18,13 @@ import {
     Disposable,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
 } from '@univerjs/core';
 import type { Documents, IPageRenderConfig } from '@univerjs/engine-render';
 import { IRenderManagerService, Rect } from '@univerjs/engine-render';
+import { Inject } from '@wendellhu/redi';
 
 const PAGE_STROKE_COLOR = 'rgba(198,198,198, 1)';
 
@@ -30,7 +32,10 @@ const PAGE_FILL_COLOR = 'rgba(255,255,255, 1)';
 
 @OnLifecycle(LifecycleStages.Rendered, PageRenderController)
 export class PageRenderController extends Disposable {
-    constructor(@IRenderManagerService private readonly _renderManagerService: IRenderManagerService) {
+    constructor(
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @Inject(IUniverInstanceService) private readonly _currentUniverService: IUniverInstanceService
+    ) {
         super();
 
         this._initialize();
@@ -45,6 +50,10 @@ export class PageRenderController extends Disposable {
     private _initialRenderRefresh() {
         this._renderManagerService.currentRender$.subscribe((unitId) => {
             if (unitId == null) {
+                return;
+            }
+
+            if (this._currentUniverService.getUniverDocInstance(unitId) == null) {
                 return;
             }
 

@@ -34,8 +34,10 @@ export interface IPermissionService {
     composePermission$(unitID: string, permissionIdList: string[]): Observable<PermissionPoint[]>;
     composePermission(unitID: string, permissionIdList: string[]): PermissionPoint[];
 }
+
 export const IPermissionService = createIdentifier<IPermissionService>('univer.permission-service');
 const resourceKey = 'PERMISSION';
+
 @OnLifecycle(LifecycleStages.Starting, PermissionService)
 export class PermissionService extends Disposable implements IPermissionService {
     private _permissionPointMap: Map<string, Map<string, BehaviorSubject<PermissionPoint>>> = new Map();

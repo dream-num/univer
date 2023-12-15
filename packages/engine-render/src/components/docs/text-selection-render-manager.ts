@@ -134,6 +134,8 @@ export interface ITextSelectionRenderManager {
     readonly onPaste$: Observable<Nullable<IEditorInputConfig>>;
     readonly textSelectionInner$: Observable<Nullable<ITextSelectionInnerParam>>;
 
+    __getEditorContainer(): HTMLElement;
+
     getViewPort(): Viewport;
 
     enableSelection(): void;
@@ -303,6 +305,10 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         if (this._docSkeleton && this._scene) {
             this.changeRuntime(this._docSkeleton, this._scene, viewport);
         }
+    }
+
+    __getEditorContainer(): HTMLElement {
+        return this._container;
     }
 
     getViewPort() {

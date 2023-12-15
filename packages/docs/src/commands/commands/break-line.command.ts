@@ -17,7 +17,6 @@
 import type { ICommand, IParagraph } from '@univerjs/core';
 import { CommandType, DataStreamTreeTokenType, ICommandService, IUniverInstanceService, Tools } from '@univerjs/core';
 
-import { DocSkeletonManagerService } from '../../services/doc-skeleton-manager.service';
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import { InsertCommand } from './core-editing.command';
 
@@ -55,17 +54,15 @@ export const BreakLineCommand: ICommand = {
     id: 'doc.command.break-line',
 
     type: CommandType.COMMAND,
+
     handler: async (accessor) => {
-        const docSkeletonManagerService = accessor.get(DocSkeletonManagerService);
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const currentUniverService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
 
-        const skeleton = docSkeletonManagerService.getCurrent()?.skeleton;
-
         const activeRange = textSelectionManagerService.getActiveRange();
 
-        if (activeRange == null || skeleton == null) {
+        if (activeRange == null) {
             return false;
         }
 
@@ -84,7 +81,7 @@ export const BreakLineCommand: ICommand = {
         ];
 
         const paragraphs = docDataModel.getBody()?.paragraphs ?? [];
-        const prevParagraph = paragraphs.find((p) => p.startIndex === startOffset);
+        const prevParagraph = paragraphs.find((p) => p.startIndex >= startOffset);
 
         // split paragraph into two.
         const result = await commandService.executeCommand(InsertCommand.id, {

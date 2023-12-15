@@ -750,6 +750,10 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                     nestingLevel: 0,
                     textStyle: {
                         fs: 20,
+                        bl: BooleanNumber.TRUE,
+                        bg: {
+                            rgb: 'rgb(255, 255, 0)',
+                        },
                     },
                 },
                 paragraphStyle: {

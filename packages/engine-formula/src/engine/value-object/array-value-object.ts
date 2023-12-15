@@ -38,6 +38,8 @@ enum BatchOperatorType {
     LIKE,
     POW,
     ROUND,
+    FLOOR,
+    CEIL,
 }
 
 enum ArrayCalculateType {
@@ -648,6 +650,32 @@ export class ArrayValueObject extends BaseValueObject {
         });
     }
 
+    override floor(valueObject: BaseValueObject): BaseValueObject {
+        return this._batchOperator(valueObject, BatchOperatorType.FLOOR);
+    }
+
+    override floorInverse(valueObject: BaseValueObject): BaseValueObject {
+        return this.map((currentValue) => {
+            if (currentValue.isError()) {
+                return currentValue;
+            }
+            return (valueObject as BaseValueObject).floor(currentValue as BaseValueObject);
+        });
+    }
+
+    override ceil(valueObject: BaseValueObject): BaseValueObject {
+        return this._batchOperator(valueObject, BatchOperatorType.CEIL);
+    }
+
+    override ceilInverse(valueObject: BaseValueObject): BaseValueObject {
+        return this.map((currentValue) => {
+            if (currentValue.isError()) {
+                return currentValue;
+            }
+            return (valueObject as BaseValueObject).ceil(currentValue as BaseValueObject);
+        });
+    }
+
     toValue() {
         return transformToValue(this._value);
     }
@@ -912,6 +940,12 @@ export class ArrayValueObject extends BaseValueObject {
                         case BatchOperatorType.ROUND:
                             result[r][column] = (currentValue as BaseValueObject).round(valueObject);
                             break;
+                        case BatchOperatorType.FLOOR:
+                            result[r][column] = (currentValue as BaseValueObject).floor(valueObject);
+                            break;
+                        case BatchOperatorType.CEIL:
+                            result[r][column] = (currentValue as BaseValueObject).ceil(valueObject);
+                            break;
                     }
                 }
             } else {
@@ -1057,6 +1091,12 @@ export class ArrayValueObject extends BaseValueObject {
                                 break;
                             case BatchOperatorType.ROUND:
                                 rowList[c] = (currentValue as BaseValueObject).round(opValue as BaseValueObject);
+                                break;
+                            case BatchOperatorType.FLOOR:
+                                rowList[c] = (currentValue as BaseValueObject).floor(opValue as BaseValueObject);
+                                break;
+                            case BatchOperatorType.CEIL:
+                                rowList[c] = (currentValue as BaseValueObject).ceil(opValue as BaseValueObject);
                                 break;
                         }
                     }

@@ -14,9 +14,25 @@
  * limitations under the License.
  */
 
+import Big from 'big.js';
+
+/**
+ * Packaging basic mathematical calculation methods, adding precision parameters and solving native JavaScript precision problems
+ */
+
 export function round(number: number, precision: number): number {
     const factor = 10 ** Math.floor(precision);
-    return Math.round(number * factor) / factor;
+    return Math.round(Big(number).times(factor).toNumber()) / factor;
+}
+
+export function floor(number: number, precision: number): number {
+    const factor = 10 ** Math.floor(precision);
+    return Math.floor(Big(number).times(factor).toNumber()) / factor;
+}
+
+export function ceil(number: number, precision: number): number {
+    const factor = 10 ** Math.floor(precision);
+    return Math.ceil(Big(number).times(factor).toNumber()) / factor;
 }
 
 export function pow(number: number, precision: number) {

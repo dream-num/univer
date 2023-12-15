@@ -259,6 +259,26 @@ export class BaseValueObject extends ObjectClassType {
         /** abstract */
         return ErrorValueObject.create(ErrorType.VALUE);
     }
+
+    floor(valueObject: BaseValueObject): BaseValueObject {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    floorInverse(valueObject: BaseValueObject): BaseValueObject {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    ceil(valueObject: BaseValueObject): BaseValueObject {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    ceilInverse(valueObject: BaseValueObject): BaseValueObject {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
 }
 
 export class ErrorValueObject extends BaseValueObject {

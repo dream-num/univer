@@ -21,7 +21,7 @@ import { BooleanValue, ConcatenateType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { compareToken } from '../../basics/token';
 import { compareWithWildcard } from '../utils/compare';
-import { log10, pow, round } from '../utils/math-kit';
+import { ceil, floor, log10, pow, round } from '../utils/math-kit';
 import { BaseValueObject, ErrorValueObject } from './base-value-object';
 
 export class NullValueObject extends BaseValueObject {
@@ -113,6 +113,14 @@ export class NullValueObject extends BaseValueObject {
 
     override round(valueObject: BaseValueObject): BaseValueObject {
         return new NumberValueObject(0, true).round(valueObject);
+    }
+
+    override floor(valueObject: BaseValueObject): BaseValueObject {
+        return new NumberValueObject(0, true).floor(valueObject);
+    }
+
+    override ceil(valueObject: BaseValueObject): BaseValueObject {
+        return new NumberValueObject(0, true).ceil(valueObject);
     }
 }
 
@@ -224,6 +232,14 @@ export class BooleanValueObject extends BaseValueObject {
 
     override round(valueObject: BaseValueObject): BaseValueObject {
         return this._convertTonNumber().round(valueObject);
+    }
+
+    override floor(valueObject: BaseValueObject): BaseValueObject {
+        return this._convertTonNumber().floor(valueObject);
+    }
+
+    override ceil(valueObject: BaseValueObject): BaseValueObject {
+        return this._convertTonNumber().ceil(valueObject);
     }
 }
 
@@ -548,6 +564,54 @@ export class NumberValueObject extends BaseValueObject {
         }
         if (typeof value === 'boolean') {
             return new NumberValueObject(round(currentValue, value ? 1 : 0));
+        }
+
+        return this;
+    }
+
+    override floor(valueObject: BaseValueObject): BaseValueObject {
+        if (valueObject.isArray()) {
+            return valueObject.floorInverse(this);
+        }
+
+        const currentValue = this.getValue();
+        const value = valueObject.getValue();
+
+        if (typeof value === 'string') {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+        if (typeof value === 'number') {
+            if (Math.abs(currentValue) === Infinity || Math.abs(value) === Infinity) {
+                return new NumberValueObject(Infinity);
+            }
+            return new NumberValueObject(floor(currentValue, value));
+        }
+        if (typeof value === 'boolean') {
+            return new NumberValueObject(floor(currentValue, value ? 1 : 0));
+        }
+
+        return this;
+    }
+
+    override ceil(valueObject: BaseValueObject): BaseValueObject {
+        if (valueObject.isArray()) {
+            return valueObject.ceilInverse(this);
+        }
+
+        const currentValue = this.getValue();
+        const value = valueObject.getValue();
+
+        if (typeof value === 'string') {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+        if (typeof value === 'number') {
+            if (Math.abs(currentValue) === Infinity || Math.abs(value) === Infinity) {
+                return new NumberValueObject(Infinity);
+            }
+            return new NumberValueObject(ceil(currentValue, value));
+        }
+        if (typeof value === 'boolean') {
+            return new NumberValueObject(ceil(currentValue, value ? 1 : 0));
         }
 
         return this;

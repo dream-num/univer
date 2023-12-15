@@ -64,7 +64,7 @@ import {
     isRectIntersect,
     mergeInfoOffset,
 } from '../../basics/tools';
-import type { IViewportBound } from '../../basics/vector2';
+import type { IBoundRectNoAngle, IViewportBound } from '../../basics/vector2';
 import { columnIterator } from '../docs/common/tools';
 import { DocumentSkeleton } from '../docs/doc-skeleton';
 import { DocumentViewModel } from '../docs/view-model/document-view-model';
@@ -529,7 +529,11 @@ export class SpreadsheetSkeleton extends Skeleton {
     // }
 
     getRowColumnSegment(bounds?: IViewportBound) {
-        return this._getBounding(this._rowHeightAccumulation, this._columnWidthAccumulation, bounds);
+        return this._getBounding(this._rowHeightAccumulation, this._columnWidthAccumulation, bounds?.viewBound);
+    }
+
+    getRowColumnSegmentByViewBound(bound?: IBoundRectNoAngle) {
+        return this._getBounding(this._rowHeightAccumulation, this._columnWidthAccumulation, bound);
     }
 
     // eslint-disable-next-line max-lines-per-function
@@ -1162,12 +1166,12 @@ export class SpreadsheetSkeleton extends Skeleton {
     protected _getBounding(
         rowHeightAccumulation: number[],
         columnWidthAccumulation: number[],
-        bounds?: IViewportBound
+        viewBound?: IBoundRectNoAngle
     ) {
         const rhaLength = rowHeightAccumulation.length;
         const cwaLength = columnWidthAccumulation.length;
 
-        if (!bounds) {
+        if (!viewBound) {
             return {
                 startRow: 0,
                 endRow: rhaLength - 1,
@@ -1181,11 +1185,8 @@ export class SpreadsheetSkeleton extends Skeleton {
         let dataset_col_st = -1;
         let dataset_col_ed = -1;
 
-        const row_st = searchArray(rowHeightAccumulation, bounds.viewBound.top - this.columnHeaderHeightAndMarginTop);
-        const row_ed = searchArray(
-            rowHeightAccumulation,
-            bounds.viewBound.bottom - this.columnHeaderHeightAndMarginTop
-        );
+        const row_st = searchArray(rowHeightAccumulation, viewBound.top - this.columnHeaderHeightAndMarginTop);
+        const row_ed = searchArray(rowHeightAccumulation, viewBound.bottom - this.columnHeaderHeightAndMarginTop);
 
         if (row_st === -1 && row_ed === -1) {
             dataset_row_st = -1;
@@ -1206,8 +1207,8 @@ export class SpreadsheetSkeleton extends Skeleton {
             }
         }
 
-        const col_st = searchArray(columnWidthAccumulation, bounds.viewBound.left - this.rowHeaderWidthAndMarginLeft);
-        const col_ed = searchArray(columnWidthAccumulation, bounds.viewBound.right - this.rowHeaderWidthAndMarginLeft);
+        const col_st = searchArray(columnWidthAccumulation, viewBound.left - this.rowHeaderWidthAndMarginLeft);
+        const col_ed = searchArray(columnWidthAccumulation, viewBound.right - this.rowHeaderWidthAndMarginLeft);
 
         if (col_st === -1 && col_ed === -1) {
             dataset_col_st = -1;

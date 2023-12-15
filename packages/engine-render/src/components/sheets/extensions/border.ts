@@ -33,8 +33,14 @@ export class Border extends SheetExtension {
 
     override zIndex = BORDER_Z_INDEX;
 
-    override draw(ctx: CanvasRenderingContext2D, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {
-        const { dataMergeCache, stylesCache, overflowCache } = spreadsheetSkeleton;
+    override draw(
+        ctx: CanvasRenderingContext2D,
+        parentScale: IScale,
+        spreadsheetSkeleton: SpreadsheetSkeleton,
+        diffRanges?: IRange[]
+    ) {
+        const { rowColumnSegment, rowHeaderWidth, columnHeaderHeight, dataMergeCache, stylesCache, overflowCache } =
+            spreadsheetSkeleton;
         const { border } = stylesCache;
         if (!spreadsheetSkeleton) {
             return;
@@ -85,6 +91,13 @@ export class Border extends SheetExtension {
                     endY = mergeInfo.endY;
                     startX = mergeInfo.startX;
                     endX = mergeInfo.endX;
+                }
+
+                if (
+                    !this.isRenderDiffRangesByRow(mergeInfo.startRow, diffRanges) &&
+                    !this.isRenderDiffRangesByRow(mergeInfo.endRow, diffRanges)
+                ) {
+                    return true;
                 }
 
                 startY = fixLineWidthByScale(startY, scaleY);

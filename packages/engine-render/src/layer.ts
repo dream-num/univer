@@ -52,10 +52,6 @@ export class Layer {
         return this._zIndex;
     }
 
-    static create(scene: ThinScene, objects: BaseObject[] = [], zIndex: number = 1, allowCache = true) {
-        return new this(scene, objects, zIndex, allowCache);
-    }
-
     getObjectsByOrder() {
         const objects: BaseObject[] = [];
         this._objects.sort(sortRules);
@@ -171,6 +167,7 @@ export class Layer {
                 const ctx = this._cacheCanvas.getContext();
 
                 this._cacheCanvas.clear();
+
                 ctx.save();
 
                 ctx.setTransform(mainCtx.getTransform());

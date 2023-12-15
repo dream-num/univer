@@ -928,6 +928,13 @@ export class Viewport {
                 diffBounds: [],
                 diffX: -1,
                 diffY: -1,
+                viewPortPosition: {
+                    top: 0,
+                    left: 0,
+                    bottom: 0,
+                    right: 0,
+                },
+                viewPortKey: this.viewPortKey,
             };
         }
 
@@ -966,8 +973,15 @@ export class Viewport {
         return {
             viewBound,
             diffBounds: this._diffViewBound(viewBound, preViewBound),
-            diffX: viewBound.left - (preViewBound?.left || 0),
-            diffY: viewBound.top - (preViewBound?.top || 0),
+            diffX: differenceX, //viewBound.left - (preViewBound?.left || 0),
+            diffY: differenceY, //viewBound.top - (preViewBound?.top || 0),
+            viewPortPosition: {
+                top: yFrom,
+                left: xFrom,
+                bottom: yTo,
+                right: xTo,
+            },
+            viewPortKey: this.viewPortKey,
         };
     }
 

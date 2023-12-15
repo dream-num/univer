@@ -155,8 +155,8 @@ export class DocCanvasView extends RxDisposable {
         }
 
         scene.addLayer(
-            Layer.create(scene, [], DOCS_COMPONENT_MAIN_LAYER_INDEX),
-            Layer.create(scene, [], DOCS_COMPONENT_HEADER_LAYER_INDEX)
+            new Layer(scene, [], DOCS_COMPONENT_MAIN_LAYER_INDEX),
+            new Layer(scene, [], DOCS_COMPONENT_HEADER_LAYER_INDEX)
         );
 
         // this._viewLoader(scene);

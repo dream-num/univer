@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IColorStyle, IScale } from '@univerjs/core';
+import type { IColorStyle, IRange, IScale } from '@univerjs/core';
 import { HorizontalAlign, ObjectMatrix, WrapStrategy } from '@univerjs/core';
 
 import { fixLineWidthByScale } from '../../../basics/tools';
@@ -42,7 +42,12 @@ export class Font extends SheetExtension {
         this.changeFontColor.setValue(r, c, color);
     }
 
-    override draw(ctx: CanvasRenderingContext2D, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {
+    override draw(
+        ctx: CanvasRenderingContext2D,
+        parentScale: IScale,
+        spreadsheetSkeleton: SpreadsheetSkeleton,
+        diffRanges?: IRange[]
+    ) {
         const { stylesCache, dataMergeCache, overflowCache } = spreadsheetSkeleton;
         const { font: fontList } = stylesCache;
         if (!spreadsheetSkeleton) {
@@ -88,6 +93,13 @@ export class Font extends SheetExtension {
                             endY = mergeInfo.endY;
                             startX = mergeInfo.startX;
                             endX = mergeInfo.endX;
+                        }
+
+                        if (
+                            !this.isRenderDiffRangesByRow(mergeInfo.startRow, diffRanges) &&
+                            !this.isRenderDiffRangesByRow(mergeInfo.endRow, diffRanges)
+                        ) {
+                            return true;
                         }
 
                         startY = fixLineWidthByScale(startY, scaleY);

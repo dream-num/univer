@@ -20,6 +20,7 @@ import { CellValueType, HorizontalAlign, ObjectMatrix, sortRules, WrapStrategy }
 import type { BaseObject } from '../../base-object';
 import { RENDER_CLASS_TYPE } from '../../basics/const';
 import { getTranslateInSpreadContextWithPixelRatio } from '../../basics/draw';
+import type { ITransformChangeState } from '../../basics/interfaces';
 import { fixLineWidthByScale, getCellByIndex, getCellPositionByIndex, getScale } from '../../basics/tools';
 import type { IViewportBound } from '../../basics/vector2';
 import { Vector2 } from '../../basics/vector2';
@@ -51,13 +52,13 @@ export class Spreadsheet extends SheetComponent {
 
     private _cacheCanvas!: Canvas;
 
-    private _boundsCache: Nullable<IViewportBound>;
+    // private _boundsCache: Nullable<IViewportBound>;
 
-    private _cacheOffsetX = 0;
+    // private _cacheOffsetX = 0;
 
-    private _cacheOffsetY = 0;
+    // private _cacheOffsetY = 0;
 
-    private _hasSelection = false;
+    private _refreshIncrementalState = false;
 
     private _documents: Documents = new Documents(OBJECT_KEY, undefined, {
         pageMarginLeft: 0,
@@ -67,7 +68,7 @@ export class Spreadsheet extends SheetComponent {
     constructor(
         oKey: string,
         spreadsheetSkeleton?: SpreadsheetSkeleton,
-        private _allowCache: boolean = false
+        private _allowCache: boolean = true
     ) {
         super(oKey, spreadsheetSkeleton);
 
@@ -75,13 +76,13 @@ export class Spreadsheet extends SheetComponent {
             this._cacheCanvas = new Canvas();
         }
 
-        // this.onIsAddedToParentObserver.add((parent) => {
-        //     (parent as Scene)?.getEngine()?.onTransformChangeObservable.add((change: ITransformChangeState) => {
-        //         this.resizeCacheCanvas();
-        //     });
-        //     this.resizeCacheCanvas();
-        //     this._addMakeDirtyToScroll();
-        // });
+        this.onIsAddedToParentObserver.add((parent) => {
+            (parent as Scene)?.getEngine()?.onTransformChangeObservable.add((change: ITransformChangeState) => {
+                this._resizeCacheCanvas();
+            });
+            this._resizeCacheCanvas();
+            this._addMakeDirtyToScroll();
+        });
 
         this._initialDefaultExtension();
 
@@ -144,9 +145,12 @@ export class Spreadsheet extends SheetComponent {
         // insert overflow cache
         this._calculateOverflow();
 
+        const diffRanges = this._refreshIncrementalState
+            ? bounds?.diffBounds.map((bound) => spreadsheetSkeleton.getRowColumnSegmentByViewBound(bound))
+            : undefined;
         const extensions = this.getExtensionsByOrder();
         for (const extension of extensions) {
-            extension.draw(ctx, parentScale, spreadsheetSkeleton);
+            extension.draw(ctx, parentScale, spreadsheetSkeleton, diffRanges);
         }
     }
 
@@ -281,10 +285,32 @@ export class Spreadsheet extends SheetComponent {
         mainCtx.save();
 
         if (bounds) {
-            const { viewBound, diffBounds, diffX, diffY } = bounds;
-            mainCtx.globalCompositeOperation = 'copy';
-            mainCtx.drawImage(mainCtx.canvas, diffX, diffY);
-            mainCtx.globalCompositeOperation = 'source-over';
+            const { viewBound, diffBounds, diffX, diffY, viewPortPosition, viewPortKey } = bounds;
+            if (viewPortKey === 'viewMain') {
+                const ctx = this._cacheCanvas.getContext();
+                ctx.save();
+
+                if (diffX !== 0 || diffBounds[0] == null || (diffX === 0 && diffY === 0)) {
+                    this._cacheCanvas.clear();
+                    ctx.setTransform(mainCtx.getTransform());
+                    this._draw(ctx, bounds);
+                    this._applyCache(mainCtx);
+                } else {
+                    ctx.globalCompositeOperation = 'copy';
+                    ctx.drawImage(this._cacheCanvas.getCanvasEle(), 0, diffY);
+                    ctx.globalCompositeOperation = 'source-over';
+
+                    this._refreshIncrementalState = true;
+                    ctx.setTransform(mainCtx.getTransform());
+                    this._draw(ctx, bounds);
+                    this._refreshIncrementalState = false;
+
+                    this._applyCache(mainCtx);
+                }
+                ctx.restore();
+            } else {
+                this._draw(mainCtx, bounds);
+            }
         } else {
             this._draw(mainCtx, bounds);
         }
@@ -297,23 +323,15 @@ export class Spreadsheet extends SheetComponent {
         // console.log('mainCtx', mainCtx, this.width, this.height);
     }
 
-    // override resizeCacheCanvas() {
-    //     const parentSize = this._getAncestorSize();
-    //     if (!parentSize || this._cacheCanvas == null) {
-    //         return;
-    //     }
-    //     const { width, height } = parentSize;
-    //     const skeleton = this.getSkeleton();
-    //     let rowHeaderWidth = 0;
-    //     let columnHeaderHeight = 0;
-    //     if (skeleton) {
-    //         rowHeaderWidth = skeleton.rowHeaderWidth;
-    //         columnHeaderHeight = skeleton.columnHeaderHeight;
-    //     }
-
-    //     this._cacheCanvas.setSize(width, height);
-    //     this.makeDirty(true);
-    // }
+    private _resizeCacheCanvas() {
+        const parentSize = this._getAncestorSize();
+        if (!parentSize || this._cacheCanvas == null) {
+            return;
+        }
+        const { width, height } = parentSize;
+        this._cacheCanvas.setSize(width, height);
+        this.makeDirty(true);
+    }
 
     // enableSelection() {
     //     if (this._hasSelection) {
@@ -355,27 +373,13 @@ export class Spreadsheet extends SheetComponent {
     //     return true;
     // }
 
-    protected _applyCache(ctx?: CanvasRenderingContext2D) {
+    protected _applyCache(ctx?: CanvasRenderingContext2D, diffX: number = 0, diffY: number = 0) {
         if (!ctx) {
             return;
         }
-        // const skeleton = this.getSkeleton();
-        // let offsetX = 0;
-        // let offsetY = 0;
-        // if (skeleton) {
-        //     const { rowHeaderWidth, columnHeaderHeight } = skeleton;
-        //     const { scaleX, scaleY } = this.getParentScale();
-        //     offsetX = fixLineWidthByScale(rowHeaderWidth, scaleX);
-        //     offsetY = fixLineWidthByScale(columnHeaderHeight, scaleY);
-        // }
-        // const pixelRatio = this._cacheCanvas.getPixelRatio();
-        // const width = this._cacheCanvas.getWidth() * pixelRatio;
-        // const height = this._cacheCanvas.getHeight() * pixelRatio;
         ctx.save();
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        // ctx.rect(offsetX + 100, offsetY + 100, width, height);
-        // ctx.clip();
-        ctx.drawImage(this._cacheCanvas.getCanvasEle(), 0, 0);
+        ctx.reset();
+        ctx.drawImage(this._cacheCanvas.getCanvasEle(), diffX, diffY);
         ctx.restore();
     }
 
@@ -440,7 +444,7 @@ export class Spreadsheet extends SheetComponent {
             if (parent.classType === RENDER_CLASS_TYPE.SCENE) {
                 const viewports = parent.getViewports();
                 const viewPorts = this._getHasScrollViewports(viewports);
-                for (const viewport of viewports) {
+                for (const viewport of viewPorts) {
                     if (viewport) {
                         fn(viewport);
                     }

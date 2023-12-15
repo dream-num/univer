@@ -32,7 +32,12 @@ export class BorderAuxiliary extends SheetExtension {
 
     override zIndex = BORDER_AUXILIARY_Z_INDEX;
 
-    override draw(ctx: CanvasRenderingContext2D, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {
+    override draw(
+        ctx: CanvasRenderingContext2D,
+        parentScale: IScale,
+        spreadsheetSkeleton: SpreadsheetSkeleton,
+        diffRanges?: IRange[]
+    ) {
         const { rowColumnSegment, dataMergeCache, overflowCache, stylesCache, showGridlines } = spreadsheetSkeleton;
         const { border } = stylesCache;
         const { startRow, endRow, startColumn, endColumn } = rowColumnSegment;
@@ -57,11 +62,35 @@ export class BorderAuxiliary extends SheetExtension {
         ctx.beginPath();
         ctx.lineWidth = getLineWith(1) / scale;
         ctx.strokeStyle = getColor([212, 212, 212]);
+
         const width = fixLineWidthByScale(columnTotalWidth, scale);
-        const height = fixLineWidthByScale(rowTotalHeight, scale);
+
+        let height = fixLineWidthByScale(rowTotalHeight, scale);
+
         const columnWidthAccumulationLength = columnWidthAccumulation.length;
         const rowHeightAccumulationLength = rowHeightAccumulation.length;
-        for (let r = startRow - 1; r <= endRow; r++) {
+
+        let rowStart = startRow - 1;
+
+        let rowEnd = endRow;
+
+        let columnDrawTopStart = 0;
+
+        if (diffRanges && diffRanges.length > 0) {
+            const diffRange = diffRanges[0];
+
+            const { startRow: diffRangeStartRow, endRow: diffRangeEndRow } = diffRange;
+
+            rowStart = diffRangeStartRow;
+
+            rowEnd = diffRangeEndRow;
+
+            columnDrawTopStart = fixLineWidthByScale(rowHeightAccumulation[rowStart], scale);
+
+            height = fixLineWidthByScale(rowHeightAccumulation[rowEnd], scale);
+        }
+
+        for (let r = rowStart; r <= rowEnd; r++) {
             if (r < 0 || r > rowHeightAccumulationLength - 1) {
                 continue;
             }
@@ -75,18 +104,12 @@ export class BorderAuxiliary extends SheetExtension {
                 continue;
             }
             const columnEndPosition = fixLineWidthByScale(columnWidthAccumulation[c], scale);
-            ctx.moveTo(columnEndPosition, 0);
+            ctx.moveTo(columnEndPosition, columnDrawTopStart);
             ctx.lineTo(columnEndPosition, height);
         }
         // console.log('xx2', scaleX, scaleY, columnTotalWidth, rowTotalHeight, rowHeightAccumulation, columnWidthAccumulation);
         ctx.stroke();
         ctx.closePath();
-
-        // merge cell
-        this._clearRectangle(ctx, scale, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
-
-        // overflow cell
-        this._clearRectangle(ctx, scale, rowHeightAccumulation, columnWidthAccumulation, overflowCache.toNativeArray());
 
         const { scaleX = 1, scaleY = 1 } = parentScale;
         // Clearing the dashed line issue caused by overlaid auxiliary lines and strokes
@@ -117,6 +140,10 @@ export class BorderAuxiliary extends SheetExtension {
                 endX = mergeInfo.endX;
             }
 
+            if (!(mergeInfo.startRow >= rowStart && mergeInfo.endRow <= rowEnd)) {
+                return true;
+            }
+
             startY = fixLineWidthByScale(startY, scaleY);
             endY = fixLineWidthByScale(endY, scaleY);
             startX = fixLineWidthByScale(startX, scaleX);
@@ -133,7 +160,18 @@ export class BorderAuxiliary extends SheetExtension {
             }
         });
         ctx.closePath();
+        // merge cell
+        this._clearRectangle(ctx, scale, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache, diffRanges);
 
+        // overflow cell
+        this._clearRectangle(
+            ctx,
+            scale,
+            rowHeightAccumulation,
+            columnWidthAccumulation,
+            overflowCache.toNativeArray(),
+            diffRanges
+        );
         ctx.restore();
     }
 
@@ -145,7 +183,8 @@ export class BorderAuxiliary extends SheetExtension {
         scale: number,
         rowHeightAccumulation: number[],
         columnWidthAccumulation: number[],
-        dataMergeCache?: IRange[]
+        dataMergeCache?: IRange[],
+        diffRanges?: IRange[]
     ) {
         if (dataMergeCache == null) {
             return;
@@ -165,7 +204,14 @@ export class BorderAuxiliary extends SheetExtension {
                 scale
             );
 
-            ctx.clearRect(startX - 1, startY - 1, endX - startX + 2, endY - startY + 2);
+            if (
+                !this.isRenderDiffRangesByRow(startRow, diffRanges) &&
+                !this.isRenderDiffRangesByRow(endRow, diffRanges)
+            ) {
+                return true;
+            }
+
+            ctx.clearRect(startX, startY, endX - startX, endY - startY);
 
             // After ClearRect, the lines will become thinner, and the lines will be repaired below.
             ctx.beginPath();

@@ -25,8 +25,6 @@ import {
     WrapTextType,
 } from '@univerjs/core';
 
-import { DEFAULT_LIST_TEST } from './default-list';
-
 export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
     id: 'd',
     drawings: {
@@ -77,7 +75,6 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
             wrapText: WrapTextType.BOTH_SIDES,
         },
     },
-    lists: DEFAULT_LIST_TEST,
     body: {
         dataStream:
             'What’s New in the 2022 Gartner Hype Cycle for Emerging Technologies\rEmerging technologies for 2022 fit into three main themes: evolving/expanding immersive experiences, accelerated artificial intelligence automation, and optimized technologist delivery.\rThe 2022 Gartner Hype Cycle identifies 25 must-know emerging technologies designed to help enterprise architecture and technology innovation leaders: \rExpand immersive experiences\rAccelerate artificial intelligence (AI) automation\rOptimize technologist delivery \rThese technologies are expected to greatly impact business and society over the next two to 10 years, but will especially enable CIOs and IT leaders to deliver on digital business transformation. \rThree Hype Cycle themes to think about in 2022 and beyond\rThe 2022 Gartner Hype Cycle features emerging technologies and distills insights from more than 2,000 technologies into a succinct high-potential set. Most technologies have multiple use cases but enterprise architecture and technology innovation leaders should prioritize those with the greatest potential benefit for their organization. (They will also need to launch a proof-of-concept project to demonstrate the feasibility of a technology for their target use case.)\b\r\nThe benefit of these technologies is that they provide individuals with more control over their identities and data, and expand their range of experiences into virtual venues and ecosystems that can be integrated with digital currencies. These technologies also provide new ways to reach customers to strengthen or open up new revenue streams.\rDigital twin of the customer (DToC) is a dynamic virtual representation of a customer that simulates and learns to emulate and anticipate behavior. It can be used to modify and enhance the customer experience (CX) and support new digitalization efforts, products, services and opportunities. DToC will take five to 10 years until mainstream adoption but will be transformational to organizations.\rOther critical technologies in immersive experiences include the following:\rDecentralized identity (DCI) allows an entity (typically a human user) to control their own digital identity by leveraging technologies such as blockchain or other distributed ledger technologies (DLTs), along with digital wallets.\rDigital humans are interactive, AI-driven representations that have some of the characteristics, personality, knowledge and mindset of a human.\rInternal talent marketplaces match internal employees and, in some cases, a pool of contingent workers, to time-boxed projects and various work opportunities, with no recruiter involvement.\r\n',
@@ -266,7 +263,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
             {
                 startIndex: 433,
                 bullet: {
-                    listId: 'testBullet',
+                    listId: 'orderList',
                     nestingLevel: 0,
                     textStyle: {
                         fs: 20,
@@ -282,7 +279,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
             {
                 startIndex: 484,
                 bullet: {
-                    listId: 'testBullet',
+                    listId: 'orderList',
                     nestingLevel: 0,
                     textStyle: {
                         fs: 20,
@@ -295,7 +292,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
             {
                 startIndex: 516,
                 bullet: {
-                    listId: 'testBullet',
+                    listId: 'orderList',
                     nestingLevel: 0,
                     textStyle: {
                         fs: 20,
@@ -348,7 +345,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                     indentFirstLine: 20,
                 },
                 bullet: {
-                    listId: 'unorderedTest',
+                    listId: 'bulletList',
                     nestingLevel: 0,
                     textStyle: {
                         fs: 20,
@@ -361,7 +358,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                     indentFirstLine: 20,
                 },
                 bullet: {
-                    listId: 'unorderedTest',
+                    listId: 'bulletList',
                     nestingLevel: 0,
                     textStyle: {
                         fs: 20,
@@ -374,7 +371,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                     indentFirstLine: 20,
                 },
                 bullet: {
-                    listId: 'unorderedTest',
+                    listId: 'bulletList',
                     nestingLevel: 0,
                     textStyle: {
                         fs: 20,

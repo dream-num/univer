@@ -59,8 +59,8 @@ export const DOCS_DEMO_DATA: IDocumentData = {
         },
     },
     lists: {
-        unorderedTest: {
-            listId: 'unorderedTest',
+        bulletList: {
+            listId: 'bulletList',
             nestingLevel: [
                 {
                     bulletAlignment: BulletAlignment.START,
@@ -97,8 +97,8 @@ export const DOCS_DEMO_DATA: IDocumentData = {
                 },
             ],
         },
-        testBullet: {
-            listId: 'testBullet',
+        orderList: {
+            listId: 'orderList',
             nestingLevel: [
                 {
                     bulletAlignment: BulletAlignment.START,
@@ -204,7 +204,7 @@ export const DOCS_DEMO_DATA: IDocumentData = {
             {
                 startIndex: 60,
                 bullet: {
-                    listId: 'testBullet',
+                    listId: 'orderList',
                     nestingLevel: 0,
                     textStyle: {
                         fs: 20,
@@ -214,7 +214,7 @@ export const DOCS_DEMO_DATA: IDocumentData = {
             {
                 startIndex: 91,
                 bullet: {
-                    listId: 'testBullet',
+                    listId: 'orderList',
                     nestingLevel: 1,
                     textStyle: {
                         fs: 20,
@@ -224,7 +224,7 @@ export const DOCS_DEMO_DATA: IDocumentData = {
             {
                 startIndex: 234,
                 bullet: {
-                    listId: 'testBullet',
+                    listId: 'orderList',
                     nestingLevel: 1,
                     textStyle: {
                         fs: 20,
@@ -234,7 +234,7 @@ export const DOCS_DEMO_DATA: IDocumentData = {
             {
                 startIndex: 327,
                 bullet: {
-                    listId: 'testBullet',
+                    listId: 'orderList',
                     nestingLevel: 1,
                     textStyle: {
                         fs: 20,
@@ -244,7 +244,7 @@ export const DOCS_DEMO_DATA: IDocumentData = {
             {
                 startIndex: 406,
                 bullet: {
-                    listId: 'testBullet',
+                    listId: 'orderList',
                     nestingLevel: 2,
                     textStyle: {
                         fs: 20,

@@ -17,8 +17,8 @@
 import { BulletAlignment, GlyphType } from '@univerjs/core';
 
 export const DEFAULT_LIST_TEST = {
-    unorderedTest: {
-        listId: 'unorderedTest',
+    bulletList: {
+        listId: 'bulletList',
         nestingLevel: [
             {
                 bulletAlignment: BulletAlignment.START,
@@ -55,8 +55,8 @@ export const DEFAULT_LIST_TEST = {
             },
         ],
     },
-    testBullet: {
-        listId: 'testBullet',
+    orderList: {
+        listId: 'orderList',
         nestingLevel: [
             {
                 bulletAlignment: BulletAlignment.START,

@@ -54,7 +54,7 @@ export const PAGE3_RICHTEXT_2 = {
                     {
                         startIndex: 41,
                         bullet: {
-                            listId: 'testBullet',
+                            listId: 'orderList',
                             nestingLevel: 0,
                             textStyle: {
                                 fs: 20,
@@ -67,7 +67,7 @@ export const PAGE3_RICHTEXT_2 = {
                     {
                         startIndex: 168,
                         bullet: {
-                            listId: 'testBullet',
+                            listId: 'orderList',
                             nestingLevel: 0,
                             textStyle: {
                                 fs: 20,

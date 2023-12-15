@@ -66,8 +66,8 @@ const richTextTestFloat: IDocumentData = {
         },
     },
     lists: {
-        unorderedTest: {
-            listId: 'unorderedTest',
+        bulletList: {
+            listId: 'bulletList',
             nestingLevel: [
                 {
                     bulletAlignment: BulletAlignment.START,
@@ -104,8 +104,8 @@ const richTextTestFloat: IDocumentData = {
                 },
             ],
         },
-        testBullet: {
-            listId: 'testBullet',
+        orderList: {
+            listId: 'orderList',
             nestingLevel: [
                 {
                     bulletAlignment: BulletAlignment.START,
@@ -191,7 +191,7 @@ const richTextTestFloat: IDocumentData = {
             {
                 startIndex: 60,
                 bullet: {
-                    listId: 'testBullet',
+                    listId: 'orderList',
                     nestingLevel: 0,
                     textStyle: {
                         fs: 20,
@@ -277,7 +277,7 @@ const richTextTest: IDocumentData = {
             {
                 startIndex: 60,
                 bullet: {
-                    listId: 'testBullet',
+                    listId: 'orderList',
                     nestingLevel: 0,
                     textStyle: {
                         fs: 20,

@@ -112,7 +112,7 @@ jobs:
             - name: Copy demo to workspace
               run: |
                   mkdir .workspace
-                  cp -r ./examples/local .workspace
+                  cp -r ./examples/local/* .workspace
 
             - name: 🚀 Deploy to Vercel (demo)
               uses: amondnet/vercel-action@v25

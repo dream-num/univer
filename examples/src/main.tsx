@@ -22,15 +22,15 @@ import styles from './styles.module.less';
 function Examples() {
     return (
         <section className={styles.examples}>
-            <a className={styles.btn} href="./sheets">
+            <a className={styles.btn} href="./sheets/">
                 <span> Univer Sheets</span>
                 <div className={styles.btnBg}>→</div>{' '}
             </a>
-            <a className={styles.btn} href="./docs">
+            <a className={styles.btn} href="./docs/">
                 <span> Univer Docs</span>
                 <div className={styles.btnBg}>→</div>{' '}
             </a>
-            <a className={styles.btn} href="./slides">
+            <a className={styles.btn} href="./slides/">
                 <span> Univer Slides</span>
                 <div className={styles.btnBg}>→</div>{' '}
             </a>

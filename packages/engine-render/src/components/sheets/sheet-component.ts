@@ -23,8 +23,6 @@ import type { SHEET_EXTENSION_TYPE } from './extensions/sheet-extension';
 import type { SpreadsheetSkeleton } from './sheet-skeleton';
 
 export class SheetComponent extends RenderComponent<SpreadsheetSkeleton, SHEET_EXTENSION_TYPE> {
-    // protected _cacheCanvas = new Canvas();
-
     constructor(
         oKey: string,
         private _skeleton?: SpreadsheetSkeleton
@@ -46,16 +44,9 @@ export class SheetComponent extends RenderComponent<SpreadsheetSkeleton, SHEET_E
             return this;
         }
 
-        // const ctx = this._cacheCanvas.getGlobalContext();
-        // this._cacheCanvas.clear();
-
         mainCtx.save();
-        // ctx.setTransform(mainCtx.getTransform());
         this._draw(mainCtx, bounds);
         mainCtx.restore();
-        // this._applyCache(mainCtx);
-        // console.log('render', ctx);
-        // console.log('mainCtx', mainCtx, this.width, this.height);
     }
 
     getParentScale() {

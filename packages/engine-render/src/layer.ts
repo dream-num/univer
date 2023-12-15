@@ -24,8 +24,6 @@ import type { ThinScene } from './thin-scene';
 export class Layer {
     private _objects: BaseObject[] = [];
 
-    private _allowCache: boolean = true;
-
     private _cacheCanvas: Nullable<Canvas>;
 
     protected _dirty: boolean = true;
@@ -33,7 +31,8 @@ export class Layer {
     constructor(
         private _scene: ThinScene,
         objects: BaseObject[] = [],
-        private _zIndex: number = 1
+        private _zIndex: number = 1,
+        private _allowCache: boolean = true
     ) {
         this.addObjects(objects);
 
@@ -53,8 +52,8 @@ export class Layer {
         return this._zIndex;
     }
 
-    static create(scene: ThinScene, objects: BaseObject[] = [], zIndex: number = 1000) {
-        return new this(scene, objects, zIndex);
+    static create(scene: ThinScene, objects: BaseObject[] = [], zIndex: number = 1, allowCache = true) {
+        return new this(scene, objects, zIndex, allowCache);
     }
 
     getObjectsByOrder() {

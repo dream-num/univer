@@ -591,14 +591,6 @@ export abstract class BaseObject {
         observable.clear();
     }
 
-    resizeCacheCanvas() {
-        /* abstract */
-    }
-
-    scaleCacheCanvas() {
-        /* abstract */
-    }
-
     triggerPointerMove(evt: IPointerEvent | IMouseEvent) {
         if (!this.onPointerMoveObserver.notifyObservers(evt)?.stopPropagation) {
             this._parent?.triggerPointerMove(evt);

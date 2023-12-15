@@ -1,11 +1,11 @@
 {
-    "name": "sheets",
+    "name": "univer-examples",
     "description": "Univer vanilla ts demo project",
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
     "private": true,
     "scripts": {
-        "esbuild:demo": "node ./esbuild.config.mjs",
+        "build:demo": "node ./esbuild.config.mjs",
         "dev:demo": "node ./esbuild.config.mjs --watch"
     },
     "dependencies": {
@@ -21,15 +21,20 @@
         "@univerjs/sheets-formula": "workspace:*",
         "@univerjs/sheets-numfmt": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
+        "@univerjs/slides": "workspace:*",
+        "@univerjs/slides-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@univerjs/uniscript": "workspace:*",
         "@wendellhu/redi": "^0.12.12",
-        "data": "workspace:*",
         "monaco-editor": "0.45.0",
-        "univer-plugin-debugger": "workspace:*"
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "rxjs": "^7.8.1"
     },
     "devDependencies": {
-        "esbuild": "^0.19.8",
+        "@types/react": "^18.2.45",
+        "@types/react-dom": "^18.2.17",
+        "esbuild": "^0.19.9",
         "esbuild-plugin-clean": "^1.0.1",
         "esbuild-plugin-copy": "^2.1.1",
         "esbuild-style-plugin": "^1.6.3",

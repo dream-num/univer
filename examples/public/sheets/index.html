@@ -3,9 +3,9 @@
     <head>
         <meta charset="utf-8" />
         <meta content="width=device-width, initial-scale=1" name="viewport" />
-        <title>UniverDoc</title>
+        <title>Univer Sheet</title>
 
-        <link rel="icon" type="image/x-icon" href="/favicon.svg">
+        <link rel="icon" type="image/x-icon" href="../favicon.svg">
         <link rel="stylesheet" href="./main.css" />
         <style>
             html,
@@ -17,14 +17,14 @@
 
         <script>
             new EventSource('/esbuild').addEventListener('change', () => {
+                console.info('reload--');
                 location.reload();
             });
         </script>
     </head>
 
-    <body>
-        <div id="app" style="z-index: 1; position: fixed; font-size: 20px; color: green"></div>
-        <div id="univer-container" style="height: 100%"></div>
+    <body style="overflow: hidden">
+        <div id="app" style="height: 100%;"></div>
 
         <script src="./main.js"></script>
     </body>

@@ -1,5 +1,5 @@
 {
-    "extends": "../../tsconfig.json",
+    "extends": "../tsconfig.json",
     "compilerOptions": {
         "rootDir": "./src",
         "outDir": "local",
@@ -7,6 +7,7 @@
         "esModuleInterop": true,
         "emitDecoratorMetadata": true,
         "strictPropertyInitialization": false,
+        "types": ["esbuild-style-plugin"]
     },
     "include": ["src/**/*"],
     "exclude": ["node_modules", "local"]

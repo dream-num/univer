@@ -1,0 +1,65 @@
+@height: 40px;
+
+.examples {
+    display: flex;
+    gap: 36px;
+    align-items: center;
+    justify-content: center;
+
+    height: 100%;
+}
+
+.btn {
+    position: relative;
+
+    overflow: hidden;
+    gap: 8px;
+
+    height: @height;
+    padding-right: 8px;
+    padding-left: @height + 6px;
+
+    font-size: 20px;
+    line-height: @height;
+    text-decoration: none;
+
+    border-radius: @height;
+
+    -webkit-font-smoothing: antialiased;
+
+    > span {
+        position: relative;
+        z-index: 1;
+        color: #313131;
+    }
+
+    &:hover {
+        > span {
+            color: #fff;
+        }
+
+        .btn-bg {
+            width: 100%;
+        }
+    }
+
+    &-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+
+        box-sizing: border-box;
+        width: 40px;
+        height: 40px;
+        padding-left: 10px;
+
+        line-height: @height;
+        color: #fff;
+        text-align: left;
+
+        background-color: #313131;
+        border-radius: 40px;
+
+        transition: width 0.15s ease-in-out;
+    }
+}

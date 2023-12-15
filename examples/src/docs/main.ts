@@ -20,9 +20,9 @@ import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UniverUIPlugin } from '@univerjs/ui';
-import { DEFAULT_DOCUMENT_DATA_CN } from 'data';
-import { DebuggerPlugin } from 'univer-plugin-debugger';
 
+import { DEFAULT_DOCUMENT_DATA_CN } from '../data';
+import { DebuggerPlugin } from '../plugins/debugger';
 import { locales } from './locales';
 
 // package info
@@ -44,7 +44,7 @@ const univer = new Univer({
 univer.registerPlugin(UniverRenderEnginePlugin);
 univer.registerPlugin(DebuggerPlugin);
 univer.registerPlugin(UniverUIPlugin, {
-    container: 'univer-container',
+    container: 'app',
     header: true,
     toolbar: true,
 });

@@ -20,25 +20,32 @@ import Big from 'big.js';
  * Packaging basic mathematical calculation methods, adding precision parameters and solving native JavaScript precision problems
  */
 
-export function round(number: number, precision: number): number {
+/**
+ * Native JavaScript: 0.6789 * 10000 = 6788.999999999999
+ *
+ * @param a
+ * @param b
+ * @returns
+ */
+export function multiply(a: number, b: number): number {
+    return Big(a).times(b).toNumber();
+}
+
+export function round(base: number, precision: number): number {
     const factor = 10 ** Math.floor(precision);
-    return Math.round(Big(number).times(factor).toNumber()) / factor;
+    return Math.round(multiply(base, factor)) / factor;
 }
 
-export function floor(number: number, precision: number): number {
+export function floor(base: number, precision: number): number {
     const factor = 10 ** Math.floor(precision);
-    return Math.floor(Big(number).times(factor).toNumber()) / factor;
+    return Math.floor(multiply(base, factor)) / factor;
 }
 
-export function ceil(number: number, precision: number): number {
+export function ceil(base: number, precision: number): number {
     const factor = 10 ** Math.floor(precision);
-    return Math.ceil(Big(number).times(factor).toNumber()) / factor;
+    return Math.ceil(multiply(base, factor)) / factor;
 }
 
-export function pow(number: number, precision: number) {
-    return number ** precision;
-}
-
-export function log10(number: number) {
-    return Math.log10(number);
+export function pow(base: number, exponent: number): number {
+    return base ** exponent;
 }

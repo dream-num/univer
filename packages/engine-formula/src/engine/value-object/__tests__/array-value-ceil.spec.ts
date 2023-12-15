@@ -51,7 +51,7 @@ describe('arrayValueObject ceil method test', () => {
             });
 
             expect((originArrayValueObject.ceil(ceilArrayValueObject) as ArrayValueObject).toValue()).toStrictEqual([
-                [0.12, 0.988, 0.5432, '#N/A', '#N/A'],
+                [0.13, 0.988, 0.5432, '#N/A', '#N/A'],
                 [0.3, 0.8765, 0.33, '#N/A', '#N/A'],
                 ['#N/A', '#N/A', '#N/A', '#N/A', '#N/A'],
             ]);

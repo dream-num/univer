@@ -40,6 +40,7 @@ enum BatchOperatorType {
     ROUND,
     FLOOR,
     CEIL,
+    ATAN2,
 }
 
 enum ArrayCalculateType {
@@ -590,12 +591,115 @@ export class ArrayValueObject extends BaseValueObject {
         });
     }
 
+    override cbrt(): BaseValueObject {
+        return this.map((currentValue) => {
+            if (currentValue.isError()) {
+                return currentValue;
+            }
+            return (currentValue as BaseValueObject).cbrt();
+        });
+    }
+
+    override cos(): BaseValueObject {
+        return this.map((currentValue) => {
+            if (currentValue.isError()) {
+                return currentValue;
+            }
+            return (currentValue as BaseValueObject).cos();
+        });
+    }
+
+    override acos(): BaseValueObject {
+        return this.map((currentValue) => {
+            if (currentValue.isError()) {
+                return currentValue;
+            }
+            return (currentValue as BaseValueObject).acos();
+        });
+    }
+
+    override acosh(): BaseValueObject {
+        return this.map((currentValue) => {
+            if (currentValue.isError()) {
+                return currentValue;
+            }
+            return (currentValue as BaseValueObject).acosh();
+        });
+    }
+
     override sin(): BaseValueObject {
         return this.map((currentValue) => {
             if (currentValue.isError()) {
                 return currentValue;
             }
             return (currentValue as BaseValueObject).sin();
+        });
+    }
+
+    override asin(): BaseValueObject {
+        return this.map((currentValue) => {
+            if (currentValue.isError()) {
+                return currentValue;
+            }
+            return (currentValue as BaseValueObject).asin();
+        });
+    }
+
+    override asinh(): BaseValueObject {
+        return this.map((currentValue) => {
+            if (currentValue.isError()) {
+                return currentValue;
+            }
+            return (currentValue as BaseValueObject).asinh();
+        });
+    }
+
+    override tan(): BaseValueObject {
+        return this.map((currentValue) => {
+            if (currentValue.isError()) {
+                return currentValue;
+            }
+            return (currentValue as BaseValueObject).tan();
+        });
+    }
+
+    override tanh(): BaseValueObject {
+        return this.map((currentValue) => {
+            if (currentValue.isError()) {
+                return currentValue;
+            }
+            return (currentValue as BaseValueObject).tanh();
+        });
+    }
+
+    override atan(): BaseValueObject {
+        return this.map((currentValue) => {
+            if (currentValue.isError()) {
+                return currentValue;
+            }
+            return (currentValue as BaseValueObject).atan();
+        });
+    }
+
+    override atanh(): BaseValueObject {
+        return this.map((currentValue) => {
+            if (currentValue.isError()) {
+                return currentValue;
+            }
+            return (currentValue as BaseValueObject).atanh();
+        });
+    }
+
+    override atan2(valueObject: BaseValueObject): BaseValueObject {
+        return this._batchOperator(valueObject, BatchOperatorType.ATAN2);
+    }
+
+    override atan2Inverse(valueObject: BaseValueObject): BaseValueObject {
+        return this.map((currentValue) => {
+            if (currentValue.isError()) {
+                return currentValue;
+            }
+            return (valueObject as BaseValueObject).atan2(currentValue as BaseValueObject);
         });
     }
 
@@ -628,12 +732,39 @@ export class ArrayValueObject extends BaseValueObject {
         return allValue.get(0, (count - 1) / 2);
     }
 
+    override log(): BaseValueObject {
+        return this.map((currentValue) => {
+            if (currentValue.isError()) {
+                return currentValue;
+            }
+            return (currentValue as BaseValueObject).log();
+        });
+    }
+
     override log10(): BaseValueObject {
         return this.map((currentValue) => {
             if (currentValue.isError()) {
                 return currentValue;
             }
             return (currentValue as BaseValueObject).log10();
+        });
+    }
+
+    override exp(): BaseValueObject {
+        return this.map((currentValue) => {
+            if (currentValue.isError()) {
+                return currentValue;
+            }
+            return (currentValue as BaseValueObject).exp();
+        });
+    }
+
+    override abs(): BaseValueObject {
+        return this.map((currentValue) => {
+            if (currentValue.isError()) {
+                return currentValue;
+            }
+            return (currentValue as BaseValueObject).abs();
         });
     }
 
@@ -943,6 +1074,9 @@ export class ArrayValueObject extends BaseValueObject {
                         case BatchOperatorType.FLOOR:
                             result[r][column] = (currentValue as BaseValueObject).floor(valueObject);
                             break;
+                        case BatchOperatorType.ATAN2:
+                            result[r][column] = (currentValue as BaseValueObject).atan2(valueObject);
+                            break;
                         case BatchOperatorType.CEIL:
                             result[r][column] = (currentValue as BaseValueObject).ceil(valueObject);
                             break;
@@ -1092,6 +1226,9 @@ export class ArrayValueObject extends BaseValueObject {
                             case BatchOperatorType.ROUND:
                                 rowList[c] = (currentValue as BaseValueObject).round(opValue as BaseValueObject);
                                 break;
+                            case BatchOperatorType.ATAN2:
+                                rowList[c] = (currentValue as BaseValueObject).atan2(opValue as BaseValueObject);
+                                break;
                             case BatchOperatorType.FLOOR:
                                 rowList[c] = (currentValue as BaseValueObject).floor(opValue as BaseValueObject);
                                 break;
@@ -1212,6 +1349,9 @@ export class ValueObjectFactory {
             return new StringValueObject(rawValue);
         }
         if (typeof rawValue === 'number') {
+            if (!Number.isFinite(rawValue)) {
+                return ErrorValueObject.create(ErrorType.NUM);
+            }
             return new NumberValueObject(rawValue, true);
         }
         return ErrorValueObject.create(ErrorType.NA);

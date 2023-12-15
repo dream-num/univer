@@ -19,25 +19,25 @@ import { describe, expect, it } from 'vitest';
 
 import { ArrayValueObject, transformToValueObject } from '../array-value-object';
 
-describe('arrayValueObject log10 method test', () => {
+describe('arrayValueObject exp method test', () => {
     const originArrayValueObject = new ArrayValueObject({
         calculateValueList: transformToValueObject([
-            [8, 1, ' ', 1.23, true, false],
-            [27, 0, '100', '2.34', 'test', -3],
+            [1, ' ', 1.23, true, false],
+            [0, '100', '2.34', 'test', -3],
         ]),
         rowCount: 2,
-        columnCount: 6,
+        columnCount: 5,
         unitId: '',
         sheetId: '',
         row: 0,
         column: 0,
     });
 
-    describe('log10', () => {
+    describe('exp', () => {
         it('origin nm', () => {
-            expect((originArrayValueObject.log10() as ArrayValueObject).toValue()).toStrictEqual([
-                [0.9030899869919435, 0, '#VALUE!', 0.08990511143939792, 0, '#NUM!'],
-                [1.4313637641589874, '#NUM!', 2, 0.36921585741014284, '#VALUE!', '#NUM!'],
+            expect((originArrayValueObject.exp() as ArrayValueObject).toValue()).toStrictEqual([
+                [2.718281828459045, '#VALUE!', 3.4212295362896734, 2.718281828459045, 1],
+                [1, 2.6881171418161356e43, 10.381236562731843, '#VALUE!', 0.049787068367863944],
             ]);
         });
     });

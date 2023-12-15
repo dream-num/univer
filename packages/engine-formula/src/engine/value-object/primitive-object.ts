@@ -21,7 +21,7 @@ import { BooleanValue, ConcatenateType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { compareToken } from '../../basics/token';
 import { compareWithWildcard } from '../utils/compare';
-import { ceil, floor, log10, pow, round } from '../utils/math-kit';
+import { ceil, floor, pow, round } from '../utils/math-kit';
 import { BaseValueObject, ErrorValueObject } from './base-value-object';
 
 export class NullValueObject extends BaseValueObject {
@@ -103,11 +103,67 @@ export class NullValueObject extends BaseValueObject {
         return new NumberValueObject(0, true);
     }
 
+    override cbrt(): BaseValueObject {
+        return new NumberValueObject(0, true);
+    }
+
+    override cos(): BaseValueObject {
+        return new NumberValueObject(0, true);
+    }
+
+    override acos(): BaseValueObject {
+        return new NumberValueObject(0, true);
+    }
+
+    override acosh(): BaseValueObject {
+        return new NumberValueObject(0, true);
+    }
+
     override sin(): BaseValueObject {
         return new NumberValueObject(0, true);
     }
 
+    override asin(): BaseValueObject {
+        return new NumberValueObject(0, true);
+    }
+
+    override asinh(): BaseValueObject {
+        return new NumberValueObject(0, true);
+    }
+
+    override tan(): BaseValueObject {
+        return new NumberValueObject(0, true);
+    }
+
+    override tanh(): BaseValueObject {
+        return new NumberValueObject(0, true);
+    }
+
+    override atan(): BaseValueObject {
+        return new NumberValueObject(0, true);
+    }
+
+    override atan2(valueObject: BaseValueObject): BaseValueObject {
+        return new NumberValueObject(0, true).atan2(valueObject);
+    }
+
+    override atanh(): BaseValueObject {
+        return new NumberValueObject(0, true);
+    }
+
+    override log(): BaseValueObject {
+        return ErrorValueObject.create(ErrorType.NUM);
+    }
+
     override log10(): BaseValueObject {
+        return ErrorValueObject.create(ErrorType.NUM);
+    }
+
+    override exp(): BaseValueObject {
+        return ErrorValueObject.create(ErrorType.NUM);
+    }
+
+    override abs(): BaseValueObject {
         return ErrorValueObject.create(ErrorType.NUM);
     }
 
@@ -222,12 +278,68 @@ export class BooleanValueObject extends BaseValueObject {
         return this._convertTonNumber();
     }
 
+    override cbrt(): BaseValueObject {
+        return this._convertTonNumber();
+    }
+
+    override cos(): BaseValueObject {
+        return this._convertTonNumber().cos();
+    }
+
+    override acos(): BaseValueObject {
+        return this._convertTonNumber().acos();
+    }
+
+    override acosh(): BaseValueObject {
+        return this._convertTonNumber().acosh();
+    }
+
     override sin(): BaseValueObject {
         return this._convertTonNumber().sin();
     }
 
+    override asin(): BaseValueObject {
+        return this._convertTonNumber().asin();
+    }
+
+    override asinh(): BaseValueObject {
+        return this._convertTonNumber().asinh();
+    }
+
+    override tan(): BaseValueObject {
+        return this._convertTonNumber().tan();
+    }
+
+    override tanh(): BaseValueObject {
+        return this._convertTonNumber().tanh();
+    }
+
+    override atan(): BaseValueObject {
+        return this._convertTonNumber().atan();
+    }
+
+    override atan2(valueObject: BaseValueObject): BaseValueObject {
+        return this._convertTonNumber().atan2(valueObject);
+    }
+
+    override atanh(): BaseValueObject {
+        return this._convertTonNumber().atanh();
+    }
+
+    override log(): BaseValueObject {
+        return this._convertTonNumber().log();
+    }
+
     override log10(): BaseValueObject {
         return this._convertTonNumber().log10();
+    }
+
+    override exp(): BaseValueObject {
+        return this._convertTonNumber().exp();
+    }
+
+    override abs(): BaseValueObject {
+        return this._convertTonNumber().abs();
     }
 
     override round(valueObject: BaseValueObject): BaseValueObject {
@@ -352,10 +464,17 @@ export class NumberValueObject extends BaseValueObject {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
         if (typeof value === 'number') {
-            if (Math.abs(currentValue) === Infinity || Math.abs(value) === Infinity) {
-                return new NumberValueObject(currentValue + value);
+            if (!Number.isFinite(currentValue) || !Number.isFinite(value)) {
+                return ErrorValueObject.create(ErrorType.NUM);
             }
-            return new NumberValueObject(Big(currentValue).plus(value).toNumber());
+
+            const result = Big(currentValue).plus(value).toNumber();
+
+            if (!Number.isFinite(result)) {
+                return ErrorValueObject.create(ErrorType.NUM);
+            }
+
+            return new NumberValueObject(result);
         }
         if (typeof value === 'boolean') {
             return new NumberValueObject(
@@ -373,10 +492,17 @@ export class NumberValueObject extends BaseValueObject {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
         if (typeof value === 'number') {
-            if (Math.abs(currentValue) === Infinity || Math.abs(value) === Infinity) {
-                return new NumberValueObject(currentValue - value);
+            if (!Number.isFinite(currentValue) || !Number.isFinite(value)) {
+                return ErrorValueObject.create(ErrorType.NUM);
             }
-            return new NumberValueObject(Big(currentValue).minus(value).toNumber());
+
+            const result = Big(currentValue).minus(value).toNumber();
+
+            if (!Number.isFinite(result)) {
+                return ErrorValueObject.create(ErrorType.NUM);
+            }
+
+            return new NumberValueObject(result);
         }
         if (typeof value === 'boolean') {
             return new NumberValueObject(
@@ -394,10 +520,16 @@ export class NumberValueObject extends BaseValueObject {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
         if (typeof value === 'number') {
-            if (Math.abs(currentValue) === Infinity || Math.abs(value) === Infinity) {
-                return new NumberValueObject(currentValue * value);
+            if (!Number.isFinite(currentValue) || !Number.isFinite(value)) {
+                return ErrorValueObject.create(ErrorType.NUM);
             }
-            return new NumberValueObject(Big(currentValue).times(value).toNumber());
+
+            const result = Big(currentValue).times(value).toNumber();
+
+            if (!Number.isFinite(result)) {
+                return ErrorValueObject.create(ErrorType.NUM);
+            }
+            return new NumberValueObject(result);
         }
         if (typeof value === 'boolean') {
             return new NumberValueObject(
@@ -418,10 +550,17 @@ export class NumberValueObject extends BaseValueObject {
             if (value === 0) {
                 return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
             }
-            if (Math.abs(currentValue) === Infinity || Math.abs(value) === Infinity) {
-                return new NumberValueObject(currentValue / value);
+            if (!Number.isFinite(currentValue) || !Number.isFinite(value)) {
+                return ErrorValueObject.create(ErrorType.NUM);
             }
-            return new NumberValueObject(Big(currentValue).div(value).toNumber());
+
+            const result = Big(currentValue).div(value).toNumber();
+
+            if (!Number.isFinite(result)) {
+                return ErrorValueObject.create(ErrorType.NUM);
+            }
+
+            return new NumberValueObject(result);
         }
         if (typeof value === 'boolean') {
             if (value === false) {
@@ -449,7 +588,7 @@ export class NumberValueObject extends BaseValueObject {
                     break;
             }
         } else if (typeof value === 'number') {
-            if (Math.abs(currentValue) === Infinity || Math.abs(value) === Infinity) {
+            if (!Number.isFinite(currentValue) || !Number.isFinite(value)) {
                 result = this._compareInfinity(currentValue, value, operator);
             } else {
                 switch (operator) {
@@ -502,10 +641,17 @@ export class NumberValueObject extends BaseValueObject {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
         if (typeof value === 'number') {
-            if (Math.abs(currentValue) === Infinity || Math.abs(value) === Infinity) {
-                return new NumberValueObject(Infinity);
+            if (!Number.isFinite(currentValue) || !Number.isFinite(value)) {
+                return ErrorValueObject.create(ErrorType.NUM);
             }
-            return new NumberValueObject(pow(currentValue, value));
+
+            const result = pow(currentValue, value);
+
+            if (!Number.isFinite(result)) {
+                return ErrorValueObject.create(ErrorType.NUM);
+            }
+
+            return new NumberValueObject(result);
         }
         if (typeof value === 'boolean') {
             return new NumberValueObject(pow(currentValue, value ? 1 : 0));
@@ -517,19 +663,244 @@ export class NumberValueObject extends BaseValueObject {
     override sqrt(): BaseValueObject {
         const currentValue = this.getValue();
 
-        if (Math.abs(currentValue) === Infinity) {
-            return new NumberValueObject(Infinity);
+        if (!Number.isFinite(currentValue)) {
+            return ErrorValueObject.create(ErrorType.NUM);
         }
-        return new NumberValueObject(Big(currentValue).sqrt().toNumber());
+
+        const result = Big(currentValue).sqrt().toNumber();
+
+        if (!Number.isFinite(result)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        return new NumberValueObject(result);
+    }
+
+    override cbrt(): BaseValueObject {
+        const currentValue = this.getValue();
+
+        if (!Number.isFinite(currentValue)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        const result = Math.cbrt(currentValue);
+
+        if (!Number.isFinite(result)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        return new NumberValueObject(result);
+    }
+
+    override cos(): BaseValueObject {
+        const currentValue = this.getValue();
+
+        if (!Number.isFinite(currentValue)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        const result = Math.cos(currentValue);
+
+        if (!Number.isFinite(result)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        return new NumberValueObject(result);
+    }
+
+    override acos(): BaseValueObject {
+        const currentValue = this.getValue();
+
+        if (!Number.isFinite(currentValue)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        const result = Math.acos(currentValue);
+
+        if (Number.isNaN(result)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        return new NumberValueObject(result);
+    }
+
+    override acosh(): BaseValueObject {
+        const currentValue = this.getValue();
+
+        if (!Number.isFinite(currentValue)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        const result = Math.acosh(currentValue);
+
+        if (Number.isNaN(result)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        return new NumberValueObject(result);
     }
 
     override sin(): BaseValueObject {
         const currentValue = this.getValue();
 
-        if (Math.abs(currentValue) === Infinity) {
-            return new NumberValueObject(Infinity);
+        if (!Number.isFinite(currentValue)) {
+            return ErrorValueObject.create(ErrorType.NUM);
         }
-        return new NumberValueObject(Math.sin(currentValue));
+
+        const result = Math.sin(currentValue);
+
+        if (!Number.isFinite(result)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        return new NumberValueObject(result);
+    }
+
+    override asin(): BaseValueObject {
+        const currentValue = this.getValue();
+
+        if (!Number.isFinite(currentValue)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        const result = Math.asin(currentValue);
+
+        if (Number.isNaN(result)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        return new NumberValueObject(result);
+    }
+
+    override asinh(): BaseValueObject {
+        const currentValue = this.getValue();
+
+        if (!Number.isFinite(currentValue)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        const result = Math.asinh(currentValue);
+
+        if (Number.isNaN(result)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        return new NumberValueObject(result);
+    }
+
+    override tan(): BaseValueObject {
+        const currentValue = this.getValue();
+
+        if (!Number.isFinite(currentValue)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        const result = Math.tan(currentValue);
+
+        if (!Number.isFinite(result)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        return new NumberValueObject(result);
+    }
+
+    override tanh(): BaseValueObject {
+        const currentValue = this.getValue();
+
+        if (!Number.isFinite(currentValue)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        const result = Math.tanh(currentValue);
+
+        if (!Number.isFinite(result)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        return new NumberValueObject(result);
+    }
+
+    override atan(): BaseValueObject {
+        const currentValue = this.getValue();
+
+        if (!Number.isFinite(currentValue)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        const result = Math.atan(currentValue);
+
+        if (!Number.isFinite(result)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        return new NumberValueObject(result);
+    }
+
+    override atan2(valueObject: BaseValueObject): BaseValueObject {
+        if (valueObject.isArray()) {
+            return valueObject.atan2Inverse(this);
+        }
+
+        const currentValue = this.getValue();
+        const value = valueObject.getValue();
+
+        if (typeof value === 'string') {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+        if (typeof value === 'number') {
+            if (!Number.isFinite(currentValue) || !Number.isFinite(value)) {
+                return ErrorValueObject.create(ErrorType.NUM);
+            }
+
+            const result = Math.atan2(currentValue, value);
+
+            if (!Number.isFinite(result)) {
+                return ErrorValueObject.create(ErrorType.NUM);
+            }
+
+            return new NumberValueObject(result);
+        }
+        if (typeof value === 'boolean') {
+            return new NumberValueObject(Math.atan2(currentValue, value ? 1 : 0));
+        }
+
+        return this;
+    }
+
+    override atanh(): BaseValueObject {
+        const currentValue = this.getValue();
+
+        if (!Number.isFinite(currentValue)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        const result = Math.atanh(currentValue);
+
+        if (!Number.isFinite(result)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        return new NumberValueObject(result);
+    }
+
+    override log(): BaseValueObject {
+        const currentValue = this.getValue();
+
+        if (typeof currentValue === 'number' && currentValue <= 0) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        if (!Number.isFinite(currentValue)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        const result = Math.log(currentValue);
+
+        if (!Number.isFinite(result)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        return new NumberValueObject(result);
     }
 
     override log10(): BaseValueObject {
@@ -539,10 +910,49 @@ export class NumberValueObject extends BaseValueObject {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        if (Math.abs(currentValue) === Infinity) {
-            return new NumberValueObject(Infinity);
+        if (!Number.isFinite(currentValue)) {
+            return ErrorValueObject.create(ErrorType.NUM);
         }
-        return new NumberValueObject(log10(currentValue));
+
+        const result = Math.log10(currentValue);
+
+        if (!Number.isFinite(result)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        return new NumberValueObject(result);
+    }
+
+    override exp(): BaseValueObject {
+        const currentValue = this.getValue();
+
+        if (!Number.isFinite(currentValue)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        const result = Math.exp(currentValue);
+
+        if (!Number.isFinite(result)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        return new NumberValueObject(result);
+    }
+
+    override abs(): BaseValueObject {
+        const currentValue = this.getValue();
+
+        if (!Number.isFinite(currentValue)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        const result = Math.abs(currentValue);
+
+        if (!Number.isFinite(result)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        return new NumberValueObject(result);
     }
 
     override round(valueObject: BaseValueObject): BaseValueObject {
@@ -557,10 +967,17 @@ export class NumberValueObject extends BaseValueObject {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
         if (typeof value === 'number') {
-            if (Math.abs(currentValue) === Infinity || Math.abs(value) === Infinity) {
-                return new NumberValueObject(Infinity);
+            if (!Number.isFinite(currentValue) || !Number.isFinite(value)) {
+                return ErrorValueObject.create(ErrorType.NUM);
             }
-            return new NumberValueObject(round(currentValue, value));
+
+            const result = round(currentValue, value);
+
+            if (!Number.isFinite(result)) {
+                return ErrorValueObject.create(ErrorType.NUM);
+            }
+
+            return new NumberValueObject(result);
         }
         if (typeof value === 'boolean') {
             return new NumberValueObject(round(currentValue, value ? 1 : 0));
@@ -581,10 +998,17 @@ export class NumberValueObject extends BaseValueObject {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
         if (typeof value === 'number') {
-            if (Math.abs(currentValue) === Infinity || Math.abs(value) === Infinity) {
-                return new NumberValueObject(Infinity);
+            if (!Number.isFinite(currentValue) || !Number.isFinite(value)) {
+                return ErrorValueObject.create(ErrorType.NUM);
             }
-            return new NumberValueObject(floor(currentValue, value));
+
+            const result = floor(currentValue, value);
+
+            if (!Number.isFinite(result)) {
+                return ErrorValueObject.create(ErrorType.NUM);
+            }
+
+            return new NumberValueObject(result);
         }
         if (typeof value === 'boolean') {
             return new NumberValueObject(floor(currentValue, value ? 1 : 0));
@@ -605,10 +1029,17 @@ export class NumberValueObject extends BaseValueObject {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
         if (typeof value === 'number') {
-            if (Math.abs(currentValue) === Infinity || Math.abs(value) === Infinity) {
-                return new NumberValueObject(Infinity);
+            if (!Number.isFinite(currentValue) || !Number.isFinite(value)) {
+                return ErrorValueObject.create(ErrorType.NUM);
             }
-            return new NumberValueObject(ceil(currentValue, value));
+
+            const result = ceil(currentValue, value);
+
+            if (!Number.isFinite(result)) {
+                return ErrorValueObject.create(ErrorType.NUM);
+            }
+
+            return new NumberValueObject(result);
         }
         if (typeof value === 'boolean') {
             return new NumberValueObject(ceil(currentValue, value ? 1 : 0));

@@ -19,25 +19,25 @@ import { describe, expect, it } from 'vitest';
 
 import { ArrayValueObject, transformToValueObject } from '../array-value-object';
 
-describe('arrayValueObject log10 method test', () => {
-    const originArrayValueObject = new ArrayValueObject({
-        calculateValueList: transformToValueObject([
-            [8, 1, ' ', 1.23, true, false],
-            [27, 0, '100', '2.34', 'test', -3],
-        ]),
-        rowCount: 2,
-        columnCount: 6,
-        unitId: '',
-        sheetId: '',
-        row: 0,
-        column: 0,
-    });
+describe('arrayValueObject cbrt method test', () => {
+    describe('cbrt', () => {
+        it('origin nm, param nm', () => {
+            const cbrtArrayValueObject = new ArrayValueObject({
+                calculateValueList: transformToValueObject([
+                    [8, 1, ' ', 1.23, true, false],
+                    [27, 0, '100', '2.34', 'test', -3],
+                ]),
+                rowCount: 2,
+                columnCount: 6,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
 
-    describe('log10', () => {
-        it('origin nm', () => {
-            expect((originArrayValueObject.log10() as ArrayValueObject).toValue()).toStrictEqual([
-                [0.9030899869919435, 0, '#VALUE!', 0.08990511143939792, 0, '#NUM!'],
-                [1.4313637641589874, '#NUM!', 2, 0.36921585741014284, '#VALUE!', '#NUM!'],
+            expect((cbrtArrayValueObject.cbrt() as ArrayValueObject).toValue()).toStrictEqual([
+                [2, 1, '#VALUE!', 1.0714412696907731, 1, 0],
+                [3, 0, 4.641588833612779, 1.3276143942617729, '#VALUE!', -1.4422495703074083],
             ]);
         });
     });

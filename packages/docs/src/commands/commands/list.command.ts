@@ -134,6 +134,13 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
                 segmentId,
             });
 
+            // See: univer/packages/engine-render/src/components/docs/block/paragraph/layout-ruler.ts line:802 comments.
+            const paragraphStyle = {
+                ...paragraph.paragraphStyle,
+                hanging: undefined,
+                indentStart: undefined,
+            };
+
             doMutation.params.mutations.push({
                 t: 'r',
                 len: 1,
@@ -142,7 +149,7 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
                     paragraphs: [
                         isAlreadyOrdered
                             ? {
-                                  paragraphStyle: paragraph.paragraphStyle,
+                                  paragraphStyle,
                                   startIndex: 0,
                               }
                             : {

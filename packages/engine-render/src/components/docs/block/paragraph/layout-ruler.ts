@@ -799,10 +799,12 @@ function __bulletIndentHandler(
 
     const { hanging: hangingBullet, indentStart: indentStartBullet } = bulletSkeleton;
 
+    // TODO: @JOCS, do not modify snapshot data directly.
     if (hanging === undefined) {
         paragraphStyle.hanging = hangingBullet;
     }
 
+    // TODO: @JOCS, do not modify snapshot data directly.
     if (indentStart === undefined) {
         paragraphStyle.indentStart =
             getNumberUnitValue(indentStartBullet || 0, charSpaceApply) -

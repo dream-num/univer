@@ -18,12 +18,11 @@ import type { IDocumentData } from '@univerjs/core';
 import {
     BaselineOffset,
     BooleanNumber,
-    BulletAlignment,
     ColumnSeparatorType,
-    GlyphType,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
+    PresetListType,
     SectionType,
     WrapTextType,
 } from '@univerjs/core';
@@ -56,84 +55,6 @@ export const docsDemoData: IDocumentData = {
             layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
             behindDoc: BooleanNumber.FALSE,
             wrapText: WrapTextType.BOTH_SIDES,
-        },
-    },
-    lists: {
-        bulletList: {
-            listId: 'bulletList',
-            nestingLevel: [
-                {
-                    bulletAlignment: BulletAlignment.START,
-                    glyphFormat: ' %0',
-                    textStyle: {
-                        fs: 12,
-                    },
-                    startNumber: 0,
-                    glyphSymbol: '\u25CF',
-                    hanging: 21,
-                    indentStart: 21,
-                },
-                {
-                    bulletAlignment: BulletAlignment.START,
-                    glyphFormat: ' %1',
-                    textStyle: {
-                        fs: 12,
-                    },
-                    startNumber: 0,
-                    glyphSymbol: '\u25A0',
-                    hanging: 21,
-                    indentStart: 42,
-                },
-                {
-                    bulletAlignment: BulletAlignment.START,
-                    glyphFormat: ' %1',
-                    textStyle: {
-                        fs: 12,
-                    },
-                    startNumber: 0,
-                    glyphSymbol: '\u25C6',
-                    hanging: 21,
-                    indentStart: 63,
-                },
-            ],
-        },
-        orderList: {
-            listId: 'orderList',
-            nestingLevel: [
-                {
-                    bulletAlignment: BulletAlignment.START,
-                    glyphFormat: ' %1.',
-                    textStyle: {
-                        fs: 12,
-                    },
-                    startNumber: 0,
-                    glyphType: GlyphType.ROMAN,
-                    hanging: 21,
-                    indentStart: 21,
-                },
-                {
-                    bulletAlignment: BulletAlignment.START,
-                    glyphFormat: ' %1.%2)',
-                    textStyle: {
-                        fs: 12,
-                    },
-                    startNumber: 0,
-                    glyphType: GlyphType.ROMAN,
-                    hanging: 21,
-                    indentStart: 42,
-                },
-                {
-                    bulletAlignment: BulletAlignment.START,
-                    glyphFormat: ' %1.%2.%3.',
-                    textStyle: {
-                        fs: 12,
-                    },
-                    startNumber: 0,
-                    glyphType: GlyphType.ROMAN,
-                    hanging: 21,
-                    indentStart: 63,
-                },
-            ],
         },
     },
     body: {
@@ -205,6 +126,7 @@ export const docsDemoData: IDocumentData = {
                 startIndex: 60,
                 bullet: {
                     listId: 'orderList',
+                    listType: PresetListType.ORDER_LIST,
                     nestingLevel: 0,
                     textStyle: {
                         fs: 20,
@@ -215,6 +137,7 @@ export const docsDemoData: IDocumentData = {
                 startIndex: 91,
                 bullet: {
                     listId: 'orderList',
+                    listType: PresetListType.ORDER_LIST,
                     nestingLevel: 1,
                     textStyle: {
                         fs: 20,
@@ -225,6 +148,7 @@ export const docsDemoData: IDocumentData = {
                 startIndex: 234,
                 bullet: {
                     listId: 'orderList',
+                    listType: PresetListType.ORDER_LIST,
                     nestingLevel: 1,
                     textStyle: {
                         fs: 20,
@@ -235,6 +159,7 @@ export const docsDemoData: IDocumentData = {
                 startIndex: 327,
                 bullet: {
                     listId: 'orderList',
+                    listType: PresetListType.ORDER_LIST,
                     nestingLevel: 1,
                     textStyle: {
                         fs: 20,
@@ -245,6 +170,7 @@ export const docsDemoData: IDocumentData = {
                 startIndex: 406,
                 bullet: {
                     listId: 'orderList',
+                    listType: PresetListType.ORDER_LIST,
                     nestingLevel: 2,
                     textStyle: {
                         fs: 20,

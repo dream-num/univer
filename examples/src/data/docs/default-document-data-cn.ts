@@ -17,11 +17,8 @@
 import type { IDocumentData } from '@univerjs/core';
 import { BaselineOffset, BooleanNumber, TextDecoration } from '@univerjs/core';
 
-import { DEFAULT_LIST_TEST } from './default-list';
-
 export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
     id: 'd',
-    lists: DEFAULT_LIST_TEST,
     body: {
         dataStream:
             '零.\t 开篇\r上标和下标：HO2 5X 删除线：🙌 🎂的内容 下划线：我是下划线\r这篇文章旨在帮助新人快速熟悉开조선어univer的架构及代码，也是我过去一段时间参与到 univer 开发中的学习和总结，肯定有不够准确或者理解偏差，欢迎大家评论指正\r第壹章，会聊聊我对univer架构的理解，univer是如何拆分模块，以及模块之间的依赖关系。然后将univer放入MMV的架构模式中，分别分析下其模型层、视图层、控制器的边界和职责\r第贰章，我们先来看看 univer sheet 的模型层数据结构设计，如何区分 workbook、sheet、row、column、style 等，了解他们的包含关系，这对后面深入理解代码是有帮助的\r第叁、肆章，我将从两条控制链路来分析 univer 的代码，一条链路是 univer 启动和初始化渲染的过程。在这条链路中，是从模型层到视图层的过程。另外一条链路是 univer 响应用户事件，并且触发模型层数据变更，页面重新渲染，在这条链路中，是从视图层到模型层的过程。在这两部分，我们会涉及到大量的源码分析，在保留代码主逻辑的前提，删除了边界 case 的代码。同时在每个代码块第一行，表示该代码块所在的 TS 文件，这样便于直接阅读源码\r\n',
@@ -746,7 +743,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
             {
                 startIndex: 126,
                 bullet: {
-                    listId: 'testBullet',
+                    listId: 'bulletList',
                     nestingLevel: 0,
                     textStyle: {
                         fs: 20,
@@ -765,7 +762,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
             {
                 startIndex: 218,
                 bullet: {
-                    listId: 'unorderedTest',
+                    listId: 'orderList',
                     nestingLevel: 0,
                     textStyle: {
                         fs: 20,
@@ -779,13 +776,6 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
             },
             {
                 startIndex: 318,
-                bullet: {
-                    listId: 'testOrderList',
-                    nestingLevel: 0,
-                    textStyle: {
-                        fs: 20,
-                    },
-                },
                 paragraphStyle: {
                     spaceAbove: 20,
                     lineSpacing: 2,

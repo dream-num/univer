@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { BulletAlignment, GlyphType } from '@univerjs/core';
+import { BulletAlignment, GlyphType } from '../../types/interfaces/i-document-data';
 
-export const DEFAULT_LIST_TEST = {
-    unorderedTest: {
-        listId: 'unorderedTest',
+export const PRESET_LIST_TYPE = {
+    bulletList: {
+        listId: 'bulletList',
         nestingLevel: [
             {
                 bulletAlignment: BulletAlignment.START,
@@ -55,8 +55,8 @@ export const DEFAULT_LIST_TEST = {
             },
         ],
     },
-    testBullet: {
-        listId: 'testBullet',
+    orderList: {
+        listId: 'orderList',
         nestingLevel: [
             {
                 bulletAlignment: BulletAlignment.START,

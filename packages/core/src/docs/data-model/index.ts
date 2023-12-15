@@ -15,4 +15,5 @@
  */
 
 export * from './document-data-model';
+export * from './preset-list-type';
 export * from './types';

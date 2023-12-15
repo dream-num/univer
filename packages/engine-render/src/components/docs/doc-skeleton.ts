@@ -20,6 +20,7 @@ import {
     GridType,
     HorizontalAlign,
     PageOrientType,
+    PRESET_LIST_TYPE,
     SectionType,
     VerticalAlign,
     WrapStrategy,
@@ -471,8 +472,13 @@ export class DocumentSkeleton extends Skeleton {
     private _createSkeleton(bounds?: IBoundRect) {
         // 每一个布局
         const DEFAULT_PAGE_SIZE = { width: Infinity, height: Infinity };
-        const { headerTreeMap, footerTreeMap } = this.getViewModel();
-        const { documentStyle, lists, drawings } = this.getViewModel().getDataModel();
+        const viewModel = this.getViewModel();
+        const { headerTreeMap, footerTreeMap } = viewModel;
+        const { documentStyle, drawings, lists: customLists = {} } = viewModel.getDataModel();
+        const lists = {
+            ...PRESET_LIST_TYPE,
+            ...customLists,
+        };
         const {
             pageNumberStart: global_pageNumberStart = 1, // pageNumberStart
             pageSize: global_pageSize = DEFAULT_PAGE_SIZE,

@@ -21,6 +21,7 @@ import {
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
+    PresetListType,
     SectionType,
     WrapTextType,
 } from '@univerjs/core';
@@ -263,7 +264,8 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
             {
                 startIndex: 433,
                 bullet: {
-                    listId: 'orderList',
+                    listType: PresetListType.ORDER_LIST,
+                    listId: 'b',
                     nestingLevel: 0,
                     textStyle: {
                         fs: 20,
@@ -279,7 +281,8 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
             {
                 startIndex: 484,
                 bullet: {
-                    listId: 'orderList',
+                    listType: PresetListType.ORDER_LIST,
+                    listId: 'b',
                     nestingLevel: 0,
                     textStyle: {
                         fs: 20,
@@ -292,7 +295,8 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
             {
                 startIndex: 516,
                 bullet: {
-                    listId: 'orderList',
+                    listType: PresetListType.ORDER_LIST,
+                    listId: 'b',
                     nestingLevel: 0,
                     textStyle: {
                         fs: 20,
@@ -345,7 +349,8 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                     indentFirstLine: 20,
                 },
                 bullet: {
-                    listId: 'bulletList',
+                    listType: PresetListType.BULLET_LIST,
+                    listId: 'a',
                     nestingLevel: 0,
                     textStyle: {
                         fs: 20,
@@ -358,7 +363,8 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                     indentFirstLine: 20,
                 },
                 bullet: {
-                    listId: 'bulletList',
+                    listType: PresetListType.BULLET_LIST,
+                    listId: 'a',
                     nestingLevel: 0,
                     textStyle: {
                         fs: 20,
@@ -371,7 +377,8 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                     indentFirstLine: 20,
                 },
                 bullet: {
-                    listId: 'bulletList',
+                    listType: PresetListType.BULLET_LIST,
+                    listId: 'a',
                     nestingLevel: 0,
                     textStyle: {
                         fs: 20,

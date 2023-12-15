@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import { PageElementType } from '@univerjs/core';
-
-import { DEFAULT_LIST_TEST } from '../../docs/default-list';
+import { PageElementType, PresetListType } from '@univerjs/core';
 
 export const PAGE3_RICHTEXT_3 = {
     id: 'detailContent3',
@@ -31,7 +29,6 @@ export const PAGE3_RICHTEXT_3 = {
     richText: {
         rich: {
             id: 'd',
-            lists: DEFAULT_LIST_TEST,
             body: {
                 dataStream: `SuperApps are more than composite applications that aggregate services.\rAdaptive AI allows for model behavior change post-deployment by using real-time feedback\r\n`,
                 textRuns: [
@@ -54,6 +51,7 @@ export const PAGE3_RICHTEXT_3 = {
                     {
                         startIndex: 71,
                         bullet: {
+                            listType: PresetListType.ORDER_LIST,
                             listId: 'orderList',
                             nestingLevel: 0,
                             textStyle: {
@@ -67,6 +65,7 @@ export const PAGE3_RICHTEXT_3 = {
                     {
                         startIndex: 160,
                         bullet: {
+                            listType: PresetListType.ORDER_LIST,
                             listId: 'orderList',
                             nestingLevel: 0,
                             textStyle: {

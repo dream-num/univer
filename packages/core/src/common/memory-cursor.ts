@@ -25,4 +25,8 @@ export class MemoryCursor {
     moveCursor(pos: number) {
         this.cursor += pos;
     }
+
+    moveCursorTo(pos: number) {
+        this.cursor = pos;
+    }
 }

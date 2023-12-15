@@ -41,6 +41,7 @@ export {
     SetInlineFormatTextColorCommand,
     SetInlineFormatUnderlineCommand,
 } from './commands/commands/inline-format.command';
+export { BulletListCommand, OrderListCommand } from './commands/commands/list.command';
 export { CoverContentCommand, ReplaceContentCommand } from './commands/commands/replace-content.command';
 export {
     type IRichTextEditingMutationParams,

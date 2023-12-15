@@ -22,6 +22,7 @@ import {
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
+    PresetListType,
     SectionType,
     WrapTextType,
 } from '@univerjs/core';
@@ -124,7 +125,8 @@ export const DEFAULT_DOCUMENT_DATA: IDocumentData = {
             {
                 startIndex: 60,
                 bullet: {
-                    listId: 'orderList',
+                    listType: PresetListType.ORDER_LIST,
+                    listId: 'a',
                     nestingLevel: 0,
                     textStyle: {
                         fs: 20,
@@ -134,7 +136,8 @@ export const DEFAULT_DOCUMENT_DATA: IDocumentData = {
             {
                 startIndex: 91,
                 bullet: {
-                    listId: 'orderList',
+                    listType: PresetListType.ORDER_LIST,
+                    listId: 'a',
                     nestingLevel: 1,
                     textStyle: {
                         fs: 20,
@@ -144,7 +147,8 @@ export const DEFAULT_DOCUMENT_DATA: IDocumentData = {
             {
                 startIndex: 234,
                 bullet: {
-                    listId: 'orderList',
+                    listType: PresetListType.ORDER_LIST,
+                    listId: 'a',
                     nestingLevel: 1,
                     textStyle: {
                         fs: 20,
@@ -154,7 +158,8 @@ export const DEFAULT_DOCUMENT_DATA: IDocumentData = {
             {
                 startIndex: 327,
                 bullet: {
-                    listId: 'orderList',
+                    listType: PresetListType.ORDER_LIST,
+                    listId: 'a',
                     nestingLevel: 1,
                     textStyle: {
                         fs: 20,
@@ -164,7 +169,8 @@ export const DEFAULT_DOCUMENT_DATA: IDocumentData = {
             {
                 startIndex: 406,
                 bullet: {
-                    listId: 'orderList',
+                    listType: PresetListType.ORDER_LIST,
+                    listId: 'a',
                     nestingLevel: 2,
                     textStyle: {
                         fs: 20,

@@ -15,13 +15,10 @@
  */
 
 import type { IDocumentData } from '@univerjs/core';
-import { BooleanNumber, ColumnSeparatorType, SectionType } from '@univerjs/core';
-
-import { DEFAULT_LIST_TEST } from '../../docs/default-list';
+import { BooleanNumber, ColumnSeparatorType, PresetListType, SectionType } from '@univerjs/core';
 
 export const PAGE5_RICHTEXT_1: IDocumentData = {
     id: 'd',
-    lists: DEFAULT_LIST_TEST,
     body: {
         dataStream:
             'What’s New in the 2022 Gartner Hype Cycle for Emerging Technologies\rEmerging technologies for 2022 fit into three main themes: evolving/expanding immersive experiences, accelerated artificial intelligence automation, and optimized technologist delivery.\rThe 2022 Gartner Hype Cycle identifies 25 must-know emerging technologies designed to help enterprise architecture and technology innovation leaders: \rExpand immersive experiences\rAccelerate artificial intelligence (AI) automation\rOptimize technologist delivery \r\n',
@@ -109,6 +106,7 @@ export const PAGE5_RICHTEXT_1: IDocumentData = {
             {
                 startIndex: 433,
                 bullet: {
+                    listType: PresetListType.BULLET_LIST,
                     listId: 'testBullet',
                     nestingLevel: 0,
                     textStyle: {
@@ -122,6 +120,7 @@ export const PAGE5_RICHTEXT_1: IDocumentData = {
             {
                 startIndex: 484,
                 bullet: {
+                    listType: PresetListType.BULLET_LIST,
                     listId: 'testBullet',
                     nestingLevel: 0,
                     textStyle: {
@@ -135,6 +134,7 @@ export const PAGE5_RICHTEXT_1: IDocumentData = {
             {
                 startIndex: 516,
                 bullet: {
+                    listType: PresetListType.BULLET_LIST,
                     listId: 'testBullet',
                     nestingLevel: 0,
                     textStyle: {

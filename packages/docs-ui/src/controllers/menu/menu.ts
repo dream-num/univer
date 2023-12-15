@@ -15,6 +15,8 @@
  */
 
 import {
+    BulletListCommand,
+    OrderListCommand,
     SetInlineFormatBoldCommand,
     SetInlineFormatItalicCommand,
     SetInlineFormatStrikethroughCommand,
@@ -99,7 +101,7 @@ export function SuperscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem
 
 export function OrderListMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
-        id: 'xx',
+        id: OrderListCommand.id,
         group: MenuGroup.TOOLBAR_LAYOUT,
         type: MenuItemType.BUTTON,
         icon: 'OrderSingle',
@@ -110,7 +112,7 @@ export function OrderListMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
 export function BulletListMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
-        id: 'yy',
+        id: BulletListCommand.id,
         group: MenuGroup.TOOLBAR_LAYOUT,
         type: MenuItemType.BUTTON,
         icon: 'UnorderSingle',

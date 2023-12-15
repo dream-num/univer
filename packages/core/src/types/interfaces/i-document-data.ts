@@ -66,7 +66,7 @@ export interface IFooters {
  * Set of lists
  */
 export interface ILists {
-    [listId: string]: IListData;
+    [listType: string]: IListData;
 }
 
 /**
@@ -158,7 +158,7 @@ export interface IHeaderData {
  * The properties of a list which describe the look and feel of bullets belonging to paragraphs associated with a list.
  */
 export interface IListData {
-    listId: string;
+    listType: string;
     nestingLevel: INestingLevel[];
 }
 
@@ -477,6 +477,7 @@ export enum ParagraphElementType {
  * Properties of list
  */
 export interface IBullet {
+    listType: string; // listType orderList or bulletList etc.
     listId: string; // listId
     nestingLevel: number; // nestingLevel
     textStyle: ITextStyle; // textStyle

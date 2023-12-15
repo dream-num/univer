@@ -16,9 +16,14 @@
 
 import { BulletAlignment, GlyphType } from '../../types/interfaces/i-document-data';
 
+export enum PresetListType {
+    BULLET_LIST = 'BULLET_LIST',
+    ORDER_LIST = 'ORDER_LIST',
+}
+
 export const PRESET_LIST_TYPE = {
-    bulletList: {
-        listId: 'bulletList',
+    [PresetListType.BULLET_LIST]: {
+        listType: PresetListType.BULLET_LIST,
         nestingLevel: [
             {
                 bulletAlignment: BulletAlignment.START,
@@ -55,8 +60,8 @@ export const PRESET_LIST_TYPE = {
             },
         ],
     },
-    orderList: {
-        listId: 'orderList',
+    [PresetListType.ORDER_LIST]: {
+        listType: PresetListType.ORDER_LIST,
         nestingLevel: [
             {
                 bulletAlignment: BulletAlignment.START,

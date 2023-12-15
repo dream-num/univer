@@ -15,7 +15,7 @@
  */
 
 import type { IDocumentData } from '@univerjs/core';
-import { BaselineOffset, BooleanNumber, TextDecoration } from '@univerjs/core';
+import { BaselineOffset, BooleanNumber, PresetListType, TextDecoration } from '@univerjs/core';
 
 export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
     id: 'd',
@@ -743,7 +743,8 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
             {
                 startIndex: 126,
                 bullet: {
-                    listId: 'bulletList',
+                    listType: PresetListType.BULLET_LIST,
+                    listId: 'a',
                     nestingLevel: 0,
                     textStyle: {
                         fs: 20,
@@ -762,7 +763,8 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
             {
                 startIndex: 218,
                 bullet: {
-                    listId: 'orderList',
+                    listType: PresetListType.ORDER_LIST,
+                    listId: 'b',
                     nestingLevel: 0,
                     textStyle: {
                         fs: 20,

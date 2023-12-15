@@ -147,9 +147,10 @@ export function createSkeletonBulletSpan(
     // 当文字也需要对齐到网格式，进行处理, LINES默认参照是doc全局字体大小
 
     const multiple = Math.ceil(contentWidth / charSpaceApply);
-    let width = (multiple < 2 ? 2 : multiple) * charSpaceApply; // 默认bullet有2个tab
+    let width = (multiple < 2 ? 2 : multiple) * charSpaceApply; // 默认 bullet 有 2 个 tab
 
     let left = 0;
+
     if (bulletType) {
         // 有序列表的处理，左对齐时left=0，其余情况根据contentWidth调整
         if (bulletAlign === BulletAlignment.CENTER) {

@@ -69,7 +69,7 @@ export function Toolbar() {
         return () => {
             listener.unsubscribe();
         };
-    }, []);
+    }, [position]);
 
     useEffect(() => {
         function resize() {

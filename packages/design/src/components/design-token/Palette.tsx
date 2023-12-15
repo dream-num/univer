@@ -22,7 +22,7 @@ interface IProps {
     theme: Record<string, string>;
 }
 
-const levelMap = ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900', '950', '1000'];
+const levelMap = ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900'];
 
 function convertToCSSVar(input: string): string {
     const dashCase = input.replace(/([A-Z])/g, (match) => `-${match.toLowerCase()}`).replace(/(\d+)/g, '-$1');
@@ -53,7 +53,7 @@ export function Palette(props: IProps) {
         },
         {
             title: 'Text Color',
-            colors: ['textColor', 'textColorSecondary', 'textColorTertiary'],
+            colors: ['textColor', 'textColorSecondary', 'textColorSecondaryDarker', 'textColorTertiary'],
         },
         {
             title: 'Link',
@@ -158,7 +158,7 @@ export function Palette(props: IProps) {
         },
         {
             title: '灰 / Grey',
-            colors: generateColors('grey', 12),
+            colors: generateColors('grey', 9),
         },
         {
             title: '黑 / 白 / Black / White',

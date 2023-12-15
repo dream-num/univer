@@ -28,9 +28,9 @@ import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverUIPlugin } from '@univerjs/ui';
 import type { IUniscriptConfig } from '@univerjs/uniscript';
 import { UniverUniscriptPlugin } from '@univerjs/uniscript';
-import { DEFAULT_WORKBOOK_DATA_DEMO } from 'data';
-import { DebuggerPlugin } from 'univer-plugin-debugger';
 
+import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data';
+import { DebuggerPlugin } from '../plugins/debugger';
 import { locales } from './locales';
 
 // package info

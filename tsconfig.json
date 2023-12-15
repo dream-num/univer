@@ -89,19 +89,7 @@
             "path": "./packages/uniscript"
         },
         {
-            "path": "./examples/data"
-        },
-        {
-            "path": "./examples/univer-plugin-debugger"
-        },
-        {
-            "path": "./examples/docs"
-        },
-        {
-            "path": "./examples/sheets"
-        },
-        {
-            "path": "./examples/slides"
+            "path": "./examples"
         },
         {
             "path": "./apps/docs"

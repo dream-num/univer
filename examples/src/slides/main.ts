@@ -20,7 +20,8 @@ import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UniverSlidesPlugin } from '@univerjs/slides';
 import { UniverSlidesUIPlugin } from '@univerjs/slides-ui';
 import { UniverUIPlugin } from '@univerjs/ui';
-import { DEFAULT_SLIDE_DATA } from 'data';
+
+import { DEFAULT_SLIDE_DATA } from '../data';
 
 // package info
 console.table({

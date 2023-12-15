@@ -5,7 +5,7 @@
         "test": {},
         "coverage": {},
         "build": {},
-        "esbuild:demo": {},
+        "build:demo": {},
         "dev:demo": {
             "cache": false,
             "persistent": true

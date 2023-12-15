@@ -119,9 +119,7 @@ jobs:
             - name: Copy demo to workspace
               run: |
                   mkdir .workspace
-                  cp -r ./examples/docs/local .workspace/docs
-                  cp -r ./examples/sheets/local .workspace/sheets
-                  cp -r ./examples/slides/local .workspace/slides
+                  cp -r ./examples/local .workspace
 
             - name: 🚀 Deploy to Vercel (demo)
               uses: amondnet/vercel-action@v25
@@ -200,9 +198,7 @@ jobs:
 
                       🏆 CI Pipeline: Success
                       **[View Deployment]**
-                      - [📑 Doc](${{ needs.build-demo.outputs.preview-url }}/docs/)
-                      - [📊 Sheet](${{ needs.build-demo.outputs.preview-url }}/sheets/)
-                      - [📽️ Slide](${{ needs.build-demo.outputs.preview-url }}/slides/)
+                      - [📑 Examples](${{ needs.build-demo.outputs.preview-url }}/)
 
                       **[View Storybook]**
                       - [📚 Storybook](${{ needs.build-storybook.outputs.preview-url }}/)
@@ -250,12 +246,7 @@ jobs:
                   issue-number: ${{ needs.setup.outputs.id }}
                   body: |
                       ## View Deployment
-                      | 📝 Doc | 📊 Sheet | 📽️ Slide |
+                      | 📑 Examples | 📚 Storybook |
                       | --- | --- | --- |
-                      | [🔗 Preview link](${{ needs.build-demo.outputs.preview-url }}/docs/) | [🔗 Preview link](${{ needs.build-demo.outputs.preview-url }}/sheets/) | [🔗 Preview link](${{ needs.build-demo.outputs.preview-url }}/slides/) |
-
-                      ## View Storybook
-                      | 📚 Storybook |
-                      | --- |
-                      | [🔗 Preview link](${{ needs.build-storybook.outputs.preview-url }}/) |
+                      | [🔗 Preview link](${{ needs.build-demo.outputs.preview-url }}/) | [🔗 Preview link](${{ needs.build-storybook.outputs.preview-url }}/) |
                   edit-mode: replace

@@ -244,6 +244,16 @@ export class BaseValueObject extends ObjectClassType {
         /** abstract */
         return this;
     }
+
+    round(valueObject: BaseValueObject): BaseValueObject {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.NAME);
+    }
+
+    roundInverse(valueObject: BaseValueObject): BaseValueObject {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.NAME);
+    }
 }
 
 export class ErrorValueObject extends BaseValueObject {

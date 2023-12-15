@@ -37,6 +37,7 @@ enum BatchOperatorType {
     PRODUCT,
     LIKE,
     POW,
+    ROUND,
 }
 
 enum ArrayCalculateType {
@@ -625,6 +626,19 @@ export class ArrayValueObject extends BaseValueObject {
         return allValue.get(0, (count - 1) / 2);
     }
 
+    override round(valueObject: BaseValueObject): BaseValueObject {
+        return this._batchOperator(valueObject, BatchOperatorType.ROUND);
+    }
+
+    override roundInverse(valueObject: BaseValueObject): BaseValueObject {
+        return this.map((currentValue) => {
+            if (currentValue.isError()) {
+                return currentValue;
+            }
+            return (valueObject as BaseValueObject).round(currentValue as BaseValueObject);
+        });
+    }
+
     toValue() {
         return transformToValue(this._value);
     }
@@ -886,6 +900,9 @@ export class ArrayValueObject extends BaseValueObject {
                         case BatchOperatorType.POW:
                             result[r][column] = (currentValue as BaseValueObject).pow(valueObject);
                             break;
+                        case BatchOperatorType.ROUND:
+                            result[r][column] = (currentValue as BaseValueObject).round(valueObject);
+                            break;
                     }
                 }
             } else {
@@ -1028,6 +1045,9 @@ export class ArrayValueObject extends BaseValueObject {
                                 break;
                             case BatchOperatorType.POW:
                                 rowList[c] = (currentValue as BaseValueObject).pow(opValue as BaseValueObject);
+                                break;
+                            case BatchOperatorType.ROUND:
+                                rowList[c] = (currentValue as BaseValueObject).round(opValue as BaseValueObject);
                                 break;
                         }
                     }

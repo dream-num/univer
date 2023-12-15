@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+import type { TooltipRef } from 'rc-tooltip';
 import RcTooltip from 'rc-tooltip';
-import React, { useContext } from 'react';
+import type { Ref } from 'react';
+import React, { forwardRef, useContext } from 'react';
 
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import styles from './index.module.less';
@@ -23,17 +25,20 @@ import { placements } from './placements';
 
 export interface ITooltipProps {
     placement?: 'top' | 'bottom';
+
     title: (() => React.ReactNode) | React.ReactNode;
+
     children: React.ReactElement;
 }
 
-export const Tooltip = (props: ITooltipProps) => {
+export const Tooltip = forwardRef((props: ITooltipProps, ref: Ref<TooltipRef>) => {
     const { children, placement = 'top', title } = props;
 
     const { mountContainer } = useContext(ConfigContext);
 
     return (
         <RcTooltip
+            ref={ref}
             prefixCls={styles.tooltip}
             getTooltipContainer={() => mountContainer}
             overlay={<div className={styles.tooltipContent}>{typeof title === 'function' ? title() : title}</div>}
@@ -46,4 +51,4 @@ export const Tooltip = (props: ITooltipProps) => {
             {children}
         </RcTooltip>
     );
-};
+});

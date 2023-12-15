@@ -5,10 +5,7 @@
     "scripts": {
         "prepare": "husky install",
         "pre-commit": "lint-staged",
-        "dev": "turbo dev:demo --filter ./examples/sheets --filter ./examples/docs --filter ./examples/slides",
-        "dev:sheet": "turbo dev:demo --filter ./examples/sheets",
-        "dev:doc": "turbo dev:demo --filter ./examples/docs",
-        "dev:slide": "turbo dev:demo --filter ./examples/slides",
+        "dev:demo": "turbo dev:demo",
         "dev:storybook": "storybook dev -p 6006 --no-open",
         "dev:site": "turbo dev:docusaurus",
         "lint": "eslint --cache **/src/**/*.{tsx,ts}",

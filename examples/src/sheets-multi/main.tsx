@@ -37,14 +37,12 @@ const univers: Univer[] = [];
 
 function factory(id: string) {
     return function createUniverOnContainer() {
-        // univer
         const univer = new Univer({
             theme: defaultTheme,
             locale: LocaleType.ZH_CN,
             logLevel: LogLevel.VERBOSE,
         });
 
-        // core plugins
         univer.registerPlugin(UniverDocsPlugin, {
             hasScroll: false,
         });
@@ -55,13 +53,12 @@ function factory(id: string) {
             toolbar: true,
             footer: false,
         });
-        univer.registerPlugin(UniverSheetsPlugin, {
-            notExecuteFormula: true,
-        });
+
+        // sheets plugin
+        univer.registerPlugin(UniverSheetsPlugin);
         univer.registerPlugin(UniverSheetsUIPlugin);
 
         // sheet feature plugins
-
         univer.registerPlugin(UniverSheetsNumfmtPlugin);
         univer.registerPlugin(UniverFormulaEnginePlugin);
         univer.registerPlugin(UniverSheetsFormulaPlugin);
@@ -77,10 +74,9 @@ const TITLE_MAP: Record<ViewId, string> = {
     a: 'Sheet 1',
     b: 'Sheet 2',
     c: 'Sheet 3',
-    new: 'New Sheet',
 };
 
-export type ViewId = 'a' | 'b' | 'c' | 'new';
+export type ViewId = 'a' | 'b' | 'c';
 
 export const App = (
     <Mosaic<ViewId>
@@ -104,7 +100,6 @@ export const App = (
 );
 
 ReactDOM.render(App, document.getElementById('container'));
-
 factory('app-a')();
 factory('app-b')();
 factory('app-c')();

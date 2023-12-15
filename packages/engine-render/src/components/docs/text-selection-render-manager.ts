@@ -134,6 +134,8 @@ export interface ITextSelectionRenderManager {
     readonly onPaste$: Observable<Nullable<IEditorInputConfig>>;
     readonly textSelectionInner$: Observable<Nullable<ITextSelectionInnerParam>>;
 
+    __getEditorContainer(): HTMLElement;
+
     getViewPort(): Viewport;
 
     enableSelection(): void;

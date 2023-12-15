@@ -518,6 +518,9 @@ export class Spreadsheet extends SheetComponent {
 
                     const { t: cellValueType = CellValueType.STRING } = cell || {};
 
+                    /**
+                     * Numerical and Boolean values are not displayed with overflow.
+                     */
                     if (
                         wrapStrategy === WrapStrategy.OVERFLOW &&
                         cellValueType !== CellValueType.NUMBER &&

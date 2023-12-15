@@ -135,6 +135,10 @@ export class BorderAuxiliary extends SheetExtension {
             }
         });
         ctx.closePath();
+
+        ctx.lineWidth = getLineWith(1) / scale;
+        ctx.strokeStyle = getColor([212, 212, 212]);
+
         // merge cell
         this._clearRectangle(ctx, scale, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
 

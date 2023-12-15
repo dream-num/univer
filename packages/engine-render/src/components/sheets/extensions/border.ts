@@ -128,24 +128,24 @@ export class Border extends SheetExtension {
         if (type === BORDER_TYPE.TOP || type === BORDER_TYPE.BOTTOM) {
             return isDraw;
         }
-        overflowCache &&
-            overflowCache.forEach((row, rowArray) => {
-                if (row !== borderRow) {
-                    return true;
-                }
-                rowArray.forEach((column, rectangle) => {
-                    const { startColumn, endColumn } = rectangle;
-                    if (type === BORDER_TYPE.LEFT && column > startColumn && column <= endColumn) {
-                        isDraw = true;
-                        return false;
-                    }
 
-                    if (type === BORDER_TYPE.RIGHT && column >= startColumn && column < endColumn) {
-                        isDraw = true;
-                        return false;
-                    }
-                });
+        overflowCache?.forEach((row, rowArray) => {
+            if (row !== borderRow) {
+                return true;
+            }
+            rowArray.forEach((column, rectangle) => {
+                const { startColumn, endColumn } = rectangle;
+                if (type === BORDER_TYPE.LEFT && borderColumn > startColumn && borderColumn <= endColumn) {
+                    isDraw = true;
+                    return false;
+                }
+
+                if (type === BORDER_TYPE.RIGHT && borderColumn >= startColumn && borderColumn < endColumn) {
+                    isDraw = true;
+                    return false;
+                }
             });
+        });
         return isDraw;
     }
 }

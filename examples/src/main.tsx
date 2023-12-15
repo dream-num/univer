@@ -42,6 +42,10 @@ function Examples() {
                 <span> Univer Slides</span>
                 <div className={styles.btnBg}>→</div>{' '}
             </a>
+            <a className={styles.btn} href="./sheets-multi/">
+                <span> Univer Multi Instance</span>
+                <div className={styles.btnBg}>→</div>{' '}
+            </a>
         </section>
     );
 }

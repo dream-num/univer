@@ -35,6 +35,7 @@ import { DesktopContextMenuService, IContextMenuService } from './services/conte
 import { DesktopDialogService } from './services/dialog/desktop-dialog.service';
 import { IDialogService } from './services/dialog/dialog.service';
 import { DesktopFocusService, IFocusService } from './services/focus/focus.service';
+import { LayoutService } from './services/layout/layout.service';
 import { DesktopLocalStorageService } from './services/local-storage/local-storage.service';
 import { DesktopMenuService, IMenuService } from './services/menu/menu.service';
 import { DesktopMessageService } from './services/message/desktop-message.service';
@@ -69,7 +70,7 @@ export class UniverUIPlugin extends Plugin {
     ) {
         super(PLUGIN_NAME);
 
-        this._config = Object.assign(DEFAULT_SLIDE_PLUGIN_DATA, config);
+        this._config = { ...DEFAULT_SLIDE_PLUGIN_DATA, ...config };
 
         this._localeService.load({
             zhCN,
@@ -93,6 +94,7 @@ export class UniverUIPlugin extends Plugin {
             // services
             [ShortcutExperienceService],
             [ShortcutPanelService],
+            [LayoutService],
             [IShortcutService, { useClass: DesktopShortcutService }],
             [IPlatformService, { useClass: DesktopPlatformService }],
             [IMenuService, { useClass: DesktopMenuService }],

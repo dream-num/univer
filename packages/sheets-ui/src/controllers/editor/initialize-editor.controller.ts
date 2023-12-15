@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
 import {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     Disposable,
@@ -27,30 +26,16 @@ import {
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
-import { getDocObject } from '@univerjs/docs';
-import { IRenderManagerService } from '@univerjs/engine-render';
-import type { Subscription } from 'rxjs';
 
 @OnLifecycle(LifecycleStages.Rendered, InitializeEditorController)
 export class InitializeEditorController extends Disposable {
-    private _onInputSubscription: Nullable<Subscription>;
-
-    constructor(
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
-    ) {
+    constructor(@IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService) {
         super();
 
         // TODO: @JOCS, remove use setTimeout.
         setTimeout(() => {
             this._initialize();
         }, 0);
-
-        this._commandExecutedListener();
-    }
-
-    override dispose(): void {
-        this._onInputSubscription?.unsubscribe();
     }
 
     private _initialize() {
@@ -102,11 +87,5 @@ export class InitializeEditorController extends Disposable {
         };
 
         this._currentUniverService.createDoc(INITIAL_SNAPSHOT);
-    }
-
-    private _commandExecutedListener() {}
-
-    private _getDocObject() {
-        return getDocObject(this._currentUniverService, this._renderManagerService);
     }
 }

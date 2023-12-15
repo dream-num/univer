@@ -203,6 +203,7 @@ export class UniverDocsPlugin extends Plugin {
                     },
                 ],
                 [TextSelectionManagerService],
+
                 // controllers
                 [DocRenderController],
                 [PageRenderController],

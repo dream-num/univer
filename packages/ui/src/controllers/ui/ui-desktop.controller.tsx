@@ -26,6 +26,7 @@ import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 
 import { IFocusService } from '../../services/focus/focus.service';
+import { LayoutService } from '../../services/layout/layout.service';
 import { App } from '../../views/App';
 import type { IWorkbenchOptions } from './ui.controller';
 import { IUIController } from './ui.controller';
@@ -81,6 +82,7 @@ export class DesktopUIController extends Disposable implements IDesktopUIControl
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService,
+        @Inject(LayoutService) private readonly _layoutService: LayoutService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IFocusService private readonly _focusService: IFocusService
     ) {
@@ -93,6 +95,7 @@ export class DesktopUIController extends Disposable implements IDesktopUIControl
                 this._initializeEngine(canvasElement);
                 this._lifecycleService.stage = LifecycleStages.Rendered;
                 this._focusService.setContainerElement(containerElement);
+                this.disposeWithMe(this._layoutService.registerContainer(containerElement));
 
                 setTimeout(() => (this._lifecycleService.stage = LifecycleStages.Steady), STEADY_TIMEOUT);
             })

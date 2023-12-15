@@ -60,13 +60,20 @@ const ctx = await esbuild[args.watch ? 'context' : 'build']({
         }),
     ],
     entryPoints: [
+        // homepage
         './src/main.tsx',
 
+        // sheets
         './src/sheets/main.ts',
         './src/sheets/worker.ts',
 
+        // sheets-multi
+        './src/sheets-multi/main.tsx',
+
+        // docs
         './src/docs/main.ts',
 
+        // slides
         './src/slides/main.ts',
     ],
     outdir: './local',

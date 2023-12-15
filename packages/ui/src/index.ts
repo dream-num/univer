@@ -46,6 +46,7 @@ export {
 } from './services/contextmenu/contextmenu.service';
 export { DesktopDialogService } from './services/dialog/desktop-dialog.service';
 export { IDialogService } from './services/dialog/dialog.service';
+export { LayoutService } from './services/layout/layout.service';
 export {
     type ICustomComponentProps,
     type IDisplayMenuItem,

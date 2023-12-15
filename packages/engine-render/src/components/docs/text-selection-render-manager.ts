@@ -305,6 +305,10 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         }
     }
 
+    __getEditorContainer(): HTMLElement {
+        return this._container;
+    }
+
     getViewPort() {
         return this._activeViewport;
     }

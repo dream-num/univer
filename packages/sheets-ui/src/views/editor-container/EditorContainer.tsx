@@ -46,13 +46,11 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
     const editorRef = useRef<HTMLDivElement>(null);
 
     const renderManagerService: IRenderManagerService = useDependency(IRenderManagerService);
-
     const cellEditorManagerService: ICellEditorManagerService = useDependency(ICellEditorManagerService);
 
     useEffect(() => {
         const editor = editorRef.current;
-
-        if (editor == null) {
+        if (!editor) {
             return;
         }
 
@@ -99,7 +97,6 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                 }
             });
 
-        // Clean up on unmount
         return () => {
             renderSubscription.unsubscribe();
         };

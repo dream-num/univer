@@ -25,7 +25,6 @@ import type { IWorkbenchOptions } from '../controllers/ui/ui.controller';
 import { IMessageService } from '../services/message/message.service';
 import styles from './app.module.less';
 import { ComponentContainer } from './components/ComponentContainer';
-import { MenuBar } from './components/doc-bars/MenuBar';
 import { Toolbar } from './components/doc-bars/Toolbar';
 import { Sidebar } from './components/sidebar/Sidebar';
 import { globalComponents } from './parts';
@@ -98,39 +97,41 @@ export function App(props: IUniverAppProps) {
         <ConfigProvider locale={locale} mountContainer={portalContainer}>
             <div className={styles.appLayout}>
                 {/* header */}
-                {props.toolbar && <MenuBar headerMenuComponents={headerMenuComponents} />}
+                {props.toolbar && (
+                    <header className={styles.appContainerHeader}>
+                        <Toolbar headerMenuComponents={headerMenuComponents} />
+                    </header>
+                )}
 
                 {/* content */}
                 <section className={styles.appContainer}>
-                    <header className={styles.appContainerHeader}>{props.toolbar && <Toolbar />}</header>
+                    <div className={styles.appContainerWrapper}>
+                        <section className={styles.appContainerContent}>
+                            <header>
+                                <ComponentContainer components={headerComponents} />
+                            </header>
 
-                    <div className={styles.appContainerMain}>
-                        <div className={styles.appContainerWrapper}>
-                            <section className={styles.appContainerContent}>
-                                <header>
-                                    <ComponentContainer components={headerComponents} />
-                                </header>
-
-                                <section
-                                    className={styles.appContainerCanvas}
-                                    ref={contentRef}
-                                    data-range-selector
-                                    onContextMenu={(e) => e.preventDefault()}
-                                >
-                                    <ComponentContainer components={contentComponents} />
-                                </section>
+                            <section
+                                className={styles.appContainerCanvas}
+                                ref={contentRef}
+                                data-range-selector
+                                onContextMenu={(e) => e.preventDefault()}
+                            >
+                                <ComponentContainer components={contentComponents} />
                             </section>
+                        </section>
 
-                            <aside className={styles.appContainerSidebar}>
-                                <Sidebar />
-                            </aside>
-                        </div>
+                        <aside className={styles.appContainerSidebar}>
+                            <Sidebar />
+                        </aside>
+                    </div>
 
-                        {/* footer */}
+                    {/* footer */}
+                    {props.footer && (
                         <footer className={styles.appFooter}>
                             <ComponentContainer components={footerComponents} />
                         </footer>
-                    </div>
+                    )}
                 </section>
             </div>
 

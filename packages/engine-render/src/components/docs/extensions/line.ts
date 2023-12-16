@@ -27,10 +27,12 @@ import { docExtension } from '../doc-extension';
 
 const UNIQUE_KEY = 'DefaultDocsLineExtension';
 
+const DOC_EXTENSION_Z_INDEX = 40;
+
 export class Line extends docExtension {
     override uKey = UNIQUE_KEY;
 
-    override zIndex = 40;
+    override zIndex = DOC_EXTENSION_Z_INDEX;
 
     private _preBackgroundColor = '';
 

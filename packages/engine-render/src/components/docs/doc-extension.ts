@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IBoundRectNoAngle } from '../..';
 import type { IDocumentSkeletonLine, IDocumentSkeletonSpan } from '../../basics/i-document-skeleton-cached';
 import { ComponentExtension } from '../extension';
 
@@ -24,7 +25,8 @@ export enum DOCS_EXTENSION_TYPE {
 
 export class docExtension extends ComponentExtension<
     IDocumentSkeletonSpan | IDocumentSkeletonLine,
-    DOCS_EXTENSION_TYPE
+    DOCS_EXTENSION_TYPE,
+    IBoundRectNoAngle
 > {
     override type = DOCS_EXTENSION_TYPE.SPAN;
 

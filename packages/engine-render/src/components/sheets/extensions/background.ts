@@ -23,10 +23,12 @@ import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultBackgroundExtension';
 
+const DOC_EXTENSION_Z_INDEX = 20;
+
 export class Background extends SheetExtension {
     override uKey = UNIQUE_KEY;
 
-    override zIndex = 20;
+    override zIndex = DOC_EXTENSION_Z_INDEX;
 
     override draw(
         ctx: CanvasRenderingContext2D,
@@ -34,7 +36,7 @@ export class Background extends SheetExtension {
         spreadsheetSkeleton: SpreadsheetSkeleton,
         diffRanges?: IRange[]
     ) {
-        const { rowHeaderWidth, columnHeaderHeight, dataMergeCache, stylesCache } = spreadsheetSkeleton;
+        const { dataMergeCache, stylesCache } = spreadsheetSkeleton;
         const { background } = stylesCache;
         if (!spreadsheetSkeleton) {
             return;
@@ -53,10 +55,11 @@ export class Background extends SheetExtension {
         }
         ctx.save();
         const { scaleX = 1, scaleY = 1 } = parentScale;
-        const fixPointFive = 0; // fixLineWidthByScale(0.5, scale);
+        // const fixPointFive = 0; // fixLineWidthByScale(0.5, scale);
         background &&
             Object.keys(background).forEach((rgb: string) => {
                 const backgroundCache = background[rgb];
+                // eslint-disable-next-line no-magic-numbers
                 ctx.fillStyle = rgb || getColor([255, 255, 255])!;
                 ctx.beginPath();
                 backgroundCache.forEach((rowIndex, backgroundRow) => {

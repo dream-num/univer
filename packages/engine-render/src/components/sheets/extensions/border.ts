@@ -39,8 +39,7 @@ export class Border extends SheetExtension {
         spreadsheetSkeleton: SpreadsheetSkeleton,
         diffRanges?: IRange[]
     ) {
-        const { rowColumnSegment, rowHeaderWidth, columnHeaderHeight, dataMergeCache, stylesCache, overflowCache } =
-            spreadsheetSkeleton;
+        const { dataMergeCache, stylesCache, overflowCache } = spreadsheetSkeleton;
         const { border } = stylesCache;
         if (!spreadsheetSkeleton) {
             return;

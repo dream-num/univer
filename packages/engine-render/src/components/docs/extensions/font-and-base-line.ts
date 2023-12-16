@@ -26,10 +26,12 @@ import { docExtension } from '../doc-extension';
 
 const UNIQUE_KEY = 'DefaultDocsFontAndBaseLineExtension';
 
+const DOC_EXTENSION_Z_INDEX = 20;
+
 export class FontAndBaseLine extends docExtension {
     override uKey = UNIQUE_KEY;
 
-    override zIndex = 20;
+    override zIndex = DOC_EXTENSION_Z_INDEX;
 
     private _preFontString = '';
 
@@ -41,9 +43,9 @@ export class FontAndBaseLine extends docExtension {
             return;
         }
 
-        const { asc = 0, marginTop: lineMarginTop = 0, paddingTop: linePaddingTop = 0 } = line;
+        // const { asc = 0, marginTop: lineMarginTop = 0, paddingTop: linePaddingTop = 0 } = line;
 
-        const maxLineAsc = asc + lineMarginTop + linePaddingTop;
+        // const maxLineAsc = asc + lineMarginTop + linePaddingTop;
 
         const { ts: textStyle, content, fontStyle, bBox } = span;
 

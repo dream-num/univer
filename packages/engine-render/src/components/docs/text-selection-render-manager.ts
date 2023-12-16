@@ -32,7 +32,6 @@ import type {
     ITextSelectionStyle,
     RANGE_DIRECTION,
 } from '../../basics/range';
-
 import { NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '../../basics/range';
 import { getCurrentScrollXY } from '../../basics/scroll-xy';
 import { checkStyle, injectStyle } from '../../basics/tools';

@@ -146,9 +146,6 @@ export class SheetCanvasView extends RxDisposable {
 
         this._addViewport(worksheet);
 
-        // const { rowTotalHeight, columnTotalWidth, rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
-        // const rowHeaderWidth = rowHeader.hidden !== true ? rowHeader.width : 0;
-        // const columnHeaderHeight = columnHeader.hidden !== true ? columnHeader.height : 0;
         const spreadsheet = new Spreadsheet(SHEET_VIEW_KEY.MAIN);
         const spreadsheetRowHeader = new SpreadsheetRowHeader(SHEET_VIEW_KEY.ROW);
         const spreadsheetColumnHeader = new SpreadsheetColumnHeader(SHEET_VIEW_KEY.COLUMN);

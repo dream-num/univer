@@ -173,8 +173,6 @@ export class DocCanvasView extends RxDisposable {
         }
 
         this._renderManagerService.setCurrent(unitId);
-
-        console.log(scene);
     }
 
     private _addComponent(currentRender: IRender) {

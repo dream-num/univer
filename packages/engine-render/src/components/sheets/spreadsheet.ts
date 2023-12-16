@@ -20,7 +20,6 @@ import { BooleanNumber, CellValueType, HorizontalAlign, ObjectMatrix, sortRules,
 import type { BaseObject } from '../../base-object';
 import { RENDER_CLASS_TYPE } from '../../basics/const';
 import { clearLineByBorderType, getLineWith, getTranslateInSpreadContextWithPixelRatio } from '../../basics/draw';
-import type { ITransformChangeState } from '../../basics/interfaces';
 import { fixLineWidthByScale, getCellByIndex, getCellPositionByIndex, getColor, getScale } from '../../basics/tools';
 import type { IViewportBound } from '../../basics/vector2';
 import { Vector2 } from '../../basics/vector2';
@@ -33,7 +32,6 @@ import { Documents } from '../docs/document';
 import { SpreadsheetExtensionRegistry } from '../extension';
 import type { Background } from './extensions/background';
 import type { Border } from './extensions/border';
-import type { BorderAuxiliary } from './extensions/border-auxiliary';
 import type { Font } from './extensions/font';
 import type { BorderCacheItem } from './interfaces';
 import { SheetComponent } from './sheet-component';
@@ -43,8 +41,6 @@ import { getDocsSkeletonPageSize } from './sheet-skeleton';
 const OBJECT_KEY = '__SHEET_EXTENSION_FONT_DOCUMENT_INSTANCE__';
 
 export class Spreadsheet extends SheetComponent {
-    private _borderAuxiliaryExtension!: BorderAuxiliary;
-
     private _backgroundExtension!: Background;
 
     private _borderExtension!: Border;
@@ -52,12 +48,6 @@ export class Spreadsheet extends SheetComponent {
     private _fontExtension!: Font;
 
     private _cacheCanvas!: Canvas;
-
-    // private _boundsCache: Nullable<IViewportBound>;
-
-    // private _cacheOffsetX = 0;
-
-    // private _cacheOffsetY = 0;
 
     private _refreshIncrementalState = false;
 
@@ -75,23 +65,19 @@ export class Spreadsheet extends SheetComponent {
 
         if (this._allowCache) {
             this._cacheCanvas = new Canvas();
-        }
 
-        this.onIsAddedToParentObserver.add((parent) => {
-            (parent as Scene)?.getEngine()?.onTransformChangeObservable.add((change: ITransformChangeState) => {
+            this.onIsAddedToParentObserver.add((parent) => {
+                (parent as Scene)?.getEngine()?.onTransformChangeObservable.add(() => {
+                    this._resizeCacheCanvas();
+                });
                 this._resizeCacheCanvas();
+                this._addMakeDirtyToScroll();
             });
-            this._resizeCacheCanvas();
-            this._addMakeDirtyToScroll();
-        });
+        }
 
         this._initialDefaultExtension();
 
         this.makeDirty(true);
-    }
-
-    get borderAuxiliaryExtension() {
-        return this._borderAuxiliaryExtension;
     }
 
     get backgroundExtension() {
@@ -289,7 +275,11 @@ export class Spreadsheet extends SheetComponent {
                     ctx.save();
                     ctx.globalCompositeOperation = 'copy';
                     ctx.setTransform(1, 0, 0, 1, 0, 0);
-                    ctx.drawImage(this._cacheCanvas.getCanvasEle(), diffX * pixelRatio, diffY * pixelRatio);
+                    ctx.drawImage(
+                        this._cacheCanvas.getCanvasEle(),
+                        diffX * pixelRatio * scale,
+                        diffY * pixelRatio * scale
+                    );
                     ctx.restore();
 
                     this._refreshIncrementalState = true;
@@ -402,7 +392,7 @@ export class Spreadsheet extends SheetComponent {
             .forEach((extension) => {
                 this.register(extension);
             });
-        this._borderAuxiliaryExtension = this.getExtensionByKey('DefaultBorderAuxiliaryExtension') as BorderAuxiliary;
+        // this._borderAuxiliaryExtension = this.getExtensionByKey('DefaultBorderAuxiliaryExtension') as BorderAuxiliary;
         this._backgroundExtension = this.getExtensionByKey('DefaultBackgroundExtension') as Background;
         this._borderExtension = this.getExtensionByKey('DefaultBorderExtension') as Border;
         this._fontExtension = this.getExtensionByKey('DefaultFontExtension') as Font;

@@ -260,15 +260,18 @@ export class Spreadsheet extends SheetComponent {
                 const dw = right - left + rowHeaderWidth;
 
                 const dh = bottom - top + columnHeaderHeight;
-                if (this.isDirty()) {
-                    this._cacheCanvas.clear();
-                    ctx.setTransform(mainCtx.getTransform());
-                    this._draw(ctx, bounds);
-                    this._applyCache(mainCtx, left, top, dw, dh, left, top, dw, dh);
-                } else {
-                    if ((diffX !== 0 && diffY !== 0) || diffBounds[0] == null || (diffX === 0 && diffY === 0)) {
+
+                if ((diffX !== 0 && diffY !== 0) || diffBounds[0] == null || (diffX === 0 && diffY === 0)) {
+                    if (this.isDirty()) {
+                        this._cacheCanvas.clear();
+                        ctx.setTransform(mainCtx.getTransform());
+                        this._draw(ctx, bounds);
                         this._applyCache(mainCtx, left, top, dw, dh, left, top, dw, dh);
                     } else {
+                        this._applyCache(mainCtx, left, top, dw, dh, left, top, dw, dh);
+                    }
+                } else {
+                    if (this.isDirty()) {
                         const pixelRatio = this._cacheCanvas.getPixelRatio();
                         ctx.save();
                         ctx.globalCompositeOperation = 'copy';
@@ -285,6 +288,8 @@ export class Spreadsheet extends SheetComponent {
                         this._draw(ctx, bounds);
                         this._refreshIncrementalState = false;
 
+                        this._applyCache(mainCtx, left, top, dw, dh, left, top, dw, dh);
+                    } else {
                         this._applyCache(mainCtx, left, top, dw, dh, left, top, dw, dh);
                     }
                 }

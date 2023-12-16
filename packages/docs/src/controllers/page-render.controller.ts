@@ -26,9 +26,9 @@ import type { Documents, IPageRenderConfig } from '@univerjs/engine-render';
 import { IRenderManagerService, Rect } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 
-const PAGE_STROKE_COLOR = 'rgba(198,198,198, 1)';
+const PAGE_STROKE_COLOR = 'rgba(198, 198, 198, 1)';
 
-const PAGE_FILL_COLOR = 'rgba(255,255,255, 1)';
+const PAGE_FILL_COLOR = 'rgba(255, 255, 255, 1)';
 
 @OnLifecycle(LifecycleStages.Rendered, PageRenderController)
 export class PageRenderController extends Disposable {
@@ -73,6 +73,7 @@ export class PageRenderController extends Disposable {
                 if ([DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY].includes(unitId)) {
                     return;
                 }
+
                 // Draw page borders
                 const { page, pageLeft, pageTop, ctx } = config;
                 const { width, height } = page;

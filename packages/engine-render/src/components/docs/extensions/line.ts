@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/* eslint-disable no-magic-numbers */
+
 import type { IScale, ITextDecoration } from '@univerjs/core';
 import { BooleanNumber, getColorStyle, TextDecoration } from '@univerjs/core';
 
@@ -84,6 +86,7 @@ export class Line extends docExtension {
         startY: number
     ) {
         const { s: show, cl: colorStyle, t: lineType } = line;
+
         if (show === BooleanNumber.TRUE) {
             const {
                 originTranslate = Vector2.create(0, 0),
@@ -97,6 +100,8 @@ export class Line extends docExtension {
 
             const centerAngle = degToRad(centerAngleDeg);
             const vertexAngle = degToRad(vertexAngleDeg);
+
+            ctx.save();
 
             ctx.beginPath();
             const color = getColorStyle(colorStyle) || COLOR_BLACK_RGB;
@@ -121,6 +126,8 @@ export class Line extends docExtension {
             ctx.moveTo(start.x, start.y);
             ctx.lineTo(end.x, end.y);
             ctx.stroke();
+
+            ctx.restore();
         }
     }
 

@@ -29,6 +29,7 @@ import { UniverUIPlugin } from '@univerjs/ui';
 
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data';
 import { DebuggerPlugin } from '../plugins/debugger';
+import { ZenEditorPlugin } from '../plugins/zen-editor';
 import { locales } from './locales';
 
 const LOAD_LAZY_PLUGINS_TIMEOUT = 5_000;
@@ -60,6 +61,7 @@ univer.registerPlugin(UniverSheetsUIPlugin);
 
 univer.registerPlugin(UniverSheetsNumfmtPlugin);
 univer.registerPlugin(DebuggerPlugin);
+univer.registerPlugin(ZenEditorPlugin);
 univer.registerPlugin(UniverFormulaEnginePlugin, {
     notExecuteFormula: true,
 });

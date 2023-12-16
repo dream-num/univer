@@ -699,12 +699,17 @@ export class Spreadsheet extends SheetComponent {
         for (const dataCache of dataMergeCache) {
             const { startRow, endRow, startColumn, endColumn } = dataCache;
 
-            const startY = rowHeightAccumulation[startRow - 1] || 0;
-            const endY = rowHeightAccumulation[endRow] || rowHeightAccumulation[rowHeightAccumulation.length - 1];
+            const startY = fixLineWidthByScale(rowHeightAccumulation[startRow - 1] || 0, scale);
+            const endY = fixLineWidthByScale(
+                rowHeightAccumulation[endRow] || rowHeightAccumulation[rowHeightAccumulation.length - 1],
+                scale
+            );
 
-            const startX = columnWidthAccumulation[startColumn - 1] || 0;
-            const endX =
-                columnWidthAccumulation[endColumn] || columnWidthAccumulation[columnWidthAccumulation.length - 1];
+            const startX = fixLineWidthByScale(columnWidthAccumulation[startColumn - 1] || 0, scale);
+            const endX = fixLineWidthByScale(
+                columnWidthAccumulation[endColumn] || columnWidthAccumulation[columnWidthAccumulation.length - 1],
+                scale
+            );
 
             ctx.clearRect(startX, startY, endX - startX, endY - startY);
 

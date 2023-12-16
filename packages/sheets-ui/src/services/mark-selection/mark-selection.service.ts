@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo } from '@univerjs/core';
 import { Disposable, ICommandService, IUniverInstanceService, ThemeService, Tools } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
-import { SelectionManagerService, SetRangeValuesMutation, SetWorksheetActiveOperation } from '@univerjs/sheets';
+import { SelectionManagerService } from '@univerjs/sheets';
 import { createIdentifier, Inject } from '@wendellhu/redi';
 
-import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 import { ISelectionRenderService } from '../selection/selection-render.service';
 import { SelectionShape } from '../selection/selection-shape';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
@@ -30,6 +28,7 @@ export interface IMarkSelectionService {
     addShape(selection: ISelectionWithStyle, zIndex?: number): string | null;
     removeShape(id: string): void;
     removeAllShapes(): void;
+    refreshShapes(): void;
 }
 
 interface IMarkSelectionInfo {
@@ -56,8 +55,6 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService
     ) {
         super();
-        this._addRemoveListener();
-        this._addRefreshListener();
     }
 
     addShape(selection: ISelectionWithStyle, zIndex: number = DEFAULT_Z_INDEX): string | null {
@@ -76,27 +73,25 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
     }
 
     refreshShapes() {
-        const currentunitId = this._currentService.getCurrentUniverSheetInstance().getUnitId();
-        const currentsubUnitId = this._currentService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
-        setTimeout(() => {
-            this._shapeMap.forEach((shape) => {
-                const { unitId, subUnitId, selection, control: oldControl, zIndex } = shape;
-                if (unitId !== currentunitId || subUnitId !== currentsubUnitId) {
-                    oldControl && oldControl.dispose();
-                    return;
-                }
-                const { style } = selection;
-                const { scene } = this._renderManagerService.getRenderById(unitId) || {};
-                const { rangeWithCoord, primaryWithCoord } =
-                    this._selectionRenderService.convertSelectionRangeToData(selection);
-                const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-                if (!scene || !skeleton) return;
-                const { rowHeaderWidth, columnHeaderHeight } = skeleton;
-                const control = new SelectionShape(scene, zIndex, false, this._themeService);
-                control.update(rangeWithCoord, rowHeaderWidth, columnHeaderHeight, style, primaryWithCoord);
-                shape.control = control;
-            });
-        }, 0);
+        const currentUnitId = this._currentService.getCurrentUniverSheetInstance().getUnitId();
+        const currentSubUnitId = this._currentService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+        this._shapeMap.forEach((shape) => {
+            const { unitId, subUnitId, selection, control: oldControl, zIndex } = shape;
+            if (unitId !== currentUnitId || subUnitId !== currentSubUnitId) {
+                oldControl && oldControl.dispose();
+                return;
+            }
+            const { style } = selection;
+            const { scene } = this._renderManagerService.getRenderById(unitId) || {};
+            const { rangeWithCoord, primaryWithCoord } =
+                this._selectionRenderService.convertSelectionRangeToData(selection);
+            const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+            if (!scene || !skeleton) return;
+            const { rowHeaderWidth, columnHeaderHeight } = skeleton;
+            const control = new SelectionShape(scene, zIndex, false, this._themeService);
+            control.update(rangeWithCoord, rowHeaderWidth, columnHeaderHeight, style, primaryWithCoord);
+            shape.control = control;
+        });
     }
 
     removeShape(id: string): void {
@@ -113,27 +108,5 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
             control && control.dispose();
         }
         this._shapeMap.clear();
-    }
-
-    private _addRemoveListener() {
-        const removeCommands = [SetCellEditVisibleOperation.id, SetRangeValuesMutation.id];
-        this.disposeWithMe(
-            this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (removeCommands.includes(command.id)) {
-                    this.removeAllShapes();
-                }
-            })
-        );
-    }
-
-    private _addRefreshListener() {
-        const refreshCommands = [SetWorksheetActiveOperation.id];
-        this.disposeWithMe(
-            this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (refreshCommands.includes(command.id)) {
-                    this.refreshShapes();
-                }
-            })
-        );
     }
 }

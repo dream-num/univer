@@ -7,7 +7,6 @@
         "pre-commit": "lint-staged",
         "dev:demo": "turbo dev:demo",
         "dev:storybook": "storybook dev -p 6006 --no-open",
-        "dev:site": "turbo dev:docusaurus",
         "lint": "eslint --cache **/src/**/*.{tsx,ts}",
         "lint:fix": "eslint --cache **/src/**/*.{tsx,ts} --fix",
         "lint:style": "stylelint **/*.less",
@@ -16,8 +15,7 @@
         "coverage": "turbo coverage -- --passWithNoTests",
         "build": "turbo build",
         "build:demo": "turbo build:demo",
-        "build:storybook": "storybook build",
-        "build:site": "turbo build:docusaurus"
+        "build:storybook": "storybook build"
     },
     "engines": {
         "node": "^18.17.0",

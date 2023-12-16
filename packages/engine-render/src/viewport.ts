@@ -94,6 +94,8 @@ export class Viewport {
 
     onScrollStopObserver = new Observable<IScrollObserverParam>();
 
+    onScrollByBarObserver = new Observable<IScrollObserverParam>();
+
     private _viewPortKey: string = '';
 
     private _dirty: boolean = true;
@@ -378,6 +380,10 @@ export class Viewport {
      */
     scrollBy(pos: IScrollBarPosition, isTrigger = true) {
         return this._scroll(SCROLL_TYPE.scrollBy, pos, isTrigger);
+    }
+
+    scrollByBar(pos: IScrollBarPosition, isTrigger = true) {
+        this._scroll(SCROLL_TYPE.scrollBy, pos, isTrigger, true);
     }
 
     /**
@@ -865,7 +871,7 @@ export class Viewport {
         }, 0);
     }
 
-    private _scroll(scrollType: SCROLL_TYPE, pos: IScrollBarPosition, isTrigger = true) {
+    private _scroll(scrollType: SCROLL_TYPE, pos: IScrollBarPosition, isTrigger = true, isFromBar = false) {
         const { x, y } = pos;
 
         if (this._scrollBar == null) {
@@ -931,6 +937,21 @@ export class Viewport {
             limitY: this._scrollBar?.limitY,
             isTrigger,
         });
+
+        if (isFromBar) {
+            this.onScrollByBarObserver.notifyObservers({
+                viewport: this,
+                scrollX: this.scrollX,
+                scrollY: this.scrollY,
+                x,
+                y,
+                actualScrollX: scroll.x,
+                actualScrollY: scroll.y,
+                limitX: this._scrollBar?.limitX,
+                limitY: this._scrollBar?.limitY,
+                isTrigger,
+            });
+        }
 
         this._triggerScrollStop(scroll, x, y, isTrigger);
 

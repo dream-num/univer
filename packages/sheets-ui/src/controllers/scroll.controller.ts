@@ -97,6 +97,33 @@ export class ScrollController extends Disposable {
                 })
             )
         );
+        this.disposeWithMe(
+            toDisposable(
+                viewportMain?.onScrollByBarObserver.add((param) => {
+                    const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+                    if (skeleton == null || param.isTrigger === false) {
+                        return;
+                    }
+
+                    const sheetObject = this._getSheetObject();
+                    if (skeleton == null || sheetObject == null) {
+                        return;
+                    }
+                    const { actualScrollX = 0, actualScrollY = 0 } = param;
+                    // according to the actual scroll position, the most suitable row, column and offset combination is recalculated.
+                    const { row, column, rowOffset, columnOffset } = skeleton.getDecomposedOffset(
+                        actualScrollX,
+                        actualScrollY
+                    );
+                    this._commandService.executeCommand(ScrollCommand.id, {
+                        sheetViewStartRow: row,
+                        sheetViewStartColumn: column,
+                        offsetX: columnOffset,
+                        offsetY: rowOffset,
+                    });
+                })
+            )
+        );
     }
 
     scrollToVisible(direction: Direction) {

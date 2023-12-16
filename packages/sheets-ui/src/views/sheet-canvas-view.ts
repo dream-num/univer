@@ -115,7 +115,7 @@ export class SheetCanvasView extends RxDisposable {
 
         this._scene = scene;
 
-        scene.addLayer(Layer.create(scene, [], 0), Layer.create(scene, [], 2));
+        scene.addLayer(new Layer(scene, [], 0), new Layer(scene, [], 2));
 
         if (currentRender != null) {
             this._addComponent(currentRender);
@@ -125,7 +125,6 @@ export class SheetCanvasView extends RxDisposable {
 
         if (should && !isAddedToExistedScene) {
             engine.runRenderLoop(() => {
-                // document.getElementById('app')!.innerHTML = engine.getFps().toString();
                 scene.render();
                 this._fps$.next(Math.round(engine.getFps()).toString());
             });
@@ -147,9 +146,6 @@ export class SheetCanvasView extends RxDisposable {
 
         this._addViewport(worksheet);
 
-        // const { rowTotalHeight, columnTotalWidth, rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
-        // const rowHeaderWidth = rowHeader.hidden !== true ? rowHeader.width : 0;
-        // const columnHeaderHeight = columnHeader.hidden !== true ? columnHeader.height : 0;
         const spreadsheet = new Spreadsheet(SHEET_VIEW_KEY.MAIN);
         const spreadsheetRowHeader = new SpreadsheetRowHeader(SHEET_VIEW_KEY.ROW);
         const spreadsheetColumnHeader = new SpreadsheetColumnHeader(SHEET_VIEW_KEY.COLUMN);
@@ -173,6 +169,8 @@ export class SheetCanvasView extends RxDisposable {
             [spreadsheetRowHeader, spreadsheetColumnHeader, SpreadsheetLeftTopPlaceholder],
             SHEET_COMPONENT_HEADER_LAYER_INDEX
         );
+
+        scene.enableLayerCache(SHEET_COMPONENT_MAIN_LAYER_INDEX, SHEET_COMPONENT_HEADER_LAYER_INDEX);
 
         this._sheetSkeletonManagerService.setCurrent({ sheetId, unitId });
     }
@@ -321,6 +319,8 @@ export class SheetCanvasView extends RxDisposable {
                 // TODO
                 // ...
             }
+
+            this._scene.makeDirty(true);
         });
 
         // create a scroll bar

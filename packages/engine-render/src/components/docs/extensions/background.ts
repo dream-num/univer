@@ -24,10 +24,12 @@ import { docExtension } from '../doc-extension';
 
 const UNIQUE_KEY = 'DefaultDocsBackgroundExtension';
 
+const DOC_EXTENSION_Z_INDEX = 10;
+
 export class Background extends docExtension {
     override uKey = UNIQUE_KEY;
 
-    override zIndex = 10;
+    override zIndex = DOC_EXTENSION_Z_INDEX;
 
     private _preBackgroundColor = '';
 
@@ -38,7 +40,7 @@ export class Background extends docExtension {
         }
 
         const { contentHeight = 0 } = line;
-        const { ts: textStyle, width, content } = span;
+        const { ts: textStyle, width } = span;
         if (!textStyle) {
             return;
         }

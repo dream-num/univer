@@ -17,8 +17,9 @@
 import type { IScale } from '@univerjs/core';
 import { numberToABC } from '@univerjs/core';
 
-import { DEFAULT_FONTFACE_PLANE, MIDDLE_CELL_POS_MAGIC_NUMBER } from '../../../basics/const';
-import { fixLineWidthByScale, getColor } from '../../../basics/tools';
+import { DEFAULT_FONTFACE_PLANE, FIX_ONE_PIXEL_BLUR_OFFSET, MIDDLE_CELL_POS_MAGIC_NUMBER } from '../../../basics/const';
+import { getLineWith } from '../../../basics/draw';
+import { getColor } from '../../../basics/tools';
 import { SheetColumnHeaderExtensionRegistry } from '../../extension';
 import type { SpreadsheetSkeleton } from '../sheet-skeleton';
 import { SheetExtension } from './sheet-extension';
@@ -60,7 +61,10 @@ export class ColumnHeaderLayout extends SheetExtension {
         ctx.textBaseline = 'middle';
         ctx.fillStyle = getColor([0, 0, 0])!;
         ctx.beginPath();
-        ctx.lineWidth = 1 / scale;
+        ctx.lineWidth = getLineWith(1) / scale;
+
+        ctx.translate(FIX_ONE_PIXEL_BLUR_OFFSET / scale, FIX_ONE_PIXEL_BLUR_OFFSET / scale);
+
         ctx.strokeStyle = getColor([217, 217, 217])!;
         ctx.font = `13px ${DEFAULT_FONTFACE_PLANE}`;
         let preColumnPosition = 0;
@@ -70,7 +74,7 @@ export class ColumnHeaderLayout extends SheetExtension {
                 continue;
             }
 
-            const columnEndPosition = fixLineWidthByScale(columnWidthAccumulation[c], scale);
+            const columnEndPosition = columnWidthAccumulation[c];
             if (preColumnPosition === columnEndPosition) {
                 // Skip hidden rows
                 continue;
@@ -87,7 +91,7 @@ export class ColumnHeaderLayout extends SheetExtension {
         }
 
         // painting line bottom border
-        const columnHeaderHeightFix = fixLineWidthByScale(columnHeaderHeight, scale);
+        const columnHeaderHeightFix = columnHeaderHeight;
         ctx.moveTo(0, columnHeaderHeightFix);
         ctx.lineTo(columnTotalWidth, columnHeaderHeightFix);
         ctx.stroke();

@@ -19,8 +19,7 @@ import type { IKeyValue, Nullable } from '@univerjs/core';
 import { BaseObject } from './base-object';
 import { RENDER_CLASS_TYPE } from './basics/const';
 import type { IObjectFullState } from './basics/interfaces';
-import { transformBoundingCoord } from './basics/position';
-import type { IBoundRect, Vector2 } from './basics/vector2';
+import type { IViewportBound, Vector2 } from './basics/vector2';
 import type { ThinScene } from './thin-scene';
 
 export class SceneViewer extends BaseObject {
@@ -40,16 +39,21 @@ export class SceneViewer extends BaseObject {
         return RENDER_CLASS_TYPE.SCENE_VIEWER;
     }
 
-    override render(mainCtx: CanvasRenderingContext2D, bounds?: IBoundRect) {
+    override render(mainCtx: CanvasRenderingContext2D, bounds?: IViewportBound) {
         if (!this.visible) {
             this.makeDirty(false);
             return this;
         }
 
         if (bounds) {
-            const { minX, maxX, minY, maxY } = transformBoundingCoord(this, bounds);
+            const { left, top, right, bottom } = bounds.viewBound;
 
-            if (this.width + this.strokeWidth < minX || maxX < 0 || this.height + this.strokeWidth < minY || maxY < 0) {
+            if (
+                this.width + this.strokeWidth < left ||
+                right < 0 ||
+                this.height + this.strokeWidth < top ||
+                bottom < 0
+            ) {
                 // console.warn('ignore object', this);
                 return this;
             }

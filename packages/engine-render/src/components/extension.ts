@@ -30,7 +30,7 @@ export interface IExtensionConfig {
     renderConfig?: IDocumentRenderConfig;
 }
 
-export class ComponentExtension<T, U> {
+export class ComponentExtension<T, U, V> {
     uKey: string = '';
 
     type!: U;
@@ -45,7 +45,7 @@ export class ComponentExtension<T, U> {
 
     extensionOffset: IExtensionConfig = {};
 
-    draw(ctx: CanvasRenderingContext2D, parentScale: IScale, skeleton: T) {
+    draw(ctx: CanvasRenderingContext2D, parentScale: IScale, skeleton: T, diffBounds?: V) {
         /* abstract */
     }
 

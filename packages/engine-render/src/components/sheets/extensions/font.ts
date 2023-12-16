@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import type { IColorStyle, IScale } from '@univerjs/core';
+import type { IColorStyle, IRange, IScale } from '@univerjs/core';
 import { HorizontalAlign, ObjectMatrix, WrapStrategy } from '@univerjs/core';
 
-import { fixLineWidthByScale } from '../../../basics/tools';
 import type { Documents } from '../../docs/document';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import type { IFontCacheItem } from '../interfaces';
@@ -26,10 +25,13 @@ import type { SpreadsheetSkeleton } from '../sheet-skeleton';
 import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultFontExtension';
+
+const EXTENSION_Z_INDEX = 40;
+
 export class Font extends SheetExtension {
     override uKey = UNIQUE_KEY;
 
-    override zIndex = 40;
+    override zIndex = EXTENSION_Z_INDEX;
 
     changeFontColor: ObjectMatrix<IColorStyle> = new ObjectMatrix();
 
@@ -42,7 +44,12 @@ export class Font extends SheetExtension {
         this.changeFontColor.setValue(r, c, color);
     }
 
-    override draw(ctx: CanvasRenderingContext2D, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {
+    override draw(
+        ctx: CanvasRenderingContext2D,
+        parentScale: IScale,
+        spreadsheetSkeleton: SpreadsheetSkeleton,
+        diffRanges?: IRange[]
+    ) {
         const { stylesCache, dataMergeCache, overflowCache } = spreadsheetSkeleton;
         const { font: fontList } = stylesCache;
         if (!spreadsheetSkeleton) {
@@ -90,10 +97,19 @@ export class Font extends SheetExtension {
                             endX = mergeInfo.endX;
                         }
 
-                        startY = fixLineWidthByScale(startY, scaleY);
-                        endY = fixLineWidthByScale(endY, scaleY);
-                        startX = fixLineWidthByScale(startX, scaleX);
-                        endX = fixLineWidthByScale(endX, scaleX);
+                        if (
+                            !this.isRenderDiffRangesByRow(mergeInfo.startRow, diffRanges) &&
+                            !this.isRenderDiffRangesByRow(mergeInfo.endRow, diffRanges)
+                        ) {
+                            return true;
+                        }
+
+                        if (
+                            !this.isRenderDiffRangesByColumn(mergeInfo.startColumn, diffRanges) &&
+                            !this.isRenderDiffRangesByColumn(mergeInfo.endColumn, diffRanges)
+                        ) {
+                            return true;
+                        }
 
                         const cellWidth = endX - startX;
                         const cellHeight = endY - startY;
@@ -148,6 +164,7 @@ export class Font extends SheetExtension {
                             ctx.rect(startX, startY, cellWidth, cellHeight);
                         }
                         ctx.clip();
+                        ctx.clearRect(startX + 1, startY + 1, cellWidth - 2, cellHeight - 2);
                         ctx.translate(startX, startY);
                         this._renderDocuments(ctx, docsConfig, startX, startY, endX, endY, rowIndex, columnIndex);
                         ctx.restore();
@@ -201,17 +218,11 @@ export class Font extends SheetExtension {
         rowHeightAccumulation: number[],
         columnWidthAccumulation: number[]
     ) {
-        const startY = fixLineWidthByScale(rowHeightAccumulation[startRow - 1] || 0, scale);
-        const endY = fixLineWidthByScale(
-            rowHeightAccumulation[endRow] || rowHeightAccumulation[rowHeightAccumulation.length - 1],
-            scale
-        );
+        const startY = rowHeightAccumulation[startRow - 1] || 0;
+        const endY = rowHeightAccumulation[endRow] || rowHeightAccumulation[rowHeightAccumulation.length - 1];
 
-        const startX = fixLineWidthByScale(columnWidthAccumulation[startColumn - 1] || 0, scale);
-        const endX = fixLineWidthByScale(
-            columnWidthAccumulation[endColumn] || columnWidthAccumulation[columnWidthAccumulation.length - 1],
-            scale
-        );
+        const startX = columnWidthAccumulation[startColumn - 1] || 0;
+        const endX = columnWidthAccumulation[endColumn] || columnWidthAccumulation[columnWidthAccumulation.length - 1];
 
         ctx.rect(startX, startY, endX - startX, endY - startY);
     }

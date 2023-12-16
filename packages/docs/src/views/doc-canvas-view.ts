@@ -157,8 +157,8 @@ export class DocCanvasView extends RxDisposable {
         }
 
         scene.addLayer(
-            Layer.create(scene, [], DOCS_COMPONENT_MAIN_LAYER_INDEX),
-            Layer.create(scene, [], DOCS_COMPONENT_HEADER_LAYER_INDEX)
+            new Layer(scene, [], DOCS_COMPONENT_MAIN_LAYER_INDEX),
+            new Layer(scene, [], DOCS_COMPONENT_HEADER_LAYER_INDEX)
         );
 
         // this._viewLoader(scene);
@@ -191,5 +191,7 @@ export class DocCanvasView extends RxDisposable {
         currentRender.components.set(DOCS_VIEW_KEY.MAIN, documents);
 
         scene.addObjects([documents], DOCS_COMPONENT_MAIN_LAYER_INDEX);
+
+        scene.enableLayerCache(DOCS_COMPONENT_MAIN_LAYER_INDEX);
     }
 }

@@ -16,7 +16,7 @@
 
 import type { BorderStyleTypes, IRange, IScale, ObjectMatrix } from '@univerjs/core';
 
-import { BORDER_TYPE, COLOR_BLACK_RGB } from '../../../basics/const';
+import { BORDER_TYPE, COLOR_BLACK_RGB, FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics/const';
 import { drawLineByBorderType, getLineWidth, setLineType } from '../../../basics/draw';
 import { fixLineWidthByScale } from '../../../basics/tools';
 import { SpreadsheetExtensionRegistry } from '../../extension';
@@ -33,7 +33,12 @@ export class Border extends SheetExtension {
 
     override zIndex = BORDER_Z_INDEX;
 
-    override draw(ctx: CanvasRenderingContext2D, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {
+    override draw(
+        ctx: CanvasRenderingContext2D,
+        parentScale: IScale,
+        spreadsheetSkeleton: SpreadsheetSkeleton,
+        diffRanges?: IRange[]
+    ) {
         const { dataMergeCache, stylesCache, overflowCache } = spreadsheetSkeleton;
         const { border } = stylesCache;
         if (!spreadsheetSkeleton) {
@@ -53,11 +58,13 @@ export class Border extends SheetExtension {
         }
         ctx.save();
         const { scaleX = 1, scaleY = 1 } = parentScale;
+
         const scale = this._getScale(parentScale);
-        // const fixPointFive = fixLineWidthByScale(0.5, scale);
 
         let preStyle: BorderStyleTypes;
         let preColor: string;
+
+        ctx.translate(FIX_ONE_PIXEL_BLUR_OFFSET / scale, FIX_ONE_PIXEL_BLUR_OFFSET / scale);
 
         border?.forEach((rowIndex, borderColumns) => {
             borderColumns?.forEach((columnIndex: number, borderCaches) => {
@@ -87,10 +94,19 @@ export class Border extends SheetExtension {
                     endX = mergeInfo.endX;
                 }
 
-                startY = fixLineWidthByScale(startY, scaleY);
-                endY = fixLineWidthByScale(endY, scaleY);
-                startX = fixLineWidthByScale(startX, scaleX);
-                endX = fixLineWidthByScale(endX, scaleX);
+                if (
+                    !this.isRenderDiffRangesByRow(mergeInfo.startRow - 1, diffRanges) &&
+                    !this.isRenderDiffRangesByRow(mergeInfo.endRow + 1, diffRanges)
+                ) {
+                    return true;
+                }
+
+                if (
+                    !this.isRenderDiffRangesByColumn(mergeInfo.startColumn - 1, diffRanges) &&
+                    !this.isRenderDiffRangesByColumn(mergeInfo.endColumn + 1, diffRanges)
+                ) {
+                    return true;
+                }
 
                 for (const key in borderCaches) {
                     const { type, style, color } = borderCaches[key] as BorderCacheItem;
@@ -110,7 +126,12 @@ export class Border extends SheetExtension {
                         preColor = color;
                     }
 
-                    drawLineByBorderType(ctx, type, { startX, startY, endX, endY });
+                    drawLineByBorderType(ctx, type, {
+                        startX: fixLineWidthByScale(startX, scale),
+                        startY: fixLineWidthByScale(startY, scale),
+                        endX: fixLineWidthByScale(endX, scale),
+                        endY: fixLineWidthByScale(endY, scale),
+                    });
                 }
             });
         });

@@ -16,8 +16,9 @@
 
 import type { IScale } from '@univerjs/core';
 
-import { DEFAULT_FONTFACE_PLANE, MIDDLE_CELL_POS_MAGIC_NUMBER } from '../../../basics/const';
-import { fixLineWidthByScale, getColor } from '../../../basics/tools';
+import { DEFAULT_FONTFACE_PLANE, FIX_ONE_PIXEL_BLUR_OFFSET, MIDDLE_CELL_POS_MAGIC_NUMBER } from '../../../basics/const';
+import { getLineWith } from '../../../basics/draw';
+import { getColor } from '../../../basics/tools';
 import { SheetRowHeaderExtensionRegistry } from '../../extension';
 import type { SpreadsheetSkeleton } from '../sheet-skeleton';
 import { SheetExtension } from './sheet-extension';
@@ -55,7 +56,10 @@ export class RowHeaderLayout extends SheetExtension {
         ctx.textBaseline = 'middle';
         ctx.fillStyle = getColor([0, 0, 0])!;
         ctx.beginPath();
-        ctx.lineWidth = 1 / scale;
+        ctx.lineWidth = getLineWith(1) / scale;
+
+        ctx.translate(FIX_ONE_PIXEL_BLUR_OFFSET / scale, FIX_ONE_PIXEL_BLUR_OFFSET / scale);
+
         ctx.strokeStyle = getColor([217, 217, 217])!;
         ctx.font = `13px ${DEFAULT_FONTFACE_PLANE}`;
         let preRowPosition = 0;
@@ -64,7 +68,7 @@ export class RowHeaderLayout extends SheetExtension {
             if (r < 0 || r > rowHeightAccumulationLength - 1) {
                 continue;
             }
-            const rowEndPosition = fixLineWidthByScale(rowHeightAccumulation[r], scale);
+            const rowEndPosition = rowHeightAccumulation[r];
             if (preRowPosition === rowEndPosition) {
                 // Skip hidden rows
                 continue;
@@ -78,8 +82,8 @@ export class RowHeaderLayout extends SheetExtension {
         }
         // console.log('xx2', rowColumnIndexRange, bounds, this._rowTotalHeight, this._rowHeightAccumulation);
 
-        ctx.moveTo(fixLineWidthByScale(rowHeaderWidth, scale), 0);
-        ctx.lineTo(fixLineWidthByScale(rowHeaderWidth, scale), rowTotalHeight);
+        ctx.moveTo(rowHeaderWidth, 0);
+        ctx.lineTo(rowHeaderWidth, rowTotalHeight);
         ctx.stroke();
     }
 }

@@ -51,6 +51,7 @@
     },
     "devDependencies": {
         "@types/react": "^18.2.42",
+        "@types/lodash": "^4.14.202",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/docs": "workspace:*",
@@ -83,6 +84,7 @@
         "@wendellhu/redi": ">=0.12.12",
         "clsx": ">=2.0.0",
         "react": ">=16.9.0",
-        "rxjs": ">=7.0.0"
+        "rxjs": ">=7.0.0",
+        "lodash": "^4.17.21"
     }
 }

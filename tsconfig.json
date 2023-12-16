@@ -90,9 +90,6 @@
         },
         {
             "path": "./examples"
-        },
-        {
-            "path": "./apps/docs"
         }
     ]
 }

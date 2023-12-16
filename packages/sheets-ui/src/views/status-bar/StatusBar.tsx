@@ -35,12 +35,14 @@ export const StatusBar = () => {
     const localeService = useDependency(LocaleService);
     const statusBarService = useDependency(IStatusBarService);
     const items = statusBarService.getFunctions().map((item, index) => ({
-        name: item,
+        name: item.func,
         value: 0,
         show: isSingle ? index < 1 : index < 3,
+        disable: false,
     }));
     const [statistics, setStatistics] = useState<IStatisticItem[]>(items);
-    const showList = statistics.filter((item) => item.show);
+    const enabledList = statistics.filter((item) => !item.disable);
+    const showList = statistics.filter((item) => item.show && !item.disable);
 
     const onChange = (item: IStatisticItem) => {
         const newStatistics = statistics.map((stat) => {
@@ -56,13 +58,18 @@ export const StatusBar = () => {
 
     useEffect(() => {
         const subscription = statusBarService.state$.subscribe((item) => {
-            if (!item) {
+            if (!item || item.length === 0) {
                 setShow(false);
             } else {
                 setShow(true);
                 const newStatistics = statistics.map((stat) => {
                     const target = item.find((i) => i.func === stat.name);
-                    stat.value = target?.value ?? stat.value;
+                    if (target) {
+                        stat.value = target.value;
+                        stat.disable = false;
+                    } else {
+                        stat.disable = true;
+                    }
                     return stat;
                 });
                 setStatistics(newStatistics);
@@ -134,7 +141,7 @@ export const StatusBar = () => {
                     placement="topRight"
                     overlay={
                         <div className={styles.statisticPicker}>
-                            {statistics?.map((item) => (
+                            {enabledList?.map((item) => (
                                 <a key={item.name} className={styles.statisticPickerItem}>
                                     <Checkbox
                                         value={item.name}

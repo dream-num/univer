@@ -92,7 +92,7 @@ export class StatusBarController extends Disposable {
                     columnCount: sheetConfig.columnCount,
                 };
             });
-        if (selections?.length && (selections?.length > 1 || !this._isSingleCell(selections[0]))) {
+        if (selections?.length) {
             const refs = selections.map((s) => new RangeReferenceObject(s, sheetId, unitId));
             refs.forEach((ref) => {
                 ref.setUnitData({
@@ -104,7 +104,7 @@ export class StatusBarController extends Disposable {
 
             const functions = this._statusBarService.getFunctions();
             const calcResult = functions.map((f) => {
-                const executor = this._functionService.getExecutor(f);
+                const executor = this._functionService.getExecutor(f.func);
                 if (!executor) {
                     return undefined;
                 }
@@ -113,7 +113,7 @@ export class StatusBarController extends Disposable {
                     return undefined;
                 }
                 return {
-                    func: f,
+                    func: f.func,
                     value: (executor?.calculate(...refs) as BaseValueObject).getValue(),
                 };
             });

@@ -27,7 +27,7 @@ export interface IStatusBarService {
     dispose(): void;
     setState(param: IStatusBarServiceStatus | null): void;
     getState(): Readonly<Nullable<IStatusBarServiceStatus>>;
-    getFunctions(): Readonly<IFunctionNames[]>;
+    getFunctions(): Readonly<IStatusBarFunction[]>;
 }
 
 export type IStatusBarServiceStatus = Array<{
@@ -35,14 +35,48 @@ export type IStatusBarServiceStatus = Array<{
     value: number;
 }>;
 
+export interface IStatusBarFunction {
+    func: IFunctionNames;
+    filter?: (status: IStatusBarServiceStatus) => boolean;
+}
+
 export class StatusBarService implements IStatusBarService, IDisposable {
-    private readonly _functions = [
-        FUNCTION_NAMES_MATH.SUM,
-        FUNCTION_NAMES_STATISTICAL.MAX,
-        FUNCTION_NAMES_STATISTICAL.MIN,
-        FUNCTION_NAMES_STATISTICAL.AVERAGE,
-        FUNCTION_NAMES_STATISTICAL.COUNT,
-        FUNCTION_NAMES_STATISTICAL.COUNTA,
+    private readonly _functions: IStatusBarFunction[] = [
+        {
+            func: FUNCTION_NAMES_MATH.SUM,
+            filter: (status: IStatusBarServiceStatus) =>
+                (status.find((item) => item.func === FUNCTION_NAMES_STATISTICAL.COUNTA)?.value ?? 0) > 1 &&
+                (status.find((item) => item.func === FUNCTION_NAMES_STATISTICAL.COUNT)?.value ?? 0) > 0,
+        },
+        {
+            func: FUNCTION_NAMES_STATISTICAL.MAX,
+            filter: (status: IStatusBarServiceStatus) =>
+                (status.find((item) => item.func === FUNCTION_NAMES_STATISTICAL.COUNTA)?.value ?? 0) > 1 &&
+                (status.find((item) => item.func === FUNCTION_NAMES_STATISTICAL.COUNT)?.value ?? 0) > 0,
+        },
+        {
+            func: FUNCTION_NAMES_STATISTICAL.MIN,
+            filter: (status: IStatusBarServiceStatus) =>
+                (status.find((item) => item.func === FUNCTION_NAMES_STATISTICAL.COUNTA)?.value ?? 0) > 1 &&
+                (status.find((item) => item.func === FUNCTION_NAMES_STATISTICAL.COUNT)?.value ?? 0) > 0,
+        },
+        {
+            func: FUNCTION_NAMES_STATISTICAL.AVERAGE,
+            filter: (status: IStatusBarServiceStatus) =>
+                (status.find((item) => item.func === FUNCTION_NAMES_STATISTICAL.COUNTA)?.value ?? 0) > 1 &&
+                (status.find((item) => item.func === FUNCTION_NAMES_STATISTICAL.COUNT)?.value ?? 0) > 0,
+        },
+        {
+            func: FUNCTION_NAMES_STATISTICAL.COUNT,
+            filter: (status: IStatusBarServiceStatus) =>
+                (status.find((item) => item.func === FUNCTION_NAMES_STATISTICAL.COUNT)?.value ?? 0) > 1 &&
+                (status.find((item) => item.func === FUNCTION_NAMES_STATISTICAL.COUNT)?.value ?? 0) > 0,
+        },
+        {
+            func: FUNCTION_NAMES_STATISTICAL.COUNTA,
+            filter: (status: IStatusBarServiceStatus) =>
+                (status.find((item) => item.func === FUNCTION_NAMES_STATISTICAL.COUNTA)?.value ?? 0) > 1,
+        },
     ];
     private readonly _state$ = new BehaviorSubject<Nullable<IStatusBarServiceStatus>>(null);
     readonly state$ = this._state$.asObservable();
@@ -52,15 +86,27 @@ export class StatusBarService implements IStatusBarService, IDisposable {
     }
 
     setState(param: IStatusBarServiceStatus | null) {
-        this._state$.next(param);
+        const newState: IStatusBarServiceStatus = [];
+        // handle the filter.
+        param?.forEach((item) => {
+            const func = this._functions.find((func) => func.func === item.func);
+            if (func && (func.filter === undefined || func.filter(param))) {
+                newState.push(item);
+            }
+        });
+        this._state$.next(newState);
     }
 
     getState(): Readonly<Nullable<IStatusBarServiceStatus>> {
         return this._state$.getValue();
     }
 
-    getFunctions(): Readonly<IFunctionNames[]> {
+    getFunctions(): Readonly<IStatusBarFunction[]> {
         return this._functions;
+    }
+
+    addFunctions(functions: IStatusBarFunction[]) {
+        this._functions.push(...functions);
     }
 }
 

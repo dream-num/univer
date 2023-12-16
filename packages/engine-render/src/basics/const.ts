@@ -154,3 +154,5 @@ export enum RENDER_CLASS_TYPE {
 export const DEFAULT_SELECTION_LAYER_INDEX = 1000;
 
 export const MAXIMUM_ROW_HEIGHT = 2000;
+
+export const FIX_ONE_PIXEL_BLUR_OFFSET = 0.5;

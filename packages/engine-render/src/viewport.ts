@@ -959,25 +959,10 @@ export class Viewport {
             };
         }
 
-        // const { scaleX, scaleY } = this._getBoundScale(this.scene.scaleX, this.scene.scaleY);
-
-        const ratioScrollX = this._scrollBar?.ratioScrollX ?? 1;
-        const ratioScrollY = this._scrollBar?.ratioScrollY ?? 1;
         const xFrom: number = this.left;
         const xTo: number = (this.width || 0) + this.left;
         const yFrom: number = this.top;
         const yTo: number = (this.height || 0) + this.top;
-
-        let differenceX = 0;
-        let differenceY = 0;
-
-        if (this._preScrollX != null) {
-            differenceX = (this._preScrollX - this.scrollX) / ratioScrollX;
-        }
-
-        if (this._preScrollY != null) {
-            differenceY = (this._preScrollY - this.scrollY) / ratioScrollY;
-        }
 
         const topLeft = this.getRelativeVector(Vector2.FromArray([xFrom, yFrom]));
         const bottomRight = this.getRelativeVector(Vector2.FromArray([xTo, yTo]));
@@ -994,8 +979,8 @@ export class Viewport {
         return {
             viewBound,
             diffBounds: this._diffViewBound(viewBound, preViewBound),
-            diffX: differenceX, //viewBound.left - (preViewBound?.left || 0),
-            diffY: differenceY, //viewBound.top - (preViewBound?.top || 0),
+            diffX: (preViewBound?.left || 0) - viewBound.left,
+            diffY: (preViewBound?.top || 0) - viewBound.top,
             viewPortPosition: {
                 top: yFrom,
                 left: xFrom,

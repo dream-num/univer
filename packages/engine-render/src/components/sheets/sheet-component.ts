@@ -53,13 +53,13 @@ export class SheetComponent extends RenderComponent<SpreadsheetSkeleton, SHEET_E
         let { scaleX = 1, scaleY = 1 } = this.parent;
 
         if (this.parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
-            scaleX = this.parent.ancestorScaleX || 1;
-            scaleY = this.parent.ancestorScaleY || 1;
+            scaleX = (this.parent.ancestorScaleX || 1) as number;
+            scaleY = (this.parent.ancestorScaleY || 1) as number;
         }
 
         return {
-            scaleX,
-            scaleY,
+            scaleX: scaleX as number,
+            scaleY: scaleY as number,
         };
     }
 

@@ -142,6 +142,18 @@ export class Scene extends ThinScene {
         return this;
     }
 
+    enableLayerCache(...layerIndexes: number[]) {
+        layerIndexes.forEach((zIndex) => {
+            this.getLayer(zIndex).enableCache();
+        });
+    }
+
+    disableLayerCache(...layerIndexes: number[]) {
+        layerIndexes.forEach((zIndex) => {
+            this.getLayer(zIndex).disableCache();
+        });
+    }
+
     isDirty(): boolean {
         for (let i = 0; i < this._layers.length; i++) {
             const layer = this._layers[i];

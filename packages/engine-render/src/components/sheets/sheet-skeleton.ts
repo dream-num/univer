@@ -211,6 +211,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     private _stylesCache: IStylesCache = {
         background: {},
+        backgroundPositions: new ObjectMatrix<ISelectionCellWithCoord>(),
         font: {},
         border: new ObjectMatrix<BorderCache>(),
     };
@@ -1472,6 +1473,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     private _resetCache() {
         this._stylesCache = {
             background: {},
+            backgroundPositions: new ObjectMatrix<ISelectionCellWithCoord>(),
             font: {},
             border: new ObjectMatrix<BorderCache>(),
         };
@@ -1517,6 +1519,10 @@ export class SpreadsheetSkeleton extends Skeleton {
             const bgCache = cache.background![rgb];
 
             bgCache.setValue(r, c, rgb);
+
+            const cellInfo = this.getCellByIndexWithNoHeader(r, c, 1, 1);
+
+            cache.backgroundPositions?.setValue(r, c, cellInfo);
         }
 
         if (!skipBackgroundAndBorder && style && style.bd) {

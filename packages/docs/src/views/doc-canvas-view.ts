@@ -173,6 +173,8 @@ export class DocCanvasView extends RxDisposable {
         }
 
         this._renderManagerService.setCurrent(unitId);
+
+        console.log(scene);
     }
 
     private _addComponent(currentRender: IRender) {
@@ -189,5 +191,7 @@ export class DocCanvasView extends RxDisposable {
         currentRender.components.set(DOCS_VIEW_KEY.MAIN, documents);
 
         scene.addObjects([documents], DOCS_COMPONENT_MAIN_LAYER_INDEX);
+
+        scene.enableLayerCache(DOCS_COMPONENT_MAIN_LAYER_INDEX);
     }
 }

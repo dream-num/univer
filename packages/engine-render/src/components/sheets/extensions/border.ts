@@ -93,8 +93,15 @@ export class Border extends SheetExtension {
                 }
 
                 if (
-                    !this.isRenderDiffRangesByRow(mergeInfo.startRow, diffRanges) &&
-                    !this.isRenderDiffRangesByRow(mergeInfo.endRow, diffRanges)
+                    !this.isRenderDiffRangesByRow(mergeInfo.startRow - 1, diffRanges) &&
+                    !this.isRenderDiffRangesByRow(mergeInfo.endRow + 1, diffRanges)
+                ) {
+                    return true;
+                }
+
+                if (
+                    !this.isRenderDiffRangesByColumn(mergeInfo.startColumn - 1, diffRanges) &&
+                    !this.isRenderDiffRangesByColumn(mergeInfo.endColumn + 1, diffRanges)
                 ) {
                     return true;
                 }

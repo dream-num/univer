@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import type { IRange, IScale } from '@univerjs/core';
+import type { IRange, IScale, ISelectionCellWithCoord, ObjectMatrix } from '@univerjs/core';
 import { BooleanNumber } from '@univerjs/core';
 
 import { clearLineByBorderType, getLineWith } from '../../../basics/draw';
 import { fixLineWidthByScale, getColor } from '../../../basics/tools';
-import { SpreadsheetExtensionRegistry } from '../../extension';
 import type { BorderCacheItem } from '../interfaces';
 import type { SpreadsheetSkeleton } from '../sheet-skeleton';
 import { SheetExtension } from './sheet-extension';
@@ -39,7 +38,7 @@ export class BorderAuxiliary extends SheetExtension {
         diffRanges?: IRange[]
     ) {
         const { rowColumnSegment, dataMergeCache, overflowCache, stylesCache, showGridlines } = spreadsheetSkeleton;
-        const { border } = stylesCache;
+        const { border, backgroundPositions } = stylesCache;
         const { startRow, endRow, startColumn, endColumn } = rowColumnSegment;
         if (!spreadsheetSkeleton || showGridlines === BooleanNumber.FALSE) {
             return;
@@ -61,6 +60,7 @@ export class BorderAuxiliary extends SheetExtension {
         const scale = this._getScale(parentScale);
         ctx.beginPath();
         ctx.lineWidth = getLineWith(1) / scale;
+        // eslint-disable-next-line no-magic-numbers
         ctx.strokeStyle = getColor([212, 212, 212]);
 
         const width = fixLineWidthByScale(columnTotalWidth, scale);
@@ -70,9 +70,9 @@ export class BorderAuxiliary extends SheetExtension {
         const columnWidthAccumulationLength = columnWidthAccumulation.length;
         const rowHeightAccumulationLength = rowHeightAccumulation.length;
 
-        let rowStart = startRow - 1;
+        let rowStart = startRow;
 
-        let rowEnd = endRow;
+        let rowEnd = endRow - 1;
 
         let columnDrawTopStart = 0;
 
@@ -83,11 +83,13 @@ export class BorderAuxiliary extends SheetExtension {
 
             rowStart = diffRangeStartRow;
 
-            rowEnd = diffRangeEndRow;
+            rowEnd = diffRangeEndRow - 1;
 
-            columnDrawTopStart = fixLineWidthByScale(rowHeightAccumulation[rowStart], scale);
+            columnDrawTopStart = fixLineWidthByScale(rowHeightAccumulation[rowStart - 1], scale) || 0;
 
-            height = fixLineWidthByScale(rowHeightAccumulation[rowEnd], scale);
+            height =
+                fixLineWidthByScale(rowHeightAccumulation[rowEnd], scale) ||
+                fixLineWidthByScale(rowHeightAccumulation[rowHeightAccumulationLength - 1], scale);
         }
 
         for (let r = rowStart; r <= rowEnd; r++) {
@@ -110,6 +112,8 @@ export class BorderAuxiliary extends SheetExtension {
         // console.log('xx2', scaleX, scaleY, columnTotalWidth, rowTotalHeight, rowHeightAccumulation, columnWidthAccumulation);
         ctx.stroke();
         ctx.closePath();
+        // ctx.restore();
+        // return;
 
         const { scaleX = 1, scaleY = 1 } = parentScale;
         // Clearing the dashed line issue caused by overlaid auxiliary lines and strokes
@@ -150,11 +154,7 @@ export class BorderAuxiliary extends SheetExtension {
             endX = fixLineWidthByScale(endX, scaleX);
 
             for (const key in borderCaches) {
-                const { type, style, color } = borderCaches[key] as BorderCacheItem;
-
-                // if (color.indexOf('255,255,255') === -1 || color.toLocaleLowerCase() !== '#ffffff') {
-                //     continue;
-                // }
+                const { type } = borderCaches[key] as BorderCacheItem;
 
                 clearLineByBorderType(ctx, type, { startX, startY, endX, endY }, scaleX, scaleY);
             }
@@ -172,6 +172,9 @@ export class BorderAuxiliary extends SheetExtension {
             overflowCache.toNativeArray(),
             diffRanges
         );
+
+        this._clearBackground(ctx, scale, backgroundPositions, diffRanges);
+
         ctx.restore();
     }
 
@@ -224,6 +227,42 @@ export class BorderAuxiliary extends SheetExtension {
             ctx.closePath();
         }
     }
+
+    private _clearBackground(
+        ctx: CanvasRenderingContext2D,
+        scale: number,
+        backgroundPositions?: ObjectMatrix<ISelectionCellWithCoord>,
+        diffRanges?: IRange[]
+    ) {
+        backgroundPositions?.forValue((row, column, cellInfo) => {
+            let { startY, endY, startX, endX } = cellInfo;
+            const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
+            if (isMerged) {
+                return true;
+            }
+
+            if (
+                !this.isRenderDiffRangesByRow(mergeInfo.startRow, diffRanges) &&
+                !this.isRenderDiffRangesByRow(mergeInfo.endRow, diffRanges)
+            ) {
+                return true;
+            }
+
+            if (isMergedMainCell) {
+                startY = mergeInfo.startY;
+                endY = mergeInfo.endY;
+                startX = mergeInfo.startX;
+                endX = mergeInfo.endX;
+            }
+
+            startY = fixLineWidthByScale(startY, scale);
+            endY = fixLineWidthByScale(endY, scale);
+            startX = fixLineWidthByScale(startX, scale);
+            endX = fixLineWidthByScale(endX, scale);
+
+            ctx.clearRect(startX, startY, endX - startX, endY - startY);
+        });
+    }
 }
 
-SpreadsheetExtensionRegistry.add(new BorderAuxiliary());
+// SpreadsheetExtensionRegistry.add(new BorderAuxiliary());

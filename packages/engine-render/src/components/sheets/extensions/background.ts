@@ -23,7 +23,7 @@ import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultBackgroundExtension';
 
-const DOC_EXTENSION_Z_INDEX = 20;
+const DOC_EXTENSION_Z_INDEX = 50;
 
 export class Background extends SheetExtension {
     override uKey = UNIQUE_KEY;
@@ -37,7 +37,7 @@ export class Background extends SheetExtension {
         diffRanges?: IRange[]
     ) {
         const { dataMergeCache, stylesCache } = spreadsheetSkeleton;
-        const { background } = stylesCache;
+        const { background, backgroundPositions } = stylesCache;
         if (!spreadsheetSkeleton) {
             return;
         }
@@ -55,6 +55,7 @@ export class Background extends SheetExtension {
         }
         ctx.save();
         const { scaleX = 1, scaleY = 1 } = parentScale;
+        ctx.globalCompositeOperation = 'destination-over';
         // const fixPointFive = 0; // fixLineWidthByScale(0.5, scale);
         background &&
             Object.keys(background).forEach((rgb: string) => {
@@ -64,13 +65,11 @@ export class Background extends SheetExtension {
                 ctx.beginPath();
                 backgroundCache.forEach((rowIndex, backgroundRow) => {
                     backgroundRow.forEach((columnIndex) => {
-                        const cellInfo = this.getCellIndex(
-                            rowIndex,
-                            columnIndex,
-                            rowHeightAccumulation,
-                            columnWidthAccumulation,
-                            dataMergeCache
-                        );
+                        const cellInfo = backgroundPositions?.getValue(rowIndex, columnIndex);
+
+                        if (cellInfo == null) {
+                            return true;
+                        }
                         let { startY, endY, startX, endX } = cellInfo;
                         const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
                         if (isMerged) {
@@ -80,6 +79,13 @@ export class Background extends SheetExtension {
                         if (
                             !this.isRenderDiffRangesByRow(mergeInfo.startRow, diffRanges) &&
                             !this.isRenderDiffRangesByRow(mergeInfo.endRow, diffRanges)
+                        ) {
+                            return true;
+                        }
+
+                        if (
+                            !this.isRenderDiffRangesByColumn(mergeInfo.startColumn, diffRanges) &&
+                            !this.isRenderDiffRangesByColumn(mergeInfo.endColumn, diffRanges)
                         ) {
                             return true;
                         }

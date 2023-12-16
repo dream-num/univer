@@ -124,13 +124,7 @@ export class SheetCanvasView extends RxDisposable {
         const should = workbook.getShouldRenderLoopImmediately();
 
         if (should && !isAddedToExistedScene) {
-            const newDiv = document.createElement('div');
-            newDiv.style.position = 'absolute';
-            newDiv.style.top = '0px';
-            newDiv.style.left = '0px';
-            document.body.appendChild(newDiv);
             engine.runRenderLoop(() => {
-                newDiv.innerHTML = engine.getFps().toString();
                 scene.render();
                 this._fps$.next(Math.round(engine.getFps()).toString());
             });
@@ -178,6 +172,8 @@ export class SheetCanvasView extends RxDisposable {
             [spreadsheetRowHeader, spreadsheetColumnHeader, SpreadsheetLeftTopPlaceholder],
             SHEET_COMPONENT_HEADER_LAYER_INDEX
         );
+
+        scene.enableLayerCache(SHEET_COMPONENT_MAIN_LAYER_INDEX, SHEET_COMPONENT_HEADER_LAYER_INDEX);
 
         this._sheetSkeletonManagerService.setCurrent({ sheetId, unitId });
     }

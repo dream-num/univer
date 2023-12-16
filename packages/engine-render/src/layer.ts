@@ -33,15 +33,12 @@ export class Layer {
         private _scene: ThinScene,
         objects: BaseObject[] = [],
         private _zIndex: number = 1,
-        private _allowCache: boolean = true
+        private _allowCache: boolean = false
     ) {
         this.addObjects(objects);
 
         if (this._allowCache) {
-            this._cacheCanvas = new Canvas();
-            this._scene.getEngine().onTransformChangeObservable.add(() => {
-                this._resizeCacheCanvas();
-            });
+            this._initialCacheCanvas();
         }
     }
 
@@ -51,6 +48,21 @@ export class Layer {
 
     get zIndex() {
         return this._zIndex;
+    }
+
+    enableCache() {
+        this._allowCache = true;
+        this._initialCacheCanvas();
+    }
+
+    disableCache() {
+        this._allowCache = false;
+        this._cacheCanvas?.dispose();
+        this._cacheCanvas = null;
+    }
+
+    isAllowCache() {
+        return this._allowCache;
     }
 
     getObjectsByOrder() {
@@ -185,6 +197,13 @@ export class Layer {
 
         this.makeDirty(false);
         return this;
+    }
+
+    private _initialCacheCanvas() {
+        this._cacheCanvas = new Canvas();
+        this._scene.getEngine().onTransformChangeObservable.add(() => {
+            this._resizeCacheCanvas();
+        });
     }
 
     private _draw(mainCtx: CanvasRenderingContext2D, isMaxLayer: boolean) {

@@ -26,10 +26,13 @@ import type { SpreadsheetSkeleton } from '../sheet-skeleton';
 import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultFontExtension';
+
+const EXTENSION_Z_INDEX = 40;
+
 export class Font extends SheetExtension {
     override uKey = UNIQUE_KEY;
 
-    override zIndex = 40;
+    override zIndex = EXTENSION_Z_INDEX;
 
     changeFontColor: ObjectMatrix<IColorStyle> = new ObjectMatrix();
 
@@ -102,6 +105,13 @@ export class Font extends SheetExtension {
                             return true;
                         }
 
+                        if (
+                            !this.isRenderDiffRangesByColumn(mergeInfo.startColumn, diffRanges) &&
+                            !this.isRenderDiffRangesByColumn(mergeInfo.endColumn, diffRanges)
+                        ) {
+                            return true;
+                        }
+
                         startY = fixLineWidthByScale(startY, scaleY);
                         endY = fixLineWidthByScale(endY, scaleY);
                         startX = fixLineWidthByScale(startX, scaleX);
@@ -160,6 +170,7 @@ export class Font extends SheetExtension {
                             ctx.rect(startX, startY, cellWidth, cellHeight);
                         }
                         ctx.clip();
+                        ctx.clearRect(startX + 1, startY + 1, cellWidth - 2, cellHeight - 2);
                         ctx.translate(startX, startY);
                         this._renderDocuments(ctx, docsConfig, startX, startY, endX, endY, rowIndex, columnIndex);
                         ctx.restore();

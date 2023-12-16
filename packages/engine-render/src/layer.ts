@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { sortRules, Nullable } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
+import { sortRules } from '@univerjs/core';
 
 import { BaseObject } from './base-object';
 import { RENDER_CLASS_TYPE } from './basics/const';

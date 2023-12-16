@@ -20,7 +20,7 @@ import React, { Component, createRef } from 'react';
 import type { IUniverDocsUIConfig } from '../../basics';
 import style from './index.module.less';
 
-export interface BaseDocContainerProps extends BaseComponentProps {
+interface IBaseDocContainerProps extends BaseComponentProps {
     config: IUniverDocsUIConfig;
     changeLocale: (locale: string) => void;
     methods?: any;
@@ -29,7 +29,7 @@ export interface BaseDocContainerProps extends BaseComponentProps {
 /**
  * One univerdoc instance DOM container
  */
-export class DocContainer extends Component<BaseDocContainerProps> {
+export class DocContainer extends Component<IBaseDocContainerProps> {
     leftContentLeft: number = 0;
 
     leftContentTop: number = 0;
@@ -42,7 +42,7 @@ export class DocContainer extends Component<BaseDocContainerProps> {
 
     contentRef = createRef<HTMLDivElement>();
 
-    constructor(props: BaseDocContainerProps) {
+    constructor(props: IBaseDocContainerProps) {
         super(props);
         this.changeSkin(props.config.container as string, 'default');
     }

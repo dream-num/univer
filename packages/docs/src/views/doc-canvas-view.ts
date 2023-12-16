@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/* eslint-disable no-magic-numbers */
+
 import type { DocumentDataModel, EventState, Nullable } from '@univerjs/core';
 import {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { getTranslateInSpreadContextWithPixelRatio } from '../../basics/draw';
 import { fixLineWidthByScale, getScale } from '../../basics/tools';
 import type { IViewportBound, Vector2 } from '../../basics/vector2';
 import { SheetRowHeaderExtensionRegistry } from '../extension';
@@ -57,12 +56,9 @@ export class SpreadsheetRowHeader extends SpreadsheetHeader {
 
         const { columnHeaderHeight } = spreadsheetSkeleton;
 
-        const { left: fixTranslateLeft, top: fixTranslateTop } = getTranslateInSpreadContextWithPixelRatio();
+        // const { left: fixTranslateLeft, top: fixTranslateTop } = getTranslateInSpreadContextWithPixelRatio();
 
-        ctx.translate(
-            -fixTranslateLeft / scale,
-            fixLineWidthByScale(columnHeaderHeight, scale) - fixTranslateTop / scale
-        );
+        ctx.translate(0, fixLineWidthByScale(columnHeaderHeight, scale));
 
         const extensions = this.getExtensionsByOrder();
         for (const extension of extensions) {

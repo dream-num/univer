@@ -17,7 +17,13 @@
 import type { IRangeWithCoord, ISelectionCellWithCoord, Nullable, ThemeService } from '@univerjs/core';
 import { ColorKit, RANGE_TYPE } from '@univerjs/core';
 import type { Scene } from '@univerjs/engine-render';
-import { DEFAULT_SELECTION_LAYER_INDEX, Group, Rect } from '@univerjs/engine-render';
+import {
+    DEFAULT_SELECTION_LAYER_INDEX,
+    FIX_ONE_PIXEL_BLUR_OFFSET,
+    fixLineWidthByScale,
+    Group,
+    Rect,
+} from '@univerjs/engine-render';
 import type { ISelectionStyle, ISelectionWidgetConfig, ISelectionWithCoordAndStyle } from '@univerjs/sheets';
 import {
     getNormalSelectionStyle,
@@ -63,8 +69,6 @@ enum SELECTION_MANAGER_KEY {
 }
 
 const SELECTION_TITLE_HIGHLIGHT_ALPHA = 0.3;
-
-// const SELECTION_BORDER_OFFSET_FIX = 0.5;
 
 /**
  * The main selection canvas component
@@ -408,12 +412,14 @@ export class SelectionShape {
 
         const leftAdjustWidth = strokeWidth + borderBuffer;
 
+        const fixOnePixelBlurOffset = FIX_ONE_PIXEL_BLUR_OFFSET / scale;
+
         this.leftControl.transformByState({
-            height: endY - startY,
-            left: -leftAdjustWidth / 2,
+            height: fixLineWidthByScale(endY - startY, scale),
+            left: -leftAdjustWidth / 2 + fixOnePixelBlurOffset,
             width: strokeWidth,
             strokeWidth: borderBuffer,
-            top: -borderBuffer / 2,
+            top: -borderBuffer / 2 + fixOnePixelBlurOffset,
         });
 
         this.leftControl.setProps({
@@ -422,11 +428,11 @@ export class SelectionShape {
         });
 
         this.rightControl.transformByState({
-            height: endY - startY,
-            left: endX - startX - leftAdjustWidth / 2,
+            height: fixLineWidthByScale(endY - startY, scale),
+            left: fixLineWidthByScale(endX - startX, scale) - leftAdjustWidth / 2 + fixOnePixelBlurOffset,
             width: strokeWidth,
             strokeWidth: borderBuffer,
-            top: -borderBuffer / 2,
+            top: -borderBuffer / 2 + fixOnePixelBlurOffset,
         });
 
         this.rightControl.setProps({
@@ -435,9 +441,9 @@ export class SelectionShape {
         });
 
         this.topControl.transformByState({
-            width: endX - startX + strokeWidth,
-            top: -leftAdjustWidth / 2,
-            left: -leftAdjustWidth / 2,
+            width: fixLineWidthByScale(endX - startX, scale) + strokeWidth,
+            top: -leftAdjustWidth / 2 + fixOnePixelBlurOffset,
+            left: -leftAdjustWidth / 2 + fixOnePixelBlurOffset,
             height: strokeWidth,
             strokeWidth: borderBuffer,
         });
@@ -448,10 +454,10 @@ export class SelectionShape {
         });
 
         this.bottomControl.transformByState({
-            width: endX - startX + strokeWidth,
-            top: endY - startY - leftAdjustWidth / 2,
+            width: fixLineWidthByScale(endX - startX, scale) + strokeWidth,
+            top: fixLineWidthByScale(endY - startY, scale) - leftAdjustWidth / 2 + fixOnePixelBlurOffset,
             height: strokeWidth,
-            left: -leftAdjustWidth / 2,
+            left: -leftAdjustWidth / 2 + fixOnePixelBlurOffset,
             strokeWidth: borderBuffer,
         });
 

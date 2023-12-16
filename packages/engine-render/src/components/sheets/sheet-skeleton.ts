@@ -55,7 +55,6 @@ import { getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
 import type { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-cached';
 import {
     degToRad,
-    fixLineWidthByScale,
     getCellByIndex,
     getCellInfoInMergeData,
     getCellPositionByIndex,
@@ -663,10 +662,10 @@ export class SpreadsheetSkeleton extends Skeleton {
             columnWidthAccumulation
         );
 
-        startY = fixLineWidthByScale(startY + columnHeaderHeightAndMarginTop, scaleY);
-        endY = fixLineWidthByScale(endY + columnHeaderHeightAndMarginTop, scaleY);
-        startX = fixLineWidthByScale(startX + rowHeaderWidthAndMarginLeft, scaleX);
-        endX = fixLineWidthByScale(endX + rowHeaderWidthAndMarginLeft, scaleX);
+        startY += columnHeaderHeightAndMarginTop;
+        endY += columnHeaderHeightAndMarginTop;
+        startX += rowHeaderWidthAndMarginLeft;
+        endX += rowHeaderWidthAndMarginLeft;
 
         return {
             startY,
@@ -679,17 +678,12 @@ export class SpreadsheetSkeleton extends Skeleton {
     getNoMergeCellPositionByIndexWithNoHeader(rowIndex: number, columnIndex: number, scaleX: number, scaleY: number) {
         const { rowHeightAccumulation, columnWidthAccumulation } = this;
         // const { scaleX = 1, scaleY = 1 } = this.getParentScale();
-        let { startY, endY, startX, endX } = getCellPositionByIndex(
+        const { startY, endY, startX, endX } = getCellPositionByIndex(
             rowIndex,
             columnIndex,
             rowHeightAccumulation,
             columnWidthAccumulation
         );
-
-        startY = fixLineWidthByScale(startY, scaleY);
-        endY = fixLineWidthByScale(endY, scaleY);
-        startX = fixLineWidthByScale(startX, scaleX);
-        endX = fixLineWidthByScale(endX, scaleX);
 
         return {
             startY,
@@ -887,10 +881,10 @@ export class SpreadsheetSkeleton extends Skeleton {
         const { isMerged, isMergedMainCell } = primary;
         let { startY, endY, startX, endX, mergeInfo } = primary;
 
-        startY = fixLineWidthByScale(startY + columnHeaderHeightAndMarginTop, scaleY);
-        endY = fixLineWidthByScale(endY + columnHeaderHeightAndMarginTop, scaleY);
-        startX = fixLineWidthByScale(startX + rowHeaderWidthAndMarginLeft, scaleX);
-        endX = fixLineWidthByScale(endX + rowHeaderWidthAndMarginLeft, scaleX);
+        startY += columnHeaderHeightAndMarginTop;
+        endY += columnHeaderHeightAndMarginTop;
+        startX += rowHeaderWidthAndMarginLeft;
+        endX += rowHeaderWidthAndMarginLeft;
 
         mergeInfo = mergeInfoOffset(
             mergeInfo,
@@ -924,14 +918,9 @@ export class SpreadsheetSkeleton extends Skeleton {
             this._config.mergeData
         );
         const { isMerged, isMergedMainCell } = primary;
-        let { startY, endY, startX, endX, mergeInfo } = primary;
+        const { startY, endY, startX, endX, mergeInfo } = primary;
 
-        startY = fixLineWidthByScale(startY, scaleY);
-        endY = fixLineWidthByScale(endY, scaleY);
-        startX = fixLineWidthByScale(startX, scaleX);
-        endX = fixLineWidthByScale(endX, scaleX);
-
-        mergeInfo = mergeInfoOffset(mergeInfo, 0, 0, scaleX, scaleY);
+        const newMergeInfo = mergeInfoOffset(mergeInfo, 0, 0, scaleX, scaleY);
 
         return {
             actualRow: row,
@@ -942,7 +931,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             endX,
             isMerged,
             isMergedMainCell,
-            mergeInfo,
+            mergeInfo: newMergeInfo,
         };
     }
 

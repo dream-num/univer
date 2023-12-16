@@ -24,7 +24,7 @@ import { SetZoomRatioCommand } from '../../commands/commands/set-zoom-ratio.comm
 import { SetZoomRatioOperation } from '../../commands/operations/set-zoom-ratio.operation';
 import { SHEET_ZOOM_RANGE } from '../../common/keys';
 
-const ZOOM_MAP = [50, 75, 100, 125, 150, 175, 200, 400];
+const ZOOM_MAP = [50, 80, 100, 130, 150, 170, 200, 400];
 
 export function ZoomSlider() {
     const commandService = useDependency(ICommandService);

@@ -20,7 +20,7 @@ import { BooleanNumber, getColorStyle, TextDecoration } from '@univerjs/core';
 import { COLOR_BLACK_RGB, DEFAULT_OFFSET_SPACING } from '../../../basics/const';
 import { calculateRectRotate } from '../../../basics/draw';
 import type { IDocumentSkeletonSpan } from '../../../basics/i-document-skeleton-cached';
-import { degToRad, fixLineWidthByScale, getScale } from '../../../basics/tools';
+import { degToRad, getScale } from '../../../basics/tools';
 import { Vector2 } from '../../../basics/vector2';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
 import { docExtension } from '../doc-extension';
@@ -57,19 +57,19 @@ export class Line extends docExtension {
         const { ul: underline, st: strikethrough, ol: overline } = textStyle;
 
         if (underline) {
-            const startY = fixLineWidthByScale(contentHeight + DEFAULT_OFFSET_SPACING - DELTA, scale);
+            const startY = contentHeight + DEFAULT_OFFSET_SPACING - DELTA;
 
             this._drawLine(ctx, span, underline, startY);
         }
 
         if (strikethrough) {
-            const startY = fixLineWidthByScale(strikeoutPosition - DELTA, scale);
+            const startY = strikeoutPosition - DELTA;
 
             this._drawLine(ctx, span, strikethrough, startY);
         }
 
         if (overline) {
-            const startY = fixLineWidthByScale(-DEFAULT_OFFSET_SPACING - DELTA, scale);
+            const startY = -DEFAULT_OFFSET_SPACING - DELTA;
 
             this._drawLine(ctx, span, overline, startY);
         }

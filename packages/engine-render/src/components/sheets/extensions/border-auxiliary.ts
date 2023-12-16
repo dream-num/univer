@@ -18,7 +18,7 @@ import type { IRange, IScale, ISelectionCellWithCoord, ObjectMatrix } from '@uni
 import { BooleanNumber } from '@univerjs/core';
 
 import { clearLineByBorderType, getLineWith } from '../../../basics/draw';
-import { fixLineWidthByScale, getColor } from '../../../basics/tools';
+import { getColor } from '../../../basics/tools';
 import type { BorderCacheItem } from '../interfaces';
 import type { SpreadsheetSkeleton } from '../sheet-skeleton';
 import { SheetExtension } from './sheet-extension';
@@ -63,9 +63,9 @@ export class BorderAuxiliary extends SheetExtension {
         // eslint-disable-next-line no-magic-numbers
         ctx.strokeStyle = getColor([212, 212, 212]);
 
-        const width = fixLineWidthByScale(columnTotalWidth, scale);
+        const width = columnTotalWidth;
 
-        let height = fixLineWidthByScale(rowTotalHeight, scale);
+        let height = rowTotalHeight;
 
         const columnWidthAccumulationLength = columnWidthAccumulation.length;
         const rowHeightAccumulationLength = rowHeightAccumulation.length;
@@ -85,18 +85,16 @@ export class BorderAuxiliary extends SheetExtension {
 
             rowEnd = diffRangeEndRow - 1;
 
-            columnDrawTopStart = fixLineWidthByScale(rowHeightAccumulation[rowStart - 1], scale) || 0;
+            columnDrawTopStart = rowHeightAccumulation[rowStart - 1] || 0;
 
-            height =
-                fixLineWidthByScale(rowHeightAccumulation[rowEnd], scale) ||
-                fixLineWidthByScale(rowHeightAccumulation[rowHeightAccumulationLength - 1], scale);
+            height = rowHeightAccumulation[rowEnd] || rowHeightAccumulation[rowHeightAccumulationLength - 1];
         }
 
         for (let r = rowStart; r <= rowEnd; r++) {
             if (r < 0 || r > rowHeightAccumulationLength - 1) {
                 continue;
             }
-            const rowEndPosition = fixLineWidthByScale(rowHeightAccumulation[r], scale);
+            const rowEndPosition = rowHeightAccumulation[r];
             ctx.moveTo(0, rowEndPosition);
             ctx.lineTo(width, rowEndPosition);
         }
@@ -105,7 +103,7 @@ export class BorderAuxiliary extends SheetExtension {
             if (c < 0 || c > columnWidthAccumulationLength - 1) {
                 continue;
             }
-            const columnEndPosition = fixLineWidthByScale(columnWidthAccumulation[c], scale);
+            const columnEndPosition = columnWidthAccumulation[c];
             ctx.moveTo(columnEndPosition, columnDrawTopStart);
             ctx.lineTo(columnEndPosition, height);
         }
@@ -147,11 +145,6 @@ export class BorderAuxiliary extends SheetExtension {
             if (!(mergeInfo.startRow >= rowStart && mergeInfo.endRow <= rowEnd)) {
                 return true;
             }
-
-            startY = fixLineWidthByScale(startY, scaleY);
-            endY = fixLineWidthByScale(endY, scaleY);
-            startX = fixLineWidthByScale(startX, scaleX);
-            endX = fixLineWidthByScale(endX, scaleX);
 
             for (const key in borderCaches) {
                 const { type } = borderCaches[key] as BorderCacheItem;
@@ -195,17 +188,12 @@ export class BorderAuxiliary extends SheetExtension {
         for (const dataCache of dataMergeCache) {
             const { startRow, endRow, startColumn, endColumn } = dataCache;
 
-            const startY = fixLineWidthByScale(rowHeightAccumulation[startRow - 1] || 0, scale);
-            const endY = fixLineWidthByScale(
-                rowHeightAccumulation[endRow] || rowHeightAccumulation[rowHeightAccumulation.length - 1],
-                scale
-            );
+            const startY = rowHeightAccumulation[startRow - 1] || 0;
+            const endY = rowHeightAccumulation[endRow] || rowHeightAccumulation[rowHeightAccumulation.length - 1];
 
-            const startX = fixLineWidthByScale(columnWidthAccumulation[startColumn - 1] || 0, scale);
-            const endX = fixLineWidthByScale(
-                columnWidthAccumulation[endColumn] || columnWidthAccumulation[columnWidthAccumulation.length - 1],
-                scale
-            );
+            const startX = columnWidthAccumulation[startColumn - 1] || 0;
+            const endX =
+                columnWidthAccumulation[endColumn] || columnWidthAccumulation[columnWidthAccumulation.length - 1];
 
             if (
                 !this.isRenderDiffRangesByRow(startRow, diffRanges) &&
@@ -254,11 +242,6 @@ export class BorderAuxiliary extends SheetExtension {
                 startX = mergeInfo.startX;
                 endX = mergeInfo.endX;
             }
-
-            startY = fixLineWidthByScale(startY, scale);
-            endY = fixLineWidthByScale(endY, scale);
-            startX = fixLineWidthByScale(startX, scale);
-            endX = fixLineWidthByScale(endX, scale);
 
             ctx.clearRect(startX, startY, endX - startX, endY - startY);
         });

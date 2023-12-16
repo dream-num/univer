@@ -136,9 +136,9 @@ export class Viewport {
 
     private _scrollStopNum: NodeJS.Timeout | number = 0;
 
-    private _preScrollX: Nullable<number> = 0;
+    private _preScrollX: number = 0;
 
-    private _preScrollY: Nullable<number> = 0;
+    private _preScrollY: number = 0;
 
     private _renderClipState = true;
 
@@ -499,11 +499,13 @@ export class Viewport {
         if (this.isActive === false) {
             return;
         }
-        const mainCtx = parentCtx || this._scene.getEngine()?.getCanvas().getContext();
+        const mainCtx = parentCtx || (this._scene.getEngine()?.getCanvas().getContext() as CanvasRenderingContext2D);
 
         const sceneTrans = this._scene.transform.clone();
 
-        sceneTrans.multiply(Transform.create([1, 0, 0, 1, -this.actualScrollX || 0, -this.actualScrollY || 0]));
+        sceneTrans.multiply(
+            Transform.create([1, 0, 0, 1, Math.round(-this.actualScrollX || 0), Math.round(-this.actualScrollY || 0)])
+        );
 
         const ctx = mainCtx;
         if (!ctx) {
@@ -959,10 +961,23 @@ export class Viewport {
             };
         }
 
+        // const ratioScrollX = this._scrollBar?.ratioScrollX ?? 1;
+        // const ratioScrollY = this._scrollBar?.ratioScrollY ?? 1;
         const xFrom: number = this.left;
         const xTo: number = (this.width || 0) + this.left;
         const yFrom: number = this.top;
         const yTo: number = (this.height || 0) + this.top;
+
+        // let differenceX = 0;
+        // let differenceY = 0;
+
+        // if (this._preScrollX != null) {
+        //     differenceX = (this._preScrollX - this.scrollX) / ratioScrollX;
+        // }
+
+        // if (this._preScrollY != null) {
+        //     differenceY = (this._preScrollY - this.scrollY) / ratioScrollY;
+        // }
 
         const topLeft = this.getRelativeVector(Vector2.FromArray([xFrom, yFrom]));
         const bottomRight = this.getRelativeVector(Vector2.FromArray([xTo, yTo]));
@@ -979,8 +994,8 @@ export class Viewport {
         return {
             viewBound,
             diffBounds: this._diffViewBound(viewBound, preViewBound),
-            diffX: (preViewBound?.left || 0) - viewBound.left,
-            diffY: (preViewBound?.top || 0) - viewBound.top,
+            diffX: Math.round((preViewBound?.left || 0) - viewBound.left),
+            diffY: Math.round((preViewBound?.top || 0) - viewBound.top),
             viewPortPosition: {
                 top: yFrom,
                 left: xFrom,

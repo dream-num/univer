@@ -16,7 +16,7 @@
 
 import type { IRange, IScale } from '@univerjs/core';
 
-import { fixLineWidthByScale, getColor } from '../../../basics/tools';
+import { getColor } from '../../../basics/tools';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import type { SpreadsheetSkeleton } from '../sheet-skeleton';
 import { SheetExtension } from './sheet-extension';
@@ -54,9 +54,9 @@ export class Background extends SheetExtension {
             return;
         }
         ctx.save();
-        const { scaleX = 1, scaleY = 1 } = parentScale;
+
         ctx.globalCompositeOperation = 'destination-over';
-        // const fixPointFive = 0; // fixLineWidthByScale(0.5, scale);
+
         background &&
             Object.keys(background).forEach((rgb: string) => {
                 const backgroundCache = background[rgb];
@@ -96,11 +96,6 @@ export class Background extends SheetExtension {
                             startX = mergeInfo.startX;
                             endX = mergeInfo.endX;
                         }
-
-                        startY = fixLineWidthByScale(startY, scaleY);
-                        endY = fixLineWidthByScale(endY, scaleY);
-                        startX = fixLineWidthByScale(startX, scaleX);
-                        endX = fixLineWidthByScale(endX, scaleX);
 
                         ctx.moveTo(startX, startY);
                         ctx.lineTo(startX, endY);

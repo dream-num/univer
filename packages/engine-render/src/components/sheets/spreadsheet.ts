@@ -18,8 +18,8 @@ import type { IRange, ISelectionCellWithCoord, Nullable } from '@univerjs/core';
 import { BooleanNumber, CellValueType, HorizontalAlign, ObjectMatrix, sortRules, WrapStrategy } from '@univerjs/core';
 
 import type { BaseObject } from '../../base-object';
-import { RENDER_CLASS_TYPE } from '../../basics/const';
-import { clearLineByBorderType, getLineWith, getTranslateInSpreadContextWithPixelRatio } from '../../basics/draw';
+import { FIX_ONE_PIXEL_BLUR_OFFSET, RENDER_CLASS_TYPE } from '../../basics/const';
+import { clearLineByBorderType, getLineWith } from '../../basics/draw';
 import { fixLineWidthByScale, getCellByIndex, getCellPositionByIndex, getColor, getScale } from '../../basics/tools';
 import type { IViewportBound } from '../../basics/vector2';
 import { Vector2 } from '../../basics/vector2';
@@ -50,6 +50,8 @@ export class Spreadsheet extends SheetComponent {
     private _cacheCanvas!: Canvas;
 
     private _refreshIncrementalState = false;
+
+    private _forceDirty = false;
 
     private _documents: Documents = new Documents(OBJECT_KEY, undefined, {
         pageMarginLeft: 0,
@@ -147,10 +149,10 @@ export class Spreadsheet extends SheetComponent {
             columnWidthAccumulation
         );
 
-        startY = fixLineWidthByScale(startY + columnHeaderHeight, scaleY);
-        endY = fixLineWidthByScale(endY + columnHeaderHeight, scaleY);
-        startX = fixLineWidthByScale(startX + rowHeaderWidth, scaleX);
-        endX = fixLineWidthByScale(endX + rowHeaderWidth, scaleX);
+        startY += columnHeaderHeight;
+        endY += columnHeaderHeight;
+        startX += rowHeaderWidth;
+        endX += rowHeaderWidth;
 
         return {
             startY,
@@ -175,6 +177,10 @@ export class Spreadsheet extends SheetComponent {
             x,
             y,
         };
+    }
+
+    makeForceDirty(state = true) {
+        this._forceDirty = state;
     }
 
     getAncestorScrollXY(offsetX: number, offsetY: number) {
@@ -235,14 +241,11 @@ export class Spreadsheet extends SheetComponent {
 
         const scale = getScale(parentScale);
 
-        const { left: fixTranslateLeft, top: fixTranslateTop } = getTranslateInSpreadContextWithPixelRatio();
+        // const { left: fixTranslateLeft, top: fixTranslateTop } = getTranslateInSpreadContextWithPixelRatio();
 
         const { rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
 
-        mainCtx.translate(
-            fixLineWidthByScale(rowHeaderWidth, scale) - fixTranslateLeft / scale,
-            fixLineWidthByScale(columnHeaderHeight, scale) - fixTranslateTop / scale
-        );
+        mainCtx.translate(fixLineWidthByScale(rowHeaderWidth, scale), fixLineWidthByScale(columnHeaderHeight, scale));
 
         this._drawAuxiliary(mainCtx);
 
@@ -255,21 +258,23 @@ export class Spreadsheet extends SheetComponent {
 
                 const { left, top, right, bottom } = viewPortPosition;
 
-                const { rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
-
                 const dw = right - left + rowHeaderWidth;
 
                 const dh = bottom - top + columnHeaderHeight;
 
-                if ((diffX !== 0 && diffY !== 0) || diffBounds[0] == null || (diffX === 0 && diffY === 0)) {
-                    if (this.isDirty()) {
+                if (
+                    (diffX !== 0 && diffY !== 0) ||
+                    diffBounds[0] == null ||
+                    (diffX === 0 && diffY === 0) ||
+                    this._forceDirty
+                ) {
+                    if (this.isDirty() || this._forceDirty) {
                         this._cacheCanvas.clear();
                         ctx.setTransform(mainCtx.getTransform());
                         this._draw(ctx, bounds);
-                        this._applyCache(mainCtx, left, top, dw, dh, left, top, dw, dh);
-                    } else {
-                        this._applyCache(mainCtx, left, top, dw, dh, left, top, dw, dh);
                     }
+                    this._applyCache(mainCtx, left, top, dw, dh, left, top, dw, dh);
+                    this._forceDirty = false;
                 } else {
                     if (this.isDirty()) {
                         const pixelRatio = this._cacheCanvas.getPixelRatio();
@@ -278,8 +283,8 @@ export class Spreadsheet extends SheetComponent {
                         ctx.setTransform(1, 0, 0, 1, 0, 0);
                         ctx.drawImage(
                             this._cacheCanvas.getCanvasEle(),
-                            diffX * pixelRatio * scale,
-                            diffY * pixelRatio * scale
+                            fixLineWidthByScale(diffX, scale) * pixelRatio * scale,
+                            fixLineWidthByScale(diffY, scale) * pixelRatio * scale
                         );
                         ctx.restore();
 
@@ -287,11 +292,8 @@ export class Spreadsheet extends SheetComponent {
                         ctx.setTransform(mainCtx.getTransform());
                         this._draw(ctx, bounds);
                         this._refreshIncrementalState = false;
-
-                        this._applyCache(mainCtx, left, top, dw, dh, left, top, dw, dh);
-                    } else {
-                        this._applyCache(mainCtx, left, top, dw, dh, left, top, dw, dh);
                     }
+                    this._applyCache(mainCtx, left, top, dw, dh, left, top, dw, dh);
                 }
 
                 ctx.restore();
@@ -601,9 +603,9 @@ export class Spreadsheet extends SheetComponent {
         // eslint-disable-next-line no-magic-numbers
         ctx.strokeStyle = getColor([212, 212, 212]);
 
-        const width = fixLineWidthByScale(columnTotalWidth, scale);
+        const width = columnTotalWidth;
 
-        const height = fixLineWidthByScale(rowTotalHeight, scale);
+        const height = rowTotalHeight;
 
         const columnWidthAccumulationLength = columnWidthAccumulation.length;
         const rowHeightAccumulationLength = rowHeightAccumulation.length;
@@ -614,28 +616,28 @@ export class Spreadsheet extends SheetComponent {
 
         const columnDrawTopStart = 0;
 
+        ctx.translate(FIX_ONE_PIXEL_BLUR_OFFSET / scale, FIX_ONE_PIXEL_BLUR_OFFSET / scale);
+
         for (let r = rowStart; r <= rowEnd; r++) {
             if (r < 0 || r > rowHeightAccumulationLength - 1) {
                 continue;
             }
-            const rowEndPosition = fixLineWidthByScale(rowHeightAccumulation[r], scale);
-            ctx.moveTo(0, rowEndPosition);
-            ctx.lineTo(width, rowEndPosition);
+            const rowEndPosition = rowHeightAccumulation[r];
+            ctx.moveTo(0, fixLineWidthByScale(rowEndPosition, scale));
+            ctx.lineTo(width, fixLineWidthByScale(rowEndPosition, scale));
         }
 
         for (let c = startColumn; c <= endColumn; c++) {
             if (c < 0 || c > columnWidthAccumulationLength - 1) {
                 continue;
             }
-            const columnEndPosition = fixLineWidthByScale(columnWidthAccumulation[c], scale);
-            ctx.moveTo(columnEndPosition, columnDrawTopStart);
-            ctx.lineTo(columnEndPosition, height);
+            const columnEndPosition = columnWidthAccumulation[c];
+            ctx.moveTo(fixLineWidthByScale(columnEndPosition, scale), columnDrawTopStart);
+            ctx.lineTo(fixLineWidthByScale(columnEndPosition, scale), height);
         }
         // console.log('xx2', scaleX, scaleY, columnTotalWidth, rowTotalHeight, rowHeightAccumulation, columnWidthAccumulation);
         ctx.stroke();
         ctx.closePath();
-        // ctx.restore();
-        // return;
 
         // Clearing the dashed line issue caused by overlaid auxiliary lines and strokes
         border?.forValue((rowIndex, columnIndex, borderCaches) => {
@@ -662,11 +664,6 @@ export class Spreadsheet extends SheetComponent {
             if (!(mergeInfo.startRow >= rowStart && mergeInfo.endRow <= rowEnd)) {
                 return true;
             }
-
-            startY = fixLineWidthByScale(startY, scaleY);
-            endY = fixLineWidthByScale(endY, scaleY);
-            startX = fixLineWidthByScale(startX, scaleX);
-            endX = fixLineWidthByScale(endX, scaleX);
 
             for (const key in borderCaches) {
                 const { type } = borderCaches[key] as BorderCacheItem;
@@ -702,17 +699,12 @@ export class Spreadsheet extends SheetComponent {
         for (const dataCache of dataMergeCache) {
             const { startRow, endRow, startColumn, endColumn } = dataCache;
 
-            const startY = fixLineWidthByScale(rowHeightAccumulation[startRow - 1] || 0, scale);
-            const endY = fixLineWidthByScale(
-                rowHeightAccumulation[endRow] || rowHeightAccumulation[rowHeightAccumulation.length - 1],
-                scale
-            );
+            const startY = rowHeightAccumulation[startRow - 1] || 0;
+            const endY = rowHeightAccumulation[endRow] || rowHeightAccumulation[rowHeightAccumulation.length - 1];
 
-            const startX = fixLineWidthByScale(columnWidthAccumulation[startColumn - 1] || 0, scale);
-            const endX = fixLineWidthByScale(
-                columnWidthAccumulation[endColumn] || columnWidthAccumulation[columnWidthAccumulation.length - 1],
-                scale
-            );
+            const startX = columnWidthAccumulation[startColumn - 1] || 0;
+            const endX =
+                columnWidthAccumulation[endColumn] || columnWidthAccumulation[columnWidthAccumulation.length - 1];
 
             ctx.clearRect(startX, startY, endX - startX, endY - startY);
 
@@ -746,11 +738,6 @@ export class Spreadsheet extends SheetComponent {
                 startX = mergeInfo.startX;
                 endX = mergeInfo.endX;
             }
-
-            startY = fixLineWidthByScale(startY, scale);
-            endY = fixLineWidthByScale(endY, scale);
-            startX = fixLineWidthByScale(startX, scale);
-            endX = fixLineWidthByScale(endX, scale);
 
             ctx.clearRect(startX, startY, endX - startX, endY - startY);
         });

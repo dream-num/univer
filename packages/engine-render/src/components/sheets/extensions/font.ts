@@ -17,7 +17,6 @@
 import type { IColorStyle, IRange, IScale } from '@univerjs/core';
 import { HorizontalAlign, ObjectMatrix, WrapStrategy } from '@univerjs/core';
 
-import { fixLineWidthByScale } from '../../../basics/tools';
 import type { Documents } from '../../docs/document';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import type { IFontCacheItem } from '../interfaces';
@@ -111,11 +110,6 @@ export class Font extends SheetExtension {
                         ) {
                             return true;
                         }
-
-                        startY = fixLineWidthByScale(startY, scaleY);
-                        endY = fixLineWidthByScale(endY, scaleY);
-                        startX = fixLineWidthByScale(startX, scaleX);
-                        endX = fixLineWidthByScale(endX, scaleX);
 
                         const cellWidth = endX - startX;
                         const cellHeight = endY - startY;
@@ -224,17 +218,11 @@ export class Font extends SheetExtension {
         rowHeightAccumulation: number[],
         columnWidthAccumulation: number[]
     ) {
-        const startY = fixLineWidthByScale(rowHeightAccumulation[startRow - 1] || 0, scale);
-        const endY = fixLineWidthByScale(
-            rowHeightAccumulation[endRow] || rowHeightAccumulation[rowHeightAccumulation.length - 1],
-            scale
-        );
+        const startY = rowHeightAccumulation[startRow - 1] || 0;
+        const endY = rowHeightAccumulation[endRow] || rowHeightAccumulation[rowHeightAccumulation.length - 1];
 
-        const startX = fixLineWidthByScale(columnWidthAccumulation[startColumn - 1] || 0, scale);
-        const endX = fixLineWidthByScale(
-            columnWidthAccumulation[endColumn] || columnWidthAccumulation[columnWidthAccumulation.length - 1],
-            scale
-        );
+        const startX = columnWidthAccumulation[startColumn - 1] || 0;
+        const endX = columnWidthAccumulation[endColumn] || columnWidthAccumulation[columnWidthAccumulation.length - 1];
 
         ctx.rect(startX, startY, endX - startX, endY - startY);
     }

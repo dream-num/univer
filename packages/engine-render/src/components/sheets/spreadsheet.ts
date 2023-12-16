@@ -260,34 +260,33 @@ export class Spreadsheet extends SheetComponent {
                 const dw = right - left + rowHeaderWidth;
 
                 const dh = bottom - top + columnHeaderHeight;
-
-                if ((diffX !== 0 && diffY !== 0) || diffBounds[0] == null || (diffX === 0 && diffY === 0)) {
-                    if (this.isDirty()) {
-                        this._cacheCanvas.clear();
-                        ctx.setTransform(mainCtx.getTransform());
-                        this._draw(ctx, bounds);
-                        this._applyCache(mainCtx, left, top, dw, dh, left, top, dw, dh);
-                    } else {
-                        this._applyCache(mainCtx, left, top, dw, dh, left, top, dw, dh);
-                    }
-                } else {
-                    const pixelRatio = this._cacheCanvas.getPixelRatio();
-                    ctx.save();
-                    ctx.globalCompositeOperation = 'copy';
-                    ctx.setTransform(1, 0, 0, 1, 0, 0);
-                    ctx.drawImage(
-                        this._cacheCanvas.getCanvasEle(),
-                        diffX * pixelRatio * scale,
-                        diffY * pixelRatio * scale
-                    );
-                    ctx.restore();
-
-                    this._refreshIncrementalState = true;
+                if (this.isDirty()) {
+                    this._cacheCanvas.clear();
                     ctx.setTransform(mainCtx.getTransform());
                     this._draw(ctx, bounds);
-                    this._refreshIncrementalState = false;
-
                     this._applyCache(mainCtx, left, top, dw, dh, left, top, dw, dh);
+                } else {
+                    if ((diffX !== 0 && diffY !== 0) || diffBounds[0] == null || (diffX === 0 && diffY === 0)) {
+                        this._applyCache(mainCtx, left, top, dw, dh, left, top, dw, dh);
+                    } else {
+                        const pixelRatio = this._cacheCanvas.getPixelRatio();
+                        ctx.save();
+                        ctx.globalCompositeOperation = 'copy';
+                        ctx.setTransform(1, 0, 0, 1, 0, 0);
+                        ctx.drawImage(
+                            this._cacheCanvas.getCanvasEle(),
+                            diffX * pixelRatio * scale,
+                            diffY * pixelRatio * scale
+                        );
+                        ctx.restore();
+
+                        this._refreshIncrementalState = true;
+                        ctx.setTransform(mainCtx.getTransform());
+                        this._draw(ctx, bounds);
+                        this._refreshIncrementalState = false;
+
+                        this._applyCache(mainCtx, left, top, dw, dh, left, top, dw, dh);
+                    }
                 }
 
                 ctx.restore();

@@ -19,7 +19,7 @@ import { DocumentType, ICommandService, IUniverInstanceService } from '@univerjs
 import { createIdentifier } from '@wendellhu/redi';
 
 export interface IRemoteSyncMutationOptions extends IExecutionOptions {
-    /** If this mutation is executed after it was sent from the peer univer instance. */
+    /** If this mutation is executed after it was sent from the peer univer instance (e.g. in a web worker). */
     fromSync?: boolean;
 }
 
@@ -38,7 +38,7 @@ export class RemoteSyncPrimaryService implements IRemoteSyncService {
 
     async syncMutation(params: { mutationInfo: IMutationInfo }): Promise<boolean> {
         return this._commandService.syncExecuteCommand(params.mutationInfo.id, params.mutationInfo.params, {
-            local: true,
+            onlyLocal: true,
             fromSync: true,
         });
     }
@@ -65,7 +65,7 @@ export class RemoteInstanceReplicaService implements IRemoteInstanceService {
 
     async syncMutation(params: { mutationInfo: IMutationInfo }): Promise<boolean> {
         return this._commandService.syncExecuteCommand(params.mutationInfo.id, params.mutationInfo.params, {
-            local: true,
+            onlyLocal: true,
             fromSync: true,
         });
     }

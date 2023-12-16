@@ -514,7 +514,7 @@ export class testMarkSelectionService {
 
     removeAllShapes(): void {}
 
-    refreshSelection(): void {}
+    refreshShapes(): void {}
 }
 
 export function clipboardTestBed(workbookConfig?: IWorkbookData, dependencies?: Dependency[]) {

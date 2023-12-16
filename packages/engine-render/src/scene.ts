@@ -199,6 +199,7 @@ export class Scene extends ThinScene {
             },
             preValue: { width: preWidth, height: preHeight },
         });
+
         return this;
     }
 

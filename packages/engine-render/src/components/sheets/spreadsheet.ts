@@ -246,7 +246,7 @@ export class Spreadsheet extends SheetComponent {
 
         this._drawAuxiliary(mainCtx);
 
-        if (bounds) {
+        if (bounds && this._allowCache === true) {
             const { viewBound, diffBounds, diffX, diffY, viewPortPosition, viewPortKey } = bounds;
 
             if (viewPortKey === 'viewMain') {
@@ -610,7 +610,7 @@ export class Spreadsheet extends SheetComponent {
 
         const rowStart = startRow;
 
-        const rowEnd = endRow - 1;
+        const rowEnd = endRow;
 
         const columnDrawTopStart = 0;
 

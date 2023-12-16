@@ -154,7 +154,12 @@ export class DocRenderController extends Disposable {
         }
 
         docsComponent.resize(width, height);
-        scene.resize(width, height);
+
+        const excludeUnitList = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];
+
+        if (!excludeUnitList.includes(currentRender.unitId)) {
+            scene.resize(width, height);
+        }
     }
 
     private _commandExecutedListener() {

@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import { PageElementType } from '@univerjs/core';
-
-import { DEFAULT_LIST_TEST } from '../../docs/default-list';
+import { PageElementType, PresetListType } from '@univerjs/core';
 
 export const PAGE3_RICHTEXT_2 = {
     id: 'detailContent2',
@@ -31,7 +29,6 @@ export const PAGE3_RICHTEXT_2 = {
     richText: {
         rich: {
             id: 'd',
-            lists: DEFAULT_LIST_TEST,
             body: {
                 dataStream: `combine SaaS, PaaS and IaaS with tailored\rprovides a curated set of tools, capabilities and processes that are packaged for easy consumption by developers and end users\r\n`,
                 textRuns: [
@@ -54,7 +51,8 @@ export const PAGE3_RICHTEXT_2 = {
                     {
                         startIndex: 41,
                         bullet: {
-                            listId: 'testBullet',
+                            listType: PresetListType.ORDER_LIST,
+                            listId: 'orderList',
                             nestingLevel: 0,
                             textStyle: {
                                 fs: 20,
@@ -67,7 +65,8 @@ export const PAGE3_RICHTEXT_2 = {
                     {
                         startIndex: 168,
                         bullet: {
-                            listId: 'testBullet',
+                            listType: PresetListType.ORDER_LIST,
+                            listId: 'orderList',
                             nestingLevel: 0,
                             textStyle: {
                                 fs: 20,

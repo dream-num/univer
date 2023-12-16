@@ -28,14 +28,9 @@ import { IShortcutService } from '@univerjs/ui';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import {
-    BreakLineCommand,
-    DeleteCommand,
-    DeleteLeftCommand,
-    DeleteRightCommand,
-    InsertCommand,
-    UpdateCommand,
-} from './commands/commands/core-editing.command';
+import { BreakLineCommand } from './commands/commands/break-line.command';
+import { DeleteCommand, InsertCommand, UpdateCommand } from './commands/commands/core-editing.command';
+import { DeleteLeftCommand, DeleteRightCommand, MergeTwoParagraphCommand } from './commands/commands/delete.command';
 import { IMEInputCommand } from './commands/commands/ime-input.command';
 import {
     SetInlineFormatBoldCommand,
@@ -49,6 +44,7 @@ import {
     SetInlineFormatTextColorCommand,
     SetInlineFormatUnderlineCommand,
 } from './commands/commands/inline-format.command';
+import { BulletListCommand, ListOperationCommand, OrderListCommand } from './commands/commands/list.command';
 import { CoverContentCommand, ReplaceContentCommand } from './commands/commands/replace-content.command';
 import { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';
 import { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
@@ -57,12 +53,10 @@ import { SelectAllOperation } from './commands/operations/select-all.operation';
 import { SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
 import { SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
 import { DocClipboardController } from './controllers/clipboard.controller';
-import { DeleteController } from './controllers/delete.controller';
 import { DocRenderController } from './controllers/doc-render.controller';
 import { FloatingObjectController } from './controllers/floating-object.controller';
 import { IMEInputController } from './controllers/ime-input.controller';
 import { InlineFormatController } from './controllers/inline-format.controller';
-import { LineBreakInputController } from './controllers/line-break-input.controller';
 import { MoveCursorController } from './controllers/move-cursor.controller';
 import { NormalInputController } from './controllers/normal-input.controller';
 import { PageRenderController } from './controllers/page-render.controller';
@@ -142,6 +136,7 @@ export class UniverDocsPlugin extends Plugin {
                 DeleteCommand,
                 UpdateCommand,
                 IMEInputCommand,
+                MergeTwoParagraphCommand,
                 RichTextEditingMutation,
                 ReplaceContentCommand,
                 CoverContentCommand,
@@ -149,6 +144,9 @@ export class UniverDocsPlugin extends Plugin {
                 SetDocZoomRatioOperation,
                 SetTextSelectionsOperation,
                 SelectAllOperation,
+                OrderListCommand,
+                BulletListCommand,
+                ListOperationCommand,
             ] as ICommand[]
         ).forEach((command) => {
             this._injector.get(ICommandService).registerCommand(command);
@@ -210,10 +208,8 @@ export class UniverDocsPlugin extends Plugin {
                 [TextSelectionController],
                 [NormalInputController],
                 [IMEInputController],
-                [DeleteController],
                 [InlineFormatController],
                 [DocClipboardController],
-                [LineBreakInputController],
                 [MoveCursorController],
                 [ZoomController],
                 [FloatingObjectController],

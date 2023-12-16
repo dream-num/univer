@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import { PageElementType } from '@univerjs/core';
-
-import { DEFAULT_LIST_TEST } from '../../docs/default-list';
+import { PageElementType, PresetListType } from '@univerjs/core';
 
 export const PAGE3_RICHTEXT_1 = {
     id: 'detailContent1',
@@ -31,7 +29,6 @@ export const PAGE3_RICHTEXT_1 = {
     richText: {
         rich: {
             id: 'd',
-            lists: DEFAULT_LIST_TEST,
             body: {
                 dataStream: `Digital Immune System\rApplied Observability\r\n`,
                 textRuns: [
@@ -54,7 +51,8 @@ export const PAGE3_RICHTEXT_1 = {
                     {
                         startIndex: 21,
                         bullet: {
-                            listId: 'testBullet',
+                            listType: PresetListType.ORDER_LIST,
+                            listId: 'orderList',
                             nestingLevel: 0,
                             textStyle: {
                                 fs: 20,
@@ -67,7 +65,8 @@ export const PAGE3_RICHTEXT_1 = {
                     {
                         startIndex: 43,
                         bullet: {
-                            listId: 'testBullet',
+                            listType: PresetListType.ORDER_LIST,
+                            listId: 'orderList',
                             nestingLevel: 0,
                             textStyle: {
                                 fs: 20,

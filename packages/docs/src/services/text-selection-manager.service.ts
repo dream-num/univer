@@ -17,9 +17,12 @@
 import type { Nullable } from '@univerjs/core';
 import { ICommandService, RxDisposable } from '@univerjs/core';
 import type {
+    INodePosition,
     ISuccinctTextRangeParam,
     ITextRangeWithStyle,
     ITextSelectionInnerParam,
+    ITextSelectionStyle,
+    RANGE_DIRECTION,
     TextRange,
 } from '@univerjs/engine-render';
 import { ITextSelectionRenderManager, NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '@univerjs/engine-render';
@@ -30,6 +33,17 @@ import { SetTextSelectionsOperation } from '../commands/operations/text-selectio
 interface ITextSelectionManagerSearchParam {
     unitId: string;
     subUnitId: string;
+}
+
+export interface ITextActiveRange {
+    startOffset: number;
+    endOffset: number;
+    collapsed: boolean;
+    startNodePosition: Nullable<INodePosition>;
+    endNodePosition: Nullable<INodePosition>;
+    direction: RANGE_DIRECTION;
+    segmentId: string;
+    style: ITextSelectionStyle;
 }
 
 interface ITextSelectionManagerInsertParam extends ITextSelectionManagerSearchParam, ITextSelectionInnerParam {}
@@ -102,7 +116,7 @@ export class TextSelectionManagerService extends RxDisposable {
         return this._getTextRanges(this._currentSelection)?.textRanges;
     }
 
-    getActiveRange() {
+    getActiveRange(): Nullable<ITextActiveRange> {
         const selectionInfo = this._getTextRanges(this._currentSelection);
         if (selectionInfo == null) {
             return;

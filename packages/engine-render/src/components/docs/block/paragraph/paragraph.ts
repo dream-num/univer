@@ -50,7 +50,7 @@ import {
 } from '../../common/tools';
 import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../view-model/document-view-model';
-import { dealWidthBullet } from './bullet';
+import { dealWithBullet } from './bullet';
 import { dealWidthInlineDrawing } from './inline-drawing';
 import { ArabicHandler, emojiHandler, otherHandler, TibetanHandler } from './language-ruler';
 import { calculateParagraphLayout } from './layout-ruler';
@@ -128,9 +128,11 @@ export function dealWidthParagraph(
         drawingAnchor,
     };
 
-    const listLevelAncestors = _getListLevelAncestors(bullet, skeListLevel); // 取得列表所有level的缓存
-    const bulletSkeleton = dealWidthBullet(bullet, lists, listLevelAncestors, localeService); // 生成bullet
-    _updateListLevelAncestors(bullet, bulletSkeleton, skeListLevel); // 更新最新的level缓存列表
+    const listLevelAncestors = _getListLevelAncestors(bullet, skeListLevel); // 取得列表所有 level 的缓存
+    const bulletSkeleton = dealWithBullet(bullet, lists, listLevelAncestors, localeService); // 生成 bullet
+
+    _updateListLevelAncestors(bullet, bulletSkeleton, skeListLevel); // 更新最新的 level 缓存列表
+
     paragraphConfig.bulletSkeleton = bulletSkeleton;
 
     const { horizontalAlign = HorizontalAlign.UNSPECIFIED, snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
@@ -361,8 +363,6 @@ function _getListLevelAncestors(
         const bs = sameList?.[i];
         listLevelAncestors[i] = bs || null;
     }
-
-    // console.log('SymbolByBesting', sameList, listLevelAncestors, level, listId, listLevel);
 
     return listLevelAncestors;
 }

@@ -15,6 +15,8 @@
  */
 
 import {
+    BulletListCommand,
+    OrderListCommand,
     SetInlineFormatBoldCommand,
     SetInlineFormatItalicCommand,
     SetInlineFormatStrikethroughCommand,
@@ -23,13 +25,14 @@ import {
     SetInlineFormatUnderlineCommand,
 } from '@univerjs/docs';
 import type { IMenuButtonItem } from '@univerjs/ui';
-import { MenuItemType, MenuPosition } from '@univerjs/ui';
+import { MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 
 // TODO @Dushusir: use for test, change id later
 export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: SetInlineFormatBoldCommand.id,
+        group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
         icon: 'BoldSingle',
         title: 'Set bold',
@@ -41,6 +44,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: SetInlineFormatItalicCommand.id,
+        group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
         icon: 'ItalicSingle',
         title: 'Set italic',
@@ -52,6 +56,7 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: SetInlineFormatUnderlineCommand.id,
+        group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
         icon: 'UnderlineSingle',
         title: 'Set underline',
@@ -63,6 +68,7 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: SetInlineFormatStrikethroughCommand.id,
+        group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
         icon: 'StrikethroughSingle',
         title: 'Set strike through',
@@ -74,6 +80,7 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
 export function SubscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: SetInlineFormatSubscriptCommand.id,
+        group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
         icon: 'FontSizeReduceSingleSingle',
         tooltip: 'toolbar.subscript',
@@ -84,8 +91,31 @@ export function SubscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 export function SuperscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: SetInlineFormatSuperscriptCommand.id,
+        group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
         icon: 'FontSizeIncreaseSingle',
+        tooltip: 'toolbar.superscript',
+        positions: [MenuPosition.TOOLBAR_START],
+    };
+}
+
+export function OrderListMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: OrderListCommand.id,
+        group: MenuGroup.TOOLBAR_LAYOUT,
+        type: MenuItemType.BUTTON,
+        icon: 'OrderSingle',
+        tooltip: 'toolbar.superscript',
+        positions: [MenuPosition.TOOLBAR_START],
+    };
+}
+
+export function BulletListMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: BulletListCommand.id,
+        group: MenuGroup.TOOLBAR_LAYOUT,
+        type: MenuItemType.BUTTON,
+        icon: 'UnorderSingle',
         tooltip: 'toolbar.superscript',
         positions: [MenuPosition.TOOLBAR_START],
     };

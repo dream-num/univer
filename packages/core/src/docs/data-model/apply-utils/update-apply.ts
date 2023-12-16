@@ -25,6 +25,7 @@ import type {
     ITable,
     ITextRun,
 } from '../../../types/interfaces';
+import { PresetListType } from '..';
 import {
     deleteCustomBlocks,
     deleteCustomRanges,
@@ -223,7 +224,9 @@ function updateParagraphs(
                 paragraphStyle: updateParagraphStyle,
                 bullet: updateBullet,
             } = updateParagraph;
+
             let splitUpdateParagraphs: IParagraph[] = [];
+
             for (const removeParagraph of removeParagraphs) {
                 const {
                     startIndex: removeStartIndex,
@@ -232,12 +235,27 @@ function updateParagraphs(
                 } = removeParagraph;
                 let newParagraphStyle;
                 let newBullet;
+
                 if (coverType === UpdateDocsAttributeType.COVER) {
                     newParagraphStyle = { ...removeParagraphStyle, ...updateParagraphStyle };
-                    newBullet = { listId: '', nestingLevel: 0, textStyle: {}, ...removeBullet, ...updateBullet };
+                    newBullet = {
+                        listId: '',
+                        listType: PresetListType.BULLET_LIST,
+                        nestingLevel: 0,
+                        textStyle: {},
+                        ...removeBullet,
+                        ...updateBullet,
+                    };
                 } else {
                     newParagraphStyle = { ...updateParagraphStyle, ...removeParagraphStyle };
-                    newBullet = { listId: '', nestingLevel: 0, textStyle: {}, ...updateBullet, ...removeBullet };
+                    newBullet = {
+                        listId: '',
+                        listType: PresetListType.BULLET_LIST,
+                        nestingLevel: 0,
+                        textStyle: {},
+                        ...updateBullet,
+                        ...removeBullet,
+                    };
                 }
 
                 if (updateStartIndex === removeStartIndex) {

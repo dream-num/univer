@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
-import { BulletAlignment, GlyphType } from '@univerjs/core';
+import { BulletAlignment, GlyphType } from '../../types/interfaces/i-document-data';
 
-export const DEFAULT_LIST_TEST = {
-    unorderedTest: {
-        listId: 'unorderedTest',
+export enum PresetListType {
+    BULLET_LIST = 'BULLET_LIST',
+    ORDER_LIST = 'ORDER_LIST',
+}
+
+export const PRESET_LIST_TYPE = {
+    [PresetListType.BULLET_LIST]: {
+        listType: PresetListType.BULLET_LIST,
         nestingLevel: [
             {
                 bulletAlignment: BulletAlignment.START,
@@ -55,8 +60,8 @@ export const DEFAULT_LIST_TEST = {
             },
         ],
     },
-    testBullet: {
-        listId: 'testBullet',
+    [PresetListType.ORDER_LIST]: {
+        listType: PresetListType.ORDER_LIST,
         nestingLevel: [
             {
                 bulletAlignment: BulletAlignment.START,
@@ -65,7 +70,7 @@ export const DEFAULT_LIST_TEST = {
                     fs: 12,
                 },
                 startNumber: 0,
-                glyphType: GlyphType.ROMAN,
+                glyphType: GlyphType.DECIMAL,
                 hanging: 21,
                 indentStart: 21,
             },
@@ -76,7 +81,7 @@ export const DEFAULT_LIST_TEST = {
                     fs: 12,
                 },
                 startNumber: 0,
-                glyphType: GlyphType.ROMAN,
+                glyphType: GlyphType.DECIMAL,
                 hanging: 21,
                 indentStart: 42,
             },
@@ -87,7 +92,7 @@ export const DEFAULT_LIST_TEST = {
                     fs: 12,
                 },
                 startNumber: 0,
-                glyphType: GlyphType.ROMAN,
+                glyphType: GlyphType.DECIMAL,
                 hanging: 21,
                 indentStart: 63,
             },

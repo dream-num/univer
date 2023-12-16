@@ -22,11 +22,10 @@ import {
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
+    PresetListType,
     SectionType,
     WrapTextType,
 } from '@univerjs/core';
-
-import { DEFAULT_LIST_TEST } from './default-list';
 
 export const DEFAULT_DOCUMENT_DATA: IDocumentData = {
     id: 'd',
@@ -58,7 +57,6 @@ export const DEFAULT_DOCUMENT_DATA: IDocumentData = {
             wrapText: WrapTextType.BOTH_SIDES,
         },
     },
-    lists: DEFAULT_LIST_TEST,
     body: {
         dataStream: `在“第1题”工作表中完成以下操作\b上标日期列单元格数据验证，限制只能输入日期（介于1949年1月1日至2099年1月1日）\r细化埋点上报链路和指标方案梳理目前通过每日定时任务发送报告\r自2018年首届进博会举办以来，进博会已经成为全球新品的首发地、前沿技术的首选地、创新服务的首推地。中国这十年”对外开放成就展湖北展区主要以图文、图表、数据、视频、企业展品、实物模型、光电科技等体现湖北十年开放成就、重大开放平台及产业。湖北省共计17家企业、机构的展品将在这一展区展示\r国家主席习近平以视频方式出席在上海举行的第五届中国国际进口博览会开幕式并发表题为《共创开放繁荣的美好未来》的致辞中国将推动各国各方共享深化国际合作机遇，全面深入参与世界贸易组织改革谈判\r中国男排两名现役国手彭世坤和张秉龙分别效力的三得利太阳鸟和东京大熊本轮遭遇。双方经过激战，主场作战的卫冕冠军三得利技高一筹3-2逆转击败对手，力夺第3场胜利\r\n`,
         textRuns: [
@@ -127,7 +125,8 @@ export const DEFAULT_DOCUMENT_DATA: IDocumentData = {
             {
                 startIndex: 60,
                 bullet: {
-                    listId: 'testBullet',
+                    listType: PresetListType.ORDER_LIST,
+                    listId: 'a',
                     nestingLevel: 0,
                     textStyle: {
                         fs: 20,
@@ -137,7 +136,8 @@ export const DEFAULT_DOCUMENT_DATA: IDocumentData = {
             {
                 startIndex: 91,
                 bullet: {
-                    listId: 'testBullet',
+                    listType: PresetListType.ORDER_LIST,
+                    listId: 'a',
                     nestingLevel: 1,
                     textStyle: {
                         fs: 20,
@@ -147,7 +147,8 @@ export const DEFAULT_DOCUMENT_DATA: IDocumentData = {
             {
                 startIndex: 234,
                 bullet: {
-                    listId: 'testBullet',
+                    listType: PresetListType.ORDER_LIST,
+                    listId: 'a',
                     nestingLevel: 1,
                     textStyle: {
                         fs: 20,
@@ -157,7 +158,8 @@ export const DEFAULT_DOCUMENT_DATA: IDocumentData = {
             {
                 startIndex: 327,
                 bullet: {
-                    listId: 'testBullet',
+                    listType: PresetListType.ORDER_LIST,
+                    listId: 'a',
                     nestingLevel: 1,
                     textStyle: {
                         fs: 20,
@@ -167,7 +169,8 @@ export const DEFAULT_DOCUMENT_DATA: IDocumentData = {
             {
                 startIndex: 406,
                 bullet: {
-                    listId: 'testBullet',
+                    listType: PresetListType.ORDER_LIST,
+                    listId: 'a',
                     nestingLevel: 2,
                     textStyle: {
                         fs: 20,

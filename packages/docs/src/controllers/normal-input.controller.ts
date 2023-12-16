@@ -58,6 +58,8 @@ export class NormalInputController extends Disposable {
 
             const documentModel = this._currentUniverService.getCurrentUniverDocInstance();
 
+            const unitId = documentModel.getUnitId();
+
             const { event, content = '', activeRange } = config;
 
             const e = event as InputEvent;
@@ -85,7 +87,7 @@ export class NormalInputController extends Disposable {
             ];
 
             await this._commandService.executeCommand(InsertCommand.id, {
-                unitId: documentModel.getUnitId(),
+                unitId,
                 body: {
                     dataStream: content,
                 },
@@ -93,8 +95,6 @@ export class NormalInputController extends Disposable {
                 textRanges,
                 segmentId,
             });
-
-            skeleton.calculate();
         });
     }
 

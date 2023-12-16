@@ -21,7 +21,7 @@ import type { IDocumentSkeletonBullet } from '../../../../basics/i-document-skel
 import { getFontStyleString } from '../../../../basics/tools';
 import { getBulletOrderedSymbol } from './bullet-ruler';
 
-export function dealWidthBullet(
+export function dealWithBullet(
     bullet?: IBullet,
     lists?: ILists,
     listLevelAncestors?: Array<Nullable<IDocumentSkeletonBullet>>,
@@ -31,9 +31,9 @@ export function dealWidthBullet(
         return;
     }
 
-    const { listId, nestingLevel = 0, textStyle } = bullet;
+    const { listId, listType, nestingLevel = 0, textStyle } = bullet;
 
-    const list = lists[listId];
+    const list = lists[listType];
 
     if (!list || !list.nestingLevel) {
         return getDefaultBulletSke(listId, listLevelAncestors?.[nestingLevel]?.startIndexItem);
@@ -151,16 +151,21 @@ function __generateOrderedListSymbol(
     //     <w:lvlText w:val="%1."/>
     //     <w:lvlJc w:val="left"/>
     // </w:lvl>
+
     const glyphFormatSplit = glyphFormat.split('%');
     const prefix = glyphFormatSplit[0];
     const resultSymbol = [prefix];
+
     for (let i = 1; i < glyphFormatSplit.length; i++) {
         const levelAndSuffixPre = glyphFormatSplit[i];
         const { level, suffix } = ___getLevelAndSuffix(levelAndSuffixPre);
+
         let startIndexItem = listLevelAncestors?.[level]?.startIndexItem || 1;
+
         if (level !== nestingLevel && listLevelAncestors?.[level] !== null) {
             startIndexItem -= 1;
         }
+
         const singleSymbol = ___getSymbolByBesting(startIndexItem, nestings[level]);
         // console.log(
         //     '___getSymbolByBesting',
@@ -174,6 +179,7 @@ function __generateOrderedListSymbol(
         // );
         resultSymbol.push(singleSymbol, suffix);
     }
+
     return resultSymbol.join('');
 }
 

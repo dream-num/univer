@@ -190,13 +190,13 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
             const len = startOffset - memoryCursor.cursor;
 
             if (collapsed) {
-                doMutation.params!.mutations.push({
+                doMutation.params.mutations.push({
                     t: 'r',
                     len,
                     segmentId,
                 });
             } else {
-                doMutation.params!.mutations.push(
+                doMutation.params.mutations.push(
                     ...getRetainAndDeleteAndExcludeLineBreak(selection, originBody, segmentId, memoryCursor.cursor)
                 );
             }

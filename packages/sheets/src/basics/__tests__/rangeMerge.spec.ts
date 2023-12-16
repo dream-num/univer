@@ -142,7 +142,7 @@ describe('test rangeMerge', () => {
             { startRow: 4, endRow: 6, startColumn: 8, endColumn: 10 },
             { startRow: 7, endRow: 10, startColumn: 2, endColumn: 10 },
         ]);
-        console.log(JSON.stringify(result, null, 2));
+
         expect(result).toEqual([
             {
                 startRow: 7,

@@ -49,9 +49,9 @@ function factory(id: string) {
         univer.registerPlugin(UniverRenderEnginePlugin);
         univer.registerPlugin(UniverUIPlugin, {
             container: id,
-            header: true,
-            toolbar: true,
-            footer: false,
+            header: id !== 'app-c',
+            toolbar: id !== 'aap-b',
+            footer: id !== 'app-a',
         });
 
         // sheets plugin

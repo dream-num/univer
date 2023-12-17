@@ -83,7 +83,7 @@ export const SetRangeValuesUndoMutationFactory = (
 
     const cellMatrix = worksheet.getCellMatrix();
     const styles = workbook.getStyles();
-    const undoData = new ObjectMatrix<ICellData>();
+    const undoData = new ObjectMatrix<Nullable<ICellData>>();
 
     const newValues = new ObjectMatrix(cellValue);
 

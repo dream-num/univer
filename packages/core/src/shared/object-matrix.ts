@@ -15,8 +15,6 @@
  */
 
 import type { IRange } from '../types/interfaces/i-range';
-import type { ObjectArrayPrimitiveType, PredicateFunction } from './object-array';
-import { ObjectArray } from './object-array';
 import { Tools } from './tools';
 import type { Nullable } from './types';
 
@@ -24,7 +22,166 @@ import type { Nullable } from './types';
  * Object Matrix Primitive Type
  */
 export interface IObjectMatrixPrimitiveType<T> {
-    [key: number]: { [key: number]: T };
+    [key: number]: IObjectArrayPrimitiveType<T>;
+}
+
+export interface IObjectArrayPrimitiveType<T> {
+    [key: number]: T;
+}
+
+export function getArrayLength<T>(o: IObjectArrayPrimitiveType<T> | IObjectMatrixPrimitiveType<T>) {
+    let maxIndex = 0;
+    const keys = Object.keys(o);
+    for (const key of keys) {
+        const rowIndex = Number(key);
+        maxIndex = Math.max(maxIndex, rowIndex);
+    }
+    return maxIndex + 1;
+}
+
+export function insertMatrixArray<T>(
+    index: number,
+    value: T,
+    o: IObjectArrayPrimitiveType<T> | IObjectMatrixPrimitiveType<T>
+) {
+    const length = getArrayLength(o);
+    const array = o;
+
+    // move all items after index in backward order
+    for (let i = length - 1; i >= index; i--) {
+        array[i + 1] = array[i];
+    }
+
+    array[index] = value;
+}
+
+export function concatMatrixArray<T>(
+    source: IObjectArrayPrimitiveType<T> | IObjectMatrixPrimitiveType<T>,
+    target: IObjectArrayPrimitiveType<T> | IObjectMatrixPrimitiveType<T>
+) {
+    const srcArray = source;
+    const srcKeys = Object.keys(srcArray) as unknown as number[];
+    const srcLength = srcKeys.length;
+
+    const targetArray = target;
+    const targetKeys = Object.keys(targetArray) as unknown as number[];
+    const targetLength = targetKeys.length;
+
+    const containerArray: IObjectArrayPrimitiveType<T> | IObjectMatrixPrimitiveType<T> = {};
+    let master = 0;
+
+    for (let i = 0; i < srcLength; i++, master++) {
+        const key = srcKeys[i];
+        containerArray[master] = srcArray[key];
+    }
+    for (let i = 0; i < targetLength; i++, master++) {
+        const key = targetKeys[i];
+        containerArray[master] = targetArray[key];
+    }
+
+    return containerArray;
+}
+
+export function sliceMatrixArray<T>(
+    start: number,
+    end: number,
+    matrixArray: IObjectArrayPrimitiveType<T> | IObjectMatrixPrimitiveType<T>
+): IObjectArrayPrimitiveType<T> | IObjectMatrixPrimitiveType<T> {
+    const array = matrixArray;
+    const length = getArrayLength(matrixArray);
+    if (length > 0) {
+        const fragment: IObjectArrayPrimitiveType<T> = {};
+        let effective = 0;
+        for (let i = start; i < end; i++) {
+            const item = array[i];
+            if (item) {
+                fragment[effective] = array[i] as T;
+                effective++;
+            }
+        }
+        return fragment;
+    }
+    return {};
+}
+
+export function moveMatrixArray<T>(
+    fromIndex: number,
+    count: number,
+    toIndex: number,
+    o: IObjectArrayPrimitiveType<T> | IObjectMatrixPrimitiveType<T>
+) {
+    const moveBackward = fromIndex > toIndex;
+    if (!moveBackward && fromIndex + count > toIndex) {
+        throw new Error('Invalid move operation');
+    }
+
+    if (moveBackward) {
+        _moveBackward(fromIndex, count, toIndex, o);
+    } else {
+        _moveForward(fromIndex, count, toIndex, o);
+    }
+}
+
+function _moveBackward<T>(
+    fromIndex: number,
+    count: number,
+    toIndex: number,
+    o: IObjectArrayPrimitiveType<T> | IObjectMatrixPrimitiveType<T>
+): void {
+    const array = o;
+
+    // cache item should be removed
+    const toMove: Array<T | IObjectArrayPrimitiveType<T>> = [];
+    for (let i = fromIndex; i < fromIndex + count; i++) {
+        toMove.push(array[i]);
+    }
+
+    // move all items after toIndex in backward order
+    for (let i = fromIndex - 1; i >= toIndex; i--) {
+        const item = array[i];
+        array[i + count] = item;
+
+        // Prevent undefined, otherwise the forValue loop will report an error
+        if (item == null) {
+            delete array[i + count];
+        }
+    }
+
+    // insert cached items to toIndex
+    toMove.forEach((item, index) => {
+        array[toIndex + index] = item;
+    });
+}
+
+function _moveForward<T>(
+    fromIndex: number,
+    count: number,
+    toIndex: number,
+    o: IObjectArrayPrimitiveType<T> | IObjectMatrixPrimitiveType<T>
+): void {
+    const array = o;
+
+    // cache item should be removed
+    const toMove: Array<T | IObjectArrayPrimitiveType<T>> = [];
+    for (let i = fromIndex; i < fromIndex + count; i++) {
+        toMove.push(array[i]);
+    }
+
+    // move all items after toIndex in forward order
+    for (let i = fromIndex + count; i < toIndex; i++) {
+        const item = array[i];
+        array[i - count] = item;
+
+        // Prevent undefined, otherwise the forValue loop will report an error
+        if (item == null) {
+            delete array[i - count];
+        }
+    }
+
+    // insert cached items to toIndex
+    toMove.forEach((item, index) => {
+        array[toIndex + index - count] = item;
+    });
 }
 
 // TODO: this is not a good name
@@ -35,8 +192,6 @@ export interface IObjectMatrixPrimitiveType<T> {
  * @beta
  */
 export class ObjectMatrix<T> {
-    private _option!: ObjectArray<ObjectArrayPrimitiveType<T>>;
-
     private _matrix!: IObjectMatrixPrimitiveType<T>;
 
     constructor(matrix: IObjectMatrixPrimitiveType<T> = {}) {
@@ -53,12 +208,33 @@ export class ObjectMatrix<T> {
         return this._matrix;
     }
 
-    forEach(callback: PredicateFunction<ObjectArray<T>>): ObjectMatrix<T> {
-        const keys = this._option.getKeys();
-        for (let i = 0; i < keys.length; i++) {
-            const key = +keys[i];
-            const value = this.getRow(key) as ObjectArray<T>;
-            const result = callback(key, value);
+    forEach(callback: (row: number, objectArray: IObjectArrayPrimitiveType<T>) => Nullable<boolean>): ObjectMatrix<T> {
+        const matrix = this._matrix;
+        const matrixRow = Object.keys(matrix);
+        for (const row of matrixRow) {
+            const rowNumber = Number(row);
+            const columns = matrix[rowNumber];
+            const result = callback(rowNumber, columns);
+            if (result === false) {
+                return this;
+            }
+        }
+
+        return this;
+    }
+
+    forRow(callback: (row: number, cols: number[]) => Nullable<boolean>): ObjectMatrix<T> {
+        const matrix = this._matrix;
+        const matrixRow = Object.keys(matrix);
+        for (const row of matrixRow) {
+            const rowNumber = Number(row);
+            const columns = matrix[rowNumber];
+            const result = callback(
+                rowNumber,
+                Object.keys(columns).map((col) => {
+                    return Number(col);
+                })
+            );
             if (result === false) {
                 return this;
             }
@@ -66,61 +242,47 @@ export class ObjectMatrix<T> {
         return this;
     }
 
-    forRow(callback: (row: number, cols: number[]) => Nullable<boolean>): void {
-        const keys = this._option.getKeys();
-        for (let i = 0; i < keys.length; i++) {
-            const key = +keys[i];
-            const value = this.getRow(key) as ObjectArray<T>;
-            const result = callback(
-                key,
-                value.getKeys().map((item) => +item)
-            );
-            if (result === false) {
-                return;
-            }
-        }
-    }
-
     forValue(callback: (row: number, col: number, value: T) => Nullable<boolean>): ObjectMatrix<T> {
-        const keys = this._option.getKeys();
-        for (let i = 0; i < keys.length; i++) {
-            const rowNumber = +keys[i];
-            const colArray = this.getRow(rowNumber) as ObjectArray<T>;
-            const colKeys = colArray.getKeys();
-            const colLength = colKeys.length;
-            for (let j = 0; j < colLength; j++) {
-                const colNumber = +colKeys[j];
-                const value = colArray.get(colNumber) as T;
+        const matrix = this._matrix;
+        const matrixRow = Object.keys(matrix);
+        for (const row of matrixRow) {
+            const rowNumber = Number(row);
+            const columns = matrix[rowNumber];
+            const columnKeys = Object.keys(columns);
+            for (const column of columnKeys) {
+                const colNumber = Number(column);
+                const value = columns[Number(column)];
+
                 const result = callback(rowNumber, colNumber, value);
                 if (result === false) {
                     return this;
                 }
             }
         }
+
         return this;
     }
 
     swapRow(src: number, target: number): void {
-        const srcRow = this._option.get(src);
-        const targetRow = this._option.get(target);
-        this._option.set(target, srcRow as ObjectArrayPrimitiveType<T>);
-        this._option.set(src, targetRow as ObjectArrayPrimitiveType<T>);
+        const srcRow = this._matrix[src];
+        const targetRow = this._matrix[target];
+
+        this._matrix[src] = targetRow;
+
+        this._matrix[target] = srcRow;
     }
 
-    getRow(rowIndex: number): Nullable<ObjectArray<T>> {
-        const element = this._option.get(rowIndex);
-        if (element) {
-            return new ObjectArray(element);
-        }
+    getRow(rowIndex: number): Nullable<IObjectArrayPrimitiveType<T>> {
+        return this._matrix[rowIndex];
     }
 
-    getRowOrCreate(rowIndex: number): ObjectArray<T> {
-        const row = this.getRow(rowIndex);
+    getRowOrCreate(rowIndex: number): IObjectArrayPrimitiveType<T> {
+        let row = this.getRow(rowIndex);
         if (row == null) {
-            const row = {};
-            this._option.set(rowIndex, row as ObjectArrayPrimitiveType<T>);
-            return new ObjectArray(row);
+            row = {};
+            this._matrix[rowIndex] = row;
         }
+
         return row;
     }
 
@@ -129,26 +291,30 @@ export class ObjectMatrix<T> {
     }
 
     hasValue() {
-        const matrix = this._option;
-        for (const row of matrix) {
-            if (!new ObjectArray(row).isEmpty()) {
+        const matrix = this._matrix;
+        const matrixRow = Object.keys(matrix);
+        if (matrixRow.length === 0) {
+            return false;
+        }
+        for (const row of matrixRow) {
+            const rowNumber = Number(row);
+            const columns = matrix[rowNumber];
+            const columnKeys = Object.keys(columns);
+            if (columnKeys.length > 0) {
                 return true;
             }
         }
+
         return false;
     }
 
-    getValue(row: number, column: number): Nullable<T> {
-        const objectArray = this.getRow(row);
-        if (objectArray) {
-            return objectArray.get(column);
-        }
-        return null;
+    getValue(row: number, column: number): T {
+        return this._matrix?.[row]?.[column];
     }
 
-    setValue(row: number, column: number, value: Nullable<T>): void {
+    setValue(row: number, column: number, value: T): void {
         const objectArray = this.getRowOrCreate(row);
-        objectArray.set(column, value as T);
+        objectArray[column] = value;
     }
 
     /**
@@ -157,106 +323,36 @@ export class ObjectMatrix<T> {
      * @deprecated use `realDelete` or `splice`
      */
     deleteValue(row: number, column: number): void {
-        const objectArray = this.getRow(row);
-        if (objectArray) {
-            objectArray.delete(column);
-        }
+        delete this._matrix?.[row]?.[column];
     }
 
     realDeleteValue(row: number, column: number): void {
-        const objectArray = this.getRow(row);
-        if (objectArray) {
-            objectArray.realDelete(column);
-            const size = objectArray.getSizeOf();
-            if (!size) {
-                this._option.realDelete(row);
+        delete this._matrix?.[row]?.[column];
+
+        if (this.getRow(row)) {
+            const objectArray = this.getRow(row);
+            if (objectArray == null) {
+                return;
+            }
+            const keys = Object.keys(objectArray);
+            if (keys.length === 0) {
+                delete this._matrix?.[row];
             }
         }
     }
 
-    spliceRows(start: number, count: number): ObjectMatrix<T> {
-        const splice = this._option.splice(start, count);
-        return new ObjectMatrix(splice.toJSON() as IObjectMatrixPrimitiveType<T>);
-    }
-
-    sliceRows(start: number, count: number): ObjectMatrix<T> {
-        const slice = this._option.slice(start, count);
-        return new ObjectMatrix(slice.toJSON() as IObjectMatrixPrimitiveType<T>);
-    }
-
-    pushRow(row: ObjectArray<T>): void {
-        this._option.push(row.toJSON() as ObjectArrayPrimitiveType<T>);
+    setRow(rowNumber: number, row: IObjectArrayPrimitiveType<T>): void {
+        this._matrix[rowNumber] = row;
     }
 
     moveRows(start: number, count: number, target: number): void {
-        this._option.move(start, count, target);
+        moveMatrixArray(start, count, target, this._matrix);
     }
 
     moveColumns(start: number, count: number, target: number): void {
         // loop all rows and move column one by one, because our matrix is row-first
-        this._option.forEach((row, value) => {
-            const array = new ObjectArray(value);
-            array.move(start, count, target);
-        });
-    }
-
-    insertRow(rowIndex: number, row: ObjectArray<T>): void {
-        this._option.insert(rowIndex, row.toJSON() as ObjectArrayPrimitiveType<T>);
-    }
-
-    insertRowCount(rowIndex: number, rowCount: number): void {
-        this._option.inserts(rowIndex, new ObjectArray(rowCount));
-    }
-
-    insertRows(rowIndex: number, matrix: ObjectMatrix<T>) {
-        this._option.inserts(rowIndex, matrix._option);
-        console.dir(this._option);
-    }
-
-    spliceColumns(start: number, count: number): ObjectMatrix<T> {
-        const columnData = new ObjectMatrix<T>();
-        this._option.forEach((index, value) => {
-            for (let i = start; i < start + count; i++) {
-                columnData.setValue(index, i - start, this.getValue(index, i));
-            }
-            const row = this._option.get(index);
-            if (row) {
-                new ObjectArray(row).splice(start, count);
-            }
-        });
-        return columnData;
-    }
-
-    sliceColumns(start: number, count: number): ObjectMatrix<T> {
-        const columnData = new ObjectMatrix<T>();
-        this._option.forEach((index, value) => {
-            for (let i = start; i < start + count; i++) {
-                columnData.setValue(index, i - start, this.getValue(index, i));
-            }
-        });
-        return columnData;
-    }
-
-    insertColumns(columnIndex: number, columnData: ObjectMatrix<T>) {
-        let count = 0;
-        columnData.forEach((key) => {
-            const data = columnData.getRow(key);
-            if (data) {
-                count = data.getLength();
-                return false;
-            }
-        });
-        this.forEach((index, value) => {
-            for (let i = columnIndex; i < columnIndex + count; i++) {
-                const data = columnData.getRow(index)?.get(i - columnIndex);
-                value.insert(i, columnData.getRow(index)?.get(i - columnIndex) as T);
-            }
-        });
-    }
-
-    insertColumnCount(columnIndex: number, columnCount: number) {
-        this.forEach((index, value) => {
-            value.inserts(columnIndex, new ObjectArray<T>(columnCount));
+        this.forEach((row, value) => {
+            moveMatrixArray(start, count, target, value);
         });
     }
 
@@ -272,13 +368,17 @@ export class ObjectMatrix<T> {
      */
     getFragment(startRow: number, endRow: number, startColumn: number, endColumn: number): ObjectMatrix<T> {
         const objectMatrix = new ObjectMatrix<T>();
+        let insertRow = 0;
         for (let r = startRow; r <= endRow; r++) {
-            const row = new ObjectArray<T>();
+            const row: IObjectArrayPrimitiveType<T> = {};
+            let insertColumn = 0;
             for (let c = startColumn; c <= endColumn; c++) {
                 const value = this.getValue(r, c) as T;
-                row.push(value);
+                row[insertColumn] = value;
+                insertColumn++;
             }
-            objectMatrix.pushRow(row);
+            objectMatrix.setRow(insertRow, row);
+            insertRow++;
         }
         return objectMatrix;
     }
@@ -308,11 +408,21 @@ export class ObjectMatrix<T> {
     }
 
     getSizeOf(): number {
-        return this._option.getSizeOf();
+        const keys = Object.keys(this._matrix);
+        return keys.length;
+        // return this._option.getSizeOf();
     }
 
     getLength(): number {
-        return this._option.getLength();
+        return getArrayLength(this._matrix);
+        // let maxIndex = 0;
+        // const keys = Object.keys(this._matrix);
+        // for (const key of keys) {
+        //     const rowIndex = Number(key);
+        //     maxIndex = Math.max(maxIndex, rowIndex);
+        // }
+        // return maxIndex + 1;
+        // return this._option.getLength();
     }
 
     getRange(): IRange {
@@ -325,7 +435,7 @@ export class ObjectMatrix<T> {
         for (let i = 0; i < length; i++) {
             const row = this.getRow(i);
             if (row) {
-                const columnLength = row.getLength() - 1;
+                const columnLength = getArrayLength(row) - 1;
                 endColumn = columnLength > endColumn ? columnLength : endColumn;
             }
         }
@@ -346,7 +456,17 @@ export class ObjectMatrix<T> {
     }
 
     toArray(): T[][] {
-        return this._option.toArray().map((item) => new ObjectArray(item).toArray()) as T[][];
+        const array: T[][] = [];
+        this.forRow((row, cols) => {
+            if (array[row] == null) {
+                array[row] = [];
+            }
+
+            cols.forEach((column) => {
+                array[row][column] = this.getValue(row, column);
+            });
+        });
+        return array;
     }
 
     toJSON(): IObjectMatrixPrimitiveType<T> {
@@ -365,12 +485,13 @@ export class ObjectMatrix<T> {
         let initRow = false;
         let initColumn = false;
         const objectMatrix = new ObjectMatrix<T>();
-        this.forEach((rowIndex, row) => {
+        this.forEach((rowIndex, rowObject) => {
             if (!initRow) {
                 initRow = true;
                 startRow = rowIndex;
             }
-            row.forEach((columnIndex, column) => {
+            Object.keys(rowObject).forEach((column) => {
+                const columnIndex = Number(column);
                 if (!initColumn) {
                     initColumn = true;
                     startColumn = columnIndex;
@@ -399,11 +520,13 @@ export class ObjectMatrix<T> {
                 startRow = rowIndex;
             }
 
-            const rowSize = row.getLength() - 1;
+            const rowSize = getArrayLength(row) - 1;
             if (rowSize > endColumn) {
                 endColumn = rowSize;
             }
-            row.forEach((columnIndex, column) => {
+
+            Object.keys(row).forEach((column) => {
+                const columnIndex = Number(column);
                 if (!initColumn) {
                     initColumn = true;
                     startColumn = columnIndex;
@@ -428,7 +551,8 @@ export class ObjectMatrix<T> {
         // Traverse row by row
         this.forEach((r, row) => {
             // Traverse column by column
-            row.forEach((c, cell) => {
+            Object.keys(row).forEach((col) => {
+                const c = Number(col);
                 let merged = false;
                 // Check if it can be merged with any of the existing ranges
                 for (const range of ranges) {
@@ -472,6 +596,5 @@ export class ObjectMatrix<T> {
 
     private _setOriginValue(matrix: IObjectMatrixPrimitiveType<T> = {}) {
         this._matrix = matrix;
-        this._option = new ObjectArray<ObjectArrayPrimitiveType<T>>(matrix);
     }
 }

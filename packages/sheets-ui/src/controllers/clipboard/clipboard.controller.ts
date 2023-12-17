@@ -14,7 +14,16 @@
  * limitations under the License.
  */
 
-import type { ICellData, IMutationInfo, IObjectMatrixPrimitiveType, IRange, IRowData, Worksheet } from '@univerjs/core';
+import type {
+    ICellData,
+    IMutationInfo,
+    IObjectArrayPrimitiveType,
+    IObjectMatrixPrimitiveType,
+    IRange,
+    IRowData,
+    Nullable,
+    Worksheet,
+} from '@univerjs/core';
 import {
     BooleanNumber,
     DEFAULT_WORKSHEET_COLUMN_WIDTH,
@@ -26,7 +35,6 @@ import {
     IUniverInstanceService,
     LifecycleStages,
     LocaleService,
-    ObjectArray,
     ObjectMatrix,
     OnLifecycle,
 } from '@univerjs/core';
@@ -241,7 +249,7 @@ export class SheetClipboardController extends Disposable {
                 const addingRowsCount = range.endRow - maxRow;
                 const existingRowsCount = rowProperties.length - addingRowsCount;
                 if (addingRowsCount > 0) {
-                    const rowInfo = new ObjectArray<IRowData>();
+                    const rowInfo: IObjectArrayPrimitiveType<IRowData> = {};
                     rowProperties.slice(existingRowsCount).forEach((property, index) => {
                         const style = property?.style;
                         if (!style) {
@@ -261,10 +269,10 @@ export class SheetClipboardController extends Disposable {
                             return false;
                         });
 
-                        rowInfo.set(index, {
+                        rowInfo[index] = {
                             h: height,
                             hd: BooleanNumber.FALSE,
-                        });
+                        };
                     });
 
                     const addRowMutation: IInsertRowMutationParams = {
@@ -281,7 +289,7 @@ export class SheetClipboardController extends Disposable {
 
                 // get row height of existing rows
                 // TODO When Excel pasted, there was no width height, Do we still need to set the height?
-                const rowHeight = new ObjectArray<number>();
+                const rowHeight: IObjectArrayPrimitiveType<number> = {};
                 rowProperties.slice(0, existingRowsCount).forEach((property, index) => {
                     const style = property.style;
                     if (!style) {
@@ -301,7 +309,7 @@ export class SheetClipboardController extends Disposable {
                         return false;
                     });
 
-                    rowHeight.set(index, height);
+                    rowHeight[index] = height;
                 });
 
                 // apply row properties to the existing rows
@@ -338,12 +346,10 @@ export class SheetClipboardController extends Disposable {
                         unitId: unitId!,
                         subUnitId: subUnitId!,
                         ranges: [{ ...range, startColumn: maxColumn }],
-                        colInfo: new ObjectArray(
-                            colProperties.slice(existingColsCount).map((property) => ({
-                                w: property.width ? +property.width : DEFAULT_WORKSHEET_COLUMN_WIDTH,
-                                hd: BooleanNumber.FALSE,
-                            }))
-                        ),
+                        colInfo: colProperties.slice(existingColsCount).map((property) => ({
+                            w: property.width ? +property.width : DEFAULT_WORKSHEET_COLUMN_WIDTH,
+                            hd: BooleanNumber.FALSE,
+                        })),
                     };
                     redoMutations.push({
                         id: InsertColMutation.id,
@@ -355,11 +361,9 @@ export class SheetClipboardController extends Disposable {
                     unitId: unitId!,
                     subUnitId: subUnitId!,
                     ranges: [{ ...range, endRow: Math.min(range.endColumn, maxColumn) }],
-                    colWidth: new ObjectArray(
-                        colProperties
-                            .slice(0, existingColsCount)
-                            .map((property) => (property.width ? +property.width : DEFAULT_WORKSHEET_COLUMN_WIDTH))
-                    ),
+                    colWidth: colProperties
+                        .slice(0, existingColsCount)
+                        .map((property) => (property.width ? +property.width : DEFAULT_WORKSHEET_COLUMN_WIDTH)),
                 };
                 redoMutations.push({
                     id: SetWorksheetColWidthMutation.id,
@@ -502,11 +506,9 @@ export class SheetClipboardController extends Disposable {
                     unitId: unitId!,
                     subUnitId: subUnitId!,
                     ranges: [{ ...range, endRow: Math.min(range.endColumn, maxColumn) }],
-                    colWidth: new ObjectArray(
-                        colProperties
-                            .slice(0, existingColsCount)
-                            .map((property) => (property.width ? +property.width : DEFAULT_WORKSHEET_COLUMN_WIDTH))
-                    ),
+                    colWidth: colProperties
+                        .slice(0, existingColsCount)
+                        .map((property) => (property.width ? +property.width : DEFAULT_WORKSHEET_COLUMN_WIDTH)),
                 };
                 redoMutations.push({
                     id: SetWorksheetColWidthMutation.id,
@@ -603,8 +605,8 @@ export class SheetClipboardController extends Disposable {
 }
 
 // Generate cellValue from range and set null
-function generateNullCellValue(range: IRange[]): IObjectMatrixPrimitiveType<ICellData> {
-    const cellValue = new ObjectMatrix<ICellData>();
+function generateNullCellValue(range: IRange[]): IObjectMatrixPrimitiveType<Nullable<ICellData>> {
+    const cellValue = new ObjectMatrix<Nullable<ICellData>>();
     range.forEach((range: IRange) => {
         const { startRow, startColumn, endRow, endColumn } = range;
         for (let i = startRow; i <= endRow; i++) {

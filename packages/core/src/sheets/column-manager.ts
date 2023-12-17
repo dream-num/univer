@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '../shared';
-import { Tools } from '../shared';
-import type { ObjectArrayType } from '../shared/object-array';
-import { ObjectArray } from '../shared/object-array';
+import type { Nullable } from '../common/type-utils';
+import type { IObjectArrayPrimitiveType } from '../shared/object-matrix';
+import { getArrayLength } from '../shared/object-matrix';
 import { BooleanNumber } from '../types/enum';
 import type { IColumnData, IRange, IWorksheetData } from '../types/interfaces';
 import { RANGE_TYPE } from '../types/interfaces';
@@ -26,33 +25,33 @@ import { RANGE_TYPE } from '../types/interfaces';
  * Manage configuration information of all columns, get column width, column length, set column width, etc.
  */
 export class ColumnManager {
-    private _columnData: ObjectArray<IColumnData>;
+    private _columnData: IObjectArrayPrimitiveType<Partial<IColumnData>> = {};
 
     constructor(
         private readonly _config: IWorksheetData,
-        data: ObjectArrayType<Partial<IColumnData>>
+        data: IObjectArrayPrimitiveType<Partial<IColumnData>>
     ) {
-        this._columnData = Tools.createObjectArray(data) as ObjectArray<IColumnData>;
+        this._columnData = data;
     }
 
     /**
      * Get width and hidden status of columns in the sheet
      * @returns
      */
-    getColumnData(): ObjectArray<IColumnData> {
+    getColumnData(): IObjectArrayPrimitiveType<Partial<IColumnData>> {
         return this._columnData;
     }
 
     getColVisible(colPos: number): boolean {
         const { _columnData } = this;
-        const col = _columnData.get(colPos);
+        const col = _columnData[colPos];
         if (!col) {
             return true;
         }
         return col.hd !== BooleanNumber.TRUE;
     }
 
-    getHiddenCols(start: number = 0, end: number = this._columnData.getLength() - 1): IRange[] {
+    getHiddenCols(start: number = 0, end: number = getArrayLength(this._columnData) - 1): IRange[] {
         const hiddenCols: IRange[] = [];
 
         let inHiddenRange = false;
@@ -88,11 +87,13 @@ export class ColumnManager {
         return hiddenCols;
     }
 
-    getColumnDatas(columnPos: number, numColumns: number): ObjectArray<IColumnData> {
-        const columnData = new ObjectArray<IColumnData>();
+    getColumnDatas(columnPos: number, numColumns: number): IObjectArrayPrimitiveType<Partial<IColumnData>> {
+        const columnData: IObjectArrayPrimitiveType<Partial<IColumnData>> = {};
+        let index = 0;
         for (let i = columnPos; i < columnPos + numColumns; i++) {
             const data = this.getColumnOrCreate(i);
-            columnData.push(data);
+            columnData[index] = data;
+            index++;
         }
         return columnData;
     }
@@ -102,7 +103,7 @@ export class ColumnManager {
      * @returns
      */
     getSize(): number {
-        return this._columnData.getLength();
+        return getArrayLength(this._columnData);
     }
 
     /**
@@ -115,10 +116,10 @@ export class ColumnManager {
         const config = this._config;
         let width: number = 0;
 
-        const column = _columnData.obtain(columnPos, {
+        const column = _columnData[columnPos] || {
             hd: BooleanNumber.FALSE,
             w: config.defaultColumnWidth,
-        });
+        };
         width = column.w || config.defaultColumnWidth;
 
         return width;
@@ -129,8 +130,8 @@ export class ColumnManager {
      * @param columnPos column index
      * @returns
      */
-    getColumn(columnPos: number): Nullable<IColumnData> {
-        const column = this._columnData.get(columnPos);
+    getColumn(columnPos: number): Nullable<Partial<IColumnData>> {
+        const column = this._columnData[columnPos];
         if (column) {
             return column;
         }
@@ -141,10 +142,10 @@ export class ColumnManager {
      * @param columnPos column index
      * @returns
      */
-    getColumnOrCreate(columnPos: number): IColumnData {
+    getColumnOrCreate(columnPos: number): Partial<IColumnData> {
         const { _columnData } = this;
         const config = this._config;
-        const column = _columnData.get(columnPos);
+        const column = _columnData[columnPos];
         if (column) {
             return column;
         }
@@ -152,7 +153,7 @@ export class ColumnManager {
             w: config.defaultColumnWidth,
             hd: BooleanNumber.FALSE,
         };
-        this._columnData.set(columnPos, create);
+        this._columnData[columnPos] = create;
         return create;
     }
 }

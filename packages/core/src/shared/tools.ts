@@ -16,8 +16,6 @@
 
 import { nanoid } from 'nanoid';
 
-import type { ObjectArrayPrimitiveType } from './object-array';
-import { ObjectArray } from './object-array';
 import type { Class, IKeyValue } from './types';
 
 const rmsPrefix = /^-ms-/;
@@ -641,13 +639,6 @@ export class Tools {
             });
         });
         return obj;
-    }
-
-    static createObjectArray<T>(array: ObjectArrayPrimitiveType<T> | ObjectArray<T>): ObjectArray<T> {
-        if (array instanceof ObjectArray) {
-            return new ObjectArray<T>(array.toJSON());
-        }
-        return new ObjectArray<T>(array);
     }
 
     static hasIntersectionBetweenTwoRanges(

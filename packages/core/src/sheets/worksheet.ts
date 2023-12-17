@@ -98,7 +98,7 @@ export class Worksheet {
      * Returns WorkSheet Cell Data Matrix
      * @returns
      */
-    getCellMatrix(): ObjectMatrix<ICellData> {
+    getCellMatrix(): ObjectMatrix<Nullable<ICellData>> {
         return this._cellData;
     }
 

@@ -18,11 +18,11 @@ import type {
     Dimension,
     ICellData,
     IColumnData,
+    IObjectArrayPrimitiveType,
     IObjectMatrixPrimitiveType,
     IRange,
     IRowData,
     IWorksheetData,
-    ObjectArray,
 } from '@univerjs/core';
 
 /** Params of `RemoveSheetMutation` */
@@ -43,7 +43,7 @@ export interface IInsertRowMutationParams {
     unitId: string;
     subUnitId: string;
     ranges: IRange[];
-    rowInfo?: ObjectArray<IRowData>;
+    rowInfo?: IObjectArrayPrimitiveType<IRowData>;
 }
 
 /** Params of InsertColMutation */
@@ -51,7 +51,7 @@ export interface IInsertColMutationParams {
     unitId: string;
     subUnitId: string;
     ranges: IRange[];
-    colInfo?: ObjectArray<IColumnData>;
+    colInfo?: IObjectArrayPrimitiveType<IColumnData>;
 }
 
 /** Params of InsertRowMutation */

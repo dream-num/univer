@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { Nullable, ObjectArrayType } from '../shared';
-import { ObjectArray, Tools } from '../shared';
+import { getArrayLength, type IObjectArrayPrimitiveType } from '../shared/object-matrix';
+import type { Nullable } from '../shared/types';
 import { BooleanNumber } from '../types/enum';
 import type { IRange, IRowData, IWorksheetData } from '../types/interfaces';
 import { RANGE_TYPE } from '../types/interfaces';
@@ -26,28 +26,30 @@ import { RANGE_TYPE } from '../types/interfaces';
  * @deprecated This class is not necessary. It increases the complexity of the code and does not bring any benefits.
  */
 export class RowManager {
-    private _rowData: ObjectArray<IRowData>;
+    private _rowData: IObjectArrayPrimitiveType<Partial<IRowData>>;
 
     constructor(
         private readonly _config: IWorksheetData,
-        data: ObjectArrayType<Partial<IRowData>>
+        data: IObjectArrayPrimitiveType<Partial<IRowData>>
     ) {
-        this._rowData = Tools.createObjectArray(data) as ObjectArray<IRowData>;
+        this._rowData = data;
     }
 
     /**
      * Get height and hidden status of columns in the sheet
      * @returns
      */
-    getRowData(): ObjectArray<IRowData> {
+    getRowData(): IObjectArrayPrimitiveType<Partial<IRowData>> {
         return this._rowData;
     }
 
-    getRowDatas(rowPos: number, numRows: number): ObjectArray<IRowData> {
-        const rowData = new ObjectArray<IRowData>();
+    getRowDatas(rowPos: number, numRows: number): IObjectArrayPrimitiveType<Partial<IRowData>> {
+        const rowData: IObjectArrayPrimitiveType<Partial<IRowData>> = {};
+        let index = 0;
         for (let i = rowPos; i < rowPos + numRows; i++) {
             const data = this.getRowOrCreate(i);
-            rowData.push(data);
+            rowData[index] = data;
+            index++;
         }
         return rowData;
     }
@@ -60,10 +62,10 @@ export class RowManager {
         let height: number = 0;
 
         for (let i = 0; i < count; i++) {
-            const row = _rowData.obtain(i + rowPos, {
+            const row = _rowData[i + rowPos] || {
                 hd: BooleanNumber.FALSE,
                 h: config.defaultRowHeight,
-            });
+            };
             const { isAutoHeight, ah, h = config.defaultRowHeight } = row;
 
             height += (isAutoHeight == null || !!isAutoHeight) && typeof ah === 'number' ? ah : h;
@@ -77,9 +79,8 @@ export class RowManager {
      * @param rowPos row index
      * @returns
      */
-    getRow(rowPos: number): Nullable<IRowData> {
-        const { _rowData } = this;
-        return _rowData.get(rowPos);
+    getRow(rowPos: number): Nullable<Partial<IRowData>> {
+        return this._rowData[rowPos];
     }
 
     /**
@@ -87,20 +88,20 @@ export class RowManager {
      * @param rowPos row index
      * @returns
      */
-    getRowOrCreate(rowPos: number): IRowData {
+    getRowOrCreate(rowPos: number): Partial<IRowData> {
         const { _rowData } = this;
-        const row = _rowData.get(rowPos);
+        const row = _rowData[rowPos];
         if (row) {
             return row;
         }
         const config = this._config;
         const create = { hd: BooleanNumber.FALSE, h: config.defaultRowHeight };
-        _rowData.set(rowPos, create);
+        _rowData[rowPos] = create;
 
         return create;
     }
 
-    getHiddenRows(start: number = 0, end: number = this._rowData.getLength() - 1): IRange[] {
+    getHiddenRows(start: number = 0, end: number = getArrayLength(this._rowData) - 1): IRange[] {
         const hiddenRows: IRange[] = [];
 
         let inHiddenRange = false;
@@ -144,6 +145,6 @@ export class RowManager {
      * @returns
      */
     getSize(): number {
-        return this._rowData.getLength();
+        return getArrayLength(this._rowData);
     }
 }

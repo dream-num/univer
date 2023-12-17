@@ -61,7 +61,7 @@ export interface IUnitData {
 }
 
 export interface IRuntimeUnitDataType {
-    [unitId: string]: { [sheetId: string]: ObjectMatrix<ICellData> };
+    [unitId: string]: { [sheetId: string]: ObjectMatrix<Nullable<ICellData>> };
 }
 
 export interface IRuntimeOtherUnitDataType {
@@ -89,7 +89,7 @@ export interface IFeatureDirtyRangeType {
 }
 
 export interface IArrayFormulaUnitCellType {
-    [unitId: string]: { [sheetId: string]: IObjectMatrixPrimitiveType<ICellData> };
+    [unitId: string]: { [sheetId: string]: IObjectMatrixPrimitiveType<Nullable<ICellData>> };
 }
 
 export interface IFormulaData {

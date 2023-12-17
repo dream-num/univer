@@ -259,10 +259,10 @@ export class ActiveDirtyController extends Disposable {
 
         const lastEndColumn = worksheet?.getLastColumnWithContent() || 0;
 
-        const matrix = new ObjectMatrix<ICellData | null>();
+        const matrix = new ObjectMatrix<Nullable<ICellData>>();
 
         for (const range of ranges) {
-            let newMatrix: Nullable<ObjectMatrix<ICellData | null>> = null;
+            let newMatrix: Nullable<ObjectMatrix<Nullable<ICellData>>> = null;
             const { startRow, startColumn, endRow, endColumn } = range;
             if (shiftDimension === Dimension.ROWS) {
                 newMatrix = this._rangeToMatrix({
@@ -307,10 +307,10 @@ export class ActiveDirtyController extends Disposable {
 
         const columnCount = worksheet?.getColumnCount() || 0;
 
-        const matrix = new ObjectMatrix<ICellData | null>();
+        const matrix = new ObjectMatrix<Nullable<ICellData>>();
 
         for (const range of ranges) {
-            let newMatrix: Nullable<ObjectMatrix<ICellData | null>> = null;
+            let newMatrix: Nullable<ObjectMatrix<Nullable<ICellData>>> = null;
             const { startRow, endRow, startColumn, endColumn } = range;
 
             if (isRow === true) {
@@ -372,7 +372,7 @@ export class ActiveDirtyController extends Disposable {
     }
 
     private _rangeToMatrix(range: IRange) {
-        const matrix = new ObjectMatrix<ICellData | null>();
+        const matrix = new ObjectMatrix<Nullable<ICellData>>();
 
         const { startRow, startColumn, endRow, endColumn } = range;
 
@@ -388,7 +388,7 @@ export class ActiveDirtyController extends Disposable {
     private _getDirtyRangesByCellValue(
         unitId: string,
         sheetId: string,
-        cellValue?: IObjectMatrixPrimitiveType<ICellData | null>
+        cellValue?: IObjectMatrixPrimitiveType<Nullable<ICellData>>
     ) {
         const dirtyRanges: IUnitRange[] = [];
 
@@ -414,7 +414,7 @@ export class ActiveDirtyController extends Disposable {
     private _getDirtyRangesForArrayFormula(
         unitId: string,
         sheetId: string,
-        cellValue: IObjectMatrixPrimitiveType<ICellData | null>
+        cellValue: IObjectMatrixPrimitiveType<Nullable<ICellData>>
     ) {
         const dirtyRanges: IUnitRange[] = [];
 

@@ -3,9 +3,6 @@ dist
 lib
 local
 .turbo
-.docusaurus
-
-apps
 
 # Coverage
 coverage-report/

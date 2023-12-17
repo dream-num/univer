@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
-import type { BorderStyleTypes, HorizontalAlign, ObjectMatrix, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import type {
+    BorderStyleTypes,
+    HorizontalAlign,
+    ISelectionCellWithCoord,
+    ObjectMatrix,
+    VerticalAlign,
+    WrapStrategy,
+} from '@univerjs/core';
 
 import type { BORDER_TYPE } from '../../basics/const';
 import type { DocumentSkeleton } from '../docs/doc-skeleton';
@@ -52,6 +59,7 @@ interface fontCache {
 
 export interface IStylesCache {
     background?: backgroundCache;
+    backgroundPositions?: ObjectMatrix<ISelectionCellWithCoord>;
     font?: fontCache;
     border?: ObjectMatrix<BorderCache>;
 }

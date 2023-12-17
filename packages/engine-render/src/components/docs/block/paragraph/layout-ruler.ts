@@ -49,7 +49,6 @@ import {
     getLastSection,
     getLineHeightConfig,
     getNumberUnitValue,
-    getPageContentWidth,
     getPositionHorizon,
     getPositionVertical,
     isColumnFull,
@@ -105,7 +104,6 @@ function _divideOperator(
         const lastSpan = divide?.spanGroup?.[divide.spanGroup.length - 1];
         const preWidth = lastSpan?.width || 0;
         const preLeft = lastSpan?.left || 0;
-        const pageContentWidth = getPageContentWidth(lastPage);
 
         // Last span is western char and the current span is Chinese word or vice verse.
         const isMixedCJKWesternTextLayout = hasMixedTextLayout(lastSpan, spanGroup[0]);
@@ -181,68 +179,6 @@ function _divideOperator(
                     defaultSpanLineHeight
                 );
             }
-
-            // if (width > pageContentWidth) {
-            //     // 一个字符 or word 超页内容宽
-            //     if (isBlankPage(lastPage)) {
-            //         addSpanToDivide(divide, spanGroup, preOffsetLeft);
-            //         __makeColumnsFull(column?.parent?.columns);
-            //     } else {
-            //         _pageOperator(
-            //             spanGroup,
-            //             pages,
-            //             sectionBreakConfig,
-            //             paragraphConfig,
-            //             paragraphStart,
-            //             defaultSpanLineHeight
-            //         );
-            //     }
-            // } else if (column && width > column.width) {
-            //     // 一个字符 or word 超列宽
-            //     setColumnFullState(column, true);
-
-            //     if (isBlankColumn(column)) {
-            //         addSpanToDivide(divide, spanGroup, preOffsetLeft);
-            //     } else {
-            //         _columnOperator(
-            //             spanGroup,
-            //             pages,
-            //             sectionBreakConfig,
-            //             paragraphConfig,
-            //             paragraphStart,
-            //             defaultSpanLineHeight
-            //         );
-            //     }
-            // } else if (divideInfo.isLast) {
-            //     // 最后一个 divide
-            //     if (
-            //         spanGroup.length === 1 &&
-            //         (spanGroup[0].content === DataStreamTreeTokenType.SPACE ||
-            //             spanGroup[0].content === DataStreamTreeTokenType.PARAGRAPH)
-            //     ) {
-            //         addSpanToDivide(divide, spanGroup, preOffsetLeft);
-            //     } else {
-            //         _lineOperator(
-            //             spanGroup,
-            //             pages,
-            //             sectionBreakConfig,
-            //             paragraphConfig,
-            //             paragraphStart,
-            //             defaultSpanLineHeight
-            //         );
-            //     }
-            // } else {
-            //     // 不是最后一个divide
-            //     _divideOperator(
-            //         spanGroup,
-            //         pages,
-            //         sectionBreakConfig,
-            //         paragraphConfig,
-            //         paragraphStart,
-            //         false,
-            //         defaultSpanLineHeight
-            //     );
-            // }
         } else {
             // w 不超过 divide 宽度，加入到 divide 中去
             const currentLine = divide.parent;
@@ -280,14 +216,15 @@ function _divideOperator(
                         newSpanGroup = [spanGroupCached[0]];
                     }
                     const column = currentLine.parent;
-                    column?.lines.pop(); // Delete the previous line and recalculate according to the maximum content height
+
+                    const { paragraphStart: lineIsStart } = column?.lines.pop()!; // Delete the previous line and recalculate according to the maximum content height
 
                     _lineOperator(
                         newSpanGroup,
                         pages,
                         sectionBreakConfig,
                         paragraphConfig,
-                        paragraphStart,
+                        lineIsStart,
                         boundingBoxAscent + boundingBoxDescent
                     );
 

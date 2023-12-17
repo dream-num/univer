@@ -28,17 +28,6 @@ const config = {
         'plugin:prettier/recommended',
         'prettier',
     ],
-    // parserOptions: {
-    //     ecmaVersion: 12,
-    //     sourceType: 'module',
-    //     // https://typescript-eslint.io/linting/troubleshooting/#i-get-errors-telling-me-eslint-was-configured-to-run--however-that-tsconfig-does-not--none-of-those-tsconfigs-include-this-file
-    //     project: [
-    //         './tsconfig.eslint.json',
-    //         './packages/*/tsconfig.json',
-    //         './examples/*/tsconfig.json',
-    //         './apps/*/tsconfig.json',
-    //     ],
-    // },
     rules: {
         'header/header': [
             2,

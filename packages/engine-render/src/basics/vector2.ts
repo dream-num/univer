@@ -29,9 +29,9 @@ export class Vector2 implements IPoint {
      */
     constructor(
         /** defines the first coordinate */
-        public x = 0,
+        public x: number = 0,
         /** defines the second coordinate */
-        public y = 0
+        public y: number = 0
     ) {}
 
     // Statics
@@ -846,4 +846,13 @@ export interface IBoundRectNoAngle {
     top: number;
     right: number;
     bottom: number;
+}
+
+export interface IViewportBound {
+    viewBound: IBoundRectNoAngle;
+    diffBounds: IBoundRectNoAngle[];
+    diffX: number;
+    diffY: number;
+    viewPortPosition: IBoundRectNoAngle;
+    viewPortKey?: string;
 }

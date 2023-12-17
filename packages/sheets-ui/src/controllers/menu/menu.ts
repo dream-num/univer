@@ -15,6 +15,7 @@
  */
 
 import {
+    BooleanNumber,
     FontItalic,
     FontWeight,
     HorizontalAlign,
@@ -926,7 +927,11 @@ export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
                     tr = range?.getTextRotation();
                 }
 
-                subscriber.next((tr && tr.a) ?? 0);
+                if (tr?.v === BooleanNumber.TRUE) {
+                    subscriber.next('v');
+                } else {
+                    subscriber.next((tr && tr.a) ?? 0);
+                }
             });
 
             subscriber.next(0);

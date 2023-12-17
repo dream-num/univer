@@ -375,6 +375,12 @@ export class StartEditController extends Disposable {
             editorWidth = clientWidth;
         }
 
+        editorWidth = Math.round(editorWidth);
+
+        editorHeight = Math.round(editorHeight);
+
+        physicHeight = Math.round(editorHeight);
+
         scene.transformByState({
             width: editorWidth,
             height: editorHeight,

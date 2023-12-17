@@ -24,7 +24,7 @@ import type { IObjectFullState, ITransformChangeState } from './basics/interface
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './basics/interfaces';
 import { generateRandomKey, toPx } from './basics/tools';
 import { Transform } from './basics/transform';
-import type { IBoundRect, Vector2 } from './basics/vector2';
+import type { IViewportBound, Vector2 } from './basics/vector2';
 
 export const BASE_OBJECT_ARRAY = [
     'top',
@@ -110,7 +110,7 @@ export abstract class BaseObject {
 
     private _strokeWidth: number = 0;
 
-    private _parent: any; // Todo: The object must be mounted to a scene or group. 'Any' is used here to avoid circular dependencies. This will be resolved later through dependency injection.
+    private _parent: any; // TODO: @DR-Univer. The object must be mounted to a scene or group. 'Any' is used here to avoid circular dependencies. This will be resolved later through dependency injection.
 
     private _zIndex: number = 0;
 
@@ -127,6 +127,8 @@ export abstract class BaseObject {
     private _isTransformer = false;
 
     private _forceRender = false;
+
+    private _layer: any; // TODO: @DR-Univer. Belong to layer
 
     constructor(key?: string) {
         if (key) {
@@ -251,6 +253,10 @@ export abstract class BaseObject {
         return this._cursor;
     }
 
+    get layer() {
+        return this._layer;
+    }
+
     set transform(trans: Transform) {
         this._transform = trans;
     }
@@ -277,6 +283,10 @@ export abstract class BaseObject {
 
     set cursor(val: CURSOR_TYPE) {
         this.setCursor(val);
+    }
+
+    set layer(layer: any) {
+        this._layer = layer;
     }
 
     protected set top(num: number | string) {
@@ -335,10 +345,14 @@ export abstract class BaseObject {
         this._dirty = state;
 
         if (state) {
-            const scene = this.getScene();
-            if (scene == null) {
-                this._dirty = false;
+            // const scene = this.getScene();
+            // if (scene == null) {
+            //     this._dirty = false;
 
+            //     return;
+            // }
+            if (this._layer == null) {
+                this._dirty = false;
                 return;
             }
             // clearTimeout(scene.debounceParentTimeout);
@@ -347,12 +361,12 @@ export abstract class BaseObject {
             //     this._parent?.makeDirty(state);
             // }, 0);
 
-            if (typeof scene.debounceParentTimeout === 'function') {
-                scene.debounceParentTimeout();
+            if (typeof this._layer.debounceParentTimeout === 'function') {
+                this._layer.debounceParentTimeout();
             }
             // To prevent multiple refreshes caused by setting values for multiple object instances at once.
-            scene.debounceParentTimeout = requestImmediateMacroTask(() => {
-                this._parent?.makeDirty(state);
+            this._layer.debounceParentTimeout = requestImmediateMacroTask(() => {
+                this._layer?.makeDirty(state);
             });
         }
 
@@ -362,7 +376,7 @@ export abstract class BaseObject {
     makeDirtyNoDebounce(state: boolean = true) {
         this._dirty = state;
         if (state) {
-            this.parent?.makeDirty(state);
+            this._layer?.makeDirty(state);
         }
 
         return this;
@@ -506,7 +520,7 @@ export abstract class BaseObject {
         return this;
     }
 
-    isRender(bounds?: IBoundRect) {
+    isRender(bounds?: IViewportBound) {
         if (this._forceRender) {
             return false;
         }
@@ -544,7 +558,7 @@ export abstract class BaseObject {
         this._makeDirtyMix();
     }
 
-    render(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
+    render(ctx: CanvasRenderingContext2D, bounds?: IViewportBound) {
         /* abstract */
     }
 
@@ -575,14 +589,6 @@ export abstract class BaseObject {
     clear(eventType: EVENT_TYPE) {
         const observable = (this as IKeyValue)[`on${eventType}Observer`] as Observable<unknown>;
         observable.clear();
-    }
-
-    resizeCacheCanvas() {
-        /* abstract */
-    }
-
-    scaleCacheCanvas() {
-        /* abstract */
     }
 
     triggerPointerMove(evt: IPointerEvent | IMouseEvent) {

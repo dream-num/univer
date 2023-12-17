@@ -69,7 +69,7 @@ export class ActiveWorksheetController extends Disposable {
                 }
 
                 // It is a mutation that we comes from the collaboration peer so we should not handle them.
-                if (options?.local) {
+                if (options?.fromCollab) {
                     return;
                 }
 

@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
+import type { IRange, Nullable } from '@univerjs/core';
 
 import { RENDER_CLASS_TYPE } from '../../basics/const';
-import type { IBoundRect, Vector2 } from '../../basics/vector2';
+import type { IViewportBound, Vector2 } from '../../basics/vector2';
 import { RenderComponent } from '../component';
 import type { SHEET_EXTENSION_TYPE } from './extensions/sheet-extension';
 import type { SpreadsheetSkeleton } from './sheet-skeleton';
 
-export class SheetComponent extends RenderComponent<SpreadsheetSkeleton, SHEET_EXTENSION_TYPE> {
-    // protected _cacheCanvas = new Canvas();
-
+export class SheetComponent extends RenderComponent<SpreadsheetSkeleton, SHEET_EXTENSION_TYPE, IRange[]> {
     constructor(
         oKey: string,
         private _skeleton?: SpreadsheetSkeleton
@@ -40,35 +38,28 @@ export class SheetComponent extends RenderComponent<SpreadsheetSkeleton, SHEET_E
         this._skeleton = spreadsheetSkeleton;
     }
 
-    override render(mainCtx: CanvasRenderingContext2D, bounds?: IBoundRect) {
+    override render(mainCtx: CanvasRenderingContext2D, bounds?: IViewportBound) {
         if (!this.visible) {
             this.makeDirty(false);
             return this;
         }
 
-        // const ctx = this._cacheCanvas.getGlobalContext();
-        // this._cacheCanvas.clear();
-
         mainCtx.save();
-        // ctx.setTransform(mainCtx.getTransform());
         this._draw(mainCtx, bounds);
         mainCtx.restore();
-        // this._applyCache(mainCtx);
-        // console.log('render', ctx);
-        // console.log('mainCtx', mainCtx, this.width, this.height);
     }
 
     getParentScale() {
         let { scaleX = 1, scaleY = 1 } = this.parent;
 
         if (this.parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
-            scaleX = this.parent.ancestorScaleX || 1;
-            scaleY = this.parent.ancestorScaleY || 1;
+            scaleX = (this.parent.ancestorScaleX || 1) as number;
+            scaleY = (this.parent.ancestorScaleY || 1) as number;
         }
 
         return {
-            scaleX,
-            scaleY,
+            scaleX: scaleX as number,
+            scaleY: scaleY as number,
         };
     }
 
@@ -95,13 +86,13 @@ export class SheetComponent extends RenderComponent<SpreadsheetSkeleton, SHEET_E
         endColumn: number;
     }> {}
 
-    protected _draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
+    protected _draw(ctx: CanvasRenderingContext2D, bounds?: IViewportBound) {
         /* abstract */
     }
 }
 
 export class SpreadsheetHeader extends SheetComponent {
-    protected override _draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect): void {
+    protected override _draw(ctx: CanvasRenderingContext2D, bounds?: IViewportBound): void {
         this.draw(ctx, bounds);
     }
 }

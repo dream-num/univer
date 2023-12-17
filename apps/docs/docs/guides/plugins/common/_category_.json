@@ -1,9 +1,0 @@
-{
-    "label": "通用插件",
-    "position": 1,
-    "link": {
-        "type": "generated-index",
-        "description": "通用插件提供了 Univer 中的基础能力。"
-    }
-}
-

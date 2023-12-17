@@ -23,7 +23,7 @@ import { RENDER_CLASS_TYPE } from './basics/const';
 import type { IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
 import type { ITransformChangeState } from './basics/interfaces';
 import { Transform } from './basics/transform';
-import type { IBoundRect, Vector2 } from './basics/vector2';
+import type { IViewportBound, Vector2 } from './basics/vector2';
 
 export abstract class ThinScene {
     onTransformChangeObservable = new Observable<ITransformChangeState>();
@@ -178,7 +178,7 @@ export abstract class ThinScene {
 
     triggerPointerEnter(evt: IPointerEvent | IMouseEvent) {}
 
-    renderObjects(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {}
+    renderObjects(ctx: CanvasRenderingContext2D, bounds?: IViewportBound) {}
 
     render(parentCtx?: CanvasRenderingContext2D) {}
 
@@ -199,6 +199,10 @@ export abstract class ThinScene {
     applyTransformer(o: BaseObject) {}
 
     makeDirtyNoParent(state: boolean = true) {
+        return this;
+    }
+
+    makeDirty(state: boolean = true) {
         return this;
     }
 

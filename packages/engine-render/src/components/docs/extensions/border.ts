@@ -17,9 +17,10 @@
 import type { BorderStyleTypes, IBorderData, IBorderStyleData, IScale, Nullable } from '@univerjs/core';
 import { getColorStyle } from '@univerjs/core';
 
-import { BORDER_TYPE, COLOR_BLACK_RGB } from '../../../basics/const';
+import { BORDER_TYPE, COLOR_BLACK_RGB, FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics/const';
 import { drawLineByBorderType, getLineWidth, setLineType } from '../../../basics/draw';
 import type { IDocumentSkeletonSpan } from '../../../basics/i-document-skeleton-cached';
+import { fixLineWidthByScale } from '../../../basics/tools';
 import { Vector2 } from '../../../basics/vector2';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
 import { docExtension } from '../doc-extension';
@@ -55,6 +56,10 @@ export class Border extends docExtension {
         const scale = this._getScale(parentScale);
         const borderCache = this._createBorderCache(borderData);
 
+        ctx.save();
+
+        ctx.translate(FIX_ONE_PIXEL_BLUR_OFFSET / scale, FIX_ONE_PIXEL_BLUR_OFFSET / scale);
+
         const { spanStartPoint = Vector2.create(0, 0) } = this.extensionOffset;
 
         for (const type of borderCache.keys()) {
@@ -77,12 +82,14 @@ export class Border extends docExtension {
             }
 
             drawLineByBorderType(ctx, type as BORDER_TYPE, {
-                startX: spanStartPoint.x,
-                startY: spanStartPoint.y,
-                endX: spanStartPoint.x + spanWidth,
-                endY: spanStartPoint.y + lineHeight,
+                startX: fixLineWidthByScale(spanStartPoint.x, scale),
+                startY: fixLineWidthByScale(spanStartPoint.y, scale),
+                endX: fixLineWidthByScale(spanStartPoint.x + spanWidth, scale),
+                endY: fixLineWidthByScale(spanStartPoint.y + lineHeight, scale),
             });
         }
+
+        ctx.restore();
     }
 
     override clearCache() {

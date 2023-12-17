@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { getTranslateInSpreadContextWithPixelRatio } from '../../basics/draw';
 import { fixLineWidthByScale, getScale } from '../../basics/tools';
-import type { IBoundRect, Vector2 } from '../../basics/vector2';
+import type { IViewportBound, Vector2 } from '../../basics/vector2';
 import { SheetRowHeaderExtensionRegistry } from '../extension';
 import type { RowHeaderLayout } from './extensions/row-header-layout';
 import { SpreadsheetHeader } from './sheet-component';
@@ -38,7 +37,7 @@ export class SpreadsheetRowHeader extends SpreadsheetHeader {
         return this._rowHeaderLayoutExtension;
     }
 
-    override draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
+    override draw(ctx: CanvasRenderingContext2D, bounds?: IViewportBound) {
         const spreadsheetSkeleton = this.getSkeleton();
         if (!spreadsheetSkeleton) {
             return;
@@ -57,12 +56,9 @@ export class SpreadsheetRowHeader extends SpreadsheetHeader {
 
         const { columnHeaderHeight } = spreadsheetSkeleton;
 
-        const { left: fixTranslateLeft, top: fixTranslateTop } = getTranslateInSpreadContextWithPixelRatio();
+        // const { left: fixTranslateLeft, top: fixTranslateTop } = getTranslateInSpreadContextWithPixelRatio();
 
-        ctx.translate(
-            -fixTranslateLeft / scale,
-            fixLineWidthByScale(columnHeaderHeight, scale) - fixTranslateTop / scale
-        );
+        ctx.translate(0, fixLineWidthByScale(columnHeaderHeight, scale));
 
         const extensions = this.getExtensionsByOrder();
         for (const extension of extensions) {

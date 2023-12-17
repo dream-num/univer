@@ -78,7 +78,7 @@ export class CalculateResultApplyController extends Disposable {
 
                 const result = redoMutationsInfo.every((m) =>
                     this._commandService.executeCommand(m.id, m.params, {
-                        local: true,
+                        onlyLocal: true,
                     })
                 );
                 return result;

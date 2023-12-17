@@ -97,7 +97,7 @@ export class ZoomController extends Disposable {
                     nextRatio = nextRatio >= 4 ? 4 : nextRatio <= 0.1 ? 0.1 : nextRatio;
 
                     this._commandService.executeCommand(SetZoomRatioCommand.id, {
-                        zoomRatio: nextRatio,
+                        zoomRatio: Math.round(nextRatio * 10) / 10,
                         unitId: workbook.getUnitId(),
                         subUnitId: sheet.getSheetId(),
                     });
@@ -154,6 +154,7 @@ export class ZoomController extends Disposable {
     private _updateViewZoom(zoomRatio: number) {
         const sheetObject = this._getSheetObject();
         sheetObject?.scene.scale(zoomRatio, zoomRatio);
+        sheetObject?.spreadsheet.makeForceDirty();
     }
 
     private _getSheetObject() {

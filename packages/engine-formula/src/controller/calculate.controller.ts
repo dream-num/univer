@@ -144,7 +144,7 @@ export class CalculateController extends Disposable {
                     functionsExecutedState,
                 },
                 {
-                    local: true,
+                    onlyLocal: true,
                 }
             );
         });
@@ -179,7 +179,7 @@ export class CalculateController extends Disposable {
                     stageInfo: data,
                 },
                 {
-                    local: true,
+                    onlyLocal: true,
                 }
             );
         });
@@ -210,7 +210,7 @@ export class CalculateController extends Disposable {
                     arrayFormulaCellData: this._formulaDataModel.getArrayFormulaCellData(),
                 },
                 {
-                    local: true,
+                    onlyLocal: true,
                 }
             );
         }
@@ -222,7 +222,7 @@ export class CalculateController extends Disposable {
                 unitOtherData,
             },
             {
-                local: true,
+                onlyLocal: true,
             }
         );
     }

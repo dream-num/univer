@@ -25,7 +25,6 @@ import type { IObjectFullState, ISceneTransformState, ITransformChangeState } fr
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './basics/interfaces';
 import { precisionTo, requestNewFrame } from './basics/tools';
 import { Transform } from './basics/transform';
-import type { IBoundRect } from './basics/vector2';
 import { Vector2 } from './basics/vector2';
 import { Layer } from './layer';
 import type { ITransformerConfig } from './scene.-transformer';
@@ -40,10 +39,6 @@ export class Scene extends ThinScene {
     private _layers: Layer[] = [];
 
     private _viewports: Viewport[] = [];
-
-    private _isFirstDirty: boolean = true;
-
-    private _maxZIndex: number = 0;
 
     private _cursor: CURSOR_TYPE = CURSOR_TYPE.DEFAULT;
 
@@ -91,10 +86,6 @@ export class Scene extends ThinScene {
         this._parent?.onTransformChangeObservable.add((change: ITransformChangeState) => {
             this._setTransForm();
         });
-
-        // setTimeout(() => {
-        //     document.querySelector('body')?.appendChild(this.getAllObjects()[0]._cacheCanvas._canvasEle);
-        // }, 500);
     }
 
     get ancestorScaleX() {
@@ -134,8 +125,8 @@ export class Scene extends ThinScene {
         return this;
     }
 
-    makeDirty(state: boolean = true) {
-        this._viewports.forEach((vp) => {
+    override makeDirty(state: boolean = true) {
+        this._layers.forEach((vp) => {
             vp.makeDirty(state);
         });
         if (this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
@@ -151,14 +142,30 @@ export class Scene extends ThinScene {
         return this;
     }
 
+    enableLayerCache(...layerIndexes: number[]) {
+        layerIndexes.forEach((zIndex) => {
+            this.getLayer(zIndex).enableCache();
+        });
+    }
+
+    disableLayerCache(...layerIndexes: number[]) {
+        layerIndexes.forEach((zIndex) => {
+            this.getLayer(zIndex).disableCache();
+        });
+    }
+
     isDirty(): boolean {
-        for (let i = 0; i < this._viewports.length; i++) {
-            const vp = this._viewports[i];
-            if (vp.isDirty() === true && vp.isActive) {
+        for (let i = 0; i < this._layers.length; i++) {
+            const layer = this._layers[i];
+            if (layer.isDirty() === true) {
                 return true;
             }
         }
         return false;
+    }
+
+    getCursor() {
+        return this._cursor;
     }
 
     resetCursor() {
@@ -199,6 +206,7 @@ export class Scene extends ThinScene {
             },
             preValue: { width: preWidth, height: preHeight },
         });
+
         return this;
     }
 
@@ -326,39 +334,19 @@ export class Scene extends ThinScene {
         this._layers.push(...argument);
     }
 
-    // getBackObjects() {
-    //     return [...this._ObjectsBack];
-    // }
-
-    // getForwardObjects() {
-    //     return [...this._ObjectsForward];
-    // }
-
     override addObject(o: BaseObject, zIndex: number = 1) {
         this.getLayer(zIndex)?.addObject(o);
         this._addObject$.next(this);
         return this;
     }
 
-    // addObjectForward(o: BaseObject) {
-    //     this._ObjectsForward.push(o);
-    //     this._setObjectBehavior(o);
-    //     return this;
-    // }
-
-    // addObjectBack(o: BaseObject) {
-    //     this._ObjectsBack.push(o);
-    //     this._setObjectBehavior(o);
-    //     return this;
-    // }
-
     override setObjectBehavior(o: BaseObject) {
         if (!o.parent) {
             o.parent = this;
         }
-        this.onTransformChangeObservable.add((state: ITransformChangeState) => {
-            o.scaleCacheCanvas();
-        });
+        // this.onTransformChangeObservable.add((state: ITransformChangeState) => {
+        //     o.scaleCacheCanvas();
+        // });
         o.onIsAddedToParentObserver.notifyObservers(this);
     }
 
@@ -487,19 +475,26 @@ export class Scene extends ThinScene {
 
     changeObjectOrder() {}
 
-    override renderObjects(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
-        this.getAllObjectsByOrder().forEach((o) => {
-            o.render(ctx, bounds);
-        });
-        return this;
-    }
+    // override renderObjects(ctx: CanvasRenderingContext2D, bounds?: IViewportBound) {
+    //     this.getAllObjectsByOrder().forEach((o) => {
+    //         o.render(ctx, bounds);
+    //     });
+    //     return this;
+    // }
 
     override render(parentCtx?: CanvasRenderingContext2D) {
         if (!this.isDirty()) {
             return;
         }
         !parentCtx && this.getEngine()?.clearCanvas();
-        this.getViewports()?.forEach((vp: Viewport) => vp.render(parentCtx));
+
+        const layers = this._layers.sort(sortRules);
+
+        for (let i = 0, len = layers.length; i < len; i++) {
+            layers[i].render(parentCtx, i === len - 1);
+        }
+
+        // this.getViewports()?.forEach((vp: Viewport) => vp.render(parentCtx));
     }
 
     async requestRender(parentCtx?: CanvasRenderingContext2D) {
@@ -864,7 +859,7 @@ export class Scene extends ThinScene {
     }
 
     private _createDefaultLayer(zIndex: number = 1) {
-        const defaultLayer = Layer.create(this, [], zIndex);
+        const defaultLayer = new Layer(this, [], zIndex);
         this.addLayer(defaultLayer);
         return defaultLayer;
     }

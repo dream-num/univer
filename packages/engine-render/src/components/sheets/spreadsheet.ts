@@ -126,6 +126,9 @@ export class Spreadsheet extends SheetComponent {
             extension.draw(ctx, parentScale, spreadsheetSkeleton, diffRanges);
         }
 
+        /**
+         * Caching overflow during scrolling and clearing it after waiting for 1 second without scrolling can significantly improve performance.
+         */
         clearTimeout(this._overflowCacheRuntimeTimeout);
         this._overflowCacheRuntimeTimeout = setTimeout(() => {
             this._overflowCacheRuntimeRange.reset();

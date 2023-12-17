@@ -104,12 +104,15 @@ export class Font extends SheetExtension {
                             return true;
                         }
 
-                        if (
-                            !this.isRenderDiffRangesByColumn(mergeInfo.startColumn, diffRanges) &&
-                            !this.isRenderDiffRangesByColumn(mergeInfo.endColumn, diffRanges)
-                        ) {
-                            return true;
-                        }
+                        /**
+                         * Overflow can cause text truncation, so columns are not rendered incrementally.
+                         */
+                        // if (
+                        //     !this.isRenderDiffRangesByColumn(mergeInfo.startColumn, diffRanges) &&
+                        //     !this.isRenderDiffRangesByColumn(mergeInfo.endColumn, diffRanges)
+                        // ) {
+                        //     return true;
+                        // }
 
                         const cellWidth = endX - startX;
                         const cellHeight = endY - startY;
@@ -123,6 +126,7 @@ export class Font extends SheetExtension {
                             const { startColumn, startRow, endColumn, endRow } = overflowRectangle;
                             if (startColumn === endColumn && startColumn === columnIndex) {
                                 ctx.rect(startX, startY, cellWidth, cellHeight);
+                                ctx.clearRect(startX + 1, startY + 1, cellWidth - 2, cellHeight - 2);
                             } else {
                                 if (horizontalAlign === HorizontalAlign.CENTER) {
                                     this._clipRectangle(
@@ -162,9 +166,10 @@ export class Font extends SheetExtension {
                             }
                         } else {
                             ctx.rect(startX, startY, cellWidth, cellHeight);
+                            ctx.clearRect(startX + 1, startY + 1, cellWidth - 2, cellHeight - 2);
                         }
                         ctx.clip();
-                        ctx.clearRect(startX + 1, startY + 1, cellWidth - 2, cellHeight - 2);
+
                         ctx.translate(startX, startY);
                         this._renderDocuments(ctx, docsConfig, startX, startY, endX, endY, rowIndex, columnIndex);
                         ctx.restore();
@@ -225,6 +230,7 @@ export class Font extends SheetExtension {
         const endX = columnWidthAccumulation[endColumn] || columnWidthAccumulation[columnWidthAccumulation.length - 1];
 
         ctx.rect(startX, startY, endX - startX, endY - startY);
+        ctx.clearRect(startX, startY, endX - startX, endY - startY);
     }
 }
 

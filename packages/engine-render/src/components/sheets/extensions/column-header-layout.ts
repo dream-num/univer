@@ -19,7 +19,7 @@ import { numberToABC } from '@univerjs/core';
 
 import { DEFAULT_FONTFACE_PLANE, FIX_ONE_PIXEL_BLUR_OFFSET, MIDDLE_CELL_POS_MAGIC_NUMBER } from '../../../basics/const';
 import { getLineWith } from '../../../basics/draw';
-import { getColor } from '../../../basics/tools';
+import { fixLineWidthByScale, getColor } from '../../../basics/tools';
 import { SheetColumnHeaderExtensionRegistry } from '../../extension';
 import type { SpreadsheetSkeleton } from '../sheet-skeleton';
 import { SheetExtension } from './sheet-extension';
@@ -81,8 +81,8 @@ export class ColumnHeaderLayout extends SheetExtension {
             }
 
             // painting line border
-            ctx.moveTo(columnEndPosition, 0);
-            ctx.lineTo(columnEndPosition, columnHeaderHeight);
+            ctx.moveTo(fixLineWidthByScale(columnEndPosition, scale), 0);
+            ctx.lineTo(fixLineWidthByScale(columnEndPosition, scale), columnHeaderHeight);
 
             // painting column header text
             const middleCellPos = preColumnPosition + (columnEndPosition - preColumnPosition) / 2;
@@ -91,9 +91,9 @@ export class ColumnHeaderLayout extends SheetExtension {
         }
 
         // painting line bottom border
-        const columnHeaderHeightFix = columnHeaderHeight;
-        ctx.moveTo(0, columnHeaderHeightFix);
-        ctx.lineTo(columnTotalWidth, columnHeaderHeightFix);
+        const columnHeaderHeightFix = columnHeaderHeight - 1 / scale;
+        ctx.moveTo(0, fixLineWidthByScale(columnHeaderHeightFix, scale));
+        ctx.lineTo(columnTotalWidth, fixLineWidthByScale(columnHeaderHeightFix, scale));
         ctx.stroke();
     }
 }

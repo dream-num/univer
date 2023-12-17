@@ -293,14 +293,14 @@ export class StartEditController extends Disposable {
             };
         }
 
-        documentDataModel?.updateDocumentDataPageSize(clientWidth - startX - canvasOffset.left);
+        documentDataModel?.updateDocumentDataPageSize((clientWidth - startX - canvasOffset.left) / scaleX);
         documentSkeleton.calculate();
 
         const size = documentSkeleton.getActualSize();
 
         let editorWidth = endX - startX;
 
-        if (editorWidth < size.actualWidth * scaleX + EDITOR_INPUT_SELF_EXTEND_GAP) {
+        if (editorWidth < size.actualWidth * scaleX + EDITOR_INPUT_SELF_EXTEND_GAP * scaleX) {
             editorWidth = size.actualWidth * scaleX + EDITOR_INPUT_SELF_EXTEND_GAP;
         }
 

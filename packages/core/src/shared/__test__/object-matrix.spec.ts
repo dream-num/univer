@@ -30,8 +30,8 @@ describe('test ObjectMatrix', () => {
         expect(matrix.getSizeOf()).toBe(2);
         matrix.realDeleteValue(1, 2);
         matrix.realDeleteValue(1, 3);
-        expect(matrix.getValue(1, 2)).toBe(null);
-        expect(matrix.getValue(1, 3)).toBe(null);
+        expect(matrix.getValue(1, 2)).toBe(undefined);
+        expect(matrix.getValue(1, 3)).toBe(undefined);
         expect(matrix.getRow(1)).toBe(undefined);
         expect(matrix.getSizeOf()).toBe(1);
     });

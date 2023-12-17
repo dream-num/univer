@@ -40,7 +40,7 @@ export interface ISetRangeValuesMutationParams extends IMutationCommonParams {
     /**
      * null for clear all
      */
-    cellValue?: IObjectMatrixPrimitiveType<ICellData | null>;
+    cellValue?: IObjectMatrixPrimitiveType<Nullable<ICellData>>;
 
     /**
      * @deprecated not a good design

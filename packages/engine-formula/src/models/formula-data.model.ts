@@ -259,7 +259,7 @@ export class FormulaDataModel extends Disposable {
         };
     }
 
-    updateFormulaData(unitId: string, sheetId: string, cellValue: IObjectMatrixPrimitiveType<ICellData | null>) {
+    updateFormulaData(unitId: string, sheetId: string, cellValue: IObjectMatrixPrimitiveType<Nullable<ICellData>>) {
         const cellMatrix = new ObjectMatrix(cellValue);
 
         const formulaIdMap = this.getFormulaIdMap(unitId, sheetId); // Connect the formula and ID

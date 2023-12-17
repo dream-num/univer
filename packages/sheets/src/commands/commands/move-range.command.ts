@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICommand, IRange } from '@univerjs/core';
+import type { ICellData, ICommand, IRange, Nullable } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
@@ -55,20 +55,20 @@ export const MoveRangeCommand: ICommand = {
                 res.setValue(params.fromRange.startRow + rowIndex, params.fromRange.startColumn + colIndex, null);
             });
             return res;
-        }, new ObjectMatrix<ICellData | null>());
+        }, new ObjectMatrix<Nullable<ICellData>>());
         const currentFromCellValues = fromValues.reduce((res, row, rowIndex) => {
             row.forEach((colItem, colIndex) => {
                 res.setValue(params.fromRange.startRow + rowIndex, params.fromRange.startColumn + colIndex, colItem);
             });
             return res;
-        }, new ObjectMatrix<ICellData | null>());
+        }, new ObjectMatrix<Nullable<ICellData>>());
 
         const newToCellValues = fromValues.reduce((res, row, rowIndex) => {
             row.forEach((colItem, colIndex) => {
                 res.setValue(params.toRange.startRow + rowIndex, params.toRange.startColumn + colIndex, colItem);
             });
             return res;
-        }, new ObjectMatrix<ICellData | null>());
+        }, new ObjectMatrix<Nullable<ICellData>>());
         const currentToCellValues = worksheet
             .getRange(params.toRange)
             .getValues()
@@ -77,7 +77,7 @@ export const MoveRangeCommand: ICommand = {
                     res.setValue(params.toRange.startRow + rowIndex, params.toRange.startColumn + colIndex, colItem);
                 });
                 return res;
-            }, new ObjectMatrix<ICellData | null>());
+            }, new ObjectMatrix<Nullable<ICellData>>());
 
         const doMoveRangeMutation: IMoveRangeMutationParams = {
             from: newFromCellValues.getMatrix(),

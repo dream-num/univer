@@ -149,7 +149,7 @@ export const InsertFunctionOperation: ICommand = {
  * 1. Starting from the first position on the left or top and ending with a continuous number (the first non-blank cell is allowed to be text)
  * 2. Match the upper part first, then the left part. If not, insert a function with empty parameters.
  */
-function findRefRange(cellMatrix: ObjectMatrix<ICellData>, row: number, column: number): Nullable<IRange> {
+function findRefRange(cellMatrix: ObjectMatrix<Nullable<ICellData>>, row: number, column: number): Nullable<IRange> {
     const startRow = findStartRow(cellMatrix, row, column);
     if (startRow !== row) {
         return {
@@ -172,7 +172,7 @@ function findRefRange(cellMatrix: ObjectMatrix<ICellData>, row: number, column: 
     return null;
 }
 
-function findStartRow(cellMatrix: ObjectMatrix<ICellData>, row: number, column: number) {
+function findStartRow(cellMatrix: ObjectMatrix<Nullable<ICellData>>, row: number, column: number) {
     let isFirstNumber = false;
 
     if (row === 0) return row;
@@ -193,7 +193,7 @@ function findStartRow(cellMatrix: ObjectMatrix<ICellData>, row: number, column: 
     return row;
 }
 
-function findStartColumn(cellMatrix: ObjectMatrix<ICellData>, row: number, column: number) {
+function findStartColumn(cellMatrix: ObjectMatrix<Nullable<ICellData>>, row: number, column: number) {
     let isFirstNumber = false;
 
     if (column === 0) return column;

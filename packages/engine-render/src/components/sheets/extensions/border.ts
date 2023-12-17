@@ -115,7 +115,7 @@ export class Border extends SheetExtension {
                         case BORDER_TYPE.LEFT: {
                             const lastCell = border.getValue(rowIndex, columnIndex - 1);
                             if (lastCell && lastCell[BORDER_TYPE.RIGHT]) {
-                                // jump draw border
+                                // skip draw border
                                 continue;
                             }
                             break;
@@ -126,7 +126,7 @@ export class Border extends SheetExtension {
                         case BORDER_TYPE.TOP: {
                             const lastCell = border.getValue(rowIndex - 1, columnIndex);
                             if (lastCell && lastCell[BORDER_TYPE.BOTTOM]) {
-                                // jump draw border
+                                // skip draw border
                                 continue;
                             }
                             break;

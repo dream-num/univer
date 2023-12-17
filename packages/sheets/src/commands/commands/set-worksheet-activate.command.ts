@@ -35,11 +35,7 @@ export const SetWorksheetActivateCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
         let unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        let subUnitId = univerInstanceService
-            .getCurrentUniverSheetInstance()
-
-            .getActiveSheet()
-            .getSheetId();
+        let subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
 
         if (params) {
             unitId = params.unitId ?? unitId;

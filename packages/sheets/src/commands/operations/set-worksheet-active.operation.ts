@@ -26,14 +26,15 @@ export const SetWorksheetActiveOperation: IOperation<ISetWorksheetActiveOperatio
     id: 'sheet.operation.set-worksheet-active',
     type: CommandType.OPERATION,
     handler: (accessor, params) => {
-        const universheet = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.unitId);
-        if (!universheet) return false;
+        const workbook = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.unitId);
+        if (!workbook) return false;
 
         // TODO: this should be changed to a inner state
-        const worksheets = universheet.getWorksheets();
+        const worksheets = workbook.getWorksheets();
         for (const [, worksheet] of worksheets) {
             if (worksheet.getSheetId() === params.subUnitId) {
                 worksheet.getConfig().status = BooleanNumber.TRUE;
+                workbook.__setActiveSheet(worksheet);
             } else {
                 worksheet.getConfig().status = BooleanNumber.FALSE;
             }

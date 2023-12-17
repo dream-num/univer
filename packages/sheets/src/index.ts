@@ -134,7 +134,10 @@ export {
     SetVerticalTextAlignCommand,
 } from './commands/commands/set-style.command';
 export { SetTabColorCommand } from './commands/commands/set-tab-color.command';
-export { SetWorksheetActivateCommand } from './commands/commands/set-worksheet-activate.command';
+export {
+    type ISetWorksheetActivateCommandParams,
+    SetWorksheetActivateCommand,
+} from './commands/commands/set-worksheet-activate.command';
 export {
     DeltaColumnWidthCommand,
     type IDeltaColumnWidthCommandParams,

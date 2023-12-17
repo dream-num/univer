@@ -15,7 +15,7 @@
  */
 
 import { Inject, Injector } from '@wendellhu/redi';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 import type { Nullable } from '../shared';
 import { GenName, Tools } from '../shared';
@@ -50,6 +50,9 @@ export class Workbook extends Disposable {
     readonly sheetDisposed$ = this._sheetDisposed$.asObservable();
 
     private readonly _genName = new GenName();
+
+    private readonly _activeSheet$ = new BehaviorSubject<Nullable<Worksheet>>(null);
+    readonly activeSheet$ = this._activeSheet$.asObservable();
 
     /**
      * sheets list
@@ -98,6 +101,7 @@ export class Workbook extends Disposable {
 
         this._sheetCreated$.complete();
         this._sheetDisposed$.complete();
+        this._activeSheet$.complete();
     }
 
     save(): IWorkbookData {
@@ -195,6 +199,10 @@ export class Workbook extends Disposable {
         }
 
         return this._worksheets.get(activeSheetId) as Worksheet;
+    }
+
+    __setActiveSheet(worksheet: Worksheet): void {
+        this._activeSheet$.next(worksheet);
     }
 
     getActiveSheetIndex(): number {

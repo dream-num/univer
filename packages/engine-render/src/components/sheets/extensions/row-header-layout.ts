@@ -18,7 +18,7 @@ import type { IScale } from '@univerjs/core';
 
 import { DEFAULT_FONTFACE_PLANE, FIX_ONE_PIXEL_BLUR_OFFSET, MIDDLE_CELL_POS_MAGIC_NUMBER } from '../../../basics/const';
 import { getLineWith } from '../../../basics/draw';
-import { getColor } from '../../../basics/tools';
+import { fixLineWidthByScale, getColor } from '../../../basics/tools';
 import { SheetRowHeaderExtensionRegistry } from '../../extension';
 import type { SpreadsheetSkeleton } from '../sheet-skeleton';
 import { SheetExtension } from './sheet-extension';
@@ -73,8 +73,8 @@ export class RowHeaderLayout extends SheetExtension {
                 // Skip hidden rows
                 continue;
             }
-            ctx.moveTo(0, rowEndPosition);
-            ctx.lineTo(rowHeaderWidth, rowEndPosition);
+            ctx.moveTo(0, fixLineWidthByScale(rowEndPosition, scale));
+            ctx.lineTo(rowHeaderWidth, fixLineWidthByScale(rowEndPosition, scale));
 
             const middleCellPos = preRowPosition + (rowEndPosition - preRowPosition) / 2;
             ctx.fillText(`${r + 1}`, rowHeaderWidth / 2, middleCellPos + MIDDLE_CELL_POS_MAGIC_NUMBER); // Magic number 1, because the vertical alignment appears to be off by 1 pixel.
@@ -82,8 +82,11 @@ export class RowHeaderLayout extends SheetExtension {
         }
         // console.log('xx2', rowColumnIndexRange, bounds, this._rowTotalHeight, this._rowHeightAccumulation);
 
-        ctx.moveTo(rowHeaderWidth, 0);
-        ctx.lineTo(rowHeaderWidth, rowTotalHeight);
+        // painting line bottom border
+        const rowHeaderWidthFix = rowHeaderWidth - 1 / scale;
+
+        ctx.moveTo(fixLineWidthByScale(rowHeaderWidthFix, scale), 0);
+        ctx.lineTo(fixLineWidthByScale(rowHeaderWidthFix, scale), rowTotalHeight);
         ctx.stroke();
     }
 }

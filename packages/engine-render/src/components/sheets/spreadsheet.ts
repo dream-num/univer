@@ -645,7 +645,7 @@ export class Spreadsheet extends SheetComponent {
         const columnWidthAccumulationLength = columnWidthAccumulation.length;
         const rowHeightAccumulationLength = rowHeightAccumulation.length;
 
-        const rowStart = startRow;
+        const rowStart = startRow - 3;
 
         const rowEnd = endRow;
 

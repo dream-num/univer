@@ -18,11 +18,13 @@ export function installShims() {
     installRequestIdleCallback();
 }
 
-const TIME_WINDOW = 50;
+const glob = typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : window;
 
 function installRequestIdleCallback() {
-    if (typeof window.requestIdleCallback !== 'function') {
-        window.requestIdleCallback = function shimRIC(callback: Function) {
+    const TIME_WINDOW = 50;
+
+    if (typeof glob.requestIdleCallback !== 'function') {
+        glob.requestIdleCallback = function shimRIC(callback: Function) {
             const start = Date.now();
             return setTimeout(function rICCallback() {
                 const remaining = Math.max(0, TIME_WINDOW - (Date.now() - start));
@@ -36,8 +38,8 @@ function installRequestIdleCallback() {
         };
     }
 
-    if (typeof window.cancelIdleCallback !== 'function') {
-        window.cancelIdleCallback = function shimCancelRIC(id: number) {
+    if (typeof glob.cancelIdleCallback !== 'function') {
+        glob.cancelIdleCallback = function shimCancelRIC(id: number) {
             clearTimeout(id);
         };
     }

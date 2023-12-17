@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { installShims } from './common/shims';
+
 export * from './basics';
 export { dedupe, remove } from './common/array';
 export {
@@ -112,3 +114,5 @@ export * from './slides/domain';
 export * from './types/const';
 export * from './types/enum';
 export * from './types/interfaces';
+
+installShims();

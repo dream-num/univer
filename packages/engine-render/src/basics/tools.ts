@@ -244,6 +244,7 @@ export function precisionTo(num: number, accurate: number) {
 }
 
 /**
+ * When drawing lines, it is necessary to align their precision.
  * performance testing
  * var time = performance.now(); for(let i=0;i<100000000;i++){ fixLineWidthByScale(i, 0.666); }; console.log(performance.now()-time);
  */
@@ -660,10 +661,10 @@ export function mergeInfoOffset(
     scaleY: number
 ) {
     const { startY, endY, startX, endX } = mergeInfo;
-    mergeInfo.startY = fixLineWidthByScale(startY + offsetY, scaleY);
-    mergeInfo.endY = fixLineWidthByScale(endY + offsetY, scaleY);
-    mergeInfo.startX = fixLineWidthByScale(startX + offsetX, scaleX);
-    mergeInfo.endX = fixLineWidthByScale(endX + offsetX, scaleX);
+    mergeInfo.startY = startY + offsetY;
+    mergeInfo.endY = endY + offsetY;
+    mergeInfo.startX = startX + offsetX;
+    mergeInfo.endX = endX + offsetX;
 
     return {
         ...mergeInfo,

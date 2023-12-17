@@ -24,7 +24,7 @@ export function getFormulaRefSelectionStyle(themeService: ThemeService, refColor
     const fill = new ColorKit(refColor).setAlpha(0.05).toRgbString();
     return {
         id,
-        strokeWidth: 1.5,
+        strokeWidth: 1,
         stroke: refColor,
         // strokeDash: 10,
         fill,

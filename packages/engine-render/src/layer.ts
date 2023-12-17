@@ -14,21 +14,32 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '@univerjs/core';
 import { sortRules } from '@univerjs/core';
 
 import { BaseObject } from './base-object';
 import { RENDER_CLASS_TYPE } from './basics/const';
+import { Canvas } from './canvas';
 import type { ThinScene } from './thin-scene';
 
 export class Layer {
     private _objects: BaseObject[] = [];
 
+    private _cacheCanvas: Nullable<Canvas>;
+
+    protected _dirty: boolean = true;
+
     constructor(
         private _scene: ThinScene,
         objects: BaseObject[] = [],
-        private _zIndex: number = 1
+        private _zIndex: number = 1,
+        private _allowCache: boolean = false
     ) {
         this.addObjects(objects);
+
+        if (this._allowCache) {
+            this._initialCacheCanvas();
+        }
     }
 
     get scene() {
@@ -39,8 +50,19 @@ export class Layer {
         return this._zIndex;
     }
 
-    static create(scene: ThinScene, objects: BaseObject[] = [], zIndex: number = 1000) {
-        return new this(scene, objects, zIndex);
+    enableCache() {
+        this._allowCache = true;
+        this._initialCacheCanvas();
+    }
+
+    disableCache() {
+        this._allowCache = false;
+        this._cacheCanvas?.dispose();
+        this._cacheCanvas = null;
+    }
+
+    isAllowCache() {
+        return this._allowCache;
     }
 
     getObjectsByOrder() {
@@ -83,6 +105,7 @@ export class Layer {
         this._objects.push(o);
         this.scene.setObjectBehavior(o);
         this.scene.applyTransformer(o);
+        o.layer = this;
 
         return this;
     }
@@ -139,6 +162,69 @@ export class Layer {
         }
     }
 
+    makeDirty(state: boolean = true) {
+        this._dirty = state;
+
+        return this;
+    }
+
+    isDirty(): boolean {
+        return this._dirty;
+    }
+
+    render(parentCtx?: CanvasRenderingContext2D, isMaxLayer = false) {
+        const mainCtx = parentCtx || this._scene.getEngine()?.getCanvas().getContext();
+
+        if (this._allowCache && this._cacheCanvas) {
+            if (this.isDirty()) {
+                const ctx = this._cacheCanvas.getContext();
+
+                this._cacheCanvas.clear();
+
+                ctx.save();
+
+                ctx.setTransform(mainCtx.getTransform());
+                this._draw(ctx, isMaxLayer);
+
+                ctx.restore();
+            }
+            this._applyCache(mainCtx);
+        } else {
+            mainCtx.save();
+            this._draw(mainCtx, isMaxLayer);
+            mainCtx.restore();
+        }
+
+        this.makeDirty(false);
+        return this;
+    }
+
+    private _initialCacheCanvas() {
+        this._cacheCanvas = new Canvas();
+        this._scene.getEngine().onTransformChangeObservable.add(() => {
+            this._resizeCacheCanvas();
+        });
+    }
+
+    private _draw(mainCtx: CanvasRenderingContext2D, isMaxLayer: boolean) {
+        this._scene.getViewports()?.forEach((vp) => vp.render(mainCtx, this.getObjectsByOrder(), isMaxLayer));
+    }
+
+    private _applyCache(ctx?: CanvasRenderingContext2D) {
+        if (!ctx || this._cacheCanvas == null) {
+            return;
+        }
+        const width = this._cacheCanvas.getWidth();
+        const height = this._cacheCanvas.getHeight();
+        ctx.drawImage(this._cacheCanvas.getCanvasEle(), 0, 0, width, height);
+    }
+
+    private _resizeCacheCanvas() {
+        const engine = this._scene.getEngine();
+        this._cacheCanvas?.setSize(engine.width, engine.height);
+        this.makeDirty(true);
+    }
+
     clear() {
         this._objects = [];
     }
@@ -148,5 +234,7 @@ export class Layer {
             o.dispose();
         });
         this.clear();
+
+        this._cacheCanvas?.dispose();
     }
 }

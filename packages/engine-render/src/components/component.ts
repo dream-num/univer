@@ -17,17 +17,17 @@
 import { sortRules } from '@univerjs/core';
 
 import { BaseObject } from '../base-object';
-import type { IBoundRect } from '../basics/vector2';
+import type { IViewportBound } from '../basics/vector2';
 import type { ComponentExtension } from './extension';
 
-export class RenderComponent<T, U> extends BaseObject {
-    private _extensions = new Map<string, ComponentExtension<T, U>>();
+export class RenderComponent<T, U, V> extends BaseObject {
+    private _extensions = new Map<string, ComponentExtension<T, U, V>>();
 
     get extensions() {
         return this._extensions;
     }
 
-    register(...extensions: Array<ComponentExtension<T, U>>) {
+    register(...extensions: Array<ComponentExtension<T, U, V>>) {
         for (const extension of extensions) {
             extension.parent = this;
             this._extensions.set(extension.uKey, extension);
@@ -51,7 +51,7 @@ export class RenderComponent<T, U> extends BaseObject {
         return this._extensions.get(uKey);
     }
 
-    draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
+    draw(ctx: CanvasRenderingContext2D, bounds?: IViewportBound) {
         /* abstract */
     }
 }

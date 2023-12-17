@@ -29,9 +29,7 @@ import { BooleanNumber, DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentDataModel } from '
 
 import { BaseObject } from '../base-object';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '../basics/interfaces';
-import { transformBoundingCoord } from '../basics/position';
-import type { IBoundRect } from '../basics/vector2';
-import { Canvas } from '../canvas';
+import type { IViewportBound } from '../basics/vector2';
 import { DocumentSkeleton } from '../components/docs/doc-skeleton';
 import { Documents } from '../components/docs/document';
 import { DocumentViewModel } from '../components/docs/view-model/document-view-model';
@@ -44,18 +42,10 @@ export interface IRichTextProps extends ITransformState, IStyleBase {
     forceRender?: boolean;
 }
 
-interface MyInterface {
-    [key: string]: number | string;
-}
-
 export const RICHTEXT_OBJECT_ARRAY = ['text', 'richText'];
 
 export class RichText extends BaseObject {
     private _documentData!: IDocumentData;
-
-    private _allowCache: boolean = false;
-
-    private _cacheCanvas: Nullable<Canvas>;
 
     private _documentSkeleton!: DocumentSkeleton;
 
@@ -108,13 +98,6 @@ export class RichText extends BaseObject {
             this._cl = props.cl;
 
             this._documentData = this._convertToDocumentData(props.text || '');
-        }
-
-        if (this._allowCache) {
-            this._cacheCanvas = new Canvas();
-            this.onTransformChangeObservable.add(() => {
-                this.resizeCacheCanvas();
-            });
         }
 
         const docModel = new DocumentDataModel(this._documentData);
@@ -183,7 +166,7 @@ export class RichText extends BaseObject {
         return this;
     }
 
-    override render(mainCtx: CanvasRenderingContext2D, bounds?: IBoundRect) {
+    override render(mainCtx: CanvasRenderingContext2D, bounds?: IViewportBound) {
         if (!this.visible) {
             this.makeDirty(false);
             return this;
@@ -191,9 +174,14 @@ export class RichText extends BaseObject {
 
         // Temporarily ignore the on-demand display of elements within a group：this.isInGroup
         if (this.isRender()) {
-            const { minX, maxX, minY, maxY } = transformBoundingCoord(this, bounds!);
+            const { top, left, bottom, right } = bounds!.viewBound;
 
-            if (this.width + this.strokeWidth < minX || maxX < 0 || this.height + this.strokeWidth < minY || maxY < 0) {
+            if (
+                this.width + this.strokeWidth < left ||
+                right < 0 ||
+                this.height + this.strokeWidth < top ||
+                bottom < 0
+            ) {
                 // console.warn('ignore object', this);
                 return this;
             }
@@ -202,22 +190,7 @@ export class RichText extends BaseObject {
         const m = this.transform.getMatrix();
         mainCtx.save();
         mainCtx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
-        if (this._allowCache) {
-            if (this.isDirty()) {
-                if (this._cacheCanvas == null) {
-                    throw new Error('cache canvas is null');
-                }
-                const ctx = this._cacheCanvas.getContext();
-                this._cacheCanvas.clear();
-                ctx.save();
-                ctx.translate(this.strokeWidth / 2, this.strokeWidth / 2); // 边框会按照宽度画在边界上，分别占据内外二分之一
-                this._draw(ctx);
-                ctx.restore();
-            }
-            this._applyCache(mainCtx);
-        } else {
-            this._draw(mainCtx);
-        }
+        this._draw(mainCtx);
         mainCtx.restore();
         this.makeDirty(false);
         return this;
@@ -299,25 +272,5 @@ export class RichText extends BaseObject {
         this.setProps(props);
 
         this.makeDirty(true);
-    }
-
-    private _applyCache(ctx?: CanvasRenderingContext2D) {
-        if (!ctx || !this._cacheCanvas) {
-            return;
-        }
-        const pixelRatio = this._cacheCanvas.getPixelRatio();
-        const width = this._cacheCanvas.getWidth() * pixelRatio;
-        const height = this._cacheCanvas.getHeight() * pixelRatio;
-        ctx.drawImage(
-            this._cacheCanvas.getCanvasEle(),
-            0,
-            0,
-            width,
-            height,
-            -this.strokeWidth / 2,
-            -this.strokeWidth / 2,
-            this.width + this.strokeWidth,
-            this.height + this.strokeWidth
-        );
     }
 }

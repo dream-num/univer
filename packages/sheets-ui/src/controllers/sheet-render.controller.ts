@@ -16,6 +16,7 @@
 
 import type { ICommandInfo } from '@univerjs/core';
 import {
+    CommandType,
     Disposable,
     ICommandService,
     IUniverInstanceService,
@@ -147,9 +148,9 @@ export class SheetRenderController extends Disposable {
                     this._sheetSkeletonManagerService.reCalculate();
                 }
 
-                // this._sheetSkeletonManagerService.reCalculate();
-
-                this._renderManagerService.getRenderById(unitId)?.mainComponent?.makeDirty(); // refresh spreadsheet
+                if (command.type === CommandType.MUTATION) {
+                    this._renderManagerService.getRenderById(unitId)?.mainComponent?.makeDirty(); // refresh spreadsheet
+                }
             })
         );
     }

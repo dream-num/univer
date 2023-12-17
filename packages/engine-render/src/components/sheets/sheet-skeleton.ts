@@ -55,7 +55,6 @@ import { getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
 import type { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-cached';
 import {
     degToRad,
-    fixLineWidthByScale,
     getCellByIndex,
     getCellInfoInMergeData,
     getCellPositionByIndex,
@@ -64,7 +63,7 @@ import {
     isRectIntersect,
     mergeInfoOffset,
 } from '../../basics/tools';
-import type { IBoundRect } from '../../basics/vector2';
+import type { IBoundRectNoAngle, IViewportBound } from '../../basics/vector2';
 import { columnIterator } from '../docs/common/tools';
 import { DocumentSkeleton } from '../docs/doc-skeleton';
 import { DocumentViewModel } from '../docs/view-model/document-view-model';
@@ -211,6 +210,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     private _stylesCache: IStylesCache = {
         background: {},
+        backgroundPositions: new ObjectMatrix<ISelectionCellWithCoord>(),
         font: {},
         border: new ObjectMatrix<BorderCache>(),
     };
@@ -350,7 +350,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         this._marginTop = top;
     }
 
-    calculateSegment(bounds?: IBoundRect) {
+    calculateSegment(bounds?: IViewportBound) {
         if (!this._config) {
             return;
         }
@@ -368,7 +368,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         return true;
     }
 
-    calculateWithoutClearingCache(bounds?: IBoundRect) {
+    calculateWithoutClearingCache(bounds?: IViewportBound) {
         if (!this.calculateSegment(bounds)) {
             return;
         }
@@ -382,7 +382,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this;
     }
 
-    calculate(bounds?: IBoundRect) {
+    calculate(bounds?: IViewportBound) {
         this._resetCache();
 
         this.calculateWithoutClearingCache(bounds);
@@ -528,8 +528,12 @@ export class SpreadsheetSkeleton extends Skeleton {
     //     this._dataMergeCacheAll = mergeData && this._getMergeCells(mergeData);
     // }
 
-    getRowColumnSegment(bounds?: IBoundRect) {
-        return this._getBounding(this._rowHeightAccumulation, this._columnWidthAccumulation, bounds);
+    getRowColumnSegment(bounds?: IViewportBound) {
+        return this._getBounding(this._rowHeightAccumulation, this._columnWidthAccumulation, bounds?.viewBound);
+    }
+
+    getRowColumnSegmentByViewBound(bound?: IBoundRectNoAngle) {
+        return this._getBounding(this._rowHeightAccumulation, this._columnWidthAccumulation, bound);
     }
 
     // eslint-disable-next-line max-lines-per-function
@@ -658,10 +662,10 @@ export class SpreadsheetSkeleton extends Skeleton {
             columnWidthAccumulation
         );
 
-        startY = fixLineWidthByScale(startY + columnHeaderHeightAndMarginTop, scaleY);
-        endY = fixLineWidthByScale(endY + columnHeaderHeightAndMarginTop, scaleY);
-        startX = fixLineWidthByScale(startX + rowHeaderWidthAndMarginLeft, scaleX);
-        endX = fixLineWidthByScale(endX + rowHeaderWidthAndMarginLeft, scaleX);
+        startY += columnHeaderHeightAndMarginTop;
+        endY += columnHeaderHeightAndMarginTop;
+        startX += rowHeaderWidthAndMarginLeft;
+        endX += rowHeaderWidthAndMarginLeft;
 
         return {
             startY,
@@ -674,17 +678,12 @@ export class SpreadsheetSkeleton extends Skeleton {
     getNoMergeCellPositionByIndexWithNoHeader(rowIndex: number, columnIndex: number, scaleX: number, scaleY: number) {
         const { rowHeightAccumulation, columnWidthAccumulation } = this;
         // const { scaleX = 1, scaleY = 1 } = this.getParentScale();
-        let { startY, endY, startX, endX } = getCellPositionByIndex(
+        const { startY, endY, startX, endX } = getCellPositionByIndex(
             rowIndex,
             columnIndex,
             rowHeightAccumulation,
             columnWidthAccumulation
         );
-
-        startY = fixLineWidthByScale(startY, scaleY);
-        endY = fixLineWidthByScale(endY, scaleY);
-        startX = fixLineWidthByScale(startX, scaleX);
-        endX = fixLineWidthByScale(endX, scaleX);
 
         return {
             startY,
@@ -882,10 +881,10 @@ export class SpreadsheetSkeleton extends Skeleton {
         const { isMerged, isMergedMainCell } = primary;
         let { startY, endY, startX, endX, mergeInfo } = primary;
 
-        startY = fixLineWidthByScale(startY + columnHeaderHeightAndMarginTop, scaleY);
-        endY = fixLineWidthByScale(endY + columnHeaderHeightAndMarginTop, scaleY);
-        startX = fixLineWidthByScale(startX + rowHeaderWidthAndMarginLeft, scaleX);
-        endX = fixLineWidthByScale(endX + rowHeaderWidthAndMarginLeft, scaleX);
+        startY += columnHeaderHeightAndMarginTop;
+        endY += columnHeaderHeightAndMarginTop;
+        startX += rowHeaderWidthAndMarginLeft;
+        endX += rowHeaderWidthAndMarginLeft;
 
         mergeInfo = mergeInfoOffset(
             mergeInfo,
@@ -919,14 +918,9 @@ export class SpreadsheetSkeleton extends Skeleton {
             this._config.mergeData
         );
         const { isMerged, isMergedMainCell } = primary;
-        let { startY, endY, startX, endX, mergeInfo } = primary;
+        const { startY, endY, startX, endX, mergeInfo } = primary;
 
-        startY = fixLineWidthByScale(startY, scaleY);
-        endY = fixLineWidthByScale(endY, scaleY);
-        startX = fixLineWidthByScale(startX, scaleX);
-        endX = fixLineWidthByScale(endX, scaleX);
-
-        mergeInfo = mergeInfoOffset(mergeInfo, 0, 0, scaleX, scaleY);
+        const newMergeInfo = mergeInfoOffset(mergeInfo, 0, 0, scaleX, scaleY);
 
         return {
             actualRow: row,
@@ -937,7 +931,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             endX,
             isMerged,
             isMergedMainCell,
-            mergeInfo,
+            mergeInfo: newMergeInfo,
         };
     }
 
@@ -1159,11 +1153,15 @@ export class SpreadsheetSkeleton extends Skeleton {
      * @param bounds The range of the visible area of the canvas
      * @returns The range cell index of the canvas visible area
      */
-    protected _getBounding(rowHeightAccumulation: number[], columnWidthAccumulation: number[], bounds?: IBoundRect) {
+    protected _getBounding(
+        rowHeightAccumulation: number[],
+        columnWidthAccumulation: number[],
+        viewBound?: IBoundRectNoAngle
+    ) {
         const rhaLength = rowHeightAccumulation.length;
         const cwaLength = columnWidthAccumulation.length;
 
-        if (!bounds) {
+        if (!viewBound) {
             return {
                 startRow: 0,
                 endRow: rhaLength - 1,
@@ -1177,8 +1175,8 @@ export class SpreadsheetSkeleton extends Skeleton {
         let dataset_col_st = -1;
         let dataset_col_ed = -1;
 
-        const row_st = searchArray(rowHeightAccumulation, bounds.tl.y - this.columnHeaderHeightAndMarginTop);
-        const row_ed = searchArray(rowHeightAccumulation, bounds.bl.y - this.columnHeaderHeightAndMarginTop);
+        const row_st = searchArray(rowHeightAccumulation, viewBound.top - this.columnHeaderHeightAndMarginTop);
+        const row_ed = searchArray(rowHeightAccumulation, viewBound.bottom - this.columnHeaderHeightAndMarginTop);
 
         if (row_st === -1 && row_ed === -1) {
             dataset_row_st = -1;
@@ -1199,8 +1197,8 @@ export class SpreadsheetSkeleton extends Skeleton {
             }
         }
 
-        const col_st = searchArray(columnWidthAccumulation, bounds.tl.x - this.rowHeaderWidthAndMarginLeft);
-        const col_ed = searchArray(columnWidthAccumulation, bounds.tr.x - this.rowHeaderWidthAndMarginLeft);
+        const col_st = searchArray(columnWidthAccumulation, viewBound.left - this.rowHeaderWidthAndMarginLeft);
+        const col_ed = searchArray(columnWidthAccumulation, viewBound.right - this.rowHeaderWidthAndMarginLeft);
 
         if (col_st === -1 && col_ed === -1) {
             dataset_col_st = -1;
@@ -1464,6 +1462,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     private _resetCache() {
         this._stylesCache = {
             background: {},
+            backgroundPositions: new ObjectMatrix<ISelectionCellWithCoord>(),
             font: {},
             border: new ObjectMatrix<BorderCache>(),
         };
@@ -1509,6 +1508,10 @@ export class SpreadsheetSkeleton extends Skeleton {
             const bgCache = cache.background![rgb];
 
             bgCache.setValue(r, c, rgb);
+
+            const cellInfo = this.getCellByIndexWithNoHeader(r, c, 1, 1);
+
+            cache.backgroundPositions?.setValue(r, c, cellInfo);
         }
 
         if (!skipBackgroundAndBorder && style && style.bd) {

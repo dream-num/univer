@@ -14,23 +14,27 @@
  * limitations under the License.
  */
 
+/* eslint-disable no-magic-numbers */
+
 import type { IScale, ITextDecoration } from '@univerjs/core';
 import { BooleanNumber, getColorStyle, TextDecoration } from '@univerjs/core';
 
 import { COLOR_BLACK_RGB, DEFAULT_OFFSET_SPACING } from '../../../basics/const';
 import { calculateRectRotate } from '../../../basics/draw';
 import type { IDocumentSkeletonSpan } from '../../../basics/i-document-skeleton-cached';
-import { degToRad, fixLineWidthByScale, getScale } from '../../../basics/tools';
+import { degToRad, getScale } from '../../../basics/tools';
 import { Vector2 } from '../../../basics/vector2';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
 import { docExtension } from '../doc-extension';
 
 const UNIQUE_KEY = 'DefaultDocsLineExtension';
 
+const DOC_EXTENSION_Z_INDEX = 40;
+
 export class Line extends docExtension {
     override uKey = UNIQUE_KEY;
 
-    override zIndex = 40;
+    override zIndex = DOC_EXTENSION_Z_INDEX;
 
     private _preBackgroundColor = '';
 
@@ -55,19 +59,19 @@ export class Line extends docExtension {
         const { ul: underline, st: strikethrough, ol: overline } = textStyle;
 
         if (underline) {
-            const startY = fixLineWidthByScale(contentHeight + DEFAULT_OFFSET_SPACING - DELTA, scale);
+            const startY = contentHeight + DEFAULT_OFFSET_SPACING - DELTA;
 
             this._drawLine(ctx, span, underline, startY);
         }
 
         if (strikethrough) {
-            const startY = fixLineWidthByScale(strikeoutPosition - DELTA, scale);
+            const startY = strikeoutPosition - DELTA;
 
             this._drawLine(ctx, span, strikethrough, startY);
         }
 
         if (overline) {
-            const startY = fixLineWidthByScale(-DEFAULT_OFFSET_SPACING - DELTA, scale);
+            const startY = -DEFAULT_OFFSET_SPACING - DELTA;
 
             this._drawLine(ctx, span, overline, startY);
         }
@@ -84,6 +88,7 @@ export class Line extends docExtension {
         startY: number
     ) {
         const { s: show, cl: colorStyle, t: lineType } = line;
+
         if (show === BooleanNumber.TRUE) {
             const {
                 originTranslate = Vector2.create(0, 0),
@@ -97,6 +102,8 @@ export class Line extends docExtension {
 
             const centerAngle = degToRad(centerAngleDeg);
             const vertexAngle = degToRad(vertexAngleDeg);
+
+            ctx.save();
 
             ctx.beginPath();
             const color = getColorStyle(colorStyle) || COLOR_BLACK_RGB;
@@ -121,6 +128,8 @@ export class Line extends docExtension {
             ctx.moveTo(start.x, start.y);
             ctx.lineTo(end.x, end.y);
             ctx.stroke();
+
+            ctx.restore();
         }
     }
 

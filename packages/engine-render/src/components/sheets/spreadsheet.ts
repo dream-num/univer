@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import type { IRange, Nullable } from '@univerjs/core';
-import { CellValueType, HorizontalAlign, ObjectMatrix, sortRules, WrapStrategy } from '@univerjs/core';
+import type { IRange, ISelectionCellWithCoord, Nullable } from '@univerjs/core';
+import { BooleanNumber, CellValueType, HorizontalAlign, ObjectMatrix, sortRules, WrapStrategy } from '@univerjs/core';
 
 import type { BaseObject } from '../../base-object';
-import { RENDER_CLASS_TYPE } from '../../basics/const';
-import { getTranslateInSpreadContextWithPixelRatio } from '../../basics/draw';
-import type { ITransformChangeState } from '../../basics/interfaces';
-import { fixLineWidthByScale, getCellByIndex, getCellPositionByIndex, getScale } from '../../basics/tools';
-import type { IBoundRect } from '../../basics/vector2';
+import { FIX_ONE_PIXEL_BLUR_OFFSET, RENDER_CLASS_TYPE } from '../../basics/const';
+import { clearLineByBorderType, getLineWith } from '../../basics/draw';
+import { fixLineWidthByScale, getCellByIndex, getCellPositionByIndex, getColor, getScale } from '../../basics/tools';
+import type { IViewportBound } from '../../basics/vector2';
 import { Vector2 } from '../../basics/vector2';
 import { Canvas } from '../../canvas';
 import type { Engine } from '../../engine';
@@ -33,8 +32,8 @@ import { Documents } from '../docs/document';
 import { SpreadsheetExtensionRegistry } from '../extension';
 import type { Background } from './extensions/background';
 import type { Border } from './extensions/border';
-import type { BorderAuxiliary } from './extensions/border-auxiliary';
 import type { Font } from './extensions/font';
+import type { BorderCacheItem } from './interfaces';
 import { SheetComponent } from './sheet-component';
 import type { SpreadsheetSkeleton } from './sheet-skeleton';
 import { getDocsSkeletonPageSize } from './sheet-skeleton';
@@ -42,8 +41,6 @@ import { getDocsSkeletonPageSize } from './sheet-skeleton';
 const OBJECT_KEY = '__SHEET_EXTENSION_FONT_DOCUMENT_INSTANCE__';
 
 export class Spreadsheet extends SheetComponent {
-    private _borderAuxiliaryExtension!: BorderAuxiliary;
-
     private _backgroundExtension!: Background;
 
     private _borderExtension!: Border;
@@ -52,13 +49,15 @@ export class Spreadsheet extends SheetComponent {
 
     private _cacheCanvas!: Canvas;
 
-    private _boundsCache: Nullable<IBoundRect>;
+    private _refreshIncrementalState = false;
 
-    private _cacheOffsetX = 0;
+    private _forceDirty = false;
 
-    private _cacheOffsetY = 0;
+    private _overflowCacheRuntime: { [row: number]: boolean } = {};
 
-    private _hasSelection = false;
+    private _overflowCacheRuntimeRange = new ObjectMatrix<IRange>();
+
+    private _overflowCacheRuntimeTimeout: number | NodeJS.Timeout = -1;
 
     private _documents: Documents = new Documents(OBJECT_KEY, undefined, {
         pageMarginLeft: 0,
@@ -74,23 +73,19 @@ export class Spreadsheet extends SheetComponent {
 
         if (this._allowCache) {
             this._cacheCanvas = new Canvas();
-        }
 
-        this.onIsAddedToParentObserver.add((parent) => {
-            (parent as Scene)?.getEngine()?.onTransformChangeObservable.add((change: ITransformChangeState) => {
-                this.resizeCacheCanvas();
+            this.onIsAddedToParentObserver.add((parent) => {
+                (parent as Scene)?.getEngine()?.onTransformChangeObservable.add(() => {
+                    this._resizeCacheCanvas();
+                });
+                this._resizeCacheCanvas();
+                this._addMakeDirtyToScroll();
             });
-            this.resizeCacheCanvas();
-            this._addMakeDirtyToScroll();
-        });
+        }
 
         this._initialDefaultExtension();
 
         this.makeDirty(true);
-    }
-
-    get borderAuxiliaryExtension() {
-        return this._borderAuxiliaryExtension;
     }
 
     get backgroundExtension() {
@@ -109,7 +104,7 @@ export class Spreadsheet extends SheetComponent {
         return this._documents;
     }
 
-    override draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
+    override draw(ctx: CanvasRenderingContext2D, bounds?: IViewportBound) {
         // const { parent = { scaleX: 1, scaleY: 1 } } = this;
         // const mergeData = this.getMergeData();
         // const showGridlines = this.getShowGridlines() || 1;
@@ -120,35 +115,25 @@ export class Spreadsheet extends SheetComponent {
 
         const parentScale = this.getParentScale();
 
-        spreadsheetSkeleton.calculateWithoutClearingCache(bounds);
-
-        const segment = spreadsheetSkeleton.rowColumnSegment;
-
-        if (
-            (segment.startRow === -1 && segment.endRow === -1) ||
-            (segment.startColumn === -1 && segment.endColumn === -1)
-        ) {
-            return;
-        }
-
-        const scale = getScale(parentScale);
-
-        const { left: fixTranslateLeft, top: fixTranslateTop } = getTranslateInSpreadContextWithPixelRatio();
-
-        const { rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
-
-        ctx.translate(
-            fixLineWidthByScale(rowHeaderWidth, scale) - fixTranslateLeft / scale,
-            fixLineWidthByScale(columnHeaderHeight, scale) - fixTranslateTop / scale
-        );
-
         // insert overflow cache
         this._calculateOverflow();
 
+        const diffRanges = this._refreshIncrementalState
+            ? bounds?.diffBounds.map((bound) => spreadsheetSkeleton.getRowColumnSegmentByViewBound(bound))
+            : undefined;
         const extensions = this.getExtensionsByOrder();
         for (const extension of extensions) {
-            extension.draw(ctx, parentScale, spreadsheetSkeleton);
+            extension.draw(ctx, parentScale, spreadsheetSkeleton, diffRanges);
         }
+
+        /**
+         * Caching overflow during scrolling and clearing it after waiting for 1 second without scrolling can significantly improve performance.
+         */
+        clearTimeout(this._overflowCacheRuntimeTimeout);
+        this._overflowCacheRuntimeTimeout = setTimeout(() => {
+            this._overflowCacheRuntimeRange.reset();
+            this._overflowCacheRuntime = {};
+        }, 1000);
     }
 
     override isHit(coord: Vector2) {
@@ -179,10 +164,10 @@ export class Spreadsheet extends SheetComponent {
             columnWidthAccumulation
         );
 
-        startY = fixLineWidthByScale(startY + columnHeaderHeight, scaleY);
-        endY = fixLineWidthByScale(endY + columnHeaderHeight, scaleY);
-        startX = fixLineWidthByScale(startX + rowHeaderWidth, scaleX);
-        endX = fixLineWidthByScale(endX + rowHeaderWidth, scaleX);
+        startY += columnHeaderHeight;
+        endY += columnHeaderHeight;
+        startX += rowHeaderWidth;
+        endX += rowHeaderWidth;
 
         return {
             startY,
@@ -207,6 +192,10 @@ export class Spreadsheet extends SheetComponent {
             x,
             y,
         };
+    }
+
+    makeForceDirty(state = true) {
+        this._forceDirty = state;
     }
 
     getAncestorScrollXY(offsetX: number, offsetY: number) {
@@ -238,135 +227,152 @@ export class Spreadsheet extends SheetComponent {
         return this.getSkeleton()?.getMergeBounding(startRow, startColumn, endRow, endColumn);
     }
 
-    override render(mainCtx: CanvasRenderingContext2D, bounds?: IBoundRect) {
+    override render(mainCtx: CanvasRenderingContext2D, bounds?: IViewportBound) {
         if (!this.visible) {
             this.makeDirty(false);
             return this;
         }
 
-        if (this._allowCache) {
-            this._cacheOffsetX = 0;
-            this._cacheOffsetY = 0;
+        const spreadsheetSkeleton = this.getSkeleton();
 
-            if (this.isDirty() || this._checkNewBounds(bounds)) {
-                const newBounds = bounds;
-                const ctx = this._cacheCanvas.getContext();
-
-                if (newBounds) {
-                    const { dx = 0, dy = 0 } = newBounds;
-                    this._cacheOffsetX = dx;
-                    this._cacheOffsetY = dy;
-                }
-                this._cacheCanvas.clear();
-                ctx.save();
-                // ctx.globalCompositeOperation = 'copy';
-                // ctx.drawImage(canvasEle, this._cacheOffsetX, this._cacheOffsetY);
-                // ctx.globalCompositeOperation = 'source-over';
-                ctx.setTransform(mainCtx.getTransform());
-                this._draw(ctx, newBounds);
-                // console.log('newBounds', JSON.stringify(newBounds));
-                // console.log('bounds', JSON.stringify(bounds));
-                // console.log('_boundsCache', JSON.stringify(this._boundsCache));
-                ctx.restore();
-
-                this._boundsCache = bounds;
-            }
-            this._applyCache(mainCtx);
-        } else {
-            mainCtx.save();
-            this._draw(mainCtx, bounds);
-            mainCtx.restore();
+        if (!spreadsheetSkeleton) {
+            return;
         }
+
+        spreadsheetSkeleton.calculateWithoutClearingCache(bounds);
+
+        const segment = spreadsheetSkeleton.rowColumnSegment;
+
+        if (
+            (segment.startRow === -1 && segment.endRow === -1) ||
+            (segment.startColumn === -1 && segment.endColumn === -1)
+        ) {
+            return;
+        }
+
+        mainCtx.save();
+
+        const parentScale = this.getParentScale();
+
+        const scale = getScale(parentScale);
+
+        // const { left: fixTranslateLeft, top: fixTranslateTop } = getTranslateInSpreadContextWithPixelRatio();
+
+        const { rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
+
+        mainCtx.translate(fixLineWidthByScale(rowHeaderWidth, scale), fixLineWidthByScale(columnHeaderHeight, scale));
+
+        this._drawAuxiliary(mainCtx);
+
+        if (bounds && this._allowCache === true) {
+            const { viewBound, diffBounds, diffX, diffY, viewPortPosition, viewPortKey } = bounds;
+
+            if (viewPortKey === 'viewMain') {
+                const ctx = this._cacheCanvas.getContext();
+                ctx.save();
+
+                const { left, top, right, bottom } = viewPortPosition;
+
+                const dw = right - left + rowHeaderWidth;
+
+                const dh = bottom - top + columnHeaderHeight;
+
+                if (
+                    (diffX !== 0 && diffY !== 0) ||
+                    diffBounds[0] == null ||
+                    (diffX === 0 && diffY === 0) ||
+                    this._forceDirty
+                ) {
+                    if (this.isDirty() || this._forceDirty) {
+                        this._cacheCanvas.clear();
+                        ctx.setTransform(mainCtx.getTransform());
+                        this._draw(ctx, bounds);
+                    }
+                    this._applyCache(mainCtx, left, top, dw, dh, left, top, dw, dh);
+                    this._forceDirty = false;
+                } else {
+                    if (this.isDirty()) {
+                        const pixelRatio = this._cacheCanvas.getPixelRatio();
+                        ctx.save();
+                        ctx.globalCompositeOperation = 'copy';
+                        ctx.setTransform(1, 0, 0, 1, 0, 0);
+                        ctx.drawImage(
+                            this._cacheCanvas.getCanvasEle(),
+                            fixLineWidthByScale(diffX, scale) * pixelRatio * scale,
+                            fixLineWidthByScale(diffY, scale) * pixelRatio * scale
+                        );
+                        ctx.restore();
+
+                        this._refreshIncrementalState = true;
+                        ctx.setTransform(mainCtx.getTransform());
+                        this._draw(ctx, bounds);
+                        this._refreshIncrementalState = false;
+                    }
+                    this._applyCache(mainCtx, left, top, dw, dh, left, top, dw, dh);
+                }
+
+                ctx.restore();
+            } else {
+                this._draw(mainCtx, bounds);
+            }
+        } else {
+            this._draw(mainCtx, bounds);
+        }
+
+        mainCtx.restore();
 
         this.makeDirty(false);
         return this;
-        // console.log('render', ctx);
-        // console.log('mainCtx', mainCtx, this.width, this.height);
     }
 
-    override resizeCacheCanvas() {
+    private _resizeCacheCanvas() {
         const parentSize = this._getAncestorSize();
         if (!parentSize || this._cacheCanvas == null) {
             return;
         }
         const { width, height } = parentSize;
-        const skeleton = this.getSkeleton();
-        let rowHeaderWidth = 0;
-        let columnHeaderHeight = 0;
-        if (skeleton) {
-            rowHeaderWidth = skeleton.rowHeaderWidth;
-            columnHeaderHeight = skeleton.columnHeaderHeight;
-        }
-
         this._cacheCanvas.setSize(width, height);
         this.makeDirty(true);
     }
 
-    // enableSelection() {
-    //     if (this._hasSelection) {
-    //         return;
-    //     }
-    //     this._selection = SelectionManager.create(this);
-    //     this._hasSelection = true;
-    // }
-
-    // disableSelection() {
-    //     this._selection?.dispose();
-    //     this._hasSelection = false;
-    // }
-    // scaleCacheCanvas() {
-    //     let scaleX = this.getParent()?.ancestorScaleX || 1;
-    //     let scaleY = this.getParent()?.ancestorScaleX || 1;
-
-    //     this._cacheCanvas?.setPixelRatio(Math.max(scaleX, scaleY) * getDevicePixelRatio());
-    //     this.makeDirty(true);
-    // }
-
-    private _checkNewBounds(bounds?: IBoundRect) {
-        const oldBounds = this._boundsCache;
-        if (oldBounds === bounds) {
-            return false;
-        }
-
-        if (bounds == null || oldBounds == null) {
-            return true;
-        }
-
-        const { tl, br } = bounds;
-        const { tl: oldTl, br: oldBr } = oldBounds;
-
-        if (tl.equals(oldTl) && br.equals(oldBr)) {
-            return false;
-        }
-
-        return true;
-    }
-
-    protected _applyCache(ctx?: CanvasRenderingContext2D) {
+    protected _applyCache(
+        ctx?: CanvasRenderingContext2D,
+        sx: number = 0,
+        sy: number = 0,
+        sw: number = 0,
+        sh: number = 0,
+        dx: number = 0,
+        dy: number = 0,
+        dw: number = 0,
+        dh: number = 0
+    ) {
         if (!ctx) {
             return;
         }
-        // const skeleton = this.getSkeleton();
-        // let offsetX = 0;
-        // let offsetY = 0;
-        // if (skeleton) {
-        //     const { rowHeaderWidth, columnHeaderHeight } = skeleton;
-        //     const { scaleX, scaleY } = this.getParentScale();
-        //     offsetX = fixLineWidthByScale(rowHeaderWidth, scaleX);
-        //     offsetY = fixLineWidthByScale(columnHeaderHeight, scaleY);
-        // }
-        // const pixelRatio = this._cacheCanvas.getPixelRatio();
-        // const width = this._cacheCanvas.getWidth() * pixelRatio;
-        // const height = this._cacheCanvas.getHeight() * pixelRatio;
+
+        const pixelRatio = this._cacheCanvas.getPixelRatio();
+
+        const cacheCtx = this._cacheCanvas.getContext();
+        cacheCtx.save();
         ctx.save();
         ctx.setTransform(1, 0, 0, 1, 0, 0);
-        // ctx.rect(offsetX + 100, offsetY + 100, width, height);
-        // ctx.clip();
-        ctx.drawImage(this._cacheCanvas.getCanvasEle(), 0, 0);
+        cacheCtx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.drawImage(
+            this._cacheCanvas.getCanvasEle(),
+            sx,
+            sy,
+            sw * pixelRatio,
+            sh * pixelRatio,
+            dx,
+            dy,
+            dw * pixelRatio,
+            dh * pixelRatio
+        );
         ctx.restore();
+        cacheCtx.restore();
     }
 
-    protected override _draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
+    protected override _draw(ctx: CanvasRenderingContext2D, bounds?: IViewportBound) {
         this.draw(ctx, bounds);
     }
 
@@ -407,7 +413,7 @@ export class Spreadsheet extends SheetComponent {
             .forEach((extension) => {
                 this.register(extension);
             });
-        this._borderAuxiliaryExtension = this.getExtensionByKey('DefaultBorderAuxiliaryExtension') as BorderAuxiliary;
+        // this._borderAuxiliaryExtension = this.getExtensionByKey('DefaultBorderAuxiliaryExtension') as BorderAuxiliary;
         this._backgroundExtension = this.getExtensionByKey('DefaultBackgroundExtension') as Background;
         this._borderExtension = this.getExtensionByKey('DefaultBorderExtension') as Border;
         this._fontExtension = this.getExtensionByKey('DefaultFontExtension') as Font;
@@ -427,7 +433,7 @@ export class Spreadsheet extends SheetComponent {
             if (parent.classType === RENDER_CLASS_TYPE.SCENE) {
                 const viewports = parent.getViewports();
                 const viewPorts = this._getHasScrollViewports(viewports);
-                for (const viewport of viewports) {
+                for (const viewport of viewPorts) {
                     if (viewport) {
                         fn(viewport);
                     }
@@ -448,45 +454,13 @@ export class Spreadsheet extends SheetComponent {
         return newViewports;
     }
 
-    // getOverflowRevertHorizontalAlign(row: number, column: number, docsConfig: fontCacheItem) {
-    //     const spreadsheetSkeleton = this.getSkeleton();
-    //     let { documentSkeleton, angle = 0, horizontalAlign, wrapStrategy } = docsConfig;
-    //     if (!spreadsheetSkeleton) {
-    //         return horizontalAlign;
-    //     }
-    //     const { rowHeightAccumulation, columnWidthAccumulation, dataMergeCache } = spreadsheetSkeleton;
-    //     const cell = spreadsheetSkeleton.getCellData().getValue(row, column);
-    //     if (wrapStrategy === WrapStrategy.OVERFLOW && angle !== 0 && cell?.n !== BooleanNumber.TRUE && horizontalAlign !== HorizontalAlign.JUSTIFIED) {
-    //         let contentSize = documentSkeleton.getLastPageSize(angle);
-
-    //         if (!contentSize) {
-    //             return horizontalAlign;
-    //         }
-    //         let { startY, endY, startX, endX } = getCellByIndex(row, column, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
-    //         const cellWidth = endX - startX;
-    //         const cellHeight = endY - startY;
-    //         if (contentSize.height > cellHeight) {
-    //             contentSize = {
-    //                 width: cellHeight / Math.tan(Math.abs(angle)) + cellWidth,
-    //                 height: cellHeight,
-    //             };
-    //             if (angle > 0) {
-    //                 return HorizontalAlign.LEFT;
-    //             } else {
-    //                 return HorizontalAlign.RIGHT;
-    //             }
-    //         }
-    //     }
-    //     return horizontalAlign;
-    // }
-
     /**
      * Calculate the overflow of cell text. If there is no value on either side of the cell,
      * the text content of this cell can be drawn to both sides, not limited by the cell's width.
      * Overflow on the left or right is aligned according to the text's horizontal alignment.
      */
     private _calculateOverflow() {
-        const overflowCache = new ObjectMatrix<IRange>();
+        // const overflowCache = new ObjectMatrix<IRange>();
         const spreadsheetSkeleton = this.getSkeleton();
         if (!spreadsheetSkeleton) {
             return;
@@ -500,190 +474,312 @@ export class Spreadsheet extends SheetComponent {
             Object.keys(fontList).forEach((fontFormat: string) => {
                 const fontObjectArray = fontList[fontFormat];
 
-                fontObjectArray.forValue((row, column, docsConfig) => {
-                    // Merged cells do not support overflow.
-                    if (spreadsheetSkeleton.intersectMergeRange(row, column)) {
-                        return true;
+                fontObjectArray.forEach((row, fontCache) => {
+                    if (this._overflowCacheRuntime[row] != null) {
+                        return;
                     }
 
-                    // wrap and angle handler
-                    const { documentSkeleton, angle = 0, horizontalAlign, wrapStrategy } = docsConfig;
+                    fontCache.forEach((column, docsConfig) => {
+                        // wrap and angle handler
+                        const { documentSkeleton, angle = 0, horizontalAlign, wrapStrategy } = docsConfig;
 
-                    const cell = spreadsheetSkeleton.getCellData().getValue(row, column);
+                        const cell = spreadsheetSkeleton.getCellData().getValue(row, column);
 
-                    const sheetSkeleton = this.getSkeleton();
-                    if (!sheetSkeleton) {
-                        return true;
-                    }
-
-                    const { t: cellValueType = CellValueType.STRING } = cell || {};
-
-                    /**
-                     * Numerical and Boolean values are not displayed with overflow.
-                     */
-                    if (
-                        wrapStrategy === WrapStrategy.OVERFLOW &&
-                        cellValueType !== CellValueType.NUMBER &&
-                        cellValueType !== CellValueType.BOOLEAN &&
-                        horizontalAlign !== HorizontalAlign.JUSTIFIED
-                    ) {
-                        let contentSize = getDocsSkeletonPageSize(documentSkeleton, angle);
-
-                        if (!contentSize) {
+                        const sheetSkeleton = this.getSkeleton();
+                        if (!sheetSkeleton) {
                             return true;
                         }
 
-                        if (angle !== 0) {
-                            const { startY, endY, startX, endX } = getCellByIndex(
+                        const { t: cellValueType = CellValueType.STRING } = cell || {};
+
+                        /**
+                         * Numerical and Boolean values are not displayed with overflow.
+                         */
+                        if (
+                            wrapStrategy === WrapStrategy.OVERFLOW &&
+                            cellValueType !== CellValueType.NUMBER &&
+                            cellValueType !== CellValueType.BOOLEAN &&
+                            horizontalAlign !== HorizontalAlign.JUSTIFIED
+                        ) {
+                            // Merged cells do not support overflow.
+                            if (spreadsheetSkeleton.intersectMergeRange(row, column)) {
+                                return true;
+                            }
+
+                            let contentSize = getDocsSkeletonPageSize(documentSkeleton, angle);
+
+                            if (!contentSize) {
+                                return true;
+                            }
+
+                            if (angle !== 0) {
+                                const { startY, endY, startX, endX } = getCellByIndex(
+                                    row,
+                                    column,
+                                    rowHeightAccumulation,
+                                    columnWidthAccumulation,
+                                    mergeData
+                                );
+                                const cellWidth = endX - startX;
+                                const cellHeight = endY - startY;
+
+                                if (contentSize.height > cellHeight) {
+                                    contentSize = {
+                                        width: cellHeight / Math.tan(Math.abs(angle)) + cellWidth,
+                                        height: cellHeight,
+                                    };
+                                    // if (angle > 0) {
+                                    //     horizontalAlign = HorizontalAlign.LEFT;
+                                    // } else {
+                                    //     horizontalAlign = HorizontalAlign.RIGHT;
+                                    // }
+                                }
+                            }
+
+                            const position = spreadsheetSkeleton.getOverflowPosition(
+                                contentSize,
+                                horizontalAlign,
+                                row,
+                                column,
+                                columnCount
+                            );
+
+                            const { startColumn, endColumn } = position;
+
+                            this._overflowCacheRuntimeRange.setValue(row, column, {
+                                startRow: row,
+                                endRow: row,
+                                startColumn,
+                                endColumn,
+                            });
+                        } else if (wrapStrategy === WrapStrategy.WRAP && angle !== 0) {
+                            // Merged cells do not support overflow.
+                            if (spreadsheetSkeleton.intersectMergeRange(row, column)) {
+                                return true;
+                            }
+
+                            const { startY, endY } = getCellByIndex(
                                 row,
                                 column,
                                 rowHeightAccumulation,
                                 columnWidthAccumulation,
                                 mergeData
                             );
-                            const cellWidth = endX - startX;
+
                             const cellHeight = endY - startY;
+                            documentSkeleton.getViewModel().getDataModel().updateDocumentDataPageSize(cellHeight);
+                            documentSkeleton.calculate();
+                            const contentSize = getDocsSkeletonPageSize(documentSkeleton, angle);
 
-                            if (contentSize.height > cellHeight) {
-                                contentSize = {
-                                    width: cellHeight / Math.tan(Math.abs(angle)) + cellWidth,
-                                    height: cellHeight,
-                                };
-                                // if (angle > 0) {
-                                //     horizontalAlign = HorizontalAlign.LEFT;
-                                // } else {
-                                //     horizontalAlign = HorizontalAlign.RIGHT;
-                                // }
+                            if (!contentSize) {
+                                return true;
                             }
+
+                            const { startColumn, endColumn } = sheetSkeleton.getOverflowPosition(
+                                contentSize,
+                                horizontalAlign,
+                                row,
+                                column,
+                                sheetSkeleton.getColumnCount()
+                            );
+                            this._overflowCacheRuntimeRange.setValue(row, column, {
+                                startRow: row,
+                                endRow: row,
+                                startColumn,
+                                endColumn,
+                            });
                         }
+                    });
 
-                        const position = spreadsheetSkeleton.getOverflowPosition(
-                            contentSize,
-                            horizontalAlign,
-                            row,
-                            column,
-                            columnCount
-                        );
+                    this._overflowCacheRuntime[row] = true;
+                });
 
-                        const { startColumn, endColumn } = position;
-
-                        overflowCache.setValue(row, column, {
-                            startRow: row,
-                            endRow: row,
-                            startColumn,
-                            endColumn,
-                        });
-                    } else if (wrapStrategy === WrapStrategy.WRAP && angle !== 0) {
-                        const { startY, endY } = getCellByIndex(
-                            row,
-                            column,
-                            rowHeightAccumulation,
-                            columnWidthAccumulation,
-                            mergeData
-                        );
-
-                        const cellHeight = endY - startY;
-                        documentSkeleton.getViewModel().getDataModel().updateDocumentDataPageSize(cellHeight);
-                        documentSkeleton.calculate();
-                        const contentSize = getDocsSkeletonPageSize(documentSkeleton, angle);
-
-                        if (!contentSize) {
-                            return true;
-                        }
-
-                        const { startColumn, endColumn } = sheetSkeleton.getOverflowPosition(
-                            contentSize,
-                            horizontalAlign,
-                            row,
-                            column,
-                            sheetSkeleton.getColumnCount()
-                        );
-                        overflowCache.setValue(row, column, { startRow: row, endRow: row, startColumn, endColumn });
-                    }
-
+                fontObjectArray.forValue((row, column, docsConfig) => {
                     // console.log('appendToOverflowCache', cellHeight, angle, contentSize, { rowIndex, columnIndex, startColumn, endColumn });
                 });
             });
 
-        spreadsheetSkeleton.setOverflowCache(overflowCache);
+        spreadsheetSkeleton.setOverflowCache(this._overflowCacheRuntimeRange);
     }
 
-    private _differentBounds(bounds: IBoundRect) {
-        // if (!bounds) {
-        //     return;
-        // }
+    private _drawAuxiliary(ctx: CanvasRenderingContext2D) {
+        const spreadsheetSkeleton = this.getSkeleton();
 
-        if (!this._boundsCache) {
-            return bounds;
+        if (spreadsheetSkeleton == null) {
+            return;
         }
 
-        // if (!this._checkSheetDifferentBounds(bounds, this._boundsCache)) {
-        //     return bounds;
-        // }
-
-        const { tl, tr, bl, br, dx, dy } = bounds;
-
-        const { tl: cacheTL, tr: cacheTR, bl: cacheBL, br: cacheBR, dx: cacheDX, dy: cacheDY } = this._boundsCache;
-        const newBounds: IBoundRect = {
-            tl,
-            tr,
-            bl,
-            br,
-            dx: 0,
-            dy: 0,
-        };
-
-        if (tl.x === cacheTL.x) {
-            if (tl.y > cacheTL.y) {
-                newBounds.tl = cacheBL;
-                newBounds.tr = cacheBR;
-            } else {
-                newBounds.bl = cacheTL;
-                newBounds.br = cacheTR;
-            }
-            newBounds.dy = cacheTL.y - tl.y;
-        } else if (tl.y === cacheTL.y) {
-            if (tl.x > cacheTL.x) {
-                newBounds.tl = cacheTR;
-                newBounds.bl = cacheBR;
-            } else {
-                newBounds.tr = cacheTL;
-                newBounds.br = cacheBL;
-            }
-            newBounds.dx = cacheTL.x - tl.x;
+        const { rowColumnSegment, dataMergeCache, overflowCache, stylesCache, showGridlines } = spreadsheetSkeleton;
+        const { border, backgroundPositions } = stylesCache;
+        const { startRow, endRow, startColumn, endColumn } = rowColumnSegment;
+        if (!spreadsheetSkeleton || showGridlines === BooleanNumber.FALSE) {
+            return;
         }
 
-        return newBounds;
+        const { rowHeightAccumulation, columnTotalWidth, columnWidthAccumulation, rowTotalHeight } =
+            spreadsheetSkeleton;
+
+        if (
+            !rowHeightAccumulation ||
+            !columnWidthAccumulation ||
+            columnTotalWidth === undefined ||
+            rowTotalHeight === undefined
+        ) {
+            return;
+        }
+
+        ctx.save();
+        const { scaleX, scaleY } = this.getParentScale();
+
+        const scale = Math.max(scaleX, scaleY);
+
+        ctx.beginPath();
+        ctx.lineWidth = getLineWith(1) / scale;
+        // eslint-disable-next-line no-magic-numbers
+        ctx.strokeStyle = getColor([212, 212, 212]);
+
+        const width = columnTotalWidth;
+
+        const height = rowTotalHeight;
+
+        const columnWidthAccumulationLength = columnWidthAccumulation.length;
+        const rowHeightAccumulationLength = rowHeightAccumulation.length;
+
+        const rowStart = startRow;
+
+        const rowEnd = endRow;
+
+        const columnDrawTopStart = 0;
+
+        ctx.translate(FIX_ONE_PIXEL_BLUR_OFFSET / scale, FIX_ONE_PIXEL_BLUR_OFFSET / scale);
+
+        for (let r = rowStart; r <= rowEnd; r++) {
+            if (r < 0 || r > rowHeightAccumulationLength - 1) {
+                continue;
+            }
+            const rowEndPosition = rowHeightAccumulation[r];
+            ctx.moveTo(0, fixLineWidthByScale(rowEndPosition, scale));
+            ctx.lineTo(width, fixLineWidthByScale(rowEndPosition, scale));
+        }
+
+        for (let c = startColumn; c <= endColumn; c++) {
+            if (c < 0 || c > columnWidthAccumulationLength - 1) {
+                continue;
+            }
+            const columnEndPosition = columnWidthAccumulation[c];
+            ctx.moveTo(fixLineWidthByScale(columnEndPosition, scale), columnDrawTopStart);
+            ctx.lineTo(fixLineWidthByScale(columnEndPosition, scale), height);
+        }
+        // console.log('xx2', scaleX, scaleY, columnTotalWidth, rowTotalHeight, rowHeightAccumulation, columnWidthAccumulation);
+        ctx.stroke();
+        ctx.closePath();
+
+        // Clearing the dashed line issue caused by overlaid auxiliary lines and strokes
+        border?.forValue((rowIndex, columnIndex, borderCaches) => {
+            if (!borderCaches) {
+                return true;
+            }
+
+            const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(rowIndex, columnIndex, scaleX, scaleY);
+
+            let { startY, endY, startX, endX } = cellInfo;
+            const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
+
+            if (isMerged) {
+                return true;
+            }
+
+            if (isMergedMainCell) {
+                startY = mergeInfo.startY;
+                endY = mergeInfo.endY;
+                startX = mergeInfo.startX;
+                endX = mergeInfo.endX;
+            }
+
+            if (!(mergeInfo.startRow >= rowStart && mergeInfo.endRow <= rowEnd)) {
+                return true;
+            }
+
+            for (const key in borderCaches) {
+                const { type } = borderCaches[key] as BorderCacheItem;
+
+                clearLineByBorderType(ctx, type, { startX, startY, endX, endY }, scaleX, scaleY);
+            }
+        });
+        ctx.closePath();
+        // merge cell
+        this._clearRectangle(ctx, scale, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
+
+        // overflow cell
+        this._clearRectangle(ctx, scale, rowHeightAccumulation, columnWidthAccumulation, overflowCache.toNativeArray());
+
+        this._clearBackground(ctx, scale, backgroundPositions);
+
+        ctx.restore();
     }
 
-    private _checkSheetDifferentBounds(bounds1: IBoundRect, bounds2: IBoundRect) {
-        const { tl, tr, bl, br } = bounds1;
-
-        const { tl: cacheTL, tr: cacheTR, bl: cacheBL, br: cacheBR } = bounds2;
-
-        if (tl.x === cacheTL.x && tr.x === cacheTR.x && bl.x === cacheBL.x && br.x === cacheBR.x) {
-            if (tl.y >= cacheTL.y && tl.y <= cacheBL.y) {
-                return true;
-            }
-
-            if (bl.y >= cacheTL.y && bl.y <= cacheBL.y) {
-                return true;
-            }
-
-            return false;
+    /**
+     * Clear the guide lines within a range in the table, to make room for merged cells and overflow.
+     */
+    private _clearRectangle(
+        ctx: CanvasRenderingContext2D,
+        scale: number,
+        rowHeightAccumulation: number[],
+        columnWidthAccumulation: number[],
+        dataMergeCache?: IRange[]
+    ) {
+        if (dataMergeCache == null) {
+            return;
         }
+        for (const dataCache of dataMergeCache) {
+            const { startRow, endRow, startColumn, endColumn } = dataCache;
 
-        if (tl.y === cacheTL.y && tr.y === cacheTR.y && bl.y === cacheBL.y && br.y === cacheBR.y) {
-            if (tl.x >= cacheTL.x && tl.x <= cacheTR.x) {
-                return true;
-            }
+            const startY = fixLineWidthByScale(rowHeightAccumulation[startRow - 1] || 0, scale);
+            const endY = fixLineWidthByScale(
+                rowHeightAccumulation[endRow] || rowHeightAccumulation[rowHeightAccumulation.length - 1],
+                scale
+            );
 
-            if (tr.x >= cacheTL.x && tr.x <= cacheTR.x) {
-                return true;
-            }
-            return true;
+            const startX = fixLineWidthByScale(columnWidthAccumulation[startColumn - 1] || 0, scale);
+            const endX = fixLineWidthByScale(
+                columnWidthAccumulation[endColumn] || columnWidthAccumulation[columnWidthAccumulation.length - 1],
+                scale
+            );
+
+            ctx.clearRect(startX, startY, endX - startX, endY - startY);
+
+            // After ClearRect, the lines will become thinner, and the lines will be repaired below.
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(endX, startY);
+            ctx.lineTo(endX, endY);
+            ctx.lineTo(startX, endY);
+            ctx.lineTo(startX, startY);
+            ctx.stroke();
+            ctx.closePath();
         }
+    }
 
-        return false;
+    private _clearBackground(
+        ctx: CanvasRenderingContext2D,
+        scale: number,
+        backgroundPositions?: ObjectMatrix<ISelectionCellWithCoord>
+    ) {
+        backgroundPositions?.forValue((row, column, cellInfo) => {
+            let { startY, endY, startX, endX } = cellInfo;
+            const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
+            if (isMerged) {
+                return true;
+            }
+
+            if (isMergedMainCell) {
+                startY = mergeInfo.startY;
+                endY = mergeInfo.endY;
+                startX = mergeInfo.startX;
+                endX = mergeInfo.endX;
+            }
+
+            ctx.clearRect(startX, startY, endX - startX, endY - startY);
+        });
     }
 }

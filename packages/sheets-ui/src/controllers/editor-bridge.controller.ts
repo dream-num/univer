@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, Nullable } from '@univerjs/core';
+import type { ICommandInfo, IExecutionOptions, Nullable } from '@univerjs/core';
 import {
     Disposable,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
@@ -269,7 +269,11 @@ export class EditorBridgeController extends Disposable {
         const updateCommandList = COMMAND_LISTENER_SKELETON_CHANGE;
 
         this.disposeWithMe(
-            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+            this._commandService.onCommandExecuted((command: ICommandInfo, options?: IExecutionOptions) => {
+                if (options?.fromCollab) {
+                    return;
+                }
+
                 if (command.id === SetWorksheetActiveOperation.id) {
                     this._keepVisibleHideEditor();
                 } else if (updateCommandList.includes(command.id)) {

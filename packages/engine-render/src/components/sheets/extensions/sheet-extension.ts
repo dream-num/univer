@@ -24,7 +24,7 @@ export enum SHEET_EXTENSION_TYPE {
     GRID,
 }
 
-export class SheetExtension extends ComponentExtension<SpreadsheetSkeleton, SHEET_EXTENSION_TYPE> {
+export class SheetExtension extends ComponentExtension<SpreadsheetSkeleton, SHEET_EXTENSION_TYPE, IRange[]> {
     override type = SHEET_EXTENSION_TYPE.GRID;
 
     getCellIndex(
@@ -35,5 +35,50 @@ export class SheetExtension extends ComponentExtension<SpreadsheetSkeleton, SHEE
         dataMergeCache: IRange[]
     ) {
         return getCellByIndex(rowIndex, columnIndex, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
+    }
+
+    isRenderDiffRangesByCell(row: number, column: number, diffRanges?: IRange[]) {
+        if (diffRanges == null) {
+            return true;
+        }
+
+        for (const range of diffRanges) {
+            const { startRow, startColumn, endRow, endColumn } = range;
+            if (row >= startRow && row <= endRow && column >= startColumn && column <= endColumn) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    isRenderDiffRangesByColumn(column: number, diffRanges?: IRange[]) {
+        if (diffRanges == null) {
+            return true;
+        }
+
+        for (const range of diffRanges) {
+            const { startColumn, endColumn } = range;
+            if (column >= startColumn && column <= endColumn) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    isRenderDiffRangesByRow(row: number, diffRanges?: IRange[]) {
+        if (diffRanges == null) {
+            return true;
+        }
+
+        for (const range of diffRanges) {
+            const { startRow, endRow } = range;
+            if (row >= startRow && row <= endRow) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

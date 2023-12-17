@@ -8,8 +8,6 @@
         "build:demo": {},
         "dev:demo": {
             "cache": false
-        },
-        "dev:docusaurus": {},
-        "build:docusaurus": {}
+        }
     }
 }

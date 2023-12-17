@@ -5,7 +5,6 @@
     },
     "include": ["."],
     "exclude": [
-        "./apps/docs/docs",
         "**/node_modules",
         "**/local",
         "**/lib",

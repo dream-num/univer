@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/* eslint-disable no-magic-numbers */
+
 import type { DocumentDataModel, EventState, Nullable } from '@univerjs/core';
 import {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
@@ -155,8 +157,8 @@ export class DocCanvasView extends RxDisposable {
         }
 
         scene.addLayer(
-            Layer.create(scene, [], DOCS_COMPONENT_MAIN_LAYER_INDEX),
-            Layer.create(scene, [], DOCS_COMPONENT_HEADER_LAYER_INDEX)
+            new Layer(scene, [], DOCS_COMPONENT_MAIN_LAYER_INDEX),
+            new Layer(scene, [], DOCS_COMPONENT_HEADER_LAYER_INDEX)
         );
 
         // this._viewLoader(scene);
@@ -189,5 +191,7 @@ export class DocCanvasView extends RxDisposable {
         currentRender.components.set(DOCS_VIEW_KEY.MAIN, documents);
 
         scene.addObjects([documents], DOCS_COMPONENT_MAIN_LAYER_INDEX);
+
+        scene.enableLayerCache(DOCS_COMPONENT_MAIN_LAYER_INDEX);
     }
 }

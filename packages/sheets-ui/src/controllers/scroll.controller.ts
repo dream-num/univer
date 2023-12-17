@@ -147,7 +147,6 @@ export class ScrollController extends Disposable {
         if (viewport == null) {
             return;
         }
-        const { tl } = viewport.getBounding();
 
         const sheetObject = this._getSheetObject();
         if (sheetObject == null) {

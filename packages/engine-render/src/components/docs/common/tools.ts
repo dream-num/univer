@@ -291,7 +291,6 @@ export function getCharSpaceConfig(sectionBreakConfig: ISectionBreakConfig, para
     };
 }
 
-// eslint-disable-next-line max-lines-per-function
 export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number = -1) {
     const firstPage = pages[0];
     const { st: firstPageStartIndex } = firstPage;

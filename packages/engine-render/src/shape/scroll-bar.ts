@@ -153,7 +153,8 @@ export class ScrollBar extends BaseScrollBar {
     }
 
     makeViewDirty(state: boolean) {
-        this._view.makeDirty(state, true);
+        const mainScene = this._mainScene || this._view.scene;
+        mainScene.makeDirty(state);
     }
 
     override pick(coord: Vector2) {

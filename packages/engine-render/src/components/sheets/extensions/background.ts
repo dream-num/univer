@@ -14,23 +14,30 @@
  * limitations under the License.
  */
 
-import type { IScale } from '@univerjs/core';
+import type { IRange, IScale } from '@univerjs/core';
 
-import { fixLineWidthByScale, getColor } from '../../../basics/tools';
+import { getColor } from '../../../basics/tools';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import type { SpreadsheetSkeleton } from '../sheet-skeleton';
 import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultBackgroundExtension';
 
+const DOC_EXTENSION_Z_INDEX = 50;
+
 export class Background extends SheetExtension {
     override uKey = UNIQUE_KEY;
 
-    override zIndex = 20;
+    override zIndex = DOC_EXTENSION_Z_INDEX;
 
-    override draw(ctx: CanvasRenderingContext2D, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {
-        const { rowHeaderWidth, columnHeaderHeight, dataMergeCache, stylesCache } = spreadsheetSkeleton;
-        const { background } = stylesCache;
+    override draw(
+        ctx: CanvasRenderingContext2D,
+        parentScale: IScale,
+        spreadsheetSkeleton: SpreadsheetSkeleton,
+        diffRanges?: IRange[]
+    ) {
+        const { dataMergeCache, stylesCache } = spreadsheetSkeleton;
+        const { background, backgroundPositions } = stylesCache;
         if (!spreadsheetSkeleton) {
             return;
         }
@@ -47,25 +54,39 @@ export class Background extends SheetExtension {
             return;
         }
         ctx.save();
-        const { scaleX = 1, scaleY = 1 } = parentScale;
-        const fixPointFive = 0; // fixLineWidthByScale(0.5, scale);
+
+        ctx.globalCompositeOperation = 'destination-over';
+
         background &&
             Object.keys(background).forEach((rgb: string) => {
                 const backgroundCache = background[rgb];
+                // eslint-disable-next-line no-magic-numbers
                 ctx.fillStyle = rgb || getColor([255, 255, 255])!;
                 ctx.beginPath();
                 backgroundCache.forEach((rowIndex, backgroundRow) => {
                     backgroundRow.forEach((columnIndex) => {
-                        const cellInfo = this.getCellIndex(
-                            rowIndex,
-                            columnIndex,
-                            rowHeightAccumulation,
-                            columnWidthAccumulation,
-                            dataMergeCache
-                        );
+                        const cellInfo = backgroundPositions?.getValue(rowIndex, columnIndex);
+
+                        if (cellInfo == null) {
+                            return true;
+                        }
                         let { startY, endY, startX, endX } = cellInfo;
                         const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
                         if (isMerged) {
+                            return true;
+                        }
+
+                        if (
+                            !this.isRenderDiffRangesByRow(mergeInfo.startRow, diffRanges) &&
+                            !this.isRenderDiffRangesByRow(mergeInfo.endRow, diffRanges)
+                        ) {
+                            return true;
+                        }
+
+                        if (
+                            !this.isRenderDiffRangesByColumn(mergeInfo.startColumn, diffRanges) &&
+                            !this.isRenderDiffRangesByColumn(mergeInfo.endColumn, diffRanges)
+                        ) {
                             return true;
                         }
 
@@ -75,11 +96,6 @@ export class Background extends SheetExtension {
                             startX = mergeInfo.startX;
                             endX = mergeInfo.endX;
                         }
-
-                        startY = fixLineWidthByScale(startY, scaleY);
-                        endY = fixLineWidthByScale(endY, scaleY);
-                        startX = fixLineWidthByScale(startX, scaleX);
-                        endX = fixLineWidthByScale(endX, scaleX);
 
                         ctx.moveTo(startX, startY);
                         ctx.lineTo(startX, endY);

@@ -116,7 +116,7 @@ export class DocRenderController extends Disposable {
     // }
 
     private _recalculateSizeBySkeleton(currentRender: IRender, skeleton: DocumentSkeleton) {
-        const { mainComponent } = currentRender;
+        const { mainComponent, scene } = currentRender;
 
         const docsComponent = mainComponent as Documents;
 
@@ -132,15 +132,20 @@ export class DocRenderController extends Disposable {
         for (let i = 0, len = pages.length; i < len; i++) {
             const page = pages[i];
             const { pageWidth, pageHeight } = page;
+
             if (docsComponent.pageLayoutType === PageLayoutType.VERTICAL) {
                 height += pageHeight;
-                if (i !== len - 1) {
+
+                height += docsComponent.pageMarginTop;
+
+                if (i === len - 1) {
                     height += docsComponent.pageMarginTop;
                 }
 
                 width = Math.max(width, pageWidth);
             } else if (docsComponent.pageLayoutType === PageLayoutType.HORIZONTAL) {
                 width += pageWidth;
+
                 if (i !== len - 1) {
                     width += docsComponent.pageMarginLeft;
                 }
@@ -149,6 +154,12 @@ export class DocRenderController extends Disposable {
         }
 
         docsComponent.resize(width, height);
+
+        const excludeUnitList = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];
+
+        if (!excludeUnitList.includes(currentRender.unitId)) {
+            scene.resize(width, height);
+        }
     }
 
     private _commandExecutedListener() {

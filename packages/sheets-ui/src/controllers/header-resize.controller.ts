@@ -24,7 +24,7 @@ import {
     toDisposable,
 } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent } from '@univerjs/engine-render';
-import { CURSOR_TYPE, IRenderManagerService, Rect, Vector2 } from '@univerjs/engine-render';
+import { CURSOR_TYPE, DeviceInputEventType, IRenderManagerService, Rect, Vector2 } from '@univerjs/engine-render';
 import type {
     IDeltaColumnWidthCommandParams,
     IDeltaRowHeightCommand,
@@ -34,6 +34,7 @@ import { DeltaColumnWidthCommand, DeltaRowHeightCommand, SetWorksheetRowIsAutoHe
 import { Inject } from '@wendellhu/redi';
 
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX, VIEWPORT_KEY } from '../common/keys';
+import { IEditorBridgeService } from '../services/editor-bridge.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 import {
     HEADER_MENU_SHAPE_THUMB_SIZE,
@@ -85,7 +86,8 @@ export class HeaderResizeController extends Disposable {
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService
     ) {
         super();
 
@@ -403,6 +405,11 @@ export class HeaderResizeController extends Disposable {
                     scene.addObject(this._resizeHelperShape, SHEET_COMPONENT_HEADER_LAYER_INDEX);
 
                     scene.disableEvent();
+
+                    this._editorBridgeService.changeVisible({
+                        visible: false,
+                        eventType: DeviceInputEventType.PointerDown,
+                    });
 
                     this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
                         const relativeCoords = scene.getRelativeCoord(

@@ -263,19 +263,19 @@ export const SetBorderCommand: ICommand = {
         }
 
         if (top) {
-            setBorderStyle(topRangeOut, { b: null });
+            //setBorderStyle(topRangeOut, { b: null });
             setBorderStyle(topRange, { t: Tools.deepClone(border) }, true);
         }
         if (bottom) {
-            setBorderStyle(bottomRangeOut, { t: null });
+            //setBorderStyle(bottomRangeOut, { t: null });
             setBorderStyle(bottomRange, { b: Tools.deepClone(border) }, true);
         }
         if (left) {
-            setBorderStyle(leftRangeOut, { r: null });
+            //setBorderStyle(leftRangeOut, { r: null });
             setBorderStyle(leftRange, { l: Tools.deepClone(border) }, true);
         }
         if (right) {
-            setBorderStyle(rightRangeOut, { l: null });
+            //setBorderStyle(rightRangeOut, { l: null });
             setBorderStyle(rightRange, { r: Tools.deepClone(border) }, true);
         }
         // inner vertical border
@@ -293,6 +293,17 @@ export const SetBorderCommand: ICommand = {
                             },
                         });
                     }
+
+                    if (rectangle.startColumn !== range.startColumn) {
+                        const style = mr.getValue(rectangle.startRow, rectangle.startColumn)?.s as IStyleData;
+                        mr.setValue(row, column, {
+                            s: {
+                                bd: style?.bd
+                                    ? Object.assign(style.bd, { l: Tools.deepClone(border) })
+                                    : { l: Tools.deepClone(border) },
+                            },
+                        });
+                    }
                 } else {
                     if (column !== range.endColumn) {
                         const style = mr.getValue(row, column)?.s as IStyleData;
@@ -301,6 +312,17 @@ export const SetBorderCommand: ICommand = {
                                 bd: style?.bd
                                     ? Object.assign(style.bd, { r: Tools.deepClone(border) })
                                     : { r: Tools.deepClone(border) },
+                            },
+                        });
+                    }
+
+                    if (column !== range.startColumn) {
+                        const style = mr.getValue(row, column)?.s as IStyleData;
+                        mr.setValue(row, column, {
+                            s: {
+                                bd: style?.bd
+                                    ? Object.assign(style.bd, { l: Tools.deepClone(border) })
+                                    : { l: Tools.deepClone(border) },
                             },
                         });
                     }
@@ -322,6 +344,17 @@ export const SetBorderCommand: ICommand = {
                             },
                         });
                     }
+
+                    if (rectangle.startRow !== range.startRow) {
+                        const style = mr.getValue(rectangle.startRow, rectangle.startColumn)?.s as IStyleData;
+                        mr.setValue(row, column, {
+                            s: {
+                                bd: style?.bd
+                                    ? Object.assign(style.bd, { t: Tools.deepClone(border) })
+                                    : { t: Tools.deepClone(border) },
+                            },
+                        });
+                    }
                 } else {
                     if (row !== range.endRow) {
                         const style = mr.getValue(row, column)?.s as IStyleData;
@@ -333,10 +366,22 @@ export const SetBorderCommand: ICommand = {
                             },
                         });
                     }
+
+                    if (row !== range.startRow) {
+                        const style = mr.getValue(row, column)?.s as IStyleData;
+                        mr.setValue(row, column, {
+                            s: {
+                                bd: style?.bd
+                                    ? Object.assign(style.bd, { t: Tools.deepClone(border) })
+                                    : { t: Tools.deepClone(border) },
+                            },
+                        });
+                    }
                 }
             });
         }
 
+        // clear
         if (!top && !bottom && !left && !right && !vertical && !horizontal) {
             setBorderStyle(topRangeOut, { b: null });
             setBorderStyle(topRange, { t: null }, true);

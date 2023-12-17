@@ -110,6 +110,32 @@ export class Border extends SheetExtension {
                         preColor = color;
                     }
 
+                    // make sure border would not overlap
+                    switch (type) {
+                        case BORDER_TYPE.LEFT: {
+                            const lastCell = border.getValue(rowIndex, columnIndex - 1);
+                            if (lastCell && lastCell[BORDER_TYPE.RIGHT]) {
+                                // jump draw border
+                                continue;
+                            }
+                            break;
+                        }
+                        case BORDER_TYPE.RIGHT:
+                            // draw
+                            break;
+                        case BORDER_TYPE.TOP: {
+                            const lastCell = border.getValue(rowIndex - 1, columnIndex);
+                            if (lastCell && lastCell[BORDER_TYPE.BOTTOM]) {
+                                // jump draw border
+                                continue;
+                            }
+                            break;
+                        }
+                        case BORDER_TYPE.BOTTOM:
+                            // draw
+                            break;
+                    }
+
                     drawLineByBorderType(ctx, type, { startX, startY, endX, endY });
                 }
             });

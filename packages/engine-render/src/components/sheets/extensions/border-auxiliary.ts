@@ -157,12 +157,14 @@ export class BorderAuxiliary extends SheetExtension {
         this._clearRectangle(ctx, scale, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache, diffRanges);
 
         // overflow cell
-        this._clearRectangle(
+        this._clearOverflow(
             ctx,
             scale,
             rowHeightAccumulation,
             columnWidthAccumulation,
-            overflowCache.toNativeArray(),
+            startRow,
+            endRow,
+            overflowCache,
             diffRanges
         );
 
@@ -199,7 +201,7 @@ export class BorderAuxiliary extends SheetExtension {
                 !this.isRenderDiffRangesByRow(startRow, diffRanges) &&
                 !this.isRenderDiffRangesByRow(endRow, diffRanges)
             ) {
-                return true;
+                continue;
             }
 
             ctx.clearRect(startX, startY, endX - startX, endY - startY);
@@ -214,6 +216,57 @@ export class BorderAuxiliary extends SheetExtension {
             ctx.stroke();
             ctx.closePath();
         }
+    }
+
+    private _clearOverflow(
+        ctx: CanvasRenderingContext2D,
+        scale: number,
+        rowHeightAccumulation: number[],
+        columnWidthAccumulation: number[],
+        currentStartRow: number,
+        currentEndRow: number,
+        overflowCache?: ObjectMatrix<IRange>,
+        diffRanges?: IRange[]
+    ) {
+        if (overflowCache == null) {
+            return;
+        }
+
+        overflowCache.forEach((row, columnRange) => {
+            if (!(row >= currentStartRow && row <= currentEndRow)) {
+                return true;
+            }
+
+            columnRange.forEach((column, dataCache) => {
+                const { startRow, endRow, startColumn, endColumn } = dataCache;
+
+                const startY = rowHeightAccumulation[startRow - 1] || 0;
+                const endY = rowHeightAccumulation[endRow] || rowHeightAccumulation[rowHeightAccumulation.length - 1];
+
+                const startX = columnWidthAccumulation[startColumn - 1] || 0;
+                const endX =
+                    columnWidthAccumulation[endColumn] || columnWidthAccumulation[columnWidthAccumulation.length - 1];
+
+                if (
+                    !this.isRenderDiffRangesByRow(startRow, diffRanges) &&
+                    !this.isRenderDiffRangesByRow(endRow, diffRanges)
+                ) {
+                    return true;
+                }
+
+                ctx.clearRect(startX, startY, endX - startX, endY - startY);
+
+                // After ClearRect, the lines will become thinner, and the lines will be repaired below.
+                ctx.beginPath();
+                ctx.moveTo(startX, startY);
+                ctx.lineTo(endX, startY);
+                ctx.lineTo(endX, endY);
+                ctx.lineTo(startX, endY);
+                ctx.lineTo(startX, startY);
+                ctx.stroke();
+                ctx.closePath();
+            });
+        });
     }
 
     private _clearBackground(

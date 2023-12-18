@@ -20,6 +20,7 @@ import {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     ICommandService,
+    IUndoRedoService,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
@@ -56,10 +57,11 @@ export class ZenEditorController extends RxDisposable {
         @ICommandService private readonly _commandService: ICommandService,
         @IZenZoneService private readonly _zenZoneService: IZenZoneService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
+        @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
+        @IUndoRedoService private readonly _undoRedoService: IUndoRedoService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
-        @Inject(DocViewModelManagerService) private readonly _docViewModelManagerService: DocViewModelManagerService,
-        @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager
+        @Inject(DocViewModelManagerService) private readonly _docViewModelManagerService: DocViewModelManagerService
     ) {
         super();
 
@@ -155,6 +157,9 @@ export class ZenEditorController extends RxDisposable {
 
     private _handleOpenZenEditor() {
         this._zenZoneService.open();
+
+        // Need to clear undo/redo service when open zen mode.
+        this._undoRedoService.clearUndoRedo(DOCS_ZEN_EDITOR_UNIT_ID_KEY);
 
         this._currentUniverService.focusUniverInstance(DOCS_ZEN_EDITOR_UNIT_ID_KEY);
 

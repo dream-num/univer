@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICommand, IRange, IStyleData, Nullable } from '@univerjs/core';
+import type { ICellData, ICommand, IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
 import {
     BooleanNumber,
     CommandType,
@@ -23,7 +23,7 @@ import {
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,
-    ObjectMatrix,
+    Range,
     sequenceExecute,
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
@@ -62,6 +62,7 @@ export interface IInsertRowCommandParams {
      * The range will the row be inserted.
      */
     range: IRange;
+    cellValue?: IObjectMatrixPrimitiveType<ICellData>;
 }
 export const InsertRowCommandId = 'sheet.command.insert-row';
 /**
@@ -80,8 +81,8 @@ export const InsertRowCommand: ICommand = {
         const workbook = univerInstanceService.getUniverSheetInstance(params.unitId)!;
         const worksheet = workbook.getSheetBySheetId(params.subUnitId)!;
 
-        const { range, direction, unitId, subUnitId } = params;
-        const { startRow, endRow, startColumn, endColumn } = range;
+        const { range, direction, unitId, subUnitId, cellValue } = params;
+        const { startRow, endRow } = range;
         const anchorRow = direction === Direction.UP ? startRow : startRow - 1;
         const height = worksheet.getRowHeight(anchorRow);
 
@@ -89,7 +90,7 @@ export const InsertRowCommand: ICommand = {
         const insertRowParams: IInsertRowMutationParams = {
             unitId,
             subUnitId,
-            ranges: [range],
+            range,
             rowInfo: new Array(endRow - startRow + 1).fill(undefined).map(() => ({
                 h: height,
                 hd: BooleanNumber.FALSE,
@@ -100,26 +101,14 @@ export const InsertRowCommand: ICommand = {
             insertRowParams
         );
 
-        // insert range contents & styles & undos
-        const cellValue = new ObjectMatrix<ICellData>();
-        const worksheetMatrix = worksheet.getCellMatrix();
-        const cellStyleByColumn = new Map<number, string | Nullable<IStyleData>>();
-        for (let row = startRow; row <= endRow; row++) {
-            for (let column = startColumn; column <= endColumn; column++) {
-                if (!cellStyleByColumn.has(column)) {
-                    cellStyleByColumn.set(column, worksheetMatrix.getValue(anchorRow, column)?.s);
-                }
-                const s = cellStyleByColumn.get(column);
-                cellValue.setValue(row, column, { v: '', s });
-            }
-        }
         const insertRangeMutationParams: IInsertRangeMutationParams = {
             unitId: params.unitId,
             subUnitId: params.subUnitId,
-            ranges: [params.range],
+            range: params.range,
             shiftDimension: Dimension.ROWS,
-            cellValue: cellValue.getData(),
+            cellValue,
         };
+
         const undoInsertRangeMutationParams: Nullable<IDeleteRangeMutationParams> = InsertRangeUndoMutationFactory(
             accessor,
             insertRangeMutationParams
@@ -188,7 +177,17 @@ export const InsertRowBeforeCommand: ICommand = {
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
         const rowCount = range.endRow - range.startRow + 1;
-
+        const cellValue: IObjectMatrixPrimitiveType<ICellData> = {};
+        Range.foreach(range, (row, col) => {
+            const cell = worksheet.getCell(row, col);
+            if (!cell || !cell.s) {
+                return;
+            }
+            if (!cellValue[row]) {
+                cellValue[row] = {};
+            }
+            cellValue[row][col] = { s: cell.s };
+        });
         const insertRowParams: IInsertRowCommandParams = {
             unitId,
             subUnitId,
@@ -199,6 +198,7 @@ export const InsertRowBeforeCommand: ICommand = {
                 startColumn: 0,
                 endColumn: worksheet.getColumnCount() - 1,
             },
+            cellValue,
         };
 
         return accessor.get(ICommandService).executeCommand(InsertRowCommand.id, insertRowParams);
@@ -257,6 +257,7 @@ export interface IInsertColCommandParams {
     subUnitId: string;
     range: IRange;
     direction: Direction.LEFT | Direction.RIGHT;
+    cellValue?: IObjectMatrixPrimitiveType<ICellData>;
 }
 export const InsertColCommandId = 'sheet.command.insert-col';
 export const InsertColCommand: ICommand<IInsertColCommandParams> = {
@@ -269,8 +270,8 @@ export const InsertColCommand: ICommand<IInsertColCommandParams> = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
-        const { range, direction, subUnitId, unitId } = params;
-        const { startRow, endRow, startColumn, endColumn } = params.range;
+        const { range, direction, subUnitId, unitId, cellValue } = params;
+        const { startColumn, endColumn } = params.range;
         const workbook = univerInstanceService.getUniverSheetInstance(params.unitId)!;
         const worksheet = workbook.getSheetBySheetId(params.subUnitId)!;
         const anchorCol = direction === Direction.LEFT ? startColumn : startColumn - 1;
@@ -280,7 +281,7 @@ export const InsertColCommand: ICommand<IInsertColCommandParams> = {
         const insertColParams: IInsertColMutationParams = {
             unitId,
             subUnitId,
-            ranges: [range],
+            range,
             colInfo: new Array(endColumn - startColumn + 1).fill(undefined).map(() => ({
                 w: width,
                 hd: BooleanNumber.FALSE,
@@ -291,26 +292,12 @@ export const InsertColCommand: ICommand<IInsertColCommandParams> = {
             insertColParams
         );
 
-        // insert range styles & undos
-        const cellValue = new ObjectMatrix<ICellData>();
-        const worksheetMatrix = worksheet.getCellMatrix();
-        const cellStyleByRow = new Map<number, string | Nullable<IStyleData>>();
-        for (let row = startRow; row <= endRow; row++) {
-            for (let column = startColumn; column <= endColumn; column++) {
-                if (!cellStyleByRow.has(row)) {
-                    cellStyleByRow.set(row, worksheetMatrix.getValue(row, anchorCol)?.s);
-                }
-
-                const s = cellStyleByRow.get(row);
-                cellValue.setValue(row, column, { v: '', s });
-            }
-        }
         const insertRangeMutationParams: IInsertRangeMutationParams = {
             unitId: params.unitId,
             subUnitId: params.subUnitId,
-            ranges: [params.range],
+            range: params.range,
             shiftDimension: Dimension.COLUMNS,
-            cellValue: cellValue.getData(),
+            cellValue,
         };
         const undoInsertRangeParams: Nullable<IDeleteRangeMutationParams> = InsertRangeUndoMutationFactory(
             accessor,
@@ -381,7 +368,17 @@ export const InsertColBeforeCommand: ICommand = {
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
         const count = range.endColumn - range.startColumn + 1;
-
+        const cellValue: IObjectMatrixPrimitiveType<ICellData> = {};
+        Range.foreach(range, (row, col) => {
+            const cell = worksheet.getCell(row, col);
+            if (!cell || !cell.s) {
+                return;
+            }
+            if (!cellValue[row]) {
+                cellValue[row] = {};
+            }
+            cellValue[row][col] = { s: cell.s };
+        });
         const insertColParams: IInsertColCommandParams = {
             unitId,
             subUnitId,
@@ -392,6 +389,7 @@ export const InsertColBeforeCommand: ICommand = {
                 startRow: 0,
                 endRow: worksheet.getLastRowWithContent(),
             },
+            cellValue,
         };
 
         return accessor.get(ICommandService).executeCommand(InsertColCommand.id, insertColParams);

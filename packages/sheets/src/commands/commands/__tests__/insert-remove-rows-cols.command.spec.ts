@@ -193,7 +193,8 @@ describe('Test insert and remove rows cols commands', () => {
             const result = await commandService.executeCommand(InsertRowBeforeCommand.id);
             expect(result).toBeTruthy();
             expect(getRowCount()).toBe(21);
-            expect(getCellStyle(1, 1)).toBe(getCellStyle(2, 1)); // the style should be copied from the cell above
+            // the style should be copied from the cell above
+            expect(getCellStyle(1, 1)).toBe(getCellStyle(2, 1));
             // the merged cell should be moved down
             expect(getMergedInfo(3, 2)).toEqual({ startRow: 3, endRow: 4, startColumn: 2, endColumn: 2 });
 
@@ -206,8 +207,8 @@ describe('Test insert and remove rows cols commands', () => {
 
         it("Should 'insert after' work", async () => {
             selectRow(1, 1);
-
-            expect(getRowCount()).toBe(20);
+            const initRowCount = getRowCount();
+            expect(getRowCount()).toBe(initRowCount);
             expect(getCellStyle(2, 1)).toBe('s4');
             expect(getMergedInfo(2, 2)).toEqual({ startRow: 2, endRow: 3, startColumn: 2, endColumn: 2 });
             const result = await commandService.executeCommand(InsertRowBeforeCommand.id);
@@ -218,7 +219,7 @@ describe('Test insert and remove rows cols commands', () => {
             expect(getMergedInfo(3, 2)).toEqual({ startRow: 3, endRow: 4, startColumn: 2, endColumn: 2 });
 
             await commandService.executeCommand(UndoCommand.id);
-            expect(getRowCount()).toBe(20);
+            expect(getRowCount()).toBe(initRowCount);
 
             await commandService.executeCommand(RedoCommand.id);
             expect(getRowCount()).toBe(21);
@@ -295,14 +296,12 @@ describe('Test insert and remove rows cols commands', () => {
     describe('Remove row where contain mergeCell', () => {
         it('reduce merge cell length', async () => {
             await commandService.executeCommand(RemoveRowCommand.id, {
-                ranges: [
-                    {
-                        startRow: 12,
-                        endRow: 13,
-                        startColumn: 1,
-                        endColumn: 1,
-                    },
-                ],
+                range: {
+                    startRow: 12,
+                    endRow: 13,
+                    startColumn: 1,
+                    endColumn: 1,
+                },
             } as IRemoveRowColCommandParams);
             expect(getMergedInfo(12, 2)).toEqual({ startRow: 10, endRow: 13, startColumn: 2, endColumn: 2 });
         });
@@ -310,14 +309,12 @@ describe('Test insert and remove rows cols commands', () => {
     describe('Remove col where contain mergeCell', () => {
         it('reduce merge cell length', async () => {
             await commandService.executeCommand(RemoveColCommand.id, {
-                ranges: [
-                    {
-                        startRow: 1,
-                        endRow: 1,
-                        startColumn: 12,
-                        endColumn: 13,
-                    },
-                ],
+                range: {
+                    startRow: 1,
+                    endRow: 1,
+                    startColumn: 12,
+                    endColumn: 13,
+                },
             } as IRemoveRowColCommandParams);
             expect(getMergedInfo(10, 12)).toEqual({ startRow: 10, endRow: 10, startColumn: 10, endColumn: 13 });
         });

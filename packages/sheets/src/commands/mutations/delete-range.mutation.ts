@@ -35,10 +35,7 @@ export const DeleteRangeUndoMutationFactory = (
     params: IDeleteRangeMutationParams
 ): Nullable<IInsertRangeMutationParams> => {
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const worksheet = univerInstanceService
-        .getCurrentUniverSheetInstance()
-
-        .getSheetBySheetId(params.subUnitId);
+    const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getSheetBySheetId(params.subUnitId);
     if (!worksheet) return null;
     const cellMatrix = worksheet.getCellMatrix();
 
@@ -46,32 +43,30 @@ export const DeleteRangeUndoMutationFactory = (
     const lastEndRow = worksheet.getConfig().rowCount;
     const lastEndColumn = worksheet.getConfig().columnCount;
 
-    for (let i = 0; i < params.ranges.length; i++) {
-        const { startRow, endRow, startColumn, endColumn } = params.ranges[i];
-        if (params.shiftDimension === Dimension.ROWS) {
-            // build new data
-            for (let r = startRow; r <= lastEndRow; r++) {
-                for (let c = startColumn; c <= endColumn; c++) {
-                    // store old value
-                    if (r <= endRow) {
-                        const cell: Nullable<ICellData> = cellMatrix.getValue(r, c);
-                        undoData.setValue(r, c, cell as ICellData);
-                    }
+    const { startRow, endRow, startColumn, endColumn } = params.range;
+    if (params.shiftDimension === Dimension.ROWS) {
+        // build new data
+        for (let r = startRow; r <= lastEndRow; r++) {
+            for (let c = startColumn; c <= endColumn; c++) {
+                // store old value
+                if (r <= endRow) {
+                    const cell: Nullable<ICellData> = cellMatrix.getValue(r, c);
+                    undoData.setValue(r, c, cell as ICellData);
                 }
             }
-        } else if (params.shiftDimension === Dimension.COLUMNS) {
-            // build new data
-            for (let r = startRow; r <= endRow; r++) {
-                for (let c = startColumn; c <= lastEndColumn; c++) {
-                    // store old value
-                    if (c <= endColumn) {
+        }
+    } else if (params.shiftDimension === Dimension.COLUMNS) {
+        // build new data
+        for (let r = startRow; r <= endRow; r++) {
+            for (let c = startColumn; c <= lastEndColumn; c++) {
+                // store old value
+                if (c <= endColumn) {
+                    const cell: Nullable<ICellData> = cellMatrix.getValue(r, c);
+                    undoData.setValue(r, c, cell as ICellData);
+                } else {
+                    for (let i = 0; i <= endColumn; i++) {
                         const cell: Nullable<ICellData> = cellMatrix.getValue(r, c);
-                        undoData.setValue(r, c, cell as ICellData);
-                    } else {
-                        for (let i = 0; i <= endColumn; i++) {
-                            const cell: Nullable<ICellData> = cellMatrix.getValue(r, c);
-                            undoData.setValue(r, c + i, cell as ICellData);
-                        }
+                        undoData.setValue(r, c + i, cell as ICellData);
                     }
                 }
             }
@@ -88,7 +83,7 @@ export const DeleteRangeMutation: IMutation<IDeleteRangeMutationParams, boolean>
     id: 'sheet.mutation.delete-range',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
-        const { unitId, subUnitId, ranges, shiftDimension } = params;
+        const { unitId, subUnitId, range, shiftDimension } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const workbook = univerInstanceService.getUniverSheetInstance(unitId);
         if (!workbook) return false;
@@ -99,7 +94,7 @@ export const DeleteRangeMutation: IMutation<IDeleteRangeMutationParams, boolean>
         const lastEndRow = worksheet.getLastRowWithContent();
         const lastEndColumn = worksheet.getLastColumnWithContent();
 
-        handleDeleteRangeMutation(cellMatrix, ranges, lastEndRow, lastEndColumn, shiftDimension);
+        handleDeleteRangeMutation(cellMatrix, range, lastEndRow, lastEndColumn, shiftDimension);
 
         return true;
     },
@@ -107,42 +102,40 @@ export const DeleteRangeMutation: IMutation<IDeleteRangeMutationParams, boolean>
 
 export function handleDeleteRangeMutation<T>(
     cellMatrix: ObjectMatrix<T>,
-    ranges: IRange[],
+    range: IRange,
     lastEndRow: number,
     lastEndColumn: number,
     shiftDimension: Dimension
 ) {
-    for (let i = 0; i < ranges.length; i++) {
-        const { startRow, endRow, startColumn, endColumn } = ranges[i];
+    const { startRow, endRow, startColumn, endColumn } = range;
 
-        const rows = endRow - startRow + 1;
-        const columns = endColumn - startColumn + 1;
+    const rows = endRow - startRow + 1;
+    const columns = endColumn - startColumn + 1;
 
-        if (shiftDimension === Dimension.ROWS) {
-            // build new data
-            for (let r = startRow; r <= lastEndRow; r++) {
-                for (let c = startColumn; c <= endColumn; c++) {
-                    // get value blow current range
-                    const value = cellMatrix.getValue(r + rows, c);
-                    if (value == null) {
-                        cellMatrix.realDeleteValue(r, c);
-                    } else {
-                        cellMatrix.setValue(r, c, value);
-                    }
+    if (shiftDimension === Dimension.ROWS) {
+        // build new data
+        for (let r = startRow; r <= lastEndRow; r++) {
+            for (let c = startColumn; c <= endColumn; c++) {
+                // get value blow current range
+                const value = cellMatrix.getValue(r + rows, c);
+                if (value == null) {
+                    cellMatrix.realDeleteValue(r, c);
+                } else {
+                    cellMatrix.setValue(r, c, value);
                 }
             }
-        } else if (shiftDimension === Dimension.COLUMNS) {
-            // build new data
-            for (let r = startRow; r <= endRow; r++) {
-                for (let c = startColumn; c <= lastEndColumn; c++) {
-                    // get value blow current range
+        }
+    } else if (shiftDimension === Dimension.COLUMNS) {
+        // build new data
+        for (let r = startRow; r <= endRow; r++) {
+            for (let c = startColumn; c <= lastEndColumn; c++) {
+                // get value blow current range
 
-                    const value = cellMatrix.getValue(r, c + columns);
-                    if (value == null) {
-                        cellMatrix.realDeleteValue(r, c);
-                    } else {
-                        cellMatrix.setValue(r, c, value);
-                    }
+                const value = cellMatrix.getValue(r, c + columns);
+                if (value == null) {
+                    cellMatrix.realDeleteValue(r, c);
+                } else {
+                    cellMatrix.setValue(r, c, value);
                 }
             }
         }

@@ -35,7 +35,7 @@ import { DeleteRangeMutation, DeleteRangeUndoMutationFactory } from '../mutation
 import { InsertRangeMutation } from '../mutations/insert-range.mutation';
 
 export interface IDeleteRangeMoveLeftCommandParams {
-    ranges: IRange[];
+    range: IRange;
 }
 
 export const DeleteRangeMoveLeftCommandId = 'sheet.command.delete-range-move-left';
@@ -59,11 +59,11 @@ export const DeleteRangeMoveLeftCommand: ICommand = {
 
             .getActiveSheet()
             .getSheetId();
-        let ranges = params?.ranges as IRange[];
-        if (!ranges) {
-            ranges = selectionManagerService.getSelectionRanges() || [];
+        let range = params?.range;
+        if (!range) {
+            range = selectionManagerService.getLast()?.range;
         }
-        if (!ranges?.length) return false;
+        if (!range) return false;
 
         const workbook = univerInstanceService.getUniverSheetInstance(unitId);
         if (!workbook) return false;
@@ -71,7 +71,7 @@ export const DeleteRangeMoveLeftCommand: ICommand = {
         if (!worksheet) return false;
 
         const deleteRangeMutationParams: IDeleteRangeMutationParams = {
-            ranges,
+            range,
             subUnitId,
             unitId,
             shiftDimension: Dimension.COLUMNS,
@@ -85,7 +85,7 @@ export const DeleteRangeMoveLeftCommand: ICommand = {
 
         const sheetInterceptor = sheetInterceptorService.onCommandExecute({
             id: DeleteRangeMoveLeftCommand.id,
-            params: { ranges } as IDeleteRangeMoveLeftCommandParams,
+            params: { range } as IDeleteRangeMoveLeftCommandParams,
         });
         const redos: IMutationInfo[] = [{ id: DeleteRangeMutation.id, params: deleteRangeMutationParams }];
         const undos: IMutationInfo[] = [{ id: InsertRangeMutation.id, params: insertRangeMutationParams }];

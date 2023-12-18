@@ -272,9 +272,7 @@ describe('Test insert range commands', () => {
                     },
                 ]);
                 expect(await commandService.executeCommand(InsertRangeMoveRightCommand.id)).toBeTruthy();
-                expect(getValueByPosition(0, 0, 0, 0)).toStrictEqual({
-                    v: '',
-                });
+                expect(getValueByPosition(0, 0, 0, 0)).toStrictEqual(null);
                 expect(getValueByPosition(0, 1, 0, 1)).toStrictEqual({
                     v: 'A1',
                 });
@@ -290,9 +288,7 @@ describe('Test insert range commands', () => {
 
                 // redo
                 expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
-                expect(getValueByPosition(0, 0, 0, 0)).toStrictEqual({
-                    v: '',
-                });
+                expect(getValueByPosition(0, 0, 0, 0)).toStrictEqual(null);
                 expect(getValueByPosition(0, 1, 0, 1)).toStrictEqual({
                     v: 'A1',
                 });
@@ -311,9 +307,7 @@ describe('Test insert range commands', () => {
                 expect(await commandService.executeCommand(InsertRangeMoveRightCommand.id)).toBeTruthy();
 
                 // cell value
-                expect(getValueByPosition(0, 2, 0, 2)).toStrictEqual({
-                    v: '',
-                });
+                expect(getValueByPosition(0, 2, 0, 2)).toStrictEqual(null);
                 expect(getValueByPosition(0, 3, 0, 3)).toStrictEqual({
                     v: 'C1',
                 });
@@ -347,9 +341,7 @@ describe('Test insert range commands', () => {
                 expect(await commandService.executeCommand(InsertRangeMoveRightCommand.id)).toBeTruthy();
 
                 // cell value
-                expect(getValueByPosition(4, 2, 4, 2)).toStrictEqual({
-                    v: '',
-                });
+                expect(getValueByPosition(4, 2, 4, 2)).toStrictEqual(null);
                 expect(getValueByPosition(4, 3, 4, 3)).toStrictEqual({
                     v: 'C5',
                 });
@@ -398,9 +390,7 @@ describe('Test insert range commands', () => {
                 ]);
 
                 expect(await commandService.executeCommand(InsertRangeMoveDownCommand.id)).toBeTruthy();
-                expect(getValueByPosition(0, 0, 0, 0)).toStrictEqual({
-                    v: '',
-                });
+                expect(getValueByPosition(0, 0, 0, 0)).toStrictEqual(null);
                 expect(getValueByPosition(1, 0, 1, 0)).toStrictEqual({
                     v: 'A1',
                 });
@@ -416,9 +406,7 @@ describe('Test insert range commands', () => {
 
                 // redo
                 expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
-                expect(getValueByPosition(0, 0, 0, 0)).toStrictEqual({
-                    v: '',
-                });
+                expect(getValueByPosition(0, 0, 0, 0)).toStrictEqual(null);
                 expect(getValueByPosition(1, 0, 1, 0)).toStrictEqual({
                     v: 'A1',
                 });
@@ -438,9 +426,7 @@ describe('Test insert range commands', () => {
                 expect(await commandService.executeCommand(InsertRangeMoveDownCommand.id)).toBeTruthy();
 
                 // cell value
-                expect(getValueByPosition(1, 6, 1, 6)).toStrictEqual({
-                    v: '',
-                });
+                expect(getValueByPosition(1, 6, 1, 6)).toStrictEqual(null);
                 expect(getValueByPosition(2, 6, 2, 6)).toStrictEqual({
                     v: 'G2',
                 });
@@ -472,9 +458,7 @@ describe('Test insert range commands', () => {
                 expect(await commandService.executeCommand(InsertRangeMoveDownCommand.id)).toBeTruthy();
 
                 // cell value
-                expect(getValueByPosition(1, 9, 1, 9)).toStrictEqual({
-                    v: '',
-                });
+                expect(getValueByPosition(1, 9, 1, 9)).toStrictEqual(null);
                 expect(getValueByPosition(2, 9, 2, 9)).toStrictEqual({
                     v: 'J2',
                 });

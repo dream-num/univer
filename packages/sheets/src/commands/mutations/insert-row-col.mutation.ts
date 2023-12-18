@@ -15,7 +15,7 @@
  */
 
 import type { IMutation } from '@univerjs/core';
-import { CommandType, insertMatrixArray, IUniverInstanceService, Rectangle } from '@univerjs/core';
+import { CommandType, insertMatrixArray, IUniverInstanceService } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
 import type {
@@ -39,7 +39,7 @@ export const InsertRowMutationUndoFactory = (
     return {
         unitId: params.unitId,
         subUnitId: params.subUnitId,
-        ranges: params.ranges.map((r) => Rectangle.clone(r)),
+        range: params.range,
     };
 };
 
@@ -47,7 +47,7 @@ export const InsertRowMutation: IMutation<IInsertRowMutationParams> = {
     id: 'sheet.mutation.insert-row',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
-        const { unitId, subUnitId, ranges, rowInfo } = params;
+        const { unitId, subUnitId, range, rowInfo } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
         const universheet = univerInstanceService.getUniverSheetInstance(unitId);
@@ -68,23 +68,18 @@ export const InsertRowMutation: IMutation<IInsertRowMutationParams> = {
             hd: 0,
         };
 
-        for (let i = 0; i < ranges.length; i++) {
-            const range = ranges[i];
-            const rowIndex = range.startRow;
-            const rowCount = range.endRow - range.startRow + 1;
+        const rowIndex = range.startRow;
+        const rowCount = range.endRow - range.startRow + 1;
 
-            for (let j = rowIndex; j < rowIndex + rowCount; j++) {
-                if (rowInfo) {
-                    insertMatrixArray(j, rowInfo[j - range.startRow] ?? defaultRowInfo, rowWrapper);
-                } else {
-                    insertMatrixArray(j, defaultRowInfo, rowWrapper);
-                }
+        for (let j = rowIndex; j < rowIndex + rowCount; j++) {
+            if (rowInfo) {
+                insertMatrixArray(j, rowInfo[j - range.startRow] ?? defaultRowInfo, rowWrapper);
+            } else {
+                insertMatrixArray(j, defaultRowInfo, rowWrapper);
             }
         }
 
-        worksheet.setRowCount(
-            worksheet.getRowCount() + ranges.reduce((acc, cur) => acc + cur.endRow - cur.startRow + 1, 0)
-        );
+        worksheet.setRowCount(worksheet.getRowCount() + range.endRow - range.startRow + 1);
 
         return true;
     },
@@ -104,7 +99,7 @@ export const InsertColMutationUndoFactory = (
     return {
         unitId: params.unitId,
         subUnitId: params.subUnitId,
-        ranges: params.ranges.map((r) => Rectangle.clone(r)),
+        range: params.range,
     };
 };
 
@@ -122,32 +117,27 @@ export const InsertColMutation: IMutation<IInsertColMutationParams> = {
         const worksheet = universheet.getSheetBySheetId(params.subUnitId);
         if (!worksheet) return false;
         const manager = worksheet.getColumnManager();
-        const { ranges, colInfo } = params;
+        const { range, colInfo } = params;
         const columnPrimitive = manager.getColumnData();
         const columnWrapper = columnPrimitive;
 
-        for (let i = 0; i < ranges.length; i++) {
-            const range = ranges[i];
-            const colIndex = range.startColumn;
-            const colCount = range.endColumn - range.startColumn + 1;
-            const defaultColWidth = worksheet.getConfig().defaultColumnWidth;
+        const colIndex = range.startColumn;
+        const colCount = range.endColumn - range.startColumn + 1;
+        const defaultColWidth = worksheet.getConfig().defaultColumnWidth;
 
-            for (let j = colIndex; j < colIndex + colCount; j++) {
-                const defaultColInfo = {
-                    w: defaultColWidth,
-                    hd: 0,
-                };
-                if (colInfo) {
-                    insertMatrixArray(j, colInfo[j - range.startColumn] ?? defaultColInfo, columnWrapper);
-                } else {
-                    insertMatrixArray(j, defaultColInfo, columnWrapper);
-                }
+        for (let j = colIndex; j < colIndex + colCount; j++) {
+            const defaultColInfo = {
+                w: defaultColWidth,
+                hd: 0,
+            };
+            if (colInfo) {
+                insertMatrixArray(j, colInfo[j - range.startColumn] ?? defaultColInfo, columnWrapper);
+            } else {
+                insertMatrixArray(j, defaultColInfo, columnWrapper);
             }
         }
 
-        worksheet.setColumnCount(
-            worksheet.getColumnCount() + ranges.reduce((acc, cur) => acc + cur.endColumn - cur.startColumn + 1, 0)
-        );
+        worksheet.setColumnCount(worksheet.getColumnCount() + range.endColumn - range.startColumn + 1);
 
         return true;
     },

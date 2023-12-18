@@ -36,7 +36,7 @@ export const InsertRangeUndoMutationFactory = (
 ): IDeleteRangeMutationParams => ({
     unitId: params.unitId,
     subUnitId: params.subUnitId,
-    ranges: params.ranges,
+    range: params.range,
     shiftDimension: params.shiftDimension,
 });
 
@@ -44,7 +44,7 @@ export const InsertRangeMutation: IMutation<IInsertRangeMutationParams, boolean>
     id: 'sheet.mutation.insert-range',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
-        const { unitId, subUnitId, ranges, cellValue, shiftDimension } = params;
+        const { unitId, subUnitId, range, cellValue, shiftDimension } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const workbook = univerInstanceService.getUniverSheetInstance(unitId);
         if (!workbook) return false;
@@ -55,7 +55,7 @@ export const InsertRangeMutation: IMutation<IInsertRangeMutationParams, boolean>
         const lastEndRow = worksheet.getLastRowWithContent();
         const lastEndColumn = worksheet.getLastColumnWithContent();
 
-        handleInsertRangeMutation(cellMatrix, ranges, lastEndRow, lastEndColumn, shiftDimension, cellValue);
+        handleInsertRangeMutation(cellMatrix, range, lastEndRow, lastEndColumn, shiftDimension, cellValue);
 
         return true;
     },
@@ -63,61 +63,59 @@ export const InsertRangeMutation: IMutation<IInsertRangeMutationParams, boolean>
 
 export function handleInsertRangeMutation<T>(
     cellMatrix: ObjectMatrix<T>,
-    ranges: IRange[],
+    range: IRange,
     lastEndRow: number,
     lastEndColumn: number,
     shiftDimension: Dimension,
     cellValue?: IObjectMatrixPrimitiveType<T>
 ) {
-    for (let i = 0; i < ranges.length; i++) {
-        const { startRow, endRow, startColumn, endColumn } = ranges[i];
-        if (shiftDimension === Dimension.ROWS) {
-            const rows = endRow - startRow + 1;
-            // build new data
-            for (let r = lastEndRow; r >= startRow; r--) {
-                for (let c = startColumn; c <= endColumn; c++) {
-                    // get value blow current range
+    const { startRow, endRow, startColumn, endColumn } = range;
+    if (shiftDimension === Dimension.ROWS) {
+        const rows = endRow - startRow + 1;
+        // build new data
+        for (let r = lastEndRow; r >= startRow; r--) {
+            for (let c = startColumn; c <= endColumn; c++) {
+                // get value blow current range
 
-                    const value = cellMatrix.getValue(r, c);
-                    if (value == null) {
-                        cellMatrix.realDeleteValue(r + rows, c);
-                    } else {
-                        cellMatrix.setValue(r + rows, c, value);
-                    }
+                const value = cellMatrix.getValue(r, c);
+                if (value == null) {
+                    cellMatrix.realDeleteValue(r + rows, c);
+                } else {
+                    cellMatrix.setValue(r + rows, c, value);
                 }
             }
-            // insert cell value from user
-            for (let r = endRow; r >= startRow; r--) {
-                for (let c = startColumn; c <= endColumn; c++) {
-                    if (cellValue) {
-                        cellMatrix.setValue(r, c, cellValue[r][c]);
-                    } else {
-                        cellMatrix.realDeleteValue(r, c);
-                    }
+        }
+        // insert cell value from user
+        for (let r = endRow; r >= startRow; r--) {
+            for (let c = startColumn; c <= endColumn; c++) {
+                if (cellValue && cellValue[r] && cellValue[r][c]) {
+                    cellMatrix.setValue(r, c, cellValue[r][c]);
+                } else {
+                    cellMatrix.realDeleteValue(r, c);
                 }
             }
-        } else if (shiftDimension === Dimension.COLUMNS) {
-            const columns = endColumn - startColumn + 1;
-            for (let r = startRow; r <= endRow; r++) {
-                for (let c = lastEndColumn; c >= startColumn; c--) {
-                    // get value blow current range
-                    const value = cellMatrix.getValue(r, c);
+        }
+    } else if (shiftDimension === Dimension.COLUMNS) {
+        const columns = endColumn - startColumn + 1;
+        for (let r = startRow; r <= endRow; r++) {
+            for (let c = lastEndColumn; c >= startColumn; c--) {
+                // get value blow current range
+                const value = cellMatrix.getValue(r, c);
 
-                    if (value == null) {
-                        cellMatrix.realDeleteValue(r, c + columns);
-                    } else {
-                        cellMatrix.setValue(r, c + columns, value);
-                    }
+                if (value == null) {
+                    cellMatrix.realDeleteValue(r, c + columns);
+                } else {
+                    cellMatrix.setValue(r, c + columns, value);
                 }
             }
-            // insert cell value from user
-            for (let r = startRow; r <= endRow; r++) {
-                for (let c = endColumn; c >= startColumn; c--) {
-                    if (cellValue) {
-                        cellMatrix.setValue(r, c, cellValue[r][c]);
-                    } else {
-                        cellMatrix.realDeleteValue(r, c);
-                    }
+        }
+        // insert cell value from user
+        for (let r = startRow; r <= endRow; r++) {
+            for (let c = endColumn; c >= startColumn; c--) {
+                if (cellValue && cellValue[r] && cellValue[r][c]) {
+                    cellMatrix.setValue(r, c, cellValue[r][c]);
+                } else {
+                    cellMatrix.realDeleteValue(r, c);
                 }
             }
         }

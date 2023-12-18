@@ -108,8 +108,8 @@ export class RefRangeService extends Disposable {
                         }
                         case EffectRefRangId.RemoveRowCommandId: {
                             const params = command;
-                            const ranges = params.params?.ranges || [];
-                            const rowStart = Math.min(...ranges.map((range) => range.startRow));
+
+                            const rowStart = params.params!.range.startRow;
                             const range: IRange = {
                                 startRow: rowStart,
                                 endRow: workSheet.getRowCount() - 1,
@@ -120,8 +120,7 @@ export class RefRangeService extends Disposable {
                         }
                         case EffectRefRangId.RemoveColCommandId: {
                             const params = command;
-                            const ranges = params.params?.ranges || [];
-                            const colStart = Math.min(...ranges.map((range) => range.startColumn));
+                            const colStart = params.params!.range.startColumn;
                             const range: IRange = {
                                 startRow: 0,
                                 endRow: workSheet.getRowCount() - 1,
@@ -133,26 +132,26 @@ export class RefRangeService extends Disposable {
                         case EffectRefRangId.DeleteRangeMoveUpCommandId:
                         case EffectRefRangId.InsertRangeMoveDownCommandId: {
                             const params = command;
-                            const ranges = params.params!.ranges || getSelectionRanges(this._selectionManagerService);
-                            const effectRanges = ranges.map((range) => ({
+                            const range = params.params!.range || getSelectionRanges(this._selectionManagerService)[0];
+                            const effectRange = {
                                 startRow: range.startRow,
                                 startColumn: range.startColumn,
                                 endColumn: range.endColumn,
                                 endRow: workSheet.getRowCount() - 1,
-                            }));
-                            return this._checkRange(effectRanges, unitId, subUnitId);
+                            };
+                            return this._checkRange([effectRange], unitId, subUnitId);
                         }
                         case EffectRefRangId.DeleteRangeMoveLeftCommandId:
                         case EffectRefRangId.InsertRangeMoveRightCommandId: {
                             const params = command;
-                            const ranges = params.params!.ranges || getSelectionRanges(this._selectionManagerService);
-                            const effectRanges = ranges.map((range) => ({
+                            const range = params.params!.range || getSelectionRanges(this._selectionManagerService)[0];
+                            const effectRange = {
                                 startRow: range.startRow,
                                 startColumn: range.startColumn,
                                 endColumn: workSheet.getColumnCount() - 1,
                                 endRow: range.endRow,
-                            }));
-                            return this._checkRange(effectRanges, unitId, subUnitId);
+                            };
+                            return this._checkRange([effectRange], unitId, subUnitId);
                         }
                     }
                 };

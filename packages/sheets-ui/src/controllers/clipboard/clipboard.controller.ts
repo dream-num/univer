@@ -278,7 +278,7 @@ export class SheetClipboardController extends Disposable {
                     const addRowMutation: IInsertRowMutationParams = {
                         unitId: unitId!,
                         subUnitId: subUnitId!,
-                        ranges: [{ ...range, startRow: maxRow }],
+                        range: { ...range, startRow: maxRow },
                         rowInfo,
                     };
                     redoMutations.push({
@@ -345,7 +345,7 @@ export class SheetClipboardController extends Disposable {
                     const addColMutation: IInsertColMutationParams = {
                         unitId: unitId!,
                         subUnitId: subUnitId!,
-                        ranges: [{ ...range, startColumn: maxColumn }],
+                        range: { ...range, startColumn: maxColumn },
                         colInfo: colProperties.slice(existingColsCount).map((property) => ({
                             w: property.width ? +property.width : DEFAULT_WORKSHEET_COLUMN_WIDTH,
                             hd: BooleanNumber.FALSE,

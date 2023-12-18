@@ -733,13 +733,11 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     override var(): BaseValueObject {
-        const allValue = this.flatten();
-
         const mean = this.mean();
 
         let isError = null;
         const squaredDifferences: BaseValueObject[][] = [];
-        allValue.iterator((valueObject: Nullable<BaseValueObject>, row: number, column: number) => {
+        this.iterator((valueObject: Nullable<BaseValueObject>, row: number, column: number) => {
             let baseValueObject = null;
 
             if (valueObject && valueObject.isError()) {
@@ -764,18 +762,28 @@ export class ArrayValueObject extends BaseValueObject {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        return new ArrayValueObject('').mean();
+        const { _rowCount, _columnCount, _unitId, _sheetId, _currentRow, _currentColumn } = this;
+        const squaredDifferencesArrayObject = new ArrayValueObject({
+            calculateValueList: squaredDifferences,
+            rowCount: _rowCount,
+            columnCount: _columnCount,
+            unitId: _unitId,
+            sheetId: _sheetId,
+            row: _currentRow,
+            column: _currentColumn,
+        });
 
-        // TODO@Dushusir: use squaredDifferences
-        // const sum = new ArrayValueObject({
-        //     calculateValueList: squaredDifferences,
-        //     rowCount: number;
-        //     columnCount: number;
-        //     unitId: string;
-        //     sheetId: string;
-        //     row: number;
-        //     column: number;
-        // }).sum();
+        return squaredDifferencesArrayObject.mean();
+    }
+
+    override std(): BaseValueObject {
+        const variance = this.var();
+
+        if (variance.isError()) {
+            return variance;
+        }
+
+        return variance.sqrt();
     }
 
     override log(): BaseValueObject {

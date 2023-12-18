@@ -126,6 +126,18 @@ describe('arrayValueObject test', () => {
         });
     });
 
+    describe('var', () => {
+        it('normal', () => {
+            expect(originArrayValueObject.var().getValue()).toStrictEqual(18.666666666666668);
+        });
+    });
+
+    describe('std', () => {
+        it('normal', () => {
+            expect(originArrayValueObject.std().getValue()).toStrictEqual(4.320493798938574);
+        });
+    });
+
     describe('ValueObjectFactory', () => {
         it('ValueObjectFactory create BooleanValueObject ', () => {
             let booleanValueObject = ValueObjectFactory.create(true);

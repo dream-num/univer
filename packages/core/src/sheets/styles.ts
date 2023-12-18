@@ -15,7 +15,7 @@
  */
 
 import type { IKeyType, Nullable } from '../shared';
-import { Tools } from '../shared';
+import { LRUMap, Tools } from '../shared';
 import type { ICellDataForSheetInterceptor, IStyleData } from '../types/interfaces';
 
 /**
@@ -26,13 +26,13 @@ import type { ICellDataForSheetInterceptor, IStyleData } from '../types/interfac
 export class Styles {
     private _styles: IKeyType<Nullable<IStyleData>>;
 
-    private _cacheMap = new Map<string, string>();
+    private _cacheMap = new LRUMap<string, string>(100000);
 
     private _maxCacheSize: number;
 
-    constructor(styles: IKeyType<Nullable<IStyleData>> = {}, maxCacheSize = 100) {
+    constructor(styles: IKeyType<Nullable<IStyleData>> = {}) {
         this._styles = styles;
-        this._maxCacheSize = maxCacheSize;
+
         this._generateCacheMap();
     }
 
@@ -52,9 +52,9 @@ export class Styles {
         const styleObject = JSON.stringify(data);
         if (this._cacheMap.has(styleObject)) {
             const id = this._cacheMap.get(styleObject) as string;
-            // Move the accessed entry to the end of the Map to represent its recent usage
-            this._cacheMap.delete(styleObject);
-            this._cacheMap.set(styleObject, id);
+            // // Move the accessed entry to the end of the Map to represent its recent usage
+            // this._cacheMap.delete(styleObject);
+            // this._cacheMap.set(styleObject, id);
 
             return id;
         }
@@ -80,13 +80,6 @@ export class Styles {
         // update cache
         const styleObject = JSON.stringify(data);
         this._cacheMap.set(styleObject, id);
-
-        // Check if cache size exceeds the maximum limit
-        if (this._cacheMap.size > this._maxCacheSize) {
-            // Remove the least recently used entry (the first entry in the Map)
-            const firstEntry = this._cacheMap.entries().next().value;
-            this._cacheMap.delete(firstEntry[0]);
-        }
 
         return id;
     }

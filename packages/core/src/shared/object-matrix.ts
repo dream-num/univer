@@ -469,12 +469,23 @@ export class ObjectMatrix<T> {
         return array;
     }
 
+    /**
+     * @deprecated Use getMatrix as a substitute.
+     */
     toJSON(): IObjectMatrixPrimitiveType<T> {
         return this._matrix;
     }
 
+    clone(): IObjectMatrixPrimitiveType<T> {
+        const json = JSON.stringify(this._matrix);
+        return JSON.parse(json);
+    }
+
+    /**
+     * @deprecated Use clone as a substitute.
+     */
     getData(): IObjectMatrixPrimitiveType<T> {
-        const json = JSON.stringify(this);
+        const json = JSON.stringify(this._matrix);
         return JSON.parse(json);
     }
 

@@ -98,9 +98,9 @@ export const SetRangeValuesUndoMutationFactory = (
     });
 
     return {
-        ...Tools.deepClone(params),
+        ...params,
         options: {},
-        cellValue: undoData.getData(),
+        cellValue: undoData.getMatrix(),
     } as ISetRangeValuesMutationParams;
 };
 

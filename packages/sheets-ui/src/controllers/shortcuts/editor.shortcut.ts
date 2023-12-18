@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { FOCUSING_EDITOR } from '@univerjs/core';
 import { BreakLineCommand, DeleteLeftCommand } from '@univerjs/docs';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import type { IShortcutItem } from '@univerjs/ui';
@@ -25,6 +24,7 @@ import {
     SetCellEditVisibleOperation,
 } from '../../commands/operations/cell-edit.operation';
 import {
+    whenEditorActivated,
     whenEditorActivatedIsVisible,
     whenEditorDidNotInputFormulaActivated,
     whenEditorFocusIsHidden,
@@ -101,7 +101,7 @@ export const EditorCursorEscShortcut: IShortcutItem = {
     binding: KeyCode.ESC,
     description: 'shortcut.sheet.abort-editing',
     group: '4_sheet-edit',
-    preconditions: (contextService) => contextService.getContextValue(FOCUSING_EDITOR),
+    preconditions: (contextService) => whenEditorActivated(contextService),
     staticParameters: {
         visible: false,
         eventType: DeviceInputEventType.Keyboard,
@@ -113,7 +113,7 @@ export const EditorBreakLineShortcut: IShortcutItem = {
     id: BreakLineCommand.id,
     description: 'shortcut.sheet.break-line',
     group: '4_sheet-edit',
-    preconditions: (contextService) => contextService.getContextValue(FOCUSING_EDITOR),
+    preconditions: (contextService) => whenEditorActivated(contextService),
     binding: KeyCode.ENTER | MetaKeys.ALT,
 };
 

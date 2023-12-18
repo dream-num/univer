@@ -27,6 +27,10 @@ export function whenEditorNotActivated(contextService: IContextService) {
     return contextService.getContextValue(FOCUSING_SHEET) && !contextService.getContextValue(FOCUSING_EDITOR);
 }
 
+export function whenEditorActivated(contextService: IContextService) {
+    return contextService.getContextValue(FOCUSING_SHEET) && contextService.getContextValue(FOCUSING_EDITOR);
+}
+
 export function whenEditorFocusIsHidden(contextService: IContextService) {
     return (
         contextService.getContextValue(FOCUSING_EDITOR_BUT_HIDDEN) && !contextService.getContextValue(FOCUSING_EDITOR)
@@ -51,6 +55,7 @@ export function whenEditorInputFormulaActivated(contextService: IContextService)
 
 export function whenEditorDidNotInputFormulaActivated(contextService: IContextService) {
     return (
+        contextService.getContextValue(FOCUSING_SHEET) &&
         contextService.getContextValue(FOCUSING_EDITOR) &&
         !contextService.getContextValue(FOCUSING_EDITOR_INPUT_FORMULA)
     );

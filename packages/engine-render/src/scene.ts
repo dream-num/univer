@@ -486,6 +486,7 @@ export class Scene extends ThinScene {
         if (!this.isDirty()) {
             return;
         }
+
         !parentCtx && this.getEngine()?.clearCanvas();
 
         const layers = this._layers.sort(sortRules);

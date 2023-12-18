@@ -14,3 +14,46 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '@univerjs/core';
+import type { IDisposable } from '@wendellhu/redi';
+import { createIdentifier } from '@wendellhu/redi';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+
+export interface IZenEditorManagerService {
+    position$: Observable<Nullable<DOMRect>>;
+
+    dispose(): void;
+    setPosition(param: DOMRect): void;
+    getPosition(): Readonly<Nullable<DOMRect>>;
+}
+
+export class ZenEditorManagerService implements IDisposable {
+    private _position: Nullable<DOMRect> = null;
+
+    private readonly _position$ = new BehaviorSubject<Nullable<DOMRect>>(null);
+    readonly position$ = this._position$.asObservable();
+
+    dispose(): void {
+        this._position$.complete();
+        this._position = null;
+    }
+
+    setPosition(param: DOMRect) {
+        this._position = param;
+
+        this._refresh(param);
+    }
+
+    getPosition(): Readonly<Nullable<DOMRect>> {
+        return this._position;
+    }
+
+    private _refresh(param: DOMRect): void {
+        this._position$.next(param);
+    }
+}
+
+export const IZenEditorManagerService = createIdentifier<ZenEditorManagerService>(
+    'univer.sheet-zen-editor-manager.service'
+);

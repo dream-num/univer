@@ -19,6 +19,8 @@ import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { ZenEditorController } from './controllers/zen-editor.controller';
+import { ZenEditorUIController } from './controllers/zen-editor-ui.controller';
+import { IZenEditorManagerService, ZenEditorManagerService } from './services/zen-editor.service';
 
 export interface IZenEditorPluginConfig {}
 
@@ -34,7 +36,11 @@ export class ZenEditorPlugin extends Plugin {
     }
 
     private _initializeDependencies(injector: Injector) {
-        const dependencies: Dependency[] = [[ZenEditorController]];
+        const dependencies: Dependency[] = [
+            [ZenEditorUIController],
+            [ZenEditorController],
+            [IZenEditorManagerService, { useClass: ZenEditorManagerService }],
+        ];
 
         dependencies.forEach((dependency) => injector.add(dependency));
     }

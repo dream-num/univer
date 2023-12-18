@@ -16,7 +16,6 @@
 
 import type { IOperation } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
-import { IZenZoneService } from '@univerjs/ui';
 
 export const OpenZenEditorOperation: IOperation = {
     id: 'zen-editor.operation.open-zen-editor',
@@ -24,10 +23,6 @@ export const OpenZenEditorOperation: IOperation = {
     type: CommandType.OPERATION,
 
     handler: (accessor) => {
-        const zenZoneService = accessor.get(IZenZoneService);
-
-        zenZoneService.open();
-
         return true;
     },
 };

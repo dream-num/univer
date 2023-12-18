@@ -14,33 +14,27 @@
  * limitations under the License.
  */
 
-import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, ICommandService } from '@univerjs/core';
+import { ICommandService } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { CheckMarkSingle, CloseSingle } from '@univerjs/icons';
-import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import { CancelZenEditCommand, ConfirmZenEditCommand } from '../../commands/commands/zen-editor.command';
+import { DOCS_ZEN_EDITOR_UNIT_ID_KEY } from '../../controllers/zen-editor.controller';
+import { IZenEditorManagerService } from '../../services/zen-editor.service';
 import styles from './index.module.less';
-
-enum ArrowDirection {
-    Down,
-    Up,
-}
 
 const COMPONENT_PREFIX = 'ZEN_EDITOR_PLUGIN_';
 export const ZEN_EDITOR_COMPONENT = `${COMPONENT_PREFIX}ZEN_EDITOR_COMPONENT`;
 
 export function ZenEditor() {
-    const [arrowDirection, setArrowDirection] = useState<ArrowDirection>(ArrowDirection.Down);
-
     const editorRef = useRef<HTMLDivElement>(null);
 
     const renderManagerService: IRenderManagerService = useDependency(IRenderManagerService);
 
-    const editorBridgeService = useDependency(IEditorBridgeService);
+    const zenEditorManagerService = useDependency(IZenEditorManagerService);
 
     const commandService = useDependency(ICommandService);
 
@@ -52,18 +46,18 @@ export function ZenEditor() {
         }
 
         const renderSubscription = renderManagerService.currentRender$.subscribe((param) => {
-            if (param !== DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
+            if (param !== DOCS_ZEN_EDITOR_UNIT_ID_KEY) {
                 return;
             }
 
-            const engine = renderManagerService.getRenderById(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY)?.engine;
+            const engine = renderManagerService.getRenderById(DOCS_ZEN_EDITOR_UNIT_ID_KEY)?.engine;
             engine?.setContainer(editor);
         });
 
         const resizeObserver = new ResizeObserver(() => {
             const editorRect = editor.getBoundingClientRect();
 
-            // formulaEditorManagerService.setPosition(editorRect);
+            zenEditorManagerService.setPosition(editorRect);
         });
 
         resizeObserver.observe(editor);
@@ -100,7 +94,7 @@ export function ZenEditor() {
                     <CheckMarkSingle />
                 </span>
             </div>
-            <div className={styles.canvasContainer} ref={editorRef} />
+            <div className={styles.zenEditorCanvasContainer} ref={editorRef} />
         </div>
     );
 }

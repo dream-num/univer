@@ -247,7 +247,7 @@ export class ActiveDirtyController extends Disposable {
     }
 
     private _getDeleteRangeMutationDirtyRange(params: IDeleteRangeMutationParams) {
-        const { subUnitId: sheetId, unitId, ranges, shiftDimension } = params;
+        const { subUnitId: sheetId, unitId, range, shiftDimension } = params;
 
         const dirtyRanges: IUnitRange[] = [];
 
@@ -261,28 +261,26 @@ export class ActiveDirtyController extends Disposable {
 
         const matrix = new ObjectMatrix<Nullable<ICellData>>();
 
-        for (const range of ranges) {
-            let newMatrix: Nullable<ObjectMatrix<Nullable<ICellData>>> = null;
-            const { startRow, startColumn, endRow, endColumn } = range;
-            if (shiftDimension === Dimension.ROWS) {
-                newMatrix = this._rangeToMatrix({
-                    startRow,
-                    startColumn,
-                    endRow: lastEndRow,
-                    endColumn,
-                });
-            } else if (shiftDimension === Dimension.COLUMNS) {
-                newMatrix = this._rangeToMatrix({
-                    startRow,
-                    startColumn,
-                    endRow,
-                    endColumn: lastEndColumn,
-                });
-            }
+        let newMatrix: Nullable<ObjectMatrix<Nullable<ICellData>>> = null;
+        const { startRow, startColumn, endRow, endColumn } = range;
+        if (shiftDimension === Dimension.ROWS) {
+            newMatrix = this._rangeToMatrix({
+                startRow,
+                startColumn,
+                endRow: lastEndRow,
+                endColumn,
+            });
+        } else if (shiftDimension === Dimension.COLUMNS) {
+            newMatrix = this._rangeToMatrix({
+                startRow,
+                startColumn,
+                endRow,
+                endColumn: lastEndColumn,
+            });
+        }
 
-            if (newMatrix != null) {
-                matrix.merge(newMatrix);
-            }
+        if (newMatrix != null) {
+            matrix.merge(newMatrix);
         }
 
         const matrixData = matrix.getData();
@@ -295,7 +293,7 @@ export class ActiveDirtyController extends Disposable {
     }
 
     private _getRemoveRowOrColumnMutation(params: IRemoveRowsMutationParams, isRow: boolean = true) {
-        const { subUnitId: sheetId, unitId, ranges } = params;
+        const { subUnitId: sheetId, unitId, range } = params;
 
         const dirtyRanges: IUnitRange[] = [];
 
@@ -309,29 +307,27 @@ export class ActiveDirtyController extends Disposable {
 
         const matrix = new ObjectMatrix<Nullable<ICellData>>();
 
-        for (const range of ranges) {
-            let newMatrix: Nullable<ObjectMatrix<Nullable<ICellData>>> = null;
-            const { startRow, endRow, startColumn, endColumn } = range;
+        let newMatrix: Nullable<ObjectMatrix<Nullable<ICellData>>> = null;
+        const { startRow, endRow, startColumn, endColumn } = range;
 
-            if (isRow === true) {
-                newMatrix = this._rangeToMatrix({
-                    startRow,
-                    startColumn: 0,
-                    endRow,
-                    endColumn: columnCount - 1,
-                });
-            } else {
-                newMatrix = this._rangeToMatrix({
-                    startRow: 0,
-                    startColumn,
-                    endRow: rowCount,
-                    endColumn,
-                });
-            }
+        if (isRow === true) {
+            newMatrix = this._rangeToMatrix({
+                startRow,
+                startColumn: 0,
+                endRow,
+                endColumn: columnCount - 1,
+            });
+        } else {
+            newMatrix = this._rangeToMatrix({
+                startRow: 0,
+                startColumn,
+                endRow: rowCount,
+                endColumn,
+            });
+        }
 
-            if (newMatrix != null) {
-                matrix.merge(newMatrix);
-            }
+        if (newMatrix != null) {
+            matrix.merge(newMatrix);
         }
 
         const matrixData = matrix.getData();

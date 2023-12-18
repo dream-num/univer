@@ -194,7 +194,7 @@ function handleInsertRow<T>(formulaMatrix: ObjectMatrix<T>, command: ICommandInf
     const lastEndRow = formulaMatrix.getLength() - 1;
     const lastEndColumn = formulaMatrix.getRange().endColumn;
 
-    handleInsertRangeMutation(formulaMatrix, [range], lastEndRow, lastEndColumn, Dimension.ROWS);
+    handleInsertRangeMutation(formulaMatrix, range, lastEndRow, lastEndColumn, Dimension.ROWS);
 }
 
 function handleInsertCol<T>(formulaMatrix: ObjectMatrix<T>, command: ICommandInfo<IInsertColCommandParams>) {
@@ -205,7 +205,7 @@ function handleInsertCol<T>(formulaMatrix: ObjectMatrix<T>, command: ICommandInf
     const lastEndRow = formulaMatrix.getLength() - 1;
     const lastEndColumn = formulaMatrix.getRange().endColumn;
 
-    handleInsertRangeMutation(formulaMatrix, [range], lastEndRow, lastEndColumn, Dimension.COLUMNS);
+    handleInsertRangeMutation(formulaMatrix, range, lastEndRow, lastEndColumn, Dimension.COLUMNS);
 }
 
 function handleInsertRangeMoveRight<T>(
@@ -215,11 +215,11 @@ function handleInsertRangeMoveRight<T>(
     const { params } = command;
     if (!params) return;
 
-    const { ranges } = params;
+    const { range } = params;
     const lastEndRow = formulaMatrix.getLength() - 1;
     const lastEndColumn = formulaMatrix.getRange().endColumn;
 
-    handleInsertRangeMutation(formulaMatrix, ranges, lastEndRow, lastEndColumn, Dimension.COLUMNS);
+    handleInsertRangeMutation(formulaMatrix, range, lastEndRow, lastEndColumn, Dimension.COLUMNS);
 }
 
 function handleInsertRangeMoveDown<T>(
@@ -229,33 +229,33 @@ function handleInsertRangeMoveDown<T>(
     const { params } = command;
     if (!params) return;
 
-    const { ranges } = params;
+    const { range } = params;
     const lastEndRow = formulaMatrix.getLength() - 1;
     const lastEndColumn = formulaMatrix.getRange().endColumn;
 
-    handleInsertRangeMutation(formulaMatrix, ranges, lastEndRow, lastEndColumn, Dimension.ROWS);
+    handleInsertRangeMutation(formulaMatrix, range, lastEndRow, lastEndColumn, Dimension.ROWS);
 }
 
 function handleRemoveRow<T>(formulaMatrix: ObjectMatrix<T>, command: ICommandInfo<IRemoveRowColCommandParams>) {
     const { params } = command;
     if (!params) return;
 
-    const { ranges } = params;
+    const { range } = params;
     const lastEndRow = formulaMatrix.getLength() - 1;
     const lastEndColumn = formulaMatrix.getRange().endColumn;
 
-    handleDeleteRangeMutation(formulaMatrix, ranges, lastEndRow, lastEndColumn, Dimension.ROWS);
+    handleDeleteRangeMutation(formulaMatrix, range, lastEndRow, lastEndColumn, Dimension.ROWS);
 }
 
 function handleRemoveCol<T>(formulaMatrix: ObjectMatrix<T>, command: ICommandInfo<IRemoveRowColCommandParams>) {
     const { params } = command;
     if (!params) return;
 
-    const { ranges } = params;
+    const { range } = params;
     const lastEndRow = formulaMatrix.getLength() - 1;
     const lastEndColumn = formulaMatrix.getRange().endColumn;
 
-    handleDeleteRangeMutation(formulaMatrix, ranges, lastEndRow, lastEndColumn, Dimension.COLUMNS);
+    handleDeleteRangeMutation(formulaMatrix, range, lastEndRow, lastEndColumn, Dimension.COLUMNS);
 }
 
 function handleDeleteRangeMoveUp<T>(
@@ -265,11 +265,11 @@ function handleDeleteRangeMoveUp<T>(
     const { params } = command;
     if (!params) return;
 
-    const { ranges } = params;
+    const { range } = params;
     const lastEndRow = formulaMatrix.getLength() - 1;
     const lastEndColumn = formulaMatrix.getRange().endColumn;
 
-    handleDeleteRangeMutation(formulaMatrix, ranges, lastEndRow, lastEndColumn, Dimension.ROWS);
+    handleDeleteRangeMutation(formulaMatrix, range, lastEndRow, lastEndColumn, Dimension.ROWS);
 }
 
 function handleDeleteRangeMoveLeft<T>(
@@ -279,11 +279,11 @@ function handleDeleteRangeMoveLeft<T>(
     const { params } = command;
     if (!params) return;
 
-    const { ranges } = params;
+    const { range } = params;
     const lastEndRow = formulaMatrix.getLength() - 1;
     const lastEndColumn = formulaMatrix.getRange().endColumn;
 
-    handleDeleteRangeMutation(formulaMatrix, ranges, lastEndRow, lastEndColumn, Dimension.COLUMNS);
+    handleDeleteRangeMutation(formulaMatrix, range, lastEndRow, lastEndColumn, Dimension.COLUMNS);
 }
 
 export function offsetArrayFormula(arrayFormulaRange: IArrayFormulaRangeType, unitId: string, sheetId: string) {

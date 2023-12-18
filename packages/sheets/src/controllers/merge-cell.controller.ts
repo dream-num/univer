@@ -451,33 +451,31 @@ export class MergeCellController extends Disposable {
         if (!worksheet) {
             return this._handleNull();
         }
-        const { ranges } = config;
+        const { range } = config;
         const mergeData: IRange[] = Tools.deepClone(worksheet.getMergeData());
         for (let i = 0; i < mergeData.length; i++) {
             const merge = mergeData[i];
             const { startColumn: mergeStartColumn, endColumn: mergeEndColumn } = merge;
             const mergedCellColumnCount = mergeEndColumn - mergeStartColumn + 1;
-            for (let j = 0; j < ranges.length; j++) {
-                const { startColumn, endColumn } = ranges[j];
-                const count = endColumn - startColumn + 1;
-                if (endColumn < merge.startColumn) {
-                    merge.startColumn -= count;
-                    merge.endColumn -= count;
-                } else if (startColumn > merge.endColumn) {
-                    continue;
-                } else if (startColumn <= merge.startColumn && endColumn >= merge.endColumn) {
+            const { startColumn, endColumn } = range;
+            const count = endColumn - startColumn + 1;
+            if (endColumn < merge.startColumn) {
+                merge.startColumn -= count;
+                merge.endColumn -= count;
+            } else if (startColumn > merge.endColumn) {
+                continue;
+            } else if (startColumn <= merge.startColumn && endColumn >= merge.endColumn) {
+                mergeData.splice(i, 1);
+                i--;
+            } else {
+                const intersects = Rectangle.getIntersects(range, merge)!;
+                const interLength = intersects.endColumn - intersects.startColumn + 1;
+
+                if (interLength === mergedCellColumnCount - 1) {
                     mergeData.splice(i, 1);
                     i--;
                 } else {
-                    const intersects = Rectangle.getIntersects(ranges[j], merge)!;
-                    const interLength = intersects.endColumn - intersects.startColumn + 1;
-
-                    if (interLength === mergedCellColumnCount - 1) {
-                        mergeData.splice(i, 1);
-                        i--;
-                    } else {
-                        merge.endColumn -= intersects.endColumn - intersects.startColumn + 1;
-                    }
+                    merge.endColumn -= intersects.endColumn - intersects.startColumn + 1;
                 }
             }
         }
@@ -511,7 +509,7 @@ export class MergeCellController extends Disposable {
     }
 
     private _handleRemoveRowCommand(config: IRemoveRowsMutationParams, unitId: string, subUnitId: string) {
-        const { ranges } = config;
+        const { range } = config;
         const workbook = getWorkbook(this._univerInstanceService, unitId);
         if (!workbook) {
             return this._handleNull();
@@ -525,26 +523,24 @@ export class MergeCellController extends Disposable {
             const merge = mergeData[i];
             const { startRow: mergeStartRow, endRow: mergeEndRow } = merge;
             const mergedCellRowCount = mergeEndRow - mergeStartRow + 1;
-            for (let j = 0; j < ranges.length; j++) {
-                const { startRow, endRow } = ranges[j];
-                const count = endRow - startRow + 1;
-                if (endRow < mergeStartRow) {
-                    merge.startRow -= count;
-                    merge.endRow -= count;
-                } else if (startRow > mergeEndRow) {
-                    continue;
-                } else if (startRow <= mergeStartRow && endRow >= mergeEndRow) {
+            const { startRow, endRow } = range;
+            const count = endRow - startRow + 1;
+            if (endRow < mergeStartRow) {
+                merge.startRow -= count;
+                merge.endRow -= count;
+            } else if (startRow > mergeEndRow) {
+                continue;
+            } else if (startRow <= mergeStartRow && endRow >= mergeEndRow) {
+                mergeData.splice(i, 1);
+                i--;
+            } else {
+                const intersects = Rectangle.getIntersects(range, merge)!;
+                const interLength = intersects.endRow - intersects.startRow + 1;
+                if (interLength === mergedCellRowCount - 1) {
                     mergeData.splice(i, 1);
                     i--;
                 } else {
-                    const intersects = Rectangle.getIntersects(ranges[j], merge)!;
-                    const interLength = intersects.endRow - intersects.startRow + 1;
-                    if (interLength === mergedCellRowCount - 1) {
-                        mergeData.splice(i, 1);
-                        i--;
-                    } else {
-                        merge.endRow -= intersects.endRow - intersects.startRow + 1;
-                    }
+                    merge.endRow -= intersects.endRow - intersects.startRow + 1;
                 }
             }
         }
@@ -590,15 +586,25 @@ export class MergeCellController extends Disposable {
         if (!worksheet) {
             return this._handleNull();
         }
-        const ranges = config.ranges;
+        const range = config.range;
         const maxCol = worksheet.getMaxColumns() - 1;
         const mergeData = worksheet.getMergeData();
         const removeMergeData: IRange[] = [];
         const addMergeData: IRange[] = [];
         mergeData.forEach((rect) => {
-            for (let i = 0; i < ranges.length; i++) {
-                const { startRow, endRow, startColumn, endColumn } = ranges[i];
-                const intersects = Rectangle.intersects(
+            const { startRow, endRow, startColumn, endColumn } = range;
+            const intersects = Rectangle.intersects(
+                {
+                    startRow,
+                    startColumn,
+                    endRow,
+                    endColumn: maxCol,
+                },
+                rect
+            );
+            if (intersects) {
+                removeMergeData.push(rect);
+                const contains = Rectangle.contains(
                     {
                         startRow,
                         startColumn,
@@ -607,27 +613,14 @@ export class MergeCellController extends Disposable {
                     },
                     rect
                 );
-                if (intersects) {
-                    removeMergeData.push(rect);
-                    const contains = Rectangle.contains(
-                        {
-                            startRow,
-                            startColumn,
-                            endRow,
-                            endColumn: maxCol,
-                        },
-                        rect
-                    );
-                    if (contains) {
-                        const currentColumnsCount = endColumn - startColumn + 1;
-                        addMergeData.push({
-                            startRow: rect.startRow,
-                            startColumn: rect.startColumn + currentColumnsCount,
-                            endRow: rect.endRow,
-                            endColumn: rect.endColumn + currentColumnsCount,
-                        });
-                        break;
-                    }
+                if (contains) {
+                    const currentColumnsCount = endColumn - startColumn + 1;
+                    addMergeData.push({
+                        startRow: rect.startRow,
+                        startColumn: rect.startColumn + currentColumnsCount,
+                        endRow: rect.endRow,
+                        endColumn: rect.endColumn + currentColumnsCount,
+                    });
                 }
             }
         });
@@ -680,28 +673,25 @@ export class MergeCellController extends Disposable {
         if (!worksheet) {
             return this._handleNull();
         }
-        const ranges = config.ranges;
+        const range = config.range;
         const maxRow = worksheet.getMaxRows() - 1;
         const mergeData = worksheet.getMergeData();
         const removeMergeData: IRange[] = [];
         const addMergeData: IRange[] = [];
         mergeData.forEach((rect) => {
-            for (let i = 0; i < ranges.length; i++) {
-                const { startRow, startColumn, endColumn, endRow } = ranges[i];
-                const intersects = Rectangle.intersects({ startRow, startColumn, endRow: maxRow, endColumn }, rect);
-                if (intersects) {
-                    removeMergeData.push(rect);
-                    const contains = Rectangle.contains({ startRow, startColumn, endRow: maxRow, endColumn }, rect);
-                    if (contains) {
-                        const rowCount = endRow - startRow + 1;
-                        addMergeData.push({
-                            startRow: rect.startRow + rowCount,
-                            startColumn: rect.startColumn,
-                            endRow: rect.endRow + rowCount,
-                            endColumn: rect.endColumn,
-                        });
-                        break;
-                    }
+            const { startRow, startColumn, endColumn, endRow } = range;
+            const intersects = Rectangle.intersects({ startRow, startColumn, endRow: maxRow, endColumn }, rect);
+            if (intersects) {
+                removeMergeData.push(rect);
+                const contains = Rectangle.contains({ startRow, startColumn, endRow: maxRow, endColumn }, rect);
+                if (contains) {
+                    const rowCount = endRow - startRow + 1;
+                    addMergeData.push({
+                        startRow: rect.startRow + rowCount,
+                        startColumn: rect.startColumn,
+                        endRow: rect.endRow + rowCount,
+                        endColumn: rect.endColumn,
+                    });
                 }
             }
         });
@@ -760,24 +750,21 @@ export class MergeCellController extends Disposable {
         if (!worksheet) {
             return this._handleNull();
         }
-        const ranges = config.ranges;
+        const range = config.range;
         const maxRow = worksheet.getMaxRows() - 1;
         const mergeData = worksheet.getMergeData();
         const removeMergeData: IRange[] = [];
         const addMergeData: IRange[] = [];
         mergeData.forEach((rect) => {
-            for (let i = 0; i < ranges.length; i++) {
-                const { startRow, startColumn, endColumn, endRow } = ranges[i];
-                const intersects = Rectangle.intersects({ startRow, startColumn, endRow: maxRow, endColumn }, rect);
-                if (intersects) {
-                    removeMergeData.push(rect);
-                    const contains = Rectangle.contains({ startRow, startColumn, endRow: maxRow, endColumn }, rect);
-                    if (contains) {
-                        const rowCount = endRow - startRow + 1;
-                        const range = Rectangle.moveVertical(rect, -rowCount);
-                        addMergeData.push(range);
-                        break;
-                    }
+            const { startRow, startColumn, endColumn, endRow } = range;
+            const intersects = Rectangle.intersects({ startRow, startColumn, endRow: maxRow, endColumn }, rect);
+            if (intersects) {
+                removeMergeData.push(rect);
+                const contains = Rectangle.contains({ startRow, startColumn, endRow: maxRow, endColumn }, rect);
+                if (contains) {
+                    const rowCount = endRow - startRow + 1;
+                    const range = Rectangle.moveVertical(rect, -rowCount);
+                    addMergeData.push(range);
                 }
             }
         });
@@ -835,15 +822,25 @@ export class MergeCellController extends Disposable {
         if (!worksheet) {
             return this._handleNull();
         }
-        const ranges = config.ranges;
+        const range = config.range;
         const maxCol = worksheet.getMaxColumns() - 1;
         const mergeData = worksheet.getMergeData();
         const removeMergeData: IRange[] = [];
         const addMergeData: IRange[] = [];
         mergeData.forEach((rect) => {
-            for (let i = 0; i < ranges.length; i++) {
-                const { startRow, endRow, startColumn, endColumn } = ranges[i];
-                const intersects = Rectangle.intersects(
+            const { startRow, endRow, startColumn, endColumn } = range;
+            const intersects = Rectangle.intersects(
+                {
+                    startRow,
+                    startColumn,
+                    endRow,
+                    endColumn: maxCol,
+                },
+                rect
+            );
+            if (intersects) {
+                removeMergeData.push(rect);
+                const contains = Rectangle.contains(
                     {
                         startRow,
                         startColumn,
@@ -852,27 +849,14 @@ export class MergeCellController extends Disposable {
                     },
                     rect
                 );
-                if (intersects) {
-                    removeMergeData.push(rect);
-                    const contains = Rectangle.contains(
-                        {
-                            startRow,
-                            startColumn,
-                            endRow,
-                            endColumn: maxCol,
-                        },
-                        rect
-                    );
-                    if (contains) {
-                        const currentColumnsCount = endColumn - startColumn + 1;
-                        addMergeData.push({
-                            startRow: rect.startRow,
-                            startColumn: rect.startColumn - currentColumnsCount,
-                            endRow: rect.endRow,
-                            endColumn: rect.endColumn - currentColumnsCount,
-                        });
-                        break;
-                    }
+                if (contains) {
+                    const currentColumnsCount = endColumn - startColumn + 1;
+                    addMergeData.push({
+                        startRow: rect.startRow,
+                        startColumn: rect.startColumn - currentColumnsCount,
+                        endRow: rect.endRow,
+                        endColumn: rect.endColumn - currentColumnsCount,
+                    });
                 }
             }
         });

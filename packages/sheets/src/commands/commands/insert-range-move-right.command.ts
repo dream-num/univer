@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICommand, IMutationInfo, IRange } from '@univerjs/core';
+import type { ICellData, ICommand, IMutationInfo, IObjectMatrixPrimitiveType, IRange } from '@univerjs/core';
 import {
     BooleanNumber,
     CommandType,
@@ -23,7 +23,7 @@ import {
     ILogService,
     IUndoRedoService,
     IUniverInstanceService,
-    ObjectMatrix,
+    Range,
     sequenceExecute,
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
@@ -40,11 +40,9 @@ import { DeleteRangeMutation } from '../mutations/delete-range.mutation';
 import { InsertRangeMutation, InsertRangeUndoMutationFactory } from '../mutations/insert-range.mutation';
 import { InsertColMutation, InsertColMutationUndoFactory } from '../mutations/insert-row-col.mutation';
 import { RemoveColMutation } from '../mutations/remove-row-col.mutation';
-import type { IInterval } from './utils/selection-utils';
-import { calculateTotalLength } from './utils/selection-utils';
 
 export interface InsertRangeMoveRightCommandParams {
-    ranges: IRange[];
+    range: IRange;
 }
 export const InsertRangeMoveRightCommandId = 'sheet.command.insert-range-move-right';
 /**
@@ -70,11 +68,11 @@ export const InsertRangeMoveRightCommand: ICommand = {
 
         const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
         const subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
-        let ranges = params?.ranges as IRange[];
-        if (!ranges) {
-            ranges = selectionManagerService.getSelectionRanges() || [];
+        let range = params?.range;
+        if (!range) {
+            range = selectionManagerService.getLast()?.range;
         }
-        if (!ranges?.length) return false;
+        if (!range) return false;
 
         const workbook = univerInstanceService.getUniverSheetInstance(unitId);
         if (!workbook) return false;
@@ -84,24 +82,24 @@ export const InsertRangeMoveRightCommand: ICommand = {
         const redoMutations: IMutationInfo[] = [];
         const undoMutations: IMutationInfo[] = [];
 
-        // 1. insert range
-        const cellValue = new ObjectMatrix<ICellData>();
-        for (let i = 0; i < ranges.length; i++) {
-            const { startRow, endRow, startColumn, endColumn } = ranges[i];
-
-            for (let r = startRow; r <= endRow; r++) {
-                for (let c = startColumn; c <= endColumn; c++) {
-                    cellValue.setValue(r, c, { v: '' });
-                }
+        // to keep style.
+        const cellValue: IObjectMatrixPrimitiveType<ICellData> = {};
+        Range.foreach(range, (row, col) => {
+            const cell = worksheet.getCell(row, col);
+            if (!cell || !cell.s) {
+                return;
             }
-        }
-
+            if (!cellValue[row]) {
+                cellValue[row] = {};
+            }
+            cellValue[row][col] = { s: cell.s };
+        });
         const insertRangeMutationParams: IInsertRangeMutationParams = {
-            ranges,
+            range,
             subUnitId,
             unitId,
             shiftDimension: Dimension.COLUMNS,
-            cellValue: cellValue.getData(),
+            cellValue,
         };
 
         redoMutations.push({ id: InsertRangeMutation.id, params: insertRangeMutationParams });
@@ -118,35 +116,31 @@ export const InsertRangeMoveRightCommand: ICommand = {
         let hasValueInLastColumn = false;
         let lastColumnWidth = 0;
         const lastColumnIndex = worksheet.getMaxColumns() - 1;
-        const columnsObject: IInterval = {};
-        for (let i = 0; i < ranges.length; i++) {
-            const { startRow, endRow, startColumn, endColumn } = ranges[i];
+        const { startRow, endRow, startColumn, endColumn } = range;
 
-            columnsObject[`${i}`] = [startColumn, endColumn];
-            for (let row = startRow; row <= endRow; row++) {
-                const lastCell = worksheet.getCell(row, lastColumnIndex);
-                const lastCellValue = lastCell?.v;
-                if (lastCellValue && lastCellValue !== '') {
-                    hasValueInLastColumn = true;
-                    lastColumnWidth = worksheet.getColumnWidth(lastColumnIndex);
-                    break;
-                }
+        for (let row = startRow; row <= endRow; row++) {
+            const lastCell = worksheet.getCell(row, lastColumnIndex);
+            const lastCellValue = lastCell?.v;
+            if (lastCellValue && lastCellValue !== '') {
+                hasValueInLastColumn = true;
+                lastColumnWidth = worksheet.getColumnWidth(lastColumnIndex);
+                break;
             }
         }
 
         // There may be overlap and deduplication is required
-        const columnsCount = calculateTotalLength(columnsObject);
+        const columnsCount = endColumn - startColumn + 1;
         if (hasValueInLastColumn) {
             const lastColumnRange = {
-                startRow: ranges[0].startRow,
-                endRow: ranges[0].endRow,
+                startRow: range.startRow,
+                endRow: range.endRow,
                 startColumn: lastColumnIndex,
                 endColumn: lastColumnIndex,
             };
             const insertColParams: IInsertColMutationParams = {
                 unitId,
                 subUnitId,
-                ranges: [lastColumnRange],
+                range: lastColumnRange,
                 colInfo: new Array(columnsCount).fill(undefined).map(() => ({
                     w: lastColumnWidth,
                     hd: BooleanNumber.FALSE,
@@ -167,7 +161,7 @@ export const InsertRangeMoveRightCommand: ICommand = {
         }
         const sheetInterceptor = sheetInterceptorService.onCommandExecute({
             id: InsertRangeMoveRightCommand.id,
-            params: { ranges } as InsertRangeMoveRightCommandParams,
+            params: { range } as InsertRangeMoveRightCommandParams,
         });
         redoMutations.push(...sheetInterceptor.redos);
         undoMutations.push(...sheetInterceptor.undos);

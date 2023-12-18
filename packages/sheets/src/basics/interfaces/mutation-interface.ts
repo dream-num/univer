@@ -42,7 +42,7 @@ export interface IInsertSheetMutationParams {
 export interface IInsertRowMutationParams {
     unitId: string;
     subUnitId: string;
-    ranges: IRange[];
+    range: IRange;
     rowInfo?: IObjectArrayPrimitiveType<IRowData>;
 }
 
@@ -50,7 +50,7 @@ export interface IInsertRowMutationParams {
 export interface IInsertColMutationParams {
     unitId: string;
     subUnitId: string;
-    ranges: IRange[];
+    range: IRange;
     colInfo?: IObjectArrayPrimitiveType<IColumnData>;
 }
 
@@ -58,21 +58,21 @@ export interface IInsertColMutationParams {
 export interface IRemoveRowsMutationParams {
     unitId: string;
     subUnitId: string;
-    ranges: IRange[];
+    range: IRange;
 }
 
 /** Params of InsertColMutation */
 export interface IRemoveColMutationParams {
     unitId: string;
     subUnitId: string;
-    ranges: IRange[];
+    range: IRange;
 }
 
 /** Params of DeleteRange */
 export interface IDeleteRangeMutationParams {
     unitId: string;
     subUnitId: string;
-    ranges: IRange[];
+    range: IRange;
     shiftDimension: Dimension;
 }
 
@@ -80,9 +80,9 @@ export interface IDeleteRangeMutationParams {
 export interface IInsertRangeMutationParams {
     unitId: string;
     subUnitId: string;
-    ranges: IRange[];
+    range: IRange;
     shiftDimension: Dimension;
-    cellValue: IObjectMatrixPrimitiveType<ICellData>;
+    cellValue?: IObjectMatrixPrimitiveType<ICellData>;
 }
 
 /** Params of RemoveWorksheetMergeMutation */

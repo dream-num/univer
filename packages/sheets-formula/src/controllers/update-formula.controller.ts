@@ -116,7 +116,7 @@ interface IFormulaReferenceMoveParam {
     type: FormulaReferenceMoveType;
     unitId: string;
     sheetId: string;
-    ranges?: IRange[];
+    range?: IRange;
     from?: IRange;
     to?: IRange;
     sheetName?: string;
@@ -158,13 +158,13 @@ export class UpdateFormulaController extends Disposable {
         );
 
         this.disposeWithMe(
-            this._commandService.onCommandExecuted((command: ICommandInfo, options) => {
+            this._commandService.onCommandExecuted((command: ICommandInfo, options?: IExecutionOptions) => {
                 if (!command.params) return;
 
                 if (command.id === SetRangeValuesMutation.id) {
                     const params = command.params as ISetRangeValuesMutationParams;
                     if (
-                        (options && options.local === true) ||
+                        (options && options.onlyLocal === true) ||
                         params.trigger === SetStyleCommand.id ||
                         params.trigger === SetBorderCommand.id
                     ) {
@@ -183,7 +183,7 @@ export class UpdateFormulaController extends Disposable {
     private _handleSetRangeValuesMutation(params: ISetRangeValuesMutationParams, options?: IExecutionOptions) {
         const { subUnitId: sheetId, unitId, cellValue } = params;
 
-        if ((options && options.local === true) || cellValue == null) {
+        if ((options && options.onlyLocal === true) || cellValue == null) {
             return;
         }
 
@@ -451,12 +451,12 @@ export class UpdateFormulaController extends Disposable {
         const { params } = command;
         if (!params) return null;
 
-        const { ranges } = params;
+        const { range } = params;
         const { unitId, sheetId } = this._getCurrentSheetInfo();
 
         return {
             type: FormulaReferenceMoveType.InsertMoveRight,
-            ranges,
+            range,
             unitId,
             sheetId,
         };
@@ -466,12 +466,12 @@ export class UpdateFormulaController extends Disposable {
         const { params } = command;
         if (!params) return null;
 
-        const { ranges } = params;
+        const { range } = params;
         const { unitId, sheetId } = this._getCurrentSheetInfo();
 
         return {
             type: FormulaReferenceMoveType.InsertMoveDown,
-            ranges,
+            range,
             unitId,
             sheetId,
         };
@@ -481,12 +481,12 @@ export class UpdateFormulaController extends Disposable {
         const { params } = command;
         if (!params) return null;
 
-        const { ranges } = params;
+        const { range } = params;
         const { unitId, sheetId } = this._getCurrentSheetInfo();
 
         return {
             type: FormulaReferenceMoveType.RemoveRow,
-            ranges,
+            range,
             unitId,
             sheetId,
         };
@@ -496,12 +496,12 @@ export class UpdateFormulaController extends Disposable {
         const { params } = command;
         if (!params) return null;
 
-        const { ranges } = params;
+        const { range } = params;
         const { unitId, sheetId } = this._getCurrentSheetInfo();
 
         return {
             type: FormulaReferenceMoveType.RemoveColumn,
-            ranges,
+            range,
             unitId,
             sheetId,
         };
@@ -511,12 +511,12 @@ export class UpdateFormulaController extends Disposable {
         const { params } = command;
         if (!params) return null;
 
-        const { ranges } = params;
+        const { range } = params;
         const { unitId, sheetId } = this._getCurrentSheetInfo();
 
         return {
             type: FormulaReferenceMoveType.DeleteMoveUp,
-            ranges,
+            range,
             unitId,
             sheetId,
         };
@@ -526,12 +526,12 @@ export class UpdateFormulaController extends Disposable {
         const { params } = command;
         if (!params) return null;
 
-        const { ranges } = params;
+        const { range } = params;
         const { unitId, sheetId } = this._getCurrentSheetInfo();
 
         return {
             type: FormulaReferenceMoveType.DeleteMoveLeft,
-            ranges,
+            range,
             unitId,
             sheetId,
         };
@@ -748,10 +748,10 @@ export class UpdateFormulaController extends Disposable {
         currentFormulaUnitId: string,
         currentFormulaSheetId: string
     ) {
-        const { type, unitId: userUnitId, sheetId: userSheetId, ranges, from, to } = formulaReferenceMoveParam;
+        const { type, unitId: userUnitId, sheetId: userSheetId, range, from, to } = formulaReferenceMoveParam;
 
         const {
-            range,
+            range: unitRange,
             sheetId: sequenceRangeSheetId,
             unitId: sequenceRangeUnitId,
             sheetName: sequenceRangeSheetName,
@@ -772,7 +772,7 @@ export class UpdateFormulaController extends Disposable {
             return;
         }
 
-        const sequenceRange = Rectangle.moveOffset(range, refOffsetX, refOffsetY);
+        const sequenceRange = Rectangle.moveOffset(unitRange, refOffsetX, refOffsetY);
         let newRange: Nullable<IRange> = null;
 
         if (type === FormulaReferenceMoveType.Move) {
@@ -808,12 +808,12 @@ export class UpdateFormulaController extends Disposable {
             newRange = this._getMoveNewRange(moveEdge, result, from, to, sequenceRange, remainRange);
         }
 
-        if (ranges != null) {
+        if (range != null) {
             if (type === FormulaReferenceMoveType.InsertRow) {
                 const operators = handleInsertRow(
                     {
                         id: EffectRefRangId.InsertRowCommandId,
-                        params: { range: ranges[0], unitId: '', subUnitId: '', direction: Direction.DOWN },
+                        params: { range, unitId: '', subUnitId: '', direction: Direction.DOWN },
                     },
                     sequenceRange
                 );
@@ -832,7 +832,7 @@ export class UpdateFormulaController extends Disposable {
                 const operators = handleInsertCol(
                     {
                         id: EffectRefRangId.InsertColCommandId,
-                        params: { range: ranges[0], unitId: '', subUnitId: '', direction: Direction.RIGHT },
+                        params: { range, unitId: '', subUnitId: '', direction: Direction.RIGHT },
                     },
                     sequenceRange
                 );
@@ -851,7 +851,7 @@ export class UpdateFormulaController extends Disposable {
                 const operators = handleIRemoveRow(
                     {
                         id: EffectRefRangId.RemoveRowCommandId,
-                        params: { ranges },
+                        params: { range },
                     },
                     sequenceRange
                 );
@@ -870,7 +870,7 @@ export class UpdateFormulaController extends Disposable {
                 const operators = handleIRemoveCol(
                     {
                         id: EffectRefRangId.RemoveColCommandId,
-                        params: { ranges },
+                        params: { range },
                     },
                     sequenceRange
                 );
@@ -889,7 +889,7 @@ export class UpdateFormulaController extends Disposable {
                 const operators = handleDeleteRangeMoveLeft(
                     {
                         id: EffectRefRangId.DeleteRangeMoveLeftCommandId,
-                        params: { ranges },
+                        params: { range },
                     },
                     sequenceRange
                 );
@@ -908,7 +908,7 @@ export class UpdateFormulaController extends Disposable {
                 const operators = handleDeleteRangeMoveUp(
                     {
                         id: EffectRefRangId.DeleteRangeMoveUpCommandId,
-                        params: { ranges },
+                        params: { range },
                     },
                     sequenceRange
                 );
@@ -927,7 +927,7 @@ export class UpdateFormulaController extends Disposable {
                 const operators = handleInsertRangeMoveDown(
                     {
                         id: EffectRefRangId.InsertRangeMoveDownCommandId,
-                        params: { ranges },
+                        params: { range },
                     },
                     sequenceRange
                 );
@@ -946,7 +946,7 @@ export class UpdateFormulaController extends Disposable {
                 const operators = handleInsertRangeMoveRight(
                     {
                         id: EffectRefRangId.InsertRangeMoveRightCommandId,
-                        params: { ranges },
+                        params: { range },
                     },
                     sequenceRange
                 );

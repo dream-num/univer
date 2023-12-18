@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-formula",
-    "version": "0.1.0-alpha.2",
+    "version": "0.1.0-alpha.3",
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
     "main": "./lib/cjs/index.js",

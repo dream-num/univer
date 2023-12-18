@@ -1012,8 +1012,8 @@ export class Viewport {
         const viewBound = {
             top: topLeft.y,
             left: topLeft.x,
-            right: bottomRight.x,
-            bottom: bottomRight.y,
+            right: bottomRight.x * scaleX,
+            bottom: bottomRight.y * scaleY,
         };
 
         const preViewBound = this._preViewportBound?.viewBound;

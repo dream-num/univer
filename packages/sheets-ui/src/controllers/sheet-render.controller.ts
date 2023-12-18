@@ -43,7 +43,7 @@ interface ISetWorksheetMutationParams {
     subUnitId: string;
 }
 
-@OnLifecycle(LifecycleStages.Rendered, SheetRenderController)
+@OnLifecycle(LifecycleStages.Ready, SheetRenderController)
 export class SheetRenderController extends Disposable {
     constructor(
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
@@ -119,6 +119,7 @@ export class SheetRenderController extends Disposable {
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
                 const unitId = workbook.getUnitId();
+
                 if (COMMAND_LISTENER_SKELETON_CHANGE.includes(command.id)) {
                     const worksheet = workbook.getActiveSheet();
                     const sheetId = worksheet.getSheetId();
@@ -139,6 +140,8 @@ export class SheetRenderController extends Disposable {
                         );
                     }
 
+                    // Change the skeleton to render when the sheet is changed.
+                    // Should also check the init sheet.
                     this._sheetSkeletonManagerService.setCurrent({
                         unitId,
                         sheetId,

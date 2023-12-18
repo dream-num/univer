@@ -46,6 +46,10 @@ function Examples() {
                 <span> Univer Multi Instance</span>
                 <div className={styles.btnBg}>→</div>{' '}
             </a>
+            <a className={styles.btn} href="./uniscript/">
+                <span> Uniscript</span>
+                <div className={styles.btnBg}>→</div>{' '}
+            </a>
         </section>
     );
 }

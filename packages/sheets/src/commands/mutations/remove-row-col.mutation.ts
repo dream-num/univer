@@ -34,16 +34,14 @@ export const RemoveRowsUndoMutationFactory = (
     const rowWrapper = rowPrimitive;
     const rowInfo: IObjectArrayPrimitiveType<IRowData> = {};
 
-    for (let i = 0; i < params.ranges.length; i++) {
-        const range = params.ranges[i];
-        const slice = sliceMatrixArray(range.startRow, range.endRow, rowWrapper);
-        concatMatrixArray(rowInfo, slice);
-    }
+    const range = params.range;
+    const slice = sliceMatrixArray(range.startRow, range.endRow, rowWrapper);
+    concatMatrixArray(rowInfo, slice);
 
     return {
         unitId: params.unitId,
         subUnitId: params.subUnitId,
-        ranges: params.ranges,
+        range: params.range,
         rowInfo,
     };
 };
@@ -66,19 +64,15 @@ export const RemoveRowMutation: IMutation<IRemoveRowsMutationParams> = {
         const rowPrimitive = manager.getRowData();
         let rowWrapper = rowPrimitive;
 
-        for (let i = 0; i < params.ranges.length; i++) {
-            const range = params.ranges[i];
-            const start = range.startRow;
-            const end = range.endRow;
+        const range = params.range;
+        const start = range.startRow;
+        const end = range.endRow;
 
-            for (let j = start; j <= end; j++) {
-                rowWrapper = sliceMatrixArray(j, 1, rowWrapper);
-            }
+        for (let j = start; j <= end; j++) {
+            rowWrapper = sliceMatrixArray(j, 1, rowWrapper);
         }
 
-        worksheet.setRowCount(
-            worksheet.getRowCount() - params.ranges.reduce((acc, range) => acc + range.endRow - range.startRow + 1, 0)
-        );
+        worksheet.setRowCount(worksheet.getRowCount() - range.endRow - range.startRow + 1);
 
         return true;
     },
@@ -106,18 +100,16 @@ export const RemoveColMutationFactory = (
     const columnWrapper = columnPrimitive;
     const colInfo: IObjectArrayPrimitiveType<IColumnData> = {};
 
-    for (let i = 0; i < params.ranges.length; i++) {
-        const range = params.ranges[i];
+    const range = params.range;
 
-        const slice = sliceMatrixArray(range.startColumn, range.endColumn, columnWrapper);
+    const slice = sliceMatrixArray(range.startColumn, range.endColumn, columnWrapper);
 
-        concatMatrixArray(colInfo, slice);
-    }
+    concatMatrixArray(colInfo, slice);
 
     return {
         unitId: params.unitId,
         subUnitId: params.subUnitId,
-        ranges: params.ranges,
+        range: params.range,
         colInfo,
     };
 };
@@ -136,24 +128,9 @@ export const RemoveColMutation: IMutation<IRemoveColMutationParams> = {
         const worksheet = universheet.getSheetBySheetId(params.subUnitId);
         if (!worksheet) return false;
 
-        const manager = worksheet.getColumnManager();
-        const columnPrimitive = manager.getColumnData();
-        let columnWrapper = columnPrimitive;
+        const range = params.range;
 
-        for (let i = 0; i < params.ranges.length; i++) {
-            const range = params.ranges[i];
-            const start = range.startColumn;
-            const end = range.endColumn;
-
-            for (let j = start; j <= end; j++) {
-                columnWrapper = sliceMatrixArray(j, i, columnWrapper);
-            }
-        }
-
-        worksheet.setColumnCount(
-            worksheet.getColumnCount() -
-                params.ranges.reduce((acc, range) => acc + range.endColumn - range.startColumn + 1, 0)
-        );
+        worksheet.setColumnCount(worksheet.getColumnCount() - range.endColumn - range.startColumn + 1);
 
         return true;
     },

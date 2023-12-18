@@ -35,7 +35,7 @@ import { DeleteRangeMutation, DeleteRangeUndoMutationFactory } from '../mutation
 import { InsertRangeMutation } from '../mutations/insert-range.mutation';
 
 export interface IDeleteRangeMoveUpCommandParams {
-    ranges: IRange[];
+    range: IRange;
 }
 export const DeleteRangeMoveUpCommandId = 'sheet.command.delete-range-move-up';
 /**
@@ -53,16 +53,12 @@ export const DeleteRangeMoveUpCommand: ICommand = {
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
         const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        const subUnitId = univerInstanceService
-            .getCurrentUniverSheetInstance()
-
-            .getActiveSheet()
-            .getSheetId();
-        let ranges = params?.ranges as IRange[];
-        if (!ranges) {
-            ranges = selectionManagerService.getSelectionRanges() || [];
+        const subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+        let range = params?.range;
+        if (!range) {
+            range = selectionManagerService.getLast()?.range!;
         }
-        if (!ranges?.length) return false;
+        if (!range) return false;
 
         const workbook = univerInstanceService.getUniverSheetInstance(unitId);
         if (!workbook) return false;
@@ -70,7 +66,7 @@ export const DeleteRangeMoveUpCommand: ICommand = {
         if (!worksheet) return false;
 
         const deleteRangeMutationParams: IDeleteRangeMutationParams = {
-            ranges,
+            range,
             subUnitId,
             unitId,
             shiftDimension: Dimension.ROWS,
@@ -84,7 +80,7 @@ export const DeleteRangeMoveUpCommand: ICommand = {
 
         const sheetInterceptor = sheetInterceptorService.onCommandExecute({
             id: DeleteRangeMoveUpCommand.id,
-            params: { ranges } as IDeleteRangeMoveUpCommandParams,
+            params: { range } as IDeleteRangeMoveUpCommandParams,
         });
         const redos: IMutationInfo[] = [{ id: DeleteRangeMutation.id, params: deleteRangeMutationParams }];
         const undos: IMutationInfo[] = [{ id: InsertRangeMutation.id, params: insertRangeMutationParams }];

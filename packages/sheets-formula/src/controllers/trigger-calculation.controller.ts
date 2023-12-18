@@ -83,7 +83,7 @@ export class TriggerCalculationController extends Disposable {
                     const params = command.params as ISetRangeValuesMutationParams;
 
                     if (
-                        (options && options.local === true) ||
+                        (options && options.onlyLocal === true) ||
                         params.trigger === SetStyleCommand.id ||
                         params.trigger === SetBorderCommand.id
                     ) {

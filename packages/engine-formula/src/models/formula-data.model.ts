@@ -60,10 +60,10 @@ export class FormulaDataModel extends Disposable {
                     return true;
                 }
 
-                let arrayFormulaCellMatrixData = new ObjectMatrix<ICellData>(); // Original array formula cell data.
+                let arrayFormulaCellMatrixData = new ObjectMatrix<Nullable<ICellData>>(); // Original array formula cell data.
 
                 if (this._arrayFormulaCellData[unitId][sheetId] != null) {
-                    arrayFormulaCellMatrixData = new ObjectMatrix<ICellData>(
+                    arrayFormulaCellMatrixData = new ObjectMatrix<Nullable<ICellData>>(
                         this._arrayFormulaCellData[unitId][sheetId]
                     );
                 }
@@ -102,14 +102,14 @@ export class FormulaDataModel extends Disposable {
 
                 let arrayFormulaRangeMatrix = new ObjectMatrix<IRange>(); // Original array formula range.
 
-                let arrayFormulaCellMatrixData = new ObjectMatrix<ICellData>(); // Original array formula cell data.
+                let arrayFormulaCellMatrixData = new ObjectMatrix<Nullable<ICellData>>(); // Original array formula cell data.
 
                 if (this._arrayFormulaRange[unitId][sheetId] != null) {
                     arrayFormulaRangeMatrix = new ObjectMatrix<IRange>(this._arrayFormulaRange[unitId][sheetId]);
                 }
 
                 if (this._arrayFormulaCellData[unitId][sheetId] != null) {
-                    arrayFormulaCellMatrixData = new ObjectMatrix<ICellData>(
+                    arrayFormulaCellMatrixData = new ObjectMatrix<Nullable<ICellData>>(
                         this._arrayFormulaCellData[unitId][sheetId]
                     );
                 }
@@ -259,7 +259,7 @@ export class FormulaDataModel extends Disposable {
         };
     }
 
-    updateFormulaData(unitId: string, sheetId: string, cellValue: IObjectMatrixPrimitiveType<ICellData | null>) {
+    updateFormulaData(unitId: string, sheetId: string, cellValue: IObjectMatrixPrimitiveType<Nullable<ICellData>>) {
         const cellMatrix = new ObjectMatrix(cellValue);
 
         const formulaIdMap = this.getFormulaIdMap(unitId, sheetId); // Connect the formula and ID
@@ -300,8 +300,8 @@ export class FormulaDataModel extends Disposable {
                     f: '',
                     si: formulaId,
                 });
-            } else if (!checkFormulaString && !checkFormulaId && sheetFormulaDataMatrix.getRow(r)?.get(c)) {
-                const currentFormulaInfo = sheetFormulaDataMatrix.getRow(r)?.get(c);
+            } else if (!checkFormulaString && !checkFormulaId && sheetFormulaDataMatrix.getValue(r, c)) {
+                const currentFormulaInfo = sheetFormulaDataMatrix.getValue(r, c);
                 const f = currentFormulaInfo?.f || '';
                 const si = currentFormulaInfo?.si || '';
 
@@ -418,7 +418,7 @@ export function initSheetFormulaData(
     formulaData: IFormulaData,
     unitId: string,
     sheetId: string,
-    cellMatrix: ObjectMatrix<ICellData>
+    cellMatrix: ObjectMatrix<Nullable<ICellData>>
 ) {
     const formulaIdMap = new Map<string, { f: string; r: number; c: number }>(); // Connect the formula and ID
     const sheetFormulaDataMatrix = new ObjectMatrix<IFormulaDataItem>();

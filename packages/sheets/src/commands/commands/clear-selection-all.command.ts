@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICommand, IMutationInfo, IObjectMatrixPrimitiveType, IRange } from '@univerjs/core';
+import type { ICellData, ICommand, IMutationInfo, IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
@@ -98,8 +98,8 @@ export const ClearSelectionAllCommand: ICommand = {
 };
 
 // Generate cellValue from range and set null
-function generateNullCellValue(range: IRange[]): IObjectMatrixPrimitiveType<ICellData> {
-    const cellValue = new ObjectMatrix<ICellData>();
+function generateNullCellValue(range: IRange[]): IObjectMatrixPrimitiveType<Nullable<ICellData>> {
+    const cellValue = new ObjectMatrix<Nullable<ICellData>>();
     range.forEach((range: IRange) => {
         const { startRow, startColumn, endRow, endColumn } = range;
         for (let i = startRow; i <= endRow; i++) {

@@ -74,106 +74,105 @@ export class Font extends SheetExtension {
         fontList &&
             Object.keys(fontList).forEach((fontFormat: string) => {
                 const fontObjectArray = fontList[fontFormat];
-                fontObjectArray.forEach((rowIndex, fontArray) => {
-                    fontArray.forEach((columnIndex, docsConfig) => {
-                        const cellInfo = this.getCellIndex(
-                            rowIndex,
-                            columnIndex,
-                            rowHeightAccumulation,
-                            columnWidthAccumulation,
-                            dataMergeCache
-                        );
-                        let { startY, endY, startX, endX } = cellInfo;
-                        const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
 
-                        if (isMerged) {
-                            return true;
-                        }
+                fontObjectArray.forValue((rowIndex, columnIndex, docsConfig) => {
+                    const cellInfo = this.getCellIndex(
+                        rowIndex,
+                        columnIndex,
+                        rowHeightAccumulation,
+                        columnWidthAccumulation,
+                        dataMergeCache
+                    );
+                    let { startY, endY, startX, endX } = cellInfo;
+                    const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
 
-                        if (isMergedMainCell) {
-                            startY = mergeInfo.startY;
-                            endY = mergeInfo.endY;
-                            startX = mergeInfo.startX;
-                            endX = mergeInfo.endX;
-                        }
+                    if (isMerged) {
+                        return true;
+                    }
 
-                        if (
-                            !this.isRenderDiffRangesByRow(mergeInfo.startRow, diffRanges) &&
-                            !this.isRenderDiffRangesByRow(mergeInfo.endRow, diffRanges)
-                        ) {
-                            return true;
-                        }
+                    if (isMergedMainCell) {
+                        startY = mergeInfo.startY;
+                        endY = mergeInfo.endY;
+                        startX = mergeInfo.startX;
+                        endX = mergeInfo.endX;
+                    }
 
-                        /**
-                         * Overflow can cause text truncation, so columns are not rendered incrementally.
-                         */
-                        // if (
-                        //     !this.isRenderDiffRangesByColumn(mergeInfo.startColumn, diffRanges) &&
-                        //     !this.isRenderDiffRangesByColumn(mergeInfo.endColumn, diffRanges)
-                        // ) {
-                        //     return true;
-                        // }
+                    if (
+                        !this.isRenderDiffRangesByRow(mergeInfo.startRow, diffRanges) &&
+                        !this.isRenderDiffRangesByRow(mergeInfo.endRow, diffRanges)
+                    ) {
+                        return true;
+                    }
 
-                        const cellWidth = endX - startX;
-                        const cellHeight = endY - startY;
+                    /**
+                     * Overflow can cause text truncation, so columns are not rendered incrementally.
+                     */
+                    // if (
+                    //     !this.isRenderDiffRangesByColumn(mergeInfo.startColumn, diffRanges) &&
+                    //     !this.isRenderDiffRangesByColumn(mergeInfo.endColumn, diffRanges)
+                    // ) {
+                    //     return true;
+                    // }
 
-                        const overflowRectangle = overflowCache.getValue(rowIndex, columnIndex);
-                        const { horizontalAlign } = docsConfig;
+                    const cellWidth = endX - startX;
+                    const cellHeight = endY - startY;
 
-                        ctx.save();
-                        ctx.beginPath();
-                        if (overflowRectangle) {
-                            const { startColumn, startRow, endColumn, endRow } = overflowRectangle;
-                            if (startColumn === endColumn && startColumn === columnIndex) {
-                                ctx.rect(startX, startY, cellWidth, cellHeight);
-                                ctx.clearRect(startX + 1, startY + 1, cellWidth - 2, cellHeight - 2);
-                            } else {
-                                if (horizontalAlign === HorizontalAlign.CENTER) {
-                                    this._clipRectangle(
-                                        ctx,
-                                        startRow,
-                                        endRow,
-                                        startColumn,
-                                        endColumn,
-                                        scale,
-                                        rowHeightAccumulation,
-                                        columnWidthAccumulation
-                                    );
-                                } else if (horizontalAlign === HorizontalAlign.RIGHT) {
-                                    // console.log('horizontalAlign === HorizontalAlign.RIGHT', { rowIndex, startColumn, columnIndex, endColumn });
-                                    this._clipRectangle(
-                                        ctx,
-                                        startRow,
-                                        rowIndex,
-                                        startColumn,
-                                        columnIndex,
-                                        scale,
-                                        rowHeightAccumulation,
-                                        columnWidthAccumulation
-                                    );
-                                } else {
-                                    this._clipRectangle(
-                                        ctx,
-                                        rowIndex,
-                                        endRow,
-                                        columnIndex,
-                                        endColumn,
-                                        scale,
-                                        rowHeightAccumulation,
-                                        columnWidthAccumulation
-                                    );
-                                }
-                            }
-                        } else {
+                    const overflowRectangle = overflowCache.getValue(rowIndex, columnIndex);
+                    const { horizontalAlign } = docsConfig;
+
+                    ctx.save();
+                    ctx.beginPath();
+                    if (overflowRectangle) {
+                        const { startColumn, startRow, endColumn, endRow } = overflowRectangle;
+                        if (startColumn === endColumn && startColumn === columnIndex) {
                             ctx.rect(startX, startY, cellWidth, cellHeight);
                             ctx.clearRect(startX + 1, startY + 1, cellWidth - 2, cellHeight - 2);
+                        } else {
+                            if (horizontalAlign === HorizontalAlign.CENTER) {
+                                this._clipRectangle(
+                                    ctx,
+                                    startRow,
+                                    endRow,
+                                    startColumn,
+                                    endColumn,
+                                    scale,
+                                    rowHeightAccumulation,
+                                    columnWidthAccumulation
+                                );
+                            } else if (horizontalAlign === HorizontalAlign.RIGHT) {
+                                // console.log('horizontalAlign === HorizontalAlign.RIGHT', { rowIndex, startColumn, columnIndex, endColumn });
+                                this._clipRectangle(
+                                    ctx,
+                                    startRow,
+                                    rowIndex,
+                                    startColumn,
+                                    columnIndex,
+                                    scale,
+                                    rowHeightAccumulation,
+                                    columnWidthAccumulation
+                                );
+                            } else {
+                                this._clipRectangle(
+                                    ctx,
+                                    rowIndex,
+                                    endRow,
+                                    columnIndex,
+                                    endColumn,
+                                    scale,
+                                    rowHeightAccumulation,
+                                    columnWidthAccumulation
+                                );
+                            }
                         }
-                        ctx.clip();
+                    } else {
+                        ctx.rect(startX, startY, cellWidth, cellHeight);
+                        ctx.clearRect(startX + 1, startY + 1, cellWidth - 2, cellHeight - 2);
+                    }
+                    ctx.clip();
 
-                        ctx.translate(startX, startY);
-                        this._renderDocuments(ctx, docsConfig, startX, startY, endX, endY, rowIndex, columnIndex);
-                        ctx.restore();
-                    });
+                    ctx.translate(startX, startY);
+                    this._renderDocuments(ctx, docsConfig, startX, startY, endX, endY, rowIndex, columnIndex);
+                    ctx.restore();
                 });
             });
         ctx.restore();

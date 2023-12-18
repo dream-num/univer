@@ -180,7 +180,7 @@ describe('Test style commands', () => {
                 expect(
                     await commandService.executeCommand(SetBorderStyleCommand.id, { value: BorderStyleTypes.MEDIUM })
                 ).toBeTruthy();
-                expect(getBorder({ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 })?.b).toBeUndefined();
+                expect(getBorder({ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 })?.b).toBeNull();
 
                 expect(
                     await commandService.executeCommand(SetBorderPositionCommand.id, { value: BorderType.OUTSIDE })
@@ -225,7 +225,7 @@ describe('Test style commands', () => {
                         value: BorderStyleTypes.MEDIUM_DASH_DOT_DOT,
                     })
                 ).toBeTruthy();
-                expect(getBorder({ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 })?.b).toBeUndefined();
+                expect(getBorder({ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 })?.b).toBeNull();
 
                 expect(
                     await commandService.executeCommand(SetBorderPositionCommand.id, { value: BorderType.ALL })

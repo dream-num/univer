@@ -40,7 +40,7 @@ export interface ISetRangeValuesMutationParams extends IMutationCommonParams {
     /**
      * null for clear all
      */
-    cellValue?: IObjectMatrixPrimitiveType<ICellData | null>;
+    cellValue?: IObjectMatrixPrimitiveType<Nullable<ICellData>>;
 
     /**
      * @deprecated not a good design
@@ -83,7 +83,7 @@ export const SetRangeValuesUndoMutationFactory = (
 
     const cellMatrix = worksheet.getCellMatrix();
     const styles = workbook.getStyles();
-    const undoData = new ObjectMatrix<ICellData>();
+    const undoData = new ObjectMatrix<Nullable<ICellData>>();
 
     const newValues = new ObjectMatrix(cellValue);
 
@@ -98,9 +98,9 @@ export const SetRangeValuesUndoMutationFactory = (
     });
 
     return {
-        ...Tools.deepClone(params),
+        ...params,
         options: {},
-        cellValue: undoData.getData(),
+        cellValue: undoData.getMatrix(),
     } as ISetRangeValuesMutationParams;
 };
 
@@ -271,7 +271,7 @@ export function transformNormalKey(
     if (!newStyle || !Object.keys(newStyle).length) {
         return oldStyle;
     }
-    const backupStyle: { [key: string]: any } = Tools.deepClone(oldStyle) || {};
+    const backupStyle: { [key: string]: any } = oldStyle || {};
 
     for (const k in newStyle) {
         if (k === 'bd') {

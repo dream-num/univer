@@ -122,7 +122,7 @@ function handleMoveRange<T>(formulaMatrix: ObjectMatrix<T>, command: ICommandInf
             const cacheValue = formulaMatrix.getValue(r, c);
             cacheMatrix.setValue(r - fromStartRow, c - fromStartColumn, cacheValue);
 
-            formulaMatrix.setValue(r, c, null);
+            formulaMatrix.setValue(r, c, null as T);
         }
     }
 

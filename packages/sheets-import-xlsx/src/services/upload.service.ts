@@ -19,13 +19,13 @@ import type {
     ICellData,
     IColumnData,
     IKeyValue,
+    IObjectArrayPrimitiveType,
     IRowData,
     IStyleData,
     ITextRun,
     ITextStyle,
     IWorkbookData,
     IWorksheetData,
-    ObjectArrayPrimitiveType,
 } from '@univerjs/core';
 import { HorizontalAlign, IUniverInstanceService, Tools, VerticalAlign, WrapStrategy } from '@univerjs/core';
 
@@ -148,7 +148,7 @@ export function migrate(config: any): Partial<IWorkbookData> {
                 // 隐藏行
                 if (sheet.config.rowhidden) {
                     if (!newSheet.rowData) newSheet.rowData = {};
-                    const rowData = newSheet.rowData as ObjectArrayPrimitiveType<Partial<IRowData>>;
+                    const rowData = newSheet.rowData as IObjectArrayPrimitiveType<Partial<IRowData>>;
                     for (const [rowIndex, isHidden] of Object.entries(sheet.config.rowhidden)) {
                         if (!rowData[Number(rowIndex)]) {
                             rowData[Number(rowIndex)] = {};
@@ -160,7 +160,7 @@ export function migrate(config: any): Partial<IWorkbookData> {
                 // 隐藏列
                 if (sheet.config.colhidden) {
                     if (!newSheet.columnData) newSheet.columnData = {};
-                    const columnData = newSheet.columnData as ObjectArrayPrimitiveType<Partial<IColumnData>>;
+                    const columnData = newSheet.columnData as IObjectArrayPrimitiveType<Partial<IColumnData>>;
                     for (const [colIndex, isHidden] of Object.entries(sheet.config.colhidden)) {
                         if (!columnData[Number(colIndex)]) {
                             columnData[Number(colIndex)] = {};

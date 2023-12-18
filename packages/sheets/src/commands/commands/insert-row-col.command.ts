@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IColumnData, ICommand, IRange, IRowData, IStyleData, Nullable } from '@univerjs/core';
+import type { ICellData, ICommand, IRange, IStyleData, Nullable } from '@univerjs/core';
 import {
     BooleanNumber,
     CommandType,
@@ -23,7 +23,6 @@ import {
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,
-    ObjectArray,
     ObjectMatrix,
     sequenceExecute,
 } from '@univerjs/core';
@@ -91,13 +90,10 @@ export const InsertRowCommand: ICommand = {
             unitId,
             subUnitId,
             ranges: [range],
-            rowInfo: new ObjectArray<IRowData>(
-                // row height should inherit from the anchor row
-                new Array(endRow - startRow + 1).fill(undefined).map(() => ({
-                    h: height,
-                    hd: BooleanNumber.FALSE,
-                }))
-            ),
+            rowInfo: new Array(endRow - startRow + 1).fill(undefined).map(() => ({
+                h: height,
+                hd: BooleanNumber.FALSE,
+            })), // row height should inherit from the anchor row
         };
         const undoRowInsertionParams: IRemoveRowsMutationParams = InsertRowMutationUndoFactory(
             accessor,
@@ -285,12 +281,10 @@ export const InsertColCommand: ICommand<IInsertColCommandParams> = {
             unitId,
             subUnitId,
             ranges: [range],
-            colInfo: new ObjectArray<IColumnData>(
-                new Array(endColumn - startColumn + 1).fill(undefined).map(() => ({
-                    w: width,
-                    hd: BooleanNumber.FALSE,
-                }))
-            ),
+            colInfo: new Array(endColumn - startColumn + 1).fill(undefined).map(() => ({
+                w: width,
+                hd: BooleanNumber.FALSE,
+            })),
         };
         const undoColInsertionParams: IRemoveColMutationParams = InsertColMutationUndoFactory(
             accessor,

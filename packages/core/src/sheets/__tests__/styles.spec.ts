@@ -20,13 +20,10 @@ import { Styles } from '../styles';
 
 describe('Test Styles', () => {
     it('Init styles, set style', () => {
-        const styles = new Styles(
-            {
-                '1': { fs: 12 },
-                '2': { fs: 14 },
-            },
-            2
-        );
+        const styles = new Styles({
+            '1': { fs: 12 },
+            '2': { fs: 14 },
+        });
 
         // get style by id
         let style = styles.get('1');
@@ -43,7 +40,7 @@ describe('Test Styles', () => {
         const styleId = styles.setValue({ fs: 16 });
 
         // search style not in cache
-        const searchId = styles.search({ fs: 12 });
+        const searchId = styles.search({ fs: 12 }, JSON.stringify({ fs: 12 }));
         expect(searchId).toBe('1');
 
         // Add duplicate style, search style in cache

@@ -20,6 +20,7 @@ import type {
     IColumnData,
     IDocumentData,
     IDocumentRenderConfig,
+    IObjectArrayPrimitiveType,
     IPaddingData,
     IRange,
     IRowData,
@@ -31,7 +32,6 @@ import type {
     IWorksheetData,
     LocaleService,
     Nullable,
-    ObjectArrayType,
     Styles,
     TextDirection,
     Worksheet,
@@ -43,6 +43,7 @@ import {
     getColorStyle,
     HorizontalAlign,
     isEmptyCell,
+    isNullCell,
     ObjectMatrix,
     searchArray,
     Tools,
@@ -226,7 +227,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     constructor(
         private _worksheet: Worksheet | undefined,
         private _config: IWorksheetData,
-        private _cellData: ObjectMatrix<ICellData>,
+        private _cellData: ObjectMatrix<Nullable<ICellData>>,
         private _styles: Styles,
         _localeService: LocaleService
     ) {
@@ -307,7 +308,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     static create(
         worksheet: Worksheet | undefined,
         config: IWorksheetData,
-        cellData: ObjectMatrix<ICellData>,
+        cellData: ObjectMatrix<Nullable<ICellData>>,
         styles: Styles,
         LocaleService: LocaleService
     ) {
@@ -397,7 +398,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         const results: IRowAutoHeightInfo[] = [];
         const { mergeData, rowData } = this._config;
-        const rowObjectArray = Tools.createObjectArray(rowData);
+        const rowObjectArray = rowData;
 
         for (const range of ranges) {
             const { startRow, endRow, startColumn, endColumn } = range;
@@ -409,7 +410,7 @@ export class SpreadsheetSkeleton extends Skeleton {
                 }
 
                 // The row sets isAutoHeight to false, and there is no need to calculate the automatic row height for the row.
-                if (rowObjectArray.get(rowIndex)?.isAutoHeight === false) {
+                if (rowObjectArray[rowIndex]?.isAutoHeight === false) {
                     continue;
                 }
 
@@ -431,7 +432,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     private _calculateRowAutoHeight(rowNum: number): number {
         const { columnCount, columnData, mergeData, defaultRowHeight } = this._config;
-        const data = Tools.createObjectArray(columnData);
+        const data = columnData;
         let height = defaultRowHeight;
 
         const worksheet = this._worksheet;
@@ -467,7 +468,7 @@ export class SpreadsheetSkeleton extends Skeleton {
                 angle = VERTICAL_ROTATE_ANGLE;
             }
 
-            const colWidth = data.get(i)?.w;
+            const colWidth = data[i]?.w;
             if (typeof colWidth === 'number' && wrapStrategy === WrapStrategy.WRAP) {
                 documentModel.updateDocumentDataPageSize(colWidth);
             }
@@ -1229,17 +1230,17 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     private _generateRowMatrixCache(
         rowCount: number,
-        rowData: ObjectArrayType<Partial<IRowData>>,
+        rowData: IObjectArrayPrimitiveType<Partial<IRowData>>,
         defaultRowHeight: number
     ) {
         let rowTotalHeight = 0;
         const rowHeightAccumulation: number[] = [];
-        const data = Tools.createObjectArray(rowData);
+        const data = rowData;
         for (let r = 0; r < rowCount; r++) {
             let rowHeight = defaultRowHeight;
 
-            if (data.get(r) != null) {
-                const rowDataItem = data.get(r);
+            if (data[r] != null) {
+                const rowDataItem = data[r];
 
                 if (!rowDataItem) {
                     continue;
@@ -1269,19 +1270,19 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     private _generateColumnMatrixCache(
         colCount: number,
-        columnData: ObjectArrayType<Partial<IColumnData>>,
+        columnData: IObjectArrayPrimitiveType<Partial<IColumnData>>,
         defaultColumnWidth: number
     ) {
         let columnTotalWidth = 0;
         const columnWidthAccumulation: number[] = [];
 
-        const data = Tools.createObjectArray(columnData);
+        const data = columnData;
 
         for (let c = 0; c < colCount; c++) {
             let columnWidth = defaultColumnWidth;
 
-            if (data.get(c) != null) {
-                const columnDataItem = data.get(c);
+            if (data[c] != null) {
+                const columnDataItem = data[c];
 
                 if (!columnDataItem) {
                     continue;
@@ -1442,21 +1443,6 @@ export class SpreadsheetSkeleton extends Skeleton {
         for (const data of dataMergeCache) {
             this._setCellCache(data.startRow, data.startColumn, false);
         }
-
-        // dataMergeCache &&
-        //     dataMergeCache.forEach((rowIndex: number, row: ObjectArray<IRange>) => {
-        //         row.forEach((columnIndex: number, mainCell: IRange) => {
-        //             if (!mainCell) {
-        //                 return true;
-        //             }
-
-        //             this._setCellCache(
-        //                 rowIndex,
-        //                 columnIndex,
-        //                 false,
-        //             );
-        //         });
-        //     });
     }
 
     private _resetCache() {
@@ -1519,6 +1505,10 @@ export class SpreadsheetSkeleton extends Skeleton {
             this._setBorderProps(r, c, BORDER_TYPE.BOTTOM, style, cache);
             this._setBorderProps(r, c, BORDER_TYPE.LEFT, style, cache);
             this._setBorderProps(r, c, BORDER_TYPE.RIGHT, style, cache);
+        }
+
+        if (isNullCell(cell)) {
+            return;
         }
 
         const modelObject = cell && this._getCellDocumentModel(cell);

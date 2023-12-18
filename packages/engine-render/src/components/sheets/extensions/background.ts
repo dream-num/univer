@@ -63,45 +63,43 @@ export class Background extends SheetExtension {
                 // eslint-disable-next-line no-magic-numbers
                 ctx.fillStyle = rgb || getColor([255, 255, 255])!;
                 ctx.beginPath();
-                backgroundCache.forEach((rowIndex, backgroundRow) => {
-                    backgroundRow.forEach((columnIndex) => {
-                        const cellInfo = backgroundPositions?.getValue(rowIndex, columnIndex);
+                backgroundCache.forValue((rowIndex, columnIndex) => {
+                    const cellInfo = backgroundPositions?.getValue(rowIndex, columnIndex);
 
-                        if (cellInfo == null) {
-                            return true;
-                        }
-                        let { startY, endY, startX, endX } = cellInfo;
-                        const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
-                        if (isMerged) {
-                            return true;
-                        }
+                    if (cellInfo == null) {
+                        return true;
+                    }
+                    let { startY, endY, startX, endX } = cellInfo;
+                    const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
+                    if (isMerged) {
+                        return true;
+                    }
 
-                        if (
-                            !this.isRenderDiffRangesByRow(mergeInfo.startRow, diffRanges) &&
-                            !this.isRenderDiffRangesByRow(mergeInfo.endRow, diffRanges)
-                        ) {
-                            return true;
-                        }
+                    if (
+                        !this.isRenderDiffRangesByRow(mergeInfo.startRow, diffRanges) &&
+                        !this.isRenderDiffRangesByRow(mergeInfo.endRow, diffRanges)
+                    ) {
+                        return true;
+                    }
 
-                        if (
-                            !this.isRenderDiffRangesByColumn(mergeInfo.startColumn, diffRanges) &&
-                            !this.isRenderDiffRangesByColumn(mergeInfo.endColumn, diffRanges)
-                        ) {
-                            return true;
-                        }
+                    if (
+                        !this.isRenderDiffRangesByColumn(mergeInfo.startColumn, diffRanges) &&
+                        !this.isRenderDiffRangesByColumn(mergeInfo.endColumn, diffRanges)
+                    ) {
+                        return true;
+                    }
 
-                        if (isMergedMainCell) {
-                            startY = mergeInfo.startY;
-                            endY = mergeInfo.endY;
-                            startX = mergeInfo.startX;
-                            endX = mergeInfo.endX;
-                        }
+                    if (isMergedMainCell) {
+                        startY = mergeInfo.startY;
+                        endY = mergeInfo.endY;
+                        startX = mergeInfo.startX;
+                        endX = mergeInfo.endX;
+                    }
 
-                        ctx.moveTo(startX, startY);
-                        ctx.lineTo(startX, endY);
-                        ctx.lineTo(endX, endY);
-                        ctx.lineTo(endX, startY);
-                    });
+                    ctx.moveTo(startX, startY);
+                    ctx.lineTo(startX, endY);
+                    ctx.lineTo(endX, endY);
+                    ctx.lineTo(endX, startY);
                 });
                 ctx.closePath();
                 ctx.fill();

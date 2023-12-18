@@ -377,7 +377,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         const unitData = this._runtimeData[unitId];
 
         if (unitData[sheetId] == null) {
-            unitData[sheetId] = new ObjectMatrix<ICellData>();
+            unitData[sheetId] = new ObjectMatrix<Nullable<ICellData>>();
         }
 
         if (this._unitArrayFormulaRange[unitId] == null) {
@@ -399,7 +399,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         const arrayFormulaCellData = this._runtimeArrayFormulaCellData[unitId];
 
         if (arrayFormulaCellData[sheetId] == null) {
-            arrayFormulaCellData[sheetId] = new ObjectMatrix<ICellData>();
+            arrayFormulaCellData[sheetId] = new ObjectMatrix<Nullable<ICellData>>();
         }
 
         if (this._runtimeClearArrayFormulaCellData[unitId] === undefined) {
@@ -409,7 +409,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         const clearArrayFormulaCellData = this._runtimeClearArrayFormulaCellData[unitId];
 
         if (clearArrayFormulaCellData[sheetId] == null) {
-            clearArrayFormulaCellData[sheetId] = new ObjectMatrix<ICellData>();
+            clearArrayFormulaCellData[sheetId] = new ObjectMatrix<Nullable<ICellData>>();
         }
 
         const sheetData = unitData[sheetId];

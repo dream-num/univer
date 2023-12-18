@@ -28,7 +28,6 @@ export * from './hash-algorithm';
 export * from './lifecycle';
 export * from './locale';
 export * from './lru/index';
-export * from './object-array';
 export * from './object-matrix';
 export * from './permission';
 export * from './rectangle';

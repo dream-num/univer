@@ -15,7 +15,7 @@
  */
 
 import type { IMutation } from '@univerjs/core';
-import { CommandType, IUniverInstanceService, ObjectArray, Rectangle } from '@univerjs/core';
+import { CommandType, insertMatrixArray, IUniverInstanceService, Rectangle } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
 import type {
@@ -75,9 +75,9 @@ export const InsertRowMutation: IMutation<IInsertRowMutationParams> = {
 
             for (let j = rowIndex; j < rowIndex + rowCount; j++) {
                 if (rowInfo) {
-                    rowWrapper.insert(j, rowInfo.get(j - range.startRow) ?? defaultRowInfo);
+                    insertMatrixArray(j, rowInfo[j - range.startRow] ?? defaultRowInfo, rowWrapper);
                 } else {
-                    rowWrapper.insert(j, defaultRowInfo);
+                    insertMatrixArray(j, defaultRowInfo, rowWrapper);
                 }
             }
         }
@@ -123,8 +123,8 @@ export const InsertColMutation: IMutation<IInsertColMutationParams> = {
         if (!worksheet) return false;
         const manager = worksheet.getColumnManager();
         const { ranges, colInfo } = params;
-        const columnPrimitive = manager.getColumnData().toJSON();
-        const columnWrapper = new ObjectArray(columnPrimitive);
+        const columnPrimitive = manager.getColumnData();
+        const columnWrapper = columnPrimitive;
 
         for (let i = 0; i < ranges.length; i++) {
             const range = ranges[i];
@@ -138,9 +138,9 @@ export const InsertColMutation: IMutation<IInsertColMutationParams> = {
                     hd: 0,
                 };
                 if (colInfo) {
-                    columnWrapper.insert(j, colInfo.get(j - range.startColumn) ?? defaultColInfo);
+                    insertMatrixArray(j, colInfo[j - range.startColumn] ?? defaultColInfo, columnWrapper);
                 } else {
-                    columnWrapper.insert(j, defaultColInfo);
+                    insertMatrixArray(j, defaultColInfo, columnWrapper);
                 }
             }
         }

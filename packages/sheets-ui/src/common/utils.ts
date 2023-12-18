@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IMutationInfo, IRange, Worksheet } from '@univerjs/core';
+import type { ICellData, IMutationInfo, IRange, Nullable, Worksheet } from '@univerjs/core';
 import { ObjectMatrix } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
@@ -77,10 +77,13 @@ export function getClearContentMutationParamsForRanges(
     };
 }
 
-export function getClearContentMutationParamForRange(worksheet: Worksheet, range: IRange): ObjectMatrix<ICellData> {
+export function getClearContentMutationParamForRange(
+    worksheet: Worksheet,
+    range: IRange
+): ObjectMatrix<Nullable<ICellData>> {
     const { startRow, startColumn, endColumn, endRow } = range;
     const cellMatrix = worksheet.getMatrixWithMergedCells(startRow, startColumn, endRow, endColumn);
-    const redoMatrix = new ObjectMatrix<ICellData>();
+    const redoMatrix = new ObjectMatrix<Nullable<ICellData>>();
     cellMatrix.forValue((row, col, cellData) => {
         if (cellData && (row !== startRow || col !== startColumn)) {
             redoMatrix.setValue(row, col, null);

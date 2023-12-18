@@ -165,11 +165,11 @@ export class Range {
      *
      * @returns range matrix
      */
-    getMatrix(): ObjectMatrix<ICellData> {
+    getMatrix(): ObjectMatrix<Nullable<ICellData>> {
         const { startRow, endRow, startColumn, endColumn } = this._range;
 
         const sheetMatrix = this._worksheet.getCellMatrix();
-        const rangeMatrix = new ObjectMatrix<ICellData>();
+        const rangeMatrix = new ObjectMatrix<Nullable<ICellData>>();
 
         for (let r = startRow; r <= endRow; r++) {
             for (let c = startColumn; c <= endColumn; c++) {
@@ -276,7 +276,7 @@ export class Range {
     /**
      * Returns the data of the object structure, and can set whether to bring styles
      */
-    getObjectValue(options: IValueOptionsType = {}): ICellData {
+    getObjectValue(options: IValueOptionsType = {}): Nullable<ICellData> {
         return this.getObjectValues(options)[0][0];
     }
 
@@ -286,7 +286,7 @@ export class Range {
      * @param options set whether to include style
      * @returns Returns a value in object format
      */
-    getObjectValues(options: IValueOptionsType = {}): IObjectMatrixPrimitiveType<ICellData> {
+    getObjectValues(options: IValueOptionsType = {}): IObjectMatrixPrimitiveType<Nullable<ICellData>> {
         const { startRow, endRow, startColumn, endColumn } = this._range;
 
         // get object values from sheet matrix, or use this.getMatrix() create a new matrix then this.getMatrix().getData()
@@ -297,13 +297,15 @@ export class Range {
             for (let r = 0; r <= endRow - startRow; r++) {
                 for (let c = 0; c <= endColumn - startColumn; c++) {
                     // handle null
-                    if (!values[r][c]) continue;
+                    if (values == null || values?.[r]?.[c] == null) {
+                        continue;
+                    }
 
-                    const s = values[r][c].s;
+                    const s = values[r][c]!.s;
 
                     // make sure value has style
                     if (s) {
-                        values[r][c].s = style.get(s);
+                        values[r][c]!.s = style.get(s);
                     }
                 }
             }

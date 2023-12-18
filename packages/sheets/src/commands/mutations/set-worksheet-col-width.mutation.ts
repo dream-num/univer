@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import type { IMutation, IRange } from '@univerjs/core';
-import { CommandType, IUniverInstanceService, ObjectArray } from '@univerjs/core';
+import type { IMutation, IObjectArrayPrimitiveType, IRange, Nullable } from '@univerjs/core';
+import { CommandType, IUniverInstanceService } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
 export interface ISetWorksheetColWidthMutationParams {
     unitId: string;
     subUnitId: string;
     ranges: IRange[];
-    colWidth: number | ObjectArray<number>;
+    colWidth: number | IObjectArrayPrimitiveType<Nullable<number>>;
 }
 
 export const SetWorksheetColWidthMutationFactory = (
@@ -40,14 +40,14 @@ export const SetWorksheetColWidthMutationFactory = (
     if (worksheet == null) {
         throw new Error('universheet is null error!');
     }
-    const colWidth = new ObjectArray<number>();
+    const colWidth: IObjectArrayPrimitiveType<Nullable<number>> = {};
     const manager = worksheet.getColumnManager();
     const ranges = params.ranges;
     for (let i = 0; i < ranges.length; i++) {
         const range = ranges[i];
         for (let j = range.startColumn; j < range.endColumn + 1; j++) {
             const column = manager.getColumnOrCreate(j);
-            colWidth.set(j, column.w);
+            colWidth[j] = column.w;
         }
     }
 
@@ -86,7 +86,7 @@ export const SetWorksheetColWidthMutation: IMutation<ISetWorksheetColWidthMutati
                 if (typeof params.colWidth === 'number') {
                     column.w = params.colWidth;
                 } else {
-                    column.w = params.colWidth.get(j - range.startColumn) ?? defaultColumnWidth;
+                    column.w = params.colWidth[j - range.startColumn] ?? defaultColumnWidth;
                 }
             }
         }

@@ -15,7 +15,7 @@
  */
 
 import type { IMutation, IRange } from '@univerjs/core';
-import { CommandType, IUniverInstanceService, Rectangle } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, moveMatrixArray, Rectangle } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
 // TODO@wzhudev: maybe we should do some error handling in these mutators
@@ -85,7 +85,7 @@ export const MoveRowsMutation: IMutation<IMoveRowsMutationParams> = {
 
         // move row properties by directing mutating
         const rowWrapper = worksheet.getRowManager().getRowData();
-        rowWrapper.move(fromRow, count, toRow);
+        moveMatrixArray(fromRow, count, toRow, rowWrapper);
 
         // move cells contents by directly mutating worksheetCellMatrix
         const cellMatrix = worksheet.getCellMatrix();
@@ -159,7 +159,7 @@ export const MoveColsMutation: IMutation<IMoveColumnsMutationParams> = {
 
         // move column properties by directing mutating
         const columnWrapper = worksheet.getColumnManager().getColumnData();
-        columnWrapper.move(fromCol, count, toCol);
+        moveMatrixArray(fromCol, count, toCol, columnWrapper);
 
         // move cells contents by directly mutating worksheetCellMatrix
         const cellMatrix = worksheet.getCellMatrix();

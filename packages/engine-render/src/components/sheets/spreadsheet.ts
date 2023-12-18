@@ -233,6 +233,8 @@ export class Spreadsheet extends SheetComponent {
             return this;
         }
 
+        const { top, left, bottom, right } = bounds!.viewBound;
+
         const spreadsheetSkeleton = this.getSkeleton();
 
         if (!spreadsheetSkeleton) {
@@ -266,6 +268,11 @@ export class Spreadsheet extends SheetComponent {
 
         if (bounds && this._allowCache === true) {
             const { viewBound, diffBounds, diffX, diffY, viewPortPosition, viewPortKey } = bounds;
+
+            if (viewPortKey === 'viewColumnRight' || viewPortKey === 'viewRowBottom' || viewPortKey === 'viewLeftTop') {
+                // console.warn('ignore object', this);
+                return;
+            }
 
             if (viewPortKey === 'viewMain') {
                 const ctx = this._cacheCanvas.getContext();
@@ -474,12 +481,13 @@ export class Spreadsheet extends SheetComponent {
             Object.keys(fontList).forEach((fontFormat: string) => {
                 const fontObjectArray = fontList[fontFormat];
 
-                fontObjectArray.forEach((row, fontCache) => {
+                fontObjectArray.forRow((row, columns) => {
                     if (this._overflowCacheRuntime[row] != null) {
                         return;
                     }
 
-                    fontCache.forEach((column, docsConfig) => {
+                    columns.forEach((column) => {
+                        const docsConfig = fontObjectArray.getValue(row, column);
                         // wrap and angle handler
                         const { documentSkeleton, angle = 0, horizontalAlign, wrapStrategy } = docsConfig;
 

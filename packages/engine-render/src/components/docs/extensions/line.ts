@@ -19,10 +19,10 @@
 import type { IScale, ITextDecoration } from '@univerjs/core';
 import { BooleanNumber, getColorStyle, TextDecoration } from '@univerjs/core';
 
-import { COLOR_BLACK_RGB, DEFAULT_OFFSET_SPACING } from '../../../basics/const';
+import { COLOR_BLACK_RGB, DEFAULT_OFFSET_SPACING, FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics/const';
 import { calculateRectRotate } from '../../../basics/draw';
 import type { IDocumentSkeletonSpan } from '../../../basics/i-document-skeleton-cached';
-import { degToRad, getScale } from '../../../basics/tools';
+import { degToRad, fixLineWidthByScale, getScale } from '../../../basics/tools';
 import { Vector2 } from '../../../basics/vector2';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
 import { docExtension } from '../doc-extension';
@@ -61,19 +61,19 @@ export class Line extends docExtension {
         if (underline) {
             const startY = contentHeight + DEFAULT_OFFSET_SPACING - DELTA;
 
-            this._drawLine(ctx, span, underline, startY);
+            this._drawLine(ctx, span, underline, startY, scale);
         }
 
         if (strikethrough) {
             const startY = strikeoutPosition - DELTA;
 
-            this._drawLine(ctx, span, strikethrough, startY);
+            this._drawLine(ctx, span, strikethrough, startY, scale);
         }
 
         if (overline) {
             const startY = -DEFAULT_OFFSET_SPACING - DELTA;
 
-            this._drawLine(ctx, span, overline, startY);
+            this._drawLine(ctx, span, overline, startY, scale);
         }
     }
 
@@ -85,7 +85,8 @@ export class Line extends docExtension {
         ctx: CanvasRenderingContext2D,
         span: IDocumentSkeletonSpan,
         line: ITextDecoration,
-        startY: number
+        startY: number,
+        scale: number
     ) {
         const { s: show, cl: colorStyle, t: lineType } = line;
 
@@ -104,6 +105,8 @@ export class Line extends docExtension {
             const vertexAngle = degToRad(vertexAngleDeg);
 
             ctx.save();
+
+            ctx.translate(FIX_ONE_PIXEL_BLUR_OFFSET / scale, FIX_ONE_PIXEL_BLUR_OFFSET / scale);
 
             ctx.beginPath();
             const color = getColorStyle(colorStyle) || COLOR_BLACK_RGB;
@@ -125,8 +128,8 @@ export class Line extends docExtension {
                 alignOffset
             );
 
-            ctx.moveTo(start.x, start.y);
-            ctx.lineTo(end.x, end.y);
+            ctx.moveTo(fixLineWidthByScale(start.x, scale), fixLineWidthByScale(start.y, scale));
+            ctx.lineTo(fixLineWidthByScale(end.x, scale), fixLineWidthByScale(end.y, scale));
             ctx.stroke();
 
             ctx.restore();

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IColumnData, IMutation, IRowData, Worksheet } from '@univerjs/core';
-import { CommandType, IUniverInstanceService, ObjectArray } from '@univerjs/core';
+import type { IColumnData, IMutation, IObjectArrayPrimitiveType, IRowData, Worksheet } from '@univerjs/core';
+import { CommandType, concatMatrixArray, IUniverInstanceService, sliceMatrixArray } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
 import type {
@@ -30,14 +30,14 @@ export const RemoveRowsUndoMutationFactory = (
     worksheet: Worksheet
 ): IInsertRowMutationParams => {
     const manager = worksheet.getRowManager();
-    const rowPrimitive = manager.getRowData().toJSON();
-    const rowWrapper = new ObjectArray(rowPrimitive);
-    const rowInfo = new ObjectArray<IRowData>();
+    const rowPrimitive = manager.getRowData();
+    const rowWrapper = rowPrimitive;
+    const rowInfo: IObjectArrayPrimitiveType<IRowData> = {};
 
     for (let i = 0; i < params.ranges.length; i++) {
         const range = params.ranges[i];
-        const slice = rowWrapper.slice(range.startRow, range.endRow);
-        rowInfo.concat(slice);
+        const slice = sliceMatrixArray(range.startRow, range.endRow, rowWrapper);
+        concatMatrixArray(rowInfo, slice);
     }
 
     return {
@@ -63,8 +63,8 @@ export const RemoveRowMutation: IMutation<IRemoveRowsMutationParams> = {
         if (!worksheet) return false;
 
         const manager = worksheet.getRowManager();
-        const rowPrimitive = manager.getRowData().toJSON();
-        const rowWrapper = new ObjectArray(rowPrimitive);
+        const rowPrimitive = manager.getRowData();
+        let rowWrapper = rowPrimitive;
 
         for (let i = 0; i < params.ranges.length; i++) {
             const range = params.ranges[i];
@@ -72,7 +72,7 @@ export const RemoveRowMutation: IMutation<IRemoveRowsMutationParams> = {
             const end = range.endRow;
 
             for (let j = start; j <= end; j++) {
-                rowWrapper.splice(j, 1);
+                rowWrapper = sliceMatrixArray(j, 1, rowWrapper);
             }
         }
 
@@ -102,15 +102,16 @@ export const RemoveColMutationFactory = (
     }
 
     const manager = worksheet.getColumnManager();
-    const columnPrimitive = manager.getColumnData().toJSON();
-    const columnWrapper = new ObjectArray(columnPrimitive);
-    const colInfo = new ObjectArray<IColumnData>();
+    const columnPrimitive = manager.getColumnData();
+    const columnWrapper = columnPrimitive;
+    const colInfo: IObjectArrayPrimitiveType<IColumnData> = {};
 
     for (let i = 0; i < params.ranges.length; i++) {
         const range = params.ranges[i];
 
-        const slice = columnWrapper.slice(range.startColumn, range.endColumn);
-        colInfo.concat(slice);
+        const slice = sliceMatrixArray(range.startColumn, range.endColumn, columnWrapper);
+
+        concatMatrixArray(colInfo, slice);
     }
 
     return {
@@ -136,8 +137,8 @@ export const RemoveColMutation: IMutation<IRemoveColMutationParams> = {
         if (!worksheet) return false;
 
         const manager = worksheet.getColumnManager();
-        const columnPrimitive = manager.getColumnData().toJSON();
-        const columnWrapper = new ObjectArray(columnPrimitive);
+        const columnPrimitive = manager.getColumnData();
+        let columnWrapper = columnPrimitive;
 
         for (let i = 0; i < params.ranges.length; i++) {
             const range = params.ranges[i];
@@ -145,7 +146,7 @@ export const RemoveColMutation: IMutation<IRemoveColMutationParams> = {
             const end = range.endColumn;
 
             for (let j = start; j <= end; j++) {
-                columnWrapper.splice(j, 1);
+                columnWrapper = sliceMatrixArray(j, i, columnWrapper);
             }
         }
 

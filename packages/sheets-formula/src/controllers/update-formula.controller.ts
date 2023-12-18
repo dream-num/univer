@@ -573,7 +573,7 @@ export class UpdateFormulaController extends Disposable {
 
                 formulaMatrix.forValue((r, c, formulaItem) => {
                     const formulaString = formulaItem?.f || '';
-                    const oldFormulaString = oldFormulaMatrix.getRow(r)?.get(c)?.f || '';
+                    const oldFormulaString = oldFormulaMatrix.getValue(r, c)?.f || '';
 
                     if (isFormulaString(formulaString)) {
                         // formula with formula id

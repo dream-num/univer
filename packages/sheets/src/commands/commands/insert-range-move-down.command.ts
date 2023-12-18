@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICommand, IMutationInfo, IRange, IRowData } from '@univerjs/core';
+import type { ICellData, ICommand, IMutationInfo, IRange } from '@univerjs/core';
 import {
     BooleanNumber,
     CommandType,
@@ -23,7 +23,6 @@ import {
     ILogService,
     IUndoRedoService,
     IUniverInstanceService,
-    ObjectArray,
     ObjectMatrix,
     sequenceExecute,
 } from '@univerjs/core';
@@ -152,12 +151,10 @@ export const InsertRangeMoveDownCommand: ICommand = {
                 unitId,
                 subUnitId,
                 ranges: [lastRowRange],
-                rowInfo: new ObjectArray<IRowData>(
-                    new Array(rowsCount).fill(undefined).map(() => ({
-                        h: lastRowHeight,
-                        hd: BooleanNumber.FALSE,
-                    }))
-                ),
+                rowInfo: new Array(rowsCount).fill(undefined).map(() => ({
+                    h: lastRowHeight,
+                    hd: BooleanNumber.FALSE,
+                })),
             };
 
             redoMutations.push({

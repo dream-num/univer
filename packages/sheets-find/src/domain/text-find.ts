@@ -274,7 +274,7 @@ export class TextFinder {
 
                 .getSheetBySheetId(this._rangeData[i].sheetId);
             if (!sheet) return [];
-            let matrix: ObjectMatrix<ICellData> = new ObjectMatrix<ICellData>();
+            let matrix: ObjectMatrix<Nullable<ICellData>> = new ObjectMatrix<Nullable<ICellData>>();
             if (this._matchFormula) {
                 // matrix = this._rangeData[i].getValue().f;
             } else {
@@ -283,7 +283,7 @@ export class TextFinder {
 
             if (this._matchEntire) {
                 matrix.forValue((row, col, value) => {
-                    if (!value.v) return;
+                    if (value == null || !value.v) return;
                     if (
                         (this._matchCase && value.v === this._text) ||
                         (this._text as string).toLowerCase() === `${value.v}`.toLowerCase()
@@ -316,7 +316,7 @@ export class TextFinder {
                 const reg = new RegExp(getRegExpStr(this._text as string), this._matchCase ? 'g' : 'ig');
 
                 matrix.forValue((row, col, value) => {
-                    if (!value.v) return;
+                    if (value == null || !value.v) return;
                     if (reg.test(`${value.v}`)) {
                         reg.lastIndex = 0;
                         range.push({

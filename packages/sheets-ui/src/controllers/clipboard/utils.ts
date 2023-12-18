@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IMutationInfo, IRange } from '@univerjs/core';
+import type { ICellData, IMutationInfo, IRange, Nullable } from '@univerjs/core';
 import { IUniverInstanceService, ObjectMatrix, Rectangle } from '@univerjs/core';
 import type {
     IAddWorksheetMergeMutationParams,
@@ -135,20 +135,20 @@ export function getMoveRangeMutations(
                     res.setValue(copyRange.startRow + rowIndex, copyRange.startColumn + colIndex, null);
                 });
                 return res;
-            }, new ObjectMatrix<ICellData | null>());
+            }, new ObjectMatrix<Nullable<ICellData>>());
             const currentFromCellValues = fromValues.reduce((res, row, rowIndex) => {
                 row.forEach((colItem, colIndex) => {
                     res.setValue(copyRange.startRow + rowIndex, copyRange.startColumn + colIndex, colItem);
                 });
                 return res;
-            }, new ObjectMatrix<ICellData | null>());
+            }, new ObjectMatrix<Nullable<ICellData>>());
 
             const newToCellValues = fromValues.reduce((res, row, rowIndex) => {
                 row.forEach((colItem, colIndex) => {
                     res.setValue(pastedRange.startRow + rowIndex, pastedRange.startColumn + colIndex, colItem);
                 });
                 return res;
-            }, new ObjectMatrix<ICellData | null>());
+            }, new ObjectMatrix<Nullable<ICellData>>());
             const currentToCellValues = worksheet
                 .getRange(pastedRange)
                 .getValues()
@@ -157,7 +157,7 @@ export function getMoveRangeMutations(
                         res.setValue(pastedRange.startRow + rowIndex, pastedRange.startColumn + colIndex, colItem);
                     });
                     return res;
-                }, new ObjectMatrix<ICellData | null>());
+                }, new ObjectMatrix<Nullable<ICellData>>());
 
             const doMoveRangeMutation: IMoveRangeMutationParams = {
                 from: newFromCellValues.getMatrix(),

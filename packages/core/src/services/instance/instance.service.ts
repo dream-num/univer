@@ -97,9 +97,6 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
     private readonly _focused$ = new BehaviorSubject<Nullable<string>>(null);
     readonly focused$ = this._focused$.asObservable();
 
-    private readonly _active$ = new BehaviorSubject<Nullable<string>>(null);
-    readonly active$ = this._active$.asObservable();
-
     private readonly _currentSheet$ = new BehaviorSubject<Nullable<Workbook>>(null);
     readonly currentSheet$ = this._currentSheet$.asObservable();
     private readonly _currentDoc$ = new BehaviorSubject<Nullable<DocumentDataModel>>(null);
@@ -136,7 +133,6 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         super.dispose();
 
         this._focused$.complete();
-        this._active$.complete();
 
         this._currentDoc$.complete();
         this._currentSheet$.complete();

@@ -67,9 +67,9 @@ jobs:
                   body: |
                       ## View Deployment
 
-                      🚧 🚧 🚧 🚧 🚧 🚧 🚧 🚧 🚧 🚧 🚧 🚧 🚧 🚧 🚧
+                      🥐 🍔 🥓 🥗 🥘 🌯 🍚 🍛 🍖 🍭 🍧 🍝 🥪 🥖 🍪
                       Still cooking, please come back later
-                      🚧 🚧 🚧 🚧 🚧 🚧 🚧 🚧 🚧 🚧 🚧 🚧 🚧 🚧 🚧
+                      🥙 🥮 🥨 🌭 🍦 🍙 🍕 🍰 🍮 🍜 🍡 🍱 🍿 🍕 🥟
                   edit-mode: replace
 
     build-demo:
@@ -77,7 +77,7 @@ jobs:
         needs: [setup]
 
         outputs:
-            preview-url: ${{ steps.vercel-demo.outputs.preview-url }}
+            preview-url: ${{ steps.vercel-demo-dev.outputs.preview-url == '' && steps.vercel-demo.outputs.preview-url || steps.vercel-demo-dev.outputs.preview-url }}
 
         steps:
             - name: Checkout
@@ -123,12 +123,22 @@ jobs:
 
             - name: 🚀 Deploy to Vercel (demo)
               uses: amondnet/vercel-action@v25
+              if: ${{ needs.setup.outputs.ref == '' }}
+              id: vercel-demo-dev
+              with:
+                  vercel-token: ${{ secrets.VERCEL_TOKEN }}
+                  vercel-org-id: ${{ secrets.ORG_ID}}
+                  vercel-project-id: ${{ secrets.PROJECT_ID}}
+                  vercel-args: '--prod'
+
+            - name: 🚀 Deploy to Vercel (demo)
+              uses: amondnet/vercel-action@v25
+              if: ${{ needs.setup.outputs.ref != '' }}
               id: vercel-demo
               with:
                   vercel-token: ${{ secrets.VERCEL_TOKEN }}
                   vercel-org-id: ${{ secrets.ORG_ID}}
                   vercel-project-id: ${{ secrets.PROJECT_ID}}
-                  vercel-args: ${{ needs.setup.outputs.ref == '' && '--prod' }}
 
     build-storybook:
         runs-on: ubuntu-latest

@@ -77,6 +77,7 @@ export class SelectionController extends Disposable {
         this._initViewMainListener(sheetObject);
         this._initRowHeader(sheetObject);
         this._initColumnHeader(sheetObject);
+        this._initLeftTop(sheetObject);
         this._initSelectionChangeListener();
         this._initThemeChangeListener();
         this._initSkeletonChangeListener();
@@ -181,6 +182,27 @@ export class SelectionController extends Disposable {
                         viewportMain,
                         ScrollTimerType.X
                     );
+                    if (evt.button !== 2) {
+                        state.stopPropagation();
+                    }
+                })
+            )
+        );
+    }
+
+    private _initLeftTop(sheetObject: ISheetObjectParam) {
+        const { spreadsheetLeftTopPlaceholder } = sheetObject;
+        this.disposeWithMe(
+            toDisposable(
+                spreadsheetLeftTopPlaceholder?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+                    const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+
+                    if (skeleton == null) {
+                        return;
+                    }
+
+                    this._selectionManagerService.replace([this._getAllRange(skeleton)]);
+
                     if (evt.button !== 2) {
                         state.stopPropagation();
                     }
@@ -311,6 +333,19 @@ export class SelectionController extends Disposable {
                 }
             }
         });
+    }
+
+    private _getAllRange(skeleton: SpreadsheetSkeleton) {
+        return {
+            range: {
+                startRow: 0,
+                startColumn: 0,
+                endRow: skeleton.getRowCount() - 1,
+                endColumn: skeleton.getColumnCount() - 1,
+            },
+            primary: this._getZeroRange(skeleton).primary,
+            style: null,
+        };
     }
 
     private _getZeroRange(skeleton: SpreadsheetSkeleton) {

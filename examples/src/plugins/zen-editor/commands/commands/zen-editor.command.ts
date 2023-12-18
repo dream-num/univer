@@ -15,7 +15,7 @@
  */
 
 import type { ICommand } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
+import { CommandType, IUniverInstanceService } from '@univerjs/core';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { IZenZoneService, KeyCode } from '@univerjs/ui';
@@ -30,6 +30,8 @@ export const CancelZenEditCommand: ICommand = {
 
         const editorBridgeService = accessor.get(IEditorBridgeService);
 
+        const univerInstanceManager = accessor.get(IUniverInstanceService);
+
         const visibleState = editorBridgeService.isVisible();
         if (visibleState.visible) {
             editorBridgeService.changeVisible({
@@ -40,6 +42,10 @@ export const CancelZenEditCommand: ICommand = {
         }
 
         zenZoneEditorService.close();
+
+        const currentSheetInstance = univerInstanceManager.getCurrentUniverSheetInstance();
+
+        univerInstanceManager.focusUniverInstance(currentSheetInstance.getUnitId());
         return true;
     },
 };
@@ -54,6 +60,8 @@ export const ConfirmZenEditCommand: ICommand = {
 
         const editorBridgeService = accessor.get(IEditorBridgeService);
 
+        const univerInstanceManager = accessor.get(IUniverInstanceService);
+
         const visibleState = editorBridgeService.isVisible();
         if (visibleState.visible) {
             editorBridgeService.changeVisible({
@@ -63,6 +71,11 @@ export const ConfirmZenEditCommand: ICommand = {
         }
 
         zenZoneEditorService.close();
+
+        const currentSheetInstance = univerInstanceManager.getCurrentUniverSheetInstance();
+
+        univerInstanceManager.focusUniverInstance(currentSheetInstance.getUnitId());
+
         return true;
     },
 };

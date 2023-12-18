@@ -111,8 +111,6 @@ export class FormulaEditorController extends RxDisposable {
 
                 this._contextService.setContextValue(FOCUSING_FORMULA_EDITOR, true);
 
-                this._univerInstanceService.activeUniverInstance(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
-
                 const formulaEditorDataModel = this._univerInstanceService.getUniverDocInstance(
                     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY
                 );
@@ -174,7 +172,6 @@ export class FormulaEditorController extends RxDisposable {
                 documentComponent.onPointerDownObserver.add(() => {
                     this._contextService.setContextValue(FOCUSING_FORMULA_EDITOR, true);
                     this._undoRedoService.clearUndoRedo(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
-                    this._univerInstanceService.activeUniverInstance(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
 
                     // When clicking on the formula bar, the cell editor also needs to enter the edit state
                     const visibleState = this._editorBridgeService.isVisible();

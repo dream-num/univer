@@ -270,10 +270,6 @@ export class EndEditController extends Disposable {
         this._contextService.setContextValue(FOCUSING_EDITOR_BUT_HIDDEN, false);
         this._contextService.setContextValue(FOCUSING_FORMULA_EDITOR, false);
 
-        // When exiting editing, get current focused univer instance, and then active it.
-        const unitId = this._currentUniverService.getFocusedUniverInstance()?.getUnitId();
-        this._currentUniverService.activeUniverInstance(unitId);
-
         this._cellEditorManagerService.setState({
             show: param.visible,
         });

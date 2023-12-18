@@ -25,11 +25,12 @@ import {
     OnLifecycle,
     RxDisposable,
 } from '@univerjs/core';
-import type { IDocObjectParam } from '@univerjs/docs';
+import type { IDocObjectParam, IRichTextEditingMutationParams } from '@univerjs/docs';
 import {
     DocSkeletonManagerService,
     DocViewModelManagerService,
     getDocObject,
+    RichTextEditingMutation,
     TextSelectionManagerService,
     VIEWPORT_KEY,
 } from '@univerjs/docs';
@@ -322,6 +323,34 @@ export class ZenEditorController extends RxDisposable {
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (updateCommandList.includes(command.id)) {
                     this._handleOpenZenEditor();
+                }
+            })
+        );
+
+        const editCommandList = [RichTextEditingMutation.id];
+
+        // const INCLUDE_LIST = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];
+
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                if (editCommandList.includes(command.id)) {
+                    const params = command.params as IRichTextEditingMutationParams;
+                    const { unitId } = params;
+
+                    if (unitId === DOCS_ZEN_EDITOR_UNIT_ID_KEY) {
+                        // sync cell content to formula editor bar when edit cell editor and vice verse.
+                        const editorDocDataModel = this._currentUniverService.getUniverDocInstance(unitId);
+                        const docBody = editorDocDataModel?.getBody();
+                        const dataStream = docBody?.dataStream;
+                        const paragraphs = docBody?.paragraphs;
+                        const textRuns = docBody?.textRuns;
+
+                        if (dataStream == null || paragraphs == null) {
+                            return;
+                        }
+
+                        this._syncContentAndRender(DOCS_NORMAL_EDITOR_UNIT_ID_KEY, dataStream, paragraphs, textRuns);
+                    }
                 }
             })
         );

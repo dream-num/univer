@@ -46,11 +46,7 @@ export interface IUniverHandler {
  * the focused univer instance.
  */
 export interface IUniverInstanceService {
-    // What's the difference between focused univer instance and active univer instance?
-    // For example, if you are currently editing a cell,
-    // the cell is active, but the focus is still sheet.
     focused$: Observable<Nullable<string>>;
-    active$: Observable<Nullable<string>>;
 
     currentSheet$: Observable<Nullable<Workbook>>;
     currentDoc$: Observable<Nullable<DocumentDataModel>>;
@@ -65,7 +61,6 @@ export interface IUniverInstanceService {
     slideDisposed$: Observable<Slide>;
 
     focusUniverInstance(id: string | null): void;
-    activeUniverInstance(id: Nullable<string>): void;
     getFocusedUniverInstance(): Workbook | DocumentDataModel | Slide | null;
 
     createDoc(data: Partial<IDocumentData>): DocumentDataModel;
@@ -279,10 +274,6 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         } else if (this._focused instanceof Slide) {
             this._contextService.setContextValue(FOCUSING_SLIDE, true);
         }
-    }
-
-    activeUniverInstance(id: Nullable<string>) {
-        this._active$.next(id);
     }
 
     getFocusedUniverInstance(): Workbook | DocumentDataModel | Slide | null {

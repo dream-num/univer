@@ -35,11 +35,12 @@ export const StatusBar = () => {
     const items = statusBarService.getFunctions().map((item, index) => ({
         name: item.func,
         value: 0,
-        show: isSingle ? index < 1 : true,
+        show: true,
         disable: false,
     }));
     const [statistics, setStatistics] = useState<IStatisticItem[]>(items);
-    const showList = statistics.filter((item) => item.show && !item.disable);
+    const firstItem = statistics.find((item) => item.show && !item.disable);
+    const showList = isSingle && firstItem ? [firstItem] : statistics.filter((item) => item.show && !item.disable);
 
     useEffect(() => {
         const subscription = statusBarService.state$.subscribe((item) => {
@@ -68,26 +69,6 @@ export const StatusBar = () => {
     const handleResize = debounce(() => {
         const newSingleState = window.innerWidth < SINGLE_MODE_WIDTH;
         if (isSingle !== newSingleState) {
-            if (newSingleState) {
-                // keep the items hide except the first show item
-                const firstIndex = statistics.findIndex((item) => item.show);
-                const newStatistics = statistics.map((stat, index) => {
-                    if (index === firstIndex) {
-                        stat.show = true;
-                    } else {
-                        stat.show = false;
-                    }
-                    return stat;
-                });
-                setStatistics(newStatistics);
-            } else {
-                // keep all items show
-                const newStatistics = statistics.map((stat) => {
-                    stat.show = true;
-                    return stat;
-                });
-                setStatistics(newStatistics);
-            }
             setIsSingle(newSingleState);
         }
     }, 100);

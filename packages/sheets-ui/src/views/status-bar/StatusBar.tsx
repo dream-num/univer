@@ -92,8 +92,8 @@ export const StatusBar = () => {
         renderContent = (
             <>
                 {' '}
-                {doubleLineList!.map((item: IStatisticItem[]) => (
-                    <div className={styles.statisticListColumn}>
+                {doubleLineList!.map((item: IStatisticItem[], index: number) => (
+                    <div key={`stat-col-${index}`} className={styles.statisticListColumn}>
                         {item?.[0] && <CopyableStatisticItem key={item?.[0].name} {...item?.[0]} />}
                         {item?.[1] && <CopyableStatisticItem key={item?.[1].name} {...item?.[1]} />}
                     </div>

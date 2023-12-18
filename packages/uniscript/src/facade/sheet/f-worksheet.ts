@@ -38,12 +38,12 @@ export class FWorksheet {
         return this._injector.createInstance(FSelection, this._workbook, this._worksheet, selections);
     }
 
-    getRange(row: number, col: number): FRange | null {
+    getRange(row: number, col: number, height?: number, width?: number): FRange | null {
         const range: IRange = {
             startRow: row,
-            endRow: row,
+            endRow: row + (height ?? 1) - 1,
             startColumn: col,
-            endColumn: col,
+            endColumn: col + (width ?? 1) - 1,
         };
 
         return this._injector.createInstance(FRange, this._workbook, this._worksheet, range);

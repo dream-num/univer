@@ -49,7 +49,9 @@ export function whenFormulaEditorFocused(contextService: IContextService) {
 
 export function whenEditorInputFormulaActivated(contextService: IContextService) {
     return (
-        contextService.getContextValue(FOCUSING_EDITOR) && contextService.getContextValue(FOCUSING_EDITOR_INPUT_FORMULA)
+        contextService.getContextValue(FOCUSING_SHEET) &&
+        contextService.getContextValue(FOCUSING_EDITOR) &&
+        contextService.getContextValue(FOCUSING_EDITOR_INPUT_FORMULA)
     );
 }
 

@@ -48,7 +48,7 @@ import { IZenEditorManagerService } from '../services/zen-editor.service';
 
 export const DOCS_ZEN_EDITOR_UNIT_ID_KEY = '__defaultDocumentZenEditorSpecialUnitId_20231218__';
 
-@OnLifecycle(LifecycleStages.Rendered, ZenEditorController)
+@OnLifecycle(LifecycleStages.Steady, ZenEditorController)
 export class ZenEditorController extends RxDisposable {
     constructor(
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
@@ -73,9 +73,7 @@ export class ZenEditorController extends RxDisposable {
 
         this._commandExecutedListener();
 
-        setTimeout(() => {
-            this._createZenEditorInstance();
-        }, 0);
+        this._createZenEditorInstance();
     }
 
     private _createZenEditorInstance() {

@@ -936,48 +936,6 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
     }
 
-    // getScrollXYByRelativeCoords(coord: Vector2) {
-    //     const scene = this.getParent() as Scene;
-    //     let x = 0;
-    //     let y = 0;
-    //     const viewPort = scene.getActiveViewportByRelativeCoord(coord);
-    //     if (viewPort) {
-    //         const actualX = viewPort.actualScrollX || 0;
-    //         const actualY = viewPort.actualScrollY || 0;
-    //         x += actualX;
-    //         y += actualY;
-    //     }
-    //     return {
-    //         x,
-    //         y,
-    //     };
-    // }
-
-    // getAncestorScrollXY(offsetX: number, offsetY: number) {
-    //     let parent: any = this.getParent();
-
-    //     let x = 0;
-    //     let y = 0;
-    //     const coord = Vector2.FromArray([offsetX, offsetY]);
-    //     while (parent) {
-    //         if (parent.classType === RENDER_CLASS_TYPE.SCENE) {
-    //             const scene = parent as Scene;
-    //             const viewPort = scene.getActiveViewportByCoord(coord);
-    //             if (viewPort) {
-    //                 const actualX = viewPort.actualScrollX || 0;
-    //                 const actualY = viewPort.actualScrollY || 0;
-    //                 x += actualX;
-    //                 y += actualY;
-    //             }
-    //         }
-    //         parent = parent?.getParent && parent?.getParent();
-    //     }
-    //     return {
-    //         x,
-    //         y,
-    //     };
-    // }
-
     // convert canvas content position to physical position in screen
     convertTransformToOffsetX(offsetX: number, scaleX: number, scrollXY: { x: number; y: number }) {
         const { x: scrollX } = scrollXY;

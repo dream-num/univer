@@ -57,9 +57,13 @@ export class Border extends SheetExtension {
             return;
         }
         ctx.save();
-        const { scaleX = 1, scaleY = 1 } = parentScale;
 
-        const scale = this._getScale(parentScale);
+        const { a: scaleX = 1, d: scaleY = 1 } = ctx.getTransform();
+
+        const scale = this._getScale({
+            scaleX,
+            scaleY,
+        });
 
         let preStyle: BorderStyleTypes;
         let preColor: string;
@@ -94,8 +98,8 @@ export class Border extends SheetExtension {
             }
 
             if (
-                !this.isRenderDiffRangesByRow(mergeInfo.startRow - 1, diffRanges) &&
-                !this.isRenderDiffRangesByRow(mergeInfo.endRow + 1, diffRanges)
+                !this.isRenderDiffRangesByRow(mergeInfo.startRow, diffRanges) &&
+                !this.isRenderDiffRangesByRow(mergeInfo.endRow, diffRanges)
             ) {
                 return true;
             }

@@ -21,7 +21,7 @@ import type { BaseObject } from './base-object';
 import { RENDER_CLASS_TYPE } from './basics/const';
 import type { IWheelEvent } from './basics/i-events';
 import { PointerInput } from './basics/i-events';
-import { toPx } from './basics/tools';
+import { fixLineWidthByScale, toPx } from './basics/tools';
 import { Transform } from './basics/transform';
 import type { IBoundRectNoAngle, IViewportBound } from './basics/vector2';
 import { Vector2 } from './basics/vector2';
@@ -448,10 +448,20 @@ export class Viewport {
                 y = this.actualScrollY;
             }
         }
+
+        const scale = this._getScale();
+
         return {
-            x: Math.round(x + this._paddingStartX),
-            y: Math.round(y + this._paddingStartY),
+            x: fixLineWidthByScale(x + this._paddingStartX, scale),
+            y: fixLineWidthByScale(y + this._paddingStartY, scale),
         };
+    }
+
+    private _getScale() {
+        const mainScene = this._scene;
+        const pixelRatio = mainScene.getEngine()?.getPixelRatio() || 1;
+        const { scaleX, scaleY } = mainScene.getAncestorScale();
+        return Math.max(scaleX * pixelRatio, scaleY * pixelRatio);
     }
 
     getTransformedScroll() {
@@ -503,14 +513,20 @@ export class Viewport {
 
         const sceneTrans = this._scene.transform.clone();
 
+        const { a: scaleX = 1, d: scaleY = 1 } = mainCtx.getTransform();
+
         sceneTrans.multiply(
-            Transform.create([1, 0, 0, 1, Math.round(-this.actualScrollX || 0), Math.round(-this.actualScrollY || 0)])
+            Transform.create([
+                1,
+                0,
+                0,
+                1,
+                fixLineWidthByScale(-this.actualScrollX || 0, scaleX),
+                fixLineWidthByScale(-this.actualScrollY || 0, scaleY),
+            ])
         );
 
         const ctx = mainCtx;
-        if (!ctx) {
-            return;
-        }
 
         const m = sceneTrans.getMatrix();
         const n = this.getScrollBarTransForm().getMatrix();
@@ -970,9 +986,25 @@ export class Viewport {
          * @DR-Univer The coordinates here need to be consistent with the clip in the render,
          * which may be caused by other issues that will be optimized later.
          */
-        const sceneTrans = this._scene.transform.clone();
-        const m = sceneTrans.getMatrix();
-        const { scaleX, scaleY } = this._getBoundScale(m[0], m[3]);
+        // const sceneTrans = this._scene.transform.clone();
+        // const m = sceneTrans.getMatrix();
+        // const { scaleX, scaleY } = this._getBoundScale(m[0], m[3]);
+
+        // let differenceX = 0;
+
+        // let differenceY = 0;
+
+        // const ratioScrollX = this._scrollBar?.ratioScrollX ?? 1;
+
+        // const ratioScrollY = this._scrollBar?.ratioScrollY ?? 1;
+
+        // if (this._preScrollX != null) {
+        //     differenceX = (this._preScrollX - this.scrollX) / ratioScrollX;
+        // }
+
+        // if (this._preScrollY != null) {
+        //     differenceY = (this._preScrollY - this.scrollY) / ratioScrollY;
+        // }
 
         const topLeft = this.getRelativeVector(Vector2.FromArray([xFrom, yFrom]));
         const bottomRight = this.getRelativeVector(Vector2.FromArray([xTo, yTo]));
@@ -980,8 +1012,8 @@ export class Viewport {
         const viewBound = {
             top: topLeft.y,
             left: topLeft.x,
-            right: bottomRight.x * scaleX,
-            bottom: bottomRight.y * scaleY,
+            right: bottomRight.x,
+            bottom: bottomRight.y,
         };
 
         const preViewBound = this._preViewportBound?.viewBound;
@@ -989,8 +1021,8 @@ export class Viewport {
         return {
             viewBound,
             diffBounds: this._diffViewBound(viewBound, preViewBound),
-            diffX: Math.round((preViewBound?.left || 0) - viewBound.left),
-            diffY: Math.round((preViewBound?.top || 0) - viewBound.top),
+            diffX: (preViewBound?.left || 0) - viewBound.left,
+            diffY: (preViewBound?.top || 0) - viewBound.top,
             viewPortPosition: {
                 top: yFrom,
                 left: xFrom,

@@ -378,7 +378,7 @@ export class SelectionShape {
      * inner update
      */
     private _updateControl(style: Nullable<ISelectionStyle>, rowHeaderWidth: number, columnHeaderHeight: number) {
-        const { startX, startY, endX, endY } = this._selectionModel;
+        let { startX, startY, endX, endY } = this._selectionModel;
         const defaultStyle = this._defaultStyle;
         if (style == null) {
             style = defaultStyle;
@@ -402,6 +402,11 @@ export class SelectionShape {
 
         const scale = this._getScale();
 
+        startX = fixLineWidthByScale(startX, scale);
+        startY = fixLineWidthByScale(startY, scale);
+        endX = fixLineWidthByScale(endX, scale);
+        endY = fixLineWidthByScale(endY, scale);
+
         strokeWidth /= scale;
         AutofillSize /= scale;
         AutofillStrokeWidth /= scale;
@@ -415,7 +420,7 @@ export class SelectionShape {
         const fixOnePixelBlurOffset = FIX_ONE_PIXEL_BLUR_OFFSET / scale;
 
         this.leftControl.transformByState({
-            height: fixLineWidthByScale(endY - startY, scale),
+            height: endY - startY,
             left: -leftAdjustWidth / 2 + fixOnePixelBlurOffset,
             width: strokeWidth,
             strokeWidth: borderBuffer,
@@ -428,8 +433,8 @@ export class SelectionShape {
         });
 
         this.rightControl.transformByState({
-            height: fixLineWidthByScale(endY - startY, scale),
-            left: fixLineWidthByScale(endX - startX, scale) - leftAdjustWidth / 2 + fixOnePixelBlurOffset,
+            height: endY - startY,
+            left: endX - startX - leftAdjustWidth / 2 + fixOnePixelBlurOffset,
             width: strokeWidth,
             strokeWidth: borderBuffer,
             top: -borderBuffer / 2 + fixOnePixelBlurOffset,
@@ -441,7 +446,7 @@ export class SelectionShape {
         });
 
         this.topControl.transformByState({
-            width: fixLineWidthByScale(endX - startX, scale) + strokeWidth,
+            width: endX - startX + strokeWidth,
             top: -leftAdjustWidth / 2 + fixOnePixelBlurOffset,
             left: -leftAdjustWidth / 2 + fixOnePixelBlurOffset,
             height: strokeWidth,
@@ -454,8 +459,8 @@ export class SelectionShape {
         });
 
         this.bottomControl.transformByState({
-            width: fixLineWidthByScale(endX - startX, scale) + strokeWidth,
-            top: fixLineWidthByScale(endY - startY, scale) - leftAdjustWidth / 2 + fixOnePixelBlurOffset,
+            width: endX - startX + strokeWidth,
+            top: endY - startY - leftAdjustWidth / 2 + fixOnePixelBlurOffset,
             height: strokeWidth,
             left: -leftAdjustWidth / 2 + fixOnePixelBlurOffset,
             strokeWidth: borderBuffer,
@@ -503,7 +508,7 @@ export class SelectionShape {
 
         this._updateBackgroundControl(style);
 
-        this._updateBackgroundTitle(style, rowHeaderWidth, columnHeaderHeight);
+        this._updateBackgroundTitle(style, fixLineWidthByScale(rowHeaderWidth, scale), columnHeaderHeight);
 
         this._updateWidgets(style);
 
@@ -786,7 +791,7 @@ export class SelectionShape {
     }
 
     private _updateBackgroundControl(style: Nullable<ISelectionStyle>) {
-        const { startX, startY, endX, endY } = this._selectionModel;
+        let { startX, startY, endX, endY } = this._selectionModel;
 
         const defaultStyle = this._defaultStyle;
 
@@ -804,6 +809,11 @@ export class SelectionShape {
 
         const highlightSelection = this._selectionModel.highlightToSelection();
 
+        startX = fixLineWidthByScale(startX, scale);
+        startY = fixLineWidthByScale(startY, scale);
+        endX = fixLineWidthByScale(endX, scale);
+        endY = fixLineWidthByScale(endY, scale);
+
         if (!highlightSelection) {
             this._backgroundControlTop.resize(endX - startX, endY - startY);
             this._backgroundControlTop.setProps({ fill });
@@ -813,9 +823,14 @@ export class SelectionShape {
             return;
         }
 
-        const { startX: h_startX, startY: h_startY, endX: h_endX, endY: h_endY } = highlightSelection;
+        let { startX: h_startX, startY: h_startY, endX: h_endX, endY: h_endY } = highlightSelection;
 
-        const strokeOffset = strokeWidth / 2;
+        h_startX = fixLineWidthByScale(h_startX, scale);
+        h_startY = fixLineWidthByScale(h_startY, scale);
+        h_endX = fixLineWidthByScale(h_endX, scale);
+        h_endY = fixLineWidthByScale(h_endY, scale);
+
+        const strokeOffset = fixLineWidthByScale(strokeWidth / 2, scale);
 
         const topConfig = {
             left: -strokeOffset,
@@ -1046,7 +1061,8 @@ export class SelectionShape {
     }
 
     private _getScale() {
+        const pixelRatio = this._scene.getEngine()?.getPixelRatio() || 1;
         const { scaleX, scaleY } = this._scene.getAncestorScale();
-        return Math.max(scaleX, scaleY);
+        return Math.max(scaleX * pixelRatio, scaleY * pixelRatio);
     }
 }

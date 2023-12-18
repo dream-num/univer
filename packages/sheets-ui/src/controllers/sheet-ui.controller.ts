@@ -47,7 +47,6 @@ import {
     SetRangeUnderlineCommand,
 } from '../commands/commands/inline-format.command';
 import { RefillCommand } from '../commands/commands/refill.command';
-import { RenameSheetOperation } from '../commands/commands/rename.command';
 import {
     ApplyFormatPainterCommand,
     SetInfiniteFormatPainterCommand,
@@ -73,6 +72,8 @@ import {
     SetCellEditVisibleArrowOperation,
     SetCellEditVisibleOperation,
 } from '../commands/operations/cell-edit.operation';
+import { RemoveSheetOperation } from '../commands/operations/remove-sheet.operation';
+import { RenameSheetOperation } from '../commands/operations/rename-sheet.operation';
 import { SetScrollOperation } from '../commands/operations/scroll.operation';
 import { SetEditorResizeOperation } from '../commands/operations/set-editor-resize.operation';
 import { SetFormatPainterOperation } from '../commands/operations/set-format-painter.operation';
@@ -247,6 +248,7 @@ export class SheetUIController extends Disposable {
             MoveSelectionCommand,
             MoveSelectionEnterAndTabCommand,
             RenameSheetOperation,
+            RemoveSheetOperation,
             ScrollCommand,
             SelectAllCommand,
             SetActivateCellEditOperation,

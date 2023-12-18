@@ -17,7 +17,6 @@
 import { ICommandService, IUniverInstanceService } from '@univerjs/core';
 import {
     CopySheetCommand,
-    RemoveSheetCommand,
     SetTabColorCommand,
     SetWorksheetHideCommand,
     SetWorksheetShowCommand,
@@ -27,14 +26,15 @@ import { MenuItemType } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 
-import { RenameSheetOperation } from '../../commands/commands/rename.command';
 import { ShowMenuListCommand } from '../../commands/commands/unhide.command';
+import { RemoveSheetOperation } from '../../commands/operations/remove-sheet.operation';
+import { RenameSheetOperation } from '../../commands/operations/rename-sheet.operation';
 import { COLOR_PICKER_COMPONENT } from '../../components/color-picker';
 import { SheetMenuPosition } from './menu';
 
 export function DeleteSheetMenuItemFactory(): IMenuButtonItem {
     return {
-        id: RemoveSheetCommand.id,
+        id: RemoveSheetOperation.id,
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.delete',

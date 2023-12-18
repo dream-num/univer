@@ -402,8 +402,8 @@ export class FormulaDataModel extends Disposable {
         sheetFormulaDataMatrix.forValue((r, c, cell) => {
             const formulaString = cell?.f || '';
             const formulaId = cell?.si || '';
-            const x = cell.x || 0;
-            const y = cell.y || 0;
+            const x = cell?.x || 0;
+            const y = cell?.y || 0;
 
             if (isFormulaString(formulaString) && isFormulaId(formulaId) && x === 0 && y === 0) {
                 formulaIdMap.set(formulaId, { f: formulaString, r, c });

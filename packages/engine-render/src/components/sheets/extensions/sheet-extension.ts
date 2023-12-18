@@ -38,7 +38,7 @@ export class SheetExtension extends ComponentExtension<SpreadsheetSkeleton, SHEE
     }
 
     isRenderDiffRangesByCell(row: number, column: number, diffRanges?: IRange[]) {
-        if (diffRanges == null) {
+        if (diffRanges == null || diffRanges.length === 0) {
             return true;
         }
 
@@ -53,7 +53,7 @@ export class SheetExtension extends ComponentExtension<SpreadsheetSkeleton, SHEE
     }
 
     isRenderDiffRangesByColumn(column: number, diffRanges?: IRange[]) {
-        if (diffRanges == null) {
+        if (diffRanges == null || diffRanges.length === 0) {
             return true;
         }
 
@@ -68,7 +68,7 @@ export class SheetExtension extends ComponentExtension<SpreadsheetSkeleton, SHEE
     }
 
     isRenderDiffRangesByRow(row: number, diffRanges?: IRange[]) {
-        if (diffRanges == null) {
+        if (diffRanges == null || diffRanges.length === 0) {
             return true;
         }
 

@@ -82,12 +82,12 @@ export class Background extends SheetExtension {
                         return true;
                     }
 
-                    if (
-                        !this.isRenderDiffRangesByColumn(mergeInfo.startColumn, diffRanges) &&
-                        !this.isRenderDiffRangesByColumn(mergeInfo.endColumn, diffRanges)
-                    ) {
-                        return true;
-                    }
+                    // if (
+                    //     !this.isRenderDiffRangesByColumn(mergeInfo.startColumn, diffRanges) &&
+                    //     !this.isRenderDiffRangesByColumn(mergeInfo.endColumn, diffRanges)
+                    // ) {
+                    //     return true;
+                    // }
 
                     if (isMergedMainCell) {
                         startY = mergeInfo.startY;

@@ -51,16 +51,11 @@ export class Styles {
         // Take from cache
         const styleObject = JSON.stringify(data);
         if (this._cacheMap.has(styleObject)) {
-            const id = this._cacheMap.get(styleObject) as string;
-            // // Move the accessed entry to the end of the Map to represent its recent usage
-            // this._cacheMap.delete(styleObject);
-            // this._cacheMap.set(styleObject, id);
-
-            return id;
+            return this._cacheMap.get(styleObject) as string;
         }
 
         // Check if the data exists in _styles and not in _cacheMap
-        const existingId = this.getExistingStyleId(data);
+        const existingId = this._getExistingStyleId(data);
         if (existingId) {
             return existingId;
         }
@@ -130,7 +125,7 @@ export class Styles {
         }
     }
 
-    private getExistingStyleId(data: IStyleData): Nullable<string> {
+    private _getExistingStyleId(data: IStyleData): Nullable<string> {
         const { _styles } = this;
         for (const id in _styles) {
             if (Tools.diffValue(_styles[id], data)) {

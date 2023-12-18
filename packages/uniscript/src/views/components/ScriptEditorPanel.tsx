@@ -97,13 +97,13 @@ export function ScriptEditorPanel() {
                 .execute(model.getValue())
                 .then(() => {
                     messageService.show({
-                        content: 'Execution completed',
+                        content: localeService.t('uniscript.message.success'),
                         type: MessageType.Success,
                     });
                 })
                 .catch(() => {
                     messageService.show({
-                        content: 'Execution failed',
+                        content: localeService.t('uniscript.message.failed'),
                         type: MessageType.Error,
                     });
                 });

@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-import type { IDisposable } from '@wendellhu/redi';
-import { createIdentifier } from '@wendellhu/redi';
-import type { Subject } from 'rxjs';
+import type { IOperation } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
+import { IZenZoneService } from '@univerjs/ui';
 
-export const IZenZoneService = createIdentifier<IZenZoneService>('univer.zen-zone-service');
+export const OpenZenEditorOperation: IOperation = {
+    id: 'zen-editor.operation.open-zen-editor',
 
-export interface IZenZoneService {
-    readonly visible$: Subject<boolean>;
-    readonly componentKey$: Subject<string>;
+    type: CommandType.OPERATION,
 
-    set(key: string, component: any): IDisposable;
+    handler: (accessor) => {
+        const zenZoneService = accessor.get(IZenZoneService);
 
-    open(): void;
+        zenZoneService.open();
 
-    close(): void;
-}
+        return true;
+    },
+};

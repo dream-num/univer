@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY } from '@univerjs/core';
-import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
+import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, ICommandService } from '@univerjs/core';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { CheckMarkSingle, CloseSingle } from '@univerjs/icons';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
-import { KeyCode } from '@univerjs/ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
+import clsx from 'clsx';
 import React, { useEffect, useRef, useState } from 'react';
 
+import { CancelZenEditCommand, ConfirmZenEditCommand } from '../../commands/commands/zen-editor.command';
 import styles from './index.module.less';
 
 enum ArrowDirection {
@@ -32,7 +34,6 @@ const COMPONENT_PREFIX = 'ZEN_EDITOR_PLUGIN_';
 export const ZEN_EDITOR_COMPONENT = `${COMPONENT_PREFIX}ZEN_EDITOR_COMPONENT`;
 
 export function ZenEditor() {
-    const [iconStyle, setIconStyle] = useState<string>(styles.formulaGrey);
     const [arrowDirection, setArrowDirection] = useState<ArrowDirection>(ArrowDirection.Down);
 
     const editorRef = useRef<HTMLDivElement>(null);
@@ -40,6 +41,8 @@ export function ZenEditor() {
     const renderManagerService: IRenderManagerService = useDependency(IRenderManagerService);
 
     const editorBridgeService = useDependency(IEditorBridgeService);
+
+    const commandService = useDependency(ICommandService);
 
     useEffect(() => {
         const editor = editorRef.current;
@@ -65,10 +68,6 @@ export function ZenEditor() {
 
         resizeObserver.observe(editor);
 
-        editorBridgeService.visible$.subscribe((visibleInfo) => {
-            setIconStyle(visibleInfo.visible ? styles.formulaActive : styles.formulaGrey);
-        });
-
         // Clean up on unmount
         return () => {
             resizeObserver.unobserve(editor);
@@ -77,30 +76,31 @@ export function ZenEditor() {
     }, []); // Empty dependency array means this effect runs once on mount and clean up on unmount
 
     function handleCloseBtnClick() {
-        const visibleState = editorBridgeService.isVisible();
-        if (visibleState.visible) {
-            editorBridgeService.changeVisible({
-                visible: false,
-                eventType: DeviceInputEventType.Keyboard,
-                keycode: KeyCode.ESC,
-            });
-        }
+        commandService.executeCommand(CancelZenEditCommand.id);
     }
 
     function handleConfirmBtnClick() {
-        const visibleState = editorBridgeService.isVisible();
-        if (visibleState.visible) {
-            editorBridgeService.changeVisible({
-                visible: false,
-                eventType: DeviceInputEventType.PointerDown,
-            });
-        }
+        commandService.executeCommand(ConfirmZenEditCommand.id);
     }
 
     return (
         <div className={styles.zenEditor}>
+            <div className={styles.zenEditorIconWrapper}>
+                <span
+                    className={clsx(styles.zenEditorIconContainer, styles.zenEditorIconError)}
+                    onClick={handleCloseBtnClick}
+                >
+                    <CloseSingle />
+                </span>
+
+                <span
+                    className={clsx(styles.zenEditorIconContainer, styles.zenEditorIconSuccess)}
+                    onClick={handleConfirmBtnClick}
+                >
+                    <CheckMarkSingle />
+                </span>
+            </div>
             <div className={styles.canvasContainer} ref={editorRef} />
-            HELLO WORLD
         </div>
     );
 }

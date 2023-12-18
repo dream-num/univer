@@ -18,7 +18,7 @@ import { Plugin, PluginType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { ZenEditorUIController } from './controllers/zen-editor-ui.controller';
+import { ZenEditorController } from './controllers/zen-editor.controller';
 
 export interface IZenEditorPluginConfig {}
 
@@ -34,7 +34,7 @@ export class ZenEditorPlugin extends Plugin {
     }
 
     private _initializeDependencies(injector: Injector) {
-        const dependencies: Dependency[] = [[ZenEditorUIController]];
+        const dependencies: Dependency[] = [[ZenEditorController]];
 
         dependencies.forEach((dependency) => injector.add(dependency));
     }

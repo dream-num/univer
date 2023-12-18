@@ -31,7 +31,7 @@ export function ZenZone() {
     const componentManager = useDependency(ComponentManager);
 
     useEffect(() => {
-        const subscribtions = [
+        const subscriptions = [
             zenZoneService.visible$.subscribe((visible) => {
                 setVisible(visible);
             }),
@@ -41,15 +41,13 @@ export function ZenZone() {
         ];
 
         return () => {
-            subscribtions.forEach((subscribtion) => {
-                subscribtion.unsubscribe();
+            subscriptions.forEach((subscription) => {
+                subscription.unsubscribe();
             });
         };
     }, []);
 
-    const _className = clsx(styles.zenZone, {
-        [styles.zenZoneOpen]: visible,
-    });
+    const _className = clsx(styles.zenZone, visible ? styles.zenZoneOpen : styles.zenZoneClose);
 
     const Component = useMemo(() => {
         const Component = componentManager.get(componentKey ?? '');

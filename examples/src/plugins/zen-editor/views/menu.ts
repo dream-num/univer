@@ -16,9 +16,11 @@
 
 import { type IMenuButtonItem, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 
+import { OpenZenEditorOperation } from '../commands/operations/zen-editor.operation';
+
 export function ZenEditorMenuItemFactory(): IMenuButtonItem {
     return {
-        id: 'xxx',
+        id: OpenZenEditorOperation.id,
         group: MenuGroup.CONTEXT_MENU_OTHERS,
         type: MenuItemType.BUTTON,
         title: 'rightClick.zenEditor',

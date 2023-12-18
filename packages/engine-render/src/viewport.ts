@@ -961,23 +961,18 @@ export class Viewport {
             };
         }
 
-        // const ratioScrollX = this._scrollBar?.ratioScrollX ?? 1;
-        // const ratioScrollY = this._scrollBar?.ratioScrollY ?? 1;
         const xFrom: number = this.left;
         const xTo: number = (this.width || 0) + this.left;
         const yFrom: number = this.top;
         const yTo: number = (this.height || 0) + this.top;
 
-        // let differenceX = 0;
-        // let differenceY = 0;
-
-        // if (this._preScrollX != null) {
-        //     differenceX = (this._preScrollX - this.scrollX) / ratioScrollX;
-        // }
-
-        // if (this._preScrollY != null) {
-        //     differenceY = (this._preScrollY - this.scrollY) / ratioScrollY;
-        // }
+        /**
+         * @DR-Univer The coordinates here need to be consistent with the clip in the render,
+         * which may be caused by other issues that will be optimized later.
+         */
+        const sceneTrans = this._scene.transform.clone();
+        const m = sceneTrans.getMatrix();
+        const { scaleX, scaleY } = this._getBoundScale(m[0], m[3]);
 
         const topLeft = this.getRelativeVector(Vector2.FromArray([xFrom, yFrom]));
         const bottomRight = this.getRelativeVector(Vector2.FromArray([xTo, yTo]));
@@ -985,8 +980,8 @@ export class Viewport {
         const viewBound = {
             top: topLeft.y,
             left: topLeft.x,
-            right: bottomRight.x,
-            bottom: bottomRight.y,
+            right: bottomRight.x * scaleX,
+            bottom: bottomRight.y * scaleY,
         };
 
         const preViewBound = this._preViewportBound?.viewBound;

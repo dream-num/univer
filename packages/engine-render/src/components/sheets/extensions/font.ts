@@ -140,7 +140,6 @@ export class Font extends SheetExtension {
                                     columnWidthAccumulation
                                 );
                             } else if (horizontalAlign === HorizontalAlign.RIGHT) {
-                                // console.log('horizontalAlign === HorizontalAlign.RIGHT', { rowIndex, startColumn, columnIndex, endColumn });
                                 this._clipRectangle(
                                     ctx,
                                     startRow,

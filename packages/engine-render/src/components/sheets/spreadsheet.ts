@@ -294,9 +294,9 @@ export class Spreadsheet extends SheetComponent {
                         this._cacheCanvas.clear();
                         ctx.setTransform(mainCtx.getTransform());
                         this._draw(ctx, bounds);
+                        this._forceDirty = false;
                     }
                     this._applyCache(mainCtx, left, top, dw, dh, left, top, dw, dh);
-                    this._forceDirty = false;
                 } else {
                     if (this.isDirty()) {
                         const pixelRatio = this._cacheCanvas.getPixelRatio();

@@ -18,7 +18,6 @@ import type { IScale } from '@univerjs/core';
 import { numberToABC } from '@univerjs/core';
 
 import { DEFAULT_FONTFACE_PLANE, FIX_ONE_PIXEL_BLUR_OFFSET, MIDDLE_CELL_POS_MAGIC_NUMBER } from '../../../basics/const';
-import { getLineWith } from '../../../basics/draw';
 import { fixLineWidthByScale, getColor } from '../../../basics/tools';
 import { SheetColumnHeaderExtensionRegistry } from '../../extension';
 import type { SpreadsheetSkeleton } from '../sheet-skeleton';
@@ -51,7 +50,12 @@ export class ColumnHeaderLayout extends SheetExtension {
             return;
         }
 
-        const scale = this._getScale(parentScale);
+        const { a: scaleX = 1, d: scaleY = 1 } = ctx.getTransform();
+
+        const scale = this._getScale({
+            scaleX,
+            scaleY,
+        });
 
         // painting background
         ctx.fillStyle = getColor([248, 249, 250])!;
@@ -61,7 +65,7 @@ export class ColumnHeaderLayout extends SheetExtension {
         ctx.textBaseline = 'middle';
         ctx.fillStyle = getColor([0, 0, 0])!;
         ctx.beginPath();
-        ctx.lineWidth = getLineWith(1) / scale;
+        ctx.lineWidth = 1 / scale;
 
         ctx.translate(FIX_ONE_PIXEL_BLUR_OFFSET / scale, FIX_ONE_PIXEL_BLUR_OFFSET / scale);
 

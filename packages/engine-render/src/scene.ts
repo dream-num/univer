@@ -630,7 +630,7 @@ export class Scene extends ThinScene {
         this._viewports = [];
     }
 
-    getAncestorScale() {
+    override getAncestorScale() {
         let { scaleX = 1, scaleY = 1 } = this;
 
         if (this.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {

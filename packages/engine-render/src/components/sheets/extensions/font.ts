@@ -17,6 +17,7 @@
 import type { IColorStyle, IRange, IScale } from '@univerjs/core';
 import { HorizontalAlign, ObjectMatrix, WrapStrategy } from '@univerjs/core';
 
+import { fixLineWidthByScale } from '../../../basics/tools';
 import type { Documents } from '../../docs/document';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import type { IFontCacheItem } from '../interfaces';
@@ -68,8 +69,13 @@ export class Font extends SheetExtension {
             return;
         }
         ctx.save();
-        const scale = this._getScale(parentScale);
-        const { scaleX = 1, scaleY = 1 } = parentScale;
+
+        const { a: scaleX = 1, d: scaleY = 1 } = ctx.getTransform();
+
+        const scale = this._getScale({
+            scaleX,
+            scaleY,
+        });
 
         fontList &&
             Object.keys(fontList).forEach((fontFormat: string) => {
@@ -96,6 +102,11 @@ export class Font extends SheetExtension {
                         startX = mergeInfo.startX;
                         endX = mergeInfo.endX;
                     }
+
+                    startY = fixLineWidthByScale(startY, scale);
+                    endY = fixLineWidthByScale(endY, scale);
+                    startX = fixLineWidthByScale(startX, scale);
+                    endX = fixLineWidthByScale(endX, scale);
 
                     if (
                         !this.isRenderDiffRangesByRow(mergeInfo.startRow, diffRanges) &&
@@ -125,8 +136,19 @@ export class Font extends SheetExtension {
                     if (overflowRectangle) {
                         const { startColumn, startRow, endColumn, endRow } = overflowRectangle;
                         if (startColumn === endColumn && startColumn === columnIndex) {
-                            ctx.rect(startX, startY, cellWidth, cellHeight);
-                            ctx.clearRect(startX + 1, startY + 1, cellWidth - 2, cellHeight - 2);
+                            ctx.rect(
+                                startX + 1 / scale,
+                                startY + 1 / scale,
+                                cellWidth - 2 / scale,
+                                cellHeight - 2 / scale
+                            );
+                            ctx.clip();
+                            ctx.clearRect(
+                                startX + 1 / scale,
+                                startY + 1 / scale,
+                                cellWidth - 2 / scale,
+                                cellHeight - 2 / scale
+                            );
                         } else {
                             if (horizontalAlign === HorizontalAlign.CENTER) {
                                 this._clipRectangle(
@@ -164,10 +186,15 @@ export class Font extends SheetExtension {
                             }
                         }
                     } else {
-                        ctx.rect(startX, startY, cellWidth, cellHeight);
-                        ctx.clearRect(startX + 1, startY + 1, cellWidth - 2, cellHeight - 2);
+                        ctx.rect(startX + 1 / scale, startY + 1 / scale, cellWidth - 2 / scale, cellHeight - 2 / scale);
+                        ctx.clip();
+                        ctx.clearRect(
+                            startX + 1 / scale,
+                            startY + 1 / scale,
+                            cellWidth - 2 / scale,
+                            cellHeight - 2 / scale
+                        );
                     }
-                    ctx.clip();
 
                     ctx.translate(startX, startY);
                     this._renderDocuments(ctx, docsConfig, startX, startY, endX, endY, rowIndex, columnIndex);
@@ -221,13 +248,20 @@ export class Font extends SheetExtension {
         rowHeightAccumulation: number[],
         columnWidthAccumulation: number[]
     ) {
-        const startY = rowHeightAccumulation[startRow - 1] || 0;
-        const endY = rowHeightAccumulation[endRow] || rowHeightAccumulation[rowHeightAccumulation.length - 1];
+        const startY = fixLineWidthByScale(rowHeightAccumulation[startRow - 1] || 0, scale);
+        const endY = fixLineWidthByScale(
+            rowHeightAccumulation[endRow] || rowHeightAccumulation[rowHeightAccumulation.length - 1],
+            scale
+        );
 
-        const startX = columnWidthAccumulation[startColumn - 1] || 0;
-        const endX = columnWidthAccumulation[endColumn] || columnWidthAccumulation[columnWidthAccumulation.length - 1];
+        const startX = fixLineWidthByScale(columnWidthAccumulation[startColumn - 1] || 0, scale);
+        const endX = fixLineWidthByScale(
+            columnWidthAccumulation[endColumn] || columnWidthAccumulation[columnWidthAccumulation.length - 1],
+            scale
+        );
 
         ctx.rect(startX, startY, endX - startX, endY - startY);
+        ctx.clip();
         ctx.clearRect(startX, startY, endX - startX, endY - startY);
     }
 }

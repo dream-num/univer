@@ -19,10 +19,9 @@ import { BooleanNumber, CellValueType, HorizontalAlign, ObjectMatrix, sortRules,
 
 import type { BaseObject } from '../../base-object';
 import { FIX_ONE_PIXEL_BLUR_OFFSET, RENDER_CLASS_TYPE } from '../../basics/const';
-import { clearLineByBorderType, getLineWith } from '../../basics/draw';
+import { clearLineByBorderType } from '../../basics/draw';
 import { fixLineWidthByScale, getCellByIndex, getCellPositionByIndex, getColor, getScale } from '../../basics/tools';
-import type { IViewportBound } from '../../basics/vector2';
-import { Vector2 } from '../../basics/vector2';
+import type { IViewportBound, Vector2 } from '../../basics/vector2';
 import { Canvas } from '../../canvas';
 import type { Engine } from '../../engine';
 import type { Scene } from '../../scene';
@@ -198,31 +197,6 @@ export class Spreadsheet extends SheetComponent {
         this._forceDirty = state;
     }
 
-    getAncestorScrollXY(offsetX: number, offsetY: number) {
-        let parent: any = this.getParent();
-
-        let x = 0;
-        let y = 0;
-        const coord = Vector2.FromArray([offsetX, offsetY]);
-        while (parent) {
-            if (parent.classType === RENDER_CLASS_TYPE.SCENE) {
-                const scene = parent as Scene;
-                const viewPort = scene.getActiveViewportByCoord(coord);
-                if (viewPort) {
-                    const actualX = viewPort.actualScrollX || 0;
-                    const actualY = viewPort.actualScrollY || 0;
-                    x += actualX;
-                    y += actualY;
-                }
-            }
-            parent = parent?.getParent && parent?.getParent();
-        }
-        return {
-            x,
-            y,
-        };
-    }
-
     override getSelectionBounding(startRow: number, startColumn: number, endRow: number, endColumn: number) {
         return this.getSkeleton()?.getMergeBounding(startRow, startColumn, endRow, endColumn);
     }
@@ -254,9 +228,9 @@ export class Spreadsheet extends SheetComponent {
 
         mainCtx.save();
 
-        const parentScale = this.getParentScale();
+        const { a: scaleX = 1, d: scaleY = 1 } = mainCtx.getTransform();
 
-        const scale = getScale(parentScale);
+        const scale = getScale({ scaleX, scaleY });
 
         // const { left: fixTranslateLeft, top: fixTranslateTop } = getTranslateInSpreadContextWithPixelRatio();
 
@@ -269,10 +243,10 @@ export class Spreadsheet extends SheetComponent {
         if (bounds && this._allowCache === true) {
             const { viewBound, diffBounds, diffX, diffY, viewPortPosition, viewPortKey } = bounds;
 
-            if (viewPortKey === 'viewColumnRight' || viewPortKey === 'viewRowBottom' || viewPortKey === 'viewLeftTop') {
-                // console.warn('ignore object', this);
-                return;
-            }
+            // if (viewPortKey === 'viewColumnRight' || viewPortKey === 'viewRowBottom' || viewPortKey === 'viewLeftTop') {
+            //     // console.warn('ignore object', this);
+            //     return;
+            // }
 
             if (viewPortKey === 'viewMain') {
                 const ctx = this._cacheCanvas.getContext();
@@ -284,12 +258,7 @@ export class Spreadsheet extends SheetComponent {
 
                 const dh = bottom - top + columnHeaderHeight;
 
-                if (
-                    (diffX !== 0 && diffY !== 0) ||
-                    diffBounds[0] == null ||
-                    (diffX === 0 && diffY === 0) ||
-                    this._forceDirty
-                ) {
+                if (diffX !== 0 || diffBounds[0] == null || (diffX === 0 && diffY === 0) || this._forceDirty) {
                     if (this.isDirty() || this._forceDirty) {
                         this._cacheCanvas.clear();
                         ctx.setTransform(mainCtx.getTransform());
@@ -305,8 +274,8 @@ export class Spreadsheet extends SheetComponent {
                         ctx.setTransform(1, 0, 0, 1, 0, 0);
                         ctx.drawImage(
                             this._cacheCanvas.getCanvasEle(),
-                            fixLineWidthByScale(diffX, scale) * pixelRatio * scale,
-                            fixLineWidthByScale(diffY, scale) * pixelRatio * scale
+                            fixLineWidthByScale(diffX, scale) * scale,
+                            fixLineWidthByScale(diffY, scale) * scale
                         );
                         ctx.restore();
 
@@ -637,12 +606,13 @@ export class Spreadsheet extends SheetComponent {
         }
 
         ctx.save();
-        const { scaleX, scaleY } = this.getParentScale();
+
+        const { a: scaleX = 1, d: scaleY = 1 } = ctx.getTransform();
 
         const scale = Math.max(scaleX, scaleY);
 
         ctx.beginPath();
-        ctx.lineWidth = getLineWith(1) / scale;
+        ctx.lineWidth = 1 / scale;
         // eslint-disable-next-line no-magic-numbers
         ctx.strokeStyle = getColor([212, 212, 212]);
 
@@ -703,6 +673,11 @@ export class Spreadsheet extends SheetComponent {
                 startX = mergeInfo.startX;
                 endX = mergeInfo.endX;
             }
+
+            startY = fixLineWidthByScale(startY, scale);
+            endY = fixLineWidthByScale(endY, scale);
+            startX = fixLineWidthByScale(startX, scale);
+            endX = fixLineWidthByScale(endX, scale);
 
             if (!(mergeInfo.startRow >= rowStart && mergeInfo.endRow <= rowEnd)) {
                 return true;

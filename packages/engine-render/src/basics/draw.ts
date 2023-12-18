@@ -50,7 +50,7 @@ export function getDevicePixelRatio(): number {
     if (_pixelRatio < 1) {
         return 1;
     }
-    return Math.ceil(_pixelRatio * 10) / 10;
+    return _pixelRatio;
 }
 
 export function drawLineByBorderType(ctx: CanvasRenderingContext2D, type: BORDER_TYPE, position: IPosition) {
@@ -168,16 +168,16 @@ export function getLineWith(width: number) {
 }
 
 export function getLineWidth(style: BorderStyleTypes) {
-    let lineWidth = getLineWith(1);
+    let lineWidth = 1;
     if (
         style === BorderStyleTypes.MEDIUM ||
         style === BorderStyleTypes.MEDIUM_DASH_DOT ||
         style === BorderStyleTypes.MEDIUM_DASHED ||
         style === BorderStyleTypes.MEDIUM_DASH_DOT_DOT
     ) {
-        lineWidth = getLineWith(2);
+        lineWidth = 2;
     } else if (style === BorderStyleTypes.THICK) {
-        lineWidth = getLineWith(3);
+        lineWidth = 3;
     }
 
     return lineWidth;

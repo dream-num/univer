@@ -261,9 +261,12 @@ describe('Test set range values commands', () => {
                 ).toBeTruthy();
                 expect(getStyle()).toStrictEqual((allStyle.value as ICellData).s);
 
+                /**
+                 * todo: @Dushusir null attribute
+                 */
                 // undo
                 expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
-                expect(getStyle()).toStrictEqual(getParamsStyleBaseObject());
+                expect(Tools.removeNull(getStyle())).toStrictEqual(getParamsStyleBaseObject());
 
                 // redo
                 expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();

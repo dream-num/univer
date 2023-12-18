@@ -24,4 +24,10 @@ export default {
             execute: '执行 Uniscript',
         },
     },
+    uniscript: {
+        message: {
+            success: '执行成功',
+            failed: '执行失败',
+        },
+    },
 };

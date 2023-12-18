@@ -24,4 +24,10 @@ export default {
             execute: 'Execute Script',
         },
     },
+    uniscript: {
+        message: {
+            success: 'Execution Success',
+            failed: 'Execution Failed',
+        },
+    },
 };

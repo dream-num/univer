@@ -58,7 +58,10 @@ export function CustomLabel(props: ICustomLabelProps): JSX.Element | null {
     }
 
     // if value is not valid, use primary color
-    const { isValid } = new ColorKit(realValue?.toString());
+    let isValid = false;
+    if (realValue && typeof realValue === 'string') {
+        isValid = new ColorKit(realValue).isValid;
+    }
 
     if (icon) {
         const Icon = componentManager.get(realIcon ?? '');

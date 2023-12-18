@@ -158,13 +158,13 @@ export class UpdateFormulaController extends Disposable {
         );
 
         this.disposeWithMe(
-            this._commandService.onCommandExecuted((command: ICommandInfo, options) => {
+            this._commandService.onCommandExecuted((command: ICommandInfo, options?: IExecutionOptions) => {
                 if (!command.params) return;
 
                 if (command.id === SetRangeValuesMutation.id) {
                     const params = command.params as ISetRangeValuesMutationParams;
                     if (
-                        (options && options.local === true) ||
+                        (options && options.onlyLocal === true) ||
                         params.trigger === SetStyleCommand.id ||
                         params.trigger === SetBorderCommand.id
                     ) {
@@ -183,7 +183,7 @@ export class UpdateFormulaController extends Disposable {
     private _handleSetRangeValuesMutation(params: ISetRangeValuesMutationParams, options?: IExecutionOptions) {
         const { subUnitId: sheetId, unitId, cellValue } = params;
 
-        if ((options && options.local === true) || cellValue == null) {
+        if ((options && options.onlyLocal === true) || cellValue == null) {
             return;
         }
 

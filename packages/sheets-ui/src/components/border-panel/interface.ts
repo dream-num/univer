@@ -74,4 +74,29 @@ export const BORDER_LINE_CHILDREN = [
         icon: 'InnerBorder',
         value: 'vertical',
     },
+    {
+        label: 'borderLine.borderVertical',
+        icon: 'InnerBorder',
+        value: 'slash1',
+    },
+    {
+        label: 'borderLine.borderVertical',
+        icon: 'InnerBorder',
+        value: 'slash2',
+    },
+    {
+        label: 'borderLine.borderVertical',
+        icon: 'InnerBorder',
+        value: 'slash3',
+    },
+    {
+        label: 'borderLine.borderVertical',
+        icon: 'InnerBorder',
+        value: 'slash4',
+    },
+    {
+        label: 'borderLine.borderVertical',
+        icon: 'InnerBorder',
+        value: 'slash5',
+    },
 ];

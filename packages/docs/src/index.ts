@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+export type { IDocObjectParam } from './basics/component-tools';
 export { getDocObject } from './basics/component-tools';
-export { IDocObjectParam } from './basics/component-tools';
 export * from './basics/docs-view-key';
 export { BreakLineCommand } from './commands/commands/break-line.command';
 export { DocCopyCommand, DocCutCommand, DocPasteCommand } from './commands/commands/clipboard.command';

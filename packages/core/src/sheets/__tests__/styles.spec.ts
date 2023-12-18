@@ -40,7 +40,7 @@ describe('Test Styles', () => {
         const styleId = styles.setValue({ fs: 16 });
 
         // search style not in cache
-        const searchId = styles.search({ fs: 12 });
+        const searchId = styles.search({ fs: 12 }, JSON.stringify({ fs: 12 }));
         expect(searchId).toBe('1');
 
         // Add duplicate style, search style in cache

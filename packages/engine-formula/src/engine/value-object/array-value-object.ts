@@ -706,7 +706,8 @@ export class ArrayValueObject extends BaseValueObject {
     override mean(): BaseValueObject {
         const sum = this.sum();
 
-        const count = this.count();
+        // Count strings in
+        const count = this.countA();
 
         return sum.divided(count);
     }
@@ -733,24 +734,19 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     override var(): BaseValueObject {
-        const allValue = this.flatten();
-
         const mean = this.mean();
 
-        let isError = null;
+        // let isError = null;
         const squaredDifferences: BaseValueObject[][] = [];
-        allValue.iterator((valueObject: Nullable<BaseValueObject>, row: number, column: number) => {
-            let baseValueObject = null;
-
-            if (valueObject && valueObject.isError()) {
-                isError = true;
-                return false; // break
+        this.iterator((valueObject: Nullable<BaseValueObject>, row: number, column: number) => {
+            if (valueObject == null || valueObject.isError() || valueObject.isString()) {
+                valueObject = new NumberValueObject(0);
             }
 
-            if (valueObject == null) {
+            let baseValueObject = (valueObject as BaseValueObject).minus(mean).pow(new NumberValueObject(2, true));
+
+            if (baseValueObject.isError()) {
                 baseValueObject = new NumberValueObject(0);
-            } else {
-                baseValueObject = (valueObject as BaseValueObject).minus(mean).pow(new NumberValueObject(2, true));
             }
 
             if (squaredDifferences[row] == null) {
@@ -760,22 +756,29 @@ export class ArrayValueObject extends BaseValueObject {
             squaredDifferences[row][column] = baseValueObject;
         });
 
-        if (isError) {
-            return ErrorValueObject.create(ErrorType.VALUE);
+        const { _rowCount, _columnCount, _unitId, _sheetId, _currentRow, _currentColumn } = this;
+
+        const squaredDifferencesArrayObject = new ArrayValueObject({
+            calculateValueList: squaredDifferences,
+            rowCount: _rowCount,
+            columnCount: _columnCount,
+            unitId: _unitId,
+            sheetId: _sheetId,
+            row: _currentRow,
+            column: _currentColumn,
+        });
+
+        return squaredDifferencesArrayObject.mean();
+    }
+
+    override std(): BaseValueObject {
+        const variance = this.var();
+
+        if (variance.isError()) {
+            return variance;
         }
 
-        return new ArrayValueObject('').mean();
-
-        // TODO@Dushusir: use squaredDifferences
-        // const sum = new ArrayValueObject({
-        //     calculateValueList: squaredDifferences,
-        //     rowCount: number;
-        //     columnCount: number;
-        //     unitId: string;
-        //     sheetId: string;
-        //     row: number;
-        //     column: number;
-        // }).sum();
+        return variance.sqrt();
     }
 
     override log(): BaseValueObject {

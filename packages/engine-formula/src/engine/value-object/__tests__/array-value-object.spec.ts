@@ -126,6 +126,90 @@ describe('arrayValueObject test', () => {
         });
     });
 
+    describe('mean', () => {
+        it('normal', () => {
+            expect(originArrayValueObject.mean().getValue()).toStrictEqual(8);
+        });
+
+        // like numpy array
+        // [
+        //     [1, 0, 1.23, 1, 0],
+        //     [0, 100, 2.34, 0, -3],
+        // ]
+        it('nm multiple formats', () => {
+            const originValueObject = new ArrayValueObject({
+                calculateValueList: transformToValueObject([
+                    [1, ' ', 1.23, true, false],
+                    [0, '100', '2.34', 'test', -3],
+                ]),
+                rowCount: 2,
+                columnCount: 5,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+
+            expect(originValueObject.mean().getValue()).toStrictEqual(10.257);
+        });
+    });
+
+    describe('var', () => {
+        it('normal', () => {
+            expect(originArrayValueObject.var().getValue()).toStrictEqual(18.666666666666668);
+        });
+
+        it('nm multiple formats', () => {
+            const originValueObject = new ArrayValueObject({
+                calculateValueList: transformToValueObject([
+                    [1, ' ', 1.23, true, false],
+                    [0, '100', '2.34', 'test', -3],
+                ]),
+                rowCount: 2,
+                columnCount: 5,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+
+            expect(originValueObject.var().getValue()).toStrictEqual(896.592801);
+        });
+    });
+
+    describe('std', () => {
+        it('normal', () => {
+            expect(originArrayValueObject.std().getValue()).toStrictEqual(4.320493798938574);
+        });
+
+        it('nm multiple formats', () => {
+            const originValueObject = new ArrayValueObject({
+                calculateValueList: transformToValueObject([
+                    [1, ' ', 1.23, true, false],
+                    [0, '100', '2.34', 'test', -3],
+                ]),
+                rowCount: 2,
+                columnCount: 5,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+
+            expect(originValueObject.std().getValue()).toStrictEqual(29.94315950263098);
+        });
+    });
+
+    describe('getNegative', () => {
+        it('normal', () => {
+            expect((originArrayValueObject.getNegative() as ArrayValueObject).toValue()).toStrictEqual([
+                [-1, -2, -3, -4, -5],
+                [-6, -7, -8, -9, -10],
+                [-11, -12, -13, -14, -15],
+            ]);
+        });
+    });
+
     describe('ValueObjectFactory', () => {
         it('ValueObjectFactory create BooleanValueObject ', () => {
             let booleanValueObject = ValueObjectFactory.create(true);

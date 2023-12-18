@@ -19,7 +19,7 @@ import { describe, expect, it } from 'vitest';
 
 import { ArrayValueObject, transformToValueObject } from '../array-value-object';
 
-describe('arrayValueObject log10 method test', () => {
+describe('arrayValueObject log method test', () => {
     const originArrayValueObject = new ArrayValueObject({
         calculateValueList: transformToValueObject([
             [8, 1, ' ', 1.23, true, false],
@@ -33,11 +33,11 @@ describe('arrayValueObject log10 method test', () => {
         column: 0,
     });
 
-    describe('log10', () => {
+    describe('log', () => {
         it('origin nm', () => {
-            expect((originArrayValueObject.log10() as ArrayValueObject).toValue()).toStrictEqual([
-                [0.9030899869919435, 0, '#VALUE!', 0.08990511143939792, 0, '#NUM!'],
-                [1.4313637641589874, '#NUM!', 2, 0.36921585741014284, '#VALUE!', '#NUM!'],
+            expect((originArrayValueObject.log() as ArrayValueObject).toValue()).toStrictEqual([
+                [2.0794415416798357, 0, '#VALUE!', 0.2070141693843261, 0, '#NUM!'],
+                [3.295836866004329, '#NUM!', 4.605170185988092, 0.85015092936961, '#VALUE!', '#NUM!'],
             ]);
         });
     });

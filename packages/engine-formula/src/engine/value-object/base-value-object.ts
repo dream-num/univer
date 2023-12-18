@@ -230,22 +230,129 @@ export class BaseValueObject extends ObjectClassType {
         return ErrorValueObject.create(ErrorType.VALUE);
     }
 
+    cbrt(): BaseValueObject {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    cos(): BaseValueObject {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    acos(): BaseValueObject {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    acosh(): BaseValueObject {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
     sin(): BaseValueObject {
         /** abstract */
         return ErrorValueObject.create(ErrorType.VALUE);
     }
 
+    asin(): BaseValueObject {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    asinh(): BaseValueObject {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    tan(): BaseValueObject {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    tanh(): BaseValueObject {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    atan(): BaseValueObject {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    atan2(valueObject: BaseValueObject): BaseValueObject {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    atan2Inverse(valueObject: BaseValueObject): BaseValueObject {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    atanh(): BaseValueObject {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    /**
+     * Calculate the mean of the entire array.
+     *
+     * reference https://numpy.org/doc/stable/reference/generated/numpy.mean.html#numpy.mean
+     *
+     */
     mean(): BaseValueObject {
         /** abstract */
         return this;
     }
 
+    /**
+     * Calculate the median of the entire array.
+     *
+     * https://numpy.org/doc/stable/reference/generated/numpy.median.html
+     *
+     */
     median(): BaseValueObject {
         /** abstract */
         return this;
     }
 
+    /**
+     * Calculate the variance of the entire array.
+     *
+     * https://numpy.org/doc/stable/reference/generated/numpy.var.html
+     */
+    var(): BaseValueObject {
+        /** abstract */
+        return this;
+    }
+
+    /**
+     * Calculate the standard deviation of the entire array.
+     *
+     * https://numpy.org/doc/stable/reference/generated/numpy.std.html
+     */
+    std(): BaseValueObject {
+        /** abstract */
+        return this;
+    }
+
+    log(): BaseValueObject {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
     log10(): BaseValueObject {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    exp(): BaseValueObject {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    abs(): BaseValueObject {
         /** abstract */
         return ErrorValueObject.create(ErrorType.VALUE);
     }
@@ -256,6 +363,26 @@ export class BaseValueObject extends ObjectClassType {
     }
 
     roundInverse(valueObject: BaseValueObject): BaseValueObject {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    floor(valueObject: BaseValueObject): BaseValueObject {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    floorInverse(valueObject: BaseValueObject): BaseValueObject {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    ceil(valueObject: BaseValueObject): BaseValueObject {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    ceilInverse(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
         return ErrorValueObject.create(ErrorType.VALUE);
     }

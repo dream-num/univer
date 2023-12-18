@@ -19,25 +19,25 @@ import { describe, expect, it } from 'vitest';
 
 import { ArrayValueObject, transformToValueObject } from '../array-value-object';
 
-describe('arrayValueObject log10 method test', () => {
-    const originArrayValueObject = new ArrayValueObject({
-        calculateValueList: transformToValueObject([
-            [8, 1, ' ', 1.23, true, false],
-            [27, 0, '100', '2.34', 'test', -3],
-        ]),
-        rowCount: 2,
-        columnCount: 6,
-        unitId: '',
-        sheetId: '',
-        row: 0,
-        column: 0,
-    });
+describe('arrayValueObject acosh method test', () => {
+    describe('acosh', () => {
+        it('origin nm, param nm', () => {
+            const tanArrayValueObject = new ArrayValueObject({
+                calculateValueList: transformToValueObject([
+                    [1, ' ', 1.23, true, false],
+                    [0, '100', '2.34', 'test', -3],
+                ]),
+                rowCount: 2,
+                columnCount: 5,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
 
-    describe('log10', () => {
-        it('origin nm', () => {
-            expect((originArrayValueObject.log10() as ArrayValueObject).toValue()).toStrictEqual([
-                [0.9030899869919435, 0, '#VALUE!', 0.08990511143939792, 0, '#NUM!'],
-                [1.4313637641589874, '#NUM!', 2, 0.36921585741014284, '#VALUE!', '#NUM!'],
+            expect((tanArrayValueObject.acosh() as ArrayValueObject).toValue()).toStrictEqual([
+                [0, '#VALUE!', 0.6658635291565548, 0, '#NUM!'],
+                ['#NUM!', 5.298292365610484, 1.494153066724473, '#VALUE!', '#NUM!'],
             ]);
         });
     });

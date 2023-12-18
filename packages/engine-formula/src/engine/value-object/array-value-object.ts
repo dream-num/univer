@@ -38,6 +38,9 @@ enum BatchOperatorType {
     LIKE,
     POW,
     ROUND,
+    FLOOR,
+    CEIL,
+    ATAN2,
 }
 
 enum ArrayCalculateType {
@@ -588,12 +591,115 @@ export class ArrayValueObject extends BaseValueObject {
         });
     }
 
+    override cbrt(): BaseValueObject {
+        return this.map((currentValue) => {
+            if (currentValue.isError()) {
+                return currentValue;
+            }
+            return (currentValue as BaseValueObject).cbrt();
+        });
+    }
+
+    override cos(): BaseValueObject {
+        return this.map((currentValue) => {
+            if (currentValue.isError()) {
+                return currentValue;
+            }
+            return (currentValue as BaseValueObject).cos();
+        });
+    }
+
+    override acos(): BaseValueObject {
+        return this.map((currentValue) => {
+            if (currentValue.isError()) {
+                return currentValue;
+            }
+            return (currentValue as BaseValueObject).acos();
+        });
+    }
+
+    override acosh(): BaseValueObject {
+        return this.map((currentValue) => {
+            if (currentValue.isError()) {
+                return currentValue;
+            }
+            return (currentValue as BaseValueObject).acosh();
+        });
+    }
+
     override sin(): BaseValueObject {
         return this.map((currentValue) => {
             if (currentValue.isError()) {
                 return currentValue;
             }
             return (currentValue as BaseValueObject).sin();
+        });
+    }
+
+    override asin(): BaseValueObject {
+        return this.map((currentValue) => {
+            if (currentValue.isError()) {
+                return currentValue;
+            }
+            return (currentValue as BaseValueObject).asin();
+        });
+    }
+
+    override asinh(): BaseValueObject {
+        return this.map((currentValue) => {
+            if (currentValue.isError()) {
+                return currentValue;
+            }
+            return (currentValue as BaseValueObject).asinh();
+        });
+    }
+
+    override tan(): BaseValueObject {
+        return this.map((currentValue) => {
+            if (currentValue.isError()) {
+                return currentValue;
+            }
+            return (currentValue as BaseValueObject).tan();
+        });
+    }
+
+    override tanh(): BaseValueObject {
+        return this.map((currentValue) => {
+            if (currentValue.isError()) {
+                return currentValue;
+            }
+            return (currentValue as BaseValueObject).tanh();
+        });
+    }
+
+    override atan(): BaseValueObject {
+        return this.map((currentValue) => {
+            if (currentValue.isError()) {
+                return currentValue;
+            }
+            return (currentValue as BaseValueObject).atan();
+        });
+    }
+
+    override atanh(): BaseValueObject {
+        return this.map((currentValue) => {
+            if (currentValue.isError()) {
+                return currentValue;
+            }
+            return (currentValue as BaseValueObject).atanh();
+        });
+    }
+
+    override atan2(valueObject: BaseValueObject): BaseValueObject {
+        return this._batchOperator(valueObject, BatchOperatorType.ATAN2);
+    }
+
+    override atan2Inverse(valueObject: BaseValueObject): BaseValueObject {
+        return this.map((currentValue) => {
+            if (currentValue.isError()) {
+                return currentValue;
+            }
+            return (valueObject as BaseValueObject).atan2(currentValue as BaseValueObject);
         });
     }
 
@@ -626,12 +732,85 @@ export class ArrayValueObject extends BaseValueObject {
         return allValue.get(0, (count - 1) / 2);
     }
 
+    override var(): BaseValueObject {
+        const allValue = this.flatten();
+
+        const mean = this.mean();
+
+        let isError = null;
+        const squaredDifferences: BaseValueObject[][] = [];
+        allValue.iterator((valueObject: Nullable<BaseValueObject>, row: number, column: number) => {
+            let baseValueObject = null;
+
+            if (valueObject && valueObject.isError()) {
+                isError = true;
+                return false; // break
+            }
+
+            if (valueObject == null) {
+                baseValueObject = new NumberValueObject(0);
+            } else {
+                baseValueObject = (valueObject as BaseValueObject).minus(mean).pow(new NumberValueObject(2, true));
+            }
+
+            if (squaredDifferences[row] == null) {
+                squaredDifferences[row] = [];
+            }
+
+            squaredDifferences[row][column] = baseValueObject;
+        });
+
+        if (isError) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+
+        return new ArrayValueObject('').mean();
+
+        // TODO@Dushusir: use squaredDifferences
+        // const sum = new ArrayValueObject({
+        //     calculateValueList: squaredDifferences,
+        //     rowCount: number;
+        //     columnCount: number;
+        //     unitId: string;
+        //     sheetId: string;
+        //     row: number;
+        //     column: number;
+        // }).sum();
+    }
+
+    override log(): BaseValueObject {
+        return this.map((currentValue) => {
+            if (currentValue.isError()) {
+                return currentValue;
+            }
+            return (currentValue as BaseValueObject).log();
+        });
+    }
+
     override log10(): BaseValueObject {
         return this.map((currentValue) => {
             if (currentValue.isError()) {
                 return currentValue;
             }
             return (currentValue as BaseValueObject).log10();
+        });
+    }
+
+    override exp(): BaseValueObject {
+        return this.map((currentValue) => {
+            if (currentValue.isError()) {
+                return currentValue;
+            }
+            return (currentValue as BaseValueObject).exp();
+        });
+    }
+
+    override abs(): BaseValueObject {
+        return this.map((currentValue) => {
+            if (currentValue.isError()) {
+                return currentValue;
+            }
+            return (currentValue as BaseValueObject).abs();
         });
     }
 
@@ -645,6 +824,32 @@ export class ArrayValueObject extends BaseValueObject {
                 return currentValue;
             }
             return (valueObject as BaseValueObject).round(currentValue as BaseValueObject);
+        });
+    }
+
+    override floor(valueObject: BaseValueObject): BaseValueObject {
+        return this._batchOperator(valueObject, BatchOperatorType.FLOOR);
+    }
+
+    override floorInverse(valueObject: BaseValueObject): BaseValueObject {
+        return this.map((currentValue) => {
+            if (currentValue.isError()) {
+                return currentValue;
+            }
+            return (valueObject as BaseValueObject).floor(currentValue as BaseValueObject);
+        });
+    }
+
+    override ceil(valueObject: BaseValueObject): BaseValueObject {
+        return this._batchOperator(valueObject, BatchOperatorType.CEIL);
+    }
+
+    override ceilInverse(valueObject: BaseValueObject): BaseValueObject {
+        return this.map((currentValue) => {
+            if (currentValue.isError()) {
+                return currentValue;
+            }
+            return (valueObject as BaseValueObject).ceil(currentValue as BaseValueObject);
         });
     }
 
@@ -912,6 +1117,15 @@ export class ArrayValueObject extends BaseValueObject {
                         case BatchOperatorType.ROUND:
                             result[r][column] = (currentValue as BaseValueObject).round(valueObject);
                             break;
+                        case BatchOperatorType.FLOOR:
+                            result[r][column] = (currentValue as BaseValueObject).floor(valueObject);
+                            break;
+                        case BatchOperatorType.ATAN2:
+                            result[r][column] = (currentValue as BaseValueObject).atan2(valueObject);
+                            break;
+                        case BatchOperatorType.CEIL:
+                            result[r][column] = (currentValue as BaseValueObject).ceil(valueObject);
+                            break;
                     }
                 }
             } else {
@@ -1058,6 +1272,15 @@ export class ArrayValueObject extends BaseValueObject {
                             case BatchOperatorType.ROUND:
                                 rowList[c] = (currentValue as BaseValueObject).round(opValue as BaseValueObject);
                                 break;
+                            case BatchOperatorType.ATAN2:
+                                rowList[c] = (currentValue as BaseValueObject).atan2(opValue as BaseValueObject);
+                                break;
+                            case BatchOperatorType.FLOOR:
+                                rowList[c] = (currentValue as BaseValueObject).floor(opValue as BaseValueObject);
+                                break;
+                            case BatchOperatorType.CEIL:
+                                rowList[c] = (currentValue as BaseValueObject).ceil(opValue as BaseValueObject);
+                                break;
                         }
                     }
                 }
@@ -1172,6 +1395,9 @@ export class ValueObjectFactory {
             return new StringValueObject(rawValue);
         }
         if (typeof rawValue === 'number') {
+            if (!Number.isFinite(rawValue)) {
+                return ErrorValueObject.create(ErrorType.NUM);
+            }
             return new NumberValueObject(rawValue, true);
         }
         return ErrorValueObject.create(ErrorType.NA);

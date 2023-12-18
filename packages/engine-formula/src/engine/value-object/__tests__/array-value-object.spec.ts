@@ -17,7 +17,8 @@
 /* eslint-disable no-magic-numbers */
 import { describe, expect, it } from 'vitest';
 
-import { ArrayValueObject, transformToValueObject } from '../array-value-object';
+import { ArrayValueObject, transformToValueObject, ValueObjectFactory } from '../array-value-object';
+import type { BooleanValueObject, NumberValueObject } from '../primitive-object';
 
 describe('arrayValueObject test', () => {
     const originArrayValueObject = new ArrayValueObject({
@@ -122,6 +123,87 @@ describe('arrayValueObject test', () => {
             });
 
             expect(originArrayValueObject.pick(pickArrayValueObject).sum().getValue()).toStrictEqual(43);
+        });
+    });
+
+    describe('ValueObjectFactory', () => {
+        it('ValueObjectFactory create BooleanValueObject ', () => {
+            let booleanValueObject = ValueObjectFactory.create(true);
+
+            expect((booleanValueObject as BooleanValueObject).isBoolean()).toBeTruthy();
+
+            booleanValueObject = ValueObjectFactory.create(false);
+
+            expect((booleanValueObject as BooleanValueObject).isBoolean()).toBeTruthy();
+
+            booleanValueObject = ValueObjectFactory.create('true');
+
+            expect((booleanValueObject as BooleanValueObject).isBoolean()).toBeTruthy();
+
+            booleanValueObject = ValueObjectFactory.create('false');
+
+            expect((booleanValueObject as BooleanValueObject).isBoolean()).toBeTruthy();
+            booleanValueObject = ValueObjectFactory.create('TRUE');
+
+            expect((booleanValueObject as BooleanValueObject).isBoolean()).toBeTruthy();
+
+            booleanValueObject = ValueObjectFactory.create('FALSE');
+
+            expect((booleanValueObject as BooleanValueObject).isBoolean()).toBeTruthy();
+        });
+        it('ValueObjectFactory create NumberValueObject ', () => {
+            let numberValueObject = ValueObjectFactory.create(1);
+
+            expect((numberValueObject as NumberValueObject).isNumber()).toBeTruthy();
+
+            numberValueObject = ValueObjectFactory.create(0);
+
+            expect((numberValueObject as NumberValueObject).isNumber()).toBeTruthy();
+            numberValueObject = ValueObjectFactory.create(-1);
+
+            expect((numberValueObject as NumberValueObject).isNumber()).toBeTruthy();
+
+            numberValueObject = ValueObjectFactory.create('1');
+
+            expect((numberValueObject as NumberValueObject).isNumber()).toBeTruthy();
+
+            numberValueObject = ValueObjectFactory.create(1e2);
+
+            expect((numberValueObject as NumberValueObject).isNumber()).toBeTruthy();
+
+            numberValueObject = ValueObjectFactory.create('1e2');
+
+            expect((numberValueObject as NumberValueObject).isNumber()).toBeTruthy();
+        });
+
+        it('ValueObjectFactory create ArrayValueObject ', () => {
+            let arrayValueObject = ValueObjectFactory.create('{1,2,3;4,5,6}');
+
+            expect((arrayValueObject as ArrayValueObject).isArray()).toBeTruthy();
+
+            arrayValueObject = ValueObjectFactory.create('{1,2,3;4,5,6}');
+
+            expect((arrayValueObject as ArrayValueObject).isArray()).toBeTruthy();
+        });
+
+        it('ValueObjectFactory create StringValueObject ', () => {
+            const stringValueObject = ValueObjectFactory.create('test');
+
+            expect(stringValueObject.isString()).toBeTruthy();
+        });
+
+        it('ValueObjectFactory create ErrorValueObject ', () => {
+            let errorValueObject = ValueObjectFactory.create(NaN);
+
+            expect(errorValueObject.isError()).toBeTruthy();
+
+            errorValueObject = ValueObjectFactory.create(Infinity);
+
+            expect(errorValueObject.isError()).toBeTruthy();
+
+            errorValueObject = ValueObjectFactory.create(-Infinity);
+
+            expect(errorValueObject.isError()).toBeTruthy();
         });
     });
 });

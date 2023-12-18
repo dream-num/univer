@@ -21,14 +21,11 @@ import type { ICellDataForSheetInterceptor, IStyleData } from '../types/interfac
 /**
  * Styles in a workbook, cells locate styles based on style IDs
  *
- * TODO@Dushusir: Cachemap needs to follow style to clear cleared following styles
  */
 export class Styles {
     private _styles: IKeyType<Nullable<IStyleData>>;
 
     private _cacheMap = new LRUMap<string, string>(100000);
-
-    private _maxCacheSize: number;
 
     constructor(styles: IKeyType<Nullable<IStyleData>> = {}) {
         this._styles = styles;
@@ -47,9 +44,9 @@ export class Styles {
         return this;
     }
 
-    search(data: IStyleData): string {
+    search(data: IStyleData, styleObject: string): string {
         // Take from cache
-        const styleObject = JSON.stringify(data);
+
         if (this._cacheMap.has(styleObject)) {
             return this._cacheMap.get(styleObject) as string;
         }
@@ -69,11 +66,11 @@ export class Styles {
         return this._styles[id];
     }
 
-    add(data: IStyleData): string {
+    add(data: IStyleData, styleObject: string): string {
         const id = Tools.generateRandomId(6);
         this._styles[id] = data;
         // update cache
-        const styleObject = JSON.stringify(data);
+
         this._cacheMap.set(styleObject, id);
 
         return id;
@@ -81,11 +78,12 @@ export class Styles {
 
     setValue(data: Nullable<IStyleData>): Nullable<string> {
         if (data == null) return;
-        const result = this.search(data);
+        const styleObject = JSON.stringify(data);
+        const result = this.search(data, styleObject);
         if (result !== '-1') {
             return result;
         }
-        return this.add(data);
+        return this.add(data, styleObject);
     }
 
     toJSON(): IKeyType<Nullable<IStyleData>> {
@@ -114,14 +112,9 @@ export class Styles {
 
     private _generateCacheMap(): void {
         const { _styles, _cacheMap } = this;
-        let count = 0;
         for (const id in _styles) {
             const styleObject = JSON.stringify(_styles[id]);
             _cacheMap.set(styleObject, id);
-            count++;
-            if (count >= this._maxCacheSize) {
-                break;
-            }
         }
     }
 

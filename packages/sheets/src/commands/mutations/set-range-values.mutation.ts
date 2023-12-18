@@ -271,7 +271,7 @@ export function transformNormalKey(
     if (!newStyle || !Object.keys(newStyle).length) {
         return oldStyle;
     }
-    const backupStyle: { [key: string]: any } = Tools.deepClone(oldStyle) || {};
+    const backupStyle: { [key: string]: any } = oldStyle || {};
 
     for (const k in newStyle) {
         if (k === 'bd') {

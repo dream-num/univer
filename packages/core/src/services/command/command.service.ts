@@ -299,10 +299,11 @@ export class CommandService implements ICommandService {
 
             const stackItemDisposable = this._pushCommandExecutionStack(commandInfo);
 
+            this._beforeCommandExecutionListeners.forEach((listener) => listener(commandInfo, options));
             const result = this._syncExecute<P, R>(command as ICommand<P, R>, params);
-            stackItemDisposable.dispose();
-
             this._commandExecutedListeners.forEach((listener) => listener(commandInfo, options));
+
+            stackItemDisposable.dispose();
 
             return result;
         }

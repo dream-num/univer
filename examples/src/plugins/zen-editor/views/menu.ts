@@ -24,7 +24,7 @@ export function ZenEditorMenuItemFactory(): IMenuButtonItem {
         group: MenuGroup.CONTEXT_MENU_OTHERS,
         type: MenuItemType.BUTTON,
         title: 'rightClick.zenEditor',
-        icon: 'NoColor',
+        icon: 'AmplifySingle',
         positions: [MenuPosition.CONTEXT_MENU],
     };
 }

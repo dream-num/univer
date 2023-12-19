@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
+import type { ICommand, IRange } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
@@ -64,17 +64,34 @@ export const DeltaRowHeightCommand: ICommand = {
         const anchorRowHeight = worksheet.getRowHeight(anchorRow);
         const destRowHeight = anchorRowHeight + deltaY;
 
+        const isAllSheetRange = selections.length === 1 && selections[0].range.rangeType === RANGE_TYPE.ALL;
         const rowSelections = selections.filter((s) => s.range.rangeType === RANGE_TYPE.ROW);
-        const rangeType = rowSelections.some(({ range }) => {
-            const { startRow, endRow } = range;
-
-            return startRow <= anchorRow && anchorRow <= endRow;
-        })
-            ? RANGE_TYPE.ROW
-            : RANGE_TYPE.NORMAL;
+        const rangeType = isAllSheetRange
+            ? RANGE_TYPE.ALL
+            : rowSelections.some(({ range }) => {
+                    const { startRow, endRow } = range;
+                    return startRow <= anchorRow && anchorRow <= endRow;
+                })
+              ? RANGE_TYPE.ROW
+              : RANGE_TYPE.NORMAL;
 
         let redoMutationParams: ISetWorksheetRowHeightMutationParams;
-        if (rangeType === RANGE_TYPE.ROW) {
+        if (rangeType === RANGE_TYPE.ALL) {
+            const colCount = worksheet.getRowCount();
+            const allRowRanges = new Array(worksheet.getColumnCount())
+                .fill(undefined)
+                .map(
+                    (_, index) =>
+                        ({ startRow: index, endRow: index, startColumn: 0, endColumn: colCount - 1 }) as IRange
+                );
+
+            redoMutationParams = {
+                subUnitId,
+                unitId,
+                rowHeight: destRowHeight,
+                ranges: allRowRanges,
+            };
+        } else if (rangeType === RANGE_TYPE.ROW) {
             redoMutationParams = {
                 subUnitId,
                 unitId,

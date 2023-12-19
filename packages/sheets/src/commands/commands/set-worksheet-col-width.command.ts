@@ -76,7 +76,7 @@ export const DeltaColumnWidthCommand: ICommand<IDeltaColumnWidthCommandParams> =
         let redoMutationParams: ISetWorksheetColWidthMutationParams;
         if (rangeType === RANGE_TYPE.ALL) {
             const rowCount = worksheet.getRowCount();
-            const allRowRanges = new Array(worksheet.getColumnCount())
+            const allColRanges = new Array(worksheet.getColumnCount())
                 .fill(undefined)
                 .map(
                     (_, index) =>
@@ -87,7 +87,7 @@ export const DeltaColumnWidthCommand: ICommand<IDeltaColumnWidthCommandParams> =
                 subUnitId,
                 unitId,
                 colWidth: destColumnWidth,
-                ranges: allRowRanges,
+                ranges: allColRanges,
             };
         } else if (rangeType === RANGE_TYPE.COLUMN) {
             redoMutationParams = {

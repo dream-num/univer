@@ -37,6 +37,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 import { AutoFillController } from '../../../controllers/auto-fill.controller';
 import { AutoFillService, IAutoFillService } from '../../../services/auto-fill/auto-fill.service';
+import { EditorBridgeService, IEditorBridgeService } from '../../../services/editor-bridge.service';
 import { ISelectionRenderService, SelectionRenderService } from '../../../services/selection/selection-render.service';
 
 const theme = {
@@ -239,6 +240,7 @@ describe('Test auto fill rules in controller', () => {
             [IAutoFillService, { useClass: AutoFillService }],
             [IShortcutService, { useClass: DesktopShortcutService }],
             [IPlatformService, { useClass: DesktopPlatformService }],
+            [IEditorBridgeService, { useClass: EditorBridgeService }],
             [AutoFillController],
         ]);
         univer = testBed.univer;

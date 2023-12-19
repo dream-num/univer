@@ -147,8 +147,7 @@ export function SheetBarTabs() {
         const currenSheetName = worksheet.getName();
         if (currenSheetName === name) return true;
 
-        const genName = workbook.getGenName();
-        const checked = genName.checkName(name);
+        const checked = workbook.checkSheetName(name);
 
         if (checked) {
             const id = 'sheetNameRepeatAlert';
@@ -234,7 +233,7 @@ export function SheetBarTabs() {
 
     const setupSubscribeRenameId = () =>
         sheetBarService.renameId$.subscribe(() => {
-            focusTabEditor();
+            setTabEditor();
         });
 
     const setupSubscribeAddSheet = () =>

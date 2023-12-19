@@ -22,7 +22,6 @@ export * from './command-enum';
 export * from './common';
 export * from './compare';
 export * from './doc-tool';
-export * from './gen-name';
 export * from './generate';
 export * from './hash-algorithm';
 export * from './lifecycle';

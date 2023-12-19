@@ -14,4 +14,8 @@
  * limitations under the License.
  */
 
-export default {};
+export default {
+    sheets: {
+        sheetCopy: '（副本）',
+    },
+};

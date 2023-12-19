@@ -22,7 +22,6 @@ import { LayoutService } from '@univerjs/ui';
 import { Inject, Optional } from '@wendellhu/redi';
 
 import { getDocObjectById } from '../basics/component-tools';
-import { VIEWPORT_KEY } from '../basics/docs-view-key';
 import type { ISetDocZoomRatioOperationParams } from '../commands/operations/set-doc-zoom-ratio.operation';
 import { SetDocZoomRatioOperation } from '../commands/operations/set-doc-zoom-ratio.operation';
 import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
@@ -105,7 +104,6 @@ export class TextSelectionController extends Disposable {
         }
 
         const { document, scene } = docObject;
-        const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
 
         this._moveInObserver = document.onPointerEnterObserver.add(() => {
             document.cursor = CURSOR_TYPE.TEXT;
@@ -123,7 +121,7 @@ export class TextSelectionController extends Disposable {
                 this._currentUniverService.setCurrentUniverDocInstance(unitId);
             }
 
-            this._textSelectionRenderManager.eventTrigger(evt, document.getOffsetConfig(), viewportMain);
+            this._textSelectionRenderManager.eventTrigger(evt);
 
             if (evt.button !== 2) {
                 state.stopPropagation();
@@ -131,11 +129,11 @@ export class TextSelectionController extends Disposable {
         });
 
         this._dblClickObserver = document?.onDblclickObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            this._textSelectionRenderManager.handleDblClick(evt, document.getOffsetConfig(), viewportMain);
+            this._textSelectionRenderManager.handleDblClick(evt);
         });
 
         this._tripleClickObserver = document?.onTripleClickObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            this._textSelectionRenderManager.handleTripleClick(evt, document.getOffsetConfig(), viewportMain);
+            this._textSelectionRenderManager.handleTripleClick(evt);
         });
     }
 
@@ -175,14 +173,8 @@ export class TextSelectionController extends Disposable {
             }
 
             const { scene, mainComponent } = currentRender;
-            const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
 
-            this._textSelectionRenderManager.changeRuntime(
-                skeleton,
-                scene,
-                viewportMain,
-                (mainComponent as Documents).getOffsetConfig()
-            );
+            this._textSelectionRenderManager.changeRuntime(skeleton, scene, mainComponent as Documents);
 
             this._textSelectionManagerService.setCurrentSelectionNotRefresh({
                 unitId,

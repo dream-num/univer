@@ -58,7 +58,7 @@ export function getDocObjectById(
         return;
     }
 
-    const { components, mainComponent, scene, engine } = currentRender;
+    const { mainComponent, scene, engine } = currentRender;
 
     const document = mainComponent as Documents;
 

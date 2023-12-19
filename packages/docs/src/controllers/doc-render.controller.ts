@@ -16,23 +16,24 @@
 
 import type { ICommandInfo } from '@univerjs/core';
 import {
-    Disposable,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     ICommandService,
     LifecycleStages,
     OnLifecycle,
+    RxDisposable,
 } from '@univerjs/core';
 import type { Documents, DocumentSkeleton, IRender } from '@univerjs/engine-render';
 import { IRenderManagerService, PageLayoutType } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
+import { takeUntil } from 'rxjs';
 
 import type { IRichTextEditingMutationParams } from '../commands/mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../commands/mutations/core-editing.mutation';
 import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
 
 @OnLifecycle(LifecycleStages.Rendered, DocRenderController)
-export class DocRenderController extends Disposable {
+export class DocRenderController extends RxDisposable {
     constructor(
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
@@ -46,7 +47,7 @@ export class DocRenderController extends Disposable {
     }
 
     private _initialRenderRefresh() {
-        this._docSkeletonManagerService.currentSkeletonBefore$.subscribe((param) => {
+        this._docSkeletonManagerService.currentSkeletonBefore$.pipe(takeUntil(this.dispose$)).subscribe((param) => {
             if (param == null) {
                 return;
             }
@@ -68,52 +69,6 @@ export class DocRenderController extends Disposable {
             this._recalculateSizeBySkeleton(currentRender, documentSkeleton);
         });
     }
-
-    // calculatePagePosition(currentRender: IRender) {
-    //     const { mainComponent, scene } = currentRender;
-
-    //     const docsComponent = mainComponent as Documents;
-
-    //     const parent = scene?.getParent();
-
-    //     const { width: docsWidth, height: docsHeight, pageMarginLeft, pageMarginTop } = docsComponent;
-    //     if (parent == null || docsWidth === Infinity || docsHeight === Infinity) {
-    //         return;
-    //     }
-    //     const { width: engineWidth, height: engineHeight } = parent;
-    //     let docsLeft = 0;
-    //     let docsTop = 0;
-
-    //     let sceneWidth = 0;
-
-    //     let sceneHeight = 0;
-
-    //     if (engineWidth > docsWidth) {
-    //         docsLeft = engineWidth / 2 - docsWidth / 2;
-    //         sceneWidth = engineWidth - 34;
-    //     } else {
-    //         docsLeft = pageMarginLeft;
-    //         sceneWidth = docsWidth + pageMarginLeft * 2;
-    //     }
-
-    //     if (engineHeight > docsHeight) {
-    //         docsTop = engineHeight / 2 - docsHeight / 2;
-    //         sceneHeight = engineHeight - 34;
-    //     } else {
-    //         docsTop = pageMarginTop;
-    //         sceneHeight = docsHeight + pageMarginTop * 2;
-    //     }
-
-    //     // this.docsLeft = docsLeft;
-
-    //     // this.docsTop = docsTop;
-
-    //     scene.resize(sceneWidth, sceneHeight + 200);
-
-    //     docsComponent.translate(docsLeft, docsTop);
-
-    //     return this;
-    // }
 
     private _recalculateSizeBySkeleton(currentRender: IRender, skeleton: DocumentSkeleton) {
         const { mainComponent, scene } = currentRender;

@@ -1,39 +1,31 @@
 name: 🚀 新功能请求
-description: 尽管我们提供了中文 feature request 的入口，但还是建议您使用英语描述需求，这可以让更多的人来帮助您。
-labels: feature request
-title: '[Feature]'
+description: 尽管我们提供了中文 Feature request 的入口，但还是建议您使用英语描述需求，这可以让更多的人来帮助您。
+labels: feature
+title: '[Feature] '
 
 body:
-  - type: checkboxes
-    id: initial-checklist
-    attributes:
-      label: 初始清单
-      options:
-        - label: 这真的是个问题吗？
+    - type: checkboxes
+      id: initial-checklist
+      attributes:
+          label: 初始清单
+          options:
+              - label: 这真的是个问题吗？
+                required: true
+              - label: 我已经在 Github Issues 中搜索过了，但没有找到类似的问题。
+                required: true
+
+    - type: textarea
+      id: problem
+      attributes:
+          label: 问题
+          description: 请描述一下你想要解决的问题。
+      validations:
           required: true
-        - label: 我已经在 Github Issues 中搜索过了，但没有找到类似的问题。
+
+    - type: textarea
+      id: solution
+      attributes:
+          label: 解决方案
+          description: 您期望的解决方案是什么？请描述预期行为。
+      validations:
           required: true
-
-  - type: textarea
-    id: problem
-    attributes:
-      label: 问题
-      description: 请描述一下你想要解决的问题。
-    validations:
-      required: true
-
-  - type: textarea
-    id: solution
-    attributes:
-      label: 解决方案
-      description: 您期望的解决方案是什么？请描述预期行为。
-    validations:
-      required: true
-
-  - type: textarea
-    id: alternatives
-    attributes:
-      label: 替代方案
-      description: 有其他的解决方案吗？这个问题是否可以用另一种方式解决?
-    validations:
-      required: true

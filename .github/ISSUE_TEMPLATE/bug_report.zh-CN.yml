@@ -1,108 +1,116 @@
 name: 🐛 Bug 报告
 description: 尽管我们提供了中文 Bug 报告的入口，但还是建议您使用英语描述问题，这可以让更多的人来帮助您。
 labels: bug
-title: '[Bug]'
+title: '[Bug] '
 
 body:
-  - type: checkboxes
-    id: initial-checklist
-    attributes:
-      label: 初始清单
-      options:
-        - label: 这真的是个问题吗？
+    - type: checkboxes
+      id: initial-checklist
+      attributes:
+          label: 初始清单
+          options:
+              - label: 这真的是个问题吗？
+                required: true
+              - label: 我已经在 Github Issues 中搜索过了，但没有找到类似的问题。
+                required: true
+
+    - type: dropdown
+      id: affected-versions
+      attributes:
+          label: 受影响的包和版本
+          multiple: true
+          description: 请使用最新版本的相关包进行测试，以确保您的问题尚未解决。
+          options:
+              - v0.1.0
+              - dev
+          default: 0
+      validations:
           required: true
-        - label: 我已经在 Github Issues 中搜索过了，但没有找到类似的问题。
+
+    # - type: checkboxes
+    #   id: affected-productions
+    #   attributes:
+    #       label: 受影响的产品
+    #       options:
+    #           - label: Univer Sheet
+    #             value: sheet
+    #           - label: Univer Doc
+    #             value: doc
+    #           - label: Univer Slide
+    #             value: slide
+    #   validations:
+    #       required: true
+
+    - type: textarea
+      id: steps-to-reproduce
+      attributes:
+          label: 复现步骤
+          description: 如何复现您的问题？请提供一个 [最小可复现的例子](https://stackoverflow.com/help/minimal-reproducible-example).
+      validations:
           required: true
 
-  - type: input
-    id: affected-versions
-    attributes:
-      label: 受影响的包和版本
-      description: 请使用最新版本的相关包进行测试，以确保您的问题尚未解决。
-    validations:
-      required: true
+    - type: textarea
+      id: expected-behavior
+      attributes:
+          label: 预期行为
+          description: 本应发生什么？
+      validations:
+          required: true
 
-#   - type: input
-#     id: runnable-example
-#     attributes:
-#       label: Link to runnable example
-#       description: |
-#         Link to repository or sandbox with runnable example of the issue.
+    - type: textarea
+      id: actual-behavior
+      attributes:
+          label: 实际行为
+          description: 实际发生了什么？
+      validations:
+          required: true
 
-#         Alternatively, use the next section *Steps to reproduce*.
-#     validations:
-#       required: false
+    - type: dropdown
+      id: javascript-runtime
+      attributes:
+          label: 运行环境
+          description: |
+              您使用的浏览器是？
+          multiple: true
+          options:
+              - Chrome
+              - Safari
+              - Firefox
+              - Electron
+              - 其他 (请在复现步骤中说明)
+      validations:
+          required: false
 
-  - type: textarea
-    id: steps-to-reproduce
-    attributes:
-      label: 复现步骤
-      description: 如何复现您的问题？请提供一个 [最小可复现的例子](https://stackoverflow.com/help/minimal-reproducible-example).
-    validations:
-      required: true
+    - type: dropdown
+      id: operating-system
+      attributes:
+          label: 操作系统
+          description: 您正在使用什么操作系统？
+          multiple: true
+          options:
+              - Windows
+              - Linux
+              - macOS
+              - 其他 (请在复现步骤中说明)
+      validations:
+          required: false
 
-  - type: textarea
-    id: expected-behavior
-    attributes:
-      label: 预期行为
-      description: 本应发生什么？
-    validations:
-      required: true
-
-  - type: textarea
-    id: actual-behavior
-    attributes:
-      label: 实际行为
-      description: 实际发生了什么？
-    validations:
-      required: true
-
-  - type: dropdown
-    id: javascript-runtime
-    attributes:
-      label: 运行环境
-      description: |
-        您使用的浏览器是？
-      multiple: true
-      options:
-        - Chrome
-        - Safari
-        - Firefox
-        - Electron
-        - 其他 (请在复现步骤中说明)
-    validations:
-      required: false
-
-  - type: dropdown
-    id: operating-system
-    attributes:
-      label: 操作系统
-      description: 您正在使用什么操作系统？
-      multiple: true
-      options:
-        - Windows
-        - Linux
-        - macOS
-        - 其他 (请在复现步骤中说明)
-    validations:
-      required: false
-
-  - type: dropdown
-    id: build-tools
-    attributes:
-      label: 构建工具
-      description: 如果有使用的话，您使用的是什么构建工具?
-      multiple: true
-      options:
-        - Webpack
-        - Rollup
-        - esbuild
-        - Parcel
-        - Create React App
-        - Gatsby
-        - Next.js
-        - Remix
-        - Vite
-        - 其他 (请在复现步骤中说明)
-    validations:
-      required: false
+    - type: dropdown
+      id: build-tools
+      attributes:
+          label: 构建工具
+          description: 如果有使用的话，您使用的是什么构建工具?
+          multiple: true
+          options:
+              - Webpack
+              - Rollup
+              - esbuild
+              - Parcel
+              - Create React App
+              - Gatsby
+              - Next.js
+              - Remix
+              - Vite
+              - 其他 (请在复现步骤中说明)
+      validations:
+          required: false

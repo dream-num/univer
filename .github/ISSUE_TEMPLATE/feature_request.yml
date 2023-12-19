@@ -1,39 +1,31 @@
 name: 🚀 Feature request
 description: Suggest an idea
 labels: feature request
-title: '[Feature]'
+title: '[Feature] '
 
 body:
-  - type: checkboxes
-    id: initial-checklist
-    attributes:
-      label: Initial checklist
-      options:
-        - label: Is this really a problem?
+    - type: checkboxes
+      id: initial-checklist
+      attributes:
+          label: Initial checklist
+          options:
+              - label: Is this really a problem?
+                required: true
+              - label: I have searched the Github Issues for similar issues, but did not find anything.
+                required: true
+
+    - type: textarea
+      id: problem
+      attributes:
+          label: Problem
+          description: Please describe the problem you are trying to solve here.
+      validations:
           required: true
-        - label: I have searched the Github Issues for similar issues, but did not find anything.
+
+    - type: textarea
+      id: solution
+      attributes:
+          label: Solution
+          description: What should happen? Please describe the desired behavior.
+      validations:
           required: true
-
-  - type: textarea
-    id: problem
-    attributes:
-      label: Problem
-      description: Please describe the problem you are trying to solve here.
-    validations:
-      required: true
-
-  - type: textarea
-    id: solution
-    attributes:
-      label: Solution
-      description: What should happen? Please describe the desired behavior.
-    validations:
-      required: true
-
-  - type: textarea
-    id: alternatives
-    attributes:
-      label: Alternatives
-      description: What are the alternative solutions? Can this be solved in a different way?
-    validations:
-      required: true

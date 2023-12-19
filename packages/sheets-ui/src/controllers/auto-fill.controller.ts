@@ -26,7 +26,7 @@ import {
     toDisposable,
     Tools,
 } from '@univerjs/core';
-import { getCellInfoInMergeData } from '@univerjs/engine-render';
+import { DeviceInputEventType, getCellInfoInMergeData } from '@univerjs/engine-render';
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
@@ -36,6 +36,7 @@ import { otherRule } from '../services/auto-fill/rules';
 import { fillCopy, fillCopyStyles, getDataIndex, getLenS } from '../services/auto-fill/tools';
 import type { APPLY_FUNCTIONS, ICopyDataInType, ICopyDataPiece, IRuleConfirmedData } from '../services/auto-fill/type';
 import { APPLY_TYPE, DATA_TYPE } from '../services/auto-fill/type';
+import { IEditorBridgeService } from '../services/editor-bridge.service';
 import { ISelectionRenderService } from '../services/selection/selection-render.service';
 
 @OnLifecycle(LifecycleStages.Steady, AutoFillController)
@@ -51,6 +52,7 @@ export class AutoFillController extends Disposable {
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
         @ICommandService private readonly _commandService: ICommandService,
         @IAutoFillService private readonly _autoFillService: IAutoFillService,
+        @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService
     ) {
         super();
@@ -213,6 +215,20 @@ export class AutoFillController extends Disposable {
                                         endRow: controlSelection.model.endRow,
                                     };
                                     this._handleDbClickFill(sourceRange);
+                                })
+                            )
+                        );
+
+                        disposableCollection.add(
+                            toDisposable(
+                                controlSelection.fillControl.onPointerDownObserver.add(() => {
+                                    const visibleState = this._editorBridgeService.isVisible();
+                                    if (visibleState.visible) {
+                                        this._editorBridgeService.changeVisible({
+                                            visible: false,
+                                            eventType: DeviceInputEventType.PointerDown,
+                                        });
+                                    }
                                 })
                             )
                         );

@@ -86,17 +86,17 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
 
     const tooltipTitle = localeService.t(tooltip ?? '') + (shortcut ? ` (${shortcut})` : '');
 
+    const { selections } = props as IDisplayMenuItem<IMenuSelectorItem>;
+
+    const options = selections as IValueOption[];
+    let iconToDisplay = icon;
+    if (isObservable(icon)) {
+        iconToDisplay = useObservable(icon, undefined, true);
+    } else {
+        iconToDisplay = options?.find((o) => o.value === value)?.icon ?? icon;
+    }
+
     function renderSelectorType(menuType: MenuItemType) {
-        const { selections } = props as IDisplayMenuItem<IMenuSelectorItem>;
-
-        const options = selections as IValueOption[];
-        let iconToDisplay = icon;
-        if (isObservable(icon)) {
-            iconToDisplay = useObservable(icon, undefined, true);
-        } else {
-            iconToDisplay = options?.find((o) => o.value === value)?.icon ?? icon;
-        }
-
         function handleSelect(option: IValueOption) {
             let commandId = id;
             const value = option;

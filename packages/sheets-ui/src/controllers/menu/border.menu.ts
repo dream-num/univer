@@ -68,5 +68,8 @@ export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSel
             },
         ],
         value$: borderStyleManagerService.borderInfo$,
+        hidden$: new Observable((subscriber) => {
+            subscriber.next(true);
+        }),
     };
 }

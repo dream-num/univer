@@ -503,12 +503,13 @@ export function expandToContinuousRange(startRange: IRange, directions: IExpandP
 }
 
 export function expandToWholeSheet(worksheet: Worksheet): IRange {
+    // DEBT: RANGE_TYPE.ALL should not use startRow, startColumn, endRow, endColumn
     return {
         startRow: 0,
         startColumn: 0,
-        endRow: worksheet.getMaxRows() - 1,
-        endColumn: worksheet.getMaxColumns() - 1,
-        rangeType: RANGE_TYPE.NORMAL,
+        endRow: worksheet.getRowCount() - 1,
+        endColumn: worksheet.getColumnCount() - 1,
+        rangeType: RANGE_TYPE.ALL,
     };
 }
 

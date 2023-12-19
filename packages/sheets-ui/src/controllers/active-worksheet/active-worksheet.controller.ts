@@ -45,7 +45,7 @@ export class ActiveWorksheetController extends Disposable {
         super();
 
         this.disposeWithMe(
-            this._commandService.onCommandExecuted((command, options) => {
+            this._commandService.beforeCommandExecuted((command, options) => {
                 if (command.id === RemoveSheetMutation.id) {
                     return this._beforeAdjustActiveSheetOnRemoveSheet(
                         command as IMutationInfo<IRemoveSheetMutationParams>

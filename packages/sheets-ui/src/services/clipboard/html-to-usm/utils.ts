@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { IParagraphStyle, Nullable } from '@univerjs/core';
+import type { IParagraph, type IParagraphStyle, type Nullable } from '@univerjs/core';
+import { DataStreamTreeTokenType, Tools } from '@univerjs/core';
 
 export default function parseToDom(rawHtml: string) {
     const parser = new DOMParser();
@@ -63,4 +64,34 @@ export function ptToPixel(pt: number) {
     const PX_TO_PT_RATIO = 0.75;
 
     return pt / PX_TO_PT_RATIO;
+}
+
+export function generateParagraphs(dataStream: string, prevParagraph?: IParagraph): IParagraph[] {
+    const paragraphs: IParagraph[] = [];
+
+    for (let i = 0, len = dataStream.length; i < len; i++) {
+        const char = dataStream[i];
+
+        if (char !== DataStreamTreeTokenType.PARAGRAPH) {
+            continue;
+        }
+
+        paragraphs.push({
+            startIndex: i,
+        });
+    }
+
+    if (prevParagraph) {
+        for (const paragraph of paragraphs) {
+            if (prevParagraph.bullet) {
+                paragraph.bullet = Tools.deepClone(prevParagraph.bullet);
+            }
+
+            if (prevParagraph.paragraphStyle) {
+                paragraph.paragraphStyle = Tools.deepClone(prevParagraph.paragraphStyle);
+            }
+        }
+    }
+
+    return paragraphs;
 }

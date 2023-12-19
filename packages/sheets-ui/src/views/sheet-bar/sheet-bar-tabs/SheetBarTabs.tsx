@@ -148,7 +148,8 @@ export function SheetBarTabs() {
         const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
         const currenSheetName = worksheet.getName();
-        if (currenSheetName === name) return true;
+        // TODO@Dushusir: no need trigger save
+        if (currenSheetName === name) return false;
 
         const checked = workbook.checkSheetName(name);
 

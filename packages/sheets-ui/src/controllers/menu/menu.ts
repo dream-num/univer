@@ -16,6 +16,7 @@
 
 import {
     BooleanNumber,
+    DocumentType,
     FontItalic,
     FontWeight,
     HorizontalAlign,
@@ -129,6 +130,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const selectionManagerService = accessor.get(SelectionManagerService);
     const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
     const sheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+
     return {
         id: SetRangeBoldCommand.id,
         group: MenuGroup.TOOLBAR_FORMAT,
@@ -167,6 +169,27 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
             subscriber.next(false);
 
             return disposable.dispose;
+        }),
+        hidden$: new Observable((subscriber) => {
+            const subscription = univerInstanceService.focused$.subscribe((unitId) => {
+                if (unitId == null) {
+                    return subscriber.next(false);
+                }
+                const univerType = univerInstanceService.getDocumentType(unitId);
+
+                subscriber.next(univerType === DocumentType.SHEET);
+            });
+
+            const focusedUniverInstance = univerInstanceService.getFocusedUniverInstance();
+
+            if (focusedUniverInstance == null) {
+                return subscriber.next(false);
+            }
+
+            const univerType = univerInstanceService.getDocumentType(focusedUniverInstance.getUnitId());
+            subscriber.next(univerType === DocumentType.SHEET);
+
+            return () => subscription.unsubscribe();
         }),
     };
 }

@@ -61,9 +61,15 @@ jobs:
             - name: 📦 Build
               run: pnpm run build
 
-            - name: 🐙 Publish
-              if: ${{ steps.release-type.outputs.release_type == 'alpha' || steps.release-type.outputs.release_type == 'beta' || steps.release-type.outputs.release_type == 'rc' }}
+            - name: 🐙 Publish (alpha)
+              if: ${{ steps.release-type.outputs.release_type == 'alpha' }}
               run: pnpm publish --access public --tag ${{ steps.release-type.outputs.release_type }} -r
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+            - name: 🐙 Publish (beta, rc)
+              if: ${{ steps.release-type.outputs.release_type == 'beta' || steps.release-type.outputs.release_type == 'rc' }}
+              run: pnpm publish --access public -r
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -171,6 +177,7 @@ jobs:
                   vercel-token: ${{ secrets.VERCEL_TOKEN }}
                   vercel-org-id: ${{ secrets.ORG_ID}}
                   vercel-project-id: ${{ secrets.PROJECT_ID_STORYBOOK}}
+                  vercel-args: --prod
 
     notify:
         needs: [release-unstable, build-demo, build-storybook]

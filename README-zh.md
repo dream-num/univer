@@ -50,7 +50,7 @@ Univer 的功能特性包括：
 
 ## 使用
 
-我们建议通过将 Univer 作为 npm 包使用，请参考文档上的[快速开始]()小节。我们还准备了一个[在线 playground]()，你无需在本地安装 Univer 就可以体验使用 Univer 开发。
+我们建议通过将 Univer 作为 npm 包使用，请参考文档上的[快速开始](https://univer.work/guides/quick-start/)小节。我们还准备了一个[在线 playground](https://univer.work/playground/overview/)，你无需在本地安装 Univer 就可以体验使用 Univer 开发。
 
 Univer 基于插件化架构设计，你可以安装以下包来增强 Univer 的功能。
 

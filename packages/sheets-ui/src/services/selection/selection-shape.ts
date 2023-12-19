@@ -407,7 +407,9 @@ export class SelectionShape {
         endX = fixLineWidthByScale(endX, scale);
         endY = fixLineWidthByScale(endY, scale);
 
-        strokeWidth /= scale;
+        const leftAdjustWidth = (strokeWidth + SELECTION_CONTROL_BORDER_BUFFER_WIDTH) / 2 / scale;
+
+        strokeWidth /= this._getPureScale();
         AutofillSize /= scale;
         AutofillStrokeWidth /= scale;
 
@@ -415,13 +417,11 @@ export class SelectionShape {
 
         const borderBuffer = SELECTION_CONTROL_BORDER_BUFFER_WIDTH / scale;
 
-        const leftAdjustWidth = strokeWidth + borderBuffer;
-
         const fixOnePixelBlurOffset = FIX_ONE_PIXEL_BLUR_OFFSET / scale;
 
         this.leftControl.transformByState({
             height: endY - startY,
-            left: -leftAdjustWidth / 2 + fixOnePixelBlurOffset,
+            left: -leftAdjustWidth + fixOnePixelBlurOffset,
             width: strokeWidth,
             strokeWidth: borderBuffer,
             top: -borderBuffer / 2 + fixOnePixelBlurOffset,
@@ -434,7 +434,7 @@ export class SelectionShape {
 
         this.rightControl.transformByState({
             height: endY - startY,
-            left: endX - startX - leftAdjustWidth / 2 + fixOnePixelBlurOffset,
+            left: endX - startX - leftAdjustWidth + fixOnePixelBlurOffset,
             width: strokeWidth,
             strokeWidth: borderBuffer,
             top: -borderBuffer / 2 + fixOnePixelBlurOffset,
@@ -447,8 +447,8 @@ export class SelectionShape {
 
         this.topControl.transformByState({
             width: endX - startX + strokeWidth,
-            top: -leftAdjustWidth / 2 + fixOnePixelBlurOffset,
-            left: -leftAdjustWidth / 2 + fixOnePixelBlurOffset,
+            top: -leftAdjustWidth + fixOnePixelBlurOffset,
+            left: -leftAdjustWidth + fixOnePixelBlurOffset,
             height: strokeWidth,
             strokeWidth: borderBuffer,
         });
@@ -460,9 +460,9 @@ export class SelectionShape {
 
         this.bottomControl.transformByState({
             width: endX - startX + strokeWidth,
-            top: endY - startY - leftAdjustWidth / 2 + fixOnePixelBlurOffset,
+            top: endY - startY - leftAdjustWidth + fixOnePixelBlurOffset,
             height: strokeWidth,
-            left: -leftAdjustWidth / 2 + fixOnePixelBlurOffset,
+            left: -leftAdjustWidth + fixOnePixelBlurOffset,
             strokeWidth: borderBuffer,
         });
 
@@ -1061,8 +1061,17 @@ export class SelectionShape {
     }
 
     private _getScale() {
-        const pixelRatio = this._scene.getEngine()?.getPixelRatio() || 1;
+        const pixelRatio = this._getPixelRatio();
         const { scaleX, scaleY } = this._scene.getAncestorScale();
         return Math.max(scaleX * pixelRatio, scaleY * pixelRatio);
+    }
+
+    private _getPureScale() {
+        const { scaleX, scaleY } = this._scene.getAncestorScale();
+        return Math.max(scaleX, scaleY);
+    }
+
+    private _getPixelRatio() {
+        return this._scene.getEngine()?.getPixelRatio() || 1;
     }
 }

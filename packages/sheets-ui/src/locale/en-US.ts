@@ -436,9 +436,12 @@ export default {
         redoDelete: 'Can be undo by Ctrl+Z',
         noHide: "Can't hide, at least keep one sheet tag",
         chartEditNoOpt: 'This operation is not allowed in chart editing mode!',
+        sheetNameErrorTitle: 'There was a problem',
         sheetNameSpecCharError: 'The name cannot contain:[ ] :  ? * / \' "',
-        sheetNameCannotIsEmptyError: 'The sheet name cannot be empty',
-        confirmDeleteSheet:
+        sheetNameCannotIsEmptyError: 'The sheet name cannot be empty.',
+        sheetNameAlreadyExistsError: 'The sheet name already exists. Please enter another name.',
+        deleteSheet: 'Delete worksheet',
+        deleteSheetContent:
             'Confirm to delete this worksheet. It will not be retrieved after deletion. Are you sure you want to delete it?',
     },
     rightClick: {

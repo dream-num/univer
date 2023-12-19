@@ -24,25 +24,14 @@ export class GenName {
         this._count = 1;
     }
 
-    checked(name: string): boolean {
+    checkName(name: string): boolean {
         return this._include.includes(name);
     }
 
-    onlyName(name: string): string {
+    addName(name: string = 'sheet'): string {
         let output = name;
-        let count = 1;
-        while (this.checked(output)) {
-            output = name + count;
-            count++;
-        }
-        this._include.push(output);
-        return output;
-    }
-
-    sheetName(name: string = 'sheet1'): string {
-        let output = name;
-        while (this.checked(output)) {
-            output = `sheet${this._count}`;
+        while (this.checkName(output)) {
+            output = name + this._count;
             this._count++;
         }
         this._include.push(output);

@@ -32,7 +32,7 @@ export interface SlideTabBarConfig {
     onChangeName: (id: string, name: string) => void;
     onChangeTab: (event: FocusEvent, id: string) => void;
     onScroll: (state: IScrollState) => void;
-    onEmptyAlert: () => void;
+    onNameCheckAlert: (text: string) => boolean;
 }
 
 export interface SlideTabItemAnimate {
@@ -90,6 +90,10 @@ export class SlideTabItem {
         return this._slideTabItem;
     }
 
+    getEditor() {
+        return this._slideTabItem.querySelector('span');
+    }
+
     isEditMode(): boolean {
         return this._editMode;
     }
@@ -98,23 +102,19 @@ export class SlideTabItem {
         return this._slideTabItem.classList;
     }
 
-    primeval(): HTMLElement {
-        return this._slideTabItem;
-    }
-
     translateX(x: number) {
         this._translateX = x;
         this._slideTabItem.style.transform = `translateX(${x}px)`;
         return this.getTranslateXDirection();
     }
 
-    editor(callback?: (event: FocusEvent) => void): void {
+    setEditor(callback?: (event: FocusEvent) => void): void {
         let compositionFlag = true;
         if (this._editMode === false) {
-            const input = this.primeval().querySelector('span');
+            const input = this._slideTabItem.querySelector('span');
 
             const blurAction = (focusEvent: FocusEvent) => {
-                if (this.emptyCheck()) return;
+                if (this.nameCheck()) return;
 
                 this._editMode = false;
 
@@ -188,15 +188,13 @@ export class SlideTabItem {
         }
     }
 
-    emptyCheck() {
-        const input = this.primeval().querySelector('span');
+    nameCheck() {
+        const input = this._slideTabItem.querySelector('span');
         if (!input) return false;
+
         const text = input.innerText;
-        if (text.trim() === '') {
-            this._slideTabBar.getConfig().onEmptyAlert();
-            return true;
-        }
-        return false;
+        const checkAlert = this._slideTabBar.getConfig().onNameCheckAlert(text);
+        return checkAlert;
     }
 
     animate(): SlideTabItemAnimate {
@@ -501,7 +499,7 @@ export class SlideTabBar {
             // double click
             if (diffTime && diffPageX && diffPageY) {
                 // user editor
-                this._activeTabItem.editor();
+                this._activeTabItem.setEditor();
             }
 
             lastPageX = pageX;

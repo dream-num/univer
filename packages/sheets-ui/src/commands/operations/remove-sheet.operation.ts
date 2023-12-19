@@ -35,11 +35,11 @@ export const RemoveSheetOperation: ICommand = {
         const result = await confirmService.confirm({
             id: 'merge.confirm.add-worksheet-merge',
             title: {
-                title: 'sheetConfig.confirmDeleteSheet',
+                title: localeService.t('sheetConfig.deleteSheet'),
             },
+            children: { title: localeService.t('sheetConfig.deleteSheetContent') },
             cancelText: localeService.t('button.cancel'),
             confirmText: localeService.t('button.confirm'),
-            onConfirm: () => {},
         });
 
         if (result) {

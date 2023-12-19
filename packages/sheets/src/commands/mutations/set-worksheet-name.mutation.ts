@@ -57,6 +57,7 @@ export const SetWorksheetNameMutation: IMutation<ISetWorksheetNameMutationParams
         }
 
         worksheet.getConfig().name = params.name;
+        universheet.getGenName().addName(params.name);
         return true;
     },
 };

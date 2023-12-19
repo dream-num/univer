@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { Inject, Injector } from '@wendellhu/redi';
 import { BehaviorSubject, Subject } from 'rxjs';
 
+import { ILogService } from '../services/log/log.service';
 import type { Nullable } from '../shared';
 import { GenName, Tools } from '../shared';
 import { Disposable } from '../shared/lifecycle';
@@ -78,7 +78,7 @@ export class Workbook extends Disposable {
 
     constructor(
         workbookData: Partial<IWorkbookData> = {},
-        @Inject(Injector) readonly _injector: Injector
+        @ILogService private readonly _log: ILogService
     ) {
         super();
 
@@ -135,6 +135,10 @@ export class Workbook extends Disposable {
 
     getContainer() {
         return this._snapshot.container;
+    }
+
+    getGenName() {
+        return this._genName;
     }
 
     /**
@@ -467,7 +471,14 @@ export class Workbook extends Disposable {
 
         for (const sheetId in sheets) {
             const config = sheets[sheetId];
-            config.name = this._genName.sheetName(config.name);
+
+            const { name } = config;
+            config.name = this._genName.addName(name);
+
+            if (config.name !== name) {
+                this._log.warn(`The worksheet name ${name} is duplicated, we change it to ${config.name}`);
+            }
+
             const worksheet = new Worksheet(config, this._styles);
             _worksheets.set(sheetId, worksheet);
             if (!sheetOrder.includes(sheetId)) {

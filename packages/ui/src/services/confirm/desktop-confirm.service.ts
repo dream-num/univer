@@ -29,7 +29,7 @@ export class DesktopConfirmService implements IConfirmService {
         if (this._confirmOptions.find((item) => item.id === option.id)) {
             this._confirmOptions = this._confirmOptions.map((item) => ({
                 ...(item.id === option.id ? option : item),
-                visible: true,
+                visible: item.id === option.id ? true : item.visible,
             }));
         } else {
             this._confirmOptions.push({

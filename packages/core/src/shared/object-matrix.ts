@@ -55,6 +55,32 @@ export function insertMatrixArray<T>(
     array[index] = value;
 }
 
+export function spliceArray<T>(start: number, count: number, o: IObjectArrayPrimitiveType<T>) {
+    const end = start + count;
+    const length = getArrayLength(o);
+    const array = o;
+    let effective = 0;
+    const splice: IObjectArrayPrimitiveType<T> = {};
+    for (let i = start; i < end; i++) {
+        const item = array[i];
+        if (item !== undefined) {
+            delete array[i];
+            splice[effective] = item;
+            effective++;
+        }
+    }
+    const diff = end - start;
+    const last = length;
+
+    for (let i = end; i < last; i++) {
+        const item = array[i];
+        if (item !== undefined) {
+            array[i - diff] = array[i];
+            delete array[i];
+        }
+    }
+}
+
 export function concatMatrixArray<T>(
     source: IObjectArrayPrimitiveType<T> | IObjectMatrixPrimitiveType<T>,
     target: IObjectArrayPrimitiveType<T> | IObjectMatrixPrimitiveType<T>

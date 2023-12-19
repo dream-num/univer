@@ -1036,7 +1036,8 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             if (bounds) {
                 const { left, top, right, bottom } = bounds.viewBound;
 
-                if (anchor.strokeWidth < left || right < 0 || anchor.strokeWidth < top || bottom < 0) {
+                if (anchor.left < left || anchor.left > right || anchor.top < top || anchor.top > bottom) {
+                    activeRangeInstance?.deactivateStatic();
                     return;
                 }
             }

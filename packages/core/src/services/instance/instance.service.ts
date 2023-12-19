@@ -27,7 +27,7 @@ import type { IDocumentData, ISlideData, IWorkbookData } from '../../types/inter
 import { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE } from '../context/context';
 import { IContextService } from '../context/context.service';
 
-export const enum DocumentType {
+export const enum UniverInstanceType {
     UNKNOWN = 0,
     DOC = 1,
     SHEET = 2,
@@ -87,7 +87,7 @@ export interface IUniverInstanceService {
     getAllUniverDocsInstance(): DocumentDataModel[];
     getAllUniverSlidesInstance(): Slide[];
 
-    getDocumentType(unitId: string): DocumentType;
+    getDocumentType(unitId: string): UniverInstanceType;
     disposeDocument(unitId: string): boolean;
 }
 
@@ -276,17 +276,17 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         return this._focused;
     }
 
-    getDocumentType(unitId: string): DocumentType {
+    getDocumentType(unitId: string): UniverInstanceType {
         if (this.getUniverDocInstance(unitId)) {
-            return DocumentType.DOC;
+            return UniverInstanceType.DOC;
         }
 
         if (this.getUniverSheetInstance(unitId)) {
-            return DocumentType.SHEET;
+            return UniverInstanceType.SHEET;
         }
 
         if (this.getUniverSlideInstance(unitId)) {
-            return DocumentType.SLIDE;
+            return UniverInstanceType.SLIDE;
         }
 
         throw new Error(`[UniverInstanceService]: No document with unitId ${unitId}`);

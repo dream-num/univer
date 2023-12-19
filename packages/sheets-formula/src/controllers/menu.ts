@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import { UniverInstanceType } from '@univerjs/core';
 import { PASTE_SPECIAL_MENU_ID } from '@univerjs/sheets-ui';
 import type { IMenuItem } from '@univerjs/ui';
-import { MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
+import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 
 import { SheetOnlyPasteFormulaCommand } from '../commands/commands/formula-clipboard.command';
@@ -58,6 +59,7 @@ export function InsertFunctionMenuItemFactory(accessor: IAccessor): IMenuItem {
                 icon: 'MinSingle',
             },
         ],
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
     };
 }
 

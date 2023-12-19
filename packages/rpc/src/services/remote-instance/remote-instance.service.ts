@@ -15,7 +15,7 @@
  */
 
 import type { IExecutionOptions, IMutationInfo, IWorkbookData } from '@univerjs/core';
-import { DocumentType, ICommandService, IUniverInstanceService } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 
 export interface IRemoteSyncMutationOptions extends IExecutionOptions {
@@ -56,7 +56,7 @@ export interface IRemoteInstanceService {
     /** Tell other modules if the `IRemoteInstanceService` is ready to load files. */
     whenReady(): Promise<true>;
 
-    createInstance(params: { unitID: string; type: DocumentType; snapshot: IWorkbookData }): Promise<boolean>;
+    createInstance(params: { unitID: string; type: UniverInstanceType; snapshot: IWorkbookData }): Promise<boolean>;
     disposeInstance(params: { unitID: string }): Promise<boolean>;
     syncMutation(params: { mutationInfo: IMutationInfo }): Promise<boolean>;
 }
@@ -77,11 +77,15 @@ export class RemoteInstanceReplicaService implements IRemoteInstanceService {
         });
     }
 
-    async createInstance(params: { unitID: string; type: DocumentType; snapshot: IWorkbookData }): Promise<boolean> {
+    async createInstance(params: {
+        unitID: string;
+        type: UniverInstanceType;
+        snapshot: IWorkbookData;
+    }): Promise<boolean> {
         const { type, snapshot } = params;
         try {
             switch (type) {
-                case DocumentType.SHEET:
+                case UniverInstanceType.SHEET:
                     return !!this._univerInstanceService.createSheet(snapshot);
                 default:
                     throw new Error(

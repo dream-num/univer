@@ -64,7 +64,7 @@ export {
     type IFloatingObjectManagerSearchItemParam,
     IFloatingObjectManagerService,
 } from './services/floating-object/floating-object-manager.service';
-export { DocumentType, IUniverInstanceService } from './services/instance/instance.service';
+export { IUniverInstanceService, UniverInstanceType } from './services/instance/instance.service';
 export { LifecycleStages, OnLifecycle, runOnLifecycle } from './services/lifecycle/lifecycle';
 export { LifecycleService } from './services/lifecycle/lifecycle.service';
 export { ILocalStorageService } from './services/local-storage/local-storage.service';

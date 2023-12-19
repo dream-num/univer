@@ -23,6 +23,7 @@ import {
     IUniverInstanceService,
     RANGE_TYPE,
     ThemeService,
+    UniverInstanceType,
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
@@ -51,7 +52,15 @@ import {
     SheetPermissionService,
 } from '@univerjs/sheets';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
-import { CopyCommand, CutCommand, MenuGroup, MenuItemType, MenuPosition, PasteCommand } from '@univerjs/ui';
+import {
+    CopyCommand,
+    CutCommand,
+    getMenuHiddenObservable,
+    MenuGroup,
+    MenuItemType,
+    MenuPosition,
+    PasteCommand,
+} from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 
@@ -67,8 +76,6 @@ import {
     SetRangeFontSizeCommand,
     SetRangeItalicCommand,
     SetRangeStrickThroughCommand,
-    SetRangeSubscriptCommand,
-    SetRangeSuperscriptCommand,
     SetRangeTextColorCommand,
     SetRangeUnderlineCommand,
 } from '../../commands/commands/inline-format.command';
@@ -96,6 +103,8 @@ export enum SheetMenuPosition {
 
 export function FormatPainterMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const formatPainterService = accessor.get(IFormatPainterService);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+
     return {
         id: SetOnceFormatPainterCommand.id,
         subId: SetInfiniteFormatPainterCommand.id,
@@ -119,6 +128,7 @@ export function FormatPainterMenuItemFactory(accessor: IAccessor): IMenuButtonIt
                 status$.unsubscribe();
             };
         }),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
     };
 }
 
@@ -169,30 +179,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
             return disposable.dispose;
         }),
-        // hidden$: new Observable((subscriber) => {
-        //     const subscription = univerInstanceService.focused$.subscribe((unitId) => {
-        //         if (unitId == null) {
-        //             return subscriber.next(false);
-        //         }
-        //         const univerType = univerInstanceService.getDocumentType(unitId);
-
-        //         subscriber.next(univerType === DocumentType.SHEET);
-        //     });
-
-        //     const focusedUniverInstance = univerInstanceService.getFocusedUniverInstance();
-
-        //     if (focusedUniverInstance == null) {
-        //         return subscriber.next(false);
-        //     }
-
-        //     const univerType = univerInstanceService.getDocumentType(focusedUniverInstance.getUnitId());
-        //     subscriber.next(univerType === DocumentType.SHEET);
-
-        //     return () => subscription.unsubscribe();
-        // TODO: @Jocs
-        hidden$: new Observable<boolean>((subscriber) => {
-            subscriber.next(true);
-        }),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
     };
 }
 
@@ -240,6 +227,7 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
             subscriber.next(false);
             return disposable.dispose;
         }),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
     };
 }
 
@@ -287,6 +275,7 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
             subscriber.next(false);
             return disposable.dispose;
         }),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
     };
 }
 
@@ -334,72 +323,7 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
             subscriber.next(false);
             return disposable.dispose;
         }),
-    };
-}
-
-export function SubScriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
-    const commandService = accessor.get(ICommandService);
-    const univerInstanceService = accessor.get(IUniverInstanceService);
-    const sheetPermissionService = accessor.get(SheetPermissionService);
-    const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-    const sheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
-    return {
-        id: SetRangeSubscriptCommand.id,
-        group: MenuGroup.TOOLBAR_FORMAT,
-        type: MenuItemType.BUTTON,
-        icon: 'FontSizeReduceSingleSingle',
-        tooltip: 'toolbar.subscript',
-        positions: [MenuPosition.TOOLBAR_START],
-        disabled$: new Observable<boolean>((subscriber) => {
-            const permission$ = sheetPermissionService.getEditable$(unitId, sheetId)?.subscribe((e) => {
-                subscriber.next(!e.value);
-            });
-
-            return () => {
-                permission$?.unsubscribe();
-            };
-        }),
-        activated$: new Observable<boolean>((subscriber) => {
-            const disposable = commandService.onCommandExecuted((c) => {
-                // TODO
-            });
-
-            subscriber.next(false);
-            return disposable.dispose;
-        }),
-    };
-}
-
-export function SuperScriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
-    const commandService = accessor.get(ICommandService);
-    const univerInstanceService = accessor.get(IUniverInstanceService);
-    const sheetPermissionService = accessor.get(SheetPermissionService);
-    const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-    const sheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
-    return {
-        id: SetRangeSuperscriptCommand.id,
-        group: MenuGroup.TOOLBAR_FORMAT,
-        type: MenuItemType.BUTTON,
-        icon: 'FontSizeIncreaseSingle',
-        tooltip: 'toolbar.superscript',
-        positions: [MenuPosition.TOOLBAR_START],
-        disabled$: new Observable<boolean>((subscriber) => {
-            const permission$ = sheetPermissionService.getEditable$(unitId, sheetId)?.subscribe((e) => {
-                subscriber.next(!e.value);
-            });
-
-            return () => {
-                permission$?.unsubscribe();
-            };
-        }),
-        activated$: new Observable<boolean>((subscriber) => {
-            const disposable = commandService.onCommandExecuted((c) => {
-                // TODO
-            });
-
-            subscriber.next(false);
-            return disposable.dispose;
-        }),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
     };
 }
 
@@ -584,6 +508,7 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
             subscriber.next(defaultValue);
             return disposable.dispose;
         }),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
     };
 }
 
@@ -594,6 +519,7 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
     const sheetPermissionService = accessor.get(SheetPermissionService);
     const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
     const sheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+
     return {
         id: SetRangeFontSizeCommand.id,
         group: MenuGroup.TOOLBAR_FORMAT,
@@ -639,6 +565,7 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
 
             return disposable.dispose;
         }),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
     };
 }
 
@@ -655,6 +582,7 @@ export function ResetTextColorMenuItemFactory(): IMenuButtonItem {
 export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     const commandService = accessor.get(ICommandService);
     const themeService = accessor.get(ThemeService);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
 
     return {
         id: SetRangeTextColorCommand.id,
@@ -684,6 +612,7 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
             subscriber.next(defaultColor);
             return disposable.dispose;
         }),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
     };
 }
 
@@ -700,6 +629,7 @@ export function ResetBackgroundColorMenuItemFactory(): IMenuButtonItem {
 export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     const commandService = accessor.get(ICommandService);
     const themeService = accessor.get(ThemeService);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
 
     return {
         id: SetBackgroundColorCommand.id,
@@ -728,6 +658,7 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
             subscriber.next(defaultColor);
             return disposable.dispose;
         }),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
     };
 }
 
@@ -752,6 +683,7 @@ export const HORIZONTAL_ALIGN_CHILDREN = [
 export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<HorizontalAlign> {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
+
     return {
         id: SetHorizontalTextAlignCommand.id,
         icon: HORIZONTAL_ALIGN_CHILDREN[0].icon,
@@ -782,6 +714,7 @@ export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelect
 
             return disposable.dispose;
         }),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
     };
 }
 
@@ -836,6 +769,7 @@ export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelector
 
             return disposable.dispose;
         }),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
     };
 }
 
@@ -890,6 +824,7 @@ export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<
 
             return disposable.dispose;
         }),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
     };
 }
 
@@ -929,6 +864,7 @@ export const TEXT_ROTATE_CHILDREN = [
 export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<number | string> {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
+
     return {
         id: SetTextRotationCommand.id,
         tooltip: 'toolbar.textRotateMode.main',
@@ -963,6 +899,7 @@ export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
 
             return disposable.dispose;
         }),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
     };
 }
 

@@ -17,12 +17,12 @@
 import type { IMutationInfo } from '@univerjs/core';
 import {
     CommandType,
-    DocumentType,
     ICommandService,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
     RxDisposable,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 import { takeUntil } from 'rxjs/operators';
@@ -79,7 +79,7 @@ export class DataSyncPrimaryController extends RxDisposable {
             // If a sheet is created, it should sync the data to the worker thread.
             this._remoteInstanceService.createInstance({
                 unitID: sheet.getUnitId(),
-                type: DocumentType.SHEET,
+                type: UniverInstanceType.SHEET,
                 snapshot: sheet.getSnapshot(),
             });
         });

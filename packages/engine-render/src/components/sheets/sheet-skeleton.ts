@@ -1382,7 +1382,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         const columnWidthAccumulation = this.columnWidthAccumulation;
         const { startRow, endRow, startColumn, endColumn } = rowColumnSegment;
 
-        if (startColumn === -1 || endColumn === -1) {
+        if (endColumn === -1) {
             return;
         }
 

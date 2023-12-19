@@ -125,8 +125,6 @@ export class ZenEditorController extends RxDisposable {
 
             const { engine, scene, document } = editorObject;
 
-            const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
-
             const skeleton = this._docSkeletonManagerService.getSkeletonByUnitId(DOCS_ZEN_EDITOR_UNIT_ID_KEY)?.skeleton;
 
             // Update page size when container resized.
@@ -140,12 +138,7 @@ export class ZenEditorController extends RxDisposable {
 
                 if (skeleton) {
                     // TODO: @JOCS, get offset config from document at runtime.
-                    this._textSelectionRenderManager.changeRuntime(
-                        skeleton,
-                        scene,
-                        viewportMain,
-                        document.getOffsetConfig()
-                    );
+                    this._textSelectionRenderManager.changeRuntime(skeleton, scene, document);
 
                     this._textSelectionManagerService.refreshSelection();
                 }

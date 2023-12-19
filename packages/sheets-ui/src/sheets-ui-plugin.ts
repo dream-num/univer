@@ -37,6 +37,7 @@ import { HeaderMenuController } from './controllers/header-menu.controller';
 import { HeaderMoveController } from './controllers/header-move.controller';
 import { HeaderResizeController } from './controllers/header-resize.controller';
 import { HeaderUnhideController } from './controllers/header-unhide.controller';
+import { MarkSelectionController } from './controllers/mark-selection.controller';
 import { MoveRangeController } from './controllers/move-range.controller';
 import { SheetNavigationController } from './controllers/navigation/navigation.controller';
 import { ScrollController } from './controllers/scroll.controller';
@@ -130,6 +131,7 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [AutoFillController],
                 [StatusBarController],
                 [EditingController],
+                [MarkSelectionController],
             ] as Dependency[]
         ).forEach((d) => injector.add(d));
     }

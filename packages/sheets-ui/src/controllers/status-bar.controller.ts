@@ -38,6 +38,7 @@ import { IStatusBarService } from '../services/status-bar.service';
 
 @OnLifecycle(LifecycleStages.Ready, StatusBarController)
 export class StatusBarController extends Disposable {
+    private _calculateTimeout: number | NodeJS.Timeout = -1;
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
@@ -59,7 +60,10 @@ export class StatusBarController extends Disposable {
             toDisposable(
                 this._selectionManagerService.selectionMoving$.subscribe((selections) => {
                     if (selections) {
-                        this._calculateSelection(selections.map((selection) => selection.range));
+                        clearTimeout(this._calculateTimeout);
+                        this._calculateTimeout = setTimeout(() => {
+                            this._calculateSelection(selections.map((selection) => selection.range));
+                        }, 100);
                     }
                 })
             )

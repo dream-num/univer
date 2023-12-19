@@ -23,23 +23,20 @@
         display: flex;
     }
 
-    &-list-two-row {
+    &-list-column {
         flex-direction: column;
     }
 
-    &-list-two-row &-list-row {
-        display: flex;
-        flex-direction: row;
-    }
-
-    &-list-two-row  &-item{
-        font-size: 11px;
+    &-list-column &-item{
+        font-size: 12px;
         line-height: 140%;
+        color: rgb(var(--grey-500));
     }
 
     &-item {
         cursor: default;
 
+        overflow: hidden;
         display: flex;
         justify-content: start;
 
@@ -50,8 +47,10 @@
         font-weight: 400;
         font-style: normal;
         line-height: 20px; /* 181.818% */
-        color: rgb(var(--grey-1000));
+        color: rgb(var(--grey-900));
         text-align: center;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     &-picker {

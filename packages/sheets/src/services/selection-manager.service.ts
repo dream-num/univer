@@ -283,7 +283,7 @@ export class SelectionManagerService implements IDisposable {
 
     createCopyPasteSelection(): ISelectionStyle {
         return {
-            strokeWidth: 2,
+            strokeWidth: 1.5,
             stroke: this._themeService.getCurrentTheme().primaryColor,
             fill: 'rgba(178, 178, 178, 0.10)',
             widgets: {},

@@ -27,7 +27,7 @@ import {
 } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { IRenderManagerService, ScrollTimerType } from '@univerjs/engine-render';
-import type { ISelectionWithCoordAndStyle } from '@univerjs/sheets';
+import type { ISelectionWithCoordAndStyle, ISelectionWithStyle } from '@univerjs/sheets';
 import {
     convertSelectionDataToRange,
     getNormalSelectionStyle,
@@ -196,7 +196,6 @@ export class SelectionController extends Disposable {
             toDisposable(
                 spreadsheetLeftTopPlaceholder?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
                     const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-
                     if (skeleton == null) {
                         return;
                     }
@@ -335,13 +334,14 @@ export class SelectionController extends Disposable {
         });
     }
 
-    private _getAllRange(skeleton: SpreadsheetSkeleton) {
+    private _getAllRange(skeleton: SpreadsheetSkeleton): ISelectionWithStyle {
         return {
             range: {
                 startRow: 0,
                 startColumn: 0,
                 endRow: skeleton.getRowCount() - 1,
                 endColumn: skeleton.getColumnCount() - 1,
+                rangeType: RANGE_TYPE.ALL,
             },
             primary: this._getZeroRange(skeleton).primary,
             style: null,

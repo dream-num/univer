@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
+import type { ICommand, IRange } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
@@ -62,17 +62,34 @@ export const DeltaColumnWidthCommand: ICommand<IDeltaColumnWidthCommandParams> =
         const anchorColWidth = worksheet.getColumnWidth(anchorCol);
         const destColumnWidth = anchorColWidth + deltaX;
 
+        const isAllSheetRange = selections.length === 1 && selections[0].range.rangeType === RANGE_TYPE.ALL;
         const colSelections = selections.filter((s) => s.range.rangeType === RANGE_TYPE.COLUMN);
-        const rangeType = colSelections.some(({ range }) => {
-            const { startColumn, endColumn } = range;
-
-            return startColumn <= anchorCol && anchorCol <= endColumn;
-        })
-            ? RANGE_TYPE.COLUMN
-            : RANGE_TYPE.NORMAL;
+        const rangeType = isAllSheetRange
+            ? RANGE_TYPE.ALL
+            : colSelections.some(({ range }) => {
+                    const { startColumn, endColumn } = range;
+                    return startColumn <= anchorCol && anchorCol <= endColumn;
+                })
+              ? RANGE_TYPE.COLUMN
+              : RANGE_TYPE.NORMAL;
 
         let redoMutationParams: ISetWorksheetColWidthMutationParams;
-        if (rangeType === RANGE_TYPE.COLUMN) {
+        if (rangeType === RANGE_TYPE.ALL) {
+            const rowCount = worksheet.getRowCount();
+            const allColRanges = new Array(worksheet.getColumnCount())
+                .fill(undefined)
+                .map(
+                    (_, index) =>
+                        ({ startRow: 0, endRow: rowCount - 1, startColumn: index, endColumn: index }) as IRange
+                );
+
+            redoMutationParams = {
+                subUnitId,
+                unitId,
+                colWidth: destColumnWidth,
+                ranges: allColRanges,
+            };
+        } else if (rangeType === RANGE_TYPE.COLUMN) {
             redoMutationParams = {
                 subUnitId,
                 unitId,

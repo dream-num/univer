@@ -569,7 +569,7 @@ describe('Test commands used for change selections', () => {
                 startColumn: 0,
                 endRow: 19,
                 endColumn: 19,
-                rangeType: RANGE_TYPE.NORMAL,
+                rangeType: RANGE_TYPE.ALL,
             });
             expect(selectionManagerService.getLast()!.primary).toEqual(unchangedPrimaryInfo);
 
@@ -599,7 +599,7 @@ describe('Test commands used for change selections', () => {
                 startColumn: 0,
                 endRow: 19,
                 endColumn: 19,
-                rangeType: RANGE_TYPE.NORMAL,
+                rangeType: RANGE_TYPE.ALL,
             });
 
             await commandService.executeCommand<ISelectAllCommandParams>(SelectAllCommand.id, {
@@ -627,7 +627,7 @@ describe('Test commands used for change selections', () => {
                 startColumn: 0,
                 endRow: 19,
                 endColumn: 19,
-                rangeType: RANGE_TYPE.NORMAL,
+                rangeType: RANGE_TYPE.ALL,
             });
 
             await commandService.executeCommand<ISelectAllCommandParams>(SelectAllCommand.id, {
@@ -639,7 +639,7 @@ describe('Test commands used for change selections', () => {
                 startColumn: 0,
                 endRow: 19,
                 endColumn: 19,
-                rangeType: RANGE_TYPE.NORMAL,
+                rangeType: RANGE_TYPE.ALL,
             });
         });
 

@@ -16,13 +16,13 @@
 
 import type { ICommandInfo, IExecutionOptions, Nullable } from '@univerjs/core';
 import {
-    Disposable,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     ICommandService,
     IUniverInstanceService,
     LifecycleStages,
     makeCellToSelection,
     OnLifecycle,
+    RxDisposable,
     ThemeService,
 } from '@univerjs/core';
 import { DeviceInputEventType, getCanvasOffsetByEngine, IRenderManagerService } from '@univerjs/engine-render';
@@ -34,6 +34,7 @@ import {
     SetWorksheetActiveOperation,
 } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
+import { merge, takeUntil } from 'rxjs';
 
 import { SetActivateCellEditOperation } from '../commands/operations/activate-cell-edit.operation';
 import { SetCellEditVisibleOperation } from '../commands/operations/cell-edit.operation';
@@ -42,8 +43,30 @@ import { ISelectionRenderService } from '../services/selection/selection-render.
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 import { getSheetObject } from './utils/component-tools';
 
+interface IEditorLocation {
+    unitId: string;
+    subUnitId: string;
+    row: number;
+    col: number;
+}
+
+function isSameEditorLocation(prevLocation: Nullable<IEditorLocation>, newLocation: IEditorLocation): boolean {
+    if (!prevLocation) {
+        return false;
+    }
+
+    return (
+        prevLocation.col === newLocation.col &&
+        prevLocation.row === newLocation.row &&
+        prevLocation.subUnitId === newLocation.subUnitId &&
+        prevLocation.unitId === newLocation.unitId
+    );
+}
+
 @OnLifecycle(LifecycleStages.Rendered, EditorBridgeController)
-export class EditorBridgeController extends Disposable {
+export class EditorBridgeController extends RxDisposable {
+    private _lastEditorLocation: Nullable<IEditorLocation> = null;
+
     constructor(
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
@@ -64,21 +87,17 @@ export class EditorBridgeController extends Disposable {
     override dispose(): void {}
 
     private _initialize() {
-        this._initialSelectionListener();
-
+        this._initSelectionChangeListener();
         this._initialEventListener();
     }
 
-    private _initialSelectionListener() {
-        this._selectionManagerService.selectionMoveEnd$.subscribe((params) => {
-            this._selectionListener(params);
-        });
-        this._selectionManagerService.selectionMoveStart$.subscribe((params) => {
-            this._selectionListener(params);
-        });
+    private _initSelectionChangeListener() {
+        merge(this._selectionManagerService.selectionMoveEnd$, this._selectionManagerService.selectionMoveStart$)
+            .pipe(takeUntil(this.dispose$))
+            .subscribe((params) => this._handleSelectionListener(params));
     }
 
-    private _selectionListener(params: Nullable<ISelectionWithStyle[]>) {
+    private _handleSelectionListener(params: Nullable<ISelectionWithStyle[]>) {
         const current = this._selectionManagerService.getCurrent();
 
         /**
@@ -105,21 +124,17 @@ export class EditorBridgeController extends Disposable {
         }
 
         const { primary } = params[params.length - 1];
-
         if (primary == null) {
             return;
         }
 
         const { startRow, startColumn } = primary;
-
         const primaryWithCoord = this._selectionRenderService.convertCellRangeToInfo(primary);
-
         if (primaryWithCoord == null) {
             return;
         }
 
         const actualRangeWithCoord = makeCellToSelection(primaryWithCoord);
-
         if (actualRangeWithCoord == null) {
             return;
         }
@@ -131,19 +146,13 @@ export class EditorBridgeController extends Disposable {
         const { scaleX, scaleY } = scene.getAncestorScale();
 
         const scrollXY = scene.getScrollXY(this._selectionRenderService.getViewPort());
-
         startX = skeleton.convertTransformToOffsetX(startX, scaleX, scrollXY);
-
         startY = skeleton.convertTransformToOffsetY(startY, scaleY, scrollXY);
-
         endX = skeleton.convertTransformToOffsetX(endX, scaleX, scrollXY);
-
         endY = skeleton.convertTransformToOffsetY(endY, scaleY, scrollXY);
 
         const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
-
         const worksheet = workbook.getActiveSheet();
-
         const location = {
             workbook,
             worksheet,
@@ -152,6 +161,18 @@ export class EditorBridgeController extends Disposable {
             row: startRow,
             col: startColumn,
         };
+
+        if (isSameEditorLocation(this._lastEditorLocation, location)) {
+            return;
+        }
+
+        this._lastEditorLocation = {
+            unitId: location.unitId,
+            subUnitId: location.subUnitId,
+            row: location.row,
+            col: location.col,
+        };
+
         const cell = this._editorBridgeService.interceptor.fetchThroughInterceptors(
             this._editorBridgeService.interceptor.getInterceptPoints().BEFORE_CELL_EDIT
         )(worksheet.getCell(startRow, startColumn), location);

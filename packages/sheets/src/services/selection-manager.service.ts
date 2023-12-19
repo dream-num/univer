@@ -165,14 +165,6 @@ export class SelectionManagerService implements IDisposable {
             return;
         }
 
-        if (
-            this._currentSelection?.unitId === param.unitId &&
-            this._currentSelection?.sheetId === param.sheetId &&
-            this._currentSelection.pluginName === param.pluginName
-        ) {
-            return;
-        }
-
         this._currentSelection = param;
         this._refresh(param);
     }

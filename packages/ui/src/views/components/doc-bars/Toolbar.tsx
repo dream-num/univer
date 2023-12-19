@@ -181,29 +181,31 @@ export function Toolbar(props: IToolbarProps) {
                         </div>
                     ))}
 
-                    <Tooltip title="more" placement="bottom">
-                        <Dropdown
-                            className={styles.toolbarMore}
-                            overlay={
-                                <div className={styles.toolbarMoreContainer} onClick={(e) => e.stopPropagation()}>
-                                    {Object.entries(toolbarGroups).map(([key, item]) => (
-                                        <div key={key} className={styles.toolbarGroup}>
-                                            {item.map(
-                                                (subItem) =>
-                                                    collapsedId.includes(subItem.id) && (
-                                                        <ToolbarItem key={subItem.id} {...subItem} />
-                                                    )
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                            }
-                        >
-                            <ToolbarButton className={styles.toolbarItemTextButton}>
-                                <MoreFunctionSingle />
-                            </ToolbarButton>
-                        </Dropdown>
-                    </Tooltip>
+                    {collapsedId.length > 0 && (
+                        <Tooltip title="更多" placement="bottom">
+                            <Dropdown
+                                className={styles.toolbarMore}
+                                overlay={
+                                    <div className={styles.toolbarMoreContainer} onClick={(e) => e.stopPropagation()}>
+                                        {Object.entries(toolbarGroups).map(([key, item]) => (
+                                            <div key={key} className={styles.toolbarGroup}>
+                                                {item.map(
+                                                    (subItem) =>
+                                                        collapsedId.includes(subItem.id) && (
+                                                            <ToolbarItem key={subItem.id} {...subItem} />
+                                                        )
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                }
+                            >
+                                <ToolbarButton className={styles.toolbarItemTextButton}>
+                                    <MoreFunctionSingle />
+                                </ToolbarButton>
+                            </Dropdown>
+                        </Tooltip>
+                    )}
                 </div>
             </div>
 

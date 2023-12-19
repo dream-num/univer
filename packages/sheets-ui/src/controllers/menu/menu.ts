@@ -16,7 +16,6 @@
 
 import {
     BooleanNumber,
-    DocumentType,
     FontItalic,
     FontWeight,
     HorizontalAlign,
@@ -170,26 +169,29 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
             return disposable.dispose;
         }),
-        hidden$: new Observable((subscriber) => {
-            const subscription = univerInstanceService.focused$.subscribe((unitId) => {
-                if (unitId == null) {
-                    return subscriber.next(false);
-                }
-                const univerType = univerInstanceService.getDocumentType(unitId);
+        // hidden$: new Observable((subscriber) => {
+        //     const subscription = univerInstanceService.focused$.subscribe((unitId) => {
+        //         if (unitId == null) {
+        //             return subscriber.next(false);
+        //         }
+        //         const univerType = univerInstanceService.getDocumentType(unitId);
 
-                subscriber.next(univerType === DocumentType.SHEET);
-            });
+        //         subscriber.next(univerType === DocumentType.SHEET);
+        //     });
 
-            const focusedUniverInstance = univerInstanceService.getFocusedUniverInstance();
+        //     const focusedUniverInstance = univerInstanceService.getFocusedUniverInstance();
 
-            if (focusedUniverInstance == null) {
-                return subscriber.next(false);
-            }
+        //     if (focusedUniverInstance == null) {
+        //         return subscriber.next(false);
+        //     }
 
-            const univerType = univerInstanceService.getDocumentType(focusedUniverInstance.getUnitId());
-            subscriber.next(univerType === DocumentType.SHEET);
+        //     const univerType = univerInstanceService.getDocumentType(focusedUniverInstance.getUnitId());
+        //     subscriber.next(univerType === DocumentType.SHEET);
 
-            return () => subscription.unsubscribe();
+        //     return () => subscription.unsubscribe();
+        // TODO: @Jocs
+        hidden$: new Observable<boolean>((subscriber) => {
+            subscriber.next(true);
         }),
     };
 }

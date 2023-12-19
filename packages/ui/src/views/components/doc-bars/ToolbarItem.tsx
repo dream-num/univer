@@ -40,6 +40,7 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
     const [value, setValue] = useState<any>();
     const [disabled, setDisabled] = useState(false);
     const [activated, setActivated] = useState(false);
+    const [hidden, setHidden] = useState(false);
 
     useEffect(() => {
         const subscriptions: Subscription[] = [];
@@ -48,6 +49,13 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
             subscriptions.push(
                 props.disabled$.subscribe((disabled) => {
                     setDisabled(disabled);
+                })
+            );
+
+        props.hidden$ &&
+            subscriptions.push(
+                props.hidden$.subscribe((hidden) => {
+                    setHidden(hidden);
                 })
             );
 
@@ -183,7 +191,9 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
     }
 
     // ref component
-    return (
+    return hidden ? (
+        <></>
+    ) : (
         <Tooltip ref={ref} title={tooltipTitle} placement="bottom">
             {renderItem()}
         </Tooltip>

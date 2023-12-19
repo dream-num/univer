@@ -145,18 +145,18 @@ export function getNormalSelectionStyle(themeService: ThemeService): ISelectionS
     const styleSheet = themeService.getCurrentTheme();
     const fill = new ColorKit(styleSheet.colorBlack).setAlpha(0.1).toRgbString();
     return {
-        strokeWidth: 1,
+        strokeWidth: 1.5,
         stroke: styleSheet.primaryColor,
         // strokeDash: 8,
         fill,
         // widgets: { tl: true, tc: true, tr: true, ml: true, mr: true, bl: true, bc: true, br: true },
         widgets: {},
-        widgetSize: 6,
+        widgetSize: 8,
         widgetStrokeWidth: 1,
         widgetStroke: styleSheet.colorWhite,
 
         hasAutoFill: true,
-        AutofillSize: 6,
+        AutofillSize: 8,
         AutofillStrokeWidth: 1,
         AutofillStroke: styleSheet.colorWhite,
 

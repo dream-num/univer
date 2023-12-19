@@ -26,15 +26,15 @@ import { MenuItemType } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 
+import { RemoveSheetConfirmCommand } from '../../commands/commands/remove-sheet-confirm.command';
 import { ShowMenuListCommand } from '../../commands/commands/unhide.command';
-import { RemoveSheetOperation } from '../../commands/operations/remove-sheet.operation';
 import { RenameSheetOperation } from '../../commands/operations/rename-sheet.operation';
 import { COLOR_PICKER_COMPONENT } from '../../components/color-picker';
 import { SheetMenuPosition } from './menu';
 
 export function DeleteSheetMenuItemFactory(): IMenuButtonItem {
     return {
-        id: RemoveSheetOperation.id,
+        id: RemoveSheetConfirmCommand.id,
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.delete',

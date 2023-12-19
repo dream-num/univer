@@ -20,14 +20,14 @@ import { RemoveSheetCommand } from '@univerjs/sheets';
 import { IConfirmService } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 
-interface IRemoveSheetOperationParams {
+interface IRemoveSheetConfirmCommandParams {
     subUnitId: string;
 }
 
-export const RemoveSheetOperation: ICommand = {
-    id: 'sheet.operation.remove-sheet',
-    type: CommandType.OPERATION,
-    handler: async (accessor: IAccessor, params: IRemoveSheetOperationParams) => {
+export const RemoveSheetConfirmCommand: ICommand = {
+    id: 'sheet.command.remove-sheet-confirm',
+    type: CommandType.COMMAND,
+    handler: async (accessor: IAccessor, params: IRemoveSheetConfirmCommandParams) => {
         const { subUnitId } = params;
         const confirmService = accessor.get(IConfirmService);
         const commandService = accessor.get(ICommandService);

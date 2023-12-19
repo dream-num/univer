@@ -192,6 +192,6 @@ export class DocCanvasView extends RxDisposable {
 
         scene.addObjects([documents], DOCS_COMPONENT_MAIN_LAYER_INDEX);
 
-        scene.enableLayerCache(DOCS_COMPONENT_MAIN_LAYER_INDEX);
+        // scene.enableLayerCache(DOCS_COMPONENT_MAIN_LAYER_INDEX);
     }
 }

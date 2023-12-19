@@ -27,7 +27,7 @@ import type {
 } from '../type';
 import { extractNodeStyle } from './parse-node-style';
 import type { IAfterProcessRule } from './paste-plugins/type';
-import parseToDom from './utils';
+import parseToDom, { generateParagraphs } from './utils';
 
 export interface IStyleRule {
     filter: string | string[] | ((node: HTMLElement) => boolean);
@@ -134,6 +134,7 @@ export class HtmlToUSMService {
                     body: {
                         dataStream: cellDataStream,
                         textRuns: cellTextRuns,
+                        paragraphs: generateParagraphs(cellDataStream),
                     },
                 });
                 valueMatrix.setValue(valueMatrix.getLength(), 0, {
@@ -167,8 +168,14 @@ export class HtmlToUSMService {
             }
         } else {
             if (dataStream) {
+                const singleDataStream = `${dataStream}\r\n`;
+                const singleDocBody: IDocumentBody = {
+                    dataStream: singleDataStream,
+                    textRuns,
+                    paragraphs: generateParagraphs(singleDataStream),
+                };
                 const p = this._generateDocumentDataModelSnapshot({
-                    body: newDocBody,
+                    body: singleDocBody,
                 });
                 valueMatrix.setValue(0, 0, {
                     v: dataStream,

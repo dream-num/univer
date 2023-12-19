@@ -28,10 +28,12 @@ export interface ISheetBarMenuHandler {
 
 export interface ISheetBarService {
     renameId$: Observable<string>;
+    removeId$: Observable<string>;
     scroll$: Observable<IScrollState>;
     scrollX$: Observable<number>;
     addSheet$: Observable<number>;
     setRenameId(id: string): void;
+    setRemoveId(id: string): void;
     setScroll(state: IScrollState): void;
     setScrollX(x: number): void;
     setAddSheet(index: number): void;
@@ -43,11 +45,13 @@ export const ISheetBarService = createIdentifier<ISheetBarService>('univer.sheet
 
 export class SheetBarService extends Disposable implements ISheetBarService {
     readonly renameId$: Observable<string>;
+    readonly removeId$: Observable<string>;
     readonly scroll$: Observable<IScrollState>;
     readonly scrollX$: Observable<number>;
     readonly addSheet$: Observable<number>;
 
     private readonly _renameId$: Subject<string>;
+    private readonly _removeId$: Subject<string>;
     private readonly _scroll$: Subject<IScrollState>;
     private readonly _scrollX$: Subject<number>;
     private readonly _addSheet$: Subject<number>;
@@ -59,6 +63,9 @@ export class SheetBarService extends Disposable implements ISheetBarService {
 
         this._renameId$ = new Subject();
         this.renameId$ = this._renameId$.asObservable();
+
+        this._removeId$ = new Subject();
+        this.removeId$ = this._removeId$.asObservable();
 
         this._scroll$ = new Subject();
         this.scroll$ = this._scroll$.asObservable();
@@ -72,6 +79,10 @@ export class SheetBarService extends Disposable implements ISheetBarService {
 
     setRenameId(renameId: string): void {
         this._renameId$.next(renameId);
+    }
+
+    setRemoveId(removeId: string): void {
+        this._removeId$.next(removeId);
     }
 
     setScroll(state: IScrollState): void {

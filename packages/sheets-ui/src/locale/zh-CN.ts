@@ -300,8 +300,12 @@ export default {
         redoDelete: '可以通过Ctrl+Z撤销删除',
         noHide: '不能隐藏, 至少保留一个sheet标签',
         chartEditNoOpt: '图表编辑模式下不允许该操作！',
+        sheetNameErrorTitle: '错误',
         sheetNameSpecCharError: "名称不能超过31个字符，首尾不能是' 且名称不能包含:\r\n[ ] : \\ ? * /",
-        sheetNameCannotIsEmptyError: '名称不能为空',
+        sheetNameCannotIsEmptyError: '名称不能为空。',
+        sheetNameAlreadyExistsError: '工作表已存在，请输入其它名称。',
+        deleteSheet: '删除工作表',
+        deleteSheetContent: '确认删除此工作表，删除后将不可找回，确定要删除吗？',
     },
     rightClick: {
         copy: '复制',

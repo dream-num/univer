@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { Inject, Injector } from '@wendellhu/redi';
 import { BehaviorSubject, Subject } from 'rxjs';
 
+import { ILogService } from '../services/log/log.service';
 import type { Nullable } from '../shared';
-import { GenName, Tools } from '../shared';
+import { Tools } from '../shared';
 import { Disposable } from '../shared/lifecycle';
 import { DEFAULT_RANGE_ARRAY, DEFAULT_WORKBOOK, DEFAULT_WORKSHEET } from '../types/const';
 import { BooleanNumber } from '../types/enum';
@@ -49,8 +49,6 @@ export class Workbook extends Disposable {
     private readonly _sheetDisposed$ = new Subject<Worksheet>();
     readonly sheetDisposed$ = this._sheetDisposed$.asObservable();
 
-    private readonly _genName = new GenName();
-
     private readonly _activeSheet$ = new BehaviorSubject<Nullable<Worksheet>>(null);
     readonly activeSheet$ = this._activeSheet$.asObservable();
 
@@ -76,9 +74,11 @@ export class Workbook extends Disposable {
 
     private _unitId: string;
 
+    private _count: number;
+
     constructor(
         workbookData: Partial<IWorkbookData> = {},
-        @Inject(Injector) readonly _injector: Injector
+        @ILogService private readonly _log: ILogService
     ) {
         super();
 
@@ -91,6 +91,7 @@ export class Workbook extends Disposable {
 
         this._unitId = this._snapshot.id;
         this._styles = new Styles(styles);
+        this._count = 1;
         this._worksheets = new Map<string, Worksheet>();
 
         this._getDefaultWorkSheet();
@@ -235,6 +236,21 @@ export class Workbook extends Disposable {
         return sheetOrder.map((sheetId) => this._worksheets.get(sheetId)) as Worksheet[];
     }
 
+    getSheetsName(): string[] {
+        const { sheetOrder } = this._snapshot;
+
+        const names: string[] = [];
+
+        sheetOrder.forEach((sheetId) => {
+            const worksheet = this._worksheets.get(sheetId);
+            if (worksheet) {
+                names.push(worksheet.getName());
+            }
+        });
+
+        return names;
+    }
+
     getSheetIndex(sheet: Worksheet): number {
         const { sheetOrder } = this._snapshot;
 
@@ -269,28 +285,6 @@ export class Workbook extends Disposable {
             .filter((s) => s.getConfig().hidden === BooleanNumber.TRUE)
             .map((s) => s.getConfig().id);
     }
-
-    // getPluginMeta<T>(name: string): T {
-    //     return this._config.pluginMeta[name];
-    // }
-
-    // setPluginMeta<T>(name: string, value: T) {
-    //     if (!this._config.pluginMeta) {
-    //         this._config.pluginMeta = {};
-    //     }
-    //     return (this._config.pluginMeta[name] = value);
-    // }
-
-    /**
-     * Creates a builder for a conditional formatting rule.
-     */
-    // newConditionalFormatRule(): ConditionalFormatRuleBuilder {
-    //     return new ConditionalFormatRuleBuilder();
-    // }
-
-    // newFilterCriteria(): FilterCriteriaBuilder {
-    //     return new FilterCriteriaBuilder();
-    // }
 
     /**
      * transform any range type to range data
@@ -359,16 +353,25 @@ export class Workbook extends Disposable {
         this._snapshot = config;
     }
 
+    checkSheetName(name: string): boolean {
+        const sheetsName = this.getSheetsName();
+        return sheetsName.includes(name);
+    }
+
+    uniqueSheetName(name: string = 'sheet1'): string {
+        let output = name;
+        while (this.checkSheetName(output)) {
+            output = name + this._count;
+            this._count++;
+        }
+        return output;
+    }
+
     /**
      * Get the range array based on the range string and sheet id
      *
-     * @privateRemarks
-     * zh: 根据范围字符串和sheet id取得范围数组
-     *
      * @param txt - range string
      * @returns
-     *
-     * @internal
      */
     private _getCellRange(txt: IRangeStringData): IGridRange {
         let sheetTxt: string = '';
@@ -450,7 +453,6 @@ export class Workbook extends Disposable {
 
     /**
      * Get Default Sheet
-     * @private
      */
     private _getDefaultWorkSheet(): void {
         const { _snapshot: _config, _worksheets } = this;
@@ -467,7 +469,14 @@ export class Workbook extends Disposable {
 
         for (const sheetId in sheets) {
             const config = sheets[sheetId];
-            config.name = this._genName.sheetName(config.name);
+
+            const { name } = config;
+            config.name = this.uniqueSheetName(name);
+
+            if (config.name !== name) {
+                this._log.warn(`The worksheet name ${name} is duplicated, we change it to ${config.name}`);
+            }
+
             const worksheet = new Worksheet(config, this._styles);
             _worksheets.set(sheetId, worksheet);
             if (!sheetOrder.includes(sheetId)) {

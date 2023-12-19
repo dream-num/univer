@@ -15,10 +15,12 @@
  */
 
 import type { Univer, Worksheet } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, RedoCommand, UndoCommand } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LocaleService, RedoCommand, UndoCommand } from '@univerjs/core';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import enUS from '../../../locale/en-US';
+import zhCN from '../../../locale/zh-CN';
 import { InsertSheetMutation } from '../../mutations/insert-sheet.mutation';
 import { RemoveSheetMutation } from '../../mutations/remove-sheet.mutation';
 import { SetWorksheetActiveOperation } from '../../operations/set-worksheet-active.operation';
@@ -33,7 +35,7 @@ describe('Test copy worksheet commands', () => {
     let commandService: ICommandService;
 
     beforeEach(() => {
-        const testBed = createCommandTestBed();
+        const testBed = createCommandTestBed(undefined);
         univer = testBed.univer;
         get = testBed.get;
 
@@ -44,6 +46,8 @@ describe('Test copy worksheet commands', () => {
         commandService.registerCommand(SetWorksheetActivateCommand);
         commandService.registerCommand(RemoveSheetCommand);
         commandService.registerCommand(RemoveSheetMutation);
+
+        get(LocaleService).load({ zhCN, enUS });
     });
 
     afterEach(() => {

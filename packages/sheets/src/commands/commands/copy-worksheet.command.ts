@@ -15,7 +15,14 @@
  */
 
 import type { ICommand } from '@univerjs/core';
-import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, Tools } from '@univerjs/core';
+import {
+    CommandType,
+    ICommandService,
+    IUndoRedoService,
+    IUniverInstanceService,
+    LocaleService,
+    Tools,
+} from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
 import type {
@@ -37,6 +44,7 @@ export const CopySheetCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
+        const localeService = accessor.get(LocaleService);
 
         let unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
         let subUnitId = univerInstanceService
@@ -54,7 +62,7 @@ export const CopySheetCommand: ICommand = {
         if (!worksheet) return false;
 
         const config = Tools.deepClone(worksheet.getConfig());
-        config.name += '副本'; // TODO: 文字国际化
+        config.name += localeService.t('sheets.sheetCopy'); // TODO: 文字国际化
         config.id = Tools.generateRandomId();
         const sheetIndex = workbook.getSheetIndex(worksheet);
 

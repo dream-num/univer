@@ -32,7 +32,7 @@ export interface SlideTabBarConfig {
     onChangeName: (id: string, name: string) => void;
     onChangeTab: (event: FocusEvent, id: string) => void;
     onScroll: (state: IScrollState) => void;
-    onEmptyAlert: () => void;
+    onNameCheckAlert: (text: string) => boolean;
 }
 
 export interface SlideTabItemAnimate {
@@ -90,6 +90,10 @@ export class SlideTabItem {
         return this._slideTabItem;
     }
 
+    getEditor() {
+        return this._slideTabItem.querySelector('span');
+    }
+
     isEditMode(): boolean {
         return this._editMode;
     }
@@ -98,23 +102,19 @@ export class SlideTabItem {
         return this._slideTabItem.classList;
     }
 
-    primeval(): HTMLElement {
-        return this._slideTabItem;
-    }
-
     translateX(x: number) {
         this._translateX = x;
         this._slideTabItem.style.transform = `translateX(${x}px)`;
         return this.getTranslateXDirection();
     }
 
-    editor(callback?: (event: FocusEvent) => void): void {
+    setEditor(callback?: (event: FocusEvent) => void): void {
         let compositionFlag = true;
         if (this._editMode === false) {
-            const input = this.primeval().querySelector('span');
+            const input = this._slideTabItem.querySelector('span');
 
             const blurAction = (focusEvent: FocusEvent) => {
-                if (this.emptyCheck()) return;
+                if (this.nameCheck()) return;
 
                 this._editMode = false;
 
@@ -188,15 +188,13 @@ export class SlideTabItem {
         }
     }
 
-    emptyCheck() {
-        const input = this.primeval().querySelector('span');
+    nameCheck() {
+        const input = this._slideTabItem.querySelector('span');
         if (!input) return false;
+
         const text = input.innerText;
-        if (text.trim() === '') {
-            this._slideTabBar.getConfig().onEmptyAlert();
-            return true;
-        }
-        return false;
+        const checkAlert = this._slideTabBar.getConfig().onNameCheckAlert(text);
+        return checkAlert;
     }
 
     animate(): SlideTabItemAnimate {
@@ -239,18 +237,20 @@ export class SlideTabItem {
         if (this._placeholder) {
             const primeval = this._slideTabBar.primeval();
 
+            // change to set unset
             this._slideTabItem.style.removeProperty('position');
             this._slideTabItem.style.removeProperty('left');
             this._slideTabItem.style.removeProperty('top');
             this._slideTabItem.style.removeProperty('width');
             this._slideTabItem.style.removeProperty('height');
-            this._slideTabItem.style.removeProperty('box-shadow');
             this._slideTabItem.style.removeProperty('background');
             this._slideTabItem.style.removeProperty('padding');
-            this._slideTabItem.style.removeProperty('boxSizing');
-            this._slideTabItem.style.removeProperty('fontSize');
+            this._slideTabItem.style.removeProperty('box-sizing');
+            this._slideTabItem.style.removeProperty('font-size');
+            this._slideTabItem.style.removeProperty('font-family');
+            this._slideTabItem.style.removeProperty('font-weight');
             this._slideTabItem.style.removeProperty('color');
-            this._slideTabItem.style.removeProperty('borderRadius');
+            this._slideTabItem.style.removeProperty('border-radius');
 
             this._placeholder.after(this._slideTabItem);
             primeval.removeChild(this._placeholder);
@@ -277,6 +277,8 @@ export class SlideTabItem {
         }
         this._slideTabItem.style.boxSizing = computedStyles.boxSizing;
         this._slideTabItem.style.fontSize = computedStyles.fontSize;
+        this._slideTabItem.style.fontFamily = computedStyles.fontFamily;
+        this._slideTabItem.style.fontWeight = computedStyles.fontWeight;
         this._slideTabItem.style.color = computedStyles.color;
         this._slideTabItem.style.borderRadius = computedStyles.borderRadius;
 
@@ -284,7 +286,6 @@ export class SlideTabItem {
         this._slideTabItem.style.top = `${boundingRect.y}px`;
         this._slideTabItem.style.width = `${boundingRect.width}px`;
         this._slideTabItem.style.height = `${boundingRect.height}px`;
-        this._slideTabItem.style.boxShadow = '0px 0px 1px 1px rgba(82,82,82,0.1)';
         this._slideTabItem.style.position = 'fixed';
 
         this._slideTabItem.after(placeholder);
@@ -501,7 +502,7 @@ export class SlideTabBar {
             // double click
             if (diffTime && diffPageX && diffPageY) {
                 // user editor
-                this._activeTabItem.editor();
+                this._activeTabItem.setEditor();
             }
 
             lastPageX = pageX;

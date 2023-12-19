@@ -104,20 +104,8 @@ export function SheetBarTabs() {
             onScroll: (state: IScrollState) => {
                 sheetBarService.setScroll(state);
             },
-            onEmptyAlert: () => {
-                const id = 'slideTabBarAlert';
-                confirmService.open({
-                    id,
-                    children: { title: localeService.t('sheetConfig.sheetNameCannotIsEmptyError') },
-                    // TODO@Dushusir: i18n
-                    title: { title: 'There was a problem' },
-                    onClose() {
-                        confirmService.close(id);
-                    },
-                    onConfirm() {
-                        confirmService.close(id);
-                    },
-                });
+            onNameCheckAlert: (text: string) => {
+                return nameEmptyCheck(text) || nameRepeatCheck(text);
             },
         });
 
@@ -127,6 +115,71 @@ export function SheetBarTabs() {
         resizeInit(slideTabBar);
 
         return slideTabBar;
+    };
+
+    const nameEmptyCheck = (name: string) => {
+        if (name.trim() === '') {
+            const id = 'sheetNameEmptyAlert';
+            confirmService.open({
+                id,
+                title: { title: localeService.t('sheetConfig.sheetNameErrorTitle') },
+                children: { title: localeService.t('sheetConfig.sheetNameCannotIsEmptyError') },
+                cancelText: localeService.t('button.cancel'),
+                confirmText: localeService.t('button.confirm'),
+                onClose() {
+                    confirmService.close(id);
+                    focusTabEditor();
+                },
+                onConfirm() {
+                    confirmService.close(id);
+                    focusTabEditor();
+                },
+            });
+
+            return true;
+        }
+        return false;
+    };
+
+    const nameRepeatCheck = (name: string) => {
+        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+        const worksheet = workbook.getActiveSheet();
+        const currenSheetName = worksheet.getName();
+        if (currenSheetName === name) return true;
+
+        const checked = workbook.checkSheetName(name);
+
+        if (checked) {
+            const id = 'sheetNameRepeatAlert';
+            confirmService.open({
+                id,
+                title: { title: localeService.t('sheetConfig.sheetNameErrorTitle') },
+                children: { title: localeService.t('sheetConfig.sheetNameAlreadyExistsError') },
+                cancelText: localeService.t('button.cancel'),
+                confirmText: localeService.t('button.confirm'),
+                onClose() {
+                    confirmService.close(id);
+                    setTabEditor();
+                },
+                onConfirm() {
+                    confirmService.close(id);
+                    setTabEditor();
+                },
+            });
+        }
+
+        return checked;
+    };
+
+    const focusTabEditor = () => {
+        const slideTabEditor = slideTabBarRef.current.slideTabBar?.getActiveItem()?.getEditor();
+        if (slideTabEditor) {
+            slideTabEditor.focus();
+        }
+    };
+
+    const setTabEditor = () => {
+        slideTabBarRef.current.slideTabBar?.getActiveItem()?.setEditor();
     };
 
     const setupSlideTabBarUpdate = () => {
@@ -152,8 +205,8 @@ export function SheetBarTabs() {
         });
 
     const statusInit = () => {
-        const currentsubUnitId = workbook.getActiveSheet().getSheetId();
-        setActiveKey(currentsubUnitId);
+        const currentSubUnitId = workbook.getActiveSheet().getSheetId();
+        setActiveKey(currentSubUnitId);
 
         const sheets = workbook.getSheets();
         const sheetListItems = sheets
@@ -180,7 +233,7 @@ export function SheetBarTabs() {
 
     const setupSubscribeRenameId = () =>
         sheetBarService.renameId$.subscribe(() => {
-            slideTabBarRef.current.slideTabBar?.getActiveItem()?.editor();
+            setTabEditor();
         });
 
     const setupSubscribeAddSheet = () =>

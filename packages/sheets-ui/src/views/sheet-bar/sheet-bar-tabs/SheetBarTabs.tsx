@@ -99,7 +99,10 @@ export function SheetBarTabs() {
                 commandService.executeCommand(SetWorksheetOrderCommand.id, { order });
             },
             onChangeTab: (event: Event, subUnitId: string) => {
-                commandService.executeCommand(SetWorksheetActivateCommand.id, { subUnitId });
+                commandService.executeCommand(SetWorksheetActivateCommand.id, {
+                    subUnitId,
+                    unitId: workbook.getUnitId(),
+                });
             },
             onScroll: (state: IScrollState) => {
                 sheetBarService.setScroll(state);

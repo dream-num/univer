@@ -41,10 +41,12 @@ export { getAutoFillRepeatRange } from './services/auto-fill/tools';
 export type { IAutoFillHook, ICopyDataPiece } from './services/auto-fill/type';
 export { APPLY_TYPE, DATA_TYPE, type IAutoFillRule } from './services/auto-fill/type';
 export { type ICopyDataInTypeIndexInfo } from './services/auto-fill/type';
-export { ISheetClipboardService } from './services/clipboard/clipboard.service';
-export { SheetClipboardService } from './services/clipboard/clipboard.service';
-export { type ISheetClipboardHook } from './services/clipboard/type';
-export { type ICellDataWithSpanInfo } from './services/clipboard/type';
+export {
+    ISheetClipboardService,
+    PREDEFINED_HOOK_NAME,
+    SheetClipboardService,
+} from './services/clipboard/clipboard.service';
+export type { ICellDataWithSpanInfo, ISheetClipboardHook } from './services/clipboard/type';
 export { COPY_TYPE } from './services/clipboard/type';
 export { getRepeatRange } from './services/clipboard/utils';
 export { CellEditorManagerService, ICellEditorManagerService } from './services/editor/cell-editor-manager.service';

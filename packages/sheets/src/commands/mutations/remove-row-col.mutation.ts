@@ -15,7 +15,7 @@
  */
 
 import type { IColumnData, IMutation, IObjectArrayPrimitiveType, IRowData, Worksheet } from '@univerjs/core';
-import { CommandType, concatMatrixArray, IUniverInstanceService, sliceMatrixArray } from '@univerjs/core';
+import { CommandType, concatMatrixArray, IUniverInstanceService, sliceMatrixArray, spliceArray } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
 import type {
@@ -59,20 +59,14 @@ export const RemoveRowMutation: IMutation<IRemoveRowsMutationParams> = {
 
         const worksheet = universheet.getSheetBySheetId(params.subUnitId);
         if (!worksheet) return false;
-
+        const range = params.range;
         const manager = worksheet.getRowManager();
         const rowPrimitive = manager.getRowData();
-        let rowWrapper = rowPrimitive;
 
-        const range = params.range;
-        const start = range.startRow;
-        const end = range.endRow;
+        const rowCount = range.endRow - range.startRow + 1;
+        spliceArray(range.startRow, rowCount, rowPrimitive);
 
-        for (let j = start; j <= end; j++) {
-            rowWrapper = sliceMatrixArray(j, 1, rowWrapper);
-        }
-
-        worksheet.setRowCount(worksheet.getRowCount() - range.endRow - range.startRow + 1);
+        worksheet.setRowCount(worksheet.getRowCount() - rowCount);
 
         return true;
     },
@@ -129,8 +123,11 @@ export const RemoveColMutation: IMutation<IRemoveColMutationParams> = {
         if (!worksheet) return false;
 
         const range = params.range;
-
-        worksheet.setColumnCount(worksheet.getColumnCount() - range.endColumn - range.startColumn + 1);
+        const manager = worksheet.getColumnManager();
+        const colPrimitive = manager.getColumnData();
+        const colCount = range.endColumn - range.startColumn + 1;
+        spliceArray(range.startColumn, colCount, colPrimitive);
+        worksheet.setColumnCount(worksheet.getColumnCount() - colCount);
 
         return true;
     },

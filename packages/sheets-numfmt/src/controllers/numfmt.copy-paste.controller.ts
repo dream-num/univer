@@ -34,7 +34,7 @@ import {
     SetNumfmtMutation,
     transformCellsToRange,
 } from '@univerjs/sheets';
-import { COPY_TYPE, getRepeatRange, ISheetClipboardService } from '@univerjs/sheets-ui';
+import { COPY_TYPE, getRepeatRange, ISheetClipboardService, PREDEFINED_HOOK_NAME } from '@univerjs/sheets-ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
 @OnLifecycle(LifecycleStages.Rendered, NumfmtCopyPasteController)
@@ -62,7 +62,8 @@ export class NumfmtCopyPasteController extends Disposable {
             this._sheetClipboardService.addClipboardHook({
                 hookName: 'numfmt',
                 onBeforeCopy: (unitId, subUnitId, range) => this._collectNumfmt(unitId, subUnitId, range),
-                onPasteCells: (pastedRange, _m, _p, _copyInfo) => this._generateNumfmtMutations(pastedRange, _copyInfo),
+                onPasteCells: (pastedRange, _m, _p, _copyInfo) =>
+                    this._generateNumfmtMutations(pastedRange, { ..._copyInfo, pasteType: _p }),
             })
         );
     }
@@ -106,6 +107,7 @@ export class NumfmtCopyPasteController extends Disposable {
         copyInfo: {
             copyType: COPY_TYPE;
             copyRange?: IRange;
+            pasteType: string;
         }
     ) {
         const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
@@ -123,6 +125,13 @@ export class NumfmtCopyPasteController extends Disposable {
             return { redos: [], undos: [] };
         }
 
+        if (
+            [PREDEFINED_HOOK_NAME.SPECIAL_PASTE_COL_WIDTH, PREDEFINED_HOOK_NAME.SPECIAL_PASTE_VALUE].includes(
+                copyInfo.pasteType
+            )
+        ) {
+            return { redos: [], undos: [] };
+        }
         const repeatRange = getRepeatRange(copyInfo.copyRange, pastedRange, true);
         const cells: ISetCellsNumfmt = [];
         const removeRedos: IRemoveNumfmtMutationParams = { unitId, subUnitId, ranges: [] };

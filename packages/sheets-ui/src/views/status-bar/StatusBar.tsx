@@ -16,7 +16,6 @@
 
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
-import debounce from 'lodash/debounce';
 import React, { useEffect, useState } from 'react';
 
 import { IStatusBarService } from '../../services/status-bar.service';
@@ -123,3 +122,21 @@ export const StatusBar = () => {
         )
     );
 };
+
+type DebounceFn<T extends (...args: any[]) => any> = (this: ThisParameterType<T>, ...args: Parameters<T>) => void;
+
+function debounce<T extends (...args: any[]) => any>(func: T, wait: number): DebounceFn<T> {
+    let timeout: NodeJS.Timeout | null;
+
+    return function (this: ThisParameterType<T>, ...args: Parameters<T>) {
+        const context = this;
+
+        const later = function () {
+            timeout = null;
+            func.apply(context, args);
+        };
+
+        clearTimeout(timeout as NodeJS.Timeout);
+        timeout = setTimeout(later, wait);
+    };
+}

@@ -116,7 +116,7 @@ export class SheetRenderController extends Disposable {
 
     private _commandExecutedListener() {
         this.disposeWithMe(
-            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+            this._commandService.onCommandExecuted((command: ICommandInfo, params) => {
                 const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
                 const unitId = workbook.getUnitId();
 

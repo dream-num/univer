@@ -34,7 +34,6 @@ import {
 
 export interface IUniverRPCMainThreadConfig {
     workerURL: string | URL;
-    unsyncMutations?: Set<string>;
 }
 
 /**
@@ -61,13 +60,7 @@ export class UniverRPCMainThreadPlugin extends Plugin {
                     useFactory: () => new ChannelService(messageProtocol),
                 },
             ],
-            [
-                DataSyncPrimaryController,
-                {
-                    useFactory: () =>
-                        injector.createInstance(DataSyncPrimaryController, this._config?.unsyncMutations ?? new Set()),
-                },
-            ],
+            [DataSyncPrimaryController],
             [IRemoteSyncService, { useClass: RemoteSyncPrimaryService }],
         ];
 

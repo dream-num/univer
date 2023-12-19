@@ -44,9 +44,9 @@ import { fromModule, toModule } from '../../services/rpc/rpc.service';
 @OnLifecycle(LifecycleStages.Starting, DataSyncPrimaryController)
 export class DataSyncPrimaryController extends RxDisposable {
     private _remoteInstanceService!: IRemoteInstanceService;
+    private readonly _syncingUnits = new Set<string>();
 
     constructor(
-        private readonly _unsyncMutations: Set<string>,
         @Inject(Injector) private readonly _injector: Injector,
         @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
@@ -75,6 +75,7 @@ export class DataSyncPrimaryController extends RxDisposable {
 
     private _init(): void {
         this._univerInstanceService.sheetAdded$.pipe(takeUntil(this.dispose$)).subscribe((sheet) => {
+            this._syncingUnits.add(sheet.getUnitId());
             // If a sheet is created, it should sync the data to the worker thread.
             this._remoteInstanceService.createInstance({
                 unitID: sheet.getUnitId(),
@@ -84,6 +85,7 @@ export class DataSyncPrimaryController extends RxDisposable {
         });
 
         this._univerInstanceService.sheetDisposed$.pipe(takeUntil(this.dispose$)).subscribe((workbook) => {
+            this._syncingUnits.delete(workbook.getUnitId());
             // If a sheet is disposed, it should sync the data to the worker thread.
             this._remoteInstanceService.disposeInstance({
                 unitID: workbook.getUnitId(),
@@ -93,14 +95,16 @@ export class DataSyncPrimaryController extends RxDisposable {
         this.disposeWithMe(
             // Mutations executed on the main thread should be synced to the worker thread.
             this._commandService.onCommandExecuted((commandInfo, options) => {
+                const { type, params } = commandInfo;
+                const unitID = (params as any).unitId || ''; // TODO@wzhudev: use a universal way to get unitId
                 if (
-                    commandInfo.type === CommandType.MUTATION &&
-                    !(options as IRemoteSyncMutationOptions)?.fromSync &&
-                    !this._unsyncMutations.has(commandInfo.id)
+                    // only sync mutations to the worker thread
+                    type === CommandType.MUTATION &&
+                    (!unitID || this._syncingUnits.has(unitID)) &&
+                    // do not sync mutations from the web worker back to the web worker
+                    !(options as IRemoteSyncMutationOptions)?.fromSync
                 ) {
-                    this._remoteInstanceService.syncMutation({
-                        mutationInfo: commandInfo as IMutationInfo,
-                    });
+                    this._remoteInstanceService.syncMutation({ mutationInfo: commandInfo as IMutationInfo });
                 }
             })
         );

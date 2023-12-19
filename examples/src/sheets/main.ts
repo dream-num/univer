@@ -16,7 +16,7 @@
 
 import { LocaleType, LogLevel, Univer } from '@univerjs/core';
 import { defaultTheme } from '@univerjs/design';
-import { RichTextEditingMutation, UniverDocsPlugin } from '@univerjs/docs';
+import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
@@ -66,7 +66,6 @@ univer.registerPlugin(UniverFormulaEnginePlugin, {
 univer.registerPlugin(UniverSheetsFormulaPlugin);
 univer.registerPlugin(UniverRPCMainThreadPlugin, {
     workerURL: './worker.js',
-    unsyncMutations: new Set([RichTextEditingMutation.id]),
 } as IUniverRPCMainThreadConfig);
 
 // create univer sheet instance

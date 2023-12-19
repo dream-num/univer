@@ -50,7 +50,7 @@ Highlights of Univer:
 
 ## Usage
 
-We recommend to import Univer as a npm package. Please checkout the [Quick Start]() section on the documentation website. We also have an [online playground]() which can help you preview Univer without setting up the development environment.
+We recommend to import Univer as a npm package. Please checkout the [Quick Start](https://univer.work/guides/quick-start/) section on the documentation website. We also have an [online playground](https://univer.work/playground/overview/) which can help you preview Univer without setting up the development environment.
 
 Univer bases on a plugin architecture. You can install the following packages to enhance the functionality of Univer.
 

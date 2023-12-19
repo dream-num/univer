@@ -28,12 +28,12 @@ import { UniverRenderEngine } from '@univerjs/engine-render';
 import { sheetsPlugin } from '@univerjs/sheets';
 import { UniverUI } from '@univerjs/ui';
 import { LocaleType, Univer } from '@univerjs/core';
-import { greenTheme } from '@univerjs/design';
+import { defaultTheme } from '@univerjs/design';
 import { FormulaPlugin } from '@univerjs/sheets-formula';
 import { UniverSheetsUI } from '@univerjs/sheets-ui';
 
 const univer = new Univer({
-    theme: greenTheme,
+    theme: defaultTheme,
     locale: LocaleType.ZH_CN,
 });
 

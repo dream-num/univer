@@ -27,14 +27,12 @@ pnmp install
 ### Start dev server
 
 ```shell
-pnpm dev:sheet # start sheet dev server
-pnpm dev:doc # start doc dev server
-pnpm dev:slide # start slide dev server
+pnpm dev:demo
 ```
 
 ### Architecture
 
-Please refer to the architecture doc. The [Chinese version](./docs/zh/achitecture.md).
+Please refer to the architecture doc. The [Chinese version](https://univer.work/guides/architecture/architecture/).
 
 ### Source code organization
 

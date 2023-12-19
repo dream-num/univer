@@ -237,18 +237,20 @@ export class SlideTabItem {
         if (this._placeholder) {
             const primeval = this._slideTabBar.primeval();
 
+            // change to set unset
             this._slideTabItem.style.removeProperty('position');
             this._slideTabItem.style.removeProperty('left');
             this._slideTabItem.style.removeProperty('top');
             this._slideTabItem.style.removeProperty('width');
             this._slideTabItem.style.removeProperty('height');
-            this._slideTabItem.style.removeProperty('box-shadow');
             this._slideTabItem.style.removeProperty('background');
             this._slideTabItem.style.removeProperty('padding');
-            this._slideTabItem.style.removeProperty('boxSizing');
-            this._slideTabItem.style.removeProperty('fontSize');
+            this._slideTabItem.style.removeProperty('box-sizing');
+            this._slideTabItem.style.removeProperty('font-size');
+            this._slideTabItem.style.removeProperty('font-family');
+            this._slideTabItem.style.removeProperty('font-weight');
             this._slideTabItem.style.removeProperty('color');
-            this._slideTabItem.style.removeProperty('borderRadius');
+            this._slideTabItem.style.removeProperty('border-radius');
 
             this._placeholder.after(this._slideTabItem);
             primeval.removeChild(this._placeholder);
@@ -275,6 +277,8 @@ export class SlideTabItem {
         }
         this._slideTabItem.style.boxSizing = computedStyles.boxSizing;
         this._slideTabItem.style.fontSize = computedStyles.fontSize;
+        this._slideTabItem.style.fontFamily = computedStyles.fontFamily;
+        this._slideTabItem.style.fontWeight = computedStyles.fontWeight;
         this._slideTabItem.style.color = computedStyles.color;
         this._slideTabItem.style.borderRadius = computedStyles.borderRadius;
 
@@ -282,7 +286,6 @@ export class SlideTabItem {
         this._slideTabItem.style.top = `${boundingRect.y}px`;
         this._slideTabItem.style.width = `${boundingRect.width}px`;
         this._slideTabItem.style.height = `${boundingRect.height}px`;
-        this._slideTabItem.style.boxShadow = '0px 0px 1px 1px rgba(82,82,82,0.1)';
         this._slideTabItem.style.position = 'fixed';
 
         this._slideTabItem.after(placeholder);

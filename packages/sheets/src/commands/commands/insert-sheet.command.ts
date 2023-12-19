@@ -32,7 +32,7 @@ import type {
 import { InsertSheetMutation, InsertSheetUndoMutationFactory } from '../mutations/insert-sheet.mutation';
 import { RemoveSheetMutation } from '../mutations/remove-sheet.mutation';
 
-export interface InsertSheetCommandParams {
+export interface IInsertSheetCommandParams {
     unitId?: string;
     index?: number;
     sheet?: IWorksheetData;
@@ -44,7 +44,7 @@ export interface InsertSheetCommandParams {
 export const InsertSheetCommand: ICommand = {
     id: 'sheet.command.insert-sheet',
     type: CommandType.COMMAND,
-    handler: async (accessor: IAccessor, params?: InsertSheetCommandParams) => {
+    handler: (accessor: IAccessor, params?: IInsertSheetCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);

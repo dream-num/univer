@@ -30,7 +30,7 @@ export const SetWorksheetActivateCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-worksheet-activate',
 
-    handler: async (accessor: IAccessor, params?: ISetWorksheetActivateCommandParams) => {
+    handler: (accessor: IAccessor, params?: ISetWorksheetActivateCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IParagraph, type IParagraphStyle, type Nullable } from '@univerjs/core';
+import type { IParagraph, IParagraphStyle, Nullable } from '@univerjs/core';
 import { DataStreamTreeTokenType, Tools } from '@univerjs/core';
 
 export default function parseToDom(rawHtml: string) {

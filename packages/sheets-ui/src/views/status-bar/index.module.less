@@ -36,6 +36,7 @@
     &-item {
         cursor: default;
 
+        overflow: hidden;
         display: flex;
         justify-content: start;
 
@@ -48,6 +49,8 @@
         line-height: 20px; /* 181.818% */
         color: rgb(var(--grey-900));
         text-align: center;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     &-picker {

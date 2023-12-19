@@ -84,14 +84,14 @@ export function ZenEditor() {
                     className={clsx(styles.zenEditorIconContainer, styles.zenEditorIconError)}
                     onClick={handleCloseBtnClick}
                 >
-                    <CloseSingle />
+                    <CloseSingle style={{ fontSize: '22px' }} />
                 </span>
 
                 <span
                     className={clsx(styles.zenEditorIconContainer, styles.zenEditorIconSuccess)}
                     onClick={handleConfirmBtnClick}
                 >
-                    <CheckMarkSingle />
+                    <CheckMarkSingle style={{ fontSize: '22px' }} />
                 </span>
             </div>
             <div className={styles.zenEditorCanvasContainer} ref={editorRef} />

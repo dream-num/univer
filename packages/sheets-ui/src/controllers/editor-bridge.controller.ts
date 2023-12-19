@@ -162,10 +162,6 @@ export class EditorBridgeController extends RxDisposable {
             col: startColumn,
         };
 
-        if (isSameEditorLocation(this._lastEditorLocation, location)) {
-            return;
-        }
-
         this._lastEditorLocation = {
             unitId: location.unitId,
             subUnitId: location.subUnitId,

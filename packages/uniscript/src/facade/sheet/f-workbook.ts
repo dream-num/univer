@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
+import { DEFAULT_WORKSHEET, ICommandService, Tools, type Workbook } from '@univerjs/core';
+import type { IInsertSheetCommandParams, ISetWorksheetActivateCommandParams } from '@univerjs/sheets';
+import { InsertSheetCommand, SetWorksheetActivateCommand } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { FWorksheet } from './f-worksheet';
@@ -22,7 +24,8 @@ import { FWorksheet } from './f-worksheet';
 export class FWorkbook {
     constructor(
         private readonly _workbook: Workbook,
-        @Inject(Injector) private readonly _injector: Injector
+        @Inject(Injector) private readonly _injector: Injector,
+        @ICommandService private readonly _commandService: ICommandService
     ) {}
 
     getActiveSheet(): FWorksheet | null {
@@ -32,5 +35,25 @@ export class FWorkbook {
         }
 
         return this._injector.createInstance(FWorksheet, this._workbook, activeSheet);
+    }
+
+    create(name: string, rows: number, column: number): FWorksheet {
+        const newSheet = Tools.deepClone(DEFAULT_WORKSHEET);
+        newSheet.rowCount = rows;
+        newSheet.columnCount = column;
+        newSheet.name = name;
+        newSheet.id = name.toLowerCase().replace(/ /g, '-');
+
+        this._commandService.syncExecuteCommand(InsertSheetCommand.id, {
+            unitId: this._workbook.getUnitId(),
+            index: this._workbook.getSheets().length,
+            sheet: newSheet,
+        } as IInsertSheetCommandParams);
+        this._commandService.syncExecuteCommand(SetWorksheetActivateCommand.id, {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._workbook.getSheets()[this._workbook.getSheets().length - 1].getSheetId(),
+        } as ISetWorksheetActivateCommandParams);
+
+        return this._injector.createInstance(FWorksheet, this._workbook, this._workbook.getActiveSheet());
     }
 }

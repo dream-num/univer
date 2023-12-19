@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import type { IRange, Workbook, Worksheet } from '@univerjs/core';
-import { SelectionManagerService } from '@univerjs/sheets';
+import { ICommandService, type IRange, type Workbook, type Worksheet } from '@univerjs/core';
+import type { ISetWorksheetColWidthMutationParams, ISetWorksheetRowHeightMutationParams } from '@univerjs/sheets';
+import { SelectionManagerService, SetWorksheetColWidthMutation, SetWorksheetRowHeightMutation } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { FRange } from './f-range';
@@ -26,7 +27,8 @@ export class FWorksheet {
         private readonly _workbook: Workbook,
         private readonly _worksheet: Worksheet,
         @Inject(Injector) private readonly _injector: Injector,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService
+        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
+        @ICommandService private readonly _commandService: ICommandService
     ) {}
 
     getSelection(): FSelection | null {
@@ -47,5 +49,37 @@ export class FWorksheet {
         };
 
         return this._injector.createInstance(FRange, this._workbook, this._worksheet, range);
+    }
+
+    setRowHeights(startRow: number, numRows: number, height: number) {
+        this._commandService.syncExecuteCommand(SetWorksheetRowHeightMutation.id, {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            ranges: [
+                {
+                    startRow,
+                    endRow: startRow + numRows - 1,
+                    startColumn: 0,
+                    endColumn: this._worksheet.getColumnCount() - 1,
+                },
+            ],
+            rowHeight: height,
+        } as ISetWorksheetRowHeightMutationParams);
+    }
+
+    setColumnWidths(startColumn: number, numColumns: number, width: number) {
+        this._commandService.syncExecuteCommand(SetWorksheetColWidthMutation.id, {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            ranges: [
+                {
+                    startColumn,
+                    endColumn: startColumn + numColumns - 1,
+                    startRow: 0,
+                    endRow: this._worksheet.getRowCount() - 1,
+                },
+            ],
+            colWidth: width,
+        } as ISetWorksheetColWidthMutationParams);
     }
 }

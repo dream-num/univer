@@ -76,6 +76,7 @@ export {
     InsertRowBeforeCommand,
     InsertRowCommand,
 } from './commands/commands/insert-row-col.command';
+export type { IInsertSheetCommandParams } from './commands/commands/insert-sheet.command';
 export { InsertSheetCommand } from './commands/commands/insert-sheet.command';
 export { type IMoveRangeCommandParams, MoveRangeCommand } from './commands/commands/move-range.command';
 export {

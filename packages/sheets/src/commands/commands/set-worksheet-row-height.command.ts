@@ -183,7 +183,7 @@ export interface ISetRowHeightCommandParams {
 export const SetRowHeightCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-row-height',
-    handler: async (accessor: IAccessor, params: ISetRowHeightCommandParams) => {
+    handler: (accessor: IAccessor, params: ISetRowHeightCommandParams) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
@@ -220,7 +220,7 @@ export const SetRowHeightCommand: ICommand = {
         const undoSetIsAutoHeightParams: ISetWorksheetRowIsAutoHeightMutationParams =
             SetWorksheetRowIsAutoHeightMutationFactory(accessor, redoSetIsAutoHeightParams);
 
-        const result = await sequenceExecute(
+        const result = sequenceExecute(
             [
                 {
                     id: SetWorksheetRowHeightMutation.id,

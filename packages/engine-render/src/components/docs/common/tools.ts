@@ -292,13 +292,6 @@ export function getCharSpaceConfig(sectionBreakConfig: ISectionBreakConfig, para
 }
 
 export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number = -1) {
-    const firstPage = pages[0];
-    const { st: firstPageStartIndex } = firstPage;
-    // if (firstPageStartIndex > endIndex) {
-    //     console.error(`pageStartIndex ${firstPageStartIndex} is large than element endIndex ${endIndex}`);
-    //     return;
-    // }
-
     let prePageStartIndex = start;
 
     for (const page of pages) {
@@ -345,10 +338,7 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
 
                         for (const span of spanGroup) {
                             const increaseValue = span.spanType === SpanType.LIST ? 0 : span.count;
-                            // pageEndIndex += increaseValue;
-                            // sectionEndIndex += increaseValue;
-                            // columnEndIndex += increaseValue;
-                            // lineEndIndex += increaseValue;
+
                             divEndIndex += increaseValue;
 
                             const bBox = span.bBox;
@@ -375,11 +365,13 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                             continue;
                         }
 
-                        divide.st = divStartIndex === 0 ? 0 : divStartIndex + 1;
+                        divide.st = divStartIndex + 1;
                         divide.ed = divEndIndex >= divide.st ? divEndIndex : divide.st;
+
                         preDivideStartIndex = divide.ed;
                     }
-                    line.st = lineStartIndex === 0 ? 0 : lineStartIndex + 1;
+
+                    line.st = lineStartIndex + 1;
                     line.ed = preDivideStartIndex >= line.st ? preDivideStartIndex : line.st;
                     line.width = actualWidth;
                     line.asc = maxLineAsc;
@@ -388,7 +380,7 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                     preLine = line;
                     preLineStartIndex = line.ed;
                 }
-                column.st = columStartIndex === 0 ? 0 : columStartIndex + 1;
+                column.st = columStartIndex + 1;
                 column.ed = preLineStartIndex >= column.st ? preLineStartIndex : column.st;
                 column.height = columnHeight;
 
@@ -400,7 +392,7 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                 preColumnStartIndex = column.ed;
             }
 
-            section.st = sectionStartIndex === 0 ? 0 : sectionStartIndex + 1;
+            section.st = sectionStartIndex + 1;
             section.ed = preColumnStartIndex >= section.st ? preColumnStartIndex : section.st;
             section.height = maxSectionHeight;
             contentHeight += maxSectionHeight;
@@ -410,7 +402,7 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
             preSectionStartIndex = section.ed;
         }
 
-        page.st = pageStartIndex === 0 ? 0 : pageStartIndex + 1;
+        page.st = pageStartIndex + 1;
         page.ed = preSectionStartIndex >= page.st ? preSectionStartIndex : page.st;
         page.height = contentHeight;
         page.width = maxContentWidth;

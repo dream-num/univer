@@ -41,7 +41,7 @@ import type { Engine } from '../../engine';
 import type { Scene } from '../../scene';
 import { ScrollTimer } from '../../scroll-timer';
 import type { IScrollObserverParam, Viewport } from '../../viewport';
-import { cursorConvertToTextRange, TextRange } from './common/range';
+import { cursorConvertToTextRange, TextRange } from './common/text-range';
 import type { DocumentSkeleton } from './doc-skeleton';
 import type { IDocumentOffsetConfig } from './document';
 
@@ -1178,5 +1178,5 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 }
 
 export const ITextSelectionRenderManager = createIdentifier<TextSelectionRenderManager>(
-    'deprecated.univer.doc.text-selection-render-manager'
+    'univer.doc.text-selection-render-manager'
 );

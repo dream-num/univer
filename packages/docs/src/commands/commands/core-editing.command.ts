@@ -63,11 +63,13 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
         };
 
         if (collapsed) {
-            doMutation.params.mutations.push({
-                t: 'r',
-                len: startOffset,
-                segmentId,
-            });
+            if (startOffset > 0) {
+                doMutation.params.mutations.push({
+                    t: 'r',
+                    len: startOffset,
+                    segmentId,
+                });
+            }
         } else {
             doMutation.params.mutations.push(...getRetainAndDeleteFromReplace(range, segmentId));
         }

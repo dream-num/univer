@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
+import { UniverInstanceType } from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
+
 import { ToggleShortcutPanelOperation } from '../../commands/operations/toggle-shortcut-panel.operation';
+import { getMenuHiddenObservable } from '../../common/menu-hidden-observable';
 import type { IMenuButtonItem } from '../../services/menu/menu';
 import { MenuItemType, MenuPosition } from '../../services/menu/menu';
 
-export function ShortcutPanelMenuItemFactory(): IMenuButtonItem {
+export function ShortcutPanelMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: ToggleShortcutPanelOperation.id,
         title: 'toggle-shortcut-panel',
@@ -26,5 +30,6 @@ export function ShortcutPanelMenuItemFactory(): IMenuButtonItem {
         icon: 'KeyboardSingle',
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.TOOLBAR_START],
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
     };
 }

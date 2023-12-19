@@ -15,7 +15,7 @@
  */
 
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 
 import {
     ShortcutPanelComponentName,
@@ -32,6 +32,7 @@ import { ShortcutPanelMenuItemFactory } from './menu';
 @OnLifecycle(LifecycleStages.Steady, ShortcutPanelController)
 export class ShortcutPanelController extends Disposable {
     constructor(
+        @Inject(Injector) private readonly _injector: Injector,
         @IMenuService menuService: IMenuService,
         @ICommandService commandService: ICommandService,
         @Inject(ComponentManager) componentManager: ComponentManager
@@ -39,7 +40,7 @@ export class ShortcutPanelController extends Disposable {
         super();
 
         // Register the menu item.
-        this.disposeWithMe(menuService.addMenuItem(ShortcutPanelMenuItemFactory()));
+        this.disposeWithMe(menuService.addMenuItem(this._injector.invoke(ShortcutPanelMenuItemFactory)));
         // Register the panel.
         this.disposeWithMe(componentManager.register(ShortcutPanelComponentName, ShortcutPanel));
         this.disposeWithMe(commandService.registerCommand(ToggleShortcutPanelOperation));

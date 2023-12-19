@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
+import { UniverInstanceType } from '@univerjs/core';
 import type { IMenuButtonItem } from '@univerjs/ui';
-import { MenuItemType, MenuPosition } from '@univerjs/ui';
+import { getMenuHiddenObservable, MenuItemType, MenuPosition } from '@univerjs/ui';
+import type { IAccessor } from '@wendellhu/redi';
 
 import { ToggleScriptPanelOperation } from '../commands/operations/panel.operation';
 
-export function UniscriptMenuItemFactory(): IMenuButtonItem {
+export function UniscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: ToggleScriptPanelOperation.id,
         title: 'toggle-script-panel',
@@ -27,5 +29,6 @@ export function UniscriptMenuItemFactory(): IMenuButtonItem {
         icon: 'CodeSingle',
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.TOOLBAR_START],
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
     };
 }

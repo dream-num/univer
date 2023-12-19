@@ -65,7 +65,7 @@ function isSameEditorLocation(prevLocation: Nullable<IEditorLocation>, newLocati
 
 @OnLifecycle(LifecycleStages.Rendered, EditorBridgeController)
 export class EditorBridgeController extends RxDisposable {
-    private _lastEditorLocation: IEditorLocation;
+    private _lastEditorLocation: Nullable<IEditorLocation> = null;
 
     constructor(
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,

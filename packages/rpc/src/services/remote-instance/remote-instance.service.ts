@@ -53,6 +53,9 @@ export const RemoteInstanceServiceName = 'univer.remote-instance-service';
  */
 export const IRemoteInstanceService = createIdentifier<IRemoteInstanceService>(RemoteInstanceServiceName);
 export interface IRemoteInstanceService {
+    /** Tell other modules if the `IRemoteInstanceService` is ready to load files. */
+    whenReady(): Promise<true>;
+
     createInstance(params: { unitID: string; type: DocumentType; snapshot: IWorkbookData }): Promise<boolean>;
     disposeInstance(params: { unitID: string }): Promise<boolean>;
     syncMutation(params: { mutationInfo: IMutationInfo }): Promise<boolean>;
@@ -62,6 +65,10 @@ export class RemoteInstanceReplicaService implements IRemoteInstanceService {
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService
     ) {}
+
+    whenReady(): Promise<true> {
+        return Promise.resolve(true);
+    }
 
     async syncMutation(params: { mutationInfo: IMutationInfo }): Promise<boolean> {
         return this._commandService.syncExecuteCommand(params.mutationInfo.id, params.mutationInfo.params, {

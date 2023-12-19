@@ -70,7 +70,11 @@ export class UniverRPCMainThreadPlugin extends Plugin {
             ],
             [IRemoteSyncService, { useClass: RemoteSyncPrimaryService }],
         ];
+
         dependencies.forEach((dependency) => injector.add(dependency));
+
+        // let DataSyncPrimaryController to be initialized and registering other modules
+        injector.get(DataSyncPrimaryController);
     }
 }
 

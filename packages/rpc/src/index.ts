@@ -20,5 +20,6 @@ export {
     UniverRPCMainThreadPlugin,
     UniverRPCWorkerThreadPlugin,
 } from './plugin';
+export { IRemoteInstanceService } from './services/remote-instance/remote-instance.service';
 export { IRPChannelService } from './services/rpc/channel.service';
 export { ChannelClient, ChannelServer, type IMessageProtocol } from './services/rpc/rpc.service';

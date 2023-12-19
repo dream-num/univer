@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DocumentType, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
+import { IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocCanvasView } from '@univerjs/docs';
 import { SheetCanvasView } from '@univerjs/sheets-ui';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -22,7 +22,7 @@ import { interval, takeUntil, throttle } from 'rxjs';
 
 @OnLifecycle(LifecycleStages.Rendered, PerformanceMonitorController)
 export class PerformanceMonitorController extends RxDisposable {
-    private _documentType: DocumentType = DocumentType.UNKNOWN;
+    private _documentType: UniverInstanceType = UniverInstanceType.UNKNOWN;
 
     private _hasWatched = false;
 
@@ -78,14 +78,14 @@ export class PerformanceMonitorController extends RxDisposable {
 
         document.head.appendChild(document.createElement('style')).innerText = style;
 
-        if (this._documentType === DocumentType.DOC) {
+        if (this._documentType === UniverInstanceType.DOC) {
             this._docCanvasView.fps$
                 .pipe(takeUntil(this.dispose$))
                 .pipe(throttle(() => interval(THROTTLE_TIME)))
                 .subscribe((fps) => {
                     container.innerText = `FPS: ${fps}`;
                 });
-        } else if (this._documentType === DocumentType.SHEET) {
+        } else if (this._documentType === UniverInstanceType.SHEET) {
             this._injector
                 .get(SheetCanvasView)
                 .fps$.pipe(takeUntil(this.dispose$))

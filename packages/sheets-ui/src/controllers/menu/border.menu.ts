@@ -28,6 +28,7 @@ export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSel
     // const permissionService = accessor.get(IPermissionService);
 
     const borderStyleManagerService = accessor.get(BorderStyleManagerService);
+
     return {
         id: SetBorderBasicCommand.id,
         icon: new Observable<string>((subscriber) => {
@@ -67,5 +68,8 @@ export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSel
             },
         ],
         value$: borderStyleManagerService.borderInfo$,
+        hidden$: new Observable((subscriber) => {
+            subscriber.next(true);
+        }),
     };
 }

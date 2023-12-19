@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { AddDigitsSingle, MoreDownSingle, ReduceDigitsSingle, RmbSingle } from '@univerjs/icons';
 import { INumfmtService, SelectionManagerService, SetNumfmtMutation } from '@univerjs/sheets';
 import type { ComponentManager, IMenuSelectorItem } from '@univerjs/ui';
-import { MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
+import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 import { merge, Observable } from 'rxjs';
 
@@ -34,21 +34,25 @@ export const CurrencyMenuItem = (componentManager: ComponentManager) => {
     const iconKey = 'icon-rmbSingle';
     componentManager.register(iconKey, RmbSingle);
     componentManager.register('MoreDownSingle', MoreDownSingle);
-    return () => ({
-        icon: iconKey,
-        id: SetCurrencyCommand.id,
-        title: 'sheet.numfmt.currency',
-        tooltip: 'sheet.numfmt.currency',
-        type: MenuItemType.BUTTON,
-        group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
-        positions: [MenuPosition.TOOLBAR_START],
-    });
+
+    return (accessor: IAccessor) => {
+        return {
+            icon: iconKey,
+            id: SetCurrencyCommand.id,
+            title: 'sheet.numfmt.currency',
+            tooltip: 'sheet.numfmt.currency',
+            type: MenuItemType.BUTTON,
+            group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
+            positions: [MenuPosition.TOOLBAR_START],
+            hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
+        };
+    };
 };
 
 export const AddDecimalMenuItem = (componentManager: ComponentManager) => {
     const iconKey = 'icon-addDigitsSingle';
     componentManager.register(iconKey, AddDigitsSingle);
-    return () => ({
+    return (accessor: IAccessor) => ({
         icon: iconKey,
         id: AddDecimalCommand.id,
         title: 'sheet.numfmt.addDecimal',
@@ -56,12 +60,13 @@ export const AddDecimalMenuItem = (componentManager: ComponentManager) => {
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.TOOLBAR_START],
         group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
     });
 };
 export const SubtractDecimalMenuItem = (componentManager: ComponentManager) => {
     const iconKey = 'icon-reduceDigitsSingle';
     componentManager.register(iconKey, ReduceDigitsSingle);
-    return () => ({
+    return (accessor: IAccessor) => ({
         icon: iconKey,
         id: SubtractDecimalCommand.id,
         title: 'sheet.numfmt.subtractDecimal',
@@ -69,6 +74,7 @@ export const SubtractDecimalMenuItem = (componentManager: ComponentManager) => {
         type: MenuItemType.BUTTON,
         group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
         positions: [MenuPosition.TOOLBAR_START],
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
     });
 };
 
@@ -121,6 +127,7 @@ export const FactoryOtherMenuItem = (componentManager: ComponentManager) => {
                 }
             })
         );
+
         return {
             // icon: 'MoreDownSingle',
             label: moreTypeKey,
@@ -138,6 +145,7 @@ export const FactoryOtherMenuItem = (componentManager: ComponentManager) => {
                 },
             ],
             value$,
+            hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.SHEET),
         } as IMenuSelectorItem;
     };
 };

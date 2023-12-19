@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { UniverInstanceType } from '@univerjs/core';
 import {
     BulletListCommand,
     OrderListCommand,
@@ -25,7 +26,7 @@ import {
     SetInlineFormatUnderlineCommand,
 } from '@univerjs/docs';
 import type { IMenuButtonItem } from '@univerjs/ui';
-import { MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
+import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 
 // TODO @Dushusir: use for test, change id later
@@ -38,6 +39,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         title: 'Set bold',
         tooltip: 'toolbar.bold',
         positions: [MenuPosition.TOOLBAR_START],
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.DOC),
     };
 }
 
@@ -50,6 +52,7 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         title: 'Set italic',
         tooltip: 'toolbar.italic',
         positions: [MenuPosition.TOOLBAR_START],
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.DOC),
     };
 }
 
@@ -62,6 +65,7 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         title: 'Set underline',
         tooltip: 'toolbar.underline',
         positions: [MenuPosition.TOOLBAR_START],
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.DOC),
     };
 }
 
@@ -74,6 +78,7 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
         title: 'Set strike through',
         tooltip: 'toolbar.strikethrough',
         positions: [MenuPosition.TOOLBAR_START],
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.DOC),
     };
 }
 
@@ -85,6 +90,7 @@ export function SubscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         icon: 'FontSizeReduceSingleSingle',
         tooltip: 'toolbar.subscript',
         positions: [MenuPosition.TOOLBAR_START],
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.DOC),
     };
 }
 
@@ -96,6 +102,7 @@ export function SuperscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem
         icon: 'FontSizeIncreaseSingle',
         tooltip: 'toolbar.superscript',
         positions: [MenuPosition.TOOLBAR_START],
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.DOC),
     };
 }
 
@@ -107,6 +114,7 @@ export function OrderListMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         icon: 'OrderSingle',
         tooltip: 'toolbar.superscript',
         positions: [MenuPosition.TOOLBAR_START],
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.DOC),
     };
 }
 
@@ -118,5 +126,6 @@ export function BulletListMenuItemFactory(accessor: IAccessor): IMenuButtonItem 
         icon: 'UnorderSingle',
         tooltip: 'toolbar.superscript',
         positions: [MenuPosition.TOOLBAR_START],
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.DOC),
     };
 }

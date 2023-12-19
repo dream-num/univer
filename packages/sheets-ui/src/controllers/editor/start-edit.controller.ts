@@ -23,6 +23,7 @@ import {
     FOCUSING_EDITOR,
     FOCUSING_EDITOR_BUT_HIDDEN,
     FOCUSING_FORMULA_EDITOR,
+    FOCUSING_SHEET,
     HorizontalAlign,
     ICommandService,
     IContextService,
@@ -585,8 +586,9 @@ export class StartEditController extends Disposable {
     private _initialKeyboardListener() {
         this._textSelectionRenderManager.onInputBefore$.subscribe((config) => {
             const isFocusFormulaEditor = this._contextService.getContextValue(FOCUSING_FORMULA_EDITOR);
+            const isFocusSheets = this._contextService.getContextValue(FOCUSING_SHEET);
 
-            if (!isFocusFormulaEditor) {
+            if (isFocusSheets && !isFocusFormulaEditor) {
                 this._showEditorByKeyboard(config);
             }
         });

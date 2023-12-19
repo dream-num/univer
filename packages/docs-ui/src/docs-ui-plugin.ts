@@ -17,6 +17,7 @@
 import {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    ILogService,
     IUniverInstanceService,
     LocaleService,
     Plugin,
@@ -39,7 +40,8 @@ export class UniverDocsUIPlugin extends Plugin {
     constructor(
         private readonly _config: IUniverDocsUIConfig,
         @Inject(Injector) override _injector: Injector,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @ILogService private _logService: ILogService
     ) {
         super(DOC_UI_PLUGIN_NAME);
 
@@ -77,11 +79,16 @@ export class UniverDocsUIPlugin extends Plugin {
 
     private _markDocAsFocused() {
         const currentService = this._injector.get(IUniverInstanceService);
-        const doc = currentService.getCurrentUniverDocInstance();
-        const id = doc.getUnitId();
 
-        if (id !== DOCS_NORMAL_EDITOR_UNIT_ID_KEY && id !== DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
-            currentService.focusUniverInstance(doc.getUnitId());
+        try {
+            const doc = currentService.getCurrentUniverDocInstance();
+            const id = doc.getUnitId();
+
+            if (id !== DOCS_NORMAL_EDITOR_UNIT_ID_KEY && id !== DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
+                currentService.focusUniverInstance(doc.getUnitId());
+            }
+        } catch (err) {
+            this._logService.warn(err);
         }
     }
 

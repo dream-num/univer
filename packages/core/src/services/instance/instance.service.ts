@@ -27,7 +27,7 @@ import type { IDocumentData, ISlideData, IWorkbookData } from '../../types/inter
 import { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE } from '../context/context';
 import { IContextService } from '../context/context.service';
 
-export const enum DocumentType {
+export const enum UniverInstanceType {
     UNKNOWN = 0,
     DOC = 1,
     SHEET = 2,
@@ -87,14 +87,14 @@ export interface IUniverInstanceService {
     getAllUniverDocsInstance(): DocumentDataModel[];
     getAllUniverSlidesInstance(): Slide[];
 
-    getDocumentType(unitID: string): DocumentType;
+    getDocumentType(unitId: string): UniverInstanceType;
     disposeDocument(unitId: string): boolean;
 }
 
 export const IUniverInstanceService = createIdentifier<IUniverInstanceService>('univer.current');
 export class UniverInstanceService extends Disposable implements IUniverInstanceService {
-    private readonly _focused$ = new BehaviorSubject<Nullable<string>>(null);
     private _focused: DocumentDataModel | Workbook | Slide | null = null;
+    private readonly _focused$ = new BehaviorSubject<Nullable<string>>(null);
     readonly focused$ = this._focused$.asObservable();
 
     private readonly _currentSheet$ = new BehaviorSubject<Nullable<Workbook>>(null);
@@ -276,18 +276,20 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         return this._focused;
     }
 
-    getDocumentType(unitID: string): DocumentType {
-        if (this.getUniverDocInstance(unitID)) {
-            return DocumentType.DOC;
-        }
-        if (this.getUniverSheetInstance(unitID)) {
-            return DocumentType.SHEET;
-        }
-        if (this.getUniverSlideInstance(unitID)) {
-            return DocumentType.SLIDE;
+    getDocumentType(unitId: string): UniverInstanceType {
+        if (this.getUniverDocInstance(unitId)) {
+            return UniverInstanceType.DOC;
         }
 
-        throw new Error(`[UniverInstanceService]: No document with unitID ${unitID}`);
+        if (this.getUniverSheetInstance(unitId)) {
+            return UniverInstanceType.SHEET;
+        }
+
+        if (this.getUniverSlideInstance(unitId)) {
+            return UniverInstanceType.SLIDE;
+        }
+
+        throw new Error(`[UniverInstanceService]: No document with unitId ${unitId}`);
     }
 
     disposeDocument(unitId: string): boolean {

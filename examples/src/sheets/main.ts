@@ -17,6 +17,7 @@
 import { LocaleType, LogLevel, Univer } from '@univerjs/core';
 import { defaultTheme } from '@univerjs/design';
 import { UniverDocsPlugin } from '@univerjs/docs';
+import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
@@ -29,6 +30,7 @@ import { UniverUIPlugin } from '@univerjs/ui';
 
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data';
 import { DebuggerPlugin } from '../plugins/debugger';
+import { ZenEditorPlugin } from '../plugins/zen-editor';
 import { locales } from './locales';
 
 const LOAD_LAZY_PLUGINS_TIMEOUT = 5_000;
@@ -55,11 +57,13 @@ univer.registerPlugin(UniverSheetsPlugin, {
     notExecuteFormula: true,
 });
 univer.registerPlugin(UniverSheetsUIPlugin);
+univer.registerPlugin(UniverDocsUIPlugin);
 
 // sheet feature plugins
 
 univer.registerPlugin(UniverSheetsNumfmtPlugin);
 univer.registerPlugin(DebuggerPlugin);
+univer.registerPlugin(ZenEditorPlugin);
 univer.registerPlugin(UniverFormulaEnginePlugin, {
     notExecuteFormula: true,
 });

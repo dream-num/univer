@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICellData, ICommandInfo, Nullable, Observer } from '@univerjs/core';
+import type { DocumentDataModel, ICellData, ICommandInfo, IDocumentBody, Nullable, Observer } from '@univerjs/core';
 import {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     Direction,
@@ -55,6 +55,15 @@ import { ICellEditorManagerService } from '../../services/editor/cell-editor-man
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { MOVE_SELECTION_KEYCODE_LIST } from '../shortcuts/editor.shortcut';
+
+function isRichText(body: IDocumentBody) {
+    const { textRuns = [], paragraphs = [] } = body;
+
+    return (
+        textRuns.some((textRun) => textRun.ts && !Tools.isEmptyObject(textRun.ts)) ||
+        paragraphs.some((paragraph) => paragraph.bullet)
+    );
+}
 
 enum CursorChange {
     InitialState,
@@ -214,7 +223,7 @@ export class EndEditController extends Disposable {
                 cellData.f = newDataStream;
                 cellData.v = null;
                 cellData.p = null;
-            } else if (body.textRuns && body.textRuns.length > 1) {
+            } else if (isRichText(body)) {
                 cellData.p = snapshot;
                 cellData.v = null;
                 cellData.f = null;

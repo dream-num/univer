@@ -228,11 +228,18 @@ export class PromptController extends Disposable {
     private _initialCursorSync() {
         this.disposeWithMe(
             toDisposable(
-                this._textSelectionManagerService.textSelection$.subscribe(() => {
+                this._textSelectionManagerService.textSelection$.subscribe((params) => {
                     if (
                         this._editorBridgeService.isVisible().visible === false ||
-                        this._formulaInputService.isSelectionMoving()
+                        this._formulaInputService.isSelectionMoving() ||
+                        params?.unitId == null
                     ) {
+                        return;
+                    }
+
+                    const INCLUDE_LIST = [DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY];
+
+                    if (!INCLUDE_LIST.includes(params.unitId)) {
                         return;
                     }
 

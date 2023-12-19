@@ -48,6 +48,8 @@ import { ShortcutExperienceService } from './services/shortcut/shortcut-experien
 import { ShortcutPanelService } from './services/shortcut/shortcut-panel.service';
 import { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
 import { ISidebarService } from './services/sidebar/sidebar.service';
+import { DesktopZenZoneService } from './services/zen-zone/desktop-zen-zone.service';
+import { IZenZoneService } from './services/zen-zone/zen-zone.service';
 
 const PLUGIN_NAME = 'ui';
 
@@ -104,6 +106,7 @@ export class UniverUIPlugin extends Plugin {
             [IDialogService, { useClass: DesktopDialogService, lazy: true }],
             [IConfirmService, { useClass: DesktopConfirmService, lazy: true }],
             [ISidebarService, { useClass: DesktopSidebarService, lazy: true }],
+            [IZenZoneService, { useClass: DesktopZenZoneService, lazy: true }],
             [IMessageService, { useClass: DesktopMessageService, lazy: true }],
             [ILocalStorageService, { useClass: DesktopLocalStorageService, lazy: true }],
             [IBeforeCloseService, { useClass: DesktopBeforeCloseService }],

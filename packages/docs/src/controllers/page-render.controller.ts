@@ -76,13 +76,14 @@ export class PageRenderController extends Disposable {
 
                 // Draw page borders
                 const { page, pageLeft, pageTop, ctx } = config;
-                const { width, height } = page;
+                const { width, pageWidth, height, pageHeight } = page;
+
                 ctx.save();
                 // eslint-disable-next-line no-magic-numbers
                 ctx.translate(pageLeft - 0.5, pageTop - 0.5);
                 Rect.drawWith(ctx, {
-                    width: pageSize?.width || width,
-                    height: pageSize?.height || height,
+                    width: pageSize?.width ?? pageWidth ?? width,
+                    height: pageSize?.height ?? pageHeight ?? height,
                     strokeWidth: 1,
                     stroke: PAGE_STROKE_COLOR,
                     fill: PAGE_FILL_COLOR,

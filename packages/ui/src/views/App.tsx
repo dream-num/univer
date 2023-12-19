@@ -27,6 +27,7 @@ import styles from './app.module.less';
 import { ComponentContainer } from './components/ComponentContainer';
 import { Toolbar } from './components/doc-bars/Toolbar';
 import { Sidebar } from './components/sidebar/Sidebar';
+import { ZenZone } from './components/zen-zone/ZenZone';
 import { globalComponents } from './parts';
 
 export interface IUniverAppProps extends IWorkbenchOptions {
@@ -132,6 +133,8 @@ export function App(props: IUniverAppProps) {
                             <ComponentContainer components={footerComponents} />
                         </footer>
                     )}
+
+                    <ZenZone />
                 </section>
             </div>
 

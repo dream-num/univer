@@ -16,6 +16,7 @@
 
 export * from './BaseComponent';
 export * from './common';
+export { getMenuHiddenObservable } from './common/menu-hidden-observable';
 export * from './components';
 export { useObservable } from './components/hooks/observable';
 export {
@@ -70,6 +71,7 @@ export { DesktopShortcutService, type IShortcutItem, IShortcutService } from './
 export { ShortcutExperienceService } from './services/shortcut/shortcut-experience.service';
 export { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
 export { ISidebarService } from './services/sidebar/sidebar.service';
+export { IZenZoneService } from './services/zen-zone/zen-zone.service';
 export { UniverUIPlugin } from './ui-plugin';
 export * from './utils';
 export { type IConfirmPartMethodOptions } from './views/components/confirm-part/interface';

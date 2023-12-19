@@ -533,6 +533,7 @@ export default {
         freezeCol: 'Freeze to this column',
         freezeRow: 'Freeze to this row',
         cancelFreeze: 'Cancel freeze',
+        zenEditor: 'Full Screen Editor',
     },
     info: {
         tooltip: 'Tooltip',

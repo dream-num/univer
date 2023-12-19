@@ -397,6 +397,7 @@ export default {
         freezeCol: '冻结列',
         freezeRow: '冻结行',
         cancelFreeze: '取消冻结',
+        zenEditor: '禅模式编辑',
     },
     info: {
         tooltip: '提示',

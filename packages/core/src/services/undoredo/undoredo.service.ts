@@ -23,7 +23,7 @@ import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY } f
 import { Disposable, toDisposable } from '../../shared/lifecycle';
 import type { ICommand, IMutationInfo } from '../command/command.service';
 import { CommandType, ICommandService, sequenceExecute } from '../command/command.service';
-import { FOCUSING_EDITOR, FOCUSING_FORMULA_EDITOR } from '../context/context';
+import { FOCUSING_EDITOR, FOCUSING_FORMULA_EDITOR, FOCUSING_SHEET } from '../context/context';
 import { IContextService } from '../context/context.service';
 import { IUniverInstanceService } from '../instance/instance.service';
 
@@ -223,10 +223,18 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
     private _getFocusedUniverInstanceId() {
         let unitID: string = '';
 
-        if (this._contextService.getContextValue(FOCUSING_FORMULA_EDITOR)) {
-            unitID = DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY;
-        } else if (this._contextService.getContextValue(FOCUSING_EDITOR)) {
-            unitID = DOCS_NORMAL_EDITOR_UNIT_ID_KEY;
+        const isFocusSheet = this._contextService.getContextValue(FOCUSING_SHEET);
+        const isFocusFormulaEditor = this._contextService.getContextValue(FOCUSING_FORMULA_EDITOR);
+        const isFocusEditor = this._contextService.getContextValue(FOCUSING_EDITOR);
+
+        if (isFocusSheet) {
+            if (isFocusFormulaEditor) {
+                unitID = DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY;
+            } else if (isFocusEditor) {
+                unitID = DOCS_NORMAL_EDITOR_UNIT_ID_KEY;
+            } else {
+                unitID = this._univerInstanceService.getFocusedUniverInstance()?.getUnitId() ?? '';
+            }
         } else {
             unitID = this._univerInstanceService.getFocusedUniverInstance()?.getUnitId() ?? '';
         }

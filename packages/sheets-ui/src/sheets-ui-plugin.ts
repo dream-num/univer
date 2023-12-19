@@ -41,7 +41,6 @@ import { MoveRangeController } from './controllers/move-range.controller';
 import { SheetNavigationController } from './controllers/navigation/navigation.controller';
 import { ScrollController } from './controllers/scroll.controller';
 import { SelectionController } from './controllers/selection.controller';
-import { SheetBarController } from './controllers/sheet-bar.controller';
 import { SheetRenderController } from './controllers/sheet-render.controller';
 import { SheetUIController } from './controllers/sheet-ui.controller';
 import { StatusBarController } from './controllers/status-bar.controller';
@@ -131,7 +130,6 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [AutoFillController],
                 [StatusBarController],
                 [EditingController],
-                [SheetBarController],
             ] as Dependency[]
         ).forEach((d) => injector.add(d));
     }

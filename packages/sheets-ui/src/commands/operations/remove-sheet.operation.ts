@@ -15,10 +15,10 @@
  */
 
 import type { ICommand } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
+import { CommandType, ICommandService, LocaleService } from '@univerjs/core';
+import { RemoveSheetCommand } from '@univerjs/sheets';
+import { IConfirmService } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
-
-import { ISheetBarService } from '../../services/sheet-bar/sheet-bar.service';
 
 interface IRemoveSheetOperationParams {
     subUnitId: string;
@@ -27,11 +27,26 @@ interface IRemoveSheetOperationParams {
 export const RemoveSheetOperation: ICommand = {
     id: 'sheet.operation.remove-sheet',
     type: CommandType.OPERATION,
-    handler: async (accessor: IAccessor, params?: IRemoveSheetOperationParams) => {
-        const sheetBarService = accessor.get(ISheetBarService);
-        if (params) {
-            sheetBarService.setRemoveId(params.subUnitId);
+    handler: async (accessor: IAccessor, params: IRemoveSheetOperationParams) => {
+        const { subUnitId } = params;
+        const confirmService = accessor.get(IConfirmService);
+        const commandService = accessor.get(ICommandService);
+        const localeService = accessor.get(LocaleService);
+        const result = await confirmService.confirm({
+            id: 'merge.confirm.add-worksheet-merge',
+            title: {
+                title: 'sheetConfig.confirmDeleteSheet',
+            },
+            cancelText: localeService.t('button.cancel'),
+            confirmText: localeService.t('button.confirm'),
+            onConfirm: () => {},
+        });
+
+        if (result) {
+            await commandService.executeCommand(RemoveSheetCommand.id, { subUnitId });
+            return true;
         }
-        return true;
+
+        return false;
     },
 };

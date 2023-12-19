@@ -438,6 +438,8 @@ export default {
         chartEditNoOpt: 'This operation is not allowed in chart editing mode!',
         sheetNameSpecCharError: 'The name cannot contain:[ ] :  ? * / \' "',
         sheetNameCannotIsEmptyError: 'The sheet name cannot be empty',
+        confirmDeleteSheet:
+            'Confirm to delete this worksheet. It will not be retrieved after deletion. Are you sure you want to delete it?',
     },
     rightClick: {
         copy: 'Copy',

@@ -302,6 +302,7 @@ export default {
         chartEditNoOpt: '图表编辑模式下不允许该操作！',
         sheetNameSpecCharError: "名称不能超过31个字符，首尾不能是' 且名称不能包含:\r\n[ ] : \\ ? * /",
         sheetNameCannotIsEmptyError: '名称不能为空',
+        confirmDeleteSheet: '确认删除此工作表，删除后将不可找回，确定要删除吗？',
     },
     rightClick: {
         copy: '复制',

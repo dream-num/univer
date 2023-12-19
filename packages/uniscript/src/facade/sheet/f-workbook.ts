@@ -42,7 +42,7 @@ export class FWorkbook {
         newSheet.rowCount = rows;
         newSheet.columnCount = column;
         newSheet.name = name;
-        newSheet.id = 'draw-mario';
+        newSheet.id = name.toLowerCase().replace(/ /g, '-');
 
         this._commandService.syncExecuteCommand(InsertSheetCommand.id, {
             unitId: this._workbook.getUnitId(),

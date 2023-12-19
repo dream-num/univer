@@ -88,6 +88,51 @@ export function drawLineByBorderType(ctx: CanvasRenderingContext2D, type: BORDER
     ctx.stroke();
 }
 
+export function drawDiagonalLineByBorderType(ctx: CanvasRenderingContext2D, type: BORDER_TYPE, position: IPosition) {
+    let drawStartX = 0;
+    let drawStartY = 0;
+    let drawEndX = 0;
+    let drawEndY = 0;
+    const { startX, startY, endX, endY } = position;
+    if (type === BORDER_TYPE.TL_BR) {
+        drawStartX = startX;
+        drawStartY = startY;
+        drawEndX = endX;
+        drawEndY = endY;
+    } else if (type === BORDER_TYPE.TL_BC) {
+        drawStartX = startX;
+        drawStartY = startY;
+        drawEndX = (startX + endX) / 2;
+        drawEndY = endY;
+    } else if (type === BORDER_TYPE.TL_MR) {
+        drawStartX = startX;
+        drawStartY = startY;
+        drawEndX = endX;
+        drawEndY = (startY + endY) / 2;
+    } else if (type === BORDER_TYPE.BL_TR) {
+        drawStartX = startX;
+        drawStartY = endY;
+        drawEndX = endX;
+        drawEndY = startY;
+    } else if (type === BORDER_TYPE.ML_TR) {
+        drawStartX = startX;
+        drawStartY = (startY + endY) / 2;
+        drawEndX = endX;
+        drawEndY = startY;
+    } else if (type === BORDER_TYPE.BC_TR) {
+        drawStartX = (startX + endX) / 2;
+        drawStartY = endY;
+        drawEndX = endX;
+        drawEndY = startY;
+    }
+
+    // ctx.clearRect(drawStartX - 1, drawStartY - 1, drawEndX - drawStartX + 2, drawEndY - drawStartY + 2);
+    ctx.beginPath();
+    ctx.moveTo(drawStartX, drawStartY);
+    ctx.lineTo(drawEndX, drawEndY);
+    ctx.stroke();
+}
+
 export function clearLineByBorderType(
     ctx: CanvasRenderingContext2D,
     type: BORDER_TYPE,

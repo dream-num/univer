@@ -17,7 +17,7 @@
 import type { BorderStyleTypes, IRange, IScale, ObjectMatrix } from '@univerjs/core';
 
 import { BORDER_TYPE, COLOR_BLACK_RGB, FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics/const';
-import { drawLineByBorderType, getLineWidth, setLineType } from '../../../basics/draw';
+import { drawDiagonalLineByBorderType, drawLineByBorderType, getLineWidth, setLineType } from '../../../basics/draw';
 import { fixLineWidthByScale } from '../../../basics/tools';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import type { BorderCacheItem } from '../interfaces';
@@ -97,6 +97,11 @@ export class Border extends SheetExtension {
                 endX = mergeInfo.endX;
             }
 
+            startY = fixLineWidthByScale(startY, scale);
+            endY = fixLineWidthByScale(endY, scale);
+            startX = fixLineWidthByScale(startX, scale);
+            endX = fixLineWidthByScale(endX, scale);
+
             if (
                 !this.isRenderDiffRangesByRow(mergeInfo.startRow, diffRanges) &&
                 !this.isRenderDiffRangesByRow(mergeInfo.endRow, diffRanges)
@@ -114,10 +119,6 @@ export class Border extends SheetExtension {
             for (const key in borderCaches) {
                 const { type, style, color } = borderCaches[key] as BorderCacheItem;
 
-                if (this._getOverflowExclusion(overflowCache, type, rowIndex, columnIndex)) {
-                    continue;
-                }
-
                 if (style !== preStyle) {
                     setLineType(ctx, style);
                     ctx.lineWidth = getLineWidth(style) / scale;
@@ -129,11 +130,22 @@ export class Border extends SheetExtension {
                     preColor = color;
                 }
 
+                drawDiagonalLineByBorderType(ctx, type, {
+                    startX,
+                    startY,
+                    endX,
+                    endY,
+                });
+
+                if (this._getOverflowExclusion(overflowCache, type, rowIndex, columnIndex)) {
+                    continue;
+                }
+
                 drawLineByBorderType(ctx, type, {
-                    startX: fixLineWidthByScale(startX, scale),
-                    startY: fixLineWidthByScale(startY, scale),
-                    endX: fixLineWidthByScale(endX, scale),
-                    endY: fixLineWidthByScale(endY, scale),
+                    startX,
+                    startY,
+                    endX,
+                    endY,
                 });
             }
         });

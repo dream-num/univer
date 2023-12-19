@@ -144,7 +144,7 @@ export class SheetCanvasView extends RxDisposable {
 
         const sheetId = worksheet.getSheetId();
 
-        this._addViewport(worksheet);
+        const viewMain = this._addViewport(worksheet);
 
         const spreadsheet = new Spreadsheet(SHEET_VIEW_KEY.MAIN);
         const spreadsheetRowHeader = new SpreadsheetRowHeader(SHEET_VIEW_KEY.ROW);
@@ -173,6 +173,10 @@ export class SheetCanvasView extends RxDisposable {
         scene.enableLayerCache(SHEET_COMPONENT_MAIN_LAYER_INDEX, SHEET_COMPONENT_HEADER_LAYER_INDEX);
 
         this._sheetSkeletonManagerService.setCurrent({ sheetId, unitId });
+
+        viewMain?.onScrollStopObserver.add(() => {
+            spreadsheet.makeForceDirty();
+        });
     }
 
     private _addViewport(worksheet: Worksheet) {
@@ -339,5 +343,7 @@ export class SheetCanvasView extends RxDisposable {
                 viewMainTop
             )
             .attachControl();
+
+        return viewMain;
     }
 }

@@ -22,6 +22,7 @@ import {
     IUniverInstanceService,
     ObjectMatrix,
     RANGE_TYPE,
+    Rectangle,
 } from '@univerjs/core';
 import type {
     IAddWorksheetMergeMutationParams,
@@ -58,7 +59,6 @@ export const AutoFillCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const undoRedoService = accessor.get(IUndoRedoService);
-
         const {
             applyRange,
             selectionRange,
@@ -70,6 +70,39 @@ export const AutoFillCommand: ICommand = {
         if (!applyRange || !applyDatas || !selectionRange) {
             return false;
         }
+
+        const undoSeq: IMutationInfo[] = [];
+        const redoSeq: IMutationInfo[] = [];
+
+        // delete cross merge
+        let removeMergeResult = true;
+        const deleteMergeRanges: IRange[] = [];
+        const mergeData = univerInstanceService
+            .getUniverSheetInstance(unitId)
+            ?.getSheetBySheetId(subUnitId)
+            ?.getMergeData();
+        if (mergeData) {
+            mergeData.forEach((merge) => {
+                if (Rectangle.intersects(merge, applyRange)) {
+                    deleteMergeRanges.push(merge);
+                }
+            });
+        }
+        const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
+            unitId,
+            subUnitId,
+            ranges: deleteMergeRanges,
+        };
+        const undoRemoveMergeMutationParams: IAddWorksheetMergeMutationParams = RemoveMergeUndoMutationFactory(
+            accessor,
+            removeMergeMutationParams
+        );
+        removeMergeResult = commandService.syncExecuteCommand(
+            RemoveWorksheetMergeMutation.id,
+            removeMergeMutationParams
+        );
+        undoSeq.push({ id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams });
+        redoSeq.push({ id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams });
 
         // set range value
         const cellValue = new ObjectMatrix<ICellData>();
@@ -97,6 +130,9 @@ export const AutoFillCommand: ICommand = {
             setRangeValuesMutationParams
         );
 
+        undoSeq.push({ id: SetRangeValuesMutation.id, params: undoSetRangeValuesMutationParams });
+        redoSeq.push({ id: SetRangeValuesMutation.id, params: setRangeValuesMutationParams });
+
         // set selection
         const selectionResult = commandService.syncExecuteCommand(SetSelectionsOperation.id, {
             selections: [
@@ -116,28 +152,15 @@ export const AutoFillCommand: ICommand = {
             subUnitId,
         });
 
-        const undoSeq: IMutationInfo[] = [{ id: SetRangeValuesMutation.id, params: undoSetRangeValuesMutationParams }];
-        const redoSeq: IMutationInfo[] = [{ id: SetRangeValuesMutation.id, params: setRangeValuesMutationParams }];
+        undoSeq.push({ id: SetRangeValuesMutation.id, params: undoSetRangeValuesMutationParams });
+        redoSeq.push({ id: SetRangeValuesMutation.id, params: setRangeValuesMutationParams });
 
-        let removeMergeResult = true;
         let addMergeResult = true;
 
         // add worksheet merge
         if (applyMergeRanges?.length) {
             const ranges = getAddMergeMutationRangeByType(applyMergeRanges);
-            const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
-                unitId,
-                subUnitId,
-                ranges,
-            };
-            const undoRemoveMergeMutationParams: IAddWorksheetMergeMutationParams = RemoveMergeUndoMutationFactory(
-                accessor,
-                removeMergeMutationParams
-            );
-            removeMergeResult = commandService.syncExecuteCommand(
-                RemoveWorksheetMergeMutation.id,
-                removeMergeMutationParams
-            );
+
             const addMergeMutationParams: IAddWorksheetMergeMutationParams = {
                 unitId,
                 subUnitId,
@@ -149,9 +172,7 @@ export const AutoFillCommand: ICommand = {
             );
             addMergeResult = commandService.syncExecuteCommand(AddWorksheetMergeMutation.id, addMergeMutationParams);
 
-            undoSeq.push({ id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams });
             undoSeq.push({ id: RemoveWorksheetMergeMutation.id, params: undoRemoveMutationParams });
-            redoSeq.push({ id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams });
             redoSeq.push({ id: AddWorksheetMergeMutation.id, params: addMergeMutationParams });
         }
 

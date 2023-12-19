@@ -1542,5 +1542,5 @@ function toRGB(color) {
 
 marioColors.forEach(color => {
     const range = newSheet.getRange(color.row, color.col);
-    range.setBackgroundColor(toRGB(color.rgb));
+    range.setBackgroundColor(color.rgb);
 });

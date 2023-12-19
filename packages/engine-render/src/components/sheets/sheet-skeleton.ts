@@ -1382,6 +1382,10 @@ export class SpreadsheetSkeleton extends Skeleton {
         const columnWidthAccumulation = this.columnWidthAccumulation;
         const { startRow, endRow, startColumn, endColumn } = rowColumnSegment;
 
+        if (endColumn === -1) {
+            return;
+        }
+
         for (let r = startRow; r <= endRow; r++) {
             for (let c = startColumn; c <= endColumn; c++) {
                 this._setCellCache(r, c, false);

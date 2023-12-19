@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody } from '@univerjs/core';
+import type { IDocumentBody, IParagraph } from '@univerjs/core';
 import { Disposable, IUniverInstanceService, toDisposable } from '@univerjs/core';
 import { HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
@@ -28,6 +28,23 @@ import { UDMToHtmlService } from './udm-to-html/convertor';
 
 HtmlToUDMService.use(PastePluginWord);
 HtmlToUDMService.use(PastePluginLark);
+
+function generateBody(text: string): IDocumentBody {
+    // Convert all \n to \r, because we use \r to indicate paragraph break.
+    const dataStream = text.replace(/\n/g, '\r');
+    const paragraphs: IParagraph[] = [];
+
+    for (let i = 0; i < dataStream.length; i++) {
+        if (dataStream[i] === '\r') {
+            paragraphs.push({ startIndex: i });
+        }
+    }
+
+    return {
+        dataStream,
+        paragraphs,
+    };
+}
 
 export interface IClipboardPropertyItem {}
 
@@ -80,10 +97,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             }
 
             if (!html) {
-                // TODO: @JOCS, Parsing paragraphs and sections
-                return {
-                    dataStream: text,
-                };
+                return generateBody(text);
             }
 
             const copyId = extractId(html);

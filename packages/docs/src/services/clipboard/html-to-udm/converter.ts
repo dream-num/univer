@@ -39,24 +39,24 @@ function matchFilter(node: HTMLElement, filter: IStyleRule['filter']) {
  * Support plug-in, add custom rules,
  */
 export class HtmlToUDMService {
-    private static pluginList: IPastePlugin[] = [];
+    private static _pluginList: IPastePlugin[] = [];
 
     static use(plugin: IPastePlugin) {
-        if (this.pluginList.includes(plugin)) {
+        if (this._pluginList.includes(plugin)) {
             throw new Error(`Univer paste plugin ${plugin.name} already added`);
         }
 
-        this.pluginList.push(plugin);
+        this._pluginList.push(plugin);
     }
 
-    private styleCache: Map<ChildNode, ITextStyle> = new Map();
+    private _styleCache: Map<ChildNode, ITextStyle> = new Map();
 
-    private styleRules: IStyleRule[] = [];
+    private _styleRules: IStyleRule[] = [];
 
-    private afterProcessRules: IAfterProcessRule[] = [];
+    private _afterProcessRules: IAfterProcessRule[] = [];
 
     convert(html: string): IDocumentBody {
-        const pastePlugin = HtmlToUDMService.pluginList.find((plugin) => plugin.checkPasteType(html));
+        const pastePlugin = HtmlToUDMService._pluginList.find((plugin) => plugin.checkPasteType(html));
 
         const dom = parseToDom(html);
 
@@ -66,28 +66,28 @@ export class HtmlToUDMService {
         };
 
         if (pastePlugin) {
-            this.styleRules = [...pastePlugin.stylesRules];
-            this.afterProcessRules = [...pastePlugin.afterProcessRules];
+            this._styleRules = [...pastePlugin.stylesRules];
+            this._afterProcessRules = [...pastePlugin.afterProcessRules];
         }
 
-        this.styleCache.clear();
-        this.process(null, dom?.childNodes!, newDocBody);
-        this.styleCache.clear();
-        this.styleRules = [];
-        this.afterProcessRules = [];
+        this._styleCache.clear();
+        this._process(null, dom?.childNodes!, newDocBody);
+        this._styleCache.clear();
+        this._styleRules = [];
+        this._afterProcessRules = [];
 
         return newDocBody;
     }
 
-    private process(parent: Nullable<ChildNode>, nodes: NodeListOf<ChildNode>, doc: IDocumentBody) {
+    private _process(parent: Nullable<ChildNode>, nodes: NodeListOf<ChildNode>, doc: IDocumentBody) {
         for (const node of nodes) {
             if (node.nodeType === Node.TEXT_NODE) {
                 // TODO: @JOCS, More characters need to be replaced, like `\b`
                 const text = node.nodeValue?.replace(/[\r\n]/g, '');
                 let style;
 
-                if (parent && this.styleCache.has(parent)) {
-                    style = this.styleCache.get(parent);
+                if (parent && this._styleCache.has(parent)) {
+                    style = this._styleCache.get(parent);
                 }
 
                 doc.dataStream += text;
@@ -100,19 +100,19 @@ export class HtmlToUDMService {
                     });
                 }
             } else if (node.nodeType === Node.ELEMENT_NODE) {
-                const parentStyles = parent ? this.styleCache.get(parent) : {};
-                const styleRule = this.styleRules.find(({ filter }) => matchFilter(node as HTMLElement, filter));
+                const parentStyles = parent ? this._styleCache.get(parent) : {};
+                const styleRule = this._styleRules.find(({ filter }) => matchFilter(node as HTMLElement, filter));
                 const nodeStyles = styleRule
                     ? styleRule.getStyle(node as HTMLElement)
                     : extractNodeStyle(node as HTMLElement);
 
-                this.styleCache.set(node, { ...parentStyles, ...nodeStyles });
+                this._styleCache.set(node, { ...parentStyles, ...nodeStyles });
 
                 const { childNodes } = node;
 
-                this.process(node, childNodes, doc);
+                this._process(node, childNodes, doc);
 
-                const afterProcessRule = this.afterProcessRules.find(({ filter }) =>
+                const afterProcessRule = this._afterProcessRules.find(({ filter }) =>
                     matchFilter(node as HTMLElement, filter)
                 );
 

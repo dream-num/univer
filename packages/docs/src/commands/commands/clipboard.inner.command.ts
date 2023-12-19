@@ -46,7 +46,9 @@ export interface IInnerPasteCommandParams {
 // Actually, the command is to handle paste event.
 export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
     id: 'doc.command.inner-paste',
+
     type: CommandType.COMMAND,
+
     handler: async (accessor, params: IInnerPasteCommandParams) => {
         const { segmentId, body, textRanges } = params;
         const undoRedoService = accessor.get(IUndoRedoService);
@@ -81,18 +83,18 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
             const len = startOffset - memoryCursor.cursor;
 
             if (collapsed) {
-                doMutation.params!.mutations.push({
+                doMutation.params.mutations.push({
                     t: 'r',
                     len,
                     segmentId,
                 });
             } else {
-                doMutation.params!.mutations.push(
+                doMutation.params.mutations.push(
                     ...getRetainAndDeleteFromReplace(selection, segmentId, memoryCursor.cursor)
                 );
             }
 
-            doMutation.params!.mutations.push({
+            doMutation.params.mutations.push({
                 t: 'i',
                 body,
                 len: body.dataStream.length,

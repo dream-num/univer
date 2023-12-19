@@ -74,4 +74,30 @@ export const BORDER_LINE_CHILDREN = [
         icon: 'InnerBorder',
         value: 'vertical',
     },
+
+    {
+        label: 'borderLine.borderTlbr',
+        icon: 'BackSlashSingle',
+        value: 'tlbr',
+    },
+    {
+        label: 'borderLine.borderTlbcTlmr',
+        icon: 'LeftDoubleDiagonalSingle',
+        value: 'tlbc_tlmr',
+    },
+    {
+        label: 'borderLine.borderTlbrTlbcTlmr',
+        icon: 'LeftTridiagonalSingle',
+        value: 'tlbr_tlbc_tlmr',
+    },
+    {
+        label: 'borderLine.borderBlTr',
+        icon: 'SlashSingle',
+        value: 'bltr',
+    },
+    {
+        label: 'borderLine.borderMltrBctr',
+        icon: 'RightDoubleDiagonalSingle',
+        value: 'mltr_bctr',
+    },
 ];

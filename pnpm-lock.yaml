@@ -1146,8 +1146,8 @@ importers:
   packages/ui:
     dependencies:
       '@univerjs/icons':
-        specifier: ^0.1.18
-        version: 0.1.18(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^0.1.23
+        version: 0.1.23(react-dom@18.2.0)(react@18.2.0)
       clsx:
         specifier: ^2.0.0
         version: 2.0.0
@@ -5730,6 +5730,16 @@ packages:
       react-dom: 18.2.0(react@18.2.0)
     dev: false
 
+  /@univerjs/icons@0.1.23(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-2alR9KjdYe/VKZlOUyWBzATUpZZmEhI8F5gTiIkftMYv2yE23P0Vid255dGbmOvBfYg9RUVDusDxXvhemiyvrQ==}
+    peerDependencies:
+      react: '*'
+      react-dom: '*'
+    dependencies:
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+    dev: false
+
   /@vitejs/plugin-react@3.1.0(vite@4.5.0):
     resolution: {integrity: sha512-AfgcRL8ZBhAlc3BFdigClmTUMISmmzHn7sB2h9U1odvc5U/MjWXsAaz18b/WoppUTDBzxOJwo2VdClfUcItu9g==}
     engines: {node: ^14.18.0 || >=16.0.0}
@@ -5792,7 +5802,7 @@ packages:
       magicast: 0.3.2
       picocolors: 1.0.0
       test-exclude: 6.0.0
-      vitest: 1.0.4(@types/node@20.10.4)
+      vitest: 1.0.4(@types/node@20.10.4)(happy-dom@12.10.3)(less@4.2.0)
     transitivePeerDependencies:
       - supports-color
     dev: true

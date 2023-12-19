@@ -194,6 +194,7 @@ export class Spreadsheet extends SheetComponent {
     }
 
     makeForceDirty(state = true) {
+        this.makeDirty(state);
         this._forceDirty = state;
     }
 

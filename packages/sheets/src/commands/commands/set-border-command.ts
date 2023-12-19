@@ -147,7 +147,20 @@ export const SetBorderCommand: ICommand = {
         const right = type === BorderType.RIGHT || type === BorderType.ALL || type === BorderType.OUTSIDE;
         const vertical = type === BorderType.VERTICAL || type === BorderType.ALL || type === BorderType.INSIDE;
         const horizontal = type === BorderType.HORIZONTAL || type === BorderType.ALL || type === BorderType.INSIDE;
-        const range = selections[0]; // TODO support multiple ranges
+
+        const tl_br = type.indexOf('tlbr') > -1;
+
+        const tl_bc = type.indexOf('tlbc') > -1;
+
+        const tl_mr = type.indexOf('tlmr') > -1;
+
+        const bl_tr = type.indexOf('bltr') > -1;
+
+        const ml_tr = type.indexOf('mltr') > -1;
+
+        const bc_tr = type.indexOf('bctr') > -1;
+
+        const range = selections[0]; // TODO @Dushusir support multiple ranges
 
         // Cells in the surrounding range may need to clear the border
         const topRangeOut = {
@@ -278,6 +291,43 @@ export const SetBorderCommand: ICommand = {
             //setBorderStyle(rightRangeOut, { l: null });
             setBorderStyle(rightRange, { r: Tools.deepClone(border) }, true);
         }
+
+        if (tl_br) {
+            setBorderStyle(range, { tl_br: Tools.deepClone(border) }, true);
+        } else {
+            setBorderStyle(range, { tl_br: null }, true);
+        }
+
+        if (tl_bc) {
+            setBorderStyle(range, { tl_bc: Tools.deepClone(border) }, true);
+        } else {
+            setBorderStyle(range, { tl_bc: null }, true);
+        }
+
+        if (tl_mr) {
+            setBorderStyle(range, { tl_mr: Tools.deepClone(border) }, true);
+        } else {
+            setBorderStyle(range, { tl_mr: null }, true);
+        }
+
+        if (bl_tr) {
+            setBorderStyle(range, { bl_tr: Tools.deepClone(border) }, true);
+        } else {
+            setBorderStyle(range, { bl_tr: null }, true);
+        }
+
+        if (ml_tr) {
+            setBorderStyle(range, { ml_tr: Tools.deepClone(border) }, true);
+        } else {
+            setBorderStyle(range, { ml_tr: null }, true);
+        }
+
+        if (bc_tr) {
+            setBorderStyle(range, { bc_tr: Tools.deepClone(border) }, true);
+        } else {
+            setBorderStyle(range, { bc_tr: null }, true);
+        }
+
         // inner vertical border
         if (vertical) {
             forEach(range, (row, column) => {

@@ -42,4 +42,10 @@ export enum BorderType {
     INSIDE = 'inside',
     HORIZONTAL = 'horizontal',
     VERTICAL = 'vertical',
+
+    TLBR = 'tlbr',
+    TLBC_TLMR = 'tlbc_tlmr',
+    TLBR_TLBC_TLMR = 'tlbr_tlbc_tlmr',
+    BLTR = 'bl_tr',
+    MLTR_BCTR = 'mltr_bctr',
 }

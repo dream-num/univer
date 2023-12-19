@@ -865,7 +865,7 @@ export class Viewport {
                 limitY: this._scrollBar?.limitY,
                 isTrigger,
             });
-        }, 0);
+        }, 200);
     }
 
     private _scroll(scrollType: SCROLL_TYPE, pos: IScrollBarPosition, isTrigger = true, isFromBar = false) {

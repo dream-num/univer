@@ -65,12 +65,31 @@ export interface IBorderStyleData {
 
 /**
  * Style properties of top, bottom, left and right border
+ *
+ * TLBR = 'tlbr', //START_TOP_LEFT_END_BOTTOM_RIGHT
+ * TLBC = 'tlbc', // START_TOP_LEFT_END_BOTTOM_CENTER
+
+ * TLMR = 'tlmr', // START_TOP_LEFT_END_MIDDLE_RIGHT
+
+ * BLTR = 'bltr', // START_BOTTOM_LEFT_END_TOP_RIGHT
+
+ * MLTR = 'mltr', // START_MIDDLE_LEFT_END_TOP_RIGHT
+
+ * BCTR = 'bctr', // START_BOTTOM_CENTER_END_TOP_RIGHT
  */
 export interface IBorderData {
     t?: Nullable<IBorderStyleData>;
     r?: Nullable<IBorderStyleData>;
     b?: Nullable<IBorderStyleData>;
     l?: Nullable<IBorderStyleData>;
+
+    tl_br?: Nullable<IBorderStyleData>;
+    tl_bc?: Nullable<IBorderStyleData>;
+    tl_mr?: Nullable<IBorderStyleData>;
+
+    bl_tr?: Nullable<IBorderStyleData>;
+    ml_tr?: Nullable<IBorderStyleData>;
+    bc_tr?: Nullable<IBorderStyleData>;
 }
 
 export interface ITextRotation {

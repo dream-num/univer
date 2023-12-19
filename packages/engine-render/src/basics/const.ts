@@ -133,6 +133,13 @@ export enum BORDER_TYPE {
     BOTTOM = 'b',
     LEFT = 'l',
     RIGHT = 'r',
+
+    TL_BR = 'tl_br',
+    TL_BC = 'tl_bc',
+    TL_MR = 'tl_mr',
+    BL_TR = 'bl_tr',
+    ML_TR = 'ml_tr',
+    BC_TR = 'bc_tr',
 }
 
 export enum ORIENTATION_TYPE {

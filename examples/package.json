@@ -15,7 +15,7 @@
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.1.18",
+        "@univerjs/icons": "^0.1.24",
         "@univerjs/local-save": "workspace:*",
         "@univerjs/rpc": "workspace:*",
         "@univerjs/sheets": "workspace:*",

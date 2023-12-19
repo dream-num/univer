@@ -19,7 +19,7 @@ export * from './convert-cursor';
 export * from './line';
 export * from './liquid';
 export * from './page';
-export * from './range';
 export * from './section';
 export * from './span';
+export * from './text-range';
 export * from './tools';

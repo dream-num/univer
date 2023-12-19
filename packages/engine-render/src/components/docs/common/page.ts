@@ -220,6 +220,7 @@ function _createSkeletonHeader(
         headerConfig,
         skeletonResourceReference
     ).pages[0];
+
     updateBlockIndex([page]);
     const column = page.sections[0].columns[0];
     const height = column.height || 0;

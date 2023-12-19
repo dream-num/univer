@@ -433,8 +433,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         // other hooks will be executed only when the paste type is the same as the hook name, including the default one
         const filteredHooks: ISheetClipboardHook[] = hooks.filter(
             (h) =>
-                (h.specialPasteInfo && pasteType === h.hookName) ||
-                (!h.specialPasteInfo && pasteType === PREDEFINED_HOOK_NAME.DEFAULT_PASTE)
+                (!h.specialPasteInfo && h.hookName !== PREDEFINED_HOOK_NAME.DEFAULT_PASTE) || pasteType === h.hookName
         );
         filteredHooks.forEach((h) => {
             if (rowProperties) {

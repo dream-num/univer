@@ -1,6 +1,6 @@
 {
     "name": "univer",
-    "version": "0.1.0-alpha.3",
+    "version": "0.1.0-beta.0",
     "private": true,
     "scripts": {
         "prepare": "husky install",

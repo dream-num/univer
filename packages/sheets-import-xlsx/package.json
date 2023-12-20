@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-import-xlsx",
-    "version": "0.1.0-alpha.3",
+    "version": "0.1.0-beta.0",
     "description": "UniverSheet normal sheets-plugin-import-xlsx",
     "keywords": [],
     "author": "DreamNum <developer@univer.ai>",

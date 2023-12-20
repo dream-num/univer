@@ -27,7 +27,7 @@ import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultFontExtension';
 
-const EXTENSION_Z_INDEX = 40;
+const EXTENSION_Z_INDEX = 30;
 
 export class Font extends SheetExtension {
     override uKey = UNIQUE_KEY;
@@ -118,12 +118,12 @@ export class Font extends SheetExtension {
                     /**
                      * Overflow can cause text truncation, so columns are not rendered incrementally.
                      */
-                    if (
-                        !this.isRenderDiffRangesByColumn(mergeInfo.startColumn, diffRanges) &&
-                        !this.isRenderDiffRangesByColumn(mergeInfo.endColumn, diffRanges)
-                    ) {
-                        return true;
-                    }
+                    // if (
+                    //     !this.isRenderDiffRangesByColumn(mergeInfo.startColumn, diffRanges) &&
+                    //     !this.isRenderDiffRangesByColumn(mergeInfo.endColumn, diffRanges)
+                    // ) {
+                    //     return true;
+                    // }
 
                     const cellWidth = endX - startX;
                     const cellHeight = endY - startY;
@@ -143,12 +143,12 @@ export class Font extends SheetExtension {
                                 cellHeight - 2 / scale
                             );
                             ctx.clip();
-                            // ctx.clearRect(
-                            //     startX + 1 / scale,
-                            //     startY + 1 / scale,
-                            //     cellWidth - 2 / scale,
-                            //     cellHeight - 2 / scale
-                            // );
+                            ctx.clearRect(
+                                startX + 1 / scale,
+                                startY + 1 / scale,
+                                cellWidth - 2 / scale,
+                                cellHeight - 2 / scale
+                            );
                         } else {
                             if (horizontalAlign === HorizontalAlign.CENTER) {
                                 this._clipRectangle(
@@ -188,12 +188,12 @@ export class Font extends SheetExtension {
                     } else {
                         ctx.rect(startX + 1 / scale, startY + 1 / scale, cellWidth - 2 / scale, cellHeight - 2 / scale);
                         ctx.clip();
-                        // ctx.clearRect(
-                        //     startX + 1 / scale,
-                        //     startY + 1 / scale,
-                        //     cellWidth - 2 / scale,
-                        //     cellHeight - 2 / scale
-                        // );
+                        ctx.clearRect(
+                            startX + 1 / scale,
+                            startY + 1 / scale,
+                            cellWidth - 2 / scale,
+                            cellHeight - 2 / scale
+                        );
                     }
 
                     ctx.translate(startX, startY);

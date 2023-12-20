@@ -259,7 +259,12 @@ export class Spreadsheet extends SheetComponent {
 
                 const dh = bottom - top + columnHeaderHeight;
 
-                if (diffX !== 0 || diffBounds[0] == null || (diffX === 0 && diffY === 0) || this._forceDirty) {
+                if (
+                    (diffX !== 0 && diffY !== 0) ||
+                    diffBounds[0] == null ||
+                    (diffX === 0 && diffY === 0) ||
+                    this._forceDirty
+                ) {
                     if (this.isDirty() || this._forceDirty) {
                         this._cacheCanvas.clear();
                         ctx.setTransform(mainCtx.getTransform());
@@ -280,10 +285,23 @@ export class Spreadsheet extends SheetComponent {
                         );
                         ctx.restore();
 
+                        ctx.save();
                         this._refreshIncrementalState = true;
                         ctx.setTransform(mainCtx.getTransform());
+                        ctx.beginPath();
+
+                        const { left: diffLeft, right: diffRight, bottom: diffBottom, top: diffTop } = diffBounds[0];
+                        ctx.rect(
+                            diffLeft - rowHeaderWidth,
+                            diffTop - columnHeaderHeight,
+                            diffRight - diffLeft + rowHeaderWidth,
+                            diffBottom - diffTop + columnHeaderHeight
+                        );
+                        // ctx.fillStyle = 'rgb(0,0,0)';
+                        ctx.clip();
                         this._draw(ctx, bounds);
                         this._refreshIncrementalState = false;
+                        ctx.restore();
                     }
                     this._applyCache(mainCtx, left, top, dw, dh, left, top, dw, dh);
                 }

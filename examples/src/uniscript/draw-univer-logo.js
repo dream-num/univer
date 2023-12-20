@@ -1548,4 +1548,4 @@ const key = setInterval(() => {
     }
 
     index += 1;
-}, 4);
+}, 23);

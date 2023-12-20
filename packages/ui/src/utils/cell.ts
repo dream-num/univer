@@ -283,9 +283,11 @@ export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
 
         // line through
         else if (key === 'text-decoration' || key === 'univer-strike') {
-            styleList.st = {
-                s: 1,
-            };
+            if (value !== 'none') {
+                styleList.st = {
+                    s: 1,
+                };
+            }
         }
         // underline
         if (key === 'univer-underline') {

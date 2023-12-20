@@ -298,7 +298,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const { startColumn, endColumn, startRow, endRow } = cellMatrix.getDataRange();
         const rowCount = endRow - startRow + 1;
         const colCount = endColumn - startColumn + 1;
-        if (!cellMatrix) {
+        if (!cellMatrix || endColumn < startColumn || endRow < startRow) {
             return false;
         }
 

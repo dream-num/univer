@@ -102,8 +102,7 @@ export class HtmlToUSMService {
         const rowProperties: IClipboardPropertyItem[] = [];
         let colProperties: IClipboardPropertyItem[] = [];
         // pick tables
-        const tableStrings = html.match(/<table.*?>([\s\S]*?)<\/table>/gi);
-
+        const tableStrings = html.match(/<table\b[^>]*>([\s\S]*?)<\/table>/gi);
         const tables: IParsedTablesInfo[] = [];
         this.process(null, dom?.childNodes!, newDocBody, tables);
         const { paragraphs, dataStream, textRuns } = newDocBody;
@@ -145,7 +144,7 @@ export class HtmlToUSMService {
 
                 if (tableStrings) {
                     tables.forEach((t) => {
-                        const curRow = valueMatrix.getLength();
+                        const curRow = valueMatrix.getDataRange().endRow + 1;
                         if (t.index === i) {
                             const tableString = tableStrings.shift();
                             const {
@@ -186,7 +185,7 @@ export class HtmlToUSMService {
 
             if (tableStrings) {
                 tableStrings.forEach((t) => {
-                    const curRow = valueMatrix.getLength();
+                    const curRow = valueMatrix.getDataRange().endRow + 1;
                     const { cellMatrix } = this._parseTable(t!);
 
                     cellMatrix &&

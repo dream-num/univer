@@ -204,13 +204,19 @@ export class UpdateFormulaController extends Disposable {
         const { subUnitId: sheetId, unitId } = params;
 
         const formulaData = this._formulaDataModel.getFormulaData();
-        delete formulaData[unitId][sheetId];
+        if (formulaData && formulaData[unitId] && formulaData[unitId][sheetId]) {
+            delete formulaData[unitId][sheetId];
+        }
 
         const arrayFormulaRange = this._formulaDataModel.getArrayFormulaRange();
-        delete arrayFormulaRange[unitId][sheetId];
+        if (arrayFormulaRange && arrayFormulaRange[unitId] && arrayFormulaRange[unitId][sheetId]) {
+            delete arrayFormulaRange[unitId][sheetId];
+        }
 
         const arrayFormulaCellData = this._formulaDataModel.getArrayFormulaCellData();
-        delete arrayFormulaCellData[unitId][sheetId];
+        if (arrayFormulaCellData && arrayFormulaCellData[unitId] && arrayFormulaCellData[unitId][sheetId]) {
+            delete arrayFormulaCellData[unitId][sheetId];
+        }
 
         this._commandService.executeCommand(SetFormulaDataMutation.id, {
             formulaData,

@@ -25,7 +25,12 @@ import {
     RxDisposable,
     ThemeService,
 } from '@univerjs/core';
-import { DeviceInputEventType, getCanvasOffsetByEngine, IRenderManagerService } from '@univerjs/engine-render';
+import {
+    DeviceInputEventType,
+    getCanvasOffsetByEngine,
+    IRenderManagerService,
+    ITextSelectionRenderManager,
+} from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import {
     COMMAND_LISTENER_SKELETON_CHANGE,
@@ -75,7 +80,8 @@ export class EditorBridgeController extends RxDisposable {
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
-        @Inject(ThemeService) private readonly _themeService: ThemeService
+        @Inject(ThemeService) private readonly _themeService: ThemeService,
+        @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager
     ) {
         super();
 
@@ -163,6 +169,7 @@ export class EditorBridgeController extends RxDisposable {
         };
 
         if (isSameEditorLocation(this._lastEditorLocation, location)) {
+            this._textSelectionRenderManager.focus();
             return;
         }
 

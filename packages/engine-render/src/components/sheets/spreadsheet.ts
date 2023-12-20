@@ -282,6 +282,7 @@ export class Spreadsheet extends SheetComponent {
                         );
                         ctx.restore();
 
+                        ctx.save();
                         this._refreshIncrementalState = true;
                         ctx.setTransform(mainCtx.getTransform());
 
@@ -316,6 +317,7 @@ export class Spreadsheet extends SheetComponent {
                         }
 
                         this._refreshIncrementalState = false;
+                        ctx.restore();
                     }
                     this._applyCache(mainCtx, left, top, dw, dh, left, top, dw, dh);
                 }

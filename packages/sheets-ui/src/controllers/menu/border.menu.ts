@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { ICommandService } from '@univerjs/core';
+import { ICommandService, UniverInstanceType } from '@univerjs/core';
 import type { IBorderInfo } from '@univerjs/sheets';
 import { BorderStyleManagerService, SetBorderBasicCommand } from '@univerjs/sheets';
 import type { IMenuSelectorItem } from '@univerjs/ui';
-import { MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
+import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 
@@ -68,8 +68,6 @@ export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSel
             },
         ],
         value$: borderStyleManagerService.borderInfo$,
-        hidden$: new Observable((subscriber) => {
-            subscriber.next(true);
-        }),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
     };
 }

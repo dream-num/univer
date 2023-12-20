@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/engine-formula",
-    "version": "0.1.0-alpha.3",
+    "version": "0.1.0-beta.0",
     "description": "UniverSheet normal base-formula-engine",
     "keywords": [],
     "author": "DreamNum <developer@univer.ai>",

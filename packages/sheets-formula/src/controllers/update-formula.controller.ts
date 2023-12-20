@@ -627,7 +627,11 @@ export class UpdateFormulaController extends Disposable {
         unitSheetNameMap: IUnitSheetNameMap,
         formulaReferenceMoveParam: IFormulaReferenceMoveParam
     ) {
+        if (formulaData == null) return {};
+
         const formulaDataKeys = Object.keys(formulaData);
+
+        if (formulaDataKeys.length === 0) return {};
 
         const newFormulaData: IFormulaData = {};
 

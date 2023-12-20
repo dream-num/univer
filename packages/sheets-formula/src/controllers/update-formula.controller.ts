@@ -91,7 +91,7 @@ import {
 } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { offsetArrayFormula, offsetFormula } from './utils';
+import { offsetArrayFormula, offsetFormula, removeFormulaData } from './utils';
 
 interface IUnitRangeWithOffset extends IUnitRange {
     refOffsetX: number;
@@ -204,19 +204,13 @@ export class UpdateFormulaController extends Disposable {
         const { subUnitId: sheetId, unitId } = params;
 
         const formulaData = this._formulaDataModel.getFormulaData();
-        if (formulaData && formulaData[unitId] && formulaData[unitId][sheetId]) {
-            delete formulaData[unitId][sheetId];
-        }
+        removeFormulaData(formulaData, unitId, sheetId);
 
         const arrayFormulaRange = this._formulaDataModel.getArrayFormulaRange();
-        if (arrayFormulaRange && arrayFormulaRange[unitId] && arrayFormulaRange[unitId][sheetId]) {
-            delete arrayFormulaRange[unitId][sheetId];
-        }
+        removeFormulaData(arrayFormulaRange, unitId, sheetId);
 
         const arrayFormulaCellData = this._formulaDataModel.getArrayFormulaCellData();
-        if (arrayFormulaCellData && arrayFormulaCellData[unitId] && arrayFormulaCellData[unitId][sheetId]) {
-            delete arrayFormulaCellData[unitId][sheetId];
-        }
+        removeFormulaData(arrayFormulaCellData, unitId, sheetId);
 
         this._commandService.executeCommand(SetFormulaDataMutation.id, {
             formulaData,

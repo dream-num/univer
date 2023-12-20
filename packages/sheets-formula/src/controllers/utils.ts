@@ -319,3 +319,9 @@ function checkFormulaDataNull<T>(formulaData: IFormulaDataGenerics<T>, unitId: s
 
     return false;
 }
+
+export function removeFormulaData<T>(formulaData: IFormulaDataGenerics<T>, unitId: string, sheetId: string) {
+    if (formulaData && formulaData[unitId] && formulaData[unitId][sheetId]) {
+        delete formulaData[unitId][sheetId];
+    }
+}

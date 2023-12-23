@@ -1172,5 +1172,7 @@ export class FreezeController extends Disposable {
         this._createFreeze(FREEZE_DIRECTION_TYPE.COLUMN);
 
         this._updateViewport(startRow, startColumn, ySplit, xSplit);
+
+        this._getSheetObject()?.spreadsheet.makeForceDirty();
     }
 }

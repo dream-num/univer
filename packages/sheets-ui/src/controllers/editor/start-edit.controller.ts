@@ -396,6 +396,8 @@ export class StartEditController extends Disposable {
 
         this._addBackground(scene, editorWidth / scaleX, editorHeight / scaleY, fill);
 
+        this._addBackground(scene, editorWidth, editorHeight, fill);
+
         scene.transformByState({
             width: editorWidth,
             height: editorHeight,

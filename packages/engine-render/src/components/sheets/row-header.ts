@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { fixLineWidthByScale, getScale } from '../../basics/tools';
+import { fixLineWidthByScale } from '../../basics/tools';
 import type { IViewportBound, Vector2 } from '../../basics/vector2';
 import { SheetRowHeaderExtensionRegistry } from '../extension';
 import type { RowHeaderLayout } from './extensions/row-header-layout';
@@ -52,7 +52,9 @@ export class SpreadsheetRowHeader extends SpreadsheetHeader {
             return;
         }
 
-        const scale = getScale(parentScale);
+        const { a: scaleX = 1, d: scaleY = 1 } = ctx.getTransform();
+
+        const scale = Math.max(scaleX, scaleY);
 
         const { columnHeaderHeight } = spreadsheetSkeleton;
 
@@ -62,7 +64,7 @@ export class SpreadsheetRowHeader extends SpreadsheetHeader {
 
         const extensions = this.getExtensionsByOrder();
         for (const extension of extensions) {
-            extension.draw(ctx, parentScale, spreadsheetSkeleton);
+            extension.draw(ctx, { scaleX, scaleY }, spreadsheetSkeleton);
         }
     }
 

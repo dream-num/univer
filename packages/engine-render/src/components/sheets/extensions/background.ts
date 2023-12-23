@@ -55,12 +55,7 @@ export class Background extends SheetExtension {
         }
         ctx.save();
 
-        const { a: scaleX = 1, d: scaleY = 1 } = ctx.getTransform();
-
-        const scale = this._getScale({
-            scaleX,
-            scaleY,
-        });
+        const scale = this._getScale(parentScale);
 
         ctx.globalCompositeOperation = 'destination-over';
 
@@ -83,8 +78,15 @@ export class Background extends SheetExtension {
                     }
 
                     if (
-                        !this.isRenderDiffRangesByRow(mergeInfo.startRow, diffRanges) &&
-                        !this.isRenderDiffRangesByRow(mergeInfo.endRow, diffRanges)
+                        !this.isRenderDiffRangesByCell(
+                            {
+                                startRow: mergeInfo.startRow,
+                                endRow: mergeInfo.endRow,
+                                startColumn: mergeInfo.startColumn,
+                                endColumn: mergeInfo.endColumn,
+                            },
+                            diffRanges
+                        )
                     ) {
                         return true;
                     }

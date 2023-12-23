@@ -382,6 +382,8 @@ export class StartEditController extends Disposable {
 
         physicHeight = Math.round(editorHeight);
 
+        this._addBackground(scene, editorWidth, editorHeight, fill);
+
         scene.transformByState({
             width: editorWidth,
             height: editorHeight,
@@ -389,12 +391,9 @@ export class StartEditController extends Disposable {
 
         documentComponent.resize(editorWidth, editorHeight);
 
-        this._addBackground(scene, editorWidth, editorHeight, fill);
-
         // resize canvas
-        requestIdleCallback(() => {
-            engine.resizeBySize(editorWidth, physicHeight);
-        });
+
+        engine.resizeBySize(editorWidth, physicHeight);
 
         // Update cell editor container position and size.
         this._cellEditorManagerService.setState({

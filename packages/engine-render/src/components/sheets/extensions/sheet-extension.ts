@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
+import { type IRange, Rectangle } from '@univerjs/core';
 
 import { getCellByIndex } from '../../../basics/tools';
 import { ComponentExtension } from '../../extension';
@@ -37,14 +37,21 @@ export class SheetExtension extends ComponentExtension<SpreadsheetSkeleton, SHEE
         return getCellByIndex(rowIndex, columnIndex, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
     }
 
-    isRenderDiffRangesByCell(row: number, column: number, diffRanges?: IRange[]) {
+    isRenderDiffRangesByCell(range: IRange, diffRanges?: IRange[]) {
         if (diffRanges == null || diffRanges.length === 0) {
             return true;
         }
 
         for (const range of diffRanges) {
             const { startRow, startColumn, endRow, endColumn } = range;
-            if (row >= startRow && row <= endRow && column >= startColumn && column <= endColumn) {
+            const isIntersect = Rectangle.intersects(range, {
+                startRow,
+                endRow,
+                startColumn,
+                endColumn,
+            });
+
+            if (isIntersect) {
                 return true;
             }
         }
@@ -52,14 +59,47 @@ export class SheetExtension extends ComponentExtension<SpreadsheetSkeleton, SHEE
         return false;
     }
 
-    isRenderDiffRangesByColumn(column: number, diffRanges?: IRange[]) {
+    // isRenderDiffRangesByColumn(column: number, diffRanges?: IRange[]) {
+    //     if (diffRanges == null || diffRanges.length === 0) {
+    //         return true;
+    //     }
+
+    //     for (const range of diffRanges) {
+    //         const { startColumn, endColumn } = range;
+    //         if (column >= startColumn && column <= endColumn) {
+    //             return true;
+    //         }
+    //     }
+
+    //     return false;
+    // }
+
+    isRenderDiffRangesByColumn(curStartColumn: number, curEndColumn: number, diffRanges?: IRange[]) {
         if (diffRanges == null || diffRanges.length === 0) {
             return true;
         }
 
         for (const range of diffRanges) {
             const { startColumn, endColumn } = range;
-            if (column >= startColumn && column <= endColumn) {
+            // if (row >= startRow && row <= endRow) {
+            //     return true;
+            // }
+            const isIntersect = Rectangle.intersects(
+                {
+                    startRow: 0,
+                    endRow: 0,
+                    startColumn: curStartColumn,
+                    endColumn: curEndColumn,
+                },
+                {
+                    startRow: 0,
+                    endRow: 0,
+                    startColumn,
+                    endColumn,
+                }
+            );
+
+            if (isIntersect) {
                 return true;
             }
         }
@@ -67,14 +107,32 @@ export class SheetExtension extends ComponentExtension<SpreadsheetSkeleton, SHEE
         return false;
     }
 
-    isRenderDiffRangesByRow(row: number, diffRanges?: IRange[]) {
+    isRenderDiffRangesByRow(curStartRow: number, curEndRow: number, diffRanges?: IRange[]) {
         if (diffRanges == null || diffRanges.length === 0) {
             return true;
         }
 
         for (const range of diffRanges) {
             const { startRow, endRow } = range;
-            if (row >= startRow && row <= endRow) {
+            // if (row >= startRow && row <= endRow) {
+            //     return true;
+            // }
+            const isIntersect = Rectangle.intersects(
+                {
+                    startRow: curStartRow,
+                    endRow: curEndRow,
+                    startColumn: 0,
+                    endColumn: 0,
+                },
+                {
+                    startRow,
+                    endRow,
+                    startColumn: 0,
+                    endColumn: 0,
+                }
+            );
+
+            if (isIntersect) {
                 return true;
             }
         }

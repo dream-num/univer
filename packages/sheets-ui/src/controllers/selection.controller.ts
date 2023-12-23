@@ -128,20 +128,35 @@ export class SelectionController extends Disposable {
                         return;
                     }
 
-                    this._selectionRenderService.reset();
+                    this._refreshSelection(param);
 
-                    for (const selectionWithStyle of param) {
-                        if (selectionWithStyle == null) {
-                            continue;
-                        }
-                        const selectionData =
-                            this._selectionRenderService.convertSelectionRangeToData(selectionWithStyle);
-                        selectionData.style = getNormalSelectionStyle(this._themeService);
-                        this._selectionRenderService.addControlToCurrentByRangeData(selectionData);
-                    }
+                    // this._selectionRenderService.reset();
+
+                    // for (const selectionWithStyle of param) {
+                    //     if (selectionWithStyle == null) {
+                    //         continue;
+                    //     }
+                    //     const selectionData =
+                    //         this._selectionRenderService.convertSelectionRangeToData(selectionWithStyle);
+                    //     selectionData.style = getNormalSelectionStyle(this._themeService);
+                    //     this._selectionRenderService.addControlToCurrentByRangeData(selectionData);
+                    // }
                 })
             )
         );
+    }
+
+    private _refreshSelection(param: readonly ISelectionWithStyle[]) {
+        this._selectionRenderService.reset();
+
+        for (const selectionWithStyle of param) {
+            if (selectionWithStyle == null) {
+                continue;
+            }
+            const selectionData = this._selectionRenderService.convertSelectionRangeToData(selectionWithStyle);
+            selectionData.style = getNormalSelectionStyle(this._themeService);
+            this._selectionRenderService.addControlToCurrentByRangeData(selectionData);
+        }
     }
 
     private _initRowHeader(sheetObject: ISheetObjectParam) {
@@ -318,11 +333,19 @@ export class SelectionController extends Disposable {
              */
             const current = this._selectionManagerService.getCurrent();
             const pluginName = current?.pluginName || NORMAL_SELECTION_PLUGIN_NAME;
-            this._selectionManagerService.setCurrentSelection({
-                pluginName,
-                unitId,
-                sheetId,
-            });
+
+            if (current?.unitId === unitId && current.sheetId === sheetId) {
+                const currentSelections = this._selectionManagerService.getSelections();
+                if (currentSelections != null) {
+                    this._refreshSelection(currentSelections);
+                }
+            } else {
+                this._selectionManagerService.setCurrentSelection({
+                    pluginName,
+                    unitId,
+                    sheetId,
+                });
+            }
 
             if (pluginName === NORMAL_SELECTION_PLUGIN_NAME) {
                 // If there is no initial selection, add one by default in the top left corner.

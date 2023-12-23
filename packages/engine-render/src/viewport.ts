@@ -528,16 +528,7 @@ export class Viewport {
 
         const { a: scaleX = 1, d: scaleY = 1 } = mainCtx.getTransform();
 
-        sceneTrans.multiply(
-            Transform.create([
-                1,
-                0,
-                0,
-                1,
-                fixLineWidthByScale(-this.actualScrollX || 0, scaleX),
-                fixLineWidthByScale(-this.actualScrollY || 0, scaleY),
-            ])
-        );
+        sceneTrans.multiply(Transform.create([1, 0, 0, 1, -this.actualScrollX || 0, -this.actualScrollY || 0]));
 
         const ctx = mainCtx;
 

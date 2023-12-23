@@ -70,12 +70,7 @@ export class Font extends SheetExtension {
         }
         ctx.save();
 
-        const { a: scaleX = 1, d: scaleY = 1 } = ctx.getTransform();
-
-        const scale = this._getScale({
-            scaleX,
-            scaleY,
-        });
+        const scale = this._getScale(parentScale);
 
         fontList &&
             Object.keys(fontList).forEach((fontFormat: string) => {
@@ -108,10 +103,7 @@ export class Font extends SheetExtension {
                     startX = fixLineWidthByScale(startX, scale);
                     endX = fixLineWidthByScale(endX, scale);
 
-                    if (
-                        !this.isRenderDiffRangesByRow(mergeInfo.startRow, diffRanges) &&
-                        !this.isRenderDiffRangesByRow(mergeInfo.endRow, diffRanges)
-                    ) {
+                    if (!this.isRenderDiffRangesByRow(mergeInfo.startRow, mergeInfo.endRow, diffRanges)) {
                         return true;
                     }
 

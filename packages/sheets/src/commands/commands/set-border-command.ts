@@ -294,38 +294,26 @@ export const SetBorderCommand: ICommand = {
 
         if (tl_br) {
             setBorderStyle(range, { tl_br: Tools.deepClone(border) }, true);
-        } else {
-            setBorderStyle(range, { tl_br: null }, true);
         }
 
         if (tl_bc) {
             setBorderStyle(range, { tl_bc: Tools.deepClone(border) }, true);
-        } else {
-            setBorderStyle(range, { tl_bc: null }, true);
         }
 
         if (tl_mr) {
             setBorderStyle(range, { tl_mr: Tools.deepClone(border) }, true);
-        } else {
-            setBorderStyle(range, { tl_mr: null }, true);
         }
 
         if (bl_tr) {
             setBorderStyle(range, { bl_tr: Tools.deepClone(border) }, true);
-        } else {
-            setBorderStyle(range, { bl_tr: null }, true);
         }
 
         if (ml_tr) {
             setBorderStyle(range, { ml_tr: Tools.deepClone(border) }, true);
-        } else {
-            setBorderStyle(range, { ml_tr: null }, true);
         }
 
         if (bc_tr) {
             setBorderStyle(range, { bc_tr: Tools.deepClone(border) }, true);
-        } else {
-            setBorderStyle(range, { bc_tr: null }, true);
         }
 
         // inner vertical border
@@ -432,7 +420,20 @@ export const SetBorderCommand: ICommand = {
         }
 
         // clear
-        if (!top && !bottom && !left && !right && !vertical && !horizontal) {
+        if (
+            !top &&
+            !bottom &&
+            !left &&
+            !right &&
+            !vertical &&
+            !horizontal &&
+            !tl_br &&
+            !tl_bc &&
+            !tl_mr &&
+            !bl_tr &&
+            !ml_tr &&
+            !bc_tr
+        ) {
             setBorderStyle(topRangeOut, { b: null });
             setBorderStyle(topRange, { t: null }, true);
             setBorderStyle(bottomRangeOut, { t: null });
@@ -441,6 +442,13 @@ export const SetBorderCommand: ICommand = {
             setBorderStyle(leftRange, { l: null }, true);
             setBorderStyle(rightRangeOut, { l: null });
             setBorderStyle(rightRange, { r: null }, true);
+
+            setBorderStyle(range, { tl_br: null }, true);
+            setBorderStyle(range, { tl_bc: null }, true);
+            setBorderStyle(range, { tl_mr: null }, true);
+            setBorderStyle(range, { bl_tr: null }, true);
+            setBorderStyle(range, { ml_tr: null }, true);
+            setBorderStyle(range, { bc_tr: null }, true);
 
             forEach(range, (row, column) => {
                 const rectangle = hasMerge(row, column);

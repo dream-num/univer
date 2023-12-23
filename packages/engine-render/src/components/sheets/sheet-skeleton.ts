@@ -1137,7 +1137,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         const row_st = searchArray(rowHeightAccumulation, viewBound.top - this.columnHeaderHeightAndMarginTop);
         const row_ed = searchArray(rowHeightAccumulation, viewBound.bottom - this.columnHeaderHeightAndMarginTop);
 
-        if (row_st === -1 && row_ed === -1) {
+        if (row_st === -1 && row_ed === 0) {
             dataset_row_st = -1;
             dataset_row_ed = -1;
         } else {
@@ -1159,7 +1159,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         const col_st = searchArray(columnWidthAccumulation, viewBound.left - this.rowHeaderWidthAndMarginLeft);
         const col_ed = searchArray(columnWidthAccumulation, viewBound.right - this.rowHeaderWidthAndMarginLeft);
 
-        if (col_st === -1 && col_ed === -1) {
+        if (col_st === -1 && col_ed === 0) {
             dataset_col_st = -1;
             dataset_col_ed = -1;
         } else {
@@ -1396,6 +1396,10 @@ export class SpreadsheetSkeleton extends Skeleton {
                 this._setCellCache(r, c, true);
             }
 
+            if (endColumn === 0) {
+                continue;
+            }
+
             // 针对溢出的情况计算文本长度，可视范围右侧列
             for (let c = endColumn + 1; c < columnWidthAccumulation.length; c++) {
                 this._setCellCache(r, c, true);
@@ -1418,10 +1422,29 @@ export class SpreadsheetSkeleton extends Skeleton {
         this._renderedCellCache = new ObjectMatrix<boolean>();
     }
 
+    private _makeDocumentSkeletonDirty(r: number, c: number) {
+        if (this._stylesCache.font == null) {
+            return;
+        }
+        const keys = Object.keys(this._stylesCache.font);
+        for (const fontString of keys) {
+            const fontCache = this._stylesCache.font![fontString];
+            if (fontCache != null && fontCache.getValue(r, c)) {
+                fontCache.getValue(r, c).documentSkeleton.makeDirty(true);
+                return;
+            }
+        }
+    }
+
     private _setCellCache(r: number, c: number, skipBackgroundAndBorder: boolean) {
         const needsRendering = this._renderedCellCache.getValue(r, c);
 
-        if (needsRendering || r === -1 || c === -1) {
+        if (r === -1 || c === -1) {
+            return true;
+        }
+
+        if (needsRendering) {
+            this._makeDocumentSkeletonDirty(r, c);
             return true;
         }
 

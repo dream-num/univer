@@ -27,6 +27,8 @@
     <a href="./README.md">English</a>
     |
     简体中文
+    |
+    <a href="./README-ja.md">日本語</a>
 </p>
 
 <!-- An introduction photo here. -->

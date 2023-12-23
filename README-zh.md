@@ -86,16 +86,18 @@ Univer 基于插件化架构设计，你可以安装以下包来增强 Univer �
 
 ## 链接
 
--   [文档]()
--   [在线 Playground]()
--   [官方网站]()
+-   [文档](https://univer.work/guides/introduction/)
+-   [在线 Playground](https://univer.work/playground/overview/)
+-   [官方网站](https://univer.work)
 -   [Legacy Univer Demo](https://dream-num.github.io/univer-demo/)
 
 ### 社区
 
 -   [Discord 社区](https://discord.gg/XPGnMBmpd6)
 -   [Github Discussions](https://github.com/dream-num/univer/discussions)
--   加入 Univer 中文社群
+-   微信扫描下方二维码，加入 Univer 中文社群
+
+![wecom-qr-code](https://univer.work/_astro/business-qr-code.yXrodgfV_1OrfAS.webp)
 
 ## 授权
 

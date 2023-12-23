@@ -86,9 +86,9 @@ If you would like to contribute code to Univer, please refer to the contributing
 
 ## Links
 
--   [Documentation]()
--   [Online Playground]()
--   [Official Website]()
+-   [Documentation](https://univer.work/guides/introduction/) (currently only Chinese version)
+-   [Online Playground](https://univer.work/playground/overview/)
+-   [Official Website](https://univer.work)
 -   [Legacy Univer Demo](https://dream-num.github.io/univer-demo/)
 
 ### Community

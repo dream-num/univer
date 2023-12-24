@@ -19,6 +19,7 @@ import { Tools } from '@univerjs/core';
 
 import { ErrorType } from '../../basics/error-type';
 import {
+    DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME,
     DEFAULT_TOKEN_TYPE_LAMBDA_OMIT_PARAMETER,
     DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER,
     DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER,
@@ -30,8 +31,6 @@ import type { LambdaPrivacyVarType } from './base-ast-node';
 import { BaseAstNode, ErrorNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
 import { NODE_ORDER_MAP, NodeType } from './node-type';
-
-export const LAMBDA_TOKEN: string = 'LAMBDA';
 
 export class LambdaNode extends BaseAstNode {
     constructor(
@@ -118,7 +117,7 @@ export class LambdaNodeFactory extends BaseAstNodeFactory {
         }
 
         const token = param.getToken().trim().toUpperCase();
-        if (token !== LAMBDA_TOKEN) {
+        if (token !== DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME) {
             return;
         }
 

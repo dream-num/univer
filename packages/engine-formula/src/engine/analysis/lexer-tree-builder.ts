@@ -37,6 +37,7 @@ import {
     SUFFIX_TOKEN_SET,
 } from '../../basics/token';
 import {
+    DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME,
     DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER,
     DEFAULT_TOKEN_TYPE_PARAMETER,
     DEFAULT_TOKEN_TYPE_ROOT,
@@ -226,7 +227,7 @@ export class LexerTreeBuilder extends Disposable {
         /**
          * Determine how many close brackets are at the end, and estimate how many functions need to automatically add close brackets.
          */
-        while (lastString === matchToken.CLOSE_BRACKET || lastString === ' ') {
+        while ((lastString === matchToken.CLOSE_BRACKET || lastString === ' ') && lastIndex >= 0) {
             if (lastString === matchToken.CLOSE_BRACKET) {
                 lastBracketCount++;
             }
@@ -255,7 +256,12 @@ export class LexerTreeBuilder extends Disposable {
          */
         while (parent) {
             const token = parent.getToken();
-            if (token !== DEFAULT_TOKEN_TYPE_PARAMETER && token !== matchToken.COLON && parent.getStartIndex() !== -1) {
+            if (
+                token !== DEFAULT_TOKEN_TYPE_PARAMETER &&
+                token !== matchToken.COLON &&
+                parent.getStartIndex() !== -1 &&
+                token.toUpperCase() !== DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME
+            ) {
                 if (lastBracketCount === 0) {
                     bracketCount += 1;
                 } else {

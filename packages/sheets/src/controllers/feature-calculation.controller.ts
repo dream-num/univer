@@ -39,6 +39,13 @@ export class FeatureCalculationController extends Disposable {
         this._initialize();
     }
 
+    /**
+     * Test function access to the formula system example , feature calculation ,
+     * you can register a listening range and callback function ,
+     * the range will be analyzed through the dependency after the callback function execution ,
+     * the callback function to return to an execution result ,
+     * you can continue to enter the formula dependency system , to get the final result .
+     */
     private _initialize(): void {
         const featureId = 'test';
 

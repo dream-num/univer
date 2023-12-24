@@ -259,7 +259,7 @@ export class StartEditController extends Disposable {
         // re-calculate skeleton(viewModel for component)
         documentSkeleton.calculate();
 
-        this._editAreaProcessing(editorWidth, editorHeight, actualRangeWithCoord, canvasOffset, fill);
+        this._editAreaProcessing(editorWidth, editorHeight, actualRangeWithCoord, canvasOffset, fill, scaleX, scaleY);
     }
 
     /**
@@ -382,7 +382,7 @@ export class StartEditController extends Disposable {
 
         physicHeight = Math.round(editorHeight);
 
-        this._addBackground(scene, editorWidth, editorHeight, fill);
+        this._addBackground(scene, editorWidth / scaleX, editorHeight / scaleY, fill);
 
         scene.transformByState({
             width: editorWidth,

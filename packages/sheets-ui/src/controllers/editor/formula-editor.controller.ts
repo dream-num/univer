@@ -30,6 +30,7 @@ import {
     OnLifecycle,
     RxDisposable,
     toDisposable,
+    Tools,
 } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import {
@@ -356,13 +357,14 @@ export class FormulaEditorController extends RxDisposable {
     }
 
     private _clearParagraph(paragraphs: IParagraph[]) {
-        for (const paragraph of paragraphs) {
+        const newParagraphs = Tools.deepClone(paragraphs);
+        for (const paragraph of newParagraphs) {
             if (paragraph.paragraphStyle) {
                 paragraph.paragraphStyle.horizontalAlign = HorizontalAlign.UNSPECIFIED;
             }
         }
 
-        return [...paragraphs];
+        return newParagraphs;
     }
 
     private _autoScroll() {

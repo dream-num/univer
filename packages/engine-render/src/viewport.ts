@@ -443,11 +443,21 @@ export class Viewport {
         let x = scrollX;
         let y = scrollY;
         if (this._scrollBar) {
-            x /= this._scrollBar.ratioScrollX; // 转换为内容区实际滚动距离
-            y /= this._scrollBar.ratioScrollY;
             const { scaleX, scaleY } = this.scene;
-            x /= scaleX;
-            y /= scaleY;
+            if (this._scrollBar.ratioScrollX !== 0) {
+                x /= this._scrollBar.ratioScrollX; // 转换为内容区实际滚动距离
+                x /= scaleX;
+            } else if (this.actualScrollX !== undefined) {
+                x = this.actualScrollX;
+            }
+
+            if (this._scrollBar.ratioScrollY !== 0) {
+                y /= this._scrollBar.ratioScrollY;
+
+                y /= scaleY;
+            } else if (this.actualScrollY !== undefined) {
+                y = this.actualScrollY;
+            }
 
             // console.log(y, this._scrollBar.miniThumbRatioY);
             // x *= this._scrollBar.miniThumbRatioX;
@@ -737,8 +747,8 @@ export class Viewport {
             return;
         }
 
-        const limitX = this._scrollBar?.limitX || Infinity;
-        const limitY = this._scrollBar?.limitY || Infinity;
+        const limitX = this._scrollBar?.limitX;
+        const limitY = this._scrollBar?.limitY;
 
         let isLimitedX = true;
         let isLimitedY = true;

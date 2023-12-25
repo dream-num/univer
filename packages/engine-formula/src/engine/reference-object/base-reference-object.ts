@@ -461,7 +461,7 @@ export class BaseReferenceObject extends ObjectClassType {
         const arrayValueObjectData: IArrayValueObject = {
             calculateValueList: arrayValueList,
             rowCount: arrayValueList.length,
-            columnCount: arrayValueList[0].length,
+            columnCount: arrayValueList[0]?.length || 0,
             unitId: this.getUnitId(),
             sheetId: this.getSheetId(),
             row: startRow,

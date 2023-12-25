@@ -1,3 +1,7 @@
+# CI / CD / repo settings
+.github @jikkai @wzhudev
+.commitlint.config.cjs @jikkai @wzhudev
+
 # core
 packages/core @DR-Univer @wzhudev
 packages/core/src/services/resource-manager @Gggpound

@@ -48,20 +48,20 @@
         "url": "https://github.com/dream-num/univer.git"
     },
     "dependencies": {
+        "@wendellhu/redi": "^0.12.12",
         "dayjs": "^1.11.10",
         "nanoid": "5.0.4",
-        "numeral": "^2.0.6"
+        "numeral": "^2.0.6",
+        "rxjs": "^7.8.1"
     },
     "devDependencies": {
         "@types/numeral": "^2.0.5",
-        "@vitest/coverage-istanbul": "^1.0.4",
-        "@wendellhu/redi": "^0.12.12",
-        "rxjs": "^7.8.1",
+        "@vitest/coverage-istanbul": "^1.1.0",
         "typescript": "^5.3.3",
-        "vite": "^5.0.8",
+        "vite": "^5.0.10",
         "vite-plugin-dts": "^3.6.4",
         "vite-plugin-externals": "^0.6.2",
-        "vitest": "^1.0.4"
+        "vitest": "^1.1.0"
     },
     "peerDependencies": {
         "@wendellhu/redi": ">=0.12.12",

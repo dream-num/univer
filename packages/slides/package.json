@@ -1,16 +1,28 @@
 {
     "name": "@univerjs/slides",
+
     "version": "0.1.0-beta.0",
-    "description": "UniverSheet normal base-slides",
-    "keywords": [],
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
-    "main": "./src/index.ts",
+    "main": "./lib/cjs/index.js",
+    "module": "./lib/es/index.js",
+    "types": "./lib/types/index.d.ts",
     "publishConfig": {
         "access": "public",
+        "main": "./lib/cjs/index.js",
+        "module": "./lib/es/index.js",
         "exports": {
-            ".": "./lib/index.js",
-            "./*": "./lib/*"
+            ".": {
+                "import": "./lib/es/index.js",
+                "require": "./lib/cjs/index.js",
+                "types": "./lib/types/index.d.ts"
+            },
+            "./*": {
+                "import": "./lib/es/*",
+                "require": "./lib/cjs/*",
+                "types": "./lib/types/index.d.ts"
+            },
+            "./lib/*": "./lib/*"
         }
     },
     "exports": {
@@ -25,20 +37,22 @@
     ],
     "private": true,
     "scripts": {},
-    "devDependencies": {
-        "@types/react": "^18.2.42",
+    "dependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/ui": "workspace:*",
+        "@wendellhu/redi": "^0.12.12"
+    },
+    "devDependencies": {
+        "@types/react": "^18.2.45",
         "@vitejs/plugin-react": "^4.2.1",
-        "@vitest/coverage-istanbul": "^1.0.4",
-        "@wendellhu/redi": "^0.12.12",
+        "@vitest/coverage-istanbul": "^1.1.0",
         "less": "^4.2.0",
         "typescript": "^5.3.3",
-        "vite": "^5.0.8",
+        "vite": "^5.0.10",
         "vite-plugin-dts": "^3.6.4",
         "vite-plugin-externals": "^0.6.2",
-        "vitest": "^1.0.4"
+        "vitest": "^1.1.0"
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",

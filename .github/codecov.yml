@@ -1,0 +1,18 @@
+coverage:
+  status:
+    project:
+      default:
+        # basic
+        target: auto
+        threshold: 85%
+        base: auto
+        flags:
+          - unit
+        paths:
+          - "src"
+        # advanced settings
+        branches:
+          - dev
+        if_ci_failed: error
+        informational: false
+        only_pulls: false

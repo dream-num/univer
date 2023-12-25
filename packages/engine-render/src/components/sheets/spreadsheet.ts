@@ -283,10 +283,16 @@ export class Spreadsheet extends SheetComponent {
                             ctx.save();
                             ctx.beginPath();
                             ctx.rect(
-                                fixLineWidthByScale(diffLeft - rowHeaderWidth, scale),
-                                fixLineWidthByScale(diffTop - columnHeaderHeight, scale),
-                                fixLineWidthByScale(diffRight - diffLeft + rowHeaderWidth, scale),
-                                fixLineWidthByScale(diffBottom - diffTop + columnHeaderHeight, scale)
+                                fixLineWidthByScale(diffLeft - rowHeaderWidth - FIX_ONE_PIXEL_BLUR_OFFSET, scale),
+                                fixLineWidthByScale(diffTop - columnHeaderHeight - FIX_ONE_PIXEL_BLUR_OFFSET, scale),
+                                fixLineWidthByScale(
+                                    diffRight - diffLeft + rowHeaderWidth + FIX_ONE_PIXEL_BLUR_OFFSET * 2,
+                                    scale
+                                ),
+                                fixLineWidthByScale(
+                                    diffBottom - diffTop + columnHeaderHeight + FIX_ONE_PIXEL_BLUR_OFFSET * 2,
+                                    scale
+                                )
                             );
                             // ctx.fillStyle = 'rgb(0,0,0)';
 

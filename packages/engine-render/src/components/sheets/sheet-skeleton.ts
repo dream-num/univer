@@ -1541,7 +1541,9 @@ export class SpreadsheetSkeleton extends Skeleton {
             });
         }
 
-        this._renderedCellCache.setValue(r, c, true);
+        if (!skipBackgroundAndBorder) {
+            this._renderedCellCache.setValue(r, c, true);
+        }
     }
 
     private _updateConfigAndGetDocumentModel(

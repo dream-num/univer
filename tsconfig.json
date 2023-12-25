@@ -50,9 +50,6 @@
             "path": "./packages/image"
         },
         {
-            "path": "./packages/local-save"
-        },
-        {
             "path": "./packages/network"
         },
         {

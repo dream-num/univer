@@ -1448,8 +1448,6 @@ export class SpreadsheetSkeleton extends Skeleton {
             return true;
         }
 
-        this._renderedCellCache.setValue(r, c, true);
-
         if (!this._worksheet) {
             return true;
         }
@@ -1542,6 +1540,8 @@ export class SpreadsheetSkeleton extends Skeleton {
                 wrapStrategy,
             });
         }
+
+        this._renderedCellCache.setValue(r, c, true);
     }
 
     private _updateConfigAndGetDocumentModel(

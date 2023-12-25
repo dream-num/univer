@@ -976,10 +976,34 @@ export class Viewport {
             };
         }
 
-        const xFrom: number = this.left;
-        const xTo: number = (this.width || 0) + this.left;
-        const yFrom: number = this.top;
-        const yTo: number = (this.height || 0) + this.top;
+        const sceneTrans = this._scene.transform.clone();
+
+        const m = sceneTrans.getMatrix();
+
+        const scaleFromX = this._isRelativeX ? (m[0] < 1 ? m[0] : 1) : 1;
+        const scaleFromY = this._isRelativeY ? (m[3] < 1 ? m[3] : 1) : 1;
+
+        const scaleToX = this._isRelativeX ? 1 : m[0] < 1 ? m[0] : 1;
+        const scaleToY = this._isRelativeY ? 1 : m[3] < 1 ? m[3] : 1;
+
+        let width = this._width;
+
+        let height = this._height;
+
+        const size = this._getViewPortSize();
+
+        if (m[0] > 1) {
+            width = size.width;
+        }
+
+        if (m[3] > 1) {
+            height = size.height;
+        }
+
+        const xFrom: number = this.left * scaleFromX;
+        const xTo: number = ((width || 0) + this.left) * scaleToX;
+        const yFrom: number = this.top * scaleFromY;
+        const yTo: number = ((height || 0) + this.top) * scaleToY;
 
         /**
          * @DR-Univer The coordinates here need to be consistent with the clip in the render,

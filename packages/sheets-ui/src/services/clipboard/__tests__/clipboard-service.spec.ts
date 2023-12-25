@@ -27,7 +27,7 @@ import {
     SetWorksheetRowHeightMutation,
 } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
-import { afterEach, beforeEach, describe, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, it } from 'vitest';
 
 import { ISheetClipboardService } from '../clipboard.service';
 import { clipboardTestBed } from './clipboard-test-bed';
@@ -630,10 +630,10 @@ describe('Test clipboard', () => {
             ]);
 
             // TODO@Dushusir remove after Dialog replacement
-            let alert = false;
-            vi.spyOn(window, 'alert').mockImplementation(() => {
-                alert = true;
-            });
+            // let alert = false;
+            // vi.spyOn(window, 'alert').mockImplementation(() => {
+            //     alert = true;
+            // });
 
             await sheetClipboardService.paste(clipboardItem);
             // expect(alert).toBe(true);
@@ -779,10 +779,10 @@ describe('Test clipboard', () => {
                 },
             ]);
 
-            let alert = false;
-            vi.spyOn(window, 'alert').mockImplementation(() => {
-                alert = true;
-            });
+            // let alert = false;
+            // vi.spyOn(window, 'alert').mockImplementation(() => {
+            //     alert = true;
+            // });
 
             await sheetClipboardService.paste(clipboardItem);
             // expect(alert).toBe(true);
@@ -837,10 +837,10 @@ describe('Test clipboard', () => {
                 },
             ]);
 
-            let alert = false;
-            vi.spyOn(window, 'alert').mockImplementation(() => {
-                alert = true;
-            });
+            // let alert = false;
+            // vi.spyOn(window, 'alert').mockImplementation(() => {
+            //     alert = true;
+            // });
 
             await sheetClipboardService.paste(clipboardItem);
             // expect(alert).toBe(true);

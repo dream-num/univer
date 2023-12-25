@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { Compare } from './compare/compare';
-import { Divided } from './divided/divided';
+import { Compare } from './compare';
+import { Divided } from './divided';
 import { FUNCTION_NAMES_META } from './function-names';
-import { Minus } from './minus/minus';
-import { Multiply } from './multiply/multiply';
-import { Plus } from './plus/plus';
-import { Union } from './union/union';
+import { Minus } from './minus';
+import { Multiply } from './multiply';
+import { Plus } from './plus';
+import { Union } from './union';
 
 export const functionMeta = [
     [Compare, FUNCTION_NAMES_META.COMPARE],

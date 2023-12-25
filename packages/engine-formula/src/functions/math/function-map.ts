@@ -15,10 +15,10 @@
  */
 
 import { FUNCTION_NAMES_MATH } from './function-names';
-import { Power } from './power/power';
-import { Sum } from './sum/sum';
-import { Sumif } from './sumif/sumif';
-import { Sumifs } from './sumifs/sumifs';
+import { Power } from './power';
+import { Sum } from './sum';
+import { Sumif } from './sumif';
+import { Sumifs } from './sumifs';
 
 export const functionMath = [
     [Sum, FUNCTION_NAMES_MATH.SUM],

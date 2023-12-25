@@ -67,9 +67,11 @@ jobs:
                   body: |
                       ## View Deployment
 
+                      <p align="center">
                       🥐 🍔 🥓 🥗 🥘 🌯 🍚 🍛 🍖 🍭 🍧 🍝 🥪 🥖 🍪
                       Still cooking, please come back later
                       🥙 🥮 🥨 🌭 🍦 🍙 🍕 🍰 🍮 🍜 🍡 🍱 🍿 🍕 🥟
+                      </p>
                   edit-mode: replace
 
     build-demo:

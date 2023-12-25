@@ -16,6 +16,7 @@
 
 import type { Nullable } from '@univerjs/core';
 import { Tools } from '@univerjs/core';
+import { Inject } from '@wendellhu/redi';
 
 import { ErrorType } from '../../basics/error-type';
 import {
@@ -26,7 +27,9 @@ import {
 } from '../../basics/token-type';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
 import { LexerNode } from '../analysis/lexer-node';
+import { Interpreter } from '../interpreter/interpreter';
 import { isFirstChildParameter } from '../utils/function-definition';
+import { LambdaValueObjectObject } from '../value-object/lambda-value-object';
 import type { LambdaPrivacyVarType } from './base-ast-node';
 import { BaseAstNode, ErrorNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
@@ -35,13 +38,18 @@ import { NODE_ORDER_MAP, NodeType } from './node-type';
 export class LambdaNode extends BaseAstNode {
     constructor(
         token: string,
-        private _lambdaId: string
+        private _lambdaId: string,
+        private _interpreter: Interpreter
     ) {
         super(token);
     }
 
     override get nodeType() {
         return NodeType.LAMBDA;
+    }
+
+    isEmptyParamFunction() {
+        return this.getChildren().length < 2;
     }
 
     isFunctionParameter() {
@@ -53,14 +61,21 @@ export class LambdaNode extends BaseAstNode {
     }
 
     override execute() {
-        const children = this.getChildren();
-        const childrenCount = children.length;
-        this.setValue(children[childrenCount - 1].getValue());
+        if (this.isEmptyParamFunction()) {
+            this.setValue(new LambdaValueObjectObject(this, this._interpreter));
+        } else {
+            const children = this.getChildren();
+            const childrenCount = children.length;
+            this.setValue(children[childrenCount - 1].getValue());
+        }
     }
 }
 
 export class LambdaNodeFactory extends BaseAstNodeFactory {
-    constructor(@IFormulaRuntimeService private readonly _runtimeService: IFormulaRuntimeService) {
+    constructor(
+        @IFormulaRuntimeService private readonly _runtimeService: IFormulaRuntimeService,
+        @Inject(Interpreter) private readonly _interpreter: Interpreter
+    ) {
         super();
     }
 
@@ -108,7 +123,7 @@ export class LambdaNodeFactory extends BaseAstNodeFactory {
 
         this._updateLambdaStatement(functionStatementNode, lambdaId, currentLambdaPrivacyVar);
 
-        return new LambdaNode(param.getToken(), lambdaId);
+        return new LambdaNode(param.getToken(), lambdaId, this._interpreter);
     }
 
     override checkAndCreateNodeType(param: LexerNode | string) {

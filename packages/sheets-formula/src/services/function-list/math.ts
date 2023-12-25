@@ -34,6 +34,51 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
         ],
     },
     {
+        functionName: FUNCTION_NAMES_MATH.ACOS,
+        functionType: FunctionType.Math,
+        description: 'formula.functionList.ACOS.description',
+        abstract: 'formula.functionList.ACOS.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.ACOS.functionParameter.number.name',
+                detail: 'formula.functionList.ACOS.functionParameter.number.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_MATH.ACOSH,
+        functionType: FunctionType.Math,
+        description: 'formula.functionList.ACOSH.description',
+        abstract: 'formula.functionList.ACOSH.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.ACOSH.functionParameter.number.name',
+                detail: 'formula.functionList.ACOSH.functionParameter.number.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_MATH.ACOT,
+        functionType: FunctionType.Math,
+        description: 'formula.functionList.ACOT.description',
+        abstract: 'formula.functionList.ACOT.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.ACOT.functionParameter.number.name',
+                detail: 'formula.functionList.ACOT.functionParameter.number.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
         functionName: FUNCTION_NAMES_MATH.SUM,
         aliasFunctionName: 'formula.functionList.SUM.aliasFunctionName',
         functionType: FunctionType.Math,

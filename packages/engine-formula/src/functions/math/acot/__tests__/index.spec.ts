@@ -24,7 +24,7 @@ import { RangeReferenceObject } from '../../../../engine/reference-object/range-
 import type { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { FUNCTION_NAMES_MATH } from '../../function-names';
-import { Abs } from '..';
+import { Acot } from '..';
 
 const cellData = {
     0: {
@@ -63,12 +63,12 @@ const cellData = {
     },
 };
 
-describe('test abs', () => {
+describe('test acot', () => {
     let unitId: string;
     let sheetId: string;
     let sheetData: ISheetData = {};
-    let abs: Abs;
-    let absCalculate: (range: IRange) => ArrayValueObject;
+    let acot: Acot;
+    let acotCalculate: (range: IRange) => ArrayValueObject;
 
     beforeEach(() => {
         unitId = 'test';
@@ -81,9 +81,9 @@ describe('test abs', () => {
             },
         };
 
-        // register abs
-        abs = new Abs(FUNCTION_NAMES_MATH.ABS);
-        absCalculate = (range: IRange) => {
+        // register acot
+        acot = new Acot(FUNCTION_NAMES_MATH.ACOT);
+        acotCalculate = (range: IRange) => {
             // range
 
             const rangeRef = new RangeReferenceObject(range, sheetId, unitId);
@@ -91,11 +91,11 @@ describe('test abs', () => {
                 [unitId]: sheetData,
             });
 
-            return abs.calculate(rangeRef) as ArrayValueObject;
+            return acot.calculate(rangeRef) as ArrayValueObject;
         };
     });
 
-    describe('abs', () => {
+    describe('acot', () => {
         describe('correct situations', () => {
             it('single cell', async () => {
                 // cell A1
@@ -106,8 +106,8 @@ describe('test abs', () => {
                     endColumn: 0,
                 };
 
-                const arrayValue = absCalculate(cell);
-                expect(arrayValue.getFirstCell().getValue()).toBe(1);
+                const arrayValue = acotCalculate(cell);
+                expect(arrayValue.getFirstCell().getValue()).toBe(0.7853981633974483);
             });
             it('range', async () => {
                 // cell A1:E2
@@ -118,10 +118,12 @@ describe('test abs', () => {
                     endColumn: 4,
                 };
 
-                const arrayValue = absCalculate(cell);
+                const arrayValue = acotCalculate(cell);
+
+                // =ACOT(-3) google gets -0.3217505544, but excel gets 2.819842
                 expect(arrayValue.toValue()).toStrictEqual([
-                    [1, '#VALUE!', 1.23, 1, 0],
-                    [0, 100, 2.34, '#VALUE!', 3],
+                    [0.7853981633974483, '#VALUE!', 0.682622552417217, 0.7853981633974483, 1.5707963267948966],
+                    [1.5707963267948966, 0.009999666686665238, 0.40385979490737667, '#VALUE!', -0.3217505543966422],
                 ]);
             });
         });
@@ -129,7 +131,7 @@ describe('test abs', () => {
         describe('fault situations', () => {
             it('value error', async () => {
                 const error = ErrorValueObject.create(ErrorType.VALUE);
-                const errorValue = abs.calculate(error);
+                const errorValue = acot.calculate(error);
                 expect(errorValue.isError()).toBeTruthy();
             });
         });

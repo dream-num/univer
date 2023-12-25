@@ -682,7 +682,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                 range.endColumn = startColumn + colCount - 1;
             } else if (endRow > mergedRange.endRow || endColumn > mergedRange.endColumn) {
                 // TODO@Dushusir: use dialog component
-                alert("We can't do that to a merged cell ");
+                // alert("We can't do that to a merged cell ");
                 return null;
             } else {
                 cellMatrix.forValue((row, col, cell) => {

@@ -352,19 +352,18 @@ export class InputManager {
     private _prePointerDoubleOrTripleClick(evt: IPointerEvent) {
         const { clientX, clientY } = evt;
 
-        this._delayedTimeout = setTimeout(() => {
-            this._resetDoubleClickParam();
-        }, InputManager.DoubleClickDelay);
-
         const isMoveThreshold = this._isPointerSwiping(clientX, clientY);
 
         if (isMoveThreshold) {
             this._resetDoubleClickParam();
         }
 
+        this._delayedTimeout = setTimeout(() => {
+            this._resetDoubleClickParam();
+        }, InputManager.DoubleClickDelay);
+
         this._doubleClickOccurred += 1;
 
-        // eslint-disable-next-line no-magic-numbers
         if (this._tripleClickState) {
             this._scene?.pick(Vector2.FromArray([evt.offsetX, evt.offsetY]))?.triggerTripleClick(evt);
 
@@ -381,7 +380,9 @@ export class InputManager {
             }
             this._resetDoubleClickParam();
             this._tripleClickState = true;
+
             clearTimeout(this._delayedTripeTimeout);
+
             this._delayedTripeTimeout = setTimeout(() => {
                 this._tripleClickState = false;
             }, InputManager.TripleClickDelay);

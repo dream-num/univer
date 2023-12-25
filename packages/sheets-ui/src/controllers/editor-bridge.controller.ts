@@ -238,7 +238,11 @@ export class EditorBridgeController extends RxDisposable {
         const { spreadsheet, spreadsheetColumnHeader, spreadsheetLeftTopPlaceholder, spreadsheetRowHeader } =
             sheetObject;
 
-        spreadsheet.onDblclickObserver.add(() => {
+        spreadsheet.onDblclickObserver.add((evt) => {
+            // No need to enter edit status when user click the right button.
+            if (evt.button === 2) {
+                return;
+            }
             // this._editorBridgeService.show(DeviceInputEventType.Dblclick);
             this._commandService.executeCommand(SetCellEditVisibleOperation.id, {
                 visible: true,

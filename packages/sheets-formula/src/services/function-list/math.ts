@@ -19,6 +19,21 @@ import { FUNCTION_NAMES_MATH, FunctionType } from '@univerjs/engine-formula';
 
 export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
+        functionName: FUNCTION_NAMES_MATH.ABS,
+        functionType: FunctionType.Math,
+        description: 'formula.functionList.ABS.description',
+        abstract: 'formula.functionList.ABS.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.ABS.functionParameter.number.name',
+                detail: 'formula.functionList.ABS.functionParameter.number.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
         functionName: FUNCTION_NAMES_MATH.SUM,
         aliasFunctionName: 'formula.functionList.SUM.aliasFunctionName',
         functionType: FunctionType.Math,

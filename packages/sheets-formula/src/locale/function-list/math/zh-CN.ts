@@ -16,7 +16,7 @@
 
 export default {
     ABS: {
-        description: '返回数字的绝对值',
+        description: '返回数字的绝对值。一个数字的绝对值是该数字不带其符号的形式。',
         abstract: '返回数字的绝对值',
         links: [
             {
@@ -25,8 +25,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '需要计算其绝对值的实数。' },
         },
     },
     ACOS: {

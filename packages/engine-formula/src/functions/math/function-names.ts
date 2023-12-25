@@ -19,4 +19,5 @@ export enum FUNCTION_NAMES_MATH {
     SUMIF = 'SUMIF',
     SUMIFS = 'SUMIFS',
     POWER = 'POWER',
+    ABS = 'ABS',
 }

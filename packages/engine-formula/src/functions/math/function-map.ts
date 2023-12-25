@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { Abs } from './abs';
 import { FUNCTION_NAMES_MATH } from './function-names';
 import { Power } from './power';
 import { Sum } from './sum';
@@ -22,6 +23,7 @@ import { Sumifs } from './sumifs';
 
 export const functionMath = [
     [Sum, FUNCTION_NAMES_MATH.SUM],
+    [Abs, FUNCTION_NAMES_MATH.ABS],
     [Sumif, FUNCTION_NAMES_MATH.SUMIF],
     [Sumifs, FUNCTION_NAMES_MATH.SUMIFS],
     [Power, FUNCTION_NAMES_MATH.POWER],

@@ -16,7 +16,7 @@
 
 export default {
     ABS: {
-        description: `数値の絶対値を返します。`,
+        description: `数値の絶対値を返します。 絶対値とは、数値から符号 (+、-) を除いた数の大きさのことです。`,
         abstract: `数値の絶対値を返します。`,
         links: [
             {
@@ -25,8 +25,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: '絶対値が必要な実数。' },
         },
     },
     ACOS: {

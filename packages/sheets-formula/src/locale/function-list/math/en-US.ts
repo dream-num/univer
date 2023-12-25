@@ -16,7 +16,7 @@
 
 export default {
     ABS: {
-        description: `Returns the absolute value of a number`,
+        description: `Returns the absolute value of a number. The absolute value of a number is the number without its sign.`,
         abstract: `Returns the absolute value of a number`,
         links: [
             {
@@ -25,8 +25,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The real number of which you want the absolute value.' },
         },
     },
     ACOS: {

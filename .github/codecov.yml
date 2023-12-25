@@ -4,15 +4,9 @@ coverage:
       default:
         # basic
         target: auto
-        threshold: 85%
+        threshold: 0
         base: auto
-        flags:
-          - unit
-        paths:
-          - "src"
         # advanced settings
-        branches:
-          - dev
         if_ci_failed: error
         informational: false
         only_pulls: false

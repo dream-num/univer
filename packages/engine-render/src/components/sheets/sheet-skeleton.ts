@@ -1443,7 +1443,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             return true;
         }
 
-        if (needsRendering) {
+        if (needsRendering === false) {
             this._makeDocumentSkeletonDirty(r, c);
             return true;
         }
@@ -1497,6 +1497,11 @@ export class SpreadsheetSkeleton extends Skeleton {
             this._setBorderProps(r, c, BORDER_TYPE.BC_TR, style, cache);
         }
 
+        if (needsRendering === true) {
+            this._makeDocumentSkeletonDirty(r, c);
+            return true;
+        }
+
         if (isNullCell(cell)) {
             return;
         }
@@ -1542,6 +1547,8 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
 
         if (!skipBackgroundAndBorder) {
+            this._renderedCellCache.setValue(r, c, false);
+        } else {
             this._renderedCellCache.setValue(r, c, true);
         }
     }

@@ -18,8 +18,9 @@ import { Disposable } from '@univerjs/core';
 
 import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
+import { DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME } from '../../basics/token-type';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
-import type { FunctionNode } from '../ast-node';
+import type { FunctionNode, LambdaNode } from '../ast-node';
 import type { BaseAstNode } from '../ast-node/base-ast-node';
 import { NodeType } from '../ast-node/node-type';
 import type { FunctionVariantType } from '../reference-object/base-reference-object';
@@ -110,6 +111,14 @@ export class Interpreter extends Disposable {
         const childrenCount = children.length;
         for (let i = 0; i < childrenCount; i++) {
             const item = children[i];
+            const token = item.getToken();
+            /**
+             * If the lambda expression has no parameters, then do not execute further.
+             */
+            if (token === DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME && (item as LambdaNode).isEmptyParamFunction()) {
+                item.execute();
+                continue;
+            }
             this._executeAsync(item);
         }
 
@@ -130,6 +139,14 @@ export class Interpreter extends Disposable {
         const childrenCount = children.length;
         for (let i = 0; i < childrenCount; i++) {
             const item = children[i];
+            const token = item.getToken();
+            /**
+             * If the lambda expression has no parameters, then do not execute further.
+             */
+            if (token === DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME && (item as LambdaNode).isEmptyParamFunction()) {
+                item.execute();
+                continue;
+            }
             this._execute(item);
         }
 

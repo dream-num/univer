@@ -39,7 +39,8 @@ export class LambdaNode extends BaseAstNode {
     constructor(
         token: string,
         private _lambdaId: string,
-        private _interpreter: Interpreter
+        private _interpreter: Interpreter,
+        private _lambdaPrivacyVarKeys: string[]
     ) {
         super(token);
     }
@@ -62,7 +63,7 @@ export class LambdaNode extends BaseAstNode {
 
     override execute() {
         if (this.isEmptyParamFunction()) {
-            this.setValue(new LambdaValueObjectObject(this, this._interpreter));
+            this.setValue(new LambdaValueObjectObject(this, this._interpreter, this._lambdaPrivacyVarKeys));
         } else {
             const children = this.getChildren();
             const childrenCount = children.length;
@@ -123,7 +124,7 @@ export class LambdaNodeFactory extends BaseAstNodeFactory {
 
         this._updateLambdaStatement(functionStatementNode, lambdaId, currentLambdaPrivacyVar);
 
-        return new LambdaNode(param.getToken(), lambdaId, this._interpreter);
+        return new LambdaNode(param.getToken(), lambdaId, this._interpreter, [...currentLambdaPrivacyVar.keys()]);
     }
 
     override checkAndCreateNodeType(param: LexerNode | string) {

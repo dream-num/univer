@@ -14,22 +14,71 @@
  * limitations under the License.
  */
 
-import type { LambdaNode } from '../ast-node';
+import { ErrorType } from '../../basics/error-type';
+import { DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER } from '../../basics/token-type';
+import type { BaseAstNode } from '../ast-node/base-ast-node';
+import type { LambdaParameterNode } from '../ast-node/lambda-parameter-node';
 import type { Interpreter } from '../interpreter/interpreter';
-import { BaseValueObject } from './base-value-object';
+import { AsyncObject } from '../reference-object/base-reference-object';
+import { BaseValueObject, ErrorValueObject } from './base-value-object';
 
 export class LambdaValueObjectObject extends BaseValueObject {
-    constructor(
-        private _lambdaNode: LambdaNode,
+    private _lambdaPrivacyValueMap = new Map<string, BaseValueObject>();
 
-        private _interpreter: Interpreter
+    constructor(
+        private _lambdaNode: BaseAstNode,
+
+        private _interpreter: Interpreter,
+
+        private _lambdaPrivacyVarKeys: string[]
     ) {
         super(0);
+        this._lambdaPrivacyValueMap.clear();
     }
 
     override isLambda() {
         return true;
     }
 
-    // async execute() {}
+    execute(...variants: BaseValueObject[]) {
+        const paramCount = this._lambdaPrivacyVarKeys.length;
+        if (variants.length !== paramCount) {
+            return new ErrorValueObject(ErrorType.VALUE);
+        }
+
+        this._setLambdaPrivacyValueMap(variants);
+
+        this._setLambdaNodeValue(this._lambdaNode);
+
+        return new AsyncObject(this._interpreter.executeAsync(this._lambdaNode) as Promise<BaseValueObject>);
+    }
+
+    private _setLambdaNodeValue(node: BaseAstNode) {
+        const children = node.getChildren();
+        const childrenCount = children.length;
+        for (let i = 0; i < childrenCount; i++) {
+            const item = children[i];
+            const token = item.getToken();
+
+            if (token === DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER) {
+                const lambdaParameter = (item as LambdaParameterNode).getLambdaParameter();
+                const value = this._lambdaPrivacyValueMap.get(lambdaParameter);
+                if (value) {
+                    (item as LambdaParameterNode).setValue(value);
+                }
+                continue;
+            }
+
+            this._setLambdaNodeValue(item);
+        }
+    }
+
+    private _setLambdaPrivacyValueMap(variants: BaseValueObject[]) {
+        for (let i = 0; i < variants.length; i++) {
+            const variant = variants[i];
+            const key = this._lambdaPrivacyVarKeys[i];
+
+            this._lambdaPrivacyValueMap.set(key, variant);
+        }
+    }
 }

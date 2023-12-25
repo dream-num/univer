@@ -492,7 +492,7 @@ export class BaseReferenceObject extends ObjectClassType {
 }
 
 export class AsyncObject extends ObjectClassType {
-    constructor(private _promise: Promise<FunctionVariantType>) {
+    constructor(private _promise: Promise<BaseValueObject>) {
         super();
     }
 
@@ -500,7 +500,48 @@ export class AsyncObject extends ObjectClassType {
         return true;
     }
 
-    getValue() {
+    async getValue() {
         return this._promise;
+    }
+}
+
+export class AsyncArrayObject extends ObjectClassType {
+    constructor(private _promiseList: Array<Array<BaseValueObject | AsyncObject>>) {
+        super();
+    }
+
+    override isAsyncArrayObject() {
+        return true;
+    }
+
+    async getValue() {
+        const variants: BaseValueObject[][] = [];
+
+        for (let r = 0; r < this._promiseList.length; r++) {
+            const promiseCells = this._promiseList[r];
+            if (variants[r] == null) {
+                variants[r] = [];
+            }
+            for (let c = 0; c < promiseCells.length; c++) {
+                const promiseCell = promiseCells[c];
+                if ((promiseCell as AsyncObject).isAsyncObject()) {
+                    variants[r][c] = await (promiseCell as AsyncObject).getValue();
+                } else {
+                    variants[r][c] = promiseCell as BaseValueObject;
+                }
+            }
+        }
+
+        const arrayValueObjectData: IArrayValueObject = {
+            calculateValueList: variants,
+            rowCount: variants.length,
+            columnCount: variants[0]?.length || 0,
+            unitId: '',
+            sheetId: '',
+            row: 0,
+            column: 0,
+        };
+
+        return new ArrayValueObject(arrayValueObjectData);
     }
 }

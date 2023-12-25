@@ -16,8 +16,9 @@
 
 import type { ICommand, IStyleData, IWorkbookData } from '@univerjs/core';
 import { CommandType, ISnapshotPersistenceService, IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
-import { ExportController, RecordController } from '@univerjs/local-save';
 import type { IAccessor } from '@wendellhu/redi';
+
+import { ExportController, RecordController } from '../../../local-save';
 
 export interface ISaveSnapshotParams {
     value: 'sheet' | 'workbook' | 'record';

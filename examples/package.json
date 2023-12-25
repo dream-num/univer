@@ -16,7 +16,6 @@
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/icons": "^0.1.24",
-        "@univerjs/local-save": "workspace:*",
         "@univerjs/rpc": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",
@@ -36,8 +35,8 @@
     },
     "devDependencies": {
         "@types/react": "^18.2.45",
-        "@types/react-dom": "^18.2.17",
-        "esbuild": "^0.19.9",
+        "@types/react-dom": "^18.2.18",
+        "esbuild": "^0.19.10",
         "esbuild-plugin-clean": "^1.0.1",
         "esbuild-plugin-copy": "^2.1.1",
         "esbuild-style-plugin": "^1.6.3",

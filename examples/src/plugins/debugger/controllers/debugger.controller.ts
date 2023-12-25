@@ -15,10 +15,10 @@
  */
 
 import { Disposable, ICommandService, ISnapshotPersistenceService, IUniverInstanceService } from '@univerjs/core';
-import { ExportController, LocalSnapshotService, RecordController } from '@univerjs/local-save';
 import { IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
+import { ExportController, LocalSnapshotService, RecordController } from '../../local-save';
 import { ConfirmOperation } from '../commands/operations/confirm.operation';
 import { DialogOperation } from '../commands/operations/dialog.operation';
 import { LocaleOperation } from '../commands/operations/locale.operation';

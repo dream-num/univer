@@ -20,7 +20,6 @@ import {
     SetFontFamilyCommand,
     SetFontSizeCommand,
     SetItalicCommand,
-    SetSelectionsOperation,
     SetStrikeThroughCommand,
     SetUnderlineCommand,
 } from '@univerjs/sheets';
@@ -277,7 +276,6 @@ export class SheetUIController extends Disposable {
             SetRowFrozenCommand,
             SetColumnFrozenCommand,
             CancelFrozenCommand,
-            SetSelectionsOperation,
             SetUnderlineCommand,
             SetZoomRatioCommand,
             SetZoomRatioOperation,

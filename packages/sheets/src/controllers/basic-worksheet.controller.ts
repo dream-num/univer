@@ -108,6 +108,7 @@ import {
     SetWorksheetRowHeightMutation,
     SetWorksheetRowIsAutoHeightMutation,
 } from '../commands/mutations/set-worksheet-row-height.mutation';
+import { SetSelectionsOperation } from '../commands/operations/selection.operation';
 import { SetWorksheetActiveOperation } from '../commands/operations/set-worksheet-active.operation';
 import { MAX_CELL_PER_SHEET_DEFAULT, MAX_CELL_PER_SHEET_KEY } from './config/config';
 
@@ -213,6 +214,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetWorksheetRowIsAutoHeightMutation,
             SetWorksheetShowCommand,
             SetNumfmtMutation,
+            SetSelectionsOperation,
             RemoveNumfmtMutation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
 

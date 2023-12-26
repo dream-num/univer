@@ -28,25 +28,18 @@ export interface ISetSelectionsOperationParams {
     selections: ISelectionWithStyle[];
     type?: SelectionMoveType;
 }
+
 export const SetSelectionsOperation: IOperation<ISetSelectionsOperationParams> = {
     id: 'sheet.operation.set-selections',
     type: CommandType.OPERATION,
     handler: (accessor, params) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
-
         if (!params) {
             return false;
         }
 
         const { selections, type } = params;
-
-        // TODO@yuhongz: incorrect coupling
-        // if (params.pluginName === FORMAT_PAINTER_SELECTION_PLUGIN_NAME) {
-        //     selections.length > 1 && selections.splice(1, selections.length - 2);
-        // }
-
         selectionManagerService.replace(selections, type);
-
         return true;
     },
 };

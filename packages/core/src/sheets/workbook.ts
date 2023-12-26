@@ -106,7 +106,7 @@ export class Workbook extends Disposable {
     }
 
     save(): IWorkbookData {
-        return this._snapshot;
+        return Tools.deepClone(this._snapshot);
     }
 
     static isIRangeType(range: IRangeType | IRangeType[]): Boolean {

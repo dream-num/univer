@@ -14,6 +14,50 @@
  * limitations under the License.
  */
 
-import type { IFunctionInfo } from '@univerjs/engine-formula';
+import { FUNCTION_NAMES_LOOKUP, FunctionType, type IFunctionInfo } from '@univerjs/engine-formula';
 
-export const FUNCTION_LIST_LOOKUP: IFunctionInfo[] = [];
+export const FUNCTION_LIST_LOOKUP: IFunctionInfo[] = [
+    {
+        functionName: FUNCTION_NAMES_LOOKUP.ADDRESS,
+        functionType: FunctionType.Lookup,
+        description: 'formula.functionList.ADDRESS.description',
+        abstract: 'formula.functionList.ADDRESS.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.ADDRESS.functionParameter.row_num.name',
+                detail: 'formula.functionList.ADDRESS.functionParameter.row_num.detail',
+                example: '2',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.ADDRESS.functionParameter.column_num.name',
+                detail: 'formula.functionList.ADDRESS.functionParameter.column_num.detail',
+                example: '2',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.ADDRESS.functionParameter.abs_num.name',
+                detail: 'formula.functionList.ADDRESS.functionParameter.abs_num.detail',
+                example: '1',
+                require: 0,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.ADDRESS.functionParameter.a1.name',
+                detail: 'formula.functionList.ADDRESS.functionParameter.a1.detail',
+                example: 'TRUE',
+                require: 0,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.ADDRESS.functionParameter.sheet_text.name',
+                detail: 'formula.functionList.ADDRESS.functionParameter.sheet_text.detail',
+                example: 'Sheet2',
+                require: 0,
+                repeat: 0,
+            },
+        ],
+    },
+];

@@ -15,6 +15,7 @@
  */
 
 export enum FUNCTION_NAMES_LOOKUP {
+    ADDRESS = 'ADDRESS',
     INDIRECT = 'INDIRECT',
     OFFSET = 'OFFSET',
 }

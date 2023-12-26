@@ -16,7 +16,8 @@
 
 export default {
     ADDRESS: {
-        description: '以文本形式将引用值返回到工作表的单个单元格',
+        description:
+            '根据指定行号和列号获得工作表中的某个单元格的地址。 例如，ADDRESS(2,3) 返回 $C$2。 再例如，ADDRESS(77,300) 返回 $KN$77。 可以使用其他函数（如 ROW 和 COLUMN 函数）为 ADDRESS 函数提供行号和列号参数。',
         abstract: '以文本形式将引用值返回到工作表的单个单元格',
         links: [
             {
@@ -25,8 +26,17 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            row_num: { name: '行号', detail: '一个数值，指定要在单元格引用中使用的行号。' },
+            column_num: { name: '列号', detail: '一个数值，指定要在单元格引用中使用的列号。' },
+            abs_num: { name: '引用类型', detail: '一个数值，指定要返回的引用类型。' },
+            a1: {
+                name: '引用样式',
+                detail: '一个逻辑值，指定 A1 或 R1C1 引用样式。 在 A1 样式中，列和行将分别按字母和数字顺序添加标签。 在 R1C1 引用样式中，列和行均按数字顺序添加标签。 如果参数 A1 为 TRUE 或被省略，则 ADDRESS 函数返回 A1 样式引用；如果为 FALSE，则 ADDRESS 函数返回 R1C1 样式引用。',
+            },
+            sheet_text: {
+                name: '工作表名称',
+                detail: '一个文本值，指定要用作外部引用的工作表的名称。 例如，公式=ADDRESS (1，1,,,"Sheet2") 返回 Sheet2！$A$1。 如果 sheet_text 参数，则不使用工作表名称，函数返回的地址引用当前工作表上的单元格。',
+            },
         },
     },
     AREAS: {

@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
+import { Address } from './address';
 import { FUNCTION_NAMES_LOOKUP } from './function-names';
 import { Indirect } from './indirect';
 import { Offset } from './offset';
 
 export const functionLookup = [
+    [Address, FUNCTION_NAMES_LOOKUP.ADDRESS],
     [Indirect, FUNCTION_NAMES_LOOKUP.INDIRECT],
     [Offset, FUNCTION_NAMES_LOOKUP.OFFSET],
 ];

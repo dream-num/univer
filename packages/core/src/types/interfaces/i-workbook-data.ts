@@ -24,12 +24,21 @@ import type { IWorksheetData } from './i-worksheet-data';
  * Properties of a workbook's configuration
  */
 export interface IWorkbookData extends IExtraModelData {
-    /** unit id */
+    /**
+     * unit id
+     */
     id: string;
-    /** Revision of this document. Would be used in collaborated editing. Starts from one. */
+    /**
+     * Revision of this spreadsheet. Would be used in collaborated editing. Starts from one.
+     */
     rev?: number;
+    /**
+     * Name of the spreadsheet.
+     */
     name: string;
-    /** Version of Univer model definition. */
+    /**
+     * Version of Univer model definition.
+     */
     appVersion: string;
     locale: LocaleType;
 

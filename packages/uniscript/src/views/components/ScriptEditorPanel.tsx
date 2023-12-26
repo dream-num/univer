@@ -67,6 +67,7 @@ export function ScriptEditorPanel() {
 
             let terminateEscaping: IDisposable | undefined;
             disposableCollection = new DisposableCollection();
+            disposableCollection.add(editorService.setEditorInstance(monacoEditor));
             disposableCollection.add(
                 monacoEditor.onDidFocusEditorWidget(() => {
                     terminateEscaping = shortcutService.forceEscape();

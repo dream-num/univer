@@ -142,7 +142,7 @@ export function FormulaBar() {
                 </div>
 
                 <div className={styles.formulaInput}>
-                    <div className={styles.formulaContent} ref={editorRef} />
+                    <div onContextMenu={(e) => e.preventDefault()} className={styles.formulaContent} ref={editorRef} />
                     <div className={styles.arrowContainer} onClick={handleArrowClick}>
                         {arrowDirection === ArrowDirection.Down ? (
                             <DropdownSingle />

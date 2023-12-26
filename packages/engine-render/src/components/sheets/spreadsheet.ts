@@ -245,6 +245,16 @@ export class Spreadsheet extends SheetComponent {
             //     return;
             // }
 
+            // if (
+            //     viewPortKey === 'viewRowTop' ||
+            //     viewPortKey === 'viewRowBottom' ||
+            //     viewPortKey === 'viewMainLeft' ||
+            //     viewPortKey === 'viewMainTop'
+            // ) {
+            //     // console.warn('ignore object', this);
+            //     return;
+            // }
+
             if (viewPortKey === 'viewMain') {
                 const ctx = this._cacheCanvas.getContext();
                 ctx.save();
@@ -361,12 +371,12 @@ export class Spreadsheet extends SheetComponent {
         cacheCtx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.drawImage(
             this._cacheCanvas.getCanvasEle(),
-            sx,
-            sy,
+            sx * pixelRatio,
+            sy * pixelRatio,
             sw * pixelRatio,
             sh * pixelRatio,
-            dx,
-            dy,
+            dx * pixelRatio,
+            dy * pixelRatio,
             dw * pixelRatio,
             dh * pixelRatio
         );

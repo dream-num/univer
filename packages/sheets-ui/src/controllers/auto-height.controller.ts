@@ -19,14 +19,11 @@ import { IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/
 import type {
     ISetRangeValuesRangeMutationParams,
     ISetStyleCommandParams,
-    ISetWorksheetColWidthMutationParams,
     ISetWorksheetRowAutoHeightMutationParams,
     ISetWorksheetRowIsAutoHeightMutationParams,
 } from '@univerjs/sheets';
 import {
-    DeltaColumnWidthCommand,
     SelectionManagerService,
-    SetColWidthCommand,
     SetRangeValuesCommand,
     SetStyleCommand,
     SetWorksheetRowAutoHeightMutation,
@@ -111,20 +108,6 @@ export class AutoHeightController {
         sheetInterceptorService.interceptCommand({
             getMutations: (command: { id: string; params: ISetWorksheetRowIsAutoHeightMutationParams }) => {
                 if (command.id !== SetWorksheetRowIsAutoHeightCommand.id) {
-                    return {
-                        redos: [],
-                        undos: [],
-                    };
-                }
-
-                return this._getUndoRedoParamsOfAutoHeight(command.params.ranges);
-            },
-        });
-
-        // for intercept set-worksheet-col-width command.
-        sheetInterceptorService.interceptCommand({
-            getMutations: (command: { id: string; params: ISetWorksheetColWidthMutationParams }) => {
-                if (command.id !== DeltaColumnWidthCommand.id && command.id !== SetColWidthCommand.id) {
                     return {
                         redos: [],
                         undos: [],

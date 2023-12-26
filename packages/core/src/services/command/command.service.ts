@@ -267,7 +267,7 @@ export class CommandService implements ICommandService {
             return result;
         }
 
-        throw new Error(`[CommandService]: Command "${id}" is not registered.`);
+        throw new Error(`[CommandService]: command "${id}" is not registered.`);
     }
 
     syncExecuteCommand<P extends object = object, R = boolean>(
@@ -308,7 +308,7 @@ export class CommandService implements ICommandService {
             return result;
         }
 
-        throw new Error(`[CommandService]: Command "${id}" is not registered.`);
+        throw new Error(`[CommandService]: command "${id}" is not registered.`);
     }
 
     private _pushCommandExecutionStack(stackItem: ICommandExecutionStackItem): IDisposable {

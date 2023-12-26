@@ -1,0 +1,16 @@
+name: 🔮 Sync mirror
+
+on:
+    push:
+        branches: [main, dev]
+
+jobs:
+    sync:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Sync Gitee
+              uses: abersheeran/sync-gitee-mirror@v1-beta
+              with:
+                  repository: dream-num/univer
+                  username: ${{ secrets.GITEE_USERNAME }}
+                  password: ${{ secrets.GITEE_PASSWORD }}

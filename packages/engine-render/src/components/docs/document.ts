@@ -275,7 +275,7 @@ export class Documents extends DocComponent {
 
                     const linesCount = lines.length;
 
-                    let alignOffset;
+                    let alignOffset = alignOffsetNoAngle;
                     let rotateTranslateXListApply = null;
 
                     if (vertexAngle !== 0) {
@@ -322,8 +322,8 @@ export class Documents extends DocComponent {
                         this._drawLiquid.translate(0, -rotateTranslateY);
 
                         rotateTranslateXListApply = rotateTranslateXList;
-                    } else {
-                        alignOffset = alignOffsetNoAngle;
+                    } else if (wrapStrategy === WrapStrategy.WRAP) {
+                        alignOffset.x = pagePaddingLeft * scale;
                     }
 
                     for (let i = 0; i < linesCount; i++) {

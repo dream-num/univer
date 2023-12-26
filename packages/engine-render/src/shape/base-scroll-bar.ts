@@ -108,7 +108,15 @@ export class BaseScrollBar {
     get miniThumbRatioX() {
         const limit = this.horizontalBarWidth - this.horizontalThumbWidth;
 
+        if (limit === 0) {
+            return 0;
+        }
+
         const actual = this.horizontalBarWidth - (this.horizontalThumbWidth - this.horizontalMinusMiniThumb);
+
+        if (actual === 0) {
+            return 0;
+        }
 
         return limit / actual;
     }
@@ -116,7 +124,15 @@ export class BaseScrollBar {
     get miniThumbRatioY() {
         const limit = this.verticalBarHeight - this.verticalThumbHeight;
 
+        if (limit === 0) {
+            return 0;
+        }
+
         const actual = this.verticalBarHeight - (this.verticalThumbHeight - this.verticalMinusMiniThumb);
+
+        if (actual === 0) {
+            return 0;
+        }
 
         return limit / actual;
     }

@@ -21,6 +21,7 @@ import {
     FOCUSING_EDITOR,
     FOCUSING_EDITOR_BUT_HIDDEN,
     FOCUSING_FORMULA_EDITOR,
+    HorizontalAlign,
     ICommandService,
     IContextService,
     IUndoRedoService,
@@ -29,6 +30,7 @@ import {
     OnLifecycle,
     RxDisposable,
     toDisposable,
+    Tools,
 } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import {
@@ -326,7 +328,7 @@ export class FormulaEditorController extends RxDisposable {
         }
 
         docDataModel.getBody()!.dataStream = dataStream;
-        docDataModel.getBody()!.paragraphs = paragraphs;
+        docDataModel.getBody()!.paragraphs = this._clearParagraph(paragraphs);
 
         // Need to empty textRuns(previous formula highlight) every time when sync content(change selection or edit cell or edit formula bar).
         if (unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
@@ -352,6 +354,17 @@ export class FormulaEditorController extends RxDisposable {
         if (INCLUDE_LIST.includes(unitId)) {
             currentRender.mainComponent?.makeDirty();
         }
+    }
+
+    private _clearParagraph(paragraphs: IParagraph[]) {
+        const newParagraphs = Tools.deepClone(paragraphs);
+        for (const paragraph of newParagraphs) {
+            if (paragraph.paragraphStyle) {
+                paragraph.paragraphStyle.horizontalAlign = HorizontalAlign.UNSPECIFIED;
+            }
+        }
+
+        return newParagraphs;
     }
 
     private _autoScroll() {

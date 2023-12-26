@@ -50,12 +50,7 @@ export class ColumnHeaderLayout extends SheetExtension {
             return;
         }
 
-        const { a: scaleX = 1, d: scaleY = 1 } = ctx.getTransform();
-
-        const scale = this._getScale({
-            scaleX,
-            scaleY,
-        });
+        const scale = this._getScale(parentScale);
 
         // painting background
         ctx.fillStyle = getColor([248, 249, 250])!;

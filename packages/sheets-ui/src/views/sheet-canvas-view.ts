@@ -174,9 +174,9 @@ export class SheetCanvasView extends RxDisposable {
 
         this._sheetSkeletonManagerService.setCurrent({ sheetId, unitId });
 
-        viewMain?.onScrollStopObserver.add(() => {
-            spreadsheet.makeForceDirty();
-        });
+        // viewMain?.onScrollStopObserver.add(() => {
+        //     spreadsheet.makeForceDirty();
+        // });
     }
 
     private _addViewport(worksheet: Worksheet) {

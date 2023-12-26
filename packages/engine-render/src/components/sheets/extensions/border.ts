@@ -26,7 +26,7 @@ import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultBorderExtension';
 
-const BORDER_Z_INDEX = 30;
+const BORDER_Z_INDEX = 50;
 
 export class Border extends SheetExtension {
     override uKey = UNIQUE_KEY;
@@ -58,12 +58,7 @@ export class Border extends SheetExtension {
         }
         ctx.save();
 
-        const { a: scaleX = 1, d: scaleY = 1 } = ctx.getTransform();
-
-        const scale = this._getScale({
-            scaleX,
-            scaleY,
-        });
+        const scale = this._getScale(parentScale);
 
         let preStyle: BorderStyleTypes;
         let preColor: string;
@@ -102,10 +97,7 @@ export class Border extends SheetExtension {
             startX = fixLineWidthByScale(startX, scale);
             endX = fixLineWidthByScale(endX, scale);
 
-            if (
-                !this.isRenderDiffRangesByRow(mergeInfo.startRow, diffRanges) &&
-                !this.isRenderDiffRangesByRow(mergeInfo.endRow, diffRanges)
-            ) {
+            if (!this.isRenderDiffRangesByRow(mergeInfo.startRow, mergeInfo.endRow, diffRanges)) {
                 return true;
             }
 

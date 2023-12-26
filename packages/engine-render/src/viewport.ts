@@ -443,11 +443,21 @@ export class Viewport {
         let x = scrollX;
         let y = scrollY;
         if (this._scrollBar) {
-            x /= this._scrollBar.ratioScrollX; // 转换为内容区实际滚动距离
-            y /= this._scrollBar.ratioScrollY;
             const { scaleX, scaleY } = this.scene;
-            x /= scaleX;
-            y /= scaleY;
+            if (this._scrollBar.ratioScrollX !== 0) {
+                x /= this._scrollBar.ratioScrollX; // 转换为内容区实际滚动距离
+                x /= scaleX;
+            } else if (this.actualScrollX !== undefined) {
+                x = this.actualScrollX;
+            }
+
+            if (this._scrollBar.ratioScrollY !== 0) {
+                y /= this._scrollBar.ratioScrollY;
+
+                y /= scaleY;
+            } else if (this.actualScrollY !== undefined) {
+                y = this.actualScrollY;
+            }
 
             // console.log(y, this._scrollBar.miniThumbRatioY);
             // x *= this._scrollBar.miniThumbRatioX;
@@ -528,16 +538,7 @@ export class Viewport {
 
         const { a: scaleX = 1, d: scaleY = 1 } = mainCtx.getTransform();
 
-        sceneTrans.multiply(
-            Transform.create([
-                1,
-                0,
-                0,
-                1,
-                fixLineWidthByScale(-this.actualScrollX || 0, scaleX),
-                fixLineWidthByScale(-this.actualScrollY || 0, scaleY),
-            ])
-        );
+        sceneTrans.multiply(Transform.create([1, 0, 0, 1, -this.actualScrollX || 0, -this.actualScrollY || 0]));
 
         const ctx = mainCtx;
 
@@ -746,8 +747,8 @@ export class Viewport {
             return;
         }
 
-        const limitX = this._scrollBar?.limitX || Infinity;
-        const limitY = this._scrollBar?.limitY || Infinity;
+        const limitX = this._scrollBar?.limitX;
+        const limitY = this._scrollBar?.limitY;
 
         let isLimitedX = true;
         let isLimitedY = true;
@@ -975,10 +976,34 @@ export class Viewport {
             };
         }
 
-        const xFrom: number = this.left;
-        const xTo: number = (this.width || 0) + this.left;
-        const yFrom: number = this.top;
-        const yTo: number = (this.height || 0) + this.top;
+        const sceneTrans = this._scene.transform.clone();
+
+        const m = sceneTrans.getMatrix();
+
+        const scaleFromX = this._isRelativeX ? (m[0] < 1 ? m[0] : 1) : 1;
+        const scaleFromY = this._isRelativeY ? (m[3] < 1 ? m[3] : 1) : 1;
+
+        const scaleToX = this._isRelativeX ? 1 : m[0] < 1 ? m[0] : 1;
+        const scaleToY = this._isRelativeY ? 1 : m[3] < 1 ? m[3] : 1;
+
+        let width = this._width;
+
+        let height = this._height;
+
+        const size = this._getViewPortSize();
+
+        if (m[0] > 1) {
+            width = size.width;
+        }
+
+        if (m[3] > 1) {
+            height = size.height;
+        }
+
+        const xFrom: number = this.left * scaleFromX;
+        const xTo: number = ((width || 0) + this.left) * scaleToX;
+        const yFrom: number = this.top * scaleFromY;
+        const yTo: number = ((height || 0) + this.top) * scaleToY;
 
         /**
          * @DR-Univer The coordinates here need to be consistent with the clip in the render,

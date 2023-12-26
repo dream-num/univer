@@ -16,7 +16,7 @@
 
 export default {
     ABS: {
-        description: `Returns the absolute value of a number`,
+        description: `Returns the absolute value of a number. The absolute value of a number is the number without its sign.`,
         abstract: `Returns the absolute value of a number`,
         links: [
             {
@@ -25,12 +25,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The real number of which you want the absolute value.' },
         },
     },
     ACOS: {
-        description: `Returns the arccosine of a number`,
+        description: `Returns the arccosine, or inverse cosine, of a number. The arccosine is the angle whose cosine is number. The returned angle is given in radians in the range 0 (zero) to pi.`,
         abstract: `Returns the arccosine of a number`,
         links: [
             {
@@ -39,12 +38,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The cosine of the angle you want and must be from -1 to 1.' },
         },
     },
     ACOSH: {
-        description: `Returns the inverse hyperbolic cosine of a number`,
+        description: `Returns the inverse hyperbolic cosine of a number. The number must be greater than or equal to 1. The inverse hyperbolic cosine is the value whose hyperbolic cosine is number, so ACOSH(COSH(number)) equals number.`,
         abstract: `Returns the inverse hyperbolic cosine of a number`,
         links: [
             {
@@ -53,12 +51,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'Any real number equal to or greater than 1.' },
         },
     },
     ACOT: {
-        description: `Returns the arccotangent of a number`,
+        description: `Returns the principal value of the arccotangent, or inverse cotangent, of a number.`,
         abstract: `Returns the arccotangent of a number`,
         links: [
             {
@@ -67,8 +64,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: {
+                name: 'number',
+                detail: 'Number is the cotangent of the angle you want. This must be a real number.',
+            },
         },
     },
     ACOTH: {

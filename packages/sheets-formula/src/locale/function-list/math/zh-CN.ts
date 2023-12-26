@@ -16,7 +16,7 @@
 
 export default {
     ABS: {
-        description: '返回数字的绝对值',
+        description: '返回数字的绝对值。一个数字的绝对值是该数字不带其符号的形式。',
         abstract: '返回数字的绝对值',
         links: [
             {
@@ -25,12 +25,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '需要计算其绝对值的实数。' },
         },
     },
     ACOS: {
-        description: '返回数字的反余弦值',
+        description:
+            '返回数字的反余弦值。 反余弦值是指余弦值为 number 的角度。 返回的角度以弧度表示，弧度值在 0（零）到 pi 之间。',
         abstract: '返回数字的反余弦值',
         links: [
             {
@@ -39,12 +39,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '所求角度的余弦值，必须介于 -1 到 1 之间。' },
         },
     },
     ACOSH: {
-        description: '返回数字的反双曲余弦值',
+        description:
+            '返回数字的反双曲余弦值。 该数字必须大于或等于 1。 反双曲余弦值是指双曲余弦值为 number 的值，因此 ACOSH(COSH(number)) 等于 number。',
         abstract: '返回数字的反双曲余弦值',
         links: [
             {
@@ -53,12 +53,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '大于或等于 1 的任意实数。' },
         },
     },
     ACOT: {
-        description: '返回一个数的反余切值',
+        description: '返回数字的反余切值的主值。',
         abstract: '返回一个数的反余切值',
         links: [
             {
@@ -67,8 +66,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: 'Number 是需要的角度的正切值。 这必须是实数。' },
         },
     },
     ACOTH: {

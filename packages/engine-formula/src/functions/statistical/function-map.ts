@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { Average } from './average/average';
-import { Count } from './count/count';
-import { CountA } from './counta/counta';
+import { Average } from './average';
+import { Count } from './count';
+import { CountA } from './counta';
 import { FUNCTION_NAMES_STATISTICAL } from './function-names';
-import { Max } from './max/max';
-import { Min } from './min/min';
+import { Max } from './max';
+import { Min } from './min';
 
 export const functionStatistical = [
     [Average, FUNCTION_NAMES_STATISTICAL.AVERAGE],

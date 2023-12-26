@@ -15,6 +15,10 @@
  */
 
 export enum FUNCTION_NAMES_MATH {
+    ABS = 'ABS',
+    ACOS = 'ACOS',
+    ACOSH = 'ACOSH',
+    ACOT = 'ACOT',
     SUM = 'SUM',
     SUMIF = 'SUMIF',
     SUMIFS = 'SUMIFS',

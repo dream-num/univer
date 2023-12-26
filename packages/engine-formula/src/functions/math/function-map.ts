@@ -14,13 +14,21 @@
  * limitations under the License.
  */
 
+import { Abs } from './abs';
+import { Acos } from './acos';
+import { Acosh } from './acosh';
+import { Acot } from './acot';
 import { FUNCTION_NAMES_MATH } from './function-names';
-import { Power } from './power/power';
-import { Sum } from './sum/sum';
-import { Sumif } from './sumif/sumif';
-import { Sumifs } from './sumifs/sumifs';
+import { Power } from './power';
+import { Sum } from './sum';
+import { Sumif } from './sumif';
+import { Sumifs } from './sumifs';
 
 export const functionMath = [
+    [Abs, FUNCTION_NAMES_MATH.ABS],
+    [Acos, FUNCTION_NAMES_MATH.ACOS],
+    [Acosh, FUNCTION_NAMES_MATH.ACOSH],
+    [Acot, FUNCTION_NAMES_MATH.ACOT],
     [Sum, FUNCTION_NAMES_MATH.SUM],
     [Sumif, FUNCTION_NAMES_MATH.SUMIF],
     [Sumifs, FUNCTION_NAMES_MATH.SUMIFS],

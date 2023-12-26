@@ -553,7 +553,7 @@ export class PromptController extends Disposable {
 
             if (this._inputPanelState === InputPanelState.keyNormal) {
                 // show search function panel
-                const searchList = this._descriptionService.getSearchListByName(token);
+                const searchList = this._descriptionService.getSearchListByNameFirstLetter(token);
                 this._hideFunctionPanel();
                 if (searchList == null || searchList.length === 0) {
                     return;

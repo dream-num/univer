@@ -89,7 +89,7 @@ export class SharedController extends Disposable {
 
     private _registerCommands(): void {
         [CutCommand, CopyCommand, PasteCommand].forEach((command) =>
-            this.disposeWithMe(this._commandService.registeMultipleCommand(command))
+            this.disposeWithMe(this._commandService.registerMultipleCommand(command))
         );
     }
 

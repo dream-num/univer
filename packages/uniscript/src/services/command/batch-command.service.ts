@@ -26,7 +26,7 @@ export class BatchCommandService implements ICommandService {
         throw new Error('Method not implemented.');
     }
 
-    registeMultipleCommand(command: ICommand<object, boolean>): IDisposable {
+    registerMultipleCommand(command: ICommand<object, boolean>): IDisposable {
         throw new Error('Method not implemented.');
     }
 

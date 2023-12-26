@@ -51,7 +51,7 @@ export class DocClipboardController extends Disposable {
 
     initialize() {
         [DocCopyCommand, DocCutCommand, DocPasteCommand].forEach((command) =>
-            this.disposeWithMe(this._commandService.registeMultipleCommand(command))
+            this.disposeWithMe(this._commandService.registerMultipleCommand(command))
         );
         [InnerPasteCommand, CutContentCommand].forEach((command) =>
             this.disposeWithMe(this._commandService.registerCommand(command))

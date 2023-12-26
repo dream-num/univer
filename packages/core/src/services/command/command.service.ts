@@ -19,7 +19,7 @@ import { createIdentifier, Inject, Injector } from '@wendellhu/redi';
 
 import { findLast, remove } from '../../common/array';
 import { sequence, sequenceAsync } from '../../common/sequence';
-import { toDisposable } from '../../shared/lifecycle';
+import { DisposableCollection, toDisposable } from '../../shared/lifecycle';
 import type { IKeyValue } from '../../shared/types';
 import { IContextService } from '../context/context.service';
 import { ILogService } from '../log/log.service';
@@ -133,7 +133,7 @@ export type CommandListener = (commandInfo: Readonly<ICommandInfo>, options?: IE
 export interface ICommandService {
     registerCommand(command: ICommand): IDisposable;
 
-    registerAsMultipleCommand(command: ICommand): IDisposable;
+    registerMultipleCommand(command: ICommand): IDisposable;
 
     executeCommand<P extends object = object, R = boolean>(
         id: string,
@@ -160,13 +160,13 @@ export const ICommandService = createIdentifier<ICommandService>('anywhere.comma
 /**
  * The registry of commands.
  */
-class CommandRegistry {
+export class CommandRegistry {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private readonly _commands = new Map<string, ICommand>();
 
     registerCommand(command: ICommand): IDisposable {
         if (this._commands.has(command.id)) {
-            throw new Error(`Command ${command.id} has registered before!`);
+            throw new Error(`[CommandRegistry]: command "${command.id}" has been registered before.`);
         }
 
         this._commands.set(command.id, command);
@@ -212,7 +212,7 @@ export class CommandService implements ICommandService {
         return this._registerCommand(command);
     }
 
-    registerAsMultipleCommand(command: ICommand): IDisposable {
+    registerMultipleCommand(command: ICommand): IDisposable {
         return this._registerMultiCommand(command);
     }
 
@@ -226,7 +226,7 @@ export class CommandService implements ICommandService {
             });
         }
 
-        throw new Error('Could not add a listener twice.');
+        throw new Error('[CommandService]: could not add a listener twice.');
     }
 
     onCommandExecuted(listener: (commandInfo: ICommandInfo) => void): IDisposable {
@@ -239,7 +239,7 @@ export class CommandService implements ICommandService {
             });
         }
 
-        throw new Error('Could not add a listener twice.');
+        throw new Error('[CommandService]: could not add a listener twice.');
     }
 
     async executeCommand<P extends object = object, R = boolean>(
@@ -326,8 +326,16 @@ export class CommandService implements ICommandService {
         let multiCommand: MultiCommand;
 
         if (!registry) {
+            const disposableCollection = new DisposableCollection();
             multiCommand = new MultiCommand(command.id);
-            this._multiCommandDisposables.set(command.id, this._commandRegistry.registerCommand(multiCommand));
+            disposableCollection.add(this._commandRegistry.registerCommand(multiCommand));
+            disposableCollection.add(
+                toDisposable(() => {
+                    this._multiCommandDisposables.delete(command.id);
+                })
+            );
+
+            this._multiCommandDisposables.set(command.id, disposableCollection);
         } else {
             if ((registry[0] as IKeyValue).multi !== true) {
                 throw new Error('Command has registered as a single command.');
@@ -336,10 +344,9 @@ export class CommandService implements ICommandService {
             }
         }
 
-        const commandDisposable = multiCommand.registerImplementation(command as IMultiCommand);
-
+        const implementationDisposable = multiCommand.registerImplementation(command as IMultiCommand);
         return toDisposable(() => {
-            commandDisposable.dispose();
+            implementationDisposable.dispose();
             if (!multiCommand.hasImplementations()) {
                 this._multiCommandDisposables.get(command.id)?.dispose();
             }
@@ -434,7 +441,7 @@ class MultiCommand implements IMultiCommand {
 
         for (const item of this._implementations) {
             const preconditions = item.command.preconditions;
-            if (preconditions?.(contextService)) {
+            if (!preconditions || (preconditions && preconditions(contextService))) {
                 logService.log(`[MultiCommand]`, `executing implementation "${item.command.name}".`);
                 const result = await injector.invoke(item.command.handler, params);
                 if (result) {

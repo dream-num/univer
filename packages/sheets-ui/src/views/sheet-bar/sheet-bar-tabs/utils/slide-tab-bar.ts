@@ -451,6 +451,11 @@ export class SlideTabBar {
         let lastPageY = 0;
         let lastTime = 0;
         this._downAction = (downEvent: MouseEvent) => {
+            // Waiting for the rename of the previous TAB
+            if (this._activeTabItem?.isEditMode()) {
+                return;
+            }
+
             const slideItemId = (downEvent.target as HTMLElement)
                 ?.closest(`.${config.slideTabBarItemClassName}`)
                 ?.getAttribute('data-id');

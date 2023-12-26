@@ -36,6 +36,8 @@ import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast
 import { NODE_ORDER_MAP, NodeType } from './node-type';
 
 export class LambdaNode extends BaseAstNode {
+    private _isNotEmpty = true;
+
     constructor(
         token: string,
         private _lambdaId: string,
@@ -49,8 +51,12 @@ export class LambdaNode extends BaseAstNode {
         return NodeType.LAMBDA;
     }
 
+    override setNotEmpty(state = false) {
+        this._isNotEmpty = state;
+    }
+
     isEmptyParamFunction() {
-        return this.getChildren().length < 2;
+        return this.getChildren().length < 2 && this._isNotEmpty;
     }
 
     isFunctionParameter() {

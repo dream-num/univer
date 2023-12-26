@@ -165,8 +165,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'rows', detail: 'The number of rows in the array. Must be greater than zero.' },
+            number2: { name: 'cols', detail: 'The number of columns in the array. Must be greater than zero.' },
+            value3: {
+                name: 'lambda',
+                detail: ' A LAMBDA that is called to create the array. The LAMBDA takes two parameters: row (The row index of the array), col (The column index of the array).',
+            },
         },
     },
     MAP: {

@@ -15,7 +15,7 @@
  */
 
 import { ErrorType } from '../../basics/error-type';
-import { DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER } from '../../basics/token-type';
+import { DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER } from '../../basics/token-type';
 import type { BaseAstNode } from '../ast-node/base-ast-node';
 import type { LambdaParameterNode } from '../ast-node/lambda-parameter-node';
 import type { Interpreter } from '../interpreter/interpreter';
@@ -50,7 +50,13 @@ export class LambdaValueObjectObject extends BaseValueObject {
 
         this._setLambdaNodeValue(this._lambdaNode);
 
-        return new AsyncObject(this._interpreter.executeAsync(this._lambdaNode) as Promise<BaseValueObject>);
+        this._lambdaNode.setNotEmpty();
+
+        const o = new AsyncObject(this._interpreter.executeAsync(this._lambdaNode) as Promise<BaseValueObject>);
+
+        this._lambdaNode.setNotEmpty(true);
+
+        return o;
     }
 
     private _setLambdaNodeValue(node: BaseAstNode) {
@@ -60,7 +66,7 @@ export class LambdaValueObjectObject extends BaseValueObject {
             const item = children[i];
             const token = item.getToken();
 
-            if (token === DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER) {
+            if (token === DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER) {
                 const lambdaParameter = (item as LambdaParameterNode).getLambdaParameter();
                 const value = this._lambdaPrivacyValueMap.get(lambdaParameter);
                 if (value) {

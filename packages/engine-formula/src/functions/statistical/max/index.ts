@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Max extends BaseFunction {
-    override calculate(...variants: FunctionVariantType[]) {
+    override calculate(...variants: BaseValueObject[]) {
         let accumulatorAll: BaseValueObject = new NumberValueObject(-Infinity);
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];
@@ -30,15 +29,11 @@ export class Max extends BaseFunction {
                 return variant;
             }
 
-            if (variant.isReferenceObject()) {
-                variant = (variant as BaseReferenceObject).toArrayValueObject();
-            }
-
-            if ((variant as ArrayValueObject).isArray()) {
+            if (variant.isArray()) {
                 variant = (variant as ArrayValueObject).max();
             }
 
-            if ((variant as ArrayValueObject).isNull()) {
+            if (variant.isNull()) {
                 continue;
             }
 

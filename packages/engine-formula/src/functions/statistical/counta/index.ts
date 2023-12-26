@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class CountA extends BaseFunction {
-    override calculate(...variants: FunctionVariantType[]) {
+    override calculate(...variants: BaseValueObject[]) {
         let accumulatorAll: BaseValueObject = new NumberValueObject(0);
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];
@@ -31,15 +30,11 @@ export class CountA extends BaseFunction {
                 continue;
             }
 
-            if (variant.isReferenceObject()) {
-                variant = (variant as BaseReferenceObject).toArrayValueObject();
-            }
-
-            if ((variant as ArrayValueObject).isArray()) {
+            if (variant.isArray()) {
                 variant = (variant as ArrayValueObject).countA();
-                accumulatorAll = accumulatorAll.plus(variant as BaseValueObject);
+                accumulatorAll = accumulatorAll.plus(variant);
             } else {
-                if (!(variant as BaseValueObject).isNull()) {
+                if (!variant.isNull()) {
                     accumulatorAll = accumulatorAll.plus(new NumberValueObject(1));
                 }
             }

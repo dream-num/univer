@@ -165,8 +165,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '行', detail: '配列内の行数。 ゼロより大きい値にする必要があります。' },
+            number2: { name: '列', detail: '配列内の列数。 ゼロより大きい値にする必要があります。' },
+            value3: {
+                name: 'lambda',
+                detail: '配列を作成するために呼び出される LAMBDA。 LAMBDA は 2 つのパラメーターを取ります: 行 (配列の行インデックス), 列 (配列の列インデックス)',
+            },
         },
     },
     MAP: {

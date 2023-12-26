@@ -30,7 +30,7 @@ import {
     StringValueObject,
 } from '../value-object/primitive-object';
 
-export type NodeValueType = BaseValueObject | BaseReferenceObject | AsyncObject;
+export type NodeValueType = BaseValueObject | BaseReferenceObject | AsyncObject | AsyncArrayObject;
 
 export type FunctionVariantType = BaseValueObject | BaseReferenceObject;
 

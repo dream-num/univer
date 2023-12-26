@@ -112,13 +112,16 @@ export class StatusBarController extends Disposable {
                 if (!executor) {
                     return undefined;
                 }
-                const res = executor?.calculate(...refs) as BaseValueObject;
+                const arrayValue = refs.map((ref) => {
+                    return ref.toArrayValueObject();
+                });
+                const res = executor?.calculate(...arrayValue) as BaseValueObject;
                 if (!res.getValue) {
                     return undefined;
                 }
                 return {
                     func: f.func,
-                    value: (executor?.calculate(...refs) as BaseValueObject).getValue(),
+                    value: (executor?.calculate(...arrayValue) as BaseValueObject).getValue(),
                 };
             });
             if (calcResult.every((r) => r === undefined)) {

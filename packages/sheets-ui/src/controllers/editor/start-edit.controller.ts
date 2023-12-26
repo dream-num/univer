@@ -495,7 +495,6 @@ export class StartEditController extends Disposable {
             const { skeleton } = docParam;
 
             this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject, scaleX, scaleY);
-
             // move selection
             if (
                 eventType === DeviceInputEventType.Keyboard ||

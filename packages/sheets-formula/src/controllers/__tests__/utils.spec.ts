@@ -29,7 +29,7 @@ import {
 } from '@univerjs/sheets';
 import { describe, expect, it } from 'vitest';
 
-import { offsetArrayFormula, offsetFormula } from '../utils';
+import { offsetArrayFormula, offsetFormula, removeFormulaData } from '../utils';
 
 describe('utils test', () => {
     describe('function offsetFormula', () => {
@@ -697,6 +697,69 @@ describe('utils test', () => {
                     },
                 },
             });
+        });
+    });
+
+    describe('function removeFormulaData', () => {
+        it('remove data', () => {
+            const unitId = 'workbook-01';
+            const sheetId = 'sheet-0011';
+            const formulaData = {
+                [unitId]: {
+                    [sheetId]: {
+                        0: {
+                            0: {
+                                f: '=SUM(A1)',
+                            },
+                        },
+                    },
+                },
+            };
+
+            removeFormulaData(formulaData, unitId, sheetId);
+
+            expect(formulaData).toStrictEqual({
+                [unitId]: {},
+            });
+        });
+
+        it('remove blank worksheet', () => {
+            const unitId = 'workbook-01';
+            const sheetId = 'sheet-0011';
+            const formulaData = {
+                [unitId]: {
+                    [sheetId]: {},
+                },
+            };
+
+            removeFormulaData(formulaData, unitId, sheetId);
+
+            expect(formulaData).toStrictEqual({
+                [unitId]: {},
+            });
+        });
+
+        it('remove blank workbook', () => {
+            const unitId = 'workbook-01';
+            const sheetId = 'sheet-0011';
+            const formulaData = {
+                [unitId]: {},
+            };
+
+            removeFormulaData(formulaData, unitId, sheetId);
+
+            expect(formulaData).toStrictEqual({
+                [unitId]: {},
+            });
+        });
+        it('remove blank object', () => {
+            const unitId = 'workbook-01';
+            const sheetId = 'sheet-0011';
+            const formulaData = {};
+
+            removeFormulaData(formulaData, unitId, sheetId);
+
+            expect(formulaData).toStrictEqual({});
         });
     });
 });

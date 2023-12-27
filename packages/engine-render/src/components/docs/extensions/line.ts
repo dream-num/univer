@@ -22,7 +22,7 @@ import { BooleanNumber, getColorStyle, TextDecoration } from '@univerjs/core';
 import { COLOR_BLACK_RGB, DEFAULT_OFFSET_SPACING, FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics/const';
 import { calculateRectRotate } from '../../../basics/draw';
 import type { IDocumentSkeletonSpan } from '../../../basics/i-document-skeleton-cached';
-import { degToRad, fixLineWidthByScale, getScale } from '../../../basics/tools';
+import { degToRad, getScale } from '../../../basics/tools';
 import { Vector2 } from '../../../basics/vector2';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
 import { docExtension } from '../doc-extension';
@@ -44,13 +44,13 @@ export class Line extends docExtension {
             return;
         }
 
-        const { contentHeight = 0 } = line;
+        const { contentHeight = 0, asc } = line;
         const { ts: textStyle, bBox } = span;
         if (!textStyle) {
             return;
         }
 
-        const { sp: strikeoutPosition } = bBox;
+        const { sp: strikeoutPosition, ba } = bBox;
 
         const scale = getScale(parentScale);
 
@@ -65,7 +65,9 @@ export class Line extends docExtension {
         }
 
         if (strikethrough) {
-            const startY = strikeoutPosition - DELTA;
+            // We use the asc baseline to find the position of the strikethrough,
+            // and ba - strikeoutPosition is exactly the offset position of the strikethrough from the baseline
+            const startY = asc - (ba - strikeoutPosition) - DELTA;
 
             this._drawLine(ctx, span, strikethrough, startY, scale);
         }
@@ -111,6 +113,7 @@ export class Line extends docExtension {
             ctx.beginPath();
             const color = getColorStyle(colorStyle) || COLOR_BLACK_RGB;
             ctx.strokeStyle = color;
+
             this._setLineType(ctx, lineType || TextDecoration.SINGLE);
 
             const start = calculateRectRotate(
@@ -128,8 +131,8 @@ export class Line extends docExtension {
                 alignOffset
             );
 
-            ctx.moveTo(fixLineWidthByScale(start.x, scale), fixLineWidthByScale(start.y, scale));
-            ctx.lineTo(fixLineWidthByScale(end.x, scale), fixLineWidthByScale(end.y, scale));
+            ctx.moveTo(start.x, start.y);
+            ctx.lineTo(end.x, end.y);
             ctx.stroke();
 
             ctx.restore();

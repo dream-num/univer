@@ -34,6 +34,7 @@ import { createIdentifier, Inject } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
 
+import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import type { SelectionRenderModel } from './selection-render-model';
 import { SelectionShape } from './selection-shape';
 import { SelectionShapeExtension } from './selection-shape-extension';
@@ -181,9 +182,20 @@ export class SelectionRenderService implements ISelectionRenderService {
 
     constructor(
         @Inject(ThemeService) private readonly _themeService: ThemeService,
-        @IShortcutService private readonly _shortcutService: IShortcutService
+        @IShortcutService private readonly _shortcutService: IShortcutService,
+        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
     ) {
         this._selectionStyle = getNormalSelectionStyle(this._themeService);
+    }
+
+    private _getFreeze() {
+        const config = this._sheetSkeletonManagerService.getCurrent()?.skeleton.getWorksheetConfig();
+
+        if (config == null) {
+            return;
+        }
+
+        return config.freeze;
     }
 
     enableHeaderHighlight() {

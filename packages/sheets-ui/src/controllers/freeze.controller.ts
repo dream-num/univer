@@ -345,21 +345,28 @@ export class FreezeController extends Disposable {
         const currentScroll = this._scrollManagerService.getCurrentScroll();
 
         const skeletonViewHeight = (sheetObject.engine.height - skeleton.columnHeaderHeight) / scale;
-
         const start = currentScroll?.sheetViewStartRow ?? 0;
         const startHeight =
             start === 0
                 ? -(currentScroll?.offsetY ?? 0)
                 : skeleton.rowHeightAccumulation[start - 1] - (currentScroll?.offsetY ?? 0);
+
         let lastRow = 0;
+        let hadFind = false;
         for (let i = start, len = skeleton.rowHeightAccumulation.length; i < len; i++) {
             const height = skeleton.rowHeightAccumulation[i];
-
             if (height - startHeight > skeletonViewHeight) {
                 lastRow = i;
+                hadFind = true;
                 break;
             }
         }
+
+        // row total height smaller than canvas height
+        if (!hadFind) {
+            lastRow = skeleton.rowHeightAccumulation.length - 1;
+        }
+
         return lastRow;
     }
 

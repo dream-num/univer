@@ -581,8 +581,8 @@ export class FreezeController extends Disposable {
             }
 
             this._commandService.executeCommand(SetFrozenCommand.id, {
-                startRow: this._changeToRow,
-                startColumn: this._changeToColumn,
+                startRow: ySplit === 0 ? -1 : this._changeToRow,
+                startColumn: xSplit === 0 ? -1 : this._changeToColumn,
                 ySplit,
                 xSplit,
                 unitId: workbook.getUnitId(),

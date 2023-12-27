@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Direction } from '@univerjs/core';
+import type { Direction, IWorksheetData } from '@univerjs/core';
 import {
     Disposable,
     ICommandService,
@@ -57,6 +57,18 @@ export class ScrollController extends Disposable {
         this._scrollEventBinding();
         this._scrollSubscribeBinding();
         this._skeletonListener();
+    }
+
+    private _getFreeze() {
+        const config: IWorksheetData | undefined = this._sheetSkeletonManagerService
+            .getCurrent()
+            ?.skeleton.getWorksheetConfig();
+
+        if (config == null) {
+            return;
+        }
+
+        return config.freeze;
     }
 
     private _scrollEventBinding() {
@@ -110,14 +122,18 @@ export class ScrollController extends Disposable {
                         return;
                     }
                     const { actualScrollX = 0, actualScrollY = 0 } = param;
+
+                    const freeze = this._getFreeze();
+
                     // according to the actual scroll position, the most suitable row, column and offset combination is recalculated.
                     const { row, column, rowOffset, columnOffset } = skeleton.getDecomposedOffset(
                         actualScrollX,
                         actualScrollY
                     );
+
                     this._commandService.executeCommand(ScrollCommand.id, {
-                        sheetViewStartRow: row,
-                        sheetViewStartColumn: column,
+                        sheetViewStartRow: row + (freeze?.ySplit || 0),
+                        sheetViewStartColumn: column + (freeze?.xSplit || 0),
                         offsetX: columnOffset,
                         offsetY: rowOffset,
                     });

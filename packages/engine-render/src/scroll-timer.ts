@@ -50,11 +50,11 @@ export class ScrollTimer {
         private _scene: any,
         private _scrollTimerType: ScrollTimerType = ScrollTimerType.ALL,
         private _padding?: IPaddingData,
-        private _smoothRatioX = 0.05,
-        private _smoothRatioY = 0.05
+        private _smoothRatioX = 0.4,
+        private _smoothRatioY = 0.1
     ) {
         if (!this._padding) {
-            this._padding = { t: 20, b: 20, l: 46, r: 60 };
+            this._padding = { t: 0, b: 15, l: 0, r: 60 };
         }
     }
 

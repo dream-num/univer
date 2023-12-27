@@ -8,6 +8,7 @@
             }
         ],
         "no-duplicate-selectors": null,
-        "no-descending-specificity": null
+        "no-descending-specificity": null,
+        "color-function-notation": null
     }
 }

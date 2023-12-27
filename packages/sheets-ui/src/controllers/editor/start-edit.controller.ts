@@ -48,6 +48,8 @@ import {
 import type { DocumentSkeleton, IDocumentLayoutObject, IEditorInputConfig, Scene } from '@univerjs/engine-render';
 import {
     DeviceInputEventType,
+    FIX_ONE_PIXEL_BLUR_OFFSET,
+    fixLineWidthByScale,
     IRenderManagerService,
     ITextSelectionRenderManager,
     Rect,
@@ -259,7 +261,7 @@ export class StartEditController extends Disposable {
         // re-calculate skeleton(viewModel for component)
         documentSkeleton.calculate();
 
-        this._editAreaProcessing(editorWidth, editorHeight, actualRangeWithCoord, canvasOffset, fill);
+        this._editAreaProcessing(editorWidth, editorHeight, actualRangeWithCoord, canvasOffset, fill, scaleX, scaleY);
     }
 
     /**
@@ -338,7 +340,7 @@ export class StartEditController extends Disposable {
             return;
         }
 
-        const { startX, startY } = actualRangeWithCoord;
+        let { startX, startY } = actualRangeWithCoord;
 
         const { document: documentComponent, scene, engine } = editorObject;
 
@@ -376,11 +378,23 @@ export class StartEditController extends Disposable {
             editorWidth = clientWidth;
         }
 
-        editorWidth = Math.round(editorWidth);
+        const pixelRatio = engine.getPixelRatio();
 
-        editorHeight = Math.round(editorHeight);
+        const scaleXPixelRatio = scaleX * pixelRatio;
 
-        physicHeight = Math.round(editorHeight);
+        const scaleYPixelRatio = scaleY * pixelRatio;
+
+        startX = fixLineWidthByScale(startX - FIX_ONE_PIXEL_BLUR_OFFSET, scaleXPixelRatio);
+
+        startY = fixLineWidthByScale(startY - FIX_ONE_PIXEL_BLUR_OFFSET, scaleYPixelRatio);
+
+        editorWidth = fixLineWidthByScale(editorWidth, scaleXPixelRatio);
+
+        editorHeight = fixLineWidthByScale(editorHeight, scaleYPixelRatio);
+
+        physicHeight = fixLineWidthByScale(editorHeight, scaleYPixelRatio);
+
+        this._addBackground(scene, editorWidth / scaleX, editorHeight / scaleY, fill);
 
         scene.transformByState({
             width: editorWidth,
@@ -389,12 +403,9 @@ export class StartEditController extends Disposable {
 
         documentComponent.resize(editorWidth, editorHeight);
 
-        this._addBackground(scene, editorWidth, editorHeight, fill);
-
         // resize canvas
-        requestIdleCallback(() => {
-            engine.resizeBySize(editorWidth, physicHeight);
-        });
+
+        engine.resizeBySize(editorWidth, physicHeight);
 
         // Update cell editor container position and size.
         this._cellEditorManagerService.setState({
@@ -495,6 +506,7 @@ export class StartEditController extends Disposable {
             const { skeleton } = docParam;
 
             this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject, scaleX, scaleY);
+
             // move selection
             if (
                 eventType === DeviceInputEventType.Keyboard ||

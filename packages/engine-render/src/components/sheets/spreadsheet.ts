@@ -112,7 +112,7 @@ export class Spreadsheet extends SheetComponent {
             return;
         }
 
-        const parentScale = this.getParentScale();
+        const { a: scaleX = 1, d: scaleY = 1 } = ctx.getTransform();
 
         // insert overflow cache
         this._calculateOverflow();
@@ -122,7 +122,7 @@ export class Spreadsheet extends SheetComponent {
             : undefined;
         const extensions = this.getExtensionsByOrder();
         for (const extension of extensions) {
-            extension.draw(ctx, parentScale, spreadsheetSkeleton, diffRanges);
+            extension.draw(ctx, { scaleX, scaleY }, spreadsheetSkeleton, diffRanges);
         }
 
         /**
@@ -208,8 +208,6 @@ export class Spreadsheet extends SheetComponent {
             return this;
         }
 
-        const { top, left, bottom, right } = bounds!.viewBound;
-
         const spreadsheetSkeleton = this.getSkeleton();
 
         if (!spreadsheetSkeleton) {
@@ -233,8 +231,6 @@ export class Spreadsheet extends SheetComponent {
 
         const scale = getScale({ scaleX, scaleY });
 
-        // const { left: fixTranslateLeft, top: fixTranslateTop } = getTranslateInSpreadContextWithPixelRatio();
-
         const { rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
 
         mainCtx.translate(fixLineWidthByScale(rowHeaderWidth, scale), fixLineWidthByScale(columnHeaderHeight, scale));
@@ -249,6 +245,16 @@ export class Spreadsheet extends SheetComponent {
             //     return;
             // }
 
+            // if (
+            //     viewPortKey === 'viewRowTop' ||
+            //     viewPortKey === 'viewRowBottom' ||
+            //     viewPortKey === 'viewMainLeft' ||
+            //     viewPortKey === 'viewMainTop'
+            // ) {
+            //     // console.warn('ignore object', this);
+            //     return;
+            // }
+
             if (viewPortKey === 'viewMain') {
                 const ctx = this._cacheCanvas.getContext();
                 ctx.save();
@@ -259,7 +265,7 @@ export class Spreadsheet extends SheetComponent {
 
                 const dh = bottom - top + columnHeaderHeight;
 
-                if (diffX !== 0 || diffBounds[0] == null || (diffX === 0 && diffY === 0) || this._forceDirty) {
+                if (diffBounds.length === 0 || (diffX === 0 && diffY === 0) || this._forceDirty) {
                     if (this.isDirty() || this._forceDirty) {
                         this._cacheCanvas.clear();
                         ctx.setTransform(mainCtx.getTransform());
@@ -269,7 +275,6 @@ export class Spreadsheet extends SheetComponent {
                     this._applyCache(mainCtx, left, top, dw, dh, left, top, dw, dh);
                 } else {
                     if (this.isDirty()) {
-                        const pixelRatio = this._cacheCanvas.getPixelRatio();
                         ctx.save();
                         ctx.globalCompositeOperation = 'copy';
                         ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -282,7 +287,37 @@ export class Spreadsheet extends SheetComponent {
 
                         this._refreshIncrementalState = true;
                         ctx.setTransform(mainCtx.getTransform());
-                        this._draw(ctx, bounds);
+
+                        for (const diffBound of diffBounds) {
+                            const { left: diffLeft, right: diffRight, bottom: diffBottom, top: diffTop } = diffBound;
+                            ctx.save();
+                            ctx.beginPath();
+                            ctx.rect(
+                                fixLineWidthByScale(diffLeft - rowHeaderWidth - FIX_ONE_PIXEL_BLUR_OFFSET, scale),
+                                fixLineWidthByScale(diffTop - columnHeaderHeight - FIX_ONE_PIXEL_BLUR_OFFSET, scale),
+                                fixLineWidthByScale(
+                                    diffRight - diffLeft + rowHeaderWidth + FIX_ONE_PIXEL_BLUR_OFFSET * 2,
+                                    scale
+                                ),
+                                fixLineWidthByScale(
+                                    diffBottom - diffTop + columnHeaderHeight + FIX_ONE_PIXEL_BLUR_OFFSET * 2,
+                                    scale
+                                )
+                            );
+                            // ctx.fillStyle = 'rgb(0,0,0)';
+
+                            ctx.clip();
+                            this._draw(ctx, {
+                                viewBound: bounds.viewBound,
+                                diffBounds: [diffBound],
+                                diffX: bounds.diffX,
+                                diffY: bounds.diffY,
+                                viewPortPosition: bounds.viewPortPosition,
+                                viewPortKey: bounds.viewPortKey,
+                            });
+                            ctx.restore();
+                        }
+
                         this._refreshIncrementalState = false;
                     }
                     this._applyCache(mainCtx, left, top, dw, dh, left, top, dw, dh);
@@ -336,12 +371,12 @@ export class Spreadsheet extends SheetComponent {
         cacheCtx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.drawImage(
             this._cacheCanvas.getCanvasEle(),
-            sx,
-            sy,
+            sx * pixelRatio,
+            sy * pixelRatio,
             sw * pixelRatio,
             sh * pixelRatio,
-            dx,
-            dy,
+            dx * pixelRatio,
+            dy * pixelRatio,
             dw * pixelRatio,
             dh * pixelRatio
         );

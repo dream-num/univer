@@ -23,7 +23,7 @@ import { RangeReferenceObject } from '../../../../engine/reference-object/range-
 import { ValueObjectFactory } from '../../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../../engine/value-object/base-value-object';
 import { FUNCTION_NAMES_MATH } from '../../function-names';
-import { Sumif } from '../sumif';
+import { Sumif } from '..';
 
 const cellData = {
     0: {

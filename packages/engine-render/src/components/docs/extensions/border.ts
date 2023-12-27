@@ -30,7 +30,7 @@ const UNIQUE_KEY = 'DefaultDocsBorderExtension';
 export class Border extends docExtension {
     override uKey = UNIQUE_KEY;
 
-    override zIndex = 30;
+    override zIndex = 50;
 
     private _preBorderStyle: Nullable<BorderStyleTypes>;
 

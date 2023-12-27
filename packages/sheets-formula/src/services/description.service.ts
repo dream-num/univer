@@ -50,6 +50,13 @@ export interface IDescriptionService {
     getSearchListByName(searchText: string): ISearchItem[];
 
     /**
+     * get search list by name, from first letter
+     * @param searchText
+     * @returns
+     */
+    getSearchListByNameFirstLetter(searchText: string): ISearchItem[];
+
+    /**
      * get search list by type, if type is -1, return all
      * @param type
      * @returns
@@ -94,6 +101,20 @@ export class DescriptionService implements IDescriptionService, IDisposable {
         functionList.forEach((item) => {
             const { functionName, abstract } = item;
             if (functionName.indexOf(searchText) > -1) {
+                searchList.push({ name: functionName, desc: abstract });
+            }
+        });
+
+        return searchList;
+    }
+
+    getSearchListByNameFirstLetter(searchText: string) {
+        const searchList: ISearchItem[] = [];
+        const functionList = this._functionService.getDescriptions();
+        searchText = searchText.toLocaleUpperCase();
+        functionList.forEach((item) => {
+            const { functionName, abstract } = item;
+            if (functionName.indexOf(searchText) === 0) {
                 searchList.push({ name: functionName, desc: abstract });
             }
         });

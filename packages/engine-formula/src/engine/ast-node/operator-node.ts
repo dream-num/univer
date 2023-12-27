@@ -20,7 +20,7 @@ import { OPERATOR_TOKEN_COMPARE_SET, OPERATOR_TOKEN_SET, operatorToken } from '.
 import type { BaseFunction } from '../../functions/base-function';
 import { FUNCTION_NAMES_COMPATIBILITY } from '../../functions/compatibility/function-names';
 import { FUNCTION_NAMES_MATH } from '../../functions/math/function-names';
-import type { Compare } from '../../functions/meta/compare/compare';
+import type { Compare } from '../../functions/meta/compare';
 import { FUNCTION_NAMES_META } from '../../functions/meta/function-names';
 import { IFunctionService } from '../../services/function.service';
 import { LexerNode } from '../analysis/lexer-node';

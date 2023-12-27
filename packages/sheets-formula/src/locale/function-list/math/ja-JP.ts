@@ -16,7 +16,7 @@
 
 export default {
     ABS: {
-        description: `数値の絶対値を返します。`,
+        description: `数値の絶対値を返します。 絶対値とは、数値から符号 (+、-) を除いた数の大きさのことです。`,
         abstract: `数値の絶対値を返します。`,
         links: [
             {
@@ -25,12 +25,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '絶対値が必要な実数。' },
         },
     },
     ACOS: {
-        description: `数値のアークコサインを返します。`,
+        description: `数値のアークコサイン (逆余弦) を返します。 アークコサインとは、そのコサインが数値となる角度のことです。 戻り値の角度は、0 (ゼロ) ～ pi の範囲内のラジアンで示されます。`,
         abstract: `数値のアークコサインを返します。`,
         links: [
             {
@@ -39,12 +38,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '求める角度のコサインの値を、-1 ～ 1 の範囲で指定します。' },
         },
     },
     ACOSH: {
-        description: `数値の双曲線逆余弦 (ハイパーボリック コサインの逆関数) を返します。`,
+        description: `数値の逆双曲線コサインを返します。 数値は 1 以上である必要があります。 逆双曲線コサインは、双曲線コサインが 数値の値なので、ACOSH(COSH(number)) は数値と等 しくなります。`,
         abstract: `数値の双曲線逆余弦 (ハイパーボリック コサインの逆関数) を返します。`,
         links: [
             {
@@ -53,12 +51,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '1 以上の実数を指定します。' },
         },
     },
     ACOT: {
-        description: `数値の逆余接を返します。`,
+        description: `コタンジェント、または逆コタンジェント、数値の主値を返します。`,
         abstract: `数値の逆余接を返します。`,
         links: [
             {
@@ -67,8 +64,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: {
+                name: '数値',
+                detail: '数値は、求める角度のコタンジェントです。 これは実数である必要があります。',
+            },
         },
     },
     ACOTH: {

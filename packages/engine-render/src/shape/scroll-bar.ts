@@ -261,7 +261,7 @@ export class ScrollBar extends BaseScrollBar {
             height: this.verticalBarHeight,
         });
 
-        if (this.verticalThumbHeight >= parentHeight) {
+        if (this.verticalThumbHeight >= parentHeight - this.barSize) {
             this.verticalThumbRect?.setProps({
                 visible: false,
             });

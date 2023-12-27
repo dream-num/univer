@@ -25,12 +25,7 @@ import {
     RxDisposable,
     ThemeService,
 } from '@univerjs/core';
-import {
-    DeviceInputEventType,
-    getCanvasOffsetByEngine,
-    IRenderManagerService,
-    ITextSelectionRenderManager,
-} from '@univerjs/engine-render';
+import { DeviceInputEventType, getCanvasOffsetByEngine, IRenderManagerService } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import {
     COMMAND_LISTENER_SKELETON_CHANGE,
@@ -48,29 +43,29 @@ import { ISelectionRenderService } from '../services/selection/selection-render.
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 import { getSheetObject } from './utils/component-tools';
 
-interface IEditorLocation {
-    unitId: string;
-    subUnitId: string;
-    row: number;
-    col: number;
-}
+// interface IEditorLocation {
+//     unitId: string;
+//     subUnitId: string;
+//     row: number;
+//     col: number;
+// }
 
-function isSameEditorLocation(prevLocation: Nullable<IEditorLocation>, newLocation: IEditorLocation): boolean {
-    if (!prevLocation) {
-        return false;
-    }
+// function isSameEditorLocation(prevLocation: Nullable<IEditorLocation>, newLocation: IEditorLocation): boolean {
+//     if (!prevLocation) {
+//         return false;
+//     }
 
-    return (
-        prevLocation.col === newLocation.col &&
-        prevLocation.row === newLocation.row &&
-        prevLocation.subUnitId === newLocation.subUnitId &&
-        prevLocation.unitId === newLocation.unitId
-    );
-}
+//     return (
+//         prevLocation.col === newLocation.col &&
+//         prevLocation.row === newLocation.row &&
+//         prevLocation.subUnitId === newLocation.subUnitId &&
+//         prevLocation.unitId === newLocation.unitId
+//     );
+// }
 
 @OnLifecycle(LifecycleStages.Rendered, EditorBridgeController)
 export class EditorBridgeController extends RxDisposable {
-    private _lastEditorLocation: Nullable<IEditorLocation> = null;
+    // private _lastEditorLocation: Nullable<IEditorLocation> = null;
 
     constructor(
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
@@ -80,8 +75,7 @@ export class EditorBridgeController extends RxDisposable {
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
-        @Inject(ThemeService) private readonly _themeService: ThemeService,
-        @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager
+        @Inject(ThemeService) private readonly _themeService: ThemeService
     ) {
         super();
 
@@ -110,6 +104,10 @@ export class EditorBridgeController extends RxDisposable {
          * The editor only responds to regular selections.
          */
         if (current?.pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
+            return;
+        }
+
+        if (this._editorBridgeService.isVisible().visible === true) {
             return;
         }
 
@@ -168,17 +166,17 @@ export class EditorBridgeController extends RxDisposable {
             col: startColumn,
         };
 
-        if (isSameEditorLocation(this._lastEditorLocation, location)) {
-            this._textSelectionRenderManager.focus();
-            return;
-        }
+        // if (isSameEditorLocation(this._lastEditorLocation, location)) {
+        //     this._textSelectionRenderManager.focus();
+        //     return;
+        // }
 
-        this._lastEditorLocation = {
-            unitId: location.unitId,
-            subUnitId: location.subUnitId,
-            row: location.row,
-            col: location.col,
-        };
+        // this._lastEditorLocation = {
+        //     unitId: location.unitId,
+        //     subUnitId: location.subUnitId,
+        //     row: location.row,
+        //     col: location.col,
+        // };
 
         const cell = this._editorBridgeService.interceptor.fetchThroughInterceptors(
             this._editorBridgeService.interceptor.getInterceptPoints().BEFORE_CELL_EDIT

@@ -475,11 +475,11 @@ export class SelectionShape {
             this.dashRect.hide();
         } else {
             this.dashRect.transformByState({
-                height: endY - startY,
-                width: endX - startX,
+                height: endY - startY - strokeWidth / 2,
+                width: endX - startX - strokeWidth / 2,
                 strokeWidth,
-                left: -1,
-                top: -1,
+                left: strokeWidth / 2 - 1 / scale,
+                top: strokeWidth / 2 - 1 / scale,
             });
 
             this.dashRect.setProps({

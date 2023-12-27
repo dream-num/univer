@@ -48,6 +48,8 @@ import {
 import type { DocumentSkeleton, IDocumentLayoutObject, IEditorInputConfig, Scene } from '@univerjs/engine-render';
 import {
     DeviceInputEventType,
+    FIX_ONE_PIXEL_BLUR_OFFSET,
+    fixLineWidthByScale,
     IRenderManagerService,
     ITextSelectionRenderManager,
     Rect,
@@ -338,7 +340,7 @@ export class StartEditController extends Disposable {
             return;
         }
 
-        const { startX, startY } = actualRangeWithCoord;
+        let { startX, startY } = actualRangeWithCoord;
 
         const { document: documentComponent, scene, engine } = editorObject;
 
@@ -376,11 +378,21 @@ export class StartEditController extends Disposable {
             editorWidth = clientWidth;
         }
 
-        editorWidth = Math.round(editorWidth);
+        const pixelRatio = engine.getPixelRatio();
 
-        editorHeight = Math.round(editorHeight);
+        const scaleXPixelRatio = scaleX * pixelRatio;
 
-        physicHeight = Math.round(editorHeight);
+        const scaleYPixelRatio = scaleY * pixelRatio;
+
+        startX = fixLineWidthByScale(startX - FIX_ONE_PIXEL_BLUR_OFFSET, scaleXPixelRatio);
+
+        startY = fixLineWidthByScale(startY - FIX_ONE_PIXEL_BLUR_OFFSET, scaleYPixelRatio);
+
+        editorWidth = fixLineWidthByScale(editorWidth, scaleXPixelRatio);
+
+        editorHeight = fixLineWidthByScale(editorHeight, scaleYPixelRatio);
+
+        physicHeight = fixLineWidthByScale(editorHeight, scaleYPixelRatio);
 
         this._addBackground(scene, editorWidth / scaleX, editorHeight / scaleY, fill);
 
@@ -494,6 +506,7 @@ export class StartEditController extends Disposable {
             const { skeleton } = docParam;
 
             this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject, scaleX, scaleY);
+
             // move selection
             if (
                 eventType === DeviceInputEventType.Keyboard ||

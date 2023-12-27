@@ -97,28 +97,26 @@ export class FormulaController extends Disposable {
     }
 
     private _registerFunctions() {
-        const functions: BaseFunction[] = (
-            [
-                ...functionArray,
-                ...functionCompatibility,
-                ...functionCube,
-                ...functionDatabase,
-                ...functionDate,
-                ...functionEngineering,
-                ...functionFinancial,
-                ...functionInformation,
-                ...functionLogical,
-                ...functionLookup,
-                ...functionMath,
-                ...functionMeta,
-                ...functionStatistical,
-                ...functionText,
-                ...functionUniver,
-                ...functionWeb,
-            ] as Array<[Ctor<BaseFunction>, IFunctionNames]>
-        ).map((registerObject) => {
-            const Func = registerObject[0];
-            const name = registerObject[1];
+        const functions: BaseFunction[] = [
+            ...functionArray,
+            ...functionCompatibility,
+            ...functionCube,
+            ...functionDatabase,
+            ...functionDate,
+            ...functionEngineering,
+            ...functionFinancial,
+            ...functionInformation,
+            ...functionLogical,
+            ...functionLookup,
+            ...functionMath,
+            ...functionMeta,
+            ...functionStatistical,
+            ...functionText,
+            ...functionUniver,
+            ...functionWeb,
+        ].map((registerObject) => {
+            const Func = registerObject[0] as Ctor<BaseFunction>;
+            const name = registerObject[1] as IFunctionNames;
 
             return new Func(name);
         });

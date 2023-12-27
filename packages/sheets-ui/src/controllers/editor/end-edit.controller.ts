@@ -224,9 +224,15 @@ export class EndEditController extends Disposable {
                 cellData.v = null;
                 cellData.p = null;
             } else if (isRichText(body)) {
-                cellData.p = snapshot;
-                cellData.v = null;
-                cellData.f = null;
+                if (body.dataStream === '\r\n') {
+                    cellData.v = '';
+                    cellData.f = null;
+                    cellData.p = null;
+                } else {
+                    cellData.p = snapshot;
+                    cellData.v = null;
+                    cellData.f = null;
+                }
             } else {
                 // eslint-disable-next-line
                 if (newDataStream == cellData.v || (newDataStream == '' && cellData.v == null)) {

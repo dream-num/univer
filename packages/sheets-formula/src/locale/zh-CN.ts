@@ -82,6 +82,7 @@ export default {
             web: 'Web',
             array: '数组',
             univer: 'Univer',
+            user: '用户自定义',
         },
 
         moreFunctions: {

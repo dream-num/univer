@@ -17,11 +17,7 @@
 import { LocaleService } from '@univerjs/core';
 import { MessageType, Tooltip } from '@univerjs/design';
 import type { IFunctionNames } from '@univerjs/engine-formula';
-import {
-    FUNCTION_NAMES_COMPATIBILITY,
-    FUNCTION_NAMES_MATH,
-    FUNCTION_NAMES_STATISTICAL,
-} from '@univerjs/engine-formula';
+import { FUNCTION_NAMES_MATH, FUNCTION_NAMES_STATISTICAL, FUNCTION_NAMES_TEXT } from '@univerjs/engine-formula';
 import { IClipboardInterfaceService, IMessageService } from '@univerjs/ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React from 'react';
@@ -42,7 +38,7 @@ export const functionDisplayNames: FunctionNameMap = {
     [FUNCTION_NAMES_STATISTICAL.MAX]: 'statusbar.max',
     [FUNCTION_NAMES_STATISTICAL.COUNT]: 'statusbar.count',
     [FUNCTION_NAMES_STATISTICAL.COUNTA]: 'statusbar.countA',
-    [FUNCTION_NAMES_COMPATIBILITY.CONCATENATE]: 'concatenate',
+    [FUNCTION_NAMES_TEXT.CONCATENATE]: 'concatenate',
 };
 interface FunctionNameMap {
     [key: string]: string;

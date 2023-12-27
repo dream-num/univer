@@ -99,20 +99,6 @@ export default {
             number2: { name: 'number2', detail: 'second' },
         },
     },
-    CONCATENATE: {
-        description: `2 つ以上のテキスト文字列を 1 つの文字列に結合する`,
-        abstract: `2 つ以上のテキスト文字列を 1 つの文字列に結合する`,
-        links: [
-            {
-                title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/concatenate-%E9%96%A2%E6%95%B0-8f8ae884-2ca8-4f7a-b093-75d702bea31d',
-            },
-        ],
-        functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
-        },
-    },
     CONFIDENCE: {
         description: `母集団に対する信頼区間を返します。`,
         abstract: `母集団に対する信頼区間を返します。`,
@@ -190,34 +176,6 @@ export default {
             {
                 title: '指導',
                 url: 'https://support.microsoft.com/ja-jp/office/finv-%E9%96%A2%E6%95%B0-4d46c97c-c368-4852-bc15-41e8e31140b1',
-            },
-        ],
-        functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
-        },
-    },
-    FLOOR: {
-        description: `数値を指定された桁数で切り捨てます。`,
-        abstract: `数値を指定された桁数で切り捨てます。`,
-        links: [
-            {
-                title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/floor-%E9%96%A2%E6%95%B0-14bb497c-24f2-4e04-b327-b0b4de5a8886',
-            },
-        ],
-        functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
-        },
-    },
-    FORECAST: {
-        description: `既存の値を使用して、将来の値を計算または予測します。`,
-        abstract: `既存の値を使用して、将来の値を計算または予測します。`,
-        links: [
-            {
-                title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/%E4%BA%88%E6%B8%AC%E3%81%A8%E4%BA%88%E6%B8%AC-linear-%E9%96%A2%E6%95%B0-50ca49c9-7b40-4892-94e4-7ad38bbeda99',
             },
         ],
         functionParameter: {

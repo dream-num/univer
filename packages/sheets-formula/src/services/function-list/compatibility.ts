@@ -150,28 +150,6 @@ export const FUNCTION_LIST_COMPATIBILITY: IFunctionInfo[] = [
         ],
     },
     {
-        functionName: FUNCTION_NAMES_COMPATIBILITY.CONCATENATE,
-        functionType: FunctionType.Compatibility,
-        description: 'formula.functionList.CONCATENATE.description',
-        abstract: 'formula.functionList.CONCATENATE.abstract',
-        functionParameter: [
-            {
-                name: 'formula.functionList.CONCATENATE.functionParameter.number1.name',
-                detail: 'formula.functionList.CONCATENATE.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.CONCATENATE.functionParameter.number2.name',
-                detail: 'formula.functionList.CONCATENATE.functionParameter.number2.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-        ],
-    },
-    {
         functionName: FUNCTION_NAMES_COMPATIBILITY.CONFIDENCE,
         functionType: FunctionType.Compatibility,
         description: 'formula.functionList.CONFIDENCE.description',
@@ -297,50 +275,6 @@ export const FUNCTION_LIST_COMPATIBILITY: IFunctionInfo[] = [
             {
                 name: 'formula.functionList.FINV.functionParameter.number2.name',
                 detail: 'formula.functionList.FINV.functionParameter.number2.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-        ],
-    },
-    {
-        functionName: FUNCTION_NAMES_COMPATIBILITY.FLOOR,
-        functionType: FunctionType.Compatibility,
-        description: 'formula.functionList.FLOOR.description',
-        abstract: 'formula.functionList.FLOOR.abstract',
-        functionParameter: [
-            {
-                name: 'formula.functionList.FLOOR.functionParameter.number1.name',
-                detail: 'formula.functionList.FLOOR.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.FLOOR.functionParameter.number2.name',
-                detail: 'formula.functionList.FLOOR.functionParameter.number2.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-        ],
-    },
-    {
-        functionName: FUNCTION_NAMES_COMPATIBILITY.FORECAST,
-        functionType: FunctionType.Compatibility,
-        description: 'formula.functionList.FORECAST.description',
-        abstract: 'formula.functionList.FORECAST.abstract',
-        functionParameter: [
-            {
-                name: 'formula.functionList.FORECAST.functionParameter.number1.name',
-                detail: 'formula.functionList.FORECAST.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.FORECAST.functionParameter.number2.name',
-                detail: 'formula.functionList.FORECAST.functionParameter.number2.detail',
                 example: 'A1:A20',
                 require: 1,
                 repeat: 0,

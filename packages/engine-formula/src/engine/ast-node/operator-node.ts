@@ -19,10 +19,10 @@ import { ErrorType } from '../../basics/error-type';
 import type { compareToken } from '../../basics/token';
 import { OPERATOR_TOKEN_COMPARE_SET, OPERATOR_TOKEN_SET, operatorToken } from '../../basics/token';
 import type { BaseFunction } from '../../functions/base-function';
-import { FUNCTION_NAMES_COMPATIBILITY } from '../../functions/compatibility/function-names';
 import { FUNCTION_NAMES_MATH } from '../../functions/math/function-names';
 import type { Compare } from '../../functions/meta/compare';
 import { FUNCTION_NAMES_META } from '../../functions/meta/function-names';
+import { FUNCTION_NAMES_TEXT } from '../../functions/text/function-names';
 import { IFunctionService } from '../../services/function.service';
 import { LexerNode } from '../analysis/lexer-node';
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
@@ -91,7 +91,7 @@ export class OperatorNodeFactory extends BaseAstNodeFactory {
         } else if (tokenTrim === operatorToken.DIVIDED) {
             functionName = FUNCTION_NAMES_META.DIVIDED;
         } else if (tokenTrim === operatorToken.CONCATENATE) {
-            functionName = FUNCTION_NAMES_COMPATIBILITY.CONCATENATE;
+            functionName = FUNCTION_NAMES_TEXT.CONCATENATE;
         } else if (tokenTrim === operatorToken.POWER) {
             functionName = FUNCTION_NAMES_MATH.POWER;
         } else if (OPERATOR_TOKEN_COMPARE_SET.has(tokenTrim)) {

@@ -15,7 +15,7 @@
  */
 
 import { LocaleService } from '@univerjs/core';
-import type { IFunctionInfo, IFunctionNames } from '@univerjs/engine-formula';
+import type { BaseFunction, IFunctionInfo, IFunctionNames } from '@univerjs/engine-formula';
 import {
     functionCompatibility,
     functionCube,
@@ -35,7 +35,7 @@ import {
     IFunctionService,
 } from '@univerjs/engine-formula';
 import { functionArray } from '@univerjs/engine-formula/functions/array/function-map.js';
-import type { IDisposable } from '@wendellhu/redi';
+import type { Ctor, IDisposable } from '@wendellhu/redi';
 import { createIdentifier, Inject } from '@wendellhu/redi';
 
 import { FUNCTION_LIST } from './function-list/function-list';
@@ -163,24 +163,26 @@ export class DescriptionService implements IDescriptionService, IDisposable {
         const localeService = this._localeService;
 
         // TODO@Dushusir: Remove filtering after all formulas have been implemented
-        const functions = [
-            ...functionArray,
-            ...functionCompatibility,
-            ...functionCube,
-            ...functionDatabase,
-            ...functionDate,
-            ...functionEngineering,
-            ...functionFinancial,
-            ...functionInformation,
-            ...functionLogical,
-            ...functionLookup,
-            ...functionMath,
-            ...functionMeta,
-            ...functionStatistical,
-            ...functionText,
-            ...functionUniver,
-            ...functionWeb,
-        ].map((item) => item[1]) as IFunctionNames[];
+        const functions = (
+            [
+                ...functionArray,
+                ...functionCompatibility,
+                ...functionCube,
+                ...functionDatabase,
+                ...functionDate,
+                ...functionEngineering,
+                ...functionFinancial,
+                ...functionInformation,
+                ...functionLogical,
+                ...functionLookup,
+                ...functionMath,
+                ...functionMeta,
+                ...functionStatistical,
+                ...functionText,
+                ...functionUniver,
+                ...functionWeb,
+            ] as Array<[Ctor<BaseFunction>, IFunctionNames]>
+        ).map((item) => item[1]);
 
         const filterFunctionList = FUNCTION_LIST.filter((item) => {
             return functions.includes(item.functionName as IFunctionNames);

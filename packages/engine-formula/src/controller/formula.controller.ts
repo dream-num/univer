@@ -18,6 +18,7 @@ import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univ
 import type { Ctor } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
+import type { IFunctionNames } from '../basics/function';
 import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
 import { RemoveDefinedNameMutation, SetDefinedNameMutation } from '../commands/mutations/set-defined-name.mutation';
 import {
@@ -96,26 +97,28 @@ export class FormulaController extends Disposable {
     }
 
     private _registerFunctions() {
-        const functions: BaseFunction[] = [
-            ...functionArray,
-            ...functionCompatibility,
-            ...functionCube,
-            ...functionDatabase,
-            ...functionDate,
-            ...functionEngineering,
-            ...functionFinancial,
-            ...functionInformation,
-            ...functionLogical,
-            ...functionLookup,
-            ...functionMath,
-            ...functionMeta,
-            ...functionStatistical,
-            ...functionText,
-            ...functionUniver,
-            ...functionWeb,
-        ].map((registerObject) => {
-            const Func = registerObject[0] as Ctor<BaseFunction>;
-            const name = registerObject[1] as string;
+        const functions: BaseFunction[] = (
+            [
+                ...functionArray,
+                ...functionCompatibility,
+                ...functionCube,
+                ...functionDatabase,
+                ...functionDate,
+                ...functionEngineering,
+                ...functionFinancial,
+                ...functionInformation,
+                ...functionLogical,
+                ...functionLookup,
+                ...functionMath,
+                ...functionMeta,
+                ...functionStatistical,
+                ...functionText,
+                ...functionUniver,
+                ...functionWeb,
+            ] as Array<[Ctor<BaseFunction>, IFunctionNames]>
+        ).map((registerObject) => {
+            const Func = registerObject[0];
+            const name = registerObject[1];
 
             return new Func(name);
         });

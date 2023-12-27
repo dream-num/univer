@@ -38,7 +38,7 @@ export {
 export { enUS, zhCN } from './locale';
 export { AutoFillService, IAutoFillService } from './services/auto-fill/auto-fill.service';
 export { getAutoFillRepeatRange } from './services/auto-fill/tools';
-export type { IAutoFillHook, ICopyDataPiece } from './services/auto-fill/type';
+export type { ICopyDataPiece, ISheetAutoFillHook } from './services/auto-fill/type';
 export { APPLY_TYPE, DATA_TYPE, type IAutoFillRule } from './services/auto-fill/type';
 export { type ICopyDataInTypeIndexInfo } from './services/auto-fill/type';
 export {

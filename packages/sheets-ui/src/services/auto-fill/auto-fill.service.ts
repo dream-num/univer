@@ -14,8 +14,15 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
-import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
+import {
+    Direction,
+    Disposable,
+    IUniverInstanceService,
+    LifecycleStages,
+    OnLifecycle,
+    toDisposable,
+} from '@univerjs/core';
 import { SelectionManagerService, SheetInterceptorService } from '@univerjs/sheets';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier, Inject } from '@wendellhu/redi';
@@ -31,23 +38,35 @@ import {
     numberRule,
     otherRule,
 } from './rules';
-import type { IAutoFillHook, IAutoFillRule } from './type';
-import { APPLY_TYPE } from './type';
+import type { IAutoFillLocation, IAutoFillRule, ISheetAutoFillHook } from './type';
+import { APPLY_TYPE, AutoFillHookType } from './type';
 
 export interface IAutoFillService {
-    getRules(): IAutoFillRule[];
-    getApplyType(): APPLY_TYPE;
-    isFillingStyle(): boolean;
-    setApplyType(type: APPLY_TYPE): void;
-    setRanges(sourceRange: IRange, destRange: IRange, applyRange: IRange): void;
-    getRanges(): { sourceRange: IRange | null; destRange: IRange | null; applyRange: IRange | null };
-    setFillingStyle(isFillingStyle: boolean): void;
     applyType$: Observable<APPLY_TYPE>;
+    applyType: APPLY_TYPE;
+
+    direction: Direction;
+
     menu$: Observable<IApplyMenuItem[]>;
+    menu: IApplyMenuItem[];
+
+    showMenu$: Observable<boolean>;
+    setShowMenu: (show: boolean) => void;
+
     setDisableApplyType: (type: APPLY_TYPE, disable: boolean) => void;
+
+    getRules(): IAutoFillRule[];
+    isFillingStyle(): boolean;
+
+    autoFillLocation$: Observable<Nullable<IAutoFillLocation>>;
+    autoFillLocation: Nullable<IAutoFillLocation>;
+
+    setFillingStyle(isFillingStyle: boolean): void;
     registerRule(rule: IAutoFillRule): void;
-    getHooks(): IAutoFillHook[];
-    addHook(hook: IAutoFillHook): IDisposable;
+
+    getAllHooks(): ISheetAutoFillHook[];
+    getActiveHooks(): ISheetAutoFillHook[];
+    addHook(hook: ISheetAutoFillHook): IDisposable;
 }
 
 export interface IApplyMenuItem {
@@ -59,12 +78,20 @@ export interface IApplyMenuItem {
 @OnLifecycle(LifecycleStages.Rendered, AutoFillService)
 export class AutoFillService extends Disposable implements IAutoFillService {
     private _rules: IAutoFillRule[] = [];
-    private _hooks: IAutoFillHook[] = [];
+    private _hooks: ISheetAutoFillHook[] = [];
     private readonly _applyType$: BehaviorSubject<APPLY_TYPE> = new BehaviorSubject<APPLY_TYPE>(APPLY_TYPE.SERIES);
     private _isFillingStyle: boolean = true;
-    private _sourceRange: IRange | null = null;
-    private _destRange: IRange | null = null;
-    private _applyRange: IRange | null = null;
+
+    private readonly _autoFillLocation$: BehaviorSubject<Nullable<IAutoFillLocation>> = new BehaviorSubject<
+        Nullable<IAutoFillLocation>
+    >(null);
+
+    readonly autoFillLocation$ = this._autoFillLocation$.asObservable();
+
+    private readonly _showMenu$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+    readonly showMenu$ = this._showMenu$.asObservable();
+
+    private _direction: Direction = Direction.DOWN;
     readonly applyType$ = this._applyType$.asObservable();
 
     private readonly _menu$: BehaviorSubject<IApplyMenuItem[]> = new BehaviorSubject<IApplyMenuItem[]>([
@@ -112,9 +139,26 @@ export class AutoFillService extends Disposable implements IAutoFillService {
         this._isFillingStyle = true;
     }
 
-    addHook(hook: IAutoFillHook) {
-        if (this._hooks.find((h) => h.hookName === hook.hookName)) {
-            throw new Error(`Add hook failed, hook name '${hook.hookName}' already exist!`);
+    private getOneByPriority(items: ISheetAutoFillHook[]) {
+        if (items.length <= 0) {
+            return [];
+        }
+        const maxPriority = items.reduce((maxItem, currentItem) => {
+            return (currentItem.priority || 0) > (maxItem.priority || 0) ? currentItem : maxItem;
+        }, items[0]);
+        return [maxPriority];
+    }
+
+    addHook(hook: ISheetAutoFillHook) {
+        if (this._hooks.find((h) => h.id === hook.id)) {
+            throw new Error(`Add hook failed, hook id '${hook.id}' already exist!`);
+        }
+        if (hook.priority === undefined) {
+            hook.priority = 0;
+        }
+
+        if (hook.hookType === undefined) {
+            hook.hookType = AutoFillHookType.APPEND;
         }
         this._hooks.push(hook);
         return toDisposable(() => {
@@ -139,16 +183,48 @@ export class AutoFillService extends Disposable implements IAutoFillService {
         return this._rules;
     }
 
-    getHooks() {
+    getAllHooks() {
         return this._hooks;
     }
 
-    getApplyType() {
+    getActiveHooks() {
+        const { source, target } = this.autoFillLocation || {};
+        if (!source || !target) {
+            return [];
+        }
+        const enabledHooks = this._hooks.filter(
+            (h) => !h.disable?.(source!, target!, this._direction, this.applyType) === true
+        );
+        const onlyHooks = enabledHooks.filter((h) => h.hookType === AutoFillHookType.ONLY);
+        if (onlyHooks.length > 0) {
+            return this.getOneByPriority(onlyHooks);
+        }
+
+        const defaultHooks = this.getOneByPriority(enabledHooks.filter((h) => h.hookType === AutoFillHookType.DEFAULT));
+
+        const appendHooks = enabledHooks.filter((h) => h.hookType === AutoFillHookType.APPEND) || [];
+
+        return [...defaultHooks, ...appendHooks];
+    }
+
+    get applyType() {
         return this._applyType$.getValue();
     }
 
-    setApplyType(type: APPLY_TYPE) {
+    set applyType(type: APPLY_TYPE) {
         this._applyType$.next(type);
+    }
+
+    get menu() {
+        return this._menu$.getValue();
+    }
+
+    get direction() {
+        return this._direction;
+    }
+
+    set direction(direction: Direction) {
+        this._direction = direction;
     }
 
     isFillingStyle(): boolean {
@@ -159,18 +235,12 @@ export class AutoFillService extends Disposable implements IAutoFillService {
         this._isFillingStyle = isFillingStyle;
     }
 
-    setRanges(destRange: IRange, sourceRange: IRange, applyRange: IRange) {
-        this._sourceRange = sourceRange;
-        this._destRange = destRange;
-        this._applyRange = applyRange;
+    get autoFillLocation() {
+        return this._autoFillLocation$.getValue();
     }
 
-    getRanges() {
-        return {
-            sourceRange: this._sourceRange,
-            destRange: this._destRange,
-            applyRange: this._applyRange,
-        };
+    set autoFillLocation(location: Nullable<IAutoFillLocation>) {
+        this._autoFillLocation$.next(location);
     }
 
     setDisableApplyType(type: APPLY_TYPE, disable: boolean) {
@@ -185,6 +255,10 @@ export class AutoFillService extends Disposable implements IAutoFillService {
                 return item;
             })
         );
+    }
+
+    setShowMenu(show: boolean) {
+        this._showMenu$.next(show);
     }
 }
 

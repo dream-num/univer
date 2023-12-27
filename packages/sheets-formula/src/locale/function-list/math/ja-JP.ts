@@ -1018,8 +1018,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: {
+                name: '数値1',
+                detail: '加算する最初の数。 ここには 4 のような数値、B6 のようなセル参照、B2:B8 のようなセル範囲を指定できます。',
+            },
+            number2: {
+                name: '数値2',
+                detail: 'これは、加算する 2 番目の数値です。 この方法で最大 255 個の数値を指定することができます。',
+            },
         },
     },
     SUMIF: {

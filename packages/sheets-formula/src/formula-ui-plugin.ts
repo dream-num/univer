@@ -15,8 +15,8 @@
  */
 
 import { IUniverInstanceService, LocaleService, Plugin, PluginType } from '@univerjs/core';
-import type { IFunctionInfo } from '@univerjs/engine-formula';
-import type { Dependency } from '@wendellhu/redi';
+import type { BaseFunction, IFunctionInfo, IFunctionNames } from '@univerjs/engine-formula';
+import type { Ctor, Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { FORMULA_UI_PLUGIN_NAME } from './common/plugin-name';
@@ -39,6 +39,7 @@ import { FormulaPromptService, IFormulaPromptService } from './services/prompt.s
 // TODO@Dushusir: user config IFunctionInfo, we will register all function info in formula engine
 interface IFormulaUIConfig {
     description: IFunctionInfo[];
+    function: Array<[Ctor<BaseFunction>, IFunctionNames]>;
 }
 export class UniverSheetsFormulaPlugin extends Plugin {
     static override type = PluginType.Sheet;
@@ -65,10 +66,15 @@ export class UniverSheetsFormulaPlugin extends Plugin {
                 IDescriptionService,
                 {
                     useFactory: () =>
-                        this._injector.createInstance(DescriptionService, this._config?.description || []), // TODO@Dusuhir: initialize config with asynchronous method?
+                        this._injector.createInstance(
+                            DescriptionService,
+                            this._config?.description || [],
+                            this._config?.function || []
+                        ),
                 },
             ],
             [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
+
             // controllers
             [FormulaUIController],
             [PromptController],

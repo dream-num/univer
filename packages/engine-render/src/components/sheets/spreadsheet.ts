@@ -114,9 +114,6 @@ export class Spreadsheet extends SheetComponent {
 
         const { a: scaleX = 1, d: scaleY = 1 } = ctx.getTransform();
 
-        // insert overflow cache
-        this._calculateOverflow();
-
         const diffRanges = this._refreshIncrementalState
             ? bounds?.diffBounds.map((bound) => spreadsheetSkeleton.getRowColumnSegmentByViewBound(bound))
             : undefined;
@@ -621,6 +618,9 @@ export class Spreadsheet extends SheetComponent {
         if (spreadsheetSkeleton == null) {
             return;
         }
+
+        // insert overflow cache
+        this._calculateOverflow();
 
         const { rowColumnSegment, dataMergeCache, overflowCache, stylesCache, showGridlines } = spreadsheetSkeleton;
         const { border, backgroundPositions } = stylesCache;

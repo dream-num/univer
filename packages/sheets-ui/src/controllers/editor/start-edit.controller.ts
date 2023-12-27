@@ -403,9 +403,13 @@ export class StartEditController extends Disposable {
 
         documentComponent.resize(editorWidth, editorHeight);
 
-        // resize canvas
-
-        engine.resizeBySize(editorWidth, physicHeight);
+        /**
+         * resize canvas
+         * When modifying the selection area for a formula, it is necessary to add a setTimeout to ensure successful updating.
+         */
+        setTimeout(() => {
+            engine.resizeBySize(editorWidth, physicHeight);
+        }, 0);
 
         // Update cell editor container position and size.
         this._cellEditorManagerService.setState({

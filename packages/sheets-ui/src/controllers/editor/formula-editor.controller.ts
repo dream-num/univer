@@ -77,6 +77,7 @@ export class FormulaEditorController extends RxDisposable {
         this._commandExecutedListener();
         this._syncEditorSize();
         this._listenFxBtnClick();
+        this._listenFoldBtnClick();
 
         this._renderManagerService.currentRender$.pipe(takeUntil(this.dispose$)).subscribe((unitId) => {
             if (unitId !== DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
@@ -154,6 +155,12 @@ export class FormulaEditorController extends RxDisposable {
 
                 this._textSelectionManagerService.replaceTextRanges(textRanges);
             }
+        });
+    }
+
+    private _listenFoldBtnClick() {
+        this._formulaEditorManagerService.foldBtnStatus$.pipe(takeUntil(this.dispose$)).subscribe(() => {
+            this._textSelectionManagerService.refreshSelection();
         });
     }
 

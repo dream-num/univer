@@ -23187,7 +23187,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                     w: 60,
                 },
             },
-            status: 0,
+            status: 1,
             showGridlines: 1,
             hideRow: [],
             hideColumn: [],

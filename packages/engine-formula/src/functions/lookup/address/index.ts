@@ -16,10 +16,10 @@
 
 import { AbsoluteRefType, type IRange, serializeRange } from '@univerjs/core';
 
-import { StringValueObject } from '../../..';
 import { ErrorType } from '../../../basics/error-type';
 import type { FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Address extends BaseFunction {
@@ -30,8 +30,12 @@ export class Address extends BaseFunction {
         a1?: FunctionVariantType,
         sheetText?: FunctionVariantType
     ) {
-        const row = Number((rowNumber as BaseValueObject).getValue());
-        const column = Number((columnNumber as BaseValueObject).getValue());
+        if (rowNumber.isError() || columnNumber.isError()) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+
+        const row = Number((rowNumber as BaseValueObject).getValue()) - 1;
+        const column = Number((columnNumber as BaseValueObject).getValue()) - 1;
 
         if (Number.isNaN(row) || Number.isNaN(column)) {
             return ErrorValueObject.create(ErrorType.VALUE);

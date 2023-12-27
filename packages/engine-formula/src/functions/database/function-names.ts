@@ -14,4 +14,17 @@
  * limitations under the License.
  */
 
-export enum FUNCTION_NAMES_DATABASE {}
+export enum FUNCTION_NAMES_DATABASE {
+    DAVERAGE = 'DAVERAGE',
+    DCOUNT = 'DCOUNT',
+    DCOUNTA = 'DCOUNTA',
+    DGET = 'DGET',
+    DMAX = 'DMAX',
+    DMIN = 'DMIN',
+    DPRODUCT = 'DPRODUCT',
+    DSTDEV = 'DSTDEV',
+    DSTDEVP = 'DSTDEVP',
+    DSUM = 'DSUM',
+    DVAR = 'DVAR',
+    DVARP = 'DVARP',
+}

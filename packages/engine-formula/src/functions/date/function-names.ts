@@ -14,4 +14,30 @@
  * limitations under the License.
  */
 
-export enum FUNCTION_NAMES_DATE {}
+export enum FUNCTION_NAMES_DATE {
+    DATE = 'DATE',
+    DATEDIF = 'DATEDIF',
+    DATEVALUE = 'DATEVALUE',
+    DAY = 'DAY',
+    DAYS = 'DAYS',
+    DAYS360 = 'DAYS360',
+    EDATE = 'EDATE',
+    EOMONTH = 'EOMONTH',
+    HOUR = 'HOUR',
+    ISOWEEKNUM = 'ISOWEEKNUM',
+    MINUTE = 'MINUTE',
+    MONTH = 'MONTH',
+    NETWORKDAYS = 'NETWORKDAYS',
+    NETWORKDAYS_INTL = 'NETWORKDAYS.INTL',
+    NOW = 'NOW',
+    SECOND = 'SECOND',
+    TIME = 'TIME',
+    TIMEVALUE = 'TIMEVALUE',
+    TODAY = 'TODAY',
+    WEEKDAY = 'WEEKDAY',
+    WEEKNUM = 'WEEKNUM',
+    WORKDAY = 'WORKDAY',
+    WORKDAY_INTL = 'WORKDAY.INTL',
+    YEAR = 'YEAR',
+    YEARFRAC = 'YEARFRAC',
+}

@@ -111,6 +111,11 @@ export enum FunctionType {
      * Univer-specific functions
      */
     Univer,
+
+    /**
+     * User-defined functions
+     */
+    User,
 }
 
 export interface IFunctionParam {

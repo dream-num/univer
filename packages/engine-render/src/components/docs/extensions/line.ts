@@ -90,7 +90,7 @@ export class Line extends docExtension {
         startY: number,
         scale: number
     ) {
-        const { s: show, cl: colorStyle, t: lineType } = line;
+        const { s: show, cl: colorStyle, t: lineType, c = BooleanNumber.TRUE } = line;
 
         if (show === BooleanNumber.TRUE) {
             const {
@@ -111,7 +111,8 @@ export class Line extends docExtension {
             ctx.translate(FIX_ONE_PIXEL_BLUR_OFFSET / scale, FIX_ONE_PIXEL_BLUR_OFFSET / scale);
 
             ctx.beginPath();
-            const color = getColorStyle(colorStyle) || COLOR_BLACK_RGB;
+            const color =
+                (c === BooleanNumber.TRUE ? getColorStyle(span.ts?.cl) : getColorStyle(colorStyle)) || COLOR_BLACK_RGB;
             ctx.strokeStyle = color;
 
             this._setLineType(ctx, lineType || TextDecoration.SINGLE);

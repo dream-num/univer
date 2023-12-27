@@ -31,7 +31,7 @@ export interface IAutoFillLocation {
 export interface ISheetAutoFillHook {
     id: string;
     priority?: number;
-    hookType?: AutoFillHookType;
+    type?: AutoFillHookType;
     disable?: (location: IAutoFillLocation, direction: Direction, applyType: APPLY_TYPE) => boolean;
     onBeforeFillData?(location: IAutoFillLocation, direction: Direction): boolean | void;
     onFillData?(

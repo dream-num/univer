@@ -157,8 +157,8 @@ export class AutoFillService extends Disposable implements IAutoFillService {
             hook.priority = 0;
         }
 
-        if (hook.hookType === undefined) {
-            hook.hookType = AutoFillHookType.APPEND;
+        if (hook.type === undefined) {
+            hook.type = AutoFillHookType.APPEND;
         }
         this._hooks.push(hook);
         return toDisposable(() => {
@@ -195,14 +195,14 @@ export class AutoFillService extends Disposable implements IAutoFillService {
         const enabledHooks = this._hooks.filter(
             (h) => !h.disable?.({ source, target, unitId, subUnitId }, this._direction, this.applyType) === true
         );
-        const onlyHooks = enabledHooks.filter((h) => h.hookType === AutoFillHookType.ONLY);
+        const onlyHooks = enabledHooks.filter((h) => h.type === AutoFillHookType.ONLY);
         if (onlyHooks.length > 0) {
             return this.getOneByPriority(onlyHooks);
         }
 
-        const defaultHooks = this.getOneByPriority(enabledHooks.filter((h) => h.hookType === AutoFillHookType.DEFAULT));
+        const defaultHooks = this.getOneByPriority(enabledHooks.filter((h) => h.type === AutoFillHookType.DEFAULT));
 
-        const appendHooks = enabledHooks.filter((h) => h.hookType === AutoFillHookType.APPEND) || [];
+        const appendHooks = enabledHooks.filter((h) => h.type === AutoFillHookType.APPEND) || [];
 
         return [...defaultHooks, ...appendHooks];
     }

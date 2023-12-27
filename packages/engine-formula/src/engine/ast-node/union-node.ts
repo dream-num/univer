@@ -20,7 +20,8 @@ import type { BaseFunction } from '../../functions/base-function';
 import { FUNCTION_NAMES_META } from '../../functions/meta/function-names';
 import { IFunctionService } from '../../services/function.service';
 import { LexerNode } from '../analysis/lexer-node';
-import type { FunctionVariantType } from '../reference-object/base-reference-object';
+import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
+import type { BaseValueObject } from '../value-object/base-value-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { BaseAstNode, ErrorNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
@@ -42,8 +43,8 @@ export class UnionNode extends BaseAstNode {
 
     override execute() {
         const children = this.getChildren();
-        const leftNode = children[0].getValue();
-        const rightNode = children[1].getValue();
+        let leftNode = children[0].getValue();
+        let rightNode = children[1].getValue();
 
         if (leftNode == null || rightNode == null) {
             throw new Error('leftNode and rightNode');
@@ -51,7 +52,18 @@ export class UnionNode extends BaseAstNode {
 
         let result: FunctionVariantType;
         if (this._operatorString === matchToken.COLON) {
-            result = this._functionExecutor.calculate(leftNode, rightNode) as FunctionVariantType;
+            if (leftNode.isReferenceObject()) {
+                leftNode = (leftNode as BaseReferenceObject).toArrayValueObject();
+            }
+
+            if (rightNode.isReferenceObject()) {
+                rightNode = (rightNode as BaseReferenceObject).toArrayValueObject();
+            }
+
+            result = this._functionExecutor.calculate(
+                leftNode as BaseValueObject,
+                rightNode as BaseValueObject
+            ) as FunctionVariantType;
         } else {
             result = ErrorValueObject.create(ErrorType.NAME);
         }

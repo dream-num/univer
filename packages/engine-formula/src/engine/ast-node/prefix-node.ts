@@ -26,6 +26,7 @@ import { IFunctionService } from '../../services/function.service';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
 import { LexerNode } from '../analysis/lexer-node';
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
+import type { BaseValueObject } from '../value-object/base-value-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { NumberValueObject } from '../value-object/primitive-object';
 import { BaseAstNode, ErrorNode } from './base-ast-node';
@@ -47,13 +48,21 @@ export class PrefixNode extends BaseAstNode {
 
     override execute() {
         const children = this.getChildren();
-        const value = children[0].getValue();
+        let value = children[0].getValue();
         let result: FunctionVariantType;
         if (value == null) {
             throw new Error('object is null');
         }
+
+        if (value.isReferenceObject()) {
+            value = (value as BaseReferenceObject).toArrayValueObject();
+        }
+
         if (this._operatorString === prefixToken.MINUS) {
-            result = this._functionExecutor!.calculate(new NumberValueObject(0), value) as FunctionVariantType;
+            result = this._functionExecutor!.calculate(
+                new NumberValueObject(0),
+                value as BaseValueObject
+            ) as FunctionVariantType;
         } else if (this._operatorString === prefixToken.AT) {
             result = this._handlerAT(value);
         } else {

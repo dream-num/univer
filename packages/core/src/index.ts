@@ -95,6 +95,7 @@ export * from './shared';
 // #region sheet
 export type { IComposeInterceptors, IInterceptor, InterceptorHandler } from './common/interceptor';
 export { composeInterceptors, createInterceptorKey, InterceptorManager } from './common/interceptor';
+export { normalizeTextRuns } from './docs/data-model/apply-utils/common';
 export type { PluginCtor } from './plugin/plugin';
 export { Range } from './sheets/range';
 export {

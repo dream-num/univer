@@ -25,8 +25,9 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
     MemoryCursor,
+    normalizeTextRuns,
 } from '@univerjs/core';
-import type { TextRange } from '@univerjs/engine-render';
+import { COLOR_BLACK_RGB, type TextRange } from '@univerjs/engine-render';
 
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
@@ -181,7 +182,7 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
         for (const selection of selections) {
             const { startOffset, endOffset } = selection;
 
-            const body: IDocumentBody = {
+            let body: IDocumentBody = {
                 dataStream: '',
                 textRuns: [
                     {
@@ -193,6 +194,24 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
                     },
                 ],
             };
+
+            if (
+                preCommandId === SetInlineFormatUnderlineCommand.id ||
+                preCommandId === SetInlineFormatStrikethroughCommand.id
+            ) {
+                const originTextRuns = docsModel.sliceBody(startOffset, endOffset)?.textRuns;
+
+                body = {
+                    dataStream: '',
+                    textRuns: coverTextRuns(
+                        startOffset,
+                        endOffset,
+                        COMMAND_ID_TO_FORMAT_KEY_MAP[preCommandId],
+                        formatValue as ITextDecoration,
+                        originTextRuns
+                    ),
+                };
+            }
 
             const len = startOffset - memoryCursor.cursor;
 
@@ -341,4 +360,66 @@ function getReverseFormatValueInSelection(
                 s: BooleanNumber.FALSE,
             }
           : BaselineOffset.NORMAL;
+}
+
+function coverTextRuns(
+    startOffset: number,
+    endOffset: number,
+    key: string,
+    value: ITextDecoration,
+    originTextRuns?: ITextRun[]
+): ITextRun[] {
+    if (originTextRuns == null) {
+        return [
+            {
+                st: 0,
+                ed: endOffset - startOffset,
+                ts: {
+                    [key]: value,
+                },
+            },
+        ];
+    }
+
+    const result: ITextRun[] = [];
+    let start = 0;
+    for (const textRun of originTextRuns) {
+        const { st, ed, ts } = textRun;
+        if (start !== st) {
+            result.push({
+                st: start,
+                ed: st,
+                ts: {
+                    [key]: value,
+                },
+            });
+        }
+
+        result.push({
+            st,
+            ed,
+            ts: {
+                [key]: {
+                    ...value,
+                    cl: {
+                        rgb: ts?.cl?.rgb ?? COLOR_BLACK_RGB,
+                    },
+                },
+            },
+        });
+
+        start = ed;
+    }
+
+    if (start !== endOffset - startOffset) {
+        result.push({
+            st: start,
+            ed: endOffset - startOffset,
+            ts: {
+                [key]: value,
+            },
+        });
+    }
+
+    return normalizeTextRuns(result);
 }

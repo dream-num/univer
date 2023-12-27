@@ -19,7 +19,13 @@ import type { Nullable } from '../../shared';
 import { getDocsUpdateBody } from '../../shared';
 import { UpdateDocsAttributeType } from '../../shared/command-enum';
 import { Tools } from '../../shared/tools';
-import type { IDocumentBody, IDocumentData, IDocumentRenderConfig } from '../../types/interfaces/i-document-data';
+import type {
+    IDocumentBody,
+    IDocumentData,
+    IDocumentRenderConfig,
+    IParagraph,
+    ITextRun,
+} from '../../types/interfaces/i-document-data';
 import { type IPaddingData } from '../../types/interfaces/i-style-data';
 import { updateAttributeByDelete } from './apply-utils/delete-apply';
 import { updateAttributeByInsert } from './apply-utils/insert-apply';
@@ -307,6 +313,73 @@ export class DocumentDataModel extends DocumentDataModelSimple {
         });
 
         return undoMutations;
+    }
+
+    sliceBody(startOffset: number, endOffset: number): Nullable<IDocumentBody> {
+        const body = this.getBody();
+
+        if (body == null) {
+            return;
+        }
+
+        const { dataStream, textRuns = [], paragraphs = [] } = body;
+
+        const docBody: IDocumentBody = {
+            dataStream: dataStream.slice(startOffset, endOffset),
+        };
+
+        const newTextRuns: ITextRun[] = [];
+
+        for (const textRun of textRuns) {
+            const clonedTextRun = Tools.deepClone(textRun);
+            const { st, ed } = clonedTextRun;
+            if (Tools.hasIntersectionBetweenTwoRanges(st, ed, startOffset, endOffset)) {
+                if (startOffset >= st && startOffset <= ed) {
+                    newTextRuns.push({
+                        ...clonedTextRun,
+                        st: startOffset,
+                        ed: Math.min(endOffset, ed),
+                    });
+                } else if (endOffset >= st && endOffset <= ed) {
+                    newTextRuns.push({
+                        ...clonedTextRun,
+                        st: Math.max(startOffset, st),
+                        ed: endOffset,
+                    });
+                } else {
+                    newTextRuns.push(clonedTextRun);
+                }
+            }
+        }
+
+        if (newTextRuns.length) {
+            docBody.textRuns = newTextRuns.map((tr) => {
+                const { st, ed } = tr;
+                return {
+                    ...tr,
+                    st: st - startOffset,
+                    ed: ed - startOffset,
+                };
+            });
+        }
+
+        const newParagraphs: IParagraph[] = [];
+
+        for (const paragraph of paragraphs) {
+            const { startIndex } = paragraph;
+            if (startIndex >= startOffset && startIndex <= endOffset) {
+                newParagraphs.push(Tools.deepClone(paragraph));
+            }
+        }
+
+        if (newParagraphs.length) {
+            docBody.paragraphs = newParagraphs.map((p) => ({
+                ...p,
+                startIndex: p.startIndex - startOffset,
+            }));
+        }
+
+        return docBody;
     }
 
     private _updateApply(

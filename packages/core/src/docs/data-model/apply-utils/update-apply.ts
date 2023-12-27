@@ -25,7 +25,7 @@ import type {
     ITable,
     ITextRun,
 } from '../../../types/interfaces';
-import { PresetListType } from '..';
+import { PresetListType } from '../preset-list-type';
 import {
     deleteCustomBlocks,
     deleteCustomRanges,

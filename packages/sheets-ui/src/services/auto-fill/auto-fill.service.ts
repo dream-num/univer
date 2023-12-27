@@ -188,12 +188,12 @@ export class AutoFillService extends Disposable implements IAutoFillService {
     }
 
     getActiveHooks() {
-        const { source, target } = this.autoFillLocation || {};
-        if (!source || !target) {
+        const { source, target, unitId, subUnitId } = this.autoFillLocation || {};
+        if (!source || !target || !unitId || !subUnitId) {
             return [];
         }
         const enabledHooks = this._hooks.filter(
-            (h) => !h.disable?.(source!, target!, this._direction, this.applyType) === true
+            (h) => !h.disable?.({ source, target, unitId, subUnitId }, this._direction, this.applyType) === true
         );
         const onlyHooks = enabledHooks.filter((h) => h.hookType === AutoFillHookType.ONLY);
         if (onlyHooks.length > 0) {

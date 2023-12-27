@@ -83,6 +83,17 @@ export class AutoFillController extends Disposable {
         @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
+        this._defaultHook = {
+            id: 'default',
+            hookType: AutoFillHookType.DEFAULT,
+            priority: 0,
+            onBeforeFillData: (location: IAutoFillLocation, direction: Direction) => {
+                this._presetAndCacheData(location, direction);
+            },
+            onFillData: (location: IAutoFillLocation, direction: Direction, applyType: APPLY_TYPE) => {
+                return this._fillData(location, direction, applyType);
+            },
+        };
         this._init();
     }
 
@@ -96,17 +107,6 @@ export class AutoFillController extends Disposable {
     }
 
     private _initDefaultHook() {
-        this._defaultHook = {
-            id: 'default',
-            hookType: AutoFillHookType.DEFAULT,
-            priority: 0,
-            onBeforeFillData: (location: IAutoFillLocation, direction: Direction) => {
-                this._presetAndCacheData(location, direction);
-            },
-            onFillData: (location: IAutoFillLocation, direction: Direction, applyType: APPLY_TYPE) => {
-                return this._fillData(location, direction, applyType);
-            },
-        };
         this._autoFillService.addHook(this._defaultHook);
     }
 

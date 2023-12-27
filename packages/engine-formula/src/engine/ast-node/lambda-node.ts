@@ -16,33 +16,48 @@
 
 import type { Nullable } from '@univerjs/core';
 import { Tools } from '@univerjs/core';
+import { Inject } from '@wendellhu/redi';
 
+import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import {
+    DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME,
     DEFAULT_TOKEN_TYPE_LAMBDA_OMIT_PARAMETER,
     DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER,
     DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER,
 } from '../../basics/token-type';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
 import { LexerNode } from '../analysis/lexer-node';
+import { Interpreter } from '../interpreter/interpreter';
 import { isFirstChildParameter } from '../utils/function-definition';
+import { LambdaValueObjectObject } from '../value-object/lambda-value-object';
 import type { LambdaPrivacyVarType } from './base-ast-node';
 import { BaseAstNode, ErrorNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
 import { NODE_ORDER_MAP, NodeType } from './node-type';
 
-export const LAMBDA_TOKEN: string = 'LAMBDA';
-
 export class LambdaNode extends BaseAstNode {
+    private _isNotEmpty = true;
+
     constructor(
         token: string,
-        private _lambdaId: string
+        private _lambdaId: string,
+        private _interpreter: Interpreter,
+        private _lambdaPrivacyVarKeys: string[]
     ) {
         super(token);
     }
 
     override get nodeType() {
         return NodeType.LAMBDA;
+    }
+
+    override setNotEmpty(state = false) {
+        this._isNotEmpty = state;
+    }
+
+    isEmptyParamFunction() {
+        return this.getChildren().length < 2 && this._isNotEmpty;
     }
 
     isFunctionParameter() {
@@ -54,14 +69,33 @@ export class LambdaNode extends BaseAstNode {
     }
 
     override execute() {
-        const children = this.getChildren();
-        const childrenCount = children.length;
-        this.setValue(children[childrenCount - 1].getValue());
+        if (this.isEmptyParamFunction()) {
+            this.setValue(new LambdaValueObjectObject(this, this._interpreter, this._lambdaPrivacyVarKeys));
+        } else {
+            const children = this.getChildren();
+            const childrenCount = children.length;
+            this.setValue(children[childrenCount - 1].getValue());
+        }
+    }
+
+    override async executeAsync() {
+        if (this.isEmptyParamFunction()) {
+            await this.setValue(new LambdaValueObjectObject(this, this._interpreter, this._lambdaPrivacyVarKeys));
+        } else {
+            const children = this.getChildren();
+            const childrenCount = children.length;
+            await this.setValue(children[childrenCount - 1].getValue());
+        }
+
+        return Promise.resolve(AstNodePromiseType.SUCCESS);
     }
 }
 
 export class LambdaNodeFactory extends BaseAstNodeFactory {
-    constructor(@IFormulaRuntimeService private readonly _runtimeService: IFormulaRuntimeService) {
+    constructor(
+        @IFormulaRuntimeService private readonly _runtimeService: IFormulaRuntimeService,
+        @Inject(Interpreter) private readonly _interpreter: Interpreter
+    ) {
         super();
     }
 
@@ -109,7 +143,7 @@ export class LambdaNodeFactory extends BaseAstNodeFactory {
 
         this._updateLambdaStatement(functionStatementNode, lambdaId, currentLambdaPrivacyVar);
 
-        return new LambdaNode(param.getToken(), lambdaId);
+        return new LambdaNode(param.getToken(), lambdaId, this._interpreter, [...currentLambdaPrivacyVar.keys()]);
     }
 
     override checkAndCreateNodeType(param: LexerNode | string) {
@@ -118,7 +152,7 @@ export class LambdaNodeFactory extends BaseAstNodeFactory {
         }
 
         const token = param.getToken().trim().toUpperCase();
-        if (token !== LAMBDA_TOKEN) {
+        if (token !== DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME) {
             return;
         }
 

@@ -25,6 +25,10 @@ export class ObjectClassType extends Disposable {
         return false;
     }
 
+    isAsyncArrayObject() {
+        return false;
+    }
+
     isReferenceObject() {
         return false;
     }

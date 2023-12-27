@@ -24,7 +24,13 @@ import type { BaseFunction } from '../../functions/base-function';
 import { FUNCTION_NAMES_META } from '../../functions/meta/function-names';
 import { IFunctionService } from '../../services/function.service';
 import type { LexerNode } from '../analysis/lexer-node';
-import type { AsyncObject, FunctionVariantType } from '../reference-object/base-reference-object';
+import type {
+    AsyncArrayObject,
+    AsyncObject,
+    BaseReferenceObject,
+    FunctionVariantType,
+} from '../reference-object/base-reference-object';
+import type { BaseValueObject } from '../value-object/base-value-object';
 import { BaseAstNode, ErrorNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
 import { NODE_ORDER_MAP, NodeType } from './node-type';
@@ -51,7 +57,7 @@ export class FunctionNode extends BaseAstNode {
     }
 
     override async executeAsync() {
-        const variants: FunctionVariantType[] = [];
+        const variants: BaseValueObject[] = [];
         const children = this.getChildren();
         const childrenCount = children.length;
         for (let i = 0; i < childrenCount; i++) {
@@ -59,12 +65,16 @@ export class FunctionNode extends BaseAstNode {
             if (object == null) {
                 continue;
             }
-            variants.push(object);
+            if (object.isReferenceObject()) {
+                variants.push((object as BaseReferenceObject).toArrayValueObject());
+            } else {
+                variants.push(object as BaseValueObject);
+            }
         }
 
         const resultVariant = this._functionExecutor.calculate(...variants);
-        if (resultVariant.isAsyncObject()) {
-            this.setValue(await (resultVariant as AsyncObject).getValue());
+        if (resultVariant.isAsyncObject() || resultVariant.isAsyncArrayObject()) {
+            this.setValue(await (resultVariant as AsyncObject | AsyncArrayObject).getValue());
         } else {
             this.setValue(resultVariant as FunctionVariantType);
         }
@@ -72,7 +82,7 @@ export class FunctionNode extends BaseAstNode {
     }
 
     override execute() {
-        const variants: FunctionVariantType[] = [];
+        const variants: BaseValueObject[] = [];
         const children = this.getChildren();
         const childrenCount = children.length;
         for (let i = 0; i < childrenCount; i++) {
@@ -80,7 +90,11 @@ export class FunctionNode extends BaseAstNode {
             if (object == null) {
                 continue;
             }
-            variants.push(object);
+            if (object.isReferenceObject()) {
+                variants.push((object as BaseReferenceObject).toArrayValueObject());
+            } else {
+                variants.push(object as BaseValueObject);
+            }
         }
 
         const resultVariant = this._functionExecutor.calculate(...variants);

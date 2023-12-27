@@ -165,8 +165,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'rows', detail: '数组中的行数。 必须大于零' },
+            number2: { name: 'cols', detail: '数组中的列数。 必须大于零' },
+            value3: {
+                name: 'lambda',
+                detail: '调用 LAMBDA 来创建数组。 LAMBDA 接受两个参数:row数组的行索引, col数组的列索引',
+            },
         },
     },
     MAP: {

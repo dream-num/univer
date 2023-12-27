@@ -38,7 +38,7 @@ export class BaseFunction extends Disposable {
         return false;
     }
 
-    calculate(...arg: FunctionVariantType[]): NodeValueType {
+    calculate(...arg: BaseValueObject[]): NodeValueType {
         return ErrorValueObject.create(ErrorType.VALUE);
     }
 

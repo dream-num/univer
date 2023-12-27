@@ -85,7 +85,7 @@ export class AutoFillController extends Disposable {
         super();
         this._defaultHook = {
             id: 'default',
-            type: AutoFillHookType.DEFAULT,
+            type: AutoFillHookType.Default,
             priority: 0,
             onBeforeFillData: (location: IAutoFillLocation, direction: Direction) => {
                 this._presetAndCacheData(location, direction);

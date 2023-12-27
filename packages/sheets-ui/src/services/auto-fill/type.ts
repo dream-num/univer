@@ -17,9 +17,9 @@
 import type { Direction, ICellData, IMutationInfo, IRange, Nullable } from '@univerjs/core';
 
 export enum AutoFillHookType {
-    APPEND = 'APPEND',
-    DEFAULT = 'DEFAULT',
-    ONLY = 'ONLY',
+    Append = 'APPEND',
+    Default = 'DEFAULT',
+    Only = 'ONLY',
 }
 
 export interface IAutoFillLocation {

@@ -25,7 +25,7 @@ import type {
 import { ColorKit, makeCellRangeToRangeData } from '@univerjs/core';
 import { getCellInfoInMergeData } from '@univerjs/engine-render';
 
-export const SELECTION_CONTROL_BORDER_BUFFER_WIDTH = 1; // The draggable range of the selection is too thin, making it easy for users to miss. Therefore, a buffer gap is provided to make it easier for users to select.
+export const SELECTION_CONTROL_BORDER_BUFFER_WIDTH = 1.5; // The draggable range of the selection is too thin, making it easy for users to miss. Therefore, a buffer gap is provided to make it easier for users to select.
 
 export const SELECTION_CONTROL_BORDER_BUFFER_COLOR = 'rgba(255,255,255, 0.01)';
 

@@ -16,10 +16,14 @@
 
 import {
     BooleanNumber,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    FOCUSING_EDITOR,
+    FOCUSING_SHEET,
     FontItalic,
     FontWeight,
     HorizontalAlign,
     ICommandService,
+    IContextService,
     IUniverInstanceService,
     RANGE_TYPE,
     ThemeService,
@@ -27,6 +31,7 @@ import {
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
+import { SetInlineFormatCommand, SetTextSelectionsOperation, TextSelectionManagerService } from '@univerjs/docs';
 import {
     ResetBackgroundColorCommand,
     ResetTextColorCommand,
@@ -136,6 +141,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const commandService = accessor.get(ICommandService);
     const sheetPermissionService = accessor.get(SheetPermissionService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
+    const contextService = accessor.get(IContextService);
     const selectionManagerService = accessor.get(SelectionManagerService);
     const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
     const sheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
@@ -159,20 +165,34 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         activated$: new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
-                if (id !== SetRangeValuesMutation.id && id !== SetSelectionsOperation.id) {
-                    return;
+                if (id === SetRangeValuesMutation.id || id === SetSelectionsOperation.id) {
+                    const primary = selectionManagerService.getLast()?.primary;
+                    const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
+                    let isBold = FontWeight.NORMAL;
+
+                    if (primary != null) {
+                        const range = worksheet.getRange(primary.startRow, primary.startColumn);
+                        isBold = range?.getFontWeight();
+                    }
+
+                    subscriber.next(isBold === FontWeight.BOLD);
                 }
 
-                const primary = selectionManagerService.getLast()?.primary;
-                const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
-                let isBold = FontWeight.NORMAL;
+                if (
+                    (id === SetTextSelectionsOperation.id || id === SetInlineFormatCommand.id) &&
+                    contextService.getContextValue(FOCUSING_EDITOR) &&
+                    contextService.getContextValue(FOCUSING_SHEET)
+                ) {
+                    const textRun = getFontStyleAtCursor(accessor);
 
-                if (primary != null) {
-                    const range = worksheet.getRange(primary.startRow, primary.startColumn);
-                    isBold = range?.getFontWeight();
+                    if (textRun == null) {
+                        return;
+                    }
+
+                    const bl = textRun.ts?.bl;
+
+                    subscriber.next(bl === BooleanNumber.TRUE);
                 }
-
-                subscriber.next(isBold === FontWeight.BOLD);
             });
 
             subscriber.next(false);
@@ -188,6 +208,7 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
     const sheetPermissionService = accessor.get(SheetPermissionService);
+    const contextService = accessor.get(IContextService);
     const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
     const sheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
     return {
@@ -209,19 +230,33 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         activated$: new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
-                if (id !== SetRangeValuesMutation.id && id !== SetSelectionsOperation.id) {
-                    return;
+                if (id === SetRangeValuesMutation.id || id === SetSelectionsOperation.id) {
+                    const primary = selectionManagerService.getLast()?.primary;
+                    const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
+                    let isItalic = FontItalic.NORMAL;
+                    if (primary != null) {
+                        const range = worksheet.getRange(primary.startRow, primary.startColumn);
+                        isItalic = range?.getFontStyle();
+                    }
+
+                    subscriber.next(isItalic === FontItalic.ITALIC);
                 }
 
-                const primary = selectionManagerService.getLast()?.primary;
-                const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
-                let isItalic = FontItalic.NORMAL;
-                if (primary != null) {
-                    const range = worksheet.getRange(primary.startRow, primary.startColumn);
-                    isItalic = range?.getFontStyle();
-                }
+                if (
+                    (id === SetTextSelectionsOperation.id || id === SetInlineFormatCommand.id) &&
+                    contextService.getContextValue(FOCUSING_EDITOR) &&
+                    contextService.getContextValue(FOCUSING_SHEET)
+                ) {
+                    const textRun = getFontStyleAtCursor(accessor);
 
-                subscriber.next(isItalic === FontItalic.ITALIC);
+                    if (textRun == null) {
+                        return;
+                    }
+
+                    const it = textRun.ts?.it;
+
+                    subscriber.next(it === BooleanNumber.TRUE);
+                }
             });
 
             subscriber.next(false);
@@ -236,6 +271,7 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
     const sheetPermissionService = accessor.get(SheetPermissionService);
+    const contextService = accessor.get(IContextService);
     const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
     const sheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
     return {
@@ -257,19 +293,33 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         activated$: new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
-                if (id !== SetRangeValuesMutation.id && id !== SetSelectionsOperation.id) {
-                    return;
+                if (id === SetRangeValuesMutation.id || id === SetSelectionsOperation.id) {
+                    const primary = selectionManagerService.getLast()?.primary;
+                    const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
+                    let isUnderline;
+                    if (primary != null) {
+                        const range = worksheet.getRange(primary.startRow, primary.startColumn);
+                        isUnderline = range?.getUnderline();
+                    }
+
+                    subscriber.next(!!(isUnderline && isUnderline.s));
                 }
 
-                const primary = selectionManagerService.getLast()?.primary;
-                const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
-                let isUnderline;
-                if (primary != null) {
-                    const range = worksheet.getRange(primary.startRow, primary.startColumn);
-                    isUnderline = range?.getUnderline();
-                }
+                if (
+                    (id === SetTextSelectionsOperation.id || id === SetInlineFormatCommand.id) &&
+                    contextService.getContextValue(FOCUSING_EDITOR) &&
+                    contextService.getContextValue(FOCUSING_SHEET)
+                ) {
+                    const textRun = getFontStyleAtCursor(accessor);
 
-                subscriber.next(!!(isUnderline && isUnderline.s));
+                    if (textRun == null) {
+                        return;
+                    }
+
+                    const ul = textRun.ts?.ul;
+
+                    subscriber.next(ul?.s === BooleanNumber.TRUE);
+                }
             });
 
             subscriber.next(false);
@@ -284,6 +334,7 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
     const sheetPermissionService = accessor.get(SheetPermissionService);
+    const contextService = accessor.get(IContextService);
     const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
     const sheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
     return {
@@ -305,19 +356,33 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
         activated$: new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
-                if (id !== SetRangeValuesMutation.id && id !== SetSelectionsOperation.id) {
-                    return;
+                if (id === SetRangeValuesMutation.id || id === SetSelectionsOperation.id) {
+                    const primary = selectionManagerService.getLast()?.primary;
+                    const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
+                    let st;
+                    if (primary != null) {
+                        const range = worksheet.getRange(primary.startRow, primary.startColumn);
+                        st = range?.getStrikeThrough();
+                    }
+
+                    subscriber.next(!!(st && st.s));
                 }
 
-                const primary = selectionManagerService.getLast()?.primary;
-                const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
-                let st;
-                if (primary != null) {
-                    const range = worksheet.getRange(primary.startRow, primary.startColumn);
-                    st = range?.getStrikeThrough();
-                }
+                if (
+                    (id === SetTextSelectionsOperation.id || id === SetInlineFormatCommand.id) &&
+                    contextService.getContextValue(FOCUSING_EDITOR) &&
+                    contextService.getContextValue(FOCUSING_SHEET)
+                ) {
+                    const textRun = getFontStyleAtCursor(accessor);
 
-                subscriber.next(!!(st && st.s));
+                    if (textRun == null) {
+                        return;
+                    }
+
+                    const st = textRun.ts?.st;
+
+                    subscriber.next(st?.s === BooleanNumber.TRUE);
+                }
             });
 
             subscriber.next(false);
@@ -517,6 +582,7 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
     const sheetPermissionService = accessor.get(SheetPermissionService);
+    const contextService = accessor.get(IContextService);
     const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
     const sheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
 
@@ -546,19 +612,33 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
             const DEFAULT_SIZE = 14;
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
-                if (id !== SetRangeValuesMutation.id && id !== SetSelectionsOperation.id) {
-                    return;
+                if (id === SetRangeValuesMutation.id || id === SetSelectionsOperation.id) {
+                    const primary = selectionManagerService.getLast()?.primary;
+                    const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
+                    let fs;
+                    if (primary != null) {
+                        const range = worksheet.getRange(primary.startRow, primary.startColumn);
+                        fs = range?.getFontSize();
+                    }
+
+                    subscriber.next(fs ?? DEFAULT_SIZE);
                 }
 
-                const primary = selectionManagerService.getLast()?.primary;
-                const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
-                let fs;
-                if (primary != null) {
-                    const range = worksheet.getRange(primary.startRow, primary.startColumn);
-                    fs = range?.getFontSize();
-                }
+                if (
+                    (id === SetTextSelectionsOperation.id || id === SetInlineFormatCommand.id) &&
+                    contextService.getContextValue(FOCUSING_EDITOR) &&
+                    contextService.getContextValue(FOCUSING_SHEET)
+                ) {
+                    const textRun = getFontStyleAtCursor(accessor);
 
-                subscriber.next(fs ?? DEFAULT_SIZE);
+                    if (textRun == null) {
+                        return;
+                    }
+
+                    const fs = textRun.ts?.fs;
+
+                    subscriber.next(fs ?? DEFAULT_SIZE);
+                }
             });
 
             subscriber.next(DEFAULT_SIZE);
@@ -582,7 +662,6 @@ export function ResetTextColorMenuItemFactory(): IMenuButtonItem {
 export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     const commandService = accessor.get(ICommandService);
     const themeService = accessor.get(ThemeService);
-    const univerInstanceService = accessor.get(IUniverInstanceService);
 
     return {
         id: SetRangeTextColorCommand.id,
@@ -629,7 +708,6 @@ export function ResetBackgroundColorMenuItemFactory(): IMenuButtonItem {
 export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     const commandService = accessor.get(ICommandService);
     const themeService = accessor.get(ThemeService);
-    const univerInstanceService = accessor.get(IUniverInstanceService);
 
     return {
         id: SetBackgroundColorCommand.id,
@@ -1281,4 +1359,27 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem
             return disposable.dispose;
         }),
     };
+}
+
+function getFontStyleAtCursor(accessor: IAccessor) {
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const textSelectionService = accessor.get(TextSelectionManagerService);
+    const editorDataModel = univerInstanceService.getUniverDocInstance(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+    const activeTextRange = textSelectionService.getActiveRange();
+
+    if (editorDataModel == null || activeTextRange == null) {
+        return;
+    }
+
+    const textRuns = editorDataModel.getBody()?.textRuns;
+
+    if (textRuns == null) {
+        return;
+    }
+
+    const { startOffset } = activeTextRange;
+
+    const textRun = textRuns.find(({ st, ed }) => startOffset >= st && startOffset < ed);
+
+    return textRun;
 }

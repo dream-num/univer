@@ -19,6 +19,7 @@ import { DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER } from '../../basics/token-
 import type { BaseAstNode } from '../ast-node/base-ast-node';
 import type { LambdaParameterNode } from '../ast-node/lambda-parameter-node';
 import type { Interpreter } from '../interpreter/interpreter';
+import type { BaseReferenceObject } from '../reference-object/base-reference-object';
 import { AsyncObject } from '../reference-object/base-reference-object';
 import { BaseValueObject, ErrorValueObject } from './base-value-object';
 
@@ -50,13 +51,23 @@ export class LambdaValueObjectObject extends BaseValueObject {
 
         this._setLambdaNodeValue(this._lambdaNode);
 
-        this._lambdaNode.setNotEmpty();
+        this._lambdaNode.setNotEmpty(false);
 
-        const o = new AsyncObject(this._interpreter.executeAsync(this._lambdaNode) as Promise<BaseValueObject>);
+        let value: AsyncObject | BaseValueObject;
+        if (this._interpreter.checkAsyncNode(this._lambdaNode)) {
+            value = new AsyncObject(this._interpreter.executeAsync(this._lambdaNode) as Promise<BaseValueObject>);
+        } else {
+            const o = this._interpreter.execute(this._lambdaNode);
+            if (o.isReferenceObject()) {
+                value = (o as BaseReferenceObject).toArrayValueObject();
+            } else {
+                value = o as BaseValueObject;
+            }
+        }
 
         this._lambdaNode.setNotEmpty(true);
 
-        return o;
+        return value;
     }
 
     private _setLambdaNodeValue(node: BaseAstNode) {

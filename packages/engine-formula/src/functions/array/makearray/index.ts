@@ -42,7 +42,7 @@ export class Makearray extends BaseFunction {
         }
 
         if (column.isArray()) {
-            column = (row as ArrayValueObject).getFirstCell();
+            column = (column as ArrayValueObject).getFirstCell();
         }
 
         if (!row.isNumber()) {
@@ -57,12 +57,12 @@ export class Makearray extends BaseFunction {
 
         const result: Array<Array<BaseValueObject | AsyncObject>> = [];
 
-        for (let r = 0; r <= (row as NumberValueObject).getValue(); r++) {
+        for (let r = 0; r < (row as NumberValueObject).getValue(); r++) {
             if (result[r] == null) {
                 result[r] = [];
             }
-            for (let c = 0; c <= (column as NumberValueObject).getValue(); c++) {
-                const value = lambda.execute(new NumberValueObject(r), new NumberValueObject(c));
+            for (let c = 0; c < (column as NumberValueObject).getValue(); c++) {
+                const value = lambda.execute(new NumberValueObject(r + 1), new NumberValueObject(c + 1));
 
                 result[r][c] = value;
             }

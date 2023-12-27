@@ -47,9 +47,15 @@ export class LambdaParameterNode extends BaseAstNode {
     }
 
     override execute() {
+        /**
+         * In the case of =lambda(x,y,lambda(a,b,a*b)(x,y))(1,2)
+         */
         const node = this._getRootLexerNode(this._currentLambdaPrivacyVar.get(this._lambdaParameter));
         if (!node) {
-            this.setValue(ErrorValueObject.create(ErrorType.SPILL));
+            const value = this.getValue();
+            if (value == null || value.isError()) {
+                this.setValue(ErrorValueObject.create(ErrorType.SPILL));
+            }
         } else {
             this.setValue(node.getValue());
         }

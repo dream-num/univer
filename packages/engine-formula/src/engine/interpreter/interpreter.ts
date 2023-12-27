@@ -115,11 +115,14 @@ export class Interpreter extends Disposable {
             /**
              * If the lambda expression has no parameters, then do not execute further.
              */
-            if (token === DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME && (item as LambdaNode).isEmptyParamFunction()) {
-                item.execute();
+            if (
+                token.toUpperCase() === DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME &&
+                (item as LambdaNode).isEmptyParamFunction()
+            ) {
+                await item.executeAsync();
                 continue;
             }
-            this._executeAsync(item);
+            await this._executeAsync(item);
         }
 
         if (node.nodeType === NodeType.FUNCTION && (node as FunctionNode).isAsync()) {
@@ -143,7 +146,10 @@ export class Interpreter extends Disposable {
             /**
              * If the lambda expression has no parameters, then do not execute further.
              */
-            if (token === DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME && (item as LambdaNode).isEmptyParamFunction()) {
+            if (
+                token.toUpperCase() === DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME &&
+                (item as LambdaNode).isEmptyParamFunction()
+            ) {
                 item.execute();
                 continue;
             }

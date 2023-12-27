@@ -1146,6 +1146,13 @@ export class PromptController extends Disposable {
                 },
             ]);
         }
+
+        /**
+         * After selecting the formula, allow the editor to continue entering content.
+         */
+        setTimeout(() => {
+            this._textSelectionRenderManager.focus();
+        }, 0);
     }
 
     private async _fitEditorSize() {

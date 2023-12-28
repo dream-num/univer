@@ -22,13 +22,12 @@ import { ZenEditorController } from './controllers/zen-editor.controller';
 import { ZenEditorUIController } from './controllers/zen-editor-ui.controller';
 import { IZenEditorManagerService, ZenEditorManagerService } from './services/zen-editor.service';
 
-export interface IZenEditorPluginConfig {}
-
-export class ZenEditorPlugin extends Plugin {
+export interface IUniverSheetsZenEditorPluginConfig {}
+export class UniverSheetsZenEditorPlugin extends Plugin {
     static override type = PluginType.Doc;
 
     constructor(
-        config: IZenEditorPluginConfig,
+        config: IUniverSheetsZenEditorPluginConfig,
         @Inject(Injector) override readonly _injector: Injector
     ) {
         super('zen-editor');

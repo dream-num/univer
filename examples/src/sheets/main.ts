@@ -26,7 +26,7 @@ import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
-import { ZenEditorPlugin } from '@univerjs/sheets-zen-editor';
+import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
 import { UniverUIPlugin } from '@univerjs/ui';
 
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data';
@@ -63,7 +63,7 @@ univer.registerPlugin(UniverDocsUIPlugin);
 
 univer.registerPlugin(UniverSheetsNumfmtPlugin);
 univer.registerPlugin(DebuggerPlugin);
-univer.registerPlugin(ZenEditorPlugin);
+univer.registerPlugin(UniverSheetsZenEditorPlugin);
 univer.registerPlugin(UniverFormulaEnginePlugin, {
     notExecuteFormula: true,
 });

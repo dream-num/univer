@@ -114,6 +114,7 @@ export class ZenEditorController extends RxDisposable {
             if (position == null) {
                 return;
             }
+
             const editorObject = getEditorObject(DOCS_ZEN_EDITOR_UNIT_ID_KEY, this._renderManagerService);
             const zenEditorDataModel = this._currentUniverService.getUniverDocInstance(DOCS_ZEN_EDITOR_UNIT_ID_KEY);
 
@@ -123,7 +124,7 @@ export class ZenEditorController extends RxDisposable {
 
             const { width, height } = position;
 
-            const { engine, scene, document } = editorObject;
+            const { engine } = editorObject;
 
             const skeleton = this._docSkeletonManagerService.getSkeletonByUnitId(DOCS_ZEN_EDITOR_UNIT_ID_KEY)?.skeleton;
 
@@ -137,9 +138,6 @@ export class ZenEditorController extends RxDisposable {
                 this._calculatePagePosition(editorObject);
 
                 if (skeleton) {
-                    // TODO: @JOCS, get offset config from document at runtime.
-                    this._textSelectionRenderManager.changeRuntime(skeleton, scene, document);
-
                     this._textSelectionManagerService.refreshSelection();
                 }
             });

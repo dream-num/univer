@@ -294,10 +294,9 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
     addTextRanges(ranges: ISuccinctTextRangeParam[]) {
         const { _scene: scene, _docSkeleton: docSkeleton } = this;
-        const documentOffsetConfig = this._document!.getOffsetConfig();
 
         for (const range of ranges) {
-            const textSelection = cursorConvertToTextRange(scene!, range, docSkeleton!, documentOffsetConfig);
+            const textSelection = cursorConvertToTextRange(scene!, range, docSkeleton!, this._document!);
 
             this._add(textSelection);
         }
@@ -483,12 +482,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         }
 
         if (evt.ctrlKey || this._isEmpty()) {
-            const newTextSelection = new TextRange(
-                scene,
-                this._document!.getOffsetConfig(),
-                this._docSkeleton!,
-                position
-            );
+            const newTextSelection = new TextRange(scene, this._document!, this._docSkeleton!, position);
 
             this._addTextRange(newTextSelection);
         } else {
@@ -801,7 +795,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         let lastRange = this._rangeList.pop();
 
         if (!lastRange) {
-            lastRange = new TextRange(this._scene, this._document!.getOffsetConfig(), this._docSkeleton!, position);
+            lastRange = new TextRange(this._scene, this._document!, this._docSkeleton!, position);
         }
 
         this._removeAllTextRanges();

@@ -187,11 +187,20 @@ export class HtmlToUSMService {
                 tableStrings.forEach((t) => {
                     const curRow = valueMatrix.getDataRange().endRow + 1;
                     const { cellMatrix } = this._parseTable(t!);
-
-                    cellMatrix &&
+                    if (cellMatrix) {
                         cellMatrix.forValue((row, col, value) => {
+                            const { rowSpan = 1, colSpan = 1 } = value;
+                            for (let i = 0; i < rowSpan; i++) {
+                                for (let j = 0; j < colSpan; j++) {
+                                    valueMatrix.setValue(curRow + row + i, col + j, {
+                                        v: '',
+                                    });
+                                }
+                            }
                             valueMatrix.setValue(curRow + row, col, value);
                         });
+                    }
+
                     rowProperties.push(...rowProperties);
                 });
             }

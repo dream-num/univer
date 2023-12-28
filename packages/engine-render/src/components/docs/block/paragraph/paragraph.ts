@@ -22,8 +22,6 @@ import {
     HorizontalAlign,
     PositionedObjectLayoutType,
 } from '@univerjs/core';
-// @ts-ignore
-import LineBreaker from 'linebreak';
 
 import { hasArabic, hasCJK, hasTibetan, startWithEmoji } from '../../../../basics';
 import type {
@@ -48,6 +46,7 @@ import {
     getSpanGroupWidth,
     lineIterator,
 } from '../../common/tools';
+import { LineBreaker } from '../../linebreak';
 import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../view-model/document-view-model';
 import { dealWithBullet } from './bullet';

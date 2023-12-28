@@ -5,7 +5,7 @@
 
 ## Introduction
 
-> TODO: Introduction
+> Zen Editor plugin for Univer Sheets. This plugin allows you to edit your sheets in a zen mode.
 
 ## Usage
 

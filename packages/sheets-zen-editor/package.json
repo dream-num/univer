@@ -1,7 +1,7 @@
 {
     "name": "@univerjs/sheets-zen-editor",
-    "version": "0.1.0-beta.0",
-    "description": "",
+    "version": "0.1.0-beta.1",
+    "description": "Zen Editor plugin for Univer Sheets.",
     "keywords": [],
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
@@ -46,7 +46,6 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/docs": "workspace:*",
-        "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/icons": "^0.1.24",
         "@univerjs/sheets": "workspace:*",
@@ -68,6 +67,16 @@
         "vitest": "^1.1.0"
     },
     "peerDependencies": {
-        "@univerjs/core": "workspace:*"
+        "@univerjs/core": "workspace:*",
+        "@univerjs/design": "workspace:*",
+        "@univerjs/docs": "workspace:*",
+        "@univerjs/engine-render": "workspace:*",
+        "@univerjs/sheets": "workspace:*",
+        "@univerjs/sheets-ui": "workspace:*",
+        "@univerjs/ui": "workspace:*",
+        "@wendellhu/redi": ">=0.12.12",
+        "clsx": ">=2.0.0",
+        "react": ">=16.9.0",
+        "rxjs": ">=7.0.0"
     }
 }

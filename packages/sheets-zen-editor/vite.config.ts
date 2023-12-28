@@ -49,7 +49,6 @@ export default defineConfig(({ mode }) => ({
                 'clsx',
                 'react',
                 'rxjs',
-                'rxjs/operators',
             ],
             output: {
                 assetFileNames: 'index.css',
@@ -64,7 +63,6 @@ export default defineConfig(({ mode }) => ({
                     clsx: 'clsx',
                     react: 'React',
                     rxjs: 'rxjs',
-                    'rxjs/operators': 'rxjs.operators',
                 },
             },
         },

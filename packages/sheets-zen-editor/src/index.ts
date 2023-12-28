@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export * from './zen-editor-plugin';
+export * from './plugin';

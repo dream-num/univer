@@ -74,6 +74,9 @@
             "path": "./packages/sheets-ui"
         },
         {
+            "path": "./packages/sheets-zen-editor"
+        },
+        {
             "path": "./packages/slides"
         },
         {

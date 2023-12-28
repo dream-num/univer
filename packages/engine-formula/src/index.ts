@@ -35,6 +35,7 @@ export { includeFormulaLexerToken, isFormulaLexerToken, normalizeSheetName } fro
 export { convertUnitDataToRuntime } from './basics/runtime';
 export { matchToken } from './basics/token';
 export { compareToken } from './basics/token';
+export { RegisterFunctionMutation } from './commands/mutations/register-function.mutation';
 export {
     type ISetArrayFormulaDataMutationParams,
     SetArrayFormulaDataMutation,

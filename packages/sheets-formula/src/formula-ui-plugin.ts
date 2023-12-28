@@ -15,13 +15,14 @@
  */
 
 import { IUniverInstanceService, LocaleService, Plugin, PluginType } from '@univerjs/core';
-import type { IFunctionInfo } from '@univerjs/engine-formula';
-import type { Dependency } from '@wendellhu/redi';
+import type { BaseFunction, IFunctionInfo, IFunctionNames } from '@univerjs/engine-formula';
+import type { Ctor, Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { FORMULA_UI_PLUGIN_NAME } from './common/plugin-name';
 import { ActiveDirtyController } from './controllers/active-dirty.controller';
 import { ArrayFormulaDisplayController } from './controllers/array-formula-display.controller';
+import { FormulaAlgorithmController } from './controllers/formula-algorithm.controller';
 import { FormulaAutoFillController } from './controllers/formula-auto-fill.controller';
 import { FormulaClipboardController } from './controllers/formula-clipboard.controller';
 import { FormulaEditorShowController } from './controllers/formula-editor-show.controller';
@@ -41,6 +42,7 @@ import { FormulaPromptService, IFormulaPromptService } from './services/prompt.s
  */
 interface IFormulaUIConfig {
     description: IFunctionInfo[];
+    function: Array<[Ctor<BaseFunction>, IFunctionNames]>;
 }
 export class UniverSheetsFormulaPlugin extends Plugin {
     static override type = PluginType.Sheet;
@@ -83,6 +85,13 @@ export class UniverSheetsFormulaPlugin extends Plugin {
             [UpdateFormulaController],
             [FormulaEditorShowController],
             [ActiveDirtyController],
+            [
+                FormulaAlgorithmController,
+                {
+                    useFactory: () =>
+                        this._injector.createInstance(FormulaAlgorithmController, this._config?.function || []),
+                },
+            ],
         ];
 
         dependencies.forEach((dependency) => this._injector.add(dependency));

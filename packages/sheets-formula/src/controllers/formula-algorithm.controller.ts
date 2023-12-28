@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-import { Disposable, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import type { BaseFunction, IFunctionNames } from '@univerjs/engine-formula';
-import { IFunctionService } from '@univerjs/engine-formula';
+import { Disposable, DisposableCollection, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import type { IFunctionNames } from '@univerjs/engine-formula';
+import { BaseFunction, IFunctionService, RegisterFunctionMutation } from '@univerjs/engine-formula';
 import type { Ctor } from '@wendellhu/redi';
 
 @OnLifecycle(LifecycleStages.Ready, FormulaAlgorithmController)
 export class FormulaAlgorithmController extends Disposable {
     constructor(
         private _function: Array<[Ctor<BaseFunction>, IFunctionNames]>,
-        @IFunctionService private readonly _functionService: IFunctionService
+        @IFunctionService private readonly _functionService: IFunctionService,
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
 
@@ -43,5 +44,41 @@ export class FormulaAlgorithmController extends Disposable {
         });
 
         this._functionService.registerExecutors(...functions);
+
+        const functionList = functions.map((func) => funcToString(func));
+
+        // Synchronous to worker
+        this._commandService.executeCommand(
+            RegisterFunctionMutation.id,
+            {
+                functions: functionList,
+            },
+            {
+                local: true,
+            }
+        );
     }
+}
+
+function funcToString(func: any) {
+    const coll = new DisposableCollection();
+    const collAsString = instanceToString(coll).replace(/(?<=class)\b/, ' DisposableCollection');
+    // console.log(collAsString);
+
+    const dis = new Disposable();
+    const disAsString = instanceToString(dis).replace(/(?<=class)\b/, ' Disposable');
+    // console.log(disAsString);
+
+    const instance = new BaseFunction(func.name);
+    const instanceAsString = instanceToString(instance).replace(/(?<=class)\b/, ' BaseFunction');
+
+    // const func = new Sum('SUM');
+    const name = func.name.slice(0, 1) + func.name.slice(1).toLocaleLowerCase();
+    const funcAsString = instanceToString(func).replace(/(?<=class)\b/, ` ${name}`);
+
+    return `function (){${collAsString}\n${disAsString}\n${instanceAsString}\n${funcAsString}; return ${name} }()`;
+}
+
+function instanceToString(instance: { [key: string]: any }) {
+    return instance.constructor.toString();
 }

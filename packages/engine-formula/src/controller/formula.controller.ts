@@ -19,6 +19,7 @@ import type { Ctor } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import type { IFunctionNames } from '../basics/function';
+import { RegisterFunctionMutation } from '../commands/mutations/register-function.mutation';
 import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
 import { RemoveDefinedNameMutation, SetDefinedNameMutation } from '../commands/mutations/set-defined-name.mutation';
 import {
@@ -93,6 +94,7 @@ export class FormulaController extends Disposable {
             SetSuperTableMutation,
             RemoveSuperTableMutation,
             SetSuperTableOptionMutation,
+            RegisterFunctionMutation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 

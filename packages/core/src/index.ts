@@ -101,6 +101,7 @@ export {
     deserializeRangeWithSheet,
     getAbsoluteRefTypeWithSingleString,
     getAbsoluteRefTypeWitString,
+    type IAbsoluteRefTypeForRange,
     serializeRange,
     serializeRangeToRefString,
     serializeRangeWithSheet,

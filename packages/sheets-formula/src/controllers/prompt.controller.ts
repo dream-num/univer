@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IRangeWithCoord, ITextRun, Nullable } from '@univerjs/core';
+import type { IAbsoluteRefTypeForRange, ICommandInfo, IRangeWithCoord, ITextRun, Nullable } from '@univerjs/core';
 import {
+    AbsoluteRefType,
     deserializeRangeWithSheet,
     Direction,
     Disposable,
@@ -23,6 +24,7 @@ import {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     FOCUSING_EDITOR_INPUT_FORMULA,
+    getAbsoluteRefTypeWitString,
     ICommandService,
     IContextService,
     isFormulaString,
@@ -1054,6 +1056,8 @@ export class PromptController extends Disposable {
 
         let { startRow, endRow, startColumn, endColumn } = range;
 
+        const { startAbsoluteRefType, endAbsoluteRefType } = range;
+
         if (primary) {
             const {
                 isMerged,
@@ -1086,6 +1090,8 @@ export class PromptController extends Disposable {
                 endRow,
                 startColumn,
                 endColumn,
+                startAbsoluteRefType,
+                endAbsoluteRefType,
             },
         });
     }
@@ -1387,18 +1393,32 @@ export class PromptController extends Disposable {
             }
         }
 
+        const nodeIndex = Number(id);
+
+        const currentNode = this._formulaInputService.getCurrentSequenceNodeByIndex(nodeIndex);
+
+        let refType: IAbsoluteRefTypeForRange = { startAbsoluteRefType: AbsoluteRefType.NONE };
+        if (typeof currentNode !== 'string') {
+            const token = (currentNode as ISequenceNode).token;
+
+            refType = getAbsoluteRefTypeWitString(token) as IAbsoluteRefTypeForRange;
+
+            if (refType.endAbsoluteRefType == null) {
+                refType.endAbsoluteRefType = refType.startAbsoluteRefType;
+            }
+        }
+
         const refString = this._getRefString({
             range: {
-                startRow,
-                endRow,
-                startColumn,
-                endColumn,
+                startRow: Math.min(startRow, endRow),
+                endRow: Math.max(startRow, endRow),
+                startColumn: Math.min(startColumn, endColumn),
+                endColumn: Math.max(startColumn, endColumn),
+                ...refType,
             },
             primary,
             style: null,
         });
-
-        const nodeIndex = Number(id);
 
         this._formulaInputService.updateSequenceRef(nodeIndex, refString);
 

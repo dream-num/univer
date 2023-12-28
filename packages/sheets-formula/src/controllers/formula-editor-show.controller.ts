@@ -25,7 +25,12 @@ import {
     ThemeService,
     toDisposable,
 } from '@univerjs/core';
-import { FormulaDataModel, LexerTreeBuilder, SetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
+import {
+    ErrorType,
+    FormulaDataModel,
+    LexerTreeBuilder,
+    SetFormulaCalculationResultMutation,
+} from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import {
@@ -66,7 +71,7 @@ export class FormulaEditorShowController extends Disposable {
                     this._editorBridgeService.interceptor.getInterceptPoints().BEFORE_CELL_EDIT,
                     {
                         handler: (value, context, next) => {
-                            const { row, col, unitId, subUnitId } = context;
+                            const { row, col, unitId, subUnitId, worksheet } = context;
                             const arrayFormulaMatrixRange = this._formulaDataModel.getArrayFormulaRange();
 
                             const arrayFormulaMatrixCell = this._formulaDataModel.getArrayFormulaCellData();
@@ -147,6 +152,12 @@ export class FormulaEditorShowController extends Disposable {
                                         return false;
                                     }
                                     if (row >= startRow && row <= endRow && col >= startColumn && col <= endColumn) {
+                                        const mainCellValue = worksheet.getCell(startRow, startColumn);
+
+                                        if (mainCellValue?.v === ErrorType.SPILL) {
+                                            return;
+                                        }
+
                                         const formulaDataItem = this._formulaDataModel.getFormulaDataItem(
                                             rowIndex,
                                             columnIndex,

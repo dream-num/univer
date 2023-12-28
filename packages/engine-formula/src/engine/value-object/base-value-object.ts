@@ -75,6 +75,10 @@ export class BaseValueObject extends ObjectClassType {
         return false;
     }
 
+    isLambda() {
+        return false;
+    }
+
     override isError() {
         return false;
     }

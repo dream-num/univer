@@ -122,6 +122,10 @@ export class BaseAstNode extends Disposable {
         /* abstract */
     }
 
+    setNotEmpty(state = true) {
+        /* abstract */
+    }
+
     setRefOffset(x: number = 0, y: number = 0) {
         this._refOffsetX = x;
         this._refOffsetY = y;

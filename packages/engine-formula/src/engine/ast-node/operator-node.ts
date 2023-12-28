@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { BaseValueObject } from '../..';
 import { ErrorType } from '../../basics/error-type';
 import type { compareToken } from '../../basics/token';
 import { OPERATOR_TOKEN_COMPARE_SET, OPERATOR_TOKEN_SET, operatorToken } from '../../basics/token';
@@ -24,7 +25,7 @@ import type { Compare } from '../../functions/meta/compare';
 import { FUNCTION_NAMES_META } from '../../functions/meta/function-names';
 import { IFunctionService } from '../../services/function.service';
 import { LexerNode } from '../analysis/lexer-node';
-import type { FunctionVariantType } from '../reference-object/base-reference-object';
+import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
 import { BaseAstNode, ErrorNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
 import { NODE_ORDER_MAP, NodeType } from './node-type';
@@ -46,12 +47,26 @@ export class OperatorNode extends BaseAstNode {
         if (this._functionExecutor.name === FUNCTION_NAMES_META.COMPARE) {
             (this._functionExecutor as Compare).setCompareType(this.getToken() as compareToken);
         }
-        const object1 = children[0].getValue();
-        const object2 = children[1].getValue();
+        let object1 = children[0].getValue();
+        let object2 = children[1].getValue();
         if (object1 == null || object2 == null) {
             throw new Error('object1 or object2 is null');
         }
-        this.setValue(this._functionExecutor.calculate(object1, object2) as FunctionVariantType);
+
+        if (object1.isReferenceObject()) {
+            object1 = (object1 as BaseReferenceObject).toArrayValueObject();
+        }
+
+        if (object2.isReferenceObject()) {
+            object2 = (object2 as BaseReferenceObject).toArrayValueObject();
+        }
+
+        this.setValue(
+            this._functionExecutor.calculate(
+                object1 as BaseValueObject,
+                object2 as BaseValueObject
+            ) as FunctionVariantType
+        );
     }
 }
 

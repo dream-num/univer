@@ -101,13 +101,13 @@ export class FreezeController extends Disposable {
 
     private _activeViewport: Viewport | null = null;
 
-    private _freeze_normal_header_color = '';
+    private _freezeNormalHeaderColor = '';
 
-    private _freeze_normal_main_color = '';
+    private _freezeNormalMainColor = '';
 
-    private _freeze_active_color = '';
+    private _freezeActiveColor = '';
 
-    private _freeze_hover_color = '';
+    private _freezeHoverColor = '';
 
     constructor(
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
@@ -203,11 +203,13 @@ export class FreezeController extends Disposable {
 
         this._changeToOffsetY = startY;
 
-        const FREEZE_SIZE = FREEZE_SIZE_NORMAL / Math.max(scene.scaleX, scene.scaleY);
+        const scale = Math.max(scene.scaleX, scene.scaleY);
+
+        const FREEZE_SIZE = FREEZE_SIZE_NORMAL / (scale < 1 ? 1 : scale);
 
         if (freezeDirectionType === FREEZE_DIRECTION_TYPE.ROW) {
             this._rowFreezeHeaderRect = new Rect(FREEZE_ROW_HEADER_NAME, {
-                fill: this._freeze_normal_header_color,
+                fill: this._freezeNormalHeaderColor,
                 width: rowHeaderWidthAndMarginLeft,
                 height: FREEZE_SIZE,
                 left: 0,
@@ -215,9 +217,9 @@ export class FreezeController extends Disposable {
                 zIndex: 3,
             });
 
-            let fill = this._freeze_normal_header_color;
+            let fill = this._freezeNormalHeaderColor;
             if (freezeRow === -1 || freezeRow === 0) {
-                fill = this._freeze_normal_main_color;
+                fill = this._freezeNormalMainColor;
             }
 
             this._rowFreezeMainRect = new Rect(FREEZE_ROW_MAIN_NAME, {
@@ -232,7 +234,7 @@ export class FreezeController extends Disposable {
             scene.addObjects([this._rowFreezeHeaderRect, this._rowFreezeMainRect], SHEET_COMPONENT_HEADER_LAYER_INDEX);
         } else {
             this._columnFreezeHeaderRect = new Rect(FREEZE_COLUMN_HEADER_NAME, {
-                fill: this._freeze_normal_header_color,
+                fill: this._freezeNormalHeaderColor,
                 width: FREEZE_SIZE,
                 height: columnHeaderHeightAndMarginTop,
                 left: startX - FREEZE_SIZE,
@@ -240,9 +242,9 @@ export class FreezeController extends Disposable {
                 zIndex: 3,
             });
 
-            let fill = this._freeze_normal_header_color;
+            let fill = this._freezeNormalHeaderColor;
             if (freezeColumn === -1 || freezeColumn === 0) {
-                fill = this._freeze_normal_main_color;
+                fill = this._freezeNormalMainColor;
             }
 
             this._columnFreezeMainRect = new Rect(FREEZE_COLUMN_MAIN_NAME, {
@@ -281,7 +283,7 @@ export class FreezeController extends Disposable {
         this._freezeMoveObservers.push(
             freezeObjectHeaderRect?.onPointerEnterObserver.add(() => {
                 freezeObjectHeaderRect?.setProps({
-                    fill: this._freeze_hover_color,
+                    fill: this._freezeHoverColor,
                     zIndex: 4,
                 });
                 scene.setCursor(CURSOR_TYPE.GRAB);
@@ -291,7 +293,7 @@ export class FreezeController extends Disposable {
         this._freezeMoveObservers.push(
             freezeObjectMainRect?.onPointerEnterObserver.add(() => {
                 freezeObjectHeaderRect?.setProps({
-                    fill: this._freeze_hover_color,
+                    fill: this._freezeHoverColor,
                     zIndex: 4,
                 });
                 scene.setCursor(CURSOR_TYPE.GRAB);
@@ -301,7 +303,7 @@ export class FreezeController extends Disposable {
         this._freezeLeaveObservers.push(
             freezeObjectHeaderRect?.onPointerLeaveObserver.add(() => {
                 freezeObjectHeaderRect?.setProps({
-                    fill: this._freeze_normal_header_color,
+                    fill: this._freezeNormalHeaderColor,
                     zIndex: 3,
                 });
                 scene.resetCursor();
@@ -311,7 +313,7 @@ export class FreezeController extends Disposable {
         this._freezeLeaveObservers.push(
             freezeObjectMainRect?.onPointerLeaveObserver.add(() => {
                 freezeObjectHeaderRect?.setProps({
-                    fill: this._freeze_normal_header_color,
+                    fill: this._freezeNormalHeaderColor,
                     zIndex: 3,
                 });
                 scene.resetCursor();
@@ -320,13 +322,13 @@ export class FreezeController extends Disposable {
 
         this._freezeDownObservers.push(
             freezeObjectHeaderRect?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
-                this._FreezeDown(evt, freezeObjectHeaderRect!, freezeObjectMainRect!, freezeDirectionType);
+                this._freezeDown(evt, freezeObjectHeaderRect!, freezeObjectMainRect!, freezeDirectionType);
             })
         );
 
         this._freezeDownObservers.push(
             freezeObjectMainRect?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
-                this._FreezeDown(evt, freezeObjectHeaderRect!, freezeObjectMainRect!, freezeDirectionType);
+                this._freezeDown(evt, freezeObjectHeaderRect!, freezeObjectMainRect!, freezeDirectionType);
             })
         );
     }
@@ -381,7 +383,7 @@ export class FreezeController extends Disposable {
         return viewports.find((i) => i.isHit(new Vector2(evt.offsetX, evt.offsetY))) || null;
     }
 
-    private _FreezeDown(
+    private _freezeDown(
         evt: IPointerEvent | IMouseEvent,
         freezeObjectHeaderRect: Rect,
         freezeObjectMainRect: Rect,
@@ -433,14 +435,14 @@ export class FreezeController extends Disposable {
                         top: Math.min(startY, lastRowY) - FREEZE_SIZE / 2,
                     })
                     ?.setProps({
-                        fill: this._freeze_active_color,
+                        fill: this._freezeActiveColor,
                     });
                 freezeObjectMainRect
                     .transformByState({
                         top: Math.min(startY, lastRowY) - FREEZE_SIZE / 2,
                     })
                     ?.setProps({
-                        fill: this._freeze_normal_header_color,
+                        fill: this._freezeNormalHeaderColor,
                     });
                 this._changeToRow = lastRow === undefined ? row : Math.min(row, lastRow);
                 this._changeToOffsetY = Math.min(startY, lastRowY);
@@ -451,14 +453,14 @@ export class FreezeController extends Disposable {
                         left: startX - FREEZE_SIZE / 2,
                     })
                     ?.setProps({
-                        fill: this._freeze_active_color,
+                        fill: this._freezeActiveColor,
                     });
                 freezeObjectMainRect
                     .transformByState({
                         left: startX - FREEZE_SIZE / 2,
                     })
                     ?.setProps({
-                        fill: this._freeze_normal_header_color,
+                        fill: this._freezeNormalHeaderColor,
                     });
 
                 this._changeToColumn = column;
@@ -483,17 +485,17 @@ export class FreezeController extends Disposable {
                     (this._changeToColumn === 0 || this._changeToColumn === -1))
             ) {
                 freezeObjectHeaderRect.setProps({
-                    fill: this._freeze_normal_header_color,
+                    fill: this._freezeNormalHeaderColor,
                 });
                 freezeObjectMainRect.setProps({
-                    fill: this._freeze_normal_main_color,
+                    fill: this._freezeNormalMainColor,
                 });
             } else {
                 freezeObjectHeaderRect?.setProps({
-                    fill: this._freeze_normal_header_color,
+                    fill: this._freezeNormalHeaderColor,
                 });
                 freezeObjectMainRect?.setProps({
-                    fill: this._freeze_normal_header_color,
+                    fill: this._freezeNormalHeaderColor,
                 });
             }
 
@@ -1064,15 +1066,15 @@ export class FreezeController extends Disposable {
     }
 
     private _themeChange(style: IStyleSheet) {
-        this._freeze_normal_header_color = style.grey400;
+        this._freezeNormalHeaderColor = style.grey400;
 
-        this._freeze_normal_main_color = new ColorKit(style.grey400)
+        this._freezeNormalMainColor = new ColorKit(style.grey400)
             .setAlpha(AUXILIARY_CLICK_HIDDEN_OBJECT_TRANSPARENCY)
             .toRgbString();
 
-        this._freeze_active_color = style.primaryColor;
+        this._freezeActiveColor = style.primaryColor;
 
-        this._freeze_hover_color = style.grey500;
+        this._freezeHoverColor = style.grey500;
     }
 
     private _commandExecutedListener() {

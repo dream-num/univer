@@ -296,7 +296,7 @@ export class SelectionShapeExtension {
             });
         });
 
-        this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {
+        this._upObserver = scene.onPointerUpObserver.add(() => {
             this._helperSelection?.dispose();
             const scene = this._scene;
             scene.resetCursor();
@@ -340,11 +340,11 @@ export class SelectionShapeExtension {
             bottomCenterWidget,
             bottomRightWidget,
         ].forEach((control, index) => {
-            control.onPointerEnterObserver.add((evt: IMouseEvent | IPointerEvent) => {
+            control.onPointerEnterObserver.add(() => {
                 control.setCursor(cursors[index]);
             });
 
-            control.onPointerLeaveObserver.add((evt: IMouseEvent | IPointerEvent) => {
+            control.onPointerLeaveObserver.add(() => {
                 control.resetCursor();
             });
 
@@ -373,9 +373,9 @@ export class SelectionShapeExtension {
 
         const { rowHeaderWidth, columnHeaderHeight } = this._skeleton;
 
-        const maxRow = this._skeleton.getRowCount() - 1;
+        // const maxRow = this._skeleton.getRowCount() - 1;
 
-        const maxColumn = this._skeleton.getColumnCount() - 1;
+        // const maxColumn = this._skeleton.getColumnCount() - 1;
 
         let startRow = this._relativeSelectionPositionRow;
 
@@ -515,7 +515,7 @@ export class SelectionShapeExtension {
             });
         });
 
-        this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {
+        this._upObserver = scene.onPointerUpObserver.add(() => {
             const scene = this._scene;
             scene.resetCursor();
             this._clearObserverEvent();
@@ -528,11 +528,11 @@ export class SelectionShapeExtension {
     private _initialFill() {
         const { fillControl } = this._control;
 
-        fillControl.onPointerEnterObserver.add((evt: IMouseEvent | IPointerEvent) => {
+        fillControl.onPointerEnterObserver.add(() => {
             fillControl.setCursor(CURSOR_TYPE.CROSSHAIR);
         });
 
-        fillControl.onPointerLeaveObserver.add((evt: IMouseEvent | IPointerEvent) => {
+        fillControl.onPointerLeaveObserver.add(() => {
             fillControl.resetCursor();
         });
 
@@ -575,7 +575,7 @@ export class SelectionShapeExtension {
         let isRowDropping = true;
 
         if ((column < startColumn || column > endColumn) && row >= startRow && row <= endRow) {
-            const rulerValue = this._FillRuler(
+            const rulerValue = this._fillRuler(
                 column,
                 startColumn,
                 endColumn,
@@ -591,7 +591,7 @@ export class SelectionShapeExtension {
 
             isRowDropping = false;
         } else if ((row < startRow || row > endRow) && column >= startColumn && column <= endColumn) {
-            const rulerValue = this._FillRuler(row, startRow, endRow, this._relativeSelectionRowLength, maxRow);
+            const rulerValue = this._fillRuler(row, startRow, endRow, this._relativeSelectionRowLength, maxRow);
 
             startRow = rulerValue.startRowOrColumn;
 
@@ -602,7 +602,7 @@ export class SelectionShapeExtension {
             Math.abs(this._startOffsetX - moveRelativeCoords.x - scrollXY.x) / 2 >
             Math.abs(this._startOffsetY - moveRelativeCoords.y - scrollXY.y)
         ) {
-            const rulerValue = this._FillRuler(
+            const rulerValue = this._fillRuler(
                 column,
                 startColumn,
                 endColumn,
@@ -618,7 +618,7 @@ export class SelectionShapeExtension {
 
             isRowDropping = false;
         } else {
-            const rulerValue = this._FillRuler(row, startRow, endRow, this._relativeSelectionRowLength, maxRow);
+            const rulerValue = this._fillRuler(row, startRow, endRow, this._relativeSelectionRowLength, maxRow);
 
             startRow = rulerValue.startRowOrColumn;
 
@@ -767,7 +767,7 @@ export class SelectionShapeExtension {
             });
         });
 
-        this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {
+        this._upObserver = scene.onPointerUpObserver.add(() => {
             this._helperSelection?.dispose();
             const scene = this._scene;
             scene.resetCursor();
@@ -863,7 +863,7 @@ export class SelectionShapeExtension {
         }
     }
 
-    private _FillRuler(
+    private _fillRuler(
         rowOrColumn: number,
         startRowOrColumn: number,
         endRowOrColumn: number,

@@ -16,23 +16,18 @@
 
 import { ErrorType } from '../../basics/error-type';
 import { matchToken } from '../../basics/token';
-import type { BaseFunction } from '../../functions/base-function';
-import { FUNCTION_NAMES_META } from '../../functions/meta/function-names';
 import { IFunctionService } from '../../services/function.service';
 import { LexerNode } from '../analysis/lexer-node';
-import type { FunctionVariantType } from '../reference-object/base-reference-object';
+import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
-import { BaseAstNode, ErrorNode } from './base-ast-node';
+import { BaseAstNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
 import { NODE_ORDER_MAP, NodeType } from './node-type';
 
-const UNION_EXECUTOR_NAME = 'UNION';
+// const UNION_EXECUTOR_NAME = 'UNION';
 
 export class UnionNode extends BaseAstNode {
-    constructor(
-        private _operatorString: string,
-        private _functionExecutor: BaseFunction
-    ) {
+    constructor(private _operatorString: string) {
         super(_operatorString);
     }
 
@@ -51,11 +46,37 @@ export class UnionNode extends BaseAstNode {
 
         let result: FunctionVariantType;
         if (this._operatorString === matchToken.COLON) {
-            result = this._functionExecutor.calculate(leftNode, rightNode) as FunctionVariantType;
+            result = this._unionFunction(leftNode, rightNode) as FunctionVariantType;
         } else {
             result = ErrorValueObject.create(ErrorType.NAME);
         }
         this.setValue(result);
+    }
+
+    private _unionFunction(variant1: FunctionVariantType, variant2: FunctionVariantType) {
+        if (variant1.isError() || variant2.isError()) {
+            return ErrorValueObject.create(ErrorType.REF);
+        }
+
+        if (!variant1.isReferenceObject() || !variant2.isReferenceObject()) {
+            return ErrorValueObject.create(ErrorType.REF);
+        }
+
+        variant1 = variant1 as BaseReferenceObject;
+
+        variant2 = variant2 as BaseReferenceObject;
+
+        if (variant1.isCell() && variant2.isCell()) {
+            return variant1.unionBy(variant2);
+        }
+        if (variant1.isRow() && variant2.isRow()) {
+            return variant1.unionBy(variant2);
+        }
+        if (variant1.isColumn() && variant2.isColumn()) {
+            return variant1.unionBy(variant2);
+        }
+
+        return ErrorValueObject.create(ErrorType.REF);
     }
 }
 
@@ -69,12 +90,7 @@ export class UnionNodeFactory extends BaseAstNodeFactory {
     }
 
     override create(param: string): BaseAstNode {
-        const functionExecutor = this._functionService.getExecutor(FUNCTION_NAMES_META.UNION);
-        if (!functionExecutor) {
-            console.error(`No function ${param}`);
-            return ErrorNode.create(ErrorType.NAME);
-        }
-        return new UnionNode(param, functionExecutor);
+        return new UnionNode(param);
     }
 
     override checkAndCreateNodeType(param: LexerNode | string) {

@@ -1146,6 +1146,13 @@ export class PromptController extends Disposable {
                 },
             ]);
         }
+
+        /**
+         * After selecting the formula, allow the editor to continue entering content.
+         */
+        setTimeout(() => {
+            this._textSelectionRenderManager.focus();
+        }, 0);
     }
 
     private async _fitEditorSize() {
@@ -1405,7 +1412,13 @@ export class PromptController extends Disposable {
 
         this._syncToEditor(sequenceNodes, node.endIndex + 1);
 
-        controlSelection.update(toRange);
+        controlSelection.update(
+            toRange,
+            undefined,
+            undefined,
+            undefined,
+            this._selectionRenderService.convertCellRangeToInfo(primary)
+        );
     }
 
     private _refreshFormulaAndCellEditor() {

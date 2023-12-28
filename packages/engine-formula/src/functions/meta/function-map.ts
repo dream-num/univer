@@ -20,7 +20,6 @@ import { FUNCTION_NAMES_META } from './function-names';
 import { Minus } from './minus';
 import { Multiply } from './multiply';
 import { Plus } from './plus';
-import { Union } from './union';
 
 export const functionMeta = [
     [Compare, FUNCTION_NAMES_META.COMPARE],
@@ -28,5 +27,4 @@ export const functionMeta = [
     [Minus, FUNCTION_NAMES_META.MINUS],
     [Multiply, FUNCTION_NAMES_META.MULTIPLY],
     [Plus, FUNCTION_NAMES_META.PLUS],
-    [Union, FUNCTION_NAMES_META.UNION],
 ];

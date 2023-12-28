@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Average extends BaseFunction {
-    override calculate(...variants: FunctionVariantType[]) {
+    override calculate(...variants: BaseValueObject[]) {
         let accumulatorSum: BaseValueObject = new NumberValueObject(0);
         let accumulatorCount: BaseValueObject = new NumberValueObject(0);
         for (let i = 0; i < variants.length; i++) {
-            let variant = variants[i];
+            const variant = variants[i];
 
             if (variant.isError()) {
                 return variant;
@@ -35,15 +34,11 @@ export class Average extends BaseFunction {
                 return accumulatorSum;
             }
 
-            if (variant.isReferenceObject()) {
-                variant = (variant as BaseReferenceObject).toArrayValueObject();
-            }
-
-            if ((variant as ArrayValueObject).isArray()) {
+            if (variant.isArray()) {
                 accumulatorSum = accumulatorSum.plus((variant as ArrayValueObject).sum());
                 accumulatorCount = accumulatorCount.plus((variant as ArrayValueObject).count());
             } else {
-                if (!(variant as BaseValueObject).isNull()) {
+                if (!variant.isNull()) {
                     accumulatorCount = accumulatorCount.plus(new NumberValueObject(1));
                 }
             }

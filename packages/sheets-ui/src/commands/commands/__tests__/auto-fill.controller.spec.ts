@@ -262,7 +262,7 @@ describe('Test auto fill rules in controller', () => {
                 const workbook = get(IUniverInstanceService).getCurrentUniverSheetInstance();
                 if (!workbook) throw new Error('This is an error');
                 // test number
-                (autoFillController as any)._handleFill(
+                (autoFillController as any)._triggerAutoFill(
                     {
                         startRow: 0,
                         startColumn: 0,
@@ -279,7 +279,7 @@ describe('Test auto fill rules in controller', () => {
                 expect(workbook.getSheetBySheetId('sheet1')?.getCell(0, 2)?.v).toBe(3);
                 expect(workbook.getSheetBySheetId('sheet1')?.getCell(0, 3)?.v).toBe(4);
                 // test number. descending
-                (autoFillController as any)._handleFill(
+                (autoFillController as any)._triggerAutoFill(
                     {
                         startRow: 1,
                         startColumn: 0,
@@ -303,7 +303,7 @@ describe('Test auto fill rules in controller', () => {
                 const workbook = get(IUniverInstanceService).getCurrentUniverSheetInstance();
                 if (!workbook) throw new Error('This is an error');
                 // test extend number
-                (autoFillController as any)._handleFill(
+                (autoFillController as any)._triggerAutoFill(
                     {
                         startRow: 2,
                         startColumn: 0,
@@ -327,7 +327,7 @@ describe('Test auto fill rules in controller', () => {
                 const workbook = get(IUniverInstanceService).getCurrentUniverSheetInstance();
                 if (!workbook) throw new Error('This is an error');
                 // test chinese number
-                (autoFillController as any)._handleFill(
+                (autoFillController as any)._triggerAutoFill(
                     {
                         startRow: 3,
                         startColumn: 0,
@@ -352,7 +352,7 @@ describe('Test auto fill rules in controller', () => {
                 if (!workbook) throw new Error('This is an error');
 
                 // test chinese week
-                (autoFillController as any)._handleFill(
+                (autoFillController as any)._triggerAutoFill(
                     {
                         startRow: 4,
                         startColumn: 0,
@@ -376,7 +376,7 @@ describe('Test auto fill rules in controller', () => {
                 const workbook = get(IUniverInstanceService).getCurrentUniverSheetInstance();
                 if (!workbook) throw new Error('This is an error');
                 // test loop series
-                (autoFillController as any)._handleFill(
+                (autoFillController as any)._triggerAutoFill(
                     {
                         startRow: 5,
                         startColumn: 0,
@@ -400,7 +400,7 @@ describe('Test auto fill rules in controller', () => {
                 const workbook = get(IUniverInstanceService).getCurrentUniverSheetInstance();
                 if (!workbook) throw new Error('This is an error');
                 // test other string
-                (autoFillController as any)._handleFill(
+                (autoFillController as any)._triggerAutoFill(
                     {
                         startRow: 6,
                         startColumn: 0,
@@ -424,7 +424,7 @@ describe('Test auto fill rules in controller', () => {
                 const workbook = get(IUniverInstanceService).getCurrentUniverSheetInstance();
                 if (!workbook) throw new Error('This is an error');
                 // test mixed mode
-                (autoFillController as any)._handleFill(
+                (autoFillController as any)._triggerAutoFill(
                     {
                         startRow: 7,
                         startColumn: 0,

@@ -23,7 +23,7 @@ import {
     SetNumfmtMutation,
     transformCellsToRange,
 } from '@univerjs/sheets';
-import type { IAutoFillHook } from '@univerjs/sheets-ui';
+import type { ISheetAutoFillHook } from '@univerjs/sheets-ui';
 import { APPLY_TYPE, getAutoFillRepeatRange, IAutoFillService } from '@univerjs/sheets-ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -132,13 +132,18 @@ export class NumfmtAutoFillController extends Disposable {
                 redos: mergeNumfmtMutations(totalRedos),
             };
         };
-        const hook: IAutoFillHook = {
-            hookName: SHEET_NUMFMT_PLUGIN,
-            hook: {
-                [APPLY_TYPE.COPY]: generalApplyFunc,
-                [APPLY_TYPE.NO_FORMAT]: noopReturnFunc,
-                [APPLY_TYPE.ONLY_FORMAT]: generalApplyFunc,
-                [APPLY_TYPE.SERIES]: generalApplyFunc,
+        const hook: ISheetAutoFillHook = {
+            id: SHEET_NUMFMT_PLUGIN,
+            onFillData: (location, direction, applyType) => {
+                if (
+                    applyType === APPLY_TYPE.COPY ||
+                    applyType === APPLY_TYPE.ONLY_FORMAT ||
+                    applyType === APPLY_TYPE.SERIES
+                ) {
+                    const { source, target } = location;
+                    return generalApplyFunc(source, target);
+                }
+                return noopReturnFunc();
             },
         };
         this.disposeWithMe(this._autoFillService.addHook(hook));

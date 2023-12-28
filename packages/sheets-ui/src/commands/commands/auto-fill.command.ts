@@ -14,189 +14,19 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICommand, IMutationInfo, IObjectMatrixPrimitiveType, IRange } from '@univerjs/core';
-import {
-    CommandType,
-    ICommandService,
-    IUndoRedoService,
-    IUniverInstanceService,
-    ObjectMatrix,
-    RANGE_TYPE,
-    Rectangle,
-} from '@univerjs/core';
-import type {
-    IAddWorksheetMergeMutationParams,
-    IRemoveWorksheetMergeMutationParams,
-    ISetRangeValuesMutationParams,
-} from '@univerjs/sheets';
-import {
-    AddMergeUndoMutationFactory,
-    AddWorksheetMergeMutation,
-    getAddMergeMutationRangeByType,
-    RemoveMergeUndoMutationFactory,
-    RemoveWorksheetMergeMutation,
-    SetRangeValuesMutation,
-    SetRangeValuesUndoMutationFactory,
-    SetSelectionsOperation,
-} from '@univerjs/sheets';
+import type { ICellData, ICommand, IObjectMatrixPrimitiveType, IRange } from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
+import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
+import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SetSelectionsOperation } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 
-export interface IAutoFillCommandParams {
-    subUnitId?: string;
-    unitId?: string;
-    applyRange: IRange;
-    selectionRange: IRange;
-    applyDatas: ICellData[][];
-    extendMutations: { undo: IMutationInfo[]; redo: IMutationInfo[] };
-    applyMergeRanges?: IRange[];
-}
+export interface IAutoFillCommandParams {}
 
 export const AutoFillCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.auto-fill',
     // eslint-disable-next-line max-lines-per-function
     handler: async (accessor: IAccessor, params: IAutoFillCommandParams) => {
-        const commandService = accessor.get(ICommandService);
-        const univerInstanceService = accessor.get(IUniverInstanceService);
-        const undoRedoService = accessor.get(IUndoRedoService);
-        const {
-            applyRange,
-            selectionRange,
-            applyDatas,
-            unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId(),
-            subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId(),
-            applyMergeRanges,
-        } = params || {};
-        if (!applyRange || !applyDatas || !selectionRange) {
-            return false;
-        }
-
-        const undoSeq: IMutationInfo[] = [];
-        const redoSeq: IMutationInfo[] = [];
-
-        // delete cross merge
-        let removeMergeResult = true;
-        const deleteMergeRanges: IRange[] = [];
-        const mergeData = univerInstanceService
-            .getUniverSheetInstance(unitId)
-            ?.getSheetBySheetId(subUnitId)
-            ?.getMergeData();
-        if (mergeData) {
-            mergeData.forEach((merge) => {
-                if (Rectangle.intersects(merge, applyRange)) {
-                    deleteMergeRanges.push(merge);
-                }
-            });
-        }
-        const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
-            unitId,
-            subUnitId,
-            ranges: deleteMergeRanges,
-        };
-        const undoRemoveMergeMutationParams: IAddWorksheetMergeMutationParams = RemoveMergeUndoMutationFactory(
-            accessor,
-            removeMergeMutationParams
-        );
-        removeMergeResult = commandService.syncExecuteCommand(
-            RemoveWorksheetMergeMutation.id,
-            removeMergeMutationParams
-        );
-        undoSeq.push({ id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams });
-        redoSeq.push({ id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams });
-
-        // set range value
-        const cellValue = new ObjectMatrix<ICellData>();
-        const { startRow, startColumn, endRow, endColumn } = applyRange;
-
-        for (let r = 0; r <= endRow - startRow; r++) {
-            for (let c = 0; c <= endColumn - startColumn; c++) {
-                cellValue.setValue(r + startRow, c + startColumn, applyDatas[r][c]);
-            }
-        }
-
-        const setRangeValuesMutationParams: ISetRangeValuesMutationParams = {
-            subUnitId,
-            unitId,
-            cellValue: cellValue.getMatrix(),
-        };
-
-        const undoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
-            accessor,
-            setRangeValuesMutationParams
-        );
-
-        const setRangeResult = commandService.syncExecuteCommand(
-            SetRangeValuesMutation.id,
-            setRangeValuesMutationParams
-        );
-
-        undoSeq.push({ id: SetRangeValuesMutation.id, params: undoSetRangeValuesMutationParams });
-        redoSeq.push({ id: SetRangeValuesMutation.id, params: setRangeValuesMutationParams });
-
-        // set selection
-        const selectionResult = commandService.syncExecuteCommand(SetSelectionsOperation.id, {
-            selections: [
-                {
-                    primary: {
-                        ...selectionRange,
-                        endColumn: selectionRange.startColumn,
-                        endRow: selectionRange.startRow,
-                    },
-                    range: {
-                        ...selectionRange,
-                        rangeType: RANGE_TYPE.NORMAL,
-                    },
-                },
-            ],
-            unitId,
-            subUnitId,
-        });
-
-        undoSeq.push({ id: SetRangeValuesMutation.id, params: undoSetRangeValuesMutationParams });
-        redoSeq.push({ id: SetRangeValuesMutation.id, params: setRangeValuesMutationParams });
-
-        let addMergeResult = true;
-
-        // add worksheet merge
-        if (applyMergeRanges?.length) {
-            const ranges = getAddMergeMutationRangeByType(applyMergeRanges);
-
-            const addMergeMutationParams: IAddWorksheetMergeMutationParams = {
-                unitId,
-                subUnitId,
-                ranges,
-            };
-            const undoRemoveMutationParams: IRemoveWorksheetMergeMutationParams = AddMergeUndoMutationFactory(
-                accessor,
-                addMergeMutationParams
-            );
-            addMergeResult = commandService.syncExecuteCommand(AddWorksheetMergeMutation.id, addMergeMutationParams);
-
-            undoSeq.push({ id: RemoveWorksheetMergeMutation.id, params: undoRemoveMutationParams });
-            redoSeq.push({ id: AddWorksheetMergeMutation.id, params: addMergeMutationParams });
-        }
-
-        // deal with extend mutations by hooks
-        const { undo, redo } = params?.extendMutations;
-        const extendResult = redo.every((item: IMutationInfo) =>
-            commandService.syncExecuteCommand(item.id, item.params)
-        );
-        undo.forEach((item: IMutationInfo) => {
-            undoSeq.push(item);
-        });
-        redo.forEach((item: IMutationInfo) => {
-            redoSeq.push(item);
-        });
-
-        if (setRangeResult && removeMergeResult && addMergeResult && selectionResult && extendResult) {
-            undoRedoService.pushUndoRedo({
-                unitID: unitId,
-                undoMutations: undoSeq,
-                redoMutations: redoSeq,
-            });
-
-            return true;
-        }
         return true;
     },
 };

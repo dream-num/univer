@@ -16,6 +16,35 @@
 
 import type { Direction, ICellData, IMutationInfo, IRange, Nullable } from '@univerjs/core';
 
+export enum AutoFillHookType {
+    Append = 'APPEND',
+    Default = 'DEFAULT',
+    Only = 'ONLY',
+}
+
+export interface IAutoFillLocation {
+    source: IRange;
+    target: IRange;
+    unitId: string;
+    subUnitId: string;
+}
+export interface ISheetAutoFillHook {
+    id: string;
+    priority?: number;
+    type?: AutoFillHookType;
+    disable?: (location: IAutoFillLocation, direction: Direction, applyType: APPLY_TYPE) => boolean;
+    onBeforeFillData?(location: IAutoFillLocation, direction: Direction): boolean | void;
+    onFillData?(
+        location: IAutoFillLocation,
+        direction: Direction,
+        applyType: APPLY_TYPE
+    ): {
+        undos: IMutationInfo[];
+        redos: IMutationInfo[];
+    };
+    onAfterFillData?(location: IAutoFillLocation, direction: Direction, applyType: APPLY_TYPE): boolean | void;
+}
+
 export enum DATA_TYPE {
     NUMBER = 'number',
     DATE = 'date',
@@ -50,15 +79,6 @@ export interface IAutoFillRule {
 export interface IMutations {
     redos: IMutationInfo[];
     undos: IMutationInfo[];
-}
-export interface IAutoFillHook {
-    hookName: string;
-    hook: {
-        [APPLY_TYPE.SERIES]: (sourceRange: IRange, targetRange: IRange) => IMutations;
-        [APPLY_TYPE.NO_FORMAT]: (sourceRange: IRange, targetRange: IRange) => IMutations;
-        [APPLY_TYPE.ONLY_FORMAT]: (sourceRange: IRange, targetRange: IRange) => IMutations;
-        [APPLY_TYPE.COPY]: (sourceRange: IRange, targetRange: IRange) => IMutations;
-    };
 }
 
 export interface IRuleConfirmedData {

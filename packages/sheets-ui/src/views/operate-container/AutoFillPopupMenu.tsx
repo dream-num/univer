@@ -15,7 +15,7 @@
  */
 
 import type { ICommandInfo } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LocaleService, toDisposable } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LocaleService, Rectangle, toDisposable } from '@univerjs/core';
 import { Dropdown } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { Autofill, CheckMarkSingle, MoreDownSingle } from '@univerjs/icons';
@@ -24,8 +24,7 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
 import React, { useCallback, useEffect, useState } from 'react';
 
-import type { IAutoFillCommandParams } from '../../commands/commands/auto-fill.command';
-import { AutoClearContentCommand, AutoFillCommand } from '../../commands/commands/auto-fill.command';
+import { AutoClearContentCommand } from '../../commands/commands/auto-fill.command';
 import { RefillCommand } from '../../commands/commands/refill.command';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 import { SetScrollOperation } from '../../commands/operations/scroll.operation';
@@ -51,7 +50,7 @@ export interface IAutoFillPopupMenuItem {
 
 const useUpdate = () => {
     const [, setState] = useState({});
-    return useCallback(() => setState({}), []);
+    return useCallback(() => setState((prevState) => !prevState), []);
 };
 
 export const AutoFillPopupMenu: React.FC<{}> = () => {
@@ -93,10 +92,6 @@ export const AutoFillPopupMenu: React.FC<{}> = () => {
             SetRangeValuesMutation.id,
         ];
         const disposable = commandService.onCommandExecuted((command: ICommandInfo) => {
-            if (command.id === AutoFillCommand.id) {
-                const { endColumn, endRow } = (command?.params as IAutoFillCommandParams).selectionRange;
-                setAnchor({ row: endRow, col: endColumn });
-            }
             if (command.id === SetScrollOperation.id) {
                 forceUpdate();
             }
@@ -111,6 +106,19 @@ export const AutoFillPopupMenu: React.FC<{}> = () => {
         const disposable = toDisposable(
             autoFillService.menu$.subscribe((menu) => {
                 setMenu(menu.map((i) => ({ ...i, index: menu.indexOf(i) })));
+            })
+        );
+        return disposable.dispose;
+    }, [autoFillService]);
+
+    useEffect(() => {
+        const disposable = toDisposable(
+            autoFillService.showMenu$.subscribe((show) => {
+                const { source, target } = autoFillService.autoFillLocation || { source: null, target: null };
+                if (show && source && target) {
+                    const selection = Rectangle.union(source, target);
+                    setAnchor({ row: selection.endRow, col: selection.endColumn });
+                }
             })
         );
         return disposable.dispose;

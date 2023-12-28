@@ -30,7 +30,7 @@ export const RefillCommand: ICommand = {
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor, params: IRefillCommandParams) => {
         const autoFillService = accessor.get(IAutoFillService);
-        autoFillService.setApplyType(params.type);
+        autoFillService.applyType = params.type;
         return true;
     },
 };

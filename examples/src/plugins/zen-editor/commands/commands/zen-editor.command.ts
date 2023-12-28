@@ -16,7 +16,6 @@
 
 import type { ICommand } from '@univerjs/core';
 import { CommandType, IUniverInstanceService } from '@univerjs/core';
-import { TextSelectionManagerService } from '@univerjs/docs';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { IZenZoneService, KeyCode } from '@univerjs/ui';
@@ -33,8 +32,6 @@ export const CancelZenEditCommand: ICommand = {
 
         const univerInstanceManager = accessor.get(IUniverInstanceService);
 
-        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
-
         const visibleState = editorBridgeService.isVisible();
         if (visibleState.visible) {
             editorBridgeService.changeVisible({
@@ -50,7 +47,7 @@ export const CancelZenEditCommand: ICommand = {
 
         univerInstanceManager.focusUniverInstance(currentSheetInstance.getUnitId());
 
-        textSelectionManagerService.replaceTextRanges([]);
+        editorBridgeService.refreshState();
 
         return true;
     },
@@ -68,8 +65,6 @@ export const ConfirmZenEditCommand: ICommand = {
 
         const univerInstanceManager = accessor.get(IUniverInstanceService);
 
-        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
-
         const visibleState = editorBridgeService.isVisible();
         if (visibleState.visible) {
             editorBridgeService.changeVisible({
@@ -84,7 +79,7 @@ export const ConfirmZenEditCommand: ICommand = {
 
         univerInstanceManager.focusUniverInstance(currentSheetInstance.getUnitId());
 
-        textSelectionManagerService.replaceTextRanges([]);
+        editorBridgeService.refreshState();
 
         return true;
     },

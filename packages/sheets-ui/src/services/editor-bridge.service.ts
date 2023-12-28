@@ -129,6 +129,10 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         return this._state;
     }
 
+    refreshState() {
+        this._state$.next(this._state);
+    }
+
     getCurrentEditorId() {
         return this._state?.editorUnitId;
     }

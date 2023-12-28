@@ -28,7 +28,7 @@ import {
 import type { IRender, IWheelEvent, RenderManagerService, Scene } from '@univerjs/engine-render';
 import { Documents, EVENT_TYPE, IRenderManagerService, Layer, ScrollBar, Viewport } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, takeUntil } from 'rxjs';
 
 import {
     DOCS_COMPONENT_DEFAULT_Z_INDEX,
@@ -62,7 +62,7 @@ export class DocCanvasView extends RxDisposable {
     }
 
     private _initialize() {
-        this._currentUniverService.currentDoc$.subscribe((documentModel) => {
+        this._currentUniverService.currentDoc$.pipe(takeUntil(this.dispose$)).subscribe((documentModel) => {
             if (documentModel == null) {
                 return;
             }

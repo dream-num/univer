@@ -332,7 +332,6 @@ export abstract class Shape<T> extends BaseObject {
                 this.height + this.strokeWidth < top ||
                 bottom < 0
             ) {
-                // console.warn('ignore object', this);
                 return this;
             }
         }

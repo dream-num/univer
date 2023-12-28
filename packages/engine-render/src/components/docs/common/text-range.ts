@@ -27,7 +27,7 @@ import { Rect } from '../../../shape/rect';
 import { RegularPolygon } from '../../../shape/regular-polygon';
 import type { ThinScene } from '../../../thin-scene';
 import type { DocumentSkeleton } from '../doc-skeleton';
-import type { IDocumentOffsetConfig } from '../document';
+import type { Documents } from '../document';
 import {
     compareNodePosition,
     compareNodePositionLogic,
@@ -46,21 +46,14 @@ export function cursorConvertToTextRange(
     scene: Scene,
     range: ISuccinctTextRangeParam,
     docSkeleton: DocumentSkeleton,
-    documentOffsetConfig: IDocumentOffsetConfig
+    document: Documents
 ): Nullable<TextRange> {
     const { startOffset, endOffset, style = NORMAL_TEXT_SELECTION_PLUGIN_STYLE } = range;
 
     const anchorNodePosition = docSkeleton.findNodePositionByCharIndex(startOffset);
     const focusNodePosition = startOffset !== endOffset ? docSkeleton.findNodePositionByCharIndex(endOffset) : null;
 
-    const textRange = new TextRange(
-        scene,
-        documentOffsetConfig,
-        docSkeleton,
-        anchorNodePosition,
-        focusNodePosition,
-        style
-    );
+    const textRange = new TextRange(scene, document, docSkeleton, anchorNodePosition, focusNodePosition, style);
 
     textRange.refresh();
 
@@ -79,7 +72,7 @@ export class TextRange {
 
     constructor(
         private _scene: ThinScene,
-        private _documentOffsetConfig: IDocumentOffsetConfig,
+        private _document: Documents,
         private _docSkeleton: DocumentSkeleton,
         public anchorNodePosition?: Nullable<INodePosition>,
         public focusNodePosition?: Nullable<INodePosition>,
@@ -207,7 +200,7 @@ export class TextRange {
     }
 
     refresh() {
-        const { _documentOffsetConfig, _docSkeleton } = this;
+        const { _document, _docSkeleton } = this;
         const anchor = this.anchorNodePosition;
         const focus = this.focusNodePosition;
 
@@ -218,9 +211,13 @@ export class TextRange {
             return;
         }
 
-        const { docsLeft, docsTop } = _documentOffsetConfig;
+        const documentOffsetConfig = _document.getOffsetConfig();
 
-        const convertor = new NodePositionConvertToCursor(_documentOffsetConfig, _docSkeleton);
+        const { docsLeft, docsTop } = documentOffsetConfig;
+
+        console.log(this._scene, this._docSkeleton, documentOffsetConfig);
+
+        const convertor = new NodePositionConvertToCursor(documentOffsetConfig, _docSkeleton);
 
         if (this._isCollapsed()) {
             const { contentBoxPointGroup, cursorList } = convertor.getRangePointData(anchor, anchor);

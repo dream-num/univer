@@ -27,12 +27,12 @@ export class InvertedIndexCache {
      *    }
      * }
      */
-    private _cache: Map<string, Map<string, Map<number, Map<string | number | boolean, number[]>>>> = new Map();
+    private _cache: Map<string, Map<string, Map<number, Map<string | number | boolean | null, number[]>>>> = new Map();
 
     private _continueBuildingCache: Map<string, Map<string, Map<number, { startRow: number; endRow: number }>>> =
         new Map();
 
-    set(unitId: string, sheetId: string, column: number, value: string | number | boolean, row: number) {
+    set(unitId: string, sheetId: string, column: number, value: string | number | boolean | null, row: number) {
         if (!this.shouldContinueBuildingCache(unitId, sheetId, column, row)) {
             return;
         }
@@ -133,6 +133,9 @@ export class InvertedIndexCache {
     }
 
     canUseCache(unitId: string, sheetId: string, column: number, rangeStartRow: number, rangeEndRow: number) {
+        if (column === -1 || rangeStartRow === -1 || rangeEndRow === -1) {
+            return false;
+        }
         const rowRange = this._continueBuildingCache.get(unitId)?.get(sheetId)?.get(column);
         if (rowRange == null) {
             return false;

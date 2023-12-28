@@ -16,6 +16,11 @@
 
 import { compareToken } from '../../basics/token';
 
+export enum ArrayBinarySearchType {
+    MIN,
+    MAX,
+}
+
 export function getCompare() {
     return new Intl.Collator(undefined, { numeric: true }).compare;
 }

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { ConcatenateType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { ObjectClassType } from '../../basics/object-class-type';
@@ -400,6 +401,9 @@ export class ErrorValueObject extends BaseValueObject {
         super(_errorType);
     }
 
+    /**
+     * @deprecated use 'new' to replace.
+     */
     static create(errorType: ErrorType, errorContent?: string) {
         const errorValueObject = new ErrorValueObject(errorType, errorContent);
         return errorValueObject;

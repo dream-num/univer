@@ -21,11 +21,6 @@ import { CI_BRK, CP_BRK, DI_BRK, IN_BRK, pairTable, PR_BRK } from './pairs';
 import data from './trie-data';
 import UnicodeTrie from './unicode-trie';
 
-export interface ITextLike {
-    charCodeAt(n: number): number;
-    length: number;
-}
-
 const classTrie = new UnicodeTrie(data);
 
 function mapClass(c: number) {
@@ -68,7 +63,6 @@ class Break {
 }
 
 export class LineBreaker {
-    node: ITextLike;
     pos: number;
     lastPos: number;
     curClass: number | null;

@@ -28,6 +28,11 @@ export interface IGridRangeName {
     range: IRange;
 }
 
+export interface IAbsoluteRefTypeForRange {
+    startAbsoluteRefType: AbsoluteRefType;
+    endAbsoluteRefType?: AbsoluteRefType;
+}
+
 /**
  *
  * @param singleRefString for example A1 or B10,  not A1:B10
@@ -55,7 +60,7 @@ export function getAbsoluteRefTypeWithSingleString(singleRefString: string) {
  *
  * @param refString for example A1:B10
  */
-export function getAbsoluteRefTypeWitString(refString: string) {
+export function getAbsoluteRefTypeWitString(refString: string): IAbsoluteRefTypeForRange {
     const sheetArray = refString.split('!');
 
     if (sheetArray.length > 1) {

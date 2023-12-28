@@ -1,4 +1,4 @@
-linebreak is fork from https://github.com/foliojs/linebrea and migrate to TypeScript.
+linebreak is fork from https://github.com/foliojs/linebreak and migrate to TypeScript.
 
 Thanks Devon Govett great work.
 

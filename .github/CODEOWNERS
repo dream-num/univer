@@ -31,6 +31,7 @@ packages/sheets-ui/src/services/editor @Jocs
 packages/sheets-ui/src/services/editor-bridge.service.ts @Jocs
 packages/sheets-numfmt @Gggpound
 packages/sheets-formula @DR-Univer @Dushusir
+packages/sheets-zen-editor @Jocs
 packages/sheets/src/services/numfmt @Gggpound
 packages/sheets/src/services/ref-range @Gggpound
 

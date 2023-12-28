@@ -99,7 +99,7 @@ export class FreezeController extends Disposable {
 
     private _changeToOffsetY: number = 0;
 
-    private _activeViewport: Viewport | null = null;
+    private _activeViewport: Nullable<Viewport> = null;
 
     private _freezeNormalHeaderColor = '';
 

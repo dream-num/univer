@@ -14,5 +14,6 @@
  * limitations under the License.
  */
 
+export { UniverSheetsFormulaCalculatePlugin } from './formula-calculate-plugin';
 export { UniverSheetsFormulaPlugin } from './formula-ui-plugin';
 export { enUS, zhCN } from './locale';

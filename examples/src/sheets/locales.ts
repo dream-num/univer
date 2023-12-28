@@ -21,8 +21,6 @@ import { enUS as UniverSheetsEnUS } from '@univerjs/sheets';
 import { enUS as UniverSheetsUIEnUS } from '@univerjs/sheets-ui';
 import { enUS as UniverUiEnUS } from '@univerjs/ui';
 
-import { functionEnUS, functionZhCN } from './custom-function';
-
 export const locales = {
     [LocaleType.EN_US]: {
         ...UniverSheetsEnUS,
@@ -30,9 +28,5 @@ export const locales = {
         ...UniverSheetsUIEnUS,
         ...UniverUiEnUS,
         ...UniverDesignEnUS,
-        ...functionEnUS,
-    },
-    [LocaleType.ZH_CN]: {
-        ...functionZhCN,
     },
 };

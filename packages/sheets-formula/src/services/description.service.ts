@@ -15,7 +15,7 @@
  */
 
 import { LocaleService } from '@univerjs/core';
-import type { BaseFunction, IFunctionInfo, IFunctionNames } from '@univerjs/engine-formula';
+import type { IFunctionInfo, IFunctionNames } from '@univerjs/engine-formula';
 import {
     functionCompatibility,
     functionCube,
@@ -35,7 +35,7 @@ import {
     IFunctionService,
 } from '@univerjs/engine-formula';
 import { functionArray } from '@univerjs/engine-formula/functions/array/function-map.js';
-import type { Ctor, IDisposable } from '@wendellhu/redi';
+import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier, Inject } from '@wendellhu/redi';
 
 import { FUNCTION_LIST } from './function-list/function-list';
@@ -87,13 +87,11 @@ export const IDescriptionService = createIdentifier<IDescriptionService>('formul
 export class DescriptionService implements IDescriptionService, IDisposable {
     constructor(
         private _description: IFunctionInfo[],
-        private _function: Array<[Ctor<BaseFunction>, IFunctionNames]>,
         @IFunctionService private readonly _functionService: IFunctionService,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         this._initialize();
         this._registerDescription();
-        this._registerFunctions();
     }
 
     dispose(): void {
@@ -203,16 +201,5 @@ export class DescriptionService implements IDescriptionService, IDisposable {
             })),
         }));
         this._functionService.registerDescriptions(...functionListLocale);
-    }
-
-    private _registerFunctions() {
-        const functions: BaseFunction[] = [...this._function].map((registerObject) => {
-            const Func = registerObject[0] as Ctor<BaseFunction>;
-            const name = registerObject[1] as IFunctionNames;
-
-            return new Func(name);
-        });
-
-        this._functionService.registerExecutors(...functions);
     }
 }

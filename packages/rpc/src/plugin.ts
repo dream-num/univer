@@ -33,7 +33,7 @@ import {
 } from './services/rpc/implementations/web-worker-rpc.service';
 
 export interface IUniverRPCMainThreadConfig {
-    workerURL: string | URL;
+    workerURL: string | URL | Worker;
 }
 
 /**
@@ -51,7 +51,8 @@ export class UniverRPCMainThreadPlugin extends Plugin {
     }
 
     override async onStarting(injector: Injector): Promise<void> {
-        const worker = new Worker(this._config.workerURL);
+        const { workerURL } = this._config;
+        const worker = workerURL instanceof Worker ? workerURL : new Worker(workerURL);
         const messageProtocol = createWebWorkerMessagePortOnMain(worker);
         const dependencies: Dependency[] = [
             [

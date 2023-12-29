@@ -84,7 +84,7 @@ export class FloatingObjectController extends Disposable {
             const { left: docsLeft, top: docsTop } = docsComponent;
 
             params.forEach((param) => {
-                const { unitId, subComponentId, floatingObjectId, floatingObject } = param;
+                const { unitId, subUnitId, floatingObjectId, floatingObject } = param;
 
                 const { left = 0, top = 0, width = 0, height = 0, angle, flipX, flipY, skewX, skewY } = floatingObject;
 
@@ -219,7 +219,7 @@ export class FloatingObjectController extends Disposable {
 
                 Objects.push({
                     unitId,
-                    subComponentId: DEFAULT_DOCUMENT_SUB_COMPONENT_ID,
+                    subUnitId: DEFAULT_DOCUMENT_SUB_COMPONENT_ID,
                     floatingObjectId: objectId,
                     floatingObject: {
                         left: aLeft + docsLeft + this._liquid.x,

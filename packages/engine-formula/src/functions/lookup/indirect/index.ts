@@ -14,12 +14,20 @@
  * limitations under the License.
  */
 
-import type { FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
+import { ErrorType } from '../../..';
 import { CellReferenceObject } from '../../../engine/reference-object/cell-reference-object';
+import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 
 export class Indirect extends BaseFunction {
-    override calculate(refText: FunctionVariantType, a1?: FunctionVariantType) {
-        return new CellReferenceObject('A5');
+    override calculate(refText: BaseValueObject, a1?: BaseValueObject) {
+        const cell = new CellReferenceObject('A7');
+        if (this.unitId == null || this.subUnitId == null) {
+            return new ErrorValueObject(ErrorType.REF);
+        }
+        cell.setDefaultUnitId(this.unitId);
+        cell.setDefaultSheetId(this.subUnitId);
+
+        return cell;
     }
 }

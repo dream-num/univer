@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '@univerjs/core';
 import { Disposable } from '@univerjs/core';
 
 import { ErrorType } from '../basics/error-type';
@@ -21,8 +22,14 @@ import type { IFunctionNames } from '../basics/function';
 import type { FunctionVariantType, NodeValueType } from '../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../engine/value-object/base-value-object';
+import type { PrimitiveValueType } from '../engine/value-object/primitive-object';
 
 export class BaseFunction extends Disposable {
+    private _unitId: Nullable<string>;
+    private _subUnitId: Nullable<string>;
+    private _row: number = -1;
+    private _column: number = -1;
+
     constructor(private _name: IFunctionNames) {
         super();
     }
@@ -31,12 +38,45 @@ export class BaseFunction extends Disposable {
         return this._name;
     }
 
+    get unitId() {
+        return this._unitId;
+    }
+
+    get subUnitId() {
+        return this._subUnitId;
+    }
+
+    get row() {
+        return this._row;
+    }
+
+    get column() {
+        return this._column;
+    }
+
     isAsync() {
         return false;
     }
 
     isAddress() {
         return false;
+    }
+
+    isCustom() {
+        return false;
+    }
+
+    setRefInfo(unitId: string, subUnitId: string, row: number, column: number) {
+        this._unitId = unitId;
+        this._subUnitId = subUnitId;
+        this._row = row;
+        this._column = column;
+    }
+
+    calculateCustom(
+        ...arg: Array<PrimitiveValueType | PrimitiveValueType[][]>
+    ): PrimitiveValueType | PrimitiveValueType[][] {
+        return null;
     }
 
     calculate(...arg: BaseValueObject[]): NodeValueType {

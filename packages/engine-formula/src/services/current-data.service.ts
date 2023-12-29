@@ -59,6 +59,8 @@ export interface IFormulaCurrentConfigService {
     getExcludedRange(): Nullable<IUnitExcludedCell>;
 
     loadDirtyRangesAndExcludedCell(dirtyRanges: IUnitRange[], excludedCell?: IUnitExcludedCell): void;
+
+    getArrayFormulaCellData(): IRuntimeUnitDataType;
 }
 
 export class FormulaCurrentConfigService extends Disposable implements IFormulaCurrentConfigService {

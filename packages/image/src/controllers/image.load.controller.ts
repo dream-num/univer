@@ -73,7 +73,7 @@ export class ImageLoadController extends Disposable {
                 this._floatingObjectManagerService.andOrUpdate$.subscribe((params) => {
                     const sceneList: Scene[] = [];
                     params.forEach((param) => {
-                        const { unitId, subComponentId, floatingObjectId, floatingObject } = param;
+                        const { unitId, subUnitId, floatingObjectId, floatingObject } = param;
 
                         const renderObject = this._renderManagerService.getRenderById(unitId);
 
@@ -85,7 +85,7 @@ export class ImageLoadController extends Disposable {
 
                         const searchParam = {
                             unitId,
-                            subComponentId,
+                            subUnitId,
                             imageId: floatingObjectId,
                         };
 
@@ -97,7 +97,7 @@ export class ImageLoadController extends Disposable {
 
                         const { left, top, width, height, angle, flipX, flipY, skewX, skewY } = floatingObject;
 
-                        const imageShapeKey = `${unitId}_${subComponentId}_${floatingObjectId}`;
+                        const imageShapeKey = `${unitId}_${subUnitId}_${floatingObjectId}`;
 
                         const imageShape = scene.getObject(imageShapeKey);
 
@@ -163,11 +163,11 @@ export class ImageLoadController extends Disposable {
                     return true;
                 }
 
-                const { unitId, subComponentId, imageId } = searchParam;
+                const { unitId, subUnitId, imageId } = searchParam;
 
                 params.push({
                     unitId,
-                    subComponentId,
+                    subUnitId,
                     floatingObjectId: imageId,
                     floatingObject: {
                         left,

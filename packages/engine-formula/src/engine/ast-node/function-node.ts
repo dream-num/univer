@@ -22,14 +22,18 @@ import { ErrorType } from '../../basics/error-type';
 import { prefixToken } from '../../basics/token';
 import type { BaseFunction } from '../../functions/base-function';
 import { FUNCTION_NAMES_META } from '../../functions/meta/function-names';
+import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { IFunctionService } from '../../services/function.service';
+import { IFormulaRuntimeService } from '../../services/runtime.service';
 import type { LexerNode } from '../analysis/lexer-node';
 import type {
     AsyncArrayObject,
     AsyncObject,
     BaseReferenceObject,
     FunctionVariantType,
+    NodeValueType,
 } from '../reference-object/base-reference-object';
+import { ArrayValueObject, transformToValueObject, ValueObjectFactory } from '../value-object/array-value-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
 import { BaseAstNode, ErrorNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
@@ -39,7 +43,9 @@ import { PrefixNode } from './prefix-node';
 export class FunctionNode extends BaseAstNode {
     constructor(
         token: string,
-        private _functionExecutor: BaseFunction
+        private _functionExecutor: BaseFunction,
+        private _currentConfigService: IFormulaCurrentConfigService,
+        private _runtimeService: IFormulaRuntimeService
     ) {
         super(token);
 
@@ -72,12 +78,17 @@ export class FunctionNode extends BaseAstNode {
             }
         }
 
-        const resultVariant = this._functionExecutor.calculate(...variants);
+        const resultVariant = this._calculate(variants);
+        let result: FunctionVariantType;
         if (resultVariant.isAsyncObject() || resultVariant.isAsyncArrayObject()) {
-            this.setValue(await (resultVariant as AsyncObject | AsyncArrayObject).getValue());
+            result = await (resultVariant as AsyncObject | AsyncArrayObject).getValue();
         } else {
-            this.setValue(resultVariant as FunctionVariantType);
+            result = resultVariant as FunctionVariantType;
         }
+
+        this._setRefData(result);
+
+        this.setValue(result);
         return Promise.resolve(AstNodePromiseType.SUCCESS);
     }
 
@@ -97,15 +108,81 @@ export class FunctionNode extends BaseAstNode {
             }
         }
 
-        const resultVariant = this._functionExecutor.calculate(...variants);
+        const resultVariant = this._calculate(variants) as FunctionVariantType;
+
+        this._setRefData(resultVariant);
 
         this.setValue(resultVariant as FunctionVariantType);
+    }
+
+    private _calculate(variants: BaseValueObject[]) {
+        let resultVariant: NodeValueType;
+
+        this._setRefInfo();
+
+        if (this._functionExecutor.isCustom()) {
+            const resultVariantCustom = this._functionExecutor.calculateCustom(
+                ...variants.map((variant) => {
+                    if (variant.isArray()) {
+                        return (variant as ArrayValueObject).toValue();
+                    }
+
+                    return variant.getValue();
+                })
+            );
+            if (typeof resultVariantCustom !== 'object' || resultVariantCustom == null) {
+                resultVariant = ValueObjectFactory.create(resultVariantCustom);
+            } else {
+                const arrayValues = transformToValueObject(resultVariantCustom);
+
+                resultVariant = new ArrayValueObject({
+                    calculateValueList: arrayValues,
+                    rowCount: arrayValues.length,
+                    columnCount: arrayValues[0]?.length || 0,
+                    unitId: '',
+                    sheetId: '',
+                    row: -1,
+                    column: -1,
+                });
+            }
+        } else {
+            resultVariant = this._functionExecutor.calculate(...variants);
+        }
+
+        return resultVariant;
+    }
+
+    private _setRefInfo() {
+        const { currentUnitId, currentSubUnitId, currentRow, currentColumn } = this._runtimeService;
+
+        this._functionExecutor.setRefInfo(currentUnitId, currentSubUnitId, currentRow, currentColumn);
+    }
+
+    private _setRefData(variant: FunctionVariantType) {
+        if (!variant.isReferenceObject()) {
+            return;
+        }
+        const referenceObject = variant as BaseReferenceObject;
+
+        referenceObject.setForcedSheetId(this._currentConfigService.getSheetNameMap());
+
+        referenceObject.setUnitData(this._currentConfigService.getUnitData());
+
+        referenceObject.setArrayFormulaCellData(this._currentConfigService.getArrayFormulaCellData());
+
+        referenceObject.setRuntimeData(this._runtimeService.getUnitData());
+
+        referenceObject.setRuntimeArrayFormulaCellData(this._runtimeService.getRuntimeArrayFormulaCellData());
+
+        referenceObject.setRuntimeFeatureCellData(this._runtimeService.getRuntimeFeatureCellData());
     }
 }
 
 export class FunctionNodeFactory extends BaseAstNodeFactory {
     constructor(
         @IFunctionService private readonly _functionService: IFunctionService,
+        @IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService,
+        @IFormulaRuntimeService private readonly _runtimeService: IFormulaRuntimeService,
         @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
@@ -121,7 +198,8 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
             console.error(`No function ${token}`);
             return ErrorNode.create(ErrorType.NAME);
         }
-        return new FunctionNode(token, functionExecutor);
+
+        return new FunctionNode(token, functionExecutor, this._currentConfigService, this._runtimeService);
     }
 
     override checkAndCreateNodeType(param: LexerNode | string) {
@@ -166,5 +244,3 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
         }
     }
 }
-
-// FORMULA_AST_NODE_REGISTRY.add(new FunctionNodeFactory());

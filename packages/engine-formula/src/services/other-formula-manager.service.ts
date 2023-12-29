@@ -22,7 +22,7 @@ import type { IFormulaDataItem, IOtherFormulaData } from '../basics/common';
 
 export interface IOtherFormulaManagerSearchParam {
     unitId: string;
-    subComponentId: string;
+    subUnitId: string;
     formulaId: string;
 }
 
@@ -58,31 +58,31 @@ export class OtherFormulaManagerService extends Disposable implements IOtherForm
     }
 
     remove(searchParam: IOtherFormulaManagerSearchParam) {
-        const { unitId, subComponentId, formulaId } = searchParam;
-        delete this._otherFormulaData?.[unitId]?.[subComponentId]?.[formulaId];
+        const { unitId, subUnitId, formulaId } = searchParam;
+        delete this._otherFormulaData?.[unitId]?.[subUnitId]?.[formulaId];
     }
 
     get(searchParam: IOtherFormulaManagerSearchParam) {
-        const { unitId, subComponentId, formulaId } = searchParam;
-        return this._otherFormulaData[unitId]?.[subComponentId]?.[formulaId];
+        const { unitId, subUnitId, formulaId } = searchParam;
+        return this._otherFormulaData[unitId]?.[subUnitId]?.[formulaId];
     }
 
     has(searchParam: IOtherFormulaManagerSearchParam) {
-        const { unitId, subComponentId, formulaId } = searchParam;
-        return this._otherFormulaData[unitId]?.[subComponentId]?.[formulaId] != null;
+        const { unitId, subUnitId, formulaId } = searchParam;
+        return this._otherFormulaData[unitId]?.[subUnitId]?.[formulaId] != null;
     }
 
     register(insertParam: IOtherFormulaManagerInsertParam) {
-        const { unitId, subComponentId, formulaId, item } = insertParam;
+        const { unitId, subUnitId, formulaId, item } = insertParam;
         if (this._otherFormulaData[unitId]) {
             this._otherFormulaData[unitId] = {};
         }
 
-        if (this._otherFormulaData[unitId][subComponentId]) {
-            this._otherFormulaData[unitId][subComponentId] = {};
+        if (this._otherFormulaData[unitId][subUnitId]) {
+            this._otherFormulaData[unitId][subUnitId] = {};
         }
 
-        this._otherFormulaData[unitId][subComponentId][formulaId] = item;
+        this._otherFormulaData[unitId][subUnitId][formulaId] = item;
     }
 
     getOtherFormulaData() {

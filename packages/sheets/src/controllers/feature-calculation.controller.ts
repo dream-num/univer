@@ -51,11 +51,11 @@ export class FeatureCalculationController extends Disposable {
 
         const unitId = 'workbook-01';
 
-        const subComponentId = 'sheet-0011';
+        const subUnitId = 'sheet-0011';
 
         const runtimeCellData = {
             [unitId]: {
-                [subComponentId]: new ObjectMatrix({
+                [subUnitId]: new ObjectMatrix({
                     4: {
                         0: {
                             v: 10,
@@ -68,7 +68,7 @@ export class FeatureCalculationController extends Disposable {
 
         const dirtyRanges = {
             [unitId]: {
-                [subComponentId]: [
+                [subUnitId]: [
                     {
                         startRow: 4,
                         startColumn: 0,
@@ -81,11 +81,11 @@ export class FeatureCalculationController extends Disposable {
 
         this._featureCalculationManagerService.register(featureId, {
             unitId,
-            subComponentId,
+            subUnitId,
             dependencyRanges: [
                 {
                     unitId,
-                    sheetId: subComponentId,
+                    sheetId: subUnitId,
                     range: {
                         startRow: 0,
                         endRow: 3,

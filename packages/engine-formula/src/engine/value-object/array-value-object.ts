@@ -54,7 +54,7 @@ export function fromObjectToString(array: IArrayValueObject) {
     return '';
 }
 
-export function transformToValueObject(array: Array<Array<number | string | boolean>> = []) {
+export function transformToValueObject(array: Array<Array<number | string | boolean | null>> = []) {
     const arrayValueList: BaseValueObject[][] = [];
 
     for (let r = 0; r < array.length; r++) {
@@ -75,7 +75,7 @@ export function transformToValueObject(array: Array<Array<number | string | bool
 }
 
 export function transformToValue(array: BaseValueObject[][] = []) {
-    const arrayValueList: Array<Array<string | number | boolean>> = [];
+    const arrayValueList: Array<Array<string | number | boolean | null>> = [];
 
     for (let r = 0; r < array.length; r++) {
         const row = array[r];
@@ -1511,7 +1511,10 @@ export class ArrayValueObject extends BaseValueObject {
 }
 
 export class ValueObjectFactory {
-    static create(rawValue: string | number | boolean) {
+    static create(rawValue: string | number | boolean | null) {
+        if (rawValue == null) {
+            return new NullValueObject(0);
+        }
         if (typeof rawValue === 'boolean') {
             return new BooleanValueObject(rawValue, true);
         }

@@ -49,15 +49,15 @@ export class SheetPermissionService extends Disposable {
         const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
         const unitId = workbook.getUnitId();
         workbook.getSheets().forEach((worksheet) => {
-            const subComponentId = worksheet.getSheetId();
-            const sheetPermission = new SheetEditablePermission(unitId, subComponentId);
+            const subUnitId = worksheet.getSheetId();
+            const sheetPermission = new SheetEditablePermission(unitId, subUnitId);
             this._permissionService.addPermissionPoint(workbook.getUnitId(), sheetPermission);
         });
         this.disposeWithMe(
             toDisposable(
                 workbook.sheetCreated$.subscribe((worksheet) => {
-                    const subComponentId = worksheet.getSheetId();
-                    const sheetPermission = new SheetEditablePermission(unitId, subComponentId);
+                    const subUnitId = worksheet.getSheetId();
+                    const sheetPermission = new SheetEditablePermission(unitId, subUnitId);
                     this._permissionService.addPermissionPoint(workbook.getUnitId(), sheetPermission);
                 })
             )
@@ -65,8 +65,8 @@ export class SheetPermissionService extends Disposable {
         this.disposeWithMe(
             toDisposable(
                 workbook.sheetDisposed$.subscribe((worksheet) => {
-                    const subComponentId = worksheet.getSheetId();
-                    const sheetPermission = new SheetEditablePermission(unitId, subComponentId);
+                    const subUnitId = worksheet.getSheetId();
+                    const sheetPermission = new SheetEditablePermission(unitId, subUnitId);
                     this._permissionService.deletePermissionPoint(workbook.getUnitId(), sheetPermission.id);
                 })
             )

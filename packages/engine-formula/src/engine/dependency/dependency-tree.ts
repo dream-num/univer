@@ -48,7 +48,7 @@ export class FormulaDependencyTree extends Disposable {
 
     column: number = -1;
 
-    subComponentId: string = '';
+    subUnitId: string = '';
 
     unitId: string = '';
 
@@ -217,7 +217,7 @@ export class FormulaDependencyTree extends Disposable {
 
             if (
                 dependenceTree.unitId === unitId &&
-                dependenceTree.subComponentId === sheetId &&
+                dependenceTree.subUnitId === sheetId &&
                 dependenceTree.inRangeData(range)
             ) {
                 return true;

@@ -24,7 +24,14 @@ import {
     RANGE_TYPE,
 } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent } from '@univerjs/engine-render';
-import { CURSOR_TYPE, IRenderManagerService, Rect, ScrollTimer, Vector2 } from '@univerjs/engine-render';
+import {
+    CURSOR_TYPE,
+    IRenderManagerService,
+    Rect,
+    ScrollTimer,
+    ScrollTimerType,
+    Vector2,
+} from '@univerjs/engine-render';
 import type { IMoveColsCommandParams, IMoveRowsCommandParams, ISelectionWithStyle } from '@univerjs/sheets';
 import { MoveColsCommand, MoveRowsCommand, SelectionManagerService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
@@ -195,10 +202,14 @@ export class HeaderMoveController extends Disposable {
 
                 const { row, column } = getCoordByOffset(evt.offsetX, evt.offsetY, scene, skeleton);
 
+                let scrollType: ScrollTimerType;
+
                 if (initialType === HEADER_MOVE_TYPE.ROW) {
                     this._changeFromRow = row;
+                    scrollType = ScrollTimerType.Y;
                 } else {
                     this._changeFromColumn = column;
+                    scrollType = ScrollTimerType.X;
                 }
 
                 const matchSelectionData = this._checkInHeaderRange(
@@ -216,7 +227,7 @@ export class HeaderMoveController extends Disposable {
 
                 scene.disableEvent();
 
-                const scrollTimer = ScrollTimer.create(scene);
+                const scrollTimer = ScrollTimer.create(scene, scrollType);
 
                 const mainViewport = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
 

@@ -722,6 +722,7 @@ export class FreezeController extends Disposable {
 
         const currentScroll = this._scrollManagerService.getCurrentScroll();
 
+        // cancel freeze
         if (isTopView === false && isLeftView === false) {
             viewMain.resize({
                 left: rowHeaderWidthAndMarginLeft,
@@ -741,6 +742,7 @@ export class FreezeController extends Disposable {
                 }
             );
         } else if (isTopView === true && isLeftView === false) {
+            // freeze row
             const topGap = endSheetView.startY - startSheetView.startY;
             viewMain.resize({
                 left: rowHeaderWidthAndMarginLeft,
@@ -754,13 +756,10 @@ export class FreezeController extends Disposable {
                 startX: 0,
                 endX: 0,
             });
-            this._commandService.executeCommand(
-                ScrollCommand.id,
-                currentScroll ?? {
-                    sheetViewStartRow: 0,
-                    offsetY: 0,
-                }
-            );
+            this._commandService.executeCommand(ScrollCommand.id, {
+                sheetViewStartRow: 0,
+                offsetY: 0,
+            });
             viewMainTop.resize({
                 left: rowHeaderWidthAndMarginLeft,
                 top: columnHeaderHeightAndMarginTop,
@@ -808,6 +807,7 @@ export class FreezeController extends Disposable {
             viewMainTop.enable();
             viewRowTop.enable();
         } else if (isTopView === false && isLeftView === true) {
+            // freeze column
             const leftGap = endSheetView.startX - startSheetView.startX;
             viewMain.resize({
                 left: rowHeaderWidthAndMarginLeft + leftGap,
@@ -821,13 +821,10 @@ export class FreezeController extends Disposable {
                 startY: 0,
                 endY: 0,
             });
-            this._commandService.executeCommand(
-                ScrollCommand.id,
-                currentScroll ?? {
-                    sheetViewStartColumn: 0,
-                    offsetX: 0,
-                }
-            );
+            this._commandService.executeCommand(ScrollCommand.id, {
+                sheetViewStartColumn: 0,
+                offsetX: 0,
+            });
             viewMainLeft.resize({
                 left: rowHeaderWidthAndMarginLeft,
                 top: columnHeaderHeightAndMarginTop,

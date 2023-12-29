@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '@univerjs/core';
+
 import { ErrorType } from '../../basics/error-type';
 import { DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER } from '../../basics/token-type';
 import type { BaseAstNode } from '../ast-node/base-ast-node';
@@ -22,6 +24,31 @@ import type { Interpreter } from '../interpreter/interpreter';
 import type { BaseReferenceObject } from '../reference-object/base-reference-object';
 import { AsyncObject } from '../reference-object/base-reference-object';
 import { BaseValueObject, ErrorValueObject } from './base-value-object';
+
+function getRootLexerHasValueNode(node: Nullable<BaseAstNode>): Nullable<BaseAstNode> {
+    if (!node) {
+        return;
+    }
+    if (node.getToken() !== DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER) {
+        return node;
+    }
+
+    const parameterNode = node as LambdaParameterNode;
+    const currentLambdaPrivacyVar = parameterNode.getCurrentLambdaPrivacyVar();
+    const lambdaParameter = parameterNode.getLambdaParameter();
+
+    if (!currentLambdaPrivacyVar) {
+        return;
+    }
+
+    const chainNode = currentLambdaPrivacyVar.get(lambdaParameter);
+
+    if (chainNode == null && node.getValue()) {
+        return node;
+    }
+
+    return getRootLexerHasValueNode(chainNode);
+}
 
 export class LambdaValueObjectObject extends BaseValueObject {
     private _lambdaPrivacyValueMap = new Map<string, BaseValueObject>();
@@ -82,6 +109,12 @@ export class LambdaValueObjectObject extends BaseValueObject {
                 const value = this._lambdaPrivacyValueMap.get(lambdaParameter);
                 if (value) {
                     (item as LambdaParameterNode).setValue(value);
+                } else {
+                    const currentLambdaPrivacyVar = (item as LambdaParameterNode).getCurrentLambdaPrivacyVar();
+                    const node = getRootLexerHasValueNode(currentLambdaPrivacyVar.get(lambdaParameter));
+                    if (node != null) {
+                        (item as LambdaParameterNode).setValue(node.getValue());
+                    }
                 }
                 continue;
             }

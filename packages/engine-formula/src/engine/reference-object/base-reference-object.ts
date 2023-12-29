@@ -428,7 +428,7 @@ export class BaseReferenceObject extends ObjectClassType {
         return this.getCellValueObject(cell);
     }
 
-    toArrayValueObject(): ArrayValueObject {
+    toArrayValueObject(useCache: boolean = true): ArrayValueObject {
         const { startRow, endRow, startColumn, endColumn } = this.getRangePosition();
 
         const key = `${this.getUnitId()}_${this.getSheetId()}_${startRow + this._refOffsetY}_${
@@ -437,7 +437,7 @@ export class BaseReferenceObject extends ObjectClassType {
 
         const array = FORMULA_REF_TO_ARRAY_CACHE.get(key);
 
-        if (array) {
+        if (array && useCache) {
             return array;
         }
 
@@ -470,7 +470,7 @@ export class BaseReferenceObject extends ObjectClassType {
 
         const arrayValueObject = new ArrayValueObject(arrayValueObjectData);
 
-        FORMULA_REF_TO_ARRAY_CACHE.set(key, arrayValueObject);
+        useCache && FORMULA_REF_TO_ARRAY_CACHE.set(key, arrayValueObject);
 
         return arrayValueObject;
     }

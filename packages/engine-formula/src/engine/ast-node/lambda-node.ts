@@ -18,7 +18,6 @@ import type { Nullable } from '@univerjs/core';
 import { Tools } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
-import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import {
     DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME,
@@ -78,17 +77,17 @@ export class LambdaNode extends BaseAstNode {
         }
     }
 
-    override async executeAsync() {
-        if (this.isEmptyParamFunction()) {
-            await this.setValue(new LambdaValueObjectObject(this, this._interpreter, this._lambdaPrivacyVarKeys));
-        } else {
-            const children = this.getChildren();
-            const childrenCount = children.length;
-            await this.setValue(children[childrenCount - 1].getValue());
-        }
+    // override async executeAsync() {
+    //     if (this.isEmptyParamFunction()) {
+    //         await this.setValue(new LambdaValueObjectObject(this, this._interpreter, this._lambdaPrivacyVarKeys));
+    //     } else {
+    //         const children = this.getChildren();
+    //         const childrenCount = children.length;
+    //         await this.setValue(children[childrenCount - 1].getValue());
+    //     }
 
-        return Promise.resolve(AstNodePromiseType.SUCCESS);
-    }
+    //     return Promise.resolve(AstNodePromiseType.SUCCESS);
+    // }
 }
 
 export class LambdaNodeFactory extends BaseAstNodeFactory {

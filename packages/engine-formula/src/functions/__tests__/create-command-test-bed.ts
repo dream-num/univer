@@ -30,6 +30,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 
 import type { ISheetData } from '../../basics/common';
 import { Lexer } from '../../engine/analysis/lexer';
+import { LexerTreeBuilder } from '../../engine/analysis/lexer-tree-builder';
 import { AstTreeBuilder } from '../../engine/analysis/parser';
 import { AstRootNodeFactory } from '../../engine/ast-node/ast-root-node';
 import { FunctionNodeFactory } from '../../engine/ast-node/function-node';
@@ -46,9 +47,11 @@ import { Interpreter } from '../../engine/interpreter/interpreter';
 import type { FormulaDataModel } from '../../models/formula-data.model';
 import { CalculateFormulaService } from '../../services/calculate-formula.service';
 import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from '../../services/current-data.service';
+import { DefinedNamesService, IDefinedNamesService } from '../../services/defined-names.service';
 import { FunctionService, IFunctionService } from '../../services/function.service';
 import { IOtherFormulaManagerService, OtherFormulaManagerService } from '../../services/other-formula-manager.service';
 import { FormulaRuntimeService, IFormulaRuntimeService } from '../../services/runtime.service';
+import { ISuperTableService, SuperTableService } from '../../services/super-table.service';
 
 const TEST_WORKBOOK_DATA: IWorkbookData = {
     id: 'test',
@@ -96,11 +99,14 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
         override onStarting(injector: Injector): void {
             injector.add([CalculateFormulaService]);
             injector.add([Lexer]);
+            injector.add([LexerTreeBuilder]);
 
             injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
             injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
             injector.add([IFunctionService, { useClass: FunctionService }]);
             injector.add([IOtherFormulaManagerService, { useClass: OtherFormulaManagerService }]);
+            injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
+            injector.add([ISuperTableService, { useClass: SuperTableService }]);
 
             injector.add([FormulaDependencyGenerator]);
             injector.add([Interpreter]);

@@ -14,7 +14,4 @@
  * limitations under the License.
  */
 
-import { FUNCTION_NAMES_ARRAY } from './function-names';
-import { Makearray } from './makearray';
-
-export const functionArray = [[Makearray, FUNCTION_NAMES_ARRAY.MAKEARRAY]];
+export const functionArray = [];

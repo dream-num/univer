@@ -119,7 +119,7 @@ export class Interpreter extends Disposable {
                 token.toUpperCase() === DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME &&
                 (item as LambdaNode).isEmptyParamFunction()
             ) {
-                await item.executeAsync();
+                item.execute();
                 continue;
             }
             await this._executeAsync(item);

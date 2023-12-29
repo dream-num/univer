@@ -460,7 +460,8 @@ export default {
         },
     },
     VLOOKUP: {
-        description: '在数组第一列中查找，然后在行之间移动以返回单元格的值',
+        description:
+            '需要在表格或区域中按行查找内容时，请使用 VLOOKUP。 例如，按部件号查找汽车部件的价格，或根据员工 ID 查找员工姓名。',
         abstract: '在数组第一列中查找，然后在行之间移动以返回单元格的值',
         links: [
             {
@@ -469,8 +470,22 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            lookupValue: {
+                name: 'lookup_value',
+                detail: '要查找的值。 要查找的值必须位于 table_array 参数中指定的单元格区域的第一列中。',
+            },
+            tableArray: {
+                name: 'table_array',
+                detail: 'VLOOKUP 在其中搜索 lookup_value 和返回值的单元格区域。 可以使用命名区域或表，并且可以在参数中使用名称，而不是单元格引用。 ',
+            },
+            colIndexNum: {
+                name: 'col_index_num',
+                detail: '其中包含返回值的单元格的编号（table_array 最左侧单元格为 1 开始编号）。',
+            },
+            rangeLookup: {
+                name: 'range_lookup',
+                detail: '一个逻辑值，该值指定希望 VLOOKUP 查找近似匹配还是精确匹配：近似匹配 - 1/TRUE, 完全匹配 - 0/FALSE',
+            },
         },
     },
     VSTACK: {

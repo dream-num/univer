@@ -470,7 +470,7 @@ export default {
         },
     },
     VLOOKUP: {
-        description: `Looks in the first column of an array and moves across the row to return the value of a cell`,
+        description: `Use VLOOKUP when you need to find things in a table or a range by row. For example, look up a price of an automotive part by the part number, or find an employee name based on their employee ID.`,
         abstract: `Looks in the first column of an array and moves across the row to return the value of a cell`,
         links: [
             {
@@ -479,8 +479,22 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            lookupValue: {
+                name: 'lookup_value',
+                detail: 'The value you want to look up. The value you want to look up must be in the first column of the range of cells you specify in the table_array argument.',
+            },
+            tableArray: {
+                name: 'table_array',
+                detail: 'The range of cells in which the VLOOKUP will search for the lookup_value and the return value. You can use a named range or a table, and you can use names in the argument instead of cell references. ',
+            },
+            colIndexNum: {
+                name: 'col_index_num',
+                detail: 'The column number (starting with 1 for the left-most column of table_array) that contains the return value.',
+            },
+            rangeLookup: {
+                name: 'range_lookup',
+                detail: 'A logical value that specifies whether you want VLOOKUP to find an approximate or an exact match: Approximate match - 1/TRUE, Exact match - 0/FALSE',
+            },
         },
     },
     VSTACK: {

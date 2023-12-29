@@ -37,7 +37,7 @@ describe('arrayValueObject test', () => {
 
     describe('slice', () => {
         it('row==null;column=2,,', () => {
-            expect(originArrayValueObject.slice(null, [2]).toValue()).toStrictEqual([
+            expect(originArrayValueObject.slice(null, [2])?.toValue()).toStrictEqual([
                 [3, 4, 5],
                 [8, 9, 10],
                 [13, 14, 15],
@@ -45,28 +45,46 @@ describe('arrayValueObject test', () => {
         });
 
         it('row==2,,;column=2,,', () => {
-            expect(originArrayValueObject.slice([2], [2]).toValue()).toStrictEqual([[13, 14, 15]]);
+            expect(originArrayValueObject.slice([2], [2])?.toValue()).toStrictEqual([[13, 14, 15]]);
         });
 
         it('row==,,2;column=2,,', () => {
-            expect(originArrayValueObject.slice([undefined, undefined, 2], [2]).toValue()).toStrictEqual([
+            expect(originArrayValueObject.slice([undefined, undefined, 2], [2])?.toValue()).toStrictEqual([
                 [3, 4, 5],
                 [13, 14, 15],
             ]);
         });
 
         it('row==1,,;column=null', () => {
-            expect(originArrayValueObject.slice([1]).toValue()).toStrictEqual([
+            expect(originArrayValueObject.slice([1])?.toValue()).toStrictEqual([
                 [6, 7, 8, 9, 10],
                 [11, 12, 13, 14, 15],
             ]);
         });
 
         it('row==0,1,;column=,,2', () => {
-            expect(originArrayValueObject.slice([0, 1], [undefined, undefined, 2]).toValue()).toStrictEqual([
+            expect(originArrayValueObject.slice([0, 1], [undefined, undefined, 2])?.toValue()).toStrictEqual([
                 [1, 3, 5],
-                [6, 8, 10],
             ]);
+        });
+
+        it('row==0,1,;column=,,2', () => {
+            expect(originArrayValueObject.slice(undefined, [2, 3])?.toValue()).toStrictEqual([[3], [8], [13]]);
+        });
+
+        it('row==1,3,;column=1,4,', () => {
+            expect(originArrayValueObject.slice([1, 3], [1, 4])?.toValue()).toStrictEqual([
+                [7, 8, 9],
+                [12, 13, 14],
+            ]);
+        });
+
+        it('row==3,,;column=,,', () => {
+            expect(originArrayValueObject.slice([3])?.toValue()).toBeUndefined();
+        });
+
+        it('row==,,;column=5,,', () => {
+            expect(originArrayValueObject.slice(undefined, [5])?.toValue()).toBeUndefined();
         });
     });
 
@@ -268,6 +286,16 @@ describe('arrayValueObject test', () => {
             arrayValueObject = ValueObjectFactory.create('{1,2,3;4,5,6}');
 
             expect((arrayValueObject as ArrayValueObject).isArray()).toBeTruthy();
+
+            arrayValueObject = ValueObjectFactory.create(`{
+                1 , 2;
+                4 , 5
+            }`);
+
+            expect((arrayValueObject as ArrayValueObject).toValue()).toStrictEqual([
+                [1, 2],
+                [4, 5],
+            ]);
         });
 
         it('ValueObjectFactory create StringValueObject ', () => {

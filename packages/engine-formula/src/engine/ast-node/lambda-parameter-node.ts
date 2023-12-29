@@ -25,6 +25,25 @@ import { BaseAstNode, ErrorNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
 import { NODE_ORDER_MAP, NodeType } from './node-type';
 
+function getRootLexerNode(node: Nullable<BaseAstNode>): Nullable<BaseAstNode> {
+    if (!node) {
+        return;
+    }
+    if (node.getToken() !== DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER) {
+        return node;
+    }
+
+    const parameterNode = node as LambdaParameterNode;
+    const currentLambdaPrivacyVar = parameterNode.getCurrentLambdaPrivacyVar();
+    const lambdaParameter = parameterNode.getLambdaParameter();
+
+    if (!currentLambdaPrivacyVar) {
+        return;
+    }
+
+    return getRootLexerNode(currentLambdaPrivacyVar.get(lambdaParameter));
+}
+
 export class LambdaParameterNode extends BaseAstNode {
     constructor(
         token: string,
@@ -50,7 +69,7 @@ export class LambdaParameterNode extends BaseAstNode {
         /**
          * In the case of =lambda(x,y,lambda(a,b,a*b)(x,y))(1,2)
          */
-        const node = this._getRootLexerNode(this._currentLambdaPrivacyVar.get(this._lambdaParameter));
+        const node = getRootLexerNode(this._currentLambdaPrivacyVar.get(this._lambdaParameter));
         if (!node) {
             const value = this.getValue();
             if (value == null || value.isError()) {
@@ -59,25 +78,6 @@ export class LambdaParameterNode extends BaseAstNode {
         } else {
             this.setValue(node.getValue());
         }
-    }
-
-    private _getRootLexerNode(node: Nullable<BaseAstNode>): Nullable<BaseAstNode> {
-        if (!node) {
-            return;
-        }
-        if (node.getToken() !== DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER) {
-            return node;
-        }
-
-        const parameterNode = node as LambdaParameterNode;
-        const currentLambdaPrivacyVar = parameterNode.getCurrentLambdaPrivacyVar();
-        const lambdaParameter = parameterNode.getLambdaParameter();
-
-        if (!currentLambdaPrivacyVar) {
-            return;
-        }
-
-        return this._getRootLexerNode(currentLambdaPrivacyVar.get(lambdaParameter));
     }
 }
 

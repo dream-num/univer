@@ -21,10 +21,10 @@ import { ErrorType } from '../../basics/error-type';
 import { CELL_INVERTED_INDEX_CACHE } from '../../basics/inverted-index-cache';
 import { $ARRAY_VALUE_REGEX } from '../../basics/regex';
 import { compareToken } from '../../basics/token';
-import { getCompare } from '../utils/compare';
+import { ArrayBinarySearchType, getCompare } from '../utils/compare';
 import type { callbackMapFnType, callbackProductFnType, IArrayValueObject } from './base-value-object';
 import { BaseValueObject, ErrorValueObject } from './base-value-object';
-import { BooleanValueObject, NumberValueObject, StringValueObject } from './primitive-object';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from './primitive-object';
 
 enum BatchOperatorType {
     MINUS,
@@ -99,7 +99,7 @@ export function transformToValue(array: BaseValueObject[][] = []) {
 }
 
 export class ArrayValueObject extends BaseValueObject {
-    private _value: BaseValueObject[][] = [];
+    private _values: BaseValueObject[][] = [];
 
     private _rowCount: number = -1;
 
@@ -113,6 +113,10 @@ export class ArrayValueObject extends BaseValueObject {
 
     private _currentColumn: number = -1;
 
+    private _sliceCache = new Map<string, ArrayValueObject>();
+
+    private _flattenCache: Nullable<ArrayValueObject>;
+
     constructor(rawValue: string | IArrayValueObject) {
         if (typeof rawValue === 'string') {
             super(rawValue as string);
@@ -121,17 +125,19 @@ export class ArrayValueObject extends BaseValueObject {
             super(rawString);
         }
 
-        this._value = this._formatValue(rawValue);
+        this._values = this._formatValue(rawValue);
     }
 
     override dispose(): void {
-        this._value.forEach((cells) => {
+        this._values.forEach((cells) => {
             cells.forEach((cell) => {
                 cell.dispose();
             });
         });
 
-        this._value = [];
+        this._values = [];
+
+        this._clearCache();
     }
 
     getRowCount() {
@@ -180,11 +186,12 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     override getArrayValue() {
-        return this._value;
+        return this._values;
     }
 
     override setArrayValue(value: BaseValueObject[][]) {
-        this._value = value;
+        this._clearCache();
+        this._values = value;
     }
 
     override isArray() {
@@ -192,14 +199,21 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     get(row: number, column: number) {
-        return this._value[row][column];
+        const v = this._values[row][column];
+        if (v == null) {
+            return new NullValueObject(0);
+        }
+        return v;
     }
 
     set(row: number, column: number, value: BaseValueObject) {
         if (row >= this._rowCount || column >= this._columnCount) {
             throw new Error('Exceeding array bounds.');
         }
-        this._value[row][column] = value;
+
+        this._clearCache();
+
+        this._values[row][column] = value;
     }
 
     getRangePosition() {
@@ -234,8 +248,7 @@ export class ArrayValueObject extends BaseValueObject {
 
     getFirstCell() {
         const { startRow, startColumn } = this.getRangePosition();
-        const valueList = this.getArrayValue();
-        return valueList[startRow][startColumn];
+        return this.get(startRow, startColumn);
     }
 
     /**
@@ -249,8 +262,8 @@ export class ArrayValueObject extends BaseValueObject {
         const takeArrayRowCount = takeArray.getRowCount();
         const takeArrayColumnCount = takeArray.getColumnCount();
 
-        if (takeArrayRowCount !== this._rowCount || takeArrayRowCount !== this._rowCount) {
-            return this._createNewArray([[new NumberValueObject(0)]], 1, 1);
+        if (takeArrayRowCount !== this._rowCount || takeArrayColumnCount !== this._columnCount) {
+            return this._createNewArray([[new NullValueObject(0)]], 1, 1);
         }
 
         const newValue: BaseValueObject[][] = [];
@@ -279,16 +292,25 @@ export class ArrayValueObject extends BaseValueObject {
      * https://numpy.org/doc/stable/reference/generated/numpy.chararray.flatten.html#numpy.chararray.flatten
      */
     flatten() {
+        if (this._flattenCache != null) {
+            return this._flattenCache;
+        }
+
         const newValue: BaseValueObject[][] = [];
         newValue[0] = [];
         for (let r = 0; r < this._rowCount; r++) {
-            for (let c = 0; c < this._rowCount; c++) {
+            for (let c = 0; c < this._columnCount; c++) {
                 const value = this.get(r, c);
 
                 newValue[0].push(value);
             }
         }
-        return this._createNewArray(newValue, 1, newValue[0].length);
+
+        const arrayV = this._createNewArray(newValue, 1, newValue[0].length);
+
+        this._flattenCache = arrayV;
+
+        return arrayV;
     }
 
     /**
@@ -300,44 +322,75 @@ export class ArrayValueObject extends BaseValueObject {
      */
     slice(rowParam: Nullable<Array<Nullable<number>>>, columnParam: Nullable<Array<Nullable<number>>>) {
         let rowStart = 0;
-        let rowStop = this._rowCount - 1;
+        let rowStop = this._rowCount;
         let rowStep = 1;
 
         let columnStart = 0;
-        let columnStop = this._columnCount - 1;
+        let columnStop = this._columnCount;
         let columnStep = 1;
 
         if (rowParam != null) {
             rowStart = rowParam[0] || 0;
-            rowStop = rowParam[1] || this._rowCount - 1;
+            rowStop = rowParam[1] || this._rowCount;
             rowStep = rowParam[2] || 1;
         }
 
         if (columnParam != null) {
             columnStart = columnParam[0] || 0;
-            columnStop = columnParam[1] || this._columnCount - 1;
+            columnStop = columnParam[1] || this._columnCount;
             columnStep = columnParam[2] || 1;
+        }
+
+        if (rowStart >= this._rowCount || columnStart >= this._columnCount) {
+            return;
+        }
+
+        const cacheKey = `${rowStart}_${rowStop}_${rowStep}_${columnStart}_${columnStop}_${columnStep}`;
+
+        const cache = this._sliceCache.get(cacheKey);
+
+        if (cache != null) {
+            return cache;
         }
 
         const result: BaseValueObject[][] = [];
 
-        const array = this._value;
+        const array = this._values;
 
         let result_row_index = 0;
         let result_column_index = 0;
-        for (let r = rowStart; r <= rowStop; r += rowStep) {
+        for (let r = rowStart; r < rowStop; r += rowStep) {
             result_column_index = 0;
             if (result[result_row_index] == null) {
                 result[result_row_index] = [];
             }
-            for (let c = columnStart; c <= columnStop; c += columnStep) {
+            for (let c = columnStart; c < columnStop; c += columnStep) {
                 result[result_row_index][result_column_index] = array[r][c];
                 result_column_index++;
             }
             result_row_index++;
         }
 
-        return this._createNewArray(result, result.length, result[0].length);
+        if (result.length === 0 || result[0].length === 0) {
+            return;
+        }
+
+        /**
+         * When iterating, arrayValue will create an inverted index cache for cell reference data.
+         * If the array is created by ref, it will hit the cache,
+         * but arrays derived from another array will lose the caching ability.
+         * Here, based on the slice range, it is determined whether to set row and column to -1;
+         * -1 means that caching is not enabled.
+         */
+        const startRow = rowStep > 1 ? -1 : rowStart + this._currentRow;
+
+        const startColumn = columnStep > 1 ? -1 : columnStart + this._currentColumn;
+
+        const newResultArray = this._createNewArray(result, result.length, result[0].length, startRow, startColumn);
+
+        this._sliceCache.set(cacheKey, newResultArray);
+
+        return newResultArray;
     }
 
     sum() {
@@ -468,24 +521,78 @@ export class ArrayValueObject extends BaseValueObject {
 
     sortByRow(index: number) {
         // new Intl.Collator('zh', { numeric: true }).compare;
-        const result: BaseValueObject[][] = this._transposeArray(this._value);
+        const result: BaseValueObject[][] = this._transposeArray(this._values);
 
         result.sort(this._sort(index));
 
-        this._value = this._transposeArray(result);
+        this._clearCache();
+
+        this._values = this._transposeArray(result);
     }
 
     sortByColumn(index: number) {
-        this._value.sort(this._sort(index));
+        this._clearCache();
+        this._values.sort(this._sort(index));
     }
 
     transpose() {
-        const transposeArray = this._transposeArray(this._value);
+        const transposeArray = this._transposeArray(this._values);
 
         const rowCount = this._rowCount;
         const columnCount = this._columnCount;
 
         return this._createNewArray(transposeArray, columnCount, rowCount);
+    }
+
+    binarySearch(valueObject: BaseValueObject, searchType: ArrayBinarySearchType = ArrayBinarySearchType.MIN) {
+        if (valueObject.isError()) {
+            return;
+        }
+
+        const flattenArrayValue = this.flatten();
+        const valueMatrix = flattenArrayValue.getArrayValue();
+        const valueArray = valueMatrix[0];
+
+        const compareFunc = getCompare();
+
+        const value = valueObject.getValue().toString();
+
+        let start = 0;
+        let end = valueArray.length - 1;
+
+        let lastValue = null;
+
+        while (start <= end) {
+            const middle = Math.floor((start + end) / 2);
+            const compareTo = valueArray[middle];
+
+            const compareToValue = compareTo.getValue();
+
+            const compare = compareFunc(compareToValue.toString(), value);
+
+            if (compare === 0) {
+                // Found the value, return the value from the returnColumn
+                return middle;
+            }
+
+            if (compare === -1) {
+                start = middle + 1;
+
+                if (searchType === ArrayBinarySearchType.MIN) {
+                    lastValue = middle;
+                }
+            } else {
+                // compareTo > value
+                end = middle - 1;
+
+                if (searchType === ArrayBinarySearchType.MAX) {
+                    lastValue = middle;
+                }
+            }
+        }
+
+        // Value not found
+        return lastValue;
     }
 
     override getNegative(): BaseValueObject {
@@ -546,7 +653,7 @@ export class ArrayValueObject extends BaseValueObject {
         for (let r = 0; r < rowCount; r++) {
             const rowList: BaseValueObject[] = [];
             for (let c = 0; c < columnCount; c++) {
-                const currentValue = this._value?.[r]?.[c];
+                const currentValue = this._values?.[r]?.[c];
 
                 if (currentValue) {
                     if (currentValue.isError()) {
@@ -857,7 +964,12 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     toValue() {
-        return transformToValue(this._value);
+        return transformToValue(this._values);
+    }
+
+    private _clearCache() {
+        this._flattenCache = null;
+        this._sliceCache.clear();
     }
 
     private _sort(index: number) {
@@ -988,16 +1100,14 @@ export class ArrayValueObject extends BaseValueObject {
                         valueObject.getValue()
                     );
 
-                    if (rowPositions != null) {
-                        for (let r = 0; r < rowCount; r++) {
-                            if (result[r] == null) {
-                                result[r] = [];
-                            }
-                            if (rowPositions.includes(r + startRow)) {
-                                result[r][column] = new BooleanValueObject(true);
-                            } else {
-                                result[r][column] = new BooleanValueObject(false);
-                            }
+                    for (let r = 0; r < rowCount; r++) {
+                        if (result[r] == null) {
+                            result[r] = [];
+                        }
+                        if (rowPositions?.includes(r + startRow)) {
+                            result[r][column] = new BooleanValueObject(true);
+                        } else {
+                            result[r][column] = new BooleanValueObject(false);
                         }
                     }
                 } else {
@@ -1039,6 +1149,14 @@ export class ArrayValueObject extends BaseValueObject {
                                 }
                             }
                         });
+                    } else {
+                        for (let r = 0; r < rowCount; r++) {
+                            if (result[r] == null) {
+                                result[r] = [];
+                            }
+
+                            result[r][column] = new BooleanValueObject(false);
+                        }
                     }
                 }
 
@@ -1046,16 +1164,8 @@ export class ArrayValueObject extends BaseValueObject {
             }
         }
 
-        CELL_INVERTED_INDEX_CACHE.setContinueBuildingCache(
-            unitId,
-            sheetId,
-            column + startColumn,
-            startRow,
-            startRow + rowCount - 1
-        );
-
         for (let r = 0; r < rowCount; r++) {
-            const currentValue = this._value?.[r]?.[column];
+            const currentValue = this._values?.[r]?.[column];
             if (result[r] == null) {
                 result[r] = [];
             }
@@ -1149,6 +1259,8 @@ export class ArrayValueObject extends BaseValueObject {
                     (currentValue as ErrorValueObject).getErrorType(),
                     r + startRow
                 );
+            } else if (currentValue.isNull()) {
+                CELL_INVERTED_INDEX_CACHE.set(unitId, sheetId, column + startColumn, null, r + startRow);
             } else {
                 CELL_INVERTED_INDEX_CACHE.set(
                     unitId,
@@ -1159,6 +1271,14 @@ export class ArrayValueObject extends BaseValueObject {
                 );
             }
         }
+
+        CELL_INVERTED_INDEX_CACHE.setContinueBuildingCache(
+            unitId,
+            sheetId,
+            column + startColumn,
+            startRow,
+            startRow + rowCount - 1
+        );
     }
 
     private _batchOperatorArray(
@@ -1190,13 +1310,13 @@ export class ArrayValueObject extends BaseValueObject {
             for (let c = 0; c < columnCount; c++) {
                 let currentValue: Nullable<BaseValueObject>;
                 if (currentCalculateType === ArrayCalculateType.SINGLE) {
-                    currentValue = this._value?.[0]?.[0];
+                    currentValue = this._values?.[0]?.[0];
                 } else if (currentCalculateType === ArrayCalculateType.ROW) {
-                    currentValue = this._value?.[0]?.[c];
+                    currentValue = this._values?.[0]?.[c];
                 } else if (currentCalculateType === ArrayCalculateType.COLUMN) {
-                    currentValue = this._value?.[r]?.[0];
+                    currentValue = this._values?.[r]?.[0];
                 } else {
-                    currentValue = this._value?.[r]?.[c];
+                    currentValue = this._values?.[r]?.[c];
                 }
 
                 let opValue: Nullable<BaseValueObject>;
@@ -1364,15 +1484,26 @@ export class ArrayValueObject extends BaseValueObject {
         return result;
     }
 
-    private _createNewArray(result: BaseValueObject[][], rowCount: number, columnCount: number) {
+    private _createNewArray(
+        result: BaseValueObject[][],
+        rowCount: number,
+        columnCount: number,
+        row: number = -1,
+        column: number = -1
+    ) {
+        if (this._currentColumn === -1 || this._currentRow === -1) {
+            row = -1;
+            column = -1;
+        }
+
         const arrayValueObjectData: IArrayValueObject = {
             calculateValueList: result,
             rowCount,
             columnCount,
             unitId: this.getUnitId(),
             sheetId: this.getSheetId(),
-            row: this._currentRow,
-            column: this._currentColumn,
+            row,
+            column,
         };
 
         return new ArrayValueObject(arrayValueObjectData);
@@ -1392,8 +1523,8 @@ export class ValueObjectFactory {
             if (isRealNum(rawValue)) {
                 return new NumberValueObject(rawValue);
             }
-            if (new RegExp($ARRAY_VALUE_REGEX, 'g').test(rawValue)) {
-                return new ArrayValueObject(rawValue);
+            if (new RegExp($ARRAY_VALUE_REGEX, 'g').test(rawValue.replace(/\n/g, '').replace(/\r/g, ''))) {
+                return new ArrayValueObject(rawValue.replace(/\n/g, '').replace(/\r/g, ''));
             }
             return new StringValueObject(rawValue);
         }

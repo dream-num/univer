@@ -128,7 +128,8 @@ export default {
         },
     },
     LAMBDA: {
-        description: '创建自定义、可重用的函数，并通过友好名称调用它们',
+        description:
+            '使用 LAMBDA 函数创建可重用的自定义函数，并使用易记名称调用它们。 新函数在整个工作簿中可用，其调用类似本机 Excel 函数。',
         abstract: '创建自定义、可重用的函数，并通过友好名称调用它们',
         links: [
             {
@@ -137,8 +138,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            parameter: {
+                name: '参数',
+                detail: '要传递给函数的值，例如单元格引用、字符串或数字。 最多可以输入 253 个参数。 此参数可选。',
+            },
+            calculation: {
+                name: '计算',
+                detail: '要作为函数结果执行并返回的公式。 其必须为最后一个参数，且必须返回结果。 此参数是必需项。',
+            },
         },
     },
     LET: {

@@ -459,7 +459,7 @@ export default {
         },
     },
     VLOOKUP: {
-        description: `配列の左端列で特定の値を検索し、対応するセルの値を返します。`,
+        description: `テーブルまたは範囲の内容を行ごとに検索する場合は、VLOOKUP を使用します。 たとえば、自動車部品の価格を部品番号で検索するか、従業員 ID に基づいて従業員名を検索します。`,
         abstract: `配列の左端列で特定の値を検索し、対応するセルの値を返します。`,
         links: [
             {
@@ -468,8 +468,22 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            lookupValue: {
+                name: '検索値',
+                detail: '検索の対象となる値。 調べたい値は、引数の 範囲 で指定したセル範囲の最初の列になければなりません。',
+            },
+            tableArray: {
+                name: '範囲',
+                detail: 'VLOOKUP が検索値と戻り値を検索するセル範囲。 名前付き範囲またはテーブルを使用でき、セル参照の代わりに引数に名前を使用できます。 ',
+            },
+            colIndexNum: {
+                name: '列番号',
+                detail: '戻り値を含む列の番号 (範囲 の左端の列は 1 で始まります)。',
+            },
+            rangeLookup: {
+                name: '検索の型',
+                detail: 'VLOOKUP を使用して、近似一致を検索するか、完全一致を検索するかを指定する論理値です。',
+            },
         },
     },
     VSTACK: {

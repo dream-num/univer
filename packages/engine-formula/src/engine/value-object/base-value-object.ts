@@ -409,6 +409,10 @@ export class ErrorValueObject extends BaseValueObject {
         return errorValueObject;
     }
 
+    override getValue() {
+        return this._errorType;
+    }
+
     getErrorType() {
         return this._errorType;
     }

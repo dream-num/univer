@@ -14,6 +14,4 @@
  * limitations under the License.
  */
 
-export enum FUNCTION_NAMES_ARRAY {
-    MAKEARRAY = 'MAKEARRAY',
-}
+export enum FUNCTION_NAMES_ARRAY {}

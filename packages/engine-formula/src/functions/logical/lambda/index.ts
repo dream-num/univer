@@ -14,6 +14,16 @@
  * limitations under the License.
  */
 
-import { type IFunctionInfo } from '@univerjs/engine-formula';
+import { ErrorType } from '../../../basics/error-type';
+import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { BaseFunction } from '../../base-function';
 
-export const FUNCTION_LIST_ARRAY: IFunctionInfo[] = [];
+/**
+ * Lambda functions are unique and are generated directly by the higher level.
+ * Please refer to the lambdaNode; here, it serves the purpose of a placeholder for the formula.
+ */
+export class Lambda extends BaseFunction {
+    override calculate(...variants: BaseValueObject[]) {
+        return new ErrorValueObject(ErrorType.VALUE);
+    }
+}

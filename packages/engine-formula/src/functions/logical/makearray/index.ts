@@ -17,7 +17,6 @@
 import { ErrorType } from '../../../basics/error-type';
 import type { AsyncObject } from '../../../engine/reference-object/base-reference-object';
 import { AsyncArrayObject } from '../../../engine/reference-object/base-reference-object';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import type { LambdaValueObjectObject } from '../../../engine/value-object/lambda-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
@@ -29,27 +28,19 @@ export class Makearray extends BaseFunction {
             return new ErrorValueObject(ErrorType.VALUE);
         }
 
-        let row = variants[0];
+        const row = this.getIndexNumValue(variants[0]);
 
-        let column = variants[1];
+        if (typeof row !== 'number') {
+            return row;
+        }
+
+        const column = this.getIndexNumValue(variants[1]);
+
+        if (typeof column !== 'number') {
+            return column;
+        }
 
         if (!(variants[2].isValueObject() && (variants[2] as LambdaValueObjectObject).isLambda())) {
-            return new ErrorValueObject(ErrorType.VALUE);
-        }
-
-        if (row.isArray()) {
-            row = (row as ArrayValueObject).getFirstCell();
-        }
-
-        if (column.isArray()) {
-            column = (column as ArrayValueObject).getFirstCell();
-        }
-
-        if (!row.isNumber()) {
-            return new ErrorValueObject(ErrorType.VALUE);
-        }
-
-        if (!column.isNumber()) {
             return new ErrorValueObject(ErrorType.VALUE);
         }
 
@@ -57,11 +48,11 @@ export class Makearray extends BaseFunction {
 
         const result: Array<Array<BaseValueObject | AsyncObject>> = [];
 
-        for (let r = 0; r < (row as NumberValueObject).getValue(); r++) {
+        for (let r = 0; r < row; r++) {
             if (result[r] == null) {
                 result[r] = [];
             }
-            for (let c = 0; c < (column as NumberValueObject).getValue(); c++) {
+            for (let c = 0; c < column; c++) {
                 const value = lambda.execute(new NumberValueObject(r + 1), new NumberValueObject(c + 1));
 
                 result[r][c] = value;

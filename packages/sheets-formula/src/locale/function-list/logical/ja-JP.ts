@@ -128,7 +128,7 @@ export default {
         },
     },
     LAMBDA: {
-        description: `カスタムで再利用可能な関数を作成し、フレンドリ名で呼び出す`,
+        description: `LAMBDA 関数を使用して、再利用可能なカスタム関数を作成し、フレンドリ名で呼び出します。 新しい関数はブック全体で使用でき、ネイティブ Excel 関数と同様に呼び出されます。`,
         abstract: `カスタムで再利用可能な関数を作成し、フレンドリ名で呼び出す`,
         links: [
             {
@@ -137,8 +137,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            parameter: {
+                name: 'パラメーター',
+                detail: 'セル参照、文字列、数値などの関数に渡す値。 最大 253 個のパラメーターを入力できます。 この引数は省略可能です。',
+            },
+            calculation: {
+                name: '計算',
+                detail: '関数の結果として実行して返す数式。 最後の引数である必要性があり、結果を返す必要があります。 この引数は必須です。',
+            },
         },
     },
     LET: {

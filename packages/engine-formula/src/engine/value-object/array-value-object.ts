@@ -341,6 +341,10 @@ export class ArrayValueObject extends BaseValueObject {
             columnStep = columnParam[2] || 1;
         }
 
+        if (rowStart >= this._rowCount || columnStart >= this._columnCount) {
+            return;
+        }
+
         const cacheKey = `${rowStart}_${rowStop}_${rowStep}_${columnStart}_${columnStop}_${columnStep}`;
 
         const cache = this._sliceCache.get(cacheKey);
@@ -566,7 +570,7 @@ export class ArrayValueObject extends BaseValueObject {
 
             const compare = compareFunc(compareToValue.toString(), value);
 
-            if (compareToValue === value) {
+            if (compare === 0) {
                 // Found the value, return the value from the returnColumn
                 return middle;
             }
@@ -1519,8 +1523,8 @@ export class ValueObjectFactory {
             if (isRealNum(rawValue)) {
                 return new NumberValueObject(rawValue);
             }
-            if (new RegExp($ARRAY_VALUE_REGEX, 'g').test(rawValue)) {
-                return new ArrayValueObject(rawValue);
+            if (new RegExp($ARRAY_VALUE_REGEX, 'g').test(rawValue.replace(/\n/g, '').replace(/\r/g, ''))) {
+                return new ArrayValueObject(rawValue.replace(/\n/g, '').replace(/\r/g, ''));
             }
             return new StringValueObject(rawValue);
         }

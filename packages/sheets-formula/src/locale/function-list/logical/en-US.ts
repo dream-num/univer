@@ -128,7 +128,7 @@ export default {
         },
     },
     LAMBDA: {
-        description: `Create custom, reusable functions and call them by a friendly name`,
+        description: `Use a LAMBDA function to create custom, reusable functions and call them by a friendly name. The new function is available throughout the workbook and called like native Excel functions.`,
         abstract: `Create custom, reusable functions and call them by a friendly name`,
         links: [
             {
@@ -137,8 +137,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            parameter: {
+                name: 'parameter',
+                detail: 'A value that you want to pass to the function, such as a cell reference, string or number. You can enter up to 253 parameters. This argument is optional.',
+            },
+            calculation: {
+                name: 'calculation',
+                detail: 'The formula you want to execute and return as the result of the function. It must be the last argument and it must return a result. This argument is required.',
+            },
         },
     },
     LET: {

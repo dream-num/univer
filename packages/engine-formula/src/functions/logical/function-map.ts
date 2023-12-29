@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
-export const functionLogical = [];
+import { FUNCTION_NAMES_LOGICAL } from './function-names';
+import { Lambda } from './lambda';
+import { Makearray } from './makearray';
+
+export const functionLogical = [
+    [Lambda, FUNCTION_NAMES_LOGICAL.LAMBDA],
+    [Makearray, FUNCTION_NAMES_LOGICAL.MAKEARRAY],
+];

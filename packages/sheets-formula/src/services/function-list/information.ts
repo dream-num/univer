@@ -14,6 +14,469 @@
  * limitations under the License.
  */
 
-import type { IFunctionInfo } from '@univerjs/engine-formula';
+import { FUNCTION_NAMES_INFORMATION, FunctionType, type IFunctionInfo } from '@univerjs/engine-formula';
 
-export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [];
+export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
+    {
+        functionName: FUNCTION_NAMES_INFORMATION.CELL,
+        functionType: FunctionType.Information,
+        description: 'formula.functionList.CELL.description',
+        abstract: 'formula.functionList.CELL.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.CELL.functionParameter.number1.name',
+                detail: 'formula.functionList.CELL.functionParameter.number1.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.CELL.functionParameter.number2.name',
+                detail: 'formula.functionList.CELL.functionParameter.number2.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_INFORMATION.ERROR_TYPE,
+        functionType: FunctionType.Information,
+        description: 'formula.functionList.ERROR_TYPE.description',
+        abstract: 'formula.functionList.ERROR_TYPE.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.ERROR_TYPE.functionParameter.number1.name',
+                detail: 'formula.functionList.ERROR_TYPE.functionParameter.number1.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.ERROR_TYPE.functionParameter.number2.name',
+                detail: 'formula.functionList.ERROR_TYPE.functionParameter.number2.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_INFORMATION.INFO,
+        functionType: FunctionType.Information,
+        description: 'formula.functionList.INFO.description',
+        abstract: 'formula.functionList.INFO.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.INFO.functionParameter.number1.name',
+                detail: 'formula.functionList.INFO.functionParameter.number1.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.INFO.functionParameter.number2.name',
+                detail: 'formula.functionList.INFO.functionParameter.number2.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_INFORMATION.ISBLANK,
+        functionType: FunctionType.Information,
+        description: 'formula.functionList.ISBLANK.description',
+        abstract: 'formula.functionList.ISBLANK.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.ISBLANK.functionParameter.number1.name',
+                detail: 'formula.functionList.ISBLANK.functionParameter.number1.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.ISBLANK.functionParameter.number2.name',
+                detail: 'formula.functionList.ISBLANK.functionParameter.number2.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_INFORMATION.ISERR,
+        functionType: FunctionType.Information,
+        description: 'formula.functionList.ISERR.description',
+        abstract: 'formula.functionList.ISERR.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.ISERR.functionParameter.number1.name',
+                detail: 'formula.functionList.ISERR.functionParameter.number1.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.ISERR.functionParameter.number2.name',
+                detail: 'formula.functionList.ISERR.functionParameter.number2.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_INFORMATION.ISERROR,
+        functionType: FunctionType.Information,
+        description: 'formula.functionList.ISERROR.description',
+        abstract: 'formula.functionList.ISERROR.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.ISERROR.functionParameter.number1.name',
+                detail: 'formula.functionList.ISERROR.functionParameter.number1.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.ISERROR.functionParameter.number2.name',
+                detail: 'formula.functionList.ISERROR.functionParameter.number2.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_INFORMATION.ISEVEN,
+        functionType: FunctionType.Information,
+        description: 'formula.functionList.ISEVEN.description',
+        abstract: 'formula.functionList.ISEVEN.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.ISEVEN.functionParameter.number1.name',
+                detail: 'formula.functionList.ISEVEN.functionParameter.number1.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.ISEVEN.functionParameter.number2.name',
+                detail: 'formula.functionList.ISEVEN.functionParameter.number2.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_INFORMATION.ISFORMULA,
+        functionType: FunctionType.Information,
+        description: 'formula.functionList.ISFORMULA.description',
+        abstract: 'formula.functionList.ISFORMULA.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.ISFORMULA.functionParameter.number1.name',
+                detail: 'formula.functionList.ISFORMULA.functionParameter.number1.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.ISFORMULA.functionParameter.number2.name',
+                detail: 'formula.functionList.ISFORMULA.functionParameter.number2.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_INFORMATION.ISLOGICAL,
+        functionType: FunctionType.Information,
+        description: 'formula.functionList.ISLOGICAL.description',
+        abstract: 'formula.functionList.ISLOGICAL.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.ISLOGICAL.functionParameter.number1.name',
+                detail: 'formula.functionList.ISLOGICAL.functionParameter.number1.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.ISLOGICAL.functionParameter.number2.name',
+                detail: 'formula.functionList.ISLOGICAL.functionParameter.number2.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_INFORMATION.ISNA,
+        functionType: FunctionType.Information,
+        description: 'formula.functionList.ISNA.description',
+        abstract: 'formula.functionList.ISNA.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.ISNA.functionParameter.number1.name',
+                detail: 'formula.functionList.ISNA.functionParameter.number1.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.ISNA.functionParameter.number2.name',
+                detail: 'formula.functionList.ISNA.functionParameter.number2.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_INFORMATION.ISNONTEXT,
+        functionType: FunctionType.Information,
+        description: 'formula.functionList.ISNONTEXT.description',
+        abstract: 'formula.functionList.ISNONTEXT.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.ISNONTEXT.functionParameter.number1.name',
+                detail: 'formula.functionList.ISNONTEXT.functionParameter.number1.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.ISNONTEXT.functionParameter.number2.name',
+                detail: 'formula.functionList.ISNONTEXT.functionParameter.number2.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_INFORMATION.ISNUMBER,
+        functionType: FunctionType.Information,
+        description: 'formula.functionList.ISNUMBER.description',
+        abstract: 'formula.functionList.ISNUMBER.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.ISNUMBER.functionParameter.number1.name',
+                detail: 'formula.functionList.ISNUMBER.functionParameter.number1.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.ISNUMBER.functionParameter.number2.name',
+                detail: 'formula.functionList.ISNUMBER.functionParameter.number2.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_INFORMATION.ISODD,
+        functionType: FunctionType.Information,
+        description: 'formula.functionList.ISODD.description',
+        abstract: 'formula.functionList.ISODD.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.ISODD.functionParameter.number1.name',
+                detail: 'formula.functionList.ISODD.functionParameter.number1.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.ISODD.functionParameter.number2.name',
+                detail: 'formula.functionList.ISODD.functionParameter.number2.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_INFORMATION.ISOMITTED,
+        functionType: FunctionType.Information,
+        description: 'formula.functionList.ISOMITTED.description',
+        abstract: 'formula.functionList.ISOMITTED.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.ISOMITTED.functionParameter.number1.name',
+                detail: 'formula.functionList.ISOMITTED.functionParameter.number1.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.ISOMITTED.functionParameter.number2.name',
+                detail: 'formula.functionList.ISOMITTED.functionParameter.number2.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_INFORMATION.ISREF,
+        functionType: FunctionType.Information,
+        description: 'formula.functionList.ISREF.description',
+        abstract: 'formula.functionList.ISREF.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.ISREF.functionParameter.number1.name',
+                detail: 'formula.functionList.ISREF.functionParameter.number1.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.ISREF.functionParameter.number2.name',
+                detail: 'formula.functionList.ISREF.functionParameter.number2.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_INFORMATION.ISTEXT,
+        functionType: FunctionType.Information,
+        description: 'formula.functionList.ISTEXT.description',
+        abstract: 'formula.functionList.ISTEXT.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.ISTEXT.functionParameter.number1.name',
+                detail: 'formula.functionList.ISTEXT.functionParameter.number1.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.ISTEXT.functionParameter.number2.name',
+                detail: 'formula.functionList.ISTEXT.functionParameter.number2.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_INFORMATION.N,
+        functionType: FunctionType.Information,
+        description: 'formula.functionList.N.description',
+        abstract: 'formula.functionList.N.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.N.functionParameter.number1.name',
+                detail: 'formula.functionList.N.functionParameter.number1.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.N.functionParameter.number2.name',
+                detail: 'formula.functionList.N.functionParameter.number2.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_INFORMATION.NA,
+        functionType: FunctionType.Information,
+        description: 'formula.functionList.NA.description',
+        abstract: 'formula.functionList.NA.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.NA.functionParameter.number1.name',
+                detail: 'formula.functionList.NA.functionParameter.number1.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.NA.functionParameter.number2.name',
+                detail: 'formula.functionList.NA.functionParameter.number2.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_INFORMATION.SHEET,
+        functionType: FunctionType.Information,
+        description: 'formula.functionList.SHEET.description',
+        abstract: 'formula.functionList.SHEET.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.SHEET.functionParameter.number1.name',
+                detail: 'formula.functionList.SHEET.functionParameter.number1.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.SHEET.functionParameter.number2.name',
+                detail: 'formula.functionList.SHEET.functionParameter.number2.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_INFORMATION.SHEETS,
+        functionType: FunctionType.Information,
+        description: 'formula.functionList.SHEETS.description',
+        abstract: 'formula.functionList.SHEETS.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.SHEETS.functionParameter.number1.name',
+                detail: 'formula.functionList.SHEETS.functionParameter.number1.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.SHEETS.functionParameter.number2.name',
+                detail: 'formula.functionList.SHEETS.functionParameter.number2.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_INFORMATION.TYPE,
+        functionType: FunctionType.Information,
+        description: 'formula.functionList.TYPE.description',
+        abstract: 'formula.functionList.TYPE.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.TYPE.functionParameter.number1.name',
+                detail: 'formula.functionList.TYPE.functionParameter.number1.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.TYPE.functionParameter.number2.name',
+                detail: 'formula.functionList.TYPE.functionParameter.number2.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+];

@@ -99,20 +99,6 @@ export default {
             number2: { name: 'number2', detail: 'second' },
         },
     },
-    CONCATENATE: {
-        description: '将 2 个或多个文本字符串联接成 1 个字符串',
-        abstract: '将 2 个或多个文本字符串联接成 1 个字符串',
-        links: [
-            {
-                title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/concatenate-%E5%87%BD%E6%95%B0-8f8ae884-2ca8-4f7a-b093-75d702bea31d',
-            },
-        ],
-        functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
-        },
-    },
     CONFIDENCE: {
         description: '返回总体平均值的置信区间',
         abstract: '返回总体平均值的置信区间',
@@ -190,34 +176,6 @@ export default {
             {
                 title: '教学',
                 url: 'https://support.microsoft.com/zh-cn/office/finv-%E5%87%BD%E6%95%B0-4d46c97c-c368-4852-bc15-41e8e31140b1',
-            },
-        ],
-        functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
-        },
-    },
-    FLOOR: {
-        description: '向绝对值减小的方向舍入数字',
-        abstract: '向绝对值减小的方向舍入数字',
-        links: [
-            {
-                title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/floor-%E5%87%BD%E6%95%B0-14bb497c-24f2-4e04-b327-b0b4de5a8886',
-            },
-        ],
-        functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
-        },
-    },
-    FORECAST: {
-        description: '使用现有值来计算或预测未来值。',
-        abstract: '使用现有值来计算或预测未来值。',
-        links: [
-            {
-                title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/forecast-%E5%92%8C-forecast-linear-%E5%87%BD%E6%95%B0-50ca49c9-7b40-4892-94e4-7ad38bbeda99',
             },
         ],
         functionParameter: {

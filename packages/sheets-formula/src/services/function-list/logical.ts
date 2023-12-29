@@ -14,6 +14,425 @@
  * limitations under the License.
  */
 
-import type { IFunctionInfo } from '@univerjs/engine-formula';
+import { FUNCTION_NAMES_LOGICAL, FunctionType, type IFunctionInfo } from '@univerjs/engine-formula';
 
-export const FUNCTION_LIST_LOGICAL: IFunctionInfo[] = [];
+export const FUNCTION_LIST_LOGICAL: IFunctionInfo[] = [
+    {
+        functionName: FUNCTION_NAMES_LOGICAL.AND,
+        functionType: FunctionType.Logical,
+        description: 'formula.functionList.AND.description',
+        abstract: 'formula.functionList.AND.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.AND.functionParameter.number1.name',
+                detail: 'formula.functionList.AND.functionParameter.number1.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.AND.functionParameter.number2.name',
+                detail: 'formula.functionList.AND.functionParameter.number2.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_LOGICAL.BYCOL,
+        functionType: FunctionType.Logical,
+        description: 'formula.functionList.BYCOL.description',
+        abstract: 'formula.functionList.BYCOL.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.BYCOL.functionParameter.number1.name',
+                detail: 'formula.functionList.BYCOL.functionParameter.number1.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.BYCOL.functionParameter.number2.name',
+                detail: 'formula.functionList.BYCOL.functionParameter.number2.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_LOGICAL.BYROW,
+        functionType: FunctionType.Logical,
+        description: 'formula.functionList.BYROW.description',
+        abstract: 'formula.functionList.BYROW.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.BYROW.functionParameter.number1.name',
+                detail: 'formula.functionList.BYROW.functionParameter.number1.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.BYROW.functionParameter.number2.name',
+                detail: 'formula.functionList.BYROW.functionParameter.number2.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_LOGICAL.FALSE,
+        functionType: FunctionType.Logical,
+        description: 'formula.functionList.FALSE.description',
+        abstract: 'formula.functionList.FALSE.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.FALSE.functionParameter.number1.name',
+                detail: 'formula.functionList.FALSE.functionParameter.number1.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.FALSE.functionParameter.number2.name',
+                detail: 'formula.functionList.FALSE.functionParameter.number2.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_LOGICAL.IF,
+        functionType: FunctionType.Logical,
+        description: 'formula.functionList.IF.description',
+        abstract: 'formula.functionList.IF.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.IF.functionParameter.number1.name',
+                detail: 'formula.functionList.IF.functionParameter.number1.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.IF.functionParameter.number2.name',
+                detail: 'formula.functionList.IF.functionParameter.number2.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_LOGICAL.IFERROR,
+        functionType: FunctionType.Logical,
+        description: 'formula.functionList.IFERROR.description',
+        abstract: 'formula.functionList.IFERROR.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.IFERROR.functionParameter.number1.name',
+                detail: 'formula.functionList.IFERROR.functionParameter.number1.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.IFERROR.functionParameter.number2.name',
+                detail: 'formula.functionList.IFERROR.functionParameter.number2.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_LOGICAL.IFNA,
+        functionType: FunctionType.Logical,
+        description: 'formula.functionList.IFNA.description',
+        abstract: 'formula.functionList.IFNA.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.IFNA.functionParameter.number1.name',
+                detail: 'formula.functionList.IFNA.functionParameter.number1.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.IFNA.functionParameter.number2.name',
+                detail: 'formula.functionList.IFNA.functionParameter.number2.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_LOGICAL.IFS,
+        functionType: FunctionType.Logical,
+        description: 'formula.functionList.IFS.description',
+        abstract: 'formula.functionList.IFS.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.IFS.functionParameter.number1.name',
+                detail: 'formula.functionList.IFS.functionParameter.number1.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.IFS.functionParameter.number2.name',
+                detail: 'formula.functionList.IFS.functionParameter.number2.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_LOGICAL.LAMBDA,
+        functionType: FunctionType.Logical,
+        description: 'formula.functionList.LAMBDA.description',
+        abstract: 'formula.functionList.LAMBDA.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.LAMBDA.functionParameter.number1.name',
+                detail: 'formula.functionList.LAMBDA.functionParameter.number1.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.LAMBDA.functionParameter.number2.name',
+                detail: 'formula.functionList.LAMBDA.functionParameter.number2.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_LOGICAL.LET,
+        functionType: FunctionType.Logical,
+        description: 'formula.functionList.LET.description',
+        abstract: 'formula.functionList.LET.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.LET.functionParameter.number1.name',
+                detail: 'formula.functionList.LET.functionParameter.number1.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.LET.functionParameter.number2.name',
+                detail: 'formula.functionList.LET.functionParameter.number2.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_LOGICAL.MAKEARRAY,
+        functionType: FunctionType.Logical,
+        description: 'formula.functionList.MAKEARRAY.description',
+        abstract: 'formula.functionList.MAKEARRAY.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.MAKEARRAY.functionParameter.number1.name',
+                detail: 'formula.functionList.MAKEARRAY.functionParameter.number1.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.MAKEARRAY.functionParameter.number2.name',
+                detail: 'formula.functionList.MAKEARRAY.functionParameter.number2.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_LOGICAL.MAP,
+        functionType: FunctionType.Logical,
+        description: 'formula.functionList.MAP.description',
+        abstract: 'formula.functionList.MAP.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.MAP.functionParameter.number1.name',
+                detail: 'formula.functionList.MAP.functionParameter.number1.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.MAP.functionParameter.number2.name',
+                detail: 'formula.functionList.MAP.functionParameter.number2.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_LOGICAL.NOT,
+        functionType: FunctionType.Logical,
+        description: 'formula.functionList.NOT.description',
+        abstract: 'formula.functionList.NOT.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.NOT.functionParameter.number1.name',
+                detail: 'formula.functionList.NOT.functionParameter.number1.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.NOT.functionParameter.number2.name',
+                detail: 'formula.functionList.NOT.functionParameter.number2.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_LOGICAL.OR,
+        functionType: FunctionType.Logical,
+        description: 'formula.functionList.OR.description',
+        abstract: 'formula.functionList.OR.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.OR.functionParameter.number1.name',
+                detail: 'formula.functionList.OR.functionParameter.number1.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.OR.functionParameter.number2.name',
+                detail: 'formula.functionList.OR.functionParameter.number2.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_LOGICAL.REDUCE,
+        functionType: FunctionType.Logical,
+        description: 'formula.functionList.REDUCE.description',
+        abstract: 'formula.functionList.REDUCE.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.REDUCE.functionParameter.number1.name',
+                detail: 'formula.functionList.REDUCE.functionParameter.number1.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.REDUCE.functionParameter.number2.name',
+                detail: 'formula.functionList.REDUCE.functionParameter.number2.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_LOGICAL.SCAN,
+        functionType: FunctionType.Logical,
+        description: 'formula.functionList.SCAN.description',
+        abstract: 'formula.functionList.SCAN.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.SCAN.functionParameter.number1.name',
+                detail: 'formula.functionList.SCAN.functionParameter.number1.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.SCAN.functionParameter.number2.name',
+                detail: 'formula.functionList.SCAN.functionParameter.number2.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_LOGICAL.SWITCH,
+        functionType: FunctionType.Logical,
+        description: 'formula.functionList.SWITCH.description',
+        abstract: 'formula.functionList.SWITCH.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.SWITCH.functionParameter.number1.name',
+                detail: 'formula.functionList.SWITCH.functionParameter.number1.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.SWITCH.functionParameter.number2.name',
+                detail: 'formula.functionList.SWITCH.functionParameter.number2.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_LOGICAL.TRUE,
+        functionType: FunctionType.Logical,
+        description: 'formula.functionList.TRUE.description',
+        abstract: 'formula.functionList.TRUE.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.TRUE.functionParameter.number1.name',
+                detail: 'formula.functionList.TRUE.functionParameter.number1.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.TRUE.functionParameter.number2.name',
+                detail: 'formula.functionList.TRUE.functionParameter.number2.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_LOGICAL.XOR,
+        functionType: FunctionType.Logical,
+        description: 'formula.functionList.XOR.description',
+        abstract: 'formula.functionList.XOR.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.XOR.functionParameter.number1.name',
+                detail: 'formula.functionList.XOR.functionParameter.number1.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.XOR.functionParameter.number2.name',
+                detail: 'formula.functionList.XOR.functionParameter.number2.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+];

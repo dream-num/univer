@@ -14,4 +14,8 @@
  * limitations under the License.
  */
 
-export enum FUNCTION_NAMES_WEB {}
+export enum FUNCTION_NAMES_WEB {
+    ENCODEURL = 'ENCODEURL',
+    FILTERXML = 'FILTERXML',
+    WEBSERVICE = 'WEBSERVICE',
+}

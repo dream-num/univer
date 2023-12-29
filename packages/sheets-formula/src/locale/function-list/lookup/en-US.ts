@@ -16,7 +16,9 @@
 
 export default {
     ADDRESS: {
-        description: `Returns a reference as text to a single cell in a worksheet`,
+        description: `Obtain the address of a cell in a worksheet, given specified row and column numbers. For example, ADDRESS(2,3) returns $C$2. As another example, ADDRESS(77,300) returns $KN$77. You can use other functions, such as the ROW and COLUMN functions, to provide the row and column number arguments for the ADDRESS function.
+
+        `,
         abstract: `Returns a reference as text to a single cell in a worksheet`,
         links: [
             {
@@ -25,8 +27,26 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            row_num: {
+                name: 'row number',
+                detail: 'A numeric value that specifies the row number to use in the cell reference.',
+            },
+            column_num: {
+                name: 'column number',
+                detail: 'A numeric value that specifies the column number to use in the cell reference.',
+            },
+            abs_num: {
+                name: 'type of reference',
+                detail: 'A numeric value that specifies the type of reference to return.',
+            },
+            a1: {
+                name: 'style of reference',
+                detail: 'A logical value that specifies the A1 or R1C1 reference style. In A1 style, columns are labeled alphabetically, and rows are labeled numerically. In R1C1 reference style, both columns and rows are labeled numerically. If the A1 argument is TRUE or omitted, the ADDRESS function returns an A1-style reference; if FALSE, the ADDRESS function returns an R1C1-style reference.',
+            },
+            sheet_text: {
+                name: 'worksheet name',
+                detail: 'A text value that specifies the name of the worksheet to be used as the external reference. For example, the formula =ADDRESS(1,1,,,"Sheet2") returns Sheet2!$A$1. If the sheet_text argument is omitted, no sheet name is used, and the address returned by the function refers to a cell on the current sheet.',
+            },
         },
     },
     AREAS: {

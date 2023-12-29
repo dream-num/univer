@@ -18,7 +18,7 @@ import { Direction, FOCUSING_FORMULA_EDITOR, IContextService } from '@univerjs/c
 import { Popup } from '@univerjs/design';
 import { ICellEditorManagerService, IFormulaEditorManagerService } from '@univerjs/sheets-ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import type { ISearchItem } from '../../../services/description.service';
 import type { INavigateParam, ISearchFunctionOperationParams } from '../../../services/prompt.service';
@@ -31,6 +31,7 @@ export function SearchFunction() {
     const [offset, setOffset] = useState<[number, number]>([0, 0]);
     const [searchList, setSearchList] = useState<ISearchItem[]>([]);
     const [searchText, setSearchText] = useState<string>('');
+    const ulRef = useRef<HTMLUListElement>(null);
     const promptService = useDependency(IFormulaPromptService);
     const cellEditorManagerService = useDependency(ICellEditorManagerService);
     const formulaEditorManagerService = useDependency(IFormulaEditorManagerService);
@@ -81,6 +82,8 @@ export function SearchFunction() {
                 setActive(nextActive);
                 updatedActive = nextActive;
             }
+
+            scrollToVisible(updatedActive);
         });
 
         const subscribeAccept = promptService.accept$.subscribe((params: boolean) => {
@@ -103,9 +106,47 @@ export function SearchFunction() {
         setActive(-1);
     }
 
+    function scrollToVisible(liIndex: number) {
+        // Get the <li> element
+        const liElement = ulRef.current?.querySelectorAll(`.${styles.formulaSearchFunctionItem}`)[
+            liIndex
+        ] as HTMLLIElement;
+
+        if (!liElement) return;
+
+        // Get the <ul> element
+        const ulElement = liElement.parentNode as HTMLUListElement;
+
+        if (!ulElement) return;
+
+        // Get the height of the <ul> element
+        const ulRect = ulElement.getBoundingClientRect();
+        const ulTop = ulRect.top;
+        const ulHeight = ulElement.offsetHeight;
+
+        // Get the position and height of the <li> element
+        const liRect = liElement.getBoundingClientRect();
+        const liTop = liRect.top;
+        const liHeight = liRect.height;
+
+        // If the <li> element is within the visible area, no scrolling operation is performed
+        if (liTop >= 0 && liTop > ulTop && liTop - ulTop + liHeight <= ulHeight) {
+            return;
+        }
+
+        // Calculate scroll position
+        const scrollTo = liElement.offsetTop - (ulHeight - liHeight) / 2;
+
+        // Perform scrolling operation
+        ulElement.scrollTo({
+            top: scrollTo,
+            behavior: 'smooth',
+        });
+    }
+
     return (
         <Popup visible={visible} offset={offset}>
-            <ul className={styles.formulaSearchFunction}>
+            <ul className={styles.formulaSearchFunction} ref={ulRef}>
                 {searchList.map((item, index) => (
                     <li
                         key={index}

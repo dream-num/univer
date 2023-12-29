@@ -80,6 +80,7 @@ export default {
             web: 'Web',
             array: 'Array',
             univer: 'Univer',
+            user: 'User Defined',
         },
         moreFunctions: {
             confirm: 'Confirm',

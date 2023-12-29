@@ -227,11 +227,13 @@ export class EndEditController extends Disposable {
                 if (body.dataStream === '\r\n') {
                     cellData.v = '';
                     cellData.f = null;
+                    cellData.si = null;
                     cellData.p = null;
                 } else {
                     cellData.p = snapshot;
                     cellData.v = null;
                     cellData.f = null;
+                    cellData.si = null;
                 }
             } else {
                 // eslint-disable-next-line
@@ -240,6 +242,7 @@ export class EndEditController extends Disposable {
                 }
                 cellData.v = newDataStream;
                 cellData.f = null;
+                cellData.si = null;
                 cellData.p = null;
             }
 

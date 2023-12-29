@@ -16,7 +16,7 @@
 
 export default {
     ADDRESS: {
-        description: `ワークシート上のセル参照を文字列として返します。`,
+        description: `ADDRESS 関数を使うと、行番号と列番号を指定して、ワークシート内のセルのアドレスを取得できます。 たとえば、ADDRESS(2,3) は $C$2 を返します。 また、ADDRESS(77,300) は $KN$77 を返します。 ROW 関数や COLUMN 関数などの他の関数を使って、ADDRESS 関数の行番号と列番号の引数を指定できます。`,
         abstract: `ワークシート上のセル参照を文字列として返します。`,
         links: [
             {
@@ -25,8 +25,17 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            row_num: { name: '行番号', detail: 'セル参照に使用する行番号を指定する数値。' },
+            column_num: { name: '列番号', detail: 'セル参照に使用する列番号を指定する数値。' },
+            abs_num: { name: '参照の型', detail: '返される参照の種類を指定する数値。' },
+            a1: {
+                name: '参照形式',
+                detail: 'A1 または R1C1 参照スタイルを指定する論理値。 A1 スタイルでは、列はアルファベット順にラベル付けされ、行は数値でラベル付けされます。 R1C1 参照スタイルでは、列と行の両方に数値ラベルが付けされます。 A1 引数が TRUE または省略された場合 、ADDRESS 関数は A1 スタイルの参照を返します。FALSE の場合 、ADDRESS 関数 は R1C1 スタイルの参照を返します。',
+            },
+            sheet_text: {
+                name: 'ワークシート名',
+                detail: '外部参照として使用するワークシートの名前を指定するテキスト値。 たとえば、数式 =ADDRESS(1,1,,,"Sheet2") は Sheet2!$A $1 を返します。 sheet_text 引数 を 省略した場合、シート名は使用されません。関数によって返されるアドレスは、現在のシート上のセルを参照します。',
+            },
         },
     },
     AREAS: {

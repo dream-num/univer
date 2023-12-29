@@ -99,20 +99,6 @@ export default {
             number2: { name: 'number2', detail: 'second' },
         },
     },
-    CONCATENATE: {
-        description: `Joins two or more text strings into one string`,
-        abstract: `Joins two or more text strings into one string`,
-        links: [
-            {
-                title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/concatenate-function-8f8ae884-2ca8-4f7a-b093-75d702bea31d',
-            },
-        ],
-        functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
-        },
-    },
     CONFIDENCE: {
         description: `Returns the confidence interval for a population mean`,
         abstract: `Returns the confidence interval for a population mean`,
@@ -190,34 +176,6 @@ export default {
             {
                 title: 'Instruction',
                 url: 'https://support.microsoft.com/en-us/office/finv-function-4d46c97c-c368-4852-bc15-41e8e31140b1',
-            },
-        ],
-        functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
-        },
-    },
-    FLOOR: {
-        description: `Rounds a number down, toward zero`,
-        abstract: `Rounds a number down, toward zero`,
-        links: [
-            {
-                title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/floor-function-14bb497c-24f2-4e04-b327-b0b4de5a8886',
-            },
-        ],
-        functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
-        },
-    },
-    FORECAST: {
-        description: `Calculates, or predicts, a future value by using existing values.`,
-        abstract: `Calculates, or predicts, a future value by using existing values.`,
-        links: [
-            {
-                title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/forecast-and-forecast-linear-functions-50ca49c9-7b40-4892-94e4-7ad38bbeda99',
             },
         ],
         functionParameter: {

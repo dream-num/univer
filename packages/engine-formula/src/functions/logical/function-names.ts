@@ -14,4 +14,24 @@
  * limitations under the License.
  */
 
-export enum FUNCTION_NAMES_LOGICAL {}
+export enum FUNCTION_NAMES_LOGICAL {
+    AND = 'AND',
+    BYCOL = 'BYCOL',
+    BYROW = 'BYROW',
+    FALSE = 'FALSE',
+    IF = 'IF',
+    IFERROR = 'IFERROR',
+    IFNA = 'IFNA',
+    IFS = 'IFS',
+    LAMBDA = 'LAMBDA',
+    LET = 'LET',
+    MAKEARRAY = 'MAKEARRAY',
+    MAP = 'MAP',
+    NOT = 'NOT',
+    OR = 'OR',
+    REDUCE = 'REDUCE',
+    SCAN = 'SCAN',
+    SWITCH = 'SWITCH',
+    TRUE = 'TRUE',
+    XOR = 'XOR',
+}

@@ -14,4 +14,26 @@
  * limitations under the License.
  */
 
-export enum FUNCTION_NAMES_INFORMATION {}
+export enum FUNCTION_NAMES_INFORMATION {
+    CELL = 'CELL',
+    ERROR_TYPE = 'ERROR.TYPE',
+    INFO = 'INFO',
+    ISBLANK = 'ISBLANK',
+    ISERR = 'ISERR',
+    ISERROR = 'ISERROR',
+    ISEVEN = 'ISEVEN',
+    ISFORMULA = 'ISFORMULA',
+    ISLOGICAL = 'ISLOGICAL',
+    ISNA = 'ISNA',
+    ISNONTEXT = 'ISNONTEXT',
+    ISNUMBER = 'ISNUMBER',
+    ISODD = 'ISODD',
+    ISOMITTED = 'ISOMITTED',
+    ISREF = 'ISREF',
+    ISTEXT = 'ISTEXT',
+    N = 'N',
+    NA = 'NA',
+    SHEET = 'SHEET',
+    SHEETS = 'SHEETS',
+    TYPE = 'TYPE',
+}

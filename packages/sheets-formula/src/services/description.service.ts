@@ -16,7 +16,25 @@
 
 import { LocaleService } from '@univerjs/core';
 import type { IFunctionInfo, IFunctionNames } from '@univerjs/engine-formula';
-import { IFunctionService } from '@univerjs/engine-formula';
+import {
+    functionCompatibility,
+    functionCube,
+    functionDatabase,
+    functionDate,
+    functionEngineering,
+    functionFinancial,
+    functionInformation,
+    functionLogical,
+    functionLookup,
+    functionMath,
+    functionMeta,
+    functionStatistical,
+    functionText,
+    functionUniver,
+    functionWeb,
+    IFunctionService,
+} from '@univerjs/engine-formula';
+import { functionArray } from '@univerjs/engine-formula/functions/array/function-map.js';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier, Inject } from '@wendellhu/redi';
 
@@ -143,7 +161,32 @@ export class DescriptionService implements IDescriptionService, IDisposable {
 
     private _registerDescription() {
         const localeService = this._localeService;
-        const functionList = FUNCTION_LIST.concat(this._description || []);
+
+        // TODO@Dushusir: Remove filtering after all formulas have been implemented
+        const functions = [
+            ...functionArray,
+            ...functionCompatibility,
+            ...functionCube,
+            ...functionDatabase,
+            ...functionDate,
+            ...functionEngineering,
+            ...functionFinancial,
+            ...functionInformation,
+            ...functionLogical,
+            ...functionLookup,
+            ...functionMath,
+            ...functionMeta,
+            ...functionStatistical,
+            ...functionText,
+            ...functionUniver,
+            ...functionWeb,
+        ].map((item) => item[1]) as IFunctionNames[];
+
+        const filterFunctionList = FUNCTION_LIST.filter((item) => {
+            return functions.includes(item.functionName as IFunctionNames);
+        });
+
+        const functionList = filterFunctionList.concat(this._description || []);
         const functionListLocale = functionList.map((functionInfo) => ({
             functionName: getFunctionName(functionInfo, localeService),
             functionType: functionInfo.functionType,

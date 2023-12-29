@@ -227,15 +227,26 @@ export class HeaderMoveController extends Disposable {
 
                 scene.disableEvent();
 
-                const scrollTimer = ScrollTimer.create(scene, scrollType);
+                let scrollTimerInitd = false;
+                let scrollTimer: ScrollTimer;
 
-                const mainViewport = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+                const initScrollTimer = () => {
+                    if (scrollTimerInitd) {
+                        return;
+                    }
 
-                scrollTimer.startScroll(newEvtOffsetX, newEvtOffsetY, mainViewport);
+                    scrollTimer = ScrollTimer.create(scene, scrollType);
 
-                this._scrollTimer = scrollTimer;
+                    const mainViewport = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+
+                    scrollTimer.startScroll(newEvtOffsetX, newEvtOffsetY, mainViewport);
+
+                    this._scrollTimer = scrollTimer;
+                    scrollTimerInitd = true;
+                };
 
                 this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
+                    initScrollTimer();
                     const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
 
                     const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeCoord(

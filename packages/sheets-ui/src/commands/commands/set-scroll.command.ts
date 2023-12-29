@@ -96,11 +96,13 @@ export const ScrollCommand: ICommand<IScrollCommandParams> = {
             offsetY: currentOffsetY,
         } = currentScroll || {};
 
+        const { xSplit, ySplit } = currentWorksheet.getConfig().freeze;
+
         return commandService.executeCommand(SetScrollOperation.id, {
             unitId: currentWorkbook.getUnitId(),
             sheetId: currentWorksheet.getSheetId(),
-            sheetViewStartRow: sheetViewStartRow ?? currentRow,
-            sheetViewStartColumn: sheetViewStartColumn ?? currentColumn,
+            sheetViewStartRow: sheetViewStartRow ?? (currentRow ?? 0) + ySplit,
+            sheetViewStartColumn: sheetViewStartColumn ?? (currentColumn ?? 0) + xSplit,
             offsetX: offsetX ?? currentOffsetX,
             offsetY: offsetY ?? currentOffsetY,
         });

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IStyleSheet, IWorksheetData, Nullable, Observer } from '@univerjs/core';
+import type { ICommandInfo, IFreeze, IStyleSheet, IWorksheetData, Nullable, Observer } from '@univerjs/core';
 import {
     ColorKit,
     Disposable,
@@ -55,6 +55,13 @@ import { getCoordByOffset, getSheetObject } from './utils/component-tools';
 enum FREEZE_DIRECTION_TYPE {
     ROW,
     COLUMN,
+}
+
+enum ResetScrollType {
+    NONE = 0,
+    X = 1,
+    Y = 2,
+    ALL = 3,
 }
 
 const FREEZE_ROW_MAIN_NAME = '__SpreadsheetFreezeRowMainName__';
@@ -108,6 +115,8 @@ export class FreezeController extends Disposable {
     private _freezeActiveColor = '';
 
     private _freezeHoverColor = '';
+
+    private _lastFreeze: IFreeze | undefined = undefined;
 
     constructor(
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
@@ -598,7 +607,7 @@ export class FreezeController extends Disposable {
         column: number = -1,
         ySplit: number = 0,
         xSplit: number = 0,
-        resetScroll = true
+        resetScroll = ResetScrollType.ALL
     ) {
         const sheetObject = this._getSheetObject();
         if (sheetObject == null) {
@@ -726,7 +735,7 @@ export class FreezeController extends Disposable {
         viewRowTop.resetPadding();
         viewColumnLeft.resetPadding();
 
-        const currentScroll = this._scrollManagerService.getCurrentScroll();
+        // const currentScroll = this._scrollManagerService.getCurrentScroll();
 
         // cancel freeze
         if (isTopView === false && isLeftView === false) {
@@ -738,17 +747,17 @@ export class FreezeController extends Disposable {
             });
             viewMain.resetPadding();
 
-            if (resetScroll) {
-                this._commandService.executeCommand(
-                    ScrollCommand.id,
-                    currentScroll ?? {
-                        sheetViewStartRow: 0,
-                        sheetViewStartColumn: 0,
-                        offsetX: 0,
-                        offsetY: 0,
-                    }
-                );
-            }
+            // if (resetScroll) {
+            //     this._commandService.executeCommand(
+            //         ScrollCommand.id,
+            //         currentScroll ?? {
+            //             sheetViewStartRow: 0,
+            //             sheetViewStartColumn: 0,
+            //             offsetX: 0,
+            //             offsetY: 0,
+            //         }
+            //     );
+            // }
         } else if (isTopView === true && isLeftView === false) {
             // freeze row
             const topGap = endSheetView.startY - startSheetView.startY;
@@ -765,7 +774,7 @@ export class FreezeController extends Disposable {
                 endX: 0,
             });
 
-            if (resetScroll) {
+            if (resetScroll & ResetScrollType.Y) {
                 this._commandService.executeCommand(ScrollCommand.id, {
                     sheetViewStartRow: 0,
                     offsetY: 0,
@@ -834,7 +843,7 @@ export class FreezeController extends Disposable {
                 endY: 0,
             });
 
-            if (resetScroll) {
+            if (resetScroll & ResetScrollType.X) {
                 this._commandService.executeCommand(ScrollCommand.id, {
                     sheetViewStartColumn: 0,
                     offsetX: 0,
@@ -906,10 +915,18 @@ export class FreezeController extends Disposable {
 
             if (resetScroll) {
                 this._commandService.executeCommand(ScrollCommand.id, {
-                    sheetViewStartRow: 0,
-                    sheetViewStartColumn: 0,
-                    offsetX: 0,
-                    offsetY: 0,
+                    ...(resetScroll & ResetScrollType.X
+                        ? {
+                              sheetViewStartColumn: 0,
+                              offsetX: 0,
+                          }
+                        : null),
+                    ...(resetScroll & ResetScrollType.Y
+                        ? {
+                              sheetViewStartRow: 0,
+                              offsetY: 0,
+                          }
+                        : null),
                 });
             }
 
@@ -1066,7 +1083,7 @@ export class FreezeController extends Disposable {
 
         const { startRow = -1, startColumn = -1, ySplit = 0, xSplit = 0 } = freeze;
 
-        this._refreshFreeze(startRow, startColumn, ySplit, xSplit, false);
+        this._refreshFreeze(startRow, startColumn, ySplit, xSplit, ResetScrollType.NONE);
     }
 
     private _themeChangeListener() {
@@ -1100,6 +1117,7 @@ export class FreezeController extends Disposable {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (updateCommandList.includes(command.id)) {
+                    const lastFreeze = this._lastFreeze;
                     const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
                     const worksheet = workbook.getActiveSheet();
 
@@ -1110,14 +1128,25 @@ export class FreezeController extends Disposable {
                     }
 
                     const freeze = worksheet.getConfig().freeze;
+                    this._lastFreeze = freeze;
 
                     if (freeze == null) {
                         return;
                     }
 
-                    const { startRow = -1, startColumn = -1, ySplit = 0, xSplit = 0 } = worksheet.getConfig().freeze;
+                    let resetScroll = ResetScrollType.NONE;
 
-                    this._refreshFreeze(startRow, startColumn, ySplit, xSplit);
+                    const { startRow = -1, startColumn = -1, ySplit = 0, xSplit = 0 } = freeze;
+
+                    if (!lastFreeze || lastFreeze.startRow !== startRow || lastFreeze.ySplit !== ySplit) {
+                        resetScroll |= ResetScrollType.Y;
+                    }
+
+                    if (!lastFreeze || lastFreeze.startColumn !== startColumn || lastFreeze.xSplit !== xSplit) {
+                        resetScroll |= ResetScrollType.X;
+                    }
+
+                    this._refreshFreeze(startRow, startColumn, ySplit, xSplit, resetScroll);
                 } else if (command.id === DeltaRowHeightCommand.id) {
                     const freeze = this._getFreeze();
                     if (
@@ -1240,7 +1269,7 @@ export class FreezeController extends Disposable {
         startColumn: number,
         ySplit: number,
         xSplit: number,
-        resetScroll?: boolean
+        resetScroll?: ResetScrollType
     ) {
         this._clearFreeze();
 

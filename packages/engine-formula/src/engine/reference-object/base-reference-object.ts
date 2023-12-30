@@ -53,10 +53,6 @@ export class BaseReferenceObject extends ObjectClassType {
 
     private _unitData: IUnitData = {};
 
-    private _rowCount: number = 0;
-
-    private _columnCount: number = 0;
-
     private _defaultUnitId: string = '';
 
     private _forcedUnitId: string = '';
@@ -101,20 +97,20 @@ export class BaseReferenceObject extends ObjectClassType {
         let startColumn = this._rangeData.startColumn;
         let endColumn = this._rangeData.endColumn;
 
-        if (startRow === -1) {
+        if (isNaN(startRow)) {
             startRow = 0;
         }
 
-        if (startColumn === -1) {
+        if (isNaN(startColumn)) {
             startColumn = 0;
         }
 
-        if (endRow === -1) {
-            endRow = this._rowCount - 1;
+        if (isNaN(endRow)) {
+            endRow = this.getRowCount() - 1;
         }
 
-        if (endColumn === -1) {
-            endColumn = this._columnCount - 1;
+        if (isNaN(endColumn)) {
+            endColumn = this.getColumnCount() - 1;
         }
 
         return {

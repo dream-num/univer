@@ -140,6 +140,8 @@ export interface IFormulaDatasetConfig {
     dirtyNameMap: IDirtyUnitSheetNameMap;
     dirtyUnitFeatureMap: IDirtyUnitFeatureMap;
     excludedCell?: IUnitExcludedCell;
+    allUnitData?: IUnitData;
+    unitSheetNameMap?: IUnitSheetNameMap;
 }
 
 export enum ConcatenateType {

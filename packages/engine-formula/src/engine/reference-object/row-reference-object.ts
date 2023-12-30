@@ -28,9 +28,9 @@ export class RowReferenceObject extends BaseReferenceObject {
         this.setForcedUnitIdDirect(grid.unitId);
         this.setForcedSheetName(grid.sheetName);
         const range: IRange = {
-            startColumn: -1,
+            startColumn: NaN,
             startRow: grid.range.startRow,
-            endColumn: -1,
+            endColumn: NaN,
             endRow: -1,
         };
         this.setRangeData(range);
@@ -46,15 +46,15 @@ export class RowReferenceObject extends BaseReferenceObject {
         }
 
         const rowReferenceObject = referenceObject as RowReferenceObject;
-        if (rowReferenceObject.getForcedSheetName() !== undefined) {
+        if (rowReferenceObject.getForcedSheetName() !== undefined && rowReferenceObject.getForcedSheetName() !== '') {
             return ErrorValueObject.create(ErrorType.REF);
         }
 
         const currentRangeData = this.getRangeData();
 
-        if (currentRangeData.endRow !== -1) {
-            return ErrorValueObject.create(ErrorType.REF);
-        }
+        // if (currentRangeData.endRow !== -1) {
+        //     return ErrorValueObject.create(ErrorType.REF);
+        // }
 
         const newRow = rowReferenceObject.getRangeData().startRow;
 

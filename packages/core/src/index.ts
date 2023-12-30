@@ -91,6 +91,7 @@ export {
     UndoCommand,
 } from './services/undoredo/undoredo.service';
 export * from './shared';
+export { deserializeRangeForR1C1 } from './sheets/r1c1-reference';
 
 // #region sheet
 export type { IComposeInterceptors, IInterceptor, InterceptorHandler } from './common/interceptor';
@@ -106,6 +107,7 @@ export {
     serializeRangeToRefString,
     serializeRangeWithSheet,
     serializeRangeWithSpreadsheet,
+    UNIT_NAME_REGEX,
 } from './sheets/reference';
 export { Styles } from './sheets/styles';
 export { SheetViewModel } from './sheets/view-model';

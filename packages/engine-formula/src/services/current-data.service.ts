@@ -134,15 +134,20 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
     }
 
     load(config: IFormulaDatasetConfig) {
-        const { allUnitData, unitSheetNameMap } = this._loadSheetData();
+        if (config.allUnitData && config.unitSheetNameMap) {
+            this._unitData = config.allUnitData;
+            this._sheetNameMap = config.unitSheetNameMap;
+        } else {
+            const { allUnitData, unitSheetNameMap } = this._loadSheetData();
 
-        this._unitData = allUnitData;
+            this._unitData = allUnitData;
+
+            this._sheetNameMap = unitSheetNameMap;
+        }
 
         this._formulaData = config.formulaData;
 
         this._arrayFormulaCellData = convertUnitDataToRuntime(config.arrayFormulaCellData);
-
-        this._sheetNameMap = unitSheetNameMap;
 
         this._forceCalculate = config.forceCalculate;
 

@@ -20,8 +20,8 @@ import { getColorStyle } from '@univerjs/core';
 import { BORDER_TYPE, COLOR_BLACK_RGB, FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics/const';
 import { drawLineByBorderType, getLineWidth, setLineType } from '../../../basics/draw';
 import type { IDocumentSkeletonSpan } from '../../../basics/i-document-skeleton-cached';
-import { fixLineWidthByScale } from '../../../basics/tools';
 import { Vector2 } from '../../../basics/vector2';
+import type { UniverContext } from '../../../context';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
 import { docExtension } from '../doc-extension';
 
@@ -36,7 +36,7 @@ export class Border extends docExtension {
 
     private _preBorderColor = '';
 
-    override draw(ctx: CanvasRenderingContext2D, parentScale: IScale, span: IDocumentSkeletonSpan) {
+    override draw(ctx: UniverContext, parentScale: IScale, span: IDocumentSkeletonSpan) {
         const line = span.parent?.parent;
         if (!line) {
             return;
@@ -58,7 +58,7 @@ export class Border extends docExtension {
 
         ctx.save();
 
-        ctx.translate(FIX_ONE_PIXEL_BLUR_OFFSET / scale, FIX_ONE_PIXEL_BLUR_OFFSET / scale);
+        ctx.translateWithPrecisionRatio(FIX_ONE_PIXEL_BLUR_OFFSET, FIX_ONE_PIXEL_BLUR_OFFSET);
 
         const { spanStartPoint = Vector2.create(0, 0) } = this.extensionOffset;
 
@@ -72,7 +72,7 @@ export class Border extends docExtension {
 
             if (style !== this._preBorderStyle) {
                 setLineType(ctx, style);
-                ctx.lineWidth = getLineWidth(style) / scale;
+                ctx.lineWidth = getLineWidth(style);
                 this._preBorderStyle = style;
             }
 
@@ -82,10 +82,10 @@ export class Border extends docExtension {
             }
 
             drawLineByBorderType(ctx, type as BORDER_TYPE, {
-                startX: fixLineWidthByScale(spanStartPoint.x, scale),
-                startY: fixLineWidthByScale(spanStartPoint.y, scale),
-                endX: fixLineWidthByScale(spanStartPoint.x + spanWidth, scale),
-                endY: fixLineWidthByScale(spanStartPoint.y + lineHeight, scale),
+                startX: spanStartPoint.x,
+                startY: spanStartPoint.y,
+                endX: spanStartPoint.x + spanWidth,
+                endY: spanStartPoint.y + lineHeight,
             });
         }
 

@@ -17,13 +17,7 @@
 import type { IRangeWithCoord, ISelectionCellWithCoord, Nullable, ThemeService } from '@univerjs/core';
 import { ColorKit, RANGE_TYPE } from '@univerjs/core';
 import type { Scene } from '@univerjs/engine-render';
-import {
-    DEFAULT_SELECTION_LAYER_INDEX,
-    FIX_ONE_PIXEL_BLUR_OFFSET,
-    fixLineWidthByScale,
-    Group,
-    Rect,
-} from '@univerjs/engine-render';
+import { DEFAULT_SELECTION_LAYER_INDEX, FIX_ONE_PIXEL_BLUR_OFFSET, Group, Rect } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISelectionWidgetConfig, ISelectionWithCoordAndStyle } from '@univerjs/sheets';
 import {
     getNormalSelectionStyle,
@@ -378,7 +372,7 @@ export class SelectionShape {
      * inner update
      */
     private _updateControl(style: Nullable<ISelectionStyle>, rowHeaderWidth: number, columnHeaderHeight: number) {
-        let { startX, startY, endX, endY } = this._selectionModel;
+        const { startX, startY, endX, endY } = this._selectionModel;
         const defaultStyle = this._defaultStyle;
         if (style == null) {
             style = defaultStyle;
@@ -402,16 +396,11 @@ export class SelectionShape {
 
         const scale = this._getScale();
 
-        startX = fixLineWidthByScale(startX, scale);
-        startY = fixLineWidthByScale(startY, scale);
-        endX = fixLineWidthByScale(endX, scale);
-        endY = fixLineWidthByScale(endY, scale);
-
         const leftAdjustWidth = (strokeWidth + SELECTION_CONTROL_BORDER_BUFFER_WIDTH) / 2 / scale;
 
-        strokeWidth /= this._getPureScale();
+        strokeWidth /= scale;
         AutofillSize /= scale;
-        AutofillStrokeWidth /= scale;
+        AutofillStrokeWidth /= scale < 1 ? 1 : scale;
 
         // const selectBorderOffsetFix = SELECTION_BORDER_OFFSET_FIX / scale;
 
@@ -493,12 +482,13 @@ export class SelectionShape {
             this.fillControl.setProps({
                 fill: stroke,
                 stroke: AutofillStroke,
+                strokeScaleEnabled: false,
             });
             this.fillControl.transformByState({
                 width: AutofillSize - AutofillStrokeWidth,
                 height: AutofillSize - AutofillStrokeWidth,
-                left: endX - startX - AutofillSize / 2,
-                top: endY - startY - AutofillSize / 2,
+                left: endX - startX - AutofillSize / 2 + AutofillStrokeWidth / 2,
+                top: endY - startY - AutofillSize / 2 + AutofillStrokeWidth / 2,
                 strokeWidth: AutofillStrokeWidth,
             });
             this.fillControl.show();
@@ -508,7 +498,7 @@ export class SelectionShape {
 
         this._updateBackgroundControl(style);
 
-        this._updateBackgroundTitle(style, fixLineWidthByScale(rowHeaderWidth, scale), columnHeaderHeight);
+        this._updateBackgroundTitle(style, rowHeaderWidth, columnHeaderHeight);
 
         this._updateWidgets(style);
 
@@ -791,7 +781,7 @@ export class SelectionShape {
     }
 
     private _updateBackgroundControl(style: Nullable<ISelectionStyle>) {
-        let { startX, startY, endX, endY } = this._selectionModel;
+        const { startX, startY, endX, endY } = this._selectionModel;
 
         const defaultStyle = this._defaultStyle;
 
@@ -809,11 +799,6 @@ export class SelectionShape {
 
         const highlightSelection = this._selectionModel.highlightToSelection();
 
-        startX = fixLineWidthByScale(startX, scale);
-        startY = fixLineWidthByScale(startY, scale);
-        endX = fixLineWidthByScale(endX, scale);
-        endY = fixLineWidthByScale(endY, scale);
-
         if (!highlightSelection) {
             this._backgroundControlTop.resize(endX - startX, endY - startY);
             this._backgroundControlTop.setProps({ fill });
@@ -823,14 +808,9 @@ export class SelectionShape {
             return;
         }
 
-        let { startX: h_startX, startY: h_startY, endX: h_endX, endY: h_endY } = highlightSelection;
+        const { startX: h_startX, startY: h_startY, endX: h_endX, endY: h_endY } = highlightSelection;
 
-        h_startX = fixLineWidthByScale(h_startX, scale);
-        h_startY = fixLineWidthByScale(h_startY, scale);
-        h_endX = fixLineWidthByScale(h_endX, scale);
-        h_endY = fixLineWidthByScale(h_endY, scale);
-
-        const strokeOffset = fixLineWidthByScale(strokeWidth / 2, scale);
+        const strokeOffset = strokeWidth / 2;
 
         const topConfig = {
             left: -strokeOffset,
@@ -910,12 +890,12 @@ export class SelectionShape {
         widgetStrokeWidth /= scale;
 
         const position = {
-            left: -widgetSize / 2,
-            center: (endX - startX) / 2 - widgetSize / 2,
-            right: endX - startX - widgetSize / 2,
+            left: -widgetSize / 2 + widgetStrokeWidth / 2,
+            center: (endX - startX) / 2 - widgetSize / 2 + widgetStrokeWidth / 2,
+            right: endX - startX - widgetSize / 2 + widgetStrokeWidth / 2,
             top: -widgetSize / 2,
             middle: (endY - startY) / 2 - widgetSize / 2,
-            bottom: endY - startY - widgetSize / 2,
+            bottom: endY - startY - widgetSize / 2 + widgetStrokeWidth / 2,
         };
 
         const size = widgetSize - widgetStrokeWidth;
@@ -1061,17 +1041,7 @@ export class SelectionShape {
     }
 
     private _getScale() {
-        const pixelRatio = this._getPixelRatio();
-        const { scaleX, scaleY } = this._scene.getAncestorScale();
-        return Math.max(scaleX * pixelRatio, scaleY * pixelRatio);
-    }
-
-    private _getPureScale() {
         const { scaleX, scaleY } = this._scene.getAncestorScale();
         return Math.max(scaleX, scaleY);
-    }
-
-    private _getPixelRatio() {
-        return this._scene.getEngine()?.getPixelRatio() || 1;
     }
 }

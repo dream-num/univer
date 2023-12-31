@@ -71,8 +71,7 @@ export function getSheetObject(
 }
 
 export function getCoordByCell(row: number, col: number, scene: Scene, skeleton: SpreadsheetSkeleton) {
-    const { scaleX, scaleY } = scene.getAncestorScale();
-    const { startX, startY, endX, endY } = skeleton.getCellByIndex(row, col, scaleX, scaleY);
+    const { startX, startY, endX, endY } = skeleton.getCellByIndex(row, col);
     return { startX, startY, endX, endY };
 }
 
@@ -101,7 +100,7 @@ export function getCoordByOffset(
 
     const { row, column } = moveActualSelection;
 
-    const startCell = skeleton.getNoMergeCellPositionByIndex(row, column, scaleX, scaleY);
+    const startCell = skeleton.getNoMergeCellPositionByIndex(row, column);
 
     const { startX, startY, endX, endY } = startCell;
 

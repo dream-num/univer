@@ -25,6 +25,7 @@ import { fixLineWidthByScale, toPx } from './basics/tools';
 import { Transform } from './basics/transform';
 import type { IBoundRectNoAngle, IViewportBound } from './basics/vector2';
 import { Vector2 } from './basics/vector2';
+import type { UniverContext } from './context';
 import type { BaseScrollBar } from './shape/base-scroll-bar';
 import type { ThinScene } from './thin-scene';
 
@@ -528,7 +529,7 @@ export class Viewport {
         return composeResult;
     }
 
-    render(parentCtx?: CanvasRenderingContext2D, objects: BaseObject[] = [], isMaxLayer = false) {
+    render(parentCtx?: UniverContext, objects: BaseObject[] = [], isMaxLayer = false) {
         if (
             this.isActive === false ||
             this.width == null ||
@@ -538,7 +539,7 @@ export class Viewport {
         ) {
             return;
         }
-        const mainCtx = parentCtx || (this._scene.getEngine()?.getCanvas().getContext() as CanvasRenderingContext2D);
+        const mainCtx = parentCtx || (this._scene.getEngine()?.getCanvas().getContext() as UniverContext);
 
         const sceneTrans = this._scene.transform.clone();
 
@@ -1092,7 +1093,7 @@ export class Viewport {
         });
     }
 
-    private _drawScrollbar(ctx: CanvasRenderingContext2D) {
+    private _drawScrollbar(ctx: UniverContext) {
         if (!this._scrollBar) {
             return;
         }

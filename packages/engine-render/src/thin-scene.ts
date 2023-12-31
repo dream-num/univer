@@ -24,6 +24,7 @@ import type { IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './
 import type { ITransformChangeState } from './basics/interfaces';
 import { Transform } from './basics/transform';
 import type { IViewportBound, Vector2 } from './basics/vector2';
+import type { UniverContext } from './context';
 
 export abstract class ThinScene {
     onTransformChangeObservable = new Observable<ITransformChangeState>();
@@ -178,9 +179,9 @@ export abstract class ThinScene {
 
     triggerPointerEnter(evt: IPointerEvent | IMouseEvent) {}
 
-    renderObjects(ctx: CanvasRenderingContext2D, bounds?: IViewportBound) {}
+    renderObjects(ctx: UniverContext, bounds?: IViewportBound) {}
 
-    render(parentCtx?: CanvasRenderingContext2D) {}
+    render(parentCtx?: UniverContext) {}
 
     getParent(): any {}
 
@@ -215,6 +216,13 @@ export abstract class ThinScene {
     removeViewport(key: string) {}
 
     getAncestorScale() {
+        return {
+            scaleX: 1,
+            scaleY: 1,
+        };
+    }
+
+    getPrecisionScale() {
         return {
             scaleX: 1,
             scaleY: 1,

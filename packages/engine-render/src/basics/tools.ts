@@ -27,6 +27,7 @@ import type {
 import { BaselineOffset, FontStyleType, Tools } from '@univerjs/core';
 import * as cjk from 'cjk-regex';
 
+import type { UniverContext } from '../context';
 import { DEFAULT_FONTFACE_PLANE } from './const';
 import { FontCache } from './font-cache';
 import type { IBoundRectNoAngle } from './vector2';
@@ -333,7 +334,7 @@ export function getFontStyleString(textStyle?: IStyleBase, localeService?: Local
     };
 }
 
-export function isSupportBoundingBox(ctx: CanvasRenderingContext2D) {
+export function isSupportBoundingBox(ctx: UniverContext) {
     const measureText = ctx.measureText('田');
     if (measureText.actualBoundingBoxAscent == null) {
         return false;
@@ -653,13 +654,7 @@ export function hasUnMergedCellInRow(
     return hasUnMergedCell;
 }
 
-export function mergeInfoOffset(
-    mergeInfo: IRangeWithCoord,
-    offsetX: number,
-    offsetY: number,
-    scaleX: number,
-    scaleY: number
-) {
+export function mergeInfoOffset(mergeInfo: IRangeWithCoord, offsetX: number, offsetY: number) {
     const { startY, endY, startX, endX } = mergeInfo;
     mergeInfo.startY = startY + offsetY;
     mergeInfo.endY = endY + offsetY;

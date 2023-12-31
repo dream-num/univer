@@ -21,6 +21,7 @@ import type { IDocumentSkeletonLine, IDocumentSkeletonSpan } from '../../basics/
 import { PageLayoutType } from '../../basics/i-document-skeleton-cached';
 import type { INodeInfo } from '../../basics/interfaces';
 import type { IBoundRectNoAngle, IViewportBound } from '../../basics/vector2';
+import type { UniverContext } from '../../context';
 import { RenderComponent } from '../component';
 import type { DOCS_EXTENSION_TYPE } from './doc-extension';
 import type { DocumentSkeleton } from './doc-skeleton';
@@ -51,7 +52,7 @@ export class DocComponent extends RenderComponent<
         this._skeleton = skeleton;
     }
 
-    override render(mainCtx: CanvasRenderingContext2D, bounds?: IViewportBound) {
+    override render(mainCtx: UniverContext, bounds?: IViewportBound) {
         if (!this.visible) {
             this.makeDirty(false);
             return this;
@@ -99,7 +100,7 @@ export class DocComponent extends RenderComponent<
 
     protected _getBounding(bounds?: IViewportBound) {}
 
-    protected _draw(ctx: CanvasRenderingContext2D, bounds?: IViewportBound) {
+    protected _draw(ctx: UniverContext, bounds?: IViewportBound) {
         /* abstract */
     }
 }

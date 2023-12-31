@@ -16,11 +16,12 @@
 
 import { BaseObject } from '../base-object';
 import type { IViewportBound, Vector2 } from '../basics/vector2';
+import type { UniverContext } from '../context';
 
 export class CustomObject extends BaseObject {
     constructor(
         key?: string,
-        private _render = (mainCtx: CanvasRenderingContext2D) => {},
+        private _render = (mainCtx: UniverContext) => {},
         private _isHitCustom?: (coord: Vector2) => boolean
     ) {
         super(key);
@@ -32,7 +33,7 @@ export class CustomObject extends BaseObject {
         };
     }
 
-    override render(mainCtx: CanvasRenderingContext2D, bounds?: IViewportBound) {
+    override render(mainCtx: UniverContext, bounds?: IViewportBound) {
         if (!this.visible) {
             this.makeDirty(false);
             return this;

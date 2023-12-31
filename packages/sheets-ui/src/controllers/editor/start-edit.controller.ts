@@ -378,25 +378,17 @@ export class StartEditController extends Disposable {
             editorWidth = clientWidth;
         }
 
-        const pixelRatio = engine.getPixelRatio();
+        startX -= FIX_ONE_PIXEL_BLUR_OFFSET;
 
-        const scaleXPixelRatio = scaleX * pixelRatio;
+        startY -= FIX_ONE_PIXEL_BLUR_OFFSET;
 
-        const scaleYPixelRatio = scaleY * pixelRatio;
-
-        startX = fixLineWidthByScale(startX - FIX_ONE_PIXEL_BLUR_OFFSET, scaleXPixelRatio);
-
-        startY = fixLineWidthByScale(startY - FIX_ONE_PIXEL_BLUR_OFFSET, scaleYPixelRatio);
-
-        editorWidth = fixLineWidthByScale(editorWidth, scaleXPixelRatio);
-
-        editorHeight = fixLineWidthByScale(editorHeight, scaleYPixelRatio);
-
-        physicHeight = fixLineWidthByScale(editorHeight, scaleYPixelRatio);
+        physicHeight = editorHeight;
 
         this._addBackground(scene, editorWidth / scaleX, editorHeight / scaleY, fill);
 
         this._addBackground(scene, editorWidth / scaleX, editorHeight / scaleY, fill);
+
+        const { scaleX: precisionScaleX, scaleY: precisionScaleY } = scene.getPrecisionScale();
 
         scene.transformByState({
             width: editorWidth,
@@ -409,9 +401,12 @@ export class StartEditController extends Disposable {
          * resize canvas
          * When modifying the selection area for a formula, it is necessary to add a setTimeout to ensure successful updating.
          */
-        setTimeout(() => {
-            engine.resizeBySize(editorWidth, physicHeight);
-        }, 0);
+        requestIdleCallback(() => {
+            engine.resizeBySize(
+                fixLineWidthByScale(editorWidth, precisionScaleX),
+                fixLineWidthByScale(physicHeight, precisionScaleY)
+            );
+        });
 
         // Update cell editor container position and size.
         this._cellEditorManagerService.setState({

@@ -25,7 +25,12 @@ import {
     RxDisposable,
     ThemeService,
 } from '@univerjs/core';
-import { DeviceInputEventType, getCanvasOffsetByEngine, IRenderManagerService } from '@univerjs/engine-render';
+import {
+    DeviceInputEventType,
+    fixLineWidthByScale,
+    getCanvasOffsetByEngine,
+    IRenderManagerService,
+} from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import {
     COMMAND_LISTENER_SKELETON_CHANGE,
@@ -129,11 +134,13 @@ export class EditorBridgeController extends RxDisposable {
 
         const { scaleX, scaleY } = scene.getAncestorScale();
 
+        const { scaleX: precisionScaleX, scaleY: precisionScaleY } = scene.getPrecisionScale();
+
         const scrollXY = scene.getScrollXY(this._selectionRenderService.getViewPort());
-        startX = skeleton.convertTransformToOffsetX(startX, scaleX, scrollXY);
-        startY = skeleton.convertTransformToOffsetY(startY, scaleY, scrollXY);
-        endX = skeleton.convertTransformToOffsetX(endX, scaleX, scrollXY);
-        endY = skeleton.convertTransformToOffsetY(endY, scaleY, scrollXY);
+        startX = fixLineWidthByScale(skeleton.convertTransformToOffsetX(startX, scaleX, scrollXY), precisionScaleX);
+        startY = fixLineWidthByScale(skeleton.convertTransformToOffsetY(startY, scaleY, scrollXY), precisionScaleY);
+        endX = fixLineWidthByScale(skeleton.convertTransformToOffsetX(endX, scaleX, scrollXY), precisionScaleX);
+        endY = fixLineWidthByScale(skeleton.convertTransformToOffsetY(endY, scaleY, scrollXY), precisionScaleY);
 
         const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();

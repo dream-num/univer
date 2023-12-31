@@ -650,14 +650,9 @@ export class FreezeController extends Disposable {
         }
 
         // freeze start
-        const startSheetView = skeleton.getNoMergeCellPositionByIndexWithNoHeader(
-            row - ySplit,
-            column - xSplit,
-            scaleX,
-            scaleY
-        );
+        const startSheetView = skeleton.getNoMergeCellPositionByIndexWithNoHeader(row - ySplit, column - xSplit);
         // freeze end
-        const endSheetView = skeleton.getNoMergeCellPositionByIndexWithNoHeader(row, column, scaleX, scaleY);
+        const endSheetView = skeleton.getNoMergeCellPositionByIndexWithNoHeader(row, column);
 
         viewMainLeftTop.disable();
         viewMainTop.disable();
@@ -1132,10 +1127,8 @@ export class FreezeController extends Disposable {
             return;
         }
 
-        const { scaleX, scaleY } = sheetObject.scene.getAncestorScale();
-
         const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-        const position = skeleton?.getNoMergeCellPositionByIndex(row, column, scaleX, scaleY);
+        const position = skeleton?.getNoMergeCellPositionByIndex(row, column);
         if (skeleton == null) {
             return;
         }

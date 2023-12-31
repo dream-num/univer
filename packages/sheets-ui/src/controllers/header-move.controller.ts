@@ -309,7 +309,7 @@ export class HeaderMoveController extends Disposable {
 
         const { row, column } = moveActualSelection;
 
-        const startCell = skeleton.getNoMergeCellPositionByIndex(row, column, scaleX, scaleY);
+        const startCell = skeleton.getNoMergeCellPositionByIndex(row, column);
 
         const { startX: cellStartX, startY: cellStartY, endX: cellEndX, endY: cellEndY } = startCell;
 

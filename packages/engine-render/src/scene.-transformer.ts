@@ -333,7 +333,7 @@ export class Transformer implements ITransformerConfig {
                 if (type === TransformerManagerType.OUTLINE) {
                     o.transformByState(this._getOutlinePosition(width, height, scaleX, scaleY));
                 } else {
-                    const { left, top } = this._getRotateAnchorPosition(type, height, width, scaleX, scaleY);
+                    const { left, top } = this._getRotateAnchorPosition(type, height, width);
                     o.transformByState({
                         left,
                         top,
@@ -544,17 +544,7 @@ export class Transformer implements ITransformerConfig {
         return cursor;
     }
 
-    private _getRotateAnchorPosition(
-        type: TransformerManagerType,
-        height: number,
-        width: number,
-        scaleX: number,
-        scaleY: number
-    ) {
-        // width /= scaleX;
-
-        // height /= scaleY;
-
+    private _getRotateAnchorPosition(type: TransformerManagerType, height: number, width: number) {
         let left = -this.anchorSize / 2;
         let top = -this.anchorSize / 2;
 
@@ -619,7 +609,7 @@ export class Transformer implements ITransformerConfig {
     private _createResizeAnchor(type: TransformerManagerType, applyObject: BaseObject, zIndex: number) {
         const { height, width, scaleX, scaleY } = applyObject.getState();
 
-        const { left, top } = this._getRotateAnchorPosition(type, height, width, scaleX, scaleY);
+        const { left, top } = this._getRotateAnchorPosition(type, height, width);
 
         const cursor = this._getRotateAnchorCursor(type);
 
@@ -755,9 +745,7 @@ export class Transformer implements ITransformerConfig {
             const { left: lineLeft, top: lineTop } = this._getRotateAnchorPosition(
                 TransformerManagerType.ROTATE_LINE,
                 height,
-                width,
-                scaleX,
-                scaleY
+                width
             );
             const rotateLine = new Rect(`${TransformerManagerType.ROTATE_LINE}_${zIndex}`, {
                 zIndex: zIndex - 1,
@@ -770,13 +758,7 @@ export class Transformer implements ITransformerConfig {
                 stroke: this.borderStroke,
             });
 
-            const { left, top } = this._getRotateAnchorPosition(
-                TransformerManagerType.ROTATE,
-                height,
-                width,
-                scaleX,
-                scaleY
-            );
+            const { left, top } = this._getRotateAnchorPosition(TransformerManagerType.ROTATE, height, width);
             const cursor = this._getRotateAnchorCursor(TransformerManagerType.ROTATE);
             const rotate = new Rect(`${TransformerManagerType.ROTATE}_${zIndex}`, {
                 zIndex: zIndex - 1,

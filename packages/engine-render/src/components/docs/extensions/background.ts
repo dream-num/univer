@@ -19,6 +19,7 @@ import { getColorStyle } from '@univerjs/core';
 
 import type { IDocumentSkeletonSpan } from '../../../basics/i-document-skeleton-cached';
 import { Vector2 } from '../../../basics/vector2';
+import type { UniverContext } from '../../../context';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
 import { docExtension } from '../doc-extension';
 
@@ -33,7 +34,7 @@ export class Background extends docExtension {
 
     private _preBackgroundColor = '';
 
-    override draw(ctx: CanvasRenderingContext2D, parentScale: IScale, span: IDocumentSkeletonSpan) {
+    override draw(ctx: UniverContext, parentScale: IScale, span: IDocumentSkeletonSpan) {
         const line = span.parent?.parent;
         if (!line) {
             return;

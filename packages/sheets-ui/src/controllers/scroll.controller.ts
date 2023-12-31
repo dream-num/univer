@@ -256,9 +256,7 @@ export class ScrollController extends Disposable {
 
                     const { startX, startY } = skeleton.getCellByIndexWithNoHeader(
                         sheetViewStartRow,
-                        sheetViewStartColumn,
-                        scaleX,
-                        scaleY
+                        sheetViewStartColumn
                     );
                     const x = startX + offsetX;
                     const y = startY + offsetY;

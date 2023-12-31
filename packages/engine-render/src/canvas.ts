@@ -16,7 +16,7 @@
 
 import { getDevicePixelRatio } from './basics/draw';
 import { createCanvasElement } from './basics/tools';
-import { Context } from './context';
+import { UniverContext } from './context';
 
 interface ICanvasProps {
     width?: number;
@@ -41,7 +41,7 @@ export class Canvas {
 
     private _canvasEle: HTMLCanvasElement;
 
-    private _context: CanvasRenderingContext2D;
+    private _context: UniverContext;
 
     private _width = 0;
 
@@ -65,7 +65,7 @@ export class Canvas {
         this._canvasEle.style.touchAction = 'none';
         this._canvasEle.style.outline = '0';
 
-        this._context = new Context(this._canvasEle.getContext('2d')!);
+        this._context = new UniverContext(this._canvasEle.getContext('2d')!);
 
         this.setSize(props.width, props.height, props.pixelRatio);
     }

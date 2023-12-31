@@ -26,6 +26,7 @@ import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './basics/interfaces';
 import { precisionTo, requestNewFrame } from './basics/tools';
 import { Transform } from './basics/transform';
 import { Vector2 } from './basics/vector2';
+import type { UniverContext } from './context';
 import { Layer } from './layer';
 import type { ITransformerConfig } from './scene.-transformer';
 import { Transformer } from './scene.-transformer';
@@ -475,14 +476,14 @@ export class Scene extends ThinScene {
 
     changeObjectOrder() {}
 
-    // override renderObjects(ctx: CanvasRenderingContext2D, bounds?: IViewportBound) {
+    // override renderObjects(ctx: UniverContext, bounds?: IViewportBound) {
     //     this.getAllObjectsByOrder().forEach((o) => {
     //         o.render(ctx, bounds);
     //     });
     //     return this;
     // }
 
-    override render(parentCtx?: CanvasRenderingContext2D) {
+    override render(parentCtx?: UniverContext) {
         if (!this.isDirty()) {
             return;
         }
@@ -498,7 +499,7 @@ export class Scene extends ThinScene {
         // this.getViewports()?.forEach((vp: Viewport) => vp.render(parentCtx));
     }
 
-    async requestRender(parentCtx?: CanvasRenderingContext2D) {
+    async requestRender(parentCtx?: UniverContext) {
         return new Promise((resolve, reject) => {
             this.render(parentCtx);
             requestNewFrame(resolve);
@@ -642,6 +643,16 @@ export class Scene extends ThinScene {
         return {
             scaleX,
             scaleY,
+        };
+    }
+
+    override getPrecisionScale() {
+        const pixelRatio = this.getEngine()?.getPixelRatio() || 1;
+        const { scaleX, scaleY } = this.getAncestorScale();
+
+        return {
+            scaleX: scaleX * pixelRatio,
+            scaleY: scaleY * pixelRatio,
         };
     }
 

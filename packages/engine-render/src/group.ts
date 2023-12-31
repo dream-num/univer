@@ -22,6 +22,7 @@ import type { CURSOR_TYPE } from './basics/const';
 import { RENDER_CLASS_TYPE } from './basics/const';
 import { isString } from './basics/tools';
 import type { IViewportBound, Vector2 } from './basics/vector2';
+import type { UniverContext } from './context';
 import type { ThinScene } from './thin-scene';
 
 export class Group extends BaseObject {
@@ -114,7 +115,7 @@ export class Group extends BaseObject {
         return this._objects;
     }
 
-    override render(ctx: CanvasRenderingContext2D, bounds?: IViewportBound) {
+    override render(ctx: UniverContext, bounds?: IViewportBound) {
         ctx.save();
         const m = this.transform.getMatrix();
         ctx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);

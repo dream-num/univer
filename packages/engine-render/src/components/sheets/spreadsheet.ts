@@ -20,9 +20,10 @@ import { BooleanNumber, CellValueType, HorizontalAlign, ObjectMatrix, sortRules,
 import type { BaseObject } from '../../base-object';
 import { FIX_ONE_PIXEL_BLUR_OFFSET, RENDER_CLASS_TYPE } from '../../basics/const';
 import { clearLineByBorderType } from '../../basics/draw';
-import { fixLineWidthByScale, getCellByIndex, getCellPositionByIndex, getColor, getScale } from '../../basics/tools';
+import { getCellByIndex, getCellPositionByIndex, getColor } from '../../basics/tools';
 import type { IViewportBound, Vector2 } from '../../basics/vector2';
 import { Canvas } from '../../canvas';
+import type { UniverContext } from '../../context';
 import type { Engine } from '../../engine';
 import type { Scene } from '../../scene';
 import type { SceneViewer } from '../../scene-viewer';
@@ -103,7 +104,7 @@ export class Spreadsheet extends SheetComponent {
         return this._documents;
     }
 
-    override draw(ctx: CanvasRenderingContext2D, bounds?: IViewportBound) {
+    override draw(ctx: UniverContext, bounds?: IViewportBound) {
         // const { parent = { scaleX: 1, scaleY: 1 } } = this;
         // const mergeData = this.getMergeData();
         // const showGridlines = this.getShowGridlines() || 1;
@@ -112,14 +113,14 @@ export class Spreadsheet extends SheetComponent {
             return;
         }
 
-        const { a: scaleX = 1, d: scaleY = 1 } = ctx.getTransform();
+        const parentScale = this.getParentScale();
 
         const diffRanges = this._refreshIncrementalState
             ? bounds?.diffBounds.map((bound) => spreadsheetSkeleton.getRowColumnSegmentByViewBound(bound))
             : undefined;
         const extensions = this.getExtensionsByOrder();
         for (const extension of extensions) {
-            extension.draw(ctx, { scaleX, scaleY }, spreadsheetSkeleton, diffRanges);
+            extension.draw(ctx, parentScale, spreadsheetSkeleton, diffRanges);
         }
 
         /**
@@ -152,7 +153,7 @@ export class Spreadsheet extends SheetComponent {
         }
         const { rowHeightAccumulation, columnWidthAccumulation, rowHeaderWidth, columnHeaderHeight } =
             spreadsheetSkeleton;
-        const { scaleX = 1, scaleY = 1 } = this.getParentScale();
+
         let { startY, endY, startX, endX } = getCellPositionByIndex(
             rowIndex,
             columnIndex,
@@ -199,7 +200,7 @@ export class Spreadsheet extends SheetComponent {
         return this.getSkeleton()?.getMergeBounding(startRow, startColumn, endRow, endColumn);
     }
 
-    override render(mainCtx: CanvasRenderingContext2D, bounds?: IViewportBound) {
+    override render(mainCtx: UniverContext, bounds?: IViewportBound) {
         if (!this.visible) {
             this.makeDirty(false);
             return this;
@@ -226,11 +227,9 @@ export class Spreadsheet extends SheetComponent {
 
         const { a: scaleX = 1, d: scaleY = 1 } = mainCtx.getTransform();
 
-        const scale = getScale({ scaleX, scaleY });
-
         const { rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
 
-        mainCtx.translate(fixLineWidthByScale(rowHeaderWidth, scale), fixLineWidthByScale(columnHeaderHeight, scale));
+        mainCtx.translateWithPrecision(rowHeaderWidth, columnHeaderHeight);
 
         this._drawAuxiliary(mainCtx);
 
@@ -275,11 +274,7 @@ export class Spreadsheet extends SheetComponent {
                         ctx.save();
                         ctx.globalCompositeOperation = 'copy';
                         ctx.setTransform(1, 0, 0, 1, 0, 0);
-                        ctx.drawImage(
-                            this._cacheCanvas.getCanvasEle(),
-                            fixLineWidthByScale(diffX, scale) * scale,
-                            fixLineWidthByScale(diffY, scale) * scale
-                        );
+                        ctx.drawImage(this._cacheCanvas.getCanvasEle(), diffX * scaleX, diffY * scaleY);
                         ctx.restore();
 
                         this._refreshIncrementalState = true;
@@ -290,16 +285,10 @@ export class Spreadsheet extends SheetComponent {
                             ctx.save();
                             ctx.beginPath();
                             ctx.rect(
-                                fixLineWidthByScale(diffLeft - rowHeaderWidth - FIX_ONE_PIXEL_BLUR_OFFSET, scale),
-                                fixLineWidthByScale(diffTop - columnHeaderHeight - FIX_ONE_PIXEL_BLUR_OFFSET, scale),
-                                fixLineWidthByScale(
-                                    diffRight - diffLeft + rowHeaderWidth + FIX_ONE_PIXEL_BLUR_OFFSET * 2,
-                                    scale
-                                ),
-                                fixLineWidthByScale(
-                                    diffBottom - diffTop + columnHeaderHeight + FIX_ONE_PIXEL_BLUR_OFFSET * 2,
-                                    scale
-                                )
+                                diffLeft - rowHeaderWidth - FIX_ONE_PIXEL_BLUR_OFFSET,
+                                diffTop - columnHeaderHeight - FIX_ONE_PIXEL_BLUR_OFFSET,
+                                diffRight - diffLeft + rowHeaderWidth + FIX_ONE_PIXEL_BLUR_OFFSET * 2,
+                                diffBottom - diffTop + columnHeaderHeight + FIX_ONE_PIXEL_BLUR_OFFSET * 2
                             );
                             // ctx.fillStyle = 'rgb(0,0,0)';
 
@@ -345,7 +334,7 @@ export class Spreadsheet extends SheetComponent {
     }
 
     protected _applyCache(
-        ctx?: CanvasRenderingContext2D,
+        ctx?: UniverContext,
         sx: number = 0,
         sy: number = 0,
         sw: number = 0,
@@ -381,7 +370,7 @@ export class Spreadsheet extends SheetComponent {
         cacheCtx.restore();
     }
 
-    protected override _draw(ctx: CanvasRenderingContext2D, bounds?: IViewportBound) {
+    protected override _draw(ctx: UniverContext, bounds?: IViewportBound) {
         this.draw(ctx, bounds);
     }
 
@@ -612,7 +601,7 @@ export class Spreadsheet extends SheetComponent {
         spreadsheetSkeleton.setOverflowCache(this._overflowCacheRuntimeRange);
     }
 
-    private _drawAuxiliary(ctx: CanvasRenderingContext2D) {
+    private _drawAuxiliary(ctx: UniverContext) {
         const spreadsheetSkeleton = this.getSkeleton();
 
         if (spreadsheetSkeleton == null) {
@@ -643,12 +632,8 @@ export class Spreadsheet extends SheetComponent {
 
         ctx.save();
 
-        const { a: scaleX = 1, d: scaleY = 1 } = ctx.getTransform();
-
-        const scale = Math.max(scaleX, scaleY);
-
         ctx.beginPath();
-        ctx.lineWidth = 1 / scale;
+        ctx.lineWidth = 1;
         // eslint-disable-next-line no-magic-numbers
         ctx.strokeStyle = getColor([212, 212, 212]);
 
@@ -665,15 +650,15 @@ export class Spreadsheet extends SheetComponent {
 
         const columnDrawTopStart = 0;
 
-        ctx.translate(FIX_ONE_PIXEL_BLUR_OFFSET / scale, FIX_ONE_PIXEL_BLUR_OFFSET / scale);
+        ctx.translateWithPrecisionRatio(FIX_ONE_PIXEL_BLUR_OFFSET, FIX_ONE_PIXEL_BLUR_OFFSET);
 
         for (let r = rowStart; r <= rowEnd; r++) {
             if (r < 0 || r > rowHeightAccumulationLength - 1) {
                 continue;
             }
             const rowEndPosition = rowHeightAccumulation[r];
-            ctx.moveTo(0, fixLineWidthByScale(rowEndPosition, scale));
-            ctx.lineTo(width, fixLineWidthByScale(rowEndPosition, scale));
+            ctx.moveTo(0, rowEndPosition);
+            ctx.lineTo(width, rowEndPosition);
         }
 
         for (let c = startColumn; c <= endColumn; c++) {
@@ -681,8 +666,8 @@ export class Spreadsheet extends SheetComponent {
                 continue;
             }
             const columnEndPosition = columnWidthAccumulation[c];
-            ctx.moveTo(fixLineWidthByScale(columnEndPosition, scale), columnDrawTopStart);
-            ctx.lineTo(fixLineWidthByScale(columnEndPosition, scale), height);
+            ctx.moveTo(columnEndPosition, columnDrawTopStart);
+            ctx.lineTo(columnEndPosition, height);
         }
         // console.log('xx2', scaleX, scaleY, columnTotalWidth, rowTotalHeight, rowHeightAccumulation, columnWidthAccumulation);
         ctx.stroke();
@@ -694,7 +679,7 @@ export class Spreadsheet extends SheetComponent {
                 return true;
             }
 
-            const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(rowIndex, columnIndex, scaleX, scaleY);
+            const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(rowIndex, columnIndex);
 
             let { startY, endY, startX, endX } = cellInfo;
             const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
@@ -710,11 +695,6 @@ export class Spreadsheet extends SheetComponent {
                 endX = mergeInfo.endX;
             }
 
-            startY = fixLineWidthByScale(startY, scale);
-            endY = fixLineWidthByScale(endY, scale);
-            startX = fixLineWidthByScale(startX, scale);
-            endX = fixLineWidthByScale(endX, scale);
-
             if (!(mergeInfo.startRow >= rowStart && mergeInfo.endRow <= rowEnd)) {
                 return true;
             }
@@ -722,17 +702,17 @@ export class Spreadsheet extends SheetComponent {
             for (const key in borderCaches) {
                 const { type } = borderCaches[key] as BorderCacheItem;
 
-                clearLineByBorderType(ctx, type, { startX, startY, endX, endY }, scaleX, scaleY);
+                clearLineByBorderType(ctx, type, { startX, startY, endX, endY });
             }
         });
         ctx.closePath();
         // merge cell
-        this._clearRectangle(ctx, scale, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
+        this._clearRectangle(ctx, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
 
         // overflow cell
-        this._clearRectangle(ctx, scale, rowHeightAccumulation, columnWidthAccumulation, overflowCache.toNativeArray());
+        this._clearRectangle(ctx, rowHeightAccumulation, columnWidthAccumulation, overflowCache.toNativeArray());
 
-        this._clearBackground(ctx, scale, backgroundPositions);
+        this._clearBackground(ctx, backgroundPositions);
 
         ctx.restore();
     }
@@ -741,8 +721,7 @@ export class Spreadsheet extends SheetComponent {
      * Clear the guide lines within a range in the table, to make room for merged cells and overflow.
      */
     private _clearRectangle(
-        ctx: CanvasRenderingContext2D,
-        scale: number,
+        ctx: UniverContext,
         rowHeightAccumulation: number[],
         columnWidthAccumulation: number[],
         dataMergeCache?: IRange[]
@@ -753,17 +732,12 @@ export class Spreadsheet extends SheetComponent {
         for (const dataCache of dataMergeCache) {
             const { startRow, endRow, startColumn, endColumn } = dataCache;
 
-            const startY = fixLineWidthByScale(rowHeightAccumulation[startRow - 1] || 0, scale);
-            const endY = fixLineWidthByScale(
-                rowHeightAccumulation[endRow] || rowHeightAccumulation[rowHeightAccumulation.length - 1],
-                scale
-            );
+            const startY = rowHeightAccumulation[startRow - 1] || 0;
+            const endY = rowHeightAccumulation[endRow] || rowHeightAccumulation[rowHeightAccumulation.length - 1];
 
-            const startX = fixLineWidthByScale(columnWidthAccumulation[startColumn - 1] || 0, scale);
-            const endX = fixLineWidthByScale(
-                columnWidthAccumulation[endColumn] || columnWidthAccumulation[columnWidthAccumulation.length - 1],
-                scale
-            );
+            const startX = columnWidthAccumulation[startColumn - 1] || 0;
+            const endX =
+                columnWidthAccumulation[endColumn] || columnWidthAccumulation[columnWidthAccumulation.length - 1];
 
             ctx.clearRect(startX, startY, endX - startX, endY - startY);
 
@@ -779,11 +753,7 @@ export class Spreadsheet extends SheetComponent {
         }
     }
 
-    private _clearBackground(
-        ctx: CanvasRenderingContext2D,
-        scale: number,
-        backgroundPositions?: ObjectMatrix<ISelectionCellWithCoord>
-    ) {
+    private _clearBackground(ctx: UniverContext, backgroundPositions?: ObjectMatrix<ISelectionCellWithCoord>) {
         backgroundPositions?.forValue((row, column, cellInfo) => {
             let { startY, endY, startX, endX } = cellInfo;
             const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
@@ -798,7 +768,7 @@ export class Spreadsheet extends SheetComponent {
                 endX = mergeInfo.endX;
             }
 
-            ctx.clearRect(startX, startY, endX - startX, endY - startY);
+            ctx.clearRect(startX, startY, endX - startX + 0.5, endY - startY + 0.5);
         });
     }
 }

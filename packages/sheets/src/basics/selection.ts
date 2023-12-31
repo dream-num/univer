@@ -151,12 +151,12 @@ export function getNormalSelectionStyle(themeService: ThemeService): ISelectionS
         fill,
         // widgets: { tl: true, tc: true, tr: true, ml: true, mr: true, bl: true, bc: true, br: true },
         widgets: {},
-        widgetSize: 8,
+        widgetSize: 6,
         widgetStrokeWidth: 1,
         widgetStroke: styleSheet.colorWhite,
 
         hasAutoFill: true,
-        AutofillSize: 8,
+        AutofillSize: 6,
         AutofillStrokeWidth: 1,
         AutofillStroke: styleSheet.colorWhite,
 

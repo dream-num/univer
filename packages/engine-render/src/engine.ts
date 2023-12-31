@@ -86,7 +86,7 @@ export class Engine extends ThinEngine<Scene> {
 
     private _isUsingFirefox = navigator.userAgent.indexOf('Firefox') !== -1;
 
-    constructor(elemWidth: number = 100, elemHeight: number = 100) {
+    constructor(elemWidth: number = 1, elemHeight: number = 1) {
         super();
         this._canvasEle = this._canvas.getCanvasEle();
         this._canvas.setSize(elemWidth, elemHeight);

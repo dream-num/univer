@@ -16,6 +16,7 @@
 
 import { getDevicePixelRatio } from './basics/draw';
 import { createCanvasElement } from './basics/tools';
+import { Context } from './context';
 
 interface ICanvasProps {
     width?: number;
@@ -64,7 +65,7 @@ export class Canvas {
         this._canvasEle.style.touchAction = 'none';
         this._canvasEle.style.outline = '0';
 
-        this._context = this._canvasEle.getContext('2d')!;
+        this._context = new Context(this._canvasEle.getContext('2d')!);
 
         this.setSize(props.width, props.height, props.pixelRatio);
     }
@@ -100,15 +101,19 @@ export class Canvas {
         this._pixelRatio = pixelRatioParam || getDevicePixelRatio();
 
         if (width) {
-            this._width = width;
             this._canvasEle.width = width * this._pixelRatio;
-            this._canvasEle.style.width = `${width}px`;
+
+            this._width = this._canvasEle.width / this._pixelRatio;
+
+            this._canvasEle.style.width = `${this._width}px`;
         }
 
         if (height) {
-            this._height = height;
             this._canvasEle.height = height * this._pixelRatio;
-            this._canvasEle.style.height = `${height}px`;
+
+            this._height = this._canvasEle.height / this._pixelRatio;
+
+            this._canvasEle.style.height = `${this._height}px`;
         }
 
         this.getContext().setTransform(this._pixelRatio, 0, 0, this._pixelRatio, 0, 0);

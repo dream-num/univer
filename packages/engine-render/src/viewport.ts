@@ -529,14 +529,18 @@ export class Viewport {
     }
 
     render(parentCtx?: CanvasRenderingContext2D, objects: BaseObject[] = [], isMaxLayer = false) {
-        if (this.isActive === false) {
+        if (
+            this.isActive === false ||
+            this.width == null ||
+            this.height == null ||
+            this.width <= 1 ||
+            this.height <= 1
+        ) {
             return;
         }
         const mainCtx = parentCtx || (this._scene.getEngine()?.getCanvas().getContext() as CanvasRenderingContext2D);
 
         const sceneTrans = this._scene.transform.clone();
-
-        const { a: scaleX = 1, d: scaleY = 1 } = mainCtx.getTransform();
 
         sceneTrans.multiply(Transform.create([1, 0, 0, 1, -this.actualScrollX || 0, -this.actualScrollY || 0]));
 

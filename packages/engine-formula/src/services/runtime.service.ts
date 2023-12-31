@@ -86,7 +86,7 @@ export interface IFormulaRuntimeService {
 
     currentColumn: number;
 
-    currentSubComponentId: string;
+    currentSubUnitId: string;
 
     currentUnitId: string;
 
@@ -170,7 +170,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
     private _currentRow: number = 0;
     private _currentColumn: number = 0;
-    private _currentSubComponentId: string = '';
+    private _currentSubUnitId: string = '';
     private _currentUnitId: string = '';
 
     private _runtimeData: IRuntimeUnitDataType = {};
@@ -214,8 +214,8 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         return this._currentColumn;
     }
 
-    get currentSubComponentId() {
-        return this._currentSubComponentId;
+    get currentSubUnitId() {
+        return this._currentSubUnitId;
     }
 
     get currentUnitId() {
@@ -329,7 +329,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
     setCurrent(row: number, column: number, sheetId: string, unitId: string) {
         this._currentRow = row;
         this._currentColumn = column;
-        this._currentSubComponentId = sheetId;
+        this._currentSubUnitId = sheetId;
         this._currentUnitId = unitId;
     }
 
@@ -346,7 +346,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
     }
 
     setRuntimeOtherData(formulaId: string, functionVariant: FunctionVariantType) {
-        const subComponentId = this._currentSubComponentId;
+        const subUnitId = this._currentSubUnitId;
         const unitId = this._currentUnitId;
 
         if (this._runtimeOtherData[unitId] === undefined) {
@@ -355,11 +355,11 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
         const unitData = this._runtimeOtherData[unitId];
 
-        if (unitData[subComponentId] === undefined) {
-            unitData[subComponentId] = {};
+        if (unitData[subUnitId] === undefined) {
+            unitData[subUnitId] = {};
         }
 
-        const subComponentData = unitData[subComponentId];
+        const subComponentData = unitData[subUnitId];
 
         subComponentData[formulaId] = this._objectValueToCellValue(functionVariant as BaseValueObject)!;
     }
@@ -367,7 +367,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
     setRuntimeData(functionVariant: FunctionVariantType) {
         const row = this._currentRow;
         const column = this._currentColumn;
-        const sheetId = this._currentSubComponentId;
+        const sheetId = this._currentSubUnitId;
         const unitId = this._currentUnitId;
 
         if (this._runtimeData[unitId] == null) {

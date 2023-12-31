@@ -31,6 +31,7 @@ import {
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
+    RANGE_TYPE,
     serializeRangeToRefString,
     ThemeService,
     toDisposable,
@@ -1056,7 +1057,7 @@ export class PromptController extends Disposable {
 
         let { startRow, endRow, startColumn, endColumn } = range;
 
-        const { startAbsoluteRefType, endAbsoluteRefType } = range;
+        const { startAbsoluteRefType, endAbsoluteRefType, rangeType } = range;
 
         if (primary) {
             const {
@@ -1090,6 +1091,7 @@ export class PromptController extends Disposable {
                 endRow,
                 startColumn,
                 endColumn,
+                rangeType,
                 startAbsoluteRefType,
                 endAbsoluteRefType,
             },
@@ -1319,7 +1321,19 @@ export class PromptController extends Disposable {
             }
 
             const control = controls.find((c) => {
-                const { startRow, startColumn, endRow, endColumn } = c.getRange();
+                const { startRow, startColumn, endRow, endColumn, rangeType } = c.getRange();
+                if (
+                    rangeType === RANGE_TYPE.COLUMN &&
+                    startColumn === range.startColumn &&
+                    endColumn === range.endColumn
+                ) {
+                    return true;
+                }
+
+                if (rangeType === RANGE_TYPE.ROW && startRow === range.startRow && endRow === range.endRow) {
+                    return true;
+                }
+
                 if (
                     startRow === range.startRow &&
                     startColumn === range.startColumn &&

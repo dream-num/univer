@@ -47,7 +47,7 @@ export class Vlookup extends BaseFunction {
             return new ErrorValueObject(ErrorType.NA);
         }
 
-        const rangeLookupValue = this._getRangeLookupValue(rangeLookup);
+        const rangeLookupValue = this.getZeroOrOneByOneDefault(rangeLookup);
 
         if (rangeLookupValue == null) {
             return new ErrorValueObject(ErrorType.VALUE);
@@ -104,33 +104,5 @@ export class Vlookup extends BaseFunction {
         }
 
         return resultValue;
-    }
-
-    private _getRangeLookupValue(rangeLookup?: BaseValueObject) {
-        if (rangeLookup == null) {
-            return 1;
-        }
-
-        let rangeLookupValue = 1;
-
-        if (rangeLookup.isArray()) {
-            rangeLookup = (rangeLookup as ArrayValueObject).getFirstCell();
-        }
-
-        if (rangeLookup.isBoolean()) {
-            const rangeLookupV = rangeLookup.getValue() as boolean;
-            if (rangeLookupV === false) {
-                rangeLookupValue = 0;
-            }
-        } else if (rangeLookup.isString()) {
-            return;
-        } else if (rangeLookup.isNumber()) {
-            const rangeLookupV = rangeLookup.getValue() as number;
-            if (rangeLookupV === 0) {
-                rangeLookupValue = 0;
-            }
-        }
-
-        return rangeLookupValue;
     }
 }

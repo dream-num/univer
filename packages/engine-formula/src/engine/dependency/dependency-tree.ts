@@ -48,7 +48,7 @@ export class FormulaDependencyTree extends Disposable {
 
     column: number = -1;
 
-    subComponentId: string = '';
+    subUnitId: string = '';
 
     unitId: string = '';
 
@@ -140,14 +140,37 @@ export class FormulaDependencyTree extends Disposable {
 
             const excludedCell = unitExcludedCell?.[unitId]?.[sheetId];
 
+            let {
+                startRow: rangeStartRow,
+                endRow: rangeEndRow,
+                startColumn: rangeStartColumn,
+                endColumn: rangeEndColumn,
+            } = range;
+
+            if (isNaN(rangeStartRow)) {
+                rangeStartRow = 0;
+            }
+
+            if (isNaN(rangeStartColumn)) {
+                rangeStartColumn = 0;
+            }
+
+            if (isNaN(rangeEndRow)) {
+                rangeEndRow = Infinity;
+            }
+
+            if (isNaN(rangeEndColumn)) {
+                rangeEndColumn = Infinity;
+            }
+
             for (const dependencyRange of dependencyRanges) {
                 const { startRow, startColumn, endRow, endColumn } = dependencyRange;
 
                 if (
-                    range.startRow > endRow ||
-                    range.endRow < startRow ||
-                    range.startColumn > endColumn ||
-                    range.endColumn < startColumn
+                    rangeStartRow > endRow ||
+                    rangeEndRow < startRow ||
+                    rangeStartColumn > endColumn ||
+                    rangeEndColumn < startColumn
                 ) {
                     continue;
                 } else {
@@ -158,10 +181,10 @@ export class FormulaDependencyTree extends Disposable {
                      */
                     excludedCell?.forValue((row, column) => {
                         if (
-                            row >= range.startRow &&
-                            row <= range.endRow &&
-                            column >= range.startColumn &&
-                            column <= range.endColumn
+                            row >= rangeStartRow &&
+                            row <= rangeEndRow &&
+                            column >= rangeStartColumn &&
+                            column <= rangeEndColumn
                         ) {
                             isInclude = false;
                             return false;
@@ -217,7 +240,7 @@ export class FormulaDependencyTree extends Disposable {
 
             if (
                 dependenceTree.unitId === unitId &&
-                dependenceTree.subComponentId === sheetId &&
+                dependenceTree.subUnitId === sheetId &&
                 dependenceTree.inRangeData(range)
             ) {
                 return true;

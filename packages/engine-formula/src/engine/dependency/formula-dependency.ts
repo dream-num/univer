@@ -168,7 +168,7 @@ export class FormulaDependencyGenerator extends Disposable {
                     FDtree.node = node;
                     FDtree.formula = formulaString;
                     FDtree.unitId = unitId;
-                    FDtree.subComponentId = sheetId;
+                    FDtree.subUnitId = sheetId;
                     FDtree.row = row;
                     FDtree.column = column;
 
@@ -185,8 +185,8 @@ export class FormulaDependencyGenerator extends Disposable {
 
             const subComponentKeys = Object.keys(subComponentData);
 
-            for (const subComponentId of subComponentKeys) {
-                const subFormulaData = subComponentData[subComponentId];
+            for (const subUnitId of subComponentKeys) {
+                const subFormulaData = subComponentData[subUnitId];
 
                 const subFormulaDataKeys = Object.keys(subFormulaData);
 
@@ -202,7 +202,7 @@ export class FormulaDependencyGenerator extends Disposable {
                     FDtree.node = node;
                     FDtree.formula = formulaString;
                     FDtree.unitId = unitId;
-                    FDtree.subComponentId = subComponentId;
+                    FDtree.subUnitId = subUnitId;
 
                     FDtree.formulaId = subFormulaDataId;
 
@@ -217,11 +217,11 @@ export class FormulaDependencyGenerator extends Disposable {
          * registration Executor based on the dependency relationship.
          */
         this._featureCalculationManagerService.getReferenceExecutorMap().forEach((params, featureId) => {
-            const { unitId, subComponentId, dependencyRanges, getDirtyData } = params;
+            const { unitId, subUnitId, dependencyRanges, getDirtyData } = params;
             const FDtree = new FormulaDependencyTree();
 
             FDtree.unitId = unitId;
-            FDtree.subComponentId = subComponentId;
+            FDtree.subUnitId = subUnitId;
 
             FDtree.getDirtyData = getDirtyData;
 
@@ -235,7 +235,7 @@ export class FormulaDependencyGenerator extends Disposable {
         for (let i = 0, len = treeList.length; i < len; i++) {
             const tree = treeList[i];
 
-            this._runtimeService.setCurrent(tree.row, tree.column, tree.subComponentId, tree.unitId);
+            this._runtimeService.setCurrent(tree.row, tree.column, tree.subUnitId, tree.unitId);
 
             if (tree.node == null) {
                 continue;
@@ -485,7 +485,7 @@ export class FormulaDependencyGenerator extends Disposable {
      */
     private _includeTree(tree: FormulaDependencyTree) {
         const unitId = tree.unitId;
-        const subComponentId = tree.subComponentId;
+        const subUnitId = tree.subUnitId;
 
         /**
          * Perform active dirty detection for the feature.
@@ -493,13 +493,13 @@ export class FormulaDependencyGenerator extends Disposable {
         const featureId = tree.featureId;
         if (featureId != null) {
             const featureMap = this._currentConfigService.getDirtyUnitFeatureMap();
-            const state = featureMap?.[unitId]?.[subComponentId]?.[featureId];
+            const state = featureMap?.[unitId]?.[subUnitId]?.[featureId];
             if (state != null) {
                 return true;
             }
         }
 
-        const excludedCell = this._currentConfigService.getExcludedRange()?.[unitId]?.[subComponentId];
+        const excludedCell = this._currentConfigService.getExcludedRange()?.[unitId]?.[subUnitId];
 
         /**
          * The position of the primary cell in the array formula needs to be excluded when calculating the impact of the array formula on dependencies.
@@ -521,7 +521,7 @@ export class FormulaDependencyGenerator extends Disposable {
          * When the name of a worksheet is changed, or a worksheet is inserted or deleted,
          * the formulas within it may not need to be calculated.
          */
-        // if (this._dirtyUnitSheetNameMap[unitId][subComponentId] != null) {
+        // if (this._dirtyUnitSheetNameMap[unitId][subUnitId] != null) {
         //     return true;
         // }
 
@@ -531,11 +531,11 @@ export class FormulaDependencyGenerator extends Disposable {
 
         const sheetRangeMap = this._updateRangeFlattenCache.get(unitId)!;
 
-        if (!sheetRangeMap.has(subComponentId)) {
+        if (!sheetRangeMap.has(subUnitId)) {
             return false;
         }
 
-        const ranges = sheetRangeMap.get(subComponentId)!;
+        const ranges = sheetRangeMap.get(subUnitId)!;
 
         for (const range of ranges) {
             if (tree.inRangeData(range)) {

@@ -215,7 +215,16 @@ export class SelectionController extends Disposable {
                         return;
                     }
 
-                    this._selectionManagerService.replace([this._getAllRange(skeleton)]);
+                    this._selectionRenderService.reset();
+
+                    const selectionWithStyle = this._getAllRange(skeleton);
+
+                    const selectionData = this._selectionRenderService.convertSelectionRangeToData(selectionWithStyle);
+                    this._selectionRenderService.addControlToCurrentByRangeData(selectionData);
+
+                    this._selectionRenderService.refreshSelectionMoveStart();
+
+                    // this._selectionManagerService.replace([selectionWithStyle]);
 
                     if (evt.button !== 2) {
                         state.stopPropagation();

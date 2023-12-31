@@ -24,7 +24,7 @@ import type { ImageModel } from '../models/image-model';
 
 export interface IImageManagerSearchParam {
     unitId: string;
-    subComponentId: string; //sheetId, pageId and so on, it has a default name in doc business
+    subUnitId: string; //sheetId, pageId and so on, it has a default name in doc business
     imageId: string;
 }
 
@@ -118,12 +118,12 @@ export class ImageManagerService implements IDisposable, IImageManagerService {
         if (searchParam == null) {
             return;
         }
-        const { unitId, subComponentId, imageId } = searchParam;
-        return this._imageManagerInfo.get(unitId)?.get(subComponentId)?.get(imageId);
+        const { unitId, subUnitId, imageId } = searchParam;
+        return this._imageManagerInfo.get(unitId)?.get(subUnitId)?.get(imageId);
     }
 
     private _addByParam(insertParam: IImageManagerParam): IImageManagerSearchParam[] {
-        const { unitId, subComponentId, imageId, imageModel } = insertParam;
+        const { unitId, subUnitId, imageId, imageModel } = insertParam;
 
         if (!this._imageManagerInfo.has(unitId)) {
             this._imageManagerInfo.set(unitId, new Map());
@@ -131,22 +131,22 @@ export class ImageManagerService implements IDisposable, IImageManagerService {
 
         const subComponentData = this._imageManagerInfo.get(unitId)!;
 
-        if (!subComponentData.has(subComponentId)) {
-            subComponentData.set(subComponentId, new Map());
+        if (!subComponentData.has(subUnitId)) {
+            subComponentData.set(subUnitId, new Map());
         }
 
-        subComponentData.get(subComponentId)!.set(imageId, insertParam);
+        subComponentData.get(subUnitId)!.set(imageId, insertParam);
 
-        return [{ unitId, subComponentId, imageId }];
+        return [{ unitId, subUnitId, imageId }];
     }
 
     private _removeByParam(searchParam: IImageManagerSearchParam): IImageManagerParam[] {
         if (searchParam == null) {
             return [];
         }
-        const { unitId, subComponentId, imageId } = searchParam;
+        const { unitId, subUnitId, imageId } = searchParam;
 
-        const subComponentObjects = this._imageManagerInfo.get(unitId)?.get(subComponentId);
+        const subComponentObjects = this._imageManagerInfo.get(unitId)?.get(subUnitId);
 
         if (subComponentObjects == null) {
             return [];

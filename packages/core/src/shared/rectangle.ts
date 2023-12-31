@@ -33,6 +33,9 @@ export class Rectangle {
     }
 
     static equals(src: IRange, target: IRange): boolean {
+        if (src == null || target == null) {
+            return false;
+        }
         return (
             src.endRow === target.endRow &&
             src.endColumn === target.endColumn &&

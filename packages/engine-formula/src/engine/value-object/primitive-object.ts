@@ -24,6 +24,8 @@ import { compareWithWildcard } from '../utils/compare';
 import { ceil, floor, pow, round } from '../utils/math-kit';
 import { BaseValueObject, ErrorValueObject } from './base-value-object';
 
+export type PrimitiveValueType = string | boolean | number | null;
+
 export class NullValueObject extends BaseValueObject {
     override isNull(): boolean {
         return true;

@@ -26,7 +26,7 @@ export const DEFAULT_DOCUMENT_SUB_COMPONENT_ID = '__default_document_sub_compone
 
 export interface IFloatingObjectManagerSearchParam {
     unitId: string;
-    subComponentId: string; //sheetId, pageId and so on, it has a default name in doc business
+    subUnitId: string; //sheetId, pageId and so on, it has a default name in doc business
 }
 
 export interface IFloatingObjectManagerSearchItemParam extends IFloatingObjectManagerSearchParam {
@@ -153,20 +153,20 @@ export class FloatingObjectManagerService implements IDisposable, IFloatingObjec
         if (param == null) {
             return;
         }
-        const { unitId, subComponentId } = param;
-        return this._managerInfo.get(unitId)?.get(subComponentId);
+        const { unitId, subUnitId } = param;
+        return this._managerInfo.get(unitId)?.get(subUnitId);
     }
 
     private _getFloatingObject(param: Nullable<IFloatingObjectManagerSearchItemParam>) {
         if (param == null) {
             return;
         }
-        const { unitId, subComponentId, floatingObjectId } = param;
-        return this._managerInfo.get(unitId)?.get(subComponentId)?.get(floatingObjectId);
+        const { unitId, subUnitId, floatingObjectId } = param;
+        return this._managerInfo.get(unitId)?.get(subUnitId)?.get(floatingObjectId);
     }
 
     private _addByParam(insertParam: IFloatingObjectManagerParam): IFloatingObjectManagerParam[] {
-        const { unitId, subComponentId, floatingObject, floatingObjectId } = insertParam;
+        const { unitId, subUnitId, floatingObject, floatingObjectId } = insertParam;
 
         if (!this._managerInfo.has(unitId)) {
             this._managerInfo.set(unitId, new Map());
@@ -174,26 +174,26 @@ export class FloatingObjectManagerService implements IDisposable, IFloatingObjec
 
         const subComponentData = this._managerInfo.get(unitId)!;
 
-        if (!subComponentData.has(subComponentId)) {
-            subComponentData.set(subComponentId, new Map());
+        if (!subComponentData.has(subUnitId)) {
+            subComponentData.set(subUnitId, new Map());
         }
 
-        subComponentData.get(subComponentId)!.set(floatingObjectId, floatingObject);
+        subComponentData.get(subUnitId)!.set(floatingObjectId, floatingObject);
 
-        return [{ unitId, subComponentId, floatingObjectId, floatingObject }];
+        return [{ unitId, subUnitId, floatingObjectId, floatingObject }];
     }
 
     private _clearByParam(param: IFloatingObjectManagerSearchParam): IFloatingObjectManagerParam[] {
         const floatingObjects = this._getFloatingObjects(param);
 
-        const { unitId, subComponentId } = param;
+        const { unitId, subUnitId } = param;
 
         const refreshObjects: IFloatingObjectManagerParam[] = [];
 
         floatingObjects?.forEach((value, key) => {
             refreshObjects.push({
                 unitId,
-                subComponentId,
+                subUnitId,
                 floatingObjectId: key,
                 floatingObject: value,
             });

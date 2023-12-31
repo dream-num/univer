@@ -85,6 +85,8 @@ export interface ISelectionRenderService {
     // getMoveCellInfo(direction: Direction, selectionData: Nullable<ISelectionWithCoord>): Nullable<ISelectionWithCoord>;
     // transformCellDataToSelectionData(row: number, column: number): Nullable<ISelectionWithCoord>;
     reset(): void;
+
+    refreshSelectionMoveStart(): void;
 }
 
 /**
@@ -288,6 +290,10 @@ export class SelectionRenderService implements ISelectionRenderService {
             control.disableHeaderHighlight();
         }
         currentControls.push(control);
+    }
+
+    refreshSelectionMoveStart() {
+        this._selectionMoveStart$.next(this.getSelectionDataWithStyle());
     }
 
     changeRuntime(skeleton: SpreadsheetSkeleton, scene: Scene, viewport?: Viewport) {

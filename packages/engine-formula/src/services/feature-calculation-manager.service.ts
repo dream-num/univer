@@ -23,7 +23,7 @@ import type { FormulaDependencyTree } from '../engine/dependency/dependency-tree
 
 export interface IFeatureCalculationManagerParam {
     unitId: string;
-    subComponentId: string;
+    subUnitId: string;
     dependencyRanges: IUnitRange[];
     getDirtyData: (currentDependencyTree: FormulaDependencyTree) => {
         runtimeCellData: IRuntimeUnitDataType;

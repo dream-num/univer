@@ -26,7 +26,12 @@ import {
 import type { IMouseEvent, IPointerEvent } from '@univerjs/engine-render';
 import { CURSOR_TYPE, IRenderManagerService, Rect, ScrollTimer, Vector2 } from '@univerjs/engine-render';
 import type { IMoveColsCommandParams, IMoveRowsCommandParams, ISelectionWithStyle } from '@univerjs/sheets';
-import { MoveColsCommand, MoveRowsCommand, SelectionManagerService } from '@univerjs/sheets';
+import {
+    MoveColsCommand,
+    MoveRowsCommand,
+    NORMAL_SELECTION_PLUGIN_NAME,
+    SelectionManagerService,
+} from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX, VIEWPORT_KEY } from '../common/keys';
@@ -391,6 +396,12 @@ export class HeaderMoveController extends Disposable {
 
     private _checkInHeaderRange(rowOrColumn: number, type: HEADER_MOVE_TYPE = HEADER_MOVE_TYPE.ROW) {
         const rangeDatas = this._selectionManagerService.getSelections();
+
+        const pluginName = this._selectionManagerService.getCurrent()?.pluginName;
+
+        if (pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
+            return false;
+        }
 
         const matchSelectionData = rangeDatas?.find((data) => {
             const range = data.range;

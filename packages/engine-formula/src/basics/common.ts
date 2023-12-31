@@ -97,7 +97,7 @@ export interface IFormulaData {
 }
 
 export interface IOtherFormulaData {
-    [unitId: string]: { [subComponentId: string]: { [formulaId: string]: IFormulaDataItem } };
+    [unitId: string]: { [subUnitId: string]: { [formulaId: string]: IFormulaDataItem } };
 }
 
 /**
@@ -140,6 +140,8 @@ export interface IFormulaDatasetConfig {
     dirtyNameMap: IDirtyUnitSheetNameMap;
     dirtyUnitFeatureMap: IDirtyUnitFeatureMap;
     excludedCell?: IUnitExcludedCell;
+    allUnitData?: IUnitData;
+    unitSheetNameMap?: IUnitSheetNameMap;
 }
 
 export enum ConcatenateType {

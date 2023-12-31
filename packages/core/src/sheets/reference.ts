@@ -16,9 +16,10 @@
 
 import { Tools } from '../shared/tools';
 import type { IRange } from '../types/interfaces/i-range';
-import { AbsoluteRefType } from '../types/interfaces/i-range';
+import { AbsoluteRefType, RANGE_TYPE } from '../types/interfaces/i-range';
 
-const UNIT_NAME_REGEX = '\'?\\[((?![\\/?:"<>|*\\\\]).)*\\]';
+export const UNIT_NAME_REGEX = '\'?\\[((?![\\/?:"<>|*\\\\]).)*?\\]';
+
 const $ROW_REGEX = /[^0-9]/g;
 const $COLUMN_REGEX = /[^A-Za-z]/g;
 
@@ -104,11 +105,34 @@ function _getAbsoluteToken(absoluteRefType = AbsoluteRefType.NONE) {
  * @param range The `IRange` to be serialized
  */
 export function serializeRange(range: IRange): string {
-    const { startColumn, startRow, endColumn, endRow, startAbsoluteRefType, endAbsoluteRefType } = range;
+    const {
+        startColumn,
+        startRow,
+        endColumn,
+        endRow,
+        startAbsoluteRefType,
+        endAbsoluteRefType,
+        rangeType = RANGE_TYPE.NORMAL,
+    } = range;
 
     const start = _getAbsoluteToken(startAbsoluteRefType);
 
     const end = _getAbsoluteToken(endAbsoluteRefType);
+
+    if (rangeType === RANGE_TYPE.ROW || rangeType === RANGE_TYPE.ALL) {
+        const startStr = `${start.rowAbsoluteString}${startRow + 1}`;
+
+        const endStr = `${end.rowAbsoluteString}${endRow + 1}`;
+
+        return `${startStr}:${endStr}`;
+    }
+    if (rangeType === RANGE_TYPE.COLUMN) {
+        const startStr = `${start.columnAbsoluteString}${Tools.chatAtABC(startColumn)}`;
+
+        const endStr = `${end.columnAbsoluteString}${Tools.chatAtABC(endColumn)}`;
+
+        return `${startStr}:${endStr}`;
+    }
 
     const startStr = `${start.columnAbsoluteString}${Tools.chatAtABC(startColumn)}${start.rowAbsoluteString}${
         startRow + 1
@@ -171,13 +195,14 @@ function singleReferenceToGrid(refBody: string) {
     };
 }
 
-export function deserializeRangeWithSheet(refString: string): IGridRangeName {
+export function handleRefStringInfo(refString: string) {
     const unitIdMatch = new RegExp(UNIT_NAME_REGEX).exec(refString);
     let unitId = '';
 
     if (unitIdMatch != null) {
-        unitId = unitIdMatch[0];
-        refString = refString.replace(new RegExp(UNIT_NAME_REGEX, 'g'), '');
+        unitId = unitIdMatch[0].trim();
+        unitId = unitId.slice(1, unitId.length - 1);
+        refString = refString.replace(new RegExp(UNIT_NAME_REGEX), '');
     }
 
     const sheetNameIndex = refString.indexOf('!');
@@ -185,10 +210,23 @@ export function deserializeRangeWithSheet(refString: string): IGridRangeName {
     let refBody: string = '';
     if (sheetNameIndex > -1) {
         sheetName = refString.substring(0, sheetNameIndex);
+        if (sheetName[0] === "'" && sheetName[sheetName.length - 1] === "'") {
+            sheetName = sheetName.substring(1, sheetName.length - 1);
+        }
         refBody = refString.substring(sheetNameIndex);
     } else {
         refBody = refString;
     }
+
+    return {
+        refBody,
+        sheetName,
+        unitId,
+    };
+}
+
+export function deserializeRangeWithSheet(refString: string): IGridRangeName {
+    const { refBody, sheetName, unitId } = handleRefStringInfo(refString);
 
     const colonIndex = refBody.indexOf(':');
 

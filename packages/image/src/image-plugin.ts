@@ -51,7 +51,7 @@ export class UniverImagePlugin extends Plugin {
         });
         imageManagerService.add({
             unitId: 'd',
-            subComponentId: DEFAULT_DOCUMENT_SUB_COMPONENT_ID,
+            subUnitId: DEFAULT_DOCUMENT_SUB_COMPONENT_ID,
             imageId: 'shapeTest1',
             imageModel: model,
         });

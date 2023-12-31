@@ -20,7 +20,7 @@ import { createIdentifier } from '@wendellhu/redi';
 
 export interface IImageRenderParam {
     unitId: string;
-    subComponentId: string; //sheetId, pageId and so on, it has a default name in doc business
+    subUnitId: string; //sheetId, pageId and so on, it has a default name in doc business
     imageId: string;
 }
 

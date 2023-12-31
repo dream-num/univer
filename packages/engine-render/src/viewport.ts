@@ -298,9 +298,6 @@ export class Viewport {
     }
 
     setScrollBar(instance: BaseScrollBar) {
-        if (this._scrollBar) {
-            console.warn('Old scrollBar will be replaced ');
-        }
         this._scrollBar = instance;
         this._resizeCacheCanvasAndScrollBar();
     }
@@ -473,19 +470,12 @@ export class Viewport {
             }
         }
 
-        const scale = this._getScale();
+        const { scaleX, scaleY } = this._scene.getPrecisionScale();
 
         return {
-            x: fixLineWidthByScale(x + this._paddingStartX, scale),
-            y: fixLineWidthByScale(y + this._paddingStartY, scale),
+            x: fixLineWidthByScale(x + this._paddingStartX, scaleX),
+            y: fixLineWidthByScale(y + this._paddingStartY, scaleY),
         };
-    }
-
-    private _getScale() {
-        const mainScene = this._scene;
-        const pixelRatio = mainScene.getEngine()?.getPixelRatio() || 1;
-        const { scaleX, scaleY } = mainScene.getAncestorScale();
-        return Math.max(scaleX * pixelRatio, scaleY * pixelRatio);
     }
 
     getTransformedScroll() {
@@ -884,7 +874,7 @@ export class Viewport {
                 limitY: this._scrollBar?.limitY,
                 isTrigger,
             });
-        }, 200);
+        }, 2);
     }
 
     private _scroll(scrollType: SCROLL_TYPE, pos: IScrollBarPosition, isTrigger = true) {
@@ -986,9 +976,11 @@ export class Viewport {
         const m = sceneTrans.getMatrix();
 
         const scaleFromX = this._isRelativeX ? (m[0] < 1 ? m[0] : 1) : 1;
+        // eslint-disable-next-line no-magic-numbers
         const scaleFromY = this._isRelativeY ? (m[3] < 1 ? m[3] : 1) : 1;
 
         const scaleToX = this._isRelativeX ? 1 : m[0] < 1 ? m[0] : 1;
+        // eslint-disable-next-line no-magic-numbers
         const scaleToY = this._isRelativeY ? 1 : m[3] < 1 ? m[3] : 1;
 
         let width = this._width;
@@ -1001,6 +993,7 @@ export class Viewport {
             width = size.width;
         }
 
+        // eslint-disable-next-line no-magic-numbers
         if (m[3] > 1) {
             height = size.height;
         }

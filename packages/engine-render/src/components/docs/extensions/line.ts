@@ -22,8 +22,9 @@ import { BooleanNumber, getColorStyle, TextDecoration } from '@univerjs/core';
 import { COLOR_BLACK_RGB, DEFAULT_OFFSET_SPACING, FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics/const';
 import { calculateRectRotate } from '../../../basics/draw';
 import type { IDocumentSkeletonSpan } from '../../../basics/i-document-skeleton-cached';
-import { degToRad, fixLineWidthByScale, getScale } from '../../../basics/tools';
+import { degToRad, getScale } from '../../../basics/tools';
 import { Vector2 } from '../../../basics/vector2';
+import type { UniverContext } from '../../../context';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
 import { docExtension } from '../doc-extension';
 
@@ -38,7 +39,7 @@ export class Line extends docExtension {
 
     private _preBackgroundColor = '';
 
-    override draw(ctx: CanvasRenderingContext2D, parentScale: IScale, span: IDocumentSkeletonSpan) {
+    override draw(ctx: UniverContext, parentScale: IScale, span: IDocumentSkeletonSpan) {
         const line = span.parent?.parent;
         if (!line) {
             return;
@@ -82,7 +83,7 @@ export class Line extends docExtension {
     }
 
     private _drawLine(
-        ctx: CanvasRenderingContext2D,
+        ctx: UniverContext,
         span: IDocumentSkeletonSpan,
         line: ITextDecoration,
         startY: number,
@@ -106,7 +107,7 @@ export class Line extends docExtension {
 
             ctx.save();
 
-            ctx.translate(FIX_ONE_PIXEL_BLUR_OFFSET / scale, FIX_ONE_PIXEL_BLUR_OFFSET / scale);
+            ctx.translateWithPrecisionRatio(FIX_ONE_PIXEL_BLUR_OFFSET, FIX_ONE_PIXEL_BLUR_OFFSET);
 
             ctx.beginPath();
             const color = getColorStyle(colorStyle) || COLOR_BLACK_RGB;
@@ -128,15 +129,15 @@ export class Line extends docExtension {
                 alignOffset
             );
 
-            ctx.moveTo(fixLineWidthByScale(start.x, scale), fixLineWidthByScale(start.y, scale));
-            ctx.lineTo(fixLineWidthByScale(end.x, scale), fixLineWidthByScale(end.y, scale));
+            ctx.moveTo(start.x, start.y);
+            ctx.lineTo(end.x, end.y);
             ctx.stroke();
 
             ctx.restore();
         }
     }
 
-    private _setLineType(ctx: CanvasRenderingContext2D, style: TextDecoration) {
+    private _setLineType(ctx: UniverContext, style: TextDecoration) {
         if (style === TextDecoration.DASH_DOT_DOT_HEAVY || style === TextDecoration.DOT_DOT_DASH) {
             ctx.setLineDash([2, 2, 5, 2, 2]);
         } else if (style === TextDecoration.DASH_DOT_HEAVY || style === TextDecoration.DOT_DASH) {
@@ -150,24 +151,6 @@ export class Line extends docExtension {
         } else {
             ctx.setLineDash([0]);
         }
-    }
-
-    private _getLineWidth(style: TextDecoration) {
-        let lineWidth = 1;
-        if (
-            style === TextDecoration.WAVY_HEAVY ||
-            style === TextDecoration.DASHED_HEAVY ||
-            style === TextDecoration.DOTTED_HEAVY ||
-            style === TextDecoration.DASH_DOT_HEAVY ||
-            style === TextDecoration.DASH_LONG_HEAVY ||
-            style === TextDecoration.DASH_DOT_DOT_HEAVY
-        ) {
-            lineWidth = 2;
-        } else if (style === TextDecoration.THICK) {
-            lineWidth = 3;
-        }
-
-        return lineWidth;
     }
 }
 

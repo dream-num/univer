@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IShapeProps } from '@univerjs/engine-render';
+import type { IShapeProps, UniverContext } from '@univerjs/engine-render';
 import { Rect, Shape } from '@univerjs/engine-render';
 
 export interface IHeaderMenuShapeResizeProps extends IShapeProps {
@@ -62,7 +62,7 @@ export class HeaderMenuResizeShape<
         return this._color;
     }
 
-    protected override _draw(ctx: CanvasRenderingContext2D) {
+    protected override _draw(ctx: UniverContext) {
         let { width, height } = this;
 
         let left = 0;

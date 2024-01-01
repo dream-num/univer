@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IShapeProps } from '@univerjs/engine-render';
+import type { IShapeProps, UniverContext } from '@univerjs/engine-render';
 import { Rect, RegularPolygon, Shape } from '@univerjs/engine-render';
 
 export interface IHeaderMenuShapeProps extends IShapeProps {
@@ -59,7 +59,7 @@ export class HeaderMenuShape<T extends IHeaderMenuShapeProps = IHeaderMenuShapeP
         });
     }
 
-    protected override _draw(ctx: CanvasRenderingContext2D) {
+    protected override _draw(ctx: UniverContext) {
         if (this._mode === HEADER_MENU_SHAPE_TYPE.HIGHLIGHT) {
             Rect.drawWith(ctx, {
                 width: this._size,

@@ -21,6 +21,7 @@ import { CURSOR_TYPE } from '../../basics/const';
 import type { IMouseEvent, IPointerEvent } from '../../basics/i-events';
 import { attachObjectHover } from '../../basics/quick-event';
 import { getColor } from '../../basics/tools';
+import type { UniverContext } from '../../context';
 import type { Scene } from '../../scene';
 import { SceneViewer } from '../../scene-viewer';
 import { Path } from '../../shape/path';
@@ -154,7 +155,7 @@ export class Slide extends SceneViewer {
         scene.getObject(SLIDE_NAVIGATION_KEY.RIGHT)?.show();
     }
 
-    renderToThumb(mainCtx: CanvasRenderingContext2D, pageId: string, scaleX: number = 1, scaleY: number = 1) {
+    renderToThumb(mainCtx: UniverContext, pageId: string, scaleX: number = 1, scaleY: number = 1) {
         const scene = this.getSubScene(pageId);
         if (scene == null) {
             return;

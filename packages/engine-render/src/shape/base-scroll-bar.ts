@@ -17,6 +17,7 @@
 import type { Nullable } from '@univerjs/core';
 
 import type { Vector2 } from '../basics/vector2';
+import type { UniverContext } from '../context';
 import type { ThinScene } from '../thin-scene';
 import type { Rect } from './rect';
 
@@ -182,5 +183,5 @@ export class BaseScrollBar {
 
     makeDirty(state: boolean) {}
 
-    render(ctx: CanvasRenderingContext2D, left: number = 0, top: number = 0) {}
+    render(ctx: UniverContext, left: number = 0, top: number = 0) {}
 }

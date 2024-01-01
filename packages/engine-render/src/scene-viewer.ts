@@ -20,6 +20,7 @@ import { BaseObject } from './base-object';
 import { RENDER_CLASS_TYPE } from './basics/const';
 import type { IObjectFullState } from './basics/interfaces';
 import type { IViewportBound, Vector2 } from './basics/vector2';
+import type { UniverContext } from './context';
 import type { ThinScene } from './thin-scene';
 
 export class SceneViewer extends BaseObject {
@@ -39,7 +40,7 @@ export class SceneViewer extends BaseObject {
         return RENDER_CLASS_TYPE.SCENE_VIEWER;
     }
 
-    override render(mainCtx: CanvasRenderingContext2D, bounds?: IViewportBound) {
+    override render(mainCtx: UniverContext, bounds?: IViewportBound) {
         if (!this.visible) {
             this.makeDirty(false);
             return this;

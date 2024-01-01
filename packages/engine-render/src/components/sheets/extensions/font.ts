@@ -17,7 +17,7 @@
 import type { IColorStyle, IRange, IScale } from '@univerjs/core';
 import { HorizontalAlign, ObjectMatrix, WrapStrategy } from '@univerjs/core';
 
-import { fixLineWidthByScale } from '../../../basics/tools';
+import type { UniverContext } from '../../../context';
 import type { Documents } from '../../docs/document';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import type { IFontCacheItem } from '../interfaces';
@@ -46,7 +46,7 @@ export class Font extends SheetExtension {
     }
 
     override draw(
-        ctx: CanvasRenderingContext2D,
+        ctx: UniverContext,
         parentScale: IScale,
         spreadsheetSkeleton: SpreadsheetSkeleton,
         diffRanges?: IRange[]
@@ -97,11 +97,6 @@ export class Font extends SheetExtension {
                         startX = mergeInfo.startX;
                         endX = mergeInfo.endX;
                     }
-
-                    startY = fixLineWidthByScale(startY, scale);
-                    endY = fixLineWidthByScale(endY, scale);
-                    startX = fixLineWidthByScale(startX, scale);
-                    endX = fixLineWidthByScale(endX, scale);
 
                     if (!this.isRenderDiffRangesByRow(mergeInfo.startRow, mergeInfo.endRow, diffRanges)) {
                         return true;
@@ -197,7 +192,7 @@ export class Font extends SheetExtension {
     }
 
     private _renderDocuments(
-        ctx: CanvasRenderingContext2D,
+        ctx: UniverContext,
         docsConfig: IFontCacheItem,
         startX: number,
         startY: number,
@@ -231,7 +226,7 @@ export class Font extends SheetExtension {
     }
 
     private _clipRectangle(
-        ctx: CanvasRenderingContext2D,
+        ctx: UniverContext,
         startRow: number,
         endRow: number,
         startColumn: number,
@@ -240,17 +235,11 @@ export class Font extends SheetExtension {
         rowHeightAccumulation: number[],
         columnWidthAccumulation: number[]
     ) {
-        const startY = fixLineWidthByScale(rowHeightAccumulation[startRow - 1] || 0, scale);
-        const endY = fixLineWidthByScale(
-            rowHeightAccumulation[endRow] || rowHeightAccumulation[rowHeightAccumulation.length - 1],
-            scale
-        );
+        const startY = rowHeightAccumulation[startRow - 1] || 0;
+        const endY = rowHeightAccumulation[endRow] || rowHeightAccumulation[rowHeightAccumulation.length - 1];
 
-        const startX = fixLineWidthByScale(columnWidthAccumulation[startColumn - 1] || 0, scale);
-        const endX = fixLineWidthByScale(
-            columnWidthAccumulation[endColumn] || columnWidthAccumulation[columnWidthAccumulation.length - 1],
-            scale
-        );
+        const startX = columnWidthAccumulation[startColumn - 1] || 0;
+        const endX = columnWidthAccumulation[endColumn] || columnWidthAccumulation[columnWidthAccumulation.length - 1];
 
         ctx.rect(startX, startY, endX - startX, endY - startY);
         ctx.clip();

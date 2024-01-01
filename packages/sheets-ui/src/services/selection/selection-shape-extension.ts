@@ -170,8 +170,8 @@ export class SelectionShapeExtension {
             }
         }
 
-        const startCell = this._skeleton.getNoMergeCellPositionByIndex(startRow, startColumn, scaleX, scaleY);
-        const endCell = this._skeleton.getNoMergeCellPositionByIndex(endRow, endColumn, scaleX, scaleY);
+        const startCell = this._skeleton.getNoMergeCellPositionByIndex(startRow, startColumn);
+        const endCell = this._skeleton.getNoMergeCellPositionByIndex(endRow, endColumn);
 
         const startY = startCell?.startY || 0;
         const endY = endCell?.endY || 0;
@@ -426,8 +426,8 @@ export class SelectionShapeExtension {
             endColumn: finalEndColumn,
         } = this._swapPositions(startRow, startColumn, endRow, endColumn);
 
-        const startCell = this._skeleton.getNoMergeCellPositionByIndex(finalStartRow, finalStartColumn, scaleX, scaleY);
-        const endCell = this._skeleton.getNoMergeCellPositionByIndex(finalEndRow, finalEndColumn, scaleX, scaleY);
+        const startCell = this._skeleton.getNoMergeCellPositionByIndex(finalStartRow, finalStartColumn);
+        const endCell = this._skeleton.getNoMergeCellPositionByIndex(finalEndRow, finalEndColumn);
 
         const startY = startCell?.startY || 0;
         const endY = endCell?.endY || 0;
@@ -627,8 +627,8 @@ export class SelectionShapeExtension {
             isLighten = rulerValue.isLighten;
         }
 
-        const startCell = this._skeleton.getNoMergeCellPositionByIndex(startRow, startColumn, scaleX, scaleY);
-        const endCell = this._skeleton.getNoMergeCellPositionByIndex(endRow, endColumn, scaleX, scaleY);
+        const startCell = this._skeleton.getNoMergeCellPositionByIndex(startRow, startColumn);
+        const endCell = this._skeleton.getNoMergeCellPositionByIndex(endRow, endColumn);
 
         const startY = startCell?.startY || 0;
         const endY = endCell?.endY || 0;

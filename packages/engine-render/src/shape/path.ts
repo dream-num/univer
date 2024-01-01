@@ -20,6 +20,7 @@ import type { IKeyValue, Nullable } from '@univerjs/core';
 
 import type { IObjectFullState } from '../basics/interfaces';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '../basics/interfaces';
+import type { UniverContext } from '../context';
 import type { IShapeProps } from './shape';
 import { Shape } from './shape';
 
@@ -133,7 +134,7 @@ export class Path extends Shape<IPathProps> {
         return this._dataArray;
     }
 
-    static override drawWith(ctx: CanvasRenderingContext2D, props: IPathProps | Path) {
+    static override drawWith(ctx: UniverContext, props: IPathProps | Path) {
         const ca = props.dataArray;
         if (!ca) {
             return;
@@ -930,7 +931,7 @@ export class Path extends Shape<IPathProps> {
         return null;
     }
 
-    protected override _draw(ctx: CanvasRenderingContext2D) {
+    protected override _draw(ctx: UniverContext) {
         Path.drawWith(ctx, this);
     }
 

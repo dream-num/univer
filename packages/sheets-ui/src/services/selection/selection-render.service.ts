@@ -556,14 +556,9 @@ export class SelectionRenderService implements ISelectionRenderService {
              */
             const bounding = skeleton.getMergeBounding(newStartRow, newStartColumn, newEndRow, newEndColumn);
 
-            const startCell = skeleton.getNoMergeCellPositionByIndex(
-                bounding.startRow,
-                bounding.startColumn,
-                scaleX,
-                scaleY
-            );
+            const startCell = skeleton.getNoMergeCellPositionByIndex(bounding.startRow, bounding.startColumn);
 
-            const endCell = skeleton.getNoMergeCellPositionByIndex(bounding.endRow, bounding.endColumn, scaleX, scaleY);
+            const endCell = skeleton.getNoMergeCellPositionByIndex(bounding.endRow, bounding.endColumn);
 
             const newSelectionRange = {
                 startColumn: bounding.startColumn,
@@ -584,7 +579,7 @@ export class SelectionRenderService implements ISelectionRenderService {
              * the original highlighted cell should remain unchanged.
              * If the highlighted cell is a merged cell, the selection needs to be expanded.
              */
-            const activeCell = skeleton.getCellByIndex(actualRow, actualColumn, scaleX, scaleY);
+            const activeCell = skeleton.getCellByIndex(actualRow, actualColumn);
 
             this._startSelectionRange = {
                 startColumn: activeCell.mergeInfo.startColumn,
@@ -724,8 +719,8 @@ export class SelectionRenderService implements ISelectionRenderService {
             return;
         }
         const { scaleX, scaleY } = scene.getAncestorScale();
-        const startCell = skeleton.getNoMergeCellPositionByIndex(startRow, startColumn, scaleX, scaleY);
-        const endCell = skeleton.getNoMergeCellPositionByIndex(endRow, endColumn, scaleX, scaleY);
+        const startCell = skeleton.getNoMergeCellPositionByIndex(startRow, startColumn);
+        const endCell = skeleton.getNoMergeCellPositionByIndex(endRow, endColumn);
 
         return {
             startRow,
@@ -752,12 +747,11 @@ export class SelectionRenderService implements ISelectionRenderService {
         }
         const { actualRow, actualColumn, isMerged, isMergedMainCell, startRow, startColumn, endRow, endColumn } =
             primary;
-        const { scaleX, scaleY } = scene.getAncestorScale();
 
-        const cellPosition = skeleton.getNoMergeCellPositionByIndex(actualRow, actualColumn, scaleX, scaleY);
+        const cellPosition = skeleton.getNoMergeCellPositionByIndex(actualRow, actualColumn);
 
-        const startCell = skeleton.getNoMergeCellPositionByIndex(startRow, startColumn, scaleX, scaleY);
-        const endCell = skeleton.getNoMergeCellPositionByIndex(endRow, endColumn, scaleX, scaleY);
+        const startCell = skeleton.getNoMergeCellPositionByIndex(startRow, startColumn);
+        const endCell = skeleton.getNoMergeCellPositionByIndex(endRow, endColumn);
 
         return {
             actualRow,
@@ -859,8 +853,8 @@ export class SelectionRenderService implements ISelectionRenderService {
             endColumn: finalEndColumn,
         } = newBounding;
 
-        const startCell = skeleton.getNoMergeCellPositionByIndex(finalStartRow, finalStartColumn, scaleX, scaleY);
-        const endCell = skeleton.getNoMergeCellPositionByIndex(finalEndRow, finalEndColumn, scaleX, scaleY);
+        const startCell = skeleton.getNoMergeCellPositionByIndex(finalStartRow, finalStartColumn);
+        const endCell = skeleton.getNoMergeCellPositionByIndex(finalEndRow, finalEndColumn);
 
         const newSelectionRange: IRangeWithCoord = {
             startColumn: finalStartColumn,
@@ -964,7 +958,7 @@ export class SelectionRenderService implements ISelectionRenderService {
 
         const { row, column } = moveActualSelection;
 
-        const startCell = skeleton.getNoMergeCellPositionByIndex(row, column, scaleX, scaleY);
+        const startCell = skeleton.getNoMergeCellPositionByIndex(row, column);
 
         const { startX, startY, endX, endY } = startCell;
 

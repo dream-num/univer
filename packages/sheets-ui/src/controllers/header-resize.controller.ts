@@ -351,12 +351,7 @@ export class HeaderResizeController extends Disposable {
 
                     const currentOffsetY = skeleton.getOffsetByPositionY(this._currentRow);
 
-                    const cell = skeleton.getNoMergeCellPositionByIndex(
-                        this._currentRow,
-                        this._currentColumn,
-                        scaleX,
-                        scaleY
-                    );
+                    const cell = skeleton.getNoMergeCellPositionByIndex(this._currentRow, this._currentColumn);
 
                     let isStartMove = false;
 

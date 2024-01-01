@@ -20,6 +20,7 @@ import { BASE_OBJECT_ARRAY, BaseObject } from '../base-object';
 import { SHAPE_TYPE } from '../basics/const';
 import type { IObjectFullState } from '../basics/interfaces';
 import type { IViewportBound, Vector2 } from '../basics/vector2';
+import type { UniverContext } from '../context';
 
 export type LineJoin = 'round' | 'bevel' | 'miter';
 export type LineCap = 'butt' | 'round' | 'square';
@@ -230,11 +231,11 @@ export abstract class Shape<T> extends BaseObject {
         return this._strokeMiterLimit;
     }
 
-    static drawWith(ctx: CanvasRenderingContext2D, props: IShapeProps) {
+    static drawWith(ctx: UniverContext, props: IShapeProps) {
         /** abstract */
     }
 
-    protected static _renderPaintInOrder(ctx: CanvasRenderingContext2D, props: IShapeProps) {
+    protected static _renderPaintInOrder(ctx: UniverContext, props: IShapeProps) {
         if (props.paintFirst === 'stroke') {
             this._renderStroke(ctx, props);
             this._renderFill(ctx, props);
@@ -246,15 +247,15 @@ export abstract class Shape<T> extends BaseObject {
 
     /**
      * @private
-     * @param {CanvasRenderingContext2D} ctx SheetContext to render on
+     * @param {UniverContext} ctx SheetContext to render on
      */
-    private static _renderFill(ctx: CanvasRenderingContext2D, props: IShapeProps) {
+    private static _renderFill(ctx: UniverContext, props: IShapeProps) {
         if (!props.fill) {
             return;
         }
 
         ctx.save();
-        this.__setFillStyles(ctx, props);
+        this._setFillStyles(ctx, props);
         if (props.fillRule === 'evenodd') {
             ctx.fill('evenodd');
         } else {
@@ -265,9 +266,9 @@ export abstract class Shape<T> extends BaseObject {
 
     /**
      * @private
-     * @param {CanvasRenderingContext2D} ctx SheetContext to render on
+     * @param {UniverContext} ctx SheetContext to render on
      */
-    private static _renderStroke(ctx: CanvasRenderingContext2D, props: IShapeProps) {
+    private static _renderStroke(ctx: UniverContext, props: IShapeProps) {
         const { stroke, strokeWidth, shadowEnabled, shadowForStrokeEnabled, strokeScaleEnabled, parent } = props;
 
         let { scaleX, scaleY } = props;
@@ -276,35 +277,35 @@ export abstract class Shape<T> extends BaseObject {
         }
 
         if (shadowEnabled && !shadowForStrokeEnabled) {
-            this.__removeShadow(ctx);
+            this._removeShadow(ctx);
         }
 
         ctx.save();
         if (strokeScaleEnabled && parent) {
-            const scaling = this.__getObjectScaling();
+            const scaling = this._getObjectScaling();
             ctx.scale(1 / scaling.scaleX, 1 / scaling.scaleY);
         } else if (strokeScaleEnabled) {
             scaleX = scaleX ?? 1;
             scaleY = scaleY ?? 1;
             ctx.scale(1 / scaleX, 1 / scaleY);
         }
-        this.__setLineDash(ctx);
-        this.__setStrokeStyles(ctx, props);
+        this._setLineDash(ctx);
+        this._setStrokeStyles(ctx, props);
         ctx.stroke();
         ctx.restore();
     }
 
-    private static __getObjectScaling() {
+    private static _getObjectScaling() {
         return { scaleX: 1, scaleY: 1 };
     }
 
-    private static __removeShadow(ctx: CanvasRenderingContext2D) {}
+    private static _removeShadow(ctx: UniverContext) {}
 
-    private static __setFillStyles(ctx: CanvasRenderingContext2D, props: IShapeProps) {
+    private static _setFillStyles(ctx: UniverContext, props: IShapeProps) {
         ctx.fillStyle = props.fill!;
     }
 
-    private static __setStrokeStyles(ctx: CanvasRenderingContext2D, props: IShapeProps) {
+    private static _setStrokeStyles(ctx: UniverContext, props: IShapeProps) {
         const { strokeWidth, strokeLineCap, strokeDashOffset, strokeLineJoin, strokeMiterLimit, stroke } = props;
         ctx.lineWidth = strokeWidth!;
         ctx.lineCap = strokeLineCap!;
@@ -314,9 +315,9 @@ export abstract class Shape<T> extends BaseObject {
         ctx.strokeStyle = stroke!;
     }
 
-    private static __setLineDash(ctx: CanvasRenderingContext2D) {}
+    private static _setLineDash(ctx: UniverContext) {}
 
-    override render(mainCtx: CanvasRenderingContext2D, bounds?: IViewportBound) {
+    override render(mainCtx: UniverContext, bounds?: IViewportBound) {
         if (!this.visible) {
             this.makeDirty(false);
             return this;
@@ -381,7 +382,7 @@ export abstract class Shape<T> extends BaseObject {
         };
     }
 
-    protected _draw(ctx: CanvasRenderingContext2D) {
+    protected _draw(ctx: UniverContext) {
         /** abstract */
     }
 

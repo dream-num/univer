@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { fixLineWidthByScale } from '../../basics/tools';
 import type { IViewportBound, Vector2 } from '../../basics/vector2';
+import type { UniverContext } from '../../context';
 import { SheetColumnHeaderExtensionRegistry } from '../extension';
 import type { ColumnHeaderLayout } from './extensions/column-header-layout';
 import { SpreadsheetHeader } from './sheet-component';
@@ -36,11 +36,12 @@ export class SpreadsheetColumnHeader extends SpreadsheetHeader {
         return this._columnHeaderLayoutExtension;
     }
 
-    override draw(ctx: CanvasRenderingContext2D, bounds?: IViewportBound) {
+    override draw(ctx: UniverContext, bounds?: IViewportBound) {
         const spreadsheetSkeleton = this.getSkeleton();
         if (!spreadsheetSkeleton) {
             return;
         }
+
         const parentScale = this.getParentScale();
 
         spreadsheetSkeleton.calculateSegment(bounds);
@@ -51,19 +52,15 @@ export class SpreadsheetColumnHeader extends SpreadsheetHeader {
             return;
         }
 
-        const { a: scaleX = 1, d: scaleY = 1 } = ctx.getTransform();
-
-        const scale = Math.max(scaleX, scaleY);
-
         const { rowHeaderWidth } = spreadsheetSkeleton;
 
         // const { left: fixTranslateLeft, top: fixTranslateTop } = getTranslateInSpreadContextWithPixelRatio();
 
-        ctx.translate(fixLineWidthByScale(rowHeaderWidth, scale), 0);
+        ctx.translateWithPrecision(rowHeaderWidth, 0);
 
         const extensions = this.getExtensionsByOrder();
         for (const extension of extensions) {
-            extension.draw(ctx, { scaleX, scaleY }, spreadsheetSkeleton);
+            extension.draw(ctx, parentScale, spreadsheetSkeleton);
         }
     }
 

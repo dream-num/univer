@@ -17,6 +17,7 @@
 import type { IKeyValue } from '@univerjs/core';
 
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '../basics/interfaces';
+import type { UniverContext } from '../context';
 import type { IShapeProps } from './shape';
 import { Shape } from './shape';
 
@@ -51,7 +52,7 @@ export class Circle extends Shape<ICircleProps> {
         return this._radius;
     }
 
-    static override drawWith(ctx: CanvasRenderingContext2D, props: ICircleProps | Circle) {
+    static override drawWith(ctx: UniverContext, props: ICircleProps | Circle) {
         let { radius } = props;
 
         radius = radius ?? 10;
@@ -82,7 +83,7 @@ export class Circle extends Shape<ICircleProps> {
         };
     }
 
-    protected override _draw(ctx: CanvasRenderingContext2D) {
+    protected override _draw(ctx: UniverContext) {
         Circle.drawWith(ctx, this);
     }
 

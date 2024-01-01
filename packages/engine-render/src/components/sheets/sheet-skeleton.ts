@@ -648,14 +648,14 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
     }
 
-    getNoMergeCellPositionByIndex(rowIndex: number, columnIndex: number, scaleX: number, scaleY: number) {
+    getNoMergeCellPositionByIndex(rowIndex: number, columnIndex: number) {
         const {
             rowHeightAccumulation,
             columnWidthAccumulation,
             rowHeaderWidthAndMarginLeft,
             columnHeaderHeightAndMarginTop,
         } = this;
-        // const { scaleX = 1, scaleY = 1 } = this.getParentScale();
+
         let { startY, endY, startX, endX } = getCellPositionByIndex(
             rowIndex,
             columnIndex,
@@ -676,9 +676,9 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
     }
 
-    getNoMergeCellPositionByIndexWithNoHeader(rowIndex: number, columnIndex: number, scaleX: number, scaleY: number) {
+    getNoMergeCellPositionByIndexWithNoHeader(rowIndex: number, columnIndex: number) {
         const { rowHeightAccumulation, columnWidthAccumulation } = this;
-        // const { scaleX = 1, scaleY = 1 } = this.getParentScale();
+
         const { startY, endY, startX, endX } = getCellPositionByIndex(
             rowIndex,
             columnIndex,
@@ -712,7 +712,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     ): Nullable<ISelectionCellWithCoord> {
         const { row, column } = this.getCellPositionByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY);
 
-        return this.getCellByIndex(row, column, scaleX, scaleY);
+        return this.getCellByIndex(row, column);
     }
 
     /**
@@ -864,7 +864,7 @@ export class SpreadsheetSkeleton extends Skeleton {
      * @param scaleX render scene scale x-axis, current Horizontal Scale, scene.getAncestorScale
      * @param scaleY render scene scale y-axis, current Vertical Scale, scene.getAncestorScale
      */
-    getCellByIndex(row: number, column: number, scaleX: number, scaleY: number): ISelectionCellWithCoord {
+    getCellByIndex(row: number, column: number): ISelectionCellWithCoord {
         const {
             rowHeightAccumulation,
             columnWidthAccumulation,
@@ -887,13 +887,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         startX += rowHeaderWidthAndMarginLeft;
         endX += rowHeaderWidthAndMarginLeft;
 
-        mergeInfo = mergeInfoOffset(
-            mergeInfo,
-            rowHeaderWidthAndMarginLeft,
-            columnHeaderHeightAndMarginTop,
-            scaleX,
-            scaleY
-        );
+        mergeInfo = mergeInfoOffset(mergeInfo, rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop);
 
         return {
             actualRow: row,
@@ -908,7 +902,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
     }
 
-    getCellByIndexWithNoHeader(row: number, column: number, scaleX: number, scaleY: number) {
+    getCellByIndexWithNoHeader(row: number, column: number) {
         const { rowHeightAccumulation, columnWidthAccumulation } = this;
 
         const primary = getCellByIndex(
@@ -921,7 +915,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         const { isMerged, isMergedMainCell } = primary;
         const { startY, endY, startX, endX, mergeInfo } = primary;
 
-        const newMergeInfo = mergeInfoOffset(mergeInfo, 0, 0, scaleX, scaleY);
+        const newMergeInfo = mergeInfoOffset(mergeInfo, 0, 0);
 
         return {
             actualRow: row,
@@ -1478,7 +1472,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
             bgCache.setValue(r, c, rgb);
 
-            const cellInfo = this.getCellByIndexWithNoHeader(r, c, 1, 1);
+            const cellInfo = this.getCellByIndexWithNoHeader(r, c);
 
             cache.backgroundPositions?.setValue(r, c, cellInfo);
         }

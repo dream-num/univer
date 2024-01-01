@@ -25,6 +25,7 @@ import { fixLineWidthByScale, toPx } from './basics/tools';
 import { Transform } from './basics/transform';
 import type { IBoundRectNoAngle, IViewportBound } from './basics/vector2';
 import { Vector2 } from './basics/vector2';
+import type { UniverContext } from './context';
 import type { BaseScrollBar } from './shape/base-scroll-bar';
 import type { ThinScene } from './thin-scene';
 
@@ -297,9 +298,6 @@ export class Viewport {
     }
 
     setScrollBar(instance: BaseScrollBar) {
-        if (this._scrollBar) {
-            console.warn('Old scrollBar will be replaced ');
-        }
         this._scrollBar = instance;
         this._resizeCacheCanvasAndScrollBar();
     }
@@ -472,19 +470,12 @@ export class Viewport {
             }
         }
 
-        const scale = this._getScale();
+        const { scaleX, scaleY } = this._scene.getPrecisionScale();
 
         return {
-            x: fixLineWidthByScale(x + this._paddingStartX, scale),
-            y: fixLineWidthByScale(y + this._paddingStartY, scale),
+            x: fixLineWidthByScale(x + this._paddingStartX, scaleX),
+            y: fixLineWidthByScale(y + this._paddingStartY, scaleY),
         };
-    }
-
-    private _getScale() {
-        const mainScene = this._scene;
-        const pixelRatio = mainScene.getEngine()?.getPixelRatio() || 1;
-        const { scaleX, scaleY } = mainScene.getAncestorScale();
-        return Math.max(scaleX * pixelRatio, scaleY * pixelRatio);
     }
 
     getTransformedScroll() {
@@ -528,15 +519,19 @@ export class Viewport {
         return composeResult;
     }
 
-    render(parentCtx?: CanvasRenderingContext2D, objects: BaseObject[] = [], isMaxLayer = false) {
-        if (this.isActive === false) {
+    render(parentCtx?: UniverContext, objects: BaseObject[] = [], isMaxLayer = false) {
+        if (
+            this.isActive === false ||
+            this.width == null ||
+            this.height == null ||
+            this.width <= 1 ||
+            this.height <= 1
+        ) {
             return;
         }
-        const mainCtx = parentCtx || (this._scene.getEngine()?.getCanvas().getContext() as CanvasRenderingContext2D);
+        const mainCtx = parentCtx || (this._scene.getEngine()?.getCanvas().getContext() as UniverContext);
 
         const sceneTrans = this._scene.transform.clone();
-
-        const { a: scaleX = 1, d: scaleY = 1 } = mainCtx.getTransform();
 
         sceneTrans.multiply(Transform.create([1, 0, 0, 1, -this.actualScrollX || 0, -this.actualScrollY || 0]));
 
@@ -879,7 +874,7 @@ export class Viewport {
                 limitY: this._scrollBar?.limitY,
                 isTrigger,
             });
-        }, 200);
+        }, 2);
     }
 
     private _scroll(scrollType: SCROLL_TYPE, pos: IScrollBarPosition, isTrigger = true) {
@@ -981,9 +976,11 @@ export class Viewport {
         const m = sceneTrans.getMatrix();
 
         const scaleFromX = this._isRelativeX ? (m[0] < 1 ? m[0] : 1) : 1;
+        // eslint-disable-next-line no-magic-numbers
         const scaleFromY = this._isRelativeY ? (m[3] < 1 ? m[3] : 1) : 1;
 
         const scaleToX = this._isRelativeX ? 1 : m[0] < 1 ? m[0] : 1;
+        // eslint-disable-next-line no-magic-numbers
         const scaleToY = this._isRelativeY ? 1 : m[3] < 1 ? m[3] : 1;
 
         let width = this._width;
@@ -996,6 +993,7 @@ export class Viewport {
             width = size.width;
         }
 
+        // eslint-disable-next-line no-magic-numbers
         if (m[3] > 1) {
             height = size.height;
         }
@@ -1088,7 +1086,7 @@ export class Viewport {
         });
     }
 
-    private _drawScrollbar(ctx: CanvasRenderingContext2D) {
+    private _drawScrollbar(ctx: UniverContext) {
         if (!this._scrollBar) {
             return;
         }

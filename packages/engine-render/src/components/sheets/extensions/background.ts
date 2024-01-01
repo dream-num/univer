@@ -16,7 +16,8 @@
 
 import type { IRange, IScale } from '@univerjs/core';
 
-import { fixLineWidthByScale, getColor } from '../../../basics/tools';
+import { getColor } from '../../../basics/tools';
+import type { UniverContext } from '../../../context';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import type { SpreadsheetSkeleton } from '../sheet-skeleton';
 import { SheetExtension } from './sheet-extension';
@@ -31,7 +32,7 @@ export class Background extends SheetExtension {
     override zIndex = DOC_EXTENSION_Z_INDEX;
 
     override draw(
-        ctx: CanvasRenderingContext2D,
+        ctx: UniverContext,
         parentScale: IScale,
         spreadsheetSkeleton: SpreadsheetSkeleton,
         diffRanges?: IRange[]
@@ -54,8 +55,6 @@ export class Background extends SheetExtension {
             return;
         }
         ctx.save();
-
-        const scale = this._getScale(parentScale);
 
         ctx.globalCompositeOperation = 'destination-over';
 
@@ -104,11 +103,6 @@ export class Background extends SheetExtension {
                         startX = mergeInfo.startX;
                         endX = mergeInfo.endX;
                     }
-
-                    startY = fixLineWidthByScale(startY, scale);
-                    endY = fixLineWidthByScale(endY, scale);
-                    startX = fixLineWidthByScale(startX, scale);
-                    endX = fixLineWidthByScale(endX, scale);
 
                     ctx.moveTo(startX, startY);
                     ctx.lineTo(startX, endY);

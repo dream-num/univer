@@ -19,6 +19,7 @@ import type { IKeyValue } from '@univerjs/core';
 import type { IObjectFullState } from '../basics/interfaces';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '../basics/interfaces';
 import type { IPoint } from '../basics/vector2';
+import type { UniverContext } from '../context';
 import type { IShapeProps } from './shape';
 import { Shape } from './shape';
 
@@ -47,7 +48,7 @@ export class RegularPolygon extends Shape<IRegularPolygonProps> {
         return this._pointsGroup;
     }
 
-    static override drawWith(ctx: CanvasRenderingContext2D, props: IRegularPolygonProps | RegularPolygon) {
+    static override drawWith(ctx: UniverContext, props: IRegularPolygonProps | RegularPolygon) {
         let { pointsGroup } = props;
 
         pointsGroup = pointsGroup ?? [[]];
@@ -146,7 +147,7 @@ export class RegularPolygon extends Shape<IRegularPolygonProps> {
         };
     }
 
-    protected override _draw(ctx: CanvasRenderingContext2D) {
+    protected override _draw(ctx: UniverContext) {
         RegularPolygon.drawWith(ctx, this);
     }
 

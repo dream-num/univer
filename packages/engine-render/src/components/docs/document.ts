@@ -26,6 +26,7 @@ import { degToRad, getScale } from '../../basics/tools';
 import type { Transform } from '../../basics/transform';
 import type { IViewportBound } from '../../basics/vector2';
 import { Vector2 } from '../../basics/vector2';
+import type { UniverContext } from '../../context';
 import type { Scene } from '../../scene';
 import type { IExtensionConfig } from '../extension';
 import { DocumentsSpanAndLineExtensionRegistry } from '../extension';
@@ -48,7 +49,7 @@ export interface IPageRenderConfig {
     page: IDocumentSkeletonPage;
     pageLeft: number;
     pageTop: number;
-    ctx: CanvasRenderingContext2D;
+    ctx: UniverContext;
 }
 
 export interface IDocumentOffsetConfig extends IPageMarginLayout {
@@ -177,7 +178,7 @@ export class Documents extends DocComponent {
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
 
-    override draw(ctx: CanvasRenderingContext2D, bounds?: IViewportBound) {
+    override draw(ctx: UniverContext, bounds?: IViewportBound) {
         const documentSkeleton = this.getSkeleton();
 
         if (!documentSkeleton) {
@@ -435,7 +436,7 @@ export class Documents extends DocComponent {
         return this;
     }
 
-    protected override _draw(ctx: CanvasRenderingContext2D, bounds?: IViewportBound) {
+    protected override _draw(ctx: UniverContext, bounds?: IViewportBound) {
         this.draw(ctx, bounds);
     }
 
@@ -474,11 +475,11 @@ export class Documents extends DocComponent {
         return offsetTop;
     }
 
-    private _startRotation(ctx: CanvasRenderingContext2D, textAngle: number) {
+    private _startRotation(ctx: UniverContext, textAngle: number) {
         ctx.rotate(textAngle || 0);
     }
 
-    private _resetRotation(ctx: CanvasRenderingContext2D, textAngle: number) {
+    private _resetRotation(ctx: UniverContext, textAngle: number) {
         ctx.rotate(-textAngle || 0);
     }
 

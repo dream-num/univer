@@ -17,12 +17,13 @@
 import type { IPosition } from '@univerjs/core';
 import { BorderStyleTypes } from '@univerjs/core';
 
+import type { UniverContext } from '../context';
 import { BORDER_TYPE, ORIENTATION_TYPE } from './const';
 import type { IDocumentSkeletonLine } from './i-document-skeleton-cached';
 import { createCanvasElement } from './tools';
 import { Vector2 } from './vector2';
 
-export interface IContext2D extends CanvasRenderingContext2D {
+export interface IContext2D extends UniverContext {
     webkitBackingStorePixelRatio: number;
     mozBackingStorePixelRatio: number;
     msBackingStorePixelRatio: number;
@@ -53,7 +54,7 @@ export function getDevicePixelRatio(): number {
     return _pixelRatio;
 }
 
-export function drawLineByBorderType(ctx: CanvasRenderingContext2D, type: BORDER_TYPE, position: IPosition) {
+export function drawLineByBorderType(ctx: UniverContext, type: BORDER_TYPE, position: IPosition) {
     let drawStartX = 0;
     let drawStartY = 0;
     let drawEndX = 0;
@@ -88,7 +89,7 @@ export function drawLineByBorderType(ctx: CanvasRenderingContext2D, type: BORDER
     ctx.stroke();
 }
 
-export function drawDiagonalLineByBorderType(ctx: CanvasRenderingContext2D, type: BORDER_TYPE, position: IPosition) {
+export function drawDiagonalLineByBorderType(ctx: UniverContext, type: BORDER_TYPE, position: IPosition) {
     let drawStartX = 0;
     let drawStartY = 0;
     let drawEndX = 0;
@@ -133,13 +134,7 @@ export function drawDiagonalLineByBorderType(ctx: CanvasRenderingContext2D, type
     ctx.stroke();
 }
 
-export function clearLineByBorderType(
-    ctx: CanvasRenderingContext2D,
-    type: BORDER_TYPE,
-    position: IPosition,
-    scaleX: number,
-    scaleY: number
-) {
+export function clearLineByBorderType(ctx: UniverContext, type: BORDER_TYPE, position: IPosition) {
     let drawStartX = 0;
     let drawStartY = 0;
     let drawEndX = 0;
@@ -175,15 +170,10 @@ export function clearLineByBorderType(
     // ctx.stroke();
 
     ctx.beginPath();
-    ctx.clearRect(
-        drawStartX - 1 / scaleX,
-        drawStartY - 1 / scaleY,
-        drawEndX - drawStartX + 2 / scaleX,
-        drawEndY - drawStartY + 2 / scaleY
-    );
+    ctx.clearRect(drawStartX, drawStartY, drawEndX - drawStartX, drawEndY - drawStartY);
 }
 
-export function setLineType(ctx: CanvasRenderingContext2D, style: BorderStyleTypes) {
+export function setLineType(ctx: UniverContext, style: BorderStyleTypes) {
     if (style === BorderStyleTypes.HAIR) {
         ctx.setLineDash([1, 2]);
     } else if (style === BorderStyleTypes.DASH_DOT_DOT || style === BorderStyleTypes.MEDIUM_DASH_DOT_DOT) {

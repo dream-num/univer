@@ -31,7 +31,6 @@ import { UniverUIPlugin } from '@univerjs/ui';
 
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data';
 import { DebuggerPlugin } from '../plugins/debugger';
-import { FUNCTION_LIST_USER } from './custom-function';
 import { locales } from './locales';
 
 const LOAD_LAZY_PLUGINS_TIMEOUT = 5_000;
@@ -68,9 +67,7 @@ univer.registerPlugin(UniverSheetsZenEditorPlugin);
 univer.registerPlugin(UniverFormulaEnginePlugin, {
     notExecuteFormula: true,
 });
-univer.registerPlugin(UniverSheetsFormulaPlugin, {
-    description: FUNCTION_LIST_USER,
-});
+univer.registerPlugin(UniverSheetsFormulaPlugin);
 univer.registerPlugin(UniverRPCMainThreadPlugin, {
     workerURL: './worker.js',
 } as IUniverRPCMainThreadConfig);

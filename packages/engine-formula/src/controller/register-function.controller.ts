@@ -18,6 +18,7 @@ import type { ICommandInfo } from '@univerjs/core';
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
+import { FunctionType, type IFunctionInfo } from '../basics/function';
 import type { IRegisterFunctionMutationParam } from '../commands/mutations/register-function.mutation';
 import { RegisterFunctionMutation } from '../commands/mutations/register-function.mutation';
 import { BaseFunction } from '../functions/base-function';
@@ -51,13 +52,27 @@ export class RegisterFunctionController extends Disposable {
                     }
 
                     const { functions } = params;
+                    const descriptionList: IFunctionInfo[] = [];
+
                     const functionList = functions.map((func) => {
                         const functionString = func[0];
                         const functionName = func[1];
 
+                        const functionIntroduction = func[2];
+                        if (functionIntroduction !== '') {
+                            descriptionList.push({
+                                functionName,
+                                functionType: FunctionType.User,
+                                description: '',
+                                abstract: functionIntroduction,
+                                functionParameter: [],
+                            });
+                        }
+
                         return createFunction(functionString, functionName);
                     });
                     this._functionService.registerExecutors(...functionList);
+                    this._functionService.registerDescriptions(...descriptionList);
                 }
             })
         );

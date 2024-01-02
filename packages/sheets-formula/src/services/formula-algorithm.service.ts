@@ -23,12 +23,14 @@ export type IRegisterFunction = (
     ...arg: Array<PrimitiveValueType | PrimitiveValueType[][]>
 ) => PrimitiveValueType | PrimitiveValueType[][];
 
+export type IRegisterFunctionList = [[IRegisterFunction, string, string?]];
+
 export interface IFormulaAlgorithmService {
     /**
      * register descriptions
      * @param functionList
      */
-    registerFunctions(functionList: [[IRegisterFunction, string]]): void;
+    registerFunctions(functionList: IRegisterFunctionList): void;
 }
 
 export const IFormulaAlgorithmService = createIdentifier<IFormulaAlgorithmService>(
@@ -43,8 +45,8 @@ export class FormulaAlgorithmService extends Disposable implements IFormulaAlgor
         super();
     }
 
-    registerFunctions(functionList: [[IRegisterFunction, string]]) {
-        const functions = functionList.map((func) => [func[0].toString(), func[1]]);
+    registerFunctions(functionList: IRegisterFunctionList) {
+        const functions = functionList.map((func) => [func[0].toString(), func[1], func[2] || '']);
 
         // Synchronous to worker
         this._commandService.executeCommand(

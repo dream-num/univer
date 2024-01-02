@@ -20,23 +20,24 @@ import { type IFunctionInfo } from '@univerjs/engine-formula';
 import type { IAccessor } from '@wendellhu/redi';
 
 import { IDescriptionService } from '../../services/description.service';
-import { IFormulaAlgorithmService, type IRegisterFunction } from '../../services/formula-algorithm.service';
+import type { IRegisterFunctionList } from '../../services/formula-algorithm.service';
+import { IFormulaAlgorithmService } from '../../services/formula-algorithm.service';
 
 export interface IRegisterFunctionOperationParams {
     /**
      * i18n
      */
-    locales: ILocales;
+    locales?: ILocales;
 
     /**
      * function description
      */
-    description: IFunctionInfo[];
+    description?: IFunctionInfo[];
 
     /**
      * function calculation
      */
-    calculate: [[IRegisterFunction, string]];
+    calculate: IRegisterFunctionList;
 }
 
 export const RegisterFunctionOperation: ICommand = {
@@ -48,8 +49,8 @@ export const RegisterFunctionOperation: ICommand = {
         const descriptionService = accessor.get(IDescriptionService);
         const formulaAlgorithmService = accessor.get(IFormulaAlgorithmService);
 
-        localeService.load(locales);
-        descriptionService.registerDescriptions(description);
+        locales && localeService.load(locales);
+        description && descriptionService.registerDescription(description);
         formulaAlgorithmService.registerFunctions(calculate);
 
         return true;

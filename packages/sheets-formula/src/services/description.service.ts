@@ -85,19 +85,20 @@ export interface IDescriptionService {
      * register descriptions
      * @param functionList
      */
-    registerDescriptions(functionList: IFunctionInfo[]): void;
+    registerDescription(functionList: IFunctionInfo[]): void;
 }
 
 export const IDescriptionService = createIdentifier<IDescriptionService>('formula-ui.description-service');
 
 export class DescriptionService implements IDescriptionService, IDisposable {
+    private _descriptions: IFunctionInfo[];
+
     constructor(
         private _description: IFunctionInfo[],
         @IFunctionService private readonly _functionService: IFunctionService,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         this._initialize();
-        this._registerDescription();
     }
 
     dispose(): void {
@@ -159,32 +160,21 @@ export class DescriptionService implements IDescriptionService, IDisposable {
         return searchList;
     }
 
-    registerDescriptions(functionList: IFunctionInfo[]) {
-        const localeService = this._localeService;
-
-        const functionListLocale = functionList.map((functionInfo) => ({
-            functionName: getFunctionName(functionInfo, localeService),
-            functionType: functionInfo.functionType,
-            description: localeService.t(functionInfo.description),
-            abstract: localeService.t(functionInfo.abstract),
-            functionParameter: functionInfo.functionParameter.map((item) => ({
-                name: localeService.t(item.name),
-                detail: localeService.t(item.detail),
-                example: item.example,
-                require: item.require,
-                repeat: item.repeat,
-            })),
-        }));
-        this._functionService.registerDescriptions(...functionListLocale);
+    registerDescription(description: IFunctionInfo[]) {
+        this._descriptions = this._descriptions.concat(description);
+        this._registerDescriptions();
     }
 
     private _initialize() {
         this._localeService.localeChanged$.subscribe(() => {
-            this._registerDescription();
+            this._registerDescriptions();
         });
+
+        this._initDescription();
+        this._registerDescriptions();
     }
 
-    private _registerDescription() {
+    private _initDescription() {
         // TODO@Dushusir: Remove filtering after all formulas have been implemented
         const functions = [
             ...functionArray,
@@ -209,7 +199,25 @@ export class DescriptionService implements IDescriptionService, IDisposable {
             return functions.includes(item.functionName as IFunctionNames);
         });
 
-        const functionList = filterFunctionList.concat(this._description);
-        this.registerDescriptions(functionList);
+        this._descriptions = filterFunctionList.concat(this._description);
+    }
+
+    private _registerDescriptions() {
+        const localeService = this._localeService;
+
+        const functionListLocale = this._descriptions.map((functionInfo) => ({
+            functionName: getFunctionName(functionInfo, localeService),
+            functionType: functionInfo.functionType,
+            description: localeService.t(functionInfo.description),
+            abstract: localeService.t(functionInfo.abstract),
+            functionParameter: functionInfo.functionParameter.map((item) => ({
+                name: localeService.t(item.name),
+                detail: localeService.t(item.detail),
+                example: item.example,
+                require: item.require,
+                repeat: item.repeat,
+            })),
+        }));
+        this._functionService.registerDescriptions(...functionListLocale);
     }
 }

@@ -91,7 +91,7 @@ export interface IDescriptionService {
 export const IDescriptionService = createIdentifier<IDescriptionService>('formula-ui.description-service');
 
 export class DescriptionService implements IDescriptionService, IDisposable {
-    private _descriptions: IFunctionInfo[];
+    private _descriptions: IFunctionInfo[] = [];
 
     constructor(
         private _description: IFunctionInfo[],

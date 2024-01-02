@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export type { IRegisterFunctionOperationParams } from './commands/operations/register-function.command';
-export { RegisterFunctionOperation } from './commands/operations/register-function.command';
+export type { IRegisterFunctionOperationParams } from './commands/operations/register-function.operation';
+export { RegisterFunctionOperation } from './commands/operations/register-function.operation';
 export { UniverSheetsFormulaPlugin } from './formula-ui-plugin';
 export { enUS, zhCN } from './locale';

@@ -46,7 +46,7 @@ export class FormulaAlgorithmService extends Disposable implements IFormulaAlgor
     }
 
     registerFunctions(functionList: IRegisterFunctionList) {
-        const functions = functionList.map((func) => [func[0].toString(), func[1], func[2] || '']);
+        const functions = functionList.map((func) => [func[0].toString(), func[1]]);
 
         // Synchronous to worker
         this._commandService.executeCommand(

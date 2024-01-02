@@ -16,7 +16,7 @@
 
 import type { ICommand, ILocales } from '@univerjs/core';
 import { CommandType, LocaleService } from '@univerjs/core';
-import { type IFunctionInfo } from '@univerjs/engine-formula';
+import { FunctionType, type IFunctionInfo, IFunctionService } from '@univerjs/engine-formula';
 import type { IAccessor } from '@wendellhu/redi';
 
 import { IDescriptionService } from '../../services/description.service';
@@ -48,9 +48,31 @@ export const RegisterFunctionOperation: ICommand = {
         const localeService = accessor.get(LocaleService);
         const descriptionService = accessor.get(IDescriptionService);
         const formulaAlgorithmService = accessor.get(IFormulaAlgorithmService);
+        const functionService = accessor.get(IFunctionService);
 
-        locales && localeService.load(locales);
-        description && descriptionService.registerDescription(description);
+        // i18n
+        if (locales) {
+            localeService.load(locales);
+        }
+
+        // description
+        if (description) {
+            descriptionService.registerDescription(description);
+        } else {
+            const descriptionList: IFunctionInfo[] = calculate.map(([func, functionName, functionIntroduction]) => {
+                return {
+                    functionName,
+                    functionType: FunctionType.User,
+                    description: '',
+                    abstract: functionIntroduction || '',
+                    functionParameter: [],
+                };
+            });
+
+            functionService.registerDescriptions(...descriptionList);
+        }
+
+        // calculation
         formulaAlgorithmService.registerFunctions(calculate);
 
         return true;

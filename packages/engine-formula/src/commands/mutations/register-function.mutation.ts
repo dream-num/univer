@@ -29,7 +29,7 @@ export interface IRegisterFunctionMutationParam {
     /**
      * function string, function name
      */
-    functions: [[string, string, string]];
+    functions: [[string, string]];
 }
 
 export const RegisterFunctionMutation: IMutation<IRegisterFunctionMutationParam> = {

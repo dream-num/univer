@@ -15,4 +15,3 @@
  */
 
 export const FORMULA_UI_PLUGIN_NAME = 'formula-ui';
-export const FORMULA_CALCULATE_PLUGIN_NAME = 'formula-calculate';

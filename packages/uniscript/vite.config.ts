@@ -47,6 +47,7 @@ export default defineConfig(({ mode }) => ({
             external: [
                 '@univerjs/core',
                 '@univerjs/design',
+                '@univerjs/facade',
                 '@univerjs/sheets',
                 '@univerjs/sheets-ui',
                 '@univerjs/ui',
@@ -61,6 +62,7 @@ export default defineConfig(({ mode }) => ({
                 globals: {
                     '@univerjs/core': 'UniverCore',
                     '@univerjs/design': 'UniverDesign',
+                    '@univerjs/facade': 'UniverFacade',
                     '@univerjs/sheets': 'UniverSheets',
                     '@univerjs/sheets-ui': 'UniverSheetsUi',
                     '@univerjs/ui': 'UniverUi',

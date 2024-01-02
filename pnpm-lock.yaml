@@ -583,43 +583,19 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
-      '@univerjs/design':
-        specifier: workspace:*
-        version: link:../design
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
-      '@univerjs/sheets-ui':
-        specifier: workspace:*
-        version: link:../sheets-ui
-      '@univerjs/ui':
-        specifier: workspace:*
-        version: link:../ui
       '@wendellhu/redi':
         specifier: ^0.12.13
         version: 0.12.13
-      monaco-editor:
-        specifier: 0.45.0
-        version: 0.45.0
-      react:
-        specifier: '>=16.9.0'
-        version: 18.2.0
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
     devDependencies:
-      '@types/react':
-        specifier: ^18.2.46
-        version: 18.2.46
-      '@vitejs/plugin-react':
-        specifier: ^4.2.1
-        version: 4.2.1(vite@5.0.10)
       '@vitest/coverage-istanbul':
         specifier: ^1.1.1
         version: 1.1.1(vitest@1.1.1)
-      less:
-        specifier: ^4.2.0
-        version: 4.2.0
       typescript:
         specifier: ^5.3.3
         version: 5.3.3
@@ -634,7 +610,7 @@ importers:
         version: 0.6.2(vite@5.0.10)
       vitest:
         specifier: ^1.1.1
-        version: 1.1.1(@types/node@20.10.6)(happy-dom@12.10.3)(less@4.2.0)
+        version: 1.1.1(@types/node@20.10.6)
 
   packages/image:
     dependencies:

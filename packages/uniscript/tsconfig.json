@@ -6,6 +6,6 @@
         "esModuleInterop": true,
         "strictPropertyInitialization": false
     },
-    "include": ["src/**/*", "../facade/src/apis/sheet", "../facade/src/apis/facade.ts"],
+    "include": ["src/**/*"],
     "exclude": ["./examples/china-id-validation.js"]
 }

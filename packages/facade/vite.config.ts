@@ -1,6 +1,7 @@
 import { resolve } from 'path';
 import { defineConfig } from 'vitest/config';
 import dts from 'vite-plugin-dts';
+
 import { name } from './package.json';
 
 const libName = name
@@ -28,12 +29,13 @@ export default defineConfig(({ mode }) => ({
             formats: ['es', 'umd', 'cjs'],
         },
         rollupOptions: {
-            external: [
-                '@univerjs/core',
-            ],
+            external: ['@univerjs/core', '@univerjs/sheets', '@wendellhu/redi', 'rxjs'],
             output: {
                 globals: {
                     '@univerjs/core': 'UniverCore',
+                    '@univerjs/sheets': 'UniverSheets',
+                    '@wendellhu/redi': '@wendellhu/redi',
+                    rxjs: 'rxjs',
                 },
             },
         },

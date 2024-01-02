@@ -111,7 +111,7 @@ const config = {
         'no-nested-ternary': 'off',
         'no-new': 'off',
         'no-unused-expressions': 'off',
-        'no-console': 'warn',
+        'no-console': ['error', { allow: ["warn", "error"] }],
         'no-multi-assign': 'off',
         'no-restricted-properties': 'off',
         'no-control-regex': 'off',

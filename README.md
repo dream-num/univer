@@ -50,6 +50,14 @@ Highlights of Univer:
     -   🧮 High-performance formula engine, supports Web Worker.
 -   🌍 Internationalization support.
 
+## Examples
+
+| Links | Previews |
+| - | - |
+| [Multi Instances](https://univer.work/playground/?title=Multi%20Instance)<br>Run multi Univer instances on the same page |  ![](./docs/img/multi-instances.png) |
+| [Uniscript](https://univer.work/playground/?title=Uniscript)<br>Use Uniscript to automate your workflow |  ![](./docs/img/uniscript.png) |
+
+
 ## Usage
 
 We recommend to import Univer as a npm package. Please checkout the [Quick Start](https://univer.work/en-us/guides/quick-start/) section on the documentation website. We also have an [online playground](https://univer.work/playground/) which can help you preview Univer without setting up the development environment.

@@ -23,12 +23,21 @@ import type { Nullable } from './types';
  */
 export class Rectangle {
     static clone(src: IRange): IRange {
+        if (src.rangeType !== undefined) {
+            return {
+                startRow: src.startRow,
+                startColumn: src.startColumn,
+                endRow: src.endRow,
+                endColumn: src.endColumn,
+                rangeType: src.rangeType,
+            };
+        }
+
         return {
             startRow: src.startRow,
             startColumn: src.startColumn,
             endRow: src.endRow,
             endColumn: src.endColumn,
-            rangeType: src.rangeType,
         };
     }
 

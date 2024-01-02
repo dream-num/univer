@@ -1583,7 +1583,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         const {
             textRotation = { a: 0, v: BooleanNumber.FALSE },
             paddingData = {
-                t: 0,
+                t: 2,
                 r: 2,
                 b: 0,
                 l: 2,

@@ -215,6 +215,10 @@ export class HeaderMoveController extends Disposable {
                     return;
                 }
 
+                const startScrollXY = scene.getScrollXYByRelativeCoords(
+                    Vector2.FromArray([this._startOffsetX, this._startOffsetY])
+                );
+
                 this._newBackgroundAndLine();
 
                 scene.setCursor(CURSOR_TYPE.GRABBING);
@@ -238,10 +242,22 @@ export class HeaderMoveController extends Disposable {
 
                     scene.setCursor(CURSOR_TYPE.GRABBING);
 
-                    this._columnMoving(newMoveOffsetX, newMoveOffsetY, matchSelectionData, initialType);
+                    this._rowColumnMoving(
+                        newMoveOffsetX,
+                        newMoveOffsetY,
+                        matchSelectionData,
+                        startScrollXY,
+                        initialType
+                    );
 
                     scrollTimer.scrolling(newMoveOffsetX, newMoveOffsetY, () => {
-                        this._columnMoving(newMoveOffsetX, newMoveOffsetY, matchSelectionData, initialType);
+                        this._rowColumnMoving(
+                            newMoveOffsetX,
+                            newMoveOffsetY,
+                            matchSelectionData,
+                            startScrollXY,
+                            initialType
+                        );
                     });
                 });
 
@@ -280,10 +296,14 @@ export class HeaderMoveController extends Disposable {
         );
     }
 
-    private _columnMoving(
+    private _rowColumnMoving(
         moveOffsetX: number,
         moveOffsetY: number,
         matchSelectionData: ISelectionWithStyle,
+        startScrollXY: {
+            x: number;
+            y: number;
+        },
         initialType: HEADER_MOVE_TYPE
     ) {
         const { scene } = this._sheetObject;
@@ -338,13 +358,13 @@ export class HeaderMoveController extends Disposable {
                 height: selectedEndY - selectedStartY,
                 width: columnTotalWidth + rowHeaderWidth,
                 left: 0,
-                top: selectedStartY + (moveOffsetY - this._startOffsetY) / scale,
+                top: selectedStartY + (moveOffsetY - this._startOffsetY) / scale + scrollXY.y - startScrollXY.y,
             });
         } else {
             this._moveHelperBackgroundShape?.transformByState({
                 height: rowTotalHeight + columnHeaderHeight,
                 width: selectedEndX - selectedStartX,
-                left: selectedStartX + (moveOffsetX - this._startOffsetX) / scale,
+                left: selectedStartX + (moveOffsetX - this._startOffsetX) / scale + scrollXY.x - startScrollXY.x,
                 top: 0,
             });
         }

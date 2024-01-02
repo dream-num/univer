@@ -15,7 +15,7 @@
  */
 
 import type { IWorkbookData } from '@univerjs/core';
-import { ICommandService,IUniverInstanceService, Univer } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, Univer } from '@univerjs/core';
 import type { IRegisterFunctionOperationParams } from '@univerjs/sheets-formula';
 import { RegisterFunctionOperation } from '@univerjs/sheets-formula';
 import { Inject, Injector } from '@wendellhu/redi';

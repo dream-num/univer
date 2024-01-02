@@ -437,12 +437,13 @@ export class NumfmtController extends Disposable implements INumfmtController {
     }
 
     private _commandExecutedListener() {
+        const commandList = [RemoveNumfmtMutation.id, SetNumfmtMutation.id];
         this.disposeWithMe(
             toDisposable(
                 merge(
                     new Observable<string>((subscribe) => {
                         const disposable = this._commandService.onCommandExecuted((command) => {
-                            if (SetNumfmtMutation.id === command.id) {
+                            if (commandList.includes(command.id)) {
                                 const params = command.params as ISetNumfmtMutationParams;
                                 subscribe.next(params.unitId);
                             }

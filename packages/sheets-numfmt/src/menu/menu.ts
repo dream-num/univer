@@ -16,7 +16,7 @@
 
 import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { AddDigitsSingle, MoreDownSingle, ReduceDigitsSingle, RmbSingle } from '@univerjs/icons';
-import { INumfmtService, SelectionManagerService, SetNumfmtMutation } from '@univerjs/sheets';
+import { INumfmtService, RemoveNumfmtMutation, SelectionManagerService, SetNumfmtMutation } from '@univerjs/sheets';
 import type { ComponentManager, IMenuSelectorItem } from '@univerjs/ui';
 import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
@@ -96,8 +96,9 @@ export const FactoryOtherMenuItem = (componentManager: ComponentManager) => {
             merge(
                 selectionManagerService.selectionMoveEnd$,
                 new Observable<null>((commandSubscribe) => {
+                    const commandList = [RemoveNumfmtMutation.id, SetNumfmtMutation.id];
                     const disposable = commandService.onCommandExecuted((commandInfo) => {
-                        if (commandInfo.id === SetNumfmtMutation.id) {
+                        if (commandList.includes(commandInfo.id)) {
                             commandSubscribe.next(null);
                         }
                     });

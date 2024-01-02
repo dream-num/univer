@@ -435,12 +435,12 @@ export class HeaderResizeController extends Disposable {
                         }
 
                         if (initialType === HEADER_RESIZE_TYPE.ROW) {
-                            if (moveChangeY < -(cell.endY - cell.startY) + 2) {
-                                moveChangeY = -(cell.endY - cell.startY) + 2;
-                            }
-
                             if (moveChangeY > canvasMaxHeight - scrollBarHorizontalHeight + scrollXY.y - cell.startY) {
                                 moveChangeY = canvasMaxHeight - scrollBarHorizontalHeight + scrollXY.y - cell.startY;
+                            }
+
+                            if (moveChangeY < -(cell.endY - cell.startY) + 2) {
+                                moveChangeY = -(cell.endY - cell.startY) + 2;
                             }
 
                             if (isStartMove) {
@@ -457,11 +457,12 @@ export class HeaderResizeController extends Disposable {
                                 scene.setCursor(CURSOR_TYPE.ROW_RESIZE);
                             }
                         } else {
-                            if (moveChangeX < -(cell.endX - cell.startX) + 2) {
-                                moveChangeX = -(cell.endX - cell.startX) + 2;
-                            }
                             if (moveChangeX > canvasMaxWidth - scrollBarVerticalWidth + scrollXY.x - cell.startX) {
                                 moveChangeX = canvasMaxWidth - scrollBarVerticalWidth + scrollXY.x - cell.startX;
+                            }
+
+                            if (moveChangeX < -(cell.endX - cell.startX) + 2) {
+                                moveChangeX = -(cell.endX - cell.startX) + 2;
                             }
 
                             if (isStartMove) {

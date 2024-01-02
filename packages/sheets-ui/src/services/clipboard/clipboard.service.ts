@@ -340,8 +340,8 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const target = this._getPastingTarget();
         const { selection, unitId, subUnitId } = target;
         const cachedData = Tools.deepClone(copyContentCache.get(copyId));
-        const { range, matrix: cellMatrix } = cachedData || {};
-        if (!selection || !cellMatrix || !cachedData || !range) {
+        const { range, matrix: cellMatrix, unitId: copyUnitId, subUnitId: copySubUnitId } = cachedData || {};
+        if (!selection || !cellMatrix || !cachedData || !range || !copyUnitId || !copySubUnitId) {
             return false;
         }
 
@@ -370,8 +370,27 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             return false;
         }
 
+        const worksheet = this._currentUniverService
+            .getUniverSheetInstance(copyUnitId)
+            ?.getSheetBySheetId(copySubUnitId);
+        if (!worksheet) {
+            return false;
+        }
+        const manager = worksheet.getColumnManager();
+        const defaultColumnWidth = worksheet.getConfig().defaultColumnWidth;
+
+        const colProperties = [];
+
+        for (let i = startColumn; i <= endColumn; i++) {
+            const column = manager.getColumnOrCreate(i);
+            colProperties.push({ width: `${column.w || defaultColumnWidth}` });
+        }
+
         const pasteRes = this._pasteUSM(
-            { cellMatrix }, // paste data
+            {
+                cellMatrix,
+                colProperties,
+            }, // paste data
             {
                 unitId, // paste target
                 subUnitId,

@@ -18,7 +18,7 @@ import type { IRange, Nullable } from '@univerjs/core';
 
 import { RENDER_CLASS_TYPE } from '../../basics/const';
 import type { IViewportBound, Vector2 } from '../../basics/vector2';
-import type { UniverContext } from '../../context';
+import type { UniverRenderingContext } from '../../context';
 import { RenderComponent } from '../component';
 import type { SHEET_EXTENSION_TYPE } from './extensions/sheet-extension';
 import type { SpreadsheetSkeleton } from './sheet-skeleton';
@@ -39,7 +39,7 @@ export class SheetComponent extends RenderComponent<SpreadsheetSkeleton, SHEET_E
         this._skeleton = spreadsheetSkeleton;
     }
 
-    override render(mainCtx: UniverContext, bounds?: IViewportBound) {
+    override render(mainCtx: UniverRenderingContext, bounds?: IViewportBound) {
         if (!this.visible) {
             this.makeDirty(false);
             return this;
@@ -87,13 +87,13 @@ export class SheetComponent extends RenderComponent<SpreadsheetSkeleton, SHEET_E
         endColumn: number;
     }> {}
 
-    protected _draw(ctx: UniverContext, bounds?: IViewportBound) {
+    protected _draw(ctx: UniverRenderingContext, bounds?: IViewportBound) {
         /* abstract */
     }
 }
 
 export class SpreadsheetHeader extends SheetComponent {
-    protected override _draw(ctx: UniverContext, bounds?: IViewportBound): void {
+    protected override _draw(ctx: UniverRenderingContext, bounds?: IViewportBound): void {
         this.draw(ctx, bounds);
     }
 }

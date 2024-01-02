@@ -21,7 +21,7 @@ import { BORDER_TYPE, COLOR_BLACK_RGB, FIX_ONE_PIXEL_BLUR_OFFSET } from '../../.
 import { drawLineByBorderType, getLineWidth, setLineType } from '../../../basics/draw';
 import type { IDocumentSkeletonSpan } from '../../../basics/i-document-skeleton-cached';
 import { Vector2 } from '../../../basics/vector2';
-import type { UniverContext } from '../../../context';
+import type { UniverRenderingContext } from '../../../context';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
 import { docExtension } from '../doc-extension';
 
@@ -36,7 +36,7 @@ export class Border extends docExtension {
 
     private _preBorderColor = '';
 
-    override draw(ctx: UniverContext, parentScale: IScale, span: IDocumentSkeletonSpan) {
+    override draw(ctx: UniverRenderingContext, parentScale: IScale, span: IDocumentSkeletonSpan) {
         const line = span.parent?.parent;
         if (!line) {
             return;

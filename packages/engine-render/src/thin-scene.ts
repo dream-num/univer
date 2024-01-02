@@ -24,7 +24,7 @@ import type { IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './
 import type { ITransformChangeState } from './basics/interfaces';
 import { Transform } from './basics/transform';
 import type { IViewportBound, Vector2 } from './basics/vector2';
-import type { UniverContext } from './context';
+import type { UniverRenderingContext } from './context';
 
 export abstract class ThinScene {
     onTransformChangeObservable = new Observable<ITransformChangeState>();
@@ -179,9 +179,9 @@ export abstract class ThinScene {
 
     triggerPointerEnter(evt: IPointerEvent | IMouseEvent) {}
 
-    renderObjects(ctx: UniverContext, bounds?: IViewportBound) {}
+    renderObjects(ctx: UniverRenderingContext, bounds?: IViewportBound) {}
 
-    render(parentCtx?: UniverContext) {}
+    render(parentCtx?: UniverRenderingContext) {}
 
     getParent(): any {}
 

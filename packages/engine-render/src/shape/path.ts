@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-// import { IShapeProps, Shape, IObjectFullState, Group, Scene } from '.';
+/* eslint-disable no-magic-numbers */
 
 import type { IKeyValue, Nullable } from '@univerjs/core';
 
 import type { IObjectFullState } from '../basics/interfaces';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '../basics/interfaces';
-import type { UniverContext } from '../context';
+import type { UniverRenderingContext } from '../context';
 import type { IShapeProps } from './shape';
 import { Shape } from './shape';
 
@@ -51,7 +51,7 @@ export const PATH_OBJECT_ARRAY = ['dataArray'];
 export class Path extends Shape<IPathProps> {
     private _dataArray: IPathDataArray[] = [];
 
-    private pathLength: number = 0;
+    private _pathLength: number = 0;
 
     private _selfRectCache: IPathFixConfig = {
         left: 0,
@@ -71,13 +71,13 @@ export class Path extends Shape<IPathProps> {
         }
 
         for (let i = 0; i < this.dataArray.length; ++i) {
-            this.pathLength += this.dataArray[i].pathLength;
+            this._pathLength += this.dataArray[i].pathLength;
         }
 
         this._setFixBoundingBox();
 
         this.onTransformChangeObservable.add((changeState) => {
-            const { type, value, preValue } = changeState;
+            const { type, preValue } = changeState;
             if (type === TRANSFORM_CHANGE_OBSERVABLE_TYPE.resize || type === TRANSFORM_CHANGE_OBSERVABLE_TYPE.all) {
                 this._reCalculateCache = true;
 
@@ -134,14 +134,14 @@ export class Path extends Shape<IPathProps> {
         return this._dataArray;
     }
 
-    static override drawWith(ctx: UniverContext, props: IPathProps | Path) {
+    static override drawWith(ctx: UniverRenderingContext, props: IPathProps | Path) {
         const ca = props.dataArray;
         if (!ca) {
             return;
         }
         // context position
         ctx.beginPath();
-        let isClosed = false;
+        // let isClosed = false;
         for (let n = 0; n < ca.length; n++) {
             const c = ca[n].command;
             const p = ca[n].points;
@@ -183,7 +183,7 @@ export class Path extends Shape<IPathProps> {
                     break;
                 }
                 case 'z':
-                    isClosed = true;
+                    // isClosed = true;
                     ctx.closePath();
                     break;
             }
@@ -847,7 +847,7 @@ export class Path extends Shape<IPathProps> {
      * var length = path.getLength();
      */
     getLength() {
-        return this.pathLength;
+        return this._pathLength;
     }
 
     /**
@@ -931,7 +931,7 @@ export class Path extends Shape<IPathProps> {
         return null;
     }
 
-    protected override _draw(ctx: UniverContext) {
+    protected override _draw(ctx: UniverRenderingContext) {
         Path.drawWith(ctx, this);
     }
 

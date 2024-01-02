@@ -21,7 +21,7 @@ import { hasCJK } from '../../../basics';
 import { COLOR_BLACK_RGB } from '../../../basics/const';
 import type { IDocumentSkeletonSpan } from '../../../basics/i-document-skeleton-cached';
 import { Vector2 } from '../../../basics/vector2';
-import type { UniverContext } from '../../../context';
+import type { UniverRenderingContext } from '../../../context';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
 import { docExtension } from '../doc-extension';
 
@@ -38,7 +38,7 @@ export class FontAndBaseLine extends docExtension {
 
     private _preFontColor = '';
 
-    override draw(ctx: UniverContext, parentScale: IScale, span: IDocumentSkeletonSpan) {
+    override draw(ctx: UniverRenderingContext, parentScale: IScale, span: IDocumentSkeletonSpan) {
         const line = span.parent?.parent;
         if (!line) {
             return;
@@ -92,7 +92,7 @@ export class FontAndBaseLine extends docExtension {
         this._fillText(ctx, span, spanPointWithFont);
     }
 
-    private _fillText(ctx: UniverContext, span: IDocumentSkeletonSpan, spanPointWithFont: Vector2) {
+    private _fillText(ctx: UniverRenderingContext, span: IDocumentSkeletonSpan, spanPointWithFont: Vector2) {
         const { renderConfig, spanStartPoint, centerPoint } = this.extensionOffset;
         const { content, width, bBox } = span;
         const { aba, abd } = bBox;

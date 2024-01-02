@@ -18,7 +18,7 @@ import { sortRules } from '@univerjs/core';
 
 import { BaseObject } from '../base-object';
 import type { IViewportBound } from '../basics/vector2';
-import type { UniverContext } from '../context';
+import type { UniverRenderingContext } from '../context';
 import type { ComponentExtension } from './extension';
 
 export class RenderComponent<T, U, V> extends BaseObject {
@@ -52,7 +52,7 @@ export class RenderComponent<T, U, V> extends BaseObject {
         return this._extensions.get(uKey);
     }
 
-    draw(ctx: UniverContext, bounds?: IViewportBound) {
+    draw(ctx: UniverRenderingContext, bounds?: IViewportBound) {
         /* abstract */
     }
 }

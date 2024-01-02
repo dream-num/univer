@@ -27,7 +27,6 @@ import type {
 import { BaselineOffset, FontStyleType, Tools } from '@univerjs/core';
 import * as cjk from 'cjk-regex';
 
-import type { UniverContext } from '../context';
 import { DEFAULT_FONTFACE_PLANE } from './const';
 import { FontCache } from './font-cache';
 import type { IBoundRectNoAngle } from './vector2';
@@ -332,14 +331,6 @@ export function getFontStyleString(textStyle?: IStyleBase, localeService?: Local
         fontSize,
         fontFamily: fontFamilyResult,
     };
-}
-
-export function isSupportBoundingBox(ctx: UniverContext) {
-    const measureText = ctx.measureText('田');
-    if (measureText.actualBoundingBoxAscent == null) {
-        return false;
-    }
-    return true;
 }
 
 // 是否有中文、日文、韩文等，不包括符号

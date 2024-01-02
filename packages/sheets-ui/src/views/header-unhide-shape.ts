@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IShapeProps, UniverContext } from '@univerjs/engine-render';
+import type { IShapeProps, UniverRenderingContext } from '@univerjs/engine-render';
 import { Rect, RegularPolygon, Shape } from '@univerjs/engine-render';
 
 import { HEADER_MENU_BACKGROUND_COLOR, HEADER_MENU_SHAPE_TRIANGLE_FILL } from './header-menu-shape';
@@ -77,7 +77,7 @@ export class HeaderUnhideShape<T extends IHeaderUnhideShapeProps = IHeaderUnhide
         });
     }
 
-    protected override _draw(ctx: UniverContext): void {
+    protected override _draw(ctx: UniverRenderingContext): void {
         if (this._unhideType === HeaderUnhideShapeType.ROW) {
             this._drawOnRow(ctx);
         } else {
@@ -85,7 +85,7 @@ export class HeaderUnhideShape<T extends IHeaderUnhideShapeProps = IHeaderUnhide
         }
     }
 
-    private _drawOnRow(ctx: UniverContext): void {
+    private _drawOnRow(ctx: UniverRenderingContext): void {
         if (this._hovered) {
             if (!this._hasNext || !this._hasPrevious) {
                 Rect.drawWith(ctx, {
@@ -141,7 +141,7 @@ export class HeaderUnhideShape<T extends IHeaderUnhideShapeProps = IHeaderUnhide
      *
      * @param ctx
      */
-    private _drawOnCol(ctx: UniverContext): void {
+    private _drawOnCol(ctx: UniverRenderingContext): void {
         if (this._hovered) {
             if (!this._hasNext || !this._hasPrevious) {
                 Rect.drawWith(ctx, {

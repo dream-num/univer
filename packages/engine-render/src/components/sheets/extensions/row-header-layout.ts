@@ -18,7 +18,7 @@ import type { IScale } from '@univerjs/core';
 
 import { DEFAULT_FONTFACE_PLANE, FIX_ONE_PIXEL_BLUR_OFFSET, MIDDLE_CELL_POS_MAGIC_NUMBER } from '../../../basics/const';
 import { getColor } from '../../../basics/tools';
-import type { UniverContext } from '../../../context';
+import type { UniverRenderingContext } from '../../../context';
 import { SheetRowHeaderExtensionRegistry } from '../../extension';
 import type { SpreadsheetSkeleton } from '../sheet-skeleton';
 import { SheetExtension } from './sheet-extension';
@@ -30,7 +30,7 @@ export class RowHeaderLayout extends SheetExtension {
 
     override zIndex = 10;
 
-    override draw(ctx: UniverContext, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {
+    override draw(ctx: UniverRenderingContext, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {
         const { rowColumnSegment, rowHeaderWidth = 0, columnHeaderHeight = 0 } = spreadsheetSkeleton;
         const { startRow, endRow, startColumn, endColumn } = rowColumnSegment;
         if (!spreadsheetSkeleton) {

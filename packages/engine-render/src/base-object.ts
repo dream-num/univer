@@ -25,7 +25,7 @@ import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './basics/interfaces';
 import { generateRandomKey, toPx } from './basics/tools';
 import { Transform } from './basics/transform';
 import type { IViewportBound, Vector2 } from './basics/vector2';
-import type { UniverContext } from './context';
+import type { UniverRenderingContext } from './context';
 
 export const BASE_OBJECT_ARRAY = [
     'top',
@@ -559,7 +559,7 @@ export abstract class BaseObject {
         this._makeDirtyMix();
     }
 
-    render(ctx: UniverContext, bounds?: IViewportBound) {
+    render(ctx: UniverRenderingContext, bounds?: IViewportBound) {
         /* abstract */
     }
 

@@ -24,7 +24,7 @@ import { calculateRectRotate } from '../../../basics/draw';
 import type { IDocumentSkeletonSpan } from '../../../basics/i-document-skeleton-cached';
 import { degToRad, getScale } from '../../../basics/tools';
 import { Vector2 } from '../../../basics/vector2';
-import type { UniverContext } from '../../../context';
+import type { UniverRenderingContext } from '../../../context';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
 import { docExtension } from '../doc-extension';
 
@@ -39,7 +39,7 @@ export class Line extends docExtension {
 
     private _preBackgroundColor = '';
 
-    override draw(ctx: UniverContext, parentScale: IScale, span: IDocumentSkeletonSpan) {
+    override draw(ctx: UniverRenderingContext, parentScale: IScale, span: IDocumentSkeletonSpan) {
         const line = span.parent?.parent;
         if (!line) {
             return;
@@ -83,7 +83,7 @@ export class Line extends docExtension {
     }
 
     private _drawLine(
-        ctx: UniverContext,
+        ctx: UniverRenderingContext,
         span: IDocumentSkeletonSpan,
         line: ITextDecoration,
         startY: number,
@@ -137,7 +137,7 @@ export class Line extends docExtension {
         }
     }
 
-    private _setLineType(ctx: UniverContext, style: TextDecoration) {
+    private _setLineType(ctx: UniverRenderingContext, style: TextDecoration) {
         if (style === TextDecoration.DASH_DOT_DOT_HEAVY || style === TextDecoration.DOT_DOT_DASH) {
             ctx.setLineDash([2, 2, 5, 2, 2]);
         } else if (style === TextDecoration.DASH_DOT_HEAVY || style === TextDecoration.DOT_DASH) {

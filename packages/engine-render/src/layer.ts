@@ -20,7 +20,7 @@ import { sortRules } from '@univerjs/core';
 import { BaseObject } from './base-object';
 import { RENDER_CLASS_TYPE } from './basics/const';
 import { Canvas } from './canvas';
-import type { UniverContext } from './context';
+import type { UniverRenderingContext } from './context';
 import type { ThinScene } from './thin-scene';
 
 export class Layer {
@@ -173,7 +173,7 @@ export class Layer {
         return this._dirty;
     }
 
-    render(parentCtx?: UniverContext, isMaxLayer = false) {
+    render(parentCtx?: UniverRenderingContext, isMaxLayer = false) {
         const mainCtx = parentCtx || this._scene.getEngine()?.getCanvas().getContext();
 
         if (this._allowCache && this._cacheCanvas) {
@@ -207,11 +207,11 @@ export class Layer {
         });
     }
 
-    private _draw(mainCtx: UniverContext, isMaxLayer: boolean) {
+    private _draw(mainCtx: UniverRenderingContext, isMaxLayer: boolean) {
         this._scene.getViewports()?.forEach((vp) => vp.render(mainCtx, this.getObjectsByOrder(), isMaxLayer));
     }
 
-    private _applyCache(ctx?: UniverContext) {
+    private _applyCache(ctx?: UniverRenderingContext) {
         if (!ctx || this._cacheCanvas == null) {
             return;
         }

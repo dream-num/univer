@@ -20,7 +20,7 @@ import { EVENT_TYPE } from '../basics/const';
 import type { IMouseEvent, IPointerEvent } from '../basics/i-events';
 import { Transform } from '../basics/transform';
 import type { Vector2 } from '../basics/vector2';
-import type { UniverContext } from '../context';
+import type { UniverRenderingContext } from '../context';
 import type { ThinScene } from '../thin-scene';
 import type { Viewport } from '../viewport';
 import type { IScrollBarProps } from './base-scroll-bar';
@@ -96,7 +96,7 @@ export class ScrollBar extends BaseScrollBar {
         this._view.removeScrollBar();
     }
 
-    override render(ctx: UniverContext, left: number = 0, top: number = 0) {
+    override render(ctx: UniverRenderingContext, left: number = 0, top: number = 0) {
         const { scrollX, scrollY } = this._view;
         ctx.save();
         const transform = new Transform([1, 0, 0, 1, left, top]);

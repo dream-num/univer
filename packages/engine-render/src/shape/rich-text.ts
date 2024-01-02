@@ -33,7 +33,7 @@ import type { IViewportBound } from '../basics/vector2';
 import { DocumentSkeleton } from '../components/docs/doc-skeleton';
 import { Documents } from '../components/docs/document';
 import { DocumentViewModel } from '../components/docs/view-model/document-view-model';
-import type { UniverContext } from '../context';
+import type { UniverRenderingContext } from '../context';
 
 export interface IRichTextProps extends ITransformState, IStyleBase {
     text?: string;
@@ -167,7 +167,7 @@ export class RichText extends BaseObject {
         return this;
     }
 
-    override render(mainCtx: UniverContext, bounds?: IViewportBound) {
+    override render(mainCtx: UniverRenderingContext, bounds?: IViewportBound) {
         if (!this.visible) {
             this.makeDirty(false);
             return this;
@@ -212,7 +212,7 @@ export class RichText extends BaseObject {
         };
     }
 
-    protected _draw(ctx: UniverContext) {
+    protected _draw(ctx: UniverRenderingContext) {
         this._documents.render(ctx);
     }
 

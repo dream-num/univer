@@ -23,7 +23,7 @@ import type { IDocumentSkeletonLine } from './i-document-skeleton-cached';
 import { createCanvasElement } from './tools';
 import { Vector2 } from './vector2';
 
-export interface IContext2D extends UniverRenderingContext {
+export interface IContext2D extends CanvasRenderingContext2D {
     webkitBackingStorePixelRatio: number;
     mozBackingStorePixelRatio: number;
     msBackingStorePixelRatio: number;

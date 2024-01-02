@@ -176,6 +176,10 @@ function _moveBackward<T>(
     // insert cached items to toIndex
     toMove.forEach((item, index) => {
         array[toIndex + index] = item;
+
+        if (item == null) {
+            delete array[toIndex + index];
+        }
     });
 }
 
@@ -207,6 +211,10 @@ function _moveForward<T>(
     // insert cached items to toIndex
     toMove.forEach((item, index) => {
         array[toIndex + index - count] = item;
+
+        if (item == null) {
+            delete array[toIndex + index - count];
+        }
     });
 }
 
@@ -274,6 +282,9 @@ export class ObjectMatrix<T> {
         for (const row of matrixRow) {
             const rowNumber = Number(row);
             const columns = matrix[rowNumber];
+
+            if (!columns) continue;
+
             const columnKeys = Object.keys(columns);
             for (const column of columnKeys) {
                 const colNumber = Number(column);

@@ -18,8 +18,6 @@ import type { IMutation, IRange } from '@univerjs/core';
 import { CommandType, IUniverInstanceService, moveMatrixArray, Rectangle } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
-// TODO@wzhudev: maybe we should do some error handling in these mutators
-
 export interface IMoveRowsMutationParams {
     unitId: string;
     subUnitId: string;
@@ -39,26 +37,35 @@ export interface IMoveRowsMutationParams {
  * @param params
  */
 export function MoveRowsMutationUndoFactory(
-    _accessor: IAccessor,
+    _accessor: IAccessor | null,
     params: IMoveRowsMutationParams
 ): IMoveRowsMutationParams {
     const { unitId, subUnitId, sourceRange, targetRange } = params;
     const movingBackward = sourceRange.startRow > targetRange.startRow;
     const count = sourceRange.endRow - sourceRange.startRow + 1;
+
     if (movingBackward) {
         // If is moving backward, target range should be `count` offset.
         return {
             unitId,
             subUnitId,
             sourceRange: Rectangle.clone(targetRange),
-            targetRange: { ...sourceRange, endRow: sourceRange.endRow + count, startRow: sourceRange.startRow + count },
+            targetRange: {
+                ...sourceRange,
+                endRow: sourceRange.endRow + count,
+                startRow: sourceRange.startRow + count,
+            },
         };
     }
     return {
         unitId,
         subUnitId,
         targetRange: Rectangle.clone(sourceRange),
-        sourceRange: Rectangle.clone(targetRange),
+        sourceRange: {
+            ...targetRange,
+            endRow: targetRange.endRow - count,
+            startRow: targetRange.startRow - count,
+        },
     };
 }
 
@@ -109,12 +116,14 @@ export interface IMoveColumnsMutationParams {
 }
 
 export function MoveColsMutationUndoFactory(
-    _accessor: IAccessor,
+    _accessor: IAccessor | null,
     params: IMoveColumnsMutationParams
 ): IMoveColumnsMutationParams {
     const { unitId, subUnitId, sourceRange, targetRange } = params;
+    // Ror example, moving C col before B col.
     const movingBackward = sourceRange.startColumn > targetRange.startColumn;
     const count = sourceRange.endColumn - sourceRange.startColumn + 1;
+
     if (movingBackward) {
         // If is moving backward, target range should be `count` offset.
         return {
@@ -128,11 +137,16 @@ export function MoveColsMutationUndoFactory(
             },
         };
     }
+
     return {
         unitId,
         subUnitId,
         targetRange: Rectangle.clone(sourceRange),
-        sourceRange: Rectangle.clone(targetRange),
+        sourceRange: {
+            ...targetRange,
+            startColumn: targetRange.startColumn - count,
+            endColumn: targetRange.endColumn - count,
+        },
     };
 }
 

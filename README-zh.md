@@ -76,6 +76,7 @@ Univer 基于插件化架构设计，你可以安装以下包来增强 Univer �
 | [engine-formula](./packages/engine-formula)  | 实现公式引擎                                                                            | [![npm version](https://img.shields.io/npm/v/@univerjs/engine-formula)](https://npmjs.org/package/@univerjs/engine-formula) |
 | [engine-numfmt](./packages/engine-numfmt)    | 实现数字格式引擎                                                                        | [![npm version](https://img.shields.io/npm/v/@univerjs/engine-numfmt)](https://npmjs.org/package/@univerjs/engine-numfmt)   |
 | [engine-render](./packages/engine-render)    | 实现渲染引擎                                                                            | [![npm version](https://img.shields.io/npm/v/@univerjs/engine-render)](https://npmjs.org/package/@univerjs/engine-render)   |
+| [facade](./packages/facade/)                 | 提供了一个让 Univer 更加易用的 API 层                                                      | [![npm version](https://img.shields.io/npm/v/@univerjs/facade)](https://npmjs.org/package/@univerjs/facade)                       |
 | [network](./packages/network)                | 实现了 Univer 的网络服务，包括 WebSocket 和 HTTP。                                      | [![npm version](https://img.shields.io/npm/v/@univerjs/network)](https://npmjs.org/package/@univerjs/network)               |
 | [rpc](./packages/rpc)                        | 实现 RPC 机制，以及在主从文档副本之间同步数据的方法，方便 web worker 等跨线程场景的开发 | [![npm version](https://img.shields.io/npm/v/@univerjs/rpc)](https://npmjs.org/package/@univerjs/rpc)                       |
 | [sheets](./packages/sheets)                  | 实现电子表格的基本业务                                                                  | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets)](https://npmjs.org/package/@univerjs/sheets)                 |
@@ -109,7 +110,7 @@ Univer 基于插件化架构设计，你可以安装以下包来增强 Univer �
 -   [Github Discussions](https://github.com/dream-num/univer/discussions)
 -   微信扫描下方二维码，加入 Univer 中文社群
 
-![wecom-qr-code](https://univer.work/_astro/business-qr-code.yXrodgfV_1OrfAS.webp)
+![wecom-qr-code](https://univer.work/_astro/business-qr-code.3zPwMdHH_ZGnJEl.webp)
 
 ## 授权
 

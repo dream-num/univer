@@ -158,7 +158,6 @@ export class NumfmtEditorController extends Disposable {
                                     );
                             };
                             if (!value?.v) {
-                                clean();
                                 return next(value);
                             }
 

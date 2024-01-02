@@ -121,6 +121,8 @@ export const FactoryOtherMenuItem = (componentManager: ComponentManager) => {
                         );
                         if (item && typeof item === 'object' && item.pattern) {
                             value = localeService.t(item.label);
+                        } else {
+                            value = localeService.t('sheet.numfmt.moreFmt');
                         }
                     }
                     subscribe.next(value);

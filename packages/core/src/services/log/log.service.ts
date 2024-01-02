@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/* eslint-disable no-console */
+
 import { createIdentifier } from '@wendellhu/redi';
 
 import { Disposable } from '../../shared/lifecycle';
@@ -22,13 +24,15 @@ export enum LogLevel /* eslint-disable no-magic-numbers */ {
     SILENT = 0,
     ERROR = 1,
     WARN = 2,
-    VERBOSE = 3,
+    INFO = 3,
+    VERBOSE = 4,
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ArgsType = any[];
 
 export interface ILogService {
+    debug(...args: ArgsType): void;
     log(...args: ArgsType): void;
     warn(...args: ArgsType): void;
     error(...args: ArgsType): void;
@@ -39,39 +43,46 @@ export interface ILogService {
 export const ILogService = createIdentifier<ILogService>('univer.log');
 
 export class DesktopLogService extends Disposable implements ILogService {
-    private _logLevel: LogLevel = LogLevel.SILENT;
+    private _logLevel: LogLevel = LogLevel.INFO;
+
+    debug(...args: ArgsType): void {
+        if (this._logLevel >= LogLevel.VERBOSE) {
+            this._log(console.debug, ...args);
+        }
+    }
 
     log(...args: ArgsType): void {
-        if (this._logLevel < LogLevel.VERBOSE || !args.length) {
-            return;
-        }
-
-        const firstArg = args[0];
-        const withTag = /^\[(.*?)\]/g.test(firstArg);
-        if (withTag) {
-            /* eslint-disable-next-line no-console */
-            console.log(`\x1B[97;104m${firstArg}\x1B[0m:`, ...args.slice(1));
-        } else {
-            /* eslint-disable-next-line no-console */
-            console.log(...args);
+        if (this._logLevel >= LogLevel.INFO) {
+            this._log(console.log, ...args);
         }
     }
 
     warn(...args: ArgsType): void {
         if (this._logLevel >= LogLevel.WARN) {
-            /* eslint-disable-next-line no-console */
-            console.warn(...args);
+            this._log(console.warn, ...args);
         }
     }
 
     error(...args: ArgsType): void {
         if (this._logLevel >= LogLevel.ERROR) {
-            /* eslint-disable-next-line no-console */
-            console.error(...args);
+            this._log(console.error, ...args);
         }
     }
 
     setLogLevel(logLevel: LogLevel): void {
         this._logLevel = logLevel;
+    }
+
+    private _log(
+        method: typeof console.log | typeof console.error | typeof console.warn | typeof console.debug,
+        ...args: ArgsType
+    ): void {
+        const firstArg = args[0];
+        const withTag = /^\[(.*?)\]/g.test(firstArg);
+        if (withTag) {
+            method(`\x1B[97;104m${firstArg}\x1B[0m:`, ...args.slice(1));
+        } else {
+            method(...args);
+        }
     }
 }

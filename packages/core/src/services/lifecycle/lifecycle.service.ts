@@ -33,10 +33,7 @@ export class LifecycleService extends Disposable {
     constructor(@ILogService private readonly _logService: ILogService) {
         super();
 
-        this._logService.log(
-            `[LifecycleService]`,
-            `lifecycle progressed to "${LifecycleNameMap[LifecycleStages.Starting]}".`
-        );
+        this._reportProgress(LifecycleStages.Starting);
     }
 
     get stage(): LifecycleStages {
@@ -52,7 +49,7 @@ export class LifecycleService extends Disposable {
             return;
         }
 
-        this._logService.log(`[LifecycleService]`, `lifecycle progressed to "${LifecycleNameMap[stage]}".`);
+        this._reportProgress(stage);
         this._lifecycle$.next(stage);
     }
 
@@ -87,6 +84,10 @@ export class LifecycleService extends Disposable {
 
             return this._lifecycle$.subscribe(subscriber);
         });
+    }
+
+    private _reportProgress(stage: LifecycleStages): void {
+        this._logService.debug(`[LifecycleService]`, `lifecycle progressed to "${LifecycleNameMap[stage]}".`);
     }
 }
 

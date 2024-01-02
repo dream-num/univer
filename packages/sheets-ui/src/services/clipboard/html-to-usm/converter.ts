@@ -102,8 +102,7 @@ export class HtmlToUSMService {
         const rowProperties: IClipboardPropertyItem[] = [];
         let colProperties: IClipboardPropertyItem[] = [];
         // pick tables
-        const tableStrings = html.match(/<table.*?>([\s\S]*?)<\/table>/gi);
-
+        const tableStrings = html.match(/<table\b[^>]*>([\s\S]*?)<\/table>/gi);
         const tables: IParsedTablesInfo[] = [];
         this.process(null, dom?.childNodes!, newDocBody, tables);
         const { paragraphs, dataStream, textRuns } = newDocBody;
@@ -145,7 +144,7 @@ export class HtmlToUSMService {
 
                 if (tableStrings) {
                     tables.forEach((t) => {
-                        const curRow = valueMatrix.getLength();
+                        const curRow = valueMatrix.getDataRange().endRow + 1;
                         if (t.index === i) {
                             const tableString = tableStrings.shift();
                             const {
@@ -186,13 +185,22 @@ export class HtmlToUSMService {
 
             if (tableStrings) {
                 tableStrings.forEach((t) => {
-                    const curRow = valueMatrix.getLength();
+                    const curRow = valueMatrix.getDataRange().endRow + 1;
                     const { cellMatrix } = this._parseTable(t!);
-
-                    cellMatrix &&
+                    if (cellMatrix) {
                         cellMatrix.forValue((row, col, value) => {
+                            const { rowSpan = 1, colSpan = 1 } = value;
+                            for (let i = 0; i < rowSpan; i++) {
+                                for (let j = 0; j < colSpan; j++) {
+                                    valueMatrix.setValue(curRow + row + i, col + j, {
+                                        v: '',
+                                    });
+                                }
+                            }
                             valueMatrix.setValue(curRow + row, col, value);
                         });
+                    }
+
                     rowProperties.push(...rowProperties);
                 });
             }

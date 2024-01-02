@@ -26,7 +26,7 @@
         "@univerjs/slides-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@univerjs/uniscript": "workspace:*",
-        "@wendellhu/redi": "^0.12.12",
+        "@wendellhu/redi": "^0.12.13",
         "clsx": "^2.0.0",
         "monaco-editor": "0.45.0",
         "react": "^18.2.0",
@@ -35,7 +35,7 @@
         "rxjs": "^7.8.1"
     },
     "devDependencies": {
-        "@types/react": "^18.2.45",
+        "@types/react": "^18.2.46",
         "@types/react-dom": "^18.2.18",
         "esbuild": "^0.19.10",
         "esbuild-plugin-clean": "^1.0.1",

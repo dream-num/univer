@@ -52,20 +52,20 @@
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "^0.12.12",
+        "@wendellhu/redi": "^0.12.13",
         "monaco-editor": "0.45.0",
         "rxjs": "^7.8.1"
     },
     "devDependencies": {
-        "@types/react": "^18.2.45",
+        "@types/react": "^18.2.46",
         "@vitejs/plugin-react": "^4.2.1",
-        "@vitest/coverage-istanbul": "^1.1.0",
+        "@vitest/coverage-istanbul": "^1.1.1",
         "less": "^4.2.0",
         "typescript": "^5.3.3",
         "vite": "^5.0.10",
-        "vite-plugin-dts": "^3.6.4",
+        "vite-plugin-dts": "^3.7.0",
         "vite-plugin-externals": "^0.6.2",
-        "vitest": "^1.1.0"
+        "vitest": "^1.1.1"
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",

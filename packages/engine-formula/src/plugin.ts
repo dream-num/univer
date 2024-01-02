@@ -15,9 +15,10 @@
  */
 
 import { Plugin } from '@univerjs/core';
-import type { Dependency } from '@wendellhu/redi';
+import type { Ctor, Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
+import type { IFunctionNames } from './basics/function';
 import { CalculateController } from './controller/calculate.controller';
 import { FormulaController } from './controller/formula.controller';
 import { RegisterFunctionController } from './controller/register-function.controller';
@@ -40,6 +41,7 @@ import { UnionNodeFactory } from './engine/ast-node/union-node';
 import { ValueNodeFactory } from './engine/ast-node/value-node';
 import { FormulaDependencyGenerator } from './engine/dependency/formula-dependency';
 import { Interpreter } from './engine/interpreter/interpreter';
+import type { BaseFunction } from './functions/base-function';
 import { FormulaDataModel } from './models/formula-data.model';
 import { CalculateFormulaService } from './services/calculate-formula.service';
 import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from './services/current-data.service';
@@ -57,6 +59,7 @@ const PLUGIN_NAME = 'base-formula-engine';
 
 interface IUniverFormulaEngine {
     notExecuteFormula?: boolean;
+    function: Array<[Ctor<BaseFunction>, IFunctionNames]>;
 }
 
 export class UniverFormulaEnginePlugin extends Plugin {
@@ -86,7 +89,12 @@ export class UniverFormulaEnginePlugin extends Plugin {
             [LexerTreeBuilder],
 
             //Controllers
-            [FormulaController],
+            [
+                FormulaController,
+                {
+                    useFactory: () => this._injector.createInstance(FormulaController, this._config?.function || []),
+                },
+            ],
             [SetFeatureCalculationController],
         ];
 

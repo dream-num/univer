@@ -22,7 +22,6 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { FORMULA_UI_PLUGIN_NAME } from './common/plugin-name';
 import { ActiveDirtyController } from './controllers/active-dirty.controller';
 import { ArrayFormulaDisplayController } from './controllers/array-formula-display.controller';
-import { FormulaAlgorithmController } from './controllers/formula-algorithm.controller';
 import { FormulaAutoFillController } from './controllers/formula-auto-fill.controller';
 import { FormulaClipboardController } from './controllers/formula-clipboard.controller';
 import { FormulaEditorShowController } from './controllers/formula-editor-show.controller';
@@ -34,6 +33,7 @@ import { UpdateFormulaController } from './controllers/update-formula.controller
 import { zhCN } from './locale';
 import { ActiveDirtyManagerService, IActiveDirtyManagerService } from './services/active-dirty-manager.service';
 import { DescriptionService, IDescriptionService } from './services/description.service';
+import { FormulaAlgorithmService, IFormulaAlgorithmService } from './services/formula-algorithm.service';
 import { FormulaInputService, IFormulaInputService } from './services/formula-input.service';
 import { FormulaPromptService, IFormulaPromptService } from './services/prompt.service';
 
@@ -72,6 +72,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
                         this._injector.createInstance(DescriptionService, this._config?.description || []),
                 },
             ],
+            [IFormulaAlgorithmService, { useClass: FormulaAlgorithmService }],
             [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
 
             // controllers
@@ -85,13 +86,6 @@ export class UniverSheetsFormulaPlugin extends Plugin {
             [UpdateFormulaController],
             [FormulaEditorShowController],
             [ActiveDirtyController],
-            [
-                FormulaAlgorithmController,
-                {
-                    useFactory: () =>
-                        this._injector.createInstance(FormulaAlgorithmController, this._config?.function || []),
-                },
-            ],
         ];
 
         dependencies.forEach((dependency) => this._injector.add(dependency));

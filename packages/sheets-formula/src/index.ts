@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
-export { UniverSheetsFormulaCalculatePlugin } from './formula-calculate-plugin';
+export type { IRegisterFunctionOperationParams } from './commands/operations/register-function.command';
+export { RegisterFunctionOperation } from './commands/operations/register-function.command';
 export { UniverSheetsFormulaPlugin } from './formula-ui-plugin';
 export { enUS, zhCN } from './locale';

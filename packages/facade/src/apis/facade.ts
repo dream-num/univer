@@ -15,7 +15,9 @@
  */
 
 import type { IWorkbookData } from '@univerjs/core';
-import { IUniverInstanceService, Univer } from '@univerjs/core';
+import { ICommandService,IUniverInstanceService, Univer } from '@univerjs/core';
+import type { IRegisterFunctionOperationParams } from '@univerjs/sheets-formula';
+import { RegisterFunctionOperation } from '@univerjs/sheets-formula';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { FWorkbook } from './sheet/f-workbook';
@@ -31,7 +33,8 @@ export class FUniver {
 
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @ICommandService private readonly _commandService: ICommandService
     ) {}
 
     createUniverSheet(data: IWorkbookData): FWorkbook {
@@ -46,5 +49,9 @@ export class FUniver {
         }
 
         return this._injector.createInstance(FWorkbook, workbook);
+    }
+
+    registerFunction(config: IRegisterFunctionOperationParams) {
+        this._commandService.syncExecuteCommand(RegisterFunctionOperation.id, config);
     }
 }

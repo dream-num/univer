@@ -80,6 +80,12 @@ export interface IDescriptionService {
      * @returns
      */
     getSearchListByType(type: number): ISearchItem[];
+
+    /**
+     * register descriptions
+     * @param functionList
+     */
+    registerDescriptions(functionList: IFunctionInfo[]): void;
 }
 
 export const IDescriptionService = createIdentifier<IDescriptionService>('formula-ui.description-service');
@@ -153,6 +159,25 @@ export class DescriptionService implements IDescriptionService, IDisposable {
         return searchList;
     }
 
+    registerDescriptions(functionList: IFunctionInfo[]) {
+        const localeService = this._localeService;
+
+        const functionListLocale = functionList.map((functionInfo) => ({
+            functionName: getFunctionName(functionInfo, localeService),
+            functionType: functionInfo.functionType,
+            description: localeService.t(functionInfo.description),
+            abstract: localeService.t(functionInfo.abstract),
+            functionParameter: functionInfo.functionParameter.map((item) => ({
+                name: localeService.t(item.name),
+                detail: localeService.t(item.detail),
+                example: item.example,
+                require: item.require,
+                repeat: item.repeat,
+            })),
+        }));
+        this._functionService.registerDescriptions(...functionListLocale);
+    }
+
     private _initialize() {
         this._localeService.localeChanged$.subscribe(() => {
             this._registerDescription();
@@ -160,8 +185,6 @@ export class DescriptionService implements IDescriptionService, IDisposable {
     }
 
     private _registerDescription() {
-        const localeService = this._localeService;
-
         // TODO@Dushusir: Remove filtering after all formulas have been implemented
         const functions = [
             ...functionArray,
@@ -186,20 +209,7 @@ export class DescriptionService implements IDescriptionService, IDisposable {
             return functions.includes(item.functionName as IFunctionNames);
         });
 
-        const functionList = filterFunctionList.concat(this._description || []);
-        const functionListLocale = functionList.map((functionInfo) => ({
-            functionName: getFunctionName(functionInfo, localeService),
-            functionType: functionInfo.functionType,
-            description: localeService.t(functionInfo.description),
-            abstract: localeService.t(functionInfo.abstract),
-            functionParameter: functionInfo.functionParameter.map((item) => ({
-                name: localeService.t(item.name),
-                detail: localeService.t(item.detail),
-                example: item.example,
-                require: item.require,
-                repeat: item.repeat,
-            })),
-        }));
-        this._functionService.registerDescriptions(...functionListLocale);
+        const functionList = filterFunctionList.concat(this._description);
+        this.registerDescriptions(functionList);
     }
 }

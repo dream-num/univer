@@ -20,6 +20,7 @@ import { Inject } from '@wendellhu/redi';
 
 import type { IRegisterFunctionMutationParam } from '../commands/mutations/register-function.mutation';
 import { RegisterFunctionMutation } from '../commands/mutations/register-function.mutation';
+import { BaseFunction } from '../functions/base-function';
 import { FormulaDataModel } from '../models/formula-data.model';
 import { IFunctionService } from '../services/function.service';
 
@@ -51,14 +52,29 @@ export class RegisterFunctionController extends Disposable {
 
                     const { functions } = params;
                     const functionList = functions.map((func) => {
-                        // eslint-disable-next-line @typescript-eslint/no-implied-eval
-                        const Instance = new Function(`return ${func}`)();
-                        const name = Instance.name.toLocaleUpperCase();
-                        return new Instance(name);
+                        const functionString = func[0];
+                        const functionName = func[1];
+
+                        return createFunction(functionString, functionName);
                     });
                     this._functionService.registerExecutors(...functionList);
                 }
             })
         );
     }
+}
+
+class CustomFunction extends BaseFunction {
+    override isCustom(): boolean {
+        return true;
+    }
+}
+
+function createFunction(functionString: string, functionName: string) {
+    const instance = new CustomFunction(functionName);
+    // eslint-disable-next-line @typescript-eslint/no-implied-eval
+    const functionCalculate = new Function(`return ${functionString}`)();
+    instance.calculateCustom = functionCalculate;
+
+    return instance as BaseFunction;
 }

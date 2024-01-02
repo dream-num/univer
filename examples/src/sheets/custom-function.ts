@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { BaseValueObject, IFunctionInfo } from '@univerjs/engine-formula';
-import { BaseFunction, FunctionType } from '@univerjs/engine-formula';
+import type { ArrayValueObject, BaseValueObject, IFunctionInfo } from '@univerjs/engine-formula';
+import { BaseFunction, FunctionType, NumberValueObject } from '@univerjs/engine-formula';
 
 /**
  * function name
@@ -115,7 +115,26 @@ export const FUNCTION_LIST_USER: IFunctionInfo[] = [
  */
 export class Customsum extends BaseFunction {
     override calculate(...variants: BaseValueObject[]) {
-        return variants[0].plus(variants[1]);
+        let accumulatorAll: BaseValueObject = new NumberValueObject(0);
+        for (let i = 0; i < variants.length; i++) {
+            let variant = variants[i];
+
+            if (variant.isError()) {
+                return variant;
+            }
+
+            if (accumulatorAll.isError()) {
+                return accumulatorAll;
+            }
+
+            if (variant.isArray()) {
+                variant = (variant as ArrayValueObject).sum();
+            }
+
+            accumulatorAll = accumulatorAll.plus(variant as BaseValueObject);
+        }
+
+        return accumulatorAll;
     }
 }
 

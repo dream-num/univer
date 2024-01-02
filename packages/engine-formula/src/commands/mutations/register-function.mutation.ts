@@ -26,7 +26,10 @@ import { CommandType } from '@univerjs/core';
  */
 
 export interface IRegisterFunctionMutationParam {
-    functions: string[];
+    /**
+     * function string, function name
+     */
+    functions: [[string, string]];
 }
 
 export const RegisterFunctionMutation: IMutation<IRegisterFunctionMutationParam> = {

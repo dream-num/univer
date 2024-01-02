@@ -278,14 +278,13 @@ export function getSetCellStyleMutations(
     const valueMatrix = new ObjectMatrix<ICellData>();
 
     matrix.forValue((row, col, value) => {
-        valueMatrix.setValue(row + startRow, col + startColumn, {
+        const newValue: ICellData = {
             s: value.s,
-        });
+        };
         if (value.p?.body) {
-            valueMatrix.setValue(row + startRow, col + startColumn, {
-                p: value.p,
-            });
+            newValue.p = value.p;
         }
+        valueMatrix.setValue(row + startRow, col + startColumn, newValue);
     });
     // set cell style
     const setValuesMutation: ISetRangeValuesMutationParams = {

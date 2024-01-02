@@ -1,7 +1,3 @@
-# CI / CD / repo settings
-.github @jikkai @wzhudev
-.commitlint.config.cjs @jikkai @wzhudev
-
 # core
 packages/core @DR-Univer @wzhudev
 packages/core/src/services/resource-manager @Gggpound
@@ -17,23 +13,31 @@ packages/ui @jikkai @wzhudev @Jocs
 packages/ui/src/services/clipboard @yuhongz
 packages/design @jikkai @wzhudev
 
+# common
+packages/image @DR-Univer
+packages/uniscript @wzhudev
+
 # docs
 packages/docs @DR-Univer @Jocs
 packages/docs-ui @jikkai @Jocs
 
 # sheets
 packages/sheets @wzhudev @DR-Univer
+packages/sheets/src/services/numfmt @Gggpound
+packages/sheets/src/services/ref-range @Gggpound
+
 packages/sheets-ui @jikkai @wzhudev
 packages/sheets-ui/src/controllers/clipboard @yuhongz
 packages/sheets-ui/src/controllers/editor @Jocs
 packages/sheets-ui/src/services/clipboard @yuhongz
 packages/sheets-ui/src/services/editor @Jocs
 packages/sheets-ui/src/services/editor-bridge.service.ts @Jocs
+
+packages/sheets-find @wzhudev
 packages/sheets-numfmt @Gggpound
+packages/sheets-imoprt-xlsx @Gggpound
 packages/sheets-formula @DR-Univer @Dushusir
 packages/sheets-zen-editor @Jocs
-packages/sheets/src/services/numfmt @Gggpound
-packages/sheets/src/services/ref-range @Gggpound
 
 # slides
 packages/slides @wzhudev @DR-Univer @jikkai

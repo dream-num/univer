@@ -232,6 +232,7 @@ export class SelectionManagerService implements IDisposable {
         if (this._currentSelection == null) {
             return;
         }
+
         this._replaceByParam({
             ...this._currentSelection,
             selectionDatas,

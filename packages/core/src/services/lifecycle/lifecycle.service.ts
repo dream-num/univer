@@ -21,10 +21,14 @@ import { Disposable, toDisposable } from '../../shared/lifecycle';
 import { ILogService } from '../log/log.service';
 import { LifecycleNameMap, LifecycleStages, LifecycleToModules } from './lifecycle';
 
+/**
+ * This service controls the lifecycle of a Univer instance. Other modules can
+ * inject this service to read the current lifecycle stage or subscribe to
+ * lifecycle changes.
+ */
 export class LifecycleService extends Disposable {
     private _lifecycle$ = new BehaviorSubject<LifecycleStages>(LifecycleStages.Starting);
-
-    lifecycle$ = this._lifecycle$.asObservable();
+    readonly lifecycle$ = this._lifecycle$.asObservable();
 
     constructor(@ILogService private readonly _logService: ILogService) {
         super();
@@ -52,9 +56,22 @@ export class LifecycleService extends Disposable {
         this._lifecycle$.next(stage);
     }
 
+    override dispose(): void {
+        this._lifecycle$.complete();
+
+        super.dispose();
+    }
+
+    /**
+     * Subscribe to lifecycle changes and all previous stages and the current
+     * stage will be emitted immediately.
+     * @returns
+     */
     subscribeWithPrevious(): Observable<LifecycleStages> {
         return new Observable<LifecycleStages>((subscriber) => {
-            // before subscribe, emit the current stage and all previous stages
+            // Before subscribe, emit the current stage and all previous stages.
+            // Since `this._lifecycle$` is a BehaviorSubject, it will emit the current stage immediately.
+            // So we just need to manually next all previous stages.
             if (this.stage === LifecycleStages.Starting) {
                 // do nothing
             } else if (this.stage === LifecycleStages.Ready) {
@@ -73,6 +90,12 @@ export class LifecycleService extends Disposable {
     }
 }
 
+/**
+ * This service is used to initialize modules on a certain lifecycle stage.
+ * Refer to `runOnLifecycle` and `OnLifecycle` for more details.
+ *
+ * @internal
+ */
 export class LifecycleInitializerService extends Disposable {
     private _started = false;
 

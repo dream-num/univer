@@ -24,10 +24,11 @@ import type { Nullable } from '../../shared/types';
  * IConfig provides universal configuration for the whole application.
  */
 export const IConfigService = createIdentifier<IConfigService>('univer.config-service');
+
 export interface IConfigService {
     getConfig<T>(id: string, defaultValue: T): T;
     getConfig<T>(id: string): Nullable<T>;
-    setConfig(id: string, value: any): void;
+    setConfig(id: string, value: unknown): void;
     deleteConfig(id: string): void;
 }
 
@@ -39,7 +40,7 @@ export class ConfigService implements IConfigService {
         return this._config.get(id) as T;
     }
 
-    setConfig(id: string, value: any) {
+    setConfig(id: string, value: unknown) {
         this._config.set(id, value);
     }
 

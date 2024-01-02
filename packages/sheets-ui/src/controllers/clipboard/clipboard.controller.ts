@@ -105,7 +105,7 @@ export class SheetClipboardController extends Disposable {
     private _init() {
         // register sheet clipboard commands
         [SheetCopyCommand, SheetCutCommand, SheetPasteCommand].forEach((command) =>
-            this.disposeWithMe(this._commandService.registerAsMultipleCommand(command))
+            this.disposeWithMe(this._commandService.registerMultipleCommand(command))
         );
 
         [

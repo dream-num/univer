@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-import type { IWorkbookData, Univer } from '@univerjs/core';
+import type { IWorkbookData } from '@univerjs/core';
 import { IUniverInstanceService } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { FWorkbook } from './sheet/f-workbook';
 
 export class FUniver {
-    private readonly univer: Univer;
-
     /**
      * Create a FUniver instance, if the injector is not provided, it will create a new Univer instance.
      */

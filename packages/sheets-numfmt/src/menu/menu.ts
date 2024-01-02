@@ -26,7 +26,7 @@ import { MENU_OPTIONS } from '../base/const/MENU-OPTIONS';
 import { AddDecimalCommand } from '../commands/commands/add.decimal.command';
 import { SetCurrencyCommand } from '../commands/commands/set.currency.command';
 import { SubtractDecimalCommand } from '../commands/commands/subtract.decimal.command';
-import { OpenNumfmtPanelOperator } from '../commands/operators/open.numfmt.panel.operator';
+import { OpenNumfmtPanelOperator } from '../commands/operations/open.numfmt.panel.operation';
 import { MoreNumfmtType, Options } from '../components/more-numfmt-type/MoreNumfmtType';
 import { isPatternEqualWithoutDecimal } from '../utils/decimal';
 

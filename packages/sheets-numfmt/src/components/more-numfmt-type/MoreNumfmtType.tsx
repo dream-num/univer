@@ -25,7 +25,7 @@ import React from 'react';
 
 import { MENU_OPTIONS } from '../../base/const/MENU-OPTIONS';
 import { SetNumfmtCommand } from '../../commands/commands/set.numfmt.command';
-import { OpenNumfmtPanelOperator } from '../../commands/operators/open.numfmt.panel.operator';
+import { OpenNumfmtPanelOperator } from '../../commands/operations/open.numfmt.panel.operation';
 import { getPatternType } from '../../utils/pattern';
 
 export const MoreNumfmtType = (props: { value?: string }) => {

@@ -28,6 +28,10 @@ export class FWorkbook {
         @ICommandService private readonly _commandService: ICommandService
     ) {}
 
+    /**
+     * Get the active sheet of the workbook.
+     * @returns The active sheet of the workbook
+     */
     getActiveSheet(): FWorksheet | null {
         const activeSheet = this._workbook.getActiveSheet();
         if (!activeSheet) {
@@ -37,6 +41,13 @@ export class FWorkbook {
         return this._injector.createInstance(FWorksheet, this._workbook, activeSheet);
     }
 
+    /**
+     * Create a new worksheet and returns a handle to it.
+     * @param name Name of the new sheet
+     * @param rows How may rows would the new sheet have
+     * @param column How many columns would the new sheet have
+     * @returns The new created sheet
+     */
     create(name: string, rows: number, column: number): FWorksheet {
         const newSheet = Tools.deepClone(DEFAULT_WORKSHEET);
         newSheet.rowCount = rows;

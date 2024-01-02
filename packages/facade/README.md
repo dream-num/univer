@@ -5,7 +5,9 @@
 
 ## Introduction
 
-> Facade works as a API layer over all other Univer packages (expect for Uniscript) so that you can use Univer without knowing the details of the implementation.
+Facade works as a API layer over all other Univer packages (expect for Uniscript) so that you can use Univer without knowing the details of the architecture.
+
+Though Facade may suites for most of the use cases, you may find it more powerful and easier to extend Univer by using the packages directly.
 
 ## Usage
 

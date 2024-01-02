@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import type { IWorkbookData, Univer } from '@univerjs/core';
+import type { IFreeze, IWorkbookData, Univer } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, RANGE_TYPE } from '@univerjs/core';
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import { ScrollManagerService } from '../../../services/scroll-manager.service';
 import {
     CancelFrozenCommand,
     SetColumnFrozenCommand,
@@ -33,6 +34,12 @@ describe('Test commands used for change selections', () => {
     let get: Injector['get'];
     let commandService: ICommandService;
     let selectionManagerService: SelectionManagerService;
+    let scrollManagerService: ScrollManagerService;
+
+    const currentInfo = {
+        unitId: 'test',
+        sheetId: 'sheet1',
+    };
 
     function select(
         startRow: number,
@@ -46,8 +53,7 @@ describe('Test commands used for change selections', () => {
     ) {
         selectionManagerService.setCurrentSelection({
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-            unitId: 'test',
-            sheetId: 'sheet1',
+            ...currentInfo,
         });
 
         selectionManagerService.add([
@@ -67,6 +73,16 @@ describe('Test commands used for change selections', () => {
             },
         ]);
     }
+
+    const scrollTo = (startRow: number, startColumn: number, offsetX = 0, offsetY = 0) => {
+        scrollManagerService.addOrReplaceByParam({
+            sheetViewStartRow: startRow,
+            sheetViewStartColumn: startColumn,
+            offsetX,
+            offsetY,
+            ...currentInfo,
+        });
+    };
 
     const getFreeze = () => {
         const currentService = get(IUniverInstanceService);
@@ -89,8 +105,11 @@ describe('Test commands used for change selections', () => {
         selectionManagerService = get(SelectionManagerService);
         selectionManagerService.setCurrentSelection({
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-            unitId: 'test',
-            sheetId: 'sheet1',
+            ...currentInfo,
+        });
+        scrollManagerService = get(ScrollManagerService);
+        scrollManagerService.setCurrentScroll({
+            ...currentInfo,
         });
     }
 
@@ -131,6 +150,27 @@ describe('Test commands used for change selections', () => {
 
             const config = getFreeze();
             expect(config?.startRow === -1 && config.startColumn === 2).toBeTruthy();
+        });
+
+        it('xSplit or ySplit must bigger than 0 if row or column was set', async () => {
+            select(2, 2, 2, 2, 2, 2, false, false);
+            scrollTo(2, 2);
+            let config: IFreeze;
+            await commandService.executeCommand(SetColumnFrozenCommand.id);
+            config = getFreeze();
+            expect(config?.startRow === -1 && config.startColumn === 2).toBeTruthy();
+            expect(config.xSplit).toBe(1);
+
+            await commandService.executeCommand(SetRowFrozenCommand.id);
+            config = getFreeze();
+            expect(config?.startRow === 2 && config.startColumn === -1).toBeTruthy();
+            expect(config.ySplit).toBe(1);
+
+            await commandService.executeCommand(SetSelectionFrozenCommand.id);
+            config = getFreeze();
+            expect(config?.startRow === 2 && config.startColumn === 2).toBeTruthy();
+            expect(config.ySplit).toBe(1);
+            expect(config.xSplit).toBe(1);
         });
 
         it('Should cancel all freeze', async () => {

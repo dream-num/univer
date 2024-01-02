@@ -15,9 +15,8 @@
  */
 
 import { Disposable, ILogService } from '@univerjs/core';
+import { FUniver } from '@univerjs/facade';
 import { Inject, Injector } from '@wendellhu/redi';
-
-import { FUniver } from '../facade/facade';
 
 /**
  * This service is to

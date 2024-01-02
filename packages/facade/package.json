@@ -1,12 +1,12 @@
 {
-    "name": "@univerjs/uniscript",
+    "name": "@univerjs/facade",
     "version": "0.1.0-beta.1",
-    "description": "UI component library for building exceptional Univer.",
+    "description": "",
     "keywords": [],
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
     "main": "./lib/cjs/index.js",
-    "module": "./lib/es/index.js",
+    "module": "./lib/esm/index.js",
     "types": "./lib/types/index.d.ts",
     "publishConfig": {
         "access": "public",
@@ -22,8 +22,7 @@
                 "import": "./lib/es/*",
                 "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
-            },
-            "./lib/*": "./lib/*"
+            }
         }
     },
     "exports": {
@@ -36,9 +35,6 @@
     "files": [
         "lib"
     ],
-    "sideEffects": [
-        "**/*.css"
-    ],
     "private": false,
     "scripts": {
         "test": "vitest run",
@@ -48,20 +44,12 @@
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/design": "workspace:*",
-        "@univerjs/facade": "workspace:*",
         "@univerjs/sheets": "workspace:*",
-        "@univerjs/sheets-ui": "workspace:*",
-        "@univerjs/ui": "workspace:*",
         "@wendellhu/redi": "^0.12.13",
-        "monaco-editor": "0.45.0",
         "rxjs": "^7.8.1"
     },
     "devDependencies": {
-        "@types/react": "^18.2.46",
-        "@vitejs/plugin-react": "^4.2.1",
         "@vitest/coverage-istanbul": "^1.1.1",
-        "less": "^4.2.0",
         "typescript": "^5.3.3",
         "vite": "^5.0.10",
         "vite-plugin-dts": "^3.7.0",
@@ -70,14 +58,8 @@
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/design": "workspace:*",
-        "@univerjs/facade": "workspace:*",
         "@univerjs/sheets": "workspace:*",
-        "@univerjs/sheets-ui": "workspace:*",
-        "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": ">=0.12.12",
-        "monaco-editor": ">=0.44.0",
-        "react": ">=16.9.0",
+        "@wendellhu/redi": ">=0.12.13",
         "rxjs": ">=7.0.0"
     }
 }

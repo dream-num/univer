@@ -578,6 +578,40 @@ importers:
         specifier: ^1.1.1
         version: 1.1.1(@types/node@20.10.6)(happy-dom@12.10.3)(less@4.2.0)
 
+  packages/facade:
+    dependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../core
+      '@univerjs/sheets':
+        specifier: workspace:*
+        version: link:../sheets
+      '@wendellhu/redi':
+        specifier: ^0.12.13
+        version: 0.12.13
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+    devDependencies:
+      '@vitest/coverage-istanbul':
+        specifier: ^1.1.1
+        version: 1.1.1(vitest@1.1.1)
+      typescript:
+        specifier: ^5.3.3
+        version: 5.3.3
+      vite:
+        specifier: ^5.0.10
+        version: 5.0.10(@types/node@20.10.6)(less@4.2.0)
+      vite-plugin-dts:
+        specifier: ^3.7.0
+        version: 3.7.0(@types/node@20.10.6)(typescript@5.3.3)(vite@5.0.10)
+      vite-plugin-externals:
+        specifier: ^0.6.2
+        version: 0.6.2(vite@5.0.10)
+      vitest:
+        specifier: ^1.1.1
+        version: 1.1.1(@types/node@20.10.6)
+
   packages/image:
     dependencies:
       '@univerjs/core':
@@ -1277,6 +1311,9 @@ importers:
       '@univerjs/design':
         specifier: workspace:*
         version: link:../design
+      '@univerjs/facade':
+        specifier: workspace:*
+        version: link:../facade
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets

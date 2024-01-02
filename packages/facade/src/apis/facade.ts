@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
+import type { IWorkbookData } from '@univerjs/core';
 import { IUniverInstanceService } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { FWorkbook } from './sheet/f-workbook';
 
 export class FUniver {
+    /**
+     * Create a FUniver instance, if the injector is not provided, it will create a new Univer instance.
+     */
     static newInstance(injector: Injector): FUniver {
         return injector.createInstance(FUniver);
     }
@@ -28,6 +32,11 @@ export class FUniver {
         @Inject(Injector) private readonly _injector: Injector,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {}
+
+    createUniverSheet(data: IWorkbookData): FWorkbook {
+        const workbook = this._univerInstanceService.createSheet(data);
+        return this._injector.createInstance(FWorkbook, workbook);
+    }
 
     getCurrentSheet(): FWorkbook | null {
         const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();

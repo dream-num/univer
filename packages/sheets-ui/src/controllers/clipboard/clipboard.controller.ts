@@ -378,7 +378,7 @@ export class SheetClipboardController extends Disposable {
                 };
             },
 
-            onPastePlainText(range, text, pasteType) {
+            onPastePlainText(range: IRange, text: string, pasteType: string) {
                 return self._onPastePlainText(range, text, pasteType);
             },
 

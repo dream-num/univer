@@ -153,6 +153,14 @@ export interface ISheetClipboardHook {
         undos: IMutationInfo[];
         redos: IMutationInfo[];
     };
+    onPastePlainText?(
+        pastedRange: IRange,
+        text: string,
+        pasteType: string
+    ): {
+        undos: IMutationInfo[];
+        redos: IMutationInfo[];
+    };
     onAfterPaste?(success: boolean): void;
 
     /**

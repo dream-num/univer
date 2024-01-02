@@ -50,6 +50,15 @@ Univer 的功能特性包括：
     -   🧮 高性能的公式引擎，支持 Web Worker
 -   🌍 国际化支持
 
+## 例子
+
+| 链接 | 预览 |
+| - | - |
+| [多实例](https://univer.work/playground/?title=Multi%20Instance)<br>在同一个网页中运行多个 Univer 实例 |  ![](./docs/img/multi-instances.png) |
+| [Uniscript](https://univer.work/playground/?title=Uniscript)<br>使用 Uniscript 来自动化工作流 |  ![](./docs/img/uniscript.png) |
+
+
+
 ## 使用
 
 我们建议通过将 Univer 作为 npm 包使用，请参考文档上的[快速开始](https://univer.work/guides/quick-start/)小节。我们还准备了一个[在线 playground](https://univer.work/playground/)，你无需在本地安装 Univer 就可以体验使用 Univer 开发。

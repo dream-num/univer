@@ -60,7 +60,7 @@ export class FormulaClipboardController extends Disposable {
 
     private _pasteFormulaHook(): ISheetClipboardHook {
         const specialPasteFormulaHook: ISheetClipboardHook = {
-            hookName: SPECIAL_PASTE_FORMULA,
+            id: SPECIAL_PASTE_FORMULA,
             specialPasteInfo: {
                 label: 'specialPaste.formula',
             },
@@ -89,7 +89,7 @@ export class FormulaClipboardController extends Disposable {
 
     private _pasteWithFormulaHook(): ISheetClipboardHook {
         const specialPasteFormulaHook: ISheetClipboardHook = {
-            hookName: DEFAULT_PASTE_FORMULA,
+            id: DEFAULT_PASTE_FORMULA,
             onPasteCells: (pastedRange, matrix, pasteType, copyInfo) => {
                 const workbook = this._currentUniverSheet.getCurrentUniverSheetInstance();
                 const unitId = workbook.getUnitId();

@@ -86,7 +86,7 @@ import {
  * This controller add basic clipboard logic for basic features such as text color / BISU / row widths to the clipboard
  * service. You can create a similar clipboard controller to add logic for your own features.
  */
-@OnLifecycle(LifecycleStages.Rendered, SheetClipboardController)
+@OnLifecycle(LifecycleStages.Ready, SheetClipboardController)
 export class SheetClipboardController extends Disposable {
     constructor(
         @IUniverInstanceService private readonly _currentUniverSheet: IUniverInstanceService,
@@ -127,7 +127,7 @@ export class SheetClipboardController extends Disposable {
         const self = this;
         let currentSheet: Worksheet | null = null;
         return {
-            hookName: PREDEFINED_HOOK_NAME.DEFAULT_COPY,
+            id: PREDEFINED_HOOK_NAME.DEFAULT_COPY,
             isDefaultHook: true,
             onBeforeCopy(unitId, subUnitId) {
                 currentSheet = self._getWorksheet(unitId, subUnitId);
@@ -218,7 +218,7 @@ export class SheetClipboardController extends Disposable {
         let currentSheet: Worksheet | null = null;
 
         return {
-            hookName: PREDEFINED_HOOK_NAME.DEFAULT_PASTE,
+            id: PREDEFINED_HOOK_NAME.DEFAULT_PASTE,
             isDefaultHook: true,
             onBeforePaste(unitId_, subUnitId_, range) {
                 currentSheet = self._getWorksheet(unitId_, subUnitId_);
@@ -415,7 +415,7 @@ export class SheetClipboardController extends Disposable {
         const self = this;
 
         const specialPasteValueHook: ISheetClipboardHook = {
-            hookName: PREDEFINED_HOOK_NAME.SPECIAL_PASTE_VALUE,
+            id: PREDEFINED_HOOK_NAME.SPECIAL_PASTE_VALUE,
             specialPasteInfo: {
                 label: 'specialPaste.value',
             },
@@ -427,7 +427,7 @@ export class SheetClipboardController extends Disposable {
             },
         };
         const specialPasteFormatHook: ISheetClipboardHook = {
-            hookName: PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMAT,
+            id: PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMAT,
             specialPasteInfo: {
                 label: 'specialPaste.format',
             },
@@ -479,7 +479,7 @@ export class SheetClipboardController extends Disposable {
         };
 
         const specialPasteColWidthHook: ISheetClipboardHook = {
-            hookName: PREDEFINED_HOOK_NAME.SPECIAL_PASTE_COL_WIDTH,
+            id: PREDEFINED_HOOK_NAME.SPECIAL_PASTE_COL_WIDTH,
             specialPasteInfo: {
                 label: 'specialPaste.colWidth',
             },
@@ -530,7 +530,7 @@ export class SheetClipboardController extends Disposable {
         };
 
         const specialPasteBesidesBorder: ISheetClipboardHook = {
-            hookName: PREDEFINED_HOOK_NAME.SPECIAL_PASTE_BESIDES_BORDER,
+            id: PREDEFINED_HOOK_NAME.SPECIAL_PASTE_BESIDES_BORDER,
             specialPasteInfo: {
                 label: 'specialPaste.besidesBorder',
             },

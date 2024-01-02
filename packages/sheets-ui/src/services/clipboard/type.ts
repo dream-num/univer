@@ -65,7 +65,7 @@ export interface ISpecialPasteInfo {
  * 1. When pasting, get access to the clipboard content and append mutations to the paste command.
  */
 export interface ISheetClipboardHook {
-    hookName: string;
+    id: string;
     isDefaultHook?: boolean;
     specialPasteInfo?: ISpecialPasteInfo; // only special paste info should be provided, which will replace the default hook.
     priority?: number;

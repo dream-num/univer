@@ -212,8 +212,8 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     }
 
     addClipboardHook(hook: ISheetClipboardHook): IDisposable {
-        if (this._clipboardHooks.findIndex((h) => h.hookName === hook.hookName) !== -1) {
-            this._logService.error('[SheetClipboardService]', 'hook already exists', hook.hookName);
+        if (this._clipboardHooks.findIndex((h) => h.id === hook.id) !== -1) {
+            this._logService.error('[SheetClipboardService]', 'hook already exists', hook.id);
             return { dispose: () => {} };
         }
         // hook added should be ordered at meaning while
@@ -432,8 +432,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         // if hooks are not special or default, it will be executed in any case.
         // other hooks will be executed only when the paste type is the same as the hook name, including the default one
         const filteredHooks: ISheetClipboardHook[] = hooks.filter(
-            (h) =>
-                (!h.specialPasteInfo && h.hookName !== PREDEFINED_HOOK_NAME.DEFAULT_PASTE) || pasteType === h.hookName
+            (h) => (!h.specialPasteInfo && h.id !== PREDEFINED_HOOK_NAME.DEFAULT_PASTE) || pasteType === h.id
         );
         filteredHooks.forEach((h) => {
             if (rowProperties) {

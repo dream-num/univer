@@ -612,6 +612,28 @@ export class UniverContext2D implements CanvasRenderingContext2D {
      */
 
     fillText(text: string, x: number, y: number, maxWidth?: number) {
+        // const { scaleX, scaleY } = this._getScale();
+        // x = fixLineWidthByScale(x, scaleX);
+        // y = fixLineWidthByScale(y, scaleY);
+
+        if (maxWidth) {
+            // maxWidth = fixLineWidthByScale(maxWidth, scaleX);
+
+            this._context.fillText(text, x, y, maxWidth);
+        } else {
+            this._context.fillText(text, x, y);
+        }
+    }
+
+    /**
+
+     * fillText function.
+
+     * @method
+
+     */
+
+    fillTextPrecision(text: string, x: number, y: number, maxWidth?: number) {
         const { scaleX, scaleY } = this._getScale();
         x = fixLineWidthByScale(x, scaleX);
         y = fixLineWidthByScale(y, scaleY);

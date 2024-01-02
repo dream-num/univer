@@ -15,7 +15,7 @@
  */
 
 import type { IWorkbookData } from '@univerjs/core';
-import { IUniverInstanceService } from '@univerjs/core';
+import { IUniverInstanceService, Univer } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { FWorkbook } from './sheet/f-workbook';
@@ -24,7 +24,8 @@ export class FUniver {
     /**
      * Create a FUniver instance, if the injector is not provided, it will create a new Univer instance.
      */
-    static newInstance(injector: Injector): FUniver {
+    static newAPI(wrapped: Univer | Injector): FUniver {
+        const injector = wrapped instanceof Univer ? wrapped.__getInjector() : wrapped;
         return injector.createInstance(FUniver);
     }
 

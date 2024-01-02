@@ -32,12 +32,12 @@ export class UniscriptExecutionService extends Disposable {
     async execute(code: string): Promise<boolean> {
         this._logService.log('[UniscriptExecutionService]', 'executing Uniscript...');
 
-        const facadeInstance = FUniver.newInstance(this._injector);
+        const apiInstance = FUniver.newAPI(this._injector);
         // eslint-disable-next-line @typescript-eslint/no-implied-eval
         const scriptFunction = new Function('Univer', `(() => {${code}})()`);
 
         try {
-            scriptFunction(facadeInstance);
+            scriptFunction(apiInstance);
             return true;
         } catch (e) {
             this._logService.error(e);

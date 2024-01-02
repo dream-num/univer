@@ -50,14 +50,14 @@ Univer 的功能特性包括：
     -   🧮 高性能的公式引擎，支持 Web Worker
 -   🌍 国际化支持
 
+点击[这里](https://univer.work/guides/features)以了解 Univer 目前已经推出的功能。
+
 ## 例子
 
 | 链接 | 预览 |
 | - | - |
 | [多实例](https://univer.work/playground/?title=Multi%20Instance)<br>在同一个网页中运行多个 Univer 实例 |  ![](./docs/img/multi-instances.png) |
 | [Uniscript](https://univer.work/playground/?title=Uniscript)<br>使用 Uniscript 来自动化工作流 |  ![](./docs/img/uniscript.png) |
-
-
 
 ## 使用
 

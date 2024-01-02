@@ -15,3 +15,7 @@
  */
 
 export { FUniver } from './apis/facade';
+export { FRange } from './apis/sheet/f-range';
+export { FSelection } from './apis/sheet/f-selection';
+export { FWorkbook } from './apis/sheet/f-workbook';
+export { FWorksheet } from './apis/sheet/f-worksheet';

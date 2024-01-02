@@ -203,7 +203,7 @@ export class CommandService implements ICommandService {
 
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
-        @ILogService private readonly _log: ILogService
+        @ILogService private readonly _logService: ILogService
     ) {
         this._commandRegistry = new CommandRegistry();
     }
@@ -354,7 +354,7 @@ export class CommandService implements ICommandService {
     }
 
     private async _execute<P extends object, R = boolean>(command: ICommand<P, R>, params?: P): Promise<R> {
-        this._log.log(
+        this._logService.debug(
             '[CommandService]',
             `${'|-'.repeat(Math.max(this._commandExecutingLevel, 0))}executing command "${command.id}"`
         );
@@ -374,7 +374,7 @@ export class CommandService implements ICommandService {
     }
 
     private _syncExecute<P extends object, R = boolean>(command: ICommand<P, R>, params?: P): R {
-        this._log.log(
+        this._logService.debug(
             '[CommandService]',
             `${'|-'.repeat(Math.max(0, this._commandExecutingLevel))}executing command "${command.id}".`
         );
@@ -442,7 +442,7 @@ class MultiCommand implements IMultiCommand {
         for (const item of this._implementations) {
             const preconditions = item.command.preconditions;
             if (!preconditions || (preconditions && preconditions(contextService))) {
-                logService.log(`[MultiCommand]`, `executing implementation "${item.command.name}".`);
+                logService.debug(`[MultiCommand]`, `executing implementation "${item.command.name}".`);
                 const result = await injector.invoke(item.command.handler, params);
                 if (result) {
                     return true;

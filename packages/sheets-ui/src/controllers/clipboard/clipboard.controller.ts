@@ -378,6 +378,10 @@ export class SheetClipboardController extends Disposable {
                 };
             },
 
+            onPastePlainText(range, text, pasteType) {
+                return self._onPastePlainText(range, text, pasteType);
+            },
+
             onPasteCells(range, matrix, pasteType, copyInfo) {
                 return self._onPasteCells(range, matrix, unitId!, subUnitId!, pasteType, copyInfo);
             },
@@ -385,6 +389,39 @@ export class SheetClipboardController extends Disposable {
             onAfterPaste(success) {
                 currentSheet = null;
             },
+        };
+    }
+
+    private _onPastePlainText(range: IRange, text: string, pasteType: string) {
+        const cellValue: IObjectMatrixPrimitiveType<ICellData> = {
+            [range.startRow]: {
+                [range.startColumn]: {
+                    v: text,
+                },
+            },
+        };
+
+        const workbook = this._currentUniverSheet.getCurrentUniverSheetInstance();
+
+        const setRangeValuesParams: ISetRangeValuesMutationParams = {
+            unitId: workbook.getUnitId(),
+            subUnitId: workbook.getActiveSheet().getSheetId(),
+            cellValue,
+        };
+
+        return {
+            redos: [
+                {
+                    id: SetRangeValuesMutation.id,
+                    params: setRangeValuesParams,
+                },
+            ],
+            undos: [
+                {
+                    id: SetRangeValuesMutation.id,
+                    params: SetRangeValuesUndoMutationFactory(this._injector, setRangeValuesParams),
+                },
+            ],
         };
     }
 

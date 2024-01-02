@@ -47,6 +47,9 @@
             "path": "./packages/engine-render"
         },
         {
+            "path": "./packages/facade"
+        },
+        {
             "path": "./packages/image"
         },
         {

@@ -56,10 +56,10 @@ The file structure of a plugin should be organized as follows:
 
 There are some limits on what paths could a file import from.
 
-* common cannot import file in other folders
-* models can only import files from common
-* services can only import files from models and common
-* commands can only import files from common, models and services
+-   common cannot import file in other folders
+-   models can only import files from common
+-   services can only import files from models and common
+-   commands can only import files from common, models and services
 
 During the refactoring process, it is recommended to remove legacy folders such as `Enum`, `Interface`, `Basics`, and `Shared`.
 
@@ -69,20 +69,24 @@ Avoid creating barrel imports (index.ts) unless it is the main root index.ts fil
 
 To ensure code quality and consistency, please adhere to the following guidelines:
 
-- Use kebab-case for both file names and folder names. If the file contains a React component, it should be in capital camelCase.
-- Folder names should be in plural format, e.g. `SheetTab.tsx`.
-- Interfaces should be named starting with a capital "I".
-- Resolve all ESLint issues that are identified in the code.
-- Do use conventional type names including .service, .controller, .menu, .command, .mutation, and .operation. Invent additional type names if you must but take care not to create too many.
+-   Use kebab-case for both file names and folder names. If the file contains a React component, it should be in capital camelCase.
+-   Folder names should be in plural format, e.g. `SheetTab.tsx`.
+-   Interfaces should be named starting with a capital "I".
+-   Resolve all ESLint issues that are identified in the code.
+-   Do use conventional type names including .service, .controller, .menu, .command, .mutation, and .operation. Invent additional type names if you must but take care not to create too many.
 
 ### Submitting pull requests
 
 Before merging a pull request, please make sure the following requirements are met:
 
-- All tests are passed. ESLint and Prettier errors are fixed.
-- Test coverage is not decreased.
+-   All tests are passed. ESLint and Prettier errors are fixed.
+-   Test coverage is not decreased.
 
 We provide preview deployments for pull requests. You can view the preview deployment by clicking the "Preview" link in the "View Deployment" section.
+
+### Documentation
+
+If you are adding a new feature, please make sure to update the documentation accordingly. Refer to our [documentation repository](https://github.com/dream-num/docs) for more guidance.
 
 ### Storybook
 
@@ -116,8 +120,21 @@ With the help of vscode and its rich ecosystem, you could directly debug unit te
 
 ### Clean code
 
-> Programs are meant to be ready by humans and only icidentally for computers to execute.
+> Programs are meant to be ready by humans and only icidentally for computers to execute. - Harold Abelson
 
-* Do not expose properties or methods those are not necessary to be public.
-* Group related methods or properties together. Do not always use blank lines to separate them.
-* Keep your concepts consistent by naming your variables consistently.
+-   Do not expose properties or methods those are not necessary to be exposed.
+-   Group related methods or properties together. Do not always use blank lines to separate them.
+-   Keep your concepts consistent by naming your variables consistently.
+
+### New Package
+
+Create a new package with our CLI tool:
+
+```shell
+# pnpm
+pnpm create @univerjs/cli init <project-name>
+
+# npm
+npm create @univerjs/cli init <project-name>
+
+```

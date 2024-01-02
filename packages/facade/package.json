@@ -1,12 +1,12 @@
 {
-    "name": "@univerjs/uniscript",
+    "name": "@univerjs/facade",
     "version": "0.1.0-beta.1",
-    "description": "UI component library for building exceptional Univer.",
+    "description": "",
     "keywords": [],
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
     "main": "./lib/cjs/index.js",
-    "module": "./lib/es/index.js",
+    "module": "./lib/esm/index.js",
     "types": "./lib/types/index.d.ts",
     "publishConfig": {
         "access": "public",
@@ -22,8 +22,7 @@
                 "import": "./lib/es/*",
                 "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
-            },
-            "./lib/*": "./lib/*"
+            }
         }
     },
     "exports": {
@@ -36,9 +35,6 @@
     "files": [
         "lib"
     ],
-    "sideEffects": [
-        "**/*.css"
-    ],
     "private": false,
     "scripts": {
         "test": "vitest run",
@@ -49,7 +45,6 @@
     "dependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
-        "@univerjs/facade": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
@@ -71,7 +66,6 @@
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
-        "@univerjs/facade": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",

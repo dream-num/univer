@@ -367,7 +367,10 @@ function parseTableCells(tdStrings: string[]) {
 
         Array.from(cellMatches).forEach((cellMatch) => {
             const cellProperties = parseProperties(cellMatch[1]);
-            const content = cellMatch[2].replace(/&nbsp;/g, ' '); // paste from excel
+            const content = cellMatch[2]
+                .replace(/&nbsp;/g, ' ')
+                .replace('<br>', '\r')
+                .replace(/<\/?[^>]*>/g, ''); // paste from excel
             const rowSpan = cellProperties.rowspan ? +cellProperties.rowspan : 1;
             const colSpan = cellProperties.colspan ? +cellProperties.colspan : 1;
 

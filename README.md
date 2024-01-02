@@ -52,7 +52,7 @@ Highlights of Univer:
 
 ## Usage
 
-We recommend to import Univer as a npm package. Please checkout the [Quick Start](https://univer.work/en-us/guides/quick-start/) section on the documentation website. We also have an [online playground](https://univer.work/en-us/playground/overview/) which can help you preview Univer without setting up the development environment.
+We recommend to import Univer as a npm package. Please checkout the [Quick Start](https://univer.work/en-us/guides/quick-start/) section on the documentation website. We also have an [online playground](https://univer.work/playground/) which can help you preview Univer without setting up the development environment.
 
 Univer bases on a plugin architecture. You can install the following packages to enhance the functionality of Univer.
 
@@ -72,6 +72,7 @@ Univer bases on a plugin architecture. You can install the following packages to
 | [sheets](./packages/sheets)                      | Basic logics of spreadsheet features.                                                                                            | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets)](https://npmjs.org/package/@univerjs/sheets)                 |
 | [sheets-formula](./packages/sheets-formula)      | It implements formula in spreadsheets.                                                                                           | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-formula)](https://npmjs.org/package/@univerjs/sheets-formula) |
 | [sheets-numfmt](./packages/sheets-numfmt)        | It implements number format in spreadsheets.                                                                                     | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-numfmt)](https://npmjs.org/package/@univerjs/sheets-numfmt)   |
+| [sheets-zen-editor](./packages/sheets-zen-editor) | It implements Zen editing mode in spreadsheets.                                                                                 | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-zen-editor)](https://npmjs.org/package/@univerjs/sheets-zen-editor)   |
 | [sheets-ui](./packages/sheets-ui)                | Provides user interface of Univer Spreadsheets                                                                                   | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-ui)](https://npmjs.org/package/@univerjs/sheets-ui)           |
 | [ui](./packages/ui)                              | Implements basic user interactions with Univer and workbench layout based on React.                                              | [![npm version](https://img.shields.io/npm/v/@univerjs/ui)](https://npmjs.org/package/@univerjs/ui)                         |
 | [uniscript](./packages/uniscript) (experimental) | Implements a DSL based on Typescript that empowers users to accomplish more sophisticated tasks                                  | [![npm version](https://img.shields.io/npm/v/@univerjs/uniscript)](https://npmjs.org/package/@univerjs/uniscript)           |
@@ -89,7 +90,7 @@ If you would like to contribute code to Univer, please refer to the contributing
 ## Links
 
 -   [Documentation](https://univer.work/guides/introduction/) (currently only Chinese version)
--   [Online Playground](https://univer.work/playground/overview/)
+-   [Online Playground](https://univer.work/playground/)
 -   [Official Website](https://univer.work)
 -   [Legacy Univer Demo](https://dream-num.github.io/univer-demo/)
 

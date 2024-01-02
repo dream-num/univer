@@ -52,7 +52,7 @@ Univer 的功能特性包括：
 
 ## 使用
 
-我们建议通过将 Univer 作为 npm 包使用，请参考文档上的[快速开始](https://univer.work/guides/quick-start/)小节。我们还准备了一个[在线 playground](https://univer.work/playground/overview/)，你无需在本地安装 Univer 就可以体验使用 Univer 开发。
+我们建议通过将 Univer 作为 npm 包使用，请参考文档上的[快速开始](https://univer.work/guides/quick-start/)小节。我们还准备了一个[在线 playground](https://univer.work/playground/)，你无需在本地安装 Univer 就可以体验使用 Univer 开发。
 
 Univer 基于插件化架构设计，你可以安装以下包来增强 Univer 的功能。
 
@@ -72,6 +72,7 @@ Univer 基于插件化架构设计，你可以安装以下包来增强 Univer �
 | [sheets](./packages/sheets)                  | 实现电子表格的基本业务                                                                  | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets)](https://npmjs.org/package/@univerjs/sheets)                 |
 | [sheets-formula](./packages/sheets-formula)  | 实现电子表格的公式编辑                                                                  | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-formula)](https://npmjs.org/package/@univerjs/sheets-formula) |
 | [sheets-numfmt](./packages/sheets-numfmt)    | 实现电子表格中的数字格式编辑                                                            | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-numfmt)](https://npmjs.org/package/@univerjs/sheets-numfmt)   |
+| [sheets-zen-editor](./packages/sheets-zen-editor)    | 实现电子表格中的禅编辑模式                                                            | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-zen-editor)](https://npmjs.org/package/@univerjs/sheets-zen-editor)   |
 | [sheets-ui](./packages/sheets-ui)            | 实现电子表格的用户交互                                                                  | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-ui)](https://npmjs.org/package/@univerjs/sheets-ui)           |
 | [ui](./packages/ui)                          | 实现基本的用户交互服务，并基于 React 提供了一套桌面端的交互布局                         | [![npm version](https://img.shields.io/npm/v/@univerjs/ui)](https://npmjs.org/package/@univerjs/ui)                         |
 | [uniscript](./packages/uniscript) （实验性） | 一套基于 TypeScript 的 DSL，让用户可以通过脚本语言操纵 Univer 完成更复杂的任务          | [![npm version](https://img.shields.io/npm/v/@univerjs/uniscript)](https://npmjs.org/package/@univerjs/uniscript)           |
@@ -89,7 +90,7 @@ Univer 基于插件化架构设计，你可以安装以下包来增强 Univer �
 ## 链接
 
 -   [文档](https://univer.work/guides/introduction/)
--   [在线 Playground](https://univer.work/playground/overview/)
+-   [在线 Playground](https://univer.work/playground/)
 -   [官方网站](https://univer.work)
 -   [Legacy Univer Demo](https://dream-num.github.io/univer-demo/)
 

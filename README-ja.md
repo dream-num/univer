@@ -52,7 +52,7 @@ Univer の機能のハイライト:
 
 ## 使用方法
 
-Univer を npm パッケージとしてインポートすることをお勧めします。ドキュメントサイトの [Quick Start](https://univer.work/en-us/guides/quick-start/) セクションをご覧ください。また、[オンラインプレイグラウンド](https://univer.work/en-us/playground/overview/)では、開発環境を構築することなく Univer をプレビューすることができます。
+Univer を npm パッケージとしてインポートすることをお勧めします。ドキュメントサイトの [Quick Start](https://univer.work/ja-jp/guides/quick-start/) セクションをご覧ください。また、[オンラインプレイグラウンド](https://univer.work/playground/)では、開発環境を構築することなく Univer をプレビューすることができます。
 
 ユニバーはプラグインアーキテクチャを採用しています。以下のパッケージをインストールすることで、Univer の機能を拡張することができます。
 
@@ -72,6 +72,7 @@ Univer を npm パッケージとしてインポートすることをお勧め�
 | [sheets](./packages/sheets)                      | スプレッドシート機能の基本ロジック。                                                                                            | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets)](https://npmjs.org/package/@univerjs/sheets)                 |
 | [sheets-formula](./packages/sheets-formula)      | スプレッドシートに数式を実装する。                                                                                           | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-formula)](https://npmjs.org/package/@univerjs/sheets-formula) |
 | [sheets-numfmt](./packages/sheets-numfmt)        | スプレッドシートの数値フォーマットを実装。                                                                                     | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-numfmt)](https://npmjs.org/package/@univerjs/sheets-numfmt)   |
+| [sheets-zen-editor](./packages/sheets-zen-editor) | スプレッドシートの禅編集モードを実装。                                                                         | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-zen-editor)](https://npmjs.org/package/@univerjs/sheets-zen-editor)   |
 | [sheets-ui](./packages/sheets-ui)                | Univer スプレッドシートのユーザーインターフェースを提供                                                                                   | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-ui)](https://npmjs.org/package/@univerjs/sheets-ui)           |
 | [ui](./packages/ui)                              | React をベースにした Univer とワークベンチのレイアウトで、基本的なユーザーインタラクションを実装する。                                              | [![npm version](https://img.shields.io/npm/v/@univerjs/ui)](https://npmjs.org/package/@univerjs/ui)                         |
 | [uniscript](./packages/uniscript) (試験的) | Typescript に基づく DSL を実装し、より高度なタスクの実行を可能にする                                  | [![npm version](https://img.shields.io/npm/v/@univerjs/uniscript)](https://npmjs.org/package/@univerjs/uniscript)           |
@@ -89,7 +90,7 @@ Univer にコードをコントリビュートしたい方は、コントリビ�
 ## リンク
 
 -   [ドキュメント](https://univer.work/guides/introduction/) (現在は中国語版のみ)
--   [Online Playground](https://univer.work/playground/overview/)
+-   [Online Playground](https://univer.work/playground/)
 -   [公式 Website](https://univer.work)
 -   [レガシー Univer デモ](https://dream-num.github.io/univer-demo/)
 

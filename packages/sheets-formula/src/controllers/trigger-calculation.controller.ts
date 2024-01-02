@@ -205,13 +205,13 @@ export class TriggerCalculationController extends Disposable {
                         stage,
                     } = params.stageInfo;
                     if (totalArrayFormulasToCalculate > 0) {
-                        console.log(
-                            `Stage ${stage} Array formula.There are ${totalArrayFormulasToCalculate} functions to be executed, ${completedArrayFormulasCount} complete.`
-                        );
+                        // console.log(
+                        //     `Stage ${stage} Array formula.There are ${totalArrayFormulasToCalculate} functions to be executed, ${completedArrayFormulasCount} complete.`
+                        // );
                     } else {
-                        console.log(
-                            `Stage ${stage} .There are ${totalFormulasToCalculate} functions to be executed, ${completedFormulasCount} complete.`
-                        );
+                        // console.log(
+                        //     `Stage ${stage} .There are ${totalFormulasToCalculate} functions to be executed, ${completedFormulasCount} complete.`
+                        // );
                     }
                 } else {
                     const state = params.functionsExecutedState;
@@ -238,7 +238,7 @@ export class TriggerCalculationController extends Disposable {
                             this._executingCommandQueue = [];
                             break;
                     }
-                    console.log(`execution result${result}`);
+                    // console.log(`execution result${result}`);
                 }
             })
         );

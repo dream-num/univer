@@ -49,7 +49,7 @@ export const Test: StoryObj<ISheetNumfmtPanelProps> = {
     args: {
         value: { defaultPattern: '', defaultValue: 123123, row: 2, col: 3 },
         onChange(pattern) {
-            console.log(pattern);
+            // console.log(pattern);
         },
     },
 };

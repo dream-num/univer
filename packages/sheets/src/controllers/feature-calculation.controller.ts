@@ -95,7 +95,6 @@ export class FeatureCalculationController extends Disposable {
                 },
             ],
             getDirtyData: () => {
-                console.log('test reference executor register');
                 return {
                     runtimeCellData,
                     dirtyRanges,

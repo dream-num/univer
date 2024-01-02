@@ -20,7 +20,7 @@ export const groupByKey = <T = Record<string, unknown>>(arr: T[], key: string, b
             const value = current && ((current as Record<string, unknown>)[key] as string);
 
             if (typeof value !== 'string') {
-                console.log(current, `${key} is not string`);
+                console.warn(current, `${key} is not string`);
                 return result;
             }
 

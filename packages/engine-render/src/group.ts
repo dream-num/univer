@@ -53,7 +53,7 @@ export class Group extends BaseObject {
             const scene = this.getScene() as ThinScene;
             object = scene?.getObject(o);
             if (!object) {
-                console.info('No object be added');
+                // console.info('No object be added');
                 return;
             }
 

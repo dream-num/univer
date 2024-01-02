@@ -20,6 +20,7 @@ import { createRoot } from 'react-dom/client';
 import styles from './styles.module.less';
 
 // package info
+// eslint-disable-next-line no-console
 console.table({
     NODE_ENV: process.env.NODE_ENV,
     GIT_COMMIT_HASH: process.env.GIT_COMMIT_HASH,

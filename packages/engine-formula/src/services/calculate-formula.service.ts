@@ -327,7 +327,8 @@ export class CalculateFormulaService extends Disposable {
 
         const astNode = this._astTreeBuilder.parse(lexerNode as LexerNode);
 
-        console.log('astNode', astNode?.serialize());
+        // console.log('astNode', astNode?.serialize());
+        astNode?.serialize();
 
         // const interpreter = Interpreter.create();
 

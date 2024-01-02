@@ -133,7 +133,13 @@ export class AutoFillController extends Disposable {
                         disposableCollection.add(
                             toDisposable(
                                 controlSelection.selectionFilled$.subscribe((filled) => {
-                                    if (filled == null) {
+                                    if (
+                                        filled == null ||
+                                        filled.startColumn === -1 ||
+                                        filled.startRow === -1 ||
+                                        filled.endColumn === -1 ||
+                                        filled.endRow === -1
+                                    ) {
                                         return;
                                     }
                                     const source: IRange = {
@@ -310,13 +316,13 @@ export class AutoFillController extends Disposable {
             while (matrix.getValue(cur, startColumn - 1)?.v != null && cur < maxRow) {
                 cur += 1;
             }
-            detectEndRow = cur;
+            detectEndRow = cur - 1;
         } else if (endColumn < maxColumn && matrix.getValue(endRow, endColumn + 1)?.v != null) {
             let cur = startRow;
             while (matrix.getValue(cur, endColumn + 1)?.v != null && cur < maxRow) {
-                cur++;
+                cur += 1;
             }
-            detectEndRow = cur;
+            detectEndRow = cur - 1;
         }
 
         for (let i = endRow + 1; i <= detectEndRow; i++) {

@@ -76,6 +76,10 @@ export class Workbook extends Disposable {
 
     private _count: number;
 
+    get name(): string {
+        return this._snapshot.name;
+    }
+
     constructor(
         workbookData: Partial<IWorkbookData> = {},
         @ILogService private readonly _log: ILogService

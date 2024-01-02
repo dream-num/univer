@@ -17,7 +17,7 @@
 import type { IRange, IScale } from '@univerjs/core';
 
 import { getColor } from '../../../basics/tools';
-import type { UniverContext } from '../../../context';
+import type { UniverRenderingContext } from '../../../context';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import type { SpreadsheetSkeleton } from '../sheet-skeleton';
 import { SheetExtension } from './sheet-extension';
@@ -32,7 +32,7 @@ export class Background extends SheetExtension {
     override zIndex = DOC_EXTENSION_Z_INDEX;
 
     override draw(
-        ctx: UniverContext,
+        ctx: UniverRenderingContext,
         parentScale: IScale,
         spreadsheetSkeleton: SpreadsheetSkeleton,
         diffRanges?: IRange[]

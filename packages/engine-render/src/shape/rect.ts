@@ -16,7 +16,7 @@
 
 import type { IKeyValue } from '@univerjs/core';
 
-import type { UniverContext } from '../context';
+import type { UniverRenderingContext } from '../context';
 import type { IShapeProps } from './shape';
 import { Shape } from './shape';
 
@@ -40,7 +40,7 @@ export class Rect<T extends IRectProps = IRectProps> extends Shape<T> {
         return this._radius;
     }
 
-    static override drawWith(ctx: UniverContext, props: IRectProps | Rect) {
+    static override drawWith(ctx: UniverRenderingContext, props: IRectProps | Rect) {
         let { radius, width, height } = props;
 
         radius = radius ?? 0;
@@ -92,7 +92,7 @@ export class Rect<T extends IRectProps = IRectProps> extends Shape<T> {
         };
     }
 
-    protected override _draw(ctx: UniverContext) {
+    protected override _draw(ctx: UniverRenderingContext) {
         Rect.drawWith(ctx, this);
     }
 }

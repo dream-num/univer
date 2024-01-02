@@ -26,7 +26,7 @@ import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './basics/interfaces';
 import { precisionTo, requestNewFrame } from './basics/tools';
 import { Transform } from './basics/transform';
 import { Vector2 } from './basics/vector2';
-import type { UniverContext } from './context';
+import type { UniverRenderingContext } from './context';
 import { Layer } from './layer';
 import type { ITransformerConfig } from './scene.-transformer';
 import { Transformer } from './scene.-transformer';
@@ -476,14 +476,14 @@ export class Scene extends ThinScene {
 
     changeObjectOrder() {}
 
-    // override renderObjects(ctx: UniverContext, bounds?: IViewportBound) {
+    // override renderObjects(ctx: UniverRenderingContext, bounds?: IViewportBound) {
     //     this.getAllObjectsByOrder().forEach((o) => {
     //         o.render(ctx, bounds);
     //     });
     //     return this;
     // }
 
-    override render(parentCtx?: UniverContext) {
+    override render(parentCtx?: UniverRenderingContext) {
         if (!this.isDirty()) {
             return;
         }
@@ -499,7 +499,7 @@ export class Scene extends ThinScene {
         // this.getViewports()?.forEach((vp: Viewport) => vp.render(parentCtx));
     }
 
-    async requestRender(parentCtx?: UniverContext) {
+    async requestRender(parentCtx?: UniverRenderingContext) {
         return new Promise((resolve, reject) => {
             this.render(parentCtx);
             requestNewFrame(resolve);

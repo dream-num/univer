@@ -23,7 +23,7 @@ import { clearLineByBorderType } from '../../basics/draw';
 import { getCellByIndex, getCellPositionByIndex, getColor } from '../../basics/tools';
 import type { IViewportBound, Vector2 } from '../../basics/vector2';
 import { Canvas } from '../../canvas';
-import type { UniverContext } from '../../context';
+import type { UniverRenderingContext } from '../../context';
 import type { Engine } from '../../engine';
 import type { Scene } from '../../scene';
 import type { SceneViewer } from '../../scene-viewer';
@@ -104,7 +104,7 @@ export class Spreadsheet extends SheetComponent {
         return this._documents;
     }
 
-    override draw(ctx: UniverContext, bounds?: IViewportBound) {
+    override draw(ctx: UniverRenderingContext, bounds?: IViewportBound) {
         // const { parent = { scaleX: 1, scaleY: 1 } } = this;
         // const mergeData = this.getMergeData();
         // const showGridlines = this.getShowGridlines() || 1;
@@ -200,7 +200,7 @@ export class Spreadsheet extends SheetComponent {
         return this.getSkeleton()?.getMergeBounding(startRow, startColumn, endRow, endColumn);
     }
 
-    override render(mainCtx: UniverContext, bounds?: IViewportBound) {
+    override render(mainCtx: UniverRenderingContext, bounds?: IViewportBound) {
         if (!this.visible) {
             this.makeDirty(false);
             return this;
@@ -334,7 +334,7 @@ export class Spreadsheet extends SheetComponent {
     }
 
     protected _applyCache(
-        ctx?: UniverContext,
+        ctx?: UniverRenderingContext,
         sx: number = 0,
         sy: number = 0,
         sw: number = 0,
@@ -370,7 +370,7 @@ export class Spreadsheet extends SheetComponent {
         cacheCtx.restore();
     }
 
-    protected override _draw(ctx: UniverContext, bounds?: IViewportBound) {
+    protected override _draw(ctx: UniverRenderingContext, bounds?: IViewportBound) {
         this.draw(ctx, bounds);
     }
 
@@ -601,7 +601,7 @@ export class Spreadsheet extends SheetComponent {
         spreadsheetSkeleton.setOverflowCache(this._overflowCacheRuntimeRange);
     }
 
-    private _drawAuxiliary(ctx: UniverContext) {
+    private _drawAuxiliary(ctx: UniverRenderingContext) {
         const spreadsheetSkeleton = this.getSkeleton();
 
         if (spreadsheetSkeleton == null) {
@@ -721,7 +721,7 @@ export class Spreadsheet extends SheetComponent {
      * Clear the guide lines within a range in the table, to make room for merged cells and overflow.
      */
     private _clearRectangle(
-        ctx: UniverContext,
+        ctx: UniverRenderingContext,
         rowHeightAccumulation: number[],
         columnWidthAccumulation: number[],
         dataMergeCache?: IRange[]
@@ -753,7 +753,7 @@ export class Spreadsheet extends SheetComponent {
         }
     }
 
-    private _clearBackground(ctx: UniverContext, backgroundPositions?: ObjectMatrix<ISelectionCellWithCoord>) {
+    private _clearBackground(ctx: UniverRenderingContext, backgroundPositions?: ObjectMatrix<ISelectionCellWithCoord>) {
         backgroundPositions?.forValue((row, column, cellInfo) => {
             let { startY, endY, startX, endX } = cellInfo;
             const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;

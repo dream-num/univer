@@ -27,7 +27,7 @@ import type {
 import { BaselineOffset, FontStyleType, Tools } from '@univerjs/core';
 import * as cjk from 'cjk-regex';
 
-import type { UniverContext } from '../context';
+import type { UniverRenderingContext } from '../context';
 import { DEFAULT_FONTFACE_PLANE } from './const';
 import { FontCache } from './font-cache';
 import type { IBoundRectNoAngle } from './vector2';
@@ -334,7 +334,7 @@ export function getFontStyleString(textStyle?: IStyleBase, localeService?: Local
     };
 }
 
-export function isSupportBoundingBox(ctx: UniverContext) {
+export function isSupportBoundingBox(ctx: UniverRenderingContext) {
     const measureText = ctx.measureText('田');
     if (measureText.actualBoundingBoxAscent == null) {
         return false;

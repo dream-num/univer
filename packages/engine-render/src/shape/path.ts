@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-// import { IShapeProps, Shape, IObjectFullState, Group, Scene } from '.';
+/* eslint-disable no-magic-numbers */
 
 import type { IKeyValue, Nullable } from '@univerjs/core';
 
 import type { IObjectFullState } from '../basics/interfaces';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '../basics/interfaces';
-import type { UniverContext } from '../context';
+import type { UniverRenderingContext } from '../context';
 import type { IShapeProps } from './shape';
 import { Shape } from './shape';
 
@@ -134,7 +134,7 @@ export class Path extends Shape<IPathProps> {
         return this._dataArray;
     }
 
-    static override drawWith(ctx: UniverContext, props: IPathProps | Path) {
+    static override drawWith(ctx: UniverRenderingContext, props: IPathProps | Path) {
         const ca = props.dataArray;
         if (!ca) {
             return;
@@ -931,7 +931,7 @@ export class Path extends Shape<IPathProps> {
         return null;
     }
 
-    protected override _draw(ctx: UniverContext) {
+    protected override _draw(ctx: UniverRenderingContext) {
         Path.drawWith(ctx, this);
     }
 

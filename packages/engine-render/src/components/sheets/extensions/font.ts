@@ -17,7 +17,7 @@
 import type { IColorStyle, IRange, IScale } from '@univerjs/core';
 import { HorizontalAlign, ObjectMatrix, WrapStrategy } from '@univerjs/core';
 
-import type { UniverContext } from '../../../context';
+import type { UniverRenderingContext } from '../../../context';
 import type { Documents } from '../../docs/document';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import type { IFontCacheItem } from '../interfaces';
@@ -46,7 +46,7 @@ export class Font extends SheetExtension {
     }
 
     override draw(
-        ctx: UniverContext,
+        ctx: UniverRenderingContext,
         parentScale: IScale,
         spreadsheetSkeleton: SpreadsheetSkeleton,
         diffRanges?: IRange[]
@@ -192,7 +192,7 @@ export class Font extends SheetExtension {
     }
 
     private _renderDocuments(
-        ctx: UniverContext,
+        ctx: UniverRenderingContext,
         docsConfig: IFontCacheItem,
         startX: number,
         startY: number,
@@ -226,7 +226,7 @@ export class Font extends SheetExtension {
     }
 
     private _clipRectangle(
-        ctx: UniverContext,
+        ctx: UniverRenderingContext,
         startRow: number,
         endRow: number,
         startColumn: number,

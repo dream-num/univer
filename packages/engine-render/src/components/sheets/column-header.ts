@@ -15,7 +15,7 @@
  */
 
 import type { IViewportBound, Vector2 } from '../../basics/vector2';
-import type { UniverContext } from '../../context';
+import type { UniverRenderingContext } from '../../context';
 import { SheetColumnHeaderExtensionRegistry } from '../extension';
 import type { ColumnHeaderLayout } from './extensions/column-header-layout';
 import { SpreadsheetHeader } from './sheet-component';
@@ -36,7 +36,7 @@ export class SpreadsheetColumnHeader extends SpreadsheetHeader {
         return this._columnHeaderLayoutExtension;
     }
 
-    override draw(ctx: UniverContext, bounds?: IViewportBound) {
+    override draw(ctx: UniverRenderingContext, bounds?: IViewportBound) {
         const spreadsheetSkeleton = this.getSkeleton();
         if (!spreadsheetSkeleton) {
             return;

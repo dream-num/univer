@@ -20,7 +20,7 @@ import { BASE_OBJECT_ARRAY, BaseObject } from '../base-object';
 import { SHAPE_TYPE } from '../basics/const';
 import type { IObjectFullState } from '../basics/interfaces';
 import type { IViewportBound, Vector2 } from '../basics/vector2';
-import type { UniverContext } from '../context';
+import type { UniverRenderingContext } from '../context';
 
 export type LineJoin = 'round' | 'bevel' | 'miter';
 export type LineCap = 'butt' | 'round' | 'square';
@@ -231,11 +231,11 @@ export abstract class Shape<T> extends BaseObject {
         return this._strokeMiterLimit;
     }
 
-    static drawWith(ctx: UniverContext, props: IShapeProps) {
+    static drawWith(ctx: UniverRenderingContext, props: IShapeProps) {
         /** abstract */
     }
 
-    protected static _renderPaintInOrder(ctx: UniverContext, props: IShapeProps) {
+    protected static _renderPaintInOrder(ctx: UniverRenderingContext, props: IShapeProps) {
         if (props.paintFirst === 'stroke') {
             this._renderStroke(ctx, props);
             this._renderFill(ctx, props);
@@ -247,9 +247,9 @@ export abstract class Shape<T> extends BaseObject {
 
     /**
      * @private
-     * @param {UniverContext} ctx SheetContext to render on
+     * @param {UniverRenderingContext} ctx SheetContext to render on
      */
-    private static _renderFill(ctx: UniverContext, props: IShapeProps) {
+    private static _renderFill(ctx: UniverRenderingContext, props: IShapeProps) {
         if (!props.fill) {
             return;
         }
@@ -266,9 +266,9 @@ export abstract class Shape<T> extends BaseObject {
 
     /**
      * @private
-     * @param {UniverContext} ctx SheetContext to render on
+     * @param {UniverRenderingContext} ctx SheetContext to render on
      */
-    private static _renderStroke(ctx: UniverContext, props: IShapeProps) {
+    private static _renderStroke(ctx: UniverRenderingContext, props: IShapeProps) {
         const { stroke, strokeWidth, shadowEnabled, shadowForStrokeEnabled, strokeScaleEnabled, parent } = props;
 
         let { scaleX, scaleY } = props;
@@ -299,13 +299,13 @@ export abstract class Shape<T> extends BaseObject {
         return { scaleX: 1, scaleY: 1 };
     }
 
-    private static _removeShadow(ctx: UniverContext) {}
+    private static _removeShadow(ctx: UniverRenderingContext) {}
 
-    private static _setFillStyles(ctx: UniverContext, props: IShapeProps) {
+    private static _setFillStyles(ctx: UniverRenderingContext, props: IShapeProps) {
         ctx.fillStyle = props.fill!;
     }
 
-    private static _setStrokeStyles(ctx: UniverContext, props: IShapeProps) {
+    private static _setStrokeStyles(ctx: UniverRenderingContext, props: IShapeProps) {
         const { strokeWidth, strokeLineCap, strokeDashOffset, strokeLineJoin, strokeMiterLimit, stroke } = props;
         ctx.lineWidth = strokeWidth!;
         ctx.lineCap = strokeLineCap!;
@@ -315,9 +315,9 @@ export abstract class Shape<T> extends BaseObject {
         ctx.strokeStyle = stroke!;
     }
 
-    private static _setLineDash(ctx: UniverContext) {}
+    private static _setLineDash(ctx: UniverRenderingContext) {}
 
-    override render(mainCtx: UniverContext, bounds?: IViewportBound) {
+    override render(mainCtx: UniverRenderingContext, bounds?: IViewportBound) {
         if (!this.visible) {
             this.makeDirty(false);
             return this;
@@ -382,7 +382,7 @@ export abstract class Shape<T> extends BaseObject {
         };
     }
 
-    protected _draw(ctx: UniverContext) {
+    protected _draw(ctx: UniverRenderingContext) {
         /** abstract */
     }
 

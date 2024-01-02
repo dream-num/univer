@@ -18,7 +18,7 @@ import type { BorderStyleTypes, IRange, IScale, ObjectMatrix } from '@univerjs/c
 
 import { BORDER_TYPE, COLOR_BLACK_RGB, FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics/const';
 import { drawDiagonalLineByBorderType, drawLineByBorderType, getLineWidth, setLineType } from '../../../basics/draw';
-import type { UniverContext } from '../../../context';
+import type { UniverRenderingContext } from '../../../context';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import type { BorderCacheItem } from '../interfaces';
 import type { SpreadsheetSkeleton } from '../sheet-skeleton';
@@ -34,7 +34,7 @@ export class Border extends SheetExtension {
     override zIndex = BORDER_Z_INDEX;
 
     override draw(
-        ctx: UniverContext,
+        ctx: UniverRenderingContext,
         parentScale: IScale,
         spreadsheetSkeleton: SpreadsheetSkeleton,
         diffRanges?: IRange[]

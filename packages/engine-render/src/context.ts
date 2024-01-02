@@ -16,7 +16,7 @@
 
 import { fixLineWidthByScale } from './basics/tools';
 
-export class UniverContext2D implements CanvasRenderingContext2D {
+export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     readonly canvas: HTMLCanvasElement;
 
     _context: CanvasRenderingContext2D;
@@ -927,11 +927,11 @@ export class UniverContext2D implements CanvasRenderingContext2D {
 /**
  * TODO
  */
-export class UniverContextWebGL {}
+export class UniverRenderingContextWebGL {}
 
 /**
  * TODO
  */
-export class UniverContextWebGPU {}
+export class UniverRenderingContextWebGPU {}
 
-export class UniverContext extends UniverContext2D {}
+export class UniverRenderingContext extends UniverRenderingContext2D {}

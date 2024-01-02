@@ -16,7 +16,7 @@
 
 import type { Nullable } from '@univerjs/core';
 
-import type { UniverContext } from '../context';
+import type { UniverRenderingContext } from '../context';
 import type { IShapeProps } from './shape';
 import { Shape } from './shape';
 
@@ -67,7 +67,7 @@ export class Picture extends Shape<IPictureProps> {
         }
     }
 
-    static override drawWith(ctx: UniverContext, picture: Picture) {
+    static override drawWith(ctx: UniverRenderingContext, picture: Picture) {
         if (picture._native?.complete) {
             const { width, height } = picture;
             try {
@@ -86,7 +86,7 @@ export class Picture extends Shape<IPictureProps> {
         return this._props;
     }
 
-    protected override _draw(ctx: UniverContext) {
+    protected override _draw(ctx: UniverRenderingContext) {
         Picture.drawWith(ctx, this);
     }
 

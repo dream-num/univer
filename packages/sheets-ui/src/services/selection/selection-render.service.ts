@@ -698,12 +698,20 @@ export class SelectionRenderService implements ISelectionRenderService {
                     (lastY < viewport.top && newMoveOffsetY > viewport.top) ||
                     (lastY > viewport.top && newMoveOffsetY < viewport.top);
 
+                if (isCrossingX) {
+                    xCrossTime += 1;
+                }
+
+                if (isCrossingY) {
+                    yCrossTime += 1;
+                }
+
                 const startKey = startViewport.viewPortKey;
                 const endKey = endViewport.viewPortKey;
                 if (startKey === VIEWPORT_KEY.VIEW_ROW_TOP) {
                     if (moveOffsetY < viewport.top && (selection?.endRow ?? 0) < (freeze?.startRow ?? 0)) {
                         scrollOffsetY = viewport.top;
-                    } else if (isCrossingY && yCrossTime % 2 === 0) {
+                    } else if (isCrossingY && yCrossTime % 2 === 1) {
                         viewport.scrollTo({
                             y: 0,
                         });
@@ -711,14 +719,12 @@ export class SelectionRenderService implements ISelectionRenderService {
                 } else if (startKey === VIEWPORT_KEY.VIEW_COLUMN_LEFT) {
                     if (moveOffsetX < viewport.left && (selection?.endColumn ?? 0) < (freeze?.startColumn ?? 0)) {
                         scrollOffsetX = viewport.left;
-                    } else if (isCrossingX && xCrossTime % 2 === 0) {
+                    } else if (isCrossingX && xCrossTime % 2 === 1) {
                         viewport.scrollTo({
                             x: 0,
                         });
                     }
-                }
-                // move during same viewport
-                else if (startKey === endKey) {
+                } else if (startKey === endKey) {
                     let disableX = false;
                     let disableY = false;
                     if (startKey === VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP) {
@@ -753,8 +759,8 @@ export class SelectionRenderService implements ISelectionRenderService {
                         x: endViewport.scrollX,
                         y: endViewport.scrollY,
                     };
-                    const shouldResetX = startXY.x !== endXY.x && isCrossingX && xCrossTime % 2 === 0;
-                    const shouldResetY = startXY.y !== endXY.y && isCrossingY && yCrossTime % 2 === 0;
+                    const shouldResetX = startXY.x !== endXY.x && isCrossingX && xCrossTime % 2 === 1;
+                    const shouldResetY = startXY.y !== endXY.y && isCrossingY && yCrossTime % 2 === 1;
 
                     if (shouldResetX || shouldResetY) {
                         viewport.scrollTo({
@@ -770,14 +776,20 @@ export class SelectionRenderService implements ISelectionRenderService {
                             scrollOffsetY = viewport.top;
                         }
                     }
-                }
 
-                if (isCrossingX) {
-                    xCrossTime += 1;
-                }
+                    if (
+                        (startKey === VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP && endKey === VIEWPORT_KEY.VIEW_MAIN_LEFT) ||
+                        (endKey === VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP && startKey === VIEWPORT_KEY.VIEW_MAIN_LEFT)
+                    ) {
+                        scrollOffsetX = viewport.left;
+                    }
 
-                if (isCrossingY) {
-                    yCrossTime += 1;
+                    if (
+                        (startKey === VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP && endKey === VIEWPORT_KEY.VIEW_MAIN_TOP) ||
+                        (endKey === VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP && startKey === VIEWPORT_KEY.VIEW_MAIN_TOP)
+                    ) {
+                        scrollOffsetY = viewport.top;
+                    }
                 }
 
                 lastX = newMoveOffsetX;
@@ -927,8 +939,8 @@ export class SelectionRenderService implements ISelectionRenderService {
         if (freeze && currentViewport) {
             if (freeze.startRow > 0 && freeze.startColumn > 0) {
                 if (
-                    (oldRangeType === RANGE_TYPE.COLUMN && freeze.startColumn > oldEndColumn) ||
-                    (oldRangeType === RANGE_TYPE.ROW && freeze.startRow > oldEndRow) ||
+                    freeze.startColumn > oldEndColumn ||
+                    freeze.startRow > oldEndRow ||
                     (freeze.startRow < oldStartRow && freeze.startColumn > oldEndColumn) ||
                     (freeze.startColumn < oldStartColumn && freeze.startRow > oldEndRow) ||
                     (freeze.startColumn > oldEndColumn && freeze.startRow > oldEndRow)

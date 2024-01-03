@@ -160,16 +160,23 @@ export function getMoveRangeMutations(
                 }, new ObjectMatrix<Nullable<ICellData>>());
 
             const doMoveRangeMutation: IMoveRangeMutationParams = {
-                from: newFromCellValues.getMatrix(),
-                to: newToCellValues.getMatrix(),
+                from: {
+                    value: newFromCellValues.getMatrix(),
+                    subUnitId,
+                },
+                to: { value: newToCellValues.getMatrix(), subUnitId },
                 unitId,
-                subUnitId,
             };
             const undoMoveRangeMutation: IMoveRangeMutationParams = {
-                from: currentFromCellValues.getMatrix(),
-                to: currentToCellValues.getMatrix(),
+                from: {
+                    value: currentFromCellValues.getMatrix(),
+                    subUnitId,
+                },
+                to: {
+                    value: currentToCellValues.getMatrix(),
+                    subUnitId,
+                },
                 unitId,
-                subUnitId,
             };
             const interceptorCommands = sheetInterceptorService.onCommandExecute({
                 id: MoveRangeCommand.id,

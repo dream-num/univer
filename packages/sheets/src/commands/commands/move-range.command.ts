@@ -39,7 +39,7 @@ export const MoveRangeCommandId = 'sheet.command.move-range';
 export const MoveRangeCommand: ICommand = {
     type: CommandType.COMMAND,
     id: MoveRangeCommandId,
-    handler: async (accessor: IAccessor, params: IMoveRangeCommandParams) => {
+    handler: (accessor: IAccessor, params: IMoveRangeCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -80,16 +80,26 @@ export const MoveRangeCommand: ICommand = {
             }, new ObjectMatrix<Nullable<ICellData>>());
 
         const doMoveRangeMutation: IMoveRangeMutationParams = {
-            from: newFromCellValues.getMatrix(),
-            to: newToCellValues.getMatrix(),
+            from: {
+                value: newFromCellValues.getMatrix(),
+                subUnitId,
+            },
+            to: {
+                value: newToCellValues.getMatrix(),
+                subUnitId,
+            },
             unitId,
-            subUnitId,
         };
         const undoMoveRangeMutation: IMoveRangeMutationParams = {
-            from: currentFromCellValues.getMatrix(),
-            to: currentToCellValues.getMatrix(),
+            from: {
+                value: currentFromCellValues.getMatrix(),
+                subUnitId,
+            },
+            to: {
+                value: currentToCellValues.getMatrix(),
+                subUnitId,
+            },
             unitId,
-            subUnitId,
         };
         const interceptorCommands = sheetInterceptorService.onCommandExecute({ id: MoveRangeCommand.id, params });
 
@@ -120,7 +130,7 @@ export const MoveRangeCommand: ICommand = {
             { id: MoveRangeMutation.id, params: undoMoveRangeMutation },
         ];
 
-        const result = await sequenceExecute(redos, commandService).result;
+        const result = sequenceExecute(redos, commandService).result;
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,

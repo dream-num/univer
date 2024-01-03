@@ -367,10 +367,7 @@ function parseTableCells(tdStrings: string[]) {
 
         Array.from(cellMatches).forEach((cellMatch) => {
             const cellProperties = parseProperties(cellMatch[1]);
-            const content = cellMatch[2]
-                .replace(/&nbsp;/g, ' ')
-                .replace('<br>', '\r')
-                .replace(/<\/?[^>]*>/g, ''); // paste from excel
+            const content = decodeHTMLEntities(cellMatch[2].replace('<br>', '\r').replace(/<\/?[^>]*>/g, '')); // paste from excel
             const rowSpan = cellProperties.rowspan ? +cellProperties.rowspan : 1;
             const colSpan = cellProperties.colspan ? +cellProperties.colspan : 1;
 
@@ -459,4 +456,17 @@ function childNodeToHTML(node: ChildNode) {
     const serializer = new XMLSerializer();
     const htmlString = serializer.serializeToString(node);
     return htmlString;
+}
+
+function decodeHTMLEntities(input: string): string {
+    const entities: { [key: string]: string } = {
+        '&lt;': '<',
+        '&gt;': '>',
+        '&amp;': '&',
+        '&quot;': '"',
+        '&#39;': "'",
+        '&nbsp;': ' ',
+    };
+
+    return input.replace(/&lt;|&gt;|&amp;|&quot;|&#39;|&nbsp;|<br>/g, (match) => entities[match]);
 }

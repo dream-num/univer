@@ -135,7 +135,7 @@ export class SheetClipboardController extends Disposable {
             },
             onCopyCellContent(row: number, col: number): string {
                 const cell = currentSheet!.getCell(row, col);
-                return `${cell?.v}` || '';
+                return `${cell?.v || ''}`;
             },
             onCopyCellStyle: (row: number, col: number, rowSpan?: number, colSpan?: number) => {
                 const properties: IClipboardPropertyItem = {};

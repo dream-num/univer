@@ -46,14 +46,17 @@ export interface IPasteTarget {
     unitId: string;
 }
 
-export interface IPasteSource {
-    copyId: string;
-    subUnitId: string;
-    unitId: string;
-    range: IRange;
-    copyType: COPY_TYPE;
+export interface ICopyPastePayload {
+    copyType?: COPY_TYPE;
+    copyId?: string;
+    pasteType: string;
 }
 
+export interface ISheetRangeLocation {
+    range: IRange;
+    subUnitId: string;
+    unitId: string;
+}
 export interface ISpecialPasteInfo {
     label: string;
     icon?: string;
@@ -117,46 +120,41 @@ export interface ISheetClipboardHook {
      *
      * @returns if it block copying it should return false
      */
-    onBeforePaste?(unitId: string, subUnitId: string, range: IRange): boolean;
+    onBeforePaste?(pasteTo: ISheetRangeLocation): boolean;
     /**
      *
      * @param row
      * @param col
      */
     onPasteCells?(
-        pastedRange: IRange,
-        matrix: ObjectMatrix<ICellDataWithSpanInfo>,
-        pasteType: string,
-        copyInfo: {
-            copyType: COPY_TYPE;
-            copyRange?: IRange;
-            subUnitId?: string;
-            unitId?: string;
-        }
+        pasteFrom: ISheetRangeLocation | null,
+        pasteTo: ISheetRangeLocation,
+        data: ObjectMatrix<ICellDataWithSpanInfo>,
+        payload: ICopyPastePayload
     ): {
         undos: IMutationInfo[];
         redos: IMutationInfo[];
     };
     onPasteRows?(
-        range: IRange,
+        pasteTo: ISheetRangeLocation,
         rowProperties: IClipboardPropertyItem[],
-        pasteType: string
+        payload: ICopyPastePayload
     ): {
         undos: IMutationInfo[];
         redos: IMutationInfo[];
     };
     onPasteColumns?(
-        range: IRange,
+        pasteTo: ISheetRangeLocation,
         colProperties: IClipboardPropertyItem[],
-        pasteType: string
+        payload: ICopyPastePayload
     ): {
         undos: IMutationInfo[];
         redos: IMutationInfo[];
     };
     onPastePlainText?(
-        pastedRange: IRange,
+        pasteTo: ISheetRangeLocation,
         text: string,
-        pasteType: string
+        payload: ICopyPastePayload
     ): {
         undos: IMutationInfo[];
         redos: IMutationInfo[];

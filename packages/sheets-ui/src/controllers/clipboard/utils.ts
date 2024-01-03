@@ -37,67 +37,44 @@ import {
 } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 
-import type { ICellDataWithSpanInfo } from '../../services/clipboard/type';
+import type { ICellDataWithSpanInfo, ICopyPastePayload, ISheetRangeLocation } from '../../services/clipboard/type';
 import { COPY_TYPE } from '../../services/clipboard/type';
 
 // if special paste need append mutations instead of replace the default, it can use this function to generate default mutations.
 export function getDefaultOnPasteCellMutations(
-    pastedRange: IRange,
-    matrix: ObjectMatrix<ICellDataWithSpanInfo>,
-    unitId: string,
-    subUnitId: string,
-    copyInfo: {
-        copyType: COPY_TYPE;
-        copyRange?: IRange;
-    },
+    pasteFrom: ISheetRangeLocation,
+    pasteTo: ISheetRangeLocation,
+    data: ObjectMatrix<ICellDataWithSpanInfo>,
+    payload: ICopyPastePayload,
     accessor: IAccessor
 ) {
     const redoMutationsInfo: IMutationInfo[] = [];
     const undoMutationsInfo: IMutationInfo[] = [];
-    if (copyInfo.copyType === COPY_TYPE.CUT) {
-        const { undos, redos } = getMoveRangeMutations(pastedRange, unitId, subUnitId, copyInfo, accessor);
+    if (payload.copyType === COPY_TYPE.CUT) {
+        const { undos, redos } = getMoveRangeMutations(pasteFrom, pasteTo, accessor);
         redoMutationsInfo.push(...redos);
         undoMutationsInfo.push(...undos);
     } else {
+        const { unitId, subUnitId, range } = pasteTo;
         // clear style
-        const { undos: clearStyleUndos, redos: clearStyleRedos } = getClearCellStyleMutations(
-            unitId,
-            subUnitId,
-            pastedRange,
-            matrix,
-            accessor
-        );
+        const { undos: clearStyleUndos, redos: clearStyleRedos } = getClearCellStyleMutations(pasteTo, data, accessor);
         redoMutationsInfo.push(...clearStyleRedos);
         undoMutationsInfo.push(...clearStyleUndos);
 
         // set values
-        const { undos: setValuesUndos, redos: setValuesRedos } = getSetCellValueMutations(
-            unitId,
-            subUnitId,
-            pastedRange,
-            matrix,
-            accessor
-        );
+        const { undos: setValuesUndos, redos: setValuesRedos } = getSetCellValueMutations(pasteTo, data, accessor);
         redoMutationsInfo.push(...setValuesRedos);
         undoMutationsInfo.push(...setValuesUndos);
 
         // set styles
-        const { undos: setStyleUndos, redos: setStyleRedos } = getSetCellStyleMutations(
-            unitId,
-            subUnitId,
-            pastedRange,
-            matrix,
-            accessor
-        );
+        const { undos: setStyleUndos, redos: setStyleRedos } = getSetCellStyleMutations(pasteTo, data, accessor);
         redoMutationsInfo.push(...setStyleRedos);
         undoMutationsInfo.push(...setStyleUndos);
 
         // clear and add merge
         const { undos: clearMergeUndos, redos: clearMergeRedos } = getClearAndSetMergeMutations(
-            unitId,
-            subUnitId,
-            pastedRange,
-            matrix,
+            pasteTo,
+            data,
             accessor
         );
         redoMutationsInfo.push(...clearMergeRedos);
@@ -110,51 +87,56 @@ export function getDefaultOnPasteCellMutations(
 }
 
 export function getMoveRangeMutations(
-    pastedRange: IRange,
-    unitId: string,
-    subUnitId: string,
-    copyInfo: {
-        copyType: COPY_TYPE;
-        copyRange?: IRange;
+    from: {
+        unitId: string;
+        subUnitId: string;
+        range?: IRange;
+    },
+    to: {
+        unitId: string;
+        subUnitId: string;
+        range?: IRange;
     },
     accessor: IAccessor
 ) {
     let redoMutationsInfo: IMutationInfo[] = [];
     let undoMutationsInfo: IMutationInfo[] = [];
-    const { copyRange } = copyInfo;
-    if (copyRange) {
+    const { range: fromRange, subUnitId: fromSubUnitId, unitId } = from;
+    const { range: toRange, subUnitId: toSubUnitId } = to;
+    if (fromRange && toRange) {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
         const workbook = univerInstanceService.getUniverSheetInstance(unitId);
-        const worksheet = workbook?.getSheetBySheetId(subUnitId);
-        if (worksheet) {
-            const fromValues = worksheet.getRange(copyRange).getValues();
+        const fromWorksheet = workbook?.getSheetBySheetId(fromSubUnitId);
+        const toWorksheet = workbook?.getSheetBySheetId(toSubUnitId);
+        if (fromWorksheet && toWorksheet) {
+            const fromValues = fromWorksheet.getRange(fromRange).getValues();
 
             const newFromCellValues = fromValues.reduce((res, row, rowIndex) => {
                 row.forEach((colItem, colIndex) => {
-                    res.setValue(copyRange.startRow + rowIndex, copyRange.startColumn + colIndex, null);
+                    res.setValue(fromRange.startRow + rowIndex, fromRange.startColumn + colIndex, null);
                 });
                 return res;
             }, new ObjectMatrix<Nullable<ICellData>>());
             const currentFromCellValues = fromValues.reduce((res, row, rowIndex) => {
                 row.forEach((colItem, colIndex) => {
-                    res.setValue(copyRange.startRow + rowIndex, copyRange.startColumn + colIndex, colItem);
+                    res.setValue(fromRange.startRow + rowIndex, fromRange.startColumn + colIndex, colItem);
                 });
                 return res;
             }, new ObjectMatrix<Nullable<ICellData>>());
 
             const newToCellValues = fromValues.reduce((res, row, rowIndex) => {
                 row.forEach((colItem, colIndex) => {
-                    res.setValue(pastedRange.startRow + rowIndex, pastedRange.startColumn + colIndex, colItem);
+                    res.setValue(toRange.startRow + rowIndex, toRange.startColumn + colIndex, colItem);
                 });
                 return res;
             }, new ObjectMatrix<Nullable<ICellData>>());
-            const currentToCellValues = worksheet
-                .getRange(pastedRange)
+            const currentToCellValues = toWorksheet
+                .getRange(toRange)
                 .getValues()
                 .reduce((res, row, rowIndex) => {
                     row.forEach((colItem, colIndex) => {
-                        res.setValue(pastedRange.startRow + rowIndex, pastedRange.startColumn + colIndex, colItem);
+                        res.setValue(toRange.startRow + rowIndex, toRange.startColumn + colIndex, colItem);
                     });
                     return res;
                 }, new ObjectMatrix<Nullable<ICellData>>());
@@ -162,25 +144,25 @@ export function getMoveRangeMutations(
             const doMoveRangeMutation: IMoveRangeMutationParams = {
                 from: {
                     value: newFromCellValues.getMatrix(),
-                    subUnitId,
+                    subUnitId: fromSubUnitId,
                 },
-                to: { value: newToCellValues.getMatrix(), subUnitId },
+                to: { value: newToCellValues.getMatrix(), subUnitId: toSubUnitId },
                 unitId,
             };
             const undoMoveRangeMutation: IMoveRangeMutationParams = {
                 from: {
                     value: currentFromCellValues.getMatrix(),
-                    subUnitId,
+                    subUnitId: fromSubUnitId,
                 },
                 to: {
                     value: currentToCellValues.getMatrix(),
-                    subUnitId,
+                    subUnitId: toSubUnitId,
                 },
                 unitId,
             };
             const interceptorCommands = sheetInterceptorService.onCommandExecute({
                 id: MoveRangeCommand.id,
-                params: { toRange: pastedRange, fromRange: copyRange },
+                params: { toRange, fromRange },
             });
 
             redoMutationsInfo = [
@@ -190,9 +172,9 @@ export function getMoveRangeMutations(
                     id: SetSelectionsOperation.id,
                     params: {
                         unitId,
-                        sheetId: subUnitId,
+                        sheetId: toSubUnitId,
                         pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-                        selections: [{ range: pastedRange }],
+                        selections: [{ range: toRange }],
                     },
                 },
             ];
@@ -201,9 +183,9 @@ export function getMoveRangeMutations(
                     id: SetSelectionsOperation.id,
                     params: {
                         unitId,
-                        sheetId: subUnitId,
+                        sheetId: fromSubUnitId,
                         pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-                        selections: [{ range: copyRange }],
+                        selections: [{ range: fromRange }],
                     },
                 },
                 ...interceptorCommands.undos,
@@ -219,12 +201,11 @@ export function getMoveRangeMutations(
 }
 
 export function getSetCellValueMutations(
-    unitId: string,
-    subUnitId: string,
-    range: IRange,
+    pasteTo: ISheetRangeLocation,
     matrix: ObjectMatrix<ICellDataWithSpanInfo>,
     accessor: IAccessor
 ) {
+    const { unitId, subUnitId, range } = pasteTo;
     const redoMutationsInfo: IMutationInfo[] = [];
     const undoMutationsInfo: IMutationInfo[] = [];
     const { startColumn, startRow } = range;
@@ -273,14 +254,13 @@ export function getSetCellValueMutations(
 }
 
 export function getSetCellStyleMutations(
-    unitId: string,
-    subUnitId: string,
-    range: IRange,
+    pasteTo: ISheetRangeLocation,
     matrix: ObjectMatrix<ICellDataWithSpanInfo>,
     accessor: IAccessor
 ) {
     const redoMutationsInfo: IMutationInfo[] = [];
     const undoMutationsInfo: IMutationInfo[] = [];
+    const { unitId, subUnitId, range } = pasteTo;
     const { startColumn, startRow } = range;
     const valueMatrix = new ObjectMatrix<ICellData>();
 
@@ -322,15 +302,14 @@ export function getSetCellStyleMutations(
 }
 
 export function getClearCellStyleMutations(
-    unitId: string,
-    subUnitId: string,
-    range: IRange,
+    pasteTo: ISheetRangeLocation,
     matrix: ObjectMatrix<ICellDataWithSpanInfo>,
     accessor: IAccessor
 ) {
     const redoMutationsInfo: IMutationInfo[] = [];
     const undoMutationsInfo: IMutationInfo[] = [];
     const clearStyleMatrix = new ObjectMatrix<ICellData>();
+    const { unitId, subUnitId, range } = pasteTo;
     const { startColumn, startRow } = range;
 
     matrix.forValue((row, col, value) => {
@@ -369,14 +348,13 @@ export function getClearCellStyleMutations(
 }
 
 export function getClearAndSetMergeMutations(
-    unitId: string,
-    subUnitId: string,
-    range: IRange,
+    pasteTo: ISheetRangeLocation,
     matrix: ObjectMatrix<ICellDataWithSpanInfo>,
     accessor: IAccessor
 ) {
     const redoMutationsInfo: IMutationInfo[] = [];
     const undoMutationsInfo: IMutationInfo[] = [];
+    const { unitId, subUnitId, range } = pasteTo;
     const { startColumn, startRow, endColumn, endRow } = range;
     let hasMerge = false;
     const mergeRangeData: IRange[] = [];

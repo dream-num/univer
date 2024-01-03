@@ -46,9 +46,9 @@ import PastePluginLark from './html-to-usm/paste-plugins/plugin-lark';
 import PastePluginWord from './html-to-usm/paste-plugins/plugin-word';
 import type {
     ICellDataWithSpanInfo,
-    IPasteSource,
     IPasteTarget,
     ISheetClipboardHook,
+    ISheetRangeLocation,
     IUniverSheetCopyDataModel,
 } from './type';
 import { COPY_TYPE } from './type';
@@ -253,7 +253,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const hooks = this._clipboardHooks;
         const enabledHooks: ISheetClipboardHook[] = [];
         const disableCopying = hooks.some(
-            (h) => enabledHooks.push(h) && h.onBeforePaste?.(unitId, subUnitId, range) === false
+            (h) => enabledHooks.push(h) && h.onBeforePaste?.({ unitId, subUnitId, range }) === false
         );
         if (disableCopying) {
             enabledHooks.forEach((h) => h.onAfterPaste?.(false));
@@ -263,7 +263,17 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const redoMutationsInfo: IMutationInfo[] = [];
         const undoMutationsInfo: IMutationInfo[] = [];
         enabledHooks.forEach((h) => {
-            const contentReturn = h.onPastePlainText?.(range, text, pasteType);
+            const contentReturn = h.onPastePlainText?.(
+                {
+                    unitId,
+                    subUnitId,
+                    range,
+                },
+                text,
+                {
+                    pasteType,
+                }
+            );
             if (contentReturn) {
                 redoMutationsInfo.push(...contentReturn.redos);
                 undoMutationsInfo.push(...contentReturn.undos);
@@ -430,7 +440,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         data: IUniverSheetCopyDataModel,
         target: IPasteTarget,
         pasteType: string,
-        source?: IPasteSource
+        source?: ISheetRangeLocation & { copyId: string; copyType: COPY_TYPE }
     ): boolean {
         const { rowProperties, colProperties, cellMatrix } = data;
         const { unitId, subUnitId, pastedRange } = target;
@@ -439,7 +449,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const hooks = this._clipboardHooks;
         const enabledHooks: ISheetClipboardHook[] = [];
         const disableCopying = hooks.some(
-            (h) => enabledHooks.push(h) && h.onBeforePaste?.(unitId, subUnitId, pastedRange) === false
+            (h) => enabledHooks.push(h) && h.onBeforePaste?.({ unitId, subUnitId, range: pastedRange }) === false
         );
         if (disableCopying) {
             enabledHooks.forEach((h) => h.onAfterPaste?.(false));
@@ -447,14 +457,19 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         }
         if (!cellMatrix) return false;
 
-        const copyInfo = source
+        const pasteFrom = source
             ? {
-                  copyRange: source.range,
-                  copyType: source.copyType,
                   unitId: source.unitId,
                   subUnitId: source.subUnitId,
+                  range: source.range,
               }
-            : { copyType: COPY_TYPE.COPY };
+            : null;
+
+        const payload = {
+            copyType: source?.copyType || COPY_TYPE.COPY,
+            copyId: source?.copyId,
+            pasteType,
+        };
 
         const redoMutationsInfo: IMutationInfo[] = [];
         const undoMutationsInfo: IMutationInfo[] = [];
@@ -466,7 +481,9 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         );
         filteredHooks.forEach((h) => {
             if (rowProperties) {
-                const rowReturn = h.onPasteRows?.(pastedRange, rowProperties, pasteType);
+                const rowReturn = h.onPasteRows?.({ range: pastedRange, unitId, subUnitId }, rowProperties, {
+                    pasteType,
+                });
                 if (rowReturn) {
                     redoMutationsInfo.push(...rowReturn.redos);
                     undoMutationsInfo.push(...rowReturn.undos);
@@ -474,16 +491,21 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             }
 
             const colReturn = h.onPasteColumns?.(
-                pastedRange,
+                { range: pastedRange, unitId, subUnitId },
                 colProperties || new Array(colCount).map(() => ({})),
-                pasteType
+                { pasteType }
             );
             if (colReturn) {
                 redoMutationsInfo.push(...colReturn.redos);
                 undoMutationsInfo.push(...colReturn.undos);
             }
 
-            const contentReturn = h.onPasteCells?.(pastedRange, cellMatrix, pasteType, copyInfo);
+            const contentReturn = h.onPasteCells?.(
+                pasteFrom,
+                { range: pastedRange, unitId, subUnitId },
+                cellMatrix,
+                payload
+            );
             if (contentReturn) {
                 redoMutationsInfo.push(...contentReturn.redos);
                 undoMutationsInfo.push(...contentReturn.undos);

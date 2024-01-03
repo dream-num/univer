@@ -20,6 +20,8 @@ import { Inject } from '@wendellhu/redi';
 
 import type { IRegisterFunctionMutationParam } from '../commands/mutations/register-function.mutation';
 import { RegisterFunctionMutation } from '../commands/mutations/register-function.mutation';
+import type { IUnregisterFunctionMutationParam } from '../commands/mutations/unregister-function.mutation';
+import { UnregisterFunctionMutation } from '../commands/mutations/unregister-function.mutation';
 import { BaseFunction } from '../functions/base-function';
 import { FormulaDataModel } from '../models/formula-data.model';
 import { IFunctionService } from '../services/function.service';
@@ -59,6 +61,16 @@ export class RegisterFunctionController extends Disposable {
                         return createFunction(functionString, functionName);
                     });
                     this._functionService.registerExecutors(...functionList);
+                } else if (command.id === UnregisterFunctionMutation.id) {
+                    const params = command.params as IUnregisterFunctionMutationParam;
+
+                    if (params == null) {
+                        return;
+                    }
+
+                    const { functions } = params;
+
+                    this._functionService.unregisterExecutors(...functions);
                 }
             })
         );

@@ -39,6 +39,7 @@ import {
     SetSuperTableMutation,
     SetSuperTableOptionMutation,
 } from '../commands/mutations/set-super-table.mutation';
+import { UnregisterFunctionMutation } from '../commands/mutations/unregister-function.mutation';
 import { functionArray } from '../functions/array/function-map';
 import type { BaseFunction } from '../functions/base-function';
 import { functionCompatibility } from '../functions/compatibility/function-map';
@@ -96,6 +97,7 @@ export class FormulaController extends Disposable {
             RemoveSuperTableMutation,
             SetSuperTableOptionMutation,
             RegisterFunctionMutation,
+            UnregisterFunctionMutation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 

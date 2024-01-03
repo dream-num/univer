@@ -85,7 +85,13 @@ export interface IDescriptionService {
      * register descriptions
      * @param functionList
      */
-    registerDescription(functionList: IFunctionInfo[]): void;
+    registerDescriptions(functionList: IFunctionInfo[]): void;
+
+    /**
+     * unregister descriptions
+     * @param functionList
+     */
+    unregisterDescriptions(functionNames: string[]): void;
 }
 
 export const IDescriptionService = createIdentifier<IDescriptionService>('formula-ui.description-service');
@@ -160,9 +166,15 @@ export class DescriptionService implements IDescriptionService, IDisposable {
         return searchList;
     }
 
-    registerDescription(description: IFunctionInfo[]) {
+    registerDescriptions(description: IFunctionInfo[]) {
         this._descriptions = this._descriptions.concat(description);
         this._registerDescriptions();
+    }
+
+    unregisterDescriptions(functionNames: string[]) {
+        this._descriptions = this._descriptions.filter((item) => !functionNames.includes(item.functionName));
+
+        this._functionService.unregisterDescriptions(...functionNames);
     }
 
     private _initialize() {

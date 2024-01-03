@@ -36,6 +36,7 @@ import { DescriptionService, IDescriptionService } from './services/description.
 import { FormulaAlgorithmService, IFormulaAlgorithmService } from './services/formula-algorithm.service';
 import { FormulaInputService, IFormulaInputService } from './services/formula-input.service';
 import { FormulaPromptService, IFormulaPromptService } from './services/prompt.service';
+import { IRegisterFunctionService, RegisterFunctionService } from './services/register-function.service';
 
 /**
  * The configuration of the formula UI plugin.
@@ -74,6 +75,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
             ],
             [IFormulaAlgorithmService, { useClass: FormulaAlgorithmService }],
             [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
+            [IRegisterFunctionService, { useClass: RegisterFunctionService }],
 
             // controllers
             [FormulaUIController],

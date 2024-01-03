@@ -65,6 +65,7 @@ export {
     SetSuperTableMutation,
     SetSuperTableOptionMutation,
 } from './commands/mutations/set-super-table.mutation';
+export { UnregisterFunctionMutation } from './commands/mutations/unregister-function.mutation';
 export { LexerNode } from './engine/analysis/lexer-node';
 export { LexerTreeBuilder } from './engine/analysis/lexer-tree-builder';
 export { BaseReferenceObject, type FunctionVariantType } from './engine/reference-object/base-reference-object';

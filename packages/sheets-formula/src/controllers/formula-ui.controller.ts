@@ -27,7 +27,6 @@ import { HelpFunctionOperation } from '../commands/operations/help-function.oper
 import { InsertFunctionOperation } from '../commands/operations/insert-function.operation';
 import { MoreFunctionsOperation } from '../commands/operations/more-functions.operation';
 import { ReferenceAbsoluteOperation } from '../commands/operations/reference-absolute.operation';
-import { RegisterFunctionOperation } from '../commands/operations/register-function.operation';
 import { SearchFunctionOperation } from '../commands/operations/search-function.operation';
 import { RenderFormulaPromptContent } from '../views/FormulaPromptContainer';
 import { MORE_FUNCTIONS_COMPONENT } from '../views/more-functions/interface';
@@ -81,7 +80,6 @@ export class FormulaUIController extends Disposable {
             HelpFunctionOperation,
             SelectEditorFormulaOperation,
             ReferenceAbsoluteOperation,
-            RegisterFunctionOperation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 

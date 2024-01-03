@@ -16,7 +16,7 @@
 
 import { Disposable, ICommandService } from '@univerjs/core';
 import type { PrimitiveValueType } from '@univerjs/engine-formula';
-import { IFunctionService, RegisterFunctionMutation } from '@univerjs/engine-formula';
+import { RegisterFunctionMutation, UnregisterFunctionMutation } from '@univerjs/engine-formula';
 import { createIdentifier } from '@wendellhu/redi';
 
 export type IRegisterFunction = (
@@ -31,6 +31,8 @@ export interface IFormulaAlgorithmService {
      * @param functionList
      */
     registerFunctions(functionList: IRegisterFunctionList): void;
+
+    unregisterFunctions(functionList: string[]): void;
 }
 
 export const IFormulaAlgorithmService = createIdentifier<IFormulaAlgorithmService>(
@@ -38,10 +40,7 @@ export const IFormulaAlgorithmService = createIdentifier<IFormulaAlgorithmServic
 );
 
 export class FormulaAlgorithmService extends Disposable implements IFormulaAlgorithmService {
-    constructor(
-        @IFunctionService private readonly _functionService: IFunctionService,
-        @ICommandService private readonly _commandService: ICommandService
-    ) {
+    constructor(@ICommandService private readonly _commandService: ICommandService) {
         super();
     }
 
@@ -53,6 +52,19 @@ export class FormulaAlgorithmService extends Disposable implements IFormulaAlgor
             RegisterFunctionMutation.id,
             {
                 functions,
+            },
+            {
+                local: true,
+            }
+        );
+    }
+
+    unregisterFunctions(functionList: string[]) {
+        // Synchronous to worker
+        this._commandService.executeCommand(
+            UnregisterFunctionMutation.id,
+            {
+                functions: functionList,
             },
             {
                 local: true,

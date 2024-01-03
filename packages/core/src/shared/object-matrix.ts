@@ -558,6 +558,7 @@ export class ObjectMatrix<T> {
         let startRow = 0;
         let startColumn = 0;
         let endColumn = 0;
+        let endRow = -1;
 
         let initRow = false;
         let initColumn = false;
@@ -582,8 +583,12 @@ export class ObjectMatrix<T> {
                     startColumn = columnIndex;
                 }
             });
+
+            // max rowIndex is the endRow
+            if (rowIndex > endRow) {
+                endRow = rowIndex;
+            }
         });
-        const endRow = startRow + this.getSizeOf() - 1;
 
         return {
             startRow,

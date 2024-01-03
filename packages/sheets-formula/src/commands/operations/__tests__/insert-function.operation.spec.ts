@@ -27,7 +27,12 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { InsertFunctionCommand } from '../../commands/insert-function.command';
 import type { IInsertFunctionOperationParams } from '../insert-function.operation';
-import { InsertFunctionOperation, isNumberCell } from '../insert-function.operation';
+import {
+    InsertFunctionOperation,
+    isMultiRowsColumnsRange,
+    isNumberCell,
+    isSingleCell,
+} from '../insert-function.operation';
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('Test insert function operation', () => {
@@ -175,6 +180,39 @@ describe('Test insert function operation', () => {
             it('should return false when cell is empty object', () => {
                 const cell = {};
                 expect(isNumberCell(cell)).toBeFalsy();
+            });
+        });
+
+        describe('function isSingleCell', () => {
+            it('should return true when startRow === endRow and startColumn === endColumn', () => {
+                const range = { startRow: 1, startColumn: 1, endRow: 1, endColumn: 1 };
+                expect(isSingleCell(range)).toBeTruthy();
+            });
+
+            it('should return false when startRow !== endRow', () => {
+                const range = { startRow: 1, startColumn: 1, endRow: 2, endColumn: 1 };
+                expect(isSingleCell(range)).toBeFalsy();
+            });
+
+            it('should return false when startColumn !== endColumn', () => {
+                const range = { startRow: 1, startColumn: 1, endRow: 1, endColumn: 2 };
+                expect(isSingleCell(range)).toBeFalsy();
+            });
+        });
+        describe('function isMultiRowsColumnsRange', () => {
+            it('should return true when startRow !== endRow and startColumn !== endColumn', () => {
+                const range = { startRow: 1, startColumn: 1, endRow: 2, endColumn: 2 };
+                expect(isMultiRowsColumnsRange(range)).toBeTruthy();
+            });
+
+            it('should return false when startRow === endRow', () => {
+                const range = { startRow: 1, startColumn: 1, endRow: 1, endColumn: 2 };
+                expect(isMultiRowsColumnsRange(range)).toBeFalsy();
+            });
+
+            it('should return false when startColumn === endColumn', () => {
+                const range = { startRow: 1, startColumn: 1, endRow: 2, endColumn: 1 };
+                expect(isMultiRowsColumnsRange(range)).toBeFalsy();
             });
         });
     });

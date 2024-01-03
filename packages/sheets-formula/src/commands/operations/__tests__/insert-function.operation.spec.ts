@@ -27,7 +27,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { InsertFunctionCommand } from '../../commands/insert-function.command';
 import type { IInsertFunctionOperationParams } from '../insert-function.operation';
-import { InsertFunctionOperation } from '../insert-function.operation';
+import { InsertFunctionOperation, isNumberCell } from '../insert-function.operation';
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('Test insert function operation', () => {
@@ -138,6 +138,43 @@ describe('Test insert function operation', () => {
             it('will not apply when there is no selected ranges', async () => {
                 const result = await commandService.executeCommand(InsertFunctionOperation.id);
                 expect(result).toBeFalsy();
+            });
+        });
+
+        describe('function isNumberCell', () => {
+            it('should return true when cell type is number', () => {
+                const cell = { t: 2, v: 1 };
+                expect(isNumberCell(cell)).toBeTruthy();
+            });
+
+            it('should return true when cell is number', () => {
+                const cell = { v: 1 };
+                expect(isNumberCell(cell)).toBeTruthy();
+            });
+
+            it('should return false when cell is string number', () => {
+                const cell = { v: '1' };
+                expect(isNumberCell(cell)).toBeTruthy();
+            });
+
+            it('should return false when cell is string', () => {
+                const cell = { v: 'test' };
+                expect(isNumberCell(cell)).toBeFalsy();
+            });
+
+            it('should return false when cell is null', () => {
+                const cell = null;
+                expect(isNumberCell(cell)).toBeFalsy();
+            });
+
+            it('should return false when cell is undefined', () => {
+                const cell = undefined;
+                expect(isNumberCell(cell)).toBeFalsy();
+            });
+
+            it('should return false when cell is empty object', () => {
+                const cell = {};
+                expect(isNumberCell(cell)).toBeFalsy();
             });
         });
     });

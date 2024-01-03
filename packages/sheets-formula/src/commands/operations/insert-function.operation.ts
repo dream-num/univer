@@ -214,6 +214,11 @@ function findStartColumn(cellMatrix: ObjectMatrix<Nullable<ICellData>>, row: num
     return column;
 }
 
-function isNumberCell(cell: Nullable<ICellData>) {
-    return cell && (Tools.isStringNumber(cell.v) || getCellValueType(cell) === CellValueType.NUMBER);
+export function isNumberCell(cell: Nullable<ICellData>) {
+    return (
+        cell &&
+        (cell.t === CellValueType.NUMBER ||
+            getCellValueType(cell) === CellValueType.NUMBER ||
+            Tools.isStringNumber(cell.v))
+    );
 }

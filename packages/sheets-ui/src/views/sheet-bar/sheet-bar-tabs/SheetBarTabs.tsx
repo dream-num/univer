@@ -105,11 +105,11 @@ export function SheetBarTabs() {
                     subUnitId,
                     unitId: workbook.getUnitId(),
                 });
-                const textSelectionRenderManager = injector.get(ITextSelectionRenderManager);
                 // The 'onChangeTab' event occurs during the 'pointerDown' event.
                 // The triggering time is too early.
                 // Settimeout is required to delay resetting the focus.
                 setTimeout(() => {
+                    const textSelectionRenderManager = injector.get(ITextSelectionRenderManager);
                     textSelectionRenderManager.focus();
                 }, 0);
             },

@@ -69,7 +69,7 @@ export function ContextMenu() {
                         const { label: commandId, value } = params;
                         commandService && commandService.executeCommand(commandId as string, { value });
                         const textSelectionRenderManager = injector.get(ITextSelectionRenderManager);
-                        textSelectionRenderManager && textSelectionRenderManager.focus();
+                        textSelectionRenderManager.focus();
                         setVisible(false);
                     }}
                 />

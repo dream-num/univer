@@ -1,10 +1,30 @@
+<!-- https://univer.work/guides/contributing/ -->
+
 # Univer Contributing Guide
 
 Welcome, and thank you for your interest in contributing to Univer!
 
+Please read our [Code of Conduct](./CODE_OF_CONDUCT.md) before you join in the Univer community.
+
 ## Asking Questions
 
+If you encounter any issues while using Univer, you can seek help in the following communities:
+
+-   [Discord community](https://discord.gg/XPGnMBmpd6)
+-   [GitHub Discussions](https://github.com/dream-num/univer/discussions)
+-   Join the Univer Chinese community (please scan the QR code [here](https://univer.work/enterprises/#%E8%8E%B7%E5%8F%96%E5%95%86%E4%B8%9A%E7%89%88))
+
 ## Reporting Issues
+
+If you encounter any issues or have any suggestions while using Univer, please feel free to raise them in the Github Issues. We will respond promptly.
+
+To better assist you, we recommend:
+
+-   Before submitting an issue, please search to see if someone has already raised a similar question.
+-   We provide an [issue template](https://github.com/dream-num/univer/issues/new/choose) and encourage you to fill it out with sufficient information, which helps us quickly identify the problem.
+-   Please try to describe the issue in English, as it enables more people to participate in the discussion. We will also make an effort to reply in English to benefit a wider audience.
+
+> If you're new to submitting issues, we recommend to read [How To Ask Questions The Smart Way](http://www.catb.org/~esr/faqs/smart-questions.html) and [How to Report Bugs Effectively](https://www.chiark.greenend.org.uk/~sgtatham/bugs.html) before posting. Well-written bug reports help us and help you!
 
 ## Contributing Code
 

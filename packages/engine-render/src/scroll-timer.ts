@@ -16,9 +16,11 @@
 
 import type { IPaddingData, Nullable } from '@univerjs/core';
 
+import type { Scene, Viewport } from '.';
 import { RENDER_CLASS_TYPE } from './basics/const';
 import { cancelRequestFrame, requestNewFrame } from './basics/tools';
 import { Vector2 } from './basics/vector2';
+import type { ThinScene } from './thin-scene';
 
 export enum ScrollTimerType {
     ALL,
@@ -47,7 +49,7 @@ export class ScrollTimer {
     private _scrollFunction: Nullable<(x?: number, y?: number) => void>;
 
     constructor(
-        private _scene: any,
+        private _scene: Scene,
         private _scrollTimerType: ScrollTimerType = ScrollTimerType.ALL,
         private _padding?: IPaddingData,
         private _smoothRatioX = 0.4,
@@ -78,7 +80,7 @@ export class ScrollTimer {
         this._runRenderLoop();
     }
 
-    private _scroll(viewport: Nullable<any>) {
+    private _scroll(viewport: Nullable<Viewport>) {
         const topBounding = viewport?.top || 0;
         const bottomBounding = topBounding + (viewport?.height || 0);
         const leftBounding = viewport?.left || 0;
@@ -153,7 +155,7 @@ export class ScrollTimer {
         delete this._scrollFunction;
     }
 
-    getViewportByCoord(scene?: any) {
+    getViewportByCoord(scene?: Scene) {
         // return scene?.getActiveViewportByCoord(Vector2.FromArray([this._offsetX, this._offsetY]));
 
         return scene?.getActiveViewportByRelativeCoord(Vector2.FromArray([this._offsetX, this._offsetY]));
@@ -169,8 +171,8 @@ export class ScrollTimer {
         this._requestNewFrameNumber = requestNewFrame(this._runRenderLoop.bind(this));
     }
 
-    private _findAncestorScene(scene?: any) {
-        let parent: any = scene?.getParent();
+    private _findAncestorScene(scene?: ThinScene) {
+        let parent = scene?.getParent();
         while (parent) {
             if (parent.classType === RENDER_CLASS_TYPE.SCENE) {
                 return parent;

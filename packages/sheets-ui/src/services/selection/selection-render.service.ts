@@ -34,6 +34,8 @@ import { createIdentifier, Inject } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
 
+import { VIEWPORT_KEY } from '../../common/keys';
+import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import type { SelectionRenderModel } from './selection-render-model';
 import { SelectionShape } from './selection-shape';
 import { SelectionShapeExtension } from './selection-shape-extension';
@@ -183,7 +185,8 @@ export class SelectionRenderService implements ISelectionRenderService {
 
     constructor(
         @Inject(ThemeService) private readonly _themeService: ThemeService,
-        @IShortcutService private readonly _shortcutService: IShortcutService
+        @IShortcutService private readonly _shortcutService: IShortcutService,
+        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
     ) {
         this._selectionStyle = getNormalSelectionStyle(this._themeService);
     }
@@ -643,7 +646,7 @@ export class SelectionRenderService implements ISelectionRenderService {
             curControls.push(selectionControl);
         }
 
-        this._selectionMoveStart$.next(this.getSelectionDataWithStyle());
+        // this._selectionMoveStart$.next(this.getSelectionDataWithStyle());
 
         this.hasSelection = true;
 
@@ -651,8 +654,10 @@ export class SelectionRenderService implements ISelectionRenderService {
 
         scene.disableEvent();
 
+        const startViewport = scene.getActiveViewportByCoord(Vector2.FromArray([newEvtOffsetX, newEvtOffsetY]));
+
         const scrollTimer = ScrollTimer.create(this._scene, scrollTimerType);
-        scrollTimer.startScroll(newEvtOffsetX, newEvtOffsetY, viewport);
+        scrollTimer.startScroll(viewport?.left ?? 0, viewport?.top ?? 0, viewport);
 
         this._scrollTimer = scrollTimer;
 
@@ -662,8 +667,11 @@ export class SelectionRenderService implements ISelectionRenderService {
             this._moving(newEvtOffsetX, newEvtOffsetY, selectionControl, rangeType);
         }
 
+        let lastViewportKey = startViewport?.viewPortKey;
+
         this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
+            const endViewport = scene.getActiveViewportByCoord(Vector2.FromArray([moveOffsetX, moveOffsetY]));
 
             const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeCoord(
                 Vector2.FromArray([moveOffsetX, moveOffsetY])
@@ -671,9 +679,85 @@ export class SelectionRenderService implements ISelectionRenderService {
 
             this._moving(newMoveOffsetX, newMoveOffsetY, selectionControl, rangeType);
 
-            scrollTimer.scrolling(newMoveOffsetX, newMoveOffsetY, () => {
+            let scrollOffsetX = newMoveOffsetX;
+            let scrollOffsetY = newMoveOffsetY;
+
+            const currentSelection = this.getActiveSelection();
+            const freeze = this._sheetSkeletonManagerService.getCurrent()?.skeleton.getWorksheetConfig().freeze;
+
+            const selection = currentSelection?.model;
+            if (startViewport && endViewport && viewport) {
+                const startKey = startViewport.viewPortKey;
+                const endKey = endViewport.viewPortKey;
+                if (startKey === VIEWPORT_KEY.VIEW_ROW_TOP) {
+                    if (moveOffsetY < viewport.top && (selection?.endRow ?? 0) < (freeze?.startRow ?? 0)) {
+                        scrollOffsetY = viewport.top;
+                    }
+                } else if (startKey === VIEWPORT_KEY.VIEW_COLUMN_LEFT) {
+                    if (moveOffsetX < viewport.left && (selection?.endColumn ?? 0) < (freeze?.startColumn ?? 0)) {
+                        scrollOffsetX = viewport.left;
+                    }
+                }
+                // move during same viewport
+                else if (startKey === endKey) {
+                    let disableX = false;
+                    let disableY = false;
+                    if (startKey === VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP) {
+                        disableX = true;
+                        disableY = true;
+                    } else if (startKey === VIEWPORT_KEY.VIEW_MAIN_TOP) {
+                        disableY = true;
+                    } else if (startKey === VIEWPORT_KEY.VIEW_MAIN_LEFT) {
+                        disableX = true;
+                    }
+
+                    if ((selection?.endRow ?? 0) > (freeze?.startRow ?? 0)) {
+                        disableY = false;
+                    }
+
+                    if ((selection?.endColumn ?? 0) > (freeze?.startColumn ?? 0)) {
+                        disableX = false;
+                    }
+                    if (disableX) {
+                        scrollOffsetX = viewport.left;
+                    }
+
+                    if (disableY) {
+                        scrollOffsetY = viewport.top;
+                    }
+                } else {
+                    const startXY = {
+                        x: startViewport.scrollX,
+                        y: startViewport.scrollY,
+                    };
+                    const endXY = {
+                        x: endViewport.scrollX,
+                        y: endViewport.scrollY,
+                    };
+                    const shouldResetX = startXY.x !== endXY.x && endKey !== lastViewportKey && lastViewportKey;
+                    const shouldResetY = startXY.y !== endXY.y && endKey !== lastViewportKey && lastViewportKey;
+
+                    if (shouldResetX || shouldResetY) {
+                        viewport.scrollTo({
+                            x: shouldResetX ? startXY.x : undefined,
+                            y: shouldResetY ? startXY.y : undefined,
+                        });
+
+                        if (!shouldResetX) {
+                            scrollOffsetX = viewport.left;
+                        }
+
+                        if (!shouldResetY) {
+                            scrollOffsetY = viewport.top;
+                        }
+                    }
+                }
+            }
+
+            scrollTimer.scrolling(scrollOffsetX, scrollOffsetY, () => {
                 this._moving(newMoveOffsetX, newMoveOffsetY, selectionControl, rangeType);
             });
+            lastViewportKey = endViewport?.viewPortKey;
         });
 
         this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {
@@ -797,9 +881,41 @@ export class SelectionRenderService implements ISelectionRenderService {
 
         const { startRow, startColumn, endRow, endColumn } = this._startSelectionRange;
 
+        const {
+            startRow: oldStartRow,
+            endRow: oldEndRow,
+            startColumn: oldStartColumn,
+            endColumn: oldEndColumn,
+            rangeType: oldRangeType,
+        } = selectionControl?.model || { startRow: -1, endRow: -1, startColumn: -1, endColumn: -1 };
+
+        const freeze = this._sheetSkeletonManagerService.getCurrent()?.skeleton.getWorksheetConfig().freeze;
+
+        const currentViewport = scene.getActiveViewportByCoord(Vector2.FromArray([moveOffsetX, moveOffsetY]));
+
+        let targetViewport = this._activeViewport;
+
+        if (freeze && currentViewport) {
+            if (freeze.startRow > 0 && freeze.startColumn > 0) {
+                if (
+                    (oldRangeType === RANGE_TYPE.COLUMN && freeze.startColumn > oldEndColumn) ||
+                    (oldRangeType === RANGE_TYPE.ROW && freeze.startRow > oldEndRow) ||
+                    (freeze.startRow < oldStartRow && freeze.startColumn > oldEndColumn) ||
+                    (freeze.startColumn < oldStartColumn && freeze.startRow > oldEndRow) ||
+                    (freeze.startColumn > oldEndColumn && freeze.startRow > oldEndRow)
+                ) {
+                    targetViewport = currentViewport;
+                }
+            } else if (freeze.startRow > 0 && freeze.startRow > oldEndRow) {
+                targetViewport = currentViewport;
+            } else if (freeze.startColumn > 0 && freeze.startRow > oldEndRow) {
+                targetViewport = currentViewport;
+            }
+        }
+
         const scrollXY = scene.getScrollXYByRelativeCoords(
             Vector2.FromArray([this._startOffsetX, this._startOffsetY]),
-            this._activeViewport
+            targetViewport
         );
 
         const { scaleX, scaleY } = scene.getAncestorScale();
@@ -813,7 +929,6 @@ export class SelectionRenderService implements ISelectionRenderService {
         }
 
         const selectionData = this._getSelectedRangeWithMerge(moveOffsetX, moveOffsetY, scaleX, scaleY, scrollXY);
-
         if (!selectionData) {
             return false;
         }
@@ -867,12 +982,6 @@ export class SelectionRenderService implements ISelectionRenderService {
             endX: endCell?.endX || 0,
         };
         // Only notify when the selection changes
-        const {
-            startRow: oldStartRow,
-            endRow: oldEndRow,
-            startColumn: oldStartColumn,
-            endColumn: oldEndColumn,
-        } = selectionControl?.model || { startRow: -1, endRow: -1, startColumn: -1, endColumn: -1 };
 
         if (
             (oldStartColumn !== finalStartColumn ||

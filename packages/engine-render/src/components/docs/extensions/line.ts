@@ -45,13 +45,13 @@ export class Line extends docExtension {
             return;
         }
 
-        const { contentHeight = 0 } = line;
+        const { contentHeight = 0, asc } = line;
         const { ts: textStyle, bBox } = span;
         if (!textStyle) {
             return;
         }
 
-        const { sp: strikeoutPosition } = bBox;
+        const { sp: strikeoutPosition, ba } = bBox;
 
         const scale = getScale(parentScale);
 
@@ -60,13 +60,15 @@ export class Line extends docExtension {
         const { ul: underline, st: strikethrough, ol: overline } = textStyle;
 
         if (underline) {
-            const startY = contentHeight + DEFAULT_OFFSET_SPACING - DELTA;
+            const startY = contentHeight + DEFAULT_OFFSET_SPACING - 3;
 
             this._drawLine(ctx, span, underline, startY, scale);
         }
 
         if (strikethrough) {
-            const startY = strikeoutPosition - DELTA;
+            // We use the asc baseline to find the position of the strikethrough,
+            // and ba - strikeoutPosition is exactly the offset position of the strikethrough from the baseline
+            const startY = asc - (ba - strikeoutPosition) - DELTA;
 
             this._drawLine(ctx, span, strikethrough, startY, scale);
         }
@@ -89,7 +91,7 @@ export class Line extends docExtension {
         startY: number,
         scale: number
     ) {
-        const { s: show, cl: colorStyle, t: lineType } = line;
+        const { s: show, cl: colorStyle, t: lineType, c = BooleanNumber.TRUE } = line;
 
         if (show === BooleanNumber.TRUE) {
             const {
@@ -110,8 +112,10 @@ export class Line extends docExtension {
             ctx.translateWithPrecisionRatio(FIX_ONE_PIXEL_BLUR_OFFSET, FIX_ONE_PIXEL_BLUR_OFFSET);
 
             ctx.beginPath();
-            const color = getColorStyle(colorStyle) || COLOR_BLACK_RGB;
+            const color =
+                (c === BooleanNumber.TRUE ? getColorStyle(span.ts?.cl) : getColorStyle(colorStyle)) || COLOR_BLACK_RGB;
             ctx.strokeStyle = color;
+
             this._setLineType(ctx, lineType || TextDecoration.SINGLE);
 
             const start = calculateRectRotate(

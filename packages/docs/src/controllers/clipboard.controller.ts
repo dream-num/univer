@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IDocumentBody, IParagraph, ITextRun } from '@univerjs/core';
+import type { ICommandInfo, IDocumentBody } from '@univerjs/core';
 import {
     Disposable,
     FOCUSING_DOC,
@@ -25,7 +25,6 @@ import {
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
-    Tools,
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
@@ -149,8 +148,6 @@ export class DocClipboardController extends Disposable {
         const ranges = this._textSelectionManagerService.getSelections();
         const docDataModel = this._currentUniverService.getCurrentUniverDocInstance();
 
-        const { dataStream, textRuns = [], paragraphs = [] } = docDataModel.getBody()!;
-
         const results: IDocumentBody[] = [];
 
         if (ranges == null) {
@@ -168,59 +165,10 @@ export class DocClipboardController extends Disposable {
                 continue;
             }
 
-            const docBody: IDocumentBody = {
-                dataStream: dataStream.slice(startOffset, endOffset),
-            };
+            const docBody = docDataModel.sliceBody(startOffset, endOffset);
 
-            const newTextRuns: ITextRun[] = [];
-
-            for (const textRun of textRuns) {
-                const clonedTextRun = Tools.deepClone(textRun);
-                const { st, ed } = clonedTextRun;
-                if (Tools.hasIntersectionBetweenTwoRanges(st, ed, startOffset, endOffset)) {
-                    if (startOffset >= st && startOffset <= ed) {
-                        newTextRuns.push({
-                            ...clonedTextRun,
-                            st: startOffset,
-                            ed: Math.min(endOffset, ed),
-                        });
-                    } else if (endOffset >= st && endOffset <= ed) {
-                        newTextRuns.push({
-                            ...clonedTextRun,
-                            st: Math.max(startOffset, st),
-                            ed: endOffset,
-                        });
-                    } else {
-                        newTextRuns.push(clonedTextRun);
-                    }
-                }
-            }
-
-            if (newTextRuns.length) {
-                docBody.textRuns = newTextRuns.map((tr) => {
-                    const { st, ed } = tr;
-                    return {
-                        ...tr,
-                        st: st - startOffset,
-                        ed: ed - startOffset,
-                    };
-                });
-            }
-
-            const newParagraphs: IParagraph[] = [];
-
-            for (const paragraph of paragraphs) {
-                const { startIndex } = paragraph;
-                if (startIndex >= startOffset && startIndex <= endOffset) {
-                    newParagraphs.push(Tools.deepClone(paragraph));
-                }
-            }
-
-            if (newParagraphs.length) {
-                docBody.paragraphs = newParagraphs.map((p) => ({
-                    ...p,
-                    startIndex: p.startIndex - startOffset,
-                }));
+            if (docBody == null) {
+                continue;
             }
 
             results.push(docBody);

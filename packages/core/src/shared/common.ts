@@ -137,10 +137,12 @@ export function getColorStyle(color: Nullable<IColorStyle>): Nullable<string> {
         if (color.rgb) {
             return color.rgb;
         }
+
         if (color.th) {
             return new ColorBuilder().setThemeColor(color.th).asThemeColor().asRgbColor().getCssString();
         }
     }
+
     return null;
 }
 

@@ -278,6 +278,7 @@ export class FontCache {
      */
     private static _getBoundingBoxByFont(fontFamily: string, fontSize = 28, content: string = '') {
         const fontData = this._fontDataMap.get(fontFamily);
+
         if (!fontData) {
             return;
         }

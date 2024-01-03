@@ -667,7 +667,10 @@ export class SelectionRenderService implements ISelectionRenderService {
             this._moving(newEvtOffsetX, newEvtOffsetY, selectionControl, rangeType);
         }
 
-        let lastViewportKey = startViewport?.viewPortKey;
+        let xCrossTime = 0;
+        let yCrossTime = 0;
+        let lastX = newEvtOffsetX;
+        let lastY = newEvtOffsetY;
 
         this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
@@ -686,16 +689,32 @@ export class SelectionRenderService implements ISelectionRenderService {
             const freeze = this._sheetSkeletonManagerService.getCurrent()?.skeleton.getWorksheetConfig().freeze;
 
             const selection = currentSelection?.model;
+
             if (startViewport && endViewport && viewport) {
+                const isCrossingX =
+                    (lastX < viewport.left && newMoveOffsetX > viewport.left) ||
+                    (lastX > viewport.left && newMoveOffsetX < viewport.left);
+                const isCrossingY =
+                    (lastY < viewport.top && newMoveOffsetY > viewport.top) ||
+                    (lastY > viewport.top && newMoveOffsetY < viewport.top);
+
                 const startKey = startViewport.viewPortKey;
                 const endKey = endViewport.viewPortKey;
                 if (startKey === VIEWPORT_KEY.VIEW_ROW_TOP) {
                     if (moveOffsetY < viewport.top && (selection?.endRow ?? 0) < (freeze?.startRow ?? 0)) {
                         scrollOffsetY = viewport.top;
+                    } else if (isCrossingY && yCrossTime % 2 === 0) {
+                        viewport.scrollTo({
+                            y: 0,
+                        });
                     }
                 } else if (startKey === VIEWPORT_KEY.VIEW_COLUMN_LEFT) {
                     if (moveOffsetX < viewport.left && (selection?.endColumn ?? 0) < (freeze?.startColumn ?? 0)) {
                         scrollOffsetX = viewport.left;
+                    } else if (isCrossingX && xCrossTime % 2 === 0) {
+                        viewport.scrollTo({
+                            x: 0,
+                        });
                     }
                 }
                 // move during same viewport
@@ -734,8 +753,8 @@ export class SelectionRenderService implements ISelectionRenderService {
                         x: endViewport.scrollX,
                         y: endViewport.scrollY,
                     };
-                    const shouldResetX = startXY.x !== endXY.x && endKey !== lastViewportKey && lastViewportKey;
-                    const shouldResetY = startXY.y !== endXY.y && endKey !== lastViewportKey && lastViewportKey;
+                    const shouldResetX = startXY.x !== endXY.x && isCrossingX && xCrossTime % 2 === 0;
+                    const shouldResetY = startXY.y !== endXY.y && isCrossingY && yCrossTime % 2 === 0;
 
                     if (shouldResetX || shouldResetY) {
                         viewport.scrollTo({
@@ -752,12 +771,22 @@ export class SelectionRenderService implements ISelectionRenderService {
                         }
                     }
                 }
+
+                if (isCrossingX) {
+                    xCrossTime += 1;
+                }
+
+                if (isCrossingY) {
+                    yCrossTime += 1;
+                }
+
+                lastX = newMoveOffsetX;
+                lastY = newMoveOffsetY;
             }
 
             scrollTimer.scrolling(scrollOffsetX, scrollOffsetY, () => {
                 this._moving(newMoveOffsetX, newMoveOffsetY, selectionControl, rangeType);
             });
-            lastViewportKey = endViewport?.viewPortKey;
         });
 
         this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {

@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICommandInfo, IRange } from '@univerjs/core';
-import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import type { ICellData, IRange } from '@univerjs/core';
+import {
+    Disposable,
+    ICommandService,
+    IUniverInstanceService,
+    LifecycleStages,
+    OnLifecycle,
+    toDisposable,
+} from '@univerjs/core';
 import { CURSOR_TYPE, IRenderManagerService } from '@univerjs/engine-render';
-import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
-import { SelectionManagerService, SetSelectionsOperation } from '@univerjs/sheets';
-import { Inject } from '@wendellhu/redi';
 
 import type { IApplyFormatPainterCommandParams } from '../../commands/commands/set-format-painter.command';
 import {
@@ -27,6 +31,7 @@ import {
     SetOnceFormatPainterCommand,
 } from '../../commands/commands/set-format-painter.command';
 import { FormatPainterStatus, IFormatPainterService } from '../../services/format-painter/format-painter.service';
+import { ISelectionRenderService } from '../../services/selection/selection-render.service';
 import { getSheetObject } from '../utils/component-tools';
 
 @OnLifecycle(LifecycleStages.Rendered, FormatPainterController)
@@ -36,7 +41,7 @@ export class FormatPainterController extends Disposable {
         @IFormatPainterService private readonly _formatPainterService: IFormatPainterService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService
+        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService
     ) {
         super();
 
@@ -62,20 +67,23 @@ export class FormatPainterController extends Disposable {
 
     private _commandExecutedListener() {
         this.disposeWithMe(
-            this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (
-                    command.id === SetSelectionsOperation.id &&
-                    this._formatPainterService.getStatus() !== FormatPainterStatus.OFF
-                ) {
-                    const { selections } = command.params as ISetSelectionsOperationParams;
-                    const { range } = selections[selections.length - 1];
-                    this._applyFormatPainter(range);
-                    // if once, turn off the format painter
-                    if (this._formatPainterService.getStatus() === FormatPainterStatus.ONCE) {
-                        this._commandService.executeCommand(SetOnceFormatPainterCommand.id);
+            toDisposable(
+                this._selectionRenderService.selectionMoveEnd$.subscribe((selections) => {
+                    if (this._formatPainterService.getStatus() !== FormatPainterStatus.OFF) {
+                        const { rangeWithCoord } = selections[selections.length - 1];
+                        this._applyFormatPainter({
+                            startRow: rangeWithCoord.startRow,
+                            startColumn: rangeWithCoord.startColumn,
+                            endRow: rangeWithCoord.endRow,
+                            endColumn: rangeWithCoord.endColumn,
+                        });
+                        // if once, turn off the format painter
+                        if (this._formatPainterService.getStatus() === FormatPainterStatus.ONCE) {
+                            this._commandService.executeCommand(SetOnceFormatPainterCommand.id);
+                        }
                     }
-                }
-            })
+                })
+            )
         );
     }
 

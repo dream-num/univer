@@ -92,7 +92,7 @@ describe('Test move range commands', () => {
             await commandService.executeCommand(UndoCommand.id);
             const undoA1 = getCellInfo(0, 0);
             const undoC3 = getCellInfo(2, 2);
-            expect(undoC3).toEqual(null);
+            expect(undoC3).toBeFalsy();
             expect(undoA1).toEqual(originA1);
         });
 

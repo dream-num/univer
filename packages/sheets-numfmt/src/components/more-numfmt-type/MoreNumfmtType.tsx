@@ -18,9 +18,10 @@ import './index.less';
 
 import { ICommandService, LocaleService, Range } from '@univerjs/core';
 import numfmt from '@univerjs/engine-numfmt';
+import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import type { FormatType } from '@univerjs/sheets';
 import { SelectionManagerService } from '@univerjs/sheets';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { useDependency, useInjector } from '@wendellhu/redi/react-bindings';
 import React from 'react';
 
 import { MENU_OPTIONS } from '../../base/const/MENU-OPTIONS';
@@ -37,6 +38,7 @@ export const MoreNumfmtType = (props: { value?: string }) => {
 export const Options = () => {
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
+    const injector = useInjector();
 
     const selectionManagerService = useDependency(SelectionManagerService);
     const setNumfmt = (pattern: string | null) => {
@@ -44,6 +46,7 @@ export const Options = () => {
         if (!selection) {
             return;
         }
+        const textSelectionRenderManager = injector.get(ITextSelectionRenderManager);
         const range = selection.range;
         const values: Array<{ row: number; col: number; pattern?: string; type?: FormatType }> = [];
         Range.foreach(range, (row, col) => {
@@ -54,6 +57,7 @@ export const Options = () => {
             }
         });
         commandService.executeCommand(SetNumfmtCommand.id, { values });
+        textSelectionRenderManager.focus();
     };
     const handleOnclick = (index: number) => {
         if (index === 0) {

@@ -17,7 +17,8 @@
 import { ICommandService } from '@univerjs/core';
 import { Popup } from '@univerjs/design';
 import type { IMouseEvent } from '@univerjs/engine-render';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { ITextSelectionRenderManager } from '@univerjs/engine-render';
+import { useDependency, useInjector } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
 import { Menu } from '../../../components/menu/Menu';
@@ -32,6 +33,7 @@ export function ContextMenu() {
 
     const contextMenuService = useDependency(IContextMenuService);
     const commandService = useDependency(ICommandService);
+    const injector = useInjector();
 
     useEffect(() => {
         const disposables = contextMenuService.registerContextMenuHandler({
@@ -66,6 +68,8 @@ export function ContextMenu() {
                     onOptionSelect={(params) => {
                         const { label: commandId, value } = params;
                         commandService && commandService.executeCommand(commandId as string, { value });
+                        const textSelectionRenderManager = injector.get(ITextSelectionRenderManager);
+                        textSelectionRenderManager.focus();
                         setVisible(false);
                     }}
                 />

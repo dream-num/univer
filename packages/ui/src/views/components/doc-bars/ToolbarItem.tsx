@@ -16,8 +16,9 @@
 
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { Dropdown, Tooltip } from '@univerjs/design';
+import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import { MoreDownSingle } from '@univerjs/icons';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { useDependency, useInjector } from '@wendellhu/redi/react-bindings';
 import type { Ref } from 'react';
 import React, { forwardRef, useEffect, useState } from 'react';
 import type { Subscription } from 'rxjs';
@@ -35,12 +36,18 @@ import styles from './index.module.less';
 export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: Ref<any>) => {
     const localeService = useDependency(LocaleService);
     const commandService = useDependency(ICommandService);
-
+    const injector = useInjector();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [value, setValue] = useState<any>();
     const [disabled, setDisabled] = useState(false);
     const [activated, setActivated] = useState(false);
     const [hidden, setHidden] = useState(false);
+
+    const handleCommandExecuted = (commandId: string, params?: Record<string, any>) => {
+        commandService.executeCommand(commandId, params);
+        const textSelectionRenderManager = injector.get(ITextSelectionRenderManager);
+        textSelectionRenderManager.focus();
+    };
 
     useEffect(() => {
         const subscriptions: Subscription[] = [];
@@ -105,18 +112,18 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
                 commandId = option.id;
             }
 
-            commandService.executeCommand(commandId, value);
+            handleCommandExecuted(commandId, value);
         }
 
         function handleChange(value: string | number) {
             const commandId = id;
-            commandService.executeCommand(commandId, { value });
+            handleCommandExecuted(commandId, { value });
         }
 
         function handleClick() {
             if (menuType === MenuItemType.BUTTON_SELECTOR) {
                 const commandId = id;
-                commandService.executeCommand(commandId, { value });
+                handleCommandExecuted(commandId, { value });
             }
         }
 
@@ -166,8 +173,8 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
                 className={styles.toolbarItemTextButton}
                 active={activated}
                 disabled={disabled}
-                onClick={() => commandService.executeCommand(props.id)}
-                onDoubleClick={() => props.subId && commandService.executeCommand(props.subId)}
+                onClick={() => handleCommandExecuted(props.id)}
+                onDoubleClick={() => props.subId && handleCommandExecuted(props.subId)}
             >
                 {isCustomComponent ? (
                     <CustomLabel title={title!} value={value} label={label} />

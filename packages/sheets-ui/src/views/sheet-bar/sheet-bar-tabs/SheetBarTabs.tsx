@@ -16,6 +16,7 @@
 
 import type { ICommandInfo } from '@univerjs/core';
 import { BooleanNumber, ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
+import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import {
     InsertSheetMutation,
     RemoveSheetMutation,
@@ -29,7 +30,7 @@ import {
     SetWorksheetOrderMutation,
 } from '@univerjs/sheets';
 import { IConfirmService } from '@univerjs/ui';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { useDependency, useInjector } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { ISheetBarService } from '../../../services/sheet-bar/sheet-bar.service';
@@ -53,6 +54,7 @@ export function SheetBarTabs() {
     const sheetBarService = useDependency(ISheetBarService);
     const localeService = useDependency(LocaleService);
     const confirmService = useDependency(IConfirmService);
+    const injector = useInjector();
 
     const workbook = univerInstanceService.getCurrentUniverSheetInstance();
 
@@ -103,6 +105,13 @@ export function SheetBarTabs() {
                     subUnitId,
                     unitId: workbook.getUnitId(),
                 });
+                // The 'onChangeTab' event occurs during the 'pointerDown' event.
+                // The triggering time is too early.
+                // Settimeout is required to delay resetting the focus.
+                setTimeout(() => {
+                    const textSelectionRenderManager = injector.get(ITextSelectionRenderManager);
+                    textSelectionRenderManager.focus();
+                }, 0);
             },
             onScroll: (state: IScrollState) => {
                 sheetBarService.setScroll(state);

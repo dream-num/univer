@@ -702,6 +702,8 @@ export abstract class BaseObject {
         this.parent?.removeObject(this);
 
         this.onDisposeObserver.notifyObservers(this);
+
+        this._makeDirtyMix();
     }
 
     toJson() {

@@ -14,11 +14,21 @@
  * limitations under the License.
  */
 
-import type { ICellV, IColorStyle, IRange, Workbook, Worksheet } from '@univerjs/core';
+import type {
+    ICellData,
+    ICellV,
+    IColorStyle,
+    IObjectMatrixPrimitiveType,
+    IRange,
+    Workbook,
+    Worksheet,
+} from '@univerjs/core';
 import { ICommandService } from '@univerjs/core';
 import type { ISetStyleCommandParams } from '@univerjs/sheets';
-import { SetStyleCommand } from '@univerjs/sheets';
+import { SetRangeValuesCommand, SetStyleCommand } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
+
+import { covertCellValue, covertCellValues } from './utils';
 
 export class FRange {
     constructor(
@@ -61,5 +71,34 @@ export class FRange {
                 },
             },
         } as ISetStyleCommandParams<IColorStyle>);
+    }
+
+    setValue(value: ICellV | ICellData): void {
+        const realValue = covertCellValue(value);
+
+        if (!realValue) {
+            console.error('Invalid value');
+            return;
+        }
+
+        this._commandService.executeCommand(SetRangeValuesCommand.id, {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            range: this._range,
+            value: realValue,
+        });
+    }
+
+    setValues(
+        value: ICellV[][] | IObjectMatrixPrimitiveType<ICellV> | ICellData[][] | IObjectMatrixPrimitiveType<ICellData>
+    ): void {
+        const realValue = covertCellValues(value, this._range);
+
+        this._commandService.executeCommand(SetRangeValuesCommand.id, {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            range: this._range,
+            value: realValue,
+        });
     }
 }

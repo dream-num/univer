@@ -26,7 +26,7 @@ import {
     toDisposable,
 } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import { IRenderManagerService, ScrollTimerType } from '@univerjs/engine-render';
+import { IRenderManagerService, ScrollTimerType, Vector2 } from '@univerjs/engine-render';
 import type { ISelectionWithCoordAndStyle, ISelectionWithStyle } from '@univerjs/sheets';
 import {
     convertSelectionDataToRange,
@@ -62,6 +62,15 @@ export class SelectionController extends Disposable {
         super();
 
         this._initialize();
+    }
+
+    private _getActiveViewport(evt: IPointerEvent | IMouseEvent) {
+        const viewports = this._getSheetObject()?.scene.getViewports();
+        if (!viewports) {
+            return null;
+        }
+
+        return viewports.find((i) => i.isHit(new Vector2(evt.offsetX, evt.offsetY))) || null;
     }
 
     private _initialize() {
@@ -105,7 +114,7 @@ export class SelectionController extends Disposable {
                         evt,
                         spreadsheet.zIndex + 1,
                         RANGE_TYPE.NORMAL,
-                        viewportMain
+                        this._getActiveViewport(evt) || viewportMain
                     );
 
                     if (evt.button !== 2) {
@@ -165,12 +174,18 @@ export class SelectionController extends Disposable {
         this.disposeWithMe(
             toDisposable(
                 spreadsheetRowHeader?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+                    const activeViewport = this._getActiveViewport(evt);
+                    const targetViewport =
+                        activeViewport?.viewPortKey === VIEWPORT_KEY.VIEW_ROW_TOP
+                            ? scene.getViewport(VIEWPORT_KEY.VIEW_MAIN_TOP)
+                            : viewportMain;
+
                     this._selectionRenderService.disableDetectMergedCell();
                     this._selectionRenderService.eventTrigger(
                         evt,
                         (spreadsheet?.zIndex || 1) + 1,
                         RANGE_TYPE.ROW,
-                        viewportMain,
+                        targetViewport,
                         ScrollTimerType.Y
                     );
                     if (evt.button !== 2) {
@@ -190,11 +205,18 @@ export class SelectionController extends Disposable {
             toDisposable(
                 spreadsheetColumnHeader?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
                     this._selectionRenderService.disableDetectMergedCell();
+
+                    const activeViewport = this._getActiveViewport(evt);
+                    const targetViewport =
+                        activeViewport?.viewPortKey === VIEWPORT_KEY.VIEW_COLUMN_LEFT
+                            ? scene.getViewport(VIEWPORT_KEY.VIEW_MAIN_LEFT)
+                            : viewportMain;
+
                     this._selectionRenderService.eventTrigger(
                         evt,
                         (spreadsheet?.zIndex || 1) + 1,
                         RANGE_TYPE.COLUMN,
-                        viewportMain,
+                        targetViewport,
                         ScrollTimerType.X
                     );
                     if (evt.button !== 2) {

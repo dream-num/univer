@@ -24,7 +24,14 @@ import {
     RANGE_TYPE,
 } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent } from '@univerjs/engine-render';
-import { CURSOR_TYPE, IRenderManagerService, Rect, ScrollTimer, Vector2 } from '@univerjs/engine-render';
+import {
+    CURSOR_TYPE,
+    IRenderManagerService,
+    Rect,
+    ScrollTimer,
+    ScrollTimerType,
+    Vector2,
+} from '@univerjs/engine-render';
 import type { IMoveColsCommandParams, IMoveRowsCommandParams, ISelectionWithStyle } from '@univerjs/sheets';
 import {
     MoveColsCommand,
@@ -200,10 +207,14 @@ export class HeaderMoveController extends Disposable {
 
                 const { row, column } = getCoordByOffset(evt.offsetX, evt.offsetY, scene, skeleton);
 
+                let scrollType: ScrollTimerType;
+
                 if (initialType === HEADER_MOVE_TYPE.ROW) {
                     this._changeFromRow = row;
+                    scrollType = ScrollTimerType.Y;
                 } else {
                     this._changeFromColumn = column;
+                    scrollType = ScrollTimerType.X;
                 }
 
                 const matchSelectionData = this._checkInHeaderRange(
@@ -225,15 +236,26 @@ export class HeaderMoveController extends Disposable {
 
                 scene.disableEvent();
 
-                const scrollTimer = ScrollTimer.create(scene);
+                let scrollTimerInitd = false;
+                let scrollTimer: ScrollTimer;
 
-                const mainViewport = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+                const initScrollTimer = () => {
+                    if (scrollTimerInitd) {
+                        return;
+                    }
 
-                scrollTimer.startScroll(newEvtOffsetX, newEvtOffsetY, mainViewport);
+                    scrollTimer = ScrollTimer.create(scene, scrollType);
 
-                this._scrollTimer = scrollTimer;
+                    const mainViewport = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+
+                    scrollTimer.startScroll(newEvtOffsetX, newEvtOffsetY, mainViewport);
+
+                    this._scrollTimer = scrollTimer;
+                    scrollTimerInitd = true;
+                };
 
                 this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
+                    initScrollTimer();
                     const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
 
                     const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeCoord(

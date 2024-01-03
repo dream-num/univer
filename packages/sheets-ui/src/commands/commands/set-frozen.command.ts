@@ -82,8 +82,8 @@ export const SetSelectionFrozenCommand: ICommand<ISetSelectionFrozenCommandParam
             subUnitId,
             startRow,
             startColumn,
-            xSplit,
-            ySplit,
+            xSplit: startColumn > 0 ? Math.max(1, xSplit) : xSplit,
+            ySplit: startRow > 0 ? Math.max(1, ySplit) : ySplit,
         };
         const undoMutationParams: ISetFrozenMutationParams = SetFrozenMutationFactory(accessor, redoMutationParams);
 

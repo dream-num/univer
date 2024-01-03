@@ -84,6 +84,7 @@ export class Group extends BaseObject {
                 const o = objects[i];
                 if (o.oKey === object) {
                     objects.splice(i, 1);
+                    this.layer.removeObject(o);
                     this.parent.removeObject(o);
                     return;
                 }
@@ -93,6 +94,7 @@ export class Group extends BaseObject {
                 const o = objects[i];
                 if (o === object) {
                     objects.splice(i, 1);
+                    this.layer.removeObject(o);
                     this.parent.removeObject(o);
                     return;
                 }

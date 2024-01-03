@@ -101,6 +101,7 @@ export class Layer {
                 }
                 this._objects.push(object);
                 this.scene.setObjectBehavior(object);
+                object.layer = this;
             }
         }
         this._objects.push(o);

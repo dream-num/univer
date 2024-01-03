@@ -44,7 +44,7 @@ export interface ITestBed {
     univerAPI: FUniver;
 }
 
-export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencies?: Dependency[]): ITestBed {
+export function createTestBed(workbookConfig?: IWorkbookData, dependencies?: Dependency[]): ITestBed {
     const univer = new Univer();
     const injector = univer.__getInjector();
 

@@ -21,7 +21,7 @@ import type { Injector } from '@wendellhu/redi';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import type { FUniver } from '../../facade';
-import { createCommandTestBed } from './create-command-test-bed';
+import { createTestBed } from './create-test-bed';
 
 describe('Test FRange', () => {
     let univer: Univer;
@@ -42,7 +42,7 @@ describe('Test FRange', () => {
     ) => Nullable<IStyleData>;
 
     beforeEach(() => {
-        const testBed = createCommandTestBed();
+        const testBed = createTestBed();
         univer = testBed.univer;
         get = testBed.get;
         univerAPI = testBed.univerAPI;

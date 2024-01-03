@@ -73,12 +73,15 @@ export class FRange {
         } as ISetStyleCommandParams<IColorStyle>);
     }
 
+    /**
+     * The value can be a number, string, boolean, or standard cell format. If it begins with `=`, it is interpreted as a formula. The value is tiled to all cells in the range.
+     * @param value
+     */
     setValue(value: ICellV | ICellData): void {
         const realValue = covertCellValue(value);
 
         if (!realValue) {
-            console.error('Invalid value');
-            return;
+            throw new Error('Invalid value');
         }
 
         this._commandService.executeCommand(SetRangeValuesCommand.id, {
@@ -89,6 +92,10 @@ export class FRange {
         });
     }
 
+    /**
+     * Sets a different value for each cell in the range. The value can be a two-dimensional array or a standard range matrix (must match the dimensions of this range), consisting of numbers, strings, Boolean values or Composed of standard cell formats. If a value begins with `=`, it is interpreted as a formula.
+     * @param value
+     */
     setValues(
         value: ICellV[][] | IObjectMatrixPrimitiveType<ICellV> | ICellData[][] | IObjectMatrixPrimitiveType<ICellData>
     ): void {

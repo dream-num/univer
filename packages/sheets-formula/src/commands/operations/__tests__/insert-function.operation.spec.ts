@@ -159,7 +159,7 @@ describe('Test insert function operation', () => {
 
             it('should return false when cell is string number', () => {
                 const cell = { v: '1' };
-                expect(isNumberCell(cell)).toBeTruthy();
+                expect(isNumberCell(cell)).toBeFalsy();
             });
 
             it('should return false when cell is string', () => {

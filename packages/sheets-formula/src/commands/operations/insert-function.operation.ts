@@ -23,7 +23,6 @@ import {
     IUniverInstanceService,
     Rectangle,
     serializeRange,
-    Tools,
 } from '@univerjs/core';
 import {
     getCellAtRowCol,
@@ -236,12 +235,7 @@ function findStartColumn(cellMatrix: ObjectMatrix<Nullable<ICellData>>, row: num
 }
 
 export function isNumberCell(cell: Nullable<ICellData>) {
-    return (
-        cell &&
-        (cell.t === CellValueType.NUMBER ||
-            getCellValueType(cell) === CellValueType.NUMBER ||
-            Tools.isStringNumber(cell.v))
-    );
+    return cell && (cell.t === CellValueType.NUMBER || getCellValueType(cell) === CellValueType.NUMBER);
 }
 
 /**

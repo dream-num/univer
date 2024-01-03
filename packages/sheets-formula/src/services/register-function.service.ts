@@ -21,8 +21,8 @@ import { FunctionType, IFunctionService } from '@univerjs/engine-formula';
 import { createIdentifier, Inject } from '@wendellhu/redi';
 
 import { IDescriptionService } from './description.service';
-import type { IRegisterFunctionList } from './formula-algorithm.service';
-import { IFormulaAlgorithmService } from './formula-algorithm.service';
+import type { IRegisterFunctionList } from './formula-custom-function.service';
+import { IFormulaCustomFunctionService } from './formula-custom-function.service';
 
 /**
  * Register function operation params
@@ -77,7 +77,8 @@ export class RegisterFunctionService extends Disposable implements IRegisterFunc
     constructor(
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(IDescriptionService) private readonly _descriptionService: IDescriptionService,
-        @Inject(IFormulaAlgorithmService) private readonly _formulaAlgorithmService: IFormulaAlgorithmService,
+        @Inject(IFormulaCustomFunctionService)
+        private readonly _formulaCustomFunctionService: IFormulaCustomFunctionService,
         @IFunctionService private readonly _functionService: IFunctionService
     ) {
         super();
@@ -109,7 +110,7 @@ export class RegisterFunctionService extends Disposable implements IRegisterFunc
         }
 
         // calculation
-        this._formulaAlgorithmService.registerFunctions(calculate);
+        this._formulaCustomFunctionService.registerFunctions(calculate);
     }
 
     unregisterFunctions(params: IUnregisterFunctionParams) {
@@ -120,6 +121,6 @@ export class RegisterFunctionService extends Disposable implements IRegisterFunc
 
         this._descriptionService.unregisterDescriptions(functionNames);
 
-        this._formulaAlgorithmService.unregisterFunctions(functionNames);
+        this._formulaCustomFunctionService.unregisterFunctions(functionNames);
     }
 }

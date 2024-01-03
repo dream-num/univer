@@ -25,7 +25,7 @@ export type IRegisterFunction = (
 
 export type IRegisterFunctionList = [[IRegisterFunction, string, string?]];
 
-export interface IFormulaAlgorithmService {
+export interface IFormulaCustomFunctionService {
     /**
      * register descriptions
      * @param functionList
@@ -35,11 +35,11 @@ export interface IFormulaAlgorithmService {
     unregisterFunctions(functionList: string[]): void;
 }
 
-export const IFormulaAlgorithmService = createIdentifier<IFormulaAlgorithmService>(
-    'formula-ui.formula-algorithm-service'
+export const IFormulaCustomFunctionService = createIdentifier<IFormulaCustomFunctionService>(
+    'formula-ui.formula-custom-function-service'
 );
 
-export class FormulaAlgorithmService extends Disposable implements IFormulaAlgorithmService {
+export class FormulaCustomFunctionService extends Disposable implements IFormulaCustomFunctionService {
     constructor(@ICommandService private readonly _commandService: ICommandService) {
         super();
     }

@@ -33,7 +33,10 @@ import { UpdateFormulaController } from './controllers/update-formula.controller
 import { zhCN } from './locale';
 import { ActiveDirtyManagerService, IActiveDirtyManagerService } from './services/active-dirty-manager.service';
 import { DescriptionService, IDescriptionService } from './services/description.service';
-import { FormulaAlgorithmService, IFormulaAlgorithmService } from './services/formula-algorithm.service';
+import {
+    FormulaCustomFunctionService,
+    IFormulaCustomFunctionService,
+} from './services/formula-custom-function.service';
 import { FormulaInputService, IFormulaInputService } from './services/formula-input.service';
 import { FormulaPromptService, IFormulaPromptService } from './services/prompt.service';
 import { IRegisterFunctionService, RegisterFunctionService } from './services/register-function.service';
@@ -73,7 +76,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
                         this._injector.createInstance(DescriptionService, this._config?.description || []),
                 },
             ],
-            [IFormulaAlgorithmService, { useClass: FormulaAlgorithmService }],
+            [IFormulaCustomFunctionService, { useClass: FormulaCustomFunctionService }],
             [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
             [IRegisterFunctionService, { useClass: RegisterFunctionService }],
 

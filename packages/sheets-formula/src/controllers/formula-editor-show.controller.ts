@@ -29,6 +29,7 @@ import {
     ErrorType,
     FormulaDataModel,
     LexerTreeBuilder,
+    SetArrayFormulaDataMutation,
     SetFormulaCalculationResultMutation,
 } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -216,8 +217,11 @@ export class FormulaEditorShowController extends Disposable {
 
     private _commandExecutedListener() {
         this.disposeWithMe(
-            this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (command.id === SetFormulaCalculationResultMutation.id) {
+            this._commandService.onCommandExecuted((command: ICommandInfo, options) => {
+                if (
+                    command.id === SetFormulaCalculationResultMutation.id ||
+                    (command.id === SetArrayFormulaDataMutation.id && options && options.remove)
+                ) {
                     this._removeArrayFormulaRangeShape();
                 }
             })

@@ -209,6 +209,7 @@ export class UpdateFormulaController extends Disposable {
             },
             {
                 onlyLocal: true,
+                remove: true, // remove array formula range shape
             }
         );
     }

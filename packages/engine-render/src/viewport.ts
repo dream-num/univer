@@ -168,6 +168,8 @@ export class Viewport {
             this._active = props.active;
         }
 
+        this._scene.addViewport(this);
+
         // if (props?.width) {
         //     this.width = props?.width;
         //     this._widthOrigin = this.width;

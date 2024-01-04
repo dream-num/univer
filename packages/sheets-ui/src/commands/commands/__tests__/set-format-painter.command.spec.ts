@@ -24,8 +24,7 @@ import {
     ThemeService,
     UndoCommand,
 } from '@univerjs/core';
-import type { Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
-import type { ISelectionStyle, ISelectionWithCoordAndStyle } from '@univerjs/sheets';
+import type { ISelectionWithCoordAndStyle } from '@univerjs/sheets';
 import {
     AddWorksheetMergeMutation,
     NORMAL_SELECTION_PLUGIN_NAME,
@@ -199,36 +198,65 @@ class SelectionRenderService extends Disposable implements ISelectionRenderServi
     readonly selectionMoving$: Observable<ISelectionWithCoordAndStyle[]>;
     readonly selectionMoveStart$: Observable<ISelectionWithCoordAndStyle[]>;
 
-    enableHeaderHighlight: () => void;
-    disableHeaderHighlight: () => void;
-    enableDetectMergedCell: () => void;
-    disableDetectMergedCell: () => void;
-    setStyle: (style: ISelectionStyle) => void;
-    resetStyle: () => void;
-    enableSelection: () => void;
-    disableSelection: () => void;
-    enableShowPrevious: () => void;
-    disableShowPrevious: () => void;
-    enableRemainLast: () => void;
-    disableRemainLast: () => void;
-    enableSkipRemainLast: () => void;
-    disableSkipRemainLast: () => void;
+    constructor() {
+        super();
+        this.selectionMoving$ = this.selectionMoveStart$ = this.selectionMoveEnd$;
+        this.controlFillConfig$ = new BehaviorSubject<IControlFillConfig | null>(null);
+    }
 
-    addControlToCurrentByRangeData: (data: ISelectionWithCoordAndStyle) => void;
-    changeRuntime: (skeleton: SpreadsheetSkeleton, scene: Scene, viewport?: Viewport) => void;
-    getViewPort: () => Viewport;
-    getCurrentControls: () => [];
-    getActiveSelections: () => [];
-    getActiveRange: () => null;
-    getActiveSelection: () => null;
-    getSelectionDataWithStyle: () => [];
+    enableHeaderHighlight() {}
+    disableHeaderHighlight() {}
+    enableDetectMergedCell() {}
+    disableDetectMergedCell() {}
+    setStyle() {}
+    resetStyle() {}
+    enableSelection() {}
+    disableSelection() {}
+    enableShowPrevious() {}
+    disableShowPrevious() {}
+    enableRemainLast() {}
+    disableRemainLast() {}
+    enableSkipRemainLast() {}
+    disableSkipRemainLast() {}
+
+    addControlToCurrentByRangeData() {}
+    changeRuntime() {}
+    getViewPort() {
+        return null as any;
+    }
+
+    getCurrentControls() {
+        return [];
+    }
+
+    getActiveSelections() {
+        return [];
+    }
+
+    getActiveRange() {
+        return null;
+    }
+
+    getActiveSelection() {
+        return null;
+    }
+
+    getSelectionDataWithStyle() {
+        return [];
+    }
     convertSelectionRangeToData: () => ISelectionWithCoordAndStyle;
-    convertRangeDataToSelection: () => null;
-    convertCellRangeToInfo: () => null;
-    eventTrigger: () => void;
-    reset: () => void;
+    convertRangeDataToSelection() {
+        return null;
+    }
 
-    refreshSelectionMoveStart: () => void;
+    convertCellRangeToInfo() {
+        return null;
+    }
+
+    eventTrigger() {}
+    reset() {}
+
+    refreshSelectionMoveStart() {}
 }
 
 class RenderManagerService {

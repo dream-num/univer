@@ -158,6 +158,11 @@
 
             border-radius: var(--border-radius-base);
 
+            &-disabled {
+                cursor: not-allowed;
+                color: rgb(var(--grey-200));
+            }
+
             &:hover {
                 background-color: rgb(var(--grey-100));
 
@@ -226,6 +231,11 @@
 
             border-radius: var(--border-radius-base);
 
+            &-disabled {
+                cursor: not-allowed;
+                color: rgb(var(--grey-200));
+            }
+
             &:hover {
                 background-color: rgb(var(--grey-100));
                 border-radius: var(--border-radius-base);
@@ -239,7 +249,16 @@
 
                 font-size: 10px;
                 color: rgb(var(--grey-400));
+
+                &-disabled {
+                    cursor: not-allowed;
+                    color: rgb(var(--grey-200));
+                }
             }
+
+
         }
+
+
     }
 }

@@ -15,6 +15,7 @@
  */
 
 import type { ICustomComponentProps } from '@univerjs/ui';
+import type { Observable } from 'rxjs';
 
 import { COMPONENT_PREFIX } from '../const';
 
@@ -28,4 +29,6 @@ export interface IFontSizeProps extends ICustomComponentProps<string> {
     max: number;
 
     onChange: (value: string) => void;
+
+    disabled$?: Observable<boolean>;
 }

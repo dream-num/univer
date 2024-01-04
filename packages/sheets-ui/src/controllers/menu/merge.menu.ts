@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import { UniverInstanceType } from '@univerjs/core';
-import { RemoveWorksheetMergeCommand } from '@univerjs/sheets';
+import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { RemoveWorksheetMergeCommand, SheetPermissionService } from '@univerjs/sheets';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
+import { Observable } from 'rxjs';
 
 import {
     AddWorksheetMergeAllCommand,
@@ -28,6 +29,20 @@ import {
 } from '../../commands/commands/add-worksheet-merge.command';
 
 export function CellMergeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const sheetPermissionService = accessor.get(SheetPermissionService);
+    const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+    const sheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+
+    const disabled$ = new Observable<boolean>((subscriber) => {
+        const permission$ = sheetPermissionService.getEditable$(unitId, sheetId)?.subscribe((e) => {
+            subscriber.next(!e.value);
+        });
+        return () => {
+            permission$?.unsubscribe();
+        };
+    });
+
     return {
         id: AddWorksheetMergeCommand.id,
         icon: 'MergeAllSingle',
@@ -37,6 +52,7 @@ export function CellMergeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem
         type: MenuItemType.SUBITEMS,
         // selections: [...MERGE_CHILDREN],
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
+        disabled$,
     };
 }
 export function CellMergeAllMenuItemFactory(accessor: IAccessor): IMenuButtonItem<string> {

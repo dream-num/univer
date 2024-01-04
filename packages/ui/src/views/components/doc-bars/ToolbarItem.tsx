@@ -128,7 +128,12 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
         }
 
         return menuType === MenuItemType.BUTTON_SELECTOR ? (
-            <div className={styles.toolbarItemSelectButton}>
+            <div
+                className={`${styles.toolbarItemSelectButton} ${
+                    disabled ? styles.toolbarItemSelectButtonDisabled : ''
+                }`}
+                data-disabled={disabled}
+            >
                 <div className={styles.toolbarItemSelectButtonLabel} onClick={handleClick}>
                     <CustomLabel
                         icon={iconToDisplay}
@@ -139,16 +144,25 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
                     />
                 </div>
                 <Dropdown
+                    visible={disabled ? false : undefined}
                     overlay={<Menu menuType={id} options={options} onOptionSelect={handleSelect} value={value} />}
                 >
-                    <div className={styles.toolbarItemSelectButtonArrow}>
+                    <div
+                        className={`${styles.toolbarItemSelectButtonArrow} ${
+                            disabled ? styles.toolbarItemSelectButtonArrowDisabled : ''
+                        }`}
+                        data-disabled={disabled}
+                    >
                         <MoreDownSingle />
                     </div>
                 </Dropdown>
             </div>
         ) : (
-            <Dropdown overlay={<Menu menuType={id} options={options} onOptionSelect={handleSelect} value={value} />}>
-                <div className={styles.toolbarItemSelect}>
+            <Dropdown
+                visible={disabled ? false : undefined}
+                overlay={<Menu menuType={id} options={options} onOptionSelect={handleSelect} value={value} />}
+            >
+                <div className={`${styles.toolbarItemSelect} ${disabled ? styles.toolbarItemSelectDisabled : ''}`}>
                     <CustomLabel
                         icon={iconToDisplay}
                         title={title!}
@@ -156,7 +170,11 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
                         label={label}
                         onChange={handleChange}
                     />
-                    <div className={styles.toolbarItemSelectArrow}>
+                    <div
+                        className={`${styles.toolbarItemSelectArrow} ${
+                            disabled ? styles.toolbarItemSelectArrowDisabled : ''
+                        }`}
+                    >
                         <MoreDownSingle />
                     </div>
                 </div>

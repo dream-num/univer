@@ -30,10 +30,13 @@ export interface IStatusBarService {
     getFunctions(): Readonly<IStatusBarFunction[]>;
 }
 
-export type IStatusBarServiceStatus = Array<{
-    func: IFunctionNames;
-    value: number;
-}>;
+export interface IStatusBarServiceStatus {
+    values: Array<{
+        func: IFunctionNames;
+        value: number;
+    }>;
+    pattern: Nullable<string>;
+}
 
 export interface IStatusBarFunction {
     func: IFunctionNames;
@@ -45,38 +48,38 @@ export class StatusBarService implements IStatusBarService, IDisposable {
         {
             func: FUNCTION_NAMES_STATISTICAL.MAX,
             filter: (status: IStatusBarServiceStatus) =>
-                (status.find((item) => item.func === FUNCTION_NAMES_STATISTICAL.COUNTA)?.value ?? 0) > 1 &&
-                (status.find((item) => item.func === FUNCTION_NAMES_STATISTICAL.COUNT)?.value ?? 0) > 0,
+                (status.values.find((item) => item.func === FUNCTION_NAMES_STATISTICAL.COUNTA)?.value ?? 0) > 1 &&
+                (status.values.find((item) => item.func === FUNCTION_NAMES_STATISTICAL.COUNT)?.value ?? 0) > 0,
         },
         {
             func: FUNCTION_NAMES_STATISTICAL.MIN,
             filter: (status: IStatusBarServiceStatus) =>
-                (status.find((item) => item.func === FUNCTION_NAMES_STATISTICAL.COUNTA)?.value ?? 0) > 1 &&
-                (status.find((item) => item.func === FUNCTION_NAMES_STATISTICAL.COUNT)?.value ?? 0) > 0,
+                (status.values.find((item) => item.func === FUNCTION_NAMES_STATISTICAL.COUNTA)?.value ?? 0) > 1 &&
+                (status.values.find((item) => item.func === FUNCTION_NAMES_STATISTICAL.COUNT)?.value ?? 0) > 0,
         },
         {
             func: FUNCTION_NAMES_MATH.SUM,
             filter: (status: IStatusBarServiceStatus) =>
-                (status.find((item) => item.func === FUNCTION_NAMES_STATISTICAL.COUNTA)?.value ?? 0) > 1 &&
-                (status.find((item) => item.func === FUNCTION_NAMES_STATISTICAL.COUNT)?.value ?? 0) > 0,
+                (status.values.find((item) => item.func === FUNCTION_NAMES_STATISTICAL.COUNTA)?.value ?? 0) > 1 &&
+                (status.values.find((item) => item.func === FUNCTION_NAMES_STATISTICAL.COUNT)?.value ?? 0) > 0,
         },
         {
             func: FUNCTION_NAMES_STATISTICAL.COUNTA,
             filter: (status: IStatusBarServiceStatus) =>
-                (status.find((item) => item.func === FUNCTION_NAMES_STATISTICAL.COUNTA)?.value ?? 0) > 1,
+                (status.values.find((item) => item.func === FUNCTION_NAMES_STATISTICAL.COUNTA)?.value ?? 0) > 1,
         },
         {
             func: FUNCTION_NAMES_STATISTICAL.COUNT,
             filter: (status: IStatusBarServiceStatus) =>
-                (status.find((item) => item.func === FUNCTION_NAMES_STATISTICAL.COUNTA)?.value ?? 0) > 1 &&
-                (status.find((item) => item.func === FUNCTION_NAMES_STATISTICAL.COUNT)?.value ?? 0) > 0,
+                (status.values.find((item) => item.func === FUNCTION_NAMES_STATISTICAL.COUNTA)?.value ?? 0) > 1 &&
+                (status.values.find((item) => item.func === FUNCTION_NAMES_STATISTICAL.COUNT)?.value ?? 0) > 0,
         },
 
         {
             func: FUNCTION_NAMES_STATISTICAL.AVERAGE,
             filter: (status: IStatusBarServiceStatus) =>
-                (status.find((item) => item.func === FUNCTION_NAMES_STATISTICAL.COUNTA)?.value ?? 0) > 1 &&
-                (status.find((item) => item.func === FUNCTION_NAMES_STATISTICAL.COUNT)?.value ?? 0) > 0,
+                (status.values.find((item) => item.func === FUNCTION_NAMES_STATISTICAL.COUNTA)?.value ?? 0) > 1 &&
+                (status.values.find((item) => item.func === FUNCTION_NAMES_STATISTICAL.COUNT)?.value ?? 0) > 0,
         },
     ];
     private readonly _state$ = new BehaviorSubject<Nullable<IStatusBarServiceStatus>>(null);
@@ -87,14 +90,18 @@ export class StatusBarService implements IStatusBarService, IDisposable {
     }
 
     setState(param: IStatusBarServiceStatus | null) {
-        const newState: IStatusBarServiceStatus = [];
+        const newState: IStatusBarServiceStatus = {
+            values: [],
+            pattern: null,
+        };
         // handle the filter.
-        param?.forEach((item) => {
+        param?.values.forEach((item) => {
             const func = this._functions.find((func) => func.func === item.func);
             if (func && (func.filter === undefined || func.filter(param))) {
-                newState.push(item);
+                newState.values.push(item);
             }
         });
+        newState.pattern = param?.pattern ?? null;
         this._state$.next(newState);
     }
 

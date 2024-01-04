@@ -24,6 +24,7 @@ import {
     ThemeService,
     UndoCommand,
 } from '@univerjs/core';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import type { ISelectionWithCoordAndStyle } from '@univerjs/sheets';
 import {
     AddWorksheetMergeMutation,
@@ -36,14 +37,12 @@ import {
 } from '@univerjs/sheets';
 import { createCommandTestBed } from '@univerjs/sheets/commands/commands/__tests__/create-command-test-bed.js';
 import type { Injector } from '@wendellhu/redi';
-import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { IMarkSelectionService, ISelectionRenderService } from '../../..';
 import { FormatPainterController } from '../../../controllers/format-painter/format-painter.controller';
 import { FormatPainterService, IFormatPainterService } from '../../../services/format-painter/format-painter.service';
-import type { IControlFillConfig } from '../../../services/selection/selection-render.service';
 import { SetFormatPainterOperation } from '../../operations/set-format-painter.operation';
 import {
     ApplyFormatPainterCommand,
@@ -190,73 +189,9 @@ class MarkSelectionService extends Disposable implements IMarkSelectionService {
     removeAllShapes(): void {}
 }
 
-class SelectionRenderService extends Disposable implements ISelectionRenderService {
+class SelectionRenderService {
     private readonly _selectionMoveEnd$ = new BehaviorSubject<ISelectionWithCoordAndStyle[]>([]);
-
     readonly selectionMoveEnd$ = this._selectionMoveEnd$.asObservable();
-    readonly controlFillConfig$: Observable<IControlFillConfig | null>;
-    readonly selectionMoving$: Observable<ISelectionWithCoordAndStyle[]>;
-    readonly selectionMoveStart$: Observable<ISelectionWithCoordAndStyle[]>;
-
-    constructor() {
-        super();
-        this.selectionMoving$ = this.selectionMoveStart$ = this.selectionMoveEnd$;
-        this.controlFillConfig$ = new BehaviorSubject<IControlFillConfig | null>(null);
-    }
-
-    enableHeaderHighlight() {}
-    disableHeaderHighlight() {}
-    enableDetectMergedCell() {}
-    disableDetectMergedCell() {}
-    setStyle() {}
-    resetStyle() {}
-    enableSelection() {}
-    disableSelection() {}
-    enableShowPrevious() {}
-    disableShowPrevious() {}
-    enableRemainLast() {}
-    disableRemainLast() {}
-    enableSkipRemainLast() {}
-    disableSkipRemainLast() {}
-
-    addControlToCurrentByRangeData() {}
-    changeRuntime() {}
-    getViewPort() {
-        return null as any;
-    }
-
-    getCurrentControls() {
-        return [];
-    }
-
-    getActiveSelections() {
-        return [];
-    }
-
-    getActiveRange() {
-        return null;
-    }
-
-    getActiveSelection() {
-        return null;
-    }
-
-    getSelectionDataWithStyle() {
-        return [];
-    }
-    convertSelectionRangeToData: () => ISelectionWithCoordAndStyle;
-    convertRangeDataToSelection() {
-        return null;
-    }
-
-    convertCellRangeToInfo() {
-        return null;
-    }
-
-    eventTrigger() {}
-    reset() {}
-
-    refreshSelectionMoveStart() {}
 }
 
 class RenderManagerService {
@@ -276,6 +211,7 @@ describe('Test format painter rules in controller', () => {
             [IMarkSelectionService, { useClass: MarkSelectionService }],
             [IFormatPainterService, { useClass: FormatPainterService }],
             [ISelectionRenderService, { useClass: SelectionRenderService }],
+            [IRenderManagerService, { useClass: RenderManagerService }],
             [FormatPainterController],
         ]);
         univer = testBed.univer;

@@ -338,6 +338,37 @@ export class SelectionRenderService implements ISelectionRenderService {
         }
     }
 
+    private _getFreeze() {
+        const freeze = this._sheetSkeletonManagerService.getCurrent()?.skeleton.getWorksheetConfig().freeze;
+        return freeze;
+    }
+
+    private _getViewportByCell(row: number, column: number) {
+        if (!this._scene) {
+            return null;
+        }
+        const freeze = this._getFreeze();
+        if (!freeze || (freeze.startRow <= 0 && freeze.startColumn <= 0)) {
+            return this._scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+        }
+
+        if (row > freeze.startRow && column > freeze.startColumn) {
+            return this._scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+        }
+
+        if (row <= freeze.startRow && column <= freeze.startColumn) {
+            return this._scene.getViewport(VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP);
+        }
+
+        if (row <= freeze.startRow && column > freeze.startColumn) {
+            return this._scene.getViewport(VIEWPORT_KEY.VIEW_MAIN_TOP);
+        }
+
+        if (row > freeze.startRow && column <= freeze.startColumn) {
+            return this._scene.getViewport(VIEWPORT_KEY.VIEW_MAIN_LEFT);
+        }
+    }
+
     /**
      * Returns the list of active ranges in the active sheet or null if there are no active ranges.
      * If there is a single range selected, this behaves as a getActiveRange() call.
@@ -795,7 +826,6 @@ export class SelectionRenderService implements ISelectionRenderService {
                 lastX = newMoveOffsetX;
                 lastY = newMoveOffsetY;
             }
-
             scrollTimer.scrolling(scrollOffsetX, scrollOffsetY, () => {
                 this._moving(newMoveOffsetX, newMoveOffsetY, selectionControl, rangeType);
             });
@@ -927,33 +957,9 @@ export class SelectionRenderService implements ISelectionRenderService {
             endRow: oldEndRow,
             startColumn: oldStartColumn,
             endColumn: oldEndColumn,
-            rangeType: oldRangeType,
         } = selectionControl?.model || { startRow: -1, endRow: -1, startColumn: -1, endColumn: -1 };
 
-        const freeze = this._sheetSkeletonManagerService.getCurrent()?.skeleton.getWorksheetConfig().freeze;
-
-        const currentViewport = scene.getActiveViewportByCoord(Vector2.FromArray([moveOffsetX, moveOffsetY]));
-
-        let targetViewport = this._activeViewport;
-
-        if (freeze && currentViewport) {
-            if (freeze.startRow > 0 && freeze.startColumn > 0) {
-                if (
-                    freeze.startColumn > oldEndColumn ||
-                    freeze.startRow > oldEndRow ||
-                    (freeze.startRow < oldStartRow && freeze.startColumn > oldEndColumn) ||
-                    (freeze.startColumn < oldStartColumn && freeze.startRow > oldEndRow) ||
-                    (freeze.startColumn > oldEndColumn && freeze.startRow > oldEndRow)
-                ) {
-                    targetViewport = currentViewport;
-                }
-            } else if (freeze.startRow > 0 && freeze.startRow > oldEndRow) {
-                targetViewport = currentViewport;
-            } else if (freeze.startColumn > 0 && freeze.startRow > oldEndRow) {
-                targetViewport = currentViewport;
-            }
-        }
-
+        const targetViewport = this._getViewportByCell(oldEndRow, oldEndColumn) ?? this._activeViewport;
         const scrollXY = scene.getScrollXYByRelativeCoords(
             Vector2.FromArray([this._startOffsetX, this._startOffsetY]),
             targetViewport

@@ -32,6 +32,7 @@ import {
     LifecycleStages,
     OnLifecycle,
     RANGE_TYPE,
+    Rectangle,
     serializeRangeToRefString,
     ThemeService,
     toDisposable,
@@ -63,6 +64,7 @@ import type { ISelectionWithStyle } from '@univerjs/sheets';
 import {
     convertSelectionDataToRange,
     getNormalSelectionStyle,
+    getPrimaryForRange,
     NORMAL_SELECTION_PLUGIN_NAME,
     SelectionManagerService,
 } from '@univerjs/sheets';
@@ -921,7 +923,7 @@ export class PromptController extends Disposable {
                 continue;
             }
 
-            const primary = this._insertSelections.find((selection) => {
+            let primary = this._insertSelections.find((selection) => {
                 const { startRow, startColumn, endRow, endColumn } = selection.range;
                 if (
                     startRow === range.startRow &&
@@ -971,6 +973,19 @@ export class PromptController extends Disposable {
                 };
 
                 continue;
+            }
+
+            primary = getPrimaryForRange(range, worksheet);
+
+            if (
+                !Rectangle.equals(primary, range) &&
+                range.startRow === range.endRow &&
+                range.startColumn === range.endColumn
+            ) {
+                range.startRow = primary.startRow;
+                range.endRow = primary.endRow;
+                range.startColumn = primary.startColumn;
+                range.endColumn = primary.endColumn;
             }
 
             selectionWithStyle.push({

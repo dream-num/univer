@@ -537,7 +537,6 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this._getBounding(this._rowHeightAccumulation, this._columnWidthAccumulation, bound);
     }
 
-    // eslint-disable-next-line max-lines-per-function
     getMergeBounding(startRow: number, startColumn: number, endRow: number, endColumn: number) {
         const mergeData = this._config.mergeData;
         if (!mergeData) {

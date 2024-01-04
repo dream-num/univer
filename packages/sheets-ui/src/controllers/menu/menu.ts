@@ -33,6 +33,7 @@ import {
 } from '@univerjs/core';
 import { SetInlineFormatCommand, SetTextSelectionsOperation, TextSelectionManagerService } from '@univerjs/docs';
 import {
+    getCurrentSheetDisabled,
     ResetBackgroundColorCommand,
     ResetTextColorCommand,
     SelectionManagerService,
@@ -55,7 +56,6 @@ import {
     SetVerticalTextAlignCommand,
     SetWorksheetRowIsAutoHeightCommand,
 } from '@univerjs/sheets';
-import { getCurrentSheetDisabled } from '@univerjs/sheets/services/permission/tool.js';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import {
     CopyCommand,

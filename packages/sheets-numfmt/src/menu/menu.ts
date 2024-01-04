@@ -16,8 +16,13 @@
 
 import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { AddDigitsSingle, MoreDownSingle, ReduceDigitsSingle, RmbSingle } from '@univerjs/icons';
-import { INumfmtService, RemoveNumfmtMutation, SelectionManagerService, SetNumfmtMutation } from '@univerjs/sheets';
-import { getCurrentSheetDisabled } from '@univerjs/sheets/services/permission/tool.js';
+import {
+    getCurrentSheetDisabled,
+    INumfmtService,
+    RemoveNumfmtMutation,
+    SelectionManagerService,
+    SetNumfmtMutation,
+} from '@univerjs/sheets';
 import type { ComponentManager, IMenuSelectorItem } from '@univerjs/ui';
 import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';

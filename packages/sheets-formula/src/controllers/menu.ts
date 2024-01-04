@@ -15,7 +15,7 @@
  */
 
 import { UniverInstanceType } from '@univerjs/core';
-import { getCurrentSheetDisabled } from '@univerjs/sheets/services/permission/tool.js';
+import { getCurrentSheetDisabled } from '@univerjs/sheets';
 import { PASTE_SPECIAL_MENU_ID } from '@univerjs/sheets-ui';
 import type { IMenuItem } from '@univerjs/ui';
 import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';

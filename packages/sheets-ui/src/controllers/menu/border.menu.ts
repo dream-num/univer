@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, UniverInstanceType } from '@univerjs/core';
 import type { IBorderInfo } from '@univerjs/sheets';
-import { BorderStyleManagerService, SetBorderBasicCommand, SheetPermissionService } from '@univerjs/sheets';
+import { BorderStyleManagerService, getCurrentSheetDisabled, SetBorderBasicCommand } from '@univerjs/sheets';
 import type { IMenuSelectorItem } from '@univerjs/ui';
 import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
@@ -28,19 +28,8 @@ export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSel
     // const permissionService = accessor.get(IPermissionService);
 
     const borderStyleManagerService = accessor.get(BorderStyleManagerService);
-    const univerInstanceService = accessor.get(IUniverInstanceService);
-    const sheetPermissionService = accessor.get(SheetPermissionService);
-    const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-    const sheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
 
-    const disabled$ = new Observable<boolean>((subscriber) => {
-        const permission$ = sheetPermissionService.getEditable$(unitId, sheetId)?.subscribe((e) => {
-            subscriber.next(!e.value);
-        });
-        return () => {
-            permission$?.unsubscribe();
-        };
-    });
+    const disabled$ = getCurrentSheetDisabled(accessor);
 
     return {
         id: SetBorderBasicCommand.id,

@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { RemoveWorksheetMergeCommand, SheetPermissionService } from '@univerjs/sheets';
+import { UniverInstanceType } from '@univerjs/core';
+import { getCurrentSheetDisabled, RemoveWorksheetMergeCommand } from '@univerjs/sheets';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
-import { Observable } from 'rxjs';
 
 import {
     AddWorksheetMergeAllCommand,
@@ -29,19 +28,7 @@ import {
 } from '../../commands/commands/add-worksheet-merge.command';
 
 export function CellMergeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
-    const univerInstanceService = accessor.get(IUniverInstanceService);
-    const sheetPermissionService = accessor.get(SheetPermissionService);
-    const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-    const sheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
-
-    const disabled$ = new Observable<boolean>((subscriber) => {
-        const permission$ = sheetPermissionService.getEditable$(unitId, sheetId)?.subscribe((e) => {
-            subscriber.next(!e.value);
-        });
-        return () => {
-            permission$?.unsubscribe();
-        };
-    });
+    const disabled$ = getCurrentSheetDisabled(accessor);
 
     return {
         id: AddWorksheetMergeCommand.id,

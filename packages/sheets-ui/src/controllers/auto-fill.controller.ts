@@ -699,6 +699,7 @@ export class AutoFillController extends Disposable {
         let hasStyle = true;
         if (applyType === APPLY_TYPE.NO_FORMAT) {
             hasStyle = false;
+            applyType = APPLY_TYPE.SERIES;
         }
 
         const { source, target, unitId, subUnitId } = location;

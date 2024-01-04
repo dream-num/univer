@@ -402,9 +402,16 @@ export class FormulaEditorController extends RxDisposable {
 
         let scrollBar = viewportMain?.getScrollBar() as Nullable<ScrollBar>;
 
+        scene.transformByState({
+            width,
+            height: actualHeight,
+        });
+
+        mainComponent?.resize(width, actualHeight);
+
         if (actualHeight > height) {
             if (scrollBar == null) {
-                viewportMain && new ScrollBar(viewportMain, { enableHorizontal: false });
+                viewportMain && new ScrollBar(viewportMain, { enableHorizontal: false, barSize: 8 });
             } else {
                 viewportMain?.resetSizeAndScrollBar();
             }
@@ -413,12 +420,5 @@ export class FormulaEditorController extends RxDisposable {
             viewportMain?.scrollTo({ x: 0, y: 0 });
             viewportMain?.getScrollBar()?.dispose();
         }
-
-        scene.transformByState({
-            width,
-            height: actualHeight,
-        });
-
-        mainComponent?.resize(width, actualHeight);
     }
 }

@@ -105,6 +105,10 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
 
     function renderSelectorType(menuType: MenuItemType) {
         function handleSelect(option: IValueOption) {
+            if (disabled) {
+                return;
+            }
+
             let commandId = id;
             const value = option;
 
@@ -116,11 +120,18 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
         }
 
         function handleChange(value: string | number) {
+            if (disabled) {
+                return;
+            }
+
             const commandId = id;
             handleCommandExecuted(commandId, { value });
         }
 
         function handleClick() {
+            if (disabled) {
+                return;
+            }
             if (menuType === MenuItemType.BUTTON_SELECTOR) {
                 const commandId = id;
                 handleCommandExecuted(commandId, { value });

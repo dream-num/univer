@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICommand, IObjectMatrixPrimitiveType, IRange } from '@univerjs/core';
-import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
+import type { ICommand, IRange } from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SetSelectionsOperation } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
+
+import { generateNullCellValue } from '../../services/auto-fill/tools';
 
 export interface IAutoFillCommandParams {}
 
@@ -96,23 +98,3 @@ export const AutoClearContentCommand: ICommand = {
         return false;
     },
 };
-
-// Generate cellValue from range and set v/p/f/si to null
-function generateNullCellValue(range: IRange[]): IObjectMatrixPrimitiveType<ICellData> {
-    const cellValue = new ObjectMatrix<ICellData>();
-    range.forEach((r: IRange) => {
-        const { startRow, startColumn, endRow, endColumn } = r;
-        for (let i = startRow; i <= endRow; i++) {
-            for (let j = startColumn; j <= endColumn; j++) {
-                cellValue.setValue(i, j, {
-                    v: null,
-                    p: null,
-                    f: null,
-                    si: null,
-                });
-            }
-        }
-    });
-
-    return cellValue.getData();
-}

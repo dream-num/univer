@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
+import type { ICommandInfo, IRange } from '@univerjs/core';
 import {
     Disposable,
+    ICommandService,
     IUniverInstanceService,
     LifecycleStages,
     ObjectMatrix,
@@ -30,7 +31,7 @@ import {
     IFunctionService,
     RangeReferenceObject,
 } from '@univerjs/engine-formula';
-import { SelectionManagerService } from '@univerjs/sheets';
+import { SelectionManagerService, SetRangeValuesMutation } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
 import type { IStatusBarServiceStatus } from '../services/status-bar.service';
@@ -44,6 +45,7 @@ export class StatusBarController extends Disposable {
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @IFunctionService private readonly _functionService: IFunctionService,
         @IStatusBarService private readonly _statusBarService: IStatusBarService,
+        @ICommandService private readonly _commandService: ICommandService,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
     ) {
         super();
@@ -76,6 +78,19 @@ export class StatusBarController extends Disposable {
                     }
                 })
             )
+        );
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                if (command.id === SetRangeValuesMutation.id) {
+                    const selections = this._selectionManagerService.getSelections();
+                    if (selections) {
+                        clearTimeout(this._calculateTimeout);
+                        this._calculateTimeout = setTimeout(() => {
+                            this._calculateSelection(selections.map((selection) => selection.range));
+                        }, 100);
+                    }
+                }
+            })
         );
     }
 

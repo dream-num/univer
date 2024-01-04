@@ -16,7 +16,6 @@
 
 import type { ICommandInfo } from '@univerjs/core';
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
-import { SetRangeValuesMutation } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
 import { SetCellEditVisibleOperation } from '../commands/operations/cell-edit.operation';
@@ -40,7 +39,7 @@ export class MarkSelectionController extends Disposable {
     }
 
     private _addRemoveListener() {
-        const removeCommands = [SetCellEditVisibleOperation.id, SetRangeValuesMutation.id];
+        const removeCommands = [SetCellEditVisibleOperation.id];
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (removeCommands.includes(command.id)) {

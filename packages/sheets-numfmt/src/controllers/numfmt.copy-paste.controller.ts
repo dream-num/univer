@@ -60,10 +60,14 @@ export class NumfmtCopyPasteController extends Disposable {
     private _initClipboardHook() {
         this.disposeWithMe(
             this._sheetClipboardService.addClipboardHook({
-                hookName: 'numfmt',
+                id: 'numfmt',
                 onBeforeCopy: (unitId, subUnitId, range) => this._collectNumfmt(unitId, subUnitId, range),
-                onPasteCells: (pastedRange, _m, _p, _copyInfo) =>
-                    this._generateNumfmtMutations(pastedRange, { ..._copyInfo, pasteType: _p }),
+                onPasteCells: (pasteFrom, pasteTo, data, payload) => {
+                    const { copyType = COPY_TYPE.COPY, pasteType } = payload;
+                    const { range: copyRange } = pasteFrom || {};
+                    const { range: pastedRange } = pasteTo;
+                    return this._generateNumfmtMutations(pastedRange, { copyType, pasteType, copyRange });
+                },
             })
         );
     }

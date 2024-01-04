@@ -77,10 +77,13 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
         const currentSubUnitId = this._currentService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
         this._shapeMap.forEach((shape) => {
             const { unitId, subUnitId, selection, control: oldControl, zIndex } = shape;
+
+            oldControl && oldControl.dispose();
+
             if (unitId !== currentUnitId || subUnitId !== currentSubUnitId) {
-                oldControl && oldControl.dispose();
                 return;
             }
+
             const { style } = selection;
             const { scene } = this._renderManagerService.getRenderById(unitId) || {};
             const { rangeWithCoord, primaryWithCoord } =

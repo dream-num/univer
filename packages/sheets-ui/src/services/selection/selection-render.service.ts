@@ -343,8 +343,8 @@ export class SelectionRenderService implements ISelectionRenderService {
         return freeze;
     }
 
-    private _getViewportByCell(row: number, column: number) {
-        if (!this._scene) {
+    private _getViewportByCell(row?: number, column?: number) {
+        if (!this._scene || row === undefined || column === undefined) {
             return null;
         }
         const freeze = this._getFreeze();
@@ -705,7 +705,6 @@ export class SelectionRenderService implements ISelectionRenderService {
 
         this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
-            const endViewport = scene.getActiveViewportByCoord(Vector2.FromArray([moveOffsetX, moveOffsetY]));
 
             const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeCoord(
                 Vector2.FromArray([moveOffsetX, moveOffsetY])
@@ -720,6 +719,9 @@ export class SelectionRenderService implements ISelectionRenderService {
             const freeze = this._sheetSkeletonManagerService.getCurrent()?.skeleton.getWorksheetConfig().freeze;
 
             const selection = currentSelection?.model;
+            const endViewport =
+                scene.getActiveViewportByCoord(Vector2.FromArray([moveOffsetX, moveOffsetY])) ??
+                this._getViewportByCell(selection?.endRow, selection?.endColumn);
 
             if (startViewport && endViewport && viewport) {
                 const isCrossingX =
@@ -739,6 +741,7 @@ export class SelectionRenderService implements ISelectionRenderService {
 
                 const startKey = startViewport.viewPortKey;
                 const endKey = endViewport.viewPortKey;
+
                 if (startKey === VIEWPORT_KEY.VIEW_ROW_TOP) {
                     if (moveOffsetY < viewport.top && (selection?.endRow ?? 0) < (freeze?.startRow ?? 0)) {
                         scrollOffsetY = viewport.top;

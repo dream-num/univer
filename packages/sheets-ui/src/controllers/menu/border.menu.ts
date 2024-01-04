@@ -16,7 +16,7 @@
 
 import { ICommandService, UniverInstanceType } from '@univerjs/core';
 import type { IBorderInfo } from '@univerjs/sheets';
-import { BorderStyleManagerService, getCurrentSheetDisabled, SetBorderBasicCommand } from '@univerjs/sheets';
+import { BorderStyleManagerService, getCurrentSheetDisabled$, SetBorderBasicCommand } from '@univerjs/sheets';
 import type { IMenuSelectorItem } from '@univerjs/ui';
 import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
@@ -29,7 +29,7 @@ export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSel
 
     const borderStyleManagerService = accessor.get(BorderStyleManagerService);
 
-    const disabled$ = getCurrentSheetDisabled(accessor);
+    const disabled$ = getCurrentSheetDisabled$(accessor);
 
     return {
         id: SetBorderBasicCommand.id,

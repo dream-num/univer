@@ -20,7 +20,7 @@ import { Observable } from 'rxjs';
 
 import { SheetPermissionService } from './sheet-permission.service';
 
-export function getCurrentSheetDisabled(accessor: IAccessor) {
+export function getCurrentSheetDisabled$(accessor: IAccessor) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const sheetPermissionService = accessor.get(SheetPermissionService);
     const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();

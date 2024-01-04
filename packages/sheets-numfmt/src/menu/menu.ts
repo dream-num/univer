@@ -17,7 +17,7 @@
 import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { AddDigitsSingle, MoreDownSingle, ReduceDigitsSingle, RmbSingle } from '@univerjs/icons';
 import {
-    getCurrentSheetDisabled,
+    getCurrentSheetDisabled$,
     INumfmtService,
     RemoveNumfmtMutation,
     SelectionManagerService,
@@ -51,7 +51,7 @@ export const CurrencyMenuItem = (componentManager: ComponentManager) => {
             group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
             positions: [MenuPosition.TOOLBAR_START],
             hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
-            disabled$: getCurrentSheetDisabled(accessor),
+            disabled$: getCurrentSheetDisabled$(accessor),
         };
     };
 };
@@ -68,7 +68,7 @@ export const AddDecimalMenuItem = (componentManager: ComponentManager) => {
         positions: [MenuPosition.TOOLBAR_START],
         group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
-        disabled$: getCurrentSheetDisabled(accessor),
+        disabled$: getCurrentSheetDisabled$(accessor),
     });
 };
 export const SubtractDecimalMenuItem = (componentManager: ComponentManager) => {
@@ -83,7 +83,7 @@ export const SubtractDecimalMenuItem = (componentManager: ComponentManager) => {
         group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
         positions: [MenuPosition.TOOLBAR_START],
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
-        disabled$: getCurrentSheetDisabled(accessor),
+        disabled$: getCurrentSheetDisabled$(accessor),
     });
 };
 
@@ -158,7 +158,7 @@ export const FactoryOtherMenuItem = (componentManager: ComponentManager) => {
             ],
             value$,
             hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.SHEET),
-            disabled$: getCurrentSheetDisabled(_accessor),
+            disabled$: getCurrentSheetDisabled$(_accessor),
         } as IMenuSelectorItem;
     };
 };

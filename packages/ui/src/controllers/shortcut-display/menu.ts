@@ -31,6 +31,6 @@ export function ShortcutPanelMenuItemFactory(accessor: IAccessor): IMenuButtonIt
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.TOOLBAR_START],
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
-        // disabled$: getCurrentSheetDisabled(accessor),
+        // disabled$: getCurrentSheetDisabled$(accessor),
     };
 }

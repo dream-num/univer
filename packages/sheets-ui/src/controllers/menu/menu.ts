@@ -33,7 +33,7 @@ import {
 } from '@univerjs/core';
 import { SetInlineFormatCommand, SetTextSelectionsOperation, TextSelectionManagerService } from '@univerjs/docs';
 import {
-    getCurrentSheetDisabled,
+    getCurrentSheetDisabled$,
     ResetBackgroundColorCommand,
     ResetTextColorCommand,
     SelectionManagerService,
@@ -133,7 +133,7 @@ export function FormatPainterMenuItemFactory(accessor: IAccessor): IMenuButtonIt
             };
         }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
-        disabled$: getCurrentSheetDisabled(accessor),
+        disabled$: getCurrentSheetDisabled$(accessor),
     };
 }
 
@@ -151,7 +151,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         title: 'Set bold',
         tooltip: 'toolbar.bold',
         positions: [MenuPosition.TOOLBAR_START],
-        disabled$: getCurrentSheetDisabled(accessor),
+        disabled$: getCurrentSheetDisabled$(accessor),
         activated$: new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
@@ -207,7 +207,7 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         title: 'Set italic',
         tooltip: 'toolbar.italic',
         positions: [MenuPosition.TOOLBAR_START],
-        disabled$: getCurrentSheetDisabled(accessor),
+        disabled$: getCurrentSheetDisabled$(accessor),
         activated$: new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
@@ -261,7 +261,7 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         title: 'Set underline',
         tooltip: 'toolbar.underline',
         positions: [MenuPosition.TOOLBAR_START],
-        disabled$: getCurrentSheetDisabled(accessor),
+        disabled$: getCurrentSheetDisabled$(accessor),
         activated$: new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
@@ -315,7 +315,7 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
         title: 'Set strike through',
         tooltip: 'toolbar.strikethrough',
         positions: [MenuPosition.TOOLBAR_START],
-        disabled$: getCurrentSheetDisabled(accessor),
+        disabled$: getCurrentSheetDisabled$(accessor),
         activated$: new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
@@ -503,7 +503,7 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
         label: FONT_FAMILY_COMPONENT,
         positions: [MenuPosition.TOOLBAR_START],
         selections: FONT_FAMILY_CHILDREN,
-        disabled$: getCurrentSheetDisabled(accessor),
+        disabled$: getCurrentSheetDisabled$(accessor),
         value$: new Observable((subscriber) => {
             const defaultValue = FONT_FAMILY_CHILDREN[0].value;
 
@@ -537,7 +537,7 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
     const selectionManagerService = accessor.get(SelectionManagerService);
     const contextService = accessor.get(IContextService);
 
-    const disabled$ = getCurrentSheetDisabled(accessor);
+    const disabled$ = getCurrentSheetDisabled$(accessor);
 
     return {
         id: SetRangeFontSizeCommand.id,
@@ -603,7 +603,7 @@ export function ResetTextColorMenuItemFactory(accessor: IAccessor): IMenuButtonI
         title: 'toolbar.resetColor',
         icon: 'NoColor',
         positions: SetRangeTextColorCommand.id,
-        disabled$: getCurrentSheetDisabled(accessor),
+        disabled$: getCurrentSheetDisabled$(accessor),
     };
 }
 
@@ -640,7 +640,7 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
             return disposable.dispose;
         }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
-        disabled$: getCurrentSheetDisabled(accessor),
+        disabled$: getCurrentSheetDisabled$(accessor),
     };
 }
 
@@ -651,7 +651,7 @@ export function ResetBackgroundColorMenuItemFactory(accessor: IAccessor): IMenuB
         title: 'toolbar.resetColor',
         icon: 'NoColor',
         positions: SetBackgroundColorCommand.id,
-        disabled$: getCurrentSheetDisabled(accessor),
+        disabled$: getCurrentSheetDisabled$(accessor),
     };
 }
 
@@ -687,7 +687,7 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
             return disposable.dispose;
         }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
-        disabled$: getCurrentSheetDisabled(accessor),
+        disabled$: getCurrentSheetDisabled$(accessor),
     };
 }
 
@@ -744,7 +744,7 @@ export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelect
             return disposable.dispose;
         }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
-        disabled$: getCurrentSheetDisabled(accessor),
+        disabled$: getCurrentSheetDisabled$(accessor),
     };
 }
 
@@ -801,7 +801,7 @@ export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelector
             return disposable.dispose;
         }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
-        disabled$: getCurrentSheetDisabled(accessor),
+        disabled$: getCurrentSheetDisabled$(accessor),
     };
 }
 
@@ -858,7 +858,7 @@ export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<
             return disposable.dispose;
         }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
-        disabled$: getCurrentSheetDisabled(accessor),
+        disabled$: getCurrentSheetDisabled$(accessor),
     };
 }
 
@@ -934,7 +934,7 @@ export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
             return disposable.dispose;
         }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
-        disabled$: getCurrentSheetDisabled(accessor),
+        disabled$: getCurrentSheetDisabled$(accessor),
     };
 }
 

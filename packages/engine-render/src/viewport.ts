@@ -184,10 +184,6 @@ export class Viewport {
         this._isWheelPreventDefaultY = props?.isWheelPreventDefaultY || false;
 
         this._resizeCacheCanvasAndScrollBar();
-
-        this._scene?.getParent().onTransformChangeObservable.add(() => {
-            this._resizeCacheCanvasAndScrollBar();
-        });
     }
 
     get scene() {
@@ -771,13 +767,26 @@ export class Viewport {
     }
 
     private _resizeCacheCanvasAndScrollBar() {
+        const actualScrollX = this.actualScrollX;
+
+        const actualScrollY = this.actualScrollY;
+
         const { width, height } = this._getViewPortSize();
 
         const contentWidth = (this._scene.width - this._paddingEndX) * this._scene.scaleX;
 
         const contentHeight = (this._scene.height - this._paddingEndY) * this._scene.scaleY;
 
-        this._scrollBar?.resize(width, height, contentWidth, contentHeight);
+        if (this._scrollBar) {
+            this._scrollBar.resize(width, height, contentWidth, contentHeight);
+
+            const { x, y } = this.getBarScroll(actualScrollX, actualScrollY);
+
+            this.scrollTo({
+                x,
+                y,
+            });
+        }
 
         this.makeDirty(true);
     }

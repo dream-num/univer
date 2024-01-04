@@ -60,11 +60,17 @@ export class FormulaClipboardController extends Disposable {
 
     private _pasteFormulaHook(): ISheetClipboardHook {
         const specialPasteFormulaHook: ISheetClipboardHook = {
-            hookName: SPECIAL_PASTE_FORMULA,
+            id: SPECIAL_PASTE_FORMULA,
             specialPasteInfo: {
                 label: 'specialPaste.formula',
             },
-            onPasteCells: (pastedRange, matrix, pasteType, copyInfo) => {
+            onPasteCells: (pasteFrom, pasteTo, data, payload) => {
+                const copyInfo = {
+                    copyType: payload.copyType || COPY_TYPE.COPY,
+                    copyRange: pasteFrom?.range,
+                };
+                const pastedRange = pasteTo.range;
+                const matrix = data;
                 const workbook = this._currentUniverSheet.getCurrentUniverSheetInstance();
                 const unitId = workbook.getUnitId();
                 const subUnitId = workbook.getActiveSheet().getSheetId();
@@ -89,8 +95,14 @@ export class FormulaClipboardController extends Disposable {
 
     private _pasteWithFormulaHook(): ISheetClipboardHook {
         const specialPasteFormulaHook: ISheetClipboardHook = {
-            hookName: DEFAULT_PASTE_FORMULA,
-            onPasteCells: (pastedRange, matrix, pasteType, copyInfo) => {
+            id: DEFAULT_PASTE_FORMULA,
+            onPasteCells: (pasteFrom, pasteTo, data, payload) => {
+                const copyInfo = {
+                    copyType: payload.copyType || COPY_TYPE.COPY,
+                    copyRange: pasteFrom?.range,
+                };
+                const pastedRange = pasteTo.range;
+                const matrix = data;
                 const workbook = this._currentUniverSheet.getCurrentUniverSheetInstance();
                 const unitId = workbook.getUnitId();
                 const subUnitId = workbook.getActiveSheet().getSheetId();

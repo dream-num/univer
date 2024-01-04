@@ -25,6 +25,7 @@ import {
     UndoCommand,
 } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import type { ISelectionWithCoordAndStyle } from '@univerjs/sheets';
 import {
     AddWorksheetMergeMutation,
     NORMAL_SELECTION_PLUGIN_NAME,
@@ -36,9 +37,10 @@ import {
 } from '@univerjs/sheets';
 import { createCommandTestBed } from '@univerjs/sheets/commands/commands/__tests__/create-command-test-bed.js';
 import type { Injector } from '@wendellhu/redi';
+import { BehaviorSubject } from 'rxjs';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { IMarkSelectionService } from '../../..';
+import { IMarkSelectionService, ISelectionRenderService } from '../../..';
 import { FormatPainterController } from '../../../controllers/format-painter/format-painter.controller';
 import { FormatPainterService, IFormatPainterService } from '../../../services/format-painter/format-painter.service';
 import { SetFormatPainterOperation } from '../../operations/set-format-painter.operation';
@@ -187,6 +189,11 @@ class MarkSelectionService extends Disposable implements IMarkSelectionService {
     removeAllShapes(): void {}
 }
 
+class SelectionRenderService {
+    private readonly _selectionMoveEnd$ = new BehaviorSubject<ISelectionWithCoordAndStyle[]>([]);
+    readonly selectionMoveEnd$ = this._selectionMoveEnd$.asObservable();
+}
+
 class RenderManagerService {
     getRenderById(id: string) {
         return null;
@@ -203,6 +210,7 @@ describe('Test format painter rules in controller', () => {
         const testBed = createCommandTestBed(TEST_WORKBOOK_DATA, [
             [IMarkSelectionService, { useClass: MarkSelectionService }],
             [IFormatPainterService, { useClass: FormatPainterService }],
+            [ISelectionRenderService, { useClass: SelectionRenderService }],
             [IRenderManagerService, { useClass: RenderManagerService }],
             [FormatPainterController],
         ]);

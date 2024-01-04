@@ -215,15 +215,15 @@ export class ActiveDirtyController extends Disposable {
     }
 
     private _getMoveRangeMutationDirtyRange(params: IMoveRangeMutationParams) {
-        const { subUnitId: sheetId, unitId, from, to } = params;
+        const { unitId, from, to } = params;
 
         const dirtyRanges: IUnitRange[] = [];
 
-        dirtyRanges.push(...this._getDirtyRangesByCellValue(unitId, sheetId, from));
+        dirtyRanges.push(...this._getDirtyRangesByCellValue(unitId, from.subUnitId, from.value));
 
-        dirtyRanges.push(...this._getDirtyRangesByCellValue(unitId, sheetId, to));
+        dirtyRanges.push(...this._getDirtyRangesByCellValue(unitId, to.subUnitId, to.value));
 
-        dirtyRanges.push(...this._getDirtyRangesForArrayFormula(unitId, sheetId, to));
+        dirtyRanges.push(...this._getDirtyRangesForArrayFormula(unitId, to.subUnitId, to.value));
 
         return dirtyRanges;
     }

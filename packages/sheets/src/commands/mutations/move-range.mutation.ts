@@ -19,9 +19,14 @@ import { CommandType, IUniverInstanceService, ObjectMatrix } from '@univerjs/cor
 
 export interface IMoveRangeMutationParams {
     unitId: string;
-    subUnitId: string;
-    from: IObjectMatrixPrimitiveType<Nullable<ICellData>>;
-    to: IObjectMatrixPrimitiveType<Nullable<ICellData>>;
+    from: {
+        subUnitId: string;
+        value: IObjectMatrixPrimitiveType<Nullable<ICellData>>;
+    };
+    to: {
+        subUnitId: string;
+        value: IObjectMatrixPrimitiveType<Nullable<ICellData>>;
+    };
 }
 
 export const MoveRangeMutation: IMutation<IMoveRangeMutationParams, boolean> = {
@@ -40,19 +45,22 @@ export const MoveRangeMutation: IMutation<IMoveRangeMutationParams, boolean> = {
             return false;
         }
 
-        const worksheet = workbook.getSheetBySheetId(params.subUnitId);
-        if (!worksheet) {
+        const fromWorksheet = workbook.getSheetBySheetId(params.from.subUnitId);
+        const toWorksheet = workbook.getSheetBySheetId(params.to.subUnitId);
+
+        if (!fromWorksheet || !toWorksheet) {
             return false;
         }
 
-        const cellMatrix = worksheet.getCellMatrix();
+        const fromCellMatrix = fromWorksheet.getCellMatrix();
+        const toCellMatrix = toWorksheet.getCellMatrix();
 
-        new ObjectMatrix<Nullable<ICellData>>(from).forValue((row, col, newVal) => {
-            cellMatrix.setValue(row, col, newVal);
+        new ObjectMatrix<Nullable<ICellData>>(from.value).forValue((row, col, newVal) => {
+            fromCellMatrix.setValue(row, col, newVal);
         });
 
-        new ObjectMatrix<Nullable<ICellData>>(to).forValue((row, col, newVal) => {
-            cellMatrix.setValue(row, col, newVal);
+        new ObjectMatrix<Nullable<ICellData>>(to.value).forValue((row, col, newVal) => {
+            toCellMatrix.setValue(row, col, newVal);
         });
 
         return true;

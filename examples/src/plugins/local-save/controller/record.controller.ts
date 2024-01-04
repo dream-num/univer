@@ -53,7 +53,7 @@ export class RecordController {
         type ParamsString = string & {};
         const result: Array<[SecondsString, CommandString, TypeString, ParamsString]> = [];
         const startTime = performance.now();
-        const disposable = this._commandService.onCommandExecuted((commandInfo) => {
+        const disposable = this._commandService.beforeCommandExecuted((commandInfo) => {
             try {
                 result.push([
                     String((performance.now() - startTime) / 1000),

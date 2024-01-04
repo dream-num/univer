@@ -39,6 +39,7 @@ import type {
 import {
     AddMergeUndoMutationFactory,
     AddWorksheetMergeMutation,
+    ClearSelectionContentCommand,
     getAddMergeMutationRangeByType,
     NORMAL_SELECTION_PLUGIN_NAME,
     RemoveMergeUndoMutationFactory,
@@ -47,13 +48,14 @@ import {
     SetRangeValuesMutation,
     SetRangeValuesUndoMutationFactory,
     SetSelectionsOperation,
+    SheetInterceptorService,
 } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { AutoClearContentCommand, AutoFillCommand } from '../commands/commands/auto-fill.command';
 import { IAutoFillService } from '../services/auto-fill/auto-fill.service';
 import { otherRule } from '../services/auto-fill/rules';
-import { fillCopy, fillCopyStyles, getDataIndex, getLenS } from '../services/auto-fill/tools';
+import { fillCopy, fillCopyStyles, generateNullCellValue, getDataIndex, getLenS } from '../services/auto-fill/tools';
 import type {
     APPLY_FUNCTIONS,
     IAutoFillLocation,
@@ -79,6 +81,7 @@ export class AutoFillController extends Disposable {
         @IUndoRedoService private readonly _undoRedoService: IUndoRedoService,
         @IAutoFillService private readonly _autoFillService: IAutoFillService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
+        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @Inject(Injector) private readonly _injector: Injector
     ) {
@@ -133,7 +136,13 @@ export class AutoFillController extends Disposable {
                         disposableCollection.add(
                             toDisposable(
                                 controlSelection.selectionFilled$.subscribe((filled) => {
-                                    if (filled == null) {
+                                    if (
+                                        filled == null ||
+                                        filled.startColumn === -1 ||
+                                        filled.startRow === -1 ||
+                                        filled.endColumn === -1 ||
+                                        filled.endRow === -1
+                                    ) {
                                         return;
                                     }
                                     const source: IRange = {
@@ -310,13 +319,13 @@ export class AutoFillController extends Disposable {
             while (matrix.getValue(cur, startColumn - 1)?.v != null && cur < maxRow) {
                 cur += 1;
             }
-            detectEndRow = cur;
+            detectEndRow = cur - 1;
         } else if (endColumn < maxColumn && matrix.getValue(endRow, endColumn + 1)?.v != null) {
             let cur = startRow;
             while (matrix.getValue(cur, endColumn + 1)?.v != null && cur < maxRow) {
-                cur++;
+                cur += 1;
             }
-            detectEndRow = cur;
+            detectEndRow = cur - 1;
         }
 
         for (let i = endRow + 1; i <= detectEndRow; i++) {
@@ -739,9 +748,7 @@ export class AutoFillController extends Disposable {
                 const row: Array<Nullable<ICellData>> = [];
                 for (let j = 0; j < untransformedApplyDatas.length; j++) {
                     row.push({
-                        v: null,
                         s: null,
-                        ...this._beforeApplyData[i][j],
                         ...untransformedApplyDatas[j][i],
                     });
                 }
@@ -755,9 +762,7 @@ export class AutoFillController extends Disposable {
                 const row: Array<Nullable<ICellData>> = [];
                 for (let j = 0; j < applyData.length; j++) {
                     row.push({
-                        v: null,
                         s: null,
-                        ...this._beforeApplyData[i - applyStartRow][j],
                         ...applyData[j],
                     });
                 }
@@ -818,6 +823,21 @@ export class AutoFillController extends Disposable {
         redos.push({ id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams });
         undos.push({ id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams });
 
+        // clear range value
+        const clearMutationParams: ISetRangeValuesMutationParams = {
+            subUnitId,
+            unitId,
+            cellValue: generateNullCellValue([target]),
+        };
+        const undoClearMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
+            accessor,
+            clearMutationParams
+        );
+
+        const intercepted = this._sheetInterceptorService.onCommandExecute({ id: ClearSelectionContentCommand.id });
+        redos.push({ id: SetRangeValuesMutation.id, params: clearMutationParams }, ...intercepted.redos);
+        undos.push(...intercepted.undos, { id: SetRangeValuesMutation.id, params: undoClearMutationParams });
+
         // set range value
         const cellValue = new ObjectMatrix<ICellData>();
         const { startRow, startColumn, endRow, endColumn } = target;
@@ -840,9 +860,6 @@ export class AutoFillController extends Disposable {
             accessor,
             setRangeValuesMutationParams
         );
-
-        undos.push({ id: SetRangeValuesMutation.id, params: undoSetRangeValuesMutationParams });
-        redos.push({ id: SetRangeValuesMutation.id, params: setRangeValuesMutationParams });
 
         undos.push({ id: SetRangeValuesMutation.id, params: undoSetRangeValuesMutationParams });
         redos.push({ id: SetRangeValuesMutation.id, params: setRangeValuesMutationParams });

@@ -120,15 +120,24 @@ export class USMToHtmlService {
         range: IRange,
         hooks: ISheetClipboardHook[]
     ): string {
-        const { startColumn, endColumn } = range;
+        const { startColumn, endColumn, startRow, endRow } = range;
         const colStyles = getColStyle(getArrayFromTo(startColumn, endColumn), hooks);
         // row styles and table contents
         const rowContents: string[] = [];
 
-        matrix.forRow((row, cols) => {
-            // TODO: cols here should filtered out those in span cells
+        const {
+            startRow: dataStartRow,
+            endRow: dataEndRow,
+            startColumn: dataStartColumn,
+            endColumn: dataEndColumn,
+        } = matrix.getDataRange();
+        for (let row = dataStartRow; row <= dataEndRow; row++) {
+            const cols = Array.from(
+                { length: dataEndColumn - dataStartColumn + 1 },
+                (_, index) => dataStartColumn + index
+            );
             rowContents.push(getRowContent(row, cols, hooks, matrix));
-        });
+        }
 
         const html = `<google-sheets-html-origin><table xmlns="http://www.w3.org/1999/xhtml" cellspacing="0" cellpadding="0" dir="ltr" border="1" style="table-layout:fixed;font-size:10pt;font-family:Arial;width:0px;border-collapse:collapse;border:none">${colStyles}
 <tbody>${rowContents.join('')}</tbody></table>`;

@@ -109,8 +109,6 @@ export class FreezeController extends Disposable {
 
     private _upObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 
-    private _viewportObservers: Array<Nullable<Observer<IScrollObserverParam>>> = [];
-
     private _changeToRow: number = -1;
 
     private _changeToColumn: number = -1;
@@ -170,6 +168,8 @@ export class FreezeController extends Disposable {
         this._themeChangeListener();
 
         this._interceptorCommands();
+
+        this._bindViewportScroll();
     }
 
     private _createFreeze(
@@ -620,27 +620,13 @@ export class FreezeController extends Disposable {
         });
     }
 
-    private _updateViewport(
-        row: number = -1,
-        column: number = -1,
-        ySplit: number = 0,
-        xSplit: number = 0,
-        resetScroll = ResetScrollType.ALL
-    ) {
+    private _getViewports() {
         const sheetObject = this._getSheetObject();
         if (sheetObject == null) {
             return;
         }
         const { scene } = sheetObject;
 
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-        if (skeleton == null) {
-            return;
-        }
-
-        const { rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop } = skeleton;
-
-        // column header
         const viewColumnLeft = scene.getViewport(VIEWPORT_KEY.VIEW_COLUMN_LEFT);
         const viewColumnRight = scene.getViewport(VIEWPORT_KEY.VIEW_COLUMN_RIGHT);
 
@@ -670,11 +656,97 @@ export class FreezeController extends Disposable {
             return;
         }
 
-        const { scaleX, scaleY } = scene.getAncestorScale();
+        return {
+            viewMain,
+            viewMainLeftTop,
+            viewMainLeft,
+            viewMainTop,
+            viewColumnLeft,
+            viewColumnRight,
+            viewRowTop,
+            viewRowBottom,
+            viewLeftTop,
+        };
+    }
 
-        this._viewportObservers.forEach((obs) => {
-            viewMain.onScrollAfterObserver.remove(obs);
-        });
+    private _bindViewportScroll() {
+        // column header
+        const viewports = this._getViewports();
+        if (!viewports) {
+            return;
+        }
+
+        const { viewMain, viewRowBottom, viewColumnRight, viewMainLeft, viewMainTop } = viewports;
+
+        this.disposeWithMe(
+            viewMain.onScrollAfterObserver.add((param: IScrollObserverParam) => {
+                const { scrollX, scrollY, actualScrollX, actualScrollY } = param;
+
+                viewRowBottom.isActive &&
+                    viewRowBottom
+                        .updateScroll({
+                            scrollY,
+                            actualScrollY,
+                        })
+                        .makeDirty(true);
+
+                viewColumnRight.isActive &&
+                    viewColumnRight
+                        .updateScroll({
+                            scrollX,
+                            actualScrollX,
+                        })
+                        .makeDirty(true);
+
+                viewMainLeft.isActive &&
+                    viewMainLeft
+                        .updateScroll({
+                            scrollY,
+                            actualScrollY,
+                        })
+                        .makeDirty(true);
+
+                viewMainTop.isActive &&
+                    viewMainTop
+                        .updateScroll({
+                            scrollX,
+                            actualScrollX,
+                        })
+                        .makeDirty(true);
+            })!
+        );
+    }
+
+    private _updateViewport(
+        row: number = -1,
+        column: number = -1,
+        ySplit: number = 0,
+        xSplit: number = 0,
+        resetScroll = ResetScrollType.ALL
+    ) {
+        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        if (skeleton == null) {
+            return;
+        }
+
+        const { rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop } = skeleton;
+
+        const viewports = this._getViewports();
+        if (!viewports) {
+            return;
+        }
+
+        const {
+            viewMain,
+            viewMainLeftTop,
+            viewMainLeft,
+            viewMainTop,
+            viewColumnLeft,
+            viewColumnRight,
+            viewRowTop,
+            viewRowBottom,
+            viewLeftTop,
+        } = viewports;
 
         viewColumnRight.resize({
             left: rowHeaderWidthAndMarginLeft,
@@ -696,26 +768,6 @@ export class FreezeController extends Disposable {
             width: rowHeaderWidthAndMarginLeft,
             height: columnHeaderHeightAndMarginTop,
         });
-
-        this._viewportObservers.push(
-            viewMain.onScrollAfterObserver.add((param: IScrollObserverParam) => {
-                const { scrollX, scrollY, actualScrollX, actualScrollY } = param;
-
-                viewColumnRight
-                    .updateScroll({
-                        scrollX,
-                        actualScrollX,
-                    })
-                    .makeDirty(true);
-
-                viewRowBottom
-                    .updateScroll({
-                        scrollY,
-                        actualScrollY,
-                    })
-                    .makeDirty(true);
-            })
-        );
 
         let isTopView = true;
 
@@ -786,7 +838,6 @@ export class FreezeController extends Disposable {
                 height: topGap,
                 right: 0,
             });
-            // const config = viewMain.getBarScroll(startSheetView.startX, startSheetView.startY);
             viewMainTop
                 .updateScroll({
                     actualScrollY: startSheetView.startY,
@@ -811,18 +862,6 @@ export class FreezeController extends Disposable {
                 bottom: 0,
                 width: rowHeaderWidthAndMarginLeft,
             });
-            this._viewportObservers.push(
-                viewMain.onScrollAfterObserver.add((param: IScrollObserverParam) => {
-                    const { scrollX, actualScrollX } = param;
-
-                    viewMainTop
-                        .updateScroll({
-                            scrollX,
-                            actualScrollX,
-                        })
-                        .makeDirty(true);
-                })
-            );
 
             viewMainTop.enable();
             viewRowTop.enable();
@@ -880,19 +919,6 @@ export class FreezeController extends Disposable {
                 height: columnHeaderHeightAndMarginTop,
                 right: 0,
             });
-
-            this._viewportObservers.push(
-                viewMain.onScrollAfterObserver.add((param: IScrollObserverParam) => {
-                    const { scrollY, actualScrollY } = param;
-
-                    viewMainLeft
-                        .updateScroll({
-                            scrollY,
-                            actualScrollY,
-                        })
-                        .makeDirty(true);
-                })
-            );
 
             viewMainLeft.enable();
             viewColumnLeft.enable();
@@ -1008,44 +1034,6 @@ export class FreezeController extends Disposable {
                 height: columnHeaderHeightAndMarginTop,
                 right: 0,
             });
-
-            this._viewportObservers.forEach((obs) => {
-                viewMain.onScrollAfterObserver.remove(obs);
-            });
-
-            this._viewportObservers.push(
-                viewMain.onScrollAfterObserver.add((param: IScrollObserverParam) => {
-                    const { scrollX, scrollY, actualScrollX, actualScrollY } = param;
-
-                    viewRowBottom
-                        .updateScroll({
-                            scrollY,
-                            actualScrollY,
-                        })
-                        .makeDirty(true);
-
-                    viewColumnRight
-                        .updateScroll({
-                            scrollX,
-                            actualScrollX,
-                        })
-                        .makeDirty(true);
-
-                    viewMainLeft
-                        .updateScroll({
-                            scrollY,
-                            actualScrollY,
-                        })
-                        .makeDirty(true);
-
-                    viewMainTop
-                        .updateScroll({
-                            scrollX,
-                            actualScrollX,
-                        })
-                        .makeDirty(true);
-                })
-            );
 
             viewMainLeftTop.enable();
             viewMainTop.enable();

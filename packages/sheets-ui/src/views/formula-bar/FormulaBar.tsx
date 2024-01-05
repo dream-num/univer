@@ -31,11 +31,6 @@ enum ArrowDirection {
     Up,
 }
 
-interface IFormulaState {
-    iconStyle: string;
-    arrowDirection: ArrowDirection;
-}
-
 export function FormulaBar() {
     const [iconStyle, setIconStyle] = useState<string>(styles.formulaGrey);
     const [arrowDirection, setArrowDirection] = useState<ArrowDirection>(ArrowDirection.Down);
@@ -85,6 +80,11 @@ export function FormulaBar() {
 
     function handleArrowClick() {
         setArrowDirection(arrowDirection === ArrowDirection.Down ? ArrowDirection.Up : ArrowDirection.Down);
+
+        const ANIMATION_DURATION = 150;
+        setTimeout(() => {
+            formulaEditorManagerService.handleFoldBtnClick(arrowDirection === ArrowDirection.Up);
+        }, ANIMATION_DURATION);
     }
 
     function handleCloseBtnClick() {

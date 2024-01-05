@@ -213,6 +213,8 @@ export abstract class ThinScene {
         return [];
     }
 
+    addViewport(...viewport: any[]) {}
+
     removeViewport(key: string) {}
 
     getAncestorScale() {

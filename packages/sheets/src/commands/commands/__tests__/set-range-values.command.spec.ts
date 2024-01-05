@@ -38,7 +38,13 @@ describe('Test set range values commands', () => {
     let get: Injector['get'];
     let commandService: ICommandService;
     let selectionManager: SelectionManagerService;
-    let getValue: () => any;
+    let getValue: () => Nullable<ICellData>;
+    let getValues: (
+        startRow: number,
+        startColumn: number,
+        endRow: number,
+        endColumn: number
+    ) => Nullable<Array<Array<Nullable<ICellData>>>>;
     let getStyle: () => any;
 
     beforeEach(() => {
@@ -70,6 +76,18 @@ describe('Test set range values commands', () => {
                 ?.getSheetBySheetId('sheet1')
                 ?.getRange(0, 0, 0, 0)
                 .getValue();
+
+        getValues = (
+            startRow: number,
+            startColumn: number,
+            endRow: number,
+            endColumn: number
+        ): Nullable<Array<Array<Nullable<ICellData>>>> =>
+            get(IUniverInstanceService)
+                .getUniverSheetInstance('test')
+                ?.getSheetBySheetId('sheet1')
+                ?.getRange(startRow, startColumn, endRow, endColumn)
+                .getValues();
 
         getStyle = (): Nullable<IStyleData> => {
             const value = getValue();
@@ -147,7 +165,88 @@ describe('Test set range values commands', () => {
                 // redo
                 expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
                 expect(getValue()).toStrictEqual(getParams().value);
+
+                // reset
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
             });
+
+            it('will tile all values when there is a selected range', async () => {
+                function getParams() {
+                    const params: ISetRangeValuesCommandParams = {
+                        range: {
+                            startRow: 0,
+                            startColumn: 0,
+                            endRow: 1,
+                            endColumn: 1,
+                        },
+                        value: {
+                            v: 'a1',
+                            t: CellValueType.STRING,
+                        },
+                    };
+
+                    return params;
+                }
+
+                expect(await commandService.executeCommand(SetRangeValuesCommand.id, getParams())).toBeTruthy();
+                expect(getValues(0, 0, 1, 1)).toStrictEqual([
+                    [
+                        {
+                            v: 'a1',
+                            t: CellValueType.STRING,
+                        },
+                        {
+                            v: 'a1',
+                            t: CellValueType.STRING,
+                        },
+                    ],
+                    [
+                        {
+                            v: 'a1',
+                            t: CellValueType.STRING,
+                        },
+                        {
+                            v: 'a1',
+                            t: CellValueType.STRING,
+                        },
+                    ],
+                ]);
+                // undo
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getValue()).toStrictEqual({
+                    v: 'A1',
+                    t: CellValueType.STRING,
+                });
+
+                // redo
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+                expect(getValues(0, 0, 1, 1)).toStrictEqual([
+                    [
+                        {
+                            v: 'a1',
+                            t: CellValueType.STRING,
+                        },
+                        {
+                            v: 'a1',
+                            t: CellValueType.STRING,
+                        },
+                    ],
+                    [
+                        {
+                            v: 'a1',
+                            t: CellValueType.STRING,
+                        },
+                        {
+                            v: 'a1',
+                            t: CellValueType.STRING,
+                        },
+                    ],
+                ]);
+
+                // reset
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            });
+
             it('set formats', async () => {
                 // set IStyleBase, the original cell has no style information
                 function getParamsStyleBase() {

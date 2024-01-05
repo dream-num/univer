@@ -158,3 +158,7 @@ pnpm create @univerjs/cli init <project-name>
 npm create @univerjs/cli init <project-name>
 
 ```
+
+## Links
+
+* [How to Contribute to Facade API](./packages/facade/docs/CONTRIBUTING.md)

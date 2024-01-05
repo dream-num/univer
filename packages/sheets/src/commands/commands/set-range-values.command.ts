@@ -85,9 +85,13 @@ export const SetRangeValuesCommand: ICommand = {
             }
         } else if (isICellData(value)) {
             for (let i = 0; i < currentSelections.length; i++) {
-                const { startRow, startColumn } = currentSelections[i];
+                const { startRow, startColumn, endRow, endColumn } = currentSelections[i];
 
-                cellValue.setValue(startRow, startColumn, value);
+                for (let r = startRow; r <= endRow; r++) {
+                    for (let c = startColumn; c <= endColumn; c++) {
+                        cellValue.setValue(r, c, value);
+                    }
+                }
             }
         } else {
             realCellValue = value as IObjectMatrixPrimitiveType<ICellData>;

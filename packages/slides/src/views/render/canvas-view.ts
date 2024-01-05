@@ -163,7 +163,7 @@ export class CanvasView {
             isWheelPreventDefaultX: true,
         });
 
-        scene.addViewport(viewMain).attachControl();
+        scene.attachControl();
 
         scene.on(EVENT_TYPE.wheel, (evt: unknown, state: EventState) => {
             const e = evt as IWheelEvent;

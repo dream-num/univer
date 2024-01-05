@@ -186,6 +186,7 @@ export class SheetCanvasView extends RxDisposable {
         }
 
         const { rowHeader, columnHeader } = worksheet.getConfig();
+
         const viewMain = new Viewport(VIEWPORT_KEY.VIEW_MAIN, scene, {
             left: rowHeader.width,
             top: columnHeader.height,
@@ -194,12 +195,12 @@ export class SheetCanvasView extends RxDisposable {
             isWheelPreventDefaultX: true,
         });
 
-        const viewRowTop = new Viewport(VIEWPORT_KEY.VIEW_ROW_TOP, scene, {
+        new Viewport(VIEWPORT_KEY.VIEW_ROW_TOP, scene, {
             active: false,
             isWheelPreventDefaultX: true,
         });
 
-        const viewRowBottom = new Viewport(VIEWPORT_KEY.VIEW_ROW_BOTTOM, scene, {
+        new Viewport(VIEWPORT_KEY.VIEW_ROW_BOTTOM, scene, {
             left: 0,
             top: columnHeader.height,
             bottom: 0,
@@ -207,12 +208,12 @@ export class SheetCanvasView extends RxDisposable {
             isWheelPreventDefaultX: true,
         });
 
-        const viewColumnLeft = new Viewport(VIEWPORT_KEY.VIEW_COLUMN_LEFT, scene, {
+        new Viewport(VIEWPORT_KEY.VIEW_COLUMN_LEFT, scene, {
             active: false,
             isWheelPreventDefaultX: true,
         });
 
-        const viewColumnRight = new Viewport(VIEWPORT_KEY.VIEW_COLUMN_RIGHT, scene, {
+        new Viewport(VIEWPORT_KEY.VIEW_COLUMN_RIGHT, scene, {
             left: rowHeader.width,
             top: 0,
             height: columnHeader.height,
@@ -220,7 +221,7 @@ export class SheetCanvasView extends RxDisposable {
             isWheelPreventDefaultX: true,
         });
 
-        const viewLeftTop = new Viewport(VIEWPORT_KEY.VIEW_LEFT_TOP, scene, {
+        new Viewport(VIEWPORT_KEY.VIEW_LEFT_TOP, scene, {
             left: 0,
             top: 0,
             width: rowHeader.width,
@@ -228,17 +229,17 @@ export class SheetCanvasView extends RxDisposable {
             isWheelPreventDefaultX: true,
         });
 
-        const viewMainLeftTop = new Viewport(VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP, scene, {
+        new Viewport(VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP, scene, {
             isWheelPreventDefaultX: true,
             active: false,
         });
 
-        const viewMainLeft = new Viewport(VIEWPORT_KEY.VIEW_MAIN_LEFT, scene, {
+        new Viewport(VIEWPORT_KEY.VIEW_MAIN_LEFT, scene, {
             isWheelPreventDefaultX: true,
             active: false,
         });
 
-        const viewMainTop = new Viewport(VIEWPORT_KEY.VIEW_MAIN_TOP, scene, {
+        new Viewport(VIEWPORT_KEY.VIEW_MAIN_TOP, scene, {
             isWheelPreventDefaultX: true,
             active: false,
         });
@@ -330,19 +331,7 @@ export class SheetCanvasView extends RxDisposable {
         // create a scroll bar
         new ScrollBar(viewMain);
 
-        scene
-            .addViewport(
-                viewMain,
-                viewColumnLeft,
-                viewColumnRight,
-                viewRowTop,
-                viewRowBottom,
-                viewLeftTop,
-                viewMainLeftTop,
-                viewMainLeft,
-                viewMainTop
-            )
-            .attachControl();
+        scene.attachControl();
 
         return viewMain;
     }

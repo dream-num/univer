@@ -515,6 +515,10 @@ export class testMarkSelectionService {
     removeAllShapes(): void {}
 
     refreshShapes(): void {}
+
+    getShapeMap(): Map<string, any> {
+        return new Map();
+    }
 }
 
 export function clipboardTestBed(workbookConfig?: IWorkbookData, dependencies?: Dependency[]) {

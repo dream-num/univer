@@ -682,37 +682,40 @@ export class FreezeController extends Disposable {
             viewMain.onScrollAfterObserver.add((param: IScrollObserverParam) => {
                 const { scrollX, scrollY, actualScrollX, actualScrollY } = param;
 
-                viewRowBottom.isActive &&
+                if (viewRowBottom.isActive) {
                     viewRowBottom
                         .updateScroll({
                             scrollY,
                             actualScrollY,
                         })
                         .makeDirty(true);
+                }
 
-                viewColumnRight.isActive &&
+                if (viewColumnRight.isActive) {
                     viewColumnRight
                         .updateScroll({
                             scrollX,
                             actualScrollX,
                         })
                         .makeDirty(true);
-
-                viewMainLeft.isActive &&
+                }
+                if (viewMainLeft.isActive) {
                     viewMainLeft
                         .updateScroll({
                             scrollY,
                             actualScrollY,
                         })
                         .makeDirty(true);
+                }
 
-                viewMainTop.isActive &&
+                if (viewMainTop.isActive) {
                     viewMainTop
                         .updateScroll({
                             scrollX,
                             actualScrollX,
                         })
                         .makeDirty(true);
+                }
             })!
         );
     }

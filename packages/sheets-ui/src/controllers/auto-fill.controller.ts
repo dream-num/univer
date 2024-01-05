@@ -650,8 +650,8 @@ export class AutoFillController extends Disposable {
                             windowEndColumn += csLen;
                         }
                     } else if (direction === Direction.LEFT) {
-                        const windowStartColumn = startColumn - csLen;
-                        const windowEndColumn = endColumn - csLen;
+                        let windowStartColumn = startColumn - csLen;
+                        let windowEndColumn = endColumn - csLen;
                         while (windowStartColumn >= target.startColumn) {
                             applyMergeRanges.push({
                                 startRow,
@@ -659,6 +659,8 @@ export class AutoFillController extends Disposable {
                                 endRow,
                                 endColumn: windowEndColumn,
                             });
+                            windowStartColumn -= csLen;
+                            windowEndColumn -= csLen;
                         }
                     }
                 }

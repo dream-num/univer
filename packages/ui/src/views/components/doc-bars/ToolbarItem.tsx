@@ -105,6 +105,10 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
 
     function renderSelectorType(menuType: MenuItemType) {
         function handleSelect(option: IValueOption) {
+            if (disabled) {
+                return;
+            }
+
             let commandId = id;
             const value = option;
 
@@ -116,11 +120,18 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
         }
 
         function handleChange(value: string | number) {
+            if (disabled) {
+                return;
+            }
+
             const commandId = id;
             handleCommandExecuted(commandId, { value });
         }
 
         function handleClick() {
+            if (disabled) {
+                return;
+            }
             if (menuType === MenuItemType.BUTTON_SELECTOR) {
                 const commandId = id;
                 handleCommandExecuted(commandId, { value });
@@ -128,7 +139,12 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
         }
 
         return menuType === MenuItemType.BUTTON_SELECTOR ? (
-            <div className={styles.toolbarItemSelectButton}>
+            <div
+                className={`${styles.toolbarItemSelectButton} ${
+                    disabled ? styles.toolbarItemSelectButtonDisabled : ''
+                }`}
+                data-disabled={disabled}
+            >
                 <div className={styles.toolbarItemSelectButtonLabel} onClick={handleClick}>
                     <CustomLabel
                         icon={iconToDisplay}
@@ -139,16 +155,25 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
                     />
                 </div>
                 <Dropdown
+                    visible={disabled ? false : undefined}
                     overlay={<Menu menuType={id} options={options} onOptionSelect={handleSelect} value={value} />}
                 >
-                    <div className={styles.toolbarItemSelectButtonArrow}>
+                    <div
+                        className={`${styles.toolbarItemSelectButtonArrow} ${
+                            disabled ? styles.toolbarItemSelectButtonArrowDisabled : ''
+                        }`}
+                        data-disabled={disabled}
+                    >
                         <MoreDownSingle />
                     </div>
                 </Dropdown>
             </div>
         ) : (
-            <Dropdown overlay={<Menu menuType={id} options={options} onOptionSelect={handleSelect} value={value} />}>
-                <div className={styles.toolbarItemSelect}>
+            <Dropdown
+                visible={disabled ? false : undefined}
+                overlay={<Menu menuType={id} options={options} onOptionSelect={handleSelect} value={value} />}
+            >
+                <div className={`${styles.toolbarItemSelect} ${disabled ? styles.toolbarItemSelectDisabled : ''}`}>
                     <CustomLabel
                         icon={iconToDisplay}
                         title={title!}
@@ -156,7 +181,11 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
                         label={label}
                         onChange={handleChange}
                     />
-                    <div className={styles.toolbarItemSelectArrow}>
+                    <div
+                        className={`${styles.toolbarItemSelectArrow} ${
+                            disabled ? styles.toolbarItemSelectArrowDisabled : ''
+                        }`}
+                    >
                         <MoreDownSingle />
                     </div>
                 </div>

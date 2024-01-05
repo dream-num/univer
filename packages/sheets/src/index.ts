@@ -45,7 +45,7 @@ export {
 export { alignToMergedCellsBorders, getCellAtRowCol } from './commands/commands/utils/selection-utils';
 export { MAX_CELL_PER_SHEET_KEY } from './controllers/config/config';
 export { BorderStyleManagerService, type IBorderInfo } from './services/border-style-manager.service';
-export { SheetEditablePermission, SheetPermissionService } from './services/permission';
+export { getCurrentSheetDisabled$, SheetEditablePermission, SheetPermissionService } from './services/permission';
 export {
     NORMAL_SELECTION_PLUGIN_NAME,
     SelectionManagerService,

@@ -15,13 +15,16 @@
  */
 
 import { InputNumber } from '@univerjs/design';
+import { useObservable } from '@univerjs/ui';
 import React, { useMemo, useState } from 'react';
+import { Observable } from 'rxjs';
 
 import styles from './index.module.less';
 import type { IFontSizeProps } from './interface';
 
 export const FontSize = (props: IFontSizeProps) => {
-    const { value, min, max, onChange } = props;
+    const { value, min, max, onChange, disabled$ } = props;
+    const disabled = useObservable(disabled$ ?? new Observable<boolean>((sub) => sub.next(false)));
     const [realValue, setRealValue] = useState<number>(Number(value ?? 0));
 
     const _value = useMemo(() => Number(value ?? realValue), [value]);
@@ -50,6 +53,7 @@ export const FontSize = (props: IFontSizeProps) => {
                 max={max}
                 onKeyDown={handleStopPropagation}
                 onChange={handleChange}
+                disabled={disabled}
             />
         </div>
     );

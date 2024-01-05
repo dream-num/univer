@@ -81,7 +81,7 @@ interface IMenuItemBase<V> {
         | {
               name: string;
               hoverable?: boolean;
-              props?: Record<string, string | number | Array<{ [x: string | number]: string }>>;
+              props?: Record<string, any>;
           }; // custom component, send to CustomLabel label property
 
     hidden$?: Observable<boolean>;

@@ -77,6 +77,7 @@ export class FormulaEditorController extends RxDisposable {
         this._commandExecutedListener();
         this._syncEditorSize();
         this._listenFxBtnClick();
+        this._listenFoldBtnClick();
 
         this._renderManagerService.currentRender$.pipe(takeUntil(this.dispose$)).subscribe((unitId) => {
             if (unitId !== DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
@@ -154,6 +155,12 @@ export class FormulaEditorController extends RxDisposable {
 
                 this._textSelectionManagerService.replaceTextRanges(textRanges);
             }
+        });
+    }
+
+    private _listenFoldBtnClick() {
+        this._formulaEditorManagerService.foldBtnStatus$.pipe(takeUntil(this.dispose$)).subscribe(() => {
+            this._textSelectionManagerService.refreshSelection();
         });
     }
 
@@ -395,9 +402,16 @@ export class FormulaEditorController extends RxDisposable {
 
         let scrollBar = viewportMain?.getScrollBar() as Nullable<ScrollBar>;
 
+        scene.transformByState({
+            width,
+            height: actualHeight,
+        });
+
+        mainComponent?.resize(width, actualHeight);
+
         if (actualHeight > height) {
             if (scrollBar == null) {
-                viewportMain && new ScrollBar(viewportMain, { enableHorizontal: false });
+                viewportMain && new ScrollBar(viewportMain, { enableHorizontal: false, barSize: 8 });
             } else {
                 viewportMain?.resetSizeAndScrollBar();
             }
@@ -406,12 +420,5 @@ export class FormulaEditorController extends RxDisposable {
             viewportMain?.scrollTo({ x: 0, y: 0 });
             viewportMain?.getScrollBar()?.dispose();
         }
-
-        scene.transformByState({
-            width,
-            height: actualHeight,
-        });
-
-        mainComponent?.resize(width, actualHeight);
     }
 }

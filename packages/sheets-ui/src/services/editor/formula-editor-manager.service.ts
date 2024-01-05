@@ -24,6 +24,7 @@ export interface IFormulaEditorManagerService {
     position$: Observable<Nullable<DOMRect>>;
     focus$: Observable<boolean>;
     fxBtnClick$: Observable<boolean>;
+    foldBtnStatus$: Observable<boolean>;
     dispose(): void;
     setPosition(param: DOMRect): void;
     getPosition(): Readonly<Nullable<DOMRect>>;
@@ -43,6 +44,9 @@ export class FormulaEditorManagerService implements IDisposable {
 
     private readonly _fxBtnClick$ = new BehaviorSubject<boolean>(false);
     readonly fxBtnClick$ = this._fxBtnClick$.asObservable();
+
+    private readonly _foldBtnStatus$ = new BehaviorSubject<boolean>(false);
+    readonly foldBtnStatus$ = this._foldBtnStatus$.asObservable();
 
     dispose(): void {
         this._position$.complete();
@@ -68,6 +72,10 @@ export class FormulaEditorManagerService implements IDisposable {
 
     handleFxBtnClick(params: boolean) {
         this._fxBtnClick$.next(params);
+    }
+
+    handleFoldBtnClick(params: boolean) {
+        this._foldBtnStatus$.next(params);
     }
 
     private _refresh(param: DOMRect): void {

@@ -16,11 +16,12 @@
 
 import type { IPaddingData, Nullable } from '@univerjs/core';
 
-import type { Scene, Viewport } from '.';
 import { RENDER_CLASS_TYPE } from './basics/const';
 import { cancelRequestFrame, requestNewFrame } from './basics/tools';
 import { Vector2 } from './basics/vector2';
+import type { Scene } from './scene';
 import type { ThinScene } from './thin-scene';
+import type { Viewport } from './viewport';
 
 export enum ScrollTimerType {
     ALL,

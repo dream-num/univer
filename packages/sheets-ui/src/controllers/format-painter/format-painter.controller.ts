@@ -120,8 +120,9 @@ export class FormatPainterController extends Disposable {
                 endRow: merge.endRow - startRow,
                 endColumn: merge.endColumn - startColumn,
             };
-            const rowRepeats = Math.floor((range.endRow - range.startRow + 1) / styleRowsNum);
-            const colRepeats = Math.floor((range.endColumn - range.startColumn + 1) / styleColsNum);
+            // merge will apply at least once
+            const rowRepeats = Math.max(1, Math.floor((range.endRow - range.startRow + 1) / styleRowsNum));
+            const colRepeats = Math.max(1, Math.floor((range.endColumn - range.startColumn + 1) / styleColsNum));
             for (let i = 0; i < rowRepeats; i++) {
                 for (let j = 0; j < colRepeats; j++) {
                     mergeRanges.push({

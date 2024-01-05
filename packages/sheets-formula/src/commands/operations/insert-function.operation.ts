@@ -144,7 +144,7 @@ export const InsertFunctionOperation: ICommand = {
 
             const setSelectionParams = {
                 unitId,
-                sheetId,
+                subUnitId: sheetId,
                 pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                 selections: [resultRange],
             };

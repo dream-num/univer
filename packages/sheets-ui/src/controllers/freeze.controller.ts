@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IFreeze, IStyleSheet, IWorksheetData, Nullable, Observer } from '@univerjs/core';
+import type { ICommandInfo, IFreeze, IRange, IStyleSheet, IWorksheetData, Nullable, Observer } from '@univerjs/core';
 import {
     ColorKit,
     Disposable,
@@ -22,6 +22,7 @@ import {
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
+    RANGE_TYPE,
     ThemeService,
     toDisposable,
 } from '@univerjs/core';
@@ -30,6 +31,9 @@ import { CURSOR_TYPE, IRenderManagerService, Rect, Vector2 } from '@univerjs/eng
 import type {
     IDeltaColumnWidthCommandParams,
     IDeltaRowHeightCommand,
+    IMoveColsCommandParams,
+    IMoveRowsCommandParams,
+    IRemoveRowColCommandParams,
     ISetColHiddenMutationParams,
     ISetFrozenMutationParams,
     ISetWorksheetRowAutoHeightMutationParams,
@@ -37,18 +41,24 @@ import type {
 import {
     DeltaColumnWidthCommand,
     DeltaRowHeightCommand,
+    MoveColsCommand,
+    MoveRowsCommand,
+    RemoveColCommand,
+    RemoveRowCommand,
     SelectionManagerService,
     SetColHiddenMutation,
     SetColVisibleMutation,
     SetFrozenCommand,
     SetFrozenMutation,
+    SetFrozenMutationFactory,
     SetRowHiddenMutation,
     SetRowVisibleMutation,
     SetWorksheetActiveOperation,
     SetWorksheetRowAutoHeightMutation,
+    SheetInterceptorService,
 } from '@univerjs/sheets';
 import type { ISetRowHiddenMutationParams } from '@univerjs/sheets/commands/mutations/set-row-visible.mutation.js';
-import { Inject } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 
 import { ScrollCommand } from '../commands/commands/set-scroll.command';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
@@ -102,8 +112,6 @@ export class FreezeController extends Disposable {
 
     private _upObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 
-    private _viewportObservers: Array<Nullable<Observer<IScrollObserverParam>>> = [];
-
     private _changeToRow: number = -1;
 
     private _changeToColumn: number = -1;
@@ -129,12 +137,12 @@ export class FreezeController extends Disposable {
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @ISelectionRenderService
-        private readonly _selectionRenderService: ISelectionRenderService,
-
+        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @Inject(ScrollManagerService) private readonly _scrollManagerService: ScrollManagerService,
-        @Inject(ThemeService) private readonly _themeService: ThemeService
+        @Inject(ThemeService) private readonly _themeService: ThemeService,
+        @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
+        @Inject(Injector) private _injector: Injector
     ) {
         super();
 
@@ -161,10 +169,17 @@ export class FreezeController extends Disposable {
         this._commandExecutedListener();
 
         this._themeChangeListener();
+
+        this._interceptorCommands();
+
+        this._bindViewportScroll();
     }
 
-    private _createFreeze(freezeDirectionType: FREEZE_DIRECTION_TYPE = FREEZE_DIRECTION_TYPE.ROW) {
-        const config = this._getFreeze();
+    private _createFreeze(
+        freezeDirectionType: FREEZE_DIRECTION_TYPE = FREEZE_DIRECTION_TYPE.ROW,
+        freezeConfig?: IFreeze
+    ) {
+        const config = freezeConfig ?? this._getFreeze();
 
         if (config == null) {
             return;
@@ -608,27 +623,13 @@ export class FreezeController extends Disposable {
         });
     }
 
-    private _updateViewport(
-        row: number = -1,
-        column: number = -1,
-        ySplit: number = 0,
-        xSplit: number = 0,
-        resetScroll = ResetScrollType.ALL
-    ) {
+    private _getViewports() {
         const sheetObject = this._getSheetObject();
         if (sheetObject == null) {
             return;
         }
         const { scene } = sheetObject;
 
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-        if (skeleton == null) {
-            return;
-        }
-
-        const { rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop } = skeleton;
-
-        // column header
         const viewColumnLeft = scene.getViewport(VIEWPORT_KEY.VIEW_COLUMN_LEFT);
         const viewColumnRight = scene.getViewport(VIEWPORT_KEY.VIEW_COLUMN_RIGHT);
 
@@ -658,11 +659,100 @@ export class FreezeController extends Disposable {
             return;
         }
 
-        const { scaleX, scaleY } = scene.getAncestorScale();
+        return {
+            viewMain,
+            viewMainLeftTop,
+            viewMainLeft,
+            viewMainTop,
+            viewColumnLeft,
+            viewColumnRight,
+            viewRowTop,
+            viewRowBottom,
+            viewLeftTop,
+        };
+    }
 
-        this._viewportObservers.forEach((obs) => {
-            viewMain.onScrollAfterObserver.remove(obs);
-        });
+    private _bindViewportScroll() {
+        // column header
+        const viewports = this._getViewports();
+        if (!viewports) {
+            return;
+        }
+
+        const { viewMain, viewRowBottom, viewColumnRight, viewMainLeft, viewMainTop } = viewports;
+
+        this.disposeWithMe(
+            viewMain.onScrollAfterObserver.add((param: IScrollObserverParam) => {
+                const { scrollX, scrollY, actualScrollX, actualScrollY } = param;
+
+                if (viewRowBottom.isActive) {
+                    viewRowBottom
+                        .updateScroll({
+                            scrollY,
+                            actualScrollY,
+                        })
+                        .makeDirty(true);
+                }
+
+                if (viewColumnRight.isActive) {
+                    viewColumnRight
+                        .updateScroll({
+                            scrollX,
+                            actualScrollX,
+                        })
+                        .makeDirty(true);
+                }
+                if (viewMainLeft.isActive) {
+                    viewMainLeft
+                        .updateScroll({
+                            scrollY,
+                            actualScrollY,
+                        })
+                        .makeDirty(true);
+                }
+
+                if (viewMainTop.isActive) {
+                    viewMainTop
+                        .updateScroll({
+                            scrollX,
+                            actualScrollX,
+                        })
+                        .makeDirty(true);
+                }
+            })!
+        );
+    }
+
+    private _updateViewport(
+        row: number = -1,
+        column: number = -1,
+        ySplit: number = 0,
+        xSplit: number = 0,
+        resetScroll = ResetScrollType.ALL
+    ) {
+        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        if (skeleton == null) {
+            return;
+        }
+
+        const { rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop } = skeleton;
+
+        const viewports = this._getViewports();
+        if (!viewports) {
+            return;
+        }
+
+        const {
+            viewMain,
+            viewMainLeftTop,
+            viewMainLeft,
+            viewMainTop,
+            viewColumnLeft,
+            viewColumnRight,
+            viewRowTop,
+            viewRowBottom,
+            viewLeftTop,
+        } = viewports;
 
         viewColumnRight.resize({
             left: rowHeaderWidthAndMarginLeft,
@@ -684,26 +774,6 @@ export class FreezeController extends Disposable {
             width: rowHeaderWidthAndMarginLeft,
             height: columnHeaderHeightAndMarginTop,
         });
-
-        this._viewportObservers.push(
-            viewMain.onScrollAfterObserver.add((param: IScrollObserverParam) => {
-                const { scrollX, scrollY, actualScrollX, actualScrollY } = param;
-
-                viewColumnRight
-                    .updateScroll({
-                        scrollX,
-                        actualScrollX,
-                    })
-                    .makeDirty(true);
-
-                viewRowBottom
-                    .updateScroll({
-                        scrollY,
-                        actualScrollY,
-                    })
-                    .makeDirty(true);
-            })
-        );
 
         let isTopView = true;
 
@@ -736,8 +806,6 @@ export class FreezeController extends Disposable {
         viewRowTop.resetPadding();
         viewColumnLeft.resetPadding();
 
-        // const currentScroll = this._scrollManagerService.getCurrentScroll();
-
         // cancel freeze
         if (isTopView === false && isLeftView === false) {
             viewMain.resize({
@@ -747,18 +815,6 @@ export class FreezeController extends Disposable {
                 right: 0,
             });
             viewMain.resetPadding();
-
-            // if (resetScroll) {
-            //     this._commandService.executeCommand(
-            //         ScrollCommand.id,
-            //         currentScroll ?? {
-            //             sheetViewStartRow: 0,
-            //             sheetViewStartColumn: 0,
-            //             offsetX: 0,
-            //             offsetY: 0,
-            //         }
-            //     );
-            // }
         } else if (isTopView === true && isLeftView === false) {
             // freeze row
             const topGap = endSheetView.startY - startSheetView.startY;
@@ -788,7 +844,6 @@ export class FreezeController extends Disposable {
                 height: topGap,
                 right: 0,
             });
-            // const config = viewMain.getBarScroll(startSheetView.startX, startSheetView.startY);
             viewMainTop
                 .updateScroll({
                     actualScrollY: startSheetView.startY,
@@ -813,18 +868,6 @@ export class FreezeController extends Disposable {
                 bottom: 0,
                 width: rowHeaderWidthAndMarginLeft,
             });
-            this._viewportObservers.push(
-                viewMain.onScrollAfterObserver.add((param: IScrollObserverParam) => {
-                    const { scrollX, actualScrollX } = param;
-
-                    viewMainTop
-                        .updateScroll({
-                            scrollX,
-                            actualScrollX,
-                        })
-                        .makeDirty(true);
-                })
-            );
 
             viewMainTop.enable();
             viewRowTop.enable();
@@ -882,19 +925,6 @@ export class FreezeController extends Disposable {
                 height: columnHeaderHeightAndMarginTop,
                 right: 0,
             });
-
-            this._viewportObservers.push(
-                viewMain.onScrollAfterObserver.add((param: IScrollObserverParam) => {
-                    const { scrollY, actualScrollY } = param;
-
-                    viewMainLeft
-                        .updateScroll({
-                            scrollY,
-                            actualScrollY,
-                        })
-                        .makeDirty(true);
-                })
-            );
 
             viewMainLeft.enable();
             viewColumnLeft.enable();
@@ -1011,44 +1041,6 @@ export class FreezeController extends Disposable {
                 right: 0,
             });
 
-            this._viewportObservers.forEach((obs) => {
-                viewMain.onScrollAfterObserver.remove(obs);
-            });
-
-            this._viewportObservers.push(
-                viewMain.onScrollAfterObserver.add((param: IScrollObserverParam) => {
-                    const { scrollX, scrollY, actualScrollX, actualScrollY } = param;
-
-                    viewRowBottom
-                        .updateScroll({
-                            scrollY,
-                            actualScrollY,
-                        })
-                        .makeDirty(true);
-
-                    viewColumnRight
-                        .updateScroll({
-                            scrollX,
-                            actualScrollX,
-                        })
-                        .makeDirty(true);
-
-                    viewMainLeft
-                        .updateScroll({
-                            scrollY,
-                            actualScrollY,
-                        })
-                        .makeDirty(true);
-
-                    viewMainTop
-                        .updateScroll({
-                            scrollX,
-                            actualScrollX,
-                        })
-                        .makeDirty(true);
-                })
-            );
-
             viewMainLeftTop.enable();
             viewMainTop.enable();
             viewMainLeft.enable();
@@ -1110,6 +1102,206 @@ export class FreezeController extends Disposable {
         this._freezeActiveColor = style.primaryColor;
 
         this._freezeHoverColor = style.grey500;
+    }
+
+    private _interceptorCommands() {
+        this.disposeWithMe(
+            this._sheetInterceptorService.interceptCommand({
+                getMutations: (command) => {
+                    const empty = {
+                        redos: [],
+                        undos: [],
+                    };
+
+                    const freeze = this._getFreeze();
+
+                    if (!freeze) {
+                        return empty;
+                    }
+
+                    const createFreezeMutationAndRefresh = (newFreeze: IFreeze) => {
+                        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+                        const unitId = workbook.getUnitId();
+                        const worksheet = workbook.getActiveSheet();
+                        const subUnitId = worksheet.getSheetId();
+
+                        this._refreshFreeze(
+                            newFreeze.startRow,
+                            newFreeze.startColumn,
+                            newFreeze.ySplit,
+                            newFreeze.xSplit,
+                            ResetScrollType.NONE
+                        );
+
+                        const redoMutationParams = {
+                            ...newFreeze,
+                            unitId,
+                            subUnitId,
+                        };
+
+                        const undoMutationParams = SetFrozenMutationFactory(this._injector, redoMutationParams);
+
+                        return {
+                            undos: [{ id: SetFrozenMutation.id, params: undoMutationParams }],
+                            redos: [{ id: SetFrozenMutation.id, params: redoMutationParams }],
+                        };
+                    };
+
+                    if (command.id === MoveColsCommand.id) {
+                        const selections = this._selectionManagerService.getSelections();
+                        const { fromCol, toCol } = command.params as IMoveColsCommandParams;
+                        const filteredSelections = selections?.filter(
+                            (selection) =>
+                                selection.range.rangeType === RANGE_TYPE.COLUMN &&
+                                selection.range.startColumn <= fromCol &&
+                                fromCol <= selection.range.endColumn
+                        );
+
+                        if (!filteredSelections?.length) {
+                            return empty;
+                        }
+                        const sourceRange = filteredSelections[0].range;
+
+                        const targetRange: IRange = {
+                            ...sourceRange,
+                            startColumn: toCol,
+                            endColumn: toCol + sourceRange.endColumn - sourceRange.startColumn,
+                        };
+
+                        if (
+                            !freeze ||
+                            freeze.startColumn <= 0 ||
+                            // move out of freeze
+                            (sourceRange.startColumn >= freeze.startColumn &&
+                                targetRange.startColumn >= freeze.startColumn) ||
+                            // not move
+                            sourceRange.startColumn === targetRange.startColumn ||
+                            // move in freeze range
+                            (sourceRange.endColumn < freeze.startColumn && targetRange.startColumn < freeze.startColumn)
+                        ) {
+                            return empty;
+                        }
+
+                        const totalColCount = sourceRange.endColumn - sourceRange.startColumn + 1;
+                        const moveFreezeColCount = Math.max(
+                            Math.min(freeze.startColumn, sourceRange.endColumn + 1) - sourceRange.startColumn,
+                            0
+                        );
+
+                        let newStartColumn;
+                        let newXSplit;
+
+                        if (targetRange.startColumn >= freeze.startColumn) {
+                            newStartColumn = Math.max(freeze.startColumn - moveFreezeColCount, 1);
+                            newXSplit = Math.max(freeze.xSplit - moveFreezeColCount, 1);
+                        } else {
+                            newStartColumn = freeze.startColumn + totalColCount - moveFreezeColCount;
+                            newXSplit = freeze.xSplit + totalColCount - moveFreezeColCount;
+                        }
+
+                        const redoMutationParams = {
+                            ...freeze,
+                            startColumn: newStartColumn,
+                            xSplit: newXSplit,
+                        };
+
+                        return createFreezeMutationAndRefresh(redoMutationParams);
+                    }
+
+                    if (command.id === MoveRowsCommand.id) {
+                        const selections = this._selectionManagerService.getSelections();
+                        const { fromRow, toRow } = command.params as IMoveRowsCommandParams;
+                        const filteredSelections = selections?.filter(
+                            (selection) =>
+                                selection.range.rangeType === RANGE_TYPE.ROW &&
+                                selection.range.startRow <= fromRow &&
+                                fromRow <= selection.range.endRow
+                        );
+
+                        if (!filteredSelections?.length) {
+                            return empty;
+                        }
+                        const sourceRange = filteredSelections[0].range;
+
+                        const targetRange: IRange = {
+                            ...sourceRange,
+                            startRow: toRow,
+                            endRow: toRow + sourceRange.endRow - sourceRange.startRow,
+                        };
+
+                        if (
+                            !freeze ||
+                            freeze.startRow <= 0 ||
+                            // move out of freeze
+                            (sourceRange.startRow >= freeze.startRow && targetRange.startRow >= freeze.startRow) ||
+                            // not move
+                            sourceRange.startRow === targetRange.startRow ||
+                            // move in freeze range
+                            (sourceRange.endRow < freeze.startRow && targetRange.startRow < freeze.startRow)
+                        ) {
+                            return empty;
+                        }
+
+                        const totalColCount = sourceRange.endRow - sourceRange.startRow + 1;
+                        const moveFreezeColCount = Math.max(
+                            Math.min(freeze.startRow, sourceRange.endRow + 1) - sourceRange.startRow,
+                            0
+                        );
+
+                        let newStartRow;
+                        let newYSplit;
+
+                        if (targetRange.startRow >= freeze.startRow) {
+                            newStartRow = Math.max(freeze.startRow - moveFreezeColCount, 1);
+                            newYSplit = Math.max(freeze.ySplit - moveFreezeColCount, 1);
+                        } else {
+                            newStartRow = freeze.startRow + totalColCount - moveFreezeColCount;
+                            newYSplit = freeze.ySplit + totalColCount - moveFreezeColCount;
+                        }
+
+                        const redoMutationParams = {
+                            ...freeze,
+                            startRow: newStartRow,
+                            ySplit: newYSplit,
+                        };
+
+                        return createFreezeMutationAndRefresh(redoMutationParams);
+                    }
+
+                    if (command.id === RemoveColCommand.id || command.id === RemoveRowCommand.id) {
+                        const params = command.params as IRemoveRowColCommandParams;
+                        const range = params.range;
+
+                        if (range.rangeType === RANGE_TYPE.COLUMN && range.startColumn < freeze.startColumn) {
+                            const deleteFreezeColCount =
+                                Math.min(freeze.startColumn, range.endColumn + 1) - range.startColumn;
+
+                            const newFreeze: IFreeze = {
+                                ...freeze,
+                                startColumn: Math.max(1, freeze.startColumn - deleteFreezeColCount),
+                                xSplit: Math.max(1, freeze.xSplit - deleteFreezeColCount),
+                            };
+
+                            return createFreezeMutationAndRefresh(newFreeze);
+                        }
+
+                        if (params.range.rangeType === RANGE_TYPE.ROW && range.startRow < freeze.startRow) {
+                            const deleteFreezeRowCount = Math.min(freeze.startRow, range.endRow + 1) - range.startRow;
+
+                            const newFreeze: IFreeze = {
+                                ...freeze,
+                                startRow: Math.max(1, freeze.startRow - deleteFreezeRowCount),
+                                ySplit: Math.max(1, freeze.ySplit - deleteFreezeRowCount),
+                            };
+
+                            return createFreezeMutationAndRefresh(newFreeze);
+                        }
+                    }
+
+                    return empty;
+                },
+            })
+        );
     }
 
     private _commandExecutedListener() {
@@ -1288,10 +1480,16 @@ export class FreezeController extends Disposable {
         xSplit: number,
         resetScroll?: ResetScrollType
     ) {
+        const newFreeze = {
+            startRow,
+            startColumn,
+            ySplit,
+            xSplit,
+        };
         this._clearFreeze();
 
-        this._createFreeze(FREEZE_DIRECTION_TYPE.ROW);
-        this._createFreeze(FREEZE_DIRECTION_TYPE.COLUMN);
+        this._createFreeze(FREEZE_DIRECTION_TYPE.ROW, newFreeze);
+        this._createFreeze(FREEZE_DIRECTION_TYPE.COLUMN, newFreeze);
 
         this._updateViewport(startRow, startColumn, ySplit, xSplit, resetScroll);
 

@@ -80,7 +80,7 @@ export class Scene extends ThinScene {
             }
             this._inputManager = new InputManager(this);
         } else if (this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
-            // 挂载到sceneViewer的scene需要响应前者的transform
+            // 挂载到 sceneViewer 的 scene 需要响应前者的 transform
             const parent = this._parent as SceneViewer;
             parent.addSubScene(this);
         }
@@ -113,7 +113,7 @@ export class Scene extends ThinScene {
 
     attachControl(hasDown: boolean = true, hasUp: boolean = true, hasMove: boolean = true, hasWheel: boolean = true) {
         if (!(this._parent.classType === RENDER_CLASS_TYPE.ENGINE)) {
-            // 只绑定直接与engine挂载的scene来统一管理事件
+            // 只绑定直接与 engine 挂载的 scene 来统一管理事件
             return;
         }
 
@@ -447,7 +447,7 @@ export class Scene extends ThinScene {
         return objects;
     }
 
-    addViewport(...viewport: Viewport[]) {
+    override addViewport(...viewport: Viewport[]) {
         this._viewports.push(...viewport);
         return this;
     }

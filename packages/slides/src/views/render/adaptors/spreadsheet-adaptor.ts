@@ -187,7 +187,8 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
             width: rowHeaderWidthScale,
             isWheelPreventDefaultX: true,
         });
-        const viewLeftTop = new Viewport(SHEET_VIEW_KEY.VIEW_LEFT_TOP + id, scene, {
+
+        new Viewport(SHEET_VIEW_KEY.VIEW_LEFT_TOP + id, scene, {
             left: 0,
             top: 0,
             width: rowHeaderWidthScale,
@@ -214,7 +215,7 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
                 .makeDirty(true);
         });
 
-        scene.addViewport(viewMain, viewLeft, viewTop, viewLeftTop).attachControl();
+        scene.attachControl();
 
         const scrollbar = new ScrollBar(viewMain, {
             mainScene,

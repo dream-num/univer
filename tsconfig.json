@@ -57,9 +57,6 @@
             "path": "./packages/facade"
         },
         {
-            "path": "./packages/find-replace"
-        },
-        {
             "path": "./packages/image"
         },
         {

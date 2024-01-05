@@ -22,7 +22,7 @@ import type { Documents } from '../../docs/document';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import type { IFontCacheItem } from '../interfaces';
 import type { SheetComponent } from '../sheet-component';
-import type { SpreadsheetSkeleton } from '../sheet-skeleton';
+import { getDocsSkeletonPageSize, type SpreadsheetSkeleton } from '../sheet-skeleton';
 import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultFontExtension';
@@ -216,6 +216,23 @@ export class Font extends SheetExtension {
             documentSkeleton.calculate();
         } else {
             documentSkeleton.getViewModel().getDataModel().updateDocumentDataPageSize(Infinity);
+        }
+
+        // Use fix https://github.com/dream-num/univer/issues/927, Set the actual width of the content to the page width of the document,
+        // so that the divide will be aligned when the skeleton is calculated.
+        if (wrapStrategy !== WrapStrategy.WRAP) {
+            const contentSize = getDocsSkeletonPageSize(documentSkeleton);
+            const documentStyle = documentSkeleton.getViewModel().getDataModel().getSnapshot().documentStyle;
+            if (contentSize && documentStyle) {
+                const { width } = contentSize;
+                const { marginRight = 0, marginLeft = 0 } = documentStyle;
+
+                documentSkeleton
+                    .getViewModel()
+                    .getDataModel()
+                    .updateDocumentDataPageSize(width + marginLeft + marginRight);
+                documentSkeleton.calculate();
+            }
         }
 
         documentSkeleton.makeDirty(false);

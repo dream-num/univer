@@ -23,7 +23,6 @@ import {
     IUniverInstanceService,
     Rectangle,
     serializeRange,
-    Tools,
 } from '@univerjs/core';
 import {
     getCellAtRowCol,
@@ -73,36 +72,57 @@ export const InsertFunctionOperation: ICommand = {
         let editRange: IRange | null = null;
         let editRow = 0;
         let editColumn = 0;
+        let editFormulaRangeString = '';
 
-        currentSelections.some((selection) => {
-            const { range, primary } = selection;
-
+        // Whether or not there is a matching refRange, single range with one cell or multiple rows and columns, enter edit mode
+        if (
+            currentSelections.length === 1 &&
+            (isSingleCell(currentSelections[0].range) || isMultiRowsColumnsRange(currentSelections[0].range))
+        ) {
+            const { range, primary } = currentSelections[0];
             const row = primary?.actualRow ?? range.startRow;
             const column = primary?.actualColumn ?? range.startColumn;
 
+            editRange = range;
+            editRow = row;
+            editColumn = column;
+
             const refRange = findRefRange(cellMatrix, row, column);
 
-            if (!refRange) {
-                editRange = range;
-                editRow = row;
-                editColumn = column;
-                return true;
+            if (refRange) {
+                editFormulaRangeString = serializeRange(refRange);
             }
+        } else {
+            currentSelections.some((selection) => {
+                const { range, primary } = selection;
 
-            const rangeString = serializeRange(refRange);
-            const formulaString = `=${value}(${rangeString})`;
+                const row = primary?.actualRow ?? range.startRow;
+                const column = primary?.actualColumn ?? range.startColumn;
 
-            list.push({
-                range,
-                primary: {
-                    row,
-                    column,
-                },
-                formula: formulaString,
+                const refRange = findRefRange(cellMatrix, row, column);
+
+                if (!refRange) {
+                    editRange = range;
+                    editRow = row;
+                    editColumn = column;
+                    return true;
+                }
+
+                const rangeString = serializeRange(refRange);
+                const formulaString = `=${value}(${rangeString})`;
+
+                list.push({
+                    range,
+                    primary: {
+                        row,
+                        column,
+                    },
+                    formula: formulaString,
+                });
+
+                return false;
             });
-
-            return false;
-        });
+        }
 
         if (editRange) {
             // set current position
@@ -133,7 +153,7 @@ export const InsertFunctionOperation: ICommand = {
             // TODO@DR-Univer: Maybe setTimeout can be removed
             setTimeout(() => {
                 // edit cell
-                formulaInputService.inputFormula(`=${value}(`);
+                formulaInputService.inputFormula(`=${value}(${editFormulaRangeString}`);
             }, 0);
         }
 
@@ -214,6 +234,22 @@ function findStartColumn(cellMatrix: ObjectMatrix<Nullable<ICellData>>, row: num
     return column;
 }
 
-function isNumberCell(cell: Nullable<ICellData>) {
-    return cell && (Tools.isStringNumber(cell.v) || getCellValueType(cell) === CellValueType.NUMBER);
+export function isNumberCell(cell: Nullable<ICellData>) {
+    return cell && (cell.t === CellValueType.NUMBER || getCellValueType(cell) === CellValueType.NUMBER);
+}
+
+/**
+ * Check if a single cell
+ * @param range
+ */
+export function isSingleCell(range: IRange) {
+    return range.startRow === range.endRow && range.startColumn === range.endColumn;
+}
+
+/**
+ * Check if there is a multi-row, multi-column range
+ * @param range
+ */
+export function isMultiRowsColumnsRange(range: IRange) {
+    return range.startRow !== range.endRow && range.startColumn !== range.endColumn;
 }

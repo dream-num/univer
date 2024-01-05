@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IMutationInfo, IRange, Nullable } from '@univerjs/core';
+import type { ICellData, ICommandInfo, IMutationInfo, IRange, Nullable } from '@univerjs/core';
 import {
     Direction,
     Disposable,
@@ -116,85 +116,86 @@ export class AutoFillController extends Disposable {
     private _onSelectionControlFillChanged() {
         const disposableCollection = new DisposableCollection();
         this.disposeWithMe(
-            toDisposable(
-                this._selectionManagerService.selectionMoveEnd$.subscribe(() => {
-                    // Each range change requires re-listening
-                    disposableCollection.dispose();
+            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                if (command.id !== SetSelectionsOperation.id) {
+                    return;
+                }
 
-                    const current = this._selectionManagerService.getCurrent();
+                /**
+                 * Auto fill only responds to regular selections;
+                 * it does not apply to selections for features like formulas or charts.
+                 */
+                const current = this._selectionManagerService.getCurrent();
+                if (current?.pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
+                    return;
+                }
 
-                    /**
-                     * Auto fill only responds to regular selections;
-                     * it does not apply to selections for features like formulas or charts.
-                     */
-                    if (current?.pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
-                        return;
-                    }
+                // Each range change requires re-listening
+                disposableCollection.dispose();
 
-                    const selectionControls = this._selectionRenderService.getCurrentControls();
-                    selectionControls.forEach((controlSelection) => {
-                        disposableCollection.add(
-                            toDisposable(
-                                controlSelection.selectionFilled$.subscribe((filled) => {
-                                    if (
-                                        filled == null ||
-                                        filled.startColumn === -1 ||
-                                        filled.startRow === -1 ||
-                                        filled.endColumn === -1 ||
-                                        filled.endRow === -1
-                                    ) {
-                                        return;
-                                    }
-                                    const source: IRange = {
-                                        startColumn: controlSelection.model.startColumn,
-                                        endColumn: controlSelection.model.endColumn,
-                                        startRow: controlSelection.model.startRow,
-                                        endRow: controlSelection.model.endRow,
-                                    };
-                                    const selection: IRange = {
-                                        startColumn: filled.startColumn,
-                                        endColumn: filled.endColumn,
-                                        startRow: filled.startRow,
-                                        endRow: filled.endRow,
-                                    };
+                const selectionControls = this._selectionRenderService.getCurrentControls();
+                selectionControls.forEach((controlSelection) => {
+                    disposableCollection.add(
+                        toDisposable(
+                            controlSelection.selectionFilled$.subscribe((filled) => {
+                                if (
+                                    filled == null ||
+                                    filled.startColumn === -1 ||
+                                    filled.startRow === -1 ||
+                                    filled.endColumn === -1 ||
+                                    filled.endRow === -1
+                                ) {
+                                    return;
+                                }
+                                const source: IRange = {
+                                    startColumn: controlSelection.model.startColumn,
+                                    endColumn: controlSelection.model.endColumn,
+                                    startRow: controlSelection.model.startRow,
+                                    endRow: controlSelection.model.endRow,
+                                };
+                                const selection: IRange = {
+                                    startColumn: filled.startColumn,
+                                    endColumn: filled.endColumn,
+                                    startRow: filled.startRow,
+                                    endRow: filled.endRow,
+                                };
 
-                                    this._triggerAutoFill(source, selection);
-                                })
-                            )
-                        );
+                                this._triggerAutoFill(source, selection);
+                            })
+                        )
+                    );
 
-                        // double click to fill range, range length will align to left or right column.
-                        // fill results will be as same as drag operation
-                        disposableCollection.add(
-                            toDisposable(
-                                controlSelection.fillControl.onDblclickObserver.add(() => {
-                                    const source = {
-                                        startColumn: controlSelection.model.startColumn,
-                                        endColumn: controlSelection.model.endColumn,
-                                        startRow: controlSelection.model.startRow,
-                                        endRow: controlSelection.model.endRow,
-                                    };
-                                    this._handleDbClickFill(source);
-                                })
-                            )
-                        );
+                    // double click to fill range, range length will align to left or right column.
+                    // fill results will be as same as drag operation
+                    disposableCollection.add(
+                        toDisposable(
+                            controlSelection.fillControl.onDblclickObserver.add(() => {
+                                const source = {
+                                    startColumn: controlSelection.model.startColumn,
+                                    endColumn: controlSelection.model.endColumn,
+                                    startRow: controlSelection.model.startRow,
+                                    endRow: controlSelection.model.endRow,
+                                };
+                                this._handleDbClickFill(source);
+                            })
+                        )
+                    );
 
-                        disposableCollection.add(
-                            toDisposable(
-                                controlSelection.fillControl.onPointerDownObserver.add(() => {
-                                    const visibleState = this._editorBridgeService.isVisible();
-                                    if (visibleState.visible) {
-                                        this._editorBridgeService.changeVisible({
-                                            visible: false,
-                                            eventType: DeviceInputEventType.PointerDown,
-                                        });
-                                    }
-                                })
-                            )
-                        );
-                    });
-                })
-            )
+                    disposableCollection.add(
+                        toDisposable(
+                            controlSelection.fillControl.onPointerDownObserver.add(() => {
+                                const visibleState = this._editorBridgeService.isVisible();
+                                if (visibleState.visible) {
+                                    this._editorBridgeService.changeVisible({
+                                        visible: false,
+                                        eventType: DeviceInputEventType.PointerDown,
+                                    });
+                                }
+                            })
+                        )
+                    );
+                });
+            })
         );
     }
 

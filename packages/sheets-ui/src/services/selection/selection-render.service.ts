@@ -962,7 +962,10 @@ export class SelectionRenderService implements ISelectionRenderService {
             endColumn: oldEndColumn,
         } = selectionControl?.model || { startRow: -1, endRow: -1, startColumn: -1, endColumn: -1 };
 
-        const targetViewport = this._getViewportByCell(oldEndRow, oldEndColumn) ?? this._activeViewport;
+        const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)!;
+
+        const targetViewport = this._getViewportByCell(oldEndRow, oldEndColumn) ?? viewportMain;
+
         const scrollXY = scene.getScrollXYByRelativeCoords(
             Vector2.FromArray([this._startOffsetX, this._startOffsetY]),
             targetViewport

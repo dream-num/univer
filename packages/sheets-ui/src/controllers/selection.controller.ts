@@ -26,7 +26,7 @@ import {
     toDisposable,
 } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import { IRenderManagerService, ScrollTimerType } from '@univerjs/engine-render';
+import { IRenderManagerService, ScrollTimerType, Vector2 } from '@univerjs/engine-render';
 import type { ISelectionWithCoordAndStyle, ISelectionWithStyle } from '@univerjs/sheets';
 import {
     convertSelectionDataToRange,
@@ -93,9 +93,15 @@ export class SelectionController extends Disposable {
         });
     }
 
+    private _getActiveViewport(evt: IPointerEvent | IMouseEvent) {
+        const sheetObject = this._getSheetObject();
+
+        return sheetObject?.scene.getActiveViewportByCoord(Vector2.FromArray([evt.offsetX, evt.offsetY]));
+    }
+
     private _initViewMainListener(sheetObject: ISheetObjectParam) {
-        const { spreadsheet, scene } = sheetObject;
-        const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+        const { spreadsheet } = sheetObject;
+
         this.disposeWithMe(
             toDisposable(
                 spreadsheet?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
@@ -105,7 +111,7 @@ export class SelectionController extends Disposable {
                         evt,
                         spreadsheet.zIndex + 1,
                         RANGE_TYPE.NORMAL,
-                        viewportMain
+                        this._getActiveViewport(evt)
                     );
 
                     if (evt.button !== 2) {
@@ -160,8 +166,8 @@ export class SelectionController extends Disposable {
     }
 
     private _initRowHeader(sheetObject: ISheetObjectParam) {
-        const { spreadsheetRowHeader, spreadsheet, scene } = sheetObject;
-        const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+        const { spreadsheetRowHeader, spreadsheet } = sheetObject;
+
         this.disposeWithMe(
             toDisposable(
                 spreadsheetRowHeader?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
@@ -170,7 +176,7 @@ export class SelectionController extends Disposable {
                         evt,
                         (spreadsheet?.zIndex || 1) + 1,
                         RANGE_TYPE.ROW,
-                        viewportMain,
+                        this._getActiveViewport(evt),
                         ScrollTimerType.Y
                     );
                     if (evt.button !== 2) {
@@ -184,8 +190,8 @@ export class SelectionController extends Disposable {
     }
 
     private _initColumnHeader(sheetObject: ISheetObjectParam) {
-        const { spreadsheetColumnHeader, spreadsheet, scene } = sheetObject;
-        const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+        const { spreadsheetColumnHeader, spreadsheet } = sheetObject;
+
         this.disposeWithMe(
             toDisposable(
                 spreadsheetColumnHeader?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
@@ -195,7 +201,7 @@ export class SelectionController extends Disposable {
                         evt,
                         (spreadsheet?.zIndex || 1) + 1,
                         RANGE_TYPE.COLUMN,
-                        viewportMain,
+                        this._getActiveViewport(evt),
                         ScrollTimerType.X
                     );
                     if (evt.button !== 2) {

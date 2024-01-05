@@ -30,6 +30,7 @@ import { CURSOR_TYPE, IRenderManagerService, Rect, Vector2 } from '@univerjs/eng
 import type {
     IDeltaColumnWidthCommandParams,
     IDeltaRowHeightCommand,
+    ISetColHiddenMutationParams,
     ISetFrozenMutationParams,
     ISetWorksheetRowAutoHeightMutationParams,
 } from '@univerjs/sheets';
@@ -37,11 +38,16 @@ import {
     DeltaColumnWidthCommand,
     DeltaRowHeightCommand,
     SelectionManagerService,
+    SetColHiddenMutation,
+    SetColVisibleMutation,
     SetFrozenCommand,
     SetFrozenMutation,
+    SetRowHiddenMutation,
+    SetRowVisibleMutation,
     SetWorksheetActiveOperation,
     SetWorksheetRowAutoHeightMutation,
 } from '@univerjs/sheets';
+import type { ISetRowHiddenMutationParams } from '@univerjs/sheets/commands/mutations/set-row-visible.mutation.js';
 import { Inject } from '@wendellhu/redi';
 
 import { ScrollCommand } from '../commands/commands/set-scroll.command';
@@ -1175,6 +1181,24 @@ export class FreezeController extends Disposable {
                                 subscription.unsubscribe();
                             });
                         });
+                    }
+                } else if (command.id === SetColHiddenMutation.id || command.id === SetColVisibleMutation.id) {
+                    const params = command.params as ISetColHiddenMutationParams;
+                    const freeze = this._getFreeze();
+                    const ranges = params.ranges;
+                    if (
+                        freeze &&
+                        freeze.startColumn > -1 &&
+                        ranges.some((range) => range.startColumn < freeze.startColumn)
+                    ) {
+                        this._refreshCurrent();
+                    }
+                } else if (command.id === SetRowHiddenMutation.id || command.id === SetRowVisibleMutation.id) {
+                    const params = command.params as ISetRowHiddenMutationParams;
+                    const freeze = this._getFreeze();
+                    const ranges = params.ranges;
+                    if (freeze && freeze.startRow > -1 && ranges.some((range) => range.startRow < freeze.startRow)) {
+                        this._refreshCurrent();
                     }
                 }
             })

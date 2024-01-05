@@ -39,6 +39,7 @@ import { AutoFillController } from '../../../controllers/auto-fill.controller';
 import { AutoFillService, IAutoFillService } from '../../../services/auto-fill/auto-fill.service';
 import { EditorBridgeService, IEditorBridgeService } from '../../../services/editor-bridge.service';
 import { ISelectionRenderService, SelectionRenderService } from '../../../services/selection/selection-render.service';
+import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
 
 const theme = {
     colorBlack: '#35322b',
@@ -241,6 +242,7 @@ describe('Test auto fill rules in controller', () => {
             [IShortcutService, { useClass: DesktopShortcutService }],
             [IPlatformService, { useClass: DesktopPlatformService }],
             [IEditorBridgeService, { useClass: EditorBridgeService }],
+            [SheetSkeletonManagerService],
             [AutoFillController],
         ]);
         univer = testBed.univer;

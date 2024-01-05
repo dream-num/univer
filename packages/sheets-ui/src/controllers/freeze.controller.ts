@@ -1111,176 +1111,178 @@ export class FreezeController extends Disposable {
     }
 
     private _interceptorCommands() {
-        this._sheetInterceptorService.interceptCommand({
-            getMutations: (command) => {
-                const empty = {
-                    redos: [],
-                    undos: [],
-                };
-
-                if (command.id === MoveColsCommand.id) {
-                    const selections = this._selectionManagerService.getSelections();
-                    const { fromCol, toCol } = command.params as IMoveColsCommandParams;
-                    const filteredSelections = selections?.filter(
-                        (selection) =>
-                            selection.range.rangeType === RANGE_TYPE.COLUMN &&
-                            selection.range.startColumn <= fromCol &&
-                            fromCol <= selection.range.endColumn
-                    );
-
-                    if (!filteredSelections?.length) {
-                        return empty;
-                    }
-                    const sourceRange = filteredSelections[0].range;
-
-                    const targetRange: IRange = {
-                        ...sourceRange,
-                        startColumn: toCol,
-                        endColumn: toCol + sourceRange.endColumn - sourceRange.startColumn,
+        this.disposeWithMe(
+            this._sheetInterceptorService.interceptCommand({
+                getMutations: (command) => {
+                    const empty = {
+                        redos: [],
+                        undos: [],
                     };
 
-                    const freeze = this._getFreeze();
-                    if (
-                        !freeze ||
-                        freeze.startColumn <= 0 ||
-                        // move out of freeze
-                        (sourceRange.startColumn >= freeze.startColumn &&
-                            targetRange.startColumn >= freeze.startColumn) ||
-                        // not move
-                        sourceRange.startColumn === targetRange.startColumn ||
-                        // move in freeze range
-                        (sourceRange.endColumn < freeze.startColumn && targetRange.startColumn < freeze.startColumn)
-                    ) {
-                        return empty;
+                    if (command.id === MoveColsCommand.id) {
+                        const selections = this._selectionManagerService.getSelections();
+                        const { fromCol, toCol } = command.params as IMoveColsCommandParams;
+                        const filteredSelections = selections?.filter(
+                            (selection) =>
+                                selection.range.rangeType === RANGE_TYPE.COLUMN &&
+                                selection.range.startColumn <= fromCol &&
+                                fromCol <= selection.range.endColumn
+                        );
+
+                        if (!filteredSelections?.length) {
+                            return empty;
+                        }
+                        const sourceRange = filteredSelections[0].range;
+
+                        const targetRange: IRange = {
+                            ...sourceRange,
+                            startColumn: toCol,
+                            endColumn: toCol + sourceRange.endColumn - sourceRange.startColumn,
+                        };
+
+                        const freeze = this._getFreeze();
+                        if (
+                            !freeze ||
+                            freeze.startColumn <= 0 ||
+                            // move out of freeze
+                            (sourceRange.startColumn >= freeze.startColumn &&
+                                targetRange.startColumn >= freeze.startColumn) ||
+                            // not move
+                            sourceRange.startColumn === targetRange.startColumn ||
+                            // move in freeze range
+                            (sourceRange.endColumn < freeze.startColumn && targetRange.startColumn < freeze.startColumn)
+                        ) {
+                            return empty;
+                        }
+
+                        const totalColCount = sourceRange.endColumn - sourceRange.startColumn + 1;
+                        const moveFreezeColCount = Math.max(
+                            Math.min(freeze.startColumn, sourceRange.endColumn + 1) - sourceRange.startColumn,
+                            0
+                        );
+                        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+                        const unitId = workbook.getUnitId();
+                        const worksheet = workbook.getActiveSheet();
+                        const subUnitId = worksheet.getSheetId();
+
+                        let newStartColumn;
+                        let newXSplit;
+
+                        if (targetRange.startColumn >= freeze.startColumn) {
+                            newStartColumn = Math.max(freeze.startColumn - moveFreezeColCount, 1);
+                            newXSplit = Math.max(freeze.xSplit - moveFreezeColCount, 1);
+                        } else {
+                            newStartColumn = freeze.startColumn + totalColCount - moveFreezeColCount;
+                            newXSplit = freeze.xSplit + totalColCount - moveFreezeColCount;
+                        }
+
+                        this._refreshFreeze(
+                            freeze.startRow,
+                            newStartColumn,
+                            freeze.ySplit,
+                            newXSplit,
+                            ResetScrollType.NONE
+                        );
+
+                        const redoMutationParams = {
+                            ...freeze,
+                            startColumn: newStartColumn,
+                            xSplit: newXSplit,
+                            unitId,
+                            subUnitId,
+                        };
+
+                        const undoMutationParams = SetFrozenMutationFactory(this._injector, redoMutationParams);
+
+                        return {
+                            undos: [{ id: SetFrozenMutation.id, params: undoMutationParams }],
+                            redos: [{ id: SetFrozenMutation.id, params: redoMutationParams }],
+                        };
+                    }
+                    if (command.id === MoveRowsCommand.id) {
+                        const selections = this._selectionManagerService.getSelections();
+                        const { fromRow, toRow } = command.params as IMoveRowsCommandParams;
+                        const filteredSelections = selections?.filter(
+                            (selection) =>
+                                selection.range.rangeType === RANGE_TYPE.ROW &&
+                                selection.range.startRow <= fromRow &&
+                                fromRow <= selection.range.endRow
+                        );
+
+                        if (!filteredSelections?.length) {
+                            return empty;
+                        }
+                        const sourceRange = filteredSelections[0].range;
+
+                        const targetRange: IRange = {
+                            ...sourceRange,
+                            startRow: toRow,
+                            endRow: toRow + sourceRange.endRow - sourceRange.startRow,
+                        };
+
+                        const freeze = this._getFreeze();
+                        if (
+                            !freeze ||
+                            freeze.startRow <= 0 ||
+                            // move out of freeze
+                            (sourceRange.startRow >= freeze.startRow && targetRange.startRow >= freeze.startRow) ||
+                            // not move
+                            sourceRange.startRow === targetRange.startRow ||
+                            // move in freeze range
+                            (sourceRange.endRow < freeze.startRow && targetRange.startRow < freeze.startRow)
+                        ) {
+                            return empty;
+                        }
+
+                        const totalColCount = sourceRange.endRow - sourceRange.startRow + 1;
+                        const moveFreezeColCount = Math.max(
+                            Math.min(freeze.startRow, sourceRange.endRow + 1) - sourceRange.startRow,
+                            0
+                        );
+                        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+                        const unitId = workbook.getUnitId();
+                        const worksheet = workbook.getActiveSheet();
+                        const subUnitId = worksheet.getSheetId();
+
+                        let newStartRow;
+                        let newYSplit;
+
+                        if (targetRange.startRow >= freeze.startRow) {
+                            newStartRow = Math.max(freeze.startRow - moveFreezeColCount, 1);
+                            newYSplit = Math.max(freeze.ySplit - moveFreezeColCount, 1);
+                        } else {
+                            newStartRow = freeze.startRow + totalColCount - moveFreezeColCount;
+                            newYSplit = freeze.ySplit + totalColCount - moveFreezeColCount;
+                        }
+
+                        this._refreshFreeze(
+                            newStartRow,
+                            freeze.startColumn,
+                            newYSplit,
+                            freeze.xSplit,
+                            ResetScrollType.NONE
+                        );
+
+                        const redoMutationParams = {
+                            ...freeze,
+                            startRow: newStartRow,
+                            ySplit: newYSplit,
+                            unitId,
+                            subUnitId,
+                        };
+
+                        const undoMutationParams = SetFrozenMutationFactory(this._injector, redoMutationParams);
+
+                        return {
+                            undos: [{ id: SetFrozenMutation.id, params: undoMutationParams }],
+                            redos: [{ id: SetFrozenMutation.id, params: redoMutationParams }],
+                        };
                     }
 
-                    const totalColCount = sourceRange.endColumn - sourceRange.startColumn + 1;
-                    const moveFreezeColCount = Math.max(
-                        Math.min(freeze.startColumn, sourceRange.endColumn + 1) - sourceRange.startColumn,
-                        0
-                    );
-                    const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
-                    const unitId = workbook.getUnitId();
-                    const worksheet = workbook.getActiveSheet();
-                    const subUnitId = worksheet.getSheetId();
-
-                    let newStartColumn;
-                    let newXSplit;
-
-                    if (targetRange.startColumn >= freeze.startColumn) {
-                        newStartColumn = Math.max(freeze.startColumn - moveFreezeColCount, 1);
-                        newXSplit = Math.max(freeze.xSplit - moveFreezeColCount, 1);
-                    } else {
-                        newStartColumn = freeze.startColumn + totalColCount - moveFreezeColCount;
-                        newXSplit = freeze.xSplit + totalColCount - moveFreezeColCount;
-                    }
-
-                    this._refreshFreeze(
-                        freeze.startRow,
-                        newStartColumn,
-                        freeze.ySplit,
-                        newXSplit,
-                        ResetScrollType.NONE
-                    );
-
-                    const redoMutationParams = {
-                        ...freeze,
-                        startColumn: newStartColumn,
-                        xSplit: newXSplit,
-                        unitId,
-                        subUnitId,
-                    };
-
-                    const undoMutationParams = SetFrozenMutationFactory(this._injector, redoMutationParams);
-
-                    return {
-                        undos: [{ id: SetFrozenMutation.id, params: undoMutationParams }],
-                        redos: [{ id: SetFrozenMutation.id, params: redoMutationParams }],
-                    };
-                }
-                if (command.id === MoveRowsCommand.id) {
-                    const selections = this._selectionManagerService.getSelections();
-                    const { fromRow, toRow } = command.params as IMoveRowsCommandParams;
-                    const filteredSelections = selections?.filter(
-                        (selection) =>
-                            selection.range.rangeType === RANGE_TYPE.ROW &&
-                            selection.range.startRow <= fromRow &&
-                            fromRow <= selection.range.endRow
-                    );
-
-                    if (!filteredSelections?.length) {
-                        return empty;
-                    }
-                    const sourceRange = filteredSelections[0].range;
-
-                    const targetRange: IRange = {
-                        ...sourceRange,
-                        startRow: toRow,
-                        endRow: toRow + sourceRange.endRow - sourceRange.startRow,
-                    };
-
-                    const freeze = this._getFreeze();
-                    if (
-                        !freeze ||
-                        freeze.startRow <= 0 ||
-                        // move out of freeze
-                        (sourceRange.startRow >= freeze.startRow && targetRange.startRow >= freeze.startRow) ||
-                        // not move
-                        sourceRange.startRow === targetRange.startRow ||
-                        // move in freeze range
-                        (sourceRange.endRow < freeze.startRow && targetRange.startRow < freeze.startRow)
-                    ) {
-                        return empty;
-                    }
-
-                    const totalColCount = sourceRange.endRow - sourceRange.startRow + 1;
-                    const moveFreezeColCount = Math.max(
-                        Math.min(freeze.startRow, sourceRange.endRow + 1) - sourceRange.startRow,
-                        0
-                    );
-                    const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
-                    const unitId = workbook.getUnitId();
-                    const worksheet = workbook.getActiveSheet();
-                    const subUnitId = worksheet.getSheetId();
-
-                    let newStartRow;
-                    let newYSplit;
-
-                    if (targetRange.startRow >= freeze.startRow) {
-                        newStartRow = Math.max(freeze.startRow - moveFreezeColCount, 1);
-                        newYSplit = Math.max(freeze.ySplit - moveFreezeColCount, 1);
-                    } else {
-                        newStartRow = freeze.startRow + totalColCount - moveFreezeColCount;
-                        newYSplit = freeze.ySplit + totalColCount - moveFreezeColCount;
-                    }
-
-                    this._refreshFreeze(
-                        newStartRow,
-                        freeze.startColumn,
-                        newYSplit,
-                        freeze.xSplit,
-                        ResetScrollType.NONE
-                    );
-
-                    const redoMutationParams = {
-                        ...freeze,
-                        startRow: newStartRow,
-                        ySplit: newYSplit,
-                        unitId,
-                        subUnitId,
-                    };
-
-                    const undoMutationParams = SetFrozenMutationFactory(this._injector, redoMutationParams);
-
-                    return {
-                        undos: [{ id: SetFrozenMutation.id, params: undoMutationParams }],
-                        redos: [{ id: SetFrozenMutation.id, params: redoMutationParams }],
-                    };
-                }
-
-                return empty;
-            },
-        });
+                    return empty;
+                },
+            })
+        );
     }
 
     private _commandExecutedListener() {

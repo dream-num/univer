@@ -15,12 +15,12 @@
  */
 
 import type { IRange, ISelectionCellWithCoord, Nullable } from '@univerjs/core';
-import { BooleanNumber, CellValueType, HorizontalAlign, ObjectMatrix, sortRules, WrapStrategy } from '@univerjs/core';
+import { BooleanNumber, ObjectMatrix, sortRules } from '@univerjs/core';
 
 import type { BaseObject } from '../../base-object';
 import { FIX_ONE_PIXEL_BLUR_OFFSET, RENDER_CLASS_TYPE } from '../../basics/const';
 import { clearLineByBorderType } from '../../basics/draw';
-import { getCellByIndex, getCellPositionByIndex, getColor } from '../../basics/tools';
+import { getCellPositionByIndex, getColor } from '../../basics/tools';
 import type { IViewportBound, Vector2 } from '../../basics/vector2';
 import { Canvas } from '../../canvas';
 import type { UniverRenderingContext } from '../../context';
@@ -36,7 +36,6 @@ import type { Font } from './extensions/font';
 import type { BorderCacheItem } from './interfaces';
 import { SheetComponent } from './sheet-component';
 import type { SpreadsheetSkeleton } from './sheet-skeleton';
-import { getDocsSkeletonPageSize } from './sheet-skeleton';
 
 const OBJECT_KEY = '__SHEET_EXTENSION_FONT_DOCUMENT_INSTANCE__';
 
@@ -122,15 +121,6 @@ export class Spreadsheet extends SheetComponent {
         for (const extension of extensions) {
             extension.draw(ctx, parentScale, spreadsheetSkeleton, diffRanges);
         }
-
-        /**
-         * Caching overflow during scrolling and clearing it after waiting for 1 second without scrolling can significantly improve performance.
-         */
-        clearTimeout(this._overflowCacheRuntimeTimeout);
-        this._overflowCacheRuntimeTimeout = setTimeout(() => {
-            this._overflowCacheRuntimeRange.reset();
-            this._overflowCacheRuntime = {};
-        }, 1000);
     }
 
     override isHit(coord: Vector2) {
@@ -452,164 +442,12 @@ export class Spreadsheet extends SheetComponent {
         return newViewports;
     }
 
-    /**
-     * Calculate the overflow of cell text. If there is no value on either side of the cell,
-     * the text content of this cell can be drawn to both sides, not limited by the cell's width.
-     * Overflow on the left or right is aligned according to the text's horizontal alignment.
-     */
-    private _calculateOverflow() {
-        // const overflowCache = new ObjectMatrix<IRange>();
-        const spreadsheetSkeleton = this.getSkeleton();
-        if (!spreadsheetSkeleton) {
-            return;
-        }
-
-        const columnCount = spreadsheetSkeleton.getColumnCount();
-        const { stylesCache, rowHeightAccumulation, columnWidthAccumulation, mergeData } = spreadsheetSkeleton;
-        const { font: fontList } = stylesCache;
-
-        fontList &&
-            Object.keys(fontList).forEach((fontFormat: string) => {
-                const fontObjectArray = fontList[fontFormat];
-
-                fontObjectArray.forRow((row, columns) => {
-                    if (this._overflowCacheRuntime[row] != null) {
-                        return;
-                    }
-
-                    columns.forEach((column) => {
-                        const docsConfig = fontObjectArray.getValue(row, column);
-                        // wrap and angle handler
-                        const { documentSkeleton, angle = 0, horizontalAlign, wrapStrategy } = docsConfig;
-
-                        const cell = spreadsheetSkeleton.getCellData().getValue(row, column);
-
-                        const sheetSkeleton = this.getSkeleton();
-                        if (!sheetSkeleton) {
-                            return true;
-                        }
-
-                        const { t: cellValueType = CellValueType.STRING } = cell || {};
-
-                        /**
-                         * Numerical and Boolean values are not displayed with overflow.
-                         */
-                        if (
-                            wrapStrategy === WrapStrategy.OVERFLOW &&
-                            cellValueType !== CellValueType.NUMBER &&
-                            cellValueType !== CellValueType.BOOLEAN &&
-                            horizontalAlign !== HorizontalAlign.JUSTIFIED
-                        ) {
-                            // Merged cells do not support overflow.
-                            if (spreadsheetSkeleton.intersectMergeRange(row, column)) {
-                                return true;
-                            }
-
-                            let contentSize = getDocsSkeletonPageSize(documentSkeleton, angle);
-
-                            if (!contentSize) {
-                                return true;
-                            }
-
-                            if (angle !== 0) {
-                                const { startY, endY, startX, endX } = getCellByIndex(
-                                    row,
-                                    column,
-                                    rowHeightAccumulation,
-                                    columnWidthAccumulation,
-                                    mergeData
-                                );
-                                const cellWidth = endX - startX;
-                                const cellHeight = endY - startY;
-
-                                if (contentSize.height > cellHeight) {
-                                    contentSize = {
-                                        width: cellHeight / Math.tan(Math.abs(angle)) + cellWidth,
-                                        height: cellHeight,
-                                    };
-                                    // if (angle > 0) {
-                                    //     horizontalAlign = HorizontalAlign.LEFT;
-                                    // } else {
-                                    //     horizontalAlign = HorizontalAlign.RIGHT;
-                                    // }
-                                }
-                            }
-
-                            const position = spreadsheetSkeleton.getOverflowPosition(
-                                contentSize,
-                                horizontalAlign,
-                                row,
-                                column,
-                                columnCount
-                            );
-
-                            const { startColumn, endColumn } = position;
-
-                            this._overflowCacheRuntimeRange.setValue(row, column, {
-                                startRow: row,
-                                endRow: row,
-                                startColumn,
-                                endColumn,
-                            });
-                        } else if (wrapStrategy === WrapStrategy.WRAP && angle !== 0) {
-                            // Merged cells do not support overflow.
-                            if (spreadsheetSkeleton.intersectMergeRange(row, column)) {
-                                return true;
-                            }
-
-                            const { startY, endY } = getCellByIndex(
-                                row,
-                                column,
-                                rowHeightAccumulation,
-                                columnWidthAccumulation,
-                                mergeData
-                            );
-
-                            const cellHeight = endY - startY;
-                            documentSkeleton.getViewModel().getDataModel().updateDocumentDataPageSize(cellHeight);
-                            documentSkeleton.calculate();
-                            const contentSize = getDocsSkeletonPageSize(documentSkeleton, angle);
-
-                            if (!contentSize) {
-                                return true;
-                            }
-
-                            const { startColumn, endColumn } = sheetSkeleton.getOverflowPosition(
-                                contentSize,
-                                horizontalAlign,
-                                row,
-                                column,
-                                sheetSkeleton.getColumnCount()
-                            );
-                            this._overflowCacheRuntimeRange.setValue(row, column, {
-                                startRow: row,
-                                endRow: row,
-                                startColumn,
-                                endColumn,
-                            });
-                        }
-                    });
-
-                    this._overflowCacheRuntime[row] = true;
-                });
-
-                fontObjectArray.forValue((row, column, docsConfig) => {
-                    // console.log('appendToOverflowCache', cellHeight, angle, contentSize, { rowIndex, columnIndex, startColumn, endColumn });
-                });
-            });
-
-        spreadsheetSkeleton.setOverflowCache(this._overflowCacheRuntimeRange);
-    }
-
     private _drawAuxiliary(ctx: UniverRenderingContext) {
         const spreadsheetSkeleton = this.getSkeleton();
 
         if (spreadsheetSkeleton == null) {
             return;
         }
-
-        // insert overflow cache
-        this._calculateOverflow();
 
         const { rowColumnSegment, dataMergeCache, overflowCache, stylesCache, showGridlines } = spreadsheetSkeleton;
         const { border, backgroundPositions } = stylesCache;

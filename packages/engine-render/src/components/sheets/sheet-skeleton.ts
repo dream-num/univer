@@ -38,6 +38,7 @@ import type {
 } from '@univerjs/core';
 import {
     BooleanNumber,
+    CellValueType,
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     DocumentDataModel,
     getColorStyle,
@@ -69,7 +70,7 @@ import { columnIterator } from '../docs/common/tools';
 import { DocumentSkeleton } from '../docs/doc-skeleton';
 import { DocumentViewModel } from '../docs/view-model/document-view-model';
 import { Skeleton } from '../skeleton';
-import type { BorderCache, IStylesCache } from './interfaces';
+import type { BorderCache, IFontCacheItem, IStylesCache } from './interfaces';
 
 /**
  * Obtain the height and width of a cell's text, taking into account scenarios with rotated text.
@@ -1100,6 +1101,103 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     /**
+     * Calculate the overflow of cell text. If there is no value on either side of the cell,
+     * the text content of this cell can be drawn to both sides, not limited by the cell's width.
+     * Overflow on the left or right is aligned according to the text's horizontal alignment.
+     */
+    private _calculateOverflowCell(row: number, column: number, docsConfig: IFontCacheItem) {
+        // wrap and angle handler
+        const { documentSkeleton, angle = 0, horizontalAlign, wrapStrategy } = docsConfig;
+
+        const cell = this.getCellData().getValue(row, column);
+
+        const { t: cellValueType = CellValueType.STRING } = cell || {};
+
+        /**
+         * Numerical and Boolean values are not displayed with overflow.
+         */
+        if (
+            (wrapStrategy === WrapStrategy.OVERFLOW || wrapStrategy === WrapStrategy.UNSPECIFIED) &&
+            cellValueType !== CellValueType.NUMBER &&
+            cellValueType !== CellValueType.BOOLEAN &&
+            horizontalAlign !== HorizontalAlign.JUSTIFIED
+        ) {
+            // Merged cells do not support overflow.
+            if (this.intersectMergeRange(row, column)) {
+                return true;
+            }
+
+            let contentSize = getDocsSkeletonPageSize(documentSkeleton, angle);
+
+            if (!contentSize) {
+                return true;
+            }
+
+            if (angle !== 0) {
+                const { startY, endY, startX, endX } = getCellByIndex(
+                    row,
+                    column,
+                    this.rowHeightAccumulation,
+                    this.columnWidthAccumulation,
+                    this.mergeData
+                );
+                const cellWidth = endX - startX;
+                const cellHeight = endY - startY;
+
+                if (contentSize.height > cellHeight) {
+                    contentSize = {
+                        width: cellHeight / Math.tan(Math.abs(angle)) + cellWidth,
+                        height: cellHeight,
+                    };
+                    // if (angle > 0) {
+                    //     horizontalAlign = HorizontalAlign.LEFT;
+                    // } else {
+                    //     horizontalAlign = HorizontalAlign.RIGHT;
+                    // }
+                }
+            }
+
+            const position = this.getOverflowPosition(contentSize, horizontalAlign, row, column, this.getColumnCount());
+
+            const { startColumn, endColumn } = position;
+
+            this.appendToOverflowCache(row, column, startColumn, endColumn);
+        } else if (wrapStrategy === WrapStrategy.WRAP && angle !== 0) {
+            // Merged cells do not support overflow.
+            if (this.intersectMergeRange(row, column)) {
+                return true;
+            }
+
+            const { startY, endY } = getCellByIndex(
+                row,
+                column,
+                this.rowHeightAccumulation,
+                this.columnWidthAccumulation,
+                this.mergeData
+            );
+
+            const cellHeight = endY - startY;
+            documentSkeleton.getViewModel().getDataModel().updateDocumentDataPageSize(cellHeight);
+            documentSkeleton.calculate();
+            const contentSize = getDocsSkeletonPageSize(documentSkeleton, angle);
+
+            if (!contentSize) {
+                return true;
+            }
+
+            const { startColumn, endColumn } = this.getOverflowPosition(
+                contentSize,
+                horizontalAlign,
+                row,
+                column,
+                this.getColumnCount()
+            );
+
+            this.appendToOverflowCache(row, column, startColumn, endColumn);
+        }
+    }
+
+    /**
      *
      * @param rowHeightAccumulation Row layout information
      * @param columnWidthAccumulation Column layout information
@@ -1376,8 +1474,12 @@ export class SpreadsheetSkeleton extends Skeleton {
         const columnWidthAccumulation = this.columnWidthAccumulation;
         const { startRow, endRow, startColumn, endColumn } = rowColumnSegment;
 
-        if (endColumn === -1) {
+        if (endColumn === -1 || endRow === -1) {
             return;
+        }
+
+        for (const data of dataMergeCache) {
+            this._setCellCache(data.startRow, data.startColumn, false);
         }
 
         for (let r = startRow; r <= endRow; r++) {
@@ -1400,9 +1502,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             }
         }
 
-        for (const data of dataMergeCache) {
-            this._setCellCache(data.startRow, data.startColumn, false);
-        }
+        // this.calculateOverflow();
     }
 
     private _resetCache() {
@@ -1414,6 +1514,8 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
 
         this._renderedCellCache = new ObjectMatrix<boolean>();
+
+        this._overflowCache.reset();
     }
 
     private _makeDocumentSkeletonDirty(r: number, c: number) {
@@ -1531,13 +1633,17 @@ export class SpreadsheetSkeleton extends Skeleton {
             const documentSkeleton = DocumentSkeleton.create(documentViewModel, this._localService);
             documentSkeleton.calculate();
 
-            fontCache.setValue(r, c, {
+            const config = {
                 documentSkeleton,
                 angle,
                 verticalAlign,
                 horizontalAlign,
                 wrapStrategy,
-            });
+            };
+
+            fontCache.setValue(r, c, config);
+
+            this._calculateOverflowCell(r, c, config);
         }
 
         if (!skipBackgroundAndBorder) {

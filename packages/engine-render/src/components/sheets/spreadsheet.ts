@@ -104,9 +104,6 @@ export class Spreadsheet extends SheetComponent {
     }
 
     override draw(ctx: UniverRenderingContext, bounds?: IViewportBound) {
-        // const { parent = { scaleX: 1, scaleY: 1 } } = this;
-        // const mergeData = this.getMergeData();
-        // const showGridlines = this.getShowGridlines() || 1;
         const spreadsheetSkeleton = this.getSkeleton();
         if (!spreadsheetSkeleton) {
             return;

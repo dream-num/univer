@@ -251,6 +251,8 @@ export { handleInsertRangeMutation } from './commands/utils/handle-range-mutatio
 export { type ISheetCommandSharedParams } from './commands/utils/interface';
 export { getAddMergeMutationRangeByType } from './controllers/merge-cell.controller';
 export { enUS, zhCN } from './locale';
+export { MergeCellService } from './services/merge-cell/merge-cell.service';
+export type { IMergeData } from './services/merge-cell/type';
 export { NumfmtService } from './services/numfmt/numfmt.service';
 export type { FormatType, INumfmtItem, INumfmtItemWithCache } from './services/numfmt/type';
 export { INumfmtService } from './services/numfmt/type';

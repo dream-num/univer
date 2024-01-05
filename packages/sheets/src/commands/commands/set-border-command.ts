@@ -36,6 +36,7 @@ import {
 import type { IAccessor } from '@wendellhu/redi';
 
 import { BorderStyleManagerService, type IBorderInfo } from '../../services/border-style-manager.service';
+import { MergeCellService } from '../../services/merge-cell/merge-cell.service';
 import { SelectionManagerService } from '../../services/selection-manager.service';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
@@ -141,14 +142,10 @@ export const SetBorderCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const selectionManagerService = accessor.get(SelectionManagerService);
         const borderStyleManagerService = accessor.get(BorderStyleManagerService);
-
-        const { worksheet, unitId, subUnitId } = getCommandTarget(
-            univerInstanceService,
-            params?.unitId,
-            params?.subUnitId
-        );
+        const mergeCellService = accessor.get(MergeCellService);
         const selections = selectionManagerService.getSelectionRanges();
-        const mergeData = worksheet.getConfig().mergeData;
+        const { unitId, subUnitId } = getCommandTarget(univerInstanceService, params?.unitId, params?.subUnitId);
+        const mergeData = mergeCellService.getMergeData(unitId, subUnitId);
         if (!selections?.length) {
             return false;
         }

@@ -27,6 +27,7 @@ import {
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
+import { MergeCellService } from '../../services/merge-cell/merge-cell.service';
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../services/selection-manager.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import type { IMoveColumnsMutationParams, IMoveRowsMutationParams } from '../mutations/move-rows-cols.mutation';
@@ -38,7 +39,6 @@ import {
 } from '../mutations/move-rows-cols.mutation';
 import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 import { SetSelectionsOperation } from '../operations/selection.operation';
-import { columnAcrossMergedCell, rowAcrossMergedCell } from './utils/merged-cell-util';
 import { alignToMergedCellsBorders, getPrimaryForRange } from './utils/selection-utils';
 
 export interface IMoveRowsCommandParams {
@@ -55,6 +55,7 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor, params: IMoveRowsCommandParams) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
+        const mergeCellService = accessor.get(MergeCellService);
         const selections = selectionManagerService.getSelections();
         const {
             fromRange: { startRow: fromRow },
@@ -94,7 +95,7 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
             return false;
         }
 
-        if (rowAcrossMergedCell(toRow, worksheet)) {
+        if (mergeCellService.rowAcrossMergedCell(unitId, subUnitId, toRow)) {
             errorService.emit('Across a merged cell.');
             return false;
         }
@@ -182,6 +183,8 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor, params: IMoveColsCommandParams) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
+        const mergeCellService = accessor.get(MergeCellService);
+
         const selections = selectionManagerService.getSelections();
         const {
             fromRange: { startColumn: fromCol },
@@ -221,7 +224,7 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
             return false;
         }
 
-        if (columnAcrossMergedCell(toCol, worksheet)) {
+        if (mergeCellService.columnAcrossMergedCell(unitId, subUnitId, toCol)) {
             errorService.emit('Across a merged cell.');
             return false;
         }

@@ -146,6 +146,11 @@ export class Worksheet {
         return new Worksheet(copy, this._styles);
     }
 
+    /**
+     * @deprecated use merge-cell-service
+     * @return {*}  {IRange[]}
+     * @memberof Worksheet
+     */
     getMergeData(): IRange[] {
         return this._snapshot.mergeData;
     }
@@ -194,12 +199,18 @@ export class Worksheet {
     }
 
     /**
+     * @deprecated @TODO:@gggpound should migrate to the service
      * Get cell matrix from a given range and pick out non-first cells of merged cells.
-     *
      * Notice that `ICellData` here is not after copying. In another word, the object matrix here should be
      * considered as a slice of the original worksheet data matrix.
+     * PERF: we could not skip indexes with merged cells, because we have already known the merged cells' range
+     * @param {number} row
+     * @param {number} col
+     * @param {number} endRow
+     * @param {number} endCol
+     * @return {*}  {(ObjectMatrix<ICellData & { rowSpan?: number; colSpan?: number }>)}
+     * @memberof Worksheet
      */
-    // PERF: we could not skip indexes with merged cells, because we have already known the merged cells' range
     getMatrixWithMergedCells(
         row: number,
         col: number,

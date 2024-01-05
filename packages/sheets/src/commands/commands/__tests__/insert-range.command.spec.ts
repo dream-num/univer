@@ -22,7 +22,6 @@ import {
     RANGE_TYPE,
     Rectangle,
     RedoCommand,
-    Tools,
     UndoCommand,
 } from '@univerjs/core';
 import type { Injector } from '@wendellhu/redi';
@@ -42,57 +41,7 @@ import { InsertRangeMoveDownCommand } from '../insert-range-move-down.command';
 import { InsertRangeMoveRightCommand } from '../insert-range-move-right.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
-const mergeData = [
-    {
-        startRow: 0,
-        endRow: 1,
-        startColumn: 2,
-        endColumn: 2,
-    },
-    {
-        startRow: 1,
-        endRow: 2,
-        startColumn: 3,
-        endColumn: 3,
-    },
-    {
-        startRow: 1,
-        endRow: 1,
-        startColumn: 6,
-        endColumn: 7,
-    },
-    {
-        startRow: 1,
-        endRow: 1,
-        startColumn: 9,
-        endColumn: 11,
-    },
-    {
-        startRow: 2,
-        endRow: 2,
-        startColumn: 5,
-        endColumn: 6,
-    },
-    {
-        startRow: 2,
-        endRow: 2,
-        startColumn: 9,
-        endColumn: 10,
-    },
-    {
-        startRow: 4,
-        endRow: 6,
-        startColumn: 2,
-        endColumn: 2,
-    },
-    {
-        startRow: 5,
-        endRow: 6,
-        startColumn: 3,
-        endColumn: 3,
-    },
-];
-const WORKBOOK_DATA_DEMO: IWorkbookData = {
+const WORKBOOK_DATA_DEMO: () => IWorkbookData = () => ({
     id: 'test',
     appVersion: '3.0.0-alpha',
     sheets: {
@@ -153,7 +102,7 @@ const WORKBOOK_DATA_DEMO: IWorkbookData = {
     name: '',
     sheetOrder: [],
     styles: {},
-};
+});
 
 describe('Test insert range commands', () => {
     let univer: Univer;
@@ -187,9 +136,7 @@ describe('Test insert range commands', () => {
     ) => IRange[] | undefined;
 
     beforeEach(() => {
-        const data = WORKBOOK_DATA_DEMO;
-        data.sheets.sheet1.mergeData = Tools.deepClone(mergeData);
-        const testBed = createCommandTestBed(data, [[MergeCellController], [RefRangeService]]);
+        const testBed = createCommandTestBed(WORKBOOK_DATA_DEMO(), [[MergeCellController], [RefRangeService]]);
         univer = testBed.univer;
         get = testBed.get;
         get(MergeCellController);

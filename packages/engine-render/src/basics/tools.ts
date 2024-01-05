@@ -486,6 +486,16 @@ export function getCellPositionByIndex(
     };
 }
 
+/**
+ * @deprecated @TODO:@gggpound should migrate to the service
+ * @export
+ * @param {number} row
+ * @param {number} column
+ * @param {number[]} rowHeightAccumulation
+ * @param {number[]} columnWidthAccumulation
+ * @param {IRange[]} mergeData
+ * @return {*}  {ISelectionCellWithCoord}
+ */
 export function getCellByIndex(
     row: number,
     column: number,
@@ -563,7 +573,13 @@ export function getCellByIndex(
 }
 
 /**
- * Determines whether the cell(row, column) is within the range of the merged cells.
+ * @deprecated use `getMergedCell` instead
+ * Determines whether the cell(row, column) is within the range of the merged cells
+ * @export
+ * @param {number} row
+ * @param {number} column
+ * @param {IRange[]} [mergeData]
+ * @return {*}  {ISelectionCell}
  */
 export function getCellInfoInMergeData(row: number, column: number, mergeData?: IRange[]): ISelectionCell {
     let isMerged = false; // The upper left cell only renders the content

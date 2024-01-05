@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IMutationInfo, IRange, Worksheet } from '@univerjs/core';
+import type { ICellData, IMutationInfo, IRange } from '@univerjs/core';
 import {
     Disposable,
     ICommandService,
@@ -29,6 +29,7 @@ import {
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import {
     getPrimaryForRange,
+    MergeCellService,
     NORMAL_SELECTION_PLUGIN_NAME,
     SelectionManagerService,
     SetSelectionsOperation,
@@ -98,7 +99,8 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         @IUndoRedoService private readonly _undoRedoService: IUndoRedoService,
         @ICommandService private readonly _commandService: ICommandService,
         @IMarkSelectionService private readonly _markSelectionService: IMarkSelectionService,
-        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
+        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
+        @Inject(MergeCellService) private _mergeCellService: MergeCellService
     ) {
         super();
         this._htmlToUSM = new HtmlToUSMService({
@@ -658,7 +660,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
         // const mergedRange = worksheet.getMergedCell(startRow, startColumn);
-        const mergeData = worksheet.getMergeData();
+        const mergeData = this._mergeCellService.getMergeData(workbook.getUnitId(), worksheet.getSheetId());
         // get all merged cells
         const mergedCellsInRange = mergeData.filter((rect) =>
             Rectangle.intersects({ startRow, startColumn, endRow, endColumn }, rect)
@@ -759,19 +761,19 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     private _topLeftCellsMatch(rowCount: number, colCount: number, range: IRange): boolean {
         const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
-        const { startRow, startColumn, endRow, endColumn } = range;
-
+        const { startRow, startColumn } = range;
+        const mergeData = this._mergeCellService.getMergeData(workbook.getUnitId(), worksheet.getSheetId());
         const isRowAcross = rowAcrossMergedCell(
             startRow + rowCount - 1,
             startColumn,
             startColumn + rowCount - 1,
-            worksheet
+            mergeData
         );
         const isColAcross = columnAcrossMergedCell(
             startColumn + colCount - 1,
             startRow,
             startRow + rowCount - 1,
-            worksheet
+            mergeData
         );
 
         return !isRowAcross && !isColAcross;
@@ -826,28 +828,24 @@ export const escapeSpecialCode = (cellStr: string) =>
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;');
 
-function rowAcrossMergedCell(row: number, startColumn: number, endColumn: number, worksheet: Worksheet): boolean {
-    return worksheet
-        .getMergeData()
-        .some(
-            (mergedCell) =>
-                mergedCell.startRow <= row &&
-                row < mergedCell.endRow &&
-                startColumn <= mergedCell.startColumn &&
-                mergedCell.startColumn <= endColumn
-        );
+function rowAcrossMergedCell(row: number, startColumn: number, endColumn: number, mergeData: IRange[]): boolean {
+    return mergeData.some(
+        (mergedCell) =>
+            mergedCell.startRow <= row &&
+            row < mergedCell.endRow &&
+            startColumn <= mergedCell.startColumn &&
+            mergedCell.startColumn <= endColumn
+    );
 }
 
-function columnAcrossMergedCell(col: number, startRow: number, endRow: number, worksheet: Worksheet): boolean {
-    return worksheet
-        .getMergeData()
-        .some(
-            (mergedCell) =>
-                mergedCell.startColumn <= col &&
-                col < mergedCell.endColumn &&
-                startRow <= mergedCell.startRow &&
-                mergedCell.startRow <= endRow
-        );
+function columnAcrossMergedCell(col: number, startRow: number, endRow: number, mergeData: IRange[]): boolean {
+    return mergeData.some(
+        (mergedCell) =>
+            mergedCell.startColumn <= col &&
+            col < mergedCell.endColumn &&
+            startRow <= mergedCell.startRow &&
+            mergedCell.startRow <= endRow
+    );
 }
 
 /**

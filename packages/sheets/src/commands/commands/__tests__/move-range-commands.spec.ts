@@ -153,7 +153,7 @@ describe('Test move range commands', () => {
         const currentService = get(IUniverInstanceService);
         const workbook = currentService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
-        return worksheet.getConfig().mergeData;
+        return worksheet.getMergeData();
     }
 });
 

@@ -16,8 +16,7 @@
 
 import type { ICellData, IRange, IStyleData } from '@univerjs/core';
 import { Disposable, IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
-import { getCellInfoInMergeData } from '@univerjs/engine-render';
-import { SelectionManagerService, SetRangeValuesMutation } from '@univerjs/sheets';
+import { MergeCellService, SelectionManagerService, SetRangeValuesMutation } from '@univerjs/sheets';
 import { createIdentifier, Inject } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
@@ -52,7 +51,8 @@ export class FormatPainterService extends Disposable implements IFormatPainterSe
     constructor(
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @IMarkSelectionService private readonly _markSelectionService: IMarkSelectionService
+        @IMarkSelectionService private readonly _markSelectionService: IMarkSelectionService,
+        @Inject(MergeCellService) private _mergeCellService: MergeCellService
     ) {
         super();
 
@@ -100,7 +100,8 @@ export class FormatPainterService extends Disposable implements IFormatPainterSe
         const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
         const worksheet = workbook?.getActiveSheet();
         const cellData = worksheet.getCellMatrix();
-        const mergeData = this._univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getMergeData();
+        const unitId = workbook.getUnitId();
+        const subUnitId = worksheet.getSheetId();
 
         const styles = workbook.getStyles();
         const stylesMatrix = new ObjectMatrix<IStyleData>();
@@ -108,7 +109,12 @@ export class FormatPainterService extends Disposable implements IFormatPainterSe
             for (let c = startColumn; c <= endColumn; c++) {
                 const cell = cellData.getValue(r, c) as ICellData;
                 stylesMatrix.setValue(r, c, styles.getStyleByCell(cell) || {});
-                const { isMergedMainCell, ...mergeInfo } = getCellInfoInMergeData(r, c, mergeData);
+                const { isMergedMainCell, ...mergeInfo } = this._mergeCellService.getCellInfoInfo(
+                    unitId,
+                    subUnitId,
+                    r,
+                    c
+                );
                 if (isMergedMainCell) {
                     this._selectionFormat.merges.push({
                         startRow: mergeInfo.startRow,

@@ -24,6 +24,7 @@ import { FeatureCalculationController } from './controllers/feature-calculation.
 import { MergeCellController } from './controllers/merge-cell.controller';
 import { zhCN } from './locale';
 import { BorderStyleManagerService } from './services/border-style-manager.service';
+import { MergeCellService } from './services/merge-cell/merge-cell.service';
 import { NumfmtService } from './services/numfmt/numfmt.service';
 import { INumfmtService } from './services/numfmt/type';
 import { SheetPermissionService } from './services/permission';
@@ -73,6 +74,7 @@ export class UniverSheetsPlugin extends Plugin {
             // controllers
             [BasicWorksheetController],
             [MergeCellController],
+            [MergeCellService],
         ];
 
         if (!this._config?.notExecuteFormula) {

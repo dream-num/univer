@@ -215,8 +215,8 @@ export function convertPrimaryWithCoordToPrimary(primaryWithCoord: ISelectionCel
         endColumn,
     };
 }
-
 /**
+ * @deprecated
  * Convert the coordinates of a single cell into a selection data.
  * @param row Specified Row Coordinate
  * @param column Specified Column Coordinate

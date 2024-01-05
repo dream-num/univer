@@ -31,10 +31,11 @@ import { Inject, Injector } from '@wendellhu/redi';
 
 import enUS from '../../../locale/en-US';
 import { BorderStyleManagerService } from '../../../services/border-style-manager.service';
+import { MergeCellService } from '../../../services/merge-cell/merge-cell.service';
 import { SelectionManagerService } from '../../../services/selection-manager.service';
 import { SheetInterceptorService } from '../../../services/sheet-interceptor/sheet-interceptor.service';
 
-const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
+const TEST_WORKBOOK_DATA_DEMO: () => IWorkbookData = () => ({
     id: 'test',
     appVersion: '3.0.0-alpha',
     sheets: {
@@ -67,7 +68,7 @@ const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
     name: '',
     sheetOrder: [],
     styles: {},
-};
+});
 
 export interface ITestBed {
     univer: Univer;
@@ -95,13 +96,14 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
             injector.add([SelectionManagerService]);
             injector.add([BorderStyleManagerService]);
             injector.add([SheetInterceptorService]);
+            injector.add([MergeCellService]);
 
             dependencies?.forEach((d) => injector.add(d));
         }
     }
 
     univer.registerPlugin(TestSpyPlugin);
-    const sheet = univer.createUniverSheet(workbookConfig || TEST_WORKBOOK_DATA_DEMO);
+    const sheet = univer.createUniverSheet(workbookConfig || TEST_WORKBOOK_DATA_DEMO());
 
     const univerInstanceService = injector.get(IUniverInstanceService);
     univerInstanceService.focusUniverInstance('test');

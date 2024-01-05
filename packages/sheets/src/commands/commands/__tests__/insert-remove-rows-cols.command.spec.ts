@@ -171,13 +171,6 @@ describe('Test insert and remove rows cols commands', () => {
         return worksheet.getMergedCells(row, col)?.[0];
     }
 
-    function getMergeData() {
-        const currentService = get(IUniverInstanceService);
-        const workbook = currentService.getCurrentUniverSheetInstance();
-        const worksheet = workbook.getActiveSheet();
-        return worksheet.getMergeData();
-    }
-
     describe('Insert rows', () => {
         /**
          * In a test case we should examine

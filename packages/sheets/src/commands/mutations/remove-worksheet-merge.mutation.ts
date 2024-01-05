@@ -22,14 +22,16 @@ import type {
     IAddWorksheetMergeMutationParams,
     IRemoveWorksheetMergeMutationParams,
 } from '../../basics/interfaces/mutation-interface';
+import { MergeCellService } from '../../services/merge-cell/merge-cell.service';
 
 export const RemoveMergeUndoMutationFactory = (
     accessor: IAccessor,
     params: IRemoveWorksheetMergeMutationParams
 ): IAddWorksheetMergeMutationParams => {
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const universheet = univerInstanceService.getUniverSheetInstance(params.unitId);
+    const mergeCellService = accessor.get(MergeCellService);
 
+    const universheet = univerInstanceService.getUniverSheetInstance(params.unitId);
     if (universheet == null) {
         throw new Error('universheet is null error!');
     }
@@ -38,16 +40,15 @@ export const RemoveMergeUndoMutationFactory = (
     if (worksheet == null) {
         throw new Error('worksheet is null error!');
     }
-    const config = worksheet.getConfig();
-    const mergeConfigData = config.mergeData;
+    const mergeData = mergeCellService.getMergeData(params.unitId, params.subUnitId);
     const mergeRemoveData = params.ranges;
     const ranges = [];
     for (let j = 0; j < mergeRemoveData.length; j++) {
-        for (let i = mergeConfigData.length - 1; i >= 0; i--) {
-            const configMerge = mergeConfigData[i];
+        for (let i = mergeData.length - 1; i >= 0; i--) {
+            const configMerge = mergeData[i];
             const removeMerge = mergeRemoveData[j];
             if (Rectangle.intersects(configMerge, removeMerge)) {
-                ranges.push(mergeConfigData[i]);
+                ranges.push(mergeData[i]);
             }
         }
     }
@@ -63,24 +64,17 @@ export const RemoveWorksheetMergeMutation: IMutation<IRemoveWorksheetMergeMutati
     id: 'sheet.mutation.remove-worksheet-merge',
     type: CommandType.MUTATION,
     handler: (accessor: IAccessor, params: IRemoveWorksheetMergeMutationParams) => {
-        const univerInstanceService = accessor.get(IUniverInstanceService);
-        const universheet = univerInstanceService.getUniverSheetInstance(params.unitId);
+        const mergeCellService = accessor.get(MergeCellService);
 
-        if (universheet == null) {
-            throw new Error('universheet is null error!');
-        }
+        const mergeData = mergeCellService.getMergeData(params.unitId, params.subUnitId);
 
-        const worksheet = universheet.getSheetBySheetId(params.subUnitId);
-        if (!worksheet) return false;
-        const config = worksheet.getConfig();
-        const mergeConfigData = config.mergeData;
         const mergeRemoveData = params.ranges;
         for (let j = 0; j < mergeRemoveData.length; j++) {
-            for (let i = mergeConfigData.length - 1; i >= 0; i--) {
-                const configMerge = mergeConfigData[i];
+            for (let i = mergeData.length - 1; i >= 0; i--) {
+                const configMerge = mergeData[i];
                 const removeMerge = mergeRemoveData[j];
                 if (Rectangle.intersects(configMerge, removeMerge)) {
-                    mergeConfigData.splice(i, 1);
+                    mergeData.splice(i, 1);
                 }
             }
         }

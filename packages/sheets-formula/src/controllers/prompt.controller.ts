@@ -54,17 +54,13 @@ import {
     normalizeSheetName,
     sequenceNodeType,
 } from '@univerjs/engine-formula';
-import {
-    DeviceInputEventType,
-    getCellInfoInMergeData,
-    IRenderManagerService,
-    ITextSelectionRenderManager,
-} from '@univerjs/engine-render';
+import { DeviceInputEventType, IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import {
     convertSelectionDataToRange,
     getNormalSelectionStyle,
     getPrimaryForRange,
+    MergeCellService,
     NORMAL_SELECTION_PLUGIN_NAME,
     SelectionManagerService,
 } from '@univerjs/sheets';
@@ -157,7 +153,8 @@ export class PromptController extends Disposable {
         @Inject(IDescriptionService) private readonly _descriptionService: IDescriptionService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @IFormulaInputService private readonly _formulaInputService: IFormulaInputService,
-        @Inject(DocViewModelManagerService) private readonly _docViewModelManagerService: DocViewModelManagerService
+        @Inject(DocViewModelManagerService) private readonly _docViewModelManagerService: DocViewModelManagerService,
+        @Inject(MergeCellService) private _mergeCellService: MergeCellService
     ) {
         super();
 
@@ -1384,7 +1381,7 @@ export class PromptController extends Disposable {
             return;
         }
 
-        const { unitId, sheetId, skeleton } = this._getCurrentUnitIdAndSheetId();
+        const { unitId, sheetId } = this._getCurrentUnitIdAndSheetId();
 
         this._formulaInputService.enableLockedSelectionChange();
 
@@ -1396,7 +1393,7 @@ export class PromptController extends Disposable {
 
         let { startRow, endRow, startColumn, endColumn } = toRange;
 
-        const primary = getCellInfoInMergeData(startRow, startColumn, skeleton?.mergeData);
+        const primary = this._mergeCellService.getCellInfoInfo(unitId, sheetId, startRow, startColumn);
 
         if (primary) {
             const {

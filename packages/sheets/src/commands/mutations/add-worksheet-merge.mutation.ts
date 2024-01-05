@@ -22,6 +22,7 @@ import type {
     IAddWorksheetMergeMutationParams,
     IRemoveWorksheetMergeMutationParams,
 } from '../../basics/interfaces/mutation-interface';
+import { MergeCellService } from '../../services/merge-cell/merge-cell.service';
 
 export const AddMergeUndoMutationFactory = (
     accessor: IAccessor,
@@ -29,7 +30,6 @@ export const AddMergeUndoMutationFactory = (
 ): IRemoveWorksheetMergeMutationParams => {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const universheet = univerInstanceService.getUniverSheetInstance(params.unitId);
-
     if (universheet == null) {
         throw new Error('universheet is null error!');
     }
@@ -47,6 +47,7 @@ export const AddWorksheetMergeMutation: IMutation<IAddWorksheetMergeMutationPara
     handler: (accessor: IAccessor, params: IAddWorksheetMergeMutationParams) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const universheet = univerInstanceService.getUniverSheetInstance(params.unitId);
+        const mergeCellService = accessor.get(MergeCellService);
 
         if (universheet == null) {
             throw new Error('universheet is null error!');
@@ -54,12 +55,11 @@ export const AddWorksheetMergeMutation: IMutation<IAddWorksheetMergeMutationPara
 
         const worksheet = universheet.getSheetBySheetId(params.subUnitId);
         if (!worksheet) return false;
+        const mergeData = mergeCellService.getMergeData(params.unitId, params.subUnitId);
 
-        const config = worksheet.getConfig()!;
-        const mergeConfigData = config.mergeData;
         const mergeAppendData = params.ranges;
         for (let i = 0; i < mergeAppendData.length; i++) {
-            mergeConfigData.push(mergeAppendData[i]);
+            mergeData.push(mergeAppendData[i]);
         }
 
         return true;

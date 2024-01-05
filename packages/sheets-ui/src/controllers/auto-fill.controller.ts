@@ -30,7 +30,7 @@ import {
     toDisposable,
     Tools,
 } from '@univerjs/core';
-import { DeviceInputEventType, getCellInfoInMergeData } from '@univerjs/engine-render';
+import { DeviceInputEventType } from '@univerjs/engine-render';
 import type {
     IAddWorksheetMergeMutationParams,
     IRemoveWorksheetMergeMutationParams,
@@ -41,6 +41,7 @@ import {
     AddWorksheetMergeMutation,
     ClearSelectionContentCommand,
     getAddMergeMutationRangeByType,
+    MergeCellService,
     NORMAL_SELECTION_PLUGIN_NAME,
     RemoveMergeUndoMutationFactory,
     RemoveWorksheetMergeMutation,
@@ -83,7 +84,8 @@ export class AutoFillController extends Disposable {
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
-        @Inject(Injector) private readonly _injector: Injector
+        @Inject(Injector) private readonly _injector: Injector,
+        @Inject(MergeCellService) private mergeCellService: MergeCellService
     ) {
         super();
         this._defaultHook = {
@@ -602,15 +604,15 @@ export class AutoFillController extends Disposable {
     }
 
     private _getMergeApplyData(source: IRange, target: IRange, direction: Direction, csLen: number) {
-        const mergeData = this._univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getMergeData();
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+        const worksheet = workbook.getActiveSheet();
+        const unitId = workbook.getUnitId();
+        const subUnitId = worksheet.getSheetId();
         const applyMergeRanges = [];
         for (let i = source.startRow; i <= source.endRow; i++) {
             for (let j = source.startColumn; j <= source.endColumn; j++) {
-                const { isMergedMainCell, startRow, startColumn, endRow, endColumn } = getCellInfoInMergeData(
-                    i,
-                    j,
-                    mergeData
-                );
+                const { isMergedMainCell, startRow, startColumn, endRow, endColumn } =
+                    this.mergeCellService.getCellInfoInfo(unitId, subUnitId, i, j);
                 if (isMergedMainCell) {
                     if (direction === Direction.DOWN) {
                         let windowStartRow = startRow + csLen;
@@ -819,17 +821,12 @@ export class AutoFillController extends Disposable {
         };
         // delete cross merge
         const deleteMergeRanges: IRange[] = [];
-        const mergeData = this._univerInstanceService
-            .getUniverSheetInstance(unitId)
-            ?.getSheetBySheetId(subUnitId)
-            ?.getMergeData();
-        if (mergeData) {
-            mergeData.forEach((merge) => {
-                if (Rectangle.intersects(merge, target)) {
-                    deleteMergeRanges.push(merge);
-                }
-            });
-        }
+        const mergeData = this.mergeCellService.getMergeData(unitId, subUnitId);
+        mergeData.forEach((merge) => {
+            if (Rectangle.intersects(merge, target)) {
+                deleteMergeRanges.push(merge);
+            }
+        });
         const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
             unitId,
             subUnitId,

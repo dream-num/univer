@@ -18,10 +18,6 @@ jobs:
             matrix:
                 node-version: [16, 18]
 
-        env:
-            TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-            TURBO_TEAM: ${{ vars.TURBO_TEAM }}
-
         steps:
             - name: Checkout
               uses: actions/checkout@v3
@@ -58,6 +54,7 @@ jobs:
 
             # TODO: cross fork PR will not trigger this action
             - name: 🧬 Report coverage
+              if: matrix.node-version == '18'
               uses: codecov/codecov-action@v3
               env:
                   CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

@@ -466,7 +466,7 @@ export class UpdateFormulaController extends Disposable {
         const { range, unitId, subUnitId } = params;
         return {
             type: FormulaReferenceMoveType.InsertRow,
-            ranges: [range],
+            range,
             unitId,
             sheetId: subUnitId,
         };
@@ -479,7 +479,7 @@ export class UpdateFormulaController extends Disposable {
         const { range, unitId, subUnitId } = params;
         return {
             type: FormulaReferenceMoveType.InsertColumn,
-            ranges: [range],
+            range,
             unitId,
             sheetId: subUnitId,
         };

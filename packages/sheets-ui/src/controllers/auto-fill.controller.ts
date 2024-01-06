@@ -798,6 +798,20 @@ export class AutoFillController extends Disposable {
             });
         }
 
+        if (applyType === APPLY_TYPE.ONLY_FORMAT) {
+            applyDatas.forEach((row, rowIndex) => {
+                row.forEach((cellData, colIndex) => {
+                    if (cellData) {
+                        const old = this._beforeApplyData[rowIndex][colIndex] || {};
+                        cellData.f = old.f;
+                        cellData.si = old.si;
+                        cellData.t = old.t;
+                        cellData.v = old.v;
+                    }
+                });
+            });
+        }
+
         const accessor = {
             get: this._injector.get.bind(this._injector),
         };

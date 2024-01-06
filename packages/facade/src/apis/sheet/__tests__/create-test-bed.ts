@@ -42,20 +42,22 @@ import { Inject, Injector } from '@wendellhu/redi';
 
 import { FUniver } from '../../facade';
 
-const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
-    id: 'test',
-    appVersion: '3.0.0-alpha',
-    sheets: {
-        sheet1: {
-            id: 'sheet1',
-            cellData: {},
+function getTestWorkbookDataDemo(): IWorkbookData {
+    return {
+        id: 'test',
+        appVersion: '3.0.0-alpha',
+        sheets: {
+            sheet1: {
+                id: 'sheet1',
+                cellData: {},
+            },
         },
-    },
-    locale: LocaleType.ZH_CN,
-    name: '',
-    sheetOrder: [],
-    styles: {},
-};
+        locale: LocaleType.ZH_CN,
+        name: '',
+        sheetOrder: [],
+        styles: {},
+    };
+}
 
 export interface ITestBed {
     univer: Univer;
@@ -95,7 +97,7 @@ export function createTestBed(workbookConfig?: IWorkbookData, dependencies?: Dep
     injector.get(LocaleService).load({ zhCN, enUS });
 
     univer.registerPlugin(TestSpyPlugin);
-    const sheet = univer.createUniverSheet(workbookConfig || TEST_WORKBOOK_DATA_DEMO);
+    const sheet = univer.createUniverSheet(workbookConfig || getTestWorkbookDataDemo());
 
     const univerInstanceService = injector.get(IUniverInstanceService);
     univerInstanceService.focusUniverInstance('test');

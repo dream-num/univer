@@ -51,7 +51,7 @@
         "react": "^18.2.0"
     },
     "devDependencies": {
-        "@types/react": "^18.2.46",
+        "@types/react": "^18.2.47",
         "@vitejs/plugin-react": "^4.2.1",
         "@vitest/coverage-istanbul": "^1.1.1",
         "less": "^4.2.0",

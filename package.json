@@ -25,7 +25,7 @@
     "license": "Apache-2.0",
     "devDependencies": {
         "@commitlint/cli": "^18.4.3",
-        "@commitlint/config-conventional": "^18.4.3",
+        "@commitlint/config-conventional": "^18.4.4",
         "@playwright/test": "^1.40.1",
         "@storybook/addon-docs": "^7.6.7",
         "@storybook/addon-essentials": "^7.6.7",

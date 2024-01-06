@@ -17,7 +17,7 @@
 import React from 'react';
 
 import styles from './index.module.less';
-import { ZoomSlider } from './zoom-slider';
+import { ZoomSlider } from './ZoomSlider';
 
 interface ICountBarProps {
     changeRatio?: (ratio: string) => void;

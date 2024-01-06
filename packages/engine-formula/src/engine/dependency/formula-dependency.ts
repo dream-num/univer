@@ -518,12 +518,12 @@ export class FormulaDependencyGenerator extends Disposable {
         }
 
         /**
-         * When the name of a worksheet is changed, or a worksheet is inserted or deleted,
-         * the formulas within it may not need to be calculated.
+         * When a worksheet is inserted or deleted,
+         * the formulas within it need to be calculated.
          */
-        // if (this._dirtyUnitSheetNameMap[unitId][subUnitId] != null) {
-        //     return true;
-        // }
+        if (this._dirtyUnitSheetNameMap[unitId][subUnitId] != null) {
+            return true;
+        }
 
         if (!this._updateRangeFlattenCache.has(unitId)) {
             return false;

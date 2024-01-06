@@ -20,8 +20,8 @@ import { SelectionManagerService } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 
 import { CURRENCYFORMAT } from '../../base/const/FORMATDETAIL';
-import type { ISetNumfmtCommandParams } from './set.numfmt.command';
-import { SetNumfmtCommand } from './set.numfmt.command';
+import type { ISetNumfmtCommandParams } from './set-numfmt.command';
+import { SetNumfmtCommand } from './set-numfmt.command';
 
 export const SetCurrencyCommand: ICommand = {
     id: 'sheet.command.numfmt.set.currency',

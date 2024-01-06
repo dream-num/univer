@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
-export { type ISetNumfmtCommandParams, SetNumfmtCommand } from './commands/commands/set-numfmt.command';
-export { enUS, zhCN } from './locale';
-export { UniverSheetsNumfmtPlugin } from './numfmt-plugin';
+import { createIdentifier } from '@wendellhu/redi';
+
+export const IFindReplaceService = createIdentifier<IFindReplaceService>('univer.find-replace-service');
+
+/**
+ *
+ */
+export interface IFindReplaceService {}
+
+export interface IFindReplaceHookd {}

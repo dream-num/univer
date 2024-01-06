@@ -38,7 +38,11 @@ import {
 } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 
+// TODO@wzhudev: unitId and subUnitId is not used in `SetNumfmtCommand`. This should be fixed to make Facade work.
+
 export interface ISetNumfmtCommandParams {
+    unitId: string;
+    subUnitId: string;
     values: Array<{ pattern?: string; row: number; col: number; type?: FormatType }>;
 }
 
@@ -49,6 +53,7 @@ export const SetNumfmtCommand: ICommand<ISetNumfmtCommandParams> = {
         if (!params) {
             return false;
         }
+
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const undoRedoService = accessor.get(IUndoRedoService);

@@ -14,19 +14,51 @@
  * limitations under the License.
  */
 
-import { DEFAULT_WORKSHEET, ICommandService, Tools, type Workbook } from '@univerjs/core';
-import type { IInsertSheetCommandParams, ISetWorksheetActivateCommandParams } from '@univerjs/sheets';
-import { InsertSheetCommand, SetWorksheetActivateCommand } from '@univerjs/sheets';
+import type { CommandListener, ICommandInfo, IRange, IWorkbookData, Workbook } from '@univerjs/core';
+import {
+    DEFAULT_WORKSHEET,
+    ICommandService,
+    IUniverInstanceService,
+    RedoCommand,
+    toDisposable,
+    Tools,
+    UndoCommand,
+} from '@univerjs/core';
+import type {
+    IInsertSheetCommandParams,
+    ISetWorksheetActivateCommandParams,
+    ISheetCommandSharedParams,
+} from '@univerjs/sheets';
+import { InsertSheetCommand, SelectionManagerService, SetWorksheetActivateCommand } from '@univerjs/sheets';
+import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { FWorksheet } from './f-worksheet';
 
 export class FWorkbook {
+    readonly id: string;
+
     constructor(
         private readonly _workbook: Workbook,
         @Inject(Injector) private readonly _injector: Injector,
+        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService
-    ) {}
+    ) {
+        this.id = this._workbook.getUnitId();
+    }
+
+    getId(): string {
+        return this._workbook.getUnitId();
+    }
+
+    getName(): string {
+        return this._workbook.getName();
+    }
+
+    getSnapshot(): IWorkbookData {
+        return this._workbook.getSnapshot();
+    }
 
     /**
      * Get the active sheet of the workbook.
@@ -48,7 +80,7 @@ export class FWorkbook {
      * @param column How many columns would the new sheet have
      * @returns The new created sheet
      */
-    create(name: string, rows: number, column: number): FWorksheet {
+    createSheet(name: string, rows: number, column: number): FWorksheet {
         const newSheet = Tools.deepClone(DEFAULT_WORKSHEET);
         newSheet.rowCount = rows;
         newSheet.columnCount = column;
@@ -67,4 +99,54 @@ export class FWorkbook {
 
         return this._injector.createInstance(FWorksheet, this._workbook, this._workbook.getActiveSheet());
     }
+
+    // #region editing
+
+    undo(): Promise<boolean> {
+        this._univerInstanceService.focusUniverInstance(this.id);
+        return this._commandService.executeCommand(UndoCommand.id);
+    }
+
+    redo(): Promise<boolean> {
+        this._univerInstanceService.focusUniverInstance(this.id);
+        return this._commandService.executeCommand(RedoCommand.id);
+    }
+
+    // #endregion
+
+    // #region callbacks
+
+    /**
+     * Register a callback that will be triggered when a command is invoked targeting the Univer sheet.
+     * @param callback the callback.
+     * @returns A function to dispose the listening.
+     */
+    onCommandExecuted(callback: CommandListener): IDisposable {
+        return this._commandService.onCommandExecuted((command) => {
+            if ((command as ICommandInfo<ISheetCommandSharedParams>).params?.unitId !== this.id) {
+                return;
+            }
+
+            callback(command);
+        });
+    }
+
+    onSelectionChange(callback: (selections: IRange[]) => void): IDisposable {
+        return toDisposable(
+            this._selectionManagerService.selectionMoveEnd$.subscribe((selections) => {
+                if (this._univerInstanceService.getCurrentUniverSheetInstance().getUnitId() !== this.id) {
+                    return;
+                }
+
+                if (!selections?.length) {
+                    callback([]);
+                }
+
+                // TODO@wzhudev: filtered out ranges changes not other currently sheet
+                callback(selections!.map((s) => s.range));
+            })
+        );
+    }
+
+    // #region callbacks
 }

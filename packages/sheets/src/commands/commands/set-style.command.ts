@@ -49,10 +49,13 @@ export interface IStyleTypeValue<T> {
     value: T | T[][];
 }
 
-export interface ISetStyleCommandParams<T> {
+interface ISetStyleCommonParams {
     subUnitId?: string;
     unitId?: string;
     range?: IRange;
+}
+
+export interface ISetStyleCommandParams<T> extends ISetStyleCommonParams {
     style: IStyleTypeValue<T>;
 }
 
@@ -511,7 +514,7 @@ export const SetHorizontalTextAlignCommand: ICommand<ISetHorizontalTextAlignComm
     },
 };
 
-export interface ISetTextWrapCommandParams {
+export interface ISetTextWrapCommandParams extends ISetStyleCommonParams {
     value: WrapStrategy;
 }
 

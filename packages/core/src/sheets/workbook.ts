@@ -121,6 +121,10 @@ export class Workbook extends Disposable {
         return this._snapshot;
     }
 
+    getName(): string {
+        return this._snapshot.name;
+    }
+
     getUnitId() {
         return this._unitId;
     }

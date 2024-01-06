@@ -14,6 +14,21 @@
  * limitations under the License.
  */
 
-export { type ISetNumfmtCommandParams, SetNumfmtCommand } from './commands/commands/set-numfmt.command';
-export { enUS, zhCN } from './locale';
-export { UniverSheetsNumfmtPlugin } from './numfmt-plugin';
+import { Plugin } from '@univerjs/core';
+import type { Dependency, Injector } from '@wendellhu/redi';
+
+import { FindReplaceController } from './controllers/find-replace.controller';
+
+const PLUGIN_NAME = 'FIND_REPLACE';
+
+export class UniverFindReplacePlugin extends Plugin {
+    constructor(protected readonly _injector: Injector) {
+        super(PLUGIN_NAME);
+    }
+
+    override onStarting(injector: Injector): void {
+        ([[FindReplaceController]] as Dependency[]).forEach((d) => {
+            injector.add(d);
+        });
+    }
+}

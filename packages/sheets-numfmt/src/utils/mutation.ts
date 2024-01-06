@@ -15,6 +15,7 @@
  */
 
 import type { IMutationInfo } from '@univerjs/core';
+import { Tools } from '@univerjs/core';
 import type { IRemoveNumfmtMutationParams, ISetNumfmtMutationParams } from '@univerjs/sheets';
 import { rangeMerge, RemoveNumfmtMutation, SetNumfmtMutation } from '@univerjs/sheets';
 
@@ -35,26 +36,36 @@ export const mergeNumfmtMutations = (list: IMutationInfo[]) => {
             },
             {
                 ranges: [],
-                unitId: setMutation[0].unitId,
-                subUnitId: setMutation[0].subUnitId,
+                unitId: removeMutation[0].unitId,
+                subUnitId: removeMutation[0].subUnitId,
             } as IRemoveNumfmtMutationParams
         );
         params.ranges = rangeMerge(params.ranges);
         result.push({ id: RemoveNumfmtMutation.id, params });
     }
+    const findKeyFromObj = (obj: Record<string, any>, item: any) => {
+        const keys = Object.keys(obj);
+        const index = keys.findIndex((key) => {
+            const value = obj[key];
+            return Tools.diffValue(value, item);
+        });
+        return keys[index];
+    };
     if (setMutation[0]) {
         const params = setMutation.reduce(
             (res, cur) => {
                 Object.keys(cur.values).forEach((key) => {
                     const curValue = cur.values[key];
                     const curRef = cur.refMap[key];
-                    if (res.values[key]) {
-                        res.values[key].ranges.push(...curValue.ranges);
+                    const index = findKeyFromObj(res.refMap, curRef);
+                    if (index) {
+                        res.values[index].ranges.push(...curValue.ranges);
                     } else {
-                        res.values[key] = {
+                        const newIndex = Math.max(...Object.keys(res.refMap).map(Number), 0) + 1;
+                        res.values[newIndex] = {
                             ranges: curValue.ranges,
                         };
-                        res.refMap[key] = curRef;
+                        res.refMap[newIndex] = curRef;
                     }
                 });
                 return res;

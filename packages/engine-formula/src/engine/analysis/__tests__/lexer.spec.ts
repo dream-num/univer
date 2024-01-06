@@ -83,7 +83,7 @@ describe('lexer nodeMaker test', () => {
 
         lexerTreeBuilder = get(LexerTreeBuilder);
 
-        runtimeService.setCurrent(0, 0, 'sheet1', 'test');
+        runtimeService.setCurrent(0, 0, 4, 1, 'sheet1', 'test');
 
         lexer = new Lexer(definedNamesService, runtimeService, lexerTreeBuilder);
     });

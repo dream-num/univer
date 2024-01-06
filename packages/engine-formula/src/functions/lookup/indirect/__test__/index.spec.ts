@@ -70,7 +70,16 @@ describe('Test indirect', () => {
             },
         });
 
-        formulaRuntimeService.setCurrent(0, 0, testBed.sheetId, testBed.unitId);
+        const sheetItem = testBed.sheetData[testBed.sheetId];
+
+        formulaRuntimeService.setCurrent(
+            0,
+            0,
+            sheetItem.rowCount,
+            sheetItem.columnCount,
+            testBed.sheetId,
+            testBed.unitId
+        );
 
         functionService.registerExecutors(
             new Indirect(FUNCTION_NAMES_LOOKUP.INDIRECT),

@@ -72,8 +72,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
             [
                 IDescriptionService,
                 {
-                    useFactory: () =>
-                        this._injector.createInstance(DescriptionService, this._config?.description || []),
+                    useFactory: () => this._injector.createInstance(DescriptionService, this._config?.description),
                 },
             ],
             [IFormulaCustomFunctionService, { useClass: FormulaCustomFunctionService }],

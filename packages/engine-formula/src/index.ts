@@ -77,6 +77,7 @@ export type { PrimitiveValueType } from './engine/value-object/primitive-object'
 export { NumberValueObject } from './engine/value-object/primitive-object';
 export { BooleanValueObject } from './engine/value-object/primitive-object';
 export { StringValueObject } from './engine/value-object/primitive-object';
+export { functionArray } from './functions/array/function-map';
 export { FUNCTION_NAMES_ARRAY } from './functions/array/function-names';
 export { BaseFunction } from './functions/base-function';
 export { functionCompatibility } from './functions/compatibility/function-map';

@@ -276,7 +276,7 @@ importers:
         version: 0.6.2(vite@5.0.10)
       vitest:
         specifier: ^1.1.1
-        version: 1.1.1(@types/node@20.10.6)
+        version: 1.1.1(@types/node@20.10.6)(happy-dom@12.10.3)
 
   packages/design:
     dependencies:
@@ -536,7 +536,7 @@ importers:
         version: 0.6.2(vite@5.0.10)
       vitest:
         specifier: ^1.1.1
-        version: 1.1.1(@types/node@20.10.6)
+        version: 1.1.1(@types/node@20.10.6)(happy-dom@12.10.3)
 
   packages/engine-render:
     dependencies:
@@ -583,6 +583,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
+      '@univerjs/engine-formula':
+        specifier: workspace:*
+        version: link:../engine-formula
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -599,6 +602,9 @@ importers:
       '@vitest/coverage-istanbul':
         specifier: ^1.1.1
         version: 1.1.1(vitest@1.1.1)
+      happy-dom:
+        specifier: ^12.10.3
+        version: 12.10.3
       typescript:
         specifier: ^5.3.3
         version: 5.3.3
@@ -613,7 +619,7 @@ importers:
         version: 0.6.2(vite@5.0.10)
       vitest:
         specifier: ^1.1.1
-        version: 1.1.1(@types/node@20.10.6)
+        version: 1.1.1(@types/node@20.10.6)(happy-dom@12.10.3)
 
   packages/image:
     dependencies:
@@ -687,7 +693,7 @@ importers:
         version: 0.6.2(vite@5.0.10)
       vitest:
         specifier: ^1.1.1
-        version: 1.1.1(@types/node@20.10.6)
+        version: 1.1.1(@types/node@20.10.6)(happy-dom@12.10.3)
 
   packages/rpc:
     dependencies:
@@ -718,7 +724,7 @@ importers:
         version: 0.6.2(vite@5.0.10)
       vitest:
         specifier: ^1.1.1
-        version: 1.1.1(@types/node@20.10.6)
+        version: 1.1.1(@types/node@20.10.6)(happy-dom@12.10.3)
 
   packages/sheets:
     dependencies:
@@ -5873,7 +5879,7 @@ packages:
       magicast: 0.3.2
       picocolors: 1.0.0
       test-exclude: 6.0.0
-      vitest: 1.1.1(@types/node@20.10.6)
+      vitest: 1.1.1(@types/node@20.10.6)(happy-dom@12.10.3)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -13187,7 +13193,7 @@ packages:
       fsevents: 2.3.3
     dev: true
 
-  /vitest@1.1.1(@types/node@20.10.6):
+  /vitest@1.1.1(@types/node@20.10.6)(happy-dom@12.10.3):
     resolution: {integrity: sha512-Ry2qs4UOu/KjpXVfOCfQkTnwSXYGrqTbBZxw6reIYEFjSy1QUARRg5pxiI5BEXy+kBVntxUYNMlq4Co+2vD3fQ==}
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
@@ -13223,6 +13229,7 @@ packages:
       chai: 4.3.10
       debug: 4.3.4
       execa: 8.0.1
+      happy-dom: 12.10.3
       local-pkg: 0.5.0
       magic-string: 0.30.5
       pathe: 1.1.1

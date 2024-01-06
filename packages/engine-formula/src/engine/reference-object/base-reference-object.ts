@@ -327,7 +327,7 @@ export class BaseReferenceObject extends ObjectClassType {
 
     getCellValueObject(cell: ICellData) {
         const value = cell.v || 0;
-        if (ERROR_TYPE_SET.has(value as string)) {
+        if (ERROR_TYPE_SET.has(value as ErrorType)) {
             return ErrorValueObject.create(value as ErrorType);
         }
 

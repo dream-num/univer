@@ -19,6 +19,7 @@ import type { Ctor } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import type { IFunctionNames } from '../basics/function';
+import { RegisterFunctionMutation } from '../commands/mutations/register-function.mutation';
 import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
 import { RemoveDefinedNameMutation, SetDefinedNameMutation } from '../commands/mutations/set-defined-name.mutation';
 import {
@@ -38,6 +39,7 @@ import {
     SetSuperTableMutation,
     SetSuperTableOptionMutation,
 } from '../commands/mutations/set-super-table.mutation';
+import { UnregisterFunctionMutation } from '../commands/mutations/unregister-function.mutation';
 import { functionArray } from '../functions/array/function-map';
 import type { BaseFunction } from '../functions/base-function';
 import { functionCompatibility } from '../functions/compatibility/function-map';
@@ -60,6 +62,7 @@ import { IFunctionService } from '../services/function.service';
 @OnLifecycle(LifecycleStages.Ready, FormulaController)
 export class FormulaController extends Disposable {
     constructor(
+        private _function: Array<[Ctor<BaseFunction>, IFunctionNames]>,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(Injector) private readonly _injector: Injector,
         @IFunctionService private readonly _functionService: IFunctionService
@@ -93,33 +96,39 @@ export class FormulaController extends Disposable {
             SetSuperTableMutation,
             RemoveSuperTableMutation,
             SetSuperTableOptionMutation,
+            RegisterFunctionMutation,
+            UnregisterFunctionMutation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 
     private _registerFunctions() {
-        const functions: BaseFunction[] = [
-            ...functionArray,
-            ...functionCompatibility,
-            ...functionCube,
-            ...functionDatabase,
-            ...functionDate,
-            ...functionEngineering,
-            ...functionFinancial,
-            ...functionInformation,
-            ...functionLogical,
-            ...functionLookup,
-            ...functionMath,
-            ...functionMeta,
-            ...functionStatistical,
-            ...functionText,
-            ...functionUniver,
-            ...functionWeb,
-        ].map((registerObject) => {
-            const Func = registerObject[0] as Ctor<BaseFunction>;
-            const name = registerObject[1] as IFunctionNames;
+        const functions: BaseFunction[] = (
+            [
+                ...functionArray,
+                ...functionCompatibility,
+                ...functionCube,
+                ...functionDatabase,
+                ...functionDate,
+                ...functionEngineering,
+                ...functionFinancial,
+                ...functionInformation,
+                ...functionLogical,
+                ...functionLookup,
+                ...functionMath,
+                ...functionMeta,
+                ...functionStatistical,
+                ...functionText,
+                ...functionUniver,
+                ...functionWeb,
+            ] as Array<[Ctor<BaseFunction>, IFunctionNames]>
+        )
+            .concat(this._function)
+            .map((registerObject) => {
+                const Func = registerObject[0] as Ctor<BaseFunction>;
+                const name = registerObject[1] as IFunctionNames;
 
-            return new Func(name);
-        });
+                return new Func(name);
+            });
 
         this._functionService.registerExecutors(...functions);
     }

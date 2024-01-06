@@ -43,6 +43,8 @@ export interface IFunctionService {
 
     hasExecutor(functionToken: IFunctionNames): boolean;
 
+    unregisterExecutors(...functionTokens: IFunctionNames[]): void;
+
     registerDescriptions(...functions: IFunctionInfo[]): void;
 
     getDescriptions(): Map<IFunctionNames, IFunctionInfo>;
@@ -50,6 +52,8 @@ export interface IFunctionService {
     getDescription(functionToken: IFunctionNames): Nullable<IFunctionInfo>;
 
     hasDescription(functionToken: IFunctionNames): boolean;
+
+    unregisterDescriptions(...functionTokens: IFunctionNames[]): void;
 }
 
 export class FunctionService extends Disposable implements IFunctionService {
@@ -81,6 +85,13 @@ export class FunctionService extends Disposable implements IFunctionService {
         return this._functionExecutors.has(functionToken);
     }
 
+    unregisterExecutors(...functionTokens: IFunctionNames[]) {
+        for (let i = 0; i < functionTokens.length; i++) {
+            const functionToken = functionTokens[i];
+            this._functionExecutors.delete(functionToken);
+        }
+    }
+
     registerDescriptions(...descriptions: IFunctionInfo[]) {
         for (let i = 0; i < descriptions.length; i++) {
             const description = descriptions[i];
@@ -98,6 +109,13 @@ export class FunctionService extends Disposable implements IFunctionService {
 
     hasDescription(functionToken: IFunctionNames) {
         return this._functionDescriptions.has(functionToken);
+    }
+
+    unregisterDescriptions(...functionTokens: IFunctionNames[]) {
+        for (let i = 0; i < functionTokens.length; i++) {
+            const functionToken = functionTokens[i];
+            this._functionDescriptions.delete(functionToken);
+        }
     }
 }
 

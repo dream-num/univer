@@ -15,8 +15,8 @@
  */
 
 import { IUniverInstanceService, LocaleService, Plugin, PluginType } from '@univerjs/core';
-import type { IFunctionInfo } from '@univerjs/engine-formula';
-import type { Dependency } from '@wendellhu/redi';
+import type { BaseFunction, IFunctionInfo, IFunctionNames } from '@univerjs/engine-formula';
+import type { Ctor, Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { FORMULA_UI_PLUGIN_NAME } from './common/plugin-name';
@@ -33,12 +33,20 @@ import { UpdateFormulaController } from './controllers/update-formula.controller
 import { zhCN } from './locale';
 import { ActiveDirtyManagerService, IActiveDirtyManagerService } from './services/active-dirty-manager.service';
 import { DescriptionService, IDescriptionService } from './services/description.service';
+import {
+    FormulaCustomFunctionService,
+    IFormulaCustomFunctionService,
+} from './services/formula-custom-function.service';
 import { FormulaInputService, IFormulaInputService } from './services/formula-input.service';
 import { FormulaPromptService, IFormulaPromptService } from './services/prompt.service';
+import { IRegisterFunctionService, RegisterFunctionService } from './services/register-function.service';
 
-// TODO@Dushusir: user config IFunctionInfo, we will register all function info in formula engine
+/**
+ * The configuration of the formula UI plugin.
+ */
 interface IFormulaUIConfig {
     description: IFunctionInfo[];
+    function: Array<[Ctor<BaseFunction>, IFunctionNames]>;
 }
 export class UniverSheetsFormulaPlugin extends Plugin {
     static override type = PluginType.Sheet;
@@ -65,10 +73,13 @@ export class UniverSheetsFormulaPlugin extends Plugin {
                 IDescriptionService,
                 {
                     useFactory: () =>
-                        this._injector.createInstance(DescriptionService, this._config?.description || []), // TODO@Dusuhir: initialize config with asynchronous method?
+                        this._injector.createInstance(DescriptionService, this._config?.description || []),
                 },
             ],
+            [IFormulaCustomFunctionService, { useClass: FormulaCustomFunctionService }],
             [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
+            [IRegisterFunctionService, { useClass: RegisterFunctionService }],
+
             // controllers
             [FormulaUIController],
             [PromptController],

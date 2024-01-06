@@ -62,23 +62,13 @@ export function HelpFunction() {
 
             const { left, top, height } = position;
 
-            const localeInfo: IFunctionInfo = {
-                functionName: functionInfo.functionName,
-                functionType: functionInfo.functionType,
-                description: localeService.t(functionInfo.description),
-                abstract: localeService.t(functionInfo.abstract),
-                functionParameter: functionInfo.functionParameter.map((item) => ({
-                    name: localeService.t(item.name),
-                    detail: localeService.t(item.detail),
-                    example: item.example,
-                    require: item.require,
-                    repeat: item.repeat,
-                })),
-            };
+            if (functionInfo.description === '' && functionInfo.functionParameter.length === 0) {
+                return;
+            }
 
             setOffset([left, top + height]);
             setParamIndex(paramIndex);
-            setFunctionInfo(localeInfo);
+            setFunctionInfo(functionInfo);
             setDecoratorPosition({ left, top });
             setVisible(visible);
         });

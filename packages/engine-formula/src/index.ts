@@ -35,6 +35,7 @@ export { includeFormulaLexerToken, isFormulaLexerToken, normalizeSheetName } fro
 export { convertUnitDataToRuntime } from './basics/runtime';
 export { matchToken } from './basics/token';
 export { compareToken } from './basics/token';
+export { RegisterFunctionMutation } from './commands/mutations/register-function.mutation';
 export {
     type ISetArrayFormulaDataMutationParams,
     SetArrayFormulaDataMutation,
@@ -64,6 +65,7 @@ export {
     SetSuperTableMutation,
     SetSuperTableOptionMutation,
 } from './commands/mutations/set-super-table.mutation';
+export { UnregisterFunctionMutation } from './commands/mutations/unregister-function.mutation';
 export { LexerNode } from './engine/analysis/lexer-node';
 export { LexerTreeBuilder } from './engine/analysis/lexer-tree-builder';
 export { BaseReferenceObject, type FunctionVariantType } from './engine/reference-object/base-reference-object';
@@ -71,6 +73,7 @@ export { RangeReferenceObject } from './engine/reference-object/range-reference-
 export { generateStringWithSequence, type ISequenceNode, sequenceNodeType } from './engine/utils/sequence';
 export { ArrayValueObject, ValueObjectFactory } from './engine/value-object/array-value-object';
 export { BaseValueObject, ErrorValueObject } from './engine/value-object/base-value-object';
+export type { PrimitiveValueType } from './engine/value-object/primitive-object';
 export { NumberValueObject } from './engine/value-object/primitive-object';
 export { BooleanValueObject } from './engine/value-object/primitive-object';
 export { StringValueObject } from './engine/value-object/primitive-object';

@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import { ErrorType } from '../../../basics/error-type';
 import { compareToken } from '../../../basics/token';
-import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
-import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { type BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 
 export class Compare extends BaseFunction {
@@ -27,19 +25,15 @@ export class Compare extends BaseFunction {
         this._compareType = token;
     }
 
-    override calculate(variant1: FunctionVariantType, variant2: FunctionVariantType) {
-        if (variant1.isError() || variant2.isError()) {
-            return ErrorValueObject.create(ErrorType.VALUE);
+    override calculate(variant1: BaseValueObject, variant2: BaseValueObject) {
+        if (variant1.isError()) {
+            return variant1;
         }
 
-        if (variant1.isReferenceObject()) {
-            variant1 = (variant1 as BaseReferenceObject).toArrayValueObject();
+        if (variant2.isError()) {
+            return variant1;
         }
 
-        if (variant2.isReferenceObject()) {
-            variant2 = (variant2 as BaseReferenceObject).toArrayValueObject();
-        }
-
-        return (variant1 as BaseValueObject).compare(variant2 as BaseValueObject, this._compareType);
+        return variant1.compare(variant2, this._compareType);
     }
 }

@@ -274,7 +274,7 @@ export class AstTreeBuilder extends Disposable {
 
             if (astNode == null) {
                 // console.log('error3', astNode, currentAstNode, lexerNode);
-                return ErrorNode.create(ErrorType.ERROR);
+                return ErrorNode.create(ErrorType.NAME);
             }
 
             astNode = this._getTopParent(astNode);

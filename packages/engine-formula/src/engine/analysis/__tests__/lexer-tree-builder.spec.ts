@@ -129,8 +129,15 @@ describe('lexer nodeMaker test', () => {
             // eslint-disable-next-line no-console
             console.log(`Elapsed time: ${elapsed} ms`);
 
-            // const expectedMaxTime = 3000; // 毫秒数 // CI may time out TODO: performance test
-            // expect(elapsed).toBeLessThan(expectedMaxTime);
+            const expectedMaxTime = 3000; // 毫秒数 // CI may time out TODO: performance test
+            expect(elapsed).toBeGreaterThan(0);
+        });
+
+        it('error', () => {
+            const node = lexerTreeBuilder.treeBuilder(`=sum(#REF! + 5 , #REF!)`) as LexerNode;
+            expect(JSON.stringify(node.serialize())).toStrictEqual(
+                `{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"sum","st":0,"ed":2,"children":[{"token":"P_1","st":0,"ed":2,"children":["#REF! "," 5 ","+"]},{"token":"P_1","st":11,"ed":13,"children":[" #REF!"]}]}]}`
+            );
         });
     });
 });

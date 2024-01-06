@@ -15,6 +15,8 @@
  */
 
 import { BooleanValue } from '../../basics/common';
+import type { ErrorType } from '../../basics/error-type';
+import { ERROR_TYPE_SET } from '../../basics/error-type';
 import { LexerNode } from '../analysis/lexer-node';
 import { ValueObjectFactory } from '../value-object/array-value-object';
 import { BaseAstNode } from './base-ast-node';
@@ -45,6 +47,11 @@ export class ValueNodeFactory extends BaseAstNodeFactory {
             const tokenTrim = token.trim();
             const startToken = tokenTrim.charAt(0);
             const endToken = tokenTrim.charAt(tokenTrim.length - 1);
+
+            if (ERROR_TYPE_SET.has(tokenTrim as ErrorType)) {
+                return this.create(tokenTrim);
+            }
+
             if (startToken === '"' && endToken === '"') {
                 return this.create(tokenTrim);
             }

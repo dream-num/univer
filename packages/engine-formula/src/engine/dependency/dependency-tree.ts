@@ -48,6 +48,10 @@ export class FormulaDependencyTree extends Disposable {
 
     column: number = -1;
 
+    rowCount: number = -Infinity;
+
+    columnCount: number = -Infinity;
+
     subUnitId: string = '';
 
     unitId: string = '';

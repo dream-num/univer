@@ -94,7 +94,14 @@ export interface IFormulaRuntimeService {
 
     reset(): void;
 
-    setCurrent(row: number, column: number, sheetId: string, unitId: string): void;
+    setCurrent(
+        row: number,
+        column: number,
+        rowCount: number,
+        columnCount: number,
+        sheetId: string,
+        unitId: string
+    ): void;
 
     registerFunctionDefinitionPrivacyVar(lambdaId: string, lambdaVar: Map<string, Nullable<BaseAstNode>>): void;
 
@@ -168,8 +175,12 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
     private _stopState = false;
 
-    private _currentRow: number = 0;
-    private _currentColumn: number = 0;
+    private _currentRow: number = -1;
+    private _currentColumn: number = -1;
+
+    private _currentRowCount: number = -Infinity;
+    private _currentColumnCount: number = -Infinity;
+
     private _currentSubUnitId: string = '';
     private _currentUnitId: string = '';
 
@@ -212,6 +223,14 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
     get currentColumn() {
         return this._currentColumn;
+    }
+
+    get currentRowCount() {
+        return this._currentRowCount;
+    }
+
+    get currentColumnCount() {
+        return this._currentColumnCount;
     }
 
     get currentSubUnitId() {
@@ -326,9 +345,11 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         this._completedFormulasCount = 0;
     }
 
-    setCurrent(row: number, column: number, sheetId: string, unitId: string) {
+    setCurrent(row: number, column: number, rowCount: number, columnCount: number, sheetId: string, unitId: string) {
         this._currentRow = row;
         this._currentColumn = column;
+        this._currentRowCount = rowCount;
+        this._currentColumnCount = columnCount;
         this._currentSubUnitId = sheetId;
         this._currentUnitId = unitId;
     }
@@ -367,6 +388,8 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
     setRuntimeData(functionVariant: FunctionVariantType) {
         const row = this._currentRow;
         const column = this._currentColumn;
+        const rowCount = this._currentRowCount;
+        const columnCount = this.currentColumnCount;
         const sheetId = this._currentSubUnitId;
         const unitId = this._currentUnitId;
 
@@ -448,7 +471,10 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
             arrayFormulaRange[sheetId] = arrayData.getData();
 
-            if (this._checkIfArrayFormulaRangeHasData(unitId, sheetId, row, column, arrayRange)) {
+            if (
+                this._checkIfArrayFormulaRangeHasData(unitId, sheetId, row, column, arrayRange) ||
+                this._checkIfArrayFormulaExceeded(rowCount, columnCount, arrayRange)
+            ) {
                 const errorObject = this._objectValueToCellValue(new ErrorValueObject(ErrorType.SPILL));
                 sheetData.setValue(row, column, errorObject);
                 clearArrayUnitData.setValue(row, column, errorObject);
@@ -626,6 +652,14 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         const { startRow, startColumn, endRow, endColumn } = range;
 
         if (r >= startRow && r <= endRow && c >= startColumn && c <= endColumn) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private _checkIfArrayFormulaExceeded(rowCount: number, columnCount: number, arrayRange: IRange) {
+        if (arrayRange.endRow >= rowCount || arrayRange.endColumn >= columnCount) {
             return true;
         }
 

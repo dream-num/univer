@@ -45,6 +45,7 @@
     "dependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/sheets": "workspace:*",
+        "@univerjs/engine-formula": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",
         "@wendellhu/redi": "^0.12.13",
         "rxjs": "^7.8.1"
@@ -52,6 +53,7 @@
     "devDependencies": {
         "@vitest/coverage-istanbul": "^1.1.1",
         "typescript": "^5.3.3",
+        "happy-dom": "^12.10.3",
         "vite": "^5.0.10",
         "vite-plugin-dts": "^3.7.0",
         "vite-plugin-externals": "^0.6.2",

@@ -62,7 +62,7 @@ import { IFunctionService } from '../services/function.service';
 @OnLifecycle(LifecycleStages.Ready, FormulaController)
 export class FormulaController extends Disposable {
     constructor(
-        private _function: Array<[Ctor<BaseFunction>, IFunctionNames]>,
+        private _function: Array<[Ctor<BaseFunction>, IFunctionNames]> = [],
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(Injector) private readonly _injector: Injector,
         @IFunctionService private readonly _functionService: IFunctionService

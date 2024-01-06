@@ -17,6 +17,7 @@
 import { LocaleService } from '@univerjs/core';
 import type { IFunctionInfo, IFunctionNames } from '@univerjs/engine-formula';
 import {
+    functionArray,
     functionCompatibility,
     functionCube,
     functionDatabase,
@@ -34,7 +35,6 @@ import {
     functionWeb,
     IFunctionService,
 } from '@univerjs/engine-formula';
-import { functionArray } from '@univerjs/engine-formula/functions/array/function-map.js';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier, Inject } from '@wendellhu/redi';
 
@@ -100,7 +100,7 @@ export class DescriptionService implements IDescriptionService, IDisposable {
     private _descriptions: IFunctionInfo[] = [];
 
     constructor(
-        private _description: IFunctionInfo[],
+        private _description: IFunctionInfo[] = [],
         @IFunctionService private readonly _functionService: IFunctionService,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {

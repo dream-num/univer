@@ -16,5 +16,12 @@
 
 export { UniverSheetsFormulaPlugin } from './formula-ui-plugin';
 export { enUS, zhCN } from './locale';
+export { IDescriptionService } from './services/description.service';
+export { DescriptionService } from './services/description.service';
+export {
+    FormulaCustomFunctionService,
+    IFormulaCustomFunctionService,
+} from './services/formula-custom-function.service';
 export type { IRegisterFunctionParams, IUnregisterFunctionParams } from './services/register-function.service';
 export { IRegisterFunctionService } from './services/register-function.service';
+export { RegisterFunctionService } from './services/register-function.service';

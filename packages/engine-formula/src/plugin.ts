@@ -92,7 +92,7 @@ export class UniverFormulaEnginePlugin extends Plugin {
             [
                 FormulaController,
                 {
-                    useFactory: () => this._injector.createInstance(FormulaController, this._config?.function || []),
+                    useFactory: () => this._injector.createInstance(FormulaController, this._config?.function),
                 },
             ],
             [SetFeatureCalculationController],

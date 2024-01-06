@@ -36,8 +36,8 @@ export const mergeNumfmtMutations = (list: IMutationInfo[]) => {
             },
             {
                 ranges: [],
-                unitId: setMutation[0].unitId,
-                subUnitId: setMutation[0].subUnitId,
+                unitId: removeMutation[0].unitId,
+                subUnitId: removeMutation[0].subUnitId,
             } as IRemoveNumfmtMutationParams
         );
         params.ranges = rangeMerge(params.ranges);

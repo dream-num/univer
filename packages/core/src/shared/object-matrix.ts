@@ -81,10 +81,7 @@ export function spliceArray<T>(start: number, count: number, o: IObjectArrayPrim
     }
 }
 
-export function concatMatrixArray<T>(
-    source: IObjectArrayPrimitiveType<T> | IObjectMatrixPrimitiveType<T>,
-    target: IObjectArrayPrimitiveType<T> | IObjectMatrixPrimitiveType<T>
-) {
+export function concatMatrixArray<T>(source: IObjectArrayPrimitiveType<T>, target: IObjectArrayPrimitiveType<T>) {
     const srcArray = source;
     const srcKeys = Object.keys(srcArray) as unknown as number[];
     const srcLength = srcKeys.length;
@@ -93,7 +90,7 @@ export function concatMatrixArray<T>(
     const targetKeys = Object.keys(targetArray) as unknown as number[];
     const targetLength = targetKeys.length;
 
-    const containerArray: IObjectArrayPrimitiveType<T> | IObjectMatrixPrimitiveType<T> = {};
+    const containerArray: IObjectArrayPrimitiveType<T> = {};
     let master = 0;
 
     for (let i = 0; i < srcLength; i++, master++) {
@@ -111,14 +108,14 @@ export function concatMatrixArray<T>(
 export function sliceMatrixArray<T>(
     start: number,
     end: number,
-    matrixArray: IObjectArrayPrimitiveType<T> | IObjectMatrixPrimitiveType<T>
-): IObjectArrayPrimitiveType<T> | IObjectMatrixPrimitiveType<T> {
+    matrixArray: IObjectArrayPrimitiveType<T>
+): IObjectArrayPrimitiveType<T> {
     const array = matrixArray;
     const length = getArrayLength(matrixArray);
     if (length > 0) {
         const fragment: IObjectArrayPrimitiveType<T> = {};
         let effective = 0;
-        for (let i = start; i < end; i++) {
+        for (let i = start; i <= end; i++) {
             const item = array[i];
             if (item) {
                 fragment[effective] = array[i] as T;

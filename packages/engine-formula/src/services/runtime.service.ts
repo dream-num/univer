@@ -353,7 +353,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
             this._runtimeOtherData[unitId] = {};
         }
 
-        const unitData = this._runtimeOtherData[unitId];
+        const unitData = this._runtimeOtherData[unitId]!;
 
         if (unitData[subUnitId] === undefined) {
             unitData[subUnitId] = {};
@@ -361,7 +361,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
         const subComponentData = unitData[subUnitId];
 
-        subComponentData[formulaId] = this._objectValueToCellValue(functionVariant as BaseValueObject)!;
+        subComponentData![formulaId] = this._objectValueToCellValue(functionVariant as BaseValueObject)!;
     }
 
     setRuntimeData(functionVariant: FunctionVariantType) {
@@ -374,7 +374,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
             this._runtimeData[unitId] = {};
         }
 
-        const unitData = this._runtimeData[unitId];
+        const unitData = this._runtimeData[unitId]!;
 
         if (unitData[sheetId] == null) {
             unitData[sheetId] = new ObjectMatrix<Nullable<ICellData>>();
@@ -384,7 +384,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
             this._unitArrayFormulaRange[unitId] = {};
         }
 
-        const arrayFormulaRange = this._unitArrayFormulaRange[unitId];
+        const arrayFormulaRange = this._unitArrayFormulaRange[unitId]!;
 
         let arrayData = new ObjectMatrix<IRange>();
 
@@ -396,7 +396,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
             this._runtimeArrayFormulaCellData[unitId] = {};
         }
 
-        const arrayFormulaCellData = this._runtimeArrayFormulaCellData[unitId];
+        const arrayFormulaCellData = this._runtimeArrayFormulaCellData[unitId]!;
 
         if (arrayFormulaCellData[sheetId] == null) {
             arrayFormulaCellData[sheetId] = new ObjectMatrix<Nullable<ICellData>>();
@@ -406,7 +406,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
             this._runtimeClearArrayFormulaCellData[unitId] = {};
         }
 
-        const clearArrayFormulaCellData = this._runtimeClearArrayFormulaCellData[unitId];
+        const clearArrayFormulaCellData = this._runtimeClearArrayFormulaCellData[unitId]!;
 
         if (clearArrayFormulaCellData[sheetId] == null) {
             clearArrayFormulaCellData[sheetId] = new ObjectMatrix<Nullable<ICellData>>();
@@ -588,6 +588,9 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
         const unitData = this._currentConfigService.getUnitData();
 
+        const unitArrayFormulaRange =
+            this._unitArrayFormulaRange[formulaUnitId]?.[formulaSheetId]?.[formulaRow]?.[formulaColumn];
+
         for (let r = startRow; r <= endRow; r++) {
             for (let c = startColumn; c <= endColumn; c++) {
                 if (r === formulaRow && formulaColumn === c) {
@@ -596,11 +599,16 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
                 const cell = this._runtimeData?.[formulaUnitId]?.[formulaSheetId]?.getValue(r, c);
 
+                const arrayDataCell = this._runtimeArrayFormulaCellData?.[formulaUnitId]?.[formulaSheetId]?.getValue(
+                    r,
+                    c
+                );
                 const currentCell = unitData?.[formulaUnitId]?.[formulaSheetId]?.cellData?.getValue(r, c);
 
                 if (
-                    (!isNullCell(cell) || !isNullCell(currentCell)) &&
-                    this._isInDirtyRange(formulaUnitId, formulaSheetId, r, c)
+                    !isNullCell(cell) ||
+                    (!isNullCell(arrayDataCell) && !this._isInArrayFormulaRange(unitArrayFormulaRange, r, c)) ||
+                    !isNullCell(currentCell)
                 ) {
                     return true;
                 }
@@ -610,8 +618,26 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         return false;
     }
 
+    private _isInArrayFormulaRange(range: Nullable<IRange>, r: number, c: number) {
+        if (range == null) {
+            return false;
+        }
+
+        const { startRow, startColumn, endRow, endColumn } = range;
+
+        if (r >= startRow && r <= endRow && c >= startColumn && c <= endColumn) {
+            return true;
+        }
+
+        return false;
+    }
+
     private _isInDirtyRange(unitId: string, sheetId: string, row: number, column: number) {
         const dirtyRanges = this._currentConfigService.getDirtyRanges();
+        // Handle the deletion and add of sheet.
+        if (dirtyRanges.length === 0) {
+            return true;
+        }
         return isInDirtyRange(dirtyRanges, unitId, sheetId, row, column);
     }
 }

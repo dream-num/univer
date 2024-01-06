@@ -52,6 +52,10 @@ export class CalculateResultApplyController extends Disposable {
                 unitIds.forEach((unitId) => {
                     const sheetData = unitData[unitId];
 
+                    if (sheetData == null) {
+                        return true;
+                    }
+
                     const sheetIds = Object.keys(sheetData);
 
                     sheetIds.forEach((sheetId) => {

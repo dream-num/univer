@@ -157,8 +157,9 @@ export class TriggerCalculationController extends Disposable {
             if (allDirtyNameMap[unitId] == null) {
                 allDirtyNameMap[unitId] = {};
             }
-            Object.keys(dirtyNameMap[unitId]).forEach((sheetId) => {
-                allDirtyNameMap[unitId][sheetId] = dirtyNameMap[unitId][sheetId];
+
+            Object.keys(dirtyNameMap[unitId]!).forEach((sheetId) => {
+                allDirtyNameMap[unitId]![sheetId] = dirtyNameMap[unitId]?.[sheetId];
             });
         });
     }
@@ -171,13 +172,13 @@ export class TriggerCalculationController extends Disposable {
             if (allDirtyUnitFeatureMap[unitId] == null) {
                 allDirtyUnitFeatureMap[unitId] = {};
             }
-            Object.keys(dirtyUnitFeatureMap[unitId]).forEach((sheetId) => {
-                if (allDirtyUnitFeatureMap[unitId][sheetId] == null) {
-                    allDirtyUnitFeatureMap[unitId][sheetId] = {};
+            Object.keys(dirtyUnitFeatureMap[unitId]!).forEach((sheetId) => {
+                if (allDirtyUnitFeatureMap[unitId]![sheetId] == null) {
+                    allDirtyUnitFeatureMap[unitId]![sheetId] = {};
                 }
-                Object.keys(dirtyUnitFeatureMap[unitId][sheetId]).forEach((featureId) => {
-                    allDirtyUnitFeatureMap[unitId][sheetId][featureId] =
-                        dirtyUnitFeatureMap[unitId][sheetId][featureId];
+                Object.keys(dirtyUnitFeatureMap[unitId]![sheetId]).forEach((featureId) => {
+                    allDirtyUnitFeatureMap[unitId]![sheetId][featureId] =
+                        dirtyUnitFeatureMap[unitId]![sheetId]![featureId] || false;
                 });
             });
         });

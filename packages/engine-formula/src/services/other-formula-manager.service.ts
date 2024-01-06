@@ -78,11 +78,11 @@ export class OtherFormulaManagerService extends Disposable implements IOtherForm
             this._otherFormulaData[unitId] = {};
         }
 
-        if (this._otherFormulaData[unitId][subUnitId]) {
-            this._otherFormulaData[unitId][subUnitId] = {};
+        if (this._otherFormulaData[unitId]![subUnitId]) {
+            this._otherFormulaData[unitId]![subUnitId] = {};
         }
 
-        this._otherFormulaData[unitId][subUnitId][formulaId] = item;
+        this._otherFormulaData[unitId]![subUnitId]![formulaId] = item;
     }
 
     getOtherFormulaData() {

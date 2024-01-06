@@ -352,7 +352,7 @@ export class ActiveDirtyController extends Disposable {
             dirtyNameMap[unitId] = {};
         }
 
-        dirtyNameMap[unitId][sheetId] = name;
+        dirtyNameMap[unitId]![sheetId] = name;
 
         return dirtyNameMap;
     }
@@ -365,7 +365,7 @@ export class ActiveDirtyController extends Disposable {
             dirtyNameMap[unitId] = {};
         }
 
-        dirtyNameMap[unitId][sheet.id] = name;
+        dirtyNameMap[unitId]![sheet.id] = name;
 
         return dirtyNameMap;
     }

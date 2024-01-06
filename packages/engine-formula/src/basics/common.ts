@@ -61,43 +61,43 @@ export interface IUnitData {
 }
 
 export interface IRuntimeUnitDataType {
-    [unitId: string]: { [sheetId: string]: ObjectMatrix<Nullable<ICellData>> };
+    [unitId: string]: Nullable<{ [sheetId: string]: ObjectMatrix<Nullable<ICellData>> }>;
 }
 
 export interface IRuntimeOtherUnitDataType {
-    [unitId: string]: { [sheetId: string]: { [formulaId: string]: ICellData } };
+    [unitId: string]: Nullable<{ [sheetId: string]: Nullable<{ [formulaId: string]: ICellData }> }>;
 }
 
 export interface IUnitSheetNameMap {
-    [unitId: string]: { [sheetName: string]: string };
+    [unitId: string]: Nullable<{ [sheetName: string]: string }>;
 }
 
 export interface IDirtyUnitSheetNameMap {
-    [unitId: string]: { [sheetId: string]: Nullable<string> };
+    [unitId: string]: Nullable<{ [sheetId: string]: Nullable<string> }>;
 }
 
 export interface IDirtyUnitFeatureMap {
-    [unitId: string]: { [sheetId: string]: { [featureId: string]: boolean } };
+    [unitId: string]: Nullable<{ [sheetId: string]: { [featureId: string]: boolean } }>;
 }
 
 export interface IArrayFormulaRangeType {
-    [unitId: string]: { [sheetId: string]: IObjectMatrixPrimitiveType<IRange> };
+    [unitId: string]: Nullable<{ [sheetId: string]: IObjectMatrixPrimitiveType<IRange> }>;
 }
 
 export interface IFeatureDirtyRangeType {
-    [unitId: string]: { [sheetId: string]: IRange[] };
+    [unitId: string]: Nullable<{ [sheetId: string]: IRange[] }>;
 }
 
 export interface IArrayFormulaUnitCellType {
-    [unitId: string]: { [sheetId: string]: IObjectMatrixPrimitiveType<Nullable<ICellData>> };
+    [unitId: string]: Nullable<{ [sheetId: string]: IObjectMatrixPrimitiveType<Nullable<ICellData>> }>;
 }
 
 export interface IFormulaData {
-    [unitId: string]: { [sheetId: string]: IObjectMatrixPrimitiveType<IFormulaDataItem> };
+    [unitId: string]: Nullable<{ [sheetId: string]: IObjectMatrixPrimitiveType<IFormulaDataItem> }>;
 }
 
 export interface IOtherFormulaData {
-    [unitId: string]: { [subUnitId: string]: { [formulaId: string]: IFormulaDataItem } };
+    [unitId: string]: Nullable<{ [subUnitId: string]: Nullable<{ [formulaId: string]: IFormulaDataItem }> }>;
 }
 
 /**
@@ -129,7 +129,7 @@ export enum TableOptionType {
 }
 
 export interface IUnitExcludedCell {
-    [unitId: string]: { [sheetId: string]: ObjectMatrix<boolean> };
+    [unitId: string]: Nullable<{ [sheetId: string]: ObjectMatrix<boolean> }>;
 }
 
 export interface IFormulaDatasetConfig {

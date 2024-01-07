@@ -178,7 +178,7 @@ describe('Test FRange', () => {
     it('Range setFontWeight', () => {
         const activeSheet = univerAPI.getCurrentSheet()?.getActiveSheet();
 
-        // A1 sets the number
+        // change A1 font weight
         const range = activeSheet?.getRange(0, 0, 1, 1);
         expect(getStyleByPosition(0, 0, 0, 0)?.bl).toBe(undefined);
         range?.setFontWeight('bold');
@@ -188,7 +188,7 @@ describe('Test FRange', () => {
         range?.setFontWeight(null);
         expect(getStyleByPosition(0, 0, 0, 0)?.bl).toBe(undefined);
 
-        // B1:C2 sets the string
+        // change B1:C2 font weight
         const range2 = activeSheet?.getRange(0, 1, 2, 2);
         range2?.setFontWeight('bold');
         expect(getStyleByPosition(0, 1, 0, 1)?.bl).toBe(1);

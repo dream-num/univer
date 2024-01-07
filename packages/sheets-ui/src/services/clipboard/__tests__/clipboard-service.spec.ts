@@ -432,9 +432,7 @@ describe('Test clipboard', () => {
 
             expect(values && values[0][0]?.v).toBe('row1col2');
             expect(styles && styles[0][0]).toStrictEqual({
-                bg: {
-                    rgb: '#ccc',
-                },
+                bg: { rgb: 'rgb(255,0,0)' },
                 ht: 2,
                 vt: 2,
             });

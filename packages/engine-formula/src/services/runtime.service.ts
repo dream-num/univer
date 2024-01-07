@@ -388,7 +388,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
         let arrayData = new ObjectMatrix<IRange>();
 
-        if (!arrayFormulaRange[sheetId]) {
+        if (arrayFormulaRange[sheetId]) {
             arrayData = new ObjectMatrix(arrayFormulaRange[sheetId]);
         }
 
@@ -444,6 +444,10 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                 endColumn: endColumn - startColumn + column,
             };
 
+            arrayData.setValue(row, column, arrayRange);
+
+            arrayFormulaRange[sheetId] = arrayData.getData();
+
             if (this._checkIfArrayFormulaRangeHasData(unitId, sheetId, row, column, arrayRange)) {
                 const errorObject = this._objectValueToCellValue(new ErrorValueObject(ErrorType.SPILL));
                 sheetData.setValue(row, column, errorObject);
@@ -466,10 +470,6 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                     }
                     arrayUnitData.setValue(rowIndex - startRow + row, columnIndex - startColumn + column, value);
                 });
-
-                arrayData.setValue(row, column, arrayRange);
-
-                arrayFormulaRange[sheetId] = arrayData.getData();
             }
         } else {
             const valueObject = this._objectValueToCellValue(functionVariant as BaseValueObject);

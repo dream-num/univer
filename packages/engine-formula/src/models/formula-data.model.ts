@@ -52,14 +52,14 @@ export class FormulaDataModel extends Disposable {
 
     clearPreviousArrayFormulaCellData(clearArrayFormulaCellData: IRuntimeUnitDataType) {
         Object.keys(clearArrayFormulaCellData).forEach((unitId) => {
-            const sheetData = clearArrayFormulaCellData[unitId];
+            const clearSheetData = clearArrayFormulaCellData[unitId];
 
-            if (sheetData == null) {
+            if (clearSheetData == null) {
                 return true;
             }
 
-            Object.keys(sheetData).forEach((sheetId) => {
-                const cellMatrixData = sheetData[sheetId];
+            Object.keys(clearSheetData).forEach((sheetId) => {
+                const clearCellMatrixData = clearSheetData[sheetId];
                 const rangeMatrix = this._arrayFormulaRange?.[unitId]?.[sheetId];
                 if (rangeMatrix == null) {
                     return true;
@@ -73,7 +73,7 @@ export class FormulaDataModel extends Disposable {
                     );
                 }
 
-                cellMatrixData.forValue((row, column) => {
+                clearCellMatrixData.forValue((row, column) => {
                     const range = rangeMatrix?.[row]?.[column];
                     if (range == null) {
                         return true;

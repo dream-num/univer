@@ -67,6 +67,7 @@ export interface ISelectionRenderService {
     disableSkipRemainLast(): void;
 
     addControlToCurrentByRangeData(data: ISelectionWithCoordAndStyle): void;
+    updateControlForCurrentByRangeData(selections: ISelectionWithCoordAndStyle[]): void;
     changeRuntime(skeleton: SpreadsheetSkeleton, scene: Scene, viewport?: Viewport): void;
     getViewPort(): Viewport;
     getCurrentControls(): SelectionShape[];
@@ -293,6 +294,35 @@ export class SelectionRenderService implements ISelectionRenderService {
             control.disableHeaderHighlight();
         }
         currentControls.push(control);
+    }
+
+    /**
+     * update selection
+     * @param selectionRange
+     * @param curCellRange
+     * @returns
+     */
+    updateControlForCurrentByRangeData(selections: ISelectionWithCoordAndStyle[]) {
+        const currentControls = this.getCurrentControls();
+        if (!currentControls) {
+            return;
+        }
+
+        const skeleton = this._skeleton;
+
+        if (skeleton == null) {
+            return;
+        }
+
+        const { rowHeaderWidth, columnHeaderHeight } = skeleton;
+
+        for (let i = 0, len = selections.length; i < len; i++) {
+            const { rangeWithCoord, primaryWithCoord, style } = selections[i];
+
+            const control = currentControls[i];
+
+            control.update(rangeWithCoord, rowHeaderWidth, columnHeaderHeight, style, primaryWithCoord);
+        }
     }
 
     refreshSelectionMoveStart() {

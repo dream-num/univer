@@ -55,7 +55,7 @@ export class SelectionShapeExtension {
 
     private _scrollTimer!: ScrollTimer;
 
-    private _activeViewport: Viewport;
+    private _activeViewport!: Viewport;
 
     private _targetSelection: IRangeWithCoord = {
         startY: 0,

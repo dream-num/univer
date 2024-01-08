@@ -267,7 +267,14 @@ export class CalculateFormulaService extends Disposable {
                 throw new Error('AstNode or executor is null');
             }
 
-            this._runtimeService.setCurrent(tree.row, tree.column, tree.subUnitId, tree.unitId);
+            this._runtimeService.setCurrent(
+                tree.row,
+                tree.column,
+                tree.rowCount,
+                tree.columnCount,
+                tree.subUnitId,
+                tree.unitId
+            );
 
             if (getDirtyData != null && tree.featureId != null) {
                 /**

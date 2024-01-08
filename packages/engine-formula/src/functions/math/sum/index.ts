@@ -37,7 +37,7 @@ export class Sum extends BaseFunction {
                 variant = (variant as ArrayValueObject).sum();
             }
 
-            accumulatorAll = accumulatorAll.plus(variant as BaseValueObject);
+            accumulatorAll = accumulatorAll.plus(variant);
         }
 
         return accumulatorAll;

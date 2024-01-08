@@ -19,7 +19,7 @@ import { Disposable, LifecycleStages, ObjectMatrix, OnLifecycle } from '@univerj
 import { Inject } from '@wendellhu/redi';
 
 import { FormulaAstLRU } from '../../basics/cache-lru';
-import type { IDirtyUnitSheetNameMap, IFormulaData, IOtherFormulaData } from '../../basics/common';
+import type { IDirtyUnitSheetNameMap, IFormulaData, IOtherFormulaData, IUnitData } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { prefixToken, suffixToken } from '../../basics/token';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
@@ -76,7 +76,9 @@ export class FormulaDependencyGenerator extends Disposable {
 
         const otherFormulaData = this._otherFormulaManagerService.getOtherFormulaData();
 
-        const treeList = await this._generateTreeList(formulaData, otherFormulaData);
+        const unitData = this._currentConfigService.getUnitData();
+
+        const treeList = await this._generateTreeList(formulaData, otherFormulaData, unitData);
 
         const updateTreeList = this._getUpdateTreeListAndMakeDependency(treeList);
 
@@ -137,7 +139,11 @@ export class FormulaDependencyGenerator extends Disposable {
      * @param formulaData
      * @returns
      */
-    private async _generateTreeList(formulaData: IFormulaData, otherFormulaData: IOtherFormulaData) {
+    private async _generateTreeList(
+        formulaData: IFormulaData,
+        otherFormulaData: IOtherFormulaData,
+        unitData: IUnitData
+    ) {
         const formulaDataKeys = Object.keys(formulaData);
 
         const otherFormulaDataKeys = Object.keys(otherFormulaData);
@@ -169,12 +175,17 @@ export class FormulaDependencyGenerator extends Disposable {
 
                     const FDtree = new FormulaDependencyTree();
 
+                    const sheetItem = unitData[unitId][sheetId];
+
                     FDtree.node = node;
                     FDtree.formula = formulaString;
                     FDtree.unitId = unitId;
                     FDtree.subUnitId = sheetId;
                     FDtree.row = row;
                     FDtree.column = column;
+
+                    FDtree.rowCount = sheetItem.rowCount;
+                    FDtree.columnCount = sheetItem.columnCount;
 
                     treeList.push(FDtree);
                 });
@@ -247,7 +258,14 @@ export class FormulaDependencyGenerator extends Disposable {
         for (let i = 0, len = treeList.length; i < len; i++) {
             const tree = treeList[i];
 
-            this._runtimeService.setCurrent(tree.row, tree.column, tree.subUnitId, tree.unitId);
+            this._runtimeService.setCurrent(
+                tree.row,
+                tree.column,
+                tree.rowCount,
+                tree.columnCount,
+                tree.subUnitId,
+                tree.unitId
+            );
 
             if (tree.node == null) {
                 continue;

@@ -17,6 +17,7 @@
 import { Address } from './address';
 import { FUNCTION_NAMES_LOOKUP } from './function-names';
 import { Indirect } from './indirect';
+import { Lookup } from './lookup';
 import { Offset } from './offset';
 import { Vlookup } from './vlookup';
 
@@ -25,4 +26,5 @@ export const functionLookup = [
     [Indirect, FUNCTION_NAMES_LOOKUP.INDIRECT],
     [Offset, FUNCTION_NAMES_LOOKUP.OFFSET],
     [Vlookup, FUNCTION_NAMES_LOOKUP.VLOOKUP],
+    [Lookup, FUNCTION_NAMES_LOOKUP.LOOKUP],
 ];

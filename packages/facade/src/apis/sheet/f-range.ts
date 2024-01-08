@@ -15,6 +15,7 @@
  */
 
 import type {
+    BooleanNumber,
     ICellData,
     ICellV,
     IColorStyle,
@@ -24,11 +25,13 @@ import type {
     Worksheet,
 } from '@univerjs/core';
 import { ICommandService } from '@univerjs/core';
-import type { ISetStyleCommandParams } from '@univerjs/sheets';
+import type { ISetStyleCommandParams, IStyleTypeValue } from '@univerjs/sheets';
 import { SetRangeValuesCommand, SetStyleCommand } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { covertCellValue, covertCellValues } from './utils';
+
+type FontWeight = 'bold' | 'normal';
 
 export class FRange {
     constructor(
@@ -107,5 +110,27 @@ export class FRange {
             range: this._range,
             value: realValue,
         });
+    }
+
+    /**
+     * Set the font weight for the given range (normal/bold).
+     * @param fontWeight
+     */
+    setFontWeight(fontWeight: FontWeight | null): void {
+        const value: BooleanNumber | undefined = fontWeight === null ? undefined : fontWeight === 'bold' ? 1 : 0;
+
+        const style: IStyleTypeValue<BooleanNumber | undefined> = {
+            type: 'bl',
+            value,
+        };
+
+        const setStyleParams: ISetStyleCommandParams<BooleanNumber | undefined> = {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            range: this._range,
+            style,
+        };
+
+        this._commandService.executeCommand(SetStyleCommand.id, setStyleParams);
     }
 }

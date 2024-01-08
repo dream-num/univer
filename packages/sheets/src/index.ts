@@ -118,6 +118,7 @@ export {
 } from './commands/commands/set-row-visible.command';
 export {
     type ISetStyleCommandParams,
+    type IStyleTypeValue,
     ResetBackgroundColorCommand,
     ResetTextColorCommand,
     SetBackgroundColorCommand,

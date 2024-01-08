@@ -16,7 +16,7 @@
 
 import type { ICellData, IStyleData, Nullable, Univer } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService } from '@univerjs/core';
-import { SetRangeValuesCommand, SetRangeValuesMutation } from '@univerjs/sheets';
+import { SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
 import { beforeEach, describe, expect, it } from 'vitest';
 
@@ -50,6 +50,7 @@ describe('Test FRange', () => {
         commandService = get(ICommandService);
         commandService.registerCommand(SetRangeValuesCommand);
         commandService.registerCommand(SetRangeValuesMutation);
+        commandService.registerCommand(SetStyleCommand);
 
         getValueByPosition = (
             startRow: number,
@@ -172,5 +173,39 @@ describe('Test FRange', () => {
         expect(getStyleByPosition(2, 4, 2, 4)?.bg?.rgb).toBe('green');
         expect(getStyleByPosition(3, 3, 3, 3)?.bg?.rgb).toBe('orange');
         expect(getStyleByPosition(3, 4, 3, 4)?.bg?.rgb).toBe('red');
+    });
+
+    it('Range setFontWeight', () => {
+        const activeSheet = univerAPI.getCurrentSheet()?.getActiveSheet();
+
+        // change A1 font weight
+        const range = activeSheet?.getRange(0, 0, 1, 1);
+        expect(getStyleByPosition(0, 0, 0, 0)?.bl).toBe(undefined);
+        range?.setFontWeight('bold');
+        expect(getStyleByPosition(0, 0, 0, 0)?.bl).toBe(1);
+        range?.setFontWeight('normal');
+        expect(getStyleByPosition(0, 0, 0, 0)?.bl).toBe(0);
+        range?.setFontWeight(null);
+        expect(getStyleByPosition(0, 0, 0, 0)?.bl).toBe(undefined);
+
+        // change B1:C2 font weight
+        const range2 = activeSheet?.getRange(0, 1, 2, 2);
+        range2?.setFontWeight('bold');
+        expect(getStyleByPosition(0, 1, 0, 1)?.bl).toBe(1);
+        expect(getStyleByPosition(0, 2, 0, 2)?.bl).toBe(1);
+        expect(getStyleByPosition(1, 1, 1, 1)?.bl).toBe(1);
+        expect(getStyleByPosition(1, 2, 1, 2)?.bl).toBe(1);
+
+        range2?.setFontWeight('normal');
+        expect(getStyleByPosition(0, 1, 0, 1)?.bl).toBe(0);
+        expect(getStyleByPosition(0, 2, 0, 2)?.bl).toBe(0);
+        expect(getStyleByPosition(1, 1, 1, 1)?.bl).toBe(0);
+        expect(getStyleByPosition(1, 2, 1, 2)?.bl).toBe(0);
+
+        range2?.setFontWeight(null);
+        expect(getStyleByPosition(0, 1, 0, 1)?.bl).toBe(undefined);
+        expect(getStyleByPosition(0, 2, 0, 2)?.bl).toBe(undefined);
+        expect(getStyleByPosition(1, 1, 1, 1)?.bl).toBe(undefined);
+        expect(getStyleByPosition(1, 2, 1, 2)?.bl).toBe(undefined);
     });
 });

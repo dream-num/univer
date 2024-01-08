@@ -382,20 +382,20 @@ export class StartEditController extends Disposable {
 
         startY -= FIX_ONE_PIXEL_BLUR_OFFSET;
 
-        physicHeight = editorHeight;
-
-        this._addBackground(scene, editorWidth / scaleX, editorHeight / scaleY, fill);
+        // physicHeight = editorHeight;
 
         this._addBackground(scene, editorWidth / scaleX, editorHeight / scaleY, fill);
 
         const { scaleX: precisionScaleX, scaleY: precisionScaleY } = scene.getPrecisionScale();
 
         scene.transformByState({
-            width: editorWidth,
-            height: editorHeight,
+            width: editorWidth / scaleX,
+            height: editorHeight / scaleY,
+            scaleX,
+            scaleY,
         });
 
-        documentComponent.resize(editorWidth, editorHeight);
+        documentComponent.resize(editorWidth / scaleX, editorHeight / scaleY);
 
         /**
          * resize canvas

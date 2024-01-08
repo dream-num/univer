@@ -18,6 +18,7 @@ import { LocaleService } from '@univerjs/core';
 import { MessageType, Tooltip } from '@univerjs/design';
 import type { IFunctionNames } from '@univerjs/engine-formula';
 import { FUNCTION_NAMES_MATH, FUNCTION_NAMES_STATISTICAL, FUNCTION_NAMES_TEXT } from '@univerjs/engine-formula';
+import numfmt from '@univerjs/engine-numfmt';
 import { IClipboardInterfaceService, IMessageService } from '@univerjs/ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React from 'react';
@@ -29,7 +30,15 @@ export interface IStatisticItem {
     value: number;
     show: boolean;
     disable: boolean;
+    pattern: string | null;
 }
+
+const allowPatternFunctions: IFunctionNames[] = [
+    FUNCTION_NAMES_MATH.SUM,
+    FUNCTION_NAMES_STATISTICAL.AVERAGE,
+    FUNCTION_NAMES_STATISTICAL.MIN,
+    FUNCTION_NAMES_STATISTICAL.MAX,
+];
 
 export const functionDisplayNames: FunctionNameMap = {
     [FUNCTION_NAMES_MATH.SUM]: 'statusbar.sum',
@@ -49,7 +58,8 @@ export const CopyableStatisticItem: React.FC<IStatisticItem> = (item: IStatistic
     const messageService = useDependency(IMessageService);
     const clipboardService = useDependency(IClipboardInterfaceService);
 
-    const formateValue = formatNumber(item.value);
+    const formateValue = formatNumber(item);
+
     const copyToClipboard = async () => {
         await clipboardService.writeText(item.value.toString());
         messageService.show({
@@ -68,7 +78,8 @@ export const CopyableStatisticItem: React.FC<IStatisticItem> = (item: IStatistic
     );
 };
 
-export function formatNumber(num: number) {
+export function formatNumber(item: IStatisticItem) {
+    const { pattern, value: num } = item;
     if (typeof num !== 'number') {
         return 'Invalid input';
     }
@@ -76,5 +87,10 @@ export function formatNumber(num: number) {
     if (num >= 1e8) {
         return num.toExponential(2);
     }
+
+    if (pattern && allowPatternFunctions.includes(item.name)) {
+        return numfmt.format(pattern, num);
+    }
+
     return num.toLocaleString();
 }

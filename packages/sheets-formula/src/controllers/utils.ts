@@ -47,7 +47,7 @@ import {
 } from '@univerjs/sheets';
 
 interface IFormulaDataGenerics<T> {
-    [unitId: string]: { [sheetId: string]: IObjectMatrixPrimitiveType<T> };
+    [unitId: string]: Nullable<{ [sheetId: string]: IObjectMatrixPrimitiveType<T> }>;
 }
 
 export function offsetFormula<T>(
@@ -61,7 +61,7 @@ export function offsetFormula<T>(
 
     if (checkFormulaDataNull(formulaData, unitId, sheetId)) return formulaData;
 
-    const formulaMatrix = new ObjectMatrix(formulaData[unitId][sheetId]);
+    const formulaMatrix = new ObjectMatrix(formulaData[unitId]?.[sheetId]);
 
     switch (id) {
         case MoveRangeCommand.id:
@@ -288,12 +288,17 @@ function handleDeleteRangeMoveLeft<T>(
 
 export function offsetArrayFormula(arrayFormulaRange: IArrayFormulaRangeType, unitId: string, sheetId: string) {
     if (checkFormulaDataNull(arrayFormulaRange, unitId, sheetId)) return arrayFormulaRange;
-
-    const arrayFormulaRangeMatrix = new ObjectMatrix(arrayFormulaRange[unitId][sheetId]);
+    if (arrayFormulaRange[unitId]?.[sheetId] == null) {
+        return arrayFormulaRange;
+    }
+    const arrayFormulaRangeMatrix = new ObjectMatrix(arrayFormulaRange[unitId]![sheetId]);
     arrayFormulaRangeMatrix.forValue((row, column, range) => {
+        if (range == null) {
+            return true;
+        }
         const { startRow, startColumn, endRow, endColumn } = range;
         if (row === startRow && column === startColumn) {
-            return;
+            return true;
         }
 
         const rows = endRow - startRow;
@@ -313,7 +318,7 @@ export function offsetArrayFormula(arrayFormulaRange: IArrayFormulaRangeType, un
 }
 
 function checkFormulaDataNull<T>(formulaData: IFormulaDataGenerics<T>, unitId: string, sheetId: string) {
-    if (formulaData == null || formulaData[unitId] == null || formulaData[unitId][sheetId] == null) {
+    if (formulaData == null || formulaData[unitId] == null || formulaData[unitId]?.[sheetId] == null) {
         return true;
     }
 
@@ -321,7 +326,7 @@ function checkFormulaDataNull<T>(formulaData: IFormulaDataGenerics<T>, unitId: s
 }
 
 export function removeFormulaData<T>(formulaData: IFormulaDataGenerics<T>, unitId: string, sheetId: string) {
-    if (formulaData && formulaData[unitId] && formulaData[unitId][sheetId]) {
-        delete formulaData[unitId][sheetId];
+    if (formulaData && formulaData[unitId] && formulaData[unitId]?.[sheetId]) {
+        delete formulaData[unitId]![sheetId];
     }
 }

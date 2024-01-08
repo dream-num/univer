@@ -3,12 +3,7 @@
         "rootDir": ".",
         "outDir": "lib",
         "forceConsistentCasingInFileNames": true,
-        "lib": [
-            "ESNext",
-            "DOM",
-            "WebWorker",
-            "dom.iterable"
-        ],
+        "lib": ["ESNext", "DOM", "WebWorker", "dom.iterable"],
         "target": "ESNext",
         "module": "ESNext",
         "experimentalDecorators": true,
@@ -26,9 +21,7 @@
         "checkJs": false,
         "skipLibCheck": true,
         "isolatedModules": true,
-        "types": [
-            "node"
-        ]
+        "types": ["node"]
     },
     "include": [],
     "references": [
@@ -55,6 +48,9 @@
         },
         {
             "path": "./packages/facade"
+        },
+        {
+            "path": "./packages/find-replace"
         },
         {
             "path": "./packages/image"

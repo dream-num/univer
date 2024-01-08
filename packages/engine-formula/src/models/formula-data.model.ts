@@ -52,9 +52,14 @@ export class FormulaDataModel extends Disposable {
 
     clearPreviousArrayFormulaCellData(clearArrayFormulaCellData: IRuntimeUnitDataType) {
         Object.keys(clearArrayFormulaCellData).forEach((unitId) => {
-            const sheetData = clearArrayFormulaCellData[unitId];
-            Object.keys(sheetData).forEach((sheetId) => {
-                const cellMatrixData = sheetData[sheetId];
+            const clearSheetData = clearArrayFormulaCellData[unitId];
+
+            if (clearSheetData == null) {
+                return true;
+            }
+
+            Object.keys(clearSheetData).forEach((sheetId) => {
+                const clearCellMatrixData = clearSheetData[sheetId];
                 const rangeMatrix = this._arrayFormulaRange?.[unitId]?.[sheetId];
                 if (rangeMatrix == null) {
                     return true;
@@ -62,13 +67,13 @@ export class FormulaDataModel extends Disposable {
 
                 let arrayFormulaCellMatrixData = new ObjectMatrix<Nullable<ICellData>>(); // Original array formula cell data.
 
-                if (this._arrayFormulaCellData[unitId][sheetId] != null) {
+                if (this._arrayFormulaCellData[unitId]?.[sheetId] != null) {
                     arrayFormulaCellMatrixData = new ObjectMatrix<Nullable<ICellData>>(
-                        this._arrayFormulaCellData[unitId][sheetId]
+                        this._arrayFormulaCellData[unitId]?.[sheetId]
                     );
                 }
 
-                cellMatrixData.forValue((row, column) => {
+                clearCellMatrixData.forValue((row, column) => {
                     const range = rangeMatrix?.[row]?.[column];
                     if (range == null) {
                         return true;
@@ -81,7 +86,9 @@ export class FormulaDataModel extends Disposable {
                     }
                 });
 
-                this._arrayFormulaCellData[unitId][sheetId] = arrayFormulaCellMatrixData.getData();
+                if (this._arrayFormulaCellData[unitId]) {
+                    this._arrayFormulaCellData[unitId]![sheetId] = arrayFormulaCellMatrixData.getData();
+                }
             });
         });
     }
@@ -89,6 +96,11 @@ export class FormulaDataModel extends Disposable {
     mergeArrayFormulaCellData(unitData: IRuntimeUnitDataType) {
         Object.keys(unitData).forEach((unitId) => {
             const sheetData = unitData[unitId];
+
+            if (sheetData == null) {
+                return true;
+            }
+
             if (this._arrayFormulaRange[unitId] == null) {
                 this._arrayFormulaRange[unitId] = {};
             }
@@ -104,13 +116,13 @@ export class FormulaDataModel extends Disposable {
 
                 let arrayFormulaCellMatrixData = new ObjectMatrix<Nullable<ICellData>>(); // Original array formula cell data.
 
-                if (this._arrayFormulaRange[unitId][sheetId] != null) {
-                    arrayFormulaRangeMatrix = new ObjectMatrix<IRange>(this._arrayFormulaRange[unitId][sheetId]);
+                if (this._arrayFormulaRange[unitId]?.[sheetId] != null) {
+                    arrayFormulaRangeMatrix = new ObjectMatrix<IRange>(this._arrayFormulaRange[unitId]?.[sheetId]);
                 }
 
-                if (this._arrayFormulaCellData[unitId][sheetId] != null) {
+                if (this._arrayFormulaCellData[unitId]?.[sheetId] != null) {
                     arrayFormulaCellMatrixData = new ObjectMatrix<Nullable<ICellData>>(
-                        this._arrayFormulaCellData[unitId][sheetId]
+                        this._arrayFormulaCellData[unitId]?.[sheetId]
                     );
                 }
 
@@ -134,7 +146,9 @@ export class FormulaDataModel extends Disposable {
                     arrayFormulaCellMatrixData.setValue(row, column, cellData);
                 });
 
-                this._arrayFormulaCellData[unitId][sheetId] = arrayFormulaCellMatrixData.getData();
+                if (this._arrayFormulaCellData[unitId]) {
+                    this._arrayFormulaCellData[unitId]![sheetId] = arrayFormulaCellMatrixData.getData();
+                }
             });
         });
     }
@@ -167,6 +181,10 @@ export class FormulaDataModel extends Disposable {
         Object.keys(formulaData).forEach((unitId) => {
             const sheetData = formulaData[unitId];
 
+            if (sheetData == null) {
+                return true;
+            }
+
             if (!this._arrayFormulaRange[unitId]) {
                 this._arrayFormulaRange[unitId] = {};
             }
@@ -176,15 +194,17 @@ export class FormulaDataModel extends Disposable {
 
                 let rangeMatrix = new ObjectMatrix<IRange>();
 
-                if (this._arrayFormulaRange[unitId][sheetId]) {
-                    rangeMatrix = new ObjectMatrix(this._arrayFormulaRange[unitId][sheetId]);
+                if (this._arrayFormulaRange[unitId]?.[sheetId]) {
+                    rangeMatrix = new ObjectMatrix(this._arrayFormulaRange[unitId]?.[sheetId]);
                 }
 
                 arrayFormula.forValue((r, c, v) => {
                     rangeMatrix.setValue(r, c, v);
                 });
 
-                this._arrayFormulaRange[unitId][sheetId] = rangeMatrix.getData();
+                if (this._arrayFormulaRange[unitId]) {
+                    this._arrayFormulaRange[unitId]![sheetId] = rangeMatrix.getData();
+                }
             });
         });
     }
@@ -198,7 +218,9 @@ export class FormulaDataModel extends Disposable {
         if (rangeMatrixData.getValue(row, column)) {
             rangeMatrixData.realDeleteValue(row, column);
 
-            this._arrayFormulaRange[unitId][sheetId] = rangeMatrixData.getData();
+            if (this._arrayFormulaRange[unitId]) {
+                this._arrayFormulaRange[unitId]![sheetId] = rangeMatrixData.getData();
+            }
         }
     }
 
@@ -269,7 +291,7 @@ export class FormulaDataModel extends Disposable {
         if (formulaData[unitId] == null) {
             formulaData[unitId] = {};
         }
-        const workbookFormulaData = formulaData[unitId];
+        const workbookFormulaData = formulaData[unitId]!;
 
         if (workbookFormulaData[sheetId] == null) {
             workbookFormulaData[sheetId] = {};
@@ -360,7 +382,7 @@ export class FormulaDataModel extends Disposable {
         }
         const workbookFormulaData = formulaData[unitId];
 
-        if (workbookFormulaData[sheetId] == null) {
+        if (workbookFormulaData?.[sheetId] == null) {
             return null;
         }
 
@@ -393,7 +415,7 @@ export class FormulaDataModel extends Disposable {
         }
         const workbookFormulaData = formulaData[unitId];
 
-        if (workbookFormulaData[sheetId] == null) {
+        if (workbookFormulaData?.[sheetId] == null) {
             return formulaIdMap;
         }
 
@@ -463,5 +485,7 @@ export function initSheetFormulaData(
         }
     });
 
-    formulaData[unitId][sheetId] = sheetFormulaDataMatrix.getData();
+    if (formulaData[unitId]) {
+        formulaData[unitId]![sheetId] = sheetFormulaDataMatrix.getData();
+    }
 }

@@ -44,6 +44,13 @@ export class MarkSelectionController extends Disposable {
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (removeCommands.includes(command.id)) {
                     this._markSelectionService.removeAllShapes();
+                } else {
+                    const shapes = this._markSelectionService.getShapeMap();
+                    shapes.forEach((shape, id) => {
+                        if (shape.exits.includes(command.id)) {
+                            this._markSelectionService.removeShape(id);
+                        }
+                    });
                 }
             })
         );

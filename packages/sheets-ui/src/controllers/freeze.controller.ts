@@ -1137,6 +1137,7 @@ export class FreezeController extends Disposable {
                             ...newFreeze,
                             unitId,
                             subUnitId,
+                            resetScroll: false,
                         };
 
                         const undoMutationParams = SetFrozenMutationFactory(this._injector, redoMutationParams);
@@ -1337,6 +1338,10 @@ export class FreezeController extends Disposable {
 
                     if (!lastFreeze || lastFreeze.startColumn !== startColumn || lastFreeze.xSplit !== xSplit) {
                         resetScroll |= ResetScrollType.X;
+                    }
+
+                    if (params.resetScroll === false) {
+                        resetScroll = ResetScrollType.NONE;
                     }
 
                     this._refreshFreeze(startRow, startColumn, ySplit, xSplit, resetScroll);

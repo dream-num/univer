@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IRange } from '@univerjs/core';
+import type { ICommandInfo, IRange, ISelectionCell, Nullable } from '@univerjs/core';
 import {
     Disposable,
     ICommandService,
@@ -31,7 +31,7 @@ import {
     IFunctionService,
     RangeReferenceObject,
 } from '@univerjs/engine-formula';
-import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService, SetRangeValuesMutation } from '@univerjs/sheets';
+import { NORMAL_SELECTION_PLUGIN_NAME, INumfmtService, SelectionManagerService, SetRangeValuesMutation } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
 import type { IStatusBarServiceStatus } from '../services/status-bar.service';
@@ -46,7 +46,8 @@ export class StatusBarController extends Disposable {
         @IFunctionService private readonly _functionService: IFunctionService,
         @IStatusBarService private readonly _statusBarService: IStatusBarService,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
+        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
+        @Inject(INumfmtService) private _numfmtService: INumfmtService
     ) {
         super();
 
@@ -67,7 +68,11 @@ export class StatusBarController extends Disposable {
                     if (selections) {
                         clearTimeout(this._calculateTimeout);
                         this._calculateTimeout = setTimeout(() => {
-                            this._calculateSelection(selections.map((selection) => selection.range));
+                            const primary = selections[selections.length - 1].primary;
+                            this._calculateSelection(
+                                selections.map((selection) => selection.range),
+                                primary
+                            );
                         }, 100);
                     }
                 })
@@ -80,7 +85,11 @@ export class StatusBarController extends Disposable {
                         return;
                     }
                     if (selections) {
-                        this._calculateSelection(selections.map((selection) => selection.range));
+                        const primary = selections[selections.length - 1].primary;
+                        this._calculateSelection(
+                            selections.map((selection) => selection.range),
+                            primary
+                        );
                     }
                 })
             )
@@ -100,7 +109,7 @@ export class StatusBarController extends Disposable {
         );
     }
 
-    private _calculateSelection(selections: IRange[]) {
+    private _calculateSelection(selections: IRange[], primary: Nullable<ISelectionCell>) {
         const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
         const unitId = workbook.getUnitId();
         const sheetId = workbook.getActiveSheet().getSheetId();
@@ -148,8 +157,17 @@ export class StatusBarController extends Disposable {
             if (calcResult.every((r) => r === undefined)) {
                 return;
             }
+            let pattern = null;
+            if (primary) {
+                const { actualRow, actualColumn } = primary;
+                pattern = this._numfmtService.getValue(unitId, sheetId, actualRow, actualColumn)?.pattern;
+            }
             const availableResult = calcResult.filter((r) => r !== undefined);
-            this._statusBarService.setState(availableResult as IStatusBarServiceStatus);
+            const newState = {
+                values: availableResult,
+                pattern,
+            };
+            this._statusBarService.setState(newState as IStatusBarServiceStatus);
         } else {
             this._statusBarService.setState(null);
         }

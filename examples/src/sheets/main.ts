@@ -20,6 +20,7 @@ import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import { UniverFindReplacePlugin } from '@univerjs/find-replace';
 import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
 import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
@@ -53,11 +54,14 @@ univer.registerPlugin(UniverUIPlugin, {
     toolbar: true,
     footer: true,
 });
+univer.registerPlugin(UniverFindReplacePlugin);
+
+univer.registerPlugin(UniverDocsUIPlugin);
+
 univer.registerPlugin(UniverSheetsPlugin, {
     notExecuteFormula: true,
 });
 univer.registerPlugin(UniverSheetsUIPlugin);
-univer.registerPlugin(UniverDocsUIPlugin);
 
 // sheet feature plugins
 
@@ -76,6 +80,7 @@ univer.registerPlugin(UniverRPCMainThreadPlugin, {
 univer.createUniverSheet(DEFAULT_WORKBOOK_DATA_DEMO);
 
 declare global {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     interface Window {
         univer?: Univer;
     }

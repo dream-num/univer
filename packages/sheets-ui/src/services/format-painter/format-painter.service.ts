@@ -17,7 +17,7 @@
 import type { ICellData, IRange, IStyleData } from '@univerjs/core';
 import { Disposable, IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
 import { getCellInfoInMergeData } from '@univerjs/engine-render';
-import { SelectionManagerService } from '@univerjs/sheets';
+import { SelectionManagerService, SetRangeValuesMutation } from '@univerjs/sheets';
 import { createIdentifier, Inject } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
@@ -81,7 +81,13 @@ export class FormatPainterService extends Disposable implements IFormatPainterSe
             const selection = this._selectionManagerService.getLast();
             if (selection) {
                 const style = this._selectionManagerService.createCopyPasteSelection();
-                this._markId = this._markSelectionService.addShape({ ...selection, style });
+                if (status === FormatPainterStatus.INFINITE) {
+                    this._markId = this._markSelectionService.addShape({ ...selection, style });
+                } else {
+                    this._markId = this._markSelectionService.addShape({ ...selection, style }, [
+                        SetRangeValuesMutation.id,
+                    ]);
+                }
             }
         }
     }

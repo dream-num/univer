@@ -25,7 +25,7 @@ import { useDependency, useInjector } from '@wendellhu/redi/react-bindings';
 import React from 'react';
 
 import { MENU_OPTIONS } from '../../base/const/MENU-OPTIONS';
-import { SetNumfmtCommand } from '../../commands/commands/set.numfmt.command';
+import { SetNumfmtCommand } from '../../commands/commands/set-numfmt.command';
 import { OpenNumfmtPanelOperator } from '../../commands/operations/open.numfmt.panel.operation';
 import { getPatternType } from '../../utils/pattern';
 

@@ -36,13 +36,15 @@ export const StatusBar = () => {
         value: 0,
         show: true,
         disable: false,
+        pattern: null,
     }));
     const [statistics, setStatistics] = useState<IStatisticItem[]>(items);
     const firstItem = statistics.find((item) => item.show && !item.disable);
     const showList = isSingle && firstItem ? [firstItem] : statistics.filter((item) => item.show && !item.disable);
 
     useEffect(() => {
-        const subscription = statusBarService.state$.subscribe((item) => {
+        const subscription = statusBarService.state$.subscribe((state) => {
+            const item = state?.values;
             if (!item || item.length === 0) {
                 setShow(false);
             } else {
@@ -55,6 +57,7 @@ export const StatusBar = () => {
                     } else {
                         stat.disable = true;
                     }
+                    stat.pattern = state?.pattern ?? null;
                     return stat;
                 });
                 setStatistics(newStatistics);

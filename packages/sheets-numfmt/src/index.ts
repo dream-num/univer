@@ -14,5 +14,6 @@
  * limitations under the License.
  */
 
+export { type ISetNumfmtCommandParams, SetNumfmtCommand } from './commands/commands/set-numfmt.command';
 export { enUS, zhCN } from './locale';
-export * from './numfmt-plugin';
+export { UniverSheetsNumfmtPlugin } from './numfmt-plugin';

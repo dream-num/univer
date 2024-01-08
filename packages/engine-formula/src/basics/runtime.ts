@@ -23,6 +23,10 @@ export function convertUnitDataToRuntime(unitData: IArrayFormulaUnitCellType) {
     Object.keys(unitData).forEach((unitId) => {
         const sheetData = unitData[unitId];
 
+        if (sheetData == null) {
+            return true;
+        }
+
         if (arrayFormulaCellData[unitId] == null) {
             arrayFormulaCellData[unitId] = {};
         }
@@ -30,7 +34,7 @@ export function convertUnitDataToRuntime(unitData: IArrayFormulaUnitCellType) {
         Object.keys(sheetData).forEach((sheetId) => {
             const cellData = sheetData[sheetId];
 
-            arrayFormulaCellData[unitId][sheetId] = new ObjectMatrix(cellData);
+            arrayFormulaCellData[unitId]![sheetId] = new ObjectMatrix(cellData);
         });
     });
 

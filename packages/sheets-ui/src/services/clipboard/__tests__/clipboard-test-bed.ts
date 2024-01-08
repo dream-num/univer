@@ -37,17 +37,14 @@ const cellData = {
     '0': {
         '7': {
             v: ' ',
-            m: ' ',
             s: 'u5otPe',
         },
         '8': {
             v: ' ',
-            m: ' ',
             s: 'u5otPe',
         },
         '10': {
             v: '456',
-            m: '456',
             s: '3UpAbI',
         },
         '11': {
@@ -57,57 +54,47 @@ const cellData = {
     '1': {
         '5': {
             v: ' ',
-            m: ' ',
             s: 'u5otPe',
         },
         '6': {
             v: ' ',
-            m: ' ',
             s: 'u5otPe',
         },
         '7': {
             v: ' ',
-            m: ' ',
             s: 'u5otPe',
         },
         '8': {
             v: ' ',
-            m: ' ',
             s: 'u5otPe',
         },
     },
     '2': {
         '8': {
             v: ' ',
-            m: ' ',
             s: 'u5otPe',
         },
     },
     '3': {
         '5': {
             v: ' ',
-            m: ' ',
             s: 'u5otPe',
         },
         '6': {
             v: ' ',
-            m: ' ',
             s: 'u5otPe',
         },
         '7': {
             v: ' ',
-            m: ' ',
             s: 'u5otPe',
         },
         '8': {
             v: ' ',
-            m: ' ',
             s: 'u5otPe',
         },
         '10': {
             s: '3UpAbI',
             v: '456',
-            m: '456',
         },
         '11': {
             s: '3UpAbI',
@@ -119,39 +106,32 @@ const cellData = {
     '5': {
         '5': {
             v: ' ',
-            m: ' ',
             s: 'u5otPe',
         },
         '6': {
             v: ' ',
-            m: ' ',
             s: 'u5otPe',
         },
         '7': {
             v: ' ',
-            m: ' ',
             s: 'u5otPe',
         },
         '8': {
             v: ' ',
-            m: ' ',
             s: 'u5otPe',
         },
     },
     '6': {
         '7': {
             v: ' ',
-            m: ' ',
             s: 'u5otPe',
         },
         '8': {
             v: ' ',
-            m: ' ',
             s: 'u5otPe',
         },
         '10': {
             v: '456',
-            m: '456',
             s: 'hw-erj',
         },
         '11': {
@@ -161,39 +141,32 @@ const cellData = {
     '7': {
         '7': {
             v: ' ',
-            m: ' ',
             s: 'u5otPe',
         },
         '8': {
             v: ' ',
-            m: ' ',
             s: 'u5otPe',
         },
     },
     '8': {
         '5': {
             v: ' ',
-            m: ' ',
             s: 'u5otPe',
         },
         '6': {
             v: ' ',
-            m: ' ',
             s: 'u5otPe',
         },
         '7': {
             v: ' ',
-            m: ' ',
             s: 'u5otPe',
         },
         '8': {
             v: ' ',
-            m: ' ',
             s: 'u5otPe',
         },
         '11': {
             v: '456',
-            m: '456',
             s: '_aRLOe',
         },
         '12': {
@@ -203,12 +176,10 @@ const cellData = {
     '9': {
         '7': {
             v: ' ',
-            m: ' ',
             s: 'u5otPe',
         },
         '8': {
             v: ' ',
-            m: ' ',
             s: 'u5otPe',
         },
         '11': {
@@ -221,34 +192,28 @@ const cellData = {
     '10': {
         '5': {
             v: ' ',
-            m: ' ',
             s: 'u5otPe',
         },
         '6': {
             v: ' ',
-            m: ' ',
             s: 'u5otPe',
         },
         '7': {
             v: ' ',
-            m: ' ',
             s: 'u5otPe',
         },
         '8': {
             v: ' ',
-            m: ' ',
             s: 'u5otPe',
         },
     },
     '11': {
         '8': {
             v: ' ',
-            m: ' ',
             s: 'u5otPe',
         },
         '10': {
             v: '456',
-            m: '456',
             s: 'Mtn4vb',
         },
         '11': {
@@ -261,14 +226,12 @@ const cellData = {
     '12': {
         '8': {
             v: ' ',
-            m: ' ',
             s: 'u5otPe',
         },
     },
     '13': {
         '11': {
             v: '456',
-            m: '456',
             s: '3UpAbI',
         },
         '12': {
@@ -286,7 +249,6 @@ const cellData = {
     '16': {
         '10': {
             v: '456',
-            m: '456',
             s: '3UpAbI',
         },
         '11': {
@@ -296,7 +258,6 @@ const cellData = {
     '17': {
         '11': {
             v: '456',
-            m: '456',
             s: '3UpAbI',
         },
         '12': {
@@ -314,7 +275,6 @@ const cellData = {
     '21': {
         '10': {
             v: '456',
-            m: '456',
             s: '3UpAbI',
         },
         '11': {
@@ -332,7 +292,6 @@ const cellData = {
     '23': {
         '11': {
             v: '456',
-            m: '456',
             s: '3UpAbI',
         },
         '12': {
@@ -515,6 +474,10 @@ export class testMarkSelectionService {
     removeAllShapes(): void {}
 
     refreshShapes(): void {}
+
+    getShapeMap(): Map<string, any> {
+        return new Map();
+    }
 }
 
 export function clipboardTestBed(workbookConfig?: IWorkbookData, dependencies?: Dependency[]) {

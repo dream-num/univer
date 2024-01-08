@@ -104,7 +104,7 @@ describe('test numfmt utils function', () => {
                 endColumn: 5,
             },
         ]);
-        expect((result as any)[1].params.values.a.ranges).toEqual([
+        expect((result as any)[1].params.values['1'].ranges).toEqual([
             {
                 startRow: 2,
                 endRow: 2,
@@ -116,6 +116,103 @@ describe('test numfmt utils function', () => {
                 endRow: 4,
                 startColumn: 5,
                 endColumn: 6,
+            },
+        ]);
+    });
+
+    it('mergeNumfmtMutations multiple data formats of different types', () => {
+        const result = mergeNumfmtMutations([
+            {
+                id: SetNumfmtMutation.id,
+                params: {
+                    values: {
+                        a: { ranges: [cellToRange(2, 3), cellToRange(2, 4), cellToRange(4, 5)] },
+                    },
+                    refMap: { a: { pattern: 'a', type: '' } },
+                },
+            },
+            {
+                id: RemoveNumfmtMutation.id,
+                params: {
+                    ranges: [cellToRange(2, 3), cellToRange(2, 4), cellToRange(4, 5)],
+                },
+            },
+            {
+                id: SetNumfmtMutation.id,
+                params: {
+                    values: {
+                        a: { ranges: [cellToRange(4, 6), cellToRange(4, 5)] },
+                    },
+                    refMap: { a: { pattern: 'b', type: '' } },
+                },
+            },
+        ]);
+        expect(result).toEqual([
+            {
+                id: 'sheet.mutation.remove.numfmt',
+                params: {
+                    ranges: [
+                        {
+                            startRow: 2,
+                            endRow: 2,
+                            startColumn: 3,
+                            endColumn: 4,
+                        },
+                        {
+                            startRow: 4,
+                            endRow: 4,
+                            startColumn: 5,
+                            endColumn: 5,
+                        },
+                    ],
+                    unitId: undefined,
+                    subUnitId: undefined,
+                },
+            },
+            {
+                id: 'sheet.mutation.set.numfmt',
+                params: {
+                    values: {
+                        '1': {
+                            ranges: [
+                                {
+                                    startRow: 2,
+                                    endRow: 2,
+                                    startColumn: 3,
+                                    endColumn: 4,
+                                },
+                                {
+                                    startRow: 4,
+                                    endRow: 4,
+                                    startColumn: 5,
+                                    endColumn: 5,
+                                },
+                            ],
+                        },
+                        '2': {
+                            ranges: [
+                                {
+                                    startRow: 4,
+                                    endRow: 4,
+                                    startColumn: 5,
+                                    endColumn: 6,
+                                },
+                            ],
+                        },
+                    },
+                    refMap: {
+                        '1': {
+                            pattern: 'a',
+                            type: '',
+                        },
+                        '2': {
+                            pattern: 'b',
+                            type: '',
+                        },
+                    },
+                    unitId: undefined,
+                    subUnitId: undefined,
+                },
             },
         ]);
     });

@@ -23,5 +23,5 @@ export {
     IFormulaCustomFunctionService,
 } from './services/formula-custom-function.service';
 export type { IRegisterFunctionParams, IUnregisterFunctionParams } from './services/register-function.service';
-export { IRegisterFunctionService } from './services/register-function.service';
 export { RegisterFunctionService } from './services/register-function.service';
+export { IRegisterFunctionService } from './services/register-function.service';

@@ -39,6 +39,7 @@ import { BorderStyleManagerService, type IBorderInfo } from '../../services/bord
 import { SelectionManagerService } from '../../services/selection-manager.service';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
+import { getCommandTarget } from '../utils/get-target';
 
 function forEach(range: IRange, action: (row: number, column: number) => void): void {
     const { startRow, startColumn, endRow, endColumn } = range;
@@ -49,14 +50,18 @@ function forEach(range: IRange, action: (row: number, column: number) => void): 
     }
 }
 
-export interface ISetBorderBasicCommand {
+export interface ISetBorderBasicCommandParams {
+    unitId?: string;
+    subUnitId?: string;
+
     value: IBorderInfo;
 }
-export const SetBorderBasicCommand: ICommand<ISetBorderBasicCommand> = {
+export const SetBorderBasicCommand: ICommand<ISetBorderBasicCommandParams> = {
     id: 'sheet.command.set-border-basic',
     type: CommandType.COMMAND,
-    handler: async (accessor: IAccessor, params: ISetBorderBasicCommand) => {
-        const { type, color, style } = params.value;
+    handler: async (accessor: IAccessor, params: ISetBorderBasicCommandParams) => {
+        const { unitId, subUnitId, value } = params;
+        const { type, color, style } = value;
 
         const commandService = accessor.get(ICommandService);
         const borderManager = accessor.get(BorderStyleManagerService);
@@ -65,7 +70,10 @@ export const SetBorderBasicCommand: ICommand<ISetBorderBasicCommand> = {
         borderManager.setColor(color);
         borderManager.setStyle(style);
 
-        return commandService.executeCommand(SetBorderCommand.id);
+        return commandService.executeCommand(SetBorderCommand.id, {
+            unitId,
+            subUnitId,
+        });
     },
 };
 
@@ -115,6 +123,11 @@ export const SetBorderColorCommand: ICommand<ISetBorderColorCommandParams> = {
     },
 };
 
+export interface ISetBorderCommandParams {
+    unitId?: string;
+    subUnitId?: string;
+}
+
 /**
  * The command to clear content in current selected ranges.
  */
@@ -122,18 +135,19 @@ export const SetBorderCommand: ICommand = {
     id: 'sheet.command.set-border',
     type: CommandType.COMMAND,
     // eslint-disable-next-line max-lines-per-function
-    handler: async (accessor: IAccessor) => {
+    handler: async (accessor: IAccessor, params?: ISetBorderCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const selectionManagerService = accessor.get(SelectionManagerService);
         const borderStyleManagerService = accessor.get(BorderStyleManagerService);
 
+        const { worksheet, unitId, subUnitId } = getCommandTarget(
+            univerInstanceService,
+            params?.unitId,
+            params?.subUnitId
+        );
         const selections = selectionManagerService.getSelectionRanges();
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-        const unitId = workbook.getUnitId();
-        const worksheet = workbook.getActiveSheet();
-        const subUnitId = worksheet.getSheetId();
         const mergeData = worksheet.getConfig().mergeData;
         if (!selections?.length) {
             return false;

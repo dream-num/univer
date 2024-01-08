@@ -55,6 +55,7 @@
         "@univerjs/icons": "^0.1.24",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/ui": "workspace:*",
+        "@univerjs/engine-numfmt": "workspace:*",
         "@wendellhu/redi": "^0.12.13",
         "clsx": "^2.0.0",
         "react": "^18.2.0",

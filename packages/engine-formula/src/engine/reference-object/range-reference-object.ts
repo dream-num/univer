@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
+import type { IRange, Nullable } from '@univerjs/core';
 
 import { BaseReferenceObject } from './base-reference-object';
 
 export class RangeReferenceObject extends BaseReferenceObject {
-    constructor(range: IRange, forcedSheetId?: string, forcedUnitId?: string) {
+    constructor(range: IRange, forcedSheetId?: Nullable<string>, forcedUnitId?: string) {
         super('');
         this.setRangeData(range);
         if (forcedSheetId) {

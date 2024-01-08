@@ -150,6 +150,10 @@ export class FormulaDependencyGenerator extends Disposable {
         for (const unitId of formulaDataKeys) {
             const sheetData = formulaData[unitId];
 
+            if (sheetData == null) {
+                continue;
+            }
+
             const sheetDataKeys = Object.keys(sheetData);
 
             for (const sheetId of sheetDataKeys) {
@@ -183,10 +187,18 @@ export class FormulaDependencyGenerator extends Disposable {
         for (const unitId of otherFormulaDataKeys) {
             const subComponentData = otherFormulaData[unitId];
 
+            if (subComponentData == null) {
+                continue;
+            }
+
             const subComponentKeys = Object.keys(subComponentData);
 
             for (const subUnitId of subComponentKeys) {
                 const subFormulaData = subComponentData[subUnitId];
+
+                if (subFormulaData == null) {
+                    continue;
+                }
 
                 const subFormulaDataKeys = Object.keys(subFormulaData);
 
@@ -518,12 +530,12 @@ export class FormulaDependencyGenerator extends Disposable {
         }
 
         /**
-         * When the name of a worksheet is changed, or a worksheet is inserted or deleted,
-         * the formulas within it may not need to be calculated.
+         * When a worksheet is inserted or deleted,
+         * the formulas within it need to be calculated.
          */
-        // if (this._dirtyUnitSheetNameMap[unitId][subUnitId] != null) {
-        //     return true;
-        // }
+        if (this._dirtyUnitSheetNameMap[unitId]?.[subUnitId] != null) {
+            return true;
+        }
 
         if (!this._updateRangeFlattenCache.has(unitId)) {
             return false;

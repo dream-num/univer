@@ -19,10 +19,16 @@
 import { Injector } from '@wendellhu/redi';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ContextService, IContextService } from '../context/context.service';
-import { DesktopLogService, ILogService } from '../log/log.service';
-import type { IMultiCommand } from './command.service';
-import { CommandService, CommandType, ICommandService, sequenceExecute, sequenceExecuteAsync } from './command.service';
+import { ContextService, IContextService } from '../../context/context.service';
+import { DesktopLogService, ILogService } from '../../log/log.service';
+import type { IMultiCommand } from '../command.service';
+import {
+    CommandService,
+    CommandType,
+    ICommandService,
+    sequenceExecute,
+    sequenceExecuteAsync,
+} from '../command.service';
 
 const commandID = 'emit-plural-error-command';
 const anotherCommandID = 'another-command';

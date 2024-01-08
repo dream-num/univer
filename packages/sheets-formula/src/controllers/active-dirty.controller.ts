@@ -189,6 +189,9 @@ export class ActiveDirtyController extends Disposable {
             },
         });
 
+        /**
+         * Changing the name of a sheet triggers an adjustment of the formula references, but does not trigger formula calculation; therefore, this logic has been removed.
+         */
         // this._activeDirtyManagerService.register(SetWorksheetNameMutation.id, {
         //     commandId: SetWorksheetNameMutation.id,
         //     getDirtyData: (command: ICommandInfo) => {
@@ -349,12 +352,12 @@ export class ActiveDirtyController extends Disposable {
             dirtyNameMap[unitId] = {};
         }
 
-        dirtyNameMap[unitId][sheetId] = name;
+        dirtyNameMap[unitId]![sheetId] = name;
 
         return dirtyNameMap;
     }
 
-    private _getInsertSheetMutation(params: IInsertSheetMutationParams, name?: Nullable<string>) {
+    private _getInsertSheetMutation(params: IInsertSheetMutationParams, name: string = '') {
         const dirtyNameMap: IDirtyUnitSheetNameMap = {};
         const { sheet, unitId } = params;
 
@@ -362,7 +365,7 @@ export class ActiveDirtyController extends Disposable {
             dirtyNameMap[unitId] = {};
         }
 
-        dirtyNameMap[unitId][sheet.id] = name;
+        dirtyNameMap[unitId]![sheet.id] = name;
 
         return dirtyNameMap;
     }

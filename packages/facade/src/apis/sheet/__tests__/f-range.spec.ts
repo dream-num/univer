@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import type { ICellData, IStyleData, Nullable, Univer } from '@univerjs/core';
+/* eslint-disable no-magic-numbers */
+
+import type { ICellData, IStyleData, Nullable } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService } from '@univerjs/core';
-import { SetRangeValuesCommand, SetRangeValuesMutation } from '@univerjs/sheets';
+import { SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
 import { beforeEach, describe, expect, it } from 'vitest';
 
@@ -24,7 +26,6 @@ import type { FUniver } from '../../facade';
 import { createTestBed } from './create-test-bed';
 
 describe('Test FRange', () => {
-    let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
     let univerAPI: FUniver;
@@ -43,13 +44,13 @@ describe('Test FRange', () => {
 
     beforeEach(() => {
         const testBed = createTestBed();
-        univer = testBed.univer;
         get = testBed.get;
         univerAPI = testBed.univerAPI;
 
         commandService = get(ICommandService);
         commandService.registerCommand(SetRangeValuesCommand);
         commandService.registerCommand(SetRangeValuesMutation);
+        commandService.registerCommand(SetStyleCommand);
 
         getValueByPosition = (
             startRow: number,
@@ -78,7 +79,7 @@ describe('Test FRange', () => {
     });
 
     it('Range setValue', () => {
-        const activeSheet = univerAPI.getCurrentSheet()?.getActiveSheet();
+        const activeSheet = univerAPI.getActiveSheet()?.getActiveSheet();
 
         // A1 sets the number
         const range1 = activeSheet?.getRange(0, 0, 1, 1);
@@ -116,7 +117,7 @@ describe('Test FRange', () => {
     });
 
     it('Range setValues', () => {
-        const activeSheet = univerAPI.getCurrentSheet()?.getActiveSheet();
+        const activeSheet = univerAPI.getActiveSheet()?.getActiveSheet();
 
         // B3:C4 sets value
         const range1 = activeSheet?.getRange(2, 1, 2, 2);
@@ -172,5 +173,39 @@ describe('Test FRange', () => {
         expect(getStyleByPosition(2, 4, 2, 4)?.bg?.rgb).toBe('green');
         expect(getStyleByPosition(3, 3, 3, 3)?.bg?.rgb).toBe('orange');
         expect(getStyleByPosition(3, 4, 3, 4)?.bg?.rgb).toBe('red');
+    });
+
+    it('Range setFontWeight', () => {
+        const activeSheet = univerAPI.getActiveSheet()?.getActiveSheet();
+
+        // change A1 font weight
+        const range = activeSheet?.getRange(0, 0, 1, 1);
+        expect(getStyleByPosition(0, 0, 0, 0)?.bl).toBe(undefined);
+        range?.setFontWeight('bold');
+        expect(getStyleByPosition(0, 0, 0, 0)?.bl).toBe(1);
+        range?.setFontWeight('normal');
+        expect(getStyleByPosition(0, 0, 0, 0)?.bl).toBe(0);
+        range?.setFontWeight(null);
+        expect(getStyleByPosition(0, 0, 0, 0)?.bl).toBe(undefined);
+
+        // change B1:C2 font weight
+        const range2 = activeSheet?.getRange(0, 1, 2, 2);
+        range2?.setFontWeight('bold');
+        expect(getStyleByPosition(0, 1, 0, 1)?.bl).toBe(1);
+        expect(getStyleByPosition(0, 2, 0, 2)?.bl).toBe(1);
+        expect(getStyleByPosition(1, 1, 1, 1)?.bl).toBe(1);
+        expect(getStyleByPosition(1, 2, 1, 2)?.bl).toBe(1);
+
+        range2?.setFontWeight('normal');
+        expect(getStyleByPosition(0, 1, 0, 1)?.bl).toBe(0);
+        expect(getStyleByPosition(0, 2, 0, 2)?.bl).toBe(0);
+        expect(getStyleByPosition(1, 1, 1, 1)?.bl).toBe(0);
+        expect(getStyleByPosition(1, 2, 1, 2)?.bl).toBe(0);
+
+        range2?.setFontWeight(null);
+        expect(getStyleByPosition(0, 1, 0, 1)?.bl).toBe(undefined);
+        expect(getStyleByPosition(0, 2, 0, 2)?.bl).toBe(undefined);
+        expect(getStyleByPosition(1, 1, 1, 1)?.bl).toBe(undefined);
+        expect(getStyleByPosition(1, 2, 1, 2)?.bl).toBe(undefined);
     });
 });

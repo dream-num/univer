@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-import { ColorKit, type IRangeWithCoord, type Nullable, type Observer, type ThemeService } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import { CURSOR_TYPE, isRectIntersect, Rect, ScrollTimer, Vector2 } from '@univerjs/engine-render';
+import type { IFreeze, IRangeWithCoord, Nullable, Observer, ThemeService } from '@univerjs/core';
+import { ColorKit } from '@univerjs/core';
+import type { IMouseEvent, IPointerEvent, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
+import { CURSOR_TYPE, isRectIntersect, Rect, ScrollTimer, ScrollTimerType, Vector2 } from '@univerjs/engine-render';
 import { getNormalSelectionStyle, SELECTION_CONTROL_BORDER_BUFFER_WIDTH } from '@univerjs/sheets';
+import type { Injector } from '@wendellhu/redi';
 
+import { VIEWPORT_KEY } from '../../common/keys';
+import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import type { SelectionShape } from './selection-shape';
 
 const HELPER_SELECTION_TEMP_NAME = '__SpreadsheetHelperSelectionTempRect';
@@ -51,6 +55,8 @@ export class SelectionShapeExtension {
 
     private _scrollTimer!: ScrollTimer;
 
+    private _activeViewport!: Viewport;
+
     private _targetSelection: IRangeWithCoord = {
         startY: 0,
         endY: 0,
@@ -70,7 +76,8 @@ export class SelectionShapeExtension {
         private _control: SelectionShape,
         private _skeleton: SpreadsheetSkeleton,
         private _scene: Scene,
-        private readonly _themeService: ThemeService
+        private readonly _themeService: ThemeService,
+        private readonly _injector: Injector
     ) {
         this._initialControl();
 
@@ -92,6 +99,41 @@ export class SelectionShapeExtension {
         this._fillControlColors = [];
         this._clearObserverEvent();
         this._helperSelection?.dispose();
+    }
+
+    private _getFreeze() {
+        const sheetSkeletonManagerService = this._injector.get(SheetSkeletonManagerService);
+        return sheetSkeletonManagerService.getCurrent()?.skeleton.getWorksheetConfig().freeze;
+    }
+
+    private _isSelectionInViewport(selection: IRangeWithCoord, viewport: Viewport) {
+        const freeze: IFreeze = this._getFreeze() || {
+            startRow: -1,
+            startColumn: -1,
+            xSplit: 0,
+            ySplit: 0,
+        };
+
+        switch (viewport.viewPortKey) {
+            case VIEWPORT_KEY.VIEW_MAIN:
+                return selection.endRow >= freeze.startRow && selection.endColumn >= freeze.startColumn;
+
+            case VIEWPORT_KEY.VIEW_MAIN_TOP:
+            case VIEWPORT_KEY.VIEW_COLUMN_RIGHT:
+                return selection.endColumn >= freeze.startColumn && selection.startRow < freeze.startRow;
+
+            case VIEWPORT_KEY.VIEW_MAIN_LEFT:
+            case VIEWPORT_KEY.VIEW_ROW_BOTTOM:
+                return selection.endRow >= freeze.startRow && selection.startColumn < freeze.startColumn;
+
+            case VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP:
+            case VIEWPORT_KEY.VIEW_COLUMN_LEFT:
+            case VIEWPORT_KEY.VIEW_ROW_TOP:
+            case VIEWPORT_KEY.VIEW_LEFT_TOP:
+                return selection.startRow < freeze.startRow && selection.startColumn < freeze.startColumn;
+            default:
+                break;
+        }
     }
 
     private _clearObserverEvent() {
@@ -120,7 +162,7 @@ export class SelectionShapeExtension {
     private _controlMoving(moveOffsetX: number, moveOffsetY: number) {
         const scene = this._scene;
 
-        const scrollXY = scene.getScrollXYByRelativeCoords(Vector2.FromArray([this._startOffsetX, this._startOffsetY]));
+        const scrollXY = scene.getScrollXYByRelativeCoords(Vector2.FromArray([moveOffsetX, moveOffsetY]));
 
         const { scaleX, scaleY } = scene.getAncestorScale();
 
@@ -271,10 +313,11 @@ export class SelectionShapeExtension {
         // const relativeCoords = scene.getRelativeCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
 
         // const { x: newEvtOffsetX, y: newEvtOffsetY } = relativeCoords;
+        const viewMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)!;
 
         const scrollTimer = ScrollTimer.create(scene);
 
-        scrollTimer.startScroll(newEvtOffsetX, newEvtOffsetY);
+        scrollTimer.startScroll(newEvtOffsetX, newEvtOffsetY, viewMain);
 
         this._scrollTimer = scrollTimer;
 
@@ -541,8 +584,9 @@ export class SelectionShapeExtension {
 
     private _fillMoving(moveOffsetX: number, moveOffsetY: number) {
         const scene = this._scene;
-
-        const scrollXY = scene.getScrollXYByRelativeCoords(Vector2.FromArray([this._startOffsetX, this._startOffsetY]));
+        // const activeViewport = scene.getActiveViewportByCoord(Vector2.FromArray([moveOffsetX, moveOffsetY]));
+        // const scrollXY = activeViewport ? scene.getScrollXY(activeViewport) : { x: 0, y: 0 };
+        const scrollXY = scene.getScrollXY(this._activeViewport);
 
         const { scaleX, scaleY } = scene.getAncestorScale();
 
@@ -739,9 +783,16 @@ export class SelectionShapeExtension {
             scene.addObject(this._helperSelection);
         }
 
-        const scrollTimer = ScrollTimer.create(scene);
+        this._activeViewport = scene.getActiveViewportByCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]))!;
 
-        scrollTimer.startScroll(newEvtOffsetX, newEvtOffsetY);
+        const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+
+        const scrollTimer = ScrollTimer.create(
+            scene,
+            this._activeViewport.viewPortKey === VIEWPORT_KEY.VIEW_MAIN ? ScrollTimerType.ALL : ScrollTimerType.NONE
+        );
+
+        scrollTimer.startScroll(newEvtOffsetX, newEvtOffsetY, viewportMain);
 
         this._scrollTimer = scrollTimer;
 
@@ -753,6 +804,7 @@ export class SelectionShapeExtension {
 
         this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
+            const currentViewport = scene.getActiveViewportByCoord(Vector2.FromArray([moveOffsetX, moveOffsetY]));
 
             const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeCoord(
                 Vector2.FromArray([moveOffsetX, moveOffsetY])
@@ -761,6 +813,45 @@ export class SelectionShapeExtension {
             this._fillMoving(newMoveOffsetX, newMoveOffsetY);
 
             scene.setCursor(CURSOR_TYPE.CROSSHAIR);
+
+            const newSelection = this._targetSelection;
+
+            if (viewportMain && currentViewport && this._activeViewport?.viewPortKey !== currentViewport?.viewPortKey) {
+                let movingRange: IRangeWithCoord;
+                if (newSelection.startRow !== originStartRow) {
+                    scrollTimer.scrollTimerType = ScrollTimerType.Y;
+                    movingRange = {
+                        ...newSelection,
+                        endRow: newSelection.startRow,
+                    };
+                } else if (newSelection.endRow !== originEndRow) {
+                    scrollTimer.scrollTimerType = ScrollTimerType.Y;
+                    movingRange = {
+                        ...newSelection,
+                        startRow: newSelection.endRow,
+                    };
+                } else if (newSelection.startColumn !== originStartColumn) {
+                    scrollTimer.scrollTimerType = ScrollTimerType.X;
+                    movingRange = {
+                        ...newSelection,
+                        endColumn: newSelection.startColumn,
+                    };
+                } else {
+                    scrollTimer.scrollTimerType = ScrollTimerType.X;
+                    movingRange = {
+                        ...newSelection,
+                        startColumn: newSelection.endColumn,
+                    };
+                }
+
+                if (this._isSelectionInViewport(movingRange, currentViewport)) {
+                    viewportMain.scrollTo({
+                        x: scrollTimer.scrollTimerType === ScrollTimerType.X ? 0 : undefined,
+                        y: scrollTimer.scrollTimerType === ScrollTimerType.Y ? 0 : undefined,
+                    });
+                    this._activeViewport = currentViewport;
+                }
+            }
 
             scrollTimer.scrolling(newMoveOffsetX, newMoveOffsetY, () => {
                 this._fillMoving(newMoveOffsetX, newMoveOffsetY);

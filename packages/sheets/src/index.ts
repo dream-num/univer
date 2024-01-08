@@ -244,7 +244,7 @@ export { enUS, zhCN } from './locale';
 export type { FormatType, INumfmtItem, INumfmtItemWithCache } from './services/numfmt/type';
 export { INumfmtService } from './services/numfmt/type';
 export { RefRangeService } from './services/ref-range/ref-range.service';
-export type { EffectRefRangeParams } from './services/ref-range/type';
+export type { EffectRefRangeParams, IOperator } from './services/ref-range/type';
 export { EffectRefRangId, OperatorType } from './services/ref-range/type';
 export {
     handleDeleteRangeMoveLeft,
@@ -255,7 +255,9 @@ export {
     handleInsertRow,
     handleIRemoveCol,
     handleIRemoveRow,
+    handleMoveCols,
     handleMoveRange,
+    handleMoveRows,
     runRefRangeMutations,
 } from './services/ref-range/util';
 export { INTERCEPTOR_POINT } from './services/sheet-interceptor/interceptor-const';

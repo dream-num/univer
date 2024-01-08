@@ -26,6 +26,7 @@ import type {
     IInsertRangeMoveDownCommand,
     IInsertRangeMoveRightCommand,
     IInsertRowCommand,
+    IMoveColsCommand,
     IMoveRangeCommand,
     IMoveRowsCommand,
     IOperator,
@@ -35,8 +36,180 @@ import type {
 import { OperatorType } from './type';
 
 const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER;
+interface IPoint {
+    start: number;
+    end: number;
+}
+/**
+ * see docs/tldr/handMoveRowsCols.tldr
+ */
+const handleBaseMove = (fromRange: IPoint, toRange: IPoint, effectRange: IPoint): Nullable<number> => {
+    const isToRangeToTheRightOfFromRange = fromRange.start <= toRange.start;
+    const isIntersected =
+        (fromRange.end > toRange.start && isToRangeToTheRightOfFromRange) ||
+        (fromRange.start < toRange.end && !isToRangeToTheRightOfFromRange);
 
-export const handMoveRows = (params: IMoveRowsCommand) => {};
+    if (isIntersected) {
+        if (
+            // 1
+            (effectRange.end < fromRange.start && isToRangeToTheRightOfFromRange) ||
+            // 2
+            (effectRange.start > toRange.end && isToRangeToTheRightOfFromRange) ||
+            // 11
+            (effectRange.start < fromRange.start && effectRange.end > toRange.end && isToRangeToTheRightOfFromRange) ||
+            //10
+            (effectRange.start > fromRange.end && effectRange.end <= toRange.end && isToRangeToTheRightOfFromRange) ||
+            // 1
+            (effectRange.end < toRange.start && !isToRangeToTheRightOfFromRange) ||
+            // 2
+            (effectRange.start > fromRange.end && !isToRangeToTheRightOfFromRange) ||
+            // 11
+            (effectRange.start < toRange.start && effectRange.end > fromRange.end && !isToRangeToTheRightOfFromRange)
+        ) {
+            return 0;
+        }
+        if (
+            // 8
+            (effectRange.start >= toRange.start &&
+                effectRange.end <= fromRange.end &&
+                isToRangeToTheRightOfFromRange) ||
+            // 9
+            (effectRange.start >= fromRange.start &&
+                effectRange.end <= toRange.start &&
+                isToRangeToTheRightOfFromRange) ||
+            // 8
+            (effectRange.start >= fromRange.start &&
+                effectRange.end <= toRange.end &&
+                !isToRangeToTheRightOfFromRange) ||
+            // 10
+            (effectRange.start > toRange.end && effectRange.end <= fromRange.end && !isToRangeToTheRightOfFromRange)
+        ) {
+            const step = toRange.start - fromRange.start;
+            return step;
+        }
+        // 9
+        if (
+            effectRange.start >= toRange.start &&
+            effectRange.end < fromRange.start &&
+            !isToRangeToTheRightOfFromRange
+        ) {
+            const step = fromRange.end - fromRange.start + 1;
+            return step;
+        }
+    } else {
+        if (
+            // 2
+            (effectRange.start >= fromRange.end && effectRange.end < toRange.start && isToRangeToTheRightOfFromRange) ||
+            // 2
+            (effectRange.start >= toRange.end && effectRange.end < fromRange.start && !isToRangeToTheRightOfFromRange)
+        ) {
+            const length = fromRange.end - fromRange.start + 1;
+            const step = isToRangeToTheRightOfFromRange ? -length : length;
+            return step;
+        }
+        if (
+            // 12
+            effectRange.start >= fromRange.start &&
+            effectRange.end <= fromRange.end &&
+            isToRangeToTheRightOfFromRange
+        ) {
+            const step = toRange.start - fromRange.start;
+            return step;
+        }
+        // 12
+        if (effectRange.start >= toRange.start && effectRange.end <= toRange.end && !isToRangeToTheRightOfFromRange) {
+            const step = fromRange.end - fromRange.start + 1;
+            return step;
+        }
+
+        //13
+        if (
+            effectRange.start >= fromRange.start &&
+            effectRange.end <= fromRange.end &&
+            !isToRangeToTheRightOfFromRange
+        ) {
+            const step = toRange.start - fromRange.start;
+            return step;
+        }
+
+        if (
+            // 1
+            (effectRange.end < fromRange.start && isToRangeToTheRightOfFromRange) ||
+            // 3
+            (effectRange.start >= toRange.end && isToRangeToTheRightOfFromRange) ||
+            // 11
+            (effectRange.start < fromRange.start &&
+                effectRange.end > toRange.end &&
+                effectRange.end < fromRange.start &&
+                isToRangeToTheRightOfFromRange) ||
+            //13
+            (effectRange.start >= toRange.start && effectRange.end <= toRange.end && isToRangeToTheRightOfFromRange) ||
+            // 1
+            (effectRange.end < toRange.start && !isToRangeToTheRightOfFromRange) ||
+            // 3
+            (effectRange.start >= fromRange.end && !isToRangeToTheRightOfFromRange) ||
+            // 11
+            (effectRange.start < toRange.start &&
+                effectRange.end > fromRange.end &&
+                effectRange.end < toRange.start &&
+                !isToRangeToTheRightOfFromRange)
+        ) {
+            return 0;
+        }
+    }
+    return null;
+};
+
+export const handleMoveRows = (params: IMoveRowsCommand, targetRange: IRange): IOperator[] => {
+    const { fromRange, toRange } = params.params || {};
+    if (!toRange || !fromRange) {
+        return [];
+    }
+    const step = handleBaseMove(
+        { start: fromRange.startRow, end: fromRange.endRow },
+        { start: toRange.startRow, end: toRange.endRow },
+        { start: targetRange.startRow, end: targetRange.endRow }
+    );
+    if (step === null) {
+        return [
+            {
+                type: OperatorType.Delete,
+            },
+        ];
+    }
+    return [
+        {
+            type: OperatorType.VerticalMove,
+            step: step || 0,
+        },
+    ];
+};
+
+export const handleMoveCols = (params: IMoveColsCommand, targetRange: IRange): IOperator[] => {
+    const { fromRange, toRange } = params.params || {};
+    if (!toRange || !fromRange) {
+        return [];
+    }
+    const step = handleBaseMove(
+        { start: fromRange.startColumn, end: fromRange.endColumn },
+        { start: toRange.startColumn, end: toRange.endColumn },
+        { start: targetRange.startColumn, end: targetRange.endColumn }
+    );
+    if (step === null) {
+        return [
+            {
+                type: OperatorType.Delete,
+            },
+        ];
+    }
+    return [
+        {
+            type: OperatorType.HorizontalMove,
+            step: step || 0,
+        },
+    ];
+};
+
 export const handleMoveRange = (param: IMoveRangeCommand, targetRange: IRange) => {
     const toRange = param.params?.toRange;
     const fromRange = param.params?.fromRange;

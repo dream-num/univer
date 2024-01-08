@@ -31,7 +31,12 @@ import {
     IFunctionService,
     RangeReferenceObject,
 } from '@univerjs/engine-formula';
-import { NORMAL_SELECTION_PLUGIN_NAME, INumfmtService, SelectionManagerService, SetRangeValuesMutation } from '@univerjs/sheets';
+import {
+    INumfmtService,
+    NORMAL_SELECTION_PLUGIN_NAME,
+    SelectionManagerService,
+    SetRangeValuesMutation,
+} from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
 import type { IStatusBarServiceStatus } from '../services/status-bar.service';

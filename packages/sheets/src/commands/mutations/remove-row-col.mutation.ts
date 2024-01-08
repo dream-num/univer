@@ -36,13 +36,13 @@ export const RemoveRowsUndoMutationFactory = (
 
     const range = params.range;
     const slice = sliceMatrixArray(range.startRow, range.endRow, rowWrapper);
-    concatMatrixArray(rowInfo, slice);
+    const _rowInfo = concatMatrixArray(rowInfo, slice);
 
     return {
         unitId: params.unitId,
         subUnitId: params.subUnitId,
         range: params.range,
-        rowInfo,
+        rowInfo: _rowInfo as IObjectArrayPrimitiveType<IRowData>,
     };
 };
 
@@ -98,13 +98,13 @@ export const RemoveColMutationFactory = (
 
     const slice = sliceMatrixArray(range.startColumn, range.endColumn, columnWrapper);
 
-    concatMatrixArray(colInfo, slice);
+    const _colInfo = concatMatrixArray(colInfo, slice);
 
     return {
         unitId: params.unitId,
         subUnitId: params.subUnitId,
         range: params.range,
-        colInfo,
+        colInfo: _colInfo as IObjectArrayPrimitiveType<IColumnData>,
     };
 };
 

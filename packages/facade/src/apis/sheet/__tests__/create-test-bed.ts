@@ -15,27 +15,49 @@
  */
 
 import type { IWorkbookData, Workbook } from '@univerjs/core';
-import { ILogService, IUniverInstanceService, LocaleType, LogLevel, Plugin, PluginType, Univer } from '@univerjs/core';
+import {
+    ILogService,
+    IUniverInstanceService,
+    LocaleService,
+    LocaleType,
+    LogLevel,
+    Plugin,
+    PluginType,
+    Univer,
+} from '@univerjs/core';
+import { FunctionService, IFunctionService } from '@univerjs/engine-formula';
 import { SelectionManagerService, SheetInterceptorService } from '@univerjs/sheets';
+import {
+    DescriptionService,
+    enUS,
+    FormulaCustomFunctionService,
+    IDescriptionService,
+    IFormulaCustomFunctionService,
+    IRegisterFunctionService,
+    RegisterFunctionService,
+    zhCN,
+} from '@univerjs/sheets-formula';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { FUniver } from '../../facade';
 
-const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
-    id: 'test',
-    appVersion: '3.0.0-alpha',
-    sheets: {
-        sheet1: {
-            id: 'sheet1',
-            cellData: {},
+function getTestWorkbookDataDemo(): IWorkbookData {
+    return {
+        id: 'test',
+        appVersion: '3.0.0-alpha',
+        sheets: {
+            sheet1: {
+                id: 'sheet1',
+                cellData: {},
+            },
         },
-    },
-    locale: LocaleType.ZH_CN,
-    name: '',
-    sheetOrder: [],
-    styles: {},
-};
+        locale: LocaleType.ZH_CN,
+        name: '',
+        sheetOrder: [],
+        styles: {},
+    };
+}
 
 export interface ITestBed {
     univer: Univer;
@@ -63,13 +85,19 @@ export function createTestBed(workbookConfig?: IWorkbookData, dependencies?: Dep
         override onStarting(injector: Injector): void {
             injector.add([SelectionManagerService]);
             injector.add([SheetInterceptorService]);
+            injector.add([IRegisterFunctionService, { useClass: RegisterFunctionService }]);
+            injector.add([IDescriptionService, { useClass: DescriptionService }]);
+            injector.add([IFunctionService, { useClass: FunctionService }]);
+            injector.add([IFormulaCustomFunctionService, { useClass: FormulaCustomFunctionService }]);
 
             dependencies?.forEach((d) => injector.add(d));
         }
     }
 
+    injector.get(LocaleService).load({ zhCN, enUS });
+
     univer.registerPlugin(TestSpyPlugin);
-    const sheet = univer.createUniverSheet(workbookConfig || TEST_WORKBOOK_DATA_DEMO);
+    const sheet = univer.createUniverSheet(workbookConfig || getTestWorkbookDataDemo());
 
     const univerInstanceService = injector.get(IUniverInstanceService);
     univerInstanceService.focusUniverInstance('test');

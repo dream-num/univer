@@ -29,11 +29,18 @@ export default defineConfig(({ mode }) => ({
             formats: ['es', 'umd', 'cjs'],
         },
         rollupOptions: {
-            external: ['@univerjs/core', '@univerjs/sheets', '@wendellhu/redi', 'rxjs'],
+            external: [
+                '@univerjs/core',
+                '@univerjs/sheets',
+                '@univerjs/sheets-formula',
+                '@wendellhu/redi',
+                'rxjs'
+            ],
             output: {
                 globals: {
                     '@univerjs/core': 'UniverCore',
                     '@univerjs/sheets': 'UniverSheets',
+                    '@univerjs/sheets-formula': 'UniverSheetsFormula',
                     '@wendellhu/redi': '@wendellhu/redi',
                     rxjs: 'rxjs',
                 },
@@ -41,6 +48,7 @@ export default defineConfig(({ mode }) => ({
         },
     },
     test: {
+        environment: 'happy-dom', // TODO@jikkai: no need to set this
         coverage: {
             provider: 'istanbul',
         },

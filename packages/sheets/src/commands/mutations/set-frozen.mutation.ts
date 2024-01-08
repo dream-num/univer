@@ -25,6 +25,7 @@ export interface ISetFrozenMutationParams {
     startColumn: number;
     ySplit: number;
     xSplit: number;
+    resetScroll?: boolean;
 }
 
 export const SetFrozenMutationFactory = (

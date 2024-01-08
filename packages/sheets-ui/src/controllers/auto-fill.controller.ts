@@ -367,6 +367,8 @@ export class AutoFillController extends Disposable {
                 {
                     primary: {
                         ...selection,
+                        actualRow: selection.startRow,
+                        actualColumn: selection.startColumn,
                         endColumn: selection.startColumn,
                         endRow: selection.startRow,
                     },

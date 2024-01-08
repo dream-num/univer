@@ -40,6 +40,7 @@ export const SetSelectionsOperation: IOperation<ISetSelectionsOperationParams> =
 
         const { selections, type } = params;
         selectionManagerService.replace(selections, type);
+
         return true;
     },
 };

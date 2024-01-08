@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-import { ICommandService, IUniverInstanceService, Univer } from '@univerjs/core';
-import type { IRegisterFunctionParams, IUnregisterFunctionParams } from '@univerjs/sheets-formula';
 import type { CommandListener, IWorkbookData } from '@univerjs/core';
 import {
     BorderStyleTypes,
+    ICommandService,
+    IUniverInstanceService,
     UndoCommand,
+    Univer,
     WrapStrategy,
 } from '@univerjs/core';
+import type { IRegisterFunctionParams, IUnregisterFunctionParams } from '@univerjs/sheets-formula';
 import { IRegisterFunctionService } from '@univerjs/sheets-formula';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';

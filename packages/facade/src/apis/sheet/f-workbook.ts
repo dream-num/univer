@@ -80,7 +80,7 @@ export class FWorkbook {
      * @param column How many columns would the new sheet have
      * @returns The new created sheet
      */
-    createSheet(name: string, rows: number, column: number): FWorksheet {
+    create(name: string, rows: number, column: number): FWorksheet {
         const newSheet = Tools.deepClone(DEFAULT_WORKSHEET);
         newSheet.rowCount = rows;
         newSheet.columnCount = column;

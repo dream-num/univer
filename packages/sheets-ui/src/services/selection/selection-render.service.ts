@@ -30,7 +30,7 @@ import { ScrollTimer, ScrollTimerType, Vector2 } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISelectionWithCoordAndStyle, ISelectionWithStyle } from '@univerjs/sheets';
 import { getNormalSelectionStyle } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
-import { createIdentifier, Inject } from '@wendellhu/redi';
+import { createIdentifier, Inject, Injector } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
 
@@ -187,7 +187,8 @@ export class SelectionRenderService implements ISelectionRenderService {
     constructor(
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @IShortcutService private readonly _shortcutService: IShortcutService,
-        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
+        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
+        @Inject(Injector) private readonly _injector: Injector
     ) {
         this._selectionStyle = getNormalSelectionStyle(this._themeService);
     }
@@ -281,7 +282,7 @@ export class SelectionRenderService implements ISelectionRenderService {
 
         const control = new SelectionShape(scene, currentControls.length, this._isHeaderHighlight, this._themeService);
 
-        new SelectionShapeExtension(control, skeleton, scene, this._themeService);
+        new SelectionShapeExtension(control, skeleton, scene, this._themeService, this._injector);
 
         const { rowHeaderWidth, columnHeaderHeight } = skeleton;
 
@@ -695,7 +696,7 @@ export class SelectionRenderService implements ISelectionRenderService {
                 this._themeService
             );
 
-            new SelectionShapeExtension(selectionControl, skeleton, scene, this._themeService);
+            new SelectionShapeExtension(selectionControl, skeleton, scene, this._themeService, this._injector);
 
             selectionControl.update(
                 startSelectionRange,

@@ -337,8 +337,8 @@ export class HeaderMoveController extends Disposable {
 
         const { rowHeaderWidth, columnHeaderHeight, rowTotalHeight, columnTotalWidth } = skeleton;
 
-        const scrollXY = scene.getScrollXYByRelativeCoords(Vector2.FromArray([this._startOffsetX, this._startOffsetY]));
-
+        // const scrollXY = scene.getScrollXYByRelativeCoords(Vector2.FromArray([this._startOffsetX, this._startOffsetY]));
+        const scrollXY = scene.getScrollXY(scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)!);
         const { scaleX, scaleY } = scene.getAncestorScale();
 
         const moveActualSelection = skeleton.getCellPositionByOffset(

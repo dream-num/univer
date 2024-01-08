@@ -288,12 +288,17 @@ function handleDeleteRangeMoveLeft<T>(
 
 export function offsetArrayFormula(arrayFormulaRange: IArrayFormulaRangeType, unitId: string, sheetId: string) {
     if (checkFormulaDataNull(arrayFormulaRange, unitId, sheetId)) return arrayFormulaRange;
-
-    const arrayFormulaRangeMatrix = new ObjectMatrix(arrayFormulaRange[unitId]?.[sheetId]);
+    if (arrayFormulaRange[unitId]?.[sheetId] == null) {
+        return arrayFormulaRange;
+    }
+    const arrayFormulaRangeMatrix = new ObjectMatrix(arrayFormulaRange[unitId]![sheetId]);
     arrayFormulaRangeMatrix.forValue((row, column, range) => {
+        if (range == null) {
+            return true;
+        }
         const { startRow, startColumn, endRow, endColumn } = range;
         if (row === startRow && column === startColumn) {
-            return;
+            return true;
         }
 
         const rows = endRow - startRow;

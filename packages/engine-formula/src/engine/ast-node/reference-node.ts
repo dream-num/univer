@@ -17,6 +17,7 @@
 import type { IAccessor } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
+import { ErrorType } from '../../basics/error-type';
 import {
     $SUPER_TABLE_COLUMN_REGEX,
     REFERENCE_REGEX_SINGLE_COLUMN,
@@ -34,6 +35,7 @@ import { CellReferenceObject } from '../reference-object/cell-reference-object';
 import { ColumnReferenceObject } from '../reference-object/column-reference-object';
 import { RowReferenceObject } from '../reference-object/row-reference-object';
 import { TableReferenceObject } from '../reference-object/table-reference-object';
+import { ErrorValueObject } from '../value-object/base-value-object';
 import { BaseAstNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
 import { NODE_ORDER_MAP, NodeType } from './node-type';
@@ -75,7 +77,11 @@ export class ReferenceNode extends BaseAstNode {
 
         this._referenceObject.setRefOffset(x, y);
 
-        this.setValue(this._referenceObject);
+        if (this._referenceObject.isExceedRange()) {
+            this.setValue(new ErrorValueObject(ErrorType.NAME));
+        } else {
+            this.setValue(this._referenceObject);
+        }
     }
 }
 

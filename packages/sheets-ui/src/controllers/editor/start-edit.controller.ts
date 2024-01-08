@@ -382,7 +382,7 @@ export class StartEditController extends Disposable {
 
         startY -= FIX_ONE_PIXEL_BLUR_OFFSET;
 
-        physicHeight = editorHeight;
+        // physicHeight = editorHeight;
 
         this._addBackground(scene, editorWidth / scaleX, editorHeight / scaleY, fill);
 

@@ -18,10 +18,11 @@ import type { ICellDataForSheetInterceptor, IPosition, Nullable } from '@univerj
 import { createInterceptorKey, Disposable, InterceptorManager, toDisposable } from '@univerjs/core';
 import type { IDocumentLayoutObject } from '@univerjs/engine-render';
 import { DeviceInputEventType } from '@univerjs/engine-render';
-import type { ISheetLocation } from '@univerjs/sheets';
+import type { ISelectionWithStyle, ISheetLocation } from '@univerjs/sheets';
+import { SelectionManagerService } from '@univerjs/sheets';
 import type { KeyCode } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
-import { createIdentifier } from '@wendellhu/redi';
+import { createIdentifier, Inject } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 
@@ -47,6 +48,7 @@ export interface IEditorBridgeServiceParam {
 const BEFORE_CELL_EDIT = createInterceptorKey<ICellDataForSheetInterceptor, ISheetLocation>('BEFORE_CELL_EDIT');
 const AFTER_CELL_EDIT = createInterceptorKey<ICellDataForSheetInterceptor, ISheetLocation>('AFTER_CELL_EDIT');
 export interface IEditorBridgeService {
+    refreshState$: Observable<Nullable<ISelectionWithStyle[]>>;
     state$: Observable<Nullable<IEditorBridgeServiceParam>>;
     visible$: Observable<IEditorBridgeServiceVisibleParam>;
     interceptor: InterceptorManager<{
@@ -78,6 +80,9 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         eventType: DeviceInputEventType.Dblclick,
     };
 
+    private readonly _refreshState$ = new BehaviorSubject<Nullable<ISelectionWithStyle[]>>(null);
+    readonly refreshState$ = this._refreshState$.asObservable();
+
     private readonly _state$ = new BehaviorSubject<Nullable<IEditorBridgeServiceParam>>(null);
     readonly state$ = this._state$.asObservable();
 
@@ -92,7 +97,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         AFTER_CELL_EDIT,
     });
 
-    constructor() {
+    constructor(@Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService) {
         super();
         this.disposeWithMe(
             toDisposable(() => {
@@ -130,7 +135,9 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
     }
 
     refreshState() {
-        this._state$.next(this._state);
+        const selections = this._selectionManagerService.getSelections() as Nullable<ISelectionWithStyle[]>;
+
+        this._refreshState$.next(selections);
     }
 
     getCurrentEditorId() {

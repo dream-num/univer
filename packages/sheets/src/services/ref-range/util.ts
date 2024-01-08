@@ -27,6 +27,7 @@ import type {
     IInsertRangeMoveRightCommand,
     IInsertRowCommand,
     IMoveRangeCommand,
+    IMoveRowsCommand,
     IOperator,
     IRemoveRowColCommand,
     IVerticalMoveOperator,
@@ -34,6 +35,8 @@ import type {
 import { OperatorType } from './type';
 
 const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER;
+
+export const handMoveRows = (params: IMoveRowsCommand) => {};
 export const handleMoveRange = (param: IMoveRangeCommand, targetRange: IRange) => {
     const toRange = param.params?.toRange;
     const fromRange = param.params?.fromRange;

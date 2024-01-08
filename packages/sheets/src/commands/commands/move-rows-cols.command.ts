@@ -52,20 +52,24 @@ import { columnAcrossMergedCell, rowAcrossMergedCell } from './utils/merged-cell
 import { alignToMergedCellsBorders, getPrimaryForRange } from './utils/selection-utils';
 
 export interface IMoveRowsCommandParams {
-    fromRow: number;
-    toRow: number;
+    fromRange: IRange;
+    toRange: IRange;
 }
 
+export const MoveRowsCommandId = 'sheet.command.move-rows' as const;
 /**
  * Command to move the selected rows (must currently selected) to the specified row.
  */
 export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
-    id: 'sheet.command.move-rows',
+    id: MoveRowsCommandId,
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor, params: IMoveRowsCommandParams) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const selections = selectionManagerService.getSelections();
-        const { fromRow, toRow } = params;
+        const {
+            fromRange: { startRow: fromRow },
+            toRange: { startRow: toRow },
+        } = params;
         const filteredSelections = selections?.filter(
             (selection) =>
                 selection.range.rangeType === RANGE_TYPE.ROW &&
@@ -219,17 +223,21 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
 };
 
 export interface IMoveColsCommandParams {
-    fromCol: number;
-    toCol: number;
+    fromRange: IRange;
+    toRange: IRange;
 }
+export const MoveColsCommandId = 'sheet.command.move-cols' as const;
 
 export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
-    id: 'sheet.command.move-cols',
+    id: MoveColsCommandId,
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor, params: IMoveColsCommandParams) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const selections = selectionManagerService.getSelections();
-        const { fromCol, toCol } = params;
+        const {
+            fromRange: { startColumn: fromCol },
+            toRange: { startColumn: toCol },
+        } = params;
         const filteredSelections = selections?.filter(
             (selection) =>
                 selection.range.rangeType === RANGE_TYPE.COLUMN &&

@@ -14,6 +14,15 @@
  * limitations under the License.
  */
 
+import type { IRange } from '@univerjs/core';
+import type {
+    IDeleteRangeMoveLeftCommandParams,
+    IDeleteRangeMoveUpCommandParams,
+    IMoveRowsCommandParams,
+    InsertRangeMoveDownCommandParams,
+    InsertRangeMoveRightCommandParams,
+    IRemoveRowColCommandParams,
+} from '@univerjs/sheets';
 import {
     DeleteRangeMoveLeftCommand,
     DeleteRangeMoveUpCommand,
@@ -31,6 +40,8 @@ import { describe, expect, it } from 'vitest';
 
 import { offsetArrayFormula, offsetFormula, removeFormulaData } from '../utils';
 
+const cellToRange = (row: number, col: number) =>
+    ({ startRow: row, endRow: row, startColumn: col, endColumn: col }) as IRange;
 describe('utils test', () => {
     describe('function offsetFormula', () => {
         it('move range', () => {
@@ -100,9 +111,9 @@ describe('utils test', () => {
             const command = {
                 id: MoveRowsCommand.id,
                 params: {
-                    fromRow: 0,
-                    toRow: 4,
-                },
+                    fromRange: cellToRange(0, 1),
+                    toRange: cellToRange(4, 1),
+                } as IMoveRowsCommandParams,
             };
 
             const selections = [
@@ -179,9 +190,9 @@ describe('utils test', () => {
             const command = {
                 id: MoveColsCommand.id,
                 params: {
-                    fromCol: 0,
-                    toCol: 4,
-                },
+                    fromRange: cellToRange(1, 0),
+                    toRange: cellToRange(1, 4),
+                } as IMoveRowsCommandParams,
             };
 
             const selections = [
@@ -364,16 +375,14 @@ describe('utils test', () => {
             const command = {
                 id: InsertRangeMoveRightCommand.id,
                 params: {
-                    ranges: [
-                        {
-                            startRow: 0,
-                            startColumn: 0,
-                            endRow: 0,
-                            endColumn: 0,
-                            rangeType: 0,
-                        },
-                    ],
-                },
+                    range: {
+                        startRow: 0,
+                        startColumn: 0,
+                        endRow: 0,
+                        endColumn: 0,
+                        rangeType: 0,
+                    },
+                } as InsertRangeMoveRightCommandParams,
             };
 
             const newFormulaData = offsetFormula(formulaData, command, unitId, sheetId);
@@ -415,16 +424,14 @@ describe('utils test', () => {
             const command = {
                 id: InsertRangeMoveDownCommand.id,
                 params: {
-                    ranges: [
-                        {
-                            startRow: 0,
-                            startColumn: 3,
-                            endRow: 0,
-                            endColumn: 3,
-                            rangeType: 0,
-                        },
-                    ],
-                },
+                    range: {
+                        startRow: 0,
+                        startColumn: 3,
+                        endRow: 0,
+                        endColumn: 3,
+                        rangeType: 0,
+                    },
+                } as InsertRangeMoveDownCommandParams,
             };
 
             const newFormulaData = offsetFormula(formulaData, command, unitId, sheetId);
@@ -469,16 +476,14 @@ describe('utils test', () => {
             const command = {
                 id: RemoveRowCommand.id,
                 params: {
-                    ranges: [
-                        {
-                            startRow: 0,
-                            startColumn: 0,
-                            endRow: 0,
-                            endColumn: 19,
-                            rangeType: 1,
-                        },
-                    ],
-                },
+                    range: {
+                        startRow: 0,
+                        startColumn: 0,
+                        endRow: 0,
+                        endColumn: 19,
+                        rangeType: 1,
+                    },
+                } as IRemoveRowColCommandParams,
             };
             const newFormulaData = offsetFormula(formulaData, command, unitId, sheetId);
             expect(newFormulaData).toStrictEqual({
@@ -520,16 +525,14 @@ describe('utils test', () => {
             const command = {
                 id: RemoveColCommand.id,
                 params: {
-                    ranges: [
-                        {
-                            startRow: 0,
-                            startColumn: 0,
-                            endRow: 999,
-                            endColumn: 0,
-                            rangeType: 2,
-                        },
-                    ],
-                },
+                    range: {
+                        startRow: 0,
+                        startColumn: 0,
+                        endRow: 999,
+                        endColumn: 0,
+                        rangeType: 2,
+                    },
+                } as IRemoveRowColCommandParams,
             };
             const newFormulaData = offsetFormula(formulaData, command, unitId, sheetId);
             expect(newFormulaData).toStrictEqual({
@@ -570,16 +573,14 @@ describe('utils test', () => {
             const command = {
                 id: DeleteRangeMoveUpCommand.id,
                 params: {
-                    ranges: [
-                        {
-                            startRow: 0,
-                            startColumn: 3,
-                            endRow: 0,
-                            endColumn: 3,
-                            rangeType: 0,
-                        },
-                    ],
-                },
+                    range: {
+                        startRow: 0,
+                        startColumn: 3,
+                        endRow: 0,
+                        endColumn: 3,
+                        rangeType: 0,
+                    },
+                } as IDeleteRangeMoveUpCommandParams,
             };
 
             const newFormulaData = offsetFormula(formulaData, command, unitId, sheetId);
@@ -622,16 +623,14 @@ describe('utils test', () => {
             const command = {
                 id: DeleteRangeMoveLeftCommand.id,
                 params: {
-                    ranges: [
-                        {
-                            startRow: 0,
-                            startColumn: 0,
-                            endRow: 0,
-                            endColumn: 0,
-                            rangeType: 0,
-                        },
-                    ],
-                },
+                    range: {
+                        startRow: 0,
+                        startColumn: 0,
+                        endRow: 0,
+                        endColumn: 0,
+                        rangeType: 0,
+                    },
+                } as IDeleteRangeMoveLeftCommandParams,
             };
 
             const newFormulaData = offsetFormula(formulaData, command, unitId, sheetId);

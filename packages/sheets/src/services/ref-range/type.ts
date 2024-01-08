@@ -28,8 +28,13 @@ import type { IInsertColCommandParams, IInsertRowCommandParams } from '../../com
 import { InsertColCommandId, InsertRowCommandId } from '../../commands/commands/insert-row-col.command';
 import type { IMoveRangeCommandParams } from '../../commands/commands/move-range.command';
 import { MoveRangeCommandId } from '../../commands/commands/move-range.command';
+import type { IMoveRowsCommandParams } from '../../commands/commands/move-rows-cols.command';
+import { MoveColsCommandId, MoveRowsCommandId } from '../../commands/commands/move-rows-cols.command';
 import type { IRemoveRowColCommandParams } from '../../commands/commands/remove-row-col.command';
 import { RemoveColCommandId, RemoveRowCommandId } from '../../commands/commands/remove-row-col.command';
+
+export type IMoveRowsCommand = ICommandInfo<IMoveRowsCommandParams> & { id: typeof MoveRowsCommandId };
+export type IMoveColsCommand = ICommandInfo<IMoveRowsCommandParams> & { id: typeof MoveColsCommandId };
 
 export type IMoveRangeCommand = ICommandInfo<IMoveRangeCommandParams> & { id: typeof MoveRangeCommandId };
 export type IInsertRowCommand = ICommandInfo<IInsertRowCommandParams> & { id: typeof InsertRowCommandId };
@@ -70,6 +75,8 @@ export const EffectRefRangId = {
     DeleteRangeMoveUpCommandId,
     InsertRangeMoveDownCommandId,
     InsertRangeMoveRightCommandId,
+    MoveColsCommandId,
+    MoveRowsCommandId,
 } as const;
 
 export enum OperatorType {

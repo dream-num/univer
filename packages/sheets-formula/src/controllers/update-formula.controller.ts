@@ -355,7 +355,10 @@ export class UpdateFormulaController extends Disposable {
         const { params } = command;
         if (!params) return null;
 
-        const { fromRow, toRow } = params;
+        const {
+            fromRange: { startRow: fromRow },
+            toRange: { startRow: toRow },
+        } = params;
 
         const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
         const unitId = workbook.getUnitId();
@@ -390,7 +393,10 @@ export class UpdateFormulaController extends Disposable {
         const { params } = command;
         if (!params) return null;
 
-        const { fromCol, toCol } = params;
+        const {
+            fromRange: { startColumn: fromCol },
+            toRange: { startColumn: toCol },
+        } = params;
 
         const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
         const unitId = workbook.getUnitId();

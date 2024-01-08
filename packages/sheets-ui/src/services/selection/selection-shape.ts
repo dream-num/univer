@@ -229,6 +229,13 @@ export class SelectionShape {
         return this._isHelperSelection;
     }
 
+    setEvent(state: boolean) {
+        this.leftControl.evented = state;
+        this.rightControl.evented = state;
+        this.topControl.evented = state;
+        this.bottomControl.evented = state;
+    }
+
     enableHeaderHighlight() {
         this._isHelperSelection = true;
     }

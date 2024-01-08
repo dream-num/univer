@@ -164,6 +164,11 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         this._dirtyRanges = dirtyRanges;
 
         this._excludedCell = excludedCell;
+
+        /**
+         * Mark dirty for expansion of array formulas, need to clear the worksheet's dirty flag.
+         */
+        this._dirtyNameMap = {};
     }
 
     registerUnitData(unitData: IUnitData) {

@@ -251,7 +251,7 @@ export class FormulaEditorShowController extends Disposable {
         const { rowHeaderWidth, columnHeaderHeight } = skeleton;
         const control = new SelectionShape(scene, 100, false, this._themeService);
         control.update(rangeWithCoord, rowHeaderWidth, columnHeaderHeight, style, primaryWithCoord);
-
+        control.setEvent(false);
         this._previousShape = control;
     }
 

@@ -564,10 +564,17 @@ export class UpdateFormulaController extends Disposable {
 
         for (const unitId of formulaDataKeys) {
             const sheetData = formulaData[unitId];
+
+            if (sheetData == null) {
+                continue;
+            }
+
             const sheetDataKeys = Object.keys(sheetData);
 
             for (const subUnitId of sheetDataKeys) {
-                const oldFormulaMatrix = new ObjectMatrix<IFormulaDataItem>(oldFormulaData[unitId][subUnitId]);
+                const value = oldFormulaData[unitId]?.[subUnitId];
+
+                const oldFormulaMatrix = new ObjectMatrix<IFormulaDataItem>(value);
                 const formulaMatrix = new ObjectMatrix<IFormulaDataItem>(sheetData[subUnitId]);
                 const cellMatrix = new ObjectMatrix<ICellData>();
 
@@ -632,6 +639,10 @@ export class UpdateFormulaController extends Disposable {
         for (const unitId of formulaDataKeys) {
             const sheetData = formulaData[unitId];
 
+            if (sheetData == null) {
+                continue;
+            }
+
             const sheetDataKeys = Object.keys(sheetData);
 
             if (newFormulaData[unitId] == null) {
@@ -671,6 +682,10 @@ export class UpdateFormulaController extends Disposable {
                             sequenceUnitId == null || sequenceUnitId.length === 0 ? unitId : sequenceUnitId;
 
                         const sequenceSheetId = unitSheetNameMap?.[mapUnitId]?.[sheetName];
+
+                        if (sequenceSheetId == null) {
+                            continue;
+                        }
 
                         const sequenceUnitRangeWidthOffset = {
                             range,
@@ -739,7 +754,9 @@ export class UpdateFormulaController extends Disposable {
                     });
                 });
 
-                newFormulaData[unitId][sheetId] = newFormulaDataItem.getData();
+                if (newFormulaData[unitId]) {
+                    newFormulaData[unitId]![sheetId] = newFormulaDataItem.getData();
+                }
             }
         }
 

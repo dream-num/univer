@@ -164,6 +164,11 @@ export class CalculateFormulaService extends Disposable {
         const excludedCell: IUnitExcludedCell = {};
         Object.keys(arrayFormulaRange).forEach((unitId) => {
             const sheetArrayFormulaRange = arrayFormulaRange[unitId];
+
+            if (sheetArrayFormulaRange == null) {
+                return true;
+            }
+
             Object.keys(sheetArrayFormulaRange).forEach((sheetId) => {
                 const cellValue = new ObjectMatrix(sheetArrayFormulaRange[sheetId]);
 
@@ -183,7 +188,7 @@ export class CalculateFormulaService extends Disposable {
                     excludedCell[unitId] = {};
                 }
 
-                excludedCell[unitId][sheetId] = newCellData;
+                excludedCell[unitId]![sheetId] = newCellData;
             });
         });
 
@@ -191,6 +196,11 @@ export class CalculateFormulaService extends Disposable {
             const arrayRange = runtimeFeatureRange[featureId];
             Object.keys(arrayRange).forEach((unitId) => {
                 const sheetArrayFormulaRange = arrayRange[unitId];
+
+                if (sheetArrayFormulaRange == null) {
+                    return true;
+                }
+
                 Object.keys(sheetArrayFormulaRange).forEach((sheetId) => {
                     const ranges = sheetArrayFormulaRange[sheetId];
 

@@ -38,7 +38,7 @@ const FORMULA_CACHE_LRU_COUNT = 100000;
 
 export const FORMULA_REF_TO_ARRAY_CACHE = new FormulaAstLRU<ArrayValueObject>(FORMULA_CACHE_LRU_COUNT);
 export class BaseReferenceObject extends ObjectClassType {
-    private _forcedSheetId: string = '';
+    private _forcedSheetId: Nullable<string> = '';
 
     private _forcedSheetName: string = '';
 

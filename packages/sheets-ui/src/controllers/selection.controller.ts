@@ -135,34 +135,19 @@ export class SelectionController extends Disposable {
                     }
 
                     this._refreshSelection(param);
-
-                    // this._selectionRenderService.reset();
-
-                    // for (const selectionWithStyle of param) {
-                    //     if (selectionWithStyle == null) {
-                    //         continue;
-                    //     }
-                    //     const selectionData =
-                    //         this._selectionRenderService.convertSelectionRangeToData(selectionWithStyle);
-                    //     selectionData.style = getNormalSelectionStyle(this._themeService);
-                    //     this._selectionRenderService.addControlToCurrentByRangeData(selectionData);
-                    // }
                 })
             )
         );
     }
 
-    private _refreshSelection(param: readonly ISelectionWithStyle[]) {
-        this._selectionRenderService.reset();
-
-        for (const selectionWithStyle of param) {
-            if (selectionWithStyle == null) {
-                continue;
-            }
+    private _refreshSelection(params: readonly ISelectionWithStyle[]) {
+        const selections = params.map((selectionWithStyle) => {
             const selectionData = this._selectionRenderService.convertSelectionRangeToData(selectionWithStyle);
             selectionData.style = getNormalSelectionStyle(this._themeService);
-            this._selectionRenderService.addControlToCurrentByRangeData(selectionData);
-        }
+            return selectionData;
+        });
+
+        this._selectionRenderService.updateControlForCurrentByRangeData(selections);
     }
 
     private _initRowHeader(sheetObject: ISheetObjectParam) {

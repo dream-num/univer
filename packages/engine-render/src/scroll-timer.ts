@@ -24,10 +24,10 @@ import type { ThinScene } from './thin-scene';
 import type { Viewport } from './viewport';
 
 export enum ScrollTimerType {
-    ALL,
+    NONE,
     X,
     Y,
-    NONE,
+    ALL,
 }
 
 export class ScrollTimer {
@@ -65,6 +65,22 @@ export class ScrollTimer {
         return new ScrollTimer(scene, scrollTimerType, padding);
     }
 
+    set scrollTimerType(type: ScrollTimerType) {
+        this._scrollTimerType = type;
+    }
+
+    get scrollTimerType() {
+        return this._scrollTimerType;
+    }
+
+    setActiveViewport(viewport: Viewport) {
+        this._viewport = viewport;
+    }
+
+    getActiveViewport() {
+        return this._viewport;
+    }
+
     startScroll(offsetX: number, offsetY: number, targetViewport?: any) {
         this._offsetX = offsetX;
         this._offsetY = offsetY;
@@ -94,7 +110,7 @@ export class ScrollTimer {
 
         let shouldScroll = false;
 
-        if (this._scrollTimerType !== ScrollTimerType.Y) {
+        if (this._scrollTimerType & ScrollTimerType.X) {
             if (this._moveX < leftBounding + l) {
                 x = (this._moveX - leftBounding - l) * this._smoothRatioX;
                 shouldScroll = true;
@@ -106,7 +122,7 @@ export class ScrollTimer {
             }
         }
 
-        if (this._scrollTimerType !== ScrollTimerType.X) {
+        if (this._scrollTimerType & ScrollTimerType.Y) {
             if (this._moveY < topBounding + t) {
                 y = (this._moveY - topBounding - t) * this._smoothRatioY;
                 shouldScroll = true;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Univer } from '@univerjs/core';
+import type { ICellData, IStyleData, Nullable, Univer } from '@univerjs/core';
 import {
     CellValueType,
     ICommandService,
@@ -37,9 +37,11 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 import { AutoFillController } from '../../../controllers/auto-fill.controller';
 import { AutoFillService, IAutoFillService } from '../../../services/auto-fill/auto-fill.service';
+import { APPLY_TYPE } from '../../../services/auto-fill/type';
 import { EditorBridgeService, IEditorBridgeService } from '../../../services/editor-bridge.service';
 import { ISelectionRenderService, SelectionRenderService } from '../../../services/selection/selection-render.service';
 import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
+import { RefillCommand } from '../refill.command';
 
 const theme = {
     colorBlack: '#35322b',
@@ -56,12 +58,10 @@ const TEST_WORKBOOK_DATA = {
                 '0': {
                     '0': {
                         v: 1,
-                        m: '1',
                         t: CellValueType.NUMBER,
                     },
                     '1': {
                         v: 2,
-                        m: '2',
                         t: CellValueType.NUMBER,
                     },
                 },
@@ -69,12 +69,10 @@ const TEST_WORKBOOK_DATA = {
                 '1': {
                     '0': {
                         v: 2,
-                        m: '2',
                         t: CellValueType.NUMBER,
                     },
                     '1': {
                         v: 1,
-                        m: '1',
                         t: CellValueType.NUMBER,
                     },
                 },
@@ -82,12 +80,10 @@ const TEST_WORKBOOK_DATA = {
                 '2': {
                     '0': {
                         v: '第1',
-                        m: '第1',
                         t: CellValueType.STRING,
                     },
                     '1': {
                         v: '第2',
-                        m: '第2',
                         t: CellValueType.STRING,
                     },
                 },
@@ -95,12 +91,10 @@ const TEST_WORKBOOK_DATA = {
                 '3': {
                     '0': {
                         v: '一',
-                        m: '一',
                         t: CellValueType.STRING,
                     },
                     '1': {
                         v: '三',
-                        m: '三',
                         t: CellValueType.STRING,
                     },
                 },
@@ -108,12 +102,10 @@ const TEST_WORKBOOK_DATA = {
                 '4': {
                     '0': {
                         v: '星期一',
-                        m: '星期一',
                         t: CellValueType.STRING,
                     },
                     '1': {
                         v: '星期三',
-                        m: '星期三',
                         t: CellValueType.STRING,
                     },
                 },
@@ -121,12 +113,10 @@ const TEST_WORKBOOK_DATA = {
                 '5': {
                     '0': {
                         v: '甲',
-                        m: '甲',
                         t: CellValueType.STRING,
                     },
                     '1': {
                         v: '乙',
-                        m: '乙',
                         t: CellValueType.STRING,
                     },
                 },
@@ -134,12 +124,10 @@ const TEST_WORKBOOK_DATA = {
                 '6': {
                     '0': {
                         v: 'copy only',
-                        m: 'copy only',
                         t: CellValueType.STRING,
                     },
                     '1': {
                         v: 'no series',
-                        m: 'no series',
                         t: CellValueType.STRING,
                     },
                 },
@@ -147,22 +135,18 @@ const TEST_WORKBOOK_DATA = {
                 '7': {
                     '0': {
                         v: 1,
-                        m: '1',
                         t: CellValueType.NUMBER,
                     },
                     '1': {
                         v: 2,
-                        m: '2',
                         t: CellValueType.NUMBER,
                     },
                     '2': {
                         v: '第1',
-                        m: '第1',
                         t: CellValueType.STRING,
                     },
                     '3': {
                         v: '第2',
-                        m: '第2',
                         t: CellValueType.STRING,
                     },
                 },
@@ -170,49 +154,58 @@ const TEST_WORKBOOK_DATA = {
                 '10': {
                     '0': {
                         v: 1,
-                        m: '1',
                         t: CellValueType.NUMBER,
                     },
                     '1': {
                         v: 2,
-                        m: '2',
                         t: CellValueType.NUMBER,
                     },
                     '2': {
                         v: 3,
-                        m: '3',
                         t: CellValueType.NUMBER,
                     },
                     '3': {
                         v: 4,
-                        m: '4',
                         t: CellValueType.NUMBER,
                     },
                 },
                 '11': {
                     '0': {
                         v: 2,
-                        m: '2',
                         t: CellValueType.NUMBER,
                     },
                     '2': {
                         v: 3,
-                        m: '3',
                         t: CellValueType.NUMBER,
                     },
                 },
                 '12': {
                     '0': {
                         v: 3,
-                        m: '3',
                         t: CellValueType.NUMBER,
                     },
                 },
                 '13': {
                     '0': {
                         v: 4,
-                        m: '4',
                         t: CellValueType.NUMBER,
+                    },
+                },
+                // left direction & equal ratio & styles
+                '14': {
+                    '2': {
+                        v: 2,
+                        t: CellValueType.NUMBER,
+                        s: '_aRLOe',
+                    },
+                    '3': {
+                        v: 4,
+                        t: CellValueType.NUMBER,
+                    },
+                    '4': {
+                        v: 8,
+                        t: CellValueType.NUMBER,
+                        s: '3UpAbI',
                     },
                 },
             },
@@ -225,7 +218,20 @@ const TEST_WORKBOOK_DATA = {
     modifiedTime: '',
     name: '',
     sheetOrder: [],
-    styles: {},
+    styles: {
+        _aRLOe: {
+            bg: {
+                rgb: '#ccc',
+            },
+            ht: 2,
+            vt: 2,
+        },
+        '3UpAbI': {
+            bg: {
+                rgb: '#eee',
+            },
+        },
+    },
     timeZone: '',
 };
 
@@ -235,6 +241,18 @@ describe('Test auto fill rules in controller', () => {
     let commandService: ICommandService;
     let autoFillController: AutoFillController;
     let themeService: ThemeService;
+    let getValues: (
+        startRow: number,
+        startColumn: number,
+        endRow: number,
+        endColumn: number
+    ) => Array<Array<Nullable<ICellData>>> | undefined;
+    let getStyles: (
+        startRow: number,
+        startColumn: number,
+        endRow: number,
+        endColumn: number
+    ) => Array<Array<Nullable<IStyleData>>> | undefined;
     beforeEach(() => {
         const testBed = createCommandTestBed(TEST_WORKBOOK_DATA, [
             [ISelectionRenderService, { useClass: SelectionRenderService }],
@@ -256,6 +274,32 @@ describe('Test auto fill rules in controller', () => {
         commandService.registerCommand(SetSelectionsOperation);
         commandService.registerCommand(RemoveWorksheetMergeMutation);
         commandService.registerCommand(AddWorksheetMergeMutation);
+        commandService.registerCommand(RefillCommand);
+
+        getValues = (
+            startRow: number,
+            startColumn: number,
+            endRow: number,
+            endColumn: number
+        ): Array<Array<Nullable<ICellData>>> | undefined =>
+            get(IUniverInstanceService)
+                .getUniverSheetInstance('test')
+                ?.getSheetBySheetId('sheet1')
+                ?.getRange(startRow, startColumn, endRow, endColumn)
+                .getValues();
+
+        getStyles = (
+            startRow: number,
+            startColumn: number,
+            endRow: number,
+            endColumn: number
+        ): Array<Array<Nullable<IStyleData>>> | undefined => {
+            const values = getValues(startRow, startColumn, endRow, endColumn);
+            const styles = get(IUniverInstanceService).getUniverSheetInstance('test')?.getStyles();
+            if (values && styles) {
+                return values.map((row) => row.map((cell) => styles.getStyleByCell(cell)));
+            }
+        };
     });
 
     describe('auto fill', () => {
@@ -486,6 +530,153 @@ describe('Test auto fill rules in controller', () => {
             expect(workbook.getSheetBySheetId('sheet1')?.getCell(11, 1)?.v).toBe(3);
             expect(workbook.getSheetBySheetId('sheet1')?.getCell(12, 1)?.v).toBe(4);
             expect(workbook.getSheetBySheetId('sheet1')?.getCell(13, 1)?.v).toBe(5);
+        });
+    });
+
+    describe('auto fill in left direction', async () => {
+        it('correct situation', async () => {
+            const workbook = get(IUniverInstanceService).getCurrentUniverSheetInstance();
+            if (!workbook) throw new Error('This is an error');
+            // test other string
+            (autoFillController as any)._triggerAutoFill(
+                {
+                    startRow: 14,
+                    startColumn: 2,
+                    endRow: 14,
+                    endColumn: 4,
+                },
+                {
+                    startRow: 14,
+                    startColumn: 0,
+                    endRow: 14,
+                    endColumn: 4,
+                }
+            );
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(14, 0)?.v).toBe(0.5);
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(14, 1)?.v).toBe(1);
+            // undo redo
+            await commandService.executeCommand(UndoCommand.id);
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(14, 0)?.v).toBe(undefined);
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(14, 1)?.v).toBe(undefined);
+
+            await commandService.executeCommand(RedoCommand.id);
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(14, 0)?.v).toBe(0.5);
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(14, 1)?.v).toBe(1);
+        });
+    });
+
+    describe('auto fill with equal ratio & style', async () => {
+        it('correct situation', async () => {
+            const workbook = get(IUniverInstanceService).getCurrentUniverSheetInstance();
+            if (!workbook) throw new Error('This is an error');
+            // equal ratio
+            (autoFillController as any)._triggerAutoFill(
+                {
+                    startRow: 14,
+                    startColumn: 2,
+                    endRow: 14,
+                    endColumn: 4,
+                },
+                {
+                    startRow: 14,
+                    startColumn: 2,
+                    endRow: 14,
+                    endColumn: 7,
+                }
+            );
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(14, 5)?.v).toBe(16);
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(14, 6)?.v).toBe(32);
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(14, 7)?.v).toBe(64);
+            const styles = getStyles(14, 5, 14, 7);
+            expect(styles && styles[0][0]).toStrictEqual({
+                bg: {
+                    rgb: '#ccc',
+                },
+                ht: 2,
+                vt: 2,
+            });
+            expect(styles && styles[0][1]).toStrictEqual(undefined);
+            expect(styles && styles[0][2]).toStrictEqual({
+                bg: {
+                    rgb: '#eee',
+                },
+            });
+
+            // undo redo
+            await commandService.executeCommand(UndoCommand.id);
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(14, 5)?.v).toBe(undefined);
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(14, 6)?.v).toBe(undefined);
+
+            await commandService.executeCommand(RedoCommand.id);
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(14, 5)?.v).toBe(16);
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(14, 6)?.v).toBe(32);
+        });
+    });
+
+    describe('auto fill without format', async () => {
+        it('correct situation', async () => {
+            const workbook = get(IUniverInstanceService).getCurrentUniverSheetInstance();
+            if (!workbook) throw new Error('This is an error');
+            // equal ratio
+            (autoFillController as any)._triggerAutoFill(
+                {
+                    startRow: 14,
+                    startColumn: 2,
+                    endRow: 14,
+                    endColumn: 3,
+                },
+                {
+                    startRow: 14,
+                    startColumn: 2,
+                    endRow: 14,
+                    endColumn: 4,
+                }
+            );
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(14, 4)?.v).toBe(6);
+            const styles = getStyles(14, 4, 14, 4);
+            expect(styles && styles[0][0]).toStrictEqual({
+                bg: {
+                    rgb: '#ccc',
+                },
+                ht: 2,
+                vt: 2,
+            });
+
+            commandService.executeCommand(RefillCommand.id, { type: APPLY_TYPE.NO_FORMAT });
+
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(14, 4)?.v).toBe(6);
+            const styles_refill = getStyles(14, 4, 14, 4);
+            expect(styles_refill && styles_refill[0][0]).toStrictEqual({
+                bg: {
+                    rgb: '#eee',
+                },
+                ht: null,
+                vt: null,
+            });
+
+            // undo redo
+            await commandService.executeCommand(UndoCommand.id);
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(14, 4)?.v).toBe(6);
+            const styles_undo = getStyles(14, 4, 14, 4);
+            expect(styles_undo && styles_undo[0][0]).toStrictEqual({
+                bg: {
+                    rgb: '#ccc',
+                },
+                ht: 2,
+                vt: 2,
+            });
+
+            // redo
+            await commandService.executeCommand(RedoCommand.id);
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(14, 4)?.v).toBe(6);
+            const styles_redo = getStyles(14, 4, 14, 4);
+            expect(styles_redo && styles_redo[0][0]).toStrictEqual({
+                bg: {
+                    rgb: '#eee',
+                },
+                ht: null,
+                vt: null,
+            });
         });
     });
 });

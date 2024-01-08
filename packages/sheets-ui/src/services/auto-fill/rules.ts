@@ -51,6 +51,7 @@ export const numberRule: IAutoFillRule = {
             const { data } = dataWithIndex;
             if (direction === Direction.LEFT || direction === Direction.UP) {
                 data.reverse();
+                return fillSeries(data, len, direction).reverse();
             }
             return fillSeries(data, len, direction);
         },

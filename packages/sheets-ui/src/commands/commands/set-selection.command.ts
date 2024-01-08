@@ -97,7 +97,7 @@ export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
 
         return accessor.get(ICommandService).executeCommand(SetSelectionsOperation.id, {
             unitId: workbook.getUnitId(),
-            sheetId: worksheet.getSheetId(),
+            subUnitId: worksheet.getSheetId(),
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             selections: [
                 {
@@ -252,7 +252,7 @@ export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTab
 
         return accessor.get(ICommandService).executeCommand(SetSelectionsOperation.id, {
             unitId,
-            sheetId,
+            subUnitId: sheetId,
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             selections: [resultRange],
         });
@@ -308,7 +308,7 @@ export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
 
         return accessor.get(ICommandService).executeCommand(SetSelectionsOperation.id, {
             unitId: currentWorkbook.getUnitId(),
-            sheetId: currentWorksheet.getSheetId(),
+            subUnitId: currentWorksheet.getSheetId(),
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             selections: [
                 {
@@ -399,7 +399,7 @@ export const SelectAllCommand: ICommand<ISelectAllCommandParams> = {
 
         return accessor.get(ICommandService).executeCommand(SetSelectionsOperation.id, {
             unitId: workbook.getUnitId(),
-            sheetId: worksheet.getSheetId(),
+            subUnitId: worksheet.getSheetId(),
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             selections: [
                 {

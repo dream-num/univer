@@ -25,10 +25,11 @@ import { SelectionShape } from '../selection/selection-shape';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 
 export interface IMarkSelectionService {
-    addShape(selection: ISelectionWithStyle, zIndex?: number): string | null;
+    addShape(selection: ISelectionWithStyle, exits?: string[], zIndex?: number): string | null;
     removeShape(id: string): void;
     removeAllShapes(): void;
     refreshShapes(): void;
+    getShapeMap(): Map<string, IMarkSelectionInfo>;
 }
 
 interface IMarkSelectionInfo {
@@ -37,6 +38,7 @@ interface IMarkSelectionInfo {
     selection: ISelectionWithStyle;
     zIndex: number;
     control: SelectionShape | null;
+    exits: string[];
 }
 
 const DEFAULT_Z_INDEX = 10000;
@@ -57,7 +59,7 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
         super();
     }
 
-    addShape(selection: ISelectionWithStyle, zIndex: number = DEFAULT_Z_INDEX): string | null {
+    addShape(selection: ISelectionWithStyle, exits: string[] = [], zIndex: number = DEFAULT_Z_INDEX): string | null {
         const workbook = this._currentService.getCurrentUniverSheetInstance();
         const subUnitId = workbook.getActiveSheet().getSheetId();
         const id = Tools.generateRandomId();
@@ -67,6 +69,7 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
             unitId: workbook.getUnitId(),
             zIndex,
             control: null,
+            exits,
         });
         this.refreshShapes();
         return id;
@@ -95,6 +98,10 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
             control.update(rangeWithCoord, rowHeaderWidth, columnHeaderHeight, style, primaryWithCoord);
             shape.control = control;
         });
+    }
+
+    getShapeMap(): Map<string, IMarkSelectionInfo> {
+        return this._shapeMap;
     }
 
     removeShape(id: string): void {

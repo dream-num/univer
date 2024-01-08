@@ -391,12 +391,7 @@ export function fillSeries(data: Array<Nullable<ICellData>>, len: number, direct
             const index = (i - 1) % data.length;
             const d = Tools.deepClone(data[index]);
 
-            let num;
-            if (direction === Direction.DOWN || direction === Direction.RIGHT) {
-                num = Number(data[data.length - 1]?.v) * (Number(data[1]?.v) / Number(data[0]?.v)) ** i;
-            } else if (direction === Direction.UP || direction === Direction.LEFT) {
-                num = Number(data[0]?.v) / (Number(data[1]?.v) / Number(data[0]?.v)) ** i;
-            }
+            const num = Number(data[data.length - 1]?.v) * (Number(data[1]?.v) / Number(data[0]?.v)) ** i;
 
             if (d) {
                 d.v = num;
@@ -409,12 +404,7 @@ export function fillSeries(data: Array<Nullable<ICellData>>, len: number, direct
             const index = (i - 1) % data.length;
             const d = Tools.deepClone(data[index]);
 
-            let y;
-            if (direction === Direction.DOWN || direction === Direction.RIGHT) {
-                y = forecast(data.length + i, dataNumArr, xArr);
-            } else {
-                y = forecast(1 - i, dataNumArr, xArr);
-            }
+            const y = forecast(data.length + i, dataNumArr, xArr);
 
             if (d) {
                 d.v = y;

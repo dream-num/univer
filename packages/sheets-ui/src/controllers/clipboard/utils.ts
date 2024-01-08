@@ -15,7 +15,7 @@
  */
 
 import type { ICellData, IMutationInfo, IRange, Nullable } from '@univerjs/core';
-import { IUniverInstanceService, ObjectMatrix, Rectangle } from '@univerjs/core';
+import { IUniverInstanceService, ObjectMatrix, Range, Rectangle } from '@univerjs/core';
 import type {
     IAddWorksheetMergeMutationParams,
     IMoveRangeMutationParams,
@@ -25,6 +25,7 @@ import type {
 import {
     AddMergeUndoMutationFactory,
     AddWorksheetMergeMutation,
+    getAddMergeMutationRangeByType,
     MoveRangeCommand,
     MoveRangeMutation,
     NORMAL_SELECTION_PLUGIN_NAME,
@@ -99,10 +100,11 @@ export function getMoveRangeMutations(
     },
     accessor: IAccessor
 ) {
-    let redoMutationsInfo: IMutationInfo[] = [];
-    let undoMutationsInfo: IMutationInfo[] = [];
+    let redos: IMutationInfo[] = [];
+    let undos: IMutationInfo[] = [];
     const { range: fromRange, subUnitId: fromSubUnitId, unitId } = from;
     const { range: toRange, subUnitId: toSubUnitId } = to;
+
     if (fromRange && toRange) {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
@@ -110,52 +112,54 @@ export function getMoveRangeMutations(
         const fromWorksheet = workbook?.getSheetBySheetId(fromSubUnitId);
         const toWorksheet = workbook?.getSheetBySheetId(toSubUnitId);
         if (fromWorksheet && toWorksheet) {
-            const fromValues = fromWorksheet.getRange(fromRange).getValues();
+            const fromCellValue = new ObjectMatrix<Nullable<ICellData>>();
+            const newFromCellValue = new ObjectMatrix<Nullable<ICellData>>();
+            const cellToRange = (row: number, col: number) => ({
+                startRow: row,
+                endRow: row,
+                startColumn: col,
+                endColumn: col,
+            });
+            const fromCellMatrix = fromWorksheet.getCellMatrix();
+            const toCellMatrix = toWorksheet.getCellMatrix();
 
-            const newFromCellValues = fromValues.reduce((res, row, rowIndex) => {
-                row.forEach((colItem, colIndex) => {
-                    res.setValue(fromRange.startRow + rowIndex, fromRange.startColumn + colIndex, null);
-                });
-                return res;
-            }, new ObjectMatrix<Nullable<ICellData>>());
-            const currentFromCellValues = fromValues.reduce((res, row, rowIndex) => {
-                row.forEach((colItem, colIndex) => {
-                    res.setValue(fromRange.startRow + rowIndex, fromRange.startColumn + colIndex, colItem);
-                });
-                return res;
-            }, new ObjectMatrix<Nullable<ICellData>>());
+            Range.foreach(fromRange, (row, col) => {
+                fromCellValue.setValue(row, col, fromCellMatrix.getValue(row, col));
+                newFromCellValue.setValue(row, col, null);
+            });
+            const toCellValue = new ObjectMatrix<Nullable<ICellData>>();
 
-            const newToCellValues = fromValues.reduce((res, row, rowIndex) => {
-                row.forEach((colItem, colIndex) => {
-                    res.setValue(toRange.startRow + rowIndex, toRange.startColumn + colIndex, colItem);
-                });
-                return res;
-            }, new ObjectMatrix<Nullable<ICellData>>());
-            const currentToCellValues = toWorksheet
-                .getRange(toRange)
-                .getValues()
-                .reduce((res, row, rowIndex) => {
-                    row.forEach((colItem, colIndex) => {
-                        res.setValue(toRange.startRow + rowIndex, toRange.startColumn + colIndex, colItem);
-                    });
-                    return res;
-                }, new ObjectMatrix<Nullable<ICellData>>());
+            Range.foreach(toRange, (row, col) => {
+                toCellValue.setValue(row, col, toCellMatrix.getValue(row, col));
+            });
+
+            const newToCellValue = new ObjectMatrix<Nullable<ICellData>>();
+
+            Range.foreach(fromRange, (row, col) => {
+                const cellRange = cellToRange(row, col);
+                const relativeRange = Rectangle.getRelativeRange(cellRange, fromRange);
+                const range = Rectangle.getPositionRange(relativeRange, toRange);
+                newToCellValue.setValue(range.startRow, range.startColumn, fromCellMatrix.getValue(row, col));
+            });
 
             const doMoveRangeMutation: IMoveRangeMutationParams = {
                 from: {
-                    value: newFromCellValues.getMatrix(),
+                    value: newFromCellValue.getMatrix(),
                     subUnitId: fromSubUnitId,
                 },
-                to: { value: newToCellValues.getMatrix(), subUnitId: toSubUnitId },
+                to: {
+                    value: newToCellValue.getMatrix(),
+                    subUnitId: toSubUnitId,
+                },
                 unitId,
             };
             const undoMoveRangeMutation: IMoveRangeMutationParams = {
                 from: {
-                    value: currentFromCellValues.getMatrix(),
+                    value: fromCellValue.getMatrix(),
                     subUnitId: fromSubUnitId,
                 },
                 to: {
-                    value: currentToCellValues.getMatrix(),
+                    value: toCellValue.getMatrix(),
                     subUnitId: toSubUnitId,
                 },
                 unitId,
@@ -165,9 +169,84 @@ export function getMoveRangeMutations(
                 params: { toRange, fromRange },
             });
 
-            redoMutationsInfo = [
+            // handle merge mutations
+            const fromMergeData = fromWorksheet.getMergeData();
+            const toMergeData = toWorksheet.getMergeData();
+            const fromMergeRanges = fromMergeData.filter((item) => Rectangle.intersects(item, fromRange));
+            const toMergeRanges = toMergeData.filter((item) => Rectangle.intersects(item, toRange));
+
+            const willMoveToMergeRanges = fromMergeRanges
+                .map((mergeRange) => Rectangle.getRelativeRange(mergeRange, fromRange))
+                .map((relativeRange) => Rectangle.getPositionRange(relativeRange, toRange));
+
+            const addMergeCellRanges = getAddMergeMutationRangeByType(willMoveToMergeRanges).filter(
+                (range) => !toMergeData.some((mergeRange) => Rectangle.equals(range, mergeRange))
+            );
+
+            const mergeRedos: Array<{
+                id: string;
+                params: IAddWorksheetMergeMutationParams | IRemoveWorksheetMergeMutationParams;
+            }> = [
+                {
+                    id: RemoveWorksheetMergeMutation.id,
+                    params: {
+                        unitId,
+                        subUnitId: fromSubUnitId,
+                        ranges: fromMergeRanges,
+                    },
+                },
+                {
+                    id: RemoveWorksheetMergeMutation.id,
+                    params: {
+                        unitId,
+                        subUnitId: fromSubUnitId,
+                        ranges: toMergeRanges,
+                    },
+                },
+                {
+                    id: AddWorksheetMergeMutation.id,
+                    params: {
+                        unitId,
+                        subUnitId: toSubUnitId,
+                        ranges: addMergeCellRanges,
+                    },
+                },
+            ];
+            const mergeUndos: Array<{
+                id: string;
+                params: IAddWorksheetMergeMutationParams | IRemoveWorksheetMergeMutationParams;
+            }> = [
+                {
+                    id: RemoveWorksheetMergeMutation.id,
+                    params: {
+                        unitId,
+                        subUnitId: toSubUnitId,
+                        ranges: addMergeCellRanges,
+                    },
+                },
+                {
+                    id: AddWorksheetMergeMutation.id,
+                    params: {
+                        unitId,
+                        subUnitId: toSubUnitId,
+                        ranges: toMergeRanges,
+                    },
+                },
+                {
+                    id: AddWorksheetMergeMutation.id,
+                    params: {
+                        unitId,
+                        subUnitId: fromSubUnitId,
+                        ranges: fromMergeRanges,
+                    },
+                },
+            ];
+            // +++++++++++++++++++++
+
+            redos = [
                 { id: MoveRangeMutation.id, params: doMoveRangeMutation },
                 ...interceptorCommands.redos,
+                ...mergeRedos,
                 {
                     id: SetSelectionsOperation.id,
                     params: {
@@ -178,7 +257,7 @@ export function getMoveRangeMutations(
                     },
                 },
             ];
-            undoMutationsInfo = [
+            undos = [
                 {
                     id: SetSelectionsOperation.id,
                     params: {
@@ -189,14 +268,15 @@ export function getMoveRangeMutations(
                     },
                 },
                 ...interceptorCommands.undos,
+                ...mergeUndos,
                 { id: MoveRangeMutation.id, params: undoMoveRangeMutation },
             ];
         }
     }
 
     return {
-        undos: undoMutationsInfo,
-        redos: redoMutationsInfo,
+        undos,
+        redos,
     };
 }
 

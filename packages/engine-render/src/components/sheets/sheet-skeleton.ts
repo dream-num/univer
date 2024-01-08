@@ -1699,7 +1699,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         } = config;
 
         const { a: angle = 0, v: isVertical = BooleanNumber.FALSE } = textRotation;
-        const { t: marginTop, r: marginRight, b: marginBottom, l: marginLeft } = paddingData;
+        const { t: marginTop, r: marginRight, b: marginBottom, l: marginLeft } = paddingData || {};
 
         let centerAngle = 0;
         let vertexAngle = angle;

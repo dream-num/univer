@@ -14,6 +14,15 @@
  * limitations under the License.
  */
 
-export { type ISetNumfmtCommandParams, SetNumfmtCommand } from './commands/commands/set-numfmt.command';
-export { enUS, zhCN } from './locale';
-export { UniverSheetsNumfmtPlugin } from './numfmt-plugin';
+import type { IOperation } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
+
+export const ToggleFindReplaceDialogOperation: IOperation = {
+    type: CommandType.OPERATION,
+    id: 'ui.operation.toggle-find-replace-dialog',
+    handler: (accessor) => {
+        const a = 1;
+        // Toggle dialog
+        return true;
+    },
+};

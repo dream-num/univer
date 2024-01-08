@@ -16,6 +16,7 @@ packages/design @jikkai @wzhudev
 # common
 packages/image @DR-Univer
 packages/uniscript @wzhudev
+packages/find-replace @wzhudev
 
 # docs
 packages/docs @DR-Univer @Jocs

@@ -39,6 +39,8 @@ import {
 import type { IAccessor } from '@wendellhu/redi';
 
 export interface ISetNumfmtCommandParams {
+    unitId?: string;
+    subUnitId?: string;
     values: Array<{ pattern?: string; row: number; col: number; type?: FormatType }>;
 }
 
@@ -49,6 +51,7 @@ export const SetNumfmtCommand: ICommand<ISetNumfmtCommandParams> = {
         if (!params) {
             return false;
         }
+
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const undoRedoService = accessor.get(IUndoRedoService);

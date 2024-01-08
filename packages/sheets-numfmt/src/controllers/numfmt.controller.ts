@@ -50,11 +50,11 @@ import { combineLatest, merge, Observable } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map, switchMap, tap } from 'rxjs/operators';
 
 import { SHEET_NUMFMT_PLUGIN } from '../base/const/PLUGIN_NAME';
-import { AddDecimalCommand } from '../commands/commands/add.decimal.command';
-import { SetCurrencyCommand } from '../commands/commands/set.currency.command';
-import type { ISetNumfmtCommandParams } from '../commands/commands/set.numfmt.command';
-import { SetNumfmtCommand } from '../commands/commands/set.numfmt.command';
-import { SubtractDecimalCommand } from '../commands/commands/subtract.decimal.command';
+import { AddDecimalCommand } from '../commands/commands/add-decimal.command';
+import { SetCurrencyCommand } from '../commands/commands/set-currency.command';
+import type { ISetNumfmtCommandParams } from '../commands/commands/set-numfmt.command';
+import { SetNumfmtCommand } from '../commands/commands/set-numfmt.command';
+import { SubtractDecimalCommand } from '../commands/commands/subtract-decimal.command';
 import { CloseNumfmtPanelOperator } from '../commands/operations/close.numfmt.panel.operation';
 import { OpenNumfmtPanelOperator } from '../commands/operations/open.numfmt.panel.operation';
 import type { ISheetNumfmtPanelProps } from '../components/index';

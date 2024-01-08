@@ -15,7 +15,70 @@
  */
 
 import type { ICellData, ICellV, IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
-import { isCellV, isFormulaString, isICellData, ObjectMatrix, Tools } from '@univerjs/core';
+import {
+    HorizontalAlign,
+    isCellV,
+    isFormulaString,
+    isICellData,
+    ObjectMatrix,
+    Tools,
+    VerticalAlign,
+} from '@univerjs/core';
+
+export type FHorizontalAlignment = 'left' | 'center' | 'normal';
+export type FVerticalAlignment = 'top' | 'middle' | 'bottom';
+
+export function transformFacadeHorizontalAlignment(value: FHorizontalAlignment): HorizontalAlign {
+    switch (value) {
+        case 'left':
+            return HorizontalAlign.LEFT;
+        case 'center':
+            return HorizontalAlign.CENTER;
+        case 'normal':
+            return HorizontalAlign.RIGHT;
+        default:
+            throw new Error(`Invalid horizontal alignment: ${value}`);
+    }
+}
+
+export function transformCoreHorizontalAlignment(value: HorizontalAlign): FHorizontalAlignment {
+    switch (value) {
+        case HorizontalAlign.LEFT:
+            return 'left';
+        case HorizontalAlign.CENTER:
+            return 'center';
+        case HorizontalAlign.RIGHT:
+            return 'normal';
+        default:
+            throw new Error(`Invalid horizontal alignment: ${value}`);
+    }
+}
+
+export function transformFacadeVerticalAlignment(value: FVerticalAlignment): VerticalAlign {
+    switch (value) {
+        case 'top':
+            return VerticalAlign.TOP;
+        case 'middle':
+            return VerticalAlign.MIDDLE;
+        case 'bottom':
+            return VerticalAlign.BOTTOM;
+        default:
+            throw new Error(`Invalid vertical alignment: ${value}`);
+    }
+}
+
+export function transformCoreVerticalAlignment(value: VerticalAlign): FVerticalAlignment {
+    switch (value) {
+        case VerticalAlign.TOP:
+            return 'top';
+        case VerticalAlign.MIDDLE:
+            return 'middle';
+        case VerticalAlign.BOTTOM:
+            return 'bottom';
+        default:
+            throw new Error(`Invalid vertical alignment: ${value}`);
+    }
+}
 
 /**
  * covert cell value to cell data

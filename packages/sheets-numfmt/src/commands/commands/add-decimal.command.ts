@@ -20,8 +20,8 @@ import { INumfmtService, SelectionManagerService } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 
 import { getDecimalFromPattern, isPatternEqualWithoutDecimal, setPatternDecimal } from '../../utils/decimal';
-import type { ISetNumfmtCommandParams } from './set.numfmt.command';
-import { SetNumfmtCommand } from './set.numfmt.command';
+import type { ISetNumfmtCommandParams } from './set-numfmt.command';
+import { SetNumfmtCommand } from './set-numfmt.command';
 
 export const AddDecimalCommand: ICommand = {
     id: 'sheet.command.numfmt.add.decimal.command',

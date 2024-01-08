@@ -14,6 +14,18 @@
  * limitations under the License.
  */
 
-export { type ISetNumfmtCommandParams, SetNumfmtCommand } from './commands/commands/set-numfmt.command';
-export { enUS, zhCN } from './locale';
-export { UniverSheetsNumfmtPlugin } from './numfmt-plugin';
+import type { IMenuButtonItem } from '@univerjs/ui';
+import { MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
+import type { IAccessor } from '@wendellhu/redi';
+
+import { ToggleFindReplaceDialogOperation } from '../commands/operations/find-replace.operation';
+
+export function FindReplaceMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: ToggleFindReplaceDialogOperation.id,
+        tooltip: 'toolbar.find-replace',
+        group: MenuGroup.TOOLBAR_OTHERS,
+        type: MenuItemType.BUTTON,
+        positions: [MenuPosition.TOOLBAR_START],
+    };
+}

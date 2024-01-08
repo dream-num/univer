@@ -91,7 +91,9 @@ export type { IRemoveSheetCommandParams } from './commands/commands/remove-sheet
 export { RemoveSheetCommand } from './commands/commands/remove-sheet.command';
 export { RemoveWorksheetMergeCommand } from './commands/commands/remove-worksheet-merge.command';
 export type {
+    ISetBorderBasicCommandParams,
     ISetBorderColorCommandParams,
+    ISetBorderCommandParams,
     ISetBorderPositionCommandParams,
     ISetBorderStyleCommandParams,
 } from './commands/commands/set-border-command';
@@ -117,7 +119,14 @@ export {
     SetSpecificRowsVisibleCommand,
 } from './commands/commands/set-row-visible.command';
 export {
+    type ISetColorCommandParams,
+    type ISetFontFamilyCommandParams,
+    type ISetFontSizeCommandParams,
+    type ISetHorizontalTextAlignCommandParams,
     type ISetStyleCommandParams,
+    type ISetTextRotationCommandParams,
+    type ISetTextWrapCommandParams,
+    type ISetVerticalTextAlignCommandParams,
     type IStyleTypeValue,
     ResetBackgroundColorCommand,
     ResetTextColorCommand,

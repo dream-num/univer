@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICellData, IStyleData, Nullable, Univer } from '@univerjs/core';
+/* eslint-disable no-magic-numbers */
+
+import type { ICellData, IStyleData, Nullable } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
@@ -24,7 +26,6 @@ import type { FUniver } from '../../facade';
 import { createTestBed } from './create-test-bed';
 
 describe('Test FRange', () => {
-    let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
     let univerAPI: FUniver;
@@ -43,7 +44,6 @@ describe('Test FRange', () => {
 
     beforeEach(() => {
         const testBed = createTestBed();
-        univer = testBed.univer;
         get = testBed.get;
         univerAPI = testBed.univerAPI;
 
@@ -79,7 +79,7 @@ describe('Test FRange', () => {
     });
 
     it('Range setValue', () => {
-        const activeSheet = univerAPI.getCurrentSheet()?.getActiveSheet();
+        const activeSheet = univerAPI.getActiveSheet()?.getActiveSheet();
 
         // A1 sets the number
         const range1 = activeSheet?.getRange(0, 0, 1, 1);
@@ -117,7 +117,7 @@ describe('Test FRange', () => {
     });
 
     it('Range setValues', () => {
-        const activeSheet = univerAPI.getCurrentSheet()?.getActiveSheet();
+        const activeSheet = univerAPI.getActiveSheet()?.getActiveSheet();
 
         // B3:C4 sets value
         const range1 = activeSheet?.getRange(2, 1, 2, 2);
@@ -176,7 +176,7 @@ describe('Test FRange', () => {
     });
 
     it('Range setFontWeight', () => {
-        const activeSheet = univerAPI.getCurrentSheet()?.getActiveSheet();
+        const activeSheet = univerAPI.getActiveSheet()?.getActiveSheet();
 
         // change A1 font weight
         const range = activeSheet?.getRange(0, 0, 1, 1);

@@ -23,12 +23,13 @@ import type {
     Workbook,
     Worksheet,
 } from '@univerjs/core';
-import type { ISetStyleCommandParams, IStyleTypeValue } from '@univerjs/sheets';
 import { BooleanNumber, ICommandService, WrapStrategy } from '@univerjs/core';
 import type {
     ISetHorizontalTextAlignCommandParams,
+    ISetStyleCommandParams,
     ISetTextWrapCommandParams,
     ISetVerticalTextAlignCommandParams,
+    IStyleTypeValue,
 } from '@univerjs/sheets';
 import {
     SetHorizontalTextAlignCommand,

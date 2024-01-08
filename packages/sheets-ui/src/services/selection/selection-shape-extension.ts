@@ -162,7 +162,7 @@ export class SelectionShapeExtension {
     private _controlMoving(moveOffsetX: number, moveOffsetY: number) {
         const scene = this._scene;
 
-        const scrollXY = scene.getScrollXYByRelativeCoords(Vector2.FromArray([this._startOffsetX, this._startOffsetY]));
+        const scrollXY = scene.getScrollXYByRelativeCoords(Vector2.FromArray([moveOffsetX, moveOffsetY]));
 
         const { scaleX, scaleY } = scene.getAncestorScale();
 
@@ -313,10 +313,11 @@ export class SelectionShapeExtension {
         // const relativeCoords = scene.getRelativeCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
 
         // const { x: newEvtOffsetX, y: newEvtOffsetY } = relativeCoords;
+        const viewMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)!;
 
         const scrollTimer = ScrollTimer.create(scene);
 
-        scrollTimer.startScroll(newEvtOffsetX, newEvtOffsetY);
+        scrollTimer.startScroll(newEvtOffsetX, newEvtOffsetY, viewMain);
 
         this._scrollTimer = scrollTimer;
 

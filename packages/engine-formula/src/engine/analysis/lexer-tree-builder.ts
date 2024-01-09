@@ -35,6 +35,7 @@ import {
     operatorToken,
     prefixToken,
     SUFFIX_TOKEN_SET,
+    suffixToken,
 } from '../../basics/token';
 import {
     DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME,
@@ -883,6 +884,24 @@ export class LexerTreeBuilder extends Disposable {
         this._colonState = false; // :
     }
 
+    private _checkSimilarErrorToken(currentString: string, cur: number, formulaStringArray: string[]) {
+        if (currentString !== suffixToken.POUND) {
+            return true;
+        }
+
+        let currentText = formulaStringArray[++cur];
+
+        while (currentText === ' ') {
+            currentText = formulaStringArray[++cur];
+        }
+
+        if (isFormulaLexerToken(currentText)) {
+            return true;
+        }
+
+        return false;
+    }
+
     // eslint-disable-next-line max-lines-per-function
     private _nodeMaker(formulaString: string, sequenceArray?: ISequenceArray[], matchCurrentNodeIndex?: number) {
         if (formulaString.substring(0, 1) === operatorToken.EQUALS) {
@@ -1170,6 +1189,7 @@ export class LexerTreeBuilder extends Disposable {
                 this._openColon(upLevel);
             } else if (
                 SUFFIX_TOKEN_SET.has(currentString) &&
+                this._checkSimilarErrorToken(currentString, cur, formulaStringArray) &&
                 this.isSingleQuotationClose() &&
                 this.isDoubleQuotationClose() &&
                 this.isSquareBracketClose()

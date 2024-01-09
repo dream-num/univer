@@ -17,7 +17,7 @@
 import { isRealNum, type Nullable } from '@univerjs/core';
 
 import { BooleanValue } from '../../basics/common';
-import { ErrorType } from '../../basics/error-type';
+import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { CELL_INVERTED_INDEX_CACHE } from '../../basics/inverted-index-cache';
 import { $ARRAY_VALUE_REGEX } from '../../basics/regex';
 import { compareToken } from '../../basics/token';
@@ -1519,7 +1519,10 @@ export class ValueObjectFactory {
             return new BooleanValueObject(rawValue, true);
         }
         if (typeof rawValue === 'string') {
-            const rawValueUpper = rawValue.toLocaleUpperCase();
+            const rawValueUpper = rawValue.toLocaleUpperCase().trim();
+            if (ERROR_TYPE_SET.has(rawValueUpper as ErrorType)) {
+                return new ErrorValueObject(rawValueUpper as ErrorType);
+            }
             if (rawValueUpper === BooleanValue.TRUE || rawValueUpper === BooleanValue.FALSE) {
                 return new BooleanValueObject(rawValueUpper);
             }

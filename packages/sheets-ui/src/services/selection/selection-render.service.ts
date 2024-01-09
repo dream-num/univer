@@ -93,9 +93,9 @@ export interface ISelectionRenderService {
 }
 
 /**
- * TODO 注册selection拦截，可能在有公式ArrayObject时，fx公式栏显示不同
+ * TODO 注册 selection 拦截，可能在有公式 ArrayObject 时，fx 公式栏显示不同
  *
- * SelectionRenderService 维护viewModel数据list，action也是修改这一层数据，obs监听到数据变动后，自动刷新（control仍然可以持有数据）
+ * SelectionRenderService 维护 viewModel 数据 list，action 也是修改这一层数据，obs 监听到数据变动后，自动刷新（control 仍然可以持有数据）
  *
  * This service is related to the drawing of the selection.
  * By modifying the properties of the service,
@@ -709,7 +709,7 @@ export class SelectionRenderService implements ISelectionRenderService {
             curControls.push(selectionControl);
         }
 
-        // this._selectionMoveStart$.next(this.getSelectionDataWithStyle());
+        this._selectionMoveStart$.next(this.getSelectionDataWithStyle());
 
         this.hasSelection = true;
 

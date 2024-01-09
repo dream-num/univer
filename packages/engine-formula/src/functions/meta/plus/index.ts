@@ -14,25 +14,19 @@
  * limitations under the License.
  */
 
-import { ErrorType } from '../../../basics/error-type';
-import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
-import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 
 export class Plus extends BaseFunction {
-    override calculate(variant1: FunctionVariantType, variant2: FunctionVariantType) {
-        if (variant1.isError() || variant2.isError()) {
-            return ErrorValueObject.create(ErrorType.VALUE);
+    override calculate(variant1: BaseValueObject, variant2: BaseValueObject) {
+        if (variant1.isError()) {
+            return variant1;
         }
 
-        if (variant1.isReferenceObject()) {
-            variant1 = (variant1 as BaseReferenceObject).toArrayValueObject();
+        if (variant2.isError()) {
+            return variant2;
         }
 
-        if (variant2.isReferenceObject()) {
-            variant2 = (variant2 as BaseReferenceObject).toArrayValueObject();
-        }
-
-        return (variant1 as BaseValueObject).plus(variant2 as BaseValueObject);
+        return variant1.plus(variant2);
     }
 }

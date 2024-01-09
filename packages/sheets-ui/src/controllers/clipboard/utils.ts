@@ -525,7 +525,10 @@ export function getClearAndSetMergeMutations(
 
 export function generateBody(text: string): IDocumentBody {
     // Convert all \n to \r, because we use \r to indicate paragraph break.
-    let dataStream = text.replace(/\n/g, '\r');
+    let dataStream = text.replace(/(\r\n|\n)/g, '\r');
+    if (!dataStream.endsWith('\r\n')) {
+        dataStream += '\r\n';
+    }
     const paragraphs: IParagraph[] = [];
 
     for (let i = 0; i < dataStream.length; i++) {
@@ -533,8 +536,6 @@ export function generateBody(text: string): IDocumentBody {
             paragraphs.push({ startIndex: i });
         }
     }
-
-    dataStream += '\r\n';
 
     return {
         dataStream,

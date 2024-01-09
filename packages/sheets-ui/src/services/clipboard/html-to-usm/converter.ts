@@ -222,7 +222,7 @@ export class HtmlToUSMService {
                 // TODO@Dushusir Temporarily use handleStringToStyle. After all replication and paste function is completed, fix the handleStringToStyle method
                 const style = handleStringToStyle(undefined, value.properties?.style);
 
-                if (value.content.includes('\n')) {
+                if (/\r|\n/.test(value.content)) {
                     const body = generateBody(value.content);
                     const p = this._generateDocumentDataModelSnapshot({
                         body,

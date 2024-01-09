@@ -420,13 +420,12 @@ export class SheetClipboardController extends Disposable {
     private _onPastePlainText(pasteTo: ISheetRangeLocation, text: string, payload: ICopyPastePayload) {
         const { range, unitId, subUnitId } = pasteTo;
         let cellValue: IObjectMatrixPrimitiveType<ICellData>;
-        if (text.includes('\n')) {
+        if (/\r|\n/.test(text)) {
             const body = generateBody(text);
             const p = this._generateDocumentDataModelSnapshot({ body });
             cellValue = {
                 [range.startRow]: {
                     [range.startColumn]: {
-                        v: text,
                         p,
                     },
                 },

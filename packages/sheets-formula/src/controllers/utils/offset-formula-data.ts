@@ -50,13 +50,20 @@ interface IFormulaDataGenerics<T> {
     [unitId: string]: Nullable<{ [sheetId: string]: IObjectMatrixPrimitiveType<T> }>;
 }
 
+export interface IRefRangeWithPosition {
+    row: number;
+    column: number;
+    range: IRange;
+}
+
 export function offsetFormula<T>(
     formulaData: IFormulaDataGenerics<T>,
     command: ICommandInfo,
     unitId: string,
     sheetId: string,
     selections?: Readonly<Nullable<ISelectionWithStyle[]>>,
-    formulaRangeData?: IFormulaDataGenerics<IRange>
+    formulaRangeData?: IFormulaDataGenerics<IRange>,
+    refRanges?: IRefRangeWithPosition[]
 ): IFormulaDataGenerics<T> {
     const { id } = command;
 
@@ -88,7 +95,12 @@ export function offsetFormula<T>(
             handleInsertRangeMoveDown<T>(formulaMatrix, command as ICommandInfo<InsertRangeMoveDownCommandParams>);
             break;
         case RemoveRowCommand.id:
-            handleRemoveRow<T>(formulaMatrix, command as ICommandInfo<IRemoveRowColCommandParams>);
+            handleRemoveRow<T>(
+                formulaMatrix,
+                command as ICommandInfo<IRemoveRowColCommandParams>,
+                formulaRangeMatrix,
+                refRanges
+            );
             break;
         case RemoveColCommand.id:
             handleRemoveCol<T>(formulaMatrix, command as ICommandInfo<IRemoveRowColCommandParams>);
@@ -225,14 +237,48 @@ function handleInsertRangeMoveDown<T>(
     handleInsertRangeMutation(formulaMatrix, range, lastEndRow, lastEndColumn, Dimension.ROWS);
 }
 
-function handleRemoveRow<T>(formulaMatrix: ObjectMatrix<T>, command: ICommandInfo<IRemoveRowColCommandParams>) {
+function handleRemoveRow<T>(
+    formulaMatrix: ObjectMatrix<T>,
+    command: ICommandInfo<IRemoveRowColCommandParams>,
+    formulaRangeMatrix?: ObjectMatrix<IRange>,
+    refRanges?: IRefRangeWithPosition[]
+) {
     const { params } = command;
     if (!params) return;
 
     const { range } = params;
+    const { startRow, endRow, startColumn, endColumn } = range;
+
+    // Handle arrayFormulaRange and arrayFormulaCellData. If removing rows affects the array formula, the array formula cell data needs to be cleared and will be regenerated during recalculation.
+    if (formulaRangeMatrix) {
+        // 1. Above the first line of ArrayFormula
+        formulaRangeMatrix.forValue((row, column, range) => {
+            if (!range) return;
+
+            const { startRow: formulaRangeStartRow } = range;
+            if (endRow <= formulaRangeStartRow) {
+                removeValueFormulaArray(range, formulaMatrix);
+            }
+        });
+
+        // 2. Above the last line of refRanges
+        refRanges?.forEach(({ row, column, range }) => {
+            if (!range) return;
+
+            const { endRow: refRangeEndRow } = range;
+            if (endRow <= refRangeEndRow) {
+                // The formula cell position corresponding to refRange
+                const removeRange = formulaRangeMatrix?.getValue(row, column);
+                removeRange && removeValueFormulaArray(removeRange, formulaMatrix);
+            }
+        });
+        return;
+    }
+
+    // Handle formula data
     const lastEndRow = formulaMatrix.getLength() - 1;
     const lastEndColumn = formulaMatrix.getRange().endColumn;
-
+    // offset formula range
     handleDeleteRangeMutation(formulaMatrix, range, lastEndRow, lastEndColumn, Dimension.ROWS);
 }
 

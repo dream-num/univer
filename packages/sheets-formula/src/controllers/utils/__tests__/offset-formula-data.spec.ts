@@ -38,11 +38,11 @@ import {
 } from '@univerjs/sheets';
 import { describe, expect, it } from 'vitest';
 
-import { offsetArrayFormula, offsetFormula, removeFormulaData } from '../utils/offset-formula-data';
+import { offsetArrayFormula, offsetFormula, removeFormulaData } from '../offset-formula-data';
 
 const cellToRange = (row: number, col: number) =>
     ({ startRow: row, endRow: row, startColumn: col, endColumn: col }) as IRange;
-describe('utils test', () => {
+describe('Utils offset formula data test', () => {
     describe('function offsetFormula', () => {
         it('move range normal formula', () => {
             const unitId = 'workbook-01';
@@ -680,7 +680,149 @@ describe('utils test', () => {
                                 f: '=SUM(A2)',
                             },
                         },
-                        // '2': {},
+                    },
+                },
+            });
+        });
+        it('remove row, handle arrayFormulaCellData, with arrayFormulaRange and refRanges', () => {
+            const unitId = 'workbook-01';
+            const sheetId = 'sheet-0011';
+            const arrayFormulaCellData = {
+                [unitId]: {
+                    [sheetId]: {
+                        '4': {
+                            '0': {
+                                v: 1,
+                                t: 2,
+                            },
+                        },
+                        '5': {
+                            '0': {
+                                v: 2,
+                                t: 2,
+                            },
+                        },
+                        '6': {
+                            '0': {
+                                v: 3,
+                                t: 2,
+                            },
+                        },
+                    },
+                },
+            };
+
+            const command = {
+                id: RemoveRowCommand.id,
+                params: {
+                    range: {
+                        startRow: 1,
+                        startColumn: 0,
+                        endRow: 1,
+                        endColumn: 19,
+                        rangeType: 1,
+                    },
+                },
+            };
+
+            const arrayFormulaRange = {
+                [unitId]: {
+                    [sheetId]: {
+                        '4': {
+                            '0': {
+                                startRow: 4,
+                                startColumn: 0,
+                                endRow: 6,
+                                endColumn: 0,
+                            },
+                        },
+                    },
+                },
+            };
+
+            const refRanges = [
+                {
+                    row: 4,
+                    column: 0,
+                    range: {
+                        startRow: 0,
+                        startColumn: 0,
+                        endRow: 2,
+                        endColumn: 0,
+                        startAbsoluteRefType: 0,
+                        endAbsoluteRefType: 0,
+                    },
+                },
+            ];
+
+            const newFormulaData = offsetFormula(
+                arrayFormulaCellData,
+                command,
+                unitId,
+                sheetId,
+                null,
+                arrayFormulaRange,
+                refRanges
+            );
+            expect(newFormulaData).toStrictEqual({
+                [unitId]: {
+                    [sheetId]: {
+                        '4': {
+                            '0': null,
+                        },
+                        '5': {
+                            '0': null,
+                        },
+                        '6': {
+                            '0': null,
+                        },
+                    },
+                },
+            });
+        });
+        it('remove row, handle arrayFormulaRange', () => {
+            const unitId = 'workbook-01';
+            const sheetId = 'sheet-0011';
+            const arrayFormulaRange = {
+                [unitId]: {
+                    [sheetId]: {
+                        '4': {
+                            '0': {
+                                startRow: 4,
+                                startColumn: 0,
+                                endRow: 6,
+                                endColumn: 0,
+                            },
+                        },
+                    },
+                },
+            };
+
+            const command = {
+                id: RemoveRowCommand.id,
+                params: {
+                    range: {
+                        startRow: 1,
+                        startColumn: 0,
+                        endRow: 1,
+                        endColumn: 19,
+                        rangeType: 1,
+                    },
+                },
+            };
+            const newFormulaData = offsetFormula(arrayFormulaRange, command, unitId, sheetId, null, arrayFormulaRange);
+            expect(newFormulaData).toStrictEqual({
+                [unitId]: {
+                    [sheetId]: {
+                        '4': {
+                            '0': null,
+                        },
+                        '5': {
+                            '0': null,
+                        },
+                        '6': {
+                            '0': null,
+                        },
                     },
                 },
             });
@@ -859,15 +1001,13 @@ describe('utils test', () => {
             const command = {
                 id: DeleteRangeMoveLeftCommand.id,
                 params: {
-                    ranges: [
-                        {
-                            startRow: 0,
-                            startColumn: 0,
-                            endRow: 0,
-                            endColumn: 0,
-                            rangeType: 0,
-                        },
-                    ],
+                    range: {
+                        startRow: 0,
+                        startColumn: 0,
+                        endRow: 0,
+                        endColumn: 0,
+                        rangeType: 0,
+                    },
                 },
             };
 

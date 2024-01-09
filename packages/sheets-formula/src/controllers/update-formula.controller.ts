@@ -103,6 +103,7 @@ import {
 } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 
+import type { IRefRangeWithPosition } from './utils/offset-formula-data';
 import { offsetArrayFormula, offsetFormula, removeFormulaData } from './utils/offset-formula-data';
 import { handleRedoUndoMoveRange } from './utils/redo-undo-formula-data';
 
@@ -215,40 +216,6 @@ export class UpdateFormulaController extends Disposable {
                 break;
 
             // TODO:@Dushusir handle other mutations
-
-            // case MoveRowsCommand.id:
-            //     result = this._handleMoveRows(command as ICommandInfo<IMoveRowsCommandParams>);
-            //     break;
-            // case MoveColsCommand.id:
-            //     result = this._handleMoveCols(command as ICommandInfo<IMoveColsCommandParams>);
-            //     break;
-            // case InsertRowCommand.id:
-            //     result = this._handleInsertRow(command as ICommandInfo<IInsertRowCommandParams>);
-            //     break;
-            // case InsertColCommand.id:
-            //     result = this._handleInsertCol(command as ICommandInfo<IInsertColCommandParams>);
-            //     break;
-            // case InsertRangeMoveRightCommand.id:
-            //     result = this._handleInsertRangeMoveRight(command as ICommandInfo<InsertRangeMoveRightCommandParams>);
-            //     break;
-            // case InsertRangeMoveDownCommand.id:
-            //     result = this._handleInsertRangeMoveDown(command as ICommandInfo<InsertRangeMoveDownCommandParams>);
-            //     break;
-            // case RemoveRowCommand.id:
-            //     result = this._handleRemoveRow(command as ICommandInfo<IRemoveRowColCommandParams>);
-            //     break;
-            // case RemoveColCommand.id:
-            //     result = this._handleRemoveCol(command as ICommandInfo<IRemoveRowColCommandParams>);
-            //     break;
-            // case DeleteRangeMoveUpCommand.id:
-            //     result = this._handleDeleteRangeMoveUp(command as ICommandInfo<IDeleteRangeMoveUpCommandParams>);
-            //     break;
-            // case DeleteRangeMoveLeftCommand.id:
-            //     result = this._handleDeleteRangeMoveLeft(command as ICommandInfo<IDeleteRangeMoveLeftCommandParams>);
-            //     break;
-            // case SetWorksheetNameCommand.id:
-            //     result = this._handleSetWorksheetName(command as ICommandInfo<ISetWorksheetNameCommandParams>);
-            //     break;
         }
 
         this._commandService.executeCommand(SetFormulaDataMutation.id, {
@@ -394,7 +361,11 @@ export class UpdateFormulaController extends Disposable {
             let oldFormulaData = this._formulaDataModel.getFormulaData();
 
             // change formula reference
-            const formulaData = this._getFormulaReferenceMoveInfo(oldFormulaData, unitSheetNameMap, result);
+            const { newFormulaData: formulaData, refRanges } = this._getFormulaReferenceMoveInfo(
+                oldFormulaData,
+                unitSheetNameMap,
+                result
+            );
 
             const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
             const unitId = workbook.getUnitId();
@@ -412,9 +383,17 @@ export class UpdateFormulaController extends Disposable {
                 unitId,
                 sheetId,
                 selections,
+                arrayFormulaRange,
+                refRanges
+            );
+            let offsetArrayFormulaRange = offsetFormula(
+                arrayFormulaRange,
+                command,
+                unitId,
+                sheetId,
+                selections,
                 arrayFormulaRange
             );
-            let offsetArrayFormulaRange = offsetFormula(arrayFormulaRange, command, unitId, sheetId, selections);
             offsetArrayFormulaRange = offsetArrayFormula(offsetArrayFormulaRange, command, unitId, sheetId);
 
             // Synchronous to the worker thread
@@ -748,13 +727,16 @@ export class UpdateFormulaController extends Disposable {
         unitSheetNameMap: IUnitSheetNameMap,
         formulaReferenceMoveParam: IFormulaReferenceMoveParam
     ) {
-        if (formulaData == null) return {};
+        if (!Tools.isDefine(formulaData)) return { newFormulaData: {}, refRanges: [] };
 
         const formulaDataKeys = Object.keys(formulaData);
 
-        if (formulaDataKeys.length === 0) return {};
+        if (formulaDataKeys.length === 0) return { newFormulaData: {}, refRanges: [] };
 
         const newFormulaData: IFormulaData = {};
+
+        // Return all reference ranges. If the operation affects the reference range, you need to clear arrayFormulaRange and arrayFormulaCellData.
+        const refRanges: IRefRangeWithPosition[] = [];
 
         for (const unitId of formulaDataKeys) {
             const sheetData = formulaData[unitId];
@@ -765,7 +747,7 @@ export class UpdateFormulaController extends Disposable {
 
             const sheetDataKeys = Object.keys(sheetData);
 
-            if (newFormulaData[unitId] == null) {
+            if (!Tools.isDefine(newFormulaData[unitId])) {
                 newFormulaData[unitId] = {};
             }
 
@@ -797,6 +779,9 @@ export class UpdateFormulaController extends Disposable {
                         const sequenceGrid = deserializeRangeWithSheet(token);
 
                         const { range, sheetName, unitId: sequenceUnitId } = sequenceGrid;
+
+                        // store ref range
+                        refRanges.push({ row, column, range });
 
                         const mapUnitId =
                             sequenceUnitId == null || sequenceUnitId.length === 0 ? unitId : sequenceUnitId;
@@ -880,7 +865,7 @@ export class UpdateFormulaController extends Disposable {
             }
         }
 
-        return newFormulaData;
+        return { newFormulaData, refRanges };
     }
 
     private _getNewRangeByMoveParam(

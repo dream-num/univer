@@ -68,28 +68,30 @@ export class NumfmtService extends Disposable implements INumfmtService {
     private _initModel() {
         const handleWorkbookAdd = (workbook: Workbook) => {
             const unitID = workbook.getUnitId();
-            this._resourceManagerService.registerPluginResource<ISnapshot>(unitID, SHEET_NUMFMT_PLUGIN, {
-                toJson: (unitID) => this._toJson(unitID),
-                parseJson: (json) => this._parseJson(json),
-                onChange: (unitID, value) => {
-                    const { model, refModel } = value;
+            this.disposeWithMe(
+                this._resourceManagerService.registerPluginResource<ISnapshot>(unitID, SHEET_NUMFMT_PLUGIN, {
+                    toJson: (unitID) => this._toJson(unitID),
+                    parseJson: (json) => this._parseJson(json),
+                    onChange: (unitID, value) => {
+                        const { model, refModel } = value;
 
-                    if (model) {
-                        const parseModel = Object.keys(model).reduce((result, sheetId) => {
-                            result.set(sheetId, new ObjectMatrix<INumfmtItem>(model[sheetId]));
-                            return result;
-                        }, new Map<string, ObjectMatrix<INumfmtItem>>());
-                        this._numfmtModel.set(unitID, parseModel);
-                    }
-                    if (refModel) {
-                        this._refAliasModel.set(
-                            unitID,
-                            new RefAlias<IRefItem, 'pattern' | 'i'>(refModel, ['pattern', 'i'])
-                        );
-                    }
-                    this._modelReplace$.next(unitID);
-                },
-            });
+                        if (model) {
+                            const parseModel = Object.keys(model).reduce((result, sheetId) => {
+                                result.set(sheetId, new ObjectMatrix<INumfmtItem>(model[sheetId]));
+                                return result;
+                            }, new Map<string, ObjectMatrix<INumfmtItem>>());
+                            this._numfmtModel.set(unitID, parseModel);
+                        }
+                        if (refModel) {
+                            this._refAliasModel.set(
+                                unitID,
+                                new RefAlias<IRefItem, 'pattern' | 'i'>(refModel, ['pattern', 'i'])
+                            );
+                        }
+                        this._modelReplace$.next(unitID);
+                    },
+                })
+            );
         };
         this.disposeWithMe(toDisposable(this._univerInstanceService.sheetAdded$.subscribe(handleWorkbookAdd)));
         this.disposeWithMe(
@@ -104,6 +106,7 @@ export class NumfmtService extends Disposable implements INumfmtService {
                     if (refModel) {
                         this._refAliasModel.delete(unitID);
                     }
+                    this._resourceManagerService.disposePluginResource(unitID, SHEET_NUMFMT_PLUGIN);
                 })
             )
         );

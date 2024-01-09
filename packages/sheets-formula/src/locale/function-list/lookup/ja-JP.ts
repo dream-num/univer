@@ -277,7 +277,7 @@ export default {
         },
     },
     LOOKUP: {
-        description: `ベクトル (1 行または 1 列で構成されるセル範囲) または配列を検索し、対応する値を返します。`,
+        description: `つの行または列から、他の行または列の同じ場所にある値を見つけるときは、検索/行列関数 の 1 つである LOOKUP を使います`,
         abstract: `ベクトル (1 行または 1 列で構成されるセル範囲) または配列を検索し、対応する値を返します。`,
         links: [
             {
@@ -286,8 +286,18 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            lookupValue: {
+                name: '検索値',
+                detail: 'LOOKUP が最初のベクトルで検索する値。 検査値には、数値、文字列、論理値、または値を参照する名前やセル参照を指定できます',
+            },
+            lookupVectorOrArray: {
+                name: '検査範囲/配列',
+                detail: '1 行または 1 列のみの範囲を指定します。 検査範囲には、文字列、数値、または論理値を指定できます。',
+            },
+            resultVector: {
+                name: 'result_vector',
+                detail: '1 つの行または列のみを含む範囲。 result_vector引数は、lookup_vectorと同じサイズにする必要があります。 同じサイズにする必要があります',
+            },
         },
     },
     MATCH: {

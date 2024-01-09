@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '@univerjs/core';
+
 import type { ArrayValueObject } from '../../..';
 import { ErrorType } from '../../../basics/error-type';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
@@ -23,86 +25,81 @@ import { BaseFunction } from '../../base-function';
 export class Lookup extends BaseFunction {
     override calculate(
         lookupValue: BaseValueObject,
-        tableArray: BaseValueObject,
-        colIndexNum: BaseValueObject,
-        rangeLookup?: BaseValueObject
+        lookupVectorOrArray: ArrayValueObject,
+        resultVector?: BaseValueObject
     ) {
         if (lookupValue.isError()) {
             return lookupValue;
         }
 
-        if (tableArray.isError()) {
+        if (lookupVectorOrArray.isError()) {
             return new ErrorValueObject(ErrorType.REF);
         }
 
-        if (!tableArray.isArray()) {
+        if (!lookupVectorOrArray.isArray()) {
             return new ErrorValueObject(ErrorType.VALUE);
         }
 
-        if (colIndexNum.isError()) {
-            return new ErrorValueObject(ErrorType.NA);
+        if (resultVector?.isError()) {
+            return resultVector;
         }
 
-        if (rangeLookup?.isError()) {
-            return new ErrorValueObject(ErrorType.NA);
+        if (lookupVectorOrArray.getColumnCount() === 1 || lookupVectorOrArray.getRowCount() === 1) {
+            if (resultVector != null && !resultVector.isArray()) {
+                return new ErrorValueObject(ErrorType.REF);
+            }
+            return this._handleVector(lookupValue, lookupVectorOrArray, resultVector as ArrayValueObject);
         }
 
-        const rangeLookupValue = this.getZeroOrOneByOneDefault(rangeLookup);
+        return this._handleArray(lookupValue, lookupVectorOrArray);
+    }
 
-        if (rangeLookupValue == null) {
-            return new ErrorValueObject(ErrorType.VALUE);
+    private _handleVector(
+        lookupValue: BaseValueObject,
+        lookupVector: ArrayValueObject,
+        resultVector?: ArrayValueObject
+    ) {
+        if (resultVector == null) {
+            resultVector = lookupVector;
+        } else if (
+            resultVector.getRowCount() !== lookupVector.getRowCount() ||
+            resultVector.getColumnCount() !== lookupVector.getColumnCount()
+        ) {
+            return new ErrorValueObject(ErrorType.REF);
         }
 
-        const colIndexNumValue = this.getIndexNumValue(colIndexNum);
-
-        if (colIndexNumValue instanceof ErrorValueObject) {
-            return colIndexNumValue;
+        if (lookupValue.isArray()) {
+            return lookupValue.map((value) => {
+                return this.binarySearch(value, lookupVector, resultVector!);
+            });
         }
 
-        const searchArray = (tableArray as ArrayValueObject).slice(undefined, [0, 1]);
+        return this.binarySearch(lookupValue, lookupVector, resultVector);
+    }
 
-        const resultArray = (tableArray as ArrayValueObject).slice(undefined, [colIndexNumValue - 1, colIndexNumValue]);
+    private _handleArray(lookupValue: BaseValueObject, lookupArray: ArrayValueObject) {
+        const rowCount = lookupArray.getRowCount();
 
-        if (searchArray == null || resultArray == null) {
+        const columnCount = lookupArray.getColumnCount();
+
+        let searchArray: Nullable<ArrayValueObject>;
+
+        if (columnCount > rowCount) {
+            searchArray = (lookupArray as ArrayValueObject).slice([0, 1]);
+        } else {
+            searchArray = (lookupArray as ArrayValueObject).slice(undefined, [0, 1]);
+        }
+
+        if (searchArray == null) {
             return new ErrorValueObject(ErrorType.VALUE);
         }
 
         if (lookupValue.isArray()) {
             return lookupValue.map((value) => {
-                return this._handleSingleObject(value, searchArray, resultArray, rangeLookupValue);
+                return this.binarySearch(value, searchArray!, searchArray!);
             });
         }
 
-        return this._handleSingleObject(lookupValue, searchArray, resultArray, rangeLookupValue);
-    }
-
-    private _handleSingleObject(
-        value: BaseValueObject,
-        searchArray: ArrayValueObject,
-        resultArray: ArrayValueObject,
-        rangeLookupValue: number
-    ) {
-        if (rangeLookupValue === 0) {
-            const resultValue = resultArray.pick(searchArray.isEqual(value) as ArrayValueObject).getFirstCell();
-            if (resultValue.isNull()) {
-                return new ErrorValueObject(ErrorType.NA);
-            }
-
-            return resultValue;
-        }
-
-        const row = searchArray.binarySearch(value);
-
-        if (row == null) {
-            return new ErrorValueObject(ErrorType.NA);
-        }
-
-        const resultValue = resultArray.get(row, 0);
-
-        if (resultValue.isNull()) {
-            return new ErrorValueObject(ErrorType.NA);
-        }
-
-        return resultValue;
+        return this.binarySearch(lookupValue, searchArray, searchArray);
     }
 }

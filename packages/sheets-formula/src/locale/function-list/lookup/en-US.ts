@@ -288,7 +288,7 @@ export default {
         },
     },
     LOOKUP: {
-        description: `Looks up values in a vector or array`,
+        description: `When you need to look in a single row or column and find a value from the same position in a second row or column`,
         abstract: `Looks up values in a vector or array`,
         links: [
             {
@@ -297,8 +297,18 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            lookupValue: {
+                name: 'lookup_value',
+                detail: 'A value that LOOKUP searches for in the first vector. Lookup_value can be a number, text, a logical value, or a name or reference that refers to a value.',
+            },
+            lookupVectorOrArray: {
+                name: 'lookup_vectorOrArray',
+                detail: 'A range that contains only one row or one column',
+            },
+            resultVector: {
+                name: 'result_vector',
+                detail: 'A range that contains only one row or column. The result_vector argument must be the same size as lookup_vector.',
+            },
         },
     },
     MATCH: {

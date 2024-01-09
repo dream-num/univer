@@ -278,7 +278,7 @@ export default {
         },
     },
     LOOKUP: {
-        description: '在向量或数组中查找值',
+        description: '当您需要查询一行或一列并查找另一行或列中的相同位置的值时使用',
         abstract: '在向量或数组中查找值',
         links: [
             {
@@ -287,8 +287,15 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            lookupValue: {
+                name: 'lookup_value',
+                detail: '在第一个向量中搜索的值。可以是数字、文本、逻辑值、名称或对值的引用。',
+            },
+            lookupVectorOrArray: { name: 'lookup_vectorOrArray', detail: '只包含一行或一列的区域。' },
+            resultVector: {
+                name: 'result_vector',
+                detail: ' 只包含一行或一列的区域。参数必须与 lookup_vector 参数大小相同。 其大小必须相同。',
+            },
         },
     },
     MATCH: {

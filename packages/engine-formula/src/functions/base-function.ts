@@ -160,4 +160,29 @@ export class BaseFunction extends Disposable {
 
         return logicValue;
     }
+
+    binarySearch(value: BaseValueObject, searchArray: ArrayValueObject, resultArray: ArrayValueObject) {
+        const row = searchArray.binarySearch(value);
+
+        if (row == null) {
+            return new ErrorValueObject(ErrorType.NA);
+        }
+
+        const resultValue = resultArray.get(row, 0);
+
+        if (resultValue.isNull()) {
+            return new ErrorValueObject(ErrorType.NA);
+        }
+
+        return resultValue;
+    }
+
+    equalSearch(value: BaseValueObject, searchArray: ArrayValueObject, resultArray: ArrayValueObject) {
+        const resultValue = resultArray.pick(searchArray.isEqual(value) as ArrayValueObject).getFirstCell();
+        if (resultValue.isNull()) {
+            return new ErrorValueObject(ErrorType.NA);
+        }
+
+        return resultValue;
+    }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IObjectMatrixPrimitiveType, Nullable } from '@univerjs/core';
+import type { ICommandInfo, IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
 import { Dimension, ObjectMatrix, RANGE_TYPE } from '@univerjs/core';
 import type { IArrayFormulaRangeType } from '@univerjs/engine-formula';
 import type {
@@ -55,17 +55,19 @@ export function offsetFormula<T>(
     command: ICommandInfo,
     unitId: string,
     sheetId: string,
-    selections?: Readonly<Nullable<ISelectionWithStyle[]>>
+    selections?: Readonly<Nullable<ISelectionWithStyle[]>>,
+    formulaRangeData?: IFormulaDataGenerics<IRange>
 ): IFormulaDataGenerics<T> {
     const { id } = command;
 
     if (checkFormulaDataNull(formulaData, unitId, sheetId)) return formulaData;
 
-    const formulaMatrix = new ObjectMatrix(formulaData[unitId]?.[sheetId]);
+    const formulaMatrix = new ObjectMatrix(formulaData[unitId][sheetId]);
+    const formulaRangeMatrix = formulaRangeData && new ObjectMatrix(formulaRangeData[unitId][sheetId]);
 
     switch (id) {
         case MoveRangeCommand.id:
-            handleMoveRange<T>(formulaMatrix, command as ICommandInfo<IMoveRangeCommandParams>);
+            handleMoveRange<T>(formulaMatrix, command as ICommandInfo<IMoveRangeCommandParams>, formulaRangeMatrix);
             break;
         case MoveRowsCommand.id:
             handleMoveRows<T>(formulaMatrix, command as ICommandInfo<IMoveRowsCommandParams>, selections);
@@ -102,36 +104,17 @@ export function offsetFormula<T>(
     return formulaData;
 }
 
-function handleMoveRange<T>(formulaMatrix: ObjectMatrix<T>, command: ICommandInfo<IMoveRangeCommandParams>) {
+function handleMoveRange<T>(
+    formulaMatrix: ObjectMatrix<T>,
+    command: ICommandInfo<IMoveRangeCommandParams>,
+    formulaRangeMatrix?: ObjectMatrix<IRange>
+) {
     const { params } = command;
     if (!params) return;
 
     const { fromRange, toRange } = params;
-    const {
-        startRow: fromStartRow,
-        endRow: fromEndRow,
-        startColumn: fromStartColumn,
-        endColumn: fromEndColumn,
-    } = fromRange;
-    const { startRow: toStartRow, endRow: toEndRow, startColumn: toStartColumn, endColumn: toEndColumn } = toRange;
 
-    const cacheMatrix = new ObjectMatrix<T>();
-
-    for (let r = fromStartRow; r <= fromEndRow; r++) {
-        for (let c = fromStartColumn; c <= fromEndColumn; c++) {
-            const cacheValue = formulaMatrix.getValue(r, c);
-            cacheMatrix.setValue(r - fromStartRow, c - fromStartColumn, cacheValue);
-
-            formulaMatrix.setValue(r, c, null as T);
-        }
-    }
-
-    for (let r = toStartRow; r <= toEndRow; r++) {
-        for (let c = toStartColumn; c <= toEndColumn; c++) {
-            const cacheValue = cacheMatrix.getValue(r - toStartRow, c - toStartColumn);
-            formulaMatrix.setValue(r, c, cacheValue);
-        }
-    }
+    moveRangeUpdateFormulaData(fromRange, toRange, formulaMatrix, formulaMatrix, formulaRangeMatrix);
 }
 
 function handleMoveRows<T>(
@@ -292,7 +275,12 @@ function handleDeleteRangeMoveLeft<T>(
     handleDeleteRangeMutation(formulaMatrix, range, lastEndRow, lastEndColumn, Dimension.COLUMNS);
 }
 
-export function offsetArrayFormula(arrayFormulaRange: IArrayFormulaRangeType, unitId: string, sheetId: string) {
+export function offsetArrayFormula(
+    arrayFormulaRange: IArrayFormulaRangeType,
+    command: ICommandInfo,
+    unitId: string,
+    sheetId: string
+) {
     if (checkFormulaDataNull(arrayFormulaRange, unitId, sheetId)) return arrayFormulaRange;
     if (arrayFormulaRange[unitId]?.[sheetId] == null) {
         return arrayFormulaRange;
@@ -334,5 +322,79 @@ function checkFormulaDataNull<T>(formulaData: IFormulaDataGenerics<T>, unitId: s
 export function removeFormulaData<T>(formulaData: IFormulaDataGenerics<T>, unitId: string, sheetId: string) {
     if (formulaData && formulaData[unitId] && formulaData[unitId]?.[sheetId]) {
         delete formulaData[unitId]![sheetId];
+    }
+}
+export function removeValueFormulaArray<T>(formulaRange: IRange, formulaMatrix: ObjectMatrix<T>) {
+    const { startRow, endRow, startColumn, endColumn } = formulaRange;
+    for (let r = startRow; r <= endRow; r++) {
+        for (let c = startColumn; c <= endColumn; c++) {
+            formulaMatrix.setValue(r, c, null as T);
+        }
+    }
+}
+
+export function inFormulaRange(row: number, column: number, formulaMatrix?: ObjectMatrix<IRange>) {
+    if (!formulaMatrix) return false;
+
+    let result = false;
+    formulaMatrix.forValue((r, c, range) => {
+        if (!range) return;
+
+        const { startRow, endRow, startColumn, endColumn } = range;
+
+        if (startRow <= row && row <= endRow && startColumn <= column && column <= endColumn) {
+            result = true;
+            return false;
+        }
+    });
+
+    return result;
+}
+
+export function moveRangeUpdateFormulaData<T>(
+    fromRange: IRange,
+    toRange: IRange,
+    fromArrayFormulaCellDataMatrix: ObjectMatrix<T>,
+    toArrayFormulaCellDataMatrix: ObjectMatrix<T>,
+    arrayFormulaRangeMatrix?: ObjectMatrix<IRange>
+) {
+    const {
+        startRow: fromStartRow,
+        endRow: fromEndRow,
+        startColumn: fromStartColumn,
+        endColumn: fromEndColumn,
+    } = fromRange;
+
+    const { startRow: toStartRow, endRow: toEndRow, startColumn: toStartColumn, endColumn: toEndColumn } = toRange;
+
+    const cacheMatrix = new ObjectMatrix<T>();
+
+    for (let r = fromStartRow; r <= fromEndRow; r++) {
+        for (let c = fromStartColumn; c <= fromEndColumn; c++) {
+            const cacheValue = fromArrayFormulaCellDataMatrix.getValue(r, c);
+
+            // If the moved area has an array formula,
+            // move the first cell, you need to clear the contents of the array formula.
+            // move the no-first cell, do not change the original data, set the new area to null
+            const formulaRange = arrayFormulaRangeMatrix && arrayFormulaRangeMatrix.getValue(r, c);
+            if (formulaRange) {
+                cacheMatrix.setValue(r - fromStartRow, c - fromStartColumn, cacheValue);
+                removeValueFormulaArray(formulaRange, fromArrayFormulaCellDataMatrix);
+                continue;
+            } else if (inFormulaRange(r, c, arrayFormulaRangeMatrix)) {
+                cacheMatrix.setValue(r - fromStartRow, c - fromStartColumn, null as T);
+                continue;
+            }
+
+            cacheMatrix.setValue(r - fromStartRow, c - fromStartColumn, cacheValue);
+            fromArrayFormulaCellDataMatrix.setValue(r, c, null as T);
+        }
+    }
+
+    for (let r = toStartRow; r <= toEndRow; r++) {
+        for (let c = toStartColumn; c <= toEndColumn; c++) {
+            const cacheValue = cacheMatrix.getValue(r - toStartRow, c - toStartColumn);
+            toArrayFormulaCellDataMatrix.setValue(r, c, cacheValue);
+        }
     }
 }

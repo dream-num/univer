@@ -14,7 +14,15 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICommandInfo, IExecutionOptions, IRange, IUnitRange, Nullable } from '@univerjs/core';
+import type {
+    ICellData,
+    ICommandInfo,
+    IExecutionOptions,
+    IMutationCommonParams,
+    IRange,
+    IUnitRange,
+    Nullable,
+} from '@univerjs/core';
 import {
     deserializeRangeWithSheet,
     Direction,
@@ -27,8 +35,10 @@ import {
     OnLifecycle,
     RANGE_TYPE,
     Rectangle,
+    RedoCommand,
     serializeRangeToRefString,
     Tools,
+    UndoCommand,
 } from '@univerjs/core';
 import type { IFormulaData, IFormulaDataItem, ISequenceNode, IUnitSheetNameMap } from '@univerjs/engine-formula';
 import {
@@ -48,6 +58,7 @@ import type {
     IInsertSheetMutationParams,
     IMoveColsCommandParams,
     IMoveRangeCommandParams,
+    IMoveRangeMutationParams,
     IMoveRowsCommandParams,
     InsertRangeMoveDownCommandParams,
     InsertRangeMoveRightCommandParams,
@@ -76,6 +87,7 @@ import {
     InsertSheetMutation,
     MoveColsCommand,
     MoveRangeCommand,
+    MoveRangeMutation,
     MoveRowsCommand,
     RemoveColCommand,
     RemoveRowCommand,
@@ -91,7 +103,8 @@ import {
 } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { offsetArrayFormula, offsetFormula, removeFormulaData } from './utils';
+import { offsetArrayFormula, offsetFormula, removeFormulaData } from './utils/offset-formula-data';
+import { handleRedoUndoMoveRange } from './utils/redo-undo-formula-data';
 
 interface IUnitRangeWithOffset extends IUnitRange {
     refOffsetX: number;
@@ -175,9 +188,76 @@ export class UpdateFormulaController extends Disposable {
                     this._handleRemoveSheetMutation(command.params as IRemoveSheetMutationParams);
                 } else if (command.id === InsertSheetMutation.id) {
                     this._handleInsertSheetMutation(command.params as IInsertSheetMutationParams);
+                } else if (
+                    (command.params as IMutationCommonParams)?.trigger === UndoCommand.id ||
+                    (command.params as IMutationCommonParams)?.trigger === RedoCommand.id
+                ) {
+                    this._handleRedoUndo(command);
                 }
             })
         );
+    }
+
+    private _handleRedoUndo(command: ICommandInfo) {
+        const { id } = command;
+        const formulaData = this._formulaDataModel.getFormulaData();
+        const arrayFormulaRange = this._formulaDataModel.getArrayFormulaRange();
+        const arrayFormulaCellData = this._formulaDataModel.getArrayFormulaCellData();
+
+        switch (id) {
+            case MoveRangeMutation.id:
+                handleRedoUndoMoveRange(
+                    command as ICommandInfo<IMoveRangeMutationParams>,
+                    formulaData,
+                    arrayFormulaRange,
+                    arrayFormulaCellData
+                );
+                break;
+
+            // TODO:@Dushusir handle other mutations
+
+            // case MoveRowsCommand.id:
+            //     result = this._handleMoveRows(command as ICommandInfo<IMoveRowsCommandParams>);
+            //     break;
+            // case MoveColsCommand.id:
+            //     result = this._handleMoveCols(command as ICommandInfo<IMoveColsCommandParams>);
+            //     break;
+            // case InsertRowCommand.id:
+            //     result = this._handleInsertRow(command as ICommandInfo<IInsertRowCommandParams>);
+            //     break;
+            // case InsertColCommand.id:
+            //     result = this._handleInsertCol(command as ICommandInfo<IInsertColCommandParams>);
+            //     break;
+            // case InsertRangeMoveRightCommand.id:
+            //     result = this._handleInsertRangeMoveRight(command as ICommandInfo<InsertRangeMoveRightCommandParams>);
+            //     break;
+            // case InsertRangeMoveDownCommand.id:
+            //     result = this._handleInsertRangeMoveDown(command as ICommandInfo<InsertRangeMoveDownCommandParams>);
+            //     break;
+            // case RemoveRowCommand.id:
+            //     result = this._handleRemoveRow(command as ICommandInfo<IRemoveRowColCommandParams>);
+            //     break;
+            // case RemoveColCommand.id:
+            //     result = this._handleRemoveCol(command as ICommandInfo<IRemoveRowColCommandParams>);
+            //     break;
+            // case DeleteRangeMoveUpCommand.id:
+            //     result = this._handleDeleteRangeMoveUp(command as ICommandInfo<IDeleteRangeMoveUpCommandParams>);
+            //     break;
+            // case DeleteRangeMoveLeftCommand.id:
+            //     result = this._handleDeleteRangeMoveLeft(command as ICommandInfo<IDeleteRangeMoveLeftCommandParams>);
+            //     break;
+            // case SetWorksheetNameCommand.id:
+            //     result = this._handleSetWorksheetName(command as ICommandInfo<ISetWorksheetNameCommandParams>);
+            //     break;
+        }
+
+        this._commandService.executeCommand(SetFormulaDataMutation.id, {
+            formulaData,
+        });
+        this._commandService.executeCommand(SetArrayFormulaDataMutation.id, {
+            arrayFormulaRange,
+            arrayFormulaCellData,
+        });
     }
 
     private _handleSetRangeValuesMutation(params: ISetRangeValuesMutationParams, options?: IExecutionOptions) {
@@ -325,15 +405,17 @@ export class UpdateFormulaController extends Disposable {
             const arrayFormulaRange = this._formulaDataModel.getArrayFormulaRange();
             const arrayFormulaCellData = this._formulaDataModel.getArrayFormulaCellData();
 
-            let offsetArrayFormulaRange = offsetFormula(arrayFormulaRange, command, unitId, sheetId, selections);
-            offsetArrayFormulaRange = offsetArrayFormula(offsetArrayFormulaRange, unitId, sheetId);
+            // First use arrayFormulaCellData and the original arrayFormulaRange to calculate the offset of arrayFormulaCellData, otherwise the offset of arrayFormulaRange will be inaccurate.
             const offsetArrayFormulaCellData = offsetFormula(
                 arrayFormulaCellData,
                 command,
                 unitId,
                 sheetId,
-                selections
+                selections,
+                arrayFormulaRange
             );
+            let offsetArrayFormulaRange = offsetFormula(arrayFormulaRange, command, unitId, sheetId, selections);
+            offsetArrayFormulaRange = offsetArrayFormula(offsetArrayFormulaRange, command, unitId, sheetId);
 
             // Synchronous to the worker thread
             this._commandService.executeCommand(

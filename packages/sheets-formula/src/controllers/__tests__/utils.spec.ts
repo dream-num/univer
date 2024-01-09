@@ -38,13 +38,13 @@ import {
 } from '@univerjs/sheets';
 import { describe, expect, it } from 'vitest';
 
-import { offsetArrayFormula, offsetFormula, removeFormulaData } from '../utils';
+import { offsetArrayFormula, offsetFormula, removeFormulaData } from '../utils/offset-formula-data';
 
 const cellToRange = (row: number, col: number) =>
     ({ startRow: row, endRow: row, startColumn: col, endColumn: col }) as IRange;
 describe('utils test', () => {
     describe('function offsetFormula', () => {
-        it('move range', () => {
+        it('move range normal formula', () => {
             const unitId = 'workbook-01';
             const sheetId = 'sheet-0011';
             const formulaData = {
@@ -88,6 +88,187 @@ describe('utils test', () => {
                             '3': {
                                 f: '=SUM(A5)',
                             },
+                        },
+                    },
+                },
+            });
+        });
+        it('move range array formula with first cell', () => {
+            const unitId = 'workbook-01';
+            const sheetId = 'sheet-0011';
+            const arrayFormulaCellData = {
+                [unitId]: {
+                    [sheetId]: {
+                        '0': {
+                            '3': {
+                                v: '1',
+                            },
+                        },
+                        '1': {
+                            '3': {
+                                v: '2',
+                            },
+                        },
+                        '2': {
+                            '3': {
+                                v: '3',
+                            },
+                        },
+                    },
+                },
+            };
+            const arrayFormulaRange = {
+                [unitId]: {
+                    [sheetId]: {
+                        '0': {
+                            '3': {
+                                startRow: 0,
+                                startColumn: 3,
+                                endRow: 2,
+                                endColumn: 3,
+                            },
+                        },
+                    },
+                },
+            };
+
+            const command = {
+                id: MoveRangeCommand.id,
+                params: {
+                    fromRange: {
+                        startRow: 0,
+                        startColumn: 3,
+                        endRow: 0,
+                        endColumn: 3,
+                    },
+                    toRange: {
+                        startRow: 3,
+                        startColumn: 3,
+                        endRow: 3,
+                        endColumn: 3,
+                    },
+                },
+            };
+
+            const newFormulaData = offsetFormula(
+                arrayFormulaCellData,
+                command,
+                unitId,
+                sheetId,
+                null,
+                arrayFormulaRange
+            );
+            expect(newFormulaData).toStrictEqual({
+                [unitId]: {
+                    [sheetId]: {
+                        '0': {
+                            '3': null,
+                        },
+                        '1': {
+                            '3': null,
+                        },
+                        '2': {
+                            '3': null,
+                        },
+                        '3': {
+                            '3': {
+                                v: '1',
+                            },
+                        },
+                    },
+                },
+            });
+        });
+        it('move range array formula with not first cell', () => {
+            const unitId = 'workbook-01';
+            const sheetId = 'sheet-0011';
+            const arrayFormulaCellData = {
+                [unitId]: {
+                    [sheetId]: {
+                        '0': {
+                            '3': {
+                                v: '1',
+                            },
+                        },
+                        '1': {
+                            '3': {
+                                v: '2',
+                            },
+                        },
+                        '2': {
+                            '3': {
+                                v: '3',
+                            },
+                        },
+                        '3': {
+                            '3': {
+                                v: '4',
+                            },
+                        },
+                    },
+                },
+            };
+            const arrayFormulaRange = {
+                [unitId]: {
+                    [sheetId]: {
+                        '0': {
+                            '3': {
+                                startRow: 0,
+                                startColumn: 3,
+                                endRow: 2,
+                                endColumn: 3,
+                            },
+                        },
+                    },
+                },
+            };
+
+            const command = {
+                id: MoveRangeCommand.id,
+                params: {
+                    fromRange: {
+                        startRow: 1,
+                        startColumn: 3,
+                        endRow: 1,
+                        endColumn: 3,
+                    },
+                    toRange: {
+                        startRow: 3,
+                        startColumn: 3,
+                        endRow: 3,
+                        endColumn: 3,
+                    },
+                },
+            };
+
+            const newFormulaData = offsetFormula(
+                arrayFormulaCellData,
+                command,
+                unitId,
+                sheetId,
+                null,
+                arrayFormulaRange
+            );
+            expect(newFormulaData).toStrictEqual({
+                [unitId]: {
+                    [sheetId]: {
+                        '0': {
+                            '3': {
+                                v: '1',
+                            },
+                        },
+                        '1': {
+                            '3': {
+                                v: '2',
+                            },
+                        },
+                        '2': {
+                            '3': {
+                                v: '3',
+                            },
+                        },
+                        '3': {
+                            '3': null,
                         },
                     },
                 },
@@ -675,7 +856,22 @@ describe('utils test', () => {
                 },
             };
 
-            const newArrayFormulaData = offsetArrayFormula(arrayFormulaData, unitId, sheetId);
+            const command = {
+                id: DeleteRangeMoveLeftCommand.id,
+                params: {
+                    ranges: [
+                        {
+                            startRow: 0,
+                            startColumn: 0,
+                            endRow: 0,
+                            endColumn: 0,
+                            rangeType: 0,
+                        },
+                    ],
+                },
+            };
+
+            const newArrayFormulaData = offsetArrayFormula(arrayFormulaData, command, unitId, sheetId);
             expect(newArrayFormulaData).toStrictEqual({
                 [unitId]: {
                     [sheetId]: {

@@ -194,7 +194,7 @@ export default {
         },
     },
     HLOOKUP: {
-        description: '查找数组的首行，并返回指定单元格的值',
+        description: '在表格的首行或数值数组中搜索值，然后返回表格或数组中指定行的所在列中的值。',
         abstract: '查找数组的首行，并返回指定单元格的值',
         links: [
             {
@@ -203,8 +203,22 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            lookupValue: {
+                name: '查找值',
+                detail: '要查找的值。 要查找的值必须位于 table_array 参数中指定的单元格区域的第一行中。',
+            },
+            tableArray: {
+                name: '范围',
+                detail: 'VLOOKUP 在其中搜索 lookup_value 和返回值的单元格区域。在其中查找数据的信息表。 使用对区域或区域名称的引用。',
+            },
+            rowIndexNum: {
+                name: '行号',
+                detail: '行号table_array匹配值将返回的行号（row_index_num为 1，则返回 table_array 中的第一行值，row_index_num 2 返回 table_array 中的第二行值）。',
+            },
+            rangeLookup: {
+                name: '查询类型',
+                detail: '指定希望查找精确匹配值还是近似匹配值：默认近似匹配 - 1/TRUE, 完全匹配 - 0/FALSE',
+            },
         },
     },
     HSTACK: {
@@ -288,12 +302,12 @@ export default {
         ],
         functionParameter: {
             lookupValue: {
-                name: 'lookup_value',
+                name: '查找值',
                 detail: '在第一个向量中搜索的值。可以是数字、文本、逻辑值、名称或对值的引用。',
             },
-            lookupVectorOrArray: { name: 'lookup_vectorOrArray', detail: '只包含一行或一列的区域。' },
+            lookupVectorOrArray: { name: '查询范围或数组', detail: '只包含一行或一列的区域。' },
             resultVector: {
-                name: 'result_vector',
+                name: '结果范围',
                 detail: ' 只包含一行或一列的区域。参数必须与 lookup_vector 参数大小相同。 其大小必须相同。',
             },
         },
@@ -478,19 +492,19 @@ export default {
         ],
         functionParameter: {
             lookupValue: {
-                name: 'lookup_value',
+                name: '查找值',
                 detail: '要查找的值。 要查找的值必须位于 table_array 参数中指定的单元格区域的第一列中。',
             },
             tableArray: {
-                name: 'table_array',
+                name: '范围',
                 detail: 'VLOOKUP 在其中搜索 lookup_value 和返回值的单元格区域。 可以使用命名区域或表，并且可以在参数中使用名称，而不是单元格引用。 ',
             },
             colIndexNum: {
-                name: 'col_index_num',
+                name: '行号',
                 detail: '其中包含返回值的单元格的编号（table_array 最左侧单元格为 1 开始编号）。',
             },
             rangeLookup: {
-                name: 'range_lookup',
+                name: '查询类型',
                 detail: '一个逻辑值，该值指定希望 VLOOKUP 查找近似匹配还是精确匹配：近似匹配 - 1/TRUE, 完全匹配 - 0/FALSE',
             },
         },
@@ -539,9 +553,8 @@ export default {
     },
     XLOOKUP: {
         description:
-            '搜索区域或数组，并返回与之找到的第一个匹配项对应的项。 如果不存在匹配项，则 XLOOKUP 可返回最接近（近似值）的匹配项。&nbsp;',
-        abstract:
-            '搜索区域或数组，并返回与之找到的第一个匹配项对应的项。 如果不存在匹配项，则 XLOOKUP 可返回最接近（近似值）的匹配项。&nbsp;',
+            '函数搜索区域或数组，然后返回与它找到的第一个匹配项对应的项。 如果不存在匹配项，则 XLOOKUP 可以返回最接近的 (近似) 匹配项',
+        abstract: '搜索区域或数组，并返回与之找到的第一个匹配项对应的项。',
         links: [
             {
                 title: '教学',
@@ -549,8 +562,24 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            lookupValue: {
+                name: '查找值',
+                detail: '要搜索的值，如果省略，XLOOKUP 将返回在 lookup_array 中找到的空白单元格。',
+            },
+            lookupArray: { name: '搜索区域', detail: '要搜索的数组或区域' },
+            returnArray: { name: '返回区域', detail: '要返回的数组或区域' },
+            ifNotFound: {
+                name: '[默认显示值]',
+                detail: '如果未找到有效的匹配项，则返回你提供的 [if_not_found] 文本，否则返回#N/A ',
+            },
+            matchMode: {
+                name: '[匹配类型]',
+                detail: `指定匹配类型： 0 - 完全匹配。 如果未找到，则返回 #N/A。默认选项。-1 - 完全匹配。 如果没有找到，则返回下一个较小的项。1 - 完全匹配。 如果没有找到，则返回下一个较大的项。 2 - 通配符匹配，其中 *, ? 和 ~ 有特殊含义。`,
+            },
+            searchMode: {
+                name: '[搜索模式]',
+                detail: `指定要使用的搜索模式：1 从第一项开始执行搜索，默认选项。-1 从最后一项开始执行反向搜索。2 执行依赖于 lookup_array 按升序排序的二进制搜索, -2执行依赖于 lookup_array 按降序排序的二进制搜索`,
+            },
         },
     },
     XMATCH: {

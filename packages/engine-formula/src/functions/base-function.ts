@@ -94,7 +94,7 @@ export class BaseFunction extends Disposable {
      * @param indexNum
      * @returns
      */
-    getIndexNumValue(indexNum: BaseValueObject) {
+    getIndexNumValue(indexNum: BaseValueObject, defaultValue = 1) {
         if (indexNum.isArray()) {
             indexNum = (indexNum as ArrayValueObject).getFirstCell();
         }
@@ -105,7 +105,7 @@ export class BaseFunction extends Disposable {
                 return new ErrorValueObject(ErrorType.VALUE);
             }
 
-            return 1;
+            return defaultValue;
         }
         if (indexNum.isString()) {
             const colIndexNumV = Number(indexNum.getValue() as string);

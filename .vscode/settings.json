@@ -32,6 +32,7 @@
         "hdmx",
         "Heiti",
         "Hiragino",
+        "Hlookup",
         "ilvl",
         "IRPC",
         "Jamo",
@@ -79,7 +80,8 @@
         "vlookup",
         "wendellhu",
         "Xingkai",
-        "Xinwei"
+        "Xinwei",
+        "Xlookup"
     ],
     "vsicons.presets.angular": false,
 

@@ -116,6 +116,13 @@ export class ArrayValueObject extends BaseValueObject {
 
     private _flattenCache: Nullable<ArrayValueObject>;
 
+    private _flattenPosition: Nullable<{
+        stringArray: BaseValueObject[];
+        stringPosition: number[];
+        numberArray: BaseValueObject[];
+        numberPosition: number[];
+    }>;
+
     constructor(rawValue: string | IArrayValueObject) {
         if (typeof rawValue === 'string') {
             super(rawValue as string);
@@ -331,6 +338,54 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     /**
+     * Flatten a 2D array.
+     * In Excel, errors and blank cells are ignored, which results in a binary search that cannot strictly adhere to the number of cells.
+     */
+    flattenPosition() {
+        if (this._flattenPosition != null) {
+            return this._flattenPosition;
+        }
+
+        const stringValue: BaseValueObject[] = [];
+        const numberValue: BaseValueObject[] = [];
+        const stringPosition: number[] = [];
+        const numberPosition: number[] = [];
+        let index = 0;
+        for (let r = 0; r < this._rowCount; r++) {
+            for (let c = 0; c < this._columnCount; c++) {
+                const value = this.get(r, c);
+
+                if (value.isError() || value.isNull()) {
+                    index++;
+                    continue;
+                }
+
+                if (value.isString()) {
+                    stringValue.push(value);
+                    stringPosition.push(index++);
+                } else {
+                    numberValue.push(value);
+                    numberPosition.push(index++);
+                }
+            }
+        }
+
+        // const stringArray = this._createNewArray(stringValue, 1, stringValue[0].length);
+        // const numberArray = this._createNewArray(numberValue, 1, numberValue[0].length);
+
+        const result = {
+            stringArray: stringValue,
+            numberArray: numberValue,
+            stringPosition,
+            numberPosition,
+        };
+
+        this._flattenPosition = result;
+
+        return result;
+    }
+
+    /**
      * I'm looking to perform slicing operations on 2D arrays, similar to the functionality provided by NumPy.
      * https://numpy.org/doc/stable/user/basics.indexing.html
      * @rowParam start:stop:step
@@ -440,30 +495,56 @@ export class ArrayValueObject extends BaseValueObject {
             return;
         }
 
-        const flattenArrayValue = this.flatten();
-        const valueMatrix = flattenArrayValue.getArrayValue();
-        const valueArray = valueMatrix[0];
+        const { stringArray, stringPosition, numberArray, numberPosition } = this.flattenPosition();
 
+        if (valueObject.isString()) {
+            return this._binarySearch(valueObject, stringArray, stringPosition, searchType);
+        }
+
+        let result = this._binarySearch(valueObject, numberArray, numberPosition, searchType);
+        if (result == null) {
+            result = this._binarySearch(valueObject, stringArray, stringPosition, searchType);
+        }
+        return result;
+
+        // const stringMatrix = stringArray.getArrayValue();
+        // const valueStringArray = stringMatrix[0];
+
+        // const numberMatrix = numberArray.getArrayValue();
+        // const valueNumberArray = numberMatrix[0];
+    }
+
+    private _binarySearch(
+        valueObject: BaseValueObject,
+        searchArray: BaseValueObject[],
+        positionArray: number[],
+        searchType: ArrayBinarySearchType = ArrayBinarySearchType.MIN
+    ) {
         const compareFunc = getCompare();
 
         const value = valueObject.getValue().toString();
 
         let start = 0;
-        let end = valueArray.length - 1;
+        let end = searchArray.length - 1;
 
         let lastValue = null;
 
         while (start <= end) {
             const middle = Math.floor((start + end) / 2);
-            const compareTo = valueArray[middle];
+            const compareTo = searchArray[middle];
 
-            const compareToValue = compareTo.getValue();
+            let compare = 0;
+            if (compareTo.isNull()) {
+                compare = 1;
+            } else {
+                const compareToValue = compareTo.getValue();
 
-            const compare = compareFunc(compareToValue.toString(), value);
+                compare = compareFunc(compareToValue.toString(), value);
+            }
 
             if (compare === 0) {
                 // Found the value, return the value from the returnColumn
-                return middle;
+                return positionArray[middle];
             }
 
             if (compare === -1) {
@@ -483,7 +564,10 @@ export class ArrayValueObject extends BaseValueObject {
         }
 
         // Value not found
-        return lastValue;
+        if (lastValue == null) {
+            return;
+        }
+        return positionArray[lastValue];
     }
 
     override sum() {
@@ -833,7 +917,9 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     override median(): BaseValueObject {
-        const allValue = this.flatten();
+        const numberArray = this.flattenPosition().numberArray;
+
+        const allValue = this._createNewArray([numberArray], 1, numberArray.length);
 
         const count = allValue.getColumnCount();
 

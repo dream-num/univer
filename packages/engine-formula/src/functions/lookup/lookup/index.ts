@@ -84,22 +84,28 @@ export class Lookup extends BaseFunction {
 
         let searchArray: Nullable<ArrayValueObject>;
 
+        let resultArray: Nullable<ArrayValueObject>;
+
         if (columnCount > rowCount) {
             searchArray = (lookupArray as ArrayValueObject).slice([0, 1]);
+
+            resultArray = (lookupArray as ArrayValueObject).slice([rowCount - 1, rowCount]);
         } else {
             searchArray = (lookupArray as ArrayValueObject).slice(undefined, [0, 1]);
+
+            resultArray = (lookupArray as ArrayValueObject).slice(undefined, [columnCount - 1, columnCount]);
         }
 
-        if (searchArray == null) {
+        if (searchArray == null || resultArray == null) {
             return new ErrorValueObject(ErrorType.VALUE);
         }
 
         if (lookupValue.isArray()) {
             return lookupValue.map((value) => {
-                return this.binarySearch(value, searchArray!, searchArray!);
+                return this.binarySearch(value, searchArray!, resultArray!);
             });
         }
 
-        return this.binarySearch(lookupValue, searchArray, searchArray);
+        return this.binarySearch(lookupValue, searchArray, resultArray);
     }
 }

@@ -215,8 +215,6 @@ export class TextRange {
 
         const { docsLeft, docsTop } = documentOffsetConfig;
 
-        // console.log(this._scene, this._docSkeleton, documentOffsetConfig);
-
         const convertor = new NodePositionConvertToCursor(documentOffsetConfig, _docSkeleton);
 
         if (this._isCollapsed()) {

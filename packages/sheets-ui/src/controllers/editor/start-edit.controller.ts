@@ -363,7 +363,7 @@ export class StartEditController extends Disposable {
             physicHeight = clientHeight;
 
             if (scrollBar == null) {
-                viewportMain && new ScrollBar(viewportMain, { enableHorizontal: false });
+                viewportMain && new ScrollBar(viewportMain, { enableHorizontal: false, barSize: 8 });
             } else {
                 viewportMain?.resetSizeAndScrollBar();
             }

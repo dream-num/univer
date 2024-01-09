@@ -304,7 +304,7 @@ export class StartEditController extends Disposable {
         let editorWidth = endX - startX;
 
         if (editorWidth < size.actualWidth * scaleX + EDITOR_INPUT_SELF_EXTEND_GAP * scaleX) {
-            editorWidth = size.actualWidth * scaleX + EDITOR_INPUT_SELF_EXTEND_GAP;
+            editorWidth = size.actualWidth * scaleX + EDITOR_INPUT_SELF_EXTEND_GAP * scaleX;
         }
 
         // Scaling is handled by the renderer, so the skeleton only accepts the original width and height, which need to be divided by the magnification factor.

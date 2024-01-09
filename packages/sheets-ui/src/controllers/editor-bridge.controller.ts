@@ -77,7 +77,12 @@ export class EditorBridgeController extends RxDisposable {
     }
 
     private _initSelectionChangeListener() {
-        merge(this._selectionManagerService.selectionMoveEnd$, this._selectionManagerService.selectionMoveStart$)
+        merge(
+            this._selectionManagerService.selectionMoveEnd$,
+            this._selectionManagerService.selectionMoveStart$,
+            // The cell size will change after edit by zen-editor, so need to refresh state(endY AND endX).
+            this._editorBridgeService.refreshState$
+        )
             .pipe(takeUntil(this.dispose$))
             .subscribe((params) => this._handleSelectionListener(params));
     }

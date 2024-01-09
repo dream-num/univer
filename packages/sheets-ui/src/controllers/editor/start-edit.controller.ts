@@ -296,7 +296,7 @@ export class StartEditController extends Disposable {
             };
         }
 
-        documentDataModel?.updateDocumentDataPageSize(clientWidth - startX - canvasOffset.left);
+        documentDataModel?.updateDocumentDataPageSize((clientWidth - startX - canvasOffset.left) / scaleX);
         documentSkeleton.calculate();
 
         const size = documentSkeleton.getActualSize();

@@ -476,11 +476,159 @@ describe('Utils offset formula data test', () => {
                                 f: '=SUM(A1)',
                             },
                         },
-                        // '1': {},
                         '2': {
                             '3': {
                                 f: '=SUM(A3)',
                             },
+                        },
+                    },
+                },
+            });
+        });
+        it('insert row, handle arrayFormulaCellData, with arrayFormulaRange and refRanges', () => {
+            const unitId = 'workbook-01';
+            const sheetId = 'sheet-0011';
+            const arrayFormulaCellData = {
+                [unitId]: {
+                    [sheetId]: {
+                        '4': {
+                            '0': {
+                                v: 1,
+                                t: 2,
+                            },
+                        },
+                        '5': {
+                            '0': {
+                                v: 2,
+                                t: 2,
+                            },
+                        },
+                        '6': {
+                            '0': {
+                                v: 3,
+                                t: 2,
+                            },
+                        },
+                    },
+                },
+            };
+
+            const command = {
+                id: InsertRowCommand.id,
+                params: {
+                    unitId,
+                    subUnitId: sheetId,
+                    direction: 0,
+                    range: {
+                        startRow: 3,
+                        endRow: 3,
+                        startColumn: 0,
+                        endColumn: 19,
+                    },
+                    cellValue: {},
+                },
+            };
+
+            const arrayFormulaRange = {
+                [unitId]: {
+                    [sheetId]: {
+                        '4': {
+                            '0': {
+                                startRow: 4,
+                                startColumn: 0,
+                                endRow: 6,
+                                endColumn: 0,
+                            },
+                        },
+                    },
+                },
+            };
+
+            const refRanges = [
+                {
+                    row: 4,
+                    column: 0,
+                    range: {
+                        startRow: 0,
+                        startColumn: 0,
+                        endRow: 2,
+                        endColumn: 0,
+                        startAbsoluteRefType: 0,
+                        endAbsoluteRefType: 0,
+                    },
+                },
+            ];
+
+            const newFormulaData = offsetFormula(
+                arrayFormulaCellData,
+                command,
+                unitId,
+                sheetId,
+                null,
+                arrayFormulaRange,
+                refRanges
+            );
+            expect(newFormulaData).toStrictEqual({
+                [unitId]: {
+                    [sheetId]: {
+                        '4': {
+                            '0': null,
+                        },
+                        '5': {
+                            '0': null,
+                        },
+                        '6': {
+                            '0': null,
+                        },
+                    },
+                },
+            });
+        });
+        it('insert row, handle arrayFormulaRange', () => {
+            const unitId = 'workbook-01';
+            const sheetId = 'sheet-0011';
+            const arrayFormulaRange = {
+                [unitId]: {
+                    [sheetId]: {
+                        '4': {
+                            '0': {
+                                startRow: 4,
+                                startColumn: 0,
+                                endRow: 6,
+                                endColumn: 0,
+                            },
+                        },
+                    },
+                },
+            };
+
+            const command = {
+                id: InsertRowCommand.id,
+                params: {
+                    unitId,
+                    subUnitId: sheetId,
+                    direction: 0,
+                    range: {
+                        startRow: 3,
+                        endRow: 3,
+                        startColumn: 0,
+                        endColumn: 19,
+                    },
+                    cellValue: {},
+                },
+            };
+            const newFormulaData = offsetFormula(arrayFormulaRange, command, unitId, sheetId, null, arrayFormulaRange);
+            expect(newFormulaData).toStrictEqual({
+                [unitId]: {
+                    [sheetId]: {
+                        '4': {
+                            '0': null,
+                        },
+                        '5': {
+                            '0': null,
+                        },
+                        '6': {
+                            '0': null,
                         },
                     },
                 },
@@ -868,6 +1016,137 @@ describe('Utils offset formula data test', () => {
                             '2': {
                                 f: '=SUM(D2)',
                             },
+                        },
+                    },
+                },
+            });
+        });
+        it('remove column, handle arrayFormulaCellData, with arrayFormulaRange and refRanges', () => {
+            const unitId = 'workbook-01';
+            const sheetId = 'sheet-0011';
+            const arrayFormulaCellData = {
+                [unitId]: {
+                    [sheetId]: {
+                        '0': {
+                            '4': {
+                                v: 1,
+                                t: 2,
+                            },
+                            '5': {
+                                v: 2,
+                                t: 2,
+                            },
+                            '6': {
+                                v: 3,
+                                t: 2,
+                            },
+                        },
+                    },
+                },
+            };
+
+            const command = {
+                id: RemoveColCommand.id,
+                params: {
+                    range: {
+                        startRow: 0,
+                        startColumn: 1,
+                        endRow: 999,
+                        endColumn: 1,
+                        rangeType: 2,
+                    },
+                },
+            };
+
+            const arrayFormulaRange = {
+                [unitId]: {
+                    [sheetId]: {
+                        '0': {
+                            '4': {
+                                startRow: 0,
+                                startColumn: 4,
+                                endRow: 0,
+                                endColumn: 6,
+                            },
+                        },
+                    },
+                },
+            };
+
+            const refRanges = [
+                {
+                    row: 0,
+                    column: 4,
+                    range: {
+                        startRow: 0,
+                        startColumn: 0,
+                        endRow: 0,
+                        endColumn: 2,
+                        startAbsoluteRefType: 0,
+                        endAbsoluteRefType: 0,
+                    },
+                },
+            ];
+
+            const newFormulaData = offsetFormula(
+                arrayFormulaCellData,
+                command,
+                unitId,
+                sheetId,
+                null,
+                arrayFormulaRange,
+                refRanges
+            );
+            expect(newFormulaData).toStrictEqual({
+                [unitId]: {
+                    [sheetId]: {
+                        '0': {
+                            '4': null,
+                            '5': null,
+                            '6': null,
+                        },
+                    },
+                },
+            });
+        });
+        it('remove column, handle arrayFormulaRange', () => {
+            const unitId = 'workbook-01';
+            const sheetId = 'sheet-0011';
+            const arrayFormulaRange = {
+                [unitId]: {
+                    [sheetId]: {
+                        '0': {
+                            '4': {
+                                startRow: 0,
+                                startColumn: 4,
+                                endRow: 0,
+                                endColumn: 6,
+                            },
+                        },
+                    },
+                },
+            };
+
+            const command = {
+                id: RemoveColCommand.id,
+                params: {
+                    range: {
+                        startRow: 0,
+                        startColumn: 1,
+                        endRow: 999,
+                        endColumn: 1,
+                        rangeType: 2,
+                    },
+                },
+            };
+            const newFormulaData = offsetFormula(arrayFormulaRange, command, unitId, sheetId, null, arrayFormulaRange);
+            expect(newFormulaData).toStrictEqual({
+                [unitId]: {
+                    [sheetId]: {
+                        '0': {
+                            '4': null,
+                            '5': null,
+                            '6': null,
                         },
                     },
                 },

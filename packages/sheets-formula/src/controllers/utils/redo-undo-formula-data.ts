@@ -73,13 +73,17 @@ function setFormulaData(
     unitId: string,
     subUnitId: string
 ) {
+    if (!formulaData[unitId]) {
+        formulaData[unitId] = {};
+    }
+
     valueMatrix.forValue((r, c, newVal) => {
-        if (!formulaData[unitId][subUnitId][r]) {
-            formulaData[unitId][subUnitId][r] = {};
+        if (!formulaData[unitId]![subUnitId][r]) {
+            formulaData[unitId]![subUnitId][r] = {};
         }
 
         if (!newVal) {
-            delete formulaData[unitId][subUnitId][r][c];
+            delete formulaData[unitId]![subUnitId][r][c];
             return;
         }
 
@@ -90,21 +94,21 @@ function setFormulaData(
         const checkFormulaId = isFormulaId(formulaId);
 
         if (checkFormulaString && checkFormulaId) {
-            formulaData[unitId][subUnitId][r][c] = {
+            formulaData[unitId]![subUnitId][r][c] = {
                 f: formulaString,
                 si: formulaId,
             };
         } else if (checkFormulaString && !checkFormulaId) {
-            formulaData[unitId][subUnitId][r][c] = {
+            formulaData[unitId]![subUnitId][r][c] = {
                 f: formulaString,
             };
         } else if (!checkFormulaString && checkFormulaId) {
-            formulaData[unitId][subUnitId][r][c] = {
+            formulaData[unitId]![subUnitId][r][c] = {
                 f: '',
                 si: formulaId,
             };
         } else if (!checkFormulaString && !checkFormulaId) {
-            delete formulaData[unitId][subUnitId][r][c];
+            delete formulaData[unitId]![subUnitId][r][c];
         }
     });
 }
@@ -118,10 +122,10 @@ function setArrayFormulaData(
     fromSubUnitId: string,
     toSubUnitId: string
 ) {
-    const fromArrayFormulaCellDataMatrix = new ObjectMatrix(arrayFormulaCellData[unitId][fromSubUnitId]);
-    const toArrayFormulaCellDataMatrix = new ObjectMatrix(arrayFormulaCellData[unitId][toSubUnitId]);
-    const fromArrayFormulaRangeMatrix = new ObjectMatrix(arrayFormulaRange[unitId][fromSubUnitId]);
-    const toArrayFormulaRangeMatrix = new ObjectMatrix(arrayFormulaRange[unitId][toSubUnitId]);
+    const fromArrayFormulaCellDataMatrix = new ObjectMatrix(arrayFormulaCellData?.[unitId]?.[fromSubUnitId] ?? {});
+    const toArrayFormulaCellDataMatrix = new ObjectMatrix(arrayFormulaCellData?.[unitId]?.[toSubUnitId] ?? {});
+    const fromArrayFormulaRangeMatrix = new ObjectMatrix(arrayFormulaRange?.[unitId]?.[fromSubUnitId] ?? {});
+    const toArrayFormulaRangeMatrix = new ObjectMatrix(arrayFormulaRange?.[unitId]?.[toSubUnitId] ?? {});
 
     // We need set toValueMatrix value to fromValueMatrix value
     const fromRange = fromValueMatrix.getDataRange();

@@ -120,7 +120,7 @@ export class USMToHtmlService {
         range: IRange,
         hooks: ISheetClipboardHook[]
     ): string {
-        const { startColumn, endColumn, startRow, endRow } = range;
+        const { startColumn, endColumn } = range;
         const colStyles = getColStyle(getArrayFromTo(startColumn, endColumn), hooks);
         // row styles and table contents
         const rowContents: string[] = [];

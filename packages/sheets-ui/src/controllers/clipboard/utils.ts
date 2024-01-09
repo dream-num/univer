@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IMutationInfo, IRange, Nullable } from '@univerjs/core';
+import type { ICellData, IDocumentBody, IMutationInfo, IParagraph, IRange, Nullable } from '@univerjs/core';
 import { IUniverInstanceService, ObjectMatrix, Range, Rectangle } from '@univerjs/core';
 import type {
     IAddWorksheetMergeMutationParams,
@@ -521,4 +521,25 @@ export function getClearAndSetMergeMutations(
     });
 
     return { undos: undoMutationsInfo, redos: redoMutationsInfo };
+}
+
+export function generateBody(text: string): IDocumentBody {
+    // Convert all \n to \r, because we use \r to indicate paragraph break.
+    let dataStream = text.replace(/(\r\n|\n)/g, '\r');
+    if (!dataStream.endsWith('\r\n')) {
+        dataStream += '\r\n';
+    }
+    const paragraphs: IParagraph[] = [];
+
+    for (let i = 0; i < dataStream.length; i++) {
+        if (dataStream[i] === '\r') {
+            paragraphs.push({ startIndex: i });
+        }
+    }
+
+    return {
+        dataStream,
+        paragraphs,
+        sectionBreaks: [{ startIndex: dataStream.indexOf('\n') }],
+    };
 }

@@ -68,8 +68,16 @@ describe('Test indirect', () => {
                 [testBed.unitId]: testBed.sheetData,
             },
         });
+        const sheetItem = testBed.sheetData[testBed.sheetId];
 
-        formulaRuntimeService.setCurrent(0, 0, testBed.sheetId, testBed.unitId);
+        formulaRuntimeService.setCurrent(
+            0,
+            0,
+            sheetItem.rowCount,
+            sheetItem.columnCount,
+            testBed.sheetId,
+            testBed.unitId
+        );
 
         functionService.registerExecutors(new Sum(FUNCTION_NAMES_MATH.SUM), new Plus(FUNCTION_NAMES_META.PLUS));
     });

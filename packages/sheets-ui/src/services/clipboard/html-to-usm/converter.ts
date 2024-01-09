@@ -18,6 +18,7 @@ import type { IDocumentBody, IDocumentData, ITextRun, ITextStyle, Nullable } fro
 import { ObjectMatrix } from '@univerjs/core';
 import { handleStringToStyle } from '@univerjs/ui';
 
+import { generateBody } from '../../../controllers/clipboard/utils';
 import type { ISheetSkeletonManagerParam } from '../../sheet-skeleton-manager.service';
 import type {
     ICellDataWithSpanInfo,
@@ -221,12 +222,26 @@ export class HtmlToUSMService {
                 // TODO@Dushusir Temporarily use handleStringToStyle. After all replication and paste function is completed, fix the handleStringToStyle method
                 const style = handleStringToStyle(undefined, value.properties?.style);
 
-                valueMatrix.setValue(row, col, {
-                    v: value.content,
-                    s: style,
-                    rowSpan: value.rowSpan,
-                    colSpan: value.colSpan,
-                });
+                if (value.content.includes('\n')) {
+                    const body = generateBody(value.content);
+                    const p = this._generateDocumentDataModelSnapshot({
+                        body,
+                    });
+                    valueMatrix.setValue(row, col, {
+                        v: value.content,
+                        p,
+                        s: style,
+                        rowSpan: value.rowSpan,
+                        colSpan: value.colSpan,
+                    });
+                } else {
+                    valueMatrix.setValue(row, col, {
+                        v: value.content,
+                        s: style,
+                        rowSpan: value.rowSpan,
+                        colSpan: value.colSpan,
+                    });
+                }
             });
         return {
             rowProperties: [],

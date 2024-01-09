@@ -361,13 +361,37 @@ export class Workbook extends Disposable {
         this._snapshot = config;
     }
 
+    /**
+     * Check if sheet name is unique
+     * @param name sheet name
+     * @returns True if sheet name is unique
+     */
     checkSheetName(name: string): boolean {
         const sheetsName = this.getSheetsName();
         return sheetsName.includes(name);
     }
 
-    uniqueSheetName(name: string = 'sheet1'): string {
+    /**
+     *  Check whether the sheet name is unique and generate a new unique sheet name
+     * @param name sheet name
+     * @returns Unique sheet name
+     */
+    uniqueSheetName(name: string = 'Sheet1'): string {
         let output = name;
+        while (this.checkSheetName(output)) {
+            output = name + this._count;
+            this._count++;
+        }
+        return output;
+    }
+
+    /**
+     * Automatically generate new sheet name
+     * @param name sheet name
+     * @returns New sheet name
+     */
+    generateNewSheetName(name: string) {
+        let output = name + this._count;
         while (this.checkSheetName(output)) {
             output = name + this._count;
             this._count++;

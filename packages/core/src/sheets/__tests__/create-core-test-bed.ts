@@ -40,6 +40,7 @@ const TEST_WORKBOOK_DATA: IWorkbookData = {
                     },
                 },
             },
+            name: 'Sheet-001',
         },
     },
     locale: LocaleType.ZH_CN,

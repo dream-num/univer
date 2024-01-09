@@ -85,7 +85,7 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
                     color: !currentSelected && color ? getTextColor(color) : '',
                     boxShadow:
                         currentSelected && color
-                            ? `0px 0px 12px rgba(0, 0, 0, 0.2), inset 0px -2px 0px 0px ${color}`
+                            ? `0px 0px 8px rgba(0, 0, 0, 0.08), inset 0px -2px 0px 0px ${color}`
                             : '',
                 }}
             >

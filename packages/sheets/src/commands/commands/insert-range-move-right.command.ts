@@ -111,54 +111,32 @@ export const InsertRangeMoveRightCommand: ICommand = {
 
         undoMutations.push({ id: DeleteRangeMutation.id, params: deleteRangeMutationParams });
 
-        // 2. insert column
-        // Only required when the last column has a value, and the column width is set to the column width of the last column
-        let hasValueInLastColumn = false;
-        let lastColumnWidth = 0;
-        const lastColumnIndex = worksheet.getMaxColumns() - 1;
-        const { startRow, endRow, startColumn, endColumn } = range;
+        const { startColumn, endColumn } = range;
+        const anchorCol = startColumn - 1;
+        const width = worksheet.getColumnWidth(anchorCol);
 
-        for (let row = startRow; row <= endRow; row++) {
-            const lastCell = worksheet.getCell(row, lastColumnIndex);
-            const lastCellValue = lastCell?.v;
-            if (lastCellValue && lastCellValue !== '') {
-                hasValueInLastColumn = true;
-                lastColumnWidth = worksheet.getColumnWidth(lastColumnIndex);
-                break;
-            }
-        }
+        const insertColParams: IInsertColMutationParams = {
+            unitId,
+            subUnitId,
+            range,
+            colInfo: new Array(endColumn - startColumn + 1).fill(undefined).map(() => ({
+                w: width,
+                hd: BooleanNumber.FALSE,
+            })),
+        };
 
-        // There may be overlap and deduplication is required
-        const columnsCount = endColumn - startColumn + 1;
-        if (hasValueInLastColumn) {
-            const lastColumnRange = {
-                startRow: range.startRow,
-                endRow: range.endRow,
-                startColumn: lastColumnIndex,
-                endColumn: lastColumnIndex,
-            };
-            const insertColParams: IInsertColMutationParams = {
-                unitId,
-                subUnitId,
-                range: lastColumnRange,
-                colInfo: new Array(columnsCount).fill(undefined).map(() => ({
-                    w: lastColumnWidth,
-                    hd: BooleanNumber.FALSE,
-                })),
-            };
+        redoMutations.push({
+            id: InsertColMutation.id,
+            params: insertColParams,
+        });
 
-            redoMutations.push({
-                id: InsertColMutation.id,
-                params: insertColParams,
-            });
+        const undoColInsertionParams: IRemoveColMutationParams = InsertColMutationUndoFactory(
+            accessor,
+            insertColParams
+        );
 
-            const undoColInsertionParams: IRemoveColMutationParams = InsertColMutationUndoFactory(
-                accessor,
-                insertColParams
-            );
+        undoMutations.push({ id: RemoveColMutation.id, params: undoColInsertionParams });
 
-            undoMutations.push({ id: RemoveColMutation.id, params: undoColInsertionParams });
-        }
         const sheetInterceptor = sheetInterceptorService.onCommandExecute({
             id: InsertRangeMoveRightCommand.id,
             params: { range } as InsertRangeMoveRightCommandParams,

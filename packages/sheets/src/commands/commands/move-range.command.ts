@@ -32,6 +32,7 @@ import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-
 import type { IMoveRangeMutationParams } from '../mutations/move-range.mutation';
 import { MoveRangeMutation } from '../mutations/move-range.mutation';
 import { SetSelectionsOperation } from '../operations/selection.operation';
+import { getPrimaryForRange } from './utils/selection-utils';
 
 export interface IMoveRangeCommandParams {
     toRange: IRange;
@@ -113,7 +114,7 @@ export const MoveRangeCommand: ICommand = {
                     unitId,
                     sheetId: subUnitId,
                     pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-                    selections: [{ range: params.toRange }],
+                    selections: [{ range: params.toRange, primary: getPrimaryForRange(params.toRange, worksheet) }],
                 },
             },
         ];
@@ -124,7 +125,7 @@ export const MoveRangeCommand: ICommand = {
                     unitId,
                     sheetId: subUnitId,
                     pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-                    selections: [{ range: params.fromRange }],
+                    selections: [{ range: params.fromRange, primary: getPrimaryForRange(params.fromRange, worksheet) }],
                 },
             },
             ...interceptorCommands.undos,

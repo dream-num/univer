@@ -274,7 +274,8 @@ function _lineOperator(
     const column = columnInfo!.column;
     const line = getLastLineByColumn(column);
 
-    const { ba: ascent, bd: descent } = spanGroup[0].bBox;
+    const ascent = Math.max(...spanGroup.map((span) => span.bBox.ba));
+    const descent = Math.max(...spanGroup.map((span) => span.bBox.bd));
     const spanLineHeight = defaultSpanLineHeight || ascent + descent;
 
     const {

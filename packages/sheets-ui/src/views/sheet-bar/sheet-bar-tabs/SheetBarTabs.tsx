@@ -16,7 +16,7 @@
 
 import type { ICommandInfo } from '@univerjs/core';
 import { BooleanNumber, ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
-import { ITextSelectionRenderManager } from '@univerjs/engine-render';
+import { DeviceInputEventType, ITextSelectionRenderManager } from '@univerjs/engine-render';
 import {
     InsertSheetMutation,
     RemoveSheetMutation,
@@ -29,10 +29,11 @@ import {
     SetWorksheetOrderCommand,
     SetWorksheetOrderMutation,
 } from '@univerjs/sheets';
-import { IConfirmService } from '@univerjs/ui';
+import { IConfirmService, KeyCode } from '@univerjs/ui';
 import { useDependency, useInjector } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useRef, useState } from 'react';
 
+import { IEditorBridgeService } from '../../../services/editor-bridge.service';
 import { ISheetBarService } from '../../../services/sheet-bar/sheet-bar.service';
 import styles from './index.module.less';
 import type { IBaseSheetBarProps } from './SheetBarItem';
@@ -54,6 +55,7 @@ export function SheetBarTabs() {
     const sheetBarService = useDependency(ISheetBarService);
     const localeService = useDependency(LocaleService);
     const confirmService = useDependency(IConfirmService);
+    const editorBridgeService = useDependency(IEditorBridgeService);
     const injector = useInjector();
 
     const workbook = univerInstanceService.getCurrentUniverSheetInstance();
@@ -101,6 +103,11 @@ export function SheetBarTabs() {
                 commandService.executeCommand(SetWorksheetOrderCommand.id, { order });
             },
             onChangeTab: (event: Event, subUnitId: string) => {
+                editorBridgeService.changeVisible({
+                    visible: false,
+                    eventType: DeviceInputEventType.PointerDown,
+                    keycode: KeyCode.ESC,
+                });
                 commandService.executeCommand(SetWorksheetActivateCommand.id, {
                     subUnitId,
                     unitId: workbook.getUnitId(),

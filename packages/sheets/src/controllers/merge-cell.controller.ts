@@ -28,6 +28,7 @@ import {
 } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
+import type { IMoveColsCommandParams, IMoveRowsCommandParams } from '..';
 import type {
     IAddWorksheetMergeMutationParams,
     IRemoveColMutationParams,
@@ -61,6 +62,8 @@ import {
 } from '../commands/mutations/remove-worksheet-merge.mutation';
 import { RefRangeService } from '../services/ref-range/ref-range.service';
 import type { EffectRefRangeParams } from '../services/ref-range/type';
+import { EffectRefRangId } from '../services/ref-range/type';
+import { handleMoveCols, handleMoveRows, runRefRangeMutations } from '../services/ref-range/util';
 import { SelectionManagerService } from '../services/selection-manager.service';
 import { SheetInterceptorService } from '../services/sheet-interceptor/sheet-interceptor.service';
 
@@ -217,6 +220,14 @@ export class MergeCellController extends Disposable {
                         const params = config.params as unknown as IDeleteRangeMoveLeftCommandParams;
                         return this._handleDeleteRangeMoveLeftCommand(params, unitId, subUnitId);
                     }
+                    case EffectRefRangId.MoveColsCommandId: {
+                        const params = config.params as unknown as IMoveColsCommandParams;
+                        return this._handleMoveColsCommand(params, unitId, subUnitId);
+                    }
+                    case EffectRefRangId.MoveRowsCommandId: {
+                        const params = config.params as unknown as IMoveRowsCommandParams;
+                        return this._handleMoveRowsCommand(params, unitId, subUnitId);
+                    }
                 }
                 return { redos: [], undos: [] };
             };
@@ -250,6 +261,82 @@ export class MergeCellController extends Disposable {
         const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
         const sheet = workbook.getActiveSheet();
         registerRefRange(workbook.getUnitId(), sheet.getSheetId());
+    }
+
+    private _handleMoveRowsCommand(params: IMoveRowsCommandParams, unitId: string, subUnitId: string) {
+        const workbook = getWorkbook(this._univerInstanceService, unitId);
+        if (!workbook) {
+            return this._handleNull();
+        }
+        const worksheet = getWorksheet(workbook, subUnitId);
+        if (!worksheet) {
+            return this._handleNull();
+        }
+        const mergeData = [...worksheet.getMergeData()];
+
+        const removeParams: IRemoveWorksheetMergeMutationParams = { unitId, subUnitId, ranges: mergeData };
+        const addParams: IAddWorksheetMergeMutationParams = { unitId, subUnitId, ranges: [] };
+        mergeData.forEach((range) => {
+            const operation = handleMoveRows({ id: EffectRefRangId.MoveRowsCommandId, params }, range);
+            const result = runRefRangeMutations(operation, range);
+            result && addParams.ranges.push(result);
+        });
+        const removeUndo = RemoveMergeUndoMutationFactory(this._injector, removeParams);
+        const addUndo = AddMergeUndoMutationFactory(this._injector, addParams);
+        return {
+            redos: [
+                { id: RemoveWorksheetMergeMutation.id, params: removeParams },
+                {
+                    id: AddWorksheetMergeMutation.id,
+                    params: addParams,
+                },
+            ],
+            undos: [
+                {
+                    id: AddWorksheetMergeMutation.id,
+                    params: addUndo,
+                },
+                { id: RemoveWorksheetMergeMutation.id, params: removeUndo },
+            ],
+        };
+    }
+
+    private _handleMoveColsCommand(params: IMoveColsCommandParams, unitId: string, subUnitId: string) {
+        const workbook = getWorkbook(this._univerInstanceService, unitId);
+        if (!workbook) {
+            return this._handleNull();
+        }
+        const worksheet = getWorksheet(workbook, subUnitId);
+        if (!worksheet) {
+            return this._handleNull();
+        }
+        const mergeData = [...worksheet.getMergeData()];
+
+        const removeParams: IRemoveWorksheetMergeMutationParams = { unitId, subUnitId, ranges: mergeData };
+        const addParams: IAddWorksheetMergeMutationParams = { unitId, subUnitId, ranges: [] };
+        mergeData.forEach((range) => {
+            const operation = handleMoveCols({ id: EffectRefRangId.MoveColsCommandId, params }, range);
+            const result = runRefRangeMutations(operation, range);
+            result && addParams.ranges.push(result);
+        });
+        const removeUndo = RemoveMergeUndoMutationFactory(this._injector, removeParams);
+        const addUndo = AddMergeUndoMutationFactory(this._injector, addParams);
+        return {
+            redos: [
+                { id: RemoveWorksheetMergeMutation.id, params: removeParams },
+                {
+                    id: AddWorksheetMergeMutation.id,
+                    params: addParams,
+                },
+            ],
+            undos: [
+                {
+                    id: AddWorksheetMergeMutation.id,
+                    params: addUndo,
+                },
+                { id: RemoveWorksheetMergeMutation.id, params: removeUndo },
+            ],
+        };
     }
 
     private _handleMoveRangeCommand(params: IMoveRangeCommandParams, unitId: string, subUnitId: string) {

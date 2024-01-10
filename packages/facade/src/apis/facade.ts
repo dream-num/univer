@@ -23,6 +23,7 @@ import {
     Univer,
     WrapStrategy,
 } from '@univerjs/core';
+import { WebSocketService } from '@univerjs/network';
 import type { IRegisterFunctionParams, IUnregisterFunctionParams } from '@univerjs/sheets-formula';
 import { IRegisterFunctionService } from '@univerjs/sheets-formula';
 import type { IDisposable } from '@wendellhu/redi';
@@ -46,7 +47,8 @@ export class FUniver {
         @Inject(Injector) private readonly _injector: Injector,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
-        @IRegisterFunctionService private readonly _registerFunctionService: IRegisterFunctionService
+        @IRegisterFunctionService private readonly _registerFunctionService: IRegisterFunctionService,
+        @Inject(WebSocketService) private readonly _ws: WebSocketService
     ) {}
 
     /**
@@ -86,10 +88,18 @@ export class FUniver {
         return this._injector.createInstance(FWorkbook, workbook);
     }
 
+    /**
+     * Register a function to the spreadsheet.
+     * @param config
+     */
     registerFunction(config: IRegisterFunctionParams) {
         this._registerFunctionService.registerFunctions(config);
     }
 
+    /**
+     * Unregister a function from the spreadsheet.
+     * @param config
+     */
     unregisterFunction(config: IUnregisterFunctionParams) {
         this._registerFunctionService.unregisterFunctions(config);
     }
@@ -129,6 +139,21 @@ export class FUniver {
         return this._commandService.onCommandExecuted((command) => {
             callback(command);
         });
+    }
+
+    /**
+     * Set WebSocket URL for WebSocketService
+     * @param url WebSocketService URL
+     * @returns WebSocket info and callback
+     */
+    createSocket(url: string) {
+        const ws = this._ws.createSocket(url);
+
+        if (!ws) {
+            throw new Error('[WebSocketService]: failed to create socket!');
+        }
+
+        return ws;
     }
 
     // @endregion

@@ -586,6 +586,9 @@ importers:
       '@univerjs/engine-formula':
         specifier: workspace:*
         version: link:../engine-formula
+      '@univerjs/network':
+        specifier: workspace:*
+        version: link:../network
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets

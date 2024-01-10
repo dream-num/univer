@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export { Pager } from './Pager';
+export { type IPagerProps, Pager } from './Pager';

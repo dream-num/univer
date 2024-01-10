@@ -240,29 +240,27 @@ export class HeaderMenuController extends Disposable {
 
         this._hoverMenu.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
             const sheetObject = this._getSheetObject();
-            if (sheetObject == null) {
+            if (!sheetObject) {
                 return;
             }
 
             const currentColumn = this._currentColumn;
-
             const currentSelectionDatas = this._selectionManagerService.getSelectionRanges();
-
-            const selectedSelection = currentSelectionDatas?.find((data) => {
+            const menuInSelections: boolean = !!currentSelectionDatas?.find((data) => {
                 const { startColumn, endColumn } = data;
-                if (currentColumn >= startColumn && startColumn <= endColumn) {
+                if (currentColumn >= startColumn && currentColumn <= endColumn) {
                     return true;
                 }
                 return false;
             });
 
-            if (selectedSelection == null) {
+            if (!menuInSelections) {
                 sheetObject.spreadsheetColumnHeader.onPointerDownObserver.notifyObservers(evt);
-            } else {
-                evt.stopPropagation();
-                evt.preventDefault();
-                this._contextMenuService.triggerContextMenu(evt, SheetMenuPosition.COL_HEADER_CONTEXT_MENU);
             }
+
+            evt.stopPropagation();
+            evt.preventDefault();
+            this._contextMenuService.triggerContextMenu(evt, SheetMenuPosition.COL_HEADER_CONTEXT_MENU);
         });
     }
 

@@ -496,8 +496,10 @@ export class SpreadsheetSkeleton extends Skeleton {
                 const absAngleInRad = Math.abs(degToRad(angle));
 
                 h +=
-                    Math.max(t * Math.cos(absAngleInRad), r * Math.sin(absAngleInRad)) +
-                    Math.max(b * Math.cos(absAngleInRad), l * Math.sin(absAngleInRad));
+                    t * Math.cos(absAngleInRad) +
+                    r * Math.sin(absAngleInRad) +
+                    b * Math.cos(absAngleInRad) +
+                    l * Math.sin(absAngleInRad);
             }
 
             height = Math.max(height, h);

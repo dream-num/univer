@@ -1247,6 +1247,8 @@ export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonIte
             props: {
                 prefix: 'rightClick.rowHeight',
                 suffix: 'px',
+                min: 2,
+                max: 1000,
             },
         },
         value$: new Observable((subscriber) => {
@@ -1290,6 +1292,8 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem
             props: {
                 prefix: 'rightClick.columnWidth',
                 suffix: 'px',
+                min: 2,
+                max: 1000,
             },
         },
         value$: new Observable((subscriber) => {

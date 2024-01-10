@@ -68,6 +68,7 @@ import type {
     ISetWorksheetNameCommandParams,
 } from '@univerjs/sheets';
 import {
+    ClearSelectionFormatCommand,
     DeleteRangeMoveLeftCommand,
     DeleteRangeMoveUpCommand,
     EffectRefRangId,
@@ -180,7 +181,8 @@ export class UpdateFormulaController extends Disposable {
                     if (
                         (options && options.onlyLocal === true) ||
                         params.trigger === SetStyleCommand.id ||
-                        params.trigger === SetBorderCommand.id
+                        params.trigger === SetBorderCommand.id ||
+                        params.trigger === ClearSelectionFormatCommand.id
                     ) {
                         return;
                     }
@@ -230,7 +232,13 @@ export class UpdateFormulaController extends Disposable {
     private _handleSetRangeValuesMutation(params: ISetRangeValuesMutationParams, options?: IExecutionOptions) {
         const { subUnitId: sheetId, unitId, cellValue } = params;
 
-        if ((options && options.onlyLocal === true) || cellValue == null) {
+        if (
+            (options && options.onlyLocal === true) ||
+            params.trigger === SetStyleCommand.id ||
+            params.trigger === SetBorderCommand.id ||
+            params.trigger === ClearSelectionFormatCommand.id ||
+            cellValue == null
+        ) {
             return;
         }
 

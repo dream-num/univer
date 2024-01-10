@@ -19,6 +19,7 @@ import {
     BooleanNumber,
     ILogService,
     IUniverInstanceService,
+    LocaleService,
     LocaleType,
     LogLevel,
     Plugin,
@@ -28,6 +29,7 @@ import {
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
+import enUS from '../../../locale/en-US';
 import { BorderStyleManagerService } from '../../../services/border-style-manager.service';
 import { SelectionManagerService } from '../../../services/selection-manager.service';
 import { SheetInterceptorService } from '../../../services/sheet-interceptor/sheet-interceptor.service';
@@ -38,6 +40,7 @@ const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
     sheets: {
         sheet1: {
             id: 'sheet1',
+            name: 'sheet1',
             cellData: {
                 '0': {
                     '0': {
@@ -105,6 +108,9 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
     const logService = injector.get(ILogService);
 
     logService.setLogLevel(LogLevel.SILENT); // change this to `LogLevel.VERBOSE` to debug tests via logs
+
+    const localeService = injector.get(LocaleService);
+    localeService.load({ enUS });
 
     return {
         univer,

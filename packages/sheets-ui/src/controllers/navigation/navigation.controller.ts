@@ -17,7 +17,6 @@
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
-import type { IMoveSelectionCommandParams } from '../../commands/commands/set-selection.command';
 import { MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../commands/commands/set-selection.command';
 import { ScrollController } from '../scroll.controller';
 
@@ -34,8 +33,7 @@ export class SheetNavigationController extends Disposable {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command) => {
                 if (SHEET_NAVIGATION_COMMANDS.includes(command.id)) {
-                    const params = command.params as IMoveSelectionCommandParams;
-                    this._scrollController.scrollToVisible(params.direction);
+                    this._scrollController.scrollToVisible();
                 }
             })
         );

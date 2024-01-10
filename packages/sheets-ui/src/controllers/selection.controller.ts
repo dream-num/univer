@@ -44,6 +44,7 @@ import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.ope
 import { VIEWPORT_KEY } from '../common/keys';
 import { ISelectionRenderService } from '../services/selection/selection-render.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
+import { ScrollController } from './scroll.controller';
 import type { ISheetObjectParam } from './utils/component-tools';
 import { getSheetObject } from './utils/component-tools';
 
@@ -57,7 +58,8 @@ export class SelectionController extends Disposable {
         @ISelectionRenderService
         private readonly _selectionRenderService: ISelectionRenderService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
-        @Inject(ThemeService) private readonly _themeService: ThemeService
+        @Inject(ThemeService) private readonly _themeService: ThemeService,
+        @Inject(ScrollController) private readonly _scrollController: ScrollController
     ) {
         super();
 
@@ -259,6 +261,8 @@ export class SelectionController extends Disposable {
 
         this._selectionRenderService.selectionMoveEnd$.subscribe((params) => {
             this._move(params, SelectionMoveType.MOVE_END);
+
+            this._scrollController.scrollToVisible(false);
         });
     }
 

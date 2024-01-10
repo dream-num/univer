@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-import { ICommandService, IUniverInstanceService } from '@univerjs/core';
+import { BooleanNumber, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import {
     CopySheetCommand,
+    InsertSheetMutation,
+    RemoveSheetMutation,
     SetTabColorCommand,
     SetWorksheetHideCommand,
+    SetWorksheetHideMutation,
     SetWorksheetShowCommand,
 } from '@univerjs/sheets';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
@@ -32,12 +35,34 @@ import { RenameSheetOperation } from '../../commands/operations/rename-sheet.ope
 import { COLOR_PICKER_COMPONENT } from '../../components/color-picker';
 import { SheetMenuPosition } from './menu';
 
-export function DeleteSheetMenuItemFactory(): IMenuButtonItem {
+export function DeleteSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const commandService = accessor.get(ICommandService);
     return {
         id: RemoveSheetConfirmCommand.id,
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.delete',
+        disabled$: new Observable<boolean>((subscriber) => {
+            const disposable = commandService.onCommandExecuted((c) => {
+                const id = c.id;
+                if (
+                    id === RemoveSheetMutation.id ||
+                    id === InsertSheetMutation.id ||
+                    id === SetWorksheetHideMutation.id
+                ) {
+                    const worksheets = univerInstanceService.getCurrentUniverSheetInstance().getWorksheets();
+                    // loop through all worksheets Map to see if there is more than one visible sheet
+                    const visibleSheets = Array.from(worksheets.values()).filter(
+                        (sheet) => sheet.getConfig().hidden === BooleanNumber.FALSE
+                    );
+
+                    subscriber.next(visibleSheets.length === 1);
+                }
+            });
+            subscriber.next(false);
+            return disposable.dispose;
+        }),
     };
 }
 
@@ -76,12 +101,34 @@ export function ChangeColorSheetMenuItemFactory(): IMenuSelectorItem<string> {
     };
 }
 
-export function HideSheetMenuItemFactory(): IMenuButtonItem {
+export function HideSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const commandService = accessor.get(ICommandService);
     return {
         id: SetWorksheetHideCommand.id,
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.hide',
+        disabled$: new Observable<boolean>((subscriber) => {
+            const disposable = commandService.onCommandExecuted((c) => {
+                const id = c.id;
+                if (
+                    id === RemoveSheetMutation.id ||
+                    id === InsertSheetMutation.id ||
+                    id === SetWorksheetHideMutation.id
+                ) {
+                    const worksheets = univerInstanceService.getCurrentUniverSheetInstance().getWorksheets();
+                    // loop through all worksheets Map to see if there is more than one visible sheet
+                    const visibleSheets = Array.from(worksheets.values()).filter(
+                        (sheet) => sheet.getConfig().hidden === BooleanNumber.FALSE
+                    );
+
+                    subscriber.next(visibleSheets.length === 1);
+                }
+            });
+            subscriber.next(false);
+            return disposable.dispose;
+        }),
     };
 }
 

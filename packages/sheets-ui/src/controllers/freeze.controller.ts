@@ -238,7 +238,7 @@ export class FreezeController extends Disposable {
         const FREEZE_SIZE = FREEZE_SIZE_NORMAL / (scale < 1 ? 1 : scale);
 
         if (freezeDirectionType === FREEZE_DIRECTION_TYPE.ROW) {
-            const FREEZE_OFFSET = freezeRow === -1 || freezeRow === 0 ? FREEZE_SIZE : FREEZE_SIZE / 2;
+            const FREEZE_OFFSET = FREEZE_SIZE;
 
             this._rowFreezeHeaderRect = new Rect(FREEZE_ROW_HEADER_NAME, {
                 fill: this._freezeNormalHeaderColor,
@@ -265,7 +265,7 @@ export class FreezeController extends Disposable {
 
             scene.addObjects([this._rowFreezeHeaderRect, this._rowFreezeMainRect], SHEET_COMPONENT_HEADER_LAYER_INDEX);
         } else {
-            const FREEZE_OFFSET = freezeColumn === -1 || freezeColumn === 0 ? FREEZE_SIZE : FREEZE_SIZE / 2;
+            const FREEZE_OFFSET = FREEZE_SIZE;
 
             this._columnFreezeHeaderRect = new Rect(FREEZE_COLUMN_HEADER_NAME, {
                 fill: this._freezeNormalHeaderColor,
@@ -285,7 +285,7 @@ export class FreezeController extends Disposable {
                 fill,
                 width: FREEZE_SIZE,
                 height: shapeHeight * 2,
-                left: startX - FREEZE_SIZE / 2,
+                left: startX - FREEZE_OFFSET,
                 top: columnHeaderHeightAndMarginTop,
                 zIndex: 3,
             });

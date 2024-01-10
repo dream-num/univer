@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICellData, ICommandInfo, IDocumentBody, Nullable, Observer } from '@univerjs/core';
+import type { ICellData, ICommandInfo, IDocumentBody, Nullable, Observer } from '@univerjs/core';
 import {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     Direction,
@@ -166,17 +166,13 @@ export class EndEditController extends Disposable {
                 return;
             }
 
-            const state = this._editorBridgeService.getState();
+            const editCellState = this._editorBridgeService.getEditCellState();
 
-            if (state == null) {
+            if (editCellState == null) {
                 return;
             }
 
-            const { unitId, sheetId, row, column, documentLayoutObject } = state;
-
-            if (documentLayoutObject == null) {
-                return;
-            }
+            const { unitId, sheetId, row, column, documentLayoutObject } = editCellState;
 
             this._moveCursor(keycode);
 
@@ -375,11 +371,15 @@ export function getCellDataByInput(
 ) {
     cellData = Tools.deepClone(cellData);
 
-    const documentModel = documentLayoutObject.documentModel as DocumentDataModel;
+    const { documentModel } = documentLayoutObject;
+
+    if (documentModel == null) {
+        return null;
+    }
 
     const snapshot = documentModel.getSnapshot();
 
-    const body = snapshot.body;
+    const { body } = snapshot;
 
     if (body == null) {
         return null;

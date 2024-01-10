@@ -16,7 +16,6 @@
 
 import type { ICommandInfo, IParagraph, ITextRun, Nullable } from '@univerjs/core';
 import {
-    DEFAULT_EMPTY_DOCUMENT_VALUE,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     FOCUSING_EDITOR,
@@ -43,7 +42,6 @@ import {
     VIEWPORT_KEY,
 } from '@univerjs/docs';
 import { DeviceInputEventType, IRenderManagerService, ScrollBar } from '@univerjs/engine-render';
-import { ClearSelectionContentCommand } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 import { takeUntil } from 'rxjs';
 
@@ -230,12 +228,12 @@ export class FormulaEditorController extends RxDisposable {
 
     // Sync cell content to formula editor bar when sheet selection changed.
     private _syncFormulaEditorContent() {
-        this._editorBridgeService.state$.pipe(takeUntil(this.dispose$)).subscribe((param) => {
-            if (param == null || this._editorBridgeService.isForceKeepVisible()) {
+        this._editorBridgeService.currentEditCellState$.pipe(takeUntil(this.dispose$)).subscribe((editCellState) => {
+            if (editCellState == null || this._editorBridgeService.isForceKeepVisible()) {
                 return;
             }
 
-            this._editorSyncHandler(param);
+            this._editorSyncHandler(editCellState);
         });
 
         this._editorBridgeService.visible$.pipe(takeUntil(this.dispose$)).subscribe((state) => {
@@ -243,13 +241,13 @@ export class FormulaEditorController extends RxDisposable {
                 return;
             }
 
-            const param = this._editorBridgeService.getState();
+            const cellEditState = this._editorBridgeService.getLatestEditCellState();
 
-            if (param == null) {
+            if (cellEditState == null) {
                 return;
             }
 
-            this._editorSyncHandler(param);
+            this._editorSyncHandler(cellEditState);
         });
     }
 
@@ -320,24 +318,24 @@ export class FormulaEditorController extends RxDisposable {
         );
 
         // Empty formula bar content when you press BACKSPACE in selection.
-        const needEmptyCommandList = [ClearSelectionContentCommand.id];
-        this.disposeWithMe(
-            this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (needEmptyCommandList.includes(command.id)) {
-                    const syncId = DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY;
-                    const dataStream = DEFAULT_EMPTY_DOCUMENT_VALUE;
-                    const paragraphs = [
-                        {
-                            startIndex: 0,
-                        },
-                    ];
+        // const needEmptyCommandList = [ClearSelectionContentCommand.id];
+        // this.disposeWithMe(
+        //     this._commandService.onCommandExecuted((command: ICommandInfo) => {
+        //         if (needEmptyCommandList.includes(command.id)) {
+        //             const syncId = DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY;
+        //             const dataStream = DEFAULT_EMPTY_DOCUMENT_VALUE;
+        //             const paragraphs = [
+        //                 {
+        //                     startIndex: 0,
+        //                 },
+        //             ];
 
-                    this._syncContentAndRender(syncId, dataStream, paragraphs);
-                    // handle weather need to show scroll bar.
-                    this._autoScroll();
-                }
-            })
-        );
+        //             this._syncContentAndRender(syncId, dataStream, paragraphs);
+        //             // handle weather need to show scroll bar.
+        //             this._autoScroll();
+        //         }
+        //     })
+        // );
     }
 
     private _syncContentAndRender(

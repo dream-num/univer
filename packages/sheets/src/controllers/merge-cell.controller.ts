@@ -292,11 +292,11 @@ export class MergeCellController extends Disposable {
                 },
             ],
             undos: [
+                { id: RemoveWorksheetMergeMutation.id, params: addUndo },
                 {
                     id: AddWorksheetMergeMutation.id,
-                    params: addUndo,
+                    params: removeUndo,
                 },
-                { id: RemoveWorksheetMergeMutation.id, params: removeUndo },
             ],
         };
     }
@@ -330,11 +330,11 @@ export class MergeCellController extends Disposable {
                 },
             ],
             undos: [
+                { id: RemoveWorksheetMergeMutation.id, params: addUndo },
                 {
                     id: AddWorksheetMergeMutation.id,
-                    params: addUndo,
+                    params: removeUndo,
                 },
-                { id: RemoveWorksheetMergeMutation.id, params: removeUndo },
             ],
         };
     }

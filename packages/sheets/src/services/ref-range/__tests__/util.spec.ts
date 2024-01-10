@@ -28,10 +28,155 @@ import {
     handleIRemoveCol,
     handleIRemoveRow,
     handleMoveRange,
+    handleMoveRows,
     runRefRangeMutations,
 } from '../util';
 
 describe('test ref-range move', () => {
+    describe('handleMoveRows', () => {
+        // see docs/tldr/handMoveRowsCols.tldr
+        const startCol = 0;
+        const endCol = 999;
+        let fromRange: IRange;
+        let toRange: IRange;
+        describe('fromRange is top of toRange', () => {
+            beforeEach(() => {
+                fromRange = { startRow: 5, endRow: 10, startColumn: startCol, endColumn: endCol };
+                toRange = { startRow: 15, endRow: 20, startColumn: startCol, endColumn: endCol };
+            });
+            it('1-1 1-3 1-11 1-13', () => {
+                const targetRange1_1 = { startRow: 2, endRow: 3, startColumn: startCol, endColumn: endCol };
+                const targetRange1_3 = { startRow: 25, endRow: 26, startColumn: startCol, endColumn: endCol };
+                const targetRange1_11 = { startRow: 3, endRow: 22, startColumn: startCol, endColumn: endCol };
+                const targetRange1_13 = { startRow: 16, endRow: 17, startColumn: startCol, endColumn: endCol };
+
+                const operators1_1 = handleMoveRows(
+                    { id: EffectRefRangId.MoveRowsCommandId, params: { toRange, fromRange } },
+                    targetRange1_3
+                );
+                const operators1_3 = handleMoveRows(
+                    { id: EffectRefRangId.MoveRowsCommandId, params: { toRange, fromRange } },
+                    targetRange1_1
+                );
+                const operators1_11 = handleMoveRows(
+                    { id: EffectRefRangId.MoveRowsCommandId, params: { toRange, fromRange } },
+                    targetRange1_11
+                );
+                const operators1_13 = handleMoveRows(
+                    { id: EffectRefRangId.MoveRowsCommandId, params: { toRange, fromRange } },
+                    targetRange1_13
+                );
+                expect(runRefRangeMutations(operators1_1!, targetRange1_1)).toEqual({
+                    startRow: 2,
+                    endRow: 3,
+                    startColumn: startCol,
+                    endColumn: endCol,
+                });
+                expect(runRefRangeMutations(operators1_3!, targetRange1_3)).toEqual({
+                    startRow: 25,
+                    endRow: 26,
+                    startColumn: startCol,
+                    endColumn: endCol,
+                });
+                // wait support expansion
+                // expect(runRefRangeMutations(operators1_11!, targetRange1_11)).toEqual({
+                //     startRow: 3,
+                //     endRow: 22,
+                //     startColumn: startCol,
+                //     endColumn: endCol,
+                // });
+                expect(runRefRangeMutations(operators1_13!, targetRange1_13)).toEqual({
+                    startRow: 16,
+                    endRow: 17,
+                    startColumn: startCol,
+                    endColumn: endCol,
+                });
+            });
+            it('1-2', () => {
+                const targetRange = { startRow: 12, endRow: 13, startColumn: startCol, endColumn: endCol };
+                const operators = handleMoveRows(
+                    { id: EffectRefRangId.MoveRowsCommandId, params: { toRange, fromRange } },
+                    targetRange
+                );
+                expect(runRefRangeMutations(operators!, targetRange)).toEqual({
+                    startRow: 6,
+                    endRow: 7,
+                    startColumn: startCol,
+                    endColumn: endCol,
+                });
+            });
+            it('1-12', () => {
+                const targetRange = { startRow: 6, endRow: 7, startColumn: startCol, endColumn: endCol };
+                const operators = handleMoveRows(
+                    { id: EffectRefRangId.MoveRowsCommandId, params: { toRange, fromRange } },
+                    targetRange
+                );
+                expect(runRefRangeMutations(operators!, targetRange)).toEqual({
+                    startRow: 10,
+                    endRow: 11,
+                    startColumn: startCol,
+                    endColumn: endCol,
+                });
+            });
+        });
+        describe('fromRange is bottom of toRange', () => {
+            beforeEach(() => {
+                fromRange = { startRow: 15, endRow: 20, startColumn: startCol, endColumn: endCol };
+                toRange = { startRow: 5, endRow: 10, startColumn: startCol, endColumn: endCol };
+            });
+            it('1-1 1-3 1-11 1-13', () => {
+                const targetRange1_1 = { startRow: 2, endRow: 3, startColumn: startCol, endColumn: endCol };
+                const targetRange1_3 = { startRow: 25, endRow: 26, startColumn: startCol, endColumn: endCol };
+
+                const operators1_1 = handleMoveRows(
+                    { id: EffectRefRangId.MoveRowsCommandId, params: { toRange, fromRange } },
+                    targetRange1_3
+                );
+                const operators1_3 = handleMoveRows(
+                    { id: EffectRefRangId.MoveRowsCommandId, params: { toRange, fromRange } },
+                    targetRange1_1
+                );
+                expect(runRefRangeMutations(operators1_1!, targetRange1_1)).toEqual({
+                    startRow: 2,
+                    endRow: 3,
+                    startColumn: startCol,
+                    endColumn: endCol,
+                });
+                expect(runRefRangeMutations(operators1_3!, targetRange1_3)).toEqual({
+                    startRow: 25,
+                    endRow: 26,
+                    startColumn: startCol,
+                    endColumn: endCol,
+                });
+            });
+            it('1-2', () => {
+                const targetRange = { startRow: 12, endRow: 13, startColumn: startCol, endColumn: endCol };
+                const operators = handleMoveRows(
+                    { id: EffectRefRangId.MoveRowsCommandId, params: { toRange, fromRange } },
+                    targetRange
+                );
+                expect(runRefRangeMutations(operators!, targetRange)).toEqual({
+                    startRow: 18,
+                    endRow: 19,
+                    startColumn: startCol,
+                    endColumn: endCol,
+                });
+            });
+            it('1-13', () => {
+                const targetRange = { startRow: 16, endRow: 17, startColumn: startCol, endColumn: endCol };
+                const operators = handleMoveRows(
+                    { id: EffectRefRangId.MoveRowsCommandId, params: { toRange, fromRange } },
+                    targetRange
+                );
+                expect(runRefRangeMutations(operators!, targetRange)).toEqual({
+                    startRow: 6,
+                    endRow: 7,
+                    startColumn: startCol,
+                    endColumn: endCol,
+                });
+            });
+        });
+    });
     describe('handleInsertRangeMoveDown', () => {
         let range: IRange;
         beforeEach(() => {

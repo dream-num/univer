@@ -22,7 +22,7 @@ import { HorizontalAlign, Observable, VerticalAlign, WrapStrategy } from '@unive
 import { calculateRectRotate, getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
 import type { IDocumentSkeletonCached, IDocumentSkeletonPage } from '../../basics/i-document-skeleton-cached';
 import { LineType, PageLayoutType } from '../../basics/i-document-skeleton-cached';
-import { degToRad, getScale } from '../../basics/tools';
+import { degToRad } from '../../basics/tools';
 import type { Transform } from '../../basics/transform';
 import type { IViewportBound } from '../../basics/vector2';
 import { Vector2 } from '../../basics/vector2';
@@ -176,8 +176,6 @@ export class Documents extends DocComponent {
         return (this.getScene() as Scene).getEngine();
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-
     override draw(ctx: UniverRenderingContext, bounds?: IViewportBound) {
         const documentSkeleton = this.getSkeleton();
 
@@ -201,7 +199,7 @@ export class Documents extends DocComponent {
 
         const { pages } = skeletonData;
         const parentScale = this.getParentScale();
-        const scale = getScale(parentScale);
+        // const scale = getScale(parentScale);
         const extensions = this.getExtensionsByOrder();
 
         for (const extension of extensions) {
@@ -324,7 +322,7 @@ export class Documents extends DocComponent {
 
                         rotateTranslateXListApply = rotateTranslateXList;
                     } else if (wrapStrategy === WrapStrategy.WRAP) {
-                        alignOffset.x = pagePaddingLeft * scale;
+                        // alignOffset.x = pagePaddingLeft * scale;
                     }
 
                     for (let i = 0; i < linesCount; i++) {

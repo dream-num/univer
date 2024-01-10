@@ -128,17 +128,17 @@ export class Liquid {
         bottom = 0
     ) {
         const {
-            sections,
-            marginTop: pagePaddingTop = 0,
-            marginBottom: pagePaddingBottom = 0,
-            marginLeft: pagePaddingLeft = 0,
-            marginRight: pagePaddingRight = 0,
+            // sections,
+            // marginTop: pagePaddingTop = 0,
+            // marginBottom: pagePaddingBottom = 0,
+            // marginLeft: pagePaddingLeft = 0,
+            // marginRight: pagePaddingRight = 0,
             pageWidth,
             pageHeight,
-            width,
-            height,
-            pageNumber = 1,
-            renderConfig = {},
+            // width,
+            // height,
+            // pageNumber = 1,
+            // renderConfig = {},
         } = page;
 
         let pageTop = 0;

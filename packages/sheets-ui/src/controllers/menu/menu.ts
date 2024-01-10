@@ -1195,8 +1195,12 @@ export function ShowColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
             ?.map((s) => s.range)
             .filter((r) => r.rangeType === RANGE_TYPE.COLUMN);
 
-        return !!colRanges?.some((range) => {
-            for (let r = range.startRow; r <= range.endRow; r++) {
+        if (!colRanges || colRanges.length === 0) {
+            return false;
+        }
+
+        return !!colRanges.some((range) => {
+            for (let r = range.startColumn; r <= range.endColumn; r++) {
                 if (!worksheet.getColVisible(r)) {
                     return true;
                 }
@@ -1247,6 +1251,8 @@ export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonIte
             props: {
                 prefix: 'rightClick.rowHeight',
                 suffix: 'px',
+                min: 2,
+                max: 1000,
             },
         },
         value$: new Observable((subscriber) => {
@@ -1290,6 +1296,8 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem
             props: {
                 prefix: 'rightClick.columnWidth',
                 suffix: 'px',
+                min: 2,
+                max: 1000,
             },
         },
         value$: new Observable((subscriber) => {

@@ -15,7 +15,7 @@
  */
 
 import type { Nullable, Observer } from '@univerjs/core';
-import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, RANGE_TYPE } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent } from '@univerjs/engine-render';
 import { CURSOR_TYPE, IRenderManagerService, Rect } from '@univerjs/engine-render';
 import { SelectionManagerService } from '@univerjs/sheets';
@@ -240,29 +240,29 @@ export class HeaderMenuController extends Disposable {
 
         this._hoverMenu.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
             const sheetObject = this._getSheetObject();
-            if (sheetObject == null) {
+            if (!sheetObject) {
                 return;
             }
 
             const currentColumn = this._currentColumn;
-
             const currentSelectionDatas = this._selectionManagerService.getSelectionRanges();
+            const menuInSelections: boolean = !!currentSelectionDatas
+                ?.filter((range) => range.rangeType === RANGE_TYPE.COLUMN)
+                .find((data) => {
+                    const { startColumn, endColumn } = data;
+                    if (currentColumn >= startColumn && currentColumn <= endColumn) {
+                        return true;
+                    }
+                    return false;
+                });
 
-            const selectedSelection = currentSelectionDatas?.find((data) => {
-                const { startColumn, endColumn } = data;
-                if (currentColumn >= startColumn && startColumn <= endColumn) {
-                    return true;
-                }
-                return false;
-            });
-
-            if (selectedSelection == null) {
+            if (!menuInSelections) {
                 sheetObject.spreadsheetColumnHeader.onPointerDownObserver.notifyObservers(evt);
-            } else {
-                evt.stopPropagation();
-                evt.preventDefault();
-                this._contextMenuService.triggerContextMenu(evt, SheetMenuPosition.COL_HEADER_CONTEXT_MENU);
             }
+
+            evt.stopPropagation();
+            evt.preventDefault();
+            this._contextMenuService.triggerContextMenu(evt, SheetMenuPosition.COL_HEADER_CONTEXT_MENU);
         });
     }
 

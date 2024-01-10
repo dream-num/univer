@@ -15,7 +15,7 @@
  */
 
 import type { Meta } from '@storybook/react';
-import React from 'react';
+import React, { useState } from 'react';
 
 import { Pager } from './Pager';
 
@@ -30,11 +30,17 @@ const meta: Meta = {
 
 export default meta;
 
+function PagerDemo() {
+    const [count, setCount] = useState(1);
+
+    return <Pager value={count} total={10} onChange={setCount} loop />;
+}
+
 export const Playground = {
     render: () => {
         return (
             <>
-                <Pager />
+                <PagerDemo />
             </>
         );
     },

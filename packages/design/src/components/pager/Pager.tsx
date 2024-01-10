@@ -14,8 +14,51 @@
  * limitations under the License.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 
-export function Pager() {
-    return <div>Pager</div>;
+import styles from './index.module.less';
+
+export interface IPagerProps {
+    value: number;
+    total: number;
+    loop?: boolean;
+
+    onChange?(value: number): void;
+}
+
+export function Pager(props: IPagerProps) {
+    const { value: current = 0, total: count = 0, loop } = props;
+    const text = useMemo(() => `${current}/${count}`, [current, count]);
+
+    const onClickLeftArrow = () => {
+        if (current === 1) {
+            if (loop) {
+                props.onChange?.(count);
+            }
+        } else {
+            props.onChange?.(current - 1);
+        }
+    };
+
+    const onClickRightArrow = () => {
+        if (current === count) {
+            if (loop) {
+                props.onChange?.(1);
+            }
+        } else {
+            props.onChange?.(current + 1);
+        }
+    };
+
+    return (
+        <div className={styles.pager}>
+            <div role="button" className={styles.pagerLeftArrow} onClick={onClickLeftArrow}>
+                ⬅️
+            </div>
+            <div className={styles.pagerNumber}>{text}</div>
+            <div role="button" className={styles.pagerRightArrow} onClick={onClickRightArrow}>
+                ➡️
+            </div>
+        </div>
+    );
 }

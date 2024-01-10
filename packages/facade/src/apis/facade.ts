@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { CommandListener, IWorkbookData } from '@univerjs/core';
+import type { CommandListener, IExecutionOptions, IWorkbookData } from '@univerjs/core';
 import {
     BorderStyleTypes,
     ICommandService,
@@ -23,7 +23,7 @@ import {
     Univer,
     WrapStrategy,
 } from '@univerjs/core';
-import { WebSocketService } from '@univerjs/network';
+import { ISocketService, WebSocketService } from '@univerjs/network';
 import type { IRegisterFunctionParams, IUnregisterFunctionParams } from '@univerjs/sheets-formula';
 import { IRegisterFunctionService } from '@univerjs/sheets-formula';
 import type { IDisposable } from '@wendellhu/redi';
@@ -37,6 +37,16 @@ export class FUniver {
      */
     static newAPI(wrapped: Univer | Injector): FUniver {
         const injector = wrapped instanceof Univer ? wrapped.__getInjector() : wrapped;
+        // Is unified registration required?
+        let socketService;
+        try {
+            socketService = injector.get(ISocketService);
+        } catch (error) {
+            if (!socketService) {
+                injector.add([ISocketService, { useClass: WebSocketService }]);
+            }
+        }
+
         return injector.createInstance(FUniver);
     }
 
@@ -48,7 +58,7 @@ export class FUniver {
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @IRegisterFunctionService private readonly _registerFunctionService: IRegisterFunctionService,
-        @Inject(WebSocketService) private readonly _ws: WebSocketService
+        @ISocketService private readonly _ws: ISocketService
     ) {}
 
     /**
@@ -136,9 +146,24 @@ export class FUniver {
      * @returns A function to dispose the listening.
      */
     onCommandExecuted(callback: CommandListener): IDisposable {
-        return this._commandService.onCommandExecuted((command) => {
-            callback(command);
+        return this._commandService.onCommandExecuted((command, options?: IExecutionOptions) => {
+            callback(command, options);
         });
+    }
+
+    /**
+     * Execute command
+     * @param id Command id
+     * @param params Command params
+     * @param options Command options
+     * @returns Command Promise
+     */
+    executeCommand<P extends object = object, R = boolean>(
+        id: string,
+        params?: P,
+        options?: IExecutionOptions
+    ): Promise<R> {
+        return this._commandService.executeCommand(id, params, options);
     }
 
     /**

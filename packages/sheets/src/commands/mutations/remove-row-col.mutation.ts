@@ -48,7 +48,9 @@ export const RemoveRowsUndoMutationFactory = (
 
 export const RemoveRowMutation: IMutation<IRemoveRowsMutationParams> = {
     id: 'sheet.mutation.remove-rows',
+
     type: CommandType.MUTATION,
+
     handler: (accessor, params) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const universheet = univerInstanceService.getUniverSheetInstance(params.unitId);

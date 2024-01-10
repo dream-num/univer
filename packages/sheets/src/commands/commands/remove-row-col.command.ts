@@ -54,7 +54,9 @@ export const RemoveRowCommandId = 'sheet.command.remove-row';
  */
 export const RemoveRowCommand: ICommand = {
     type: CommandType.COMMAND,
+
     id: RemoveRowCommandId,
+
     handler: async (accessor: IAccessor, params?: IRemoveRowColCommandParams) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);

@@ -679,18 +679,18 @@ export class SpreadsheetSkeleton extends Skeleton {
             columnHeaderHeightAndMarginTop,
         } = this;
 
-        const rowCount = this.getRowCount();
+        // const rowCount = this.getRowCount();
 
-        const columnCount = this.getColumnCount();
+        // const columnCount = this.getColumnCount();
 
-        if (rowIndex >= rowCount || rowIndex < 0 || columnIndex >= columnCount || columnIndex < 0) {
-            return {
-                startY: -100,
-                endY: -100,
-                startX: -100,
-                endX: -100,
-            };
-        }
+        // if (rowIndex >= rowCount || rowIndex < 0 || columnIndex >= columnCount || columnIndex < 0) {
+        //     return {
+        //         startY: -100,
+        //         endY: -100,
+        //         startX: -100,
+        //         endX: -100,
+        //     };
+        // }
 
         let { startY, endY, startX, endX } = getCellPositionByIndex(
             rowIndex,

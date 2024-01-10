@@ -15,3 +15,4 @@
  */
 
 export { type IInputProps, Input } from './Input';
+export { type IInputWithSlotProps, InputWithSlot } from './InputWithSlot';

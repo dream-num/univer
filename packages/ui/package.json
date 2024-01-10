@@ -50,7 +50,7 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.1.24",
+        "@univerjs/icons": "^0.1.25",
         "@wendellhu/redi": "^0.12.13",
         "clsx": "^2.0.0",
         "localforage": "^1.10.0",

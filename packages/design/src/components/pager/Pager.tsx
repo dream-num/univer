@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { MoreLeftSingle, MoreRightSingle } from '@univerjs/icons';
 import React, { useMemo } from 'react';
 
 import styles from './index.module.less';
@@ -53,11 +54,11 @@ export function Pager(props: IPagerProps) {
     return (
         <div className={styles.pager}>
             <div role="button" className={styles.pagerLeftArrow} onClick={onClickLeftArrow}>
-                ⬅️
+                <MoreLeftSingle />
             </div>
             <div className={styles.pagerNumber}>{text}</div>
             <div role="button" className={styles.pagerRightArrow} onClick={onClickRightArrow}>
-                ➡️
+                <MoreRightSingle />
             </div>
         </div>
     );

@@ -76,6 +76,25 @@ export class RefRangeService extends Disposable {
                 const subUnitId = getsubUnitId(this._univerInstanceService);
                 const getEffectsCbList = () => {
                     switch (command.id) {
+                        case EffectRefRangId.MoveColsCommandId: {
+                            const params = command.params!;
+                            const startColumn = Math.min(params.fromRange.startColumn, params.toRange.startColumn);
+                            return this._checkRange(
+                                [{ ...params.fromRange, startColumn, endColumn: workSheet.getColumnCount() - 1 }],
+                                unitId,
+                                subUnitId
+                            );
+                        }
+                        case EffectRefRangId.MoveRowsCommandId: {
+                            const params = command.params!;
+                            const startRow = Math.min(params.fromRange.startRow, params.toRange.startRow);
+
+                            return this._checkRange(
+                                [{ ...params.fromRange, startRow, endRow: workSheet.getRowCount() - 1 }],
+                                unitId,
+                                subUnitId
+                            );
+                        }
                         case EffectRefRangId.MoveRangeCommandId: {
                             const params = command;
                             return this._checkRange(

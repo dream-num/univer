@@ -27,6 +27,7 @@ import {
 } from '@univerjs/core';
 import type {
     EffectRefRangeParams,
+    IOperator,
     IRemoveNumfmtMutationParams,
     ISetCellsNumfmt,
     ISetNumfmtMutationParams,
@@ -43,7 +44,9 @@ import {
     handleInsertRow,
     handleIRemoveCol,
     handleIRemoveRow,
+    handleMoveCols,
     handleMoveRange,
+    handleMoveRows,
     INumfmtService,
     RefRangeService,
     RemoveNumfmtMutation,
@@ -126,7 +129,7 @@ export class NumfmtRefRangeController extends Disposable {
                                 endRow: row,
                                 endColumn: col,
                             };
-                            let operators = [];
+                            let operators: IOperator[] = [];
                             switch (commandInfo.id) {
                                 case EffectRefRangId.DeleteRangeMoveLeftCommandId: {
                                     operators = handleDeleteRangeMoveLeft(commandInfo, targetRange);
@@ -163,6 +166,13 @@ export class NumfmtRefRangeController extends Disposable {
                                 case EffectRefRangId.RemoveRowCommandId: {
                                     operators = handleIRemoveRow(commandInfo, targetRange);
                                     break;
+                                }
+                                case EffectRefRangId.MoveColsCommandId: {
+                                    operators = handleMoveCols(commandInfo, targetRange);
+                                    break;
+                                }
+                                case EffectRefRangId.MoveRowsCommandId: {
+                                    operators = handleMoveRows(commandInfo, targetRange);
                                 }
                             }
                             const resultRange = runRefRangeMutations(operators, targetRange);

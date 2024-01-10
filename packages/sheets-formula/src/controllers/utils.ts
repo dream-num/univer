@@ -142,7 +142,10 @@ function handleMoveRows<T>(
     const { params } = command;
     if (!params) return;
 
-    const { fromRow, toRow } = params;
+    const {
+        fromRange: { startRow: fromRow },
+        toRange: { startRow: toRow },
+    } = params;
 
     const filteredSelections = selections?.filter(
         (selection) =>
@@ -168,7 +171,10 @@ function handleMoveCols<T>(
     const { params } = command;
     if (!params) return;
 
-    const { fromCol, toCol } = params;
+    const {
+        fromRange: { startColumn: fromCol },
+        toRange: { startColumn: toCol },
+    } = params;
 
     const filteredSelections = selections?.filter(
         (selection) =>

@@ -26,7 +26,9 @@ import type {
     IInsertRangeMoveDownCommand,
     IInsertRangeMoveRightCommand,
     IInsertRowCommand,
+    IMoveColsCommand,
     IMoveRangeCommand,
+    IMoveRowsCommand,
     IOperator,
     IRemoveRowColCommand,
     IVerticalMoveOperator,
@@ -34,6 +36,135 @@ import type {
 import { OperatorType } from './type';
 
 const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER;
+interface ILine {
+    start: number;
+    end: number;
+}
+/**
+ * see docs/tldr/handMoveRowsCols.tldr
+ */
+const handleBaseMove = (fromRange: ILine, toRange: ILine, effectRange: ILine): Nullable<number> => {
+    const _effectRange = { ...effectRange };
+    const _toRange = { ...toRange };
+    const getIntersects = (line1: ILine, line2: ILine): Nullable<ILine> => {
+        const start = Math.max(line1.start, line2.start);
+        const end = Math.min(line1.end, line2.end);
+        if (end < start) {
+            return null;
+        }
+        return { start, end };
+    };
+    const getLength = (line: ILine) => line.end - line.start + 1;
+    const getRelative = (line: ILine, origin: ILine) => ({
+        start: line.start - origin.start,
+        end: line.start - origin.start + line.end - line.start,
+    });
+    const getAbsolute = (line: ILine, origin: ILine): ILine => ({
+        start: origin.start + line.start,
+        end: origin.start + line.start + line.end - line.start,
+    });
+
+    if (toRange.start > fromRange.start) {
+        const step = Math.min(fromRange.end, toRange.start) - fromRange.start + 1;
+        _toRange.start -= step;
+        _toRange.end -= step;
+    }
+    const fromRangeStep = getLength(fromRange);
+    const toRangeStep = fromRangeStep;
+    const fromRangeIntersectsEffectRange = getIntersects(fromRange, _effectRange);
+    const isFromRangeContainEffectRange =
+        fromRangeIntersectsEffectRange && getLength(fromRangeIntersectsEffectRange) <= getLength(_effectRange);
+    if (fromRange.end < _effectRange.start) {
+        _effectRange.start -= fromRangeStep;
+        _effectRange.end -= fromRangeStep;
+    } else if (fromRangeIntersectsEffectRange) {
+        const fromRangeIntersectsEffectRangeStep = getLength(fromRangeIntersectsEffectRange);
+        if (isFromRangeContainEffectRange) {
+            const relative = getRelative(_effectRange, fromRange);
+            const newLine = getAbsolute(relative, _toRange);
+            _effectRange.start = newLine.start;
+            _effectRange.end = newLine.end;
+        } else if (fromRangeIntersectsEffectRange.start > fromRange.start) {
+            _effectRange.end -= fromRangeIntersectsEffectRangeStep;
+        } else {
+            _effectRange.start -= fromRangeStep;
+            _effectRange.start -= fromRangeStep + fromRangeIntersectsEffectRangeStep;
+        }
+    }
+
+    const toRangeIntersectsEffectRange = getIntersects(_toRange, _effectRange);
+    if (_toRange.start <= _effectRange.start && !isFromRangeContainEffectRange) {
+        _effectRange.start += toRangeStep;
+        _effectRange.end += toRangeStep;
+    } else if (toRangeIntersectsEffectRange) {
+        const insertStart = _toRange.start;
+        if (getLength(toRangeIntersectsEffectRange) <= getLength(_effectRange)) {
+            return _effectRange.start - effectRange.start;
+        }
+        if (insertStart < _effectRange.start) {
+            _effectRange.start += toRangeStep;
+            _effectRange.end += toRangeStep;
+        } else if (insertStart >= _effectRange.start && insertStart <= _effectRange.end) {
+            // 1. move
+            _effectRange.end += toRangeStep;
+            _effectRange.start += toRangeStep;
+            // 2. split
+            // 3. expansion
+        }
+    }
+    return _effectRange.start - effectRange.start;
+};
+
+export const handleMoveRows = (params: IMoveRowsCommand, targetRange: IRange): IOperator[] => {
+    const { fromRange, toRange } = params.params || {};
+    if (!toRange || !fromRange) {
+        return [];
+    }
+    const step = handleBaseMove(
+        { start: fromRange.startRow, end: fromRange.endRow },
+        { start: toRange.startRow, end: toRange.endRow },
+        { start: targetRange.startRow, end: targetRange.endRow }
+    );
+    if (step === null) {
+        return [
+            {
+                type: OperatorType.Delete,
+            },
+        ];
+    }
+    return [
+        {
+            type: OperatorType.VerticalMove,
+            step: step || 0,
+        },
+    ];
+};
+
+export const handleMoveCols = (params: IMoveColsCommand, targetRange: IRange): IOperator[] => {
+    const { fromRange, toRange } = params.params || {};
+    if (!toRange || !fromRange) {
+        return [];
+    }
+    const step = handleBaseMove(
+        { start: fromRange.startColumn, end: fromRange.endColumn },
+        { start: toRange.startColumn, end: toRange.endColumn },
+        { start: targetRange.startColumn, end: targetRange.endColumn }
+    );
+    if (step === null) {
+        return [
+            {
+                type: OperatorType.Delete,
+            },
+        ];
+    }
+    return [
+        {
+            type: OperatorType.HorizontalMove,
+            step: step || 0,
+        },
+    ];
+};
+
 export const handleMoveRange = (param: IMoveRangeCommand, targetRange: IRange) => {
     const toRange = param.params?.toRange;
     const fromRange = param.params?.fromRange;

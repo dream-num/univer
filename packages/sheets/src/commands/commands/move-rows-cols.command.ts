@@ -24,17 +24,11 @@ import {
     RANGE_TYPE,
     Rectangle,
     sequenceExecute,
-    Tools,
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
-import type {
-    IAddWorksheetMergeMutationParams,
-    IRemoveWorksheetMergeMutationParams,
-} from '../../basics/interfaces/mutation-interface';
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../services/selection-manager.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
-import { AddMergeUndoMutationFactory, AddWorksheetMergeMutation } from '../mutations/add-worksheet-merge.mutation';
 import type { IMoveColumnsMutationParams, IMoveRowsMutationParams } from '../mutations/move-rows-cols.mutation';
 import {
     MoveColsMutation,
@@ -42,30 +36,30 @@ import {
     MoveRowsMutation,
     MoveRowsMutationUndoFactory,
 } from '../mutations/move-rows-cols.mutation';
-import {
-    RemoveMergeUndoMutationFactory,
-    RemoveWorksheetMergeMutation,
-} from '../mutations/remove-worksheet-merge.mutation';
 import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 import { SetSelectionsOperation } from '../operations/selection.operation';
 import { columnAcrossMergedCell, rowAcrossMergedCell } from './utils/merged-cell-util';
 import { alignToMergedCellsBorders, getPrimaryForRange } from './utils/selection-utils';
 
 export interface IMoveRowsCommandParams {
-    fromRow: number;
-    toRow: number;
+    fromRange: IRange;
+    toRange: IRange;
 }
 
+export const MoveRowsCommandId = 'sheet.command.move-rows' as const;
 /**
  * Command to move the selected rows (must currently selected) to the specified row.
  */
 export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
-    id: 'sheet.command.move-rows',
+    id: MoveRowsCommandId,
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor, params: IMoveRowsCommandParams) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const selections = selectionManagerService.getSelections();
-        const { fromRow, toRow } = params;
+        const {
+            fromRange: { startRow: fromRow },
+            toRange: { startRow: toRow },
+        } = params;
         const filteredSelections = selections?.filter(
             (selection) =>
                 selection.range.rangeType === RANGE_TYPE.ROW &&
@@ -123,43 +117,6 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
         const movedLength = toRow - fromRow;
         const moveBackward = movedLength < 0;
         const count = rangeToMove.endRow - rangeToMove.startRow + 1;
-        const mergedCells: IRange[] = Tools.deepClone(worksheet.getMergeData());
-        for (let i = 0; i < mergedCells.length; i++) {
-            const mergedCell = mergedCells[i];
-            const { startRow: mergeStartRow, endRow: mergedEndRow } = mergedCell;
-            if (moveBackward) {
-                // merged cells between `rangeToMove` to `destination` should be moved forward
-                // merged cells in the `rangeToMove` should be moved backward
-                if (Rectangle.contains(rangeToMove, mergedCell)) {
-                    mergedCell.startRow += movedLength;
-                    mergedCell.endRow += movedLength;
-                } else if (mergedEndRow < rangeToMove.startRow && mergeStartRow >= destinationRange.startRow) {
-                    mergedCell.startRow += count;
-                    mergedCell.endRow += count;
-                }
-            } else {
-                // move forward
-                if (Rectangle.contains(rangeToMove, mergedCell)) {
-                    mergedCell.startRow += movedLength;
-                    mergedCell.endRow += movedLength;
-                } else if (rangeToMove.endRow < mergeStartRow && mergedEndRow < destinationRange.startRow) {
-                    mergedCell.startRow -= count;
-                    mergedCell.endRow -= count;
-                }
-            }
-        }
-        const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
-            unitId,
-            subUnitId,
-            ranges: Tools.deepClone(worksheet.getMergeData()),
-        };
-        const undoRemoveMergeMutationParams = RemoveMergeUndoMutationFactory(accessor, removeMergeMutationParams);
-        const addMergeParams: IAddWorksheetMergeMutationParams = {
-            unitId,
-            subUnitId,
-            ranges: mergedCells,
-        };
-        const undoAddMergeParams = AddMergeUndoMutationFactory(accessor, addMergeParams);
 
         // deal with selections
         const destSelection: IRange = moveBackward
@@ -188,16 +145,12 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
 
         const redos = [
             { id: MoveRowsMutation.id, params: moveRowsParams },
-            { id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams },
-            { id: AddWorksheetMergeMutation.id, params: addMergeParams },
             { id: SetSelectionsOperation.id, params: setSelectionsParam },
             ...interceptorCommands.redos,
         ];
 
         const undos = [
             { id: MoveRowsMutation.id, params: undoMoveRowsParams },
-            { id: RemoveWorksheetMergeMutation.id, params: undoAddMergeParams },
-            { id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams },
             { id: SetSelectionsOperation.id, params: undoSetSelectionsParam },
             ...interceptorCommands.undos,
         ];
@@ -219,17 +172,21 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
 };
 
 export interface IMoveColsCommandParams {
-    fromCol: number;
-    toCol: number;
+    fromRange: IRange;
+    toRange: IRange;
 }
+export const MoveColsCommandId = 'sheet.command.move-cols' as const;
 
 export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
-    id: 'sheet.command.move-cols',
+    id: MoveColsCommandId,
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor, params: IMoveColsCommandParams) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const selections = selectionManagerService.getSelections();
-        const { fromCol, toCol } = params;
+        const {
+            fromRange: { startColumn: fromCol },
+            toRange: { startColumn: toCol },
+        } = params;
         const filteredSelections = selections?.filter(
             (selection) =>
                 selection.range.rangeType === RANGE_TYPE.COLUMN &&
@@ -288,45 +245,6 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
         const movedLength = toCol - fromCol;
         const moveBackward = movedLength < 0;
 
-        const mergedCells: IRange[] = Tools.deepClone(worksheet.getMergeData());
-        for (let i = 0; i < mergedCells.length; i++) {
-            const mergedCell = mergedCells[i];
-            const { startColumn: mergeStartCol, endColumn: mergedEndCol } = mergedCell;
-            if (moveBackward) {
-                // merged cells between `rangeToMove` to `destination` should be moved forward
-                // merged cells in the `rangeToMove` should be moved backward
-                if (Rectangle.contains(rangeToMove, mergedCell)) {
-                    mergedCell.startColumn += movedLength;
-                    mergedCell.endColumn += movedLength;
-                } else if (mergedEndCol < rangeToMove.startColumn && mergeStartCol >= destinationRange.startColumn) {
-                    mergedCell.startColumn += count;
-                    mergedCell.endColumn += count;
-                }
-            } else {
-                // move forward
-                if (Rectangle.contains(rangeToMove, mergedCell)) {
-                    mergedCell.startColumn += movedLength;
-                    mergedCell.endColumn += movedLength;
-                } else if (rangeToMove.endColumn < mergeStartCol && mergedEndCol < destinationRange.startColumn) {
-                    mergedCell.startColumn -= count;
-                    mergedCell.endColumn -= count;
-                }
-            }
-        }
-
-        const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
-            unitId,
-            subUnitId,
-            ranges: Tools.deepClone(worksheet.getMergeData()),
-        };
-        const undoRemoveMergeMutationParams = RemoveMergeUndoMutationFactory(accessor, removeMergeMutationParams);
-        const addMergeParams: IAddWorksheetMergeMutationParams = {
-            unitId,
-            subUnitId,
-            ranges: mergedCells,
-        };
-        const undoAddMergeParams = AddMergeUndoMutationFactory(accessor, addMergeParams);
-
         // deal with selections
         const destSelection: IRange = moveBackward
             ? destinationRange
@@ -354,16 +272,12 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
 
         const redos = [
             { id: MoveColsMutation.id, params: moveColsParams },
-            { id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams },
-            { id: AddWorksheetMergeMutation.id, params: addMergeParams },
             { id: SetSelectionsOperation.id, params: setSelectionsParam },
             ...interceptorCommands.redos,
         ];
 
         const undos = [
             { id: MoveColsMutation.id, params: undoMoveColsParams },
-            { id: RemoveWorksheetMergeMutation.id, params: undoAddMergeParams },
-            { id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams },
             { id: SetSelectionsOperation.id, params: undoSetSelectionsParam },
             ...interceptorCommands.undos,
         ];

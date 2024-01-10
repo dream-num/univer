@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, Nullable, Univer } from '@univerjs/core';
+import type { ICellData, IRange, Nullable, Univer } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, RANGE_TYPE } from '@univerjs/core';
 import { MoveRowsCommand, NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
@@ -22,6 +22,8 @@ import { afterEach, beforeEach, describe, it } from 'vitest';
 
 import { createCommandTestBed } from './create-command-test-bed';
 
+const cellToRange = (row: number, col: number) =>
+    ({ startRow: row, endRow: row, startColumn: col, endColumn: col }) as IRange;
 // TODO@Dushusir: add move range,insert range,delete range test case
 describe('Test insert function operation', () => {
     let univer: Univer;
@@ -79,8 +81,8 @@ describe('Test insert function operation', () => {
                 ]);
 
                 const params = {
-                    fromRow: 0,
-                    toRow: 1,
+                    fromRange: cellToRange(0, 1),
+                    toRange: cellToRange(1, 1),
                 };
 
                 await commandService.executeCommand(MoveRowsCommand.id, params);

@@ -1154,7 +1154,10 @@ export class FreezeController extends Disposable {
 
                     if (command.id === MoveColsCommand.id) {
                         const selections = this._selectionManagerService.getSelections();
-                        const { fromCol, toCol } = command.params as IMoveColsCommandParams;
+                        const {
+                            fromRange: { startColumn: fromCol },
+                            toRange: { startColumn: toCol },
+                        } = command.params as IMoveColsCommandParams;
                         const filteredSelections = selections?.filter(
                             (selection) =>
                                 selection.range.rangeType === RANGE_TYPE.COLUMN &&
@@ -1215,7 +1218,10 @@ export class FreezeController extends Disposable {
 
                     if (command.id === MoveRowsCommand.id) {
                         const selections = this._selectionManagerService.getSelections();
-                        const { fromRow, toRow } = command.params as IMoveRowsCommandParams;
+                        const {
+                            fromRange: { startRow: fromRow },
+                            toRange: { startRow: toRow },
+                        } = command.params as IMoveRowsCommandParams;
                         const filteredSelections = selections?.filter(
                             (selection) =>
                                 selection.range.rangeType === RANGE_TYPE.ROW &&

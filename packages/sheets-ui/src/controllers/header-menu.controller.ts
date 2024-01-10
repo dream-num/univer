@@ -15,7 +15,7 @@
  */
 
 import type { Nullable, Observer } from '@univerjs/core';
-import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, RANGE_TYPE } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent } from '@univerjs/engine-render';
 import { CURSOR_TYPE, IRenderManagerService, Rect } from '@univerjs/engine-render';
 import { SelectionManagerService } from '@univerjs/sheets';
@@ -246,13 +246,15 @@ export class HeaderMenuController extends Disposable {
 
             const currentColumn = this._currentColumn;
             const currentSelectionDatas = this._selectionManagerService.getSelectionRanges();
-            const menuInSelections: boolean = !!currentSelectionDatas?.find((data) => {
-                const { startColumn, endColumn } = data;
-                if (currentColumn >= startColumn && currentColumn <= endColumn) {
-                    return true;
-                }
-                return false;
-            });
+            const menuInSelections: boolean = !!currentSelectionDatas
+                ?.filter((range) => range.rangeType === RANGE_TYPE.COLUMN)
+                .find((data) => {
+                    const { startColumn, endColumn } = data;
+                    if (currentColumn >= startColumn && currentColumn <= endColumn) {
+                        return true;
+                    }
+                    return false;
+                });
 
             if (!menuInSelections) {
                 sheetObject.spreadsheetColumnHeader.onPointerDownObserver.notifyObservers(evt);

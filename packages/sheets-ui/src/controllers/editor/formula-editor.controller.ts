@@ -319,7 +319,7 @@ export class FormulaEditorController extends RxDisposable {
             })
         );
 
-        // Empty formula bar content when you press BACKSPACE in selection.
+        // Update formula bar content when you call SetRangeValuesMutation and MoveRangeMutation.
         const needUpdateFormulaEditorContentCommandList = [SetRangeValuesMutation.id, MoveRangeMutation.id];
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {

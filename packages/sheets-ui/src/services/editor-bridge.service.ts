@@ -81,6 +81,7 @@ export interface IEditorBridgeService {
         AFTER_CELL_EDIT: typeof AFTER_CELL_EDIT;
     }>;
     dispose(): void;
+    refreshEditCellState(): void;
     setEditCell(param: ICurrentEditCellParam): void;
     getEditCellState(): Readonly<Nullable<IEditorBridgeServiceParam>>;
     // Gets the DocumentDataModel of the latest table cell based on the latest cell contents
@@ -157,6 +158,13 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
                 })
             )
         );
+    }
+
+    refreshEditCellState() {
+        const editCellState = this.getLatestEditCellState();
+        this._currentEditCellState = editCellState;
+
+        this._currentEditCellState$.next(editCellState);
     }
 
     setEditCell(param: ICurrentEditCellParam) {

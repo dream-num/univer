@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import type { Direction, IWorksheetData } from '@univerjs/core';
+import type { IWorksheetData } from '@univerjs/core';
 import {
+    Direction,
     Disposable,
     ICommandService,
     IUniverInstanceService,
@@ -142,23 +143,26 @@ export class ScrollController extends Disposable {
         );
     }
 
-    scrollToVisible(direction: Direction) {
+    scrollToVisible(direction: Direction = Direction.LEFT) {
         let startSheetViewRow;
         let startSheetViewColumn;
         const selection = this._selectionManagerService.getLast();
         if (selection == null) {
             return;
         }
+
         const { actualRow: selectionStartRow, actualColumn: selectionStartColumn } = selection.primary;
         const { rowHeightAccumulation, columnWidthAccumulation } =
             this._sheetSkeletonManagerService.getCurrent()?.skeleton ?? {};
         if (rowHeightAccumulation == null || columnWidthAccumulation == null) {
             return;
         }
+
         const scene = this._getSheetObject()?.scene;
         if (scene == null) {
             return;
         }
+
         const viewport = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
         if (viewport == null) {
             return;
@@ -182,6 +186,7 @@ export class ScrollController extends Disposable {
         if (skeleton == null) {
             return;
         }
+
         const {
             startRow: viewportStartRow,
             startColumn: viewportStartColumn,

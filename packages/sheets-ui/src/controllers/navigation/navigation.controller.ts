@@ -35,6 +35,7 @@ export class SheetNavigationController extends Disposable {
             this._commandService.onCommandExecuted((command) => {
                 if (SHEET_NAVIGATION_COMMANDS.includes(command.id)) {
                     const params = command.params as IMoveSelectionCommandParams;
+
                     this._scrollController.scrollToVisible(params.direction);
                 }
             })

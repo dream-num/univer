@@ -110,7 +110,7 @@ export const ScrollCommand: ICommand<IScrollCommandParams> = {
 };
 
 /**
- * This command is reset the scroll position of the current view to 0 ,0
+ * This command is reset the scroll position of the current view to 0, 0
  */
 export const RestScrollCommand: ICommand<{}> = {
     id: 'sheet.command.scroll-view-reset',

@@ -36,128 +36,83 @@ import type {
 import { OperatorType } from './type';
 
 const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER;
-interface IPoint {
+interface ILine {
     start: number;
     end: number;
 }
 /**
  * see docs/tldr/handMoveRowsCols.tldr
  */
-const handleBaseMove = (fromRange: IPoint, toRange: IPoint, effectRange: IPoint): Nullable<number> => {
-    const isToRangeToTheRightOfFromRange = fromRange.start <= toRange.start;
-    const isIntersected =
-        (fromRange.end > toRange.start && isToRangeToTheRightOfFromRange) ||
-        (fromRange.start < toRange.end && !isToRangeToTheRightOfFromRange);
+const handleBaseMove = (fromRange: ILine, toRange: ILine, effectRange: ILine): Nullable<number> => {
+    const _effectRange = { ...effectRange };
+    const _toRange = { ...toRange };
+    const getIntersects = (line1: ILine, line2: ILine): Nullable<ILine> => {
+        const start = Math.max(line1.start, line2.start);
+        const end = Math.min(line1.end, line2.end);
+        if (end < start) {
+            return null;
+        }
+        return { start, end };
+    };
+    const getLength = (line: ILine) => line.end - line.start + 1;
+    const getRelative = (line: ILine, origin: ILine) => ({
+        start: line.start - origin.start,
+        end: line.start - origin.start + line.end - line.start,
+    });
+    const getAbsolute = (line: ILine, origin: ILine): ILine => ({
+        start: origin.start + line.start,
+        end: origin.start + line.start + line.end - line.start,
+    });
 
-    if (isIntersected) {
-        if (
-            // 1
-            (effectRange.end < fromRange.start && isToRangeToTheRightOfFromRange) ||
-            // 2
-            (effectRange.start > toRange.end && isToRangeToTheRightOfFromRange) ||
-            // 11
-            (effectRange.start < fromRange.start && effectRange.end > toRange.end && isToRangeToTheRightOfFromRange) ||
-            //10
-            (effectRange.start > fromRange.end && effectRange.end <= toRange.end && isToRangeToTheRightOfFromRange) ||
-            // 1
-            (effectRange.end < toRange.start && !isToRangeToTheRightOfFromRange) ||
-            // 2
-            (effectRange.start > fromRange.end && !isToRangeToTheRightOfFromRange) ||
-            // 11
-            (effectRange.start < toRange.start && effectRange.end > fromRange.end && !isToRangeToTheRightOfFromRange)
-        ) {
-            return 0;
-        }
-        if (
-            // 8
-            (effectRange.start >= toRange.start &&
-                effectRange.end <= fromRange.end &&
-                isToRangeToTheRightOfFromRange) ||
-            // 9
-            (effectRange.start >= fromRange.start &&
-                effectRange.end <= toRange.start &&
-                isToRangeToTheRightOfFromRange) ||
-            // 8
-            (effectRange.start >= fromRange.start &&
-                effectRange.end <= toRange.end &&
-                !isToRangeToTheRightOfFromRange) ||
-            // 10
-            (effectRange.start > toRange.end && effectRange.end <= fromRange.end && !isToRangeToTheRightOfFromRange)
-        ) {
-            const step = toRange.start - fromRange.start;
-            return step;
-        }
-        // 9
-        if (
-            effectRange.start >= toRange.start &&
-            effectRange.end < fromRange.start &&
-            !isToRangeToTheRightOfFromRange
-        ) {
-            const step = fromRange.end - fromRange.start + 1;
-            return step;
-        }
-    } else {
-        if (
-            // 2
-            (effectRange.start >= fromRange.end && effectRange.end < toRange.start && isToRangeToTheRightOfFromRange) ||
-            // 2
-            (effectRange.start >= toRange.end && effectRange.end < fromRange.start && !isToRangeToTheRightOfFromRange)
-        ) {
-            const length = fromRange.end - fromRange.start + 1;
-            const step = isToRangeToTheRightOfFromRange ? -length : length;
-            return step;
-        }
-        if (
-            // 12
-            effectRange.start >= fromRange.start &&
-            effectRange.end <= fromRange.end &&
-            isToRangeToTheRightOfFromRange
-        ) {
-            const step = toRange.start - fromRange.start;
-            return step;
-        }
-        // 12
-        if (effectRange.start >= toRange.start && effectRange.end <= toRange.end && !isToRangeToTheRightOfFromRange) {
-            const step = fromRange.end - fromRange.start + 1;
-            return step;
-        }
-
-        //13
-        if (
-            effectRange.start >= fromRange.start &&
-            effectRange.end <= fromRange.end &&
-            !isToRangeToTheRightOfFromRange
-        ) {
-            const step = toRange.start - fromRange.start;
-            return step;
-        }
-
-        if (
-            // 1
-            (effectRange.end < fromRange.start && isToRangeToTheRightOfFromRange) ||
-            // 3
-            (effectRange.start >= toRange.end && isToRangeToTheRightOfFromRange) ||
-            // 11
-            (effectRange.start < fromRange.start &&
-                effectRange.end > toRange.end &&
-                effectRange.end < fromRange.start &&
-                isToRangeToTheRightOfFromRange) ||
-            //13
-            (effectRange.start >= toRange.start && effectRange.end <= toRange.end && isToRangeToTheRightOfFromRange) ||
-            // 1
-            (effectRange.end < toRange.start && !isToRangeToTheRightOfFromRange) ||
-            // 3
-            (effectRange.start >= fromRange.end && !isToRangeToTheRightOfFromRange) ||
-            // 11
-            (effectRange.start < toRange.start &&
-                effectRange.end > fromRange.end &&
-                effectRange.end < toRange.start &&
-                !isToRangeToTheRightOfFromRange)
-        ) {
-            return 0;
+    if (toRange.start > fromRange.start) {
+        const step = Math.min(fromRange.end, toRange.start) - fromRange.start + 1;
+        _toRange.start -= step;
+        _toRange.end -= step;
+    }
+    const fromRangeStep = getLength(fromRange);
+    const toRangeStep = fromRangeStep;
+    const fromRangeIntersectsEffectRange = getIntersects(fromRange, _effectRange);
+    const isFromRangeContainEffectRange =
+        fromRangeIntersectsEffectRange && getLength(fromRangeIntersectsEffectRange) <= getLength(_effectRange);
+    if (fromRange.end < _effectRange.start) {
+        _effectRange.start -= fromRangeStep;
+        _effectRange.end -= fromRangeStep;
+    } else if (fromRangeIntersectsEffectRange) {
+        const fromRangeIntersectsEffectRangeStep = getLength(fromRangeIntersectsEffectRange);
+        if (isFromRangeContainEffectRange) {
+            const relative = getRelative(_effectRange, fromRange);
+            const newLine = getAbsolute(relative, _toRange);
+            _effectRange.start = newLine.start;
+            _effectRange.end = newLine.end;
+        } else if (fromRangeIntersectsEffectRange.start > fromRange.start) {
+            _effectRange.end -= fromRangeIntersectsEffectRangeStep;
+        } else {
+            _effectRange.start -= fromRangeStep;
+            _effectRange.start -= fromRangeStep + fromRangeIntersectsEffectRangeStep;
         }
     }
-    return null;
+
+    const toRangeIntersectsEffectRange = getIntersects(_toRange, _effectRange);
+    if (_toRange.start <= _effectRange.start && !isFromRangeContainEffectRange) {
+        _effectRange.start += toRangeStep;
+        _effectRange.end += toRangeStep;
+    } else if (toRangeIntersectsEffectRange) {
+        const insertStart = _toRange.start;
+        if (getLength(toRangeIntersectsEffectRange) <= getLength(_effectRange)) {
+            return _effectRange.start - effectRange.start;
+        }
+        if (insertStart < _effectRange.start) {
+            _effectRange.start += toRangeStep;
+            _effectRange.end += toRangeStep;
+        } else if (insertStart >= _effectRange.start && insertStart <= _effectRange.end) {
+            // 1. move
+            _effectRange.end += toRangeStep;
+            _effectRange.start += toRangeStep;
+            // 2. split
+            // 3. expansion
+        }
+    }
+    return _effectRange.start - effectRange.start;
 };
 
 export const handleMoveRows = (params: IMoveRowsCommand, targetRange: IRange): IOperator[] => {

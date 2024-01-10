@@ -27,6 +27,8 @@ import {
 import type { Injector } from '@wendellhu/redi';
 import { beforeEach, describe, expect, it } from 'vitest';
 
+import { MergeCellController } from '../../../controllers/merge-cell.controller';
+import { RefRangeService } from '../../../services/ref-range/ref-range.service';
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../../services/selection-manager.service';
 import { AddWorksheetMergeMutation } from '../../mutations/add-worksheet-merge.mutation';
 import { MoveColsMutation, MoveRowsMutation } from '../../mutations/move-rows-cols.mutation';
@@ -60,7 +62,7 @@ describe('Test move rows cols', () => {
             AddWorksheetMergeMutation,
             SetSelectionsOperation,
         ].forEach((c) => commandService.registerCommand(c));
-
+        get(MergeCellController);
         const selectionManagerService = get(SelectionManagerService);
         selectionManagerService.setCurrentSelection({
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
@@ -173,8 +175,8 @@ describe('Test move rows cols', () => {
             selectRow(18, 19);
 
             const result = await commandService.executeCommand<IMoveRowsCommandParams>(MoveRowsCommand.id, {
-                fromRange: cellToRange(18, 1),
-                toRange: cellToRange(1, 1),
+                fromRange: { ...cellToRange(18, 1), endRow: 19 },
+                toRange: { ...cellToRange(1, 1), endRow: 2 },
             });
             expect(result).toEqual(true);
             expect(getCellInfo(0, 0)?.v).toEqual('A1');
@@ -255,8 +257,8 @@ describe('Test move rows cols', () => {
             selectColumn(18, 19);
 
             const result = await commandService.executeCommand<IMoveColsCommandParams>(MoveColsCommand.id, {
-                fromRange: cellToRange(1, 18),
-                toRange: cellToRange(1, 1),
+                fromRange: { ...cellToRange(1, 18), endColumn: 19 },
+                toRange: { ...cellToRange(1, 1), endColumn: 2 },
             });
             expect(result).toEqual(true);
             expect(getCellInfo(0, 0)?.v).toEqual('A1');
@@ -395,5 +397,5 @@ const TEST_ROWS_COLS_MOVE_DEMO: IWorkbookData = {
 };
 
 function createMoveRowsColsTestBed() {
-    return createCommandTestBed(Tools.deepClone(TEST_ROWS_COLS_MOVE_DEMO));
+    return createCommandTestBed(Tools.deepClone(TEST_ROWS_COLS_MOVE_DEMO), [[MergeCellController], [RefRangeService]]);
 }

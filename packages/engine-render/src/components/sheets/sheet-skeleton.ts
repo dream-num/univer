@@ -87,11 +87,14 @@ export function getDocsSkeletonPageSize(documentSkeleton: DocumentSkeleton, angl
     }
     const { pages } = skeletonData;
     const lastPage = pages[pages.length - 1];
+    const { width, height } = lastPage;
 
     if (angle === 0) {
-        const { width, height } = lastPage;
-
         return { width, height };
+    }
+
+    if (Math.abs(angle) === Math.PI / 2) {
+        return { width: height, height: width };
     }
 
     let allRotatedWidth = 0;
@@ -477,7 +480,27 @@ export class SpreadsheetSkeleton extends Skeleton {
             const documentSkeleton = DocumentSkeleton.create(documentViewModel, this._localService);
             documentSkeleton.calculate();
 
-            const { height: h = 0 } = getDocsSkeletonPageSize(documentSkeleton, angle) ?? {};
+            let { height: h = 0 } = getDocsSkeletonPageSize(documentSkeleton, angle) ?? {};
+
+            // When calculating the auto Height, need take the margin information into account,
+            // because there is margin information when rendering
+            if (documentSkeleton) {
+                const skeletonData = documentSkeleton.getSkeletonData()!;
+                const {
+                    marginTop: t,
+                    marginBottom: b,
+                    marginLeft: l,
+                    marginRight: r,
+                } = skeletonData.pages[skeletonData.pages.length - 1];
+
+                const absAngleInRad = Math.abs(degToRad(angle));
+
+                h +=
+                    t * Math.cos(absAngleInRad) +
+                    r * Math.sin(absAngleInRad) +
+                    b * Math.cos(absAngleInRad) +
+                    l * Math.sin(absAngleInRad);
+            }
 
             height = Math.max(height, h);
         }

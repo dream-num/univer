@@ -149,8 +149,6 @@ export class IMEInputController extends Disposable {
             segmentId,
         });
 
-        skeleton.calculate();
-
         if (isUpdate) {
             if (!this._previousIMERange.collapsed) {
                 this._previousIMERange.collapsed = true;

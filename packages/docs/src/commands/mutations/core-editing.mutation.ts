@@ -16,6 +16,7 @@
 
 import { CommandType, type DocMutationParams, type IMutation, IUniverInstanceService } from '@univerjs/core';
 
+import { DocSkeletonManagerService } from '../..';
 import { DocViewModelManagerService } from '../../services/doc-view-model-manager.service';
 
 export interface IRichTextEditingMutationParams {
@@ -40,19 +41,28 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         const docViewModelManagerService = accessor.get(DocViewModelManagerService);
         const documentViewModel = docViewModelManagerService.getViewModel(unitId);
 
-        if (documentDataModel == null || documentViewModel == null) {
-            throw new Error(`DocumentDataModel or documentViewModel not found for unitId: ${unitId}`);
+        const docSkeletonManagerService = accessor.get(DocSkeletonManagerService);
+        const skeleton = docSkeletonManagerService.getSkeletonByUnitId(unitId)?.skeleton;
+
+        if (documentDataModel == null || documentViewModel == null || skeleton == null) {
+            throw new Error(`DocumentDataModel or documentViewModel or skeleton not found for unitId: ${unitId}`);
+        }
+
+        if (mutations.length === 0) {
+            throw new Error(`Mutation's length should great than 0 when call RichTextEditingMutation`);
         }
 
         // Step 1: Update Doc Data Model.
         const undoMutations = documentDataModel.apply(mutations);
 
         // Step 2: Update Doc View Model.
-        const segmentId = mutations[0].segmentId;
+        const { segmentId } = mutations[0];
         const segmentDocumentDataModel = documentDataModel.getSelfOrHeaderFooterModel(segmentId);
         const segmentViewModel = documentViewModel.getSelfOrHeaderFooterViewModel(segmentId);
 
         segmentViewModel.reset(segmentDocumentDataModel);
+
+        skeleton.calculate();
 
         return {
             unitId,

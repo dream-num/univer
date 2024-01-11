@@ -15,10 +15,9 @@
  */
 
 import type { DocumentDataModel, Nullable } from '@univerjs/core';
-import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, IUniverInstanceService } from '@univerjs/core';
+import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, IUniverInstanceService, RxDisposable } from '@univerjs/core';
 import { DocumentViewModel } from '@univerjs/engine-render';
-import type { IDisposable } from '@wendellhu/redi';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, takeUntil } from 'rxjs';
 
 export interface IDocumentViewModelManagerParam {
     unitId: string;
@@ -28,19 +27,33 @@ export interface IDocumentViewModelManagerParam {
 /**
  * The view model manager is used to manage Doc view model. has a one-to-one correspondence with the doc skeleton.
  */
-export class DocViewModelManagerService implements IDisposable {
+export class DocViewModelManagerService extends RxDisposable {
     private _currentViewModelUnitId: string = '';
     private _docViewModelMap: Map<string, IDocumentViewModelManagerParam> = new Map();
 
     private readonly _currentDocViewModel$ = new BehaviorSubject<Nullable<IDocumentViewModelManagerParam>>(null);
-
     readonly currentDocViewModel$ = this._currentDocViewModel$.asObservable();
 
-    constructor(@IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService) {}
+    constructor(@IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService) {
+        super();
+        this._initialize();
+    }
 
-    dispose(): void {
+    private _initialize() {
+        this._currentUniverService.currentDoc$.pipe(takeUntil(this.dispose$)).subscribe((documentModel) => {
+            if (documentModel == null) {
+                return;
+            }
+
+            const unitId = documentModel.getUnitId();
+            // Build the view model and notify the skeleton manager to create the skeleton.
+            this._setCurrent(unitId);
+        });
+    }
+
+    override dispose(): void {
         this._currentDocViewModel$.complete();
-        this._docViewModelMap = new Map();
+        this._docViewModelMap.clear();
     }
 
     getCurrent() {
@@ -51,7 +64,7 @@ export class DocViewModelManagerService implements IDisposable {
         return this._docViewModelMap.get(unitId)?.docViewModel;
     }
 
-    setCurrent(unitId: string) {
+    private _setCurrent(unitId: string) {
         const documentDataModel = this._currentUniverService.getUniverDocInstance(unitId);
         if (documentDataModel == null) {
             throw new Error(`Document data model with id ${unitId} not found when build view model.`);

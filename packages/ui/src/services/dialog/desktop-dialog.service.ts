@@ -14,47 +14,54 @@
  * limitations under the License.
  */
 
-import { toDisposable } from '@univerjs/core';
+import { Disposable, toDisposable } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 import { Subject } from 'rxjs';
 
 import { type IDialogPartMethodOptions } from '../../views/components/dialog-part/interface';
 import type { IDialogService } from './dialog.service';
 
-export class DesktopDialogService implements IDialogService {
-    private dialogOptions: IDialogPartMethodOptions[] = [];
-    private readonly dialogOptions$ = new Subject<IDialogPartMethodOptions[]>();
+export class DesktopDialogService extends Disposable implements IDialogService {
+    private _dialogOptions: IDialogPartMethodOptions[] = [];
+    private readonly _dialogOptions$ = new Subject<IDialogPartMethodOptions[]>();
+
+    override dispose(): void {
+        super.dispose();
+
+        this._dialogOptions$.complete();
+    }
 
     open(option: IDialogPartMethodOptions): IDisposable {
-        if (this.dialogOptions.find((item) => item.id === option.id)) {
-            this.dialogOptions = this.dialogOptions.map((item) => ({
+        if (this._dialogOptions.find((item) => item.id === option.id)) {
+            this._dialogOptions = this._dialogOptions.map((item) => ({
                 ...(item.id === option.id ? option : item),
                 visible: true,
             }));
         } else {
-            this.dialogOptions.push({
+            this._dialogOptions.push({
                 ...option,
                 visible: true,
             });
         }
 
-        this.dialogOptions$.next(this.dialogOptions);
+        this._dialogOptions$.next(this._dialogOptions);
 
         return toDisposable(() => {
-            this.dialogOptions = [];
-            this.dialogOptions$.next([]);
+            this._dialogOptions = [];
+            this._dialogOptions$.next([]);
         });
     }
 
     close(id: string) {
-        this.dialogOptions = this.dialogOptions.map((item) => ({
+        this._dialogOptions = this._dialogOptions.map((item) => ({
             ...item,
             visible: item.id === id ? false : item.visible,
         }));
-        this.dialogOptions$.next([...this.dialogOptions]);
+
+        this._dialogOptions$.next([...this._dialogOptions]);
     }
 
     getObservableDialog() {
-        return this.dialogOptions$;
+        return this._dialogOptions$;
     }
 }

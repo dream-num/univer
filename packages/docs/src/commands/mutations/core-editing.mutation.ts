@@ -62,6 +62,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
 
         segmentViewModel.reset(segmentDocumentDataModel);
 
+        // Step 3: Recalculate Doc Skeleton
         skeleton.calculate();
 
         return {

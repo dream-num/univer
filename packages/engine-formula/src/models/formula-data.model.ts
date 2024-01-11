@@ -375,6 +375,81 @@ export class FormulaDataModel extends Disposable {
         });
     }
 
+    updateArrayFormulaRange(
+        unitId: string,
+        sheetId: string,
+        cellValue: IObjectMatrixPrimitiveType<Nullable<ICellData>>
+    ) {
+        // remove the array formula range when cell value is null
+
+        const arrayFormulaRange = this._arrayFormulaRange[unitId]?.[sheetId];
+
+        if (!arrayFormulaRange) return;
+
+        const arrayFormulaRangeMatrix = new ObjectMatrix(arrayFormulaRange);
+
+        const cellMatrix = new ObjectMatrix(cellValue);
+        cellMatrix.forValue((r, c, cell) => {
+            const arrayFormulaRangeValue = arrayFormulaRangeMatrix?.getValue(r, c);
+            if (arrayFormulaRangeValue == null) {
+                return true;
+            }
+
+            const formulaString = cell?.f || '';
+            const formulaId = cell?.si || '';
+
+            const checkFormulaString = isFormulaString(formulaString);
+            const checkFormulaId = isFormulaId(formulaId);
+
+            if (!checkFormulaString && !checkFormulaId) {
+                arrayFormulaRangeMatrix.realDeleteValue(r, c);
+            }
+        });
+    }
+
+    updateArrayFormulaCellData(
+        unitId: string,
+        sheetId: string,
+        cellValue: IObjectMatrixPrimitiveType<Nullable<ICellData>>
+    ) {
+        // remove the array formula range when cell value is null
+
+        const arrayFormulaRange = this._arrayFormulaRange[unitId]?.[sheetId];
+
+        if (!arrayFormulaRange) return;
+
+        const arrayFormulaRangeMatrix = new ObjectMatrix(arrayFormulaRange);
+
+        const arrayFormulaCellData = this._arrayFormulaCellData[unitId]?.[sheetId];
+
+        if (!arrayFormulaCellData) return;
+
+        const arrayFormulaCellDataMatrix = new ObjectMatrix(arrayFormulaCellData);
+
+        const cellMatrix = new ObjectMatrix(cellValue);
+        cellMatrix.forValue((r, c, cell) => {
+            const arrayFormulaRangeValue = arrayFormulaRangeMatrix?.getValue(r, c);
+            if (arrayFormulaRangeValue == null) {
+                return true;
+            }
+
+            const formulaString = cell?.f || '';
+            const formulaId = cell?.si || '';
+
+            const checkFormulaString = isFormulaString(formulaString);
+            const checkFormulaId = isFormulaId(formulaId);
+
+            if (!checkFormulaString && !checkFormulaId) {
+                const { startRow, startColumn, endRow, endColumn } = arrayFormulaRangeValue;
+                for (let r = startRow; r <= endRow; r++) {
+                    for (let c = startColumn; c <= endColumn; c++) {
+                        arrayFormulaCellDataMatrix.realDeleteValue(r, c);
+                    }
+                }
+            }
+        });
+    }
+
     getFormulaItemBySId(sId: string, sheetId: string, unitId: string): Nullable<IFormulaDataItem> {
         const formulaData = this._formulaData;
         if (formulaData[unitId] == null) {

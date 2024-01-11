@@ -35,7 +35,7 @@ import {
 } from '@univerjs/core';
 import { MoveCursorOperation, MoveSelectionOperation } from '@univerjs/docs';
 import { LexerTreeBuilder, matchToken } from '@univerjs/engine-formula';
-import type { IMouseEvent, IPointerEvent } from '@univerjs/engine-render';
+import type { IDocumentLayoutObject, IMouseEvent, IPointerEvent } from '@univerjs/engine-render';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import {
     SelectionManagerService,
@@ -195,62 +195,13 @@ export class EndEditController extends Disposable {
                 return;
             }
 
-            const cellData: ICellData = Tools.deepClone(worksheet.getCellRaw(row, column) || {});
+            const cellData: Nullable<ICellData> = getCellDataByInput(
+                worksheet.getCellRaw(row, column) || {},
+                documentLayoutObject,
+                this._lexerTreeBuilder
+            );
 
-            const documentModel = documentLayoutObject.documentModel as DocumentDataModel;
-
-            const snapshot = documentModel.getSnapshot();
-
-            const body = snapshot.body;
-
-            if (body == null) {
-                return;
-            }
-
-            const data = body.dataStream;
-
-            const lastString = data.substring(data.length - 2, data.length);
-            let newDataStream = lastString === DEFAULT_EMPTY_DOCUMENT_VALUE ? data.substring(0, data.length - 2) : data;
-
-            if (isFormulaString(newDataStream)) {
-                if (cellData.f === newDataStream) {
-                    return;
-                }
-                const bracketCount = this._lexerTreeBuilder.checkIfAddBracket(newDataStream);
-                for (let i = 0; i < bracketCount; i++) {
-                    newDataStream += matchToken.CLOSE_BRACKET;
-                }
-
-                cellData.f = newDataStream;
-                cellData.v = null;
-                cellData.p = null;
-            } else if (isRichText(body)) {
-                if (body.dataStream === '\r\n') {
-                    cellData.v = '';
-                    cellData.f = null;
-                    cellData.si = null;
-                    cellData.p = null;
-                } else {
-                    cellData.p = snapshot;
-                    cellData.v = null;
-                    cellData.f = null;
-                    cellData.si = null;
-                }
-            } else {
-                // add `cellData.p == null` to fix https://github.com/dream-num/univer/issues/1087
-                if (
-                    // eslint-disable-next-line
-                    (newDataStream == cellData.v || (newDataStream == '' && cellData.v == null)) &&
-                    cellData.p == null
-                ) {
-                    return;
-                }
-
-                cellData.v = newDataStream;
-                cellData.f = null;
-                cellData.si = null;
-                cellData.p = null;
-            }
+            if (cellData == null) return;
 
             const context = {
                 subUnitId: sheetId,
@@ -415,4 +366,63 @@ export class EndEditController extends Disposable {
     private _getEditorObject() {
         return getEditorObject(this._editorBridgeService.getCurrentEditorId(), this._renderManagerService);
     }
+}
+
+export function getCellDataByInput(
+    cellData: ICellData,
+    documentLayoutObject: IDocumentLayoutObject,
+    lexerTreeBuilder: LexerTreeBuilder
+) {
+    cellData = Tools.deepClone(cellData);
+
+    const documentModel = documentLayoutObject.documentModel as DocumentDataModel;
+
+    const snapshot = documentModel.getSnapshot();
+
+    const body = snapshot.body;
+
+    if (body == null) {
+        return null;
+    }
+
+    const data = body.dataStream;
+    const lastString = data.substring(data.length - 2, data.length);
+    let newDataStream = lastString === DEFAULT_EMPTY_DOCUMENT_VALUE ? data.substring(0, data.length - 2) : data;
+
+    if (isFormulaString(newDataStream)) {
+        if (cellData.f === newDataStream) {
+            return null;
+        }
+        const bracketCount = lexerTreeBuilder.checkIfAddBracket(newDataStream);
+        for (let i = 0; i < bracketCount; i++) {
+            newDataStream += matchToken.CLOSE_BRACKET;
+        }
+
+        cellData.f = newDataStream;
+        cellData.v = null;
+        cellData.p = null;
+    } else if (isRichText(body)) {
+        if (body.dataStream === '\r\n') {
+            cellData.v = '';
+            cellData.f = null;
+            cellData.si = null;
+            cellData.p = null;
+        } else {
+            cellData.p = snapshot;
+            cellData.v = null;
+            cellData.f = null;
+            cellData.si = null;
+        }
+    } else {
+        // If the data is empty, the data is set to null.
+        if ((newDataStream === cellData.v || (newDataStream === '' && cellData.v == null)) && cellData.p == null) {
+            return null;
+        }
+        cellData.v = newDataStream;
+        cellData.f = null;
+        cellData.si = null;
+        cellData.p = null;
+    }
+
+    return cellData;
 }

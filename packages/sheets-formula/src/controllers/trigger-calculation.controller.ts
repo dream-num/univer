@@ -102,7 +102,7 @@ export class TriggerCalculationController extends Disposable {
                             ...this._generateDirty(this._waitingCommandQueue),
                         },
                         {
-                            local: true,
+                            onlyLocal: true,
                         }
                     );
 
@@ -253,7 +253,7 @@ export class TriggerCalculationController extends Disposable {
                 forceCalculation: true,
             },
             {
-                local: true,
+                onlyLocal: true,
             }
         );
     }

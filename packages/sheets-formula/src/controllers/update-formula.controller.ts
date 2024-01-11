@@ -188,6 +188,8 @@ export class UpdateFormulaController extends Disposable {
         }
 
         this._formulaDataModel.updateFormulaData(unitId, sheetId, cellValue);
+        this._formulaDataModel.updateArrayFormulaCellData(unitId, sheetId, cellValue);
+        this._formulaDataModel.updateArrayFormulaRange(unitId, sheetId, cellValue);
 
         this._commandService.executeCommand(
             SetFormulaDataMutation.id,
@@ -195,7 +197,19 @@ export class UpdateFormulaController extends Disposable {
                 formulaData: this._formulaDataModel.getFormulaData(),
             },
             {
-                local: true,
+                onlyLocal: true,
+            }
+        );
+
+        this._commandService.executeCommand(
+            SetArrayFormulaDataMutation.id,
+            {
+                arrayFormulaRange: this._formulaDataModel.getArrayFormulaRange(),
+                arrayFormulaCellData: this._formulaDataModel.getArrayFormulaCellData(),
+            },
+            {
+                onlyLocal: true,
+                remove: true, // remove array formula range shape
             }
         );
     }
@@ -212,13 +226,25 @@ export class UpdateFormulaController extends Disposable {
         const arrayFormulaCellData = this._formulaDataModel.getArrayFormulaCellData();
         removeFormulaData(arrayFormulaCellData, unitId, sheetId);
 
-        this._commandService.executeCommand(SetFormulaDataMutation.id, {
-            formulaData,
-        });
-        this._commandService.executeCommand(SetArrayFormulaDataMutation.id, {
-            arrayFormulaRange,
-            arrayFormulaCellData,
-        });
+        this._commandService.executeCommand(
+            SetFormulaDataMutation.id,
+            {
+                formulaData,
+            },
+            {
+                onlyLocal: true,
+            }
+        );
+        this._commandService.executeCommand(
+            SetArrayFormulaDataMutation.id,
+            {
+                arrayFormulaRange,
+                arrayFormulaCellData,
+            },
+            {
+                onlyLocal: true,
+            }
+        );
     }
 
     private _handleInsertSheetMutation(params: IInsertSheetMutationParams) {
@@ -229,9 +255,15 @@ export class UpdateFormulaController extends Disposable {
         const cellMatrix = new ObjectMatrix(cellData);
         initSheetFormulaData(formulaData, unitId, sheetId, cellMatrix);
 
-        this._commandService.executeCommand(SetFormulaDataMutation.id, {
-            formulaData,
-        });
+        this._commandService.executeCommand(
+            SetFormulaDataMutation.id,
+            {
+                formulaData,
+            },
+            {
+                onlyLocal: true,
+            }
+        );
     }
 
     private _getUpdateFormula(command: ICommandInfo) {
@@ -311,7 +343,7 @@ export class UpdateFormulaController extends Disposable {
                     arrayFormulaCellData: offsetArrayFormulaCellData,
                 },
                 {
-                    local: true,
+                    onlyLocal: true,
                 }
             );
 

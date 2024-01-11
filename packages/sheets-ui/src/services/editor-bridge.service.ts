@@ -25,22 +25,15 @@ import {
     ThemeService,
     toDisposable,
 } from '@univerjs/core';
-import type { IDocumentLayoutObject } from '@univerjs/engine-render';
-import {
-    DeviceInputEventType,
-    fixLineWidthByScale,
-    getCanvasOffsetByEngine,
-    IRenderManagerService,
-} from '@univerjs/engine-render';
+import type { Engine, IDocumentLayoutObject, Scene } from '@univerjs/engine-render';
+import { DeviceInputEventType, fixLineWidthByScale, getCanvasOffsetByEngine } from '@univerjs/engine-render';
 import type { ISheetLocation } from '@univerjs/sheets';
-import { SelectionManagerService } from '@univerjs/sheets';
 import type { KeyCode } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier, Inject } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 
-import { getSheetObject } from '../controllers/utils/component-tools';
 import { ISelectionRenderService } from './selection/selection-render.service';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 
@@ -51,6 +44,8 @@ export interface IEditorBridgeServiceVisibleParam {
 }
 
 export interface ICurrentEditCellParam {
+    scene: Scene;
+    engine: Engine;
     unitId: string;
     sheetId: string;
     primary: ISelectionCell;
@@ -125,12 +120,10 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
     });
 
     constructor(
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService
     ) {
         super();
 
@@ -188,17 +181,13 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
 
         const currentSkeleton = this._sheetSkeletonManagerService.getCurrent();
 
-        const sheetObject = this._getSheetObject();
-
-        if (currentSkeleton == null || sheetObject == null) {
+        if (currentSkeleton == null) {
             return;
         }
 
         const { skeleton } = currentSkeleton;
 
-        const { scene, engine } = sheetObject;
-
-        const { primary, unitId, sheetId } = currentEditCell;
+        const { primary, unitId, sheetId, scene, engine } = currentEditCell;
         const { startRow, startColumn } = primary;
         const primaryWithCoord = this._selectionRenderService.convertCellRangeToInfo(primary);
         if (primaryWithCoord == null) {
@@ -323,10 +312,6 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
 
     getEditorDirty() {
         return this._editorIsDirty;
-    }
-
-    private _getSheetObject() {
-        return getSheetObject(this._currentUniverService, this._renderManagerService);
     }
 }
 

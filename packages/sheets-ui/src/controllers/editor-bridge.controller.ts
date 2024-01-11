@@ -90,9 +90,19 @@ export class EditorBridgeController extends RxDisposable {
             return;
         }
 
+        const sheetObject = this._getSheetObject();
+
+        if (sheetObject == null) {
+            return;
+        }
+
         const { unitId, sheetId } = currentSkeleton;
 
+        const { scene, engine } = sheetObject;
+
         this._commandService.executeCommand(SetActivateCellEditOperation.id, {
+            scene,
+            engine,
             primary,
             unitId,
             sheetId,

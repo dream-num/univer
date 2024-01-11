@@ -404,7 +404,8 @@ export function fillSeries(data: Array<Nullable<ICellData>>, len: number, direct
             const index = (i - 1) % data.length;
             const d = Tools.deepClone(data[index]);
 
-            const y = forecast(data.length + i, dataNumArr, xArr);
+            const forward = direction === (Direction.DOWN || direction === Direction.RIGHT);
+            const y = forecast(data.length + i, dataNumArr, xArr, forward);
 
             if (d) {
                 d.v = y;
@@ -415,7 +416,7 @@ export function fillSeries(data: Array<Nullable<ICellData>>, len: number, direct
     return applyData;
 }
 
-export function forecast(x: number, yArr: number[], xArr: number[]) {
+export function forecast(x: number, yArr: number[], xArr: number[], forward = true) {
     function getAverage(arr: number[]) {
         let sum = 0;
 
@@ -438,7 +439,7 @@ export function forecast(x: number, yArr: number[], xArr: number[]) {
 
     let b;
     if (sum_n === 0) {
-        b = 1;
+        b = forward ? 1 : -1;
     } else {
         b = sum_d / sum_n;
     }

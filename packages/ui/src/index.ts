@@ -18,6 +18,7 @@ export * from './BaseComponent';
 export * from './common';
 export { getMenuHiddenObservable } from './common/menu-hidden-observable';
 export * from './components';
+export { t } from './components/hooks/locale';
 export { useObservable } from './components/hooks/observable';
 export {
     CopyShortcutItem,
@@ -47,6 +48,7 @@ export {
 } from './services/contextmenu/contextmenu.service';
 export { DesktopDialogService } from './services/dialog/desktop-dialog.service';
 export { IDialogService } from './services/dialog/dialog.service';
+export { IFocusService } from './services/focus/focus.service';
 export { LayoutService } from './services/layout/layout.service';
 export {
     type ICustomComponentProps,

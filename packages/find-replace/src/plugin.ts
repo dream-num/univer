@@ -18,6 +18,9 @@ import { Plugin } from '@univerjs/core';
 import type { Dependency, Injector } from '@wendellhu/redi';
 
 import { FindReplaceController } from './controllers/find-replace.controller';
+import { DesktopFindReplaceDialogService } from './services/desktop/desktop-find-replace-dialog.service';
+import { FindReplaceService, IFindReplaceService } from './services/find-replace.service';
+import { IFindReplaceDialogService } from './services/find-replace-dialog.service';
 
 const PLUGIN_NAME = 'FIND_REPLACE';
 
@@ -27,7 +30,14 @@ export class UniverFindReplacePlugin extends Plugin {
     }
 
     override onStarting(injector: Injector): void {
-        ([[FindReplaceController]] as Dependency[]).forEach((d) => {
+        (
+            [
+                [FindReplaceController],
+
+                [IFindReplaceService, { useClass: FindReplaceService }],
+                [IFindReplaceDialogService, { useClass: DesktopFindReplaceDialogService }],
+            ] as Dependency[]
+        ).forEach((d) => {
             injector.add(d);
         });
     }

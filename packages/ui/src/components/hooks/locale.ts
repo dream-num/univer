@@ -14,18 +14,13 @@
  * limitations under the License.
  */
 
-import type { IMenuButtonItem } from '@univerjs/ui';
-import { MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
+import { LocaleService } from '@univerjs/core';
+import { useDependency } from '@wendellhu/redi/react-bindings';
 
-import { ToggleFindReplaceDialogOperation } from '../commands/operations/find-replace.operation';
+export function useLocaleService() {
+    return useDependency(LocaleService);
+}
 
-export function FindReplaceMenuItemFactory(): IMenuButtonItem {
-    return {
-        id: ToggleFindReplaceDialogOperation.id,
-        icon: 'SearchIcon',
-        tooltip: 'toolbar.find-replace',
-        group: MenuGroup.TOOLBAR_OTHERS,
-        type: MenuItemType.BUTTON,
-        positions: [MenuPosition.TOOLBAR_START],
-    };
+export function t(localeService: LocaleService, key: string, ...args: Array<number | string>): string {
+    return localeService.t(key);
 }

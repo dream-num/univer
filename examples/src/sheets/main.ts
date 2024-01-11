@@ -20,7 +20,6 @@ import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
-import { UniverFindReplacePlugin } from '@univerjs/find-replace';
 import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
 import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
@@ -33,6 +32,8 @@ import { UniverUIPlugin } from '@univerjs/ui';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data';
 import { DebuggerPlugin } from '../plugins/debugger';
 import { locales } from './locales';
+import { UniverFindReplacePlugin } from '@univerjs/find-replace';
+import { UniverSheetsFindPlugin } from '@univerjs/sheets-find-replace';
 
 const LOAD_LAZY_PLUGINS_TIMEOUT = 5_000;
 // univer
@@ -54,7 +55,6 @@ univer.registerPlugin(UniverUIPlugin, {
     toolbar: true,
     footer: true,
 });
-univer.registerPlugin(UniverFindReplacePlugin);
 
 univer.registerPlugin(UniverDocsUIPlugin);
 
@@ -76,6 +76,10 @@ univer.registerPlugin(UniverRPCMainThreadPlugin, {
     workerURL: './worker.js',
 } as IUniverRPCMainThreadConfig);
 
+// find replace
+univer.registerPlugin(UniverFindReplacePlugin);
+univer.registerPlugin(UniverSheetsFindPlugin);
+
 // create univer sheet instance
 univer.createUniverSheet(DEFAULT_WORKBOOK_DATA_DEMO);
 
@@ -88,8 +92,8 @@ declare global {
 
 setTimeout(() => {
     import('./lazy').then((lazy) => {
-        const plugin = lazy.default();
-        univer.registerPlugin(plugin[0], plugin[1]);
+        const plugins = lazy.default();
+        plugins.forEach((p) => univer.registerPlugin(p[0], p[1]));
     });
 }, LOAD_LAZY_PLUGINS_TIMEOUT);
 

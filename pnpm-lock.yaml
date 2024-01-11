@@ -164,6 +164,9 @@ importers:
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../packages/sheets
+      '@univerjs/sheets-find-replace':
+        specifier: workspace:*
+        version: link:../packages/sheets-find-replace
       '@univerjs/sheets-formula':
         specifier: workspace:*
         version: link:../packages/sheets-formula
@@ -328,6 +331,9 @@ importers:
       react-transition-group:
         specifier: ^4.4.5
         version: 4.4.5(react-dom@18.2.0)(react@18.2.0)
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
     devDependencies:
       '@testing-library/react':
         specifier: ^14.1.2
@@ -632,12 +638,24 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../design
+      '@univerjs/icons':
+        specifier: ^0.1.25
+        version: 0.1.25(react-dom@18.2.0)(react@18.2.0)
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
         specifier: ^0.12.13
         version: 0.12.13
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.2.0(react@18.2.0)
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -809,7 +827,7 @@ importers:
         specifier: ^1.1.1
         version: 1.1.1(@types/node@20.10.6)(happy-dom@12.10.3)(less@4.2.0)
 
-  packages/sheets-find:
+  packages/sheets-find-replace:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -820,6 +838,9 @@ importers:
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../engine-render
+      '@univerjs/find-replace':
+        specifier: workspace:*
+        version: link:../find-replace
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets

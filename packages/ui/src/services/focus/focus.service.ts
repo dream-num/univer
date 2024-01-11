@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import type { ContextService } from '@univerjs/core';
-import { Disposable, IContextService, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
+import type { ContextService, Nullable } from '@univerjs/core';
+import { Disposable, IContextService, ILogService, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 import { fromEvent } from 'rxjs';
-import type { Nullable } from 'vitest';
 
 /**
  * FocusService manages focusing state of the Univer application instance.
  */
 export const IFocusService = createIdentifier<IFocusService>('univer.focus-service');
-
 export interface IFocusService {
     readonly isFocused: boolean;
+
+    forceFocus(): void;
     setContainerElement(container: HTMLElement): void;
 }
 
@@ -42,7 +42,10 @@ export class DesktopFocusService extends Disposable implements IFocusService {
         return this._isUniverFocused;
     }
 
-    constructor(@IContextService private readonly _contextService: ContextService) {
+    constructor(
+        @IContextService private readonly _contextService: ContextService,
+        @ILogService private readonly _logService: ILogService
+    ) {
         super();
 
         this._initFocusListener();
@@ -59,6 +62,11 @@ export class DesktopFocusService extends Disposable implements IFocusService {
         this._containerElement = container;
     }
 
+    forceFocus(): void {
+        // TODO@Jocs: should focus the focused element's input handler
+        setTimeout(() => this._containerElement?.focus(), 16);
+    }
+
     private _initFocusListener(): void {
         this.disposeWithMe(
             toDisposable(
@@ -73,13 +81,5 @@ export class DesktopFocusService extends Disposable implements IFocusService {
                 })
             )
         );
-
-        // this.disposeWithMe(
-        //     toDisposable(
-        //         fromEvent(window, 'focusout').subscribe((element) => {
-        //             console.log('focusing out element', element.target);
-        //         })
-        //     )
-        // );
     }
 }

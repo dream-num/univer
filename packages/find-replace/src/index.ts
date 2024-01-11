@@ -15,3 +15,17 @@
  */
 
 export { UniverFindReplacePlugin } from './plugin';
+
+// #region services
+
+export { DesktopFindReplaceDialogService } from './services/desktop/desktop-find-replace-dialog.service';
+export type {
+    IFindComplete,
+    IFindProgressItem,
+    IFindQuery,
+    IFindReplaceProvider,
+    IFindResult,
+} from './services/find-replace.service';
+export { IFindReplaceService } from './services/find-replace.service';
+
+// #endregion

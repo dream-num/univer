@@ -23,6 +23,7 @@ export {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
 } from './common/const';
+export { throttle } from './common/function';
 export { MemoryCursor } from './common/memory-cursor';
 export { requestImmediateMacroTask } from './common/request-immediate-macro-task';
 export { type ISequenceExecuteResult, sequence, sequenceAsync } from './common/sequence';

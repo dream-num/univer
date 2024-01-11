@@ -491,4 +491,8 @@ export class Worksheet {
     cellHasValue(value: ICellData) {
         return value && (value.v !== undefined || value.f !== undefined || value.p !== undefined);
     }
+
+    // #region iterators
+
+    // #endregion
 }

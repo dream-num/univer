@@ -65,7 +65,7 @@
             "path": "./packages/sheets"
         },
         {
-            "path": "./packages/sheets-find"
+            "path": "./packages/sheets-find-replace"
         },
         {
             "path": "./packages/sheets-formula"

@@ -14,18 +14,7 @@
  * limitations under the License.
  */
 
-import type { IMenuButtonItem } from '@univerjs/ui';
-import { MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
-
-import { ToggleFindReplaceDialogOperation } from '../commands/operations/find-replace.operation';
-
-export function FindReplaceMenuItemFactory(): IMenuButtonItem {
-    return {
-        id: ToggleFindReplaceDialogOperation.id,
-        icon: 'SearchIcon',
-        tooltip: 'toolbar.find-replace',
-        group: MenuGroup.TOOLBAR_OTHERS,
-        type: MenuItemType.BUTTON,
-        positions: [MenuPosition.TOOLBAR_START],
-    };
-}
+/**
+ * If find replace feature is activated.
+ */
+export const FIND_REPLACE_ACTIVATED = 'FIND_REPLACE_ACTIVATED';

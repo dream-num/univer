@@ -26,6 +26,11 @@ const config: StorybookConfig = {
             files: '*.stories.@(js|jsx|mjs|ts|tsx)',
             titlePrefix: 'Numfmt'
         },
+        {
+            directory: '../packages/find-replace/src/**',
+            files: '*.stories.@(js|jsx|mjs|ts|tsx)',
+            titlePrefix: 'Find & Replace'
+        },
     ],
     addons: [
         getAbsolutePath('@storybook/addon-links'),

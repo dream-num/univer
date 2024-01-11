@@ -48,9 +48,9 @@ function getValue(locale: ILocales[LocaleType], key: string): Nullable<string> {
  * This service provides i18n and timezone / location features to other modules.
  */
 export class LocaleService extends Disposable {
-    private currentLocale: LocaleType = LocaleType.ZH_CN;
+    private _currentLocale: LocaleType = LocaleType.ZH_CN;
 
-    private locales: ILocales | null = null;
+    private _locales: ILocales | null = null;
 
     localeChanged$ = new Subject<void>();
 
@@ -68,25 +68,25 @@ export class LocaleService extends Disposable {
      *
      */
     load(locales: ILocales) {
-        this.locales = Tools.deepMerge(this.locales ?? {}, locales);
+        this._locales = Tools.deepMerge(this._locales ?? {}, locales);
     }
 
     t = (key: string): string => {
-        if (!this.locales) throw new Error('Locale not initialized');
+        if (!this._locales) throw new Error('Locale not initialized');
 
-        return getValue(this.locales[this.currentLocale], key) ?? key;
+        return getValue(this._locales[this._currentLocale], key) ?? key;
     };
 
     setLocale(locale: LocaleType): void {
-        this.currentLocale = locale;
+        this._currentLocale = locale;
         this.localeChanged$.next();
     }
 
     getLocales() {
-        return this.locales?.[this.currentLocale];
+        return this._locales?.[this._currentLocale];
     }
 
     getCurrentLocale() {
-        return this.currentLocale;
+        return this._currentLocale;
     }
 }

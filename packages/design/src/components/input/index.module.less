@@ -1,5 +1,6 @@
 .input {
     box-sizing: border-box;
+    width: 100%;
     color: rgb(var(--text-color));
 
     &::selection {
@@ -100,7 +101,11 @@
 
     &-slot-container {
         position: relative;
-        display: inline-block;
+        display: flex;
+
+        > span {
+            width: 100%;
+        }
     }
 
     &-slot {

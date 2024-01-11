@@ -16,7 +16,7 @@
 
 import { CommandType, type DocMutationParams, type IMutation, IUniverInstanceService } from '@univerjs/core';
 
-import { DocSkeletonManagerService } from '../..';
+import { DocSkeletonManagerService } from '../../services/doc-skeleton-manager.service';
 import { DocViewModelManagerService } from '../../services/doc-view-model-manager.service';
 
 export interface IRichTextEditingMutationParams {

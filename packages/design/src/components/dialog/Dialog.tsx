@@ -23,6 +23,8 @@ import { ConfigContext } from '../config-provider/ConfigProvider';
 import styles from './index.module.less';
 
 export interface IDialogProps {
+    width?: number | string;
+
     children: React.ReactNode;
 
     /**
@@ -61,7 +63,16 @@ export interface IDialogProps {
 }
 
 export function Dialog(props: IDialogProps) {
-    const { children, visible = false, title, draggable = false, closeIcon = <CloseSingle />, footer, onClose } = props;
+    const {
+        children,
+        visible = false,
+        title,
+        draggable = false,
+        closeIcon = <CloseSingle />,
+        footer,
+        onClose,
+        width,
+    } = props;
     const [dragDisabled, setDragDisabled] = useState(false);
 
     const { mountContainer } = useContext(ConfigContext);
@@ -94,6 +105,7 @@ export function Dialog(props: IDialogProps) {
 
     return (
         <RcDialog
+            width={width}
             prefixCls={styles.dialog}
             rootClassName={draggable ? styles.dialogRootDraggable : styles.dialogRoot}
             getContainer={() => mountContainer}

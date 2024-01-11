@@ -131,7 +131,7 @@ export class StartEditController extends Disposable {
                 renderConfig.document.onPointerDownObserver.add(() => {
                     // fix https://github.com/dream-num/univer/issues/628, need to recalculate the cell editor size after it acquire focus.
                     if (this._editorBridgeService.isVisible()) {
-                        const param = this._editorBridgeService.getState();
+                        const param = this._editorBridgeService.getEditCellState();
                         const unitId = this._editorBridgeService.getCurrentEditorId();
 
                         if (param == null || unitId == null) {
@@ -160,12 +160,12 @@ export class StartEditController extends Disposable {
     }
 
     private _initialEditFocusListener() {
-        this._onInputSubscription = this._editorBridgeService.state$.subscribe((param) => {
-            if (param == null || this._editorBridgeService.isForceKeepVisible()) {
+        this._onInputSubscription = this._editorBridgeService.currentEditCellState$.subscribe((editCellState) => {
+            if (editCellState == null || this._editorBridgeService.isForceKeepVisible()) {
                 return;
             }
 
-            const { position, documentLayoutObject, scaleX, editorUnitId } = param;
+            const { position, documentLayoutObject, scaleX, editorUnitId } = editCellState;
 
             const editorObject = this._getEditorObject();
 
@@ -180,8 +180,6 @@ export class StartEditController extends Disposable {
             const { a: angle } = textRotation as ITextRotation;
 
             documentModel!.updateDocumentId(editorUnitId);
-
-            // documentModel!.updateDocumentDataMargin(paddingData);
 
             if (wrapStrategy === WrapStrategy.WRAP && angle === 0) {
                 documentModel!.updateDocumentDataPageSize((endX - startX) / scaleX);
@@ -469,9 +467,9 @@ export class StartEditController extends Disposable {
                 return;
             }
 
-            const state = this._editorBridgeService.getState();
+            const editCellState = this._editorBridgeService.getEditCellState();
 
-            if (state == null) {
+            if (editCellState == null) {
                 return;
             }
 
@@ -484,7 +482,7 @@ export class StartEditController extends Disposable {
                 editorUnitId,
                 unitId,
                 isInArrayFormulaRange = false,
-            } = state;
+            } = editCellState;
 
             const editorObject = this._getEditorObject();
 
@@ -649,7 +647,7 @@ export class StartEditController extends Disposable {
                         return;
                     }
 
-                    const param = this._editorBridgeService.getState();
+                    const param = this._editorBridgeService.getEditCellState();
                     if (param == null) {
                         return;
                     }

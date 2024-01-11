@@ -15,22 +15,8 @@
  */
 
 import type { ICommandInfo, IExecutionOptions, Nullable } from '@univerjs/core';
-import {
-    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-    ICommandService,
-    IUniverInstanceService,
-    LifecycleStages,
-    makeCellToSelection,
-    OnLifecycle,
-    RxDisposable,
-    ThemeService,
-} from '@univerjs/core';
-import {
-    DeviceInputEventType,
-    fixLineWidthByScale,
-    getCanvasOffsetByEngine,
-    IRenderManagerService,
-} from '@univerjs/engine-render';
+import { ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
+import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import {
     COMMAND_LISTENER_SKELETON_CHANGE,
@@ -44,23 +30,18 @@ import { merge, takeUntil } from 'rxjs';
 import { SetActivateCellEditOperation } from '../commands/operations/activate-cell-edit.operation';
 import { SetCellEditVisibleOperation } from '../commands/operations/cell-edit.operation';
 import { IEditorBridgeService } from '../services/editor-bridge.service';
-import { ISelectionRenderService } from '../services/selection/selection-render.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 import { getSheetObject } from './utils/component-tools';
 
 @OnLifecycle(LifecycleStages.Rendered, EditorBridgeController)
 export class EditorBridgeController extends RxDisposable {
-    // private _lastEditorLocation: Nullable<IEditorLocation> = null;
-
     constructor(
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
-        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
-        @Inject(ThemeService) private readonly _themeService: ThemeService
+        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService
     ) {
         super();
 
@@ -77,12 +58,7 @@ export class EditorBridgeController extends RxDisposable {
     }
 
     private _initSelectionChangeListener() {
-        merge(
-            this._selectionManagerService.selectionMoveEnd$,
-            this._selectionManagerService.selectionMoveStart$,
-            // The cell size will change after edit by zen-editor, so need to refresh state(endY AND endX).
-            this._editorBridgeService.refreshState$
-        )
+        merge(this._selectionManagerService.selectionMoveEnd$, this._selectionManagerService.selectionMoveStart$)
             .pipe(takeUntil(this.dispose$))
             .subscribe((params) => this._handleSelectionListener(params));
     }
@@ -90,9 +66,7 @@ export class EditorBridgeController extends RxDisposable {
     private _handleSelectionListener(params: Nullable<ISelectionWithStyle[]>) {
         const current = this._selectionManagerService.getCurrent();
 
-        /**
-         * The editor only responds to regular selections.
-         */
+        // The editor only responds to regular selections.
         if (current?.pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
             return;
         }
@@ -103,17 +77,11 @@ export class EditorBridgeController extends RxDisposable {
 
         const currentSkeleton = this._sheetSkeletonManagerService.getCurrent();
 
-        const sheetObject = this._getSheetObject();
-
-        if (currentSkeleton == null || sheetObject == null) {
+        if (currentSkeleton == null) {
             return;
         }
 
-        const { skeleton, unitId, sheetId } = currentSkeleton;
-
-        const { scene, engine } = sheetObject;
-
-        if (params == null || params.length === 0 || skeleton == null || params[params.length - 1] == null) {
+        if (params == null || params.length === 0 || params[params.length - 1] == null) {
             return;
         }
 
@@ -122,88 +90,22 @@ export class EditorBridgeController extends RxDisposable {
             return;
         }
 
-        const { startRow, startColumn } = primary;
-        const primaryWithCoord = this._selectionRenderService.convertCellRangeToInfo(primary);
-        if (primaryWithCoord == null) {
+        const sheetObject = this._getSheetObject();
+
+        if (sheetObject == null) {
             return;
         }
 
-        const actualRangeWithCoord = makeCellToSelection(primaryWithCoord);
-        if (actualRangeWithCoord == null) {
-            return;
-        }
+        const { unitId, sheetId } = currentSkeleton;
 
-        const canvasOffset = getCanvasOffsetByEngine(engine);
-
-        let { startX, startY, endX, endY } = actualRangeWithCoord;
-
-        const { scaleX, scaleY } = scene.getAncestorScale();
-
-        const { scaleX: precisionScaleX, scaleY: precisionScaleY } = scene.getPrecisionScale();
-
-        const scrollXY = scene.getScrollXY(this._selectionRenderService.getViewPort());
-        startX = fixLineWidthByScale(skeleton.convertTransformToOffsetX(startX, scaleX, scrollXY), precisionScaleX);
-        startY = fixLineWidthByScale(skeleton.convertTransformToOffsetY(startY, scaleY, scrollXY), precisionScaleY);
-        endX = fixLineWidthByScale(skeleton.convertTransformToOffsetX(endX, scaleX, scrollXY), precisionScaleX);
-        endY = fixLineWidthByScale(skeleton.convertTransformToOffsetY(endY, scaleY, scrollXY), precisionScaleY);
-
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
-        const worksheet = workbook.getActiveSheet();
-        const location = {
-            workbook,
-            worksheet,
-            unitId: workbook.getUnitId(),
-            subUnitId: worksheet.getSheetId(),
-            row: startRow,
-            col: startColumn,
-        };
-
-        const cell = this._editorBridgeService.interceptor.fetchThroughInterceptors(
-            this._editorBridgeService.interceptor.getInterceptPoints().BEFORE_CELL_EDIT
-        )(worksheet.getCell(startRow, startColumn), location);
-
-        let documentLayoutObject = cell && skeleton.getCellDocumentModelWithFormula(cell);
-
-        if (!documentLayoutObject || documentLayoutObject.documentModel == null) {
-            documentLayoutObject = skeleton.getBlankCellDocumentModel(cell);
-        }
-
-        documentLayoutObject.documentModel?.setZoomRatio(Math.max(scaleX, scaleY));
-
-        if (cell?.isInArrayFormulaRange === true) {
-            const body = documentLayoutObject.documentModel?.getBody();
-            if (body) {
-                body.textRuns = [
-                    {
-                        st: 0,
-                        ed: body.dataStream.length - 2,
-                        ts: {
-                            cl: {
-                                rgb: this._themeService.getCurrentTheme().textColorSecondary,
-                            },
-                        },
-                    },
-                ];
-            }
-        }
+        const { scene, engine } = sheetObject;
 
         this._commandService.executeCommand(SetActivateCellEditOperation.id, {
-            position: {
-                startX,
-                startY,
-                endX,
-                endY,
-            },
-            scaleX,
-            scaleY,
-            canvasOffset,
-            row: startRow,
-            column: startColumn,
+            scene,
+            engine,
+            primary,
             unitId,
             sheetId,
-            documentLayoutObject,
-            editorUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-            isInArrayFormulaRange: cell?.isInArrayFormulaRange,
         });
     }
 

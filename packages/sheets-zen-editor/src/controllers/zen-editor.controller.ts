@@ -35,7 +35,7 @@ import {
     TextSelectionManagerService,
     VIEWPORT_KEY,
 } from '@univerjs/docs';
-import { DeviceInputEventType, IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/engine-render';
+import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import { getEditorObject } from '@univerjs/sheets-ui';
 import type { IEditorBridgeServiceParam } from '@univerjs/sheets-ui/services/editor-bridge.service.js';
 import { IEditorBridgeService } from '@univerjs/sheets-ui/services/editor-bridge.service.js';
@@ -57,7 +57,6 @@ export class ZenEditorController extends RxDisposable {
         @ICommandService private readonly _commandService: ICommandService,
         @IZenZoneService private readonly _zenZoneService: IZenZoneService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
-        @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
         @IUndoRedoService private readonly _undoRedoService: IUndoRedoService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
@@ -162,13 +161,13 @@ export class ZenEditorController extends RxDisposable {
             });
         }
 
-        const param = this._editorBridgeService.getState();
+        const editCellState = this._editorBridgeService.getLatestEditCellState();
 
-        if (param == null) {
+        if (editCellState == null) {
             return;
         }
 
-        this._editorSyncHandler(param);
+        this._editorSyncHandler(editCellState);
 
         const textRanges = [
             {

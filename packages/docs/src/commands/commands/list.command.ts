@@ -214,7 +214,7 @@ function getParagraphsInRange(activeRange: IActiveTextRange, paragraphs: IParagr
     const { startOffset, endOffset } = activeRange;
     const results: IParagraph[] = [];
 
-    let start = 0;
+    let start = -1;
 
     for (const paragraph of paragraphs) {
         const { startIndex } = paragraph;

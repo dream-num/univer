@@ -15,12 +15,11 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { LocaleService } from '@univerjs/core';
+import { LocaleService, RxDisposable } from '@univerjs/core';
 import type { DocumentViewModel } from '@univerjs/engine-render';
 import { DocumentSkeleton } from '@univerjs/engine-render';
-import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, takeUntil } from 'rxjs';
 
 import type { IDocumentViewModelManagerParam } from './doc-view-model-manager.service';
 import { DocViewModelManagerService } from './doc-view-model-manager.service';
@@ -34,18 +33,15 @@ export interface IDocSkeletonManagerParam {
 /**
  * This service is for worksheet build sheet skeleton.
  */
-export class DocSkeletonManagerService implements IDisposable {
+export class DocSkeletonManagerService extends RxDisposable {
     private _currentSkeletonUnitId: string = '';
 
     private _docSkeletonMap: Map<string, IDocSkeletonManagerParam> = new Map();
 
     private readonly _currentSkeleton$ = new BehaviorSubject<Nullable<IDocSkeletonManagerParam>>(null);
-
     readonly currentSkeleton$ = this._currentSkeleton$.asObservable();
 
-    /**
-     * CurrentSkeletonBefore for pre-triggered logic during registration
-     */
+    // CurrentSkeletonBefore for pre-triggered logic during registration
     private readonly _currentSkeletonBefore$ = new BehaviorSubject<Nullable<IDocSkeletonManagerParam>>(null);
 
     readonly currentSkeletonBefore$ = this._currentSkeletonBefore$.asObservable();
@@ -54,23 +50,26 @@ export class DocSkeletonManagerService implements IDisposable {
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(DocViewModelManagerService) private readonly _docViewModelManagerService: DocViewModelManagerService
     ) {
-        this.initialize();
+        super();
+        this._initialize();
     }
 
-    initialize() {
-        this._docViewModelManagerService.currentDocViewModel$.subscribe((docViewModel) => {
-            if (docViewModel == null) {
-                return;
-            }
+    private _initialize() {
+        this._docViewModelManagerService.currentDocViewModel$
+            .pipe(takeUntil(this.dispose$))
+            .subscribe((docViewModel) => {
+                if (docViewModel == null) {
+                    return;
+                }
 
-            this._setCurrent(docViewModel);
-        });
+                this._setCurrent(docViewModel);
+            });
     }
 
-    dispose(): void {
+    override dispose(): void {
         this._currentSkeletonBefore$.complete();
         this._currentSkeleton$.complete();
-        this._docSkeletonMap = new Map();
+        this._docSkeletonMap.clear();
     }
 
     getCurrent(): Nullable<IDocSkeletonManagerParam> {
@@ -88,6 +87,10 @@ export class DocSkeletonManagerService implements IDisposable {
         }
 
         param.dirty = state;
+    }
+
+    getSkeletonByUnitId(unitId: string): Nullable<IDocSkeletonManagerParam> {
+        return this._docSkeletonMap.get(unitId);
     }
 
     private _setCurrent(docViewModelParam: IDocumentViewModelManagerParam): Nullable<IDocSkeletonManagerParam> {
@@ -116,10 +119,6 @@ export class DocSkeletonManagerService implements IDisposable {
         this._currentSkeleton$.next(this.getCurrent());
 
         return this.getCurrent();
-    }
-
-    getSkeletonByUnitId(unitId: string): Nullable<IDocSkeletonManagerParam> {
-        return this._docSkeletonMap.get(unitId);
     }
 
     private _buildSkeleton(documentViewModel: DocumentViewModel) {

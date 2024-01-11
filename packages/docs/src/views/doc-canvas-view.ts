@@ -70,8 +70,6 @@ export class DocCanvasView extends RxDisposable {
             this._currentDocumentModel = documentModel;
 
             const unitId = documentModel.getUnitId();
-            // Build the view model and notify the skeleton manager to create the skeleton.
-            this._docViewModelManagerService.setCurrent(unitId);
 
             if (!this._loadedMap.has(unitId)) {
                 this._addNewRender();

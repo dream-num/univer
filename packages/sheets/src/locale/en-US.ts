@@ -17,5 +17,6 @@
 export default {
     sheets: {
         sheetCopy: '(Copy)',
+        sheet: 'Sheet',
     },
 };

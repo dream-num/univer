@@ -142,6 +142,8 @@ export class DocRenderController extends RxDisposable {
                         return;
                     }
 
+                    skeleton.calculate();
+
                     if (excludeUnitList.includes(unitId)) {
                         currentRender.mainComponent?.makeDirty();
                         return;

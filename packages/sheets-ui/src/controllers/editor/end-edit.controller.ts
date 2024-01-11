@@ -208,6 +208,7 @@ export class EndEditController extends Disposable {
             }
 
             const data = body.dataStream;
+
             const lastString = data.substring(data.length - 2, data.length);
             let newDataStream = lastString === DEFAULT_EMPTY_DOCUMENT_VALUE ? data.substring(0, data.length - 2) : data;
 
@@ -236,10 +237,15 @@ export class EndEditController extends Disposable {
                     cellData.si = null;
                 }
             } else {
-                // eslint-disable-next-line
-                if (newDataStream == cellData.v || (newDataStream == '' && cellData.v == null)) {
+                // add `cellData.p == null` to fix https://github.com/dream-num/univer/issues/1087
+                if (
+                    // eslint-disable-next-line
+                    (newDataStream == cellData.v || (newDataStream == '' && cellData.v == null)) &&
+                    cellData.p == null
+                ) {
                     return;
                 }
+
                 cellData.v = newDataStream;
                 cellData.f = null;
                 cellData.si = null;

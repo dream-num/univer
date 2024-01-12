@@ -25,6 +25,7 @@ export { Confirm, type IConfirmProps } from './components/confirm';
 export { Container, type IContainerProps } from './components/container';
 export { Dialog, type IDialogProps } from './components/dialog';
 export { Dropdown, type IDropdownProps } from './components/dropdown';
+export { FormLayout, type IFormLayoutProps } from './components/form-layout';
 export { type IInputProps, Input } from './components/input';
 export { type IInputNumberProps, InputNumber } from './components/input-number';
 export { Menu, MenuItem, MenuItemGroup, SubMenu } from './components/menu';

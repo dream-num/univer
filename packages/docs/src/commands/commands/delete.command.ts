@@ -33,7 +33,7 @@ import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
 import { CutContentCommand } from './clipboard.inner.command';
 import { DeleteCommand, DeleteDirection, UpdateCommand } from './core-editing.command';
 
-// Handle BACKSPACE.
+// Handle BACKSPACE key.
 export const DeleteLeftCommand: ICommand = {
     id: 'doc.command.delete-left',
 
@@ -49,7 +49,7 @@ export const DeleteLeftCommand: ICommand = {
         const ranges = textSelectionManagerService.getSelections();
         const skeleton = docSkeletonManagerService.getCurrent()?.skeleton;
 
-        let result;
+        let result = true;
 
         if (activeRange == null || skeleton == null || ranges == null) {
             return false;
@@ -59,28 +59,23 @@ export const DeleteLeftCommand: ICommand = {
 
         const { startOffset, collapsed, segmentId, style } = activeRange;
 
-        // No need to delete when the cursor is at the first position of the first paragraph.
-        if (startOffset === 0 && collapsed) {
-            return true;
-        }
-
         const preSpan = skeleton.findNodeByCharIndex(startOffset);
 
         // is in bullet list?
         const preIsBullet = hasListSpan(preSpan);
         // is in indented paragraph?
-        const preIsIndent = isIndentBySpan(preSpan, docDataModel.body);
+        const preIsIndent = isIndentBySpan(preSpan, docDataModel.getBody());
 
         let cursor = startOffset;
 
-        // Get the deleted span.
-        const span = skeleton.findNodeByCharIndex(startOffset - 1)!;
+        // Get the deleted span. It maybe null or undefined when the preSpan is first span in skeleton.
+        const span = skeleton.findNodeByCharIndex(startOffset - 1);
 
         const isUpdateParagraph =
             isFirstSpan(preSpan) && span !== preSpan && (preIsBullet === true || preIsIndent === true);
 
         if (isUpdateParagraph) {
-            const paragraph = getParagraphBySpan(preSpan, docDataModel.body);
+            const paragraph = getParagraphBySpan(preSpan, docDataModel.getBody());
 
             if (paragraph == null) {
                 return false;
@@ -136,6 +131,11 @@ export const DeleteLeftCommand: ICommand = {
             });
         } else {
             if (collapsed === true) {
+                // No need to delete when the cursor is at the first position of the first paragraph.
+                if (span == null) {
+                    return true;
+                }
+
                 if (span.content === '\r') {
                     result = await commandService.executeCommand(MergeTwoParagraphCommand.id, {
                         direction: DeleteDirection.LEFT,

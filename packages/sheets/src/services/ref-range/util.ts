@@ -307,11 +307,8 @@ const handleBaseInsertRange = (insertRange: IRange, targetRange: IRange) => {
                 targetRange.endColumn >= insertRange.endColumn &&
                 getRowLength(insertRange) >= getRowLength(targetRange))
         ) {
-            const intersectedRange = Rectangle.getIntersects(targetRange, insertRange);
-            if (intersectedRange) {
-                const length = getLength(intersectedRange);
-                return { step: 0, length };
-            }
+            const length = getLength(insertRange);
+            return { step: 0, length };
         }
 
         if (

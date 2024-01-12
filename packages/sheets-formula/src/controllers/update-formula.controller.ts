@@ -796,7 +796,7 @@ export class UpdateFormulaController extends Disposable {
 
                         const sequenceSheetId = unitSheetNameMap?.[mapUnitId]?.[sheetName];
 
-                        if (sequenceSheetId == null) {
+                        if (sheetName.length > 0 && sequenceSheetId !== sheetId) {
                             continue;
                         }
 

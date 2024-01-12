@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Direction } from '@univerjs/core';
+import { CellValueType, Direction } from '@univerjs/core';
 
 import {
     chineseToNumber,
@@ -38,8 +38,7 @@ import { APPLY_TYPE, DATA_TYPE } from './type';
 export const numberRule: IAutoFillRule = {
     type: DATA_TYPE.NUMBER,
     priority: 1000,
-    match: (cellData) => typeof cellData?.v === 'number' || !isNaN(Number(cellData?.v)),
-    // TODO@yuhongz: not the good way to match number, will be changed after cell type is supported
+    match: (cellData) => typeof cellData?.v === 'number' || cellData?.t === CellValueType.NUMBER,
     isContinue: (prev, cur) => {
         if (prev.type === DATA_TYPE.NUMBER) {
             return true;

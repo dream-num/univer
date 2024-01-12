@@ -67,7 +67,7 @@ jobs:
                   body: |
                       ## View Deployment
 
-                      [#${{ github.ref.GITHUB_RUN_ID }}](https://github.com/dream-num/univer/actions/runs/${{ github.ref.GITHUB_RUN_ID }})
+                      [#${{ github.run_id }}](https://github.com/dream-num/univer/actions/runs/${{ github.run_id }})
 
                       <p align="center">
                         🥐 🍔 🥓 🥗 🥘 🌯 🍚 🍛 🍖 🍭 🍧 🍝 🥪 🥖 🍪 <br />

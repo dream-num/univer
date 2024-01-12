@@ -616,8 +616,11 @@ export function fillLoopSeries(data: Array<Nullable<ICellData>>, len: number, st
         const d = Tools.deepClone(data[index]);
 
         const last = `${data[data.length - 1]?.v}`;
-        const num = series.indexOf(last) + step * i;
+        let num = series.indexOf(last) + step * i;
 
+        if (num < 0) {
+            num += Math.abs(step) * seriesLen;
+        }
         const rsd = num % seriesLen;
         if (d) {
             d.v = series[rsd];

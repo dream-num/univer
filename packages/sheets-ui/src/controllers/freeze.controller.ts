@@ -749,6 +749,12 @@ export class FreezeController extends Disposable {
         if (!viewports) {
             return;
         }
+        console.log('===1', {
+            row,
+            column,
+            xSplit,
+            ySplit,
+        });
 
         const {
             viewMain,

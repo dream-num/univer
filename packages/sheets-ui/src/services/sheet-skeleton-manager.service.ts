@@ -139,6 +139,10 @@ export class SheetSkeletonManagerService implements IDisposable {
         param.dirty = state;
     }
 
+    getSkeleton(searchParm: ISheetSkeletonManagerSearch) {
+        return this._getCurrentBySearch(searchParm);
+    }
+
     private _getCurrentBySearch(searchParm: ISheetSkeletonManagerSearch): Nullable<ISheetSkeletonManagerParam> {
         const item = this._sheetSkeletonParam.find(
             (param) => param.unitId === searchParm.unitId && param.sheetId === searchParm.sheetId

@@ -467,7 +467,6 @@ export class Spreadsheet extends SheetComponent {
         ) {
             return;
         }
-
         ctx.save();
 
         ctx.beginPath();

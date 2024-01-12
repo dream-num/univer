@@ -103,6 +103,52 @@ export class Worksheet {
     }
 
     /**
+     * get worksheet valued cell range
+     * @returns
+     */
+    getCellMatrixDataRange() {
+        const matrix = this.getCellMatrix();
+        let startRow = -1;
+        let endRow = -1;
+        let startColumn = -1;
+        let endColumn = -1;
+
+        let rowInitd = false;
+        let columnInitd = false;
+
+        matrix.forEach((rowIndex, row) => {
+            Object.keys(row).forEach((colIndexStr) => {
+                const colIndex = +colIndexStr;
+                const cellValue = matrix.getValue(rowIndex, colIndex);
+                if (cellValue && (cellValue.v || cellValue.p || cellValue.s)) {
+                    if (!rowInitd) {
+                        startRow = rowIndex;
+                        endRow = rowIndex;
+                        rowInitd = false;
+                    } else {
+                        endRow = rowIndex;
+                    }
+
+                    if (columnInitd) {
+                        startColumn = Math.min(startColumn, colIndex);
+                    } else {
+                        startColumn = colIndex;
+                    }
+
+                    endColumn = Math.max(endColumn, colIndex);
+                }
+            });
+        });
+
+        return {
+            startColumn,
+            startRow,
+            endColumn,
+            endRow,
+        };
+    }
+
+    /**
      * Returns Row Manager
      * @returns Row Manager
      */

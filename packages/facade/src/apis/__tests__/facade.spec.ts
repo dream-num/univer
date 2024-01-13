@@ -114,7 +114,6 @@ describe('Test FUniver', () => {
     });
 
     it('Function createSocket', () => {
-        const ws = univerAPI.createSocket('URL');
-        ws.error$.subscribe((error) => {});
+        expect(() => univerAPI.createSocket('URL')).toThrowError();
     });
 });

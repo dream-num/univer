@@ -41,7 +41,7 @@ import {
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { FUniver } from '../../facade';
+import { FUniver } from '../facade';
 
 function getTestWorkbookDataDemo(): IWorkbookData {
     return {

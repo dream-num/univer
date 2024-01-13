@@ -836,7 +836,7 @@ export class UpdateFormulaController extends Disposable {
                             });
                         } else {
                             newRefString = this._getNewRangeByMoveParam(
-                                sequenceUnitRangeWidthOffset,
+                                sequenceUnitRangeWidthOffset as IUnitRangeWithOffset,
                                 formulaReferenceMoveParam,
                                 unitId,
                                 sheetId

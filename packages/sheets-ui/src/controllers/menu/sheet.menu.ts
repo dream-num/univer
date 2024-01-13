@@ -174,11 +174,31 @@ export function UnHideSheetMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
     };
 }
 
-export function ShowMenuItemFactory(): IMenuButtonItem {
+export function ShowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const commandService = accessor.get(ICommandService);
     return {
         id: ShowMenuListCommand.id,
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.unhide',
+        disabled$: new Observable<boolean>((subscriber) => {
+            const disposable = commandService.onCommandExecuted((c) => {
+                const id = c.id;
+                if (
+                    id === RemoveSheetMutation.id ||
+                    id === InsertSheetMutation.id ||
+                    id === SetWorksheetHideMutation.id
+                ) {
+                    const worksheets = univerInstanceService.getCurrentUniverSheetInstance().getWorksheets();
+                    // loop through all worksheets Map to see if there is more than one sheet
+                    const visibleSheets = Array.from(worksheets.values());
+
+                    subscriber.next(visibleSheets.length === 1);
+                }
+            });
+            subscriber.next(false);
+            return disposable.dispose;
+        }),
     };
 }

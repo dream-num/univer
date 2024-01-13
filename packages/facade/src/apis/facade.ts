@@ -27,7 +27,7 @@ import { ISocketService, WebSocketService } from '@univerjs/network';
 import type { IRegisterFunctionParams, IUnregisterFunctionParams } from '@univerjs/sheets-formula';
 import { IRegisterFunctionService } from '@univerjs/sheets-formula';
 import type { IDisposable } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
+import { Inject, Injector, Quantity } from '@wendellhu/redi';
 
 import { FWorkbook } from './sheet/f-workbook';
 
@@ -38,13 +38,9 @@ export class FUniver {
     static newAPI(wrapped: Univer | Injector): FUniver {
         const injector = wrapped instanceof Univer ? wrapped.__getInjector() : wrapped;
         // Is unified registration required?
-        let socketService;
-        try {
-            socketService = injector.get(ISocketService);
-        } catch (error) {
-            if (!socketService) {
-                injector.add([ISocketService, { useClass: WebSocketService }]);
-            }
+        const socketService = injector.get(ISocketService, Quantity.OPTIONAL);
+        if (!socketService) {
+            injector.add([ISocketService, { useClass: WebSocketService }]);
         }
 
         return injector.createInstance(FUniver);

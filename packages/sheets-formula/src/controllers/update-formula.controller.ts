@@ -80,7 +80,9 @@ import {
     handleInsertRow,
     handleIRemoveCol,
     handleIRemoveRow,
+    handleMoveCols,
     handleMoveRange,
+    handleMoveRows,
     InsertColCommand,
     InsertRangeMoveDownCommand,
     InsertRangeMoveRightCommand,
@@ -115,7 +117,9 @@ interface IUnitRangeWithOffset extends IUnitRange {
 }
 
 enum FormulaReferenceMoveType {
-    Move, // range
+    MoveRange, // range
+    MoveRows, // move rows
+    MoveCols, // move columns
     InsertRow, // row
     InsertColumn, // column
     RemoveRow, // row
@@ -444,7 +448,7 @@ export class UpdateFormulaController extends Disposable {
         const { unitId, sheetId } = this._getCurrentSheetInfo();
 
         return {
-            type: FormulaReferenceMoveType.Move,
+            type: FormulaReferenceMoveType.MoveRange,
             from: fromRange,
             to: toRange,
             unitId,
@@ -482,7 +486,7 @@ export class UpdateFormulaController extends Disposable {
         };
 
         return {
-            type: FormulaReferenceMoveType.Move,
+            type: FormulaReferenceMoveType.MoveRows,
             from,
             to,
             unitId,
@@ -520,7 +524,7 @@ export class UpdateFormulaController extends Disposable {
         };
 
         return {
-            type: FormulaReferenceMoveType.Move,
+            type: FormulaReferenceMoveType.MoveCols,
             from,
             to,
             unitId,
@@ -796,7 +800,7 @@ export class UpdateFormulaController extends Disposable {
 
                         const sequenceSheetId = unitSheetNameMap?.[mapUnitId]?.[sheetName];
 
-                        if (sequenceSheetId == null) {
+                        if (sheetName.length > 0 && sequenceSheetId !== sheetId) {
                             continue;
                         }
 
@@ -836,7 +840,7 @@ export class UpdateFormulaController extends Disposable {
                             });
                         } else {
                             newRefString = this._getNewRangeByMoveParam(
-                                sequenceUnitRangeWidthOffset,
+                                sequenceUnitRangeWidthOffset as IUnitRangeWithOffset,
                                 formulaReferenceMoveParam,
                                 unitId,
                                 sheetId
@@ -909,7 +913,7 @@ export class UpdateFormulaController extends Disposable {
         const sequenceRange = Rectangle.moveOffset(unitRange, refOffsetX, refOffsetY);
         let newRange: Nullable<IRange> = null;
 
-        if (type === FormulaReferenceMoveType.Move) {
+        if (type === FormulaReferenceMoveType.MoveRange) {
             if (from == null || to == null) {
                 return;
             }
@@ -930,6 +934,56 @@ export class UpdateFormulaController extends Disposable {
 
             const operators = handleMoveRange(
                 { id: EffectRefRangId.MoveRangeCommandId, params: { toRange: to, fromRange: from } },
+                remainRange
+            );
+
+            const result = runRefRangeMutations(operators, remainRange);
+
+            if (result == null) {
+                return;
+            }
+
+            newRange = this._getMoveNewRange(moveEdge, result, from, to, sequenceRange, remainRange);
+        } else if (type === FormulaReferenceMoveType.MoveRows) {
+            if (from == null || to == null) {
+                return;
+            }
+
+            const moveEdge = this._checkMoveEdge(sequenceRange, from);
+
+            const remainRange = Rectangle.getIntersects(sequenceRange, from);
+
+            if (remainRange == null) {
+                return;
+            }
+
+            const operators = handleMoveRows(
+                { id: EffectRefRangId.MoveRowsCommandId, params: { toRange: to, fromRange: from } },
+                remainRange
+            );
+
+            const result = runRefRangeMutations(operators, remainRange);
+
+            if (result == null) {
+                return;
+            }
+
+            newRange = this._getMoveNewRange(moveEdge, result, from, to, sequenceRange, remainRange);
+        } else if (type === FormulaReferenceMoveType.MoveCols) {
+            if (from == null || to == null) {
+                return;
+            }
+
+            const moveEdge = this._checkMoveEdge(sequenceRange, from);
+
+            const remainRange = Rectangle.getIntersects(sequenceRange, from);
+
+            if (remainRange == null) {
+                return;
+            }
+
+            const operators = handleMoveCols(
+                { id: EffectRefRangId.MoveColsCommandId, params: { toRange: to, fromRange: from } },
                 remainRange
             );
 

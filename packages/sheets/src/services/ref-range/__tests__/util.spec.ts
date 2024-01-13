@@ -400,7 +400,7 @@ describe('test ref-range move', () => {
             expect(result).toEqual({ startRow: 0, endRow: 99, startColumn: 4, endColumn: 17 });
         });
         it('the targetRange is overlap with  range', () => {
-            const targetRange = { startRow: 0, endRow: 99, startColumn: 4, endColumn: 5 };
+            const targetRange = { startRow: 0, endRow: 99, startColumn: 4, endColumn: 6 };
             const operators = handleInsertCol(
                 {
                     id: EffectRefRangId.InsertColCommandId,
@@ -409,7 +409,7 @@ describe('test ref-range move', () => {
                 targetRange
             );
             const result = runRefRangeMutations(operators!, targetRange);
-            expect(result).toEqual({ ...targetRange, endColumn: 6 });
+            expect(result).toEqual({ ...targetRange, endColumn: 12 });
         });
         it('the targetRange is on the range bottom', () => {
             const targetRange = { startRow: 0, endRow: 99, startColumn: 12, endColumn: 13 };
@@ -467,7 +467,7 @@ describe('test ref-range move', () => {
             expect(result).toEqual({ startRow: 4, endRow: 17, endColumn: 99, startColumn: 0 });
         });
         it('the targetRange is overlap with  range', () => {
-            const targetRange = { startRow: 4, endColumn: 99, startColumn: 0, endRow: 6 };
+            const targetRange = { startRow: 4, endRow: 6, endColumn: 99, startColumn: 0 };
             const operators = handleInsertRow(
                 {
                     id: EffectRefRangId.InsertRowCommandId,
@@ -476,7 +476,7 @@ describe('test ref-range move', () => {
                 targetRange
             );
             const result = runRefRangeMutations(operators!, targetRange);
-            expect(result).toEqual({ ...targetRange, endRow: 8 });
+            expect(result).toEqual({ ...targetRange, endRow: 12 });
         });
         it('the targetRange is on the range bottom', () => {
             const targetRange = { startRow: 12, endColumn: 99, startColumn: 0, endRow: 13 };

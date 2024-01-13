@@ -273,6 +273,8 @@ function handleInsertRangeMoveDown<T>(
     const lastEndRow = formulaMatrix.getLength() - 1;
     const lastEndColumn = formulaMatrix.getRange().endColumn;
 
+    // TODO@Dushusir:
+    // 影响了 ref range 和 first-cell range,就需要重新计算公式，清除引用它的公式所在的arrayFormulaCellData
     handleInsertRangeMutation(formulaMatrix, range, lastEndRow, lastEndColumn, Dimension.ROWS);
 }
 

@@ -56,6 +56,7 @@ import type {
     IDeleteRangeMoveUpCommandParams,
     IInsertColCommandParams,
     IInsertRowCommandParams,
+    IInsertRowMutationParams,
     IInsertSheetMutationParams,
     IMoveColsCommandParams,
     IMoveRangeCommandParams,
@@ -89,6 +90,7 @@ import {
     InsertRangeMoveDownCommand,
     InsertRangeMoveRightCommand,
     InsertRowCommand,
+    InsertRowMutation,
     InsertSheetMutation,
     MoveColsCommand,
     MoveRangeCommand,
@@ -111,7 +113,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 
 import type { IRefRangeWithPosition } from './utils/offset-formula-data';
 import { offsetArrayFormula, offsetFormula, removeFormulaData } from './utils/offset-formula-data';
-import { handleRedoUndoMoveRange } from './utils/redo-undo-formula-data';
+import { handleRedoUndoInsertRow, handleRedoUndoMoveRange } from './utils/redo-undo-formula-data';
 
 interface IUnitRangeWithOffset extends IUnitRange {
     refOffsetX: number;
@@ -223,6 +225,15 @@ export class UpdateFormulaController extends Disposable {
                     arrayFormulaRange,
                     arrayFormulaCellData
                 );
+                break;
+            case InsertRowMutation.id:
+                handleRedoUndoInsertRow(
+                    command as ICommandInfo<IInsertRowMutationParams>,
+                    formulaData,
+                    arrayFormulaRange,
+                    arrayFormulaCellData
+                );
+
                 break;
 
             // TODO:@Dushusir handle other mutations

@@ -17,7 +17,7 @@
 import type { ICellData, ICommandInfo, IMutationCommonParams, Nullable } from '@univerjs/core';
 import { isFormulaId, isFormulaString, ObjectMatrix, UndoCommand } from '@univerjs/core';
 import type { IArrayFormulaRangeType, IArrayFormulaUnitCellType, IFormulaData } from '@univerjs/engine-formula';
-import type { IMoveRangeMutationParams } from '@univerjs/sheets';
+import type { IInsertRowMutationParams, IMoveRangeMutationParams } from '@univerjs/sheets';
 
 import { checkFormulaDataNull, moveRangeUpdateFormulaData } from './offset-formula-data';
 
@@ -143,4 +143,16 @@ function setArrayFormulaData(
 
     // update arrayFormulaRange
     moveRangeUpdateFormulaData(fromRange, toRange, fromArrayFormulaRangeMatrix, toArrayFormulaRangeMatrix);
+}
+
+export function handleRedoUndoInsertRow(
+    command: ICommandInfo<IInsertRowMutationParams>,
+    formulaData: IFormulaData,
+    arrayFormulaRange: IArrayFormulaRangeType,
+    arrayFormulaCellData: IArrayFormulaUnitCellType
+) {
+    const { params } = command;
+    if (!params) return;
+
+    const { unitId, subUnitId, range, rowInfo } = params;
 }

@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import type { IMutation } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
+
 export const EmptyMutation: IMutation<{}, boolean> = {
     id: 'sheet.mutation.empty',
     type: CommandType.MUTATION,

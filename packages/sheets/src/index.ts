@@ -175,6 +175,7 @@ export {
 } from './commands/mutations/add-worksheet-merge.mutation';
 export { DeleteRangeMutation } from './commands/mutations/delete-range.mutation';
 export { handleDeleteRangeMutation } from './commands/mutations/delete-range.mutation';
+export { EmptyMutation } from './commands/mutations/empty.mutation';
 export { InsertRangeMutation } from './commands/mutations/insert-range.mutation';
 export { handleInsertRangeMutation } from './commands/mutations/insert-range.mutation';
 export {

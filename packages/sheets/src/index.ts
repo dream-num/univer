@@ -257,6 +257,9 @@ export { RefRangeService } from './services/ref-range/ref-range.service';
 export type { EffectRefRangeParams, IOperator } from './services/ref-range/type';
 export { EffectRefRangId, OperatorType } from './services/ref-range/type';
 export {
+    handleBaseInsertRange,
+    handleBaseMoveRowsCols,
+    handleBaseRemoveRange,
     handleDeleteRangeMoveLeft,
     handleDeleteRangeMoveUp,
     handleInsertCol,

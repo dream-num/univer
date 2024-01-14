@@ -49,7 +49,7 @@ interface ILine {
 /**
  * see docs/tldr/ref-range/move-rows-cols.tldr
  */
-const handleBaseMoveRowsCols = (
+export const handleBaseMoveRowsCols = (
     fromRange: ILine,
     toRange: ILine,
     effectRange: ILine
@@ -227,7 +227,7 @@ export const handleMoveRange = (param: IMoveRangeCommand, targetRange: IRange) =
 };
 
 // see docs/tldr/ref-range/remove-rows-cols.tldr
-const handleBaseRemoveRange = (removeRange: IRange, targetRange: IRange) => {
+export const handleBaseRemoveRange = (removeRange: IRange, targetRange: IRange) => {
     const getLength = (range: IRange): number => range.endColumn - range.startColumn + 1;
     const getRowLength = (range: IRange): number => range.endRow - range.startRow + 1;
     if (removeRange.startRow <= targetRange.endRow && removeRange.endRow >= targetRange.endRow) {
@@ -317,7 +317,7 @@ export const handleIRemoveRow = (param: IRemoveRowColCommand, targetRange: IRang
     return operators;
 };
 // see docs/tldr/ref-range/insert-rows-cols.tldr
-const handleBaseInsertRange = (insertRange: IRange, targetRange: IRange) => {
+export const handleBaseInsertRange = (insertRange: IRange, targetRange: IRange) => {
     const getLength = (range: IRange): number => range.endColumn - range.startColumn + 1;
     const getRowLength = (range: IRange): number => range.endRow - range.startRow + 1;
 

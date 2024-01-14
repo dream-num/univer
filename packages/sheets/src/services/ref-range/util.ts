@@ -32,7 +32,7 @@ import type {
 } from './type';
 import { OperatorType } from './type';
 
-const rotateRange = (range: IRange): IRange => {
+export const rotateRange = (range: IRange): IRange => {
     // rotate {startRow:2,endRow:3,startCol:3,endCol:10} to
     // {startRow:3,endRow:10,startCol:2,endRow:3}
     return {

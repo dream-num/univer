@@ -272,6 +272,7 @@ export {
     handleMoveCols,
     handleMoveRange,
     handleMoveRows,
+    rotateRange,
     runRefRangeMutations,
 } from './services/ref-range/util';
 export { INTERCEPTOR_POINT } from './services/sheet-interceptor/interceptor-const';

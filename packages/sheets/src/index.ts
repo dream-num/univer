@@ -175,6 +175,7 @@ export {
 } from './commands/mutations/add-worksheet-merge.mutation';
 export { DeleteRangeMutation } from './commands/mutations/delete-range.mutation';
 export { handleDeleteRangeMutation } from './commands/mutations/delete-range.mutation';
+export { EmptyMutation } from './commands/mutations/empty.mutation';
 export { InsertRangeMutation } from './commands/mutations/insert-range.mutation';
 export { handleInsertRangeMutation } from './commands/mutations/insert-range.mutation';
 export {
@@ -257,6 +258,9 @@ export { RefRangeService } from './services/ref-range/ref-range.service';
 export type { EffectRefRangeParams, IOperator } from './services/ref-range/type';
 export { EffectRefRangId, OperatorType } from './services/ref-range/type';
 export {
+    handleBaseInsertRange,
+    handleBaseMoveRowsCols,
+    handleBaseRemoveRange,
     handleDeleteRangeMoveLeft,
     handleDeleteRangeMoveUp,
     handleInsertCol,
@@ -268,6 +272,7 @@ export {
     handleMoveCols,
     handleMoveRange,
     handleMoveRows,
+    rotateRange,
     runRefRangeMutations,
 } from './services/ref-range/util';
 export { INTERCEPTOR_POINT } from './services/sheet-interceptor/interceptor-const';

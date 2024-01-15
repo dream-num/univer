@@ -207,7 +207,7 @@ describe('test ref-range move', () => {
             expect(result).toEqual({ startRow: 16, endRow: 17, startColumn: 5, endColumn: 6 });
         });
         it('the targetRange is overlap with range ', () => {
-            const targetRange = { startRow: 12, endRow: 13, startColumn: 3, endColumn: 6 };
+            const targetRange = { startRow: 12, endRow: 13, startColumn: 4, endColumn: 6 };
             const operators = handleInsertRangeMoveDown(
                 {
                     params: { range },

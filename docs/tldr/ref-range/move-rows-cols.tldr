@@ -8,9 +8,9 @@
         "version": 1,
         "subTypeKey": "type",
         "subTypeVersions": {
-          "image": 2,
-          "video": 2,
-          "bookmark": 0
+          "image": 3,
+          "video": 3,
+          "bookmark": 1
         }
       },
       "camera": {
@@ -34,17 +34,17 @@
         "subTypeVersions": {
           "group": 0,
           "text": 1,
-          "bookmark": 1,
+          "bookmark": 2,
           "draw": 1,
-          "geo": 7,
-          "note": 4,
+          "geo": 8,
+          "note": 5,
           "line": 1,
           "frame": 0,
           "arrow": 2,
           "highlight": 0,
           "embed": 4,
-          "image": 2,
-          "video": 1
+          "image": 3,
+          "video": 2
         }
       },
       "instance_presence": {
@@ -66,9 +66,9 @@
     {
       "id": "pointer:pointer",
       "typeName": "pointer",
-      "x": 1612.998880263944,
-      "y": 347.3408281592515,
-      "lastActivityTimestamp": 1704866955718,
+      "x": 1284.651115464451,
+      "y": 1103.7717774000166,
+      "lastActivityTimestamp": 1705137252973,
       "meta": {}
     },
     {
@@ -79,9 +79,9 @@
       "typeName": "page"
     },
     {
-      "x": -292.4424917164073,
-      "y": 160.35701328752248,
-      "z": 0.43819124652182156,
+      "x": 42.323994221064424,
+      "y": 459.3820565153594,
+      "z": 0.35291732043940677,
       "meta": {},
       "id": "camera:page:page",
       "typeName": "camera"
@@ -90,7 +90,7 @@
       "editingShapeId": null,
       "croppingShapeId": null,
       "selectedShapeIds": [],
-      "hoveredShapeId": "shape:dFeveS-GehMaRYzINPKui",
+      "hoveredShapeId": null,
       "erasingShapeIds": [],
       "hintingShapeIds": [],
       "focusedGroupId": null,
@@ -119,8 +119,8 @@
       "screenBounds": {
         "x": 0,
         "y": 0,
-        "w": 1399,
-        "h": 966
+        "w": 1502,
+        "h": 686
       },
       "zoomBrush": null,
       "isGridMode": false,
@@ -623,8 +623,8 @@
       "typeName": "shape"
     },
     {
-      "x": 515.6821636368934,
-      "y": 809.8912193648168,
+      "x": 515.6932320933668,
+      "y": 850.4239069704852,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -634,7 +634,7 @@
         "color": "violet",
         "size": "m",
         "w": 413.828125,
-        "text": "1,3,13 unchnged\n2 move forward fromRamge step\n4,5,6,7,8,9,10,14,15 unhandle \n12 move to mirror position",
+        "text": "1,3,13 unchnged\n2 move forward fromRamge step\n6,7,10 unhandle \n12 move to mirror position\n4,5,8,9,11,14,15 reduce",
         "font": "draw",
         "align": "middle",
         "autoSize": true,
@@ -1127,8 +1127,8 @@
       "typeName": "shape"
     },
     {
-      "x": 1466.9183002479476,
-      "y": 823.113365068284,
+      "x": 1455.8719806874733,
+      "y": 836.7164980741185,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -1138,7 +1138,7 @@
         "color": "violet",
         "size": "m",
         "w": 363.140625,
-        "text": "1,3  unchanged\n2 move back fromRange step\n4,5,6,7,8,9,10,11,14,15 unhandle\n13 move to mirror position\n12 move right",
+        "text": "1,3  unchanged\n2 move back fromRange step\n4,5,9 unhandle\n13 move to mirror position\n12 move right\n6,8,10,11,14,15 reduce\n7 reduce and move left",
         "font": "draw",
         "align": "middle",
         "autoSize": true,

@@ -30,7 +30,7 @@ export interface SlideTabBarConfig {
     currentIndex: number;
     onSlideEnd: (event: MouseEvent, compareIndex: number) => void;
     onChangeName: (id: string, name: string) => void;
-    onChangeTab: (event: FocusEvent, id: string) => void;
+    onChangeTab: (event: MouseEvent, id: string) => void;
     onScroll: (state: IScrollState) => void;
     onNameCheckAlert: (text: string) => boolean;
 }

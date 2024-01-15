@@ -99,10 +99,20 @@ export function offsetFormula<T>(
             );
             break;
         case InsertRangeMoveRightCommand.id:
-            handleInsertRangeMoveRight<T>(formulaMatrix, command as ICommandInfo<InsertRangeMoveRightCommandParams>);
+            handleInsertRangeMoveRight<T>(
+                formulaMatrix,
+                command as ICommandInfo<InsertRangeMoveRightCommandParams>,
+                formulaRangeMatrix,
+                refRanges
+            );
             break;
         case InsertRangeMoveDownCommand.id:
-            handleInsertRangeMoveDown<T>(formulaMatrix, command as ICommandInfo<InsertRangeMoveDownCommandParams>);
+            handleInsertRangeMoveDown<T>(
+                formulaMatrix,
+                command as ICommandInfo<InsertRangeMoveDownCommandParams>,
+                formulaRangeMatrix,
+                refRanges
+            );
             break;
         case RemoveRowCommand.id:
             handleRemoveRow<T>(
@@ -121,10 +131,20 @@ export function offsetFormula<T>(
             );
             break;
         case DeleteRangeMoveUpCommand.id:
-            handleDeleteRangeMoveUp<T>(formulaMatrix, command as ICommandInfo<IDeleteRangeMoveUpCommandParams>);
+            handleDeleteRangeMoveUp<T>(
+                formulaMatrix,
+                command as ICommandInfo<IDeleteRangeMoveUpCommandParams>,
+                formulaRangeMatrix,
+                refRanges
+            );
             break;
         case DeleteRangeMoveLeftCommand.id:
-            handleDeleteRangeMoveLeft<T>(formulaMatrix, command as ICommandInfo<IDeleteRangeMoveLeftCommandParams>);
+            handleDeleteRangeMoveLeft<T>(
+                formulaMatrix,
+                command as ICommandInfo<IDeleteRangeMoveLeftCommandParams>,
+                formulaRangeMatrix,
+                refRanges
+            );
             break;
     }
 
@@ -250,12 +270,20 @@ function handleInsertCol<T>(
 
 function handleInsertRangeMoveRight<T>(
     formulaMatrix: ObjectMatrix<T>,
-    command: ICommandInfo<InsertRangeMoveRightCommandParams>
+    command: ICommandInfo<InsertRangeMoveRightCommandParams>,
+    formulaRangeMatrix?: ObjectMatrix<IRange>,
+    refRanges?: IRefRangeWithPosition[]
 ) {
     const { params } = command;
     if (!params) return;
 
     const { range } = params;
+
+    if (formulaRangeMatrix) {
+        removeFormulaArrayColumn(range, formulaMatrix, formulaRangeMatrix, refRanges);
+        return;
+    }
+
     const lastEndRow = formulaMatrix.getLength() - 1;
     const lastEndColumn = formulaMatrix.getRange().endColumn;
 
@@ -264,17 +292,23 @@ function handleInsertRangeMoveRight<T>(
 
 function handleInsertRangeMoveDown<T>(
     formulaMatrix: ObjectMatrix<T>,
-    command: ICommandInfo<InsertRangeMoveDownCommandParams>
+    command: ICommandInfo<InsertRangeMoveDownCommandParams>,
+    formulaRangeMatrix?: ObjectMatrix<IRange>,
+    refRanges?: IRefRangeWithPosition[]
 ) {
     const { params } = command;
     if (!params) return;
 
     const { range } = params;
+
+    if (formulaRangeMatrix) {
+        removeFormulaArrayRow(range, formulaMatrix, formulaRangeMatrix, refRanges);
+        return;
+    }
+
     const lastEndRow = formulaMatrix.getLength() - 1;
     const lastEndColumn = formulaMatrix.getRange().endColumn;
 
-    // TODO@Dushusir:
-    // 影响了 ref range 和 first-cell range,就需要重新计算公式，清除引用它的公式所在的arrayFormulaCellData
     handleInsertRangeMutation(formulaMatrix, range, lastEndRow, lastEndColumn, Dimension.ROWS);
 }
 
@@ -326,12 +360,20 @@ function handleRemoveCol<T>(
 
 function handleDeleteRangeMoveUp<T>(
     formulaMatrix: ObjectMatrix<T>,
-    command: ICommandInfo<IDeleteRangeMoveUpCommandParams>
+    command: ICommandInfo<IDeleteRangeMoveUpCommandParams>,
+    formulaRangeMatrix?: ObjectMatrix<IRange>,
+    refRanges?: IRefRangeWithPosition[]
 ) {
     const { params } = command;
     if (!params) return;
 
     const { range } = params;
+
+    if (formulaRangeMatrix) {
+        removeFormulaArrayRow(range, formulaMatrix, formulaRangeMatrix, refRanges);
+        return;
+    }
+
     const lastEndRow = formulaMatrix.getLength() - 1;
     const lastEndColumn = formulaMatrix.getRange().endColumn;
 
@@ -340,12 +382,20 @@ function handleDeleteRangeMoveUp<T>(
 
 function handleDeleteRangeMoveLeft<T>(
     formulaMatrix: ObjectMatrix<T>,
-    command: ICommandInfo<IDeleteRangeMoveLeftCommandParams>
+    command: ICommandInfo<IDeleteRangeMoveLeftCommandParams>,
+    formulaRangeMatrix?: ObjectMatrix<IRange>,
+    refRanges?: IRefRangeWithPosition[]
 ) {
     const { params } = command;
     if (!params) return;
 
     const { range } = params;
+
+    if (formulaRangeMatrix) {
+        removeFormulaArrayColumn(range, formulaMatrix, formulaRangeMatrix, refRanges);
+        return;
+    }
+
     const lastEndRow = formulaMatrix.getLength() - 1;
     const lastEndColumn = formulaMatrix.getRange().endColumn;
 

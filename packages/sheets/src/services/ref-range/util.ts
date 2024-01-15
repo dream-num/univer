@@ -230,16 +230,14 @@ export const handleMoveRange = (param: IMoveRangeCommand, targetRange: IRange) =
 const handleBaseRemoveRange = (removeRange: IRange, targetRange: IRange) => {
     const getLength = (range: IRange): number => range.endColumn - range.startColumn + 1;
     const getRowLength = (range: IRange): number => range.endRow - range.startRow + 1;
-    if (removeRange.startRow <= targetRange.endRow && removeRange.endRow >= targetRange.endRow) {
+    if (removeRange.startRow <= targetRange.startRow && removeRange.endRow >= targetRange.endRow) {
         if (
             // 2
             (targetRange.startColumn < removeRange.startColumn &&
                 targetRange.endColumn >= removeRange.startColumn &&
                 targetRange.endColumn <= removeRange.endColumn) ||
             // 6
-            (targetRange.startColumn < removeRange.startColumn &&
-                targetRange.endColumn >= removeRange.endColumn &&
-                getRowLength(removeRange) >= getRowLength(targetRange))
+            (targetRange.startColumn < removeRange.startColumn && targetRange.endColumn >= removeRange.endColumn)
         ) {
             const intersectedRange = Rectangle.getIntersects(targetRange, removeRange);
             if (intersectedRange) {
@@ -319,18 +317,14 @@ export const handleIRemoveRow = (param: IRemoveRowColCommand, targetRange: IRang
 // see docs/tldr/ref-range/insert-rows-cols.tldr
 const handleBaseInsertRange = (insertRange: IRange, targetRange: IRange) => {
     const getLength = (range: IRange): number => range.endColumn - range.startColumn + 1;
-    const getRowLength = (range: IRange): number => range.endRow - range.startRow + 1;
-
-    if (insertRange.startRow <= targetRange.endRow && insertRange.endRow >= targetRange.endRow) {
+    if (insertRange.startRow <= targetRange.startRow && insertRange.endRow >= targetRange.endRow) {
         if (
             // 2
             (targetRange.startColumn < insertRange.startColumn &&
                 targetRange.endColumn >= insertRange.startColumn &&
                 targetRange.endColumn <= insertRange.endColumn) ||
             // 6
-            (targetRange.startColumn < insertRange.startColumn &&
-                targetRange.endColumn >= insertRange.endColumn &&
-                getRowLength(insertRange) >= getRowLength(targetRange))
+            (targetRange.startColumn < insertRange.startColumn && targetRange.endColumn >= insertRange.endColumn)
         ) {
             const length = getLength(insertRange);
             return { step: 0, length };

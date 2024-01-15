@@ -194,30 +194,6 @@ export function dealWidthParagraph(
             const char = src[0];
             const charIndex = i + startIndex;
 
-            // if (char === DataStreamTreeTokenType.TAB) {
-            //     const fontCreateConfig = getFontCreateConfig(
-            //         i,
-            //         bodyModel,
-            //         paragraphNode,
-            //         sectionBreakConfig,
-            //         paragraphStyle
-            //     );
-            //     const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
-            //     const tabSpan = createSkeletonTabSpan(fontCreateConfig, charSpaceApply);
-            //     pushPending();
-            //     allPages = calculateParagraphLayout(
-            //         [tabSpan],
-            //         allPages,
-            //         sectionBreakConfig,
-            //         paragraphConfig,
-            //         paragraphStart
-            //     );
-
-            //     i++;
-            //     src = src.substring(1);
-            //     continue;
-            // }
-
             if (/\s/.test(char) || hasCJK(char)) {
                 const config = getFontCreateConfig(i, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
                 let newSpan: IDocumentSkeletonSpan;

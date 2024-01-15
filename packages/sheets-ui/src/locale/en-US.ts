@@ -401,6 +401,8 @@ export default {
             title: 'Continue merging would only keep the upper-left cell value, discard other values. Are you sure to continue?',
             cancel: 'Cancel merging',
             confirm: 'Continue merging',
+            waring: 'Waring',
+            dismantleMergeCellWaring: 'This will cause some merged cells to be split. Do you want to continue?',
         },
     },
     textWrap: {

@@ -265,6 +265,8 @@ export default {
             title: '合并单元格仅保存左上角单元格的值，是否继续？',
             cancel: '取消合并',
             confirm: '继续合并',
+            waring: '警告',
+            dismantleMergeCellWaring: '此操作会导致一些合并单元格被拆散，是否继续?',
         },
     },
     textWrap: {

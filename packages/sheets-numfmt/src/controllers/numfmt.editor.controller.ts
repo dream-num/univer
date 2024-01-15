@@ -107,9 +107,8 @@ export class NumfmtEditorController extends Disposable {
                                     case 'currency':
                                     case 'grouped':
                                     case 'number': {
-                                        // remove the style atr
                                         const cell = context.worksheet.getCellRaw(row, col);
-                                        return cell ? filterAtr(cell, ['s']) : cell;
+                                        return cell;
                                     }
                                     case 'date':
                                     case 'time':

@@ -322,7 +322,7 @@ export class Documents extends DocComponent {
 
                         rotateTranslateXListApply = rotateTranslateXList;
                     } else if (wrapStrategy === WrapStrategy.WRAP) {
-                        // alignOffset.x = pagePaddingLeft * scale;
+                        alignOffset.x = pagePaddingLeft;
                     }
 
                     for (let i = 0; i < linesCount; i++) {

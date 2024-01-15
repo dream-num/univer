@@ -15,7 +15,7 @@
  */
 
 import type { ICellData, IRange, IWorkbookData, Nullable, Univer } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LocaleType, Rectangle, Tools, UndoCommand } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LocaleType, Tools } from '@univerjs/core';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -61,63 +61,78 @@ describe('Test move range commands', () => {
     afterEach(() => univer.dispose());
 
     describe('move range', () => {
-        const fromRange: IRange = {
-            startRow: 0,
-            endRow: 0,
-            startColumn: 0,
-            endColumn: 0,
-        };
-        const toRange: IRange = {
-            startRow: 2,
-            endRow: 2,
-            startColumn: 2,
-            endColumn: 2,
-        };
-        it('move a1 to b3', async () => {
-            await commandService.executeCommand(MoveRangeCommand.id, { fromRange, toRange });
-            const c3 = getCellInfo(2, 2);
-            const a1 = getCellInfo(0, 0);
-            expect(c3).toEqual({ v: 'A1', s: 's1' });
-            expect(a1).toEqual(null);
+        it('move c2:d2 to g5', async () => {
+            const fromRange: IRange = {
+                startRow: 1,
+                endRow: 1,
+                startColumn: 2,
+                endColumn: 3,
+            };
+            const toRange: IRange = {
+                startRow: 1,
+                endRow: 1,
+                startColumn: 6,
+                endColumn: 6,
+            };
+            const result = await commandService.executeCommand(MoveRangeCommand.id, { fromRange, toRange });
+            expect(result).toBeTruthy();
+            const mergeCell = getMergedInfo(1, 6);
+            expect(getMergeData().length).toBe(2);
+            expect(mergeCell).toEqual({ startRow: 1, endRow: 1, startColumn: 6, endColumn: 7 });
         });
 
-        it('undo move a1 to b3 ', async () => {
-            const originA1 = getCellInfo(0, 0);
-
-            await commandService.executeCommand(MoveRangeCommand.id, { fromRange, toRange });
-            const c3 = getCellInfo(2, 2);
-            const a1 = getCellInfo(0, 0);
-            expect(c3).toEqual({ v: 'A1', s: 's1' });
-            expect(a1).toEqual(null);
-            await commandService.executeCommand(UndoCommand.id);
-            const undoA1 = getCellInfo(0, 0);
-            const undoC3 = getCellInfo(2, 2);
-            expect(undoC3).toBeFalsy();
-            expect(undoA1).toEqual(originA1);
+        it('move a1 to c2 ', async () => {
+            const fromRange: IRange = {
+                startRow: 0,
+                endRow: 0,
+                startColumn: 0,
+                endColumn: 0,
+            };
+            const toRange: IRange = {
+                startRow: 1,
+                endRow: 1,
+                startColumn: 2,
+                endColumn: 2,
+            };
+            const result = await commandService.executeCommand(MoveRangeCommand.id, { fromRange, toRange });
+            expect(result).toBeFalsy();
         });
 
-        it('mergeCell be affected by move range ', async () => {
-            const mergeDataB3Before = getMergedInfo(2, 2);
-            expect(mergeDataB3Before).toEqual({ startRow: 2, endRow: 3, startColumn: 2, endColumn: 2 });
-            await commandService.executeCommand(MoveRangeCommand.id, { fromRange, toRange });
-            const mergeDataB3After = getMergedInfo(2, 2);
-            expect(mergeDataB3After).toEqual(undefined);
+        it('move a1 to c2 ,should be stopped', async () => {
+            const fromRange: IRange = {
+                startRow: 0,
+                endRow: 0,
+                startColumn: 0,
+                endColumn: 0,
+            };
+            const toRange: IRange = {
+                startRow: 1,
+                endRow: 1,
+                startColumn: 2,
+                endColumn: 2,
+            };
+            const result = await commandService.executeCommand(MoveRangeCommand.id, { fromRange, toRange });
+            expect(result).toBeFalsy();
+        });
+
+        it('move c1:d2 to c3 ,should be replace', async () => {
+            const fromRange: IRange = {
+                startRow: 0,
+                endRow: 1,
+                startColumn: 2,
+                endColumn: 3,
+            };
+            const toRange: IRange = {
+                startRow: 2,
+                endRow: 3,
+                startColumn: 2,
+                endColumn: 3,
+            };
+            const result = await commandService.executeCommand(MoveRangeCommand.id, { fromRange, toRange });
+            expect(result).toBeTruthy();
             const mergeData = getMergeData();
-            expect(mergeData.length).toEqual(1);
-        });
-
-        it('undo mergeCell be affected by move range ', async () => {
-            const originMergeData = Tools.deepClone(getMergeData());
-            expect(originMergeData.length).toEqual(2);
-            await commandService.executeCommand(MoveRangeCommand.id, { fromRange, toRange });
-            expect(getMergeData().length).toEqual(1);
-            expect(getMergeData()[0]).toEqual({ startRow: 1, endRow: 1, startColumn: 2, endColumn: 3 });
-            await commandService.executeCommand(UndoCommand.id);
-            const mergeData = getMergeData();
-            expect(mergeData.length).toEqual(2);
-            mergeData.forEach((range) => {
-                expect(originMergeData.some((item: IRange) => Rectangle.equals(item, range))).toBeTruthy();
-            });
+            expect(mergeData.length).toBe(1);
+            expect(mergeData[0]).toEqual({ startRow: 3, endRow: 3, startColumn: 2, endColumn: 3 });
         });
     });
 

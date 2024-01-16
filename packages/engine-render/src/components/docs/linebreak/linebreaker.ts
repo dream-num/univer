@@ -111,6 +111,7 @@ export class LineBreaker {
             }
 
             if (this._rule.shouldBreak(this._codePoint!, this._nextClass)) {
+                this._curClass = mapFirst(mapClass(this._nextClass));
                 return new Break(this._lastPos);
             }
 

@@ -33,7 +33,7 @@ export const RemoveSheetConfirmCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const localeService = accessor.get(LocaleService);
         const result = await confirmService.confirm({
-            id: 'merge.confirm.add-worksheet-merge',
+            id: 'sheet.confirm.remove-sheet',
             title: {
                 title: localeService.t('sheetConfig.deleteSheet'),
             },

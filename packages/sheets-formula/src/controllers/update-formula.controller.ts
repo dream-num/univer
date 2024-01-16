@@ -56,11 +56,9 @@ import type {
     IDeleteRangeMoveUpCommandParams,
     IInsertColCommandParams,
     IInsertRowCommandParams,
-    IInsertRowMutationParams,
     IInsertSheetMutationParams,
     IMoveColsCommandParams,
     IMoveRangeCommandParams,
-    IMoveRangeMutationParams,
     IMoveRowsCommandParams,
     InsertRangeMoveDownCommandParams,
     InsertRangeMoveRightCommandParams,
@@ -90,11 +88,9 @@ import {
     InsertRangeMoveDownCommand,
     InsertRangeMoveRightCommand,
     InsertRowCommand,
-    InsertRowMutation,
     InsertSheetMutation,
     MoveColsCommand,
     MoveRangeCommand,
-    MoveRangeMutation,
     MoveRowsCommand,
     RemoveColCommand,
     RemoveRowCommand,
@@ -113,7 +109,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 
 import type { IRefRangeWithPosition } from './utils/offset-formula-data';
 import { offsetArrayFormula, offsetFormula, removeFormulaData } from './utils/offset-formula-data';
-import { handleRedoUndoInsertRow, handleRedoUndoMoveRange } from './utils/redo-undo-formula-data';
+import { handleRedoUndoMutation } from './utils/redo-undo-formula-data';
 
 interface IUnitRangeWithOffset extends IUnitRange {
     refOffsetX: number;
@@ -188,6 +184,7 @@ export class UpdateFormulaController extends Disposable {
 
                 if (command.id === SetRangeValuesMutation.id) {
                     const params = command.params as ISetRangeValuesMutationParams;
+
                     if (
                         (options && options.onlyLocal === true) ||
                         params.trigger === SetStyleCommand.id ||
@@ -205,6 +202,7 @@ export class UpdateFormulaController extends Disposable {
                     (command.params as IMutationCommonParams)?.trigger === UndoCommand.id ||
                     (command.params as IMutationCommonParams)?.trigger === RedoCommand.id
                 ) {
+                    // Commands that affect formula updates, listen to the Mutation they trigger when undoing redo, and update formula data
                     this._handleRedoUndo(command);
                 }
             })
@@ -212,32 +210,11 @@ export class UpdateFormulaController extends Disposable {
     }
 
     private _handleRedoUndo(command: ICommandInfo) {
-        const { id } = command;
         const formulaData = this._formulaDataModel.getFormulaData();
         const arrayFormulaRange = this._formulaDataModel.getArrayFormulaRange();
         const arrayFormulaCellData = this._formulaDataModel.getArrayFormulaCellData();
 
-        switch (id) {
-            case MoveRangeMutation.id:
-                handleRedoUndoMoveRange(
-                    command as ICommandInfo<IMoveRangeMutationParams>,
-                    formulaData,
-                    arrayFormulaRange,
-                    arrayFormulaCellData
-                );
-                break;
-            case InsertRowMutation.id:
-                handleRedoUndoInsertRow(
-                    command as ICommandInfo<IInsertRowMutationParams>,
-                    formulaData,
-                    arrayFormulaRange,
-                    arrayFormulaCellData
-                );
-
-                break;
-
-            // TODO:@Dushusir handle other mutations
-        }
+        handleRedoUndoMutation(command, formulaData, arrayFormulaRange, arrayFormulaCellData);
 
         this._commandService.executeCommand(SetFormulaDataMutation.id, {
             formulaData,

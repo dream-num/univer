@@ -17,11 +17,113 @@
 import type { ICellData, ICommandInfo, IMutationCommonParams, Nullable } from '@univerjs/core';
 import { isFormulaId, isFormulaString, ObjectMatrix, UndoCommand } from '@univerjs/core';
 import type { IArrayFormulaRangeType, IArrayFormulaUnitCellType, IFormulaData } from '@univerjs/engine-formula';
-import type { IInsertRowMutationParams, IMoveRangeMutationParams } from '@univerjs/sheets';
+import {
+    DeleteRangeMutation,
+    type IDeleteRangeMutationParams,
+    type IInsertColMutationParams,
+    type IInsertRangeMutationParams,
+    type IInsertRowMutationParams,
+    type IMoveColumnsMutationParams,
+    type IMoveRangeMutationParams,
+    type IMoveRowsMutationParams,
+    InsertRangeMutation,
+    type IRemoveColMutationParams,
+    type IRemoveRowsMutationParams,
+    MoveColsMutation,
+    MoveRangeMutation,
+    MoveRowsMutation,
+} from '@univerjs/sheets';
 
 import { checkFormulaDataNull, moveRangeUpdateFormulaData } from './offset-formula-data';
 
-export function handleRedoUndoMoveRange(
+export function handleRedoUndoMutation(
+    command: ICommandInfo,
+    formulaData: IFormulaData,
+    arrayFormulaRange: IArrayFormulaRangeType,
+    arrayFormulaCellData: IArrayFormulaUnitCellType
+) {
+    const { id } = command;
+    switch (id) {
+        case MoveRangeMutation.id:
+            handleRedoUndoMoveRange(
+                command as ICommandInfo<IMoveRangeMutationParams>,
+                formulaData,
+                arrayFormulaRange,
+                arrayFormulaCellData
+            );
+            break;
+        case MoveRowsMutation.id:
+            handleRedoUndoMoveRows(
+                command as ICommandInfo<IMoveRowsMutationParams>,
+                formulaData,
+                arrayFormulaRange,
+                arrayFormulaCellData
+            );
+            break;
+        case MoveColsMutation.id:
+            handleRedoUndoMoveCols(
+                command as ICommandInfo<IMoveColumnsMutationParams>,
+                formulaData,
+                arrayFormulaRange,
+                arrayFormulaCellData
+            );
+            break;
+        // RemoveRowMutation and RemoveColMutation usually appear together with DeleteRangeMutation. We only need to deal with DeleteRangeMutation.
+        case DeleteRangeMutation.id:
+            handleRedoUndoDeleteRange(
+                command as ICommandInfo<IDeleteRangeMutationParams>,
+                formulaData,
+                arrayFormulaRange,
+                arrayFormulaCellData
+            );
+            break;
+        // case RemoveRowMutation.id:
+        //     handleRedoUndoRemoveRow(
+        //         command as ICommandInfo<IRemoveRowsMutationParams>,
+        //         formulaData,
+        //         arrayFormulaRange,
+        //         arrayFormulaCellData
+        //     );
+        //     break;
+        // case RemoveColMutation.id:
+        //     handleRedoUndoRemoveCol(
+        //         command as ICommandInfo<IRemoveColMutationParams>,
+        //         formulaData,
+        //         arrayFormulaRange,
+        //         arrayFormulaCellData
+        //     );
+        //     break;
+
+        // InsertRowMutation and InsertColMutation usually appear together with InsertRangeMutation. We only need to deal with InsertRangeMutation.
+        case InsertRangeMutation.id:
+            handleRedoUndoInsertRange(
+                command as ICommandInfo<IInsertRangeMutationParams>,
+                formulaData,
+                arrayFormulaRange,
+                arrayFormulaCellData
+            );
+            break;
+
+        // case InsertRowMutation.id:
+        //     handleRedoUndoInsertRow(
+        //         command as ICommandInfo<IInsertRowMutationParams>,
+        //         formulaData,
+        //         arrayFormulaRange,
+        //         arrayFormulaCellData
+        //     );
+        //     break;
+        // case InsertColMutation.id:
+        //     handleRedoUndoInsertCol(
+        //         command as ICommandInfo<IInsertColMutationParams>,
+        //         formulaData,
+        //         arrayFormulaRange,
+        //         arrayFormulaCellData
+        //     );
+        //     break;
+    }
+}
+
+function handleRedoUndoMoveRange(
     command: ICommandInfo<IMoveRangeMutationParams>,
     formulaData: IFormulaData,
     arrayFormulaRange: IArrayFormulaRangeType,
@@ -145,8 +247,22 @@ function setArrayFormulaData(
     moveRangeUpdateFormulaData(fromRange, toRange, fromArrayFormulaRangeMatrix, toArrayFormulaRangeMatrix);
 }
 
-export function handleRedoUndoInsertRow(
-    command: ICommandInfo<IInsertRowMutationParams>,
+function handleRedoUndoMoveRows(
+    command: ICommandInfo<IMoveRowsMutationParams>,
+    formulaData: IFormulaData,
+    arrayFormulaRange: IArrayFormulaRangeType,
+    arrayFormulaCellData: IArrayFormulaUnitCellType
+) {}
+
+function handleRedoUndoMoveCols(
+    command: ICommandInfo<IMoveColumnsMutationParams>,
+    formulaData: IFormulaData,
+    arrayFormulaRange: IArrayFormulaRangeType,
+    arrayFormulaCellData: IArrayFormulaUnitCellType
+) {}
+
+function handleRedoUndoDeleteRange(
+    command: ICommandInfo<IDeleteRangeMutationParams>,
     formulaData: IFormulaData,
     arrayFormulaRange: IArrayFormulaRangeType,
     arrayFormulaCellData: IArrayFormulaUnitCellType
@@ -154,5 +270,47 @@ export function handleRedoUndoInsertRow(
     const { params } = command;
     if (!params) return;
 
-    const { unitId, subUnitId, range, rowInfo } = params;
+    const { unitId, subUnitId, range, shiftDimension } = params;
+    // if (shiftDimension === Dimension.ROWS) {
+    // }
 }
+
+function handleRedoUndoRemoveRow(
+    command: ICommandInfo<IRemoveRowsMutationParams>,
+    formulaData: IFormulaData,
+    arrayFormulaRange: IArrayFormulaRangeType,
+    arrayFormulaCellData: IArrayFormulaUnitCellType
+) {}
+
+function handleRedoUndoRemoveCol(
+    command: ICommandInfo<IRemoveColMutationParams>,
+    formulaData: IFormulaData,
+    arrayFormulaRange: IArrayFormulaRangeType,
+    arrayFormulaCellData: IArrayFormulaUnitCellType
+) {}
+
+function handleRedoUndoInsertRange(
+    command: ICommandInfo<IInsertRangeMutationParams>,
+    formulaData: IFormulaData,
+    arrayFormulaRange: IArrayFormulaRangeType,
+    arrayFormulaCellData: IArrayFormulaUnitCellType
+) {
+    const { params } = command;
+    if (!params) return;
+
+    const { unitId, subUnitId, range, shiftDimension } = params;
+}
+
+function handleRedoUndoInsertRow(
+    command: ICommandInfo<IInsertRowMutationParams>,
+    formulaData: IFormulaData,
+    arrayFormulaRange: IArrayFormulaRangeType,
+    arrayFormulaCellData: IArrayFormulaUnitCellType
+) {}
+
+function handleRedoUndoInsertCol(
+    command: ICommandInfo<IInsertColMutationParams>,
+    formulaData: IFormulaData,
+    arrayFormulaRange: IArrayFormulaRangeType,
+    arrayFormulaCellData: IArrayFormulaUnitCellType
+) {}

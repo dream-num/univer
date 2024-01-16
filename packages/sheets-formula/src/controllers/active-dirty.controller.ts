@@ -239,7 +239,7 @@ export class ActiveDirtyController extends Disposable {
 
         const lastEndColumn = worksheet?.getLastColumnWithContent() || 0;
 
-        const matrix = new ObjectMatrix<Nullable<ICellData>>();
+        let matrix = new ObjectMatrix<Nullable<ICellData>>();
 
         let newMatrix: Nullable<ObjectMatrix<Nullable<ICellData>>> = null;
         const { startRow, startColumn, endRow, endColumn } = range;
@@ -260,7 +260,7 @@ export class ActiveDirtyController extends Disposable {
         }
 
         if (newMatrix != null) {
-            matrix.merge(newMatrix);
+            matrix = newMatrix;
         }
 
         const matrixData = matrix.getData();
@@ -285,7 +285,7 @@ export class ActiveDirtyController extends Disposable {
 
         const columnCount = worksheet?.getColumnCount() || 0;
 
-        const matrix = new ObjectMatrix<Nullable<ICellData>>();
+        let matrix = new ObjectMatrix<Nullable<ICellData>>();
 
         let newMatrix: Nullable<ObjectMatrix<Nullable<ICellData>>> = null;
         const { startRow, endRow, startColumn, endColumn } = range;
@@ -307,7 +307,7 @@ export class ActiveDirtyController extends Disposable {
         }
 
         if (newMatrix != null) {
-            matrix.merge(newMatrix);
+            matrix = newMatrix;
         }
 
         const matrixData = matrix.getData();

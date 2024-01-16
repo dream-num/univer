@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-import {
-    DeleteRangeMoveLeftCommand,
-    DeleteRangeMoveUpCommand,
-    RemoveColCommand,
-    RemoveRowCommand,
-} from '@univerjs/sheets';
+import { RemoveColCommand, RemoveRowCommand } from '@univerjs/sheets';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import { MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 
+import { DeleteRangeMoveUpConfirmCommand } from '../../commands/commands/delete-range-move-down-confirm.command';
+import { DeleteRangeMoveLeftConfirmCommand } from '../../commands/commands/delete-range-move-left-confirm.command ';
 import { SheetMenuPosition } from './menu';
 
 const DELETE_RANGE_MENU_ID = 'sheet.menu.delete';
@@ -61,7 +58,7 @@ export function RemoveRowMenuItemFactory(): IMenuButtonItem {
 
 export function DeleteRangeMoveLeftMenuItemFactory(): IMenuButtonItem {
     return {
-        id: DeleteRangeMoveLeftCommand.id,
+        id: DeleteRangeMoveLeftConfirmCommand.id,
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
         title: 'rightClick.moveLeft',
@@ -72,7 +69,7 @@ export function DeleteRangeMoveLeftMenuItemFactory(): IMenuButtonItem {
 
 export function DeleteRangeMoveUpMenuItemFactory(): IMenuButtonItem {
     return {
-        id: DeleteRangeMoveUpCommand.id,
+        id: DeleteRangeMoveUpConfirmCommand.id,
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
         title: 'rightClick.moveUp',

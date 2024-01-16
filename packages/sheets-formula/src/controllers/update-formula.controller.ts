@@ -423,6 +423,9 @@ export class UpdateFormulaController extends Disposable {
                 formulaData: this._formulaDataModel.getFormulaData(),
             });
 
+            // Updated data can be overwritten when undoing
+            offsetFormula(undoOldFormulaData, command, unitId, sheetId, selections);
+
             return this._getUpdateFormulaMutations(oldFormulaData, offsetFormulaData, undoOldFormulaData);
         }
 
@@ -928,7 +931,7 @@ export class UpdateFormulaController extends Disposable {
                 });
 
                 if (oldFormulaData[unitId]) {
-                    newFormulaData[unitId]![sheetId] = oldFormulaDataItem.getData();
+                    oldFormulaData[unitId]![sheetId] = oldFormulaDataItem.getData();
                 }
                 if (newFormulaData[unitId]) {
                     newFormulaData[unitId]![sheetId] = newFormulaDataItem.getData();

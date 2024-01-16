@@ -9,7 +9,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Sync Gitee
-              uses: abersheeran/sync-gitee-mirror@v1-beta
+              uses: jikkai/sync-gitee@main
               with:
                   repository: dream-num/univer
                   username: ${{ secrets.GITEE_USERNAME }}

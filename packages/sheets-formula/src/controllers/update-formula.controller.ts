@@ -100,7 +100,6 @@ import {
     SelectionManagerService,
     SetBorderCommand,
     SetRangeValuesMutation,
-    SetRangeValuesUndoMutationFactory,
     SetStyleCommand,
     SetWorksheetNameCommand,
     SheetInterceptorService,
@@ -368,11 +367,11 @@ export class UpdateFormulaController extends Disposable {
             let oldFormulaData = this._formulaDataModel.getFormulaData();
 
             // change formula reference
-            const { newFormulaData: formulaData, refRanges } = this._getFormulaReferenceMoveInfo(
-                oldFormulaData,
-                unitSheetNameMap,
-                result
-            );
+            const {
+                newFormulaData: formulaData,
+                oldFormulaData: undoOldFormulaData,
+                refRanges,
+            } = this._getFormulaReferenceMoveInfo(oldFormulaData, unitSheetNameMap, result);
 
             const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
             const unitId = workbook.getUnitId();
@@ -424,7 +423,7 @@ export class UpdateFormulaController extends Disposable {
                 formulaData: this._formulaDataModel.getFormulaData(),
             });
 
-            return this._getUpdateFormulaMutations(oldFormulaData, offsetFormulaData);
+            return this._getUpdateFormulaMutations(oldFormulaData, offsetFormulaData, undoOldFormulaData);
         }
 
         return {
@@ -674,13 +673,19 @@ export class UpdateFormulaController extends Disposable {
         };
     }
 
-    private _getUpdateFormulaMutations(oldFormulaData: IFormulaData, formulaData: IFormulaData) {
+    /**
+     * Redo takes the updated and offset data, undo takes the unoffset data before the update
+     * @param oldFormulaData
+     * @param formulaData
+     * @returns
+     */
+    private _getUpdateFormulaMutations(
+        oldFormulaData: IFormulaData,
+        formulaData: IFormulaData,
+        undoOldFormulaData: IFormulaData
+    ) {
         const redos = [];
         const undos = [];
-        const accessor = {
-            get: this._injector.get.bind(this._injector),
-        };
-
         const formulaDataKeys = Object.keys(formulaData);
 
         for (const unitId of formulaDataKeys) {
@@ -728,8 +733,11 @@ export class UpdateFormulaController extends Disposable {
                     params: setRangeValuesMutationParams,
                 });
 
-                const undoSetRangeValuesMutationParams: ISetRangeValuesMutationParams =
-                    SetRangeValuesUndoMutationFactory(accessor, setRangeValuesMutationParams);
+                const undoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = {
+                    subUnitId,
+                    unitId,
+                    cellValue: undoOldFormulaData[unitId]?.[subUnitId],
+                };
 
                 undos.push({
                     id: SetRangeValuesMutation.id,
@@ -749,12 +757,13 @@ export class UpdateFormulaController extends Disposable {
         unitSheetNameMap: IUnitSheetNameMap,
         formulaReferenceMoveParam: IFormulaReferenceMoveParam
     ) {
-        if (!Tools.isDefine(formulaData)) return { newFormulaData: {}, refRanges: [] };
+        if (!Tools.isDefine(formulaData)) return { newFormulaData: {}, oldFormulaData: {}, refRanges: [] };
 
         const formulaDataKeys = Object.keys(formulaData);
 
-        if (formulaDataKeys.length === 0) return { newFormulaData: {}, refRanges: [] };
+        if (formulaDataKeys.length === 0) return { newFormulaData: {}, oldFormulaData: {}, refRanges: [] };
 
+        const oldFormulaData: IFormulaData = {};
         const newFormulaData: IFormulaData = {};
 
         // Return all reference ranges. If the operation affects the reference range, you need to clear arrayFormulaRange and arrayFormulaCellData.
@@ -769,6 +778,10 @@ export class UpdateFormulaController extends Disposable {
 
             const sheetDataKeys = Object.keys(sheetData);
 
+            if (!Tools.isDefine(oldFormulaData[unitId])) {
+                oldFormulaData[unitId] = {};
+            }
+
             if (!Tools.isDefine(newFormulaData[unitId])) {
                 newFormulaData[unitId] = {};
             }
@@ -776,6 +789,7 @@ export class UpdateFormulaController extends Disposable {
             for (const sheetId of sheetDataKeys) {
                 const matrixData = new ObjectMatrix(sheetData[sheetId]);
 
+                const oldFormulaDataItem = new ObjectMatrix<IFormulaDataItem>();
                 const newFormulaDataItem = new ObjectMatrix<IFormulaDataItem>();
 
                 matrixData.forValue((row, column, formulaDataItem) => {
@@ -899,6 +913,12 @@ export class UpdateFormulaController extends Disposable {
 
                     const newSequenceNodes = this._updateRefOffset(sequenceNodes, refChangeIds, x, y);
 
+                    oldFormulaDataItem.setValue(row, column, {
+                        f: formulaString,
+                        x,
+                        y,
+                        si,
+                    });
                     newFormulaDataItem.setValue(row, column, {
                         f: `=${generateStringWithSequence(newSequenceNodes)}`,
                         x,
@@ -907,13 +927,16 @@ export class UpdateFormulaController extends Disposable {
                     });
                 });
 
+                if (oldFormulaData[unitId]) {
+                    newFormulaData[unitId]![sheetId] = oldFormulaDataItem.getData();
+                }
                 if (newFormulaData[unitId]) {
                     newFormulaData[unitId]![sheetId] = newFormulaDataItem.getData();
                 }
             }
         }
 
-        return { newFormulaData, refRanges };
+        return { newFormulaData, oldFormulaData, refRanges };
     }
 
     private _getNewRangeByMoveParam(

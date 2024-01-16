@@ -51,7 +51,7 @@ export enum DataStreamTreeTokenType {
     PAGE_BREAK = '\f', // 换页
     DOCS_END = '\0', // 文档结尾
     TAB = '\t', // 制表符
-    CUSTOM_BLOCK = '\b', // 图片 mention等不参与文档流的场景
+    CUSTOM_BLOCK = '\b', // 图片 mention 等不参与文档流的场景
 
     LETTER = '',
 

@@ -47,6 +47,7 @@ import {
     lineIterator,
 } from '../../common/tools';
 import { LineBreaker } from '../../linebreak';
+import { tabLineBreakExtension } from '../../linebreak/extensions/tab-linebreak-extension';
 import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../view-model/document-view-model';
 import { dealWithBullet } from './bullet';
@@ -160,6 +161,9 @@ export function dealWidthParagraph(
     let last = 0;
     let bk;
 
+    // Add custom extension for linebreak.
+    tabLineBreakExtension(breaker);
+
     while ((bk = breaker.nextBreak())) {
         // get the string between the last break and this one
         const word = content.slice(last, bk.position);
@@ -190,33 +194,16 @@ export function dealWidthParagraph(
             const char = src[0];
             const charIndex = i + startIndex;
 
-            if (char === DataStreamTreeTokenType.TAB) {
-                const fontCreateConfig = getFontCreateConfig(
-                    i,
-                    bodyModel,
-                    paragraphNode,
-                    sectionBreakConfig,
-                    paragraphStyle
-                );
-                const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
-                const tabSpan = createSkeletonTabSpan(fontCreateConfig, charSpaceApply);
-                pushPending();
-                allPages = calculateParagraphLayout(
-                    [tabSpan],
-                    allPages,
-                    sectionBreakConfig,
-                    paragraphConfig,
-                    paragraphStart
-                );
-
-                i++;
-                src = src.substring(1);
-                continue;
-            }
-
             if (/\s/.test(char) || hasCJK(char)) {
                 const config = getFontCreateConfig(i, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
-                const newSpan = createSkeletonLetterSpan(char, config);
+                let newSpan: IDocumentSkeletonSpan;
+
+                if (char === DataStreamTreeTokenType.TAB) {
+                    const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
+                    newSpan = createSkeletonTabSpan(config, charSpaceApply);
+                } else {
+                    newSpan = createSkeletonLetterSpan(char, config);
+                }
 
                 spanGroup.push(newSpan);
                 i++;

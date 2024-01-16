@@ -14,12 +14,22 @@
  * limitations under the License.
  */
 
+/* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable no-magic-numbers */
 
+import type { Nullable } from '@univerjs/core';
+
+import { Break } from './break';
 import { AI, AL, BA, BK, CJ, CR, HL, HY, LF, NL, NS, RI, SA, SG, SP, WJ, XX, ZWJ } from './classes';
 import { CI_BRK, CP_BRK, DI_BRK, IN_BRK, pairTable, PR_BRK } from './pairs';
+import type { ILineBreakRule } from './rule';
+import { Rule } from './rule';
 import data from './trie-data';
 import UnicodeTrie from './unicode-trie';
+
+interface ILineBreakExtension {
+    (breaker: LineBreaker): void;
+}
 
 const classTrie = new UnicodeTrie(data);
 
@@ -54,74 +64,126 @@ function mapFirst(c: number) {
             return c;
     }
 }
-
-class Break {
-    constructor(
-        public position: number,
-        public required = false
-    ) {}
-}
-
 export class LineBreaker {
-    pos: number;
-    lastPos: number;
-    curClass: number | null;
-    nextClass: number | null;
-    LB8a: boolean;
-    LB21a: boolean;
-    LB30a: number;
+    private _pos: number = 0;
+    private _lastPos: number = 0;
+    private _curClass: Nullable<number> = null;
+    private _codePoint: Nullable<number> = null;
+    private _nextClass: Nullable<number> = null;
+    private _LB8a: boolean = false;
+    private _LB21a: boolean = false;
+    private _LB30a: number = 0;
+    private _rule: Rule = new Rule();
 
-    constructor(public string: string) {
-        this.pos = 0;
-        this.lastPos = 0;
-        this.curClass = null;
-        this.nextClass = null;
-        this.LB8a = false;
-        this.LB21a = false;
-        this.LB30a = 0;
+    constructor(public string: string) {}
+
+    use(extension: ILineBreakExtension) {
+        extension(this);
+
+        return this;
     }
 
-    nextCodePoint() {
-        const code = this.string.charCodeAt(this.pos++);
-        const next = this.string.charCodeAt(this.pos);
+    addRule(key: string, rule: ILineBreakRule) {
+        this._rule.add(key, rule);
+
+        return this;
+    }
+
+    nextBreak() {
+        // get the first char if we're at the beginning of the string
+        if (this._curClass == null) {
+            const firstClass = this._nextCharClass();
+            this._curClass = mapFirst(firstClass);
+            this._nextClass = firstClass;
+            this._LB8a = firstClass === ZWJ;
+            this._LB30a = 0;
+        }
+
+        while (this._pos < this.string.length) {
+            this._lastPos = this._pos;
+            const lastClass = this._nextClass;
+            this._nextClass = this._nextCharClass();
+
+            // explicit newline
+            if (this._curClass === BK || (this._curClass === CR && this._nextClass !== LF)) {
+                this._curClass = mapFirst(mapClass(this._nextClass));
+                return new Break(this._lastPos, true);
+            }
+
+            if (this._rule.shouldBreak(this._codePoint!, this._nextClass)) {
+                this._curClass = mapFirst(mapClass(this._nextClass));
+                return new Break(this._lastPos);
+            }
+
+            let shouldBreak = this._getSimpleBreak();
+
+            if (shouldBreak === null) {
+                shouldBreak = this._getPairTableBreak(lastClass!);
+            }
+
+            // Rule _LB8a
+            this._LB8a = this._nextClass === ZWJ;
+
+            if (shouldBreak) {
+                return new Break(this._lastPos);
+            }
+        }
+
+        if (this._lastPos < this.string.length) {
+            this._lastPos = this.string.length;
+            return new Break(this.string.length);
+        }
+
+        return null;
+    }
+
+    private _getNextCodePoint() {
+        const code = this.string.charCodeAt(this._pos++);
+        const next = this.string.charCodeAt(this._pos);
 
         // If a surrogate pair
         if (code >= 0xd800 && code <= 0xdbff && next >= 0xdc00 && next <= 0xdfff) {
-            this.pos++;
+            this._pos++;
             return (code - 0xd800) * 0x400 + (next - 0xdc00) + 0x10000;
         }
 
         return code;
     }
 
-    nextCharClass() {
-        return mapClass(classTrie.get(this.nextCodePoint()));
+    private _nextCharClass() {
+        const nextCodePoint = this._getNextCodePoint();
+        const rawClass = classTrie.get(nextCodePoint);
+
+        this._codePoint = nextCodePoint;
+
+        return mapClass(rawClass);
     }
 
-    getSimpleBreak() {
+    private _getSimpleBreak() {
         // handle classes not handled by the pair table
-        switch (this.nextClass) {
+        switch (this._nextClass) {
             case SP:
                 return false;
 
             case BK:
             case LF:
             case NL:
-                this.curClass = BK;
+                this._curClass = BK;
                 return false;
 
             case CR:
-                this.curClass = CR;
+                this._curClass = CR;
                 return false;
         }
 
         return null;
     }
 
-    getPairTableBreak(lastClass: number) {
+    private _getPairTableBreak(lastClass: number) {
         // if not handled already, use the pair table
         let shouldBreak = false;
-        switch (pairTable[this.curClass!][this.nextClass!]) {
+
+        switch (pairTable[this._curClass!][this._nextClass!]) {
             case DI_BRK: // Direct break
                 shouldBreak = true;
                 break;
@@ -148,74 +210,31 @@ export class LineBreaker {
                 break;
         }
 
-        if (this.LB8a) {
+        if (this._LB8a) {
             shouldBreak = false;
         }
 
-        // Rule LB21a
-        if (this.LB21a && (this.curClass === HY || this.curClass === BA)) {
+        // Rule _LB21a
+        if (this._LB21a && (this._curClass === HY || this._curClass === BA)) {
             shouldBreak = false;
-            this.LB21a = false;
+            this._LB21a = false;
         } else {
-            this.LB21a = this.curClass === HL;
+            this._LB21a = this._curClass === HL;
         }
 
-        // Rule LB30a
-        if (this.curClass === RI) {
-            this.LB30a++;
-            if (this.LB30a === 2 && this.nextClass === RI) {
+        // Rule _LB30a
+        if (this._curClass === RI) {
+            this._LB30a++;
+            if (this._LB30a === 2 && this._nextClass === RI) {
                 shouldBreak = true;
-                this.LB30a = 0;
+                this._LB30a = 0;
             }
         } else {
-            this.LB30a = 0;
+            this._LB30a = 0;
         }
 
-        this.curClass = this.nextClass;
+        this._curClass = this._nextClass;
 
         return shouldBreak;
-    }
-
-    nextBreak() {
-        // get the first char if we're at the beginning of the string
-        if (this.curClass == null) {
-            const firstClass = this.nextCharClass();
-            this.curClass = mapFirst(firstClass);
-            this.nextClass = firstClass;
-            this.LB8a = firstClass === ZWJ;
-            this.LB30a = 0;
-        }
-
-        while (this.pos < this.string.length) {
-            this.lastPos = this.pos;
-            const lastClass = this.nextClass;
-            this.nextClass = this.nextCharClass();
-
-            // explicit newline
-            if (this.curClass === BK || (this.curClass === CR && this.nextClass !== LF)) {
-                this.curClass = mapFirst(mapClass(this.nextClass));
-                return new Break(this.lastPos, true);
-            }
-
-            let shouldBreak = this.getSimpleBreak();
-
-            if (shouldBreak === null) {
-                shouldBreak = this.getPairTableBreak(lastClass!);
-            }
-
-            // Rule LB8a
-            this.LB8a = this.nextClass === ZWJ;
-
-            if (shouldBreak) {
-                return new Break(this.lastPos);
-            }
-        }
-
-        if (this.lastPos < this.string.length) {
-            this.lastPos = this.string.length;
-            return new Break(this.string.length);
-        }
-
-        return null;
     }
 }

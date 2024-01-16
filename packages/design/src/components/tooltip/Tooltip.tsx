@@ -24,20 +24,25 @@ import styles from './index.module.less';
 import { placements } from './placements';
 
 export interface ITooltipProps {
+    visible?: boolean;
+
     placement?: 'top' | 'bottom';
 
     title: (() => React.ReactNode) | React.ReactNode;
 
     children: React.ReactElement;
+
+    onVisibleChange?: (visible: boolean) => void;
 }
 
 export const Tooltip = forwardRef((props: ITooltipProps, ref: Ref<TooltipRef>) => {
-    const { children, placement = 'top', title } = props;
+    const { children, visible, placement = 'top', title, onVisibleChange } = props;
 
     const { mountContainer } = useContext(ConfigContext);
 
     return (
         <RcTooltip
+            visible={visible}
             ref={ref}
             prefixCls={styles.tooltip}
             getTooltipContainer={() => mountContainer}
@@ -47,6 +52,7 @@ export const Tooltip = forwardRef((props: ITooltipProps, ref: Ref<TooltipRef>) =
             mouseEnterDelay={0.2}
             showArrow
             destroyTooltipOnHide
+            onVisibleChange={onVisibleChange}
         >
             {children}
         </RcTooltip>

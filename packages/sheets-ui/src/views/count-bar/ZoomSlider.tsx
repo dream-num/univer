@@ -24,6 +24,7 @@ import { SetZoomRatioCommand } from '../../commands/commands/set-zoom-ratio.comm
 import { SetZoomRatioOperation } from '../../commands/operations/set-zoom-ratio.operation';
 import { SHEET_ZOOM_RANGE } from '../../common/keys';
 
+// eslint-disable-next-line no-magic-numbers
 const ZOOM_MAP = [50, 80, 100, 130, 150, 170, 200, 400];
 
 export function ZoomSlider() {
@@ -52,9 +53,12 @@ export function ZoomSlider() {
     function handleChange(value: number) {
         setZoom(value);
         const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-        if (!workbook) return;
-        const worksheet = workbook.getActiveSheet();
-        if (!worksheet) return;
+        const worksheet = workbook?.getActiveSheet();
+        if (worksheet == null) {
+            return;
+        }
+
+        // eslint-disable-next-line no-magic-numbers
         const zoomRatio = value / 100;
 
         commandService.executeCommand(SetZoomRatioCommand.id, {

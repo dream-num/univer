@@ -261,6 +261,7 @@ export class SelectionRenderService implements ISelectionRenderService {
      */
     addControlToCurrentByRangeData(data: ISelectionWithCoordAndStyle) {
         const currentControls = this.getCurrentControls();
+
         if (!currentControls) {
             return;
         }
@@ -1086,6 +1087,7 @@ export class SelectionRenderService implements ISelectionRenderService {
         if (scene == null) {
             return;
         }
+
         scene.onPointerMoveObserver.remove(this._moveObserver);
         scene.onPointerUpObserver.remove(this._upObserver);
         scene.enableEvent();

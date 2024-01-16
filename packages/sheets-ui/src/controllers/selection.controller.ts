@@ -166,6 +166,7 @@ export class SelectionController extends Disposable {
                         this._getActiveViewport(evt),
                         ScrollTimerType.Y
                     );
+
                     if (evt.button !== 2) {
                         state.stopPropagation();
                     }
@@ -191,6 +192,7 @@ export class SelectionController extends Disposable {
                         this._getActiveViewport(evt),
                         ScrollTimerType.X
                     );
+
                     if (evt.button !== 2) {
                         state.stopPropagation();
                     }

@@ -476,15 +476,15 @@ export class HeaderMoveController extends Disposable {
 
         const matchSelectionData = rangeDatas?.find((data) => {
             const range = data.range;
-            const { startRow, endRow, startColumn, endColumn } = range;
+            const { startRow, endRow, startColumn, endColumn, rangeType } = range;
             if (type === HEADER_MOVE_TYPE.COLUMN) {
-                if (rowOrColumn >= startColumn && rowOrColumn <= endColumn) {
+                if (rowOrColumn >= startColumn && rowOrColumn <= endColumn && RANGE_TYPE.COLUMN === rangeType) {
                     return true;
                 }
                 return false;
             }
 
-            if (rowOrColumn >= startRow && rowOrColumn <= endRow) {
+            if (rowOrColumn >= startRow && rowOrColumn <= endRow && RANGE_TYPE.ROW === rangeType) {
                 return true;
             }
             return false;

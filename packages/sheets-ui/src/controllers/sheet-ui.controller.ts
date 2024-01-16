@@ -34,8 +34,8 @@ import {
     AddWorksheetMergeHorizontalCommand,
     AddWorksheetMergeVerticalCommand,
 } from '../commands/commands/add-worksheet-merge.command';
-import { DeleteRangeMoveUpConfirmCommand } from '../commands/commands/delete-range-move-down-confirm.command';
 import { DeleteRangeMoveLeftConfirmCommand } from '../commands/commands/delete-range-move-left-confirm.command ';
+import { DeleteRangeMoveUpConfirmCommand } from '../commands/commands/delete-range-move-up-confirm.command';
 import {
     SetRangeBoldCommand,
     SetRangeFontFamilyCommand,
@@ -47,8 +47,8 @@ import {
     SetRangeTextColorCommand,
     SetRangeUnderlineCommand,
 } from '../commands/commands/inline-format.command';
+import { InsertRangeMoveDownConfirmCommand } from '../commands/commands/insert-range-move-down-confirm.command';
 import { InsertRangeMoveRightConfirmCommand } from '../commands/commands/insert-range-move-right-confirm.command';
-import { InsertRangeMoveDownConfirmCommand } from '../commands/commands/insert-range-move-up-confirm.command';
 import { RefillCommand } from '../commands/commands/refill.command';
 import { RemoveSheetConfirmCommand } from '../commands/commands/remove-sheet-confirm.command';
 import {

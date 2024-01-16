@@ -18,8 +18,8 @@ import { RemoveColCommand, RemoveRowCommand } from '@univerjs/sheets';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import { MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 
-import { DeleteRangeMoveUpConfirmCommand } from '../../commands/commands/delete-range-move-down-confirm.command';
 import { DeleteRangeMoveLeftConfirmCommand } from '../../commands/commands/delete-range-move-left-confirm.command ';
+import { DeleteRangeMoveUpConfirmCommand } from '../../commands/commands/delete-range-move-up-confirm.command';
 import { SheetMenuPosition } from './menu';
 
 const DELETE_RANGE_MENU_ID = 'sheet.menu.delete';

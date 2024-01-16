@@ -26,8 +26,8 @@ import { MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 
+import { InsertRangeMoveDownConfirmCommand } from '../../commands/commands/insert-range-move-down-confirm.command';
 import { InsertRangeMoveRightConfirmCommand } from '../../commands/commands/insert-range-move-right-confirm.command';
-import { InsertRangeMoveDownConfirmCommand } from '../../commands/commands/insert-range-move-up-confirm.command';
 import { SheetMenuPosition } from './menu';
 
 const COL_INSERT_MENU_ID = 'sheet.menu.col-insert';

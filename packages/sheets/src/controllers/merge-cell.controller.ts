@@ -557,8 +557,9 @@ export class MergeCellController extends Disposable {
             } else {
                 const intersects = Rectangle.getIntersects(range, merge)!;
                 const interLength = intersects.endColumn - intersects.startColumn + 1;
+                const isSimpleRow = intersects.endRow - intersects.startRow === 0;
 
-                if (interLength === mergedCellColumnCount - 1) {
+                if (interLength === mergedCellColumnCount - 1 && isSimpleRow) {
                     mergeData.splice(i, 1);
                     i--;
                 } else {
@@ -623,7 +624,8 @@ export class MergeCellController extends Disposable {
             } else {
                 const intersects = Rectangle.getIntersects(range, merge)!;
                 const interLength = intersects.endRow - intersects.startRow + 1;
-                if (interLength === mergedCellRowCount - 1) {
+                const isSimpleCol = intersects.endColumn - intersects.startColumn === 0;
+                if (interLength === mergedCellRowCount - 1 && isSimpleCol) {
                     mergeData.splice(i, 1);
                     i--;
                 } else {

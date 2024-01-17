@@ -469,6 +469,10 @@ export class SelectionRenderService implements ISelectionRenderService {
 
     endSelection() {
         this._endSelection();
+        this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
+
+        // when selection mouse up, enable the short cut service
+        this._shortcutService.setDisable(false);
     }
 
     reset() {

@@ -453,6 +453,7 @@ export class StartEditController extends Disposable {
         }
     }
 
+    // You can double-click on the cell or input content by keyboard to put the cell into the edit state.
     private _initialStartEdit() {
         this._onInputActivateSubscription = this._editorBridgeService.visible$.subscribe((param) => {
             const { visible, eventType, keycode } = param;

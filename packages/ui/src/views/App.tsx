@@ -137,10 +137,8 @@ export function App(props: IUniverAppProps) {
 
                     <ZenZone />
                 </section>
-
-                <Print />
             </div>
-
+            <Print />
             <ComponentContainer components={globalComponents} />
         </ConfigProvider>
     );

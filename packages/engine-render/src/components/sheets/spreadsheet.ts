@@ -488,8 +488,8 @@ export class Spreadsheet extends SheetComponent {
 
         ctx.translateWithPrecisionRatio(FIX_ONE_PIXEL_BLUR_OFFSET, FIX_ONE_PIXEL_BLUR_OFFSET);
 
-        // ctx.moveTo(0, 0);
-        // ctx.lineTo(width, 0);
+        ctx.moveTo(0, 0);
+        ctx.lineTo(width, 0);
 
         for (let r = rowStart; r <= rowEnd; r++) {
             if (r < 0 || r > rowHeightAccumulationLength - 1) {
@@ -500,8 +500,8 @@ export class Spreadsheet extends SheetComponent {
             ctx.lineTo(width, rowEndPosition);
         }
 
-        // ctx.moveTo(0, 0);
-        // ctx.lineTo(0, height);
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, height);
         for (let c = startColumn; c <= endColumn; c++) {
             if (c < 0 || c > columnWidthAccumulationLength - 1) {
                 continue;

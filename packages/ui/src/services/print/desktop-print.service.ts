@@ -17,7 +17,7 @@
 import { toDisposable } from '@univerjs/core';
 import { type IDisposable, Inject } from '@wendellhu/redi';
 import type { ForwardRefExoticComponent } from 'react';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 
 import { ComponentManager } from '../../common/component-manager';
 import type { IPrintService } from './print.service';

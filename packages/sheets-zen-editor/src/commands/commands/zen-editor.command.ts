@@ -47,7 +47,7 @@ export const CancelZenEditCommand: ICommand = {
 
         univerInstanceManager.focusUniverInstance(currentSheetInstance.getUnitId());
 
-        editorBridgeService.refreshState();
+        editorBridgeService.refreshEditCellState();
 
         return true;
     },
@@ -79,7 +79,7 @@ export const ConfirmZenEditCommand: ICommand = {
 
         univerInstanceManager.focusUniverInstance(currentSheetInstance.getUnitId());
 
-        editorBridgeService.refreshState();
+        editorBridgeService.refreshEditCellState();
 
         return true;
     },

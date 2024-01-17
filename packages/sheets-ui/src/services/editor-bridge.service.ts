@@ -14,21 +14,41 @@
  * limitations under the License.
  */
 
-import type { ICellDataForSheetInterceptor, IPosition, Nullable } from '@univerjs/core';
-import { createInterceptorKey, Disposable, InterceptorManager, toDisposable } from '@univerjs/core';
-import type { IDocumentLayoutObject } from '@univerjs/engine-render';
-import { DeviceInputEventType } from '@univerjs/engine-render';
+import type { ICellDataForSheetInterceptor, IPosition, ISelectionCell, Nullable } from '@univerjs/core';
+import {
+    createInterceptorKey,
+    Disposable,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    InterceptorManager,
+    IUniverInstanceService,
+    makeCellToSelection,
+    ThemeService,
+    toDisposable,
+} from '@univerjs/core';
+import type { Engine, IDocumentLayoutObject, Scene } from '@univerjs/engine-render';
+import { DeviceInputEventType, fixLineWidthByScale, getCanvasOffsetByEngine } from '@univerjs/engine-render';
 import type { ISheetLocation } from '@univerjs/sheets';
 import type { KeyCode } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
-import { createIdentifier } from '@wendellhu/redi';
+import { createIdentifier, Inject } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
+
+import { ISelectionRenderService } from './selection/selection-render.service';
+import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 
 export interface IEditorBridgeServiceVisibleParam {
     visible: boolean;
     eventType: DeviceInputEventType;
     keycode?: KeyCode;
+}
+
+export interface ICurrentEditCellParam {
+    scene: Scene;
+    engine: Engine;
+    unitId: string;
+    sheetId: string;
+    primary: ISelectionCell;
 }
 
 export interface IEditorBridgeServiceParam {
@@ -44,18 +64,23 @@ export interface IEditorBridgeServiceParam {
     editorUnitId: string;
     isInArrayFormulaRange?: Nullable<boolean>;
 }
+
 const BEFORE_CELL_EDIT = createInterceptorKey<ICellDataForSheetInterceptor, ISheetLocation>('BEFORE_CELL_EDIT');
 const AFTER_CELL_EDIT = createInterceptorKey<ICellDataForSheetInterceptor, ISheetLocation>('AFTER_CELL_EDIT');
+
 export interface IEditorBridgeService {
-    state$: Observable<Nullable<IEditorBridgeServiceParam>>;
+    currentEditCellState$: Observable<Nullable<IEditorBridgeServiceParam>>;
     visible$: Observable<IEditorBridgeServiceVisibleParam>;
     interceptor: InterceptorManager<{
         BEFORE_CELL_EDIT: typeof BEFORE_CELL_EDIT;
         AFTER_CELL_EDIT: typeof AFTER_CELL_EDIT;
     }>;
     dispose(): void;
-    setState(param: IEditorBridgeServiceParam): void;
-    getState(): Readonly<Nullable<IEditorBridgeServiceParam>>;
+    refreshEditCellState(): void;
+    setEditCell(param: ICurrentEditCellParam): void;
+    getEditCellState(): Readonly<Nullable<IEditorBridgeServiceParam>>;
+    // Gets the DocumentDataModel of the latest table cell based on the latest cell contents
+    getLatestEditCellState(): Readonly<Nullable<IEditorBridgeServiceParam>>;
     changeVisible(param: IEditorBridgeServiceVisibleParam): void;
     changeEditorDirty(dirtyStatus: boolean): void;
     getEditorDirty(): boolean;
@@ -67,7 +92,7 @@ export interface IEditorBridgeService {
 }
 
 export class EditorBridgeService extends Disposable implements IEditorBridgeService, IDisposable {
-    private _state: Nullable<IEditorBridgeServiceParam> = null;
+    private _editorUnitId: string = DOCS_NORMAL_EDITOR_UNIT_ID_KEY;
 
     private _isForceKeepVisible: boolean = false;
 
@@ -78,8 +103,10 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         eventType: DeviceInputEventType.Dblclick,
     };
 
-    private readonly _state$ = new BehaviorSubject<Nullable<IEditorBridgeServiceParam>>(null);
-    readonly state$ = this._state$.asObservable();
+    private _currentEditCell: Nullable<ICurrentEditCellParam> = null;
+    private _currentEditCellState: Nullable<IEditorBridgeServiceParam> = null;
+    private readonly _currentEditCellState$ = new BehaviorSubject<Nullable<IEditorBridgeServiceParam>>(null);
+    readonly currentEditCellState$ = this._currentEditCellState$.asObservable();
 
     private readonly _visible$ = new BehaviorSubject<IEditorBridgeServiceVisibleParam>(this._visible);
     readonly visible$ = this._visible$.asObservable();
@@ -92,14 +119,21 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         AFTER_CELL_EDIT,
     });
 
-    constructor() {
+    constructor(
+        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
+        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
+        @Inject(ThemeService) private readonly _themeService: ThemeService,
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService
+    ) {
         super();
+
         this.disposeWithMe(
             toDisposable(() => {
-                this._state$.complete();
-                this._state = null;
+                this._currentEditCellState$.complete();
+                this._currentEditCell = null;
             })
         );
+
         this.disposeWithMe(
             toDisposable(
                 this.interceptor.intercept(this.interceptor.getInterceptPoints().AFTER_CELL_EDIT, {
@@ -119,22 +153,129 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         );
     }
 
-    setState(param: IEditorBridgeServiceParam) {
-        this._state = param;
+    refreshEditCellState() {
+        const editCellState = this.getLatestEditCellState();
+        this._currentEditCellState = editCellState;
 
-        this._state$.next(param);
+        this._currentEditCellState$.next(editCellState);
     }
 
-    getState(): Readonly<Nullable<IEditorBridgeServiceParam>> {
-        return this._state;
+    setEditCell(param: ICurrentEditCellParam) {
+        this._currentEditCell = param;
+
+        const editCellState = this.getLatestEditCellState();
+        this._currentEditCellState = editCellState;
+
+        this._currentEditCellState$.next(editCellState);
     }
 
-    refreshState() {
-        this._state$.next(this._state);
+    getEditCellState(): Readonly<Nullable<IEditorBridgeServiceParam>> {
+        return this._currentEditCellState;
+    }
+
+    getLatestEditCellState() {
+        const currentEditCell = this._currentEditCell;
+        if (currentEditCell == null) {
+            return;
+        }
+
+        const currentSkeleton = this._sheetSkeletonManagerService.getCurrent();
+
+        if (currentSkeleton == null) {
+            return;
+        }
+
+        const { skeleton } = currentSkeleton;
+
+        const { primary, unitId, sheetId, scene, engine } = currentEditCell;
+        const { startRow, startColumn } = primary;
+        const primaryWithCoord = this._selectionRenderService.convertCellRangeToInfo(primary);
+        if (primaryWithCoord == null) {
+            return;
+        }
+
+        const actualRangeWithCoord = makeCellToSelection(primaryWithCoord);
+        if (actualRangeWithCoord == null) {
+            return;
+        }
+
+        const canvasOffset = getCanvasOffsetByEngine(engine);
+
+        let { startX, startY, endX, endY } = actualRangeWithCoord;
+
+        const { scaleX, scaleY } = scene.getAncestorScale();
+
+        const { scaleX: precisionScaleX, scaleY: precisionScaleY } = scene.getPrecisionScale();
+
+        const scrollXY = scene.getScrollXY(this._selectionRenderService.getViewPort());
+        startX = fixLineWidthByScale(skeleton.convertTransformToOffsetX(startX, scaleX, scrollXY), precisionScaleX);
+        startY = fixLineWidthByScale(skeleton.convertTransformToOffsetY(startY, scaleY, scrollXY), precisionScaleY);
+        endX = fixLineWidthByScale(skeleton.convertTransformToOffsetX(endX, scaleX, scrollXY), precisionScaleX);
+        endY = fixLineWidthByScale(skeleton.convertTransformToOffsetY(endY, scaleY, scrollXY), precisionScaleY);
+
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+        const worksheet = workbook.getActiveSheet();
+        const location = {
+            workbook,
+            worksheet,
+            unitId: workbook.getUnitId(),
+            subUnitId: worksheet.getSheetId(),
+            row: startRow,
+            col: startColumn,
+        };
+
+        const cell = this.interceptor.fetchThroughInterceptors(this.interceptor.getInterceptPoints().BEFORE_CELL_EDIT)(
+            worksheet.getCell(startRow, startColumn),
+            location
+        );
+
+        let documentLayoutObject = cell && skeleton.getCellDocumentModelWithFormula(cell);
+
+        if (!documentLayoutObject || documentLayoutObject.documentModel == null) {
+            documentLayoutObject = skeleton.getBlankCellDocumentModel(cell);
+        }
+
+        documentLayoutObject.documentModel?.setZoomRatio(Math.max(scaleX, scaleY));
+
+        if (cell?.isInArrayFormulaRange === true) {
+            const body = documentLayoutObject.documentModel?.getBody();
+            if (body) {
+                body.textRuns = [
+                    {
+                        st: 0,
+                        ed: body.dataStream.length - 2,
+                        ts: {
+                            cl: {
+                                rgb: this._themeService.getCurrentTheme().textColorSecondary,
+                            },
+                        },
+                    },
+                ];
+            }
+        }
+
+        return {
+            position: {
+                startX,
+                startY,
+                endX,
+                endY,
+            },
+            scaleX,
+            scaleY,
+            canvasOffset,
+            row: startRow,
+            column: startColumn,
+            unitId,
+            sheetId,
+            documentLayoutObject,
+            editorUnitId: this._editorUnitId,
+            isInArrayFormulaRange: cell?.isInArrayFormulaRange,
+        };
     }
 
     getCurrentEditorId() {
-        return this._state?.editorUnitId;
+        return this._editorUnitId;
     }
 
     changeVisible(param: IEditorBridgeServiceVisibleParam) {

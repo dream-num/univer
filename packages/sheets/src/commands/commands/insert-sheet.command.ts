@@ -21,6 +21,7 @@ import {
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,
+    LocaleService,
     Tools,
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
@@ -48,6 +49,7 @@ export const InsertSheetCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
+        const localeService = accessor.get(LocaleService);
 
         let unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
 
@@ -66,11 +68,11 @@ export const InsertSheetCommand: ICommand = {
                 sheetConfig = params.sheet;
             } else {
                 sheetConfig.id = Tools.generateRandomId();
-                sheetConfig.name = `工作表${++workbook.getSheets().length}`; // Todo: 表名
+                sheetConfig.name = workbook.generateNewSheetName(`${localeService.t('sheets.sheet')}`);
             }
         } else {
             sheetConfig.id = Tools.generateRandomId();
-            sheetConfig.name = `工作表${++workbook.getSheets().length}`; // Todo: 表名
+            sheetConfig.name = workbook.generateNewSheetName(`${localeService.t('sheets.sheet')}`);
         }
 
         // prepare do mutations

@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import { ErrorType } from '../../../basics/error-type';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
@@ -27,6 +28,10 @@ export class Sum extends BaseFunction {
 
             if (variant.isError()) {
                 return variant;
+            }
+
+            if (variant.isString()) {
+                return new ErrorValueObject(ErrorType.VALUE);
             }
 
             if (accumulatorAll.isError()) {

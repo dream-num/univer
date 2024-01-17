@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { CloseSingle } from '@univerjs/icons';
 import RcDialog from 'rc-dialog';
 import React, { useContext, useState } from 'react';
 import Draggable from 'react-draggable';
@@ -22,6 +23,8 @@ import { ConfigContext } from '../config-provider/ConfigProvider';
 import styles from './index.module.less';
 
 export interface IDialogProps {
+    width?: number | string;
+
     children: React.ReactNode;
 
     /**
@@ -36,7 +39,9 @@ export interface IDialogProps {
     title?: React.ReactNode;
 
     /**
-     * Whether the dialog can be dragged.
+     * Whether the dialog can be dragged. If a dialog is draggable, the backdrop would be hidden and
+     * the wrapper container would not response to user's mouse events.
+     *
      * @default false
      */
     draggable?: boolean;
@@ -58,7 +63,16 @@ export interface IDialogProps {
 }
 
 export function Dialog(props: IDialogProps) {
-    const { children, visible = false, title, draggable = false, closeIcon, footer, onClose } = props;
+    const {
+        children,
+        visible = false,
+        title,
+        draggable = false,
+        closeIcon = <CloseSingle />,
+        footer,
+        onClose,
+        width,
+    } = props;
     const [dragDisabled, setDragDisabled] = useState(false);
 
     const { mountContainer } = useContext(ConfigContext);
@@ -91,7 +105,9 @@ export function Dialog(props: IDialogProps) {
 
     return (
         <RcDialog
+            width={width}
             prefixCls={styles.dialog}
+            rootClassName={draggable ? styles.dialogRootDraggable : styles.dialogRoot}
             getContainer={() => mountContainer}
             visible={visible}
             title={TitleIfDraggable}
@@ -99,6 +115,7 @@ export function Dialog(props: IDialogProps) {
             closeIcon={closeIcon}
             footer={footer}
             onClose={onClose}
+            mask={!draggable}
         >
             {children}
         </RcDialog>

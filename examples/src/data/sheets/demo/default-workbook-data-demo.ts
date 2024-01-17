@@ -13818,6 +13818,14 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
             rowCount: 1000,
             columnCount: 20,
             zoomRatio: 1,
+            cellData: {
+                '0': {
+                    '0': {
+                        s: '1',
+                        v: 'A Schedule of Items',
+                    },
+                },
+            },
             freeze: {
                 xSplit: 0,
                 ySplit: 0,
@@ -13831,10 +13839,9 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
             mergeData: [],
             hideRow: [],
             hideColumn: [],
-            cellData: {},
             rowData: {},
             columnData: {},
-            status: 0,
+            status: 1,
             showGridlines: 1,
             rowHeader: {
                 width: 46,

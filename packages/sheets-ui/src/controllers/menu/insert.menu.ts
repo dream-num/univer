@@ -17,8 +17,6 @@
 import {
     InsertColAfterCommand,
     InsertColBeforeCommand,
-    InsertRangeMoveDownCommand,
-    InsertRangeMoveRightCommand,
     InsertRowAfterCommand,
     InsertRowBeforeCommand,
     SelectionManagerService,
@@ -28,6 +26,8 @@ import { MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 
+import { InsertRangeMoveDownConfirmCommand } from '../../commands/commands/insert-range-move-down-confirm.command';
+import { InsertRangeMoveRightConfirmCommand } from '../../commands/commands/insert-range-move-right-confirm.command';
 import { SheetMenuPosition } from './menu';
 
 const COL_INSERT_MENU_ID = 'sheet.menu.col-insert';
@@ -131,7 +131,7 @@ export function InsertColAfterMenuItemFactory(accessor: IAccessor): IMenuButtonI
 
 export function InsertRangeMoveRightMenuItemFactory(): IMenuButtonItem {
     return {
-        id: InsertRangeMoveRightCommand.id,
+        id: InsertRangeMoveRightConfirmCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.moveRight',
         icon: 'InsertCellShiftRight',
@@ -141,7 +141,7 @@ export function InsertRangeMoveRightMenuItemFactory(): IMenuButtonItem {
 
 export function InsertRangeMoveDownMenuItemFactory(): IMenuButtonItem {
     return {
-        id: InsertRangeMoveDownCommand.id,
+        id: InsertRangeMoveDownConfirmCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.moveDown',
         icon: 'InsertCellDown',

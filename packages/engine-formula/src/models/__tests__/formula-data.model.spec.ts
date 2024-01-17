@@ -61,7 +61,7 @@ const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
 };
 
 describe('Test formula data model', () => {
-    describe('updateFormulaData', () => {
+    describe('formulaDataModel function', () => {
         let univer: Univer;
         let get: Injector['get'];
         let formulaDataModel: FormulaDataModel;
@@ -96,153 +96,259 @@ describe('Test formula data model', () => {
             univer.dispose();
         });
 
-        it('delete formula with id', () => {
-            formulaDataModel.initFormulaData();
+        describe('updateFormulaData', () => {
+            it('delete formula with id', () => {
+                formulaDataModel.initFormulaData();
 
-            const unitId = 'test';
-            const sheetId = 'sheet1';
-            const cellValue = {
-                '1': {
-                    '3': {
-                        v: null,
-                        p: null,
-                        f: null,
-                        si: null,
-                    },
-                },
-            };
-
-            const result = {
-                [unitId]: {
-                    [sheetId]: {
-                        '0': {
-                            '3': {
-                                f: '=SUM(A1)',
-                                si: '3e4r5t',
-                            },
-                        },
-                        '2': {
-                            '3': {
-                                f: '=SUM(A3)',
-                                si: 'OSPtzm',
-                            },
-                        },
+                const unitId = 'test';
+                const sheetId = 'sheet1';
+                const cellValue = {
+                    '1': {
                         '3': {
+                            v: null,
+                            p: null,
+                            f: null,
+                            si: null,
+                        },
+                    },
+                };
+
+                const result = {
+                    [unitId]: {
+                        [sheetId]: {
+                            '0': {
+                                '3': {
+                                    f: '=SUM(A1)',
+                                    si: '3e4r5t',
+                                },
+                            },
+                            '2': {
+                                '3': {
+                                    f: '=SUM(A3)',
+                                    si: 'OSPtzm',
+                                },
+                            },
                             '3': {
-                                f: '=SUM(A3)',
-                                si: 'OSPtzm',
-                                x: 0,
-                                y: 1,
+                                '3': {
+                                    f: '=SUM(A3)',
+                                    si: 'OSPtzm',
+                                    x: 0,
+                                    y: 1,
+                                },
                             },
                         },
                     },
-                },
-            };
+                };
 
-            formulaDataModel.updateFormulaData(unitId, sheetId, cellValue);
+                formulaDataModel.updateFormulaData(unitId, sheetId, cellValue);
 
-            const formulaData = formulaDataModel.getFormulaData();
-            expect(formulaData).toStrictEqual(result);
+                const formulaData = formulaDataModel.getFormulaData();
+                expect(formulaData).toStrictEqual(result);
+            });
+
+            it('delete formulas with ids and formulas with only ids', () => {
+                formulaDataModel.initFormulaData();
+
+                const unitId = 'test';
+                const sheetId = 'sheet1';
+                const cellValue = {
+                    '0': {
+                        '3': {
+                            v: null,
+                            p: null,
+                            f: null,
+                            si: null,
+                        },
+                    },
+                    '1': {
+                        '3': {
+                            v: null,
+                            p: null,
+                            f: null,
+                            si: null,
+                        },
+                    },
+                    '2': {
+                        '3': {
+                            v: null,
+                            p: null,
+                            f: null,
+                            si: null,
+                        },
+                    },
+                };
+
+                const result = {
+                    [unitId]: {
+                        [sheetId]: {
+                            '3': {
+                                '3': {
+                                    f: '=SUM(A4)',
+                                    si: 'OSPtzm',
+                                },
+                            },
+                        },
+                    },
+                };
+
+                formulaDataModel.updateFormulaData(unitId, sheetId, cellValue);
+
+                const formulaData = formulaDataModel.getFormulaData();
+                expect(formulaData).toStrictEqual(result);
+            });
+
+            it('delete the formula with only id', () => {
+                formulaDataModel.initFormulaData();
+
+                const unitId = 'test';
+                const sheetId = 'sheet1';
+                const cellValue = {
+                    '3': {
+                        '3': {
+                            v: null,
+                            p: null,
+                            f: null,
+                            si: null,
+                        },
+                    },
+                };
+
+                const result = {
+                    [unitId]: {
+                        [sheetId]: {
+                            '0': {
+                                '3': {
+                                    f: '=SUM(A1)',
+                                    si: '3e4r5t',
+                                },
+                            },
+                            '1': {
+                                '3': {
+                                    f: '=SUM(A2)',
+                                    si: 'OSPtzm',
+                                },
+                            },
+                            '2': {
+                                '3': {
+                                    f: '=SUM(A2)',
+                                    si: 'OSPtzm',
+                                    x: 0,
+                                    y: 1,
+                                },
+                            },
+                        },
+                    },
+                };
+
+                formulaDataModel.updateFormulaData(unitId, sheetId, cellValue);
+
+                const formulaData = formulaDataModel.getFormulaData();
+                expect(formulaData).toStrictEqual(result);
+            });
         });
 
-        it('delete formulas with ids and formulas with only ids', () => {
-            formulaDataModel.initFormulaData();
+        describe('updateArrayFormulaRange', () => {
+            it('update array formula range', () => {
+                const unitId = 'test';
+                const sheetId = 'sheet1';
 
-            const unitId = 'test';
-            const sheetId = 'sheet1';
-            const cellValue = {
-                '0': {
-                    '3': {
-                        v: null,
-                        p: null,
-                        f: null,
-                        si: null,
+                formulaDataModel.setArrayFormulaRange({
+                    [unitId]: {
+                        [sheetId]: {
+                            '0': {
+                                '3': {
+                                    startRow: 0,
+                                    startColumn: 3,
+                                    endRow: 1,
+                                    endColumn: 3,
+                                },
+                            },
+                        },
                     },
-                },
-                '1': {
-                    '3': {
-                        v: null,
-                        p: null,
-                        f: null,
-                        si: null,
-                    },
-                },
-                '2': {
-                    '3': {
-                        v: null,
-                        p: null,
-                        f: null,
-                        si: null,
-                    },
-                },
-            };
+                });
 
-            const result = {
-                [unitId]: {
-                    [sheetId]: {
+                const cellValue = {
+                    '0': {
                         '3': {
-                            '3': {
-                                f: '=SUM(A4)',
-                                si: 'OSPtzm',
-                            },
+                            v: null,
+                            p: null,
+                            f: null,
+                            si: null,
                         },
                     },
-                },
-            };
+                };
 
-            formulaDataModel.updateFormulaData(unitId, sheetId, cellValue);
+                const result = {
+                    [unitId]: {
+                        [sheetId]: {},
+                    },
+                };
 
-            const formulaData = formulaDataModel.getFormulaData();
-            expect(formulaData).toStrictEqual(result);
+                formulaDataModel.updateArrayFormulaRange(unitId, sheetId, cellValue);
+
+                const formulaData = formulaDataModel.getArrayFormulaRange();
+                expect(formulaData).toStrictEqual(result);
+            });
         });
+        describe('updateArrayFormulaCellData', () => {
+            it('update array formula cell data', () => {
+                const unitId = 'test';
+                const sheetId = 'sheet1';
 
-        it('delete the formula with only id', () => {
-            formulaDataModel.initFormulaData();
-
-            const unitId = 'test';
-            const sheetId = 'sheet1';
-            const cellValue = {
-                '3': {
-                    '3': {
-                        v: null,
-                        p: null,
-                        f: null,
-                        si: null,
-                    },
-                },
-            };
-
-            const result = {
-                [unitId]: {
-                    [sheetId]: {
-                        '0': {
-                            '3': {
-                                f: '=SUM(A1)',
-                                si: '3e4r5t',
-                            },
-                        },
-                        '1': {
-                            '3': {
-                                f: '=SUM(A2)',
-                                si: 'OSPtzm',
-                            },
-                        },
-                        '2': {
-                            '3': {
-                                f: '=SUM(A2)',
-                                si: 'OSPtzm',
-                                x: 0,
-                                y: 1,
+                formulaDataModel.setArrayFormulaRange({
+                    [unitId]: {
+                        [sheetId]: {
+                            '0': {
+                                '3': {
+                                    startRow: 0,
+                                    startColumn: 3,
+                                    endRow: 1,
+                                    endColumn: 3,
+                                },
                             },
                         },
                     },
-                },
-            };
+                });
 
-            formulaDataModel.updateFormulaData(unitId, sheetId, cellValue);
+                formulaDataModel.setArrayFormulaCellData({
+                    [unitId]: {
+                        [sheetId]: {
+                            '0': {
+                                '3': {
+                                    v: 1,
+                                },
+                            },
+                            '1': {
+                                '3': {
+                                    v: 2,
+                                },
+                            },
+                        },
+                    },
+                });
 
-            const formulaData = formulaDataModel.getFormulaData();
-            expect(formulaData).toStrictEqual(result);
+                const cellValue = {
+                    '0': {
+                        '3': {
+                            v: null,
+                            p: null,
+                            f: null,
+                            si: null,
+                        },
+                    },
+                };
+
+                const result = {
+                    [unitId]: {
+                        [sheetId]: {},
+                    },
+                };
+
+                formulaDataModel.updateArrayFormulaCellData(unitId, sheetId, cellValue);
+
+                const formulaData = formulaDataModel.getArrayFormulaCellData();
+                expect(formulaData).toStrictEqual(result);
+            });
         });
     });
 

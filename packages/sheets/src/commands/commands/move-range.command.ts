@@ -17,6 +17,7 @@
 import type { ICellData, ICommand, IRange, Nullable } from '@univerjs/core';
 import {
     CommandType,
+    ErrorService,
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,
@@ -32,6 +33,7 @@ import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-
 import type { IMoveRangeMutationParams } from '../mutations/move-range.mutation';
 import { MoveRangeMutation } from '../mutations/move-range.mutation';
 import { SetSelectionsOperation } from '../operations/selection.operation';
+import { alignToMergedCellsBorders, getPrimaryForRange } from './utils/selection-utils';
 
 export interface IMoveRangeCommandParams {
     toRange: IRange;
@@ -46,11 +48,19 @@ export const MoveRangeCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
+        const errorService = accessor.get(ErrorService);
         const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
         const cellMatrix = worksheet.getCellMatrix();
+
+        const alignedRangeWithToRange = alignToMergedCellsBorders(params.toRange, worksheet, false);
+
+        if (!Rectangle.equals(params.toRange, alignedRangeWithToRange)) {
+            errorService.emit('Across a merged cell.');
+            return false;
+        }
 
         const fromCellValue = new ObjectMatrix<Nullable<ICellData>>();
         const newFromCellValue = new ObjectMatrix<Nullable<ICellData>>();
@@ -113,7 +123,7 @@ export const MoveRangeCommand: ICommand = {
                     unitId,
                     sheetId: subUnitId,
                     pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-                    selections: [{ range: params.toRange }],
+                    selections: [{ range: params.toRange, primary: getPrimaryForRange(params.toRange, worksheet) }],
                 },
             },
         ];
@@ -124,7 +134,7 @@ export const MoveRangeCommand: ICommand = {
                     unitId,
                     sheetId: subUnitId,
                     pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-                    selections: [{ range: params.fromRange }],
+                    selections: [{ range: params.fromRange, primary: getPrimaryForRange(params.fromRange, worksheet) }],
                 },
             },
             ...interceptorCommands.undos,

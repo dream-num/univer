@@ -26,6 +26,7 @@ import {
     Univer,
 } from '@univerjs/core';
 import { FunctionService, IFunctionService } from '@univerjs/engine-formula';
+import { ISocketService, WebSocketService } from '@univerjs/network';
 import { SelectionManagerService, SheetInterceptorService } from '@univerjs/sheets';
 import {
     DescriptionService,
@@ -49,6 +50,7 @@ function getTestWorkbookDataDemo(): IWorkbookData {
         sheets: {
             sheet1: {
                 id: 'sheet1',
+                name: 'sheet1',
                 cellData: {},
             },
         },
@@ -86,9 +88,15 @@ export function createTestBed(workbookConfig?: IWorkbookData, dependencies?: Dep
             injector.add([SelectionManagerService]);
             injector.add([SheetInterceptorService]);
             injector.add([IRegisterFunctionService, { useClass: RegisterFunctionService }]);
-            injector.add([IDescriptionService, { useClass: DescriptionService }]);
+            injector.add([
+                IDescriptionService,
+                {
+                    useFactory: () => this._injector.createInstance(DescriptionService, undefined),
+                },
+            ]);
             injector.add([IFunctionService, { useClass: FunctionService }]);
             injector.add([IFormulaCustomFunctionService, { useClass: FormulaCustomFunctionService }]);
+            injector.add([ISocketService, { useClass: WebSocketService }]);
 
             dependencies?.forEach((d) => injector.add(d));
         }

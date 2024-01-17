@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/ui",
-    "version": "0.1.0-beta.1",
+    "version": "0.1.0-beta.2",
     "description": "UniverSheet normal plugin UI manager",
     "keywords": [],
     "author": "DreamNum <developer@univer.ai>",
@@ -50,7 +50,7 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.1.24",
+        "@univerjs/icons": "^0.1.25",
         "@wendellhu/redi": "^0.12.13",
         "clsx": "^2.0.0",
         "localforage": "^1.10.0",
@@ -62,7 +62,7 @@
     },
     "devDependencies": {
         "@testing-library/react": "^14.1.2",
-        "@types/react": "^18.2.46",
+        "@types/react": "^18.2.47",
         "@types/react-dom": "^18.2.18",
         "@types/react-transition-group": "^4.4.10",
         "@vitejs/plugin-react": "^4.2.1",

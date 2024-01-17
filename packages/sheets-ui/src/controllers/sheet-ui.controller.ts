@@ -34,6 +34,8 @@ import {
     AddWorksheetMergeHorizontalCommand,
     AddWorksheetMergeVerticalCommand,
 } from '../commands/commands/add-worksheet-merge.command';
+import { DeleteRangeMoveLeftConfirmCommand } from '../commands/commands/delete-range-move-left-confirm.command ';
+import { DeleteRangeMoveUpConfirmCommand } from '../commands/commands/delete-range-move-up-confirm.command';
 import {
     SetRangeBoldCommand,
     SetRangeFontFamilyCommand,
@@ -45,6 +47,8 @@ import {
     SetRangeTextColorCommand,
     SetRangeUnderlineCommand,
 } from '../commands/commands/inline-format.command';
+import { InsertRangeMoveDownConfirmCommand } from '../commands/commands/insert-range-move-down-confirm.command';
+import { InsertRangeMoveRightConfirmCommand } from '../commands/commands/insert-range-move-right-confirm.command';
 import { RefillCommand } from '../commands/commands/refill.command';
 import { RemoveSheetConfirmCommand } from '../commands/commands/remove-sheet-confirm.command';
 import {
@@ -281,6 +285,10 @@ export class SheetUIController extends Disposable {
             SetZoomRatioOperation,
             ShowMenuListCommand,
             RefillCommand,
+            InsertRangeMoveDownConfirmCommand,
+            DeleteRangeMoveUpConfirmCommand,
+            InsertRangeMoveRightConfirmCommand,
+            DeleteRangeMoveLeftConfirmCommand,
         ].forEach((c) => {
             this.disposeWithMe(this._commandService.registerCommand(c));
         });

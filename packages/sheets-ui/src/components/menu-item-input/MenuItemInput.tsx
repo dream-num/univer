@@ -23,7 +23,7 @@ import styles from './index.module.less';
 import type { IMenuItemInputProps } from './interface';
 
 export const MenuItemInput = (props: IMenuItemInputProps) => {
-    const { prefix, suffix, value, onChange } = props;
+    const { prefix, suffix, value, onChange, min = Number.MIN_SAFE_INTEGER, max = Number.MAX_SAFE_INTEGER } = props;
 
     const localeService = useDependency(LocaleService);
 
@@ -54,6 +54,8 @@ export const MenuItemInput = (props: IMenuItemInputProps) => {
                     precision={0}
                     onKeyDown={handleKeyDown}
                     onChange={handleChange}
+                    min={min}
+                    max={max}
                 />
             </span>
             {localeService.t(suffix)}

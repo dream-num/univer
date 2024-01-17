@@ -129,7 +129,6 @@ function _divideOperator(
         if (preOffsetLeft + width > divide.width) {
             // width 超过 divide 宽度
             setDivideFullState(divide, true);
-
             // 处理 word 或者数字串超过 divide width 的情况，主要分两种情况
             // 1. 以段落符号结尾时候，即使超过 divide 宽度，也需要将换行符追加到 divide 结尾。
             // 2. 空行中，英文单词或者连续数字超过 divide 宽度的情况，将把英文单词、数字串拆分，一部分追加到上一行，剩下的放在新的一行中，
@@ -274,7 +273,8 @@ function _lineOperator(
     const column = columnInfo!.column;
     const line = getLastLineByColumn(column);
 
-    const { ba: ascent, bd: descent } = spanGroup[0].bBox;
+    const ascent = Math.max(...spanGroup.map((span) => span.bBox.ba));
+    const descent = Math.max(...spanGroup.map((span) => span.bBox.bd));
     const spanLineHeight = defaultSpanLineHeight || ascent + descent;
 
     const {

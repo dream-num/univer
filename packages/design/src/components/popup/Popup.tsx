@@ -40,7 +40,7 @@ export function Popup(props: IPopupProps) {
 
     const nodeRef = useRef(null);
 
-    const [realoffset, setRealOffset] = useState<[number, number]>(offset);
+    const [realOffset, setRealOffset] = useState<[number, number]>(offset);
 
     useEffect(() => {
         if (!visible) {
@@ -66,7 +66,7 @@ export function Popup(props: IPopupProps) {
         <CSSTransition
             in={visible}
             nodeRef={nodeRef}
-            timeout={300}
+            timeout={500}
             classNames={{
                 enter: styles.popupEnter,
                 enterActive: styles.popupEnterActive,
@@ -79,8 +79,11 @@ export function Popup(props: IPopupProps) {
                 ref={nodeRef}
                 className={styles.popup}
                 style={{
-                    left: realoffset[0],
-                    top: realoffset[1],
+                    // Fix #1089. If the popup does not have this 2px offset, the pointerup event's target would
+                    // become the popup itself not the canvas element, hence the selection gesture is not terminated.
+                    // It should be considered as debt of the rendering engine.
+                    left: realOffset[0] + 2,
+                    top: realOffset[1] + 2,
                 }}
                 onContextMenu={preventDefault}
             >

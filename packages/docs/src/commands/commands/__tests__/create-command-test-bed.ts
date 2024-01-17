@@ -132,10 +132,6 @@ export function createCommandTestBed(workbookConfig?: IDocumentData, dependencie
         throw new Error('[TestPlugin]: not hooked on!');
     }
 
-    const docViewModelManagerService = get(DocViewModelManagerService);
-
-    docViewModelManagerService.setCurrent('test-doc');
-
     const univerInstanceService = get(IUniverInstanceService);
     univerInstanceService.focusUniverInstance('test-doc');
 

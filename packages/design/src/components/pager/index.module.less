@@ -1,0 +1,33 @@
+.pager {
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+
+    &-left-arrow,
+    &-right-arrow {
+        cursor: pointer;
+        user-select: none;
+
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        width: 16px;
+        height: 16px;
+
+        font-size: 8px;
+        color: rgb(var(--grey-400));
+
+        border-radius: 4px;
+
+        &:hover {
+            background-color: rgb(var(--grey-50));
+        }
+    }
+
+    &-number {
+        margin: 0 4px;
+        font-size: 13px;
+        color: rgb(var(--text-color));
+    }
+}

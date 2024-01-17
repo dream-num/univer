@@ -27,6 +27,8 @@ import {
 import type { Injector } from '@wendellhu/redi';
 import { beforeEach, describe, expect, it } from 'vitest';
 
+import { MergeCellController } from '../../../controllers/merge-cell.controller';
+import { RefRangeService } from '../../../services/ref-range/ref-range.service';
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../../services/selection-manager.service';
 import { AddWorksheetMergeMutation } from '../../mutations/add-worksheet-merge.mutation';
 import { MoveColsMutation, MoveRowsMutation } from '../../mutations/move-rows-cols.mutation';
@@ -35,6 +37,9 @@ import { SetSelectionsOperation } from '../../operations/selection.operation';
 import type { IMoveColsCommandParams, IMoveRowsCommandParams } from '../move-rows-cols.command';
 import { MoveColsCommand, MoveRowsCommand } from '../move-rows-cols.command';
 import { createCommandTestBed } from './create-command-test-bed';
+
+const cellToRange = (row: number, col: number) =>
+    ({ startRow: row, endRow: row, startColumn: col, endColumn: col }) as IRange;
 
 describe('Test move rows cols', () => {
     let univer: Univer;
@@ -57,7 +62,7 @@ describe('Test move rows cols', () => {
             AddWorksheetMergeMutation,
             SetSelectionsOperation,
         ].forEach((c) => commandService.registerCommand(c));
-
+        get(MergeCellController);
         const selectionManagerService = get(SelectionManagerService);
         selectionManagerService.setCurrentSelection({
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
@@ -170,8 +175,8 @@ describe('Test move rows cols', () => {
             selectRow(18, 19);
 
             const result = await commandService.executeCommand<IMoveRowsCommandParams>(MoveRowsCommand.id, {
-                fromRow: 18,
-                toRow: 1,
+                fromRange: { ...cellToRange(18, 1), endRow: 19 },
+                toRange: { ...cellToRange(1, 1), endRow: 2 },
             });
             expect(result).toEqual(true);
             expect(getCellInfo(0, 0)?.v).toEqual('A1');
@@ -224,8 +229,8 @@ describe('Test move rows cols', () => {
             selectRow(2, 2);
 
             const result = await commandService.executeCommand<IMoveRowsCommandParams>(MoveRowsCommand.id, {
-                fromRow: 2,
-                toRow: 1,
+                fromRange: cellToRange(2, 1),
+                toRange: cellToRange(1, 1),
             });
             expect(result).toBeFalsy();
         });
@@ -234,14 +239,14 @@ describe('Test move rows cols', () => {
             selectRow(18, 19);
 
             const result = await commandService.executeCommand<IMoveRowsCommandParams>(MoveRowsCommand.id, {
-                fromRow: 18,
-                toRow: 3,
+                fromRange: cellToRange(18, 1),
+                toRange: cellToRange(3, 1),
             });
             expect(result).toBeFalsy();
 
             const result2 = await commandService.executeCommand<IMoveRowsCommandParams>(MoveRowsCommand.id, {
-                fromRow: 18,
-                toRow: 4,
+                fromRange: cellToRange(18, 1),
+                toRange: cellToRange(4, 1),
             });
             expect(result2).toBeTruthy();
         });
@@ -252,8 +257,8 @@ describe('Test move rows cols', () => {
             selectColumn(18, 19);
 
             const result = await commandService.executeCommand<IMoveColsCommandParams>(MoveColsCommand.id, {
-                fromCol: 18,
-                toCol: 1,
+                fromRange: { ...cellToRange(1, 18), endColumn: 19 },
+                toRange: { ...cellToRange(1, 1), endColumn: 2 },
             });
             expect(result).toEqual(true);
             expect(getCellInfo(0, 0)?.v).toEqual('A1');
@@ -306,8 +311,8 @@ describe('Test move rows cols', () => {
             selectColumn(2, 2);
 
             const result = await commandService.executeCommand<IMoveColsCommandParams>(MoveColsCommand.id, {
-                fromCol: 2,
-                toCol: 1,
+                fromRange: cellToRange(1, 2),
+                toRange: cellToRange(1, 1),
             });
             expect(result).toBeFalsy();
         });
@@ -316,14 +321,14 @@ describe('Test move rows cols', () => {
             selectColumn(18, 19);
 
             const result = await commandService.executeCommand<IMoveColsCommandParams>(MoveColsCommand.id, {
-                fromCol: 18,
-                toCol: 2,
+                fromRange: cellToRange(1, 18),
+                toRange: cellToRange(1, 2),
             });
             expect(result).toBeFalsy();
 
             const result2 = await commandService.executeCommand<IMoveColsCommandParams>(MoveColsCommand.id, {
-                fromCol: 18,
-                toCol: 3,
+                fromRange: cellToRange(1, 18),
+                toRange: cellToRange(1, 3),
             });
             expect(result2).toBeTruthy();
         });
@@ -392,5 +397,5 @@ const TEST_ROWS_COLS_MOVE_DEMO: IWorkbookData = {
 };
 
 function createMoveRowsColsTestBed() {
-    return createCommandTestBed(Tools.deepClone(TEST_ROWS_COLS_MOVE_DEMO));
+    return createCommandTestBed(Tools.deepClone(TEST_ROWS_COLS_MOVE_DEMO), [[MergeCellController], [RefRangeService]]);
 }

@@ -238,12 +238,14 @@ export class FreezeController extends Disposable {
         const FREEZE_SIZE = FREEZE_SIZE_NORMAL / (scale < 1 ? 1 : scale);
 
         if (freezeDirectionType === FREEZE_DIRECTION_TYPE.ROW) {
+            const FREEZE_OFFSET = FREEZE_SIZE;
+
             this._rowFreezeHeaderRect = new Rect(FREEZE_ROW_HEADER_NAME, {
                 fill: this._freezeNormalHeaderColor,
                 width: rowHeaderWidthAndMarginLeft,
                 height: FREEZE_SIZE,
                 left: 0,
-                top: startY - FREEZE_SIZE,
+                top: startY - FREEZE_OFFSET,
                 zIndex: 3,
             });
 
@@ -257,17 +259,19 @@ export class FreezeController extends Disposable {
                 width: shapeWidth * 2,
                 height: FREEZE_SIZE,
                 left: rowHeaderWidthAndMarginLeft,
-                top: startY - FREEZE_SIZE,
+                top: startY - FREEZE_OFFSET,
                 zIndex: 3,
             });
 
             scene.addObjects([this._rowFreezeHeaderRect, this._rowFreezeMainRect], SHEET_COMPONENT_HEADER_LAYER_INDEX);
         } else {
+            const FREEZE_OFFSET = FREEZE_SIZE;
+
             this._columnFreezeHeaderRect = new Rect(FREEZE_COLUMN_HEADER_NAME, {
                 fill: this._freezeNormalHeaderColor,
                 width: FREEZE_SIZE,
                 height: columnHeaderHeightAndMarginTop,
-                left: startX - FREEZE_SIZE,
+                left: startX - FREEZE_OFFSET,
                 top: 0,
                 zIndex: 3,
             });
@@ -281,7 +285,7 @@ export class FreezeController extends Disposable {
                 fill,
                 width: FREEZE_SIZE,
                 height: shapeHeight * 2,
-                left: startX - FREEZE_SIZE,
+                left: startX - FREEZE_OFFSET,
                 top: columnHeaderHeightAndMarginTop,
                 zIndex: 3,
             });
@@ -1150,7 +1154,10 @@ export class FreezeController extends Disposable {
 
                     if (command.id === MoveColsCommand.id) {
                         const selections = this._selectionManagerService.getSelections();
-                        const { fromCol, toCol } = command.params as IMoveColsCommandParams;
+                        const {
+                            fromRange: { startColumn: fromCol },
+                            toRange: { startColumn: toCol },
+                        } = command.params as IMoveColsCommandParams;
                         const filteredSelections = selections?.filter(
                             (selection) =>
                                 selection.range.rangeType === RANGE_TYPE.COLUMN &&
@@ -1211,7 +1218,10 @@ export class FreezeController extends Disposable {
 
                     if (command.id === MoveRowsCommand.id) {
                         const selections = this._selectionManagerService.getSelections();
-                        const { fromRow, toRow } = command.params as IMoveRowsCommandParams;
+                        const {
+                            fromRange: { startRow: fromRow },
+                            toRange: { startRow: toRow },
+                        } = command.params as IMoveRowsCommandParams;
                         const filteredSelections = selections?.filter(
                             (selection) =>
                                 selection.range.rangeType === RANGE_TYPE.ROW &&

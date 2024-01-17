@@ -79,6 +79,15 @@ export class BaseReferenceObject extends ObjectClassType {
         this._runtimeData = {};
     }
 
+    isExceedRange() {
+        const { startRow, endRow, startColumn, endColumn } = this.getRangePosition();
+
+        if (startRow < 0 || startColumn < 0 || endRow >= this.getRowCount() || endColumn >= this.getColumnCount()) {
+            return true;
+        }
+        return false;
+    }
+
     setRefOffset(x: number = 0, y: number = 0) {
         this._refOffsetX = x;
         this._refOffsetY = y;
@@ -92,10 +101,10 @@ export class BaseReferenceObject extends ObjectClassType {
     }
 
     getRangePosition() {
-        let startRow = this._rangeData.startRow;
-        let endRow = this._rangeData.endRow;
-        let startColumn = this._rangeData.startColumn;
-        let endColumn = this._rangeData.endColumn;
+        let startRow = this._rangeData.startRow + this._refOffsetY;
+        let endRow = this._rangeData.endRow + this._refOffsetY;
+        let startColumn = this._rangeData.startColumn + this._refOffsetX;
+        let endColumn = this._rangeData.endColumn + this._refOffsetX;
 
         if (isNaN(startRow)) {
             startRow = 0;
@@ -136,14 +145,11 @@ export class BaseReferenceObject extends ObjectClassType {
 
         for (let r = startRow; r <= endRow; r++) {
             for (let c = startColumn; c <= endColumn; c++) {
-                const row = r + this._refOffsetY;
-                const column = c + this._refOffsetX;
-
-                if (row < 0 || column < 0) {
+                if (r < 0 || c < 0) {
                     return callback(new ErrorValueObject(ErrorType.REF), r, c);
                 }
 
-                const cell = this.getCellData(row, column);
+                const cell = this.getCellData(r, c);
                 let result: Nullable<boolean> = false;
                 if (cell == null || isNullCell(cell)) {
                     result = callback(null, r, c);
@@ -163,7 +169,7 @@ export class BaseReferenceObject extends ObjectClassType {
 
     getFirstCell() {
         const { startRow, startColumn } = this.getRangePosition();
-        const cell = this.getCellData(startRow + this._refOffsetY, startColumn + this._refOffsetX);
+        const cell = this.getCellData(startRow, startColumn);
 
         if (!cell) {
             return new NumberValueObject(0, true);
@@ -327,7 +333,7 @@ export class BaseReferenceObject extends ObjectClassType {
 
     getCellValueObject(cell: ICellData) {
         const value = cell.v || 0;
-        if (ERROR_TYPE_SET.has(value as string)) {
+        if (ERROR_TYPE_SET.has(value as ErrorType)) {
             return ErrorValueObject.create(value as ErrorType);
         }
 
@@ -427,9 +433,7 @@ export class BaseReferenceObject extends ObjectClassType {
     toArrayValueObject(useCache: boolean = true): ArrayValueObject {
         const { startRow, endRow, startColumn, endColumn } = this.getRangePosition();
 
-        const key = `${this.getUnitId()}_${this.getSheetId()}_${startRow + this._refOffsetY}_${
-            endRow + this._refOffsetY
-        }_${startColumn + this._refOffsetX}_${endColumn + this._refOffsetX}`;
+        const key = `${this.getUnitId()}_${this.getSheetId()}_${startRow}_${endRow}_${startColumn}_${endColumn}`;
 
         const array = FORMULA_REF_TO_ARRAY_CACHE.get(key);
 
@@ -439,6 +443,11 @@ export class BaseReferenceObject extends ObjectClassType {
 
         const rowSize = endRow - startRow + 1;
         const columnSize = endColumn - startColumn + 1;
+
+        if (rowSize < 0 || columnSize < 0) {
+            return this._getBlankArrayValueObject();
+        }
+
         const arrayValueList: BaseValueObject[][] = new Array(rowSize);
         this.iterator((valueObject: Nullable<BaseValueObject>, rowIndex: number, columnIndex: number) => {
             const row = rowIndex - startRow;
@@ -473,7 +482,7 @@ export class BaseReferenceObject extends ObjectClassType {
 
     toUnitRange() {
         return {
-            range: this._rangeData,
+            range: this.getRangePosition(),
             sheetId: this.getSheetId(),
             unitId: this.getUnitId(),
         };
@@ -484,6 +493,20 @@ export class BaseReferenceObject extends ObjectClassType {
             return true;
         }
         return false;
+    }
+
+    private _getBlankArrayValueObject() {
+        const arrayValueObjectData: IArrayValueObject = {
+            calculateValueList: [],
+            rowCount: 0,
+            columnCount: 0,
+            unitId: this.getUnitId(),
+            sheetId: this.getSheetId(),
+            row: 0,
+            column: 0,
+        };
+
+        return new ArrayValueObject(arrayValueObjectData);
     }
 }
 

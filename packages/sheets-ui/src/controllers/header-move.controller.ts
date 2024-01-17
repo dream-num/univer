@@ -292,23 +292,52 @@ export class HeaderMoveController extends Disposable {
 
                     // when multi ranges are selected, we should only move the range that contains
                     // `changeFromRow`
+                    const selections = this._selectionManagerService.getSelections();
 
                     if (initialType === HEADER_MOVE_TYPE.ROW) {
                         if (this._changeFromRow !== this._changeToRow && this._changeToRow !== -1) {
-                            this._commandService.executeCommand<IMoveRowsCommandParams>(MoveRowsCommand.id, {
-                                fromRow: this._changeFromRow,
-                                toRow: this._changeToRow,
-                            });
+                            const filteredSelections =
+                                selections?.filter(
+                                    (selection) =>
+                                        selection.range.rangeType === RANGE_TYPE.ROW &&
+                                        selection.range.startRow <= this._changeFromRow &&
+                                        this._changeFromRow <= selection.range.endRow
+                                ) || [];
+                            const range = filteredSelections[0]?.range;
+                            if (range) {
+                                this._commandService.executeCommand<IMoveRowsCommandParams>(MoveRowsCommand.id, {
+                                    fromRange: range,
+                                    toRange: {
+                                        ...range,
+                                        startRow: this._changeToRow,
+                                        endRow: this._changeToRow + range.endRow - range.startRow,
+                                    },
+                                });
+                            }
                         }
 
                         // reset dragging status
                         this._changeToRow = this._changeFromRow = -1;
                     } else {
                         if (this._changeFromColumn !== this._changeToColumn && this._changeToColumn !== -1) {
-                            this._commandService.executeCommand<IMoveColsCommandParams>(MoveColsCommand.id, {
-                                fromCol: this._changeFromColumn,
-                                toCol: this._changeToColumn,
-                            });
+                            const filteredSelections =
+                                selections?.filter(
+                                    (selection) =>
+                                        selection.range.rangeType === RANGE_TYPE.COLUMN &&
+                                        selection.range.startColumn <= this._changeFromColumn &&
+                                        this._changeFromColumn <= selection.range.endColumn
+                                ) || [];
+                            const range = filteredSelections[0]?.range;
+                            if (range) {
+                                this._commandService.executeCommand<IMoveColsCommandParams>(MoveColsCommand.id, {
+                                    fromRange: range,
+                                    toRange: {
+                                        ...range,
+                                        startColumn: this._changeToColumn,
+                                        endColumn: this._changeToColumn + range.endColumn - range.startColumn,
+                                    },
+                                });
+                            }
                         }
 
                         this._changeToColumn = this._changeFromColumn = -1;
@@ -447,15 +476,15 @@ export class HeaderMoveController extends Disposable {
 
         const matchSelectionData = rangeDatas?.find((data) => {
             const range = data.range;
-            const { startRow, endRow, startColumn, endColumn } = range;
+            const { startRow, endRow, startColumn, endColumn, rangeType } = range;
             if (type === HEADER_MOVE_TYPE.COLUMN) {
-                if (rowOrColumn >= startColumn && rowOrColumn <= endColumn) {
+                if (rowOrColumn >= startColumn && rowOrColumn <= endColumn && RANGE_TYPE.COLUMN === rangeType) {
                     return true;
                 }
                 return false;
             }
 
-            if (rowOrColumn >= startRow && rowOrColumn <= endRow) {
+            if (rowOrColumn >= startRow && rowOrColumn <= endRow && RANGE_TYPE.ROW === rangeType) {
                 return true;
             }
             return false;

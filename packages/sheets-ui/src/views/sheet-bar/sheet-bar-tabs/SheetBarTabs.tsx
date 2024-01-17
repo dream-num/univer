@@ -16,6 +16,7 @@
 
 import type { ICommandInfo } from '@univerjs/core';
 import { BooleanNumber, ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
+import { Dropdown } from '@univerjs/design';
 import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import {
     InsertSheetMutation,
@@ -29,10 +30,11 @@ import {
     SetWorksheetOrderCommand,
     SetWorksheetOrderMutation,
 } from '@univerjs/sheets';
-import { IConfirmService } from '@univerjs/ui';
+import { IConfirmService, Menu } from '@univerjs/ui';
 import { useDependency, useInjector } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useRef, useState } from 'react';
 
+import { SheetMenuPosition } from '../../../controllers/menu/menu';
 import { ISheetBarService } from '../../../services/sheet-bar/sheet-bar.service';
 import styles from './index.module.less';
 import type { IBaseSheetBarProps } from './SheetBarItem';
@@ -46,6 +48,8 @@ export function SheetBarTabs() {
     const [sheetList, setSheetList] = useState<IBaseSheetBarProps[]>([]);
     const [activeKey, setActiveKey] = useState('');
     const [boxShadow, setBoxShadow] = useState('');
+    const [visible, setVisible] = useState(false);
+    const [offset, setOffset] = useState([0, 0]);
     const slideTabBarRef = useRef<{ slideTabBar: SlideTabBar | null }>({ slideTabBar: null });
     const slideTabBarContainerRef = useRef<HTMLDivElement>(null);
 
@@ -100,11 +104,19 @@ export function SheetBarTabs() {
             onSlideEnd: (event: Event, order: number) => {
                 commandService.executeCommand(SetWorksheetOrderCommand.id, { order });
             },
-            onChangeTab: (event: Event, subUnitId: string) => {
-                commandService.executeCommand(SetWorksheetActivateCommand.id, {
-                    subUnitId,
-                    unitId: workbook.getUnitId(),
-                });
+            onChangeTab: (event: MouseEvent, subUnitId: string) => {
+                commandService
+                    .executeCommand(SetWorksheetActivateCommand.id, {
+                        subUnitId,
+                        unitId: workbook.getUnitId(),
+                    })
+                    .then(() => {
+                        // right click to show menu
+                        if (event.button === 2) {
+                            onVisibleChange(true);
+                        }
+                    });
+
                 // The 'onChangeTab' event occurs during the 'pointerDown' event.
                 // The triggering time is too early.
                 // Settimeout is required to delay resetting the focus.
@@ -283,7 +295,7 @@ export function SheetBarTabs() {
         const slideTabBarContainer = slideTabBarContainerRef.current?.querySelector(`.${styles.slideTabBar}`);
         if (!slideTabBarContainer) return;
 
-        // Create a Resizeobserver
+        // Create a ResizeObserver
         const observer = new ResizeObserver(() => {
             buttonScroll(slideTabBar);
         });
@@ -292,13 +304,45 @@ export function SheetBarTabs() {
         observer.observe(slideTabBarContainer);
     };
 
+    const onVisibleChange = (visible: boolean) => {
+        if (visible) {
+            const { left: containerLeft } = slideTabBarContainerRef.current?.getBoundingClientRect() ?? {};
+            // current active tab position
+            const { left: activeTabLeft } =
+                slideTabBarRef.current.slideTabBar?.getActiveItem()?.getSlideTabItem().getBoundingClientRect() ?? {};
+
+            if (containerLeft !== undefined && activeTabLeft !== undefined) {
+                setOffset([activeTabLeft - containerLeft, 0]);
+            }
+        }
+        setVisible(visible);
+    };
+
     return (
-        <div className={styles.slideTabBarContainer} ref={slideTabBarContainerRef}>
-            <div className={styles.slideTabBar} style={{ boxShadow }}>
-                {sheetList.map((item) => (
-                    <SheetBarItem {...item} key={item.sheetId} selected={activeKey === item.sheetId} />
-                ))}
+        <Dropdown
+            className={styles.slideTabItemDropdown}
+            visible={visible}
+            align={{ offset }}
+            trigger={['contextMenu']}
+            overlay={
+                <Menu
+                    menuType={SheetMenuPosition.SHEET_BAR}
+                    onOptionSelect={(params) => {
+                        const { label: commandId, value } = params;
+                        commandService.executeCommand(commandId as string, { value, subUnitId: activeKey });
+                        setVisible(false);
+                    }}
+                />
+            }
+            onVisibleChange={onVisibleChange}
+        >
+            <div className={styles.slideTabBarContainer} ref={slideTabBarContainerRef}>
+                <div className={styles.slideTabBar} style={{ boxShadow }}>
+                    {sheetList.map((item) => (
+                        <SheetBarItem {...item} key={item.sheetId} selected={activeKey === item.sheetId} />
+                    ))}
+                </div>
             </div>
-        </div>
+        </Dropdown>
     );
 }

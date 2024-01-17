@@ -28,28 +28,31 @@ export const DialogOperation: ICommand = {
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor, params: IUIComponentCommandParams) => {
         const dialogService = accessor.get(IDialogService);
+        const { value } = params;
 
-        dialogService.open({
-            id: 'dialog1',
-            children: { title: 'Dialog Content' },
-            footer: { title: 'Dialog Footer' },
-            title: { title: 'Dialog Title' },
-            draggable: false,
-            onClose() {
-                dialogService.close('dialog1');
-            },
-        });
-
-        dialogService.open({
-            id: 'dialog2',
-            children: { title: 'Dialog2 Content' },
-            footer: { title: 'Dialog2 Footer' },
-            title: { title: 'Dialog2 Title' },
-            draggable: true,
-            onClose() {
-                dialogService.close('dialog2');
-            },
-        });
+        if (value === 'draggable') {
+            dialogService.open({
+                id: 'draggable',
+                children: { title: 'Draggable Dialog Content' },
+                title: { title: 'Draggable Dialog' },
+                draggable: true,
+                width: 350,
+                onClose() {
+                    dialogService.close('draggable');
+                },
+            });
+        } else {
+            dialogService.open({
+                id: 'dialog1',
+                children: { title: 'Dialog Content' },
+                footer: { title: 'Dialog Footer' },
+                title: { title: 'Dialog Title' },
+                draggable: false,
+                onClose() {
+                    dialogService.close('dialog1');
+                },
+            });
+        }
 
         return true;
     },

@@ -116,53 +116,32 @@ export const InsertRangeMoveDownCommand: ICommand = {
 
         undoMutations.push({ id: DeleteRangeMutation.id, params: deleteRangeMutationParams });
 
-        // 2. insert row
-        // Only required when the last row has a value, and the row height is set to the row height of the last row
-        let hasValueInLastRow = false;
-        let lastRowHeight = 0;
-        const lastRowIndex = worksheet.getMaxRows() - 1;
-        const { startRow, endRow, startColumn, endColumn } = range;
-        for (let column = startColumn; column <= endColumn; column++) {
-            const lastCell = worksheet.getCell(lastRowIndex, column);
-            const lastCellValue = lastCell?.v;
-            if (lastCellValue && lastCellValue !== '') {
-                hasValueInLastRow = true;
-                lastRowHeight = worksheet.getRowHeight(lastRowIndex);
-                break;
-            }
-        }
+        const { startRow, endRow } = range;
 
-        // There may be overlap and deduplication is required
-        const rowsCount = endRow - startRow + 1;
-        if (hasValueInLastRow) {
-            const lastRowRange = {
-                startRow: lastRowIndex,
-                endRow: lastRowIndex,
-                startColumn: range.startColumn,
-                endColumn: range.endColumn,
-            };
-            const insertRowParams: IInsertRowMutationParams = {
-                unitId,
-                subUnitId,
-                range: lastRowRange,
-                rowInfo: new Array(rowsCount).fill(undefined).map(() => ({
-                    h: lastRowHeight,
-                    hd: BooleanNumber.FALSE,
-                })),
-            };
+        const anchorRow = startRow - 1;
+        const height = worksheet.getRowHeight(anchorRow);
 
-            redoMutations.push({
-                id: InsertRowMutation.id,
-                params: insertRowParams,
-            });
+        const insertRowParams: IInsertRowMutationParams = {
+            unitId,
+            subUnitId,
+            range,
+            rowInfo: new Array(endRow - startRow + 1).fill(undefined).map(() => ({
+                h: height,
+                hd: BooleanNumber.FALSE,
+            })),
+        };
 
-            const undoRowInsertionParams: IRemoveRowsMutationParams = InsertRowMutationUndoFactory(
-                accessor,
-                insertRowParams
-            );
+        redoMutations.push({
+            id: InsertRowMutation.id,
+            params: insertRowParams,
+        });
 
-            undoMutations.push({ id: RemoveRowMutation.id, params: undoRowInsertionParams });
-        }
+        const undoRowInsertionParams: IRemoveRowsMutationParams = InsertRowMutationUndoFactory(
+            accessor,
+            insertRowParams
+        );
+
+        undoMutations.push({ id: RemoveRowMutation.id, params: undoRowInsertionParams });
 
         const sheetInterceptor = sheetInterceptorService.onCommandExecute({
             id: InsertRangeMoveDownCommand.id,

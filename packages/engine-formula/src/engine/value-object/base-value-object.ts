@@ -42,6 +42,19 @@ export class BaseValueObject extends ObjectClassType {
         return true;
     }
 
+    toUnitRange() {
+        return {
+            range: {
+                startColumn: -1,
+                startRow: -1,
+                endRow: -1,
+                endColumn: -1,
+            },
+            sheetId: '',
+            unitId: '',
+        };
+    }
+
     getValue(): string | number | boolean {
         /** abstract */
         return 0;

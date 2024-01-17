@@ -22,6 +22,8 @@
     }
 
     &-content {
+        pointer-events: all;
+
         position: relative;
 
         color: rgb(var(--text-color));
@@ -42,10 +44,10 @@
 
         padding: 0;
 
-        font-size: var(--font-size-base);
+        font-size: var(--font-size-lg);
         font-weight: 500;
         line-height: 1;
-        color: rgb(var(--text-color));
+        color: rgb(var(--grey-500));
         text-decoration: none;
 
         opacity: .2;
@@ -188,5 +190,9 @@
         100% {
             opacity: 0;
         }
+    }
+
+    &-root-draggable {
+        pointer-events: none;
     }
 }

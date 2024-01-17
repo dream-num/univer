@@ -192,8 +192,6 @@ export class ImageLoadController extends Disposable {
             });
 
             this._floatingObjectManagerService.pluginUpdateRefresh(params);
-
-            // docsSkeleton?.calculate();
         });
     }
 }

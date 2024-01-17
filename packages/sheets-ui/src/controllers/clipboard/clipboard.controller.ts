@@ -16,6 +16,7 @@
 
 import type {
     ICellData,
+    IDocumentData,
     IMutationInfo,
     IObjectArrayPrimitiveType,
     IObjectMatrixPrimitiveType,
@@ -75,7 +76,9 @@ import type {
     ISheetClipboardHook,
     ISheetRangeLocation,
 } from '../../services/clipboard/type';
+import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import {
+    generateBody,
     getClearAndSetMergeMutations,
     getClearCellStyleMutations,
     getDefaultOnPasteCellMutations,
@@ -95,6 +98,7 @@ export class SheetClipboardController extends Disposable {
         @IConfigService private readonly _configService: IConfigService,
         @ISheetClipboardService private readonly _sheetClipboardService: ISheetClipboardService,
         @IMessageService private readonly _messageService: IMessageService,
+        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(LocaleService) private readonly _localService: LocaleService
     ) {
@@ -400,17 +404,41 @@ export class SheetClipboardController extends Disposable {
         };
     }
 
+    private _generateDocumentDataModelSnapshot(snapshot: Partial<IDocumentData>) {
+        const currentSkeleton = this._sheetSkeletonManagerService.getCurrent();
+        if (currentSkeleton == null) {
+            return null;
+        }
+        const { skeleton } = currentSkeleton;
+        const documentModel = skeleton.getBlankCellDocumentModel()?.documentModel;
+        const p = documentModel?.getSnapshot();
+        const documentData = { ...p, ...snapshot };
+        documentModel?.reset(documentData);
+        return documentModel?.getSnapshot();
+    }
+
     private _onPastePlainText(pasteTo: ISheetRangeLocation, text: string, payload: ICopyPastePayload) {
         const { range, unitId, subUnitId } = pasteTo;
-        const cellValue: IObjectMatrixPrimitiveType<ICellData> = {
-            [range.startRow]: {
-                [range.startColumn]: {
-                    v: text,
+        let cellValue: IObjectMatrixPrimitiveType<ICellData>;
+        if (/\r|\n/.test(text)) {
+            const body = generateBody(text);
+            const p = this._generateDocumentDataModelSnapshot({ body });
+            cellValue = {
+                [range.startRow]: {
+                    [range.startColumn]: {
+                        p,
+                    },
                 },
-            },
-        };
-
-        const workbook = this._currentUniverSheet.getCurrentUniverSheetInstance();
+            };
+        } else {
+            cellValue = {
+                [range.startRow]: {
+                    [range.startColumn]: {
+                        v: text,
+                    },
+                },
+            };
+        }
 
         const setRangeValuesParams: ISetRangeValuesMutationParams = {
             unitId,

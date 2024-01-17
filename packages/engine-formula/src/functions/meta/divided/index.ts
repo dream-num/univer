@@ -15,28 +15,23 @@
  */
 
 import { ErrorType } from '../../../basics/error-type';
-import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 
 export class Divided extends BaseFunction {
-    override calculate(variant1: FunctionVariantType, variant2: FunctionVariantType) {
-        if (variant1.isError() || variant2.isError()) {
-            return ErrorValueObject.create(ErrorType.VALUE);
+    override calculate(variant1: BaseValueObject, variant2: BaseValueObject) {
+        if (variant1.isError()) {
+            return variant1;
         }
 
-        if (variant1.isReferenceObject()) {
-            variant1 = (variant1 as BaseReferenceObject).toArrayValueObject();
+        if (variant2.isError()) {
+            return variant1;
         }
 
-        if (variant2.isReferenceObject()) {
-            variant2 = (variant2 as BaseReferenceObject).toArrayValueObject();
-        }
-
-        if (!(variant2 as BaseValueObject).isArray() && (variant2 as BaseValueObject).getValue() === 0) {
+        if (!variant2.isArray() && variant2.getValue() === 0) {
             return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
         }
 
-        return (variant1 as BaseValueObject).divided(variant2 as BaseValueObject);
+        return variant1.divided(variant2);
     }
 }

@@ -818,11 +818,12 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
     private _scrollToSelection() {
         const activeRangeInstance = this._getActiveRangeInstance();
         const anchor = activeRangeInstance?.getAnchor();
+
         if (!anchor || (anchor && !anchor.visible) || this._activeViewport == null) {
             return;
         }
 
-        const { scaleX, scaleY } = this._scene?.getAncestorScale() || { scaleX: 1, scaleY: 1 };
+        // const { scaleX, scaleY } = this._scene?.getAncestorScale() || { scaleX: 1, scaleY: 1 };
 
         const { left, top, height, width } = anchor;
 
@@ -836,8 +837,8 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             right: boundRight,
             bottom: boundBottom,
         } = this._activeViewport.getBounding().viewBound;
-        const constantOffsetWidth = width / scaleX;
-        const constantOffsetHeight = height / scaleY;
+        const constantOffsetWidth = width;
+        const constantOffsetHeight = height;
         let offsetY = 0;
         let offsetX = 0;
 

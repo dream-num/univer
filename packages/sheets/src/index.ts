@@ -175,6 +175,7 @@ export {
 } from './commands/mutations/add-worksheet-merge.mutation';
 export { DeleteRangeMutation } from './commands/mutations/delete-range.mutation';
 export { handleDeleteRangeMutation } from './commands/mutations/delete-range.mutation';
+export { EmptyMutation } from './commands/mutations/empty.mutation';
 export { InsertRangeMutation } from './commands/mutations/insert-range.mutation';
 export { handleInsertRangeMutation } from './commands/mutations/insert-range.mutation';
 export {
@@ -254,9 +255,12 @@ export { enUS, zhCN } from './locale';
 export type { FormatType, INumfmtItem, INumfmtItemWithCache } from './services/numfmt/type';
 export { INumfmtService } from './services/numfmt/type';
 export { RefRangeService } from './services/ref-range/ref-range.service';
-export type { EffectRefRangeParams } from './services/ref-range/type';
+export type { EffectRefRangeParams, IOperator } from './services/ref-range/type';
 export { EffectRefRangId, OperatorType } from './services/ref-range/type';
 export {
+    handleBaseInsertRange,
+    handleBaseMoveRowsCols,
+    handleBaseRemoveRange,
     handleDeleteRangeMoveLeft,
     handleDeleteRangeMoveUp,
     handleInsertCol,
@@ -265,7 +269,10 @@ export {
     handleInsertRow,
     handleIRemoveCol,
     handleIRemoveRow,
+    handleMoveCols,
     handleMoveRange,
+    handleMoveRows,
+    rotateRange,
     runRefRangeMutations,
 } from './services/ref-range/util';
 export { INTERCEPTOR_POINT } from './services/sheet-interceptor/interceptor-const';

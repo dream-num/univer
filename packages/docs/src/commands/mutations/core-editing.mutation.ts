@@ -44,11 +44,15 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
             throw new Error(`DocumentDataModel or documentViewModel not found for unitId: ${unitId}`);
         }
 
+        if (mutations.length === 0) {
+            throw new Error(`Mutation's length should great than 0 when call RichTextEditingMutation`);
+        }
+
         // Step 1: Update Doc Data Model.
         const undoMutations = documentDataModel.apply(mutations);
 
         // Step 2: Update Doc View Model.
-        const segmentId = mutations[0].segmentId;
+        const { segmentId } = mutations[0];
         const segmentDocumentDataModel = documentDataModel.getSelfOrHeaderFooterModel(segmentId);
         const segmentViewModel = documentViewModel.getSelfOrHeaderFooterViewModel(segmentId);
 

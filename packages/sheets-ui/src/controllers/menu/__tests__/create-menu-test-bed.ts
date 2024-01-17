@@ -54,7 +54,7 @@ export function createMenuTestBed() {
 
         static override type = PluginType.Sheet;
 
-        constructor(@Inject(Injector) _injector: Injector) {
+        constructor(_config: unknown, @Inject(Injector) _injector: Injector) {
             super('test-plugin');
 
             this._injector = _injector;

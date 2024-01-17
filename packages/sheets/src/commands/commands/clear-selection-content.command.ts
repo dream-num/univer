@@ -35,7 +35,9 @@ import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mu
  */
 export const ClearSelectionContentCommand: ICommand = {
     id: 'sheet.command.clear-selection-content',
+
     type: CommandType.COMMAND,
+
     handler: async (accessor: IAccessor) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);

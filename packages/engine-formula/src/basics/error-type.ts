@@ -46,17 +46,4 @@ export enum ErrorType {
     NULL = '#NULL!',
 }
 
-export const ERROR_TYPE_SET = new Set([
-    ErrorType.DIV_BY_ZERO as string,
-    ErrorType.NAME,
-    ErrorType.VALUE,
-    ErrorType.NUM,
-    ErrorType.NA,
-    ErrorType.CYCLE,
-    ErrorType.REF,
-    ErrorType.SPILL,
-    ErrorType.CALC,
-    ErrorType.ERROR,
-    ErrorType.CONNECT,
-    ErrorType.NULL,
-]);
+export const ERROR_TYPE_SET = new Set(Object.values(ErrorType));

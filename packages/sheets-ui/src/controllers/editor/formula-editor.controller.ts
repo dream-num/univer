@@ -42,6 +42,8 @@ import {
     VIEWPORT_KEY,
 } from '@univerjs/docs';
 import { DeviceInputEventType, IRenderManagerService, ScrollBar } from '@univerjs/engine-render';
+import type { IMoveRangeMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
+import { MoveRangeMutation, SetRangeValuesMutation } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 import { takeUntil } from 'rxjs';
 
@@ -228,12 +230,12 @@ export class FormulaEditorController extends RxDisposable {
 
     // Sync cell content to formula editor bar when sheet selection changed.
     private _syncFormulaEditorContent() {
-        this._editorBridgeService.state$.pipe(takeUntil(this.dispose$)).subscribe((param) => {
-            if (param == null || this._editorBridgeService.isForceKeepVisible()) {
+        this._editorBridgeService.currentEditCellState$.pipe(takeUntil(this.dispose$)).subscribe((editCellState) => {
+            if (editCellState == null || this._editorBridgeService.isForceKeepVisible()) {
                 return;
             }
 
-            this._editorSyncHandler(param);
+            this._editorSyncHandler(editCellState);
         });
 
         this._editorBridgeService.visible$.pipe(takeUntil(this.dispose$)).subscribe((state) => {
@@ -241,13 +243,13 @@ export class FormulaEditorController extends RxDisposable {
                 return;
             }
 
-            const param = this._editorBridgeService.getState();
+            const cellEditState = this._editorBridgeService.getLatestEditCellState();
 
-            if (param == null) {
+            if (cellEditState == null) {
                 return;
             }
 
-            this._editorSyncHandler(param);
+            this._editorSyncHandler(cellEditState);
         });
     }
 
@@ -310,6 +312,48 @@ export class FormulaEditorController extends RxDisposable {
 
                         this._syncContentAndRender(syncId, dataStream, paragraphs);
 
+                        // handle weather need to show scroll bar.
+                        this._autoScroll();
+                    }
+                }
+            })
+        );
+
+        // Update formula bar content when you call SetRangeValuesMutation and MoveRangeMutation.
+        const needUpdateFormulaEditorContentCommandList = [SetRangeValuesMutation.id, MoveRangeMutation.id];
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                if (needUpdateFormulaEditorContentCommandList.includes(command.id)) {
+                    const editCellState = this._editorBridgeService.getLatestEditCellState();
+
+                    if (editCellState == null) {
+                        return;
+                    }
+
+                    let needUpdate = false;
+
+                    const { row, column } = editCellState;
+
+                    if (command.id === SetRangeValuesMutation.id && command.params) {
+                        const params = command.params as ISetRangeValuesMutationParams;
+                        if (params.cellValue?.[row]?.[column]) {
+                            needUpdate = true;
+                        }
+                    } else if (command.id === MoveRangeMutation.id && command.params) {
+                        const params = command.params as IMoveRangeMutationParams;
+                        if (params.to.value?.[row]?.[column]) {
+                            needUpdate = true;
+                        }
+                    }
+
+                    if (needUpdate) {
+                        const body = editCellState.documentLayoutObject.documentModel?.getBody();
+
+                        if (body == null) {
+                            return;
+                        }
+                        const { dataStream, paragraphs = [] } = body;
+                        this._syncContentAndRender(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, dataStream, paragraphs);
                         // handle weather need to show scroll bar.
                         this._autoScroll();
                     }

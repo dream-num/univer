@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Direction } from '@univerjs/core';
+import { CellValueType, Direction } from '@univerjs/core';
 
 import {
     chineseToNumber,
@@ -38,8 +38,7 @@ import { APPLY_TYPE, DATA_TYPE } from './type';
 export const numberRule: IAutoFillRule = {
     type: DATA_TYPE.NUMBER,
     priority: 1000,
-    match: (cellData) => typeof cellData?.v === 'number' || !isNaN(Number(cellData?.v)),
-    // TODO@yuhongz: not the good way to match number, will be changed after cell type is supported
+    match: (cellData) => typeof cellData?.v === 'number' || cellData?.t === CellValueType.NUMBER,
     isContinue: (prev, cur) => {
         if (prev.type === DATA_TYPE.NUMBER) {
             return true;
@@ -87,11 +86,12 @@ export const extendNumberRule: IAutoFillRule = {
     applyFunctions: {
         [APPLY_TYPE.SERIES]: (dataWithIndex, len, direction) => {
             const { data } = dataWithIndex;
+            const isReverse = direction === Direction.UP || direction === Direction.LEFT;
 
             let step;
             if (data.length === 1) {
-                step = direction === Direction.DOWN || direction === Direction.RIGHT ? 1 : -1;
-                return fillExtendNumber(data, len, step);
+                step = isReverse ? -1 : 1;
+                return reverseIfNeed(fillExtendNumber(data, len, step), isReverse);
             }
             const dataNumArr = [];
 
@@ -100,14 +100,14 @@ export const extendNumberRule: IAutoFillRule = {
                 txt && dataNumArr.push(Number(matchExtendNumber(txt).matchTxt));
             }
 
-            if (direction === Direction.UP || direction === Direction.LEFT) {
+            if (isReverse) {
                 data.reverse();
                 dataNumArr.reverse();
             }
 
             if (isEqualDiff(dataNumArr)) {
                 step = dataNumArr[1] - dataNumArr[0];
-                return fillExtendNumber(data, len, step);
+                return reverseIfNeed(fillExtendNumber(data, len, step), isReverse);
             }
             return fillCopy(data, len);
         },
@@ -143,10 +143,10 @@ export const chnNumberRule: IAutoFillRule = {
                     step = -1;
                 }
                 if (formattedValue && (formattedValue === '日' || chineseToNumber(formattedValue) < 7)) {
-                    return fillChnWeek(data, len, step);
+                    return reverseIfNeed(fillChnWeek(data, len, step), isReverse);
                 }
 
-                return fillChnNumber(data, len, step);
+                return reverseIfNeed(fillChnNumber(data, len, step), isReverse);
             }
             let hasWeek = false;
             for (let i = 0; i < data.length; i++) {
@@ -189,11 +189,11 @@ export const chnNumberRule: IAutoFillRule = {
                 ) {
                     // Fill with sequence of Monday~Sunday
                     const step = dataNumArr[1] - dataNumArr[0];
-                    return fillChnWeek(data, len, step);
+                    return reverseIfNeed(fillChnWeek(data, len, step), isReverse);
                 }
                 // Fill with sequence of Chinese lowercase numbers
                 const step = dataNumArr[1] - dataNumArr[0];
-                return fillChnNumber(data, len, step);
+                return reverseIfNeed(fillChnNumber(data, len, step), isReverse);
             }
             // Not an arithmetic progression, copy data
             return fillCopy(data, len);
@@ -224,7 +224,7 @@ export const chnWeek2Rule: IAutoFillRule = {
                     step = -1;
                 }
 
-                return fillChnWeek(data, len, step, 1);
+                return reverseIfNeed(fillChnWeek(data, len, step, 1), isReverse);
             }
             const dataNumArr = [];
             let weekIndex = 0;
@@ -251,7 +251,7 @@ export const chnWeek2Rule: IAutoFillRule = {
 
             if (isEqualDiff(dataNumArr)) {
                 const step = dataNumArr[1] - dataNumArr[0];
-                return fillChnWeek(data, len, step, 1);
+                return reverseIfNeed(fillChnWeek(data, len, step, 1), isReverse);
             }
             return fillCopy(data, len);
         },
@@ -276,7 +276,7 @@ export const chnWeek3Rule: IAutoFillRule = {
                     step = -1;
                 }
 
-                return fillChnWeek(data, len, step, 2);
+                return reverseIfNeed(fillChnWeek(data, len, step, 2), isReverse);
             }
             const dataNumArr = [];
             let weekIndex = 0;
@@ -305,7 +305,7 @@ export const chnWeek3Rule: IAutoFillRule = {
 
             if (isEqualDiff(dataNumArr)) {
                 const step = dataNumArr[1] - dataNumArr[0];
-                return fillChnWeek(data, len, step, 2);
+                return reverseIfNeed(fillChnWeek(data, len, step, 2), isReverse);
             }
             return fillCopy(data, len);
         },
@@ -335,7 +335,7 @@ export const loopSeriesRule: IAutoFillRule = {
                     step = -1;
                 }
 
-                return fillLoopSeries(data, len, step, series);
+                return reverseIfNeed(fillLoopSeries(data, len, step, series), isReverse);
             }
             const dataNumArr = [];
             let cycleIndex = 0;
@@ -362,9 +362,13 @@ export const loopSeriesRule: IAutoFillRule = {
 
             if (isEqualDiff(dataNumArr)) {
                 const step = dataNumArr[1] - dataNumArr[0];
-                return fillLoopSeries(data, len, step, series);
+                return reverseIfNeed(fillLoopSeries(data, len, step, series), isReverse);
             }
             return fillCopy(data, len);
         },
     },
 };
+
+export function reverseIfNeed<T>(data: T[], reverse: boolean): T[] {
+    return reverse ? data.reverse() : data;
+}

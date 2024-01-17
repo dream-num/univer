@@ -26,6 +26,7 @@ import {
 } from '@univerjs/sheets';
 import { BehaviorSubject, Subject } from 'rxjs';
 
+import { SHEET_COMPONENT_SELECTION_LAYER_INDEX } from '../../common/keys';
 import { SelectionRenderModel } from './selection-render-model';
 
 enum SELECTION_MANAGER_KEY {
@@ -595,7 +596,7 @@ export class SelectionShape {
         this._selectionShape.zIndex = zIndex;
 
         const scene = this.getScene();
-        scene.addObject(this._selectionShape);
+        scene.addObject(this._selectionShape, SHEET_COMPONENT_SELECTION_LAYER_INDEX);
 
         this._initialTitle();
     }

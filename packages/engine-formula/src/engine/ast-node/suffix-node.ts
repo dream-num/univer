@@ -90,7 +90,7 @@ export class SuffixNode extends BaseAstNode {
         const lexer = this._accessor.get(Lexer);
 
         const cellValue = value as CellReferenceObject;
-        const range = cellValue.getRangeData();
+        const range = cellValue.getRangePosition();
         const unitId = cellValue.getUnitId();
         const sheetId = cellValue.getSheetId();
         const formulaData = currentConfigService.getFormulaData();

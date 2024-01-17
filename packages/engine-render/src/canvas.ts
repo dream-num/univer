@@ -65,7 +65,7 @@ export class Canvas {
         this._canvasEle.style.touchAction = 'none';
         this._canvasEle.style.outline = '0';
 
-        this._context = new UniverRenderingContext(this._canvasEle.getContext('2d')!);
+        this._context = new UniverRenderingContext(this._canvasEle?.getContext('2d')!);
 
         this.setSize(props.width, props.height, props.pixelRatio);
     }

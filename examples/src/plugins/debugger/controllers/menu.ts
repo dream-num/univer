@@ -107,8 +107,12 @@ export function DialogMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
         positions: [MenuPosition.TOOLBAR_OTHERS],
         selections: [
             {
-                label: 'Open dialog',
+                label: 'Open Dialog',
                 value: 'dialog',
+            },
+            {
+                label: 'Draggable Dialog',
+                value: 'draggable',
             },
         ],
     };

@@ -17,16 +17,16 @@
 import type { IOperation } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
 
-import type { IEditorBridgeServiceParam } from '../../services/editor-bridge.service';
+import type { ICurrentEditCellParam } from '../../services/editor-bridge.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 
-export const SetActivateCellEditOperation: IOperation<IEditorBridgeServiceParam> = {
+export const SetActivateCellEditOperation: IOperation<ICurrentEditCellParam> = {
     id: 'sheet.operation.set-activate-cell-edit',
     type: CommandType.OPERATION,
     handler: (accessor, params) => {
         const editorBridgeService = accessor.get(IEditorBridgeService);
 
-        editorBridgeService.setState(params!);
+        editorBridgeService.setEditCell(params);
 
         return true;
     },

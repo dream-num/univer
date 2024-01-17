@@ -31,7 +31,12 @@ import {
     IFunctionService,
     RangeReferenceObject,
 } from '@univerjs/engine-formula';
-import { INumfmtService, SelectionManagerService, SetRangeValuesMutation } from '@univerjs/sheets';
+import {
+    INumfmtService,
+    NORMAL_SELECTION_PLUGIN_NAME,
+    SelectionManagerService,
+    SetRangeValuesMutation,
+} from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
 import type { IStatusBarServiceStatus } from '../services/status-bar.service';
@@ -62,6 +67,9 @@ export class StatusBarController extends Disposable {
         this.disposeWithMe(
             toDisposable(
                 this._selectionManagerService.selectionMoving$.subscribe((selections) => {
+                    if (this._selectionManagerService.getCurrent()?.pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
+                        return;
+                    }
                     if (selections) {
                         clearTimeout(this._calculateTimeout);
                         this._calculateTimeout = setTimeout(() => {
@@ -78,6 +86,9 @@ export class StatusBarController extends Disposable {
         this.disposeWithMe(
             toDisposable(
                 this._selectionManagerService.selectionMoveEnd$.subscribe((selections) => {
+                    if (this._selectionManagerService.getCurrent()?.pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
+                        return;
+                    }
                     if (selections) {
                         const primary = selections[selections.length - 1].primary;
                         this._calculateSelection(

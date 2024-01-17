@@ -35,8 +35,6 @@ import type {
 } from '../../basics/interfaces/mutation-interface';
 import { SelectionManagerService } from '../../services/selection-manager.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
-import { DeleteRangeMutation, DeleteRangeUndoMutationFactory } from '../mutations/delete-range.mutation';
-import { InsertRangeMutation } from '../mutations/insert-range.mutation';
 import { InsertColMutation, InsertRowMutation } from '../mutations/insert-row-col.mutation';
 import {
     RemoveColMutation,
@@ -44,6 +42,7 @@ import {
     RemoveRowMutation,
     RemoveRowsUndoMutationFactory,
 } from '../mutations/remove-row-col.mutation';
+import { DeleteRangeUndoMutationFactory, getRemoveRangeMutations } from '../utils/handle-range-mutation';
 import { followSelectionOperation } from './utils/selection-utils';
 
 export interface IRemoveRowColCommandParams {
@@ -106,6 +105,10 @@ export const RemoveRowCommand: ICommand = {
         );
 
         if (!undoDeleteRangeValueParams) return false;
+        const { redo: removeRangeRedo, undo: removeRangeUndo } = getRemoveRangeMutations(
+            accessor,
+            deleteRangeValueParams
+        );
 
         const intercepted = sheetInterceptorService.onCommandExecute({
             id: RemoveRowCommand.id,
@@ -113,24 +116,30 @@ export const RemoveRowCommand: ICommand = {
         });
 
         const commandService = accessor.get(ICommandService);
-        const redo = [
-            { id: DeleteRangeMutation.id, params: deleteRangeValueParams },
-            { id: RemoveRowMutation.id, params: removeRowsParams },
-            ...intercepted.redos,
-            followSelectionOperation(range, workbook, worksheet),
-        ];
-        const result = sequenceExecute(redo, commandService);
+        const result = sequenceExecute(
+            [
+                ...removeRangeRedo,
+                { id: RemoveRowMutation.id, params: removeRowsParams },
+                ...intercepted.redos,
+                followSelectionOperation(range, workbook, worksheet),
+            ],
+            commandService
+        );
 
         if (result.result) {
             accessor.get(IUndoRedoService).pushUndoRedo({
                 unitID: unitId,
                 undoMutations: [
                     ...intercepted.undos,
-
                     { id: InsertRowMutation.id, params: undoRemoveRowsParams },
-                    { id: InsertRangeMutation.id, params: undoDeleteRangeValueParams },
+
+                    ...removeRangeUndo,
                 ],
-                redoMutations: redo,
+                redoMutations: [
+                    ...removeRangeRedo,
+                    { id: RemoveRowMutation.id, params: removeRowsParams },
+                    ...intercepted.redos,
+                ],
             });
             return true;
         }
@@ -192,19 +201,25 @@ export const RemoveColCommand: ICommand = {
             throw new Error();
         }
 
+        const { redo: removeRangeRedo, undo: removeRangeUndo } = getRemoveRangeMutations(
+            accessor,
+            removeRangeValuesParams
+        );
+
         const intercepted = sheetInterceptorService.onCommandExecute({
             id: RemoveColCommand.id,
             params: { range } as IRemoveRowColCommandParams,
         });
         const commandService = accessor.get(ICommandService);
-        const redo = [
-            { id: RemoveColMutation.id, params: removeColParams },
-            { id: DeleteRangeMutation.id, params: removeRangeValuesParams },
-            ...intercepted.redos,
-            followSelectionOperation(range, workbook, worksheet),
-        ];
-
-        const result = sequenceExecute(redo, commandService);
+        const result = sequenceExecute(
+            [
+                { id: RemoveColMutation.id, params: removeColParams },
+                ...removeRangeRedo,
+                ...intercepted.redos,
+                followSelectionOperation(range, workbook, worksheet),
+            ],
+            commandService
+        );
 
         if (result.result) {
             const undoRedoService = accessor.get(IUndoRedoService);
@@ -213,9 +228,13 @@ export const RemoveColCommand: ICommand = {
                 undoMutations: [
                     ...intercepted.undos,
                     { id: InsertColMutation.id, params: undoRemoveColParams },
-                    { id: InsertRangeMutation.id, params: undoRemoveRangeValuesParams },
+                    ...removeRangeUndo,
                 ],
-                redoMutations: redo,
+                redoMutations: [
+                    { id: RemoveColMutation.id, params: removeColParams },
+                    ...removeRangeRedo,
+                    ...intercepted.redos,
+                ],
             });
 
             return true;

@@ -31,8 +31,6 @@ import { MergeCellController } from '../../../controllers/merge-cell.controller'
 import { RefRangeService } from '../../../services/ref-range/ref-range.service';
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../../services/selection-manager.service';
 import { AddWorksheetMergeMutation } from '../../mutations/add-worksheet-merge.mutation';
-import { DeleteRangeMutation } from '../../mutations/delete-range.mutation';
-import { InsertRangeMutation } from '../../mutations/insert-range.mutation';
 import { InsertColMutation, InsertRowMutation } from '../../mutations/insert-row-col.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../../mutations/remove-row-col.mutation';
 import { RemoveWorksheetMergeMutation } from '../../mutations/remove-worksheet-merge.mutation';
@@ -73,10 +71,8 @@ describe('Test insert and remove rows cols commands', () => {
 
             InsertColMutation,
             InsertRowMutation,
-            InsertRangeMutation,
             RemoveRowMutation,
             RemoveColMutation,
-            DeleteRangeMutation,
             AddWorksheetMergeMutation,
             RemoveWorksheetMergeMutation,
             SetSelectionsOperation,

@@ -29,8 +29,6 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../../services/selection-manager.service';
 import { AddWorksheetMergeMutation } from '../../mutations/add-worksheet-merge.mutation';
-import { DeleteRangeMutation } from '../../mutations/delete-range.mutation';
-import { InsertRangeMutation } from '../../mutations/insert-range.mutation';
 import { InsertColMutation, InsertRowMutation } from '../../mutations/insert-row-col.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../../mutations/remove-row-col.mutation';
 import { RemoveWorksheetMergeMutation } from '../../mutations/remove-worksheet-merge.mutation';
@@ -190,8 +188,6 @@ describe('Test delete range commands', () => {
         commandService = get(ICommandService);
         commandService.registerCommand(DeleteRangeMoveUpCommand);
         commandService.registerCommand(DeleteRangeMoveLeftCommand);
-        commandService.registerCommand(InsertRangeMutation);
-        commandService.registerCommand(DeleteRangeMutation);
         commandService.registerCommand(AddWorksheetMergeMutation);
         commandService.registerCommand(RemoveWorksheetMergeMutation);
         commandService.registerCommand(InsertColMutation);

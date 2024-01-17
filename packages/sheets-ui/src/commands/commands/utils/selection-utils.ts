@@ -635,3 +635,67 @@ export function checkIfShrink(selection: ISelection, direction: Direction, works
             return anchorRange.startColumn > range.startColumn;
     }
 }
+
+export function isAllRowsCovered(allRowRanges: IRange[], ranges: IRange[]): boolean {
+    // Find the minimum start point and maximum end point in all row ranges
+    let start = allRowRanges[0].startRow;
+    let end = allRowRanges[0].endRow;
+    allRowRanges.forEach((range) => {
+        const { startRow, endRow } = range;
+        start = Math.min(start, startRow);
+        end = Math.max(end, endRow);
+    });
+
+    const covered = new Array(end - start + 1).fill(false);
+
+    // Mark true in ranges
+    ranges.forEach((range) => {
+        const { startRow, endRow } = range;
+        for (let i = Math.max(startRow, start); i <= Math.min(endRow, end); i++) {
+            covered[i - start] = true;
+        }
+    });
+
+    // Check if every range in allRowRanges is covered
+    return allRowRanges.every((range) => {
+        const { startRow, endRow } = range;
+        for (let i = startRow; i <= endRow; i++) {
+            if (!covered[i - start]) {
+                return false;
+            }
+        }
+        return true;
+    });
+}
+
+export function isAllColumnsCovered(allColumnRanges: IRange[], ranges: IRange[]): boolean {
+    // Find the minimum start point and maximum end point in all column ranges
+    let start = allColumnRanges[0].startColumn;
+    let end = allColumnRanges[0].endColumn;
+    allColumnRanges.forEach((range) => {
+        const { startColumn, endColumn } = range;
+        start = Math.min(start, startColumn);
+        end = Math.max(end, endColumn);
+    });
+
+    const covered = new Array(end - start + 1).fill(false);
+
+    // Mark true in ranges
+    ranges.forEach((range) => {
+        const { startColumn, endColumn } = range;
+        for (let i = Math.max(startColumn, start); i <= Math.min(endColumn, end); i++) {
+            covered[i - start] = true;
+        }
+    });
+
+    // Check if every range in allColumnRanges is covered
+    return allColumnRanges.every((range) => {
+        const { startColumn, endColumn } = range;
+        for (let i = startColumn; i <= endColumn; i++) {
+            if (!covered[i - start]) {
+                return false;
+            }
+        }
+        return true;
+    });
+}

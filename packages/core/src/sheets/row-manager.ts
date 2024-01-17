@@ -101,6 +101,12 @@ export class RowManager {
         return create;
     }
 
+    /**
+     * Get all hidden rows
+     * @param start Start index
+     * @param end End index
+     * @returns Hidden rows range list
+     */
     getHiddenRows(start: number = 0, end: number = getArrayLength(this._rowData) - 1): IRange[] {
         const hiddenRows: IRange[] = [];
 
@@ -129,6 +135,42 @@ export class RowManager {
         }
 
         return hiddenRows;
+    }
+
+    /**
+     * Get all visible rows
+     * @param start Start index
+     * @param end End index
+     * @returns Hidden rows range list
+     */
+    getVisibleRows(start: number = 0, end: number = getArrayLength(this._rowData) - 1): IRange[] {
+        const visibleRows: IRange[] = [];
+
+        let inVisibleRange = false;
+        let startRow = -1;
+
+        for (let i = start; i <= end; i++) {
+            const visible = this.getRowVisible(i);
+            if (inVisibleRange && !visible) {
+                inVisibleRange = false;
+                visibleRows.push({
+                    startRow,
+                    endRow: i - 1,
+                    startColumn: 0,
+                    endColumn: 0,
+                    rangeType: RANGE_TYPE.ROW,
+                });
+            } else if (!inVisibleRange && visible) {
+                inVisibleRange = true;
+                startRow = i;
+            }
+        }
+
+        if (inVisibleRange) {
+            visibleRows.push({ startRow, endRow: end, startColumn: 0, endColumn: 0, rangeType: RANGE_TYPE.ROW });
+        }
+
+        return visibleRows;
     }
 
     getRowVisible(rowPos: number): boolean {

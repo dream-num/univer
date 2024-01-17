@@ -51,6 +51,12 @@ export class ColumnManager {
         return col.hd !== BooleanNumber.TRUE;
     }
 
+    /**
+     * Get all hidden columns
+     * @param start Start index
+     * @param end End index
+     * @returns Hidden columns range list
+     */
     getHiddenCols(start: number = 0, end: number = getArrayLength(this._columnData) - 1): IRange[] {
         const hiddenCols: IRange[] = [];
 
@@ -85,6 +91,48 @@ export class ColumnManager {
         }
 
         return hiddenCols;
+    }
+
+    /**
+     * Get all visible columns
+     * @param start Start index
+     * @param end End index
+     * @returns Visible columns range list
+     */
+    getVisibleCols(start: number = 0, end: number = getArrayLength(this._columnData) - 1): IRange[] {
+        const visibleCols: IRange[] = [];
+
+        let inVisibleRange = false;
+        let startColumn = -1;
+
+        for (let i = start; i <= end; i++) {
+            const visible = this.getColVisible(i);
+            if (inVisibleRange && !visible) {
+                inVisibleRange = false;
+                visibleCols.push({
+                    rangeType: RANGE_TYPE.COLUMN,
+                    startColumn,
+                    endColumn: i - 1,
+                    startRow: 0,
+                    endRow: 0,
+                });
+            } else if (!inVisibleRange && visible) {
+                inVisibleRange = true;
+                startColumn = i;
+            }
+        }
+
+        if (inVisibleRange) {
+            visibleCols.push({
+                startRow: 0,
+                endRow: 0,
+                startColumn,
+                endColumn: end,
+                rangeType: RANGE_TYPE.COLUMN,
+            });
+        }
+
+        return visibleCols;
     }
 
     getColumnDatas(columnPos: number, numColumns: number): IObjectArrayPrimitiveType<Partial<IColumnData>> {

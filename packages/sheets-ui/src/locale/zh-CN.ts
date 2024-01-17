@@ -404,6 +404,10 @@ export default {
         freezeRow: '冻结行',
         cancelFreeze: '取消冻结',
         zenEditor: '禅模式编辑',
+        deleteAllRowsAlert: `您无法删除工作表上的所有行`,
+        deleteAllColumnsAlert: `您无法删除工作表上的所有列`,
+        hideAllRowsAlert: `您无法隐藏工作表上的所有行`,
+        hideAllColumnsAlert: `您无法隐藏工作表上的所有列`,
     },
     info: {
         tooltip: '提示',
@@ -435,6 +439,7 @@ export default {
         tipColumnWidthLimit: '列宽必须在0 ~ 2038之间',
         // eslint-disable-next-line no-template-curly-in-string
         pageInfoFull: '共${total}条，${totalPage}页，已显示全部数据',
+        problem: '出现了一个问题',
     },
     clipboard: {
         paste: {

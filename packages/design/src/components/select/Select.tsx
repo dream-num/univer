@@ -43,10 +43,14 @@ export interface ISelectProps {
      * The callback function that is triggered when the value is changed
      */
     onChange: (value: string) => void;
+
+    style?: React.CSSProperties;
+
+    className?: string;
 }
 
 export function Select(props: ISelectProps) {
-    const { value, options = [], onChange } = props;
+    const { value, options = [], onChange, style, className } = props;
 
     const { mountContainer } = useContext(ConfigContext);
 
@@ -59,6 +63,8 @@ export function Select(props: ISelectProps) {
             menuItemSelectedIcon={null}
             suffixIcon={<MoreDownSingle />}
             onChange={onChange}
+            style={style}
+            className={className}
         />
     );
 }

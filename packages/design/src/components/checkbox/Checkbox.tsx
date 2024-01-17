@@ -43,13 +43,15 @@ export interface ICheckboxProps {
      * Set the handler to handle `click` event
      */
     onChange?: (value: string | number | boolean) => void;
+
+    style?: React.CSSProperties;
 }
 
 /**
  * Checkbox Component
  */
 export function Checkbox(props: ICheckboxProps) {
-    const { children, checked, value, disabled = false, onChange } = props;
+    const { children, checked, value, disabled = false, onChange, style } = props;
 
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -71,7 +73,7 @@ export function Checkbox(props: ICheckboxProps) {
     });
 
     return (
-        <label className={_className}>
+        <label className={_className} style={style}>
             <span className={styles.checkboxTarget}>
                 <input
                     ref={inputRef}

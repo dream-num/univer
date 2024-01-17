@@ -110,6 +110,19 @@ describe('Test Reference', () => {
                 unitId: 'workbook1',
             })
         ).toEqual('[workbook1]sheet1!A:K');
+        expect(
+            serializeRangeToRefString({
+                range: {
+                    startColumn: NaN,
+                    endColumn: NaN,
+                    startRow: 15,
+                    endRow: 15,
+                    rangeType: RANGE_TYPE.ROW,
+                },
+                sheetName: 'sheet1',
+                unitId: 'workbook1',
+            })
+        ).toEqual('[workbook1]sheet1!16:16');
     });
 
     it('deserializeRangeWithSheet', () => {
@@ -121,6 +134,7 @@ describe('Test Reference', () => {
                 startAbsoluteRefType: 0,
                 startColumn: 0,
                 startRow: 4,
+                rangeType: RANGE_TYPE.NORMAL,
             },
             sheetName: 'sheet1',
             unitId: 'workbook1',
@@ -134,6 +148,7 @@ describe('Test Reference', () => {
                 startAbsoluteRefType: 0,
                 startColumn: 0,
                 startRow: 4,
+                rangeType: RANGE_TYPE.NORMAL,
             },
             sheetName: 'sheet1',
             unitId: 'workbook2',
@@ -147,6 +162,7 @@ describe('Test Reference', () => {
                 startAbsoluteRefType: AbsoluteRefType.NONE,
                 startColumn: 0,
                 startRow: NaN,
+                rangeType: RANGE_TYPE.COLUMN,
             },
             sheetName: 'sheet1',
             unitId: 'workbook2',
@@ -160,6 +176,7 @@ describe('Test Reference', () => {
                 startAbsoluteRefType: AbsoluteRefType.NONE,
                 startColumn: NaN,
                 startRow: 9,
+                rangeType: RANGE_TYPE.ROW,
             },
             sheetName: 'sheet1',
             unitId: 'workbook2',
@@ -173,6 +190,7 @@ describe('Test Reference', () => {
                 startAbsoluteRefType: AbsoluteRefType.NONE,
                 startColumn: NaN,
                 startRow: 9,
+                rangeType: RANGE_TYPE.ROW,
             },
             sheetName: '',
             unitId: '',
@@ -186,6 +204,7 @@ describe('Test Reference', () => {
                 startAbsoluteRefType: AbsoluteRefType.NONE,
                 startColumn: NaN,
                 startRow: 9,
+                rangeType: RANGE_TYPE.ROW,
             },
             sheetName: 'sheet-1',
             unitId: 'workbook2',

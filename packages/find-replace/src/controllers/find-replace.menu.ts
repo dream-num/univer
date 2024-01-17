@@ -17,11 +17,11 @@
 import type { IMenuButtonItem } from '@univerjs/ui';
 import { MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 
-import { ToggleFindReplaceDialogOperation } from '../commands/operations/find-replace.operation';
+import { OpenFindDialogOperation } from '../commands/operations/find-replace.operation';
 
 export function FindReplaceMenuItemFactory(): IMenuButtonItem {
     return {
-        id: ToggleFindReplaceDialogOperation.id,
+        id: OpenFindDialogOperation.id,
         icon: 'SearchIcon',
         tooltip: 'toolbar.find-replace',
         group: MenuGroup.TOOLBAR_OTHERS,

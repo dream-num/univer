@@ -17,15 +17,14 @@
 import type { IOperation } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
 
-import { IFindReplaceService } from '../../services/find-replace.service';
-import { FindReplaceState, IFindReplaceDialogService } from '../../services/find-replace-dialog.service';
+import { FindReplaceService, IFindReplaceService } from '../../services/find-replace.service';
 
 export const OpenFindDialogOperation: IOperation = {
     id: 'ui.operation.open-find-dialog',
     type: CommandType.OPERATION,
     handler: (accessor) => {
-        const dialogService = accessor.get(IFindReplaceDialogService);
-        dialogService.toggleFind();
+        const findReplaceService = accessor.get(IFindReplaceService);
+        findReplaceService.start();
         return true;
     },
 };
@@ -34,33 +33,26 @@ export const OpenReplaceDialogOperation: IOperation = {
     id: 'ui.operation.open-replace-dialog',
     type: CommandType.OPERATION,
     handler: (accessor) => {
-        const dialogService = accessor.get(IFindReplaceDialogService);
-        dialogService.toggleReplace();
+        const findReplaceService = accessor.get(IFindReplaceService);
+        findReplaceService.start();
         return true;
     },
 };
+
+export const ToggleReplaceDialogOperation: IOperation = {
+    id: 'ui.operation.toggle-replace-dialog',
+    type: CommandType.OPERATION,
+    handler: (accessor) => {
+        const findReplaceService = accessor.get(IFindReplaceService);
+        // findReplaceService.
+        return true;
+    }
+}
 
 export const CloseFRDialogOperation: IOperation = {
     id: 'ui.operation.close-find-replace-dialog',
     type: CommandType.OPERATION,
     handler: (accessor) => {
-        const dialogService = accessor.get(IFindReplaceDialogService);
-        dialogService.closePanel();
-        return true;
-    },
-};
-
-export const ToggleFindReplaceDialogOperation: IOperation = {
-    type: CommandType.OPERATION,
-    id: 'ui.operation.toggle-find-replace-dialog',
-    handler: (accessor) => {
-        const dialogService = accessor.get(IFindReplaceDialogService);
-        if (dialogService.state === FindReplaceState.CLOSED) {
-            dialogService.toggleFind();
-        } else {
-            dialogService.closePanel();
-        }
-
         return true;
     },
 };
@@ -69,8 +61,6 @@ export const GoToNextMatchOperation: IOperation = {
     type: CommandType.OPERATION,
     id: 'ui.operation.go-to-next-match',
     handler: (accessor) => {
-        const dialogService = accessor.get(IFindReplaceService);
-        // dialogService.findNext();
         return true;
     },
 };
@@ -79,8 +69,6 @@ export const GoToPreviousMatchOperation: IOperation = {
     type: CommandType.OPERATION,
     id: 'ui.operation.go-to-previous-match',
     handler: (accessor) => {
-        const dialogService = accessor.get(IFindReplaceService);
-        // dialogService.findPrevious();
         return true;
     },
 };

@@ -17,8 +17,8 @@
 import type { Nullable } from '@univerjs/core';
 import { Disposable, ILogService, IUniverInstanceService, toDisposable } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
-import { createIdentifier } from '@wendellhu/redi';
-import { BehaviorSubject } from 'rxjs';
+import { Inject, Injector, createIdentifier } from '@wendellhu/redi';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 
 export type FindProgressFn = () => void;
 
@@ -31,7 +31,15 @@ export interface IFindResult<T = unknown> {
     range: T;
 }
 
-export interface IFindProgressItem {}
+/**
+ * FindResult is constructed per unit. When the content changes, the
+ * find results could emit this event.
+ */
+export class FindResult {
+
+}
+
+export interface IFindProgressItem { }
 
 /**
  * A provider should be implemented by a business to provide the find results.
@@ -46,6 +54,9 @@ export interface IFindReplaceProvider {
  * This service works as a core of the find & replace feature.
  */
 export interface IFindReplaceService {
+    readonly stateUpdates$: Observable<Partial<IFindReplaceState>>;
+    readonly state$: Observable<IFindReplaceState>;
+
     /**
      * Register a find replace provider to the service. The provider is the actual bearer to
      * perform the find in different kinds of documents or different environments.
@@ -56,9 +67,15 @@ export interface IFindReplaceService {
 
     /**
      * Start a find & replace session.
+     *
+     * @returns if the find & replace session is created and user could start find replace
      */
-    start(): void;
+    start(): boolean;
 
+    end(): boolean;
+
+    revealReplace(): void;
+    changeFindString(value: string): void;
     moveToNextMatch(): boolean;
     moveToPreviousMatch(): boolean;
     replace(): boolean;
@@ -72,7 +89,6 @@ export interface IFindReplaceService {
     //  */
     // find(query: IFindQuery, onProgress?: FindProgressFn): void;
 }
-
 export const IFindReplaceService = createIdentifier<IFindReplaceService>('univer.find-replace.service');
 
 /**
@@ -89,28 +105,58 @@ export interface IFindQuery {
 }
 
 /**
- * This class stores find replace results.
+ * This class stores find replace results and provides methods to perform replace or something.
  */
 export class FindReplaceModel extends Disposable {
-    constructor(private readonly _state: FindReplaceState) {
+    constructor(
+        private readonly _state: FindReplaceState,
+        private readonly _providers: Set<IFindReplaceProvider>,
+        @ILogService private readonly _logService: ILogService
+    ) {
         super();
 
-        this._state.state$.subscribe((newState) => {});
+        this._state.stateUpdates$.subscribe((newState) => {
+            // Should restart
+            if (newState.findString) {
+                this.find().then((results) => {
+                    this._logService.debug('debug', newState.findString, results);
+                });
+            }
+        });
     }
 
-    async research(providers: IFindReplaceProvider[], query: IFindQuery): Promise<IFindComplete> {
+    async find(): Promise<IFindComplete> {
+        this._cancelFinding();
+
         // TODO: support async search in the future
-        const completes = await Promise.all(providers.map((provider) => provider.find(query)));
+        const providers = Array.from(this._providers);
+        const promises = await Promise.all(
+            providers.map((provider) =>
+                provider.find({
+                    text: this._state.findString,
+                })
+            )
+        );
+
         return {
-            results: completes.map((c) => c.results).flat(),
+            results: promises.map((c) => c.results).flat(),
         };
+    }
+
+    private _cancelFinding(): void {
+        // Cancel finding in progress. This method is not empty because all finding now is synchronous.
     }
 }
 
 export interface IFindReplaceState {
+    revealed: boolean;
+
     /** The string user inputs in the input box. */
     findString: string;
     replaceString?: string;
+
+    /** Indicates if is in replacing mode. */
+    replaceRevealed: boolean;
 
     /** The currently focused match's index (1-based). */
     matchesPosition: number;
@@ -119,7 +165,9 @@ export interface IFindReplaceState {
 
 function createInitFindReplaceState(): IFindReplaceState {
     return {
+        revealed: true,
         findString: '',
+        replaceRevealed: false,
         matchesPosition: 0,
         matchesCount: 0,
     };
@@ -131,10 +179,59 @@ function createInitFindReplaceState(): IFindReplaceState {
  * operations.
  */
 export class FindReplaceState {
-    private readonly _state$ = new BehaviorSubject<IFindReplaceState>(createInitFindReplaceState());
-    readonly state$ = this._state$.asObservable(); // TODO@wzhudev: state or stateChange? Only emits changed properties.
+    private readonly _stateUpdates$ = new Subject<Partial<IFindReplaceState>>();
+    readonly stateUpdates$: Observable<Partial<IFindReplaceState>> = this._stateUpdates$.asObservable();
 
-    changeState(changes: Partial<IFindReplaceState>): void {}
+    private readonly _state$ = new BehaviorSubject<IFindReplaceState>(createInitFindReplaceState());
+    readonly state$ = this._state$.asObservable();
+    get state(): IFindReplaceState {
+        return this._state$.getValue();
+    }
+
+    // TODO@wzhudev: put all state properties here
+    private _findString: string = '';
+    private _revealed = false;
+    private _replaceRevealed = false;
+    private _matchesPosition = 0;
+    private _matchesCount = 0;
+
+    get findString(): string {
+        return this._findString;
+    }
+
+    changeState(changes: Partial<IFindReplaceState>): void {
+        let changed = false;
+        const changedState: Partial<IFindReplaceState> = {};
+
+        if (typeof changes.findString !== 'undefined' && changes.findString !== this._findString) {
+            this._findString = changes.findString;
+            changedState.findString = this._findString;
+            changed = true;
+        }
+
+        if (typeof changes.revealed !== 'undefined' && changes.revealed !== this._revealed) {
+            this._revealed = changes.revealed;
+            changedState.revealed = changes.revealed;
+            changed = true;
+        }
+
+        if (typeof changes.replaceRevealed !== 'undefined' && changes.replaceRevealed !== this._replaceRevealed) {
+            this._replaceRevealed = changes.replaceRevealed;
+            changedState.replaceRevealed = changes.replaceRevealed;
+            changed = true;
+        }
+
+        if (changed) {
+            this._stateUpdates$.next(changedState);
+            this._state$.next({
+                findString: this._findString,
+                revealed: this._revealed,
+                replaceRevealed: this._replaceRevealed,
+                matchesCount: this._matchesCount,
+                matchesPosition: this._matchesPosition,
+            });
+        }
+    }
 }
 
 // Since Univer' Find&Replace features works in a plugin manner,
@@ -146,11 +243,25 @@ export class FindReplaceService extends Disposable implements IFindReplaceServic
     private readonly _state = new FindReplaceState();
     private _model: Nullable<FindReplaceModel>;
 
+    get stateUpdates$() {
+        return this._state.stateUpdates$;
+    }
+    get state$() {
+        return this._state.state$;
+    }
+
     constructor(
+        @Inject(Injector) private readonly _injector: Injector,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ILogService private readonly _logService: ILogService
     ) {
         super();
+    }
+
+    changeFindString(value: string): void {
+        this._state.changeState({
+            findString: value,
+        });
     }
 
     moveToNextMatch(): boolean {
@@ -169,42 +280,37 @@ export class FindReplaceService extends Disposable implements IFindReplaceServic
         return true;
     }
 
+    revealReplace(): void {
+        this._state.changeState({ replaceRevealed: true });
+    }
+
     disposeModel(): void {
         this._model?.dispose();
         this._model = null;
     }
 
-    start(): void {
-        // init find & replace state
-        this._model = new FindReplaceModel(this._state);
+    start(): boolean {
+        if (this._providers.size === 0) {
+            return false;
+        }
+
+        this._model = this._injector.createInstance(FindReplaceModel, this._state, this._providers);
+
+        const newState = createInitFindReplaceState();
+        newState.revealed = true;
+
+        this._state.changeState(newState);
+
+        return true;
+    }
+
+    end(): boolean {
+        this._state.changeState({ revealed: false, replaceRevealed: false });
+        return true;
     }
 
     registerFindReplaceProvider(provider: IFindReplaceProvider): IDisposable {
         this._providers.add(provider);
         return toDisposable(() => this._providers.delete(provider));
-    }
-
-    // TODO@wzhudev: this method should be move to Find Model
-    async research(query: IFindQuery, onProgress?: FindProgressFn): Promise<void> {
-        if (this._providers.size === 0) {
-            this._logService.warn(
-                '[FindReplaceService]',
-                'no find replace provider registered hance cannot perform searching.'
-            );
-
-            return;
-        }
-
-        const complete = await this._findWithProviders(query, onProgress);
-    }
-
-    private _findWithProviders(query: IFindQuery, onProgress?: FindProgressFn): Promise<IFindComplete> {
-        return Promise.all(Array.from(this._providers).map((provider) => provider.find(query, onProgress))).then(
-            (completes) => {
-                return {
-                    results: completes.map((c) => c.results).flat(),
-                };
-            }
-        );
     }
 }

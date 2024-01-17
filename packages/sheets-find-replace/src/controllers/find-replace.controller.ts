@@ -70,6 +70,10 @@ export interface ISheetFindResult extends IFindResult {
     };
 }
 
+export class SheetFindResult {
+     
+}
+
 /**
  * This module is responsible for searching and replacing in the sheets.
  * It also adds the search results to the search view by highlighting them.

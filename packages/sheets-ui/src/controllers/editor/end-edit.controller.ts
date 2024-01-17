@@ -61,7 +61,8 @@ function isRichText(body: IDocumentBody) {
 
     return (
         textRuns.some((textRun) => textRun.ts && !Tools.isEmptyObject(textRun.ts)) ||
-        paragraphs.some((paragraph) => paragraph.bullet)
+        paragraphs.some((paragraph) => paragraph.bullet) ||
+        paragraphs.length >= 2
     );
 }
 
@@ -174,12 +175,12 @@ export class EndEditController extends Disposable {
 
             const { unitId, sheetId, row, column, documentLayoutObject } = editCellState;
 
-            this._moveCursor(keycode);
-
             // If neither the formula bar editor nor the cell editor has been edited,
             // it is considered that the content has not changed and returns directly.
             const editorIsDirty = this._editorBridgeService.getEditorDirty();
             if (editorIsDirty === false) {
+                this._moveCursor(keycode);
+
                 return;
             }
 
@@ -197,7 +198,11 @@ export class EndEditController extends Disposable {
                 this._lexerTreeBuilder
             );
 
-            if (cellData == null) return;
+            if (cellData == null) {
+                this._moveCursor(keycode);
+
+                return;
+            }
 
             const context = {
                 subUnitId: sheetId,
@@ -222,6 +227,9 @@ export class EndEditController extends Disposable {
                 },
                 value: cell,
             });
+
+            // moveCursor need to put behind of SetRangeValuesCommand, fix https://github.com/dream-num/univer/issues/1155
+            this._moveCursor(keycode);
 
             /**
              * When closing the editor, switch to the current tab of the editor.

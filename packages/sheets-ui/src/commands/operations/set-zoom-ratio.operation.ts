@@ -42,12 +42,9 @@ export const SetZoomRatioOperation: IOperation<ISetZoomRatioOperationParams> = {
     type: CommandType.OPERATION,
     handler: (accessor, params: ISetZoomRatioOperationParams) => {
         const workbook = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.unitId);
-        if (!workbook) {
-            return false;
-        }
 
-        const worksheet = workbook.getSheetBySheetId(params.subUnitId);
-        if (!worksheet) {
+        const worksheet = workbook?.getSheetBySheetId(params.subUnitId);
+        if (worksheet == null) {
             return false;
         }
 

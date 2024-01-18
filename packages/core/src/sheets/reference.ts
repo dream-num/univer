@@ -263,6 +263,13 @@ export function deserializeRangeWithSheet(refString: string): IGridRangeName {
     const endRow = endGrid.row;
     const endColumn = endGrid.column;
 
+    let rangeType = RANGE_TYPE.NORMAL;
+    if (isNaN(startRow) && isNaN(endRow)) {
+        rangeType = RANGE_TYPE.COLUMN;
+    } else if (isNaN(startColumn) && isNaN(endColumn)) {
+        rangeType = RANGE_TYPE.ROW;
+    }
+
     return {
         unitId,
         sheetName,
@@ -275,6 +282,8 @@ export function deserializeRangeWithSheet(refString: string): IGridRangeName {
             startAbsoluteRefType: startGrid.absoluteRefType,
 
             endAbsoluteRefType: endGrid.absoluteRefType,
+
+            rangeType,
         },
     };
 }

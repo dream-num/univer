@@ -29,18 +29,17 @@ import {
 import type { IMouseEvent, IPointerEvent, IScrollObserverParam, Viewport } from '@univerjs/engine-render';
 import { CURSOR_TYPE, IRenderManagerService, Rect, Vector2 } from '@univerjs/engine-render';
 import type {
-    IDeltaColumnWidthCommandParams,
-    IDeltaRowHeightCommand,
     IMoveColsCommandParams,
     IMoveRowsCommandParams,
     IRemoveRowColCommandParams,
     ISetColHiddenMutationParams,
     ISetFrozenMutationParams,
+    ISetWorksheetColWidthMutationParams,
     ISetWorksheetRowAutoHeightMutationParams,
+    ISetWorksheetRowHeightMutationParams,
 } from '@univerjs/sheets';
 import {
-    DeltaColumnWidthCommand,
-    DeltaRowHeightCommand,
+    InsertRangeMutation,
     MoveColsCommand,
     MoveRowsCommand,
     RemoveColCommand,
@@ -54,7 +53,9 @@ import {
     SetRowHiddenMutation,
     SetRowVisibleMutation,
     SetWorksheetActiveOperation,
+    SetWorksheetColWidthMutation,
     SetWorksheetRowAutoHeightMutation,
+    SetWorksheetRowHeightMutation,
     SheetInterceptorService,
 } from '@univerjs/sheets';
 import type { ISetRowHiddenMutationParams } from '@univerjs/sheets/commands/mutations/set-row-visible.mutation.js';
@@ -1063,7 +1064,7 @@ export class FreezeController extends Disposable {
         this.disposeWithMe(
             toDisposable(
                 this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
-                    if (![SetWorksheetActiveOperation.id].includes(param?.commandId || '')) {
+                    if (![SetWorksheetActiveOperation.id, InsertRangeMutation.id].includes(param?.commandId || '')) {
                         return;
                     }
                     this._refreshCurrent();
@@ -1355,21 +1356,25 @@ export class FreezeController extends Disposable {
                     }
 
                     this._refreshFreeze(startRow, startColumn, ySplit, xSplit, resetScroll);
-                } else if (command.id === DeltaRowHeightCommand.id) {
+                } else if (command.id === SetWorksheetRowHeightMutation.id) {
                     const freeze = this._getFreeze();
                     if (
                         command.params &&
                         freeze &&
-                        (command.params as IDeltaRowHeightCommand).anchorRow < freeze.startRow
+                        (command.params as ISetWorksheetRowHeightMutationParams).ranges.some(
+                            (i) => i.startRow < freeze.startRow
+                        )
                     ) {
                         this._refreshCurrent();
                     }
-                } else if (command.id === DeltaColumnWidthCommand.id) {
+                } else if (command.id === SetWorksheetColWidthMutation.id) {
                     const freeze = this._getFreeze();
                     if (
                         command.params &&
                         freeze &&
-                        (command.params as IDeltaColumnWidthCommandParams).anchorCol < freeze.startColumn
+                        (command.params as ISetWorksheetColWidthMutationParams).ranges.some(
+                            (i) => i.startColumn < freeze.startColumn
+                        )
                     ) {
                         this._refreshCurrent();
                     }

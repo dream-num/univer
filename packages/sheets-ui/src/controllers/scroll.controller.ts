@@ -143,12 +143,11 @@ export class ScrollController extends Disposable {
         if (startSheetViewRow === undefined && startSheetViewColumn === undefined) {
             return;
         }
-        const { sheetViewStartColumn, sheetViewStartRow, offsetX, offsetY } =
-            this._scrollManagerService.getCurrentScroll() || {};
+        const { offsetX, offsetY } = this._scrollManagerService.getCurrentScroll() || {};
 
         this._commandService.executeCommand(ScrollCommand.id, {
-            sheetViewStartRow: startSheetViewRow ?? sheetViewStartRow,
-            sheetViewStartColumn: startSheetViewColumn ?? sheetViewStartColumn,
+            sheetViewStartRow: startSheetViewRow,
+            sheetViewStartColumn: startSheetViewColumn,
             offsetX: startSheetViewColumn === undefined ? offsetX : 0,
             offsetY: startSheetViewRow === undefined ? offsetY : 0,
         });

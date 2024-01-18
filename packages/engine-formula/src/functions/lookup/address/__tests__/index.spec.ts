@@ -94,7 +94,7 @@ describe('test address', () => {
 
         describe('fault situations', () => {
             it('value error', async () => {
-                const error = ErrorValueObject.create(ErrorType.VALUE);
+                const error = new ErrorValueObject(ErrorType.VALUE);
                 const errorValue = address.calculate(error, error);
                 expect(errorValue.isError()).toBeTruthy();
             });

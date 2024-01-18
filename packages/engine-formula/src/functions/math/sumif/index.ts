@@ -29,7 +29,7 @@ export class Sumif extends BaseFunction {
         // 1. Check whether the number of parameters is correct,
         // TODO@Dushusir: Report the allowed parameter number range and the actual number of parameters
         if (variants.length < 2 || variants.length > 3) {
-            return ErrorValueObject.create(ErrorType.NA);
+            return new ErrorValueObject(ErrorType.NA);
         }
 
         const range = variants[0];
@@ -38,7 +38,7 @@ export class Sumif extends BaseFunction {
 
         // 2. Check whether all parameter types meet the requirements
         if (range.isError() || criteria.isError() || (sumRange && sumRange.isError())) {
-            return ErrorValueObject.create(ErrorType.VALUE);
+            return new ErrorValueObject(ErrorType.VALUE);
         }
 
         let accumulatorAll: BaseValueObject = new NumberValueObject(0);

@@ -31,14 +31,14 @@ export class Address extends BaseFunction {
         sheetText?: FunctionVariantType
     ) {
         if (rowNumber.isError() || columnNumber.isError()) {
-            return ErrorValueObject.create(ErrorType.VALUE);
+            return new ErrorValueObject(ErrorType.VALUE);
         }
 
         const row = Number((rowNumber as BaseValueObject).getValue()) - 1;
         const column = Number((columnNumber as BaseValueObject).getValue()) - 1;
 
         if (Number.isNaN(row) || Number.isNaN(column)) {
-            return ErrorValueObject.create(ErrorType.VALUE);
+            return new ErrorValueObject(ErrorType.VALUE);
         }
 
         const range: IRange = {

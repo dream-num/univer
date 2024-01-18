@@ -662,7 +662,7 @@ export class ArrayValueObject extends BaseValueObject {
                         rowList[c] = callbackFn(currentValue, r, c);
                     }
                 } else {
-                    rowList[c] = ErrorValueObject.create(ErrorType.VALUE);
+                    rowList[c] = new ErrorValueObject(ErrorType.VALUE);
                 }
             }
             result.push(rowList);
@@ -1173,7 +1173,7 @@ export class ArrayValueObject extends BaseValueObject {
                 if (currentValue.isError()) {
                     result[r][column] = currentValue as ErrorValueObject;
                 } else if (valueObject.isError()) {
-                    result[r][column] = ErrorValueObject.create(ErrorType.VALUE);
+                    result[r][column] = new ErrorValueObject(ErrorType.VALUE);
                 } else {
                     switch (batchOperatorType) {
                         case BatchOperatorType.PLUS:
@@ -1190,7 +1190,7 @@ export class ArrayValueObject extends BaseValueObject {
                             break;
                         case BatchOperatorType.COMPARE:
                             if (!operator) {
-                                result[r][column] = ErrorValueObject.create(ErrorType.VALUE);
+                                result[r][column] = new ErrorValueObject(ErrorType.VALUE);
                             } else {
                                 result[r][column] = (currentValue as BaseValueObject).compare(
                                     valueObject,
@@ -1206,7 +1206,7 @@ export class ArrayValueObject extends BaseValueObject {
                             break;
                         case BatchOperatorType.PRODUCT:
                             if (!operator) {
-                                result[r][column] = ErrorValueObject.create(ErrorType.VALUE);
+                                result[r][column] = new ErrorValueObject(ErrorType.VALUE);
                             } else {
                                 result[r][column] = (currentValue as BaseValueObject).product(
                                     valueObject,
@@ -1216,7 +1216,7 @@ export class ArrayValueObject extends BaseValueObject {
                             break;
                         case BatchOperatorType.LIKE:
                             if (!operator) {
-                                result[r][column] = ErrorValueObject.create(ErrorType.VALUE);
+                                result[r][column] = new ErrorValueObject(ErrorType.VALUE);
                             } else {
                                 result[r][column] = (currentValue as BaseValueObject).wildcard(
                                     valueObject as StringValueObject,
@@ -1242,7 +1242,7 @@ export class ArrayValueObject extends BaseValueObject {
                     }
                 }
             } else {
-                result[r][column] = ErrorValueObject.create(ErrorType.NA);
+                result[r][column] = new ErrorValueObject(ErrorType.NA);
             }
 
             /**
@@ -1351,7 +1351,7 @@ export class ArrayValueObject extends BaseValueObject {
                                 break;
                             case BatchOperatorType.COMPARE:
                                 if (!operator) {
-                                    rowList[c] = ErrorValueObject.create(ErrorType.VALUE);
+                                    rowList[c] = new ErrorValueObject(ErrorType.VALUE);
                                 } else {
                                     rowList[c] = (currentValue as BaseValueObject).compare(
                                         opValue as BaseValueObject,
@@ -1371,7 +1371,7 @@ export class ArrayValueObject extends BaseValueObject {
                                 break;
                             case BatchOperatorType.PRODUCT:
                                 if (!operator) {
-                                    rowList[c] = ErrorValueObject.create(ErrorType.VALUE);
+                                    rowList[c] = new ErrorValueObject(ErrorType.VALUE);
                                 } else {
                                     rowList[c] = (currentValue as BaseValueObject).product(
                                         opValue as BaseValueObject,
@@ -1381,7 +1381,7 @@ export class ArrayValueObject extends BaseValueObject {
                                 break;
                             case BatchOperatorType.LIKE:
                                 if (!operator) {
-                                    rowList[c] = ErrorValueObject.create(ErrorType.VALUE);
+                                    rowList[c] = new ErrorValueObject(ErrorType.VALUE);
                                 } else {
                                     rowList[c] = (currentValue as BaseValueObject).wildcard(
                                         opValue as StringValueObject,
@@ -1413,7 +1413,7 @@ export class ArrayValueObject extends BaseValueObject {
                 //     rowList[c] = opValue;
                 // }
                 else {
-                    rowList[c] = ErrorValueObject.create(ErrorType.NA);
+                    rowList[c] = new ErrorValueObject(ErrorType.NA);
                 }
             }
             result.push(rowList);
@@ -1536,10 +1536,10 @@ export class ValueObjectFactory {
         }
         if (typeof rawValue === 'number') {
             if (!Number.isFinite(rawValue)) {
-                return ErrorValueObject.create(ErrorType.NUM);
+                return new ErrorValueObject(ErrorType.NUM);
             }
             return new NumberValueObject(rawValue, true);
         }
-        return ErrorValueObject.create(ErrorType.NA);
+        return new ErrorValueObject(ErrorType.NA);
     }
 }

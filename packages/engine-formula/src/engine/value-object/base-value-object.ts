@@ -127,36 +127,36 @@ export class BaseValueObject extends ObjectClassType {
     }
 
     getNegative(): BaseValueObject {
-        return ErrorValueObject.create(ErrorType.NAME);
+        return new ErrorValueObject(ErrorType.NAME);
     }
 
     getReciprocal(): BaseValueObject {
-        return ErrorValueObject.create(ErrorType.NAME);
+        return new ErrorValueObject(ErrorType.NAME);
     }
 
     plus(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.NAME);
+        return new ErrorValueObject(ErrorType.NAME);
     }
 
     minus(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.NAME);
+        return new ErrorValueObject(ErrorType.NAME);
     }
 
     multiply(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.NAME);
+        return new ErrorValueObject(ErrorType.NAME);
     }
 
     divided(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.NAME);
+        return new ErrorValueObject(ErrorType.NAME);
     }
 
     map(callbackFn: callbackMapFnType): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.NAME);
+        return new ErrorValueObject(ErrorType.NAME);
     }
 
     product(valueObject: BaseValueObject, callbackFn: callbackProductFnType): BaseValueObject {
@@ -165,12 +165,12 @@ export class BaseValueObject extends ObjectClassType {
 
     compare(valueObject: BaseValueObject, operator: compareToken): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.NAME);
+        return new ErrorValueObject(ErrorType.NAME);
     }
 
     wildcard(valueObject: StringValueObject, operator: compareToken): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.NAME);
+        return new ErrorValueObject(ErrorType.NAME);
     }
 
     isEqual(valueObject: BaseValueObject): BaseValueObject {
@@ -199,37 +199,37 @@ export class BaseValueObject extends ObjectClassType {
 
     concatenateFront(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.NAME);
+        return new ErrorValueObject(ErrorType.NAME);
     }
 
     concatenateBack(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.NAME);
+        return new ErrorValueObject(ErrorType.NAME);
     }
 
     plusBy(value: string | number | boolean): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.NAME);
+        return new ErrorValueObject(ErrorType.NAME);
     }
 
     minusBy(value: string | number | boolean): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.NAME);
+        return new ErrorValueObject(ErrorType.NAME);
     }
 
     multiplyBy(value: string | number | boolean): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.NAME);
+        return new ErrorValueObject(ErrorType.NAME);
     }
 
     dividedBy(value: string | number | boolean): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.NAME);
+        return new ErrorValueObject(ErrorType.NAME);
     }
 
     compareBy(value: string | number | boolean, operator: compareToken): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.NAME);
+        return new ErrorValueObject(ErrorType.NAME);
     }
 
     concatenate(value: string | number | boolean, concatenateType = ConcatenateType.FRONT): string {
@@ -260,82 +260,82 @@ export class BaseValueObject extends ObjectClassType {
 
     pow(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return new ErrorValueObject(ErrorType.VALUE);
     }
 
     powInverse(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return new ErrorValueObject(ErrorType.VALUE);
     }
 
     sqrt(): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return new ErrorValueObject(ErrorType.VALUE);
     }
 
     cbrt(): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return new ErrorValueObject(ErrorType.VALUE);
     }
 
     cos(): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return new ErrorValueObject(ErrorType.VALUE);
     }
 
     acos(): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return new ErrorValueObject(ErrorType.VALUE);
     }
 
     acosh(): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return new ErrorValueObject(ErrorType.VALUE);
     }
 
     sin(): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return new ErrorValueObject(ErrorType.VALUE);
     }
 
     asin(): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return new ErrorValueObject(ErrorType.VALUE);
     }
 
     asinh(): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return new ErrorValueObject(ErrorType.VALUE);
     }
 
     tan(): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return new ErrorValueObject(ErrorType.VALUE);
     }
 
     tanh(): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return new ErrorValueObject(ErrorType.VALUE);
     }
 
     atan(): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return new ErrorValueObject(ErrorType.VALUE);
     }
 
     atan2(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return new ErrorValueObject(ErrorType.VALUE);
     }
 
     atan2Inverse(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return new ErrorValueObject(ErrorType.VALUE);
     }
 
     atanh(): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return new ErrorValueObject(ErrorType.VALUE);
     }
 
     /**
@@ -382,52 +382,52 @@ export class BaseValueObject extends ObjectClassType {
 
     log(): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return new ErrorValueObject(ErrorType.VALUE);
     }
 
     log10(): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return new ErrorValueObject(ErrorType.VALUE);
     }
 
     exp(): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return new ErrorValueObject(ErrorType.VALUE);
     }
 
     abs(): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return new ErrorValueObject(ErrorType.VALUE);
     }
 
     round(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return new ErrorValueObject(ErrorType.VALUE);
     }
 
     roundInverse(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return new ErrorValueObject(ErrorType.VALUE);
     }
 
     floor(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return new ErrorValueObject(ErrorType.VALUE);
     }
 
     floorInverse(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return new ErrorValueObject(ErrorType.VALUE);
     }
 
     ceil(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return new ErrorValueObject(ErrorType.VALUE);
     }
 
     ceilInverse(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return new ErrorValueObject(ErrorType.VALUE);
     }
 }
 
@@ -437,14 +437,6 @@ export class ErrorValueObject extends BaseValueObject {
         private _errorContent: string = ''
     ) {
         super(_errorType);
-    }
-
-    /**
-     * @deprecated use 'new' to replace.
-     */
-    static create(errorType: ErrorType, errorContent?: string) {
-        const errorValueObject = new ErrorValueObject(errorType, errorContent);
-        return errorValueObject;
     }
 
     override getValue() {

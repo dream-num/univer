@@ -90,7 +90,7 @@ export const InsertRangeMoveDownCommand: ICommand = {
         const cellValue: IObjectMatrixPrimitiveType<ICellData> = {};
         Range.foreach(range, (row, col) => {
             const cell = worksheet.getCell(row, col);
-            if (!cell || !cell.s) {
+            if (!cell) {
                 return;
             }
             if (!cellValue[row]) {

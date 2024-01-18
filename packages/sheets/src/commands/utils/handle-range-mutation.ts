@@ -79,7 +79,7 @@ export const InsertRangeUndoMutationFactory = (
 export function getInsertRangeMutations(accessor: IAccessor, params: IInsertRangeMutationParams) {
     const redo: IMutationInfo[] = [];
     const undo: IMutationInfo[] = [];
-    const { unitId, subUnitId, range, shiftDimension, cellValue } = params;
+    const { unitId, subUnitId, range, shiftDimension, cellValue = {} } = params;
     const instanceService = accessor.get(IUniverInstanceService);
     const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
@@ -135,11 +135,23 @@ export function getInsertRangeMutations(accessor: IAccessor, params: IInsertRang
             const moveRangeMutations = getMoveRangeUndoRedoMutations(
                 accessor,
                 { unitId, subUnitId, range: moveFromRange },
-                { unitId, subUnitId, range: moveToRange }
+                { unitId, subUnitId, range: moveToRange },
+                true
             );
             if (moveRangeMutations) {
                 redo.push(...moveRangeMutations.redos);
                 undo.push(...moveRangeMutations.undos);
+            }
+        }
+
+        if (Object.entries(cellValue).length === 0) {
+            for (let row = range.startRow; row <= range.endRow; row++) {
+                if (!cellValue[row]) {
+                    cellValue[row] = {};
+                }
+                for (let column = range.startColumn; column <= range.endColumn; column++) {
+                    cellValue[row][column] = null;
+                }
             }
         }
 
@@ -247,7 +259,8 @@ export function getRemoveRangeMutations(accessor: IAccessor, params: IDeleteRang
                 const moveRangeMutations = getMoveRangeUndoRedoMutations(
                     accessor,
                     { unitId, subUnitId, range: moveFromRange },
-                    { unitId, subUnitId, range: moveToRange }
+                    { unitId, subUnitId, range: moveToRange },
+                    true
                 );
                 if (moveRangeMutations) {
                     redo.push(...moveRangeMutations.redos);

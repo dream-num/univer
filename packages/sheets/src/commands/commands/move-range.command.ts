@@ -107,7 +107,12 @@ export interface IRangeUnit {
     range: IRange;
 }
 
-export function getMoveRangeUndoRedoMutations(accessor: IAccessor, from: IRangeUnit, to: IRangeUnit) {
+export function getMoveRangeUndoRedoMutations(
+    accessor: IAccessor,
+    from: IRangeUnit,
+    to: IRangeUnit,
+    ignoreMerge = false
+) {
     const redos: IMutationInfo[] = [];
     const undos: IMutationInfo[] = [];
     const { range: fromRange, subUnitId: fromSubUnitId, unitId } = from;
@@ -122,7 +127,7 @@ export function getMoveRangeUndoRedoMutations(accessor: IAccessor, from: IRangeU
     if (toWorksheet && fromWorksheet && toCellMatrix && fromCellMatrix) {
         const alignedRangeWithToRange = alignToMergedCellsBorders(toRange, toWorksheet, false);
 
-        if (!Rectangle.equals(toRange, alignedRangeWithToRange)) {
+        if (!Rectangle.equals(toRange, alignedRangeWithToRange) && !ignoreMerge) {
             return null;
         }
 
@@ -182,7 +187,7 @@ export function getMoveRangeUndoRedoMutations(accessor: IAccessor, from: IRangeU
         });
 
         redos.push({ id: MoveRangeMutation.id, params: doMoveRangeMutation }, ...interceptorCommands.redos);
-        undos.push(...interceptorCommands.undos, { id: MoveRangeMutation.id, params: undoMoveRangeMutation });
+        undos.push({ id: MoveRangeMutation.id, params: undoMoveRangeMutation }, ...interceptorCommands.undos);
     }
 
     return {

@@ -15,7 +15,7 @@
  */
 
 import type { ICommand } from '@univerjs/core';
-import { CommandType, ICommandService, IUniverInstanceService, LocaleService, RANGE_TYPE } from '@univerjs/core';
+import { CommandType, ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { SelectionManagerService, SetColHiddenCommand, SetRowHiddenCommand } from '@univerjs/sheets';
 import { IConfirmService } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
@@ -28,10 +28,7 @@ export const HideRowConfirmCommand: ICommand = {
     handler: async (accessor: IAccessor) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
 
-        const ranges = selectionManagerService
-            .getSelections()
-            ?.map((s) => s.range)
-            .filter((r) => r.rangeType === RANGE_TYPE.ROW);
+        const ranges = selectionManagerService.getSelections()?.map((s) => s.range);
         if (!ranges?.length) {
             return false;
         }
@@ -70,10 +67,7 @@ export const HideColConfirmCommand: ICommand = {
     handler: async (accessor: IAccessor) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
 
-        const ranges = selectionManagerService
-            .getSelections()
-            ?.map((s) => s.range)
-            .filter((r) => r.rangeType === RANGE_TYPE.COLUMN);
+        const ranges = selectionManagerService.getSelections()?.map((s) => s.range);
         if (!ranges?.length) {
             return false;
         }

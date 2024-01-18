@@ -40,7 +40,7 @@ export const HideRowConfirmCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
-        const allRowRanges = worksheet.getRowManager().getVisibleRows();
+        const allRowRanges = worksheet.getVisibleRows();
 
         if (isAllRowsCovered(allRowRanges, ranges)) {
             const confirmService = accessor.get(IConfirmService);
@@ -60,7 +60,7 @@ export const HideRowConfirmCommand: ICommand = {
         }
 
         await commandService.executeCommand(SetRowHiddenCommand.id);
-        return false;
+        return true;
     },
 };
 
@@ -82,7 +82,7 @@ export const HideColConfirmCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
-        const allColumnRanges = worksheet.getColumnManager().getVisibleCols();
+        const allColumnRanges = worksheet.getVisibleCols();
 
         if (isAllColumnsCovered(allColumnRanges, ranges)) {
             const confirmService = accessor.get(IConfirmService);

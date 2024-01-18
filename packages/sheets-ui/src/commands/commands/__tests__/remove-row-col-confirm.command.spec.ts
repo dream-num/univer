@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-import type { IRange, Univer } from '@univerjs/core';
+import type { Univer } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleService, RANGE_TYPE } from '@univerjs/core';
 import {
     AddWorksheetMergeMutation,
+    DeleteRangeMutation,
     NORMAL_SELECTION_PLUGIN_NAME,
+    RemoveColCommand,
+    RemoveColMutation,
+    RemoveRowCommand,
+    RemoveRowMutation,
     RemoveWorksheetMergeCommand,
     RemoveWorksheetMergeMutation,
     SelectionManagerService,
-    SetColHiddenCommand,
-    SetColHiddenMutation,
     SetRangeValuesMutation,
-    SetRowHiddenCommand,
-    SetRowHiddenMutation,
 } from '@univerjs/sheets';
 import { type IConfirmPartMethodOptions, IConfirmService } from '@univerjs/ui';
 import type { IDisposable, Injector } from '@wendellhu/redi';
@@ -39,10 +40,10 @@ import {
     AddWorksheetMergeHorizontalCommand,
     AddWorksheetMergeVerticalCommand,
 } from '../add-worksheet-merge.command';
-import { HideColConfirmCommand, HideRowConfirmCommand } from '../hide-row-col-confirm.command';
+import { RemoveColConfirmCommand, RemoveRowConfirmCommand } from '../remove-row-col-confirm.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
-describe('Test hide row col confirm commands', () => {
+describe('Test remove row col confirm commands', () => {
     let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
@@ -83,12 +84,13 @@ describe('Test hide row col confirm commands', () => {
         commandService.registerCommand(RemoveWorksheetMergeCommand);
         commandService.registerCommand(AddWorksheetMergeMutation);
         commandService.registerCommand(RemoveWorksheetMergeMutation);
-        commandService.registerCommand(HideColConfirmCommand);
-        commandService.registerCommand(HideRowConfirmCommand);
-        commandService.registerCommand(SetRowHiddenCommand);
-        commandService.registerCommand(SetRowHiddenMutation);
-        commandService.registerCommand(SetColHiddenCommand);
-        commandService.registerCommand(SetColHiddenMutation);
+        commandService.registerCommand(RemoveRowConfirmCommand);
+        commandService.registerCommand(RemoveRowCommand);
+        commandService.registerCommand(RemoveRowMutation);
+        commandService.registerCommand(DeleteRangeMutation);
+        commandService.registerCommand(RemoveColConfirmCommand);
+        commandService.registerCommand(RemoveColCommand);
+        commandService.registerCommand(RemoveColMutation);
 
         get(LocaleService).load({});
     });
@@ -97,7 +99,7 @@ describe('Test hide row col confirm commands', () => {
         univer.dispose();
     });
 
-    describe('Hide row', () => {
+    describe('Remove row', () => {
         it('Will apply when select some rows', async () => {
             const selectionManager = get(SelectionManagerService);
             selectionManager.setCurrentSelection({
@@ -113,25 +115,16 @@ describe('Test hide row col confirm commands', () => {
                 },
             ]);
 
-            function getHiddenRows(): IRange[] | undefined {
+            function getRowCount(): number | undefined {
                 return get(IUniverInstanceService)
                     .getUniverSheetInstance('test')
                     ?.getSheetBySheetId('sheet1')
-                    ?.getRowManager()
-                    .getHiddenRows();
+                    ?.getRowCount();
             }
 
-            expect(getHiddenRows()).toStrictEqual([]);
-            expect(await commandService.executeCommand(HideRowConfirmCommand.id)).toBeTruthy();
-            expect(getHiddenRows()).toStrictEqual([
-                {
-                    endColumn: 0,
-                    endRow: 1,
-                    rangeType: RANGE_TYPE.ROW,
-                    startColumn: 0,
-                    startRow: 1,
-                },
-            ]);
+            expect(getRowCount()).toBe(1000);
+            expect(await commandService.executeCommand(RemoveRowConfirmCommand.id)).toBeTruthy();
+            expect(getRowCount()).toBe(999);
         });
 
         it('Will not apply when select all rows', async () => {
@@ -149,20 +142,20 @@ describe('Test hide row col confirm commands', () => {
                 },
             ]);
 
-            function getHiddenRows(): IRange[] | undefined {
+            function getRowCount(): number | undefined {
                 return get(IUniverInstanceService)
                     .getUniverSheetInstance('test')
                     ?.getSheetBySheetId('sheet1')
-                    ?.getRowManager()
-                    .getHiddenRows();
+                    ?.getRowCount();
             }
 
-            expect(getHiddenRows()).toStrictEqual([]);
-            expect(await commandService.executeCommand(HideRowConfirmCommand.id)).toBeFalsy();
+            expect(getRowCount()).toBe(1000);
+            expect(await commandService.executeCommand(RemoveRowConfirmCommand.id)).toBeFalsy();
+            expect(getRowCount()).toBe(1000);
         });
     });
 
-    describe('Hide col', () => {
+    describe('Remove col', () => {
         it('Will apply when select some cols', async () => {
             const selectionManager = get(SelectionManagerService);
             selectionManager.setCurrentSelection({
@@ -178,25 +171,16 @@ describe('Test hide row col confirm commands', () => {
                 },
             ]);
 
-            function getHiddenCols(): IRange[] | undefined {
+            function getColumnCount(): number | undefined {
                 return get(IUniverInstanceService)
                     .getUniverSheetInstance('test')
                     ?.getSheetBySheetId('sheet1')
-                    ?.getColumnManager()
-                    .getHiddenCols();
+                    ?.getColumnCount();
             }
 
-            expect(getHiddenCols()).toStrictEqual([]);
-            expect(await commandService.executeCommand(HideColConfirmCommand.id)).toBeTruthy();
-            expect(getHiddenCols()).toStrictEqual([
-                {
-                    endColumn: 1,
-                    endRow: 0,
-                    rangeType: RANGE_TYPE.COLUMN,
-                    startColumn: 1,
-                    startRow: 0,
-                },
-            ]);
+            expect(getColumnCount()).toBe(20);
+            expect(await commandService.executeCommand(RemoveColConfirmCommand.id)).toBeTruthy();
+            expect(getColumnCount()).toBe(19);
         });
 
         it('Will not apply when select all cols', async () => {
@@ -214,16 +198,16 @@ describe('Test hide row col confirm commands', () => {
                 },
             ]);
 
-            function getHiddenCols(): IRange[] | undefined {
+            function getColumnCount(): number | undefined {
                 return get(IUniverInstanceService)
                     .getUniverSheetInstance('test')
                     ?.getSheetBySheetId('sheet1')
-                    ?.getColumnManager()
-                    .getHiddenCols();
+                    ?.getColumnCount();
             }
 
-            expect(getHiddenCols()).toStrictEqual([]);
-            expect(await commandService.executeCommand(HideColConfirmCommand.id)).toBeFalsy();
+            expect(getColumnCount()).toBe(20);
+            expect(await commandService.executeCommand(RemoveColConfirmCommand.id)).toBeFalsy();
+            expect(getColumnCount()).toBe(20);
         });
     });
 });

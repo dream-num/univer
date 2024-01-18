@@ -425,6 +425,24 @@ export class Worksheet {
     }
 
     /**
+     * Get all visible rows in the sheet.
+     * @returns Visible rows range list
+     */
+    getVisibleRows(): IRange[] {
+        const rowCount = this.getRowCount();
+        return this._rowManager.getVisibleRows(0, rowCount - 1);
+    }
+
+    /**
+     * Get all visible columns in the sheet.
+     * @returns Visible columns range list
+     */
+    getVisibleCols(): IRange[] {
+        const columnCount = this.getColumnCount();
+        return this._columnManager.getVisibleCols(0, columnCount - 1);
+    }
+
+    /**
      * Returns true if this sheet layout is right-to-left. Returns false if the sheet uses the default left-to-right layout.
      * @returns true if this sheet layout is right-to-left. Returns false if the sheet uses the default left-to-right layout.
      */

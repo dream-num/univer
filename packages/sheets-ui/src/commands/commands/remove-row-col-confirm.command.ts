@@ -41,7 +41,7 @@ export const RemoveRowConfirmCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
-        const allRowRanges = worksheet.getRowManager().getVisibleRows();
+        const allRowRanges = worksheet.getVisibleRows();
 
         if (isAllRowsCovered(allRowRanges, [range])) {
             const confirmService = accessor.get(IConfirmService);
@@ -61,7 +61,7 @@ export const RemoveRowConfirmCommand: ICommand = {
         }
 
         await commandService.executeCommand(RemoveRowCommand.id, { range });
-        return false;
+        return true;
     },
 };
 
@@ -83,7 +83,7 @@ export const RemoveColConfirmCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
-        const allColumnRanges = worksheet.getColumnManager().getVisibleCols();
+        const allColumnRanges = worksheet.getVisibleCols();
 
         if (isAllColumnsCovered(allColumnRanges, [range])) {
             const confirmService = accessor.get(IConfirmService);

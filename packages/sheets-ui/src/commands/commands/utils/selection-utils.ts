@@ -636,6 +636,12 @@ export function checkIfShrink(selection: ISelection, direction: Direction, works
     }
 }
 
+/**
+ * Determine whether the entire row is selected
+ * @param allRowRanges Range of all rows
+ * @param ranges Range of selected rows
+ * @returns Whether the entire row is selected
+ */
 export function isAllRowsCovered(allRowRanges: IRange[], ranges: IRange[]): boolean {
     // Find the minimum start point and maximum end point in all row ranges
     let start = allRowRanges[0].startRow;
@@ -668,6 +674,12 @@ export function isAllRowsCovered(allRowRanges: IRange[], ranges: IRange[]): bool
     });
 }
 
+/**
+ * Determine whether the entire column is selected
+ * @param allColumnRanges Range of all columns
+ * @param ranges Range of selected columns
+ * @returns Whether the entire column is selected
+ */
 export function isAllColumnsCovered(allColumnRanges: IRange[], ranges: IRange[]): boolean {
     // Find the minimum start point and maximum end point in all column ranges
     let start = allColumnRanges[0].startColumn;

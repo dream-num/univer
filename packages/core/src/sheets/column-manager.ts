@@ -57,7 +57,7 @@ export class ColumnManager {
      * @param end End index
      * @returns Hidden columns range list
      */
-    getHiddenCols(start: number = 0, end: number = getArrayLength(this._columnData) - 1): IRange[] {
+    getHiddenCols(start: number = 0, end: number = this.getSize() - 1): IRange[] {
         const hiddenCols: IRange[] = [];
 
         let inHiddenRange = false;
@@ -99,7 +99,7 @@ export class ColumnManager {
      * @param end End index
      * @returns Visible columns range list
      */
-    getVisibleCols(start: number = 0, end: number = getArrayLength(this._columnData) - 1): IRange[] {
+    getVisibleCols(start: number = 0, end: number = this.getSize() - 1): IRange[] {
         const visibleCols: IRange[] = [];
 
         let inVisibleRange = false;

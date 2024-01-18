@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-import { RemoveColCommand, RemoveRowCommand } from '@univerjs/sheets';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import { MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 
 import { DeleteRangeMoveLeftConfirmCommand } from '../../commands/commands/delete-range-move-left-confirm.command ';
 import { DeleteRangeMoveUpConfirmCommand } from '../../commands/commands/delete-range-move-up-confirm.command';
+import {
+    RemoveColConfirmCommand,
+    RemoveRowConfirmCommand,
+} from '../../commands/commands/remove-row-col-confirm.command';
 import { SheetMenuPosition } from './menu';
 
 const DELETE_RANGE_MENU_ID = 'sheet.menu.delete';
@@ -36,7 +39,7 @@ export function DeleteRangeMenuItemFactory(): IMenuSelectorItem<string> {
 
 export function RemoveColMenuItemFactory(): IMenuButtonItem {
     return {
-        id: RemoveColCommand.id,
+        id: RemoveColConfirmCommand.id,
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
         icon: 'DeleteColumn',
@@ -47,7 +50,7 @@ export function RemoveColMenuItemFactory(): IMenuButtonItem {
 
 export function RemoveRowMenuItemFactory(): IMenuButtonItem {
     return {
-        id: RemoveRowCommand.id,
+        id: RemoveRowConfirmCommand.id,
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
         icon: 'DeleteRow',

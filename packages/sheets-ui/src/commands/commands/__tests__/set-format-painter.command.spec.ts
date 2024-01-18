@@ -35,7 +35,6 @@ import {
     SetRangeValuesMutation,
     SetSelectionsOperation,
 } from '@univerjs/sheets';
-import { createCommandTestBed } from '@univerjs/sheets/commands/commands/__tests__/create-command-test-bed.js';
 import type { Injector } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -49,6 +48,7 @@ import {
     SetInfiniteFormatPainterCommand,
     SetOnceFormatPainterCommand,
 } from '../set-format-painter.command';
+import { createCommandTestBed } from './create-command-test-bed';
 
 const theme = {
     colorBlack: '#35322b',

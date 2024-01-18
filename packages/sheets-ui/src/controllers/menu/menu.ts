@@ -38,14 +38,12 @@ import {
     ResetTextColorCommand,
     SelectionManagerService,
     SetBackgroundColorCommand,
-    SetColHiddenCommand,
     SetColHiddenMutation,
     SetColVisibleMutation,
     SetColWidthCommand,
     SetHorizontalTextAlignCommand,
     SetRangeValuesMutation,
     SetRowHeightCommand,
-    SetRowHiddenCommand,
     SetRowHiddenMutation,
     SetRowVisibleMutation,
     SetSelectedColsVisibleCommand,
@@ -75,6 +73,7 @@ import {
     SheetPasteFormatCommand,
     SheetPasteValueCommand,
 } from '../../commands/commands/clipboard.command';
+import { HideColConfirmCommand, HideRowConfirmCommand } from '../../commands/commands/hide-row-col-confirm.command';
 import {
     SetRangeBoldCommand,
     SetRangeFontFamilyCommand,
@@ -1116,7 +1115,7 @@ export function CancelFrozenMenuItemFactory(): IMenuButtonItem {
 
 export function HideRowMenuItemFactory(): IMenuButtonItem {
     return {
-        id: SetRowHiddenCommand.id,
+        id: HideRowConfirmCommand.id,
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
@@ -1127,7 +1126,7 @@ export function HideRowMenuItemFactory(): IMenuButtonItem {
 
 export function HideColMenuItemFactory(): IMenuButtonItem {
     return {
-        id: SetColHiddenCommand.id,
+        id: HideColConfirmCommand.id,
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.COL_HEADER_CONTEXT_MENU],

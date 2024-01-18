@@ -31,7 +31,6 @@ import {
     SelectionManagerService,
     SetRangeValuesMutation,
 } from '@univerjs/sheets';
-import { createCommandTestBed } from '@univerjs/sheets/commands/commands/__tests__/create-command-test-bed.js';
 import { type IConfirmPartMethodOptions, IConfirmService } from '@univerjs/ui';
 import type { IDisposable, Injector } from '@wendellhu/redi';
 import { Subject } from 'rxjs';
@@ -43,8 +42,9 @@ import {
     AddWorksheetMergeHorizontalCommand,
     AddWorksheetMergeVerticalCommand,
 } from '../add-worksheet-merge.command';
+import { createCommandTestBed } from './create-command-test-bed';
 
-describe('Test style commands', () => {
+describe('Test add worksheet merge commands', () => {
     let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;

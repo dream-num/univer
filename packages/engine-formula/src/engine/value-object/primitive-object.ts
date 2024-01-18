@@ -1124,26 +1124,21 @@ export class StringValueObject extends BaseValueObject {
             // if (o.isError()) {
             //     return o;
             // }
-            return (valueObject as BaseValueObject).compare(this, reverseCompareOperator(operator));
+            return valueObject.compare(this, reverseCompareOperator(operator));
         }
         return this.compareBy(valueObject.getValue(), operator);
-    }
-
-    override wildcard(valueObject: StringValueObject, operator: compareToken): BaseValueObject {
-        if (valueObject.isArray()) {
-            // const o = valueObject.getReciprocal();
-            // if (o.isError()) {
-            //     return o;
-            // }
-            return valueObject.wildcard(this, reverseCompareOperator(operator));
-        }
-        return this._checkWildcard(valueObject.getValue(), operator);
     }
 
     override compareBy(value: string | number | boolean, operator: compareToken): BaseValueObject {
         const currentValue = this.getValue();
         let result = false;
         if (typeof value === 'string') {
+            // TODO
+            const v = this._checkWildcard(value, operator).getValue();
+            if (v) {
+                return new BooleanValueObject(true);
+            }
+
             switch (operator) {
                 case compareToken.EQUALS:
                     result = currentValue === value;

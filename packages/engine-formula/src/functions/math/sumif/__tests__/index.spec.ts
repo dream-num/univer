@@ -115,10 +115,14 @@ describe('test sumif', () => {
                 });
 
                 // calculate
-                resultObject = sumif.calculate(rangeRef, criteriaRef, sumRangeRef) as BaseValueObject;
+                resultObject = sumif.calculate(
+                    rangeRef as unknown as BaseValueObject,
+                    criteriaRef,
+                    sumRangeRef as unknown as BaseValueObject
+                ) as BaseValueObject;
             } else {
                 // calculate
-                resultObject = sumif.calculate(rangeRef, criteriaRef) as BaseValueObject;
+                resultObject = sumif.calculate(rangeRef as unknown as BaseValueObject, criteriaRef) as BaseValueObject;
             }
 
             return resultObject?.getValue();

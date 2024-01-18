@@ -53,7 +53,7 @@ export function valueObjectCompare(range: BaseReferenceObject, criteria: BaseVal
     const [token, criteriaStringObject] = findCompareToken(criteriaValueString);
 
     if (isWildcard(criteriaValueString)) {
-        return arrayValueObject.wildcard(criteriaStringObject, token);
+        // return arrayValueObject.wildcard(criteriaStringObject, token);
     }
 
     return arrayValueObject.compare(criteriaStringObject, token);

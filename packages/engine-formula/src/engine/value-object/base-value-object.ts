@@ -20,7 +20,6 @@ import { ConcatenateType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { ObjectClassType } from '../../basics/object-class-type';
 import { compareToken } from '../../basics/token';
-import type { StringValueObject } from './primitive-object';
 
 export type callbackMapFnType = (currentValue: BaseValueObject, row: number, column: number) => BaseValueObject;
 
@@ -164,11 +163,6 @@ export class BaseValueObject extends ObjectClassType {
     }
 
     compare(valueObject: BaseValueObject, operator: compareToken): BaseValueObject {
-        /** abstract */
-        return new ErrorValueObject(ErrorType.NAME);
-    }
-
-    wildcard(valueObject: StringValueObject, operator: compareToken): BaseValueObject {
         /** abstract */
         return new ErrorValueObject(ErrorType.NAME);
     }

@@ -18,7 +18,7 @@ import type { ICommandInfo, IParagraph, ITextRun, Nullable } from '@univerjs/cor
 import {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-    FOCUSING_EDITOR,
+    EDITOR_ACTIVATED,
     FOCUSING_EDITOR_BUT_HIDDEN,
     FOCUSING_FORMULA_EDITOR,
     HorizontalAlign,
@@ -109,7 +109,7 @@ export class FormulaEditorController extends RxDisposable {
         this._formulaEditorManagerService.fxBtnClick$.pipe(takeUntil(this.dispose$)).subscribe(() => {
             const isFocusButHidden =
                 this._contextService.getContextValue(FOCUSING_EDITOR_BUT_HIDDEN) &&
-                !this._contextService.getContextValue(FOCUSING_EDITOR);
+                !this._contextService.getContextValue(EDITOR_ACTIVATED);
 
             if (isFocusButHidden) {
                 this._univerInstanceService.setCurrentUniverDocInstance(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);

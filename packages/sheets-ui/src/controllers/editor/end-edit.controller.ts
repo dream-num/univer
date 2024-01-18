@@ -20,7 +20,7 @@ import {
     Direction,
     Disposable,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
-    FOCUSING_EDITOR,
+    EDITOR_ACTIVATED,
     FOCUSING_EDITOR_BUT_HIDDEN,
     FOCUSING_EDITOR_INPUT_FORMULA,
     FOCUSING_FORMULA_EDITOR,
@@ -245,7 +245,7 @@ export class EndEditController extends Disposable {
 
     private _exitInput(param: IEditorBridgeServiceVisibleParam) {
         this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
-        this._contextService.setContextValue(FOCUSING_EDITOR, false);
+        this._contextService.setContextValue(EDITOR_ACTIVATED, false);
         this._contextService.setContextValue(FOCUSING_EDITOR_BUT_HIDDEN, false);
         this._contextService.setContextValue(FOCUSING_FORMULA_EDITOR, false);
 

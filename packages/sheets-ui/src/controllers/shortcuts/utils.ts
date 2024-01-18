@@ -16,8 +16,7 @@
 
 import type { IContextService } from '@univerjs/core';
 import {
-    FOCUSING_EDITOR,
-    FOCUSING_EDITOR_BUT_HIDDEN,
+    EDITOR_ACTIVATED,
     FOCUSING_EDITOR_INPUT_FORMULA,
     FOCUSING_FORMULA_EDITOR,
     FOCUSING_SHEET,
@@ -31,36 +30,36 @@ import {
  * @param contextService
  * @returns
  */
-export function whenEditorNotActivated(contextService: IContextService) {
+export function whenSheetEditorFocused(contextService: IContextService) {
     return (
         contextService.getContextValue(FOCUSING_SHEET) &&
         contextService.getContextValue(FOCUSING_UNIVER_EDITOR) &&
-        !contextService.getContextValue(FOCUSING_EDITOR)
+        !contextService.getContextValue(EDITOR_ACTIVATED)
+    );
+}
+
+/**
+ * Requires the currently focused unit to be Workbook and the sheet editor is activated.
+ * @param contextService
+ * @returns
+ */
+export function whenSheetEditorActivated(contextService: IContextService) {
+    return (
+        contextService.getContextValue(FOCUSING_SHEET) &&
+        contextService.getContextValue(FOCUSING_UNIVER_EDITOR) &&
+        contextService.getContextValue(EDITOR_ACTIVATED)
     );
 }
 
 export function whenEditorActivated(contextService: IContextService) {
-    return (
-        contextService.getContextValue(FOCUSING_SHEET) &&
-        contextService.getContextValue(FOCUSING_UNIVER_EDITOR) &&
-        contextService.getContextValue(FOCUSING_EDITOR)
-    );
+    return contextService.getContextValue(EDITOR_ACTIVATED);
 }
 
-export function whenEditorFocusIsHidden(contextService: IContextService) {
-    return (
-        contextService.getContextValue(FOCUSING_UNIVER_EDITOR) &&
-        contextService.getContextValue(FOCUSING_EDITOR_BUT_HIDDEN) &&
-        !contextService.getContextValue(FOCUSING_EDITOR)
-    );
-}
-
-export function whenEditorActivatedIsVisible(contextService: IContextService) {
-    return (
-        contextService.getContextValue(FOCUSING_EDITOR) && contextService.getContextValue(FOCUSING_EDITOR_BUT_HIDDEN)
-    );
-}
-
+/**
+ * Requires the currently focused editor is a formula editor.
+ * @param contextService
+ * @returns
+ */
 export function whenFormulaEditorFocused(contextService: IContextService) {
     return (
         contextService.getContextValue(FOCUSING_FORMULA_EDITOR) &&
@@ -68,26 +67,24 @@ export function whenFormulaEditorFocused(contextService: IContextService) {
     );
 }
 
-export function whenEditorInputFormulaActivated(contextService: IContextService) {
+/**
+ * Requires the currently focused editor is a formula editor, and it is activated.
+ * @param contextService
+ * @returns
+ */
+export function whenFormulaEditorActivated(contextService: IContextService) {
     return (
         contextService.getContextValue(FOCUSING_SHEET) &&
-        contextService.getContextValue(FOCUSING_EDITOR) &&
-        contextService.getContextValue(FOCUSING_EDITOR_INPUT_FORMULA)
+        contextService.getContextValue(EDITOR_ACTIVATED) &&
+        contextService.getContextValue(FOCUSING_EDITOR_INPUT_FORMULA) &&
+        contextService.getContextValue(FOCUSING_UNIVER_EDITOR)
     );
 }
 
 export function whenEditorDidNotInputFormulaActivated(contextService: IContextService) {
     return (
         contextService.getContextValue(FOCUSING_SHEET) &&
-        contextService.getContextValue(FOCUSING_EDITOR) &&
+        contextService.getContextValue(EDITOR_ACTIVATED) &&
         !contextService.getContextValue(FOCUSING_EDITOR_INPUT_FORMULA)
-    );
-}
-
-export function whenEditorNotActivatedOrFormulaActivated(contextService: IContextService) {
-    return (
-        contextService.getContextValue(FOCUSING_SHEET) &&
-        (!contextService.getContextValue(FOCUSING_EDITOR) ||
-            contextService.getContextValue(FOCUSING_EDITOR_INPUT_FORMULA))
     );
 }

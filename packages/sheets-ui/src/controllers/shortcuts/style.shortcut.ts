@@ -23,13 +23,13 @@ import {
     SetRangeStrickThroughCommand,
     SetRangeUnderlineCommand,
 } from '../../commands/commands/inline-format.command';
-import { whenEditorNotActivated } from './utils';
+import { whenSheetEditorFocused } from './utils';
 
 export const SetBoldShortcutItem: IShortcutItem = {
     id: SetRangeBoldCommand.id,
     description: 'shortcut.sheet.set-bold',
     group: '4_sheet-edit',
-    preconditions: (contextService) => whenEditorNotActivated(contextService),
+    preconditions: (contextService) => whenSheetEditorFocused(contextService),
     binding: KeyCode.B | MetaKeys.CTRL_COMMAND,
 };
 
@@ -37,7 +37,7 @@ export const SetItalicShortcutItem: IShortcutItem = {
     id: SetRangeItalicCommand.id,
     description: 'shortcut.sheet.set-italic',
     group: '4_sheet-edit',
-    preconditions: (contextService) => whenEditorNotActivated(contextService),
+    preconditions: (contextService) => whenSheetEditorFocused(contextService),
     binding: KeyCode.I | MetaKeys.CTRL_COMMAND,
 };
 
@@ -45,7 +45,7 @@ export const SetUnderlineShortcutItem: IShortcutItem = {
     id: SetRangeUnderlineCommand.id,
     description: 'shortcut.sheet.set-underline',
     group: '4_sheet-edit',
-    preconditions: (contextService) => whenEditorNotActivated(contextService),
+    preconditions: (contextService) => whenSheetEditorFocused(contextService),
     binding: KeyCode.U | MetaKeys.CTRL_COMMAND,
 };
 
@@ -53,6 +53,6 @@ export const SetStrikeThroughShortcutItem: IShortcutItem = {
     id: SetRangeStrickThroughCommand.id,
     description: 'shortcut.sheet.set-strike-through',
     group: '4_sheet-edit',
-    preconditions: (contextService) => whenEditorNotActivated(contextService),
+    preconditions: (contextService) => whenSheetEditorFocused(contextService),
     binding: KeyCode.X | MetaKeys.SHIFT | MetaKeys.CTRL_COMMAND,
 };

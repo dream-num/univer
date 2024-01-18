@@ -15,7 +15,6 @@
  */
 
 import { ErrorType } from '../../../basics/error-type';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -39,7 +38,7 @@ export class Sum extends BaseFunction {
             }
 
             if (variant.isArray()) {
-                variant = (variant as ArrayValueObject).sum();
+                variant = variant.sum();
             }
 
             accumulatorAll = accumulatorAll.plus(variant);

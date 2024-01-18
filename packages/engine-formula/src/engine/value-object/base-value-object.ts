@@ -15,6 +15,7 @@
  */
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { ConcatenateType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { ObjectClassType } from '../../basics/object-class-type';
@@ -99,6 +100,30 @@ export class BaseValueObject extends ObjectClassType {
 
     isNull() {
         return false;
+    }
+
+    sum(): BaseValueObject {
+        return new ErrorValueObject(ErrorType.VALUE);
+    }
+
+    max(): BaseValueObject {
+        return new ErrorValueObject(ErrorType.VALUE);
+    }
+
+    min(): BaseValueObject {
+        return new ErrorValueObject(ErrorType.VALUE);
+    }
+
+    count(): BaseValueObject {
+        return new ErrorValueObject(ErrorType.VALUE);
+    }
+
+    countA(): BaseValueObject {
+        return new ErrorValueObject(ErrorType.VALUE);
+    }
+
+    countBlank(): BaseValueObject {
+        return new ErrorValueObject(ErrorType.VALUE);
     }
 
     getNegative(): BaseValueObject {
@@ -327,7 +352,7 @@ export class BaseValueObject extends ObjectClassType {
     /**
      * Calculate the median of the entire array.
      *
-     * https://numpy.org/doc/stable/reference/generated/numpy.median.html
+     * reference https://numpy.org/doc/stable/reference/generated/numpy.median.html
      *
      */
     median(): BaseValueObject {
@@ -338,7 +363,7 @@ export class BaseValueObject extends ObjectClassType {
     /**
      * Calculate the variance of the entire array.
      *
-     * https://numpy.org/doc/stable/reference/generated/numpy.var.html
+     * reference https://numpy.org/doc/stable/reference/generated/numpy.var.html
      */
     var(): BaseValueObject {
         /** abstract */
@@ -348,7 +373,7 @@ export class BaseValueObject extends ObjectClassType {
     /**
      * Calculate the standard deviation of the entire array.
      *
-     * https://numpy.org/doc/stable/reference/generated/numpy.std.html
+     * reference https://numpy.org/doc/stable/reference/generated/numpy.std.html
      */
     std(): BaseValueObject {
         /** abstract */

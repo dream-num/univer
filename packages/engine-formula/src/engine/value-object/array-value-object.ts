@@ -393,132 +393,6 @@ export class ArrayValueObject extends BaseValueObject {
         return newResultArray;
     }
 
-    sum() {
-        let accumulatorAll: BaseValueObject = new NumberValueObject(0);
-        this.iterator((valueObject) => {
-            if (valueObject == null) {
-                return true; // continue
-            }
-
-            if (valueObject.isError()) {
-                accumulatorAll = valueObject;
-                return false; // break
-            }
-            accumulatorAll = (accumulatorAll as NumberValueObject).plus(
-                valueObject as BaseValueObject
-            ) as BaseValueObject;
-        });
-
-        return accumulatorAll;
-    }
-
-    max() {
-        let accumulatorAll: BaseValueObject = new NumberValueObject(-Infinity);
-        this.iterator((valueObject) => {
-            if (valueObject == null) {
-                return true; // continue
-            }
-
-            if (valueObject.isError()) {
-                accumulatorAll = valueObject;
-                return false; // break
-            }
-
-            if ((valueObject as BaseValueObject).isString() || (valueObject as BaseValueObject).isNull()) {
-                return true; // continue
-            }
-
-            const result = (accumulatorAll as BaseValueObject).isLessThan(
-                valueObject as BaseValueObject
-            ) as BooleanValueObject;
-
-            if (result.getValue()) {
-                accumulatorAll = valueObject as NumberValueObject;
-            }
-        });
-
-        return accumulatorAll;
-    }
-
-    min() {
-        let accumulatorAll: BaseValueObject = new NumberValueObject(Infinity);
-
-        this.iterator((valueObject) => {
-            if (valueObject == null) {
-                return true; // continue
-            }
-
-            if (valueObject.isError()) {
-                accumulatorAll = valueObject;
-                return false; // break
-            }
-
-            if ((valueObject as BaseValueObject).isString() || (valueObject as BaseValueObject).isNull()) {
-                return true; // continue
-            }
-
-            const result = (accumulatorAll as BaseValueObject).isGreaterThan(
-                valueObject as BaseValueObject
-            ) as BooleanValueObject;
-
-            if (result.getValue()) {
-                accumulatorAll = valueObject as NumberValueObject;
-            }
-        });
-
-        return accumulatorAll;
-    }
-
-    count() {
-        let accumulatorAll: BaseValueObject = new NumberValueObject(0);
-        this.iterator((valueObject) => {
-            if (valueObject == null) {
-                return true; // continue
-            }
-
-            if (
-                valueObject.isError() ||
-                (valueObject as BaseValueObject).isString() ||
-                (valueObject as BaseValueObject).isNull()
-            ) {
-                return true; // continue
-            }
-            accumulatorAll = accumulatorAll.plusBy(1) as BaseValueObject;
-        });
-
-        return accumulatorAll;
-    }
-
-    countA() {
-        let accumulatorAll: BaseValueObject = new NumberValueObject(0);
-        this.iterator((valueObject) => {
-            if (valueObject == null) {
-                return true; // continue
-            }
-
-            if ((valueObject as BaseValueObject).isNull()) {
-                return true; // continue
-            }
-
-            accumulatorAll = accumulatorAll.plusBy(1) as BaseValueObject;
-        });
-
-        return accumulatorAll;
-    }
-
-    countBlank() {
-        let accumulatorAll: BaseValueObject = new NumberValueObject(0);
-        this.iterator((valueObject) => {
-            if (valueObject != null) {
-                return true; // continue
-            }
-
-            accumulatorAll = accumulatorAll.plusBy(1) as BaseValueObject;
-        });
-
-        return accumulatorAll;
-    }
-
     sortByRow(index: number) {
         // new Intl.Collator('zh', { numeric: true }).compare;
         const result: BaseValueObject[][] = this._transposeArray(this._values);
@@ -593,6 +467,132 @@ export class ArrayValueObject extends BaseValueObject {
 
         // Value not found
         return lastValue;
+    }
+
+    override sum() {
+        let accumulatorAll: BaseValueObject = new NumberValueObject(0);
+        this.iterator((valueObject) => {
+            if (valueObject == null) {
+                return true; // continue
+            }
+
+            if (valueObject.isError()) {
+                accumulatorAll = valueObject;
+                return false; // break
+            }
+            accumulatorAll = (accumulatorAll as NumberValueObject).plus(
+                valueObject as BaseValueObject
+            ) as BaseValueObject;
+        });
+
+        return accumulatorAll;
+    }
+
+    override max() {
+        let accumulatorAll: BaseValueObject = new NumberValueObject(-Infinity);
+        this.iterator((valueObject) => {
+            if (valueObject == null) {
+                return true; // continue
+            }
+
+            if (valueObject.isError()) {
+                accumulatorAll = valueObject;
+                return false; // break
+            }
+
+            if ((valueObject as BaseValueObject).isString() || (valueObject as BaseValueObject).isNull()) {
+                return true; // continue
+            }
+
+            const result = (accumulatorAll as BaseValueObject).isLessThan(
+                valueObject as BaseValueObject
+            ) as BooleanValueObject;
+
+            if (result.getValue()) {
+                accumulatorAll = valueObject as NumberValueObject;
+            }
+        });
+
+        return accumulatorAll;
+    }
+
+    override min() {
+        let accumulatorAll: BaseValueObject = new NumberValueObject(Infinity);
+
+        this.iterator((valueObject) => {
+            if (valueObject == null) {
+                return true; // continue
+            }
+
+            if (valueObject.isError()) {
+                accumulatorAll = valueObject;
+                return false; // break
+            }
+
+            if ((valueObject as BaseValueObject).isString() || (valueObject as BaseValueObject).isNull()) {
+                return true; // continue
+            }
+
+            const result = (accumulatorAll as BaseValueObject).isGreaterThan(
+                valueObject as BaseValueObject
+            ) as BooleanValueObject;
+
+            if (result.getValue()) {
+                accumulatorAll = valueObject as NumberValueObject;
+            }
+        });
+
+        return accumulatorAll;
+    }
+
+    override count() {
+        let accumulatorAll: BaseValueObject = new NumberValueObject(0);
+        this.iterator((valueObject) => {
+            if (valueObject == null) {
+                return true; // continue
+            }
+
+            if (
+                valueObject.isError() ||
+                (valueObject as BaseValueObject).isString() ||
+                (valueObject as BaseValueObject).isNull()
+            ) {
+                return true; // continue
+            }
+            accumulatorAll = accumulatorAll.plusBy(1) as BaseValueObject;
+        });
+
+        return accumulatorAll;
+    }
+
+    override countA() {
+        let accumulatorAll: BaseValueObject = new NumberValueObject(0);
+        this.iterator((valueObject) => {
+            if (valueObject == null) {
+                return true; // continue
+            }
+
+            if ((valueObject as BaseValueObject).isNull()) {
+                return true; // continue
+            }
+
+            accumulatorAll = accumulatorAll.plusBy(1) as BaseValueObject;
+        });
+
+        return accumulatorAll;
+    }
+
+    override countBlank() {
+        let accumulatorAll: BaseValueObject = new NumberValueObject(0);
+        this.iterator((valueObject) => {
+            if (valueObject != null) {
+                return true; // continue
+            }
+
+            accumulatorAll = accumulatorAll.plusBy(1) as BaseValueObject;
+        });
+
+        return accumulatorAll;
     }
 
     override getNegative(): BaseValueObject {

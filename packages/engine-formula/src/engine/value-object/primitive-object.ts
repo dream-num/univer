@@ -20,7 +20,7 @@ import { reverseCompareOperator } from '../../basics/calculate';
 import { BooleanValue, ConcatenateType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { compareToken } from '../../basics/token';
-import { compareWithWildcard } from '../utils/compare';
+import { compareWithWildcard, isWildcard } from '../utils/compare';
 import { ceil, floor, pow, round } from '../utils/math-kit';
 import { BaseValueObject, ErrorValueObject } from './base-value-object';
 
@@ -1133,10 +1133,8 @@ export class StringValueObject extends BaseValueObject {
         const currentValue = this.getValue();
         let result = false;
         if (typeof value === 'string') {
-            // TODO
-            const v = this._checkWildcard(value, operator).getValue();
-            if (v) {
-                return new BooleanValueObject(true);
+            if (isWildcard(value)) {
+                return this._checkWildcard(value, operator);
             }
 
             switch (operator) {

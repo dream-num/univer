@@ -19,79 +19,87 @@ import { ObjectMatrix } from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import type { ISheetData } from '../../../../basics/common';
+import { CELL_INVERTED_INDEX_CACHE } from '../../../../basics/inverted-index-cache';
+import { FORMULA_REF_TO_ARRAY_CACHE } from '../../../../engine/reference-object/base-reference-object';
 import { RangeReferenceObject } from '../../../../engine/reference-object/range-reference-object';
 import { ValueObjectFactory } from '../../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../../engine/value-object/base-value-object';
 import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { Sumif } from '..';
 
-const cellData = {
-    0: {
+const getCellData = () => {
+    return {
         0: {
-            v: 1,
+            0: {
+                v: 1,
+            },
+            1: {
+                v: 'Ada',
+                t: 1,
+            },
+            2: {
+                v: 1,
+            },
         },
         1: {
-            v: 'Ada',
-            t: 1,
+            0: {
+                v: 4,
+            },
+            1: {
+                v: 'test1',
+                t: 1,
+            },
+            2: {
+                v: 1,
+            },
         },
         2: {
-            v: 1,
+            0: {
+                v: 44,
+            },
+            1: {
+                v: 'test12',
+                t: 1,
+            },
+            2: {
+                v: 1,
+            },
         },
-    },
-    1: {
-        0: {
-            v: 4,
+        3: {
+            0: {
+                v: 444,
+            },
+            1: {
+                v: 'Univer',
+                t: 1,
+            },
+            2: {
+                v: 1,
+            },
         },
-        1: {
-            v: 'test1',
-            t: 1,
-        },
-        2: {
-            v: 1,
-        },
-    },
-    2: {
-        0: {
-            v: 44,
-        },
-        1: {
-            v: 'test12',
-            t: 1,
-        },
-        2: {
-            v: 1,
-        },
-    },
-    3: {
-        0: {
-            v: 444,
-        },
-        1: {
-            v: 'Univer',
-            t: 1,
-        },
-        2: {
-            v: 1,
-        },
-    },
+    };
 };
 
 describe('test sumif', () => {
     let unitId: string;
     let sheetId: string;
-    let sheetData: ISheetData = {};
+    let sheetData: () => ISheetData;
     let sumif: Sumif;
     let sumifCalculate: (range: IRange, criteria: string, sumRange?: IRange) => string | number | boolean;
 
     beforeEach(() => {
+        FORMULA_REF_TO_ARRAY_CACHE.clear();
+        CELL_INVERTED_INDEX_CACHE.clear();
         unitId = 'test';
         sheetId = 'sheet1';
-        sheetData = {
-            [sheetId]: {
-                cellData: new ObjectMatrix(cellData),
-                rowCount: 4,
-                columnCount: 3,
-            },
+        sheetData = () => {
+            return {
+                [sheetId]: {
+                    cellData: new ObjectMatrix(getCellData()),
+                    rowCount: 4,
+                    columnCount: 3,
+                },
+            };
         };
 
         // register sumif
@@ -101,7 +109,7 @@ describe('test sumif', () => {
 
             const rangeRef = new RangeReferenceObject(range, sheetId, unitId);
             rangeRef.setUnitData({
-                [unitId]: sheetData,
+                [unitId]: sheetData(),
             });
 
             // criteria
@@ -111,7 +119,7 @@ describe('test sumif', () => {
                 // sum range
                 const sumRangeRef = new RangeReferenceObject(sumRange, sheetId, unitId);
                 sumRangeRef.setUnitData({
-                    [unitId]: sheetData,
+                    [unitId]: sheetData(),
                 });
 
                 // calculate
@@ -143,7 +151,7 @@ describe('test sumif', () => {
             expect(value).toBe(488);
         });
 
-        it('sum range with wildcard *', async () => {
+        it('sum range with wildcard asterisk', async () => {
             // range
             const range = {
                 startRow: 0,
@@ -164,7 +172,7 @@ describe('test sumif', () => {
             expect(value).toBe(2);
         });
 
-        it('sum range with compare = and wildcard *', async () => {
+        it('sum range with compare = and wildcard asterisk', async () => {
             // range
             const range = {
                 startRow: 0,
@@ -185,7 +193,7 @@ describe('test sumif', () => {
             expect(value).toBe(2);
         });
 
-        it('sum range with compare > and wildcard *', async () => {
+        it('sum range with compare > and wildcard asterisk', async () => {
             // range
             const range = {
                 startRow: 0,
@@ -206,7 +214,7 @@ describe('test sumif', () => {
             expect(value).toBe(3);
         });
 
-        it('sum range with compare >= and wildcard *', async () => {
+        it('sum range with compare >= and wildcard asterisk', async () => {
             // range
             const range = {
                 startRow: 0,
@@ -227,7 +235,7 @@ describe('test sumif', () => {
             expect(value).toBe(3);
         });
 
-        it('sum range with compare < and wildcard *', async () => {
+        it('sum range with compare < and wildcard asterisk', async () => {
             // range
             const range = {
                 startRow: 0,
@@ -248,7 +256,7 @@ describe('test sumif', () => {
             expect(value).toBe(1);
         });
 
-        it('sum range with compare <= and wildcard *', async () => {
+        it('sum range with compare <= and wildcard asterisk', async () => {
             // range
             const range = {
                 startRow: 0,
@@ -269,7 +277,7 @@ describe('test sumif', () => {
             expect(value).toBe(1);
         });
 
-        it('sum range with wildcard ?', async () => {
+        it('sum range with wildcard question mark', async () => {
             // range
             const range = {
                 startRow: 0,
@@ -290,7 +298,7 @@ describe('test sumif', () => {
             expect(value).toBe(1);
         });
 
-        it('sum range with compare = and wildcard ?', async () => {
+        it('sum range with compare = and wildcard question mark', async () => {
             // range
             const range = {
                 startRow: 0,
@@ -311,7 +319,7 @@ describe('test sumif', () => {
             expect(value).toBe(1);
         });
 
-        it('sum range with compare > and wildcard ?', async () => {
+        it('sum range with compare > and wildcard question mark', async () => {
             // range
             const range = {
                 startRow: 0,
@@ -332,7 +340,7 @@ describe('test sumif', () => {
             expect(value).toBe(3);
         });
 
-        it('sum range with compare >= and wildcard ?', async () => {
+        it('sum range with compare >= and wildcard question mark', async () => {
             // range
             const range = {
                 startRow: 0,
@@ -353,7 +361,7 @@ describe('test sumif', () => {
             expect(value).toBe(3);
         });
 
-        it('sum range with compare < and wildcard ?', async () => {
+        it('sum range with compare < and wildcard question mark', async () => {
             // range
             const range = {
                 startRow: 0,
@@ -374,7 +382,7 @@ describe('test sumif', () => {
             expect(value).toBe(1);
         });
 
-        it('sum range with compare <= and wildcard ?', async () => {
+        it('sum range with compare <= and wildcard question mark', async () => {
             // range
             const range = {
                 startRow: 0,

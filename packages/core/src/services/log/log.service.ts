@@ -80,7 +80,7 @@ export class DesktopLogService extends Disposable implements ILogService {
         const firstArg = args[0];
         const withTag = /^\[(.*?)\]/g.test(firstArg);
         if (withTag) {
-            method(`\x1B[97;104m${firstArg}\x1B[0m:`, ...args.slice(1));
+            method(`\x1B[97;104m${firstArg}\x1B[0m`, ...args.slice(1));
         } else {
             method(...args);
         }

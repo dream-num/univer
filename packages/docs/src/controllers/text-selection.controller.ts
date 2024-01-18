@@ -77,6 +77,7 @@ export class TextSelectionController extends Disposable {
 
         if (this._layoutService) {
             this.disposeWithMe(
+                // the content editable div should be regarded as part of the applications container
                 this._layoutService.registerContainer(this._textSelectionRenderManager.__getEditorContainer())
             );
         }

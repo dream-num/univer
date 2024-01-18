@@ -38,7 +38,8 @@ export abstract class PluginHolder extends Disposable {
         } else {
             const lazyPlugins = plugins.map(([plugin, options]) => this._initPlugin(plugin, options));
             this._pluginsRunLifecycle(lazyPlugins, LifecycleStages.Starting);
-            setTimeout(() => this._takePluginsThroughLifecycle(lazyPlugins));
+
+            setTimeout(() => this._takePluginsThroughLifecycle(lazyPlugins, true));
         }
     }
 

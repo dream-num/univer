@@ -100,6 +100,7 @@ export const App = (
 );
 
 ReactDOM.render(App, document.getElementById('container'));
+
 factory('app-a')();
 factory('app-b')();
 factory('app-c')();

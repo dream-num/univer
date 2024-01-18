@@ -28,7 +28,7 @@ export { VIEWPORT_KEY } from './common/keys';
 export { RangeSelector } from './components/range-selector/RangeSelector';
 export { AutoFillController } from './controllers/auto-fill.controller';
 export { PASTE_SPECIAL_MENU_ID } from './controllers/menu/menu';
-export { whenEditorInputFormulaActivated } from './controllers/shortcuts/utils';
+export { whenFormulaEditorActivated } from './controllers/shortcuts/utils';
 export {
     getCoordByCell,
     getCoordByOffset,

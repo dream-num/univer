@@ -19,6 +19,7 @@
         "@univerjs/icons": "^0.1.25",
         "@univerjs/rpc": "workspace:*",
         "@univerjs/sheets": "workspace:*",
+        "@univerjs/sheets-find-replace": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",
         "@univerjs/sheets-numfmt": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",

@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-import type { PluginCtor } from '@univerjs/core';
-import type { IUniscriptConfig } from '@univerjs/uniscript';
+import type { Plugin, PluginCtor } from '@univerjs/core';
 import { UniverUniscriptPlugin } from '@univerjs/uniscript';
 
-export default function getLazyPlugins(): [PluginCtor<UniverUniscriptPlugin>, IUniscriptConfig] {
+export default function getLazyPlugins(): Array<[PluginCtor<Plugin>] | [PluginCtor<Plugin>, unknown]> {
     return [
-        UniverUniscriptPlugin,
-        {
-            getWorkerUrl(moduleID, label) {
-                if (label === 'typescript' || label === 'javascript') {
-                    return './vs/language/typescript/ts.worker.js';
-                }
+        [
+            UniverUniscriptPlugin,
+            {
+                getWorkerUrl(moduleID: string, label: string) {
+                    if (label === 'typescript' || label === 'javascript') {
+                        return './vs/language/typescript/ts.worker.js';
+                    }
 
-                return './vs/editor/editor.worker.js';
+                    return './vs/editor/editor.worker.js';
+                },
             },
-        },
+        ],
     ];
 }

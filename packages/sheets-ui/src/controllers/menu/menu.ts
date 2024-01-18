@@ -17,7 +17,7 @@
 import {
     BooleanNumber,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-    FOCUSING_EDITOR,
+    EDITOR_ACTIVATED,
     FOCUSING_SHEET,
     FontItalic,
     FontWeight,
@@ -169,7 +169,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
                 if (
                     (id === SetTextSelectionsOperation.id || id === SetInlineFormatCommand.id) &&
-                    contextService.getContextValue(FOCUSING_EDITOR) &&
+                    contextService.getContextValue(EDITOR_ACTIVATED) &&
                     contextService.getContextValue(FOCUSING_SHEET)
                 ) {
                     const textRun = getFontStyleAtCursor(accessor);
@@ -224,7 +224,7 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
                 if (
                     (id === SetTextSelectionsOperation.id || id === SetInlineFormatCommand.id) &&
-                    contextService.getContextValue(FOCUSING_EDITOR) &&
+                    contextService.getContextValue(EDITOR_ACTIVATED) &&
                     contextService.getContextValue(FOCUSING_SHEET)
                 ) {
                     const textRun = getFontStyleAtCursor(accessor);
@@ -278,7 +278,7 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
                 if (
                     (id === SetTextSelectionsOperation.id || id === SetInlineFormatCommand.id) &&
-                    contextService.getContextValue(FOCUSING_EDITOR) &&
+                    contextService.getContextValue(EDITOR_ACTIVATED) &&
                     contextService.getContextValue(FOCUSING_SHEET)
                 ) {
                     const textRun = getFontStyleAtCursor(accessor);
@@ -332,7 +332,7 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
 
                 if (
                     (id === SetTextSelectionsOperation.id || id === SetInlineFormatCommand.id) &&
-                    contextService.getContextValue(FOCUSING_EDITOR) &&
+                    contextService.getContextValue(EDITOR_ACTIVATED) &&
                     contextService.getContextValue(FOCUSING_SHEET)
                 ) {
                     const textRun = getFontStyleAtCursor(accessor);
@@ -572,7 +572,7 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
 
                 if (
                     (id === SetTextSelectionsOperation.id || id === SetInlineFormatCommand.id) &&
-                    contextService.getContextValue(FOCUSING_EDITOR) &&
+                    contextService.getContextValue(EDITOR_ACTIVATED) &&
                     contextService.getContextValue(FOCUSING_SHEET)
                 ) {
                     const textRun = getFontStyleAtCursor(accessor);

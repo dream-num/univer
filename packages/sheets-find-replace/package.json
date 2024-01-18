@@ -1,0 +1,82 @@
+{
+    "name": "@univerjs/sheets-find-replace",
+    "version": "0.1.0-beta.2",
+    "description": "UniverSheet find replace plugin",
+    "keywords": [],
+    "author": "DreamNum <developer@univer.ai>",
+    "license": "Apache-2.0",
+    "main": "./lib/cjs/index.js",
+    "module": "./lib/es/index.js",
+    "types": "./lib/types/index.d.ts",
+    "publishConfig": {
+        "access": "public",
+        "main": "./lib/cjs/index.js",
+        "module": "./lib/es/index.js",
+        "exports": {
+            ".": {
+                "import": "./lib/es/index.js",
+                "require": "./lib/cjs/index.js",
+                "types": "./lib/types/index.d.ts"
+            },
+            "./*": {
+                "import": "./lib/es/*",
+                "require": "./lib/cjs/*",
+                "types": "./lib/types/index.d.ts"
+            },
+            "./lib/*": "./lib/*"
+        }
+    },
+    "exports": {
+        ".": "./src/index.ts",
+        "./*": "./src/*"
+    },
+    "directories": {
+        "lib": "lib"
+    },
+    "files": [
+        "lib"
+    ],
+    "sideEffects": [
+        "**/*.css"
+    ],
+    "private": true,
+    "scripts": {
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "coverage": "vitest run --coverage",
+        "build": "tsc && vite build"
+    },
+    "dependencies": {
+        "@univerjs/core": "workspace:*",
+        "@univerjs/design": "workspace:*",
+        "@univerjs/engine-render": "workspace:*",
+        "@univerjs/find-replace": "workspace:*",
+        "@univerjs/sheets": "workspace:*",
+        "@univerjs/sheets-ui": "workspace:*",
+        "@univerjs/ui": "workspace:*",
+        "@wendellhu/redi": "^0.12.13",
+        "react": "^18.2.0"
+    },
+    "devDependencies": {
+        "@types/react": "^18.2.47",
+        "@vitejs/plugin-react": "^4.2.1",
+        "@vitest/coverage-istanbul": "^1.1.1",
+        "less": "^4.2.0",
+        "typescript": "^5.3.3",
+        "vite": "^5.0.10",
+        "vite-plugin-dts": "^3.7.0",
+        "vite-plugin-externals": "^0.6.2",
+        "vitest": "^1.1.1"
+    },
+    "peerDependencies": {
+        "@univerjs/core": "workspace:*",
+        "@univerjs/design": "workspace:*",
+        "@univerjs/engine-render": "workspace:*",
+        "@univerjs/find-replace": "workspace:*",
+        "@univerjs/sheets": "workspace:*",
+        "@univerjs/sheets-ui": "workspace:*",
+        "@univerjs/ui": "workspace:*",
+        "@wendellhu/redi": ">=0.12.12",
+        "react": ">=16.9.0"
+    }
+}

@@ -22,7 +22,7 @@ import type { IStyleData } from './i-style-data';
 /**
  * Cell value type
  */
-export type ICellV = string | number | boolean;
+export type CellValue = string | number | boolean;
 
 /**
  * Cell data
@@ -38,7 +38,7 @@ export interface ICellData {
     /**
      * Origin value
      */
-    v?: Nullable<ICellV>;
+    v?: Nullable<CellValue>;
     // Usually the type is automatically determined based on the data, or the user directly specifies
     t?: Nullable<CellValueType>; // 1 string, 2 number, 3 boolean, 4 force string, green icon, set null for cell clear all
     f?: Nullable<string>; // formula '=SUM(1)'
@@ -100,6 +100,6 @@ export function isNullCell(cell: Nullable<ICellData>) {
     return true;
 }
 
-export function isCellV(cell: Nullable<ICellData | ICellV>) {
+export function isCellV(cell: Nullable<ICellData | CellValue>) {
     return cell != null && (typeof cell === 'string' || typeof cell === 'number' || typeof cell === 'boolean');
 }

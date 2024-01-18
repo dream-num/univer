@@ -14,19 +14,27 @@
  * limitations under the License.
  */
 
-import type { ContextService } from '@univerjs/core';
-import { Disposable, IContextService, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
+import type { ContextService, Nullable } from '@univerjs/core';
+import {
+    Disposable,
+    FOCUSING_UNIVER_EDITOR,
+    IContextService,
+    ILogService,
+    LifecycleStages,
+    OnLifecycle,
+    toDisposable,
+} from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 import { fromEvent } from 'rxjs';
-import type { Nullable } from 'vitest';
 
 /**
  * FocusService manages focusing state of the Univer application instance.
  */
 export const IFocusService = createIdentifier<IFocusService>('univer.focus-service');
-
 export interface IFocusService {
     readonly isFocused: boolean;
+
+    forceFocus(): void;
     setContainerElement(container: HTMLElement): void;
 }
 
@@ -42,11 +50,17 @@ export class DesktopFocusService extends Disposable implements IFocusService {
         return this._isUniverFocused;
     }
 
-    constructor(@IContextService private readonly _contextService: ContextService) {
+    constructor(
+        @IContextService private readonly _contextService: ContextService,
+        @ILogService private readonly _logService: ILogService
+    ) {
         super();
 
         this._initFocusListener();
-        // TODO: we may call context service to set context values
+        this._initEditorStatus();
+
+        // @ts-ignore
+        window._contextService = this;
     }
 
     override dispose(): void {
@@ -59,6 +73,8 @@ export class DesktopFocusService extends Disposable implements IFocusService {
         this._containerElement = container;
     }
 
+    forceFocus(): void {}
+
     private _initFocusListener(): void {
         this.disposeWithMe(
             toDisposable(
@@ -70,16 +86,19 @@ export class DesktopFocusService extends Disposable implements IFocusService {
                     }
 
                     this._contextService.setContextValue(FOCUSING_UNIVER, this._isUniverFocused);
+                    this._contextService.setContextValue(
+                        FOCUSING_UNIVER_EDITOR,
+                        (event.target as HTMLElement).classList.contains('univer-editor')
+                    );
                 })
             )
         );
+    }
 
-        // this.disposeWithMe(
-        //     toDisposable(
-        //         fromEvent(window, 'focusout').subscribe((element) => {
-        //             console.log('focusing out element', element.target);
-        //         })
-        //     )
-        // );
+    private _initEditorStatus(): void {
+        this._contextService.setContextValue(
+            FOCUSING_UNIVER_EDITOR,
+            !!document.activeElement?.classList.contains('univer-editor')
+        );
     }
 }

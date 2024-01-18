@@ -62,7 +62,8 @@
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "react-draggable": "^4.4.6",
-        "react-transition-group": "^4.4.5"
+        "react-transition-group": "^4.4.5",
+        "rxjs": "^7.8.1"
     },
     "devDependencies": {
         "@testing-library/react": "^14.1.2",
@@ -81,6 +82,7 @@
     },
     "peerDependencies": {
         "react": ">=16.9.0",
-        "react-dom": ">=16.9.0"
+        "react-dom": ">=16.9.0",
+        "rxjs": "^7.8.1"
     }
 }

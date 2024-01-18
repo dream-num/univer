@@ -252,6 +252,7 @@ export { type ISetWorksheetActiveOperationParams } from './commands/operations/s
 export { type ISheetCommandSharedParams } from './commands/utils/interface';
 export { getAddMergeMutationRangeByType } from './controllers/merge-cell.controller';
 export { enUS, zhCN } from './locale';
+export { NumfmtService } from './services/numfmt/numfmt.service';
 export type { FormatType, INumfmtItem, INumfmtItemWithCache } from './services/numfmt/type';
 export { INumfmtService } from './services/numfmt/type';
 export { RefRangeService } from './services/ref-range/ref-range.service';

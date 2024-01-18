@@ -17,7 +17,7 @@
 import type { IOperation } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
 
-import { FindReplaceService, IFindReplaceService } from '../../services/find-replace.service';
+import { IFindReplaceService } from '../../services/find-replace.service';
 
 export const OpenFindDialogOperation: IOperation = {
     id: 'ui.operation.open-find-dialog',
@@ -46,10 +46,10 @@ export const ToggleReplaceDialogOperation: IOperation = {
         const findReplaceService = accessor.get(IFindReplaceService);
         // findReplaceService.
         return true;
-    }
-}
+    },
+};
 
-export const CloseFRDialogOperation: IOperation = {
+export const CloseFindReplaceDialogOperation: IOperation = {
     id: 'ui.operation.close-find-replace-dialog',
     type: CommandType.OPERATION,
     handler: (accessor) => {
@@ -61,6 +61,8 @@ export const GoToNextMatchOperation: IOperation = {
     type: CommandType.OPERATION,
     id: 'ui.operation.go-to-next-match',
     handler: (accessor) => {
+        const findReplaceService = accessor.get(IFindReplaceService);
+        findReplaceService.moveToNextMatch();
         return true;
     },
 };
@@ -69,6 +71,8 @@ export const GoToPreviousMatchOperation: IOperation = {
     type: CommandType.OPERATION,
     id: 'ui.operation.go-to-previous-match',
     handler: (accessor) => {
+        const findReplaceService = accessor.get(IFindReplaceService);
+        findReplaceService.moveToPreviousMatch();
         return true;
     },
 };

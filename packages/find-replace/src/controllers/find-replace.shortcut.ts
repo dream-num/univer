@@ -17,7 +17,7 @@
 import { type IShortcutItem, KeyCode, MetaKeys } from '@univerjs/ui';
 
 import {
-    CloseFRDialogOperation,
+    CloseFindReplaceDialogOperation,
     GoToNextMatchOperation,
     GoToPreviousMatchOperation,
     OpenFindDialogOperation,
@@ -46,7 +46,7 @@ export const OpenReplaceDialogShortcutItem: IShortcutItem = {
 };
 
 export const CloseFRDialogShortcutItem: IShortcutItem = {
-    id: CloseFRDialogOperation.id,
+    id: CloseFindReplaceDialogOperation.id,
     description: 'shortcut.find-replace.close-dialog',
     binding: KeyCode.ESC,
     group: '4_find-replace',
@@ -59,7 +59,7 @@ export const CloseFRDialogShortcutItem: IShortcutItem = {
 export const GoToNextFindMatchShortcutItem: IShortcutItem = {
     id: GoToNextMatchOperation.id,
     description: 'shortcut.find-replace.go-to-next-find-match',
-    binding: KeyCode.ARROW_DOWN,
+    binding: KeyCode.ENTER,
     group: '4_find-replace',
     priority: 1000,
     preconditions(contextService) {
@@ -70,7 +70,7 @@ export const GoToNextFindMatchShortcutItem: IShortcutItem = {
 export const GoToPreviousFindMatchShortcutItem: IShortcutItem = {
     id: GoToPreviousMatchOperation.id,
     description: 'shortcut.find-replace.go-to-previous-find-match',
-    binding: KeyCode.ARROW_UP,
+    binding: KeyCode.ENTER | MetaKeys.SHIFT,
     group: '4_find-replace',
     priority: 1000,
     preconditions(contextService) {

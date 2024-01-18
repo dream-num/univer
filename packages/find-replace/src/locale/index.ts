@@ -14,6 +14,5 @@
  * limitations under the License.
  */
 
-export { UniverFindReplacePlugin } from './plugin';
-export type { IFindComplete, IFindMatch, IFindQuery, IFindReplaceProvider } from './services/find-replace.service';
-export { FindModel, IFindReplaceService } from './services/find-replace.service';
+export { default as enUS } from './en-US';
+export { default as zhCN } from './zh-CN';

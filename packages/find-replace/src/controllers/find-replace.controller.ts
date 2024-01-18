@@ -14,27 +14,38 @@
  * limitations under the License.
  */
 
-import { ICommandService, IContextService, LifecycleStages, LocaleService, OnLifecycle, RxDisposable } from '@univerjs/core';
+import {
+    ICommandService,
+    IContextService,
+    LifecycleStages,
+    LocaleService,
+    OnLifecycle,
+    RxDisposable,
+} from '@univerjs/core';
 import { SearchSingle16 } from '@univerjs/icons';
 import { ComponentManager, IDialogService, IFocusService, IMenuService, IShortcutService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
+import { takeUntil } from 'rxjs';
 
 import {
-    CloseFRDialogOperation,
+    CloseFindReplaceDialogOperation,
+    GoToNextMatchOperation,
+    GoToPreviousMatchOperation,
     OpenFindDialogOperation,
     OpenReplaceDialogOperation,
     ToggleReplaceDialogOperation,
 } from '../commands/operations/find-replace.operation';
+import { FIND_REPLACE_ACTIVATED } from '../services/context-keys';
+import { IFindReplaceService } from '../services/find-replace.service';
 import { FindReplaceDialog } from '../views/dialog/Dialog';
 import { FindReplaceMenuItemFactory } from './find-replace.menu';
 import {
     CloseFRDialogShortcutItem,
+    GoToNextFindMatchShortcutItem,
+    GoToPreviousFindMatchShortcutItem,
     OpenFindDialogShortcutItem,
     OpenReplaceDialogShortcutItem,
 } from './find-replace.shortcut';
-import { IFindReplaceService } from '../services/find-replace.service';
-import { takeUntil } from 'rxjs';
-import { FIND_REPLACE_ACTIVATED } from '../services/context-keys';
 
 const FIND_REPLACE_DIALOG_ID = 'DESKTOP_FIND_REPLACE_DIALOG';
 
@@ -61,10 +72,12 @@ export class FindReplaceController extends RxDisposable {
 
     private _initOperations(): void {
         [
-            CloseFRDialogOperation,
+            CloseFindReplaceDialogOperation,
             OpenFindDialogOperation,
             OpenReplaceDialogOperation,
             ToggleReplaceDialogOperation,
+            GoToNextMatchOperation,
+            GoToPreviousMatchOperation,
         ].forEach((c) => {
             this.disposeWithMe(this._commandService.registerCommand(c));
         });
@@ -79,7 +92,7 @@ export class FindReplaceController extends RxDisposable {
         this.disposeWithMe(this._componentManager.register('SearchIcon', SearchSingle16));
 
         // this controller is also responsible for toggling the FindReplaceDialog
-        this._findReplaceService.stateUpdates$.pipe(takeUntil(this.dispose$)).subscribe(newState => {
+        this._findReplaceService.stateUpdates$.pipe(takeUntil(this.dispose$)).subscribe((newState) => {
             if (newState.revealed === true) {
                 this._openPanel();
             } else if (newState.revealed === false) {
@@ -89,7 +102,13 @@ export class FindReplaceController extends RxDisposable {
     }
 
     private _initShortcuts(): void {
-        [OpenReplaceDialogShortcutItem, OpenFindDialogShortcutItem, CloseFRDialogShortcutItem].forEach((s) => {
+        [
+            OpenReplaceDialogShortcutItem,
+            OpenFindDialogShortcutItem,
+            CloseFRDialogShortcutItem,
+            GoToPreviousFindMatchShortcutItem,
+            GoToNextFindMatchShortcutItem,
+        ].forEach((s) => {
             this.disposeWithMe(this._shortcutService.registerShortcut(s));
         });
     }
@@ -99,8 +118,8 @@ export class FindReplaceController extends RxDisposable {
             id: FIND_REPLACE_DIALOG_ID,
             draggable: true,
             width: 350,
-            title: { title: this._localeService.t('univer.find-replace.dialog.title'), },
-            children: { label: 'FindReplaceDialog', },
+            title: { title: this._localeService.t('univer.find-replace.dialog.title') },
+            children: { label: 'FindReplaceDialog' },
             onClose: () => this._closePanel(),
         });
 

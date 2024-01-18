@@ -45,7 +45,7 @@ export class SheetFindReplaceHighlightShape extends Shape<ISheetFindReplaceHighl
         Rect.drawWith(ctx as UniverRenderingContext, {
             width: this.width,
             height: this.height,
-            fill: 'rgba(5, 5, 5, 0.2)',
+            fill: 'rgba(89, 208, 30, 0.2)',
             evented: false,
         });
     }

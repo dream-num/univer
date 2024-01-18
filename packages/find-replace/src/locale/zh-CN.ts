@@ -14,6 +14,23 @@
  * limitations under the License.
  */
 
-export { UniverFindReplacePlugin } from './plugin';
-export type { IFindComplete, IFindMatch, IFindQuery, IFindReplaceProvider } from './services/find-replace.service';
-export { FindModel, IFindReplaceService } from './services/find-replace.service';
+import { type default as enUS } from './en-US';
+
+const locale: typeof enUS = {
+    univer: {
+        'find-replace': {
+            dialog: {
+                title: '查找',
+                find: '查找',
+                replace: '替换',
+                'replace-all': '替换全部',
+                'find-range': '查找范围',
+                'find-placeholder': '输入查找内容',
+                'advanced-finding': '替换 / 高级查找',
+                'replace-placeholder': '输入替换内容',
+            },
+        },
+    },
+};
+
+export default locale;

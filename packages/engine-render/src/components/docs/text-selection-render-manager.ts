@@ -636,6 +636,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         this._input.contentEditable = 'true';
 
+        this._input.classList.add('univer-editor');
         this._input.style.cssText = `
             position: absolute;
             overflow: hidden;

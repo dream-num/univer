@@ -17,37 +17,37 @@
 import type { Nullable } from '@univerjs/core';
 import { Disposable, ILogService, IUniverInstanceService, toDisposable } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
-import { Inject, Injector, createIdentifier } from '@wendellhu/redi';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { createIdentifier, Inject, Injector } from '@wendellhu/redi';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 export type FindProgressFn = () => void;
 
-export interface IFindComplete {
-    results: IFindResult[];
+export interface IFindComplete<T extends IFindMatch = IFindMatch> {
+    results: T[];
 }
 
-export interface IFindResult<T = unknown> {
+export interface IFindMatch<T = unknown> {
     provider: string;
+    unitId: string;
     range: T;
 }
 
-/**
- * FindResult is constructed per unit. When the content changes, the
- * find results could emit this event.
- */
-export class FindResult {
+export abstract class FindModel extends Disposable {
+    abstract readonly unitId: string;
 
+    abstract getMatches(): IFindMatch[];
+
+    abstract moveToNextMatch(loop?: boolean): IFindMatch | null;
+    abstract moveToPreviousMatch(loop?: boolean): IFindMatch | null;
 }
-
-export interface IFindProgressItem { }
 
 /**
  * A provider should be implemented by a business to provide the find results.
  */
 export interface IFindReplaceProvider {
-    find(query: IFindQuery, onProgress?: (p: IFindProgressItem) => void): Promise<IFindComplete>;
-
-    activateFindResult(result: IFindResult): void;
+    find(query: IFindQuery): Promise<FindModel[]>;
+    cancel(): void;
 }
 
 /**
@@ -76,8 +76,8 @@ export interface IFindReplaceService {
 
     revealReplace(): void;
     changeFindString(value: string): void;
-    moveToNextMatch(): boolean;
-    moveToPreviousMatch(): boolean;
+    moveToNextMatch(): void;
+    moveToPreviousMatch(): void;
     replace(): boolean;
     replaceAll(): boolean;
 
@@ -108,19 +108,27 @@ export interface IFindQuery {
  * This class stores find replace results and provides methods to perform replace or something.
  */
 export class FindReplaceModel extends Disposable {
+    private _matchPositionFindModel?: Nullable<FindModel> = null;
+    private _findModels: FindModel[] = [];
+    private _matches: IFindMatch[] = [];
+    private _positionModel: FindModel | null = null;
+
     constructor(
         private readonly _state: FindReplaceState,
         private readonly _providers: Set<IFindReplaceProvider>,
-        @ILogService private readonly _logService: ILogService
+        @ILogService private readonly _logService: ILogService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
 
+        // Should restart finding when the following conditions changed
         this._state.stateUpdates$.subscribe((newState) => {
-            // Should restart
-            if (newState.findString) {
-                this.find().then((results) => {
-                    this._logService.debug('debug', newState.findString, results);
-                });
+            if (typeof newState.findString !== 'undefined') {
+                if (newState.findString) {
+                    this.find();
+                } else {
+                    this._cancelFinding();
+                }
             }
         });
     }
@@ -128,23 +136,110 @@ export class FindReplaceModel extends Disposable {
     async find(): Promise<IFindComplete> {
         this._cancelFinding();
 
-        // TODO: support async search in the future
         const providers = Array.from(this._providers);
-        const promises = await Promise.all(
-            providers.map((provider) =>
-                provider.find({
-                    text: this._state.findString,
-                })
-            )
-        );
+        const findModels = (this._findModels = (
+            await Promise.all(providers.map((provider) => provider.find({ text: this._state.findString })))
+        ).flat());
+
+        const matches = findModels.map((c) => c.getMatches()).flat();
+        this._matches = matches;
+
+        if (!matches.length) {
+            return {
+                results: [],
+            };
+        }
+
+        const index = this._moveToInitialMatch(findModels, matches);
+        this._state.changeState({
+            matchesCount: matches.length,
+            matchesPosition: index + 1, //  the matches position start from 1
+        });
 
         return {
-            results: promises.map((c) => c.results).flat(),
+            results: matches,
         };
     }
 
+    moveToNextMatch(): void {
+        if (!this._positionModel) {
+            return;
+        }
+
+        const loopInCurrentUnit = this._findModels.length === 1;
+        const nextMatch = this._positionModel.moveToNextMatch(loopInCurrentUnit);
+        if (nextMatch) {
+            const index = this._matches.findIndex((value) => value === nextMatch);
+            this._state.changeState({
+                matchesPosition: index + 1,
+            });
+        } else {
+            // search in the next find model
+            const indexOfPositionModel = this._findModels.findIndex((m) => m === this._positionModel);
+            const nextPositionModel = this._findModels[(indexOfPositionModel + 1) % this._findModels.length]; // TODO: always loop or not
+            const nextMatch = nextPositionModel.moveToNextMatch();
+            const index = this._matches.findIndex((value) => value === nextMatch);
+            this._positionModel = nextPositionModel;
+            this._state.changeState({
+                matchesPosition: index + 1,
+            });
+        }
+    }
+
+    moveToPreviousMatch(): void {
+        if (!this._positionModel) {
+            return;
+        }
+
+        const loopInCurrentUnit = this._findModels.length === 1;
+        const nextMatch = this._positionModel.moveToPreviousMatch(loopInCurrentUnit);
+        if (nextMatch) {
+            const index = this._matches.findIndex((value) => value === nextMatch);
+            this._state.changeState({
+                matchesPosition: index + 1,
+            });
+        } else {
+            const indexOfPositionModel = this._findModels.findIndex((m) => m === this._positionModel);
+            const nextPositionModel =
+                this._findModels[(indexOfPositionModel - 1 + this._findModels.length) % this._findModels.length];
+            const nextMatch = nextPositionModel.moveToPreviousMatch();
+            const index = this._matches.findIndex((value) => value === nextMatch);
+            this._positionModel = nextPositionModel;
+            this._state.changeState({
+                matchesPosition: index + 1,
+            });
+        }
+    }
+
+    // TODO@wzhudev: some cold could definitely be reused. Reuse them.
+
+    private _moveToInitialMatch(findModels: FindModel[], results: IFindMatch[]): number {
+        const focusedUnitId = this._univerInstanceService.getFocusedUniverInstance()?.getUnitId();
+        if (!focusedUnitId) {
+            return -1;
+        }
+
+        const findModelOnFocusUnit = findModels.find((model) => model.unitId === focusedUnitId);
+        if (findModelOnFocusUnit) {
+            this._positionModel = findModelOnFocusUnit;
+            const result = findModelOnFocusUnit.moveToNextMatch();
+            const index = results.findIndex((value) => value === result);
+            return index;
+        }
+
+        // otherwise we just simply match the first result
+        this._positionModel = findModels[0];
+        const nextMatch = this._positionModel.moveToNextMatch();
+        const matchPosition = this._matches.findIndex((m) => m === nextMatch);
+        return matchPosition;
+    }
+
     private _cancelFinding(): void {
-        // Cancel finding in progress. This method is not empty because all finding now is synchronous.
+        this._providers.forEach((provider) => provider.cancel());
+        this._state.changeState({
+            matchesCount: 0,
+            matchesPosition: 0,
+        });
     }
 }
 
@@ -221,6 +316,19 @@ export class FindReplaceState {
             changed = true;
         }
 
+        if (typeof changes.matchesCount !== 'undefined' && changes.matchesCount !== this._matchesCount) {
+            this._matchesCount = changes.matchesCount;
+            changedState.matchesCount = changes.matchesCount;
+            changed = true;
+        }
+
+        if (typeof changes.matchesPosition !== 'undefined' && changes.matchesPosition !== this._matchesPosition) {
+            this._matchesPosition = changes.matchesPosition;
+            changedState.matchesPosition = changes.matchesPosition;
+            changed = true;
+            // TODO@wzhudev: maybe we should recalc matches position according to the current selections position
+        }
+
         if (changed) {
             this._stateUpdates$.next(changedState);
             this._state$.next({
@@ -246,6 +354,7 @@ export class FindReplaceService extends Disposable implements IFindReplaceServic
     get stateUpdates$() {
         return this._state.stateUpdates$;
     }
+
     get state$() {
         return this._state.state$;
     }
@@ -264,12 +373,16 @@ export class FindReplaceService extends Disposable implements IFindReplaceServic
         });
     }
 
-    moveToNextMatch(): boolean {
-        throw new Error('Method not implemented.');
+    moveToNextMatch(): void {
+        if (this._model) {
+            this._model?.moveToNextMatch();
+        }
     }
 
-    moveToPreviousMatch(): boolean {
-        return true;
+    moveToPreviousMatch(): void {
+        if (this._model) {
+            this._model?.moveToPreviousMatch();
+        }
     }
 
     replace(): boolean {

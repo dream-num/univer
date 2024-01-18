@@ -40,7 +40,12 @@
         "**/*.css"
     ],
     "private": true,
-    "scripts": {},
+    "scripts": {
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "coverage": "vitest run --coverage",
+        "build": "tsc && vite build"
+    },
     "dependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",

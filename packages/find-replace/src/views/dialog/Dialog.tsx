@@ -14,29 +14,37 @@
  * limitations under the License.
  */
 
-import { LocaleService, throttle } from '@univerjs/core';
-import { Button, Input, InputWithSlot, Pager, Select, useObservable, FormLayout } from '@univerjs/design';
+import { IContextService, LocaleService } from '@univerjs/core';
+import { Button, FormLayout, Input, InputWithSlot, Pager, Select, useObservable } from '@univerjs/design';
+import { LayoutService } from '@univerjs/ui';
+import type { IDisposable } from '@wendellhu/redi';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import React, { Fragment, useCallback, useState } from 'react';
+import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 
 import { IFindReplaceService } from '../../services/find-replace.service';
 import styles from './Dialog.module.less';
-import { map } from 'rxjs';
 
 const FIND_THROTTLE_TIME = 500;
 
 export function FindReplaceDialog() {
     const findReplaceService = useDependency(IFindReplaceService);
     const localeService = useDependency(LocaleService);
+    const contextService = useDependency(IContextService);
+    const layoutService = useDependency(LayoutService);
 
     const [findString, setFindString] = useState<string>('');
     const [replaceString, setReplaceString] = useState<string>('');
 
-    const replaceRevealed = useObservable(findReplaceService.state$.pipe(map((s) => s.replaceRevealed)), false);
+    const dialogContainerRef = useRef<HTMLDivElement>(null);
+
+    const state = useObservable(findReplaceService.state$);
+    const { matchesCount, matchesPosition } = state;
     const revealReplace = useCallback(() => findReplaceService.revealReplace(), [findReplaceService]);
 
     const updateFindString = useCallback(
-        throttle((findString: string) => findReplaceService.changeFindString(findString), FIND_THROTTLE_TIME),
+        (findString: string) => findReplaceService.changeFindString(findString),
+        // FIXME@wzhudev: this throttle function has no leading and taling config hence has some problems
+        // throttle((findString: string) => findReplaceService.changeFindString(findString), FIND_THROTTLE_TIME),
         [findReplaceService]
     );
 
@@ -55,12 +63,39 @@ export function FindReplaceDialog() {
         [findReplaceService]
     );
 
+    useEffect(() => {
+        let disposable: IDisposable | undefined;
+        if (dialogContainerRef.current) {
+            disposable = layoutService.registerContainer(dialogContainerRef.current);
+        }
+
+        return () => disposable?.dispose();
+    }, [dialogContainerRef.current]);
+
     function renderFindDialog() {
         return (
             <Fragment>
                 <InputWithSlot
-                    placeholder={'univer.find-replace.find-placeholder'}
-                    slot={<Pager value={1} total={10} />}
+                    autoFocus={true}
+                    placeholder={localeService.t('univer.find-replace.dialog.find-placeholder')}
+                    slot={
+                        <Pager
+                            loop={true}
+                            value={matchesPosition}
+                            total={matchesCount}
+                            onChange={(newIndex) => {
+                                if (matchesPosition === matchesCount && newIndex === 1) {
+                                    findReplaceService.moveToNextMatch();
+                                } else if (matchesPosition === 1 && newIndex === matchesCount) {
+                                    findReplaceService.moveToPreviousMatch();
+                                } else if (newIndex < matchesPosition) {
+                                    findReplaceService.moveToPreviousMatch();
+                                } else {
+                                    findReplaceService.moveToNextMatch();
+                                }
+                            }}
+                        />
+                    }
                     value={findString}
                     onChange={(value) => onFindInputChange(value)}
                 />
@@ -75,34 +110,41 @@ export function FindReplaceDialog() {
     }
 
     function renderReplaceDialog() {
-        {
-            /*
-             * TODO@wzhudev: this form should be configure by business (maybe with a schema?) Here we just
-             * simply hard coded them here for a quick implementation.
-             */
-        }
+        /*
+         * TODO@wzhudev: this form should be configure by business (maybe with a schema?) Here we just
+         * simply hard coded them here for a quick implementation.
+         */
 
         return (
             <Fragment>
-                <FormLayout label={localeService.t('univer.find-replace.dialog.find-placeholder')}>
-                    <Input value={findString} onChange={(value) => onReplaceInputChange(value)} />
+                <FormLayout label={localeService.t('univer.find-replace.dialog.find')}>
+                    <Input
+                        placeholder={localeService.t('univer.find-replace.dialog.find-placeholder')}
+                        autoFocus={true}
+                        value={findString}
+                        onChange={(value) => onReplaceInputChange(value)}
+                    />
                 </FormLayout>
-                <FormLayout label={localeService.t('univer.find-replace.dialog.replace-placeholder')}>
-                    <Input value={replaceString} onChange={(value) => onReplaceInputChange(value)} />
+                <FormLayout label={localeService.t('univer.find-replace.dialog.replace')}>
+                    <Input
+                        placeholder={localeService.t('univer.find-replace.dialog.replace-placeholder')}
+                        value={replaceString}
+                        onChange={(value) => onReplaceInputChange(value)}
+                    />
                 </FormLayout>
-                <FormLayout label={localeService.t('univer.find-replace.dialog.search-range')}>
+                <FormLayout label={localeService.t('univer.find-replace.dialog.find-range')}>
                     <Select value={'123'} onChange={() => {}} />
                 </FormLayout>
                 <Button type="primary">{localeService.t('univer.find-replace.dialog.find')}</Button>
                 <Button>{localeService.t('univer.find-replace.dialog.replace')}</Button>
-                <Button>{localeService.t('univer.find-replace.dialog.replaceAll')}</Button>
+                <Button>{localeService.t('univer.find-replace.dialog.replace-all')}</Button>
             </Fragment>
         );
     }
 
     return (
-        <div className={styles.findReplaceDialogContainer}>
-            {!replaceRevealed ? renderFindDialog() : renderReplaceDialog()}
+        <div className={styles.findReplaceDialogContainer} ref={dialogContainerRef}>
+            {!state.replaceRevealed ? renderFindDialog() : renderReplaceDialog()}
         </div>
     );
 }

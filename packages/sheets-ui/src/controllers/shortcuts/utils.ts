@@ -21,19 +21,37 @@ import {
     FOCUSING_EDITOR_INPUT_FORMULA,
     FOCUSING_FORMULA_EDITOR,
     FOCUSING_SHEET,
+    FOCUSING_UNIVER_EDITOR,
 } from '@univerjs/core';
 
+// TODO@wzhudev: some definition here is pretty ambiguous and not very consistent. Rename them.
+
+/**
+ * Requires the currently focused unit to be Workbook and the sheet editor is focused but not activated.
+ * @param contextService
+ * @returns
+ */
 export function whenEditorNotActivated(contextService: IContextService) {
-    return contextService.getContextValue(FOCUSING_SHEET) && !contextService.getContextValue(FOCUSING_EDITOR);
+    return (
+        contextService.getContextValue(FOCUSING_SHEET) &&
+        contextService.getContextValue(FOCUSING_UNIVER_EDITOR) &&
+        !contextService.getContextValue(FOCUSING_EDITOR)
+    );
 }
 
 export function whenEditorActivated(contextService: IContextService) {
-    return contextService.getContextValue(FOCUSING_SHEET) && contextService.getContextValue(FOCUSING_EDITOR);
+    return (
+        contextService.getContextValue(FOCUSING_SHEET) &&
+        contextService.getContextValue(FOCUSING_UNIVER_EDITOR) &&
+        contextService.getContextValue(FOCUSING_EDITOR)
+    );
 }
 
 export function whenEditorFocusIsHidden(contextService: IContextService) {
     return (
-        contextService.getContextValue(FOCUSING_EDITOR_BUT_HIDDEN) && !contextService.getContextValue(FOCUSING_EDITOR)
+        contextService.getContextValue(FOCUSING_UNIVER_EDITOR) &&
+        contextService.getContextValue(FOCUSING_EDITOR_BUT_HIDDEN) &&
+        !contextService.getContextValue(FOCUSING_EDITOR)
     );
 }
 
@@ -44,7 +62,10 @@ export function whenEditorActivatedIsVisible(contextService: IContextService) {
 }
 
 export function whenFormulaEditorFocused(contextService: IContextService) {
-    return contextService.getContextValue(FOCUSING_FORMULA_EDITOR);
+    return (
+        contextService.getContextValue(FOCUSING_FORMULA_EDITOR) &&
+        contextService.getContextValue(FOCUSING_UNIVER_EDITOR)
+    );
 }
 
 export function whenEditorInputFormulaActivated(contextService: IContextService) {

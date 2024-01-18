@@ -14,6 +14,21 @@
  * limitations under the License.
  */
 
-export { UniverFindReplacePlugin } from './plugin';
-export type { IFindComplete, IFindMatch, IFindQuery, IFindReplaceProvider } from './services/find-replace.service';
-export { FindModel, IFindReplaceService } from './services/find-replace.service';
+const locale = {
+    univer: {
+        'find-replace': {
+            dialog: {
+                title: 'Find',
+                find: 'Find',
+                replace: 'Replace',
+                'replace-all': 'Replace All',
+                'find-range': 'Find Range',
+                'find-placeholder': 'Find in this Sheet',
+                'advanced-finding': 'Advanced Searching & Replace',
+                'replace-placeholder': 'Input Replace String',
+            },
+        },
+    },
+};
+
+export default locale;

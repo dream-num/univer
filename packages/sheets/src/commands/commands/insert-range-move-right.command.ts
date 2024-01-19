@@ -40,6 +40,7 @@ import { DeleteRangeMutation } from '../mutations/delete-range.mutation';
 import { InsertRangeMutation, InsertRangeUndoMutationFactory } from '../mutations/insert-range.mutation';
 import { InsertColMutation, InsertColMutationUndoFactory } from '../mutations/insert-row-col.mutation';
 import { RemoveColMutation } from '../mutations/remove-row-col.mutation';
+import { followSelectionOperation } from './utils/selection-utils';
 
 export interface InsertRangeMoveRightCommandParams {
     range: IRange;
@@ -142,6 +143,7 @@ export const InsertRangeMoveRightCommand: ICommand = {
             params: { range } as InsertRangeMoveRightCommandParams,
         });
         redoMutations.push(...sheetInterceptor.redos);
+        redoMutations.push(followSelectionOperation(range, workbook, worksheet));
         undoMutations.push(...sheetInterceptor.undos);
         // execute do mutations and add undo mutations to undo stack if completed
         const result = sequenceExecute(redoMutations, commandService);

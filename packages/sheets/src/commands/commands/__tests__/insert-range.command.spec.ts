@@ -36,6 +36,7 @@ import { InsertRangeMutation } from '../../mutations/insert-range.mutation';
 import { InsertColMutation, InsertRowMutation } from '../../mutations/insert-row-col.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../../mutations/remove-row-col.mutation';
 import { RemoveWorksheetMergeMutation } from '../../mutations/remove-worksheet-merge.mutation';
+import { SetSelectionsOperation } from '../../operations/selection.operation';
 import { InsertRangeMoveDownCommand } from '../insert-range-move-down.command';
 import { InsertRangeMoveRightCommand } from '../insert-range-move-right.command';
 import { createCommandTestBed } from './create-command-test-bed';
@@ -200,6 +201,7 @@ describe('Test insert range commands', () => {
         commandService.registerCommand(RemoveColMutation);
         commandService.registerCommand(InsertRowMutation);
         commandService.registerCommand(RemoveRowMutation);
+        commandService.registerCommand(SetSelectionsOperation);
 
         selectionManager = get(SelectionManagerService);
         selectionManager.setCurrentSelection({

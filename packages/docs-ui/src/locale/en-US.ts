@@ -14,4 +14,23 @@
  * limitations under the License.
  */
 
-export default {};
+export default {
+    toolbar: {
+        undo: 'Undo',
+        redo: 'Redo',
+        font: 'Font',
+        fontSize: 'Font size',
+        bold: 'Bold',
+        italic: 'Italic',
+        strikethrough: 'Strikethrough',
+        subscript: 'Subscript',
+        superscript: 'Superscript',
+        textColor: {
+            main: 'Text color',
+            right: 'Choose color',
+        },
+        resetColor: 'Reset',
+        order: 'Ordered list',
+        unorder: 'Unordered list',
+    },
+};

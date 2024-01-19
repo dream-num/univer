@@ -20,9 +20,7 @@ import { Injector } from '@wendellhu/redi';
 import { RediContext } from '@wendellhu/redi/react-bindings';
 import React, { useState } from 'react';
 
-import { IFindReplaceDialogService } from '../../services/find-replace-dialog.service';
 import { FindReplaceDialog } from './Dialog';
-import { StorybookFindReplaceDialogService } from './mock/mocks';
 
 const meta: Meta = {
     title: 'Find Replace Dialog',
@@ -39,7 +37,6 @@ function FindDialogDemo() {
         const injector = new Injector();
         // injector.add([IFindReplaceService]);
         injector.add([LocaleService]);
-        injector.add([IFindReplaceDialogService, { useClass: StorybookFindReplaceDialogService }]);
 
         injector.get(LocaleService).load({});
 
@@ -64,10 +61,8 @@ function ReplaceDialogDemo() {
         const injector = new Injector();
         // injector.add([IFindReplaceService]);
         injector.add([LocaleService]);
-        injector.add([IFindReplaceDialogService, { useClass: StorybookFindReplaceDialogService }]);
 
         injector.get(LocaleService).load({});
-        (injector.get(IFindReplaceDialogService) as StorybookFindReplaceDialogService).toggleReplace();
 
         return injector;
     });

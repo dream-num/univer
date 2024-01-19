@@ -45,6 +45,7 @@ univer.createUniverSlide(DEFAULT_SLIDE_DATA);
 
 // use for console test
 declare global {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     interface Window {
         univer?: Univer;
     }

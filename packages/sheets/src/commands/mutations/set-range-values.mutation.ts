@@ -15,9 +15,9 @@
  */
 
 import type {
+    CellValue,
     IBorderData,
     ICellData,
-    CellValue,
     ICopyToOptionsData,
     IDocumentData,
     IKeyValue,

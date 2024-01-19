@@ -29,7 +29,7 @@ import { isBeforePositionWithRowPriority, isBehindPositionWithRowPriority, isSam
 
 @OnLifecycle(LifecycleStages.Steady, SheetsFindReplaceController)
 export class SheetsFindReplaceController extends Disposable implements IDisposable {
-    private _provider: SheetsFindReplaceProvider;
+    private _provider!: SheetsFindReplaceProvider;
 
     constructor(
         @Inject(Injector) private readonly _injector: Injector,

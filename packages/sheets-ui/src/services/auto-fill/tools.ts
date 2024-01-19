@@ -654,7 +654,7 @@ export function getAutoFillRepeatRange(sourceRange: IRange, targetRange: IRange)
     if (direction === Direction.DOWN || direction === Direction.UP) {
         const sourceLength = sourceRange.endRow - sourceRange.startRow + 1;
         const targetLength = targetRange.endRow - targetRange.startRow + 1;
-        const mod = targetLength / sourceLength;
+        const mod = Math.floor(targetLength / sourceLength);
         const rest = targetLength % sourceLength;
         const relativeRange = {
             startRow: 0,
@@ -715,7 +715,7 @@ export function getAutoFillRepeatRange(sourceRange: IRange, targetRange: IRange)
     if (direction === Direction.RIGHT || direction === Direction.LEFT) {
         const sourceLength = sourceRange.endColumn - sourceRange.startColumn + 1;
         const targetLength = targetRange.endColumn - targetRange.startColumn + 1;
-        const mod = targetLength / sourceLength;
+        const mod = Math.floor(targetLength / sourceLength);
         const rest = targetLength % sourceLength;
         const relativeRange = {
             startRow: 0,

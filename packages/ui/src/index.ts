@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-export * from './BaseComponent';
 export * from './common';
 export { getMenuHiddenObservable } from './common/menu-hidden-observable';
 export * from './components';

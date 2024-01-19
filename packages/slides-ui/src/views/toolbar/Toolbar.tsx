@@ -15,7 +15,6 @@
  */
 
 import { Button, Container, Tooltip } from '@univerjs/design';
-import type { BaseComponentProps } from '@univerjs/ui';
 import React, { Component, createRef } from 'react';
 
 import type { UniverSlidesUIPlugin } from '../..';
@@ -23,7 +22,7 @@ import { SLIDE_UI_PLUGIN_NAME } from '../../basics';
 import type { IToolbarItemProps } from '../../controllers';
 import styles from './index.module.less';
 
-interface IProps extends BaseComponentProps {
+interface IProps {
     style?: React.CSSProperties;
     toolList: IToolbarItemProps[];
 }
@@ -195,7 +194,6 @@ export class Toolbar extends Component<IProps, IState> {
     };
 
     override componentDidMount() {
-        this.props.getComponent?.(this);
         window.addEventListener('resize', this.debounceSetToolbarListWidth);
     }
 

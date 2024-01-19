@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import type { BaseComponentProps } from '@univerjs/ui';
 import React, { Component, createRef } from 'react';
 
 import type { IUniverDocsUIConfig } from '../../basics';
 import style from './index.module.less';
 
-interface IBaseDocContainerProps extends BaseComponentProps {
+interface IBaseDocContainerProps {
     config: IUniverDocsUIConfig;
     changeLocale: (locale: string) => void;
     methods?: any;
@@ -45,10 +44,6 @@ export class DocContainer extends Component<IBaseDocContainerProps> {
     constructor(props: IBaseDocContainerProps) {
         super(props);
         this.changeSkin(props.config.container as string, 'default');
-    }
-
-    override componentDidMount() {
-        this.props.getComponent?.(this);
     }
 
     /**

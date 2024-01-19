@@ -39,7 +39,8 @@ import type {
     ISetWorksheetRowHeightMutationParams,
 } from '@univerjs/sheets';
 import {
-    InsertRangeMutation,
+    InsertRangeMoveDownCommand,
+    InsertRangeMoveRightCommand,
     MoveColsCommand,
     MoveRowsCommand,
     RemoveColCommand,
@@ -1064,7 +1065,13 @@ export class FreezeController extends Disposable {
         this.disposeWithMe(
             toDisposable(
                 this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
-                    if (![SetWorksheetActiveOperation.id, InsertRangeMutation.id].includes(param?.commandId || '')) {
+                    if (
+                        ![
+                            SetWorksheetActiveOperation.id,
+                            InsertRangeMoveDownCommand.id,
+                            InsertRangeMoveRightCommand.id,
+                        ].includes(param?.commandId || '')
+                    ) {
                         return;
                     }
                     this._refreshCurrent();

@@ -15,10 +15,10 @@
  */
 
 import { InputNumber } from '@univerjs/design';
-import { useObservable } from '@univerjs/ui';
 import React, { useMemo, useState } from 'react';
 import { Observable } from 'rxjs';
 
+import { useObservable } from '../hooks/observable';
 import styles from './index.module.less';
 import type { IFontSizeProps } from './interface';
 

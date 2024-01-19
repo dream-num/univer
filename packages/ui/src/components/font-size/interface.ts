@@ -14,8 +14,17 @@
  * limitations under the License.
  */
 
-import { COMPONENT_PREFIX } from '../const';
+import type { ICustomComponentProps } from '@univerjs/ui';
+import type { Observable } from 'rxjs';
 
-export const FONT_FAMILY_COMPONENT = `${COMPONENT_PREFIX}_FONT_FAMILY_COMPONENT`;
+export interface IFontSizeProps extends ICustomComponentProps<string> {
+    value: string;
 
-export const FONT_FAMILY_ITEM_COMPONENT = `${COMPONENT_PREFIX}_FONT_FAMILY_ITEM_COMPONENT`;
+    min: number;
+
+    max: number;
+
+    onChange: (value: string) => void;
+
+    disabled$?: Observable<boolean>;
+}

@@ -19,6 +19,14 @@ import type { IDesktopUIController, IMenuItemFactory } from '@univerjs/ui';
 import { ComponentManager, IMenuService, IShortcutService, IUIController } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
+import { COLOR_PICKER_COMPONENT, ColorPicker } from '../components/color-picker';
+import {
+    FONT_FAMILY_COMPONENT,
+    FONT_FAMILY_ITEM_COMPONENT,
+    FontFamily,
+    FontFamilyItem,
+} from '../components/font-family';
+import { FONT_SIZE_COMPONENT, FontSize } from '../components/font-size';
 import {
     BoldMenuItemFactory,
     BulletListMenuItemFactory,
@@ -46,7 +54,15 @@ export class DocUIController extends Disposable {
         this._init();
     }
 
-    private _init(): void {
+    private _initCustomComponents(): void {
+        const componentManager = this._componentManager;
+        this.disposeWithMe(componentManager.register(COLOR_PICKER_COMPONENT, ColorPicker));
+        this.disposeWithMe(componentManager.register(FONT_FAMILY_COMPONENT, FontFamily));
+        this.disposeWithMe(componentManager.register(FONT_FAMILY_ITEM_COMPONENT, FontFamilyItem));
+        this.disposeWithMe(componentManager.register(FONT_SIZE_COMPONENT, FontSize));
+    }
+
+    private _initMenus(): void {
         // init menus
         (
             [
@@ -62,5 +78,10 @@ export class DocUIController extends Disposable {
         ).forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
         });
+    }
+
+    private _init(): void {
+        this._initCustomComponents();
+        this._initMenus();
     }
 }

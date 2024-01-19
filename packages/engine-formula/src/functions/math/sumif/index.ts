@@ -15,58 +15,43 @@
  */
 
 import { ErrorType } from '../../../basics/error-type';
-import type { BaseReferenceObject } from '../../../engine/reference-object/base-reference-object';
 import { valueObjectCompare } from '../../../engine/utils/object-compare';
 import { type ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Sumif extends BaseFunction {
-    override calculate(...variants: BaseValueObject[]) {
-        // 1. Check whether the number of parameters is correct,
-        // TODO@Dushusir: Report the allowed parameter number range and the actual number of parameters
-        if (variants.length < 2 || variants.length > 3) {
+    override calculate(range: BaseValueObject, criteria: BaseValueObject, sumRange?: BaseValueObject) {
+        if (range.isError() || criteria.isError() || sumRange?.isError()) {
             return new ErrorValueObject(ErrorType.NA);
         }
 
-        let range = variants[0];
-        let criteria = variants[1];
-        let sumRange = variants[2];
-
-        // 2. Check whether all parameter types meet the requirements
-        if (range.isError() || criteria.isError() || (sumRange && sumRange.isError())) {
+        if (!range.isArray() || (sumRange && !sumRange.isArray())) {
             return new ErrorValueObject(ErrorType.VALUE);
         }
 
-        let accumulatorAll: BaseValueObject = new NumberValueObject(0);
-
-        if (range.isReferenceObject()) {
-            range = (range as unknown as BaseReferenceObject).toArrayValueObject();
-        }
-        if (criteria.isReferenceObject()) {
-            criteria = (criteria as unknown as BaseReferenceObject).toArrayValueObject();
-        }
-        if (sumRange && sumRange.isReferenceObject()) {
-            sumRange = (sumRange as unknown as BaseReferenceObject).toArrayValueObject();
+        if (criteria.isArray()) {
+            return criteria.map((criteriaItem) => this._handleSingleObject(range, criteriaItem, sumRange));
         }
 
+        return this._handleSingleObject(range, criteria, sumRange);
+    }
+
+    private _handleSingleObject(range: BaseValueObject, criteria: BaseValueObject, sumRange?: BaseValueObject) {
         const resultArrayObject = valueObjectCompare(range, criteria);
-        const resultArrayValue = resultArrayObject.getArrayValue();
 
-        const sumRangeValue = (sumRange || range) as BaseReferenceObject | ArrayValueObject;
-        const { startRow, startColumn } = sumRangeValue.getRangePosition();
+        // sumRange has the same dimensions as range
+        const sumRangeArray = sumRange
+            ? (sumRange as ArrayValueObject).slice(
+                  [0, (range as ArrayValueObject).getRowCount()],
+                  [0, (range as ArrayValueObject).getColumnCount()]
+              )
+            : (range as ArrayValueObject);
 
-        sumRangeValue.iterator((valueObject, row, column) => {
-            if (!valueObject) return;
+        if (!sumRangeArray) {
+            return new ErrorValueObject(ErrorType.VALUE);
+        }
 
-            if (!valueObject?.isError()) {
-                const arrayValue = resultArrayValue[row - startRow][column - startColumn];
-                const accumulator = arrayValue.getValue() ? valueObject : new NumberValueObject(0);
-                accumulatorAll = accumulatorAll.plus(accumulator);
-            }
-        });
-
-        return accumulatorAll;
+        return sumRangeArray.pick(resultArrayObject as ArrayValueObject).sum();
     }
 }

@@ -14,393 +14,69 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
-import { ObjectMatrix } from '@univerjs/core';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
-import type { ISheetData } from '../../../../basics/common';
-import { CELL_INVERTED_INDEX_CACHE } from '../../../../basics/inverted-index-cache';
-import { FORMULA_REF_TO_ARRAY_CACHE } from '../../../../engine/reference-object/base-reference-object';
-import { RangeReferenceObject } from '../../../../engine/reference-object/range-reference-object';
-import { ValueObjectFactory } from '../../../../engine/value-object/array-value-object';
-import type { BaseValueObject } from '../../../../engine/value-object/base-value-object';
+import { StringValueObject } from '../../../..';
+import { ArrayValueObject, transformToValue } from '../../../../engine/value-object/array-value-object';
 import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { Sumif } from '..';
 
-const getCellData = () => {
-    return {
-        0: {
-            0: {
-                v: 1,
-            },
-            1: {
-                v: 'Ada',
-                t: 1,
-            },
-            2: {
-                v: 1,
-            },
-        },
-        1: {
-            0: {
-                v: 4,
-            },
-            1: {
-                v: 'test1',
-                t: 1,
-            },
-            2: {
-                v: 1,
-            },
-        },
-        2: {
-            0: {
-                v: 44,
-            },
-            1: {
-                v: 'test12',
-                t: 1,
-            },
-            2: {
-                v: 1,
-            },
-        },
-        3: {
-            0: {
-                v: 444,
-            },
-            1: {
-                v: 'Univer',
-                t: 1,
-            },
-            2: {
-                v: 1,
-            },
-        },
-    };
-};
-
 describe('test sumif', () => {
-    let unitId: string;
-    let sheetId: string;
-    let sheetData: () => ISheetData;
-    let sumif: Sumif;
-    let sumifCalculate: (range: IRange, criteria: string, sumRange?: IRange) => string | number | boolean;
-
-    beforeEach(() => {
-        FORMULA_REF_TO_ARRAY_CACHE.clear();
-        CELL_INVERTED_INDEX_CACHE.clear();
-        unitId = 'test';
-        sheetId = 'sheet1';
-        sheetData = () => {
-            return {
-                [sheetId]: {
-                    cellData: new ObjectMatrix(getCellData()),
-                    rowCount: 4,
-                    columnCount: 3,
-                },
-            };
-        };
-
-        // register sumif
-        sumif = new Sumif(FUNCTION_NAMES_MATH.SUMIF);
-        sumifCalculate = (range: IRange, criteria: string, sumRange?: IRange) => {
-            // range
-
-            const rangeRef = new RangeReferenceObject(range, sheetId, unitId);
-            rangeRef.setUnitData({
-                [unitId]: sheetData(),
-            });
-
-            // criteria
-            const criteriaRef = ValueObjectFactory.create(criteria);
-            let resultObject;
-            if (sumRange) {
-                // sum range
-                const sumRangeRef = new RangeReferenceObject(sumRange, sheetId, unitId);
-                sumRangeRef.setUnitData({
-                    [unitId]: sheetData(),
-                });
-
-                // calculate
-                resultObject = sumif.calculate(
-                    rangeRef as unknown as BaseValueObject,
-                    criteriaRef,
-                    sumRangeRef as unknown as BaseValueObject
-                ) as BaseValueObject;
-            } else {
-                // calculate
-                resultObject = sumif.calculate(rangeRef as unknown as BaseValueObject, criteriaRef) as BaseValueObject;
-            }
-
-            return resultObject?.getValue();
-        };
-    });
+    const textFunction = new Sumif(FUNCTION_NAMES_MATH.SUMIF);
 
     describe('sumif', () => {
         it('range and criteria', async () => {
-            // range A1:A4
-            const range = {
-                startRow: 0,
-                startColumn: 0,
-                endRow: 3,
-                endColumn: 0,
-            };
+            const range = new ArrayValueObject(/*ts*/ `{
+                1;
+                4;
+                44;
+                444
+            }`);
 
-            const value = sumifCalculate(range, '>40');
-            expect(value).toBe(488);
+            const criteria = new StringValueObject('>40');
+
+            const resultObject = textFunction.calculate(range, criteria);
+            expect(resultObject.getValue()).toBe(488);
         });
 
         it('sum range with wildcard asterisk', async () => {
-            // range
-            const range = {
-                startRow: 0,
-                startColumn: 1,
-                endRow: 3,
-                endColumn: 1,
-            };
+            const range = new ArrayValueObject(/*ts*/ `{
+                Ada;
+                test1;
+                test12;
+                Univer
+            }`);
 
-            // sum range
-            const sumRange = {
-                startRow: 0,
-                startColumn: 2,
-                endRow: 3,
-                endColumn: 2,
-            };
+            const criteria = new StringValueObject('test*');
 
-            const value = sumifCalculate(range, 'test*', sumRange);
-            expect(value).toBe(2);
+            const sumRange = new ArrayValueObject(/*ts*/ `{
+                1;
+                1;
+                1;
+                1
+            }`);
+
+            const resultObject = textFunction.calculate(range, criteria, sumRange);
+            expect(resultObject.getValue()).toBe(2);
         });
 
-        it('sum range with compare = and wildcard asterisk', async () => {
-            // range
-            const range = {
-                startRow: 0,
-                startColumn: 1,
-                endRow: 3,
-                endColumn: 1,
-            };
+        it('ArrayValueObject range and ArrayValueObject criteria', async () => {
+            const range = new ArrayValueObject(/*ts*/ `{
+                1;
+                4;
+                44;
+                444
+            }`);
 
-            // sum range
-            const sumRange = {
-                startRow: 0,
-                startColumn: 2,
-                endRow: 3,
-                endColumn: 2,
-            };
+            const criteria = new ArrayValueObject(/*ts*/ `{
+                4;
+                4;
+                44;
+                444
+            }`);
 
-            const value = sumifCalculate(range, '=test*', sumRange);
-            expect(value).toBe(2);
-        });
-
-        it('sum range with compare > and wildcard asterisk', async () => {
-            // range
-            const range = {
-                startRow: 0,
-                startColumn: 1,
-                endRow: 3,
-                endColumn: 1,
-            };
-
-            // sum range
-            const sumRange = {
-                startRow: 0,
-                startColumn: 2,
-                endRow: 3,
-                endColumn: 2,
-            };
-
-            const value = sumifCalculate(range, '>test*', sumRange);
-            expect(value).toBe(3);
-        });
-
-        it('sum range with compare >= and wildcard asterisk', async () => {
-            // range
-            const range = {
-                startRow: 0,
-                startColumn: 1,
-                endRow: 3,
-                endColumn: 1,
-            };
-
-            // sum range
-            const sumRange = {
-                startRow: 0,
-                startColumn: 2,
-                endRow: 3,
-                endColumn: 2,
-            };
-
-            const value = sumifCalculate(range, '>=test*', sumRange);
-            expect(value).toBe(3);
-        });
-
-        it('sum range with compare < and wildcard asterisk', async () => {
-            // range
-            const range = {
-                startRow: 0,
-                startColumn: 1,
-                endRow: 3,
-                endColumn: 1,
-            };
-
-            // sum range
-            const sumRange = {
-                startRow: 0,
-                startColumn: 2,
-                endRow: 3,
-                endColumn: 2,
-            };
-
-            const value = sumifCalculate(range, '<test*', sumRange);
-            expect(value).toBe(1);
-        });
-
-        it('sum range with compare <= and wildcard asterisk', async () => {
-            // range
-            const range = {
-                startRow: 0,
-                startColumn: 1,
-                endRow: 3,
-                endColumn: 1,
-            };
-
-            // sum range
-            const sumRange = {
-                startRow: 0,
-                startColumn: 2,
-                endRow: 3,
-                endColumn: 2,
-            };
-
-            const value = sumifCalculate(range, '<=test*', sumRange);
-            expect(value).toBe(1);
-        });
-
-        it('sum range with wildcard question mark', async () => {
-            // range
-            const range = {
-                startRow: 0,
-                startColumn: 1,
-                endRow: 3,
-                endColumn: 1,
-            };
-
-            // sum range
-            const sumRange = {
-                startRow: 0,
-                startColumn: 2,
-                endRow: 3,
-                endColumn: 2,
-            };
-
-            const value = sumifCalculate(range, 'test?', sumRange);
-            expect(value).toBe(1);
-        });
-
-        it('sum range with compare = and wildcard question mark', async () => {
-            // range
-            const range = {
-                startRow: 0,
-                startColumn: 1,
-                endRow: 3,
-                endColumn: 1,
-            };
-
-            // sum range
-            const sumRange = {
-                startRow: 0,
-                startColumn: 2,
-                endRow: 3,
-                endColumn: 2,
-            };
-
-            const value = sumifCalculate(range, '=test??', sumRange);
-            expect(value).toBe(1);
-        });
-
-        it('sum range with compare > and wildcard question mark', async () => {
-            // range
-            const range = {
-                startRow: 0,
-                startColumn: 1,
-                endRow: 3,
-                endColumn: 1,
-            };
-
-            // sum range
-            const sumRange = {
-                startRow: 0,
-                startColumn: 2,
-                endRow: 3,
-                endColumn: 2,
-            };
-
-            const value = sumifCalculate(range, '>test?', sumRange);
-            expect(value).toBe(3);
-        });
-
-        it('sum range with compare >= and wildcard question mark', async () => {
-            // range
-            const range = {
-                startRow: 0,
-                startColumn: 1,
-                endRow: 3,
-                endColumn: 1,
-            };
-
-            // sum range
-            const sumRange = {
-                startRow: 0,
-                startColumn: 2,
-                endRow: 3,
-                endColumn: 2,
-            };
-
-            const value = sumifCalculate(range, '>=test??', sumRange);
-            expect(value).toBe(3);
-        });
-
-        it('sum range with compare < and wildcard question mark', async () => {
-            // range
-            const range = {
-                startRow: 0,
-                startColumn: 1,
-                endRow: 2,
-                endColumn: 1,
-            };
-
-            // sum range
-            const sumRange = {
-                startRow: 0,
-                startColumn: 2,
-                endRow: 2,
-                endColumn: 2,
-            };
-
-            const value = sumifCalculate(range, '<test?', sumRange);
-            expect(value).toBe(1);
-        });
-
-        it('sum range with compare <= and wildcard question mark', async () => {
-            // range
-            const range = {
-                startRow: 0,
-                startColumn: 1,
-                endRow: 2,
-                endColumn: 1,
-            };
-
-            // sum range
-            const sumRange = {
-                startRow: 0,
-                startColumn: 2,
-                endRow: 2,
-                endColumn: 2,
-            };
-
-            const value = sumifCalculate(range, '<=test??', sumRange);
-            expect(value).toBe(1);
+            const resultObject = textFunction.calculate(range, criteria);
+            expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[4], [4], [44], [444]]);
         });
     });
 });

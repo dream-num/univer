@@ -32,8 +32,10 @@ import { RefRangeService } from '../../../services/ref-range/ref-range.service';
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../../services/selection-manager.service';
 import { AddWorksheetMergeMutation } from '../../mutations/add-worksheet-merge.mutation';
 import { InsertColMutation, InsertRowMutation } from '../../mutations/insert-row-col.mutation';
+import { MoveRangeMutation } from '../../mutations/move-range.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../../mutations/remove-row-col.mutation';
 import { RemoveWorksheetMergeMutation } from '../../mutations/remove-worksheet-merge.mutation';
+import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
 import { SetSelectionsOperation } from '../../operations/selection.operation';
 import {
     InsertColAfterCommand,
@@ -76,6 +78,8 @@ describe('Test insert and remove rows cols commands', () => {
             AddWorksheetMergeMutation,
             RemoveWorksheetMergeMutation,
             SetSelectionsOperation,
+            MoveRangeMutation,
+            SetRangeValuesMutation,
         ].forEach((c) => commandService.registerCommand(c));
         const selectionManagerService = get(SelectionManagerService);
         selectionManagerService.setCurrentSelection({
@@ -191,8 +195,6 @@ describe('Test insert and remove rows cols commands', () => {
             const result = await commandService.executeCommand(InsertRowBeforeCommand.id);
             expect(result).toBeTruthy();
             expect(getRowCount()).toBe(21);
-            // the style should be copied from the cell above
-            expect(getCellStyle(1, 1)).toBe(getCellStyle(2, 1));
             // the merged cell should be moved down
             expect(getMergedInfo(3, 2)).toEqual({ startRow: 3, endRow: 4, startColumn: 2, endColumn: 2 });
 

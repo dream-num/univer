@@ -69,7 +69,6 @@ export { INotificationService } from './services/notification/notification.servi
 export { DesktopPlatformService, IPlatformService } from './services/platform/platform.service';
 export { KeyCode, MetaKeys } from './services/shortcut/keycode';
 export { DesktopShortcutService, type IShortcutItem, IShortcutService } from './services/shortcut/shortcut.service';
-export { ShortcutExperienceService } from './services/shortcut/shortcut-experience.service';
 export { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
 export { ISidebarService } from './services/sidebar/sidebar.service';
 export { IZenZoneService } from './services/zen-zone/zen-zone.service';

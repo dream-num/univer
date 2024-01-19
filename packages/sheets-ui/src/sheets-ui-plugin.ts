@@ -61,6 +61,7 @@ import { ScrollManagerService } from './services/scroll-manager.service';
 import { ISelectionRenderService, SelectionRenderService } from './services/selection/selection-render.service';
 import { ISheetBarService, SheetBarService } from './services/sheet-bar/sheet-bar.service';
 import { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
+import { ShortcutExperienceService } from './services/shortcut-experience.service';
 import { IStatusBarService, StatusBarService } from './services/status-bar.service';
 import { SheetCanvasView } from './views/sheet-canvas-view';
 
@@ -87,6 +88,7 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [SheetCanvasView],
 
                 // services
+                [ShortcutExperienceService],
                 [IEditorBridgeService, { useClass: EditorBridgeService }],
                 [ISheetClipboardService, { useClass: SheetClipboardService }],
                 [ISheetBarService, { useClass: SheetBarService }],

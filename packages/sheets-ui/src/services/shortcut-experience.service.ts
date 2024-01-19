@@ -16,10 +16,9 @@
 
 import type { ISelection, ITextRangeParam, Nullable } from '@univerjs/core';
 import { IUniverInstanceService, LocaleService } from '@univerjs/core';
+import type { KeyCode } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
-
-import type { KeyCode } from './keycode';
 
 export interface IShortcutExperienceSearch {
     unitId: string;

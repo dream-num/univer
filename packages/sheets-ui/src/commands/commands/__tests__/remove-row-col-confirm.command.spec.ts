@@ -18,7 +18,6 @@ import type { Univer } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleService, RANGE_TYPE } from '@univerjs/core';
 import {
     AddWorksheetMergeMutation,
-    DeleteRangeMutation,
     NORMAL_SELECTION_PLUGIN_NAME,
     RemoveColCommand,
     RemoveColMutation,
@@ -87,7 +86,6 @@ describe('Test remove row col confirm commands', () => {
         commandService.registerCommand(RemoveRowConfirmCommand);
         commandService.registerCommand(RemoveRowCommand);
         commandService.registerCommand(RemoveRowMutation);
-        commandService.registerCommand(DeleteRangeMutation);
         commandService.registerCommand(RemoveColConfirmCommand);
         commandService.registerCommand(RemoveColCommand);
         commandService.registerCommand(RemoveColMutation);

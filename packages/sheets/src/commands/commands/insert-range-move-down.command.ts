@@ -29,17 +29,15 @@ import {
 import type { IAccessor } from '@wendellhu/redi';
 
 import type {
-    IDeleteRangeMutationParams,
     IInsertRangeMutationParams,
     IInsertRowMutationParams,
     IRemoveRowsMutationParams,
 } from '../../basics/interfaces/mutation-interface';
 import { SelectionManagerService } from '../../services/selection-manager.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
-import { DeleteRangeMutation } from '../mutations/delete-range.mutation';
-import { InsertRangeMutation, InsertRangeUndoMutationFactory } from '../mutations/insert-range.mutation';
 import { InsertRowMutation, InsertRowMutationUndoFactory } from '../mutations/insert-row-col.mutation';
 import { RemoveRowMutation } from '../mutations/remove-row-col.mutation';
+import { getInsertRangeMutations } from '../utils/handle-range-mutation';
 import { followSelectionOperation } from './utils/selection-utils';
 
 export interface InsertRangeMoveDownCommandParams {
@@ -92,7 +90,7 @@ export const InsertRangeMoveDownCommand: ICommand = {
         const cellValue: IObjectMatrixPrimitiveType<ICellData> = {};
         Range.foreach(range, (row, col) => {
             const cell = worksheet.getCell(row, col);
-            if (!cell || !cell.s) {
+            if (!cell) {
                 return;
             }
             if (!cellValue[row]) {
@@ -108,14 +106,14 @@ export const InsertRangeMoveDownCommand: ICommand = {
             cellValue,
         };
 
-        redoMutations.push({ id: InsertRangeMutation.id, params: insertRangeMutationParams });
-
-        const deleteRangeMutationParams: IDeleteRangeMutationParams = InsertRangeUndoMutationFactory(
+        const { redo: insertRangeRedo, undo: insertRangeUndo } = getInsertRangeMutations(
             accessor,
             insertRangeMutationParams
         );
 
-        undoMutations.push({ id: DeleteRangeMutation.id, params: deleteRangeMutationParams });
+        redoMutations.push(...insertRangeRedo);
+
+        undoMutations.push(...insertRangeUndo);
 
         const { startRow, endRow } = range;
 

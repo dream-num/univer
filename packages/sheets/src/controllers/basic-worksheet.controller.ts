@@ -84,8 +84,6 @@ import {
 } from '../commands/commands/set-worksheet-row-height.command';
 import { SetWorksheetShowCommand } from '../commands/commands/set-worksheet-show.command';
 import { AddWorksheetMergeMutation } from '../commands/mutations/add-worksheet-merge.mutation';
-import { DeleteRangeMutation } from '../commands/mutations/delete-range.mutation';
-import { InsertRangeMutation } from '../commands/mutations/insert-range.mutation';
 import { InsertColMutation, InsertRowMutation } from '../commands/mutations/insert-row-col.mutation';
 import { InsertSheetMutation } from '../commands/mutations/insert-sheet.mutation';
 import { MoveRangeMutation } from '../commands/mutations/move-range.mutation';
@@ -136,7 +134,6 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             CopySheetCommand,
             DeleteRangeMoveLeftCommand,
             DeleteRangeMoveUpCommand,
-            DeleteRangeMutation,
             DeltaColumnWidthCommand,
             DeltaRowHeightCommand,
             InsertColAfterCommand,
@@ -145,7 +142,6 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             InsertColMutation,
             InsertRangeMoveDownCommand,
             InsertRangeMoveRightCommand,
-            InsertRangeMutation,
             InsertRowAfterCommand,
             InsertRowBeforeCommand,
             InsertRowCommand,

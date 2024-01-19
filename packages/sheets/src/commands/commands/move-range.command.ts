@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICommand, IRange, Nullable } from '@univerjs/core';
+import type { ICellData, ICommand, IMutationInfo, IRange, Nullable } from '@univerjs/core';
 import {
     CommandType,
     ErrorService,
@@ -47,76 +47,24 @@ export const MoveRangeCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const sheetInterceptorService = accessor.get(SheetInterceptorService);
         const errorService = accessor.get(ErrorService);
         const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
-        const cellMatrix = worksheet.getCellMatrix();
 
-        const alignedRangeWithToRange = alignToMergedCellsBorders(params.toRange, worksheet, false);
-
-        if (!Rectangle.equals(params.toRange, alignedRangeWithToRange)) {
+        const moveRangeMutations = getMoveRangeUndoRedoMutations(
+            accessor,
+            { unitId, subUnitId, range: params.fromRange },
+            { unitId, subUnitId, range: params.toRange }
+        );
+        if (moveRangeMutations === null) {
             errorService.emit('Across a merged cell.');
             return false;
         }
 
-        const fromCellValue = new ObjectMatrix<Nullable<ICellData>>();
-        const newFromCellValue = new ObjectMatrix<Nullable<ICellData>>();
-        const cellToRange = (row: number, col: number) => ({
-            startRow: row,
-            endRow: row,
-            startColumn: col,
-            endColumn: col,
-        });
-
-        Range.foreach(params.fromRange, (row, col) => {
-            fromCellValue.setValue(row, col, cellMatrix.getValue(row, col));
-            newFromCellValue.setValue(row, col, null);
-        });
-        const toCellValue = new ObjectMatrix<Nullable<ICellData>>();
-
-        Range.foreach(params.toRange, (row, col) => {
-            toCellValue.setValue(row, col, cellMatrix.getValue(row, col));
-        });
-
-        const newToCellValue = new ObjectMatrix<Nullable<ICellData>>();
-
-        Range.foreach(params.fromRange, (row, col) => {
-            const cellRange = cellToRange(row, col);
-            const relativeRange = Rectangle.getRelativeRange(cellRange, params.fromRange);
-            const range = Rectangle.getPositionRange(relativeRange, params.toRange);
-            newToCellValue.setValue(range.startRow, range.startColumn, cellMatrix.getValue(row, col));
-        });
-
-        const doMoveRangeMutation: IMoveRangeMutationParams = {
-            from: {
-                value: newFromCellValue.getMatrix(),
-                subUnitId,
-            },
-            to: {
-                value: newToCellValue.getMatrix(),
-                subUnitId,
-            },
-            unitId,
-        };
-        const undoMoveRangeMutation: IMoveRangeMutationParams = {
-            from: {
-                value: fromCellValue.getMatrix(),
-                subUnitId,
-            },
-            to: {
-                value: toCellValue.getMatrix(),
-                subUnitId,
-            },
-            unitId,
-        };
-        const interceptorCommands = sheetInterceptorService.onCommandExecute({ id: MoveRangeCommand.id, params });
-
         const redos = [
-            { id: MoveRangeMutation.id, params: doMoveRangeMutation },
-            ...interceptorCommands.redos,
+            ...moveRangeMutations.redos,
             {
                 id: SetSelectionsOperation.id,
                 params: {
@@ -137,8 +85,7 @@ export const MoveRangeCommand: ICommand = {
                     selections: [{ range: params.fromRange, primary: getPrimaryForRange(params.fromRange, worksheet) }],
                 },
             },
-            ...interceptorCommands.undos,
-            { id: MoveRangeMutation.id, params: undoMoveRangeMutation },
+            ...moveRangeMutations.undos,
         ];
 
         const result = sequenceExecute(redos, commandService).result;
@@ -153,3 +100,98 @@ export const MoveRangeCommand: ICommand = {
         return false;
     },
 };
+
+export interface IRangeUnit {
+    unitId: string;
+    subUnitId: string;
+    range: IRange;
+}
+
+export function getMoveRangeUndoRedoMutations(
+    accessor: IAccessor,
+    from: IRangeUnit,
+    to: IRangeUnit,
+    ignoreMerge = false
+) {
+    const redos: IMutationInfo[] = [];
+    const undos: IMutationInfo[] = [];
+    const { range: fromRange, subUnitId: fromSubUnitId, unitId } = from;
+    const { range: toRange, subUnitId: toSubUnitId } = to;
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const sheetInterceptorService = accessor.get(SheetInterceptorService);
+    const workbook = univerInstanceService.getUniverSheetInstance(unitId);
+    const toWorksheet = workbook?.getSheetBySheetId(toSubUnitId);
+    const fromWorksheet = workbook?.getSheetBySheetId(fromSubUnitId);
+    const toCellMatrix = toWorksheet?.getCellMatrix();
+    const fromCellMatrix = fromWorksheet?.getCellMatrix();
+    if (toWorksheet && fromWorksheet && toCellMatrix && fromCellMatrix) {
+        const alignedRangeWithToRange = alignToMergedCellsBorders(toRange, toWorksheet, false);
+
+        if (!Rectangle.equals(toRange, alignedRangeWithToRange) && !ignoreMerge) {
+            return null;
+        }
+
+        const fromCellValue = new ObjectMatrix<Nullable<ICellData>>();
+        const newFromCellValue = new ObjectMatrix<Nullable<ICellData>>();
+        const cellToRange = (row: number, col: number) => ({
+            startRow: row,
+            endRow: row,
+            startColumn: col,
+            endColumn: col,
+        });
+
+        Range.foreach(fromRange, (row, col) => {
+            fromCellValue.setValue(row, col, fromCellMatrix.getValue(row, col));
+            newFromCellValue.setValue(row, col, null);
+        });
+        const toCellValue = new ObjectMatrix<Nullable<ICellData>>();
+
+        Range.foreach(toRange, (row, col) => {
+            toCellValue.setValue(row, col, toCellMatrix.getValue(row, col));
+        });
+
+        const newToCellValue = new ObjectMatrix<Nullable<ICellData>>();
+
+        Range.foreach(fromRange, (row, col) => {
+            const cellRange = cellToRange(row, col);
+            const relativeRange = Rectangle.getRelativeRange(cellRange, fromRange);
+            const range = Rectangle.getPositionRange(relativeRange, toRange);
+            newToCellValue.setValue(range.startRow, range.startColumn, fromCellMatrix.getValue(row, col));
+        });
+
+        const doMoveRangeMutation: IMoveRangeMutationParams = {
+            from: {
+                value: newFromCellValue.getMatrix(),
+                subUnitId: fromSubUnitId,
+            },
+            to: {
+                value: newToCellValue.getMatrix(),
+                subUnitId: toSubUnitId,
+            },
+            unitId,
+        };
+        const undoMoveRangeMutation: IMoveRangeMutationParams = {
+            from: {
+                value: fromCellValue.getMatrix(),
+                subUnitId: fromSubUnitId,
+            },
+            to: {
+                value: toCellValue.getMatrix(),
+                subUnitId: toSubUnitId,
+            },
+            unitId,
+        };
+        const interceptorCommands = sheetInterceptorService.onCommandExecute({
+            id: MoveRangeCommand.id,
+            params: { fromRange, toRange },
+        });
+
+        redos.push({ id: MoveRangeMutation.id, params: doMoveRangeMutation }, ...interceptorCommands.redos);
+        undos.push({ id: MoveRangeMutation.id, params: undoMoveRangeMutation }, ...interceptorCommands.undos);
+    }
+
+    return {
+        redos,
+        undos,
+    };
+}

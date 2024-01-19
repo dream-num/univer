@@ -23,6 +23,7 @@ import type {
     IRange,
     IRowData,
     IWorksheetData,
+    Nullable,
 } from '@univerjs/core';
 
 /** Params of `RemoveSheetMutation` */
@@ -82,7 +83,7 @@ export interface IInsertRangeMutationParams {
     subUnitId: string;
     range: IRange;
     shiftDimension: Dimension;
-    cellValue?: IObjectMatrixPrimitiveType<ICellData>;
+    cellValue?: IObjectMatrixPrimitiveType<Nullable<ICellData>>;
 }
 
 /** Params of RemoveWorksheetMergeMutation */

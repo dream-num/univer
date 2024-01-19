@@ -15,8 +15,6 @@
  */
 
 import { AddWorksheetMergeMutation } from '../../commands/mutations/add-worksheet-merge.mutation';
-import { DeleteRangeMutation } from '../../commands/mutations/delete-range.mutation';
-import { InsertRangeMutation } from '../../commands/mutations/insert-range.mutation';
 import { InsertColMutation, InsertRowMutation } from '../../commands/mutations/insert-row-col.mutation';
 import { MoveRangeMutation } from '../../commands/mutations/move-range.mutation';
 import { MoveColsMutation, MoveRowsMutation } from '../../commands/mutations/move-rows-cols.mutation';
@@ -45,8 +43,6 @@ export const COMMAND_LISTENER_SKELETON_CHANGE = [
     SetColVisibleMutation.id,
     SetRowHiddenMutation.id,
     SetRowVisibleMutation.id,
-    InsertRangeMutation.id,
-    DeleteRangeMutation.id,
     InsertColMutation.id,
     InsertRowMutation.id,
     RemoveColMutation.id,

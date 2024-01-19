@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { AbsoluteRefType, type IRange } from '../types/interfaces/i-range';
+import { AbsoluteRefType, type IRange } from '@univerjs/core';
+
 import type { IGridRangeName } from './reference';
 import { handleRefStringInfo } from './reference';
 
@@ -122,4 +123,31 @@ export function deserializeRangeForR1C1(refString: string, currentRow = 0, curre
             endAbsoluteRefType: endGrid.absoluteRefType,
         },
     };
+}
+
+export function serializeRangeToR1C1(range: IRange): string {
+    const startRowRef = getR1C1Ref(range.startRow, range.startAbsoluteRefType, true);
+    const startColumnRef = getR1C1Ref(range.startColumn, range.startAbsoluteRefType, false);
+    const endRowRef = getR1C1Ref(range.endRow, range.endAbsoluteRefType, true);
+    const endColumnRef = getR1C1Ref(range.endColumn, range.endAbsoluteRefType, false);
+
+    if (startRowRef === endRowRef && startColumnRef === endColumnRef) {
+        return `R${startRowRef}C${startColumnRef}`;
+    }
+
+    return `R${startRowRef}C${startColumnRef}:R${endRowRef}C${endColumnRef}`;
+}
+
+function getR1C1Ref(index: number, absoluteRefType: AbsoluteRefType = AbsoluteRefType.NONE, isRow: boolean): string {
+    index += 1;
+    switch (absoluteRefType) {
+        case AbsoluteRefType.NONE:
+            return isRow ? `${index}` : `${index}`;
+        case AbsoluteRefType.ROW:
+            return isRow ? `[${index}]` : `${index}`;
+        case AbsoluteRefType.COLUMN:
+            return isRow ? `${index}` : `[${index}]`;
+        case AbsoluteRefType.ALL:
+            return `[${index}]`;
+    }
 }

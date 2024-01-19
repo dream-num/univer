@@ -24,7 +24,6 @@ import type {
     Nullable,
 } from '@univerjs/core';
 import {
-    deserializeRangeWithSheet,
     Direction,
     Disposable,
     ICommandService,
@@ -36,17 +35,18 @@ import {
     RANGE_TYPE,
     Rectangle,
     RedoCommand,
-    serializeRangeToRefString,
     Tools,
     UndoCommand,
 } from '@univerjs/core';
 import type { IFormulaData, IFormulaDataItem, ISequenceNode, IUnitSheetNameMap } from '@univerjs/engine-formula';
 import {
+    deserializeRangeWithSheet,
     FormulaDataModel,
     generateStringWithSequence,
     initSheetFormulaData,
     LexerTreeBuilder,
     sequenceNodeType,
+    serializeRangeToRefString,
     SetArrayFormulaDataMutation,
     SetFormulaDataMutation,
 } from '@univerjs/engine-formula';

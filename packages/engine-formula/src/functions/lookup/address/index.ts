@@ -14,42 +14,69 @@
  * limitations under the License.
  */
 
-import { AbsoluteRefType, type IRange, serializeRange } from '@univerjs/core';
+import { AbsoluteRefType, type IRange } from '@univerjs/core';
 
 import { ErrorType } from '../../../basics/error-type';
-import type { FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
+import { serializeRangeToR1C1 } from '../../../engine/utils/r1c1-reference';
+import { serializeRange } from '../../../engine/utils/reference';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Address extends BaseFunction {
     override calculate(
-        rowNumber: FunctionVariantType,
-        columnNumber: FunctionVariantType,
-        absNumber?: FunctionVariantType,
-        a1?: FunctionVariantType,
-        sheetText?: FunctionVariantType
+        rowNumber: BaseValueObject,
+        columnNumber: BaseValueObject,
+        absNumber?: BaseValueObject,
+        a1?: BaseValueObject,
+        sheetText?: BaseValueObject
     ) {
-        if (rowNumber.isError() || columnNumber.isError()) {
+        if (
+            rowNumber.isError() ||
+            columnNumber.isError() ||
+            (absNumber && absNumber.isError()) ||
+            (a1 && a1.isError()) ||
+            (sheetText && sheetText.isError())
+        ) {
             return new ErrorValueObject(ErrorType.VALUE);
         }
 
-        const row = Number((rowNumber as BaseValueObject).getValue()) - 1;
-        const column = Number((columnNumber as BaseValueObject).getValue()) - 1;
+        const row = Number(rowNumber.getValue()) - 1;
+        const column = Number(columnNumber.getValue()) - 1;
 
         if (Number.isNaN(row) || Number.isNaN(column)) {
             return new ErrorValueObject(ErrorType.VALUE);
         }
+
+        const absType = absNumber ? transformAbsoluteRefType(absNumber.getValue()) : AbsoluteRefType.ALL;
+
+        const a1Value = this.getZeroOrOneByOneDefault(a1);
 
         const range: IRange = {
             startRow: row,
             startColumn: column,
             endRow: row,
             endColumn: column,
-            startAbsoluteRefType: AbsoluteRefType.ALL,
-            endAbsoluteRefType: AbsoluteRefType.ALL,
+            startAbsoluteRefType: absType,
+            endAbsoluteRefType: absType,
         };
-        const rangeString = serializeRange(range);
+
+        const rangeString = a1 && !a1Value ? serializeRangeToR1C1(range) : serializeRange(range);
         return new StringValueObject(rangeString);
+    }
+}
+
+function transformAbsoluteRefType(number: number | string | boolean) {
+    switch (number) {
+        case 1:
+            return AbsoluteRefType.ALL;
+        case 2:
+            return AbsoluteRefType.ROW;
+        case 3:
+            return AbsoluteRefType.COLUMN;
+        case 4:
+            return AbsoluteRefType.NONE;
+        default:
+            return AbsoluteRefType.ALL;
     }
 }

@@ -14,90 +14,84 @@
  * limitations under the License.
  */
 
-import { ObjectMatrix } from '@univerjs/core';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { NumberValueObject } from '../../../..';
-import type { ISheetData } from '../../../../basics/common';
 import { ErrorType } from '../../../../basics/error-type';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { Address } from '..';
 
-const cellData = {
-    0: {
-        0: {
-            v: 1,
-        },
-        1: {
-            v: ' ',
-        },
-        2: {
-            v: 1.23,
-        },
-        3: {
-            v: true,
-        },
-        4: {
-            v: false,
-        },
-    },
-    1: {
-        0: {
-            v: 0,
-        },
-        1: {
-            v: '100',
-        },
-        2: {
-            v: '2.34',
-        },
-        3: {
-            v: 'test',
-        },
-        4: {
-            v: -3,
-        },
-    },
-};
+describe('Test address', () => {
+    const textFunction = new Address(FUNCTION_NAMES_LOOKUP.ADDRESS);
 
-describe('test address', () => {
-    let unitId: string;
-    let sheetId: string;
-    let sheetData: ISheetData = {};
-    let address: Address;
-
-    beforeEach(() => {
-        unitId = 'test';
-        sheetId = 'sheet1';
-        sheetData = {
-            [sheetId]: {
-                cellData: new ObjectMatrix(cellData),
-                rowCount: 4,
-                columnCount: 3,
-            },
-        };
-
-        // register address
-        address = new Address(FUNCTION_NAMES_LOOKUP.ADDRESS);
-    });
-
-    describe('address', () => {
-        describe('correct situations', () => {
-            it('single cell', async () => {
-                const rowNumber = new NumberValueObject(2);
-                const columnNumber = new NumberValueObject(3);
-                const result = address.calculate(rowNumber, columnNumber);
-                expect(result.getValue()).toBe('$C$2');
-            });
+    describe('Correct situations', () => {
+        it('Absolute reference', async () => {
+            const rowNumber = new NumberValueObject(2);
+            const columnNumber = new NumberValueObject(3);
+            const result = textFunction.calculate(rowNumber, columnNumber);
+            expect(result.getValue()).toBe('$C$2');
         });
 
-        describe('fault situations', () => {
-            it('value error', async () => {
-                const error = new ErrorValueObject(ErrorType.VALUE);
-                const errorValue = address.calculate(error, error);
-                expect(errorValue.isError()).toBeTruthy();
-            });
+        it('Absolute row; relative column', async () => {
+            const rowNumber = new NumberValueObject(2);
+            const columnNumber = new NumberValueObject(3);
+            const absNumber = new NumberValueObject(2);
+            const result = textFunction.calculate(rowNumber, columnNumber, absNumber);
+            expect(result.getValue()).toBe('C$2');
+        });
+
+        it('Relative row; absolute column', async () => {
+            const rowNumber = new NumberValueObject(2);
+            const columnNumber = new NumberValueObject(3);
+            const absNumber = new NumberValueObject(3);
+            const result = textFunction.calculate(rowNumber, columnNumber, absNumber);
+            expect(result.getValue()).toBe('$C2');
+        });
+
+        it('Relative reference', async () => {
+            const rowNumber = new NumberValueObject(2);
+            const columnNumber = new NumberValueObject(3);
+            const absNumber = new NumberValueObject(4);
+            const result = textFunction.calculate(rowNumber, columnNumber, absNumber);
+            expect(result.getValue()).toBe('C2');
+        });
+
+        // it('Absolute row; relative column in R1C1 reference style', async () => {
+        //     const rowNumber = new NumberValueObject(2);
+        //     const columnNumber = new NumberValueObject(3);
+        //     const absNumber = new NumberValueObject(2);
+        //     const a1 = new BooleanValueObject(false);
+        //     const result = textFunction.calculate(rowNumber, columnNumber, absNumber, a1);
+        //     expect(result.getValue()).toBe('R2C[3]');
+        // });
+
+        // it('Absolute reference to another workbook and worksheet', async () => {
+        //     const rowNumber = new NumberValueObject(2);
+        //     const columnNumber = new NumberValueObject(3);
+        //     const absNumber = new NumberValueObject(1);
+        //     const a1 = new BooleanValueObject(false);
+        //     const sheetText = new StringValueObject('[Book1]Sheet1');
+        //     const result = textFunction.calculate(rowNumber, columnNumber, absNumber, a1, sheetText);
+        //     expect(result.getValue()).toBe("'[Book1]Sheet1'!R2C3");
+        // });
+
+        // it('Absolute reference to another worksheet', async () => {
+        //     const rowNumber = new NumberValueObject(2);
+        //     const columnNumber = new NumberValueObject(3);
+        //     const absNumber = new NumberValueObject(1);
+        //     const a1 = new BooleanValueObject(false);
+        //     const sheetText = new StringValueObject('EXCEL SHEET');
+        //     const result = textFunction.calculate(rowNumber, columnNumber, absNumber, a1, sheetText);
+        //     expect(result.getValue()).toBe("'EXCEL SHEET'!R2C3");
+        // });
+    });
+
+    describe('Fault situations', () => {
+        it('Value error', async () => {
+            const error = new ErrorValueObject(ErrorType.VALUE);
+            const errorValue = textFunction.calculate(error, error);
+            expect(errorValue.isError()).toBeTruthy();
         });
     });
 });

@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import { Tools } from '../shared/tools';
-import type { IRange } from '../types/interfaces/i-range';
-import { AbsoluteRefType, RANGE_TYPE } from '../types/interfaces/i-range';
+import type { IRange } from '@univerjs/core';
+import { AbsoluteRefType, RANGE_TYPE, Tools } from '@univerjs/core';
 
-export const UNIT_NAME_REGEX = '\'?\\[((?![\\/?:"<>|*\\\\]).)*?\\]';
+import { includeFormulaLexerToken } from '../../basics/match-token';
+
+// export const UNIT_NAME_REGEX = '\'?\\[((?![\\/?:"<>|*\\\\]).)*?\\]';
+export const UNIT_NAME_REGEX = '\\[((?![\\/?:"<>|*\\\\]).)*?\\]'; // '[Book-1.xlsx]Sheet1'!$A$4 gets [Book-1.xlsx] as unitId
 
 const $ROW_REGEX = /[^0-9]/g;
 const $COLUMN_REGEX = /[^A-Za-z]/g;
@@ -154,6 +156,9 @@ export function serializeRange(range: IRange): string {
  * @returns
  */
 export function serializeRangeWithSheet(sheetName: string, range: IRange): string {
+    if (needsQuoting(sheetName)) {
+        return `'${sheetName}'!${serializeRange(range)}`;
+    }
     return `${sheetName}!${serializeRange(range)}`;
 }
 
@@ -165,6 +170,9 @@ export function serializeRangeWithSheet(sheetName: string, range: IRange): strin
  * @returns
  */
 export function serializeRangeWithSpreadsheet(unit: string, sheetName: string, range: IRange): string {
+    if (needsQuoting(unit) || needsQuoting(sheetName)) {
+        return `'[${unit}]${sheetName}'!${serializeRange(range)}`;
+    }
     return `[${unit}]${sheetName}!${serializeRange(range)}`;
 }
 
@@ -286,4 +294,70 @@ export function deserializeRangeWithSheet(refString: string): IGridRangeName {
             rangeType,
         },
     };
+}
+
+/**
+ * Determine whether the sheet name needs to be wrapped in quotes
+
+   Excel will quote the worksheet name if any of the following is true:
+
+    - It contains any space or punctuation characters, such as  ()$,;-{}"'（）【】“”‘’%… and many more
+    - It is a valid cell reference in A1 notation, e.g. B1048576 is quoted, B1048577 is not
+    - It is a valid cell reference in R1C1 notation, e.g. RC, RC2, R5C, R-4C, RC-8, R, C
+    - It starts with a non-letter, e.g. 99, 1.5, 12a, 💩a
+    - Excel will not quote worksheet names if they only contain non-punctuation, non-letter characters in non-initial positions. For example, a💩 remains unquoted.
+
+    In addition, if a worksheet name contains single quotes, these will be doubled up within the name itself. For example, the sheet name a'b'c becomes 'a''b''c'.
+ *
+ *  reference https://stackoverflow.com/questions/41677779/when-does-excel-surround-sheet-names-with-single-quotes-in-workbook-xml-or-othe
+ * 
+ * @param name Sheet name
+ * @returns Result
+ */
+export function needsQuoting(name: string) {
+    if (name.length === 0) {
+        return false;
+    }
+
+    if (includeFormulaLexerToken(name)) {
+        return true;
+    }
+
+    // Check if the name is a valid cell reference in A1 or R1C1 notation
+    if (isA1Notation(name) || isR1C1Notation(name)) {
+        return true;
+    }
+
+    // Check if the name starts with a non-letter
+    if (startsWithNonLetter(name)) {
+        return true;
+    }
+
+    // Check for spaces, punctuation and special characters
+
+    // eslint-disable-next-line no-misleading-character-class, no-useless-escape
+    if (/[\s!$%^&*()+\-=\[\]{};':"\\|,.<>\/?💩]/.test(name)) {
+        return true;
+    }
+
+    // Check if name contains single quotes
+    // eslint-disable-next-line no-useless-escape
+    if (/\'/.test(name)) {
+        return true;
+    }
+
+    return false;
+}
+
+function isA1Notation(name: string) {
+    const match = name.match(/[1-9][0-9]{0,6}/);
+    return /^[A-Z]+[1-9][0-9]{0,6}$/.test(name) && match !== null && parseInt(match[0], 10) <= 1048576;
+}
+
+function isR1C1Notation(name: string) {
+    return /^(R(-?[0-9]+)?C(-?[0-9]+)?|C(-?[0-9]+)?|R(-?[0-9]+)?)$/.test(name);
+}
+
+function startsWithNonLetter(name: string) {
+    return !/^[A-Za-z]/.test(name);
 }

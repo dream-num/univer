@@ -36,6 +36,7 @@ import { InsertRangeMutation } from '../../mutations/insert-range.mutation';
 import { InsertColMutation, InsertRowMutation } from '../../mutations/insert-row-col.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../../mutations/remove-row-col.mutation';
 import { RemoveWorksheetMergeMutation } from '../../mutations/remove-worksheet-merge.mutation';
+import { SetSelectionsOperation } from '../../operations/selection.operation';
 import {
     InsertColAfterCommand,
     InsertColBeforeCommand,
@@ -78,6 +79,7 @@ describe('Test insert and remove rows cols commands', () => {
             DeleteRangeMutation,
             AddWorksheetMergeMutation,
             RemoveWorksheetMergeMutation,
+            SetSelectionsOperation,
         ].forEach((c) => commandService.registerCommand(c));
         const selectionManagerService = get(SelectionManagerService);
         selectionManagerService.setCurrentSelection({

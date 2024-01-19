@@ -168,7 +168,7 @@ export {
     SetWorksheetRowIsAutoHeightCommand,
 } from './commands/commands/set-worksheet-row-height.command';
 export { SetWorksheetShowCommand } from './commands/commands/set-worksheet-show.command';
-export { getPrimaryForRange } from './commands/commands/utils/selection-utils';
+export { followSelectionOperation, getPrimaryForRange } from './commands/commands/utils/selection-utils';
 export {
     AddMergeUndoMutationFactory,
     AddWorksheetMergeMutation,

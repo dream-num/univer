@@ -33,6 +33,7 @@ import { SelectionManagerService } from '../../services/selection-manager.servic
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { DeleteRangeMutation, DeleteRangeUndoMutationFactory } from '../mutations/delete-range.mutation';
 import { InsertRangeMutation } from '../mutations/insert-range.mutation';
+import { followSelectionOperation } from './utils/selection-utils';
 
 export interface IDeleteRangeMoveLeftCommandParams {
     range: IRange;
@@ -90,6 +91,7 @@ export const DeleteRangeMoveLeftCommand: ICommand = {
         const redos: IMutationInfo[] = [{ id: DeleteRangeMutation.id, params: deleteRangeMutationParams }];
         const undos: IMutationInfo[] = [{ id: InsertRangeMutation.id, params: insertRangeMutationParams }];
         redos.push(...sheetInterceptor.redos);
+        redos.push(followSelectionOperation(range, workbook, worksheet));
         undos.push(...sheetInterceptor.undos);
         // execute do mutations and add undo mutations to undo stack if completed
         const result = sequenceExecute(redos, commandService).result;

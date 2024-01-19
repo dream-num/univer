@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
+import { UniverInstanceType } from '@univerjs/core';
 import type { IMenuButtonItem } from '@univerjs/ui';
-import { MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
+import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
+import type { IAccessor } from '@wendellhu/redi';
 
 import { OpenFindDialogOperation } from '../commands/operations/find-replace.operation';
 
-export function FindReplaceMenuItemFactory(): IMenuButtonItem {
+export function FindReplaceMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: OpenFindDialogOperation.id,
         icon: 'SearchIcon',
@@ -27,5 +29,6 @@ export function FindReplaceMenuItemFactory(): IMenuButtonItem {
         group: MenuGroup.TOOLBAR_OTHERS,
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.TOOLBAR_START],
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
     };
 }

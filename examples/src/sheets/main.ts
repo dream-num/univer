@@ -20,9 +20,11 @@ import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import { UniverFindReplacePlugin } from '@univerjs/find-replace';
 import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
 import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
+import { UniverSheetsFindPlugin } from '@univerjs/sheets-find-replace';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
@@ -32,8 +34,6 @@ import { UniverUIPlugin } from '@univerjs/ui';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data';
 import { DebuggerPlugin } from '../plugins/debugger';
 import { locales } from './locales';
-import { UniverFindReplacePlugin } from '@univerjs/find-replace';
-import { UniverSheetsFindPlugin } from '@univerjs/sheets-find-replace';
 
 const LOAD_LAZY_PLUGINS_TIMEOUT = 5_000;
 // univer

@@ -22,8 +22,9 @@ import {
     SelectionManagerService,
     SetSelectionsOperation,
 } from '@univerjs/sheets';
-import { KeyCode, ShortcutExperienceService } from '@univerjs/ui';
+import { KeyCode } from '@univerjs/ui';
 
+import { ShortcutExperienceService } from '../../services/shortcut-experience.service';
 import {
     checkIfShrink,
     expandToContinuousRange,

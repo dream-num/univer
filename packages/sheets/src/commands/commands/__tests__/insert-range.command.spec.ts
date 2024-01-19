@@ -22,6 +22,7 @@ import {
     RANGE_TYPE,
     Rectangle,
     RedoCommand,
+    Tools,
     UndoCommand,
 } from '@univerjs/core';
 import type { Injector } from '@wendellhu/redi';
@@ -145,7 +146,7 @@ const WORKBOOK_DATA_DEMO: IWorkbookData = {
                     },
                 },
             },
-            mergeData,
+            mergeData: [],
         },
     },
     locale: LocaleType.ZH_CN,
@@ -186,7 +187,9 @@ describe('Test insert range commands', () => {
     ) => IRange[] | undefined;
 
     beforeEach(() => {
-        const testBed = createCommandTestBed(WORKBOOK_DATA_DEMO, [[MergeCellController], [RefRangeService]]);
+        const data = WORKBOOK_DATA_DEMO;
+        data.sheets.sheet1.mergeData = Tools.deepClone(mergeData);
+        const testBed = createCommandTestBed(data, [[MergeCellController], [RefRangeService]]);
         univer = testBed.univer;
         get = testBed.get;
         get(MergeCellController);
@@ -334,15 +337,26 @@ describe('Test insert range commands', () => {
                     v: 'D2',
                 });
 
-                const mergedCells = getMergedCells(0, 2, 2, 4);
-                expect(deduplicateRanges(mergedCells!)).toStrictEqual([
-                    {
-                        startRow: 0,
-                        startColumn: 3,
-                        endRow: 1,
-                        endColumn: 3,
-                    },
-                ]);
+                const mergedCells = deduplicateRanges(getMergedCells(0, 2, 2, 4)!);
+                expect(mergedCells.length).toStrictEqual(2);
+                mergedCells.forEach((mergedCell) => {
+                    expect(
+                        [
+                            {
+                                startRow: 0,
+                                startColumn: 3,
+                                endRow: 1,
+                                endColumn: 3,
+                            },
+                            {
+                                startRow: 1,
+                                startColumn: 4,
+                                endRow: 2,
+                                endColumn: 4,
+                            },
+                        ].some((range) => Rectangle.equals(mergedCell, range))
+                    ).toBeTruthy();
+                });
 
                 // TODO@Dushusir: test undo redo after delete range completed
 

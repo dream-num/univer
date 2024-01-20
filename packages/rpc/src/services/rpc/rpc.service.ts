@@ -91,6 +91,11 @@ export function fromModule(module: unknown): IChannel {
 export function toModule<T extends object>(channel: IChannel): T {
     return new Proxy({} as T, {
         get(_: T, propKey: string) {
+            // a remote module is not disposable to the current instance
+            if (propKey === 'dispose') {
+                return undefined;
+            }
+
             // eslint-disable-next-line func-names
             return function (...args: any[]) {
                 const isObservable = propertyIsEventSource(propKey);

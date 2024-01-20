@@ -42,6 +42,8 @@
     "private": false,
     "scripts": {
         "test": "vitest run",
+        "test:watch": "vitest",
+        "coverage": "vitest run --coverage",
         "build": "tsc && vite build"
     },
     "dependencies": {

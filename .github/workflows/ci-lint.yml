@@ -74,7 +74,7 @@ jobs:
             - name: Install Node.js
               uses: actions/setup-node@v3
               with:
-                node-version: 18
+                  node-version: 18
 
             - name: Install pnpm
               uses: pnpm/action-setup@v2
@@ -115,7 +115,7 @@ jobs:
             - name: Install Node.js
               uses: actions/setup-node@v3
               with:
-                node-version: 18
+                  node-version: 18
 
             - name: Install pnpm
               uses: pnpm/action-setup@v2
@@ -141,3 +141,10 @@ jobs:
 
             - name: 🎨 Run Stylelint
               run: pnpm run lint:style
+
+    sonar:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: SonarCloud Scan
+              uses: SonarSource/sonarcloud-github-action@v2.1.1

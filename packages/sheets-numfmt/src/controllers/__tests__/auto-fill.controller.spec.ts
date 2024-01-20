@@ -205,7 +205,7 @@ describe('test auto fill', () => {
                                 startRow: 3,
                                 endRow: 5,
                                 startColumn: 6,
-                                endColumn: 11,
+                                endColumn: 10,
                             },
                         ],
                         unitId: 'test',
@@ -249,7 +249,7 @@ describe('test auto fill', () => {
                                         startRow: 3,
                                         endRow: 5,
                                         startColumn: 2,
-                                        endColumn: 11, // 有点问题.
+                                        endColumn: 10,
                                     },
                                 ],
                             },

@@ -444,6 +444,9 @@ importers:
       react:
         specifier: ^18.2.0
         version: 18.2.0
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
     devDependencies:
       '@types/react':
         specifier: ^18.2.47
@@ -5744,7 +5747,7 @@ packages:
       magicast: 0.3.2
       picocolors: 1.0.0
       test-exclude: 6.0.0
-      vitest: 1.1.1(@types/node@20.10.6)(happy-dom@12.10.3)
+      vitest: 1.1.1(@types/node@20.10.6)(happy-dom@12.10.3)(less@4.2.0)
     transitivePeerDependencies:
       - supports-color
     dev: true

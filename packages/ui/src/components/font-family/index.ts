@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import { COMPONENT_PREFIX } from '../const';
-
-export const FONT_FAMILY_COMPONENT = `${COMPONENT_PREFIX}_FONT_FAMILY_COMPONENT`;
-
-export const FONT_FAMILY_ITEM_COMPONENT = `${COMPONENT_PREFIX}_FONT_FAMILY_ITEM_COMPONENT`;
+export { FontFamily } from './FontFamily';
+export { FontFamilyItem } from './FontFamilyItem';
+export { FONT_FAMILY_LIST } from './interface';

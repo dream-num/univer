@@ -14,4 +14,42 @@
  * limitations under the License.
  */
 
-export default {};
+export default {
+    toolbar: {
+        undo: '撤销',
+        redo: '重做',
+        font: '字体',
+        fontSize: '字号',
+        bold: '粗体',
+        italic: '斜体',
+        strikethrough: '删除线',
+        subscript: '下标',
+        superscript: '上标',
+        underline: '下划线',
+        textColor: {
+            main: '文本颜色',
+            right: '颜色选择',
+        },
+        resetColor: '重置颜色',
+        order: '有序列表',
+        unorder: '无序列表',
+    },
+    fontFamily: {
+        TimesNewRoman: 'Times New Roman',
+        Arial: 'Arial',
+        Tahoma: 'Tahoma',
+        Verdana: 'Verdana',
+        MicrosoftYaHei: '微软雅黑',
+        SimSun: '宋体',
+        SimHei: '黑体',
+        Kaiti: '楷体',
+        FangSong: '仿宋',
+        NSimSun: '新宋体',
+        STXinwei: '华文新魏',
+        STXingkai: '华文行楷',
+        STLiti: '华文隶书',
+        HanaleiFill: 'HanaleiFill',
+        Anton: 'Anton',
+        Pacifico: 'Pacifico',
+    },
+};

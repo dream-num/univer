@@ -58,6 +58,8 @@ import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import {
     CopyCommand,
     CutCommand,
+    FONT_FAMILY_LIST,
+    FONT_SIZE_LIST,
     getMenuHiddenObservable,
     MenuGroup,
     MenuItemType,
@@ -354,141 +356,6 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
     };
 }
 
-export const FONT_SIZE_CHILDREN = [
-    {
-        label: '9',
-        value: 9,
-    },
-    {
-        label: '10',
-        value: 10,
-    },
-    {
-        label: '11',
-        value: 11,
-    },
-    {
-        label: '12',
-        value: 12,
-    },
-    {
-        label: '14',
-        value: 14,
-    },
-    {
-        label: '16',
-        value: 16,
-    },
-    {
-        label: '18',
-        value: 18,
-    },
-    {
-        label: '20',
-        value: 20,
-    },
-
-    {
-        label: '22',
-        value: 22,
-    },
-    {
-        label: '24',
-        value: 24,
-    },
-    {
-        label: '26',
-        value: 26,
-    },
-    {
-        label: '28',
-        value: 28,
-    },
-    {
-        label: '36',
-        value: 36,
-    },
-    {
-        label: '48',
-        value: 48,
-    },
-    {
-        label: '72',
-        value: 72,
-    },
-];
-
-export const FONT_FAMILY_CHILDREN = [
-    {
-        label: FONT_FAMILY_ITEM_COMPONENT,
-        value: 'Times New Roman',
-    },
-    {
-        label: FONT_FAMILY_ITEM_COMPONENT,
-        value: 'Arial',
-    },
-    {
-        label: FONT_FAMILY_ITEM_COMPONENT,
-        value: 'Tahoma',
-    },
-    {
-        label: FONT_FAMILY_ITEM_COMPONENT,
-        value: 'Verdana',
-    },
-    {
-        label: FONT_FAMILY_ITEM_COMPONENT,
-        value: 'Microsoft YaHei',
-    },
-    {
-        label: FONT_FAMILY_ITEM_COMPONENT,
-        value: 'SimSun',
-    },
-    {
-        label: FONT_FAMILY_ITEM_COMPONENT,
-        value: 'SimHei',
-    },
-    {
-        label: FONT_FAMILY_ITEM_COMPONENT,
-        value: 'Kaiti',
-    },
-    {
-        label: FONT_FAMILY_ITEM_COMPONENT,
-        value: 'FangSong',
-    },
-    {
-        label: FONT_FAMILY_ITEM_COMPONENT,
-        value: 'NSimSun',
-    },
-    {
-        label: FONT_FAMILY_ITEM_COMPONENT,
-        value: 'STXinwei',
-    },
-    {
-        label: FONT_FAMILY_ITEM_COMPONENT,
-        value: 'STXingkai',
-    },
-    {
-        label: FONT_FAMILY_ITEM_COMPONENT,
-        value: 'STLiti',
-    },
-    // The following 3 fonts do not work, temporarily delete
-    // {
-    //     label: 'fontFamily.HanaleiFill',
-    //     style: { 'font-family': 'HanaleiFill' },
-    //     value: 'HanaleiFill',
-    // },
-    // {
-    //     label: 'fontFamily.Anton',
-    //     style: { 'font-family': 'Anton' },
-    //     value: 'Anton',
-    // },
-    // {
-    //     label: 'fontFamily.Pacifico',
-    //     style: { 'font-family': 'Pacifico' },
-    //     value: 'Pacifico',
-    // },
-];
-
 export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     const commandService = accessor.get(ICommandService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -501,10 +368,15 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
         type: MenuItemType.SELECTOR,
         label: FONT_FAMILY_COMPONENT,
         positions: [MenuPosition.TOOLBAR_START],
-        selections: FONT_FAMILY_CHILDREN,
+        selections: FONT_FAMILY_LIST.map((item) => ({
+            label: {
+                name: FONT_FAMILY_ITEM_COMPONENT,
+                value: item.value,
+            },
+        })),
         disabled$: getCurrentSheetDisabled$(accessor),
         value$: new Observable((subscriber) => {
-            const defaultValue = FONT_FAMILY_CHILDREN[0].value;
+            const defaultValue = FONT_FAMILY_LIST[0].value;
 
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
@@ -552,7 +424,7 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
             },
         },
         positions: [MenuPosition.TOOLBAR_START],
-        selections: FONT_SIZE_CHILDREN,
+        selections: FONT_SIZE_LIST,
         disabled$,
         value$: new Observable((subscriber) => {
             const DEFAULT_SIZE = 14;

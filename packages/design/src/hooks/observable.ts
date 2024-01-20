@@ -69,15 +69,15 @@ export function useObservable<T>(
 ): T | undefined {
     const observableRef = useRef<Observable<T> | null>(null);
     const subscriptionRef = useRef<Subscription | null>(null);
-    const _deps = deps ?? [];
     const depsRef = useRef<any[] | undefined>(deps ?? undefined);
+    const initializedRef = useRef<boolean>(false);
 
     let setValue: React.Dispatch<React.SetStateAction<T | undefined>>;
-    let initialized = false;
     let innerDefaultValue: T | undefined;
 
     const shouldResubscribe = (() => {
         if (typeof depsRef.current !== 'undefined') {
+            const _deps = deps ?? [];
             if (showArrayNotEqual(depsRef.current, _deps)) {
                 depsRef.current = _deps;
                 return true;
@@ -97,12 +97,12 @@ export function useObservable<T>(
                 setValue(value);
             } else {
                 innerDefaultValue = value;
-                initialized = true;
+                initializedRef.current = true;
             }
         });
     }
 
-    if (shouldHaveSyncValue && !initialized) {
+    if (shouldHaveSyncValue && !initializedRef.current) {
         throw new Error('[useObservable]: expect shouldHaveSyncValue but not getting a sync value!');
     }
 

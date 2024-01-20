@@ -37,7 +37,7 @@ export function FindReplaceDialog() {
 
     const dialogContainerRef = useRef<HTMLDivElement>(null);
 
-    const state = useObservable(findReplaceService.state$);
+    const state = useObservable(findReplaceService.state$, true);
     const { matchesCount, matchesPosition } = state;
     const revealReplace = useCallback(() => findReplaceService.revealReplace(), [findReplaceService]);
 

@@ -52,8 +52,8 @@ export function ZoomSlider() {
                 map(([editorFocus, editorActivated]) => editorFocus && !editorActivated),
                 debounceTime(DISABLE_DEBOUNCE_TIME)
             ),
+        false,
         true,
-        undefined,
         [FOCUSING_UNIVER_EDITOR]
     );
     const disabled = !sheetEditorFocused;

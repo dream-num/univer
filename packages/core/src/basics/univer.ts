@@ -92,6 +92,8 @@ export class Univer extends PluginHolder {
 
     override dispose(): void {
         this._injector.dispose();
+
+        super.dispose();
     }
 
     setLocale(locale: LocaleType) {

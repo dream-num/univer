@@ -35,7 +35,7 @@ import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data';
 import { DebuggerPlugin } from '../plugins/debugger';
 import { locales } from './locales';
 
-const LOAD_LAZY_PLUGINS_TIMEOUT = 5_000;
+const LOAD_LAZY_PLUGINS_TIMEOUT = 1_000;
 // univer
 const univer = new Univer({
     theme: defaultTheme,

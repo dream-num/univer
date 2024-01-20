@@ -30,30 +30,66 @@
  * limitations under the License.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type React from 'react';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Observable, Subscription } from 'rxjs';
 
-export function useObservable<T>(observable: Observable<T>, defaultValue?: T): T | undefined;
-export function useObservable<T>(observable: Observable<T>, defaultValue?: T, shouldHaveSyncValue?: true): T;
+type ObservableOrFn<T> = Observable<T> | (() => Observable<T>);
+
+function unwrap<T>(o: ObservableOrFn<T>): Observable<T> {
+    if (typeof o === 'function') {
+        return o();
+    }
+
+    return o;
+}
+
+function showArrayNotEqual(arr1: unknown[], arr2: unknown[]): boolean {
+    if (arr1.length !== arr2.length) {
+        return true;
+    }
+
+    return arr1.some((value, index) => value !== arr2[index]);
+}
+
 export function useObservable<T>(
-    observable: Observable<T>,
+    observable: ObservableOrFn<T>,
     defaultValue?: T,
-    shouldHaveSyncValue?: true
+    shouldHaveSyncValue?: true,
+    deps?: any[]
 ): T | undefined {
     const observableRef = useRef<Observable<T> | null>(null);
     const subscriptionRef = useRef<Subscription | null>(null);
+    const _deps = deps ?? [];
+    const depsRef = useRef<any[] | undefined>(deps ?? undefined);
 
     let setValue: React.Dispatch<React.SetStateAction<T | undefined>>;
     let initialized = false;
     let innerDefaultValue: T | undefined;
-    if (!observableRef.current || observableRef.current !== observable) {
+
+    const shouldResubscribe = (() => {
+        if (typeof depsRef.current !== 'undefined') {
+            if (showArrayNotEqual(depsRef.current, _deps)) {
+                depsRef.current = _deps;
+                return true;
+            }
+
+            return false;
+        }
+
+        return observableRef.current !== observable;
+    })();
+
+    if (!subscriptionRef.current || shouldResubscribe) {
+        observableRef.current = unwrap(observable);
         subscriptionRef.current?.unsubscribe();
-        subscriptionRef.current = observable.subscribe((v) => {
+        subscriptionRef.current = observableRef.current.subscribe((value) => {
             if (setValue) {
-                setValue(v);
+                setValue(value);
             } else {
-                innerDefaultValue = v;
+                innerDefaultValue = value;
                 initialized = true;
             }
         });
@@ -66,6 +102,10 @@ export function useObservable<T>(
     const s = useState<T | undefined>(innerDefaultValue || defaultValue);
     const value = s[0];
     setValue = s[1];
+
+    useEffect(() => {
+        return () => subscriptionRef.current?.unsubscribe();
+    }, []);
 
     return value;
 }

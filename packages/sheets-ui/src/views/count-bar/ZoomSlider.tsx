@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { ICommandService, IUniverInstanceService } from '@univerjs/core';
-import { Slider } from '@univerjs/design';
+import { FOCUSING_UNIVER_EDITOR, ICommandService, IContextService, IUniverInstanceService } from '@univerjs/core';
+import { Slider, useObservable } from '@univerjs/design';
 import { SetWorksheetActivateCommand } from '@univerjs/sheets';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
@@ -30,8 +30,17 @@ const ZOOM_MAP = [50, 80, 100, 130, 150, 170, 200, 400];
 export function ZoomSlider() {
     const commandService = useDependency(ICommandService);
     const univerInstanceService = useDependency(IUniverInstanceService);
+    const contextService = useDependency(IContextService);
+
     const currentZoom = getCurrentZoom();
     const [zoom, setZoom] = useState(currentZoom);
+    const sheetEditorFocused = useObservable(
+        contextService.subscribeContextValue$(FOCUSING_UNIVER_EDITOR),
+        true,
+        undefined,
+        [FOCUSING_UNIVER_EDITOR]
+    );
+    const disabled = !sheetEditorFocused;
 
     useEffect(() => {
         const disposable = commandService.onCommandExecuted((commandInfo) => {

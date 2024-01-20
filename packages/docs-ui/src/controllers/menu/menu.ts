@@ -19,6 +19,7 @@ import {
     BooleanNumber,
     ICommandService,
     IUniverInstanceService,
+    ThemeService,
     UniverInstanceType,
 } from '@univerjs/core';
 import {
@@ -26,18 +27,32 @@ import {
     OrderListCommand,
     SetInlineFormatBoldCommand,
     SetInlineFormatCommand,
+    SetInlineFormatFontFamilyCommand,
+    SetInlineFormatFontSizeCommand,
     SetInlineFormatItalicCommand,
     SetInlineFormatStrikethroughCommand,
     SetInlineFormatSubscriptCommand,
     SetInlineFormatSuperscriptCommand,
+    SetInlineFormatTextColorCommand,
     SetInlineFormatUnderlineCommand,
     SetTextSelectionsOperation,
     TextSelectionManagerService,
 } from '@univerjs/docs';
-import type { IMenuButtonItem } from '@univerjs/ui';
-import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
+import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
+import {
+    FONT_FAMILY_LIST,
+    FONT_SIZE_LIST,
+    getMenuHiddenObservable,
+    MenuGroup,
+    MenuItemType,
+    MenuPosition,
+} from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
+
+import { COLOR_PICKER_COMPONENT } from '../../components/color-picker';
+import { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from '../../components/font-family';
+import { FONT_SIZE_COMPONENT } from '../../components/font-size';
 
 // TODO @Dushusir: use for test, change id later
 export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
@@ -251,6 +266,131 @@ export function SuperscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem
             return disposable.dispose;
         }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.DOC),
+    };
+}
+
+export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+    const commandService = accessor.get(ICommandService);
+
+    return {
+        id: SetInlineFormatFontFamilyCommand.id,
+        tooltip: 'toolbar.font',
+        group: MenuGroup.TOOLBAR_FORMAT,
+        type: MenuItemType.SELECTOR,
+        label: FONT_FAMILY_COMPONENT,
+        positions: [MenuPosition.TOOLBAR_START],
+        selections: FONT_FAMILY_LIST.map((item) => ({
+            label: {
+                name: FONT_FAMILY_ITEM_COMPONENT,
+                value: item.value,
+            },
+        })),
+        // disabled$: getCurrentSheetDisabled$(accessor),
+        value$: new Observable((subscriber) => {
+            const defaultValue = FONT_FAMILY_LIST[0].value;
+
+            const disposable = commandService.onCommandExecuted((c) => {
+                const id = c.id;
+
+                if (id === SetTextSelectionsOperation.id || id === SetInlineFormatFontFamilyCommand.id) {
+                    const textRun = getFontStyleAtCursor(accessor);
+
+                    if (textRun == null) {
+                        return;
+                    }
+
+                    const ff = textRun.ts?.ff;
+
+                    subscriber.next(ff ?? defaultValue);
+                }
+            });
+
+            subscriber.next(defaultValue);
+            return disposable.dispose;
+        }),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.DOC),
+    };
+}
+
+export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<number> {
+    const commandService = accessor.get(ICommandService);
+
+    return {
+        id: SetInlineFormatFontSizeCommand.id,
+        group: MenuGroup.TOOLBAR_FORMAT,
+        type: MenuItemType.SELECTOR,
+        tooltip: 'toolbar.fontSize',
+        label: {
+            name: FONT_SIZE_COMPONENT,
+            props: {
+                min: 1,
+                max: 400,
+                // disabled$,
+            },
+        },
+        positions: [MenuPosition.TOOLBAR_START],
+        selections: FONT_SIZE_LIST,
+        // disabled$,
+        value$: new Observable((subscriber) => {
+            const DEFAULT_SIZE = 14;
+            const disposable = commandService.onCommandExecuted((c) => {
+                const id = c.id;
+
+                if (id === SetTextSelectionsOperation.id || id === SetInlineFormatFontSizeCommand.id) {
+                    const textRun = getFontStyleAtCursor(accessor);
+
+                    if (textRun == null) {
+                        return;
+                    }
+
+                    const fs = textRun.ts?.fs;
+
+                    subscriber.next(fs ?? DEFAULT_SIZE);
+                }
+            });
+
+            subscriber.next(DEFAULT_SIZE);
+
+            return disposable.dispose;
+        }),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.DOC),
+    };
+}
+
+export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+    const commandService = accessor.get(ICommandService);
+    const themeService = accessor.get(ThemeService);
+
+    return {
+        id: SetInlineFormatTextColorCommand.id,
+        icon: 'FontColor',
+        tooltip: 'toolbar.textColor.main',
+
+        group: MenuGroup.TOOLBAR_FORMAT,
+        type: MenuItemType.BUTTON_SELECTOR,
+        positions: [MenuPosition.TOOLBAR_START],
+        selections: [
+            {
+                label: {
+                    name: COLOR_PICKER_COMPONENT,
+                    hoverable: false,
+                },
+            },
+        ],
+        value$: new Observable<string>((subscriber) => {
+            const defaultColor = themeService.getCurrentTheme().textColor;
+            const disposable = commandService.onCommandExecuted((c) => {
+                if (c.id === SetInlineFormatTextColorCommand.id) {
+                    const color = (c.params as { value: string }).value;
+                    subscriber.next(color ?? defaultColor);
+                }
+            });
+
+            subscriber.next(defaultColor);
+            return disposable.dispose;
+        }),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.DOC),
+        // disabled$: getCurrentSheetDisabled$(accessor),
     };
 }
 

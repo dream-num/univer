@@ -30,11 +30,14 @@ import { FONT_SIZE_COMPONENT, FontSize } from '../components/font-size';
 import {
     BoldMenuItemFactory,
     BulletListMenuItemFactory,
+    FontFamilySelectorMenuItemFactory,
+    FontSizeSelectorMenuItemFactory,
     ItalicMenuItemFactory,
     OrderListMenuItemFactory,
     StrikeThroughMenuItemFactory,
     SubscriptMenuItemFactory,
     SuperscriptMenuItemFactory,
+    TextColorSelectorMenuItemFactory,
     UnderlineMenuItemFactory,
 } from './menu/menu';
 
@@ -72,6 +75,9 @@ export class DocUIController extends Disposable {
                 StrikeThroughMenuItemFactory,
                 SubscriptMenuItemFactory,
                 SuperscriptMenuItemFactory,
+                FontSizeSelectorMenuItemFactory,
+                FontFamilySelectorMenuItemFactory,
+                TextColorSelectorMenuItemFactory,
                 OrderListMenuItemFactory,
                 BulletListMenuItemFactory,
             ] as IMenuItemFactory[]

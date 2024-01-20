@@ -16,3 +16,4 @@
 
 export { FontFamily } from './FontFamily';
 export { FontFamilyItem } from './FontFamilyItem';
+export { FONT_FAMILY_LIST } from './interface';

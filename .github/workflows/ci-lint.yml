@@ -74,7 +74,7 @@ jobs:
             - name: Install Node.js
               uses: actions/setup-node@v3
               with:
-                node-version: 18
+                  node-version: 18
 
             - name: Install pnpm
               uses: pnpm/action-setup@v2
@@ -115,7 +115,7 @@ jobs:
             - name: Install Node.js
               uses: actions/setup-node@v3
               with:
-                node-version: 18
+                  node-version: 18
 
             - name: Install pnpm
               uses: pnpm/action-setup@v2
@@ -141,3 +141,19 @@ jobs:
 
             - name: 🎨 Run Stylelint
               run: pnpm run lint:style
+
+    sonar:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3
+              with:
+                  # Disabling shallow clone is recommended for improving relevancy of reporting
+                  fetch-depth: 0
+
+            - name: SonarCloud Scan
+              uses: SonarSource/sonarcloud-github-action@v2.1.1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

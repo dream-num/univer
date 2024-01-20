@@ -39,7 +39,8 @@ export interface ISliderProps {
      */
     max?: number;
 
-    /** Whether the slider is disabled
+    /**
+     * Whether the slider is disabled
      *  @default false
      */
     disabled?: boolean;

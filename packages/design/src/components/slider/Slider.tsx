@@ -39,6 +39,11 @@ export interface ISliderProps {
      */
     max?: number;
 
+    /** Whether the slider is disabled
+     *  @default false
+     */
+    disabled?: boolean;
+
     /** The maximum value the slider can slide to
      *  @default 100
      */
@@ -55,17 +60,21 @@ export interface ISliderProps {
  * Slider Component
  */
 export function Slider(props: ISliderProps) {
-    const { value, min = 0, max = 400, resetPoint = 100, shortcuts, onChange } = props;
+    const { value, min = 0, max = 400, disabled = false, resetPoint = 100, shortcuts, onChange } = props;
 
     const sliderInnerRailRef = useRef<HTMLDivElement>(null);
 
     const { locale } = useContext(ConfigContext);
 
     function handleReset() {
+        if (disabled) return;
+
         onChange && onChange(resetPoint);
     }
 
     function handleStep(offset: number) {
+        if (disabled) return;
+
         let result = value + offset;
         if (value + offset <= min) {
             result = min;
@@ -87,7 +96,9 @@ export function Slider(props: ISliderProps) {
     }, [min, max, resetPoint, value]);
 
     function handleMouseDown(e: React.MouseEvent<HTMLDivElement>) {
+        if (disabled) return;
         e.preventDefault();
+
         const rail = sliderInnerRailRef.current!;
         let isDragging = true;
 
@@ -132,8 +143,12 @@ export function Slider(props: ISliderProps) {
     }
 
     return (
-        <div className={styles.slider}>
-            <Button type="text" size="small" disabled={value <= min} onClick={() => handleStep(-10)}>
+        <div
+            className={clsx(styles.slider, {
+                [styles.sliderDisabled]: disabled,
+            })}
+        >
+            <Button type="text" size="small" disabled={value <= min || disabled} onClick={() => handleStep(-10)}>
                 <ReduceSingle />
             </Button>
 
@@ -154,7 +169,7 @@ export function Slider(props: ISliderProps) {
                 </div>
             </div>
 
-            <Button type="text" size="small" disabled={value >= max} onClick={() => handleStep(10)}>
+            <Button type="text" size="small" disabled={value >= max || disabled} onClick={() => handleStep(10)}>
                 <IncreaseSingle />
             </Button>
 

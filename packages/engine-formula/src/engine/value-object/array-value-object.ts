@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import { isRealNum, type Nullable } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
+import { isRealNum } from '@univerjs/core';
 
 import { BooleanValue } from '../../basics/common';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { CELL_INVERTED_INDEX_CACHE } from '../../basics/inverted-index-cache';
 import { $ARRAY_VALUE_REGEX } from '../../basics/regex';
 import { compareToken } from '../../basics/token';
-import { ArrayBinarySearchType, getCompare } from '../utils/compare';
+import { ArrayBinarySearchType, ArrayOrderSearchType, getCompare } from '../utils/compare';
 import type { callbackMapFnType, callbackProductFnType, IArrayValueObject } from './base-value-object';
 import { BaseValueObject, ErrorValueObject } from './base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from './primitive-object';
@@ -270,9 +271,64 @@ export class ArrayValueObject extends BaseValueObject {
         }
     }
 
+    iteratorReverse(
+        callback: (valueObject: Nullable<BaseValueObject>, rowIndex: number, columnIndex: number) => Nullable<boolean>
+    ) {
+        const { startRow, endRow, startColumn, endColumn } = this.getRangePosition();
+
+        const valueList = this.getArrayValue();
+
+        for (let r = endRow; r >= startRow; r--) {
+            for (let c = endColumn; c >= startColumn; c--) {
+                if (callback(valueList[r][c], r, c) === false) {
+                    return;
+                }
+            }
+        }
+    }
+
+    getFirstTruePosition() {
+        let rangeSingle: Nullable<{ row: number; column: number }>;
+
+        this.iteratorReverse((value, rowIndex, columnIndex) => {
+            if (value?.isBoolean()) {
+                rangeSingle = {
+                    row: rowIndex,
+                    column: columnIndex,
+                };
+
+                return false;
+            }
+        });
+
+        return rangeSingle;
+    }
+
+    getLastTruePosition() {
+        let rangeSingle: Nullable<{ row: number; column: number }>;
+
+        this.iterator((value, rowIndex, columnIndex) => {
+            if (value?.isBoolean()) {
+                rangeSingle = {
+                    row: rowIndex,
+                    column: columnIndex,
+                };
+
+                return false;
+            }
+        });
+
+        return rangeSingle;
+    }
+
     getFirstCell() {
         const { startRow, startColumn } = this.getRangePosition();
         return this.get(startRow, startColumn);
+    }
+
+    getLastCell() {
+        const { endRow, endColumn } = this.getRangePosition();
+        return this.get(endRow, endColumn);
     }
 
     /**
@@ -488,6 +544,81 @@ export class ArrayValueObject extends BaseValueObject {
         const columnCount = this._columnCount;
 
         return this._createNewArray(transposeArray, columnCount, rowCount);
+    }
+
+    /**
+     * Due to the inability to effectively utilize the cache,
+     * the sequential matching approach is only used for special matches in XLOOKUP and XMATCH.
+     * For example, when match_mode is set to 1 and -1 for an exact match. If not found, it returns the next smaller item.
+     */
+    orderSearch(
+        valueObject: BaseValueObject,
+        searchType: ArrayOrderSearchType = ArrayOrderSearchType.MIN,
+        isDesc = false,
+        isFuzzyMatching = false
+    ) {
+        let result: Nullable<BaseValueObject>;
+        let maxOrMin: Nullable<BaseValueObject>;
+        let resultPosition: Nullable<{ row: number; column: number }>;
+
+        let maxOrMinPosition: Nullable<{ row: number; column: number }>;
+
+        const _handleMatch = (itemValue: Nullable<BaseValueObject>, row: number, column: number) => {
+            let matchObject: Nullable<BaseValueObject>;
+            if (isFuzzyMatching === true) {
+                matchObject = itemValue?.wildcard(valueObject as StringValueObject, compareToken.EQUALS);
+            } else {
+                matchObject = itemValue?.isEqual(valueObject);
+            }
+
+            if (matchObject?.getValue() === true) {
+                result = itemValue;
+                resultPosition = { row, column };
+                return false;
+            }
+
+            if (maxOrMin == null) {
+                maxOrMin = itemValue;
+                maxOrMinPosition = { row, column };
+            } else if (searchType === ArrayOrderSearchType.MAX) {
+                if (itemValue?.isGreaterThan(maxOrMin).getValue() === true) {
+                    maxOrMin = itemValue;
+                    maxOrMinPosition = { row, column };
+                }
+            } else if (searchType === ArrayOrderSearchType.MIN) {
+                if (itemValue?.isLessThan(maxOrMin).getValue() === true) {
+                    maxOrMin = itemValue;
+                    maxOrMinPosition = { row, column };
+                }
+            }
+        };
+
+        if (isDesc) {
+            const rowCount = this._values.length;
+            if (this._values[0] == null) {
+                return;
+            }
+            const columnCount = this._values[0].length;
+
+            for (let r = rowCount - 1; r >= 0; r--) {
+                for (let c = columnCount - 1; c >= 0; c--) {
+                    const itemValue = this._values[r][c];
+                    _handleMatch(itemValue, r, c);
+                }
+            }
+        } else {
+            this.iterator((itemValue, r, c) => {
+                _handleMatch(itemValue, r, c);
+            });
+        }
+
+        if (result != null) {
+            return resultPosition;
+        }
+
+        if (maxOrMin != null) {
+            return maxOrMinPosition;
+        }
     }
 
     binarySearch(valueObject: BaseValueObject, searchType: ArrayBinarySearchType = ArrayBinarySearchType.MIN) {

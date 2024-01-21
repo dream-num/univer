@@ -21,6 +21,12 @@ export enum ArrayBinarySearchType {
     MAX,
 }
 
+export enum ArrayOrderSearchType {
+    NORMAL,
+    MIN,
+    MAX,
+}
+
 export function getCompare() {
     return new Intl.Collator(undefined, { numeric: true }).compare;
 }

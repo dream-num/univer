@@ -101,30 +101,9 @@ export const InsertRowCommand: ICommand = {
             insertRowParams
         );
 
-        const insertRangeMutationParams: IInsertRangeMutationParams = {
-            unitId: params.unitId,
-            subUnitId: params.subUnitId,
-            range: params.range,
-            shiftDimension: Dimension.ROWS,
-            cellValue,
-        };
-
-        const undoInsertRangeMutationParams: Nullable<IDeleteRangeMutationParams> = InsertRangeUndoMutationFactory(
-            accessor,
-            insertRangeMutationParams
-        );
-        // intercept the command execution to gether undo redo commands
-        const intercepted = accessor.get(SheetInterceptorService).onCommandExecute({ id: InsertRowCommand.id, params });
-
-        const { redo: insertRangeRedo, undo: insertRangeUndo } = getInsertRangeMutations(
-            accessor,
-            insertRangeMutationParams
-        );
         const result = sequenceExecute(
             [
                 { id: InsertRowMutation.id, params: insertRowParams },
-                ...insertRangeRedo,
-                ...intercepted.redos,
                 followSelectionOperation(range, workbook, worksheet),
             ],
             commandService
@@ -133,16 +112,8 @@ export const InsertRowCommand: ICommand = {
         if (result.result) {
             undoRedoService.pushUndoRedo({
                 unitID: params.unitId,
-                undoMutations: [
-                    ...intercepted.undos,
-                    ...insertRangeUndo,
-                    { id: RemoveRowMutation.id, params: undoRowInsertionParams },
-                ],
-                redoMutations: [
-                    { id: InsertRowMutation.id, params: insertRowParams },
-                    ...insertRangeRedo,
-                    ...intercepted.redos,
-                ],
+                undoMutations: [{ id: RemoveRowMutation.id, params: undoRowInsertionParams }],
+                redoMutations: [{ id: InsertRowMutation.id, params: insertRowParams }],
             });
 
             return true;

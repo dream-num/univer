@@ -455,7 +455,7 @@ export class NumberValueObject extends BaseValueObject {
 
     override compare(valueObject: BaseValueObject, operator: compareToken): BaseValueObject {
         if (valueObject.isArray()) {
-            return (valueObject as BaseValueObject).compare(this, reverseCompareOperator(operator));
+            return valueObject.compare(this, reverseCompareOperator(operator));
         }
         return this.compareBy(valueObject.getValue(), operator);
     }

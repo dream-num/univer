@@ -499,13 +499,11 @@ export class ArrayValueObject extends BaseValueObject {
                 return false; // break
             }
 
-            if ((valueObject as BaseValueObject).isString() || (valueObject as BaseValueObject).isNull()) {
+            if (valueObject.isString() || valueObject.isNull()) {
                 return true; // continue
             }
 
-            const result = (accumulatorAll as BaseValueObject).isLessThan(
-                valueObject as BaseValueObject
-            ) as BooleanValueObject;
+            const result = accumulatorAll.isLessThan(valueObject) as BooleanValueObject;
 
             if (result.getValue()) {
                 accumulatorAll = valueObject as NumberValueObject;
@@ -528,13 +526,11 @@ export class ArrayValueObject extends BaseValueObject {
                 return false; // break
             }
 
-            if ((valueObject as BaseValueObject).isString() || (valueObject as BaseValueObject).isNull()) {
+            if (valueObject.isString() || valueObject.isNull()) {
                 return true; // continue
             }
 
-            const result = (accumulatorAll as BaseValueObject).isGreaterThan(
-                valueObject as BaseValueObject
-            ) as BooleanValueObject;
+            const result = accumulatorAll.isGreaterThan(valueObject) as BooleanValueObject;
 
             if (result.getValue()) {
                 accumulatorAll = valueObject as NumberValueObject;
@@ -551,11 +547,7 @@ export class ArrayValueObject extends BaseValueObject {
                 return true; // continue
             }
 
-            if (
-                valueObject.isError() ||
-                (valueObject as BaseValueObject).isString() ||
-                (valueObject as BaseValueObject).isNull()
-            ) {
+            if (valueObject.isError() || valueObject.isString() || valueObject.isNull()) {
                 return true; // continue
             }
             accumulatorAll = accumulatorAll.plusBy(1) as BaseValueObject;
@@ -571,11 +563,11 @@ export class ArrayValueObject extends BaseValueObject {
                 return true; // continue
             }
 
-            if ((valueObject as BaseValueObject).isNull()) {
+            if (valueObject.isNull()) {
                 return true; // continue
             }
 
-            accumulatorAll = accumulatorAll.plusBy(1) as BaseValueObject;
+            accumulatorAll = accumulatorAll.plusBy(1);
         });
 
         return accumulatorAll;
@@ -680,7 +672,7 @@ export class ArrayValueObject extends BaseValueObject {
             if (currentValue.isError()) {
                 return currentValue;
             }
-            return (valueObject as BaseValueObject).pow(currentValue);
+            return valueObject.pow(currentValue);
         });
     }
 
@@ -801,7 +793,7 @@ export class ArrayValueObject extends BaseValueObject {
             if (currentValue.isError()) {
                 return currentValue;
             }
-            return (valueObject as BaseValueObject).atan2(currentValue);
+            return valueObject.atan2(currentValue);
         });
     }
 
@@ -845,7 +837,7 @@ export class ArrayValueObject extends BaseValueObject {
                 valueObject = new NumberValueObject(0);
             }
 
-            let baseValueObject = (valueObject as BaseValueObject).minus(mean).pow(new NumberValueObject(2, true));
+            let baseValueObject = valueObject.minus(mean).pow(new NumberValueObject(2, true));
 
             if (baseValueObject.isError()) {
                 baseValueObject = new NumberValueObject(0);
@@ -928,7 +920,7 @@ export class ArrayValueObject extends BaseValueObject {
             if (currentValue.isError()) {
                 return currentValue;
             }
-            return (valueObject as BaseValueObject).round(currentValue);
+            return valueObject.round(currentValue);
         });
     }
 
@@ -941,7 +933,7 @@ export class ArrayValueObject extends BaseValueObject {
             if (currentValue.isError()) {
                 return currentValue;
             }
-            return (valueObject as BaseValueObject).floor(currentValue);
+            return valueObject.floor(currentValue);
         });
     }
 
@@ -954,7 +946,7 @@ export class ArrayValueObject extends BaseValueObject {
             if (currentValue.isError()) {
                 return currentValue;
             }
-            return (valueObject as BaseValueObject).ceil(currentValue);
+            return valueObject.ceil(currentValue);
         });
     }
 

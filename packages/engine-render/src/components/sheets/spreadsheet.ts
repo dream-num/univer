@@ -58,6 +58,8 @@ export class Spreadsheet extends SheetComponent {
 
     private _overflowCacheRuntimeTimeout: number | NodeJS.Timeout = -1;
 
+    private _forceDisableGridlines = false;
+
     private _documents: Documents = new Documents(OBJECT_KEY, undefined, {
         pageMarginLeft: 0,
         pageMarginTop: 0,
@@ -101,6 +103,14 @@ export class Spreadsheet extends SheetComponent {
 
     override getDocuments() {
         return this._documents;
+    }
+
+    get allowCache() {
+        return this._allowCache;
+    }
+
+    get forceDisableGridlines() {
+        return this._forceDisableGridlines;
     }
 
     override draw(ctx: UniverRenderingContext, bounds?: IViewportBound) {
@@ -184,6 +194,10 @@ export class Spreadsheet extends SheetComponent {
     makeForceDirty(state = true) {
         this.makeDirty(state);
         this._forceDirty = state;
+    }
+
+    setForceDisableGridlines(disabled: boolean) {
+        this._forceDisableGridlines = disabled;
     }
 
     override getSelectionBounding(startRow: number, startColumn: number, endRow: number, endColumn: number) {
@@ -452,7 +466,7 @@ export class Spreadsheet extends SheetComponent {
         const { rowColumnSegment, dataMergeCache, overflowCache, stylesCache, showGridlines } = spreadsheetSkeleton;
         const { border, backgroundPositions } = stylesCache;
         const { startRow, endRow, startColumn, endColumn } = rowColumnSegment;
-        if (!spreadsheetSkeleton || showGridlines === BooleanNumber.FALSE) {
+        if (!spreadsheetSkeleton || showGridlines === BooleanNumber.FALSE || this._forceDisableGridlines) {
             return;
         }
 
@@ -491,7 +505,7 @@ export class Spreadsheet extends SheetComponent {
         ctx.moveTo(0, 0);
         ctx.lineTo(width, 0);
 
-        for (let r = rowStart; r <= rowEnd; r++) {
+        for (let r = 0; r <= rowHeightAccumulationLength - 1; r++) {
             if (r < 0 || r > rowHeightAccumulationLength - 1) {
                 continue;
             }
@@ -502,7 +516,7 @@ export class Spreadsheet extends SheetComponent {
 
         ctx.moveTo(0, 0);
         ctx.lineTo(0, height);
-        for (let c = startColumn; c <= endColumn; c++) {
+        for (let c = 0; c <= columnWidthAccumulationLength - 1; c++) {
             if (c < 0 || c > columnWidthAccumulationLength - 1) {
                 continue;
             }
@@ -609,7 +623,7 @@ export class Spreadsheet extends SheetComponent {
                 endX = mergeInfo.endX;
             }
 
-            ctx.clearRect(startX, startY, endX - startX + 0.5, endY - startY + 0.5);
+            //ctx.clearRect(startX, startY, endX - startX + 0.5, endY - startY + 0.5);
         });
     }
 }

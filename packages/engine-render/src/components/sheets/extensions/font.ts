@@ -24,6 +24,7 @@ import type { IFontCacheItem } from '../interfaces';
 import type { SheetComponent } from '../sheet-component';
 import { getDocsSkeletonPageSize, type SpreadsheetSkeleton } from '../sheet-skeleton';
 import { SheetExtension } from './sheet-extension';
+import { Spreadsheet } from '..';
 
 const UNIQUE_KEY = 'DefaultFontExtension';
 
@@ -176,14 +177,21 @@ export class Font extends SheetExtension {
                             }
                         }
                     } else {
-                        ctx.rect(startX + 1 / scale, startY + 1 / scale, cellWidth - 2 / scale, cellHeight - 2 / scale);
-                        ctx.clip();
-                        ctx.clearRect(
-                            startX + 1 / scale,
-                            startY + 1 / scale,
-                            cellWidth - 2 / scale,
-                            cellHeight - 2 / scale
-                        );
+                        if ((this.parent as Spreadsheet).allowCache) {
+                            ctx.rect(
+                                startX + 1 / scale,
+                                startY + 1 / scale,
+                                cellWidth - 2 / scale,
+                                cellHeight - 2 / scale
+                            );
+                            ctx.clip();
+                            ctx.clearRect(
+                                startX + 1 / scale,
+                                startY + 1 / scale,
+                                cellWidth - 2 / scale,
+                                cellHeight - 2 / scale
+                            );
+                        }
                     }
 
                     ctx.translate(startX, startY);

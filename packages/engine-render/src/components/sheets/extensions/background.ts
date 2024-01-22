@@ -24,7 +24,7 @@ import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultBackgroundExtension';
 
-const DOC_EXTENSION_Z_INDEX = 40;
+const DOC_EXTENSION_Z_INDEX = 20;
 
 export class Background extends SheetExtension {
     override uKey = UNIQUE_KEY;
@@ -56,7 +56,7 @@ export class Background extends SheetExtension {
         }
         ctx.save();
 
-        ctx.globalCompositeOperation = 'destination-over';
+        // ctx.globalCompositeOperation = 'destination-over';
 
         background &&
             Object.keys(background).forEach((rgb: string) => {

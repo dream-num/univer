@@ -88,10 +88,10 @@ export class Engine extends ThinEngine<Scene> {
 
     private _isUsingFirefox = navigator.userAgent.indexOf('Firefox') !== -1;
 
-    constructor(elemWidth: number = 1, elemHeight: number = 1) {
+    constructor(elemWidth: number = 1, elemHeight: number = 1, pixelRatio?: number) {
         super();
         this._canvasEle = this._canvas.getCanvasEle();
-        this._canvas.setSize(elemWidth, elemHeight);
+        this._canvas.setSize(elemWidth, elemHeight, pixelRatio);
         this._handleKeyboardAction();
         this._handlePointerAction();
     }
@@ -144,29 +144,30 @@ export class Engine extends ThinEngine<Scene> {
         return this._canvas.getPixelRatio();
     }
 
-    setContainer(elem: HTMLElement) {
+    setContainer(elem: HTMLElement, resize = true) {
         this._container = elem;
         this._container.appendChild(this._canvasEle);
 
-        this.resize();
+        if (resize) {
+            this.resize();
 
-        let timer: number | undefined;
-        const resizeObserver = new ResizeObserver(() => {
-            if (!timer) {
-                timer = window.requestIdleCallback(() => {
-                    this.resize();
-                    timer = undefined;
-                });
-            }
-        });
+            let timer: number | undefined;
+            const resizeObserver = new ResizeObserver(() => {
+                if (!timer) {
+                    timer = window.requestIdleCallback(() => {
+                        this.resize();
+                        timer = undefined;
+                    });
+                }
+            });
+            resizeObserver.observe(this._container);
 
-        resizeObserver.observe(this._container);
-
-        this.disposeWithMe(
-            toDisposable(() => {
-                resizeObserver.unobserve(this._container as HTMLElement);
-            })
-        );
+            this.disposeWithMe(
+                toDisposable(() => {
+                    resizeObserver.unobserve(this._container as HTMLElement);
+                })
+            );
+        }
     }
 
     resize() {

@@ -30,7 +30,7 @@ import type {
     IAddWorksheetMergeMutationParams,
     IRemoveWorksheetMergeMutationParams,
 } from '../../basics/interfaces/mutation-interface';
-import { getAddMergeMutationRangeByType } from '../../controllers/merge-cell.controller';
+import { getAddMergeMutationRangeByType } from '../../controllers/merge-cell/utils';
 import { SelectionManagerService } from '../../services/selection-manager.service';
 import { AddMergeUndoMutationFactory, AddWorksheetMergeMutation } from '../mutations/add-worksheet-merge.mutation';
 import {

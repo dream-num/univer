@@ -16,7 +16,7 @@
 
 import type { ICommand, IRange } from '@univerjs/core';
 import { CommandType, ICommandService, IUniverInstanceService, LocaleService, Rectangle } from '@univerjs/core';
-import { InsertRangeMoveDownCommand, SelectionManagerService } from '@univerjs/sheets';
+import { InsertRangeMoveDownCommand, MergeCellService, SelectionManagerService } from '@univerjs/sheets';
 import { IConfirmService } from '@univerjs/ui';
 
 export const InsertRangeMoveDownConfirmCommand: ICommand = {
@@ -28,7 +28,7 @@ export const InsertRangeMoveDownConfirmCommand: ICommand = {
         const localeService = accessor.get(LocaleService);
         const selectionManagerService = accessor.get(SelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-
+        const mergeCellService = accessor.get(MergeCellService);
         const selection = selectionManagerService.getSelections();
         if (!selection) {
             return false;
@@ -43,10 +43,12 @@ export const InsertRangeMoveDownConfirmCommand: ICommand = {
         range = { ...range, endRow: worksheet.getColumnCount() - 1 };
 
         const getColLength = (range: IRange) => range.endColumn - range.startColumn;
-        const mergeData = worksheet.getMergeData().find((mergeRange) => {
-            const interSectedRange = Rectangle.getIntersects(mergeRange, range);
-            return interSectedRange ? getColLength(mergeRange) > getColLength(interSectedRange) : false;
-        });
+        const mergeData = mergeCellService
+            .getMergeData(workbook.getUnitId(), worksheet.getSheetId())
+            .find((mergeRange) => {
+                const interSectedRange = Rectangle.getIntersects(mergeRange, range);
+                return interSectedRange ? getColLength(mergeRange) > getColLength(interSectedRange) : false;
+            });
 
         if (!mergeData) {
             return commandService.executeCommand(InsertRangeMoveDownCommand.id);

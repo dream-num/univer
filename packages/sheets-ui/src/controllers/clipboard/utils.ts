@@ -109,6 +109,7 @@ export function getMoveRangeMutations(
     if (fromRange && toRange) {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
+        const mergeCellService = accessor.get(MergeCellService);
         const workbook = univerInstanceService.getUniverSheetInstance(unitId);
         const fromWorksheet = workbook?.getSheetBySheetId(fromSubUnitId);
         const toWorksheet = workbook?.getSheetBySheetId(toSubUnitId);
@@ -171,8 +172,8 @@ export function getMoveRangeMutations(
             });
 
             // handle merge mutations
-            const fromMergeData = fromWorksheet.getMergeData();
-            const toMergeData = toWorksheet.getMergeData();
+            const fromMergeData = mergeCellService.getMergeData(unitId, fromSubUnitId);
+            const toMergeData = mergeCellService.getMergeData(unitId, toSubUnitId);
             const fromMergeRanges = fromMergeData.filter((item) => Rectangle.intersects(item, fromRange));
             const toMergeRanges = toMergeData.filter((item) => Rectangle.intersects(item, toRange));
 

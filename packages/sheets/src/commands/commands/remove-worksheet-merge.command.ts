@@ -22,6 +22,7 @@ import type {
     IAddWorksheetMergeMutationParams,
     IRemoveWorksheetMergeMutationParams,
 } from '../../basics/interfaces/mutation-interface';
+import { MergeCellService } from '../../services/merge-cell/merge-cell.service';
 import { SelectionManagerService } from '../../services/selection-manager.service';
 import { AddWorksheetMergeMutation } from '../mutations/add-worksheet-merge.mutation';
 import {
@@ -37,6 +38,7 @@ export const RemoveWorksheetMergeCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
+        const mergeCellService = accessor.get(MergeCellService);
 
         const selections = selectionManagerService.getSelectionRanges();
         if (!selections?.length) return false;
@@ -60,7 +62,7 @@ export const RemoveWorksheetMergeCommand: ICommand = {
 
         // 范围内没有合并单元格return
         let hasMerge = false;
-        const mergeData = worksheet.getConfig().mergeData;
+        const mergeData = mergeCellService.getMergeData(unitId, subUnitId);
         selections.forEach((selection) => {
             mergeData.forEach((merge) => {
                 if (Rectangle.intersects(selection, merge)) {

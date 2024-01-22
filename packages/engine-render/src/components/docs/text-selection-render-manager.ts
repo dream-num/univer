@@ -472,6 +472,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         if (position == null) {
             this._removeAllTextRanges();
+
             return;
         }
 
@@ -479,12 +480,14 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             position.isBack = true;
         }
 
-        if (evt.ctrlKey || this._isEmpty()) {
+        if (evt.shiftKey && this._getActiveRangeInstance()) {
+            this._updateActiveRangeFocusPosition(position);
+        } else if (evt.ctrlKey || this._isEmpty()) {
             const newTextSelection = new TextRange(scene, this._document!, this._docSkeleton!, position);
 
             this._addTextRange(newTextSelection);
         } else {
-            this._updateTextRangePosition(position);
+            this._updateTextRangeAnchorPosition(position);
         }
 
         this._activeSelectionRefresh();
@@ -786,7 +789,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         this._rangeList.push(textRange);
     }
 
-    private _updateTextRangePosition(position: INodePosition) {
+    private _updateTextRangeAnchorPosition(position: INodePosition) {
         if (!this._scene) {
             return;
         }
@@ -802,6 +805,25 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         lastRange.anchorNodePosition = position;
         lastRange.focusNodePosition = null;
         this._rangeList = [lastRange];
+    }
+
+    private _updateActiveRangeFocusPosition(position: INodePosition) {
+        if (!this._scene) {
+            return;
+        }
+
+        const activeTextRange = this._getActiveRangeInstance();
+
+        if (activeTextRange == null || activeTextRange.anchorNodePosition == null) {
+            return;
+        }
+
+        this._removeAllTextRanges();
+        activeTextRange.activate();
+        activeTextRange.focusNodePosition = position;
+
+        this.deactivate();
+        this._rangeList = [activeTextRange];
     }
 
     private _isEmpty() {

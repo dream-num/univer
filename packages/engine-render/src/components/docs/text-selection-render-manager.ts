@@ -360,6 +360,8 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         this._activeViewport = scene.getViewports()[0];
 
         this._document = document;
+
+        this._attachScrollEvent(this._activeViewport);
     }
 
     // Handler double click.
@@ -463,10 +465,6 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         const scene = this._scene;
 
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
-
-        this._attachScrollEvent(
-            this._activeViewport || scene.getActiveViewportByCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]))
-        );
 
         const startNode = this._findNodeByCoord(evtOffsetX, evtOffsetY);
 
@@ -916,10 +914,12 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
     }
 
     private _attachScrollEvent(viewport: Nullable<Viewport>) {
-        if (viewport == null) {
+        if (viewport == null || this._docSkeleton == null) {
             return;
         }
-        const key = viewport.viewPortKey;
+        const unitId = this._docSkeleton.getViewModel().getDataModel().getUnitId();
+        const key = `${unitId}_${viewport.viewPortKey}`;
+
         if (this._viewPortObserverMap.has(key)) {
             return;
         }

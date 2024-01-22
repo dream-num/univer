@@ -27,6 +27,8 @@ export class If extends BaseFunction {
         }
 
         logicalTest = logicalTest.isArray() ? (logicalTest as ArrayValueObject).getFirstCell() : logicalTest;
+        valueIfTrue = valueIfTrue.isArray() ? (valueIfTrue as ArrayValueObject).getFirstCell() : valueIfTrue;
+        valueIfFalse = valueIfFalse?.isArray() ? (valueIfFalse as ArrayValueObject).getFirstCell() : valueIfFalse;
         valueIfFalse = valueIfFalse ?? new BooleanValueObject(false);
 
         return logicalTest.getValue() ? valueIfTrue : valueIfFalse;

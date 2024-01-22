@@ -28,66 +28,43 @@ import { Address } from '..';
 
 describe('Test address', () => {
     const textFunction = new Address(FUNCTION_NAMES_LOOKUP.ADDRESS);
+    const calculate = (row: number, column: number, abs?: number, a1?: boolean, sheet?: string) => {
+        const rowNumber = new NumberValueObject(row);
+        const columnNumber = new NumberValueObject(column);
+        const absNumber = abs ? new NumberValueObject(abs) : undefined;
+        const a1Value = a1 !== undefined ? new BooleanValueObject(a1) : undefined;
+        const sheetText = sheet ? new StringValueObject(sheet) : undefined;
+        const result = textFunction.calculate(rowNumber, columnNumber, absNumber, a1Value, sheetText);
+        return result.getValue();
+    };
 
     describe('Correct situations', () => {
         it('Absolute reference', async () => {
-            const rowNumber = new NumberValueObject(2);
-            const columnNumber = new NumberValueObject(3);
-            const result = textFunction.calculate(rowNumber, columnNumber);
-            expect(result.getValue()).toBe('$C$2');
+            expect(calculate(2, 3)).toBe('$C$2');
         });
 
         it('Absolute row; relative column', async () => {
-            const rowNumber = new NumberValueObject(2);
-            const columnNumber = new NumberValueObject(3);
-            const absNumber = new NumberValueObject(2);
-            const result = textFunction.calculate(rowNumber, columnNumber, absNumber);
-            expect(result.getValue()).toBe('C$2');
+            expect(calculate(2, 3, 2)).toBe('C$2');
         });
 
         it('Relative row; absolute column', async () => {
-            const rowNumber = new NumberValueObject(2);
-            const columnNumber = new NumberValueObject(3);
-            const absNumber = new NumberValueObject(3);
-            const result = textFunction.calculate(rowNumber, columnNumber, absNumber);
-            expect(result.getValue()).toBe('$C2');
+            expect(calculate(2, 3, 3)).toBe('$C2');
         });
 
         it('Relative reference', async () => {
-            const rowNumber = new NumberValueObject(2);
-            const columnNumber = new NumberValueObject(3);
-            const absNumber = new NumberValueObject(4);
-            const result = textFunction.calculate(rowNumber, columnNumber, absNumber);
-            expect(result.getValue()).toBe('C2');
+            expect(calculate(2, 3, 4)).toBe('C2');
         });
 
         it('Absolute row; relative column in R1C1 reference style', async () => {
-            const rowNumber = new NumberValueObject(2);
-            const columnNumber = new NumberValueObject(3);
-            const absNumber = new NumberValueObject(2);
-            const a1 = new BooleanValueObject(false);
-            const result = textFunction.calculate(rowNumber, columnNumber, absNumber, a1);
-            expect(result.getValue()).toBe('R2C[3]');
+            expect(calculate(2, 3, 2, false)).toBe('R2C[3]');
         });
 
         it('Absolute reference to another workbook and worksheet', async () => {
-            const rowNumber = new NumberValueObject(2);
-            const columnNumber = new NumberValueObject(3);
-            const absNumber = new NumberValueObject(1);
-            const a1 = new BooleanValueObject(false);
-            const sheetText = new StringValueObject('[Book1]Sheet1');
-            const result = textFunction.calculate(rowNumber, columnNumber, absNumber, a1, sheetText);
-            expect(result.getValue()).toBe("'[Book1]Sheet1'!R2C3");
+            expect(calculate(2, 3, 1, false, '[Book1]Sheet1')).toBe("'[Book1]Sheet1'!R2C3");
         });
 
         it('Absolute reference to another worksheet', async () => {
-            const rowNumber = new NumberValueObject(2);
-            const columnNumber = new NumberValueObject(3);
-            const absNumber = new NumberValueObject(1);
-            const a1 = new BooleanValueObject(false);
-            const sheetText = new StringValueObject('EXCEL SHEET');
-            const result = textFunction.calculate(rowNumber, columnNumber, absNumber, a1, sheetText);
-            expect(result.getValue()).toBe("'EXCEL SHEET'!R2C3");
+            expect(calculate(2, 3, 1, false, 'EXCEL SHEET')).toBe("'EXCEL SHEET'!R2C3");
         });
     });
 

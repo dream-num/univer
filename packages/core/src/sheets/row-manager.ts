@@ -66,9 +66,9 @@ export class RowManager {
                 hd: BooleanNumber.FALSE,
                 h: config.defaultRowHeight,
             };
-            const { isAutoHeight, ah, h = config.defaultRowHeight } = row;
+            const { ia, ah, h = config.defaultRowHeight } = row;
 
-            height += (isAutoHeight == null || !!isAutoHeight) && typeof ah === 'number' ? ah : h;
+            height += (ia == null || ia === BooleanNumber.TRUE) && typeof ah === 'number' ? ah : h;
         }
 
         return height;

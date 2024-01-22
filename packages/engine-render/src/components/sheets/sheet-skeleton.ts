@@ -413,8 +413,8 @@ export class SpreadsheetSkeleton extends Skeleton {
                     continue;
                 }
 
-                // The row sets isAutoHeight to false, and there is no need to calculate the automatic row height for the row.
-                if (rowObjectArray[rowIndex]?.isAutoHeight === false) {
+                // The row sets ia to false, and there is no need to calculate the automatic row height for the row.
+                if (rowObjectArray[rowIndex]?.ia === BooleanNumber.FALSE) {
                     continue;
                 }
 
@@ -1330,8 +1330,8 @@ export class SpreadsheetSkeleton extends Skeleton {
                 if (!rowDataItem) {
                     continue;
                 }
-                const { h = defaultRowHeight, ah, isAutoHeight } = rowDataItem;
-                if ((isAutoHeight == null || !!isAutoHeight) && typeof ah === 'number') {
+                const { h = defaultRowHeight, ah, ia } = rowDataItem;
+                if ((ia == null || ia === BooleanNumber.TRUE) && typeof ah === 'number') {
                     rowHeight = ah;
                 } else {
                     rowHeight = h;

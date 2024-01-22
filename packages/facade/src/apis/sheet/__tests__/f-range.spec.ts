@@ -79,7 +79,7 @@ describe('Test FRange', () => {
     });
 
     it('Range setValue', () => {
-        const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+        const activeSheet = univerAPI.getActiveSheet()?.getActiveSheet();
 
         // A1 sets the number
         const range1 = activeSheet?.getRange(0, 0, 1, 1);
@@ -117,7 +117,7 @@ describe('Test FRange', () => {
     });
 
     it('Range setValues', () => {
-        const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+        const activeSheet = univerAPI.getActiveSheet()?.getActiveSheet();
 
         // B3:C4 sets value
         const range1 = activeSheet?.getRange(2, 1, 2, 2);
@@ -176,7 +176,7 @@ describe('Test FRange', () => {
     });
 
     it('Range setFontWeight', () => {
-        const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+        const activeSheet = univerAPI.getActiveSheet()?.getActiveSheet();
 
         // change A1 font weight
         const range = activeSheet?.getRange(0, 0, 1, 1);

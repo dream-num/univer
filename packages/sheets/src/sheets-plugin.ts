@@ -21,7 +21,8 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { BasicWorksheetController } from './controllers/basic-worksheet.controller';
 import { CalculateResultApplyController } from './controllers/calculate-result-apply.controller';
 import { FeatureCalculationController } from './controllers/feature-calculation.controller';
-import { MergeCellController } from './controllers/merge-cell.controller';
+import { MergeCellInterceptorController } from './controllers/merge-cell/merge-cell.interceptor';
+import { MergeCellRefRangeController } from './controllers/merge-cell/merge-cell.ref-range';
 import { zhCN } from './locale';
 import { BorderStyleManagerService } from './services/border-style-manager.service';
 import { MergeCellService } from './services/merge-cell/merge-cell.service';
@@ -73,8 +74,9 @@ export class UniverSheetsPlugin extends Plugin {
 
             // controllers
             [BasicWorksheetController],
-            [MergeCellController],
+            [MergeCellInterceptorController],
             [MergeCellService],
+            [MergeCellRefRangeController],
         ];
 
         if (!this._config?.notExecuteFormula) {

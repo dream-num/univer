@@ -15,24 +15,18 @@
  */
 
 import type { ICellData, ICommandInfo, IMutationCommonParams, Nullable } from '@univerjs/core';
-import { Dimension, isFormulaId, isFormulaString, ObjectMatrix, UndoCommand } from '@univerjs/core';
+import { isFormulaId, isFormulaString, ObjectMatrix, UndoCommand } from '@univerjs/core';
 import type { IArrayFormulaRangeType, IArrayFormulaUnitCellType, IFormulaData } from '@univerjs/engine-formula';
 import {
-    DeleteRangeMutation,
-    handleDeleteRangeMutation,
-    handleInsertRangeMutation,
-    type IDeleteRangeMutationParams,
-    type IInsertRangeMutationParams,
     type IMoveColumnsMutationParams,
     type IMoveRangeMutationParams,
     type IMoveRowsMutationParams,
-    InsertRangeMutation,
     MoveColsMutation,
     MoveRangeMutation,
     MoveRowsMutation,
 } from '@univerjs/sheets';
 
-import { moveRangeUpdateFormulaData, removeFormulaArrayColumn, removeFormulaArrayRow } from './offset-formula-data';
+import { moveRangeUpdateFormulaData } from './offset-formula-data';
 
 export function handleRedoUndoMutation(
     command: ICommandInfo,
@@ -61,25 +55,6 @@ export function handleRedoUndoMutation(
         case MoveColsMutation.id:
             handleRedoUndoMoveCols(
                 command as ICommandInfo<IMoveColumnsMutationParams>,
-                formulaData,
-                arrayFormulaRange,
-                arrayFormulaCellData
-            );
-            break;
-        // RemoveRowMutation and RemoveColMutation usually appear together with DeleteRangeMutation. We only need to deal with DeleteRangeMutation.
-        case DeleteRangeMutation.id:
-            handleRedoUndoDeleteRange(
-                command as ICommandInfo<IDeleteRangeMutationParams>,
-                formulaData,
-                arrayFormulaRange,
-                arrayFormulaCellData
-            );
-            break;
-
-        // InsertRowMutation and InsertColMutation usually appear together with InsertRangeMutation. We only need to deal with InsertRangeMutation.
-        case InsertRangeMutation.id:
-            handleRedoUndoInsertRange(
-                command as ICommandInfo<IInsertRangeMutationParams>,
                 formulaData,
                 arrayFormulaRange,
                 arrayFormulaCellData
@@ -215,85 +190,3 @@ function handleRedoUndoMoveCols(
     arrayFormulaRange: IArrayFormulaRangeType,
     arrayFormulaCellData: IArrayFormulaUnitCellType
 ) {}
-
-export function handleRedoUndoDeleteRange(
-    command: ICommandInfo<IDeleteRangeMutationParams>,
-    formulaData: IFormulaData,
-    arrayFormulaRange: IArrayFormulaRangeType,
-    arrayFormulaCellData: IArrayFormulaUnitCellType
-) {
-    const { params } = command;
-    if (!params) return;
-
-    const { unitId, subUnitId, range, shiftDimension } = params;
-
-    const formulaMatrix = new ObjectMatrix(formulaData?.[unitId]?.[subUnitId] ?? {});
-    const formulaCellDataMatrix = new ObjectMatrix(arrayFormulaCellData?.[unitId]?.[subUnitId] ?? {});
-    const formulaRangeMatrix = new ObjectMatrix(arrayFormulaRange?.[unitId]?.[subUnitId] ?? {});
-
-    if (shiftDimension === Dimension.ROWS) {
-        const lastEndRow = formulaMatrix.getLength() - 1;
-        const lastEndColumn = formulaMatrix.getRange().endColumn;
-
-        // set formulaData
-        handleDeleteRangeMutation(formulaMatrix, range, lastEndRow, lastEndColumn, Dimension.ROWS);
-
-        // set formulaCellData
-        removeFormulaArrayRow(range, formulaCellDataMatrix, formulaRangeMatrix);
-
-        // set formulaRange
-        removeFormulaArrayRow(range, formulaRangeMatrix, formulaRangeMatrix);
-    } else if (shiftDimension === Dimension.COLUMNS) {
-        const lastEndRow = formulaMatrix.getLength() - 1;
-        const lastEndColumn = formulaMatrix.getRange().endColumn;
-
-        handleDeleteRangeMutation(formulaMatrix, range, lastEndRow, lastEndColumn, Dimension.COLUMNS);
-
-        // set formulaCellData
-        removeFormulaArrayColumn(range, formulaCellDataMatrix, formulaRangeMatrix);
-
-        // set formulaRange
-        removeFormulaArrayColumn(range, formulaRangeMatrix, formulaRangeMatrix);
-    }
-}
-
-export function handleRedoUndoInsertRange(
-    command: ICommandInfo<IInsertRangeMutationParams>,
-    formulaData: IFormulaData,
-    arrayFormulaRange: IArrayFormulaRangeType,
-    arrayFormulaCellData: IArrayFormulaUnitCellType
-) {
-    const { params } = command;
-    if (!params) return;
-
-    const { unitId, subUnitId, range, shiftDimension } = params;
-
-    const formulaMatrix = new ObjectMatrix(formulaData?.[unitId]?.[subUnitId] ?? {});
-    const formulaCellDataMatrix = new ObjectMatrix(arrayFormulaCellData?.[unitId]?.[subUnitId] ?? {});
-    const formulaRangeMatrix = new ObjectMatrix(arrayFormulaRange?.[unitId]?.[subUnitId] ?? {});
-
-    if (shiftDimension === Dimension.ROWS) {
-        const lastEndRow = formulaMatrix.getLength() - 1;
-        const lastEndColumn = formulaMatrix.getRange().endColumn;
-
-        // set formulaData
-        handleInsertRangeMutation(formulaMatrix, range, lastEndRow, lastEndColumn, Dimension.ROWS);
-
-        // set formulaCellData
-        removeFormulaArrayRow(range, formulaCellDataMatrix, formulaRangeMatrix);
-
-        // set formulaRange
-        removeFormulaArrayRow(range, formulaRangeMatrix, formulaRangeMatrix);
-    } else if (shiftDimension === Dimension.COLUMNS) {
-        const lastEndRow = formulaMatrix.getLength() - 1;
-        const lastEndColumn = formulaMatrix.getRange().endColumn;
-
-        handleInsertRangeMutation(formulaMatrix, range, lastEndRow, lastEndColumn, Dimension.COLUMNS);
-
-        // set formulaCellData
-        removeFormulaArrayColumn(range, formulaCellDataMatrix, formulaRangeMatrix);
-
-        // set formulaRange
-        removeFormulaArrayColumn(range, formulaRangeMatrix, formulaRangeMatrix);
-    }
-}

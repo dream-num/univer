@@ -21,7 +21,7 @@ import { includeFormulaLexerToken } from '../../basics/match-token';
 
 // export const UNIT_NAME_REGEX = '\'?\\[((?![\\/?:"<>|*\\\\]).)*?\\]';
 // export const UNIT_NAME_REGEX = '\\[((?![\\/?:"<>|*\\\\]).)*?\\]';
-export const UNIT_NAME_REGEX = '\\[([^\\/?:"<>|*\\\\]+)\\]'; // '[Book-1.xlsx]Sheet1'!$A$4 gets [Book-1.xlsx] as unitId
+export const UNIT_NAME_REGEX = '\\[([^\\[\\]\\/?:"<>|*\\\\]+)\\]'; // '[Book-1.xlsx]Sheet1'!$A$4 gets [Book-1.xlsx] as unitId
 
 const $ROW_REGEX = /[^0-9]/g;
 const $COLUMN_REGEX = /[^A-Za-z]/g;

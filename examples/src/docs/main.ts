@@ -21,7 +21,7 @@ import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UniverUIPlugin } from '@univerjs/ui';
 
-import { DEFAULT_DOCUMENT_DATA_CN } from '../data';
+import { DEFAULT_DOCUMENT_DATA_SIMPLE } from '../data';
 import { DebuggerPlugin } from '../plugins/debugger';
 import { locales } from './locales';
 
@@ -61,7 +61,7 @@ univer.registerPlugin(UniverDocsUIPlugin, {
     },
 });
 
-univer.createUniverDoc(DEFAULT_DOCUMENT_DATA_CN);
+univer.createUniverDoc(DEFAULT_DOCUMENT_DATA_SIMPLE);
 
 // use for console test
 declare global {

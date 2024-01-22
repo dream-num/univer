@@ -167,7 +167,6 @@ export function dealWidthParagraph(
     while ((bk = breaker.nextBreak())) {
         // get the string between the last break and this one
         const word = content.slice(last, bk.position);
-
         let src = word;
         let i = last;
         let spanGroup: IDocumentSkeletonSpan[] = [];

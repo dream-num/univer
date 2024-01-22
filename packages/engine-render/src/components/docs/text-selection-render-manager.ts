@@ -15,7 +15,7 @@
  */
 
 import type { Nullable, Observer } from '@univerjs/core';
-import { DataStreamTreeTokenType, RxDisposable } from '@univerjs/core';
+import { DataStreamTreeTokenType, ILogService, RxDisposable } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
@@ -258,7 +258,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
     private _document: Nullable<Documents>;
 
-    constructor() {
+    constructor(@ILogService private readonly _logService: ILogService) {
         super();
 
         this._initDOM();
@@ -809,12 +809,18 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
     private _updateActiveRangeFocusPosition(position: INodePosition) {
         if (!this._scene) {
+            this._logService.error('[TextSelectionRenderManager] _updateActiveRangeFocusPosition: scene is null');
+
             return;
         }
 
         const activeTextRange = this._getActiveRangeInstance();
 
         if (activeTextRange == null || activeTextRange.anchorNodePosition == null) {
+            this._logService.error(
+                '[TextSelectionRenderManager] _updateActiveRangeFocusPosition: active range has no anchor'
+            );
+
             return;
         }
 

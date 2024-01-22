@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-import { FUNCTION_NAMES_LOGICAL } from './function-names';
-import { If } from './if';
-import { Lambda } from './lambda';
-import { Makearray } from './makearray';
+import { describe, it } from 'vitest';
 
-export const functionLogical = [
-    [Lambda, FUNCTION_NAMES_LOGICAL.LAMBDA],
-    [Makearray, FUNCTION_NAMES_LOGICAL.MAKEARRAY],
-    [If, FUNCTION_NAMES_LOGICAL.IF],
-];
+import { FUNCTION_NAMES_LOGICAL } from '../../function-names';
+import { If } from '..';
+
+describe('Test if function', () => {
+    const textFunction = new If(FUNCTION_NAMES_LOGICAL.IF);
+
+    describe('If', () => {
+        it('LogicalTest and valueIfTrue', async () => {});
+    });
+});

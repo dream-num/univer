@@ -81,8 +81,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            logicalTest: { name: 'logical_test', detail: 'テストする条件' },
+            valueIfTrue: { name: 'value_if_true', detail: 'logical_test の結果が TRUE の場合に返す値' },
+            valueIfFalse: { name: 'value_if_false', detail: 'logical_test の結果が FALSE の場合に返す値' },
         },
     },
     IFERROR: {

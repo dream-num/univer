@@ -21,11 +21,11 @@ import { ArrayValueObject, transformToValue } from '../../../../engine/value-obj
 import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { Sumif } from '..';
 
-describe('test sumif', () => {
+describe('Test sumif function', () => {
     const textFunction = new Sumif(FUNCTION_NAMES_MATH.SUMIF);
 
-    describe('sumif', () => {
-        it('range and criteria', async () => {
+    describe('Sumif', () => {
+        it('Range and criteria', async () => {
             const range = new ArrayValueObject(/*ts*/ `{
                 1;
                 4;
@@ -39,7 +39,7 @@ describe('test sumif', () => {
             expect(resultObject.getValue()).toBe(488);
         });
 
-        it('sum range with wildcard asterisk', async () => {
+        it('Sum range with wildcard asterisk', async () => {
             const range = new ArrayValueObject(/*ts*/ `{
                 Ada;
                 test1;

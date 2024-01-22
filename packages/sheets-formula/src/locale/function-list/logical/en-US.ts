@@ -81,8 +81,15 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            logicalTest: { name: 'logical_test', detail: 'The condition you want to test.' },
+            valueIfTrue: {
+                name: 'value_if_true',
+                detail: 'The value that you want returned if the result of logical_test is TRUE.',
+            },
+            valueIfFalse: {
+                name: 'value_if_false',
+                detail: 'The value that you want returned if the result of logical_test is FALSE.',
+            },
         },
     },
     IFERROR: {

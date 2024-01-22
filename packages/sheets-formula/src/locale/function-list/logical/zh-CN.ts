@@ -81,8 +81,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            logicalTest: { name: 'logical_test', detail: '要测试的条件。' },
+            valueIfTrue: { name: 'value_if_true', detail: 'logical_test 的结果为 TRUE 时，您希望返回的值。' },
+            valueIfFalse: { name: 'value_if_false', detail: 'logical_test 的结果为 FALSE 时，您希望返回的值。' },
         },
     },
     IFERROR: {

@@ -206,6 +206,7 @@ export class CommandService implements ICommandService {
         @ILogService private readonly _logService: ILogService
     ) {
         this._commandRegistry = new CommandRegistry();
+        this._registerCommand(NilCommand);
     }
 
     registerCommand(command: ICommand): IDisposable {
@@ -467,3 +468,9 @@ export function sequenceExecuteAsync(
     const promises = tasks.map((task) => () => commandService.executeCommand(task.id, task.params, options));
     return sequenceAsync(promises);
 }
+
+export const NilCommand: ICommand = {
+    id: 'nil',
+    type: CommandType.COMMAND,
+    handler: () => true,
+};

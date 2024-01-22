@@ -50,6 +50,7 @@ export {
     type IMutationInfo,
     type IOperation,
     type IOperationInfo,
+    NilCommand,
     sequenceExecute,
     sequenceExecuteAsync,
 } from './services/command/command.service';

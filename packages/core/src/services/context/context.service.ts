@@ -15,23 +15,24 @@
  */
 
 import { createIdentifier } from '@wendellhu/redi';
-import type { Observable } from 'rxjs';
-import { Subject } from 'rxjs';
+import { filter, Observable, Subject } from 'rxjs';
 
 import { Disposable } from '../../shared/lifecycle';
 
 export interface IContextService {
-    readonly contextChanged$: Observable<void>;
+    readonly contextChanged$: Observable<{ [key: string]: boolean }>;
 
     getContextValue(key: string): boolean;
     setContextValue(key: string, value: boolean): void;
+
+    subscribeContextValue$(key: string): Observable<boolean>;
 }
 
 export const IContextService = createIdentifier<IContextService>('univer.context-service');
 
 export class ContextService extends Disposable implements IContextService {
-    private _contextChanged$ = new Subject<void>();
-    contextChanged$: Observable<void> = this._contextChanged$.asObservable();
+    private _contextChanged$ = new Subject<{ [key: string]: boolean }>();
+    readonly contextChanged$ = this._contextChanged$.asObservable();
 
     private readonly _contextMap = new Map<string, boolean>();
 
@@ -46,6 +47,20 @@ export class ContextService extends Disposable implements IContextService {
 
     setContextValue(key: string, value: boolean): void {
         this._contextMap.set(key, value);
-        this._contextChanged$.next();
+        this._contextChanged$.next({ [key]: value });
+    }
+
+    subscribeContextValue$(key: string): Observable<boolean> {
+        return new Observable((observer) => {
+            const contextChangeSubscription = this._contextChanged$
+                .pipe(filter((event) => typeof event[key] !== 'undefined'))
+                .subscribe((event) => observer.next(event[key]));
+
+            if (this._contextMap.has(key)) {
+                observer.next(this._contextMap.get(key) as boolean);
+            }
+
+            return () => contextChangeSubscription.unsubscribe();
+        });
     }
 }

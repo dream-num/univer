@@ -213,7 +213,14 @@ import {
     SetUnderlineShortcutItem,
 } from './shortcuts/style.shortcut';
 import { ClearSelectionValueShortcutItem } from './shortcuts/value.shortcut';
-import { ResetZoomShortcutItem, ZoomInShortcutItem, ZoomOutShortcutItem } from './shortcuts/view.shortcut';
+import {
+    PreventDefaultResetZoomShortcutItem,
+    PreventDefaultZoomInShortcutItem,
+    PreventDefaultZoomOutShortcutItem,
+    ResetZoomShortcutItem,
+    ZoomInShortcutItem,
+    ZoomOutShortcutItem,
+} from './shortcuts/view.shortcut';
 
 @OnLifecycle(LifecycleStages.Ready, SheetUIController)
 export class SheetUIController extends Disposable {
@@ -409,6 +416,9 @@ export class SheetUIController extends Disposable {
             ZoomInShortcutItem,
             ZoomOutShortcutItem,
             ResetZoomShortcutItem,
+            PreventDefaultResetZoomShortcutItem,
+            PreventDefaultZoomInShortcutItem,
+            PreventDefaultZoomOutShortcutItem,
 
             // toggle cell style shortcuts
             SetBoldShortcutItem,

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { IContextService, LocaleService } from '@univerjs/core';
+import { LocaleService } from '@univerjs/core';
 import { Button, FormLayout, Input, InputWithSlot, Pager, Select, useObservable } from '@univerjs/design';
 import { LayoutService } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
@@ -29,7 +29,6 @@ const FIND_THROTTLE_TIME = 500;
 export function FindReplaceDialog() {
     const findReplaceService = useDependency(IFindReplaceService);
     const localeService = useDependency(LocaleService);
-    const contextService = useDependency(IContextService);
     const layoutService = useDependency(LayoutService);
 
     const [findString, setFindString] = useState<string>('');
@@ -37,7 +36,7 @@ export function FindReplaceDialog() {
 
     const dialogContainerRef = useRef<HTMLDivElement>(null);
 
-    const state = useObservable(findReplaceService.state$);
+    const state = useObservable(findReplaceService.state$, true);
     const { matchesCount, matchesPosition } = state;
     const revealReplace = useCallback(() => findReplaceService.revealReplace(), [findReplaceService]);
 

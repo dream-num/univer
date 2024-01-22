@@ -18,7 +18,7 @@ import { AbsoluteRefType, type IRange } from '@univerjs/core';
 
 import { ErrorType } from '../../../basics/error-type';
 import { serializeRangeToR1C1 } from '../../../engine/utils/r1c1-reference';
-import { serializeRange } from '../../../engine/utils/reference';
+import { needsQuoting, serializeRange } from '../../../engine/utils/reference';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -52,6 +52,9 @@ export class Address extends BaseFunction {
 
         const a1Value = this.getZeroOrOneByOneDefault(a1);
 
+        const sheetTextValue = sheetText ? `${sheetText.getValue()}` : '';
+        const sheetName = needsQuoting(sheetTextValue) ? `'${sheetTextValue}'` : sheetTextValue;
+
         const range: IRange = {
             startRow: row,
             startColumn: column,
@@ -62,7 +65,7 @@ export class Address extends BaseFunction {
         };
 
         const rangeString = a1 && !a1Value ? serializeRangeToR1C1(range) : serializeRange(range);
-        return new StringValueObject(rangeString);
+        return new StringValueObject(sheetName !== '' ? `${sheetName}!${rangeString}` : rangeString);
     }
 }
 

@@ -83,7 +83,7 @@ describe('Test Reference R1C1', () => {
                 startAbsoluteRefType: AbsoluteRefType.ROW,
                 endAbsoluteRefType: AbsoluteRefType.ROW,
             };
-            expect(serializeRangeToR1C1(range)).toEqual('R[2]C2:R[3]C3');
+            expect(serializeRangeToR1C1(range)).toEqual('R2C[2]:R3C[3]');
         });
 
         it('should handle absolute column references', () => {
@@ -95,7 +95,7 @@ describe('Test Reference R1C1', () => {
                 startAbsoluteRefType: AbsoluteRefType.COLUMN,
                 endAbsoluteRefType: AbsoluteRefType.COLUMN,
             };
-            expect(serializeRangeToR1C1(range)).toEqual('R2C[2]:R3C[3]');
+            expect(serializeRangeToR1C1(range)).toEqual('R[2]C2:R[3]C3');
         });
 
         it('should handle all absolute references', () => {
@@ -107,9 +107,27 @@ describe('Test Reference R1C1', () => {
                 startAbsoluteRefType: AbsoluteRefType.ALL,
                 endAbsoluteRefType: AbsoluteRefType.ALL,
             };
+            expect(serializeRangeToR1C1(range)).toEqual('R2C2:R3C3');
+        });
+        it('should handle all absolute references', () => {
+            const range: IRange = {
+                startRow: 1,
+                startColumn: 1,
+                endRow: 2,
+                endColumn: 2,
+                startAbsoluteRefType: AbsoluteRefType.NONE,
+                endAbsoluteRefType: AbsoluteRefType.NONE,
+            };
             expect(serializeRangeToR1C1(range)).toEqual('R[2]C[2]:R[3]C[3]');
         });
-
-        // Additional tests can be added to cover more scenarios
+        it('should handle all absolute references', () => {
+            const range: IRange = {
+                startRow: 1,
+                startColumn: 1,
+                endRow: 2,
+                endColumn: 2,
+            };
+            expect(serializeRangeToR1C1(range)).toEqual('R2C2:R3C3');
+        });
     });
 });

@@ -329,20 +329,14 @@ export function needsQuoting(name: string) {
     }
 
     // Check if the name starts with a non-letter
-    if (startsWithNonLetter(name)) {
+    if (startsWithNonAlphabetic(name)) {
         return true;
     }
 
     // Check for spaces, punctuation and special characters
 
     // eslint-disable-next-line no-misleading-character-class, no-useless-escape
-    if (/[\s!$%^&*()+\-=\[\]{};':"\\|,.<>\/?💩]/.test(name)) {
-        return true;
-    }
-
-    // Check if name contains single quotes
-    // eslint-disable-next-line no-useless-escape
-    if (/\'/.test(name)) {
+    if (/[\s!$%^&*()+\-=\[\]{};':"\\|,.<>\/?]/.test(name)) {
         return true;
     }
 
@@ -358,6 +352,7 @@ function isR1C1Notation(name: string) {
     return /^(R(-?[0-9]+)?C(-?[0-9]+)?|C(-?[0-9]+)?|R(-?[0-9]+)?)$/.test(name);
 }
 
-function startsWithNonLetter(name: string) {
-    return !/^[A-Za-z]/.test(name);
+function startsWithNonAlphabetic(name: string) {
+    // Check if the first character is not a letter (including non-English characters)
+    return !/^\p{Letter}/u.test(name.charAt(0));
 }

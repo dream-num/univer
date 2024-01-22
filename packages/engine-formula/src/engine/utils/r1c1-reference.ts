@@ -138,16 +138,16 @@ export function serializeRangeToR1C1(range: IRange): string {
     return `R${startRowRef}C${startColumnRef}:R${endRowRef}C${endColumnRef}`;
 }
 
-function getR1C1Ref(index: number, absoluteRefType: AbsoluteRefType = AbsoluteRefType.NONE, isRow: boolean): string {
+function getR1C1Ref(index: number, absoluteRefType: AbsoluteRefType = AbsoluteRefType.ALL, isRow: boolean): string {
     index += 1;
     switch (absoluteRefType) {
-        case AbsoluteRefType.NONE:
-            return isRow ? `${index}` : `${index}`;
-        case AbsoluteRefType.ROW:
-            return isRow ? `[${index}]` : `${index}`;
-        case AbsoluteRefType.COLUMN:
-            return isRow ? `${index}` : `[${index}]`;
         case AbsoluteRefType.ALL:
+            return `${index}`;
+        case AbsoluteRefType.ROW:
+            return isRow ? `${index}` : `[${index}]`;
+        case AbsoluteRefType.COLUMN:
+            return isRow ? `[${index}]` : `${index}`;
+        case AbsoluteRefType.NONE:
             return `[${index}]`;
     }
 }

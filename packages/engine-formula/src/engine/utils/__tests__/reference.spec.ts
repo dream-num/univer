@@ -242,8 +242,12 @@ describe('Test Reference', () => {
             '1.5',
             '12a',
             '💩a',
+            '❤️b',
+            "Sheet'",
+            '!Sheet',
+            '！Sheet',
         ];
-        const testFalseCase = ['B1048577'];
+        const testFalseCase = ['Sheet1', '工作表1', 'B1048577'];
 
         testTrueCases.forEach((testTrueCase) => {
             expect(needsQuoting(testTrueCase)).toBeTruthy();

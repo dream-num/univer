@@ -26,7 +26,12 @@ import {
     PluginType,
     Univer,
 } from '@univerjs/core';
-import { BorderStyleManagerService, SelectionManagerService, SheetInterceptorService } from '@univerjs/sheets';
+import {
+    BorderStyleManagerService,
+    MergeCellService,
+    SelectionManagerService,
+    SheetInterceptorService,
+} from '@univerjs/sheets';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -95,6 +100,7 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
             injector.add([SelectionManagerService]);
             injector.add([BorderStyleManagerService]);
             injector.add([SheetInterceptorService]);
+            injector.add([MergeCellService]);
 
             dependencies?.forEach((d) => injector.add(d));
         }

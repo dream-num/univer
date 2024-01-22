@@ -26,7 +26,7 @@ import {
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { MergeCellController } from '../../../controllers/merge-cell.controller';
+import { MergeCellInterceptorController } from '../../../controllers/merge-cell/merge-cell.interceptor';
 import { RefRangeService } from '../../../services/ref-range/ref-range.service';
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../../services/selection-manager.service';
 import { AddWorksheetMergeMutation } from '../../mutations/add-worksheet-merge.mutation';
@@ -46,10 +46,10 @@ describe('Test clear selection content commands', () => {
     let commandService: ICommandService;
 
     beforeEach(() => {
-        const testBed = createCommandTestBed(undefined, [[MergeCellController], [RefRangeService]]);
+        const testBed = createCommandTestBed(undefined, [[MergeCellInterceptorController], [RefRangeService]]);
         univer = testBed.univer;
         get = testBed.get;
-        get(MergeCellController);
+        get(MergeCellInterceptorController);
         commandService = get(ICommandService);
         commandService.registerCommand(ClearSelectionContentCommand);
         commandService.registerCommand(ClearSelectionFormatCommand);

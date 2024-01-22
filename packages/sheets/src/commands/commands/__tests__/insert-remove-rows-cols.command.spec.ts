@@ -27,7 +27,7 @@ import {
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { MergeCellController } from '../../../controllers/merge-cell.controller';
+import { MergeCellRefRangeController } from '../../../controllers/merge-cell/merge-cell.ref-range';
 import { RefRangeService } from '../../../services/ref-range/ref-range.service';
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../../services/selection-manager.service';
 import { AddWorksheetMergeMutation } from '../../mutations/add-worksheet-merge.mutation';
@@ -58,7 +58,7 @@ describe('Test insert and remove rows cols commands', () => {
         const testBed = createInsertRowColTestBed();
         univer = testBed.univer;
         get = testBed.get;
-        get(MergeCellController);
+        get(MergeCellRefRangeController);
         commandService = get(ICommandService);
 
         [
@@ -381,7 +381,7 @@ const TEST_ROW_COL_INSERTION_DEMO: IWorkbookData = {
 
 function createInsertRowColTestBed() {
     return createCommandTestBed(Tools.deepClone(TEST_ROW_COL_INSERTION_DEMO), [
-        [MergeCellController],
+        [MergeCellRefRangeController],
         [RefRangeService],
     ]);
 }

@@ -249,7 +249,7 @@ export { handleDeleteRangeMutation } from './commands/utils/handle-range-mutatio
 export { getInsertRangeMutations, getRemoveRangeMutations } from './commands/utils/handle-range-mutation';
 export { handleInsertRangeMutation } from './commands/utils/handle-range-mutation';
 export { type ISheetCommandSharedParams } from './commands/utils/interface';
-export { getAddMergeMutationRangeByType } from './controllers/merge-cell.controller';
+export { getAddMergeMutationRangeByType } from './controllers/merge-cell/utils';
 export { enUS, zhCN } from './locale';
 export { MergeCellService } from './services/merge-cell/merge-cell.service';
 export type { IMergeData } from './services/merge-cell/type';

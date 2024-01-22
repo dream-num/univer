@@ -35,7 +35,7 @@ import { MergeCellService } from '../../../services/merge-cell/merge-cell.servic
 import { SelectionManagerService } from '../../../services/selection-manager.service';
 import { SheetInterceptorService } from '../../../services/sheet-interceptor/sheet-interceptor.service';
 
-const TEST_WORKBOOK_DATA_DEMO: () => IWorkbookData = () => ({
+const TEST_WORKBOOK_DATA_DEMO = {
     id: 'test',
     appVersion: '3.0.0-alpha',
     sheets: {
@@ -68,7 +68,7 @@ const TEST_WORKBOOK_DATA_DEMO: () => IWorkbookData = () => ({
     name: '',
     sheetOrder: [],
     styles: {},
-});
+};
 
 export interface ITestBed {
     univer: Univer;
@@ -103,7 +103,7 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
     }
 
     univer.registerPlugin(TestSpyPlugin);
-    const sheet = univer.createUniverSheet(workbookConfig || TEST_WORKBOOK_DATA_DEMO());
+    const sheet = univer.createUniverSheet(workbookConfig || TEST_WORKBOOK_DATA_DEMO);
 
     const univerInstanceService = injector.get(IUniverInstanceService);
     univerInstanceService.focusUniverInstance('test');

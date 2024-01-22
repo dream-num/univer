@@ -27,6 +27,11 @@ const range = new ArrayValueObject(/*ts*/ `{
     Univer
 }`);
 
+function transformValue(criteriaValue: string) {
+    const criteria = new StringValueObject(criteriaValue);
+
+    return transformToValue(valueObjectCompare(range, criteria).getArrayValue());
+}
 describe('Test object compare', () => {
     describe('Test valueObjectCompare', () => {
         it('range and criteria', () => {
@@ -44,87 +49,51 @@ describe('Test object compare', () => {
         });
 
         it('range with wildcard asterisk', () => {
-            const criteria = new StringValueObject('test*');
-
-            const resultObjectValue = transformToValue(valueObjectCompare(range, criteria).getArrayValue());
-            expect(resultObjectValue).toStrictEqual([[false], [true], [true], [false]]);
+            expect(transformValue('test*')).toStrictEqual([[false], [true], [true], [false]]);
         });
 
         it('range with compare = and wildcard asterisk', () => {
-            const criteria = new StringValueObject('=test*');
-
-            const resultObjectValue = transformToValue(valueObjectCompare(range, criteria).getArrayValue());
-            expect(resultObjectValue).toStrictEqual([[false], [true], [true], [false]]);
+            expect(transformValue('=test*')).toStrictEqual([[false], [true], [true], [false]]);
         });
 
         it('range with compare > and wildcard asterisk', () => {
-            const criteria = new StringValueObject('>test*');
-
-            const resultObjectValue = transformToValue(valueObjectCompare(range, criteria).getArrayValue());
-            expect(resultObjectValue).toStrictEqual([[false], [true], [true], [true]]);
+            expect(transformValue('>test*')).toStrictEqual([[false], [true], [true], [true]]);
         });
 
         it('range with compare >= and wildcard asterisk', () => {
-            const criteria = new StringValueObject('>=test*');
-
-            const resultObjectValue = transformToValue(valueObjectCompare(range, criteria).getArrayValue());
-            expect(resultObjectValue).toStrictEqual([[false], [true], [true], [true]]);
+            expect(transformValue('>=test*')).toStrictEqual([[false], [true], [true], [true]]);
         });
 
         it('range with compare < and wildcard asterisk', () => {
-            const criteria = new StringValueObject('<test*');
-
-            const resultObjectValue = transformToValue(valueObjectCompare(range, criteria).getArrayValue());
-            expect(resultObjectValue).toStrictEqual([[true], [false], [false], [false]]);
+            expect(transformValue('<test*')).toStrictEqual([[true], [false], [false], [false]]);
         });
 
         it('range with compare <= and wildcard asterisk', () => {
-            const criteria = new StringValueObject('<=test*');
-
-            const resultObjectValue = transformToValue(valueObjectCompare(range, criteria).getArrayValue());
-            expect(resultObjectValue).toStrictEqual([[true], [false], [false], [false]]);
+            expect(transformValue('<=test*')).toStrictEqual([[true], [false], [false], [false]]);
         });
 
         it('range with wildcard question mark', () => {
-            const criteria = new StringValueObject('test?');
-
-            const resultObjectValue = transformToValue(valueObjectCompare(range, criteria).getArrayValue());
-            expect(resultObjectValue).toStrictEqual([[false], [true], [false], [false]]);
+            expect(transformValue('test?')).toStrictEqual([[false], [true], [false], [false]]);
         });
 
         it('range with compare = and wildcard question mark', () => {
-            const criteria = new StringValueObject('=test??');
-
-            const resultObjectValue = transformToValue(valueObjectCompare(range, criteria).getArrayValue());
-            expect(resultObjectValue).toStrictEqual([[false], [false], [true], [false]]);
+            expect(transformValue('=test??')).toStrictEqual([[false], [false], [true], [false]]);
         });
 
         it('range with compare > and wildcard question mark', () => {
-            const criteria = new StringValueObject('>test?');
-
-            const resultObjectValue = transformToValue(valueObjectCompare(range, criteria).getArrayValue());
-            expect(resultObjectValue).toStrictEqual([[false], [true], [true], [true]]);
+            expect(transformValue('>test?')).toStrictEqual([[false], [true], [true], [true]]);
         });
 
         it('range with compare >= and wildcard question mark', () => {
-            const criteria = new StringValueObject('>=test??');
-
-            const resultObjectValue = transformToValue(valueObjectCompare(range, criteria).getArrayValue());
-            expect(resultObjectValue).toStrictEqual([[false], [true], [true], [true]]);
+            expect(transformValue('>=test??')).toStrictEqual([[false], [true], [true], [true]]);
         });
 
         it('range with compare < and wildcard question mark', () => {
-            const criteria = new StringValueObject('<test?');
-
-            const resultObjectValue = transformToValue(valueObjectCompare(range, criteria).getArrayValue());
-            expect(resultObjectValue).toStrictEqual([[true], [false], [false], [false]]);
+            expect(transformValue('<test?')).toStrictEqual([[true], [false], [false], [false]]);
         });
 
         it('range with compare <= and wildcard question mark', () => {
-            const criteria = new StringValueObject('<=test??');
-
-            const resultObjectValue = transformToValue(valueObjectCompare(range, criteria).getArrayValue());
-            expect(resultObjectValue).toStrictEqual([[true], [false], [false], [false]]);
+            expect(transformValue('<=test??')).toStrictEqual([[true], [false], [false], [false]]);
         });
     });
 });

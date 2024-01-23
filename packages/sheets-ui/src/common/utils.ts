@@ -43,10 +43,7 @@ export function getClearContentMutationParamsForRanges(
     unitId: string,
     worksheet: Worksheet,
     ranges: IRange[]
-): {
-    undos: IMutationInfo[];
-    redos: IMutationInfo[];
-} {
+): { undos: IMutationInfo[]; redos: IMutationInfo[] } {
     const undos: IMutationInfo[] = [];
     const redos: IMutationInfo[] = [];
 

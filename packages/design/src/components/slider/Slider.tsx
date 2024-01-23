@@ -34,7 +34,8 @@ export interface ISliderProps {
      */
     min?: number;
 
-    /** The maximum value the slider can slide to
+    /**
+     * The maximum value the slider can slide to
      *  @default 400
      */
     max?: number;
@@ -45,7 +46,8 @@ export interface ISliderProps {
      */
     disabled?: boolean;
 
-    /** The maximum value the slider can slide to
+    /**
+     * The maximum value the slider can slide to
      *  @default 100
      */
     resetPoint?: number;
@@ -176,7 +178,7 @@ export function Slider(props: ISliderProps) {
 
             <Dropdown
                 placement="topLeft"
-                overlay={
+                overlay={(
                     <div className={styles.sliderShortcuts}>
                         {shortcuts?.map((item) => (
                             <a
@@ -188,13 +190,19 @@ export function Slider(props: ISliderProps) {
                                 onClick={() => onChange && onChange(item)}
                             >
                                 {item === value && <span className={styles.sliderShortcutIcon}>✔</span>}
-                                <span>{item}%</span>
+                                <span>
+                                    {item}
+                                    %
+                                </span>
                             </a>
                         ))}
                     </div>
-                }
+                )}
             >
-                <a className={styles.sliderValue}>{value}%</a>
+                <a className={styles.sliderValue}>
+                    {value}
+                    %
+                </a>
             </Dropdown>
         </div>
     );

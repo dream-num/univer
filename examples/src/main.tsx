@@ -22,9 +22,13 @@ import styles from './styles.module.less';
 // package info
 // eslint-disable-next-line no-console
 console.table({
+    // eslint-disable-next-line node/prefer-global/process
     NODE_ENV: process.env.NODE_ENV,
+    // eslint-disable-next-line node/prefer-global/process
     GIT_COMMIT_HASH: process.env.GIT_COMMIT_HASH,
+    // eslint-disable-next-line node/prefer-global/process
     GIT_REF_NAME: process.env.GIT_REF_NAME,
+    // eslint-disable-next-line node/prefer-global/process
     BUILD_TIME: process.env.BUILD_TIME,
 });
 
@@ -33,23 +37,28 @@ function Examples() {
         <section className={styles.examples}>
             <a className={styles.btn} href="./sheets/">
                 <span> Univer Sheets</span>
-                <div className={styles.btnBg}>→</div>{' '}
+                <div className={styles.btnBg}>→</div>
+                {' '}
             </a>
             <a className={styles.btn} href="./docs/">
                 <span> Univer Docs</span>
-                <div className={styles.btnBg}>→</div>{' '}
+                <div className={styles.btnBg}>→</div>
+                {' '}
             </a>
             <a className={styles.btn} href="./slides/">
                 <span> Univer Slides</span>
-                <div className={styles.btnBg}>→</div>{' '}
+                <div className={styles.btnBg}>→</div>
+                {' '}
             </a>
             <a className={styles.btn} href="./sheets-multi/">
                 <span> Univer Multi Instance</span>
-                <div className={styles.btnBg}>→</div>{' '}
+                <div className={styles.btnBg}>→</div>
+                {' '}
             </a>
             <a className={styles.btn} href="./uniscript/">
                 <span> Uniscript</span>
-                <div className={styles.btnBg}>→</div>{' '}
+                <div className={styles.btnBg}>→</div>
+                {' '}
             </a>
         </section>
     );

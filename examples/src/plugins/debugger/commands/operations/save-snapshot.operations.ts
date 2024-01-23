@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+/* eslint-disable node/prefer-global/process */
 import type { ICommand, IStyleData, IWorkbookData } from '@univerjs/core';
 import { CommandType, ISnapshotPersistenceService, IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';

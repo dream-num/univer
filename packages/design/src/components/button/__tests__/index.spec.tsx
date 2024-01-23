@@ -16,17 +16,17 @@
 
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
-import { describe, expect, test } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { Button } from '../Button';
 
 describe('Button', () => {
-    test('renders correctly', () => {
+    it('renders correctly', () => {
         const { container } = render(<Button type="primary">btn1</Button>);
         expect(container);
     });
 
-    test('click onClick function', () => {
+    it('click onClick function', () => {
         let a = 1;
 
         const { container } = render(
@@ -44,7 +44,7 @@ describe('Button', () => {
         expect(a).toEqual(2);
     });
 
-    test('should prevent event when button is disabled', () => {
+    it('should prevent event when button is disabled', () => {
         let a = 1;
 
         const { container } = render(

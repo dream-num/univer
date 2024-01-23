@@ -566,10 +566,7 @@ function rangeHasValue(
     col: number,
     rowEnd: number,
     colEnd: number
-): {
-    hasValue: boolean;
-    matrix: ObjectMatrix<ICellData & { rowSpan?: number; colSpan?: number }>;
-} {
+): { hasValue: boolean; matrix: ObjectMatrix<ICellData & { rowSpan?: number; colSpan?: number }> } {
     let hasValue = false;
 
     const matrix = worksheet.getMatrixWithMergedCells(row, col, rowEnd, colEnd).forValue((_, __, value) => {

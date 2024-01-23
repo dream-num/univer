@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable no-magic-numbers */
-
 const TINF_OK = 0;
 const TINF_DATA_ERROR = -3;
 
@@ -170,7 +168,7 @@ function tinf_read_bits(d: Data, num: number, base: number) {
         d.bitcount += 8;
     }
 
-    const val = d.tag & (0xffff >>> (16 - num));
+    const val = d.tag & (0xFFFF >>> (16 - num));
     d.tag >>>= num;
     d.bitcount -= num;
     return val + base;
@@ -232,7 +230,7 @@ function tinf_decode_trees(d: Data, lt: Tree, dt: Tree) {
     tinf_build_tree(code_tree, lengths, 0, 19);
 
     /* decode code lengths for the dynamic trees */
-    for (num = 0; num < hlit + hdist; ) {
+    for (num = 0; num < hlit + hdist;) {
         const sym = tinf_decode_symbol(d, code_tree);
 
         switch (sym) {
@@ -327,7 +325,7 @@ function tinf_inflate_uncompressed_block(d: Data) {
     invlength = 256 * invlength + d.source[d.sourceIndex + 2];
 
     /* check length */
-    if (length !== (~invlength & 0x0000ffff)) return TINF_DATA_ERROR;
+    if (length !== (~invlength & 0x0000FFFF)) return TINF_DATA_ERROR;
 
     d.sourceIndex += 4;
 

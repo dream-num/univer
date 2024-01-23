@@ -222,7 +222,6 @@ export abstract class BaseObject {
     }
 
     get parent() {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return this._parent;
     }
 
@@ -529,7 +528,6 @@ export abstract class BaseObject {
     }
 
     getParent() {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return this._parent;
     }
 

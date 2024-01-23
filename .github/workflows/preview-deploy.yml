@@ -2,7 +2,7 @@ name: 📤 Preview Deploy
 
 on:
     workflow_run:
-        workflows: ['📦 Build']
+        workflows: [📦 Build]
         types: [completed]
 
 permissions:
@@ -133,7 +133,7 @@ jobs:
                   vercel-token: ${{ secrets.VERCEL_TOKEN }}
                   vercel-org-id: ${{ secrets.ORG_ID}}
                   vercel-project-id: ${{ secrets.PROJECT_ID}}
-                  vercel-args: '--prod'
+                  vercel-args: --prod
 
             - name: 🚀 Deploy to Vercel (demo)
               uses: amondnet/vercel-action@v25

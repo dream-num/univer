@@ -149,23 +149,23 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
                     paragraphs: [
                         isAlreadyOrdered
                             ? {
-                                  paragraphStyle,
-                                  startIndex: 0,
-                              }
+                                paragraphStyle,
+                                startIndex: 0,
+                            }
                             : {
-                                  ...paragraph,
-                                  startIndex: 0,
-                                  bullet: {
-                                      ...(paragraph.bullet ?? {
-                                          nestingLevel: 0,
-                                          textStyle: {
-                                              fs: 20,
-                                          },
-                                      }),
-                                      listType,
-                                      listId,
-                                  },
-                              },
+                                ...paragraph,
+                                startIndex: 0,
+                                bullet: {
+                                    ...(paragraph.bullet ?? {
+                                        nestingLevel: 0,
+                                        textStyle: {
+                                            fs: 20,
+                                        },
+                                    }),
+                                    listType,
+                                    listId,
+                                },
+                            },
                     ],
                 },
                 segmentId,

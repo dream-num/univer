@@ -67,11 +67,11 @@ export const DeltaColumnWidthCommand: ICommand<IDeltaColumnWidthCommandParams> =
         const rangeType = isAllSheetRange
             ? RANGE_TYPE.ALL
             : colSelections.some(({ range }) => {
-                    const { startColumn, endColumn } = range;
-                    return startColumn <= anchorCol && anchorCol <= endColumn;
-                })
-              ? RANGE_TYPE.COLUMN
-              : RANGE_TYPE.NORMAL;
+                const { startColumn, endColumn } = range;
+                return startColumn <= anchorCol && anchorCol <= endColumn;
+            })
+                ? RANGE_TYPE.COLUMN
+                : RANGE_TYPE.NORMAL;
 
         let redoMutationParams: ISetWorksheetColWidthMutationParams;
         if (rangeType === RANGE_TYPE.ALL) {

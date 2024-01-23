@@ -137,10 +137,10 @@ export const SetSelectedRowsVisibleCommand: ICommand = {
         return accessor
             .get(ICommandService)
             .executeCommand<ISetSpecificRowsVisibleCommandParams>(SetSpecificRowsVisibleCommand.id, {
-                unitId,
-                subUnitId,
-                ranges: hiddenRanges,
-            });
+            unitId,
+            subUnitId,
+            ranges: hiddenRanges,
+        });
     },
 };
 

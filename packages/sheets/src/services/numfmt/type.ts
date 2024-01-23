@@ -19,7 +19,7 @@ import { LifecycleStages, runOnLifecycle } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+// eslint-disable-next-line ts/consistent-type-definitions
 export type INumfmtItem = {
     i: string;
 };

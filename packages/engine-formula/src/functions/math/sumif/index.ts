@@ -16,7 +16,7 @@
 
 import { ErrorType } from '../../../basics/error-type';
 import { valueObjectCompare } from '../../../engine/utils/object-compare';
-import { type ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 
@@ -43,9 +43,9 @@ export class Sumif extends BaseFunction {
         // sumRange has the same dimensions as range
         const sumRangeArray = sumRange
             ? (sumRange as ArrayValueObject).slice(
-                  [0, (range as ArrayValueObject).getRowCount()],
-                  [0, (range as ArrayValueObject).getColumnCount()]
-              )
+                [0, (range as ArrayValueObject).getRowCount()],
+                [0, (range as ArrayValueObject).getColumnCount()]
+            )
             : (range as ArrayValueObject);
 
         if (!sumRangeArray) {

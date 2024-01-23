@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { Ctor, Injector } from '@wendellhu/redi';
 
 export type PluginCtor<T extends Plugin> = Ctor<T> & { type: PluginType };
@@ -42,7 +40,6 @@ export abstract class Plugin {
         this._name = name;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     onStarting(injector: Injector): void {}
 
     onReady(): void {}

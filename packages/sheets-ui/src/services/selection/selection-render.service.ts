@@ -114,6 +114,7 @@ export class SelectionRenderService implements ISelectionRenderService {
 
     private _controlFillConfig$: BehaviorSubject<IControlFillConfig | null> =
         new BehaviorSubject<IControlFillConfig | null>(null);
+
     readonly controlFillConfig$ = this._controlFillConfig$.asObservable();
 
     private _selectionControls: SelectionShape[] = []; // sheetID:Controls
@@ -147,7 +148,7 @@ export class SelectionRenderService implements ISelectionRenderService {
     private _isHeaderHighlight: boolean = true;
 
     // If true, the selector will respond to the range of merged cells and automatically extend the selected range. If false, it will ignore the merged cells.
-    private _isDetectMergedCell: Boolean = true;
+    private _isDetectMergedCell: boolean = true;
 
     // The style of the selection area, including dashed lines, color, thickness, autofill, other points for modifying the range of the selection area, title highlighting, and so on, can all be customized.
     private _selectionStyle!: ISelectionStyle;
@@ -1013,9 +1014,9 @@ export class SelectionRenderService implements ISelectionRenderService {
         const { rowHeaderWidth, columnHeaderHeight } = skeleton;
 
         if (rangeType === RANGE_TYPE.ROW) {
-            moveOffsetX = Infinity;
+            moveOffsetX = Number.POSITIVE_INFINITY;
         } else if (rangeType === RANGE_TYPE.COLUMN) {
-            moveOffsetY = Infinity;
+            moveOffsetY = Number.POSITIVE_INFINITY;
         }
 
         const selectionData = this._getSelectedRangeWithMerge(moveOffsetX, moveOffsetY, scaleX, scaleY, scrollXY);

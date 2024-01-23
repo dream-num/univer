@@ -19,7 +19,6 @@ import type { IDisposable } from '@wendellhu/redi';
 
 export function fromDocumentEvent<K extends keyof DocumentEventMap>(
     type: K,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     listener: (this: Document, ev: DocumentEventMap[K]) => any,
     options?: boolean | AddEventListenerOptions
 ): IDisposable {
@@ -30,7 +29,6 @@ export function fromDocumentEvent<K extends keyof DocumentEventMap>(
 export function fromEvent<K extends keyof HTMLElementEventMap>(
     target: HTMLElement,
     type: K,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any,
     options?: boolean | AddEventListenerOptions
 ): IDisposable {

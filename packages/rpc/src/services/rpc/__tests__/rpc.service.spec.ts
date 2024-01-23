@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Observable } from 'rxjs';
 import { of, Subject } from 'rxjs';
 import { beforeEach, describe, expect, it } from 'vitest';

@@ -77,28 +77,30 @@ export function Dialog(props: IDialogProps) {
 
     const { mountContainer } = useContext(ConfigContext);
 
-    const TitleIfDraggable = draggable ? (
-        <div
-            style={{
-                width: '100%',
-                cursor: 'pointer',
-            }}
-            onMouseOver={() => {
-                if (dragDisabled) {
-                    setDragDisabled(false);
-                }
-            }}
-            onMouseOut={() => {
-                setDragDisabled(true);
-            }}
-            onFocus={() => {}}
-            onBlur={() => {}}
-        >
-            {title}
-        </div>
-    ) : (
-        title
-    );
+    const TitleIfDraggable = draggable
+        ? (
+            <div
+                style={{
+                    width: '100%',
+                    cursor: 'pointer',
+                }}
+                onMouseOver={() => {
+                    if (dragDisabled) {
+                        setDragDisabled(false);
+                    }
+                }}
+                onMouseOut={() => {
+                    setDragDisabled(true);
+                }}
+                onFocus={() => {}}
+                onBlur={() => {}}
+            >
+                {title}
+            </div>
+        )
+        : (
+            title
+        );
 
     const modalRender = (modal: React.ReactNode) =>
         draggable ? <Draggable disabled={dragDisabled}>{modal}</Draggable> : modal;

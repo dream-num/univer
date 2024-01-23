@@ -121,7 +121,7 @@ export const RemoveColCommandId = 'sheet.command.remove-col';
 export const RemoveColCommand: ICommand = {
     type: CommandType.COMMAND,
     id: RemoveColCommandId,
-    // eslint-disable-next-line max-lines-per-function
+
     handler: async (accessor: IAccessor, params?: IRemoveRowColCommandParams) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);

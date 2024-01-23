@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable */
-
 const activeSheet = univerAPI.getCurrentSheet().getActiveSheet();
 
 // Set A1:B2 to bold

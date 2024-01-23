@@ -294,14 +294,14 @@ export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
                 ? expandToNextGapRange(startRange, direction, currentWorksheet)
                 : expandToNextCell(startRange, direction, currentWorksheet)
             : jumpOver === JumpOver.moveGap
-              ? shrinkToNextGapRange(
+                ? shrinkToNextGapRange(
                     startRange,
                     // TODO: should fix on SelectionManagerService's side
                     { ...Rectangle.clone(primary), rangeType: RANGE_TYPE.NORMAL },
                     direction,
                     currentWorksheet
                 )
-              : shrinkToNextCell(startRange, direction, currentWorksheet);
+                : shrinkToNextCell(startRange, direction, currentWorksheet);
 
         if (Rectangle.equals(destRange, startRange)) {
             return false;

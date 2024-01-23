@@ -50,7 +50,6 @@ export interface ICellDataForSheetInterceptor extends ICellData {
     isInArrayFormulaRange?: Nullable<boolean>;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isICellData(value: any): value is ICellData {
     return (
         value &&

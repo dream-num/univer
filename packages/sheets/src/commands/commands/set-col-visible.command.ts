@@ -133,10 +133,10 @@ export const SetSelectedColsVisibleCommand: ICommand = {
         return accessor
             .get(ICommandService)
             .executeCommand<ISetSpecificColsVisibleCommandParams>(SetSpecificColsVisibleCommand.id, {
-                unitId,
-                subUnitId,
-                ranges: hiddenRanges,
-            });
+            unitId,
+            subUnitId,
+            ranges: hiddenRanges,
+        });
     },
 };
 

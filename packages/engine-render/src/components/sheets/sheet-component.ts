@@ -80,12 +80,7 @@ export class SheetComponent extends RenderComponent<SpreadsheetSkeleton, SHEET_E
         startColumn: number,
         endRow: number,
         endColumn: number
-    ): Nullable<{
-        startRow: number;
-        startColumn: number;
-        endRow: number;
-        endColumn: number;
-    }> {}
+    ): Nullable<{ startRow: number; startColumn: number; endRow: number; endColumn: number }> {}
 
     protected _draw(ctx: UniverRenderingContext, bounds?: IViewportBound) {
         /* abstract */

@@ -69,11 +69,11 @@ export const DeltaRowHeightCommand: ICommand = {
         const rangeType = isAllSheetRange
             ? RANGE_TYPE.ALL
             : rowSelections.some(({ range }) => {
-                    const { startRow, endRow } = range;
-                    return startRow <= anchorRow && anchorRow <= endRow;
-                })
-              ? RANGE_TYPE.ROW
-              : RANGE_TYPE.NORMAL;
+                const { startRow, endRow } = range;
+                return startRow <= anchorRow && anchorRow <= endRow;
+            })
+                ? RANGE_TYPE.ROW
+                : RANGE_TYPE.NORMAL;
 
         let redoMutationParams: ISetWorksheetRowHeightMutationParams;
         if (rangeType === RANGE_TYPE.ALL) {
@@ -286,13 +286,13 @@ export const SetWorksheetRowIsAutoHeightCommand: ICommand = {
         const ranges =
             anchorRow != null
                 ? [
-                      {
-                          startRow: anchorRow,
-                          endRow: anchorRow,
-                          startColumn: 0,
-                          endColumn: workSheet.getMaxColumns() - 1,
-                      },
-                  ]
+                    {
+                        startRow: anchorRow,
+                        endRow: anchorRow,
+                        startColumn: 0,
+                        endColumn: workSheet.getMaxColumns() - 1,
+                    },
+                ]
                 : selectionManagerService.getSelectionRanges();
 
         if (!ranges?.length) {

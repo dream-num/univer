@@ -269,7 +269,7 @@ export class SheetClipboardController extends Disposable {
                             const key = textTrim(css.substr(0, css.indexOf(':')));
                             const value = textTrim(css.substr(css.indexOf(':') + 1));
                             if (key === 'height') {
-                                height = parseFloat(value);
+                                height = Number.parseFloat(value);
                                 return true;
                             }
                             return false;
@@ -309,7 +309,7 @@ export class SheetClipboardController extends Disposable {
                         const key = textTrim(css.substr(0, css.indexOf(':')));
                         const value = textTrim(css.substr(css.indexOf(':') + 1));
                         if (key === 'height') {
-                            height = parseFloat(value);
+                            height = Number.parseFloat(value);
                             return true;
                         }
                         return false;
@@ -468,9 +468,9 @@ export class SheetClipboardController extends Disposable {
         data: ObjectMatrix<ICellDataWithSpanInfo>,
         payload: ICopyPastePayload
     ): {
-        redos: IMutationInfo[];
-        undos: IMutationInfo[];
-    } {
+            redos: IMutationInfo[];
+            undos: IMutationInfo[];
+        } {
         const accessor = {
             get: this._injector.get.bind(this._injector),
         };

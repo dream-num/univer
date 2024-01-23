@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { Injector } from '@wendellhu/redi';
 
 import type { DocumentDataModel } from '../docs/data-model/document-data-model';

@@ -16,13 +16,14 @@
 
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import type { IMenuItemFactory } from '@univerjs/ui';
-import { IMenuService, IZenZoneService } from '@univerjs/ui';
+import { IMenuService, IShortcutService, IZenZoneService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { CancelZenEditCommand, ConfirmZenEditCommand } from '../commands/commands/zen-editor.command';
 import { OpenZenEditorOperation } from '../commands/operations/zen-editor.operation';
 import { ZenEditorMenuItemFactory } from '../views/menu';
 import { ZEN_EDITOR_COMPONENT, ZenEditor } from '../views/zen-editor';
+import { ZenEditorCancelShortcut, ZenEditorConfirmShortcut } from './shortcuts/zen-editor.shortcut';
 
 @OnLifecycle(LifecycleStages.Ready, ZenEditorUIController)
 export class ZenEditorUIController extends Disposable {
@@ -30,7 +31,8 @@ export class ZenEditorUIController extends Disposable {
         @Inject(Injector) private readonly _injector: Injector,
         @IZenZoneService private readonly _zenZoneService: IZenZoneService,
         @ICommandService private readonly _commandService: ICommandService,
-        @IMenuService private readonly _menuService: IMenuService
+        @IMenuService private readonly _menuService: IMenuService,
+        @IShortcutService private readonly _shortcutService: IShortcutService
     ) {
         super();
 
@@ -41,6 +43,7 @@ export class ZenEditorUIController extends Disposable {
         this._initCustomComponents();
         this._initCommands();
         this._initMenus();
+        this._initShortcuts();
     }
 
     private _initCustomComponents(): void {
@@ -61,6 +64,12 @@ export class ZenEditorUIController extends Disposable {
             ] as IMenuItemFactory[]
         ).forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
+        });
+    }
+
+    private _initShortcuts(): void {
+        [ZenEditorConfirmShortcut, ZenEditorCancelShortcut].forEach((item) => {
+            this.disposeWithMe(this._shortcutService.registerShortcut(item));
         });
     }
 }

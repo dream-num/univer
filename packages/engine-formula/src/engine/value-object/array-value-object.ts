@@ -198,7 +198,12 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     get(row: number, column: number) {
-        const v = this._values[row][column];
+        const rowValues = this._values[row];
+        if (rowValues == null) {
+            return new NullValueObject(0);
+        }
+
+        const v = rowValues[column];
         if (v == null) {
             return new NullValueObject(0);
         }
@@ -981,19 +986,19 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     private _transposeArray(array: BaseValueObject[][]) {
-        // 创建一个新的二维数组作为转置后的矩阵
+        // Create a new 2D array as the transposed matrix
         const rows = array.length;
         const cols = array[0].length;
         const transposedArray: BaseValueObject[][] = [];
 
-        // 遍历原二维数组的列
+        // Traverse the columns of the original two-dimensional array
         for (let col = 0; col < cols; col++) {
-            // 创建新的行
+            // Create new row
             transposedArray[col] = [] as BaseValueObject[];
 
-            // 遍历原二维数组的行
+            // Traverse the rows of the original two-dimensional array
             for (let row = 0; row < rows; row++) {
-                // 将元素赋值到新的行
+                // Assign elements to new rows
                 transposedArray[col][row] = array[row][col];
             }
         }

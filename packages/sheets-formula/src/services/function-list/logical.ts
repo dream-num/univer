@@ -141,16 +141,16 @@ export const FUNCTION_LIST_LOGICAL: IFunctionInfo[] = [
         abstract: 'formula.functionList.IFERROR.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.IFERROR.functionParameter.number1.name',
-                detail: 'formula.functionList.IFERROR.functionParameter.number1.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.IFERROR.functionParameter.value.name',
+                detail: 'formula.functionList.IFERROR.functionParameter.value.detail',
+                example: 'A2/B2',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'formula.functionList.IFERROR.functionParameter.number2.name',
-                detail: 'formula.functionList.IFERROR.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.IFERROR.functionParameter.valueIfError.name',
+                detail: 'formula.functionList.IFERROR.functionParameter.valueIfError.detail',
+                example: 'Error in calculation',
                 require: 1,
                 repeat: 0,
             },

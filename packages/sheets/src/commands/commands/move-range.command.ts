@@ -63,8 +63,15 @@ export const MoveRangeCommand: ICommand = {
             return false;
         }
 
+        const sheetInterceptorService = accessor.get(SheetInterceptorService);
+        const interceptorCommands = sheetInterceptorService.onCommandExecute({
+            id: MoveRangeCommand.id,
+            params: { ...params },
+        });
+
         const redos = [
             ...moveRangeMutations.redos,
+            ...interceptorCommands.redos,
             {
                 id: SetSelectionsOperation.id,
                 params: {
@@ -86,6 +93,7 @@ export const MoveRangeCommand: ICommand = {
                 },
             },
             ...moveRangeMutations.undos,
+            ...interceptorCommands.undos,
         ];
 
         const result = sequenceExecute(redos, commandService).result;
@@ -118,7 +126,6 @@ export function getMoveRangeUndoRedoMutations(
     const { range: fromRange, subUnitId: fromSubUnitId, unitId } = from;
     const { range: toRange, subUnitId: toSubUnitId } = to;
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const sheetInterceptorService = accessor.get(SheetInterceptorService);
     const workbook = univerInstanceService.getUniverSheetInstance(unitId);
     const toWorksheet = workbook?.getSheetBySheetId(toSubUnitId);
     const fromWorksheet = workbook?.getSheetBySheetId(fromSubUnitId);
@@ -181,13 +188,9 @@ export function getMoveRangeUndoRedoMutations(
             },
             unitId,
         };
-        const interceptorCommands = sheetInterceptorService.onCommandExecute({
-            id: MoveRangeCommand.id,
-            params: { fromRange, toRange },
-        });
 
-        redos.push({ id: MoveRangeMutation.id, params: doMoveRangeMutation }, ...interceptorCommands.redos);
-        undos.push({ id: MoveRangeMutation.id, params: undoMoveRangeMutation }, ...interceptorCommands.undos);
+        redos.push({ id: MoveRangeMutation.id, params: doMoveRangeMutation });
+        undos.push({ id: MoveRangeMutation.id, params: undoMoveRangeMutation });
     }
 
     return {

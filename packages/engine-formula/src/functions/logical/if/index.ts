@@ -52,18 +52,16 @@ export class If extends BaseFunction {
         const valueIfTrueArray = expandArrayValueObject(maxRowLength, maxColumnLength, valueIfTrue, new ErrorValueObject(ErrorType.NA));
         const valueIfFalseArray = expandArrayValueObject(maxRowLength, maxColumnLength, valueIfFalse, new ErrorValueObject(ErrorType.NA));
 
-        logicalTestArray.iterator((logicalTestValue, rowIndex, columnIndex) => {
-            if (logicalTestValue?.isNull()) {
-                logicalTestArray.set(rowIndex, columnIndex, new ErrorValueObject(ErrorType.NA));
-            } else if (logicalTestValue) {
+        return logicalTestArray.map((logicalTestValue, rowIndex, columnIndex) => {
+            if (logicalTestValue.isNull()) {
+                return new ErrorValueObject(ErrorType.NA);
+            } else {
                 const valueIfTrueValue = valueIfTrueArray.get(rowIndex, columnIndex);
                 const valueIfFalseValue = valueIfFalseArray.get(rowIndex, columnIndex);
 
-                logicalTestArray.set(rowIndex, columnIndex, this._calculateSingleCell(logicalTestValue, valueIfTrueValue, valueIfFalseValue));
+                return this._calculateSingleCell(logicalTestValue, valueIfTrueValue, valueIfFalseValue);
             }
         });
-
-        return logicalTestArray;
     }
 
     private _getSingleValueObject(valueObject: BaseValueObject) {

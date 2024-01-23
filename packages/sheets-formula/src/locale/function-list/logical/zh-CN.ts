@@ -25,8 +25,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            logical1: { name: 'logical1', detail: '第一个想要测试且计算结果可为 TRUE 或 FALSE 的条件。' },
+            logical2: { name: 'logical2', detail: '其他想要测试且计算结果可为 TRUE 或 FALSE 的条件（最多 255 个条件）。' },
         },
     },
     BYCOL: {

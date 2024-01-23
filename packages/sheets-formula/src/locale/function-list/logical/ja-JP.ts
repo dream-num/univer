@@ -25,8 +25,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            logical1: { name: 'logical1', detail: 'TRUE または FALSE に評価できるテスト対象の 1 つ目の条件。' },
+            logical2: { name: 'logical2', detail: ' 最大 255 個の条件まで、TRUE または FALSE のいずれかに評価できるテストする追加の条件。' },
         },
     },
     BYCOL: {

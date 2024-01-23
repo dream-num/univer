@@ -19,7 +19,7 @@ export enum ErrorType {
     DIV_BY_ZERO = '#DIV/0!',
 
     /** Function error. */
-    NAME = '#NAME!',
+    NAME = '#NAME?',
     VALUE = '#VALUE!',
     NUM = '#NUM!',
     NA = '#N/A',

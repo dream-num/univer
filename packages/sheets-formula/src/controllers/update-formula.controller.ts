@@ -800,7 +800,16 @@ export class UpdateFormulaController extends Disposable {
 
                         const sequenceSheetId = unitSheetNameMap?.[mapUnitId]?.[sheetName];
 
-                        if (sheetName.length > 0 && sequenceSheetId !== sheetId) {
+                        if (
+                            !this._checkIsSameUnitAndSheet(
+                                formulaReferenceMoveParam.unitId,
+                                formulaReferenceMoveParam.sheetId,
+                                unitId,
+                                sheetId,
+                                sequenceUnitId,
+                                sequenceSheetId || ''
+                            )
+                        ) {
                             continue;
                         }
 

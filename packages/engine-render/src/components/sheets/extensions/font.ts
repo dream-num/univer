@@ -177,21 +177,17 @@ export class Font extends SheetExtension {
                             }
                         }
                     } else {
-                        if ((this.parent as Spreadsheet).allowCache) {
-                            ctx.rect(
-                                startX + 1 / scale,
-                                startY + 1 / scale,
-                                cellWidth - 2 / scale,
-                                cellHeight - 2 / scale
-                            );
-                            ctx.clip();
-                            ctx.clearRect(
-                                startX + 1 / scale,
-                                startY + 1 / scale,
-                                cellWidth - 2 / scale,
-                                cellHeight - 2 / scale
-                            );
-                        }
+                        ctx.rect(startX + 1 / scale, startY + 1 / scale, cellWidth - 2 / scale, cellHeight - 2 / scale);
+                        ctx.clip();
+
+                        // if ((this.parent as Spreadsheet).allowCache) {
+                        //     ctx.clearRect(
+                        //         startX + 1 / scale,
+                        //         startY + 1 / scale,
+                        //         cellWidth - 2 / scale,
+                        //         cellHeight - 2 / scale
+                        //     );
+                        // }
                     }
 
                     ctx.translate(startX, startY);
@@ -271,7 +267,7 @@ export class Font extends SheetExtension {
 
         ctx.rect(startX, startY, endX - startX, endY - startY);
         ctx.clip();
-        ctx.clearRect(startX, startY, endX - startX, endY - startY);
+        ctx.clearRect(startX + 0.5 / scale, startY + 0.5 / scale, endX - startX - 1 / scale, endY - startY - 1 / scale);
     }
 }
 

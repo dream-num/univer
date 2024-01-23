@@ -14,4 +14,9 @@
  * limitations under the License.
  */
 
-export const functionInformation = [];
+import { FUNCTION_NAMES_INFORMATION } from './function-names';
+import { Isblank } from './isblank';
+
+export const functionInformation = [
+    [Isblank, FUNCTION_NAMES_INFORMATION.ISBLANK],
+];

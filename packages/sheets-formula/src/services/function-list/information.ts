@@ -90,15 +90,8 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
         abstract: 'formula.functionList.ISBLANK.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.ISBLANK.functionParameter.number1.name',
-                detail: 'formula.functionList.ISBLANK.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.ISBLANK.functionParameter.number2.name',
-                detail: 'formula.functionList.ISBLANK.functionParameter.number2.detail',
+                name: 'formula.functionList.ISBLANK.functionParameter.value.name',
+                detail: 'formula.functionList.ISBLANK.functionParameter.value.detail',
                 example: 'A1:A20',
                 require: 1,
                 repeat: 0,

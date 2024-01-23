@@ -24,6 +24,9 @@ import {
 } from '@univerjs/core';
 
 // TODO@wzhudev: some definition here is pretty ambiguous and not very consistent. Rename them.
+export function whenSheetFocused(contextService: IContextService) {
+    return contextService.getContextValue(FOCUSING_SHEET);
+}
 
 /**
  * Requires the currently focused unit to be Workbook and the sheet editor is focused but not activated.

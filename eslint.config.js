@@ -1,5 +1,6 @@
 import antfu from '@antfu/eslint-config';
 import header from 'eslint-plugin-header';
+import tsParser from '@typescript-eslint/parser';
 
 export default antfu({
     stylistic: {
@@ -35,6 +36,17 @@ export default antfu({
             SwitchCase: 1,
             ignoreComments: true,
         }],
+        'sort-imports': [
+            'error',
+            {
+                allowSeparatedGroups: false,
+                //   ignoreCase: false,
+                ignoreCase: true,
+                ignoreDeclarationSort: true,
+                ignoreMemberSort: false,
+                memberSyntaxSortOrder: ['none', 'all', 'multiple', 'single'],
+            },
+        ],
 
         // TODO: debatable rules
         'test/prefer-lowercase-title': 'off',
@@ -53,17 +65,6 @@ export default antfu({
         'unicorn/prefer-dom-node-text-content': 'warn',
         'unicorn/prefer-number-properties': 'warn',
         'no-prototype-builtins': 'warn',
-        'sort-imports': [
-            'error',
-            {
-                allowSeparatedGroups: false,
-                //   ignoreCase: false,
-                ignoreCase: true,
-                ignoreDeclarationSort: true,
-                ignoreMemberSort: false,
-                memberSyntaxSortOrder: ['none', 'all', 'multiple', 'single'],
-            },
-        ],
         'style/no-tabs': 'warn',
         'style/quotes': ['warn', 'single', { avoidEscape: true }],
 
@@ -98,27 +99,6 @@ export default antfu({
         'style/multiline-ternary': 'warn',
         'unicorn/prefer-type-error': 'warn',
         'accessor-pairs': 'warn',
-
-        // 'ts/naming-convention': [
-        //     'warn',
-        //     // Interfaces' names should start with a capital 'I'.
-        //     {
-        //         selector: 'interface',
-        //         format: ['PascalCase'],
-        //         custom: {
-        //             regex: '^I[A-Z0-9]',
-        //             match: true,
-        //         },
-        //     },
-        //     // Private fields of a class should start with an underscore '_'.
-        //     {
-        //         selector: ['classMethod', 'classProperty'],
-        //         modifiers: ['private'],
-        //         format: ['camelCase'],
-        //         leadingUnderscore: 'require',
-        //     },
-        // ],
-
     },
 }, {
     files: ['**/*.ts', '**/*.tsx'],
@@ -149,5 +129,31 @@ export default antfu({
             ],
             2,
         ],
+    },
+}, {
+    files: ['**/*.ts', '**/*.tsx'],
+    rules: {
+        'ts/naming-convention': [
+            'warn',
+            // Interfaces' names should start with a capital 'I'.
+            {
+                selector: 'interface',
+                format: ['PascalCase'],
+                custom: {
+                    regex: '^I[A-Z0-9]',
+                    match: true,
+                },
+            },
+            // Private fields of a class should start with an underscore '_'.
+            {
+                selector: ['classMethod', 'classProperty'],
+                modifiers: ['private'],
+                format: ['camelCase'],
+                leadingUnderscore: 'require',
+            },
+        ],
+    },
+    languageOptions: {
+        parser: tsParser,
     },
 });

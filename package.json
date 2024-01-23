@@ -39,6 +39,7 @@
         "@storybook/testing-library": "^0.2.2",
         "@types/node": "^20.10.6",
         "@types/react": "^18.2.46",
+        "@typescript-eslint/parser": "^6.19.1",
         "@univerjs/design": "workspace:*",
         "@vitejs/plugin-react": "^4.2.1",
         "eslint": "^8.56.0",

@@ -31,7 +31,7 @@ export interface ICheckboxProps {
     /**
      * Used for setting the currently selected value
      */
-    value: string | number | boolean;
+    value?: string | number | boolean;
 
     /**
      * Specifies whether the checkbox is disabled

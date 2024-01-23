@@ -36,11 +36,11 @@ export class Interpreter extends Disposable {
 
     async executeAsync(node: BaseAstNode): Promise<FunctionVariantType> {
         // if (!this._interpreterCalculateProps) {
-        //     return ErrorValueObject.create(ErrorType.ERROR);
+        //     return new ErrorValueObject(ErrorType.ERROR);
         // }
 
         if (!node) {
-            return ErrorValueObject.create(ErrorType.VALUE);
+            return new ErrorValueObject(ErrorType.VALUE);
         }
 
         await this._executeAsync(node);
@@ -56,11 +56,11 @@ export class Interpreter extends Disposable {
 
     execute(node: BaseAstNode): FunctionVariantType {
         // if (!this._interpreterCalculateProps) {
-        //     return ErrorValueObject.create(ErrorType.ERROR);
+        //     return new ErrorValueObject(ErrorType.ERROR);
         // }
 
         if (!node) {
-            return ErrorValueObject.create(ErrorType.VALUE);
+            return new ErrorValueObject(ErrorType.VALUE);
         }
 
         this._execute(node);

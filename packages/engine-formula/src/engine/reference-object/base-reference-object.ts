@@ -318,7 +318,7 @@ export class BaseReferenceObject extends ObjectClassType {
 
     unionBy(referenceObject: BaseReferenceObject): NodeValueType {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.REF);
+        return new ErrorValueObject(ErrorType.REF);
     }
 
     unionRange(rangeData1: IRange, rangeData2: IRange): IRange {
@@ -334,7 +334,7 @@ export class BaseReferenceObject extends ObjectClassType {
     getCellValueObject(cell: ICellData) {
         const value = cell.v || 0;
         if (ERROR_TYPE_SET.has(value as ErrorType)) {
-            return ErrorValueObject.create(value as ErrorType);
+            return new ErrorValueObject(value as ErrorType);
         }
 
         if (cell.t === CellValueType.NUMBER) {
@@ -424,7 +424,7 @@ export class BaseReferenceObject extends ObjectClassType {
         const cell = this.getCellData(row, column);
 
         if (!cell) {
-            return ErrorValueObject.create(ErrorType.VALUE);
+            return new ErrorValueObject(ErrorType.VALUE);
         }
 
         return this.getCellValueObject(cell);

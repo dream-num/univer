@@ -130,7 +130,7 @@ describe('test acot', () => {
 
         describe('fault situations', () => {
             it('value error', async () => {
-                const error = ErrorValueObject.create(ErrorType.VALUE);
+                const error = new ErrorValueObject(ErrorType.VALUE);
                 const errorValue = acot.calculate(error);
                 expect(errorValue.isError()).toBeTruthy();
             });

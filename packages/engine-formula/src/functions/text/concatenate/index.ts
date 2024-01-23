@@ -21,6 +21,6 @@ import { BaseFunction } from '../../base-function';
 
 export class Concatenate extends BaseFunction {
     override calculate(numberVar: FunctionVariantType, powerVar: FunctionVariantType) {
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return new ErrorValueObject(ErrorType.VALUE);
     }
 }

@@ -15,7 +15,7 @@
         "dev:demo": "turbo dev:demo",
         "dev:storybook": "storybook dev -p 6006 --no-open",
         "lint:style": "stylelint **/*.less",
-        "lint:types": "tsc --noEmit -p tsconfig.eslint.json",
+        "lint:types": "turbo lint:types",
         "test": "turbo test -- --passWithNoTests",
         "coverage": "turbo coverage -- --passWithNoTests",
         "build": "turbo build",

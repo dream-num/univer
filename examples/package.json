@@ -6,7 +6,8 @@
     "license": "Apache-2.0",
     "scripts": {
         "build:demo": "node ./esbuild.config.mjs",
-        "dev:demo": "node ./esbuild.config.mjs --watch"
+        "dev:demo": "node ./esbuild.config.mjs --watch",
+        "lint:types": "tsc --noEmit"
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",

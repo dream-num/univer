@@ -66,8 +66,9 @@ export const SaveSnapshotOptions: ICommand = {
                 const sheet = snapshot.sheets[sheetId];
                 snapshot.sheets = { [sheetId]: sheet };
                 snapshot.sheetOrder = [sheetId];
+                break;
             }
-            // eslint-disable-next-line no-fallthrough
+
             case 'workbook': {
                 const text = JSON.stringify(filterStyle(snapshot), null, 2);
                 // navigator.clipboard.writeText(text);

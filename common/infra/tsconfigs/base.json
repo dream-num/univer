@@ -3,7 +3,7 @@
     "compilerOptions": {
         "target": "ESNext",
         "jsx": "react",
-        "lib": ["ESNext", "DOM", "DOM.Iterable"],
+        "lib": ["ESNext", "DOM", "DOM.Iterable", "WebWorker"],
         "useDefineForClassFields": true,
 
         "experimentalDecorators": true,

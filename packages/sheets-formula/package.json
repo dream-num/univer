@@ -39,6 +39,7 @@
         "lib"
     ],
     "scripts": {
+        "lint:types": "tsc --noEmit",
         "build": "tsc && vite build"
     },
     "peerDependencies": {

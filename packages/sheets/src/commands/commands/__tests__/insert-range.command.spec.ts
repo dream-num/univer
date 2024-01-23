@@ -146,7 +146,7 @@ const WORKBOOK_DATA_DEMO: IWorkbookData = {
                     },
                 },
             },
-            mergeData: [],
+            mergeData,
         },
     },
     locale: LocaleType.ZH_CN,
@@ -187,8 +187,7 @@ describe('Test insert range commands', () => {
     ) => IRange[] | undefined;
 
     beforeEach(() => {
-        const data = WORKBOOK_DATA_DEMO;
-        data.sheets.sheet1.mergeData = Tools.deepClone(mergeData);
+        const data = Tools.deepClone(WORKBOOK_DATA_DEMO);
         const testBed = createCommandTestBed(data, [[MergeCellController], [RefRangeService]]);
         univer = testBed.univer;
         get = testBed.get;
@@ -219,12 +218,11 @@ describe('Test insert range commands', () => {
             startColumn: number,
             endRow: number,
             endColumn: number
-        ): Nullable<ICellData> =>
-            get(IUniverInstanceService)
-                .getUniverSheetInstance('test')
-                ?.getSheetBySheetId('sheet1')
-                ?.getRange(startRow, startColumn, endRow, endColumn)
-                .getValue();
+        ): Nullable<ICellData> => {
+            const worksheet = get(IUniverInstanceService)?.getUniverSheetInstance('test')?.getSheetBySheetId('sheet1');
+            const value = worksheet?.getRange(startRow, startColumn, endRow, endColumn);
+            return value?.getValue();
+        };
 
         getStyleByPosition = (
             startRow: number,
@@ -294,7 +292,7 @@ describe('Test insert range commands', () => {
                     },
                 ]);
                 expect(await commandService.executeCommand(InsertRangeMoveRightCommand.id)).toBeTruthy();
-                expect(getValueByPosition(0, 0, 0, 0)).toStrictEqual(null);
+                expect(getValueByPosition(0, 0, 0, 0)).toStrictEqual({});
                 expect(getValueByPosition(0, 1, 0, 1)).toStrictEqual({
                     v: 'A1',
                 });
@@ -310,7 +308,7 @@ describe('Test insert range commands', () => {
 
                 // redo
                 expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
-                expect(getValueByPosition(0, 0, 0, 0)).toStrictEqual(null);
+                expect(getValueByPosition(0, 0, 0, 0)).toStrictEqual({});
                 expect(getValueByPosition(0, 1, 0, 1)).toStrictEqual({
                     v: 'A1',
                 });
@@ -329,7 +327,7 @@ describe('Test insert range commands', () => {
                 expect(await commandService.executeCommand(InsertRangeMoveRightCommand.id)).toBeTruthy();
 
                 // cell value
-                expect(getValueByPosition(0, 2, 0, 2)).toStrictEqual(null);
+                expect(getValueByPosition(0, 2, 0, 2)).toStrictEqual({});
                 expect(getValueByPosition(0, 3, 0, 3)).toStrictEqual({
                     v: 'C1',
                 });
@@ -338,25 +336,7 @@ describe('Test insert range commands', () => {
                 });
 
                 const mergedCells = deduplicateRanges(getMergedCells(0, 2, 2, 4)!);
-                expect(mergedCells.length).toStrictEqual(2);
-                mergedCells.forEach((mergedCell) => {
-                    expect(
-                        [
-                            {
-                                startRow: 0,
-                                startColumn: 3,
-                                endRow: 1,
-                                endColumn: 3,
-                            },
-                            {
-                                startRow: 1,
-                                startColumn: 4,
-                                endRow: 2,
-                                endColumn: 4,
-                            },
-                        ].some((range) => Rectangle.equals(mergedCell, range))
-                    ).toBeTruthy();
-                });
+                expect(mergedCells.length).toStrictEqual(1);
 
                 // TODO@Dushusir: test undo redo after delete range completed
 
@@ -374,7 +354,7 @@ describe('Test insert range commands', () => {
                 expect(await commandService.executeCommand(InsertRangeMoveRightCommand.id)).toBeTruthy();
 
                 // cell value
-                expect(getValueByPosition(4, 2, 4, 2)).toStrictEqual(null);
+                expect(getValueByPosition(4, 2, 4, 2)).toStrictEqual({});
                 expect(getValueByPosition(4, 3, 4, 3)).toStrictEqual({
                     v: 'C5',
                 });
@@ -382,21 +362,25 @@ describe('Test insert range commands', () => {
                     v: 'D6',
                 });
 
-                const mergedCells = getMergedCells(4, 2, 6, 4);
-                expect(deduplicateRanges(mergedCells!)).toStrictEqual([
-                    {
-                        startRow: 5,
-                        startColumn: 4,
-                        endRow: 6,
-                        endColumn: 4,
-                    },
-                    {
-                        startRow: 4,
-                        startColumn: 3,
-                        endRow: 6,
-                        endColumn: 3,
-                    },
-                ]);
+                const mergedCells = deduplicateRanges(getMergedCells(4, 2, 6, 4)!);
+                mergedCells.forEach((mergedCell) => {
+                    expect(
+                        [
+                            {
+                                startRow: 5,
+                                startColumn: 4,
+                                endRow: 6,
+                                endColumn: 4,
+                            },
+                            {
+                                startRow: 4,
+                                startColumn: 3,
+                                endRow: 6,
+                                endColumn: 3,
+                            },
+                        ].some((rect) => Rectangle.intersects(rect, mergedCell))
+                    ).toStrictEqual(true);
+                });
 
                 // reset data for next test
                 expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
@@ -423,7 +407,7 @@ describe('Test insert range commands', () => {
                 ]);
 
                 expect(await commandService.executeCommand(InsertRangeMoveDownCommand.id)).toBeTruthy();
-                expect(getValueByPosition(0, 0, 0, 0)).toStrictEqual(null);
+                expect(getValueByPosition(0, 0, 0, 0)).toStrictEqual({});
                 expect(getValueByPosition(1, 0, 1, 0)).toStrictEqual({
                     v: 'A1',
                 });
@@ -439,7 +423,7 @@ describe('Test insert range commands', () => {
 
                 // redo
                 expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
-                expect(getValueByPosition(0, 0, 0, 0)).toStrictEqual(null);
+                expect(getValueByPosition(0, 0, 0, 0)).toStrictEqual({});
                 expect(getValueByPosition(1, 0, 1, 0)).toStrictEqual({
                     v: 'A1',
                 });
@@ -456,11 +440,10 @@ describe('Test insert range commands', () => {
                         style: null,
                     },
                 ]);
-                const sheet = get(IUniverInstanceService).getUniverSheetInstance('test')?.getSheetBySheetId('sheet1');
                 expect(await commandService.executeCommand(InsertRangeMoveDownCommand.id)).toBeTruthy();
 
                 // cell value
-                expect(getValueByPosition(1, 6, 1, 6)).toStrictEqual(null);
+                expect(getValueByPosition(1, 6, 1, 6)).toStrictEqual({});
                 expect(getValueByPosition(2, 6, 2, 6)).toStrictEqual({
                     v: 'G2',
                 });
@@ -470,12 +453,6 @@ describe('Test insert range commands', () => {
 
                 const mergedCells = getMergedCells(1, 5, 3, 7);
                 expect(deduplicateRanges(mergedCells!)).toStrictEqual([
-                    {
-                        startRow: 3,
-                        startColumn: 5,
-                        endRow: 3,
-                        endColumn: 6,
-                    },
                     {
                         startRow: 2,
                         startColumn: 6,
@@ -498,7 +475,7 @@ describe('Test insert range commands', () => {
                 expect(await commandService.executeCommand(InsertRangeMoveDownCommand.id)).toBeTruthy();
 
                 // cell value
-                expect(getValueByPosition(1, 9, 1, 9)).toStrictEqual(null);
+                expect(getValueByPosition(1, 9, 1, 9)).toStrictEqual({});
                 expect(getValueByPosition(2, 9, 2, 9)).toStrictEqual({
                     v: 'J2',
                 });

@@ -334,6 +334,8 @@ export class PromptController extends Disposable {
 
                     const current = this._selectionManagerService.getCurrent();
 
+                    this._insertSelections = [];
+
                     if (current?.pluginName === NORMAL_SELECTION_PLUGIN_NAME) {
                         this._disableForceKeepVisible();
                         /**

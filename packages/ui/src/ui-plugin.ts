@@ -55,7 +55,7 @@ import { IRangeSelectorService, RangeSelectorService } from './services/range-se
 
 const PLUGIN_NAME = 'ui';
 
-export interface IUniverUIConfig extends IWorkbenchOptions {}
+export interface IUniverUIConfig extends IWorkbenchOptions { }
 
 const DEFAULT_SLIDE_PLUGIN_DATA = {};
 

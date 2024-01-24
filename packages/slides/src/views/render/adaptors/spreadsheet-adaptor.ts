@@ -15,7 +15,7 @@
  */
 
 import type { EventState, ICellData, IPageElement } from '@univerjs/core';
-import { LocaleService, ObjectMatrix, PageElementType, Styles } from '@univerjs/core';
+import { IContextService, LocaleService, ObjectMatrix, PageElementType, Styles } from '@univerjs/core';
 import type { IScrollObserverParam, IWheelEvent } from '@univerjs/engine-render';
 import {
     EVENT_TYPE,
@@ -53,7 +53,10 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
 
     override viewKey = PageElementType.SPREADSHEET;
 
-    constructor(@Inject(LocaleService) private readonly _localeService: LocaleService) {
+    constructor(
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @IContextService private readonly _contextService: IContextService
+    ) {
         super();
     }
 
@@ -79,8 +82,6 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
             skewY,
             flipX,
             flipY,
-            title,
-            description,
             spreadsheet: spreadsheetModel,
         } = pageElement;
 
@@ -90,16 +91,17 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
 
         const { worksheet, styles } = spreadsheetModel;
 
-        const { columnData, rowData, cellData } = worksheet;
+        const { cellData } = worksheet;
 
         const cellDataMatrix = new ObjectMatrix<ICellData>(cellData);
 
-        const spreadsheetSkeleton = SpreadsheetSkeleton.create(
+        const spreadsheetSkeleton = new SpreadsheetSkeleton(
             undefined, // FIXME: worksheet in slide doesn't has a Worksheet object
             worksheet,
             cellDataMatrix,
             new Styles(styles),
-            this._localeService
+            this._localeService,
+            this._contextService
         );
 
         const { rowTotalHeight, columnTotalWidth, rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;

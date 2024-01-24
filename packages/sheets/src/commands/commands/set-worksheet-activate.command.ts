@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
+import type { ICommand, IExecutionOptions } from '@univerjs/core';
 import { CommandType, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
@@ -29,8 +29,7 @@ export interface ISetWorksheetActivateCommandParams {
 export const SetWorksheetActivateCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-worksheet-activate',
-
-    handler: (accessor: IAccessor, params?: ISetWorksheetActivateCommandParams) => {
+    handler: (accessor: IAccessor, params?: ISetWorksheetActivateCommandParams, options?: IExecutionOptions) => {
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
@@ -42,11 +41,9 @@ export const SetWorksheetActivateCommand: ICommand = {
             subUnitId = params.subUnitId ?? subUnitId;
         }
 
-        const redoMutationParams: ISetWorksheetActiveOperationParams = {
+        return commandService.syncExecuteCommand(SetWorksheetActiveOperation.id, {
             unitId,
             subUnitId,
-        };
-
-        return commandService.syncExecuteCommand(SetWorksheetActiveOperation.id, redoMutationParams);
+        } as ISetWorksheetActiveOperationParams, options);
     },
 };

@@ -36,16 +36,16 @@ export type IScrollInfo = Map<string, Map<string, IScrollManagerParam>>;
 /**
  * This service manages and sets the virtual scrolling of the canvas content area.
  * It triggers service changes through SetScrollOperation.
+ *
  * ScrollController subscribes to the changes in service data to refresh the view scrolling.
  */
 export class ScrollManagerService {
     private readonly _scrollInfo: IScrollInfo = new Map();
 
-    private _currentScroll: Nullable<IScrollManagerSearchParam> = null;
-
     private readonly _scrollInfo$ = new BehaviorSubject<Nullable<IScrollManagerParam>>(null);
-
     readonly scrollInfo$ = this._scrollInfo$.asObservable();
+
+    private _currentScroll: Nullable<IScrollManagerSearchParam> = null;
 
     dispose(): void {
         this._scrollInfo$.complete();
@@ -69,6 +69,7 @@ export class ScrollManagerService {
         if (this._currentScroll == null) {
             return;
         }
+
         this._addByParam({
             ...this._currentScroll,
             ...scroll,
@@ -79,6 +80,7 @@ export class ScrollManagerService {
         if (this._currentScroll == null) {
             return;
         }
+
         this._addByParam(
             {
                 ...this._currentScroll,

@@ -4,6 +4,7 @@
 
     &-label {
         font-size: var(--font-size-sm);
+        min-height: var(--font-size-sm);
         color: rgba(var(--grey-400));
     }
 
@@ -16,5 +17,28 @@
     &-content {
         margin-top: var(--margin-xs);
         margin-bottom: var(--margin-sm);
+
+        .input-affix-wrapper {
+            width: 100%;
+        }
+
+        .select {
+            width: 100%;
+        }
+
+        .range-selector {
+            width: 100%;
+        }
+    }
+}
+
+.form-dual-column-layout {
+    display: flex;
+    justify-content: space-between;
+
+    .form-layout {
+        flex-grow: 1;
+        flex-shrink: 1;
+        max-width: calc(50% - 8px);
     }
 }

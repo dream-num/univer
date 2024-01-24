@@ -14,4 +14,14 @@
  * limitations under the License.
  */
 
-export class Cache {}
+import type { IDisposable } from '@wendellhu/redi';
+import { Observable } from 'rxjs';
+
+type CallbackFn<T extends readonly unknown[]> = (cb: (...args: T) => void) => IDisposable;
+
+export function fromCallback<T extends readonly unknown[]>(callback: CallbackFn<T>): Observable<T> {
+    return new Observable((subscriber) => {
+        const disposable: IDisposable | undefined = callback((...args: T) => subscriber.next(args));
+        return () => disposable?.dispose();
+    });
+};

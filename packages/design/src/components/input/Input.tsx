@@ -16,6 +16,7 @@
 
 import { CloseSingle } from '@univerjs/icons';
 import clsx from 'clsx';
+import type { InputProps } from 'rc-input';
 import RcInput from 'rc-input';
 import React from 'react';
 
@@ -105,6 +106,11 @@ export function Input(props: IInputProps) {
         onClick,
         onKeyDown,
         onChange,
+<<<<<<< HEAD
+=======
+        autoFocus,
+        ...rest
+>>>>>>> 3fbf3696c (feat(sheet): support find replace)
     } = props;
 
     function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -122,12 +128,8 @@ export function Input(props: IInputProps) {
     return (
         <RcInput
             prefixCls={styles.input}
-            classNames={{
-                affixWrapper: _className,
-            }}
-            styles={{
-                affixWrapper: affixWrapperStyle,
-            }}
+            classNames={{ affixWrapper: _className }}
+            styles={{ affixWrapper: affixWrapperStyle }}
             autoFocus={autoFocus}
             type={type}
             placeholder={placeholder}
@@ -136,9 +138,8 @@ export function Input(props: IInputProps) {
             onClick={onClick}
             onKeyDown={onKeyDown}
             onChange={handleChange}
-            allowClear={{
-                clearIcon: allowClear ? <CloseSingle /> : <></>,
-            }}
+            allowClear={{ clearIcon: allowClear ? <CloseSingle /> : <></> }}
+            {...rest}
         />
     );
 }

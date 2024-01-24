@@ -38,7 +38,6 @@ import { HeaderResizeController } from './controllers/header-resize.controller';
 import { HeaderUnhideController } from './controllers/header-unhide.controller';
 import { MarkSelectionController } from './controllers/mark-selection.controller';
 import { MoveRangeController } from './controllers/move-range.controller';
-import { SheetNavigationController } from './controllers/navigation/navigation.controller';
 import { ScrollController } from './controllers/scroll.controller';
 import { SelectionController } from './controllers/selection.controller';
 import { SheetRenderController } from './controllers/sheet-render.controller';
@@ -124,7 +123,6 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [SelectionController],
                 [SheetClipboardController],
                 [SheetContextMenuController],
-                [SheetNavigationController],
                 [SheetRenderController],
                 [SheetUIController],
                 [StartEditController],

@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+/* eslint-disable ts/prefer-literal-enum-member */
+
 // Useful keyboard event inspection tool https://www.toptal.com/developers/keycode
 
 /** KeyCode that maps to browser standard keycode. */
-export const enum KeyCode {
+export enum KeyCode {
     UNKNOWN = 0,
 
     BACKSPACE = 8,
@@ -89,15 +91,8 @@ export const enum KeyCode {
 
     MINUS = 189,
     EQUAL = 187,
-}
 
-export const enum MetaKeys {
-    SHIFT = 1 << 10,
-    /** Option key on MacOS. Alt key on other systems. */
-    ALT = 1 << 11,
-    /** Command key on MacOS. Ctrl key on other systems. */
-    CTRL_COMMAND = 1 << 12,
-    MAC_CTRL = 1 << 13,
+    BACK_SLASH = 220,
 }
 
 export const KeyCodeToChar: { [key: number]: string } = {
@@ -152,4 +147,17 @@ export const KeyCodeToChar: { [key: number]: string } = {
 
     [KeyCode.MINUS]: '-',
     [KeyCode.EQUAL]: '=',
+
+    [KeyCode.BACK_SLASH]: '\\',
 };
+
+/** Define meta key numbers. */
+export enum MetaKeys {
+    SHIFT = 1 << 10,
+    /** Option key on MacOS. Alt key on other systems. */
+    ALT = 1 << 11,
+    /** Command key on MacOS. Ctrl key on other systems. */
+    CTRL_COMMAND = 1 << 12,
+    /** Ctrl key for MacOS. Not valid on other systems. */
+    MAC_CTRL = 1 << 13,
+}

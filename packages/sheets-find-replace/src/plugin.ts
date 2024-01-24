@@ -18,7 +18,7 @@ import { Plugin, PluginType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { SheetsFindReplaceController } from './controllers/find-replace.controller';
+import { SheetsFindReplaceController } from './controllers/sheet-find-replace.controller';
 
 export interface IFindPluginConfig {}
 

@@ -48,7 +48,7 @@ export function Palette(props: IProps) {
             colors: ['primaryColor', 'primaryColorHover'],
         },
         {
-            title: 'Fuctional / 功能',
+            title: 'Functional / 功能',
             colors: ['infoColor', 'successColor', 'warningColor', 'errorColor'],
         },
         {

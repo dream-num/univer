@@ -14,4 +14,5 @@
  * limitations under the License.
  */
 
-export * from './FormLayout';
+export type { IFormDualColumnLayoutProps, IFormLayoutProps } from './FormLayout';
+export { FormDualColumnLayout, FormLayout } from './FormLayout';

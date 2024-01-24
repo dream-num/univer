@@ -33,16 +33,27 @@ export interface ICellData {
      * the plug-in does not need to change the data, reducing the pressure on the back-end interface id?: string.
      */
     p?: Nullable<IDocumentData>; // univer docs, set null for cell clear all
+
     /** style id */
     s?: Nullable<IStyleData | string>;
+
     /**
      * Origin value
      */
     v?: Nullable<CellValue>;
+
     // Usually the type is automatically determined based on the data, or the user directly specifies
     t?: Nullable<CellValueType>; // 1 string, 2 number, 3 boolean, 4 force string, green icon, set null for cell clear all
-    f?: Nullable<string>; // formula '=SUM(1)'
-    si?: Nullable<string>; // formula id
+
+    /**
+     * Raw formula string. For example `=SUM(A1:B4)`.
+     */
+    f?: Nullable<string>;
+
+    /**
+     * Id of the formula.
+     */
+    si?: Nullable<string>;
 }
 
 export interface ICellDataForSheetInterceptor extends ICellData {

@@ -1,0 +1,28 @@
+.find-replace {
+    &-dialog-container {
+        display: block;
+    }
+
+    &-expand-container {
+        margin-top: 16px;
+        text-align: center;
+
+        .button-text {
+            color: rgb(var(--primary-color));
+        }
+    }
+
+    &-buttons-group {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 24px;
+
+        &-right {
+            > button {
+                &:not(:first-child) {
+                    margin-left: 8px;
+                }
+            }
+        }
+    }
+}

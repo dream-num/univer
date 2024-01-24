@@ -74,13 +74,8 @@ export class Editor {
 
     private _valueLegality = true;
 
-    private _openForSheetUnitId: Nullable<string>;
-
-    private _openForSheetSubUnitId: Nullable<string>;
-
     constructor(private _param: IEditorSetParam) {
-        this._openForSheetUnitId = this._param.openForSheetUnitId;
-        this._openForSheetSubUnitId = this._param.openForSheetSubUnitId;
+
     }
 
     get documentDataModel() {
@@ -104,19 +99,19 @@ export class Editor {
     }
 
     setOpenForSheetUnitId(unitId: Nullable<string>) {
-        this._openForSheetUnitId = unitId;
+        this._param.openForSheetUnitId = unitId;
     }
 
     getOpenForSheetUnitId() {
-        return this._openForSheetUnitId;
+        return this._param.openForSheetUnitId;
     }
 
     setOpenForSheetSubUnitId(subUnitId: Nullable<string>) {
-        this._openForSheetSubUnitId = subUnitId;
+        this._param.openForSheetSubUnitId = subUnitId;
     }
 
     getOpenForSheetSubUnitId() {
-        return this._openForSheetSubUnitId;
+        return this._param.openForSheetSubUnitId;
     }
 
     isValueLegality() {

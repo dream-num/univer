@@ -20,9 +20,19 @@ export { AutoFillCommand } from './commands/commands/auto-fill.command';
 export { SheetPasteCommand } from './commands/commands/clipboard.command';
 export { SheetCopyCommand } from './commands/commands/clipboard.command';
 export { ExpandSelectionCommand, JumpOver, MoveSelectionCommand } from './commands/commands/set-selection.command';
-export { SetCellEditVisibleArrowOperation } from './commands/operations/cell-edit.operation';
+export { SetCellEditVisibleArrowOperation, SetCellEditVisibleOperation } from './commands/operations/cell-edit.operation';
 export { SetScrollOperation } from './commands/operations/scroll.operation';
+export { ScrollController } from './controllers/scroll.controller';
 export { SetZoomRatioOperation } from './commands/operations/set-zoom-ratio.operation';
+export {
+    ResetScrollCommand,
+    ScrollCommand,
+    ScrollToCellCommand,
+    SetScrollRelativeCommand,
+    type IScrollCommandParams,
+    type IScrollToCellCommandParams,
+    type ISetScrollRelativeCommandParams,
+} from './commands/commands/set-scroll.command';
 export { VIEWPORT_KEY } from './common/keys';
 export { AutoFillController } from './controllers/auto-fill.controller';
 export { PASTE_SPECIAL_MENU_ID } from './controllers/menu/menu';

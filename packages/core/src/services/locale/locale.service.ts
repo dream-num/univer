@@ -38,10 +38,9 @@ export class LocaleService extends Disposable {
     }
 
     /**
-     * Load more locales after init
+     * Load more locales after init.
      *
      * @param locales - Locale object
-     *
      */
     load(locales: ILocales) {
         this._locales = Tools.deepMerge(this._locales ?? {}, locales);
@@ -49,9 +48,11 @@ export class LocaleService extends Disposable {
 
     /**
      * Translate a key to the current locale
+     *
      * @param {string} key the key to translate
      * @param {string[]} args optional arguments to replace in the translated string
      * @returns {string} the translated string
+     *
      * @example
      * const locales = {
      *   [LocaleType.EN_US]: {

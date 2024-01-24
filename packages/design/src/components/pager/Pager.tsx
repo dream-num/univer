@@ -15,11 +15,13 @@
  */
 
 import { MoreLeftSingle, MoreRightSingle } from '@univerjs/icons';
-import React, { useMemo } from 'react';
+import React, { Fragment, useMemo } from 'react';
 
 import styles from './index.module.less';
 
 export interface IPagerProps {
+    text?: string;
+
     value: number;
     total: number;
     loop?: boolean;
@@ -28,8 +30,9 @@ export interface IPagerProps {
 }
 
 export function Pager(props: IPagerProps) {
-    const { value: current = 0, total: count = 0, loop } = props;
-    const text = useMemo(() => `${current}/${count}`, [current, count]);
+    const { value: current = 0, total: count = 0, loop, text: propText } = props;
+    const text = useMemo(() => propText ?? `${current}/${count}`, [current, count, propText]);
+    const hasValue = count > 0;
 
     const onClickLeftArrow = () => {
         if (current === 1) {
@@ -53,13 +56,19 @@ export function Pager(props: IPagerProps) {
 
     return (
         <div className={styles.pager}>
-            <div role="button" className={styles.pagerLeftArrow} onClick={onClickLeftArrow}>
-                <MoreLeftSingle />
-            </div>
-            <div className={styles.pagerNumber}>{text}</div>
-            <div role="button" className={styles.pagerRightArrow} onClick={onClickRightArrow}>
-                <MoreRightSingle />
-            </div>
+            {hasValue
+                ? (
+                    <Fragment>
+                        <div role="button" className={styles.pagerLeftArrow} onClick={onClickLeftArrow}>
+                            <MoreLeftSingle />
+                        </div>
+                        <div className={styles.pagerNumber}>{text}</div>
+                        <div role="button" className={styles.pagerRightArrow} onClick={onClickRightArrow}>
+                            <MoreRightSingle />
+                        </div>
+                    </Fragment>
+                )
+                : <div className={styles.pagerNumber}>{text}</div>}
         </div>
     );
 }

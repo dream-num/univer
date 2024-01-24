@@ -16,64 +16,87 @@
 
 import { type IShortcutItem, KeyCode, MetaKeys } from '@univerjs/ui';
 
+import { EDITOR_ACTIVATED, FOCUSING_SHEET, type IContextService } from '@univerjs/core';
 import {
-    CloseFindReplaceDialogOperation,
     GoToNextMatchOperation,
     GoToPreviousMatchOperation,
     OpenFindDialogOperation,
     OpenReplaceDialogOperation,
 } from '../commands/operations/find-replace.operation';
-import { FIND_REPLACE_ACTIVATED } from '../services/context-keys';
+import { FIND_REPLACE_DIALOG_FOCUS, FIND_REPLACE_INPUT_FOCUS, FIND_REPLACE_REPLACE_REVEALED } from '../services/context-keys';
+
+function whenFindReplaceDialogFocused(contextService: IContextService): boolean {
+    return contextService.getContextValue(FIND_REPLACE_DIALOG_FOCUS);
+}
+
+function whenReplaceRevealed(contextService: IContextService): boolean {
+    return contextService.getContextValue(FIND_REPLACE_REPLACE_REVEALED);
+}
+
+function whenFindReplaceInputFocused(contextService: IContextService): boolean {
+    return contextService.getContextValue(FIND_REPLACE_INPUT_FOCUS);
+}
+
+const FIND_REPLACE_SHORTCUT_GROUP = '7_find-replace-shortcuts';
+
+// Current we only support find replace on sheet.
+function whenSheetFocused(contextService: IContextService) {
+    return contextService.getContextValue(FOCUSING_SHEET);
+}
+
+function whenEditorNotActivated(contextService: IContextService): boolean {
+    return !contextService.getContextValue(EDITOR_ACTIVATED);
+}
 
 export const OpenFindDialogShortcutItem: IShortcutItem = {
     id: OpenFindDialogOperation.id,
-    description: 'shortcut.find-replace.open-find-dialog',
+    description: 'find-replace.shortcut.open-find-dialog',
     binding: KeyCode.F | MetaKeys.CTRL_COMMAND,
-    group: '4_find-replace',
+    group: FIND_REPLACE_SHORTCUT_GROUP,
     preconditions(contextService) {
-        return !contextService.getContextValue(FIND_REPLACE_ACTIVATED);
+        return !whenFindReplaceDialogFocused(contextService) && whenSheetFocused(contextService) && whenEditorNotActivated(contextService);
+    },
+};
+
+export const MacOpenFindDialogShortcutItem: IShortcutItem = {
+    id: OpenFindDialogOperation.id,
+    description: 'find-replace.shortcut.open-find-dialog',
+    binding: KeyCode.F | MetaKeys.CTRL_COMMAND,
+    mac: KeyCode.F | MetaKeys.MAC_CTRL,
+    preconditions(contextService) {
+        return !whenFindReplaceDialogFocused(contextService) && whenSheetFocused(contextService) && whenEditorNotActivated(contextService);
     },
 };
 
 export const OpenReplaceDialogShortcutItem: IShortcutItem = {
     id: OpenReplaceDialogOperation.id,
-    description: 'shortcut.find-replace.open-replace-dialog',
+    description: 'find-replace.shortcut.open-replace-dialog',
     binding: KeyCode.H | MetaKeys.CTRL_COMMAND,
-    group: '4_find-replace',
+    mac: KeyCode.H | MetaKeys.MAC_CTRL,
+    group: FIND_REPLACE_SHORTCUT_GROUP,
     preconditions(contextService) {
-        return !contextService.getContextValue(FIND_REPLACE_ACTIVATED);
-    },
-};
-
-export const CloseFRDialogShortcutItem: IShortcutItem = {
-    id: CloseFindReplaceDialogOperation.id,
-    description: 'shortcut.find-replace.close-dialog',
-    binding: KeyCode.ESC,
-    group: '4_find-replace',
-    priority: 1000,
-    preconditions(contextService) {
-        return !!contextService.getContextValue(FIND_REPLACE_ACTIVATED);
+        return whenSheetFocused(contextService) && whenEditorNotActivated(contextService) && (!whenFindReplaceDialogFocused(contextService) || !whenReplaceRevealed(contextService));
     },
 };
 
 export const GoToNextFindMatchShortcutItem: IShortcutItem = {
     id: GoToNextMatchOperation.id,
-    description: 'shortcut.find-replace.go-to-next-find-match',
+    description: 'find-replace.shortcut.go-to-next-match',
     binding: KeyCode.ENTER,
-    group: '4_find-replace',
+    group: FIND_REPLACE_SHORTCUT_GROUP,
     priority: 1000,
     preconditions(contextService) {
-        return !!contextService.getContextValue(FIND_REPLACE_ACTIVATED);
+        return whenFindReplaceInputFocused(contextService);
     },
 };
 
 export const GoToPreviousFindMatchShortcutItem: IShortcutItem = {
     id: GoToPreviousMatchOperation.id,
-    description: 'shortcut.find-replace.go-to-previous-find-match',
+    description: 'find-replace.shortcut.go-to-previous-match',
     binding: KeyCode.ENTER | MetaKeys.SHIFT,
-    group: '4_find-replace',
+    group: FIND_REPLACE_SHORTCUT_GROUP,
     priority: 1000,
     preconditions(contextService) {
-        return !!contextService.getContextValue(FIND_REPLACE_ACTIVATED);
+        return whenFindReplaceInputFocused(contextService);
     },
 };

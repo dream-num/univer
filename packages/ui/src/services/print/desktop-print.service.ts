@@ -17,7 +17,7 @@
 import { toDisposable } from '@univerjs/core';
 import { type IDisposable, Inject } from '@wendellhu/redi';
 import type { ForwardRefExoticComponent } from 'react';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 
 import { ComponentManager } from '../../common/component-manager';
 import type { IPrintService } from './print.service';
@@ -26,7 +26,10 @@ export class DesktopPrintService implements IPrintService {
     readonly visible$ = new Subject<boolean>();
     readonly componentKey$ = new Subject<string>();
 
-    constructor(@Inject(ComponentManager) private readonly _componentManager: ComponentManager) {}
+    constructor(
+        @Inject(ComponentManager)
+        private readonly _componentManager: ComponentManager
+    ) {}
 
     set(key: string, component: ForwardRefExoticComponent<any>): IDisposable {
         this._componentManager.register(key, component);

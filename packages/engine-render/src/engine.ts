@@ -23,7 +23,7 @@ import { DeviceType, PointerInput } from './basics/i-events';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './basics/interfaces';
 import { PerformanceMonitor } from './basics/performance-monitor';
 import { getPointerPrefix, getSizeForDom, IsSafari, requestNewFrame } from './basics/tools';
-import { Canvas, CanvasRenderMode } from './canvas';
+import { Canvas, type CanvasRenderMode } from './canvas';
 import type { Scene } from './scene';
 import { ThinEngine } from './thin-engine';
 

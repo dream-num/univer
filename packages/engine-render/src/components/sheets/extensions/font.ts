@@ -24,7 +24,6 @@ import type { IFontCacheItem } from '../interfaces';
 import type { SheetComponent } from '../sheet-component';
 import { getDocsSkeletonPageSize, type SpreadsheetSkeleton } from '../sheet-skeleton';
 import { SheetExtension } from './sheet-extension';
-import { Spreadsheet } from '..';
 
 const UNIQUE_KEY = 'DefaultFontExtension';
 

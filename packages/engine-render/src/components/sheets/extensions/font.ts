@@ -130,12 +130,12 @@ export class Font extends SheetExtension {
                                 cellHeight - 2 / scale
                             );
                             ctx.clip();
-                            ctx.clearRect(
-                                startX + 1 / scale,
-                                startY + 1 / scale,
-                                cellWidth - 2 / scale,
-                                cellHeight - 2 / scale
-                            );
+                            // ctx.clearRect(
+                            //     startX + 1 / scale,
+                            //     startY + 1 / scale,
+                            //     cellWidth - 2 / scale,
+                            //     cellHeight - 2 / scale
+                            // );
                         } else {
                             if (horizontalAlign === HorizontalAlign.CENTER) {
                                 this._clipRectangle(
@@ -263,7 +263,7 @@ export class Font extends SheetExtension {
 
         ctx.rect(startX, startY, endX - startX, endY - startY);
         ctx.clip();
-        ctx.clearRect(startX + 0.5 / scale, startY + 0.5 / scale, endX - startX - 1 / scale, endY - startY - 1 / scale);
+        // ctx.clearRect(startX + 0.5 / scale, startY + 0.5 / scale, endX - startX - 1 / scale, endY - startY - 1 / scale);
     }
 }
 

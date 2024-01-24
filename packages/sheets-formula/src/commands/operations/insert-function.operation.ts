@@ -22,8 +22,8 @@ import {
     ICommandService,
     IUniverInstanceService,
     Rectangle,
-    serializeRange,
 } from '@univerjs/core';
+import { serializeRange } from '@univerjs/engine-formula';
 import {
     getCellAtRowCol,
     NORMAL_SELECTION_PLUGIN_NAME,

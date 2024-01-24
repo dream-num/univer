@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
+import { AbsoluteRefType, RANGE_TYPE } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 
-import { AbsoluteRefType, RANGE_TYPE } from '../../types/interfaces/i-range';
 import {
     deserializeRangeWithSheet,
     getAbsoluteRefTypeWithSingleString,
     getAbsoluteRefTypeWitString,
+    handleRefStringInfo,
+    needsQuoting,
     serializeRange,
     serializeRangeToRefString,
 } from '../reference';
@@ -119,10 +121,23 @@ describe('Test Reference', () => {
                     endRow: 15,
                     rangeType: RANGE_TYPE.ROW,
                 },
-                sheetName: 'sheet1',
+                sheetName: 'sheet-1',
                 unitId: 'workbook1',
             })
-        ).toEqual('[workbook1]sheet1!16:16');
+        ).toEqual("'[workbook1]sheet-1'!16:16");
+        expect(
+            serializeRangeToRefString({
+                range: {
+                    startColumn: NaN,
+                    endColumn: NaN,
+                    startRow: 15,
+                    endRow: 15,
+                    rangeType: RANGE_TYPE.ROW,
+                },
+                sheetName: 'sheet1',
+                unitId: 'workbook-1',
+            })
+        ).toEqual("'[workbook-1]sheet1'!16:16");
     });
 
     it('deserializeRangeWithSheet', () => {
@@ -208,6 +223,79 @@ describe('Test Reference', () => {
             },
             sheetName: 'sheet-1',
             unitId: 'workbook2',
+        });
+    });
+
+    it('needsQuoting', () => {
+        const testTrueCases = [
+            'sheet-1',
+            'sheet 1',
+            'B1048576',
+            'RC',
+            'RC2',
+            'R5C',
+            'R-4C',
+            'RC-8',
+            'R',
+            'C',
+            '99',
+            '1.5',
+            '12a',
+            '💩a',
+            '❤️b',
+            "Sheet'",
+            '!Sheet',
+            '！Sheet',
+        ];
+        const testFalseCase = ['Sheet1', '工作表1', 'B1048577'];
+
+        testTrueCases.forEach((testTrueCase) => {
+            expect(needsQuoting(testTrueCase)).toBeTruthy();
+        });
+        testFalseCase.forEach((testFalseCase) => {
+            expect(needsQuoting(testFalseCase)).toBeFalsy();
+        });
+    });
+
+    it('handleRefStringInfo', () => {
+        expect(handleRefStringInfo('A1:A2')).toStrictEqual({
+            refBody: 'A1:A2',
+            sheetName: '',
+            unitId: '',
+        });
+
+        expect(handleRefStringInfo('sheet1!A1')).toStrictEqual({
+            refBody: '!A1',
+            sheetName: 'sheet1',
+            unitId: '',
+        });
+
+        expect(handleRefStringInfo('[Book1]Sheet1!A1')).toStrictEqual({
+            refBody: '!A1',
+            sheetName: 'Sheet1',
+            unitId: 'Book1',
+        });
+        expect(handleRefStringInfo("'[Book1]Sheet1'!R2C3")).toStrictEqual({
+            refBody: '!R2C3',
+            sheetName: 'Sheet1',
+            unitId: 'Book1',
+        });
+
+        expect(handleRefStringInfo("'sheet-1'!A1")).toStrictEqual({
+            refBody: '!A1',
+            sheetName: 'sheet-1',
+            unitId: '',
+        });
+
+        expect(handleRefStringInfo("'[Book-1.xlsx]Sheet1'!$A$4")).toStrictEqual({
+            refBody: '!$A$4',
+            sheetName: 'Sheet1',
+            unitId: 'Book-1.xlsx',
+        });
+        expect(handleRefStringInfo("'[Book-1.xlsx]sheet-1'!$A$4")).toStrictEqual({
+            refBody: '!$A$4',
+            sheetName: 'sheet-1',
+            unitId: 'Book-1.xlsx',
         });
     });
 });

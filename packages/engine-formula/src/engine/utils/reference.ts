@@ -192,7 +192,7 @@ export function serializeRangeToRefString(gridRangeName: IGridRangeName) {
 }
 
 function singleReferenceToGrid(refBody: string) {
-    const row = parseInt(refBody.replace($ROW_REGEX, '')) - 1;
+    const row = Number.parseInt(refBody.replace($ROW_REGEX, '')) - 1;
     const column = Tools.ABCatNum(refBody.replace($COLUMN_REGEX, ''));
 
     const absoluteRefType = getAbsoluteRefTypeWithSingleString(refBody);
@@ -299,19 +299,16 @@ export function deserializeRangeWithSheet(refString: string): IGridRangeName {
 
 /**
  * Determine whether the sheet name needs to be wrapped in quotes
-
-   Excel will quote the worksheet name if any of the following is true:
-
-    - It contains any space or punctuation characters, such as  ()$,;-{}"'（）【】“”‘’%… and many more
-    - It is a valid cell reference in A1 notation, e.g. B1048576 is quoted, B1048577 is not
-    - It is a valid cell reference in R1C1 notation, e.g. RC, RC2, R5C, R-4C, RC-8, R, C
-    - It starts with a non-letter, e.g. 99, 1.5, 12a, 💩a
-    - Excel will not quote worksheet names if they only contain non-punctuation, non-letter characters in non-initial positions. For example, a💩 remains unquoted.
-
-    In addition, if a worksheet name contains single quotes, these will be doubled up within the name itself. For example, the sheet name a'b'c becomes 'a''b''c'.
+ * Excel will quote the worksheet name if any of the following is true:
+ *  - It contains any space or punctuation characters, such as  ()$,;-{}"'（）【】“”‘’%… and many more
+ *  - It is a valid cell reference in A1 notation, e.g. B1048576 is quoted, B1048577 is not
+ *  - It is a valid cell reference in R1C1 notation, e.g. RC, RC2, R5C, R-4C, RC-8, R, C
+ *  - It starts with a non-letter, e.g. 99, 1.5, 12a, 💩a
+ *  - Excel will not quote worksheet names if they only contain non-punctuation, non-letter characters in non-initial positions. For example, a💩 remains unquoted.*
+ *  In addition, if a worksheet name contains single quotes, these will be doubled up within the name itself. For example, the sheet name a'b'c becomes 'a''b''c'.
  *
  *  reference https://stackoverflow.com/questions/41677779/when-does-excel-surround-sheet-names-with-single-quotes-in-workbook-xml-or-othe
- * 
+ *
  * @param name Sheet name
  * @returns Result
  */
@@ -336,7 +333,6 @@ export function needsQuoting(name: string) {
 
     // Check for spaces, punctuation and special characters
 
-    // eslint-disable-next-line no-misleading-character-class, no-useless-escape
     if (/[\s!$%^&*()+\-=\[\]{};':"\\|,.<>\/?]/.test(name)) {
         return true;
     }
@@ -346,7 +342,7 @@ export function needsQuoting(name: string) {
 
 function isA1Notation(name: string) {
     const match = name.match(/[1-9][0-9]{0,6}/);
-    return /^[A-Z]+[1-9][0-9]{0,6}$/.test(name) && match !== null && parseInt(match[0], 10) <= 1048576;
+    return /^[A-Z]+[1-9][0-9]{0,6}$/.test(name) && match !== null && Number.parseInt(match[0], 10) <= 1048576;
 }
 
 function isR1C1Notation(name: string) {

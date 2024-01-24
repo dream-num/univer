@@ -1,0 +1,82 @@
+{
+    "name": "@univerjs/sheets-conditional-format",
+    "version": "0.1.0-beta.2",
+    "private": true,
+    "description": "",
+    "author": "DreamNum <developer@univer.ai>",
+    "license": "Apache-2.0",
+    "homepage": "https://github.com/dream-num/univer",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/dream-num/univer.git"
+    },
+    "keywords": [],
+    "exports": {
+        ".": "./src/index.ts",
+        "./*": "./src/*"
+    },
+    "main": "./lib/cjs/index.js",
+    "module": "./lib/es/index.js",
+    "types": "./lib/types/index.d.ts",
+    "publishConfig": {
+        "access": "public",
+        "main": "./lib/cjs/index.js",
+        "module": "./lib/es/index.js",
+        "exports": {
+            ".": {
+                "import": "./lib/es/index.js",
+                "require": "./lib/cjs/index.js",
+                "types": "./lib/types/index.d.ts"
+            },
+            "./*": {
+                "import": "./lib/es/*",
+                "require": "./lib/cjs/*",
+                "types": "./lib/types/index.d.ts"
+            }
+        }
+    },
+    "directories": {
+        "lib": "lib"
+    },
+    "files": [
+        "lib"
+    ],
+    "scripts": {
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "coverage": "vitest run --coverage",
+        "lint:types": "tsc --noEmit",
+        "build": "tsc && vite build"
+    },
+    "peerDependencies": {
+        "@univerjs/core": "workspace:*",
+        "@univerjs/design": "workspace:*",
+        "@univerjs/ui": "workspace:*",
+        "@wendellhu/redi": ">=0.12.13",
+        "clsx": ">=2.0.0",
+        "react": ">=16.9.0",
+        "rxjs": ">=7.0.0"
+    },
+    "dependencies": {
+        "@univerjs/core": "workspace:*",
+        "@univerjs/design": "workspace:*",
+        "@univerjs/icons": "^0.1.26",
+        "@univerjs/ui": "workspace:*",
+        "@wendellhu/redi": "^0.12.13",
+        "clsx": "^2.1.0",
+        "react": "^18.2.0",
+        "rxjs": "^7.8.1"
+    },
+    "devDependencies": {
+        "@univerjs/infra": "workspace:*",
+        "@vitejs/plugin-react": "^4.2.1",
+        "@vitest/coverage-istanbul": "^1.2.1",
+        "happy-dom": "^13.2.1",
+        "less": "^4.2.0",
+        "typescript": "^5.3.3",
+        "vite": "^5.0.12",
+        "vite-plugin-dts": "^3.7.1",
+        "vite-plugin-externals": "^0.6.2",
+        "vitest": "^1.2.1"
+    }
+}

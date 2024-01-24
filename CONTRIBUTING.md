@@ -1,4 +1,4 @@
-<!-- https://univer.work/guides/contributing/ -->
+<!-- https://univer.ai/guides/contributing/ -->
 
 # Univer Contributing Guide
 
@@ -10,9 +10,9 @@ Please read our [Code of Conduct](./CODE_OF_CONDUCT.md) before you join in the U
 
 If you encounter any issues while using Univer, you can seek help in the following communities:
 
--   [Discord community](https://discord.gg/XPGnMBmpd6)
+-   [Discord community](https://discord.gg/z3NKNT6D2f)
 -   [GitHub Discussions](https://github.com/dream-num/univer/discussions)
--   Join the Univer Chinese community (please scan the QR code [here](https://univer.work/enterprises/#%E8%8E%B7%E5%8F%96%E5%95%86%E4%B8%9A%E7%89%88))
+-   Join the Univer Chinese community (please scan the QR code [here](https://univer.ai/enterprises/#%E8%8E%B7%E5%8F%96%E5%95%86%E4%B8%9A%E7%89%88))
 
 ## Reporting Issues
 
@@ -52,7 +52,7 @@ pnpm dev:demo
 
 ### Architecture
 
-Please refer to the architecture doc. The [Chinese version](https://univer.work/guides/architecture/architecture/).
+Please refer to the architecture doc. The [Chinese version](https://univer.ai/guides/architecture/architecture/).
 
 ### Source code organization
 

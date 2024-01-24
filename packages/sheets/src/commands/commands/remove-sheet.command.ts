@@ -79,6 +79,7 @@ export const RemoveSheetCommand: ICommand = {
         const RemoveSheetMutationParams: IRemoveSheetMutationParams = {
             subUnitId,
             unitId,
+            subUnitName: worksheet.getName(),
         };
         const InsertSheetMutationParams: IInsertSheetMutationParams = RemoveSheetUndoMutationFactory(
             accessor,

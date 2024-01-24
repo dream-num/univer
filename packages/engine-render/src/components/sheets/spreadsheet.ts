@@ -529,37 +529,38 @@ export class Spreadsheet extends SheetComponent {
         ctx.closePath();
 
         // Clearing the dashed line issue caused by overlaid auxiliary lines and strokes
-        border?.forValue((rowIndex, columnIndex, borderCaches) => {
-            if (!borderCaches) {
-                return true;
-            }
+        // border?.forValue((rowIndex, columnIndex, borderCaches) => {
+        //     if (!borderCaches) {
+        //         return true;
+        //     }
 
-            const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(rowIndex, columnIndex);
+        //     const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(rowIndex, columnIndex);
 
-            let { startY, endY, startX, endX } = cellInfo;
-            const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
+        //     let { startY, endY, startX, endX } = cellInfo;
+        //     const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
 
-            if (isMerged) {
-                return true;
-            }
+        //     if (isMerged) {
+        //         return true;
+        //     }
 
-            if (isMergedMainCell) {
-                startY = mergeInfo.startY;
-                endY = mergeInfo.endY;
-                startX = mergeInfo.startX;
-                endX = mergeInfo.endX;
-            }
+        //     if (isMergedMainCell) {
+        //         startY = mergeInfo.startY;
+        //         endY = mergeInfo.endY;
+        //         startX = mergeInfo.startX;
+        //         endX = mergeInfo.endX;
+        //     }
 
-            if (!(mergeInfo.startRow >= rowStart && mergeInfo.endRow <= rowEnd)) {
-                return true;
-            }
+        //     if (!(mergeInfo.startRow >= rowStart && mergeInfo.endRow <= rowEnd)) {
+        //         return true;
+        //     }
 
-            for (const key in borderCaches) {
-                const { type } = borderCaches[key] as BorderCacheItem;
+        //     for (const key in borderCaches) {
+        //         const { type } = borderCaches[key] as BorderCacheItem;
 
-                clearLineByBorderType(ctx, type, { startX, startY, endX, endY });
-            }
-        });
+        //         clearLineByBorderType(ctx, type, { startX, startY, endX, endY });
+        //     }
+        // });
+
         ctx.closePath();
         // merge cell
         this._clearRectangle(ctx, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
@@ -567,7 +568,7 @@ export class Spreadsheet extends SheetComponent {
         // overflow cell
         this._clearRectangle(ctx, rowHeightAccumulation, columnWidthAccumulation, overflowCache.toNativeArray());
 
-        this._clearBackground(ctx, backgroundPositions);
+        // this._clearBackground(ctx, backgroundPositions);
 
         ctx.restore();
     }
@@ -595,7 +596,7 @@ export class Spreadsheet extends SheetComponent {
                 columnWidthAccumulation[endColumn] || columnWidthAccumulation[columnWidthAccumulation.length - 1];
 
             ctx.clearRect(startX, startY, endX - startX, endY - startY);
-
+        
             // After ClearRect, the lines will become thinner, and the lines will be repaired below.
             ctx.beginPath();
             ctx.moveTo(startX, startY);

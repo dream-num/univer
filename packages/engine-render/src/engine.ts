@@ -23,7 +23,7 @@ import { DeviceType, PointerInput } from './basics/i-events';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './basics/interfaces';
 import { PerformanceMonitor } from './basics/performance-monitor';
 import { getPointerPrefix, getSizeForDom, IsSafari, requestNewFrame } from './basics/tools';
-import { Canvas } from './canvas';
+import { Canvas, CanvasRenderMode } from './canvas';
 import type { Scene } from './scene';
 import { ThinEngine } from './thin-engine';
 
@@ -42,7 +42,7 @@ export class Engine extends ThinEngine<Scene> {
 
     private _container: Nullable<HTMLElement>;
 
-    private _canvas: Canvas = new Canvas();
+    private _canvas: Canvas;
 
     private _canvasEle!: HTMLCanvasElement;
 
@@ -86,10 +86,16 @@ export class Engine extends ThinEngine<Scene> {
 
     private _isUsingFirefox = navigator.userAgent.indexOf('Firefox') !== -1;
 
-    constructor(elemWidth: number = 1, elemHeight: number = 1, pixelRatio?: number) {
+    constructor(elemWidth: number = 1, elemHeight: number = 1, pixelRatio?: number, mode?: CanvasRenderMode) {
         super();
+        this._canvas = new Canvas({
+            mode,
+            width: elemWidth,
+            height: elemHeight,
+            pixelRatio,
+        });
         this._canvasEle = this._canvas.getCanvasEle();
-        this._canvas.setSize(elemWidth, elemHeight, pixelRatio);
+        // this._canvas.setSize(elemWidth, elemHeight, pixelRatio);
         this._handleKeyboardAction();
         this._handlePointerAction();
     }

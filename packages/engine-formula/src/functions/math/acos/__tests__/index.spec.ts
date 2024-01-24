@@ -128,7 +128,7 @@ describe('test acos', () => {
 
         describe('fault situations', () => {
             it('value error', async () => {
-                const error = ErrorValueObject.create(ErrorType.VALUE);
+                const error = new ErrorValueObject(ErrorType.VALUE);
                 const errorValue = acos.calculate(error);
                 expect(errorValue.isError()).toBeTruthy();
             });

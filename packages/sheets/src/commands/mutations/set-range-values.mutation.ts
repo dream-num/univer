@@ -15,9 +15,9 @@
  */
 
 import type {
+    CellValue,
     IBorderData,
     ICellData,
-    ICellV,
     ICopyToOptionsData,
     IDocumentData,
     IKeyValue,
@@ -232,7 +232,7 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
     },
 };
 
-function checkCellValueType(v: Nullable<ICellV>): Nullable<CellValueType> {
+function checkCellValueType(v: Nullable<CellValue>): Nullable<CellValueType> {
     if (v === null) return null;
 
     if (typeof v === 'string') {

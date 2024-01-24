@@ -15,9 +15,9 @@
  */
 
 import type { IRange } from '@univerjs/core';
-import { deserializeRangeWithSheet } from '@univerjs/core';
 
 import { ErrorType } from '../../basics/error-type';
+import { deserializeRangeWithSheet } from '../utils/reference';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { BaseReferenceObject } from './base-reference-object';
 
@@ -42,18 +42,18 @@ export class RowReferenceObject extends BaseReferenceObject {
 
     override unionBy(referenceObject: BaseReferenceObject) {
         if (!referenceObject.isRow()) {
-            return ErrorValueObject.create(ErrorType.REF);
+            return new ErrorValueObject(ErrorType.REF);
         }
 
         const rowReferenceObject = referenceObject as RowReferenceObject;
         if (rowReferenceObject.getForcedSheetName() !== undefined && rowReferenceObject.getForcedSheetName() !== '') {
-            return ErrorValueObject.create(ErrorType.REF);
+            return new ErrorValueObject(ErrorType.REF);
         }
 
         const currentRangeData = this.getRangeData();
 
         // if (currentRangeData.endRow !== -1) {
-        //     return ErrorValueObject.create(ErrorType.REF);
+        //     return new ErrorValueObject(ErrorType.REF);
         // }
 
         const newRow = rowReferenceObject.getRangeData().startRow;

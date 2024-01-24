@@ -84,53 +84,55 @@ export function HelpFunction() {
 
     return (
         <>
-            {helpVisible ? (
-                <Popup visible={visible} offset={offset}>
-                    {functionInfo ? (
-                        <div className={styles.formulaHelpFunction}>
-                            <div className={styles.formulaHelpFunctionTitle}>
-                                <Help
-                                    prefix={functionInfo.functionName}
-                                    value={functionInfo.functionParameter}
-                                    active={paramIndex}
-                                    onClick={handleSwitchActive}
-                                />
-                                <div className={styles.formulaHelpFunctionTitleIcons}>
-                                    <div
-                                        className={styles.formulaHelpFunctionTitleIcon}
-                                        style={{ transform: contentVisible ? 'rotateZ(-90deg)' : 'rotateZ(90deg)' }}
-                                        onClick={() => setContentVisible(!contentVisible)}
-                                    >
-                                        <MoreSingle />
+            {helpVisible
+                ? (
+                    <Popup visible={visible} offset={offset}>
+                        {functionInfo
+                            ? (
+                                <div className={styles.formulaHelpFunction}>
+                                    <div className={styles.formulaHelpFunctionTitle}>
+                                        <Help
+                                            prefix={functionInfo.functionName}
+                                            value={functionInfo.functionParameter}
+                                            active={paramIndex}
+                                            onClick={handleSwitchActive}
+                                        />
+                                        <div className={styles.formulaHelpFunctionTitleIcons}>
+                                            <div
+                                                className={styles.formulaHelpFunctionTitleIcon}
+                                                style={{ transform: contentVisible ? 'rotateZ(-90deg)' : 'rotateZ(90deg)' }}
+                                                onClick={() => setContentVisible(!contentVisible)}
+                                            >
+                                                <MoreSingle />
+                                            </div>
+                                            <div
+                                                className={styles.formulaHelpFunctionTitleIcon}
+                                                onClick={() => setHelpVisible(!helpVisible)}
+                                            >
+                                                <CloseSingle />
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div
-                                        className={styles.formulaHelpFunctionTitleIcon}
-                                        onClick={() => setHelpVisible(!helpVisible)}
-                                    >
-                                        <CloseSingle />
-                                    </div>
-                                </div>
-                            </div>
 
-                            <div
-                                className={styles.formulaHelpFunctionContent}
-                                style={{
-                                    height: contentVisible ? 'unset' : 0,
-                                    padding: contentVisible ? 'revert-layer' : 0,
-                                }}
-                            >
-                                <div className={styles.formulaHelpFunctionContentInner}>
-                                    <Params
-                                        title={localeService.t('formula.prompt.helpExample')}
-                                        value={`${functionInfo.functionName}(${functionInfo.functionParameter
-                                            .map((item) => item.example)
-                                            .join(',')})`}
-                                    />
-                                    <Params
-                                        title={localeService.t('formula.prompt.helpAbstract')}
-                                        value={functionInfo.description}
-                                    />
-                                    {functionInfo &&
+                                    <div
+                                        className={styles.formulaHelpFunctionContent}
+                                        style={{
+                                            height: contentVisible ? 'unset' : 0,
+                                            padding: contentVisible ? 'revert-layer' : 0,
+                                        }}
+                                    >
+                                        <div className={styles.formulaHelpFunctionContentInner}>
+                                            <Params
+                                                title={localeService.t('formula.prompt.helpExample')}
+                                                value={`${functionInfo.functionName}(${functionInfo.functionParameter
+                                                    .map((item) => item.example)
+                                                    .join(',')})`}
+                                            />
+                                            <Params
+                                                title={localeService.t('formula.prompt.helpAbstract')}
+                                                value={functionInfo.description}
+                                            />
+                                            {functionInfo &&
                                         functionInfo.functionParameter &&
                                         functionInfo.functionParameter.map((item: IFunctionParam, i: number) => (
                                             <Params
@@ -140,24 +142,28 @@ export function HelpFunction() {
                                                 value={`${item.require ? required : optional} ${item.detail}`}
                                             />
                                         ))}
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
+                            )
+                            : (
+                                <></>
+                            )}
+                    </Popup>
+                )
+                : visible
+                    ? (
+                        <div
+                            className={styles.formulaHelpDecorator}
+                            onClick={() => setHelpVisible(!helpVisible)}
+                            style={{ left: decoratorPosition.left - 24, top: decoratorPosition.top }}
+                        >
+                            <DetailsSingle />
                         </div>
-                    ) : (
+                    )
+                    : (
                         <></>
                     )}
-                </Popup>
-            ) : visible ? (
-                <div
-                    className={styles.formulaHelpDecorator}
-                    onClick={() => setHelpVisible(!helpVisible)}
-                    style={{ left: decoratorPosition.left - 24, top: decoratorPosition.top }}
-                >
-                    <DetailsSingle />
-                </div>
-            ) : (
-                <></>
-            )}
         </>
     );
 }
@@ -186,7 +192,10 @@ const Help = (props: IHelpProps) => {
     const { prefix, value, active, onClick } = props;
     return (
         <div>
-            <span>{prefix}(</span>
+            <span>
+                {prefix}
+                (
+            </span>
             {value &&
                 value.map((item: IFunctionParam, i: number) => (
                     // TODO@Dushusir: more params needs to be active

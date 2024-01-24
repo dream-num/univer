@@ -16,14 +16,14 @@
 
 import { render } from '@testing-library/react';
 import React, { useContext } from 'react';
-import { describe, expect, test } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import type { ILocale } from '../../../locale';
 import { enUS, zhCN } from '../../../locale';
 import { ConfigContext, ConfigProvider } from '../ConfigProvider';
 
 describe('ConfigProvider', () => {
-    test('should render correctly', () => {
+    it('should render correctly', () => {
         let _mountContainer: HTMLElement | null = null;
         let _locale: ILocale | null = null;
 
@@ -48,7 +48,7 @@ describe('ConfigProvider', () => {
         root.unmount();
     });
 
-    test('should render correctly when mountContainer is not document.body', () => {
+    it('should render correctly when mountContainer is not document.body', () => {
         const mountContainer = document.createElement('div');
         document.body.appendChild(mountContainer);
 
@@ -73,7 +73,7 @@ describe('ConfigProvider', () => {
         root.unmount();
     });
 
-    test('should render correctly when locale is invalid', () => {
+    it('should render correctly when locale is invalid', () => {
         const mountContainer = document.createElement('div');
         document.body.appendChild(mountContainer);
 

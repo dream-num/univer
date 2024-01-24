@@ -23,7 +23,7 @@ import { BaseFunction } from '../../base-function';
 export class Abs extends BaseFunction {
     override calculate(variant: FunctionVariantType) {
         if (variant.isError()) {
-            return ErrorValueObject.create(ErrorType.VALUE);
+            return new ErrorValueObject(ErrorType.VALUE);
         }
 
         if (variant.isReferenceObject()) {

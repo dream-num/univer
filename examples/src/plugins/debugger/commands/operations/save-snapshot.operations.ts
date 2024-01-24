@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+/* eslint-disable node/prefer-global/process */
 import type { ICommand, IStyleData, IWorkbookData } from '@univerjs/core';
 import { CommandType, ISnapshotPersistenceService, IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
@@ -65,8 +66,9 @@ export const SaveSnapshotOptions: ICommand = {
                 const sheet = snapshot.sheets[sheetId];
                 snapshot.sheets = { [sheetId]: sheet };
                 snapshot.sheetOrder = [sheetId];
+                break;
             }
-            // eslint-disable-next-line no-fallthrough
+
             case 'workbook': {
                 const text = JSON.stringify(filterStyle(snapshot), null, 2);
                 // navigator.clipboard.writeText(text);

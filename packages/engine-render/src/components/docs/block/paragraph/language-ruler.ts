@@ -17,13 +17,13 @@
 import type { IParagraphStyle } from '@univerjs/core';
 
 import type { ISectionBreakConfig } from '../../../../basics/interfaces';
-import { EMOJI_REG, hasArabic, hasSpace, hasTibetan } from '../../../../basics/tools';
+import { EMOJI_REG, hasArabic, hasSpace, hasTibetan, startWithEmoji } from '../../../../basics/tools';
 import { createSkeletonLetterSpan, createSkeletonWordSpan } from '../../common/span';
 import { getFontCreateConfig } from '../../common/tools';
 import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../view-model/document-view-model';
 
-// Handle Chinese, Japanese, Korean (CJK), English word, number characters.
+// Handle English word, English punctuation, number characters.
 // https://en.wikipedia.org/wiki/CJK_characters
 export function otherHandler(
     index: number,
@@ -39,7 +39,7 @@ export function otherHandler(
     for (let i = 0; i < charArray.length; i++) {
         const newChar = charArray[i];
 
-        if (hasSpace(newChar)) {
+        if (hasSpace(newChar) || startWithEmoji(charArray.substring(i))) {
             break;
         }
 

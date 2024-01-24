@@ -94,6 +94,15 @@ export class SlideTabItem {
         return this._slideTabItem.querySelector('span');
     }
 
+    focus() {
+        this.getEditor()?.focus();
+    }
+
+    selectAll() {
+        const input = this.getEditor();
+        input && SlideTabBar.keepSelectAll(input);
+    }
+
     isEditMode(): boolean {
         return this._editMode;
     }

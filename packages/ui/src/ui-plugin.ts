@@ -45,7 +45,6 @@ import { DesktopNotificationService } from './services/notification/desktop-noti
 import { INotificationService } from './services/notification/notification.service';
 import { DesktopPlatformService, IPlatformService } from './services/platform/platform.service';
 import { DesktopShortcutService, IShortcutService } from './services/shortcut/shortcut.service';
-import { ShortcutExperienceService } from './services/shortcut/shortcut-experience.service';
 import { ShortcutPanelService } from './services/shortcut/shortcut-panel.service';
 import { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
 import { ISidebarService } from './services/sidebar/sidebar.service';
@@ -95,7 +94,6 @@ export class UniverUIPlugin extends Plugin {
             [ZIndexManager],
 
             // services
-            [ShortcutExperienceService],
             [ShortcutPanelService],
             [LayoutService],
             [IShortcutService, { useClass: DesktopShortcutService }],

@@ -153,17 +153,17 @@ export function Toolbar(props: IToolbarProps) {
             <header className={styles.headerbar}>
                 <div className={styles.menubar}>
                     {group.length > 1 &&
-                        group.map((item, index) => (
-                            <a
-                                key={index}
-                                className={clsx(styles.menubarItem, {
-                                    [styles.menubarItemActive]: item.name === position,
-                                })}
-                                onClick={() => setPosition(item.name)}
-                            >
-                                {localeService.t(item.name)}
-                            </a>
-                        ))}
+                    group.map((item, index) => (
+                        <a
+                            key={index}
+                            className={clsx(styles.menubarItem, {
+                                [styles.menubarItemActive]: item.name === position,
+                            })}
+                            onClick={() => setPosition(item.name)}
+                        >
+                            {localeService.t(item.name)}
+                        </a>
+                    ))}
                 </div>
                 <div className={styles.headerMenu}>
                     <ComponentContainer components={headerMenuComponents} />
@@ -185,7 +185,7 @@ export function Toolbar(props: IToolbarProps) {
                         <Tooltip title="更多" placement="bottom">
                             <Dropdown
                                 className={styles.toolbarMore}
-                                overlay={
+                                overlay={(
                                     <div className={styles.toolbarMoreContainer} onClick={(e) => e.stopPropagation()}>
                                         {Object.entries(toolbarGroups).map(([key, item]) => (
                                             <div key={key} className={styles.toolbarGroup}>
@@ -198,7 +198,7 @@ export function Toolbar(props: IToolbarProps) {
                                             </div>
                                         ))}
                                     </div>
-                                }
+                                )}
                             >
                                 <ToolbarButton className={styles.toolbarItemTextButton}>
                                     <MoreFunctionSingle />

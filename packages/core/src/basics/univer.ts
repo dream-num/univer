@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { Injector } from '@wendellhu/redi';
 
 import type { DocumentDataModel } from '../docs/data-model/document-data-model';
@@ -92,6 +90,8 @@ export class Univer extends PluginHolder {
 
     override dispose(): void {
         this._injector.dispose();
+
+        super.dispose();
     }
 
     setLocale(locale: LocaleType) {

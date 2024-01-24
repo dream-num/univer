@@ -26,7 +26,10 @@ export function FunctionHelp(props: IFunctionHelpProps) {
     const { prefix, value } = props;
     return (
         <div>
-            <span>{prefix}(</span>
+            <span>
+                {prefix}
+                (
+            </span>
             {value &&
                 value.map((item: IFunctionParam, i: number) => (
                     <span key={i}>

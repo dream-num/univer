@@ -82,6 +82,7 @@ export class StatusBarService implements IStatusBarService, IDisposable {
                 (status.values.find((item) => item.func === FUNCTION_NAMES_STATISTICAL.COUNT)?.value ?? 0) > 0,
         },
     ];
+
     private readonly _state$ = new BehaviorSubject<Nullable<IStatusBarServiceStatus>>(null);
     readonly state$ = this._state$.asObservable();
 

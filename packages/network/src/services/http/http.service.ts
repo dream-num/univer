@@ -31,7 +31,6 @@ import type { HTTPEvent, HTTPResponseError } from './response';
 import { HTTPResponse } from './response';
 
 export interface IRequestParams {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     body?: any;
     /** Query params. These params would be append to the url before the request is sent. */
     params?: { [param: string]: string | number | boolean };
@@ -41,7 +40,6 @@ export interface IRequestParams {
 }
 
 export interface IPostRequestParams extends IRequestParams {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     body?: any;
 }
 
@@ -59,7 +57,6 @@ export interface IHTTPInterceptor {
 
 export class HTTPService extends Disposable {
     private _interceptors: IHTTPInterceptor[] = [];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private _pipe: Nullable<RequestPipe<any>>;
 
     constructor(@IHTTPImplementation private readonly _http: IHTTPImplementation) {

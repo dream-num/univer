@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -35,8 +34,8 @@ export class Average extends BaseFunction {
             }
 
             if (variant.isArray()) {
-                accumulatorSum = accumulatorSum.plus((variant as ArrayValueObject).sum());
-                accumulatorCount = accumulatorCount.plus((variant as ArrayValueObject).count());
+                accumulatorSum = accumulatorSum.plus(variant.sum());
+                accumulatorCount = accumulatorCount.plus(variant.count());
             } else {
                 if (!variant.isNull()) {
                     accumulatorCount = accumulatorCount.plus(new NumberValueObject(1));

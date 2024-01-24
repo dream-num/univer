@@ -26,7 +26,7 @@ import {
     IUniverInstanceService,
     MemoryCursor,
 } from '@univerjs/core';
-import { type TextRange } from '@univerjs/engine-render';
+import type { TextRange } from '@univerjs/engine-render';
 
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
@@ -337,8 +337,8 @@ function getReverseFormatValueInSelection(
     return /bl|it/.test(key)
         ? BooleanNumber.FALSE
         : /ul|st/.test(key)
-          ? {
+            ? {
                 s: BooleanNumber.FALSE,
             }
-          : BaselineOffset.NORMAL;
+            : BaselineOffset.NORMAL;
 }

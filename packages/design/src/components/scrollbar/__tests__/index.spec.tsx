@@ -16,12 +16,12 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { describe, expect, test } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { Scrollbar } from '../Scrollbar';
 
 describe('Scrollbar', () => {
-    test('should not render thumb', () => {
+    it('should not render thumb', () => {
         const { container } = render(
             <section style={{ height: '100px' }}>
                 <Scrollbar>

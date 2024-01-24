@@ -48,8 +48,9 @@ export function handleRedoUndoMoveRange(
         checkFormulaDataNull(arrayFormulaRange, unitId, toSubUnitId) ||
         checkFormulaDataNull(arrayFormulaCellData, unitId, fromSubUnitId) ||
         checkFormulaDataNull(arrayFormulaCellData, unitId, toSubUnitId)
-    )
+    ) {
         return;
+    }
 
     const fromValueMatrix = new ObjectMatrix(fromValue);
     const toValueMatrix = new ObjectMatrix(toValue);

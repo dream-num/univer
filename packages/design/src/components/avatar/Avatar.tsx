@@ -83,10 +83,10 @@ export function Avatar(props: IAvatarProps) {
     const sizeStyle =
         typeof size === 'number'
             ? {
-                  width: size,
-                  height: size,
-                  lineHeight: `${size}px`,
-              }
+                width: size,
+                height: size,
+                lineHeight: `${size}px`,
+            }
             : {};
 
     const _className = clsx(styles.avatar, {

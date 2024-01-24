@@ -1,4 +1,4 @@
-import { resolve } from 'path';
+import { resolve } from 'node:path';
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import dts from 'vite-plugin-dts';
@@ -22,7 +22,8 @@ export default defineConfig(({ mode }) => ({
         alias: [
             {
                 find: /^monaco-editor$/,
-                replacement: __dirname + '/node_modules/monaco-editor/esm/vs/editor/editor.api',
+                // eslint-disable-next-line node/no-path-concat
+                replacement: `${__dirname}/node_modules/monaco-editor/esm/vs/editor/editor.api`,
             },
         ],
     },

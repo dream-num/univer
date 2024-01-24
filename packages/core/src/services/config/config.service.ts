@@ -33,7 +33,6 @@ export interface IConfigService {
 }
 
 export class ConfigService implements IConfigService {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private readonly _config: Map<string, any> = new Map();
 
     getConfig<T>(id: string): Nullable<T> {

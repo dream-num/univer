@@ -37,6 +37,9 @@ import {
 import { COPY_TYPE, getRepeatRange, ISheetClipboardService, PREDEFINED_HOOK_NAME } from '@univerjs/sheets-ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
+import { SHEET_NUMFMT_PLUGIN } from '../base/const/PLUGIN_NAME';
+import { mergeNumfmtMutations } from '../utils/mutation';
+
 @OnLifecycle(LifecycleStages.Rendered, NumfmtCopyPasteController)
 export class NumfmtCopyPasteController extends Disposable {
     private _copyInfo: Nullable<{
@@ -60,7 +63,7 @@ export class NumfmtCopyPasteController extends Disposable {
     private _initClipboardHook() {
         this.disposeWithMe(
             this._sheetClipboardService.addClipboardHook({
-                id: 'numfmt',
+                id: SHEET_NUMFMT_PLUGIN,
                 onBeforeCopy: (unitId, subUnitId, range) => this._collectNumfmt(unitId, subUnitId, range),
                 onPasteCells: (pasteFrom, pasteTo, data, payload) => {
                     const { copyType = COPY_TYPE.COPY, pasteType } = payload;
@@ -186,7 +189,7 @@ export class NumfmtCopyPasteController extends Disposable {
                 { id: RemoveNumfmtMutation.id, params: removeRedos },
                 { id: SetNumfmtMutation.id, params: setRedos },
             ],
-            undos,
+            undos: mergeNumfmtMutations(undos),
         };
     }
 }

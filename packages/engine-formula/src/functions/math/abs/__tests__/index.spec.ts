@@ -128,7 +128,7 @@ describe('test abs', () => {
 
         describe('fault situations', () => {
             it('value error', async () => {
-                const error = ErrorValueObject.create(ErrorType.VALUE);
+                const error = new ErrorValueObject(ErrorType.VALUE);
                 const errorValue = abs.calculate(error);
                 expect(errorValue.isError()).toBeTruthy();
             });

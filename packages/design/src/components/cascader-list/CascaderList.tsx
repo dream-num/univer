@@ -83,32 +83,34 @@ export function CascaderList(props: ICascaderListProps) {
     return (
         <section className={styles.cascaderList}>
             {activeOptions.map((options, index) =>
-                options.length ? (
-                    <ul key={index} className={styles.cascaderListBoard}>
-                        {options.map((option) => (
-                            <li
-                                key={option.value}
-                                className={clsx(styles.cascaderListItem, {
-                                    [styles.cascaderListItemActive]: option.value === value[index],
-                                })}
-                            >
-                                <a
-                                    className={styles.cascaderListOption}
-                                    onClick={() => handleChange(index, option.value)}
+                options.length
+                    ? (
+                        <ul key={index} className={styles.cascaderListBoard}>
+                            {options.map((option) => (
+                                <li
+                                    key={option.value}
+                                    className={clsx(styles.cascaderListItem, {
+                                        [styles.cascaderListItemActive]: option.value === value[index],
+                                    })}
                                 >
-                                    <span className={styles.cascaderListCheckMark}>
-                                        {option.value === value[index] && <CheckMarkSingle />}
-                                    </span>
-                                    <span>{option.label}</span>
-                                </a>
-                            </li>
-                        ))}
-                    </ul>
-                ) : (
-                    <section key={index} className={styles.cascaderListEmpty}>
-                        无
-                    </section>
-                )
+                                    <a
+                                        className={styles.cascaderListOption}
+                                        onClick={() => handleChange(index, option.value)}
+                                    >
+                                        <span className={styles.cascaderListCheckMark}>
+                                            {option.value === value[index] && <CheckMarkSingle />}
+                                        </span>
+                                        <span>{option.label}</span>
+                                    </a>
+                                </li>
+                            ))}
+                        </ul>
+                    )
+                    : (
+                        <section key={index} className={styles.cascaderListEmpty}>
+                            无
+                        </section>
+                    )
             )}
             {value.length <= 0 && <section className={styles.cascaderListEmpty}>无</section>}
         </section>

@@ -184,6 +184,7 @@ export class Rectangle {
             ranges[0]
         );
     }
+
     static getRelativeRange = (range: IRange, originRange: IRange) =>
         ({
             startRow: range.startRow - originRange.startRow,

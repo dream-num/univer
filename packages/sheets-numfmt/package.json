@@ -1,10 +1,18 @@
 {
     "name": "@univerjs/sheets-numfmt",
     "version": "0.1.0-beta.2",
+    "private": false,
     "description": "UniverSheet numfmt plugin",
-    "keywords": [],
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
+    "keywords": [],
+    "sideEffects": [
+        "**/*.css"
+    ],
+    "exports": {
+        ".": "./src/index.ts",
+        "./*": "./src/*"
+    },
     "main": "./lib/cjs/index.js",
     "module": "./lib/es/index.js",
     "types": "./lib/types/index.d.ts",
@@ -26,47 +34,18 @@
             "./lib/*": "./lib/*"
         }
     },
-    "exports": {
-        ".": "./src/index.ts",
-        "./*": "./src/*"
-    },
     "directories": {
         "lib": "lib"
     },
     "files": [
         "lib"
     ],
-    "sideEffects": [
-        "**/*.css"
-    ],
-    "private": false,
     "scripts": {
         "test": "vitest run",
+        "test:watch": "vitest",
+        "coverage": "vitest run --coverage",
+        "lint:types": "tsc --noEmit",
         "build": "tsc && vite build"
-    },
-    "dependencies": {
-        "@univerjs/core": "workspace:*",
-        "@univerjs/design": "workspace:*",
-        "@univerjs/engine-numfmt": "workspace:*",
-        "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.1.25",
-        "@univerjs/sheets": "workspace:*",
-        "@univerjs/sheets-ui": "workspace:*",
-        "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "^0.12.13",
-        "react": "^18.2.0",
-        "rxjs": "^7.8.1"
-    },
-    "devDependencies": {
-        "@types/react": "^18.2.47",
-        "@vitejs/plugin-react": "^4.2.1",
-        "@vitest/coverage-istanbul": "^1.1.1",
-        "less": "^4.2.0",
-        "typescript": "^5.3.3",
-        "vite": "^5.0.10",
-        "vite-plugin-dts": "^3.7.0",
-        "vite-plugin-externals": "^0.6.2",
-        "vitest": "^1.1.1"
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
@@ -79,5 +58,29 @@
         "@wendellhu/redi": ">=0.12.12",
         "react": ">=16.9.0",
         "rxjs": ">=7.0.0"
+    },
+    "dependencies": {
+        "@univerjs/core": "workspace:*",
+        "@univerjs/design": "workspace:*",
+        "@univerjs/engine-numfmt": "workspace:*",
+        "@univerjs/engine-render": "workspace:*",
+        "@univerjs/icons": "^0.1.26",
+        "@univerjs/sheets": "workspace:*",
+        "@univerjs/sheets-ui": "workspace:*",
+        "@univerjs/ui": "workspace:*",
+        "@wendellhu/redi": "^0.12.13",
+        "react": "^18.2.0",
+        "rxjs": "^7.8.1"
+    },
+    "devDependencies": {
+        "@types/react": "^18.2.47",
+        "@univerjs/infra": "workspace:*",
+        "@vitejs/plugin-react": "^4.2.1",
+        "@vitest/coverage-istanbul": "^1.1.1",
+        "less": "^4.2.0",
+        "typescript": "^5.3.3",
+        "vite": "^5.0.10",
+        "vite-plugin-dts": "^3.7.0",
+        "vitest": "^1.1.1"
     }
 }

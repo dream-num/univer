@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { BaseComponentProps } from '@univerjs/ui';
 import React, { Component, createRef } from 'react';
 
 import type { IUniverSlidesUIConfig } from '../../basics';
@@ -23,7 +22,7 @@ import { SlideBar } from '../slide-bar/SlideBar';
 import { Toolbar } from '../toolbar';
 import style from './index.module.less';
 
-export interface BaseSlideContainerProps extends BaseComponentProps {
+export interface BaseSlideContainerProps {
     config: IUniverSlidesUIConfig;
     changeLocale: (locale: string) => void;
     methods?: any;
@@ -48,10 +47,6 @@ export class SlideContainer extends Component<BaseSlideContainerProps> {
     constructor(props: BaseSlideContainerProps) {
         super(props);
         this.changeSkin(props.config.container as string, 'default');
-    }
-
-    override componentDidMount() {
-        this.props.getComponent?.(this);
     }
 
     /**

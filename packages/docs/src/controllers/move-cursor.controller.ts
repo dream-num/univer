@@ -108,8 +108,8 @@ export class MoveCursorController extends Disposable {
         const { startOffset, endOffset, style, collapsed, direction: rangeDirection } = activeRange;
 
         if (allRanges.length > 1) {
-            let min = Infinity;
-            let max = -Infinity;
+            let min = Number.POSITIVE_INFINITY;
+            let max = Number.NEGATIVE_INFINITY;
 
             for (const range of allRanges) {
                 min = Math.min(min, range.startOffset!);
@@ -130,11 +130,11 @@ export class MoveCursorController extends Disposable {
         const anchorOffset = collapsed
             ? startOffset
             : rangeDirection === RANGE_DIRECTION.FORWARD
-              ? startOffset
-              : endOffset;
+                ? startOffset
+                : endOffset;
 
         let focusOffset = collapsed ? endOffset : rangeDirection === RANGE_DIRECTION.FORWARD ? endOffset : startOffset;
-        const dataStreamLength = docDataModel.getBody()!.dataStream.length ?? Infinity;
+        const dataStreamLength = docDataModel.getBody()!.dataStream.length ?? Number.POSITIVE_INFINITY;
 
         if (direction === Direction.LEFT || direction === Direction.RIGHT) {
             const preSpan = skeleton.findNodeByCharIndex(focusOffset - 1);
@@ -208,14 +208,14 @@ export class MoveCursorController extends Disposable {
 
         const { startOffset, endOffset, style, collapsed } = activeRange;
 
-        const dataStreamLength = docDataModel.getBody()!.dataStream.length ?? Infinity;
+        const dataStreamLength = docDataModel.getBody()!.dataStream.length ?? Number.POSITIVE_INFINITY;
 
         if (direction === Direction.LEFT || direction === Direction.RIGHT) {
             let cursor;
 
             if (!activeRange.collapsed || allRanges.length > 1) {
-                let min = Infinity;
-                let max = -Infinity;
+                let min = Number.POSITIVE_INFINITY;
+                let max = Number.NEGATIVE_INFINITY;
 
                 for (const range of allRanges) {
                     min = Math.min(min, range.startOffset!);
@@ -323,7 +323,7 @@ export class MoveCursorController extends Disposable {
         const divide = span.parent;
 
         if (divide == null) {
-            return -Infinity;
+            return Number.NEGATIVE_INFINITY;
         }
 
         const divideLeft = divide.left;
@@ -340,7 +340,7 @@ export class MoveCursorController extends Disposable {
             span?: IDocumentSkeletonSpan;
             distance: number;
         } = {
-            distance: Infinity,
+            distance: Number.POSITIVE_INFINITY,
         };
 
         for (const divide of line.divides) {

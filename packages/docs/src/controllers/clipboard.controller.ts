@@ -17,8 +17,8 @@
 import type { ICommandInfo, IDocumentBody } from '@univerjs/core';
 import {
     Disposable,
+    EDITOR_ACTIVATED,
     FOCUSING_DOC,
-    FOCUSING_EDITOR,
     ICommandService,
     IContextService,
     ILogService,
@@ -68,7 +68,7 @@ export class DocClipboardController extends Disposable {
 
                 if (
                     !this._contextService.getContextValue(FOCUSING_DOC) &&
-                    !this._contextService.getContextValue(FOCUSING_EDITOR)
+                    !this._contextService.getContextValue(EDITOR_ACTIVATED)
                 ) {
                     return;
                 }

@@ -16,7 +16,7 @@
 
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-import { describe, expect, test } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { Radio } from '../../radio/Radio';
 import { RadioGroup } from '../RadioGroup';
@@ -35,7 +35,7 @@ describe('RadioGroup', () => {
         </RadioGroup>
     );
 
-    test('click Radio', async () => {
+    it('click Radio', async () => {
         render(group);
 
         fireEvent.click(screen.getByText('1'));

@@ -29,17 +29,17 @@ const meta: Meta = {
 
 export default meta;
 
-export const PlayGround = {
+export const Playground = {
     render() {
         function handleRedirect() {
-            window.open('https://univer-icons.vercel.app/', '_blank');
+            window.open('https://univer.ai/icons', '_blank');
         }
 
         return (
             <>
-                Check out our icon library at{' '}
+                Check out our icon library at
                 <Button type="link" onClick={handleRedirect}>
-                    https://univer-icons.vercel.app/
+                    https://univer.ai/icons
                 </Button>
             </>
         );

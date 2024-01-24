@@ -27,7 +27,6 @@ import type { IDirtyUnitSheetNameMap } from '@univerjs/engine-formula';
 import { FormulaDataModel } from '@univerjs/engine-formula';
 import type {
     IDeleteRangeMutationParams,
-    IInsertRangeMutationParams,
     IInsertSheetMutationParams,
     IMoveColumnsMutationParams,
     IMoveRangeMutationParams,
@@ -38,8 +37,6 @@ import type {
     ISetRangeValuesMutationParams,
 } from '@univerjs/sheets';
 import {
-    DeleteRangeMutation,
-    InsertRangeMutation,
     InsertSheetMutation,
     MoveColsMutation,
     MoveRangeMutation,
@@ -129,26 +126,6 @@ export class ActiveDirtyController extends Disposable {
                 const params = command.params as IMoveColumnsMutationParams;
                 return {
                     dirtyRanges: this._getMoveRowsMutationDirtyRange(params),
-                };
-            },
-        });
-
-        this._activeDirtyManagerService.register(DeleteRangeMutation.id, {
-            commandId: DeleteRangeMutation.id,
-            getDirtyData: (command: ICommandInfo) => {
-                const params = command.params as IDeleteRangeMutationParams;
-                return {
-                    dirtyRanges: this._getDeleteRangeMutationDirtyRange(params),
-                };
-            },
-        });
-
-        this._activeDirtyManagerService.register(InsertRangeMutation.id, {
-            commandId: InsertRangeMutation.id,
-            getDirtyData: (command: ICommandInfo) => {
-                const params = command.params as IInsertRangeMutationParams;
-                return {
-                    dirtyRanges: this._getDeleteRangeMutationDirtyRange(params),
                 };
             },
         });

@@ -21,6 +21,6 @@ import { BaseFunction } from '../../base-function';
 
 export class Sumifs extends BaseFunction {
     override calculate(...variants: FunctionVariantType[]) {
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return new ErrorValueObject(ErrorType.VALUE);
     }
 }

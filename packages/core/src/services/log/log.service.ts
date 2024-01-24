@@ -20,7 +20,7 @@ import { createIdentifier } from '@wendellhu/redi';
 
 import { Disposable } from '../../shared/lifecycle';
 
-export enum LogLevel /* eslint-disable no-magic-numbers */ {
+export enum LogLevel {
     SILENT = 0,
     ERROR = 1,
     WARN = 2,
@@ -28,7 +28,6 @@ export enum LogLevel /* eslint-disable no-magic-numbers */ {
     VERBOSE = 4,
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ArgsType = any[];
 
 export interface ILogService {
@@ -80,7 +79,7 @@ export class DesktopLogService extends Disposable implements ILogService {
         const firstArg = args[0];
         const withTag = /^\[(.*?)\]/g.test(firstArg);
         if (withTag) {
-            method(`\x1B[97;104m${firstArg}\x1B[0m:`, ...args.slice(1));
+            method(`\x1B[97;104m${firstArg}\x1B[0m`, ...args.slice(1));
         } else {
             method(...args);
         }

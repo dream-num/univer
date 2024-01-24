@@ -19,14 +19,14 @@ import { describe, expect, it } from 'vitest';
 import { compareToken } from '../../../basics/token';
 import { compareWithWildcard, isMatchWildcard, isWildcard, replaceWildcard } from '../compare';
 
-describe('test compare', () => {
-    it('function isWildcard', () => {
+describe('Test compare', () => {
+    it('Function isWildcard', () => {
         expect(isWildcard('test')).toBe(false);
         expect(isWildcard('test*')).toBe(true);
         expect(isWildcard('test?')).toBe(true);
     });
 
-    it('function isMatchWildcard', () => {
+    it('Function isMatchWildcard', () => {
         expect(isMatchWildcard('test', 'test')).toBe(true);
         expect(isMatchWildcard('test', 'test*')).toBe(true);
         expect(isMatchWildcard('test', 'test?')).toBe(false);
@@ -39,7 +39,7 @@ describe('test compare', () => {
         expect(isMatchWildcard('test?', 'test~?')).toBe(true);
     });
 
-    it('function replaceWildcard', () => {
+    it('Function replaceWildcard', () => {
         expect(replaceWildcard('test*')).toBe('test ');
         expect(replaceWildcard('test?')).toBe('test ');
         expect(replaceWildcard('test~*')).toBe('test*');
@@ -47,7 +47,7 @@ describe('test compare', () => {
         expect(replaceWildcard('test~~*')).toBe('test~*');
     });
 
-    it('function compareWithWildcard', () => {
+    it('Function compareWithWildcard', () => {
         expect(compareWithWildcard('test12', 'test*', compareToken.EQUALS)).toBe(true);
         expect(compareWithWildcard('test12', 'test*', compareToken.GREATER_THAN)).toBe(true);
         expect(compareWithWildcard('test12', 'test*', compareToken.GREATER_THAN_OR_EQUAL)).toBe(true);

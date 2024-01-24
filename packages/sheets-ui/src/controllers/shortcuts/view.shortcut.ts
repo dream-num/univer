@@ -14,19 +14,27 @@
  * limitations under the License.
  */
 
+import { NilCommand } from '@univerjs/core';
 import type { IShortcutItem } from '@univerjs/ui';
 import { KeyCode, MetaKeys } from '@univerjs/ui';
 
 import { ChangeZoomRatioCommand } from '../../commands/commands/set-zoom-ratio.command';
+import { whenSheetEditorFocused } from './utils';
 
 export const ZoomInShortcutItem: IShortcutItem = {
     id: ChangeZoomRatioCommand.id,
     description: 'shortcut.sheet.zoom-in',
     binding: KeyCode.EQUAL | MetaKeys.CTRL_COMMAND,
     group: '3_sheet-view',
+    preconditions: whenSheetEditorFocused,
+    priority: 1,
     staticParameters: {
         delta: 0.2,
     },
+};
+export const PreventDefaultZoomInShortcutItem: IShortcutItem = {
+    id: NilCommand.id,
+    binding: KeyCode.EQUAL | MetaKeys.CTRL_COMMAND,
 };
 
 export const ZoomOutShortcutItem: IShortcutItem = {
@@ -34,17 +42,29 @@ export const ZoomOutShortcutItem: IShortcutItem = {
     description: 'shortcut.sheet.zoom-out',
     binding: KeyCode.MINUS | MetaKeys.CTRL_COMMAND,
     group: '3_sheet-view',
+    preconditions: whenSheetEditorFocused,
+    priority: 1,
     staticParameters: {
         delta: -0.2,
     },
+};
+export const PreventDefaultZoomOutShortcutItem: IShortcutItem = {
+    id: NilCommand.id,
+    binding: KeyCode.MINUS | MetaKeys.CTRL_COMMAND,
 };
 
 export const ResetZoomShortcutItem: IShortcutItem = {
     id: ChangeZoomRatioCommand.id,
     description: 'shortcut.sheet.reset-zoom',
     binding: KeyCode.Digit0 | MetaKeys.CTRL_COMMAND,
+    preconditions: whenSheetEditorFocused,
     group: '3_sheet-view',
+    priority: 1,
     staticParameters: {
         reset: true,
     },
+};
+export const PreventDefaultResetZoomShortcutItem: IShortcutItem = {
+    id: NilCommand.id,
+    binding: KeyCode.Digit0 | MetaKeys.CTRL_COMMAND,
 };

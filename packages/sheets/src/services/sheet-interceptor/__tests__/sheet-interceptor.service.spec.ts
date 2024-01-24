@@ -130,7 +130,6 @@ describe('Test SheetInterceptorService', () => {
         it('the second interceptor should not be executed when not call next in the first interceptor', () => {
             get(SheetInterceptorService).intercept(stringIntercept, {
                 priority: 100,
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 handler(value, _, _next) {
                     return `${value} first`;
                 },

@@ -15,74 +15,43 @@
  */
 
 import { ErrorType } from '../../../basics/error-type';
-import type { compareToken } from '../../../basics/token';
-import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import { valueObjectCompare } from '../../../engine/utils/object-compare';
-import { type ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import type { BooleanValueObject } from '../../../engine/value-object/primitive-object';
-import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Sumif extends BaseFunction {
-    override calculate(...variants: FunctionVariantType[]) {
-        // 1. Check whether the number of parameters is correct,
-        // TODO@Dushusir: Report the allowed parameter number range and the actual number of parameters
-        if (variants.length < 2 || variants.length > 3) {
-            return ErrorValueObject.create(ErrorType.NA);
+    override calculate(range: BaseValueObject, criteria: BaseValueObject, sumRange?: BaseValueObject) {
+        if (range.isError() || criteria.isError() || sumRange?.isError()) {
+            return new ErrorValueObject(ErrorType.NA);
         }
 
-        const range = variants[0];
-        const criteria = variants[1];
-        const sumRange = variants[2];
-
-        // 2. Check whether all parameter types meet the requirements
-        if (range.isError() || criteria.isError() || (sumRange && sumRange.isError())) {
-            return ErrorValueObject.create(ErrorType.VALUE);
+        if (!range.isArray() || (sumRange && !sumRange.isArray())) {
+            return new ErrorValueObject(ErrorType.VALUE);
         }
 
-        let accumulatorAll: BaseValueObject = new NumberValueObject(0);
-
-        if (range.isReferenceObject() || (range.isValueObject() && (range as BaseValueObject).isArray())) {
-            // TODO@Dushusir: criteria is referenceObject
-            const resultArrayObject = valueObjectCompare(range as BaseReferenceObject, criteria as BaseValueObject);
-
-            const resultArrayValue = (resultArrayObject as ArrayValueObject).getArrayValue();
-
-            const sumRangeValue = (sumRange || range) as BaseReferenceObject | ArrayValueObject;
-            const { startRow, startColumn } = sumRangeValue.getRangePosition();
-
-            sumRangeValue.iterator((valueObject, row, column) => {
-                if (!valueObject?.isError()) {
-                    const arrayValue = resultArrayValue[row - startRow][column - startColumn] as BaseValueObject;
-                    const accumulator = arrayValue.getValue()
-                        ? (valueObject as BaseValueObject)
-                        : new NumberValueObject(0);
-                    accumulatorAll = accumulatorAll.plus(accumulator) as BaseValueObject;
-                }
-            });
-        } else if (criteria.isValueObject()) {
-            // TODO@Dushusir: criteria is referenceObject
-            accumulatorAll = this._validator(range as BaseValueObject, criteria as BaseValueObject);
+        if (criteria.isArray()) {
+            return criteria.map((criteriaItem) => this._handleSingleObject(range, criteriaItem, sumRange));
         }
 
-        return accumulatorAll;
+        return this._handleSingleObject(range, criteria, sumRange);
     }
 
-    private _validator(rangeValue: BaseValueObject, criteriaValue: BaseValueObject) {
-        const criteriaValueString = criteriaValue.getValue();
-        if (criteriaValueString) {
-            // TODO@Dushusir: support ==, !=, >, >=, <, <=, <>, *, ?, ~?, ~*
-            const token = (criteriaValueString as string).substring(0, 1) as compareToken;
-            const criteriaString = (criteriaValueString as string).substring(1);
-            // TODO@Dushusir: support string value
-            const validator = rangeValue.compare(new NumberValueObject(criteriaString), token) as BooleanValueObject;
-            const validatorValue = validator.getValue();
-            if (!validatorValue) {
-                rangeValue = new NumberValueObject(0);
-            }
+    private _handleSingleObject(range: BaseValueObject, criteria: BaseValueObject, sumRange?: BaseValueObject) {
+        const resultArrayObject = valueObjectCompare(range, criteria);
+
+        // sumRange has the same dimensions as range
+        const sumRangeArray = sumRange
+            ? (sumRange as ArrayValueObject).slice(
+                [0, (range as ArrayValueObject).getRowCount()],
+                [0, (range as ArrayValueObject).getColumnCount()]
+            )
+            : (range as ArrayValueObject);
+
+        if (!sumRangeArray) {
+            return new ErrorValueObject(ErrorType.VALUE);
         }
 
-        return rangeValue;
+        return sumRangeArray.pick(resultArrayObject as ArrayValueObject).sum();
     }
 }

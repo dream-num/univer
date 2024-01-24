@@ -367,7 +367,6 @@ export class Engine extends ThinEngine<Scene> {
         this._canvasEle.addEventListener('keyup', keyboardUpEvent);
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _handlePointerAction() {
         const eventPrefix = getPointerPrefix();
 
@@ -621,8 +620,8 @@ export class Engine extends ThinEngine<Scene> {
             'onwheel' in document.createElement('div')
                 ? 'wheel' // Modern browsers support "wheel"
                 : (document as any).onmousewheel !== undefined
-                  ? 'mousewheel' // Webkit and IE support at least "mousewheel"
-                  : 'DOMMouseScroll'; // let's assume that remaining browsers are older Firefox
+                    ? 'mousewheel' // Webkit and IE support at least "mousewheel"
+                    : 'DOMMouseScroll'; // let's assume that remaining browsers are older Firefox
         return wheelEventName;
     }
 

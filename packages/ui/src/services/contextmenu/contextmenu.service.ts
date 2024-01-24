@@ -25,6 +25,10 @@ export interface IContextMenuHandler {
 }
 
 export interface IContextMenuService {
+    disabled: boolean;
+
+    enable(): void;
+    disable(): void;
     triggerContextMenu(event: IPointerEvent | IMouseEvent, menuType: string): void;
     registerContextMenuHandler(handler: IContextMenuHandler): IDisposable;
 }
@@ -34,8 +38,21 @@ export const IContextMenuService = createIdentifier<IContextMenuService>('univer
 export class DesktopContextMenuService extends Disposable implements IContextMenuService {
     private _currentHandler: IContextMenuHandler | null = null;
 
+    disabled: boolean = false;
+
+    disable(): void {
+        this.disabled = true;
+    }
+
+    enable(): void {
+        this.disabled = false;
+    }
+
     triggerContextMenu(event: IPointerEvent | IMouseEvent, menuType: string): void {
         event.stopPropagation();
+
+        if (this.disabled) return;
+
         this._currentHandler?.handleContextMenu(event, menuType);
     }
 

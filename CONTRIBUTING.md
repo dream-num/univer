@@ -1,4 +1,4 @@
-<!-- https://univer.work/guides/contributing/ -->
+<!-- https://univer.ai/guides/contributing/ -->
 
 # Univer Contributing Guide
 
@@ -10,9 +10,9 @@ Please read our [Code of Conduct](./CODE_OF_CONDUCT.md) before you join in the U
 
 If you encounter any issues while using Univer, you can seek help in the following communities:
 
--   [Discord community](https://discord.gg/XPGnMBmpd6)
+-   [Discord community](https://discord.gg/z3NKNT6D2f)
 -   [GitHub Discussions](https://github.com/dream-num/univer/discussions)
--   Join the Univer Chinese community (please scan the QR code [here](https://univer.work/enterprises/#%E8%8E%B7%E5%8F%96%E5%95%86%E4%B8%9A%E7%89%88))
+-   Join the Univer Chinese community (please scan the QR code [here](https://univer.ai/enterprises/#%E8%8E%B7%E5%8F%96%E5%95%86%E4%B8%9A%E7%89%88))
 
 ## Reporting Issues
 
@@ -52,7 +52,7 @@ pnpm dev:demo
 
 ### Architecture
 
-Please refer to the architecture doc. The [Chinese version](https://univer.work/guides/architecture/architecture/).
+Please refer to the architecture doc. The [Chinese version](https://univer.ai/guides/architecture/architecture/).
 
 ### Source code organization
 
@@ -84,6 +84,16 @@ There are some limits on what paths could a file import from.
 During the refactoring process, it is recommended to remove legacy folders such as `Enum`, `Interface`, `Basics`, and `Shared`.
 
 Avoid creating barrel imports (index.ts) unless it is the main root index.ts file of a plugin.
+
+### Contextual Connections
+
+To effectively contribute as a member of a software engineering team (and community as well!), it is crucial to establish strong contextual connections. Providing links to relevant resources can greatly assist others in understanding the context. Consider the following practices:
+
+- Include the link to the corresponding issue in your commit message.
+- Leave comments with links to the relevant context within the code.
+- Whenever possible, document important information directly within the codebase itself.
+
+By adopting these practices, you can enhance collaboration and facilitate a better understanding of the codebase within our community.
 
 ### Naming conventions
 

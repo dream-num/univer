@@ -39,7 +39,7 @@ export function DialogPart() {
         };
     }, []);
 
-    const props = dialogOptions.map((options) => {
+    const attrs = dialogOptions.map((options) => {
         const { children, title, closeIcon, footer, ...restProps } = options;
 
         const dialogProps = restProps as IDialogProps & { id: string };
@@ -55,5 +55,5 @@ export function DialogPart() {
         return dialogProps;
     });
 
-    return <>{props?.map((options) => <Dialog key={options.id} {...options} />)}</>;
+    return <>{attrs?.map((options) => <Dialog key={options.id} {...options} />)}</>;
 }

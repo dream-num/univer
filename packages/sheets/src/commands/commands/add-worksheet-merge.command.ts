@@ -70,10 +70,7 @@ function getClearContentMutationParamsForRanges(
     unitId: string,
     worksheet: Worksheet,
     ranges: IRange[]
-): {
-    undos: IMutationInfo[];
-    redos: IMutationInfo[];
-} {
+): { undos: IMutationInfo[]; redos: IMutationInfo[] } {
     const undos: IMutationInfo[] = [];
     const redos: IMutationInfo[] = [];
 
@@ -120,7 +117,7 @@ function getClearContentMutationParamForRange(worksheet: Worksheet, range: IRang
 export const AddWorksheetMergeCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.add-worksheet-merge',
-    // eslint-disable-next-line max-lines-per-function
+
     handler: async (accessor: IAccessor, params: IAddMergeCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);

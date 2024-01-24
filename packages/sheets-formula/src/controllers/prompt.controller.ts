@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-import type { IAbsoluteRefTypeForRange, ICommandInfo, IRangeWithCoord, ITextRun, Nullable } from '@univerjs/core';
+import type { ICommandInfo, IRangeWithCoord, ITextRun, Nullable } from '@univerjs/core';
 import {
     AbsoluteRefType,
-    deserializeRangeWithSheet,
     Direction,
     Disposable,
     DisposableCollection,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     FOCUSING_EDITOR_INPUT_FORMULA,
-    getAbsoluteRefTypeWitString,
     ICommandService,
     IContextService,
     isFormulaString,
@@ -33,7 +31,6 @@ import {
     OnLifecycle,
     RANGE_TYPE,
     Rectangle,
-    serializeRangeToRefString,
     ThemeService,
     toDisposable,
     Tools,
@@ -44,15 +41,17 @@ import {
     ReplaceContentCommand,
     TextSelectionManagerService,
 } from '@univerjs/docs';
-import type { ISequenceNode } from '@univerjs/engine-formula';
+import type { IAbsoluteRefTypeForRange, ISequenceNode } from '@univerjs/engine-formula';
 import {
+    deserializeRangeWithSheet,
     generateStringWithSequence,
-    includeFormulaLexerToken,
+    getAbsoluteRefTypeWitString,
     isFormulaLexerToken,
     LexerTreeBuilder,
     matchToken,
     normalizeSheetName,
     sequenceNodeType,
+    serializeRangeToRefString,
 } from '@univerjs/engine-formula';
 import {
     DeviceInputEventType,
@@ -1015,11 +1014,7 @@ export class PromptController extends Disposable {
     private _getSheetNameById(unitId: string, sheetId: string) {
         const workbook = this._currentUniverService.getUniverSheetInstance(unitId);
 
-        let sheetName = workbook?.getSheetBySheetId(sheetId)?.getName() || '';
-
-        if (sheetName.length > 0 && includeFormulaLexerToken(sheetName)) {
-            sheetName = `'${sheetName}'`;
-        }
+        const sheetName = workbook?.getSheetBySheetId(sheetId)?.getName() || '';
 
         return sheetName;
     }

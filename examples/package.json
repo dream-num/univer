@@ -1,12 +1,13 @@
 {
     "name": "univer-examples",
+    "private": true,
     "description": "Univer vanilla ts demo project",
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
-    "private": true,
     "scripts": {
         "build:demo": "node ./esbuild.config.mjs",
-        "dev:demo": "node ./esbuild.config.mjs --watch"
+        "dev:demo": "node ./esbuild.config.mjs --watch",
+        "lint:types": "tsc --noEmit"
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
@@ -14,11 +15,12 @@
         "@univerjs/docs": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
-        "@univerjs/find-replace": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.1.25",
+        "@univerjs/find-replace": "workspace:*",
+        "@univerjs/icons": "^0.1.26",
         "@univerjs/rpc": "workspace:*",
         "@univerjs/sheets": "workspace:*",
+        "@univerjs/sheets-find-replace": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",
         "@univerjs/sheets-numfmt": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
@@ -38,6 +40,7 @@
     "devDependencies": {
         "@types/react": "^18.2.46",
         "@types/react-dom": "^18.2.18",
+        "@univerjs/infra": "workspace:*",
         "esbuild": "^0.19.10",
         "esbuild-plugin-clean": "^1.0.1",
         "esbuild-plugin-copy": "^2.1.1",

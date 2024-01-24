@@ -72,13 +72,9 @@ export function InputParams(props: IInputParamsProps) {
 
             <div className={styles.formulaInputParamsInfo}>
                 <FunctionParams
-                    title={
-                        activeIndex === -1 ? (
-                            <FunctionHelp prefix={functionInfo.functionName} value={functionParameter} />
-                        ) : (
-                            functionParameter[activeIndex].name
-                        )
-                    }
+                    title={activeIndex === -1
+                        ? <FunctionHelp prefix={functionInfo.functionName} value={functionParameter} />
+                        : functionParameter[activeIndex].name}
                     value={activeIndex === -1 ? functionInfo.description : functionParameter[activeIndex].detail}
                 />
             </div>

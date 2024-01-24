@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 

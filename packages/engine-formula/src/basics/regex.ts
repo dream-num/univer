@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { UNIT_NAME_REGEX } from '@univerjs/core';
-
+import { UNIT_NAME_REGEX } from '../engine/utils/reference';
 import { prefixToken, suffixToken } from './token';
 
 // export const UNIT_NAME_REGEX = '\'?\\[((?![\\/?:"<>|*\\\\]).)*\\]';

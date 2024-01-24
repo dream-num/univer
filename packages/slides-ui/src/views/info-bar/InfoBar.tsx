@@ -16,7 +16,6 @@
 
 import type { Nullable } from '@univerjs/core';
 import { Container, Input, Tooltip } from '@univerjs/design';
-import type { BaseComponentProps } from '@univerjs/ui';
 import React, { Component } from 'react';
 
 import type { BaseInfoBarProps } from '../../controllers/info-bar-ui-controller';
@@ -26,7 +25,7 @@ interface IState {
     infoList: Nullable<BaseInfoBarProps>;
 }
 
-interface IProps extends BaseComponentProps {
+interface IProps {
     renameSheet: () => void;
 }
 
@@ -40,10 +39,6 @@ export class InfoBar extends Component<IProps, IState> {
         this.state = {
             infoList: null,
         };
-    }
-
-    override componentDidMount() {
-        this.props.getComponent?.(this);
     }
 
     setInfoList(list: BaseInfoBarProps) {

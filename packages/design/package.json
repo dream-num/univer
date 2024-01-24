@@ -1,10 +1,18 @@
 {
     "name": "@univerjs/design",
     "version": "0.1.0-beta.2",
+    "private": false,
     "description": "UI component library for building exceptional Univer.",
-    "keywords": [],
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
+    "keywords": [],
+    "sideEffects": [
+        "**/*.css"
+    ],
+    "exports": {
+        ".": "./src/index.ts",
+        "./*": "./src/*"
+    },
     "main": "./lib/cjs/index.js",
     "module": "./lib/es/index.js",
     "types": "./lib/types/index.d.ts",
@@ -26,30 +34,28 @@
             "./lib/*": "./lib/*"
         }
     },
-    "exports": {
-        ".": "./src/index.ts",
-        "./*": "./src/*"
-    },
     "directories": {
         "lib": "lib"
     },
     "files": [
         "lib"
     ],
-    "sideEffects": [
-        "**/*.css"
-    ],
-    "private": false,
     "scripts": {
         "test": "vitest run",
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
+        "lint:types": "tsc --noEmit",
         "build": "tsc && vite build"
+    },
+    "peerDependencies": {
+        "react": ">=16.9.0",
+        "react-dom": ">=16.9.0",
+        "rxjs": "^7.8.1"
     },
     "dependencies": {
         "@rc-component/color-picker": "^1.4.1",
         "@rc-component/trigger": "^1.18.2",
-        "@univerjs/icons": "^0.1.25",
+        "@univerjs/icons": "^0.1.26",
         "clsx": "^2.0.0",
         "rc-dialog": "^9.3.4",
         "rc-dropdown": "^4.1.0",
@@ -62,13 +68,15 @@
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "react-draggable": "^4.4.6",
-        "react-transition-group": "^4.4.5"
+        "react-transition-group": "^4.4.5",
+        "rxjs": "^7.8.1"
     },
     "devDependencies": {
         "@testing-library/react": "^14.1.2",
         "@types/react": "^18.2.47",
         "@types/react-dom": "^18.2.18",
         "@types/react-transition-group": "^4.4.10",
+        "@univerjs/infra": "workspace:*",
         "@vitejs/plugin-react": "^4.2.1",
         "@vitest/coverage-istanbul": "^1.1.1",
         "happy-dom": "^12.10.3",
@@ -76,11 +84,6 @@
         "typescript": "^5.3.3",
         "vite": "^5.0.10",
         "vite-plugin-dts": "^3.7.0",
-        "vite-plugin-externals": "^0.6.2",
         "vitest": "^1.1.1"
-    },
-    "peerDependencies": {
-        "react": ">=16.9.0",
-        "react-dom": ">=16.9.0"
     }
 }

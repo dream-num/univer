@@ -25,7 +25,7 @@ import type {
 } from '../../../basics/i-document-skeleton-cached';
 import { BreakType } from '../../../basics/i-document-skeleton-cached';
 import type { ISectionBreakConfig } from '../../../basics/interfaces';
-// eslint-disable-next-line import/no-cycle
+
 import { dealWithSections } from '../block/section';
 import type { DocumentViewModel } from '../view-model/document-view-model';
 import { createSkeletonSection } from './section';
@@ -33,7 +33,7 @@ import { updateBlockIndex } from './tools';
 
 // 新增数据结构框架
 // 判断奇数和偶数页码
-// eslint-disable-next-line max-lines-per-function
+
 export function createSkeletonPage(
     sectionBreakConfig: ISectionBreakConfig,
     skeletonResourceReference: ISkeletonResourceReference,
@@ -44,7 +44,7 @@ export function createSkeletonPage(
 
     const {
         pageNumberStart = 1,
-        pageSize = { width: Infinity, height: Infinity },
+        pageSize = { width: Number.POSITIVE_INFINITY, height: Number.POSITIVE_INFINITY },
         pageOrient = PageOrientType.PORTRAIT,
         headerIds = {},
         footerIds = {},
@@ -65,7 +65,7 @@ export function createSkeletonPage(
 
     const { skeHeaders, skeFooters } = skeletonResourceReference;
 
-    const { width: pageWidth = Infinity, height: pageHeight = Infinity } = pageSize;
+    const { width: pageWidth = Number.POSITIVE_INFINITY, height: pageHeight = Number.POSITIVE_INFINITY } = pageSize;
 
     page.pageNumber = pageNumber;
     page.pageNumberStart = pageNumberStart;
@@ -199,14 +199,14 @@ function _createSkeletonHeader(
         marginHeader = 0,
         marginFooter = 0,
     } = sectionBreakConfig;
-    const pageWidth = pageSize?.width || Infinity;
+    const pageWidth = pageSize?.width || Number.POSITIVE_INFINITY;
     const headerConfig: ISectionBreakConfig = {
         lists,
         footerTreeMap,
         headerTreeMap,
         pageSize: {
             width: pageWidth - marginLeft - marginRight,
-            height: Infinity,
+            height: Number.POSITIVE_INFINITY,
         },
         localeService,
         drawings,

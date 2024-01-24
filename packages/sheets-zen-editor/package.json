@@ -1,10 +1,15 @@
 {
     "name": "@univerjs/sheets-zen-editor",
     "version": "0.1.0-beta.2",
+    "private": false,
     "description": "Zen Editor plugin for Univer Sheets.",
-    "keywords": [],
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
+    "keywords": [],
+    "exports": {
+        ".": "./src/index.ts",
+        "./*": "./src/*"
+    },
     "main": "./lib/cjs/index.js",
     "module": "./lib/esm/index.js",
     "types": "./lib/types/index.d.ts",
@@ -25,29 +30,39 @@
             }
         }
     },
-    "exports": {
-        ".": "./src/index.ts",
-        "./*": "./src/*"
-    },
     "directories": {
         "lib": "lib"
     },
     "files": [
         "lib"
     ],
-    "private": false,
     "scripts": {
         "test": "vitest run",
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
+        "lint:types": "tsc --noEmit",
         "build": "tsc && vite build"
+    },
+    "peerDependencies": {
+        "@univerjs/core": "workspace:*",
+        "@univerjs/design": "workspace:*",
+        "@univerjs/docs": "workspace:*",
+        "@univerjs/engine-render": "workspace:*",
+        "@univerjs/infra": "workspace:*",
+        "@univerjs/sheets": "workspace:*",
+        "@univerjs/sheets-ui": "workspace:*",
+        "@univerjs/ui": "workspace:*",
+        "@wendellhu/redi": ">=0.12.12",
+        "clsx": ">=2.0.0",
+        "react": ">=16.9.0",
+        "rxjs": ">=7.0.0"
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/docs": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.1.25",
+        "@univerjs/icons": "^0.1.26",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
@@ -63,20 +78,6 @@
         "typescript": "^5.3.3",
         "vite": "^5.0.10",
         "vite-plugin-dts": "^3.7.0",
-        "vite-plugin-externals": "^0.6.2",
         "vitest": "^1.1.1"
-    },
-    "peerDependencies": {
-        "@univerjs/core": "workspace:*",
-        "@univerjs/design": "workspace:*",
-        "@univerjs/docs": "workspace:*",
-        "@univerjs/engine-render": "workspace:*",
-        "@univerjs/sheets": "workspace:*",
-        "@univerjs/sheets-ui": "workspace:*",
-        "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": ">=0.12.12",
-        "clsx": ">=2.0.0",
-        "react": ">=16.9.0",
-        "rxjs": ">=7.0.0"
     }
 }

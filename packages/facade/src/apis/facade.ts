@@ -85,7 +85,7 @@ export class FUniver {
      * Get the currently focused Univer spreadsheet.
      * @returns the currently focused Univer spreadsheet.
      */
-    getActiveSheet(): FWorkbook | null {
+    getActiveWorkbook(): FWorkbook | null {
         const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
         if (!workbook) {
             return null;

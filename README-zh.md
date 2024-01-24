@@ -50,42 +50,44 @@ Univer 的功能特性包括：
     -   🧮 高性能的公式引擎，支持 Web Worker
 -   🌍 国际化支持
 
-点击[这里](https://univer.work/guides/features)以了解 Univer 目前已经推出的功能。
+点击[这里](https://univer.ai/guides/features)以了解 Univer 目前已经推出的功能。
 
 ## 例子
 
 | 链接 | 预览 |
 | - | - |
-| [多实例](https://univer.work/playground/?title=Multi%20Instance)<br>在同一个网页中运行多个 Univer 实例 |  ![](./docs/img/multi-instances.png) |
-| [Uniscript](https://univer.work/playground/?title=Uniscript)<br>使用 Uniscript 来自动化工作流 |  ![](./docs/img/uniscript.png) |
+| [多实例](https://univer.ai/playground/?title=Multi%20Instance)<br>在同一个网页中运行多个 Univer 实例 |  ![](./docs/img/multi-instances.png) |
+| [Uniscript](https://univer.ai/playground/?title=Uniscript)<br>使用 Uniscript 来自动化工作流 |  ![](./docs/img/uniscript.png) |
 
 ## 使用
 
-我们建议通过将 Univer 作为 npm 包使用，请参考文档上的[快速开始](https://univer.work/guides/quick-start/)小节。我们还准备了一个[在线 playground](https://univer.work/playground/)，你无需在本地安装 Univer 就可以体验使用 Univer 开发。
+我们建议通过将 Univer 作为 npm 包使用，请参考文档上的[快速开始](https://univer.ai/guides/quick-start/)小节。我们还准备了一个[在线 playground](https://univer.ai/playground/)，你无需在本地安装 Univer 就可以体验使用 Univer 开发。
 
 Univer 基于插件化架构设计，你可以安装以下包来增强 Univer 的功能。
 
 ### Packages
 
-| 包名                                         | 描述                                                                                    | 版本                                                                                                                        |
-| :------------------------------------------- | :-------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------- |
-| [core](./packages/core)                      | Univer 核心包，实现 Univer 架构和插件机制、基础服务，以及各个文档类型的基本模型         | [![npm version](https://img.shields.io/npm/v/@univerjs/core)](https://npmjs.org/package/@univerjs/core)                     |
-| [design](./packages/design)                  | 实现 Univer 设计语言，提供了一套 CSS 以及一套基于 React 的组件                          | [![npm version](https://img.shields.io/npm/v/@univerjs/design)](https://npmjs.org/package/@univerjs/design)                 |
-| [docs](./packages/docs)                      | 实现了富文本文档的基本业务，同时支持其他业务的文本编辑                                  | [![npm version](https://img.shields.io/npm/v/@univerjs/docs)](https://npmjs.org/package/@univerjs/docs)                     |
-| [docs-ui](./packages/docs-ui)                | 实现了富文本文档的用户交互                                                              | [![npm version](https://img.shields.io/npm/v/@univerjs/docs-ui)](https://npmjs.org/package/@univerjs/docs-ui)               |
-| [engine-formula](./packages/engine-formula)  | 实现公式引擎                                                                            | [![npm version](https://img.shields.io/npm/v/@univerjs/engine-formula)](https://npmjs.org/package/@univerjs/engine-formula) |
-| [engine-numfmt](./packages/engine-numfmt)    | 实现数字格式引擎                                                                        | [![npm version](https://img.shields.io/npm/v/@univerjs/engine-numfmt)](https://npmjs.org/package/@univerjs/engine-numfmt)   |
-| [engine-render](./packages/engine-render)    | 实现渲染引擎                                                                            | [![npm version](https://img.shields.io/npm/v/@univerjs/engine-render)](https://npmjs.org/package/@univerjs/engine-render)   |
-| [facade](./packages/facade/)                 | 提供了一个让 Univer 更加易用的 API 层                                                      | [![npm version](https://img.shields.io/npm/v/@univerjs/facade)](https://npmjs.org/package/@univerjs/facade)                       |
-| [network](./packages/network)                | 实现了 Univer 的网络服务，包括 WebSocket 和 HTTP。                                      | [![npm version](https://img.shields.io/npm/v/@univerjs/network)](https://npmjs.org/package/@univerjs/network)               |
-| [rpc](./packages/rpc)                        | 实现 RPC 机制，以及在主从文档副本之间同步数据的方法，方便 web worker 等跨线程场景的开发 | [![npm version](https://img.shields.io/npm/v/@univerjs/rpc)](https://npmjs.org/package/@univerjs/rpc)                       |
-| [sheets](./packages/sheets)                  | 实现电子表格的基本业务                                                                  | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets)](https://npmjs.org/package/@univerjs/sheets)                 |
-| [sheets-formula](./packages/sheets-formula)  | 实现电子表格的公式编辑                                                                  | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-formula)](https://npmjs.org/package/@univerjs/sheets-formula) |
-| [sheets-numfmt](./packages/sheets-numfmt)    | 实现电子表格中的数字格式编辑                                                            | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-numfmt)](https://npmjs.org/package/@univerjs/sheets-numfmt)   |
-| [sheets-zen-editor](./packages/sheets-zen-editor)    | 实现电子表格中的禅编辑模式                                                            | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-zen-editor)](https://npmjs.org/package/@univerjs/sheets-zen-editor)   |
-| [sheets-ui](./packages/sheets-ui)            | 实现电子表格的用户交互                                                                  | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-ui)](https://npmjs.org/package/@univerjs/sheets-ui)           |
-| [ui](./packages/ui)                          | 实现基本的用户交互服务，并基于 React 提供了一套桌面端的交互布局                         | [![npm version](https://img.shields.io/npm/v/@univerjs/ui)](https://npmjs.org/package/@univerjs/ui)                         |
-| [uniscript](./packages/uniscript) （实验性） | 一套基于 TypeScript 的 DSL，让用户可以通过脚本语言操纵 Univer 完成更复杂的任务          | [![npm version](https://img.shields.io/npm/v/@univerjs/uniscript)](https://npmjs.org/package/@univerjs/uniscript)           |
+| 包名                                                    | 描述                                                                                    | 版本                                                                                                                        |
+| :-------------------------------------------            | :-------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------- |
+| [core](./packages/core)                                 | Univer 核心包，实现 Univer 架构和插件机制、基础服务，以及各个文档类型的基本模型         | [![npm version](https://img.shields.io/npm/v/@univerjs/core)](https://npmjs.org/package/@univerjs/core)                     |
+| [design](./packages/design)                             | 实现 Univer 设计语言，提供了一套 CSS 以及一套基于 React 的组件                          | [![npm version](https://img.shields.io/npm/v/@univerjs/design)](https://npmjs.org/package/@univerjs/design)                 |
+| [docs](./packages/docs)                                 | 实现了富文本文档的基本业务，同时支持其他业务的文本编辑                                  | [![npm version](https://img.shields.io/npm/v/@univerjs/docs)](https://npmjs.org/package/@univerjs/docs)                     |
+| [docs-ui](./packages/docs-ui)                           | 实现了富文本文档的用户交互                                                              | [![npm version](https://img.shields.io/npm/v/@univerjs/docs-ui)](https://npmjs.org/package/@univerjs/docs-ui)               |
+| [engine-formula](./packages/engine-formula)             | 实现公式引擎                                                                            | [![npm version](https://img.shields.io/npm/v/@univerjs/engine-formula)](https://npmjs.org/package/@univerjs/engine-formula) |
+| [engine-numfmt](./packages/engine-numfmt)               | 实现数字格式引擎                                                                        | [![npm version](https://img.shields.io/npm/v/@univerjs/engine-numfmt)](https://npmjs.org/package/@univerjs/engine-numfmt)   |
+| [engine-render](./packages/engine-render)               | 实现渲染引擎                                                                            | [![npm version](https://img.shields.io/npm/v/@univerjs/engine-render)](https://npmjs.org/package/@univerjs/engine-render)   |
+| [facade](./packages/facade/)                            | 提供了一个让 Univer 更加易用的 API 层                                                      | [![npm version](https://img.shields.io/npm/v/@univerjs/facade)](https://npmjs.org/package/@univerjs/facade)                       |
+| [find-replace](./packages/find-replace)                 | 实现 Univer 的查找替换                                                                             | [![npm version](https://img.shields.io/npm/v/@univerjs/find-replace)](https://npmjs.org/package/@univerjs/find-replace)         |
+| [network](./packages/network)                           | 实现了 Univer 的网络服务，包括 WebSocket 和 HTTP。                                      | [![npm version](https://img.shields.io/npm/v/@univerjs/network)](https://npmjs.org/package/@univerjs/network)               |
+| [rpc](./packages/rpc)                                   | 实现 RPC 机制，以及在主从文档副本之间同步数据的方法，方便 web worker 等跨线程场景的开发 | [![npm version](https://img.shields.io/npm/v/@univerjs/rpc)](https://npmjs.org/package/@univerjs/rpc)                       |
+| [sheets](./packages/sheets)                             | 实现电子表格的基本业务                                                                  | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets)](https://npmjs.org/package/@univerjs/sheets)                 |
+| [sheets-find-replace](./packages/sheets-find-replace)   | 实现电子表格的查找替换                                                                  | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-find-replace)](https://npmjs.org/package/@univerjs/sheets-find-replace) |
+| [sheets-formula](./packages/sheets-formula)             | 实现电子表格的公式编辑                                                                  | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-formula)](https://npmjs.org/package/@univerjs/sheets-formula) |
+| [sheets-numfmt](./packages/sheets-numfmt)               | 实现电子表格中的数字格式编辑                                                            | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-numfmt)](https://npmjs.org/package/@univerjs/sheets-numfmt)   |
+| [sheets-zen-editor](./packages/sheets-zen-editor)       | 实现电子表格中的禅编辑模式                                                            | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-zen-editor)](https://npmjs.org/package/@univerjs/sheets-zen-editor)   |
+| [sheets-ui](./packages/sheets-ui)                       | 实现电子表格的用户交互                                                                  | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-ui)](https://npmjs.org/package/@univerjs/sheets-ui)           |
+| [ui](./packages/ui)                                     | 实现基本的用户交互服务，并基于 React 提供了一套桌面端的交互布局                         | [![npm version](https://img.shields.io/npm/v/@univerjs/ui)](https://npmjs.org/package/@univerjs/ui)                         |
+| [uniscript](./packages/uniscript) （实验性）              | 一套基于 TypeScript 的 DSL，让用户可以通过脚本语言操纵 Univer 完成更复杂的任务          | [![npm version](https://img.shields.io/npm/v/@univerjs/uniscript)](https://npmjs.org/package/@univerjs/uniscript)           |
 
 ## 贡献
 
@@ -99,9 +101,9 @@ Univer 基于插件化架构设计，你可以安装以下包来增强 Univer �
 
 ## 链接
 
--   [文档](https://univer.work/guides/introduction/)
--   [在线 Playground](https://univer.work/playground/)
--   [官方网站](https://univer.work)
+-   [文档](https://univer.ai/guides/introduction/)
+-   [在线 Playground](https://univer.ai/playground/)
+-   [官方网站](https://univer.ai)
 -   [Legacy Univer Demo](https://dream-num.github.io/univer-demo/)
 
 ### 社区
@@ -110,7 +112,7 @@ Univer 基于插件化架构设计，你可以安装以下包来增强 Univer �
 -   [Github Discussions](https://github.com/dream-num/univer/discussions)
 -   微信扫描下方二维码，加入 Univer 中文社群
 
-![wecom-qr-code](https://univer.work/_astro/business-qr-code.3zPwMdHH_ZGnJEl.webp)
+![wecom-qr-code](https://univer.ai/_astro/business-qr-code.3zPwMdHH_ZGnJEl.webp)
 
 ## 授权
 

@@ -36,6 +36,7 @@ import {
 } from '../commands/commands/add-worksheet-merge.command';
 import { DeleteRangeMoveLeftConfirmCommand } from '../commands/commands/delete-range-move-left-confirm.command ';
 import { DeleteRangeMoveUpConfirmCommand } from '../commands/commands/delete-range-move-up-confirm.command';
+import { HideColConfirmCommand, HideRowConfirmCommand } from '../commands/commands/hide-row-col-confirm.command';
 import {
     SetRangeBoldCommand,
     SetRangeFontFamilyCommand,
@@ -50,6 +51,7 @@ import {
 import { InsertRangeMoveDownConfirmCommand } from '../commands/commands/insert-range-move-down-confirm.command';
 import { InsertRangeMoveRightConfirmCommand } from '../commands/commands/insert-range-move-right-confirm.command';
 import { RefillCommand } from '../commands/commands/refill.command';
+import { RemoveColConfirmCommand, RemoveRowConfirmCommand } from '../commands/commands/remove-row-col-confirm.command';
 import { RemoveSheetConfirmCommand } from '../commands/commands/remove-sheet-confirm.command';
 import {
     ApplyFormatPainterCommand,
@@ -211,7 +213,14 @@ import {
     SetUnderlineShortcutItem,
 } from './shortcuts/style.shortcut';
 import { ClearSelectionValueShortcutItem } from './shortcuts/value.shortcut';
-import { ResetZoomShortcutItem, ZoomInShortcutItem, ZoomOutShortcutItem } from './shortcuts/view.shortcut';
+import {
+    PreventDefaultResetZoomShortcutItem,
+    PreventDefaultZoomInShortcutItem,
+    PreventDefaultZoomOutShortcutItem,
+    ResetZoomShortcutItem,
+    ZoomInShortcutItem,
+    ZoomOutShortcutItem,
+} from './shortcuts/view.shortcut';
 
 @OnLifecycle(LifecycleStages.Ready, SheetUIController)
 export class SheetUIController extends Disposable {
@@ -250,6 +259,10 @@ export class SheetUIController extends Disposable {
             MoveSelectionEnterAndTabCommand,
             RenameSheetOperation,
             RemoveSheetConfirmCommand,
+            RemoveRowConfirmCommand,
+            RemoveColConfirmCommand,
+            HideRowConfirmCommand,
+            HideColConfirmCommand,
             ScrollCommand,
             SelectAllCommand,
             SetActivateCellEditOperation,
@@ -403,6 +416,9 @@ export class SheetUIController extends Disposable {
             ZoomInShortcutItem,
             ZoomOutShortcutItem,
             ResetZoomShortcutItem,
+            PreventDefaultResetZoomShortcutItem,
+            PreventDefaultZoomInShortcutItem,
+            PreventDefaultZoomOutShortcutItem,
 
             // toggle cell style shortcuts
             SetBoldShortcutItem,

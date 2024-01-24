@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable no-magic-numbers */
-
 import { RxDisposable } from '@univerjs/core';
 import type { Subscriber, Subscription } from 'rxjs';
 import { BehaviorSubject, firstValueFrom, isObservable, Observable, of } from 'rxjs';
@@ -96,7 +93,6 @@ export function toModule<T extends object>(channel: IChannel): T {
                 return undefined;
             }
 
-            // eslint-disable-next-line func-names
             return function (...args: any[]) {
                 const isObservable = propertyIsEventSource(propKey);
                 if (isObservable) {

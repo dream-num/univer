@@ -364,11 +364,11 @@ export class Range {
         if (p && Array.isArray(p.body?.textRuns)) {
             return isAllFormatInTextRuns('ul', p.body?.textRuns!) === BooleanNumber.TRUE
                 ? {
-                      s: BooleanNumber.TRUE,
-                  }
+                    s: BooleanNumber.TRUE,
+                }
                 : {
-                      s: BooleanNumber.FALSE,
-                  };
+                    s: BooleanNumber.FALSE,
+                };
         }
 
         return this.getUnderlines()[0][0];
@@ -397,11 +397,11 @@ export class Range {
         if (p && Array.isArray(p.body?.textRuns)) {
             return isAllFormatInTextRuns('st', p.body?.textRuns!) === BooleanNumber.TRUE
                 ? {
-                      s: BooleanNumber.TRUE,
-                  }
+                    s: BooleanNumber.TRUE,
+                }
                 : {
-                      s: BooleanNumber.FALSE,
-                  };
+                    s: BooleanNumber.FALSE,
+                };
         }
 
         return this.getStrikeThroughs()[0][0];

@@ -116,6 +116,7 @@ export class AutoFillService extends Disposable implements IAutoFillService {
             disable: false,
         },
     ]);
+
     readonly menu$ = this._menu$.asObservable();
     constructor(
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,

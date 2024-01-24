@@ -36,7 +36,6 @@ function getValue(locale: ILocales[LocaleType], key: string): Nullable<string> {
     try {
         if (locale[key]) return locale[key] as string;
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return key.split('.').reduce((a: any, b: string) => a[b], locale);
     } catch (error) {
         console.warn('Key %s not found', key);

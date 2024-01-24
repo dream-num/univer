@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { Ctor, Injector } from '@wendellhu/redi';
 
 import type { Plugin, PluginCtor } from '../plugin/plugin';

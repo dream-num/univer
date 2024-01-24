@@ -1,4 +1,4 @@
-import { resolve } from 'path';
+import { resolve } from 'node:path';
 import { defineConfig } from 'vitest/config';
 import dts from 'vite-plugin-dts';
 
@@ -28,19 +28,26 @@ export default defineConfig(({ mode }) => ({
             fileName: (format) => `${format}/index.js`,
             formats: ['es', 'umd', 'cjs'],
         },
+
         rollupOptions: {
             external: [
                 '@univerjs/core',
+                '@univerjs/engine-formula',
+                '@univerjs/network',
                 '@univerjs/sheets',
                 '@univerjs/sheets-formula',
+                '@univerjs/sheets-numfmt',
                 '@wendellhu/redi',
-                'rxjs'
+                'rxjs',
             ],
             output: {
                 globals: {
                     '@univerjs/core': 'UniverCore',
+                    '@univerjs/engine-formula': 'UniverEngineFormula',
+                    '@univerjs/network': 'UniverNetwork',
                     '@univerjs/sheets': 'UniverSheets',
                     '@univerjs/sheets-formula': 'UniverSheetsFormula',
+                    '@univerjs/sheets-numfmt': 'UniverSheetsNumfmt',
                     '@wendellhu/redi': '@wendellhu/redi',
                     rxjs: 'rxjs',
                 },

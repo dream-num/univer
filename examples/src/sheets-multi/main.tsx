@@ -28,7 +28,7 @@ import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverUIPlugin } from '@univerjs/ui';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Mosaic, MosaicWindow } from 'react-mosaic-component';
 
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data';
@@ -99,7 +99,7 @@ export const App = (
     />
 );
 
-ReactDOM.render(App, document.getElementById('container'));
+createRoot(document.getElementById('container')!).render(App);
 
 factory('app-a')();
 factory('app-b')();

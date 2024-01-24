@@ -71,7 +71,8 @@ export const SelectGroup = {
                     {
                         label: (
                             <span>
-                                Option 3-2 <strong>xxx</strong>
+                                Option 3-2
+                                <strong>xxx</strong>
                             </span>
                         ),
                         value: 'option32',

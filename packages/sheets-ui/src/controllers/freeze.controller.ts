@@ -442,7 +442,7 @@ export class FreezeController extends Disposable {
         scene.disableEvent();
 
         const lastRow = this._getCurrentLastVisibleRow();
-        const lastRowY = lastRow === undefined ? Infinity : skeleton.rowHeightAccumulation[lastRow];
+        const lastRowY = lastRow === undefined ? Number.POSITIVE_INFINITY : skeleton.rowHeightAccumulation[lastRow];
         this._activeViewport = null;
         const oldFreeze = this._getFreeze();
 
@@ -954,15 +954,15 @@ export class FreezeController extends Disposable {
                 this._commandService.executeCommand(ScrollCommand.id, {
                     ...(resetScroll & ResetScrollType.X
                         ? {
-                              sheetViewStartColumn: 0,
-                              offsetX: 0,
-                          }
+                            sheetViewStartColumn: 0,
+                            offsetX: 0,
+                        }
                         : null),
                     ...(resetScroll & ResetScrollType.Y
                         ? {
-                              sheetViewStartRow: 0,
-                              offsetY: 0,
-                          }
+                            sheetViewStartRow: 0,
+                            offsetY: 0,
+                        }
                         : null),
                 });
             }

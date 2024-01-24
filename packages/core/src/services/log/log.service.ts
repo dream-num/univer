@@ -20,7 +20,7 @@ import { createIdentifier } from '@wendellhu/redi';
 
 import { Disposable } from '../../shared/lifecycle';
 
-export enum LogLevel /* eslint-disable no-magic-numbers */ {
+export enum LogLevel {
     SILENT = 0,
     ERROR = 1,
     WARN = 2,
@@ -28,7 +28,6 @@ export enum LogLevel /* eslint-disable no-magic-numbers */ {
     VERBOSE = 4,
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ArgsType = any[];
 
 export interface ILogService {

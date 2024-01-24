@@ -1,10 +1,9 @@
 {
-    "extends": "../../tsconfig.json",
+    "extends": "@univerjs/infra/tsconfigs/base",
     "compilerOptions": {
-        "rootDir": ".",
-        "outDir": "lib",
-        "esModuleInterop": true,
-        "types": ["./src/types/index.d.ts"]
+        "rootDir": "src",
+        "outDir": "lib/types"
     },
-    "include": ["src/**/*"]
+    "references": [{ "path": "./tsconfig.node.json" }],
+    "include": ["src"]
 }

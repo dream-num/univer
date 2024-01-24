@@ -85,7 +85,7 @@ class CustomFunction extends BaseFunction {
 
 function createFunction(functionString: string, functionName: string) {
     const instance = new CustomFunction(functionName);
-    // eslint-disable-next-line @typescript-eslint/no-implied-eval
+    // eslint-disable-next-line no-new-func
     const functionCalculate = new Function(`return ${functionString}`)();
     instance.calculateCustom = functionCalculate;
 

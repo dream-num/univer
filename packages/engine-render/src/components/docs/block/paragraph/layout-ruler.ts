@@ -35,7 +35,7 @@ import {
     createSkeletonLine,
     setDivideFullState,
 } from '../../common/line';
-// eslint-disable-next-line import/no-cycle
+
 import { createSkeletonPage } from '../../common/page';
 import { setColumnFullState } from '../../common/section';
 import { addSpanToDivide, createSkeletonBulletSpan, hasMixedTextLayout } from '../../common/span';
@@ -697,7 +697,7 @@ function __getSpanGroupWidth(spanGroup: IDocumentSkeletonSpan[]) {
 
 function __maxFontBoundingBoxBySpanGroup(spanGroup: IDocumentSkeletonSpan[]) {
     const spanGroupLen = spanGroup.length;
-    let height = -Infinity;
+    let height = Number.NEGATIVE_INFINITY;
     let maxBox;
 
     for (let i = 0; i < spanGroupLen; i++) {

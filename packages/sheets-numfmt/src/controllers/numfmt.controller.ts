@@ -120,7 +120,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
         if (numfmtValue) {
             pattern = numfmtValue.pattern;
         }
-        // eslint-disable-next-line no-magic-numbers
+
         const defaultValue = (cellValue?.t === CellValueType.NUMBER ? cellValue.v : 12345678) as number;
 
         const props: ISheetNumfmtPanelProps = {
@@ -156,7 +156,6 @@ export class NumfmtController extends Disposable implements INumfmtController {
             header: { title: localeService.t('sheet.numfmt.title') },
             children: {
                 label: SHEET_NUMFMT_PLUGIN,
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 ...(props as any), // need passthrough to react props.
             },
             onClose: () => {

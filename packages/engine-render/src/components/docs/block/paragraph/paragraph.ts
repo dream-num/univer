@@ -34,7 +34,7 @@ import type {
 } from '../../../../basics/i-document-skeleton-cached';
 import { BreakType } from '../../../../basics/i-document-skeleton-cached';
 import type { IParagraphConfig, ISectionBreakConfig } from '../../../../basics/interfaces';
-// eslint-disable-next-line import/no-cycle
+
 import { createSkeletonPage } from '../../common/page';
 import { setColumnFullState } from '../../common/section';
 import { createSkeletonLetterSpan, createSkeletonTabSpan } from '../../common/span';
@@ -68,8 +68,8 @@ export function dealWidthParagraph(
         defaultTabStop = 10.5,
 
         pageSize = {
-            width: Infinity,
-            height: Infinity,
+            width: Number.POSITIVE_INFINITY,
+            height: Number.POSITIVE_INFINITY,
         },
 
         marginRight = 0,
@@ -447,7 +447,7 @@ function horizontalAlignHandler(line: IDocumentSkeletonLine, horizontalAlign: Ho
         const { width } = divide;
         const spanGroupWidth = getSpanGroupWidth(divide);
 
-        if (width === Infinity) {
+        if (width === Number.POSITIVE_INFINITY) {
             continue;
         }
         if (horizontalAlign === HorizontalAlign.CENTER) {

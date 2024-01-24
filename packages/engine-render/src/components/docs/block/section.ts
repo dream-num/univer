@@ -21,7 +21,7 @@ import type { ISectionBreakConfig } from '../../../basics/interfaces';
 import type { DataStreamTreeNode } from '../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../view-model/document-view-model';
 import { dealWithBlockError } from './block-error';
-// eslint-disable-next-line import/no-cycle
+
 import { dealWidthParagraph } from './paragraph';
 
 export function dealWithSections(

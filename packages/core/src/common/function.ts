@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
-// eslint-disable-next-line no-magic-numbers
 export function throttle<T extends (...args: any[]) => any>(fn: T, wait: number = 16): T {
     let lastTime = 0;
     let timer: number | null = null;

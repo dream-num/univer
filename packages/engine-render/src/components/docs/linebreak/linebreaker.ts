@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-/* eslint-disable no-magic-numbers */
-
 import type { Nullable } from '@univerjs/core';
 
 import { Break } from './break';
@@ -142,9 +139,9 @@ export class LineBreaker {
         const next = this.string.charCodeAt(this._pos);
 
         // If a surrogate pair
-        if (code >= 0xd800 && code <= 0xdbff && next >= 0xdc00 && next <= 0xdfff) {
+        if (code >= 0xD800 && code <= 0xDBFF && next >= 0xDC00 && next <= 0xDFFF) {
             this._pos++;
-            return (code - 0xd800) * 0x400 + (next - 0xdc00) + 0x10000;
+            return (code - 0xD800) * 0x400 + (next - 0xDC00) + 0x10000;
         }
 
         return code;

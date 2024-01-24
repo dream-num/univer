@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ICommandService, IUniverInstanceService } from '@univerjs/core';
+import { BooleanNumber, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import type { Injector } from '@wendellhu/redi';
 import { beforeEach, describe, expect, it } from 'vitest';
 
@@ -72,7 +72,7 @@ describe('Test moving rows & cols', () => {
             expect(undoDeleteParams).toEqual({
                 ...getId(),
                 range: { endColumn: 19, endRow: 3, rangeType: 1, startColumn: 0, startRow: 3 },
-                rowInfo: { 0: { h: 96.328125, hd: 0, isAutoHeight: false } },
+                rowInfo: { 0: { h: 96.328125, hd: 0, ia: BooleanNumber.FALSE } },
             });
         });
     });

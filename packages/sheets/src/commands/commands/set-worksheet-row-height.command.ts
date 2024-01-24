@@ -16,6 +16,7 @@
 
 import type { ICommand, IRange } from '@univerjs/core';
 import {
+    BooleanNumber,
     CommandType,
     ICommandService,
     IUndoRedoService,
@@ -123,7 +124,7 @@ export const DeltaRowHeightCommand: ICommand = {
             unitId,
             subUnitId,
             ranges: redoMutationParams.ranges,
-            autoHeightInfo: false,
+            autoHeightInfo: BooleanNumber.FALSE,
         };
 
         const undoSetIsAutoHeightParams: ISetWorksheetRowIsAutoHeightMutationParams =
@@ -132,7 +133,7 @@ export const DeltaRowHeightCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
 
-        const result = await sequenceExecute(
+        const result = sequenceExecute(
             [
                 {
                     id: SetWorksheetRowHeightMutation.id,
@@ -214,7 +215,7 @@ export const SetRowHeightCommand: ICommand = {
             unitId,
             subUnitId,
             ranges: redoMutationParams.ranges,
-            autoHeightInfo: false,
+            autoHeightInfo: BooleanNumber.FALSE,
         };
 
         const undoSetIsAutoHeightParams: ISetWorksheetRowIsAutoHeightMutationParams =
@@ -303,7 +304,7 @@ export const SetWorksheetRowIsAutoHeightCommand: ICommand = {
             unitId,
             subUnitId,
             ranges,
-            autoHeightInfo: true, // Hard code first, maybe it will change by the menu item in the future.
+            autoHeightInfo: BooleanNumber.TRUE, // Hard code first, maybe it will change by the menu item in the future.
         };
 
         const undoMutationParams: ISetWorksheetRowIsAutoHeightMutationParams =

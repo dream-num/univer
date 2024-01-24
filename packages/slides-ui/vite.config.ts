@@ -43,7 +43,6 @@ export default defineConfig(({ mode }) => ({
                 '@univerjs/slides',
                 '@univerjs/ui',
                 '@wendellhu/redi',
-                '@wendellhu/redi/react-bindings',
                 'react',
             ],
             output: {
@@ -55,7 +54,6 @@ export default defineConfig(({ mode }) => ({
                     '@univerjs/slides': 'UniverSlides',
                     '@univerjs/ui': 'UniverUi',
                     '@wendellhu/redi': '@wendellhu/redi',
-                    '@wendellhu/redi/react-bindings': '@wendellhu/redi/react-bindings',
                     react: 'React',
                 },
             },

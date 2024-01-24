@@ -52,8 +52,8 @@
     "devDependencies": {
         "@univerjs/infra": "workspace:*",
         "typescript": "^5.3.3",
-        "vite": "^5.0.10",
-        "vite-plugin-dts": "^3.7.0",
-        "vitest": "^1.1.1"
+        "vite": "^5.0.12",
+        "vite-plugin-dts": "^3.7.2",
+        "vitest": "^1.2.1"
     }
 }

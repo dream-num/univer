@@ -61,12 +61,12 @@
     },
     "devDependencies": {
         "@univerjs/infra": "workspace:*",
-        "@vitest/coverage-istanbul": "^1.1.1",
-        "happy-dom": "^12.10.3",
+        "@vitest/coverage-istanbul": "^1.2.1",
+        "happy-dom": "^13.3.1",
         "less": "^4.2.0",
         "typescript": "^5.3.3",
-        "vite": "^5.0.10",
-        "vite-plugin-dts": "^3.7.0",
-        "vitest": "^1.1.1"
+        "vite": "^5.0.12",
+        "vite-plugin-dts": "^3.7.2",
+        "vitest": "^1.2.1"
     }
 }

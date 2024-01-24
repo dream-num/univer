@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICommand, IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
+import type { ICellData, ICommand, IObjectMatrixPrimitiveType, IRange } from '@univerjs/core';
 import {
     BooleanNumber,
     CommandType,
@@ -29,7 +29,6 @@ import {
 import type { IAccessor } from '@wendellhu/redi';
 
 import type {
-    IDeleteRangeMutationParams,
     IInsertColMutationParams,
     IInsertRangeMutationParams,
     IInsertRowMutationParams,
@@ -45,7 +44,6 @@ import {
     InsertRowMutationUndoFactory,
 } from '../mutations/insert-row-col.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../mutations/remove-row-col.mutation';
-import { getInsertRangeMutations, InsertRangeUndoMutationFactory } from '../utils/handle-range-mutation';
 import { followSelectionOperation } from './utils/selection-utils';
 
 export interface IInsertRowCommandParams {
@@ -77,11 +75,12 @@ export const InsertRowCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
+        const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
         const workbook = univerInstanceService.getUniverSheetInstance(params.unitId)!;
         const worksheet = workbook.getSheetBySheetId(params.subUnitId)!;
 
-        const { range, direction, unitId, subUnitId, cellValue } = params;
+        const { range, direction, unitId, subUnitId } = params;
         const { startRow, endRow } = range;
         const anchorRow = direction === Direction.UP ? startRow : startRow - 1;
         const height = worksheet.getRowHeight(anchorRow);
@@ -101,29 +100,14 @@ export const InsertRowCommand: ICommand = {
             insertRowParams
         );
 
-        const insertRangeMutationParams: IInsertRangeMutationParams = {
-            unitId: params.unitId,
-            subUnitId: params.subUnitId,
-            range: params.range,
-            shiftDimension: Dimension.ROWS,
-            cellValue,
-        };
+        const intercepted = sheetInterceptorService.onCommandExecute({
+            id: InsertRowCommand.id,
+            params,
+        });
 
-        const undoInsertRangeMutationParams: Nullable<IDeleteRangeMutationParams> = InsertRangeUndoMutationFactory(
-            accessor,
-            insertRangeMutationParams
-        );
-        // intercept the command execution to gether undo redo commands
-        const intercepted = accessor.get(SheetInterceptorService).onCommandExecute({ id: InsertRowCommand.id, params });
-
-        const { redo: insertRangeRedo, undo: insertRangeUndo } = getInsertRangeMutations(
-            accessor,
-            insertRangeMutationParams
-        );
         const result = sequenceExecute(
             [
                 { id: InsertRowMutation.id, params: insertRowParams },
-                ...insertRangeRedo,
                 ...intercepted.redos,
                 followSelectionOperation(range, workbook, worksheet),
             ],
@@ -133,16 +117,8 @@ export const InsertRowCommand: ICommand = {
         if (result.result) {
             undoRedoService.pushUndoRedo({
                 unitID: params.unitId,
-                undoMutations: [
-                    ...intercepted.undos,
-                    ...insertRangeUndo,
-                    { id: RemoveRowMutation.id, params: undoRowInsertionParams },
-                ],
-                redoMutations: [
-                    { id: InsertRowMutation.id, params: insertRowParams },
-                    ...insertRangeRedo,
-                    ...intercepted.redos,
-                ],
+                undoMutations: [{ id: RemoveRowMutation.id, params: undoRowInsertionParams }, ...intercepted.redos],
+                redoMutations: [...intercepted.undos, { id: InsertRowMutation.id, params: insertRowParams }],
             });
 
             return true;
@@ -304,24 +280,14 @@ export const InsertColCommand: ICommand<IInsertColCommandParams> = {
             shiftDimension: Dimension.COLUMNS,
             cellValue,
         };
-        const undoInsertRangeParams: Nullable<IDeleteRangeMutationParams> = InsertRangeUndoMutationFactory(
-            accessor,
-            insertRangeMutationParams
-        );
         const intercepted = sheetInterceptorService.onCommandExecute({
             id: InsertColCommand.id,
             params,
         });
 
-        const { redo: insertRangeRedo, undo: insertRangeUndo } = getInsertRangeMutations(
-            accessor,
-            insertRangeMutationParams
-        );
-
         const result = sequenceExecute(
             [
                 { id: InsertColMutation.id, params: insertColParams },
-                ...insertRangeRedo,
                 ...intercepted.redos,
                 followSelectionOperation(range, workbook, worksheet),
             ],
@@ -333,17 +299,12 @@ export const InsertColCommand: ICommand<IInsertColCommandParams> = {
                 unitID: params.unitId,
                 undoMutations: [
                     ...intercepted.undos,
-                    ...insertRangeUndo,
                     {
                         id: RemoveColMutation.id,
                         params: undoColInsertionParams,
                     },
                 ],
-                redoMutations: [
-                    { id: InsertColMutation.id, params: insertColParams },
-                    ...insertRangeRedo,
-                    ...intercepted.redos,
-                ],
+                redoMutations: [{ id: InsertColMutation.id, params: insertColParams }, ...intercepted.redos],
             });
             return true;
         }

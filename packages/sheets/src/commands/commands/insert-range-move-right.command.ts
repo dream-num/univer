@@ -81,6 +81,46 @@ export const InsertRangeMoveRightCommand: ICommand = {
         const redoMutations: IMutationInfo[] = [];
         const undoMutations: IMutationInfo[] = [];
 
+        const cellMatrix = worksheet.getCellMatrix();
+        const dataRange = cellMatrix.getDataRange();
+        const moveSlice = cellMatrix.getSlice(range.startRow, range.endRow, dataRange.startColumn, dataRange.endColumn);
+        const sliceMaxCol = moveSlice.getDataRange().endColumn;
+        const insertColCount = Math.max(
+            sliceMaxCol + (range.endColumn - range.startColumn + 1) - dataRange.endColumn,
+            0
+        );
+        if (insertColCount > 0) {
+            const anchorCol = range.startColumn - 1;
+            const width = worksheet.getColumnWidth(anchorCol);
+
+            const insertColParams: IInsertColMutationParams = {
+                unitId,
+                subUnitId,
+                range: {
+                    startRow: dataRange.startRow + 1,
+                    endRow: dataRange.endRow,
+                    startColumn: dataRange.endColumn + 1,
+                    endColumn: dataRange.endColumn + insertColCount,
+                },
+                colInfo: new Array(insertColCount).fill(undefined).map(() => ({
+                    w: width,
+                    hd: BooleanNumber.FALSE,
+                })),
+            };
+
+            redoMutations.push({
+                id: InsertColMutation.id,
+                params: insertColParams,
+            });
+
+            const undoColInsertionParams: IRemoveColMutationParams = InsertColMutationUndoFactory(
+                accessor,
+                insertColParams
+            );
+
+            undoMutations.push({ id: RemoveColMutation.id, params: undoColInsertionParams });
+        }
+
         // to keep style.
         const cellValue: IObjectMatrixPrimitiveType<ICellData> = {};
         Range.foreach(range, (row, col) => {
@@ -109,32 +149,6 @@ export const InsertRangeMoveRightCommand: ICommand = {
         redoMutations.push(...insertRangeRedo);
 
         undoMutations.push(...insertRangeUndo);
-
-        const { startColumn, endColumn } = range;
-        const anchorCol = startColumn - 1;
-        const width = worksheet.getColumnWidth(anchorCol);
-
-        const insertColParams: IInsertColMutationParams = {
-            unitId,
-            subUnitId,
-            range,
-            colInfo: new Array(endColumn - startColumn + 1).fill(undefined).map(() => ({
-                w: width,
-                hd: BooleanNumber.FALSE,
-            })),
-        };
-
-        redoMutations.push({
-            id: InsertColMutation.id,
-            params: insertColParams,
-        });
-
-        const undoColInsertionParams: IRemoveColMutationParams = InsertColMutationUndoFactory(
-            accessor,
-            insertColParams
-        );
-
-        undoMutations.push({ id: RemoveColMutation.id, params: undoColInsertionParams });
 
         const sheetInterceptor = sheetInterceptorService.onCommandExecute({
             id: InsertRangeMoveRightCommand.id,

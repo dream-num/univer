@@ -68,6 +68,10 @@ export const RemoveRowMutation: IMutation<IRemoveRowsMutationParams> = {
         const rowCount = range.endRow - range.startRow + 1;
         spliceArray(range.startRow, rowCount, rowPrimitive);
 
+        // remove cells contents by directly mutating worksheetCellMatrix
+        const cellMatrix = worksheet.getCellMatrix();
+        cellMatrix.removeRows(range.startRow, rowCount);
+
         worksheet.setRowCount(worksheet.getRowCount() - rowCount);
 
         return true;
@@ -130,6 +134,10 @@ export const RemoveColMutation: IMutation<IRemoveColMutationParams> = {
         const colCount = range.endColumn - range.startColumn + 1;
         spliceArray(range.startColumn, colCount, colPrimitive);
         worksheet.setColumnCount(worksheet.getColumnCount() - colCount);
+
+        // remove cells contents by directly mutating worksheetCellMatrix
+        const cellMatrix = worksheet.getCellMatrix();
+        cellMatrix.removeColumns(range.startColumn, colCount);
 
         return true;
     },

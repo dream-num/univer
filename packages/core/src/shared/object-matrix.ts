@@ -55,12 +55,17 @@ export function insertMatrixArray<T>(
     array[index] = value;
 }
 
-export function spliceArray<T>(start: number, count: number, o: IObjectArrayPrimitiveType<T>) {
+export function spliceArray<T>(
+    start: number,
+    count: number,
+    o: IObjectArrayPrimitiveType<T> | IObjectMatrixPrimitiveType<T>,
+    insert?: IObjectArrayPrimitiveType<T> | IObjectMatrixPrimitiveType<T>
+) {
     const end = start + count;
     const length = getArrayLength(o);
     const array = o;
     let effective = 0;
-    const splice: IObjectArrayPrimitiveType<T> = {};
+    const splice: IObjectArrayPrimitiveType<T> | IObjectMatrixPrimitiveType<T> = {};
     for (let i = start; i < end; i++) {
         const item = array[i];
         if (item !== undefined) {
@@ -69,16 +74,36 @@ export function spliceArray<T>(start: number, count: number, o: IObjectArrayPrim
             effective++;
         }
     }
-    const diff = end - start;
+    const insertLength = insert ? getArrayLength(insert) : 0;
+
+    const diff = start - end + insertLength;
     const last = length;
 
-    for (let i = end; i < last; i++) {
-        const item = array[i];
-        if (item !== undefined) {
-            array[i - diff] = array[i];
-            delete array[i];
+    if (diff > 0) {
+        for (let i = last - 1; i >= end; i--) {
+            const item = array[i];
+            if (item !== undefined) {
+                array[i + diff] = array[i];
+                delete array[i];
+            }
+        }
+    } else if (diff < 0) {
+        for (let i = end; i < last; i++) {
+            const item = array[i];
+            if (item !== undefined) {
+                array[i + diff] = array[i];
+                delete array[i];
+            }
         }
     }
+
+    if (insert) {
+        for (let i = 0; i < insertLength; i++) {
+            array[start + i] = insert[i];
+        }
+    }
+
+    return splice;
 }
 
 export function concatMatrixArray<T>(source: IObjectArrayPrimitiveType<T>, target: IObjectArrayPrimitiveType<T>) {
@@ -387,6 +412,31 @@ export class ObjectMatrix<T> {
         // loop all rows and move column one by one, because our matrix is row-first
         this.forEach((row, value) => {
             moveMatrixArray(start, count, target, value);
+        });
+    }
+
+    insertRows(start: number, count: number): void {
+        for (let r = start; r < start + count; r++) {
+            const initial: IObjectArrayPrimitiveType<T> = {};
+            insertMatrixArray(r, initial, this._matrix);
+        }
+    }
+
+    insertColumns(start: number, count: number): void {
+        for (let c = start; c < start + count; c++) {
+            this.forEach((row, data) => {
+                insertMatrixArray(c, undefined, data);
+            });
+        }
+    }
+
+    removeRows(start: number, count: number): void {
+        spliceArray(start, count, this._matrix);
+    }
+
+    removeColumns(start: number, count: number): void {
+        this.forEach((row, value) => {
+            spliceArray(start, count, value);
         });
     }
 

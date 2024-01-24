@@ -15,6 +15,8 @@ export default antfu({
     },
     markdown: false,
     rules: {
+        'import/no-cycle': 'error',
+        'ts/no-explicit-any': 'warn',
         'style/brace-style': ['warn', '1tbs', { allowSingleLine: true }],
         'style/comma-dangle': ['error', {
             arrays: 'always-multiline',

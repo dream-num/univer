@@ -37,6 +37,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { SheetMenuPosition } from '../../../controllers/menu/menu';
 import { ISelectionRenderService } from '../../../services/selection/selection-render.service';
 import { ISheetBarService } from '../../../services/sheet-bar/sheet-bar.service';
+import { IEditorBridgeService } from '../../../services/editor-bridge.service';
 import styles from './index.module.less';
 import type { IBaseSheetBarProps } from './SheetBarItem';
 import { SheetBarItem } from './SheetBarItem';
@@ -60,6 +61,7 @@ export function SheetBarTabs() {
     const localeService = useDependency(LocaleService);
     const confirmService = useDependency(IConfirmService);
     const selectionRenderService = useDependency(ISelectionRenderService);
+    const editorBridgeService = useDependency(IEditorBridgeService);
     const injector = useInjector();
 
     const workbook = univerInstanceService.getCurrentUniverSheetInstance();
@@ -313,6 +315,9 @@ export function SheetBarTabs() {
     };
 
     const onVisibleChange = (visible: boolean) => {
+        if (editorBridgeService.isForceKeepVisible()) {
+            return;
+        }
         if (visible) {
             const { left: containerLeft } = slideTabBarContainerRef.current?.getBoundingClientRect() ?? {};
             // current active tab position
@@ -332,7 +337,7 @@ export function SheetBarTabs() {
             visible={visible}
             align={{ offset }}
             trigger={['contextMenu']}
-            overlay={
+            overlay={(
                 <Menu
                     menuType={SheetMenuPosition.SHEET_BAR}
                     onOptionSelect={(params) => {
@@ -341,7 +346,7 @@ export function SheetBarTabs() {
                         setVisible(false);
                     }}
                 />
-            }
+            )}
             onVisibleChange={onVisibleChange}
         >
             <div className={styles.slideTabBarContainer} ref={slideTabBarContainerRef}>

@@ -14,21 +14,32 @@
  * limitations under the License.
  */
 
-import { Plugin } from '@univerjs/core';
-import type { Dependency, Injector } from '@wendellhu/redi';
+import { LocaleService, Plugin } from '@univerjs/core';
+import { type Dependency, Inject, type Injector } from '@wendellhu/redi';
 
 import { FindReplaceController } from './controllers/find-replace.controller';
+import { zhCN } from './locale';
+import { FindReplaceService, IFindReplaceService } from './services/find-replace.service';
 
 const PLUGIN_NAME = 'FIND_REPLACE';
 
 export class UniverFindReplacePlugin extends Plugin {
-    constructor(protected readonly _injector: Injector) {
+    constructor(
+        protected readonly _injector: Injector,
+        @Inject(LocaleService) private readonly _localeService: LocaleService
+    ) {
         super(PLUGIN_NAME);
+
+        this._localeService.load({
+            zhCN,
+        });
     }
 
     override onStarting(injector: Injector): void {
-        ([[FindReplaceController]] as Dependency[]).forEach((d) => {
-            injector.add(d);
-        });
+        ([[FindReplaceController], [IFindReplaceService, { useClass: FindReplaceService }]] as Dependency[]).forEach(
+            (d) => {
+                injector.add(d);
+            }
+        );
     }
 }

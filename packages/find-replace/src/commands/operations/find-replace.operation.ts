@@ -17,12 +17,62 @@
 import type { IOperation } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
 
-export const ToggleFindReplaceDialogOperation: IOperation = {
+import { IFindReplaceService } from '../../services/find-replace.service';
+
+export const OpenFindDialogOperation: IOperation = {
+    id: 'ui.operation.open-find-dialog',
     type: CommandType.OPERATION,
-    id: 'ui.operation.toggle-find-replace-dialog',
     handler: (accessor) => {
-        const a = 1;
-        // Toggle dialog
+        const findReplaceService = accessor.get(IFindReplaceService);
+        findReplaceService.start();
+        return true;
+    },
+};
+
+export const OpenReplaceDialogOperation: IOperation = {
+    id: 'ui.operation.open-replace-dialog',
+    type: CommandType.OPERATION,
+    handler: (accessor) => {
+        const findReplaceService = accessor.get(IFindReplaceService);
+        findReplaceService.start();
+        return true;
+    },
+};
+
+export const ToggleReplaceDialogOperation: IOperation = {
+    id: 'ui.operation.toggle-replace-dialog',
+    type: CommandType.OPERATION,
+    handler: (accessor) => {
+        const findReplaceService = accessor.get(IFindReplaceService);
+        // findReplaceService.
+        return true;
+    },
+};
+
+export const CloseFindReplaceDialogOperation: IOperation = {
+    id: 'ui.operation.close-find-replace-dialog',
+    type: CommandType.OPERATION,
+    handler: (accessor) => {
+        return true;
+    },
+};
+
+export const GoToNextMatchOperation: IOperation = {
+    type: CommandType.OPERATION,
+    id: 'ui.operation.go-to-next-match',
+    handler: (accessor) => {
+        const findReplaceService = accessor.get(IFindReplaceService);
+        findReplaceService.moveToNextMatch();
+        return true;
+    },
+};
+
+export const GoToPreviousMatchOperation: IOperation = {
+    type: CommandType.OPERATION,
+    id: 'ui.operation.go-to-previous-match',
+    handler: (accessor) => {
+        const findReplaceService = accessor.get(IFindReplaceService);
+        findReplaceService.moveToPreviousMatch();
         return true;
     },
 };

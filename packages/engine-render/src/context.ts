@@ -272,25 +272,17 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     }
 
     /**
-
      * reset canvas context transform
-
      * @method
-
      */
-
     reset() {
         this._context.reset();
     }
 
     /**
-
      * arc function.
-
      * @method
-
      */
-
     arc(x: number, y: number, radius: number, startAngle: number, endAngle: number, counterClockwise?: boolean) {
         const { scaleX, scaleY } = this._getScale();
         x = fixLineWidthByScale(x, scaleX);
@@ -300,15 +292,10 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     }
 
     /**
-
      * arcTo function.
-
      * @method
-
      *
-
      */
-
     arcTo(x1: number, y1: number, x2: number, y2: number, radius: number) {
         const { scaleX, scaleY } = this._getScale();
         x1 = fixLineWidthByScale(x1, scaleX);
@@ -320,25 +307,17 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     }
 
     /**
-
      * beginPath function.
-
      * @method
-
      */
-
     beginPath() {
         this._context.beginPath();
     }
 
     /**
-
      * bezierCurveTo function.
-
      * @method
-
      */
-
     bezierCurveTo(cp1x: number, cp1y: number, cp2x: number, cp2y: number, x: number, y: number) {
         const { scaleX, scaleY } = this._getScale();
         x = fixLineWidthByScale(x, scaleX);
@@ -352,13 +331,9 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     }
 
     /**
-
      * clearRect function.
-
      * @method
-
      */
-
     clearRect(x: number, y: number, width: number, height: number) {
         const { scaleX, scaleY } = this._getScale();
         x = fixLineWidthByScale(x, scaleX);
@@ -370,11 +345,8 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     }
 
     /**
-
      * clip function.
-
      * @method
-
      */
     clip(): void;
 
@@ -389,25 +361,17 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     }
 
     /**
-
      * closePath function.
-
      * @method
-
      */
-
     closePath() {
         this._context.closePath();
     }
 
     /**
-
      * createImageData function.
-
      * @method
-
      */
-
     createImageData(width: number, height: number, settings?: ImageDataSettings): ImageData;
 
     createImageData(imagedata: ImageData): ImageData;
@@ -426,49 +390,33 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     }
 
     /**
-
      * createLinearGradient function.
-
      * @method
-
      */
-
     createLinearGradient(x0: number, y0: number, x1: number, y1: number) {
         return this._context.createLinearGradient(x0, y0, x1, y1);
     }
 
     /**
-
      * createPattern function.
-
      * @method
-
      */
-
     createPattern(image: CanvasImageSource, repetition: string | null) {
         return this._context.createPattern(image, repetition);
     }
 
     /**
-
      * createRadialGradient function.
-
      * @method
-
      */
-
     createRadialGradient(x0: number, y0: number, r0: number, x1: number, y1: number, r1: number) {
         return this._context.createRadialGradient(x0, y0, r0, x1, y1, r1);
     }
 
     /**
-
      * drawImage function.
-
      * @method
-
      */
-
     drawImage(
         image: CanvasImageSource,
 
@@ -506,13 +454,9 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     }
 
     /**
-
      * ellipse function.
-
      * @method
-
      */
-
     ellipse(
         x: number,
 
@@ -534,13 +478,9 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     }
 
     /**
-
      * isPointInPath function.
-
      * @method
-
      */
-
     isPointInPath(x: number, y: number, fillRule?: CanvasFillRule): boolean;
 
     isPointInPath(path: Path2D, x: number, y: number, fillRule?: CanvasFillRule): boolean;
@@ -550,13 +490,9 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     }
 
     /**
-
      * fill function.
-
      * @method
-
      */
-
     fill(fillRule?: CanvasFillRule): void;
 
     fill(path: Path2D, fillRule?: CanvasFillRule): void;
@@ -568,13 +504,9 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     }
 
     /**
-
      * fillRect function.
-
      * @method
-
      */
-
     fillRect(x: number, y: number, width: number, height: number) {
         const { scaleX, scaleY } = this._getScale();
         x = fixLineWidthByScale(x, scaleX);
@@ -586,13 +518,9 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     }
 
     /**
-
      * strokeRect function.
-
      * @method
-
      */
-
     strokeRect(x: number, y: number, width: number, height: number) {
         const { scaleX, scaleY } = this._getScale();
         x = fixLineWidthByScale(x, scaleX);
@@ -604,13 +532,9 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     }
 
     /**
-
      * fillText function.
-
      * @method
-
      */
-
     fillText(text: string, x: number, y: number, maxWidth?: number) {
         // const { scaleX, scaleY } = this._getScale();
         // x = fixLineWidthByScale(x, scaleX);
@@ -626,13 +550,9 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     }
 
     /**
-
      * fillText function.
-
      * @method
-
      */
-
     fillTextPrecision(text: string, x: number, y: number, maxWidth?: number) {
         const { scaleX, scaleY } = this._getScale();
         x = fixLineWidthByScale(x, scaleX);
@@ -648,37 +568,25 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     }
 
     /**
-
      * measureText function.
-
      * @method
-
      */
-
     measureText(text: string) {
         return this._context.measureText(text);
     }
 
     /**
-
      * getImageData function.
-
      * @method
-
      */
-
     getImageData(sx: number, sy: number, sw: number, sh: number) {
         return this._context.getImageData(sx, sy, sw, sh);
     }
 
     /**
-
      * lineTo function.
-
      * @method
-
      */
-
     lineTo(x: number, y: number) {
         const { scaleX, scaleY } = this._getScale();
         x = fixLineWidthByScale(x, scaleX);
@@ -688,13 +596,9 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     }
 
     /**
-
      * moveTo function.
-
      * @method
-
      */
-
     moveTo(x: number, y: number) {
         const { scaleX, scaleY } = this._getScale();
         x = fixLineWidthByScale(x, scaleX);
@@ -704,13 +608,9 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     }
 
     /**
-
      * rect function.
-
      * @method
-
      */
-
     rect(x: number, y: number, width: number, height: number) {
         const { scaleX, scaleY } = this._getScale();
         x = fixLineWidthByScale(x, scaleX);
@@ -722,85 +622,57 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     }
 
     /**
-
      * putImageData function.
-
      * @method
-
      */
-
     putImageData(imageData: ImageData, dx: number, dy: number) {
         this._context.putImageData(imageData, dx, dy);
     }
 
     /**
-
      * quadraticCurveTo function.
-
      * @method
-
      */
-
     quadraticCurveTo(cpx: number, cpy: number, x: number, y: number) {
         this._context.quadraticCurveTo(cpx, cpy, x, y);
     }
 
     /**
-
      * restore function.
-
      * @method
-
      */
-
     restore() {
         this._context.restore();
     }
 
     /**
-
      * rotate function.
-
      * @method
-
      */
-
     rotate(angle: number) {
         this._context.rotate(angle);
     }
 
     /**
-
      * save function.
-
      * @method
-
      */
-
     save() {
         this._context.save();
     }
 
     /**
-
      * scale function.
-
      * @method
-
      */
-
     scale(x: number, y: number) {
         this._context.scale(x, y);
     }
 
     /**
-
      * setLineDash function.
-
      * @method
-
      */
-
     setLineDash(segments: number[]) {
         // works for Chrome and IE11
 
@@ -809,36 +681,28 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
         } else if ('mozDash' in this._context) {
             // verified that this works in firefox
 
-            (<any>this._context.mozDash) = segments;
+            (<any> this._context.mozDash) = segments;
         } else if ('webkitLineDash' in this._context) {
             // does not currently work for Safari
 
-            (<any>this._context.webkitLineDash) = segments;
+            (<any> this._context.webkitLineDash) = segments;
         }
 
         // no support for IE9 and IE10
     }
 
     /**
-
      * getLineDash function.
-
      * @method
-
      */
-
     getLineDash() {
         return this._context.getLineDash();
     }
 
     /**
-
      * setTransform function.
-
      * @method
-
      */
-
     setTransform(transform?: DOMMatrix2DInit): void;
 
     setTransform(a: number, b: number, c: number, d: number, e: number, f: number): void;
@@ -848,13 +712,9 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     }
 
     /**
-
      * stroke function.
-
      * @method
-
      */
-
     stroke(path2d?: Path2D) {
         if (path2d) {
             this._context.stroke(path2d);
@@ -864,13 +724,9 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     }
 
     /**
-
      * strokeText function.
-
      * @method
-
      */
-
     strokeText(text: string, x: number, y: number, maxWidth?: number) {
         const { scaleX, scaleY } = this._getScale();
         x = fixLineWidthByScale(x, scaleX);
@@ -883,25 +739,17 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     }
 
     /**
-
      * transform function.
-
      * @method
-
      */
-
     transform(a: number, b: number, c: number, d: number, e: number, f: number) {
         this._context.transform(a, b, c, d, e, f);
     }
 
     /**
-
      * translate function.
-
      * @method
-
      */
-
     translate(x: number, y: number) {
         // const { scaleX, scaleY } = this._getScale();
         // x = fixLineWidthByScale(x, scaleX);

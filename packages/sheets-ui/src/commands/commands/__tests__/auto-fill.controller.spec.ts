@@ -30,7 +30,6 @@ import {
     SetRangeValuesMutation,
     SetSelectionsOperation,
 } from '@univerjs/sheets';
-import { createCommandTestBed } from '@univerjs/sheets/commands/commands/__tests__/create-command-test-bed.js';
 import { DesktopPlatformService, DesktopShortcutService, IPlatformService, IShortcutService } from '@univerjs/ui';
 import type { Injector } from '@wendellhu/redi';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -42,6 +41,7 @@ import { EditorBridgeService, IEditorBridgeService } from '../../../services/edi
 import { ISelectionRenderService, SelectionRenderService } from '../../../services/selection/selection-render.service';
 import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
 import { RefillCommand } from '../refill.command';
+import { createCommandTestBed } from './create-command-test-bed';
 
 const theme = {
     colorBlack: '#35322b',

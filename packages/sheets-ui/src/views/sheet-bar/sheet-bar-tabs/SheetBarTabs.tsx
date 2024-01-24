@@ -35,6 +35,7 @@ import { useDependency, useInjector } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { SheetMenuPosition } from '../../../controllers/menu/menu';
+import { ISelectionRenderService } from '../../../services/selection/selection-render.service';
 import { ISheetBarService } from '../../../services/sheet-bar/sheet-bar.service';
 import styles from './index.module.less';
 import type { IBaseSheetBarProps } from './SheetBarItem';
@@ -58,6 +59,7 @@ export function SheetBarTabs() {
     const sheetBarService = useDependency(ISheetBarService);
     const localeService = useDependency(LocaleService);
     const confirmService = useDependency(IConfirmService);
+    const selectionRenderService = useDependency(ISelectionRenderService);
     const injector = useInjector();
 
     const workbook = univerInstanceService.getCurrentUniverSheetInstance();
@@ -151,12 +153,12 @@ export function SheetBarTabs() {
                 cancelText: localeService.t('button.cancel'),
                 confirmText: localeService.t('button.confirm'),
                 onClose() {
-                    confirmService.close(id);
                     focusTabEditor();
+                    confirmService.close(id);
                 },
                 onConfirm() {
-                    confirmService.close(id);
                     focusTabEditor();
+                    confirmService.close(id);
                 },
             });
 
@@ -184,11 +186,11 @@ export function SheetBarTabs() {
                 confirmText: localeService.t('button.confirm'),
                 onClose() {
                     confirmService.close(id);
-                    setTabEditor();
+                    focusTabEditor();
                 },
                 onConfirm() {
                     confirmService.close(id);
-                    setTabEditor();
+                    focusTabEditor();
                 },
             });
         }
@@ -197,10 +199,16 @@ export function SheetBarTabs() {
     };
 
     const focusTabEditor = () => {
-        const slideTabEditor = slideTabBarRef.current.slideTabBar?.getActiveItem()?.getEditor();
-        if (slideTabEditor) {
-            slideTabEditor.focus();
-        }
+        selectionRenderService.endSelection();
+
+        // There is an asynchronous operation in endSelection, which will trigger blur immediately after focus, so it must be wrapped with setTimeout.
+        setTimeout(() => {
+            const activeSlideTab = slideTabBarRef.current.slideTabBar?.getActiveItem();
+            if (activeSlideTab) {
+                activeSlideTab.focus();
+                activeSlideTab.selectAll();
+            }
+        }, 0);
     };
 
     const setTabEditor = () => {

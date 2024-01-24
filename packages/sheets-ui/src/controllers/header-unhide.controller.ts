@@ -34,7 +34,7 @@ import {
     SetSpecificRowsVisibleCommand,
 } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
-import { takeUntil } from 'rxjs';
+import { pairwise, startWith, takeUntil } from 'rxjs';
 
 import { SHEET_COMPONENT_UNHIDE_LAYER_INDEX } from '../common/keys';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
@@ -87,13 +87,15 @@ export class HeaderUnhideController extends RxDisposable {
         }
 
         // Re-render when sheet skeleton changes.
-        this._sheetSkeletonManagerService.currentSkeleton$.pipe(takeUntil(this.dispose$)).subscribe((skeleton) => {
-            if (skeleton) {
-                const workbook = this._univerInstanceService.getUniverSheetInstance(skeleton.unitId)!;
-                const worksheet = workbook.getSheetBySheetId(skeleton.sheetId)!;
-                this._updateWorksheet(workbook!, worksheet);
-            }
-        });
+        this._sheetSkeletonManagerService.currentSkeleton$
+            .pipe(takeUntil(this.dispose$), startWith(undefined), pairwise())
+            .subscribe(([lastSkeleton, skeleton]) => {
+                if (skeleton) {
+                    const workbook = this._univerInstanceService.getUniverSheetInstance(skeleton.unitId)!;
+                    const worksheet = workbook.getSheetBySheetId(skeleton.sheetId)!;
+                    this._updateWorksheet(workbook!, worksheet, lastSkeleton?.sheetId);
+                }
+            });
 
         // Re-render hidden rows / cols when specific commands are executed.
         this.disposeWithMe(
@@ -112,7 +114,7 @@ export class HeaderUnhideController extends RxDisposable {
                 );
                 const worksheet = workbook?.getSheetBySheetId((command.params as IKeyValue).subUnitId);
                 if (worksheet) {
-                    this._updateWorksheet(workbook!, worksheet);
+                    this._updateWorksheet(workbook!, worksheet, worksheet.getSheetId());
                 }
             })
         );
@@ -200,10 +202,13 @@ export class HeaderUnhideController extends RxDisposable {
         this._shapes.set(getWorksheetUID(workbook, worksheet), { cols: colShapes, rows: rowShapes });
     }
 
-    private _updateWorksheet(workbook: Workbook, worksheet: Worksheet): void {
-        const shapes = this._shapes.get(getWorksheetUID(workbook, worksheet));
-        shapes?.cols.forEach((shape) => shape.dispose());
-        shapes?.rows.forEach((shape) => shape.dispose());
+    private _updateWorksheet(workbook: Workbook, worksheet: Worksheet, lastWorksheetId?: string): void {
+        if (lastWorksheetId) {
+            const shapes = this._shapes.get(`${workbook.getUnitId()}|${lastWorksheetId}`);
+            shapes?.cols.forEach((shape) => shape.dispose());
+            shapes?.rows.forEach((shape) => shape.dispose());
+        }
+
         this._initForWorksheet(workbook, worksheet);
     }
 

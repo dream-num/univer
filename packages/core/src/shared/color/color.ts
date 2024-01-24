@@ -52,7 +52,7 @@ export class ColorBuilder {
                 return this.asRgbColor();
             }
             case ColorType.UNSUPPORTED: {
-                throw Error('unsupported color type');
+                throw new Error('unsupported color type');
             }
         }
     }
@@ -118,9 +118,9 @@ export class Color {
         const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
         let string = null;
         if (result) {
-            const r = parseInt(result[1], 16);
-            const g = parseInt(result[2], 16);
-            const b = parseInt(result[3], 16);
+            const r = Number.parseInt(result[1], 16);
+            const g = Number.parseInt(result[2], 16);
+            const b = Number.parseInt(result[3], 16);
             string = `rgba(${r},${g},${b})`;
         }
         return string;
@@ -283,10 +283,10 @@ export class RgbColor extends Color {
     static RGB_COLOR_AMT: number = 0;
 
     static RGBA_EXTRACT: RegExp = new RegExp(
-        `\\s*rgba\\s*\\((\\s*\\d+\\s*),(\\s*\\d+\\s*),(\\s*\\d+\\s*),(\\s*\\d.\\d|\\d\\s*)\\)\\s*`
+        '\\s*rgba\\s*\\((\\s*\\d+\\s*),(\\s*\\d+\\s*),(\\s*\\d+\\s*),(\\s*\\d.\\d|\\d\\s*)\\)\\s*'
     );
 
-    static RGB_EXTRACT: RegExp = new RegExp(`\\s*rgb\\s*\\((\\s*\\d+\\s*),(\\s*\\d+\\s*),(\\s*\\d+\\s*)\\)\\s*`);
+    static RGB_EXTRACT: RegExp = new RegExp('\\s*rgb\\s*\\((\\s*\\d+\\s*),(\\s*\\d+\\s*),(\\s*\\d+\\s*)\\)\\s*');
 
     private _cssString: string;
 

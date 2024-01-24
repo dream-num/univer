@@ -20,7 +20,7 @@ import {
     Disposable,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-    FOCUSING_EDITOR,
+    EDITOR_ACTIVATED,
     FOCUSING_EDITOR_BUT_HIDDEN,
     FOCUSING_FORMULA_EDITOR,
     FOCUSING_SHEET,
@@ -453,6 +453,7 @@ export class StartEditController extends Disposable {
         }
     }
 
+    // You can double-click on the cell or input content by keyboard to put the cell into the edit state.
     private _initialStartEdit() {
         this._onInputActivateSubscription = this._editorBridgeService.visible$.subscribe((param) => {
             const { visible, eventType, keycode } = param;
@@ -492,7 +493,7 @@ export class StartEditController extends Disposable {
 
             const { document, scene } = editorObject;
 
-            this._contextService.setContextValue(FOCUSING_EDITOR, true);
+            this._contextService.setContextValue(EDITOR_ACTIVATED, true);
 
             const { documentModel: documentDataModel } = documentLayoutObject;
 

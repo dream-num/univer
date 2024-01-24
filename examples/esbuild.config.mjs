@@ -1,11 +1,12 @@
 import path from 'node:path';
+import process from 'node:process';
 
+import { execSync } from 'node:child_process';
 import esbuild from 'esbuild';
 import cleanPlugin from 'esbuild-plugin-clean';
 import copyPlugin from 'esbuild-plugin-copy';
 import stylePlugin from 'esbuild-style-plugin';
 import minimist from 'minimist';
-import { execSync } from 'node:child_process';
 
 const nodeModules = path.resolve(process.cwd(), './node_modules');
 
@@ -18,8 +19,8 @@ const monacoEditorEntryPoints = ['vs/language/typescript/ts.worker.js', 'vs/edit
 const gitCommitHash = execSync('git rev-parse --short HEAD').toString().trim();
 const gitRefName = execSync('git symbolic-ref -q --short HEAD || git describe --tags --exact-match').toString().trim();
 
-const monacoBuildTask = () =>
-    esbuild.build({
+function monacoBuildTask() {
+    return esbuild.build({
         entryPoints: monacoEditorEntryPoints.map((entry) => `./node_modules/monaco-editor/esm/${entry}`),
         bundle: true,
         color: true,
@@ -32,6 +33,7 @@ const monacoBuildTask = () =>
             }),
         ],
     });
+}
 
 const ctx = await esbuild[args.watch ? 'context' : 'build']({
     bundle: true,
@@ -93,11 +95,13 @@ if (args.watch) {
     await monacoBuildTask();
     await ctx.watch();
 
-    const { host, port } = await ctx.serve({
+    const { port } = await ctx.serve({
         servedir: './local',
         port: 3002,
     });
 
     const url = `http://localhost:${port}`;
+
+    // eslint-disable-next-line no-console
     console.log(`Local server: ${url}`);
 }

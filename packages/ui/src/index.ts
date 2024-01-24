@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-export * from './BaseComponent';
 export * from './common';
 export { getMenuHiddenObservable } from './common/menu-hidden-observable';
 export * from './components';
+export { t } from './components/hooks/locale';
 export { useObservable } from './components/hooks/observable';
 export {
     CopyShortcutItem,
@@ -47,6 +47,7 @@ export {
 } from './services/contextmenu/contextmenu.service';
 export { DesktopDialogService } from './services/dialog/desktop-dialog.service';
 export { IDialogService } from './services/dialog/dialog.service';
+export { IFocusService } from './services/focus/focus.service';
 export { LayoutService } from './services/layout/layout.service';
 export {
     type ICustomComponentProps,
@@ -69,7 +70,6 @@ export { DesktopPlatformService, IPlatformService } from './services/platform/pl
 export * from './services/print';
 export { KeyCode, MetaKeys } from './services/shortcut/keycode';
 export { DesktopShortcutService, type IShortcutItem, IShortcutService } from './services/shortcut/shortcut.service';
-export { ShortcutExperienceService } from './services/shortcut/shortcut-experience.service';
 export { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
 export { ISidebarService } from './services/sidebar/sidebar.service';
 export { IZenZoneService } from './services/zen-zone/zen-zone.service';

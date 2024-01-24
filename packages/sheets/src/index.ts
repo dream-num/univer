@@ -168,16 +168,12 @@ export {
     SetWorksheetRowIsAutoHeightCommand,
 } from './commands/commands/set-worksheet-row-height.command';
 export { SetWorksheetShowCommand } from './commands/commands/set-worksheet-show.command';
-export { getPrimaryForRange } from './commands/commands/utils/selection-utils';
+export { followSelectionOperation, getPrimaryForRange } from './commands/commands/utils/selection-utils';
 export {
     AddMergeUndoMutationFactory,
     AddWorksheetMergeMutation,
 } from './commands/mutations/add-worksheet-merge.mutation';
-export { DeleteRangeMutation } from './commands/mutations/delete-range.mutation';
-export { handleDeleteRangeMutation } from './commands/mutations/delete-range.mutation';
 export { EmptyMutation } from './commands/mutations/empty.mutation';
-export { InsertRangeMutation } from './commands/mutations/insert-range.mutation';
-export { handleInsertRangeMutation } from './commands/mutations/insert-range.mutation';
 export {
     InsertColMutation,
     InsertColMutationUndoFactory,
@@ -249,9 +245,13 @@ export {
 export { type ISetSelectionsOperationParams, SetSelectionsOperation } from './commands/operations/selection.operation';
 export { SetWorksheetActiveOperation } from './commands/operations/set-worksheet-active.operation';
 export { type ISetWorksheetActiveOperationParams } from './commands/operations/set-worksheet-active.operation';
+export { handleDeleteRangeMutation } from './commands/utils/handle-range-mutation';
+export { getInsertRangeMutations, getRemoveRangeMutations } from './commands/utils/handle-range-mutation';
+export { handleInsertRangeMutation } from './commands/utils/handle-range-mutation';
 export { type ISheetCommandSharedParams } from './commands/utils/interface';
 export { getAddMergeMutationRangeByType } from './controllers/merge-cell.controller';
 export { enUS, zhCN } from './locale';
+export { NumfmtService } from './services/numfmt/numfmt.service';
 export type { FormatType, INumfmtItem, INumfmtItemWithCache } from './services/numfmt/type';
 export { INumfmtService } from './services/numfmt/type';
 export { RefRangeService } from './services/ref-range/ref-range.service';

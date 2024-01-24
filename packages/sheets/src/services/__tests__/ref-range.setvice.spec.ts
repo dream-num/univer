@@ -22,6 +22,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { IMoveRangeCommandParams } from '../../commands/commands/move-range.command';
 import { MoveRangeCommand } from '../../commands/commands/move-range.command';
 import { MoveRangeMutation } from '../../commands/mutations/move-range.mutation';
+import { SetSelectionsOperation } from '../../commands/operations/selection.operation';
 import { RefRangeService } from '../ref-range/ref-range.service';
 import { SelectionManagerService } from '../selection-manager.service';
 import { SheetInterceptorService } from '../sheet-interceptor/sheet-interceptor.service';
@@ -59,7 +60,9 @@ describe('Test ref-range.service', () => {
         sheetInterceptorService = get(SheetInterceptorService);
         refRangeService = get(RefRangeService);
         commandService = testBed.get(ICommandService);
-        [MoveRangeCommand, MoveRangeMutation].forEach((item) => commandService.registerCommand(item));
+        [MoveRangeCommand, MoveRangeMutation, SetSelectionsOperation].forEach((item) =>
+            commandService.registerCommand(item)
+        );
 
         const univerInstanceService = get(IUniverInstanceService);
         workbook = univerInstanceService.getCurrentUniverSheetInstance();

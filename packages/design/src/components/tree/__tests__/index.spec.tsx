@@ -16,12 +16,12 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { describe, expect, test } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { Tree } from '../Tree';
 
 describe('Tree', () => {
-    test('defaultExpandAll', async () => {
+    it('defaultExpandAll', async () => {
         const { container } = render(
             <Tree
                 data={[

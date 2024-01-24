@@ -15,10 +15,8 @@
  */
 
 import { compareToken } from '../../basics/token';
-import type { BaseReferenceObject } from '../reference-object/base-reference-object';
 import { ValueObjectFactory } from '../value-object/array-value-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
-import { isWildcard } from './compare';
 
 export function findCompareToken(str: string): [compareToken, BaseValueObject] {
     const comparisonTokens: compareToken[] = [
@@ -46,15 +44,19 @@ export function findCompareToken(str: string): [compareToken, BaseValueObject] {
  * 2. >=apple*: normal value, >apple: obtains the same effect as >=apple*
  * 3. <apple*: normal value, <=apple: obtains the same effect as <apple*
  */
-export function valueObjectCompare(range: BaseReferenceObject, criteria: BaseValueObject) {
-    const arrayValueObject = range.toArrayValueObject();
-    const criteriaValueString = `${criteria.getValue()}`;
-
-    const [token, criteriaStringObject] = findCompareToken(criteriaValueString);
-
-    if (isWildcard(criteriaValueString)) {
-        return arrayValueObject.wildcard(criteriaStringObject, token);
+export function valueObjectCompare(range: BaseValueObject, criteria: BaseValueObject, operator?: compareToken) {
+    if (!operator) {
+        // Only strings can extract comparison symbols, other types of values are 'equal to'
+        // TODO: criteria: 32, ">32", B5, "3?", "apple*", "*~?", TODAY(), ">"&A1:B3
+        if (criteria.isString()) {
+            const criteriaValueString = `${criteria.getValue()}`;
+            const [token, criteriaStringObject] = findCompareToken(criteriaValueString);
+            operator = token;
+            criteria = criteriaStringObject;
+        } else {
+            operator = compareToken.EQUALS;
+        }
     }
 
-    return arrayValueObject.compare(criteriaStringObject, token);
+    return range.compare(criteria, operator);
 }

@@ -459,10 +459,10 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
         const pasteFrom = source
             ? {
-                  unitId: source.unitId,
-                  subUnitId: source.subUnitId,
-                  range: source.range,
-              }
+                unitId: source.unitId,
+                subUnitId: source.subUnitId,
+                range: source.range,
+            }
             : null;
 
         const payload = {
@@ -822,7 +822,7 @@ function getCellTextForClipboard(cell: ICellDataWithSpanInfo) {
 export const escapeSpecialCode = (cellStr: string) =>
     cellStr
         .replace(/&/g, '&amp;')
-        .replace(/\ufeff/g, '')
+        .replace(/\uFEFF/g, '')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;');
 

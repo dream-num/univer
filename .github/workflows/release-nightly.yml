@@ -55,30 +55,18 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v3
 
-            - name: Install Node.js
-              uses: actions/setup-node@v3
-              with:
-                  node-version: 18
-                  registry-url: ${{ secrets.VERDACCIO_URL }}
-
             - name: Install pnpm
               uses: pnpm/action-setup@v2
               with:
                   version: 8
                   run_install: false
 
-            - name: Get pnpm store directory
-              shell: bash
-              run: |
-                  echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-            - name: Setup pnpm cache
-              uses: actions/cache@v3
+            - name: Install Node.js
+              uses: actions/setup-node@v3
               with:
-                  path: ${{ env.STORE_PATH }}
-                  key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
-                  restore-keys: |
-                      ${{ runner.os }}-pnpm-
+                  node-version: 18
+                  registry-url: ${{ secrets.VERDACCIO_URL }}
+                  cache: pnpm
 
             - name: 📌 Get package version (version + date)
               id: nightly-version
@@ -86,18 +74,6 @@ jobs:
                   original_version=$(node -p "require('./package.json').version")
                   version_number=$(echo "$original_version" | sed -E 's/^([0-9]+\.[0-9]+\.[0-9]+).*$/\1/')
                   echo "version=$version_number-nightly.$(date +%Y%m%d%H%M)" >> $GITHUB_OUTPUT
-
-            # - name: Create tag
-            #   uses: actions/github-script@v5
-            #   with:
-            #       github-token: ${{ secrets.GITHUB_TOKEN }}
-            #       script: |
-            #           github.rest.git.createRef({
-            #             owner: context.repo.owner,
-            #             repo: context.repo.repo,
-            #             ref: 'refs/tags/${{ steps.nightly-version.outputs.version }}',
-            #             sha: context.sha
-            #           })
 
             - name: 🔏 Set all monorepo's package version
               run: |
@@ -127,32 +103,8 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v3
 
-            - name: Install Node.js
-              uses: actions/setup-node@v3
-              with:
-                  node-version: 18
-
-            - name: Install pnpm
-              uses: pnpm/action-setup@v2
-              with:
-                  version: 8
-                  run_install: false
-
-            - name: Get pnpm store directory
-              shell: bash
-              run: |
-                  echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-            - name: Setup pnpm cache
-              uses: actions/cache@v3
-              with:
-                  path: ${{ env.STORE_PATH }}
-                  key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
-                  restore-keys: |
-                      ${{ runner.os }}-pnpm-
-
-            - name: Install dependencies
-              run: pnpm install
+            - name: Setup Node.js
+              uses: ./.github/actions/setup-node
 
             #  ================= Deploy Demo =================
             - name: 📦 Build demo
@@ -182,32 +134,8 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v3
 
-            - name: Install Node.js
-              uses: actions/setup-node@v3
-              with:
-                  node-version: 18
-
-            - name: Install pnpm
-              uses: pnpm/action-setup@v2
-              with:
-                  version: 8
-                  run_install: false
-
-            - name: Get pnpm store directory
-              shell: bash
-              run: |
-                  echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-            - name: Setup pnpm cache
-              uses: actions/cache@v3
-              with:
-                  path: ${{ env.STORE_PATH }}
-                  key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
-                  restore-keys: |
-                      ${{ runner.os }}-pnpm-
-
-            - name: Install dependencies
-              run: pnpm install
+            - name: Setup Node.js
+              uses: ./.github/actions/setup-node
 
             # ================= Deploy Storybook =================
             - name: 📦 Build storybook

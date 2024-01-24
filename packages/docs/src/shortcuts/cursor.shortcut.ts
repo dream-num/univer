@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Direction, FOCUSING_DOC, FOCUSING_EDITOR } from '@univerjs/core';
+import { Direction, EDITOR_ACTIVATED, FOCUSING_DOC } from '@univerjs/core';
 import type { IShortcutItem } from '@univerjs/ui';
 import { KeyCode, MetaKeys } from '@univerjs/ui';
 
@@ -97,5 +97,5 @@ export const SelectAllShortcut: IShortcutItem = {
     id: SelectAllOperation.id,
     binding: KeyCode.A | MetaKeys.CTRL_COMMAND,
     preconditions: (contextService) =>
-        contextService.getContextValue(FOCUSING_DOC) || contextService.getContextValue(FOCUSING_EDITOR),
+        contextService.getContextValue(FOCUSING_DOC) || contextService.getContextValue(EDITOR_ACTIVATED),
 };

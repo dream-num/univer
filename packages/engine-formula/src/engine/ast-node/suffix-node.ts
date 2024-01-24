@@ -66,7 +66,7 @@ export class SuffixNode extends BaseAstNode {
         } else if (this._operatorString === suffixToken.POUND) {
             result = this._handlerPound(value);
         } else {
-            result = ErrorValueObject.create(ErrorType.VALUE);
+            result = new ErrorValueObject(ErrorType.VALUE);
         }
         this.setValue(result);
     }
@@ -78,11 +78,11 @@ export class SuffixNode extends BaseAstNode {
         // }
 
         if (!value.isReferenceObject()) {
-            return ErrorValueObject.create(ErrorType.VALUE);
+            return new ErrorValueObject(ErrorType.VALUE);
         }
 
         if (!(value as BaseReferenceObject).isCell()) {
-            return ErrorValueObject.create(ErrorType.VALUE);
+            return new ErrorValueObject(ErrorType.VALUE);
         }
 
         const currentConfigService = this._accessor.get(IFormulaCurrentConfigService);
@@ -98,12 +98,12 @@ export class SuffixNode extends BaseAstNode {
         const formulaString = formulaData?.[unitId]?.[sheetId]?.[range.startRow]?.[range.startColumn]?.f;
 
         if (!formulaString) {
-            return ErrorValueObject.create(ErrorType.VALUE);
+            return new ErrorValueObject(ErrorType.VALUE);
         }
 
         const lexerNode = lexer.treeBuilder(formulaString);
 
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return new ErrorValueObject(ErrorType.VALUE);
         /** todo */
     }
 }

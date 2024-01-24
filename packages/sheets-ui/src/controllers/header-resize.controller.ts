@@ -96,16 +96,14 @@ export class HeaderResizeController extends Disposable {
 
     override dispose(): void {
         this._rowResizeRect?.dispose();
-
         this._rowResizeRect = null;
 
         this._columnResizeRect?.dispose();
-
         this._columnResizeRect = null;
 
         const sheetObject = this._getSheetObject();
         if (sheetObject == null) {
-            throw new Error('sheetObject is null');
+            return;
         }
 
         const { spreadsheetRowHeader, spreadsheetColumnHeader } = sheetObject;

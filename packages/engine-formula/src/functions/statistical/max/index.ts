@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -30,7 +29,7 @@ export class Max extends BaseFunction {
             }
 
             if (variant.isArray()) {
-                variant = (variant as ArrayValueObject).max();
+                variant = variant.max();
             }
 
             if (variant.isNull()) {

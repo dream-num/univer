@@ -23,11 +23,9 @@ import type { Nullable } from '../common/type-utils';
 import type { Observer } from '../observer/observable';
 import { isObserver } from '../observer/observable';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function toDisposable(observer: Nullable<Observer<any>>): IDisposable;
 export function toDisposable(subscription: SubscriptionLike): IDisposable;
 export function toDisposable(callback: () => void): IDisposable;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function toDisposable(v: SubscriptionLike | (() => void) | Nullable<Observer<any>>): IDisposable {
     let disposed = false;
 

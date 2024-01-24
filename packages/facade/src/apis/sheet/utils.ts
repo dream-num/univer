@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICellV, IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
+import type { CellValue, ICellData, IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
 import {
     HorizontalAlign,
     isCellV,
@@ -85,7 +85,7 @@ export function transformCoreVerticalAlignment(value: VerticalAlign): FVerticalA
  * @param value
  * @returns
  */
-export function covertCellValue(value: ICellV | ICellData): ICellData {
+export function covertCellValue(value: CellValue | ICellData): ICellData {
     if (isFormulaString(value)) {
         return {
             f: value as string,
@@ -93,7 +93,7 @@ export function covertCellValue(value: ICellV | ICellData): ICellData {
     }
     if (isCellV(value)) {
         return {
-            v: value as Nullable<ICellV>,
+            v: value as Nullable<CellValue>,
         };
     }
     if (isICellData(value)) {
@@ -111,7 +111,11 @@ export function covertCellValue(value: ICellV | ICellData): ICellData {
  * @returns
  */
 export function covertCellValues(
-    value: ICellV[][] | IObjectMatrixPrimitiveType<ICellV> | ICellData[][] | IObjectMatrixPrimitiveType<ICellData>,
+    value:
+        | CellValue[][]
+        | IObjectMatrixPrimitiveType<CellValue>
+        | ICellData[][]
+        | IObjectMatrixPrimitiveType<ICellData>,
     range: IRange
 ): IObjectMatrixPrimitiveType<ICellData> {
     const cellValue = new ObjectMatrix<ICellData>();
@@ -124,7 +128,7 @@ export function covertCellValues(
             }
         }
     } else {
-        const valueMatrix = new ObjectMatrix(value as IObjectMatrixPrimitiveType<ICellData | ICellV>);
+        const valueMatrix = new ObjectMatrix(value as IObjectMatrixPrimitiveType<ICellData | CellValue>);
         valueMatrix.forValue((r, c, v) => {
             cellValue.setValue(r, c, covertCellValue(v));
         });

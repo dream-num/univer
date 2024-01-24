@@ -90,7 +90,7 @@ export class InterceptorManager<P extends Record<string, IInterceptor<any, any>>
 
         this._interceptorsByName.set(
             key,
-            interceptors.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))
+            interceptors.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0)) // from large to small
         );
         return () => remove(this._interceptorsByName.get(key)!, interceptor);
     }

@@ -80,7 +80,7 @@ export class BaseFunction extends Disposable {
     }
 
     calculate(...arg: BaseValueObject[]): NodeValueType {
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return new ErrorValueObject(ErrorType.VALUE);
     }
 
     checkArrayType(variant: FunctionVariantType) {

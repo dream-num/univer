@@ -15,3 +15,5 @@
  */
 
 export { UniverFindReplacePlugin } from './plugin';
+export type { IFindComplete, IFindMatch, IFindQuery, IFindReplaceProvider } from './services/find-replace.service';
+export { FindModel, IFindReplaceService } from './services/find-replace.service';

@@ -15,7 +15,7 @@
  */
 
 import { DeviceInputEventType } from '@univerjs/engine-render';
-import { whenEditorInputFormulaActivated } from '@univerjs/sheets-ui';
+import { whenFormulaEditorActivated } from '@univerjs/sheets-ui';
 import type { IShortcutItem } from '@univerjs/ui';
 import { KeyCode, MetaKeys } from '@univerjs/ui';
 
@@ -38,7 +38,7 @@ export function promptSelectionShortcutItem() {
         shortcutList.push({
             id: SelectEditorFormulaOperation.id,
             binding: keycode,
-            preconditions: (contextService) => whenEditorInputFormulaActivated(contextService),
+            preconditions: (contextService) => whenFormulaEditorActivated(contextService),
             staticParameters: {
                 eventType: DeviceInputEventType.Keyboard,
                 keycode,
@@ -54,7 +54,7 @@ export function promptSelectionShortcutItemShift() {
         shortcutList.push({
             id: SelectEditorFormulaOperation.id,
             binding: keycode | MetaKeys.SHIFT,
-            preconditions: (contextService) => whenEditorInputFormulaActivated(contextService),
+            preconditions: (contextService) => whenFormulaEditorActivated(contextService),
             staticParameters: {
                 eventType: DeviceInputEventType.Keyboard,
                 keycode,
@@ -71,7 +71,7 @@ export function promptSelectionShortcutItemCtrl() {
         shortcutList.push({
             id: SelectEditorFormulaOperation.id,
             binding: keycode | MetaKeys.CTRL_COMMAND,
-            preconditions: (contextService) => whenEditorInputFormulaActivated(contextService),
+            preconditions: (contextService) => whenFormulaEditorActivated(contextService),
             staticParameters: {
                 eventType: DeviceInputEventType.Keyboard,
                 keycode,
@@ -88,7 +88,7 @@ export function promptSelectionShortcutItemCtrlAndShift() {
         shortcutList.push({
             id: SelectEditorFormulaOperation.id,
             binding: keycode | MetaKeys.SHIFT | MetaKeys.CTRL_COMMAND,
-            preconditions: (contextService) => whenEditorInputFormulaActivated(contextService),
+            preconditions: (contextService) => whenFormulaEditorActivated(contextService),
             staticParameters: {
                 eventType: DeviceInputEventType.Keyboard,
                 keycode,
@@ -102,5 +102,5 @@ export function promptSelectionShortcutItemCtrlAndShift() {
 export const ChangeRefToAbsoluteShortcut: IShortcutItem = {
     id: ReferenceAbsoluteOperation.id,
     binding: KeyCode.F4,
-    preconditions: (contextService) => whenEditorInputFormulaActivated(contextService),
+    preconditions: (contextService) => whenFormulaEditorActivated(contextService),
 };

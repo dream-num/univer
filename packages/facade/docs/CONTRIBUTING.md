@@ -1,6 +1,6 @@
 # How to Contribute to Facade API
 
-Facade API is an API layer of all other packages of Univer and it helps users to use Univer easily. For a detailed introduction of Facade API, please visit [Facade API](https://univer.work/guides/facade).
+Facade API is an API layer of all other packages of Univer and it helps users to use Univer easily. For a detailed introduction of Facade API, please visit [Facade API](https://univer.ai/guides/facade).
 
 ## How to Contribute
 

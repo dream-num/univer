@@ -69,7 +69,6 @@ univer.registerPlugin(UniverUniscriptPlugin, {
 univer.createUniverSheet(UNISCRIT_WORKBOOK_DATA_DEMO);
 
 declare global {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     interface Window {
         univer?: Univer;
     }

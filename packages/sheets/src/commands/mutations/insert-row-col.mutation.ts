@@ -81,6 +81,10 @@ export const InsertRowMutation: IMutation<IInsertRowMutationParams> = {
 
         worksheet.setRowCount(worksheet.getRowCount() + range.endRow - range.startRow + 1);
 
+        // remove cells contents by directly mutating worksheetCellMatrix
+        const cellMatrix = worksheet.getCellMatrix();
+        cellMatrix.insertRows(range.startRow, rowCount);
+
         return true;
     },
 };
@@ -124,7 +128,6 @@ export const InsertColMutation: IMutation<IInsertColMutationParams> = {
         const colIndex = range.startColumn;
         const colCount = range.endColumn - range.startColumn + 1;
         const defaultColWidth = worksheet.getConfig().defaultColumnWidth;
-
         for (let j = colIndex; j < colIndex + colCount; j++) {
             const defaultColInfo = {
                 w: defaultColWidth,
@@ -138,6 +141,10 @@ export const InsertColMutation: IMutation<IInsertColMutationParams> = {
         }
 
         worksheet.setColumnCount(worksheet.getColumnCount() + range.endColumn - range.startColumn + 1);
+
+        // remove cells contents by directly mutating worksheetCellMatrix
+        const cellMatrix = worksheet.getCellMatrix();
+        cellMatrix.insertColumns(range.startColumn, colCount);
 
         return true;
     },

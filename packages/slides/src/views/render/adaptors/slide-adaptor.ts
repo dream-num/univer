@@ -22,6 +22,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 
 import { CanvasObjectProviderRegistry, ObjectAdaptor } from '../adaptor';
 import { ObjectProvider } from '../object-provider';
+
 // import { DocsAdaptor, ImageAdaptor, RichTextAdaptor, ShapeAdaptor  } from './';
 
 export enum SLIDE_VIEW_KEY {

@@ -135,34 +135,36 @@ export function SheetBarMenu(props: ISheetBarMenuProps) {
         <Dropdown
             placement="topLeft"
             trigger={['click']}
-            overlay={
+            overlay={(
                 <ul className={styles.sheetBarMenu} style={{ ...style }}>
                     {menu.map((item) => (
                         <li
                             key={item.index}
                             onClick={() => handleClick(item)}
-                            className={
-                                item.selected
-                                    ? `${styles.sheetBarMenuItem} ${styles.sheetBarMenuItemSelect}`
-                                    : item.hidden
-                                      ? `${styles.sheetBarMenuItem} ${styles.sheetBarMenuItemHide}`
-                                      : styles.sheetBarMenuItem
-                            }
+                            className={item.selected
+                                ? `${styles.sheetBarMenuItem} ${styles.sheetBarMenuItemSelect}`
+                                : item.hidden
+                                    ? `${styles.sheetBarMenuItem} ${styles.sheetBarMenuItemHide}`
+                                    : styles.sheetBarMenuItem}
                         >
                             <span className={styles.sheetBarMenuItemIcon}>
-                                {item.selected ? (
-                                    <CheckMarkSingle />
-                                ) : item.hidden ? (
-                                    <EyelashSingle />
-                                ) : (
-                                    <CheckMarkSingle />
-                                )}
+                                {item.selected
+                                    ? (
+                                        <CheckMarkSingle />
+                                    )
+                                    : item.hidden
+                                        ? (
+                                            <EyelashSingle />
+                                        )
+                                        : (
+                                            <CheckMarkSingle />
+                                        )}
                             </span>
                             <span className={styles.sheetBarMenuItemLabel}>{item.label}</span>
                         </li>
                     ))}
                 </ul>
-            }
+            )}
             visible={visible}
             onVisibleChange={onVisibleChange}
         >

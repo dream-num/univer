@@ -1,4 +1,4 @@
-import { resolve } from 'path';
+import { resolve } from 'node:path';
 import { defineConfig } from 'vitest/config';
 import dts from 'vite-plugin-dts';
 import { name } from './package.json';
@@ -31,7 +31,7 @@ export default defineConfig(({ mode }) => ({
             external: [
                 '@univerjs/core',
                 '@wendellhu/redi',
-                'rxjs'
+                'rxjs',
             ],
             output: {
                 globals: {

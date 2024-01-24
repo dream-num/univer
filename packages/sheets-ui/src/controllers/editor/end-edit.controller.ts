@@ -240,6 +240,12 @@ export class EndEditController extends Disposable {
                     unitId,
                 });
             }
+
+            /**
+             * When switching tabs while the editor is open,
+             * the operation to refresh the selection will be blocked and needs to be triggered manually.
+             */
+            this._selectionManagerService.refreshSelection();
         });
     }
 

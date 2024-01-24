@@ -19,7 +19,7 @@ import { ICommandService, IUniverInstanceService, LocaleService, Rectangle, toDi
 import { Dropdown } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { Autofill, CheckMarkSingle, MoreDownSingle } from '@univerjs/icons';
-import { MoveRangeMutation, SetRangeValuesMutation, SetWorksheetActiveOperation } from '@univerjs/sheets';
+import { MoveRangeMutation, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -89,7 +89,6 @@ export const AutoFillPopupMenu: React.FC<{}> = () => {
             SetCellEditVisibleOperation.id,
             AutoClearContentCommand.id,
             SetZoomRatioOperation.id,
-            SetRangeValuesMutation.id,
             SetWorksheetActiveOperation.id,
             MoveRangeMutation.id,
         ];

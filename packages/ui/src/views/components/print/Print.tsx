@@ -17,11 +17,11 @@
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
 import React, { useMemo } from 'react';
-
 import { ComponentManager } from '../../../common/component-manager';
-import styles from './index.module.less';
 import { IPrintService } from '../../../services/print/print.service';
 import { useObservable } from '../../../components/hooks/observable';
+
+import styles from './index.module.less';
 
 export function Print() {
     const printService = useDependency(IPrintService);

@@ -18,8 +18,10 @@ import type { IRange, ISelectionCellWithCoord, Nullable } from '@univerjs/core';
 import { BooleanNumber, ObjectMatrix, sortRules } from '@univerjs/core';
 
 import type { BaseObject } from '../../base-object';
+
 import { FIX_ONE_PIXEL_BLUR_OFFSET, RENDER_CLASS_TYPE } from '../../basics/const';
-import { clearLineByBorderType } from '../../basics/draw';
+
+// import { clearLineByBorderType } from '../../basics/draw';
 import { getCellPositionByIndex, getColor } from '../../basics/tools';
 import type { IViewportBound, Vector2 } from '../../basics/vector2';
 import { Canvas } from '../../canvas';
@@ -33,7 +35,8 @@ import { SpreadsheetExtensionRegistry } from '../extension';
 import type { Background } from './extensions/background';
 import type { Border } from './extensions/border';
 import type { Font } from './extensions/font';
-import type { BorderCacheItem } from './interfaces';
+
+// import type { BorderCacheItem } from './interfaces';
 import { SheetComponent } from './sheet-component';
 import type { SpreadsheetSkeleton } from './sheet-skeleton';
 
@@ -484,7 +487,7 @@ export class Spreadsheet extends SheetComponent {
 
         ctx.beginPath();
         ctx.lineWidth = 1;
-        // eslint-disable-next-line no-magic-numbers
+
         ctx.strokeStyle = getColor([212, 212, 212]);
 
         const width = columnTotalWidth;
@@ -596,7 +599,7 @@ export class Spreadsheet extends SheetComponent {
                 columnWidthAccumulation[endColumn] || columnWidthAccumulation[columnWidthAccumulation.length - 1];
 
             ctx.clearRect(startX, startY, endX - startX, endY - startY);
-        
+
             // After ClearRect, the lines will become thinner, and the lines will be repaired below.
             ctx.beginPath();
             ctx.moveTo(startX, startY);

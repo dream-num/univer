@@ -21,7 +21,7 @@
         "build": "turbo build",
         "build:demo": "turbo build:demo",
         "build:storybook": "storybook build",
-        "lint": "eslint .",
+        "lint": "eslint . --quiet",
         "lint:fix": "eslint . --fix"
     },
     "devDependencies": {

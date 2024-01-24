@@ -16,7 +16,7 @@
 
 import { LocaleService, ThemeService } from '@univerjs/core';
 import type { ILocale } from '@univerjs/design';
-import { ConfigProvider, defaultTheme, themeInstance, ConfigContext } from '@univerjs/design';
+import { ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { ComponentType } from 'react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -40,7 +40,6 @@ export interface IUniverAppProps extends IWorkbenchOptions {
     onRendered?: (container: HTMLElement) => void;
 }
 
-// eslint-disable-next-line max-lines-per-function
 export function App(props: IUniverAppProps) {
     const localeService = useDependency(LocaleService);
     const themeService = useDependency(ThemeService);

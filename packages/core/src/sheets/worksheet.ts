@@ -20,7 +20,13 @@ import { createRowColIter } from '../shared/row-col-iter';
 import { DEFAULT_WORKSHEET } from '../types/const';
 import type { SheetTypes } from '../types/enum';
 import { BooleanNumber } from '../types/enum';
-import type { ICellData, ICellDataForSheetInterceptor, IFreeze, IRange, IWorksheetData } from '../types/interfaces';
+import type {
+    ICellData,
+    ICellDataForSheetInterceptor,
+    IFreeze,
+    IRange,
+    IWorksheetData,
+} from '../types/interfaces';
 import { ColumnManager } from './column-manager';
 import { Range } from './range';
 import { RowManager } from './row-manager';
@@ -124,14 +130,15 @@ export class Worksheet {
                     if (!rowInitd) {
                         startRow = rowIndex;
                         endRow = rowIndex;
-                        rowInitd = false;
+                        rowInitd = true;
                     } else {
-                        endRow = rowIndex;
+                        endRow = Math.max(rowIndex, endRow);
                     }
 
                     if (columnInitd) {
                         startColumn = Math.min(startColumn, colIndex);
                     } else {
+                        columnInitd = true;
                         startColumn = colIndex;
                     }
 
@@ -207,7 +214,17 @@ export class Worksheet {
         const rectList = [];
         for (let i = 0; i < _rectangleList.length; i++) {
             const range = _rectangleList[i];
-            if (Rectangle.intersects({ startRow: row, startColumn: col, endRow: row, endColumn: col }, range)) {
+            if (
+                Rectangle.intersects(
+                    {
+                        startRow: row,
+                        startColumn: col,
+                        endRow: row,
+                        endColumn: col,
+                    },
+                    range
+                )
+            ) {
                 rectList.push(range);
             }
         }
@@ -219,7 +236,17 @@ export class Worksheet {
         const rectangleList = this._snapshot.mergeData;
         for (let i = 0; i < rectangleList.length; i++) {
             const range = rectangleList[i];
-            if (Rectangle.intersects({ startRow: row, startColumn: col, endRow: row, endColumn: col }, range)) {
+            if (
+                Rectangle.intersects(
+                    {
+                        startRow: row,
+                        startColumn: col,
+                        endRow: row,
+                        endColumn: col,
+                    },
+                    range
+                )
+            ) {
                 return range;
             }
         }
@@ -256,10 +283,15 @@ export class Worksheet {
 
         // get all merged cells
         const mergedCellsInRange = this._snapshot.mergeData.filter((rect) =>
-            Rectangle.intersects({ startRow: row, startColumn: col, endRow, endColumn: endCol }, rect)
+            Rectangle.intersects(
+                { startRow: row, startColumn: col, endRow, endColumn: endCol },
+                rect
+            )
         );
 
-        const ret = new ObjectMatrix<ICellData & { rowSpan?: number; colSpan?: number }>();
+        const ret = new ObjectMatrix<
+            ICellData & { rowSpan?: number; colSpan?: number }
+        >();
 
         // iterate all cells in the range
         createRowColIter(row, endRow, col, endCol).forEach((row, col) => {
@@ -271,19 +303,21 @@ export class Worksheet {
 
         mergedCellsInRange.forEach((mergedCell) => {
             const { startColumn, startRow, endColumn, endRow } = mergedCell;
-            createRowColIter(startRow, endRow, startColumn, endColumn).forEach((row, col) => {
-                if (row === startRow && col === startColumn) {
-                    ret.setValue(row, col, {
-                        ...matrix.getValue(row, col),
-                        rowSpan: endRow - startRow + 1,
-                        colSpan: endColumn - startColumn + 1,
-                    });
-                }
+            createRowColIter(startRow, endRow, startColumn, endColumn).forEach(
+                (row, col) => {
+                    if (row === startRow && col === startColumn) {
+                        ret.setValue(row, col, {
+                            ...matrix.getValue(row, col),
+                            rowSpan: endRow - startRow + 1,
+                            colSpan: endColumn - startColumn + 1,
+                        });
+                    }
 
-                if (row !== startRow || col !== startColumn) {
-                    ret.realDeleteValue(row, col);
+                    if (row !== startRow || col !== startColumn) {
+                        ret.realDeleteValue(row, col);
+                    }
                 }
-            });
+            );
         });
 
         return ret;
@@ -291,8 +325,18 @@ export class Worksheet {
 
     getRange(range: IRange): Range;
     getRange(startRow: number, startColumn: number): Range;
-    getRange(startRow: number, startColumn: number, endRow: number, endColumn: number): Range;
-    getRange(startRowOrRange: number | IRange, startColumn?: number, endRow?: number, endColumn?: number): Range {
+    getRange(
+        startRow: number,
+        startColumn: number,
+        endRow: number,
+        endColumn: number,
+    ): Range;
+    getRange(
+        startRowOrRange: number | IRange,
+        startColumn?: number,
+        endRow?: number,
+        endColumn?: number
+    ): Range {
         if (typeof startRowOrRange === 'object') {
             return new Range(this, startRowOrRange, {
                 getStyles: () => this._styles,
@@ -407,7 +451,7 @@ export class Worksheet {
      * Returns true if the sheet's gridlines are hidden; otherwise returns false. Gridlines are visible by default.
      * @returns Gridlines Hidden Status
      */
-    hasHiddenGridlines(): Boolean {
+    hasHiddenGridlines(): boolean {
         const { _snapshot: _config } = this;
         const { showGridlines } = _config;
         if (showGridlines === 0) {
@@ -535,7 +579,12 @@ export class Worksheet {
     }
 
     cellHasValue(value: ICellData) {
-        return value && (value.v !== undefined || value.f !== undefined || value.p !== undefined);
+        return (
+            value &&
+            (value.v !== undefined ||
+                value.f !== undefined ||
+                value.p !== undefined)
+        );
     }
 
     // #region iterators

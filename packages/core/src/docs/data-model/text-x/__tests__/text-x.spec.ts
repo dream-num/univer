@@ -171,5 +171,71 @@ describe('test TextX methods and branches', () => {
                 },
             ]);
         });
+
+        it('test TextX push method and with more than one params', () => {
+            const textX = new TextX();
+
+            textX.push({
+                t: 'r',
+                len: 4,
+                segmentId: '',
+            }, {
+                t: 'r',
+                len: 5,
+                segmentId: '',
+            });
+
+            const actions = textX.serialize();
+
+            expect(actions).toEqual([
+                {
+                    t: 'r',
+                    len: 9,
+                    segmentId: '',
+                },
+            ]);
+        });
+
+        it('test TextX push method and with more than one params and merge the last two actions', () => {
+            const textX = new TextX();
+            const body: IDocumentBody = {
+                dataStream: 'hello',
+                textRuns: [
+                    {
+                        st: 0,
+                        ed: 5,
+                        ts: {
+                            bl: BooleanNumber.TRUE,
+                        },
+                    },
+                ],
+            };
+
+            textX.push({
+                t: 'r',
+                len: 4,
+                segmentId: '',
+            }, {
+                t: 'd',
+                len: 5,
+                line: 0,
+                segmentId: '',
+            });
+
+            textX.push({
+                t: 'i',
+                len: 5,
+                body,
+                line: 0,
+                segmentId: '',
+            });
+
+            const actions = textX.serialize();
+
+            expect(actions.length).toBe(3);
+            expect(actions[0].t).toBe('r');
+            expect(actions[1].t).toBe('i');
+            expect(actions[2].t).toBe('d');
+        });
     });
 });

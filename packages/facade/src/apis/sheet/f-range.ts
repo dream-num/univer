@@ -52,7 +52,7 @@ import {
     transformFacadeVerticalAlignment,
 } from './utils';
 
-type FontWeight = 'bold' | 'normal';
+export type FontWeight = 'bold' | 'normal';
 
 export class FRange {
     constructor(

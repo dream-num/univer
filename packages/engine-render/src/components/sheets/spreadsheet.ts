@@ -425,6 +425,9 @@ export class Spreadsheet extends SheetComponent {
         this._backgroundExtension = this.getExtensionByKey('DefaultBackgroundExtension') as Background;
         this._borderExtension = this.getExtensionByKey('DefaultBorderExtension') as Border;
         this._fontExtension = this.getExtensionByKey('DefaultFontExtension') as Font;
+        if (!this._allowCache) {
+            this._backgroundExtension.zIndex = 20;
+        }
     }
 
     private _addMakeDirtyToScroll() {

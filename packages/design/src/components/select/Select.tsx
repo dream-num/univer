@@ -47,15 +47,17 @@ export interface ISelectProps {
     style?: React.CSSProperties;
 
     className?: string;
+    mode?: 'combobox' | 'multiple' | 'tags' | undefined;
 }
 
 export function Select(props: ISelectProps) {
-    const { value, options = [], onChange, style, className } = props;
+    const { value, options = [], onChange, style, className, mode } = props;
 
     const { mountContainer } = useContext(ConfigContext);
 
     return (
         <RcSelect
+            mode={mode}
             prefixCls={styles.select}
             getPopupContainer={() => mountContainer}
             options={options}

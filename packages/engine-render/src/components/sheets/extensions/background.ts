@@ -62,9 +62,9 @@ export class Background extends SheetExtension {
         }
         ctx.save();
 
-        // if (this.spreadsheet.allowCache) {
-        ctx.globalCompositeOperation = 'destination-over';
-        // }
+        if (this.spreadsheet.allowCache) {
+            ctx.globalCompositeOperation = 'destination-over';
+        }
 
         background &&
             Object.keys(background).forEach((rgb: string) => {

@@ -340,8 +340,8 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
     // FIXME: for editor cell editor we don't need to blur the input element
     deactivate() {
-        this._container.style.left = `0px`;
-        this._container.style.top = `0px`;
+        this._container.style.left = '0px';
+        this._container.style.top = '0px';
 
         this._cursor.style.animation = '';
         this._cursor.style.display = 'none';
@@ -397,8 +397,8 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         const segmenter = new Intl.Segmenter(undefined, { granularity: 'word' });
         const segments = segmenter.segment(content);
 
-        let startOffset = -Infinity;
-        let endOffset = -Infinity;
+        let startOffset = Number.NEGATIVE_INFINITY;
+        let endOffset = Number.NEGATIVE_INFINITY;
 
         // Use that for segmentation
         for (const { segment, index, isWordLike } of segments) {
@@ -512,7 +512,6 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
             scene.setCursor(CURSOR_TYPE.TEXT);
 
-            // eslint-disable-next-line no-magic-numbers
             if (Math.sqrt((moveOffsetX - preMoveOffsetX) ** 2 + (moveOffsetY - preMoveOffsetY) ** 2) < 3) {
                 return;
             }
@@ -604,8 +603,8 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
     private _initDOM() {
         const container = document.createElement('div');
         container.style.position = 'fixed';
-        container.style.left = `0px`;
-        container.style.top = `0px`;
+        container.style.left = '0px';
+        container.style.top = '0px';
 
         const inputParent = document.createElement('div');
         const inputDom = document.createElement('div');

@@ -79,6 +79,8 @@ export abstract class ThinEngine<T extends IDisposable> extends Disposable {
         return scene;
     }
 
+    setRemainCapture() {}
+
     hasActiveScene(): boolean {
         return this._activeScene != null;
     }

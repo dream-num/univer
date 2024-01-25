@@ -65,7 +65,7 @@ export class FRange {
         private readonly _range: IRange,
         @Inject(Injector) private readonly _injector: Injector,
         @ICommandService private readonly _commandService: ICommandService
-    ) {}
+    ) { }
 
     getRow(): number {
         return this._range.startRow;
@@ -363,6 +363,27 @@ export class FRange {
         };
 
         this._commandService.executeCommand(SetStyleCommand.id, setStyleParams);
+    }
+
+    /**
+     * Sets the font family, such as "Arial" or "Helvetica".
+     * @param fontFamily The font family to set; a null value resets the font family.
+     */
+    setFontFamily(fontFamily: string | null): this {
+        const style: IStyleTypeValue<string | null> = {
+            type: 'ff',
+            value: fontFamily,
+        };
+        const setStyleParams: ISetStyleCommandParams<string | null> = {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            range: this._range,
+            style,
+        };
+
+        this._commandService.executeCommand(SetStyleCommand.id, setStyleParams);
+
+        return this;
     }
 
     // #endregion editing

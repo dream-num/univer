@@ -307,4 +307,38 @@ describe('Test FRange', () => {
         expect(getStyleByPosition(1, 0, 1, 0)?.st).toBe(undefined);
         expect(getStyleByPosition(1, 1, 1, 1)?.st).toBe(undefined);
     });
+
+    it('Range setFontFamily', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+
+        // change A1 Font Family
+        const range = activeSheet?.getRange(0, 0);
+        expect(getStyleByPosition(0, 0, 0, 0)?.ff).toBe(undefined);
+        range?.setFontFamily('Arial');
+        expect(getStyleByPosition(0, 0, 0, 0)?.ff).toBe('Arial');
+        range?.setFontFamily('宋体');
+        expect(getStyleByPosition(0, 0, 0, 0)?.ff).toBe('宋体');
+        range?.setFontFamily(null);
+        expect(getStyleByPosition(0, 0, 0, 0)?.ff).toBe(undefined);
+
+        // change A1:B2 Font Family
+        const range2 = activeSheet?.getRange(0, 0, 2, 2);
+        range2?.setFontFamily('Arial');
+        expect(getStyleByPosition(0, 0, 0, 0)?.ff).toBe('Arial');
+        expect(getStyleByPosition(0, 1, 0, 1)?.ff).toBe('Arial');
+        expect(getStyleByPosition(1, 0, 1, 0)?.ff).toBe('Arial');
+        expect(getStyleByPosition(1, 1, 1, 1)?.ff).toBe('Arial');
+
+        range2?.setFontFamily('宋体');
+        expect(getStyleByPosition(0, 0, 0, 0)?.ff).toBe('宋体');
+        expect(getStyleByPosition(0, 1, 0, 1)?.ff).toBe('宋体');
+        expect(getStyleByPosition(1, 0, 1, 0)?.ff).toBe('宋体');
+        expect(getStyleByPosition(1, 1, 1, 1)?.ff).toBe('宋体');
+
+        range2?.setFontFamily(null);
+        expect(getStyleByPosition(0, 0, 0, 0)?.ff).toBe(undefined);
+        expect(getStyleByPosition(0, 1, 0, 1)?.ff).toBe(undefined);
+        expect(getStyleByPosition(1, 0, 1, 0)?.ff).toBe(undefined);
+        expect(getStyleByPosition(1, 1, 1, 1)?.ff).toBe(undefined);
+    });
 });

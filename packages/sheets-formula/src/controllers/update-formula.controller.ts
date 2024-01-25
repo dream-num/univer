@@ -894,16 +894,15 @@ export class UpdateFormulaController extends Disposable {
                             );
                         }
 
-                        if (newRefString == null) {
-                            newRefString = ErrorType.REF;
+                        if (newRefString != null) {
+                            sequenceNodes[i] = {
+                                ...node,
+                                token: newRefString,
+                            };
+                            shouldModify = true;
+                            refChangeIds.push(i);
+                            // newRefString = ErrorType.REF;
                         }
-
-                        sequenceNodes[i] = {
-                            ...node,
-                            token: newRefString,
-                        };
-                        shouldModify = true;
-                        refChangeIds.push(i);
                     }
 
                     if (!shouldModify) {
@@ -989,7 +988,7 @@ export class UpdateFormulaController extends Disposable {
             const result = runRefRangeMutations(operators, remainRange);
 
             if (result == null) {
-                return;
+                return ErrorType.REF;
             }
 
             newRange = this._getMoveNewRange(moveEdge, result, from, to, sequenceRange, remainRange);
@@ -1014,7 +1013,7 @@ export class UpdateFormulaController extends Disposable {
             const result = runRefRangeMutations(operators, remainRange);
 
             if (result == null) {
-                return;
+                return ErrorType.REF;
             }
 
             newRange = this._getMoveNewRange(moveEdge, result, from, to, sequenceRange, remainRange);
@@ -1039,7 +1038,7 @@ export class UpdateFormulaController extends Disposable {
             const result = runRefRangeMutations(operators, remainRange);
 
             if (result == null) {
-                return;
+                return ErrorType.REF;
             }
 
             newRange = this._getMoveNewRange(moveEdge, result, from, to, sequenceRange, remainRange);
@@ -1096,7 +1095,7 @@ export class UpdateFormulaController extends Disposable {
                 const result = runRefRangeMutations(operators, sequenceRange);
 
                 if (result == null) {
-                    return;
+                    return ErrorType.REF;
                 }
 
                 newRange = {
@@ -1115,7 +1114,7 @@ export class UpdateFormulaController extends Disposable {
                 const result = runRefRangeMutations(operators, sequenceRange);
 
                 if (result == null) {
-                    return;
+                    return ErrorType.REF;
                 }
 
                 newRange = {
@@ -1134,7 +1133,7 @@ export class UpdateFormulaController extends Disposable {
                 const result = runRefRangeMutations(operators, sequenceRange);
 
                 if (result == null) {
-                    return;
+                    return ErrorType.REF;
                 }
 
                 newRange = {
@@ -1153,7 +1152,7 @@ export class UpdateFormulaController extends Disposable {
                 const result = runRefRangeMutations(operators, sequenceRange);
 
                 if (result == null) {
-                    return;
+                    return ErrorType.REF;
                 }
 
                 newRange = {

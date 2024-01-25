@@ -18,6 +18,13 @@
     "main": "./lib/cjs/index.js",
     "module": "./lib/es/index.js",
     "types": "./lib/types/index.d.ts",
+    "files": [
+        "lib"
+    ],
+    "engines": {
+        "node": ">=16.0.0",
+        "npm": ">=8.0.0"
+    },
     "publishConfig": {
         "access": "public",
         "main": "./lib/cjs/index.js",
@@ -38,9 +45,6 @@
     "directories": {
         "lib": "lib"
     },
-    "files": [
-        "lib"
-    ],
     "scripts": {
         "test": "vitest run",
         "test:watch": "vitest",
@@ -49,20 +53,20 @@
         "build": "tsc && vite build"
     },
     "peerDependencies": {
-        "@wendellhu/redi": ">=0.12.12",
+        "@wendellhu/redi": ">=0.12.13",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@wendellhu/redi": "^0.12.13",
         "dayjs": "^1.11.10",
         "nanoid": "5.0.4",
-        "numeral": "^2.0.6",
-        "rxjs": "^7.8.1"
+        "numeral": "^2.0.6"
     },
     "devDependencies": {
         "@types/numeral": "^2.0.5",
         "@univerjs/infra": "workspace:*",
         "@vitest/coverage-istanbul": "^1.2.1",
+        "@wendellhu/redi": "^0.12.13",
+        "rxjs": "^7.8.1",
         "typescript": "^5.3.3",
         "vite": "^5.0.12",
         "vite-plugin-dts": "^3.7.2",

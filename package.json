@@ -3,11 +3,11 @@
     "type": "module",
     "version": "0.1.0-beta.2",
     "private": true,
+    "packageManager": "pnpm@8.6.2",
     "author": "DreamNum Inc. <developer@univer.ai>",
     "license": "Apache-2.0",
     "engines": {
-        "node": "^18.17.0",
-        "pnpm": "^8.6.2"
+        "node": ">=18.0.0"
     },
     "scripts": {
         "prepare": "husky install",
@@ -37,7 +37,7 @@
         "@storybook/react": "^7.6.10",
         "@storybook/react-vite": "^7.6.10",
         "@storybook/testing-library": "^0.2.2",
-        "@types/node": "^20.10.6",
+        "@types/node": "^20.11.6",
         "@types/react": "^18.2.48",
         "@typescript-eslint/parser": "^6.19.1",
         "@univerjs/design": "workspace:*",

@@ -40,6 +40,10 @@
     "files": [
         "lib"
     ],
+    "engines": {
+        "node": ">=16.0.0",
+        "npm": ">=8.0.0"
+    },
     "scripts": {
         "test": "vitest run",
         "test:watch": "vitest",
@@ -51,35 +55,36 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@wendellhu/redi": ">=0.12.12",
+        "@wendellhu/redi": ">=0.12.13",
+        "clsx": ">=2.0.0",
         "react": ">=16.9.0",
         "react-dom": ">=16.9.0",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/core": "workspace:*",
-        "@univerjs/design": "workspace:*",
-        "@univerjs/engine-render": "workspace:*",
         "@univerjs/icons": "^0.1.26",
-        "@wendellhu/redi": "^0.12.13",
-        "clsx": "^2.0.0",
         "localforage": "^1.10.0",
         "rc-notification": "^5.3.0",
-        "rc-util": "^5.38.1",
-        "react": "^18.2.0",
-        "react-dom": "^18.2.0",
-        "rxjs": "^7.8.1"
+        "rc-util": "^5.38.1"
     },
     "devDependencies": {
         "@testing-library/react": "^14.1.2",
-        "@types/react": "^18.2.47",
+        "@types/react": "^18.2.48",
         "@types/react-dom": "^18.2.18",
         "@types/react-transition-group": "^4.4.10",
+        "@univerjs/core": "workspace:*",
+        "@univerjs/design": "workspace:*",
+        "@univerjs/engine-render": "workspace:*",
         "@univerjs/infra": "workspace:*",
         "@vitejs/plugin-react": "^4.2.1",
         "@vitest/coverage-istanbul": "^1.2.1",
+        "@wendellhu/redi": "^0.12.13",
+        "clsx": "^2.1.0",
         "happy-dom": "^13.3.1",
         "less": "^4.2.0",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "rxjs": "^7.8.1",
         "typescript": "^5.3.3",
         "vite": "^5.0.12",
         "vite-plugin-dts": "^3.7.2",

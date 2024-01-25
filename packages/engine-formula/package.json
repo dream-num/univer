@@ -36,6 +36,10 @@
     "files": [
         "lib"
     ],
+    "engines": {
+        "node": ">=16.0.0",
+        "npm": ">=8.0.0"
+    },
     "scripts": {
         "test": "vitest run",
         "test:watch": "vitest",
@@ -45,20 +49,20 @@
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
-        "@wendellhu/redi": ">=0.12.12",
+        "@wendellhu/redi": ">=0.12.13",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/core": "workspace:*",
-        "@wendellhu/redi": "^0.12.13",
-        "big.js": "^6.2.1",
-        "rxjs": "^7.8.1"
+        "big.js": "^6.2.1"
     },
     "devDependencies": {
         "@types/big.js": "^6.2.2",
+        "@univerjs/core": "workspace:*",
         "@univerjs/infra": "workspace:*",
         "@vitest/coverage-istanbul": "^1.2.1",
+        "@wendellhu/redi": "^0.12.13",
         "less": "^4.2.0",
+        "rxjs": "^7.8.1",
         "typescript": "^5.3.3",
         "vite": "^5.0.12",
         "vite-plugin-dts": "^3.7.2",

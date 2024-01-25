@@ -1,6 +1,5 @@
 import { resolve } from 'node:path';
 import { defineConfig } from 'vitest/config';
-import react from '@vitejs/plugin-react';
 import dts from 'vite-plugin-dts';
 import { name } from './package.json';
 
@@ -12,7 +11,6 @@ const libName = name
 
 export default defineConfig(({ mode }) => ({
     plugins: [
-        react(),
         dts({
             entryRoot: 'src',
             outDir: 'lib/types',

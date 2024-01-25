@@ -341,4 +341,38 @@ describe('Test FRange', () => {
         expect(getStyleByPosition(1, 0, 1, 0)?.ff).toBe(undefined);
         expect(getStyleByPosition(1, 1, 1, 1)?.ff).toBe(undefined);
     });
+
+    it('Range setFontSize', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+
+        // change A1 Font Size
+        const range = activeSheet?.getRange(0, 0);
+        expect(getStyleByPosition(0, 0, 0, 0)?.fs).toBe(undefined);
+        range?.setFontSize(12);
+        expect(getStyleByPosition(0, 0, 0, 0)?.fs).toBe(12);
+        range?.setFontSize(24);
+        expect(getStyleByPosition(0, 0, 0, 0)?.fs).toBe(24);
+        range?.setFontSize(null);
+        expect(getStyleByPosition(0, 0, 0, 0)?.fs).toBe(undefined);
+
+        // change A1:B2 Font Size
+        const range2 = activeSheet?.getRange(0, 0, 2, 2);
+        range2?.setFontSize(12);
+        expect(getStyleByPosition(0, 0, 0, 0)?.fs).toBe(12);
+        expect(getStyleByPosition(0, 1, 0, 1)?.fs).toBe(12);
+        expect(getStyleByPosition(1, 0, 1, 0)?.fs).toBe(12);
+        expect(getStyleByPosition(1, 1, 1, 1)?.fs).toBe(12);
+
+        range2?.setFontSize(24);
+        expect(getStyleByPosition(0, 0, 0, 0)?.fs).toBe(24);
+        expect(getStyleByPosition(0, 1, 0, 1)?.fs).toBe(24);
+        expect(getStyleByPosition(1, 0, 1, 0)?.fs).toBe(24);
+        expect(getStyleByPosition(1, 1, 1, 1)?.fs).toBe(24);
+
+        range2?.setFontSize(null);
+        expect(getStyleByPosition(0, 0, 0, 0)?.fs).toBe(undefined);
+        expect(getStyleByPosition(0, 1, 0, 1)?.fs).toBe(undefined);
+        expect(getStyleByPosition(1, 0, 1, 0)?.fs).toBe(undefined);
+        expect(getStyleByPosition(1, 1, 1, 1)?.fs).toBe(undefined);
+    });
 });

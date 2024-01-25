@@ -386,6 +386,27 @@ export class FRange {
         return this;
     }
 
+    /**
+     * Sets the font size, with the size being the point size to use.
+     * @param size A font size in point size. A null value resets the font size.
+     */
+    setFontSize(size: number | null): this {
+        const style: IStyleTypeValue<number | null> = {
+            type: 'fs',
+            value: size,
+        };
+        const setStyleParams: ISetStyleCommandParams<number | null> = {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            range: this._range,
+            style,
+        };
+
+        this._commandService.executeCommand(SetStyleCommand.id, setStyleParams);
+
+        return this;
+    }
+
     // #endregion editing
 
     /**

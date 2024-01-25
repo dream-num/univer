@@ -173,6 +173,24 @@ describe('Test FRange', () => {
         expect(getStyleByPosition(3, 4, 3, 4)?.bg?.rgb).toBe('red');
     });
 
+    it('Range getCellData', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+        activeSheet?.getRange(0, 0)?.setValue(1);
+        const range = activeSheet?.getRange(0, 0);
+        expect(range?.getCellData()?.v).toBe(1);
+    });
+
+    it('Range getCellStyleData', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+        activeSheet?.getRange(0, 0)?.setValue(1);
+        activeSheet?.getRange(0, 0)?.setBackgroundColor('red');
+        const range = activeSheet?.getRange(0, 0);
+        expect(range?.getCellStyleData()?.bg?.rgb).toBe('red');
+
+        activeSheet?.getRange(0, 0, 2, 2)?.setFontWeight('bold');
+        expect(range?.getCellStyleData()?.bl).toBe(1);
+    });
+
     it('Range setFontWeight', () => {
         const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
 
@@ -205,5 +223,88 @@ describe('Test FRange', () => {
         expect(getStyleByPosition(0, 2, 0, 2)?.bl).toBe(undefined);
         expect(getStyleByPosition(1, 1, 1, 1)?.bl).toBe(undefined);
         expect(getStyleByPosition(1, 2, 1, 2)?.bl).toBe(undefined);
+    });
+
+    it('Range setFontStyle', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+
+        // change A1 Font Style
+        const range = activeSheet?.getRange(0, 0);
+        expect(getStyleByPosition(0, 0, 0, 0)?.it).toBe(undefined);
+        range?.setFontStyle('italic');
+        expect(getStyleByPosition(0, 0, 0, 0)?.it).toBe(1);
+        range?.setFontStyle('normal');
+        expect(getStyleByPosition(0, 0, 0, 0)?.it).toBe(0);
+        range?.setFontStyle(null);
+        expect(getStyleByPosition(0, 0, 0, 0)?.it).toBe(undefined);
+
+        // change A1:B2 Font Style
+        const range2 = activeSheet?.getRange(0, 0, 2, 2);
+        range2?.setFontStyle('italic');
+        expect(getStyleByPosition(0, 0, 0, 0)?.it).toBe(1);
+        expect(getStyleByPosition(0, 1, 0, 1)?.it).toBe(1);
+        expect(getStyleByPosition(1, 0, 1, 0)?.it).toBe(1);
+        expect(getStyleByPosition(1, 1, 1, 1)?.it).toBe(1);
+
+        range2?.setFontStyle('normal');
+        expect(getStyleByPosition(0, 0, 0, 0)?.it).toBe(0);
+        expect(getStyleByPosition(0, 1, 0, 1)?.it).toBe(0);
+        expect(getStyleByPosition(1, 0, 1, 0)?.it).toBe(0);
+        expect(getStyleByPosition(1, 1, 1, 1)?.it).toBe(0);
+
+        range2?.setFontStyle(null);
+        expect(getStyleByPosition(0, 0, 0, 0)?.it).toBe(undefined);
+        expect(getStyleByPosition(0, 1, 0, 1)?.it).toBe(undefined);
+        expect(getStyleByPosition(1, 0, 1, 0)?.it).toBe(undefined);
+        expect(getStyleByPosition(1, 1, 1, 1)?.it).toBe(undefined);
+    });
+
+    it('Range setFontLine', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+
+        // change A1 Font Line
+        const range = activeSheet?.getRange(0, 0);
+        expect(getStyleByPosition(0, 0, 0, 0)?.ul?.s).toBe(undefined);
+        range?.setFontLine('underline');
+        expect(getStyleByPosition(0, 0, 0, 0)?.ul?.s).toBe(1);
+        range?.setFontLine('line-through');
+        expect(getStyleByPosition(0, 0, 0, 0)?.st?.s).toBe(1);
+        range?.setFontLine('none');
+        expect(getStyleByPosition(0, 0, 0, 0)?.ul?.s).toBe(0);
+        expect(getStyleByPosition(0, 0, 0, 0)?.st?.s).toBe(0);
+        range?.setFontLine(null);
+        expect(getStyleByPosition(0, 0, 0, 0)?.ul).toBe(undefined);
+        expect(getStyleByPosition(0, 0, 0, 0)?.st).toBe(undefined);
+
+        // change A1:B2 Font Line
+        const range2 = activeSheet?.getRange(0, 0, 2, 2);
+        range2?.setFontLine('underline');
+        expect(getStyleByPosition(0, 0, 0, 0)?.ul?.s).toBe(1);
+        expect(getStyleByPosition(0, 1, 0, 1)?.ul?.s).toBe(1);
+        expect(getStyleByPosition(1, 0, 1, 0)?.ul?.s).toBe(1);
+        expect(getStyleByPosition(1, 1, 1, 1)?.ul?.s).toBe(1);
+
+        range2?.setFontLine('line-through');
+        expect(getStyleByPosition(0, 0, 0, 0)?.st?.s).toBe(1);
+        expect(getStyleByPosition(0, 1, 0, 1)?.st?.s).toBe(1);
+        expect(getStyleByPosition(1, 0, 1, 0)?.st?.s).toBe(1);
+        expect(getStyleByPosition(1, 1, 1, 1)?.st?.s).toBe(1);
+
+        range2?.setFontLine('none');
+        expect(getStyleByPosition(0, 0, 0, 0)?.ul?.s).toBe(0);
+        expect(getStyleByPosition(0, 1, 0, 1)?.ul?.s).toBe(0);
+        expect(getStyleByPosition(1, 0, 1, 0)?.ul?.s).toBe(0);
+        expect(getStyleByPosition(1, 1, 1, 1)?.ul?.s).toBe(0);
+
+        range2?.setFontLine(null);
+        expect(getStyleByPosition(0, 0, 0, 0)?.ul).toBe(undefined);
+        expect(getStyleByPosition(0, 1, 0, 1)?.ul).toBe(undefined);
+        expect(getStyleByPosition(1, 0, 1, 0)?.ul).toBe(undefined);
+        expect(getStyleByPosition(1, 1, 1, 1)?.ul).toBe(undefined);
+
+        expect(getStyleByPosition(0, 0, 0, 0)?.st).toBe(undefined);
+        expect(getStyleByPosition(0, 1, 0, 1)?.st).toBe(undefined);
+        expect(getStyleByPosition(1, 0, 1, 0)?.st).toBe(undefined);
+        expect(getStyleByPosition(1, 1, 1, 1)?.st).toBe(undefined);
     });
 });

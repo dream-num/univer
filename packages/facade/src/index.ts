@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export type { FontWeight } from './apis/sheet/f-range';
+export type { FontLine, FontStyle, FontWeight } from './apis/sheet/f-range';
 export { FUniver } from './apis/facade';
 export { FRange } from './apis/sheet/f-range';
 export { FSelection } from './apis/sheet/f-selection';

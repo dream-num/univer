@@ -20,6 +20,8 @@ import type {
     IColorStyle,
     IObjectMatrixPrimitiveType,
     IRange,
+    IStyleData,
+    ITextDecoration,
     Workbook,
     Worksheet,
 } from '@univerjs/core';
@@ -52,7 +54,9 @@ import {
     transformFacadeVerticalAlignment,
 } from './utils';
 
-export type FontWeight = 'bold' | 'normal';
+export type FontLine = 'none' | 'underline' | 'line-through';
+export type FontStyle = 'normal' | 'italic';
+export type FontWeight = 'normal' | 'bold';
 
 export class FRange {
     constructor(
@@ -77,6 +81,28 @@ export class FRange {
 
     getHeight(): number {
         return this._range.endRow - this._range.startRow + 1;
+    }
+
+    /**
+     * Return first cell model data in this range
+     * @returns The cell model data
+     */
+    getCellData(): ICellData | null {
+        return this._worksheet.getCell(this._range.startRow, this._range.startColumn) ?? null;
+    }
+
+    /**
+     * Return first cell style data in this range
+     * @returns The cell style data
+     */
+    getCellStyleData(): IStyleData | null {
+        const cell = this.getCellData();
+        const styles = this._workbook.getStyles();
+        if (cell && styles) {
+            return styles.getStyleByCell(cell) ?? null;
+        }
+
+        return null;
     }
 
     getValue(): CellValue | null {
@@ -209,18 +235,127 @@ export class FRange {
     }
 
     /**
-     * Set the font weight for the given range (normal/bold).
-     * @param fontWeight
+     * Sets the font weight for the given range (normal/bold),
+     * @param fontWeight The font weight, either 'normal' or 'bold'; a null value resets the font weight.
      */
-    setFontWeight(fontWeight: FontWeight | null): void {
-        const value: BooleanNumber | undefined = fontWeight === null ? undefined : fontWeight === 'bold' ? 1 : 0;
+    setFontWeight(fontWeight: FontWeight | null): this {
+        let value: BooleanNumber | null;
+        if (fontWeight === 'bold') {
+            value = BooleanNumber.TRUE;
+        } else if (fontWeight === 'normal') {
+            value = BooleanNumber.FALSE;
+        } else if (fontWeight === null) {
+            value = null;
+        } else {
+            throw new Error('Invalid fontWeight');
+        }
 
-        const style: IStyleTypeValue<BooleanNumber | undefined> = {
+        const style: IStyleTypeValue<BooleanNumber | null> = {
             type: 'bl',
             value,
         };
 
-        const setStyleParams: ISetStyleCommandParams<BooleanNumber | undefined> = {
+        const setStyleParams: ISetStyleCommandParams<BooleanNumber | null> = {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            range: this._range,
+            style,
+        };
+
+        this._commandService.executeCommand(SetStyleCommand.id, setStyleParams);
+
+        return this;
+    }
+
+    /**
+     * Sets the font style for the given range ('italic' or 'normal').
+     * @param fontStyle The font style, either 'italic' or 'normal'; a null value resets the font style.
+     */
+    setFontStyle(fontStyle: FontStyle | null): this {
+        let value: BooleanNumber | null;
+        if (fontStyle === 'italic') {
+            value = BooleanNumber.TRUE;
+        } else if (fontStyle === 'normal') {
+            value = BooleanNumber.FALSE;
+        } else if (fontStyle === null) {
+            value = null;
+        } else {
+            throw new Error('Invalid fontStyle');
+        }
+
+        const style: IStyleTypeValue<BooleanNumber | null> = {
+            type: 'it',
+            value,
+        };
+
+        const setStyleParams: ISetStyleCommandParams<BooleanNumber | null> = {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            range: this._range,
+            style,
+        };
+
+        this._commandService.executeCommand(SetStyleCommand.id, setStyleParams);
+
+        return this;
+    }
+
+    /**
+     * Sets the font line style of the given range ('underline', 'line-through', or 'none').
+     * @param fontLine The font line style, either 'underline', 'line-through', or 'none'; a null value resets the font line style.
+     */
+    setFontLine(fontLine: FontLine | null): this {
+        if (fontLine === 'underline') {
+            this._setFontUnderline({
+                s: BooleanNumber.TRUE,
+            });
+        } else if (fontLine === 'line-through') {
+            this._setFontStrikethrough({
+                s: BooleanNumber.TRUE,
+            });
+        } else if (fontLine === 'none') {
+            this._setFontUnderline({
+                s: BooleanNumber.FALSE,
+            });
+            this._setFontStrikethrough({
+                s: BooleanNumber.FALSE,
+            });
+        } else if (fontLine === null) {
+            this._setFontUnderline(null);
+            this._setFontStrikethrough(null);
+        } else {
+            throw new Error('Invalid fontLine');
+        }
+        return this;
+    }
+
+    /**
+     * Sets the font underline style of the given ITextDecoration
+     */
+    private _setFontUnderline(value: ITextDecoration | null) {
+        const style: IStyleTypeValue<ITextDecoration | null> = {
+            type: 'ul',
+            value,
+        };
+        const setStyleParams: ISetStyleCommandParams<ITextDecoration | null> = {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            range: this._range,
+            style,
+        };
+
+        this._commandService.executeCommand(SetStyleCommand.id, setStyleParams);
+    }
+
+    /**
+     * Sets the font strikethrough style of the given ITextDecoration
+     */
+    private _setFontStrikethrough(value: ITextDecoration | null) {
+        const style: IStyleTypeValue<ITextDecoration | null> = {
+            type: 'st',
+            value,
+        };
+        const setStyleParams: ISetStyleCommandParams<ITextDecoration | null> = {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
             range: this._range,

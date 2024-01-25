@@ -20,6 +20,7 @@ import {
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,
+    TextX,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
 import type { IActiveTextRange, TextRange } from '@univerjs/engine-render';
@@ -305,14 +306,16 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
             },
         };
 
-        doMutation.params.mutations.push({
+        const textX = new TextX();
+
+        textX.push({
             t: 'r',
             len: direction === DeleteDirection.LEFT ? startOffset - 1 : startOffset,
             segmentId,
         });
 
         if (body.dataStream.length) {
-            doMutation.params.mutations.push({
+            textX.push({
                 t: 'i',
                 body,
                 len: body.dataStream.length,
@@ -321,18 +324,20 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
             });
         }
 
-        doMutation.params.mutations.push({
+        textX.push({
             t: 'r',
             len: 1,
             segmentId,
         });
 
-        doMutation.params.mutations.push({
+        textX.push({
             t: 'd',
             len: endIndex + 1 - startIndex,
             line: 0,
             segmentId,
         });
+
+        doMutation.params.mutations = textX.serialize();
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,

@@ -16,10 +16,10 @@
 
 import type {
     ICommand,
-    IDeleteMutationParams,
+    IDeleteAction,
     IDocumentBody,
     IMutationInfo,
-    IRetainMutationParams,
+    IRetainAction,
     ITextRange,
 } from '@univerjs/core';
 import {
@@ -29,6 +29,7 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
     MemoryCursor,
+    TextX,
 } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 
@@ -77,24 +78,24 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
 
         memoryCursor.reset();
 
+        const textX = new TextX();
+
         for (const selection of selections) {
             const { startOffset, endOffset, collapsed } = selection;
 
             const len = startOffset - memoryCursor.cursor;
 
             if (collapsed) {
-                doMutation.params.mutations.push({
+                textX.push({
                     t: 'r',
                     len,
                     segmentId,
                 });
             } else {
-                doMutation.params.mutations.push(
-                    ...getRetainAndDeleteFromReplace(selection, segmentId, memoryCursor.cursor)
-                );
+                textX.push(...getRetainAndDeleteFromReplace(selection, segmentId, memoryCursor.cursor));
             }
 
-            doMutation.params.mutations.push({
+            textX.push({
                 t: 'i',
                 body,
                 len: body.dataStream.length,
@@ -105,6 +106,8 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
             memoryCursor.reset();
             memoryCursor.moveCursor(endOffset);
         }
+
+        doMutation.params.mutations = textX.serialize();
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,
@@ -186,26 +189,28 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
 
         memoryCursor.reset();
 
+        const textX = new TextX();
+
         for (const selection of selections) {
             const { startOffset, endOffset, collapsed } = selection;
 
             const len = startOffset - memoryCursor.cursor;
 
             if (collapsed) {
-                doMutation.params.mutations.push({
+                textX.push({
                     t: 'r',
                     len,
                     segmentId,
                 });
             } else {
-                doMutation.params.mutations.push(
-                    ...getRetainAndDeleteAndExcludeLineBreak(selection, originBody, segmentId, memoryCursor.cursor)
-                );
+                textX.push(...getRetainAndDeleteAndExcludeLineBreak(selection, originBody, segmentId, memoryCursor.cursor));
             }
 
             memoryCursor.reset();
             memoryCursor.moveCursor(endOffset);
         }
+
+        doMutation.params.mutations = textX.serialize();
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,
@@ -249,9 +254,9 @@ function getRetainAndDeleteAndExcludeLineBreak(
     body: IDocumentBody,
     segmentId: string = '',
     memoryCursor: number = 0
-): Array<IRetainMutationParams | IDeleteMutationParams> {
+): Array<IRetainAction | IDeleteAction> {
     const { startOffset, endOffset } = range;
-    const dos: Array<IRetainMutationParams | IDeleteMutationParams> = [];
+    const dos: Array<IRetainAction | IDeleteAction> = [];
 
     const { paragraphs = [] } = body;
 

@@ -22,6 +22,7 @@ import {
     IUniverInstanceService,
     MemoryCursor,
     PresetListType,
+    TextX,
     Tools,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
@@ -125,10 +126,12 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
 
         memoryCursor.reset();
 
+        const textX = new TextX();
+
         for (const paragraph of currentParagraphs) {
             const { startIndex } = paragraph;
 
-            doMutation.params.mutations.push({
+            textX.push({
                 t: 'r',
                 len: startIndex - memoryCursor.cursor,
                 segmentId,
@@ -141,7 +144,7 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
                 indentStart: undefined,
             };
 
-            doMutation.params.mutations.push({
+            textX.push({
                 t: 'r',
                 len: 1,
                 body: {
@@ -174,6 +177,8 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
 
             memoryCursor.moveCursorTo(startIndex + 1);
         }
+
+        doMutation.params.mutations = textX.serialize();
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,

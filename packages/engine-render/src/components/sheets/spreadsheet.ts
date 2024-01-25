@@ -32,6 +32,7 @@ import type { SceneViewer } from '../../scene-viewer';
 import type { Viewport } from '../../viewport';
 import { Documents } from '../docs/document';
 import { SpreadsheetExtensionRegistry } from '../extension';
+import { clearLineByBorderType } from '../../basics/draw';
 import type { Background } from './extensions/background';
 import type { Border } from './extensions/border';
 import type { Font } from './extensions/font';
@@ -39,6 +40,7 @@ import type { Font } from './extensions/font';
 // import type { BorderCacheItem } from './interfaces';
 import { SheetComponent } from './sheet-component';
 import type { SpreadsheetSkeleton } from './sheet-skeleton';
+import type { BorderCacheItem } from './interfaces';
 
 const OBJECT_KEY = '__SHEET_EXTENSION_FONT_DOCUMENT_INSTANCE__';
 
@@ -131,6 +133,7 @@ export class Spreadsheet extends SheetComponent {
             ? bounds?.diffBounds.map((bound) => spreadsheetSkeleton.getRowColumnSegmentByViewBound(bound))
             : undefined;
         const extensions = this.getExtensionsByOrder();
+
         for (const extension of extensions) {
             extension.draw(ctx, parentScale, spreadsheetSkeleton, diffRanges);
         }
@@ -531,38 +534,40 @@ export class Spreadsheet extends SheetComponent {
         ctx.stroke();
         ctx.closePath();
 
+        if (this._allowCache) {
+            border?.forValue((rowIndex, columnIndex, borderCaches) => {
+                if (!borderCaches) {
+                    return true;
+                }
+
+                const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(rowIndex, columnIndex);
+
+                let { startY, endY, startX, endX } = cellInfo;
+                const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
+
+                if (isMerged) {
+                    return true;
+                }
+
+                if (isMergedMainCell) {
+                    startY = mergeInfo.startY;
+                    endY = mergeInfo.endY;
+                    startX = mergeInfo.startX;
+                    endX = mergeInfo.endX;
+                }
+
+                if (!(mergeInfo.startRow >= rowStart && mergeInfo.endRow <= rowEnd)) {
+                    return true;
+                }
+
+                for (const key in borderCaches) {
+                    const { type } = borderCaches[key] as BorderCacheItem;
+
+                    clearLineByBorderType(ctx, type, { startX, startY, endX, endY });
+                }
+            });
+        }
         // Clearing the dashed line issue caused by overlaid auxiliary lines and strokes
-        // border?.forValue((rowIndex, columnIndex, borderCaches) => {
-        //     if (!borderCaches) {
-        //         return true;
-        //     }
-
-        //     const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(rowIndex, columnIndex);
-
-        //     let { startY, endY, startX, endX } = cellInfo;
-        //     const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
-
-        //     if (isMerged) {
-        //         return true;
-        //     }
-
-        //     if (isMergedMainCell) {
-        //         startY = mergeInfo.startY;
-        //         endY = mergeInfo.endY;
-        //         startX = mergeInfo.startX;
-        //         endX = mergeInfo.endX;
-        //     }
-
-        //     if (!(mergeInfo.startRow >= rowStart && mergeInfo.endRow <= rowEnd)) {
-        //         return true;
-        //     }
-
-        //     for (const key in borderCaches) {
-        //         const { type } = borderCaches[key] as BorderCacheItem;
-
-        //         clearLineByBorderType(ctx, type, { startX, startY, endX, endY });
-        //     }
-        // });
 
         ctx.closePath();
         // merge cell
@@ -571,7 +576,9 @@ export class Spreadsheet extends SheetComponent {
         // overflow cell
         this._clearRectangle(ctx, rowHeightAccumulation, columnWidthAccumulation, overflowCache.toNativeArray());
 
-        // this._clearBackground(ctx, backgroundPositions);
+        if (this._allowCache) {
+            this._clearBackground(ctx, backgroundPositions);
+        }
 
         ctx.restore();
     }
@@ -627,7 +634,7 @@ export class Spreadsheet extends SheetComponent {
                 endX = mergeInfo.endX;
             }
 
-            //ctx.clearRect(startX, startY, endX - startX + 0.5, endY - startY + 0.5);
+            ctx.clearRect(startX, startY, endX - startX + 0.5, endY - startY + 0.5);
         });
     }
 }

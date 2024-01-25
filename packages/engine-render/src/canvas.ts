@@ -35,10 +35,10 @@ interface ICanvasProps {
  * Usually you don't need to use it manually.
  * @constructor
  * @abstract
- * @param {Object} props
- * @param {Number} props.width
- * @param {Number} props.height
- * @param {Number} props.pixelRatio
+ * @param {object} props
+ * @param {number} props.width
+ * @param {number} props.height
+ * @param {number} props.pixelRatio
  */
 export class Canvas {
     isCache = false;
@@ -152,9 +152,9 @@ export class Canvas {
     /**
      * to data url
      * @method
-     * @param {String} mimeType
-     * @param {Number} quality between 0 and 1 for jpg mime types
-     * @returns {String} data url string
+     * @param {string} mimeType
+     * @param {number} quality between 0 and 1 for jpg mime types
+     * @returns {string} data url string
      */
     toDataURL(mimeType: string, quality: number) {
         try {

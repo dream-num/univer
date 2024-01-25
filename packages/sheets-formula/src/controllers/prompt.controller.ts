@@ -1170,7 +1170,10 @@ export class PromptController extends Disposable {
          */
         setTimeout(() => {
             this._textSelectionRenderManager.focus();
+            this._setRemainCapture();
         }, 0);
+
+        this._setRemainCapture();
     }
 
     private async _fitEditorSize() {
@@ -1481,6 +1484,16 @@ export class PromptController extends Disposable {
 
             documentComponent.makeDirty();
         }
+    }
+
+    private _setRemainCapture() {
+        const { unitId } = this._getCurrentUnitIdAndSheetId();
+
+        const editorObject = getEditorObject(unitId, this._renderManagerService);
+
+        const engine = editorObject?.engine;
+
+        engine?.setRemainCapture();
     }
 
     private _cursorStateListener() {

@@ -36,6 +36,10 @@
     "files": [
         "lib"
     ],
+    "engines": {
+        "node": ">=16.0.0",
+        "npm": ">=8.0.0"
+    },
     "scripts": {
         "test": "vitest run",
         "test:watch": "vitest",
@@ -47,10 +51,10 @@
         "@univerjs/core": "workspace:*"
     },
     "dependencies": {
-        "@univerjs/core": "workspace:*",
         "numfmt": "^2.5.2"
     },
     "devDependencies": {
+        "@univerjs/core": "workspace:*",
         "@univerjs/infra": "workspace:*",
         "@vitest/coverage-istanbul": "^1.2.1",
         "typescript": "^5.3.3",

@@ -36,6 +36,10 @@
     "files": [
         "lib"
     ],
+    "engines": {
+        "node": ">=16.0.0",
+        "npm": ">=8.0.0"
+    },
     "scripts": {
         "test": "vitest run",
         "test:watch": "vitest",
@@ -53,20 +57,20 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/core": "workspace:*",
-        "@univerjs/design": "workspace:*",
-        "@univerjs/icons": "^0.1.26",
-        "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "^0.12.13",
-        "react": "^18.2.0",
-        "rxjs": "^7.8.1"
+        "@univerjs/icons": "^0.1.26"
     },
     "devDependencies": {
         "@types/react": "^18.2.48",
+        "@univerjs/core": "workspace:*",
+        "@univerjs/design": "workspace:*",
         "@univerjs/infra": "workspace:*",
+        "@univerjs/ui": "workspace:*",
         "@vitejs/plugin-react": "^4.2.1",
         "@vitest/coverage-istanbul": "^1.2.1",
+        "@wendellhu/redi": "^0.12.13",
         "happy-dom": "^13.3.1",
+        "react": "^18.2.0",
+        "rxjs": "^7.8.1",
         "typescript": "^5.3.3",
         "vite": "^5.0.12",
         "vite-plugin-dts": "^3.7.2",

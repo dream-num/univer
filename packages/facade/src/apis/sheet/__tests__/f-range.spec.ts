@@ -375,4 +375,38 @@ describe('Test FRange', () => {
         expect(getStyleByPosition(1, 0, 1, 0)?.fs).toBe(undefined);
         expect(getStyleByPosition(1, 1, 1, 1)?.fs).toBe(undefined);
     });
+
+    it('Range setFontColor', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+
+        // change A1 Font Color
+        const range = activeSheet?.getRange(0, 0);
+        expect(getStyleByPosition(0, 0, 0, 0)?.cl).toBe(undefined);
+        range?.setFontColor('red');
+        expect(getStyleByPosition(0, 0, 0, 0)?.cl?.rgb).toBe('red');
+        range?.setFontColor('green');
+        expect(getStyleByPosition(0, 0, 0, 0)?.cl?.rgb).toBe('green');
+        range?.setFontColor(null);
+        expect(getStyleByPosition(0, 0, 0, 0)?.cl).toBe(undefined);
+
+        // change A1:B2 Font Color
+        const range2 = activeSheet?.getRange(0, 0, 2, 2);
+        range2?.setFontColor('red');
+        expect(getStyleByPosition(0, 0, 0, 0)?.cl?.rgb).toBe('red');
+        expect(getStyleByPosition(0, 1, 0, 1)?.cl?.rgb).toBe('red');
+        expect(getStyleByPosition(1, 0, 1, 0)?.cl?.rgb).toBe('red');
+        expect(getStyleByPosition(1, 1, 1, 1)?.cl?.rgb).toBe('red');
+
+        range2?.setFontColor('green');
+        expect(getStyleByPosition(0, 0, 0, 0)?.cl?.rgb).toBe('green');
+        expect(getStyleByPosition(0, 1, 0, 1)?.cl?.rgb).toBe('green');
+        expect(getStyleByPosition(1, 0, 1, 0)?.cl?.rgb).toBe('green');
+        expect(getStyleByPosition(1, 1, 1, 1)?.cl?.rgb).toBe('green');
+
+        range2?.setFontColor(null);
+        expect(getStyleByPosition(0, 0, 0, 0)?.cl).toBe(undefined);
+        expect(getStyleByPosition(0, 1, 0, 1)?.cl).toBe(undefined);
+        expect(getStyleByPosition(1, 0, 1, 0)?.cl).toBe(undefined);
+        expect(getStyleByPosition(1, 1, 1, 1)?.cl).toBe(undefined);
+    });
 });

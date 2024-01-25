@@ -407,6 +407,39 @@ export class FRange {
         return this;
     }
 
+    /**
+     * Sets the font color in CSS notation (such as '#ffffff' or 'white').
+     * @param color The font color in CSS notation (such as '#ffffff' or 'white'); a null value resets the color.
+     */
+    setFontColor(color: string | null): this {
+        let style: IStyleTypeValue<IColorStyle | null>;
+
+        if (color === null) {
+            style = {
+                type: 'cl',
+                value: null,
+            };
+        } else {
+            style = {
+                type: 'cl',
+                value: {
+                    rgb: color,
+                },
+            };
+        }
+
+        const setStyleParams: ISetStyleCommandParams<IColorStyle | null> = {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            range: this._range,
+            style,
+        };
+
+        this._commandService.executeCommand(SetStyleCommand.id, setStyleParams);
+
+        return this;
+    }
+
     // #endregion editing
 
     /**

@@ -124,51 +124,8 @@ jobs:
         if: ${{ always() }}
 
         steps:
-            # ================= Notify Discord =================
-            - name: 👾 Discord Notification
-              uses: sarisia/actions-status-discord@v1
-              if: ${{ success() }}
+            - name: Invoke deployment hook
+              uses: distributhor/workflow-webhook@v3
               with:
-                  webhook: ${{ secrets.DISCORD_WEBHOOK }}?thread_id=${{ secrets.DISCORD_CI_UNSTABLE_RELEASE }}
-                  status: ${{ job.status }}
-                  description: |
-                      🎉 Unstable release: Successful
-
-                      🎉 🎉 🎉 🎉 🎉 🎉 🎉 🎉 🎉
-                      Release version: ${{ github.ref_name }}
-
-                      **[View Deployment]**
-                      - [📑 Examples](${{ needs.build-demo.outputs.preview-url }}/)
-
-                      **[View Docs]**
-                      - [📚 Storybook](${{ needs.build-storybook.outputs.preview-url }}/)
-                      🎉 🎉 🎉 🎉 🎉 🎉 🎉 🎉 🎉
-
-                      Have a good dream! 🌙
-                  nofail: false
-                  nodetail: false
-                  nocontext: false
-                  noprefix: true
-                  color: 0x00b894
-                  username: Unstable Release
-
-            - name: 👾 Discord Notification
-              uses: sarisia/actions-status-discord@v1
-              if: ${{ failure() }}
-              with:
-                  webhook: ${{ secrets.DISCORD_WEBHOOK }}?thread_id=${{ secrets.DISCORD_CI_UNSTABLE_RELEASE }}
-                  status: ${{ job.status }}
-                  description: |
-                      💥 Ustable release: Unsuccessful 💩
-
-                      👿 👿 👿 👿 👿 👿 👿 👿 👿
-                      Failed version: ${{ github.ref_name }}
-                      👿 👿 👿 👿 👿 👿 👿 👿 👿
-
-                      Oops! Something went wrong. 😭
-                  nofail: false
-                  nodetail: false
-                  nocontext: false
-                  noprefix: true
-                  color: 0xd63031
-                  username: Unstable Release
+                  webhook_url: ${{ secrets.WEBHOOK_URL }}
+                  data: '{"type":"release","version": "${{ github.ref_name }}","preview":{"examples":"${{ needs.build-demo.outputs.preview-url }}/","storybook":"${{ needs.build-storybook.outputs.preview-url }}/"}}'

@@ -26,11 +26,11 @@ import type {
     IParagraph,
     ITextRun,
 } from '../../types/interfaces/i-document-data';
-import { type IPaddingData } from '../../types/interfaces/i-style-data';
+import type { IPaddingData } from '../../types/interfaces/i-style-data';
 import { updateAttributeByDelete } from './apply-utils/delete-apply';
 import { updateAttributeByInsert } from './apply-utils/insert-apply';
 import { updateAttribute } from './apply-utils/update-apply';
-import { type DocMutationParams } from './mutation-types';
+import type { TextXAction } from './mutation-types';
 
 export const DEFAULT_DOC = {
     id: 'default_doc',
@@ -138,8 +138,8 @@ class DocumentDataModelSimple {
         const { documentStyle } = this.snapshot;
 
         if (!documentStyle.pageSize) {
-            width = width ?? Infinity;
-            height = height ?? Infinity;
+            width = width ?? Number.POSITIVE_INFINITY;
+            height = height ?? Number.POSITIVE_INFINITY;
 
             documentStyle.pageSize = {
                 width,
@@ -254,8 +254,8 @@ export class DocumentDataModel extends DocumentDataModelSimple {
         return this._unitId;
     }
 
-    apply(mutations: DocMutationParams[]) {
-        const undoMutations: DocMutationParams[] = [];
+    apply(mutations: TextXAction[]) {
+        const undoMutations: TextXAction[] = [];
 
         const memoryCursor = new MemoryCursor();
 

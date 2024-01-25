@@ -15,7 +15,7 @@
  */
 
 import type { ICommand, ICommandInfo, ITextRange } from '@univerjs/core';
-import { CommandType, ICommandService, IUndoRedoService } from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, TextX } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 
 import { getRetainAndDeleteFromReplace } from '../../basics/retain-delete-params';
@@ -54,18 +54,20 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
             },
         };
 
+        const textX = new TextX();
+
         if (range.collapsed) {
-            doMutation.params!.mutations.push({
+            textX.push({
                 t: 'r',
                 len: range.startOffset,
                 segmentId,
             });
         } else {
-            doMutation.params!.mutations.push(...getRetainAndDeleteFromReplace(range, segmentId));
+            textX.push(...getRetainAndDeleteFromReplace(range, segmentId));
         }
 
         if (oldTextLen > 0) {
-            doMutation.params!.mutations.push({
+            textX.push({
                 t: 'd',
                 len: oldTextLen,
                 line: 0,
@@ -73,7 +75,7 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
             });
         }
 
-        doMutation.params!.mutations.push({
+        textX.push({
             t: 'i',
             body: {
                 dataStream: newText,
@@ -82,6 +84,8 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
             line: 0,
             segmentId,
         });
+
+        doMutation.params!.mutations = textX.serialize();
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,

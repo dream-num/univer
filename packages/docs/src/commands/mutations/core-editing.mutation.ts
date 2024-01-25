@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { CommandType, type DocMutationParams, type IMutation, IUniverInstanceService } from '@univerjs/core';
+import { CommandType, type IMutation, IUniverInstanceService, type TextXAction } from '@univerjs/core';
 
 import { DocViewModelManagerService } from '../../services/doc-view-model-manager.service';
 
 export interface IRichTextEditingMutationParams {
     unitId: string;
-    mutations: DocMutationParams[];
+    mutations: TextXAction[];
 }
 
 /**
@@ -45,7 +45,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         }
 
         if (mutations.length === 0) {
-            throw new Error(`Mutation's length should great than 0 when call RichTextEditingMutation`);
+            throw new Error('Mutation\'s length should great than 0 when call RichTextEditingMutation');
         }
 
         // Step 1: Update Doc Data Model.

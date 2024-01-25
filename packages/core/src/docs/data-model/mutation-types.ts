@@ -20,7 +20,7 @@ import type { IDocumentBody } from '../../types/interfaces/i-document-data';
 /**
  * Retain mutation is used to move the cursor or to update properties of the text in the given range.
  */
-export interface IRetainMutationParams {
+export interface IRetainAction {
     t: 'r';
     len: number;
     body?: IDocumentBody;
@@ -31,7 +31,7 @@ export interface IRetainMutationParams {
 /**
  * Insert mutation is used to insert text (maybe with rich text properties) at the given position.
  */
-export interface IInsertMutationParams {
+export interface IInsertAction {
     t: 'i';
     body: IDocumentBody;
     len: number;
@@ -42,11 +42,11 @@ export interface IInsertMutationParams {
 /**
  * Delete mutation is used to delete text at the given position.
  */
-export interface IDeleteMutationParams {
+export interface IDeleteAction {
     t: 'd';
-    line: number;
     len: number;
+    line: number;
     segmentId?: string;
 }
 
-export type DocMutationParams = IRetainMutationParams | IInsertMutationParams | IDeleteMutationParams;
+export type TextXAction = IRetainAction | IInsertAction | IDeleteAction;

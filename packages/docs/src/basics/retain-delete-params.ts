@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import type { IDeleteMutationParams, IRetainMutationParams, ITextRange } from '@univerjs/core';
+import type { IDeleteAction, IRetainAction, ITextRange } from '@univerjs/core';
 
 export function getRetainAndDeleteFromReplace(
     range: ITextRange,
     segmentId: string = '',
     memoryCursor: number = 0
-): Array<IRetainMutationParams | IDeleteMutationParams> {
+): Array<IRetainAction | IDeleteAction> {
     const { startOffset, endOffset } = range;
-    const dos: Array<IRetainMutationParams | IDeleteMutationParams> = [];
+    const dos: Array<IRetainAction | IDeleteAction> = [];
 
     const textStart = startOffset - memoryCursor;
     const textEnd = endOffset - memoryCursor;

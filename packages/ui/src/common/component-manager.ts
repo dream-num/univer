@@ -79,6 +79,7 @@ import {
     PaintBucket,
     PasteSpecial,
     PipingSingle,
+    PrintSingle,
     RedoSingle,
     Reduce,
     RightBorder,
@@ -100,7 +101,6 @@ import {
     VerticalCenterSingle,
     VerticalIntegrationSingle,
     VerticalTextSingle,
-    PrintSingle,
 } from '@univerjs/icons';
 import type { IDisposable } from '@wendellhu/redi';
 

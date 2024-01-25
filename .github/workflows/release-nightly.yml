@@ -124,4 +124,15 @@ jobs:
               uses: distributhor/workflow-webhook@v3
               with:
                   webhook_url: ${{ secrets.WEBHOOK_URL }}
-                  data: '{"type":"release","version": "${{ needs.release-nightly.outputs.version }}","preview":{"examples":"${{ needs.build-demo.outputs.preview-url }}/","storybook":"${{ needs.build-storybook.outputs.preview-url }}/"}}'
+                  data: >
+                    {
+                        "type": "release",
+                        "version": "${{ needs.release-nightly.outputs.version }}",
+                        "workflow": {
+                            "id": "${{ github.run_id }}"
+                        },
+                        "preview": {
+                            "examples": "${{ needs.build-demo.outputs.preview-url }}/",
+                            "storybook": "${{ needs.build-storybook.outputs.preview-url }}/"
+                        }
+                    }

@@ -20,14 +20,20 @@ import { getColor } from '../../../basics/tools';
 import type { UniverRenderingContext } from '../../../context';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import type { SpreadsheetSkeleton } from '../sheet-skeleton';
+import type { Spreadsheet } from '../spreadsheet';
 import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultBackgroundExtension';
 
-const DOC_EXTENSION_Z_INDEX = 20;
+const DOC_EXTENSION_Z_INDEX = 40;
+const NO_CACHE_Z_INDEX = 20;
 
 export class Background extends SheetExtension {
     override uKey = UNIQUE_KEY;
+
+    get spreadsheet() {
+        return this.parent as Spreadsheet;
+    }
 
     override zIndex = DOC_EXTENSION_Z_INDEX;
 
@@ -56,12 +62,14 @@ export class Background extends SheetExtension {
         }
         ctx.save();
 
-        // ctx.globalCompositeOperation = 'destination-over';
+        // if (this.spreadsheet.allowCache) {
+        ctx.globalCompositeOperation = 'destination-over';
+        // }
 
         background &&
             Object.keys(background).forEach((rgb: string) => {
                 const backgroundCache = background[rgb];
-                // eslint-disable-next-line no-magic-numbers
+
                 ctx.fillStyle = rgb || getColor([255, 255, 255])!;
                 ctx.beginPath();
                 backgroundCache.forValue((rowIndex, columnIndex) => {

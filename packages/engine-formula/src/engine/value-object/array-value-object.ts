@@ -570,11 +570,15 @@ export class ArrayValueObject extends BaseValueObject {
         let maxOrMinPosition: Nullable<{ row: number; column: number }>;
 
         const _handleMatch = (itemValue: Nullable<BaseValueObject>, row: number, column: number) => {
+            if (itemValue == null) {
+                return true;
+            }
+
             let matchObject: Nullable<BaseValueObject>;
             if (isFuzzyMatching === true) {
-                matchObject = itemValue?.wildcard(valueObject as StringValueObject, compareToken.EQUALS);
+                matchObject = itemValue.wildcard(valueObject as StringValueObject, compareToken.EQUALS);
             } else {
-                matchObject = itemValue?.isEqual(valueObject);
+                matchObject = itemValue.isEqual(valueObject);
             }
 
             if (matchObject?.getValue() === true) {
@@ -583,18 +587,33 @@ export class ArrayValueObject extends BaseValueObject {
                 return false;
             }
 
-            if (maxOrMin == null) {
-                maxOrMin = itemValue;
-                maxOrMinPosition = { row, column };
-            } else if (searchType === ArrayOrderSearchType.MAX) {
-                if (itemValue?.isGreaterThan(maxOrMin).getValue() === true) {
-                    maxOrMin = itemValue;
-                    maxOrMinPosition = { row, column };
+            if (searchType === ArrayOrderSearchType.MAX) {
+                if (itemValue.isGreaterThan(valueObject).getValue() === true) {
+                    if (
+                        maxOrMin == null ||
+                        itemValue
+                            .minus(valueObject)
+                            .abs()
+                            .isLessThanOrEqual(maxOrMin.minus(valueObject).abs())
+                            .getValue() === true
+                    ) {
+                        maxOrMin = itemValue;
+                        maxOrMinPosition = { row, column };
+                    }
                 }
             } else if (searchType === ArrayOrderSearchType.MIN) {
-                if (itemValue?.isLessThan(maxOrMin).getValue() === true) {
-                    maxOrMin = itemValue;
-                    maxOrMinPosition = { row, column };
+                if (itemValue.isLessThan(valueObject).getValue() === true) {
+                    if (
+                        maxOrMin == null ||
+                        itemValue
+                            .minus(valueObject)
+                            .abs()
+                            .isLessThanOrEqual(maxOrMin.minus(valueObject).abs())
+                            .getValue() === true
+                    ) {
+                        maxOrMin = itemValue;
+                        maxOrMinPosition = { row, column };
+                    }
                 }
             }
         };

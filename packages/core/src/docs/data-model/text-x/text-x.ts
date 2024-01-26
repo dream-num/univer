@@ -63,6 +63,7 @@ export class TextX {
                 } else if (thisAction.t === ActionType.INSERT && otherAction.t === ActionType.DELETE) {
                     // Nothing need to do, they are just cancel off.
                 } else {
+                    // I think exec will never go here.
                     throw new Error('unknown compose case');
                 }
             }

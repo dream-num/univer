@@ -19,10 +19,6 @@ import type { TextXAction } from '../action-types';
 import { ActionType } from '../action-types';
 import { getBodySlice } from './utils';
 
-function actionLength(action: TextXAction) {
-    return action.len;
-}
-
 export class ActionIterator {
     private _index = 0;
     private _offset = 0;
@@ -90,7 +86,7 @@ export class ActionIterator {
     peekLength() {
         if (this._actions[this._index]) {
             // Should never return 0 if our index is being managed correctly
-            return actionLength(this._actions[this._index]) - this._offset;
+            return this._actions[this._index].len - this._offset;
         } else {
             return Number.POSITIVE_INFINITY;
         }

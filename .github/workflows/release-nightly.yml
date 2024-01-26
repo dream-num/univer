@@ -32,6 +32,7 @@ jobs:
                   node-version: 18
                   cache: pnpm
                   registry-url: ${{ secrets.VERDACCIO_URL }}
+                  scope: '@univerjs'
 
             - name: 📌 Get package version (version + date)
               id: nightly-version
@@ -126,7 +127,7 @@ jobs:
                   data: >
                       {
                           "type": "release",
-                          "version": "${{ github.ref_name }}",
+                          "version": "${{ needs.release-nightly.outputs.version }}",
                           "workflow": {
                               "id": "${{ github.run_id }}"
                           },

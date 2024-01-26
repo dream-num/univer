@@ -1,6 +1,7 @@
 name: 🍰 Release Unstable
 
 on:
+    workflow_dispatch:
     push:
         tags:
             - 'v*.*.*-alpha.*'
@@ -43,10 +44,9 @@ jobs:
                   fi
 
             - name: 🚚 Install dependencies
-              run: pnpm install
-
-            - name: 📦 Build
-              run: pnpm run build
+              run: |
+                  pnpm install
+                  pnpm run build
 
             - name: 🐙 Publish (alpha)
               if: ${{ steps.release-type.outputs.release_type == 'alpha' }}
@@ -59,6 +59,52 @@ jobs:
               run: pnpm publish --access public -r
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+    release-verdaccio:
+        if: github.repository == 'dream-num/univer'
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Install pnpm
+              uses: pnpm/action-setup@v2
+              with:
+                  version: 8
+                  run_install: false
+
+            - name: Install Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 18
+                  registry-url: ${{ secrets.VERDACCIO_URL }}
+                  scope: '@univerjs'
+
+            - name: 🚚 Get release type
+              id: release-type
+              run: |
+                  if [[ ${{ github.ref_name }} =~ -(rc|beta|alpha)\. ]]; then
+                      extracted_type="${BASH_REMATCH[1]}"
+                      echo "release_type=$extracted_type" >> $GITHUB_OUTPUT
+                  fi
+
+            - name: 🚚 Install dependencies
+              run: |
+                  pnpm install
+                  pnpm run build
+
+            - name: 🐙 Publish (alpha)
+              if: ${{ steps.release-type.outputs.release_type == 'alpha' }}
+              run: pnpm publish --access public --tag ${{ steps.release-type.outputs.release_type }} -r
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.VERDACCIO_TOKEN }}
+
+            - name: 🐙 Publish (beta, rc)
+              if: ${{ steps.release-type.outputs.release_type == 'beta' || steps.release-type.outputs.release_type == 'rc' }}
+              run: pnpm publish --access public -r
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.VERDACCIO_TOKEN }}
 
     build-demo:
         runs-on: ubuntu-latest
@@ -119,7 +165,7 @@ jobs:
                   vercel-args: --prod
 
     notify:
-        needs: [release-unstable, build-demo, build-storybook]
+        needs: [release-unstable, release-verdaccio, build-demo, build-storybook]
         runs-on: ubuntu-latest
 
         steps:

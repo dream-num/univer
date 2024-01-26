@@ -48,10 +48,13 @@ export interface ISelectProps {
 
     className?: string;
     mode?: 'combobox' | 'multiple' | 'tags' | undefined;
+    dropdownRender?: (
+        menu: React.ReactElement<any, string | React.JSXElementConstructor<any>>
+    ) => React.ReactElement<any, string | React.JSXElementConstructor<any>>;
 }
 
 export function Select(props: ISelectProps) {
-    const { value, options = [], onChange, style, className, mode } = props;
+    const { value, options = [], onChange, style, className, mode, dropdownRender } = props;
 
     const { mountContainer } = useContext(ConfigContext);
 
@@ -67,6 +70,7 @@ export function Select(props: ISelectProps) {
             onChange={onChange}
             style={style}
             className={className}
+            dropdownRender={dropdownRender}
         />
     );
 }

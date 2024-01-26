@@ -28,8 +28,19 @@ export class Concatenate extends BaseFunction {
             return new ErrorValueObject(ErrorType.NA);
         }
 
-        const maxRowLength = Math.max(...textValues.map((textValue) => textValue.isArray() ? (textValue as ArrayValueObject).getRowCount() : 1));
-        const maxColumnLength = Math.max(...textValues.map((textValue) => textValue.isArray() ? (textValue as ArrayValueObject).getColumnCount() : 1));
+        let maxRowLength = 0;
+        let maxColumnLength = 0;
+
+        textValues.forEach((textValue) => {
+            if (textValue.isArray()) {
+                const arrayValue = textValue as ArrayValueObject;
+                maxRowLength = Math.max(maxRowLength, arrayValue.getRowCount());
+                maxColumnLength = Math.max(maxColumnLength, arrayValue.getColumnCount());
+            } else {
+                maxRowLength = Math.max(maxRowLength, 1);
+                maxColumnLength = Math.max(maxColumnLength, 1);
+            }
+        });
 
         let result: BaseValueObject | null = null;
 

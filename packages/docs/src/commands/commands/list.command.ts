@@ -16,6 +16,7 @@
 
 import type { ICommand, IMutationInfo, IParagraph } from '@univerjs/core';
 import {
+    ActionType,
     CommandType,
     ICommandService,
     IUndoRedoService,
@@ -132,7 +133,7 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
             const { startIndex } = paragraph;
 
             textX.push({
-                t: 'r',
+                t: ActionType.RETAIN,
                 len: startIndex - memoryCursor.cursor,
                 segmentId,
             });
@@ -145,7 +146,7 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
             };
 
             textX.push({
-                t: 'r',
+                t: ActionType.RETAIN,
                 len: 1,
                 body: {
                     dataStream: '',

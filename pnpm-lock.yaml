@@ -424,8 +424,34 @@ importers:
         specifier: ^5.1.6
         version: 5.1.6(@types/node@20.11.29)(less@4.2.0)
       vitest:
+<<<<<<< HEAD
         specifier: ^1.4.0
         version: 1.4.0(@types/node@20.11.29)(less@4.2.0)
+=======
+<<<<<<< HEAD
+        specifier: ^1.3.1
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.27)(less@4.2.0)
+=======
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.25)(less@4.2.0)
+=======
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.24)(less@4.2.0)
+=======
+        version: 1.3.1(@types/node@20.11.19)(less@4.2.0)
+=======
+        specifier: ^1.2.1
+<<<<<<< HEAD
+        version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
+=======
+        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
+>>>>>>> 1070651f5 (fix(dev): fix dev config)
+>>>>>>> 89540337d (fix(dev): fix dev config)
+>>>>>>> 816d01ba3 (fix(dev): fix dev config)
+>>>>>>> 96e0cdbac (fix(dev): fix dev config)
+>>>>>>> 8e6c211e1 (fix(dev): fix dev config)
+>>>>>>> 6d433f1e2 (fix(dev): fix dev config)
 
   packages/docs:
     devDependencies:
@@ -451,8 +477,34 @@ importers:
         specifier: ^5.1.6
         version: 5.1.6(@types/node@20.11.29)(less@4.2.0)
       vitest:
+<<<<<<< HEAD
         specifier: ^1.4.0
         version: 1.4.0(@types/node@20.11.29)(jsdom@24.0.0)
+=======
+<<<<<<< HEAD
+        specifier: ^1.3.1
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.27)(less@4.2.0)
+=======
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.25)(less@4.2.0)
+=======
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.24)(less@4.2.0)
+=======
+        version: 1.3.1(@types/node@20.11.19)(less@4.2.0)
+=======
+        specifier: ^1.2.1
+<<<<<<< HEAD
+        version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
+=======
+        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
+>>>>>>> 1070651f5 (fix(dev): fix dev config)
+>>>>>>> 89540337d (fix(dev): fix dev config)
+>>>>>>> 816d01ba3 (fix(dev): fix dev config)
+>>>>>>> 96e0cdbac (fix(dev): fix dev config)
+>>>>>>> 8e6c211e1 (fix(dev): fix dev config)
+>>>>>>> 6d433f1e2 (fix(dev): fix dev config)
 
   packages/docs-ui:
     devDependencies:
@@ -496,8 +548,34 @@ importers:
         specifier: ^5.1.6
         version: 5.1.6(@types/node@20.11.29)(less@4.2.0)
       vitest:
+<<<<<<< HEAD
         specifier: ^1.4.0
         version: 1.4.0(@types/node@20.11.29)(less@4.2.0)
+=======
+<<<<<<< HEAD
+        specifier: ^1.3.1
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.27)(less@4.2.0)
+=======
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.25)(less@4.2.0)
+=======
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.24)(less@4.2.0)
+=======
+        version: 1.3.1(@types/node@20.11.19)(less@4.2.0)
+=======
+        specifier: ^1.2.1
+<<<<<<< HEAD
+        version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
+=======
+        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
+>>>>>>> 1070651f5 (fix(dev): fix dev config)
+>>>>>>> 89540337d (fix(dev): fix dev config)
+>>>>>>> 816d01ba3 (fix(dev): fix dev config)
+>>>>>>> 96e0cdbac (fix(dev): fix dev config)
+>>>>>>> 8e6c211e1 (fix(dev): fix dev config)
+>>>>>>> 6d433f1e2 (fix(dev): fix dev config)
 
   packages/engine-formula:
     dependencies:
@@ -527,8 +605,34 @@ importers:
         specifier: ^5.1.6
         version: 5.1.6(@types/node@20.11.29)(less@4.2.0)
       vitest:
+<<<<<<< HEAD
         specifier: ^1.4.0
         version: 1.4.0(@types/node@20.11.29)(jsdom@24.0.0)
+=======
+<<<<<<< HEAD
+        specifier: ^1.3.1
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.27)(less@4.2.0)
+=======
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.25)(less@4.2.0)
+=======
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.24)(less@4.2.0)
+=======
+        version: 1.3.1(@types/node@20.11.19)(less@4.2.0)
+=======
+        specifier: ^1.2.1
+<<<<<<< HEAD
+        version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
+=======
+        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
+>>>>>>> 1070651f5 (fix(dev): fix dev config)
+>>>>>>> 89540337d (fix(dev): fix dev config)
+>>>>>>> 816d01ba3 (fix(dev): fix dev config)
+>>>>>>> 96e0cdbac (fix(dev): fix dev config)
+>>>>>>> 8e6c211e1 (fix(dev): fix dev config)
+>>>>>>> 6d433f1e2 (fix(dev): fix dev config)
 
   packages/engine-numfmt:
     dependencies:
@@ -577,8 +681,34 @@ importers:
         specifier: ^5.1.6
         version: 5.1.6(@types/node@20.11.29)(less@4.2.0)
       vitest:
+<<<<<<< HEAD
         specifier: ^1.4.0
         version: 1.4.0(@types/node@20.11.29)(jsdom@24.0.0)
+=======
+<<<<<<< HEAD
+        specifier: ^1.3.1
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.27)(less@4.2.0)
+=======
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.25)(less@4.2.0)
+=======
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.24)(less@4.2.0)
+=======
+        version: 1.3.1(@types/node@20.11.19)(less@4.2.0)
+=======
+        specifier: ^1.2.1
+<<<<<<< HEAD
+        version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
+=======
+        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
+>>>>>>> 1070651f5 (fix(dev): fix dev config)
+>>>>>>> 89540337d (fix(dev): fix dev config)
+>>>>>>> 816d01ba3 (fix(dev): fix dev config)
+>>>>>>> 96e0cdbac (fix(dev): fix dev config)
+>>>>>>> 8e6c211e1 (fix(dev): fix dev config)
+>>>>>>> 6d433f1e2 (fix(dev): fix dev config)
 
   packages/facade:
     devDependencies:
@@ -761,8 +891,92 @@ importers:
         specifier: ^5.1.6
         version: 5.1.6(@types/node@20.11.29)(less@4.2.0)
       vitest:
+<<<<<<< HEAD
         specifier: ^1.4.0
         version: 1.4.0(@types/node@20.11.29)(jsdom@24.0.0)
+=======
+<<<<<<< HEAD
+        specifier: ^1.3.1
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.27)(less@4.2.0)
+=======
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.25)(less@4.2.0)
+=======
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.24)(less@4.2.0)
+=======
+        version: 1.3.1(@types/node@20.11.19)(less@4.2.0)
+=======
+        specifier: ^1.2.1
+<<<<<<< HEAD
+        version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
+=======
+        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
+
+  packages/sheets-conditional-format:
+    dependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../core
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../design
+      '@univerjs/icons':
+        specifier: ^0.1.26
+        version: 0.1.26(react-dom@18.2.0)(react@18.2.0)
+      '@univerjs/ui':
+        specifier: workspace:*
+        version: link:../ui
+      '@wendellhu/redi':
+        specifier: ^0.12.13
+        version: 0.12.13
+      clsx:
+        specifier: ^2.1.0
+        version: 2.1.0
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+    devDependencies:
+      '@univerjs/shared':
+        specifier: workspace:*
+        version: link:../../common/shared
+      '@vitejs/plugin-react':
+        specifier: ^4.2.1
+        version: 4.2.1(vite@5.0.12)
+      '@vitest/coverage-istanbul':
+        specifier: ^1.2.1
+        version: 1.2.1(vitest@1.2.1)
+      happy-dom:
+        specifier: ^13.2.1
+        version: 13.3.1
+      less:
+        specifier: ^4.2.0
+        version: 4.2.0
+      typescript:
+        specifier: ^5.3.3
+        version: 5.3.3
+      vite:
+        specifier: ^5.0.12
+        version: 5.0.12(@types/node@20.11.7)(less@4.2.0)
+      vite-plugin-dts:
+        specifier: ^3.7.1
+        version: 3.7.2(@types/node@20.11.7)(typescript@5.3.3)(vite@5.0.12)
+      vite-plugin-externals:
+        specifier: ^0.6.2
+        version: 0.6.2(vite@5.0.12)
+      vitest:
+        specifier: ^1.2.1
+        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
+>>>>>>> 1070651f5 (fix(dev): fix dev config)
+>>>>>>> 89540337d (fix(dev): fix dev config)
+>>>>>>> 816d01ba3 (fix(dev): fix dev config)
+>>>>>>> 96e0cdbac (fix(dev): fix dev config)
+>>>>>>> 8e6c211e1 (fix(dev): fix dev config)
+>>>>>>> 6d433f1e2 (fix(dev): fix dev config)
 
   packages/sheets-find-replace:
     devDependencies:
@@ -800,8 +1014,38 @@ importers:
         specifier: ^5.1.6
         version: 5.1.6(@types/node@20.11.29)(less@4.2.0)
       vitest:
+<<<<<<< HEAD
         specifier: ^1.4.0
         version: 1.4.0(@types/node@20.11.29)(jsdom@24.0.0)
+=======
+<<<<<<< HEAD
+        specifier: ^1.3.1
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.27)(less@4.2.0)
+=======
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.25)(jsdom@24.0.0)
+=======
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.24)(jsdom@24.0.0)
+=======
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.24)(happy-dom@13.3.8)
+=======
+        version: 1.3.1(@types/node@20.11.19)(happy-dom@13.3.8)
+=======
+        specifier: ^1.2.1
+<<<<<<< HEAD
+        version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
+=======
+        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
+>>>>>>> 1070651f5 (fix(dev): fix dev config)
+>>>>>>> 89540337d (fix(dev): fix dev config)
+>>>>>>> 816d01ba3 (fix(dev): fix dev config)
+>>>>>>> 6287f0379 (fix(dev): fix dev config)
+>>>>>>> 96e0cdbac (fix(dev): fix dev config)
+>>>>>>> 8e6c211e1 (fix(dev): fix dev config)
+>>>>>>> 6d433f1e2 (fix(dev): fix dev config)
 
   packages/sheets-formula:
     dependencies:
@@ -864,8 +1108,34 @@ importers:
         specifier: ^5.1.6
         version: 5.1.6(@types/node@20.11.29)(less@4.2.0)
       vitest:
+<<<<<<< HEAD
         specifier: ^1.4.0
         version: 1.4.0(@types/node@20.11.29)(less@4.2.0)
+=======
+<<<<<<< HEAD
+        specifier: ^1.3.1
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.27)(less@4.2.0)
+=======
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.25)(less@4.2.0)
+=======
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.24)(less@4.2.0)
+=======
+        version: 1.3.1(@types/node@20.11.19)(less@4.2.0)
+=======
+        specifier: ^1.2.1
+<<<<<<< HEAD
+        version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
+=======
+        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
+>>>>>>> 1070651f5 (fix(dev): fix dev config)
+>>>>>>> 89540337d (fix(dev): fix dev config)
+>>>>>>> 816d01ba3 (fix(dev): fix dev config)
+>>>>>>> 96e0cdbac (fix(dev): fix dev config)
+>>>>>>> 8e6c211e1 (fix(dev): fix dev config)
+>>>>>>> 6d433f1e2 (fix(dev): fix dev config)
 
   packages/sheets-numfmt:
     dependencies:
@@ -922,8 +1192,34 @@ importers:
         specifier: ^5.1.6
         version: 5.1.6(@types/node@20.11.29)(less@4.2.0)
       vitest:
+<<<<<<< HEAD
         specifier: ^1.4.0
         version: 1.4.0(@types/node@20.11.29)(less@4.2.0)
+=======
+<<<<<<< HEAD
+        specifier: ^1.3.1
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.27)(less@4.2.0)
+=======
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.25)(less@4.2.0)
+=======
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.24)(less@4.2.0)
+=======
+        version: 1.3.1(@types/node@20.11.19)(less@4.2.0)
+=======
+        specifier: ^1.2.1
+<<<<<<< HEAD
+        version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
+=======
+        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
+>>>>>>> 1070651f5 (fix(dev): fix dev config)
+>>>>>>> 89540337d (fix(dev): fix dev config)
+>>>>>>> 816d01ba3 (fix(dev): fix dev config)
+>>>>>>> 96e0cdbac (fix(dev): fix dev config)
+>>>>>>> 8e6c211e1 (fix(dev): fix dev config)
+>>>>>>> 6d433f1e2 (fix(dev): fix dev config)
 
   packages/sheets-ui:
     dependencies:
@@ -983,8 +1279,34 @@ importers:
         specifier: ^5.1.6
         version: 5.1.6(@types/node@20.11.29)(less@4.2.0)
       vitest:
+<<<<<<< HEAD
         specifier: ^1.4.0
         version: 1.4.0(@types/node@20.11.29)(less@4.2.0)
+=======
+<<<<<<< HEAD
+        specifier: ^1.3.1
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.27)(less@4.2.0)
+=======
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.25)(less@4.2.0)
+=======
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.24)(less@4.2.0)
+=======
+        version: 1.3.1(@types/node@20.11.19)(less@4.2.0)
+=======
+        specifier: ^1.2.1
+<<<<<<< HEAD
+        version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
+=======
+        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
+>>>>>>> 1070651f5 (fix(dev): fix dev config)
+>>>>>>> 89540337d (fix(dev): fix dev config)
+>>>>>>> 816d01ba3 (fix(dev): fix dev config)
+>>>>>>> 96e0cdbac (fix(dev): fix dev config)
+>>>>>>> 8e6c211e1 (fix(dev): fix dev config)
+>>>>>>> 6d433f1e2 (fix(dev): fix dev config)
 
   packages/sheets-zen-editor:
     dependencies:
@@ -1035,8 +1357,34 @@ importers:
         specifier: ^5.1.6
         version: 5.1.6(@types/node@20.11.29)(less@4.2.0)
       vitest:
+<<<<<<< HEAD
         specifier: ^1.4.0
         version: 1.4.0(@types/node@20.11.29)(less@4.2.0)
+=======
+<<<<<<< HEAD
+        specifier: ^1.3.1
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.27)(less@4.2.0)
+=======
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.25)(less@4.2.0)
+=======
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.24)(less@4.2.0)
+=======
+        version: 1.3.1(@types/node@20.11.19)(less@4.2.0)
+=======
+        specifier: ^1.2.1
+<<<<<<< HEAD
+        version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
+=======
+        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
+>>>>>>> 1070651f5 (fix(dev): fix dev config)
+>>>>>>> 89540337d (fix(dev): fix dev config)
+>>>>>>> 816d01ba3 (fix(dev): fix dev config)
+>>>>>>> 96e0cdbac (fix(dev): fix dev config)
+>>>>>>> 8e6c211e1 (fix(dev): fix dev config)
+>>>>>>> 6d433f1e2 (fix(dev): fix dev config)
 
   packages/slides:
     dependencies:
@@ -1069,8 +1417,34 @@ importers:
         specifier: ^5.1.6
         version: 5.1.6(@types/node@20.11.29)(less@4.2.0)
       vitest:
+<<<<<<< HEAD
         specifier: ^1.4.0
         version: 1.4.0(@types/node@20.11.29)(jsdom@24.0.0)
+=======
+<<<<<<< HEAD
+        specifier: ^1.3.1
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.27)(less@4.2.0)
+=======
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.25)(less@4.2.0)
+=======
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.24)(less@4.2.0)
+=======
+        version: 1.3.1(@types/node@20.11.19)(less@4.2.0)
+=======
+        specifier: ^1.2.1
+<<<<<<< HEAD
+        version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
+=======
+        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
+>>>>>>> 1070651f5 (fix(dev): fix dev config)
+>>>>>>> 89540337d (fix(dev): fix dev config)
+>>>>>>> 816d01ba3 (fix(dev): fix dev config)
+>>>>>>> 96e0cdbac (fix(dev): fix dev config)
+>>>>>>> 8e6c211e1 (fix(dev): fix dev config)
+>>>>>>> 6d433f1e2 (fix(dev): fix dev config)
 
   packages/slides-ui:
     devDependencies:
@@ -1114,8 +1488,34 @@ importers:
         specifier: ^5.1.6
         version: 5.1.6(@types/node@20.11.29)(less@4.2.0)
       vitest:
+<<<<<<< HEAD
         specifier: ^1.4.0
         version: 1.4.0(@types/node@20.11.29)(less@4.2.0)
+=======
+<<<<<<< HEAD
+        specifier: ^1.3.1
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.27)(less@4.2.0)
+=======
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.25)(less@4.2.0)
+=======
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.24)(less@4.2.0)
+=======
+        version: 1.3.1(@types/node@20.11.19)(less@4.2.0)
+=======
+        specifier: ^1.2.1
+<<<<<<< HEAD
+        version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
+=======
+        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
+>>>>>>> 1070651f5 (fix(dev): fix dev config)
+>>>>>>> 89540337d (fix(dev): fix dev config)
+>>>>>>> 816d01ba3 (fix(dev): fix dev config)
+>>>>>>> 96e0cdbac (fix(dev): fix dev config)
+>>>>>>> 8e6c211e1 (fix(dev): fix dev config)
+>>>>>>> 6d433f1e2 (fix(dev): fix dev config)
 
   packages/ui:
     dependencies:
@@ -1184,11 +1584,43 @@ importers:
         specifier: ^5.1.6
         version: 5.1.6(@types/node@20.11.29)(less@4.2.0)
       vitest:
+<<<<<<< HEAD
         specifier: ^1.4.0
         version: 1.4.0(@types/node@20.11.29)(less@4.2.0)
+=======
+<<<<<<< HEAD
+        specifier: ^1.3.1
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.27)(less@4.2.0)
+=======
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.25)(less@4.2.0)
+>>>>>>> 8e6c211e1 (fix(dev): fix dev config)
+>>>>>>> 6d433f1e2 (fix(dev): fix dev config)
       vue:
         specifier: ^3.4.21
         version: 3.4.21(typescript@5.4.2)
+=======
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.24)(less@4.2.0)
+<<<<<<< HEAD
+      vue:
+        specifier: ^3.4.21
+        version: 3.4.21(typescript@5.3.3)
+=======
+=======
+        version: 1.3.1(@types/node@20.11.19)(less@4.2.0)
+=======
+        specifier: ^1.2.1
+<<<<<<< HEAD
+        version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
+=======
+        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
+>>>>>>> 1070651f5 (fix(dev): fix dev config)
+>>>>>>> 89540337d (fix(dev): fix dev config)
+>>>>>>> 816d01ba3 (fix(dev): fix dev config)
+>>>>>>> bb699e835 (fix(dev): fix dev config)
+>>>>>>> 96e0cdbac (fix(dev): fix dev config)
 
   packages/uniscript:
     dependencies:
@@ -1236,8 +1668,34 @@ importers:
         specifier: ^5.1.6
         version: 5.1.6(@types/node@20.11.29)(less@4.2.0)
       vitest:
+<<<<<<< HEAD
         specifier: ^1.4.0
         version: 1.4.0(@types/node@20.11.29)(less@4.2.0)
+=======
+<<<<<<< HEAD
+        specifier: ^1.3.1
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.27)(less@4.2.0)
+=======
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.25)(less@4.2.0)
+=======
+<<<<<<< HEAD
+        version: 1.3.1(@types/node@20.11.24)(less@4.2.0)
+=======
+        version: 1.3.1(@types/node@20.11.19)(less@4.2.0)
+=======
+        specifier: ^1.2.1
+<<<<<<< HEAD
+        version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
+=======
+        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
+>>>>>>> 1070651f5 (fix(dev): fix dev config)
+>>>>>>> 89540337d (fix(dev): fix dev config)
+>>>>>>> 816d01ba3 (fix(dev): fix dev config)
+>>>>>>> 96e0cdbac (fix(dev): fix dev config)
+>>>>>>> 8e6c211e1 (fix(dev): fix dev config)
+>>>>>>> 6d433f1e2 (fix(dev): fix dev config)
 
 packages:
 
@@ -1382,6 +1840,7 @@ packages:
     dependencies:
       '@ampproject/remapping': 2.2.1
       '@babel/code-frame': 7.23.5
+<<<<<<< HEAD
       '@babel/generator': 7.23.6
       '@babel/helper-compilation-targets': 7.23.6
       '@babel/helper-module-transforms': 7.23.3(@babel/core@7.23.9)
@@ -1390,6 +1849,16 @@ packages:
       '@babel/template': 7.23.9
       '@babel/traverse': 7.23.9
       '@babel/types': 7.23.9
+=======
+      '@babel/generator': 7.23.5
+      '@babel/helper-compilation-targets': 7.22.15
+      '@babel/helper-module-transforms': 7.23.3(@babel/core@7.23.5)
+      '@babel/helpers': 7.23.5
+      '@babel/parser': 7.23.6
+      '@babel/template': 7.22.15
+      '@babel/traverse': 7.23.5
+      '@babel/types': 7.23.6
+>>>>>>> 89540337d (fix(dev): fix dev config)
       convert-source-map: 2.0.0
       debug: 4.3.4
       gensync: 1.0.0-beta.2
@@ -1425,9 +1894,15 @@ packages:
     resolution: {integrity: sha512-9JB548GZoQVmzrFgp8o7KxdgkTGm6xs9DW0o/Pim72UDjzr5ObUQ6ZzYPqA+g9OTS2bBQoctLJrky0RDCAWRgQ==}
     engines: {node: '>=6.9.0'}
     dependencies:
+<<<<<<< HEAD
       '@babel/compat-data': 7.23.5
       '@babel/helper-validator-option': 7.23.5
       browserslist: 4.23.0
+=======
+      '@babel/compat-data': 7.23.3
+      '@babel/helper-validator-option': 7.22.15
+      browserslist: 4.22.2
+>>>>>>> 89540337d (fix(dev): fix dev config)
       lru-cache: 5.1.1
       semver: 6.3.1
 
@@ -3421,7 +3896,6 @@ packages:
       '@rushstack/node-core-library': 3.62.0(@types/node@20.11.29)
     transitivePeerDependencies:
       - '@types/node'
-    dev: false
 
   /@microsoft/api-extractor@7.39.0(@types/node@20.11.29):
     resolution: {integrity: sha512-PuXxzadgnvp+wdeZFPonssRAj/EW4Gm4s75TXzPk09h3wJ8RS3x7typf95B4vwZRrPTQBGopdUl+/vHvlPdAcg==}
@@ -3441,7 +3915,6 @@ packages:
       typescript: 5.3.3
     transitivePeerDependencies:
       - '@types/node'
-    dev: false
 
   /@microsoft/tsdoc-config@0.16.2:
     resolution: {integrity: sha512-OGiIzzoBLgWWR0UdRJX98oYO+XKGf7tiK4Zk6tQ/E4IJqGCe7dvkTvgDZV5cFJUzLGDOjeAXrnZoA6QkVySuxw==}
@@ -3450,11 +3923,9 @@ packages:
       ajv: 6.12.6
       jju: 1.4.0
       resolve: 1.19.0
-    dev: false
 
   /@microsoft/tsdoc@0.14.2:
     resolution: {integrity: sha512-9b8mPpKrfeGRuhFH5iO1iwCLeIIsV6+H1sRfxbkoGXIyQE2BTsPd9zqSqQJ+pv5sJ/hT5M1zvOFL02MnEezFug==}
-    dev: false
 
   /@ndelangen/get-tarball@3.0.9:
     resolution: {integrity: sha512-9JKTEik4vq+yGosHYhZ1tiH/3WpUS0Nh0kej4Agndhox8pAdWhEx5knFVRcb/ya9knCRCs1rPxNrSXTDdfVqpA==}
@@ -3928,14 +4399,12 @@ packages:
       resolve: 1.22.8
       semver: 7.5.4
       z-schema: 5.0.5
-    dev: false
 
   /@rushstack/rig-package@0.5.1:
     resolution: {integrity: sha512-pXRYSe29TjRw7rqxD4WS3HN/sRSbfr+tJs4a9uuaSIBAITbUggygdhuG0VrO0EO+QqH91GhYMN4S6KRtOEmGVA==}
     dependencies:
       resolve: 1.22.8
       strip-json-comments: 3.1.1
-    dev: false
 
   /@rushstack/ts-command-line@4.17.1:
     resolution: {integrity: sha512-2jweO1O57BYP5qdBGl6apJLB+aRIn5ccIRTPDyULh0KMwVzFqWtw6IZWt1qtUoZD/pD2RNkIOosH6Cq45rIYeg==}
@@ -3944,7 +4413,6 @@ packages:
       argparse: 1.0.10
       colors: 1.2.5
       string-argv: 0.3.2
-    dev: false
 
   /@sinclair/typebox@0.27.8:
     resolution: {integrity: sha512-+Fj43pSMwJs4KRrH/938Uf+uAELIgVBmQzg/q1YG10djyfA3TnrU8N8XzqCh/okZdszqBQTZf96idMfE5lnwTA==}
@@ -5067,7 +5535,6 @@ packages:
 
   /@types/argparse@1.0.38:
     resolution: {integrity: sha512-ebDJ9b0e702Yr7pWgB0jzm+CX4Srzz8RcXtLJDJB+BSccqMa36uyH/zUsSYao5+BD1ytv3k3rPYCq4mAE1hsXA==}
-    dev: false
 
   /@types/aria-query@5.0.4:
     resolution: {integrity: sha512-rfT93uj5s0PRL7EzccGMs3brplhcrghnDoV26NqKhCAS1hVo+WdNsPvE/yb6ilfr5hi2MEk6d5EWJTKdxg8jVw==}
@@ -5075,9 +5542,15 @@ packages:
   /@types/babel__core@7.20.5:
     resolution: {integrity: sha512-qoQprZvz5wQFJwMDqeseRXWv3rqMvhgpbXFfVyWhbx9X47POIA6i/+dXefEmZKoAgOaTdaIgNSMqMIU61yRyzA==}
     dependencies:
+<<<<<<< HEAD
       '@babel/parser': 7.23.9
       '@babel/types': 7.23.9
       '@types/babel__generator': 7.6.8
+=======
+      '@babel/parser': 7.23.6
+      '@babel/types': 7.23.6
+      '@types/babel__generator': 7.6.7
+>>>>>>> 89540337d (fix(dev): fix dev config)
       '@types/babel__template': 7.4.4
       '@types/babel__traverse': 7.20.5
 
@@ -5617,7 +6090,6 @@ packages:
       vitest: 1.4.0(@types/node@20.11.29)(happy-dom@13.3.8)
     transitivePeerDependencies:
       - supports-color
-    dev: false
 
   /@vitest/expect@1.3.1:
     resolution: {integrity: sha512-xofQFwIzfdmLLlHa6ag0dPV8YsnKOCP1KdAeVVh34vSjN2dcUiXYCD9htu/9eM7t8Xln4v03U9HLxLpPlsXdZw==}
@@ -5680,20 +6152,17 @@ packages:
     resolution: {integrity: sha512-dOcNn3i9GgZAcJt43wuaEykSluAuOkQgzni1cuxLxTV0nJKanQztp7FxyswdRILaKH+P2XZMPRp2S4MV/pElCw==}
     dependencies:
       '@volar/source-map': 1.11.1
-    dev: false
 
   /@volar/source-map@1.11.1:
     resolution: {integrity: sha512-hJnOnwZ4+WT5iupLRnuzbULZ42L7BWWPMmruzwtLhJfpDVoZLjNBxHDi2sY2bgZXCKlpU5XcsMFoYrsQmPhfZg==}
     dependencies:
       muggle-string: 0.3.1
-    dev: false
 
   /@volar/typescript@1.11.1:
     resolution: {integrity: sha512-iU+t2mas/4lYierSnoFOeRFQUhAEMgsFuQxoxvwn5EdQopw43j+J27a4lt9LMInx1gLJBC6qL14WYGlgymaSMQ==}
     dependencies:
       '@volar/language-core': 1.11.1
       path-browserify: 1.0.1
-    dev: false
 
   /@vue/compiler-core@3.4.19:
     resolution: {integrity: sha512-gj81785z0JNzRcU0Mq98E56e4ltO1yf8k5PQ+tV/7YHnbZkrM0fyFyuttnN8ngJZjbpofWE/m4qjKBiLl8Ju4w==}
@@ -5762,9 +6231,17 @@ packages:
       minimatch: 9.0.3
       muggle-string: 0.3.1
       path-browserify: 1.0.1
+<<<<<<< HEAD
       typescript: 5.4.2
+=======
+      typescript: 5.3.3
+<<<<<<< HEAD
+>>>>>>> 96e0cdbac (fix(dev): fix dev config)
       vue-template-compiler: 2.7.16
     dev: false
+=======
+      vue-template-compiler: 2.7.15
+>>>>>>> 89540337d (fix(dev): fix dev config)
 
   /@vue/reactivity@3.4.21:
     resolution: {integrity: sha512-UhenImdc0L0/4ahGCyEzc/pZNwVgcglGy9HVzJ1Bq2Mm9qXOpP8RyNTjookw/gOCUlXSEtuZ2fUg5nrHcoqJcw==}
@@ -6467,6 +6944,7 @@ packages:
       pako: 0.2.9
     dev: false
 
+<<<<<<< HEAD
   /browserslist@4.23.0:
     resolution: {integrity: sha512-QW8HiM1shhT2GuzkvklfjcKDiWFXHOeFCIA/huJPwHsslwcydgk7X+z2zXpEijP98UCY7HbubZt5J2Zgvf0CaQ==}
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
@@ -6476,6 +6954,17 @@ packages:
       electron-to-chromium: 1.4.675
       node-releases: 2.0.14
       update-browserslist-db: 1.0.13(browserslist@4.23.0)
+=======
+  /browserslist@4.22.2:
+    resolution: {integrity: sha512-0UgcrvQmBDvZHFGdYUehrCNIazki7/lUP3kkoi/r3YB2amZbFM9J43ZRkJTXBUZK4gmx56+Sqk9+Vs9mwZx9+A==}
+    engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
+    hasBin: true
+    dependencies:
+      caniuse-lite: 1.0.30001579
+      electron-to-chromium: 1.4.640
+      node-releases: 2.0.14
+      update-browserslist-db: 1.0.13(browserslist@4.22.2)
+>>>>>>> 89540337d (fix(dev): fix dev config)
 
   /buffer-from@1.1.2:
     resolution: {integrity: sha512-E+XQCRwSbaaiChtv6k6Dwgc+bx+Bs6vuKJHHl5kox/BaKbhiXzqQOwK4cO22yElGp2OCmjwVhT3HmxgyPGnJfQ==}
@@ -6557,10 +7046,15 @@ packages:
       tslib: 2.6.2
     dev: false
 
+<<<<<<< HEAD
   /camelcase@7.0.1:
     resolution: {integrity: sha512-xlx1yCK2Oc1APsPXDL2LdlNP6+uu8OCDdhOBSVT279M/S+y75O30C2VuD8T2ogdePBBl7PfPF4504tnLgX3zfw==}
     engines: {node: '>=14.16'}
     dev: true
+=======
+  /caniuse-lite@1.0.30001579:
+    resolution: {integrity: sha512-u5AUVkixruKHJjw/pj9wISlcMpgFWzSrczLZbrqBSxukQixmg0SJ5sZTpvaFvxU0HoQKd4yoyAogyrAz9pzJnA==}
+>>>>>>> 89540337d (fix(dev): fix dev config)
 
   /caniuse-lite@1.0.30001588:
     resolution: {integrity: sha512-+hVY9jE44uKLkH0SrUTqxjxqNTOWHsbnQDIKjwkZ3lNTzUUVdBLBGXtj/q5Mp5u98r3droaZAewQuEDzjQdZlQ==}
@@ -6820,7 +7314,6 @@ packages:
   /colors@1.2.5:
     resolution: {integrity: sha512-erNRLao/Y3Fv54qUa0LBB+//Uf3YwMUmdJinN20yMXm9zdKKqH9wt7R9IIVZ+K7ShzfpLV/Zg8+VyrBJYB4lpg==}
     engines: {node: '>=0.1.90'}
-    dev: false
 
   /combined-stream@1.0.8:
     resolution: {integrity: sha512-FQN4MRfuJeHf7cBbBMJFXhKSDq+2kAArBlmRBvcvFE5BB1HZKXtSFASDhdlz9zOYwxh8lDdnvmMOe/+5cdoEdg==}
@@ -6852,7 +7345,6 @@ packages:
     resolution: {integrity: sha512-KRs7WVDKg86PWiuAqhDrAQnTXZKraVcCc6vFdL14qrZ/DcWwuRo7VoiYXalXO7S5GKpqYiVEwCbgFDfxNHKJBQ==}
     engines: {node: ^12.20.0 || >=14}
     requiresBuild: true
-    dev: false
     optional: true
 
   /comment-parser@1.4.1:
@@ -6894,7 +7386,6 @@ packages:
 
   /computeds@0.0.1:
     resolution: {integrity: sha512-7CEBgcMjVmitjYo5q8JTJVra6X5mQ20uTThdK+0kR7UEaDrAWEQcRiBtWJzga4eRpP6afNwwLsX2SET2JhVB1Q==}
-    dev: false
 
   /concat-map@0.0.1:
     resolution: {integrity: sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==}
@@ -7255,7 +7746,6 @@ packages:
 
   /de-indent@1.0.2:
     resolution: {integrity: sha512-e/1zu3xH5MQryN2zdVaF0OrdNLUbvWxzMbi+iNA6Bky7l1RoP8a2fIbRocyHclXt/arDrrR6lL3TqFD9pMQTsg==}
-    dev: false
 
   /debug@2.6.9:
     resolution: {integrity: sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==}
@@ -7618,8 +8108,13 @@ packages:
       jake: 10.8.7
     dev: false
 
+<<<<<<< HEAD
   /electron-to-chromium@1.4.675:
     resolution: {integrity: sha512-+1u3F/XPNIdUwv8i1lDxHAxCvNNU0QIqgb1Ycn+Jnng8ITzWSvUqixRSM7NOazJuwhf65IV17f/VbKj8DmL26A==}
+=======
+  /electron-to-chromium@1.4.640:
+    resolution: {integrity: sha512-z/6oZ/Muqk4BaE7P69bXhUhpJbUM9ZJeka43ZwxsDshKtePns4mhBlh8bU5+yrnOnz3fhG82XLzGUXazOmsWnA==}
+>>>>>>> 89540337d (fix(dev): fix dev config)
 
   /emoji-regex@10.3.0:
     resolution: {integrity: sha512-QpLs9D9v9kArv4lfDEgg1X/gN5XLnf/A6l9cs8SPZLRZR3ZkY9+kwIQTxm+fsSej5UMYGE8fdoaZVIBlqG0XTw==}
@@ -7789,9 +8284,19 @@ packages:
       safe-array-concat: 1.1.0
     dev: true
 
+<<<<<<< HEAD
   /es-module-lexer@1.4.1:
     resolution: {integrity: sha512-cXLGjP0c4T3flZJKQSuziYoq7MlT+rnvfZjfp7h+I7K9BNX54kP9nyWvdbwjQ4u1iWbOL4u96fgeZLToQlZC7w==}
     dev: false
+=======
+  /es-module-lexer@0.4.1:
+    resolution: {integrity: sha512-ooYciCUtfw6/d2w56UVeqHPcoCFAiJdz5XOkYpv/Txl1HMUozpXjz/2RIQgqwKdXNDPSF1W7mJCFse3G+HDyAA==}
+    dev: true
+
+  /es-module-lexer@0.9.3:
+    resolution: {integrity: sha512-1HQ2M2sPtxwnvOvT1ZClHyQDiggdNjURWpY2we6aMKCQiUVxTmVs2UYPLIrD84sS+kMdUwfBSylbJPwNnBrnHQ==}
+    dev: true
+>>>>>>> 816d01ba3 (fix(dev): fix dev config)
 
   /es-set-tostringtag@2.0.2:
     resolution: {integrity: sha512-BuDyupZt65P9D2D2vA/zqcI3G5xRsklm5N3xCwuiy+/vKy8i0ifdsQP1sLgO4tZDSCaQUSnmC48khknGMV3D2Q==}
@@ -9090,7 +9595,6 @@ packages:
       graceful-fs: 4.2.11
       jsonfile: 4.0.0
       universalify: 0.1.2
-    dev: false
 
   /fs-minipass@2.1.0:
     resolution: {integrity: sha512-V/JgOLFCS+R6Vcq0slCuaeWEdNC3ouDlJMNIsacH2VtALiu9mV4LPrHc5cDl8k5aw6J8jwgWWpiTo5RYhmIzvg==}
@@ -9495,7 +9999,6 @@ packages:
   /he@1.2.0:
     resolution: {integrity: sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==}
     hasBin: true
-    dev: false
 
   /hoist-non-react-statics@3.3.2:
     resolution: {integrity: sha512-/gGivxi8JPKWNm/W0jSmzcMPpfpPLc3dY/6GxhX2hQ9iGj3aDfklV4ET7NjKpSinLpJ5vafa9iiGIEZg10SfBw==}
@@ -9526,7 +10029,6 @@ packages:
 
   /html-escaper@2.0.2:
     resolution: {integrity: sha512-H2iMtd0I4Mt5eYiapRdIDjp+XzelXQ0tFE4JS7YFwFevXXMmOp9myNrUvCg0D6ws8iqkRPBfKHgbwig1SmlLfg==}
-    dev: false
 
   /html-minifier-terser@6.1.0:
     resolution: {integrity: sha512-YXxSlJBZTP7RS3tWnQw74ooKa6L9b9i9QYXY21eUEvhZ3u9XLfv6OnFsQq6RxkhHygsaUMvYsZRV5rU/OVNZxw==}
@@ -10165,7 +10667,6 @@ packages:
       semver: 7.6.0
     transitivePeerDependencies:
       - supports-color
-    dev: false
 
   /istanbul-lib-report@3.0.1:
     resolution: {integrity: sha512-GCfE1mtsHGOELCU8e/Z7YWzpmybrx/+dSTfLrvY8qRmaY6zXTKWn6WQIjaAFw069icm6GVMNkgu0NzI4iPZUNw==}
@@ -10174,7 +10675,6 @@ packages:
       istanbul-lib-coverage: 3.2.2
       make-dir: 4.0.0
       supports-color: 7.2.0
-    dev: false
 
   /istanbul-lib-source-maps@5.0.4:
     resolution: {integrity: sha512-wHOoEsNJTVltaJp8eVkm8w+GVkVNHT2YDYo53YdzQEL2gWm1hBX5cGFR9hQJtuGLebidVX7et3+dmDZrmclduw==}
@@ -10185,7 +10685,6 @@ packages:
       istanbul-lib-coverage: 3.2.2
     transitivePeerDependencies:
       - supports-color
-    dev: false
 
   /istanbul-reports@3.1.7:
     resolution: {integrity: sha512-BewmUXImeuRk2YY0PVbxgKAysvhRPUQE0h5QRM++nVWyubKGV0l8qQ5op8+B2DOmwSe63Jivj0BjkPQVf8fP5g==}
@@ -10193,7 +10692,6 @@ packages:
     dependencies:
       html-escaper: 2.0.2
       istanbul-lib-report: 3.0.1
-    dev: false
 
   /iterate-iterator@1.0.2:
     resolution: {integrity: sha512-t91HubM4ZDQ70M9wqp+pcNpu8OyJ9UAtXntT/Bcsvp5tZMnz9vRa+IunKXeI8AnfZMTv0jNuVEmGeLSMjVvfPw==}
@@ -10258,7 +10756,6 @@ packages:
 
   /jju@1.4.0:
     resolution: {integrity: sha512-8wb9Yw966OSxApiCt0K3yNJL8pnNeIv+OEq2YMidz4FKP6nonSRoOXc80iXY4JaN2FC11B9qsNmDsm+ZOfMROA==}
-    dev: false
 
   /js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
@@ -10412,7 +10909,6 @@ packages:
     resolution: {integrity: sha512-m6F1R3z8jjlf2imQHS2Qez5sjKWQzbuuhuJ/FKYFRZvPE3PuHcSMVZzfsLhGVOkfd20obL5SWEBew5ShlquNxg==}
     optionalDependencies:
       graceful-fs: 4.2.11
-    dev: false
 
   /jsonfile@6.1.0:
     resolution: {integrity: sha512-5dgndWOriYSm5cnYaJNhalLNDKOqFwyDB/rr1E9ZsGciGvKPs8R2xYGCacuf3z6K1YKDz182fd+fY3cn3pMqXQ==}
@@ -10453,7 +10949,6 @@ packages:
 
   /kolorist@1.8.0:
     resolution: {integrity: sha512-Y+60/zizpJ3HRH8DCss+q95yr6145JXZo46OTpFvDZWLfRCE4qChOyk1b26nMaNpfHHgxagk9dXT5OP0Tfe+dQ==}
-    dev: false
 
   /latest-version@7.0.0:
     resolution: {integrity: sha512-KvNT4XqAMzdcL6ka6Tl3i2lYeFDgXNCuIX+xNx6ZMVR1dFq+idXd9FLKNMOIx0t9mJ9/HudyX4oZWXZQ0UJHeg==}
@@ -10641,11 +11136,9 @@ packages:
 
   /lodash.get@4.4.2:
     resolution: {integrity: sha512-z+Uw/vLuy6gQe8cfaFWD7p0wVv8fJl3mbzXh33RS+0oW2wvUqiRXiQ69gLWSLpgB5/6sU+r6BlQR0MBILadqTQ==}
-    dev: false
 
   /lodash.isequal@4.5.0:
     resolution: {integrity: sha512-pDo3lu8Jhfjqls6GkMgpahsF9kCyayhgykjyLMNFTKWrpVdAQtYyB4muAMWozBB4ig/dtWAmsMxLEI8wuz+DYQ==}
-    dev: false
 
   /lodash.isplainobject@4.0.6:
     resolution: {integrity: sha512-oSXzaWypCMHkPC3NvBEaPHf0KsA5mvPrOPgQWDsbg8n7orZ290M0BmC/jgRZ4vcJ6DTAhjrsSYgdsW/F+MFOBA==}
@@ -10765,9 +11258,16 @@ packages:
     resolution: {integrity: sha512-h5bgJWpxJNswbU7qCrV0tIKQCaS3blPDrqKWx+QxzuzL1zGUzij9XCWLrSLsJPu5t+eWA/ycetzYAO5IOMcWAQ==}
     hasBin: true
 
+<<<<<<< HEAD
   /macos-release@3.2.0:
     resolution: {integrity: sha512-fSErXALFNsnowREYZ49XCdOHF8wOPWuFOGQrAhP7x5J/BqQv+B02cNsTykGpDgRVx43EKg++6ANmTaGTtW+hUA==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
+=======
+  /magic-string@0.25.9:
+    resolution: {integrity: sha512-RmF0AsMzgt25qzqqLc1+MbHmhdx0ojF2Fvs4XnOqz2ZOBXzzkEwc/dJQZCYHAn7v1jbVOjAZfK8msRn4BxO4VQ==}
+    dependencies:
+      sourcemap-codec: 1.4.8
+>>>>>>> 89540337d (fix(dev): fix dev config)
     dev: true
 
   /magic-string@0.30.7:
@@ -10782,7 +11282,6 @@ packages:
       '@babel/parser': 7.23.9
       '@babel/types': 7.23.9
       source-map-js: 1.0.2
-    dev: false
 
   /make-dir@2.1.0:
     resolution: {integrity: sha512-LS9X+dc8KLxXCb8dni79fLIIUA5VyZoyjSMCwTluaXA0o27cCK0bhXkpgw+sTXVpPy/lSO57ilRixqk0vDmtRA==}
@@ -10802,8 +11301,12 @@ packages:
     resolution: {integrity: sha512-hXdUTZYIVOt1Ex//jAQi+wTZZpUpwBj/0QsOzqegb3rGMMeJiSEu5xLHnYfBrRV4RH2+OCSOO95Is/7x1WJ4bw==}
     engines: {node: '>=10'}
     dependencies:
+<<<<<<< HEAD
       semver: 7.6.0
     dev: false
+=======
+      semver: 7.5.4
+>>>>>>> 89540337d (fix(dev): fix dev config)
 
   /map-or-similar@1.5.0:
     resolution: {integrity: sha512-0aF7ZmVon1igznGI4VS30yugpduQW3y3GkcgGJOp7d8x8QrizhigUxjI/m2UojsXXto+jLAH3KSz+xOJTiORjg==}
@@ -11017,7 +11520,6 @@ packages:
 
   /muggle-string@0.3.1:
     resolution: {integrity: sha512-ckmWDJjphvd/FvZawgygcUeQCxzvohjFO5RxTjj4eq8kw359gFF3E1brjfI+viLMxss5JrHTDRHZvu2/tuy0Qg==}
-    dev: false
 
   /mute-stream@1.0.0:
     resolution: {integrity: sha512-avsJQhyd+680gKXyG/sQc0nXaC6rBkPOfyHYcFb9+hdkqQkR9bdnkJ0AMZhke0oesPqIO+mFFJ+IdBc7mst4IA==}
@@ -11548,7 +12050,6 @@ packages:
 
   /path-browserify@1.0.1:
     resolution: {integrity: sha512-b7uo2UCUOYZcnF/3ID0lulOJi/bafxa1xPe7ZPsammBSpjSWQkjNxlt635YGS2MiR9GjvuXCtz2emr3jbsz98g==}
-    dev: false
 
   /path-exists@3.0.0:
     resolution: {integrity: sha512-bpC7GYwiDYQ4wYLe+FA8lhRjhQCMcQGuSgGGqDkg/QerRWw9CmGRT0iSOVRSZJ29NMLZgIzqaljJ63oaL4NIJQ==}
@@ -12772,7 +13273,6 @@ packages:
     dependencies:
       is-core-module: 2.13.1
       path-parse: 1.0.7
-    dev: false
 
   /resolve@1.22.8:
     resolution: {integrity: sha512-oKWePCxqpd6FlLvGV1VU0x7bkPmmCNolxzjMf4NczoDnQcIWrAF+cPtZn5i6n+RfD2d9i0tzpKnG6Yk168yIyw==}
@@ -13166,9 +13666,20 @@ packages:
     resolution: {integrity: sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==}
     engines: {node: '>=0.10.0'}
 
+<<<<<<< HEAD
   /space-separated-tokens@2.0.2:
     resolution: {integrity: sha512-PEGlAwrG8yXGXRjW32fGbg66JAlOAwbObuqVoJpv/mRgoWDQfgH1wDPvtzWyUSNAXBGSk8h755YDbbcEy3SH2Q==}
     dev: false
+=======
+  /sourcemap-codec@1.4.8:
+    resolution: {integrity: sha512-9NykojV5Uih4lgo5So5dtw+f0JgJX30KCNI8gwhz2J9A15wD0Ml6tjHKwf6fTSa6fAdVBdZeNOs9eJ71qCk8vA==}
+    deprecated: Please use @jridgewell/sourcemap-codec instead
+    dev: true
+
+  /space-separated-tokens@1.1.5:
+    resolution: {integrity: sha512-q/JSVd1Lptzhf5bkYm4ob4iWPjx0KiRe3sRFBNrVqbJkFaBm5vbbowy1mymoPNLRa52+oadOhJ+K49wsSeSjTA==}
+    dev: true
+>>>>>>> 816d01ba3 (fix(dev): fix dev config)
 
   /spdx-correct@3.2.0:
     resolution: {integrity: sha512-kN9dJbvnySHULIluDHy32WHRUu3Og7B9sbY7tsFLctQkIqnMh3hErYgdMjTYuqmcXX+lK5T1lnUt3G7zNswmZA==}
@@ -14013,7 +14524,6 @@ packages:
   /universalify@0.1.2:
     resolution: {integrity: sha512-rBJeI5CXAlmy1pV+617WB9J63U6XcazHHF2f2dbJix4XzpUF0RS3Zbj0FGIOCAva5P/d/GBOYaACQ1w+0azUkg==}
     engines: {node: '>= 4.0.0'}
-    dev: false
 
   /universalify@0.2.0:
     resolution: {integrity: sha512-CJ1QgKmNg3CwvAv/kOFmtnEN05f0D/cn9QntgNOQlQF9dgvVTHj3t+8JPdjqawCHk7V/KA+fbUqzZ9XWhcqPUg==}
@@ -14043,11 +14553,16 @@ packages:
     engines: {node: '>=8'}
     dev: false
 
+<<<<<<< HEAD
   /update-browserslist-db@1.0.13(browserslist@4.23.0):
+=======
+  /update-browserslist-db@1.0.13(browserslist@4.22.2):
+>>>>>>> 89540337d (fix(dev): fix dev config)
     resolution: {integrity: sha512-xebP81SNcPuNpPP3uzeW1NYXxI3rxyJzF3pD6sH4jE7o/IX+WtSpwnVU+qIsDPyk0d3hmFQ7mjqc6AtV604hbg==}
     hasBin: true
     peerDependencies:
       browserslist: '>= 4.21.0'
+<<<<<<< HEAD
     dependencies:
       browserslist: 4.23.0
       escalade: 3.1.2
@@ -14070,6 +14585,12 @@ packages:
       semver-diff: 4.0.0
       xdg-basedir: 5.1.0
     dev: true
+=======
+    dependencies:
+      browserslist: 4.22.2
+      escalade: 3.1.1
+      picocolors: 1.0.0
+>>>>>>> 89540337d (fix(dev): fix dev config)
 
   /uri-js@4.4.1:
     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}
@@ -14141,7 +14662,6 @@ packages:
   /validator@13.11.0:
     resolution: {integrity: sha512-Ii+sehpSfZy+At5nPdnyMhx78fEoPDkR2XW/zimHEL3MyGJQOCQ7WeP20jPYRz7ZCpcKLB21NxuXHF3bxjStBQ==}
     engines: {node: '>= 0.10'}
-    dev: false
 
   /vary@1.1.2:
     resolution: {integrity: sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==}
@@ -14190,7 +14710,19 @@ packages:
       - '@types/node'
       - rollup
       - supports-color
-    dev: false
+
+  /vite-plugin-externals@0.6.2(vite@5.0.12):
+    resolution: {integrity: sha512-R5oVY8xDJjLXLTs2XDYzvYbc/RTZuIwOx2xcFbYf+/VXB6eJuatDgt8jzQ7kZ+IrgwQhe6tU8U2fTyy72C25CQ==}
+    engines: {node: ^14.18.0 || >=16.0.0}
+    peerDependencies:
+      vite: '>=2.0.0'
+    dependencies:
+      acorn: 8.11.3
+      es-module-lexer: 0.4.1
+      fs-extra: 10.1.0
+      magic-string: 0.25.9
+      vite: 5.0.12(@types/node@20.11.7)(less@4.2.0)
+    dev: true
 
   /vite@5.1.6(@types/node@20.11.29)(less@4.2.0):
     resolution: {integrity: sha512-yYIAZs9nVfRJ/AiOLCA91zzhjsHUgMjB+EigzFb6W2XTLO8JixBCKCjvhKZaye+NKYHCrkv3Oh50dH9EdLU2RA==}
@@ -14351,8 +14883,34 @@ packages:
       - terser
     dev: true
 
+<<<<<<< HEAD
   /vitest@1.4.0(@types/node@20.11.29)(less@4.2.0):
     resolution: {integrity: sha512-gujzn0g7fmwf83/WzrDTnncZt2UiXP41mHuFYFrdwaLRVQ6JYQEiME2IfEjU3vcFL3VKa75XhI3lFgn+hfVsQw==}
+=======
+<<<<<<< HEAD
+  /vitest@1.3.1(@types/node@20.11.27)(less@4.2.0):
+=======
+<<<<<<< HEAD
+  /vitest@1.3.1(@types/node@20.11.25)(less@4.2.0):
+=======
+<<<<<<< HEAD
+  /vitest@1.3.1(@types/node@20.11.24)(less@4.2.0):
+=======
+<<<<<<< HEAD
+  /vitest@1.3.1(@types/node@20.11.19)(less@4.2.0):
+>>>>>>> 816d01ba3 (fix(dev): fix dev config)
+>>>>>>> 96e0cdbac (fix(dev): fix dev config)
+>>>>>>> 8e6c211e1 (fix(dev): fix dev config)
+    resolution: {integrity: sha512-/1QJqXs8YbCrfv/GPQ05wAZf2eakUPLPa18vkJAKE7RXOKfVHqMZZ1WlTjiwl6Gcn65M5vpNUB6EFLnEdRdEXQ==}
+=======
+<<<<<<< HEAD
+  /vitest@1.2.1(@types/node@20.11.16)(less@4.2.0):
+=======
+  /vitest@1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0):
+>>>>>>> 1070651f5 (fix(dev): fix dev config)
+    resolution: {integrity: sha512-TRph8N8rnSDa5M2wKWJCMnztCZS9cDcgVTQ6tsTFTG/odHJ4l5yNVqvbeDJYJRZ6is3uxaEpFs8LL6QM+YFSdA==}
+>>>>>>> 89540337d (fix(dev): fix dev config)
+>>>>>>> 6d433f1e2 (fix(dev): fix dev config)
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
     peerDependencies:
@@ -14386,6 +14944,7 @@ packages:
       chai: 4.4.1
       debug: 4.3.4
       execa: 8.0.1
+      happy-dom: 13.3.1
       local-pkg: 0.5.0
       magic-string: 0.30.7
       pathe: 1.1.2
@@ -14430,7 +14989,6 @@ packages:
     dependencies:
       de-indent: 1.0.2
       he: 1.2.0
-    dev: false
 
   /vue-tsc@1.8.27(typescript@5.4.2):
     resolution: {integrity: sha512-WesKCAZCRAbmmhuGl3+VrdWItEvfoFIPXOvUJkjULi+x+6G/Dy69yO3TBRJDr9eUlmsNAwVmxsNZxvHKzbkKdg==}
@@ -14441,8 +14999,12 @@ packages:
       '@volar/typescript': 1.11.1
       '@vue/language-core': 1.8.27(typescript@5.4.2)
       semver: 7.6.0
+<<<<<<< HEAD
       typescript: 5.4.2
     dev: false
+=======
+      typescript: 5.3.3
+>>>>>>> 96e0cdbac (fix(dev): fix dev config)
 
   /vue@3.4.21(typescript@5.4.2):
     resolution: {integrity: sha512-5hjyV/jLEIKD/jYl4cavMcnzKwjMKohureP8ejn3hhEjwhWIhWeuzL2kJAjzl/WyVsgPY56Sy4Z40C3lVshxXA==}
@@ -14847,4 +15409,3 @@ packages:
       validator: 13.11.0
     optionalDependencies:
       commander: 9.5.0
-    dev: false

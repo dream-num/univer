@@ -20,7 +20,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             - name: Setup Node.js
               uses: ./.github/actions/setup-node
@@ -28,15 +28,16 @@ jobs:
             - name: 📦 Build
               run: pnpm run build
 
-    set-pr-id:
-        name: set PR ID
+    set-pr-info:
+        name: set PR info
         runs-on: ubuntu-latest
         steps:
-            - name: Save PR number
+            - name: Save PR info
               if: ${{ always() }}
               run: |
                   echo ${{ github.event.pull_request.number }} > ./pr-id.txt
                   echo ${{ github.head_ref }} >> ./pr-ref.txt
+                  echo ${{ github.event.pull_request.head.repo.full_name || github.repository }} >> ./pr-repo.txt
 
             - name: Upload PR number
               if: ${{ always() }}
@@ -51,3 +52,10 @@ jobs:
               with:
                   name: pr-ref
                   path: ./pr-ref.txt
+
+            - name: Upload PR repo
+              if: ${{ always() }}
+              uses: actions/upload-artifact@v3
+              with:
+                  name: pr-repo
+                  path: ./pr-repo.txt

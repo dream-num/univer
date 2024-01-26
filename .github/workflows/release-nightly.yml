@@ -18,20 +18,19 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v3
-
-            - name: Install pnpm
-              uses: pnpm/action-setup@v2
-              with:
-                  version: 8
-                  run_install: false
+              uses: actions/checkout@v4
 
             - name: Install Node.js
               uses: actions/setup-node@v3
               with:
                   node-version: 18
                   registry-url: ${{ secrets.VERDACCIO_URL }}
-                  cache: pnpm
+
+            - name: Install pnpm
+              uses: pnpm/action-setup@v2
+              with:
+                  version: 8
+                  run_install: false
 
             - name: 📌 Get package version (version + date)
               id: nightly-version
@@ -66,7 +65,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             - name: Setup Node.js
               uses: ./.github/actions/setup-node
@@ -97,7 +96,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             - name: Setup Node.js
               uses: ./.github/actions/setup-node
@@ -117,7 +116,6 @@ jobs:
     notify:
         needs: [release-nightly, build-demo, build-storybook]
         runs-on: ubuntu-latest
-        if: ${{ always() }}
 
         steps:
             - name: Invoke deployment hook

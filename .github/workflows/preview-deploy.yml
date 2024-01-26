@@ -15,11 +15,12 @@ jobs:
         runs-on: ubuntu-latest
 
         outputs:
-            id: ${{ steps.pr.outputs.id }}
-            ref: ${{ steps.ref.outputs.ref }}
+            id: ${{ steps.pr.outputs.value }}
+            ref: ${{ steps.ref.outputs.value }}
+            repo: ${{ steps.repo.outputs.value }}
 
         steps:
-            # Get PR ID from artifact
+            # Get PR id from artifact
             - name: download pr artifact
               uses: dawidd6/action-download-artifact@v2
               with:
@@ -29,9 +30,9 @@ jobs:
 
             - name: get PR id
               id: pr
-              run: echo "id=$(<pr-id.txt)" >> $GITHUB_OUTPUT
+              run: echo "value=$(<pr-id.txt)" >> $GITHUB_OUTPUT
 
-            # Get PR ID from artifact
+            # Get PR ref from artifact
             - name: download pr artifact
               uses: dawidd6/action-download-artifact@v2
               with:
@@ -41,7 +42,19 @@ jobs:
 
             - name: get PR ref
               id: ref
-              run: echo "ref=$(<pr-ref.txt)" >> $GITHUB_OUTPUT
+              run: echo "value=$(<pr-ref.txt)" >> $GITHUB_OUTPUT
+
+            # Get PR repo from artifact
+            - name: download pr artifact
+              uses: dawidd6/action-download-artifact@v2
+              with:
+                  workflow: ${{ github.event.workflow_run.workflow_id }}
+                  run_id: ${{ github.event.workflow_run.id }}
+                  name: pr-repo
+
+            - name: get PR repo
+              id: repo
+              run: echo "value=$(<pr-repo.txt)" >> $GITHUB_OUTPUT
 
     prepare:
         runs-on: ubuntu-latest
@@ -85,8 +98,9 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
               with:
+                  repository: ${{ needs.setup.outputs.repo }}
                   ref: ${{ needs.setup.outputs.ref }}
 
             - name: Setup Node.js
@@ -129,8 +143,9 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
               with:
+                  repository: ${{ needs.setup.outputs.repo }}
                   ref: ${{ needs.setup.outputs.ref }}
 
             - name: Setup Node.js

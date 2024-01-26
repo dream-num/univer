@@ -31,7 +31,6 @@
  */
 
 import { ObjectMatrix } from '@univerjs/core';
-import type { IConditionFormatRule } from './type';
 
 interface ICellItem {
     cfList: { cfId: string; ruleCache?: any }[];
@@ -68,6 +67,22 @@ export class ConditionalFormatViewModel {
         return value;
     }
 
+    setCellCfRuleCache(unitId: string, subUnitId: string, row: number, col: number, cfId: string, value: any) {
+        const cell = this.getCellCf(unitId, subUnitId, row, col);
+        const item = cell?.cfList.find((e) => e.cfId === cfId);
+        if (item) {
+            item.ruleCache = value;
+            this.markComposeDirty(unitId, subUnitId, row, col, cell!);
+        }
+    }
+
+    setCellComposeCache(unitId: string, subUnitId: string, row: number, col: number, value: any) {
+        const cell = this.getCellCf(unitId, subUnitId, row, col);
+        if (cell) {
+            cell.composeCache = value;
+        }
+    }
+
     deleteCellCf(
         unitId: string,
         subUnitId: string,
@@ -84,6 +99,9 @@ export class ConditionalFormatViewModel {
                 if (index > -1) {
                     cfList.splice(index, 1);
                 }
+                if (!cfList.length) {
+                    _matrix.realDeleteValue(row, col);
+                }
             }
         }
     }
@@ -93,25 +111,22 @@ export class ConditionalFormatViewModel {
         subUnitId: string,
         row: number,
         col: number,
-        value: IConditionFormatRule
+        cfId: string
     ) {
         const _matrix = this._ensureMatrix(unitId, subUnitId);
         let cellValue = _matrix.getValue(row, col);
         if (!cellValue) {
-            cellValue = { cfList: [{ cfId: value.cfId }] };
+            cellValue = { cfList: [{ cfId }] };
         } else {
             const cfIdList = cellValue.cfList;
-            const index = cfIdList.findIndex((item) => item.cfId === value.cfId);
+            const index = cfIdList.findIndex((item) => item.cfId === cfId);
             if (index > -1) {
                 cfIdList.splice(index, 1);
             }
-            cfIdList.push({ cfId: value.cfId });
-            this.markComposeDirty(unitId, subUnitId, row, col);
+            cfIdList.push({ cfId });
+            this.markComposeDirty(unitId, subUnitId, row, col, cellValue!);
         }
         _matrix.setValue(row, col, cellValue);
-        return () => {
-            this.deleteCellCf(unitId, subUnitId, row, col, value.cfId, _matrix);
-        };
     }
 
     sortCellCf(
@@ -137,18 +152,20 @@ export class ConditionalFormatViewModel {
             });
             cell.cfList = sortResult;
             if (isNeedRestoreComposeCache) {
-                this.markComposeDirty(unitId, subUnitId, row, col);
+                this.markComposeDirty(unitId, subUnitId, row, col, cell);
             }
         }
     }
 
-    markComposeDirty(unitId: string,
+    markComposeDirty(
+        unitId: string,
         subUnitId: string,
         row: number,
-        col: number) {
-        const cell = this.getCellCf(unitId, subUnitId, row, col);
-        if (cell) {
-            cell.composeCache = null;
+        col: number,
+        cell?: ICellItem) {
+        const _cell = cell || this.getCellCf(unitId, subUnitId, row, col);
+        if (_cell) {
+            _cell.composeCache = null;
         }
     }
 
@@ -157,14 +174,14 @@ export class ConditionalFormatViewModel {
         subUnitId: string,
         row: number,
         col: number,
-        cfId?: string
+        cfId: string
     ) {
         const cell = this.getCellCf(unitId, subUnitId, row, col);
         if (cell) {
             const rule = cell.cfList.find((item) => item.cfId === cfId);
             if (rule) {
                 rule.ruleCache = null;
-                this.markComposeDirty(unitId, subUnitId, row, col);
+                this.markComposeDirty(unitId, subUnitId, row, col, cell);
             }
         }
     }

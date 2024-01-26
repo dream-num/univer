@@ -71,7 +71,7 @@ describe('test text-x utils', () => {
         });
     });
 
-    it('test composeBody fn', () => {
+    it('test composeBody fn with textRuns', () => {
         const thisBody: IDocumentBody = {
             dataStream: 'hello\nworld',
             textRuns: [
@@ -164,5 +164,40 @@ describe('test text-x utils', () => {
         expect(() => {
             composeBody(thisBody, otherBody);
         }).toThrowError();
+    });
+
+    it('test composeBody fn both width paragraphs', () => {
+        const thisBody: IDocumentBody = {
+            dataStream: 'hello\nworld',
+            paragraphs: [{
+                startIndex: 5,
+            }],
+        };
+
+        const otherBody: IDocumentBody = {
+            dataStream: '',
+            paragraphs: [{
+                startIndex: 5,
+                paragraphStyle: {
+                    spaceAbove: 10,
+                    lineSpacing: 2,
+                    spaceBelow: 0,
+                },
+            }],
+        };
+
+        const composedBody = composeBody(thisBody, otherBody);
+
+        expect(composedBody).toEqual({
+            dataStream: 'hello\nworld',
+            paragraphs: [{
+                startIndex: 5,
+                paragraphStyle: {
+                    spaceAbove: 10,
+                    lineSpacing: 2,
+                    spaceBelow: 0,
+                },
+            }],
+        });
     });
 });

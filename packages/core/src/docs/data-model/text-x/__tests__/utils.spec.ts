@@ -71,6 +71,71 @@ describe('test text-x utils', () => {
         });
     });
 
+    it('test getBodySlice fn with a larger range', () => {
+        const body: IDocumentBody = {
+            dataStream: 'hello\nworld',
+            textRuns: [
+                {
+                    st: 0,
+                    ed: 3,
+                    ts: {
+                        bl: BooleanNumber.TRUE,
+                    },
+                },
+                {
+                    st: 3,
+                    ed: 5,
+                    ts: {
+                        bl: BooleanNumber.FALSE,
+                    },
+                },
+                {
+                    st: 6,
+                    ed: 10,
+                    ts: {
+                        bl: BooleanNumber.FALSE,
+                        it: BooleanNumber.TRUE,
+                    },
+                },
+            ],
+            paragraphs: [{
+                startIndex: 5,
+            }],
+        };
+
+        const sliceBody = getBodySlice(body, 2, 8);
+        expect(sliceBody).toEqual({
+            dataStream: 'llo\nwo',
+            textRuns: [
+                {
+                    st: 0,
+                    ed: 1,
+                    ts: {
+                        bl: BooleanNumber.TRUE,
+                    },
+                },
+                {
+                    st: 1,
+                    ed: 3,
+                    ts: {
+                        bl: BooleanNumber.FALSE,
+                    },
+                },
+                {
+                    st: 4,
+                    ed: 6,
+                    ts: {
+                        bl: BooleanNumber.FALSE,
+                        it: BooleanNumber.TRUE,
+                    },
+                },
+            ],
+            paragraphs: [{
+                startIndex: 3,
+            }],
+        });
+    });
+
     it('test composeBody fn with textRuns', () => {
         const thisBody: IDocumentBody = {
             dataStream: 'hello\nworld',

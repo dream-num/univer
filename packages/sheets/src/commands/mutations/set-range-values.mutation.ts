@@ -350,15 +350,15 @@ export function mergeStyle(
     // }
 
     if ('cl' in backupStyle) {
-        if ('ul' in backupStyle) {
+        if ('ul' in backupStyle && backupStyle.ul) {
             backupStyle.ul.cl = backupStyle.cl;
         }
 
-        if ('ol' in backupStyle) {
+        if ('ol' in backupStyle && backupStyle.ol) {
             backupStyle.ol.cl = backupStyle.cl;
         }
 
-        if ('st' in backupStyle) {
+        if ('st' in backupStyle && backupStyle.st) {
             backupStyle.st.cl = backupStyle.cl;
         }
     }

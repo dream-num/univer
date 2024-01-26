@@ -63,7 +63,7 @@ export class SheetSkeletonManagerService implements IDisposable {
     constructor(
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @Inject(LocaleService) private readonly _localeService: LocaleService
-    ) {}
+    ) { }
 
     dispose(): void {
         this._currentSkeletonBefore$.complete();
@@ -139,8 +139,29 @@ export class SheetSkeletonManagerService implements IDisposable {
         param.dirty = state;
     }
 
-    getSkeleton(searchParm: ISheetSkeletonManagerSearch) {
-        return this._getCurrentBySearch(searchParm);
+    getOrCreateSkeleton(searchParam: ISheetSkeletonManagerSearch) {
+        const skeleton = this._getCurrentBySearch(searchParam);
+        
+        if (skeleton) {
+            return skeleton.skeleton;
+        }
+
+        const workbook = this._currentUniverService.getUniverSheetInstance(searchParam.unitId);
+
+        const worksheet = workbook?.getSheetBySheetId(searchParam.sheetId);
+        if (!worksheet || !workbook) {
+            return;
+        }
+        const newSkeleton = this._buildSkeleton(worksheet, workbook);
+
+        this._sheetSkeletonParam.push({
+            unitId: searchParam.unitId,
+            sheetId: searchParam.sheetId,
+            skeleton: newSkeleton,
+            dirty: false,
+        });
+
+        return newSkeleton
     }
 
     private _getCurrentBySearch(searchParm: ISheetSkeletonManagerSearch): Nullable<ISheetSkeletonManagerParam> {

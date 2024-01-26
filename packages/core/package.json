@@ -63,14 +63,11 @@
     },
     "devDependencies": {
         "@types/numeral": "^2.0.5",
-        "@univerjs/infra": "workspace:*",
-        "@vitest/coverage-istanbul": "^1.2.1",
+        "@univerjs/shared": "workspace:*",
         "@wendellhu/redi": "^0.12.13",
         "rxjs": "^7.8.1",
         "typescript": "^5.3.3",
         "vite": "^5.0.12",
-        "vite-plugin-dts": "^3.7.2",
-        "vite-plugin-externals": "^0.6.2",
         "vitest": "^1.2.1"
     }
 }

@@ -2,7 +2,12 @@ name: 📤 Preview Deploy
 
 on:
     workflow_run:
-        workflows: [📦 Build]
+        workflows:
+            - 📌 Check PR
+            - 🩺 CI Lint
+            - 🧪 CI Test
+            - 🎭 Playwright Tests
+            - 📦 Build
         types: [completed]
 
 permissions:
@@ -121,7 +126,7 @@ jobs:
               id: vercel-demo-dev
               with:
                   vercel-token: ${{ secrets.VERCEL_TOKEN }}
-                  vercel-org-id: ${{ secrets.ORG_ID}}
+                  vercel-org-id: ${{ secrets.ORG_ID }}
                   vercel-project-id: ${{ secrets.PROJECT_ID}}
                   vercel-args: --prod
 
@@ -131,7 +136,7 @@ jobs:
               id: vercel-demo
               with:
                   vercel-token: ${{ secrets.VERCEL_TOKEN }}
-                  vercel-org-id: ${{ secrets.ORG_ID}}
+                  vercel-org-id: ${{ secrets.ORG_ID }}
                   vercel-project-id: ${{ secrets.PROJECT_ID}}
 
     build-storybook:
@@ -160,7 +165,7 @@ jobs:
               id: vercel-storybook
               with:
                   vercel-token: ${{ secrets.VERCEL_TOKEN }}
-                  vercel-org-id: ${{ secrets.ORG_ID}}
+                  vercel-org-id: ${{ secrets.ORG_ID }}
                   vercel-project-id: ${{ secrets.PROJECT_ID_STORYBOOK}}
 
     notify:

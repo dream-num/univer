@@ -52,14 +52,11 @@
     "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/infra": "workspace:*",
-        "@univerjs/ui": "workspace:*",
-        "@vitest/coverage-istanbul": "^1.2.1",
+        "@univerjs/shared": "workspace:*",
         "@wendellhu/redi": "^0.12.13",
         "less": "^4.2.0",
         "typescript": "^5.3.3",
         "vite": "^5.0.12",
-        "vite-plugin-dts": "^3.7.2",
         "vitest": "^1.2.1"
     }
 }

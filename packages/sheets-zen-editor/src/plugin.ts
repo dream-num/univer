@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import { Plugin, PluginType } from '@univerjs/core';
+import { LocaleService, Plugin, PluginType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { ZenEditorController } from './controllers/zen-editor.controller';
 import { ZenEditorUIController } from './controllers/zen-editor-ui.controller';
 import { IZenEditorManagerService, ZenEditorManagerService } from './services/zen-editor.service';
+import { zhCN } from './locale';
 
 export interface IUniverSheetsZenEditorPluginConfig {}
 export class UniverSheetsZenEditorPlugin extends Plugin {
@@ -28,10 +29,18 @@ export class UniverSheetsZenEditorPlugin extends Plugin {
 
     constructor(
         config: IUniverSheetsZenEditorPluginConfig,
-        @Inject(Injector) override readonly _injector: Injector
+        @Inject(Injector) override readonly _injector: Injector,
+        @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super('zen-editor');
+        this._initialize();
         this._initializeDependencies(this._injector);
+    }
+
+    private _initialize(): void {
+        this._localeService.load({
+            zhCN,
+        });
     }
 
     private _initializeDependencies(injector: Injector) {

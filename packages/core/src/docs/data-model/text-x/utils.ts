@@ -81,7 +81,11 @@ export function getBodySlice(body: IDocumentBody, startOffset: number, endOffset
     return docBody;
 }
 
-export function composeBody(thisBody: IDocumentBody, otherBody: IDocumentBody, coverType: UpdateDocsAttributeType = UpdateDocsAttributeType.COVER): IDocumentBody {
+export function composeBody(
+    thisBody: IDocumentBody,
+    otherBody: IDocumentBody,
+    coverType: UpdateDocsAttributeType = UpdateDocsAttributeType.COVER
+): IDocumentBody {
     if (otherBody.dataStream !== '') {
         throw new Error('Cannot compose other body with non-empty dataStream');
     }

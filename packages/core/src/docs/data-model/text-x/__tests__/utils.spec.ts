@@ -150,4 +150,19 @@ describe('test text-x utils', () => {
             }],
         });
     });
+
+    it('test composeBody and throw error', () => {
+        const thisBody: IDocumentBody = {
+            dataStream: 'hello\nworld',
+            textRuns: [],
+        };
+        const otherBody: IDocumentBody = {
+            dataStream: 'error',
+            textRuns: [],
+        };
+
+        expect(() => {
+            composeBody(thisBody, otherBody);
+        }).toThrowError();
+    });
 });

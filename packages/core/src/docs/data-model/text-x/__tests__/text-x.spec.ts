@@ -19,7 +19,7 @@ import { TextX } from '../text-x';
 import type { IDocumentBody } from '../../../../types/interfaces/i-document-data';
 import { BooleanNumber } from '../../../../types/enum/text-style';
 import { UpdateDocsAttributeType } from '../../../../shared/command-enum';
-import { ActionType } from '../../action-types';
+import { TextXActionType } from '../../action-types';
 
 describe('test TextX methods and branches', () => {
     describe('test TextX methods', () => {
@@ -44,7 +44,7 @@ describe('test TextX methods and branches', () => {
 
             expect(actions).toEqual([
                 {
-                    t: ActionType.INSERT,
+                    t: TextXActionType.INSERT,
                     body,
                     len: 5,
                     line: 0,
@@ -62,7 +62,7 @@ describe('test TextX methods and branches', () => {
 
             expect(actions).toEqual([
                 {
-                    t: ActionType.DELETE,
+                    t: TextXActionType.DELETE,
                     len: 5,
                     line: 0,
                     segmentId: '',
@@ -91,7 +91,7 @@ describe('test TextX methods and branches', () => {
 
             expect(actions).toEqual([
                 {
-                    t: ActionType.RETAIN,
+                    t: TextXActionType.RETAIN,
                     body,
                     len: 5,
                     coverType: UpdateDocsAttributeType.COVER,
@@ -110,7 +110,7 @@ describe('test TextX methods and branches', () => {
 
             expect(actions).toEqual([
                 {
-                    t: ActionType.DELETE,
+                    t: TextXActionType.DELETE,
                     len: 10, // 5 + 5
                     line: 0,
                     segmentId: '',
@@ -141,14 +141,14 @@ describe('test TextX methods and branches', () => {
 
             expect(actions).toEqual([
                 {
-                    t: ActionType.INSERT,
+                    t: TextXActionType.INSERT,
                     body,
                     len: 5,
                     line: 0,
                     segmentId: '',
                 },
                 {
-                    t: ActionType.DELETE,
+                    t: TextXActionType.DELETE,
                     len: 5,
                     line: 0,
                     segmentId: '',
@@ -166,7 +166,7 @@ describe('test TextX methods and branches', () => {
 
             expect(actions).toEqual([
                 {
-                    t: ActionType.RETAIN,
+                    t: TextXActionType.RETAIN,
                     len: 9,
                     segmentId: '',
                 },
@@ -177,11 +177,11 @@ describe('test TextX methods and branches', () => {
             const textX = new TextX();
 
             textX.push({
-                t: ActionType.RETAIN,
+                t: TextXActionType.RETAIN,
                 len: 4,
                 segmentId: '',
             }, {
-                t: ActionType.RETAIN,
+                t: TextXActionType.RETAIN,
                 len: 5,
                 segmentId: '',
             });
@@ -190,7 +190,7 @@ describe('test TextX methods and branches', () => {
 
             expect(actions).toEqual([
                 {
-                    t: ActionType.RETAIN,
+                    t: TextXActionType.RETAIN,
                     len: 9,
                     segmentId: '',
                 },
@@ -213,18 +213,18 @@ describe('test TextX methods and branches', () => {
             };
 
             textX.push({
-                t: ActionType.RETAIN,
+                t: TextXActionType.RETAIN,
                 len: 4,
                 segmentId: '',
             }, {
-                t: ActionType.DELETE,
+                t: TextXActionType.DELETE,
                 len: 5,
                 line: 0,
                 segmentId: '',
             });
 
             textX.push({
-                t: ActionType.INSERT,
+                t: TextXActionType.INSERT,
                 len: 5,
                 body,
                 line: 0,
@@ -234,9 +234,9 @@ describe('test TextX methods and branches', () => {
             const actions = textX.serialize();
 
             expect(actions.length).toBe(3);
-            expect(actions[0].t).toBe(ActionType.RETAIN);
-            expect(actions[1].t).toBe(ActionType.INSERT);
-            expect(actions[2].t).toBe(ActionType.DELETE);
+            expect(actions[0].t).toBe(TextXActionType.RETAIN);
+            expect(actions[1].t).toBe(TextXActionType.INSERT);
+            expect(actions[2].t).toBe(TextXActionType.DELETE);
         });
     });
 });

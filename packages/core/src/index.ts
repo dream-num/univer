@@ -29,7 +29,7 @@ export { requestImmediateMacroTask } from './common/request-immediate-macro-task
 export { type ISequenceExecuteResult, sequence, sequenceAsync } from './common/sequence';
 export * from './docs/data-model';
 export {
-    ActionType,
+    TextXActionType,
     type TextXAction,
     type IDeleteAction,
     type IInsertAction,

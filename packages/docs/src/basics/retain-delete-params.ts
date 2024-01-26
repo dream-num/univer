@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ActionType, type IDeleteAction, type IRetainAction, type ITextRange } from '@univerjs/core';
+import { type IDeleteAction, type IRetainAction, type ITextRange, TextXActionType } from '@univerjs/core';
 
 export function getRetainAndDeleteFromReplace(
     range: ITextRange,
@@ -29,14 +29,14 @@ export function getRetainAndDeleteFromReplace(
 
     if (textStart > 0) {
         dos.push({
-            t: ActionType.RETAIN,
+            t: TextXActionType.RETAIN,
             len: textStart,
             segmentId,
         });
     }
 
     dos.push({
-        t: ActionType.DELETE,
+        t: TextXActionType.DELETE,
         len: textEnd - textStart,
         line: 0,
         segmentId,

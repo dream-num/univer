@@ -17,7 +17,7 @@
 import { Tools } from '../../../shared/tools';
 import type { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import type { IDocumentBody } from '../../../types/interfaces/i-document-data';
-import { ActionType, type IDeleteAction, type IInsertAction, type IRetainAction, type TextXAction } from '../action-types';
+import { type IDeleteAction, type IInsertAction, type IRetainAction, type TextXAction, TextXActionType } from '../action-types';
 import { ActionIterator } from './action-iterator';
 import { composeBody } from './utils';
 
@@ -33,16 +33,16 @@ export class TextX {
         const textX = new TextX();
 
         while (thisIter.hasNext() || otherIter.hasNext()) {
-            if (otherIter.peekType() === ActionType.INSERT) {
+            if (otherIter.peekType() === TextXActionType.INSERT) {
                 textX.push(otherIter.next());
-            } else if (thisIter.peekType() === ActionType.DELETE) {
+            } else if (thisIter.peekType() === TextXActionType.DELETE) {
                 textX.push(thisIter.next());
             } else {
                 const length = Math.min(thisIter.peekLength(), otherIter.peekLength());
                 const thisAction = thisIter.next(length);
                 const otherAction = otherIter.next(length);
 
-                if (thisAction.t === ActionType.INSERT && otherAction.t === ActionType.RETAIN) {
+                if (thisAction.t === TextXActionType.INSERT && otherAction.t === TextXActionType.RETAIN) {
                     if (otherAction.body == null) {
                         textX.push(thisAction);
                     } else {
@@ -51,7 +51,7 @@ export class TextX {
                             body: composeBody(thisAction.body, otherAction.body, otherAction.coverType),
                         });
                     }
-                } else if (thisAction.t === ActionType.RETAIN && otherAction.t === ActionType.RETAIN) {
+                } else if (thisAction.t === TextXActionType.RETAIN && otherAction.t === TextXActionType.RETAIN) {
                     if (thisAction.body == null && otherAction.body == null) {
                         textX.push(thisAction); // or otherAction
                     } else if (thisAction.body && otherAction.body) {
@@ -62,9 +62,9 @@ export class TextX {
                     } else {
                         textX.push(thisAction.body ? thisAction : otherAction);
                     }
-                } else if (thisAction.t === ActionType.RETAIN && otherAction.t === ActionType.DELETE) {
+                } else if (thisAction.t === TextXActionType.RETAIN && otherAction.t === TextXActionType.DELETE) {
                     textX.push(otherAction);
-                } else if (thisAction.t === ActionType.INSERT && otherAction.t === ActionType.DELETE) {
+                } else if (thisAction.t === TextXActionType.INSERT && otherAction.t === TextXActionType.DELETE) {
                     // Nothing need to do, they are just cancel off.
                 }
                 // else {
@@ -83,7 +83,7 @@ export class TextX {
 
     insert(len: number, body: IDocumentBody, segmentId: string): this {
         const insertAction: IInsertAction = {
-            t: ActionType.INSERT,
+            t: TextXActionType.INSERT,
             body,
             len,
             line: 0, // hardcode
@@ -97,7 +97,7 @@ export class TextX {
 
     retain(len: number, segmentId: string, body?: IDocumentBody, coverType?: UpdateDocsAttributeType): this {
         const retainAction: IRetainAction = {
-            t: ActionType.RETAIN,
+            t: TextXActionType.RETAIN,
             len,
             segmentId,
         };
@@ -117,7 +117,7 @@ export class TextX {
 
     delete(len: number, segmentId: string): this {
         const deleteAction: IDeleteAction = {
-            t: ActionType.DELETE,
+            t: TextXActionType.DELETE,
             len,
             line: 0, // hardcode
             segmentId,
@@ -148,7 +148,7 @@ export class TextX {
 
         if (typeof lastAction === 'object') {
             // if lastAction and newAction are both delete action, merge the two actions and return this.
-            if (lastAction.t === ActionType.DELETE && newAction.t === ActionType.DELETE) {
+            if (lastAction.t === TextXActionType.DELETE && newAction.t === TextXActionType.DELETE) {
                 lastAction.len += newAction.len;
 
                 return this;
@@ -156,7 +156,7 @@ export class TextX {
 
             // Since it does not matter if we insert before or after deleting at the same index,
             // always prefer to insert first
-            if (lastAction.t === ActionType.DELETE && newAction.t === ActionType.INSERT) {
+            if (lastAction.t === TextXActionType.DELETE && newAction.t === TextXActionType.INSERT) {
                 index -= 1;
                 lastAction = this._actions[index - 1];
 
@@ -168,14 +168,14 @@ export class TextX {
             }
 
             // if lastAction and newAction are both retain action and has no body, merge the two actions and return this.
-            if (lastAction.t === ActionType.RETAIN && newAction.t === ActionType.RETAIN && lastAction.body == null && newAction.body == null) {
+            if (lastAction.t === TextXActionType.RETAIN && newAction.t === TextXActionType.RETAIN && lastAction.body == null && newAction.body == null) {
                 lastAction.len += newAction.len;
 
                 return this;
             }
 
             // Both are insert action, and has no styles, merge it.
-            if (lastAction.t === ActionType.INSERT && onlyHasDataStream(lastAction.body) && newAction.t === ActionType.INSERT && onlyHasDataStream(newAction.body)) {
+            if (lastAction.t === TextXActionType.INSERT && onlyHasDataStream(lastAction.body) && newAction.t === TextXActionType.INSERT && onlyHasDataStream(newAction.body)) {
                 lastAction.len += newAction.len;
                 lastAction.body.dataStream += newAction.body.dataStream;
 
@@ -195,7 +195,7 @@ export class TextX {
     trimEndUselessRetainAction(): this {
         let lastAction = this._actions[this._actions.length - 1];
 
-        while (lastAction && lastAction.t === ActionType.RETAIN && lastAction.body == null) {
+        while (lastAction && lastAction.t === TextXActionType.RETAIN && lastAction.body == null) {
             this._actions.pop();
 
             lastAction = this._actions[this._actions.length - 1];

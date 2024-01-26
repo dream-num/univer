@@ -16,7 +16,7 @@
 
 import { describe, expect, it } from 'vitest';
 import type { TextXAction } from '../../action-types';
-import { ActionType } from '../../action-types';
+import { TextXActionType } from '../../action-types';
 import { BooleanNumber } from '../../../../types/enum/text-style';
 import { TextX } from '../text-x';
 
@@ -27,22 +27,22 @@ describe('compose test cases', () => {
 
     it('test compose basic use', () => {
         const actions_a: TextXAction[] = [{
-            t: ActionType.RETAIN,
+            t: TextXActionType.RETAIN,
             len: 5,
         }, {
-            t: ActionType.DELETE,
+            t: TextXActionType.DELETE,
             len: 2,
             line: 0,
         }];
 
         const actions_b: TextXAction[] = [{
-            t: ActionType.DELETE,
+            t: TextXActionType.DELETE,
             len: 8,
             line: 0,
         }];
 
         const expect_actions: TextXAction[] = [{
-            t: ActionType.DELETE,
+            t: TextXActionType.DELETE,
             len: 10,
             line: 0,
         }];
@@ -52,19 +52,19 @@ describe('compose test cases', () => {
 
     it('test compose delete + delete', () => {
         const actions_a: TextXAction[] = [{
-            t: ActionType.DELETE,
+            t: TextXActionType.DELETE,
             len: 2,
             line: 0,
         }];
 
         const actions_b: TextXAction[] = [{
-            t: ActionType.DELETE,
+            t: TextXActionType.DELETE,
             len: 8,
             line: 0,
         }];
 
         const expect_actions: TextXAction[] = [{
-            t: ActionType.DELETE,
+            t: TextXActionType.DELETE,
             len: 10,
             line: 0,
         }];
@@ -74,18 +74,18 @@ describe('compose test cases', () => {
 
     it('test compose delete + retain', () => {
         const actions_a: TextXAction[] = [{
-            t: ActionType.DELETE,
+            t: TextXActionType.DELETE,
             len: 2,
             line: 0,
         }];
 
         const actions_b: TextXAction[] = [{
-            t: ActionType.RETAIN,
+            t: TextXActionType.RETAIN,
             len: 8,
         }];
 
         const expect_actions: TextXAction[] = [{
-            t: ActionType.DELETE,
+            t: TextXActionType.DELETE,
             len: 2,
             line: 0,
         }];
@@ -95,13 +95,13 @@ describe('compose test cases', () => {
 
     it('test compose delete + insert', () => {
         const actions_a: TextXAction[] = [{
-            t: ActionType.DELETE,
+            t: TextXActionType.DELETE,
             len: 2,
             line: 0,
         }];
 
         const actions_b: TextXAction[] = [{
-            t: ActionType.INSERT,
+            t: TextXActionType.INSERT,
             body: {
                 dataStream: 'h',
             },
@@ -111,14 +111,14 @@ describe('compose test cases', () => {
 
         // Always put insert before delete.
         const expect_actions: TextXAction[] = [{
-            t: ActionType.INSERT,
+            t: TextXActionType.INSERT,
             body: {
                 dataStream: 'h',
             },
             len: 1,
             line: 0,
         }, {
-            t: ActionType.DELETE,
+            t: TextXActionType.DELETE,
             len: 2,
             line: 0,
         }];
@@ -128,12 +128,12 @@ describe('compose test cases', () => {
 
     it('test compose retain + retain', () => {
         const actions_a: TextXAction[] = [{
-            t: ActionType.RETAIN,
+            t: TextXActionType.RETAIN,
             len: 2,
         }];
 
         const actions_b: TextXAction[] = [{
-            t: ActionType.RETAIN,
+            t: TextXActionType.RETAIN,
             len: 8,
         }];
 
@@ -144,12 +144,12 @@ describe('compose test cases', () => {
 
     it('test compose retain + insert', () => {
         const actions_a: TextXAction[] = [{
-            t: ActionType.RETAIN,
+            t: TextXActionType.RETAIN,
             len: 2,
         }];
 
         const actions_b: TextXAction[] = [{
-            t: ActionType.INSERT,
+            t: TextXActionType.INSERT,
             len: 1,
             body: {
                 dataStream: 'h',
@@ -158,7 +158,7 @@ describe('compose test cases', () => {
         }];
 
         const expect_actions: TextXAction[] = [{
-            t: ActionType.INSERT,
+            t: TextXActionType.INSERT,
             len: 1,
             body: {
                 dataStream: 'h',
@@ -171,18 +171,18 @@ describe('compose test cases', () => {
 
     it('test compose retain + delete', () => {
         const actions_a: TextXAction[] = [{
-            t: ActionType.RETAIN,
+            t: TextXActionType.RETAIN,
             len: 2,
         }];
 
         const actions_b: TextXAction[] = [{
-            t: ActionType.DELETE,
+            t: TextXActionType.DELETE,
             len: 1,
             line: 0,
         }];
 
         const expect_actions: TextXAction[] = [{
-            t: ActionType.DELETE,
+            t: TextXActionType.DELETE,
             len: 1,
             line: 0,
         }];
@@ -192,7 +192,7 @@ describe('compose test cases', () => {
 
     it('test compose insert + retain', () => {
         const actions_a: TextXAction[] = [{
-            t: ActionType.INSERT,
+            t: TextXActionType.INSERT,
             body: {
                 dataStream: 'h',
             },
@@ -201,12 +201,12 @@ describe('compose test cases', () => {
         }];
 
         const actions_b: TextXAction[] = [{
-            t: ActionType.RETAIN,
+            t: TextXActionType.RETAIN,
             len: 1,
         }];
 
         const expect_actions: TextXAction[] = [{
-            t: ActionType.INSERT,
+            t: TextXActionType.INSERT,
             body: {
                 dataStream: 'h',
             },
@@ -219,7 +219,7 @@ describe('compose test cases', () => {
 
     it('test compose insert + insert', () => {
         const actions_a: TextXAction[] = [{
-            t: ActionType.INSERT,
+            t: TextXActionType.INSERT,
             body: {
                 dataStream: 'h',
             },
@@ -228,7 +228,7 @@ describe('compose test cases', () => {
         }];
 
         const actions_b: TextXAction[] = [{
-            t: ActionType.INSERT,
+            t: TextXActionType.INSERT,
             body: {
                 dataStream: 'b',
             },
@@ -237,7 +237,7 @@ describe('compose test cases', () => {
         }];
 
         const expect_actions: TextXAction[] = [{
-            t: ActionType.INSERT,
+            t: TextXActionType.INSERT,
             body: {
                 dataStream: 'bh',
             },
@@ -252,7 +252,7 @@ describe('compose test cases', () => {
 
     it('test compose insert + delete', () => {
         const actions_a: TextXAction[] = [{
-            t: ActionType.INSERT,
+            t: TextXActionType.INSERT,
             body: {
                 dataStream: 'h',
             },
@@ -261,7 +261,7 @@ describe('compose test cases', () => {
         }];
 
         const actions_b: TextXAction[] = [{
-            t: ActionType.DELETE,
+            t: TextXActionType.DELETE,
             len: 1,
             line: 0,
         }];
@@ -273,7 +273,7 @@ describe('compose test cases', () => {
 
     it('test compose retain + retain with style', () => {
         const actions_a: TextXAction[] = [{
-            t: ActionType.RETAIN,
+            t: TextXActionType.RETAIN,
             body: {
                 dataStream: '',
                 textRuns: [{
@@ -288,7 +288,7 @@ describe('compose test cases', () => {
         }];
 
         const actions_b: TextXAction[] = [{
-            t: ActionType.RETAIN,
+            t: TextXActionType.RETAIN,
             body: {
                 dataStream: '',
                 textRuns: [{
@@ -303,7 +303,7 @@ describe('compose test cases', () => {
         }];
 
         const expect_actions: TextXAction[] = [{
-            t: ActionType.RETAIN,
+            t: TextXActionType.RETAIN,
             body: {
                 dataStream: '',
                 textRuns: [{
@@ -323,7 +323,7 @@ describe('compose test cases', () => {
 
     it('test compose insert + retain with style', () => {
         const actions_a: TextXAction[] = [{
-            t: ActionType.INSERT,
+            t: TextXActionType.INSERT,
             body: {
                 dataStream: 'h',
             },
@@ -332,7 +332,7 @@ describe('compose test cases', () => {
         }];
 
         const actions_b: TextXAction[] = [{
-            t: ActionType.RETAIN,
+            t: TextXActionType.RETAIN,
             body: {
                 dataStream: '',
                 textRuns: [{
@@ -347,7 +347,7 @@ describe('compose test cases', () => {
         }];
 
         const expect_actions: TextXAction[] = [{
-            t: ActionType.INSERT,
+            t: TextXActionType.INSERT,
             body: {
                 dataStream: 'h',
                 textRuns: [{
@@ -367,12 +367,12 @@ describe('compose test cases', () => {
 
     it('test compose retain with no body + retain with style', () => {
         const actions_a: TextXAction[] = [{
-            t: ActionType.RETAIN,
+            t: TextXActionType.RETAIN,
             len: 1,
         }];
 
         const actions_b: TextXAction[] = [{
-            t: ActionType.RETAIN,
+            t: TextXActionType.RETAIN,
             body: {
                 dataStream: '',
                 textRuns: [{
@@ -387,7 +387,7 @@ describe('compose test cases', () => {
         }];
 
         const expect_actions: TextXAction[] = [{
-            t: ActionType.RETAIN,
+            t: TextXActionType.RETAIN,
             body: {
                 dataStream: '',
                 textRuns: [{

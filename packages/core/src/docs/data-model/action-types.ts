@@ -17,7 +17,7 @@
 import type { UpdateDocsAttributeType } from '../../shared/command-enum';
 import type { IDocumentBody } from '../../types/interfaces/i-document-data';
 
-export enum ActionType {
+export enum TextXActionType {
     RETAIN = 'r',
     INSERT = 'i',
     DELETE = 'd',
@@ -27,7 +27,7 @@ export enum ActionType {
  * Retain mutation is used to move the cursor or to update properties of the text in the given range.
  */
 export interface IRetainAction {
-    t: ActionType.RETAIN;
+    t: TextXActionType.RETAIN;
     len: number;
     body?: IDocumentBody;
     coverType?: UpdateDocsAttributeType;
@@ -38,7 +38,7 @@ export interface IRetainAction {
  * Insert mutation is used to insert text (maybe with rich text properties) at the given position.
  */
 export interface IInsertAction {
-    t: ActionType.INSERT;
+    t: TextXActionType.INSERT;
     body: IDocumentBody;
     len: number;
     line: number;
@@ -49,7 +49,7 @@ export interface IInsertAction {
  * Delete mutation is used to delete text at the given position.
  */
 export interface IDeleteAction {
-    t: ActionType.DELETE;
+    t: TextXActionType.DELETE;
     len: number;
     line: number;
     segmentId?: string;

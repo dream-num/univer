@@ -16,16 +16,16 @@
 
 import { describe, expect, it } from 'vitest';
 import { ActionIterator } from '../action-iterator';
-import { ActionType } from '../../action-types';
+import { TextXActionType } from '../../action-types';
 import { BooleanNumber } from '../../../../types/enum/text-style';
 
 describe('Test action iterator', () => {
     it('test action iterator basic use', () => {
         const iterator = new ActionIterator([{
-            t: ActionType.RETAIN,
+            t: TextXActionType.RETAIN,
             len: 5,
         }, {
-            t: ActionType.INSERT,
+            t: TextXActionType.INSERT,
             body: {
                 dataStream: 'hello',
                 textRuns: [{
@@ -39,35 +39,35 @@ describe('Test action iterator', () => {
             len: 5,
             line: 0,
         }, {
-            t: ActionType.DELETE,
+            t: TextXActionType.DELETE,
             len: 5,
             line: 0,
         }]);
 
         expect(iterator.hasNext()).toBe(true);
 
-        expect(iterator.peekType()).toBe(ActionType.RETAIN);
+        expect(iterator.peekType()).toBe(TextXActionType.RETAIN);
 
         expect(iterator.peekLength()).toBe(5);
 
         expect(iterator.peek()).toEqual({
-            t: ActionType.RETAIN,
+            t: TextXActionType.RETAIN,
             len: 5,
         });
 
         let action = iterator.next();
 
         expect(action).toEqual({
-            t: ActionType.RETAIN,
+            t: TextXActionType.RETAIN,
             len: 5,
         });
 
-        expect(iterator.peekType()).toBe(ActionType.INSERT);
+        expect(iterator.peekType()).toBe(TextXActionType.INSERT);
 
         action = iterator.next(2);
 
         expect(action).toEqual({
-            t: ActionType.INSERT,
+            t: TextXActionType.INSERT,
             body: {
                 dataStream: 'he',
                 textRuns: [{
@@ -82,12 +82,12 @@ describe('Test action iterator', () => {
             line: 0,
         });
 
-        expect(iterator.peekType()).toBe(ActionType.INSERT);
+        expect(iterator.peekType()).toBe(TextXActionType.INSERT);
 
         action = iterator.next(4);
 
         expect(action).toEqual({
-            t: ActionType.INSERT,
+            t: TextXActionType.INSERT,
             body: {
                 dataStream: 'llo',
                 textRuns: [{
@@ -102,19 +102,19 @@ describe('Test action iterator', () => {
             line: 0,
         });
 
-        expect(iterator.peekType()).toBe(ActionType.DELETE);
+        expect(iterator.peekType()).toBe(TextXActionType.DELETE);
 
         action = iterator.next();
 
         expect(action).toEqual({
-            t: ActionType.DELETE,
+            t: TextXActionType.DELETE,
             len: 5,
             line: 0,
         });
 
         expect(iterator.hasNext()).toBe(false);
 
-        expect(iterator.peekType()).toBe(ActionType.RETAIN);
+        expect(iterator.peekType()).toBe(TextXActionType.RETAIN);
 
         expect(iterator.peekLength()).toBe(Number.POSITIVE_INFINITY);
 
@@ -125,26 +125,26 @@ describe('Test action iterator', () => {
         action = iterator.next();
 
         expect(action).toEqual({
-            t: ActionType.RETAIN,
+            t: TextXActionType.RETAIN,
             len: Number.POSITIVE_INFINITY,
         });
     });
 
     it('test action iterator rest', () => {
         const iterator = new ActionIterator([{
-            t: ActionType.RETAIN,
+            t: TextXActionType.RETAIN,
             len: 5,
         }, {
-            t: ActionType.DELETE,
+            t: TextXActionType.DELETE,
             len: 5,
             line: 0,
         }]);
 
         expect(iterator.rest()).toEqual([{
-            t: ActionType.RETAIN,
+            t: TextXActionType.RETAIN,
             len: 5,
         }, {
-            t: ActionType.DELETE,
+            t: TextXActionType.DELETE,
             len: 5,
             line: 0,
         }]);
@@ -152,10 +152,10 @@ describe('Test action iterator', () => {
         iterator.next(3);
 
         expect(iterator.rest()).toEqual([{
-            t: ActionType.RETAIN,
+            t: TextXActionType.RETAIN,
             len: 2,
         }, {
-            t: ActionType.DELETE,
+            t: TextXActionType.DELETE,
             len: 5,
             line: 0,
         }]);

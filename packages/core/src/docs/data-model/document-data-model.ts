@@ -28,7 +28,7 @@ import type { IPaddingData } from '../../types/interfaces/i-style-data';
 import { updateAttributeByDelete } from './apply-utils/delete-apply';
 import { updateAttributeByInsert } from './apply-utils/insert-apply';
 import { updateAttribute } from './apply-utils/update-apply';
-import { ActionType, type TextXAction } from './action-types';
+import { type TextXAction, TextXActionType } from './action-types';
 import { getBodySlice } from './text-x/utils';
 
 export const DEFAULT_DOC = {
@@ -266,7 +266,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
             // be modified to have no side effects in the future?
             action = Tools.deepClone(action);
 
-            if (action.t === ActionType.RETAIN) {
+            if (action.t === TextXActionType.RETAIN) {
                 const { coverType, body, len, segmentId } = action;
 
                 if (body != null) {
@@ -274,36 +274,36 @@ export class DocumentDataModel extends DocumentDataModelSimple {
 
                     undoMutations.push({
                         ...action,
-                        t: ActionType.RETAIN,
+                        t: TextXActionType.RETAIN,
                         coverType: UpdateDocsAttributeType.REPLACE,
                         body: documentBody,
                     });
                 } else {
                     undoMutations.push({
                         ...action,
-                        t: ActionType.RETAIN,
+                        t: TextXActionType.RETAIN,
                     });
                 }
 
                 memoryCursor.moveCursor(len);
-            } else if (action.t === ActionType.INSERT) {
+            } else if (action.t === TextXActionType.INSERT) {
                 const { body, len, segmentId, line } = action;
 
                 this._insertApply(body!, len, memoryCursor.cursor, segmentId);
                 memoryCursor.moveCursor(len);
                 undoMutations.push({
-                    t: ActionType.DELETE,
+                    t: TextXActionType.DELETE,
                     len,
                     line,
                     segmentId,
                 });
-            } else if (action.t === ActionType.DELETE) {
+            } else if (action.t === TextXActionType.DELETE) {
                 const { len, segmentId } = action;
                 const documentBody = this._deleteApply(len, memoryCursor.cursor, segmentId);
 
                 undoMutations.push({
                     ...action,
-                    t: ActionType.INSERT,
+                    t: TextXActionType.INSERT,
                     body: documentBody,
                 });
             } else {

@@ -16,7 +16,7 @@
 
 import { Tools } from '../../../shared/tools';
 import type { TextXAction } from '../action-types';
-import { ActionType } from '../action-types';
+import { TextXActionType } from '../action-types';
 import { getBodySlice } from './utils';
 
 export class ActionIterator {
@@ -57,13 +57,13 @@ export class ActionIterator {
              *    3) Reassemble the returned action
              */
 
-            if (nextAction.t === ActionType.DELETE || (nextAction.t === ActionType.RETAIN && nextAction.body == null)) {
+            if (nextAction.t === TextXActionType.DELETE || (nextAction.t === TextXActionType.RETAIN && nextAction.body == null)) {
                 return Tools.deepClone({
                     ...nextAction,
                     len: length,
                 });
             } else {
-                // handle condition: (nextAction.t === ActionType.INSERT || nextAction.t === ActionType.RETAIN && nextAction.body)
+                // handle condition: (nextAction.t === TextXActionType.INSERT || nextAction.t === TextXActionType.RETAIN && nextAction.body)
                 return Tools.deepClone({
                     ...nextAction,
                     len: length,
@@ -71,9 +71,9 @@ export class ActionIterator {
                 });
             }
         } else {
-            // It indicate that the iterator is exhausted when return ActionType.RETAIN and len is positive infinity.
+            // It indicate that the iterator is exhausted when return TextXActionType.RETAIN and len is positive infinity.
             return {
-                t: ActionType.RETAIN,
+                t: TextXActionType.RETAIN,
                 len: Number.POSITIVE_INFINITY,
             };
         }
@@ -92,19 +92,19 @@ export class ActionIterator {
         }
     }
 
-    peekType(): ActionType {
+    peekType(): TextXActionType {
         const action = this._actions[this._index];
         if (action) {
-            if (action.t === ActionType.DELETE) {
-                return ActionType.DELETE;
-            } else if (action.t === ActionType.RETAIN) {
-                return ActionType.RETAIN;
+            if (action.t === TextXActionType.DELETE) {
+                return TextXActionType.DELETE;
+            } else if (action.t === TextXActionType.RETAIN) {
+                return TextXActionType.RETAIN;
             } else {
-                return ActionType.INSERT;
+                return TextXActionType.INSERT;
             }
         }
 
-        return ActionType.RETAIN;
+        return TextXActionType.RETAIN;
     }
 
     rest(): TextXAction[] {

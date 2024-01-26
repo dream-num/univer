@@ -23,7 +23,6 @@ import type {
     ITextRange,
 } from '@univerjs/core';
 import {
-    ActionType,
     CommandType,
     getDocsUpdateBody,
     ICommandService,
@@ -31,6 +30,7 @@ import {
     IUniverInstanceService,
     MemoryCursor,
     TextX,
+    TextXActionType,
 } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 
@@ -88,7 +88,7 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
 
             if (collapsed) {
                 textX.push({
-                    t: ActionType.RETAIN,
+                    t: TextXActionType.RETAIN,
                     len,
                     segmentId,
                 });
@@ -97,7 +97,7 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
             }
 
             textX.push({
-                t: ActionType.INSERT,
+                t: TextXActionType.INSERT,
                 body,
                 len: body.dataStream.length,
                 line: 0,
@@ -199,7 +199,7 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
 
             if (collapsed) {
                 textX.push({
-                    t: ActionType.RETAIN,
+                    t: TextXActionType.RETAIN,
                     len,
                     segmentId,
                 });
@@ -270,7 +270,7 @@ function getRetainAndDeleteAndExcludeLineBreak(
 
     if (textStart > 0) {
         dos.push({
-            t: ActionType.RETAIN,
+            t: TextXActionType.RETAIN,
             len: textStart,
             segmentId,
         });
@@ -280,21 +280,21 @@ function getRetainAndDeleteAndExcludeLineBreak(
         const paragraphIndex = paragraphInRange.startIndex - memoryCursor;
 
         dos.push({
-            t: ActionType.DELETE,
+            t: TextXActionType.DELETE,
             len: paragraphIndex - textStart,
             line: 0,
             segmentId,
         });
 
         dos.push({
-            t: ActionType.RETAIN,
+            t: TextXActionType.RETAIN,
             len: 1,
             segmentId,
         });
 
         if (textEnd > paragraphIndex + 1) {
             dos.push({
-                t: ActionType.DELETE,
+                t: TextXActionType.DELETE,
                 len: textEnd - paragraphIndex - 1,
                 line: 0,
                 segmentId,
@@ -302,7 +302,7 @@ function getRetainAndDeleteAndExcludeLineBreak(
         }
     } else {
         dos.push({
-            t: ActionType.DELETE,
+            t: TextXActionType.DELETE,
             len: textEnd - textStart,
             line: 0,
             segmentId,

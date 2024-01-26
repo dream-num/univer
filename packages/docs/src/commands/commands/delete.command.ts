@@ -16,12 +16,12 @@
 
 import type { ICommand, IDocumentBody, IMutationInfo, IParagraph, ITextRun } from '@univerjs/core';
 import {
-    ActionType,
     CommandType,
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,
     TextX,
+    TextXActionType,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
 import type { IActiveTextRange, TextRange } from '@univerjs/engine-render';
@@ -310,14 +310,14 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
         const textX = new TextX();
 
         textX.push({
-            t: ActionType.RETAIN,
+            t: TextXActionType.RETAIN,
             len: direction === DeleteDirection.LEFT ? startOffset - 1 : startOffset,
             segmentId,
         });
 
         if (body.dataStream.length) {
             textX.push({
-                t: ActionType.INSERT,
+                t: TextXActionType.INSERT,
                 body,
                 len: body.dataStream.length,
                 line: 0,
@@ -326,13 +326,13 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
         }
 
         textX.push({
-            t: ActionType.RETAIN,
+            t: TextXActionType.RETAIN,
             len: 1,
             segmentId,
         });
 
         textX.push({
-            t: ActionType.DELETE,
+            t: TextXActionType.DELETE,
             len: endIndex + 1 - startIndex,
             line: 0,
             segmentId,

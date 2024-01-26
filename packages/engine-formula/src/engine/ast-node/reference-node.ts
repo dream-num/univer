@@ -24,6 +24,7 @@ import {
     REFERENCE_REGEX_SINGLE_ROW,
     REFERENCE_SINGLE_RANGE_REGEX,
 } from '../../basics/regex';
+import { matchToken } from '../../basics/token';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { IDefinedNamesService } from '../../services/defined-names.service';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
@@ -44,7 +45,8 @@ export class ReferenceNode extends BaseAstNode {
     constructor(
         private _accessor: IAccessor,
         private _operatorString: string,
-        private _referenceObject: BaseReferenceObject
+        private _referenceObject: BaseReferenceObject,
+        private _isPrepareMerge: boolean = false
     ) {
         super(_operatorString);
     }
@@ -77,7 +79,7 @@ export class ReferenceNode extends BaseAstNode {
 
         this._referenceObject.setRefOffset(x, y);
 
-        if (this._referenceObject.isExceedRange()) {
+        if (!this._isPrepareMerge && this._referenceObject.isExceedRange()) {
             this.setValue(new ErrorValueObject(ErrorType.NAME));
         } else {
             this.setValue(this._referenceObject);
@@ -103,9 +105,18 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
     override checkAndCreateNodeType(param: LexerNode | string) {
         let isLexerNode = false;
         let tokenTrim: string;
+        let isPrepareMerge = false;
         if (param instanceof LexerNode) {
             isLexerNode = true;
             tokenTrim = param.getToken().trim();
+
+            /**
+             * If this node is a reference to a range,
+             * it is necessary to determine whether it will be combined into a single range by a union operation.
+             */
+            if (param.getParent()?.getParent()?.getToken().trim() === matchToken.COLON) {
+                isPrepareMerge = true;
+            }
         } else {
             tokenTrim = param.trim();
         }
@@ -120,15 +131,15 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
         }
 
         if (new RegExp(REFERENCE_SINGLE_RANGE_REGEX).test(tokenTrim)) {
-            return new ReferenceNode(this._injector, tokenTrim, new CellReferenceObject(tokenTrim));
+            return new ReferenceNode(this._injector, tokenTrim, new CellReferenceObject(tokenTrim), isPrepareMerge);
         }
 
         if (isLexerNode && new RegExp(REFERENCE_REGEX_SINGLE_ROW).test(tokenTrim)) {
-            return new ReferenceNode(this._injector, tokenTrim, new RowReferenceObject(tokenTrim));
+            return new ReferenceNode(this._injector, tokenTrim, new RowReferenceObject(tokenTrim), isPrepareMerge);
         }
 
         if (isLexerNode && new RegExp(REFERENCE_REGEX_SINGLE_COLUMN).test(tokenTrim)) {
-            return new ReferenceNode(this._injector, tokenTrim, new ColumnReferenceObject(tokenTrim));
+            return new ReferenceNode(this._injector, tokenTrim, new ColumnReferenceObject(tokenTrim), isPrepareMerge);
         }
 
         const unitId = this._formulaRuntimeService.currentUnitId;

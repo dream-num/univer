@@ -73,7 +73,7 @@ export interface IUnitSheetNameMap {
 }
 
 export interface IDirtyUnitSheetNameMap {
-    [unitId: string]: Nullable<{ [sheetId: string]: Nullable<string> }>;
+    [unitId: string]: Nullable<{ [sheetId: string]: string }>;
 }
 
 export interface IDirtyUnitFeatureMap {

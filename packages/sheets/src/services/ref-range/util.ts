@@ -15,7 +15,7 @@
  */
 
 import type { IRange, Nullable } from '@univerjs/core';
-import { Rectangle } from '@univerjs/core';
+import { RANGE_TYPE, Rectangle } from '@univerjs/core';
 
 import type {
     IDeleteRangeMoveLeftCommand,
@@ -32,6 +32,47 @@ import type {
 } from './type';
 import { OperatorType } from './type';
 
+const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER;
+export const handleRangeTypeInput = (range: IRange) => {
+    const _range = { ...range };
+    if (_range.rangeType === RANGE_TYPE.COLUMN) {
+        _range.startRow = 0;
+        _range.endRow = MAX_SAFE_INTEGER;
+    }
+    if (_range.rangeType === RANGE_TYPE.ROW) {
+        _range.startColumn = 0;
+        _range.endColumn = MAX_SAFE_INTEGER;
+    }
+    if (_range.rangeType === RANGE_TYPE.ALL) {
+        _range.startColumn = 0;
+        _range.endColumn = MAX_SAFE_INTEGER;
+        _range.startRow = 0;
+        _range.endRow = MAX_SAFE_INTEGER;
+    }
+    return _range;
+};
+export const handleRangeTypeOutput = (range: IRange, maxRow: number, maxCol: number) => {
+    const _range = { ...range };
+    if (_range.rangeType === RANGE_TYPE.COLUMN) {
+        _range.startRow = 0;
+        _range.endRow = maxRow;
+    } else if (_range.rangeType === RANGE_TYPE.ROW) {
+        _range.startColumn = 0;
+        _range.endColumn = maxCol;
+    } else if (_range.rangeType === RANGE_TYPE.ALL) {
+        _range.startColumn = 0;
+        _range.startRow = 0;
+        _range.endColumn = maxCol;
+        _range.endRow = maxRow;
+    } else {
+        _range.startRow = Math.max(0, _range.startRow);
+        _range.endRow = Math.min(maxRow, _range.endRow);
+        _range.startColumn = Math.max(0, _range.startColumn);
+        _range.endColumn = Math.min(maxCol, _range.endColumn);
+    }
+
+    return _range;
+};
 export const rotateRange = (range: IRange): IRange => {
     // rotate {startRow:2,endRow:3,startCol:3,endCol:10} to
     // {startRow:3,endRow:10,startCol:2,endRow:3}
@@ -149,10 +190,13 @@ export const handleMoveRows = (params: IMoveRowsCommand, targetRange: IRange): I
     if (!toRange || !fromRange) {
         return [];
     }
+    const _fromRange = handleRangeTypeInput(fromRange);
+    const _toRange = handleRangeTypeInput(toRange);
+    const _targetRange = handleRangeTypeInput(targetRange);
     const result = handleBaseMoveRowsCols(
-        { start: fromRange.startRow, end: fromRange.endRow },
-        { start: toRange.startRow, end: toRange.endRow },
-        { start: targetRange.startRow, end: targetRange.endRow }
+        { start: _fromRange.startRow, end: _fromRange.endRow },
+        { start: _toRange.startRow, end: _toRange.endRow },
+        { start: _targetRange.startRow, end: _targetRange.endRow }
     );
     if (result === null) {
         return [
@@ -175,10 +219,13 @@ export const handleMoveCols = (params: IMoveColsCommand, targetRange: IRange): I
     if (!toRange || !fromRange) {
         return [];
     }
+    const _fromRange = handleRangeTypeInput(fromRange);
+    const _toRange = handleRangeTypeInput(toRange);
+    const _targetRange = handleRangeTypeInput(targetRange);
     const result = handleBaseMoveRowsCols(
-        { start: fromRange.startColumn, end: fromRange.endColumn },
-        { start: toRange.startColumn, end: toRange.endColumn },
-        { start: targetRange.startColumn, end: targetRange.endColumn }
+        { start: _fromRange.startColumn, end: _fromRange.endColumn },
+        { start: _toRange.startColumn, end: _toRange.endColumn },
+        { start: _targetRange.startColumn, end: _targetRange.endColumn }
     );
     if (result === null) {
         return [
@@ -227,7 +274,9 @@ export const handleMoveRange = (param: IMoveRangeCommand, targetRange: IRange) =
 };
 
 // see docs/tldr/ref-range/remove-rows-cols.tldr
-export const handleBaseRemoveRange = (removeRange: IRange, targetRange: IRange) => {
+export const handleBaseRemoveRange = (_removeRange: IRange, _targetRange: IRange) => {
+    const removeRange = handleRangeTypeInput(_removeRange);
+    const targetRange = handleRangeTypeInput(_targetRange);
     const getLength = (range: IRange): number => range.endColumn - range.startColumn + 1;
     const getRowLength = (range: IRange): number => range.endRow - range.startRow + 1;
     if (removeRange.startRow <= targetRange.startRow && removeRange.endRow >= targetRange.endRow) {
@@ -315,7 +364,9 @@ export const handleIRemoveRow = (param: IRemoveRowColCommand, targetRange: IRang
     return operators;
 };
 // see docs/tldr/ref-range/insert-rows-cols.tldr
-export const handleBaseInsertRange = (insertRange: IRange, targetRange: IRange) => {
+export const handleBaseInsertRange = (_insertRange: IRange, _targetRange: IRange) => {
+    const insertRange = handleRangeTypeInput(_insertRange);
+    const targetRange = handleRangeTypeInput(_targetRange);
     const getLength = (range: IRange): number => range.endColumn - range.startColumn + 1;
     if (insertRange.startRow <= targetRange.startRow && insertRange.endRow >= targetRange.endRow) {
         if (

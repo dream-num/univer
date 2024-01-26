@@ -30,6 +30,7 @@ import type {
 export interface IRemoveSheetMutationParams {
     subUnitId: string;
     unitId: string;
+    subUnitName: string;
 }
 
 /** Params of `InsertSheetMutation` */

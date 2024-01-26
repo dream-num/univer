@@ -364,4 +364,43 @@ describe('compose test cases', () => {
 
         expect(TextX.compose(actions_a, actions_b)).toEqual(expect_actions);
     });
+
+    it('test compose retain with no body + retain with style', () => {
+        const actions_a: TextXAction[] = [{
+            t: ActionType.RETAIN,
+            len: 1,
+        }];
+
+        const actions_b: TextXAction[] = [{
+            t: ActionType.RETAIN,
+            body: {
+                dataStream: '',
+                textRuns: [{
+                    st: 0,
+                    ed: 1,
+                    ts: {
+                        it: BooleanNumber.TRUE,
+                    },
+                }],
+            },
+            len: 1,
+        }];
+
+        const expect_actions: TextXAction[] = [{
+            t: ActionType.RETAIN,
+            body: {
+                dataStream: '',
+                textRuns: [{
+                    st: 0,
+                    ed: 1,
+                    ts: {
+                        it: BooleanNumber.TRUE,
+                    },
+                }],
+            },
+            len: 1,
+        }];
+
+        expect(TextX.compose(actions_a, actions_b)).toEqual(expect_actions);
+    });
 });

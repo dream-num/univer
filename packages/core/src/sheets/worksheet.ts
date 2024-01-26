@@ -112,7 +112,7 @@ export class Worksheet {
      * get worksheet valued cell range
      * @returns
      */
-    getCellMatrixDataRange() {
+    getCellMatrixPrintRange() {
         const matrix = this.getCellMatrix();
         let startRow = -1;
         let endRow = -1;
@@ -121,12 +121,14 @@ export class Worksheet {
 
         let rowInitd = false;
         let columnInitd = false;
-
+ 
         matrix.forEach((rowIndex, row) => {
             Object.keys(row).forEach((colIndexStr) => {
                 const colIndex = +colIndexStr;
                 const cellValue = matrix.getValue(rowIndex, colIndex);
-                if (cellValue && (cellValue.v || cellValue.p || cellValue.s)) {
+                const style = cellValue?.s ? this._styles.get(cellValue.s) : null
+
+                if (cellValue && (cellValue.v || cellValue.p || style?.bg || style?.bd)) {
                     if (!rowInitd) {
                         startRow = rowIndex;
                         endRow = rowIndex;

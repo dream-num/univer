@@ -20,17 +20,18 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v4
 
-            - name: Install Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: 18
-                  registry-url: ${{ secrets.VERDACCIO_URL }}
-
             - name: Install pnpm
               uses: pnpm/action-setup@v2
               with:
                   version: 8
                   run_install: false
+
+            - name: Install Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 18
+                  cache: pnpm
+                  registry-url: ${{ secrets.VERDACCIO_URL }}
 
             - name: 📌 Get package version (version + date)
               id: nightly-version

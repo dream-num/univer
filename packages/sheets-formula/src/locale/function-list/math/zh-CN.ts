@@ -1020,11 +1020,11 @@ export default {
         ],
         functionParameter: {
             number1: {
-                name: 'number1',
+                name: '数值 1',
                 detail: '要相加的第一个数字。 该数字可以是 4 之类的数字，B6 之类的单元格引用或 B2:B8 之类的单元格范围。',
             },
             number2: {
-                name: 'number2',
+                name: '数值 2',
                 detail: '这是要相加的第二个数字。 可以按照这种方式最多指定 255 个数字。',
             },
         },
@@ -1040,15 +1040,15 @@ export default {
         ],
         functionParameter: {
             range: {
-                name: 'range',
+                name: '范围',
                 detail: '要根据条件进行检测的范围。',
             },
             criteria: {
-                name: 'criteria',
+                name: '条件',
                 detail: '以数字、表达式、单元格引用、文本或函数的形式来定义将添加哪些单元格。可包括的通配符字符 - 问号（？）以匹配任意单个字符，星号（*）以匹配任意字符序列。 如果要查找实际的问号或星号，请在该字符前键入波形符（~）。',
             },
             sumRange: {
-                name: 'sum_range',
+                name: '求和范围',
                 detail: '要添加的实际单元格，如果要添加在范围参数指定以外的其他单元格。 如果省略sum_range参数，Excel就会添加范围参数中指定的单元格（与应用标准的单元格相同）。',
             },
         },

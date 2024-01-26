@@ -14,18 +14,68 @@
  * limitations under the License.
  */
 
-import type { FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
-import { CellReferenceObject } from '../../../engine/reference-object/cell-reference-object';
+import type { ArrayValueObject } from '../../..';
+import { RangeReferenceObject } from '../../..';
+import { ErrorType } from '../../../basics/error-type';
+import type { BaseReferenceObject } from '../../../engine/reference-object/base-reference-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 
 export class Offset extends BaseFunction {
     override calculate(
-        reference: FunctionVariantType,
-        rows: FunctionVariantType,
-        columns: FunctionVariantType,
-        height?: FunctionVariantType,
-        width?: FunctionVariantType
+        reference: BaseValueObject,
+        rows: BaseValueObject,
+        columns: BaseValueObject,
+        height?: BaseValueObject,
+        width?: BaseValueObject
     ) {
-        return new CellReferenceObject('A5');
+        if (!reference.isArray()) {
+            return new ErrorValueObject(ErrorType.VALUE);
+        }
+
+        const row = (reference as ArrayValueObject).getCurrentRow();
+        const column = (reference as ArrayValueObject).getCurrentColumn();
+        const rowOffset = this.getIndexNumValue(rows);
+        const columnOffset = this.getIndexNumValue(columns);
+
+        if (typeof rowOffset !== 'number' || typeof columnOffset !== 'number') {
+            return new ErrorValueObject(ErrorType.VALUE);
+        }
+
+        const targetRow = row + (rowOffset as number);
+        const targetColumn = column + (columnOffset as number);
+        const heightCount = (height && this.getIndexNumValue(height)) || 1;
+        const widthCount = (width && this.getIndexNumValue(width)) || 1;
+
+        if (typeof heightCount !== 'number' || typeof widthCount !== 'number') {
+            return new ErrorValueObject(ErrorType.VALUE);
+        }
+
+        const range = {
+            startRow: targetRow,
+            startColumn: targetColumn,
+            endRow: targetRow + (heightCount as number) - 1,
+            endColumn: targetColumn + (widthCount as number) - 1,
+        };
+
+        const unitId = (reference as ArrayValueObject).getUnitId();
+        const sheetId = (reference as ArrayValueObject).getSheetId();
+
+        const rangeReferenceObject = new RangeReferenceObject(range, sheetId, unitId);
+
+        // TODO: test
+        // TODO: edge case
+
+        return this._setDefault(rangeReferenceObject);
+    }
+
+    private _setDefault(object: BaseReferenceObject) {
+        if (this.unitId == null || this.subUnitId == null) {
+            return new ErrorValueObject(ErrorType.REF);
+        }
+        object.setDefaultUnitId(this.unitId);
+        object.setDefaultSheetId(this.subUnitId);
+        return object;
     }
 }

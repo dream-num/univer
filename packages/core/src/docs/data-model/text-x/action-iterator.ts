@@ -120,11 +120,11 @@ export class ActionIterator {
             const offset = this._offset;
             const index = this._index;
             const next = this.next();
-            const rest = this._actions.slice(this._index);
+            const restActions = this._actions.slice(this._index);
             this._offset = offset;
             this._index = index;
 
-            return [next].concat(rest);
+            return [next].concat(restActions);
         }
     }
 }

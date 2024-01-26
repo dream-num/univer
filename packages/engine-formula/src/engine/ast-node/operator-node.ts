@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { BaseValueObject } from '../..';
 import { ErrorType } from '../../basics/error-type';
 import type { compareToken } from '../../basics/token';
 import { OPERATOR_TOKEN_COMPARE_SET, OPERATOR_TOKEN_SET, operatorToken } from '../../basics/token';
@@ -26,6 +25,7 @@ import { FUNCTION_NAMES_TEXT } from '../../functions/text/function-names';
 import { IFunctionService } from '../../services/function.service';
 import { LexerNode } from '../analysis/lexer-node';
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
+import type { BaseValueObject } from '../value-object/base-value-object';
 import { BaseAstNode, ErrorNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
 import { NODE_ORDER_MAP, NodeType } from './node-type';

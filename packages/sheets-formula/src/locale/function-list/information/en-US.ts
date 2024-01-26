@@ -16,8 +16,8 @@
 
 export default {
     CELL: {
-        description: `Returns information about the formatting, location, or contents of a cell`,
-        abstract: `Returns information about the formatting, location, or contents of a cell`,
+        description: 'Returns information about the formatting, location, or contents of a cell',
+        abstract: 'Returns information about the formatting, location, or contents of a cell',
         links: [
             {
                 title: 'Instruction',
@@ -30,8 +30,8 @@ export default {
         },
     },
     ERROR_TYPE: {
-        description: `Returns a number corresponding to an error type`,
-        abstract: `Returns a number corresponding to an error type`,
+        description: 'Returns a number corresponding to an error type',
+        abstract: 'Returns a number corresponding to an error type',
         links: [
             {
                 title: 'Instruction',
@@ -44,8 +44,8 @@ export default {
         },
     },
     INFO: {
-        description: `Returns information about the current operating environment`,
-        abstract: `Returns information about the current operating environment`,
+        description: 'Returns information about the current operating environment',
+        abstract: 'Returns information about the current operating environment',
         links: [
             {
                 title: 'Instruction',
@@ -58,8 +58,8 @@ export default {
         },
     },
     ISBLANK: {
-        description: `Returns TRUE if the value is blank`,
-        abstract: `Returns TRUE if the value is blank`,
+        description: 'Returns TRUE if the value is blank',
+        abstract: 'Returns TRUE if the value is blank',
         links: [
             {
                 title: 'Instruction',
@@ -67,13 +67,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: 'value', detail: 'The value that you want tested. The value argument can be a blank (empty cell), error, logical value, text, number, or reference value, or a name referring to any of these.' },
         },
     },
     ISERR: {
-        description: `Returns TRUE if the value is any error value except #N/A`,
-        abstract: `Returns TRUE if the value is any error value except #N/A`,
+        description: 'Returns TRUE if the value is any error value except #N/A',
+        abstract: 'Returns TRUE if the value is any error value except #N/A',
         links: [
             {
                 title: 'Instruction',
@@ -86,8 +85,8 @@ export default {
         },
     },
     ISERROR: {
-        description: `Returns TRUE if the value is any error value`,
-        abstract: `Returns TRUE if the value is any error value`,
+        description: 'Returns TRUE if the value is any error value',
+        abstract: 'Returns TRUE if the value is any error value',
         links: [
             {
                 title: 'Instruction',
@@ -100,8 +99,8 @@ export default {
         },
     },
     ISEVEN: {
-        description: `Returns TRUE if the number is even`,
-        abstract: `Returns TRUE if the number is even`,
+        description: 'Returns TRUE if the number is even',
+        abstract: 'Returns TRUE if the number is even',
         links: [
             {
                 title: 'Instruction',
@@ -114,8 +113,8 @@ export default {
         },
     },
     ISFORMULA: {
-        description: `Returns TRUE if there is a reference to a cell that contains a formula`,
-        abstract: `Returns TRUE if there is a reference to a cell that contains a formula`,
+        description: 'Returns TRUE if there is a reference to a cell that contains a formula',
+        abstract: 'Returns TRUE if there is a reference to a cell that contains a formula',
         links: [
             {
                 title: 'Instruction',
@@ -128,8 +127,8 @@ export default {
         },
     },
     ISLOGICAL: {
-        description: `Returns TRUE if the value is a logical value`,
-        abstract: `Returns TRUE if the value is a logical value`,
+        description: 'Returns TRUE if the value is a logical value',
+        abstract: 'Returns TRUE if the value is a logical value',
         links: [
             {
                 title: 'Instruction',
@@ -142,8 +141,8 @@ export default {
         },
     },
     ISNA: {
-        description: `Returns TRUE if the value is the #N/A error value`,
-        abstract: `Returns TRUE if the value is the #N/A error value`,
+        description: 'Returns TRUE if the value is the #N/A error value',
+        abstract: 'Returns TRUE if the value is the #N/A error value',
         links: [
             {
                 title: 'Instruction',
@@ -156,8 +155,8 @@ export default {
         },
     },
     ISNONTEXT: {
-        description: `Returns TRUE if the value is not text`,
-        abstract: `Returns TRUE if the value is not text`,
+        description: 'Returns TRUE if the value is not text',
+        abstract: 'Returns TRUE if the value is not text',
         links: [
             {
                 title: 'Instruction',
@@ -170,8 +169,8 @@ export default {
         },
     },
     ISNUMBER: {
-        description: `Returns TRUE if the value is a number`,
-        abstract: `Returns TRUE if the value is a number`,
+        description: 'Returns TRUE if the value is a number',
+        abstract: 'Returns TRUE if the value is a number',
         links: [
             {
                 title: 'Instruction',
@@ -184,8 +183,8 @@ export default {
         },
     },
     ISODD: {
-        description: `Returns TRUE if the number is odd`,
-        abstract: `Returns TRUE if the number is odd`,
+        description: 'Returns TRUE if the number is odd',
+        abstract: 'Returns TRUE if the number is odd',
         links: [
             {
                 title: 'Instruction',
@@ -198,8 +197,8 @@ export default {
         },
     },
     ISOMITTED: {
-        description: `Checks whether the value in a&nbsp;LAMBDA&nbsp;is missing and returns TRUE or FALSE`,
-        abstract: `Checks whether the value in a&nbsp;LAMBDA&nbsp;is missing and returns TRUE or FALSE`,
+        description: 'Checks whether the value in a&nbsp;LAMBDA&nbsp;is missing and returns TRUE or FALSE',
+        abstract: 'Checks whether the value in a&nbsp;LAMBDA&nbsp;is missing and returns TRUE or FALSE',
         links: [
             {
                 title: 'Instruction',
@@ -212,8 +211,8 @@ export default {
         },
     },
     ISREF: {
-        description: `Returns TRUE if the value is a reference`,
-        abstract: `Returns TRUE if the value is a reference`,
+        description: 'Returns TRUE if the value is a reference',
+        abstract: 'Returns TRUE if the value is a reference',
         links: [
             {
                 title: 'Instruction',
@@ -226,8 +225,8 @@ export default {
         },
     },
     ISTEXT: {
-        description: `Returns TRUE if the value is text`,
-        abstract: `Returns TRUE if the value is text`,
+        description: 'Returns TRUE if the value is text',
+        abstract: 'Returns TRUE if the value is text',
         links: [
             {
                 title: 'Instruction',
@@ -240,8 +239,8 @@ export default {
         },
     },
     N: {
-        description: `Returns a value converted to a number`,
-        abstract: `Returns a value converted to a number`,
+        description: 'Returns a value converted to a number',
+        abstract: 'Returns a value converted to a number',
         links: [
             {
                 title: 'Instruction',
@@ -254,8 +253,8 @@ export default {
         },
     },
     NA: {
-        description: `Returns the error value #N/A`,
-        abstract: `Returns the error value #N/A`,
+        description: 'Returns the error value #N/A',
+        abstract: 'Returns the error value #N/A',
         links: [
             {
                 title: 'Instruction',
@@ -268,8 +267,8 @@ export default {
         },
     },
     SHEET: {
-        description: `Returns the sheet number of the referenced sheet`,
-        abstract: `Returns the sheet number of the referenced sheet`,
+        description: 'Returns the sheet number of the referenced sheet',
+        abstract: 'Returns the sheet number of the referenced sheet',
         links: [
             {
                 title: 'Instruction',
@@ -282,8 +281,8 @@ export default {
         },
     },
     SHEETS: {
-        description: `Returns the number of sheets in a reference`,
-        abstract: `Returns the number of sheets in a reference`,
+        description: 'Returns the number of sheets in a reference',
+        abstract: 'Returns the number of sheets in a reference',
         links: [
             {
                 title: 'Instruction',
@@ -296,8 +295,8 @@ export default {
         },
     },
     TYPE: {
-        description: `Returns a number indicating the data type of a value`,
-        abstract: `Returns a number indicating the data type of a value`,
+        description: 'Returns a number indicating the data type of a value',
+        abstract: 'Returns a number indicating the data type of a value',
         links: [
             {
                 title: 'Instruction',

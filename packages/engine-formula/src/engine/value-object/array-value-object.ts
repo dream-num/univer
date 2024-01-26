@@ -198,9 +198,27 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     get(row: number, column: number) {
-        const v = this._values[row][column];
+        const rowValues = this._values[row];
+        if (rowValues == null) {
+            return new NullValueObject(0);
+        }
+
+        const v = rowValues[column];
         if (v == null) {
             return new NullValueObject(0);
+        }
+        return v;
+    }
+
+    getRealValue(row: number, column: number) {
+        const rowValues = this._values[row];
+        if (rowValues == null) {
+            return null;
+        }
+
+        const v = rowValues[column];
+        if (v == null) {
+            return null;
         }
         return v;
     }
@@ -632,6 +650,18 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     override map(callbackFn: callbackMapFnType): BaseValueObject {
+        const wrappedCallbackFn = (currentValue: BaseValueObject, r: number, c: number) => {
+            if (currentValue.isError()) {
+                return currentValue as ErrorValueObject;
+            } else {
+                return callbackFn(currentValue, r, c);
+            }
+        };
+
+        return this.mapValue(wrappedCallbackFn);
+    }
+
+    override mapValue(callbackFn: callbackMapFnType): BaseValueObject {
         const rowCount = this._rowCount;
         const columnCount = this._columnCount;
 
@@ -643,11 +673,7 @@ export class ArrayValueObject extends BaseValueObject {
                 const currentValue = this._values?.[r]?.[c];
 
                 if (currentValue) {
-                    if (currentValue.isError()) {
-                        rowList[c] = currentValue as ErrorValueObject;
-                    } else {
-                        rowList[c] = callbackFn(currentValue, r, c);
-                    }
+                    rowList[c] = callbackFn(currentValue, r, c);
                 } else {
                     rowList[c] = new ErrorValueObject(ErrorType.VALUE);
                 }
@@ -981,19 +1007,19 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     private _transposeArray(array: BaseValueObject[][]) {
-        // 创建一个新的二维数组作为转置后的矩阵
+        // Create a new 2D array as the transposed matrix
         const rows = array.length;
         const cols = array[0].length;
         const transposedArray: BaseValueObject[][] = [];
 
-        // 遍历原二维数组的列
+        // Traverse the columns of the original two-dimensional array
         for (let col = 0; col < cols; col++) {
-            // 创建新的行
+            // Create new row
             transposedArray[col] = [] as BaseValueObject[];
 
-            // 遍历原二维数组的行
+            // Traverse the rows of the original two-dimensional array
             for (let row = 0; row < rows; row++) {
-                // 将元素赋值到新的行
+                // Assign elements to new rows
                 transposedArray[col][row] = array[row][col];
             }
         }

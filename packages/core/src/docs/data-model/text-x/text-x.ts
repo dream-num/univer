@@ -21,6 +21,10 @@ import { ActionType, type IDeleteAction, type IInsertAction, type IRetainAction,
 import { ActionIterator } from './action-iterator';
 import { composeBody } from './utils';
 
+function onlyHasDataStream(body: IDocumentBody) {
+    return Object.keys(body).length === 1;
+}
+
 export class TextX {
     static compose(thisActions: TextXAction[], otherActions: TextXAction[]): TextXAction[] {
         const thisIter = new ActionIterator(thisActions);
@@ -168,6 +172,14 @@ export class TextX {
 
                 return this;
             }
+
+            // Both are insert action, and has no styles, merge it.
+            if (lastAction.t === ActionType.INSERT && onlyHasDataStream(lastAction.body) && newAction.t === ActionType.INSERT && onlyHasDataStream(newAction.body)) {
+                lastAction.len += newAction.len;
+                lastAction.body.dataStream += newAction.body.dataStream;
+
+                return this;
+            }
         }
 
         if (index === this._actions.length) {
@@ -182,7 +194,7 @@ export class TextX {
     trimEndUselessRetainAction(): this {
         let lastAction = this._actions[this._actions.length - 1];
 
-        while (lastAction.t === ActionType.RETAIN && lastAction.body == null) {
+        while (lastAction && lastAction.t === ActionType.RETAIN && lastAction.body == null) {
             this._actions.pop();
 
             lastAction = this._actions[this._actions.length - 1];

@@ -16,6 +16,7 @@
 
 import type { ICommand, IDocumentBody, IMutationInfo, IStyleBase, ITextDecoration, ITextRun } from '@univerjs/core';
 import {
+    ActionType,
     BaselineOffset,
     BooleanNumber,
     CommandType,
@@ -201,14 +202,14 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
 
             if (len !== 0) {
                 textX.push({
-                    t: 'r',
+                    t: ActionType.RETAIN,
                     len,
                     segmentId,
                 });
             }
 
             textX.push({
-                t: 'r',
+                t: ActionType.RETAIN,
                 body,
                 len: endOffset - startOffset,
                 segmentId,

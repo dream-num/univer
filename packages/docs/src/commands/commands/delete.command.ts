@@ -16,6 +16,7 @@
 
 import type { ICommand, IDocumentBody, IMutationInfo, IParagraph, ITextRun } from '@univerjs/core';
 import {
+    ActionType,
     CommandType,
     ICommandService,
     IUndoRedoService,
@@ -309,14 +310,14 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
         const textX = new TextX();
 
         textX.push({
-            t: 'r',
+            t: ActionType.RETAIN,
             len: direction === DeleteDirection.LEFT ? startOffset - 1 : startOffset,
             segmentId,
         });
 
         if (body.dataStream.length) {
             textX.push({
-                t: 'i',
+                t: ActionType.INSERT,
                 body,
                 len: body.dataStream.length,
                 line: 0,
@@ -325,13 +326,13 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
         }
 
         textX.push({
-            t: 'r',
+            t: ActionType.RETAIN,
             len: 1,
             segmentId,
         });
 
         textX.push({
-            t: 'd',
+            t: ActionType.DELETE,
             len: endIndex + 1 - startIndex,
             line: 0,
             segmentId,

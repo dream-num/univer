@@ -22,7 +22,7 @@ import type {
     ITextRange,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
-import { CommandType, ICommandService, IUndoRedoService, TextX } from '@univerjs/core';
+import { ActionType, CommandType, ICommandService, IUndoRedoService, TextX } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 
 import { getRetainAndDeleteFromReplace } from '../../basics/retain-delete-params';
@@ -67,7 +67,7 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
         if (collapsed) {
             if (startOffset > 0) {
                 textX.push({
-                    t: 'r',
+                    t: ActionType.RETAIN,
                     len: startOffset,
                     segmentId,
                 });
@@ -77,7 +77,7 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
         }
 
         textX.push({
-            t: 'i',
+            t: ActionType.INSERT,
             body,
             len: body.dataStream.length,
             line: 0,
@@ -164,14 +164,14 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
 
         if (startOffset > 0) {
             textX.push({
-                t: 'r',
+                t: ActionType.RETAIN,
                 len: direction === DeleteDirection.LEFT ? startOffset - len : startOffset,
                 segmentId,
             });
         }
 
         textX.push({
-            t: 'd',
+            t: ActionType.DELETE,
             len,
             line: 0,
             segmentId,
@@ -249,13 +249,13 @@ export const UpdateCommand: ICommand<IUpdateCommandParams> = {
         const { startOffset, endOffset } = range;
 
         textX.push({
-            t: 'r',
+            t: ActionType.RETAIN,
             len: startOffset,
             segmentId,
         });
 
         textX.push({
-            t: 'r',
+            t: ActionType.RETAIN,
             body: updateBody,
             len: endOffset - startOffset,
             segmentId,

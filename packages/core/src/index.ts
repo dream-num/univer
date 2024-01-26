@@ -29,11 +29,12 @@ export { requestImmediateMacroTask } from './common/request-immediate-macro-task
 export { type ISequenceExecuteResult, sequence, sequenceAsync } from './common/sequence';
 export * from './docs/data-model';
 export {
+    ActionType,
     type TextXAction,
     type IDeleteAction,
     type IInsertAction,
     type IRetainAction,
-} from './docs/data-model/mutation-types';
+} from './docs/data-model/action-types';
 export { TextX } from './docs/data-model/text-x/text-x';
 export * from './observer';
 export { Plugin, PluginType } from './plugin/plugin';

@@ -1,5 +1,5 @@
 {
-    "name": "@univerjs/infra",
+    "name": "@univerjs/shared",
     "version": "0.1.0-beta.2",
     "private": true,
     "description": "Some infrastructures for univerjs",
@@ -13,7 +13,15 @@
     "keywords": [],
     "exports": {
         "./tsconfigs/*.json": "./tsconfigs/*",
-        "./tsconfigs/*": "./tsconfigs/*.json"
+        "./tsconfigs/*": "./tsconfigs/*.json",
+        "./vite": "./vite/index.js"
     },
-    "dependencies": {}
+    "dependencies": {
+        "@vitejs/plugin-react": "^4.2.1",
+        "@vitest/coverage-istanbul": "^1.2.1",
+        "happy-dom": "^13.3.1",
+        "vite": "^5.0.12",
+        "vite-plugin-dts": "^3.7.2",
+        "vitest": "^1.2.1"
+    }
 }

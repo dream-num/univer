@@ -40,7 +40,7 @@
     "devDependencies": {
         "@types/react": "^18.2.48",
         "@types/react-dom": "^18.2.18",
-        "@univerjs/infra": "workspace:*",
+        "@univerjs/shared": "workspace:*",
         "esbuild": "^0.19.10",
         "esbuild-plugin-clean": "^1.0.1",
         "esbuild-plugin-copy": "^2.1.1",

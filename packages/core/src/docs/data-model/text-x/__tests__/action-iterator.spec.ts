@@ -113,6 +113,51 @@ describe('Test action iterator', () => {
         });
 
         expect(iterator.hasNext()).toBe(false);
+
+        expect(iterator.peekType()).toBe(ActionType.RETAIN);
+
+        expect(iterator.peekLength()).toBe(Number.POSITIVE_INFINITY);
+
+        expect(iterator.peek()).toBe(undefined);
+
         expect(iterator.rest()).toEqual([]);
+
+        action = iterator.next();
+
+        expect(action).toEqual({
+            t: ActionType.RETAIN,
+            len: Number.POSITIVE_INFINITY,
+        });
+    });
+
+    it('test action iterator rest', () => {
+        const iterator = new ActionIterator([{
+            t: ActionType.RETAIN,
+            len: 5,
+        }, {
+            t: ActionType.DELETE,
+            len: 5,
+            line: 0,
+        }]);
+
+        expect(iterator.rest()).toEqual([{
+            t: ActionType.RETAIN,
+            len: 5,
+        }, {
+            t: ActionType.DELETE,
+            len: 5,
+            line: 0,
+        }]);
+
+        iterator.next(3);
+
+        expect(iterator.rest()).toEqual([{
+            t: ActionType.RETAIN,
+            len: 2,
+        }, {
+            t: ActionType.DELETE,
+            len: 5,
+            line: 0,
+        }]);
     });
 });

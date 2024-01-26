@@ -210,6 +210,19 @@ export class ArrayValueObject extends BaseValueObject {
         return v;
     }
 
+    getRealValue(row: number, column: number) {
+        const rowValues = this._values[row];
+        if (rowValues == null) {
+            return null;
+        }
+
+        const v = rowValues[column];
+        if (v == null) {
+            return null;
+        }
+        return v;
+    }
+
     set(row: number, column: number, value: BaseValueObject) {
         if (row >= this._rowCount || column >= this._columnCount) {
             throw new Error('Exceeding array bounds.');
@@ -637,6 +650,18 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     override map(callbackFn: callbackMapFnType): BaseValueObject {
+        const wrappedCallbackFn = (currentValue: BaseValueObject, r: number, c: number) => {
+            if (currentValue.isError()) {
+                return currentValue as ErrorValueObject;
+            } else {
+                return callbackFn(currentValue, r, c);
+            }
+        };
+
+        return this.mapValue(wrappedCallbackFn);
+    }
+
+    override mapValue(callbackFn: callbackMapFnType): BaseValueObject {
         const rowCount = this._rowCount;
         const columnCount = this._columnCount;
 
@@ -648,11 +673,7 @@ export class ArrayValueObject extends BaseValueObject {
                 const currentValue = this._values?.[r]?.[c];
 
                 if (currentValue) {
-                    if (currentValue.isError()) {
-                        rowList[c] = currentValue as ErrorValueObject;
-                    } else {
-                        rowList[c] = callbackFn(currentValue, r, c);
-                    }
+                    rowList[c] = callbackFn(currentValue, r, c);
                 } else {
                     rowList[c] = new ErrorValueObject(ErrorType.VALUE);
                 }

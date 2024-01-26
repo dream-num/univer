@@ -15,12 +15,45 @@
  */
 
 import { ErrorType } from '../../../basics/error-type';
-import type { FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
+import { expandArrayValueObject } from '../../../engine/utils/array-object';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Concatenate extends BaseFunction {
-    override calculate(numberVar: FunctionVariantType, powerVar: FunctionVariantType) {
-        return new ErrorValueObject(ErrorType.VALUE);
+    override calculate(...textValues: BaseValueObject[]) {
+        if (textValues.length === 0) {
+            return new ErrorValueObject(ErrorType.NA);
+        }
+
+        const maxRowLength = Math.max(...textValues.map((textValue) => textValue.isArray() ? (textValue as ArrayValueObject).getRowCount() : 1));
+        const maxColumnLength = Math.max(...textValues.map((textValue) => textValue.isArray() ? (textValue as ArrayValueObject).getColumnCount() : 1));
+
+        let result: BaseValueObject | null = null;
+
+        for (const textValue of textValues) {
+            const textValueArray = expandArrayValueObject(maxRowLength, maxColumnLength, textValue, new ErrorValueObject(ErrorType.NA));
+            result = textValueArray.mapValue((textValueObject, rowIndex, columnIndex) => {
+                const resultValueObject = result && (result as ArrayValueObject).get(rowIndex, columnIndex);
+
+                if (resultValueObject?.isError()) {
+                    return resultValueObject;
+                }
+
+                if (textValueObject.isError()) {
+                    return textValueObject;
+                }
+
+                return new StringValueObject(`${resultValueObject?.getValue() || ''}${textValueObject.getValue()}`);
+            });
+        }
+
+        if (!result) {
+            return new ErrorValueObject(ErrorType.VALUE);
+        }
+
+        return result;
     }
 }

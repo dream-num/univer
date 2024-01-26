@@ -156,6 +156,11 @@ export class BaseValueObject extends ObjectClassType {
         return new ErrorValueObject(ErrorType.NAME);
     }
 
+    mapValue(callbackFn: callbackMapFnType): BaseValueObject {
+        /** abstract */
+        return new ErrorValueObject(ErrorType.NAME);
+    }
+
     product(valueObject: BaseValueObject, callbackFn: callbackProductFnType): BaseValueObject {
         return callbackFn(this, valueObject);
     }

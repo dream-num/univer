@@ -95,13 +95,7 @@ export class ActionIterator {
     peekType(): TextXActionType {
         const action = this._actions[this._index];
         if (action) {
-            if (action.t === TextXActionType.DELETE) {
-                return TextXActionType.DELETE;
-            } else if (action.t === TextXActionType.RETAIN) {
-                return TextXActionType.RETAIN;
-            } else {
-                return TextXActionType.INSERT;
-            }
+            return action.t;
         }
 
         return TextXActionType.RETAIN;

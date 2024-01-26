@@ -488,7 +488,7 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     override max() {
-        let accumulatorAll: BaseValueObject = new NumberValueObject(-Infinity);
+        let accumulatorAll: BaseValueObject = new NumberValueObject(Number.NEGATIVE_INFINITY);
         this.iterator((valueObject) => {
             if (valueObject == null) {
                 return true; // continue
@@ -514,7 +514,7 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     override min() {
-        let accumulatorAll: BaseValueObject = new NumberValueObject(Infinity);
+        let accumulatorAll: BaseValueObject = new NumberValueObject(Number.POSITIVE_INFINITY);
 
         this.iterator((valueObject) => {
             if (valueObject == null) {
@@ -1120,19 +1120,27 @@ export class ArrayValueObject extends BaseValueObject {
                             }
 
                             const matchResult = currentValue.compare(valueObject, operator as compareToken);
-                            if (matchResult) {
-                                for (let r = 0; r < rowCount; r++) {
-                                    if (result[r] == null) {
-                                        result[r] = [];
+                            if ((matchResult as BooleanValueObject).getValue() === true) {
+                                rowPositions.forEach((index) => {
+                                    if (index >= startRow && index <= startRow + rowCount - 1) {
+                                        if (result[index - startRow] == null) {
+                                            result[index - startRow] = [];
+                                        }
+                                        result[index - startRow][column] = new BooleanValueObject(true);
                                     }
-                                    if (rowPositions.includes(r + startRow)) {
-                                        result[r][column] = new BooleanValueObject(true);
-                                    } else {
-                                        result[r][column] = new BooleanValueObject(false);
-                                    }
-                                }
+                                });
                             }
                         });
+
+                        for (let r = 0; r < rowCount; r++) {
+                            if (result[r] == null) {
+                                result[r] = [];
+                            }
+
+                            if (result[r][column] == null) {
+                                result[r][column] = new BooleanValueObject(false);
+                            }
+                        }
                     } else {
                         for (let r = 0; r < rowCount; r++) {
                             if (result[r] == null) {

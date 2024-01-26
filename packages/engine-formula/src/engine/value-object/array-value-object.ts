@@ -147,6 +147,12 @@ export class ArrayValueObject extends BaseValueObject {
         this._clearCache();
     }
 
+    clone() {
+        return this.map((o) => {
+            return o;
+        }) as ArrayValueObject;
+    }
+
     getRowCount() {
         return this._rowCount;
     }
@@ -287,11 +293,11 @@ export class ArrayValueObject extends BaseValueObject {
         }
     }
 
-    getFirstTruePosition() {
+    getLastTruePosition() {
         let rangeSingle: Nullable<{ row: number; column: number }>;
 
         this.iteratorReverse((value, rowIndex, columnIndex) => {
-            if (value?.isBoolean()) {
+            if (value?.isBoolean() && (value as BaseValueObject).getValue() === true) {
                 rangeSingle = {
                     row: rowIndex,
                     column: columnIndex,
@@ -304,11 +310,11 @@ export class ArrayValueObject extends BaseValueObject {
         return rangeSingle;
     }
 
-    getLastTruePosition() {
+    getFirstTruePosition() {
         let rangeSingle: Nullable<{ row: number; column: number }>;
 
         this.iterator((value, rowIndex, columnIndex) => {
-            if (value?.isBoolean()) {
+            if (value?.isBoolean() && (value as BaseValueObject).getValue() === true) {
                 rangeSingle = {
                     row: rowIndex,
                     column: columnIndex,

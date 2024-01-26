@@ -22,38 +22,25 @@ import { ArrayValueObject } from '../../../../engine/value-object/array-value-ob
 import type { BaseValueObject } from '../../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
-import { Vlookup } from '..';
+import { Hlookup } from '..';
 
 const arrayValueObject1 = new ArrayValueObject(/*ts*/ `{
-    1, "First";
-    2, "Second";
-    3, "Third";
-    4, "Fourth";
-    5, "Fifth";
-    6, "Sixth";
-    7, "Seventh";
-    8, "Eighth"
+    1,2,3,4,5,6,7,8;
+    "First","Second","Third","Fourth","Fifth","Sixth","Seventh","Eighth"
 }`);
 
 const arrayValueObject2 = new ArrayValueObject(/*ts*/ `{
-        4, "Fourth";
-        5, "Fifth";
-        6, "Sixth";
-        7, "Seventh";
-        8, "Eighth";
-        1, "First";
-        2, "Second";
-        3, "Third"
+    4,5,6,7,8,1,2,3;
+    "Fourth","Fifth","Sixth","Seventh","Eighth","First","Second","Third"
 }`);
 
 const matchArrayValueObject = new ArrayValueObject(/*ts*/ `{
-    1, 3;
-    4, 6;
-    8, 7
+    1,2,8;
+    3,6,7
 }`);
 
-describe('Test vlookup', () => {
-    const textFunction = new Vlookup(FUNCTION_NAMES_LOOKUP.VLOOKUP);
+describe('Test hlookup', () => {
+    const textFunction = new Hlookup(FUNCTION_NAMES_LOOKUP.HLOOKUP);
 
     describe('Exact match', () => {
         it('Search two', async () => {
@@ -104,9 +91,8 @@ describe('Test vlookup', () => {
                 new NumberValueObject(0)
             ) as BaseValueObject;
             expect((resultObject as ArrayValueObject).toValue()).toStrictEqual([
-                ['First', 'Third'],
-                ['Fourth', 'Sixth'],
-                ['Eighth', 'Seventh'],
+                ['First', 'Second', 'Eighth'],
+                ['Third', 'Sixth', 'Seventh'],
             ]);
         });
     });

@@ -127,8 +127,27 @@ export class Xlookup extends BaseFunction {
             });
         }
 
-        let axis = 0;
+        if (columnCountLookup === columnCountReturn && rowCountLookup === rowCountReturn) {
+            const result = this._handleSingleObject(
+                lookupValue,
+                lookupArray,
+                returnArray!,
+                matchModeVale,
+                searchModeValue
+            );
 
+            if (result.isError()) {
+                return ifNotFound!;
+            }
+
+            return result;
+        }
+
+        let axis = 0;
+        /**
+         * 0 for rows
+         * 1 for columns
+         */
         if (columnCountLookup === columnCountReturn) {
             axis = 1;
         }

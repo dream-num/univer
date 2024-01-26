@@ -254,7 +254,7 @@ export class BaseFunction extends Disposable {
             return new ErrorValueObject(ErrorType.NA);
         }
 
-        if (axis === 1) {
+        if (axis === 0) {
             return resultArray.slice([rowOrColumn, rowOrColumn + 1]);
         }
         return resultArray.slice(undefined, [rowOrColumn, rowOrColumn + 1]);
@@ -281,7 +281,7 @@ export class BaseFunction extends Disposable {
             return new ErrorValueObject(ErrorType.NA);
         }
 
-        if (axis === 1) {
+        if (axis === 0) {
             return resultArray.slice([position.row, position.row + 1]);
         }
         return resultArray.slice(undefined, [position.column, position.column + 1]);
@@ -308,7 +308,7 @@ export class BaseFunction extends Disposable {
             return new ErrorValueObject(ErrorType.NA);
         }
 
-        if (axis === 1) {
+        if (axis === 0) {
             return resultArray.slice([position.row, position.row + 1]);
         }
         return resultArray.slice(undefined, [position.column, position.column + 1]);
@@ -328,7 +328,7 @@ export class BaseFunction extends Disposable {
             return new ErrorValueObject(ErrorType.NA);
         }
 
-        if (axis === 1) {
+        if (axis === 0) {
             return resultArray.slice([position.row, position.row + 1]);
         }
         return resultArray.slice(undefined, [position.column, position.column + 1]);

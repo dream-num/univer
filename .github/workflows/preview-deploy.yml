@@ -3,10 +3,6 @@ name: 📤 Preview Deploy
 on:
     workflow_run:
         workflows:
-            - 📌 Check PR
-            - 🩺 CI Lint
-            - 🧪 CI Test
-            - 🎭 Playwright Tests
             - 📦 Build
         types: [completed]
 

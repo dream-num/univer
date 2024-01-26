@@ -236,7 +236,7 @@ describe('test TextX methods and branches', () => {
             expect(actions.length).toBe(3);
             expect(actions[0].t).toBe(ActionType.RETAIN);
             expect(actions[1].t).toBe(ActionType.INSERT);
-            expect(actions[2].t).toBe(ActionType.INSERT);
+            expect(actions[2].t).toBe(ActionType.DELETE);
         });
     });
 });

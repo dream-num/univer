@@ -93,7 +93,7 @@ export function composeBody(thisBody: IDocumentBody, otherBody: IDocumentBody, c
     const { textRuns: thisTextRuns = [], paragraphs: thisParagraphs = [] } = thisBody;
     const { textRuns: otherTextRuns = [], paragraphs: otherParagraphs = [] } = otherBody;
 
-    const textRuns = coverTextRuns(thisTextRuns, otherTextRuns, coverType);
+    const textRuns = coverTextRuns(otherTextRuns, thisTextRuns, coverType);
     if (textRuns.length) {
         retBody.textRuns = textRuns;
     }
@@ -123,11 +123,11 @@ export function composeBody(thisBody: IDocumentBody, otherBody: IDocumentBody, c
         }
     }
 
-    if (thisIndex < thisParagraphs.length - 1) {
+    if (thisIndex < thisParagraphs.length) {
         paragraphs.push(...thisParagraphs.slice(thisIndex));
     }
 
-    if (otherIndex < otherParagraphs.length - 1) {
+    if (otherIndex < otherParagraphs.length) {
         paragraphs.push(...otherParagraphs.slice(otherIndex));
     }
 

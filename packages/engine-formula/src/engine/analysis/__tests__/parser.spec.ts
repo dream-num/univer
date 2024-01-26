@@ -83,7 +83,7 @@ describe('Test indirect', () => {
 
     describe('normal', () => {
         it('Ref error', async () => {
-            const lexerNode = lexer.treeBuilder('=sum(#REF! + 1)');
+            const lexerNode = lexer.treeBuilder(`=sum(${ErrorType.REF} + 1)`);
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
@@ -93,7 +93,7 @@ describe('Test indirect', () => {
         });
 
         it('Name error', async () => {
-            const lexerNode = lexer.treeBuilder('=sum(#NAME? + 1, sum(#REF! + 1))');
+            const lexerNode = lexer.treeBuilder(`=sum(${ErrorType.NAME} + 1, sum(${ErrorType.REF} + 1))`);
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 

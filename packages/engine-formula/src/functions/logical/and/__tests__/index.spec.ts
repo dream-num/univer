@@ -18,9 +18,8 @@ import { describe, expect, it } from 'vitest';
 
 import { FUNCTION_NAMES_LOGICAL } from '../../function-names';
 import { And } from '..';
-import { ArrayValueObject, BooleanValueObject, NumberValueObject, StringValueObject } from '../../../..';
-import { transformToValueObject } from '../../../../engine/value-object/array-value-object';
-import { NullValueObject } from '../../../../engine/value-object/primitive-object';
+import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 
 describe('Test and function', () => {
     const textFunction = new And(FUNCTION_NAMES_LOGICAL.AND);

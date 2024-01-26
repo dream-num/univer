@@ -16,10 +16,10 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { compareToken } from '../../..';
 import { ArrayValueObject, transformToValue } from '../../value-object/array-value-object';
 import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../value-object/primitive-object';
 import { valueObjectCompare } from '../object-compare';
+import { compareToken } from '../../../basics/token';
 
 const range = new ArrayValueObject(/*ts*/ `{
     Ada;

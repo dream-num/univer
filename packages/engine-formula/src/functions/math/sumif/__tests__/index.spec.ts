@@ -16,10 +16,10 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { StringValueObject } from '../../../..';
 import { ArrayValueObject, transformToValue } from '../../../../engine/value-object/array-value-object';
 import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { Sumif } from '..';
+import { StringValueObject } from '../../../../engine/value-object/primitive-object';
 
 describe('Test sumif function', () => {
     const textFunction = new Sumif(FUNCTION_NAMES_MATH.SUMIF);

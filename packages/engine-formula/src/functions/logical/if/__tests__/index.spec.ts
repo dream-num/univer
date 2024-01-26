@@ -18,8 +18,8 @@ import { describe, expect, it } from 'vitest';
 
 import { FUNCTION_NAMES_LOGICAL } from '../../function-names';
 import { If } from '..';
-import { ArrayValueObject, BooleanValueObject, NumberValueObject, StringValueObject } from '../../../..';
-import { transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 
 describe('Test if function', () => {
     const textFunction = new If(FUNCTION_NAMES_LOGICAL.IF);

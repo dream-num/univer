@@ -39,7 +39,6 @@ import type { Injector } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { IMarkSelectionService, ISelectionRenderService } from '../../..';
 import { FormatPainterController } from '../../../controllers/format-painter/format-painter.controller';
 import { FormatPainterService, IFormatPainterService } from '../../../services/format-painter/format-painter.service';
 import { SetFormatPainterOperation } from '../../operations/set-format-painter.operation';
@@ -48,6 +47,8 @@ import {
     SetInfiniteFormatPainterCommand,
     SetOnceFormatPainterCommand,
 } from '../set-format-painter.command';
+import { IMarkSelectionService } from '../../../services/mark-selection/mark-selection.service';
+import { ISelectionRenderService } from '../../../services/selection/selection-render.service';
 import { createCommandTestBed } from './create-command-test-bed';
 
 const theme = {
@@ -86,7 +87,7 @@ const TEST_WORKBOOK_DATA = {
             id: 'sheet-0011',
             name: 'sheet11',
             columnData: {
-                '1': {
+                1: {
                     hd: 0,
                 },
             },
@@ -100,68 +101,68 @@ const TEST_WORKBOOK_DATA = {
             ],
             status: 1,
             cellData: {
-                '0': {
-                    '0': {
+                0: {
+                    0: {
                         v: 1,
                         t: 2,
                         s: 'yifA1t',
                     },
-                    '1': {
+                    1: {
                         v: 2,
                         t: 2,
                         s: 'M5JbP2',
                     },
-                    '2': {
+                    2: {
                         v: 3,
                     },
-                    '3': {
+                    3: {
                         v: 1,
                         f: '=SUM(A1)',
                         si: '3e4r5t',
                         t: 2,
                     },
                 },
-                '1': {
-                    '0': {
+                1: {
+                    0: {
                         v: 4,
                     },
-                    '2': {
+                    2: {
                         v: 1,
                         t: 2,
                     },
-                    '3': {
+                    3: {
                         v: 1,
                         t: 2,
                     },
                 },
-                '2': {
-                    '0': {
+                2: {
+                    0: {
                         v: 44,
                     },
-                    '2': {
+                    2: {
                         v: 1,
                         t: 2,
                     },
-                    '3': {
+                    3: {
                         v: 1,
                         t: 2,
                     },
                 },
-                '3': {
-                    '0': {
+                3: {
+                    0: {
                         v: 444,
                     },
-                    '2': {
+                    2: {
                         v: 1,
                         t: 2,
                     },
-                    '3': {
+                    3: {
                         v: 1,
                         t: 2,
                     },
                 },
-                '4': {
-                    '2': {
+                4: {
+                    2: {
                         v: 1,
                         t: 2,
                     },

@@ -237,4 +237,41 @@ describe('test text-x utils', () => {
             }],
         });
     });
+
+    it('test composeBody fn both width paragraphs and from retain 2', () => {
+        const thisBody: IDocumentBody = {
+            dataStream: '',
+            paragraphs: [{
+                startIndex: 8,
+            }],
+        };
+
+        const otherBody: IDocumentBody = {
+            dataStream: '',
+            paragraphs: [{
+                startIndex: 5,
+                paragraphStyle: {
+                    spaceAbove: 10,
+                    lineSpacing: 2,
+                    spaceBelow: 0,
+                },
+            }],
+        };
+
+        const composedBody = composeBody(thisBody, otherBody);
+
+        expect(composedBody).toEqual({
+            dataStream: '',
+            paragraphs: [{
+                startIndex: 5,
+                paragraphStyle: {
+                    spaceAbove: 10,
+                    lineSpacing: 2,
+                    spaceBelow: 0,
+                },
+            }, {
+                startIndex: 8,
+            }],
+        });
+    });
 });

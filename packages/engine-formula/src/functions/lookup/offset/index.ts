@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { ArrayValueObject } from '../../..';
-import { RangeReferenceObject } from '../../..';
 import { ErrorType } from '../../../basics/error-type';
 import type { BaseReferenceObject } from '../../../engine/reference-object/base-reference-object';
+import { RangeReferenceObject } from '../../../engine/reference-object/range-reference-object';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
@@ -43,29 +43,47 @@ export class Offset extends BaseFunction {
             return new ErrorValueObject(ErrorType.VALUE);
         }
 
-        const targetRow = row + (rowOffset as number);
-        const targetColumn = column + (columnOffset as number);
-        const heightCount = (height && this.getIndexNumValue(height)) || 1;
-        const widthCount = (width && this.getIndexNumValue(width)) || 1;
+        const targetRow = row + rowOffset;
+        const targetColumn = column + columnOffset;
+
+        if (targetRow < 0 || targetColumn < 0 || targetRow > 1048576 || targetColumn > 16384) {
+            return new ErrorValueObject(ErrorType.REF);
+        }
+
+        const heightCount = (height && this.getIndexNumValue(height)) ?? 1;
+        const widthCount = (width && this.getIndexNumValue(width)) ?? 1;
 
         if (typeof heightCount !== 'number' || typeof widthCount !== 'number') {
             return new ErrorValueObject(ErrorType.VALUE);
         }
 
+        if (heightCount === 0 || widthCount === 0) {
+            return new ErrorValueObject(ErrorType.REF);
+        }
+
+        const targetRowWithHeight = heightCount > 0 ? targetRow + heightCount - 1 : targetRow + heightCount + 1;
+        const targetColumnWithWidth = widthCount > 0 ? targetColumn + widthCount - 1 : targetColumn + widthCount + 1;
+
+        if (targetRowWithHeight < 0 || targetColumnWithWidth < 0 || targetRowWithHeight > 1048576 || targetColumnWithWidth > 16384) {
+            return new ErrorValueObject(ErrorType.REF);
+        }
+
+        const startRow = targetRow < targetRowWithHeight ? targetRow : targetRowWithHeight;
+        const startColumn = targetColumn < targetColumnWithWidth ? targetColumn : targetColumnWithWidth;
+        const endRow = targetRow > targetRowWithHeight ? targetRow : targetRowWithHeight;
+        const endColumn = targetColumn > targetColumnWithWidth ? targetColumn : targetColumnWithWidth;
+
         const range = {
-            startRow: targetRow,
-            startColumn: targetColumn,
-            endRow: targetRow + (heightCount as number) - 1,
-            endColumn: targetColumn + (widthCount as number) - 1,
+            startRow,
+            startColumn,
+            endRow,
+            endColumn,
         };
 
         const unitId = (reference as ArrayValueObject).getUnitId();
         const sheetId = (reference as ArrayValueObject).getSheetId();
 
         const rangeReferenceObject = new RangeReferenceObject(range, sheetId, unitId);
-
-        // TODO: test
-        // TODO: edge case
 
         return this._setDefault(rangeReferenceObject);
     }

@@ -24,7 +24,7 @@ import type { BaseAstNode } from '../../../../engine/ast-node/base-ast-node';
 import { Interpreter } from '../../../../engine/interpreter/interpreter';
 import type { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
 import { IFunctionService } from '../../../../services/function.service';
-import { createCommandTestBed } from '../../../__tests__/create-command-test-bed';
+import { createFunctionTestBed } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_META } from '../../../meta/function-names';
 import { Multiply } from '../../../meta/multiply';
 import { FUNCTION_NAMES_LOGICAL } from '../../function-names';
@@ -40,7 +40,7 @@ describe('Test makearray', () => {
     let interpreter: Interpreter;
 
     beforeEach(() => {
-        const testBed = createCommandTestBed();
+        const testBed = createFunctionTestBed();
 
         get = testBed.get;
 

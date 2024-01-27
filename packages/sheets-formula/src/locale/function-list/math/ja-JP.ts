@@ -1053,8 +1053,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            sumRange: { name: '合計範囲', detail: '合計するセルの範囲を指定します。' },
+            criteriaRange1: { name: '条件範囲 1', detail: '条件 1 に基づいて検証する範囲を指定します。条件範囲 1 と条件 1 が検索時にペアとなり、特定の条件に基づいて条件範囲が検索されます。 条件範囲で項目が見つかったら、合計対象範囲内のその項目に対応する値が合計されます。' },
+            criteria1: { name: '条件 1', detail: '条件範囲 1 内のどのセルを合計するかを定義する条件を指定します。 たとえば条件は、32、">32"、B4、"リンゴ"、または "32" のように入力できます。' },
+            criteriaRange2: { name: '条件範囲 2', detail: '追加の範囲。 最大 127 の範囲のペアを入力できます。' },
+            criteria2: { name: '条件 2', detail: '追加対応する条件です。 最大 127 条件のペアを入力できます。' },
         },
     },
     SUMPRODUCT: {

@@ -1063,8 +1063,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            sumRange: { name: '求和范围', detail: '要求和的单元格区域。' },
+            criteriaRange1: { name: '条件范围 1', detail: '使用条件 1 测试的区域。条件范围 1 和条件 1 设置用于搜索某个区域是否符合特定条件的搜索对。 一旦在该区域中找到了项，将计算求和范围中的相应值的和。' },
+            criteria1: { name: '条件 1', detail: '定义将计算条件范围 1 中的哪些单元格的和的条件。 例如，可以将条件输入为 32、">32"、B4、"苹果" 或 "32"。' },
+            criteriaRange2: { name: '条件范围 2', detail: '附加的区域，最多可以输入 127 个区域。' },
+            criteria2: { name: '条件 2', detail: '附加的关联条件，最多可以输入 127 个条件。' },
         },
     },
     SUMPRODUCT: {

@@ -1062,8 +1062,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            sumRange: { name: 'Sum Range', detail: 'The range of cells to sum.' },
+            criteriaRange1: { name: 'Criteria Range 1', detail: 'The range that is tested using Criteria 1. Criteria Range 1 and Criteria 1 set up a search pair whereby a range is searched for specific criteria. Once items in the range are found, their corresponding values in Sum Range are added.' },
+            criteria1: { name: 'Criteria 1', detail: 'The criteria that defines which cells in Criteria Range 1 will be added. For example, criteria can be entered as 32, ">32", B4, "apples", or "32".' },
+            criteriaRange2: { name: 'Criteria Range 2', detail: 'Additional ranges. You can enter up to 127 range pairs.' },
+            criteria2: { name: 'Criteria 2', detail: 'Additional associated criteria. You can enter up to 127 criteria pairs.' },
         },
     },
     SUMPRODUCT: {

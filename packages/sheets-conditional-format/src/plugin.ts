@@ -14,6 +14,36 @@
  * limitations under the License.
  */
 
-import { Plugin } from '@univerjs/core';
+import { ICommandService, Plugin, PluginType } from '@univerjs/core';
+import { Inject, Injector } from '@wendellhu/redi';
+import { SHEET_CONDITION_FORMAT_PLUGIN } from './base/const';
+import { ConditionalFormatService } from './services/conditional-format.service';
+import { ConditionalFormatRuleModel } from './models/conditional-format-rule-model';
+import { ConditionalFormatViewModel } from './models/conditional-format-view-model';
+import { RenderController } from './controllers/render.controller';
+import { addCfRule } from './commands/commands/command';
 
-export class SheetsConditionalFormatPlugin extends Plugin {}
+export class SheetsConditionalFormatPlugin extends Plugin {
+    static override type = PluginType.Sheet;
+    constructor(
+        _config: unknown,
+        @Inject(Injector) override readonly _injector: Injector,
+        @Inject(ICommandService) private _commandService: ICommandService
+    ) {
+        super(SHEET_CONDITION_FORMAT_PLUGIN);
+        this._initCommand();
+    }
+
+    override onStarting(): void {
+        this._injector.add([ConditionalFormatService]);
+        this._injector.add([ConditionalFormatRuleModel]);
+        this._injector.add([ConditionalFormatViewModel]);
+        this._injector.add([RenderController]);
+    }
+
+    _initCommand() {
+        this._commandService.registerCommand(addCfRule);
+        // console.log(addCfRule);
+        // window.commandService = this._commandService;
+    }
+}

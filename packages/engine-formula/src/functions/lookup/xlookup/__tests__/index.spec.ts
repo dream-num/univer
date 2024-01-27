@@ -49,6 +49,20 @@ const arrayValueObject3 = new ArrayValueObject(/*ts*/ `{
     1000, 3000
 }`);
 
+const arrayValueObject4 = new ArrayValueObject(/*ts*/ `{
+    701, 3000;
+    101, 800;
+    401, 2000;
+    901, 5000;
+    501, 2300;
+    1000, 6000
+    601, 2900;
+    0, 500;
+    201, 1200;
+    301, 1700;
+    801, 3500
+}`);
+
 describe('Test vlookup', () => {
     const textFunction = new Xlookup(FUNCTION_NAMES_LOOKUP.XLOOKUP);
 
@@ -89,28 +103,6 @@ describe('Test vlookup', () => {
             expect((resultObject as ArrayValueObject).toValue()).toStrictEqual([[82], [89], [70]]);
         });
 
-        it('Approximate match', async () => {
-            const resultObject = textFunction.calculate(
-                new StringValueObject('s*'),
-                arrayValueObject1.slice(undefined, [1, 2])!,
-                arrayValueObject1.slice(undefined, [3, 4])!,
-                new NullValueObject(''),
-                new NumberValueObject(2)
-            ) as BaseValueObject;
-            expect(resultObject.getValue().toString()).toBe('66');
-        });
-
-        it('Approximate match2', async () => {
-            const resultObject = textFunction.calculate(
-                new StringValueObject('?ourth'),
-                arrayValueObject1.slice(undefined, [1, 2])!,
-                arrayValueObject1.slice(undefined, [3, 4])!,
-                new NullValueObject(''),
-                new NumberValueObject(2)
-            ) as BaseValueObject;
-            expect(resultObject.getValue().toString()).toBe('70');
-        });
-
         it('Search across multiple columns', async () => {
             const resultObject = textFunction.calculate(
                 new NumberValueObject(5),
@@ -121,8 +113,42 @@ describe('Test vlookup', () => {
         });
     });
 
-    describe('Approximate match', () => {
-        it('match_mode -1', async () => {
+    describe('Approximate match test', () => {
+        it('Approximate match1', async () => {
+            const resultObject = textFunction.calculate(
+                new StringValueObject('s*'),
+                arrayValueObject1.slice(undefined, [1, 2])!,
+                arrayValueObject1.slice(undefined, [3, 4])!,
+                new NullValueObject(''),
+                new NumberValueObject(2)
+            ) as BaseValueObject;
+            expect(resultObject.getValue().toString()).toBe('66');
+        });
+
+        it('Approximate asc', async () => {
+            const resultObject = textFunction.calculate(
+                new StringValueObject('???th'),
+                arrayValueObject1.slice(undefined, [1, 2])!,
+                arrayValueObject1.slice(undefined, [3, 4])!,
+                new NullValueObject(''),
+                new NumberValueObject(2)
+            ) as BaseValueObject;
+            expect(resultObject.getValue().toString()).toBe('69');
+        });
+
+        it('Approximate desc', async () => {
+            const resultObject = textFunction.calculate(
+                new StringValueObject('???th'),
+                arrayValueObject1.slice(undefined, [1, 2])!,
+                arrayValueObject1.slice(undefined, [3, 4])!,
+                new NullValueObject(''),
+                new NumberValueObject(2),
+                new NumberValueObject(-1)
+            ) as BaseValueObject;
+            expect(resultObject.getValue().toString()).toBe('82');
+        });
+
+        it('match_mode is -1', async () => {
             const resultObject = textFunction.calculate(
                 new NumberValueObject(110),
                 arrayValueObject3.slice(undefined, [0, 1])!,
@@ -143,5 +169,29 @@ describe('Test vlookup', () => {
             ) as BaseValueObject;
             expect(resultObject.getValue().toString()).toBe('1000');
         });
+
+        // it('match_mode binary asc', async () => {
+        //     const resultObject = textFunction.calculate(
+        //         new NumberValueObject(660),
+        //         arrayValueObject4.slice(undefined, [0, 1])!,
+        //         arrayValueObject4.slice(undefined, [1])!,
+        //         new NullValueObject(''),
+        //         new NumberValueObject(0),
+        //         new NumberValueObject(2)
+        //     ) as BaseValueObject;
+        //     expect(resultObject.getValue().toString()).toBe('2900');
+        // });
+
+        // it('match_mode binary desc', async () => {
+        //     const resultObject = textFunction.calculate(
+        //         new NumberValueObject(660),
+        //         arrayValueObject4.slice(undefined, [0, 1])!,
+        //         arrayValueObject4.slice(undefined, [1])!,
+        //         new NullValueObject(''),
+        //         new NumberValueObject(0),
+        //         new NumberValueObject(-2)
+        //     ) as BaseValueObject;
+        //     expect(resultObject.getValue().toString()).toBe('2900');
+        // });
     });
 });

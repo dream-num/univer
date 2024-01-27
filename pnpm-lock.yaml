@@ -216,6 +216,9 @@ importers:
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../packages/sheets
+      '@univerjs/sheets-conditional-format':
+        specifier: workspace:*
+        version: link:../packages/sheets-conditional-format
       '@univerjs/sheets-find-replace':
         specifier: workspace:*
         version: link:../packages/sheets-find-replace
@@ -925,6 +928,9 @@ importers:
       '@univerjs/icons':
         specifier: ^0.1.26
         version: 0.1.26(react-dom@18.2.0)(react@18.2.0)
+      '@univerjs/sheets':
+        specifier: workspace:*
+        version: link:../sheets
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
@@ -934,6 +940,9 @@ importers:
       clsx:
         specifier: ^2.1.0
         version: 2.1.0
+      dayjs:
+        specifier: ^1.11.10
+        version: 1.11.10
       react:
         specifier: ^18.2.0
         version: 18.2.0

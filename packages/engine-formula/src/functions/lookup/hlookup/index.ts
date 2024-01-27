@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../../..';
 import { ErrorType } from '../../../basics/error-type';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 
-export class Vlookup extends BaseFunction {
+export class Hlookup extends BaseFunction {
     override calculate(
         lookupValue: BaseValueObject,
         tableArray: BaseValueObject,
-        colIndexNum: BaseValueObject,
+        rowIndexNum: BaseValueObject,
         rangeLookup?: BaseValueObject
     ) {
         if (lookupValue.isError()) {
@@ -39,7 +39,7 @@ export class Vlookup extends BaseFunction {
             return new ErrorValueObject(ErrorType.VALUE);
         }
 
-        if (colIndexNum.isError()) {
+        if (rowIndexNum.isError()) {
             return new ErrorValueObject(ErrorType.NA);
         }
 
@@ -53,15 +53,15 @@ export class Vlookup extends BaseFunction {
             return new ErrorValueObject(ErrorType.VALUE);
         }
 
-        const colIndexNumValue = this.getIndexNumValue(colIndexNum);
+        const rowIndexNumValue = this.getIndexNumValue(rowIndexNum);
 
-        if (colIndexNumValue instanceof ErrorValueObject) {
-            return colIndexNumValue;
+        if (rowIndexNumValue instanceof ErrorValueObject) {
+            return rowIndexNumValue;
         }
 
-        const searchArray = (tableArray as ArrayValueObject).slice(undefined, [0, 1]);
+        const searchArray = (tableArray as ArrayValueObject).slice([0, 1]);
 
-        const resultArray = (tableArray as ArrayValueObject).slice(undefined, [colIndexNumValue - 1, colIndexNumValue]);
+        const resultArray = (tableArray as ArrayValueObject).slice([rowIndexNumValue - 1, rowIndexNumValue]);
 
         if (searchArray == null || resultArray == null) {
             return new ErrorValueObject(ErrorType.VALUE);

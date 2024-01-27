@@ -67,6 +67,7 @@ export interface INumfmtService {
     deleteValues(unitId: string, subUnitId: string, values: IRange[]): void;
     getRefModel(unitId: string): Nullable<RefAlias<IRefItem, 'i' | 'pattern'>>;
     modelReplace$: Observable<string>;
+    serialTimeToTimestamp: (v: number, is1900?: boolean) => number;
 }
 
 export interface ISnapshot {

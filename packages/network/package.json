@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/network",
-    "version": "0.1.0-beta.2",
+    "version": "0.1.0-beta.3",
     "private": false,
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
@@ -35,25 +35,28 @@
     "files": [
         "lib"
     ],
+    "engines": {
+        "node": ">=16.0.0",
+        "npm": ">=8.0.0"
+    },
     "scripts": {
         "lint:types": "tsc --noEmit",
         "build": "tsc && vite build"
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
-        "@wendellhu/redi": ">=0.12.12",
+        "@wendellhu/redi": ">=0.12.13",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/core": "workspace:*",
-        "@wendellhu/redi": "^0.12.13",
-        "rxjs": "^7.8.1"
     },
     "devDependencies": {
-        "@univerjs/infra": "workspace:*",
+        "@univerjs/core": "workspace:*",
+        "@univerjs/shared": "workspace:*",
+        "@wendellhu/redi": "^0.12.13",
+        "rxjs": "^7.8.1",
         "typescript": "^5.3.3",
-        "vite": "^5.0.10",
-        "vite-plugin-dts": "^3.7.0",
-        "vitest": "^1.1.1"
+        "vite": "^5.0.12",
+        "vitest": "^1.2.1"
     }
 }

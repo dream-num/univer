@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IRangeWithCoord, ITextRun, Nullable } from '@univerjs/core';
+import type {
+    ICommandInfo,
+    IRange,
+    IRangeWithCoord,
+    ITextRun,
+    Nullable,
+} from '@univerjs/core';
 import {
     AbsoluteRefType,
     Direction,
@@ -78,7 +84,7 @@ import {
     SetEditorResizeOperation,
     SheetSkeletonManagerService,
 } from '@univerjs/sheets-ui';
-import { KeyCode, MetaKeys } from '@univerjs/ui';
+import { IContextMenuService, KeyCode, MetaKeys } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 
 import type { ISelectEditorFormulaOperationParam } from '../commands/operations/editor-formula.operation';
@@ -156,7 +162,8 @@ export class PromptController extends Disposable {
         @Inject(IDescriptionService) private readonly _descriptionService: IDescriptionService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @IFormulaInputService private readonly _formulaInputService: IFormulaInputService,
-        @Inject(DocViewModelManagerService) private readonly _docViewModelManagerService: DocViewModelManagerService
+        @Inject(DocViewModelManagerService) private readonly _docViewModelManagerService: DocViewModelManagerService,
+        @IContextMenuService private readonly _contextMenuService: IContextMenuService
     ) {
         super();
 
@@ -328,8 +335,15 @@ export class PromptController extends Disposable {
 
                     const current = this._selectionManagerService.getCurrent();
 
+                    this._insertSelections = [];
+
                     if (current?.pluginName === NORMAL_SELECTION_PLUGIN_NAME) {
                         this._disableForceKeepVisible();
+                        /**
+                         * In the standard selection mode, the pivot table and page fields of the formula selection need to be cleared.
+                         */
+                        this._currentUnitId = null;
+                        this._currentSheetId = null;
                         return;
                     }
 
@@ -638,6 +652,8 @@ export class PromptController extends Disposable {
         if (this._matchRefDrawToken(char)) {
             this._editorBridgeService.enableForceKeepVisible();
 
+            this._contextMenuService.disable();
+
             this._formulaInputService.enableLockedSelectionInsert();
 
             this._selectionRenderService.enableRemainLast();
@@ -696,6 +712,8 @@ export class PromptController extends Disposable {
      */
     private _disableForceKeepVisible() {
         this._editorBridgeService.disableForceKeepVisible();
+
+        this._contextMenuService.enable();
 
         this._formulaInputService.disableLockedSelectionInsert();
 
@@ -885,6 +903,19 @@ export class PromptController extends Disposable {
         return { textRuns, refSelections };
     }
 
+    private _exceedCurrentRange(range: IRange, rowCount: number, columnCount: number) {
+        const { endRow, endColumn } = range;
+        if (endRow > rowCount) {
+            return true;
+        }
+
+        if (endColumn > columnCount) {
+            return true;
+        }
+
+        return false;
+    }
+
     /**
      * Draw the referenced selection text based on the style and token.
      * @param refSelections
@@ -919,6 +950,10 @@ export class PromptController extends Disposable {
             const refSheetId = this._getSheetIdByName(unitId, sheetName.trim());
 
             if (sheetName.length !== 0 && refSheetId !== sheetId) {
+                continue;
+            }
+
+            if (this._exceedCurrentRange(range, worksheet.getRowCount(), worksheet.getColumnCount())) {
                 continue;
             }
 
@@ -1170,7 +1205,10 @@ export class PromptController extends Disposable {
          */
         setTimeout(() => {
             this._textSelectionRenderManager.focus();
+            this._setRemainCapture();
         }, 0);
+
+        this._setRemainCapture();
     }
 
     private async _fitEditorSize() {
@@ -1481,6 +1519,16 @@ export class PromptController extends Disposable {
 
             documentComponent.makeDirty();
         }
+    }
+
+    private _setRemainCapture() {
+        const { unitId } = this._getCurrentUnitIdAndSheetId();
+
+        const editorObject = getEditorObject(unitId, this._renderManagerService);
+
+        const engine = editorObject?.engine;
+
+        engine?.setRemainCapture();
     }
 
     private _cursorStateListener() {

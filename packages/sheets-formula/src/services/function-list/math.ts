@@ -1597,8 +1597,8 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
                 repeat: 0,
             },
             {
-                name: 'formula.functionList.SUMIF.functionParameter.sum_range.name',
-                detail: 'formula.functionList.SUMIF.functionParameter.sum_range.detail',
+                name: 'formula.functionList.SUMIF.functionParameter.sumRange.name',
+                detail: 'formula.functionList.SUMIF.functionParameter.sumRange.detail',
                 example: 'B1:B20',
                 require: 0,
                 repeat: 0,

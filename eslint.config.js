@@ -14,6 +14,11 @@ export default antfu({
         },
     },
     markdown: false,
+    formatters: {
+        css: true,
+        html: true,
+        // markdown: 'prettier'
+    },
     rules: {
         curly: ['error', 'multi-line'],
         'import/no-cycle': 'error',

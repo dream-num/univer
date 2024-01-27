@@ -15,7 +15,7 @@
  */
 
 import type { ICommand, IDocumentBody, IMutationInfo } from '@univerjs/core';
-import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, TextX, TextXActionType } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
@@ -136,10 +136,12 @@ function getMutationParams(unitId: string, segmentId: string, prevBody: IDocumen
         },
     };
 
+    const textX = new TextX();
+
     const deleteLen = prevBody?.dataStream.length - 2;
     if (deleteLen > 0) {
-        doMutation.params.mutations.push({
-            t: 'd',
+        textX.push({
+            t: TextXActionType.DELETE,
             len: deleteLen,
             line: 0,
             segmentId,
@@ -147,14 +149,16 @@ function getMutationParams(unitId: string, segmentId: string, prevBody: IDocumen
     }
 
     if (body.dataStream.length > 0) {
-        doMutation.params.mutations.push({
-            t: 'i',
+        textX.push({
+            t: TextXActionType.INSERT,
             body,
             len: body.dataStream.length,
             line: 0,
             segmentId,
         });
     }
+
+    doMutation.params.mutations = textX.serialize();
 
     return doMutation;
 }

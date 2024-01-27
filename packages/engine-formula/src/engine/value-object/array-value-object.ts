@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import { isRealNum, type Nullable } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
+import { isRealNum } from '@univerjs/core';
 
 import { BooleanValue } from '../../basics/common';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { CELL_INVERTED_INDEX_CACHE } from '../../basics/inverted-index-cache';
 import { $ARRAY_VALUE_REGEX } from '../../basics/regex';
 import { compareToken } from '../../basics/token';
-import { ArrayBinarySearchType, getCompare } from '../utils/compare';
+import { ArrayBinarySearchType, ArrayOrderSearchType, getCompare } from '../utils/compare';
 import type { callbackMapFnType, callbackProductFnType, IArrayValueObject } from './base-value-object';
 import { BaseValueObject, ErrorValueObject } from './base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from './primitive-object';
@@ -116,6 +117,13 @@ export class ArrayValueObject extends BaseValueObject {
 
     private _flattenCache: Nullable<ArrayValueObject>;
 
+    private _flattenPosition: Nullable<{
+        stringArray: BaseValueObject[];
+        stringPosition: number[];
+        numberArray: BaseValueObject[];
+        numberPosition: number[];
+    }>;
+
     constructor(rawValue: string | IArrayValueObject) {
         if (typeof rawValue === 'string') {
             super(rawValue as string);
@@ -137,6 +145,12 @@ export class ArrayValueObject extends BaseValueObject {
         this._values = [];
 
         this._clearCache();
+    }
+
+    clone() {
+        return this.map((o) => {
+            return o;
+        }) as ArrayValueObject;
     }
 
     getRowCount() {
@@ -198,9 +212,27 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     get(row: number, column: number) {
-        const v = this._values[row][column];
+        const rowValues = this._values[row];
+        if (rowValues == null) {
+            return new NullValueObject(0);
+        }
+
+        const v = rowValues[column];
         if (v == null) {
             return new NullValueObject(0);
+        }
+        return v;
+    }
+
+    getRealValue(row: number, column: number) {
+        const rowValues = this._values[row];
+        if (rowValues == null) {
+            return null;
+        }
+
+        const v = rowValues[column];
+        if (v == null) {
+            return null;
         }
         return v;
     }
@@ -245,9 +277,64 @@ export class ArrayValueObject extends BaseValueObject {
         }
     }
 
+    iteratorReverse(
+        callback: (valueObject: Nullable<BaseValueObject>, rowIndex: number, columnIndex: number) => Nullable<boolean>
+    ) {
+        const { startRow, endRow, startColumn, endColumn } = this.getRangePosition();
+
+        const valueList = this.getArrayValue();
+
+        for (let r = endRow; r >= startRow; r--) {
+            for (let c = endColumn; c >= startColumn; c--) {
+                if (callback(valueList[r][c], r, c) === false) {
+                    return;
+                }
+            }
+        }
+    }
+
+    getLastTruePosition() {
+        let rangeSingle: Nullable<{ row: number; column: number }>;
+
+        this.iteratorReverse((value, rowIndex, columnIndex) => {
+            if (value?.isBoolean() && (value as BaseValueObject).getValue() === true) {
+                rangeSingle = {
+                    row: rowIndex,
+                    column: columnIndex,
+                };
+
+                return false;
+            }
+        });
+
+        return rangeSingle;
+    }
+
+    getFirstTruePosition() {
+        let rangeSingle: Nullable<{ row: number; column: number }>;
+
+        this.iterator((value, rowIndex, columnIndex) => {
+            if (value?.isBoolean() && (value as BaseValueObject).getValue() === true) {
+                rangeSingle = {
+                    row: rowIndex,
+                    column: columnIndex,
+                };
+
+                return false;
+            }
+        });
+
+        return rangeSingle;
+    }
+
     getFirstCell() {
         const { startRow, startColumn } = this.getRangePosition();
         return this.get(startRow, startColumn);
+    }
+
+    getLastCell() {
+        const { endRow, endColumn } = this.getRangePosition();
+        return this.get(endRow, endColumn);
     }
 
     /**
@@ -310,6 +397,54 @@ export class ArrayValueObject extends BaseValueObject {
         this._flattenCache = arrayV;
 
         return arrayV;
+    }
+
+    /**
+     * Flatten a 2D array.
+     * In Excel, errors and blank cells are ignored, which results in a binary search that cannot strictly adhere to the number of cells.
+     */
+    flattenPosition() {
+        if (this._flattenPosition != null) {
+            return this._flattenPosition;
+        }
+
+        const stringValue: BaseValueObject[] = [];
+        const numberValue: BaseValueObject[] = [];
+        const stringPosition: number[] = [];
+        const numberPosition: number[] = [];
+        let index = 0;
+        for (let r = 0; r < this._rowCount; r++) {
+            for (let c = 0; c < this._columnCount; c++) {
+                const value = this.get(r, c);
+
+                if (value.isError() || value.isNull()) {
+                    index++;
+                    continue;
+                }
+
+                if (value.isString()) {
+                    stringValue.push(value);
+                    stringPosition.push(index++);
+                } else {
+                    numberValue.push(value);
+                    numberPosition.push(index++);
+                }
+            }
+        }
+
+        // const stringArray = this._createNewArray(stringValue, 1, stringValue[0].length);
+        // const numberArray = this._createNewArray(numberValue, 1, numberValue[0].length);
+
+        const result = {
+            stringArray: stringValue,
+            numberArray: numberValue,
+            stringPosition,
+            numberPosition,
+        };
+
+        this._flattenPosition = result;
+
+        return result;
     }
 
     /**
@@ -417,35 +552,155 @@ export class ArrayValueObject extends BaseValueObject {
         return this._createNewArray(transposeArray, columnCount, rowCount);
     }
 
+    /**
+     * Due to the inability to effectively utilize the cache,
+     * the sequential matching approach is only used for special matches in XLOOKUP and XMATCH.
+     * For example, when match_mode is set to 1 and -1 for an exact match. If not found, it returns the next smaller item.
+     */
+    orderSearch(
+        valueObject: BaseValueObject,
+        searchType: ArrayOrderSearchType = ArrayOrderSearchType.MIN,
+        isDesc = false,
+        isFuzzyMatching = false
+    ) {
+        let result: Nullable<BaseValueObject>;
+        let maxOrMin: Nullable<BaseValueObject>;
+        let resultPosition: Nullable<{ row: number; column: number }>;
+
+        let maxOrMinPosition: Nullable<{ row: number; column: number }>;
+
+        const _handleMatch = (itemValue: Nullable<BaseValueObject>, row: number, column: number) => {
+            if (itemValue == null) {
+                return true;
+            }
+
+            let matchObject: Nullable<BaseValueObject>;
+            if (isFuzzyMatching === true) {
+                matchObject = itemValue.compare(valueObject as StringValueObject, compareToken.EQUALS);
+            } else {
+                matchObject = itemValue.isEqual(valueObject);
+            }
+
+            if (matchObject?.getValue() === true) {
+                result = itemValue;
+                resultPosition = { row, column };
+                return false;
+            }
+
+            if (searchType === ArrayOrderSearchType.MAX) {
+                if (itemValue.isGreaterThan(valueObject).getValue() === true) {
+                    if (
+                        maxOrMin == null ||
+                        itemValue
+                            .minus(valueObject)
+                            .abs()
+                            .isLessThanOrEqual(maxOrMin.minus(valueObject).abs())
+                            .getValue() === true
+                    ) {
+                        maxOrMin = itemValue;
+                        maxOrMinPosition = { row, column };
+                    }
+                }
+            } else if (searchType === ArrayOrderSearchType.MIN) {
+                if (itemValue.isLessThan(valueObject).getValue() === true) {
+                    if (
+                        maxOrMin == null ||
+                        itemValue
+                            .minus(valueObject)
+                            .abs()
+                            .isLessThanOrEqual(maxOrMin.minus(valueObject).abs())
+                            .getValue() === true
+                    ) {
+                        maxOrMin = itemValue;
+                        maxOrMinPosition = { row, column };
+                    }
+                }
+            }
+        };
+
+        if (isDesc) {
+            const rowCount = this._values.length;
+            if (this._values[0] == null) {
+                return;
+            }
+            const columnCount = this._values[0].length;
+
+            for (let r = rowCount - 1; r >= 0; r--) {
+                for (let c = columnCount - 1; c >= 0; c--) {
+                    const itemValue = this._values[r][c];
+                    _handleMatch(itemValue, r, c);
+                }
+            }
+        } else {
+            this.iterator((itemValue, r, c) => {
+                _handleMatch(itemValue, r, c);
+            });
+        }
+
+        if (result != null) {
+            return resultPosition;
+        }
+
+        if (maxOrMin != null) {
+            return maxOrMinPosition;
+        }
+    }
+
     binarySearch(valueObject: BaseValueObject, searchType: ArrayBinarySearchType = ArrayBinarySearchType.MIN) {
         if (valueObject.isError()) {
             return;
         }
 
-        const flattenArrayValue = this.flatten();
-        const valueMatrix = flattenArrayValue.getArrayValue();
-        const valueArray = valueMatrix[0];
+        const { stringArray, stringPosition, numberArray, numberPosition } = this.flattenPosition();
 
+        if (valueObject.isString()) {
+            return this._binarySearch(valueObject, stringArray, stringPosition, searchType);
+        }
+
+        let result = this._binarySearch(valueObject, numberArray, numberPosition, searchType);
+        if (result == null) {
+            result = this._binarySearch(valueObject, stringArray, stringPosition, searchType);
+        }
+        return result;
+
+        // const stringMatrix = stringArray.getArrayValue();
+        // const valueStringArray = stringMatrix[0];
+
+        // const numberMatrix = numberArray.getArrayValue();
+        // const valueNumberArray = numberMatrix[0];
+    }
+
+    private _binarySearch(
+        valueObject: BaseValueObject,
+        searchArray: BaseValueObject[],
+        positionArray: number[],
+        searchType: ArrayBinarySearchType = ArrayBinarySearchType.MIN
+    ) {
         const compareFunc = getCompare();
 
         const value = valueObject.getValue().toString();
 
         let start = 0;
-        let end = valueArray.length - 1;
+        let end = searchArray.length - 1;
 
         let lastValue = null;
 
         while (start <= end) {
             const middle = Math.floor((start + end) / 2);
-            const compareTo = valueArray[middle];
+            const compareTo = searchArray[middle];
 
-            const compareToValue = compareTo.getValue();
+            let compare = 0;
+            if (compareTo.isNull()) {
+                compare = 1;
+            } else {
+                const compareToValue = compareTo.getValue();
 
-            const compare = compareFunc(compareToValue.toString(), value);
+                compare = compareFunc(compareToValue.toString(), value);
+            }
 
             if (compare === 0) {
                 // Found the value, return the value from the returnColumn
-                return middle;
+                return positionArray[middle];
             }
 
             if (compare === -1) {
@@ -465,7 +720,10 @@ export class ArrayValueObject extends BaseValueObject {
         }
 
         // Value not found
-        return lastValue;
+        if (lastValue == null) {
+            return;
+        }
+        return positionArray[lastValue];
     }
 
     override sum() {
@@ -488,7 +746,7 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     override max() {
-        let accumulatorAll: BaseValueObject = new NumberValueObject(-Infinity);
+        let accumulatorAll: BaseValueObject = new NumberValueObject(Number.NEGATIVE_INFINITY);
         this.iterator((valueObject) => {
             if (valueObject == null) {
                 return true; // continue
@@ -514,7 +772,7 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     override min() {
-        let accumulatorAll: BaseValueObject = new NumberValueObject(Infinity);
+        let accumulatorAll: BaseValueObject = new NumberValueObject(Number.POSITIVE_INFINITY);
 
         this.iterator((valueObject) => {
             if (valueObject == null) {
@@ -632,6 +890,18 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     override map(callbackFn: callbackMapFnType): BaseValueObject {
+        const wrappedCallbackFn = (currentValue: BaseValueObject, r: number, c: number) => {
+            if (currentValue.isError()) {
+                return currentValue as ErrorValueObject;
+            } else {
+                return callbackFn(currentValue, r, c);
+            }
+        };
+
+        return this.mapValue(wrappedCallbackFn);
+    }
+
+    override mapValue(callbackFn: callbackMapFnType): BaseValueObject {
         const rowCount = this._rowCount;
         const columnCount = this._columnCount;
 
@@ -643,11 +913,7 @@ export class ArrayValueObject extends BaseValueObject {
                 const currentValue = this._values?.[r]?.[c];
 
                 if (currentValue) {
-                    if (currentValue.isError()) {
-                        rowList[c] = currentValue as ErrorValueObject;
-                    } else {
-                        rowList[c] = callbackFn(currentValue, r, c);
-                    }
+                    rowList[c] = callbackFn(currentValue, r, c);
                 } else {
                     rowList[c] = new ErrorValueObject(ErrorType.VALUE);
                 }
@@ -807,7 +1073,9 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     override median(): BaseValueObject {
-        const allValue = this.flatten();
+        const numberArray = this.flattenPosition().numberArray;
+
+        const allValue = this._createNewArray([numberArray], 1, numberArray.length);
 
         const count = allValue.getColumnCount();
 
@@ -981,19 +1249,19 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     private _transposeArray(array: BaseValueObject[][]) {
-        // 创建一个新的二维数组作为转置后的矩阵
+        // Create a new 2D array as the transposed matrix
         const rows = array.length;
         const cols = array[0].length;
         const transposedArray: BaseValueObject[][] = [];
 
-        // 遍历原二维数组的列
+        // Traverse the columns of the original two-dimensional array
         for (let col = 0; col < cols; col++) {
-            // 创建新的行
+            // Create new row
             transposedArray[col] = [] as BaseValueObject[];
 
-            // 遍历原二维数组的行
+            // Traverse the rows of the original two-dimensional array
             for (let row = 0; row < rows; row++) {
-                // 将元素赋值到新的行
+                // Assign elements to new rows
                 transposedArray[col][row] = array[row][col];
             }
         }
@@ -1120,19 +1388,27 @@ export class ArrayValueObject extends BaseValueObject {
                             }
 
                             const matchResult = currentValue.compare(valueObject, operator as compareToken);
-                            if (matchResult) {
-                                for (let r = 0; r < rowCount; r++) {
-                                    if (result[r] == null) {
-                                        result[r] = [];
+                            if ((matchResult as BooleanValueObject).getValue() === true) {
+                                rowPositions.forEach((index) => {
+                                    if (index >= startRow && index <= startRow + rowCount - 1) {
+                                        if (result[index - startRow] == null) {
+                                            result[index - startRow] = [];
+                                        }
+                                        result[index - startRow][column] = new BooleanValueObject(true);
                                     }
-                                    if (rowPositions.includes(r + startRow)) {
-                                        result[r][column] = new BooleanValueObject(true);
-                                    } else {
-                                        result[r][column] = new BooleanValueObject(false);
-                                    }
-                                }
+                                });
                             }
                         });
+
+                        for (let r = 0; r < rowCount; r++) {
+                            if (result[r] == null) {
+                                result[r] = [];
+                            }
+
+                            if (result[r][column] == null) {
+                                result[r][column] = new BooleanValueObject(false);
+                            }
+                        }
                     } else {
                         for (let r = 0; r < rowCount; r++) {
                             if (result[r] == null) {

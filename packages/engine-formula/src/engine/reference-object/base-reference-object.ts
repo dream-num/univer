@@ -388,7 +388,7 @@ export class BaseReferenceObject extends ObjectClassType {
             activeRuntimeArrayFormulaCellData?.getValue(row, column) ||
             this.getRuntimeFeatureCellValue(row, column) ||
             activeArrayFormulaCellData?.getValue(row, column) ||
-            activeSheetData.cellData.getValue(row, column)
+            activeSheetData?.cellData.getValue(row, column)
         );
     }
 

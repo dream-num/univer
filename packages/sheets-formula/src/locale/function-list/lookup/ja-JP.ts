@@ -193,7 +193,7 @@ export default {
         },
     },
     HLOOKUP: {
-        description: `配列の上端行で特定の値を検索し、対応するセルの値を返します。`,
+        description: `配テーブルの上端行または配列内の特定の値を検索し、テーブルまたは配列内の指定した行から同じ列の値を返します。`,
         abstract: `配列の上端行で特定の値を検索し、対応するセルの値を返します。`,
         links: [
             {
@@ -202,8 +202,22 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            lookupValue: {
+                name: '検索値',
+                detail: '必ず指定します。 テーブルの上端行で検索する値を指定します。',
+            },
+            tableArray: {
+                name: '範囲',
+                detail: 'データを検索する情報のテーブルです。 セル範囲への参照またはセル範囲名を使用します。',
+            },
+            rowIndexNum: {
+                name: '行番号',
+                detail: ' 一致する値を返す、範囲内の行番号。 行番号に 1 を指定すると、範囲の最初の行の値が返され、行番号に 2 を指定すると、範囲の 2 番目の行の値が返され、以降同様に処理されます。',
+            },
+            rangeLookup: {
+                name: '検索の型',
+                detail: 'HLOOKUP を使用して検索値と完全に一致する値だけを検索するか、その近似値を含めて検索するかを指定する論理値です。',
+            },
         },
     },
     HSTACK: {
@@ -277,7 +291,7 @@ export default {
         },
     },
     LOOKUP: {
-        description: `ベクトル (1 行または 1 列で構成されるセル範囲) または配列を検索し、対応する値を返します。`,
+        description: `つの行または列から、他の行または列の同じ場所にある値を見つけるときは、検索/行列関数 の 1 つである LOOKUP を使います`,
         abstract: `ベクトル (1 行または 1 列で構成されるセル範囲) または配列を検索し、対応する値を返します。`,
         links: [
             {
@@ -286,8 +300,18 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            lookupValue: {
+                name: '検索値',
+                detail: 'LOOKUP が最初のベクトルで検索する値。 検査値には、数値、文字列、論理値、または値を参照する名前やセル参照を指定できます',
+            },
+            lookupVectorOrArray: {
+                name: '検査範囲/配列',
+                detail: '1 行または 1 列のみの範囲を指定します。 検査範囲には、文字列、数値、または論理値を指定できます。',
+            },
+            resultVector: {
+                name: '範囲',
+                detail: '1 つの行または列のみを含む範囲。 result_vector引数は、lookup_vectorと同じサイズにする必要があります。 同じサイズにする必要があります',
+            },
         },
     },
     MATCH: {
@@ -538,8 +562,24 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            lookupValue: {
+                name: '検索値',
+                detail: '検索する値は, 省略した場合、XLOOKUPは検索範囲に空白のセルを返します。',
+            },
+            lookupArray: { name: '検索範囲', detail: '検索する配列または範囲' },
+            returnArray: { name: '戻り配列', detail: '返す配列または範囲' },
+            ifNotFound: {
+                name: '[見つからない場合]',
+                detail: '有効な一致が見つからない場合は、指定した [見つからない場合] テキストを返します。有効な一致が見つからず、[見つからない場合] が見つからない場合、#N/A が返されます。',
+            },
+            matchMode: {
+                name: '[一致モード]',
+                detail: `一致の種類を指定します: 0 完全一致。 見つからない場合は、#N/A が返されます。 これが既定の設定です。-1 完全一致。 見つからない場合は、次の小さなアイテムが返されます。1 完全一致。 見つからない場合は、次の大きなアイテムが返されます。 2 *、?、および 〜 が特別な意味を持つワイルドカードの一致。`,
+            },
+            searchMode: {
+                name: '[検索モード]',
+                detail: `使用する検索モードを指定します: 1 先頭の項目から検索を実行します。 これが既定の設定です。-1 末尾の項目から逆方向に検索を実行します。2 昇順で並べ替えられた検索範囲を使用してバイナリ検索を実行します。 並べ替えられていない場合、無効な結果が返されます。-2 降順で並べ替えられた検索範囲を使用してバイナリ検索を実行します。 並べ替えられていない場合、無効な結果が返されます。`,
+            },
         },
     },
     XMATCH: {

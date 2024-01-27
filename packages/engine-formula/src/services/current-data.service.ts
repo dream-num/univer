@@ -158,6 +158,8 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         this._dirtyUnitFeatureMap = config.dirtyUnitFeatureMap;
 
         this._excludedCell = config.excludedCell;
+
+        this._mergeNameMap(this._sheetNameMap, this._dirtyNameMap);
     }
 
     loadDirtyRangesAndExcludedCell(dirtyRanges: IUnitRange[], excludedCell?: IUnitExcludedCell) {
@@ -259,6 +261,19 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
     //     return otherFormulaData;
     // }
+
+    private _mergeNameMap(unitSheetNameMap: IUnitSheetNameMap, dirtyNameMap: IDirtyUnitSheetNameMap) {
+        Object.keys(dirtyNameMap).forEach((unitId) => {
+            if (dirtyNameMap[unitId]) {
+                Object.keys(dirtyNameMap[unitId]!).forEach((sheetId) => {
+                    if (unitSheetNameMap[unitId] == null) {
+                        unitSheetNameMap[unitId] = {};
+                    }
+                    unitSheetNameMap[unitId]![dirtyNameMap[unitId]![sheetId]] = sheetId;
+                });
+            }
+        });
+    }
 
     private _loadSheetData() {
         const unitAllSheet = this._currentUniverService.getAllUniverSheetsInstance();

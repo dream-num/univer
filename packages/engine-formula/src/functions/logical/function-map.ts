@@ -14,11 +14,17 @@
  * limitations under the License.
  */
 
+import { And } from './and';
 import { FUNCTION_NAMES_LOGICAL } from './function-names';
+import { If } from './if';
+import { Iferror } from './iferror';
 import { Lambda } from './lambda';
 import { Makearray } from './makearray';
 
 export const functionLogical = [
+    [And, FUNCTION_NAMES_LOGICAL.AND],
     [Lambda, FUNCTION_NAMES_LOGICAL.LAMBDA],
     [Makearray, FUNCTION_NAMES_LOGICAL.MAKEARRAY],
+    [If, FUNCTION_NAMES_LOGICAL.IF],
+    [Iferror, FUNCTION_NAMES_LOGICAL.IFERROR],
 ];

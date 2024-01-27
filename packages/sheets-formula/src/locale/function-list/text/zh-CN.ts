@@ -123,8 +123,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text1: { name: 'text1', detail: '要联接的第一个项目。 项目可以是文本值、数字或单元格引用。' },
+            text2: { name: 'text2', detail: '要联接的其他文本项目。 最多可以有 255 个项目，总共最多支持 8,192 个字符。' },
         },
     },
     DBCS: {

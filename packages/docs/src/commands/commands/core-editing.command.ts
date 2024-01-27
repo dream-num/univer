@@ -22,7 +22,7 @@ import type {
     ITextRange,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
-import { CommandType, ICommandService, IUndoRedoService } from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, TextX, TextXActionType } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 
 import { getRetainAndDeleteFromReplace } from '../../basics/retain-delete-params';
@@ -62,25 +62,29 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
             },
         };
 
+        const textX = new TextX();
+
         if (collapsed) {
             if (startOffset > 0) {
-                doMutation.params.mutations.push({
-                    t: 'r',
+                textX.push({
+                    t: TextXActionType.RETAIN,
                     len: startOffset,
                     segmentId,
                 });
             }
         } else {
-            doMutation.params.mutations.push(...getRetainAndDeleteFromReplace(range, segmentId));
+            textX.push(...getRetainAndDeleteFromReplace(range, segmentId));
         }
 
-        doMutation.params.mutations.push({
-            t: 'i',
+        textX.push({
+            t: TextXActionType.INSERT,
             body,
             len: body.dataStream.length,
             line: 0,
             segmentId,
         });
+
+        doMutation.params.mutations = textX.serialize();
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,
@@ -156,20 +160,24 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
             },
         };
 
+        const textX = new TextX();
+
         if (startOffset > 0) {
-            doMutation.params.mutations.push({
-                t: 'r',
+            textX.push({
+                t: TextXActionType.RETAIN,
                 len: direction === DeleteDirection.LEFT ? startOffset - len : startOffset,
                 segmentId,
             });
         }
 
-        doMutation.params.mutations.push({
-            t: 'd',
+        textX.push({
+            t: TextXActionType.DELETE,
             len,
             line: 0,
             segmentId,
         });
+
+        doMutation.params.mutations = textX.serialize();
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,
@@ -236,21 +244,25 @@ export const UpdateCommand: ICommand<IUpdateCommandParams> = {
             },
         };
 
+        const textX = new TextX();
+
         const { startOffset, endOffset } = range;
 
-        doMutation.params.mutations.push({
-            t: 'r',
+        textX.push({
+            t: TextXActionType.RETAIN,
             len: startOffset,
             segmentId,
         });
 
-        doMutation.params.mutations.push({
-            t: 'r',
+        textX.push({
+            t: TextXActionType.RETAIN,
             body: updateBody,
             len: endOffset - startOffset,
             segmentId,
             coverType,
         });
+
+        doMutation.params.mutations = textX.serialize();
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,

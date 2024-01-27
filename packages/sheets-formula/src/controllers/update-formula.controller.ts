@@ -41,6 +41,7 @@ import {
 import type { IFormulaData, IFormulaDataItem, ISequenceNode, IUnitSheetNameMap } from '@univerjs/engine-formula';
 import {
     deserializeRangeWithSheet,
+    ErrorType,
     FormulaDataModel,
     generateStringWithSequence,
     initSheetFormulaData,
@@ -63,6 +64,7 @@ import type {
     InsertRangeMoveDownCommandParams,
     InsertRangeMoveRightCommandParams,
     IRemoveRowColCommandParams,
+    IRemoveSheetCommandParams,
     IRemoveSheetMutationParams,
     ISetRangeValuesMutationParams,
     ISetWorksheetNameCommandParams,
@@ -94,6 +96,7 @@ import {
     MoveRowsCommand,
     RemoveColCommand,
     RemoveRowCommand,
+    RemoveSheetCommand,
     RemoveSheetMutation,
     runRefRangeMutations,
     SelectionManagerService,
@@ -129,6 +132,7 @@ enum FormulaReferenceMoveType {
     InsertMoveDown, // range
     InsertMoveRight, // range
     SetName,
+    removeSheet,
 }
 
 interface IFormulaReferenceMoveParam {
@@ -365,6 +369,9 @@ export class UpdateFormulaController extends Disposable {
                 break;
             case SetWorksheetNameCommand.id:
                 result = this._handleSetWorksheetName(command as ICommandInfo<ISetWorksheetNameCommandParams>);
+                break;
+            case RemoveSheetCommand.id:
+                result = this._handleRemoveWorksheet(command as ICommandInfo<IRemoveSheetCommandParams>);
                 break;
         }
 
@@ -664,6 +671,21 @@ export class UpdateFormulaController extends Disposable {
         };
     }
 
+    private _handleRemoveWorksheet(command: ICommandInfo<IRemoveSheetCommandParams>) {
+        const { params } = command;
+        if (!params) return null;
+
+        const { unitId, subUnitId } = params;
+
+        const { unitId: workbookId, sheetId } = this._getCurrentSheetInfo();
+
+        return {
+            type: FormulaReferenceMoveType.removeSheet,
+            unitId: unitId || workbookId,
+            sheetId: subUnitId || sheetId,
+        };
+    }
+
     private _getUpdateFormulaMutations(oldFormulaData: IFormulaData, formulaData: IFormulaData) {
         const redos = [];
         const undos = [];
@@ -800,7 +822,16 @@ export class UpdateFormulaController extends Disposable {
 
                         const sequenceSheetId = unitSheetNameMap?.[mapUnitId]?.[sheetName];
 
-                        if (sheetName.length > 0 && sequenceSheetId !== sheetId) {
+                        if (
+                            !this._checkIsSameUnitAndSheet(
+                                formulaReferenceMoveParam.unitId,
+                                formulaReferenceMoveParam.sheetId,
+                                unitId,
+                                sheetId,
+                                sequenceUnitId,
+                                sequenceSheetId || ''
+                            )
+                        ) {
                             continue;
                         }
 
@@ -838,6 +869,22 @@ export class UpdateFormulaController extends Disposable {
                                 sheetName: newSheetName,
                                 unitId: sequenceUnitId,
                             });
+                        } else if (formulaReferenceMoveParam.type === FormulaReferenceMoveType.removeSheet) {
+                            const {
+                                unitId: userUnitId,
+                                sheetId: userSheetId,
+                                sheetName: newSheetName,
+                            } = formulaReferenceMoveParam;
+
+                            if (sequenceSheetId == null || sequenceSheetId.length === 0) {
+                                continue;
+                            }
+
+                            if (userSheetId !== sequenceSheetId) {
+                                continue;
+                            }
+
+                            newRefString = ErrorType.REF;
                         } else {
                             newRefString = this._getNewRangeByMoveParam(
                                 sequenceUnitRangeWidthOffset as IUnitRangeWithOffset,
@@ -854,6 +901,7 @@ export class UpdateFormulaController extends Disposable {
                             };
                             shouldModify = true;
                             refChangeIds.push(i);
+                            // newRefString = ErrorType.REF;
                         }
                     }
 
@@ -940,7 +988,7 @@ export class UpdateFormulaController extends Disposable {
             const result = runRefRangeMutations(operators, remainRange);
 
             if (result == null) {
-                return;
+                return ErrorType.REF;
             }
 
             newRange = this._getMoveNewRange(moveEdge, result, from, to, sequenceRange, remainRange);
@@ -965,7 +1013,7 @@ export class UpdateFormulaController extends Disposable {
             const result = runRefRangeMutations(operators, remainRange);
 
             if (result == null) {
-                return;
+                return ErrorType.REF;
             }
 
             newRange = this._getMoveNewRange(moveEdge, result, from, to, sequenceRange, remainRange);
@@ -990,7 +1038,7 @@ export class UpdateFormulaController extends Disposable {
             const result = runRefRangeMutations(operators, remainRange);
 
             if (result == null) {
-                return;
+                return ErrorType.REF;
             }
 
             newRange = this._getMoveNewRange(moveEdge, result, from, to, sequenceRange, remainRange);
@@ -1047,7 +1095,7 @@ export class UpdateFormulaController extends Disposable {
                 const result = runRefRangeMutations(operators, sequenceRange);
 
                 if (result == null) {
-                    return;
+                    return ErrorType.REF;
                 }
 
                 newRange = {
@@ -1066,7 +1114,7 @@ export class UpdateFormulaController extends Disposable {
                 const result = runRefRangeMutations(operators, sequenceRange);
 
                 if (result == null) {
-                    return;
+                    return ErrorType.REF;
                 }
 
                 newRange = {
@@ -1085,7 +1133,7 @@ export class UpdateFormulaController extends Disposable {
                 const result = runRefRangeMutations(operators, sequenceRange);
 
                 if (result == null) {
-                    return;
+                    return ErrorType.REF;
                 }
 
                 newRange = {
@@ -1104,7 +1152,7 @@ export class UpdateFormulaController extends Disposable {
                 const result = runRefRangeMutations(operators, sequenceRange);
 
                 if (result == null) {
-                    return;
+                    return ErrorType.REF;
                 }
 
                 newRange = {

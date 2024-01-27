@@ -136,9 +136,11 @@ export class ConditionalFormatViewModel {
         col: number,
         sortList: string[]) {
         const cell = this.getCellCf(unitId, subUnitId, row, col);
+        const priorityCacheMap: Map<string, number> = new Map();
         if (cell) {
             const sortResult = cell.cfList.map((cf) => {
-                const priority = sortList.findIndex((item) => item === cf.cfId);
+                const priority = priorityCacheMap.get(cf.cfId) || sortList.findIndex((item) => item === cf.cfId);
+                priorityCacheMap.set(cf.cfId, priority);
                 if (priority === -1) {
                     return null;
                 }

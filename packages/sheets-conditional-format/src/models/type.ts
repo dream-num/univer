@@ -31,7 +31,7 @@ export interface IHighlightCell extends IBaseCfRule {
         fontSize?: number;
     };
     type: RuleType.highlightCell; // cellIs
-    subType: string;
+    subType: SubRuleType;
 }
 
 interface IValueConfig {
@@ -56,17 +56,24 @@ export interface IRankHighlightCell extends IHighlightCell {
 export interface ITextHighlightCell extends IHighlightCell {
     subType: SubRuleType.text;
     operator: TextOperator;
+    value: string;
 }
 
 export interface ITimePeriodHighlightCell extends IHighlightCell {
     subType: SubRuleType.timePeriod;
     operator: TimePeriodOperator;
-}
+    value: number;
 
-export interface INumberHighlightCell extends IHighlightCell {
-    subType: SubRuleType.number;
-    operator: NumberOperator;
 }
+export type INumberHighlightCell = ({
+    subType: SubRuleType.number;
+    operator: NumberOperator.between | NumberOperator.notBetween;
+    value: [number, number];
+} & IHighlightCell) | ({
+    subType: SubRuleType.number;
+    operator: NumberOperator.equal | NumberOperator.notEqual | NumberOperator.greaterThan | NumberOperator.greaterThanOrEqual | NumberOperator.lessThanOrEqual | NumberOperator.lessThan;
+    value: number;
+} & IHighlightCell);
 
 export interface IAverageHighlightCell extends IHighlightCell {
     subType: SubRuleType.average;
@@ -95,7 +102,6 @@ ITimePeriodHighlightCell | INumberHighlightCell | IAverageHighlightCell;
 export interface IConditionFormatRule {
     ranges: IRange [];
     cfId: string;
-    priority: number;
     stopIfTrue: boolean;
     rule: IConditionalFormatRuleConfig;
 }

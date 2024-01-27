@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+export const SHEET_CONDITION_FORMAT_PLUGIN = 'SHEET_CONDITION_FORMAT_PLUGIN';
 export enum TextOperator {
     beginsWith = 'beginsWith',
     endWith = 'endWith',

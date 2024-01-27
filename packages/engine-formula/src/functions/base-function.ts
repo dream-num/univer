@@ -21,6 +21,7 @@ import { ErrorType } from '../basics/error-type';
 import type { IFunctionNames } from '../basics/function';
 import { compareToken } from '../basics/token';
 import type { FunctionVariantType, NodeValueType } from '../engine/reference-object/base-reference-object';
+import type { ArrayBinarySearchType } from '../engine/utils/compare';
 import { ArrayOrderSearchType } from '../engine/utils/compare';
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../engine/value-object/base-value-object';
@@ -163,8 +164,13 @@ export class BaseFunction extends Disposable {
         return logicValue;
     }
 
-    binarySearch(value: BaseValueObject, searchArray: ArrayValueObject, resultArray: ArrayValueObject) {
-        const rowOrColumn = searchArray.binarySearch(value);
+    binarySearch(
+        value: BaseValueObject,
+        searchArray: ArrayValueObject,
+        resultArray: ArrayValueObject,
+        searchType?: ArrayBinarySearchType
+    ) {
+        const rowOrColumn = searchArray.binarySearch(value, searchType);
 
         if (rowOrColumn == null) {
             return new ErrorValueObject(ErrorType.NA);
@@ -247,8 +253,14 @@ export class BaseFunction extends Disposable {
      * @param axis 0 row, 1 column
      * @returns
      */
-    binarySearchExpand(value: BaseValueObject, searchArray: ArrayValueObject, resultArray: ArrayValueObject, axis = 0) {
-        const rowOrColumn = searchArray.binarySearch(value);
+    binarySearchExpand(
+        value: BaseValueObject,
+        searchArray: ArrayValueObject,
+        resultArray: ArrayValueObject,
+        axis = 0,
+        searchType?: ArrayBinarySearchType
+    ) {
+        const rowOrColumn = searchArray.binarySearch(value, searchType);
 
         if (rowOrColumn == null) {
             return new ErrorValueObject(ErrorType.NA);

@@ -55,7 +55,7 @@ const arrayValueObject4 = new ArrayValueObject(/*ts*/ `{
     401, 2000;
     901, 5000;
     501, 2300;
-    1000, 6000
+    1000, 6000;
     601, 2900;
     0, 500;
     201, 1200;
@@ -170,28 +170,28 @@ describe('Test vlookup', () => {
             expect(resultObject.getValue().toString()).toBe('1000');
         });
 
-        // it('match_mode binary asc', async () => {
-        //     const resultObject = textFunction.calculate(
-        //         new NumberValueObject(660),
-        //         arrayValueObject4.slice(undefined, [0, 1])!,
-        //         arrayValueObject4.slice(undefined, [1])!,
-        //         new NullValueObject(''),
-        //         new NumberValueObject(0),
-        //         new NumberValueObject(2)
-        //     ) as BaseValueObject;
-        //     expect(resultObject.getValue().toString()).toBe('2900');
-        // });
+        it('match_mode binary asc', async () => {
+            const resultObject = textFunction.calculate(
+                new NumberValueObject(660),
+                arrayValueObject4.slice(undefined, [0, 1])!,
+                arrayValueObject4.slice(undefined, [1])!,
+                new NullValueObject(''),
+                new NumberValueObject(0),
+                new NumberValueObject(2)
+            ) as BaseValueObject;
+            expect(resultObject.getValue().toString()).toBe('1700');
+        });
 
-        // it('match_mode binary desc', async () => {
-        //     const resultObject = textFunction.calculate(
-        //         new NumberValueObject(660),
-        //         arrayValueObject4.slice(undefined, [0, 1])!,
-        //         arrayValueObject4.slice(undefined, [1])!,
-        //         new NullValueObject(''),
-        //         new NumberValueObject(0),
-        //         new NumberValueObject(-2)
-        //     ) as BaseValueObject;
-        //     expect(resultObject.getValue().toString()).toBe('2900');
-        // });
+        it('match_mode binary desc', async () => {
+            const resultObject = textFunction.calculate(
+                new NumberValueObject(660),
+                arrayValueObject4.slice(undefined, [0, 1])!,
+                arrayValueObject4.slice(undefined, [1])!,
+                new NullValueObject(''),
+                new NumberValueObject(0),
+                new NumberValueObject(-2)
+            ) as BaseValueObject;
+            expect(resultObject.getValue().toString()).toBe('3500');
+        });
     });
 });

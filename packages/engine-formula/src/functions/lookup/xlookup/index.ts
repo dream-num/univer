@@ -17,7 +17,7 @@
 import type { Nullable } from '@univerjs/core';
 
 import { ErrorType } from '../../../basics/error-type';
-import { ArrayOrderSearchType } from '../../../engine/utils/compare';
+import { ArrayBinarySearchType, ArrayOrderSearchType } from '../../../engine/utils/compare';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
@@ -201,7 +201,13 @@ export class Xlookup extends BaseFunction {
         axis: number = 0
     ) {
         if ((searchModeValue === 2 || searchModeValue === -2) && matchModeVale !== 2) {
-            return this.binarySearchExpand(value, searchArray, resultArray, axis);
+            return this.binarySearchExpand(
+                value,
+                searchArray,
+                resultArray,
+                axis,
+                this._getSearchModeValue(searchModeValue)
+            );
         }
 
         if (matchModeVale === 2) {
@@ -229,7 +235,7 @@ export class Xlookup extends BaseFunction {
         searchModeValue: number
     ) {
         if ((searchModeValue === 2 || searchModeValue === -2) && matchModeVale !== 2) {
-            return this.binarySearch(value, searchArray, resultArray);
+            return this.binarySearch(value, searchArray, resultArray, this._getSearchModeValue(searchModeValue));
         }
 
         if (matchModeVale === 2) {
@@ -246,5 +252,9 @@ export class Xlookup extends BaseFunction {
         }
 
         return this.equalSearch(value, searchArray, resultArray, searchModeValue !== -1);
+    }
+
+    private _getSearchModeValue(searchModeValue: number) {
+        return searchModeValue === -2 ? ArrayBinarySearchType.MAX : ArrayBinarySearchType.MIN;
     }
 }

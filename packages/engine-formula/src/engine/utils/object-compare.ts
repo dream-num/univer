@@ -15,8 +15,11 @@
  */
 
 import { compareToken } from '../../basics/token';
+import type { ArrayValueObject } from '../value-object/array-value-object';
 import { ValueObjectFactory } from '../value-object/array-value-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
+import { BooleanValueObject } from '../value-object/primitive-object';
+import { expandArrayValueObject } from './array-object';
 
 export function findCompareToken(str: string): [compareToken, BaseValueObject] {
     const comparisonTokens: compareToken[] = [
@@ -59,4 +62,36 @@ export function valueObjectCompare(range: BaseValueObject, criteria: BaseValueOb
     }
 
     return range.compare(criteria, operator);
+}
+
+/**
+ * Find the Boolean intersection of two ArrayValueObjects
+ * @param valueObject1
+ * @param valueObject2
+ * @returns
+ */
+export function booleanObjectIntersection(valueObject1: BaseValueObject, valueObject2: BaseValueObject) {
+    const maxRowLength = Math.max(valueObject1.isArray() ? (valueObject1 as ArrayValueObject).getRowCount() : 1, valueObject2.isArray() ? (valueObject2 as ArrayValueObject).getRowCount() : 1);
+    const maxColumnLength = Math.max(valueObject1.isArray() ? (valueObject1 as ArrayValueObject).getColumnCount() : 1, valueObject2.isArray() ? (valueObject2 as ArrayValueObject).getColumnCount() : 1);
+
+    const valueObject1Array = expandArrayValueObject(maxRowLength, maxColumnLength, valueObject1);
+    const valueObject2Array = expandArrayValueObject(maxRowLength, maxColumnLength, valueObject2);
+
+    return valueObject1Array.mapValue((valueObject1, rowIndex, columnIndex) => {
+        const valueObject2 = valueObject2Array.get(rowIndex, columnIndex);
+
+        if (valueObject1?.isError()) {
+            return valueObject1;
+        }
+
+        if (valueObject2?.isError()) {
+            return valueObject2;
+        }
+
+        if (valueObject1?.isBoolean() && valueObject2?.isBoolean()) {
+            return new BooleanValueObject(valueObject1.getValue() && valueObject2.getValue());
+        }
+
+        return new BooleanValueObject(false);
+    });
 }

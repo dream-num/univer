@@ -16,8 +16,8 @@
 
 export default {
     AVEDEV: {
-        description: `データ全体の平均値に対するそれぞれのデータの絶対偏差の平均を返します。`,
-        abstract: `データ全体の平均値に対するそれぞれのデータの絶対偏差の平均を返します。`,
+        description: 'データ全体の平均値に対するそれぞれのデータの絶対偏差の平均を返します。',
+        abstract: 'データ全体の平均値に対するそれぞれのデータの絶対偏差の平均を返します。',
         links: [
             {
                 title: '指導',
@@ -30,8 +30,8 @@ export default {
         },
     },
     AVERAGE: {
-        description: `引数の平均値を返します。`,
-        abstract: `引数の平均値を返します。`,
+        description: '引数の平均値を返します。',
+        abstract: '引数の平均値を返します。',
         links: [
             {
                 title: '指導',
@@ -44,8 +44,8 @@ export default {
         },
     },
     AVERAGEA: {
-        description: `数値、文字列、および論理値を含む引数の平均値を返します。`,
-        abstract: `数値、文字列、および論理値を含む引数の平均値を返します。`,
+        description: '数値、文字列、および論理値を含む引数の平均値を返します。',
+        abstract: '数値、文字列、および論理値を含む引数の平均値を返します。',
         links: [
             {
                 title: '指導',
@@ -58,8 +58,8 @@ export default {
         },
     },
     AVERAGEIF: {
-        description: `範囲内の検索条件に一致するすべてのセルの平均値 (算術平均) を返します。`,
-        abstract: `範囲内の検索条件に一致するすべてのセルの平均値 (算術平均) を返します。`,
+        description: '範囲内の検索条件に一致するすべてのセルの平均値 (算術平均) を返します。',
+        abstract: '範囲内の検索条件に一致するすべてのセルの平均値 (算術平均) を返します。',
         links: [
             {
                 title: '指導',
@@ -72,8 +72,8 @@ export default {
         },
     },
     AVERAGEIFS: {
-        description: `複数の検索条件に一致するすべてのセルの平均値 (算術平均) を返します。`,
-        abstract: `複数の検索条件に一致するすべてのセルの平均値 (算術平均) を返します。`,
+        description: '複数の検索条件に一致するすべてのセルの平均値 (算術平均) を返します。',
+        abstract: '複数の検索条件に一致するすべてのセルの平均値 (算術平均) を返します。',
         links: [
             {
                 title: '指導',
@@ -86,8 +86,8 @@ export default {
         },
     },
     BETA_DIST: {
-        description: `β分布の累積分布関数の値を返します。`,
-        abstract: `β分布の累積分布関数の値を返します。`,
+        description: 'β分布の累積分布関数の値を返します。',
+        abstract: 'β分布の累積分布関数の値を返します。',
         links: [
             {
                 title: '指導',
@@ -100,8 +100,8 @@ export default {
         },
     },
     BETA_INV: {
-        description: `指定されたβ分布の累積分布関数の逆関数の値を返します。`,
-        abstract: `指定されたβ分布の累積分布関数の逆関数の値を返します。`,
+        description: '指定されたβ分布の累積分布関数の逆関数の値を返します。',
+        abstract: '指定されたβ分布の累積分布関数の逆関数の値を返します。',
         links: [
             {
                 title: '指導',
@@ -114,8 +114,8 @@ export default {
         },
     },
     BINOM_DIST: {
-        description: `二項分布の確率関数の値を返します。`,
-        abstract: `二項分布の確率関数の値を返します。`,
+        description: '二項分布の確率関数の値を返します。',
+        abstract: '二項分布の確率関数の値を返します。',
         links: [
             {
                 title: '指導',
@@ -128,8 +128,8 @@ export default {
         },
     },
     BINOM_DIST_RANGE: {
-        description: `二項分布を使用した試行結果の確率を返します。`,
-        abstract: `二項分布を使用した試行結果の確率を返します。`,
+        description: '二項分布を使用した試行結果の確率を返します。',
+        abstract: '二項分布を使用した試行結果の確率を返します。',
         links: [
             {
                 title: '指導',
@@ -142,8 +142,8 @@ export default {
         },
     },
     BINOM_INV: {
-        description: `累積二項分布の値が基準値以上になるような最小の値を返します。`,
-        abstract: `累積二項分布の値が基準値以上になるような最小の値を返します。`,
+        description: '累積二項分布の値が基準値以上になるような最小の値を返します。',
+        abstract: '累積二項分布の値が基準値以上になるような最小の値を返します。',
         links: [
             {
                 title: '指導',
@@ -156,8 +156,8 @@ export default {
         },
     },
     CHISQ_DIST: {
-        description: `累積β確率密度関数の値を返します。`,
-        abstract: `累積β確率密度関数の値を返します。`,
+        description: '累積β確率密度関数の値を返します。',
+        abstract: '累積β確率密度関数の値を返します。',
         links: [
             {
                 title: '指導',
@@ -170,8 +170,8 @@ export default {
         },
     },
     CHISQ_DIST_RT: {
-        description: `カイ 2 乗分布の片側確率の値を返します。`,
-        abstract: `カイ 2 乗分布の片側確率の値を返します。`,
+        description: 'カイ 2 乗分布の片側確率の値を返します。',
+        abstract: 'カイ 2 乗分布の片側確率の値を返します。',
         links: [
             {
                 title: '指導',
@@ -184,8 +184,8 @@ export default {
         },
     },
     CHISQ_INV: {
-        description: `累積β確率密度関数の値を返します。`,
-        abstract: `累積β確率密度関数の値を返します。`,
+        description: '累積β確率密度関数の値を返します。',
+        abstract: '累積β確率密度関数の値を返します。',
         links: [
             {
                 title: '指導',
@@ -198,8 +198,8 @@ export default {
         },
     },
     CHISQ_INV_RT: {
-        description: `カイ 2 乗分布の片側確率の逆関数の値を返します。`,
-        abstract: `カイ 2 乗分布の片側確率の逆関数の値を返します。`,
+        description: 'カイ 2 乗分布の片側確率の逆関数の値を返します。',
+        abstract: 'カイ 2 乗分布の片側確率の逆関数の値を返します。',
         links: [
             {
                 title: '指導',
@@ -212,8 +212,8 @@ export default {
         },
     },
     CHISQ_TEST: {
-        description: `カイ 2 乗 (χ2) 検定を行います。`,
-        abstract: `カイ 2 乗 (χ2) 検定を行います。`,
+        description: 'カイ 2 乗 (χ2) 検定を行います。',
+        abstract: 'カイ 2 乗 (χ2) 検定を行います。',
         links: [
             {
                 title: '指導',
@@ -226,8 +226,8 @@ export default {
         },
     },
     CONFIDENCE_NORM: {
-        description: `母集団に対する信頼区間を返します。`,
-        abstract: `母集団に対する信頼区間を返します。`,
+        description: '母集団に対する信頼区間を返します。',
+        abstract: '母集団に対する信頼区間を返します。',
         links: [
             {
                 title: '指導',
@@ -240,8 +240,8 @@ export default {
         },
     },
     CONFIDENCE_T: {
-        description: `スチューデントの t 分布を使用して、母集団に対する信頼区間を返します。`,
-        abstract: `スチューデントの t 分布を使用して、母集団に対する信頼区間を返します。`,
+        description: 'スチューデントの t 分布を使用して、母集団に対する信頼区間を返します。',
+        abstract: 'スチューデントの t 分布を使用して、母集団に対する信頼区間を返します。',
         links: [
             {
                 title: '指導',
@@ -254,8 +254,8 @@ export default {
         },
     },
     CORREL: {
-        description: `2 つの配列データの相関係数を返します。`,
-        abstract: `2 つの配列データの相関係数を返します。`,
+        description: '2 つの配列データの相関係数を返します。',
+        abstract: '2 つの配列データの相関係数を返します。',
         links: [
             {
                 title: '指導',
@@ -268,8 +268,8 @@ export default {
         },
     },
     COUNT: {
-        description: `引数リストの各項目に含まれる数値の個数を返します。`,
-        abstract: `引数リストの各項目に含まれる数値の個数を返します。`,
+        description: '引数リストの各項目に含まれる数値の個数を返します。',
+        abstract: '引数リストの各項目に含まれる数値の個数を返します。',
         links: [
             {
                 title: '指導',
@@ -277,13 +277,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value1: { name: '値 1', detail: '数値の個数を調べる 1 つ目の項目、セル参照、またはセル範囲。' },
+            value2: { name: '値 2', detail: '数値をカウントする追加の項目、セル参照、または範囲は最大 255 件です。' },
         },
     },
     COUNTA: {
-        description: `引数リストの各項目に含まれるデータの個数を返します。`,
-        abstract: `引数リストの各項目に含まれるデータの個数を返します。`,
+        description: '引数リストの各項目に含まれるデータの個数を返します。',
+        abstract: '引数リストの各項目に含まれるデータの個数を返します。',
         links: [
             {
                 title: '指導',
@@ -296,8 +296,8 @@ export default {
         },
     },
     COUNTBLANK: {
-        description: `指定された範囲に含まれる空白セルの個数を返します。`,
-        abstract: `指定された範囲に含まれる空白セルの個数を返します。`,
+        description: '指定された範囲に含まれる空白セルの個数を返します。',
+        abstract: '指定された範囲に含まれる空白セルの個数を返します。',
         links: [
             {
                 title: '指導',
@@ -310,8 +310,8 @@ export default {
         },
     },
     COUNTIF: {
-        description: `指定された範囲に含まれるセルのうち、検索条件に一致するセルの個数を返します。`,
-        abstract: `指定された範囲に含まれるセルのうち、検索条件に一致するセルの個数を返します。`,
+        description: '指定された範囲に含まれるセルのうち、検索条件に一致するセルの個数を返します。',
+        abstract: '指定された範囲に含まれるセルのうち、検索条件に一致するセルの個数を返します。',
         links: [
             {
                 title: '指導',
@@ -324,8 +324,8 @@ export default {
         },
     },
     COUNTIFS: {
-        description: `指定された範囲に含まれるセルのうち、複数の検索条件に一致するセルの個数を返します。`,
-        abstract: `指定された範囲に含まれるセルのうち、複数の検索条件に一致するセルの個数を返します。`,
+        description: '指定された範囲に含まれるセルのうち、複数の検索条件に一致するセルの個数を返します。',
+        abstract: '指定された範囲に含まれるセルのうち、複数の検索条件に一致するセルの個数を返します。',
         links: [
             {
                 title: '指導',
@@ -338,8 +338,8 @@ export default {
         },
     },
     COVARIANCE_P: {
-        description: `共分散を返します。共分散とは、2 組の対応するデータ間での標準偏差の積の平均値です。`,
-        abstract: `共分散を返します。共分散とは、2 組の対応するデータ間での標準偏差の積の平均値です。`,
+        description: '共分散を返します。共分散とは、2 組の対応するデータ間での標準偏差の積の平均値です。',
+        abstract: '共分散を返します。共分散とは、2 組の対応するデータ間での標準偏差の積の平均値です。',
         links: [
             {
                 title: '指導',
@@ -352,8 +352,8 @@ export default {
         },
     },
     COVARIANCE_S: {
-        description: `標本の共分散を返します。共分散とは、2 組の対応するデータ間での標準偏差の積の平均値です。`,
-        abstract: `標本の共分散を返します。共分散とは、2 組の対応するデータ間での標準偏差の積の平均値です。`,
+        description: '標本の共分散を返します。共分散とは、2 組の対応するデータ間での標準偏差の積の平均値です。',
+        abstract: '標本の共分散を返します。共分散とは、2 組の対応するデータ間での標準偏差の積の平均値です。',
         links: [
             {
                 title: '指導',
@@ -366,8 +366,8 @@ export default {
         },
     },
     DEVSQ: {
-        description: `標本の平均値に対する各データの偏差の平方和を返します。`,
-        abstract: `標本の平均値に対する各データの偏差の平方和を返します。`,
+        description: '標本の平均値に対する各データの偏差の平方和を返します。',
+        abstract: '標本の平均値に対する各データの偏差の平方和を返します。',
         links: [
             {
                 title: '指導',
@@ -380,8 +380,8 @@ export default {
         },
     },
     EXPON_DIST: {
-        description: `指数分布関数を返します。`,
-        abstract: `指数分布関数を返します。`,
+        description: '指数分布関数を返します。',
+        abstract: '指数分布関数を返します。',
         links: [
             {
                 title: '指導',
@@ -394,8 +394,8 @@ export default {
         },
     },
     F_DIST: {
-        description: `F 分布の確率関数の値を返します。`,
-        abstract: `F 分布の確率関数の値を返します。`,
+        description: 'F 分布の確率関数の値を返します。',
+        abstract: 'F 分布の確率関数の値を返します。',
         links: [
             {
                 title: '指導',
@@ -408,8 +408,8 @@ export default {
         },
     },
     F_DIST_RT: {
-        description: `F 分布の確率関数の値を返します。`,
-        abstract: `F 分布の確率関数の値を返します。`,
+        description: 'F 分布の確率関数の値を返します。',
+        abstract: 'F 分布の確率関数の値を返します。',
         links: [
             {
                 title: '指導',
@@ -422,8 +422,8 @@ export default {
         },
     },
     F_INV: {
-        description: `F 分布の確率関数の逆関数値を返します。`,
-        abstract: `F 分布の確率関数の逆関数値を返します。`,
+        description: 'F 分布の確率関数の逆関数値を返します。',
+        abstract: 'F 分布の確率関数の逆関数値を返します。',
         links: [
             {
                 title: '指導',
@@ -436,8 +436,8 @@ export default {
         },
     },
     F_INV_RT: {
-        description: `F 分布の確率関数の逆関数値を返します。`,
-        abstract: `F 分布の確率関数の逆関数値を返します。`,
+        description: 'F 分布の確率関数の逆関数値を返します。',
+        abstract: 'F 分布の確率関数の逆関数値を返します。',
         links: [
             {
                 title: '指導',
@@ -450,8 +450,8 @@ export default {
         },
     },
     F_TEST: {
-        description: `F 検定の結果を返します。`,
-        abstract: `F 検定の結果を返します。`,
+        description: 'F 検定の結果を返します。',
+        abstract: 'F 検定の結果を返します。',
         links: [
             {
                 title: '指導',
@@ -464,8 +464,8 @@ export default {
         },
     },
     FISHER: {
-        description: `フィッシャー変換の値を返します。`,
-        abstract: `フィッシャー変換の値を返します。`,
+        description: 'フィッシャー変換の値を返します。',
+        abstract: 'フィッシャー変換の値を返します。',
         links: [
             {
                 title: '指導',
@@ -478,8 +478,8 @@ export default {
         },
     },
     FISHERINV: {
-        description: `フィッシャー変換の逆関数値を返します。`,
-        abstract: `フィッシャー変換の逆関数値を返します。`,
+        description: 'フィッシャー変換の逆関数値を返します。',
+        abstract: 'フィッシャー変換の逆関数値を返します。',
         links: [
             {
                 title: '指導',
@@ -492,8 +492,8 @@ export default {
         },
     },
     FORECAST: {
-        description: `既知の値を使用し、将来の値を予測します。`,
-        abstract: `既知の値を使用し、将来の値を予測します。`,
+        description: '既知の値を使用し、将来の値を予測します。',
+        abstract: '既知の値を使用し、将来の値を予測します。',
         links: [
             {
                 title: '指導',
@@ -506,8 +506,8 @@ export default {
         },
     },
     FORECAST_ETS: {
-        description: `指数平滑化 (ETS) アルゴリズムの AAA バージョンを使って、既存の (履歴) 値に基づき将来価値を返します。`,
-        abstract: `指数平滑化 (ETS) アルゴリズムの AAA バージョンを使って、既存の (履歴) 値に基づき将来価値を返します。`,
+        description: '指数平滑化 (ETS) アルゴリズムの AAA バージョンを使って、既存の (履歴) 値に基づき将来価値を返します。',
+        abstract: '指数平滑化 (ETS) アルゴリズムの AAA バージョンを使って、既存の (履歴) 値に基づき将来価値を返します。',
         links: [
             {
                 title: '指導',
@@ -520,8 +520,8 @@ export default {
         },
     },
     FORECAST_ETS_CONFINT: {
-        description: `特定の目標日の予測値について信頼区間を返します。`,
-        abstract: `特定の目標日の予測値について信頼区間を返します。`,
+        description: '特定の目標日の予測値について信頼区間を返します。',
+        abstract: '特定の目標日の予測値について信頼区間を返します。',
         links: [
             {
                 title: '指導',
@@ -534,8 +534,8 @@ export default {
         },
     },
     FORECAST_ETS_SEASONALITY: {
-        description: `指定された時系列に見られる反復パターンの長さを返します。`,
-        abstract: `指定された時系列に見られる反復パターンの長さを返します。`,
+        description: '指定された時系列に見られる反復パターンの長さを返します。',
+        abstract: '指定された時系列に見られる反復パターンの長さを返します。',
         links: [
             {
                 title: '指導',
@@ -548,8 +548,8 @@ export default {
         },
     },
     FORECAST_ETS_STAT: {
-        description: `時系列予測の結果として統計値を返します。`,
-        abstract: `時系列予測の結果として統計値を返します。`,
+        description: '時系列予測の結果として統計値を返します。',
+        abstract: '時系列予測の結果として統計値を返します。',
         links: [
             {
                 title: '指導',
@@ -562,8 +562,8 @@ export default {
         },
     },
     FORECAST_LINEAR: {
-        description: `既存の値に基づいて、将来価値を返します。`,
-        abstract: `既存の値に基づいて、将来価値を返します。`,
+        description: '既存の値に基づいて、将来価値を返します。',
+        abstract: '既存の値に基づいて、将来価値を返します。',
         links: [
             {
                 title: '指導',
@@ -576,8 +576,8 @@ export default {
         },
     },
     FREQUENCY: {
-        description: `頻度分布を縦方向の数値の配列として返します。`,
-        abstract: `頻度分布を縦方向の数値の配列として返します。`,
+        description: '頻度分布を縦方向の数値の配列として返します。',
+        abstract: '頻度分布を縦方向の数値の配列として返します。',
         links: [
             {
                 title: '指導',
@@ -590,8 +590,8 @@ export default {
         },
     },
     GAMMA: {
-        description: `ガンマ関数値を返します。`,
-        abstract: `ガンマ関数値を返します。`,
+        description: 'ガンマ関数値を返します。',
+        abstract: 'ガンマ関数値を返します。',
         links: [
             {
                 title: '指導',
@@ -604,8 +604,8 @@ export default {
         },
     },
     GAMMA_DIST: {
-        description: `ガンマ分布関数の値を返します。`,
-        abstract: `ガンマ分布関数の値を返します。`,
+        description: 'ガンマ分布関数の値を返します。',
+        abstract: 'ガンマ分布関数の値を返します。',
         links: [
             {
                 title: '指導',
@@ -618,8 +618,8 @@ export default {
         },
     },
     GAMMA_INV: {
-        description: `ガンマ分布の累積分布関数の逆関数値を返します。`,
-        abstract: `ガンマ分布の累積分布関数の逆関数値を返します。`,
+        description: 'ガンマ分布の累積分布関数の逆関数値を返します。',
+        abstract: 'ガンマ分布の累積分布関数の逆関数値を返します。',
         links: [
             {
                 title: '指導',
@@ -632,8 +632,8 @@ export default {
         },
     },
     GAMMALN: {
-        description: `ガンマ関数Γ(x) の値の自然対数を返します。`,
-        abstract: `ガンマ関数Γ(x) の値の自然対数を返します。`,
+        description: 'ガンマ関数Γ(x) の値の自然対数を返します。',
+        abstract: 'ガンマ関数Γ(x) の値の自然対数を返します。',
         links: [
             {
                 title: '指導',
@@ -646,8 +646,8 @@ export default {
         },
     },
     GAMMALN_PRECISE: {
-        description: `ガンマ関数Γ(x) の値の自然対数を返します。`,
-        abstract: `ガンマ関数Γ(x) の値の自然対数を返します。`,
+        description: 'ガンマ関数Γ(x) の値の自然対数を返します。',
+        abstract: 'ガンマ関数Γ(x) の値の自然対数を返します。',
         links: [
             {
                 title: '指導',
@@ -660,8 +660,8 @@ export default {
         },
     },
     GAUSS: {
-        description: `標準正規分布の累積分布関数より 0.5 小さい値を返します。`,
-        abstract: `標準正規分布の累積分布関数より 0.5 小さい値を返します。`,
+        description: '標準正規分布の累積分布関数より 0.5 小さい値を返します。',
+        abstract: '標準正規分布の累積分布関数より 0.5 小さい値を返します。',
         links: [
             {
                 title: '指導',
@@ -674,8 +674,8 @@ export default {
         },
     },
     GEOMEAN: {
-        description: `相乗平均を返します。`,
-        abstract: `相乗平均を返します。`,
+        description: '相乗平均を返します。',
+        abstract: '相乗平均を返します。',
         links: [
             {
                 title: '指導',
@@ -688,8 +688,8 @@ export default {
         },
     },
     GROWTH: {
-        description: `指数曲線から予測される値を返します。`,
-        abstract: `指数曲線から予測される値を返します。`,
+        description: '指数曲線から予測される値を返します。',
+        abstract: '指数曲線から予測される値を返します。',
         links: [
             {
                 title: '指導',
@@ -702,8 +702,8 @@ export default {
         },
     },
     HARMEAN: {
-        description: `調和平均を返します。`,
-        abstract: `調和平均を返します。`,
+        description: '調和平均を返します。',
+        abstract: '調和平均を返します。',
         links: [
             {
                 title: '指導',
@@ -716,8 +716,8 @@ export default {
         },
     },
     HYPGEOM_DIST: {
-        description: `超幾何分布関数の値を返します。`,
-        abstract: `超幾何分布関数の値を返します。`,
+        description: '超幾何分布関数の値を返します。',
+        abstract: '超幾何分布関数の値を返します。',
         links: [
             {
                 title: '指導',
@@ -730,8 +730,8 @@ export default {
         },
     },
     INTERCEPT: {
-        description: `回帰直線の切片を返します。`,
-        abstract: `回帰直線の切片を返します。`,
+        description: '回帰直線の切片を返します。',
+        abstract: '回帰直線の切片を返します。',
         links: [
             {
                 title: '指導',
@@ -744,8 +744,8 @@ export default {
         },
     },
     KURT: {
-        description: `指定されたデータの尖度を返します。`,
-        abstract: `指定されたデータの尖度を返します。`,
+        description: '指定されたデータの尖度を返します。',
+        abstract: '指定されたデータの尖度を返します。',
         links: [
             {
                 title: '指導',
@@ -758,8 +758,8 @@ export default {
         },
     },
     LARGE: {
-        description: `指定されたデータの中で k 番目に大きなデータを返します。`,
-        abstract: `指定されたデータの中で k 番目に大きなデータを返します。`,
+        description: '指定されたデータの中で k 番目に大きなデータを返します。',
+        abstract: '指定されたデータの中で k 番目に大きなデータを返します。',
         links: [
             {
                 title: '指導',
@@ -772,8 +772,8 @@ export default {
         },
     },
     LINEST: {
-        description: `回帰直線の係数の値を配列で返します。`,
-        abstract: `回帰直線の係数の値を配列で返します。`,
+        description: '回帰直線の係数の値を配列で返します。',
+        abstract: '回帰直線の係数の値を配列で返します。',
         links: [
             {
                 title: '指導',
@@ -786,8 +786,8 @@ export default {
         },
     },
     LOGEST: {
-        description: `回帰指数曲線の係数の値を配列で返します。`,
-        abstract: `回帰指数曲線の係数の値を配列で返します。`,
+        description: '回帰指数曲線の係数の値を配列で返します。',
+        abstract: '回帰指数曲線の係数の値を配列で返します。',
         links: [
             {
                 title: '指導',
@@ -800,8 +800,8 @@ export default {
         },
     },
     LOGNORM_DIST: {
-        description: `対数正規分布の累積分布関数の値を返します。`,
-        abstract: `対数正規分布の累積分布関数の値を返します。`,
+        description: '対数正規分布の累積分布関数の値を返します。',
+        abstract: '対数正規分布の累積分布関数の値を返します。',
         links: [
             {
                 title: '指導',
@@ -814,8 +814,8 @@ export default {
         },
     },
     LOGNORM_INV: {
-        description: `対数正規型の累積分布関数の逆関数値を返します。`,
-        abstract: `対数正規型の累積分布関数の逆関数値を返します。`,
+        description: '対数正規型の累積分布関数の逆関数値を返します。',
+        abstract: '対数正規型の累積分布関数の逆関数値を返します。',
         links: [
             {
                 title: '指導',
@@ -828,8 +828,8 @@ export default {
         },
     },
     MAX: {
-        description: `引数リストに含まれる最大の数値を返します。`,
-        abstract: `引数リストに含まれる最大の数値を返します。`,
+        description: '引数リストに含まれる最大の数値を返します。',
+        abstract: '引数リストに含まれる最大の数値を返します。',
         links: [
             {
                 title: '指導',
@@ -842,8 +842,8 @@ export default {
         },
     },
     MAXA: {
-        description: `数値、文字列、および論理値を含む引数リストから最大の数値を返します。`,
-        abstract: `数値、文字列、および論理値を含む引数リストから最大の数値を返します。`,
+        description: '数値、文字列、および論理値を含む引数リストから最大の数値を返します。',
+        abstract: '数値、文字列、および論理値を含む引数リストから最大の数値を返します。',
         links: [
             {
                 title: '指導',
@@ -856,8 +856,8 @@ export default {
         },
     },
     MAXIFS: {
-        description: `条件セットで指定されたセルの中の最大値を返します。`,
-        abstract: `条件セットで指定されたセルの中の最大値を返します。`,
+        description: '条件セットで指定されたセルの中の最大値を返します。',
+        abstract: '条件セットで指定されたセルの中の最大値を返します。',
         links: [
             {
                 title: '指導',
@@ -870,8 +870,8 @@ export default {
         },
     },
     MEDIAN: {
-        description: `引数リストに含まれる数値のメジアン (中央値) を返します。`,
-        abstract: `引数リストに含まれる数値のメジアン (中央値) を返します。`,
+        description: '引数リストに含まれる数値のメジアン (中央値) を返します。',
+        abstract: '引数リストに含まれる数値のメジアン (中央値) を返します。',
         links: [
             {
                 title: '指導',
@@ -884,8 +884,8 @@ export default {
         },
     },
     MIN: {
-        description: `引数リストに含まれる最小の数値を返します。`,
-        abstract: `引数リストに含まれる最小の数値を返します。`,
+        description: '引数リストに含まれる最小の数値を返します。',
+        abstract: '引数リストに含まれる最小の数値を返します。',
         links: [
             {
                 title: '指導',
@@ -898,8 +898,8 @@ export default {
         },
     },
     MINA: {
-        description: `数値、文字列、および論理値を含む引数リストから最小の数値を返します。`,
-        abstract: `数値、文字列、および論理値を含む引数リストから最小の数値を返します。`,
+        description: '数値、文字列、および論理値を含む引数リストから最小の数値を返します。',
+        abstract: '数値、文字列、および論理値を含む引数リストから最小の数値を返します。',
         links: [
             {
                 title: '指導',
@@ -912,8 +912,8 @@ export default {
         },
     },
     MINIFS: {
-        description: `条件セットで指定されたセルの中の最小値を返します。`,
-        abstract: `条件セットで指定されたセルの中の最小値を返します。`,
+        description: '条件セットで指定されたセルの中の最小値を返します。',
+        abstract: '条件セットで指定されたセルの中の最小値を返します。',
         links: [
             {
                 title: '指導',
@@ -926,8 +926,8 @@ export default {
         },
     },
     MODE_MULT: {
-        description: `配列またはセル範囲として指定されたデータの中で、最も頻繁に出現する値 (最頻値) を縦方向の配列として返します。`,
-        abstract: `配列またはセル範囲として指定されたデータの中で、最も頻繁に出現する値 (最頻値) を縦方向の配列として返します。`,
+        description: '配列またはセル範囲として指定されたデータの中で、最も頻繁に出現する値 (最頻値) を縦方向の配列として返します。',
+        abstract: '配列またはセル範囲として指定されたデータの中で、最も頻繁に出現する値 (最頻値) を縦方向の配列として返します。',
         links: [
             {
                 title: '指導',
@@ -940,8 +940,8 @@ export default {
         },
     },
     MODE_SNGL: {
-        description: `最も頻繁に出現する値 (最頻値) を返します。`,
-        abstract: `最も頻繁に出現する値 (最頻値) を返します。`,
+        description: '最も頻繁に出現する値 (最頻値) を返します。',
+        abstract: '最も頻繁に出現する値 (最頻値) を返します。',
         links: [
             {
                 title: '指導',
@@ -954,8 +954,8 @@ export default {
         },
     },
     NEGBINOM_DIST: {
-        description: `負の二項分布の確率関数値を返します。`,
-        abstract: `負の二項分布の確率関数値を返します。`,
+        description: '負の二項分布の確率関数値を返します。',
+        abstract: '負の二項分布の確率関数値を返します。',
         links: [
             {
                 title: '指導',
@@ -968,8 +968,8 @@ export default {
         },
     },
     NORM_DIST: {
-        description: `正規分布の累積分布関数の値を返します。`,
-        abstract: `正規分布の累積分布関数の値を返します。`,
+        description: '正規分布の累積分布関数の値を返します。',
+        abstract: '正規分布の累積分布関数の値を返します。',
         links: [
             {
                 title: '指導',
@@ -982,8 +982,8 @@ export default {
         },
     },
     NORM_INV: {
-        description: `正規分布の累積分布関数の逆関数値を返します。`,
-        abstract: `正規分布の累積分布関数の逆関数値を返します。`,
+        description: '正規分布の累積分布関数の逆関数値を返します。',
+        abstract: '正規分布の累積分布関数の逆関数値を返します。',
         links: [
             {
                 title: '指導',
@@ -996,8 +996,8 @@ export default {
         },
     },
     NORM_S_DIST: {
-        description: `標準正規分布の累積分布関数の値を返します。`,
-        abstract: `標準正規分布の累積分布関数の値を返します。`,
+        description: '標準正規分布の累積分布関数の値を返します。',
+        abstract: '標準正規分布の累積分布関数の値を返します。',
         links: [
             {
                 title: '指導',
@@ -1010,8 +1010,8 @@ export default {
         },
     },
     NORM_S_INV: {
-        description: `標準正規分布の累積分布関数の逆関数値を返します。`,
-        abstract: `標準正規分布の累積分布関数の逆関数値を返します。`,
+        description: '標準正規分布の累積分布関数の逆関数値を返します。',
+        abstract: '標準正規分布の累積分布関数の逆関数値を返します。',
         links: [
             {
                 title: '指導',
@@ -1024,8 +1024,8 @@ export default {
         },
     },
     PEARSON: {
-        description: `ピアソンの積率相関係数 r の値を返します。`,
-        abstract: `ピアソンの積率相関係数 r の値を返します。`,
+        description: 'ピアソンの積率相関係数 r の値を返します。',
+        abstract: 'ピアソンの積率相関係数 r の値を返します。',
         links: [
             {
                 title: '指導',
@@ -1038,8 +1038,8 @@ export default {
         },
     },
     PERCENTILE_EXC: {
-        description: `特定の範囲に含まれるデータの第 k 百分位数に当たる値を返します (k は 0 より大きく 1 より小さい値)。`,
-        abstract: `特定の範囲に含まれるデータの第 k 百分位数に当たる値を返します (k は 0 より大きく 1 より小さい値)。`,
+        description: '特定の範囲に含まれるデータの第 k 百分位数に当たる値を返します (k は 0 より大きく 1 より小さい値)。',
+        abstract: '特定の範囲に含まれるデータの第 k 百分位数に当たる値を返します (k は 0 より大きく 1 より小さい値)。',
         links: [
             {
                 title: '指導',
@@ -1052,8 +1052,8 @@ export default {
         },
     },
     PERCENTILE_INC: {
-        description: `特定の範囲に含まれるデータの第 k 百分位数に当たる値を返します。`,
-        abstract: `特定の範囲に含まれるデータの第 k 百分位数に当たる値を返します。`,
+        description: '特定の範囲に含まれるデータの第 k 百分位数に当たる値を返します。',
+        abstract: '特定の範囲に含まれるデータの第 k 百分位数に当たる値を返します。',
         links: [
             {
                 title: '指導',
@@ -1066,8 +1066,8 @@ export default {
         },
     },
     PERCENTRANK_EXC: {
-        description: `配列内での値の順位を百分率 (0 より大きく 1 より小さい) で表した値を返します。`,
-        abstract: `配列内での値の順位を百分率 (0 より大きく 1 より小さい) で表した値を返します。`,
+        description: '配列内での値の順位を百分率 (0 より大きく 1 より小さい) で表した値を返します。',
+        abstract: '配列内での値の順位を百分率 (0 より大きく 1 より小さい) で表した値を返します。',
         links: [
             {
                 title: '指導',
@@ -1080,8 +1080,8 @@ export default {
         },
     },
     PERCENTRANK_INC: {
-        description: `配列内での値の順位を百分率で表した値を返します。`,
-        abstract: `配列内での値の順位を百分率で表した値を返します。`,
+        description: '配列内での値の順位を百分率で表した値を返します。',
+        abstract: '配列内での値の順位を百分率で表した値を返します。',
         links: [
             {
                 title: '指導',
@@ -1094,8 +1094,8 @@ export default {
         },
     },
     PERMUT: {
-        description: `与えられた標本数から指定した個数を選択する場合の順列を返します。`,
-        abstract: `与えられた標本数から指定した個数を選択する場合の順列を返します。`,
+        description: '与えられた標本数から指定した個数を選択する場合の順列を返します。',
+        abstract: '与えられた標本数から指定した個数を選択する場合の順列を返します。',
         links: [
             {
                 title: '指導',
@@ -1108,8 +1108,8 @@ export default {
         },
     },
     PERMUTATIONA: {
-        description: `指定した数の対象から、指定された数だけ (重複あり) 抜き取る場合の順列の数を返します。`,
-        abstract: `指定した数の対象から、指定された数だけ (重複あり) 抜き取る場合の順列の数を返します。`,
+        description: '指定した数の対象から、指定された数だけ (重複あり) 抜き取る場合の順列の数を返します。',
+        abstract: '指定した数の対象から、指定された数だけ (重複あり) 抜き取る場合の順列の数を返します。',
         links: [
             {
                 title: '指導',
@@ -1122,8 +1122,8 @@ export default {
         },
     },
     PHI: {
-        description: `標準正規分布の密度関数の値を返します。`,
-        abstract: `標準正規分布の密度関数の値を返します。`,
+        description: '標準正規分布の密度関数の値を返します。',
+        abstract: '標準正規分布の密度関数の値を返します。',
         links: [
             {
                 title: '指導',
@@ -1136,8 +1136,8 @@ export default {
         },
     },
     POISSON_DIST: {
-        description: `ポアソン確率の値を返します。`,
-        abstract: `ポアソン確率の値を返します。`,
+        description: 'ポアソン確率の値を返します。',
+        abstract: 'ポアソン確率の値を返します。',
         links: [
             {
                 title: '指導',
@@ -1150,8 +1150,8 @@ export default {
         },
     },
     PROB: {
-        description: `指定した範囲に含まれる値が上限と下限との間に収まる確率を返します。`,
-        abstract: `指定した範囲に含まれる値が上限と下限との間に収まる確率を返します。`,
+        description: '指定した範囲に含まれる値が上限と下限との間に収まる確率を返します。',
+        abstract: '指定した範囲に含まれる値が上限と下限との間に収まる確率を返します。',
         links: [
             {
                 title: '指導',
@@ -1164,8 +1164,8 @@ export default {
         },
     },
     QUARTILE_EXC: {
-        description: `0 より大きく 1 より小さい百分位値に基づいて、配列に含まれるデータから四分位数を返します。`,
-        abstract: `0 より大きく 1 より小さい百分位値に基づいて、配列に含まれるデータから四分位数を返します。`,
+        description: '0 より大きく 1 より小さい百分位値に基づいて、配列に含まれるデータから四分位数を返します。',
+        abstract: '0 より大きく 1 より小さい百分位値に基づいて、配列に含まれるデータから四分位数を返します。',
         links: [
             {
                 title: '指導',
@@ -1178,8 +1178,8 @@ export default {
         },
     },
     QUARTILE_INC: {
-        description: `配列に含まれるデータから四分位数を抽出します。`,
-        abstract: `配列に含まれるデータから四分位数を抽出します。`,
+        description: '配列に含まれるデータから四分位数を抽出します。',
+        abstract: '配列に含まれるデータから四分位数を抽出します。',
         links: [
             {
                 title: '指導',
@@ -1192,8 +1192,8 @@ export default {
         },
     },
     RANK_AVG: {
-        description: `数値のリストの中で、指定した数値の序列を返します。`,
-        abstract: `数値のリストの中で、指定した数値の序列を返します。`,
+        description: '数値のリストの中で、指定した数値の序列を返します。',
+        abstract: '数値のリストの中で、指定した数値の序列を返します。',
         links: [
             {
                 title: '指導',
@@ -1206,8 +1206,8 @@ export default {
         },
     },
     RANK_EQ: {
-        description: `数値のリストの中で、指定した数値の序列を返します。`,
-        abstract: `数値のリストの中で、指定した数値の序列を返します。`,
+        description: '数値のリストの中で、指定した数値の序列を返します。',
+        abstract: '数値のリストの中で、指定した数値の序列を返します。',
         links: [
             {
                 title: '指導',
@@ -1220,8 +1220,8 @@ export default {
         },
     },
     RSQ: {
-        description: `ピアソンの積率相関係数の 2 乗値を返します。`,
-        abstract: `ピアソンの積率相関係数の 2 乗値を返します。`,
+        description: 'ピアソンの積率相関係数の 2 乗値を返します。',
+        abstract: 'ピアソンの積率相関係数の 2 乗値を返します。',
         links: [
             {
                 title: '指導',
@@ -1234,8 +1234,8 @@ export default {
         },
     },
     SKEW: {
-        description: `分布の歪度を返します。`,
-        abstract: `分布の歪度を返します。`,
+        description: '分布の歪度を返します。',
+        abstract: '分布の歪度を返します。',
         links: [
             {
                 title: '指導',
@@ -1248,8 +1248,8 @@ export default {
         },
     },
     SKEW_P: {
-        description: `人口に基づく分布の歪度を返します。歪度とは、分布の平均値周辺での両側の非対称度を表す値です。`,
-        abstract: `人口に基づく分布の歪度を返します。歪度とは、分布の平均値周辺での両側の非対称度を表す値です。`,
+        description: '人口に基づく分布の歪度を返します。歪度とは、分布の平均値周辺での両側の非対称度を表す値です。',
+        abstract: '人口に基づく分布の歪度を返します。歪度とは、分布の平均値周辺での両側の非対称度を表す値です。',
         links: [
             {
                 title: '指導',
@@ -1262,8 +1262,8 @@ export default {
         },
     },
     SLOPE: {
-        description: `回帰直線の傾きを返します。`,
-        abstract: `回帰直線の傾きを返します。`,
+        description: '回帰直線の傾きを返します。',
+        abstract: '回帰直線の傾きを返します。',
         links: [
             {
                 title: '指導',
@@ -1276,8 +1276,8 @@ export default {
         },
     },
     SMALL: {
-        description: `指定されたデータの中で、k 番目に小さなデータを返します。`,
-        abstract: `指定されたデータの中で、k 番目に小さなデータを返します。`,
+        description: '指定されたデータの中で、k 番目に小さなデータを返します。',
+        abstract: '指定されたデータの中で、k 番目に小さなデータを返します。',
         links: [
             {
                 title: '指導',
@@ -1290,8 +1290,8 @@ export default {
         },
     },
     STANDARDIZE: {
-        description: `正規化された値を返します。`,
-        abstract: `正規化された値を返します。`,
+        description: '正規化された値を返します。',
+        abstract: '正規化された値を返します。',
         links: [
             {
                 title: '指導',
@@ -1304,8 +1304,8 @@ export default {
         },
     },
     STDEV_P: {
-        description: `引数を母集団全体と見なし、母集団の標準偏差を返します。`,
-        abstract: `引数を母集団全体と見なし、母集団の標準偏差を返します。`,
+        description: '引数を母集団全体と見なし、母集団の標準偏差を返します。',
+        abstract: '引数を母集団全体と見なし、母集団の標準偏差を返します。',
         links: [
             {
                 title: '指導',
@@ -1318,8 +1318,8 @@ export default {
         },
     },
     STDEV_S: {
-        description: `引数を正規母集団の標本と見なし、標本に基づいて母集団の標準偏差の推定値を返します。`,
-        abstract: `引数を正規母集団の標本と見なし、標本に基づいて母集団の標準偏差の推定値を返します。`,
+        description: '引数を正規母集団の標本と見なし、標本に基づいて母集団の標準偏差の推定値を返します。',
+        abstract: '引数を正規母集団の標本と見なし、標本に基づいて母集団の標準偏差の推定値を返します。',
         links: [
             {
                 title: '指導',
@@ -1332,8 +1332,8 @@ export default {
         },
     },
     STDEVA: {
-        description: `数値、文字列、および論理値を含む引数を正規母集団の標本と見なし、母集団の標準偏差の推定値を返します。`,
-        abstract: `数値、文字列、および論理値を含む引数を正規母集団の標本と見なし、母集団の標準偏差の推定値を返します。`,
+        description: '数値、文字列、および論理値を含む引数を正規母集団の標本と見なし、母集団の標準偏差の推定値を返します。',
+        abstract: '数値、文字列、および論理値を含む引数を正規母集団の標本と見なし、母集団の標準偏差の推定値を返します。',
         links: [
             {
                 title: '指導',
@@ -1346,8 +1346,8 @@ export default {
         },
     },
     STDEVPA: {
-        description: `数値、文字列、および論理値を含む引数を母集団全体と見なし、母集団の標準偏差を返します。`,
-        abstract: `数値、文字列、および論理値を含む引数を母集団全体と見なし、母集団の標準偏差を返します。`,
+        description: '数値、文字列、および論理値を含む引数を母集団全体と見なし、母集団の標準偏差を返します。',
+        abstract: '数値、文字列、および論理値を含む引数を母集団全体と見なし、母集団の標準偏差を返します。',
         links: [
             {
                 title: '指導',
@@ -1360,8 +1360,8 @@ export default {
         },
     },
     STEYX: {
-        description: `回帰直線上の予測値の標準誤差を返します。`,
-        abstract: `回帰直線上の予測値の標準誤差を返します。`,
+        description: '回帰直線上の予測値の標準誤差を返します。',
+        abstract: '回帰直線上の予測値の標準誤差を返します。',
         links: [
             {
                 title: '指導',
@@ -1374,8 +1374,8 @@ export default {
         },
     },
     T_DIST: {
-        description: `スチューデントの t 分布のパーセンテージ (確率) を返します。`,
-        abstract: `スチューデントの t 分布のパーセンテージ (確率) を返します。`,
+        description: 'スチューデントの t 分布のパーセンテージ (確率) を返します。',
+        abstract: 'スチューデントの t 分布のパーセンテージ (確率) を返します。',
         links: [
             {
                 title: '指導',
@@ -1388,8 +1388,8 @@ export default {
         },
     },
     T_DIST_2T: {
-        description: `スチューデントの t 分布のパーセンテージ (確率) を返します。`,
-        abstract: `スチューデントの t 分布のパーセンテージ (確率) を返します。`,
+        description: 'スチューデントの t 分布のパーセンテージ (確率) を返します。',
+        abstract: 'スチューデントの t 分布のパーセンテージ (確率) を返します。',
         links: [
             {
                 title: '指導',
@@ -1402,8 +1402,8 @@ export default {
         },
     },
     T_DIST_RT: {
-        description: `スチューデントの t 分布の値を返します。`,
-        abstract: `スチューデントの t 分布の値を返します。`,
+        description: 'スチューデントの t 分布の値を返します。',
+        abstract: 'スチューデントの t 分布の値を返します。',
         links: [
             {
                 title: '指導',
@@ -1416,8 +1416,8 @@ export default {
         },
     },
     T_INV: {
-        description: `スチューデントの t 分布の t 値を、確率と自由度の関数として返します。`,
-        abstract: `スチューデントの t 分布の t 値を、確率と自由度の関数として返します。`,
+        description: 'スチューデントの t 分布の t 値を、確率と自由度の関数として返します。',
+        abstract: 'スチューデントの t 分布の t 値を、確率と自由度の関数として返します。',
         links: [
             {
                 title: '指導',
@@ -1430,8 +1430,8 @@ export default {
         },
     },
     T_INV_2T: {
-        description: `スチューデントの t 分布の逆関数値を返します。`,
-        abstract: `スチューデントの t 分布の逆関数値を返します。`,
+        description: 'スチューデントの t 分布の逆関数値を返します。',
+        abstract: 'スチューデントの t 分布の逆関数値を返します。',
         links: [
             {
                 title: '指導',
@@ -1444,8 +1444,8 @@ export default {
         },
     },
     T_TEST: {
-        description: `スチューデントの t 分布に従う確率を返します。`,
-        abstract: `スチューデントの t 分布に従う確率を返します。`,
+        description: 'スチューデントの t 分布に従う確率を返します。',
+        abstract: 'スチューデントの t 分布に従う確率を返します。',
         links: [
             {
                 title: '指導',
@@ -1458,8 +1458,8 @@ export default {
         },
     },
     TREND: {
-        description: `回帰直線による予測値を配列で返します。`,
-        abstract: `回帰直線による予測値を配列で返します。`,
+        description: '回帰直線による予測値を配列で返します。',
+        abstract: '回帰直線による予測値を配列で返します。',
         links: [
             {
                 title: '指導',
@@ -1472,8 +1472,8 @@ export default {
         },
     },
     TRIMMEAN: {
-        description: `データの中間項の平均を返します。`,
-        abstract: `データの中間項の平均を返します。`,
+        description: 'データの中間項の平均を返します。',
+        abstract: 'データの中間項の平均を返します。',
         links: [
             {
                 title: '指導',
@@ -1486,8 +1486,8 @@ export default {
         },
     },
     VAR_P: {
-        description: `引数を母集団全体と見なし、母集団の分散 (標本分散) を返します。`,
-        abstract: `引数を母集団全体と見なし、母集団の分散 (標本分散) を返します。`,
+        description: '引数を母集団全体と見なし、母集団の分散 (標本分散) を返します。',
+        abstract: '引数を母集団全体と見なし、母集団の分散 (標本分散) を返します。',
         links: [
             {
                 title: '指導',
@@ -1500,8 +1500,8 @@ export default {
         },
     },
     VAR_S: {
-        description: `標本に基づいて母集団の分散の推定値 (不偏分散) を返します。`,
-        abstract: `標本に基づいて母集団の分散の推定値 (不偏分散) を返します。`,
+        description: '標本に基づいて母集団の分散の推定値 (不偏分散) を返します。',
+        abstract: '標本に基づいて母集団の分散の推定値 (不偏分散) を返します。',
         links: [
             {
                 title: '指導',
@@ -1514,8 +1514,8 @@ export default {
         },
     },
     VARA: {
-        description: `数値、文字列、および論理値を含む引数を正規母集団の標本と見なし、標本に基づいて母集団の分散の推定値 (不偏分散) を返します。`,
-        abstract: `数値、文字列、および論理値を含む引数を正規母集団の標本と見なし、標本に基づいて母集団の分散の推定値 (不偏分散) を返します。`,
+        description: '数値、文字列、および論理値を含む引数を正規母集団の標本と見なし、標本に基づいて母集団の分散の推定値 (不偏分散) を返します。',
+        abstract: '数値、文字列、および論理値を含む引数を正規母集団の標本と見なし、標本に基づいて母集団の分散の推定値 (不偏分散) を返します。',
         links: [
             {
                 title: '指導',
@@ -1528,8 +1528,8 @@ export default {
         },
     },
     VARPA: {
-        description: `数値、文字列、および論理値を含む引数を母集団全体と見なし、母集団の分散 (標本分散) を返します。`,
-        abstract: `数値、文字列、および論理値を含む引数を母集団全体と見なし、母集団の分散 (標本分散) を返します。`,
+        description: '数値、文字列、および論理値を含む引数を母集団全体と見なし、母集団の分散 (標本分散) を返します。',
+        abstract: '数値、文字列、および論理値を含む引数を母集団全体と見なし、母集団の分散 (標本分散) を返します。',
         links: [
             {
                 title: '指導',
@@ -1542,8 +1542,8 @@ export default {
         },
     },
     WEIBULL_DIST: {
-        description: `ワイブル分布の値を返します。`,
-        abstract: `ワイブル分布の値を返します。`,
+        description: 'ワイブル分布の値を返します。',
+        abstract: 'ワイブル分布の値を返します。',
         links: [
             {
                 title: '指導',
@@ -1556,8 +1556,8 @@ export default {
         },
     },
     Z_TEST: {
-        description: `z 検定の片側 P 値を返します。`,
-        abstract: `z 検定の片側 P 値を返します。`,
+        description: 'z 検定の片側 P 値を返します。',
+        abstract: 'z 検定の片側 P 値を返します。',
         links: [
             {
                 title: '指導',

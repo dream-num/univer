@@ -40,11 +40,11 @@ export default {
         ],
         functionParameter: {
             number1: {
-                name: '数值1',
+                name: '数值 1',
                 detail: '要计算平均值的第一个数字、单元格引用或单元格区域。',
             },
             number2: {
-                name: '数值2',
+                name: '数值 2',
                 detail: '要计算平均值的其他数字、单元格引用或单元格区域，最多可包含 255 个。',
             },
         },
@@ -284,11 +284,11 @@ export default {
         ],
         functionParameter: {
             value1: {
-                name: '值1',
+                name: '值 1',
                 detail: '要计算其中数字的个数的第一项、单元格引用或区域。',
             },
             value2: {
-                name: '值2',
+                name: '值 2',
                 detail: '要计算其中数字的个数的其他项、单元格引用或区域，最多可包含 255 个。',
             },
         },
@@ -305,11 +305,11 @@ export default {
         ],
         functionParameter: {
             number1: {
-                name: '数值1',
+                name: '数值 1',
                 detail: '必需。 表示要计数的值的第一个参数',
             },
             number2: {
-                name: '数值2',
+                name: '数值 2',
                 detail: '可选。 表示要计数的值的其他参数，最多可包含 255 个参数。',
             },
         },
@@ -857,11 +857,11 @@ export default {
         ],
         functionParameter: {
             number1: {
-                name: '数值1',
+                name: '数值 1',
                 detail: '要计算最大值的第一个数字、单元格引用或单元格区域。',
             },
             number2: {
-                name: '数值2',
+                name: '数值 2',
                 detail: '要计算最大值的其他数字、单元格引用或单元格区域，最多可包含 255 个。',
             },
         },
@@ -919,11 +919,11 @@ export default {
         ],
         functionParameter: {
             number1: {
-                name: '数值1',
+                name: '数值 1',
                 detail: '要计算最小值的第一个数字、单元格引用或单元格区域。',
             },
             number2: {
-                name: '数值2',
+                name: '数值 2',
                 detail: '要计算最小值的其他数字、单元格引用或单元格区域，最多可包含 255 个。',
             },
         },

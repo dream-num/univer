@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { type Nullable, TextXActionType } from '@univerjs/core';
+import { TextX } from '@univerjs/core';
+import type { type Nullable, TextXAction } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IDisposable } from '@wendellhu/redi';
 
-import { getRetainAndDeleteFromReplace } from '../basics/retain-delete-params';
 import type { IRichTextEditingMutationParams } from '../commands/mutations/core-editing.mutation';
 
 // Used to record all intermediate states when typing with IME,
@@ -42,67 +42,26 @@ export class IMEInputManagerService implements IDisposable {
         this._redoMutationParamsCache.push(redoParams);
     }
 
-    fetchComposedUndoRedoMutationParams(newText: string) {
-        if (this._undoMutationParamsCache.length === 0 || this._previousActiveRange == null) {
+    fetchComposedUndoRedoMutationParams() {
+        if (this._undoMutationParamsCache.length === 0 || this._previousActiveRange == null || this._redoMutationParamsCache.length === 0) {
             return null;
         }
 
         const { unitId } = this._undoMutationParamsCache[0];
-        const { segmentId, startOffset, collapsed } = this._previousActiveRange;
 
         const undoMutationParams: IRichTextEditingMutationParams = {
             unitId,
-            mutations: [],
+            mutations: this._undoMutationParamsCache.reverse().reduce((acc, cur) => {
+                return TextX.compose(acc, cur.mutations);
+            }, [] as TextXAction[]),
         };
 
         const redoMutationParams: IRichTextEditingMutationParams = {
             unitId,
-            mutations: [],
+            mutations: this._redoMutationParamsCache.reduce((acc, cur) => {
+                return TextX.compose(acc, cur.mutations);
+            }, [] as TextXAction[]),
         };
-
-        if (collapsed) {
-            undoMutationParams.mutations.push({
-                t: TextXActionType.RETAIN,
-                len: startOffset,
-                segmentId,
-            });
-            redoMutationParams.mutations.push({
-                t: TextXActionType.RETAIN,
-                len: startOffset,
-                segmentId,
-            });
-        } else {
-            if (startOffset > 0) {
-                undoMutationParams.mutations.push({
-                    t: TextXActionType.RETAIN,
-                    len: startOffset,
-                    segmentId,
-                });
-            }
-
-            undoMutationParams.mutations.push(this._undoMutationParamsCache[0].mutations.find((m) => m.t === TextXActionType.INSERT)!);
-
-            redoMutationParams.mutations.push(...getRetainAndDeleteFromReplace(this._previousActiveRange, segmentId));
-        }
-
-        if (newText.length) {
-            undoMutationParams.mutations.push({
-                t: TextXActionType.DELETE,
-                len: newText.length,
-                line: 0,
-                segmentId,
-            });
-
-            redoMutationParams.mutations.push({
-                t: TextXActionType.INSERT,
-                body: {
-                    dataStream: newText,
-                },
-                len: newText.length,
-                line: 0,
-                segmentId,
-            });
-        }
 
         return { redoMutationParams, undoMutationParams, previousActiveRange: this._previousActiveRange };
     }

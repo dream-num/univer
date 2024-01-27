@@ -15,7 +15,7 @@
  */
 
 import type { ICommand, ICommandInfo, ITextRange } from '@univerjs/core';
-import { CommandType, ICommandService, IUndoRedoService, TextX } from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, TextX, TextXActionType } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 
 import { getRetainAndDeleteFromReplace } from '../../basics/retain-delete-params';
@@ -58,7 +58,7 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
 
         if (range.collapsed) {
             textX.push({
-                t: 'r',
+                t: TextXActionType.RETAIN,
                 len: range.startOffset,
                 segmentId,
             });
@@ -68,7 +68,7 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
 
         if (oldTextLen > 0) {
             textX.push({
-                t: 'd',
+                t: TextXActionType.DELETE,
                 len: oldTextLen,
                 line: 0,
                 segmentId,
@@ -76,7 +76,7 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
         }
 
         textX.push({
-            t: 'i',
+            t: TextXActionType.INSERT,
             body: {
                 dataStream: newText,
             },

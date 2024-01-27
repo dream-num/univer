@@ -23,14 +23,13 @@ import type {
     IDocumentBody,
     IDocumentData,
     IDocumentRenderConfig,
-    IParagraph,
-    ITextRun,
 } from '../../types/interfaces/i-document-data';
 import type { IPaddingData } from '../../types/interfaces/i-style-data';
 import { updateAttributeByDelete } from './apply-utils/delete-apply';
 import { updateAttributeByInsert } from './apply-utils/insert-apply';
 import { updateAttribute } from './apply-utils/update-apply';
-import type { TextXAction } from './mutation-types';
+import { type TextXAction, TextXActionType } from './action-types';
+import { getBodySlice } from './text-x/utils';
 
 export const DEFAULT_DOC = {
     id: 'default_doc',
@@ -254,61 +253,61 @@ export class DocumentDataModel extends DocumentDataModelSimple {
         return this._unitId;
     }
 
-    apply(mutations: TextXAction[]) {
+    apply(actions: TextXAction[]) {
         const undoMutations: TextXAction[] = [];
 
         const memoryCursor = new MemoryCursor();
 
         memoryCursor.reset();
 
-        mutations.forEach((mutation) => {
-            // FIXME: @JOCS Since updateApply modifies the mutation(used in undo/redo),
+        actions.forEach((action) => {
+            // FIXME: @JOCS Since updateApply modifies the action(used in undo/redo),
             // so make a deep copy here, does updateApply need to
             // be modified to have no side effects in the future?
-            mutation = Tools.deepClone(mutation);
+            action = Tools.deepClone(action);
 
-            if (mutation.t === 'r') {
-                const { coverType, body, len, segmentId } = mutation;
+            if (action.t === TextXActionType.RETAIN) {
+                const { coverType, body, len, segmentId } = action;
 
                 if (body != null) {
                     const documentBody = this._updateApply(body, len, memoryCursor.cursor, coverType, segmentId);
 
                     undoMutations.push({
-                        ...mutation,
-                        t: 'r',
+                        ...action,
+                        t: TextXActionType.RETAIN,
                         coverType: UpdateDocsAttributeType.REPLACE,
                         body: documentBody,
                     });
                 } else {
                     undoMutations.push({
-                        ...mutation,
-                        t: 'r',
+                        ...action,
+                        t: TextXActionType.RETAIN,
                     });
                 }
 
                 memoryCursor.moveCursor(len);
-            } else if (mutation.t === 'i') {
-                const { body, len, segmentId, line } = mutation;
+            } else if (action.t === TextXActionType.INSERT) {
+                const { body, len, segmentId, line } = action;
 
                 this._insertApply(body!, len, memoryCursor.cursor, segmentId);
                 memoryCursor.moveCursor(len);
                 undoMutations.push({
-                    t: 'd',
+                    t: TextXActionType.DELETE,
                     len,
                     line,
                     segmentId,
                 });
-            } else if (mutation.t === 'd') {
-                const { len, segmentId } = mutation;
+            } else if (action.t === TextXActionType.DELETE) {
+                const { len, segmentId } = action;
                 const documentBody = this._deleteApply(len, memoryCursor.cursor, segmentId);
 
                 undoMutations.push({
-                    ...mutation,
-                    t: 'i',
+                    ...action,
+                    t: TextXActionType.INSERT,
                     body: documentBody,
                 });
             } else {
-                throw new Error(`Unknown mutation type for mutation: ${mutation}.`);
+                throw new Error(`Unknown action type for action: ${action}.`);
             }
         });
 
@@ -322,64 +321,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
             return;
         }
 
-        const { dataStream, textRuns = [], paragraphs = [] } = body;
-
-        const docBody: IDocumentBody = {
-            dataStream: dataStream.slice(startOffset, endOffset),
-        };
-
-        const newTextRuns: ITextRun[] = [];
-
-        for (const textRun of textRuns) {
-            const clonedTextRun = Tools.deepClone(textRun);
-            const { st, ed } = clonedTextRun;
-            if (Tools.hasIntersectionBetweenTwoRanges(st, ed, startOffset, endOffset)) {
-                if (startOffset >= st && startOffset <= ed) {
-                    newTextRuns.push({
-                        ...clonedTextRun,
-                        st: startOffset,
-                        ed: Math.min(endOffset, ed),
-                    });
-                } else if (endOffset >= st && endOffset <= ed) {
-                    newTextRuns.push({
-                        ...clonedTextRun,
-                        st: Math.max(startOffset, st),
-                        ed: endOffset,
-                    });
-                } else {
-                    newTextRuns.push(clonedTextRun);
-                }
-            }
-        }
-
-        if (newTextRuns.length) {
-            docBody.textRuns = newTextRuns.map((tr) => {
-                const { st, ed } = tr;
-                return {
-                    ...tr,
-                    st: st - startOffset,
-                    ed: ed - startOffset,
-                };
-            });
-        }
-
-        const newParagraphs: IParagraph[] = [];
-
-        for (const paragraph of paragraphs) {
-            const { startIndex } = paragraph;
-            if (startIndex >= startOffset && startIndex <= endOffset) {
-                newParagraphs.push(Tools.deepClone(paragraph));
-            }
-        }
-
-        if (newParagraphs.length) {
-            docBody.paragraphs = newParagraphs.map((p) => ({
-                ...p,
-                startIndex: p.startIndex - startOffset,
-            }));
-        }
-
-        return docBody;
+        return getBodySlice(body, startOffset, endOffset);
     }
 
     private _updateApply(

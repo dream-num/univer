@@ -19,6 +19,7 @@ import { TextX } from '../text-x';
 import type { IDocumentBody } from '../../../../types/interfaces/i-document-data';
 import { BooleanNumber } from '../../../../types/enum/text-style';
 import { UpdateDocsAttributeType } from '../../../../shared/command-enum';
+import { TextXActionType } from '../../action-types';
 
 describe('test TextX methods and branches', () => {
     describe('test TextX methods', () => {
@@ -43,7 +44,7 @@ describe('test TextX methods and branches', () => {
 
             expect(actions).toEqual([
                 {
-                    t: 'i',
+                    t: TextXActionType.INSERT,
                     body,
                     len: 5,
                     line: 0,
@@ -61,7 +62,7 @@ describe('test TextX methods and branches', () => {
 
             expect(actions).toEqual([
                 {
-                    t: 'd',
+                    t: TextXActionType.DELETE,
                     len: 5,
                     line: 0,
                     segmentId: '',
@@ -90,7 +91,7 @@ describe('test TextX methods and branches', () => {
 
             expect(actions).toEqual([
                 {
-                    t: 'r',
+                    t: TextXActionType.RETAIN,
                     body,
                     len: 5,
                     coverType: UpdateDocsAttributeType.COVER,
@@ -109,7 +110,7 @@ describe('test TextX methods and branches', () => {
 
             expect(actions).toEqual([
                 {
-                    t: 'd',
+                    t: TextXActionType.DELETE,
                     len: 10, // 5 + 5
                     line: 0,
                     segmentId: '',
@@ -140,14 +141,14 @@ describe('test TextX methods and branches', () => {
 
             expect(actions).toEqual([
                 {
-                    t: 'i',
+                    t: TextXActionType.INSERT,
                     body,
                     len: 5,
                     line: 0,
                     segmentId: '',
                 },
                 {
-                    t: 'd',
+                    t: TextXActionType.DELETE,
                     len: 5,
                     line: 0,
                     segmentId: '',
@@ -165,7 +166,7 @@ describe('test TextX methods and branches', () => {
 
             expect(actions).toEqual([
                 {
-                    t: 'r',
+                    t: TextXActionType.RETAIN,
                     len: 9,
                     segmentId: '',
                 },
@@ -176,11 +177,11 @@ describe('test TextX methods and branches', () => {
             const textX = new TextX();
 
             textX.push({
-                t: 'r',
+                t: TextXActionType.RETAIN,
                 len: 4,
                 segmentId: '',
             }, {
-                t: 'r',
+                t: TextXActionType.RETAIN,
                 len: 5,
                 segmentId: '',
             });
@@ -189,7 +190,7 @@ describe('test TextX methods and branches', () => {
 
             expect(actions).toEqual([
                 {
-                    t: 'r',
+                    t: TextXActionType.RETAIN,
                     len: 9,
                     segmentId: '',
                 },
@@ -212,18 +213,18 @@ describe('test TextX methods and branches', () => {
             };
 
             textX.push({
-                t: 'r',
+                t: TextXActionType.RETAIN,
                 len: 4,
                 segmentId: '',
             }, {
-                t: 'd',
+                t: TextXActionType.DELETE,
                 len: 5,
                 line: 0,
                 segmentId: '',
             });
 
             textX.push({
-                t: 'i',
+                t: TextXActionType.INSERT,
                 len: 5,
                 body,
                 line: 0,
@@ -233,9 +234,9 @@ describe('test TextX methods and branches', () => {
             const actions = textX.serialize();
 
             expect(actions.length).toBe(3);
-            expect(actions[0].t).toBe('r');
-            expect(actions[1].t).toBe('i');
-            expect(actions[2].t).toBe('d');
+            expect(actions[0].t).toBe(TextXActionType.RETAIN);
+            expect(actions[1].t).toBe(TextXActionType.INSERT);
+            expect(actions[2].t).toBe(TextXActionType.DELETE);
         });
     });
 });

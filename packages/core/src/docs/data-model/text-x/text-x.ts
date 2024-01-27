@@ -17,20 +17,73 @@
 import { Tools } from '../../../shared/tools';
 import type { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import type { IDocumentBody } from '../../../types/interfaces/i-document-data';
-import type { IDeleteAction, IInsertAction, IRetainAction, TextXAction } from '../mutation-types';
+import { type IDeleteAction, type IInsertAction, type IRetainAction, type TextXAction, TextXActionType } from '../action-types';
+import { ActionIterator } from './action-iterator';
+import { composeBody } from './utils';
+
+function onlyHasDataStream(body: IDocumentBody) {
+    return Object.keys(body).length === 1;
+}
 
 export class TextX {
-    // eslint-disable-next-line unused-imports/no-unused-vars
     static compose(thisActions: TextXAction[], otherActions: TextXAction[]): TextXAction[] {
-        // TODO: @jocs Implement this.
-        return [];
+        const thisIter = new ActionIterator(thisActions);
+        const otherIter = new ActionIterator(otherActions);
+
+        const textX = new TextX();
+
+        while (thisIter.hasNext() || otherIter.hasNext()) {
+            if (otherIter.peekType() === TextXActionType.INSERT) {
+                textX.push(otherIter.next());
+            } else if (thisIter.peekType() === TextXActionType.DELETE) {
+                textX.push(thisIter.next());
+            } else {
+                const length = Math.min(thisIter.peekLength(), otherIter.peekLength());
+                const thisAction = thisIter.next(length);
+                const otherAction = otherIter.next(length);
+
+                if (thisAction.t === TextXActionType.INSERT && otherAction.t === TextXActionType.RETAIN) {
+                    if (otherAction.body == null) {
+                        textX.push(thisAction);
+                    } else {
+                        textX.push({
+                            ...thisAction,
+                            body: composeBody(thisAction.body, otherAction.body, otherAction.coverType),
+                        });
+                    }
+                } else if (thisAction.t === TextXActionType.RETAIN && otherAction.t === TextXActionType.RETAIN) {
+                    if (thisAction.body == null && otherAction.body == null) {
+                        textX.push(thisAction); // or otherAction
+                    } else if (thisAction.body && otherAction.body) {
+                        textX.push({
+                            ...thisAction,
+                            body: composeBody(thisAction.body, otherAction.body, otherAction.coverType),
+                        });
+                    } else {
+                        textX.push(thisAction.body ? thisAction : otherAction);
+                    }
+                } else if (thisAction.t === TextXActionType.RETAIN && otherAction.t === TextXActionType.DELETE) {
+                    textX.push(otherAction);
+                } else if (thisAction.t === TextXActionType.INSERT && otherAction.t === TextXActionType.DELETE) {
+                    // Nothing need to do, they are just cancel off.
+                }
+                // else {
+                //     // I think exec will never go here.
+                //     throw new Error('unknown compose case');
+                // }
+            }
+        }
+
+        textX.trimEndUselessRetainAction();
+
+        return textX.serialize();
     }
 
     private _actions: TextXAction[] = [];
 
     insert(len: number, body: IDocumentBody, segmentId: string): this {
         const insertAction: IInsertAction = {
-            t: 'i',
+            t: TextXActionType.INSERT,
             body,
             len,
             line: 0, // hardcode
@@ -44,7 +97,7 @@ export class TextX {
 
     retain(len: number, segmentId: string, body?: IDocumentBody, coverType?: UpdateDocsAttributeType): this {
         const retainAction: IRetainAction = {
-            t: 'r',
+            t: TextXActionType.RETAIN,
             len,
             segmentId,
         };
@@ -64,7 +117,7 @@ export class TextX {
 
     delete(len: number, segmentId: string): this {
         const deleteAction: IDeleteAction = {
-            t: 'd',
+            t: TextXActionType.DELETE,
             len,
             line: 0, // hardcode
             segmentId,
@@ -95,7 +148,7 @@ export class TextX {
 
         if (typeof lastAction === 'object') {
             // if lastAction and newAction are both delete action, merge the two actions and return this.
-            if (lastAction.t === 'd' && newAction.t === 'd') {
+            if (lastAction.t === TextXActionType.DELETE && newAction.t === TextXActionType.DELETE) {
                 lastAction.len += newAction.len;
 
                 return this;
@@ -103,7 +156,7 @@ export class TextX {
 
             // Since it does not matter if we insert before or after deleting at the same index,
             // always prefer to insert first
-            if (lastAction.t === 'd' && newAction.t === 'i') {
+            if (lastAction.t === TextXActionType.DELETE && newAction.t === TextXActionType.INSERT) {
                 index -= 1;
                 lastAction = this._actions[index - 1];
 
@@ -115,8 +168,16 @@ export class TextX {
             }
 
             // if lastAction and newAction are both retain action and has no body, merge the two actions and return this.
-            if (lastAction.t === 'r' && newAction.t === 'r' && lastAction.body == null && newAction.body == null) {
+            if (lastAction.t === TextXActionType.RETAIN && newAction.t === TextXActionType.RETAIN && lastAction.body == null && newAction.body == null) {
                 lastAction.len += newAction.len;
+
+                return this;
+            }
+
+            // Both are insert action, and has no styles, merge it.
+            if (lastAction.t === TextXActionType.INSERT && onlyHasDataStream(lastAction.body) && newAction.t === TextXActionType.INSERT && onlyHasDataStream(newAction.body)) {
+                lastAction.len += newAction.len;
+                lastAction.body.dataStream += newAction.body.dataStream;
 
                 return this;
             }
@@ -126,6 +187,18 @@ export class TextX {
             this._actions.push(newAction);
         } else {
             this._actions.splice(index, 0, newAction);
+        }
+
+        return this;
+    }
+
+    trimEndUselessRetainAction(): this {
+        let lastAction = this._actions[this._actions.length - 1];
+
+        while (lastAction && lastAction.t === TextXActionType.RETAIN && lastAction.body == null) {
+            this._actions.pop();
+
+            lastAction = this._actions[this._actions.length - 1];
         }
 
         return this;

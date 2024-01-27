@@ -238,6 +238,8 @@ function checkCellValueType(v: Nullable<CellValue>): Nullable<CellValueType> {
     if (typeof v === 'string') {
         if (isSafeNumeric(v)) {
             return CellValueType.NUMBER;
+        } else if (isBooleanString(v)) {
+            return CellValueType.BOOLEAN;
         }
         return CellValueType.STRING;
     }
@@ -401,4 +403,8 @@ function isSafeNumeric(str: string) {
     }
 
     return Number(str) <= Number.MAX_SAFE_INTEGER;
+}
+
+function isBooleanString(str: string) {
+    return str.toUpperCase() === 'TRUE' || str.toUpperCase() === 'FALSE';
 }

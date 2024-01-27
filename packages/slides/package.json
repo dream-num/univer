@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/slides",
-    "version": "0.1.0-beta.2",
+    "version": "0.1.0-beta.3",
     "private": true,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
@@ -36,28 +36,27 @@
     "files": [
         "lib"
     ],
+    "engines": {
+        "node": ">=16.0.0",
+        "npm": ">=8.0.0"
+    },
     "scripts": {},
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": ">=0.12.12"
+        "@wendellhu/redi": ">=0.12.13"
     },
     "dependencies": {
-        "@univerjs/core": "workspace:*",
-        "@univerjs/engine-render": "workspace:*",
-        "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "^0.12.13"
     },
     "devDependencies": {
-        "@types/react": "^18.2.47",
-        "@univerjs/infra": "workspace:*",
-        "@vitejs/plugin-react": "^4.2.1",
-        "@vitest/coverage-istanbul": "^1.1.1",
+        "@univerjs/core": "workspace:*",
+        "@univerjs/engine-render": "workspace:*",
+        "@univerjs/shared": "workspace:*",
+        "@wendellhu/redi": "^0.12.13",
         "less": "^4.2.0",
         "typescript": "^5.3.3",
-        "vite": "^5.0.10",
-        "vite-plugin-dts": "^3.7.0",
-        "vitest": "^1.1.1"
+        "vite": "^5.0.12",
+        "vitest": "^1.2.1"
     }
 }

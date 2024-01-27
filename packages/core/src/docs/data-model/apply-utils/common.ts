@@ -34,6 +34,10 @@ export function normalizeTextRuns(textRuns: ITextRun[]) {
     for (const textRun of textRuns) {
         const { st, ed } = textRun;
 
+        if (textRun.sId === undefined) {
+            delete textRun.sId;
+        }
+
         if (st === ed) {
             continue;
         }

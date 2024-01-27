@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ArrayValueObject } from '../../..';
 import { ErrorType } from '../../../basics/error-type';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
@@ -83,26 +83,9 @@ export class Vlookup extends BaseFunction {
         rangeLookupValue: number
     ) {
         if (rangeLookupValue === 0) {
-            const resultValue = resultArray.pick(searchArray.isEqual(value) as ArrayValueObject).getFirstCell();
-            if (resultValue.isNull()) {
-                return new ErrorValueObject(ErrorType.NA);
-            }
-
-            return resultValue;
+            return this.equalSearch(value, searchArray, resultArray);
         }
 
-        const row = searchArray.binarySearch(value);
-
-        if (row == null) {
-            return new ErrorValueObject(ErrorType.NA);
-        }
-
-        const resultValue = resultArray.get(row, 0);
-
-        if (resultValue.isNull()) {
-            return new ErrorValueObject(ErrorType.NA);
-        }
-
-        return resultValue;
+        return this.binarySearch(value, searchArray, resultArray);
     }
 }

@@ -1159,14 +1159,15 @@ export class StringValueObject extends BaseValueObject {
             }
         } else if (typeof value === 'number') {
             switch (operator) {
-                case compareToken.EQUALS:
+                case compareToken.NOT_EQUAL:
                 case compareToken.GREATER_THAN:
                 case compareToken.GREATER_THAN_OR_EQUAL:
                     result = true;
                     break;
+
+                case compareToken.EQUALS:
                 case compareToken.LESS_THAN:
                 case compareToken.LESS_THAN_OR_EQUAL:
-                case compareToken.NOT_EQUAL:
                     result = false;
                     break;
             }

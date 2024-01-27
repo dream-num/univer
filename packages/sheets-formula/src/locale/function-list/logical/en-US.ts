@@ -16,8 +16,8 @@
 
 export default {
     AND: {
-        description: `Returns TRUE if all of its arguments are TRUE`,
-        abstract: `Returns TRUE if all of its arguments are TRUE`,
+        description: 'Returns TRUE if all of its arguments are TRUE',
+        abstract: 'Returns TRUE if all of its arguments are TRUE',
         links: [
             {
                 title: 'Instruction',
@@ -25,13 +25,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            logical1: { name: 'logical1', detail: 'The first condition that you want to test that can evaluate to either TRUE or FALSE.' },
+            logical2: { name: 'logical2', detail: 'Additional conditions that you want to test that can evaluate to either TRUE or FALSE, up to a maximum of 255 conditions.' },
         },
     },
     BYCOL: {
-        description: `Applies a&nbsp;LAMBDA&nbsp;to each column and returns an array of the results`,
-        abstract: `Applies a&nbsp;LAMBDA&nbsp;to each column and returns an array of the results`,
+        description: 'Applies a&nbsp;LAMBDA&nbsp;to each column and returns an array of the results',
+        abstract: 'Applies a&nbsp;LAMBDA&nbsp;to each column and returns an array of the results',
         links: [
             {
                 title: 'Instruction',
@@ -44,8 +44,8 @@ export default {
         },
     },
     BYROW: {
-        description: `Applies a&nbsp;LAMBDA&nbsp;to each row and returns an array of the results`,
-        abstract: `Applies a&nbsp;LAMBDA&nbsp;to each row and returns an array of the results`,
+        description: 'Applies a&nbsp;LAMBDA&nbsp;to each row and returns an array of the results',
+        abstract: 'Applies a&nbsp;LAMBDA&nbsp;to each row and returns an array of the results',
         links: [
             {
                 title: 'Instruction',
@@ -58,8 +58,8 @@ export default {
         },
     },
     FALSE: {
-        description: `Returns the logical value FALSE`,
-        abstract: `Returns the logical value FALSE`,
+        description: 'Returns the logical value FALSE',
+        abstract: 'Returns the logical value FALSE',
         links: [
             {
                 title: 'Instruction',
@@ -72,8 +72,8 @@ export default {
         },
     },
     IF: {
-        description: `Specifies a logical test to perform`,
-        abstract: `Specifies a logical test to perform`,
+        description: 'Specifies a logical test to perform',
+        abstract: 'Specifies a logical test to perform',
         links: [
             {
                 title: 'Instruction',
@@ -81,13 +81,20 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            logicalTest: { name: 'logical_test', detail: 'The condition you want to test.' },
+            valueIfTrue: {
+                name: 'value_if_true',
+                detail: 'The value that you want returned if the result of logical_test is TRUE.',
+            },
+            valueIfFalse: {
+                name: 'value_if_false',
+                detail: 'The value that you want returned if the result of logical_test is FALSE.',
+            },
         },
     },
     IFERROR: {
-        description: `Returns a value you specify if a formula evaluates to an error; otherwise, returns the result of the formula`,
-        abstract: `Returns a value you specify if a formula evaluates to an error; otherwise, returns the result of the formula`,
+        description: 'Returns a value you specify if a formula evaluates to an error; otherwise, returns the result of the formula',
+        abstract: 'Returns a value you specify if a formula evaluates to an error; otherwise, returns the result of the formula',
         links: [
             {
                 title: 'Instruction',
@@ -95,13 +102,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: 'value', detail: 'The argument that is checked for an error.' },
+            valueIfError: { name: 'value_if_error', detail: 'The value to return if the formula evaluates to an error. The following error types are evaluated: #N/A, #VALUE!, #REF!, #DIV/0!, #NUM!, #NAME?, or #NULL!.' },
         },
     },
     IFNA: {
-        description: `Returns the value you specify if the expression resolves to #N/A, otherwise returns the result of the expression`,
-        abstract: `Returns the value you specify if the expression resolves to #N/A, otherwise returns the result of the expression`,
+        description: 'Returns the value you specify if the expression resolves to #N/A, otherwise returns the result of the expression',
+        abstract: 'Returns the value you specify if the expression resolves to #N/A, otherwise returns the result of the expression',
         links: [
             {
                 title: 'Instruction',
@@ -114,8 +121,8 @@ export default {
         },
     },
     IFS: {
-        description: `Checks whether one or more conditions are met and returns a value that corresponds to the first TRUE condition.`,
-        abstract: `Checks whether one or more conditions are met and returns a value that corresponds to the first TRUE condition.`,
+        description: 'Checks whether one or more conditions are met and returns a value that corresponds to the first TRUE condition.',
+        abstract: 'Checks whether one or more conditions are met and returns a value that corresponds to the first TRUE condition.',
         links: [
             {
                 title: 'Instruction',
@@ -128,8 +135,8 @@ export default {
         },
     },
     LAMBDA: {
-        description: `Use a LAMBDA function to create custom, reusable functions and call them by a friendly name. The new function is available throughout the workbook and called like native Excel functions.`,
-        abstract: `Create custom, reusable functions and call them by a friendly name`,
+        description: 'Use a LAMBDA function to create custom, reusable functions and call them by a friendly name. The new function is available throughout the workbook and called like native Excel functions.',
+        abstract: 'Create custom, reusable functions and call them by a friendly name',
         links: [
             {
                 title: 'Instruction',
@@ -148,8 +155,8 @@ export default {
         },
     },
     LET: {
-        description: `Assigns names to calculation results`,
-        abstract: `Assigns names to calculation results`,
+        description: 'Assigns names to calculation results',
+        abstract: 'Assigns names to calculation results',
         links: [
             {
                 title: 'Instruction',
@@ -162,8 +169,8 @@ export default {
         },
     },
     MAKEARRAY: {
-        description: `Returns a&nbsp;calculated array of a specified row and column size, by applying a&nbsp;LAMBDA`,
-        abstract: `Returns a&nbsp;calculated array of a specified row and column size, by applying a&nbsp;LAMBDA`,
+        description: 'Returns a&nbsp;calculated array of a specified row and column size, by applying a&nbsp;LAMBDA',
+        abstract: 'Returns a&nbsp;calculated array of a specified row and column size, by applying a&nbsp;LAMBDA',
         links: [
             {
                 title: 'Instruction',
@@ -180,8 +187,8 @@ export default {
         },
     },
     MAP: {
-        description: `Returns an array&nbsp;formed by mapping&nbsp;each value in the array(s) to a new value by applying a&nbsp;LAMBDA&nbsp;to create a new value`,
-        abstract: `Returns an array&nbsp;formed by mapping&nbsp;each value in the array(s) to a new value by applying a&nbsp;LAMBDA&nbsp;to create a new value`,
+        description: 'Returns an array&nbsp;formed by mapping&nbsp;each value in the array(s) to a new value by applying a&nbsp;LAMBDA&nbsp;to create a new value',
+        abstract: 'Returns an array&nbsp;formed by mapping&nbsp;each value in the array(s) to a new value by applying a&nbsp;LAMBDA&nbsp;to create a new value',
         links: [
             {
                 title: 'Instruction',
@@ -194,8 +201,8 @@ export default {
         },
     },
     NOT: {
-        description: `Reverses the logic of its argument`,
-        abstract: `Reverses the logic of its argument`,
+        description: 'Reverses the logic of its argument',
+        abstract: 'Reverses the logic of its argument',
         links: [
             {
                 title: 'Instruction',
@@ -208,8 +215,8 @@ export default {
         },
     },
     OR: {
-        description: `Returns TRUE if any argument is TRUE`,
-        abstract: `Returns TRUE if any argument is TRUE`,
+        description: 'Returns TRUE if any argument is TRUE',
+        abstract: 'Returns TRUE if any argument is TRUE',
         links: [
             {
                 title: 'Instruction',
@@ -222,8 +229,8 @@ export default {
         },
     },
     REDUCE: {
-        description: `Reduces an array to an accumulated value by applying a&nbsp;LAMBDA&nbsp;to each value and returning the total value in the accumulator`,
-        abstract: `Reduces an array to an accumulated value by applying a&nbsp;LAMBDA&nbsp;to each value and returning the total value in the accumulator`,
+        description: 'Reduces an array to an accumulated value by applying a&nbsp;LAMBDA&nbsp;to each value and returning the total value in the accumulator',
+        abstract: 'Reduces an array to an accumulated value by applying a&nbsp;LAMBDA&nbsp;to each value and returning the total value in the accumulator',
         links: [
             {
                 title: 'Instruction',
@@ -236,8 +243,8 @@ export default {
         },
     },
     SCAN: {
-        description: `Scans&nbsp;an array by applying a&nbsp;LAMBDA&nbsp;to each value and returns an array that has each intermediate value`,
-        abstract: `Scans&nbsp;an array by applying a&nbsp;LAMBDA&nbsp;to each value and returns an array that has each intermediate value`,
+        description: 'Scans&nbsp;an array by applying a&nbsp;LAMBDA&nbsp;to each value and returns an array that has each intermediate value',
+        abstract: 'Scans&nbsp;an array by applying a&nbsp;LAMBDA&nbsp;to each value and returns an array that has each intermediate value',
         links: [
             {
                 title: 'Instruction',
@@ -250,8 +257,8 @@ export default {
         },
     },
     SWITCH: {
-        description: `Evaluates an expression against a list of values and returns the result corresponding to the first matching value. If there is no match, an optional default value may be returned.`,
-        abstract: `Evaluates an expression against a list of values and returns the result corresponding to the first matching value. If there is no match, an optional default value may be returned.`,
+        description: 'Evaluates an expression against a list of values and returns the result corresponding to the first matching value. If there is no match, an optional default value may be returned.',
+        abstract: 'Evaluates an expression against a list of values and returns the result corresponding to the first matching value. If there is no match, an optional default value may be returned.',
         links: [
             {
                 title: 'Instruction',
@@ -264,8 +271,8 @@ export default {
         },
     },
     TRUE: {
-        description: `Returns the logical value TRUE`,
-        abstract: `Returns the logical value TRUE`,
+        description: 'Returns the logical value TRUE',
+        abstract: 'Returns the logical value TRUE',
         links: [
             {
                 title: 'Instruction',
@@ -278,8 +285,8 @@ export default {
         },
     },
     XOR: {
-        description: `Returns a logical exclusive OR of all arguments`,
-        abstract: `Returns a logical exclusive OR of all arguments`,
+        description: 'Returns a logical exclusive OR of all arguments',
+        abstract: 'Returns a logical exclusive OR of all arguments',
         links: [
             {
                 title: 'Instruction',

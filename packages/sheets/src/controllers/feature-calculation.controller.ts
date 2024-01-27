@@ -36,7 +36,7 @@ export class FeatureCalculationController extends Disposable {
     ) {
         super();
 
-        this._initialize();
+        // this._initialize();
     }
 
     /**

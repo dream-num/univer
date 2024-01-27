@@ -165,7 +165,12 @@ export class TriggerCalculationController extends Disposable {
             }
 
             Object.keys(dirtyNameMap[unitId]!).forEach((sheetId) => {
-                allDirtyNameMap[unitId]![sheetId] = dirtyNameMap[unitId]?.[sheetId];
+                if (dirtyNameMap[unitId]?.[sheetId]) {
+                    if (allDirtyNameMap[unitId] == null) {
+                        allDirtyNameMap[unitId] = {};
+                    }
+                    allDirtyNameMap[unitId]![sheetId] = dirtyNameMap[unitId]![sheetId];
+                }
             });
         });
     }

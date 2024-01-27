@@ -21,8 +21,20 @@ export enum ArrayBinarySearchType {
     MAX,
 }
 
+export enum ArrayOrderSearchType {
+    NORMAL,
+    MIN,
+    MAX,
+}
+
 export function getCompare() {
-    return new Intl.Collator(undefined, { numeric: true }).compare;
+    if (Intl && Intl.Collator) {
+        return new Intl.Collator(undefined, { numeric: false }).compare;
+    }
+
+    return (a: string, b: string): number => {
+        return a.localeCompare(b);
+    };
 }
 
 export function isWildcard(str: string) {

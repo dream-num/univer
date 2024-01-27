@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IBoundRectNoAngle } from '../..';
 import type { IDocumentSkeletonLine, IDocumentSkeletonSpan } from '../../basics/i-document-skeleton-cached';
+import type { IBoundRectNoAngle } from '../../basics/vector2';
 import { ComponentExtension } from '../extension';
 
 export enum DOCS_EXTENSION_TYPE {

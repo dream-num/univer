@@ -32,6 +32,7 @@
         "hdmx",
         "Heiti",
         "Hiragino",
+        "Hlookup",
         "ilvl",
         "IRPC",
         "Jamo",
@@ -79,7 +80,9 @@
         "vlookup",
         "wendellhu",
         "Xingkai",
-        "Xinwei"
+        "Xinwei",
+        "Xlookup",
+        "XMATCH"
     ],
     "vsicons.presets.angular": false,
 
@@ -93,8 +96,7 @@
     // Auto fix
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": "explicit",
-        "source.organizeImports": "never",
-        "source.fixAll.stylelint": "explicit"
+        "source.organizeImports": "never"
     },
 
     // Silent the stylistic rules in you IDE, but still auto fix them
@@ -123,6 +125,8 @@
         "json",
         "jsonc",
         "yaml",
-        "toml"
+        "toml",
+        "less",
+        "css"
     ]
 }

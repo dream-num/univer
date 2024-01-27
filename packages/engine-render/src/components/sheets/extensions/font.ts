@@ -98,6 +98,9 @@ export class Font extends SheetExtension {
                         endX = mergeInfo.endX;
                     }
 
+                    /**
+                     * Incremental content rendering for texture mapping
+                     */
                     if (!this.isRenderDiffRangesByRow(mergeInfo.startRow, mergeInfo.endRow, diffRanges)) {
                         return true;
                     }

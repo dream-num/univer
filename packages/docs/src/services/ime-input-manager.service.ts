@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
+import { type Nullable, TextXActionType } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IDisposable } from '@wendellhu/redi';
 
@@ -62,39 +62,39 @@ export class IMEInputManagerService implements IDisposable {
 
         if (collapsed) {
             undoMutationParams.mutations.push({
-                t: 'r',
+                t: TextXActionType.RETAIN,
                 len: startOffset,
                 segmentId,
             });
             redoMutationParams.mutations.push({
-                t: 'r',
+                t: TextXActionType.RETAIN,
                 len: startOffset,
                 segmentId,
             });
         } else {
             if (startOffset > 0) {
                 undoMutationParams.mutations.push({
-                    t: 'r',
+                    t: TextXActionType.RETAIN,
                     len: startOffset,
                     segmentId,
                 });
             }
 
-            undoMutationParams.mutations.push(this._undoMutationParamsCache[0].mutations.find((m) => m.t === 'i')!);
+            undoMutationParams.mutations.push(this._undoMutationParamsCache[0].mutations.find((m) => m.t === TextXActionType.INSERT)!);
 
             redoMutationParams.mutations.push(...getRetainAndDeleteFromReplace(this._previousActiveRange, segmentId));
         }
 
         if (newText.length) {
             undoMutationParams.mutations.push({
-                t: 'd',
+                t: TextXActionType.DELETE,
                 len: newText.length,
                 line: 0,
                 segmentId,
             });
 
             redoMutationParams.mutations.push({
-                t: 'i',
+                t: TextXActionType.INSERT,
                 body: {
                     dataStream: newText,
                 },

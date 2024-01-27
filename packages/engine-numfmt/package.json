@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/engine-numfmt",
-    "version": "0.1.0-beta.2",
+    "version": "0.1.0-beta.3",
     "private": false,
     "description": "UniverSheet normal plugin UI manager",
     "author": "DreamNum <developer@univer.ai>",
@@ -36,6 +36,10 @@
     "files": [
         "lib"
     ],
+    "engines": {
+        "node": ">=16.0.0",
+        "npm": ">=8.0.0"
+    },
     "scripts": {
         "test": "vitest run",
         "test:watch": "vitest",
@@ -47,15 +51,13 @@
         "@univerjs/core": "workspace:*"
     },
     "dependencies": {
-        "@univerjs/core": "workspace:*",
         "numfmt": "^2.5.2"
     },
     "devDependencies": {
-        "@univerjs/infra": "workspace:*",
-        "@vitest/coverage-istanbul": "^1.1.1",
+        "@univerjs/core": "workspace:*",
+        "@univerjs/shared": "workspace:*",
         "typescript": "^5.3.3",
-        "vite": "^5.0.10",
-        "vite-plugin-dts": "^3.7.0",
-        "vitest": "^1.1.1"
+        "vite": "^5.0.12",
+        "vitest": "^1.2.1"
     }
 }

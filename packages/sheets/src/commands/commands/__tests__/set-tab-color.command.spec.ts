@@ -19,8 +19,8 @@ import { ICommandService, IUniverInstanceService, RedoCommand, UndoCommand } fro
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { SetTabColorMutation } from '../../..';
 import { SetTabColorCommand } from '../set-tab-color.command';
+import { SetTabColorMutation } from '../../mutations/set-tab-color.mutation';
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('Test tab color commands', () => {

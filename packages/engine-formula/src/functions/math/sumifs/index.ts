@@ -33,7 +33,7 @@ export class Sumifs extends BaseFunction {
         }
 
         // Range and criteria must be paired
-        if (variants.length % 2 !== 0) {
+        if (variants.length < 2 || variants.length % 2 !== 0) {
             return new ErrorValueObject(ErrorType.VALUE);
         }
 

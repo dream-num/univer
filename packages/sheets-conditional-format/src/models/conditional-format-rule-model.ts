@@ -137,6 +137,6 @@ export class ConditionalFormatRuleModel {
 
     createCfId(unitId: string, subUnitId: string) {
         const list = this._model.get(unitId)?.get(subUnitId);
-        return (list?.length || 0) + 1;
+        return `${(list?.length || 0) + 1}`;
     }
 }

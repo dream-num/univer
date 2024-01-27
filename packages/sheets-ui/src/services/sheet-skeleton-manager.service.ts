@@ -141,7 +141,6 @@ export class SheetSkeletonManagerService implements IDisposable {
 
     getOrCreateSkeleton(searchParam: ISheetSkeletonManagerSearch) {
         const skeleton = this._getCurrentBySearch(searchParam);
-        
         if (skeleton) {
             return skeleton.skeleton;
         }
@@ -161,7 +160,7 @@ export class SheetSkeletonManagerService implements IDisposable {
             dirty: false,
         });
 
-        return newSkeleton
+        return newSkeleton;
     }
 
     private _getCurrentBySearch(searchParm: ISheetSkeletonManagerSearch): Nullable<ISheetSkeletonManagerParam> {

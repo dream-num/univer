@@ -210,7 +210,7 @@ export class BaseFunction extends Disposable {
     }
 
     fuzzySearch(value: BaseValueObject, searchArray: ArrayValueObject, resultArray: ArrayValueObject, isFirst = true) {
-        const resultArrayValue = resultArray.pick(searchArray.wildcard(value, compareToken.EQUALS) as ArrayValueObject);
+        const resultArrayValue = resultArray.pick(searchArray.compare(value, compareToken.EQUALS) as ArrayValueObject);
 
         let resultValue: BaseValueObject;
 
@@ -306,7 +306,7 @@ export class BaseFunction extends Disposable {
         isFirst = true,
         axis = 0
     ) {
-        const matchObject = searchArray.wildcard(value, compareToken.EQUALS) as ArrayValueObject;
+        const matchObject = searchArray.compare(value, compareToken.EQUALS) as ArrayValueObject;
 
         let position: Nullable<{ row: number; column: number }>;
 

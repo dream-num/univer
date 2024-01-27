@@ -576,7 +576,7 @@ export class ArrayValueObject extends BaseValueObject {
 
             let matchObject: Nullable<BaseValueObject>;
             if (isFuzzyMatching === true) {
-                matchObject = itemValue.wildcard(valueObject as StringValueObject, compareToken.EQUALS);
+                matchObject = itemValue.compare(valueObject as StringValueObject, compareToken.EQUALS);
             } else {
                 matchObject = itemValue.isEqual(valueObject);
             }

@@ -15,7 +15,7 @@
  */
 
 import { TextX } from '@univerjs/core';
-import type { type Nullable, TextXAction } from '@univerjs/core';
+import type { Nullable, TextXAction } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IDisposable } from '@wendellhu/redi';
 

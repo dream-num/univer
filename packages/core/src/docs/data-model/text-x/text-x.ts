@@ -96,10 +96,6 @@ export class TextX {
     }
 
     retain(len: number, segmentId: string, body?: IDocumentBody, coverType?: UpdateDocsAttributeType): this {
-        if (len === 0 && body == null) {
-            return this;
-        }
-
         const retainAction: IRetainAction = {
             t: TextXActionType.RETAIN,
             len,

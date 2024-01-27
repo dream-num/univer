@@ -20,13 +20,7 @@ import { createRowColIter } from '../shared/row-col-iter';
 import { DEFAULT_WORKSHEET } from '../types/const';
 import type { SheetTypes } from '../types/enum';
 import { BooleanNumber } from '../types/enum';
-import type {
-    ICellData,
-    ICellDataForSheetInterceptor,
-    IFreeze,
-    IRange,
-    IWorksheetData,
-} from '../types/interfaces';
+import type { ICellData, ICellDataForSheetInterceptor, IFreeze, IRange, IWorksheetData } from '../types/interfaces';
 import { ColumnManager } from './column-manager';
 import { Range } from './range';
 import { RowManager } from './row-manager';
@@ -109,11 +103,13 @@ export class Worksheet {
     }
 
     /**
-     * get worksheet valued cell range
+     * get worksheet printable cell range
      * @returns
      */
     getCellMatrixPrintRange() {
         const matrix = this.getCellMatrix();
+        const mergedCells = this.getMergeData();
+
         let startRow = -1;
         let endRow = -1;
         let startColumn = -1;
@@ -121,21 +117,20 @@ export class Worksheet {
 
         let rowInitd = false;
         let columnInitd = false;
- 
         matrix.forEach((rowIndex, row) => {
             Object.keys(row).forEach((colIndexStr) => {
                 const colIndex = +colIndexStr;
-                const cellValue = matrix.getValue(rowIndex, colIndex);
-                const style = cellValue?.s ? this._styles.get(cellValue.s) : null
 
+                const cellValue = matrix.getValue(rowIndex, colIndex);
+                const style = cellValue?.s ? this._styles.get(cellValue.s) : null;
                 if (cellValue && (cellValue.v || cellValue.p || style?.bg || style?.bd)) {
-                    if (!rowInitd) {
-                        startRow = rowIndex;
-                        endRow = rowIndex;
-                        rowInitd = true;
+                    if (rowInitd) {
+                        startRow = Math.min(startRow, rowIndex);
                     } else {
-                        endRow = Math.max(rowIndex, endRow);
+                        startRow = rowIndex;
+                        rowInitd = true;
                     }
+                    endRow = Math.max(endRow, rowIndex);
 
                     if (columnInitd) {
                         startColumn = Math.min(startColumn, colIndex);
@@ -147,6 +142,24 @@ export class Worksheet {
                     endColumn = Math.max(endColumn, colIndex);
                 }
             });
+        });
+
+        mergedCells.forEach((mergedCell) => {
+            if (rowInitd) {
+                startRow = Math.min(startRow, mergedCell.startRow);
+            } else {
+                startRow = mergedCell.startRow;
+                rowInitd = true;
+            }
+            endRow = Math.max(endRow, mergedCell.endRow);
+
+            if (columnInitd) {
+                startColumn = Math.min(startColumn, mergedCell.startColumn);
+            } else {
+                startColumn = mergedCell.startColumn;
+                rowInitd = true;
+            }
+            endColumn = Math.max(endColumn, mergedCell.endColumn);
         });
 
         return {
@@ -285,15 +298,10 @@ export class Worksheet {
 
         // get all merged cells
         const mergedCellsInRange = this._snapshot.mergeData.filter((rect) =>
-            Rectangle.intersects(
-                { startRow: row, startColumn: col, endRow, endColumn: endCol },
-                rect
-            )
+            Rectangle.intersects({ startRow: row, startColumn: col, endRow, endColumn: endCol }, rect)
         );
 
-        const ret = new ObjectMatrix<
-            ICellData & { rowSpan?: number; colSpan?: number }
-        >();
+        const ret = new ObjectMatrix<ICellData & { rowSpan?: number; colSpan?: number }>();
 
         // iterate all cells in the range
         createRowColIter(row, endRow, col, endCol).forEach((row, col) => {
@@ -305,21 +313,19 @@ export class Worksheet {
 
         mergedCellsInRange.forEach((mergedCell) => {
             const { startColumn, startRow, endColumn, endRow } = mergedCell;
-            createRowColIter(startRow, endRow, startColumn, endColumn).forEach(
-                (row, col) => {
-                    if (row === startRow && col === startColumn) {
-                        ret.setValue(row, col, {
-                            ...matrix.getValue(row, col),
-                            rowSpan: endRow - startRow + 1,
-                            colSpan: endColumn - startColumn + 1,
-                        });
-                    }
-
-                    if (row !== startRow || col !== startColumn) {
-                        ret.realDeleteValue(row, col);
-                    }
+            createRowColIter(startRow, endRow, startColumn, endColumn).forEach((row, col) => {
+                if (row === startRow && col === startColumn) {
+                    ret.setValue(row, col, {
+                        ...matrix.getValue(row, col),
+                        rowSpan: endRow - startRow + 1,
+                        colSpan: endColumn - startColumn + 1,
+                    });
                 }
-            );
+
+                if (row !== startRow || col !== startColumn) {
+                    ret.realDeleteValue(row, col);
+                }
+            });
         });
 
         return ret;
@@ -327,18 +333,8 @@ export class Worksheet {
 
     getRange(range: IRange): Range;
     getRange(startRow: number, startColumn: number): Range;
-    getRange(
-        startRow: number,
-        startColumn: number,
-        endRow: number,
-        endColumn: number,
-    ): Range;
-    getRange(
-        startRowOrRange: number | IRange,
-        startColumn?: number,
-        endRow?: number,
-        endColumn?: number
-    ): Range {
+    getRange(startRow: number, startColumn: number, endRow: number, endColumn: number): Range;
+    getRange(startRowOrRange: number | IRange, startColumn?: number, endRow?: number, endColumn?: number): Range {
         if (typeof startRowOrRange === 'object') {
             return new Range(this, startRowOrRange, {
                 getStyles: () => this._styles,
@@ -581,12 +577,7 @@ export class Worksheet {
     }
 
     cellHasValue(value: ICellData) {
-        return (
-            value &&
-            (value.v !== undefined ||
-                value.f !== undefined ||
-                value.p !== undefined)
-        );
+        return value && (value.v !== undefined || value.f !== undefined || value.p !== undefined);
     }
 
     // #region iterators

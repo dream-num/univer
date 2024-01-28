@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { CellValueType, Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, Range,
-    Tools } from '@univerjs/core';
+import { CellValueType, Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, Range, Tools } from '@univerjs/core';
 import { INumfmtService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 import dayjs from 'dayjs';
@@ -280,7 +279,7 @@ export class ConditionalFormatService extends Disposable {
                     }
                 }
                 return pre;
-            }, {} as Record<string, any>);
+            }, {} as { style?: IHighlightCell['style'] } & { dataBar?: any;colorScale?: any });
             this._conditionalFormatViewModel.setCellComposeCache(unitId, subUnitId, row, col, result);
             return result;
         }

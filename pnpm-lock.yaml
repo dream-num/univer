@@ -951,12 +951,18 @@ importers:
       '@univerjs/design':
         specifier: workspace:*
         version: link:../design
+      '@univerjs/engine-render':
+        specifier: workspace:*
+        version: link:../engine-render
       '@univerjs/icons':
         specifier: ^0.1.26
         version: 0.1.26(react-dom@18.2.0)(react@18.2.0)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
+      '@univerjs/sheets-ui':
+        specifier: workspace:*
+        version: link:../sheets-ui
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui

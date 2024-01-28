@@ -14,16 +14,37 @@
  * limitations under the License.
  */
 
-import { LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
+import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
+import { IRenderManagerService } from '@univerjs/engine-render';
+
 import { ConditionalFormatService } from '../services/conditional-format.service';
+import { addCfRule } from '../commands/commands/command';
 
 @OnLifecycle(LifecycleStages.Rendered, RenderController)
 export class RenderController {
     constructor(@Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
-        @Inject(ConditionalFormatService) private _conditionalFormatService: ConditionalFormatService) {
+        @Inject(ConditionalFormatService) private _conditionalFormatService: ConditionalFormatService,
+        @Inject(ICommandService) private _commandService: ICommandService,
+        @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
+        @Inject(IRenderManagerService) private _renderManagerService: IRenderManagerService,
+
+        @Inject(SheetSkeletonManagerService) private _sheetSkeletonManagerService: SheetSkeletonManagerService) {
+        window.commandService = _commandService;
         this._initHighlightCell();
+        this._initSkeleton();
+    }
+
+    _initSkeleton() {
+        this._commandService.onCommandExecuted((commandInfo) => {
+            if (commandInfo.id === addCfRule.id) {
+                this._sheetSkeletonManagerService.reCalculate();
+                const unitId = this._univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+                this._renderManagerService.getRenderById(unitId)?.mainComponent?.makeDirty();
+            }
+        });
     }
 
     _initHighlightCell() {
@@ -33,13 +54,10 @@ export class RenderController {
             if (!result) {
                 return next(cell);
             }
-
-            if (result.style) {
-                if (result.style.b) {
-                    const s = (typeof cell?.s === 'object' && cell.s !== null) ? { ...cell.s } : {};
-                    s.bl = 1;
-                    return next({ ...cell, s });
-                }
+            const style = result.style;
+            if (style) {
+                const s = (typeof cell?.s === 'object' && cell.s !== null) ? { ...cell.s } : { ...style };
+                return next({ ...cell, s });
             }
 
             return next(cell);

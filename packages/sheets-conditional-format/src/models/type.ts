@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
+import type { BooleanNumber, IRange } from '@univerjs/core';
 import type { NumberOperator, RuleType, SubRuleType, TextOperator, TimePeriodOperator, ValueType } from '../base/const';
 
 export interface IBaseCfRule {
@@ -22,13 +22,9 @@ export interface IBaseCfRule {
 }
 export interface IHighlightCell extends IBaseCfRule {
     style: {
-        b?: boolean;
-        s?: boolean;
-        u?: boolean;
-        i?: boolean;
-        fontColor?: string;
-        backgroundColor?: string;
-        fontSize?: number;
+        bl?: BooleanNumber; //bold
+        it?: BooleanNumber; //italic
+        fs?: number; // fontSize
     };
     type: RuleType.highlightCell; // cellIs
     subType: SubRuleType;

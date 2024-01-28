@@ -39,9 +39,9 @@ export const addCfRule: ICommand = {
                                                  type: RuleType.highlightCell,
                                                  subType: SubRuleType.number,
                                                  operator: NumberOperator.greaterThan,
-                                                 value: 2,
+                                                 value: 5,
                                                  style: {
-                                                     b: true,
+                                                     bl: 1,
                                                  },
                                              } };
         conditionalFormatRuleModel.addRule(unitID, sheetId, rule);

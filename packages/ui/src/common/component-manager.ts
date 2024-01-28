@@ -79,6 +79,7 @@ import {
     PaintBucket,
     PasteSpecial,
     PipingSingle,
+    PrintSingle,
     RedoSingle,
     Reduce,
     RightBorder,
@@ -199,6 +200,7 @@ export class ComponentManager {
             LeftTridiagonalSingle,
             SlashSingle,
             RightDoubleDiagonalSingle,
+            PrintSingle,
         };
 
         for (const k in iconList) {

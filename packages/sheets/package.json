@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets",
-    "version": "0.1.0-beta.2",
+    "version": "0.1.0-beta.3",
     "private": false,
     "description": "UniverSheet normal base-sheets",
     "author": "DreamNum <developer@univer.ai>",
@@ -60,15 +60,12 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/infra": "workspace:*",
-        "@vitest/coverage-istanbul": "^1.2.1",
+        "@univerjs/shared": "workspace:*",
         "@wendellhu/redi": "^0.12.13",
-        "happy-dom": "^13.3.1",
         "less": "^4.2.0",
         "rxjs": "^7.8.1",
         "typescript": "^5.3.3",
         "vite": "^5.0.12",
-        "vite-plugin-dts": "^3.7.2",
         "vitest": "^1.2.1"
     }
 }

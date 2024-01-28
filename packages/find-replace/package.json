@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/find-replace",
-    "version": "0.1.0-beta.2",
+    "version": "0.1.0-beta.3",
     "private": false,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
@@ -63,17 +63,13 @@
         "@types/react": "^18.2.48",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
-        "@univerjs/infra": "workspace:*",
+        "@univerjs/shared": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@vitejs/plugin-react": "^4.2.1",
-        "@vitest/coverage-istanbul": "^1.2.1",
         "@wendellhu/redi": "^0.12.13",
-        "happy-dom": "^13.3.1",
         "react": "^18.2.0",
         "rxjs": "^7.8.1",
         "typescript": "^5.3.3",
         "vite": "^5.0.12",
-        "vite-plugin-dts": "^3.7.2",
         "vitest": "^1.2.1"
     }
 }

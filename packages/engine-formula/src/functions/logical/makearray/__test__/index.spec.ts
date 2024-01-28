@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-/* eslint-disable no-magic-numbers */
 import type { Injector } from '@wendellhu/redi';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import type { BaseValueObject } from '../../../..';
 import { Lexer } from '../../../../engine/analysis/lexer';
 import type { LexerNode } from '../../../../engine/analysis/lexer-node';
 import { AstTreeBuilder } from '../../../../engine/analysis/parser';
@@ -32,6 +30,7 @@ import { Multiply } from '../../../meta/multiply';
 import { FUNCTION_NAMES_LOGICAL } from '../../function-names';
 import { Lambda } from '../../lambda';
 import { Makearray } from '..';
+import type { BaseValueObject } from '../../../../engine/value-object/base-value-object';
 
 describe('Test makearray', () => {
     // const textFunction = new Makearray(FUNCTION_NAMES_LOGICAL.MAKEARRAY);

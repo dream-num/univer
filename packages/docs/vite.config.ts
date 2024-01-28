@@ -1,32 +1,8 @@
-import { resolve } from 'node:path';
-import { defineConfig } from 'vitest/config';
-import dts from 'vite-plugin-dts';
-import { name } from './package.json';
+import createViteConfig from '@univerjs/shared/vite';
+import pkg from './package.json';
 
-const libName = name
-    .replace('@univerjs/', 'univer-')
-    .split('-')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join('');
-
-export default defineConfig(({ mode }) => ({
-    plugins: [
-        dts({
-            entryRoot: 'src',
-            outDir: 'lib/types',
-        }),
-    ],
-    define: {
-        'process.env.NODE_ENV': JSON.stringify(mode),
-    },
+export default ({ mode }) => createViteConfig({
     build: {
-        outDir: 'lib',
-        lib: {
-            entry: resolve(__dirname, 'src/index.ts'),
-            name: libName,
-            fileName: (format) => `${format}/index.js`,
-            formats: ['es', 'umd', 'cjs'],
-        },
         rollupOptions: {
             external: [
                 '@univerjs/core',
@@ -48,10 +24,10 @@ export default defineConfig(({ mode }) => ({
             },
         },
     },
-    test: {
-        environment: 'happy-dom',
-        coverage: {
-            provider: 'istanbul',
-        },
+}, {
+    mode,
+    pkg,
+    features: {
+        dom: true, // FIXME: should not use dom here
     },
-}));
+});

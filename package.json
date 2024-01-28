@@ -1,7 +1,7 @@
 {
     "name": "univer",
     "type": "module",
-    "version": "0.1.0-beta.2",
+    "version": "0.1.0-beta.3",
     "private": true,
     "packageManager": "pnpm@8.6.2",
     "author": "DreamNum Inc. <developer@univer.ai>",
@@ -14,7 +14,6 @@
         "pre-commit": "lint-staged",
         "dev:demo": "turbo dev:demo",
         "dev:storybook": "storybook dev -p 6006 --no-open",
-        "lint:style": "stylelint **/*.less",
         "lint:types": "turbo lint:types",
         "test": "turbo test -- --passWithNoTests",
         "coverage": "turbo coverage -- --passWithNoTests",
@@ -26,8 +25,8 @@
     },
     "devDependencies": {
         "@antfu/eslint-config": "^2.6.3",
-        "@commitlint/cli": "^18.5.0",
-        "@commitlint/config-conventional": "^18.5.0",
+        "@commitlint/cli": "^18.6.0",
+        "@commitlint/config-conventional": "^18.6.0",
         "@playwright/test": "^1.41.1",
         "@storybook/addon-docs": "^7.6.10",
         "@storybook/addon-essentials": "^7.6.10",
@@ -37,36 +36,26 @@
         "@storybook/react": "^7.6.10",
         "@storybook/react-vite": "^7.6.10",
         "@storybook/testing-library": "^0.2.2",
-        "@types/node": "^20.11.6",
+        "@types/node": "^20.11.7",
         "@types/react": "^18.2.48",
         "@typescript-eslint/parser": "^6.19.1",
         "@univerjs/design": "workspace:*",
         "@vitejs/plugin-react": "^4.2.1",
         "eslint": "^8.56.0",
+        "eslint-plugin-format": "^0.1.0",
         "eslint-plugin-header": "^3.1.1",
         "eslint-plugin-react": "^7.33.2",
         "eslint-plugin-react-hooks": "^4.6.0",
         "eslint-plugin-react-refresh": "^0.4.5",
-        "husky": "^8.0.3",
+        "husky": "^9.0.6",
         "lint-staged": "^15.2.0",
-        "prettier": "^3.1.1",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "storybook": "^7.6.10",
-        "stylelint": "^15.11.0",
-        "stylelint-config-clean-order": "^5.2.0",
-        "stylelint-config-prettier": "^9.0.5",
-        "stylelint-config-standard": "^34.0.0",
-        "stylelint-config-standard-less": "^2.0.0",
         "turbo": "^1.11.3",
         "typescript": "^5.3.3"
     },
     "lint-staged": {
-        "**/src/**/*.{tsx,ts}": [
-            "eslint --fix"
-        ],
-        "**/*.less": [
-            "stylelint --fix"
-        ]
+        "*": "eslint --fix"
     }
 }

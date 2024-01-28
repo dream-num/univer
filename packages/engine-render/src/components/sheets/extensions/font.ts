@@ -23,6 +23,7 @@ import { SpreadsheetExtensionRegistry } from '../../extension';
 import type { IFontCacheItem } from '../interfaces';
 import type { SheetComponent } from '../sheet-component';
 import { getDocsSkeletonPageSize, type SpreadsheetSkeleton } from '../sheet-skeleton';
+import type { Spreadsheet } from '../spreadsheet';
 import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultFontExtension';
@@ -35,6 +36,10 @@ export class Font extends SheetExtension {
     override zIndex = EXTENSION_Z_INDEX;
 
     changeFontColor: ObjectMatrix<IColorStyle> = new ObjectMatrix();
+
+    get spreadsheet() {
+        return this.parent as Spreadsheet;
+    }
 
     getDocuments() {
         const parent = this.parent as SheetComponent;
@@ -133,12 +138,14 @@ export class Font extends SheetExtension {
                                 cellHeight - 2 / scale
                             );
                             ctx.clip();
-                            ctx.clearRect(
-                                startX + 1 / scale,
-                                startY + 1 / scale,
-                                cellWidth - 2 / scale,
-                                cellHeight - 2 / scale
-                            );
+                            if (this.spreadsheet.allowCache) {
+                                ctx.clearRect(
+                                    startX + 1 / scale,
+                                    startY + 1 / scale,
+                                    cellWidth - 2 / scale,
+                                    cellHeight - 2 / scale
+                                );
+                            }
                         } else {
                             if (horizontalAlign === HorizontalAlign.CENTER) {
                                 this._clipRectangle(
@@ -178,12 +185,15 @@ export class Font extends SheetExtension {
                     } else {
                         ctx.rect(startX + 1 / scale, startY + 1 / scale, cellWidth - 2 / scale, cellHeight - 2 / scale);
                         ctx.clip();
-                        ctx.clearRect(
-                            startX + 1 / scale,
-                            startY + 1 / scale,
-                            cellWidth - 2 / scale,
-                            cellHeight - 2 / scale
-                        );
+
+                        if (this.spreadsheet.allowCache) {
+                            ctx.clearRect(
+                                startX + 1 / scale,
+                                startY + 1 / scale,
+                                cellWidth - 2 / scale,
+                                cellHeight - 2 / scale
+                            );
+                        }
                     }
 
                     ctx.translate(startX, startY);
@@ -263,7 +273,9 @@ export class Font extends SheetExtension {
 
         ctx.rect(startX, startY, endX - startX, endY - startY);
         ctx.clip();
-        ctx.clearRect(startX, startY, endX - startX, endY - startY);
+        if (this.spreadsheet.allowCache) {
+            ctx.clearRect(startX, startY, endX - startX, endY - startY);
+        }
     }
 }
 

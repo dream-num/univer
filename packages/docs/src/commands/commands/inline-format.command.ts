@@ -25,6 +25,8 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
     MemoryCursor,
+    TextX,
+    TextXActionType,
 } from '@univerjs/core';
 import type { TextRange } from '@univerjs/engine-render';
 
@@ -174,6 +176,8 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
             },
         };
 
+        const textX = new TextX();
+
         const memoryCursor = new MemoryCursor();
 
         memoryCursor.reset();
@@ -197,15 +201,15 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
             const len = startOffset - memoryCursor.cursor;
 
             if (len !== 0) {
-                doMutation.params!.mutations.push({
-                    t: 'r',
+                textX.push({
+                    t: TextXActionType.RETAIN,
                     len,
                     segmentId,
                 });
             }
 
-            doMutation.params!.mutations.push({
-                t: 'r',
+            textX.push({
+                t: TextXActionType.RETAIN,
                 body,
                 len: endOffset - startOffset,
                 segmentId,
@@ -214,6 +218,8 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
             memoryCursor.reset();
             memoryCursor.moveCursor(endOffset);
         }
+
+        doMutation.params.mutations = textX.serialize();
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,

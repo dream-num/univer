@@ -33,7 +33,7 @@ export const FormLayout = (props: IFormLayoutProps) => {
     return (
         <div className={clsx(styles.formLayout, className)} style={style}>
             <div className={styles.formLayoutLabel}>{label}</div>
-            <div className={styles.formLayoutDesc}>{desc}</div>
+            {desc ? <div className={styles.formLayoutDesc}>{desc}</div> : null}
             <div className={styles.formLayoutContent}>{children}</div>
         </div>
     );

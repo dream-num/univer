@@ -213,8 +213,22 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            lookupValue: {
+                name: 'lookup_value',
+                detail: 'The value to be found in the first row of the table. Lookup_value can be a value, a reference, or a text string.',
+            },
+            tableArray: {
+                name: 'table_array',
+                detail: 'A table of information in which data is looked up. Use a reference to a range or a range name.',
+            },
+            rowIndexNum: {
+                name: 'row_index_num',
+                detail: 'The row number in table_array from which the matching value will be returned. A row_index_num of 1 returns the first row value in table_array, a row_index_num of 2 returns the second row value in table_array, and so on. ',
+            },
+            rangeLookup: {
+                name: 'range_lookup',
+                detail: 'A logical value that specifies whether you want HLOOKUP to find an exact match or an approximate match.',
+            },
         },
     },
     HSTACK: {
@@ -288,7 +302,7 @@ export default {
         },
     },
     LOOKUP: {
-        description: `Looks up values in a vector or array`,
+        description: `When you need to look in a single row or column and find a value from the same position in a second row or column`,
         abstract: `Looks up values in a vector or array`,
         links: [
             {
@@ -297,8 +311,18 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            lookupValue: {
+                name: 'lookup_value',
+                detail: 'A value that LOOKUP searches for in the first vector. Lookup_value can be a number, text, a logical value, or a name or reference that refers to a value.',
+            },
+            lookupVectorOrArray: {
+                name: 'lookup_vectorOrArray',
+                detail: 'A range that contains only one row or one column',
+            },
+            resultVector: {
+                name: 'result_vector',
+                detail: 'A range that contains only one row or column. The result_vector argument must be the same size as lookup_vector.',
+            },
         },
     },
     MATCH: {
@@ -549,8 +573,24 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            lookupValue: {
+                name: 'lookup_value',
+                detail: 'The value to search for, If omitted, XLOOKUP returns blank cells it finds in lookup_array. ',
+            },
+            lookupArray: { name: 'lookup_array', detail: 'The array or range to search' },
+            returnArray: { name: 'return_array', detail: 'The array or range to return' },
+            ifNotFound: {
+                name: '[if_not_found]',
+                detail: 'Where a valid match is not found, return the [if_not_found] text you supply. If a valid match is not found, and [if_not_found] is missing, #N/A is returned.',
+            },
+            matchMode: {
+                name: '[match_mode]',
+                detail: `Specify the match type: 0 - Exact match. If none found, return #N/A. This is the default. -1 - Exact match. If none found, return the next smaller item. 1 - Exact match. If none found, return the next larger item. 2 - A wildcard match where *, ?, and ~ have special meaning.`,
+            },
+            searchMode: {
+                name: '[search_mode]',
+                detail: `Specify the search mode to use: 1 - Perform a search starting at the first item. This is the default. -1 - Perform a reverse search starting at the last item. 2 - Perform a binary search that relies on lookup_array being sorted in ascending order. If not sorted, invalid results will be returned. -2 - Perform a binary search that relies on lookup_array being sorted in descending order. If not sorted, invalid results will be returned.`,
+            },
         },
     },
     XMATCH: {

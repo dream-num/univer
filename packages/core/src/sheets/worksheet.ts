@@ -103,6 +103,74 @@ export class Worksheet {
     }
 
     /**
+     * get worksheet printable cell range
+     * @returns
+     */
+    getCellMatrixPrintRange() {
+        const matrix = this.getCellMatrix();
+        const mergedCells = this.getMergeData();
+
+        let startRow = -1;
+        let endRow = -1;
+        let startColumn = -1;
+        let endColumn = -1;
+
+        let rowInitd = false;
+        let columnInitd = false;
+        matrix.forEach((rowIndex, row) => {
+            Object.keys(row).forEach((colIndexStr) => {
+                const colIndex = +colIndexStr;
+
+                const cellValue = matrix.getValue(rowIndex, colIndex);
+                const style = cellValue?.s ? this._styles.get(cellValue.s) : null;
+                if (cellValue && (cellValue.v || cellValue.p || style?.bg || style?.bd)) {
+                    if (rowInitd) {
+                        startRow = Math.min(startRow, rowIndex);
+                    } else {
+                        startRow = rowIndex;
+                        rowInitd = true;
+                    }
+                    endRow = Math.max(endRow, rowIndex);
+
+                    if (columnInitd) {
+                        startColumn = Math.min(startColumn, colIndex);
+                    } else {
+                        columnInitd = true;
+                        startColumn = colIndex;
+                    }
+
+                    endColumn = Math.max(endColumn, colIndex);
+                }
+            });
+        });
+
+        mergedCells.forEach((mergedCell) => {
+            if (rowInitd) {
+                startRow = Math.min(startRow, mergedCell.startRow);
+            } else {
+                startRow = mergedCell.startRow;
+                rowInitd = true;
+            }
+            endRow = Math.max(endRow, mergedCell.endRow);
+
+            if (columnInitd) {
+                startColumn = Math.min(startColumn, mergedCell.startColumn);
+            } else {
+                startColumn = mergedCell.startColumn;
+                rowInitd = true;
+            }
+            endColumn = Math.max(endColumn, mergedCell.endColumn);
+        });
+
+        return {
+            startColumn,
+            startRow,
+            endColumn,
+            endRow,
+        };
+    }
+
+    /**
      * Returns Row Manager
      * @returns Row Manager
      */
@@ -161,7 +229,17 @@ export class Worksheet {
         const rectList = [];
         for (let i = 0; i < _rectangleList.length; i++) {
             const range = _rectangleList[i];
-            if (Rectangle.intersects({ startRow: row, startColumn: col, endRow: row, endColumn: col }, range)) {
+            if (
+                Rectangle.intersects(
+                    {
+                        startRow: row,
+                        startColumn: col,
+                        endRow: row,
+                        endColumn: col,
+                    },
+                    range
+                )
+            ) {
                 rectList.push(range);
             }
         }
@@ -173,7 +251,17 @@ export class Worksheet {
         const rectangleList = this._snapshot.mergeData;
         for (let i = 0; i < rectangleList.length; i++) {
             const range = rectangleList[i];
-            if (Rectangle.intersects({ startRow: row, startColumn: col, endRow: row, endColumn: col }, range)) {
+            if (
+                Rectangle.intersects(
+                    {
+                        startRow: row,
+                        startColumn: col,
+                        endRow: row,
+                        endColumn: col,
+                    },
+                    range
+                )
+            ) {
                 return range;
             }
         }
@@ -361,7 +449,7 @@ export class Worksheet {
      * Returns true if the sheet's gridlines are hidden; otherwise returns false. Gridlines are visible by default.
      * @returns Gridlines Hidden Status
      */
-    hasHiddenGridlines(): Boolean {
+    hasHiddenGridlines(): boolean {
         const { _snapshot: _config } = this;
         const { showGridlines } = _config;
         if (showGridlines === 0) {

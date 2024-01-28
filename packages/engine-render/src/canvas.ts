@@ -16,12 +16,18 @@
 
 import { getDevicePixelRatio } from './basics/draw';
 import { createCanvasElement } from './basics/tools';
-import { UniverRenderingContext } from './context';
+import { UniverPrintingContext, UniverRenderingContext } from './context';
+
+export enum CanvasRenderMode {
+    Rendering,
+    Printing,
+}
 
 interface ICanvasProps {
     width?: number;
     height?: number;
     pixelRatio?: number;
+    mode?: CanvasRenderMode;
 }
 
 /**
@@ -29,10 +35,10 @@ interface ICanvasProps {
  * Usually you don't need to use it manually.
  * @constructor
  * @abstract
- * @param {Object} props
- * @param {Number} props.width
- * @param {Number} props.height
- * @param {Number} props.pixelRatio
+ * @param {object} props
+ * @param {number} props.width
+ * @param {number} props.height
+ * @param {number} props.pixelRatio
  */
 export class Canvas {
     isCache = false;
@@ -65,7 +71,11 @@ export class Canvas {
         this._canvasEle.style.touchAction = 'none';
         this._canvasEle.style.outline = '0';
 
-        this._context = new UniverRenderingContext(this._canvasEle?.getContext('2d')!);
+        if (props.mode === CanvasRenderMode.Printing) {
+            this._context = new UniverPrintingContext(this._canvasEle?.getContext('2d')!);
+        } else {
+            this._context = new UniverRenderingContext(this._canvasEle?.getContext('2d')!);
+        }
 
         this.setSize(props.width, props.height, props.pixelRatio);
     }
@@ -142,9 +152,9 @@ export class Canvas {
     /**
      * to data url
      * @method
-     * @param {String} mimeType
-     * @param {Number} quality between 0 and 1 for jpg mime types
-     * @returns {String} data url string
+     * @param {string} mimeType
+     * @param {number} quality between 0 and 1 for jpg mime types
+     * @returns {string} data url string
      */
     toDataURL(mimeType: string, quality: number) {
         try {

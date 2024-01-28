@@ -16,8 +16,8 @@
 
 export default {
     ASC: {
-        description: `Changes full-width (double-byte) English letters or katakana within a character string to half-width (single-byte) characters`,
-        abstract: `Changes full-width (double-byte) English letters or katakana within a character string to half-width (single-byte) characters`,
+        description: 'Changes full-width (double-byte) English letters or katakana within a character string to half-width (single-byte) characters',
+        abstract: 'Changes full-width (double-byte) English letters or katakana within a character string to half-width (single-byte) characters',
         links: [
             {
                 title: 'Instruction',
@@ -30,8 +30,8 @@ export default {
         },
     },
     ARRAYTOTEXT: {
-        description: `Returns an array of text values from any specified range`,
-        abstract: `Returns an array of text values from any specified range`,
+        description: 'Returns an array of text values from any specified range',
+        abstract: 'Returns an array of text values from any specified range',
         links: [
             {
                 title: 'Instruction',
@@ -44,8 +44,8 @@ export default {
         },
     },
     BAHTTEXT: {
-        description: `Converts a number to text, using the ß (baht) currency format`,
-        abstract: `Converts a number to text, using the ß (baht) currency format`,
+        description: 'Converts a number to text, using the ß (baht) currency format',
+        abstract: 'Converts a number to text, using the ß (baht) currency format',
         links: [
             {
                 title: 'Instruction',
@@ -58,8 +58,8 @@ export default {
         },
     },
     CHAR: {
-        description: `Returns the character specified by the code number`,
-        abstract: `Returns the character specified by the code number`,
+        description: 'Returns the character specified by the code number',
+        abstract: 'Returns the character specified by the code number',
         links: [
             {
                 title: 'Instruction',
@@ -72,8 +72,8 @@ export default {
         },
     },
     CLEAN: {
-        description: `Removes all nonprintable characters from text`,
-        abstract: `Removes all nonprintable characters from text`,
+        description: 'Removes all nonprintable characters from text',
+        abstract: 'Removes all nonprintable characters from text',
         links: [
             {
                 title: 'Instruction',
@@ -86,8 +86,8 @@ export default {
         },
     },
     CODE: {
-        description: `Returns a numeric code for the first character in a text string`,
-        abstract: `Returns a numeric code for the first character in a text string`,
+        description: 'Returns a numeric code for the first character in a text string',
+        abstract: 'Returns a numeric code for the first character in a text string',
         links: [
             {
                 title: 'Instruction',
@@ -100,8 +100,8 @@ export default {
         },
     },
     CONCAT: {
-        description: `Combines the text from multiple ranges and/or strings, but it doesn't provide the delimiter or IgnoreEmpty arguments.`,
-        abstract: `Combines the text from multiple ranges and/or strings, but it doesn't provide the delimiter or IgnoreEmpty arguments.`,
+        description: 'Combines the text from multiple ranges and/or strings, but it doesn\'t provide the delimiter or IgnoreEmpty arguments.',
+        abstract: 'Combines the text from multiple ranges and/or strings, but it doesn\'t provide the delimiter or IgnoreEmpty arguments.',
         links: [
             {
                 title: 'Instruction',
@@ -114,8 +114,8 @@ export default {
         },
     },
     CONCATENATE: {
-        description: `Joins several text items into one text item`,
-        abstract: `Joins several text items into one text item`,
+        description: 'Joins several text items into one text item',
+        abstract: 'Joins several text items into one text item',
         links: [
             {
                 title: 'Instruction',
@@ -123,13 +123,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text1: { name: 'text1', detail: 'The first item to join. The item can be a text value, number, or cell reference.' },
+            text2: { name: 'text2', detail: 'Additional text items to join. You can have up to 255 items, up to a total of 8,192 characters.' },
         },
     },
     DBCS: {
-        description: `Changes half-width (single-byte) English letters or katakana within a character string to full-width (double-byte) characters`,
-        abstract: `Changes half-width (single-byte) English letters or katakana within a character string to full-width (double-byte) characters`,
+        description: 'Changes half-width (single-byte) English letters or katakana within a character string to full-width (double-byte) characters',
+        abstract: 'Changes half-width (single-byte) English letters or katakana within a character string to full-width (double-byte) characters',
         links: [
             {
                 title: 'Instruction',
@@ -142,8 +142,8 @@ export default {
         },
     },
     DOLLAR: {
-        description: `Converts a number to text, using the $ (dollar) currency format`,
-        abstract: `Converts a number to text, using the $ (dollar) currency format`,
+        description: 'Converts a number to text, using the $ (dollar) currency format',
+        abstract: 'Converts a number to text, using the $ (dollar) currency format',
         links: [
             {
                 title: 'Instruction',
@@ -156,8 +156,8 @@ export default {
         },
     },
     EXACT: {
-        description: `Checks to see if two text values are identical`,
-        abstract: `Checks to see if two text values are identical`,
+        description: 'Checks to see if two text values are identical',
+        abstract: 'Checks to see if two text values are identical',
         links: [
             {
                 title: 'Instruction',
@@ -170,8 +170,8 @@ export default {
         },
     },
     FIND: {
-        description: `Finds one text value within another (case-sensitive)`,
-        abstract: `Finds one text value within another (case-sensitive)`,
+        description: 'Finds one text value within another (case-sensitive)',
+        abstract: 'Finds one text value within another (case-sensitive)',
         links: [
             {
                 title: 'Instruction',
@@ -184,8 +184,8 @@ export default {
         },
     },
     FINDB: {
-        description: `Finds one text value within another (case-sensitive)`,
-        abstract: `Finds one text value within another (case-sensitive)`,
+        description: 'Finds one text value within another (case-sensitive)',
+        abstract: 'Finds one text value within another (case-sensitive)',
         links: [
             {
                 title: 'Instruction',
@@ -198,8 +198,8 @@ export default {
         },
     },
     FIXED: {
-        description: `Formats a number as text with a fixed number of decimals`,
-        abstract: `Formats a number as text with a fixed number of decimals`,
+        description: 'Formats a number as text with a fixed number of decimals',
+        abstract: 'Formats a number as text with a fixed number of decimals',
         links: [
             {
                 title: 'Instruction',
@@ -212,8 +212,8 @@ export default {
         },
     },
     LEFT: {
-        description: `Returns the leftmost characters from a text value`,
-        abstract: `Returns the leftmost characters from a text value`,
+        description: 'Returns the leftmost characters from a text value',
+        abstract: 'Returns the leftmost characters from a text value',
         links: [
             {
                 title: 'Instruction',
@@ -226,8 +226,8 @@ export default {
         },
     },
     LEFTB: {
-        description: `Returns the leftmost characters from a text value`,
-        abstract: `Returns the leftmost characters from a text value`,
+        description: 'Returns the leftmost characters from a text value',
+        abstract: 'Returns the leftmost characters from a text value',
         links: [
             {
                 title: 'Instruction',
@@ -240,8 +240,8 @@ export default {
         },
     },
     LEN: {
-        description: `Returns the number of characters in a text string`,
-        abstract: `Returns the number of characters in a text string`,
+        description: 'Returns the number of characters in a text string',
+        abstract: 'Returns the number of characters in a text string',
         links: [
             {
                 title: 'Instruction',
@@ -254,8 +254,8 @@ export default {
         },
     },
     LENB: {
-        description: `Returns the number of characters in a text string`,
-        abstract: `Returns the number of characters in a text string`,
+        description: 'Returns the number of characters in a text string',
+        abstract: 'Returns the number of characters in a text string',
         links: [
             {
                 title: 'Instruction',
@@ -268,8 +268,8 @@ export default {
         },
     },
     LOWER: {
-        description: `Converts text to lowercase`,
-        abstract: `Converts text to lowercase`,
+        description: 'Converts text to lowercase',
+        abstract: 'Converts text to lowercase',
         links: [
             {
                 title: 'Instruction',
@@ -282,8 +282,8 @@ export default {
         },
     },
     MID: {
-        description: `Returns a specific number of characters from a text string starting at the position you specify`,
-        abstract: `Returns a specific number of characters from a text string starting at the position you specify`,
+        description: 'Returns a specific number of characters from a text string starting at the position you specify',
+        abstract: 'Returns a specific number of characters from a text string starting at the position you specify',
         links: [
             {
                 title: 'Instruction',
@@ -296,8 +296,8 @@ export default {
         },
     },
     MIDB: {
-        description: `Returns a specific number of characters from a text string starting at the position you specify`,
-        abstract: `Returns a specific number of characters from a text string starting at the position you specify`,
+        description: 'Returns a specific number of characters from a text string starting at the position you specify',
+        abstract: 'Returns a specific number of characters from a text string starting at the position you specify',
         links: [
             {
                 title: 'Instruction',
@@ -310,8 +310,8 @@ export default {
         },
     },
     NUMBERVALUE: {
-        description: `Converts text to number in a locale-independent manner`,
-        abstract: `Converts text to number in a locale-independent manner`,
+        description: 'Converts text to number in a locale-independent manner',
+        abstract: 'Converts text to number in a locale-independent manner',
         links: [
             {
                 title: 'Instruction',
@@ -324,8 +324,8 @@ export default {
         },
     },
     PHONETIC: {
-        description: `Extracts the phonetic (furigana) characters from a text string`,
-        abstract: `Extracts the phonetic (furigana) characters from a text string`,
+        description: 'Extracts the phonetic (furigana) characters from a text string',
+        abstract: 'Extracts the phonetic (furigana) characters from a text string',
         links: [
             {
                 title: 'Instruction',
@@ -338,8 +338,8 @@ export default {
         },
     },
     PROPER: {
-        description: `Capitalizes the first letter in each word of a text value`,
-        abstract: `Capitalizes the first letter in each word of a text value`,
+        description: 'Capitalizes the first letter in each word of a text value',
+        abstract: 'Capitalizes the first letter in each word of a text value',
         links: [
             {
                 title: 'Instruction',
@@ -352,8 +352,8 @@ export default {
         },
     },
     REPLACE: {
-        description: `Replaces characters within text`,
-        abstract: `Replaces characters within text`,
+        description: 'Replaces characters within text',
+        abstract: 'Replaces characters within text',
         links: [
             {
                 title: 'Instruction',
@@ -366,8 +366,8 @@ export default {
         },
     },
     REPLACEB: {
-        description: `Replaces characters within text`,
-        abstract: `Replaces characters within text`,
+        description: 'Replaces characters within text',
+        abstract: 'Replaces characters within text',
         links: [
             {
                 title: 'Instruction',
@@ -380,8 +380,8 @@ export default {
         },
     },
     REPT: {
-        description: `Repeats text a given number of times`,
-        abstract: `Repeats text a given number of times`,
+        description: 'Repeats text a given number of times',
+        abstract: 'Repeats text a given number of times',
         links: [
             {
                 title: 'Instruction',
@@ -394,8 +394,8 @@ export default {
         },
     },
     RIGHT: {
-        description: `Returns the rightmost characters from a text value`,
-        abstract: `Returns the rightmost characters from a text value`,
+        description: 'Returns the rightmost characters from a text value',
+        abstract: 'Returns the rightmost characters from a text value',
         links: [
             {
                 title: 'Instruction',
@@ -408,8 +408,8 @@ export default {
         },
     },
     RIGHTB: {
-        description: `Returns the rightmost characters from a text value`,
-        abstract: `Returns the rightmost characters from a text value`,
+        description: 'Returns the rightmost characters from a text value',
+        abstract: 'Returns the rightmost characters from a text value',
         links: [
             {
                 title: 'Instruction',
@@ -422,8 +422,8 @@ export default {
         },
     },
     SEARCH: {
-        description: `Finds one text value within another (not case-sensitive)`,
-        abstract: `Finds one text value within another (not case-sensitive)`,
+        description: 'Finds one text value within another (not case-sensitive)',
+        abstract: 'Finds one text value within another (not case-sensitive)',
         links: [
             {
                 title: 'Instruction',
@@ -436,8 +436,8 @@ export default {
         },
     },
     SEARCHB: {
-        description: `Finds one text value within another (not case-sensitive)`,
-        abstract: `Finds one text value within another (not case-sensitive)`,
+        description: 'Finds one text value within another (not case-sensitive)',
+        abstract: 'Finds one text value within another (not case-sensitive)',
         links: [
             {
                 title: 'Instruction',
@@ -450,8 +450,8 @@ export default {
         },
     },
     SUBSTITUTE: {
-        description: `Substitutes new text for old text in a text string`,
-        abstract: `Substitutes new text for old text in a text string`,
+        description: 'Substitutes new text for old text in a text string',
+        abstract: 'Substitutes new text for old text in a text string',
         links: [
             {
                 title: 'Instruction',
@@ -464,8 +464,8 @@ export default {
         },
     },
     T: {
-        description: `Converts its arguments to text`,
-        abstract: `Converts its arguments to text`,
+        description: 'Converts its arguments to text',
+        abstract: 'Converts its arguments to text',
         links: [
             {
                 title: 'Instruction',
@@ -478,8 +478,8 @@ export default {
         },
     },
     TEXT: {
-        description: `Formats a number and converts it to text`,
-        abstract: `Formats a number and converts it to text`,
+        description: 'Formats a number and converts it to text',
+        abstract: 'Formats a number and converts it to text',
         links: [
             {
                 title: 'Instruction',
@@ -492,8 +492,8 @@ export default {
         },
     },
     TEXTAFTER: {
-        description: `Returns text that occurs after given character or string`,
-        abstract: `Returns text that occurs after given character or string`,
+        description: 'Returns text that occurs after given character or string',
+        abstract: 'Returns text that occurs after given character or string',
         links: [
             {
                 title: 'Instruction',
@@ -506,8 +506,8 @@ export default {
         },
     },
     TEXTBEFORE: {
-        description: `Returns text that occurs before a given character or string`,
-        abstract: `Returns text that occurs before a given character or string`,
+        description: 'Returns text that occurs before a given character or string',
+        abstract: 'Returns text that occurs before a given character or string',
         links: [
             {
                 title: 'Instruction',
@@ -520,8 +520,8 @@ export default {
         },
     },
     TEXTJOIN: {
-        description: `Text: Combines the text from multiple ranges and/or strings`,
-        abstract: `Text: Combines the text from multiple ranges and/or strings`,
+        description: 'Text: Combines the text from multiple ranges and/or strings',
+        abstract: 'Text: Combines the text from multiple ranges and/or strings',
         links: [
             {
                 title: 'Instruction',
@@ -534,8 +534,8 @@ export default {
         },
     },
     TEXTSPLIT: {
-        description: `Splits text strings by using column and row delimiters`,
-        abstract: `Splits text strings by using column and row delimiters`,
+        description: 'Splits text strings by using column and row delimiters',
+        abstract: 'Splits text strings by using column and row delimiters',
         links: [
             {
                 title: 'Instruction',
@@ -548,8 +548,8 @@ export default {
         },
     },
     TRIM: {
-        description: `Removes spaces from text`,
-        abstract: `Removes spaces from text`,
+        description: 'Removes spaces from text',
+        abstract: 'Removes spaces from text',
         links: [
             {
                 title: 'Instruction',
@@ -562,8 +562,8 @@ export default {
         },
     },
     UNICHAR: {
-        description: `Returns the Unicode character that is references by the given numeric value`,
-        abstract: `Returns the Unicode character that is references by the given numeric value`,
+        description: 'Returns the Unicode character that is references by the given numeric value',
+        abstract: 'Returns the Unicode character that is references by the given numeric value',
         links: [
             {
                 title: 'Instruction',
@@ -576,8 +576,8 @@ export default {
         },
     },
     UNICODE: {
-        description: `Returns the number (code point) that corresponds to the first character of the text`,
-        abstract: `Returns the number (code point) that corresponds to the first character of the text`,
+        description: 'Returns the number (code point) that corresponds to the first character of the text',
+        abstract: 'Returns the number (code point) that corresponds to the first character of the text',
         links: [
             {
                 title: 'Instruction',
@@ -590,8 +590,8 @@ export default {
         },
     },
     UPPER: {
-        description: `Converts text to uppercase`,
-        abstract: `Converts text to uppercase`,
+        description: 'Converts text to uppercase',
+        abstract: 'Converts text to uppercase',
         links: [
             {
                 title: 'Instruction',
@@ -604,8 +604,8 @@ export default {
         },
     },
     VALUE: {
-        description: `Converts a text argument to a number`,
-        abstract: `Converts a text argument to a number`,
+        description: 'Converts a text argument to a number',
+        abstract: 'Converts a text argument to a number',
         links: [
             {
                 title: 'Instruction',
@@ -618,8 +618,8 @@ export default {
         },
     },
     VALUETOTEXT: {
-        description: `Returns text from any specified value`,
-        abstract: `Returns text from any specified value`,
+        description: 'Returns text from any specified value',
+        abstract: 'Returns text from any specified value',
         links: [
             {
                 title: 'Instruction',
@@ -632,8 +632,8 @@ export default {
         },
     },
     CALL: {
-        description: `Calls a procedure in a dynamic link library or code resource`,
-        abstract: `Calls a procedure in a dynamic link library or code resource`,
+        description: 'Calls a procedure in a dynamic link library or code resource',
+        abstract: 'Calls a procedure in a dynamic link library or code resource',
         links: [
             {
                 title: 'Instruction',
@@ -646,8 +646,8 @@ export default {
         },
     },
     EUROCONVERT: {
-        description: `Converts a number to euros, converts a number from euros to a euro member currency, or converts a number from one euro member currency to another by using the euro as an intermediary (triangulation)`,
-        abstract: `Converts a number to euros, converts a number from euros to a euro member currency, or converts a number from one euro member currency to another by using the euro as an intermediary (triangulation)`,
+        description: 'Converts a number to euros, converts a number from euros to a euro member currency, or converts a number from one euro member currency to another by using the euro as an intermediary (triangulation)',
+        abstract: 'Converts a number to euros, converts a number from euros to a euro member currency, or converts a number from one euro member currency to another by using the euro as an intermediary (triangulation)',
         links: [
             {
                 title: 'Instruction',
@@ -660,8 +660,8 @@ export default {
         },
     },
     REGISTER_ID: {
-        description: `Returns the register ID of the specified dynamic link library (DLL) or code resource that has been previously registered`,
-        abstract: `Returns the register ID of the specified dynamic link library (DLL) or code resource that has been previously registered`,
+        description: 'Returns the register ID of the specified dynamic link library (DLL) or code resource that has been previously registered',
+        abstract: 'Returns the register ID of the specified dynamic link library (DLL) or code resource that has been previously registered',
         links: [
             {
                 title: 'Instruction',

@@ -67,6 +67,7 @@ export { IMessageService } from './services/message/message.service';
 export { DesktopNotificationService } from './services/notification/desktop-notification.service';
 export { INotificationService } from './services/notification/notification.service';
 export { DesktopPlatformService, IPlatformService } from './services/platform/platform.service';
+export * from './services/print';
 export { KeyCode, MetaKeys } from './services/shortcut/keycode';
 export { DesktopShortcutService, type IShortcutItem, IShortcutService } from './services/shortcut/shortcut.service';
 export { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';

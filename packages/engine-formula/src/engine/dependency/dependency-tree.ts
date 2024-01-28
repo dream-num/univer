@@ -48,9 +48,9 @@ export class FormulaDependencyTree extends Disposable {
 
     column: number = -1;
 
-    rowCount: number = -Infinity;
+    rowCount: number = Number.NEGATIVE_INFINITY;
 
-    columnCount: number = -Infinity;
+    columnCount: number = Number.NEGATIVE_INFINITY;
 
     subUnitId: string = '';
 
@@ -130,6 +130,14 @@ export class FormulaDependencyTree extends Disposable {
             const unitRange = this.rangeList[r];
             const { unitId, sheetId, range } = unitRange;
 
+            /**
+             * When a worksheet is inserted or deleted,
+             * the formulas that depend on these worksheets need to be calculated.
+             */
+            if (dirtyUnitSheetNameMap[unitId]?.[sheetId] != null) {
+                return true;
+            }
+
             if (!dependencyRangeList.has(unitId)) {
                 continue;
             }
@@ -160,11 +168,11 @@ export class FormulaDependencyTree extends Disposable {
             }
 
             if (isNaN(rangeEndRow)) {
-                rangeEndRow = Infinity;
+                rangeEndRow = Number.POSITIVE_INFINITY;
             }
 
             if (isNaN(rangeEndColumn)) {
-                rangeEndColumn = Infinity;
+                rangeEndColumn = Number.POSITIVE_INFINITY;
             }
 
             for (const dependencyRange of dependencyRanges) {
@@ -199,14 +207,6 @@ export class FormulaDependencyTree extends Disposable {
                         return true;
                     }
                 }
-            }
-
-            /**
-             * When a worksheet is inserted or deleted,
-             * the formulas that depend on these worksheets need to be calculated.
-             */
-            if (dirtyUnitSheetNameMap[unitId]?.[sheetId] != null) {
-                return true;
             }
         }
 

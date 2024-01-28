@@ -29,6 +29,7 @@ import { Toolbar } from './components/doc-bars/Toolbar';
 import { Sidebar } from './components/sidebar/Sidebar';
 import { ZenZone } from './components/zen-zone/ZenZone';
 import { globalComponents } from './parts';
+import { Print } from './components/print/Print';
 
 export interface IUniverAppProps extends IWorkbenchOptions {
     mountContainer: HTMLElement;
@@ -39,7 +40,6 @@ export interface IUniverAppProps extends IWorkbenchOptions {
     onRendered?: (container: HTMLElement) => void;
 }
 
-// eslint-disable-next-line max-lines-per-function
 export function App(props: IUniverAppProps) {
     const localeService = useDependency(LocaleService);
     const themeService = useDependency(ThemeService);
@@ -137,7 +137,7 @@ export function App(props: IUniverAppProps) {
                     <ZenZone />
                 </section>
             </div>
-
+            <Print />
             <ComponentContainer components={globalComponents} />
         </ConfigProvider>
     );

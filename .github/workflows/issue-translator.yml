@@ -4,7 +4,7 @@ on:
     issue_comment:
         types: [created]
     issues:
-        types: [opened]
+        types: [opened, reopened]
 
 jobs:
     build:
@@ -12,3 +12,5 @@ jobs:
 
         steps:
             - uses: usthe/issues-translate-action@v2.7
+              with:
+                  IS_MODIFY_TITLE: true

@@ -162,6 +162,10 @@ export class Worksheet {
             endColumn = Math.max(endColumn, mergedCell.endColumn);
         });
 
+        if(!rowInitd || !columnInitd){
+            return null
+        }
+
         return {
             startColumn,
             startRow,

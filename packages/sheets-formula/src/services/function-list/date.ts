@@ -419,20 +419,6 @@ export const FUNCTION_LIST_DATE: IFunctionInfo[] = [
         description: 'formula.functionList.TODAY.description',
         abstract: 'formula.functionList.TODAY.abstract',
         functionParameter: [
-            {
-                name: 'formula.functionList.TODAY.functionParameter.number1.name',
-                detail: 'formula.functionList.TODAY.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.TODAY.functionParameter.number2.name',
-                detail: 'formula.functionList.TODAY.functionParameter.number2.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
         ],
     },
     {

@@ -277,8 +277,6 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
         },
     },
     WEEKDAY: {
@@ -338,7 +336,7 @@ export default {
         },
     },
     YEAR: {
-        description: '将序列号转换为年',
+        description: '返回对应于某个日期的年份。 Year 作为 1900 - 9999 之间的整数返回。',
         abstract: '将序列号转换为年',
         links: [
             {
@@ -347,8 +345,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            serialNumber: { name: '日期序列号', detail: '要查找的年份的日期。 应使用 DATE 函数输入日期，或者将日期作为其他公式或函数的结果输入。 例如，使用函数 DATE(2008,5,23) 输入 2008 年 5 月 23 日。 如果日期以文本形式输入，则会出现问题。' },
         },
     },
     YEARFRAC: {

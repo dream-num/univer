@@ -15,13 +15,16 @@
  */
 
 import type { ICommandInfo, IUnitRange } from '@univerjs/core';
-import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, ICommandService, LifecycleStages, ObjectMatrix, OnLifecycle, Tools } from '@univerjs/core';
 import type {
     IDirtyUnitFeatureMap,
     IDirtyUnitSheetNameMap,
+    IFormulaDataItem,
+    INumfmtItemMap,
     ISetFormulaCalculationNotificationMutation,
 } from '@univerjs/engine-formula';
 import {
+    FormulaDataModel,
     FormulaExecutedStateType,
     SetFormulaCalculationNotificationMutation,
     SetFormulaCalculationStartMutation,
@@ -29,11 +32,13 @@ import {
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import {
     ClearSelectionFormatCommand,
+    INumfmtService,
     SetBorderCommand,
     SetRangeValuesMutation,
     SetStyleCommand,
 } from '@univerjs/sheets';
 
+import { Inject } from '@wendellhu/redi';
 import { IActiveDirtyManagerService } from '../services/active-dirty-manager.service';
 
 @OnLifecycle(LifecycleStages.Ready, TriggerCalculationController)
@@ -48,7 +53,9 @@ export class TriggerCalculationController extends Disposable {
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @IActiveDirtyManagerService private readonly _activeDirtyManagerService: IActiveDirtyManagerService
+        @IActiveDirtyManagerService private readonly _activeDirtyManagerService: IActiveDirtyManagerService,
+        @Inject(INumfmtService) private readonly _numfmtService: INumfmtService,
+        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
     ) {
         super();
 
@@ -126,6 +133,7 @@ export class TriggerCalculationController extends Disposable {
         const allDirtyRanges: IUnitRange[] = [];
         const allDirtyNameMap: IDirtyUnitSheetNameMap = {};
         const allDirtyUnitFeatureMap: IDirtyUnitFeatureMap = {};
+        const numfmtItemMap: INumfmtItemMap = {};
 
         for (const command of commands) {
             const conversion = this._activeDirtyManagerService.get(command.id);
@@ -151,10 +159,68 @@ export class TriggerCalculationController extends Disposable {
             }
         }
 
+        // number format data
+        allDirtyRanges.forEach((dirtyRange) => {
+            const { unitId, sheetId } = dirtyRange;
+
+            if (numfmtItemMap[unitId] == null) {
+                numfmtItemMap[unitId] = {};
+            }
+
+            if (numfmtItemMap[unitId]![sheetId] == null) {
+                numfmtItemMap[unitId]![sheetId] = {};
+            }
+
+            if (!Tools.isEmptyObject(numfmtItemMap[unitId]![sheetId])) {
+                return;
+            }
+
+            const numfmtItem = this._numfmtService.getModel(unitId, sheetId);
+            if (!numfmtItem) return;
+
+            numfmtItem.forValue((row, col, numfmt) => {
+                if (numfmt) {
+                    if (numfmtItemMap[unitId]![sheetId][row] == null) {
+                        numfmtItemMap[unitId]![sheetId][row] = {};
+                    }
+
+                    numfmtItemMap[unitId]![sheetId][row][col] = numfmt.i;
+                }
+            });
+        });
+
+        const formulaData = this._formulaDataModel.getFormulaData();
+        Object.keys(formulaData).forEach((unitId) => {
+            const unitData = formulaData[unitId];
+            if (!unitData) return;
+            Object.keys(unitData).forEach((sheetId) => {
+                const sheetData = unitData[sheetId];
+                const formulaDataItemMatrix = new ObjectMatrix<IFormulaDataItem>(sheetData);
+                formulaDataItemMatrix.forValue((row, col, formulaDataItem) => {
+                    if (formulaDataItem?.n) {
+                        if (numfmtItemMap[unitId] == null) {
+                            numfmtItemMap[unitId] = {};
+                        }
+
+                        if (numfmtItemMap[unitId]![sheetId] == null) {
+                            numfmtItemMap[unitId]![sheetId] = {};
+                        }
+
+                        if (numfmtItemMap[unitId]![sheetId][row] == null) {
+                            numfmtItemMap[unitId]![sheetId][row] = {};
+                        }
+
+                        numfmtItemMap[unitId]![sheetId][row][col] = formulaDataItem.n;
+                    }
+                });
+            });
+        });
+
         return {
             dirtyRanges: allDirtyRanges,
             dirtyNameMap: allDirtyNameMap,
             dirtyUnitFeatureMap: allDirtyUnitFeatureMap,
+            numfmtItemMap,
         };
     }
 

@@ -28,6 +28,7 @@ export default ({ mode }) => createViteConfig({
                     '@univerjs/engine-render': 'UniverEngineRender',
                     '@univerjs/sheets': 'UniverSheets',
                     '@univerjs/sheets-ui': 'UniverSheetsUi',
+                    '@univerjs/sheets-numfmt': 'UniverSheetsNumfmt',
                     '@univerjs/ui': 'UniverUi',
                     '@wendellhu/redi': '@wendellhu/redi',
                     '@wendellhu/redi/react-bindings': '@wendellhu/redi/react-bindings',

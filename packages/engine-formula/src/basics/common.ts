@@ -100,6 +100,10 @@ export interface IOtherFormulaData {
     [unitId: string]: Nullable<{ [subUnitId: string]: Nullable<{ [formulaId: string]: IFormulaDataItem }> }>;
 }
 
+export interface INumfmtItemMap {
+    [unitId: string]: Nullable<{ [sheetId: string]: IObjectMatrixPrimitiveType<string> }>;
+}
+
 /**
  * @f  formulaString, the text string of the formula.
  * @si The formula ID can be utilized in scenarios such as copy-pasting and drag-filling to convert formulas into references, eliminating the need for recreating the formulaString.
@@ -109,6 +113,7 @@ export interface IFormulaDataItem {
     x?: number; // Offset from x direction
     y?: number; // Offset from y direction
     si?: string; // formulaId,
+    p?: string; // number format
     // row: number;
     // column: number;
     // sheetId: string;
@@ -139,6 +144,7 @@ export interface IFormulaDatasetConfig {
     dirtyRanges: IUnitRange[];
     dirtyNameMap: IDirtyUnitSheetNameMap;
     dirtyUnitFeatureMap: IDirtyUnitFeatureMap;
+    numfmtItemMap: INumfmtItemMap;
     excludedCell?: IUnitExcludedCell;
     allUnitData?: IUnitData;
     unitSheetNameMap?: IUnitSheetNameMap;

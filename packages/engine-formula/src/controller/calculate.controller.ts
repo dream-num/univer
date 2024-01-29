@@ -18,7 +18,7 @@ import type { ICommandInfo, IUnitRange } from '@univerjs/core';
 import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
-import type { IDirtyUnitFeatureMap, IDirtyUnitSheetNameMap, IFormulaData } from '../basics/common';
+import type { IDirtyUnitFeatureMap, IDirtyUnitSheetNameMap, IFormulaData, INumfmtItemMap } from '../basics/common';
 import type { ISetArrayFormulaDataMutationParams } from '../commands/mutations/set-array-formula-data.mutation';
 import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
 import type { ISetFormulaCalculationStartMutation } from '../commands/mutations/set-formula-calculation.mutation';
@@ -69,9 +69,9 @@ export class CalculateController extends Disposable {
                     if (params.forceCalculation === true) {
                         this._calculate(true);
                     } else {
-                        const { dirtyRanges, dirtyNameMap, dirtyUnitFeatureMap } = params;
+                        const { dirtyRanges, dirtyNameMap, dirtyUnitFeatureMap, numfmtItemMap } = params;
 
-                        this._calculate(false, dirtyRanges, dirtyNameMap, dirtyUnitFeatureMap);
+                        this._calculate(false, dirtyRanges, dirtyNameMap, dirtyUnitFeatureMap, numfmtItemMap);
                     }
                 } else if (command.id === SetArrayFormulaDataMutation.id) {
                     const params = command.params as ISetArrayFormulaDataMutationParams;
@@ -92,7 +92,8 @@ export class CalculateController extends Disposable {
         forceCalculate: boolean = false,
         dirtyRanges: IUnitRange[] = [],
         dirtyNameMap: IDirtyUnitSheetNameMap = {},
-        dirtyUnitFeatureMap: IDirtyUnitFeatureMap = {}
+        dirtyUnitFeatureMap: IDirtyUnitFeatureMap = {},
+        numfmtItemMap: INumfmtItemMap = {}
     ) {
         if (
             dirtyRanges.length === 0 &&
@@ -116,6 +117,7 @@ export class CalculateController extends Disposable {
             dirtyRanges,
             dirtyNameMap,
             dirtyUnitFeatureMap,
+            numfmtItemMap,
         });
     }
 

@@ -277,8 +277,6 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
         },
     },
     WEEKDAY: {
@@ -338,7 +336,7 @@ export default {
         },
     },
     YEAR: {
-        description: 'シリアル値を年に変換します。',
+        description: '日付に対応する年を返します。 戻り値は、1900 (年) ～ 9999 (年) の範囲の整数となります。',
         abstract: 'シリアル値を年に変換します。',
         links: [
             {
@@ -347,8 +345,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            serialNumber: { name: 'シリアル値', detail: '検索する年の日付を指定します。 日付は、DATE 関数を使って入力するか、他の数式または他の関数の結果として指定します。 たとえば、2008 年 5 月 23 日を入力する場合は、DATE(2008,5,23) を使用します。 日付を文字列として入力した場合、エラーが発生することがあります。' },
         },
     },
     YEARFRAC: {

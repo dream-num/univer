@@ -14,40 +14,14 @@
  * limitations under the License.
  */
 
-import { Disposable } from '@univerjs/core';
-
-export class ObjectClassType extends Disposable {
-    pattern: string = '';
-
-    getPattern() {
-        return this.pattern;
-    }
-
-    setPattern(pattern: string) {
-        this.pattern = pattern;
-    }
-
-    isError() {
-        return false;
-    }
-
-    isAsyncObject() {
-        return false;
-    }
-
-    isAsyncArrayObject() {
-        return false;
-    }
-
-    isReferenceObject() {
-        return false;
-    }
-
-    isValueObject() {
-        return false;
-    }
-
-    isEqualType(object: ObjectClassType) {
-        return false;
-    }
+/**
+ * Excel stores dates as sequential serial numbers so they can be used in calculations. By default, January 1, 1900 is serial number 1, and January 1, 2008 is serial number 39448 because it is 39,447 days after January 1, 1900.
+ *
+ * @param date
+ * @returns
+ */
+export function excelDateSerial(date: Date): number {
+    const baseDate = new Date(1900, 0, 1); // January 1, 1900
+    const dayDifference = (date.getTime() - baseDate.getTime()) / (1000 * 3600 * 24);
+    return Math.ceil(dayDifference) + 1; // +1 for adjusting for Excel's 1900 leap year error
 }

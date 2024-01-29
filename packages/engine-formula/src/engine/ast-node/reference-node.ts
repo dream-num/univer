@@ -71,6 +71,8 @@ export class ReferenceNode extends BaseAstNode {
 
         this._referenceObject.setRuntimeData(runtimeService.getUnitData());
 
+        this._referenceObject.setNumfmtItemData(currentConfigService.getNumfmtItemMap());
+
         this._referenceObject.setRuntimeArrayFormulaCellData(runtimeService.getRuntimeArrayFormulaCellData());
 
         this._referenceObject.setRuntimeFeatureCellData(runtimeService.getRuntimeFeatureCellData());

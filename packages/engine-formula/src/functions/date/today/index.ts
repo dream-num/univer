@@ -14,40 +14,13 @@
  * limitations under the License.
  */
 
-import { Disposable } from '@univerjs/core';
+import { NumberValueObject } from '../../..';
+import { excelDateSerial } from '../../../basics/date';
+import { BaseFunction } from '../../base-function';
 
-export class ObjectClassType extends Disposable {
-    pattern: string = '';
-
-    getPattern() {
-        return this.pattern;
-    }
-
-    setPattern(pattern: string) {
-        this.pattern = pattern;
-    }
-
-    isError() {
-        return false;
-    }
-
-    isAsyncObject() {
-        return false;
-    }
-
-    isAsyncArrayObject() {
-        return false;
-    }
-
-    isReferenceObject() {
-        return false;
-    }
-
-    isValueObject() {
-        return false;
-    }
-
-    isEqualType(object: ObjectClassType) {
-        return false;
+export class Today extends BaseFunction {
+    override calculate() {
+        const currentSerial = excelDateSerial(new Date());
+        return new NumberValueObject(currentSerial);
     }
 }

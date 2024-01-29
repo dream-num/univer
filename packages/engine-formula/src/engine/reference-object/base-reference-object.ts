@@ -18,7 +18,7 @@ import type { ICellData, IRange, Nullable } from '@univerjs/core';
 import { CellValueType, isNullCell } from '@univerjs/core';
 
 import { FormulaAstLRU } from '../../basics/cache-lru';
-import type { IRuntimeUnitDataType, IUnitData, IUnitSheetNameMap } from '../../basics/common';
+import type { INumfmtItemMap, IRuntimeUnitDataType, IUnitData, IUnitSheetNameMap } from '../../basics/common';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { ObjectClassType } from '../../basics/object-class-type';
 import { ArrayValueObject, ValueObjectFactory } from '../value-object/array-value-object';
@@ -65,6 +65,8 @@ export class BaseReferenceObject extends ObjectClassType {
     private _runtimeArrayFormulaCellData: IRuntimeUnitDataType = {};
 
     private _runtimeFeatureCellData: { [featureId: string]: IRuntimeUnitDataType } = {};
+
+    private _numfmtItemData: INumfmtItemMap = {};
 
     private _refOffsetX = 0;
 
@@ -289,6 +291,14 @@ export class BaseReferenceObject extends ObjectClassType {
         this._runtimeFeatureCellData = unitData;
     }
 
+    getNmfmtItemData() {
+        return this._numfmtItemData;
+    }
+
+    setNumfmtItemData(numfmtItemData: INumfmtItemMap) {
+        this._numfmtItemData = numfmtItemData;
+    }
+
     getRowCount() {
         return this.getCurrentActiveSheetData().rowCount;
     }
@@ -462,6 +472,10 @@ export class BaseReferenceObject extends ObjectClassType {
             }
 
             arrayValueList[row][column] = valueObject;
+
+            if (rowIndex === startRow && columnIndex === startColumn) {
+                return false;
+            }
         });
 
         const arrayValueObjectData: IArrayValueObject = {

@@ -14,40 +14,22 @@
  * limitations under the License.
  */
 
-import { Disposable } from '@univerjs/core';
+import { describe, expect, it, vi } from 'vitest';
 
-export class ObjectClassType extends Disposable {
-    pattern: string = '';
+import { FUNCTION_NAMES_DATE } from '../../function-names';
+import { Today } from '..';
 
-    getPattern() {
-        return this.pattern;
-    }
+// mock new Date() use V
+const _Date = Date;
+global.Date = vi.fn(() => new _Date('2024-01-01T00:00:00.000Z')) as any;
 
-    setPattern(pattern: string) {
-        this.pattern = pattern;
-    }
+describe('Test today function', () => {
+    const textFunction = new Today(FUNCTION_NAMES_DATE.TODAY);
 
-    isError() {
-        return false;
-    }
-
-    isAsyncObject() {
-        return false;
-    }
-
-    isAsyncArrayObject() {
-        return false;
-    }
-
-    isReferenceObject() {
-        return false;
-    }
-
-    isValueObject() {
-        return false;
-    }
-
-    isEqualType(object: ObjectClassType) {
-        return false;
-    }
-}
+    describe('Today', () => {
+        it('Value is normal', () => {
+            const result = textFunction.calculate();
+            expect(result.getValue()).toBe(1);
+        });
+    });
+});

@@ -277,8 +277,6 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
         },
     },
     WEEKDAY: {
@@ -338,7 +336,7 @@ export default {
         },
     },
     YEAR: {
-        description: 'Converts a serial number to a year',
+        description: 'Returns the year corresponding to a date. The year is returned as an integer in the range 1900-9999.',
         abstract: 'Converts a serial number to a year',
         links: [
             {
@@ -347,8 +345,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            serialNumber: { name: 'Serial Number', detail: 'The date of the year you want to find. Dates should be entered by using the DATE function, or as results of other formulas or functions. For example, use DATE(2008,5,23) for the 23rd day of May, 2008. Problems can occur if dates are entered as text.' },
         },
     },
     YEARFRAC: {

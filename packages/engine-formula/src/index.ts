@@ -26,6 +26,7 @@ export type {
     ISheetData,
     IUnitData,
     IUnitSheetNameMap,
+    INumfmtItemMap,
 } from './basics/common';
 export { isInDirtyRange } from './basics/dirty';
 export { ErrorType } from './basics/error-type';

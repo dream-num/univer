@@ -27,7 +27,7 @@ import {
     toDisposable,
 } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IScrollObserverParam, Viewport } from '@univerjs/engine-render';
-import { CURSOR_TYPE, IRenderManagerService, Rect, Vector2 } from '@univerjs/engine-render';
+import { CURSOR_TYPE, IRenderManagerService, Rect, TRANSFORM_CHANGE_OBSERVABLE_TYPE, Vector2 } from '@univerjs/engine-render';
 import type {
     IMoveColsCommandParams,
     IMoveRowsCommandParams,
@@ -175,6 +175,8 @@ export class FreezeController extends Disposable {
         this._interceptorCommands();
 
         this._bindViewportScroll();
+
+        this._zoomRefresh();
     }
 
     private _createFreeze(
@@ -1422,6 +1424,22 @@ export class FreezeController extends Disposable {
                 }
             })
         );
+    }
+
+    private _zoomRefresh() {
+        const sheetObject = this._getSheetObject();
+        if (sheetObject == null) {
+            return;
+        }
+        const { scene } = sheetObject;
+
+        scene.onTransformChangeObservable.add((state) => {
+            if (state.type !== TRANSFORM_CHANGE_OBSERVABLE_TYPE.scale) {
+                return;
+            }
+
+            this._refreshCurrent();
+        });
     }
 
     private _clearObserverEvent() {

@@ -57,7 +57,7 @@ export const SheetPasteCommand: IMultiCommand = {
     type: CommandType.COMMAND,
     multi: true,
     name: 'sheet.command.paste',
-    priority: 1000,
+    priority: 998,
     preconditions: whenSheetFocused,
     handler: async (accessor: IAccessor, params: ISheetPasteParams) => {
         const logService = accessor.get(ILogService);

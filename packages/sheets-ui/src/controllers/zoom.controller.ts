@@ -93,7 +93,7 @@ export class ZoomController extends Disposable {
                     const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
                     const sheet = workbook.getActiveSheet();
                     const currentRatio = sheet.getZoomRatio();
-                    let nextRatio = +parseFloat(`${currentRatio + ratioDelta}`).toFixed(1);
+                    let nextRatio = +Number.parseFloat(`${currentRatio + ratioDelta}`).toFixed(1);
                     nextRatio = nextRatio >= 4 ? 4 : nextRatio <= 0.1 ? 0.1 : nextRatio;
 
                     this._commandService.executeCommand(SetZoomRatioCommand.id, {

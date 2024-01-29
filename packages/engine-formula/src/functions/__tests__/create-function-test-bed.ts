@@ -141,7 +141,7 @@ const TEST_WORKBOOK_DATA: IWorkbookData = {
     sheetOrder: [],
     styles: {},
 };
-export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencies?: Dependency[]) {
+export function createFunctionTestBed(workbookConfig?: IWorkbookData, dependencies?: Dependency[]) {
     const univer = new Univer();
 
     let get: Injector['get'] | undefined;

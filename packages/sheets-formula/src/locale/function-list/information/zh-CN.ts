@@ -67,7 +67,7 @@ export default {
             },
         ],
         functionParameter: {
-            value: { name: 'value', detail: ' 指的是要测试的值。 参数 value 可以是空白（空单元格）、错误值、逻辑值、文本、数字、引用值，或者引用要测试的以上任意值的名称。' },
+            value: { name: '值', detail: ' 指的是要测试的值。 参数 value 可以是空白（空单元格）、错误值、逻辑值、文本、数字、引用值，或者引用要测试的以上任意值的名称。' },
         },
     },
     ISERR: {

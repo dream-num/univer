@@ -53,7 +53,7 @@ export class TextX {
                     }
                 } else if (thisAction.t === TextXActionType.RETAIN && otherAction.t === TextXActionType.RETAIN) {
                     if (thisAction.body == null && otherAction.body == null) {
-                        textX.push(thisAction); // or otherAction
+                        textX.push(thisAction.len !== Number.POSITIVE_INFINITY ? thisAction : otherAction); // or otherAction
                     } else if (thisAction.body && otherAction.body) {
                         textX.push({
                             ...thisAction,
@@ -145,6 +145,11 @@ export class TextX {
         let lastAction = this._actions[index - 1];
 
         const newAction = Tools.deepClone(args[0]);
+
+        // Nothing need to do, if the retain 0 and body is null.
+        if (newAction.t === TextXActionType.RETAIN && newAction.len === 0 && newAction.body == null) {
+            return this;
+        }
 
         if (typeof lastAction === 'object') {
             // if lastAction and newAction are both delete action, merge the two actions and return this.

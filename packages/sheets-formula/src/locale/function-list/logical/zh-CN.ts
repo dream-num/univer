@@ -25,8 +25,8 @@ export default {
             },
         ],
         functionParameter: {
-            logical1: { name: 'logical1', detail: '第一个想要测试且计算结果可为 TRUE 或 FALSE 的条件。' },
-            logical2: { name: 'logical2', detail: '其他想要测试且计算结果可为 TRUE 或 FALSE 的条件（最多 255 个条件）。' },
+            logical1: { name: '逻辑值 1', detail: '第一个想要测试且计算结果可为 TRUE 或 FALSE 的条件。' },
+            logical2: { name: '逻辑值 2', detail: '其他想要测试且计算结果可为 TRUE 或 FALSE 的条件（最多 255 个条件）。' },
         },
     },
     BYCOL: {
@@ -81,9 +81,9 @@ export default {
             },
         ],
         functionParameter: {
-            logicalTest: { name: 'logical_test', detail: '要测试的条件。' },
-            valueIfTrue: { name: 'value_if_true', detail: 'logical_test 的结果为 TRUE 时，您希望返回的值。' },
-            valueIfFalse: { name: 'value_if_false', detail: 'logical_test 的结果为 FALSE 时，您希望返回的值。' },
+            logicalTest: { name: '布尔表达式', detail: '要测试的条件。' },
+            valueIfTrue: { name: '如果值为 true', detail: 'logical_test 的结果为 TRUE 时，您希望返回的值。' },
+            valueIfFalse: { name: '如果值为 false', detail: 'logical_test 的结果为 FALSE 时，您希望返回的值。' },
         },
     },
     IFERROR: {
@@ -96,8 +96,8 @@ export default {
             },
         ],
         functionParameter: {
-            value: { name: 'value', detail: ' 检查是否存在错误的参数。' },
-            valueIfError: { name: 'value_if_error', detail: '公式计算结果为错误时要返回的值。 评估以下错误类型：#N/A、#VALUE!、#REF!、#DIV/0!、#NUM!、#NAME? 或 #NULL!。' },
+            value: { name: '值', detail: ' 检查是否存在错误的参数。' },
+            valueIfError: { name: '发生错误时的值', detail: '公式计算结果为错误时要返回的值。 评估以下错误类型：#N/A、#VALUE!、#REF!、#DIV/0!、#NUM!、#NAME? 或 #NULL!。' },
         },
     },
     IFNA: {

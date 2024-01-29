@@ -17,7 +17,7 @@
 import type { IRangeWithCoord, ISelectionCellWithCoord, Nullable, ThemeService } from '@univerjs/core';
 import { ColorKit, RANGE_TYPE } from '@univerjs/core';
 import type { Scene } from '@univerjs/engine-render';
-import { DEFAULT_SELECTION_LAYER_INDEX, FIX_ONE_PIXEL_BLUR_OFFSET, Group, Rect } from '@univerjs/engine-render';
+import { DEFAULT_SELECTION_LAYER_INDEX, FIX_ONE_PIXEL_BLUR_OFFSET, Group, Rect, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISelectionWidgetConfig, ISelectionWithCoordAndStyle } from '@univerjs/sheets';
 import {
     getNormalSelectionStyle,
@@ -126,6 +126,8 @@ export class SelectionShape {
     readonly selectionFilled$ = this._selectionFilled$.asObservable();
 
     private _defaultStyle!: ISelectionStyle;
+
+    private _currentStyle: Nullable<ISelectionStyle>;
 
     private _isHelperSelection: boolean = true;
 
@@ -386,6 +388,8 @@ export class SelectionShape {
             style = defaultStyle;
         }
 
+        this._currentStyle = style;
+
         const {
             stroke = defaultStyle.stroke!,
             widgets = defaultStyle.widgets!,
@@ -597,6 +601,14 @@ export class SelectionShape {
 
         const scene = this.getScene();
         scene.addObject(this._selectionShape, SHEET_COMPONENT_SELECTION_LAYER_INDEX);
+
+        scene.onTransformChangeObservable.add((state) => {
+            if (state.type !== TRANSFORM_CHANGE_OBSERVABLE_TYPE.scale) {
+                return;
+            }
+
+            this._updateControl(this._currentStyle, this._rowHeaderWidth, this._columnHeaderHeight);
+        });
 
         this._initialTitle();
     }

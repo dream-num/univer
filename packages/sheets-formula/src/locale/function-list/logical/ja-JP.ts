@@ -25,8 +25,8 @@ export default {
             },
         ],
         functionParameter: {
-            logical1: { name: 'logical1', detail: 'TRUE または FALSE に評価できるテスト対象の 1 つ目の条件。' },
-            logical2: { name: 'logical2', detail: ' 最大 255 個の条件まで、TRUE または FALSE のいずれかに評価できるテストする追加の条件。' },
+            logical1: { name: '論理式 1', detail: 'TRUE または FALSE に評価できるテスト対象の 1 つ目の条件。' },
+            logical2: { name: '論理式 2', detail: ' 最大 255 個の条件まで、TRUE または FALSE のいずれかに評価できるテストする追加の条件。' },
         },
     },
     BYCOL: {
@@ -81,9 +81,9 @@ export default {
             },
         ],
         functionParameter: {
-            logicalTest: { name: 'logical_test', detail: 'テストする条件' },
-            valueIfTrue: { name: 'value_if_true', detail: 'logical_test の結果が TRUE の場合に返す値' },
-            valueIfFalse: { name: 'value_if_false', detail: 'logical_test の結果が FALSE の場合に返す値' },
+            logicalTest: { name: '論理式', detail: 'テストする条件' },
+            valueIfTrue: { name: '値が真の場合', detail: 'logical_test の結果が TRUE の場合に返す値' },
+            valueIfFalse: { name: '値が偽の場合', detail: 'logical_test の結果が FALSE の場合に返す値' },
         },
     },
     IFERROR: {
@@ -96,8 +96,8 @@ export default {
             },
         ],
         functionParameter: {
-            value: { name: 'value', detail: 'エラーかどうかをチェックする引数です。' },
-            valueIfError: { name: 'value_if_error', detail: '数式がエラー値と評価された場合に返す値を指定します。 次のエラーの種類はが評価されます: #N/A、#VALUE!、#REF!、#DIV/0!、#NUM!、#NAME?、#NULL!。' },
+            value: { name: '値', detail: 'エラーかどうかをチェックする引数です。' },
+            valueIfError: { name: 'エラーの場合の値', detail: '数式がエラー値と評価された場合に返す値を指定します。 次のエラーの種類はが評価されます: #N/A、#VALUE!、#REF!、#DIV/0!、#NUM!、#NAME?、#NULL!。' },
         },
     },
     IFNA: {

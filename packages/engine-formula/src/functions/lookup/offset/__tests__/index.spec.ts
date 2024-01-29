@@ -17,25 +17,22 @@
 import type { Injector } from '@wendellhu/redi';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { ErrorType } from '../../../../basics/error-type';
 import { Lexer } from '../../../../engine/analysis/lexer';
 import type { LexerNode } from '../../../../engine/analysis/lexer-node';
 import { AstTreeBuilder } from '../../../../engine/analysis/parser';
 import type { BaseAstNode } from '../../../../engine/ast-node/base-ast-node';
 import { Interpreter } from '../../../../engine/interpreter/interpreter';
 import type { BaseReferenceObject } from '../../../../engine/reference-object/base-reference-object';
-import type { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
 import { IFormulaCurrentConfigService } from '../../../../services/current-data.service';
 import { IFunctionService } from '../../../../services/function.service';
 import { IFormulaRuntimeService } from '../../../../services/runtime.service';
 import { createFunctionTestBed } from '../../../__tests__/create-function-test-bed';
-import { FUNCTION_NAMES_META } from '../../../meta/function-names';
-import { Multiply } from '../../../meta/multiply';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
-import { Indirect } from '..';
+import { Offset } from '..';
+import type { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
+import { ErrorType } from '../../../../basics/error-type';
 
-describe('Test indirect', () => {
-    // const textFunction = new Makearray(FUNCTION_NAMES_LOGICAL.MAKEARRAY);
+describe('Test offset', () => {
     let get: Injector['get'];
     let lexer: Lexer;
     let astTreeBuilder: AstTreeBuilder;
@@ -81,66 +78,59 @@ describe('Test indirect', () => {
         );
 
         functionService.registerExecutors(
-            new Indirect(FUNCTION_NAMES_LOOKUP.INDIRECT),
-            new Multiply(FUNCTION_NAMES_META.MULTIPLY)
+            new Offset(FUNCTION_NAMES_LOOKUP.OFFSET)
         );
     });
 
-    describe('normal', () => {
-        it('string', async () => {
-            const lexerNode = lexer.treeBuilder('=Indirect("B2")');
+    describe('Offset', () => {
+        it('Normal single cell', async () => {
+            const lexerNode = lexer.treeBuilder('=OFFSET(A1,1,0,1,1)');
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
             const result = await interpreter.executeAsync(astNode as BaseAstNode);
 
-            expect((result as BaseReferenceObject).toArrayValueObject().toValue()).toStrictEqual([[4]]);
+            expect((result as BaseReferenceObject).toArrayValueObject().toValue()).toStrictEqual([[3]]);
         });
 
-        it('ref', async () => {
-            const lexerNode = lexer.treeBuilder('=Indirect(C2)');
+        it('Normal array cell', async () => {
+            const lexerNode = lexer.treeBuilder('=OFFSET(A1,1,0,3,1)');
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
             const result = await interpreter.executeAsync(astNode as BaseAstNode);
 
-            expect((result as BaseReferenceObject).toArrayValueObject().toValue()).toStrictEqual([[4]]);
+            expect((result as BaseReferenceObject).toArrayValueObject().toValue()).toStrictEqual([[3], [1], [0]]);
         });
 
-        it('array', async () => {
-            const lexerNode = lexer.treeBuilder('=Indirect(A1:D3)');
+        it('TRUE as 1', async () => {
+            const lexerNode = lexer.treeBuilder('=OFFSET(A1,TRUE,0,3,1)');
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
             const result = await interpreter.executeAsync(astNode as BaseAstNode);
 
-            expect((result as ArrayValueObject).toValue()).toStrictEqual([
-                [ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE],
-                [ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE],
-                [ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE],
-            ]);
-        });
-    });
-
-    describe('r1c1', () => {
-        it('r1c1 string', async () => {
-            const lexerNode = lexer.treeBuilder('=Indirect("R2C2", 0)');
-
-            const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
-
-            const result = await interpreter.executeAsync(astNode as BaseAstNode);
-
-            expect((result as BaseReferenceObject).toArrayValueObject().toValue()).toStrictEqual([[4]]);
+            expect((result as BaseReferenceObject).toArrayValueObject().toValue()).toStrictEqual([[3], [1], [0]]);
         });
 
-        it('r1c1 ref', async () => {
-            const lexerNode = lexer.treeBuilder('=Indirect(D2, 0)');
+        it('Height is negative', async () => {
+            const lexerNode = lexer.treeBuilder('=OFFSET(A1,1,0,0,1)');
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
             const result = await interpreter.executeAsync(astNode as BaseAstNode);
 
-            expect((result as BaseReferenceObject).toArrayValueObject().toValue()).toStrictEqual([[4]]);
+            expect((result as ErrorValueObject).getValue()).toBe(ErrorType.REF);
+        });
+
+        it('Offset outside sheet boundary', async () => {
+            const lexerNode = lexer.treeBuilder('=OFFSET(A1,-1,0,1,1)');
+
+            const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+
+            const result = await interpreter.executeAsync(astNode as BaseAstNode);
+
+            expect((result as ErrorValueObject).getValue()).toBe(ErrorType.REF);
         });
     });
 });

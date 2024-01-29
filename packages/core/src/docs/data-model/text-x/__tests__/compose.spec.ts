@@ -25,6 +25,42 @@ describe('compose test cases', () => {
         expect(TextX.compose([], [])).toEqual([]);
     });
 
+    it('should return second actions when action A is empty', () => {
+        const actions_a: TextXAction[] = [];
+        const actions_b: TextXAction[] = [{
+            t: TextXActionType.RETAIN,
+            len: 5,
+        }, {
+            t: TextXActionType.INSERT,
+            body: {
+                dataStream: 'w',
+            },
+            len: 5,
+            line: 0,
+        }];
+        const expect_actions = actions_b;
+
+        expect(TextX.compose(actions_a, actions_b)).toEqual(expect_actions);
+    });
+
+    it('should return first actions when action B is empty', () => {
+        const actions_a: TextXAction[] = [{
+            t: TextXActionType.RETAIN,
+            len: 5,
+        }, {
+            t: TextXActionType.INSERT,
+            body: {
+                dataStream: 'w',
+            },
+            len: 5,
+            line: 0,
+        }];
+        const actions_b: TextXAction[] = [];
+        const expect_actions = actions_a;
+
+        expect(TextX.compose(actions_a, actions_b)).toEqual(expect_actions);
+    });
+
     it('test compose basic use', () => {
         const actions_a: TextXAction[] = [{
             t: TextXActionType.RETAIN,
@@ -402,5 +438,79 @@ describe('compose test cases', () => {
         }];
 
         expect(TextX.compose(actions_a, actions_b)).toEqual(expect_actions);
+    });
+
+    it('test compose r-i with r-i-d', () => {
+        const actions_a: TextXAction[] = [{
+            t: TextXActionType.RETAIN,
+            len: 1,
+        }, {
+            t: TextXActionType.INSERT,
+            body: {
+                dataStream: 'h',
+            },
+            len: 1,
+            line: 0,
+        }];
+
+        const actions_b: TextXAction[] = [{
+            t: TextXActionType.RETAIN,
+            len: 1,
+        }, {
+            t: TextXActionType.INSERT,
+            body: {
+                dataStream: 'ab',
+            },
+            len: 2,
+            line: 0,
+        }, {
+            t: TextXActionType.DELETE,
+            len: 1,
+            line: 0,
+        }];
+
+        const inner_actions: TextXAction[] = [{
+            t: TextXActionType.RETAIN,
+            len: 1,
+        }, {
+            t: TextXActionType.INSERT,
+            body: {
+                dataStream: 'ab',
+            },
+            len: 2,
+            line: 0,
+        }];
+
+        expect(TextX.compose(actions_a, actions_b)).toEqual(inner_actions);
+
+        const actions_c: TextXAction[] = [{
+            t: TextXActionType.RETAIN,
+            len: 1,
+        }, {
+            t: TextXActionType.INSERT,
+            body: {
+                dataStream: 'c',
+            },
+            len: 1,
+            line: 0,
+        }, {
+            t: TextXActionType.DELETE,
+            len: 2,
+            line: 0,
+        }];
+
+        const expect_actions: TextXAction[] = [{
+            t: TextXActionType.RETAIN,
+            len: 1,
+        }, {
+            t: TextXActionType.INSERT,
+            body: {
+                dataStream: 'c',
+            },
+            len: 1,
+            line: 0,
+        }];
+
+        expect(TextX.compose(inner_actions, actions_c)).toEqual(expect_actions);
     });
 });

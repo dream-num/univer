@@ -1019,11 +1019,11 @@ export default {
         ],
         functionParameter: {
             number1: {
-                name: 'number1',
+                name: 'Number 1',
                 detail: 'The first number you want to add. The number can be like 4, a cell reference like B6, or a cell range like B2:B8.',
             },
             number2: {
-                name: 'number2',
+                name: 'Number 2',
                 detail: 'This is the second number you want to add. You can specify up to 255 numbers in this way.',
             },
         },
@@ -1039,15 +1039,15 @@ export default {
         ],
         functionParameter: {
             range: {
-                name: 'range',
+                name: 'Range',
                 detail: 'The range of cells that you want evaluated by criteria.',
             },
             criteria: {
-                name: 'criteria',
+                name: 'Criteria',
                 detail: 'The criteria in the form of a number, expression, a cell reference, text, or a function that defines which cells will be added. Wildcard characters can be included - a question mark (?) to match any single character, an asterisk (*) to match any sequence of characters. If you want to find an actual question mark or asterisk, type a tilde (~) preceding the character.',
             },
             sumRange: {
-                name: 'sum_range',
+                name: 'Sum Range',
                 detail: 'The actual cells to add, if you want to add cells other than those specified in the range argument. If the sum_range argument is omitted, Excel adds the cells that are specified in the range argument (the same cells to which the criteria is applied).',
             },
         },
@@ -1062,8 +1062,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            sumRange: { name: 'Sum Range', detail: 'The range of cells to sum.' },
+            criteriaRange1: { name: 'Criteria Range 1', detail: 'The range that is tested using Criteria 1. Criteria Range 1 and Criteria 1 set up a search pair whereby a range is searched for specific criteria. Once items in the range are found, their corresponding values in Sum Range are added.' },
+            criteria1: { name: 'Criteria 1', detail: 'The criteria that defines which cells in Criteria Range 1 will be added. For example, criteria can be entered as 32, ">32", B4, "apples", or "32".' },
+            criteriaRange2: { name: 'Criteria Range 2', detail: 'Additional ranges. You can enter up to 127 range pairs.' },
+            criteria2: { name: 'Criteria 2', detail: 'Additional associated criteria. You can enter up to 127 criteria pairs.' },
         },
     },
     SUMPRODUCT: {

@@ -57,7 +57,7 @@ export class StatusBarController extends Disposable {
     ) {
         super();
 
-        // this._init();
+        this._init();
     }
 
     private _init(): void {

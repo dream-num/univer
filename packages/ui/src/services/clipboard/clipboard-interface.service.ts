@@ -68,7 +68,7 @@ export class BrowserClipboardService extends Disposable implements IClipboardInt
     constructor(
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @ILogService private readonly _logService: ILogService,
-        @INotificationService private readonly _notificationService: INotificationService
+        @Optional(INotificationService) private readonly _notificationService?: INotificationService
     ) {
         super();
     }
@@ -172,7 +172,7 @@ export class BrowserClipboardService extends Disposable implements IClipboardInt
     }
 
     private _showClipboardAuthenticationNotification(): void {
-        this._notificationService.show({
+        this._notificationService?.show({
             type: 'warning',
             title: this._localeService.t('clipboard.authentication.title'),
             content: this._localeService.t('clipboard.authentication.content'),

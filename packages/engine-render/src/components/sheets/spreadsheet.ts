@@ -514,7 +514,7 @@ export class Spreadsheet extends SheetComponent {
         ctx.moveTo(startX, startY);
         ctx.lineTo(endX, startY);
 
-        for (let r = 0; r <= rowHeightAccumulationLength - 1; r++) {
+        for (let r = 0; r <= endRow; r++) {
             if (r < 0 || r > rowHeightAccumulationLength - 1) {
                 continue;
             }
@@ -525,7 +525,7 @@ export class Spreadsheet extends SheetComponent {
 
         ctx.moveTo(startX, startY);
         ctx.lineTo(startX, endY);
-        for (let c = 0; c <= columnWidthAccumulationLength - 1; c++) {
+        for (let c = 0; c <= endColumn; c++) {
             if (c < 0 || c > columnWidthAccumulationLength - 1) {
                 continue;
             }

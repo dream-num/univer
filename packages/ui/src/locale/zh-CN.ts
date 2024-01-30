@@ -53,4 +53,10 @@ export default {
     },
     'common-edit': '常用编辑',
     'toggle-shortcut-panel': '打开收起快捷键面板',
+    clipboard: {
+        authentication: {
+            title: '无法访问剪贴板',
+            content: '请允许 Univer 访问您的剪贴板。',
+        },
+    },
 };

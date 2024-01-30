@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import { Disposable, ILogService } from '@univerjs/core';
-import { createIdentifier } from '@wendellhu/redi';
+import { Disposable, ILogService, LocaleService } from '@univerjs/core';
+import { createIdentifier, Inject } from '@wendellhu/redi';
+
+import { INotificationService } from '../notification/notification.service';
 
 export const PLAIN_TEXT_CLIPBOARD_MIME_TYPE = 'text/plain';
 export const HTML_CLIPBOARD_MIME_TYPE = 'text/html';
@@ -48,7 +50,9 @@ export interface IClipboardInterfaceService {
      */
     read(): Promise<ClipboardItem[]>;
 
-    // NOTE: maybe we should add an interface to support image copy
+    /**
+     * This property tells if the platform supports reading data directly from the clipboard.
+     */
     readonly supportClipboard: boolean;
 }
 
@@ -61,7 +65,11 @@ export class BrowserClipboardService extends Disposable implements IClipboardInt
         return typeof window.navigator.clipboard.readText === 'function';
     }
 
-    constructor(@ILogService private readonly _logService: ILogService) {
+    constructor(
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @ILogService private readonly _logService: ILogService,
+        @INotificationService private readonly _notificationService: INotificationService
+    ) {
         super();
     }
 
@@ -80,18 +88,50 @@ export class BrowserClipboardService extends Disposable implements IClipboardInt
             ]);
         } catch (error) {
             this._logService.error('[BrowserClipboardService]', error);
+            this._showClipboardAuthenticationNotification();
         }
     }
 
     async writeText(text: string): Promise<void> {
+        if (!this.supportClipboard) {
+            return this._legacyCopyText(text);
+        }
+
         // use new Clipboard API first
         try {
             return await navigator.clipboard.writeText(text);
         } catch (error) {
             this._logService.error('[BrowserClipboardService]', error);
+            this._showClipboardAuthenticationNotification();
+        }
+    }
+
+    async read(): Promise<ClipboardItem[]> {
+        if (!this.supportClipboard) {
+            throw new Error('[BrowserClipboardService] read() is not supported on this platform.');
         }
 
-        this._legacyCopyText(text);
+        try {
+            return navigator.clipboard.read();
+        } catch (e) {
+            this._logService.error('[BrowserClipboardService]', e);
+            this._showClipboardAuthenticationNotification();
+            return [];
+        }
+    }
+
+    async readText(): Promise<string> {
+        if (!this.supportClipboard) {
+            throw new Error('[BrowserClipboardService] read() is not supported on this platform.');
+        }
+
+        try {
+            return await navigator.clipboard.readText();
+        } catch (e) {
+            this._logService.error('[BrowserClipboardService]', e);
+            this._showClipboardAuthenticationNotification();
+            return '';
+        }
     }
 
     private _legacyCopyHtml(html: string): void {
@@ -131,18 +171,12 @@ export class BrowserClipboardService extends Disposable implements IClipboardInt
         }
     }
 
-    async read(): Promise<ClipboardItem[]> {
-        return navigator.clipboard.read();
-    }
-
-    async readText(): Promise<string> {
-        try {
-            return await navigator.clipboard.readText();
-        } catch (e) {
-            console.error(e);
-
-            return '';
-        }
+    private _showClipboardAuthenticationNotification(): void {
+        this._notificationService.show({
+            type: 'warning',
+            title: this._localeService.t('clipboard.authentication.title'),
+            content: this._localeService.t('clipboard.authentication.content'),
+        });
     }
 }
 

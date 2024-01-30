@@ -19,7 +19,7 @@ import { CommandType, ICommandService, ILogService } from '@univerjs/core';
 import { CopyCommand, CutCommand, IClipboardInterfaceService, PasteCommand } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 
-import { whenSheetFocused } from '../../controllers/shortcuts/utils';
+import { whenSheetEditorFocused, whenSheetFocused } from '../../controllers/shortcuts/utils';
 import { ISheetClipboardService, PREDEFINED_HOOK_NAME } from '../../services/clipboard/clipboard.service';
 
 export const SheetCopyCommand: IMultiCommand = {
@@ -41,7 +41,7 @@ export const SheetCutCommand: IMultiCommand = {
     type: CommandType.COMMAND,
     multi: true,
     priority: 1000,
-    preconditions: whenSheetFocused,
+    preconditions: whenSheetEditorFocused,
     handler: async (accessor) => {
         const sheetClipboardService = accessor.get(ISheetClipboardService);
         return sheetClipboardService.cut();
@@ -58,19 +58,19 @@ export const SheetPasteCommand: IMultiCommand = {
     multi: true,
     name: 'sheet.command.paste',
     priority: 998,
-    preconditions: whenSheetFocused,
+    preconditions: whenSheetEditorFocused,
     handler: async (accessor: IAccessor, params: ISheetPasteParams) => {
         const logService = accessor.get(ILogService);
 
         // use cell editor to get ClipboardData first
         // if that doesn't work, use the browser's clipboard API
         // this clipboard API would ask user for permission, so we may need to notify user (and retry perhaps)
-        logService.log('[SheetPasteCommand]', 'the focusing element is', document.activeElement);
+        logService.debug('[SheetPasteCommand]', 'the focusing element is', document.activeElement);
 
         const result = document.execCommand('paste');
 
         if (!result) {
-            logService.log(
+            logService.debug(
                 '[SheetPasteCommand]',
                 'failed to execute paste command on the activeElement, trying to use clipboard API.'
             );

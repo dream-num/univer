@@ -15,7 +15,7 @@
  */
 
 import { Disposable, ILogService, LocaleService } from '@univerjs/core';
-import { createIdentifier, Inject } from '@wendellhu/redi';
+import { createIdentifier, Inject, Optional } from '@wendellhu/redi';
 
 import { INotificationService } from '../notification/notification.service';
 

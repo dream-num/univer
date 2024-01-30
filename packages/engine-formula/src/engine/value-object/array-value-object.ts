@@ -729,7 +729,8 @@ export class ArrayValueObject extends BaseValueObject {
     override sum() {
         let accumulatorAll: BaseValueObject = new NumberValueObject(0);
         this.iterator((valueObject) => {
-            if (valueObject == null) {
+            // 'test', ' ',  blank cell, TRUE and FALSE are ignored
+            if (valueObject == null || valueObject.isString() || valueObject.isBoolean() || valueObject.isNull()) {
                 return true; // continue
             }
 
@@ -801,11 +802,8 @@ export class ArrayValueObject extends BaseValueObject {
     override count() {
         let accumulatorAll: BaseValueObject = new NumberValueObject(0);
         this.iterator((valueObject) => {
-            if (valueObject == null) {
-                return true; // continue
-            }
-
-            if (valueObject.isError() || valueObject.isString() || valueObject.isNull()) {
+            // 'test', ' ',  blank cell, TRUE and FALSE are ignored
+            if (valueObject == null || valueObject.isError() || valueObject.isString() || valueObject.isNull() || valueObject.isBoolean()) {
                 return true; // continue
             }
             accumulatorAll = accumulatorAll.plusBy(1) as BaseValueObject;
@@ -817,11 +815,7 @@ export class ArrayValueObject extends BaseValueObject {
     override countA() {
         let accumulatorAll: BaseValueObject = new NumberValueObject(0);
         this.iterator((valueObject) => {
-            if (valueObject == null) {
-                return true; // continue
-            }
-
-            if (valueObject.isNull()) {
+            if (valueObject == null || valueObject.isNull()) {
                 return true; // continue
             }
 
@@ -834,7 +828,7 @@ export class ArrayValueObject extends BaseValueObject {
     override countBlank() {
         let accumulatorAll: BaseValueObject = new NumberValueObject(0);
         this.iterator((valueObject) => {
-            if (valueObject != null) {
+            if (valueObject != null && !valueObject.isNull()) {
                 return true; // continue
             }
 
@@ -1066,8 +1060,8 @@ export class ArrayValueObject extends BaseValueObject {
     override mean(): BaseValueObject {
         const sum = this.sum();
 
-        // Count strings in
-        const count = this.countA();
+        // Like sum, ignore strings and booleans
+        const count = this.count();
 
         return sum.divided(count);
     }
@@ -1095,35 +1089,39 @@ export class ArrayValueObject extends BaseValueObject {
         return allValue.get(0, (count - 1) / 2);
     }
 
+    // TODO ddof, ignore strings and booleans
     override var(): BaseValueObject {
         const mean = this.mean();
 
         // let isError = null;
-        const squaredDifferences: BaseValueObject[][] = [];
-        this.iterator((valueObject: Nullable<BaseValueObject>, row: number, column: number) => {
-            if (valueObject == null || valueObject.isError() || valueObject.isString()) {
-                valueObject = new NumberValueObject(0);
+        const squaredDifferences: BaseValueObject[][] = [[]];
+        this.iterator((valueObject: Nullable<BaseValueObject>) => {
+            // for VARPA and VARA, strings and FALSE are counted as 0, TRUE is counted as 1
+            // for VAR.S/VAR, or VAR.P/VARP, strings,TRUE and FALSE are ignored
+            // Since sum ignores strings and booleans, they are ignored here too, and VAR.S and VAR.P are used more
+
+            // VAR.S assumes that its arguments are a sample of the population, like numpy.var(data, ddof=1)
+            // VAR.P assumes that its arguments are the entire population, like numpy.var(data, ddof=0)
+            // numpy.var uses ddof=0 by default, so we use ddof=0 here
+            if (valueObject == null || valueObject.isError() || valueObject.isString() || valueObject.isBoolean() || valueObject.isNull()) {
+                return;
             }
 
-            let baseValueObject = valueObject.minus(mean).pow(new NumberValueObject(2, true));
+            const baseValueObject = valueObject.minus(mean).pow(new NumberValueObject(2, true));
 
             if (baseValueObject.isError()) {
-                baseValueObject = new NumberValueObject(0);
+                return;
             }
 
-            if (squaredDifferences[row] == null) {
-                squaredDifferences[row] = [];
-            }
-
-            squaredDifferences[row][column] = baseValueObject;
+            squaredDifferences[0].push(baseValueObject);
         });
 
         const { _rowCount, _columnCount, _unitId, _sheetId, _currentRow, _currentColumn } = this;
 
         const squaredDifferencesArrayObject = new ArrayValueObject({
             calculateValueList: squaredDifferences,
-            rowCount: _rowCount,
-            columnCount: _columnCount,
+            rowCount: 1,
+            columnCount: squaredDifferences[0].length,
             unitId: _unitId,
             sheetId: _sheetId,
             row: _currentRow,
@@ -1133,6 +1131,14 @@ export class ArrayValueObject extends BaseValueObject {
         return squaredDifferencesArrayObject.mean();
     }
 
+    /**
+     * STDEV.P: ddof=0, ignore strings and booleans
+     * STDEV.S: ddof=1, ignore strings and booleans
+     *
+     * STDEVPA: ddof=0,
+     * STDEVA: ddof=1,
+     * @returns
+     */
     override std(): BaseValueObject {
         const variance = this.var();
 

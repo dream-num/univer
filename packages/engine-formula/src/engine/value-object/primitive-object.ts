@@ -277,11 +277,11 @@ export class BooleanValueObject extends BaseValueObject {
     }
 
     override sqrt(): BaseValueObject {
-        return this._convertTonNumber();
+        return this._convertTonNumber().sqrt();
     }
 
     override cbrt(): BaseValueObject {
-        return this._convertTonNumber();
+        return this._convertTonNumber().cbrt();
     }
 
     override cos(): BaseValueObject {

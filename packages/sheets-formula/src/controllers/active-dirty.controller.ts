@@ -27,7 +27,6 @@ import type { IDirtyUnitSheetNameMap } from '@univerjs/engine-formula';
 import { FormulaDataModel } from '@univerjs/engine-formula';
 import type {
     IDeleteRangeMutationParams,
-    IInsertRangeMutationParams,
     IInsertSheetMutationParams,
     IMoveColumnsMutationParams,
     IMoveRangeMutationParams,
@@ -38,8 +37,6 @@ import type {
     ISetRangeValuesMutationParams,
 } from '@univerjs/sheets';
 import {
-    DeleteRangeMutation,
-    InsertRangeMutation,
     InsertSheetMutation,
     MoveColsMutation,
     MoveRangeMutation,
@@ -129,26 +126,6 @@ export class ActiveDirtyController extends Disposable {
                 const params = command.params as IMoveColumnsMutationParams;
                 return {
                     dirtyRanges: this._getMoveRowsMutationDirtyRange(params),
-                };
-            },
-        });
-
-        this._activeDirtyManagerService.register(DeleteRangeMutation.id, {
-            commandId: DeleteRangeMutation.id,
-            getDirtyData: (command: ICommandInfo) => {
-                const params = command.params as IDeleteRangeMutationParams;
-                return {
-                    dirtyRanges: this._getDeleteRangeMutationDirtyRange(params),
-                };
-            },
-        });
-
-        this._activeDirtyManagerService.register(InsertRangeMutation.id, {
-            commandId: InsertRangeMutation.id,
-            getDirtyData: (command: ICommandInfo) => {
-                const params = command.params as IInsertRangeMutationParams;
-                return {
-                    dirtyRanges: this._getDeleteRangeMutationDirtyRange(params),
                 };
             },
         });
@@ -342,9 +319,9 @@ export class ActiveDirtyController extends Disposable {
         return dirtyRanges;
     }
 
-    private _getRemoveSheetMutation(params: IRemoveSheetMutationParams, name?: Nullable<string>) {
+    private _getRemoveSheetMutation(params: IRemoveSheetMutationParams) {
         const dirtyNameMap: IDirtyUnitSheetNameMap = {};
-        const { subUnitId: sheetId, unitId } = params;
+        const { subUnitId: sheetId, unitId, subUnitName } = params;
 
         // const dirtyNameMap: IDirtyUnitSheetNameMap = {};
 
@@ -352,12 +329,12 @@ export class ActiveDirtyController extends Disposable {
             dirtyNameMap[unitId] = {};
         }
 
-        dirtyNameMap[unitId]![sheetId] = name;
+        dirtyNameMap[unitId]![sheetId] = subUnitName;
 
         return dirtyNameMap;
     }
 
-    private _getInsertSheetMutation(params: IInsertSheetMutationParams, name: string = '') {
+    private _getInsertSheetMutation(params: IInsertSheetMutationParams) {
         const dirtyNameMap: IDirtyUnitSheetNameMap = {};
         const { sheet, unitId } = params;
 
@@ -365,7 +342,7 @@ export class ActiveDirtyController extends Disposable {
             dirtyNameMap[unitId] = {};
         }
 
-        dirtyNameMap[unitId]![sheet.id] = name;
+        dirtyNameMap[unitId]![sheet.id] = sheet.name;
 
         return dirtyNameMap;
     }

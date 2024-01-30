@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICellDataForSheetInterceptor, IRange } from '@univerjs/core';
+import type { IRange } from '@univerjs/core';
 import {
     CellValueType,
     Disposable,
@@ -23,7 +23,6 @@ import {
     IUniverInstanceService,
     LifecycleStages,
     LocaleService,
-    ObjectMatrix,
     OnLifecycle,
     Range,
     ThemeService,
@@ -44,10 +43,10 @@ import {
     SheetInterceptorService,
 } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import { ComponentManager, IMenuService, ISidebarService } from '@univerjs/ui';
+import { ComponentManager, ISidebarService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { combineLatest, merge, Observable } from 'rxjs';
-import { debounceTime, distinctUntilChanged, map, switchMap, tap } from 'rxjs/operators';
+import { debounceTime, map, switchMap, tap } from 'rxjs/operators';
 
 import { SHEET_NUMFMT_PLUGIN } from '../base/const/PLUGIN_NAME';
 import { AddDecimalCommand } from '../commands/commands/add-decimal.command';
@@ -59,8 +58,6 @@ import { CloseNumfmtPanelOperator } from '../commands/operations/close.numfmt.pa
 import { OpenNumfmtPanelOperator } from '../commands/operations/open.numfmt.panel.operation';
 import type { ISheetNumfmtPanelProps } from '../components/index';
 import { SheetNumfmtPanel } from '../components/index';
-import { zhCN } from '../locale';
-import { AddDecimalMenuItem, CurrencyMenuItem, FactoryOtherMenuItem, SubtractDecimalMenuItem } from '../menu/menu';
 import { getPatternPreview, getPatternType } from '../utils/pattern';
 import type { INumfmtController } from './type';
 
@@ -84,7 +81,6 @@ export class NumfmtController extends Disposable implements INumfmtController {
         @Inject(IRenderManagerService) private _renderManagerService: IRenderManagerService,
         @Inject(INumfmtService) private _numfmtService: INumfmtService,
         @Inject(ComponentManager) private _componentManager: ComponentManager,
-        @Inject(IMenuService) private _menuService: IMenuService,
         @Inject(ISidebarService) private _sidebarService: ISidebarService,
         @Inject(LocaleService) private _localeService: LocaleService
     ) {
@@ -94,9 +90,6 @@ export class NumfmtController extends Disposable implements INumfmtController {
         this._initPanel();
         this._initCommands();
         this._commandExecutedListener();
-        this._initMenu();
-        this._initInterceptorCellContent();
-        this._initLocal();
     }
 
     openPanel = () => {
@@ -127,7 +120,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
         if (numfmtValue) {
             pattern = numfmtValue.pattern;
         }
-        // eslint-disable-next-line no-magic-numbers
+
         const defaultValue = (cellValue?.t === CellValueType.NUMBER ? cellValue.v : 12345678) as number;
 
         const props: ISheetNumfmtPanelProps = {
@@ -163,7 +156,6 @@ export class NumfmtController extends Disposable implements INumfmtController {
             header: { title: localeService.t('sheet.numfmt.title') },
             children: {
                 label: SHEET_NUMFMT_PLUGIN,
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 ...(props as any), // need passthrough to react props.
             },
             onClose: () => {
@@ -189,17 +181,6 @@ export class NumfmtController extends Disposable implements INumfmtController {
 
     private _initPanel() {
         this._componentManager.register(SHEET_NUMFMT_PLUGIN, SheetNumfmtPanel);
-    }
-    private _initLocal = () => {
-        this._localeService.load({ zhCN });
-    };
-
-    private _initMenu() {
-        [AddDecimalMenuItem, SubtractDecimalMenuItem, CurrencyMenuItem, FactoryOtherMenuItem]
-            .map((factory) => factory(this._componentManager))
-            .forEach((configFactory) => {
-                this.disposeWithMe(this._menuService.addMenuItem(configFactory(this._injector)));
-            });
     }
 
     private _initInterceptorCommands() {
@@ -251,88 +232,6 @@ export class NumfmtController extends Disposable implements INumfmtController {
                     };
                 },
             })
-        );
-    }
-
-    private _initInterceptorCellContent() {
-        const renderCache = new ObjectMatrix<{ result: ICellData; parameters: string | number }>();
-        this.disposeWithMe(
-            this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
-                handler: (cell, location, next) => {
-                    const unitId = location.unitId;
-                    const sheetId = location.subUnitId;
-                    const numfmtValue = this._numfmtService.getValue(unitId, sheetId, location.row, location.col);
-                    if (!numfmtValue) {
-                        return next(cell);
-                    }
-                    const originCellValue = cell;
-                    if (!originCellValue) {
-                        return next(cell);
-                    }
-                    // just handle number
-                    if (originCellValue.t !== CellValueType.NUMBER) {
-                        return next(cell);
-                    }
-
-                    let numfmtRes: string = '';
-                    const cache = renderCache.getValue(location.row, location.col);
-                    if (cache && cache.parameters === originCellValue.v) {
-                        return { ...cell, ...cache.result };
-                    }
-
-                    const info = getPatternPreview(numfmtValue.pattern, Number(originCellValue.v));
-
-                    numfmtRes = info.result;
-
-                    if (!numfmtRes) {
-                        return next(cell);
-                    }
-
-                    const res: ICellDataForSheetInterceptor = { v: numfmtRes };
-
-                    if (info.color) {
-                        const color = this._themeService.getCurrentTheme()[`${info.color}500`];
-
-                        if (color) {
-                            res.interceptorStyle = { cl: { rgb: color } };
-                        }
-                    }
-
-                    renderCache.setValue(location.row, location.col, {
-                        result: res,
-                        parameters: originCellValue.v as number,
-                    });
-
-                    return { ...cell, ...res };
-                },
-            })
-        );
-        this.disposeWithMe(
-            this._commandService.onCommandExecuted((commandInfo) => {
-                if (commandInfo.id === SetNumfmtMutation.id) {
-                    const params = commandInfo.params as ISetNumfmtMutationParams;
-                    Object.keys(params.values).forEach((key) => {
-                        const v = params.values[key];
-                        v.ranges.forEach((range) => {
-                            Range.foreach(range, (row, col) => {
-                                renderCache.realDeleteValue(row, col);
-                            });
-                        });
-                    });
-                }
-            })
-        );
-        this.disposeWithMe(
-            toDisposable(
-                this._sheetSkeletonManagerService.currentSkeleton$
-                    .pipe(
-                        map((skeleton) => skeleton?.sheetId),
-                        distinctUntilChanged()
-                    )
-                    .subscribe(() => {
-                        renderCache.reset();
-                    })
-            )
         );
     }
 

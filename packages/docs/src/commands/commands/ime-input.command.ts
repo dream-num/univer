@@ -15,7 +15,7 @@
  */
 
 import type { ICommand, ICommandInfo, ITextRange } from '@univerjs/core';
-import { CommandType, ICommandService, IUndoRedoService } from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, TextX, TextXActionType } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 
 import { getRetainAndDeleteFromReplace } from '../../basics/retain-delete-params';
@@ -54,27 +54,29 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
             },
         };
 
+        const textX = new TextX();
+
         if (range.collapsed) {
-            doMutation.params!.mutations.push({
-                t: 'r',
+            textX.push({
+                t: TextXActionType.RETAIN,
                 len: range.startOffset,
                 segmentId,
             });
         } else {
-            doMutation.params!.mutations.push(...getRetainAndDeleteFromReplace(range, segmentId));
+            textX.push(...getRetainAndDeleteFromReplace(range, segmentId));
         }
 
         if (oldTextLen > 0) {
-            doMutation.params!.mutations.push({
-                t: 'd',
+            textX.push({
+                t: TextXActionType.DELETE,
                 len: oldTextLen,
                 line: 0,
                 segmentId,
             });
         }
 
-        doMutation.params!.mutations.push({
-            t: 'i',
+        textX.push({
+            t: TextXActionType.INSERT,
             body: {
                 dataStream: newText,
             },
@@ -82,6 +84,8 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
             line: 0,
             segmentId,
         });
+
+        doMutation.params!.mutations = textX.serialize();
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,
@@ -94,7 +98,7 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
 
         if (isCompositionEnd) {
             if (result) {
-                const historyParams = imeInputManagerService.fetchComposedUndoRedoMutationParams(newText);
+                const historyParams = imeInputManagerService.fetchComposedUndoRedoMutationParams();
 
                 if (historyParams == null) {
                     return false;

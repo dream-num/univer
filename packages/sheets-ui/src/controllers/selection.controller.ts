@@ -263,8 +263,6 @@ export class SelectionController extends Disposable {
 
         this._selectionRenderService.selectionMoveEnd$.subscribe((params) => {
             this._move(params, SelectionMoveType.MOVE_END);
-
-            this._scrollController.scrollToVisible(false);
         });
     }
 

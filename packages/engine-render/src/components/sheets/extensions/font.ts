@@ -98,6 +98,9 @@ export class Font extends SheetExtension {
                         endX = mergeInfo.endX;
                     }
 
+                    /**
+                     * Incremental content rendering for texture mapping
+                     */
                     if (!this.isRenderDiffRangesByRow(mergeInfo.startRow, mergeInfo.endRow, diffRanges)) {
                         return true;
                     }
@@ -215,7 +218,7 @@ export class Font extends SheetExtension {
             documentSkeleton.getViewModel().getDataModel().updateDocumentDataPageSize(cellWidth);
             documentSkeleton.calculate();
         } else {
-            documentSkeleton.getViewModel().getDataModel().updateDocumentDataPageSize(Infinity);
+            documentSkeleton.getViewModel().getDataModel().updateDocumentDataPageSize(Number.POSITIVE_INFINITY);
         }
 
         // Use fix https://github.com/dream-num/univer/issues/927, Set the actual width of the content to the page width of the document,

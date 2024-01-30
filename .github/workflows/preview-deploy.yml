@@ -2,7 +2,8 @@ name: 📤 Preview Deploy
 
 on:
     workflow_run:
-        workflows: ['📦 Build']
+        workflows:
+            - 📦 Build
         types: [completed]
 
 permissions:
@@ -15,11 +16,12 @@ jobs:
         runs-on: ubuntu-latest
 
         outputs:
-            id: ${{ steps.pr.outputs.id }}
-            ref: ${{ steps.ref.outputs.ref }}
+            id: ${{ steps.pr.outputs.value }}
+            ref: ${{ steps.ref.outputs.value }}
+            repo: ${{ steps.repo.outputs.value }}
 
         steps:
-            # Get PR ID from artifact
+            # Get PR id from artifact
             - name: download pr artifact
               uses: dawidd6/action-download-artifact@v2
               with:
@@ -29,9 +31,9 @@ jobs:
 
             - name: get PR id
               id: pr
-              run: echo "id=$(<pr-id.txt)" >> $GITHUB_OUTPUT
+              run: echo "value=$(<pr-id.txt)" >> $GITHUB_OUTPUT
 
-            # Get PR ID from artifact
+            # Get PR ref from artifact
             - name: download pr artifact
               uses: dawidd6/action-download-artifact@v2
               with:
@@ -41,7 +43,19 @@ jobs:
 
             - name: get PR ref
               id: ref
-              run: echo "ref=$(<pr-ref.txt)" >> $GITHUB_OUTPUT
+              run: echo "value=$(<pr-ref.txt)" >> $GITHUB_OUTPUT
+
+            # Get PR repo from artifact
+            - name: download pr artifact
+              uses: dawidd6/action-download-artifact@v2
+              with:
+                  workflow: ${{ github.event.workflow_run.workflow_id }}
+                  run_id: ${{ github.event.workflow_run.id }}
+                  name: pr-repo
+
+            - name: get PR repo
+              id: repo
+              run: echo "value=$(<pr-repo.txt)" >> $GITHUB_OUTPUT
 
     prepare:
         runs-on: ubuntu-latest
@@ -85,36 +99,13 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
               with:
+                  repository: ${{ needs.setup.outputs.repo }}
                   ref: ${{ needs.setup.outputs.ref }}
 
-            - name: Install Node.js
-              uses: actions/setup-node@v3
-              with:
-                  node-version: 18
-
-            - name: Install pnpm
-              uses: pnpm/action-setup@v2
-              with:
-                  version: 8
-                  run_install: false
-
-            - name: Get pnpm store directory
-              shell: bash
-              run: |
-                  echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-            - name: Setup pnpm cache
-              uses: actions/cache@v3
-              with:
-                  path: ${{ env.STORE_PATH }}
-                  key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
-                  restore-keys: |
-                      ${{ runner.os }}-pnpm-
-
-            - name: Install dependencies
-              run: pnpm install
+            - name: Setup Node.js
+              uses: ./.github/actions/setup-node
 
             #  ================= Deploy Demo =================
             - name: 📦 Build demo
@@ -131,9 +122,9 @@ jobs:
               id: vercel-demo-dev
               with:
                   vercel-token: ${{ secrets.VERCEL_TOKEN }}
-                  vercel-org-id: ${{ secrets.ORG_ID}}
+                  vercel-org-id: ${{ secrets.ORG_ID }}
                   vercel-project-id: ${{ secrets.PROJECT_ID}}
-                  vercel-args: '--prod'
+                  vercel-args: --prod
 
             - name: 🚀 Deploy to Vercel (demo)
               uses: amondnet/vercel-action@v25
@@ -141,7 +132,7 @@ jobs:
               id: vercel-demo
               with:
                   vercel-token: ${{ secrets.VERCEL_TOKEN }}
-                  vercel-org-id: ${{ secrets.ORG_ID}}
+                  vercel-org-id: ${{ secrets.ORG_ID }}
                   vercel-project-id: ${{ secrets.PROJECT_ID}}
 
     build-storybook:
@@ -153,36 +144,13 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
               with:
+                  repository: ${{ needs.setup.outputs.repo }}
                   ref: ${{ needs.setup.outputs.ref }}
 
-            - name: Install Node.js
-              uses: actions/setup-node@v3
-              with:
-                  node-version: 18
-
-            - name: Install pnpm
-              uses: pnpm/action-setup@v2
-              with:
-                  version: 8
-                  run_install: false
-
-            - name: Get pnpm store directory
-              shell: bash
-              run: |
-                  echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-            - name: Setup pnpm cache
-              uses: actions/cache@v3
-              with:
-                  path: ${{ env.STORE_PATH }}
-                  key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
-                  restore-keys: |
-                      ${{ runner.os }}-pnpm-
-
-            - name: Install dependencies
-              run: pnpm install
+            - name: Setup Node.js
+              uses: ./.github/actions/setup-node
 
             # ================= Deploy Storybook =================
             - name: 📦 Build storybook
@@ -193,7 +161,7 @@ jobs:
               id: vercel-storybook
               with:
                   vercel-token: ${{ secrets.VERCEL_TOKEN }}
-                  vercel-org-id: ${{ secrets.ORG_ID}}
+                  vercel-org-id: ${{ secrets.ORG_ID }}
                   vercel-project-id: ${{ secrets.PROJECT_ID_STORYBOOK}}
 
     notify:
@@ -201,47 +169,27 @@ jobs:
         needs: [setup, build-demo, build-storybook]
 
         steps:
-            # ================= Notify Discord =================
-            - name: 👾 Discord Notification
-              uses: sarisia/actions-status-discord@v1
-              if: ${{ success() }}
+            - name: Invoke deployment hook
+              uses: distributhor/workflow-webhook@v3
               with:
-                  webhook: ${{ secrets.DISCORD_WEBHOOK }}?thread_id=${{ needs.setup.outputs.ref != '' && secrets.DISCORD_CI_PR || secrets.DISCORD_CI_DEV }}
-                  status: ${{ job.status }}
-                  description: |
-                      Ref: ${{ needs.setup.outputs.ref }}
-
-                      🏆 CI Pipeline: Success
-                      **[View Deployment]**
-                      - [📑 Examples](${{ needs.build-demo.outputs.preview-url }}/)
-
-                      **[View Storybook]**
-                      - [📚 Storybook](${{ needs.build-storybook.outputs.preview-url }}/)
-                  nofail: false
-                  nodetail: false
-                  nocontext: false
-                  noprefix: true
-                  color: 0x00b894
-                  username: GitHub Actions
-
-            - name: 👾 Discord Notification
-              uses: sarisia/actions-status-discord@v1
-              if: ${{ failure() }}
-              with:
-                  webhook: ${{ secrets.DISCORD_WEBHOOK }}?thread_id=${{ needs.setup.outputs.ref != '' && secrets.DISCORD_CI_PR || secrets.DISCORD_CI_DEV }}
-                  status: ${{ job.status }}
-                  description: |
-                      Ref: ${{ needs.setup.outputs.ref }}
-
-                      📛 CI Pipeline: Unsuccessful
-                      **[PR ID]**
-                      #${{ needs.setup.outputs.id }}
-                  nofail: false
-                  nodetail: false
-                  nocontext: false
-                  noprefix: true
-                  color: 0xd63031
-                  username: GitHub Actions
+                  webhook_url: ${{ secrets.WEBHOOK_URL }}
+                  data: >
+                      {
+                          "type": "build",
+                          "workflow": {
+                              "id": "${{ github.run_id }}"
+                          },
+                          "commit": {
+                              "ref": "${{ needs.setup.outputs.ref }}",
+                              "message": "${{ github.event.workflow_run.head_commit.message }}",
+                              "id": "${{ github.event.workflow_run.head_commit.id }}",
+                              "author": "${{ github.event.workflow_run.head_commit.author.name }}"
+                          },
+                          "preview": {
+                              "📑 Examples": "${{ needs.build-demo.outputs.preview-url }}/",
+                              "📚 Storybook": "${{ needs.build-storybook.outputs.preview-url }}/"
+                          }
+                      }
 
             # ================= Create Comment =================
             - name: 🧽 Find And Delete Comment

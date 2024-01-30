@@ -15,7 +15,7 @@
  */
 
 import type { Nullable, Observer } from '@univerjs/core';
-import { DataStreamTreeTokenType, RxDisposable } from '@univerjs/core';
+import { DataStreamTreeTokenType, ILogService, RxDisposable } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
@@ -258,7 +258,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
     private _document: Nullable<Documents>;
 
-    constructor() {
+    constructor(@ILogService private readonly _logService: ILogService) {
         super();
 
         this._initDOM();
@@ -340,8 +340,8 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
     // FIXME: for editor cell editor we don't need to blur the input element
     deactivate() {
-        this._container.style.left = `0px`;
-        this._container.style.top = `0px`;
+        this._container.style.left = '0px';
+        this._container.style.top = '0px';
 
         this._cursor.style.animation = '';
         this._cursor.style.display = 'none';
@@ -360,6 +360,8 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         this._activeViewport = scene.getViewports()[0];
 
         this._document = document;
+
+        this._attachScrollEvent(this._activeViewport);
     }
 
     // Handler double click.
@@ -395,8 +397,8 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         const segmenter = new Intl.Segmenter(undefined, { granularity: 'word' });
         const segments = segmenter.segment(content);
 
-        let startOffset = -Infinity;
-        let endOffset = -Infinity;
+        let startOffset = Number.NEGATIVE_INFINITY;
+        let endOffset = Number.NEGATIVE_INFINITY;
 
         // Use that for segmentation
         for (const { segment, index, isWordLike } of segments) {
@@ -464,16 +466,13 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
 
-        this._attachScrollEvent(
-            this._activeViewport || scene.getActiveViewportByCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]))
-        );
-
         const startNode = this._findNodeByCoord(evtOffsetX, evtOffsetY);
 
         const position = this._getNodePosition(startNode);
 
         if (position == null) {
             this._removeAllTextRanges();
+
             return;
         }
 
@@ -481,12 +480,14 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             position.isBack = true;
         }
 
-        if (evt.ctrlKey || this._isEmpty()) {
+        if (evt.shiftKey && this._getActiveRangeInstance()) {
+            this._updateActiveRangeFocusPosition(position);
+        } else if (evt.ctrlKey || this._isEmpty()) {
             const newTextSelection = new TextRange(scene, this._document!, this._docSkeleton!, position);
 
             this._addTextRange(newTextSelection);
         } else {
-            this._updateTextRangePosition(position);
+            this._updateTextRangeAnchorPosition(position);
         }
 
         this._activeSelectionRefresh();
@@ -511,7 +512,6 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
             scene.setCursor(CURSOR_TYPE.TEXT);
 
-            // eslint-disable-next-line no-magic-numbers
             if (Math.sqrt((moveOffsetX - preMoveOffsetX) ** 2 + (moveOffsetY - preMoveOffsetY) ** 2) < 3) {
                 return;
             }
@@ -603,8 +603,8 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
     private _initDOM() {
         const container = document.createElement('div');
         container.style.position = 'fixed';
-        container.style.left = `0px`;
-        container.style.top = `0px`;
+        container.style.left = '0px';
+        container.style.top = '0px';
 
         const inputParent = document.createElement('div');
         const inputDom = document.createElement('div');
@@ -636,6 +636,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         this._input.contentEditable = 'true';
 
+        this._input.classList.add('univer-editor');
         this._input.style.cssText = `
             position: absolute;
             overflow: hidden;
@@ -787,7 +788,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         this._rangeList.push(textRange);
     }
 
-    private _updateTextRangePosition(position: INodePosition) {
+    private _updateTextRangeAnchorPosition(position: INodePosition) {
         if (!this._scene) {
             return;
         }
@@ -803,6 +804,31 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         lastRange.anchorNodePosition = position;
         lastRange.focusNodePosition = null;
         this._rangeList = [lastRange];
+    }
+
+    private _updateActiveRangeFocusPosition(position: INodePosition) {
+        if (!this._scene) {
+            this._logService.error('[TextSelectionRenderManager] _updateActiveRangeFocusPosition: scene is null');
+
+            return;
+        }
+
+        const activeTextRange = this._getActiveRangeInstance();
+
+        if (activeTextRange == null || activeTextRange.anchorNodePosition == null) {
+            this._logService.error(
+                '[TextSelectionRenderManager] _updateActiveRangeFocusPosition: active range has no anchor'
+            );
+
+            return;
+        }
+
+        this._removeAllTextRanges();
+        activeTextRange.activate();
+        activeTextRange.focusNodePosition = position;
+
+        this.deactivate();
+        this._rangeList = [activeTextRange];
     }
 
     private _isEmpty() {
@@ -915,10 +941,12 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
     }
 
     private _attachScrollEvent(viewport: Nullable<Viewport>) {
-        if (viewport == null) {
+        if (viewport == null || this._docSkeleton == null) {
             return;
         }
-        const key = viewport.viewPortKey;
+        const unitId = this._docSkeleton.getViewModel().getDataModel().getUnitId();
+        const key = `${unitId}_${viewport.viewPortKey}`;
+
         if (this._viewPortObserverMap.has(key)) {
             return;
         }

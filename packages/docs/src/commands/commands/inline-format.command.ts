@@ -25,8 +25,10 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
     MemoryCursor,
+    TextX,
+    TextXActionType,
 } from '@univerjs/core';
-import { type TextRange } from '@univerjs/engine-render';
+import type { TextRange } from '@univerjs/engine-render';
 
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
@@ -174,6 +176,8 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
             },
         };
 
+        const textX = new TextX();
+
         const memoryCursor = new MemoryCursor();
 
         memoryCursor.reset();
@@ -197,15 +201,15 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
             const len = startOffset - memoryCursor.cursor;
 
             if (len !== 0) {
-                doMutation.params!.mutations.push({
-                    t: 'r',
+                textX.push({
+                    t: TextXActionType.RETAIN,
                     len,
                     segmentId,
                 });
             }
 
-            doMutation.params!.mutations.push({
-                t: 'r',
+            textX.push({
+                t: TextXActionType.RETAIN,
                 body,
                 len: endOffset - startOffset,
                 segmentId,
@@ -214,6 +218,8 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
             memoryCursor.reset();
             memoryCursor.moveCursor(endOffset);
         }
+
+        doMutation.params.mutations = textX.serialize();
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,
@@ -337,8 +343,8 @@ function getReverseFormatValueInSelection(
     return /bl|it/.test(key)
         ? BooleanNumber.FALSE
         : /ul|st/.test(key)
-          ? {
+            ? {
                 s: BooleanNumber.FALSE,
             }
-          : BaselineOffset.NORMAL;
+            : BaselineOffset.NORMAL;
 }

@@ -22,7 +22,7 @@ import { PAGE5_RICHTEXT_1 } from '../../slides/rich-text/page5-richtext1';
 const richTextDemo: IDocumentData = {
     id: 'd',
     body: {
-        dataStream: `Instructions:\f①Project division - Fill in the specific division of labor after the project is disassembled:\f②Responsible Person - Enter the responsible person's name here:\f③Date-The specific execution time of the project (detailed to the date of a certain month), and the gray color block marks the planned real-time time of the division of labor of the project (for example,\fthe specific execution time of [regional scene model arrangement and construction] is the 2 days marked in gray. \r\n`,
+        dataStream: `Instructions: ①Project division - Fill in the specific division of labor after the project is disassembled: ②Responsible Person - Enter the responsible person's name here: ③Date-The specific execution time of the project (detailed to the date of a certain month), and the gray color block marks the planned real-time time of the division of labor of the project (for example, the specific execution time of [regional scene model arrangement and construction] is the 2 days marked in gray. \r\n`,
         textRuns: [
             {
                 st: 0,

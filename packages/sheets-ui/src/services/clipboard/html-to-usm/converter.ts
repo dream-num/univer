@@ -479,7 +479,7 @@ function decodeHTMLEntities(input: string): string {
         '&gt;': '>',
         '&amp;': '&',
         '&quot;': '"',
-        '&#39;': "'",
+        '&#39;': '\'',
         '&nbsp;': ' ',
     };
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IMutationInfo, IRange, Nullable } from '@univerjs/core';
+import type { ICommand, IMutationInfo, IRange } from '@univerjs/core';
 import {
     CommandType,
     Dimension,
@@ -25,14 +25,11 @@ import {
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
-import type {
-    IDeleteRangeMutationParams,
-    IInsertRangeMutationParams,
-} from '../../basics/interfaces/mutation-interface';
+import type { IDeleteRangeMutationParams } from '../../basics/interfaces/mutation-interface';
 import { SelectionManagerService } from '../../services/selection-manager.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
-import { DeleteRangeMutation, DeleteRangeUndoMutationFactory } from '../mutations/delete-range.mutation';
-import { InsertRangeMutation } from '../mutations/insert-range.mutation';
+import { getRemoveRangeMutations } from '../utils/handle-range-mutation';
+import { followSelectionOperation } from './utils/selection-utils';
 
 export interface IDeleteRangeMoveUpCommandParams {
     range: IRange;
@@ -72,19 +69,19 @@ export const DeleteRangeMoveUpCommand: ICommand = {
             shiftDimension: Dimension.ROWS,
         };
 
-        const insertRangeMutationParams: Nullable<IInsertRangeMutationParams> = DeleteRangeUndoMutationFactory(
-            accessor,
-            deleteRangeMutationParams
-        );
-        if (!insertRangeMutationParams) return false;
-
         const sheetInterceptor = sheetInterceptorService.onCommandExecute({
             id: DeleteRangeMoveUpCommand.id,
             params: { range } as IDeleteRangeMoveUpCommandParams,
         });
-        const redos: IMutationInfo[] = [{ id: DeleteRangeMutation.id, params: deleteRangeMutationParams }];
-        const undos: IMutationInfo[] = [{ id: InsertRangeMutation.id, params: insertRangeMutationParams }];
+
+        const { redo: removeRangeRedo, undo: removeRangeUndo } = getRemoveRangeMutations(
+            accessor,
+            deleteRangeMutationParams
+        );
+        const redos: IMutationInfo[] = [...removeRangeRedo];
+        const undos: IMutationInfo[] = [...removeRangeUndo];
         redos.push(...sheetInterceptor.redos);
+        redos.push(followSelectionOperation(range, workbook, worksheet));
         undos.push(...sheetInterceptor.undos);
         const result = await sequenceExecute(redos, commandService).result;
 

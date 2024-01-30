@@ -25,10 +25,10 @@ import {
 } from '../../commands/operations/cell-edit.operation';
 import {
     whenEditorActivated,
-    whenEditorActivatedIsVisible,
     whenEditorDidNotInputFormulaActivated,
-    whenEditorFocusIsHidden,
     whenFormulaEditorFocused,
+    whenSheetEditorActivated,
+    whenSheetEditorFocused,
 } from './utils';
 
 export const ARROW_SELECTION_KEYCODE_LIST = [
@@ -101,7 +101,7 @@ export const EditorCursorEscShortcut: IShortcutItem = {
     binding: KeyCode.ESC,
     description: 'shortcut.sheet.abort-editing',
     group: '4_sheet-edit',
-    preconditions: (contextService) => whenEditorActivated(contextService),
+    preconditions: (contextService) => whenSheetEditorActivated(contextService),
     staticParameters: {
         visible: false,
         eventType: DeviceInputEventType.Keyboard,
@@ -113,14 +113,13 @@ export const EditorBreakLineShortcut: IShortcutItem = {
     id: BreakLineCommand.id,
     description: 'shortcut.sheet.break-line',
     group: '4_sheet-edit',
-    preconditions: (contextService) => whenEditorActivated(contextService),
+    preconditions: (contextService) => whenSheetEditorActivated(contextService),
     binding: KeyCode.ENTER | MetaKeys.ALT,
 };
 
 export const EditorDeleteLeftShortcut: IShortcutItem = {
     id: DeleteLeftCommand.id,
-    preconditions: (contextService) =>
-        whenEditorActivatedIsVisible(contextService) || whenFormulaEditorFocused(contextService),
+    preconditions: (contextService) => whenEditorActivated(contextService) || whenFormulaEditorFocused(contextService),
     binding: KeyCode.BACKSPACE,
 };
 
@@ -129,7 +128,7 @@ export const EditorDeleteLeftShortcutInActive: IShortcutItem = {
     description: 'shortcut.sheet.delete-and-start-editing',
     group: '4_sheet-edit',
     preconditions: (contextService) =>
-        whenEditorFocusIsHidden(contextService) && !whenFormulaEditorFocused(contextService),
+        whenSheetEditorFocused(contextService) && !whenFormulaEditorFocused(contextService),
     binding: KeyCode.BACKSPACE,
     staticParameters: {
         visible: true,

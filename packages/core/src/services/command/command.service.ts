@@ -161,7 +161,6 @@ export const ICommandService = createIdentifier<ICommandService>('anywhere.comma
  * The registry of commands.
  */
 export class CommandRegistry {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private readonly _commands = new Map<string, ICommand>();
 
     registerCommand(command: ICommand): IDisposable {
@@ -206,6 +205,7 @@ export class CommandService implements ICommandService {
         @ILogService private readonly _logService: ILogService
     ) {
         this._commandRegistry = new CommandRegistry();
+        this._registerCommand(NilCommand);
     }
 
     registerCommand(command: ICommand): IDisposable {
@@ -384,7 +384,7 @@ export class CommandService implements ICommandService {
         try {
             result = this._injector.invoke(command.handler, params) as R;
             if (result instanceof Promise) {
-                throw new Error('[CommandService]: Command handler should not return a promise.');
+                throw new TypeError('[CommandService]: Command handler should not return a promise.');
             }
 
             this._commandExecutingLevel--;
@@ -442,7 +442,7 @@ class MultiCommand implements IMultiCommand {
         for (const item of this._implementations) {
             const preconditions = item.command.preconditions;
             if (!preconditions || (preconditions && preconditions(contextService))) {
-                logService.debug(`[MultiCommand]`, `executing implementation "${item.command.name}".`);
+                logService.debug('[MultiCommand]', `executing implementation "${item.command.name}".`);
                 const result = await injector.invoke(item.command.handler, params);
                 if (result) {
                     return true;
@@ -467,3 +467,9 @@ export function sequenceExecuteAsync(
     const promises = tasks.map((task) => () => commandService.executeCommand(task.id, task.params, options));
     return sequenceAsync(promises);
 }
+
+export const NilCommand: ICommand = {
+    id: 'nil',
+    type: CommandType.COMMAND,
+    handler: () => true,
+};

@@ -23,8 +23,9 @@ import { interval, takeUntil, throttle } from 'rxjs';
 @OnLifecycle(LifecycleStages.Rendered, PerformanceMonitorController)
 export class PerformanceMonitorController extends RxDisposable {
     private _documentType: UniverInstanceType = UniverInstanceType.UNKNOWN;
-
     private _hasWatched = false;
+    private _container!: HTMLDivElement;
+    private _styleElement!: HTMLStyleElement;
 
     constructor(
         @Inject(DocCanvasView) private _docCanvasView: DocCanvasView,
@@ -34,6 +35,13 @@ export class PerformanceMonitorController extends RxDisposable {
         super();
 
         this._listenDocumentTypeChange();
+    }
+
+    override dispose(): void {
+        super.dispose();
+
+        document.body.removeChild(this._container);
+        document.head.removeChild(this._styleElement);
     }
 
     private _listenDocumentTypeChange() {
@@ -55,7 +63,7 @@ export class PerformanceMonitorController extends RxDisposable {
 
         this._hasWatched = true;
 
-        const container = document.createElement('div');
+        const container = (this._container = document.createElement('div'));
         container.classList.add('fps-monitor');
         const THROTTLE_TIME = 500;
         document.body.appendChild(container);
@@ -76,7 +84,8 @@ export class PerformanceMonitorController extends RxDisposable {
             }
         `;
 
-        document.head.appendChild(document.createElement('style')).innerText = style;
+        this._styleElement = document.createElement('style');
+        document.head.appendChild(this._styleElement).innerText = style;
 
         if (this._documentType === UniverInstanceType.DOC) {
             this._docCanvasView.fps$

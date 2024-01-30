@@ -59,7 +59,7 @@ describe('Test vlookup', () => {
         it('Search two', async () => {
             const resultObject = textFunction.calculate(
                 new NumberValueObject(2),
-                arrayValueObject1,
+                arrayValueObject1.clone(),
                 new NumberValueObject(2),
                 new NumberValueObject(0)
             ) as BaseValueObject;
@@ -69,7 +69,7 @@ describe('Test vlookup', () => {
         it('Search eight', async () => {
             const resultObject = textFunction.calculate(
                 new NumberValueObject(8),
-                arrayValueObject1,
+                arrayValueObject1.clone(),
                 new NumberValueObject(2),
                 new NumberValueObject(0)
             ) as BaseValueObject;
@@ -79,7 +79,7 @@ describe('Test vlookup', () => {
         it('Exceeding columns', async () => {
             const resultObject = textFunction.calculate(
                 new NumberValueObject(8),
-                arrayValueObject1,
+                arrayValueObject1.clone(),
                 new NumberValueObject(3),
                 new NumberValueObject(0)
             ) as BaseValueObject;
@@ -89,7 +89,7 @@ describe('Test vlookup', () => {
         it('Not match', async () => {
             const resultObject = textFunction.calculate(
                 new NumberValueObject(100),
-                arrayValueObject1,
+                arrayValueObject1.clone(),
                 new NumberValueObject(2),
                 new NumberValueObject(0)
             ) as BaseValueObject;
@@ -98,8 +98,8 @@ describe('Test vlookup', () => {
 
         it('array', async () => {
             const resultObject = textFunction.calculate(
-                matchArrayValueObject,
-                arrayValueObject1,
+                matchArrayValueObject.clone(),
+                arrayValueObject1.clone(),
                 new NumberValueObject(2),
                 new NumberValueObject(0)
             ) as BaseValueObject;
@@ -115,7 +115,7 @@ describe('Test vlookup', () => {
         it('Approximate search two', async () => {
             const resultObject = textFunction.calculate(
                 new NumberValueObject(2),
-                arrayValueObject1,
+                arrayValueObject1.clone(),
                 new NumberValueObject(2),
                 new NumberValueObject(1)
             ) as BaseValueObject;
@@ -125,7 +125,7 @@ describe('Test vlookup', () => {
         it('Approximate search eight', async () => {
             const resultObject = textFunction.calculate(
                 new NumberValueObject(8),
-                arrayValueObject1,
+                arrayValueObject1.clone(),
                 new NumberValueObject(2)
             ) as BaseValueObject;
             expect(resultObject.getValue().toString()).toBe('Eighth');
@@ -134,7 +134,7 @@ describe('Test vlookup', () => {
         it('Approximate exceeding columns', async () => {
             const resultObject = textFunction.calculate(
                 new NumberValueObject(8),
-                arrayValueObject1,
+                arrayValueObject1.clone(),
                 new NumberValueObject(3)
             ) as BaseValueObject;
             expect(resultObject.getValue().toString()).toBe(ErrorType.VALUE);
@@ -143,17 +143,17 @@ describe('Test vlookup', () => {
         it('Approximate not match', async () => {
             const resultObject = textFunction.calculate(
                 new NumberValueObject(100),
-                arrayValueObject1,
+                arrayValueObject1.clone(),
                 new NumberValueObject(2),
                 new NumberValueObject(1)
             ) as BaseValueObject;
-            expect(resultObject.getValue().toString()).toBe('Eighth');
+            expect(resultObject.getValue().toString()).toBe('First');
         });
 
         it('Approximate not order data', async () => {
             const resultObject = textFunction.calculate(
                 new NumberValueObject(2),
-                arrayValueObject2,
+                arrayValueObject2.clone(),
                 new NumberValueObject(2),
                 new NumberValueObject(1)
             ) as BaseValueObject;
@@ -163,7 +163,7 @@ describe('Test vlookup', () => {
         it('Approximate not order data match', async () => {
             const resultObject = textFunction.calculate(
                 new NumberValueObject(8),
-                arrayValueObject2,
+                arrayValueObject2.clone(),
                 new NumberValueObject(2)
             ) as BaseValueObject;
             expect(resultObject.getValue().toString()).toBe('Third');

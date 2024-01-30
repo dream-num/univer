@@ -79,6 +79,8 @@ export class Engine extends ThinEngine<Scene> {
 
     private _pointerLeaveEvent!: (evt: any) => void;
 
+    private _remainCapture: number = -1;
+
     /** previous pointer position */
     private pointer: { [deviceSlot: number]: number } = {};
 
@@ -128,6 +130,14 @@ export class Engine extends ThinEngine<Scene> {
 
     override getCanvasElement() {
         return this._canvas.getCanvasEle();
+    }
+
+    /**
+     * To ensure mouse events remain bound to the host element,
+     * preventing the events from becoming ineffective once the mouse leaves the host.
+     */
+    override setRemainCapture() {
+        this._canvasEle.setPointerCapture(this._remainCapture);
     }
 
     getPixelRatio() {
@@ -367,7 +377,6 @@ export class Engine extends ThinEngine<Scene> {
         this._canvasEle.addEventListener('keyup', keyboardUpEvent);
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _handlePointerAction() {
         const eventPrefix = getPointerPrefix();
 
@@ -446,11 +455,13 @@ export class Engine extends ThinEngine<Scene> {
                     }
                 }
                 if (!document.pointerLockElement) {
+                    this._remainCapture = this._mouseId;
                     this._canvasEle.setPointerCapture(this._mouseId);
                 }
             } else {
                 // Touch; Since touches are dynamically assigned, only set capture if we have an id
                 if (evt.pointerId && !document.pointerLockElement) {
+                    this._remainCapture = evt.pointerId;
                     this._canvasEle.setPointerCapture(evt.pointerId);
                 }
             }
@@ -525,8 +536,10 @@ export class Engine extends ThinEngine<Scene> {
                 this._mouseId >= 0 &&
                 this._canvasEle.hasPointerCapture(this._mouseId)
             ) {
+                this._remainCapture = this._mouseId;
                 this._canvasEle.releasePointerCapture(this._mouseId);
             } else if (deviceEvent.pointerId && this._canvasEle.hasPointerCapture(deviceEvent.pointerId)) {
+                this._remainCapture = deviceEvent.pointerId;
                 this._canvasEle.releasePointerCapture(deviceEvent.pointerId);
             }
 
@@ -563,6 +576,7 @@ export class Engine extends ThinEngine<Scene> {
         this._pointerBlurEvent = (evt: any) => {
             if (this._mouseId >= 0 && this._canvasEle.hasPointerCapture(this._mouseId)) {
                 this._canvasEle.releasePointerCapture(this._mouseId);
+                this._remainCapture = this._mouseId;
                 this._mouseId = -1;
             }
 
@@ -621,8 +635,8 @@ export class Engine extends ThinEngine<Scene> {
             'onwheel' in document.createElement('div')
                 ? 'wheel' // Modern browsers support "wheel"
                 : (document as any).onmousewheel !== undefined
-                  ? 'mousewheel' // Webkit and IE support at least "mousewheel"
-                  : 'DOMMouseScroll'; // let's assume that remaining browsers are older Firefox
+                    ? 'mousewheel' // Webkit and IE support at least "mousewheel"
+                    : 'DOMMouseScroll'; // let's assume that remaining browsers are older Firefox
         return wheelEventName;
     }
 

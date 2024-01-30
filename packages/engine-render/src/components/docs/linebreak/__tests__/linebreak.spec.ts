@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-/* eslint-disable no-magic-numbers */
-
-import fs from 'fs';
+import fs from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 import { tabLineBreakExtension } from '../extensions/tab-linebreak-extension';
@@ -37,7 +35,7 @@ describe('unicode line break tests', () => {
     return lines.forEach((line, i) => {
         const rowNumber = i + 1;
         let bk;
-        if (!line || /^#/.test(line)) {
+        if (!line || line.startsWith('#')) {
             return;
         }
 
@@ -45,7 +43,7 @@ describe('unicode line break tests', () => {
         const codePoints = cols
             .split(/\s*[×÷]\s*/)
             .slice(1, -1)
-            .map((c) => parseInt(c, 16));
+            .map((c) => Number.parseInt(c, 16));
         const str = String.fromCodePoint(...codePoints);
 
         const breaker = new LineBreaker(str);
@@ -64,7 +62,7 @@ describe('unicode line break tests', () => {
                 if (codes[0] === '') {
                     codes.shift();
                 }
-                codes = codes.map((c) => parseInt(c, 16));
+                codes = codes.map((c) => Number.parseInt(c, 16));
                 return String.fromCodePoint(...codes);
             });
 

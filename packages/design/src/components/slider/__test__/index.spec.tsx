@@ -16,17 +16,17 @@
 
 import { fireEvent, render, screen } from '@testing-library/react';
 import React, { useState } from 'react';
-import { describe, expect, test } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { Slider } from '../Slider';
 
 describe('Slider', () => {
-    test('renders correctly', () => {
+    it('renders correctly', () => {
         const { container } = render(<Slider min={0} max={100} value={90} />);
         expect(container);
     });
 
-    test('renders correctly with resetPoint', () => {
+    it('renders correctly with resetPoint', () => {
         let value = 90;
 
         function handleChange(point: number) {
@@ -40,7 +40,7 @@ describe('Slider', () => {
         expect(value).toBe(30);
     });
 
-    test('renders correctly with steps', () => {
+    it('renders correctly with steps', () => {
         let result = 10;
         function Demo() {
             const [value, setValue] = useState(result);
@@ -66,7 +66,7 @@ describe('Slider', () => {
         expect(result).toBe(20);
     });
 
-    test('renders correctly with shortcuts', () => {
+    it('renders correctly with shortcuts', () => {
         let result = 10;
         function Demo() {
             const [value, setValue] = useState(result);

@@ -16,8 +16,8 @@
 
 export default {
     CELL: {
-        description: `セルの書式、位置、内容についての情報を返します。`,
-        abstract: `セルの書式、位置、内容についての情報を返します。`,
+        description: 'セルの書式、位置、内容についての情報を返します。',
+        abstract: 'セルの書式、位置、内容についての情報を返します。',
         links: [
             {
                 title: '指導',
@@ -30,8 +30,8 @@ export default {
         },
     },
     ERROR_TYPE: {
-        description: `エラーの種類に対応する数値を返します。`,
-        abstract: `エラーの種類に対応する数値を返します。`,
+        description: 'エラーの種類に対応する数値を返します。',
+        abstract: 'エラーの種類に対応する数値を返します。',
         links: [
             {
                 title: '指導',
@@ -44,8 +44,8 @@ export default {
         },
     },
     INFO: {
-        description: `現在の操作環境についての情報を返します。`,
-        abstract: `現在の操作環境についての情報を返します。`,
+        description: '現在の操作環境についての情報を返します。',
+        abstract: '現在の操作環境についての情報を返します。',
         links: [
             {
                 title: '指導',
@@ -58,8 +58,8 @@ export default {
         },
     },
     ISBLANK: {
-        description: `対象が空白セルを参照するときに TRUE を返します。`,
-        abstract: `対象が空白セルを参照するときに TRUE を返します。`,
+        description: '対象が空白セルを参照するときに TRUE を返します。',
+        abstract: '対象が空白セルを参照するときに TRUE を返します。',
         links: [
             {
                 title: '指導',
@@ -67,13 +67,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: '値', detail: 'テストする値を指定します。 テストの対象引数には、空白セル、エラー、論理値、文字列、数値、参照値、または対象となるデータを参照する名前を指定することができます。' },
         },
     },
     ISERR: {
-        description: `対象が #N/A 以外のエラー値のときに TRUE を返します。`,
-        abstract: `対象が #N/A 以外のエラー値のときに TRUE を返します。`,
+        description: '対象が #N/A 以外のエラー値のときに TRUE を返します。',
+        abstract: '対象が #N/A 以外のエラー値のときに TRUE を返します。',
         links: [
             {
                 title: '指導',
@@ -86,8 +85,8 @@ export default {
         },
     },
     ISERROR: {
-        description: `対象が任意のエラー値のときに TRUE を返します。`,
-        abstract: `対象が任意のエラー値のときに TRUE を返します。`,
+        description: '対象が任意のエラー値のときに TRUE を返します。',
+        abstract: '対象が任意のエラー値のときに TRUE を返します。',
         links: [
             {
                 title: '指導',
@@ -100,8 +99,8 @@ export default {
         },
     },
     ISEVEN: {
-        description: `数値が偶数のときに TRUE を返します。`,
-        abstract: `数値が偶数のときに TRUE を返します。`,
+        description: '数値が偶数のときに TRUE を返します。',
+        abstract: '数値が偶数のときに TRUE を返します。',
         links: [
             {
                 title: '指導',
@@ -114,8 +113,8 @@ export default {
         },
     },
     ISFORMULA: {
-        description: `数式が含まれるセルへの参照がある場合に TRUE を返します。`,
-        abstract: `数式が含まれるセルへの参照がある場合に TRUE を返します。`,
+        description: '数式が含まれるセルへの参照がある場合に TRUE を返します。',
+        abstract: '数式が含まれるセルへの参照がある場合に TRUE を返します。',
         links: [
             {
                 title: '指導',
@@ -128,8 +127,8 @@ export default {
         },
     },
     ISLOGICAL: {
-        description: `対象が論理値のときに TRUE を返します。`,
-        abstract: `対象が論理値のときに TRUE を返します。`,
+        description: '対象が論理値のときに TRUE を返します。',
+        abstract: '対象が論理値のときに TRUE を返します。',
         links: [
             {
                 title: '指導',
@@ -142,8 +141,8 @@ export default {
         },
     },
     ISNA: {
-        description: `対象がエラー値 #N/A のときに TRUE を返します。`,
-        abstract: `対象がエラー値 #N/A のときに TRUE を返します。`,
+        description: '対象がエラー値 #N/A のときに TRUE を返します。',
+        abstract: '対象がエラー値 #N/A のときに TRUE を返します。',
         links: [
             {
                 title: '指導',
@@ -156,8 +155,8 @@ export default {
         },
     },
     ISNONTEXT: {
-        description: `対象が文字列以外のときに TRUE を返します。`,
-        abstract: `対象が文字列以外のときに TRUE を返します。`,
+        description: '対象が文字列以外のときに TRUE を返します。',
+        abstract: '対象が文字列以外のときに TRUE を返します。',
         links: [
             {
                 title: '指導',
@@ -170,8 +169,8 @@ export default {
         },
     },
     ISNUMBER: {
-        description: `対象が数値のときに TRUE を返します。`,
-        abstract: `対象が数値のときに TRUE を返します。`,
+        description: '対象が数値のときに TRUE を返します。',
+        abstract: '対象が数値のときに TRUE を返します。',
         links: [
             {
                 title: '指導',
@@ -184,8 +183,8 @@ export default {
         },
     },
     ISODD: {
-        description: `数値が奇数のときに TRUE を返します。`,
-        abstract: `数値が奇数のときに TRUE を返します。`,
+        description: '数値が奇数のときに TRUE を返します。',
+        abstract: '数値が奇数のときに TRUE を返します。',
         links: [
             {
                 title: '指導',
@@ -198,8 +197,8 @@ export default {
         },
     },
     ISOMITTED: {
-        description: `LAMBDA の値が見つからないかどうかを確認し、TRUE または FALSE を返します`,
-        abstract: `LAMBDA の値が見つからないかどうかを確認し、TRUE または FALSE を返します`,
+        description: 'LAMBDA の値が見つからないかどうかを確認し、TRUE または FALSE を返します',
+        abstract: 'LAMBDA の値が見つからないかどうかを確認し、TRUE または FALSE を返します',
         links: [
             {
                 title: '指導',
@@ -212,8 +211,8 @@ export default {
         },
     },
     ISREF: {
-        description: `対象がセル参照のときに TRUE を返します。`,
-        abstract: `対象がセル参照のときに TRUE を返します。`,
+        description: '対象がセル参照のときに TRUE を返します。',
+        abstract: '対象がセル参照のときに TRUE を返します。',
         links: [
             {
                 title: '指導',
@@ -226,8 +225,8 @@ export default {
         },
     },
     ISTEXT: {
-        description: `対象が文字列のときに TRUE を返します。`,
-        abstract: `対象が文字列のときに TRUE を返します。`,
+        description: '対象が文字列のときに TRUE を返します。',
+        abstract: '対象が文字列のときに TRUE を返します。',
         links: [
             {
                 title: '指導',
@@ -240,8 +239,8 @@ export default {
         },
     },
     N: {
-        description: `値を数値に変換します。`,
-        abstract: `値を数値に変換します。`,
+        description: '値を数値に変換します。',
+        abstract: '値を数値に変換します。',
         links: [
             {
                 title: '指導',
@@ -254,8 +253,8 @@ export default {
         },
     },
     NA: {
-        description: `エラー値 #N/A を返します。`,
-        abstract: `エラー値 #N/A を返します。`,
+        description: 'エラー値 #N/A を返します。',
+        abstract: 'エラー値 #N/A を返します。',
         links: [
             {
                 title: '指導',
@@ -268,8 +267,8 @@ export default {
         },
     },
     SHEET: {
-        description: `参照されるシートのシート番号を返します。`,
-        abstract: `参照されるシートのシート番号を返します。`,
+        description: '参照されるシートのシート番号を返します。',
+        abstract: '参照されるシートのシート番号を返します。',
         links: [
             {
                 title: '指導',
@@ -282,8 +281,8 @@ export default {
         },
     },
     SHEETS: {
-        description: `参照内のシート数を返します。`,
-        abstract: `参照内のシート数を返します。`,
+        description: '参照内のシート数を返します。',
+        abstract: '参照内のシート数を返します。',
         links: [
             {
                 title: '指導',
@@ -296,8 +295,8 @@ export default {
         },
     },
     TYPE: {
-        description: `データ型を表す数値を返します。`,
-        abstract: `データ型を表す数値を返します。`,
+        description: 'データ型を表す数値を返します。',
+        abstract: 'データ型を表す数値を返します。',
         links: [
             {
                 title: '指導',

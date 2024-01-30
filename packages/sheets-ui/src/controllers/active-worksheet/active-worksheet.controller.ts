@@ -149,12 +149,9 @@ export class ActiveWorksheetController extends Disposable {
 
         const previousIndex = this._previousSheetIndex;
         const nextIndex = previousIndex >= 1 ? previousIndex - 1 : 0;
-        const nextSheet = workbook.getSheetByIndex(nextIndex);
-        if (!nextSheet) {
-            throw new Error('[ActiveWorksheetController]: cannot find the next sheet!');
-        }
+        const nextId = findTheNextUnhiddenSheet(workbook, nextIndex);
 
-        this._switchToNextSheet(unitId, nextSheet.getSheetId());
+        this._switchToNextSheet(unitId, nextId);
     }
 
     private _adjustActiveSheetOnInsertSheet(mutation: IMutationInfo<IInsertSheetMutationParams>) {

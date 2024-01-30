@@ -16,7 +16,7 @@
 
 import { fireEvent, render } from '@testing-library/react';
 import React, { useState } from 'react';
-import { describe, expect, test } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { Checkbox } from '../../checkbox/Checkbox';
 import { CheckboxGroup } from '../CheckboxGroup';
@@ -35,7 +35,7 @@ describe('CheckboxGroup', () => {
         </CheckboxGroup>
     );
 
-    test('click Checkbox', async () => {
+    it('click Checkbox', async () => {
         render(group);
 
         let result = ['0'];

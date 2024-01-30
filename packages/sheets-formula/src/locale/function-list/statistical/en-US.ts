@@ -16,8 +16,8 @@
 
 export default {
     AVEDEV: {
-        description: `Returns the average of the absolute deviations of data points from their mean`,
-        abstract: `Returns the average of the absolute deviations of data points from their mean`,
+        description: 'Returns the average of the absolute deviations of data points from their mean',
+        abstract: 'Returns the average of the absolute deviations of data points from their mean',
         links: [
             {
                 title: 'Instruction',
@@ -30,8 +30,8 @@ export default {
         },
     },
     AVERAGE: {
-        description: `Returns the average (arithmetic mean) of the arguments.`,
-        abstract: `Returns the average of its arguments`,
+        description: 'Returns the average (arithmetic mean) of the arguments.',
+        abstract: 'Returns the average of its arguments',
         links: [
             {
                 title: 'Instruction',
@@ -50,8 +50,8 @@ export default {
         },
     },
     AVERAGEA: {
-        description: `Returns the average of its arguments, including numbers, text, and logical values`,
-        abstract: `Returns the average of its arguments, including numbers, text, and logical values`,
+        description: 'Returns the average of its arguments, including numbers, text, and logical values',
+        abstract: 'Returns the average of its arguments, including numbers, text, and logical values',
         links: [
             {
                 title: 'Instruction',
@@ -64,8 +64,8 @@ export default {
         },
     },
     AVERAGEIF: {
-        description: `Returns the average (arithmetic mean) of all the cells in a range that meet a given criteria`,
-        abstract: `Returns the average (arithmetic mean) of all the cells in a range that meet a given criteria`,
+        description: 'Returns the average (arithmetic mean) of all the cells in a range that meet a given criteria',
+        abstract: 'Returns the average (arithmetic mean) of all the cells in a range that meet a given criteria',
         links: [
             {
                 title: 'Instruction',
@@ -78,8 +78,8 @@ export default {
         },
     },
     AVERAGEIFS: {
-        description: `Returns the average (arithmetic mean) of all cells that meet multiple criteria`,
-        abstract: `Returns the average (arithmetic mean) of all cells that meet multiple criteria`,
+        description: 'Returns the average (arithmetic mean) of all cells that meet multiple criteria',
+        abstract: 'Returns the average (arithmetic mean) of all cells that meet multiple criteria',
         links: [
             {
                 title: 'Instruction',
@@ -92,8 +92,8 @@ export default {
         },
     },
     BETA_DIST: {
-        description: `Returns the beta cumulative distribution function`,
-        abstract: `Returns the beta cumulative distribution function`,
+        description: 'Returns the beta cumulative distribution function',
+        abstract: 'Returns the beta cumulative distribution function',
         links: [
             {
                 title: 'Instruction',
@@ -106,8 +106,8 @@ export default {
         },
     },
     BETA_INV: {
-        description: `Returns the inverse of the cumulative distribution function for a specified beta distribution`,
-        abstract: `Returns the inverse of the cumulative distribution function for a specified beta distribution`,
+        description: 'Returns the inverse of the cumulative distribution function for a specified beta distribution',
+        abstract: 'Returns the inverse of the cumulative distribution function for a specified beta distribution',
         links: [
             {
                 title: 'Instruction',
@@ -120,8 +120,8 @@ export default {
         },
     },
     BINOM_DIST: {
-        description: `Returns the individual term binomial distribution probability`,
-        abstract: `Returns the individual term binomial distribution probability`,
+        description: 'Returns the individual term binomial distribution probability',
+        abstract: 'Returns the individual term binomial distribution probability',
         links: [
             {
                 title: 'Instruction',
@@ -134,8 +134,8 @@ export default {
         },
     },
     BINOM_DIST_RANGE: {
-        description: `Returns the probability of a trial result using a binomial distribution`,
-        abstract: `Returns the probability of a trial result using a binomial distribution`,
+        description: 'Returns the probability of a trial result using a binomial distribution',
+        abstract: 'Returns the probability of a trial result using a binomial distribution',
         links: [
             {
                 title: 'Instruction',
@@ -148,8 +148,8 @@ export default {
         },
     },
     BINOM_INV: {
-        description: `Returns the smallest value for which the cumulative binomial distribution is less than or equal to a criterion value`,
-        abstract: `Returns the smallest value for which the cumulative binomial distribution is less than or equal to a criterion value`,
+        description: 'Returns the smallest value for which the cumulative binomial distribution is less than or equal to a criterion value',
+        abstract: 'Returns the smallest value for which the cumulative binomial distribution is less than or equal to a criterion value',
         links: [
             {
                 title: 'Instruction',
@@ -162,8 +162,8 @@ export default {
         },
     },
     CHISQ_DIST: {
-        description: `Returns the cumulative beta probability density function`,
-        abstract: `Returns the cumulative beta probability density function`,
+        description: 'Returns the cumulative beta probability density function',
+        abstract: 'Returns the cumulative beta probability density function',
         links: [
             {
                 title: 'Instruction',
@@ -176,8 +176,8 @@ export default {
         },
     },
     CHISQ_DIST_RT: {
-        description: `Returns the one-tailed probability of the chi-squared distribution`,
-        abstract: `Returns the one-tailed probability of the chi-squared distribution`,
+        description: 'Returns the one-tailed probability of the chi-squared distribution',
+        abstract: 'Returns the one-tailed probability of the chi-squared distribution',
         links: [
             {
                 title: 'Instruction',
@@ -190,8 +190,8 @@ export default {
         },
     },
     CHISQ_INV: {
-        description: `Returns the cumulative beta probability density function`,
-        abstract: `Returns the cumulative beta probability density function`,
+        description: 'Returns the cumulative beta probability density function',
+        abstract: 'Returns the cumulative beta probability density function',
         links: [
             {
                 title: 'Instruction',
@@ -204,8 +204,8 @@ export default {
         },
     },
     CHISQ_INV_RT: {
-        description: `Returns the inverse of the one-tailed probability of the chi-squared distribution`,
-        abstract: `Returns the inverse of the one-tailed probability of the chi-squared distribution`,
+        description: 'Returns the inverse of the one-tailed probability of the chi-squared distribution',
+        abstract: 'Returns the inverse of the one-tailed probability of the chi-squared distribution',
         links: [
             {
                 title: 'Instruction',
@@ -218,8 +218,8 @@ export default {
         },
     },
     CHISQ_TEST: {
-        description: `Returns the test for independence`,
-        abstract: `Returns the test for independence`,
+        description: 'Returns the test for independence',
+        abstract: 'Returns the test for independence',
         links: [
             {
                 title: 'Instruction',
@@ -232,8 +232,8 @@ export default {
         },
     },
     CONFIDENCE_NORM: {
-        description: `Returns the confidence interval for a population mean`,
-        abstract: `Returns the confidence interval for a population mean`,
+        description: 'Returns the confidence interval for a population mean',
+        abstract: 'Returns the confidence interval for a population mean',
         links: [
             {
                 title: 'Instruction',
@@ -246,8 +246,8 @@ export default {
         },
     },
     CONFIDENCE_T: {
-        description: `Returns the confidence interval for a population mean, using a Student's t distribution`,
-        abstract: `Returns the confidence interval for a population mean, using a Student's t distribution`,
+        description: 'Returns the confidence interval for a population mean, using a Student\'s t distribution',
+        abstract: 'Returns the confidence interval for a population mean, using a Student\'s t distribution',
         links: [
             {
                 title: 'Instruction',
@@ -260,8 +260,8 @@ export default {
         },
     },
     CORREL: {
-        description: `Returns the correlation coefficient between two data sets`,
-        abstract: `Returns the correlation coefficient between two data sets`,
+        description: 'Returns the correlation coefficient between two data sets',
+        abstract: 'Returns the correlation coefficient between two data sets',
         links: [
             {
                 title: 'Instruction',
@@ -274,8 +274,8 @@ export default {
         },
     },
     COUNT: {
-        description: `Counts the number of cells that contain numbers, and counts numbers within the list of arguments.`,
-        abstract: `Counts how many numbers are in the list of arguments`,
+        description: 'Counts the number of cells that contain numbers, and counts numbers within the list of arguments.',
+        abstract: 'Counts how many numbers are in the list of arguments',
         links: [
             {
                 title: 'Instruction',
@@ -284,11 +284,11 @@ export default {
         ],
         functionParameter: {
             value1: {
-                name: 'value1',
+                name: 'Value 1',
                 detail: 'The first item, cell reference, or range within which you want to count numbers.',
             },
             value2: {
-                name: 'value2',
+                name: 'Value 2',
                 detail: 'Up to 255 additional items, cell references, or ranges within which you want to count numbers.',
             },
         },
@@ -296,7 +296,7 @@ export default {
     COUNTA: {
         description: `Counts cells containing any type of information, including error values and empty text ("")
         If you do not need to count logical values, text, or error values`,
-        abstract: `Counts how many values are in the list of arguments`,
+        abstract: 'Counts how many values are in the list of arguments',
         links: [
             {
                 title: 'Instruction',
@@ -315,8 +315,8 @@ export default {
         },
     },
     COUNTBLANK: {
-        description: `Counts the number of blank cells within a range`,
-        abstract: `Counts the number of blank cells within a range`,
+        description: 'Counts the number of blank cells within a range',
+        abstract: 'Counts the number of blank cells within a range',
         links: [
             {
                 title: 'Instruction',
@@ -329,8 +329,8 @@ export default {
         },
     },
     COUNTIF: {
-        description: `Counts the number of cells within a range that meet the given criteria`,
-        abstract: `Counts the number of cells within a range that meet the given criteria`,
+        description: 'Counts the number of cells within a range that meet the given criteria',
+        abstract: 'Counts the number of cells within a range that meet the given criteria',
         links: [
             {
                 title: 'Instruction',
@@ -343,8 +343,8 @@ export default {
         },
     },
     COUNTIFS: {
-        description: `Counts the number of cells within a range that meet multiple criteria`,
-        abstract: `Counts the number of cells within a range that meet multiple criteria`,
+        description: 'Counts the number of cells within a range that meet multiple criteria',
+        abstract: 'Counts the number of cells within a range that meet multiple criteria',
         links: [
             {
                 title: 'Instruction',
@@ -357,8 +357,8 @@ export default {
         },
     },
     COVARIANCE_P: {
-        description: `Returns covariance, the average of the products of paired deviations`,
-        abstract: `Returns covariance, the average of the products of paired deviations`,
+        description: 'Returns covariance, the average of the products of paired deviations',
+        abstract: 'Returns covariance, the average of the products of paired deviations',
         links: [
             {
                 title: 'Instruction',
@@ -371,8 +371,8 @@ export default {
         },
     },
     COVARIANCE_S: {
-        description: `Returns the sample covariance, the average of the products deviations for each data point pair in two data sets`,
-        abstract: `Returns the sample covariance, the average of the products deviations for each data point pair in two data sets`,
+        description: 'Returns the sample covariance, the average of the products deviations for each data point pair in two data sets',
+        abstract: 'Returns the sample covariance, the average of the products deviations for each data point pair in two data sets',
         links: [
             {
                 title: 'Instruction',
@@ -385,8 +385,8 @@ export default {
         },
     },
     DEVSQ: {
-        description: `Returns the sum of squares of deviations`,
-        abstract: `Returns the sum of squares of deviations`,
+        description: 'Returns the sum of squares of deviations',
+        abstract: 'Returns the sum of squares of deviations',
         links: [
             {
                 title: 'Instruction',
@@ -399,8 +399,8 @@ export default {
         },
     },
     EXPON_DIST: {
-        description: `Returns the exponential distribution`,
-        abstract: `Returns the exponential distribution`,
+        description: 'Returns the exponential distribution',
+        abstract: 'Returns the exponential distribution',
         links: [
             {
                 title: 'Instruction',
@@ -413,8 +413,8 @@ export default {
         },
     },
     F_DIST: {
-        description: `Returns the F probability distribution`,
-        abstract: `Returns the F probability distribution`,
+        description: 'Returns the F probability distribution',
+        abstract: 'Returns the F probability distribution',
         links: [
             {
                 title: 'Instruction',
@@ -427,8 +427,8 @@ export default {
         },
     },
     F_DIST_RT: {
-        description: `Returns the F probability distribution`,
-        abstract: `Returns the F probability distribution`,
+        description: 'Returns the F probability distribution',
+        abstract: 'Returns the F probability distribution',
         links: [
             {
                 title: 'Instruction',
@@ -441,8 +441,8 @@ export default {
         },
     },
     F_INV: {
-        description: `Returns the inverse of the F probability distribution`,
-        abstract: `Returns the inverse of the F probability distribution`,
+        description: 'Returns the inverse of the F probability distribution',
+        abstract: 'Returns the inverse of the F probability distribution',
         links: [
             {
                 title: 'Instruction',
@@ -455,8 +455,8 @@ export default {
         },
     },
     F_INV_RT: {
-        description: `Returns the inverse of the F probability distribution`,
-        abstract: `Returns the inverse of the F probability distribution`,
+        description: 'Returns the inverse of the F probability distribution',
+        abstract: 'Returns the inverse of the F probability distribution',
         links: [
             {
                 title: 'Instruction',
@@ -469,8 +469,8 @@ export default {
         },
     },
     F_TEST: {
-        description: `Returns the result of an F-test`,
-        abstract: `Returns the result of an F-test`,
+        description: 'Returns the result of an F-test',
+        abstract: 'Returns the result of an F-test',
         links: [
             {
                 title: 'Instruction',
@@ -483,8 +483,8 @@ export default {
         },
     },
     FISHER: {
-        description: `Returns the Fisher transformation`,
-        abstract: `Returns the Fisher transformation`,
+        description: 'Returns the Fisher transformation',
+        abstract: 'Returns the Fisher transformation',
         links: [
             {
                 title: 'Instruction',
@@ -497,8 +497,8 @@ export default {
         },
     },
     FISHERINV: {
-        description: `Returns the inverse of the Fisher transformation`,
-        abstract: `Returns the inverse of the Fisher transformation`,
+        description: 'Returns the inverse of the Fisher transformation',
+        abstract: 'Returns the inverse of the Fisher transformation',
         links: [
             {
                 title: 'Instruction',
@@ -511,8 +511,8 @@ export default {
         },
     },
     FORECAST: {
-        description: `Returns a value along a linear trend`,
-        abstract: `Returns a value along a linear trend`,
+        description: 'Returns a value along a linear trend',
+        abstract: 'Returns a value along a linear trend',
         links: [
             {
                 title: 'Instruction',
@@ -525,8 +525,8 @@ export default {
         },
     },
     FORECAST_ETS: {
-        description: `Returns a future value based on existing (historical) values by using the AAA version of the Exponential Smoothing (ETS) algorithm`,
-        abstract: `Returns a future value based on existing (historical) values by using the AAA version of the Exponential Smoothing (ETS) algorithm`,
+        description: 'Returns a future value based on existing (historical) values by using the AAA version of the Exponential Smoothing (ETS) algorithm',
+        abstract: 'Returns a future value based on existing (historical) values by using the AAA version of the Exponential Smoothing (ETS) algorithm',
         links: [
             {
                 title: 'Instruction',
@@ -539,8 +539,8 @@ export default {
         },
     },
     FORECAST_ETS_CONFINT: {
-        description: `Returns a confidence interval for the forecast value at the specified target date`,
-        abstract: `Returns a confidence interval for the forecast value at the specified target date`,
+        description: 'Returns a confidence interval for the forecast value at the specified target date',
+        abstract: 'Returns a confidence interval for the forecast value at the specified target date',
         links: [
             {
                 title: 'Instruction',
@@ -553,8 +553,8 @@ export default {
         },
     },
     FORECAST_ETS_SEASONALITY: {
-        description: `Returns the length of the repetitive pattern Excel detects for the specified time series`,
-        abstract: `Returns the length of the repetitive pattern Excel detects for the specified time series`,
+        description: 'Returns the length of the repetitive pattern Excel detects for the specified time series',
+        abstract: 'Returns the length of the repetitive pattern Excel detects for the specified time series',
         links: [
             {
                 title: 'Instruction',
@@ -567,8 +567,8 @@ export default {
         },
     },
     FORECAST_ETS_STAT: {
-        description: `Returns a statistical value as a result of time series forecasting`,
-        abstract: `Returns a statistical value as a result of time series forecasting`,
+        description: 'Returns a statistical value as a result of time series forecasting',
+        abstract: 'Returns a statistical value as a result of time series forecasting',
         links: [
             {
                 title: 'Instruction',
@@ -581,8 +581,8 @@ export default {
         },
     },
     FORECAST_LINEAR: {
-        description: `Returns a future value based on existing values`,
-        abstract: `Returns a future value based on existing values`,
+        description: 'Returns a future value based on existing values',
+        abstract: 'Returns a future value based on existing values',
         links: [
             {
                 title: 'Instruction',
@@ -595,8 +595,8 @@ export default {
         },
     },
     FREQUENCY: {
-        description: `Returns a frequency distribution as a vertical array`,
-        abstract: `Returns a frequency distribution as a vertical array`,
+        description: 'Returns a frequency distribution as a vertical array',
+        abstract: 'Returns a frequency distribution as a vertical array',
         links: [
             {
                 title: 'Instruction',
@@ -609,8 +609,8 @@ export default {
         },
     },
     GAMMA: {
-        description: `Returns the Gamma function value`,
-        abstract: `Returns the Gamma function value`,
+        description: 'Returns the Gamma function value',
+        abstract: 'Returns the Gamma function value',
         links: [
             {
                 title: 'Instruction',
@@ -623,8 +623,8 @@ export default {
         },
     },
     GAMMA_DIST: {
-        description: `Returns the gamma distribution`,
-        abstract: `Returns the gamma distribution`,
+        description: 'Returns the gamma distribution',
+        abstract: 'Returns the gamma distribution',
         links: [
             {
                 title: 'Instruction',
@@ -637,8 +637,8 @@ export default {
         },
     },
     GAMMA_INV: {
-        description: `Returns the inverse of the gamma cumulative distribution`,
-        abstract: `Returns the inverse of the gamma cumulative distribution`,
+        description: 'Returns the inverse of the gamma cumulative distribution',
+        abstract: 'Returns the inverse of the gamma cumulative distribution',
         links: [
             {
                 title: 'Instruction',
@@ -651,8 +651,8 @@ export default {
         },
     },
     GAMMALN: {
-        description: `Returns the natural logarithm of the gamma function, Γ(x)`,
-        abstract: `Returns the natural logarithm of the gamma function, Γ(x)`,
+        description: 'Returns the natural logarithm of the gamma function, Γ(x)',
+        abstract: 'Returns the natural logarithm of the gamma function, Γ(x)',
         links: [
             {
                 title: 'Instruction',
@@ -665,8 +665,8 @@ export default {
         },
     },
     GAMMALN_PRECISE: {
-        description: `Returns the natural logarithm of the gamma function, Γ(x)`,
-        abstract: `Returns the natural logarithm of the gamma function, Γ(x)`,
+        description: 'Returns the natural logarithm of the gamma function, Γ(x)',
+        abstract: 'Returns the natural logarithm of the gamma function, Γ(x)',
         links: [
             {
                 title: 'Instruction',
@@ -679,8 +679,8 @@ export default {
         },
     },
     GAUSS: {
-        description: `Returns 0.5 less than the standard normal cumulative distribution`,
-        abstract: `Returns 0.5 less than the standard normal cumulative distribution`,
+        description: 'Returns 0.5 less than the standard normal cumulative distribution',
+        abstract: 'Returns 0.5 less than the standard normal cumulative distribution',
         links: [
             {
                 title: 'Instruction',
@@ -693,8 +693,8 @@ export default {
         },
     },
     GEOMEAN: {
-        description: `Returns the geometric mean`,
-        abstract: `Returns the geometric mean`,
+        description: 'Returns the geometric mean',
+        abstract: 'Returns the geometric mean',
         links: [
             {
                 title: 'Instruction',
@@ -707,8 +707,8 @@ export default {
         },
     },
     GROWTH: {
-        description: `Returns values along an exponential trend`,
-        abstract: `Returns values along an exponential trend`,
+        description: 'Returns values along an exponential trend',
+        abstract: 'Returns values along an exponential trend',
         links: [
             {
                 title: 'Instruction',
@@ -721,8 +721,8 @@ export default {
         },
     },
     HARMEAN: {
-        description: `Returns the harmonic mean`,
-        abstract: `Returns the harmonic mean`,
+        description: 'Returns the harmonic mean',
+        abstract: 'Returns the harmonic mean',
         links: [
             {
                 title: 'Instruction',
@@ -735,8 +735,8 @@ export default {
         },
     },
     HYPGEOM_DIST: {
-        description: `Returns the hypergeometric distribution`,
-        abstract: `Returns the hypergeometric distribution`,
+        description: 'Returns the hypergeometric distribution',
+        abstract: 'Returns the hypergeometric distribution',
         links: [
             {
                 title: 'Instruction',
@@ -749,8 +749,8 @@ export default {
         },
     },
     INTERCEPT: {
-        description: `Returns the intercept of the linear regression line`,
-        abstract: `Returns the intercept of the linear regression line`,
+        description: 'Returns the intercept of the linear regression line',
+        abstract: 'Returns the intercept of the linear regression line',
         links: [
             {
                 title: 'Instruction',
@@ -763,8 +763,8 @@ export default {
         },
     },
     KURT: {
-        description: `Returns the kurtosis of a data set`,
-        abstract: `Returns the kurtosis of a data set`,
+        description: 'Returns the kurtosis of a data set',
+        abstract: 'Returns the kurtosis of a data set',
         links: [
             {
                 title: 'Instruction',
@@ -777,8 +777,8 @@ export default {
         },
     },
     LARGE: {
-        description: `Returns the k-th largest value in a data set`,
-        abstract: `Returns the k-th largest value in a data set`,
+        description: 'Returns the k-th largest value in a data set',
+        abstract: 'Returns the k-th largest value in a data set',
         links: [
             {
                 title: 'Instruction',
@@ -791,8 +791,8 @@ export default {
         },
     },
     LINEST: {
-        description: `Returns the parameters of a linear trend`,
-        abstract: `Returns the parameters of a linear trend`,
+        description: 'Returns the parameters of a linear trend',
+        abstract: 'Returns the parameters of a linear trend',
         links: [
             {
                 title: 'Instruction',
@@ -805,8 +805,8 @@ export default {
         },
     },
     LOGEST: {
-        description: `Returns the parameters of an exponential trend`,
-        abstract: `Returns the parameters of an exponential trend`,
+        description: 'Returns the parameters of an exponential trend',
+        abstract: 'Returns the parameters of an exponential trend',
         links: [
             {
                 title: 'Instruction',
@@ -819,8 +819,8 @@ export default {
         },
     },
     LOGNORM_DIST: {
-        description: `Returns the cumulative lognormal distribution`,
-        abstract: `Returns the cumulative lognormal distribution`,
+        description: 'Returns the cumulative lognormal distribution',
+        abstract: 'Returns the cumulative lognormal distribution',
         links: [
             {
                 title: 'Instruction',
@@ -833,8 +833,8 @@ export default {
         },
     },
     LOGNORM_INV: {
-        description: `Returns the inverse of the lognormal cumulative distribution`,
-        abstract: `Returns the inverse of the lognormal cumulative distribution`,
+        description: 'Returns the inverse of the lognormal cumulative distribution',
+        abstract: 'Returns the inverse of the lognormal cumulative distribution',
         links: [
             {
                 title: 'Instruction',
@@ -847,8 +847,8 @@ export default {
         },
     },
     MAX: {
-        description: `Returns the largest value in a set of values.`,
-        abstract: `Returns the maximum value in a list of arguments`,
+        description: 'Returns the largest value in a set of values.',
+        abstract: 'Returns the maximum value in a list of arguments',
         links: [
             {
                 title: 'Instruction',
@@ -867,8 +867,8 @@ export default {
         },
     },
     MAXA: {
-        description: `Returns the maximum value in a list of arguments, including numbers, text, and logical values`,
-        abstract: `Returns the maximum value in a list of arguments, including numbers, text, and logical values`,
+        description: 'Returns the maximum value in a list of arguments, including numbers, text, and logical values',
+        abstract: 'Returns the maximum value in a list of arguments, including numbers, text, and logical values',
         links: [
             {
                 title: 'Instruction',
@@ -881,8 +881,8 @@ export default {
         },
     },
     MAXIFS: {
-        description: `Returns the maximum value among cells specified by a given set of conditions or criteria`,
-        abstract: `Returns the maximum value among cells specified by a given set of conditions or criteria`,
+        description: 'Returns the maximum value among cells specified by a given set of conditions or criteria',
+        abstract: 'Returns the maximum value among cells specified by a given set of conditions or criteria',
         links: [
             {
                 title: 'Instruction',
@@ -895,8 +895,8 @@ export default {
         },
     },
     MEDIAN: {
-        description: `Returns the median of the given numbers`,
-        abstract: `Returns the median of the given numbers`,
+        description: 'Returns the median of the given numbers',
+        abstract: 'Returns the median of the given numbers',
         links: [
             {
                 title: 'Instruction',
@@ -909,8 +909,8 @@ export default {
         },
     },
     MIN: {
-        description: `Returns the smallest number in a set of values.`,
-        abstract: `Returns the minimum value in a list of arguments`,
+        description: 'Returns the smallest number in a set of values.',
+        abstract: 'Returns the minimum value in a list of arguments',
         links: [
             {
                 title: 'Instruction',
@@ -929,8 +929,8 @@ export default {
         },
     },
     MINA: {
-        description: `Returns the smallest value in a list of arguments, including numbers, text, and logical values`,
-        abstract: `Returns the smallest value in a list of arguments, including numbers, text, and logical values`,
+        description: 'Returns the smallest value in a list of arguments, including numbers, text, and logical values',
+        abstract: 'Returns the smallest value in a list of arguments, including numbers, text, and logical values',
         links: [
             {
                 title: 'Instruction',
@@ -943,8 +943,8 @@ export default {
         },
     },
     MINIFS: {
-        description: `Returns the minimum value among cells specified by a given set of conditions or criteria.`,
-        abstract: `Returns the minimum value among cells specified by a given set of conditions or criteria.`,
+        description: 'Returns the minimum value among cells specified by a given set of conditions or criteria.',
+        abstract: 'Returns the minimum value among cells specified by a given set of conditions or criteria.',
         links: [
             {
                 title: 'Instruction',
@@ -957,8 +957,8 @@ export default {
         },
     },
     MODE_MULT: {
-        description: `Returns a vertical array of the most frequently occurring, or repetitive values in an array or range of data`,
-        abstract: `Returns a vertical array of the most frequently occurring, or repetitive values in an array or range of data`,
+        description: 'Returns a vertical array of the most frequently occurring, or repetitive values in an array or range of data',
+        abstract: 'Returns a vertical array of the most frequently occurring, or repetitive values in an array or range of data',
         links: [
             {
                 title: 'Instruction',
@@ -971,8 +971,8 @@ export default {
         },
     },
     MODE_SNGL: {
-        description: `Returns the most common value in a data set`,
-        abstract: `Returns the most common value in a data set`,
+        description: 'Returns the most common value in a data set',
+        abstract: 'Returns the most common value in a data set',
         links: [
             {
                 title: 'Instruction',
@@ -985,8 +985,8 @@ export default {
         },
     },
     NEGBINOM_DIST: {
-        description: `Returns the negative binomial distribution`,
-        abstract: `Returns the negative binomial distribution`,
+        description: 'Returns the negative binomial distribution',
+        abstract: 'Returns the negative binomial distribution',
         links: [
             {
                 title: 'Instruction',
@@ -999,8 +999,8 @@ export default {
         },
     },
     NORM_DIST: {
-        description: `Returns the normal cumulative distribution`,
-        abstract: `Returns the normal cumulative distribution`,
+        description: 'Returns the normal cumulative distribution',
+        abstract: 'Returns the normal cumulative distribution',
         links: [
             {
                 title: 'Instruction',
@@ -1013,8 +1013,8 @@ export default {
         },
     },
     NORM_INV: {
-        description: `Returns the inverse of the normal cumulative distribution`,
-        abstract: `Returns the inverse of the normal cumulative distribution`,
+        description: 'Returns the inverse of the normal cumulative distribution',
+        abstract: 'Returns the inverse of the normal cumulative distribution',
         links: [
             {
                 title: 'Instruction',
@@ -1027,8 +1027,8 @@ export default {
         },
     },
     NORM_S_DIST: {
-        description: `Returns the standard normal cumulative distribution`,
-        abstract: `Returns the standard normal cumulative distribution`,
+        description: 'Returns the standard normal cumulative distribution',
+        abstract: 'Returns the standard normal cumulative distribution',
         links: [
             {
                 title: 'Instruction',
@@ -1041,8 +1041,8 @@ export default {
         },
     },
     NORM_S_INV: {
-        description: `Returns the inverse of the standard normal cumulative distribution`,
-        abstract: `Returns the inverse of the standard normal cumulative distribution`,
+        description: 'Returns the inverse of the standard normal cumulative distribution',
+        abstract: 'Returns the inverse of the standard normal cumulative distribution',
         links: [
             {
                 title: 'Instruction',
@@ -1055,8 +1055,8 @@ export default {
         },
     },
     PEARSON: {
-        description: `Returns the Pearson product moment correlation coefficient`,
-        abstract: `Returns the Pearson product moment correlation coefficient`,
+        description: 'Returns the Pearson product moment correlation coefficient',
+        abstract: 'Returns the Pearson product moment correlation coefficient',
         links: [
             {
                 title: 'Instruction',
@@ -1069,8 +1069,8 @@ export default {
         },
     },
     PERCENTILE_EXC: {
-        description: `Returns the k-th percentile of values in a range, where k is in the range 0..1, exclusive`,
-        abstract: `Returns the k-th percentile of values in a range, where k is in the range 0..1, exclusive`,
+        description: 'Returns the k-th percentile of values in a range, where k is in the range 0..1, exclusive',
+        abstract: 'Returns the k-th percentile of values in a range, where k is in the range 0..1, exclusive',
         links: [
             {
                 title: 'Instruction',
@@ -1083,8 +1083,8 @@ export default {
         },
     },
     PERCENTILE_INC: {
-        description: `Returns the k-th percentile of values in a range`,
-        abstract: `Returns the k-th percentile of values in a range`,
+        description: 'Returns the k-th percentile of values in a range',
+        abstract: 'Returns the k-th percentile of values in a range',
         links: [
             {
                 title: 'Instruction',
@@ -1097,8 +1097,8 @@ export default {
         },
     },
     PERCENTRANK_EXC: {
-        description: `Returns the rank of a value in a data set as a percentage (0..1, exclusive) of the data set`,
-        abstract: `Returns the rank of a value in a data set as a percentage (0..1, exclusive) of the data set`,
+        description: 'Returns the rank of a value in a data set as a percentage (0..1, exclusive) of the data set',
+        abstract: 'Returns the rank of a value in a data set as a percentage (0..1, exclusive) of the data set',
         links: [
             {
                 title: 'Instruction',
@@ -1111,8 +1111,8 @@ export default {
         },
     },
     PERCENTRANK_INC: {
-        description: `Returns the percentage rank of a value in a data set`,
-        abstract: `Returns the percentage rank of a value in a data set`,
+        description: 'Returns the percentage rank of a value in a data set',
+        abstract: 'Returns the percentage rank of a value in a data set',
         links: [
             {
                 title: 'Instruction',
@@ -1125,8 +1125,8 @@ export default {
         },
     },
     PERMUT: {
-        description: `Returns the number of permutations for a given number of objects`,
-        abstract: `Returns the number of permutations for a given number of objects`,
+        description: 'Returns the number of permutations for a given number of objects',
+        abstract: 'Returns the number of permutations for a given number of objects',
         links: [
             {
                 title: 'Instruction',
@@ -1139,8 +1139,8 @@ export default {
         },
     },
     PERMUTATIONA: {
-        description: `Returns the number of permutations for a given number of objects (with repetitions) that can be selected from the total objects`,
-        abstract: `Returns the number of permutations for a given number of objects (with repetitions) that can be selected from the total objects`,
+        description: 'Returns the number of permutations for a given number of objects (with repetitions) that can be selected from the total objects',
+        abstract: 'Returns the number of permutations for a given number of objects (with repetitions) that can be selected from the total objects',
         links: [
             {
                 title: 'Instruction',
@@ -1153,8 +1153,8 @@ export default {
         },
     },
     PHI: {
-        description: `Returns the value of the density function for a standard normal distribution`,
-        abstract: `Returns the value of the density function for a standard normal distribution`,
+        description: 'Returns the value of the density function for a standard normal distribution',
+        abstract: 'Returns the value of the density function for a standard normal distribution',
         links: [
             {
                 title: 'Instruction',
@@ -1167,8 +1167,8 @@ export default {
         },
     },
     POISSON_DIST: {
-        description: `Returns the Poisson distribution`,
-        abstract: `Returns the Poisson distribution`,
+        description: 'Returns the Poisson distribution',
+        abstract: 'Returns the Poisson distribution',
         links: [
             {
                 title: 'Instruction',
@@ -1181,8 +1181,8 @@ export default {
         },
     },
     PROB: {
-        description: `Returns the probability that values in a range are between two limits`,
-        abstract: `Returns the probability that values in a range are between two limits`,
+        description: 'Returns the probability that values in a range are between two limits',
+        abstract: 'Returns the probability that values in a range are between two limits',
         links: [
             {
                 title: 'Instruction',
@@ -1195,8 +1195,8 @@ export default {
         },
     },
     QUARTILE_EXC: {
-        description: `Returns the quartile of the data set, based on percentile values from 0..1, exclusive`,
-        abstract: `Returns the quartile of the data set, based on percentile values from 0..1, exclusive`,
+        description: 'Returns the quartile of the data set, based on percentile values from 0..1, exclusive',
+        abstract: 'Returns the quartile of the data set, based on percentile values from 0..1, exclusive',
         links: [
             {
                 title: 'Instruction',
@@ -1209,8 +1209,8 @@ export default {
         },
     },
     QUARTILE_INC: {
-        description: `Returns the quartile of a data set`,
-        abstract: `Returns the quartile of a data set`,
+        description: 'Returns the quartile of a data set',
+        abstract: 'Returns the quartile of a data set',
         links: [
             {
                 title: 'Instruction',
@@ -1223,8 +1223,8 @@ export default {
         },
     },
     RANK_AVG: {
-        description: `Returns the rank of a number in a list of numbers`,
-        abstract: `Returns the rank of a number in a list of numbers`,
+        description: 'Returns the rank of a number in a list of numbers',
+        abstract: 'Returns the rank of a number in a list of numbers',
         links: [
             {
                 title: 'Instruction',
@@ -1237,8 +1237,8 @@ export default {
         },
     },
     RANK_EQ: {
-        description: `Returns the rank of a number in a list of numbers`,
-        abstract: `Returns the rank of a number in a list of numbers`,
+        description: 'Returns the rank of a number in a list of numbers',
+        abstract: 'Returns the rank of a number in a list of numbers',
         links: [
             {
                 title: 'Instruction',
@@ -1251,8 +1251,8 @@ export default {
         },
     },
     RSQ: {
-        description: `Returns the square of the Pearson product moment correlation coefficient`,
-        abstract: `Returns the square of the Pearson product moment correlation coefficient`,
+        description: 'Returns the square of the Pearson product moment correlation coefficient',
+        abstract: 'Returns the square of the Pearson product moment correlation coefficient',
         links: [
             {
                 title: 'Instruction',
@@ -1265,8 +1265,8 @@ export default {
         },
     },
     SKEW: {
-        description: `Returns the skewness of a distribution`,
-        abstract: `Returns the skewness of a distribution`,
+        description: 'Returns the skewness of a distribution',
+        abstract: 'Returns the skewness of a distribution',
         links: [
             {
                 title: 'Instruction',
@@ -1279,8 +1279,8 @@ export default {
         },
     },
     SKEW_P: {
-        description: `Returns the skewness of a distribution based on a population: a characterization of the degree of asymmetry of a distribution around its mean`,
-        abstract: `Returns the skewness of a distribution based on a population: a characterization of the degree of asymmetry of a distribution around its mean`,
+        description: 'Returns the skewness of a distribution based on a population: a characterization of the degree of asymmetry of a distribution around its mean',
+        abstract: 'Returns the skewness of a distribution based on a population: a characterization of the degree of asymmetry of a distribution around its mean',
         links: [
             {
                 title: 'Instruction',
@@ -1293,8 +1293,8 @@ export default {
         },
     },
     SLOPE: {
-        description: `Returns the slope of the linear regression line`,
-        abstract: `Returns the slope of the linear regression line`,
+        description: 'Returns the slope of the linear regression line',
+        abstract: 'Returns the slope of the linear regression line',
         links: [
             {
                 title: 'Instruction',
@@ -1307,8 +1307,8 @@ export default {
         },
     },
     SMALL: {
-        description: `Returns the k-th smallest value in a data set`,
-        abstract: `Returns the k-th smallest value in a data set`,
+        description: 'Returns the k-th smallest value in a data set',
+        abstract: 'Returns the k-th smallest value in a data set',
         links: [
             {
                 title: 'Instruction',
@@ -1321,8 +1321,8 @@ export default {
         },
     },
     STANDARDIZE: {
-        description: `Returns a normalized value`,
-        abstract: `Returns a normalized value`,
+        description: 'Returns a normalized value',
+        abstract: 'Returns a normalized value',
         links: [
             {
                 title: 'Instruction',
@@ -1335,8 +1335,8 @@ export default {
         },
     },
     STDEV_P: {
-        description: `Calculates standard deviation based on the entire population`,
-        abstract: `Calculates standard deviation based on the entire population`,
+        description: 'Calculates standard deviation based on the entire population',
+        abstract: 'Calculates standard deviation based on the entire population',
         links: [
             {
                 title: 'Instruction',
@@ -1349,8 +1349,8 @@ export default {
         },
     },
     STDEV_S: {
-        description: `Estimates standard deviation based on a sample`,
-        abstract: `Estimates standard deviation based on a sample`,
+        description: 'Estimates standard deviation based on a sample',
+        abstract: 'Estimates standard deviation based on a sample',
         links: [
             {
                 title: 'Instruction',
@@ -1363,8 +1363,8 @@ export default {
         },
     },
     STDEVA: {
-        description: `Estimates standard deviation based on a sample, including numbers, text, and logical values`,
-        abstract: `Estimates standard deviation based on a sample, including numbers, text, and logical values`,
+        description: 'Estimates standard deviation based on a sample, including numbers, text, and logical values',
+        abstract: 'Estimates standard deviation based on a sample, including numbers, text, and logical values',
         links: [
             {
                 title: 'Instruction',
@@ -1377,8 +1377,8 @@ export default {
         },
     },
     STDEVPA: {
-        description: `Calculates standard deviation based on the entire population, including numbers, text, and logical values`,
-        abstract: `Calculates standard deviation based on the entire population, including numbers, text, and logical values`,
+        description: 'Calculates standard deviation based on the entire population, including numbers, text, and logical values',
+        abstract: 'Calculates standard deviation based on the entire population, including numbers, text, and logical values',
         links: [
             {
                 title: 'Instruction',
@@ -1391,8 +1391,8 @@ export default {
         },
     },
     STEYX: {
-        description: `Returns the standard error of the predicted y-value for each x in the regression`,
-        abstract: `Returns the standard error of the predicted y-value for each x in the regression`,
+        description: 'Returns the standard error of the predicted y-value for each x in the regression',
+        abstract: 'Returns the standard error of the predicted y-value for each x in the regression',
         links: [
             {
                 title: 'Instruction',
@@ -1405,8 +1405,8 @@ export default {
         },
     },
     T_DIST: {
-        description: `Returns the Percentage Points (probability) for the Student t-distribution`,
-        abstract: `Returns the Percentage Points (probability) for the Student t-distribution`,
+        description: 'Returns the Percentage Points (probability) for the Student t-distribution',
+        abstract: 'Returns the Percentage Points (probability) for the Student t-distribution',
         links: [
             {
                 title: 'Instruction',
@@ -1419,8 +1419,8 @@ export default {
         },
     },
     T_DIST_2T: {
-        description: `Returns the Percentage Points (probability) for the Student t-distribution`,
-        abstract: `Returns the Percentage Points (probability) for the Student t-distribution`,
+        description: 'Returns the Percentage Points (probability) for the Student t-distribution',
+        abstract: 'Returns the Percentage Points (probability) for the Student t-distribution',
         links: [
             {
                 title: 'Instruction',
@@ -1433,8 +1433,8 @@ export default {
         },
     },
     T_DIST_RT: {
-        description: `Returns the Student's t-distribution`,
-        abstract: `Returns the Student's t-distribution`,
+        description: 'Returns the Student\'s t-distribution',
+        abstract: 'Returns the Student\'s t-distribution',
         links: [
             {
                 title: 'Instruction',
@@ -1447,8 +1447,8 @@ export default {
         },
     },
     T_INV: {
-        description: `Returns the t-value of the Student's t-distribution as a function of the probability and the degrees of freedom`,
-        abstract: `Returns the t-value of the Student's t-distribution as a function of the probability and the degrees of freedom`,
+        description: 'Returns the t-value of the Student\'s t-distribution as a function of the probability and the degrees of freedom',
+        abstract: 'Returns the t-value of the Student\'s t-distribution as a function of the probability and the degrees of freedom',
         links: [
             {
                 title: 'Instruction',
@@ -1461,8 +1461,8 @@ export default {
         },
     },
     T_INV_2T: {
-        description: `Returns the inverse of the Student's t-distribution`,
-        abstract: `Returns the inverse of the Student's t-distribution`,
+        description: 'Returns the inverse of the Student\'s t-distribution',
+        abstract: 'Returns the inverse of the Student\'s t-distribution',
         links: [
             {
                 title: 'Instruction',
@@ -1475,8 +1475,8 @@ export default {
         },
     },
     T_TEST: {
-        description: `Returns the probability associated with a Student's t-test`,
-        abstract: `Returns the probability associated with a Student's t-test`,
+        description: 'Returns the probability associated with a Student\'s t-test',
+        abstract: 'Returns the probability associated with a Student\'s t-test',
         links: [
             {
                 title: 'Instruction',
@@ -1489,8 +1489,8 @@ export default {
         },
     },
     TREND: {
-        description: `Returns values along a linear trend`,
-        abstract: `Returns values along a linear trend`,
+        description: 'Returns values along a linear trend',
+        abstract: 'Returns values along a linear trend',
         links: [
             {
                 title: 'Instruction',
@@ -1503,8 +1503,8 @@ export default {
         },
     },
     TRIMMEAN: {
-        description: `Returns the mean of the interior of a data set`,
-        abstract: `Returns the mean of the interior of a data set`,
+        description: 'Returns the mean of the interior of a data set',
+        abstract: 'Returns the mean of the interior of a data set',
         links: [
             {
                 title: 'Instruction',
@@ -1517,8 +1517,8 @@ export default {
         },
     },
     VAR_P: {
-        description: `Calculates variance based on the entire population`,
-        abstract: `Calculates variance based on the entire population`,
+        description: 'Calculates variance based on the entire population',
+        abstract: 'Calculates variance based on the entire population',
         links: [
             {
                 title: 'Instruction',
@@ -1531,8 +1531,8 @@ export default {
         },
     },
     VAR_S: {
-        description: `Estimates variance based on a sample`,
-        abstract: `Estimates variance based on a sample`,
+        description: 'Estimates variance based on a sample',
+        abstract: 'Estimates variance based on a sample',
         links: [
             {
                 title: 'Instruction',
@@ -1545,8 +1545,8 @@ export default {
         },
     },
     VARA: {
-        description: `Estimates variance based on a sample, including numbers, text, and logical values`,
-        abstract: `Estimates variance based on a sample, including numbers, text, and logical values`,
+        description: 'Estimates variance based on a sample, including numbers, text, and logical values',
+        abstract: 'Estimates variance based on a sample, including numbers, text, and logical values',
         links: [
             {
                 title: 'Instruction',
@@ -1559,8 +1559,8 @@ export default {
         },
     },
     VARPA: {
-        description: `Calculates variance based on the entire population, including numbers, text, and logical values`,
-        abstract: `Calculates variance based on the entire population, including numbers, text, and logical values`,
+        description: 'Calculates variance based on the entire population, including numbers, text, and logical values',
+        abstract: 'Calculates variance based on the entire population, including numbers, text, and logical values',
         links: [
             {
                 title: 'Instruction',
@@ -1573,8 +1573,8 @@ export default {
         },
     },
     WEIBULL_DIST: {
-        description: `Returns the Weibull distribution`,
-        abstract: `Returns the Weibull distribution`,
+        description: 'Returns the Weibull distribution',
+        abstract: 'Returns the Weibull distribution',
         links: [
             {
                 title: 'Instruction',
@@ -1587,8 +1587,8 @@ export default {
         },
     },
     Z_TEST: {
-        description: `Returns the one-tailed probability-value of a z-test`,
-        abstract: `Returns the one-tailed probability-value of a z-test`,
+        description: 'Returns the one-tailed probability-value of a z-test',
+        abstract: 'Returns the one-tailed probability-value of a z-test',
         links: [
             {
                 title: 'Instruction',

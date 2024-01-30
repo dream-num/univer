@@ -29,11 +29,12 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../../services/selection-manager.service';
 import { AddWorksheetMergeMutation } from '../../mutations/add-worksheet-merge.mutation';
-import { DeleteRangeMutation } from '../../mutations/delete-range.mutation';
-import { InsertRangeMutation } from '../../mutations/insert-range.mutation';
 import { InsertColMutation, InsertRowMutation } from '../../mutations/insert-row-col.mutation';
+import { MoveRangeMutation } from '../../mutations/move-range.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../../mutations/remove-row-col.mutation';
 import { RemoveWorksheetMergeMutation } from '../../mutations/remove-worksheet-merge.mutation';
+import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
+import { SetSelectionsOperation } from '../../operations/selection.operation';
 import { DeleteRangeMoveLeftCommand } from '../delete-range-move-left.command';
 import { DeleteRangeMoveUpCommand } from '../delete-range-move-up.command';
 import { createCommandTestBed } from './create-command-test-bed';
@@ -189,14 +190,15 @@ describe('Test delete range commands', () => {
         commandService = get(ICommandService);
         commandService.registerCommand(DeleteRangeMoveUpCommand);
         commandService.registerCommand(DeleteRangeMoveLeftCommand);
-        commandService.registerCommand(InsertRangeMutation);
-        commandService.registerCommand(DeleteRangeMutation);
         commandService.registerCommand(AddWorksheetMergeMutation);
         commandService.registerCommand(RemoveWorksheetMergeMutation);
         commandService.registerCommand(InsertColMutation);
         commandService.registerCommand(RemoveColMutation);
         commandService.registerCommand(InsertRowMutation);
         commandService.registerCommand(RemoveRowMutation);
+        commandService.registerCommand(SetSelectionsOperation);
+        commandService.registerCommand(MoveRangeMutation);
+        commandService.registerCommand(SetRangeValuesMutation);
 
         selectionManager = get(SelectionManagerService);
         selectionManager.setCurrentSelection({
@@ -275,9 +277,7 @@ describe('Test delete range commands', () => {
 
                 // undo
                 expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
-                expect(getValueByPosition(0, 0, 0, 0)).toStrictEqual({
-                    v: 'A1',
-                });
+                expect(getValueByPosition(0, 0, 0, 0)!.v).toStrictEqual('A1');
                 expect(getValueByPosition(0, 1, 0, 1)).toStrictEqual({
                     v: 'B1',
                 });
@@ -319,9 +319,7 @@ describe('Test delete range commands', () => {
 
                 // undo
                 expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
-                expect(getValueByPosition(0, 0, 0, 0)).toStrictEqual({
-                    v: 'A1',
-                });
+                expect(getValueByPosition(0, 0, 0, 0)!.v).toStrictEqual('A1');
                 expect(getValueByPosition(1, 0, 1, 0)).toStrictEqual({
                     v: 'A2',
                 });

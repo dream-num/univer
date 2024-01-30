@@ -1,33 +1,34 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta content="width=device-width, initial-scale=1" name="viewport" />
+        <title>UniverSlides</title>
 
-<head>
-    <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1" name="viewport" />
-    <title>UniverSlides</title>
+        <link rel="icon" type="image/x-icon" href="../favicon.svg" />
+        <link rel="stylesheet" href="./main.css" />
+        <style>
+            html,
+            body {
+                height: 100%;
+                margin: 0;
+            }
+        </style>
 
-    <link rel="icon" type="image/x-icon" href="../favicon.svg">
-    <link rel="stylesheet" href="./main.css" />
-    <style>
-        html,
-        body {
-            height: 100%;
-            margin: 0;
-        }
-    </style>
+        <script>
+            new EventSource('/esbuild').addEventListener('change', () => {
+                location.reload();
+            });
+        </script>
+    </head>
 
-    <script>
-        new EventSource('/esbuild').addEventListener('change', () => {
-            location.reload()
-        })
-    </script>
-</head>
+    <body>
+        <div
+            id="app"
+            style="z-index: 1; position: fixed; font-size: 20px; color: green"
+        ></div>
+        <div id="univer-container" style="height: 100%"></div>
 
-<body>
-    <div id="app" style="z-index: 1; position: fixed; font-size: 20px; color: green;"></div>
-    <div id="univer-container" style="height: 100%;"></div>
-
-    <script src="./main.js"></script>
-</body>
-
+        <script src="./main.js"></script>
+    </body>
 </html>

@@ -19,7 +19,10 @@ import { Disposable } from '@univerjs/core';
 
 import { ErrorType } from '../basics/error-type';
 import type { IFunctionNames } from '../basics/function';
+import { compareToken } from '../basics/token';
 import type { FunctionVariantType, NodeValueType } from '../engine/reference-object/base-reference-object';
+import type { ArrayBinarySearchType } from '../engine/utils/compare';
+import { ArrayOrderSearchType } from '../engine/utils/compare';
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../engine/value-object/base-value-object';
 import type { PrimitiveValueType } from '../engine/value-object/primitive-object';
@@ -80,7 +83,7 @@ export class BaseFunction extends Disposable {
     }
 
     calculate(...arg: BaseValueObject[]): NodeValueType {
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return new ErrorValueObject(ErrorType.VALUE);
     }
 
     checkArrayType(variant: FunctionVariantType) {
@@ -94,7 +97,7 @@ export class BaseFunction extends Disposable {
      * @param indexNum
      * @returns
      */
-    getIndexNumValue(indexNum: BaseValueObject) {
+    getIndexNumValue(indexNum: BaseValueObject, defaultValue = 1) {
         if (indexNum.isArray()) {
             indexNum = (indexNum as ArrayValueObject).getFirstCell();
         }
@@ -105,13 +108,14 @@ export class BaseFunction extends Disposable {
                 return new ErrorValueObject(ErrorType.VALUE);
             }
 
-            return 1;
+            return defaultValue;
         }
         if (indexNum.isString()) {
             const colIndexNumV = Number(indexNum.getValue() as string);
             if (isNaN(colIndexNumV)) {
                 return new ErrorValueObject(ErrorType.REF);
             }
+            return colIndexNumV;
         } else if (indexNum.isNumber()) {
             const colIndexNumV = indexNum.getValue() as number;
             return colIndexNumV;
@@ -159,5 +163,187 @@ export class BaseFunction extends Disposable {
         }
 
         return logicValue;
+    }
+
+    binarySearch(
+        value: BaseValueObject,
+        searchArray: ArrayValueObject,
+        resultArray: ArrayValueObject,
+        searchType?: ArrayBinarySearchType
+    ) {
+        const rowOrColumn = searchArray.binarySearch(value, searchType);
+
+        if (rowOrColumn == null) {
+            return new ErrorValueObject(ErrorType.NA);
+        }
+
+        let resultValue: BaseValueObject;
+
+        if (resultArray.getRowCount() === 1) {
+            resultValue = resultArray.get(0, rowOrColumn);
+        } else {
+            resultValue = resultArray.get(rowOrColumn, 0);
+        }
+
+        if (resultValue.isNull()) {
+            return new ErrorValueObject(ErrorType.NA);
+        }
+
+        return resultValue;
+    }
+
+    equalSearch(value: BaseValueObject, searchArray: ArrayValueObject, resultArray: ArrayValueObject, isFirst = true) {
+        const resultArrayValue = resultArray.pick(searchArray.isEqual(value) as ArrayValueObject);
+
+        let resultValue: BaseValueObject;
+
+        if (isFirst) {
+            resultValue = resultArrayValue.getFirstCell();
+        } else {
+            resultValue = resultArrayValue.getLastCell();
+        }
+
+        if (resultValue.isNull()) {
+            return new ErrorValueObject(ErrorType.NA);
+        }
+
+        return resultValue;
+    }
+
+    fuzzySearch(value: BaseValueObject, searchArray: ArrayValueObject, resultArray: ArrayValueObject, isFirst = true) {
+        const resultArrayValue = resultArray.pick(searchArray.compare(value, compareToken.EQUALS) as ArrayValueObject);
+
+        let resultValue: BaseValueObject;
+
+        if (isFirst) {
+            resultValue = resultArrayValue.getFirstCell();
+        } else {
+            resultValue = resultArrayValue.getLastCell();
+        }
+
+        if (resultValue.isNull()) {
+            return new ErrorValueObject(ErrorType.NA);
+        }
+
+        return resultValue;
+    }
+
+    orderSearch(
+        value: BaseValueObject,
+        searchArray: ArrayValueObject,
+        resultArray: ArrayValueObject,
+        searchType: ArrayOrderSearchType = ArrayOrderSearchType.MIN,
+        isDesc = false
+    ) {
+        const position = searchArray.orderSearch(value, searchType, isDesc);
+
+        if (position == null) {
+            return new ErrorValueObject(ErrorType.NA);
+        }
+
+        const resultValue = resultArray.get(position.row, position.column);
+
+        if (resultValue.isNull()) {
+            return new ErrorValueObject(ErrorType.NA);
+        }
+
+        return resultValue;
+    }
+
+    /**
+     * @param axis 0 row, 1 column
+     * @returns
+     */
+    binarySearchExpand(
+        value: BaseValueObject,
+        searchArray: ArrayValueObject,
+        resultArray: ArrayValueObject,
+        axis = 0,
+        searchType?: ArrayBinarySearchType
+    ) {
+        const rowOrColumn = searchArray.binarySearch(value, searchType);
+
+        if (rowOrColumn == null) {
+            return new ErrorValueObject(ErrorType.NA);
+        }
+
+        if (axis === 0) {
+            return resultArray.slice([rowOrColumn, rowOrColumn + 1]);
+        }
+        return resultArray.slice(undefined, [rowOrColumn, rowOrColumn + 1]);
+    }
+
+    equalSearchExpand(
+        value: BaseValueObject,
+        searchArray: ArrayValueObject,
+        resultArray: ArrayValueObject,
+        isFirst = true,
+        axis = 0
+    ) {
+        const matchObject = searchArray.isEqual(value) as ArrayValueObject;
+
+        let position: Nullable<{ row: number; column: number }>;
+
+        if (isFirst) {
+            position = matchObject.getFirstTruePosition();
+        } else {
+            position = matchObject.getLastTruePosition();
+        }
+
+        if (position == null) {
+            return new ErrorValueObject(ErrorType.NA);
+        }
+
+        if (axis === 0) {
+            return resultArray.slice([position.row, position.row + 1]);
+        }
+        return resultArray.slice(undefined, [position.column, position.column + 1]);
+    }
+
+    fuzzySearchExpand(
+        value: BaseValueObject,
+        searchArray: ArrayValueObject,
+        resultArray: ArrayValueObject,
+        isFirst = true,
+        axis = 0
+    ) {
+        const matchObject = searchArray.compare(value, compareToken.EQUALS) as ArrayValueObject;
+
+        let position: Nullable<{ row: number; column: number }>;
+
+        if (isFirst) {
+            position = matchObject.getFirstTruePosition();
+        } else {
+            position = matchObject.getLastTruePosition();
+        }
+
+        if (position == null) {
+            return new ErrorValueObject(ErrorType.NA);
+        }
+
+        if (axis === 0) {
+            return resultArray.slice([position.row, position.row + 1]);
+        }
+        return resultArray.slice(undefined, [position.column, position.column + 1]);
+    }
+
+    orderSearchExpand(
+        value: BaseValueObject,
+        searchArray: ArrayValueObject,
+        resultArray: ArrayValueObject,
+        searchType: ArrayOrderSearchType = ArrayOrderSearchType.MIN,
+        isDesc = false,
+        axis = 0
+    ) {
+        const position = searchArray.orderSearch(value, searchType, isDesc);
+
+        if (position == null) {
+            return new ErrorValueObject(ErrorType.NA);
+        }
+
+        if (axis === 0) {
+            return resultArray.slice([position.row, position.row + 1]);
+        }
+        return resultArray.slice(undefined, [position.column, position.column + 1]);
     }
 }

@@ -22,6 +22,8 @@ import React from 'react';
 import styles from './index.module.less';
 
 export interface IInputProps {
+    autoFocus?: boolean;
+
     /**
      * The input affix wrapper style
      */
@@ -92,6 +94,7 @@ export function Input(props: IInputProps) {
         onClick,
         onKeyDown,
         onChange,
+        autoFocus,
     } = props;
 
     function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -115,6 +118,7 @@ export function Input(props: IInputProps) {
             styles={{
                 affixWrapper: affixWrapperStyle,
             }}
+            autoFocus={autoFocus}
             type={type}
             placeholder={placeholder}
             value={value}

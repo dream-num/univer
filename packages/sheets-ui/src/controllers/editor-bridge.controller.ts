@@ -27,6 +27,7 @@ import {
 import { Inject } from '@wendellhu/redi';
 import { merge, takeUntil } from 'rxjs';
 
+import { SetZoomRatioCommand } from '../commands/commands/set-zoom-ratio.command';
 import { SetActivateCellEditOperation } from '../commands/operations/activate-cell-edit.operation';
 import { SetCellEditVisibleOperation } from '../commands/operations/cell-edit.operation';
 import { IEditorBridgeService } from '../services/editor-bridge.service';
@@ -190,6 +191,15 @@ export class EditorBridgeController extends RxDisposable {
                     this._keepVisibleHideEditor();
                 } else if (updateCommandList.includes(command.id)) {
                     this._hideEditor();
+                }
+            })
+        );
+
+        // When the zoom ratio is changed, the editor needs to be refreshed to get the latest cell size and position.
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                if (command.id === SetZoomRatioCommand.id) {
+                    this._editorBridgeService.refreshEditCellState();
                 }
             })
         );

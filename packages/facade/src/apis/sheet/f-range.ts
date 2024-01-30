@@ -15,8 +15,8 @@
  */
 
 import type {
+    CellValue,
     ICellData,
-    ICellV,
     IColorStyle,
     IObjectMatrixPrimitiveType,
     IRange,
@@ -79,7 +79,7 @@ export class FRange {
         return this._range.endRow - this._range.startRow + 1;
     }
 
-    getValue(): ICellV | null {
+    getValue(): CellValue | null {
         return this._worksheet.getCell(this._range.startRow, this._range.startColumn)?.v ?? null;
     }
 
@@ -119,7 +119,7 @@ export class FRange {
      * The value can be a number, string, boolean, or standard cell format. If it begins with `=`, it is interpreted as a formula. The value is tiled to all cells in the range.
      * @param value
      */
-    setValue(value: ICellV | ICellData): Promise<boolean> {
+    setValue(value: CellValue | ICellData): Promise<boolean> {
         const realValue = covertCellValue(value);
 
         if (!realValue) {
@@ -192,7 +192,11 @@ export class FRange {
      * @param value
      */
     setValues(
-        value: ICellV[][] | IObjectMatrixPrimitiveType<ICellV> | ICellData[][] | IObjectMatrixPrimitiveType<ICellData>
+        value:
+            | CellValue[][]
+            | IObjectMatrixPrimitiveType<CellValue>
+            | ICellData[][]
+            | IObjectMatrixPrimitiveType<ICellData>
     ): Promise<boolean> {
         const realValue = covertCellValues(value, this._range);
 

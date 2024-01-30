@@ -19,7 +19,7 @@ import { CommandType, ICommandService, ILogService } from '@univerjs/core';
 import { CopyCommand, CutCommand, IClipboardInterfaceService, PasteCommand } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 
-import { whenEditorNotActivated } from '../../controllers/shortcuts/utils';
+import { whenSheetFocused } from '../../controllers/shortcuts/utils';
 import { ISheetClipboardService, PREDEFINED_HOOK_NAME } from '../../services/clipboard/clipboard.service';
 
 export const SheetCopyCommand: IMultiCommand = {
@@ -28,7 +28,7 @@ export const SheetCopyCommand: IMultiCommand = {
     type: CommandType.COMMAND,
     multi: true,
     priority: 1000,
-    preconditions: whenEditorNotActivated,
+    preconditions: whenSheetFocused,
     handler: async (accessor) => {
         const sheetClipboardService = accessor.get(ISheetClipboardService);
         return sheetClipboardService.copy();
@@ -41,7 +41,7 @@ export const SheetCutCommand: IMultiCommand = {
     type: CommandType.COMMAND,
     multi: true,
     priority: 1000,
-    preconditions: whenEditorNotActivated,
+    preconditions: whenSheetFocused,
     handler: async (accessor) => {
         const sheetClipboardService = accessor.get(ISheetClipboardService);
         return sheetClipboardService.cut();
@@ -57,8 +57,8 @@ export const SheetPasteCommand: IMultiCommand = {
     type: CommandType.COMMAND,
     multi: true,
     name: 'sheet.command.paste',
-    priority: 1000,
-    preconditions: whenEditorNotActivated,
+    priority: 998,
+    preconditions: whenSheetFocused,
     handler: async (accessor: IAccessor, params: ISheetPasteParams) => {
         const logService = accessor.get(ILogService);
 

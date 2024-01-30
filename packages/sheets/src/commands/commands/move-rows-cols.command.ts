@@ -122,10 +122,10 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
         const destSelection: IRange = moveBackward
             ? destinationRange
             : {
-                  ...destinationRange,
-                  startRow: destinationRange.startRow - count,
-                  endRow: destinationRange.endRow - count,
-              };
+                ...destinationRange,
+                startRow: destinationRange.startRow - count,
+                endRow: destinationRange.endRow - count,
+            };
         const setSelectionsParam: ISetSelectionsOperationParams = {
             unitId,
             subUnitId,
@@ -249,10 +249,10 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
         const destSelection: IRange = moveBackward
             ? destinationRange
             : {
-                  ...destinationRange,
-                  startColumn: destinationRange.startColumn - count,
-                  endColumn: destinationRange.endColumn - count,
-              };
+                ...destinationRange,
+                startColumn: destinationRange.startColumn - count,
+                endColumn: destinationRange.endColumn - count,
+            };
         const setSelectionsParam: ISetSelectionsOperationParams = {
             unitId,
             subUnitId,

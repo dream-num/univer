@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import { deserializeRangeForR1C1, deserializeRangeWithSheet } from '@univerjs/core';
-
 import { ErrorType } from '../../../basics/error-type';
 import { REFERENCE_REGEX_COLUMN, REFERENCE_REGEX_ROW, REFERENCE_SINGLE_RANGE_REGEX } from '../../../basics/regex';
 import type { BaseReferenceObject } from '../../../engine/reference-object/base-reference-object';
@@ -23,6 +21,8 @@ import { CellReferenceObject } from '../../../engine/reference-object/cell-refer
 import { ColumnReferenceObject } from '../../../engine/reference-object/column-reference-object';
 import { RangeReferenceObject } from '../../../engine/reference-object/range-reference-object';
 import { RowReferenceObject } from '../../../engine/reference-object/row-reference-object';
+import { deserializeRangeForR1C1 } from '../../../engine/utils/r1c1-reference';
+import { deserializeRangeWithSheet } from '../../../engine/utils/reference';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';

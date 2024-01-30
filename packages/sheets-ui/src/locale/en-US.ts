@@ -176,24 +176,6 @@ export default {
         titleDateTime: 'Date and time formats',
         titleNumber: 'Number formats',
     },
-    fontFamily: {
-        TimesNewRoman: 'Times New Roman',
-        Arial: 'Arial',
-        Tahoma: 'Tahoma',
-        Verdana: 'Verdana',
-        MicrosoftYaHei: 'Microsoft YaHei',
-        SimSun: 'SimSun',
-        SimHei: 'SimHei',
-        Kaiti: 'Kaiti',
-        FangSong: 'FangSong',
-        NSimSun: 'NSimSun',
-        STXinwei: 'STXinwei',
-        STXingkai: 'STXingkai',
-        STLiti: 'STLiti',
-        HanaleiFill: 'HanaleiFill',
-        Anton: 'Anton',
-        Pacifico: 'Pacifico',
-    },
     print: {
         normalBtn: 'Normal',
         layoutBtn: 'Page Layout',
@@ -541,6 +523,10 @@ export default {
         freezeRow: 'Freeze to this row',
         cancelFreeze: 'Cancel freeze',
         zenEditor: 'Full Screen Editor',
+        deleteAllRowsAlert: `You can't delete all the rows on the sheet`,
+        deleteAllColumnsAlert: `You can't delete all the columns on the sheet`,
+        hideAllRowsAlert: `You can't hide all the rows on the sheet`,
+        hideAllColumnsAlert: `You can't hide all the columns on the sheet`,
     },
     info: {
         tooltip: 'Tooltip',
@@ -572,6 +558,7 @@ export default {
         tipColumnWidthLimit: 'The column width must be between 0 ~ 2038',
         // eslint-disable-next-line no-template-curly-in-string
         pageInfoFull: 'Total ${total}，${totalPage} page，All data displayed',
+        problem: 'There was a problem',
     },
     clipboard: {
         paste: {

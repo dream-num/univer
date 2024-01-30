@@ -17,7 +17,7 @@
 import {
     BooleanNumber,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-    FOCUSING_EDITOR,
+    EDITOR_ACTIVATED,
     FOCUSING_SHEET,
     FontItalic,
     FontWeight,
@@ -38,14 +38,12 @@ import {
     ResetTextColorCommand,
     SelectionManagerService,
     SetBackgroundColorCommand,
-    SetColHiddenCommand,
     SetColHiddenMutation,
     SetColVisibleMutation,
     SetColWidthCommand,
     SetHorizontalTextAlignCommand,
     SetRangeValuesMutation,
     SetRowHeightCommand,
-    SetRowHiddenCommand,
     SetRowHiddenMutation,
     SetRowVisibleMutation,
     SetSelectedColsVisibleCommand,
@@ -60,6 +58,8 @@ import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import {
     CopyCommand,
     CutCommand,
+    FONT_FAMILY_LIST,
+    FONT_SIZE_LIST,
     getMenuHiddenObservable,
     MenuGroup,
     MenuItemType,
@@ -75,6 +75,7 @@ import {
     SheetPasteFormatCommand,
     SheetPasteValueCommand,
 } from '../../commands/commands/clipboard.command';
+import { HideColConfirmCommand, HideRowConfirmCommand } from '../../commands/commands/hide-row-col-confirm.command';
 import {
     SetRangeBoldCommand,
     SetRangeFontFamilyCommand,
@@ -170,7 +171,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
                 if (
                     (id === SetTextSelectionsOperation.id || id === SetInlineFormatCommand.id) &&
-                    contextService.getContextValue(FOCUSING_EDITOR) &&
+                    contextService.getContextValue(EDITOR_ACTIVATED) &&
                     contextService.getContextValue(FOCUSING_SHEET)
                 ) {
                     const textRun = getFontStyleAtCursor(accessor);
@@ -225,7 +226,7 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
                 if (
                     (id === SetTextSelectionsOperation.id || id === SetInlineFormatCommand.id) &&
-                    contextService.getContextValue(FOCUSING_EDITOR) &&
+                    contextService.getContextValue(EDITOR_ACTIVATED) &&
                     contextService.getContextValue(FOCUSING_SHEET)
                 ) {
                     const textRun = getFontStyleAtCursor(accessor);
@@ -279,7 +280,7 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
                 if (
                     (id === SetTextSelectionsOperation.id || id === SetInlineFormatCommand.id) &&
-                    contextService.getContextValue(FOCUSING_EDITOR) &&
+                    contextService.getContextValue(EDITOR_ACTIVATED) &&
                     contextService.getContextValue(FOCUSING_SHEET)
                 ) {
                     const textRun = getFontStyleAtCursor(accessor);
@@ -333,7 +334,7 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
 
                 if (
                     (id === SetTextSelectionsOperation.id || id === SetInlineFormatCommand.id) &&
-                    contextService.getContextValue(FOCUSING_EDITOR) &&
+                    contextService.getContextValue(EDITOR_ACTIVATED) &&
                     contextService.getContextValue(FOCUSING_SHEET)
                 ) {
                     const textRun = getFontStyleAtCursor(accessor);
@@ -355,141 +356,6 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
     };
 }
 
-export const FONT_SIZE_CHILDREN = [
-    {
-        label: '9',
-        value: 9,
-    },
-    {
-        label: '10',
-        value: 10,
-    },
-    {
-        label: '11',
-        value: 11,
-    },
-    {
-        label: '12',
-        value: 12,
-    },
-    {
-        label: '14',
-        value: 14,
-    },
-    {
-        label: '16',
-        value: 16,
-    },
-    {
-        label: '18',
-        value: 18,
-    },
-    {
-        label: '20',
-        value: 20,
-    },
-
-    {
-        label: '22',
-        value: 22,
-    },
-    {
-        label: '24',
-        value: 24,
-    },
-    {
-        label: '26',
-        value: 26,
-    },
-    {
-        label: '28',
-        value: 28,
-    },
-    {
-        label: '36',
-        value: 36,
-    },
-    {
-        label: '48',
-        value: 48,
-    },
-    {
-        label: '72',
-        value: 72,
-    },
-];
-
-export const FONT_FAMILY_CHILDREN = [
-    {
-        label: FONT_FAMILY_ITEM_COMPONENT,
-        value: 'Times New Roman',
-    },
-    {
-        label: FONT_FAMILY_ITEM_COMPONENT,
-        value: 'Arial',
-    },
-    {
-        label: FONT_FAMILY_ITEM_COMPONENT,
-        value: 'Tahoma',
-    },
-    {
-        label: FONT_FAMILY_ITEM_COMPONENT,
-        value: 'Verdana',
-    },
-    {
-        label: FONT_FAMILY_ITEM_COMPONENT,
-        value: 'Microsoft YaHei',
-    },
-    {
-        label: FONT_FAMILY_ITEM_COMPONENT,
-        value: 'SimSun',
-    },
-    {
-        label: FONT_FAMILY_ITEM_COMPONENT,
-        value: 'SimHei',
-    },
-    {
-        label: FONT_FAMILY_ITEM_COMPONENT,
-        value: 'Kaiti',
-    },
-    {
-        label: FONT_FAMILY_ITEM_COMPONENT,
-        value: 'FangSong',
-    },
-    {
-        label: FONT_FAMILY_ITEM_COMPONENT,
-        value: 'NSimSun',
-    },
-    {
-        label: FONT_FAMILY_ITEM_COMPONENT,
-        value: 'STXinwei',
-    },
-    {
-        label: FONT_FAMILY_ITEM_COMPONENT,
-        value: 'STXingkai',
-    },
-    {
-        label: FONT_FAMILY_ITEM_COMPONENT,
-        value: 'STLiti',
-    },
-    // The following 3 fonts do not work, temporarily delete
-    // {
-    //     label: 'fontFamily.HanaleiFill',
-    //     style: { 'font-family': 'HanaleiFill' },
-    //     value: 'HanaleiFill',
-    // },
-    // {
-    //     label: 'fontFamily.Anton',
-    //     style: { 'font-family': 'Anton' },
-    //     value: 'Anton',
-    // },
-    // {
-    //     label: 'fontFamily.Pacifico',
-    //     style: { 'font-family': 'Pacifico' },
-    //     value: 'Pacifico',
-    // },
-];
-
 export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     const commandService = accessor.get(ICommandService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -502,10 +368,16 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
         type: MenuItemType.SELECTOR,
         label: FONT_FAMILY_COMPONENT,
         positions: [MenuPosition.TOOLBAR_START],
-        selections: FONT_FAMILY_CHILDREN,
+        selections: FONT_FAMILY_LIST.map((item) => ({
+            label: {
+                name: FONT_FAMILY_ITEM_COMPONENT,
+                hoverable: true,
+            },
+            value: item.value,
+        })),
         disabled$: getCurrentSheetDisabled$(accessor),
         value$: new Observable((subscriber) => {
-            const defaultValue = FONT_FAMILY_CHILDREN[0].value;
+            const defaultValue = FONT_FAMILY_LIST[0].value;
 
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
@@ -553,7 +425,7 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
             },
         },
         positions: [MenuPosition.TOOLBAR_START],
-        selections: FONT_SIZE_CHILDREN,
+        selections: FONT_SIZE_LIST,
         disabled$,
         value$: new Observable((subscriber) => {
             const DEFAULT_SIZE = 14;
@@ -573,7 +445,7 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
 
                 if (
                     (id === SetTextSelectionsOperation.id || id === SetInlineFormatCommand.id) &&
-                    contextService.getContextValue(FOCUSING_EDITOR) &&
+                    contextService.getContextValue(EDITOR_ACTIVATED) &&
                     contextService.getContextValue(FOCUSING_SHEET)
                 ) {
                     const textRun = getFontStyleAtCursor(accessor);
@@ -1116,7 +988,7 @@ export function CancelFrozenMenuItemFactory(): IMenuButtonItem {
 
 export function HideRowMenuItemFactory(): IMenuButtonItem {
     return {
-        id: SetRowHiddenCommand.id,
+        id: HideRowConfirmCommand.id,
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
@@ -1127,7 +999,7 @@ export function HideRowMenuItemFactory(): IMenuButtonItem {
 
 export function HideColMenuItemFactory(): IMenuButtonItem {
     return {
-        id: SetColHiddenCommand.id,
+        id: HideColConfirmCommand.id,
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.COL_HEADER_CONTEXT_MENU],

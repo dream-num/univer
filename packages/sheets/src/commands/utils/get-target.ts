@@ -30,12 +30,7 @@ export function getCommandTarget(
     univerInstanceService: IUniverInstanceService,
     unitId?: string,
     subUnitId?: string
-): {
-    workbook: Workbook;
-    worksheet: Worksheet;
-    unitId: string;
-    subUnitId: string;
-} {
+): { workbook: Workbook; worksheet: Worksheet; unitId: string; subUnitId: string } {
     const workbook = unitId
         ? univerInstanceService.getUniverSheetInstance(unitId)
         : univerInstanceService.getCurrentUniverSheetInstance();

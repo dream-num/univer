@@ -1,14 +1,8 @@
 {
-    "extends": "../tsconfig.json",
+    "extends": "@univerjs/shared/tsconfigs/base",
     "compilerOptions": {
-        "rootDir": "./src",
-        "outDir": "local",
-        "downlevelIteration": true,
-        "esModuleInterop": true,
-        "emitDecoratorMetadata": true,
-        "strictPropertyInitialization": false,
-        "types": ["esbuild-style-plugin"]
+        "types": ["esbuild-style-plugin"],
+        "outDir": "local"
     },
-    "include": ["src/**/*"],
-    "exclude": ["node_modules", "local"]
+    "include": ["src"]
 }

@@ -16,10 +16,10 @@
 
 import type {
     ICommand,
-    IDeleteMutationParams,
+    IDeleteAction,
     IDocumentBody,
     IMutationInfo,
-    IRetainMutationParams,
+    IRetainAction,
     ITextRange,
 } from '@univerjs/core';
 import {
@@ -29,6 +29,8 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
     MemoryCursor,
+    TextX,
+    TextXActionType,
 } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 
@@ -77,25 +79,25 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
 
         memoryCursor.reset();
 
+        const textX = new TextX();
+
         for (const selection of selections) {
             const { startOffset, endOffset, collapsed } = selection;
 
             const len = startOffset - memoryCursor.cursor;
 
             if (collapsed) {
-                doMutation.params.mutations.push({
-                    t: 'r',
+                textX.push({
+                    t: TextXActionType.RETAIN,
                     len,
                     segmentId,
                 });
             } else {
-                doMutation.params.mutations.push(
-                    ...getRetainAndDeleteFromReplace(selection, segmentId, memoryCursor.cursor)
-                );
+                textX.push(...getRetainAndDeleteFromReplace(selection, segmentId, memoryCursor.cursor));
             }
 
-            doMutation.params.mutations.push({
-                t: 'i',
+            textX.push({
+                t: TextXActionType.INSERT,
                 body,
                 len: body.dataStream.length,
                 line: 0,
@@ -105,6 +107,8 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
             memoryCursor.reset();
             memoryCursor.moveCursor(endOffset);
         }
+
+        doMutation.params.mutations = textX.serialize();
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,
@@ -186,26 +190,28 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
 
         memoryCursor.reset();
 
+        const textX = new TextX();
+
         for (const selection of selections) {
             const { startOffset, endOffset, collapsed } = selection;
 
             const len = startOffset - memoryCursor.cursor;
 
             if (collapsed) {
-                doMutation.params.mutations.push({
-                    t: 'r',
+                textX.push({
+                    t: TextXActionType.RETAIN,
                     len,
                     segmentId,
                 });
             } else {
-                doMutation.params.mutations.push(
-                    ...getRetainAndDeleteAndExcludeLineBreak(selection, originBody, segmentId, memoryCursor.cursor)
-                );
+                textX.push(...getRetainAndDeleteAndExcludeLineBreak(selection, originBody, segmentId, memoryCursor.cursor));
             }
 
             memoryCursor.reset();
             memoryCursor.moveCursor(endOffset);
         }
+
+        doMutation.params.mutations = textX.serialize();
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,
@@ -249,9 +255,9 @@ function getRetainAndDeleteAndExcludeLineBreak(
     body: IDocumentBody,
     segmentId: string = '',
     memoryCursor: number = 0
-): Array<IRetainMutationParams | IDeleteMutationParams> {
+): Array<IRetainAction | IDeleteAction> {
     const { startOffset, endOffset } = range;
-    const dos: Array<IRetainMutationParams | IDeleteMutationParams> = [];
+    const dos: Array<IRetainAction | IDeleteAction> = [];
 
     const { paragraphs = [] } = body;
 
@@ -264,7 +270,7 @@ function getRetainAndDeleteAndExcludeLineBreak(
 
     if (textStart > 0) {
         dos.push({
-            t: 'r',
+            t: TextXActionType.RETAIN,
             len: textStart,
             segmentId,
         });
@@ -274,21 +280,21 @@ function getRetainAndDeleteAndExcludeLineBreak(
         const paragraphIndex = paragraphInRange.startIndex - memoryCursor;
 
         dos.push({
-            t: 'd',
+            t: TextXActionType.DELETE,
             len: paragraphIndex - textStart,
             line: 0,
             segmentId,
         });
 
         dos.push({
-            t: 'r',
+            t: TextXActionType.RETAIN,
             len: 1,
             segmentId,
         });
 
         if (textEnd > paragraphIndex + 1) {
             dos.push({
-                t: 'd',
+                t: TextXActionType.DELETE,
                 len: textEnd - paragraphIndex - 1,
                 line: 0,
                 segmentId,
@@ -296,7 +302,7 @@ function getRetainAndDeleteAndExcludeLineBreak(
         }
     } else {
         dos.push({
-            t: 'd',
+            t: TextXActionType.DELETE,
             len: textEnd - textStart,
             line: 0,
             segmentId,

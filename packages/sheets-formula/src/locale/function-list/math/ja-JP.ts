@@ -16,8 +16,8 @@
 
 export default {
     ABS: {
-        description: `数値の絶対値を返します。 絶対値とは、数値から符号 (+、-) を除いた数の大きさのことです。`,
-        abstract: `数値の絶対値を返します。`,
+        description: '数値の絶対値を返します。 絶対値とは、数値から符号 (+、-) を除いた数の大きさのことです。',
+        abstract: '数値の絶対値を返します。',
         links: [
             {
                 title: '指導',
@@ -29,8 +29,8 @@ export default {
         },
     },
     ACOS: {
-        description: `数値のアークコサイン (逆余弦) を返します。 アークコサインとは、そのコサインが数値となる角度のことです。 戻り値の角度は、0 (ゼロ) ～ pi の範囲内のラジアンで示されます。`,
-        abstract: `数値のアークコサインを返します。`,
+        description: '数値のアークコサイン (逆余弦) を返します。 アークコサインとは、そのコサインが数値となる角度のことです。 戻り値の角度は、0 (ゼロ) ～ pi の範囲内のラジアンで示されます。',
+        abstract: '数値のアークコサインを返します。',
         links: [
             {
                 title: '指導',
@@ -42,8 +42,8 @@ export default {
         },
     },
     ACOSH: {
-        description: `数値の逆双曲線コサインを返します。 数値は 1 以上である必要があります。 逆双曲線コサインは、双曲線コサインが 数値の値なので、ACOSH(COSH(number)) は数値と等 しくなります。`,
-        abstract: `数値の双曲線逆余弦 (ハイパーボリック コサインの逆関数) を返します。`,
+        description: '数値の逆双曲線コサインを返します。 数値は 1 以上である必要があります。 逆双曲線コサインは、双曲線コサインが 数値の値なので、ACOSH(COSH(number)) は数値と等 しくなります。',
+        abstract: '数値の双曲線逆余弦 (ハイパーボリック コサインの逆関数) を返します。',
         links: [
             {
                 title: '指導',
@@ -55,8 +55,8 @@ export default {
         },
     },
     ACOT: {
-        description: `コタンジェント、または逆コタンジェント、数値の主値を返します。`,
-        abstract: `数値の逆余接を返します。`,
+        description: 'コタンジェント、または逆コタンジェント、数値の主値を返します。',
+        abstract: '数値の逆余接を返します。',
         links: [
             {
                 title: '指導',
@@ -71,8 +71,8 @@ export default {
         },
     },
     ACOTH: {
-        description: `数値の双曲線逆余接を返します。`,
-        abstract: `数値の双曲線逆余接を返します。`,
+        description: '数値の双曲線逆余接を返します。',
+        abstract: '数値の双曲線逆余接を返します。',
         links: [
             {
                 title: '指導',
@@ -85,8 +85,8 @@ export default {
         },
     },
     AGGREGATE: {
-        description: `リストまたはデータベースの集計値を返します。`,
-        abstract: `リストまたはデータベースの集計値を返します。`,
+        description: 'リストまたはデータベースの集計値を返します。',
+        abstract: 'リストまたはデータベースの集計値を返します。',
         links: [
             {
                 title: '指導',
@@ -99,8 +99,8 @@ export default {
         },
     },
     ARABIC: {
-        description: `ローマ数字をアラビア数字に変換します。`,
-        abstract: `ローマ数字をアラビア数字に変換します。`,
+        description: 'ローマ数字をアラビア数字に変換します。',
+        abstract: 'ローマ数字をアラビア数字に変換します。',
         links: [
             {
                 title: '指導',
@@ -113,8 +113,8 @@ export default {
         },
     },
     ASIN: {
-        description: `数値のアークサインを返します。`,
-        abstract: `数値のアークサインを返します。`,
+        description: '数値のアークサインを返します。',
+        abstract: '数値のアークサインを返します。',
         links: [
             {
                 title: '指導',
@@ -127,8 +127,8 @@ export default {
         },
     },
     ASINH: {
-        description: `数値の双曲線逆正弦 (ハイパーボリック サインの逆関数) を返します。`,
-        abstract: `数値の双曲線逆正弦 (ハイパーボリック サインの逆関数) を返します。`,
+        description: '数値の双曲線逆正弦 (ハイパーボリック サインの逆関数) を返します。',
+        abstract: '数値の双曲線逆正弦 (ハイパーボリック サインの逆関数) を返します。',
         links: [
             {
                 title: '指導',
@@ -141,8 +141,8 @@ export default {
         },
     },
     ATAN: {
-        description: `数値のアークタンジェントを返します。`,
-        abstract: `数値のアークタンジェントを返します。`,
+        description: '数値のアークタンジェントを返します。',
+        abstract: '数値のアークタンジェントを返します。',
         links: [
             {
                 title: '指導',
@@ -155,8 +155,8 @@ export default {
         },
     },
     ATAN2: {
-        description: `指定された x-y 座標のアークタンジェントを返します。`,
-        abstract: `指定された x-y 座標のアークタンジェントを返します。`,
+        description: '指定された x-y 座標のアークタンジェントを返します。',
+        abstract: '指定された x-y 座標のアークタンジェントを返します。',
         links: [
             {
                 title: '指導',
@@ -169,8 +169,8 @@ export default {
         },
     },
     ATANH: {
-        description: `数値の双曲線逆正接 (ハイパーボリック タンジェントの逆関数) を返します。`,
-        abstract: `数値の双曲線逆正接 (ハイパーボリック タンジェントの逆関数) を返します。`,
+        description: '数値の双曲線逆正接 (ハイパーボリック タンジェントの逆関数) を返します。',
+        abstract: '数値の双曲線逆正接 (ハイパーボリック タンジェントの逆関数) を返します。',
         links: [
             {
                 title: '指導',
@@ -183,8 +183,8 @@ export default {
         },
     },
     BASE: {
-        description: `指定された基数 (底) のテキスト表現に、数値を変換します。`,
-        abstract: `指定された基数 (底) のテキスト表現に、数値を変換します。`,
+        description: '指定された基数 (底) のテキスト表現に、数値を変換します。',
+        abstract: '指定された基数 (底) のテキスト表現に、数値を変換します。',
         links: [
             {
                 title: '指導',
@@ -197,8 +197,8 @@ export default {
         },
     },
     CEILING: {
-        description: `指定された基準値の倍数のうち、最も近い値に数値を切り上げます。`,
-        abstract: `指定された基準値の倍数のうち、最も近い値に数値を切り上げます。`,
+        description: '指定された基準値の倍数のうち、最も近い値に数値を切り上げます。',
+        abstract: '指定された基準値の倍数のうち、最も近い値に数値を切り上げます。',
         links: [
             {
                 title: '指導',
@@ -211,8 +211,8 @@ export default {
         },
     },
     CEILING_MATH: {
-        description: `指定された基準値の倍数のうち、最も近い値に数値を切り上げます。`,
-        abstract: `指定された基準値の倍数のうち、最も近い値に数値を切り上げます。`,
+        description: '指定された基準値の倍数のうち、最も近い値に数値を切り上げます。',
+        abstract: '指定された基準値の倍数のうち、最も近い値に数値を切り上げます。',
         links: [
             {
                 title: '指導',
@@ -225,8 +225,8 @@ export default {
         },
     },
     CEILING_PRECISE: {
-        description: `指定された基準値の倍数のうち、最も近い値に数値を切り上げます。 数値は正負に関係なく切り上げられます。`,
-        abstract: `指定された基準値の倍数のうち、最も近い値に数値を切り上げます。 数値は正負に関係なく切り上げられます。`,
+        description: '指定された基準値の倍数のうち、最も近い値に数値を切り上げます。 数値は正負に関係なく切り上げられます。',
+        abstract: '指定された基準値の倍数のうち、最も近い値に数値を切り上げます。 数値は正負に関係なく切り上げられます。',
         links: [
             {
                 title: '指導',
@@ -239,8 +239,8 @@ export default {
         },
     },
     COMBIN: {
-        description: `指定された個数を選択するときの組み合わせの数を返します。`,
-        abstract: `指定された個数を選択するときの組み合わせの数を返します。`,
+        description: '指定された個数を選択するときの組み合わせの数を返します。',
+        abstract: '指定された個数を選択するときの組み合わせの数を返します。',
         links: [
             {
                 title: '指導',
@@ -253,8 +253,8 @@ export default {
         },
     },
     COMBINA: {
-        description: `指定された個数を選択するときの組み合わせ (反復あり) の数を返します`,
-        abstract: `指定された個数を選択するときの組み合わせ (反復あり) の数を返します`,
+        description: '指定された個数を選択するときの組み合わせ (反復あり) の数を返します',
+        abstract: '指定された個数を選択するときの組み合わせ (反復あり) の数を返します',
         links: [
             {
                 title: '指導',
@@ -267,8 +267,8 @@ export default {
         },
     },
     COS: {
-        description: `指定された角度のコサインを返します。`,
-        abstract: `指定された角度のコサインを返します。`,
+        description: '指定された角度のコサインを返します。',
+        abstract: '指定された角度のコサインを返します。',
         links: [
             {
                 title: '指導',
@@ -281,8 +281,8 @@ export default {
         },
     },
     COSH: {
-        description: `数値の双曲線余弦 (ハイパーボリック コサイン) を返します。`,
-        abstract: `数値の双曲線余弦 (ハイパーボリック コサイン) を返します。`,
+        description: '数値の双曲線余弦 (ハイパーボリック コサイン) を返します。',
+        abstract: '数値の双曲線余弦 (ハイパーボリック コサイン) を返します。',
         links: [
             {
                 title: '指導',
@@ -295,8 +295,8 @@ export default {
         },
     },
     COT: {
-        description: `角度の双曲線余接を返します。`,
-        abstract: `角度の双曲線余接を返します。`,
+        description: '角度の双曲線余接を返します。',
+        abstract: '角度の双曲線余接を返します。',
         links: [
             {
                 title: '指導',
@@ -309,8 +309,8 @@ export default {
         },
     },
     COTH: {
-        description: `数値の双曲線余接を返します。`,
-        abstract: `数値の双曲線余接を返します。`,
+        description: '数値の双曲線余接を返します。',
+        abstract: '数値の双曲線余接を返します。',
         links: [
             {
                 title: '指導',
@@ -323,8 +323,8 @@ export default {
         },
     },
     CSC: {
-        description: `角度の余割を返します。`,
-        abstract: `角度の余割を返します。`,
+        description: '角度の余割を返します。',
+        abstract: '角度の余割を返します。',
         links: [
             {
                 title: '指導',
@@ -337,8 +337,8 @@ export default {
         },
     },
     CSCH: {
-        description: `角度の双曲線余割を返します。`,
-        abstract: `角度の双曲線余割を返します。`,
+        description: '角度の双曲線余割を返します。',
+        abstract: '角度の双曲線余割を返します。',
         links: [
             {
                 title: '指導',
@@ -351,8 +351,8 @@ export default {
         },
     },
     DECIMAL: {
-        description: `指定された底の数値のテキスト表現を 10 進数に変換します。`,
-        abstract: `指定された底の数値のテキスト表現を 10 進数に変換します。`,
+        description: '指定された底の数値のテキスト表現を 10 進数に変換します。',
+        abstract: '指定された底の数値のテキスト表現を 10 進数に変換します。',
         links: [
             {
                 title: '指導',
@@ -365,8 +365,8 @@ export default {
         },
     },
     DEGREES: {
-        description: `ラジアンを度に変換します。`,
-        abstract: `ラジアンを度に変換します。`,
+        description: 'ラジアンを度に変換します。',
+        abstract: 'ラジアンを度に変換します。',
         links: [
             {
                 title: '指導',
@@ -379,8 +379,8 @@ export default {
         },
     },
     EVEN: {
-        description: `指定された数値を最も近い偶数に切り上げた値を返します。`,
-        abstract: `指定された数値を最も近い偶数に切り上げた値を返します。`,
+        description: '指定された数値を最も近い偶数に切り上げた値を返します。',
+        abstract: '指定された数値を最も近い偶数に切り上げた値を返します。',
         links: [
             {
                 title: '指導',
@@ -393,8 +393,8 @@ export default {
         },
     },
     EXP: {
-        description: `e を底とする数値のべき乗を返します。`,
-        abstract: `e を底とする数値のべき乗を返します。`,
+        description: 'e を底とする数値のべき乗を返します。',
+        abstract: 'e を底とする数値のべき乗を返します。',
         links: [
             {
                 title: '指導',
@@ -407,8 +407,8 @@ export default {
         },
     },
     FACT: {
-        description: `数値の階乗を返します。`,
-        abstract: `数値の階乗を返します。`,
+        description: '数値の階乗を返します。',
+        abstract: '数値の階乗を返します。',
         links: [
             {
                 title: '指導',
@@ -421,8 +421,8 @@ export default {
         },
     },
     FACTDOUBLE: {
-        description: `数値の二重階乗を返します。`,
-        abstract: `数値の二重階乗を返します。`,
+        description: '数値の二重階乗を返します。',
+        abstract: '数値の二重階乗を返します。',
         links: [
             {
                 title: '指導',
@@ -435,8 +435,8 @@ export default {
         },
     },
     FLOOR: {
-        description: `数値を指定された桁数で切り捨てます。`,
-        abstract: `数値を指定された桁数で切り捨てます。`,
+        description: '数値を指定された桁数で切り捨てます。',
+        abstract: '数値を指定された桁数で切り捨てます。',
         links: [
             {
                 title: '指導',
@@ -449,8 +449,8 @@ export default {
         },
     },
     FLOOR_MATH: {
-        description: `指定された基準値の倍数のうち、最も近い値に数値を切り捨てます。`,
-        abstract: `指定された基準値の倍数のうち、最も近い値に数値を切り捨てます。`,
+        description: '指定された基準値の倍数のうち、最も近い値に数値を切り捨てます。',
+        abstract: '指定された基準値の倍数のうち、最も近い値に数値を切り捨てます。',
         links: [
             {
                 title: '指導',
@@ -463,8 +463,8 @@ export default {
         },
     },
     FLOOR_PRECISE: {
-        description: `指定された基準値の倍数のうち、最も近い値に数値を切り捨てます。 数値は正負に関係なく切り捨てられます。`,
-        abstract: `指定された基準値の倍数のうち、最も近い値に数値を切り捨てます。 数値は正負に関係なく切り捨てられます。`,
+        description: '指定された基準値の倍数のうち、最も近い値に数値を切り捨てます。 数値は正負に関係なく切り捨てられます。',
+        abstract: '指定された基準値の倍数のうち、最も近い値に数値を切り捨てます。 数値は正負に関係なく切り捨てられます。',
         links: [
             {
                 title: '指導',
@@ -477,8 +477,8 @@ export default {
         },
     },
     GCD: {
-        description: `最大公約数を返します。`,
-        abstract: `最大公約数を返します。`,
+        description: '最大公約数を返します。',
+        abstract: '最大公約数を返します。',
         links: [
             {
                 title: '指導',
@@ -491,8 +491,8 @@ export default {
         },
     },
     INT: {
-        description: `指定された数値を最も近い整数に切り捨てます。`,
-        abstract: `指定された数値を最も近い整数に切り捨てます。`,
+        description: '指定された数値を最も近い整数に切り捨てます。',
+        abstract: '指定された数値を最も近い整数に切り捨てます。',
         links: [
             {
                 title: '指導',
@@ -505,8 +505,8 @@ export default {
         },
     },
     ISO_CEILING: {
-        description: `最も近い整数に切り上げた値、または、指定された基準値の倍数のうち最も近い値を返します。`,
-        abstract: `最も近い整数に切り上げた値、または、指定された基準値の倍数のうち最も近い値を返します。`,
+        description: '最も近い整数に切り上げた値、または、指定された基準値の倍数のうち最も近い値を返します。',
+        abstract: '最も近い整数に切り上げた値、または、指定された基準値の倍数のうち最も近い値を返します。',
         links: [
             {
                 title: '指導',
@@ -519,8 +519,8 @@ export default {
         },
     },
     LCM: {
-        description: `最小公倍数を返します。`,
-        abstract: `最小公倍数を返します。`,
+        description: '最小公倍数を返します。',
+        abstract: '最小公倍数を返します。',
         links: [
             {
                 title: '指導',
@@ -533,8 +533,8 @@ export default {
         },
     },
     LET: {
-        description: `計算結果に名前を割り当てることにより、中間計算、値、定義名などを数式内に格納できます。`,
-        abstract: `計算結果に名前を割り当てることにより、中間計算、値、定義名などを数式内に格納できます。`,
+        description: '計算結果に名前を割り当てることにより、中間計算、値、定義名などを数式内に格納できます。',
+        abstract: '計算結果に名前を割り当てることにより、中間計算、値、定義名などを数式内に格納できます。',
         links: [
             {
                 title: '指導',
@@ -547,8 +547,8 @@ export default {
         },
     },
     LN: {
-        description: `数値の自然対数を返します。`,
-        abstract: `数値の自然対数を返します。`,
+        description: '数値の自然対数を返します。',
+        abstract: '数値の自然対数を返します。',
         links: [
             {
                 title: '指導',
@@ -561,8 +561,8 @@ export default {
         },
     },
     LOG: {
-        description: `指定された数を底とする数値の対数を返します。`,
-        abstract: `指定された数を底とする数値の対数を返します。`,
+        description: '指定された数を底とする数値の対数を返します。',
+        abstract: '指定された数を底とする数値の対数を返します。',
         links: [
             {
                 title: '指導',
@@ -575,8 +575,8 @@ export default {
         },
     },
     LOG10: {
-        description: `10 を底とする数値の対数 (常用対数) を返します。`,
-        abstract: `10 を底とする数値の対数 (常用対数) を返します。`,
+        description: '10 を底とする数値の対数 (常用対数) を返します。',
+        abstract: '10 を底とする数値の対数 (常用対数) を返します。',
         links: [
             {
                 title: '指導',
@@ -589,8 +589,8 @@ export default {
         },
     },
     MDETERM: {
-        description: `配列の行列式を返します。`,
-        abstract: `配列の行列式を返します。`,
+        description: '配列の行列式を返します。',
+        abstract: '配列の行列式を返します。',
         links: [
             {
                 title: '指導',
@@ -603,8 +603,8 @@ export default {
         },
     },
     MINVERSE: {
-        description: `行列の逆行列を返します。`,
-        abstract: `行列の逆行列を返します。`,
+        description: '行列の逆行列を返します。',
+        abstract: '行列の逆行列を返します。',
         links: [
             {
                 title: '指導',
@@ -617,8 +617,8 @@ export default {
         },
     },
     MMULT: {
-        description: `2 つの配列の行列積を返します。`,
-        abstract: `2 つの配列の行列積を返します。`,
+        description: '2 つの配列の行列積を返します。',
+        abstract: '2 つの配列の行列積を返します。',
         links: [
             {
                 title: '指導',
@@ -631,8 +631,8 @@ export default {
         },
     },
     MOD: {
-        description: `数値を除算したときの剰余を返します。`,
-        abstract: `数値を除算したときの剰余を返します。`,
+        description: '数値を除算したときの剰余を返します。',
+        abstract: '数値を除算したときの剰余を返します。',
         links: [
             {
                 title: '指導',
@@ -645,8 +645,8 @@ export default {
         },
     },
     MROUND: {
-        description: `指定された値の倍数になるように、数値を切り上げまたは切り捨てます。`,
-        abstract: `指定された値の倍数になるように、数値を切り上げまたは切り捨てます。`,
+        description: '指定された値の倍数になるように、数値を切り上げまたは切り捨てます。',
+        abstract: '指定された値の倍数になるように、数値を切り上げまたは切り捨てます。',
         links: [
             {
                 title: '指導',
@@ -659,8 +659,8 @@ export default {
         },
     },
     MULTINOMIAL: {
-        description: `指定された複数の数値の多項係数を返します。`,
-        abstract: `指定された複数の数値の多項係数を返します。`,
+        description: '指定された複数の数値の多項係数を返します。',
+        abstract: '指定された複数の数値の多項係数を返します。',
         links: [
             {
                 title: '指導',
@@ -673,8 +673,8 @@ export default {
         },
     },
     MUNIT: {
-        description: `指定された次元の単位行列を返します。`,
-        abstract: `指定された次元の単位行列を返します。`,
+        description: '指定された次元の単位行列を返します。',
+        abstract: '指定された次元の単位行列を返します。',
         links: [
             {
                 title: '指導',
@@ -687,8 +687,8 @@ export default {
         },
     },
     ODD: {
-        description: `指定された数値を最も近い奇数に切り上げた値を返します。`,
-        abstract: `指定された数値を最も近い奇数に切り上げた値を返します。`,
+        description: '指定された数値を最も近い奇数に切り上げた値を返します。',
+        abstract: '指定された数値を最も近い奇数に切り上げた値を返します。',
         links: [
             {
                 title: '指導',
@@ -701,8 +701,8 @@ export default {
         },
     },
     PI: {
-        description: `円周率πを返します。`,
-        abstract: `円周率πを返します。`,
+        description: '円周率πを返します。',
+        abstract: '円周率πを返します。',
         links: [
             {
                 title: '指導',
@@ -715,8 +715,8 @@ export default {
         },
     },
     POWER: {
-        description: `数値のべき乗を返します。`,
-        abstract: `数値のべき乗を返します。`,
+        description: '数値のべき乗を返します。',
+        abstract: '数値のべき乗を返します。',
         links: [
             {
                 title: '指導',
@@ -729,8 +729,8 @@ export default {
         },
     },
     PRODUCT: {
-        description: `引数リストの積を返します。`,
-        abstract: `引数リストの積を返します。`,
+        description: '引数リストの積を返します。',
+        abstract: '引数リストの積を返します。',
         links: [
             {
                 title: '指導',
@@ -743,8 +743,8 @@ export default {
         },
     },
     QUOTIENT: {
-        description: `除算の商の整数部を返します。`,
-        abstract: `除算の商の整数部を返します。`,
+        description: '除算の商の整数部を返します。',
+        abstract: '除算の商の整数部を返します。',
         links: [
             {
                 title: '指導',
@@ -757,8 +757,8 @@ export default {
         },
     },
     RADIANS: {
-        description: `度をラジアンに変換します。`,
-        abstract: `度をラジアンに変換します。`,
+        description: '度をラジアンに変換します。',
+        abstract: '度をラジアンに変換します。',
         links: [
             {
                 title: '指導',
@@ -771,8 +771,8 @@ export default {
         },
     },
     RAND: {
-        description: `0 以上 1 未満の乱数を返します。`,
-        abstract: `0 以上 1 未満の乱数を返します。`,
+        description: '0 以上 1 未満の乱数を返します。',
+        abstract: '0 以上 1 未満の乱数を返します。',
         links: [
             {
                 title: '指導',
@@ -785,8 +785,8 @@ export default {
         },
     },
     RANDARRAY: {
-        description: `0 から 1 までのランダムな数値の配列を返します。 ただし、入力する行と列の数、最小値と最大値、および整数または 10 進数の値を返すかどうかを指定できます。`,
-        abstract: `0 から 1 までのランダムな数値の配列を返します。 ただし、入力する行と列の数、最小値と最大値、および整数または 10 進数の値を返すかどうかを指定できます。`,
+        description: '0 から 1 までのランダムな数値の配列を返します。 ただし、入力する行と列の数、最小値と最大値、および整数または 10 進数の値を返すかどうかを指定できます。',
+        abstract: '0 から 1 までのランダムな数値の配列を返します。 ただし、入力する行と列の数、最小値と最大値、および整数または 10 進数の値を返すかどうかを指定できます。',
         links: [
             {
                 title: '指導',
@@ -799,8 +799,8 @@ export default {
         },
     },
     RANDBETWEEN: {
-        description: `指定された範囲内の整数の乱数を返します。`,
-        abstract: `指定された範囲内の整数の乱数を返します。`,
+        description: '指定された範囲内の整数の乱数を返します。',
+        abstract: '指定された範囲内の整数の乱数を返します。',
         links: [
             {
                 title: '指導',
@@ -813,8 +813,8 @@ export default {
         },
     },
     ROMAN: {
-        description: `アラビア数字を、ローマ数字を表す文字列に変換します。`,
-        abstract: `アラビア数字を、ローマ数字を表す文字列に変換します。`,
+        description: 'アラビア数字を、ローマ数字を表す文字列に変換します。',
+        abstract: 'アラビア数字を、ローマ数字を表す文字列に変換します。',
         links: [
             {
                 title: '指導',
@@ -827,8 +827,8 @@ export default {
         },
     },
     ROUND: {
-        description: `数値を四捨五入して指定された桁数にします。`,
-        abstract: `数値を四捨五入して指定された桁数にします。`,
+        description: '数値を四捨五入して指定された桁数にします。',
+        abstract: '数値を四捨五入して指定された桁数にします。',
         links: [
             {
                 title: '指導',
@@ -841,8 +841,8 @@ export default {
         },
     },
     ROUNDDOWN: {
-        description: `数値を指定された桁数で切り捨てます。`,
-        abstract: `数値を指定された桁数で切り捨てます。`,
+        description: '数値を指定された桁数で切り捨てます。',
+        abstract: '数値を指定された桁数で切り捨てます。',
         links: [
             {
                 title: '指導',
@@ -855,8 +855,8 @@ export default {
         },
     },
     ROUNDUP: {
-        description: `数値を指定された桁数に切り上げます。`,
-        abstract: `数値を指定された桁数に切り上げます。`,
+        description: '数値を指定された桁数に切り上げます。',
+        abstract: '数値を指定された桁数に切り上げます。',
         links: [
             {
                 title: '指導',
@@ -869,8 +869,8 @@ export default {
         },
     },
     SEC: {
-        description: `角度の正割を返します。`,
-        abstract: `角度の正割を返します。`,
+        description: '角度の正割を返します。',
+        abstract: '角度の正割を返します。',
         links: [
             {
                 title: '指導',
@@ -883,8 +883,8 @@ export default {
         },
     },
     SECH: {
-        description: `角度の双曲線正割を返します。`,
-        abstract: `角度の双曲線正割を返します。`,
+        description: '角度の双曲線正割を返します。',
+        abstract: '角度の双曲線正割を返します。',
         links: [
             {
                 title: '指導',
@@ -897,8 +897,8 @@ export default {
         },
     },
     SERIESSUM: {
-        description: `数式で定義されるべき級数を返します。`,
-        abstract: `数式で定義されるべき級数を返します。`,
+        description: '数式で定義されるべき級数を返します。',
+        abstract: '数式で定義されるべき級数を返します。',
         links: [
             {
                 title: '指導',
@@ -911,8 +911,8 @@ export default {
         },
     },
     SEQUENCE: {
-        description: `1、2、3、4 など、配列内の連続した数値の一覧を生成します。`,
-        abstract: `1、2、3、4 など、配列内の連続した数値の一覧を生成します。`,
+        description: '1、2、3、4 など、配列内の連続した数値の一覧を生成します。',
+        abstract: '1、2、3、4 など、配列内の連続した数値の一覧を生成します。',
         links: [
             {
                 title: '指導',
@@ -925,8 +925,8 @@ export default {
         },
     },
     SIGN: {
-        description: `数値の正負を調べます。`,
-        abstract: `数値の正負を調べます。`,
+        description: '数値の正負を調べます。',
+        abstract: '数値の正負を調べます。',
         links: [
             {
                 title: '指導',
@@ -939,8 +939,8 @@ export default {
         },
     },
     SIN: {
-        description: `指定された角度のサインを返します。`,
-        abstract: `指定された角度のサインを返します。`,
+        description: '指定された角度のサインを返します。',
+        abstract: '指定された角度のサインを返します。',
         links: [
             {
                 title: '指導',
@@ -953,8 +953,8 @@ export default {
         },
     },
     SINH: {
-        description: `数値の双曲線正弦 (ハイパーボリック サイン) を返します。`,
-        abstract: `数値の双曲線正弦 (ハイパーボリック サイン) を返します。`,
+        description: '数値の双曲線正弦 (ハイパーボリック サイン) を返します。',
+        abstract: '数値の双曲線正弦 (ハイパーボリック サイン) を返します。',
         links: [
             {
                 title: '指導',
@@ -967,8 +967,8 @@ export default {
         },
     },
     SQRT: {
-        description: `正の平方根を返します。`,
-        abstract: `正の平方根を返します。`,
+        description: '正の平方根を返します。',
+        abstract: '正の平方根を返します。',
         links: [
             {
                 title: '指導',
@@ -981,8 +981,8 @@ export default {
         },
     },
     SQRTPI: {
-        description: `(数値 * π) の平方根を返します。`,
-        abstract: `(数値 * π) の平方根を返します。`,
+        description: '(数値 * π) の平方根を返します。',
+        abstract: '(数値 * π) の平方根を返します。',
         links: [
             {
                 title: '指導',
@@ -995,8 +995,8 @@ export default {
         },
     },
     SUBTOTAL: {
-        description: `リストまたはデータベースの集計値を返します。`,
-        abstract: `リストまたはデータベースの集計値を返します。`,
+        description: 'リストまたはデータベースの集計値を返します。',
+        abstract: 'リストまたはデータベースの集計値を返します。',
         links: [
             {
                 title: '指導',
@@ -1009,8 +1009,8 @@ export default {
         },
     },
     SUM: {
-        description: `引数を合計します。`,
-        abstract: `引数を合計します。`,
+        description: '引数を合計します。',
+        abstract: '引数を合計します。',
         links: [
             {
                 title: '指導',
@@ -1019,18 +1019,18 @@ export default {
         ],
         functionParameter: {
             number1: {
-                name: '数値1',
+                name: '数値 1',
                 detail: '加算する最初の数。 ここには 4 のような数値、B6 のようなセル参照、B2:B8 のようなセル範囲を指定できます。',
             },
             number2: {
-                name: '数値2',
+                name: '数値 2',
                 detail: 'これは、加算する 2 番目の数値です。 この方法で最大 255 個の数値を指定することができます。',
             },
         },
     },
     SUMIF: {
-        description: `指定された検索条件に一致するセルの値を合計します。`,
-        abstract: `指定された検索条件に一致するセルの値を合計します。`,
+        description: '指定された検索条件に一致するセルの値を合計します。',
+        abstract: '指定された検索条件に一致するセルの値を合計します。',
         links: [
             {
                 title: '指導',
@@ -1038,13 +1038,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            range: { name: '範囲', detail: '条件によって評価するセルの範囲。' },
+            criteria: { name: '条件', detail: ' 数値、式、セル参照、テキスト、または追加するセルを定義する関数の形式の条件。 ワイルドカード文字を含めることができます。疑問符 (?) は任意の 1 文字に一致し、アスタリスク (*) は任意の文字シーケンスに一致します。 ワイルドカード文字ではなく、通常の文字として疑問符やアスタリスクを検索する場合は、その文字の前に、"~*" のように半角のチルダ (~) を付けます。' },
+            sumRange: { name: '合計範囲', detail: 'range 引数で指定されたセル以外のセルを追加する場合は、追加する実際のセル。 sum_range引数を省略すると、範囲引数で指定されたセル (条件が適用されるセルと同じセル) が追加されます。' },
         },
     },
     SUMIFS: {
-        description: `指定した複数の条件を満たすセルの値を合計します。`,
-        abstract: `指定した複数の条件を満たすセルの値を合計します。`,
+        description: '指定した複数の条件を満たすセルの値を合計します。',
+        abstract: '指定した複数の条件を満たすセルの値を合計します。',
         links: [
             {
                 title: '指導',
@@ -1052,13 +1053,16 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            sumRange: { name: '合計範囲', detail: '合計するセルの範囲を指定します。' },
+            criteriaRange1: { name: '条件範囲 1', detail: '条件 1 に基づいて検証する範囲を指定します。条件範囲 1 と条件 1 が検索時にペアとなり、特定の条件に基づいて条件範囲が検索されます。 条件範囲で項目が見つかったら、合計対象範囲内のその項目に対応する値が合計されます。' },
+            criteria1: { name: '条件 1', detail: '条件範囲 1 内のどのセルを合計するかを定義する条件を指定します。 たとえば条件は、32、">32"、B4、"リンゴ"、または "32" のように入力できます。' },
+            criteriaRange2: { name: '条件範囲 2', detail: '追加の範囲。 最大 127 の範囲のペアを入力できます。' },
+            criteria2: { name: '条件 2', detail: '追加対応する条件です。 最大 127 条件のペアを入力できます。' },
         },
     },
     SUMPRODUCT: {
-        description: `指定された配列で対応する要素の積を合計します。`,
-        abstract: `指定された配列で対応する要素の積を合計します。`,
+        description: '指定された配列で対応する要素の積を合計します。',
+        abstract: '指定された配列で対応する要素の積を合計します。',
         links: [
             {
                 title: '指導',
@@ -1071,8 +1075,8 @@ export default {
         },
     },
     SUMSQ: {
-        description: `引数の 2 乗の和 (平方和) を返します。`,
-        abstract: `引数の 2 乗の和 (平方和) を返します。`,
+        description: '引数の 2 乗の和 (平方和) を返します。',
+        abstract: '引数の 2 乗の和 (平方和) を返します。',
         links: [
             {
                 title: '指導',
@@ -1085,8 +1089,8 @@ export default {
         },
     },
     SUMX2MY2: {
-        description: `2 つの配列で対応する配列要素の平方差を合計します。`,
-        abstract: `2 つの配列で対応する配列要素の平方差を合計します。`,
+        description: '2 つの配列で対応する配列要素の平方差を合計します。',
+        abstract: '2 つの配列で対応する配列要素の平方差を合計します。',
         links: [
             {
                 title: '指導',
@@ -1099,8 +1103,8 @@ export default {
         },
     },
     SUMX2PY2: {
-        description: `2 つの配列で対応する配列要素の平方和を合計します。`,
-        abstract: `2 つの配列で対応する配列要素の平方和を合計します。`,
+        description: '2 つの配列で対応する配列要素の平方和を合計します。',
+        abstract: '2 つの配列で対応する配列要素の平方和を合計します。',
         links: [
             {
                 title: '指導',
@@ -1113,8 +1117,8 @@ export default {
         },
     },
     SUMXMY2: {
-        description: `2 つの配列で対応する配列要素の差を 2 乗して合計します。`,
-        abstract: `2 つの配列で対応する配列要素の差を 2 乗して合計します。`,
+        description: '2 つの配列で対応する配列要素の差を 2 乗して合計します。',
+        abstract: '2 つの配列で対応する配列要素の差を 2 乗して合計します。',
         links: [
             {
                 title: '指導',
@@ -1127,8 +1131,8 @@ export default {
         },
     },
     TAN: {
-        description: `指定された角度のタンジェントを返します。`,
-        abstract: `指定された角度のタンジェントを返します。`,
+        description: '指定された角度のタンジェントを返します。',
+        abstract: '指定された角度のタンジェントを返します。',
         links: [
             {
                 title: '指導',
@@ -1141,8 +1145,8 @@ export default {
         },
     },
     TANH: {
-        description: `数値の双曲線正接 (ハイパーボリック タンジェント) を返します。`,
-        abstract: `数値の双曲線正接 (ハイパーボリック タンジェント) を返します。`,
+        description: '数値の双曲線正接 (ハイパーボリック タンジェント) を返します。',
+        abstract: '数値の双曲線正接 (ハイパーボリック タンジェント) を返します。',
         links: [
             {
                 title: '指導',
@@ -1155,8 +1159,8 @@ export default {
         },
     },
     TRUNC: {
-        description: `数値の小数部を切り捨てて、整数または指定された桁数にします。`,
-        abstract: `数値の小数部を切り捨てて、整数または指定された桁数にします。`,
+        description: '数値の小数部を切り捨てて、整数または指定された桁数にします。',
+        abstract: '数値の小数部を切り捨てて、整数または指定された桁数にします。',
         links: [
             {
                 title: '指導',

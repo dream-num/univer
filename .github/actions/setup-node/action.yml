@@ -1,0 +1,21 @@
+name: Node Setup
+description: Node.js setup for CI, including cache configuration
+
+runs:
+    using: composite
+    steps:
+        - name: Setup pnpm
+          uses: pnpm/action-setup@v2
+          with:
+              version: 8
+              run_install: false
+
+        - name: Setup Node.js
+          uses: actions/setup-node@v4
+          with:
+              node-version: 20
+              cache: pnpm
+
+        - name: Install dependencies
+          run: pnpm install
+          shell: bash

@@ -14,23 +14,49 @@
  * limitations under the License.
  */
 
-import { ICommandService, IUniverInstanceService } from '@univerjs/core';
-import { Slider } from '@univerjs/design';
+import {
+    EDITOR_ACTIVATED,
+    FOCUSING_UNIVER_EDITOR,
+    ICommandService,
+    IContextService,
+    IUniverInstanceService,
+} from '@univerjs/core';
+import { Slider, useObservable } from '@univerjs/design';
 import { SetWorksheetActivateCommand } from '@univerjs/sheets';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
+import { combineLatest, debounceTime, map } from 'rxjs';
 
 import { SetZoomRatioCommand } from '../../commands/commands/set-zoom-ratio.command';
 import { SetZoomRatioOperation } from '../../commands/operations/set-zoom-ratio.operation';
 import { SHEET_ZOOM_RANGE } from '../../common/keys';
 
+// eslint-disable-next-line no-magic-numbers
 const ZOOM_MAP = [50, 80, 100, 130, 150, 170, 200, 400];
+
+const DISABLE_DEBOUNCE_TIME = 100;
 
 export function ZoomSlider() {
     const commandService = useDependency(ICommandService);
     const univerInstanceService = useDependency(IUniverInstanceService);
+    const contextService = useDependency(IContextService);
+
     const currentZoom = getCurrentZoom();
     const [zoom, setZoom] = useState(currentZoom);
+    const sheetEditorFocused = useObservable(
+        () =>
+            combineLatest(
+                contextService.subscribeContextValue$(FOCUSING_UNIVER_EDITOR),
+                contextService.subscribeContextValue$(EDITOR_ACTIVATED)
+            ).pipe(
+                map(([editorFocus, editorActivated]) => editorFocus && !editorActivated),
+                debounceTime(DISABLE_DEBOUNCE_TIME)
+            ),
+        false,
+        true,
+        [FOCUSING_UNIVER_EDITOR]
+    );
+    const disabled = !sheetEditorFocused;
 
     useEffect(() => {
         const disposable = commandService.onCommandExecuted((commandInfo) => {
@@ -52,9 +78,12 @@ export function ZoomSlider() {
     function handleChange(value: number) {
         setZoom(value);
         const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-        if (!workbook) return;
-        const worksheet = workbook.getActiveSheet();
-        if (!worksheet) return;
+        const worksheet = workbook?.getActiveSheet();
+        if (worksheet == null) {
+            return;
+        }
+
+        // eslint-disable-next-line no-magic-numbers
         const zoomRatio = value / 100;
 
         commandService.executeCommand(SetZoomRatioCommand.id, {
@@ -64,5 +93,13 @@ export function ZoomSlider() {
         });
     }
 
-    return <Slider min={SHEET_ZOOM_RANGE[0]} value={zoom} shortcuts={ZOOM_MAP} onChange={handleChange} />;
+    return (
+        <Slider
+            disabled={disabled}
+            min={SHEET_ZOOM_RANGE[0]}
+            value={zoom}
+            shortcuts={ZOOM_MAP}
+            onChange={handleChange}
+        />
+    );
 }

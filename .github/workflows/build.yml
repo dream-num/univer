@@ -20,58 +20,41 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v3
-
-            - name: Install Node.js
-              uses: actions/setup-node@v3
+              uses: actions/checkout@v4
               with:
-                  node-version: 18
+                  repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+                  ref: ${{ github.head_ref }}
 
-            - name: Install pnpm
-              uses: pnpm/action-setup@v2
-              with:
-                  version: 8
-                  run_install: false
-
-            - name: Get pnpm store directory
-              shell: bash
-              run: |
-                  echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-            - name: Setup pnpm cache
-              uses: actions/cache@v3
-              with:
-                  path: ${{ env.STORE_PATH }}
-                  key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
-                  restore-keys: |
-                      ${{ runner.os }}-pnpm-
-
-            - name: Install dependencies
-              run: pnpm install
+            - name: Setup Node.js
+              uses: ./.github/actions/setup-node
 
             - name: 📦 Build
               run: pnpm run build
 
-    set-pr-id:
-        name: set PR ID
+    set-pr-info:
+        name: set PR info
         runs-on: ubuntu-latest
         steps:
-            - name: Save PR number
-              if: ${{ always() }}
+            - name: Save PR info
               run: |
                   echo ${{ github.event.pull_request.number }} > ./pr-id.txt
                   echo ${{ github.head_ref }} >> ./pr-ref.txt
+                  echo ${{ github.event.pull_request.head.repo.full_name || github.repository }} >> ./pr-repo.txt
 
             - name: Upload PR number
-              if: ${{ always() }}
               uses: actions/upload-artifact@v3
               with:
                   name: pr-id
                   path: ./pr-id.txt
 
             - name: Upload PR ref
-              if: ${{ always() }}
               uses: actions/upload-artifact@v3
               with:
                   name: pr-ref
                   path: ./pr-ref.txt
+
+            - name: Upload PR repo
+              uses: actions/upload-artifact@v3
+              with:
+                  name: pr-repo
+                  path: ./pr-repo.txt

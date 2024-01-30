@@ -36,6 +36,7 @@ export const InsertSheetUndoMutationFactory = (
 ): IRemoveSheetMutationParams => ({
     subUnitId: params.sheet.id,
     unitId: params.unitId,
+    subUnitName: params.sheet.name,
 });
 
 export const InsertSheetMutation: IMutation<IInsertSheetMutationParams, boolean> = {

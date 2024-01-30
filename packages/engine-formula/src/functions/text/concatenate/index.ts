@@ -15,12 +15,56 @@
  */
 
 import { ErrorType } from '../../../basics/error-type';
-import type { FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
+import { expandArrayValueObject } from '../../../engine/utils/array-object';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Concatenate extends BaseFunction {
-    override calculate(numberVar: FunctionVariantType, powerVar: FunctionVariantType) {
-        return ErrorValueObject.create(ErrorType.VALUE);
+    override calculate(...textValues: BaseValueObject[]) {
+        if (textValues.length === 0) {
+            return new ErrorValueObject(ErrorType.NA);
+        }
+
+        let maxRowLength = 0;
+        let maxColumnLength = 0;
+
+        textValues.forEach((textValue) => {
+            if (textValue.isArray()) {
+                const arrayValue = textValue as ArrayValueObject;
+                maxRowLength = Math.max(maxRowLength, arrayValue.getRowCount());
+                maxColumnLength = Math.max(maxColumnLength, arrayValue.getColumnCount());
+            } else {
+                maxRowLength = Math.max(maxRowLength, 1);
+                maxColumnLength = Math.max(maxColumnLength, 1);
+            }
+        });
+
+        let result: BaseValueObject | null = null;
+
+        for (const textValue of textValues) {
+            const textValueArray = expandArrayValueObject(maxRowLength, maxColumnLength, textValue, new ErrorValueObject(ErrorType.NA));
+            result = textValueArray.mapValue((textValueObject, rowIndex, columnIndex) => {
+                const resultValueObject = result && (result as ArrayValueObject).get(rowIndex, columnIndex);
+
+                if (resultValueObject?.isError()) {
+                    return resultValueObject;
+                }
+
+                if (textValueObject.isError()) {
+                    return textValueObject;
+                }
+
+                return new StringValueObject(`${resultValueObject?.getValue() || ''}${textValueObject.getValue()}`);
+            });
+        }
+
+        if (!result) {
+            return new ErrorValueObject(ErrorType.VALUE);
+        }
+
+        return result;
     }
 }

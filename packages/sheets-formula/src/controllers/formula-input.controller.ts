@@ -17,16 +17,20 @@
 import type { ICommandInfo } from '@univerjs/core';
 import {
     AbsoluteRefType,
-    deserializeRangeWithSheet,
     Disposable,
     ICommandService,
     LifecycleStages,
     OnLifecycle,
-    serializeRange,
     toDisposable,
 } from '@univerjs/core';
 import { TextSelectionManagerService } from '@univerjs/docs';
-import { LexerTreeBuilder, matchToken, sequenceNodeType } from '@univerjs/engine-formula';
+import {
+    deserializeRangeWithSheet,
+    LexerTreeBuilder,
+    matchToken,
+    sequenceNodeType,
+    serializeRange,
+} from '@univerjs/engine-formula';
 import { DeviceInputEventType, IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/engine-render';
 import type { EditorBridgeService } from '@univerjs/sheets-ui';
 import { getEditorObject, IEditorBridgeService } from '@univerjs/sheets-ui';

@@ -1,12 +1,30 @@
 {
     "name": "@univerjs/core",
-    "version": "0.1.0-beta.2",
+    "version": "0.1.0-beta.3",
+    "private": false,
     "description": "Core library for Univer.",
-    "keywords": [],
     "author": "DreamNum <developer@univer.ai>",
+    "license": "Apache-2.0",
+    "homepage": "https://github.com/dream-num/univer",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/dream-num/univer.git"
+    },
+    "keywords": [],
+    "exports": {
+        ".": "./src/index.ts",
+        "./*": "./src/*"
+    },
     "main": "./lib/cjs/index.js",
     "module": "./lib/es/index.js",
     "types": "./lib/types/index.d.ts",
+    "files": [
+        "lib"
+    ],
+    "engines": {
+        "node": ">=16.0.0",
+        "npm": ">=8.0.0"
+    },
     "publishConfig": {
         "access": "public",
         "main": "./lib/cjs/index.js",
@@ -24,47 +42,32 @@
             }
         }
     },
-    "exports": {
-        ".": "./src/index.ts",
-        "./*": "./src/*"
-    },
     "directories": {
         "lib": "lib"
     },
-    "files": [
-        "lib"
-    ],
-    "private": false,
     "scripts": {
         "test": "vitest run",
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
+        "lint:types": "tsc --noEmit",
         "build": "tsc && vite build"
     },
-    "license": "Apache-2.0",
-    "homepage": "https://github.com/dream-num/univer",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/dream-num/univer.git"
+    "peerDependencies": {
+        "@wendellhu/redi": ">=0.12.13",
+        "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@wendellhu/redi": "^0.12.13",
         "dayjs": "^1.11.10",
         "nanoid": "5.0.4",
-        "numeral": "^2.0.6",
-        "rxjs": "^7.8.1"
+        "numeral": "^2.0.6"
     },
     "devDependencies": {
         "@types/numeral": "^2.0.5",
-        "@vitest/coverage-istanbul": "^1.1.1",
+        "@univerjs/shared": "workspace:*",
+        "@wendellhu/redi": "^0.12.13",
+        "rxjs": "^7.8.1",
         "typescript": "^5.3.3",
-        "vite": "^5.0.10",
-        "vite-plugin-dts": "^3.7.0",
-        "vite-plugin-externals": "^0.6.2",
-        "vitest": "^1.1.1"
-    },
-    "peerDependencies": {
-        "@wendellhu/redi": ">=0.12.12",
-        "rxjs": ">=7.0.0"
+        "vite": "^5.0.12",
+        "vitest": "^1.2.1"
     }
 }

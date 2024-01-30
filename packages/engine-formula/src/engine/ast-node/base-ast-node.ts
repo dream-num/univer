@@ -173,7 +173,7 @@ export class ErrorNode extends BaseAstNode {
 
     constructor(errorType: ErrorType) {
         super(errorType);
-        this._errorValueObject = ErrorValueObject.create(errorType);
+        this._errorValueObject = new ErrorValueObject(errorType);
     }
 
     override get nodeType() {

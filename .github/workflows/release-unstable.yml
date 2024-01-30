@@ -20,13 +20,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v3
-
-            - name: Install Node.js
-              uses: actions/setup-node@v3
-              with:
-                  node-version: 18
-                  registry-url: https://registry.npmjs.org
+              uses: actions/checkout@v4
 
             - name: Install pnpm
               uses: pnpm/action-setup@v2
@@ -34,18 +28,11 @@ jobs:
                   version: 8
                   run_install: false
 
-            - name: Get pnpm store directory
-              shell: bash
-              run: |
-                  echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-            - name: Setup pnpm cache
-              uses: actions/cache@v3
+            - name: Install Node.js
+              uses: actions/setup-node@v4
               with:
-                  path: ${{ env.STORE_PATH }}
-                  key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
-                  restore-keys: |
-                      ${{ runner.os }}-pnpm-
+                  node-version: 18
+                  registry-url: https://registry.npmjs.org
 
             - name: 🚚 Get release type
               id: release-type
@@ -56,10 +43,9 @@ jobs:
                   fi
 
             - name: 🚚 Install dependencies
-              run: pnpm install
-
-            - name: 📦 Build
-              run: pnpm run build
+              run: |
+                  pnpm install
+                  pnpm run build
 
             - name: 🐙 Publish (alpha)
               if: ${{ steps.release-type.outputs.release_type == 'alpha' }}
@@ -73,6 +59,52 @@ jobs:
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
+    release-verdaccio:
+        if: github.repository == 'dream-num/univer'
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Install pnpm
+              uses: pnpm/action-setup@v2
+              with:
+                  version: 8
+                  run_install: false
+
+            - name: Install Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 18
+                  registry-url: ${{ secrets.VERDACCIO_URL }}
+                  scope: '@univerjs'
+
+            - name: 🚚 Get release type
+              id: release-type
+              run: |
+                  if [[ ${{ github.ref_name }} =~ -(rc|beta|alpha)\. ]]; then
+                      extracted_type="${BASH_REMATCH[1]}"
+                      echo "release_type=$extracted_type" >> $GITHUB_OUTPUT
+                  fi
+
+            - name: 🚚 Install dependencies
+              run: |
+                  pnpm install
+                  pnpm run build
+
+            - name: 🐙 Publish (alpha)
+              if: ${{ steps.release-type.outputs.release_type == 'alpha' }}
+              run: pnpm publish --access public --tag ${{ steps.release-type.outputs.release_type }} -r
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.VERDACCIO_TOKEN }}
+
+            - name: 🐙 Publish (beta, rc)
+              if: ${{ steps.release-type.outputs.release_type == 'beta' || steps.release-type.outputs.release_type == 'rc' }}
+              run: pnpm publish --access public -r
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.VERDACCIO_TOKEN }}
+
     build-demo:
         runs-on: ubuntu-latest
         needs: [release-unstable]
@@ -82,34 +114,10 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
-            - name: Install Node.js
-              uses: actions/setup-node@v3
-              with:
-                  node-version: 18
-
-            - name: Install pnpm
-              uses: pnpm/action-setup@v2
-              with:
-                  version: 8
-                  run_install: false
-
-            - name: Get pnpm store directory
-              shell: bash
-              run: |
-                  echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-            - name: Setup pnpm cache
-              uses: actions/cache@v3
-              with:
-                  path: ${{ env.STORE_PATH }}
-                  key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
-                  restore-keys: |
-                      ${{ runner.os }}-pnpm-
-
-            - name: Install dependencies
-              run: pnpm install
+            - name: Setup Node.js
+              uses: ./.github/actions/setup-node
 
             #  ================= Deploy Demo =================
             - name: 📦 Build demo
@@ -137,34 +145,10 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
-            - name: Install Node.js
-              uses: actions/setup-node@v3
-              with:
-                  node-version: 18
-
-            - name: Install pnpm
-              uses: pnpm/action-setup@v2
-              with:
-                  version: 8
-                  run_install: false
-
-            - name: Get pnpm store directory
-              shell: bash
-              run: |
-                  echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-            - name: Setup pnpm cache
-              uses: actions/cache@v3
-              with:
-                  path: ${{ env.STORE_PATH }}
-                  key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
-                  restore-keys: |
-                      ${{ runner.os }}-pnpm-
-
-            - name: Install dependencies
-              run: pnpm install
+            - name: Setup Node.js
+              uses: ./.github/actions/setup-node
 
             # ================= Deploy Storybook =================
             - name: 📦 Build storybook
@@ -180,56 +164,23 @@ jobs:
                   vercel-args: --prod
 
     notify:
-        needs: [release-unstable, build-demo, build-storybook]
+        needs: [release-unstable, release-verdaccio, build-demo, build-storybook]
         runs-on: ubuntu-latest
-        if: ${{ always() }}
 
         steps:
-            # ================= Notify Discord =================
-            - name: 👾 Discord Notification
-              uses: sarisia/actions-status-discord@v1
-              if: ${{ success() }}
+            - name: Invoke deployment hook
+              uses: distributhor/workflow-webhook@v3
               with:
-                  webhook: ${{ secrets.DISCORD_WEBHOOK }}?thread_id=${{ secrets.DISCORD_CI_UNSTABLE_RELEASE }}
-                  status: ${{ job.status }}
-                  description: |
-                      🎉 Unstable release: Successful
-
-                      🎉 🎉 🎉 🎉 🎉 🎉 🎉 🎉 🎉
-                      Release version: ${{ github.ref_name }}
-
-                      **[View Deployment]**
-                      - [📑 Examples](${{ needs.build-demo.outputs.preview-url }}/)
-
-                      **[View Docs]**
-                      - [📚 Storybook](${{ needs.build-storybook.outputs.preview-url }}/)
-                      🎉 🎉 🎉 🎉 🎉 🎉 🎉 🎉 🎉
-
-                      Have a good dream! 🌙
-                  nofail: false
-                  nodetail: false
-                  nocontext: false
-                  noprefix: true
-                  color: 0x00b894
-                  username: Unstable Release
-
-            - name: 👾 Discord Notification
-              uses: sarisia/actions-status-discord@v1
-              if: ${{ failure() }}
-              with:
-                  webhook: ${{ secrets.DISCORD_WEBHOOK }}?thread_id=${{ secrets.DISCORD_CI_UNSTABLE_RELEASE }}
-                  status: ${{ job.status }}
-                  description: |
-                      💥 Ustable release: Unsuccessful 💩
-
-                      👿 👿 👿 👿 👿 👿 👿 👿 👿
-                      Failed version: ${{ github.ref_name }}
-                      👿 👿 👿 👿 👿 👿 👿 👿 👿
-
-                      Oops! Something went wrong. 😭
-                  nofail: false
-                  nodetail: false
-                  nocontext: false
-                  noprefix: true
-                  color: 0xd63031
-                  username: Unstable Release
+                  webhook_url: ${{ secrets.WEBHOOK_URL }}
+                  data: >
+                      {
+                          "type": "release",
+                          "version": "${{ github.ref_name }}",
+                          "workflow": {
+                              "id": "${{ github.run_id }}"
+                          },
+                          "preview": {
+                              "📑 Examples": "${{ needs.build-demo.outputs.preview-url }}/",
+                              "📚 Storybook": "${{ needs.build-storybook.outputs.preview-url }}/"
+                          }
+                      }

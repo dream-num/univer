@@ -23,16 +23,21 @@ export {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
 } from './common/const';
+export { throttle } from './common/function';
 export { MemoryCursor } from './common/memory-cursor';
 export { requestImmediateMacroTask } from './common/request-immediate-macro-task';
 export { type ISequenceExecuteResult, sequence, sequenceAsync } from './common/sequence';
 export * from './docs/data-model';
 export {
-    type DocMutationParams,
-    type IDeleteMutationParams,
-    type IInsertMutationParams,
-    type IRetainMutationParams,
-} from './docs/data-model/mutation-types';
+    TextXActionType,
+    type TextXAction,
+    type IDeleteAction,
+    type IInsertAction,
+    type IRetainAction,
+} from './docs/data-model/action-types';
+export { ActionIterator } from './docs/data-model/text-x/action-iterator';
+export { getBodySlice, composeBody } from './docs/data-model/text-x/utils';
+export { TextX } from './docs/data-model/text-x/text-x';
 export * from './observer';
 export { Plugin, PluginType } from './plugin/plugin';
 export {
@@ -49,6 +54,7 @@ export {
     type IMutationInfo,
     type IOperation,
     type IOperationInfo,
+    NilCommand,
     sequenceExecute,
     sequenceExecuteAsync,
 } from './services/command/command.service';
@@ -91,7 +97,6 @@ export {
     UndoCommand,
 } from './services/undoredo/undoredo.service';
 export * from './shared';
-export { deserializeRangeForR1C1 } from './sheets/r1c1-reference';
 
 // #region sheet
 export type { IComposeInterceptors, IInterceptor, InterceptorHandler } from './common/interceptor';
@@ -99,17 +104,6 @@ export { composeInterceptors, createInterceptorKey, InterceptorManager } from '.
 export { normalizeTextRuns } from './docs/data-model/apply-utils/common';
 export type { PluginCtor } from './plugin/plugin';
 export { Range } from './sheets/range';
-export {
-    deserializeRangeWithSheet,
-    getAbsoluteRefTypeWithSingleString,
-    getAbsoluteRefTypeWitString,
-    type IAbsoluteRefTypeForRange,
-    serializeRange,
-    serializeRangeToRefString,
-    serializeRangeWithSheet,
-    serializeRangeWithSpreadsheet,
-    UNIT_NAME_REGEX,
-} from './sheets/reference';
 export { Styles } from './sheets/styles';
 export { SheetViewModel } from './sheets/view-model';
 export { getWorksheetUID, Workbook } from './sheets/workbook';

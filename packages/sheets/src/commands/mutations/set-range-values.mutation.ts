@@ -15,9 +15,9 @@
  */
 
 import type {
+    CellValue,
     IBorderData,
     ICellData,
-    ICellV,
     ICopyToOptionsData,
     IDocumentData,
     IKeyValue,
@@ -232,12 +232,14 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
     },
 };
 
-function checkCellValueType(v: Nullable<ICellV>): Nullable<CellValueType> {
+function checkCellValueType(v: Nullable<CellValue>): Nullable<CellValueType> {
     if (v === null) return null;
 
     if (typeof v === 'string') {
         if (isSafeNumeric(v)) {
             return CellValueType.NUMBER;
+        } else if (isBooleanString(v)) {
+            return CellValueType.BOOLEAN;
         }
         return CellValueType.STRING;
     }
@@ -401,4 +403,8 @@ function isSafeNumeric(str: string) {
     }
 
     return Number(str) <= Number.MAX_SAFE_INTEGER;
+}
+
+function isBooleanString(str: string) {
+    return str.toUpperCase() === 'TRUE' || str.toUpperCase() === 'FALSE';
 }

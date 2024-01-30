@@ -20,7 +20,7 @@ import {
     Direction,
     Disposable,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
-    FOCUSING_EDITOR,
+    EDITOR_ACTIVATED,
     FOCUSING_EDITOR_BUT_HIDDEN,
     FOCUSING_EDITOR_INPUT_FORMULA,
     FOCUSING_FORMULA_EDITOR,
@@ -234,18 +234,24 @@ export class EndEditController extends Disposable {
             /**
              * When closing the editor, switch to the current tab of the editor.
              */
-            if (workbookId === unitId && sheetId !== worksheetId) {
+            if (workbookId === unitId && sheetId !== worksheetId && this._editorBridgeService.isForceKeepVisible()) {
                 this._commandService.executeCommand(SetWorksheetActivateCommand.id, {
                     subUnitId: sheetId,
                     unitId,
                 });
             }
+
+            /**
+             * When switching tabs while the editor is open,
+             * the operation to refresh the selection will be blocked and needs to be triggered manually.
+             */
+            this._selectionManagerService.refreshSelection();
         });
     }
 
     private _exitInput(param: IEditorBridgeServiceVisibleParam) {
         this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
-        this._contextService.setContextValue(FOCUSING_EDITOR, false);
+        this._contextService.setContextValue(EDITOR_ACTIVATED, false);
         this._contextService.setContextValue(FOCUSING_EDITOR_BUT_HIDDEN, false);
         this._contextService.setContextValue(FOCUSING_FORMULA_EDITOR, false);
 

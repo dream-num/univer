@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IMutation, IObjectArrayPrimitiveType, IRange, Nullable } from '@univerjs/core';
+import type { BooleanNumber, IMutation, IObjectArrayPrimitiveType, IRange, Nullable } from '@univerjs/core';
 import { CommandType, IUniverInstanceService } from '@univerjs/core';
 import type { IRowAutoHeightInfo } from '@univerjs/engine-render';
 import type { IAccessor } from '@wendellhu/redi';
@@ -32,7 +32,7 @@ export interface ISetWorksheetRowIsAutoHeightMutationParams {
     unitId: string;
     subUnitId: string;
     ranges: IRange[];
-    autoHeightInfo: boolean | IObjectArrayPrimitiveType<Nullable<boolean>>;
+    autoHeightInfo: BooleanNumber | IObjectArrayPrimitiveType<Nullable<BooleanNumber>>;
 }
 
 export interface ISetWorksheetRowAutoHeightMutationParams {
@@ -82,14 +82,14 @@ export const SetWorksheetRowIsAutoHeightMutationFactory = (
     const workbook = univerInstanceService.getUniverSheetInstance(unitId)!;
     const worksheet = workbook.getSheetBySheetId(subUnitId)!;
 
-    const autoHeightHash: IObjectArrayPrimitiveType<Nullable<boolean>> = {};
+    const autoHeightHash: IObjectArrayPrimitiveType<Nullable<BooleanNumber>> = {};
     const manager = worksheet.getRowManager();
 
     for (const { startRow, endRow } of ranges) {
         for (let rowIndex = startRow; rowIndex <= endRow; rowIndex++) {
             const row = manager.getRowOrCreate(rowIndex);
 
-            autoHeightHash[rowIndex] = row.isAutoHeight;
+            autoHeightHash[rowIndex] = row.ia;
         }
     }
 
@@ -184,10 +184,10 @@ export const SetWorksheetRowIsAutoHeightMutation: IMutation<ISetWorksheetRowIsAu
             for (let rowIndex = startRow; rowIndex <= endRow; rowIndex++) {
                 const row = manager.getRowOrCreate(rowIndex);
 
-                if (typeof autoHeightInfo === 'boolean') {
-                    row.isAutoHeight = autoHeightInfo;
+                if (typeof autoHeightInfo === 'number') {
+                    row.ia = autoHeightInfo;
                 } else {
-                    row.isAutoHeight = autoHeightInfo[rowIndex - startRow] ?? defaultRowIsAutoHeight;
+                    row.ia = autoHeightInfo[rowIndex - startRow] ?? defaultRowIsAutoHeight;
                 }
             }
         }

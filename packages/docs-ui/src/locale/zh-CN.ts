@@ -14,4 +14,24 @@
  * limitations under the License.
  */
 
-export default {};
+export default {
+    toolbar: {
+        undo: '撤销',
+        redo: '重做',
+        font: '字体',
+        fontSize: '字号',
+        bold: '粗体',
+        italic: '斜体',
+        strikethrough: '删除线',
+        subscript: '下标',
+        superscript: '上标',
+        underline: '下划线',
+        textColor: {
+            main: '文本颜色',
+            right: '颜色选择',
+        },
+        resetColor: '重置颜色',
+        order: '有序列表',
+        unorder: '无序列表',
+    },
+};

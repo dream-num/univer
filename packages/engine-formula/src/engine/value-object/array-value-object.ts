@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import { isRealNum, type Nullable } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
+import { isRealNum } from '@univerjs/core';
 
 import { BooleanValue } from '../../basics/common';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { CELL_INVERTED_INDEX_CACHE } from '../../basics/inverted-index-cache';
 import { $ARRAY_VALUE_REGEX } from '../../basics/regex';
 import { compareToken } from '../../basics/token';
-import { ArrayBinarySearchType, getCompare } from '../utils/compare';
+import { ArrayBinarySearchType, ArrayOrderSearchType, getCompare } from '../utils/compare';
 import type { callbackMapFnType, callbackProductFnType, IArrayValueObject } from './base-value-object';
 import { BaseValueObject, ErrorValueObject } from './base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from './primitive-object';
@@ -35,7 +36,6 @@ enum BatchOperatorType {
     CONCATENATE_FRONT,
     CONCATENATE_BACK,
     PRODUCT,
-    LIKE,
     POW,
     ROUND,
     FLOOR,
@@ -117,6 +117,13 @@ export class ArrayValueObject extends BaseValueObject {
 
     private _flattenCache: Nullable<ArrayValueObject>;
 
+    private _flattenPosition: Nullable<{
+        stringArray: BaseValueObject[];
+        stringPosition: number[];
+        numberArray: BaseValueObject[];
+        numberPosition: number[];
+    }>;
+
     constructor(rawValue: string | IArrayValueObject) {
         if (typeof rawValue === 'string') {
             super(rawValue as string);
@@ -138,6 +145,12 @@ export class ArrayValueObject extends BaseValueObject {
         this._values = [];
 
         this._clearCache();
+    }
+
+    clone() {
+        return this.map((o) => {
+            return o;
+        }) as ArrayValueObject;
     }
 
     getRowCount() {
@@ -199,9 +212,27 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     get(row: number, column: number) {
-        const v = this._values[row][column];
+        const rowValues = this._values[row];
+        if (rowValues == null) {
+            return new NullValueObject(0);
+        }
+
+        const v = rowValues[column];
         if (v == null) {
             return new NullValueObject(0);
+        }
+        return v;
+    }
+
+    getRealValue(row: number, column: number) {
+        const rowValues = this._values[row];
+        if (rowValues == null) {
+            return null;
+        }
+
+        const v = rowValues[column];
+        if (v == null) {
+            return null;
         }
         return v;
     }
@@ -246,9 +277,64 @@ export class ArrayValueObject extends BaseValueObject {
         }
     }
 
+    iteratorReverse(
+        callback: (valueObject: Nullable<BaseValueObject>, rowIndex: number, columnIndex: number) => Nullable<boolean>
+    ) {
+        const { startRow, endRow, startColumn, endColumn } = this.getRangePosition();
+
+        const valueList = this.getArrayValue();
+
+        for (let r = endRow; r >= startRow; r--) {
+            for (let c = endColumn; c >= startColumn; c--) {
+                if (callback(valueList[r][c], r, c) === false) {
+                    return;
+                }
+            }
+        }
+    }
+
+    getLastTruePosition() {
+        let rangeSingle: Nullable<{ row: number; column: number }>;
+
+        this.iteratorReverse((value, rowIndex, columnIndex) => {
+            if (value?.isBoolean() && (value as BaseValueObject).getValue() === true) {
+                rangeSingle = {
+                    row: rowIndex,
+                    column: columnIndex,
+                };
+
+                return false;
+            }
+        });
+
+        return rangeSingle;
+    }
+
+    getFirstTruePosition() {
+        let rangeSingle: Nullable<{ row: number; column: number }>;
+
+        this.iterator((value, rowIndex, columnIndex) => {
+            if (value?.isBoolean() && (value as BaseValueObject).getValue() === true) {
+                rangeSingle = {
+                    row: rowIndex,
+                    column: columnIndex,
+                };
+
+                return false;
+            }
+        });
+
+        return rangeSingle;
+    }
+
     getFirstCell() {
         const { startRow, startColumn } = this.getRangePosition();
         return this.get(startRow, startColumn);
+    }
+
+    getLastCell() {
+        const { endRow, endColumn } = this.getRangePosition();
+        return this.get(endRow, endColumn);
     }
 
     /**
@@ -311,6 +397,54 @@ export class ArrayValueObject extends BaseValueObject {
         this._flattenCache = arrayV;
 
         return arrayV;
+    }
+
+    /**
+     * Flatten a 2D array.
+     * In Excel, errors and blank cells are ignored, which results in a binary search that cannot strictly adhere to the number of cells.
+     */
+    flattenPosition() {
+        if (this._flattenPosition != null) {
+            return this._flattenPosition;
+        }
+
+        const stringValue: BaseValueObject[] = [];
+        const numberValue: BaseValueObject[] = [];
+        const stringPosition: number[] = [];
+        const numberPosition: number[] = [];
+        let index = 0;
+        for (let r = 0; r < this._rowCount; r++) {
+            for (let c = 0; c < this._columnCount; c++) {
+                const value = this.get(r, c);
+
+                if (value.isError() || value.isNull()) {
+                    index++;
+                    continue;
+                }
+
+                if (value.isString()) {
+                    stringValue.push(value);
+                    stringPosition.push(index++);
+                } else {
+                    numberValue.push(value);
+                    numberPosition.push(index++);
+                }
+            }
+        }
+
+        // const stringArray = this._createNewArray(stringValue, 1, stringValue[0].length);
+        // const numberArray = this._createNewArray(numberValue, 1, numberValue[0].length);
+
+        const result = {
+            stringArray: stringValue,
+            numberArray: numberValue,
+            stringPosition,
+            numberPosition,
+        };
+
+        this._flattenPosition = result;
+
+        return result;
     }
 
     /**
@@ -393,132 +527,6 @@ export class ArrayValueObject extends BaseValueObject {
         return newResultArray;
     }
 
-    sum() {
-        let accumulatorAll: BaseValueObject = new NumberValueObject(0);
-        this.iterator((valueObject) => {
-            if (valueObject == null) {
-                return true; // continue
-            }
-
-            if (valueObject.isError()) {
-                accumulatorAll = valueObject;
-                return false; // break
-            }
-            accumulatorAll = (accumulatorAll as NumberValueObject).plus(
-                valueObject as BaseValueObject
-            ) as BaseValueObject;
-        });
-
-        return accumulatorAll;
-    }
-
-    max() {
-        let accumulatorAll: BaseValueObject = new NumberValueObject(-Infinity);
-        this.iterator((valueObject) => {
-            if (valueObject == null) {
-                return true; // continue
-            }
-
-            if (valueObject.isError()) {
-                accumulatorAll = valueObject;
-                return false; // break
-            }
-
-            if ((valueObject as BaseValueObject).isString() || (valueObject as BaseValueObject).isNull()) {
-                return true; // continue
-            }
-
-            const result = (accumulatorAll as BaseValueObject).isLessThan(
-                valueObject as BaseValueObject
-            ) as BooleanValueObject;
-
-            if (result.getValue()) {
-                accumulatorAll = valueObject as NumberValueObject;
-            }
-        });
-
-        return accumulatorAll;
-    }
-
-    min() {
-        let accumulatorAll: BaseValueObject = new NumberValueObject(Infinity);
-
-        this.iterator((valueObject) => {
-            if (valueObject == null) {
-                return true; // continue
-            }
-
-            if (valueObject.isError()) {
-                accumulatorAll = valueObject;
-                return false; // break
-            }
-
-            if ((valueObject as BaseValueObject).isString() || (valueObject as BaseValueObject).isNull()) {
-                return true; // continue
-            }
-
-            const result = (accumulatorAll as BaseValueObject).isGreaterThan(
-                valueObject as BaseValueObject
-            ) as BooleanValueObject;
-
-            if (result.getValue()) {
-                accumulatorAll = valueObject as NumberValueObject;
-            }
-        });
-
-        return accumulatorAll;
-    }
-
-    count() {
-        let accumulatorAll: BaseValueObject = new NumberValueObject(0);
-        this.iterator((valueObject) => {
-            if (valueObject == null) {
-                return true; // continue
-            }
-
-            if (
-                valueObject.isError() ||
-                (valueObject as BaseValueObject).isString() ||
-                (valueObject as BaseValueObject).isNull()
-            ) {
-                return true; // continue
-            }
-            accumulatorAll = accumulatorAll.plusBy(1) as BaseValueObject;
-        });
-
-        return accumulatorAll;
-    }
-
-    countA() {
-        let accumulatorAll: BaseValueObject = new NumberValueObject(0);
-        this.iterator((valueObject) => {
-            if (valueObject == null) {
-                return true; // continue
-            }
-
-            if ((valueObject as BaseValueObject).isNull()) {
-                return true; // continue
-            }
-
-            accumulatorAll = accumulatorAll.plusBy(1) as BaseValueObject;
-        });
-
-        return accumulatorAll;
-    }
-
-    countBlank() {
-        let accumulatorAll: BaseValueObject = new NumberValueObject(0);
-        this.iterator((valueObject) => {
-            if (valueObject != null) {
-                return true; // continue
-            }
-
-            accumulatorAll = accumulatorAll.plusBy(1) as BaseValueObject;
-        });
-
-        return accumulatorAll;
-    }
-
     sortByRow(index: number) {
         // new Intl.Collator('zh', { numeric: true }).compare;
         const result: BaseValueObject[][] = this._transposeArray(this._values);
@@ -544,35 +552,155 @@ export class ArrayValueObject extends BaseValueObject {
         return this._createNewArray(transposeArray, columnCount, rowCount);
     }
 
+    /**
+     * Due to the inability to effectively utilize the cache,
+     * the sequential matching approach is only used for special matches in XLOOKUP and XMATCH.
+     * For example, when match_mode is set to 1 and -1 for an exact match. If not found, it returns the next smaller item.
+     */
+    orderSearch(
+        valueObject: BaseValueObject,
+        searchType: ArrayOrderSearchType = ArrayOrderSearchType.MIN,
+        isDesc = false,
+        isFuzzyMatching = false
+    ) {
+        let result: Nullable<BaseValueObject>;
+        let maxOrMin: Nullable<BaseValueObject>;
+        let resultPosition: Nullable<{ row: number; column: number }>;
+
+        let maxOrMinPosition: Nullable<{ row: number; column: number }>;
+
+        const _handleMatch = (itemValue: Nullable<BaseValueObject>, row: number, column: number) => {
+            if (itemValue == null) {
+                return true;
+            }
+
+            let matchObject: Nullable<BaseValueObject>;
+            if (isFuzzyMatching === true) {
+                matchObject = itemValue.compare(valueObject as StringValueObject, compareToken.EQUALS);
+            } else {
+                matchObject = itemValue.isEqual(valueObject);
+            }
+
+            if (matchObject?.getValue() === true) {
+                result = itemValue;
+                resultPosition = { row, column };
+                return false;
+            }
+
+            if (searchType === ArrayOrderSearchType.MAX) {
+                if (itemValue.isGreaterThan(valueObject).getValue() === true) {
+                    if (
+                        maxOrMin == null ||
+                        itemValue
+                            .minus(valueObject)
+                            .abs()
+                            .isLessThanOrEqual(maxOrMin.minus(valueObject).abs())
+                            .getValue() === true
+                    ) {
+                        maxOrMin = itemValue;
+                        maxOrMinPosition = { row, column };
+                    }
+                }
+            } else if (searchType === ArrayOrderSearchType.MIN) {
+                if (itemValue.isLessThan(valueObject).getValue() === true) {
+                    if (
+                        maxOrMin == null ||
+                        itemValue
+                            .minus(valueObject)
+                            .abs()
+                            .isLessThanOrEqual(maxOrMin.minus(valueObject).abs())
+                            .getValue() === true
+                    ) {
+                        maxOrMin = itemValue;
+                        maxOrMinPosition = { row, column };
+                    }
+                }
+            }
+        };
+
+        if (isDesc) {
+            const rowCount = this._values.length;
+            if (this._values[0] == null) {
+                return;
+            }
+            const columnCount = this._values[0].length;
+
+            for (let r = rowCount - 1; r >= 0; r--) {
+                for (let c = columnCount - 1; c >= 0; c--) {
+                    const itemValue = this._values[r][c];
+                    _handleMatch(itemValue, r, c);
+                }
+            }
+        } else {
+            this.iterator((itemValue, r, c) => {
+                _handleMatch(itemValue, r, c);
+            });
+        }
+
+        if (result != null) {
+            return resultPosition;
+        }
+
+        if (maxOrMin != null) {
+            return maxOrMinPosition;
+        }
+    }
+
     binarySearch(valueObject: BaseValueObject, searchType: ArrayBinarySearchType = ArrayBinarySearchType.MIN) {
         if (valueObject.isError()) {
             return;
         }
 
-        const flattenArrayValue = this.flatten();
-        const valueMatrix = flattenArrayValue.getArrayValue();
-        const valueArray = valueMatrix[0];
+        const { stringArray, stringPosition, numberArray, numberPosition } = this.flattenPosition();
 
+        if (valueObject.isString()) {
+            return this._binarySearch(valueObject, stringArray, stringPosition, searchType);
+        }
+
+        let result = this._binarySearch(valueObject, numberArray, numberPosition, searchType);
+        if (result == null) {
+            result = this._binarySearch(valueObject, stringArray, stringPosition, searchType);
+        }
+        return result;
+
+        // const stringMatrix = stringArray.getArrayValue();
+        // const valueStringArray = stringMatrix[0];
+
+        // const numberMatrix = numberArray.getArrayValue();
+        // const valueNumberArray = numberMatrix[0];
+    }
+
+    private _binarySearch(
+        valueObject: BaseValueObject,
+        searchArray: BaseValueObject[],
+        positionArray: number[],
+        searchType: ArrayBinarySearchType = ArrayBinarySearchType.MIN
+    ) {
         const compareFunc = getCompare();
 
         const value = valueObject.getValue().toString();
 
         let start = 0;
-        let end = valueArray.length - 1;
+        let end = searchArray.length - 1;
 
         let lastValue = null;
 
         while (start <= end) {
             const middle = Math.floor((start + end) / 2);
-            const compareTo = valueArray[middle];
+            const compareTo = searchArray[middle];
 
-            const compareToValue = compareTo.getValue();
+            let compare = 0;
+            if (compareTo.isNull()) {
+                compare = 1;
+            } else {
+                const compareToValue = compareTo.getValue();
 
-            const compare = compareFunc(compareToValue.toString(), value);
+                compare = compareFunc(compareToValue.toString(), value);
+            }
 
             if (compare === 0) {
                 // Found the value, return the value from the returnColumn
-                return middle;
+                return positionArray[middle];
             }
 
             if (compare === -1) {
@@ -592,7 +720,128 @@ export class ArrayValueObject extends BaseValueObject {
         }
 
         // Value not found
-        return lastValue;
+        if (lastValue == null) {
+            return;
+        }
+        return positionArray[lastValue];
+    }
+
+    override sum() {
+        let accumulatorAll: BaseValueObject = new NumberValueObject(0);
+        this.iterator((valueObject) => {
+            if (valueObject == null) {
+                return true; // continue
+            }
+
+            if (valueObject.isError()) {
+                accumulatorAll = valueObject;
+                return false; // break
+            }
+            accumulatorAll = (accumulatorAll as NumberValueObject).plus(
+                valueObject as BaseValueObject
+            ) as BaseValueObject;
+        });
+
+        return accumulatorAll;
+    }
+
+    override max() {
+        let accumulatorAll: BaseValueObject = new NumberValueObject(Number.NEGATIVE_INFINITY);
+        this.iterator((valueObject) => {
+            if (valueObject == null) {
+                return true; // continue
+            }
+
+            if (valueObject.isError()) {
+                accumulatorAll = valueObject;
+                return false; // break
+            }
+
+            if (valueObject.isString() || valueObject.isNull()) {
+                return true; // continue
+            }
+
+            const result = accumulatorAll.isLessThan(valueObject) as BooleanValueObject;
+
+            if (result.getValue()) {
+                accumulatorAll = valueObject as NumberValueObject;
+            }
+        });
+
+        return accumulatorAll;
+    }
+
+    override min() {
+        let accumulatorAll: BaseValueObject = new NumberValueObject(Number.POSITIVE_INFINITY);
+
+        this.iterator((valueObject) => {
+            if (valueObject == null) {
+                return true; // continue
+            }
+
+            if (valueObject.isError()) {
+                accumulatorAll = valueObject;
+                return false; // break
+            }
+
+            if (valueObject.isString() || valueObject.isNull()) {
+                return true; // continue
+            }
+
+            const result = accumulatorAll.isGreaterThan(valueObject) as BooleanValueObject;
+
+            if (result.getValue()) {
+                accumulatorAll = valueObject as NumberValueObject;
+            }
+        });
+
+        return accumulatorAll;
+    }
+
+    override count() {
+        let accumulatorAll: BaseValueObject = new NumberValueObject(0);
+        this.iterator((valueObject) => {
+            if (valueObject == null) {
+                return true; // continue
+            }
+
+            if (valueObject.isError() || valueObject.isString() || valueObject.isNull()) {
+                return true; // continue
+            }
+            accumulatorAll = accumulatorAll.plusBy(1) as BaseValueObject;
+        });
+
+        return accumulatorAll;
+    }
+
+    override countA() {
+        let accumulatorAll: BaseValueObject = new NumberValueObject(0);
+        this.iterator((valueObject) => {
+            if (valueObject == null) {
+                return true; // continue
+            }
+
+            if (valueObject.isNull()) {
+                return true; // continue
+            }
+
+            accumulatorAll = accumulatorAll.plusBy(1);
+        });
+
+        return accumulatorAll;
+    }
+
+    override countBlank() {
+        let accumulatorAll: BaseValueObject = new NumberValueObject(0);
+        this.iterator((valueObject) => {
+            if (valueObject != null) {
+                return true; // continue
+            }
+
+            accumulatorAll = accumulatorAll.plusBy(1) as BaseValueObject;
+        });
+
+        return accumulatorAll;
     }
 
     override getNegative(): BaseValueObject {
@@ -628,10 +877,6 @@ export class ArrayValueObject extends BaseValueObject {
         return this._batchOperator(valueObject, BatchOperatorType.COMPARE, operator);
     }
 
-    override wildcard(valueObject: BaseValueObject, operator: compareToken): BaseValueObject {
-        return this._batchOperator(valueObject, BatchOperatorType.LIKE, operator);
-    }
-
     override concatenateFront(valueObject: BaseValueObject): BaseValueObject {
         return this._batchOperator(valueObject, BatchOperatorType.CONCATENATE_FRONT);
     }
@@ -645,6 +890,18 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     override map(callbackFn: callbackMapFnType): BaseValueObject {
+        const wrappedCallbackFn = (currentValue: BaseValueObject, r: number, c: number) => {
+            if (currentValue.isError()) {
+                return currentValue as ErrorValueObject;
+            } else {
+                return callbackFn(currentValue, r, c);
+            }
+        };
+
+        return this.mapValue(wrappedCallbackFn);
+    }
+
+    override mapValue(callbackFn: callbackMapFnType): BaseValueObject {
         const rowCount = this._rowCount;
         const columnCount = this._columnCount;
 
@@ -656,13 +913,9 @@ export class ArrayValueObject extends BaseValueObject {
                 const currentValue = this._values?.[r]?.[c];
 
                 if (currentValue) {
-                    if (currentValue.isError()) {
-                        rowList[c] = currentValue as ErrorValueObject;
-                    } else {
-                        rowList[c] = callbackFn(currentValue, r, c);
-                    }
+                    rowList[c] = callbackFn(currentValue, r, c);
                 } else {
-                    rowList[c] = ErrorValueObject.create(ErrorType.VALUE);
+                    rowList[c] = new ErrorValueObject(ErrorType.VALUE);
                 }
             }
             result.push(rowList);
@@ -685,7 +938,7 @@ export class ArrayValueObject extends BaseValueObject {
             if (currentValue.isError()) {
                 return currentValue;
             }
-            return (valueObject as BaseValueObject).pow(currentValue as BaseValueObject);
+            return valueObject.pow(currentValue);
         });
     }
 
@@ -694,7 +947,7 @@ export class ArrayValueObject extends BaseValueObject {
             if (currentValue.isError()) {
                 return currentValue;
             }
-            return (currentValue as BaseValueObject).sqrt();
+            return currentValue.sqrt();
         });
     }
 
@@ -703,7 +956,7 @@ export class ArrayValueObject extends BaseValueObject {
             if (currentValue.isError()) {
                 return currentValue;
             }
-            return (currentValue as BaseValueObject).cbrt();
+            return currentValue.cbrt();
         });
     }
 
@@ -712,7 +965,7 @@ export class ArrayValueObject extends BaseValueObject {
             if (currentValue.isError()) {
                 return currentValue;
             }
-            return (currentValue as BaseValueObject).cos();
+            return currentValue.cos();
         });
     }
 
@@ -721,7 +974,7 @@ export class ArrayValueObject extends BaseValueObject {
             if (currentValue.isError()) {
                 return currentValue;
             }
-            return (currentValue as BaseValueObject).acos();
+            return currentValue.acos();
         });
     }
 
@@ -730,7 +983,7 @@ export class ArrayValueObject extends BaseValueObject {
             if (currentValue.isError()) {
                 return currentValue;
             }
-            return (currentValue as BaseValueObject).acosh();
+            return currentValue.acosh();
         });
     }
 
@@ -739,7 +992,7 @@ export class ArrayValueObject extends BaseValueObject {
             if (currentValue.isError()) {
                 return currentValue;
             }
-            return (currentValue as BaseValueObject).sin();
+            return currentValue.sin();
         });
     }
 
@@ -748,7 +1001,7 @@ export class ArrayValueObject extends BaseValueObject {
             if (currentValue.isError()) {
                 return currentValue;
             }
-            return (currentValue as BaseValueObject).asin();
+            return currentValue.asin();
         });
     }
 
@@ -757,7 +1010,7 @@ export class ArrayValueObject extends BaseValueObject {
             if (currentValue.isError()) {
                 return currentValue;
             }
-            return (currentValue as BaseValueObject).asinh();
+            return currentValue.asinh();
         });
     }
 
@@ -766,7 +1019,7 @@ export class ArrayValueObject extends BaseValueObject {
             if (currentValue.isError()) {
                 return currentValue;
             }
-            return (currentValue as BaseValueObject).tan();
+            return currentValue.tan();
         });
     }
 
@@ -775,7 +1028,7 @@ export class ArrayValueObject extends BaseValueObject {
             if (currentValue.isError()) {
                 return currentValue;
             }
-            return (currentValue as BaseValueObject).tanh();
+            return currentValue.tanh();
         });
     }
 
@@ -784,7 +1037,7 @@ export class ArrayValueObject extends BaseValueObject {
             if (currentValue.isError()) {
                 return currentValue;
             }
-            return (currentValue as BaseValueObject).atan();
+            return currentValue.atan();
         });
     }
 
@@ -793,7 +1046,7 @@ export class ArrayValueObject extends BaseValueObject {
             if (currentValue.isError()) {
                 return currentValue;
             }
-            return (currentValue as BaseValueObject).atanh();
+            return currentValue.atanh();
         });
     }
 
@@ -806,7 +1059,7 @@ export class ArrayValueObject extends BaseValueObject {
             if (currentValue.isError()) {
                 return currentValue;
             }
-            return (valueObject as BaseValueObject).atan2(currentValue as BaseValueObject);
+            return valueObject.atan2(currentValue);
         });
     }
 
@@ -820,7 +1073,9 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     override median(): BaseValueObject {
-        const allValue = this.flatten();
+        const numberArray = this.flattenPosition().numberArray;
+
+        const allValue = this._createNewArray([numberArray], 1, numberArray.length);
 
         const count = allValue.getColumnCount();
 
@@ -850,7 +1105,7 @@ export class ArrayValueObject extends BaseValueObject {
                 valueObject = new NumberValueObject(0);
             }
 
-            let baseValueObject = (valueObject as BaseValueObject).minus(mean).pow(new NumberValueObject(2, true));
+            let baseValueObject = valueObject.minus(mean).pow(new NumberValueObject(2, true));
 
             if (baseValueObject.isError()) {
                 baseValueObject = new NumberValueObject(0);
@@ -893,7 +1148,7 @@ export class ArrayValueObject extends BaseValueObject {
             if (currentValue.isError()) {
                 return currentValue;
             }
-            return (currentValue as BaseValueObject).log();
+            return currentValue.log();
         });
     }
 
@@ -902,7 +1157,7 @@ export class ArrayValueObject extends BaseValueObject {
             if (currentValue.isError()) {
                 return currentValue;
             }
-            return (currentValue as BaseValueObject).log10();
+            return currentValue.log10();
         });
     }
 
@@ -911,7 +1166,7 @@ export class ArrayValueObject extends BaseValueObject {
             if (currentValue.isError()) {
                 return currentValue;
             }
-            return (currentValue as BaseValueObject).exp();
+            return currentValue.exp();
         });
     }
 
@@ -920,7 +1175,7 @@ export class ArrayValueObject extends BaseValueObject {
             if (currentValue.isError()) {
                 return currentValue;
             }
-            return (currentValue as BaseValueObject).abs();
+            return currentValue.abs();
         });
     }
 
@@ -933,7 +1188,7 @@ export class ArrayValueObject extends BaseValueObject {
             if (currentValue.isError()) {
                 return currentValue;
             }
-            return (valueObject as BaseValueObject).round(currentValue as BaseValueObject);
+            return valueObject.round(currentValue);
         });
     }
 
@@ -946,7 +1201,7 @@ export class ArrayValueObject extends BaseValueObject {
             if (currentValue.isError()) {
                 return currentValue;
             }
-            return (valueObject as BaseValueObject).floor(currentValue as BaseValueObject);
+            return valueObject.floor(currentValue);
         });
     }
 
@@ -959,7 +1214,7 @@ export class ArrayValueObject extends BaseValueObject {
             if (currentValue.isError()) {
                 return currentValue;
             }
-            return (valueObject as BaseValueObject).ceil(currentValue as BaseValueObject);
+            return valueObject.ceil(currentValue);
         });
     }
 
@@ -994,19 +1249,19 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     private _transposeArray(array: BaseValueObject[][]) {
-        // 创建一个新的二维数组作为转置后的矩阵
+        // Create a new 2D array as the transposed matrix
         const rows = array.length;
         const cols = array[0].length;
         const transposedArray: BaseValueObject[][] = [];
 
-        // 遍历原二维数组的列
+        // Traverse the columns of the original two-dimensional array
         for (let col = 0; col < cols; col++) {
-            // 创建新的行
+            // Create new row
             transposedArray[col] = [] as BaseValueObject[];
 
-            // 遍历原二维数组的行
+            // Traverse the rows of the original two-dimensional array
             for (let row = 0; row < rows; row++) {
-                // 将元素赋值到新的行
+                // Assign elements to new rows
                 transposedArray[col][row] = array[row][col];
             }
         }
@@ -1132,23 +1387,28 @@ export class ArrayValueObject extends BaseValueObject {
                                 return true;
                             }
 
-                            const matchResult = (currentValue as BaseValueObject).compare(
-                                valueObject,
-                                operator as compareToken
-                            );
-                            if (matchResult) {
-                                for (let r = 0; r < rowCount; r++) {
-                                    if (result[r] == null) {
-                                        result[r] = [];
+                            const matchResult = currentValue.compare(valueObject, operator as compareToken);
+                            if ((matchResult as BooleanValueObject).getValue() === true) {
+                                rowPositions.forEach((index) => {
+                                    if (index >= startRow && index <= startRow + rowCount - 1) {
+                                        if (result[index - startRow] == null) {
+                                            result[index - startRow] = [];
+                                        }
+                                        result[index - startRow][column] = new BooleanValueObject(true);
                                     }
-                                    if (rowPositions.includes(r + startRow)) {
-                                        result[r][column] = new BooleanValueObject(true);
-                                    } else {
-                                        result[r][column] = new BooleanValueObject(false);
-                                    }
-                                }
+                                });
                             }
                         });
+
+                        for (let r = 0; r < rowCount; r++) {
+                            if (result[r] == null) {
+                                result[r] = [];
+                            }
+
+                            if (result[r][column] == null) {
+                                result[r][column] = new BooleanValueObject(false);
+                            }
+                        }
                     } else {
                         for (let r = 0; r < rowCount; r++) {
                             if (result[r] == null) {
@@ -1173,76 +1433,63 @@ export class ArrayValueObject extends BaseValueObject {
                 if (currentValue.isError()) {
                     result[r][column] = currentValue as ErrorValueObject;
                 } else if (valueObject.isError()) {
-                    result[r][column] = ErrorValueObject.create(ErrorType.VALUE);
+                    result[r][column] = new ErrorValueObject(ErrorType.VALUE);
                 } else {
                     switch (batchOperatorType) {
                         case BatchOperatorType.PLUS:
-                            result[r][column] = (currentValue as BaseValueObject).plus(valueObject);
+                            result[r][column] = currentValue.plus(valueObject);
                             break;
                         case BatchOperatorType.MINUS:
-                            result[r][column] = (currentValue as BaseValueObject).minus(valueObject);
+                            result[r][column] = currentValue.minus(valueObject);
                             break;
                         case BatchOperatorType.MULTIPLY:
-                            result[r][column] = (currentValue as BaseValueObject).multiply(valueObject);
+                            result[r][column] = currentValue.multiply(valueObject);
                             break;
                         case BatchOperatorType.DIVIDED:
-                            result[r][column] = (currentValue as BaseValueObject).divided(valueObject);
+                            result[r][column] = currentValue.divided(valueObject);
                             break;
                         case BatchOperatorType.COMPARE:
                             if (!operator) {
-                                result[r][column] = ErrorValueObject.create(ErrorType.VALUE);
+                                result[r][column] = new ErrorValueObject(ErrorType.VALUE);
                             } else {
-                                result[r][column] = (currentValue as BaseValueObject).compare(
-                                    valueObject,
-                                    operator as compareToken
-                                );
+                                result[r][column] = currentValue.compare(valueObject, operator as compareToken);
                             }
                             break;
                         case BatchOperatorType.CONCATENATE_FRONT:
-                            result[r][column] = (currentValue as BaseValueObject).concatenateFront(valueObject);
+                            result[r][column] = currentValue.concatenateFront(valueObject);
                             break;
                         case BatchOperatorType.CONCATENATE_BACK:
-                            result[r][column] = (currentValue as BaseValueObject).concatenateBack(valueObject);
+                            result[r][column] = currentValue.concatenateBack(valueObject);
                             break;
                         case BatchOperatorType.PRODUCT:
                             if (!operator) {
-                                result[r][column] = ErrorValueObject.create(ErrorType.VALUE);
+                                result[r][column] = new ErrorValueObject(ErrorType.VALUE);
                             } else {
-                                result[r][column] = (currentValue as BaseValueObject).product(
+                                result[r][column] = currentValue.product(
                                     valueObject,
                                     operator as callbackProductFnType
                                 );
                             }
                             break;
-                        case BatchOperatorType.LIKE:
-                            if (!operator) {
-                                result[r][column] = ErrorValueObject.create(ErrorType.VALUE);
-                            } else {
-                                result[r][column] = (currentValue as BaseValueObject).wildcard(
-                                    valueObject as StringValueObject,
-                                    operator as compareToken
-                                );
-                            }
-                            break;
                         case BatchOperatorType.POW:
-                            result[r][column] = (currentValue as BaseValueObject).pow(valueObject);
+                            result[r][column] = currentValue.pow(valueObject);
                             break;
                         case BatchOperatorType.ROUND:
-                            result[r][column] = (currentValue as BaseValueObject).round(valueObject);
+                            result[r][column] = currentValue.round(valueObject);
                             break;
                         case BatchOperatorType.FLOOR:
-                            result[r][column] = (currentValue as BaseValueObject).floor(valueObject);
+                            result[r][column] = currentValue.floor(valueObject);
                             break;
                         case BatchOperatorType.ATAN2:
-                            result[r][column] = (currentValue as BaseValueObject).atan2(valueObject);
+                            result[r][column] = currentValue.atan2(valueObject);
                             break;
                         case BatchOperatorType.CEIL:
-                            result[r][column] = (currentValue as BaseValueObject).ceil(valueObject);
+                            result[r][column] = currentValue.ceil(valueObject);
                             break;
                     }
                 }
             } else {
-                result[r][column] = ErrorValueObject.create(ErrorType.NA);
+                result[r][column] = new ErrorValueObject(ErrorType.NA);
             }
 
             /**
@@ -1266,7 +1513,7 @@ export class ArrayValueObject extends BaseValueObject {
                     unitId,
                     sheetId,
                     column + startColumn,
-                    (currentValue as BaseValueObject).getValue(),
+                    currentValue.getValue(),
                     r + startRow
                 );
             }
@@ -1338,71 +1585,51 @@ export class ArrayValueObject extends BaseValueObject {
                     } else {
                         switch (batchOperatorType) {
                             case BatchOperatorType.PLUS:
-                                rowList[c] = (currentValue as BaseValueObject).plus(opValue as BaseValueObject);
+                                rowList[c] = currentValue.plus(opValue);
                                 break;
                             case BatchOperatorType.MINUS:
-                                rowList[c] = (currentValue as BaseValueObject).minus(opValue as BaseValueObject);
+                                rowList[c] = currentValue.minus(opValue);
                                 break;
                             case BatchOperatorType.MULTIPLY:
-                                rowList[c] = (currentValue as BaseValueObject).multiply(opValue as BaseValueObject);
+                                rowList[c] = currentValue.multiply(opValue);
                                 break;
                             case BatchOperatorType.DIVIDED:
-                                rowList[c] = (currentValue as BaseValueObject).divided(opValue as BaseValueObject);
+                                rowList[c] = currentValue.divided(opValue);
                                 break;
                             case BatchOperatorType.COMPARE:
                                 if (!operator) {
-                                    rowList[c] = ErrorValueObject.create(ErrorType.VALUE);
+                                    rowList[c] = new ErrorValueObject(ErrorType.VALUE);
                                 } else {
-                                    rowList[c] = (currentValue as BaseValueObject).compare(
-                                        opValue as BaseValueObject,
-                                        operator as compareToken
-                                    );
+                                    rowList[c] = currentValue.compare(opValue, operator as compareToken);
                                 }
                                 break;
                             case BatchOperatorType.CONCATENATE_FRONT:
-                                rowList[c] = (currentValue as BaseValueObject).concatenateFront(
-                                    opValue as BaseValueObject
-                                );
+                                rowList[c] = currentValue.concatenateFront(opValue);
                                 break;
                             case BatchOperatorType.CONCATENATE_BACK:
-                                rowList[c] = (currentValue as BaseValueObject).concatenateBack(
-                                    opValue as BaseValueObject
-                                );
+                                rowList[c] = currentValue.concatenateBack(opValue);
                                 break;
                             case BatchOperatorType.PRODUCT:
                                 if (!operator) {
-                                    rowList[c] = ErrorValueObject.create(ErrorType.VALUE);
+                                    rowList[c] = new ErrorValueObject(ErrorType.VALUE);
                                 } else {
-                                    rowList[c] = (currentValue as BaseValueObject).product(
-                                        opValue as BaseValueObject,
-                                        operator as callbackProductFnType
-                                    );
-                                }
-                                break;
-                            case BatchOperatorType.LIKE:
-                                if (!operator) {
-                                    rowList[c] = ErrorValueObject.create(ErrorType.VALUE);
-                                } else {
-                                    rowList[c] = (currentValue as BaseValueObject).wildcard(
-                                        opValue as StringValueObject,
-                                        operator as compareToken
-                                    );
+                                    rowList[c] = currentValue.product(opValue, operator as callbackProductFnType);
                                 }
                                 break;
                             case BatchOperatorType.POW:
-                                rowList[c] = (currentValue as BaseValueObject).pow(opValue as BaseValueObject);
+                                rowList[c] = currentValue.pow(opValue);
                                 break;
                             case BatchOperatorType.ROUND:
-                                rowList[c] = (currentValue as BaseValueObject).round(opValue as BaseValueObject);
+                                rowList[c] = currentValue.round(opValue);
                                 break;
                             case BatchOperatorType.ATAN2:
-                                rowList[c] = (currentValue as BaseValueObject).atan2(opValue as BaseValueObject);
+                                rowList[c] = currentValue.atan2(opValue);
                                 break;
                             case BatchOperatorType.FLOOR:
-                                rowList[c] = (currentValue as BaseValueObject).floor(opValue as BaseValueObject);
+                                rowList[c] = currentValue.floor(opValue);
                                 break;
                             case BatchOperatorType.CEIL:
-                                rowList[c] = (currentValue as BaseValueObject).ceil(opValue as BaseValueObject);
+                                rowList[c] = currentValue.ceil(opValue);
                                 break;
                         }
                     }
@@ -1413,7 +1640,7 @@ export class ArrayValueObject extends BaseValueObject {
                 //     rowList[c] = opValue;
                 // }
                 else {
-                    rowList[c] = ErrorValueObject.create(ErrorType.NA);
+                    rowList[c] = new ErrorValueObject(ErrorType.NA);
                 }
             }
             result.push(rowList);
@@ -1536,10 +1763,10 @@ export class ValueObjectFactory {
         }
         if (typeof rawValue === 'number') {
             if (!Number.isFinite(rawValue)) {
-                return ErrorValueObject.create(ErrorType.NUM);
+                return new ErrorValueObject(ErrorType.NUM);
             }
             return new NumberValueObject(rawValue, true);
         }
-        return ErrorValueObject.create(ErrorType.NA);
+        return new ErrorValueObject(ErrorType.NA);
     }
 }

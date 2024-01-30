@@ -79,13 +79,15 @@ export const CurrencyPanel: FC<IBusinessComponentProps> = (props) => {
                     </div>
                 </div>
                 <div className="option">
-                    <div className="label"> {t('sheet.numfmt.currencyType')}</div>
+                    <div className="label">{t('sheet.numfmt.currencyType')}</div>
                     <div className="m-t-8 w-140">
                         <Select onChange={onSelect} options={options} value={suffix} />
                     </div>
                 </div>
             </div>
-            <div className="m-t-16 label"> {t('sheet.numfmt.negType')}</div>
+            <div className="m-t-16 label">
+                {t('sheet.numfmt.negType')}
+            </div>
 
             <div className="m-t-8">
                 <SelectList onChange={onChange} options={negativeOptions} value={pattern} />

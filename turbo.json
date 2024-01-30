@@ -8,6 +8,7 @@
         "build:demo": {},
         "dev:demo": {
             "cache": false
-        }
+        },
+        "lint:types": {}
     }
 }

@@ -71,7 +71,10 @@ export const ThousandthPercentilePanel: FC<IBusinessComponentProps> = (props) =>
                     onChange={handleDecimalChange}
                 />
             </div>
-            <div className="m-t-16 label"> {localeService.t('sheet.numfmt.negType')}</div>
+            <div className="m-t-16 label">
+                {' '}
+                {localeService.t('sheet.numfmt.negType')}
+            </div>
             <div className="m-t-8">
                 <SelectList onChange={handleClick} options={options} value={suffix} />
             </div>

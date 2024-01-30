@@ -38,7 +38,6 @@ export class BorderStyleManagerService implements IDisposable {
 
     private readonly _borderInfo$ = new BehaviorSubject<IBorderInfo>(this._borderInfo);
 
-    // eslint-disable-next-line @typescript-eslint/member-ordering
     readonly borderInfo$ = this._borderInfo$.asObservable();
 
     dispose(): void {

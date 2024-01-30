@@ -62,7 +62,7 @@ export class FUniver {
      * @param data the snapshot of the spreadsheet.
      * @returns Spreadsheet API instance.
      */
-    createUniverSheet(data: IWorkbookData): FWorkbook {
+    createUniverSheet(data: Partial<IWorkbookData>): FWorkbook {
         const workbook = this._univerInstanceService.createSheet(data);
         return this._injector.createInstance(FWorkbook, workbook);
     }
@@ -85,7 +85,7 @@ export class FUniver {
      * Get the currently focused Univer spreadsheet.
      * @returns the currently focused Univer spreadsheet.
      */
-    getActiveSheet(): FWorkbook | null {
+    getActiveWorkbook(): FWorkbook | null {
         const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
         if (!workbook) {
             return null;

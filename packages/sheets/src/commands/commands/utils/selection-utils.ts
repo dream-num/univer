@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-import type { IRange, ISelectionCell, Worksheet } from '@univerjs/core';
+import type { IRange, ISelectionCell, Workbook, Worksheet } from '@univerjs/core';
 import { RANGE_TYPE, Rectangle, selectionToArray } from '@univerjs/core';
+
+import { NORMAL_SELECTION_PLUGIN_NAME } from '../../../services/selection-manager.service';
+import { SetSelectionsOperation } from '../../operations/selection.operation';
 
 export interface IExpandParams {
     left?: boolean;
@@ -157,3 +160,13 @@ export function calculateTotalLength(intervalsObject: IInterval): number {
 
     return totalLength + 1;
 }
+
+export const followSelectionOperation = (range: IRange, workbook: Workbook, worksheet: Worksheet) => ({
+    id: SetSelectionsOperation.id,
+    params: {
+        unitId: workbook.getUnitId(),
+        sheetId: worksheet.getSheetId(),
+        pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+        selections: [{ range, primary: getPrimaryForRange(range, worksheet) }],
+    },
+});

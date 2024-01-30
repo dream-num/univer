@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable no-magic-numbers */
 import type { Injector } from '@wendellhu/redi';
 import { beforeEach, describe, expect, it } from 'vitest';
 
@@ -29,7 +28,7 @@ import type { ArrayValueObject } from '../../../../engine/value-object/array-val
 import { IFormulaCurrentConfigService } from '../../../../services/current-data.service';
 import { IFunctionService } from '../../../../services/function.service';
 import { IFormulaRuntimeService } from '../../../../services/runtime.service';
-import { createCommandTestBed } from '../../../__tests__/create-command-test-bed';
+import { createFunctionTestBed } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_META } from '../../../meta/function-names';
 import { Multiply } from '../../../meta/multiply';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
@@ -43,7 +42,7 @@ describe('Test indirect', () => {
     let interpreter: Interpreter;
 
     beforeEach(() => {
-        const testBed = createCommandTestBed();
+        const testBed = createFunctionTestBed();
 
         get = testBed.get;
 

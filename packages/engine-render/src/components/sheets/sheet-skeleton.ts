@@ -138,7 +138,7 @@ interface ICellOtherConfig {
      * textRotation
      */
     textRotation?: ITextRotation;
-    /** *
+    /**
      * textDirection
      */
     textDirection?: Nullable<TextDirection>;
@@ -413,8 +413,8 @@ export class SpreadsheetSkeleton extends Skeleton {
                     continue;
                 }
 
-                // The row sets isAutoHeight to false, and there is no need to calculate the automatic row height for the row.
-                if (rowObjectArray[rowIndex]?.isAutoHeight === false) {
+                // The row sets ia to false, and there is no need to calculate the automatic row height for the row.
+                if (rowObjectArray[rowIndex]?.ia === BooleanNumber.FALSE) {
                     continue;
                 }
 
@@ -792,7 +792,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         let column = searchArray(columnWidthAccumulation, offsetX);
 
-        if (column === Infinity) {
+        if (column === Number.POSITIVE_INFINITY) {
             column = columnWidthAccumulation.length - 1;
         } else if (column === -1) {
             column = 0;
@@ -825,7 +825,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         let row = searchArray(rowHeightAccumulation, offsetY);
 
-        if (row === Infinity) {
+        if (row === Number.POSITIVE_INFINITY) {
             row = rowHeightAccumulation.length - 1;
         } else if (row === -1) {
             row = 0;
@@ -1261,8 +1261,8 @@ export class SpreadsheetSkeleton extends Skeleton {
         let dataset_col_st = -1;
         let dataset_col_ed = -1;
 
-        const row_st = searchArray(rowHeightAccumulation, viewBound.top - this.columnHeaderHeightAndMarginTop);
-        const row_ed = searchArray(rowHeightAccumulation, viewBound.bottom - this.columnHeaderHeightAndMarginTop);
+        const row_st = searchArray(rowHeightAccumulation, Math.round(viewBound.top) - this.columnHeaderHeightAndMarginTop);
+        const row_ed = searchArray(rowHeightAccumulation, Math.round(viewBound.bottom) - this.columnHeaderHeightAndMarginTop);
 
         if (row_st === -1 && row_ed === 0) {
             dataset_row_st = -1;
@@ -1274,7 +1274,7 @@ export class SpreadsheetSkeleton extends Skeleton {
                 dataset_row_st = row_st;
             }
 
-            if (row_ed === Infinity) {
+            if (row_ed === Number.POSITIVE_INFINITY) {
                 dataset_row_ed = rhaLength - 1;
             } else if (row_ed >= rhaLength) {
                 dataset_row_ed = rhaLength - 1;
@@ -1283,8 +1283,8 @@ export class SpreadsheetSkeleton extends Skeleton {
             }
         }
 
-        const col_st = searchArray(columnWidthAccumulation, viewBound.left - this.rowHeaderWidthAndMarginLeft);
-        const col_ed = searchArray(columnWidthAccumulation, viewBound.right - this.rowHeaderWidthAndMarginLeft);
+        const col_st = searchArray(columnWidthAccumulation, Math.round(viewBound.left) - this.rowHeaderWidthAndMarginLeft);
+        const col_ed = searchArray(columnWidthAccumulation, Math.round(viewBound.right) - this.rowHeaderWidthAndMarginLeft);
 
         if (col_st === -1 && col_ed === 0) {
             dataset_col_st = -1;
@@ -1296,7 +1296,7 @@ export class SpreadsheetSkeleton extends Skeleton {
                 dataset_col_st = col_st;
             }
 
-            if (col_ed === Infinity) {
+            if (col_ed === Number.POSITIVE_INFINITY) {
                 dataset_col_ed = cwaLength - 1;
             } else if (col_ed >= cwaLength) {
                 dataset_col_ed = cwaLength - 1;
@@ -1330,8 +1330,8 @@ export class SpreadsheetSkeleton extends Skeleton {
                 if (!rowDataItem) {
                     continue;
                 }
-                const { h = defaultRowHeight, ah, isAutoHeight } = rowDataItem;
-                if ((isAutoHeight == null || !!isAutoHeight) && typeof ah === 'number') {
+                const { h = defaultRowHeight, ah, ia } = rowDataItem;
+                if ((ia == null || ia === BooleanNumber.TRUE) && typeof ah === 'number') {
                     rowHeight = ah;
                 } else {
                     rowHeight = h;
@@ -1502,7 +1502,6 @@ export class SpreadsheetSkeleton extends Skeleton {
     //     return mergeRangeCache;
     // }
 
-    // eslint-disable-next-line max-lines-per-function
     private _calculateStylesCache() {
         const dataMergeCache = this._dataMergeCache;
         const rowColumnSegment = this._rowColumnSegment;
@@ -1765,8 +1764,8 @@ export class SpreadsheetSkeleton extends Skeleton {
             },
             documentStyle: {
                 pageSize: {
-                    width: Infinity,
-                    height: Infinity,
+                    width: Number.POSITIVE_INFINITY,
+                    height: Number.POSITIVE_INFINITY,
                 },
                 marginTop,
                 marginBottom,

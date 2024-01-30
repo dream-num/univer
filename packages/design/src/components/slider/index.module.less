@@ -16,9 +16,50 @@
 }
 
 .slider {
+    user-select: none;
     display: flex;
     gap: var(--margin-xxs);
     align-items: center;
+
+    &-disabled {
+        cursor: not-allowed;
+
+        .slider {
+            &-rail {
+                background-color: rgb(var(--grey-300));
+            }
+
+            &-handle {
+                background-color: rgb(var(--grey-300));
+                box-shadow: none;
+
+                &:hover {
+                    cursor: not-allowed;
+                    background-color: rgb(var(--grey-300));
+                }
+            }
+
+            &-reset-point {
+                cursor: not-allowed;
+            }
+
+            &-value {
+                &:hover {
+                    cursor: not-allowed;
+                    background-color: rgb(var(--grey-300));
+                }
+            }
+
+            &-value {
+                pointer-events: none;
+                color: rgb(var(--grey-300));
+
+                &:hover {
+                    background-color: transparent;
+                }
+            }
+        }
+    }
 
     &-rail {
         @padding: (@slider-handle-size / 2);
@@ -52,7 +93,7 @@
         border-radius: 50%;
         box-shadow: 0 0 6px 0 rgb(0 0 0 / 10%);
 
-        transition: background .2s;
+        transition: background 0.2s;
 
         &:hover {
             background-color: @slider-parts-hover-color;
@@ -89,7 +130,7 @@
 
         border-radius: var(--border-radius-base);
 
-        transition: all .2s;
+        transition: all 0.2s;
 
         &:hover {
             background-color: @slider-parts-hover-color;
@@ -131,7 +172,7 @@
 
         border-radius: var(--border-radius-base);
 
-        transition: background .2s;
+        transition: background 0.2s;
 
         &:hover {
             background-color: rgb(var(--bg-color-hover));

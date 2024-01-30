@@ -1,6 +1,7 @@
 name: 🥷 Release Nightly
 
 on:
+    workflow_dispatch:
     schedule:
         - cron: '0 16 * * *'
 
@@ -8,42 +9,6 @@ permissions:
     contents: read
 
 jobs:
-    settlement:
-        if: github.repository == 'dream-num/univer'
-        runs-on: ubuntu-latest
-
-        steps:
-            - name: ✨ Fetch repo status
-              id: repo-status
-              run: |
-                  status=$(curl -s https://api.github.com/repos/${{ github.repository }})
-                  stars=$(echo $status | jq .stargazers_count)
-                  forks=$(echo $status  | jq .forks_count)
-                  issues=$(echo $status  | jq .open_issues_count)
-
-                  echo "date=$(date +%Y-%m-%d)" >> $GITHUB_OUTPUT
-                  echo "stars=$stars" >> $GITHUB_OUTPUT
-                  echo "forks=$forks" >> $GITHUB_OUTPUT
-                  echo "issues=$issues" >> $GITHUB_OUTPUT
-
-            - name: 👾 Daily settlement
-              uses: sarisia/actions-status-discord@v1
-              with:
-                  webhook: ${{ secrets.DISCORD_WEBHOOK }}?thread_id=${{ secrets.DISCORD_CI_NIGHTLY_RELEASE }}
-                  status: ${{ job.status }}
-                  description: |
-                      🚀 Daily settlement (${{ steps.repo-status.outputs.date }})
-
-                      - 🌟 Stars: ${{ steps.repo-status.outputs.stars }}
-                      - 🍴 Forks: ${{ steps.repo-status.outputs.forks }}
-                      - 🤖 Issues + PRs: ${{ steps.repo-status.outputs.issues }}
-                  nofail: false
-                  nodetail: true
-                  nocontext: true
-                  noprefix: true
-                  color: 0x0984e3
-                  username: Daily Settlement
-
     release-nightly:
         if: github.repository == 'dream-num/univer'
         runs-on: ubuntu-latest
@@ -53,13 +18,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v3
-
-            - name: Install Node.js
-              uses: actions/setup-node@v3
-              with:
-                  node-version: 18
-                  registry-url: ${{ secrets.VERDACCIO_URL }}
+              uses: actions/checkout@v4
 
             - name: Install pnpm
               uses: pnpm/action-setup@v2
@@ -67,18 +26,13 @@ jobs:
                   version: 8
                   run_install: false
 
-            - name: Get pnpm store directory
-              shell: bash
-              run: |
-                  echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-            - name: Setup pnpm cache
-              uses: actions/cache@v3
+            - name: Install Node.js
+              uses: actions/setup-node@v4
               with:
-                  path: ${{ env.STORE_PATH }}
-                  key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
-                  restore-keys: |
-                      ${{ runner.os }}-pnpm-
+                  node-version: 18
+                  cache: pnpm
+                  registry-url: ${{ secrets.VERDACCIO_URL }}
+                  scope: '@univerjs'
 
             - name: 📌 Get package version (version + date)
               id: nightly-version
@@ -86,18 +40,6 @@ jobs:
                   original_version=$(node -p "require('./package.json').version")
                   version_number=$(echo "$original_version" | sed -E 's/^([0-9]+\.[0-9]+\.[0-9]+).*$/\1/')
                   echo "version=$version_number-nightly.$(date +%Y%m%d%H%M)" >> $GITHUB_OUTPUT
-
-            # - name: Create tag
-            #   uses: actions/github-script@v5
-            #   with:
-            #       github-token: ${{ secrets.GITHUB_TOKEN }}
-            #       script: |
-            #           github.rest.git.createRef({
-            #             owner: context.repo.owner,
-            #             repo: context.repo.repo,
-            #             ref: 'refs/tags/${{ steps.nightly-version.outputs.version }}',
-            #             sha: context.sha
-            #           })
 
             - name: 🔏 Set all monorepo's package version
               run: |
@@ -125,34 +67,10 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
-            - name: Install Node.js
-              uses: actions/setup-node@v3
-              with:
-                  node-version: 18
-
-            - name: Install pnpm
-              uses: pnpm/action-setup@v2
-              with:
-                  version: 8
-                  run_install: false
-
-            - name: Get pnpm store directory
-              shell: bash
-              run: |
-                  echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-            - name: Setup pnpm cache
-              uses: actions/cache@v3
-              with:
-                  path: ${{ env.STORE_PATH }}
-                  key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
-                  restore-keys: |
-                      ${{ runner.os }}-pnpm-
-
-            - name: Install dependencies
-              run: pnpm install
+            - name: Setup Node.js
+              uses: ./.github/actions/setup-node
 
             #  ================= Deploy Demo =================
             - name: 📦 Build demo
@@ -180,34 +98,10 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
-            - name: Install Node.js
-              uses: actions/setup-node@v3
-              with:
-                  node-version: 18
-
-            - name: Install pnpm
-              uses: pnpm/action-setup@v2
-              with:
-                  version: 8
-                  run_install: false
-
-            - name: Get pnpm store directory
-              shell: bash
-              run: |
-                  echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-            - name: Setup pnpm cache
-              uses: actions/cache@v3
-              with:
-                  path: ${{ env.STORE_PATH }}
-                  key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
-                  restore-keys: |
-                      ${{ runner.os }}-pnpm-
-
-            - name: Install dependencies
-              run: pnpm install
+            - name: Setup Node.js
+              uses: ./.github/actions/setup-node
 
             # ================= Deploy Storybook =================
             - name: 📦 Build storybook
@@ -224,54 +118,21 @@ jobs:
     notify:
         needs: [release-nightly, build-demo, build-storybook]
         runs-on: ubuntu-latest
-        if: ${{ always() }}
 
         steps:
-            # ================= Notify Discord =================
-            - name: 👾 Discord Notification
-              uses: sarisia/actions-status-discord@v1
-              if: ${{ success() }}
+            - name: Invoke deployment hook
+              uses: distributhor/workflow-webhook@v3
               with:
-                  webhook: ${{ secrets.DISCORD_WEBHOOK }}?thread_id=${{ secrets.DISCORD_CI_NIGHTLY_RELEASE }}
-                  status: ${{ job.status }}
-                  description: |
-                      🌝 Nightly release: Successful
-
-                      🎉 🎉 🎉 🎉 🎉 🎉 🎉 🎉 🎉
-                      Release version: ${{ needs.release-nightly.outputs.version }}
-
-                      **[View Deployment]**
-                      - [📑 Examples](${{ needs.build-demo.outputs.preview-url }}/)
-
-                      **[View Docs]**
-                      - [📚 Storybook](${{ needs.build-storybook.outputs.preview-url }}/)
-                      🎉 🎉 🎉 🎉 🎉 🎉 🎉 🎉 🎉
-
-                      Have a good dream! 🌙
-                  nofail: false
-                  nodetail: false
-                  nocontext: false
-                  noprefix: true
-                  color: 0x00b894
-                  username: Nightly Release
-
-            - name: 👾 Discord Notification
-              uses: sarisia/actions-status-discord@v1
-              if: ${{ failure() }}
-              with:
-                  webhook: ${{ secrets.DISCORD_WEBHOOK }}?thread_id=${{ secrets.DISCORD_CI_NIGHTLY_RELEASE }}
-                  status: ${{ job.status }}
-                  description: |
-                      🌚 Nightly release: Unsuccessful 💩
-
-                      👿 👿 👿 👿 👿 👿 👿 👿 👿
-                      Failed version: ${{ needs.release-nightly.outputs.version }}
-                      👿 👿 👿 👿 👿 👿 👿 👿 👿
-
-                      Don't worry, tomorrow will be better! 🌞
-                  nofail: false
-                  nodetail: false
-                  nocontext: false
-                  noprefix: true
-                  color: 0xd63031
-                  username: Nightly Release
+                  webhook_url: ${{ secrets.WEBHOOK_URL }}
+                  data: >
+                      {
+                          "type": "release",
+                          "version": "${{ needs.release-nightly.outputs.version }}",
+                          "workflow": {
+                              "id": "${{ github.run_id }}"
+                          },
+                          "preview": {
+                              "📑 Examples": "${{ needs.build-demo.outputs.preview-url }}/",
+                              "📚 Storybook": "${{ needs.build-storybook.outputs.preview-url }}/"
+                          }
+                      }

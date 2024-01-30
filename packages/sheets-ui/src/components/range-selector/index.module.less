@@ -11,7 +11,6 @@
 
     padding: 0 var(--padding-sm) 0 var(--padding-base);
 
-
     border: 1px solid rgb(var(--border-color));
     border-radius: var(--border-radius-base);
 
@@ -39,7 +38,7 @@
 
         &:empty::before {
             content: attr(data-placeholder);
-            color: rgb(var(--grey-400))
+            color: rgb(var(--grey-400));
         }
     }
 
@@ -74,7 +73,7 @@
 
     &-active {
         border-color: rgb(var(--primary-color));
-    
+
         .range-selector-icon {
             color: rgb(var(--primary-color));
         }

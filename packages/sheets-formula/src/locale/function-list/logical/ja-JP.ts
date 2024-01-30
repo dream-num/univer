@@ -16,8 +16,8 @@
 
 export default {
     AND: {
-        description: `すべての引数が TRUE のときに TRUE を返します。`,
-        abstract: `すべての引数が TRUE のときに TRUE を返します。`,
+        description: 'すべての引数が TRUE のときに TRUE を返します。',
+        abstract: 'すべての引数が TRUE のときに TRUE を返します。',
         links: [
             {
                 title: '指導',
@@ -25,13 +25,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            logical1: { name: '論理式 1', detail: 'TRUE または FALSE に評価できるテスト対象の 1 つ目の条件。' },
+            logical2: { name: '論理式 2', detail: ' 最大 255 個の条件まで、TRUE または FALSE のいずれかに評価できるテストする追加の条件。' },
         },
     },
     BYCOL: {
-        description: `各列に LAMBDA を適用し、結果の配列を返します`,
-        abstract: `各列に LAMBDA を適用し、結果の配列を返します`,
+        description: '各列に LAMBDA を適用し、結果の配列を返します',
+        abstract: '各列に LAMBDA を適用し、結果の配列を返します',
         links: [
             {
                 title: '指導',
@@ -44,8 +44,8 @@ export default {
         },
     },
     BYROW: {
-        description: `各行に LAMBDA を適用し、結果の配列を返します`,
-        abstract: `各行に LAMBDA を適用し、結果の配列を返します`,
+        description: '各行に LAMBDA を適用し、結果の配列を返します',
+        abstract: '各行に LAMBDA を適用し、結果の配列を返します',
         links: [
             {
                 title: '指導',
@@ -58,8 +58,8 @@ export default {
         },
     },
     FALSE: {
-        description: `論理値 FALSE を返します。`,
-        abstract: `論理値 FALSE を返します。`,
+        description: '論理値 FALSE を返します。',
+        abstract: '論理値 FALSE を返します。',
         links: [
             {
                 title: '指導',
@@ -72,8 +72,8 @@ export default {
         },
     },
     IF: {
-        description: `値または数式が条件を満たしているかどうかを判定します。`,
-        abstract: `値または数式が条件を満たしているかどうかを判定します。`,
+        description: '値または数式が条件を満たしているかどうかを判定します。',
+        abstract: '値または数式が条件を満たしているかどうかを判定します。',
         links: [
             {
                 title: '指導',
@@ -81,13 +81,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            logicalTest: { name: '論理式', detail: 'テストする条件' },
+            valueIfTrue: { name: '値が真の場合', detail: 'logical_test の結果が TRUE の場合に返す値' },
+            valueIfFalse: { name: '値が偽の場合', detail: 'logical_test の結果が FALSE の場合に返す値' },
         },
     },
     IFERROR: {
-        description: `数式の結果がエラーの場合は指定した値を返し、それ以外の場合は数式の結果を返します。`,
-        abstract: `数式の結果がエラーの場合は指定した値を返し、それ以外の場合は数式の結果を返します。`,
+        description: '数式の結果がエラーの場合は指定した値を返し、それ以外の場合は数式の結果を返します。',
+        abstract: '数式の結果がエラーの場合は指定した値を返し、それ以外の場合は数式の結果を返します。',
         links: [
             {
                 title: '指導',
@@ -95,13 +96,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: '値', detail: 'エラーかどうかをチェックする引数です。' },
+            valueIfError: { name: 'エラーの場合の値', detail: '数式がエラー値と評価された場合に返す値を指定します。 次のエラーの種類はが評価されます: #N/A、#VALUE!、#REF!、#DIV/0!、#NUM!、#NAME?、#NULL!。' },
         },
     },
     IFNA: {
-        description: `それ以外の場合は、式の結果を返します。`,
-        abstract: `それ以外の場合は、式の結果を返します。`,
+        description: 'それ以外の場合は、式の結果を返します。',
+        abstract: 'それ以外の場合は、式の結果を返します。',
         links: [
             {
                 title: '指導',
@@ -114,8 +115,8 @@ export default {
         },
     },
     IFS: {
-        description: `1つ以上の条件が満たされているかどうかをチェックして、最初の TRUE 条件に対応する値を返します。`,
-        abstract: `1つ以上の条件が満たされているかどうかをチェックして、最初の TRUE 条件に対応する値を返します。`,
+        description: '1つ以上の条件が満たされているかどうかをチェックして、最初の TRUE 条件に対応する値を返します。',
+        abstract: '1つ以上の条件が満たされているかどうかをチェックして、最初の TRUE 条件に対応する値を返します。',
         links: [
             {
                 title: '指導',
@@ -128,8 +129,8 @@ export default {
         },
     },
     LAMBDA: {
-        description: `LAMBDA 関数を使用して、再利用可能なカスタム関数を作成し、フレンドリ名で呼び出します。 新しい関数はブック全体で使用でき、ネイティブ Excel 関数と同様に呼び出されます。`,
-        abstract: `カスタムで再利用可能な関数を作成し、フレンドリ名で呼び出す`,
+        description: 'LAMBDA 関数を使用して、再利用可能なカスタム関数を作成し、フレンドリ名で呼び出します。 新しい関数はブック全体で使用でき、ネイティブ Excel 関数と同様に呼び出されます。',
+        abstract: 'カスタムで再利用可能な関数を作成し、フレンドリ名で呼び出す',
         links: [
             {
                 title: '指導',
@@ -148,8 +149,8 @@ export default {
         },
     },
     LET: {
-        description: `計算結果に名前を割り当てます`,
-        abstract: `計算結果に名前を割り当てます`,
+        description: '計算結果に名前を割り当てます',
+        abstract: '計算結果に名前を割り当てます',
         links: [
             {
                 title: '指導',
@@ -162,8 +163,8 @@ export default {
         },
     },
     MAKEARRAY: {
-        description: `LAMBDA を適用して、指定した行と列のサイズの計算された配列を返します`,
-        abstract: `LAMBDA を適用して、指定した行と列のサイズの計算された配列を返します`,
+        description: 'LAMBDA を適用して、指定した行と列のサイズの計算された配列を返します',
+        abstract: 'LAMBDA を適用して、指定した行と列のサイズの計算された配列を返します',
         links: [
             {
                 title: '指導',
@@ -180,8 +181,8 @@ export default {
         },
     },
     MAP: {
-        description: `LAMBDA を適用して新しい値を作成することで、配列内の各値を新しい値にマッピングして形成された配列を返します。`,
-        abstract: `LAMBDA を適用して新しい値を作成することで、配列内の各値を新しい値にマッピングして形成された配列を返します。`,
+        description: 'LAMBDA を適用して新しい値を作成することで、配列内の各値を新しい値にマッピングして形成された配列を返します。',
+        abstract: 'LAMBDA を適用して新しい値を作成することで、配列内の各値を新しい値にマッピングして形成された配列を返します。',
         links: [
             {
                 title: '指導',
@@ -194,8 +195,8 @@ export default {
         },
     },
     NOT: {
-        description: `引数の論理値 (TRUE または FALSE) を逆にして返します。`,
-        abstract: `引数の論理値 (TRUE または FALSE) を逆にして返します。`,
+        description: '引数の論理値 (TRUE または FALSE) を逆にして返します。',
+        abstract: '引数の論理値 (TRUE または FALSE) を逆にして返します。',
         links: [
             {
                 title: '指導',
@@ -208,8 +209,8 @@ export default {
         },
     },
     OR: {
-        description: `いずれかの引数が TRUE のときに TRUE を返します。`,
-        abstract: `いずれかの引数が TRUE のときに TRUE を返します。`,
+        description: 'いずれかの引数が TRUE のときに TRUE を返します。',
+        abstract: 'いずれかの引数が TRUE のときに TRUE を返します。',
         links: [
             {
                 title: '指導',
@@ -222,8 +223,8 @@ export default {
         },
     },
     REDUCE: {
-        description: `各値に LAMBDA を適用し、アキュムレータの合計値を返すことで、配列を累積値に減らします。`,
-        abstract: `各値に LAMBDA を適用し、アキュムレータの合計値を返すことで、配列を累積値に減らします。`,
+        description: '各値に LAMBDA を適用し、アキュムレータの合計値を返すことで、配列を累積値に減らします。',
+        abstract: '各値に LAMBDA を適用し、アキュムレータの合計値を返すことで、配列を累積値に減らします。',
         links: [
             {
                 title: '指導',
@@ -236,8 +237,8 @@ export default {
         },
     },
     SCAN: {
-        description: `各値に LAMBDA を適用して配列をスキャンし、各中間値を持つ配列を返します`,
-        abstract: `各値に LAMBDA を適用して配列をスキャンし、各中間値を持つ配列を返します`,
+        description: '各値に LAMBDA を適用して配列をスキャンし、各中間値を持つ配列を返します',
+        abstract: '各値に LAMBDA を適用して配列をスキャンし、各中間値を持つ配列を返します',
         links: [
             {
                 title: '指導',
@@ -250,8 +251,8 @@ export default {
         },
     },
     SWITCH: {
-        description: `値の一覧に対して式を評価し、最初に一致する値に対応する結果を返します。 いずれにも一致しない場合は、任意指定の既定値が返されます。`,
-        abstract: `値の一覧に対して式を評価し、最初に一致する値に対応する結果を返します。 いずれにも一致しない場合は、任意指定の既定値が返されます。`,
+        description: '値の一覧に対して式を評価し、最初に一致する値に対応する結果を返します。 いずれにも一致しない場合は、任意指定の既定値が返されます。',
+        abstract: '値の一覧に対して式を評価し、最初に一致する値に対応する結果を返します。 いずれにも一致しない場合は、任意指定の既定値が返されます。',
         links: [
             {
                 title: '指導',
@@ -264,8 +265,8 @@ export default {
         },
     },
     TRUE: {
-        description: `論理値 TRUE を返します。`,
-        abstract: `論理値 TRUE を返します。`,
+        description: '論理値 TRUE を返します。',
+        abstract: '論理値 TRUE を返します。',
         links: [
             {
                 title: '指導',
@@ -278,8 +279,8 @@ export default {
         },
     },
     XOR: {
-        description: `すべての引数の排他的論理和を返します。`,
-        abstract: `すべての引数の排他的論理和を返します。`,
+        description: 'すべての引数の排他的論理和を返します。',
+        abstract: 'すべての引数の排他的論理和を返します。',
         links: [
             {
                 title: '指導',

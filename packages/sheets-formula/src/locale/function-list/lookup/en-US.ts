@@ -19,7 +19,7 @@ export default {
         description: `Obtain the address of a cell in a worksheet, given specified row and column numbers. For example, ADDRESS(2,3) returns $C$2. As another example, ADDRESS(77,300) returns $KN$77. You can use other functions, such as the ROW and COLUMN functions, to provide the row and column number arguments for the ADDRESS function.
 
         `,
-        abstract: `Returns a reference as text to a single cell in a worksheet`,
+        abstract: 'Returns a reference as text to a single cell in a worksheet',
         links: [
             {
                 title: 'Instruction',
@@ -50,8 +50,8 @@ export default {
         },
     },
     AREAS: {
-        description: `Returns the number of areas in a reference`,
-        abstract: `Returns the number of areas in a reference`,
+        description: 'Returns the number of areas in a reference',
+        abstract: 'Returns the number of areas in a reference',
         links: [
             {
                 title: 'Instruction',
@@ -64,8 +64,8 @@ export default {
         },
     },
     CHOOSE: {
-        description: `Chooses a value from a list of values`,
-        abstract: `Chooses a value from a list of values`,
+        description: 'Chooses a value from a list of values',
+        abstract: 'Chooses a value from a list of values',
         links: [
             {
                 title: 'Instruction',
@@ -78,8 +78,8 @@ export default {
         },
     },
     CHOOSECOLS: {
-        description: `Returns the specified columns from an array`,
-        abstract: `Returns the specified columns from an array`,
+        description: 'Returns the specified columns from an array',
+        abstract: 'Returns the specified columns from an array',
         links: [
             {
                 title: 'Instruction',
@@ -92,8 +92,8 @@ export default {
         },
     },
     CHOOSEROWS: {
-        description: `Returns the specified rows from an array`,
-        abstract: `Returns the specified rows from an array`,
+        description: 'Returns the specified rows from an array',
+        abstract: 'Returns the specified rows from an array',
         links: [
             {
                 title: 'Instruction',
@@ -106,8 +106,8 @@ export default {
         },
     },
     COLUMN: {
-        description: `Returns the column number of a reference`,
-        abstract: `Returns the column number of a reference`,
+        description: 'Returns the column number of a reference',
+        abstract: 'Returns the column number of a reference',
         links: [
             {
                 title: 'Instruction',
@@ -120,8 +120,8 @@ export default {
         },
     },
     COLUMNS: {
-        description: `Returns the number of columns in a reference`,
-        abstract: `Returns the number of columns in a reference`,
+        description: 'Returns the number of columns in a reference',
+        abstract: 'Returns the number of columns in a reference',
         links: [
             {
                 title: 'Instruction',
@@ -134,8 +134,8 @@ export default {
         },
     },
     DROP: {
-        description: `Excludes a specified number of rows or columns from the start or end of an array`,
-        abstract: `Excludes a specified number of rows or columns from the start or end of an array`,
+        description: 'Excludes a specified number of rows or columns from the start or end of an array',
+        abstract: 'Excludes a specified number of rows or columns from the start or end of an array',
         links: [
             {
                 title: 'Instruction',
@@ -148,8 +148,8 @@ export default {
         },
     },
     EXPAND: {
-        description: `Expands or pads an array to specified row and column dimensions`,
-        abstract: `Expands or pads an array to specified row and column dimensions`,
+        description: 'Expands or pads an array to specified row and column dimensions',
+        abstract: 'Expands or pads an array to specified row and column dimensions',
         links: [
             {
                 title: 'Instruction',
@@ -162,8 +162,8 @@ export default {
         },
     },
     FILTER: {
-        description: `Filters a range of data based on criteria you define`,
-        abstract: `Filters a range of data based on criteria you define`,
+        description: 'Filters a range of data based on criteria you define',
+        abstract: 'Filters a range of data based on criteria you define',
         links: [
             {
                 title: 'Instruction',
@@ -176,8 +176,8 @@ export default {
         },
     },
     FORMULATEXT: {
-        description: `Returns the formula at the given reference as text`,
-        abstract: `Returns the formula at the given reference as text`,
+        description: 'Returns the formula at the given reference as text',
+        abstract: 'Returns the formula at the given reference as text',
         links: [
             {
                 title: 'Instruction',
@@ -190,8 +190,8 @@ export default {
         },
     },
     GETPIVOTDATA: {
-        description: `Returns data stored in a PivotTable report`,
-        abstract: `Returns data stored in a PivotTable report`,
+        description: 'Returns data stored in a PivotTable report',
+        abstract: 'Returns data stored in a PivotTable report',
         links: [
             {
                 title: 'Instruction',
@@ -204,8 +204,8 @@ export default {
         },
     },
     HLOOKUP: {
-        description: `Looks in the top row of an array and returns the value of the indicated cell`,
-        abstract: `Looks in the top row of an array and returns the value of the indicated cell`,
+        description: 'Looks in the top row of an array and returns the value of the indicated cell',
+        abstract: 'Looks in the top row of an array and returns the value of the indicated cell',
         links: [
             {
                 title: 'Instruction',
@@ -213,13 +213,27 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            lookupValue: {
+                name: 'lookup_value',
+                detail: 'The value to be found in the first row of the table. Lookup_value can be a value, a reference, or a text string.',
+            },
+            tableArray: {
+                name: 'table_array',
+                detail: 'A table of information in which data is looked up. Use a reference to a range or a range name.',
+            },
+            rowIndexNum: {
+                name: 'row_index_num',
+                detail: 'The row number in table_array from which the matching value will be returned. A row_index_num of 1 returns the first row value in table_array, a row_index_num of 2 returns the second row value in table_array, and so on. ',
+            },
+            rangeLookup: {
+                name: 'range_lookup',
+                detail: 'A logical value that specifies whether you want HLOOKUP to find an exact match or an approximate match.',
+            },
         },
     },
     HSTACK: {
-        description: `Appends arrays horizontally and&nbsp;in sequence to return a larger array`,
-        abstract: `Appends arrays horizontally and&nbsp;in sequence to return a larger array`,
+        description: 'Appends arrays horizontally and&nbsp;in sequence to return a larger array',
+        abstract: 'Appends arrays horizontally and&nbsp;in sequence to return a larger array',
         links: [
             {
                 title: 'Instruction',
@@ -232,8 +246,8 @@ export default {
         },
     },
     HYPERLINK: {
-        description: `Creates a shortcut or jump that opens a document stored on a network server, an intranet, or the Internet`,
-        abstract: `Creates a shortcut or jump that opens a document stored on a network server, an intranet, or the Internet`,
+        description: 'Creates a shortcut or jump that opens a document stored on a network server, an intranet, or the Internet',
+        abstract: 'Creates a shortcut or jump that opens a document stored on a network server, an intranet, or the Internet',
         links: [
             {
                 title: 'Instruction',
@@ -246,8 +260,8 @@ export default {
         },
     },
     IMAGE: {
-        description: `Returns an image from a given source`,
-        abstract: `Returns an image from a given source`,
+        description: 'Returns an image from a given source',
+        abstract: 'Returns an image from a given source',
         links: [
             {
                 title: 'Instruction',
@@ -260,8 +274,8 @@ export default {
         },
     },
     INDEX: {
-        description: `Uses an index to choose a value from a reference or array`,
-        abstract: `Uses an index to choose a value from a reference or array`,
+        description: 'Uses an index to choose a value from a reference or array',
+        abstract: 'Uses an index to choose a value from a reference or array',
         links: [
             {
                 title: 'Instruction',
@@ -274,8 +288,8 @@ export default {
         },
     },
     INDIRECT: {
-        description: `Returns a reference indicated by a text value`,
-        abstract: `Returns a reference indicated by a text value`,
+        description: 'Returns a reference indicated by a text value',
+        abstract: 'Returns a reference indicated by a text value',
         links: [
             {
                 title: 'Instruction',
@@ -288,7 +302,7 @@ export default {
         },
     },
     LOOKUP: {
-        description: `Looks up values in a vector or array`,
+        description: `When you need to look in a single row or column and find a value from the same position in a second row or column`,
         abstract: `Looks up values in a vector or array`,
         links: [
             {
@@ -297,13 +311,23 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            lookupValue: {
+                name: 'lookup_value',
+                detail: 'A value that LOOKUP searches for in the first vector. Lookup_value can be a number, text, a logical value, or a name or reference that refers to a value.',
+            },
+            lookupVectorOrArray: {
+                name: 'lookup_vectorOrArray',
+                detail: 'A range that contains only one row or one column',
+            },
+            resultVector: {
+                name: 'result_vector',
+                detail: 'A range that contains only one row or column. The result_vector argument must be the same size as lookup_vector.',
+            },
         },
     },
     MATCH: {
-        description: `Looks up values in a reference or array`,
-        abstract: `Looks up values in a reference or array`,
+        description: 'Looks up values in a reference or array',
+        abstract: 'Looks up values in a reference or array',
         links: [
             {
                 title: 'Instruction',
@@ -316,8 +340,8 @@ export default {
         },
     },
     OFFSET: {
-        description: `Returns a reference offset from a given reference`,
-        abstract: `Returns a reference offset from a given reference`,
+        description: 'Returns a reference offset from a given reference',
+        abstract: 'Returns a reference offset from a given reference',
         links: [
             {
                 title: 'Instruction',
@@ -325,13 +349,16 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            reference: { name: 'Reference', detail: 'The reference from which you want to base the offset. Reference must refer to a cell or range of adjacent cells; otherwise, OFFSET returns the #VALUE! error value.' },
+            rows: { name: 'Rows', detail: 'The number of rows, up or down, that you want the upper-left cell to refer to. Using 5 as the rows argument specifies that the upper-left cell in the reference is five rows below reference. Rows can be positive (which means below the starting reference) or negative (which means above the starting reference).' },
+            cols: { name: 'Columns', detail: 'The number of columns, to the left or right, that you want the upper-left cell of the result to refer to. Using 5 as the cols argument specifies that the upper-left cell in the reference is five columns to the right of reference. Cols can be positive (which means to the right of the starting reference) or negative (which means to the left of the starting reference).' },
+            height: { name: 'Height', detail: 'The height, in number of rows, that you want the returned reference to be. Height must be a positive number.' },
+            width: { name: 'Width', detail: 'The width, in number of columns, that you want the returned reference to be. Width must be a positive number.' },
         },
     },
     ROW: {
-        description: `Returns the row number of a reference`,
-        abstract: `Returns the row number of a reference`,
+        description: 'Returns the row number of a reference',
+        abstract: 'Returns the row number of a reference',
         links: [
             {
                 title: 'Instruction',
@@ -344,8 +371,8 @@ export default {
         },
     },
     ROWS: {
-        description: `Returns the number of rows in a reference`,
-        abstract: `Returns the number of rows in a reference`,
+        description: 'Returns the number of rows in a reference',
+        abstract: 'Returns the number of rows in a reference',
         links: [
             {
                 title: 'Instruction',
@@ -358,8 +385,8 @@ export default {
         },
     },
     RTD: {
-        description: `Retrieves real-time data from a program that supports COM automation`,
-        abstract: `Retrieves real-time data from a program that supports COM automation`,
+        description: 'Retrieves real-time data from a program that supports COM automation',
+        abstract: 'Retrieves real-time data from a program that supports COM automation',
         links: [
             {
                 title: 'Instruction',
@@ -372,8 +399,8 @@ export default {
         },
     },
     SORT: {
-        description: `Sorts the contents of a range or array`,
-        abstract: `Sorts the contents of a range or array`,
+        description: 'Sorts the contents of a range or array',
+        abstract: 'Sorts the contents of a range or array',
         links: [
             {
                 title: 'Instruction',
@@ -386,8 +413,8 @@ export default {
         },
     },
     SORTBY: {
-        description: `Sorts the contents of a range or array based on the values in a corresponding range or array`,
-        abstract: `Sorts the contents of a range or array based on the values in a corresponding range or array`,
+        description: 'Sorts the contents of a range or array based on the values in a corresponding range or array',
+        abstract: 'Sorts the contents of a range or array based on the values in a corresponding range or array',
         links: [
             {
                 title: 'Instruction',
@@ -400,8 +427,8 @@ export default {
         },
     },
     TAKE: {
-        description: `Returns a specified number of contiguous rows or columns from the start or end of an array`,
-        abstract: `Returns a specified number of contiguous rows or columns from the start or end of an array`,
+        description: 'Returns a specified number of contiguous rows or columns from the start or end of an array',
+        abstract: 'Returns a specified number of contiguous rows or columns from the start or end of an array',
         links: [
             {
                 title: 'Instruction',
@@ -414,8 +441,8 @@ export default {
         },
     },
     TOCOL: {
-        description: `Returns the array in a single column`,
-        abstract: `Returns the array in a single column`,
+        description: 'Returns the array in a single column',
+        abstract: 'Returns the array in a single column',
         links: [
             {
                 title: 'Instruction',
@@ -428,8 +455,8 @@ export default {
         },
     },
     TOROW: {
-        description: `Returns the array in a single row`,
-        abstract: `Returns the array in a single row`,
+        description: 'Returns the array in a single row',
+        abstract: 'Returns the array in a single row',
         links: [
             {
                 title: 'Instruction',
@@ -442,8 +469,8 @@ export default {
         },
     },
     TRANSPOSE: {
-        description: `Returns the transpose of an array`,
-        abstract: `Returns the transpose of an array`,
+        description: 'Returns the transpose of an array',
+        abstract: 'Returns the transpose of an array',
         links: [
             {
                 title: 'Instruction',
@@ -456,8 +483,8 @@ export default {
         },
     },
     UNIQUE: {
-        description: `Returns a list of unique values in a list or range`,
-        abstract: `Returns a list of unique values in a list or range`,
+        description: 'Returns a list of unique values in a list or range',
+        abstract: 'Returns a list of unique values in a list or range',
         links: [
             {
                 title: 'Instruction',
@@ -470,8 +497,8 @@ export default {
         },
     },
     VLOOKUP: {
-        description: `Use VLOOKUP when you need to find things in a table or a range by row. For example, look up a price of an automotive part by the part number, or find an employee name based on their employee ID.`,
-        abstract: `Looks in the first column of an array and moves across the row to return the value of a cell`,
+        description: 'Use VLOOKUP when you need to find things in a table or a range by row. For example, look up a price of an automotive part by the part number, or find an employee name based on their employee ID.',
+        abstract: 'Looks in the first column of an array and moves across the row to return the value of a cell',
         links: [
             {
                 title: 'Instruction',
@@ -498,8 +525,8 @@ export default {
         },
     },
     VSTACK: {
-        description: `Appends&nbsp;arrays vertically and in sequence to return a larger array`,
-        abstract: `Appends&nbsp;arrays vertically and in sequence to return a larger array`,
+        description: 'Appends&nbsp;arrays vertically and in sequence to return a larger array',
+        abstract: 'Appends&nbsp;arrays vertically and in sequence to return a larger array',
         links: [
             {
                 title: 'Instruction',
@@ -512,8 +539,8 @@ export default {
         },
     },
     WRAPCOLS: {
-        description: `Wraps the provided row or column of values by columns after a specified number of elements`,
-        abstract: `Wraps the provided row or column of values by columns after a specified number of elements`,
+        description: 'Wraps the provided row or column of values by columns after a specified number of elements',
+        abstract: 'Wraps the provided row or column of values by columns after a specified number of elements',
         links: [
             {
                 title: 'Instruction',
@@ -526,8 +553,8 @@ export default {
         },
     },
     WRAPROWS: {
-        description: `Wraps the provided row or column of values by rows after a specified number of elements`,
-        abstract: `Wraps the provided row or column of values by rows after a specified number of elements`,
+        description: 'Wraps the provided row or column of values by rows after a specified number of elements',
+        abstract: 'Wraps the provided row or column of values by rows after a specified number of elements',
         links: [
             {
                 title: 'Instruction',
@@ -540,8 +567,8 @@ export default {
         },
     },
     XLOOKUP: {
-        description: `Searches a range or an array, and returns&nbsp;an item&nbsp;corresponding&nbsp;to the&nbsp;first match it finds. If a match doesn't exist,&nbsp;then XLOOKUP can return the&nbsp;closest (approximate) match.&nbsp;`,
-        abstract: `Searches a range or an array, and returns&nbsp;an item&nbsp;corresponding&nbsp;to the&nbsp;first match it finds. If a match doesn't exist,&nbsp;then XLOOKUP can return the&nbsp;closest (approximate) match.&nbsp;`,
+        description: 'Searches a range or an array, and returns&nbsp;an item&nbsp;corresponding&nbsp;to the&nbsp;first match it finds. If a match doesn\'t exist,&nbsp;then XLOOKUP can return the&nbsp;closest (approximate) match.&nbsp;',
+        abstract: 'Searches a range or an array, and returns&nbsp;an item&nbsp;corresponding&nbsp;to the&nbsp;first match it finds. If a match doesn\'t exist,&nbsp;then XLOOKUP can return the&nbsp;closest (approximate) match.&nbsp;',
         links: [
             {
                 title: 'Instruction',
@@ -549,13 +576,29 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            lookupValue: {
+                name: 'lookup_value',
+                detail: 'The value to search for, If omitted, XLOOKUP returns blank cells it finds in lookup_array. ',
+            },
+            lookupArray: { name: 'lookup_array', detail: 'The array or range to search' },
+            returnArray: { name: 'return_array', detail: 'The array or range to return' },
+            ifNotFound: {
+                name: '[if_not_found]',
+                detail: 'Where a valid match is not found, return the [if_not_found] text you supply. If a valid match is not found, and [if_not_found] is missing, #N/A is returned.',
+            },
+            matchMode: {
+                name: '[match_mode]',
+                detail: `Specify the match type: 0 - Exact match. If none found, return #N/A. This is the default. -1 - Exact match. If none found, return the next smaller item. 1 - Exact match. If none found, return the next larger item. 2 - A wildcard match where *, ?, and ~ have special meaning.`,
+            },
+            searchMode: {
+                name: '[search_mode]',
+                detail: `Specify the search mode to use: 1 - Perform a search starting at the first item. This is the default. -1 - Perform a reverse search starting at the last item. 2 - Perform a binary search that relies on lookup_array being sorted in ascending order. If not sorted, invalid results will be returned. -2 - Perform a binary search that relies on lookup_array being sorted in descending order. If not sorted, invalid results will be returned.`,
+            },
         },
     },
     XMATCH: {
-        description: `Returns the&nbsp;relative&nbsp;position of an item in an array or range of cells.&nbsp;`,
-        abstract: `Returns the&nbsp;relative&nbsp;position of an item in an array or range of cells.&nbsp;`,
+        description: 'Returns the&nbsp;relative&nbsp;position of an item in an array or range of cells.&nbsp;',
+        abstract: 'Returns the&nbsp;relative&nbsp;position of an item in an array or range of cells.&nbsp;',
         links: [
             {
                 title: 'Instruction',

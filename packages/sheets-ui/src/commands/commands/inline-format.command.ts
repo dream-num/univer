@@ -15,7 +15,7 @@
  */
 
 import type { ICommand } from '@univerjs/core';
-import { CommandType, FOCUSING_EDITOR, ICommandService, IContextService } from '@univerjs/core';
+import { CommandType, EDITOR_ACTIVATED, ICommandService, IContextService } from '@univerjs/core';
 import {
     SetInlineFormatBoldCommand,
     SetInlineFormatFontFamilyCommand,
@@ -49,7 +49,7 @@ export const SetRangeBoldCommand: ICommand = {
     handler: async (accessor) => {
         const commandService = accessor.get(ICommandService);
         const contextService = accessor.get(IContextService);
-        const isCellEditorFocus = contextService.getContextValue(FOCUSING_EDITOR);
+        const isCellEditorFocus = contextService.getContextValue(EDITOR_ACTIVATED);
 
         if (isCellEditorFocus) {
             return commandService.executeCommand(SetInlineFormatBoldCommand.id);
@@ -65,7 +65,7 @@ export const SetRangeItalicCommand: ICommand = {
     handler: async (accessor) => {
         const commandService = accessor.get(ICommandService);
         const contextService = accessor.get(IContextService);
-        const isCellEditorFocus = contextService.getContextValue(FOCUSING_EDITOR);
+        const isCellEditorFocus = contextService.getContextValue(EDITOR_ACTIVATED);
 
         if (isCellEditorFocus) {
             return commandService.executeCommand(SetInlineFormatItalicCommand.id);
@@ -81,7 +81,7 @@ export const SetRangeUnderlineCommand: ICommand = {
     handler: async (accessor) => {
         const commandService = accessor.get(ICommandService);
         const contextService = accessor.get(IContextService);
-        const isCellEditorFocus = contextService.getContextValue(FOCUSING_EDITOR);
+        const isCellEditorFocus = contextService.getContextValue(EDITOR_ACTIVATED);
 
         if (isCellEditorFocus) {
             return commandService.executeCommand(SetInlineFormatUnderlineCommand.id);
@@ -97,7 +97,7 @@ export const SetRangeStrickThroughCommand: ICommand = {
     handler: async (accessor) => {
         const commandService = accessor.get(ICommandService);
         const contextService = accessor.get(IContextService);
-        const isCellEditorFocus = contextService.getContextValue(FOCUSING_EDITOR);
+        const isCellEditorFocus = contextService.getContextValue(EDITOR_ACTIVATED);
 
         if (isCellEditorFocus) {
             return commandService.executeCommand(SetInlineFormatStrikethroughCommand.id);
@@ -113,7 +113,7 @@ export const SetRangeSubscriptCommand: ICommand = {
     handler: async (accessor) => {
         const commandService = accessor.get(ICommandService);
         const contextService = accessor.get(IContextService);
-        const isCellEditorFocus = contextService.getContextValue(FOCUSING_EDITOR);
+        const isCellEditorFocus = contextService.getContextValue(EDITOR_ACTIVATED);
 
         if (isCellEditorFocus) {
             return commandService.executeCommand(SetInlineFormatSubscriptCommand.id);
@@ -129,7 +129,7 @@ export const SetRangeSuperscriptCommand: ICommand = {
     handler: async (accessor) => {
         const commandService = accessor.get(ICommandService);
         const contextService = accessor.get(IContextService);
-        const isCellEditorFocus = contextService.getContextValue(FOCUSING_EDITOR);
+        const isCellEditorFocus = contextService.getContextValue(EDITOR_ACTIVATED);
 
         if (isCellEditorFocus) {
             return commandService.executeCommand(SetInlineFormatSuperscriptCommand.id);
@@ -145,7 +145,7 @@ export const SetRangeFontSizeCommand: ICommand = {
     handler: async (accessor, params) => {
         const commandService = accessor.get(ICommandService);
         const contextService = accessor.get(IContextService);
-        const isCellEditorFocus = contextService.getContextValue(FOCUSING_EDITOR);
+        const isCellEditorFocus = contextService.getContextValue(EDITOR_ACTIVATED);
 
         if (isCellEditorFocus) {
             return commandService.executeCommand(SetInlineFormatFontSizeCommand.id, params);
@@ -161,7 +161,7 @@ export const SetRangeFontFamilyCommand: ICommand = {
     handler: async (accessor, params) => {
         const commandService = accessor.get(ICommandService);
         const contextService = accessor.get(IContextService);
-        const isCellEditorFocus = contextService.getContextValue(FOCUSING_EDITOR);
+        const isCellEditorFocus = contextService.getContextValue(EDITOR_ACTIVATED);
 
         if (isCellEditorFocus) {
             return commandService.executeCommand(SetInlineFormatFontFamilyCommand.id, params);
@@ -177,7 +177,7 @@ export const SetRangeTextColorCommand: ICommand = {
     handler: async (accessor, params) => {
         const commandService = accessor.get(ICommandService);
         const contextService = accessor.get(IContextService);
-        const isCellEditorFocus = contextService.getContextValue(FOCUSING_EDITOR);
+        const isCellEditorFocus = contextService.getContextValue(EDITOR_ACTIVATED);
 
         if (isCellEditorFocus) {
             return commandService.executeCommand(SetInlineFormatTextColorCommand.id, params);

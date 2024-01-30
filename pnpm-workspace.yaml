@@ -1,4 +1,4 @@
 packages:
-    # all packages in sub dirs of packages/ and Components/
+    - ./common/*
     - ./packages/*
     - ./examples

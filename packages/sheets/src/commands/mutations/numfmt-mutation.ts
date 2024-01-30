@@ -48,7 +48,7 @@ export const factorySetNumfmtUndoMutation = (accessor: IAccessor, option: ISetNu
         });
     });
     const result: Array<IMutationInfo<ISetNumfmtMutationParams | IRemoveNumfmtMutationParams>> = [];
-    if (cells) {
+    if (cells.length) {
         const params = transformCellsToRange(unitId, subUnitId, cells);
         Object.keys(params.values).forEach((key) => {
             const v = params.values[key];
@@ -59,7 +59,7 @@ export const factorySetNumfmtUndoMutation = (accessor: IAccessor, option: ISetNu
             params: transformCellsToRange(unitId, subUnitId, cells),
         });
     }
-    if (removeCells) {
+    if (removeCells.length) {
         result.push({
             id: RemoveNumfmtMutation.id,
             params: {
@@ -154,6 +154,9 @@ export const factoryRemoveNumfmtUndoMutation = (accessor: IAccessor, option: IRe
             }
         });
     });
+    if (!cells.length) {
+        return [];
+    }
     const params = transformCellsToRange(unitId, subUnitId, cells);
     Object.keys(params.values).forEach((key) => {
         const v = params.values[key];

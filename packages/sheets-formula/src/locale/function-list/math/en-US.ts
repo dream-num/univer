@@ -16,8 +16,8 @@
 
 export default {
     ABS: {
-        description: `Returns the absolute value of a number. The absolute value of a number is the number without its sign.`,
-        abstract: `Returns the absolute value of a number`,
+        description: 'Returns the absolute value of a number. The absolute value of a number is the number without its sign.',
+        abstract: 'Returns the absolute value of a number',
         links: [
             {
                 title: 'Instruction',
@@ -29,8 +29,8 @@ export default {
         },
     },
     ACOS: {
-        description: `Returns the arccosine, or inverse cosine, of a number. The arccosine is the angle whose cosine is number. The returned angle is given in radians in the range 0 (zero) to pi.`,
-        abstract: `Returns the arccosine of a number`,
+        description: 'Returns the arccosine, or inverse cosine, of a number. The arccosine is the angle whose cosine is number. The returned angle is given in radians in the range 0 (zero) to pi.',
+        abstract: 'Returns the arccosine of a number',
         links: [
             {
                 title: 'Instruction',
@@ -42,8 +42,8 @@ export default {
         },
     },
     ACOSH: {
-        description: `Returns the inverse hyperbolic cosine of a number. The number must be greater than or equal to 1. The inverse hyperbolic cosine is the value whose hyperbolic cosine is number, so ACOSH(COSH(number)) equals number.`,
-        abstract: `Returns the inverse hyperbolic cosine of a number`,
+        description: 'Returns the inverse hyperbolic cosine of a number. The number must be greater than or equal to 1. The inverse hyperbolic cosine is the value whose hyperbolic cosine is number, so ACOSH(COSH(number)) equals number.',
+        abstract: 'Returns the inverse hyperbolic cosine of a number',
         links: [
             {
                 title: 'Instruction',
@@ -55,8 +55,8 @@ export default {
         },
     },
     ACOT: {
-        description: `Returns the principal value of the arccotangent, or inverse cotangent, of a number.`,
-        abstract: `Returns the arccotangent of a number`,
+        description: 'Returns the principal value of the arccotangent, or inverse cotangent, of a number.',
+        abstract: 'Returns the arccotangent of a number',
         links: [
             {
                 title: 'Instruction',
@@ -71,8 +71,8 @@ export default {
         },
     },
     ACOTH: {
-        description: `Returns the hyperbolic arccotangent of a number`,
-        abstract: `Returns the hyperbolic arccotangent of a number`,
+        description: 'Returns the hyperbolic arccotangent of a number',
+        abstract: 'Returns the hyperbolic arccotangent of a number',
         links: [
             {
                 title: 'Instruction',
@@ -85,8 +85,8 @@ export default {
         },
     },
     AGGREGATE: {
-        description: `Returns an aggregate in a list or database`,
-        abstract: `Returns an aggregate in a list or database`,
+        description: 'Returns an aggregate in a list or database',
+        abstract: 'Returns an aggregate in a list or database',
         links: [
             {
                 title: 'Instruction',
@@ -99,8 +99,8 @@ export default {
         },
     },
     ARABIC: {
-        description: `Converts a Roman number to Arabic, as a number`,
-        abstract: `Converts a Roman number to Arabic, as a number`,
+        description: 'Converts a Roman number to Arabic, as a number',
+        abstract: 'Converts a Roman number to Arabic, as a number',
         links: [
             {
                 title: 'Instruction',
@@ -113,8 +113,8 @@ export default {
         },
     },
     ASIN: {
-        description: `Returns the arcsine of a number`,
-        abstract: `Returns the arcsine of a number`,
+        description: 'Returns the arcsine of a number',
+        abstract: 'Returns the arcsine of a number',
         links: [
             {
                 title: 'Instruction',
@@ -127,8 +127,8 @@ export default {
         },
     },
     ASINH: {
-        description: `Returns the inverse hyperbolic sine of a number`,
-        abstract: `Returns the inverse hyperbolic sine of a number`,
+        description: 'Returns the inverse hyperbolic sine of a number',
+        abstract: 'Returns the inverse hyperbolic sine of a number',
         links: [
             {
                 title: 'Instruction',
@@ -141,8 +141,8 @@ export default {
         },
     },
     ATAN: {
-        description: `Returns the arctangent of a number`,
-        abstract: `Returns the arctangent of a number`,
+        description: 'Returns the arctangent of a number',
+        abstract: 'Returns the arctangent of a number',
         links: [
             {
                 title: 'Instruction',
@@ -155,8 +155,8 @@ export default {
         },
     },
     ATAN2: {
-        description: `Returns the arctangent from x- and y-coordinates`,
-        abstract: `Returns the arctangent from x- and y-coordinates`,
+        description: 'Returns the arctangent from x- and y-coordinates',
+        abstract: 'Returns the arctangent from x- and y-coordinates',
         links: [
             {
                 title: 'Instruction',
@@ -169,8 +169,8 @@ export default {
         },
     },
     ATANH: {
-        description: `Returns the inverse hyperbolic tangent of a number`,
-        abstract: `Returns the inverse hyperbolic tangent of a number`,
+        description: 'Returns the inverse hyperbolic tangent of a number',
+        abstract: 'Returns the inverse hyperbolic tangent of a number',
         links: [
             {
                 title: 'Instruction',
@@ -183,8 +183,8 @@ export default {
         },
     },
     BASE: {
-        description: `Converts a number into a text representation with the given radix (base)`,
-        abstract: `Converts a number into a text representation with the given radix (base)`,
+        description: 'Converts a number into a text representation with the given radix (base)',
+        abstract: 'Converts a number into a text representation with the given radix (base)',
         links: [
             {
                 title: 'Instruction',
@@ -197,8 +197,8 @@ export default {
         },
     },
     CEILING: {
-        description: `Rounds a number to the nearest integer or to the nearest multiple of significance`,
-        abstract: `Rounds a number to the nearest integer or to the nearest multiple of significance`,
+        description: 'Rounds a number to the nearest integer or to the nearest multiple of significance',
+        abstract: 'Rounds a number to the nearest integer or to the nearest multiple of significance',
         links: [
             {
                 title: 'Instruction',
@@ -211,8 +211,8 @@ export default {
         },
     },
     CEILING_MATH: {
-        description: `Rounds a number up, to the nearest integer or to the nearest multiple of significance`,
-        abstract: `Rounds a number up, to the nearest integer or to the nearest multiple of significance`,
+        description: 'Rounds a number up, to the nearest integer or to the nearest multiple of significance',
+        abstract: 'Rounds a number up, to the nearest integer or to the nearest multiple of significance',
         links: [
             {
                 title: 'Instruction',
@@ -225,8 +225,8 @@ export default {
         },
     },
     CEILING_PRECISE: {
-        description: `Rounds a number the nearest integer or to the nearest multiple of significance. Regardless of the sign of the number, the number is rounded up.`,
-        abstract: `Rounds a number the nearest integer or to the nearest multiple of significance. Regardless of the sign of the number, the number is rounded up.`,
+        description: 'Rounds a number the nearest integer or to the nearest multiple of significance. Regardless of the sign of the number, the number is rounded up.',
+        abstract: 'Rounds a number the nearest integer or to the nearest multiple of significance. Regardless of the sign of the number, the number is rounded up.',
         links: [
             {
                 title: 'Instruction',
@@ -239,8 +239,8 @@ export default {
         },
     },
     COMBIN: {
-        description: `Returns the number of combinations for a given number of objects`,
-        abstract: `Returns the number of combinations for a given number of objects`,
+        description: 'Returns the number of combinations for a given number of objects',
+        abstract: 'Returns the number of combinations for a given number of objects',
         links: [
             {
                 title: 'Instruction',
@@ -253,8 +253,8 @@ export default {
         },
     },
     COMBINA: {
-        description: `Returns the number of combinations with repetitions for a given number of items`,
-        abstract: `Returns the number of combinations with repetitions for a given number of items`,
+        description: 'Returns the number of combinations with repetitions for a given number of items',
+        abstract: 'Returns the number of combinations with repetitions for a given number of items',
         links: [
             {
                 title: 'Instruction',
@@ -267,8 +267,8 @@ export default {
         },
     },
     COS: {
-        description: `Returns the cosine of a number`,
-        abstract: `Returns the cosine of a number`,
+        description: 'Returns the cosine of a number',
+        abstract: 'Returns the cosine of a number',
         links: [
             {
                 title: 'Instruction',
@@ -281,8 +281,8 @@ export default {
         },
     },
     COSH: {
-        description: `Returns the hyperbolic cosine of a number`,
-        abstract: `Returns the hyperbolic cosine of a number`,
+        description: 'Returns the hyperbolic cosine of a number',
+        abstract: 'Returns the hyperbolic cosine of a number',
         links: [
             {
                 title: 'Instruction',
@@ -295,8 +295,8 @@ export default {
         },
     },
     COT: {
-        description: `Returns the cotangent of an angle`,
-        abstract: `Returns the cotangent of an angle`,
+        description: 'Returns the cotangent of an angle',
+        abstract: 'Returns the cotangent of an angle',
         links: [
             {
                 title: 'Instruction',
@@ -309,8 +309,8 @@ export default {
         },
     },
     COTH: {
-        description: `Returns the hyperbolic cotangent of a number`,
-        abstract: `Returns the hyperbolic cotangent of a number`,
+        description: 'Returns the hyperbolic cotangent of a number',
+        abstract: 'Returns the hyperbolic cotangent of a number',
         links: [
             {
                 title: 'Instruction',
@@ -323,8 +323,8 @@ export default {
         },
     },
     CSC: {
-        description: `Returns the cosecant of an angle`,
-        abstract: `Returns the cosecant of an angle`,
+        description: 'Returns the cosecant of an angle',
+        abstract: 'Returns the cosecant of an angle',
         links: [
             {
                 title: 'Instruction',
@@ -337,8 +337,8 @@ export default {
         },
     },
     CSCH: {
-        description: `Returns the hyperbolic cosecant of an angle`,
-        abstract: `Returns the hyperbolic cosecant of an angle`,
+        description: 'Returns the hyperbolic cosecant of an angle',
+        abstract: 'Returns the hyperbolic cosecant of an angle',
         links: [
             {
                 title: 'Instruction',
@@ -351,8 +351,8 @@ export default {
         },
     },
     DECIMAL: {
-        description: `Converts a text representation of a number in a given base into a decimal number`,
-        abstract: `Converts a text representation of a number in a given base into a decimal number`,
+        description: 'Converts a text representation of a number in a given base into a decimal number',
+        abstract: 'Converts a text representation of a number in a given base into a decimal number',
         links: [
             {
                 title: 'Instruction',
@@ -365,8 +365,8 @@ export default {
         },
     },
     DEGREES: {
-        description: `Converts radians to degrees`,
-        abstract: `Converts radians to degrees`,
+        description: 'Converts radians to degrees',
+        abstract: 'Converts radians to degrees',
         links: [
             {
                 title: 'Instruction',
@@ -379,8 +379,8 @@ export default {
         },
     },
     EVEN: {
-        description: `Rounds a number up to the nearest even integer`,
-        abstract: `Rounds a number up to the nearest even integer`,
+        description: 'Rounds a number up to the nearest even integer',
+        abstract: 'Rounds a number up to the nearest even integer',
         links: [
             {
                 title: 'Instruction',
@@ -393,8 +393,8 @@ export default {
         },
     },
     EXP: {
-        description: `Returns e raised to the power of a given number`,
-        abstract: `Returns e raised to the power of a given number`,
+        description: 'Returns e raised to the power of a given number',
+        abstract: 'Returns e raised to the power of a given number',
         links: [
             {
                 title: 'Instruction',
@@ -407,8 +407,8 @@ export default {
         },
     },
     FACT: {
-        description: `Returns the factorial of a number`,
-        abstract: `Returns the factorial of a number`,
+        description: 'Returns the factorial of a number',
+        abstract: 'Returns the factorial of a number',
         links: [
             {
                 title: 'Instruction',
@@ -421,8 +421,8 @@ export default {
         },
     },
     FACTDOUBLE: {
-        description: `Returns the double factorial of a number`,
-        abstract: `Returns the double factorial of a number`,
+        description: 'Returns the double factorial of a number',
+        abstract: 'Returns the double factorial of a number',
         links: [
             {
                 title: 'Instruction',
@@ -435,8 +435,8 @@ export default {
         },
     },
     FLOOR: {
-        description: `Rounds a number down, toward zero`,
-        abstract: `Rounds a number down, toward zero`,
+        description: 'Rounds a number down, toward zero',
+        abstract: 'Rounds a number down, toward zero',
         links: [
             {
                 title: 'Instruction',
@@ -449,8 +449,8 @@ export default {
         },
     },
     FLOOR_MATH: {
-        description: `Rounds a number down, to the nearest integer or to the nearest multiple of significance`,
-        abstract: `Rounds a number down, to the nearest integer or to the nearest multiple of significance`,
+        description: 'Rounds a number down, to the nearest integer or to the nearest multiple of significance',
+        abstract: 'Rounds a number down, to the nearest integer or to the nearest multiple of significance',
         links: [
             {
                 title: 'Instruction',
@@ -463,8 +463,8 @@ export default {
         },
     },
     FLOOR_PRECISE: {
-        description: `Rounds a number down to the nearest integer or to the nearest multiple of significance. Regardless of the sign of the number, the number is rounded down.`,
-        abstract: `Rounds a number down to the nearest integer or to the nearest multiple of significance. Regardless of the sign of the number, the number is rounded down.`,
+        description: 'Rounds a number down to the nearest integer or to the nearest multiple of significance. Regardless of the sign of the number, the number is rounded down.',
+        abstract: 'Rounds a number down to the nearest integer or to the nearest multiple of significance. Regardless of the sign of the number, the number is rounded down.',
         links: [
             {
                 title: 'Instruction',
@@ -477,8 +477,8 @@ export default {
         },
     },
     GCD: {
-        description: `Returns the greatest common divisor`,
-        abstract: `Returns the greatest common divisor`,
+        description: 'Returns the greatest common divisor',
+        abstract: 'Returns the greatest common divisor',
         links: [
             {
                 title: 'Instruction',
@@ -491,8 +491,8 @@ export default {
         },
     },
     INT: {
-        description: `Rounds a number down to the nearest integer`,
-        abstract: `Rounds a number down to the nearest integer`,
+        description: 'Rounds a number down to the nearest integer',
+        abstract: 'Rounds a number down to the nearest integer',
         links: [
             {
                 title: 'Instruction',
@@ -505,8 +505,8 @@ export default {
         },
     },
     ISO_CEILING: {
-        description: `Returns a number that is rounded up to the nearest integer or to the nearest multiple of significance`,
-        abstract: `Returns a number that is rounded up to the nearest integer or to the nearest multiple of significance`,
+        description: 'Returns a number that is rounded up to the nearest integer or to the nearest multiple of significance',
+        abstract: 'Returns a number that is rounded up to the nearest integer or to the nearest multiple of significance',
         links: [
             {
                 title: 'Instruction',
@@ -519,8 +519,8 @@ export default {
         },
     },
     LCM: {
-        description: `Returns the least common multiple`,
-        abstract: `Returns the least common multiple`,
+        description: 'Returns the least common multiple',
+        abstract: 'Returns the least common multiple',
         links: [
             {
                 title: 'Instruction',
@@ -533,8 +533,8 @@ export default {
         },
     },
     LET: {
-        description: `Assigns names to calculation results to allow storing intermediate calculations, values, or defining names inside a formula`,
-        abstract: `Assigns names to calculation results to allow storing intermediate calculations, values, or defining names inside a formula`,
+        description: 'Assigns names to calculation results to allow storing intermediate calculations, values, or defining names inside a formula',
+        abstract: 'Assigns names to calculation results to allow storing intermediate calculations, values, or defining names inside a formula',
         links: [
             {
                 title: 'Instruction',
@@ -547,8 +547,8 @@ export default {
         },
     },
     LN: {
-        description: `Returns the natural logarithm of a number`,
-        abstract: `Returns the natural logarithm of a number`,
+        description: 'Returns the natural logarithm of a number',
+        abstract: 'Returns the natural logarithm of a number',
         links: [
             {
                 title: 'Instruction',
@@ -561,8 +561,8 @@ export default {
         },
     },
     LOG: {
-        description: `Returns the logarithm of a number to a specified base`,
-        abstract: `Returns the logarithm of a number to a specified base`,
+        description: 'Returns the logarithm of a number to a specified base',
+        abstract: 'Returns the logarithm of a number to a specified base',
         links: [
             {
                 title: 'Instruction',
@@ -575,8 +575,8 @@ export default {
         },
     },
     LOG10: {
-        description: `Returns the base-10 logarithm of a number`,
-        abstract: `Returns the base-10 logarithm of a number`,
+        description: 'Returns the base-10 logarithm of a number',
+        abstract: 'Returns the base-10 logarithm of a number',
         links: [
             {
                 title: 'Instruction',
@@ -589,8 +589,8 @@ export default {
         },
     },
     MDETERM: {
-        description: `Returns the matrix determinant of an array`,
-        abstract: `Returns the matrix determinant of an array`,
+        description: 'Returns the matrix determinant of an array',
+        abstract: 'Returns the matrix determinant of an array',
         links: [
             {
                 title: 'Instruction',
@@ -603,8 +603,8 @@ export default {
         },
     },
     MINVERSE: {
-        description: `Returns the matrix inverse of an array`,
-        abstract: `Returns the matrix inverse of an array`,
+        description: 'Returns the matrix inverse of an array',
+        abstract: 'Returns the matrix inverse of an array',
         links: [
             {
                 title: 'Instruction',
@@ -617,8 +617,8 @@ export default {
         },
     },
     MMULT: {
-        description: `Returns the matrix product of two arrays`,
-        abstract: `Returns the matrix product of two arrays`,
+        description: 'Returns the matrix product of two arrays',
+        abstract: 'Returns the matrix product of two arrays',
         links: [
             {
                 title: 'Instruction',
@@ -631,8 +631,8 @@ export default {
         },
     },
     MOD: {
-        description: `Returns the remainder from division`,
-        abstract: `Returns the remainder from division`,
+        description: 'Returns the remainder from division',
+        abstract: 'Returns the remainder from division',
         links: [
             {
                 title: 'Instruction',
@@ -645,8 +645,8 @@ export default {
         },
     },
     MROUND: {
-        description: `Returns a number rounded to the desired multiple`,
-        abstract: `Returns a number rounded to the desired multiple`,
+        description: 'Returns a number rounded to the desired multiple',
+        abstract: 'Returns a number rounded to the desired multiple',
         links: [
             {
                 title: 'Instruction',
@@ -659,8 +659,8 @@ export default {
         },
     },
     MULTINOMIAL: {
-        description: `Returns the multinomial of a set of numbers`,
-        abstract: `Returns the multinomial of a set of numbers`,
+        description: 'Returns the multinomial of a set of numbers',
+        abstract: 'Returns the multinomial of a set of numbers',
         links: [
             {
                 title: 'Instruction',
@@ -673,8 +673,8 @@ export default {
         },
     },
     MUNIT: {
-        description: `Returns the unit matrix or the specified dimension`,
-        abstract: `Returns the unit matrix or the specified dimension`,
+        description: 'Returns the unit matrix or the specified dimension',
+        abstract: 'Returns the unit matrix or the specified dimension',
         links: [
             {
                 title: 'Instruction',
@@ -687,8 +687,8 @@ export default {
         },
     },
     ODD: {
-        description: `Rounds a number up to the nearest odd integer`,
-        abstract: `Rounds a number up to the nearest odd integer`,
+        description: 'Rounds a number up to the nearest odd integer',
+        abstract: 'Rounds a number up to the nearest odd integer',
         links: [
             {
                 title: 'Instruction',
@@ -701,8 +701,8 @@ export default {
         },
     },
     PI: {
-        description: `Returns the value of pi`,
-        abstract: `Returns the value of pi`,
+        description: 'Returns the value of pi',
+        abstract: 'Returns the value of pi',
         links: [
             {
                 title: 'Instruction',
@@ -715,8 +715,8 @@ export default {
         },
     },
     POWER: {
-        description: `Returns the result of a number raised to a power`,
-        abstract: `Returns the result of a number raised to a power`,
+        description: 'Returns the result of a number raised to a power',
+        abstract: 'Returns the result of a number raised to a power',
         links: [
             {
                 title: 'Instruction',
@@ -729,8 +729,8 @@ export default {
         },
     },
     PRODUCT: {
-        description: `Multiplies its arguments`,
-        abstract: `Multiplies its arguments`,
+        description: 'Multiplies its arguments',
+        abstract: 'Multiplies its arguments',
         links: [
             {
                 title: 'Instruction',
@@ -743,8 +743,8 @@ export default {
         },
     },
     QUOTIENT: {
-        description: `Returns the integer portion of a division`,
-        abstract: `Returns the integer portion of a division`,
+        description: 'Returns the integer portion of a division',
+        abstract: 'Returns the integer portion of a division',
         links: [
             {
                 title: 'Instruction',
@@ -757,8 +757,8 @@ export default {
         },
     },
     RADIANS: {
-        description: `Converts degrees to radians`,
-        abstract: `Converts degrees to radians`,
+        description: 'Converts degrees to radians',
+        abstract: 'Converts degrees to radians',
         links: [
             {
                 title: 'Instruction',
@@ -771,8 +771,8 @@ export default {
         },
     },
     RAND: {
-        description: `Returns a random number between 0 and 1`,
-        abstract: `Returns a random number between 0 and 1`,
+        description: 'Returns a random number between 0 and 1',
+        abstract: 'Returns a random number between 0 and 1',
         links: [
             {
                 title: 'Instruction',
@@ -785,8 +785,8 @@ export default {
         },
     },
     RANDARRAY: {
-        description: `Returns an array of random numbers between 0 and 1. However, you can specify the number of rows and columns to fill, minimum and maximum values, and whether to return whole numbers or decimal values.`,
-        abstract: `Returns an array of random numbers between 0 and 1. However, you can specify the number of rows and columns to fill, minimum and maximum values, and whether to return whole numbers or decimal values.`,
+        description: 'Returns an array of random numbers between 0 and 1. However, you can specify the number of rows and columns to fill, minimum and maximum values, and whether to return whole numbers or decimal values.',
+        abstract: 'Returns an array of random numbers between 0 and 1. However, you can specify the number of rows and columns to fill, minimum and maximum values, and whether to return whole numbers or decimal values.',
         links: [
             {
                 title: 'Instruction',
@@ -799,8 +799,8 @@ export default {
         },
     },
     RANDBETWEEN: {
-        description: `Returns a random number between the numbers you specify`,
-        abstract: `Returns a random number between the numbers you specify`,
+        description: 'Returns a random number between the numbers you specify',
+        abstract: 'Returns a random number between the numbers you specify',
         links: [
             {
                 title: 'Instruction',
@@ -813,8 +813,8 @@ export default {
         },
     },
     ROMAN: {
-        description: `Converts an Arabic numeral to Roman, as text`,
-        abstract: `Converts an Arabic numeral to Roman, as text`,
+        description: 'Converts an Arabic numeral to Roman, as text',
+        abstract: 'Converts an Arabic numeral to Roman, as text',
         links: [
             {
                 title: 'Instruction',
@@ -827,8 +827,8 @@ export default {
         },
     },
     ROUND: {
-        description: `Rounds a number to a specified number of digits`,
-        abstract: `Rounds a number to a specified number of digits`,
+        description: 'Rounds a number to a specified number of digits',
+        abstract: 'Rounds a number to a specified number of digits',
         links: [
             {
                 title: 'Instruction',
@@ -841,8 +841,8 @@ export default {
         },
     },
     ROUNDDOWN: {
-        description: `Rounds a number down, toward zero`,
-        abstract: `Rounds a number down, toward zero`,
+        description: 'Rounds a number down, toward zero',
+        abstract: 'Rounds a number down, toward zero',
         links: [
             {
                 title: 'Instruction',
@@ -855,8 +855,8 @@ export default {
         },
     },
     ROUNDUP: {
-        description: `Rounds a number up, away from zero`,
-        abstract: `Rounds a number up, away from zero`,
+        description: 'Rounds a number up, away from zero',
+        abstract: 'Rounds a number up, away from zero',
         links: [
             {
                 title: 'Instruction',
@@ -869,8 +869,8 @@ export default {
         },
     },
     SEC: {
-        description: `Returns the secant of an angle`,
-        abstract: `Returns the secant of an angle`,
+        description: 'Returns the secant of an angle',
+        abstract: 'Returns the secant of an angle',
         links: [
             {
                 title: 'Instruction',
@@ -883,8 +883,8 @@ export default {
         },
     },
     SECH: {
-        description: `Returns the hyperbolic secant of an angle`,
-        abstract: `Returns the hyperbolic secant of an angle`,
+        description: 'Returns the hyperbolic secant of an angle',
+        abstract: 'Returns the hyperbolic secant of an angle',
         links: [
             {
                 title: 'Instruction',
@@ -897,8 +897,8 @@ export default {
         },
     },
     SERIESSUM: {
-        description: `Returns the sum of a power series based on the formula`,
-        abstract: `Returns the sum of a power series based on the formula`,
+        description: 'Returns the sum of a power series based on the formula',
+        abstract: 'Returns the sum of a power series based on the formula',
         links: [
             {
                 title: 'Instruction',
@@ -911,8 +911,8 @@ export default {
         },
     },
     SEQUENCE: {
-        description: `Generates a list of sequential numbers in an array, such as 1, 2, 3, 4`,
-        abstract: `Generates a list of sequential numbers in an array, such as 1, 2, 3, 4`,
+        description: 'Generates a list of sequential numbers in an array, such as 1, 2, 3, 4',
+        abstract: 'Generates a list of sequential numbers in an array, such as 1, 2, 3, 4',
         links: [
             {
                 title: 'Instruction',
@@ -925,8 +925,8 @@ export default {
         },
     },
     SIGN: {
-        description: `Returns the sign of a number`,
-        abstract: `Returns the sign of a number`,
+        description: 'Returns the sign of a number',
+        abstract: 'Returns the sign of a number',
         links: [
             {
                 title: 'Instruction',
@@ -939,8 +939,8 @@ export default {
         },
     },
     SIN: {
-        description: `Returns the sine of the given angle`,
-        abstract: `Returns the sine of the given angle`,
+        description: 'Returns the sine of the given angle',
+        abstract: 'Returns the sine of the given angle',
         links: [
             {
                 title: 'Instruction',
@@ -953,8 +953,8 @@ export default {
         },
     },
     SINH: {
-        description: `Returns the hyperbolic sine of a number`,
-        abstract: `Returns the hyperbolic sine of a number`,
+        description: 'Returns the hyperbolic sine of a number',
+        abstract: 'Returns the hyperbolic sine of a number',
         links: [
             {
                 title: 'Instruction',
@@ -967,8 +967,8 @@ export default {
         },
     },
     SQRT: {
-        description: `Returns a positive square root`,
-        abstract: `Returns a positive square root`,
+        description: 'Returns a positive square root',
+        abstract: 'Returns a positive square root',
         links: [
             {
                 title: 'Instruction',
@@ -981,8 +981,8 @@ export default {
         },
     },
     SQRTPI: {
-        description: `Returns the square root of (number * pi)`,
-        abstract: `Returns the square root of (number * pi)`,
+        description: 'Returns the square root of (number * pi)',
+        abstract: 'Returns the square root of (number * pi)',
         links: [
             {
                 title: 'Instruction',
@@ -995,8 +995,8 @@ export default {
         },
     },
     SUBTOTAL: {
-        description: `Returns a subtotal in a list or database`,
-        abstract: `Returns a subtotal in a list or database`,
+        description: 'Returns a subtotal in a list or database',
+        abstract: 'Returns a subtotal in a list or database',
         links: [
             {
                 title: 'Instruction',
@@ -1009,8 +1009,8 @@ export default {
         },
     },
     SUM: {
-        description: `You can add individual values, cell references or ranges or a mix of all three.`,
-        abstract: `Adds its arguments`,
+        description: 'You can add individual values, cell references or ranges or a mix of all three.',
+        abstract: 'Adds its arguments',
         links: [
             {
                 title: 'Instruction',
@@ -1019,18 +1019,18 @@ export default {
         ],
         functionParameter: {
             number1: {
-                name: 'number1',
+                name: 'Number 1',
                 detail: 'The first number you want to add. The number can be like 4, a cell reference like B6, or a cell range like B2:B8.',
             },
             number2: {
-                name: 'number2',
+                name: 'Number 2',
                 detail: 'This is the second number you want to add. You can specify up to 255 numbers in this way.',
             },
         },
     },
     SUMIF: {
-        description: `Sum the values in a range that meet criteria that you specify.`,
-        abstract: `Adds the cells specified by a given criteria`,
+        description: 'Sum the values in a range that meet criteria that you specify.',
+        abstract: 'Adds the cells specified by a given criteria',
         links: [
             {
                 title: 'Instruction',
@@ -1039,22 +1039,22 @@ export default {
         ],
         functionParameter: {
             range: {
-                name: 'range',
+                name: 'Range',
                 detail: 'The range of cells that you want evaluated by criteria.',
             },
             criteria: {
-                name: 'criteria',
+                name: 'Criteria',
                 detail: 'The criteria in the form of a number, expression, a cell reference, text, or a function that defines which cells will be added. Wildcard characters can be included - a question mark (?) to match any single character, an asterisk (*) to match any sequence of characters. If you want to find an actual question mark or asterisk, type a tilde (~) preceding the character.',
             },
-            sum_range: {
-                name: 'sum_range',
+            sumRange: {
+                name: 'Sum Range',
                 detail: 'The actual cells to add, if you want to add cells other than those specified in the range argument. If the sum_range argument is omitted, Excel adds the cells that are specified in the range argument (the same cells to which the criteria is applied).',
             },
         },
     },
     SUMIFS: {
-        description: `Adds the cells in a range that meet multiple criteria`,
-        abstract: `Adds the cells in a range that meet multiple criteria`,
+        description: 'Adds the cells in a range that meet multiple criteria',
+        abstract: 'Adds the cells in a range that meet multiple criteria',
         links: [
             {
                 title: 'Instruction',
@@ -1062,13 +1062,16 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            sumRange: { name: 'Sum Range', detail: 'The range of cells to sum.' },
+            criteriaRange1: { name: 'Criteria Range 1', detail: 'The range that is tested using Criteria 1. Criteria Range 1 and Criteria 1 set up a search pair whereby a range is searched for specific criteria. Once items in the range are found, their corresponding values in Sum Range are added.' },
+            criteria1: { name: 'Criteria 1', detail: 'The criteria that defines which cells in Criteria Range 1 will be added. For example, criteria can be entered as 32, ">32", B4, "apples", or "32".' },
+            criteriaRange2: { name: 'Criteria Range 2', detail: 'Additional ranges. You can enter up to 127 range pairs.' },
+            criteria2: { name: 'Criteria 2', detail: 'Additional associated criteria. You can enter up to 127 criteria pairs.' },
         },
     },
     SUMPRODUCT: {
-        description: `Returns the sum of the products of corresponding array components`,
-        abstract: `Returns the sum of the products of corresponding array components`,
+        description: 'Returns the sum of the products of corresponding array components',
+        abstract: 'Returns the sum of the products of corresponding array components',
         links: [
             {
                 title: 'Instruction',
@@ -1081,8 +1084,8 @@ export default {
         },
     },
     SUMSQ: {
-        description: `Returns the sum of the squares of the arguments`,
-        abstract: `Returns the sum of the squares of the arguments`,
+        description: 'Returns the sum of the squares of the arguments',
+        abstract: 'Returns the sum of the squares of the arguments',
         links: [
             {
                 title: 'Instruction',
@@ -1095,8 +1098,8 @@ export default {
         },
     },
     SUMX2MY2: {
-        description: `Returns the sum of the difference of squares of corresponding values in two arrays`,
-        abstract: `Returns the sum of the difference of squares of corresponding values in two arrays`,
+        description: 'Returns the sum of the difference of squares of corresponding values in two arrays',
+        abstract: 'Returns the sum of the difference of squares of corresponding values in two arrays',
         links: [
             {
                 title: 'Instruction',
@@ -1109,8 +1112,8 @@ export default {
         },
     },
     SUMX2PY2: {
-        description: `Returns the sum of the sum of squares of corresponding values in two arrays`,
-        abstract: `Returns the sum of the sum of squares of corresponding values in two arrays`,
+        description: 'Returns the sum of the sum of squares of corresponding values in two arrays',
+        abstract: 'Returns the sum of the sum of squares of corresponding values in two arrays',
         links: [
             {
                 title: 'Instruction',
@@ -1123,8 +1126,8 @@ export default {
         },
     },
     SUMXMY2: {
-        description: `Returns the sum of squares of differences of corresponding values in two arrays`,
-        abstract: `Returns the sum of squares of differences of corresponding values in two arrays`,
+        description: 'Returns the sum of squares of differences of corresponding values in two arrays',
+        abstract: 'Returns the sum of squares of differences of corresponding values in two arrays',
         links: [
             {
                 title: 'Instruction',
@@ -1137,8 +1140,8 @@ export default {
         },
     },
     TAN: {
-        description: `Returns the tangent of a number`,
-        abstract: `Returns the tangent of a number`,
+        description: 'Returns the tangent of a number',
+        abstract: 'Returns the tangent of a number',
         links: [
             {
                 title: 'Instruction',
@@ -1151,8 +1154,8 @@ export default {
         },
     },
     TANH: {
-        description: `Returns the hyperbolic tangent of a number`,
-        abstract: `Returns the hyperbolic tangent of a number`,
+        description: 'Returns the hyperbolic tangent of a number',
+        abstract: 'Returns the hyperbolic tangent of a number',
         links: [
             {
                 title: 'Instruction',
@@ -1165,8 +1168,8 @@ export default {
         },
     },
     TRUNC: {
-        description: `Truncates a number to an integer`,
-        abstract: `Truncates a number to an integer`,
+        description: 'Truncates a number to an integer',
+        abstract: 'Truncates a number to an integer',
         links: [
             {
                 title: 'Instruction',

@@ -1433,7 +1433,8 @@ export class ArrayValueObject extends BaseValueObject {
                 if (currentValue.isError()) {
                     result[r][column] = currentValue as ErrorValueObject;
                 } else if (valueObject.isError()) {
-                    result[r][column] = new ErrorValueObject(ErrorType.VALUE);
+                    // 1 + #NAME? gets #NAME?
+                    result[r][column] = valueObject;
                 } else {
                     switch (batchOperatorType) {
                         case BatchOperatorType.PLUS:

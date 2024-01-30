@@ -185,6 +185,10 @@ export class FormulaDataModel extends Disposable {
         return this._numfmtItemMap;
     }
 
+    setNumfmtItemMap(value: INumfmtItemMap) {
+        this._numfmtItemMap = value;
+    }
+
     updateNumfmtItemMap(value: INumfmtItemMap) {
         Object.keys(value).forEach((unitId) => {
             const sheetData = value[unitId];

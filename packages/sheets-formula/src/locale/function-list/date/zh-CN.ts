@@ -16,7 +16,7 @@
 
 export default {
     DATE: {
-        description: '返回特定日期的序列号',
+        description: '采用三个单独的值并将它们合并为一个日期。',
         abstract: '返回特定日期的序列号',
         links: [
             {
@@ -25,8 +25,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            year: { name: '年', detail: '可以包含 1 到 4 位数字。 Excel 根据计算机使用的日期系统解释 year 参数。 默认情况下，Univer 使用 1900 日期系统，这意味着第一个日期是 1900 年 1 月 1 日。' },
+            month: { name: '月', detail: '一个正整数或负整数，表示一年中从 1 月至 12 月（一月到十二月）的各个月。' },
+            day: { name: '日', detail: '一个正整数或负整数，表示一月中从 1 日到 31 日的各天。' },
         },
     },
     DATEDIF: {

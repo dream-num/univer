@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+import { DateFunction } from './date';
 import { FUNCTION_NAMES_DATE } from './function-names';
 import { Today } from './today';
 
 export const functionDate = [
     [Today, FUNCTION_NAMES_DATE.TODAY],
+    [DateFunction, FUNCTION_NAMES_DATE.DATE],
 ];

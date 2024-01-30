@@ -25,8 +25,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            year: { name: '年', detail: 'year 引数の値 には 、1 ~ 4 桁の数字を指定できます。 Excel は、コンピューター が使用 している日付システムに応じて年の引数を解釈します。 既定では、Univer では 1900 年の日付システムが使用されます。つまり、最初の日付は 1900 年 1 月 1 日です。' },
+            month: { name: '月', detail: '1 ~ 12 (1 月から 12 月) の月を表す正または負の整数です。' },
+            day: { name: '日', detail: '1 ~ 31 の月の日を表す正または負の整数です。' },
         },
     },
     DATEDIF: {

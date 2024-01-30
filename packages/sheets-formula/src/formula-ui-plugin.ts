@@ -40,6 +40,7 @@ import {
 import { FormulaInputService, IFormulaInputService } from './services/formula-input.service';
 import { FormulaPromptService, IFormulaPromptService } from './services/prompt.service';
 import { IRegisterFunctionService, RegisterFunctionService } from './services/register-function.service';
+import { NumfmtFormulaDisplayController } from './controllers/numfmt-formula-display.controller';
 
 /**
  * The configuration of the formula UI plugin.
@@ -86,6 +87,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
             [FormulaAutoFillController],
             [FormulaClipboardController],
             [ArrayFormulaDisplayController],
+            [NumfmtFormulaDisplayController],
             [TriggerCalculationController],
             [UpdateFormulaController],
             [FormulaEditorShowController],

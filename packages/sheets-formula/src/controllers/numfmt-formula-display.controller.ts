@@ -16,14 +16,14 @@
 
 import type { ICommandInfo } from '@univerjs/core';
 import { CellValueType, Disposable, ICommandService, LifecycleStages, OnLifecycle, ThemeService } from '@univerjs/core';
-import type { ISetArrayFormulaDataMutationParams } from '@univerjs/engine-formula';
-import { FormulaDataModel, SetArrayFormulaDataMutation } from '@univerjs/engine-formula';
+import type { ISetNumfmtFormulaDataMutationParams } from '@univerjs/engine-formula';
+import { FormulaDataModel, SetNumfmtFormulaDataMutation } from '@univerjs/engine-formula';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { getPatternPreview } from '@univerjs/sheets-numfmt';
 import { Inject } from '@wendellhu/redi';
 
-@OnLifecycle(LifecycleStages.Ready, ArrayFormulaDisplayController)
-export class ArrayFormulaDisplayController extends Disposable {
+@OnLifecycle(LifecycleStages.Ready, NumfmtFormulaDisplayController)
+export class NumfmtFormulaDisplayController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
@@ -45,19 +45,18 @@ export class ArrayFormulaDisplayController extends Disposable {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 // Synchronous data from worker
-                if (command.id !== SetArrayFormulaDataMutation.id) {
+                if (command.id !== SetNumfmtFormulaDataMutation.id) {
                     return;
                 }
 
-                const params = command.params as ISetArrayFormulaDataMutationParams;
+                const params = command.params as ISetNumfmtFormulaDataMutationParams;
 
                 if (params == null) {
                     return;
                 }
 
-                const { arrayFormulaRange, arrayFormulaCellData } = params;
-                this._formulaDataModel.setArrayFormulaRange(arrayFormulaRange);
-                this._formulaDataModel.setArrayFormulaCellData(arrayFormulaCellData);
+                const { numfmtItemMap } = params;
+                this._formulaDataModel.updateNumfmtItemMap(numfmtItemMap);
             })
         );
     }
@@ -65,53 +64,43 @@ export class ArrayFormulaDisplayController extends Disposable {
     private _initInterceptorCellContent() {
         this.disposeWithMe(
             this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
-                priority: 100,
+                priority: 98,
                 handler: (cell, location, next) => {
                     const { unitId, subUnitId, row, col } = location;
-                    const arrayFormulaCellData = this._formulaDataModel.getArrayFormulaCellData();
-                    const arrayFormulaRange = this._formulaDataModel.getArrayFormulaRange();
-                    const cellData = arrayFormulaCellData?.[unitId]?.[subUnitId]?.[row]?.[col];
-                    const cellRange = arrayFormulaRange?.[unitId]?.[subUnitId]?.[row]?.[col];
-                    if (cellData == null) {
-                        return next(cell);
-                    }
-
-                    if (cellRange != null && cellRange.startRow === row && cellRange.startColumn === col) {
-                        return next(cell);
-                    }
 
                     const numfmtItemMap = this._formulaDataModel.getNumfmtItemMap();
                     const numfmtItem = numfmtItemMap[unitId]?.[subUnitId]?.[row]?.[col];
 
-                    if (numfmtItem) {
-                        const value = cellData?.v;
-                        const type = cellData?.t;
+                    if (numfmtItem == null) {
+                        return next(cell);
+                    }
 
-                        if (value == null || type !== CellValueType.NUMBER) {
-                            return next(cell);
-                        }
+                    const rawValue = location.worksheet.getCellRaw(row, col);
+                    const value = rawValue?.v;
+                    const type = rawValue?.t;
 
-                        const info = getPatternPreview(numfmtItem, value as number);
+                    if (value == null || type !== CellValueType.NUMBER) {
+                        return next(cell);
+                    }
 
-                        if (info.color) {
-                            const colorMap = this._themeService.getCurrentTheme();
-                            const color = colorMap[`${info.color}500`];
-                            return {
-                                ...cell,
-                                v: info.result,
-                                t: CellValueType.STRING,
-                                s: { cl: { rgb: color } },
-                            };
-                        }
+                    const info = getPatternPreview(numfmtItem, value as number);
 
+                    if (info.color) {
+                        const colorMap = this._themeService.getCurrentTheme();
+                        const color = colorMap[`${info.color}500`];
                         return {
                             ...cell,
                             v: info.result,
                             t: CellValueType.STRING,
+                            s: { cl: { rgb: color } },
                         };
                     }
 
-                    return next({ ...cell, ...cellData });
+                    return {
+                        ...cell,
+                        v: info.result,
+                        t: CellValueType.STRING,
+                    };
                 },
             })
         );

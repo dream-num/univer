@@ -101,7 +101,7 @@ export interface IOtherFormulaData {
 }
 
 export interface INumfmtItemMap {
-    [unitId: string]: Nullable<{ [sheetId: string]: IObjectMatrixPrimitiveType<string> }>;
+    [unitId: string]: Nullable<{ [sheetId: string]: IObjectMatrixPrimitiveType<Nullable<string>> }>;
 }
 
 /**
@@ -113,7 +113,6 @@ export interface IFormulaDataItem {
     x?: number; // Offset from x direction
     y?: number; // Offset from y direction
     si?: string; // formulaId,
-    p?: string; // number format
     // row: number;
     // column: number;
     // sheetId: string;

@@ -400,6 +400,9 @@ export class NumberValueObject extends BaseValueObject {
             return object;
         }
 
+        // Set number format
+        object.setPattern(this.getPattern() || valueObject.getPattern());
+
         return object;
     }
 
@@ -420,6 +423,9 @@ export class NumberValueObject extends BaseValueObject {
             return this;
         }
 
+        // Set number format
+        object.setPattern(this.getPattern() || valueObject.getPattern());
+
         return object;
     }
 
@@ -427,7 +433,12 @@ export class NumberValueObject extends BaseValueObject {
         if (valueObject.isArray()) {
             return valueObject.multiply(this);
         }
-        return this.multiplyBy(valueObject.getValue());
+        const object = this.multiplyBy(valueObject.getValue());
+
+        // Set number format
+        object.setPattern(this.getPattern() || valueObject.getPattern());
+
+        return object;
     }
 
     override divided(valueObject: BaseValueObject): BaseValueObject {
@@ -438,7 +449,12 @@ export class NumberValueObject extends BaseValueObject {
             }
             return (o as BaseValueObject).multiply(this);
         }
-        return this.dividedBy(valueObject.getValue());
+        const object = this.dividedBy(valueObject.getValue());
+
+        // Set number format
+        object.setPattern(this.getPattern() || valueObject.getPattern());
+
+        return object;
     }
 
     override concatenateFront(valueObject: BaseValueObject): BaseValueObject {

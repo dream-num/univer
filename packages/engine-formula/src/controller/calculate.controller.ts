@@ -15,7 +15,7 @@
  */
 
 import type { ICommandInfo, IUnitRange } from '@univerjs/core';
-import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import type { IDirtyUnitFeatureMap, IDirtyUnitSheetNameMap, IFormulaData, INumfmtItemMap } from '../basics/common';
@@ -34,6 +34,7 @@ import { FormulaDataModel } from '../models/formula-data.model';
 import { CalculateFormulaService } from '../services/calculate-formula.service';
 import type { IAllRuntimeData } from '../services/runtime.service';
 import { FormulaExecutedStateType } from '../services/runtime.service';
+import { SetNumfmtFormulaDataMutation } from '../commands/mutations/set-numfmt-formula-data.mutation';
 
 @OnLifecycle(LifecycleStages.Ready, CalculateController)
 export class CalculateController extends Disposable {
@@ -188,7 +189,7 @@ export class CalculateController extends Disposable {
     }
 
     private async _applyFormula(data: IAllRuntimeData) {
-        const { unitData, unitOtherData, arrayFormulaRange, arrayFormulaCellData, clearArrayFormulaCellData } = data;
+        const { unitData, unitOtherData, arrayFormulaRange, arrayFormulaCellData, clearArrayFormulaCellData, numfmtItemMap } = data;
 
         if (!unitData) {
             console.error('No sheetData from Formula Engine!');
@@ -210,6 +211,19 @@ export class CalculateController extends Disposable {
                 {
                     arrayFormulaRange: this._formulaDataModel.getArrayFormulaRange(),
                     arrayFormulaCellData: this._formulaDataModel.getArrayFormulaCellData(),
+                },
+                {
+                    onlyLocal: true,
+                }
+            );
+        }
+
+        // Synchronous to the main thread
+        if (!Tools.isEmptyObject(numfmtItemMap)) {
+            this._commandService.executeCommand(
+                SetNumfmtFormulaDataMutation.id,
+                {
+                    numfmtItemMap,
                 },
                 {
                     onlyLocal: true,

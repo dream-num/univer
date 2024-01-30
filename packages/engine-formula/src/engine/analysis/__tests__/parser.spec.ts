@@ -59,6 +59,7 @@ describe('Test indirect', () => {
             formulaData: {},
             arrayFormulaCellData: {},
             forceCalculate: false,
+            numfmtItemMap: {},
             dirtyRanges: [],
             dirtyNameMap: {},
             dirtyUnitFeatureMap: {},

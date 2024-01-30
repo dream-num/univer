@@ -15,11 +15,10 @@
  */
 
 import type { ICommandInfo, IUnitRange } from '@univerjs/core';
-import { Disposable, ICommandService, LifecycleStages, ObjectMatrix, OnLifecycle, Tools } from '@univerjs/core';
+import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import type {
     IDirtyUnitFeatureMap,
     IDirtyUnitSheetNameMap,
-    IFormulaDataItem,
     INumfmtItemMap,
     ISetFormulaCalculationNotificationMutation,
 } from '@univerjs/engine-formula';
@@ -171,48 +170,24 @@ export class TriggerCalculationController extends Disposable {
                 numfmtItemMap[unitId]![sheetId] = {};
             }
 
-            if (!Tools.isEmptyObject(numfmtItemMap[unitId]![sheetId])) {
-                return;
-            }
+            const numfmtModel = this._numfmtService.getModel(unitId, sheetId);
 
-            const numfmtItem = this._numfmtService.getModel(unitId, sheetId);
-            if (!numfmtItem) return;
+            if (!numfmtModel) return;
 
-            numfmtItem.forValue((row, col, numfmt) => {
-                if (numfmt) {
+            const refMode = this._numfmtService.getRefModel(unitId);
+
+            numfmtModel.forValue((row, col, numfmtValue) => {
+                if (numfmtValue && refMode) {
+                    const refValue = refMode.getValue(numfmtValue?.i);
+
+                    if (!refValue) return;
+
                     if (numfmtItemMap[unitId]![sheetId][row] == null) {
                         numfmtItemMap[unitId]![sheetId][row] = {};
                     }
 
-                    numfmtItemMap[unitId]![sheetId][row][col] = numfmt.i;
+                    numfmtItemMap[unitId]![sheetId][row][col] = refValue.pattern;
                 }
-            });
-        });
-
-        const formulaData = this._formulaDataModel.getFormulaData();
-        Object.keys(formulaData).forEach((unitId) => {
-            const unitData = formulaData[unitId];
-            if (!unitData) return;
-            Object.keys(unitData).forEach((sheetId) => {
-                const sheetData = unitData[sheetId];
-                const formulaDataItemMatrix = new ObjectMatrix<IFormulaDataItem>(sheetData);
-                formulaDataItemMatrix.forValue((row, col, formulaDataItem) => {
-                    if (formulaDataItem?.n) {
-                        if (numfmtItemMap[unitId] == null) {
-                            numfmtItemMap[unitId] = {};
-                        }
-
-                        if (numfmtItemMap[unitId]![sheetId] == null) {
-                            numfmtItemMap[unitId]![sheetId] = {};
-                        }
-
-                        if (numfmtItemMap[unitId]![sheetId][row] == null) {
-                            numfmtItemMap[unitId]![sheetId][row] = {};
-                        }
-
-                        numfmtItemMap[unitId]![sheetId][row][col] = formulaDataItem.n;
-                    }
-                });
             });
         });
 

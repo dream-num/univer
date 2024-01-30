@@ -146,6 +146,9 @@ export class BaseReferenceObject extends ObjectClassType {
             return callback(new ErrorValueObject(ErrorType.VALUE), startRow, startColumn);
         }
 
+        const unitId = this._forcedUnitId || this._defaultUnitId;
+        const sheetId = this._forcedSheetId || this._defaultSheetId;
+
         for (let r = startRow; r <= endRow; r++) {
             for (let c = startColumn; c <= endColumn; c++) {
                 if (r < 0 || c < 0) {
@@ -160,6 +163,9 @@ export class BaseReferenceObject extends ObjectClassType {
                 }
 
                 const resultObjectValue = this.getCellValueObject(cell);
+
+                const pattern = this._numfmtItemData[unitId]?.[sheetId]?.[r]?.[c];
+                pattern && resultObjectValue.setPattern(pattern);
 
                 result = callback(resultObjectValue, r, c);
 
@@ -178,7 +184,15 @@ export class BaseReferenceObject extends ObjectClassType {
             return new NumberValueObject(0, true);
         }
 
-        return this.getCellValueObject(cell);
+        const cellValueObject = this.getCellValueObject(cell);
+
+        // Set numfmt pattern
+        const unitId = this._forcedUnitId || this._defaultUnitId;
+        const sheetId = this._forcedSheetId || this._defaultSheetId;
+        const numfmtItem = this._numfmtItemData[unitId]?.[sheetId]?.[startRow]?.[startColumn];
+        numfmtItem && cellValueObject.setPattern(numfmtItem);
+
+        return cellValueObject;
     }
 
     getRangeData() {
@@ -291,7 +305,7 @@ export class BaseReferenceObject extends ObjectClassType {
         this._runtimeFeatureCellData = unitData;
     }
 
-    getNmfmtItemData() {
+    getNumfmtItemData() {
         return this._numfmtItemData;
     }
 
@@ -472,10 +486,6 @@ export class BaseReferenceObject extends ObjectClassType {
             }
 
             arrayValueList[row][column] = valueObject;
-
-            if (rowIndex === startRow && columnIndex === startColumn) {
-                return false;
-            }
         });
 
         const arrayValueObjectData: IArrayValueObject = {

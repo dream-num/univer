@@ -523,12 +523,12 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
                     arrayUnitData.setValue(currentRow, currentColumn, value);
 
-                    if (numfmtItem[currentRow] == null) {
-                        numfmtItem[currentRow] = {};
-                    }
-
                     const pattern = valueObject?.getPattern();
                     if (pattern) {
+                        if (numfmtItem[currentRow] == null) {
+                            numfmtItem[currentRow] = {};
+                        }
+
                         numfmtItem[currentRow]![currentColumn] = pattern;
                     }
                 });
@@ -536,6 +536,13 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         } else {
             const valueObject = this._objectValueToCellValue(functionVariant as BaseValueObject);
             sheetData.setValue(row, column, valueObject);
+
+            if (numfmtItem[row] == null) {
+                numfmtItem[row] = {};
+            }
+
+            numfmtItem[row]![column] = functionVariant.getPattern();
+
             clearArrayUnitData.setValue(row, column, valueObject);
         }
     }

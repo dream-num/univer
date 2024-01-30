@@ -45,7 +45,7 @@ export interface ICheckboxGroupProps {
  * CheckboxGroup Component
  */
 export function CheckboxGroup(props: ICheckboxGroupProps) {
-    const { children, value, disabled = false, onChange, style } = props;
+    const { children, value, disabled, onChange, style } = props;
 
     const handleChange = (item: string | number | boolean) => {
         if (value.includes(item)) {

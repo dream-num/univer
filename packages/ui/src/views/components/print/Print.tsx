@@ -16,17 +16,17 @@
 
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ComponentManager } from '../../../common/component-manager';
 import { IPrintService } from '../../../services/print/print.service';
 import { useObservable } from '../../../components/hooks/observable';
 
 import styles from './index.module.less';
+import { useEffect } from 'react';
 
 export function Print() {
     const printService = useDependency(IPrintService);
-    const visible = useObservable(printService.visible$);
-
+    const [visible, setVisible] = useState(false);
     const componentKey = useObservable(printService.componentKey$);
     const componentManager = useDependency(ComponentManager);
 
@@ -38,6 +38,16 @@ export function Print() {
             return Component;
         }
     }, [componentKey]);
+
+    useEffect(() => {
+        const subscription = printService.visible$.subscribe(val => {
+            setVisible(val)
+        })
+
+        return () => {
+            subscription.unsubscribe()
+        }
+    }, [printService.visible$])
 
     if (!visible) {
         return null;

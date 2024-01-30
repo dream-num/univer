@@ -61,6 +61,7 @@ import {
     FONT_FAMILY_LIST,
     FONT_SIZE_LIST,
     getMenuHiddenObservable,
+    IClipboardInterfaceService,
     MenuGroup,
     MenuItemType,
     MenuPosition,
@@ -811,7 +812,11 @@ export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
 }
 
 // #region - copy cut paste
-// TODO@wzhudev: maybe we should move these menu factory to base-ui
+// TODO@wzhudev: maybe we should move these menu factory to @univerjs/ui
+
+function menuClipboardDisabledObservable(injector: IAccessor): Observable<boolean> {
+    return new Observable((subscriber) => subscriber.next(!injector.get(IClipboardInterfaceService).supportClipboard));
+}
 
 export function CopyMenuItemFactory(): IMenuButtonItem {
     return {
@@ -842,13 +847,14 @@ export function CutMenuItemFactory(): IMenuButtonItem {
     };
 }
 
-export function PasteMenuItemFactory(): IMenuButtonItem {
+export function PasteMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: PasteCommand.id,
         group: MenuGroup.CONTEXT_MENU_FORMAT,
         type: MenuItemType.BUTTON,
         title: 'rightClick.paste',
         icon: 'PasteSpecial',
+        disabled$: menuClipboardDisabledObservable(accessor),
         positions: [
             MenuPosition.CONTEXT_MENU,
             SheetMenuPosition.COL_HEADER_CONTEXT_MENU,
@@ -858,13 +864,14 @@ export function PasteMenuItemFactory(): IMenuButtonItem {
 }
 
 export const PASTE_SPECIAL_MENU_ID = 'sheet.menu.paste-special';
-export function PasteSpacialMenuItemFactory(): IMenuSelectorItem {
+export function PasteSpacialMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {
         id: PASTE_SPECIAL_MENU_ID,
         group: MenuGroup.CONTEXT_MENU_FORMAT,
         type: MenuItemType.SUBITEMS,
         icon: 'PasteSpecial',
         title: 'rightClick.pasteSpecial',
+        disabled$: menuClipboardDisabledObservable(accessor),
         positions: [
             MenuPosition.CONTEXT_MENU,
             SheetMenuPosition.COL_HEADER_CONTEXT_MENU,
@@ -873,39 +880,43 @@ export function PasteSpacialMenuItemFactory(): IMenuSelectorItem {
     };
 }
 
-export function PasteValueMenuItemFactory(): IMenuButtonItem<string> {
+export function PasteValueMenuItemFactory(accessor: IAccessor): IMenuButtonItem<string> {
     return {
         id: SheetPasteValueCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.pasteValue',
         positions: [PASTE_SPECIAL_MENU_ID],
+        disabled$: menuClipboardDisabledObservable(accessor),
     };
 }
 
-export function PasteFormatMenuItemFactory(): IMenuButtonItem<string> {
+export function PasteFormatMenuItemFactory(accessor: IAccessor): IMenuButtonItem<string> {
     return {
         id: SheetPasteFormatCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.pasteFormat',
         positions: [PASTE_SPECIAL_MENU_ID],
+        disabled$: menuClipboardDisabledObservable(accessor),
     };
 }
 
-export function PasteColWidthMenuItemFactory(): IMenuButtonItem<string> {
+export function PasteColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem<string> {
     return {
         id: SheetPasteColWidthCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.pasteColWidth',
         positions: [PASTE_SPECIAL_MENU_ID],
+        disabled$: menuClipboardDisabledObservable(accessor),
     };
 }
 
-export function PasteBesidesBorderMenuItemFactory(): IMenuButtonItem<string> {
+export function PasteBesidesBorderMenuItemFactory(accessor: IAccessor): IMenuButtonItem<string> {
     return {
         id: SheetPasteBesidesBorderCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.pasteBesidesBorder',
         positions: [PASTE_SPECIAL_MENU_ID],
+        disabled$: menuClipboardDisabledObservable(accessor),
     };
 }
 

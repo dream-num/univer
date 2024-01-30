@@ -73,6 +73,7 @@ export interface ISheetClipboardService {
     copy(): Promise<boolean>;
     cut(): Promise<boolean>;
     paste(item: ClipboardItem, pasteType?: string): Promise<boolean>;
+    legacyPaste(html?: string, text?: string): Promise<boolean>;
 
     addClipboardHook(hook: ISheetClipboardHook): IDisposable;
     getClipboardHooks(): ISheetClipboardHook[];
@@ -208,6 +209,16 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         this._logService.error('[SheetClipboardService]', 'No valid data on clipboard');
 
         return false;
+    }
+
+    legacyPaste(html?: string, text?: string): Promise<boolean> {
+        if (html) {
+            return this._pasteHTML(html, PREDEFINED_HOOK_NAME.DEFAULT_PASTE);
+        } else if (text) {
+            return this._pastePlainText(text, PREDEFINED_HOOK_NAME.DEFAULT_PASTE);
+        }
+
+        return Promise.resolve(false);
     }
 
     addClipboardHook(hook: ISheetClipboardHook): IDisposable {

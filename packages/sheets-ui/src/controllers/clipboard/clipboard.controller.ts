@@ -29,9 +29,11 @@ import {
     BooleanNumber,
     DEFAULT_WORKSHEET_COLUMN_WIDTH,
     DEFAULT_WORKSHEET_ROW_HEIGHT,
+    EDITOR_ACTIVATED,
     handleStyleToString,
     ICommandService,
     IConfigService,
+    IContextService,
     IUniverInstanceService,
     LifecycleStages,
     LocaleService,
@@ -97,6 +99,7 @@ export class SheetClipboardController extends RxDisposable {
     constructor(
         @IUniverInstanceService private readonly _currentUniverSheet: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
+        @IContextService private readonly _contextService: IContextService,
         @IConfigService private readonly _configService: IConfigService,
         @ISheetClipboardService private readonly _sheetClipboardService: ISheetClipboardService,
         @IClipboardInterfaceService private readonly _clipboardInterfaceService: IClipboardInterfaceService,
@@ -112,6 +115,10 @@ export class SheetClipboardController extends RxDisposable {
 
         if (!this._clipboardInterfaceService.supportClipboard) {
             this._textSelectionRenderManager.onPaste$.pipe(takeUntil(this.dispose$)).subscribe((config) => {
+                if (this._contextService.getContextValue(EDITOR_ACTIVATED)) {
+                    return;
+                }
+
                 // editor's value should not change and avoid triggering input event
                 config!.event.preventDefault();
 

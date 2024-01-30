@@ -136,7 +136,7 @@ export class Engine extends ThinEngine<Scene> {
      * To ensure mouse events remain bound to the host element,
      * preventing the events from becoming ineffective once the mouse leaves the host.
      */
-    setRemainCapture() {
+    override setRemainCapture() {
         this._canvasEle.setPointerCapture(this._remainCapture);
     }
 

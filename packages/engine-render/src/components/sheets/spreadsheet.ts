@@ -241,7 +241,7 @@ export class Spreadsheet extends SheetComponent {
 
         mainCtx.translateWithPrecision(rowHeaderWidth, columnHeaderHeight);
 
-        this._drawAuxiliary(mainCtx);
+        this._drawAuxiliary(mainCtx, bounds);
 
         if (bounds && this._allowCache === true) {
             const { viewBound, diffBounds, diffX, diffY, viewPortPosition, viewPortKey } = bounds;
@@ -465,9 +465,8 @@ export class Spreadsheet extends SheetComponent {
         return newViewports;
     }
 
-    private _drawAuxiliary(ctx: UniverRenderingContext) {
+    private _drawAuxiliary(ctx: UniverRenderingContext, bounds?: IViewportBound) {
         const spreadsheetSkeleton = this.getSkeleton();
-
         if (spreadsheetSkeleton == null) {
             return;
         }
@@ -496,9 +495,10 @@ export class Spreadsheet extends SheetComponent {
 
         ctx.strokeStyle = getColor([212, 212, 212]);
 
-        const width = columnTotalWidth;
-
-        const height = rowTotalHeight;
+        const startX = columnWidthAccumulation[startColumn - 1] || 0;
+        const startY = rowHeightAccumulation[startRow - 1] || 0;
+        let endX = columnWidthAccumulation[endColumn];
+        let endY = rowHeightAccumulation[endRow];
 
         const columnWidthAccumulationLength = columnWidthAccumulation.length;
         const rowHeightAccumulationLength = rowHeightAccumulation.length;
@@ -511,27 +511,27 @@ export class Spreadsheet extends SheetComponent {
 
         ctx.translateWithPrecisionRatio(FIX_ONE_PIXEL_BLUR_OFFSET, FIX_ONE_PIXEL_BLUR_OFFSET);
 
-        ctx.moveTo(0, 0);
-        ctx.lineTo(width, 0);
+        ctx.moveTo(startX, startY);
+        ctx.lineTo(endX, startY);
 
         for (let r = 0; r <= rowHeightAccumulationLength - 1; r++) {
             if (r < 0 || r > rowHeightAccumulationLength - 1) {
                 continue;
             }
             const rowEndPosition = rowHeightAccumulation[r];
-            ctx.moveTo(0, rowEndPosition);
-            ctx.lineTo(width, rowEndPosition);
+            ctx.moveTo(startX, rowEndPosition);
+            ctx.lineTo(endX, rowEndPosition);
         }
 
-        ctx.moveTo(0, 0);
-        ctx.lineTo(0, height);
+        ctx.moveTo(startX, startY);
+        ctx.lineTo(startX, endY);
         for (let c = 0; c <= columnWidthAccumulationLength - 1; c++) {
             if (c < 0 || c > columnWidthAccumulationLength - 1) {
                 continue;
             }
             const columnEndPosition = columnWidthAccumulation[c];
-            ctx.moveTo(columnEndPosition, columnDrawTopStart);
-            ctx.lineTo(columnEndPosition, height);
+            ctx.moveTo(columnEndPosition, startY);
+            ctx.lineTo(columnEndPosition, endY);
         }
         // console.log('xx2', scaleX, scaleY, columnTotalWidth, rowTotalHeight, rowHeightAccumulation, columnWidthAccumulation);
         ctx.stroke();

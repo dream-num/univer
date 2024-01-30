@@ -98,7 +98,7 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
 
         if (isCompositionEnd) {
             if (result) {
-                const historyParams = imeInputManagerService.fetchComposedUndoRedoMutationParams(newText);
+                const historyParams = imeInputManagerService.fetchComposedUndoRedoMutationParams();
 
                 if (historyParams == null) {
                     return false;

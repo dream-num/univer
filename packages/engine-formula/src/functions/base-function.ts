@@ -115,6 +115,7 @@ export class BaseFunction extends Disposable {
             if (isNaN(colIndexNumV)) {
                 return new ErrorValueObject(ErrorType.REF);
             }
+            return colIndexNumV;
         } else if (indexNum.isNumber()) {
             const colIndexNumV = indexNum.getValue() as number;
             return colIndexNumV;

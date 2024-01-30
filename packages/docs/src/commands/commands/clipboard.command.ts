@@ -45,7 +45,7 @@ export const DocPasteCommand: IMultiCommand = {
     name: 'doc.command.paste',
     type: CommandType.COMMAND,
     multi: true,
-    priority: 999,
+    priority: 999, // Need to bigger than SheetPasteCommand's priority.
     preconditions: (contextService) =>
         contextService.getContextValue(FOCUSING_DOC) || contextService.getContextValue(EDITOR_ACTIVATED),
     handler: async () => true,

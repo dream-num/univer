@@ -67,7 +67,7 @@ export default {
             },
         ],
         functionParameter: {
-            value: { name: 'value', detail: 'The value that you want tested. The value argument can be a blank (empty cell), error, logical value, text, number, or reference value, or a name referring to any of these.' },
+            value: { name: 'Value', detail: 'The value that you want tested. The value argument can be a blank (empty cell), error, logical value, text, number, or reference value, or a name referring to any of these.' },
         },
     },
     ISERR: {

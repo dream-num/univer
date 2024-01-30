@@ -336,8 +336,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            reference: { name: '引用', detail: '要基于偏移量的引用。 引用必须引用单元格或相邻单元格区域;否则，OFFSET 返回#VALUE！ 错误值。' },
+            rows: { name: '行数', detail: '需要左上角单元格引用的向上或向下行数。 使用 5 作为 rows 参数，可指定引用中的左上角单元格为引用下方的 5 行。 Rows 可为正数（这意味着在起始引用的下方）或负数（这意味着在起始引用的上方）。' },
+            cols: { name: '列数', detail: '需要结果的左上角单元格引用的从左到右的列数。 使用 5 作为 cols 参数，可指定引用中的左上角单元格为引用右方的 5 列。 Cols 可为正数（这意味着在起始引用的右侧）或负数（这意味着在起始引用的左侧）。' },
+            height: { name: '行高', detail: '需要返回的引用的行高。 Height 必须为正数。' },
+            width: { name: '列宽', detail: '需要返回的引用的列宽。 Width 必须为正数。' },
         },
     },
     ROW: {

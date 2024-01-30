@@ -32,13 +32,18 @@ export function normalizeTextRuns(textRuns: ITextRun[]) {
     const results: ITextRun[] = [];
 
     for (const textRun of textRuns) {
-        const { st, ed } = textRun;
+        const { st, ed, ts } = textRun;
 
         if (textRun.sId === undefined) {
             delete textRun.sId;
         }
 
         if (st === ed) {
+            continue;
+        }
+
+        // Delete textRun if it has no style(ts is empty or has no sId)
+        if (Tools.isEmptyObject(ts) && textRun.sId == null) {
             continue;
         }
 

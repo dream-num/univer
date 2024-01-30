@@ -17,7 +17,9 @@
 import { describe, expect, it } from 'vitest';
 import type { IDocumentBody } from '../../../../types/interfaces/i-document-data';
 import { BooleanNumber } from '../../../../types/enum/text-style';
-import { composeBody, getBodySlice } from '../utils';
+import { composeBody, getBodySlice, isUselessRetainAction } from '../utils';
+import type { IRetainAction } from '../../action-types';
+import { TextXActionType } from '../../action-types';
 
 describe('test text-x utils', () => {
     it('test getBodySlice fn', () => {
@@ -338,5 +340,40 @@ describe('test text-x utils', () => {
                 startIndex: 8,
             }],
         });
+    });
+
+    it('test isUselessRetainAction()', () => {
+        const action1: IRetainAction = {
+            t: TextXActionType.RETAIN,
+            len: 10,
+        };
+
+        const action2: IRetainAction = {
+            t: TextXActionType.RETAIN,
+            len: 10,
+            body: {
+                dataStream: '',
+                textRuns: [],
+            },
+        };
+
+        const action3: IRetainAction = {
+            t: TextXActionType.RETAIN,
+            len: 10,
+            body: {
+                dataStream: '',
+                textRuns: [{
+                    st: 0,
+                    ed: 10,
+                    ts: {
+                        bl: BooleanNumber.FALSE,
+                    },
+                }],
+            },
+        };
+
+        expect(isUselessRetainAction(action1)).toBe(true);
+        expect(isUselessRetainAction(action2)).toBe(true);
+        expect(isUselessRetainAction(action3)).toBe(false);
     });
 });

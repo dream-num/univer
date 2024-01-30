@@ -19,7 +19,7 @@ import type { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import type { IDocumentBody } from '../../../types/interfaces/i-document-data';
 import { type IDeleteAction, type IInsertAction, type IRetainAction, type TextXAction, TextXActionType } from '../action-types';
 import { ActionIterator } from './action-iterator';
-import { composeBody } from './utils';
+import { composeBody, isUselessRetainAction } from './utils';
 
 function onlyHasDataStream(body: IDocumentBody) {
     return Object.keys(body).length === 1;
@@ -200,7 +200,7 @@ export class TextX {
     trimEndUselessRetainAction(): this {
         let lastAction = this._actions[this._actions.length - 1];
 
-        while (lastAction && lastAction.t === TextXActionType.RETAIN && lastAction.body == null) {
+        while (lastAction && lastAction.t === TextXActionType.RETAIN && isUselessRetainAction(lastAction)) {
             this._actions.pop();
 
             lastAction = this._actions[this._actions.length - 1];

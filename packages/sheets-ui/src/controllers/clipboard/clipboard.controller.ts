@@ -29,7 +29,6 @@ import {
     BooleanNumber,
     DEFAULT_WORKSHEET_COLUMN_WIDTH,
     DEFAULT_WORKSHEET_ROW_HEIGHT,
-    EDITOR_ACTIVATED,
     handleStyleToString,
     ICommandService,
     IConfigService,
@@ -81,6 +80,7 @@ import type {
     ISheetRangeLocation,
 } from '../../services/clipboard/type';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
+import { whenSheetEditorFocused } from '../shortcuts/utils';
 import {
     generateBody,
     getClearAndSetMergeMutations,
@@ -115,7 +115,7 @@ export class SheetClipboardController extends RxDisposable {
 
         if (!this._clipboardInterfaceService.supportClipboard) {
             this._textSelectionRenderManager.onPaste$.pipe(takeUntil(this.dispose$)).subscribe((config) => {
-                if (this._contextService.getContextValue(EDITOR_ACTIVATED)) {
+                if (whenSheetEditorFocused(this._contextService) === false) {
                     return;
                 }
 

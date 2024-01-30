@@ -58,7 +58,7 @@ import {
     SetWorksheetRowHeightMutation,
 } from '@univerjs/sheets';
 import { IClipboardInterfaceService, IMessageService, textTrim } from '@univerjs/ui';
-import { Inject, Injector } from '@wendellhu/redi';
+import { Inject, Injector, Optional } from '@wendellhu/redi';
 
 import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import { takeUntil } from 'rxjs';
@@ -97,6 +97,7 @@ import {
 @OnLifecycle(LifecycleStages.Steady, SheetClipboardController)
 export class SheetClipboardController extends RxDisposable {
     constructor(
+        @Inject(Injector) private readonly _injector: Injector,
         @IUniverInstanceService private readonly _currentUniverSheet: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @IContextService private readonly _contextService: IContextService,
@@ -104,17 +105,16 @@ export class SheetClipboardController extends RxDisposable {
         @ISheetClipboardService private readonly _sheetClipboardService: ISheetClipboardService,
         @IClipboardInterfaceService private readonly _clipboardInterfaceService: IClipboardInterfaceService,
         @IMessageService private readonly _messageService: IMessageService,
-        @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @Inject(Injector) private readonly _injector: Injector,
-        @Inject(LocaleService) private readonly _localService: LocaleService
+        @Inject(LocaleService) private readonly _localService: LocaleService,
+        @Optional(ITextSelectionRenderManager) private readonly _textSelectionRenderManager?: ITextSelectionRenderManager
     ) {
         super();
 
         this._init();
 
         if (!this._clipboardInterfaceService.supportClipboard) {
-            this._textSelectionRenderManager.onPaste$.pipe(takeUntil(this.dispose$)).subscribe((config) => {
+            this._textSelectionRenderManager?.onPaste$.pipe(takeUntil(this.dispose$)).subscribe((config) => {
                 if (whenSheetEditorFocused(this._contextService) === false) {
                     return;
                 }

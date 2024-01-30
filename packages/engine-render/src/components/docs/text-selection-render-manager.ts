@@ -201,7 +201,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
     private readonly _onSelectionStart$ = new BehaviorSubject<Nullable<INodePosition>>(null);
     readonly onSelectionStart$ = this._onSelectionStart$.asObservable();
 
-    private readonly _onPaste$ = new Subject<Nullable<IEditorInputConfig>>(null);
+    private readonly _onPaste$ = new Subject<Nullable<IEditorInputConfig>>();
     readonly onPaste$ = this._onPaste$.asObservable();
 
     private readonly _textSelectionInner$ = new BehaviorSubject<Nullable<ITextSelectionInnerParam>>(null);

@@ -217,6 +217,8 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         } else if (text) {
             return this._pastePlainText(text, PREDEFINED_HOOK_NAME.DEFAULT_PASTE);
         }
+
+        return Promise.resolve(false);
     }
 
     addClipboardHook(hook: ISheetClipboardHook): IDisposable {

@@ -71,7 +71,7 @@ export class NumfmtFormulaDisplayController extends Disposable {
                     const numfmtItemMap = this._formulaDataModel.getNumfmtItemMap();
                     const numfmtItem = numfmtItemMap[unitId]?.[subUnitId]?.[row]?.[col];
 
-                    if (numfmtItem == null) {
+                    if (numfmtItem == null || numfmtItem === '') {
                         return next(cell);
                     }
 

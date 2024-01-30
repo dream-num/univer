@@ -15,12 +15,14 @@
  */
 
 import { NumberValueObject } from '../../..';
-import { excelDateSerial } from '../../../basics/date';
+import { DEFFAULT_DATE_FORMAT, excelDateSerial } from '../../../basics/date';
 import { BaseFunction } from '../../base-function';
 
 export class Today extends BaseFunction {
     override calculate() {
         const currentSerial = excelDateSerial(new Date());
-        return new NumberValueObject(currentSerial);
+        const valueObject = new NumberValueObject(currentSerial);
+        valueObject.setPattern(DEFFAULT_DATE_FORMAT);
+        return valueObject;
     }
 }

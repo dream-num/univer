@@ -18,7 +18,7 @@ import type { Nullable, Observer } from '@univerjs/core';
 import { DataStreamTreeTokenType, ILogService, RxDisposable } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 import { CURSOR_TYPE } from '../../basics/const';
 import type { IDocumentSkeletonSpan } from '../../basics/i-document-skeleton-cached';
@@ -181,39 +181,30 @@ export interface IEditorInputConfig {
 
 export class TextSelectionRenderManager extends RxDisposable implements ITextSelectionRenderManager {
     private readonly _onInputBefore$ = new BehaviorSubject<Nullable<IEditorInputConfig>>(null);
-
     readonly onInputBefore$ = this._onInputBefore$.asObservable();
 
     private readonly _onKeydown$ = new BehaviorSubject<Nullable<IEditorInputConfig>>(null);
-
     readonly onKeydown$ = this._onKeydown$.asObservable();
 
     private readonly _onInput$ = new BehaviorSubject<Nullable<IEditorInputConfig>>(null);
-
     readonly onInput$ = this._onInput$.asObservable();
 
     private readonly _onCompositionstart$ = new BehaviorSubject<Nullable<IEditorInputConfig>>(null);
-
     readonly onCompositionstart$ = this._onCompositionstart$.asObservable();
 
     private readonly _onCompositionupdate$ = new BehaviorSubject<Nullable<IEditorInputConfig>>(null);
-
     readonly onCompositionupdate$ = this._onCompositionupdate$.asObservable();
 
     private readonly _onCompositionend$ = new BehaviorSubject<Nullable<IEditorInputConfig>>(null);
-
     readonly onCompositionend$ = this._onCompositionend$.asObservable();
 
     private readonly _onSelectionStart$ = new BehaviorSubject<Nullable<INodePosition>>(null);
-
     readonly onSelectionStart$ = this._onSelectionStart$.asObservable();
 
-    private readonly _onPaste$ = new BehaviorSubject<Nullable<IEditorInputConfig>>(null);
-
+    private readonly _onPaste$ = new Subject<Nullable<IEditorInputConfig>>(null);
     readonly onPaste$ = this._onPaste$.asObservable();
 
     private readonly _textSelectionInner$ = new BehaviorSubject<Nullable<ITextSelectionInnerParam>>(null);
-
     readonly textSelectionInner$ = this._textSelectionInner$.asObservable();
 
     private _container!: HTMLDivElement;
@@ -1002,6 +993,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         });
     }
 
+    // FIXME: listeners here are not correctly disposed
     private _initInputEvents() {
         this._input.addEventListener('keydown', (e) => {
             if (this._isIMEInputApply) {

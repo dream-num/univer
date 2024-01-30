@@ -154,7 +154,7 @@ export class DesktopShortcutService extends Disposable implements IShortcutServi
         const altKey = binding & MetaKeys.ALT;
         const macCtrl = binding & MetaKeys.MAC_CTRL;
 
-        const body = KeyCodeToChar[binding & 0xff] ?? '<->';
+        const body = KeyCodeToChar[binding & 0xFF] ?? '<->';
 
         if (this._platformService.isMac) {
             return `${ctrlKey ? '⌘' : ''}${shiftKey ? '⇧' : ''}${altKey ? '⌥' : ''}${macCtrl ? '⌃' : ''}${body}`;

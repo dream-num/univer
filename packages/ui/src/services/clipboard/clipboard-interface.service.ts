@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable } from '@univerjs/core';
+import { Disposable, ILogService } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 
 export const PLAIN_TEXT_CLIPBOARD_MIME_TYPE = 'text/plain';
@@ -29,6 +29,7 @@ export interface IClipboardInterfaceService {
      * @param text
      */
     writeText(text: string): Promise<void>;
+
     /**
      * Write both plain text and html into clipboard.
      * @param text
@@ -41,12 +42,14 @@ export interface IClipboardInterfaceService {
      * @returns plain text
      */
     readText(): Promise<string>;
+
     /**
      * Read `ClipboardItem[]` from clipboard.
      */
     read(): Promise<ClipboardItem[]>;
 
     // NOTE: maybe we should add an interface to support image copy
+    readonly supportClipboard: boolean;
 }
 
 export const IClipboardInterfaceService = createIdentifier<IClipboardInterfaceService>(
@@ -54,7 +57,19 @@ export const IClipboardInterfaceService = createIdentifier<IClipboardInterfaceSe
 );
 
 export class BrowserClipboardService extends Disposable implements IClipboardInterfaceService {
+    get supportClipboard(): boolean {
+        return typeof window.navigator.clipboard.readText === 'function';
+    }
+
+    constructor(@ILogService private readonly _logService: ILogService) {
+        super();
+    }
+
     async write(text: string, html: string): Promise<void> {
+        if (!this.supportClipboard) {
+            return this._legacyCopyHtml(html);
+        }
+
         try {
             // write both pure text content and html content to the clipboard
             return await navigator.clipboard.write([
@@ -64,7 +79,7 @@ export class BrowserClipboardService extends Disposable implements IClipboardInt
                 }),
             ]);
         } catch (error) {
-            console.error(error);
+            this._logService.error('[BrowserClipboardService]', error);
         }
     }
 
@@ -73,24 +88,47 @@ export class BrowserClipboardService extends Disposable implements IClipboardInt
         try {
             return await navigator.clipboard.writeText(text);
         } catch (error) {
-            console.error(error);
+            this._logService.error('[BrowserClipboardService]', error);
         }
 
-        // fallback to traditional way
+        this._legacyCopyText(text);
+    }
+
+    private _legacyCopyHtml(html: string): void {
         const activeElement = document.activeElement;
-        const container = createCopyPasteContainer();
-        container.value = text;
-        container.focus();
-        container.select();
+        const container = createCopyHtmlContainer();
         document.body.appendChild(container);
+        container.innerHTML = html; // TODO: wzhudev: sanitize html
 
-        document.execCommand('copy');
+        try {
+            select(container);
+            document.execCommand('copy');
+        } finally {
+            if (activeElement instanceof HTMLElement) {
+                activeElement.focus();
+            }
 
-        if (activeElement instanceof HTMLElement) {
-            activeElement.focus();
+            document.body.removeChild(container);
         }
+    }
 
-        document.removeChild(container);
+    private _legacyCopyText(text: string): void {
+        const activeElement = document.activeElement;
+        const container = createCopyTextContainer();
+        document.body.appendChild(container);
+        container.value = text;
+
+        try {
+            select(container);
+            document.execCommand('copy');
+        } finally {
+        // reset previous elements focus state
+            if (activeElement instanceof HTMLElement) {
+                activeElement.focus();
+            }
+
+            document.body.removeChild(container);
+        }
     }
 
     async read(): Promise<ClipboardItem[]> {
@@ -108,10 +146,58 @@ export class BrowserClipboardService extends Disposable implements IClipboardInt
     }
 }
 
-function createCopyPasteContainer() {
+function createCopyTextContainer() {
     const textArea = document.createElement('textarea');
     textArea.style.position = 'absolute';
     textArea.style.height = '1px';
     textArea.style.width = '1px';
+    textArea.style.opacity = '0';
+    textArea.readOnly = true;
     return textArea;
+}
+
+function createCopyHtmlContainer() {
+    const div = document.createElement('div');
+    div.contentEditable = 'true';
+    div.style.position = 'absolute';
+    div.style.opacity = '0';
+    div.style.height = '1px';
+    div.style.width = '1px';
+    return div;
+}
+
+function select(element: HTMLTextAreaElement | HTMLDivElement): string {
+    if (element instanceof HTMLTextAreaElement) {
+        const isReadOnly = element.hasAttribute('readonly');
+
+        if (!isReadOnly) {
+            element.setAttribute('readonly', '');
+        }
+
+        element.select();
+        element.setSelectionRange(0, element.value.length);
+
+        if (!isReadOnly) {
+            element.removeAttribute('readonly');
+        }
+
+        return element.value;
+    }
+
+    if (element.hasAttribute('contenteditable')) {
+        element.focus();
+    }
+
+    const range = document.createRange();
+    range.selectNodeContents(element);
+    const selection = window.getSelection();
+
+    if (!selection) {
+        throw new Error();
+    }
+
+    selection.removeAllRanges();
+    selection.addRange(range);
+
+    return selection.toString();
 }

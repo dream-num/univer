@@ -17,6 +17,7 @@
 import { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import { Tools } from '../../../shared/tools';
 import type { IDocumentBody, IParagraph, ITextRun } from '../../../types/interfaces/i-document-data';
+import type { IRetainAction } from '../action-types';
 import { coverTextRuns } from '../apply-utils/update-apply';
 
 export function getBodySlice(body: IDocumentBody, startOffset: number, endOffset: number): IDocumentBody {
@@ -140,4 +141,20 @@ export function composeBody(
     }
 
     return retBody;
+}
+
+export function isUselessRetainAction(action: IRetainAction): boolean {
+    const { body } = action;
+
+    if (body == null) {
+        return true;
+    }
+
+    const { textRuns = [], paragraphs = [] } = body;
+
+    if (textRuns.length === 0 && paragraphs.length === 0) {
+        return true;
+    }
+
+    return false;
 }

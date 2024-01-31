@@ -95,7 +95,10 @@ export class ConditionalFormatRuleModel {
         const list = this._ensureList(unitId, subUnitId);
         const oldRule = list.find((item) => item.cfId === rule.cfId);
         if (oldRule) {
-            const cfIdList = list.map((item) => item.cfId);
+            const cfPriorityMap = list.map((item) => item.cfId).reduce((map, cur, index) => {
+                map.set(cur, index);
+                return map;
+            }, new Map<string, number>());
             oldRule.ranges.forEach((range) => {
                 Range.foreach(range, (row, col) => {
                     this._conditionalFormatViewModel.deleteCellCf(unitId, subUnitId, row, col, oldRule.cfId);
@@ -105,7 +108,7 @@ export class ConditionalFormatRuleModel {
             rule.ranges.forEach((range) => {
                 Range.foreach(range, (row, col) => {
                     this._conditionalFormatViewModel.pushCellCf(unitId, subUnitId, row, col, rule.cfId);
-                    this._conditionalFormatViewModel.sortCellCf(unitId, subUnitId, row, col, cfIdList);
+                    this._conditionalFormatViewModel.sortCellCf(unitId, subUnitId, row, col, cfPriorityMap);
                 });
             });
             this._ruleChange$.next({ rule, subUnitId, unitId, type: 'set' });
@@ -119,11 +122,14 @@ export class ConditionalFormatRuleModel {
             // The new conditional format has a higher priority
             list.unshift(rule);
         }
-        const cfIdList = list.map((item) => item.cfId);
+        const cfPriorityMap = list.map((item) => item.cfId).reduce((map, cur, index) => {
+            map.set(cur, index);
+            return map;
+        }, new Map<string, number>());
         rule.ranges.forEach((range) => {
             Range.foreach(range, (row, col) => {
                 this._conditionalFormatViewModel.pushCellCf(unitId, subUnitId, row, col, rule.cfId);
-                this._conditionalFormatViewModel.sortCellCf(unitId, subUnitId, row, col, cfIdList);
+                this._conditionalFormatViewModel.sortCellCf(unitId, subUnitId, row, col, cfPriorityMap);
             });
         });
         this._conditionalFormatViewModel.markRuleDirty(unitId, subUnitId, rule);
@@ -149,10 +155,13 @@ export class ConditionalFormatRuleModel {
             } else {
                 list.unshift(rule);
             }
-            const cfIdList = list.map((item) => item.cfId);
+            const cfPriorityMap = list.map((item) => item.cfId).reduce((map, cur, index) => {
+                map.set(cur, index);
+                return map;
+            }, new Map<string, number>());
             rule.ranges.forEach((range) => {
                 Range.foreach(range, (row, col) => {
-                    this._conditionalFormatViewModel.sortCellCf(unitId, subUnitId, row, col, cfIdList);
+                    this._conditionalFormatViewModel.sortCellCf(unitId, subUnitId, row, col, cfPriorityMap);
                 });
             });
             this._ruleChange$.next({ rule, subUnitId, unitId, type: 'sort' });

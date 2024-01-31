@@ -18,10 +18,11 @@ import { ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle }
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
+import { bufferTime, filter } from 'rxjs/operators';
 import { IRenderManagerService } from '@univerjs/engine-render';
 
 import { ConditionalFormatService } from '../services/conditional-format.service';
-import { addCfRule } from '../commands/commands/command';
+import { ConditionalFormatViewModel } from '../models/conditional-format-view-model';
 
 @OnLifecycle(LifecycleStages.Rendered, RenderController)
 export class RenderController {
@@ -30,7 +31,7 @@ export class RenderController {
         @Inject(ICommandService) private _commandService: ICommandService,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
         @Inject(IRenderManagerService) private _renderManagerService: IRenderManagerService,
-
+        @Inject(ConditionalFormatViewModel) private _conditionalFormatViewModel: ConditionalFormatViewModel,
         @Inject(SheetSkeletonManagerService) private _sheetSkeletonManagerService: SheetSkeletonManagerService) {
         window.commandService = _commandService;
         this._initHighlightCell();
@@ -38,19 +39,26 @@ export class RenderController {
     }
 
     _initSkeleton() {
-        this._commandService.onCommandExecuted((commandInfo) => {
-            if (commandInfo.id === addCfRule.id) {
-                this._sheetSkeletonManagerService.reCalculate();
-                const unitId = this._univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-                this._renderManagerService.getRenderById(unitId)?.mainComponent?.makeDirty();
-            }
-        });
+        const markDirtySkeleton = () => {
+            this._sheetSkeletonManagerService.reCalculate();
+            const unitId = this._univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+            this._renderManagerService.getRenderById(unitId)?.mainComponent?.makeDirty();
+        };
+        this._conditionalFormatService.ruleComputeStatus$.pipe(bufferTime(0), filter((v) => {
+            const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+            const worksheet = workbook.getActiveSheet();
+            return v.filter((item) => item.unitId === workbook.getUnitId() && item.subUnitId === worksheet.getSheetId()).length > 0;
+        })).subscribe(markDirtySkeleton);
+        this._conditionalFormatViewModel.markDirty$.pipe(bufferTime(0), filter((v) => {
+            const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+            const worksheet = workbook.getActiveSheet();
+            return v.filter((item) => item.unitId === workbook.getUnitId() && item.subUnitId === worksheet.getSheetId()).length > 0;
+        })).subscribe(markDirtySkeleton);
     }
 
     _initHighlightCell() {
         this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, { priority: 99, handler: (cell, context, next) => {
             const result = this._conditionalFormatService.composeStyle(context.unitId, context.subUnitId, context.row, context.col);
-
             if (!result) {
                 return next(cell);
             }
@@ -59,7 +67,6 @@ export class RenderController {
                 const s = (typeof cell?.s === 'object' && cell.s !== null) ? { ...cell.s } : { ...style };
                 return next({ ...cell, s });
             }
-
             return next(cell);
         },
         });

@@ -495,26 +495,26 @@ export class Spreadsheet extends SheetComponent {
 
         ctx.strokeStyle = getColor([212, 212, 212]);
 
-        const startX = columnWidthAccumulation[startColumn - 1] || 0;
-        const startY = rowHeightAccumulation[startRow - 1] || 0;
-        let endX = columnWidthAccumulation[endColumn];
-        let endY = rowHeightAccumulation[endRow];
 
         const columnWidthAccumulationLength = columnWidthAccumulation.length;
         const rowHeightAccumulationLength = rowHeightAccumulation.length;
 
-        const rowStart = startRow;
+        const rowStart = this._allowCache ? startRow : 0;
+        const rowEnd = this._allowCache ? endRow : rowHeightAccumulationLength - 1;
+        const columnEnd = this._allowCache ? endColumn : columnWidthAccumulationLength - 1;
+        const columnStart = this._allowCache ? startColumn : 0;
 
-        const rowEnd = endRow;
-
-        const columnDrawTopStart = 0;
+        const startX = columnWidthAccumulation[columnStart - 1] || 0;
+        const startY = rowHeightAccumulation[rowStart - 1] || 0;
+        const endX = columnWidthAccumulation[columnEnd];
+        const endY = rowHeightAccumulation[rowEnd];
 
         ctx.translateWithPrecisionRatio(FIX_ONE_PIXEL_BLUR_OFFSET, FIX_ONE_PIXEL_BLUR_OFFSET);
 
         ctx.moveTo(startX, startY);
         ctx.lineTo(endX, startY);
 
-        for (let r = 0; r <= endRow; r++) {
+        for (let r = 0; r <= rowEnd; r++) {
             if (r < 0 || r > rowHeightAccumulationLength - 1) {
                 continue;
             }

@@ -17,31 +17,37 @@
 import type { ICommand } from '@univerjs/core';
 import {
     CommandType,
+    Tools,
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 import { ConditionalFormatRuleModel } from '../../models/conditional-format-rule-model';
-import type { IConditionFormatRule } from '../../models/type';
-import type { IDeleteConditionalRuleMutationParams } from './deleteConditionalRule.mutation';
-import { deleteConditionalRuleMutation } from './deleteConditionalRule.mutation';
+import type { IAddConditionalRuleMutationParams } from './addConditionalRule.mutation';
+import { addConditionalRuleMutation } from './addConditionalRule.mutation';
 
-export interface IAddConditionalRuleMutationParams {
+export interface IDeleteConditionalRuleMutationParams {
     unitId: string;
     subUnitId: string;
-    rule: IConditionFormatRule;
+    cfId: string;
 }
-export const addConditionalRuleMutationUndoFactory = (accessor: IAccessor, param: IAddConditionalRuleMutationParams) => {
-    return { id: deleteConditionalRuleMutation.id, param: { unitId: param.unitId, subUnitId: param.subUnitId, cfId: param.rule.cfId } as IDeleteConditionalRuleMutationParams };
+export const deleteConditionalRuleMutationUndoFactory = (accessor: IAccessor, param: IDeleteConditionalRuleMutationParams) => {
+    const conditionalFormatRuleModel = accessor.get(ConditionalFormatRuleModel);
+    const { unitId, subUnitId, cfId } = param;
+    const rule = conditionalFormatRuleModel.getRule(unitId, subUnitId, cfId);
+    if (rule) {
+        return { id: addConditionalRuleMutation.id, param: { unitId, subUnitId, rule: Tools.deepClone(rule) } as IAddConditionalRuleMutationParams };
+    }
+    return null;
 };
-export const addConditionalRuleMutation: ICommand<IAddConditionalRuleMutationParams> = {
+export const deleteConditionalRuleMutation: ICommand<IDeleteConditionalRuleMutationParams> = {
     type: CommandType.MUTATION,
-    id: 'sheet.mutation.add-conditional-rule',
+    id: 'sheet.mutation.delete-conditional-rule',
     handler(accessor, params) {
         if (!params) {
             return false;
         }
-        const { unitId, subUnitId, rule } = params;
+        const { unitId, subUnitId, cfId } = params;
         const conditionalFormatRuleModel = accessor.get(ConditionalFormatRuleModel);
-        conditionalFormatRuleModel.addRule(unitId, subUnitId, rule);
+        conditionalFormatRuleModel.deleteRule(unitId, subUnitId, cfId);
         return true;
     },
 };

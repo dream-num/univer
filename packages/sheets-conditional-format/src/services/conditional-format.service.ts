@@ -207,35 +207,38 @@ export class ConditionalFormatService extends Disposable {
                         }
                     }
                 }
-                // case SubRuleType.average:{
-                //     if (isNull(value)) {
-                //         return false;
-                //     }
-                //     const subRuleConfig = ruleConfig as IAverageHighlightCell;
-                //     switch (subRuleConfig.operator) {
-                //         case NumberOperator.greaterThan:{}
-                //         case NumberOperator.greaterThanOrEqual:{}
-                //         case NumberOperator.lessThan:{}
-                //         case NumberOperator.lessThanOrEqual:{}
-                //         case NumberOperator.equal:{}
-                //         case NumberOperator.notEqual:{}
-                //     }
-                // }
-                // case SubRuleType.rank:{
-                //     if (isNull(value)) {
-                //         return false;
-                //     }
-                // }
+                case SubRuleType.average:{
+                    const v = Number(value);
+                    if (isNullable(value) || Number.isNaN(v)) {
+                        return false;
+                    }
+                    const subRuleConfig = ruleConfig as IAverageHighlightCell;
+                    const average = cache?.average!;
 
-                // case SubRuleType.uniqueValues:{
-
-                // }
-                // case SubRuleType.duplicateValues:{
-
-                // }
-            }
-            return false;
-        };
+                    switch (subRuleConfig.operator) {
+                        case NumberOperator.greaterThan:{
+                            return v > average;
+                        }
+                        case NumberOperator.greaterThanOrEqual:{
+                            return v >= average;
+                        }
+                        case NumberOperator.lessThan:{
+                            return v < average;
+                        }
+                        case NumberOperator.lessThanOrEqual:{
+                            return v <= average;
+                        }
+                        case NumberOperator.equal:{
+                            return isFloatsEqual(v, average);
+                        }
+                        case NumberOperator.notEqual:{
+                            return !isFloatsEqual(v, average);
+                        }
+                        default:{
+                            return false;
+                        }
+                    }
+                }
         rule.ranges.forEach((range) => {
             Range.foreach(range, (row, col) => {
                 if (check(row, col)) {

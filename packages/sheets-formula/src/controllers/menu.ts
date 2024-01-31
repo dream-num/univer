@@ -18,8 +18,9 @@ import { UniverInstanceType } from '@univerjs/core';
 import { getCurrentSheetDisabled$ } from '@univerjs/sheets';
 import { PASTE_SPECIAL_MENU_ID } from '@univerjs/sheets-ui';
 import type { IMenuItem } from '@univerjs/ui';
-import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
+import { getMenuHiddenObservable, IClipboardInterfaceService, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
+import { Observable } from 'rxjs';
 
 import { SheetOnlyPasteFormulaCommand } from '../commands/commands/formula-clipboard.command';
 import { InsertFunctionOperation } from '../commands/operations/insert-function.operation';
@@ -65,7 +66,7 @@ export function InsertFunctionMenuItemFactory(accessor: IAccessor): IMenuItem {
     };
 }
 
-export function MoreFunctionsMenuItemFactory(accessor: IAccessor): IMenuItem {
+export function MoreFunctionsMenuItemFactory(): IMenuItem {
     return {
         id: MoreFunctionsOperation.id,
         title: 'formula.insert.more',
@@ -74,11 +75,16 @@ export function MoreFunctionsMenuItemFactory(accessor: IAccessor): IMenuItem {
     };
 }
 
+function menuClipboardDisabledObservable(injector: IAccessor): Observable<boolean> {
+    return new Observable((subscriber) => subscriber.next(!injector.get(IClipboardInterfaceService).supportClipboard));
+}
+
 export function PasteFormulaMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
         id: SheetOnlyPasteFormulaCommand.id,
         type: MenuItemType.BUTTON,
         title: 'formula.operation.pasteFormula',
         positions: [PASTE_SPECIAL_MENU_ID],
+        disabled$: menuClipboardDisabledObservable(accessor),
     };
 }

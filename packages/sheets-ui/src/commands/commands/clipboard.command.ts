@@ -14,21 +14,27 @@
  * limitations under the License.
  */
 
-import type { ICommand, IMultiCommand } from '@univerjs/core';
-import { CommandType, ICommandService, ILogService } from '@univerjs/core';
+import type { ICommand, IContextService, IMultiCommand } from '@univerjs/core';
+import { CommandType, EDITOR_ACTIVATED, ICommandService, ILogService } from '@univerjs/core';
 import { CopyCommand, CutCommand, IClipboardInterfaceService, PasteCommand } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 
-import { whenSheetFocused } from '../../controllers/shortcuts/utils';
+import { whenSheetEditorActivated, whenSheetEditorFocused } from '../../controllers/shortcuts/utils';
 import { ISheetClipboardService, PREDEFINED_HOOK_NAME } from '../../services/clipboard/clipboard.service';
+
+function whenSheetEditorNotActivated(context: IContextService): boolean {
+    return whenSheetEditorFocused(context) && !context.getContextValue(EDITOR_ACTIVATED);
+}
+
+const SHEET_CLIPBOARD_PRIORITY = 998;
 
 export const SheetCopyCommand: IMultiCommand = {
     id: CopyCommand.id,
     name: 'sheet.command.copy',
     type: CommandType.COMMAND,
     multi: true,
-    priority: 1000,
-    preconditions: whenSheetFocused,
+    priority: SHEET_CLIPBOARD_PRIORITY,
+    preconditions: whenSheetEditorNotActivated,
     handler: async (accessor) => {
         const sheetClipboardService = accessor.get(ISheetClipboardService);
         return sheetClipboardService.copy();
@@ -40,8 +46,8 @@ export const SheetCutCommand: IMultiCommand = {
     name: 'sheet.command.cut',
     type: CommandType.COMMAND,
     multi: true,
-    priority: 1000,
-    preconditions: whenSheetFocused,
+    priority: SHEET_CLIPBOARD_PRIORITY,
+    preconditions: whenSheetEditorActivated,
     handler: async (accessor) => {
         const sheetClipboardService = accessor.get(ISheetClipboardService);
         return sheetClipboardService.cut();
@@ -57,20 +63,19 @@ export const SheetPasteCommand: IMultiCommand = {
     type: CommandType.COMMAND,
     multi: true,
     name: 'sheet.command.paste',
-    priority: 998,
-    preconditions: whenSheetFocused,
+    priority: SHEET_CLIPBOARD_PRIORITY,
+    preconditions: whenSheetEditorNotActivated,
     handler: async (accessor: IAccessor, params: ISheetPasteParams) => {
         const logService = accessor.get(ILogService);
 
         // use cell editor to get ClipboardData first
         // if that doesn't work, use the browser's clipboard API
         // this clipboard API would ask user for permission, so we may need to notify user (and retry perhaps)
-        logService.log('[SheetPasteCommand]', 'the focusing element is', document.activeElement);
+        logService.debug('[SheetPasteCommand]', 'the focusing element is', document.activeElement);
 
         const result = document.execCommand('paste');
-
         if (!result) {
-            logService.log(
+            logService.debug(
                 '[SheetPasteCommand]',
                 'failed to execute paste command on the activeElement, trying to use clipboard API.'
             );
@@ -79,7 +84,8 @@ export const SheetPasteCommand: IMultiCommand = {
             const clipboardItems = await clipboardInterfaceService.read();
             const sheetClipboardService = accessor.get(ISheetClipboardService);
 
-            // logService.log('[SheetPasteCommand]: clipboard data is', clipboardItems);
+            // logService.debug('[SheetPasteCommand]: clipboard data is', clipboardItems);
+
             if (clipboardItems.length !== 0) {
                 return sheetClipboardService.paste(clipboardItems[0], params?.value);
             }

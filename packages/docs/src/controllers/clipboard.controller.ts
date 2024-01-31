@@ -14,224 +14,55 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IDocumentBody } from '@univerjs/core';
 import {
-    Disposable,
-    EDITOR_ACTIVATED,
-    FOCUSING_DOC,
     ICommandService,
     IContextService,
-    ILogService,
-    IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
+    RxDisposable,
 } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
+import { IClipboardInterfaceService } from '@univerjs/ui';
 
-import { DocCopyCommand, DocCutCommand, DocPasteCommand } from '../commands/commands/clipboard.command';
+import { ITextSelectionRenderManager } from '@univerjs/engine-render';
+import { takeUntil } from 'rxjs';
+import { DocCopyCommand, DocCutCommand, DocPasteCommand, whenDocOrEditor } from '../commands/commands/clipboard.command';
 import { CutContentCommand, InnerPasteCommand } from '../commands/commands/clipboard.inner.command';
 import { IDocClipboardService } from '../services/clipboard/clipboard.service';
-import { TextSelectionManagerService } from '../services/text-selection-manager.service';
 
-@OnLifecycle(LifecycleStages.Rendered, DocClipboardController)
-export class DocClipboardController extends Disposable {
+@OnLifecycle(LifecycleStages.Steady, DocClipboardController)
+export class DocClipboardController extends RxDisposable {
     constructor(
-        @ILogService private readonly _logService: ILogService,
         @ICommandService private readonly _commandService: ICommandService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IClipboardInterfaceService private readonly _clipboardInterfaceService: IClipboardInterfaceService,
         @IDocClipboardService private readonly _docClipboardService: IDocClipboardService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
+        @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
         @IContextService private readonly _contextService: IContextService
     ) {
         super();
-        this._commandExecutedListener();
-        this.initialize();
+
+        this._init();
     }
 
-    initialize() {
-        [DocCopyCommand, DocCutCommand, DocPasteCommand].forEach((command) =>
-            this.disposeWithMe(this._commandService.registerMultipleCommand(command))
-        );
-        [InnerPasteCommand, CutContentCommand].forEach((command) =>
-            this.disposeWithMe(this._commandService.registerCommand(command))
-        );
+    private _init() {
+        [DocCopyCommand, DocCutCommand, DocPasteCommand].forEach((command) => this.disposeWithMe(this._commandService.registerMultipleCommand(command)));
+        [InnerPasteCommand, CutContentCommand].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
+
+        this._initLegacyPasteCommand();
     }
 
-    private _commandExecutedListener() {
-        const updateCommandList = [DocCutCommand.id, DocCopyCommand.id, DocPasteCommand.id];
-
-        this.disposeWithMe(
-            this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (!updateCommandList.includes(command.id)) {
+    private _initLegacyPasteCommand(): void {
+        if (!this._clipboardInterfaceService.supportClipboard) {
+            this._textSelectionRenderManager?.onPaste$.pipe(takeUntil(this.dispose$)).subscribe((config) => {
+                if (!whenDocOrEditor(this._contextService)) {
                     return;
                 }
 
-                if (
-                    !this._contextService.getContextValue(FOCUSING_DOC) &&
-                    !this._contextService.getContextValue(EDITOR_ACTIVATED)
-                ) {
-                    return;
-                }
-
-                switch (command.id) {
-                    case DocPasteCommand.id: {
-                        this._handlePaste();
-                        break;
-                    }
-
-                    case DocCopyCommand.id: {
-                        this._handleCopy();
-                        break;
-                    }
-
-                    case DocCutCommand.id: {
-                        this._handleCut();
-                        break;
-                    }
-
-                    default:
-                        throw new Error(`Unhandled command ${command.id}`);
-                }
-            })
-        );
-    }
-
-    private async _handlePaste() {
-        const { _docClipboardService: clipboard } = this;
-        const {
-            segmentId,
-            endOffset: activeEndOffset,
-            style,
-        } = this._textSelectionManagerService.getActiveRange() ?? {};
-        const ranges = this._textSelectionManagerService.getSelections();
-
-        if (segmentId == null) {
-            this._logService.error('[DocClipboardController] segmentId is not existed');
-        }
-
-        if (activeEndOffset == null || ranges == null) {
-            return;
-        }
-
-        try {
-            const body = await clipboard.queryClipboardData();
-
-            // When doc has multiple selections, the cursor moves to the last pasted content's end.
-            let cursor = activeEndOffset;
-            for (const range of ranges) {
-                const { startOffset, endOffset } = range;
-
-                if (startOffset == null || endOffset == null) {
-                    continue;
-                }
-
-                if (endOffset <= activeEndOffset) {
-                    cursor += body.dataStream.length - (endOffset - startOffset);
-                }
-            }
-
-            const textRanges = [
-                {
-                    startOffset: cursor,
-                    endOffset: cursor,
-                    style,
-                },
-            ];
-
-            this._commandService.executeCommand(InnerPasteCommand.id, { body, segmentId, textRanges });
-        } catch (_e) {
-            this._logService.error('[DocClipboardController] clipboard is empty');
-        }
-    }
-
-    private _getDocumentBodyInRanges(): IDocumentBody[] {
-        const ranges = this._textSelectionManagerService.getSelections();
-        const docDataModel = this._currentUniverService.getCurrentUniverDocInstance();
-
-        const results: IDocumentBody[] = [];
-
-        if (ranges == null) {
-            return results;
-        }
-
-        for (const range of ranges) {
-            const { startOffset, endOffset, collapsed } = range;
-
-            if (collapsed) {
-                continue;
-            }
-
-            if (startOffset == null || endOffset == null) {
-                continue;
-            }
-
-            const docBody = docDataModel.sliceBody(startOffset, endOffset);
-
-            if (docBody == null) {
-                continue;
-            }
-
-            results.push(docBody);
-        }
-
-        return results;
-    }
-
-    private async _handleCopy() {
-        const { _docClipboardService: clipboard } = this;
-        const documentBodyList = this._getDocumentBodyInRanges();
-
-        try {
-            clipboard.setClipboardData(documentBodyList);
-        } catch (_e) {
-            this._logService.error('[DocClipboardController] set clipboard failed');
-        }
-    }
-
-    private async _handleCut() {
-        const {
-            segmentId,
-            endOffset: activeEndOffset,
-            style,
-        } = this._textSelectionManagerService.getActiveRange() ?? {};
-        const ranges = this._textSelectionManagerService.getSelections();
-
-        if (segmentId == null) {
-            this._logService.error('[DocClipboardController] segmentId is not existed');
-        }
-
-        if (activeEndOffset == null || ranges == null) {
-            return;
-        }
-
-        // Set content to clipboard.
-        this._handleCopy();
-
-        try {
-            let cursor = activeEndOffset;
-            for (const range of ranges) {
-                const { startOffset, endOffset } = range;
-
-                if (startOffset == null || endOffset == null) {
-                    continue;
-                }
-
-                if (endOffset <= activeEndOffset) {
-                    cursor -= endOffset - startOffset;
-                }
-            }
-
-            const textRanges = [
-                {
-                    startOffset: cursor,
-                    endOffset: cursor,
-                    style,
-                },
-            ];
-
-            this._commandService.executeCommand(CutContentCommand.id, { segmentId, textRanges });
-        } catch (e) {
-            this._logService.error('[DocClipboardController] cut content failed');
+                config!.event.preventDefault();
+                const clipboardEvent = config!.event as ClipboardEvent;
+                const htmlContent = clipboardEvent.clipboardData?.getData('text/html');
+                const textContent = clipboardEvent.clipboardData?.getData('text/plain');
+                this._docClipboardService.legacyPaste(htmlContent, textContent);
+            });
         }
     }
 }

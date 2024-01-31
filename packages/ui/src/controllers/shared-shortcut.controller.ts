@@ -22,13 +22,20 @@ import { IMenuService } from '../services/menu/menu.service';
 import { KeyCode, MetaKeys } from '../services/shortcut/keycode';
 import type { IShortcutItem } from '../services/shortcut/shortcut.service';
 import { IShortcutService } from '../services/shortcut/shortcut.service';
+import { IClipboardInterfaceService } from '../services/clipboard/clipboard-interface.service';
+import { supportClipboardAPI } from '../services/clipboard/clipboard-utils';
 import { RedoMenuItemFactory, UndoMenuItemFactory } from './menus/menus';
+
+// Not that the clipboard shortcut items would only be invoked when the browser fully supports clipboard API.
+// If not, the corresponding shortcut would not be triggered and we will perform clipboard operations
+// through clipboard events (editorElement.addEventListener('paste')).
 
 export const CopyShortcutItem: IShortcutItem = {
     id: CopyCommand.id,
     description: 'shortcut.copy',
     group: '1_common-edit',
     binding: KeyCode.C | MetaKeys.CTRL_COMMAND,
+    // preconditions: supportClipboardAPI,
 };
 
 export const CutShortcutItem: IShortcutItem = {
@@ -36,6 +43,7 @@ export const CutShortcutItem: IShortcutItem = {
     description: 'shortcut.cut',
     group: '1_common-edit',
     binding: KeyCode.X | MetaKeys.CTRL_COMMAND,
+    // preconditions: supportClipboardAPI,
 };
 
 export const PasteShortcutItem: IShortcutItem = {
@@ -43,6 +51,7 @@ export const PasteShortcutItem: IShortcutItem = {
     description: 'shortcut.paste',
     group: '1_common-edit',
     binding: KeyCode.V | MetaKeys.CTRL_COMMAND,
+    preconditions: supportClipboardAPI,
 };
 
 export const UndoShortcutItem: IShortcutItem = {
@@ -60,7 +69,7 @@ export const RedoShortcutItem: IShortcutItem = {
 };
 
 /**
- * Define shared UI behavior across Univer business.
+ * Define shared UI behavior across Univer business. Including undo / redo and clipboard operations.
  */
 @OnLifecycle(LifecycleStages.Ready, SharedController)
 export class SharedController extends Disposable {
@@ -68,7 +77,8 @@ export class SharedController extends Disposable {
         @Inject(Injector) private readonly _injector: Injector,
         @IMenuService private readonly _menuService: IMenuService,
         @IShortcutService private readonly _shortcutService: IShortcutService,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @IClipboardInterfaceService private readonly _interfaceService: IClipboardInterfaceService
     ) {
         super();
 
@@ -94,8 +104,9 @@ export class SharedController extends Disposable {
     }
 
     private _registerShortcuts(): void {
-        [UndoShortcutItem, RedoShortcutItem, CutShortcutItem, CopyShortcutItem, PasteShortcutItem].forEach((shortcut) =>
-            this.disposeWithMe(this._shortcutService.registerShortcut(shortcut))
-        );
+        const shortcutItems = [UndoShortcutItem, RedoShortcutItem];
+        shortcutItems.push(CutShortcutItem, CopyShortcutItem, PasteShortcutItem);
+
+        shortcutItems.forEach((shortcut) => this.disposeWithMe(this._shortcutService.registerShortcut(shortcut)));
     }
 }

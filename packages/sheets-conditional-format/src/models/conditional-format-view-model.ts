@@ -30,10 +30,13 @@
  * limitations under the License.
  */
 
-import { ObjectMatrix } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
+import { ObjectMatrix, Range } from '@univerjs/core';
+import { Subject } from 'rxjs';
+import type { IColorScale, IConditionFormatRule, IDataBar, IHighlightCell } from './type';
 
 interface ICellItem {
-    cfList: { cfId: string; ruleCache?: any }[];
+    cfList: { cfId: string; ruleCache?: Nullable<IHighlightCell['style'] | IDataBar['config'] | IColorScale['config']> }[];
     composeCache?: any;
 }
 
@@ -43,6 +46,9 @@ export class ConditionalFormatViewModel {
     private _getMatrix(unitId: string, subUnitId: string) {
         return this._model.get(unitId)?.get(subUnitId);
     }
+
+    private _markDirty$ = new Subject<{ rule: IConditionFormatRule;unitId: string;subUnitId: string }>();
+    markDirty$ = this._markDirty$.asObservable();
 
     private _ensureMatrix(unitId: string, subUnitId: string) {
         let _matrix = this._getMatrix(unitId, subUnitId);
@@ -68,18 +74,11 @@ export class ConditionalFormatViewModel {
     }
 
     setCellCfRuleCache(unitId: string, subUnitId: string, row: number, col: number, cfId: string, value: any) {
-        const cell = this.getCellCf(unitId, subUnitId, row, col);
+        const matrix = this._ensureMatrix(unitId, subUnitId);
+        const cell = matrix.getValue(row, col);
         const item = cell?.cfList.find((e) => e.cfId === cfId);
         if (item) {
             item.ruleCache = value;
-            this.markComposeDirty(unitId, subUnitId, row, col, cell!);
-        }
-    }
-
-    setCellComposeCache(unitId: string, subUnitId: string, row: number, col: number, value: any) {
-        const cell = this.getCellCf(unitId, subUnitId, row, col);
-        if (cell) {
-            cell.composeCache = value;
         }
     }
 
@@ -124,7 +123,6 @@ export class ConditionalFormatViewModel {
                 cfIdList.splice(index, 1);
             }
             cfIdList.push({ cfId });
-            this.markComposeDirty(unitId, subUnitId, row, col, cellValue!);
         }
         _matrix.setValue(row, col, cellValue);
     }
@@ -149,42 +147,35 @@ export class ConditionalFormatViewModel {
                 .filter((item) => !!item)
                 .sort((a, b) => a!.priority - b!.priority) as ICellItem['cfList'];
                 // The smaller the priority, the higher
-            const isNeedRestoreComposeCache = sortResult.some((item, index) => {
-                return item.cfId !== cell.cfList[index]?.cfId;
-            });
             cell.cfList = sortResult;
-            if (isNeedRestoreComposeCache) {
-                this.markComposeDirty(unitId, subUnitId, row, col, cell);
-            }
-        }
-    }
-
-    markComposeDirty(
-        unitId: string,
-        subUnitId: string,
-        row: number,
-        col: number,
-        cell?: ICellItem) {
-        const _cell = cell || this.getCellCf(unitId, subUnitId, row, col);
-        if (_cell) {
-            _cell.composeCache = null;
         }
     }
 
     markRuleDirty(
         unitId: string,
         subUnitId: string,
-        row: number,
-        col: number,
-        cfId: string
+        rule: IConditionFormatRule,
+        row?: number,
+        col?: number
     ) {
-        const cell = this.getCellCf(unitId, subUnitId, row, col);
-        if (cell) {
-            const rule = cell.cfList.find((item) => item.cfId === cfId);
-            if (rule) {
-                rule.ruleCache = null;
-                this.markComposeDirty(unitId, subUnitId, row, col, cell);
+        const handleCell = (row: number, col: number) => {
+            const cell = this.getCellCf(unitId, subUnitId, row, col);
+            if (cell) {
+                const ruleItem = cell.cfList.find((item) => item.cfId === rule.cfId);
+                if (ruleItem) {
+                    ruleItem.ruleCache = null;
+                    this._markDirty$.next({ rule, unitId, subUnitId });
+                }
             }
+        };
+        if (row !== undefined && col !== undefined) {
+            handleCell(row, col);
+        } else {
+            rule.ranges.forEach((range) => {
+                Range.foreach(range, (row, col) => {
+                    handleCell(row, col);
+                });
+            });
         }
     }
 }

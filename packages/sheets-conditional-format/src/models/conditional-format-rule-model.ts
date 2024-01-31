@@ -32,12 +32,16 @@
 
 import { Inject } from '@wendellhu/redi';
 import { Range } from '@univerjs/core';
+import { Subject } from 'rxjs';
 import type { IConditionFormatRule } from './type';
 import { ConditionalFormatViewModel } from './conditional-format-view-model';
 
+type RuleOperatorType = 'delete' | 'set' | 'add' | 'sort';
 export class ConditionalFormatRuleModel {
    //  Map<unitID ,<sheetId ,IConditionFormatRule[]>>
     private _model: Map<string, Map<string, IConditionFormatRule[]>> = new Map();
+    private _ruleChange$ = new Subject<{ rule: IConditionFormatRule;unitId: string;subUnitId: string; type: RuleOperatorType }>();
+    $ruleChange = this._ruleChange$.asObservable();
 
     constructor(@Inject(ConditionalFormatViewModel) private _conditionalFormatViewModel: ConditionalFormatViewModel) {
 
@@ -57,12 +61,17 @@ export class ConditionalFormatRuleModel {
         return list;
     }
 
-    getRule(unitId: string, subUnitId: string, cfId: string) {
+    getRule(unitId: string, subUnitId: string, cfId?: string) {
         const list = this._model.get(unitId)?.get(subUnitId);
         if (list) {
             return list.find((item) => item.cfId === cfId);
         }
         return null;
+    }
+
+    getAllRule(unitId: string, subUnitId: string) {
+        const list = this._model.get(unitId)?.get(subUnitId);
+        return list || null;
     }
 
     deleteRule(unitId: string, subUnitId: string, cfId: string) {
@@ -77,8 +86,8 @@ export class ConditionalFormatRuleModel {
                         this._conditionalFormatViewModel.deleteCellCf(unitId, subUnitId, row, col, rule.cfId);
                     });
                 });
+                this._ruleChange$.next({ rule, subUnitId, unitId, type: 'delete' });
             }
-            ;
         }
     }
 
@@ -99,6 +108,7 @@ export class ConditionalFormatRuleModel {
                     this._conditionalFormatViewModel.sortCellCf(unitId, subUnitId, row, col, cfIdList);
                 });
             });
+            this._ruleChange$.next({ rule, subUnitId, unitId, type: 'set' });
         }
     }
 
@@ -116,6 +126,8 @@ export class ConditionalFormatRuleModel {
                 this._conditionalFormatViewModel.sortCellCf(unitId, subUnitId, row, col, cfIdList);
             });
         });
+        this._conditionalFormatViewModel.markRuleDirty(unitId, subUnitId, rule);
+        this._ruleChange$.next({ rule, subUnitId, unitId, type: 'add' });
     }
 
     moveRulePriority(unitId: string, subUnitId: string, cfId: string, preCfId: string) {
@@ -132,6 +144,7 @@ export class ConditionalFormatRuleModel {
                     this._conditionalFormatViewModel.sortCellCf(unitId, subUnitId, row, col, cfIdList);
                 });
             });
+            this._ruleChange$.next({ rule, subUnitId, unitId, type: 'sort' });
         }
     }
 

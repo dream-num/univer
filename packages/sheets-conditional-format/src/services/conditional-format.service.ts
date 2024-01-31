@@ -14,27 +14,144 @@
  * limitations under the License.
  */
 
-import { CellValueType, Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, Range, Tools } from '@univerjs/core';
-import { INumfmtService } from '@univerjs/sheets';
+import type { ICellData, IRange } from '@univerjs/core';
+import { CellValueType, Disposable, ICommandService, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Range, Rectangle, Tools } from '@univerjs/core';
+import type { IInsertColMutationParams, IMoveColumnsMutationParams, IMoveRangeMutationParams, IMoveRowsMutationParams, IRemoveRowsMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
+import { InsertColMutation, InsertRowMutation, INumfmtService, MoveColsMutation, MoveRangeMutation, MoveRowsMutation, RefRangeService, RemoveColMutation, RemoveRowMutation, SetRangeValuesMutation } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 import dayjs from 'dayjs';
+import { Subject } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import { ConditionalFormatRuleModel } from '../models/conditional-format-rule-model';
 import { ConditionalFormatViewModel } from '../models/conditional-format-view-model';
 import { NumberOperator, RuleType, SubRuleType, TextOperator, TimePeriodOperator } from '../base/const';
-import type { IConditionFormatRule, IHighlightCell, INumberHighlightCell, ITextHighlightCell, ITimePeriodHighlightCell } from '../models/type';
+import type { IAverageHighlightCell, IConditionFormatRule, IHighlightCell, INumberHighlightCell, IRankHighlightCell, ITextHighlightCell, ITimePeriodHighlightCell } from '../models/type';
 
 function isFloatsEqual(a: number, b: number) {
     return Math.abs(a - b) < Number.EPSILON;
 }
+const isNullable = (v: any) => [undefined, null].includes(v);
+
+const getCellValue = (cell?: ICellData) => {
+    if (!cell) {
+        return null;
+    }
+    const v = cell.v;
+    const dataStream = cell.p?.body?.dataStream.replace(/\r\n$/, '');
+    return !isNullable(v) ? v : !isNullable(dataStream) ? dataStream : null;
+};
+type ComputeStatus = 'computing' | 'end' | 'error';
+
+interface AverageComputeCache { average: number };
+interface CountComputeCache { count: Map<any, number> };
+interface RankComputeCache { rank: number };
+
+type ComputeCache = Partial<AverageComputeCache & CountComputeCache & RankComputeCache & { status: ComputeStatus }>;
 @OnLifecycle(LifecycleStages.Rendered, ConditionalFormatService)
 export class ConditionalFormatService extends Disposable {
+    // <unitId,<subUnitId,<cfId,ComputeCache>>>
+    private _ruleCacheMap: Map<string, Map<string, Map<string, ComputeCache>>> = new Map();
+
+    private _ruleComputeStatus$: Subject<{ status: ComputeStatus;result?: ObjectMatrix<any>;unitId: string; subUnitId: string; cfId: string }> = new Subject();
+    ruleComputeStatus$ = this._ruleComputeStatus$.asObservable();
+
     constructor(@Inject(ConditionalFormatRuleModel) private _conditionalFormatRuleModel: ConditionalFormatRuleModel,
         @Inject(ConditionalFormatViewModel) private _conditionalFormatViewModel: ConditionalFormatViewModel,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
-        @Inject(INumfmtService) private _numfmtService: INumfmtService
+        @Inject(INumfmtService) private _numfmtService: INumfmtService,
+        @Inject(ICommandService) private _commandService: ICommandService
     ) {
         super();
         this._initCellChange();
+        this._initCacheManager();
+        this._ruleComputeStatus$.subscribe(({ status, subUnitId, unitId, cfId, result }) => {
+            const cache = this._getComputedCache(unitId, subUnitId, cfId) || {};
+            cache.status = status;
+            this._setComputedCache(unitId, subUnitId, cfId, cache);
+            if (status === 'end' && result) {
+                result.forValue((row, col, value) => {
+                    this._conditionalFormatViewModel.setCellCfRuleCache(unitId, subUnitId, row, col, cfId, value);
+                });
+            }
+        });
+    }
+
+    private _getComputedCache(unitId: string, subUnitId: string, cfId: string) {
+        return this._ruleCacheMap.get(unitId)?.get(subUnitId)?.get(cfId);
+    }
+
+    private _setComputedCache(unitId: string, subUnitId: string, cfId: string, value: ComputeCache) {
+        let unitMap = this._ruleCacheMap.get(unitId);
+        if (!unitMap) {
+            unitMap = new Map();
+            this._ruleCacheMap.set(unitId, unitMap);
+        }
+        let subUnitMap = unitMap.get(subUnitId);
+        if (!subUnitMap) {
+            subUnitMap = new Map();
+            unitMap.set(subUnitId, subUnitMap);
+        }
+        subUnitMap.set(cfId, value);
+    }
+
+    private _deleteComputeCache(unitId: string, subUnitId: string, cfId: string) {
+        const unitCache = this._ruleCacheMap.get(unitId);
+        const subUnitCache = unitCache?.get(subUnitId);
+        if (subUnitCache) {
+            subUnitCache.delete(cfId);
+            const size = subUnitCache.size;
+            if (!size) {
+                unitCache?.delete(subUnitId);
+            }
+        }
+    }
+
+    private _initCacheManager() {
+        this._conditionalFormatViewModel.markDirty$.subscribe((item) => {
+            this._deleteComputeCache(item.unitId, item.subUnitId, item.rule.cfId);
+        });
+        this._conditionalFormatRuleModel.$ruleChange.pipe(filter((item) => item.type !== 'sort')).subscribe((item) => {
+            this._deleteComputeCache(item.unitId, item.subUnitId, item.rule.cfId);
+        });
+    }
+
+    composeStyle(unitId: string, subUnitId: string, row: number, col: number) {
+        const cell = this._conditionalFormatViewModel.getCellCf(unitId, subUnitId, row, col);
+        if (cell) {
+            const ruleList = cell.cfList.map((item) => this._conditionalFormatRuleModel.getRule(unitId, subUnitId, item.cfId)!).filter((rule) => !!rule);
+            const endIndex = ruleList.findIndex((rule) => rule?.stopIfTrue);
+            if (endIndex > -1) {
+                ruleList.splice(endIndex + 1);
+            }
+            const result = ruleList.reduce((pre, rule) => {
+                const type = rule.rule.type;
+                const ruleCacheItem = cell.cfList.find((cache) => cache.cfId === rule.cfId);
+                if (type === RuleType.highlightCell) {
+                    if (!ruleCacheItem?.ruleCache) {
+                        this._handleHighlightCell(unitId, subUnitId, rule);
+                    } else {
+                        Tools.deepMerge(pre, { style: ruleCacheItem!.ruleCache });
+                    }
+                } else if (type === RuleType.colorScale) {
+                    if (!ruleCacheItem?.ruleCache) {
+                        this._handleHighlightCell(unitId, subUnitId, rule);
+                    } else {
+                        pre.colorScale = ruleCacheItem!.ruleCache;
+                    }
+                } else if (type === RuleType.dataBar) {
+                    if (!ruleCacheItem?.ruleCache) {
+                        this._handleHighlightCell(unitId, subUnitId, rule);
+                    } else {
+                        pre.dataBar = ruleCacheItem!.ruleCache;
+                    }
+                }
+                return pre;
+            }, {} as { style?: IHighlightCell['style'] } & { dataBar?: any; colorScale?: any });
+            return result;
+        }
+        return null;
+    }
+
     private _initCellChange() {
         this._commandService.onCommandExecuted((commandInfo) => {
             const collectRule = (unitId: string, subUnitId: string, cellData: [number, number][]) => {
@@ -56,7 +173,6 @@ export class ConditionalFormatService extends Disposable {
                     });
                     const rules = collectRule(unitId, subUnitId, cellMatrix);
                     rules.forEach((rule) => {
-                        
                         this._conditionalFormatViewModel.markRuleDirty(unitId, subUnitId, rule);
                         this._deleteComputeCache(unitId, subUnitId, rule.cfId);
                     });
@@ -142,39 +258,91 @@ export class ConditionalFormatService extends Disposable {
             }
         });
     }
+
+    private _handleHighlightCell(unitId: string, subUnitId: string, rule: IConditionFormatRule) {
         const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
         const worksheet = workbook?.getSheetBySheetId(subUnitId);
         const ruleConfig = rule.rule as IHighlightCell;
-        const getCache = (rule: IHighlightCell) => {
-            switch (rule.subType) {
+        let cache = this._getComputedCache(unitId, subUnitId, rule.cfId);
+        if (cache && cache.status === 'computing') {
+            return;
+        }
+        console.log('_handleHighlightCell::', cache);
+        const getCache = (ruleConfig: IHighlightCell) => {
+            // eslint-disable-next-line no-console
+            console.log('getCache::', ruleConfig);
+            switch (ruleConfig.subType) {
                 case SubRuleType.average:{
-                    return { average: 'average' };
+                    let sum = 0;
+                    let count = 0;
+                    rule.ranges.forEach((range) => {
+                        Range.foreach(range, (row, col) => {
+                            const cell = worksheet?.getCellRaw(row, col);
+                            if (cell && cell.t === CellValueType.NUMBER) {
+                                sum += Number(cell.v || 0);
+                                count++;
+                            }
+                        });
+                    });
+                    return { average: sum / count };
                 }
+                case SubRuleType.uniqueValues:
                 case SubRuleType.duplicateValues:{
-                    return { duplicateValues: 'duplicateValues' };
+                    const cacheMap: Map<any, number> = new Map();
+                    rule.ranges.forEach((range) => {
+                        Range.foreach(range, (row, col) => {
+                            const cell = worksheet?.getCellRaw(row, col);
+                            if (cell && !isNullable(cell.v)) {
+                                const cache = cacheMap.get(cell.v);
+                                if (cache) {
+                                    cacheMap.set(cell.v, cache + 1);
+                                } else {
+                                    cacheMap.set(cell.v, 1);
+                                }
+                            }
+                        });
+                    });
+                    return { count: cacheMap };
                 }
                 case SubRuleType.rank:{
-                    return { rank: 'rank' };
-                }
-                case SubRuleType.uniqueValues:{
-                    return { uniqueValues: 'uniqueValues' };
+                    const allValue: number[] = [];
+                    rule.ranges.forEach((range) => {
+                        Range.foreach(range, (row, col) => {
+                            const cell = worksheet?.getCellRaw(row, col);
+                            if (cell && cell.t === CellValueType.NUMBER) {
+                                allValue.push(Number(cell.v || 0));
+                            }
+                        });
+                    });
+                    allValue.sort((a, b) => b - a);
+                    const configRule = rule.rule as IRankHighlightCell;
+                    const targetIndex = configRule.isPercent
+                        ? Math.round(Math.max(Math.min(configRule.value, 100), 0) / 100 * allValue.length)
+                        : Math.round(Math.max(Math.min(configRule.value, allValue.length), 0));
+                    if (configRule.isBottom) {
+                        return { rank: allValue[allValue.length - targetIndex] };
+                    } else {
+                        return { rank: allValue[Math.max(targetIndex - 1, 0)] };
+                    }
                 }
             }
-            return null;
+            return {};
         };
-        const cache = getCache(ruleConfig);
+        if (!cache) {
+            cache = getCache(ruleConfig);
+            cache.status = 'computing';
+            this._setComputedCache(unitId, subUnitId, rule.cfId, cache);
+        }
         const check = (row: number, col: number) => {
-            const isNull = (v: any) => [undefined, null].includes(v);
             const cellValue = worksheet?.getCellRaw(row, col);
-            const value = cellValue?.v;
-
+            const value = getCellValue(cellValue!);
             switch (ruleConfig.subType) {
                 case SubRuleType.number:{
-                    if (isNull(value) || cellValue?.t !== CellValueType.NUMBER) {
+                    const v = Number(value);
+                    if (isNullable(value) || Number.isNaN(value)) {
                         return false;
                     }
                     const subRuleConfig = ruleConfig as INumberHighlightCell;
-                    const v = (cellValue?.v || 0) as number;
 
                     switch (subRuleConfig.operator) {
                         case NumberOperator.between:{
@@ -216,7 +384,7 @@ export class ConditionalFormatService extends Disposable {
                 }
                 case SubRuleType.text:{
                     const subRuleConfig = ruleConfig as ITextHighlightCell;
-                    const v = (cellValue?.v || 0) as string;
+                    const v = String(value);
                     const condition = subRuleConfig.value;
                     switch (subRuleConfig.operator) {
                         case TextOperator.beginsWith:{
@@ -256,7 +424,7 @@ export class ConditionalFormatService extends Disposable {
                     }
                 }
                 case SubRuleType.timePeriod:{
-                    if (isNull(value) || cellValue?.t !== CellValueType.NUMBER) {
+                    if (isNullable(value) || Number.isNaN(Number(value))) {
                         return false;
                     }
                     const subRuleConfig = ruleConfig as ITimePeriodHighlightCell;
@@ -375,53 +543,20 @@ export class ConditionalFormatService extends Disposable {
                 }
             }
         };
+        const computeResult = new ObjectMatrix();
+        const emptyStyle = {};
         rule.ranges.forEach((range) => {
             Range.foreach(range, (row, col) => {
                 if (check(row, col)) {
-                    this._conditionalFormatViewModel.setCellCfRuleCache(unitId, subUnitId, row, col, rule.cfId, ruleConfig.style);
+                    computeResult.setValue(row, col, ruleConfig.style);
+                } else {
+                    // 返回一个空属性,表明已经被处理过了.否则在外层判断 cache 的时候,会读不到结果.
+                    computeResult.setValue(row, col, emptyStyle);
                 }
             });
         });
-    }
-
-    composeStyle(unitId: string, subUnitId: string, row: number, col: number) {
-        const cell = this._conditionalFormatViewModel.getCellCf(unitId, subUnitId, row, col);
-        if (cell) {
-            const ruleList = cell.cfList.map((item) => this._conditionalFormatRuleModel.getRule(unitId, subUnitId, item.cfId)!).filter((rule) => !!rule);
-            const endIndex = ruleList.findIndex((rule) => rule?.stopIfTrue);
-            if (endIndex > -1) {
-                ruleList.splice(endIndex + 1);
-            }
-            const result = ruleList.reduce((pre, rule) => {
-                const type = rule.rule.type;
-                const ruleCacheItem = cell.cfList.find((cache) => cache.cfId === rule.cfId);
-                if (type === RuleType.highlightCell) {
-                    if (!ruleCacheItem?.ruleCache) {
-                        this.handleHighlightCell(unitId, subUnitId, rule);
-                    }
-                    if (ruleCacheItem!.ruleCache) {
-                        Tools.deepMerge(pre, { style: ruleCacheItem!.ruleCache });
-                    }
-                } else if (type === RuleType.colorScale) {
-                    if (!ruleCacheItem?.ruleCache) {
-                        this.handleHighlightCell(unitId, subUnitId, rule);
-                    }
-                    if (ruleCacheItem!.ruleCache) {
-                        pre.colorScale = ruleCacheItem!.ruleCache;
-                    }
-                } else if (type === RuleType.dataBar) {
-                    if (!ruleCacheItem?.ruleCache) {
-                        this.handleHighlightCell(unitId, subUnitId, rule);
-                    }
-                    if (ruleCacheItem!.ruleCache) {
-                        pre.dataBar = ruleCacheItem!.ruleCache;
-                    }
-                }
-                return pre;
-            }, {} as { style?: IHighlightCell['style'] } & { dataBar?: any;colorScale?: any });
-            this._conditionalFormatViewModel.setCellComposeCache(unitId, subUnitId, row, col, result);
-            return result;
-        }
-        return null;
+        setTimeout(() => {
+            this._ruleComputeStatus$.next({ status: 'end', unitId, subUnitId, result: computeResult, cfId: rule.cfId });
+        }, 0);
     }
 }

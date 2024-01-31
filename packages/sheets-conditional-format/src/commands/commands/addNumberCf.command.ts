@@ -17,11 +17,14 @@
 import type { ICommand, IRange } from '@univerjs/core';
 import {
     CommandType,
+    ICommandService,
     IUniverInstanceService,
 } from '@univerjs/core';
 import { ConditionalFormatRuleModel } from '../../models/conditional-format-rule-model';
 import type { IConditionFormatRule, INumberHighlightCell } from '../../models/type';
 import { NumberOperator, RuleType, SubRuleType } from '../../base/const';
+import type { IAddConditionalRuleMutationParams } from '../mutations/addConditionalRule.mutation';
+import { addConditionalRuleMutation } from '../mutations/addConditionalRule.mutation';
 
 interface IAddNumberCfParams {
     ranges: IRange[];
@@ -39,12 +42,13 @@ export const addNumberCfCommand: ICommand<IAddNumberCfParams> = {
         }
         const { ranges, style, stopIfTrue, operator, value } = params;
         const conditionalFormatRuleModel = accessor.get(ConditionalFormatRuleModel);
+        const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
-        const unitID = workbook.getUnitId();
-        const sheetId = worksheet.getSheetId();
-        const cfId = conditionalFormatRuleModel.createCfId(unitID, sheetId);
+        const unitId = workbook.getUnitId();
+        const subUnitId = worksheet.getSheetId();
+        const cfId = conditionalFormatRuleModel.createCfId(unitId, subUnitId);
         let rule: IConditionFormatRule;
         if ([NumberOperator.between, NumberOperator.notBetween].includes(operator)) {
             const _value = value as [number, number];
@@ -73,7 +77,8 @@ export const addNumberCfCommand: ICommand<IAddNumberCfParams> = {
                          value: _value,
                      } };
         }
-        conditionalFormatRuleModel.addRule(unitID, sheetId, rule);
+        commandService.executeCommand(addConditionalRuleMutation.id, { unitId, subUnitId, rule } as IAddConditionalRuleMutationParams);
+
         return true;
     },
 };

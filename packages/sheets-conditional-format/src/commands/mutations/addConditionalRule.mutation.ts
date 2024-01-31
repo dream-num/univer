@@ -21,13 +21,13 @@ import {
 import { ConditionalFormatRuleModel } from '../../models/conditional-format-rule-model';
 import type { IConditionFormatRule } from '../../models/type';
 
-interface IAddConditionalRule {
+export interface IAddConditionalRuleMutationParams {
     unitId: string;
     subUnitId: string;
     rule: IConditionFormatRule;
 }
 
-export const addConditionalRuleMutation: ICommand<IAddConditionalRule> = {
+export const addConditionalRuleMutation: ICommand<IAddConditionalRuleMutationParams> = {
     type: CommandType.MUTATION,
     id: 'sheet.mutation.add-conditional-rule',
     handler(accessor, params) {

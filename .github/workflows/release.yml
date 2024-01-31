@@ -1,22 +1,69 @@
-name: 🍰 Release Unstable
+name: 🍰 Release
 
 on:
-    push:
-        tags:
-            - 'v*.*.*-alpha.*'
-            - 'v*.*.*-beta.*'
-            - 'v*.*.*-rc.*'
+    workflow_dispatch:
+        inputs:
+            release_version:
+                description: Release version
+                required: true
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
 
 permissions:
     contents: read
 
 jobs:
-    release-unstable:
-        if: github.repository == 'dream-num/univer'
+    prepare:
         runs-on: ubuntu-latest
 
         outputs:
-            release_type: ${{ steps.release-type.outputs.release_type }}
+            release_type: ${{ steps.release-type.outputs.value }}
+
+        steps:
+            - name: Validate release version
+              run: |
+                  if [[ ! ${{ github.event.inputs.release_version }} =~ ^[0-9]+\.[0-9]+\.[0-9]+(-(rc|beta|alpha)\.[0-9]+)?$ ]]; then
+                      echo "Invalid release version: ${{ github.event.inputs.release_version }}"
+                      exit 1
+                  fi
+
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: ./.github/actions/setup-node
+
+            - name: 🔏 Set all monorepo's package version
+              run: |
+                  node -e "const fs = require('fs'); const package = JSON.parse(fs.readFileSync('./package.json')); package.version = '${{ github.event.inputs.release_version }}'; fs.writeFileSync('./package.json', JSON.stringify(package, null, 4) + '\n');"
+                  for package in $(ls packages); do
+                      node -e "const fs = require('fs'); const package = JSON.parse(fs.readFileSync('./packages/$package/package.json')); package.version = '${{ github.event.inputs.release_version }}'; fs.writeFileSync('./packages/$package/package.json', JSON.stringify(package, null, 4) + '\n');"
+                  done
+
+            - name: 📝 Commit and push changes
+              run: |
+                  git config --global user.email "actions@github.com"
+                  git config --global user.name "GitHub Actions"
+                  git add -A
+                  git commit -m "chore(release): v${{ github.event.inputs.release_version }}" || exit 0
+                  git push
+                  git tag -a v${{ github.event.inputs.release_version }} -m "v${{ github.event.inputs.release_version }}"
+                  git push origin v${{ github.event.inputs.release_version }}
+
+            - name: 🚚 Get release type
+              id: release-type
+              run: |
+                  if [[ ${{ github.event.inputs.release_version }} =~ -alpha\. ]]; then
+                      extracted_type="${BASH_REMATCH[1]}"
+                      echo "value=$extracted_type" >> $GITHUB_OUTPUT
+                  fi
+
+    release-npm:
+        needs: [prepare]
+        if: github.repository == 'dream-num/univer'
+        runs-on: ubuntu-latest
 
         steps:
             - name: Checkout
@@ -34,32 +81,25 @@ jobs:
                   node-version: 18
                   registry-url: https://registry.npmjs.org
 
-            - name: 🚚 Get release type
-              id: release-type
-              run: |
-                  if [[ ${{ github.ref_name }} =~ -(rc|beta|alpha)\. ]]; then
-                      extracted_type="${BASH_REMATCH[1]}"
-                      echo "release_type=$extracted_type" >> $GITHUB_OUTPUT
-                  fi
-
-            - name: 🚚 Install dependencies
+            - name: 🚚 Install dependencies and build
               run: |
                   pnpm install
                   pnpm run build
 
             - name: 🐙 Publish (alpha)
-              if: ${{ steps.release-type.outputs.release_type == 'alpha' }}
-              run: pnpm publish --access public --tag ${{ steps.release-type.outputs.release_type }} -r
+              if: ${{ needs.prepare.outputs.release_type == 'alpha' }}
+              run: pnpm publish --access public --tag ${{ needs.prepare.outputs.release_type }} -r
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-            - name: 🐙 Publish (beta, rc)
-              if: ${{ steps.release-type.outputs.release_type == 'beta' || steps.release-type.outputs.release_type == 'rc' }}
+            - name: 🐙 Publish (beta, rc, stable)
+              if: ${{ needs.prepare.outputs.release_type != 'alpha' }}
               run: pnpm publish --access public -r
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
     release-verdaccio:
+        needs: [prepare]
         if: github.repository == 'dream-num/univer'
         runs-on: ubuntu-latest
 
@@ -80,34 +120,26 @@ jobs:
                   registry-url: ${{ secrets.VERDACCIO_URL }}
                   scope: '@univerjs'
 
-            - name: 🚚 Get release type
-              id: release-type
-              run: |
-                  if [[ ${{ github.ref_name }} =~ -(rc|beta|alpha)\. ]]; then
-                      extracted_type="${BASH_REMATCH[1]}"
-                      echo "release_type=$extracted_type" >> $GITHUB_OUTPUT
-                  fi
-
             - name: 🚚 Install dependencies
               run: |
                   pnpm install
                   pnpm run build
 
             - name: 🐙 Publish (alpha)
-              if: ${{ steps.release-type.outputs.release_type == 'alpha' }}
-              run: pnpm publish --access public --tag ${{ steps.release-type.outputs.release_type }} -r
+              if: ${{ needs.prepare.outputs.release_type == 'alpha' }}
+              run: pnpm publish --access public --tag ${{ needs.prepare.outputs.release_type }} -r
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.VERDACCIO_TOKEN }}
 
             - name: 🐙 Publish (beta, rc)
-              if: ${{ steps.release-type.outputs.release_type == 'beta' || steps.release-type.outputs.release_type == 'rc' }}
+              if: ${{ needs.prepare.outputs.release_type == 'beta' || needs.prepare.outputs.release_type == 'rc' }}
               run: pnpm publish --access public -r
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.VERDACCIO_TOKEN }}
 
     build-demo:
         runs-on: ubuntu-latest
-        needs: [release-unstable]
+        needs: [release-npm]
 
         outputs:
             preview-url: ${{ steps.vercel-demo.outputs.preview-url }}
@@ -138,7 +170,7 @@ jobs:
 
     build-storybook:
         runs-on: ubuntu-latest
-        needs: [release-unstable]
+        needs: [release-npm]
 
         outputs:
             preview-url: ${{ steps.vercel-storybook.outputs.preview-url }}
@@ -164,7 +196,7 @@ jobs:
                   vercel-args: --prod
 
     notify:
-        needs: [release-unstable, release-verdaccio, build-demo, build-storybook]
+        needs: [prepare, release-npm, release-verdaccio, build-demo, build-storybook]
         runs-on: ubuntu-latest
 
         steps:

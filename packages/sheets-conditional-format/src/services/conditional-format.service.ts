@@ -239,6 +239,37 @@ export class ConditionalFormatService extends Disposable {
                         }
                     }
                 }
+                case SubRuleType.rank:{
+                    const v = Number(value);
+
+                    if (isNullable(value) || Number.isNaN(v)) {
+                        return false;
+                    }
+
+                    const targetValue = cache!.rank!;
+                    const subRuleConfig = ruleConfig as IRankHighlightCell;
+                    if (subRuleConfig.isBottom) {
+                        return v <= targetValue;
+                    } else {
+                        return v >= targetValue;
+                    }
+                }
+                case SubRuleType.uniqueValues:{
+                    if (isNullable(value)) {
+                        return false;
+                    }
+                    const uniqueCache = cache!.count!;
+                    return uniqueCache.get(value) === 1;
+                }
+                case SubRuleType.duplicateValues:{
+                    if (isNullable(value)) {
+                        return false;
+                    }
+                    const uniqueCache = cache!.count!;
+                    return uniqueCache.get(value) !== 1;
+                }
+            }
+        };
         rule.ranges.forEach((range) => {
             Range.foreach(range, (row, col) => {
                 if (check(row, col)) {

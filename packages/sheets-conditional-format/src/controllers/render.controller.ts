@@ -44,12 +44,12 @@ export class RenderController {
             const unitId = this._univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
             this._renderManagerService.getRenderById(unitId)?.mainComponent?.makeDirty();
         };
-        this._conditionalFormatService.ruleComputeStatus$.pipe(bufferTime(0), filter((v) => {
+        this._conditionalFormatService.ruleComputeStatus$.pipe(bufferTime(16), filter((v) => {
             const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
             const worksheet = workbook.getActiveSheet();
             return v.filter((item) => item.unitId === workbook.getUnitId() && item.subUnitId === worksheet.getSheetId()).length > 0;
         })).subscribe(markDirtySkeleton);
-        this._conditionalFormatViewModel.markDirty$.pipe(bufferTime(0), filter((v) => {
+        this._conditionalFormatViewModel.markDirty$.pipe(bufferTime(16), filter((v) => {
             const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
             const worksheet = workbook.getActiveSheet();
             return v.filter((item) => item.unitId === workbook.getUnitId() && item.subUnitId === worksheet.getSheetId()).length > 0;
@@ -62,9 +62,10 @@ export class RenderController {
             if (!result) {
                 return next(cell);
             }
-            const style = result.style;
-            if (style) {
-                const s = (typeof cell?.s === 'object' && cell.s !== null) ? { ...cell.s } : { ...style };
+            if (result.style) {
+                const styleMap = context.workbook.getStyles();
+                const _cellStyle = (typeof cell?.s === 'string' ? styleMap.get(cell?.s) : cell?.s) || {};
+                const s = { ..._cellStyle, ...result.style };
                 return next({ ...cell, s });
             }
             return next(cell);

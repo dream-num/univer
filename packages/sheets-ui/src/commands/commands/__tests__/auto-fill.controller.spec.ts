@@ -55,157 +55,164 @@ const TEST_WORKBOOK_DATA = {
             id: 'sheet1',
             cellData: {
                 // Single Number
-                '0': {
-                    '0': {
+                0: {
+                    0: {
                         v: 1,
                         t: CellValueType.NUMBER,
                     },
-                    '1': {
+                    1: {
                         v: 2,
                         t: CellValueType.NUMBER,
                     },
                 },
                 // Single Number. descending
-                '1': {
-                    '0': {
+                1: {
+                    0: {
                         v: 2,
                         t: CellValueType.NUMBER,
                     },
-                    '1': {
+                    1: {
                         v: 1,
                         t: CellValueType.NUMBER,
                     },
                 },
                 // Extend Number
-                '2': {
-                    '0': {
+                2: {
+                    0: {
                         v: '第1',
                         t: CellValueType.STRING,
                     },
-                    '1': {
+                    1: {
                         v: '第2',
                         t: CellValueType.STRING,
                     },
                 },
                 // Chinese Number
-                '3': {
-                    '0': {
+                3: {
+                    0: {
                         v: '一',
                         t: CellValueType.STRING,
                     },
-                    '1': {
+                    1: {
                         v: '三',
                         t: CellValueType.STRING,
                     },
                 },
                 // Chinese Week
-                '4': {
-                    '0': {
+                4: {
+                    0: {
                         v: '星期一',
                         t: CellValueType.STRING,
                     },
-                    '1': {
+                    1: {
                         v: '星期三',
                         t: CellValueType.STRING,
                     },
                 },
                 // Loop Series
-                '5': {
-                    '0': {
+                5: {
+                    0: {
                         v: '甲',
                         t: CellValueType.STRING,
                     },
-                    '1': {
+                    1: {
                         v: '乙',
                         t: CellValueType.STRING,
                     },
                 },
                 // Other String
-                '6': {
-                    '0': {
+                6: {
+                    0: {
                         v: 'copy only',
                         t: CellValueType.STRING,
                     },
-                    '1': {
+                    1: {
                         v: 'no series',
                         t: CellValueType.STRING,
                     },
                 },
                 // Mixed Mode
-                '7': {
-                    '0': {
+                7: {
+                    0: {
                         v: 1,
                         t: CellValueType.NUMBER,
                     },
-                    '1': {
+                    1: {
                         v: 2,
                         t: CellValueType.NUMBER,
                     },
-                    '2': {
+                    2: {
                         v: '第1',
                         t: CellValueType.STRING,
                     },
-                    '3': {
+                    3: {
                         v: '第2',
                         t: CellValueType.STRING,
                     },
                 },
                 // db click to fill
-                '10': {
-                    '0': {
+                10: {
+                    0: {
                         v: 1,
                         t: CellValueType.NUMBER,
                     },
-                    '1': {
+                    1: {
                         v: 2,
                         t: CellValueType.NUMBER,
                     },
-                    '2': {
+                    2: {
                         v: 3,
                         t: CellValueType.NUMBER,
                     },
-                    '3': {
+                    3: {
                         v: 4,
                         t: CellValueType.NUMBER,
                     },
                 },
-                '11': {
-                    '0': {
+                11: {
+                    0: {
                         v: 2,
                         t: CellValueType.NUMBER,
                     },
-                    '2': {
+                    2: {
                         v: 3,
                         t: CellValueType.NUMBER,
                     },
                 },
-                '12': {
-                    '0': {
+                12: {
+                    0: {
                         v: 3,
                         t: CellValueType.NUMBER,
                     },
                 },
-                '13': {
-                    '0': {
+                13: {
+                    0: {
                         v: 4,
                         t: CellValueType.NUMBER,
                     },
                 },
                 // left direction & equal ratio & styles
-                '14': {
-                    '2': {
+                14: {
+                    2: {
                         v: 2,
                         t: CellValueType.NUMBER,
                         s: '_aRLOe',
                     },
-                    '3': {
+                    3: {
                         v: 4,
                         t: CellValueType.NUMBER,
                     },
-                    '4': {
+                    4: {
                         v: 8,
                         t: CellValueType.NUMBER,
                         s: '3UpAbI',
+                    },
+                },
+                16: {
+                    2: {
+                        v: 2,
+                        t: CellValueType.NUMBER,
+                        s: '_aRLOe',
                     },
                 },
             },
@@ -677,6 +684,79 @@ describe('Test auto fill rules in controller', () => {
                 ht: null,
                 vt: null,
             });
+        });
+    });
+
+    describe('auto fill from single cell', async () => {
+        it('correct situation', async () => {
+            const workbook = get(IUniverInstanceService).getCurrentUniverSheetInstance();
+            if (!workbook) throw new Error('This is an error');
+            // test right
+            (autoFillController as any)._triggerAutoFill(
+                {
+                    startRow: 16,
+                    startColumn: 2,
+                    endRow: 16,
+                    endColumn: 2,
+                },
+                {
+                    startRow: 16,
+                    startColumn: 2,
+                    endRow: 16,
+                    endColumn: 4,
+                }
+            );
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(16, 3)?.v).toBe(3);
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(16, 4)?.v).toBe(4);
+            // test left
+            (autoFillController as any)._triggerAutoFill(
+                {
+                    startRow: 16,
+                    startColumn: 2,
+                    endRow: 16,
+                    endColumn: 2,
+                },
+                {
+                    startRow: 16,
+                    startColumn: 0,
+                    endRow: 16,
+                    endColumn: 2,
+                }
+            );
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(16, 1)?.v).toBe(1);
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(16, 0)?.v).toBe(0);
+            // test up
+            (autoFillController as any)._triggerAutoFill(
+                {
+                    startRow: 16,
+                    startColumn: 2,
+                    endRow: 16,
+                    endColumn: 2,
+                },
+                {
+                    startRow: 15,
+                    startColumn: 2,
+                    endRow: 16,
+                    endColumn: 2,
+                }
+            );
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(15, 2)?.v).toBe(1);
+            // test down
+            (autoFillController as any)._triggerAutoFill(
+                {
+                    startRow: 16,
+                    startColumn: 2,
+                    endRow: 16,
+                    endColumn: 2,
+                },
+                {
+                    startRow: 16,
+                    startColumn: 2,
+                    endRow: 17,
+                    endColumn: 2,
+                }
+            );
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(17, 2)?.v).toBe(3);
         });
     });
 });

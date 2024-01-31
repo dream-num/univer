@@ -33,6 +33,10 @@ export class Border extends SheetExtension {
 
     override zIndex = BORDER_Z_INDEX;
 
+    override clone() {
+        return new Border()
+    }
+
     override draw(
         ctx: UniverRenderingContext,
         parentScale: IScale,

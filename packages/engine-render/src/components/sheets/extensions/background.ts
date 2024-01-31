@@ -31,6 +31,10 @@ const NO_CACHE_Z_INDEX = 20;
 export class Background extends SheetExtension {
     override uKey = UNIQUE_KEY;
 
+    override clone() {
+        return new Background()
+    }
+
     get spreadsheet() {
         return this.parent as Spreadsheet;
     }

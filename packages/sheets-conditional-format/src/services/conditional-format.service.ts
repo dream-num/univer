@@ -17,7 +17,7 @@
 import type { ICellData, IRange } from '@univerjs/core';
 import { CellValueType, Disposable, ICommandService, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Range, Rectangle, Tools } from '@univerjs/core';
 import type { IInsertColMutationParams, IMoveColumnsMutationParams, IMoveRangeMutationParams, IMoveRowsMutationParams, IRemoveRowsMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { InsertColMutation, InsertRowMutation, INumfmtService, MoveColsMutation, MoveRangeMutation, MoveRowsMutation, RefRangeService, RemoveColMutation, RemoveRowMutation, SetRangeValuesMutation } from '@univerjs/sheets';
+import { InsertColMutation, InsertRowMutation, INumfmtService, MoveColsMutation, MoveRangeMutation, MoveRowsMutation, RemoveColMutation, RemoveRowMutation, SetRangeValuesMutation } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 import dayjs from 'dayjs';
 import { Subject } from 'rxjs';
@@ -72,6 +72,7 @@ export class ConditionalFormatService extends Disposable {
                 result.forValue((row, col, value) => {
                     this._conditionalFormatViewModel.setCellCfRuleCache(unitId, subUnitId, row, col, cfId, value);
                 });
+                this._deleteComputeCache(unitId, subUnitId, cfId);
             }
         });
     }
@@ -265,10 +266,7 @@ export class ConditionalFormatService extends Disposable {
         if (cache && cache.status === 'computing') {
             return;
         }
-        console.log('_handleHighlightCell::', cache);
         const getCache = (ruleConfig: IHighlightCell) => {
-            // eslint-disable-next-line no-console
-            console.log('getCache::', ruleConfig);
             switch (ruleConfig.subType) {
                 case SubRuleType.average:{
                     let sum = 0;
@@ -548,7 +546,7 @@ export class ConditionalFormatService extends Disposable {
                 if (check(row, col)) {
                     computeResult.setValue(row, col, ruleConfig.style);
                 } else {
-                    // 返回一个空属性,表明已经被处理过了.否则在外层判断 cache 的时候,会读不到结果.
+                    // Returns an empty property indicating that it has been processed.
                     computeResult.setValue(row, col, emptyStyle);
                 }
             });

@@ -19,17 +19,99 @@ import { describe, expect, it } from 'vitest';
 import { FUNCTION_NAMES_DATE } from '../../function-names';
 import { DateFunction } from '..';
 import { NumberValueObject } from '../../../../engine/value-object/primitive-object';
+import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 
 describe('Test date function', () => {
     const textFunction = new DateFunction(FUNCTION_NAMES_DATE.DATE);
 
     describe('Date', () => {
-        it('Value is normal', () => {
+        it('All value is normal', () => {
             const year = new NumberValueObject(2024);
             const month = new NumberValueObject(1);
             const day = new NumberValueObject(1);
             const result = textFunction.calculate(year, month, day);
-            expect(result.getValue()).toBe(45292);
+            expect(transformToValue(result.getArrayValue())).toStrictEqual([[45292]]);
+        });
+
+        it('Year is single cell, month is one column, day is one row', () => {
+            const year = new NumberValueObject(2024);
+            const month = new ArrayValueObject({
+                calculateValueList: transformToValueObject([[1], [2]]),
+                rowCount: 2,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const day = new ArrayValueObject({
+                calculateValueList: transformToValueObject([[3, 4, 5]]),
+                rowCount: 1,
+                columnCount: 3,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result = textFunction.calculate(year, month, day);
+            expect(transformToValue(result.getArrayValue())).toStrictEqual([[45294, 45295, 45296], [45325, 45326, 45327]]);
+        });
+
+        it('Year is array with multiple format values', () => {
+            const year = new ArrayValueObject({
+                calculateValueList: transformToValueObject([
+                    [1, ' ', 1.23, true, false, null, 18],
+                    [0, '100', '2.34', 'test', -3, 1900, 108],
+                ]),
+                rowCount: 2,
+                columnCount: 7,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const month = new NumberValueObject(1);
+            const day = new NumberValueObject(1);
+            const result = textFunction.calculate(year, month, day);
+            expect(transformToValue(result.getArrayValue())).toStrictEqual([[367, '#VALUE!', 367, 367, 1, 1, 6576], [1, 36526, 732, '#VALUE!', '#NUM!', 1, 39448]]);
+        });
+
+        it('Month is array with multiple format values', () => {
+            const year = new NumberValueObject(2024);
+            const month = new ArrayValueObject({
+                calculateValueList: transformToValueObject([
+                    [1, ' ', 1.23, true, false, null],
+                    [0, '100', '2.34', 'test', -3, 14],
+                ]),
+                rowCount: 2,
+                columnCount: 6,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const day = new NumberValueObject(1);
+            const result = textFunction.calculate(year, month, day);
+            expect(transformToValue(result.getArrayValue())).toStrictEqual([[45292, '#VALUE!', 45292, 45292, 45261, 45261], [45261, 48305, 45323, '#VALUE!', 45170, 45689]]);
+        });
+
+        it('Day is array with multiple format values', () => {
+            const year = new NumberValueObject(2024);
+            const month = new NumberValueObject(1);
+            const day = new ArrayValueObject({
+                calculateValueList: transformToValueObject([
+                    [1, ' ', 1.23, true, false, null],
+                    [0, '100', '2.34', 'test', -3, 32],
+                ]),
+                rowCount: 2,
+                columnCount: 6,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result = textFunction.calculate(year, month, day);
+            expect(transformToValue(result.getArrayValue())).toStrictEqual([[45292, '#VALUE!', 45292, 45292, 45291, 45291], [45291, 45391, 45293, '#VALUE!', 45288, 45323]]);
         });
     });
 });

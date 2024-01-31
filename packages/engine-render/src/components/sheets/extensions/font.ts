@@ -189,7 +189,6 @@ export class Font extends SheetExtension {
                     } else {
                         ctx.rect(startX + 1 / scale, startY + 1 / scale, cellWidth - 2 / scale, cellHeight - 2 / scale);
                         ctx.clip();
-                        console.log('===this.spreadsheet.allowCache', this.spreadsheet.allowCache);
                         if (this.spreadsheet.allowCache) {
                             ctx.clearRect(
                                 startX + 1 / scale,

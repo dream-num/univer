@@ -18,18 +18,25 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { FUNCTION_NAMES_DATE } from '../../function-names';
 import { Today } from '..';
+import { NumberValueObject } from '../../../../engine/value-object/primitive-object';
+import { ErrorType } from '../../../..';
 
 // mock new Date() use V
 const _Date = Date;
-global.Date = vi.fn(() => new _Date('2024-01-01T00:00:00.000Z')) as any;
+global.Date = vi.fn((...params) => params.length > 0 ? new _Date(params[0], params[1], params[2]) : new _Date(2020, 0, 1)) as any;
 
 describe('Test today function', () => {
     const textFunction = new Today(FUNCTION_NAMES_DATE.TODAY);
 
     describe('Today', () => {
-        it('Value is normal', () => {
+        it('Normal', () => {
             const result = textFunction.calculate();
-            expect(result.getValue()).toBe(1);
+            expect(result.getValue()).toBe(43831);
+        });
+
+        it('Set a parameter', () => {
+            const result = textFunction.calculate(new NumberValueObject(1));
+            expect(result.getValue()).toBe(ErrorType.NA);
         });
     });
 });

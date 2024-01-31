@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
-import { NumberValueObject } from '../../..';
+import type { BaseValueObject } from '../../..';
+import { ErrorType, ErrorValueObject, NumberValueObject } from '../../..';
 import { DEFFAULT_DATE_FORMAT, excelDateSerial } from '../../../basics/date';
 import { BaseFunction } from '../../base-function';
 
 export class Today extends BaseFunction {
-    override calculate() {
+    override calculate(value?: BaseValueObject) {
+        if (value) {
+            return new ErrorValueObject(ErrorType.NA);
+        }
+
         const currentSerial = excelDateSerial(new Date());
         const valueObject = new NumberValueObject(currentSerial);
         valueObject.setPattern(DEFFAULT_DATE_FORMAT);

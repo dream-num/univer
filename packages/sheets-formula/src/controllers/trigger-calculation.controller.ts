@@ -132,7 +132,7 @@ export class TriggerCalculationController extends Disposable {
         const allDirtyRanges: IUnitRange[] = [];
         const allDirtyNameMap: IDirtyUnitSheetNameMap = {};
         const allDirtyUnitFeatureMap: IDirtyUnitFeatureMap = {};
-        const numfmtItemMap: INumfmtItemMap = {};
+        const numfmtItemMap: INumfmtItemMap = this._formulaDataModel.getNumfmtItemMap();
 
         for (const command of commands) {
             const conversion = this._activeDirtyManagerService.get(command.id);

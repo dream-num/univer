@@ -335,11 +335,11 @@ export class ConditionalFormatService extends Disposable {
                     switch (subRuleConfig.operator) {
                         case NumberOperator.between:{
                             const [start, end] = subRuleConfig.value;
-                            return v >= start && v < end;
+                            return v >= start && v <= end;
                         }
                         case NumberOperator.notBetween:{
                             const [start, end] = subRuleConfig.value;
-                            return !(v >= start && v < end);
+                            return !(v >= start && v <= end);
                         }
                         case NumberOperator.equal:{
                             const condition = subRuleConfig.value;

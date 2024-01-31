@@ -115,7 +115,7 @@ export class SheetClipboardController extends RxDisposable {
 
         if (!this._clipboardInterfaceService.supportClipboard) {
             this._textSelectionRenderManager?.onPaste$.pipe(takeUntil(this.dispose$)).subscribe((config) => {
-                if (whenSheetEditorFocused(this._contextService) === false) {
+                if (!whenSheetEditorFocused(this._contextService)) {
                     return;
                 }
 

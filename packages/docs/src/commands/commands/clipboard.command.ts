@@ -14,9 +14,19 @@
  * limitations under the License.
  */
 
-import type { IMultiCommand } from '@univerjs/core';
+import type { IContextService, IMultiCommand } from '@univerjs/core';
 import { CommandType, EDITOR_ACTIVATED, FOCUSING_DOC } from '@univerjs/core';
-import { CopyCommand, CutCommand, PasteCommand } from '@univerjs/ui';
+import { CopyCommand, CutCommand, IClipboardInterfaceService, PasteCommand } from '@univerjs/ui';
+import type { IAccessor } from '@wendellhu/redi';
+
+import { IDocClipboardService } from '../../services/clipboard/clipboard.service';
+
+export function whenDocOrEditor(contextService: IContextService): boolean {
+    return contextService.getContextValue(FOCUSING_DOC) || contextService.getContextValue(EDITOR_ACTIVATED);
+}
+
+// Commands here should have higher priority than commands of sheets
+// in packages/sheets-ui/src/commands/commands/clipboard.command.ts
 
 export const DocCopyCommand: IMultiCommand = {
     id: CopyCommand.id,
@@ -24,9 +34,11 @@ export const DocCopyCommand: IMultiCommand = {
     type: CommandType.COMMAND,
     multi: true,
     priority: 999,
-    preconditions: (contextService) =>
-        contextService.getContextValue(FOCUSING_DOC) || contextService.getContextValue(EDITOR_ACTIVATED),
-    handler: async () => true,
+    preconditions: whenDocOrEditor,
+    handler: async (accessor: IAccessor) => {
+        const docClipboardService = accessor.get(IDocClipboardService);
+        return docClipboardService.copy();
+    },
 };
 
 export const DocCutCommand: IMultiCommand = {
@@ -35,9 +47,11 @@ export const DocCutCommand: IMultiCommand = {
     type: CommandType.COMMAND,
     multi: true,
     priority: 999,
-    preconditions: (contextService) =>
-        contextService.getContextValue(FOCUSING_DOC) || contextService.getContextValue(EDITOR_ACTIVATED),
-    handler: async () => true,
+    preconditions: whenDocOrEditor,
+    handler: async (accessor: IAccessor) => {
+        const docClipboardService = accessor.get(IDocClipboardService);
+        return docClipboardService.cut();
+    },
 };
 
 export const DocPasteCommand: IMultiCommand = {
@@ -45,8 +59,17 @@ export const DocPasteCommand: IMultiCommand = {
     name: 'doc.command.paste',
     type: CommandType.COMMAND,
     multi: true,
-    priority: 999, // Need to bigger than SheetPasteCommand's priority.
-    preconditions: (contextService) =>
-        contextService.getContextValue(FOCUSING_DOC) || contextService.getContextValue(EDITOR_ACTIVATED),
-    handler: async () => true,
+    priority: 999,
+    preconditions: whenDocOrEditor,
+    handler: async (accessor: IAccessor) => {
+        const docClipboardService = accessor.get(IDocClipboardService);
+        const clipboardInterfaceService = accessor.get(IClipboardInterfaceService);
+
+        const clipboardItems = await clipboardInterfaceService.read();
+        if (clipboardItems.length === 0) {
+            return false;
+        }
+
+        return docClipboardService.paste(clipboardItems);
+    },
 };

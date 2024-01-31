@@ -127,23 +127,21 @@ export class ConditionalFormatService extends Disposable {
                 const type = rule.rule.type;
                 const ruleCacheItem = cell.cfList.find((cache) => cache.cfId === rule.cfId);
                 if (type === RuleType.highlightCell) {
-                    if (!ruleCacheItem?.ruleCache) {
+                    if (ruleCacheItem?.isDirty) {
                         this._handleHighlightCell(unitId, subUnitId, rule);
-                    } else {
-                        Tools.deepMerge(pre, { style: ruleCacheItem!.ruleCache });
                     }
+                    ruleCacheItem!.ruleCache && Tools.deepMerge(pre, { style: ruleCacheItem!.ruleCache });
                 } else if (type === RuleType.colorScale) {
-                    if (!ruleCacheItem?.ruleCache) {
+                    if (ruleCacheItem?.isDirty) {
                         this._handleHighlightCell(unitId, subUnitId, rule);
-                    } else {
-                        pre.colorScale = ruleCacheItem!.ruleCache;
                     }
+
+                    pre.colorScale = ruleCacheItem!.ruleCache;
                 } else if (type === RuleType.dataBar) {
-                    if (!ruleCacheItem?.ruleCache) {
+                    if (ruleCacheItem?.isDirty) {
                         this._handleHighlightCell(unitId, subUnitId, rule);
-                    } else {
-                        pre.dataBar = ruleCacheItem!.ruleCache;
                     }
+                    pre.dataBar = ruleCacheItem!.ruleCache;
                 }
                 return pre;
             }, {} as { style?: IHighlightCell['style'] } & { dataBar?: any; colorScale?: any });

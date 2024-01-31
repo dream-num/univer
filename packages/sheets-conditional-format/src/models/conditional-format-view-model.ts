@@ -36,7 +36,7 @@ import { Subject } from 'rxjs';
 import type { IColorScale, IConditionFormatRule, IDataBar, IHighlightCell } from './type';
 
 interface ICellItem {
-    cfList: { cfId: string; ruleCache?: Nullable<IHighlightCell['style'] | IDataBar['config'] | IColorScale['config']> }[];
+    cfList: { cfId: string; ruleCache?: Nullable<IHighlightCell['style'] | IDataBar['config'] | IColorScale['config']>;isDirty: boolean }[];
     composeCache?: any;
 }
 
@@ -79,6 +79,7 @@ export class ConditionalFormatViewModel {
         const item = cell?.cfList.find((e) => e.cfId === cfId);
         if (item) {
             item.ruleCache = value;
+            item.isDirty = false;
         }
     }
 
@@ -115,14 +116,14 @@ export class ConditionalFormatViewModel {
         const _matrix = this._ensureMatrix(unitId, subUnitId);
         let cellValue = _matrix.getValue(row, col);
         if (!cellValue) {
-            cellValue = { cfList: [{ cfId }] };
+            cellValue = { cfList: [{ cfId, isDirty: true }] };
         } else {
             const cfIdList = cellValue.cfList;
             const index = cfIdList.findIndex((item) => item.cfId === cfId);
             if (index > -1) {
                 cfIdList.splice(index, 1);
             }
-            cfIdList.push({ cfId });
+            cfIdList.push({ cfId, isDirty: true });
         }
         _matrix.setValue(row, col, cellValue);
     }
@@ -163,7 +164,7 @@ export class ConditionalFormatViewModel {
             if (cell) {
                 const ruleItem = cell.cfList.find((item) => item.cfId === rule.cfId);
                 if (ruleItem) {
-                    ruleItem.ruleCache = null;
+                    ruleItem.isDirty = true;
                     this._markDirty$.next({ rule, unitId, subUnitId });
                 }
             }

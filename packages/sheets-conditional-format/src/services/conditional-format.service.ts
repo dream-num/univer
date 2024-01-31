@@ -53,7 +53,7 @@ export class ConditionalFormatService extends Disposable {
     private _ruleCacheMap: Map<string, Map<string, Map<string, ComputeCache>>> = new Map();
 
     private _ruleComputeStatus$: Subject<{ status: ComputeStatus;result?: ObjectMatrix<any>;unitId: string; subUnitId: string; cfId: string }> = new Subject();
-    ruleComputeStatus$ = this._ruleComputeStatus$.asObservable();
+    public ruleComputeStatus$ = this._ruleComputeStatus$.asObservable();
 
     constructor(@Inject(ConditionalFormatRuleModel) private _conditionalFormatRuleModel: ConditionalFormatRuleModel,
         @Inject(ConditionalFormatViewModel) private _conditionalFormatViewModel: ConditionalFormatViewModel,
@@ -64,17 +64,7 @@ export class ConditionalFormatService extends Disposable {
         super();
         this._initCellChange();
         this._initCacheManager();
-        this._ruleComputeStatus$.subscribe(({ status, subUnitId, unitId, cfId, result }) => {
-            const cache = this._getComputedCache(unitId, subUnitId, cfId) || {};
-            cache.status = status;
-            this._setComputedCache(unitId, subUnitId, cfId, cache);
-            if (status === 'end' && result) {
-                result.forValue((row, col, value) => {
-                    this._conditionalFormatViewModel.setCellCfRuleCache(unitId, subUnitId, row, col, cfId, value);
-                });
-                this._deleteComputeCache(unitId, subUnitId, cfId);
-            }
-        });
+        this._initRemoteCalculate();
     }
 
     private _getComputedCache(unitId: string, subUnitId: string, cfId: string) {
@@ -108,15 +98,16 @@ export class ConditionalFormatService extends Disposable {
     }
 
     private _initCacheManager() {
-        this._conditionalFormatViewModel.markDirty$.subscribe((item) => {
+        this.disposeWithMe(this._conditionalFormatViewModel.markDirty$.subscribe((item) => {
             this._deleteComputeCache(item.unitId, item.subUnitId, item.rule.cfId);
-        });
-        this._conditionalFormatRuleModel.$ruleChange.pipe(filter((item) => item.type !== 'sort')).subscribe((item) => {
+        }));
+
+        this.disposeWithMe(this._conditionalFormatRuleModel.$ruleChange.pipe(filter((item) => item.type !== 'sort')).subscribe((item) => {
             this._deleteComputeCache(item.unitId, item.subUnitId, item.rule.cfId);
-        });
+        }));
     }
 
-    composeStyle(unitId: string, subUnitId: string, row: number, col: number) {
+    public composeStyle(unitId: string, subUnitId: string, row: number, col: number) {
         const cell = this._conditionalFormatViewModel.getCellCf(unitId, subUnitId, row, col);
         if (cell) {
             const ruleList = cell.cfList.map((item) => this._conditionalFormatRuleModel.getRule(unitId, subUnitId, item.cfId)!).filter((rule) => !!rule);
@@ -152,110 +143,111 @@ export class ConditionalFormatService extends Disposable {
     }
 
     private _initCellChange() {
-        this._commandService.onCommandExecuted((commandInfo) => {
-            const collectRule = (unitId: string, subUnitId: string, cellData: [number, number][]) => {
-                const ruleIds: Set<string> = new Set();
-                cellData.forEach(([row, col]) => {
-                    const ruleItem = this._conditionalFormatViewModel.getCellCf(unitId, subUnitId, row, col);
-                    ruleItem?.cfList.forEach((item) => ruleIds.add(item.cfId));
-                });
-                return [...ruleIds].map((cfId) => this._conditionalFormatRuleModel.getRule(unitId, subUnitId, cfId) as IConditionFormatRule).filter((rule) => !!rule);
-            };
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((commandInfo) => {
+                const collectRule = (unitId: string, subUnitId: string, cellData: [number, number][]) => {
+                    const ruleIds: Set<string> = new Set();
+                    cellData.forEach(([row, col]) => {
+                        const ruleItem = this._conditionalFormatViewModel.getCellCf(unitId, subUnitId, row, col);
+                        ruleItem?.cfList.forEach((item) => ruleIds.add(item.cfId));
+                    });
+                    return [...ruleIds].map((cfId) => this._conditionalFormatRuleModel.getRule(unitId, subUnitId, cfId) as IConditionFormatRule).filter((rule) => !!rule);
+                };
 
-            switch (commandInfo.id) {
-                case SetRangeValuesMutation.id:{
-                    const params = commandInfo.params as ISetRangeValuesMutationParams;
-                    const { subUnitId, unitId, cellValue } = params;
-                    const cellMatrix: [number, number][] = [];
-                    new ObjectMatrix(cellValue).forValue((row, col) => {
-                        cellMatrix.push([row, col]);
-                    });
-                    const rules = collectRule(unitId, subUnitId, cellMatrix);
-                    rules.forEach((rule) => {
-                        this._conditionalFormatViewModel.markRuleDirty(unitId, subUnitId, rule);
-                        this._deleteComputeCache(unitId, subUnitId, rule.cfId);
-                    });
-                    break;
-                }
-                case InsertColMutation.id:
-                case RemoveColMutation.id:{
-                    const { range, unitId, subUnitId } = commandInfo.params as IInsertColMutationParams;
-                    const allRules = this._conditionalFormatRuleModel.getAllRule(unitId, subUnitId);
-                    const effectRange: IRange = { ...range, endColumn: Number.MAX_SAFE_INTEGER };
-                    if (allRules) {
-                        const effectRule = allRules.filter((rule) => rule.ranges.some((ruleRange) => Rectangle.intersects(ruleRange, effectRange)));
-                        effectRule.forEach((rule) => {
-                            this._conditionalFormatViewModel.markRuleDirty(unitId, subUnitId, rule);
-                            this._deleteComputeCache(unitId, subUnitId, rule.cfId);
-                        });
-                    }
-                    break;
-                }
-                case RemoveRowMutation.id:
-                case InsertRowMutation.id:{
-                    const { range, unitId, subUnitId } = commandInfo.params as IRemoveRowsMutationParams;
-                    const allRules = this._conditionalFormatRuleModel.getAllRule(unitId, subUnitId);
-                    const effectRange: IRange = { ...range, endRow: Number.MAX_SAFE_INTEGER };
-                    if (allRules) {
-                        const effectRule = allRules.filter((rule) => rule.ranges.some((ruleRange) => Rectangle.intersects(ruleRange, effectRange)));
-                        effectRule.forEach((rule) => {
-                            this._conditionalFormatViewModel.markRuleDirty(unitId, subUnitId, rule);
-                            this._deleteComputeCache(unitId, subUnitId, rule.cfId);
-                        });
-                    }
-                    break;
-                }
-                case MoveRowsMutation.id:{
-                    const { sourceRange, targetRange, unitId, subUnitId } = commandInfo.params as IMoveRowsMutationParams;
-                    const allRules = this._conditionalFormatRuleModel.getAllRule(unitId, subUnitId);
-                    const effectRange: IRange = { startRow: Math.min(sourceRange.startRow, targetRange.startRow),
-                                                  endRow: Number.MAX_SAFE_INTEGER,
-                                                  startColumn: 0,
-                                                  endColumn: Number.MAX_SAFE_INTEGER };
-                    if (allRules) {
-                        const effectRule = allRules.filter((rule) => rule.ranges.some((ruleRange) => Rectangle.intersects(ruleRange, effectRange)));
-                        effectRule.forEach((rule) => {
-                            this._conditionalFormatViewModel.markRuleDirty(unitId, subUnitId, rule);
-                            this._deleteComputeCache(unitId, subUnitId, rule.cfId);
-                        });
-                    }
-                    break;
-                }
-                case MoveColsMutation.id:{
-                    const { sourceRange, targetRange, unitId, subUnitId } = commandInfo.params as IMoveColumnsMutationParams;
-                    const allRules = this._conditionalFormatRuleModel.getAllRule(unitId, subUnitId);
-                    const effectRange: IRange = { startRow: 0,
-                                                  endRow: Number.MAX_SAFE_INTEGER,
-                                                  startColumn: Math.min(sourceRange.startColumn, targetRange.startColumn),
-                                                  endColumn: Number.MAX_SAFE_INTEGER };
-                    if (allRules) {
-                        const effectRule = allRules.filter((rule) => rule.ranges.some((ruleRange) => Rectangle.intersects(ruleRange, effectRange)));
-                        effectRule.forEach((rule) => {
-                            this._conditionalFormatViewModel.markRuleDirty(unitId, subUnitId, rule);
-                            this._deleteComputeCache(unitId, subUnitId, rule.cfId);
-                        });
-                    }
-                    break;
-                }
-                case MoveRangeMutation.id:{
-                    const { unitId, to, from } = commandInfo.params as IMoveRangeMutationParams;
-                    const handleSubUnit = (value: IMoveRangeMutationParams['from']) => {
+                switch (commandInfo.id) {
+                    case SetRangeValuesMutation.id:{
+                        const params = commandInfo.params as ISetRangeValuesMutationParams;
+                        const { subUnitId, unitId, cellValue } = params;
                         const cellMatrix: [number, number][] = [];
-                        new ObjectMatrix(value.value).forValue((row, col) => {
+                        new ObjectMatrix(cellValue).forValue((row, col) => {
                             cellMatrix.push([row, col]);
                         });
-                        const rules = collectRule(unitId, value.subUnitId, cellMatrix);
+                        const rules = collectRule(unitId, subUnitId, cellMatrix);
                         rules.forEach((rule) => {
-                            this._conditionalFormatViewModel.markRuleDirty(unitId, value.subUnitId, rule);
-                            this._deleteComputeCache(unitId, value.subUnitId, rule.cfId);
+                            this._conditionalFormatViewModel.markRuleDirty(unitId, subUnitId, rule);
+                            this._deleteComputeCache(unitId, subUnitId, rule.cfId);
                         });
-                    };
-                    handleSubUnit(to);
-                    handleSubUnit(from);
-                    break;
+                        break;
+                    }
+                    case InsertColMutation.id:
+                    case RemoveColMutation.id:{
+                        const { range, unitId, subUnitId } = commandInfo.params as IInsertColMutationParams;
+                        const allRules = this._conditionalFormatRuleModel.getAllRule(unitId, subUnitId);
+                        const effectRange: IRange = { ...range, endColumn: Number.MAX_SAFE_INTEGER };
+                        if (allRules) {
+                            const effectRule = allRules.filter((rule) => rule.ranges.some((ruleRange) => Rectangle.intersects(ruleRange, effectRange)));
+                            effectRule.forEach((rule) => {
+                                this._conditionalFormatViewModel.markRuleDirty(unitId, subUnitId, rule);
+                                this._deleteComputeCache(unitId, subUnitId, rule.cfId);
+                            });
+                        }
+                        break;
+                    }
+                    case RemoveRowMutation.id:
+                    case InsertRowMutation.id:{
+                        const { range, unitId, subUnitId } = commandInfo.params as IRemoveRowsMutationParams;
+                        const allRules = this._conditionalFormatRuleModel.getAllRule(unitId, subUnitId);
+                        const effectRange: IRange = { ...range, endRow: Number.MAX_SAFE_INTEGER };
+                        if (allRules) {
+                            const effectRule = allRules.filter((rule) => rule.ranges.some((ruleRange) => Rectangle.intersects(ruleRange, effectRange)));
+                            effectRule.forEach((rule) => {
+                                this._conditionalFormatViewModel.markRuleDirty(unitId, subUnitId, rule);
+                                this._deleteComputeCache(unitId, subUnitId, rule.cfId);
+                            });
+                        }
+                        break;
+                    }
+                    case MoveRowsMutation.id:{
+                        const { sourceRange, targetRange, unitId, subUnitId } = commandInfo.params as IMoveRowsMutationParams;
+                        const allRules = this._conditionalFormatRuleModel.getAllRule(unitId, subUnitId);
+                        const effectRange: IRange = { startRow: Math.min(sourceRange.startRow, targetRange.startRow),
+                                                      endRow: Number.MAX_SAFE_INTEGER,
+                                                      startColumn: 0,
+                                                      endColumn: Number.MAX_SAFE_INTEGER };
+                        if (allRules) {
+                            const effectRule = allRules.filter((rule) => rule.ranges.some((ruleRange) => Rectangle.intersects(ruleRange, effectRange)));
+                            effectRule.forEach((rule) => {
+                                this._conditionalFormatViewModel.markRuleDirty(unitId, subUnitId, rule);
+                                this._deleteComputeCache(unitId, subUnitId, rule.cfId);
+                            });
+                        }
+                        break;
+                    }
+                    case MoveColsMutation.id:{
+                        const { sourceRange, targetRange, unitId, subUnitId } = commandInfo.params as IMoveColumnsMutationParams;
+                        const allRules = this._conditionalFormatRuleModel.getAllRule(unitId, subUnitId);
+                        const effectRange: IRange = { startRow: 0,
+                                                      endRow: Number.MAX_SAFE_INTEGER,
+                                                      startColumn: Math.min(sourceRange.startColumn, targetRange.startColumn),
+                                                      endColumn: Number.MAX_SAFE_INTEGER };
+                        if (allRules) {
+                            const effectRule = allRules.filter((rule) => rule.ranges.some((ruleRange) => Rectangle.intersects(ruleRange, effectRange)));
+                            effectRule.forEach((rule) => {
+                                this._conditionalFormatViewModel.markRuleDirty(unitId, subUnitId, rule);
+                                this._deleteComputeCache(unitId, subUnitId, rule.cfId);
+                            });
+                        }
+                        break;
+                    }
+                    case MoveRangeMutation.id:{
+                        const { unitId, to, from } = commandInfo.params as IMoveRangeMutationParams;
+                        const handleSubUnit = (value: IMoveRangeMutationParams['from']) => {
+                            const cellMatrix: [number, number][] = [];
+                            new ObjectMatrix(value.value).forValue((row, col) => {
+                                cellMatrix.push([row, col]);
+                            });
+                            const rules = collectRule(unitId, value.subUnitId, cellMatrix);
+                            rules.forEach((rule) => {
+                                this._conditionalFormatViewModel.markRuleDirty(unitId, value.subUnitId, rule);
+                                this._deleteComputeCache(unitId, value.subUnitId, rule.cfId);
+                            });
+                        };
+                        handleSubUnit(to);
+                        handleSubUnit(from);
+                        break;
+                    }
                 }
-            }
-        });
+            }));
     }
 
     private _handleHighlightCell(unitId: string, subUnitId: string, rule: IConditionFormatRule) {
@@ -554,5 +546,19 @@ export class ConditionalFormatService extends Disposable {
         setTimeout(() => {
             this._ruleComputeStatus$.next({ status: 'end', unitId, subUnitId, result: computeResult, cfId: rule.cfId });
         }, 0);
+    }
+
+    private _initRemoteCalculate() {
+        this.disposeWithMe(this._ruleComputeStatus$.subscribe(({ status, subUnitId, unitId, cfId, result }) => {
+            const cache = this._getComputedCache(unitId, subUnitId, cfId) || {};
+            cache.status = status;
+            this._setComputedCache(unitId, subUnitId, cfId, cache);
+            if (status === 'end' && result) {
+                result.forValue((row, col, value) => {
+                    this._conditionalFormatViewModel.setCellCfRuleCache(unitId, subUnitId, row, col, cfId, value);
+                });
+                this._deleteComputeCache(unitId, subUnitId, cfId);
+            }
+        }));
     }
 }

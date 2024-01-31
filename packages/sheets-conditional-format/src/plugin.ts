@@ -21,10 +21,31 @@ import { ConditionalFormatService } from './services/conditional-format.service'
 import { ConditionalFormatRuleModel } from './models/conditional-format-rule-model';
 import { ConditionalFormatViewModel } from './models/conditional-format-view-model';
 import { RenderController } from './controllers/render.controller';
-import { addCfRule } from './commands/commands/command';
+import { addAverageCfCommand } from './commands/commands/addAverageCf.command';
+import { addColorScaleConditionalRuleCommand } from './commands/commands/addColorScaleCf.command';
+import { addDataBarConditionalRuleCommand } from './commands/commands/addDataBarCf.command';
+import { addDuplicateValuesCfCommand } from './commands/commands/addDuplicateValuesCf.command';
+import { addNumberCfCommand } from './commands/commands/addNumberCf.command';
+import { addRankCfCommand } from './commands/commands/addRankCf.command';
+import { addTextCfCommand } from './commands/commands/addTextCf.command';
+import { addTimePeriodCfCommand } from './commands/commands/addTimePeriodCf.command';
+import { addUniqueValuesCfCommand } from './commands/commands/addUniqueValuesCf.command';
+import { addConditionalRuleMutation } from './commands/mutations/addConditionalRule.mutation';
 
 export class SheetsConditionalFormatPlugin extends Plugin {
     static override type = PluginType.Sheet;
+    static commandList = [addAverageCfCommand,
+        addColorScaleConditionalRuleCommand,
+        addDataBarConditionalRuleCommand,
+        addDuplicateValuesCfCommand,
+        addNumberCfCommand,
+        addRankCfCommand,
+        addTextCfCommand,
+        addTimePeriodCfCommand,
+        addUniqueValuesCfCommand,
+    ];
+
+    static mutationList = [addConditionalRuleMutation];
     constructor(
         _config: unknown,
         @Inject(Injector) override readonly _injector: Injector,
@@ -42,8 +63,13 @@ export class SheetsConditionalFormatPlugin extends Plugin {
     }
 
     _initCommand() {
-        this._commandService.registerCommand(addCfRule);
-        // console.log(addCfRule);
-        // window.commandService = this._commandService;
+        SheetsConditionalFormatPlugin.commandList.forEach((m) => {
+            this._commandService.registerCommand(m);
+        });
+        SheetsConditionalFormatPlugin.mutationList.forEach((m) => {
+            this._commandService.registerCommand(m);
+        });
+            // test
+        (window as any).commandService = this._commandService;
     }
 }

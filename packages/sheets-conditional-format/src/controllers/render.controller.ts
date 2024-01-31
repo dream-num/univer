@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
@@ -25,7 +25,7 @@ import { ConditionalFormatService } from '../services/conditional-format.service
 import { ConditionalFormatViewModel } from '../models/conditional-format-view-model';
 
 @OnLifecycle(LifecycleStages.Rendered, RenderController)
-export class RenderController {
+export class RenderController extends Disposable {
     constructor(@Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @Inject(ConditionalFormatService) private _conditionalFormatService: ConditionalFormatService,
         @Inject(ICommandService) private _commandService: ICommandService,
@@ -33,7 +33,7 @@ export class RenderController {
         @Inject(IRenderManagerService) private _renderManagerService: IRenderManagerService,
         @Inject(ConditionalFormatViewModel) private _conditionalFormatViewModel: ConditionalFormatViewModel,
         @Inject(SheetSkeletonManagerService) private _sheetSkeletonManagerService: SheetSkeletonManagerService) {
-        window.commandService = _commandService;
+        super();
         this._initHighlightCell();
         this._initSkeleton();
     }
@@ -46,23 +46,23 @@ export class RenderController {
         };
 
         // After the conditional format is marked dirty to drive a rendering, to trigger the window within the conditional format recalculation
-        this._conditionalFormatViewModel.markDirty$.pipe(bufferTime(16), filter((v) => {
+        this.disposeWithMe(this._conditionalFormatViewModel.markDirty$.pipe(bufferTime(16), filter((v) => {
             const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
             const worksheet = workbook.getActiveSheet();
             return v.filter((item) => item.unitId === workbook.getUnitId() && item.subUnitId === worksheet.getSheetId()).length > 0;
-        })).subscribe(markDirtySkeleton);
+        })).subscribe(markDirtySkeleton));
 
         // Once the calculation is complete, a view update is triggered
         // This rendering does not trigger conditional format recalculation,because the rule is not mark dirty
-        this._conditionalFormatService.ruleComputeStatus$.pipe(bufferTime(16), filter((v) => {
+        this.disposeWithMe(this._conditionalFormatService.ruleComputeStatus$.pipe(bufferTime(16), filter((v) => {
             const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
             const worksheet = workbook.getActiveSheet();
             return v.filter((item) => item.unitId === workbook.getUnitId() && item.subUnitId === worksheet.getSheetId()).length > 0;
-        })).subscribe(markDirtySkeleton);
+        })).subscribe(markDirtySkeleton));
     }
 
     _initHighlightCell() {
-        this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, { priority: 99, handler: (cell, context, next) => {
+        this.disposeWithMe(this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, { priority: 99, handler: (cell, context, next) => {
             const result = this._conditionalFormatService.composeStyle(context.unitId, context.subUnitId, context.row, context.col);
             if (!result) {
                 return next(cell);
@@ -75,6 +75,6 @@ export class RenderController {
             }
             return next(cell);
         },
-        });
+        }));
     }
 }

@@ -14,19 +14,31 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
+import type { ICommand, IRange } from '@univerjs/core';
 import {
     CommandType,
     IUniverInstanceService,
 } from '@univerjs/core';
 import { ConditionalFormatRuleModel } from '../../models/conditional-format-rule-model';
-import type { IConditionFormatRule } from '../../models/type';
-import { NumberOperator, RuleType, SubRuleType } from '../../base/const';
+import type { IConditionFormatRule, ITimePeriodHighlightCell } from '../../models/type';
+import { RuleType, SubRuleType } from '../../base/const';
 
-export const addCfRule: ICommand = {
+interface IAddTimePeriodCf {
+    ranges: IRange[];
+    stopIfTrue?: boolean;
+    style: ITimePeriodHighlightCell['style'];
+    operator: ITimePeriodHighlightCell['operator'];
+    value: number;
+
+}
+export const addTimePeriodCfCommand: ICommand<IAddTimePeriodCf> = {
     type: CommandType.COMMAND,
-    id: 'sheet.command.add-conditional-rule',
-    handler(accessor) {
+    id: 'sheet.command.add-time-period-conditional-rule',
+    handler(accessor, params) {
+        if (!params) {
+            return false;
+        }
+        const { ranges, style, stopIfTrue, operator, value } = params;
         const conditionalFormatRuleModel = accessor.get(ConditionalFormatRuleModel);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const workbook = univerInstanceService.getCurrentUniverSheetInstance();
@@ -34,15 +46,13 @@ export const addCfRule: ICommand = {
         const unitID = workbook.getUnitId();
         const sheetId = worksheet.getSheetId();
         const cfId = conditionalFormatRuleModel.createCfId(unitID, sheetId);
-        const rule: IConditionFormatRule = { ranges: [{ startRow: 0, endRow: 99, startColumn: 0, endColumn: 0 }], cfId, stopIfTrue: false,
+        const rule: IConditionFormatRule = { ranges, cfId, stopIfTrue: !!stopIfTrue,
                                              rule: {
                                                  type: RuleType.highlightCell,
-                                                 subType: SubRuleType.number,
-                                                 operator: NumberOperator.greaterThan,
-                                                 value: 5,
-                                                 style: {
-                                                     bl: 1,
-                                                 },
+                                                 subType: SubRuleType.timePeriod,
+                                                 operator,
+                                                 style,
+                                                 value,
                                              } };
         conditionalFormatRuleModel.addRule(unitID, sheetId, rule);
         return true;

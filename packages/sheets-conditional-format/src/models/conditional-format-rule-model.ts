@@ -130,14 +130,25 @@ export class ConditionalFormatRuleModel {
         this._ruleChange$.next({ rule, subUnitId, unitId, type: 'add' });
     }
 
-    moveRulePriority(unitId: string, subUnitId: string, cfId: string, preCfId: string) {
+    /**
+     * example [1,2,3,4,5,6],if you move behind 5 to 2, then cfId=5,targetId=2.
+     * if targetId does not exist, it defaults to top
+     */
+    moveRulePriority(unitId: string, subUnitId: string, cfId: string, targetCfId?: string) {
         const list = this._ensureList(unitId, subUnitId);
         const curIndex = list.findIndex((item) => item.cfId === cfId);
-        const preCfIndex = list.findIndex((item) => item.cfId === preCfId);
         const rule = list[curIndex];
-        if (rule && preCfIndex > -1) {
+        if (rule) {
             list.splice(curIndex, 1);
-            list.splice(preCfIndex, 0, rule);
+            if (targetCfId) {
+                const targetCfIndex = list.findIndex((item) => item.cfId === targetCfId);
+                if (targetCfIndex === -1) {
+                    return;
+                }
+                list.splice(targetCfIndex, 0, rule);
+            } else {
+                list.unshift(rule);
+            }
             const cfIdList = list.map((item) => item.cfId);
             rule.ranges.forEach((range) => {
                 Range.foreach(range, (row, col) => {

@@ -123,7 +123,7 @@ export class Worksheet {
 
                 const cellValue = matrix.getValue(rowIndex, colIndex);
                 const style = cellValue?.s ? this._styles.get(cellValue.s) : null;
-                if (cellValue && (cellValue.v || cellValue.p || style?.bg || style?.bd)) {
+                if (cellValue && (cellValue.v || cellValue.p || style?.bg || (style?.bd && (style.bd.b || style.bd.l || style.bd.r || style.bd.t || style.bd.bc_tr || style.bd.bl_tr || style.bd.ml_tr || style.bd.tl_bc || style.bd.tl_br || style.bd.tl_mr)))) {
                     if (rowInitd) {
                         startRow = Math.min(startRow, rowIndex);
                     } else {
@@ -162,7 +162,7 @@ export class Worksheet {
             endColumn = Math.max(endColumn, mergedCell.endColumn);
         });
 
-        if(!rowInitd || !columnInitd){
+        if (!rowInitd || !columnInitd) {
             return null
         }
 

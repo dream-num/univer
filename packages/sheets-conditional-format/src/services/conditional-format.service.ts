@@ -34,9 +34,114 @@ export class ConditionalFormatService extends Disposable {
         @Inject(INumfmtService) private _numfmtService: INumfmtService
     ) {
         super();
-    }
+        this._initCellChange();
+    private _initCellChange() {
+        this._commandService.onCommandExecuted((commandInfo) => {
+            const collectRule = (unitId: string, subUnitId: string, cellData: [number, number][]) => {
+                const ruleIds: Set<string> = new Set();
+                cellData.forEach(([row, col]) => {
+                    const ruleItem = this._conditionalFormatViewModel.getCellCf(unitId, subUnitId, row, col);
+                    ruleItem?.cfList.forEach((item) => ruleIds.add(item.cfId));
+                });
+                return [...ruleIds].map((cfId) => this._conditionalFormatRuleModel.getRule(unitId, subUnitId, cfId) as IConditionFormatRule).filter((rule) => !!rule);
+            };
 
-    handleHighlightCell(unitId: string, subUnitId: string, rule: IConditionFormatRule) {
+            switch (commandInfo.id) {
+                case SetRangeValuesMutation.id:{
+                    const params = commandInfo.params as ISetRangeValuesMutationParams;
+                    const { subUnitId, unitId, cellValue } = params;
+                    const cellMatrix: [number, number][] = [];
+                    new ObjectMatrix(cellValue).forValue((row, col) => {
+                        cellMatrix.push([row, col]);
+                    });
+                    const rules = collectRule(unitId, subUnitId, cellMatrix);
+                    rules.forEach((rule) => {
+                        
+                        this._conditionalFormatViewModel.markRuleDirty(unitId, subUnitId, rule);
+                        this._deleteComputeCache(unitId, subUnitId, rule.cfId);
+                    });
+                    break;
+                }
+                case InsertColMutation.id:
+                case RemoveColMutation.id:{
+                    const { range, unitId, subUnitId } = commandInfo.params as IInsertColMutationParams;
+                    const allRules = this._conditionalFormatRuleModel.getAllRule(unitId, subUnitId);
+                    const effectRange: IRange = { ...range, endColumn: Number.MAX_SAFE_INTEGER };
+                    if (allRules) {
+                        const effectRule = allRules.filter((rule) => rule.ranges.some((ruleRange) => Rectangle.intersects(ruleRange, effectRange)));
+                        effectRule.forEach((rule) => {
+                            this._conditionalFormatViewModel.markRuleDirty(unitId, subUnitId, rule);
+                            this._deleteComputeCache(unitId, subUnitId, rule.cfId);
+                        });
+                    }
+                    break;
+                }
+                case RemoveRowMutation.id:
+                case InsertRowMutation.id:{
+                    const { range, unitId, subUnitId } = commandInfo.params as IRemoveRowsMutationParams;
+                    const allRules = this._conditionalFormatRuleModel.getAllRule(unitId, subUnitId);
+                    const effectRange: IRange = { ...range, endRow: Number.MAX_SAFE_INTEGER };
+                    if (allRules) {
+                        const effectRule = allRules.filter((rule) => rule.ranges.some((ruleRange) => Rectangle.intersects(ruleRange, effectRange)));
+                        effectRule.forEach((rule) => {
+                            this._conditionalFormatViewModel.markRuleDirty(unitId, subUnitId, rule);
+                            this._deleteComputeCache(unitId, subUnitId, rule.cfId);
+                        });
+                    }
+                    break;
+                }
+                case MoveRowsMutation.id:{
+                    const { sourceRange, targetRange, unitId, subUnitId } = commandInfo.params as IMoveRowsMutationParams;
+                    const allRules = this._conditionalFormatRuleModel.getAllRule(unitId, subUnitId);
+                    const effectRange: IRange = { startRow: Math.min(sourceRange.startRow, targetRange.startRow),
+                                                  endRow: Number.MAX_SAFE_INTEGER,
+                                                  startColumn: 0,
+                                                  endColumn: Number.MAX_SAFE_INTEGER };
+                    if (allRules) {
+                        const effectRule = allRules.filter((rule) => rule.ranges.some((ruleRange) => Rectangle.intersects(ruleRange, effectRange)));
+                        effectRule.forEach((rule) => {
+                            this._conditionalFormatViewModel.markRuleDirty(unitId, subUnitId, rule);
+                            this._deleteComputeCache(unitId, subUnitId, rule.cfId);
+                        });
+                    }
+                    break;
+                }
+                case MoveColsMutation.id:{
+                    const { sourceRange, targetRange, unitId, subUnitId } = commandInfo.params as IMoveColumnsMutationParams;
+                    const allRules = this._conditionalFormatRuleModel.getAllRule(unitId, subUnitId);
+                    const effectRange: IRange = { startRow: 0,
+                                                  endRow: Number.MAX_SAFE_INTEGER,
+                                                  startColumn: Math.min(sourceRange.startColumn, targetRange.startColumn),
+                                                  endColumn: Number.MAX_SAFE_INTEGER };
+                    if (allRules) {
+                        const effectRule = allRules.filter((rule) => rule.ranges.some((ruleRange) => Rectangle.intersects(ruleRange, effectRange)));
+                        effectRule.forEach((rule) => {
+                            this._conditionalFormatViewModel.markRuleDirty(unitId, subUnitId, rule);
+                            this._deleteComputeCache(unitId, subUnitId, rule.cfId);
+                        });
+                    }
+                    break;
+                }
+                case MoveRangeMutation.id:{
+                    const { unitId, to, from } = commandInfo.params as IMoveRangeMutationParams;
+                    const handleSubUnit = (value: IMoveRangeMutationParams['from']) => {
+                        const cellMatrix: [number, number][] = [];
+                        new ObjectMatrix(value.value).forValue((row, col) => {
+                            cellMatrix.push([row, col]);
+                        });
+                        const rules = collectRule(unitId, value.subUnitId, cellMatrix);
+                        rules.forEach((rule) => {
+                            this._conditionalFormatViewModel.markRuleDirty(unitId, value.subUnitId, rule);
+                            this._deleteComputeCache(unitId, value.subUnitId, rule.cfId);
+                        });
+                    };
+                    handleSubUnit(to);
+                    handleSubUnit(from);
+                    break;
+                }
+            }
+        });
+    }
         const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
         const worksheet = workbook?.getSheetBySheetId(subUnitId);
         const ruleConfig = rule.rule as IHighlightCell;

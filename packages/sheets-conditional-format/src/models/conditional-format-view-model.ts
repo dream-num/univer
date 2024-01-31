@@ -163,18 +163,19 @@ export class ConditionalFormatViewModel {
                 const ruleItem = cell.cfList.find((item) => item.cfId === rule.cfId);
                 if (ruleItem) {
                     ruleItem.isDirty = true;
-                    this._markDirty$.next({ rule, unitId, subUnitId });
                 }
             }
         };
         if (row !== undefined && col !== undefined) {
             handleCell(row, col);
+            this._markDirty$.next({ rule, unitId, subUnitId });
         } else {
             rule.ranges.forEach((range) => {
                 Range.foreach(range, (row, col) => {
                     handleCell(row, col);
                 });
             });
+            this._markDirty$.next({ rule, unitId, subUnitId });
         }
     }
 }

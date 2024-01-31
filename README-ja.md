@@ -92,10 +92,9 @@ Univer にコードをコントリビュートしたい方は、コントリビ�
 
 ## リンク
 
--   [ドキュメント](https://univer.ai/guides/introduction/) (現在は中国語版のみ)
+-   [ドキュメント](https://univer.ai/ja-jp/guides/introduction/)
 -   [Online Playground](https://univer.ai/playground/)
 -   [公式 Website](https://univer.ai)
--   [レガシー Univer デモ](https://dream-num.github.io/univer-demo/)
 
 ### コミュニティ
 

@@ -99,10 +99,9 @@ If you would like to contribute code to Univer, please refer to the contributing
 
 ## Links
 
--   [Documentation](https://univer.ai/guides/introduction/) (currently only Chinese version)
+-   [Documentation](https://univer.ai/en-us/guides/introduction/)
 -   [Online Playground](https://univer.ai/playground/)
 -   [Official Website](https://univer.ai)
--   [Legacy Univer Demo](https://dream-num.github.io/univer-demo/)
 
 ### Community
 

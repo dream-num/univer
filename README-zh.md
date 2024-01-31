@@ -104,7 +104,6 @@ Univer 基于插件化架构设计，你可以安装以下包来增强 Univer �
 -   [文档](https://univer.ai/guides/introduction/)
 -   [在线 Playground](https://univer.ai/playground/)
 -   [官方网站](https://univer.ai)
--   [Legacy Univer Demo](https://dream-num.github.io/univer-demo/)
 
 ### 社区
 

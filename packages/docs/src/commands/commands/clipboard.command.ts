@@ -25,6 +25,8 @@ export function whenDocOrEditor(contextService: IContextService): boolean {
     return contextService.getContextValue(FOCUSING_DOC) || contextService.getContextValue(EDITOR_ACTIVATED);
 }
 
+const DOC_CLIPBOARD_PRIORITY = 999;
+
 // Commands here should have higher priority than commands of sheets
 // in packages/sheets-ui/src/commands/commands/clipboard.command.ts
 
@@ -33,7 +35,7 @@ export const DocCopyCommand: IMultiCommand = {
     name: 'doc.command.copy',
     type: CommandType.COMMAND,
     multi: true,
-    priority: 999,
+    priority: DOC_CLIPBOARD_PRIORITY,
     preconditions: whenDocOrEditor,
     handler: async (accessor: IAccessor) => {
         const docClipboardService = accessor.get(IDocClipboardService);
@@ -46,7 +48,7 @@ export const DocCutCommand: IMultiCommand = {
     name: 'doc.command.cut',
     type: CommandType.COMMAND,
     multi: true,
-    priority: 999,
+    priority: DOC_CLIPBOARD_PRIORITY,
     preconditions: whenDocOrEditor,
     handler: async (accessor: IAccessor) => {
         const docClipboardService = accessor.get(IDocClipboardService);
@@ -59,7 +61,7 @@ export const DocPasteCommand: IMultiCommand = {
     name: 'doc.command.paste',
     type: CommandType.COMMAND,
     multi: true,
-    priority: 999,
+    priority: DOC_CLIPBOARD_PRIORITY,
     preconditions: whenDocOrEditor,
     handler: async (accessor: IAccessor) => {
         const docClipboardService = accessor.get(IDocClipboardService);

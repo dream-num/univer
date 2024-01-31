@@ -26,12 +26,14 @@ function whenSheetEditorNotActivated(context: IContextService): boolean {
     return whenSheetEditorFocused(context) && !context.getContextValue(EDITOR_ACTIVATED);
 }
 
+const SHEET_CLIPBOARD_PRIORITY = 998;
+
 export const SheetCopyCommand: IMultiCommand = {
     id: CopyCommand.id,
     name: 'sheet.command.copy',
     type: CommandType.COMMAND,
     multi: true,
-    priority: 1000,
+    priority: SHEET_CLIPBOARD_PRIORITY,
     preconditions: whenSheetEditorNotActivated,
     handler: async (accessor) => {
         const sheetClipboardService = accessor.get(ISheetClipboardService);
@@ -44,7 +46,7 @@ export const SheetCutCommand: IMultiCommand = {
     name: 'sheet.command.cut',
     type: CommandType.COMMAND,
     multi: true,
-    priority: 1000,
+    priority: SHEET_CLIPBOARD_PRIORITY,
     preconditions: whenSheetEditorActivated,
     handler: async (accessor) => {
         const sheetClipboardService = accessor.get(ISheetClipboardService);
@@ -61,7 +63,7 @@ export const SheetPasteCommand: IMultiCommand = {
     type: CommandType.COMMAND,
     multi: true,
     name: 'sheet.command.paste',
-    priority: 998,
+    priority: SHEET_CLIPBOARD_PRIORITY,
     preconditions: whenSheetEditorNotActivated,
     handler: async (accessor: IAccessor, params: ISheetPasteParams) => {
         const logService = accessor.get(ILogService);

@@ -67,6 +67,41 @@ export class ConditionalFormatService extends Disposable {
         this._initRemoteCalculate();
     }
 
+    public composeStyle(unitId: string, subUnitId: string, row: number, col: number) {
+        const cell = this._conditionalFormatViewModel.getCellCf(unitId, subUnitId, row, col);
+        if (cell) {
+            const ruleList = cell.cfList.map((item) => this._conditionalFormatRuleModel.getRule(unitId, subUnitId, item.cfId)!).filter((rule) => !!rule);
+            const endIndex = ruleList.findIndex((rule) => rule?.stopIfTrue);
+            if (endIndex > -1) {
+                ruleList.splice(endIndex + 1);
+            }
+            const result = ruleList.reduce((pre, rule) => {
+                const type = rule.rule.type;
+                const ruleCacheItem = cell.cfList.find((cache) => cache.cfId === rule.cfId);
+                if (type === RuleType.highlightCell) {
+                    if (ruleCacheItem?.isDirty) {
+                        this._handleHighlightCell(unitId, subUnitId, rule);
+                    }
+                    ruleCacheItem!.ruleCache && Tools.deepMerge(pre, { style: ruleCacheItem!.ruleCache });
+                } else if (type === RuleType.colorScale) {
+                    if (ruleCacheItem?.isDirty) {
+                        this._handleHighlightCell(unitId, subUnitId, rule);
+                    }
+
+                    pre.colorScale = ruleCacheItem!.ruleCache;
+                } else if (type === RuleType.dataBar) {
+                    if (ruleCacheItem?.isDirty) {
+                        this._handleHighlightCell(unitId, subUnitId, rule);
+                    }
+                    pre.dataBar = ruleCacheItem!.ruleCache;
+                }
+                return pre;
+            }, {} as { style?: IHighlightCell['style'] } & { dataBar?: any; colorScale?: any });
+            return result;
+        }
+        return null;
+    }
+
     private _getComputedCache(unitId: string, subUnitId: string, cfId: string) {
         return this._ruleCacheMap.get(unitId)?.get(subUnitId)?.get(cfId);
     }
@@ -105,41 +140,6 @@ export class ConditionalFormatService extends Disposable {
         this.disposeWithMe(this._conditionalFormatRuleModel.$ruleChange.pipe(filter((item) => item.type !== 'sort')).subscribe((item) => {
             this._deleteComputeCache(item.unitId, item.subUnitId, item.rule.cfId);
         }));
-    }
-
-    public composeStyle(unitId: string, subUnitId: string, row: number, col: number) {
-        const cell = this._conditionalFormatViewModel.getCellCf(unitId, subUnitId, row, col);
-        if (cell) {
-            const ruleList = cell.cfList.map((item) => this._conditionalFormatRuleModel.getRule(unitId, subUnitId, item.cfId)!).filter((rule) => !!rule);
-            const endIndex = ruleList.findIndex((rule) => rule?.stopIfTrue);
-            if (endIndex > -1) {
-                ruleList.splice(endIndex + 1);
-            }
-            const result = ruleList.reduce((pre, rule) => {
-                const type = rule.rule.type;
-                const ruleCacheItem = cell.cfList.find((cache) => cache.cfId === rule.cfId);
-                if (type === RuleType.highlightCell) {
-                    if (ruleCacheItem?.isDirty) {
-                        this._handleHighlightCell(unitId, subUnitId, rule);
-                    }
-                    ruleCacheItem!.ruleCache && Tools.deepMerge(pre, { style: ruleCacheItem!.ruleCache });
-                } else if (type === RuleType.colorScale) {
-                    if (ruleCacheItem?.isDirty) {
-                        this._handleHighlightCell(unitId, subUnitId, rule);
-                    }
-
-                    pre.colorScale = ruleCacheItem!.ruleCache;
-                } else if (type === RuleType.dataBar) {
-                    if (ruleCacheItem?.isDirty) {
-                        this._handleHighlightCell(unitId, subUnitId, rule);
-                    }
-                    pre.dataBar = ruleCacheItem!.ruleCache;
-                }
-                return pre;
-            }, {} as { style?: IHighlightCell['style'] } & { dataBar?: any; colorScale?: any });
-            return result;
-        }
-        return null;
     }
 
     private _initCellChange() {

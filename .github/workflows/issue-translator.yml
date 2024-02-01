@@ -12,5 +12,4 @@ jobs:
 
         steps:
             - uses: usthe/issues-translate-action@v2.7
-              with:
-                  IS_MODIFY_TITLE: true
+

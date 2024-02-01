@@ -120,10 +120,23 @@ export class Worksheet {
         matrix.forEach((rowIndex, row) => {
             Object.keys(row).forEach((colIndexStr) => {
                 const colIndex = +colIndexStr;
-
                 const cellValue = matrix.getValue(rowIndex, colIndex);
                 const style = cellValue?.s ? this._styles.get(cellValue.s) : null;
-                if (cellValue && (cellValue.v || cellValue.p || style?.bg || (style?.bd && (style.bd.b || style.bd.l || style.bd.r || style.bd.t || style.bd.bc_tr || style.bd.bl_tr || style.bd.ml_tr || style.bd.tl_bc || style.bd.tl_br || style.bd.tl_mr)))) {
+                const isLegalBorder =
+                    style?.bd &&
+                    (
+                        style.bd.b
+                        || style.bd.l
+                        || style.bd.r
+                        || style.bd.t
+                        || style.bd.bc_tr
+                        || style.bd.bl_tr
+                        || style.bd.ml_tr
+                        || style.bd.tl_bc
+                        || style.bd.tl_br
+                        || style.bd.tl_mr
+                    );
+                if ((cellValue && (cellValue.v || cellValue.p)) || style?.bg || isLegalBorder) {
                     if (rowInitd) {
                         startRow = Math.min(startRow, rowIndex);
                     } else {

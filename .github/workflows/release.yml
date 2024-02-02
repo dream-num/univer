@@ -216,7 +216,7 @@ jobs:
                   data: >
                       {
                           "type": "release",
-                          "version": "${{ github.ref_name }}",
+                          "version": "v${{ github.event.inputs.release_version }}",
                           "workflow": {
                               "id": "${{ github.run_id }}"
                           },

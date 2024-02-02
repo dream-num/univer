@@ -28,7 +28,7 @@ export class SheetExtension extends ComponentExtension<SpreadsheetSkeleton, SHEE
     override type = SHEET_EXTENSION_TYPE.GRID;
 
     clone(): SheetExtension {
-        return this
+        return this;
     }
 
     getCellIndex(

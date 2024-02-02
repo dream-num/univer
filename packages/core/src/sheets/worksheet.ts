@@ -176,7 +176,7 @@ export class Worksheet {
         });
 
         if (!rowInitd || !columnInitd) {
-            return null
+            return null;
         }
 
         return {

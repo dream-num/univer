@@ -38,7 +38,7 @@ export class Font extends SheetExtension {
     changeFontColor: ObjectMatrix<IColorStyle> = new ObjectMatrix();
 
     override clone() {
-        return new Font()
+        return new Font();
     }
 
     get spreadsheet() {

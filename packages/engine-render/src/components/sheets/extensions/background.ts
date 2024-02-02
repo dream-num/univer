@@ -32,7 +32,7 @@ export class Background extends SheetExtension {
     override uKey = UNIQUE_KEY;
 
     override clone() {
-        return new Background()
+        return new Background();
     }
 
     get spreadsheet() {

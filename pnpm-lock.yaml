@@ -105,11 +105,11 @@ importers:
         specifier: ^4.2.1
         version: 4.2.1(vite@5.0.12)
       '@vitest/coverage-istanbul':
-        specifier: ^1.2.1
-        version: 1.2.1(vitest@1.2.1)
+        specifier: ^1.2.2
+        version: 1.2.2(vitest@1.2.1)
       happy-dom:
-        specifier: ^13.3.1
-        version: 13.3.1
+        specifier: ^13.3.8
+        version: 13.3.8
       vite:
         specifier: ^5.0.12
         version: 5.0.12(@types/node@20.11.7)(less@4.2.0)
@@ -118,7 +118,7 @@ importers:
         version: 3.7.2(@types/node@20.11.7)(typescript@5.3.3)(vite@5.0.12)
       vitest:
         specifier: ^1.2.1
-        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)
+        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.8)
 
   examples:
     dependencies:
@@ -144,8 +144,8 @@ importers:
         specifier: workspace:*
         version: link:../packages/find-replace
       '@univerjs/icons':
-        specifier: ^0.1.26
-        version: 0.1.26(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^0.1.27
+        version: 0.1.27(react-dom@18.2.0)(react@18.2.0)
       '@univerjs/rpc':
         specifier: workspace:*
         version: link:../packages/rpc
@@ -264,7 +264,7 @@ importers:
         version: 5.0.12(@types/node@20.11.7)(less@4.2.0)
       vitest:
         specifier: ^1.2.1
-        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)
+        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.8)
 
   packages/design:
     dependencies:
@@ -275,8 +275,8 @@ importers:
         specifier: ^1.18.3
         version: 1.18.3(react-dom@18.2.0)(react@18.2.0)
       '@univerjs/icons':
-        specifier: ^0.1.26
-        version: 0.1.26(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^0.1.27
+        version: 0.1.27(react-dom@18.2.0)(react@18.2.0)
       rc-dialog:
         specifier: ^9.3.4
         version: 9.3.4(react-dom@18.2.0)(react@18.2.0)
@@ -483,7 +483,7 @@ importers:
         version: 5.0.12(@types/node@20.11.7)(less@4.2.0)
       vitest:
         specifier: ^1.2.1
-        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)
+        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.8)
 
   packages/engine-render:
     dependencies:
@@ -556,13 +556,13 @@ importers:
         version: 5.0.12(@types/node@20.11.7)(less@4.2.0)
       vitest:
         specifier: ^1.2.1
-        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)
+        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.8)
 
   packages/find-replace:
     dependencies:
       '@univerjs/icons':
-        specifier: ^0.1.26
-        version: 0.1.26(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^0.1.27
+        version: 0.1.27(react-dom@18.2.0)(react@18.2.0)
     devDependencies:
       '@types/react':
         specifier: ^18.2.48
@@ -596,7 +596,7 @@ importers:
         version: 5.0.12(@types/node@20.11.7)(less@4.2.0)
       vitest:
         specifier: ^1.2.1
-        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)
+        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.8)
 
   packages/network:
     devDependencies:
@@ -620,7 +620,7 @@ importers:
         version: 5.0.12(@types/node@20.11.7)(less@4.2.0)
       vitest:
         specifier: ^1.2.1
-        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)
+        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.8)
 
   packages/rpc:
     devDependencies:
@@ -644,7 +644,7 @@ importers:
         version: 5.0.12(@types/node@20.11.7)(less@4.2.0)
       vitest:
         specifier: ^1.2.1
-        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)
+        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.8)
 
   packages/sheets:
     devDependencies:
@@ -730,8 +730,8 @@ importers:
   packages/sheets-formula:
     dependencies:
       '@univerjs/icons':
-        specifier: ^0.1.26
-        version: 0.1.26(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^0.1.27
+        version: 0.1.27(react-dom@18.2.0)(react@18.2.0)
     devDependencies:
       '@types/react':
         specifier: ^18.2.48
@@ -791,8 +791,8 @@ importers:
   packages/sheets-numfmt:
     dependencies:
       '@univerjs/icons':
-        specifier: ^0.1.26
-        version: 0.1.26(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^0.1.27
+        version: 0.1.27(react-dom@18.2.0)(react@18.2.0)
     devDependencies:
       '@types/react':
         specifier: ^18.2.48
@@ -846,8 +846,8 @@ importers:
   packages/sheets-ui:
     dependencies:
       '@univerjs/icons':
-        specifier: ^0.1.26
-        version: 0.1.26(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^0.1.27
+        version: 0.1.27(react-dom@18.2.0)(react@18.2.0)
     devDependencies:
       '@types/react':
         specifier: ^18.2.48
@@ -907,8 +907,8 @@ importers:
   packages/sheets-zen-editor:
     dependencies:
       '@univerjs/icons':
-        specifier: ^0.1.26
-        version: 0.1.26(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^0.1.27
+        version: 0.1.27(react-dom@18.2.0)(react@18.2.0)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1035,8 +1035,8 @@ importers:
   packages/ui:
     dependencies:
       '@univerjs/icons':
-        specifier: ^0.1.26
-        version: 0.1.26(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^0.1.27
+        version: 0.1.27(react-dom@18.2.0)(react@18.2.0)
       localforage:
         specifier: ^1.10.0
         version: 1.10.0
@@ -5590,8 +5590,8 @@ packages:
     resolution: {integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==}
     dev: true
 
-  /@univerjs/icons@0.1.26(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-tQZ+t24QsvjeR+8RvSzPzuHMuv+xcwAFW73uQ9mn6NE1QxIyFGMrXQzt8vDxnYbsP2HOIXnkOoCfBEJhfF+YAQ==}
+  /@univerjs/icons@0.1.27(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-1mcnDgcmWxWW4O7TG+1OoqrPnExk6M9vqXfRdxQqm213lABfuBKcqz7BX/WjOnlzaimOzsgtPmUgEDdU2S5lJg==}
     peerDependencies:
       react: '*'
       react-dom: '*'
@@ -5647,8 +5647,8 @@ packages:
     transitivePeerDependencies:
       - supports-color
 
-  /@vitest/coverage-istanbul@1.2.1(vitest@1.2.1):
-    resolution: {integrity: sha512-j8M4R3XbQ7cmLqJd7mfxCpEc0bQ7S6o5VIEt7c0Auri2lT1hkd89Sa/mOYDnuGasTNawamW+0d9vDRK/5uhVXw==}
+  /@vitest/coverage-istanbul@1.2.2(vitest@1.2.1):
+    resolution: {integrity: sha512-tJybwO8JT4H9ANz0T0/tJ1M5g3BkuHKYF1w5YO3z9sAiHBdGANrxN9c5lomJx1WSnLzCxQR5xxlJ4TLKbzrR3w==}
     peerDependencies:
       vitest: ^1.0.0
     dependencies:
@@ -5661,7 +5661,7 @@ packages:
       magicast: 0.3.3
       picocolors: 1.0.0
       test-exclude: 6.0.0
-      vitest: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)
+      vitest: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.8)
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -8477,8 +8477,8 @@ packages:
       uglify-js: 3.17.4
     dev: true
 
-  /happy-dom@13.3.1:
-    resolution: {integrity: sha512-KIlztn+nRWstprUyI3Wzy1UJrg72uOaoo4SaBLNrV6xrn2Rq86eQruKOL7ZyDhkfou3nEZX6rgRYtvsqwMInvQ==}
+  /happy-dom@13.3.8:
+    resolution: {integrity: sha512-RAbq4oYfJNkVan1m1F3jfA4YEyRY0/ASoNvZsNJbuX85jIypidmsz9jQZD7Tqz0VXA2MhAGfcsh5oshwmwNYSg==}
     engines: {node: '>=16.0.0'}
     dependencies:
       entities: 4.5.0
@@ -12548,7 +12548,7 @@ packages:
     optionalDependencies:
       fsevents: 2.3.3
 
-  /vitest@1.2.1(@types/node@20.11.7)(happy-dom@13.3.1):
+  /vitest@1.2.1(@types/node@20.11.7)(happy-dom@13.3.8):
     resolution: {integrity: sha512-TRph8N8rnSDa5M2wKWJCMnztCZS9cDcgVTQ6tsTFTG/odHJ4l5yNVqvbeDJYJRZ6is3uxaEpFs8LL6QM+YFSdA==}
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
@@ -12584,7 +12584,7 @@ packages:
       chai: 4.3.10
       debug: 4.3.4
       execa: 8.0.1
-      happy-dom: 13.3.1
+      happy-dom: 13.3.8
       local-pkg: 0.5.0
       magic-string: 0.30.5
       pathe: 1.1.1

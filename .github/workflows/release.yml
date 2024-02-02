@@ -40,6 +40,9 @@ jobs:
             - name: 🔏 Set all monorepo's package version
               run: |
                   node -e "const fs = require('fs'); const package = JSON.parse(fs.readFileSync('./package.json')); package.version = '${{ github.event.inputs.release_version }}'; fs.writeFileSync('./package.json', JSON.stringify(package, null, 4) + '\n');"
+                  for package in $(ls common); do
+                      node -e "const fs = require('fs'); const package = JSON.parse(fs.readFileSync('./common/$package/package.json')); package.version = '${{ github.event.inputs.release_version }}'; fs.writeFileSync('./common/$package/package.json', JSON.stringify(package, null, 4) + '\n');"
+                  done
                   for package in $(ls packages); do
                       node -e "const fs = require('fs'); const package = JSON.parse(fs.readFileSync('./packages/$package/package.json')); package.version = '${{ github.event.inputs.release_version }}'; fs.writeFileSync('./packages/$package/package.json', JSON.stringify(package, null, 4) + '\n');"
                   done
@@ -122,7 +125,7 @@ jobs:
                   registry-url: ${{ secrets.VERDACCIO_URL }}
                   scope: '@univerjs'
 
-            - name: 🚚 Install dependencies
+            - name: 🚚 Install dependencies and build
               run: |
                   pnpm install
                   pnpm run build
@@ -133,8 +136,8 @@ jobs:
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.VERDACCIO_TOKEN }}
 
-            - name: 🐙 Publish (beta, rc)
-              if: ${{ needs.prepare.outputs.release_type == 'beta' || needs.prepare.outputs.release_type == 'rc' }}
+            - name: 🐙 Publish (beta, rc, stable)
+              if: ${{ needs.prepare.outputs.release_type != 'alpha' }}
               run: pnpm publish --access public -r
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.VERDACCIO_TOKEN }}

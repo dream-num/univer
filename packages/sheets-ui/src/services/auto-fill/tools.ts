@@ -404,7 +404,7 @@ export function fillSeries(data: Array<Nullable<ICellData>>, len: number, direct
             const index = (i - 1) % data.length;
             const d = Tools.deepClone(data[index]);
 
-            const forward = direction === (Direction.DOWN || direction === Direction.RIGHT);
+            const forward = direction === Direction.DOWN || direction === Direction.RIGHT;
             const y = forecast(data.length + i, dataNumArr, xArr, forward);
 
             if (d) {

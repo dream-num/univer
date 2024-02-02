@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/ui",
-    "version": "0.1.0-beta.3",
+    "version": "0.1.0-beta.4",
     "private": false,
     "description": "UniverSheet normal plugin UI manager",
     "author": "DreamNum <developer@univer.ai>",
@@ -62,7 +62,7 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.26",
+        "@univerjs/icons": "^0.1.27",
         "localforage": "^1.10.0",
         "rc-notification": "^5.3.0",
         "rc-util": "^5.38.1"

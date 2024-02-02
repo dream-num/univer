@@ -60,6 +60,7 @@ function createViteConfig(overrideConfig, /** @type {IOptions} */ options) {
 
     const originalConfig = {
         build: {
+            target: 'chrome70',
             outDir: 'lib',
             lib: {
                 entry: resolve(dirname, 'src/index.ts'),

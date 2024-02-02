@@ -58,7 +58,7 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
             id: RichTextEditingMutation.id,
             params: {
                 unitId,
-                mutations: [],
+                actions: [],
             },
         };
 
@@ -84,7 +84,7 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
             segmentId,
         });
 
-        doMutation.params.mutations = textX.serialize();
+        doMutation.params.actions = textX.serialize();
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,
@@ -156,7 +156,7 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
             id: RichTextEditingMutation.id,
             params: {
                 unitId,
-                mutations: [],
+                actions: [],
             },
         };
 
@@ -177,7 +177,7 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
             segmentId,
         });
 
-        doMutation.params.mutations = textX.serialize();
+        doMutation.params.actions = textX.serialize();
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,
@@ -240,7 +240,7 @@ export const UpdateCommand: ICommand<IUpdateCommandParams> = {
             id: RichTextEditingMutation.id,
             params: {
                 unitId,
-                mutations: [],
+                actions: [],
             },
         };
 
@@ -262,7 +262,7 @@ export const UpdateCommand: ICommand<IUpdateCommandParams> = {
             coverType,
         });
 
-        doMutation.params.mutations = textX.serialize();
+        doMutation.params.actions = textX.serialize();
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,

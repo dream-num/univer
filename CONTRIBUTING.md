@@ -40,7 +40,7 @@ cd univer
 npm i -g pnpm
 
 # install dependencies
-pnmp install
+pnpm install
 
 ```
 

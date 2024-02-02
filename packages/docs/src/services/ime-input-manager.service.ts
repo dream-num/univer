@@ -51,15 +51,15 @@ export class IMEInputManagerService implements IDisposable {
 
         const undoMutationParams: IRichTextEditingMutationParams = {
             unitId,
-            mutations: this._undoMutationParamsCache.reverse().reduce((acc, cur) => {
-                return TextX.compose(acc, cur.mutations);
+            actions: this._undoMutationParamsCache.reverse().reduce((acc, cur) => {
+                return TextX.compose(acc, cur.actions);
             }, [] as TextXAction[]),
         };
 
         const redoMutationParams: IRichTextEditingMutationParams = {
             unitId,
-            mutations: this._redoMutationParamsCache.reduce((acc, cur) => {
-                return TextX.compose(acc, cur.mutations);
+            actions: this._redoMutationParamsCache.reduce((acc, cur) => {
+                return TextX.compose(acc, cur.actions);
             }, [] as TextXAction[]),
         };
 

@@ -1196,6 +1196,10 @@ export class SpreadsheetSkeleton extends Skeleton {
 
             const { startColumn, endColumn } = position;
 
+            if (startColumn === endColumn) {
+                return true;
+            }
+
             this.appendToOverflowCache(row, column, startColumn, endColumn);
         } else if (wrapStrategy === WrapStrategy.WRAP && angle !== 0) {
             // Merged cells do not support overflow.
@@ -1227,6 +1231,10 @@ export class SpreadsheetSkeleton extends Skeleton {
                 column,
                 this.getColumnCount()
             );
+
+            if (startColumn === endColumn) {
+                return true;
+            }
 
             this.appendToOverflowCache(row, column, startColumn, endColumn);
         }

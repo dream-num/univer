@@ -110,7 +110,7 @@ export class ZoomController extends Disposable {
 
                         const currentRatio = documentModel.zoomRatio;
 
-                        let nextRatio = +parseFloat(`${currentRatio + ratioDelta}`).toFixed(1);
+                        let nextRatio = +Number.parseFloat(`${currentRatio + ratioDelta}`).toFixed(1);
                         nextRatio = nextRatio >= 4 ? 4 : nextRatio <= 0.1 ? 0.1 : nextRatio;
 
                         this._commandService.executeCommand(SetDocZoomRatioCommand.id, {
@@ -197,7 +197,7 @@ export class ZoomController extends Disposable {
         const parent = scene?.getParent();
 
         const { width: docsWidth, height: docsHeight, pageMarginLeft, pageMarginTop } = docsComponent;
-        if (parent == null || docsWidth === Infinity || docsHeight === Infinity) {
+        if (parent == null || docsWidth === Number.POSITIVE_INFINITY || docsHeight === Number.POSITIVE_INFINITY) {
             return;
         }
         const { width: engineWidth, height: engineHeight } = parent;
@@ -208,7 +208,7 @@ export class ZoomController extends Disposable {
 
         let sceneHeight = 0;
 
-        let scrollToX = Infinity;
+        let scrollToX = Number.POSITIVE_INFINITY;
 
         if (engineWidth > (docsWidth + pageMarginLeft * 2) * zoomRatio) {
             docsLeft = engineWidth / 2 - (docsWidth * zoomRatio) / 2;
@@ -240,7 +240,7 @@ export class ZoomController extends Disposable {
         docsComponent.translate(docsLeft, docsTop);
 
         const viewport = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
-        if (scrollToX !== Infinity && viewport != null) {
+        if (scrollToX !== Number.POSITIVE_INFINITY && viewport != null) {
             const actualX = viewport.getBarScroll(scrollToX, 0).x;
             viewport.scrollTo({
                 x: actualX,

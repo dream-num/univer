@@ -78,9 +78,9 @@ export class HeaderResizeController extends Disposable {
 
     private _resizeHelperShape: Nullable<Rect>;
 
-    private _startOffsetX: number = Infinity;
+    private _startOffsetX: number = Number.POSITIVE_INFINITY;
 
-    private _startOffsetY: number = Infinity;
+    private _startOffsetY: number = Number.POSITIVE_INFINITY;
 
     constructor(
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,

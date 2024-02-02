@@ -97,8 +97,8 @@ describe('test copy paste', () => {
                 subUnitId,
             },
             {
-                '0': {
-                    '0': {
+                0: {
+                    0: {
                         p: null,
                         v: 5,
                         s: null,
@@ -106,7 +106,7 @@ describe('test copy paste', () => {
                         si: null,
                         t: 2,
                     },
-                    '1': {
+                    1: {
                         p: null,
                         v: 6,
                         s: null,
@@ -115,8 +115,8 @@ describe('test copy paste', () => {
                         t: 2,
                     },
                 },
-                '1': {
-                    '0': {
+                1: {
+                    0: {
                         p: null,
                         v: 6,
                         s: null,
@@ -124,7 +124,7 @@ describe('test copy paste', () => {
                         si: null,
                         t: 2,
                     },
-                    '1': {
+                    1: {
                         p: null,
                         v: 7,
                         s: null,
@@ -133,8 +133,8 @@ describe('test copy paste', () => {
                         t: 2,
                     },
                 },
-                '2': {
-                    '0': {
+                2: {
+                    0: {
                         p: null,
                         v: 7,
                         s: null,
@@ -142,7 +142,7 @@ describe('test copy paste', () => {
                         si: null,
                         t: 2,
                     },
-                    '1': {
+                    1: {
                         p: null,
                         v: 8,
                         s: null,
@@ -174,13 +174,13 @@ describe('test copy paste', () => {
                         unitId,
                         subUnitId,
                         refMap: {
-                            '0': {
+                            0: {
                                 pattern: '$#,##0;(#,##0)',
                                 type: '',
                             },
                         },
                         values: {
-                            '0': {
+                            0: {
                                 ranges: [
                                     {
                                         startRow: 9,

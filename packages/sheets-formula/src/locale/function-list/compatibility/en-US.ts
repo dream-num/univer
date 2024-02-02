@@ -16,8 +16,8 @@
 
 export default {
     BETADIST: {
-        description: `Returns the beta cumulative distribution function`,
-        abstract: `Returns the beta cumulative distribution function`,
+        description: 'Returns the beta cumulative distribution function',
+        abstract: 'Returns the beta cumulative distribution function',
         links: [
             {
                 title: 'Instruction',
@@ -30,8 +30,8 @@ export default {
         },
     },
     BETAINV: {
-        description: `Returns the inverse of the cumulative distribution function for a specified beta distribution`,
-        abstract: `Returns the inverse of the cumulative distribution function for a specified beta distribution`,
+        description: 'Returns the inverse of the cumulative distribution function for a specified beta distribution',
+        abstract: 'Returns the inverse of the cumulative distribution function for a specified beta distribution',
         links: [
             {
                 title: 'Instruction',
@@ -44,8 +44,8 @@ export default {
         },
     },
     BINOMDIST: {
-        description: `Returns the individual term binomial distribution probability`,
-        abstract: `Returns the individual term binomial distribution probability`,
+        description: 'Returns the individual term binomial distribution probability',
+        abstract: 'Returns the individual term binomial distribution probability',
         links: [
             {
                 title: 'Instruction',
@@ -58,8 +58,8 @@ export default {
         },
     },
     CHIDIST: {
-        description: `Returns the one-tailed probability of the chi-squared distribution`,
-        abstract: `Returns the one-tailed probability of the chi-squared distribution`,
+        description: 'Returns the one-tailed probability of the chi-squared distribution',
+        abstract: 'Returns the one-tailed probability of the chi-squared distribution',
         links: [
             {
                 title: 'Instruction',
@@ -72,8 +72,8 @@ export default {
         },
     },
     CHIINV: {
-        description: `Returns the inverse of the one-tailed probability of the chi-squared distribution`,
-        abstract: `Returns the inverse of the one-tailed probability of the chi-squared distribution`,
+        description: 'Returns the inverse of the one-tailed probability of the chi-squared distribution',
+        abstract: 'Returns the inverse of the one-tailed probability of the chi-squared distribution',
         links: [
             {
                 title: 'Instruction',
@@ -86,8 +86,8 @@ export default {
         },
     },
     CHITEST: {
-        description: `Returns the test for independence`,
-        abstract: `Returns the test for independence`,
+        description: 'Returns the test for independence',
+        abstract: 'Returns the test for independence',
         links: [
             {
                 title: 'Instruction',
@@ -100,8 +100,8 @@ export default {
         },
     },
     CONFIDENCE: {
-        description: `Returns the confidence interval for a population mean`,
-        abstract: `Returns the confidence interval for a population mean`,
+        description: 'Returns the confidence interval for a population mean',
+        abstract: 'Returns the confidence interval for a population mean',
         links: [
             {
                 title: 'Instruction',
@@ -114,8 +114,8 @@ export default {
         },
     },
     COVAR: {
-        description: `Returns covariance, the average of the products of paired deviations`,
-        abstract: `Returns covariance, the average of the products of paired deviations`,
+        description: 'Returns covariance, the average of the products of paired deviations',
+        abstract: 'Returns covariance, the average of the products of paired deviations',
         links: [
             {
                 title: 'Instruction',
@@ -128,8 +128,8 @@ export default {
         },
     },
     CRITBINOM: {
-        description: `Returns the smallest value for which the cumulative binomial distribution is less than or equal to a criterion value`,
-        abstract: `Returns the smallest value for which the cumulative binomial distribution is less than or equal to a criterion value`,
+        description: 'Returns the smallest value for which the cumulative binomial distribution is less than or equal to a criterion value',
+        abstract: 'Returns the smallest value for which the cumulative binomial distribution is less than or equal to a criterion value',
         links: [
             {
                 title: 'Instruction',
@@ -142,8 +142,8 @@ export default {
         },
     },
     EXPONDIST: {
-        description: `Returns the exponential distribution`,
-        abstract: `Returns the exponential distribution`,
+        description: 'Returns the exponential distribution',
+        abstract: 'Returns the exponential distribution',
         links: [
             {
                 title: 'Instruction',
@@ -156,8 +156,8 @@ export default {
         },
     },
     FDIST: {
-        description: `Returns the F probability distribution`,
-        abstract: `Returns the F probability distribution`,
+        description: 'Returns the F probability distribution',
+        abstract: 'Returns the F probability distribution',
         links: [
             {
                 title: 'Instruction',
@@ -170,8 +170,8 @@ export default {
         },
     },
     FINV: {
-        description: `Returns the inverse of the F probability distribution`,
-        abstract: `Returns the inverse of the F probability distribution`,
+        description: 'Returns the inverse of the F probability distribution',
+        abstract: 'Returns the inverse of the F probability distribution',
         links: [
             {
                 title: 'Instruction',
@@ -184,8 +184,8 @@ export default {
         },
     },
     FTEST: {
-        description: `Returns the result of an F-test`,
-        abstract: `Returns the result of an F-test`,
+        description: 'Returns the result of an F-test',
+        abstract: 'Returns the result of an F-test',
         links: [
             {
                 title: 'Instruction',
@@ -198,8 +198,8 @@ export default {
         },
     },
     GAMMADIST: {
-        description: `Returns the gamma distribution`,
-        abstract: `Returns the gamma distribution`,
+        description: 'Returns the gamma distribution',
+        abstract: 'Returns the gamma distribution',
         links: [
             {
                 title: 'Instruction',
@@ -212,8 +212,8 @@ export default {
         },
     },
     GAMMAINV: {
-        description: `Returns the inverse of the gamma cumulative distribution`,
-        abstract: `Returns the inverse of the gamma cumulative distribution`,
+        description: 'Returns the inverse of the gamma cumulative distribution',
+        abstract: 'Returns the inverse of the gamma cumulative distribution',
         links: [
             {
                 title: 'Instruction',
@@ -226,8 +226,8 @@ export default {
         },
     },
     HYPGEOMDIST: {
-        description: `Returns the hypergeometric distribution`,
-        abstract: `Returns the hypergeometric distribution`,
+        description: 'Returns the hypergeometric distribution',
+        abstract: 'Returns the hypergeometric distribution',
         links: [
             {
                 title: 'Instruction',
@@ -240,8 +240,8 @@ export default {
         },
     },
     LOGINV: {
-        description: `Returns the inverse of the lognormal cumulative distribution function`,
-        abstract: `Returns the inverse of the lognormal cumulative distribution function`,
+        description: 'Returns the inverse of the lognormal cumulative distribution function',
+        abstract: 'Returns the inverse of the lognormal cumulative distribution function',
         links: [
             {
                 title: 'Instruction',
@@ -254,8 +254,8 @@ export default {
         },
     },
     LOGNORMDIST: {
-        description: `Returns the cumulative lognormal distribution`,
-        abstract: `Returns the cumulative lognormal distribution`,
+        description: 'Returns the cumulative lognormal distribution',
+        abstract: 'Returns the cumulative lognormal distribution',
         links: [
             {
                 title: 'Instruction',
@@ -268,8 +268,8 @@ export default {
         },
     },
     MODE: {
-        description: `Returns the most common value in a data set`,
-        abstract: `Returns the most common value in a data set`,
+        description: 'Returns the most common value in a data set',
+        abstract: 'Returns the most common value in a data set',
         links: [
             {
                 title: 'Instruction',
@@ -282,8 +282,8 @@ export default {
         },
     },
     NEGBINOMDIST: {
-        description: `Returns the negative binomial distribution`,
-        abstract: `Returns the negative binomial distribution`,
+        description: 'Returns the negative binomial distribution',
+        abstract: 'Returns the negative binomial distribution',
         links: [
             {
                 title: 'Instruction',
@@ -296,8 +296,8 @@ export default {
         },
     },
     NORMDIST: {
-        description: `Returns the normal cumulative distribution`,
-        abstract: `Returns the normal cumulative distribution`,
+        description: 'Returns the normal cumulative distribution',
+        abstract: 'Returns the normal cumulative distribution',
         links: [
             {
                 title: 'Instruction',
@@ -310,8 +310,8 @@ export default {
         },
     },
     NORMINV: {
-        description: `Returns the inverse of the normal cumulative distribution`,
-        abstract: `Returns the inverse of the normal cumulative distribution`,
+        description: 'Returns the inverse of the normal cumulative distribution',
+        abstract: 'Returns the inverse of the normal cumulative distribution',
         links: [
             {
                 title: 'Instruction',
@@ -324,8 +324,8 @@ export default {
         },
     },
     NORMSDIST: {
-        description: `Returns the standard normal cumulative distribution`,
-        abstract: `Returns the standard normal cumulative distribution`,
+        description: 'Returns the standard normal cumulative distribution',
+        abstract: 'Returns the standard normal cumulative distribution',
         links: [
             {
                 title: 'Instruction',
@@ -338,8 +338,8 @@ export default {
         },
     },
     NORMSINV: {
-        description: `Returns the inverse of the standard normal cumulative distribution`,
-        abstract: `Returns the inverse of the standard normal cumulative distribution`,
+        description: 'Returns the inverse of the standard normal cumulative distribution',
+        abstract: 'Returns the inverse of the standard normal cumulative distribution',
         links: [
             {
                 title: 'Instruction',
@@ -352,8 +352,8 @@ export default {
         },
     },
     PERCENTILE: {
-        description: `Returns the k-th percentile of values in a range`,
-        abstract: `Returns the k-th percentile of values in a range`,
+        description: 'Returns the k-th percentile of values in a range',
+        abstract: 'Returns the k-th percentile of values in a range',
         links: [
             {
                 title: 'Instruction',
@@ -366,8 +366,8 @@ export default {
         },
     },
     PERCENTRANK: {
-        description: `Returns the percentage rank of a value in a data set`,
-        abstract: `Returns the percentage rank of a value in a data set`,
+        description: 'Returns the percentage rank of a value in a data set',
+        abstract: 'Returns the percentage rank of a value in a data set',
         links: [
             {
                 title: 'Instruction',
@@ -380,8 +380,8 @@ export default {
         },
     },
     POISSON: {
-        description: `Returns the Poisson distribution`,
-        abstract: `Returns the Poisson distribution`,
+        description: 'Returns the Poisson distribution',
+        abstract: 'Returns the Poisson distribution',
         links: [
             {
                 title: 'Instruction',
@@ -394,8 +394,8 @@ export default {
         },
     },
     QUARTILE: {
-        description: `Returns the quartile of a data set`,
-        abstract: `Returns the quartile of a data set`,
+        description: 'Returns the quartile of a data set',
+        abstract: 'Returns the quartile of a data set',
         links: [
             {
                 title: 'Instruction',
@@ -408,8 +408,8 @@ export default {
         },
     },
     RANK: {
-        description: `Returns the rank of a number in a list of numbers`,
-        abstract: `Returns the rank of a number in a list of numbers`,
+        description: 'Returns the rank of a number in a list of numbers',
+        abstract: 'Returns the rank of a number in a list of numbers',
         links: [
             {
                 title: 'Instruction',
@@ -422,8 +422,8 @@ export default {
         },
     },
     STDEV: {
-        description: `Estimates standard deviation based on a sample`,
-        abstract: `Estimates standard deviation based on a sample`,
+        description: 'Estimates standard deviation based on a sample',
+        abstract: 'Estimates standard deviation based on a sample',
         links: [
             {
                 title: 'Instruction',
@@ -436,8 +436,8 @@ export default {
         },
     },
     STDEVP: {
-        description: `Calculates standard deviation based on the entire population`,
-        abstract: `Calculates standard deviation based on the entire population`,
+        description: 'Calculates standard deviation based on the entire population',
+        abstract: 'Calculates standard deviation based on the entire population',
         links: [
             {
                 title: 'Instruction',
@@ -450,8 +450,8 @@ export default {
         },
     },
     TDIST: {
-        description: `Returns the Student's t-distribution`,
-        abstract: `Returns the Student's t-distribution`,
+        description: 'Returns the Student\'s t-distribution',
+        abstract: 'Returns the Student\'s t-distribution',
         links: [
             {
                 title: 'Instruction',
@@ -464,8 +464,8 @@ export default {
         },
     },
     TINV: {
-        description: `Returns the inverse of the Student's t-distribution`,
-        abstract: `Returns the inverse of the Student's t-distribution`,
+        description: 'Returns the inverse of the Student\'s t-distribution',
+        abstract: 'Returns the inverse of the Student\'s t-distribution',
         links: [
             {
                 title: 'Instruction',
@@ -478,8 +478,8 @@ export default {
         },
     },
     TTEST: {
-        description: `Returns the probability associated with a Student's t-test`,
-        abstract: `Returns the probability associated with a Student's t-test`,
+        description: 'Returns the probability associated with a Student\'s t-test',
+        abstract: 'Returns the probability associated with a Student\'s t-test',
         links: [
             {
                 title: 'Instruction',
@@ -492,8 +492,8 @@ export default {
         },
     },
     VAR: {
-        description: `Estimates variance based on a sample`,
-        abstract: `Estimates variance based on a sample`,
+        description: 'Estimates variance based on a sample',
+        abstract: 'Estimates variance based on a sample',
         links: [
             {
                 title: 'Instruction',
@@ -506,8 +506,8 @@ export default {
         },
     },
     VARP: {
-        description: `Calculates variance based on the entire population`,
-        abstract: `Calculates variance based on the entire population`,
+        description: 'Calculates variance based on the entire population',
+        abstract: 'Calculates variance based on the entire population',
         links: [
             {
                 title: 'Instruction',
@@ -520,8 +520,8 @@ export default {
         },
     },
     WEIBULL: {
-        description: `Returns the Weibull distribution`,
-        abstract: `Returns the Weibull distribution`,
+        description: 'Returns the Weibull distribution',
+        abstract: 'Returns the Weibull distribution',
         links: [
             {
                 title: 'Instruction',
@@ -534,8 +534,8 @@ export default {
         },
     },
     ZTEST: {
-        description: `Returns the one-tailed probability-value of a z-test`,
-        abstract: `Returns the one-tailed probability-value of a z-test`,
+        description: 'Returns the one-tailed probability-value of a z-test',
+        abstract: 'Returns the one-tailed probability-value of a z-test',
         links: [
             {
                 title: 'Instruction',

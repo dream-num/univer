@@ -78,32 +78,32 @@ export const SELECTION_WITH_EMPTY_CELLS_DATA: IWorkbookData = {
         sheet1: {
             id: 'sheet1',
             cellData: {
-                '0': {
-                    '0': {
+                0: {
+                    0: {
                         v: 'A1',
                     },
-                    '1': {
+                    1: {
                         v: 'B1',
                     },
-                    '2': {
+                    2: {
                         v: 'C1',
                     },
-                    '3': {
+                    3: {
                         v: '',
                     },
-                    '4': {
+                    4: {
                         v: '',
                     },
-                    '5': {
+                    5: {
                         v: 'F1',
                     },
-                    '6': {
+                    6: {
                         v: '', // merged to F1
                     },
-                    '7': {
+                    7: {
                         v: '',
                     },
-                    '8': {
+                    8: {
                         v: '',
                     },
                 },
@@ -124,25 +124,25 @@ export const SELECTION_WITH_MERGED_CELLS_DATA: IWorkbookData = {
         sheet1: {
             id: 'sheet1',
             cellData: {
-                '0': {
-                    '0': {
+                0: {
+                    0: {
                         v: 'A1',
                     },
-                    '1': {
+                    1: {
                         v: 'B1',
                     },
-                    '2': {
+                    2: {
                         v: 'C1',
                     },
                 },
-                '1': {
-                    '0': {
+                1: {
+                    0: {
                         v: 'A2',
                     },
-                    '1': {
+                    1: {
                         v: '', // merged to B1
                     },
-                    '2': {
+                    2: {
                         v: 'C2',
                     },
                 },
@@ -163,19 +163,19 @@ export const SIMPLE_SELECTION_WORKBOOK_DATA: IWorkbookData = {
         sheet1: {
             id: 'sheet1',
             cellData: {
-                '0': {
-                    '0': {
+                0: {
+                    0: {
                         v: 'A1',
                     },
-                    '1': {
+                    1: {
                         v: 'A2',
                     },
                 },
-                '1': {
-                    '0': {
+                1: {
+                    0: {
                         v: 'B1',
                     },
-                    '1': {
+                    1: {
                         v: 'B2',
                     },
                 },

@@ -361,7 +361,7 @@ export class Worksheet {
      * Returns true if the sheet's gridlines are hidden; otherwise returns false. Gridlines are visible by default.
      * @returns Gridlines Hidden Status
      */
-    hasHiddenGridlines(): Boolean {
+    hasHiddenGridlines(): boolean {
         const { _snapshot: _config } = this;
         const { showGridlines } = _config;
         if (showGridlines === 0) {

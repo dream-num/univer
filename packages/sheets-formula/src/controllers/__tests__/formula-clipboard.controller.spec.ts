@@ -76,11 +76,11 @@ describe('Test paste with formula', () => {
                 rangeType: 0,
             };
             const matrix = new ObjectMatrix<ICellDataWithSpanInfo>({
-                '0': {
-                    '0': {
+                0: {
+                    0: {
                         v: 3,
                     },
-                    '1': {
+                    1: {
                         v: 2,
                         f: '=SUM(A1)',
                         si: '3e4r5t',
@@ -111,8 +111,8 @@ describe('Test paste with formula', () => {
                             unitId,
                             subUnitId,
                             cellValue: {
-                                '12': {
-                                    '2': {
+                                12: {
+                                    2: {
                                         s: null,
                                         f: null,
                                         si: null,
@@ -120,7 +120,7 @@ describe('Test paste with formula', () => {
                                         v: null,
                                         t: null,
                                     },
-                                    '3': {
+                                    3: {
                                         s: null,
                                         f: null,
                                         si: null,
@@ -141,9 +141,9 @@ describe('Test paste with formula', () => {
                             unitId,
                             subUnitId,
                             cellValue: {
-                                '12': {
-                                    '2': {},
-                                    '3': {
+                                12: {
+                                    2: {},
+                                    3: {
                                         f: '=SUM(A13)',
                                         v: null,
                                         p: null,

@@ -16,8 +16,8 @@
 
 export default {
     BESSELI: {
-        description: `Returns the modified Bessel function In(x)`,
-        abstract: `Returns the modified Bessel function In(x)`,
+        description: 'Returns the modified Bessel function In(x)',
+        abstract: 'Returns the modified Bessel function In(x)',
         links: [
             {
                 title: 'Instruction',
@@ -30,8 +30,8 @@ export default {
         },
     },
     BESSELJ: {
-        description: `Returns the Bessel function Jn(x)`,
-        abstract: `Returns the Bessel function Jn(x)`,
+        description: 'Returns the Bessel function Jn(x)',
+        abstract: 'Returns the Bessel function Jn(x)',
         links: [
             {
                 title: 'Instruction',
@@ -44,8 +44,8 @@ export default {
         },
     },
     BESSELK: {
-        description: `Returns the modified Bessel function Kn(x)`,
-        abstract: `Returns the modified Bessel function Kn(x)`,
+        description: 'Returns the modified Bessel function Kn(x)',
+        abstract: 'Returns the modified Bessel function Kn(x)',
         links: [
             {
                 title: 'Instruction',
@@ -58,8 +58,8 @@ export default {
         },
     },
     BESSELY: {
-        description: `Returns the Bessel function Yn(x)`,
-        abstract: `Returns the Bessel function Yn(x)`,
+        description: 'Returns the Bessel function Yn(x)',
+        abstract: 'Returns the Bessel function Yn(x)',
         links: [
             {
                 title: 'Instruction',
@@ -72,8 +72,8 @@ export default {
         },
     },
     BIN2DEC: {
-        description: `Converts a binary number to decimal`,
-        abstract: `Converts a binary number to decimal`,
+        description: 'Converts a binary number to decimal',
+        abstract: 'Converts a binary number to decimal',
         links: [
             {
                 title: 'Instruction',
@@ -86,8 +86,8 @@ export default {
         },
     },
     BIN2HEX: {
-        description: `Converts a binary number to hexadecimal`,
-        abstract: `Converts a binary number to hexadecimal`,
+        description: 'Converts a binary number to hexadecimal',
+        abstract: 'Converts a binary number to hexadecimal',
         links: [
             {
                 title: 'Instruction',
@@ -100,8 +100,8 @@ export default {
         },
     },
     BIN2OCT: {
-        description: `Converts a binary number to octal`,
-        abstract: `Converts a binary number to octal`,
+        description: 'Converts a binary number to octal',
+        abstract: 'Converts a binary number to octal',
         links: [
             {
                 title: 'Instruction',
@@ -114,8 +114,8 @@ export default {
         },
     },
     BITAND: {
-        description: `Returns a 'Bitwise And' of two numbers`,
-        abstract: `Returns a 'Bitwise And' of two numbers`,
+        description: 'Returns a \'Bitwise And\' of two numbers',
+        abstract: 'Returns a \'Bitwise And\' of two numbers',
         links: [
             {
                 title: 'Instruction',
@@ -128,8 +128,8 @@ export default {
         },
     },
     BITLSHIFT: {
-        description: `Returns a value number shifted left by shift_amount bits`,
-        abstract: `Returns a value number shifted left by shift_amount bits`,
+        description: 'Returns a value number shifted left by shift_amount bits',
+        abstract: 'Returns a value number shifted left by shift_amount bits',
         links: [
             {
                 title: 'Instruction',
@@ -142,8 +142,8 @@ export default {
         },
     },
     BITOR: {
-        description: `Returns a bitwise OR of 2 numbers`,
-        abstract: `Returns a bitwise OR of 2 numbers`,
+        description: 'Returns a bitwise OR of 2 numbers',
+        abstract: 'Returns a bitwise OR of 2 numbers',
         links: [
             {
                 title: 'Instruction',
@@ -156,8 +156,8 @@ export default {
         },
     },
     BITRSHIFT: {
-        description: `Returns a value number shifted right by shift_amount bits`,
-        abstract: `Returns a value number shifted right by shift_amount bits`,
+        description: 'Returns a value number shifted right by shift_amount bits',
+        abstract: 'Returns a value number shifted right by shift_amount bits',
         links: [
             {
                 title: 'Instruction',
@@ -170,8 +170,8 @@ export default {
         },
     },
     BITXOR: {
-        description: `Returns a bitwise 'Exclusive Or' of two numbers`,
-        abstract: `Returns a bitwise 'Exclusive Or' of two numbers`,
+        description: 'Returns a bitwise \'Exclusive Or\' of two numbers',
+        abstract: 'Returns a bitwise \'Exclusive Or\' of two numbers',
         links: [
             {
                 title: 'Instruction',
@@ -184,8 +184,8 @@ export default {
         },
     },
     COMPLEX: {
-        description: `Converts real and imaginary coefficients into a complex number`,
-        abstract: `Converts real and imaginary coefficients into a complex number`,
+        description: 'Converts real and imaginary coefficients into a complex number',
+        abstract: 'Converts real and imaginary coefficients into a complex number',
         links: [
             {
                 title: 'Instruction',
@@ -198,8 +198,8 @@ export default {
         },
     },
     CONVERT: {
-        description: `Converts a number from one measurement system to another`,
-        abstract: `Converts a number from one measurement system to another`,
+        description: 'Converts a number from one measurement system to another',
+        abstract: 'Converts a number from one measurement system to another',
         links: [
             {
                 title: 'Instruction',
@@ -212,8 +212,8 @@ export default {
         },
     },
     DEC2BIN: {
-        description: `Converts a decimal number to binary`,
-        abstract: `Converts a decimal number to binary`,
+        description: 'Converts a decimal number to binary',
+        abstract: 'Converts a decimal number to binary',
         links: [
             {
                 title: 'Instruction',
@@ -226,8 +226,8 @@ export default {
         },
     },
     DEC2HEX: {
-        description: `Converts a decimal number to hexadecimal`,
-        abstract: `Converts a decimal number to hexadecimal`,
+        description: 'Converts a decimal number to hexadecimal',
+        abstract: 'Converts a decimal number to hexadecimal',
         links: [
             {
                 title: 'Instruction',
@@ -240,8 +240,8 @@ export default {
         },
     },
     DEC2OCT: {
-        description: `Converts a decimal number to octal`,
-        abstract: `Converts a decimal number to octal`,
+        description: 'Converts a decimal number to octal',
+        abstract: 'Converts a decimal number to octal',
         links: [
             {
                 title: 'Instruction',
@@ -254,8 +254,8 @@ export default {
         },
     },
     DELTA: {
-        description: `Tests whether two values are equal`,
-        abstract: `Tests whether two values are equal`,
+        description: 'Tests whether two values are equal',
+        abstract: 'Tests whether two values are equal',
         links: [
             {
                 title: 'Instruction',
@@ -268,8 +268,8 @@ export default {
         },
     },
     ERF: {
-        description: `Returns the error function`,
-        abstract: `Returns the error function`,
+        description: 'Returns the error function',
+        abstract: 'Returns the error function',
         links: [
             {
                 title: 'Instruction',
@@ -282,8 +282,8 @@ export default {
         },
     },
     ERF_PRECISE: {
-        description: `Returns the error function`,
-        abstract: `Returns the error function`,
+        description: 'Returns the error function',
+        abstract: 'Returns the error function',
         links: [
             {
                 title: 'Instruction',
@@ -296,8 +296,8 @@ export default {
         },
     },
     ERFC: {
-        description: `Returns the complementary error function`,
-        abstract: `Returns the complementary error function`,
+        description: 'Returns the complementary error function',
+        abstract: 'Returns the complementary error function',
         links: [
             {
                 title: 'Instruction',
@@ -310,8 +310,8 @@ export default {
         },
     },
     ERFC_PRECISE: {
-        description: `Returns the complementary ERF function integrated between x and infinity`,
-        abstract: `Returns the complementary ERF function integrated between x and infinity`,
+        description: 'Returns the complementary ERF function integrated between x and infinity',
+        abstract: 'Returns the complementary ERF function integrated between x and infinity',
         links: [
             {
                 title: 'Instruction',
@@ -324,8 +324,8 @@ export default {
         },
     },
     GESTEP: {
-        description: `Tests whether a number is greater than a threshold value`,
-        abstract: `Tests whether a number is greater than a threshold value`,
+        description: 'Tests whether a number is greater than a threshold value',
+        abstract: 'Tests whether a number is greater than a threshold value',
         links: [
             {
                 title: 'Instruction',
@@ -338,8 +338,8 @@ export default {
         },
     },
     HEX2BIN: {
-        description: `Converts a hexadecimal number to binary`,
-        abstract: `Converts a hexadecimal number to binary`,
+        description: 'Converts a hexadecimal number to binary',
+        abstract: 'Converts a hexadecimal number to binary',
         links: [
             {
                 title: 'Instruction',
@@ -352,8 +352,8 @@ export default {
         },
     },
     HEX2DEC: {
-        description: `Converts a hexadecimal number to decimal`,
-        abstract: `Converts a hexadecimal number to decimal`,
+        description: 'Converts a hexadecimal number to decimal',
+        abstract: 'Converts a hexadecimal number to decimal',
         links: [
             {
                 title: 'Instruction',
@@ -366,8 +366,8 @@ export default {
         },
     },
     HEX2OCT: {
-        description: `Converts a hexadecimal number to octal`,
-        abstract: `Converts a hexadecimal number to octal`,
+        description: 'Converts a hexadecimal number to octal',
+        abstract: 'Converts a hexadecimal number to octal',
         links: [
             {
                 title: 'Instruction',
@@ -380,8 +380,8 @@ export default {
         },
     },
     IMABS: {
-        description: `Returns the absolute value (modulus) of a complex number`,
-        abstract: `Returns the absolute value (modulus) of a complex number`,
+        description: 'Returns the absolute value (modulus) of a complex number',
+        abstract: 'Returns the absolute value (modulus) of a complex number',
         links: [
             {
                 title: 'Instruction',
@@ -394,8 +394,8 @@ export default {
         },
     },
     IMAGINARY: {
-        description: `Returns the imaginary coefficient of a complex number`,
-        abstract: `Returns the imaginary coefficient of a complex number`,
+        description: 'Returns the imaginary coefficient of a complex number',
+        abstract: 'Returns the imaginary coefficient of a complex number',
         links: [
             {
                 title: 'Instruction',
@@ -408,8 +408,8 @@ export default {
         },
     },
     IMARGUMENT: {
-        description: `Returns the argument theta, an angle expressed in radians`,
-        abstract: `Returns the argument theta, an angle expressed in radians`,
+        description: 'Returns the argument theta, an angle expressed in radians',
+        abstract: 'Returns the argument theta, an angle expressed in radians',
         links: [
             {
                 title: 'Instruction',
@@ -422,8 +422,8 @@ export default {
         },
     },
     IMCONJUGATE: {
-        description: `Returns the complex conjugate of a complex number`,
-        abstract: `Returns the complex conjugate of a complex number`,
+        description: 'Returns the complex conjugate of a complex number',
+        abstract: 'Returns the complex conjugate of a complex number',
         links: [
             {
                 title: 'Instruction',
@@ -436,8 +436,8 @@ export default {
         },
     },
     IMCOS: {
-        description: `Returns the cosine of a complex number`,
-        abstract: `Returns the cosine of a complex number`,
+        description: 'Returns the cosine of a complex number',
+        abstract: 'Returns the cosine of a complex number',
         links: [
             {
                 title: 'Instruction',
@@ -450,8 +450,8 @@ export default {
         },
     },
     IMCOSH: {
-        description: `Returns the hyperbolic cosine of a complex number`,
-        abstract: `Returns the hyperbolic cosine of a complex number`,
+        description: 'Returns the hyperbolic cosine of a complex number',
+        abstract: 'Returns the hyperbolic cosine of a complex number',
         links: [
             {
                 title: 'Instruction',
@@ -464,8 +464,8 @@ export default {
         },
     },
     IMCOT: {
-        description: `Returns the cotangent of a complex number`,
-        abstract: `Returns the cotangent of a complex number`,
+        description: 'Returns the cotangent of a complex number',
+        abstract: 'Returns the cotangent of a complex number',
         links: [
             {
                 title: 'Instruction',
@@ -478,8 +478,8 @@ export default {
         },
     },
     IMCSC: {
-        description: `Returns the cosecant of a complex number`,
-        abstract: `Returns the cosecant of a complex number`,
+        description: 'Returns the cosecant of a complex number',
+        abstract: 'Returns the cosecant of a complex number',
         links: [
             {
                 title: 'Instruction',
@@ -492,8 +492,8 @@ export default {
         },
     },
     IMCSCH: {
-        description: `Returns the hyperbolic cosecant of a complex number`,
-        abstract: `Returns the hyperbolic cosecant of a complex number`,
+        description: 'Returns the hyperbolic cosecant of a complex number',
+        abstract: 'Returns the hyperbolic cosecant of a complex number',
         links: [
             {
                 title: 'Instruction',
@@ -506,8 +506,8 @@ export default {
         },
     },
     IMDIV: {
-        description: `Returns the quotient of two complex numbers`,
-        abstract: `Returns the quotient of two complex numbers`,
+        description: 'Returns the quotient of two complex numbers',
+        abstract: 'Returns the quotient of two complex numbers',
         links: [
             {
                 title: 'Instruction',
@@ -520,8 +520,8 @@ export default {
         },
     },
     IMEXP: {
-        description: `Returns the exponential of a complex number`,
-        abstract: `Returns the exponential of a complex number`,
+        description: 'Returns the exponential of a complex number',
+        abstract: 'Returns the exponential of a complex number',
         links: [
             {
                 title: 'Instruction',
@@ -534,8 +534,8 @@ export default {
         },
     },
     IMLN: {
-        description: `Returns the natural logarithm of a complex number`,
-        abstract: `Returns the natural logarithm of a complex number`,
+        description: 'Returns the natural logarithm of a complex number',
+        abstract: 'Returns the natural logarithm of a complex number',
         links: [
             {
                 title: 'Instruction',
@@ -548,8 +548,8 @@ export default {
         },
     },
     IMLOG10: {
-        description: `Returns the base-10 logarithm of a complex number`,
-        abstract: `Returns the base-10 logarithm of a complex number`,
+        description: 'Returns the base-10 logarithm of a complex number',
+        abstract: 'Returns the base-10 logarithm of a complex number',
         links: [
             {
                 title: 'Instruction',
@@ -562,8 +562,8 @@ export default {
         },
     },
     IMLOG2: {
-        description: `Returns the base-2 logarithm of a complex number`,
-        abstract: `Returns the base-2 logarithm of a complex number`,
+        description: 'Returns the base-2 logarithm of a complex number',
+        abstract: 'Returns the base-2 logarithm of a complex number',
         links: [
             {
                 title: 'Instruction',
@@ -576,8 +576,8 @@ export default {
         },
     },
     IMPOWER: {
-        description: `Returns a complex number raised to an integer power`,
-        abstract: `Returns a complex number raised to an integer power`,
+        description: 'Returns a complex number raised to an integer power',
+        abstract: 'Returns a complex number raised to an integer power',
         links: [
             {
                 title: 'Instruction',
@@ -590,8 +590,8 @@ export default {
         },
     },
     IMPRODUCT: {
-        description: `Returns the product of from 2 to 255 complex numbers`,
-        abstract: `Returns the product of from 2 to 255 complex numbers`,
+        description: 'Returns the product of from 2 to 255 complex numbers',
+        abstract: 'Returns the product of from 2 to 255 complex numbers',
         links: [
             {
                 title: 'Instruction',
@@ -604,8 +604,8 @@ export default {
         },
     },
     IMREAL: {
-        description: `Returns the real coefficient of a complex number`,
-        abstract: `Returns the real coefficient of a complex number`,
+        description: 'Returns the real coefficient of a complex number',
+        abstract: 'Returns the real coefficient of a complex number',
         links: [
             {
                 title: 'Instruction',
@@ -618,8 +618,8 @@ export default {
         },
     },
     IMSEC: {
-        description: `Returns the secant of a complex number`,
-        abstract: `Returns the secant of a complex number`,
+        description: 'Returns the secant of a complex number',
+        abstract: 'Returns the secant of a complex number',
         links: [
             {
                 title: 'Instruction',
@@ -632,8 +632,8 @@ export default {
         },
     },
     IMSECH: {
-        description: `Returns the hyperbolic secant of a complex number`,
-        abstract: `Returns the hyperbolic secant of a complex number`,
+        description: 'Returns the hyperbolic secant of a complex number',
+        abstract: 'Returns the hyperbolic secant of a complex number',
         links: [
             {
                 title: 'Instruction',
@@ -646,8 +646,8 @@ export default {
         },
     },
     IMSIN: {
-        description: `Returns the sine of a complex number`,
-        abstract: `Returns the sine of a complex number`,
+        description: 'Returns the sine of a complex number',
+        abstract: 'Returns the sine of a complex number',
         links: [
             {
                 title: 'Instruction',
@@ -660,8 +660,8 @@ export default {
         },
     },
     IMSINH: {
-        description: `Returns the hyperbolic sine of a complex number`,
-        abstract: `Returns the hyperbolic sine of a complex number`,
+        description: 'Returns the hyperbolic sine of a complex number',
+        abstract: 'Returns the hyperbolic sine of a complex number',
         links: [
             {
                 title: 'Instruction',
@@ -674,8 +674,8 @@ export default {
         },
     },
     IMSQRT: {
-        description: `Returns the square root of a complex number`,
-        abstract: `Returns the square root of a complex number`,
+        description: 'Returns the square root of a complex number',
+        abstract: 'Returns the square root of a complex number',
         links: [
             {
                 title: 'Instruction',
@@ -688,8 +688,8 @@ export default {
         },
     },
     IMSUB: {
-        description: `Returns the difference between two complex numbers`,
-        abstract: `Returns the difference between two complex numbers`,
+        description: 'Returns the difference between two complex numbers',
+        abstract: 'Returns the difference between two complex numbers',
         links: [
             {
                 title: 'Instruction',
@@ -702,8 +702,8 @@ export default {
         },
     },
     IMSUM: {
-        description: `Returns the sum of complex numbers`,
-        abstract: `Returns the sum of complex numbers`,
+        description: 'Returns the sum of complex numbers',
+        abstract: 'Returns the sum of complex numbers',
         links: [
             {
                 title: 'Instruction',
@@ -716,8 +716,8 @@ export default {
         },
     },
     IMTAN: {
-        description: `Returns the tangent of a complex number`,
-        abstract: `Returns the tangent of a complex number`,
+        description: 'Returns the tangent of a complex number',
+        abstract: 'Returns the tangent of a complex number',
         links: [
             {
                 title: 'Instruction',
@@ -730,8 +730,8 @@ export default {
         },
     },
     OCT2BIN: {
-        description: `Converts an octal number to binary`,
-        abstract: `Converts an octal number to binary`,
+        description: 'Converts an octal number to binary',
+        abstract: 'Converts an octal number to binary',
         links: [
             {
                 title: 'Instruction',
@@ -744,8 +744,8 @@ export default {
         },
     },
     OCT2DEC: {
-        description: `Converts an octal number to decimal`,
-        abstract: `Converts an octal number to decimal`,
+        description: 'Converts an octal number to decimal',
+        abstract: 'Converts an octal number to decimal',
         links: [
             {
                 title: 'Instruction',
@@ -758,8 +758,8 @@ export default {
         },
     },
     OCT2HEX: {
-        description: `Converts an octal number to hexadecimal`,
-        abstract: `Converts an octal number to hexadecimal`,
+        description: 'Converts an octal number to hexadecimal',
+        abstract: 'Converts an octal number to hexadecimal',
         links: [
             {
                 title: 'Instruction',

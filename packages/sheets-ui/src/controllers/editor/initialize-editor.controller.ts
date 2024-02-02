@@ -68,8 +68,8 @@ export class InitializeEditorController extends Disposable {
             },
             documentStyle: {
                 pageSize: {
-                    width: Infinity,
-                    height: Infinity,
+                    width: Number.POSITIVE_INFINITY,
+                    height: Number.POSITIVE_INFINITY,
                 },
                 marginTop: 5,
                 marginBottom: 5,

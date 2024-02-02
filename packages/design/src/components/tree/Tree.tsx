@@ -47,7 +47,7 @@ export interface ITreeProps {
      * @description
      * - `TreeSelectionMode.ONLY_LEAF_NODE` only select leaf node
      * - `TreeSelectionMode.ALL` select all node
-     * */
+     */
     selectionMode?: TreeSelectionMode;
 
     /**

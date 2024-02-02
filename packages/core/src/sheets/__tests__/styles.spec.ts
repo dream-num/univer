@@ -21,8 +21,8 @@ import { Styles } from '../styles';
 describe('Test Styles', () => {
     it('Init styles, set style', () => {
         const styles = new Styles({
-            '1': { fs: 12 },
-            '2': { fs: 14 },
+            1: { fs: 12 },
+            2: { fs: 14 },
         });
 
         // get style by id
@@ -57,8 +57,8 @@ describe('Test Styles', () => {
         // toJSON function
         const stylesJSON = styles.toJSON();
         expect(stylesJSON).toEqual({
-            '1': { fs: 12 },
-            '2': { fs: 14 },
+            1: { fs: 12 },
+            2: { fs: 14 },
             [styleId as string]: { fs: 16 },
         });
 

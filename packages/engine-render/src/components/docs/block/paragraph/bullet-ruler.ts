@@ -57,7 +57,7 @@ function decimal(startIndex: number, startNumber: number) {
 // 	// 	A number where single digit numbers are prefixed with a zero, like 01, 02, or 03. Numbers with more than one digit are not prefixed with a zero.
 function zeroDecimal(startIndex: number, startNumber: number) {
     const currentIndex = startIndex + startNumber;
-    // eslint-disable-next-line no-magic-numbers
+
     if (currentIndex < 10) {
         return `0${currentIndex}`;
     }

@@ -718,7 +718,6 @@ export class Transformer implements ITransformerConfig {
         this.onClearControlObservable.notifyObservers(null);
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _createControl(applyObject: BaseObject) {
         const { left, top, height, width, angle, scaleX, scaleY, skewX, skewY, flipX, flipY } = applyObject.getState();
         const oKey = applyObject.oKey;

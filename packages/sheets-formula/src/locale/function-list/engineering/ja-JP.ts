@@ -16,8 +16,8 @@
 
 export default {
     BESSELI: {
-        description: `修正ベッセル関数 In(x) を返します。`,
-        abstract: `修正ベッセル関数 In(x) を返します。`,
+        description: '修正ベッセル関数 In(x) を返します。',
+        abstract: '修正ベッセル関数 In(x) を返します。',
         links: [
             {
                 title: '指導',
@@ -30,8 +30,8 @@ export default {
         },
     },
     BESSELJ: {
-        description: `ベッセル関数 Jn(x) を返します。`,
-        abstract: `ベッセル関数 Jn(x) を返します。`,
+        description: 'ベッセル関数 Jn(x) を返します。',
+        abstract: 'ベッセル関数 Jn(x) を返します。',
         links: [
             {
                 title: '指導',
@@ -44,8 +44,8 @@ export default {
         },
     },
     BESSELK: {
-        description: `修正ベッセル関数 Kn(x) を返します。`,
-        abstract: `修正ベッセル関数 Kn(x) を返します。`,
+        description: '修正ベッセル関数 Kn(x) を返します。',
+        abstract: '修正ベッセル関数 Kn(x) を返します。',
         links: [
             {
                 title: '指導',
@@ -58,8 +58,8 @@ export default {
         },
     },
     BESSELY: {
-        description: `ベッセル関数 Yn(x) を返します。`,
-        abstract: `ベッセル関数 Yn(x) を返します。`,
+        description: 'ベッセル関数 Yn(x) を返します。',
+        abstract: 'ベッセル関数 Yn(x) を返します。',
         links: [
             {
                 title: '指導',
@@ -72,8 +72,8 @@ export default {
         },
     },
     BIN2DEC: {
-        description: `2 進数を 10 進数に変換します。`,
-        abstract: `2 進数を 10 進数に変換します。`,
+        description: '2 進数を 10 進数に変換します。',
+        abstract: '2 進数を 10 進数に変換します。',
         links: [
             {
                 title: '指導',
@@ -86,8 +86,8 @@ export default {
         },
     },
     BIN2HEX: {
-        description: `2 進数を 16 進数に変換します。`,
-        abstract: `2 進数を 16 進数に変換します。`,
+        description: '2 進数を 16 進数に変換します。',
+        abstract: '2 進数を 16 進数に変換します。',
         links: [
             {
                 title: '指導',
@@ -100,8 +100,8 @@ export default {
         },
     },
     BIN2OCT: {
-        description: `2 進数を 8 進数に変換します。`,
-        abstract: `2 進数を 8 進数に変換します。`,
+        description: '2 進数を 8 進数に変換します。',
+        abstract: '2 進数を 8 進数に変換します。',
         links: [
             {
                 title: '指導',
@@ -114,8 +114,8 @@ export default {
         },
     },
     BITAND: {
-        description: `2 つの数値の 'ビット単位の And' を返します。`,
-        abstract: `2 つの数値の 'ビット単位の And' を返します。`,
+        description: '2 つの数値の \'ビット単位の And\' を返します。',
+        abstract: '2 つの数値の \'ビット単位の And\' を返します。',
         links: [
             {
                 title: '指導',
@@ -128,8 +128,8 @@ export default {
         },
     },
     BITLSHIFT: {
-        description: `shift_amount ビットだけ左へシフトした数値を返します。`,
-        abstract: `shift_amount ビットだけ左へシフトした数値を返します。`,
+        description: 'shift_amount ビットだけ左へシフトした数値を返します。',
+        abstract: 'shift_amount ビットだけ左へシフトした数値を返します。',
         links: [
             {
                 title: '指導',
@@ -142,8 +142,8 @@ export default {
         },
     },
     BITOR: {
-        description: `2 つの数値のビット単位の OR を返します。`,
-        abstract: `2 つの数値のビット単位の OR を返します。`,
+        description: '2 つの数値のビット単位の OR を返します。',
+        abstract: '2 つの数値のビット単位の OR を返します。',
         links: [
             {
                 title: '指導',
@@ -156,8 +156,8 @@ export default {
         },
     },
     BITRSHIFT: {
-        description: `shift_amount ビットだけ右へシフトした数値を返します。`,
-        abstract: `shift_amount ビットだけ右へシフトした数値を返します。`,
+        description: 'shift_amount ビットだけ右へシフトした数値を返します。',
+        abstract: 'shift_amount ビットだけ右へシフトした数値を返します。',
         links: [
             {
                 title: '指導',
@@ -170,8 +170,8 @@ export default {
         },
     },
     BITXOR: {
-        description: `2 つの数値のビット単位の 'Exclusive Or' を返します。`,
-        abstract: `2 つの数値のビット単位の 'Exclusive Or' を返します。`,
+        description: '2 つの数値のビット単位の \'Exclusive Or\' を返します。',
+        abstract: '2 つの数値のビット単位の \'Exclusive Or\' を返します。',
         links: [
             {
                 title: '指導',
@@ -184,8 +184,8 @@ export default {
         },
     },
     COMPLEX: {
-        description: `実数係数および虚数係数を 'x+yi' または 'x+yj' の形式の複素数に変換します。`,
-        abstract: `実数係数および虚数係数を 'x+yi' または 'x+yj' の形式の複素数に変換します。`,
+        description: '実数係数および虚数係数を \'x+yi\' または \'x+yj\' の形式の複素数に変換します。',
+        abstract: '実数係数および虚数係数を \'x+yi\' または \'x+yj\' の形式の複素数に変換します。',
         links: [
             {
                 title: '指導',
@@ -198,8 +198,8 @@ export default {
         },
     },
     CONVERT: {
-        description: `数値の単位を変換します。`,
-        abstract: `数値の単位を変換します。`,
+        description: '数値の単位を変換します。',
+        abstract: '数値の単位を変換します。',
         links: [
             {
                 title: '指導',
@@ -212,8 +212,8 @@ export default {
         },
     },
     DEC2BIN: {
-        description: `10 進数を 2 進数に変換します。`,
-        abstract: `10 進数を 2 進数に変換します。`,
+        description: '10 進数を 2 進数に変換します。',
+        abstract: '10 進数を 2 進数に変換します。',
         links: [
             {
                 title: '指導',
@@ -226,8 +226,8 @@ export default {
         },
     },
     DEC2HEX: {
-        description: `10 進数を 16 進数に変換します。`,
-        abstract: `10 進数を 16 進数に変換します。`,
+        description: '10 進数を 16 進数に変換します。',
+        abstract: '10 進数を 16 進数に変換します。',
         links: [
             {
                 title: '指導',
@@ -240,8 +240,8 @@ export default {
         },
     },
     DEC2OCT: {
-        description: `10 進数を 8 進数に変換します。`,
-        abstract: `10 進数を 8 進数に変換します。`,
+        description: '10 進数を 8 進数に変換します。',
+        abstract: '10 進数を 8 進数に変換します。',
         links: [
             {
                 title: '指導',
@@ -254,8 +254,8 @@ export default {
         },
     },
     DELTA: {
-        description: `2 つの値が等しいかどうかを調べます。`,
-        abstract: `2 つの値が等しいかどうかを調べます。`,
+        description: '2 つの値が等しいかどうかを調べます。',
+        abstract: '2 つの値が等しいかどうかを調べます。',
         links: [
             {
                 title: '指導',
@@ -268,8 +268,8 @@ export default {
         },
     },
     ERF: {
-        description: `誤差関数の積分値を返します。`,
-        abstract: `誤差関数の積分値を返します。`,
+        description: '誤差関数の積分値を返します。',
+        abstract: '誤差関数の積分値を返します。',
         links: [
             {
                 title: '指導',
@@ -282,8 +282,8 @@ export default {
         },
     },
     ERF_PRECISE: {
-        description: `誤差関数の積分値を返します。`,
-        abstract: `誤差関数の積分値を返します。`,
+        description: '誤差関数の積分値を返します。',
+        abstract: '誤差関数の積分値を返します。',
         links: [
             {
                 title: '指導',
@@ -296,8 +296,8 @@ export default {
         },
     },
     ERFC: {
-        description: `相補誤差関数の積分値を返します。`,
-        abstract: `相補誤差関数の積分値を返します。`,
+        description: '相補誤差関数の積分値を返します。',
+        abstract: '相補誤差関数の積分値を返します。',
         links: [
             {
                 title: '指導',
@@ -310,8 +310,8 @@ export default {
         },
     },
     ERFC_PRECISE: {
-        description: `x ～無限大の範囲で、相補誤差関数の積分値を返します。`,
-        abstract: `x ～無限大の範囲で、相補誤差関数の積分値を返します。`,
+        description: 'x ～無限大の範囲で、相補誤差関数の積分値を返します。',
+        abstract: 'x ～無限大の範囲で、相補誤差関数の積分値を返します。',
         links: [
             {
                 title: '指導',
@@ -324,8 +324,8 @@ export default {
         },
     },
     GESTEP: {
-        description: `数値がしきい値以上であるかどうかを調べます。`,
-        abstract: `数値がしきい値以上であるかどうかを調べます。`,
+        description: '数値がしきい値以上であるかどうかを調べます。',
+        abstract: '数値がしきい値以上であるかどうかを調べます。',
         links: [
             {
                 title: '指導',
@@ -338,8 +338,8 @@ export default {
         },
     },
     HEX2BIN: {
-        description: `16 進数を 2 進数に変換します。`,
-        abstract: `16 進数を 2 進数に変換します。`,
+        description: '16 進数を 2 進数に変換します。',
+        abstract: '16 進数を 2 進数に変換します。',
         links: [
             {
                 title: '指導',
@@ -352,8 +352,8 @@ export default {
         },
     },
     HEX2DEC: {
-        description: `16 進数を 10 進数に変換します。`,
-        abstract: `16 進数を 10 進数に変換します。`,
+        description: '16 進数を 10 進数に変換します。',
+        abstract: '16 進数を 10 進数に変換します。',
         links: [
             {
                 title: '指導',
@@ -366,8 +366,8 @@ export default {
         },
     },
     HEX2OCT: {
-        description: `16 進数を 8 進数に変換します。`,
-        abstract: `16 進数を 8 進数に変換します。`,
+        description: '16 進数を 8 進数に変換します。',
+        abstract: '16 進数を 8 進数に変換します。',
         links: [
             {
                 title: '指導',
@@ -380,8 +380,8 @@ export default {
         },
     },
     IMABS: {
-        description: `指定した複素数の絶対値を返します。`,
-        abstract: `指定した複素数の絶対値を返します。`,
+        description: '指定した複素数の絶対値を返します。',
+        abstract: '指定した複素数の絶対値を返します。',
         links: [
             {
                 title: '指導',
@@ -394,8 +394,8 @@ export default {
         },
     },
     IMAGINARY: {
-        description: `指定した複素数の虚数係数を返します。`,
-        abstract: `指定した複素数の虚数係数を返します。`,
+        description: '指定した複素数の虚数係数を返します。',
+        abstract: '指定した複素数の虚数係数を返します。',
         links: [
             {
                 title: '指導',
@@ -408,8 +408,8 @@ export default {
         },
     },
     IMARGUMENT: {
-        description: `引数シータ (ラジアンで表した角度) を返します。`,
-        abstract: `引数シータ (ラジアンで表した角度) を返します。`,
+        description: '引数シータ (ラジアンで表した角度) を返します。',
+        abstract: '引数シータ (ラジアンで表した角度) を返します。',
         links: [
             {
                 title: '指導',
@@ -422,8 +422,8 @@ export default {
         },
     },
     IMCONJUGATE: {
-        description: `複素数の複素共役を返します。`,
-        abstract: `複素数の複素共役を返します。`,
+        description: '複素数の複素共役を返します。',
+        abstract: '複素数の複素共役を返します。',
         links: [
             {
                 title: '指導',
@@ -436,8 +436,8 @@ export default {
         },
     },
     IMCOS: {
-        description: `複素数のコサインを返します。`,
-        abstract: `複素数のコサインを返します。`,
+        description: '複素数のコサインを返します。',
+        abstract: '複素数のコサインを返します。',
         links: [
             {
                 title: '指導',
@@ -450,8 +450,8 @@ export default {
         },
     },
     IMCOSH: {
-        description: `複素数の双曲線余弦を返します。`,
-        abstract: `複素数の双曲線余弦を返します。`,
+        description: '複素数の双曲線余弦を返します。',
+        abstract: '複素数の双曲線余弦を返します。',
         links: [
             {
                 title: '指導',
@@ -464,8 +464,8 @@ export default {
         },
     },
     IMCOT: {
-        description: `複素数の余接を返します。`,
-        abstract: `複素数の余接を返します。`,
+        description: '複素数の余接を返します。',
+        abstract: '複素数の余接を返します。',
         links: [
             {
                 title: '指導',
@@ -478,8 +478,8 @@ export default {
         },
     },
     IMCSC: {
-        description: `複素数の余割を返します。`,
-        abstract: `複素数の余割を返します。`,
+        description: '複素数の余割を返します。',
+        abstract: '複素数の余割を返します。',
         links: [
             {
                 title: '指導',
@@ -492,8 +492,8 @@ export default {
         },
     },
     IMCSCH: {
-        description: `複素数の双曲線余割を返します。`,
-        abstract: `複素数の双曲線余割を返します。`,
+        description: '複素数の双曲線余割を返します。',
+        abstract: '複素数の双曲線余割を返します。',
         links: [
             {
                 title: '指導',
@@ -506,8 +506,8 @@ export default {
         },
     },
     IMDIV: {
-        description: `2 つの複素数の商を返します。`,
-        abstract: `2 つの複素数の商を返します。`,
+        description: '2 つの複素数の商を返します。',
+        abstract: '2 つの複素数の商を返します。',
         links: [
             {
                 title: '指導',
@@ -520,8 +520,8 @@ export default {
         },
     },
     IMEXP: {
-        description: `複素数のべき乗を返します。`,
-        abstract: `複素数のべき乗を返します。`,
+        description: '複素数のべき乗を返します。',
+        abstract: '複素数のべき乗を返します。',
         links: [
             {
                 title: '指導',
@@ -534,8 +534,8 @@ export default {
         },
     },
     IMLN: {
-        description: `複素数の自然対数を返します。`,
-        abstract: `複素数の自然対数を返します。`,
+        description: '複素数の自然対数を返します。',
+        abstract: '複素数の自然対数を返します。',
         links: [
             {
                 title: '指導',
@@ -548,8 +548,8 @@ export default {
         },
     },
     IMLOG10: {
-        description: `複素数の 10 を底とする対数を返します。`,
-        abstract: `複素数の 10 を底とする対数を返します。`,
+        description: '複素数の 10 を底とする対数を返します。',
+        abstract: '複素数の 10 を底とする対数を返します。',
         links: [
             {
                 title: '指導',
@@ -562,8 +562,8 @@ export default {
         },
     },
     IMLOG2: {
-        description: `複素数の 2 を底とする対数を返します。`,
-        abstract: `複素数の 2 を底とする対数を返します。`,
+        description: '複素数の 2 を底とする対数を返します。',
+        abstract: '複素数の 2 を底とする対数を返します。',
         links: [
             {
                 title: '指導',
@@ -576,8 +576,8 @@ export default {
         },
     },
     IMPOWER: {
-        description: `複素数の整数乗を返します。`,
-        abstract: `複素数の整数乗を返します。`,
+        description: '複素数の整数乗を返します。',
+        abstract: '複素数の整数乗を返します。',
         links: [
             {
                 title: '指導',
@@ -590,8 +590,8 @@ export default {
         },
     },
     IMPRODUCT: {
-        description: `2 ～ 255 個の複素数の積を返します。`,
-        abstract: `2 ～ 255 個の複素数の積を返します。`,
+        description: '2 ～ 255 個の複素数の積を返します。',
+        abstract: '2 ～ 255 個の複素数の積を返します。',
         links: [
             {
                 title: '指導',
@@ -604,8 +604,8 @@ export default {
         },
     },
     IMREAL: {
-        description: `複素数の実数係数を返します。`,
-        abstract: `複素数の実数係数を返します。`,
+        description: '複素数の実数係数を返します。',
+        abstract: '複素数の実数係数を返します。',
         links: [
             {
                 title: '指導',
@@ -618,8 +618,8 @@ export default {
         },
     },
     IMSEC: {
-        description: `複素数の正割を返します。`,
-        abstract: `複素数の正割を返します。`,
+        description: '複素数の正割を返します。',
+        abstract: '複素数の正割を返します。',
         links: [
             {
                 title: '指導',
@@ -632,8 +632,8 @@ export default {
         },
     },
     IMSECH: {
-        description: `複素数の双曲線正割を返します。`,
-        abstract: `複素数の双曲線正割を返します。`,
+        description: '複素数の双曲線正割を返します。',
+        abstract: '複素数の双曲線正割を返します。',
         links: [
             {
                 title: '指導',
@@ -646,8 +646,8 @@ export default {
         },
     },
     IMSIN: {
-        description: `複素数のサインを返します。`,
-        abstract: `複素数のサインを返します。`,
+        description: '複素数のサインを返します。',
+        abstract: '複素数のサインを返します。',
         links: [
             {
                 title: '指導',
@@ -660,8 +660,8 @@ export default {
         },
     },
     IMSINH: {
-        description: `複素数の双曲線正弦を返します。`,
-        abstract: `複素数の双曲線正弦を返します。`,
+        description: '複素数の双曲線正弦を返します。',
+        abstract: '複素数の双曲線正弦を返します。',
         links: [
             {
                 title: '指導',
@@ -674,8 +674,8 @@ export default {
         },
     },
     IMSQRT: {
-        description: `複素数の平方根を返します。`,
-        abstract: `複素数の平方根を返します。`,
+        description: '複素数の平方根を返します。',
+        abstract: '複素数の平方根を返します。',
         links: [
             {
                 title: '指導',
@@ -688,8 +688,8 @@ export default {
         },
     },
     IMSUB: {
-        description: `2 つの複素数の差を返します。`,
-        abstract: `2 つの複素数の差を返します。`,
+        description: '2 つの複素数の差を返します。',
+        abstract: '2 つの複素数の差を返します。',
         links: [
             {
                 title: '指導',
@@ -702,8 +702,8 @@ export default {
         },
     },
     IMSUM: {
-        description: `複素数の和を返します。`,
-        abstract: `複素数の和を返します。`,
+        description: '複素数の和を返します。',
+        abstract: '複素数の和を返します。',
         links: [
             {
                 title: '指導',
@@ -716,8 +716,8 @@ export default {
         },
     },
     IMTAN: {
-        description: `複素数の正接を返します。`,
-        abstract: `複素数の正接を返します。`,
+        description: '複素数の正接を返します。',
+        abstract: '複素数の正接を返します。',
         links: [
             {
                 title: '指導',
@@ -730,8 +730,8 @@ export default {
         },
     },
     OCT2BIN: {
-        description: `8 進数を 2 進数に変換します。`,
-        abstract: `8 進数を 2 進数に変換します。`,
+        description: '8 進数を 2 進数に変換します。',
+        abstract: '8 進数を 2 進数に変換します。',
         links: [
             {
                 title: '指導',
@@ -744,8 +744,8 @@ export default {
         },
     },
     OCT2DEC: {
-        description: `8 進数を 10 進数に変換します。`,
-        abstract: `8 進数を 10 進数に変換します。`,
+        description: '8 進数を 10 進数に変換します。',
+        abstract: '8 進数を 10 進数に変換します。',
         links: [
             {
                 title: '指導',
@@ -758,8 +758,8 @@ export default {
         },
     },
     OCT2HEX: {
-        description: `8 進数を 16 進数に変換します。`,
-        abstract: `8 進数を 16 進数に変換します。`,
+        description: '8 進数を 16 進数に変換します。',
+        abstract: '8 進数を 16 進数に変換します。',
         links: [
             {
                 title: '指導',

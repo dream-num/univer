@@ -19,7 +19,6 @@ import { AbsoluteRefType, type IRange } from '@univerjs/core';
 import type { IGridRangeName } from './reference';
 import { handleRefStringInfo } from './reference';
 
-// eslint-disable-next-line no-useless-escape
 const $relativeRegex = /[\[\]]/g;
 
 function handleR1C1(rowOrColumnString: string, current: number) {

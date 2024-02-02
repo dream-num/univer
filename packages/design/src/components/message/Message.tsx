@@ -94,7 +94,6 @@ export class Message {
     }
 
     append(type: MessageType, options: IMessageMethodOptions) {
-        // eslint-disable-next-line no-magic-numbers
         const { content, delay = 3000 } = options;
         const key = Date.now();
 

@@ -16,7 +16,7 @@
 
 export function ABCToNumber(a: string) {
     if (a == null || a.length === 0) {
-        return NaN;
+        return Number.NaN;
     }
     const str = a.toLowerCase().split('');
     const al = str.length;
@@ -28,7 +28,7 @@ export function ABCToNumber(a: string) {
         numOut += charnum * 26 ** (al - i - 1);
     }
     if (numOut === 0) {
-        return NaN;
+        return Number.NaN;
     }
     return numOut - 1;
 }

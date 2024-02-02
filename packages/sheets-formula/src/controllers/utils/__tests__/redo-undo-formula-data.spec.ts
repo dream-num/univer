@@ -32,8 +32,8 @@ describe('Utils redo undo formula data test', () => {
                 params: {
                     from: {
                         value: {
-                            '4': {
-                                '0': {
+                            4: {
+                                0: {
                                     f: '=A1:A3',
                                     v: 1,
                                     t: 2,
@@ -44,8 +44,8 @@ describe('Utils redo undo formula data test', () => {
                     },
                     to: {
                         value: {
-                            '4': {
-                                '2': null,
+                            4: {
+                                2: null,
                             },
                         },
                         subUnitId,
@@ -58,8 +58,8 @@ describe('Utils redo undo formula data test', () => {
             const formulaData = {
                 [unitId]: {
                     [subUnitId]: {
-                        '4': {
-                            '2': {
+                        4: {
+                            2: {
                                 f: '=A1:A3',
                             },
                         },
@@ -70,8 +70,8 @@ describe('Utils redo undo formula data test', () => {
             const arrayFormulaRange = {
                 [unitId]: {
                     [subUnitId]: {
-                        '4': {
-                            '2': {
+                        4: {
+                            2: {
                                 startRow: 4,
                                 startColumn: 2,
                                 endRow: 6,
@@ -85,23 +85,23 @@ describe('Utils redo undo formula data test', () => {
             const arrayFormulaCellData = {
                 [unitId]: {
                     [subUnitId]: {
-                        '4': {
-                            '0': null,
-                            '2': {
+                        4: {
+                            0: null,
+                            2: {
                                 v: 1,
                                 t: 2,
                             },
                         },
-                        '5': {
-                            '0': null,
-                            '2': {
+                        5: {
+                            0: null,
+                            2: {
                                 v: 2,
                                 t: 2,
                             },
                         },
-                        '6': {
-                            '0': null,
-                            '2': {
+                        6: {
+                            0: null,
+                            2: {
                                 v: 3,
                                 t: 2,
                             },
@@ -115,8 +115,8 @@ describe('Utils redo undo formula data test', () => {
             expect(formulaData).toStrictEqual({
                 [unitId]: {
                     [subUnitId]: {
-                        '4': {
-                            '0': {
+                        4: {
+                            0: {
                                 f: '=A1:A3',
                             },
                         },
@@ -126,14 +126,14 @@ describe('Utils redo undo formula data test', () => {
             expect(arrayFormulaRange).toStrictEqual({
                 [unitId]: {
                     [subUnitId]: {
-                        '4': {
-                            '0': {
+                        4: {
+                            0: {
                                 startRow: 4,
                                 startColumn: 2,
                                 endRow: 6,
                                 endColumn: 2,
                             },
-                            '2': null,
+                            2: null,
                         },
                     },
                 },
@@ -142,20 +142,20 @@ describe('Utils redo undo formula data test', () => {
             expect(arrayFormulaCellData).toStrictEqual({
                 [unitId]: {
                     [subUnitId]: {
-                        '4': {
-                            '0': {
+                        4: {
+                            0: {
                                 v: 1,
                                 t: 2,
                             },
-                            '2': null,
+                            2: null,
                         },
-                        '5': {
-                            '0': null,
-                            '2': null,
+                        5: {
+                            0: null,
+                            2: null,
                         },
-                        '6': {
-                            '0': null,
-                            '2': null,
+                        6: {
+                            0: null,
+                            2: null,
                         },
                     },
                 },

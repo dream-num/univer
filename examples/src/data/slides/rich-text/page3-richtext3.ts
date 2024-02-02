@@ -30,7 +30,7 @@ export const PAGE3_RICHTEXT_3 = {
         rich: {
             id: 'd',
             body: {
-                dataStream: `SuperApps are more than composite applications that aggregate services.\rAdaptive AI allows for model behavior change post-deployment by using real-time feedback\r\n`,
+                dataStream: 'SuperApps are more than composite applications that aggregate services.\rAdaptive AI allows for model behavior change post-deployment by using real-time feedback\r\n',
                 textRuns: [
                     {
                         st: 0,

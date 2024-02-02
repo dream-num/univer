@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-/* eslint-disable no-magic-numbers */
+ 
 import { describe, expect, it } from 'vitest';
 
 import { ArrayValueObject, transformToValueObject, ValueObjectFactory } from '../array-value-object';
@@ -305,15 +304,15 @@ describe('arrayValueObject test', () => {
         });
 
         it('ValueObjectFactory create ErrorValueObject ', () => {
-            let errorValueObject = ValueObjectFactory.create(NaN);
+            let errorValueObject = ValueObjectFactory.create(Number.NaN);
 
             expect(errorValueObject.isError()).toBeTruthy();
 
-            errorValueObject = ValueObjectFactory.create(Infinity);
+            errorValueObject = ValueObjectFactory.create(Number.POSITIVE_INFINITY);
 
             expect(errorValueObject.isError()).toBeTruthy();
 
-            errorValueObject = ValueObjectFactory.create(-Infinity);
+            errorValueObject = ValueObjectFactory.create(Number.NEGATIVE_INFINITY);
 
             expect(errorValueObject.isError()).toBeTruthy();
         });

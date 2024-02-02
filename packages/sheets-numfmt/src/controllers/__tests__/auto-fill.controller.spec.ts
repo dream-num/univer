@@ -107,7 +107,7 @@ describe('test auto fill', () => {
                     id: 'sheet.mutation.set.numfmt',
                     params: {
                         values: {
-                            '1': {
+                            1: {
                                 ranges: [
                                     {
                                         startRow: 3,
@@ -119,7 +119,7 @@ describe('test auto fill', () => {
                             },
                         },
                         refMap: {
-                            '1': {
+                            1: {
                                 pattern: '$#,##0;(#,##0)',
                                 type: '',
                             },
@@ -134,7 +134,7 @@ describe('test auto fill', () => {
                     id: 'sheet.mutation.set.numfmt',
                     params: {
                         values: {
-                            '1': {
+                            1: {
                                 ranges: [
                                     {
                                         startRow: 3,
@@ -146,7 +146,7 @@ describe('test auto fill', () => {
                             },
                         },
                         refMap: {
-                            '1': {
+                            1: {
                                 pattern: '$#,##0;(#,##0)',
                                 type: '',
                             },
@@ -216,7 +216,7 @@ describe('test auto fill', () => {
                     id: 'sheet.mutation.set.numfmt',
                     params: {
                         values: {
-                            '1': {
+                            1: {
                                 ranges: [
                                     {
                                         startRow: 3,
@@ -228,7 +228,7 @@ describe('test auto fill', () => {
                             },
                         },
                         refMap: {
-                            '1': {
+                            1: {
                                 pattern: '$#,##0;(#,##0)',
                                 type: '',
                             },
@@ -243,7 +243,7 @@ describe('test auto fill', () => {
                     id: 'sheet.mutation.set.numfmt',
                     params: {
                         values: {
-                            '1': {
+                            1: {
                                 ranges: [
                                     {
                                         startRow: 3,
@@ -255,7 +255,7 @@ describe('test auto fill', () => {
                             },
                         },
                         refMap: {
-                            '1': {
+                            1: {
                                 pattern: '$#,##0;(#,##0)',
                                 type: '',
                             },

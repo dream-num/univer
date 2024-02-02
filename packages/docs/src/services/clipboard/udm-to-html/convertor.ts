@@ -68,7 +68,7 @@ function covertTextRunToHtml(dataStream: string, textRun: ITextRun): string {
 
     // overline
     if (ol) {
-        style.push(`text-decoration: overline`);
+        style.push('text-decoration: overline');
     }
 
     // background color

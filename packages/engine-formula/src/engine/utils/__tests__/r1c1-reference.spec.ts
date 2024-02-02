@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable no-magic-numbers */
-
 import { AbsoluteRefType, type IRange } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 

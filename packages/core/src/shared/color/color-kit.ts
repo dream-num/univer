@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-/* eslint-disable no-magic-numbers */
+ 
 interface IRgbColor {
     b: number;
 
@@ -516,15 +515,15 @@ const hexToColor: (color: string) => Color = (color) => {
     }
 
     const rgbColor: IRgbColor = {
-        r: parseInt(colors[0], 16),
+        r: Number.parseInt(colors[0], 16),
 
-        g: parseInt(colors[1], 16),
+        g: Number.parseInt(colors[1], 16),
 
-        b: parseInt(colors[2], 16),
+        b: Number.parseInt(colors[2], 16),
     };
 
     if (colors.length > 3) {
-        rgbColor.a = parseInt(colors[3], 16) / 255;
+        rgbColor.a = Number.parseInt(colors[3], 16) / 255;
     }
 
     return rgbColor;
@@ -544,15 +543,15 @@ const rgbToColor: (color: string) => Color = (color) => {
     }
 
     const rgbColor: IRgbColor = {
-        r: parseInt(values[0], 10),
+        r: Number.parseInt(values[0], 10),
 
-        g: parseInt(values[1], 10),
+        g: Number.parseInt(values[1], 10),
 
-        b: parseInt(values[2], 10),
+        b: Number.parseInt(values[2], 10),
     };
 
     if (values.length > 3) {
-        rgbColor.a = parseFloat(values[3]);
+        rgbColor.a = Number.parseFloat(values[3]);
     }
 
     return rgbColor;
@@ -572,15 +571,15 @@ const hslToColor: (color: string) => Color = (color) => {
     }
 
     const hslColor: IHslColor = {
-        h: parseInt(values[0], 10),
+        h: Number.parseInt(values[0], 10),
 
-        s: parseFloat(values[1]),
+        s: Number.parseFloat(values[1]),
 
-        l: parseFloat(values[2]),
+        l: Number.parseFloat(values[2]),
     };
 
     if (values.length > 3) {
-        hslColor.a = parseFloat(values[3]);
+        hslColor.a = Number.parseFloat(values[3]);
     }
 
     return hslColor;
@@ -600,15 +599,15 @@ const hsvToColor: (color: string) => Color = (color) => {
     }
 
     const hsvColor: IHsvColor = {
-        h: parseInt(values[0], 10),
+        h: Number.parseInt(values[0], 10),
 
-        s: parseFloat(values[1]),
+        s: Number.parseFloat(values[1]),
 
-        v: parseFloat(values[2]),
+        v: Number.parseFloat(values[2]),
     };
 
     if (values.length > 3) {
-        hsvColor.a = parseFloat(values[3]);
+        hsvColor.a = Number.parseFloat(values[3]);
     }
 
     return hsvColor;

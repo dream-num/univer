@@ -85,7 +85,7 @@ export class SlideContainerUIController {
 
     /**
      * Change language
-     * @param {String} lang new language
+     * @param {string} lang new language
      *
      * e: {target: HTMLSelectElement } reference from  https://stackoverflow.com/a/48443771
      *

@@ -18,7 +18,7 @@ import { toDisposable } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 import { Subject } from 'rxjs';
 
-import { type IConfirmPartMethodOptions } from '../../views/components/confirm-part/interface';
+import type { IConfirmPartMethodOptions } from '../../views/components/confirm-part/interface';
 import type { IConfirmService } from './confirm.service';
 
 export class DesktopConfirmService implements IConfirmService {

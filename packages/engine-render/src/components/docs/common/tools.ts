@@ -299,7 +299,7 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
         const pageStartIndex = prePageStartIndex;
         const pageEndIndex = pageStartIndex;
         let preSectionStartIndex = pageStartIndex;
-        let maxContentWidth = -Infinity;
+        let maxContentWidth = Number.NEGATIVE_INFINITY;
         let contentHeight = 0;
 
         for (const section of sections) {
@@ -307,7 +307,7 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
             const sectionStartIndex = preSectionStartIndex;
             const sectionEndIndex = pageStartIndex;
             let preColumnStartIndex = sectionStartIndex;
-            let maxSectionHeight = -Infinity;
+            let maxSectionHeight = Number.NEGATIVE_INFINITY;
             let sectionWidth = 0;
 
             for (const column of columns) {
@@ -316,7 +316,7 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                 const columnEndIndex = columStartIndex;
                 let preLineStartIndex = columStartIndex;
                 let columnHeight = 0;
-                let maxColumnWidth = -Infinity;
+                let maxColumnWidth = Number.NEGATIVE_INFINITY;
                 let preLine: Nullable<IDocumentSkeletonLine> = null;
 
                 for (const line of lines) {
@@ -479,7 +479,6 @@ export function columnIterator(
     }
 }
 
-// eslint-disable-next-line max-lines-per-function
 export function getPositionHorizon(
     positionH: ObjectPositionH,
     column: IDocumentSkeletonColumn,
@@ -709,8 +708,8 @@ export function getFontCreateConfig(
         charSpace = 0,
         documentTextStyle = {},
         pageSize = {
-            width: Infinity,
-            height: Infinity,
+            width: Number.POSITIVE_INFINITY,
+            height: Number.POSITIVE_INFINITY,
         },
 
         marginRight = 0,
@@ -727,7 +726,7 @@ export function getFontCreateConfig(
         ...textStyle,
     };
 
-    const pageWidth = pageSize.width || Infinity - marginLeft - marginRight;
+    const pageWidth = pageSize.width || Number.POSITIVE_INFINITY - marginLeft - marginRight;
 
     const result = {
         fontStyle,

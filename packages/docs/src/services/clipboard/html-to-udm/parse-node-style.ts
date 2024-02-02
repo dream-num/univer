@@ -70,11 +70,11 @@ export function extractNodeStyle(node: HTMLElement): ITextStyle {
             }
 
             case 'font-size': {
-                const fontSize = parseInt(cssValue);
+                const fontSize = Number.parseInt(cssValue);
 
                 if (!Number.isNaN(fontSize)) {
                     // TODO: @JOCS, hand other CSS value unit, rem, em, pt, %
-                    docStyles.fs = /pt$/.test(cssValue) ? ptToPixel(fontSize) : fontSize;
+                    docStyles.fs = cssValue.endsWith('pt') ? ptToPixel(fontSize) : fontSize;
                 }
 
                 break;

@@ -15,7 +15,7 @@
  */
 
 import { compareToken } from '../../../basics/token';
-import { type BaseValueObject } from '../../../engine/value-object/base-value-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 
 export class Compare extends BaseFunction {

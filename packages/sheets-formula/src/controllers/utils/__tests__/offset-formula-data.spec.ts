@@ -50,8 +50,8 @@ describe('Utils offset formula data test', () => {
             const formulaData = {
                 [unitId]: {
                     [sheetId]: {
-                        '0': {
-                            '3': {
+                        0: {
+                            3: {
                                 f: '=SUM(A5)',
                             },
                         },
@@ -81,11 +81,11 @@ describe('Utils offset formula data test', () => {
             expect(newFormulaData).toStrictEqual({
                 [unitId]: {
                     [sheetId]: {
-                        '0': {
-                            '3': null,
+                        0: {
+                            3: null,
                         },
-                        '3': {
-                            '3': {
+                        3: {
+                            3: {
                                 f: '=SUM(A5)',
                             },
                         },
@@ -99,18 +99,18 @@ describe('Utils offset formula data test', () => {
             const arrayFormulaCellData = {
                 [unitId]: {
                     [sheetId]: {
-                        '0': {
-                            '3': {
+                        0: {
+                            3: {
                                 v: '1',
                             },
                         },
-                        '1': {
-                            '3': {
+                        1: {
+                            3: {
                                 v: '2',
                             },
                         },
-                        '2': {
-                            '3': {
+                        2: {
+                            3: {
                                 v: '3',
                             },
                         },
@@ -120,8 +120,8 @@ describe('Utils offset formula data test', () => {
             const arrayFormulaRange = {
                 [unitId]: {
                     [sheetId]: {
-                        '0': {
-                            '3': {
+                        0: {
+                            3: {
                                 startRow: 0,
                                 startColumn: 3,
                                 endRow: 2,
@@ -161,17 +161,17 @@ describe('Utils offset formula data test', () => {
             expect(newFormulaData).toStrictEqual({
                 [unitId]: {
                     [sheetId]: {
-                        '0': {
-                            '3': null,
+                        0: {
+                            3: null,
                         },
-                        '1': {
-                            '3': null,
+                        1: {
+                            3: null,
                         },
-                        '2': {
-                            '3': null,
+                        2: {
+                            3: null,
                         },
-                        '3': {
-                            '3': {
+                        3: {
+                            3: {
                                 v: '1',
                             },
                         },
@@ -185,23 +185,23 @@ describe('Utils offset formula data test', () => {
             const arrayFormulaCellData = {
                 [unitId]: {
                     [sheetId]: {
-                        '0': {
-                            '3': {
+                        0: {
+                            3: {
                                 v: '1',
                             },
                         },
-                        '1': {
-                            '3': {
+                        1: {
+                            3: {
                                 v: '2',
                             },
                         },
-                        '2': {
-                            '3': {
+                        2: {
+                            3: {
                                 v: '3',
                             },
                         },
-                        '3': {
-                            '3': {
+                        3: {
+                            3: {
                                 v: '4',
                             },
                         },
@@ -211,8 +211,8 @@ describe('Utils offset formula data test', () => {
             const arrayFormulaRange = {
                 [unitId]: {
                     [sheetId]: {
-                        '0': {
-                            '3': {
+                        0: {
+                            3: {
                                 startRow: 0,
                                 startColumn: 3,
                                 endRow: 2,
@@ -252,23 +252,23 @@ describe('Utils offset formula data test', () => {
             expect(newFormulaData).toStrictEqual({
                 [unitId]: {
                     [sheetId]: {
-                        '0': {
-                            '3': {
+                        0: {
+                            3: {
                                 v: '1',
                             },
                         },
-                        '1': {
-                            '3': {
+                        1: {
+                            3: {
                                 v: '2',
                             },
                         },
-                        '2': {
-                            '3': {
+                        2: {
+                            3: {
                                 v: '3',
                             },
                         },
-                        '3': {
-                            '3': null,
+                        3: {
+                            3: null,
                         },
                     },
                 },
@@ -280,8 +280,8 @@ describe('Utils offset formula data test', () => {
             const formulaData = {
                 [unitId]: {
                     [sheetId]: {
-                        '0': {
-                            '3': {
+                        0: {
+                            3: {
                                 f: '=SUM(A5)',
                             },
                         },
@@ -344,8 +344,8 @@ describe('Utils offset formula data test', () => {
             expect(newFormulaData).toStrictEqual({
                 [unitId]: {
                     [sheetId]: {
-                        '3': {
-                            '3': {
+                        3: {
+                            3: {
                                 f: '=SUM(A5)',
                             },
                         },
@@ -359,8 +359,8 @@ describe('Utils offset formula data test', () => {
             const formulaData = {
                 [unitId]: {
                     [sheetId]: {
-                        '0': {
-                            '0': {
+                        0: {
+                            0: {
                                 f: '=SUM(E2)',
                             },
                         },
@@ -423,8 +423,8 @@ describe('Utils offset formula data test', () => {
             expect(newFormulaData).toStrictEqual({
                 [unitId]: {
                     [sheetId]: {
-                        '0': {
-                            '3': {
+                        0: {
+                            3: {
                                 f: '=SUM(E2)',
                             },
                         },
@@ -438,13 +438,13 @@ describe('Utils offset formula data test', () => {
             const formulaData = {
                 [unitId]: {
                     [sheetId]: {
-                        '0': {
-                            '3': {
+                        0: {
+                            3: {
                                 f: '=SUM(A1)',
                             },
                         },
-                        '1': {
-                            '3': {
+                        1: {
+                            3: {
                                 f: '=SUM(A3)',
                             },
                         },
@@ -471,13 +471,13 @@ describe('Utils offset formula data test', () => {
             expect(newFormulaData).toStrictEqual({
                 [unitId]: {
                     [sheetId]: {
-                        '0': {
-                            '3': {
+                        0: {
+                            3: {
                                 f: '=SUM(A1)',
                             },
                         },
-                        '2': {
-                            '3': {
+                        2: {
+                            3: {
                                 f: '=SUM(A3)',
                             },
                         },
@@ -491,20 +491,20 @@ describe('Utils offset formula data test', () => {
             const arrayFormulaCellData = {
                 [unitId]: {
                     [sheetId]: {
-                        '4': {
-                            '0': {
+                        4: {
+                            0: {
                                 v: 1,
                                 t: 2,
                             },
                         },
-                        '5': {
-                            '0': {
+                        5: {
+                            0: {
                                 v: 2,
                                 t: 2,
                             },
                         },
-                        '6': {
-                            '0': {
+                        6: {
+                            0: {
                                 v: 3,
                                 t: 2,
                             },
@@ -532,8 +532,8 @@ describe('Utils offset formula data test', () => {
             const arrayFormulaRange = {
                 [unitId]: {
                     [sheetId]: {
-                        '4': {
-                            '0': {
+                        4: {
+                            0: {
                                 startRow: 4,
                                 startColumn: 0,
                                 endRow: 6,
@@ -571,14 +571,14 @@ describe('Utils offset formula data test', () => {
             expect(newFormulaData).toStrictEqual({
                 [unitId]: {
                     [sheetId]: {
-                        '4': {
-                            '0': null,
+                        4: {
+                            0: null,
                         },
-                        '5': {
-                            '0': null,
+                        5: {
+                            0: null,
                         },
-                        '6': {
-                            '0': null,
+                        6: {
+                            0: null,
                         },
                     },
                 },
@@ -590,8 +590,8 @@ describe('Utils offset formula data test', () => {
             const arrayFormulaRange = {
                 [unitId]: {
                     [sheetId]: {
-                        '4': {
-                            '0': {
+                        4: {
+                            0: {
                                 startRow: 4,
                                 startColumn: 0,
                                 endRow: 6,
@@ -621,14 +621,14 @@ describe('Utils offset formula data test', () => {
             expect(newFormulaData).toStrictEqual({
                 [unitId]: {
                     [sheetId]: {
-                        '4': {
-                            '0': null,
+                        4: {
+                            0: null,
                         },
-                        '5': {
-                            '0': null,
+                        5: {
+                            0: null,
                         },
-                        '6': {
-                            '0': null,
+                        6: {
+                            0: null,
                         },
                     },
                 },
@@ -640,11 +640,11 @@ describe('Utils offset formula data test', () => {
             const formulaData = {
                 [unitId]: {
                     [sheetId]: {
-                        '0': {
-                            '2': {
+                        0: {
+                            2: {
                                 f: '=SUM(C2)',
                             },
-                            '3': {
+                            3: {
                                 f: '=SUM(D2)',
                             },
                         },
@@ -671,11 +671,11 @@ describe('Utils offset formula data test', () => {
             expect(newFormulaData).toStrictEqual({
                 [unitId]: {
                     [sheetId]: {
-                        '0': {
-                            '3': {
+                        0: {
+                            3: {
                                 f: '=SUM(C2)',
                             },
-                            '4': {
+                            4: {
                                 f: '=SUM(D2)',
                             },
                         },
@@ -689,11 +689,11 @@ describe('Utils offset formula data test', () => {
             const formulaData = {
                 [unitId]: {
                     [sheetId]: {
-                        '0': {
-                            '2': {
+                        0: {
+                            2: {
                                 f: '=SUM(B2)',
                             },
-                            '3': {
+                            3: {
                                 f: '=SUM(C2)',
                             },
                         },
@@ -718,11 +718,11 @@ describe('Utils offset formula data test', () => {
             expect(newFormulaData).toStrictEqual({
                 [unitId]: {
                     [sheetId]: {
-                        '0': {
-                            '3': {
+                        0: {
+                            3: {
                                 f: '=SUM(B2)',
                             },
-                            '4': {
+                            4: {
                                 f: '=SUM(C2)',
                             },
                         },
@@ -736,13 +736,13 @@ describe('Utils offset formula data test', () => {
             const formulaData = {
                 [unitId]: {
                     [sheetId]: {
-                        '0': {
-                            '3': {
+                        0: {
+                            3: {
                                 f: '=SUM(A2)',
                             },
                         },
-                        '1': {
-                            '3': {
+                        1: {
+                            3: {
                                 f: '=SUM(A3)',
                             },
                         },
@@ -768,13 +768,13 @@ describe('Utils offset formula data test', () => {
                 [unitId]: {
                     [sheetId]: {
                         // '0': {},
-                        '1': {
-                            '3': {
+                        1: {
+                            3: {
                                 f: '=SUM(A2)',
                             },
                         },
-                        '2': {
-                            '3': {
+                        2: {
+                            3: {
                                 f: '=SUM(A3)',
                             },
                         },
@@ -788,13 +788,13 @@ describe('Utils offset formula data test', () => {
             const formulaData = {
                 [unitId]: {
                     [sheetId]: {
-                        '1': {
-                            '3': {
+                        1: {
+                            3: {
                                 f: '=SUM(A1)',
                             },
                         },
-                        '2': {
-                            '3': {
+                        2: {
+                            3: {
                                 f: '=SUM(A2)',
                             },
                         },
@@ -818,13 +818,13 @@ describe('Utils offset formula data test', () => {
             expect(newFormulaData).toStrictEqual({
                 [unitId]: {
                     [sheetId]: {
-                        '0': {
-                            '3': {
+                        0: {
+                            3: {
                                 f: '=SUM(A1)',
                             },
                         },
-                        '1': {
-                            '3': {
+                        1: {
+                            3: {
                                 f: '=SUM(A2)',
                             },
                         },
@@ -838,20 +838,20 @@ describe('Utils offset formula data test', () => {
             const arrayFormulaCellData = {
                 [unitId]: {
                     [sheetId]: {
-                        '4': {
-                            '0': {
+                        4: {
+                            0: {
                                 v: 1,
                                 t: 2,
                             },
                         },
-                        '5': {
-                            '0': {
+                        5: {
+                            0: {
                                 v: 2,
                                 t: 2,
                             },
                         },
-                        '6': {
-                            '0': {
+                        6: {
+                            0: {
                                 v: 3,
                                 t: 2,
                             },
@@ -876,8 +876,8 @@ describe('Utils offset formula data test', () => {
             const arrayFormulaRange = {
                 [unitId]: {
                     [sheetId]: {
-                        '4': {
-                            '0': {
+                        4: {
+                            0: {
                                 startRow: 4,
                                 startColumn: 0,
                                 endRow: 6,
@@ -915,14 +915,14 @@ describe('Utils offset formula data test', () => {
             expect(newFormulaData).toStrictEqual({
                 [unitId]: {
                     [sheetId]: {
-                        '4': {
-                            '0': null,
+                        4: {
+                            0: null,
                         },
-                        '5': {
-                            '0': null,
+                        5: {
+                            0: null,
                         },
-                        '6': {
-                            '0': null,
+                        6: {
+                            0: null,
                         },
                     },
                 },
@@ -934,8 +934,8 @@ describe('Utils offset formula data test', () => {
             const arrayFormulaRange = {
                 [unitId]: {
                     [sheetId]: {
-                        '4': {
-                            '0': {
+                        4: {
+                            0: {
                                 startRow: 4,
                                 startColumn: 0,
                                 endRow: 6,
@@ -962,14 +962,14 @@ describe('Utils offset formula data test', () => {
             expect(newFormulaData).toStrictEqual({
                 [unitId]: {
                     [sheetId]: {
-                        '4': {
-                            '0': null,
+                        4: {
+                            0: null,
                         },
-                        '5': {
-                            '0': null,
+                        5: {
+                            0: null,
                         },
-                        '6': {
-                            '0': null,
+                        6: {
+                            0: null,
                         },
                     },
                 },
@@ -981,11 +981,11 @@ describe('Utils offset formula data test', () => {
             const formulaData = {
                 [unitId]: {
                     [sheetId]: {
-                        '0': {
-                            '2': {
+                        0: {
+                            2: {
                                 f: '=SUM(C2)',
                             },
-                            '3': {
+                            3: {
                                 f: '=SUM(D2)',
                             },
                         },
@@ -1009,11 +1009,11 @@ describe('Utils offset formula data test', () => {
             expect(newFormulaData).toStrictEqual({
                 [unitId]: {
                     [sheetId]: {
-                        '0': {
-                            '1': {
+                        0: {
+                            1: {
                                 f: '=SUM(C2)',
                             },
-                            '2': {
+                            2: {
                                 f: '=SUM(D2)',
                             },
                         },
@@ -1027,16 +1027,16 @@ describe('Utils offset formula data test', () => {
             const arrayFormulaCellData = {
                 [unitId]: {
                     [sheetId]: {
-                        '0': {
-                            '4': {
+                        0: {
+                            4: {
                                 v: 1,
                                 t: 2,
                             },
-                            '5': {
+                            5: {
                                 v: 2,
                                 t: 2,
                             },
-                            '6': {
+                            6: {
                                 v: 3,
                                 t: 2,
                             },
@@ -1061,8 +1061,8 @@ describe('Utils offset formula data test', () => {
             const arrayFormulaRange = {
                 [unitId]: {
                     [sheetId]: {
-                        '0': {
-                            '4': {
+                        0: {
+                            4: {
                                 startRow: 0,
                                 startColumn: 4,
                                 endRow: 0,
@@ -1100,10 +1100,10 @@ describe('Utils offset formula data test', () => {
             expect(newFormulaData).toStrictEqual({
                 [unitId]: {
                     [sheetId]: {
-                        '0': {
-                            '4': null,
-                            '5': null,
-                            '6': null,
+                        0: {
+                            4: null,
+                            5: null,
+                            6: null,
                         },
                     },
                 },
@@ -1115,8 +1115,8 @@ describe('Utils offset formula data test', () => {
             const arrayFormulaRange = {
                 [unitId]: {
                     [sheetId]: {
-                        '0': {
-                            '4': {
+                        0: {
+                            4: {
                                 startRow: 0,
                                 startColumn: 4,
                                 endRow: 0,
@@ -1143,10 +1143,10 @@ describe('Utils offset formula data test', () => {
             expect(newFormulaData).toStrictEqual({
                 [unitId]: {
                     [sheetId]: {
-                        '0': {
-                            '4': null,
-                            '5': null,
-                            '6': null,
+                        0: {
+                            4: null,
+                            5: null,
+                            6: null,
                         },
                     },
                 },
@@ -1158,13 +1158,13 @@ describe('Utils offset formula data test', () => {
             const formulaData = {
                 [unitId]: {
                     [sheetId]: {
-                        '1': {
-                            '3': {
+                        1: {
+                            3: {
                                 f: '=SUM(A2)',
                             },
                         },
-                        '2': {
-                            '3': {
+                        2: {
+                            3: {
                                 f: '=SUM(A3)',
                             },
                         },
@@ -1189,13 +1189,13 @@ describe('Utils offset formula data test', () => {
             expect(newFormulaData).toStrictEqual({
                 [unitId]: {
                     [sheetId]: {
-                        '0': {
-                            '3': {
+                        0: {
+                            3: {
                                 f: '=SUM(A2)',
                             },
                         },
-                        '1': {
-                            '3': {
+                        1: {
+                            3: {
                                 f: '=SUM(A3)',
                             },
                         },
@@ -1210,11 +1210,11 @@ describe('Utils offset formula data test', () => {
             const formulaData = {
                 [unitId]: {
                     [sheetId]: {
-                        '0': {
-                            '2': {
+                        0: {
+                            2: {
                                 f: '=SUM(B2)',
                             },
-                            '3': {
+                            3: {
                                 f: '=SUM(C2)',
                             },
                         },
@@ -1239,11 +1239,11 @@ describe('Utils offset formula data test', () => {
             expect(newFormulaData).toStrictEqual({
                 [unitId]: {
                     [sheetId]: {
-                        '0': {
-                            '1': {
+                        0: {
+                            1: {
                                 f: '=SUM(B2)',
                             },
-                            '2': {
+                            2: {
                                 f: '=SUM(C2)',
                             },
                         },
@@ -1259,14 +1259,14 @@ describe('Utils offset formula data test', () => {
             const arrayFormulaData = {
                 [unitId]: {
                     [sheetId]: {
-                        '7': {
-                            '0': {
+                        7: {
+                            0: {
                                 startRow: 6,
                                 startColumn: 0,
                                 endRow: 9,
                                 endColumn: 3,
                             },
-                            '5': {
+                            5: {
                                 startRow: 6,
                                 startColumn: 5,
                                 endRow: 9,
@@ -1294,14 +1294,14 @@ describe('Utils offset formula data test', () => {
             expect(newArrayFormulaData).toStrictEqual({
                 [unitId]: {
                     [sheetId]: {
-                        '7': {
-                            '0': {
+                        7: {
+                            0: {
                                 startRow: 7,
                                 startColumn: 0,
                                 endRow: 10,
                                 endColumn: 3,
                             },
-                            '5': {
+                            5: {
                                 startRow: 7,
                                 startColumn: 5,
                                 endRow: 10,

@@ -30,7 +30,7 @@ export const PAGE3_RICHTEXT_1 = {
         rich: {
             id: 'd',
             body: {
-                dataStream: `Digital Immune System\rApplied Observability\r\n`,
+                dataStream: 'Digital Immune System\rApplied Observability\r\n',
                 textRuns: [
                     {
                         st: 0,

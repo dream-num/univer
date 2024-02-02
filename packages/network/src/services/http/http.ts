@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-/* eslint-disable no-magic-numbers */
+ 
 export type HTTPResponseType = 'arraybuffer' | 'blob' | 'json' | 'text';
 
 export const SuccessStatusCodeLowerBound = 200;

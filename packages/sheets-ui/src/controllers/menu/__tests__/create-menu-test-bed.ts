@@ -27,8 +27,8 @@ const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
         sheet1: {
             id: 'sheet1',
             cellData: {
-                '0': {
-                    '0': {
+                0: {
+                    0: {
                         v: 'A1',
                     },
                 },

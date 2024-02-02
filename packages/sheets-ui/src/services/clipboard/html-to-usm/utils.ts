@@ -37,13 +37,13 @@ export function getParagraphStyle(el: HTMLElement): Nullable<IParagraphStyle> {
 
         switch (cssRule) {
             case 'margin-top': {
-                const marginTopValue = parseInt(cssValue);
+                const marginTopValue = Number.parseInt(cssValue);
                 paragraphStyle.spaceAbove = /pt/.test(cssValue) ? ptToPixel(marginTopValue) : marginTopValue;
                 break;
             }
 
             case 'margin-bottom': {
-                const marginBottomValue = parseInt(cssValue);
+                const marginBottomValue = Number.parseInt(cssValue);
                 paragraphStyle.spaceBelow = /pt/.test(cssValue) ? ptToPixel(marginBottomValue) : marginBottomValue;
 
                 break;

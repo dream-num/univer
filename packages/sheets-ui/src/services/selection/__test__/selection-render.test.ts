@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable no-magic-numbers */
 import { LocaleService, ThemeService } from '@univerjs/core';
 import type { CURSOR_TYPE, IMouseEvent } from '@univerjs/engine-render';
 import {

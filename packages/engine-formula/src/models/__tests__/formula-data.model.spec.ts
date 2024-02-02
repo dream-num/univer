@@ -29,25 +29,25 @@ const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
         sheet1: {
             id: 'sheet1',
             cellData: {
-                '0': {
-                    '3': {
+                0: {
+                    3: {
                         f: '=SUM(A1)',
                         si: '3e4r5t',
                     },
                 },
-                '1': {
-                    '3': {
+                1: {
+                    3: {
                         f: '=SUM(A2)',
                         si: 'OSPtzm',
                     },
                 },
-                '2': {
-                    '3': {
+                2: {
+                    3: {
                         si: 'OSPtzm',
                     },
                 },
-                '3': {
-                    '3': {
+                3: {
+                    3: {
                         si: 'OSPtzm',
                     },
                 },
@@ -103,8 +103,8 @@ describe('Test formula data model', () => {
                 const unitId = 'test';
                 const sheetId = 'sheet1';
                 const cellValue = {
-                    '1': {
-                        '3': {
+                    1: {
+                        3: {
                             v: null,
                             p: null,
                             f: null,
@@ -116,20 +116,20 @@ describe('Test formula data model', () => {
                 const result = {
                     [unitId]: {
                         [sheetId]: {
-                            '0': {
-                                '3': {
+                            0: {
+                                3: {
                                     f: '=SUM(A1)',
                                     si: '3e4r5t',
                                 },
                             },
-                            '2': {
-                                '3': {
+                            2: {
+                                3: {
                                     f: '=SUM(A3)',
                                     si: 'OSPtzm',
                                 },
                             },
-                            '3': {
-                                '3': {
+                            3: {
+                                3: {
                                     f: '=SUM(A3)',
                                     si: 'OSPtzm',
                                     x: 0,
@@ -152,24 +152,24 @@ describe('Test formula data model', () => {
                 const unitId = 'test';
                 const sheetId = 'sheet1';
                 const cellValue = {
-                    '0': {
-                        '3': {
+                    0: {
+                        3: {
                             v: null,
                             p: null,
                             f: null,
                             si: null,
                         },
                     },
-                    '1': {
-                        '3': {
+                    1: {
+                        3: {
                             v: null,
                             p: null,
                             f: null,
                             si: null,
                         },
                     },
-                    '2': {
-                        '3': {
+                    2: {
+                        3: {
                             v: null,
                             p: null,
                             f: null,
@@ -181,8 +181,8 @@ describe('Test formula data model', () => {
                 const result = {
                     [unitId]: {
                         [sheetId]: {
-                            '3': {
-                                '3': {
+                            3: {
+                                3: {
                                     f: '=SUM(A4)',
                                     si: 'OSPtzm',
                                 },
@@ -203,8 +203,8 @@ describe('Test formula data model', () => {
                 const unitId = 'test';
                 const sheetId = 'sheet1';
                 const cellValue = {
-                    '3': {
-                        '3': {
+                    3: {
+                        3: {
                             v: null,
                             p: null,
                             f: null,
@@ -216,20 +216,20 @@ describe('Test formula data model', () => {
                 const result = {
                     [unitId]: {
                         [sheetId]: {
-                            '0': {
-                                '3': {
+                            0: {
+                                3: {
                                     f: '=SUM(A1)',
                                     si: '3e4r5t',
                                 },
                             },
-                            '1': {
-                                '3': {
+                            1: {
+                                3: {
                                     f: '=SUM(A2)',
                                     si: 'OSPtzm',
                                 },
                             },
-                            '2': {
-                                '3': {
+                            2: {
+                                3: {
                                     f: '=SUM(A2)',
                                     si: 'OSPtzm',
                                     x: 0,
@@ -255,8 +255,8 @@ describe('Test formula data model', () => {
                 formulaDataModel.setArrayFormulaRange({
                     [unitId]: {
                         [sheetId]: {
-                            '0': {
-                                '3': {
+                            0: {
+                                3: {
                                     startRow: 0,
                                     startColumn: 3,
                                     endRow: 1,
@@ -268,8 +268,8 @@ describe('Test formula data model', () => {
                 });
 
                 const cellValue = {
-                    '0': {
-                        '3': {
+                    0: {
+                        3: {
                             v: null,
                             p: null,
                             f: null,
@@ -298,8 +298,8 @@ describe('Test formula data model', () => {
                 formulaDataModel.setArrayFormulaRange({
                     [unitId]: {
                         [sheetId]: {
-                            '0': {
-                                '3': {
+                            0: {
+                                3: {
                                     startRow: 0,
                                     startColumn: 3,
                                     endRow: 1,
@@ -313,13 +313,13 @@ describe('Test formula data model', () => {
                 formulaDataModel.setArrayFormulaCellData({
                     [unitId]: {
                         [sheetId]: {
-                            '0': {
-                                '3': {
+                            0: {
+                                3: {
                                     v: 1,
                                 },
                             },
-                            '1': {
-                                '3': {
+                            1: {
+                                3: {
                                     v: 2,
                                 },
                             },
@@ -328,8 +328,8 @@ describe('Test formula data model', () => {
                 });
 
                 const cellValue = {
-                    '0': {
-                        '3': {
+                    0: {
+                        3: {
                             v: null,
                             p: null,
                             f: null,
@@ -362,34 +362,34 @@ describe('Test formula data model', () => {
             };
 
             const cellValue = {
-                '0': {
-                    '0': {
+                0: {
+                    0: {
                         v: 1,
                     },
-                    '1': {
+                    1: {
                         v: 2,
                     },
-                    '2': {
+                    2: {
                         v: 3,
                     },
-                    '3': {
+                    3: {
                         v: 2,
                         f: '=SUM(A1)',
                         si: '3e4r5t',
                     },
                 },
-                '1': {
-                    '0': {
+                1: {
+                    0: {
                         v: 4,
                     },
                 },
-                '2': {
-                    '0': {
+                2: {
+                    0: {
                         v: 44,
                     },
                 },
-                '3': {
-                    '0': {
+                3: {
+                    0: {
                         v: 444,
                     },
                 },
@@ -400,8 +400,8 @@ describe('Test formula data model', () => {
             const result = {
                 [unitId]: {
                     [sheetId]: {
-                        '0': {
-                            '3': {
+                        0: {
+                            3: {
                                 f: '=SUM(A1)',
                                 si: '3e4r5t',
                             },

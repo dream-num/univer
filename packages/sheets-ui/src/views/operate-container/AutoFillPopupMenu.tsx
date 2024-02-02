@@ -182,7 +182,7 @@ export const AutoFillPopupMenu: React.FC<{}> = () => {
             <Dropdown
                 placement="bottomLeft"
                 trigger={['click']}
-                overlay={
+                overlay={(
                     <ul className={styles.autoFillPopupMenu}>
                         {availableMenu.map((item) => (
                             <li
@@ -199,7 +199,7 @@ export const AutoFillPopupMenu: React.FC<{}> = () => {
                             </li>
                         ))}
                     </ul>
-                }
+                )}
                 visible={visible}
                 onVisibleChange={onVisibleChange}
             >

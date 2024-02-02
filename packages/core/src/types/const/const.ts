@@ -186,7 +186,7 @@ export const DEFAULT_STYLES = {
          */
         v: BooleanNumber.FALSE,
     },
-    /** *
+    /**
      * textDirection
      */
     td: TextDirection.UNSPECIFIED,

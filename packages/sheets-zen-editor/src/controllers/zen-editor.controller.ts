@@ -257,7 +257,7 @@ export class ZenEditorController extends RxDisposable {
         const parent = scene?.getParent();
 
         const { width: docsWidth, height: docsHeight, pageMarginLeft, pageMarginTop } = docsComponent;
-        if (parent == null || docsWidth === Infinity || docsHeight === Infinity) {
+        if (parent == null || docsWidth === Number.POSITIVE_INFINITY || docsHeight === Number.POSITIVE_INFINITY) {
             return;
         }
         const { width: engineWidth, height: engineHeight } = parent;
@@ -269,7 +269,7 @@ export class ZenEditorController extends RxDisposable {
 
         let sceneHeight = 0;
 
-        let scrollToX = Infinity;
+        let scrollToX = Number.POSITIVE_INFINITY;
 
         const { scaleX, scaleY } = scene.getAncestorScale();
 
@@ -299,7 +299,7 @@ export class ZenEditorController extends RxDisposable {
         docsComponent.translate(docsLeft, docsTop);
 
         const viewport = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
-        if (scrollToX !== Infinity && viewport != null) {
+        if (scrollToX !== Number.POSITIVE_INFINITY && viewport != null) {
             const actualX = viewport.getBarScroll(scrollToX, 0).x;
             viewport.scrollTo({
                 x: actualX,

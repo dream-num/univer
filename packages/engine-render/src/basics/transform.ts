@@ -69,8 +69,8 @@ export class Transform {
      * Transform point
      * @method
      * @name UniverSheet.Transform#point
-     * @param {Object} point 2D point(x, y)
-     * @returns {Object} 2D point(x, y)
+     * @param {object} point 2D point(x, y)
+     * @returns {object} 2D point(x, y)
      */
     applyPoint(point: Vector2, ignoreOffset: boolean = false): Vector2 {
         const m = this._m;
@@ -88,8 +88,8 @@ export class Transform {
      * Apply translation
      * @method
      * @name universheet.Transform#translate
-     * @param {Number} x
-     * @param {Number} y
+     * @param {number} x
+     * @param {number} y
      * @returns {UniverSheet.Transform}
      */
     translate(x: number, y: number) {
@@ -102,8 +102,8 @@ export class Transform {
      * Apply scale
      * @method
      * @name UniverSheet.Transform#scale
-     * @param {Number} sx
-     * @param {Number} sy
+     * @param {number} sx
+     * @param {number} sy
      * @returns {UniverSheet.Transform}
      */
     scale(sx: number, sy: number) {
@@ -118,7 +118,7 @@ export class Transform {
      * Apply rotation
      * @method
      * @name UniverSheet.Transform#rotate
-     * @param {Number} Degree  Angle in Degree
+     * @param {number} Degree  Angle in Degree
      * @returns {UniverSheet.Transform}
      */
     rotate(deg: number) {
@@ -140,7 +140,7 @@ export class Transform {
      * Returns the translation
      * @method
      * @name UniverSheet.Transform#getTranslation
-     * @returns {Object} 2D point(x, y)
+     * @returns {object} 2D point(x, y)
      */
     getTranslation() {
         return {
@@ -153,8 +153,8 @@ export class Transform {
      * Apply skew
      * @method
      * @name UniverSheet.Transform#skew
-     * @param {Number} sx
-     * @param {Number} sy
+     * @param {number} sx
+     * @param {number} sy
      * @returns {UniverSheet.Transform}
      */
     skew(sx: number, sy: number) {
@@ -358,14 +358,14 @@ export class Transform {
      * transformations from an object that is not enLived yet.
      * is called DimensionsTransformMatrix because those properties are the one that influence
      * the size of the resulting box of the object.
-     * @param  {Object} options
-     * @param  {Number} [options.scaleX]
-     * @param  {Number} [options.scaleY]
-     * @param  {Boolean} [options.flipX]
-     * @param  {Boolean} [options.flipY]
-     * @param  {Number} [options.skewX]
-     * @param  {Number} [options.skewX]
-     * @return {Number[]} transform matrix
+     * @param  {object} options
+     * @param  {number} [options.scaleX]
+     * @param  {number} [options.scaleY]
+     * @param  {boolean} [options.flipX]
+     * @param  {boolean} [options.flipY]
+     * @param  {number} [options.skewX]
+     * @param  {number} [options.skewX]
+     * @return {number[]} transform matrix
      */
     private _calcDimensionsMatrix(options: ITransformState) {
         const scaleX = options.scaleX ?? 1;

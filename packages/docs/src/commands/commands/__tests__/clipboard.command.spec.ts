@@ -160,7 +160,7 @@ describe('test cases in clipboard', () => {
 
     describe('Test paste in multiple ranges', () => {
         it('Should paste content to each selection ranges', async () => {
-            expect(getTextByPosition(0, 5)).toBe(`What’`);
+            expect(getTextByPosition(0, 5)).toBe('What’');
             expect(getFormatValueAt('bl', 0)).toBe(BooleanNumber.FALSE);
 
             const commandParams: IInnerPasteCommandParams = {
@@ -182,7 +182,7 @@ describe('test cases in clipboard', () => {
 
             await commandService.executeCommand(InnerPasteCommand.id, commandParams);
 
-            expect(getTextByPosition(0, 6)).toBe(`univer`);
+            expect(getTextByPosition(0, 6)).toBe('univer');
             expect(getTextByPosition(11, 17)).toBe('univer');
             expect(getFormatValueAt('bl', 0)).toBe(BooleanNumber.TRUE);
 
@@ -192,7 +192,7 @@ describe('test cases in clipboard', () => {
 
     describe('Test cut in multiple ranges', () => {
         it('Should cut content to each selection ranges', async () => {
-            expect(getTextByPosition(0, 5)).toBe(`What’`);
+            expect(getTextByPosition(0, 5)).toBe('What’');
             expect(getFormatValueAt('bl', 0)).toBe(BooleanNumber.FALSE);
 
             const commandParams: IInnerCutCommandParams = {
@@ -202,7 +202,7 @@ describe('test cases in clipboard', () => {
 
             await commandService.executeCommand(CutContentCommand.id, commandParams);
 
-            expect(getTextByPosition(0, 5)).toBe(`s New`);
+            expect(getTextByPosition(0, 5)).toBe('s New');
 
             expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
         });

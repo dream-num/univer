@@ -472,7 +472,7 @@ export class Spreadsheet extends SheetComponent {
 
         ctx.beginPath();
         ctx.lineWidth = 1;
-        // eslint-disable-next-line no-magic-numbers
+
         ctx.strokeStyle = getColor([212, 212, 212]);
 
         const width = columnTotalWidth;

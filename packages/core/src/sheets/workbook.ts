@@ -113,7 +113,7 @@ export class Workbook extends Disposable {
         return Tools.deepClone(this._snapshot);
     }
 
-    static isIRangeType(range: IRangeType | IRangeType[]): Boolean {
+    static isIRangeType(range: IRangeType | IRangeType[]): boolean {
         return typeof range === 'string' || 'startRow' in range || 'row' in range;
     }
 
@@ -420,7 +420,7 @@ export class Workbook extends Disposable {
             rangeTxt = txt;
         }
         if (rangeTxt.indexOf(':') === -1) {
-            const row = parseInt(rangeTxt.replace(/[^0-9]/g, ''), 10) - 1;
+            const row = Number.parseInt(rangeTxt.replace(/[^0-9]/g, ''), 10) - 1;
             const col = Tools.ABCatNum(rangeTxt.replace(/[^A-Za-z]/g, ''));
 
             if (!Number.isNaN(row) && !Number.isNaN(col)) {
@@ -443,8 +443,8 @@ export class Workbook extends Disposable {
         const col: IColumnStartEndData = [0, 0];
         const maxRow = this.getSheetBySheetName(sheetTxt)?.getMaxRows() || this.getActiveSheet()?.getMaxRows();
         const maxCol = this.getSheetBySheetName(sheetTxt)?.getMaxColumns() || this.getActiveSheet()?.getMaxColumns();
-        row[0] = parseInt(rangeTxt[0].replace(/[^0-9]/g, ''), 10) - 1;
-        row[1] = parseInt(rangeTxt[1].replace(/[^0-9]/g, ''), 10) - 1;
+        row[0] = Number.parseInt(rangeTxt[0].replace(/[^0-9]/g, ''), 10) - 1;
+        row[1] = Number.parseInt(rangeTxt[1].replace(/[^0-9]/g, ''), 10) - 1;
 
         if (Number.isNaN(row[0])) {
             row[0] = 0;

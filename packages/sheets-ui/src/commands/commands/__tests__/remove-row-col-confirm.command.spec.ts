@@ -107,7 +107,7 @@ describe('Test remove row col confirm commands', () => {
             });
             selectionManager.add([
                 {
-                    range: { startRow: 1, startColumn: NaN, endRow: 1, endColumn: NaN, rangeType: RANGE_TYPE.ROW },
+                    range: { startRow: 1, startColumn: Number.NaN, endRow: 1, endColumn: Number.NaN, rangeType: RANGE_TYPE.ROW },
                     primary: null,
                     style: null,
                 },
@@ -134,7 +134,7 @@ describe('Test remove row col confirm commands', () => {
             });
             selectionManager.add([
                 {
-                    range: { startRow: 0, startColumn: NaN, endRow: 999, endColumn: NaN, rangeType: RANGE_TYPE.ROW },
+                    range: { startRow: 0, startColumn: Number.NaN, endRow: 999, endColumn: Number.NaN, rangeType: RANGE_TYPE.ROW },
                     primary: null,
                     style: null,
                 },
@@ -163,7 +163,7 @@ describe('Test remove row col confirm commands', () => {
             });
             selectionManager.add([
                 {
-                    range: { startRow: NaN, startColumn: 1, endRow: NaN, endColumn: 1, rangeType: RANGE_TYPE.COLUMN },
+                    range: { startRow: Number.NaN, startColumn: 1, endRow: Number.NaN, endColumn: 1, rangeType: RANGE_TYPE.COLUMN },
                     primary: null,
                     style: null,
                 },
@@ -190,7 +190,7 @@ describe('Test remove row col confirm commands', () => {
             });
             selectionManager.add([
                 {
-                    range: { startRow: NaN, startColumn: 0, endRow: NaN, endColumn: 19, rangeType: RANGE_TYPE.COLUMN },
+                    range: { startRow: Number.NaN, startColumn: 0, endRow: Number.NaN, endColumn: 19, rangeType: RANGE_TYPE.COLUMN },
                     primary: null,
                     style: null,
                 },

@@ -28,16 +28,16 @@ const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
         sheet1: {
             id: 'sheet1',
             cellData: {
-                '0': {
-                    '0': {
+                0: {
+                    0: {
                         v: 1,
                     },
-                    '1': {
+                    1: {
                         f: '=SUM(A1)',
                     },
                 },
-                '1': {
-                    '1': {
+                1: {
+                    1: {
                         v: 1,
                     },
                 },

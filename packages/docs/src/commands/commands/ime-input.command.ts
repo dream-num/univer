@@ -50,7 +50,7 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
             id: RichTextEditingMutation.id,
             params: {
                 unitId,
-                mutations: [],
+                actions: [],
             },
         };
 
@@ -85,7 +85,7 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
             segmentId,
         });
 
-        doMutation.params!.mutations = textX.serialize();
+        doMutation.params!.actions = textX.serialize();
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,

@@ -53,4 +53,10 @@ export default {
     },
     'common-edit': 'Common Editing Shortcuts',
     'toggle-shortcut-panel': 'Toggle Shortcut Panel',
+    clipboard: {
+        authentication: {
+            title: 'Permission Denied',
+            content: 'Please allow Univer to access your clipboard.',
+        },
+    },
 };

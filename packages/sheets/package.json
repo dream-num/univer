@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets",
-    "version": "0.1.0-beta.3",
+    "version": "0.1.0-beta.4",
     "private": false,
     "description": "UniverSheet normal base-sheets",
     "author": "DreamNum <developer@univer.ai>",
@@ -54,8 +54,7 @@
         "@wendellhu/redi": ">=0.12.13",
         "rxjs": ">=7.0.0"
     },
-    "dependencies": {
-    },
+    "dependencies": {},
     "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",

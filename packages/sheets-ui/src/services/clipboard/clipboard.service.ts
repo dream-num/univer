@@ -73,6 +73,7 @@ export interface ISheetClipboardService {
     copy(): Promise<boolean>;
     cut(): Promise<boolean>;
     paste(item: ClipboardItem, pasteType?: string): Promise<boolean>;
+    legacyPaste(html?: string, text?: string): Promise<boolean>;
 
     addClipboardHook(hook: ISheetClipboardHook): IDisposable;
     getClipboardHooks(): ISheetClipboardHook[];
@@ -82,13 +83,14 @@ export const ISheetClipboardService = createIdentifier<ISheetClipboardService>('
 
 export class SheetClipboardService extends Disposable implements ISheetClipboardService {
     private _clipboardHooks: ISheetClipboardHook[] = [];
+
     private readonly _clipboardHooks$ = new BehaviorSubject<ISheetClipboardHook[]>([]);
     readonly clipboardHooks$ = this._clipboardHooks$.asObservable();
 
-    private _htmlToUSM;
-    private _usmToHtml;
+    private _htmlToUSM: HtmlToUSMService;
+    private _usmToHtml: USMToHtmlService;
+
     private _copyMarkId: string | null = null;
-    private _pasteType = PREDEFINED_HOOK_NAME.DEFAULT_PASTE;
 
     constructor(
         @ILogService private readonly _logService: ILogService,
@@ -208,6 +210,16 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         this._logService.error('[SheetClipboardService]', 'No valid data on clipboard');
 
         return false;
+    }
+
+    legacyPaste(html?: string, text?: string): Promise<boolean> {
+        if (html) {
+            return this._pasteHTML(html, PREDEFINED_HOOK_NAME.DEFAULT_PASTE);
+        } else if (text) {
+            return this._pastePlainText(text, PREDEFINED_HOOK_NAME.DEFAULT_PASTE);
+        }
+
+        return Promise.resolve(false);
     }
 
     addClipboardHook(hook: ISheetClipboardHook): IDisposable {
@@ -590,8 +602,6 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         };
     }
 
-    // NOTE: why there are some differences between internal and external pasting?
-
     private _getPastingTarget() {
         const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
@@ -778,21 +788,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     }
 }
 
-// #region paste parsing
-
-// #endregion
-
 // #region copy generation
-
-/**
- *
- * @param matrix
- * @param cols
- * @param hooks
- */
-function getTableContent(matrix: number[][], cols: number[], hooks: ISheetClipboardHook[]) {}
-
-function getSingleCellContent() {}
 
 function getMatrixPlainText(matrix: ObjectMatrix<ICellDataWithSpanInfo>) {
     let plain = '';
@@ -869,10 +865,6 @@ function isMultipleCells(cellMatrix: ObjectMatrix<ICellDataWithSpanInfo>): boole
 }
 
 // #endregion
-
-function isLegalSpreadsheetHTMLContent(html: string): boolean {
-    return html.indexOf('<table') !== -1; // NOTE: This is just a temporary implementation. Definitely would be changed later.
-}
 
 function getEmptyCell(): ICellData {
     return {

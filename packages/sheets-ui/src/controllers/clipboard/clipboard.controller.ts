@@ -29,15 +29,16 @@ import {
     BooleanNumber,
     DEFAULT_WORKSHEET_COLUMN_WIDTH,
     DEFAULT_WORKSHEET_ROW_HEIGHT,
-    Disposable,
     handleStyleToString,
     ICommandService,
     IConfigService,
+    IContextService,
     IUniverInstanceService,
     LifecycleStages,
     LocaleService,
     ObjectMatrix,
     OnLifecycle,
+    RxDisposable,
 } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import type {
@@ -56,9 +57,11 @@ import {
     SetWorksheetColWidthMutation,
     SetWorksheetRowHeightMutation,
 } from '@univerjs/sheets';
-import { IMessageService, textTrim } from '@univerjs/ui';
-import { Inject, Injector } from '@wendellhu/redi';
+import { IClipboardInterfaceService, IMessageService, textTrim } from '@univerjs/ui';
+import { Inject, Injector, Optional } from '@wendellhu/redi';
 
+import { ITextSelectionRenderManager } from '@univerjs/engine-render';
+import { takeUntil } from 'rxjs';
 import {
     SheetCopyCommand,
     SheetCutCommand,
@@ -77,6 +80,7 @@ import type {
     ISheetRangeLocation,
 } from '../../services/clipboard/type';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
+import { whenSheetEditorFocused } from '../shortcuts/utils';
 import {
     generateBody,
     getClearAndSetMergeMutations,
@@ -90,21 +94,40 @@ import {
  * This controller add basic clipboard logic for basic features such as text color / BISU / row widths to the clipboard
  * service. You can create a similar clipboard controller to add logic for your own features.
  */
-@OnLifecycle(LifecycleStages.Ready, SheetClipboardController)
-export class SheetClipboardController extends Disposable {
+@OnLifecycle(LifecycleStages.Steady, SheetClipboardController)
+export class SheetClipboardController extends RxDisposable {
     constructor(
+        @Inject(Injector) private readonly _injector: Injector,
         @IUniverInstanceService private readonly _currentUniverSheet: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
+        @IContextService private readonly _contextService: IContextService,
         @IConfigService private readonly _configService: IConfigService,
         @ISheetClipboardService private readonly _sheetClipboardService: ISheetClipboardService,
+        @IClipboardInterfaceService private readonly _clipboardInterfaceService: IClipboardInterfaceService,
         @IMessageService private readonly _messageService: IMessageService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @Inject(Injector) private readonly _injector: Injector,
-        @Inject(LocaleService) private readonly _localService: LocaleService
+        @Inject(LocaleService) private readonly _localService: LocaleService,
+        @Optional(ITextSelectionRenderManager) private readonly _textSelectionRenderManager?: ITextSelectionRenderManager
     ) {
         super();
-        // this._commandExecutedListener();
+
         this._init();
+
+        if (!this._clipboardInterfaceService.supportClipboard) {
+            this._textSelectionRenderManager?.onPaste$.pipe(takeUntil(this.dispose$)).subscribe((config) => {
+                if (!whenSheetEditorFocused(this._contextService)) {
+                    return;
+                }
+
+                // editor's value should not change and avoid triggering input event
+                config!.event.preventDefault();
+
+                const clipboardEvent = config!.event as ClipboardEvent;
+                const htmlContent = clipboardEvent.clipboardData?.getData('text/html');
+                const textContent = clipboardEvent.clipboardData?.getData('text/plain');
+                this._sheetClipboardService.legacyPaste(htmlContent, textContent);
+            });
+        }
     }
 
     private _init() {
@@ -119,6 +142,7 @@ export class SheetClipboardController extends Disposable {
             SheetPasteColWidthCommand,
             SheetPasteBesidesBorderCommand,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
+
         // register basic sheet clipboard hooks
         this.disposeWithMe(this._sheetClipboardService.addClipboardHook(this._initCopyingHooks()));
         this.disposeWithMe(this._sheetClipboardService.addClipboardHook(this._initPastingHook()));

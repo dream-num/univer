@@ -114,7 +114,7 @@ describe('Test clipboard', () => {
         };
         // read use mock
         const clipboardData = {
-            'text/html': `<google-sheets-html-origin><table xmlns="http://www.w3.org/1999/xhtml" cellspacing="0" cellpadding="0" dir="ltr" border="1" style="table-layout:fixed;font-size:10pt;font-family:Arial;width:0px;border-collapse:collapse;border:none"><colgroup><col width="73"><col width="73"></colgroup><tbody><tr style="height: 81px;"><td rowspan="1" colspan="2" style="background: rgb(255,0,0); text-align: center; vertical-align: middle; text-decoration:none;">row1col2</td></tr></tbody></table></google-sheets-html-origin>`,
+            'text/html': '<google-sheets-html-origin><table xmlns="http://www.w3.org/1999/xhtml" cellspacing="0" cellpadding="0" dir="ltr" border="1" style="table-layout:fixed;font-size:10pt;font-family:Arial;width:0px;border-collapse:collapse;border:none"><colgroup><col width="73"><col width="73"></colgroup><tbody><tr style="height: 81px;"><td rowspan="1" colspan="2" style="background: rgb(255,0,0); text-align: center; vertical-align: middle; text-decoration:none;">row1col2</td></tr></tbody></table></google-sheets-html-origin>',
         };
         const mockClipboard = new MockClipboard(clipboardData);
         const clipboardItems = await mockClipboard.read();

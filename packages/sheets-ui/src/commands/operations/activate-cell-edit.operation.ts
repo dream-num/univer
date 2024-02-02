@@ -25,9 +25,7 @@ export const SetActivateCellEditOperation: IOperation<ICurrentEditCellParam> = {
     type: CommandType.OPERATION,
     handler: (accessor, params) => {
         const editorBridgeService = accessor.get(IEditorBridgeService);
-
         editorBridgeService.setEditCell(params);
-
         return true;
     },
 };

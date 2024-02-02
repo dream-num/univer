@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/slides",
-    "version": "0.1.0-beta.3",
+    "version": "0.1.0-beta.4",
     "private": true,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
@@ -47,8 +47,7 @@
         "@univerjs/ui": "workspace:*",
         "@wendellhu/redi": ">=0.12.13"
     },
-    "dependencies": {
-    },
+    "dependencies": {},
     "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-render": "workspace:*",

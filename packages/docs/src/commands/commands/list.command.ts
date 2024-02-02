@@ -119,7 +119,7 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
             id: RichTextEditingMutation.id,
             params: {
                 unitId,
-                mutations: [],
+                actions: [],
             },
         };
 
@@ -179,7 +179,7 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
             memoryCursor.moveCursorTo(startIndex + 1);
         }
 
-        doMutation.params.mutations = textX.serialize();
+        doMutation.params.actions = textX.serialize();
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,

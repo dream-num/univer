@@ -77,6 +77,7 @@ function createViteConfig(overrideConfig, /** @type {IOptions} */ options) {
         ],
         define: {
             'process.env.NODE_ENV': JSON.stringify(mode),
+            'process.env.BUNDLE_TYPE': JSON.stringify(process.env.BUNDLE_TYPE ?? ''),
         },
         test: {
             coverage: {

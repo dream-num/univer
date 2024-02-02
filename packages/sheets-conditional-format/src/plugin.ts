@@ -31,6 +31,7 @@ import { addTextCfCommand } from './commands/commands/addTextCf.command';
 import { addTimePeriodCfCommand } from './commands/commands/addTimePeriodCf.command';
 import { addUniqueValuesCfCommand } from './commands/commands/addUniqueValuesCf.command';
 import { addConditionalRuleMutation } from './commands/mutations/addConditionalRule.mutation';
+import { deleteConditionalRuleMutation } from './commands/mutations/deleteConditionalRule.mutation';
 
 export class SheetsConditionalFormatPlugin extends Plugin {
     static override type = PluginType.Sheet;
@@ -45,7 +46,7 @@ export class SheetsConditionalFormatPlugin extends Plugin {
         addUniqueValuesCfCommand,
     ];
 
-    static mutationList = [addConditionalRuleMutation];
+    static mutationList = [addConditionalRuleMutation, deleteConditionalRuleMutation];
     constructor(
         _config: unknown,
         @Inject(Injector) override readonly _injector: Injector,

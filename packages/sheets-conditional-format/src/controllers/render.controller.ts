@@ -19,10 +19,13 @@ import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
 import { bufferTime, filter } from 'rxjs/operators';
+import type { Spreadsheet } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 
 import { ConditionalFormatService } from '../services/conditional-format.service';
 import { ConditionalFormatViewModel } from '../models/conditional-format-view-model';
+import { DataBar, dataBarUKey } from '../render/data-bar.render';
+import type { IDataBarCellData } from '../render/type';
 
 @OnLifecycle(LifecycleStages.Rendered, RenderController)
 export class RenderController extends Disposable {
@@ -34,7 +37,7 @@ export class RenderController extends Disposable {
         @Inject(ConditionalFormatViewModel) private _conditionalFormatViewModel: ConditionalFormatViewModel,
         @Inject(SheetSkeletonManagerService) private _sheetSkeletonManagerService: SheetSkeletonManagerService) {
         super();
-        this._initHighlightCell();
+        this._initViewModelInterceptor();
         this._initSkeleton();
         this._initRenderDataBar();
     }
@@ -76,19 +79,23 @@ export class RenderController extends Disposable {
         })).subscribe(markDirtySkeleton));
     }
 
-    _initHighlightCell() {
+    _initViewModelInterceptor() {
         this.disposeWithMe(this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, { priority: 99, handler: (cell, context, next) => {
             const result = this._conditionalFormatService.composeStyle(context.unitId, context.subUnitId, context.row, context.col);
             if (!result) {
                 return next(cell);
             }
+            const styleMap = context.workbook.getStyles();
+            const defaultStyle = (typeof cell?.s === 'string' ? styleMap.get(cell?.s) : cell?.s) || {};
+            const s = { ...defaultStyle };
+            const cloneCell = { ...cell, s } as IDataBarCellData;
             if (result.style) {
-                const styleMap = context.workbook.getStyles();
-                const _cellStyle = (typeof cell?.s === 'string' ? styleMap.get(cell?.s) : cell?.s) || {};
-                const s = { ..._cellStyle, ...result.style };
-                return next({ ...cell, s });
+                Object.assign(s, result.style);
             }
-            return next(cell);
+            if (result.dataBar) {
+                cloneCell.dataBar = result.dataBar;
+            }
+            return next(cloneCell);
         },
         }));
     }

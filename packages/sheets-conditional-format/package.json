@@ -62,9 +62,11 @@
     "dependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
+        "@univerjs/engine-render": "workspace:*",
         "@univerjs/icons": "^0.1.26",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/ui": "workspace:*",
+
         "@wendellhu/redi": "^0.12.13",
         "clsx": "^2.1.0",
         "dayjs": "^1.11.10",

@@ -69,7 +69,8 @@ export enum ValueType {
     min = 'min',
     max = 'max',
     percent = 'percent',
+
     percentile = 'percentile',
-    auto = 'auto',
+
     formula = 'formula',
 }

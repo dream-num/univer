@@ -430,12 +430,22 @@ importers:
 =======
         specifier: ^1.2.1
 <<<<<<< HEAD
+<<<<<<< HEAD
         version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
 =======
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
 >>>>>>> 1070651f5 (fix(dev): fix dev config)
+<<<<<<< HEAD
 >>>>>>> 89540337d (fix(dev): fix dev config)
+<<<<<<< HEAD
 >>>>>>> 816d01ba3 (fix(dev): fix dev config)
+=======
+=======
+=======
+        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.2.1)(less@4.2.0)
+>>>>>>> 5d49a0768 (chore(cf): format code)
+>>>>>>> 38115db70 (chore(cf): format code)
+>>>>>>> 9af864941 (chore(cf): format code)
 
   packages/docs:
     devDependencies:
@@ -473,12 +483,22 @@ importers:
 =======
         specifier: ^1.2.1
 <<<<<<< HEAD
+<<<<<<< HEAD
         version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
 =======
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
 >>>>>>> 1070651f5 (fix(dev): fix dev config)
+<<<<<<< HEAD
 >>>>>>> 89540337d (fix(dev): fix dev config)
+<<<<<<< HEAD
 >>>>>>> 816d01ba3 (fix(dev): fix dev config)
+=======
+=======
+=======
+        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.2.1)(less@4.2.0)
+>>>>>>> 5d49a0768 (chore(cf): format code)
+>>>>>>> 38115db70 (chore(cf): format code)
+>>>>>>> 9af864941 (chore(cf): format code)
 
   packages/docs-ui:
     devDependencies:
@@ -531,12 +551,22 @@ importers:
 =======
         specifier: ^1.2.1
 <<<<<<< HEAD
+<<<<<<< HEAD
         version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
 =======
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
 >>>>>>> 1070651f5 (fix(dev): fix dev config)
+<<<<<<< HEAD
 >>>>>>> 89540337d (fix(dev): fix dev config)
+<<<<<<< HEAD
 >>>>>>> 816d01ba3 (fix(dev): fix dev config)
+=======
+=======
+=======
+        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.2.1)(less@4.2.0)
+>>>>>>> 5d49a0768 (chore(cf): format code)
+>>>>>>> 38115db70 (chore(cf): format code)
+>>>>>>> 9af864941 (chore(cf): format code)
 
   packages/engine-formula:
     dependencies:
@@ -578,12 +608,22 @@ importers:
 =======
         specifier: ^1.2.1
 <<<<<<< HEAD
+<<<<<<< HEAD
         version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
 =======
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
 >>>>>>> 1070651f5 (fix(dev): fix dev config)
+<<<<<<< HEAD
 >>>>>>> 89540337d (fix(dev): fix dev config)
+<<<<<<< HEAD
 >>>>>>> 816d01ba3 (fix(dev): fix dev config)
+=======
+=======
+=======
+        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.2.1)(less@4.2.0)
+>>>>>>> 5d49a0768 (chore(cf): format code)
+>>>>>>> 38115db70 (chore(cf): format code)
+>>>>>>> 9af864941 (chore(cf): format code)
 
   packages/engine-numfmt:
     dependencies:
@@ -644,12 +684,22 @@ importers:
 =======
         specifier: ^1.2.1
 <<<<<<< HEAD
+<<<<<<< HEAD
         version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
 =======
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
 >>>>>>> 1070651f5 (fix(dev): fix dev config)
+<<<<<<< HEAD
 >>>>>>> 89540337d (fix(dev): fix dev config)
+<<<<<<< HEAD
 >>>>>>> 816d01ba3 (fix(dev): fix dev config)
+=======
+=======
+=======
+        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.2.1)(less@4.2.0)
+>>>>>>> 5d49a0768 (chore(cf): format code)
+>>>>>>> 38115db70 (chore(cf): format code)
+>>>>>>> 9af864941 (chore(cf): format code)
 
   packages/facade:
     devDependencies:
@@ -823,9 +873,13 @@ importers:
 =======
         specifier: ^1.2.1
 <<<<<<< HEAD
+<<<<<<< HEAD
         version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
 =======
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
+=======
+        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.2.1)(less@4.2.0)
+>>>>>>> 5d49a0768 (chore(cf): format code)
 
   packages/sheets-conditional-format:
     dependencies:
@@ -877,7 +931,7 @@ importers:
         version: 1.2.1(vitest@1.2.1)
       happy-dom:
         specifier: ^13.2.1
-        version: 13.3.1
+        version: 13.2.1
       less:
         specifier: ^4.2.0
         version: 4.2.0
@@ -895,10 +949,20 @@ importers:
         version: 0.6.2(vite@5.0.12)
       vitest:
         specifier: ^1.2.1
+<<<<<<< HEAD
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
 >>>>>>> 1070651f5 (fix(dev): fix dev config)
+<<<<<<< HEAD
 >>>>>>> 89540337d (fix(dev): fix dev config)
+<<<<<<< HEAD
 >>>>>>> 816d01ba3 (fix(dev): fix dev config)
+=======
+=======
+=======
+        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.2.1)(less@4.2.0)
+>>>>>>> 5d49a0768 (chore(cf): format code)
+>>>>>>> 38115db70 (chore(cf): format code)
+>>>>>>> 9af864941 (chore(cf): format code)
 
   packages/sheets-find-replace:
     devDependencies:
@@ -939,12 +1003,22 @@ importers:
 =======
         specifier: ^1.2.1
 <<<<<<< HEAD
+<<<<<<< HEAD
         version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
 =======
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
 >>>>>>> 1070651f5 (fix(dev): fix dev config)
+<<<<<<< HEAD
 >>>>>>> 89540337d (fix(dev): fix dev config)
+<<<<<<< HEAD
 >>>>>>> 816d01ba3 (fix(dev): fix dev config)
+=======
+=======
+=======
+        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.2.1)(less@4.2.0)
+>>>>>>> 5d49a0768 (chore(cf): format code)
+>>>>>>> 38115db70 (chore(cf): format code)
+>>>>>>> 9af864941 (chore(cf): format code)
 
   packages/sheets-formula:
     dependencies:
@@ -1016,12 +1090,22 @@ importers:
 =======
         specifier: ^1.2.1
 <<<<<<< HEAD
+<<<<<<< HEAD
         version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
 =======
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
 >>>>>>> 1070651f5 (fix(dev): fix dev config)
+<<<<<<< HEAD
 >>>>>>> 89540337d (fix(dev): fix dev config)
+<<<<<<< HEAD
 >>>>>>> 816d01ba3 (fix(dev): fix dev config)
+=======
+=======
+=======
+        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.2.1)(less@4.2.0)
+>>>>>>> 5d49a0768 (chore(cf): format code)
+>>>>>>> 38115db70 (chore(cf): format code)
+>>>>>>> 9af864941 (chore(cf): format code)
 
   packages/sheets-numfmt:
     dependencies:
@@ -1087,12 +1171,22 @@ importers:
 =======
         specifier: ^1.2.1
 <<<<<<< HEAD
+<<<<<<< HEAD
         version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
 =======
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
 >>>>>>> 1070651f5 (fix(dev): fix dev config)
+<<<<<<< HEAD
 >>>>>>> 89540337d (fix(dev): fix dev config)
+<<<<<<< HEAD
 >>>>>>> 816d01ba3 (fix(dev): fix dev config)
+=======
+=======
+=======
+        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.2.1)(less@4.2.0)
+>>>>>>> 5d49a0768 (chore(cf): format code)
+>>>>>>> 38115db70 (chore(cf): format code)
+>>>>>>> 9af864941 (chore(cf): format code)
 
   packages/sheets-ui:
     dependencies:
@@ -1161,12 +1255,22 @@ importers:
 =======
         specifier: ^1.2.1
 <<<<<<< HEAD
+<<<<<<< HEAD
         version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
 =======
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
 >>>>>>> 1070651f5 (fix(dev): fix dev config)
+<<<<<<< HEAD
 >>>>>>> 89540337d (fix(dev): fix dev config)
+<<<<<<< HEAD
 >>>>>>> 816d01ba3 (fix(dev): fix dev config)
+=======
+=======
+=======
+        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.2.1)(less@4.2.0)
+>>>>>>> 5d49a0768 (chore(cf): format code)
+>>>>>>> 38115db70 (chore(cf): format code)
+>>>>>>> 9af864941 (chore(cf): format code)
 
   packages/sheets-zen-editor:
     dependencies:
@@ -1226,12 +1330,22 @@ importers:
 =======
         specifier: ^1.2.1
 <<<<<<< HEAD
+<<<<<<< HEAD
         version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
 =======
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
 >>>>>>> 1070651f5 (fix(dev): fix dev config)
+<<<<<<< HEAD
 >>>>>>> 89540337d (fix(dev): fix dev config)
+<<<<<<< HEAD
 >>>>>>> 816d01ba3 (fix(dev): fix dev config)
+=======
+=======
+=======
+        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.2.1)(less@4.2.0)
+>>>>>>> 5d49a0768 (chore(cf): format code)
+>>>>>>> 38115db70 (chore(cf): format code)
+>>>>>>> 9af864941 (chore(cf): format code)
 
   packages/slides:
     dependencies:
@@ -1270,12 +1384,22 @@ importers:
 =======
         specifier: ^1.2.1
 <<<<<<< HEAD
+<<<<<<< HEAD
         version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
 =======
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
 >>>>>>> 1070651f5 (fix(dev): fix dev config)
+<<<<<<< HEAD
 >>>>>>> 89540337d (fix(dev): fix dev config)
+<<<<<<< HEAD
 >>>>>>> 816d01ba3 (fix(dev): fix dev config)
+=======
+=======
+=======
+        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.2.1)(less@4.2.0)
+>>>>>>> 5d49a0768 (chore(cf): format code)
+>>>>>>> 38115db70 (chore(cf): format code)
+>>>>>>> 9af864941 (chore(cf): format code)
 
   packages/slides-ui:
     devDependencies:
@@ -1325,12 +1449,22 @@ importers:
 =======
         specifier: ^1.2.1
 <<<<<<< HEAD
+<<<<<<< HEAD
         version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
 =======
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
 >>>>>>> 1070651f5 (fix(dev): fix dev config)
+<<<<<<< HEAD
 >>>>>>> 89540337d (fix(dev): fix dev config)
+<<<<<<< HEAD
 >>>>>>> 816d01ba3 (fix(dev): fix dev config)
+=======
+=======
+=======
+        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.2.1)(less@4.2.0)
+>>>>>>> 5d49a0768 (chore(cf): format code)
+>>>>>>> 38115db70 (chore(cf): format code)
+>>>>>>> 9af864941 (chore(cf): format code)
 
   packages/ui:
     dependencies:
@@ -1413,13 +1547,26 @@ importers:
 =======
         specifier: ^1.2.1
 <<<<<<< HEAD
+<<<<<<< HEAD
         version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
 =======
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
 >>>>>>> 1070651f5 (fix(dev): fix dev config)
+<<<<<<< HEAD
 >>>>>>> 89540337d (fix(dev): fix dev config)
+<<<<<<< HEAD
 >>>>>>> 816d01ba3 (fix(dev): fix dev config)
+<<<<<<< HEAD
 >>>>>>> bb699e835 (fix(dev): fix dev config)
+=======
+=======
+=======
+=======
+        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.2.1)(less@4.2.0)
+>>>>>>> 5d49a0768 (chore(cf): format code)
+>>>>>>> 38115db70 (chore(cf): format code)
+>>>>>>> 9af864941 (chore(cf): format code)
+>>>>>>> 1d774e4f7 (chore(cf): format code)
 
   packages/uniscript:
     dependencies:
@@ -1476,12 +1623,22 @@ importers:
 =======
         specifier: ^1.2.1
 <<<<<<< HEAD
+<<<<<<< HEAD
         version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
 =======
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
 >>>>>>> 1070651f5 (fix(dev): fix dev config)
+<<<<<<< HEAD
 >>>>>>> 89540337d (fix(dev): fix dev config)
+<<<<<<< HEAD
 >>>>>>> 816d01ba3 (fix(dev): fix dev config)
+=======
+=======
+=======
+        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.2.1)(less@4.2.0)
+>>>>>>> 5d49a0768 (chore(cf): format code)
+>>>>>>> 38115db70 (chore(cf): format code)
+>>>>>>> 9af864941 (chore(cf): format code)
 
 packages:
 
@@ -5952,8 +6109,33 @@ packages:
   /@ungap/structured-clone@1.2.0:
     resolution: {integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==}
 
+<<<<<<< HEAD
   /@univerjs/icons@0.1.39(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-LlvMLjF18VM1KKLybMpCEnetnyvQgb5ZvJA0HeWRnTNO8HFXlEpCJmXpAIajNGL+PjtZU4LTj3tMf/2C6prn/w==}
+=======
+<<<<<<< HEAD
+  /@univerjs/icons@0.1.30(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-TdI4MuVH6zkbeLXllrkVemilQ+MnTm7PJLwaQQXyuwl+YSuoe4m5S5nc6iE/CXzx7Zp5Nyhv1rsXetpXWcgEpA==}
+=======
+<<<<<<< HEAD
+  /@univerjs/icons@0.1.28(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-EMPdWp3gA0t/GPcUxOEWlKIXqlbgRbcVMC/i0z1IT3sDCOJ+lVq7ONe/rbpx4pupU9A6XvqTl73XbRV7O2bbhw==}
+=======
+  /@univerjs/icons@0.1.26(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-tQZ+t24QsvjeR+8RvSzPzuHMuv+xcwAFW73uQ9mn6NE1QxIyFGMrXQzt8vDxnYbsP2HOIXnkOoCfBEJhfF+YAQ==}
+    peerDependencies:
+      react: '*'
+      react-dom: '*'
+    dependencies:
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+    dev: false
+
+  /@univerjs/icons@0.1.27(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-1mcnDgcmWxWW4O7TG+1OoqrPnExk6M9vqXfRdxQqm213lABfuBKcqz7BX/WjOnlzaimOzsgtPmUgEDdU2S5lJg==}
+>>>>>>> 5d49a0768 (chore(cf): format code)
+>>>>>>> ccfd7f42c (chore(cf): format code)
+>>>>>>> 1d774e4f7 (chore(cf): format code)
     peerDependencies:
       react: '*'
       react-dom: '*'
@@ -5977,8 +6159,37 @@ packages:
     transitivePeerDependencies:
       - supports-color
 
+<<<<<<< HEAD
   /@vitest/coverage-istanbul@1.3.1(vitest@1.3.1):
     resolution: {integrity: sha512-aBVgQ2eY9gzrxBJjGKbWgatTU2w1CacEx0n8OMctPzl9836KqoM5X/WigJpjM7wZEtX2N0ZTE5KDGPmVM+o2Wg==}
+=======
+<<<<<<< HEAD
+  /@vitest/coverage-istanbul@1.3.0(vitest@1.3.1):
+    resolution: {integrity: sha512-Kvj05eR2LJRmYgV+83I6WSHSS7JP3ayeon3c1YN1Tb2Z2U/VHMJNuq1hdC2lF/wC+WRA/MZ0BZUMVP8LfDClJQ==}
+=======
+  /@vitest/coverage-istanbul@1.2.1(vitest@1.2.1):
+    resolution: {integrity: sha512-j8M4R3XbQ7cmLqJd7mfxCpEc0bQ7S6o5VIEt7c0Auri2lT1hkd89Sa/mOYDnuGasTNawamW+0d9vDRK/5uhVXw==}
+    peerDependencies:
+      vitest: ^1.0.0
+    dependencies:
+      debug: 4.3.4
+      istanbul-lib-coverage: 3.2.2
+      istanbul-lib-instrument: 6.0.1
+      istanbul-lib-report: 3.0.1
+      istanbul-lib-source-maps: 4.0.1
+      istanbul-reports: 3.1.6
+      magicast: 0.3.3
+      picocolors: 1.0.0
+      test-exclude: 6.0.0
+      vitest: 1.2.1(@types/node@20.11.7)(happy-dom@13.2.1)(less@4.2.0)
+    transitivePeerDependencies:
+      - supports-color
+    dev: true
+
+  /@vitest/coverage-istanbul@1.2.2(vitest@1.2.1):
+    resolution: {integrity: sha512-tJybwO8JT4H9ANz0T0/tJ1M5g3BkuHKYF1w5YO3z9sAiHBdGANrxN9c5lomJx1WSnLzCxQR5xxlJ4TLKbzrR3w==}
+>>>>>>> 38115db70 (chore(cf): format code)
+>>>>>>> ccfd7f42c (chore(cf): format code)
     peerDependencies:
       vitest: 1.3.1
     dependencies:
@@ -5994,6 +6205,7 @@ packages:
       vitest: 1.3.1(@types/node@20.11.24)(happy-dom@13.3.8)
     transitivePeerDependencies:
       - supports-color
+    dev: false
 
   /@vitest/expect@1.3.1:
     resolution: {integrity: sha512-xofQFwIzfdmLLlHa6ag0dPV8YsnKOCP1KdAeVVh34vSjN2dcUiXYCD9htu/9eM7t8Xln4v03U9HLxLpPlsXdZw==}
@@ -9749,6 +9961,15 @@ packages:
       wordwrap: 1.0.0
     optionalDependencies:
       uglify-js: 3.17.4
+
+  /happy-dom@13.2.1:
+    resolution: {integrity: sha512-AwSV0OPsLxOu1nsKsw+1aakYGiCgLcYed/BPLMGe4lOxAZY14UWGAw8nB7SSnHRltBPwcM6Rf+5hcMXcU7qxaQ==}
+    engines: {node: '>=16.0.0'}
+    dependencies:
+      entities: 4.5.0
+      webidl-conversions: 7.0.0
+      whatwg-mimetype: 3.0.0
+    dev: true
 
   /happy-dom@13.3.8:
     resolution: {integrity: sha512-RAbq4oYfJNkVan1m1F3jfA4YEyRY0/ASoNvZsNJbuX85jIypidmsz9jQZD7Tqz0VXA2MhAGfcsh5oshwmwNYSg==}
@@ -14461,8 +14682,79 @@ packages:
     optionalDependencies:
       fsevents: 2.3.3
 
+<<<<<<< HEAD
   /vitest@1.3.1(@types/node@20.11.24)(happy-dom@13.3.8):
+=======
+<<<<<<< HEAD
+  /vitest@1.3.1(@types/node@20.11.19)(happy-dom@13.3.8):
+>>>>>>> 9af864941 (chore(cf): format code)
     resolution: {integrity: sha512-/1QJqXs8YbCrfv/GPQ05wAZf2eakUPLPa18vkJAKE7RXOKfVHqMZZ1WlTjiwl6Gcn65M5vpNUB6EFLnEdRdEXQ==}
+=======
+<<<<<<< HEAD
+  /vitest@1.2.1(@types/node@20.11.16)(happy-dom@13.3.8):
+=======
+  /vitest@1.2.1(@types/node@20.11.7)(happy-dom@13.2.1)(less@4.2.0):
+    resolution: {integrity: sha512-TRph8N8rnSDa5M2wKWJCMnztCZS9cDcgVTQ6tsTFTG/odHJ4l5yNVqvbeDJYJRZ6is3uxaEpFs8LL6QM+YFSdA==}
+    engines: {node: ^18.0.0 || >=20.0.0}
+    hasBin: true
+    peerDependencies:
+      '@edge-runtime/vm': '*'
+      '@types/node': ^18.0.0 || >=20.0.0
+      '@vitest/browser': ^1.0.0
+      '@vitest/ui': ^1.0.0
+      happy-dom: '*'
+      jsdom: '*'
+    peerDependenciesMeta:
+      '@edge-runtime/vm':
+        optional: true
+      '@types/node':
+        optional: true
+      '@vitest/browser':
+        optional: true
+      '@vitest/ui':
+        optional: true
+      happy-dom:
+        optional: true
+      jsdom:
+        optional: true
+    dependencies:
+      '@types/node': 20.11.7
+      '@vitest/expect': 1.2.1
+      '@vitest/runner': 1.2.1
+      '@vitest/snapshot': 1.2.1
+      '@vitest/spy': 1.2.1
+      '@vitest/utils': 1.2.1
+      acorn-walk: 8.3.2
+      cac: 6.7.14
+      chai: 4.3.10
+      debug: 4.3.4
+      execa: 8.0.1
+      happy-dom: 13.2.1
+      local-pkg: 0.5.0
+      magic-string: 0.30.5
+      pathe: 1.1.1
+      picocolors: 1.0.0
+      std-env: 3.5.0
+      strip-literal: 1.3.0
+      tinybench: 2.5.1
+      tinypool: 0.8.1
+      vite: 5.0.12(@types/node@20.11.7)(less@4.2.0)
+      vite-node: 1.2.1(@types/node@20.11.7)(less@4.2.0)
+      why-is-node-running: 2.2.2
+    transitivePeerDependencies:
+      - less
+      - lightningcss
+      - sass
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+    dev: true
+
+  /vitest@1.2.1(@types/node@20.11.7)(happy-dom@13.3.8):
+>>>>>>> 5d49a0768 (chore(cf): format code)
+    resolution: {integrity: sha512-TRph8N8rnSDa5M2wKWJCMnztCZS9cDcgVTQ6tsTFTG/odHJ4l5yNVqvbeDJYJRZ6is3uxaEpFs8LL6QM+YFSdA==}
+>>>>>>> 38115db70 (chore(cf): format code)
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
     peerDependencies:
@@ -14518,13 +14810,18 @@ packages:
       - terser
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   /vitest@1.3.1(@types/node@20.11.24)(less@4.2.0):
 =======
+=======
+>>>>>>> 9af864941 (chore(cf): format code)
 <<<<<<< HEAD
   /vitest@1.3.1(@types/node@20.11.19)(less@4.2.0):
 >>>>>>> 816d01ba3 (fix(dev): fix dev config)
     resolution: {integrity: sha512-/1QJqXs8YbCrfv/GPQ05wAZf2eakUPLPa18vkJAKE7RXOKfVHqMZZ1WlTjiwl6Gcn65M5vpNUB6EFLnEdRdEXQ==}
 =======
+=======
+>>>>>>> 38115db70 (chore(cf): format code)
 <<<<<<< HEAD
   /vitest@1.2.1(@types/node@20.11.16)(less@4.2.0):
 =======
@@ -14589,6 +14886,10 @@ packages:
 
   /vue-eslint-parser@9.4.2(eslint@8.57.0):
     resolution: {integrity: sha512-Ry9oiGmCAK91HrKMtCrKFWmSFWvYkpGglCeFAIqDdr9zdXmMMpJOmUJS7WWsW7fX81h6mwHmUZCQQ1E0PkSwYQ==}
+=======
+  /vue-eslint-parser@9.4.1(eslint@8.56.0):
+    resolution: {integrity: sha512-EmIbJ5cCI/E06SlI8K5sldVZ+Ef5vy26Ck0lNALxgY7FEAMOjNR32qcsVM3FUJUbvVWTBEiOy5lQvbhPK/ynBw==}
+>>>>>>> 5d49a0768 (chore(cf): format code)
     engines: {node: ^14.17.0 || >=16.0.0}
     peerDependencies:
       eslint: '>=6.0.0'

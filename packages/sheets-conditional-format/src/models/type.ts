@@ -30,7 +30,7 @@ export interface IHighlightCell extends IBaseCfRule {
     subType: SubRuleType;
 }
 
-interface IValueConfig {
+export interface IValueConfig {
     type: ValueType;
     value?: number;
 }

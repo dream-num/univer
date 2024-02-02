@@ -12,7 +12,7 @@ concurrency:
     cancel-in-progress: true
 
 permissions:
-    contents: read
+    contents: write
 
 jobs:
     prepare:
@@ -31,6 +31,8 @@ jobs:
 
             - name: Checkout
               uses: actions/checkout@v4
+              with:
+                  token: ${{ secrets.GH_TOKEN }}
 
             - name: Setup Node.js
               uses: ./.github/actions/setup-node
@@ -196,7 +198,7 @@ jobs:
                   vercel-args: --prod
 
     notify:
-        needs: [prepare, release-npm, release-verdaccio, build-demo, build-storybook]
+        needs: [release-npm, release-verdaccio, build-demo, build-storybook]
         runs-on: ubuntu-latest
 
         steps:

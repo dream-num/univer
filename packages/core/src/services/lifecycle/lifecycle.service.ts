@@ -87,7 +87,7 @@ export class LifecycleService extends Disposable {
     }
 
     private _reportProgress(stage: LifecycleStages): void {
-        this._logService.debug(`[LifecycleService]`, `lifecycle progressed to "${LifecycleNameMap[stage]}".`);
+        this._logService.debug('[LifecycleService]', `lifecycle progressed to "${LifecycleNameMap[stage]}".`);
     }
 }
 

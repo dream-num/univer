@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable no-magic-numbers */
-
 import type { IKeyValue, Nullable } from '@univerjs/core';
 
 import type { IObjectFullState } from '../basics/interfaces';
@@ -338,7 +336,7 @@ export class Path extends Shape<IPathProps> {
      *  L data for the purpose of high performance Path
      *  rendering
      */
-    // eslint-disable-next-line max-lines-per-function
+
     static parsePathData(data: string) {
         // Path Data Segment must begin with a moveTo
         //m (x y)+  Relative moveTo (subsequent points are treated as lineTo)
@@ -409,7 +407,7 @@ export class Path extends Shape<IPathProps> {
                     p.push(0, 0);
                     continue;
                 }
-                const parsed = parseFloat(coords[j]);
+                const parsed = Number.parseFloat(coords[j]);
                 if (!isNaN(parsed)) {
                     p.push(parsed);
                 } else {
@@ -842,7 +840,7 @@ export class Path extends Shape<IPathProps> {
     /**
      * Return length of the path.
      * @method
-     * @returns {Number} length
+     * @returns {number} length
      * @example
      * var length = path.getLength();
      */
@@ -853,8 +851,8 @@ export class Path extends Shape<IPathProps> {
     /**
      * Get point on path at specific length of the path
      * @method
-     * @param {Number} length length
-     * @returns {Object} point {x,y} point
+     * @param {number} length length
+     * @returns {object} point {x,y} point
      * @example
      * var point = path.getPointAtLength(10);
      */
@@ -953,7 +951,6 @@ export class Path extends Shape<IPathProps> {
         this._setTransForm();
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _getSelfRect() {
         if (!this._reCalculateCache) {
             return this._selfRectCache;

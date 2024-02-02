@@ -16,9 +16,9 @@
 
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier } from '@wendellhu/redi';
-import { type Subject } from 'rxjs';
+import type { Subject } from 'rxjs';
 
-import { type IDialogPartMethodOptions } from '../../views/components/dialog-part/interface';
+import type { IDialogPartMethodOptions } from '../../views/components/dialog-part/interface';
 
 export const IDialogService = createIdentifier<IDialogService>('univer.dialog-service');
 export interface IDialogService {

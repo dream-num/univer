@@ -16,8 +16,8 @@
 
 export default {
     DAVERAGE: {
-        description: `Returns the average of selected database entries`,
-        abstract: `Returns the average of selected database entries`,
+        description: 'Returns the average of selected database entries',
+        abstract: 'Returns the average of selected database entries',
         links: [
             {
                 title: 'Instruction',
@@ -30,8 +30,8 @@ export default {
         },
     },
     DCOUNT: {
-        description: `Counts the cells that contain numbers in a database`,
-        abstract: `Counts the cells that contain numbers in a database`,
+        description: 'Counts the cells that contain numbers in a database',
+        abstract: 'Counts the cells that contain numbers in a database',
         links: [
             {
                 title: 'Instruction',
@@ -44,8 +44,8 @@ export default {
         },
     },
     DCOUNTA: {
-        description: `Counts nonblank cells in a database`,
-        abstract: `Counts nonblank cells in a database`,
+        description: 'Counts nonblank cells in a database',
+        abstract: 'Counts nonblank cells in a database',
         links: [
             {
                 title: 'Instruction',
@@ -58,8 +58,8 @@ export default {
         },
     },
     DGET: {
-        description: `Extracts from a database a single record that matches the specified criteria`,
-        abstract: `Extracts from a database a single record that matches the specified criteria`,
+        description: 'Extracts from a database a single record that matches the specified criteria',
+        abstract: 'Extracts from a database a single record that matches the specified criteria',
         links: [
             {
                 title: 'Instruction',
@@ -72,8 +72,8 @@ export default {
         },
     },
     DMAX: {
-        description: `Returns the maximum value from selected database entries`,
-        abstract: `Returns the maximum value from selected database entries`,
+        description: 'Returns the maximum value from selected database entries',
+        abstract: 'Returns the maximum value from selected database entries',
         links: [
             {
                 title: 'Instruction',
@@ -86,8 +86,8 @@ export default {
         },
     },
     DMIN: {
-        description: `Returns the minimum value from selected database entries`,
-        abstract: `Returns the minimum value from selected database entries`,
+        description: 'Returns the minimum value from selected database entries',
+        abstract: 'Returns the minimum value from selected database entries',
         links: [
             {
                 title: 'Instruction',
@@ -100,8 +100,8 @@ export default {
         },
     },
     DPRODUCT: {
-        description: `Multiplies the values in a particular field of records that match the criteria in a database`,
-        abstract: `Multiplies the values in a particular field of records that match the criteria in a database`,
+        description: 'Multiplies the values in a particular field of records that match the criteria in a database',
+        abstract: 'Multiplies the values in a particular field of records that match the criteria in a database',
         links: [
             {
                 title: 'Instruction',
@@ -114,8 +114,8 @@ export default {
         },
     },
     DSTDEV: {
-        description: `Estimates the standard deviation based on a sample of selected database entries`,
-        abstract: `Estimates the standard deviation based on a sample of selected database entries`,
+        description: 'Estimates the standard deviation based on a sample of selected database entries',
+        abstract: 'Estimates the standard deviation based on a sample of selected database entries',
         links: [
             {
                 title: 'Instruction',
@@ -128,8 +128,8 @@ export default {
         },
     },
     DSTDEVP: {
-        description: `Calculates the standard deviation based on the entire population of selected database entries`,
-        abstract: `Calculates the standard deviation based on the entire population of selected database entries`,
+        description: 'Calculates the standard deviation based on the entire population of selected database entries',
+        abstract: 'Calculates the standard deviation based on the entire population of selected database entries',
         links: [
             {
                 title: 'Instruction',
@@ -142,8 +142,8 @@ export default {
         },
     },
     DSUM: {
-        description: `Adds the numbers in the field column of records in the database that match the criteria`,
-        abstract: `Adds the numbers in the field column of records in the database that match the criteria`,
+        description: 'Adds the numbers in the field column of records in the database that match the criteria',
+        abstract: 'Adds the numbers in the field column of records in the database that match the criteria',
         links: [
             {
                 title: 'Instruction',
@@ -156,8 +156,8 @@ export default {
         },
     },
     DVAR: {
-        description: `Estimates variance based on a sample from selected database entries`,
-        abstract: `Estimates variance based on a sample from selected database entries`,
+        description: 'Estimates variance based on a sample from selected database entries',
+        abstract: 'Estimates variance based on a sample from selected database entries',
         links: [
             {
                 title: 'Instruction',
@@ -170,8 +170,8 @@ export default {
         },
     },
     DVARP: {
-        description: `Calculates variance based on the entire population of selected database entries`,
-        abstract: `Calculates variance based on the entire population of selected database entries`,
+        description: 'Calculates variance based on the entire population of selected database entries',
+        abstract: 'Calculates variance based on the entire population of selected database entries',
         links: [
             {
                 title: 'Instruction',

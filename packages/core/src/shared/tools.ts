@@ -129,7 +129,7 @@ export class Tools {
         if (isIE) {
             const reIE = new RegExp('MSIE (\\d+\\.\\d+);');
             reIE.test(userAgent);
-            const fIEVersion = parseFloat(RegExp.$1);
+            const fIEVersion = Number.parseFloat(RegExp.$1);
             if (fIEVersion === 7) {
                 return 'IE7';
             }
@@ -393,7 +393,7 @@ export class Tools {
     }
 
     static isStringNumber(value?: any): boolean {
-        return !isNaN(parseFloat(value)) && isFinite(value);
+        return !isNaN(Number.parseFloat(value)) && isFinite(value);
     }
 
     static isObject<T>(value?: any): value is T {
@@ -544,7 +544,7 @@ export class Tools {
 
     static ABCatNum(a: string): number {
         if (a == null || a.length === 0) {
-            return NaN;
+            return Number.NaN;
         }
 
         const str = a.toLowerCase().split('');
@@ -556,7 +556,7 @@ export class Tools {
             numOut += charnum * 26 ** (al - i - 1);
         }
         if (numOut === 0) {
-            return NaN;
+            return Number.NaN;
         }
         return numOut - 1;
     }
@@ -589,7 +589,7 @@ export class Tools {
 
     static randSort<T>(arr: T[]) {
         for (let i = 0, len = arr.length; i < len; i++) {
-            const rand = parseInt((Math.random() * len).toString());
+            const rand = Number.parseInt((Math.random() * len).toString());
             const temp = arr[rand];
             arr[rand] = arr[i];
             arr[i] = temp;

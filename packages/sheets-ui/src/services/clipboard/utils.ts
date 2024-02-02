@@ -21,7 +21,7 @@ import type { IRange } from '@univerjs/core';
  *
  * @param {IRange} sourceRange
  * @param {IRange} targetRang
- * @param {boolean} [isStrictMode=false] if is true,the remainder of the row and column must all be 0 to be repeated
+ * @param {boolean} [isStrictMode] if is true,the remainder of the row and column must all be 0 to be repeated
  * @return {*}
  */
 export const getRepeatRange = (sourceRange: IRange, targetRang: IRange, isStrictMode = false) => {

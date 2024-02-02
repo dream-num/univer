@@ -47,11 +47,10 @@ export const ChangeZoomRatioCommand: ICommand<IChangeZoomRatioCommandParams> = {
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
 
-        // eslint-disable-next-line no-magic-numbers
         let zoom = reset ? 100 : Math.round((worksheet.getConfig().zoomRatio + delta) * 100);
         zoom = Math.max(SHEET_ZOOM_RANGE[0], zoom);
         zoom = Math.min(SHEET_ZOOM_RANGE[1], zoom);
-        // eslint-disable-next-line no-magic-numbers
+
         const zoomRatio = zoom / 100;
 
         return accessor.get(ICommandService).executeCommand(SetZoomRatioOperation.id, {

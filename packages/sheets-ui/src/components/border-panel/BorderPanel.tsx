@@ -114,11 +114,11 @@ export function BorderPanel(props: IBorderPanelProps) {
                         align={{
                             offset: [0, 18],
                         }}
-                        overlay={
+                        overlay={(
                             <section className={styles.uiPluginSheetsBorderPanelBoard} onClick={stopPropagation}>
                                 <ColorPicker onChange={(value) => handleClick(value, 'color')} />
                             </section>
-                        }
+                        )}
                     >
                         <a className={styles.uiPluginSheetsBorderPanelButton} onClick={stopPropagation}>
                             <PaintBucket extend={{ colorChannel1: value.color ?? 'rgb(var(--primary-color))' }} />
@@ -134,7 +134,7 @@ export function BorderPanel(props: IBorderPanelProps) {
                         align={{
                             offset: [0, 18],
                         }}
-                        overlay={
+                        overlay={(
                             <section onClick={stopPropagation}>
                                 <Menu>
                                     {BORDER_SIZE_CHILDREN.map((item) => (
@@ -148,7 +148,7 @@ export function BorderPanel(props: IBorderPanelProps) {
                                     ))}
                                 </Menu>
                             </section>
-                        }
+                        )}
                     >
                         <a className={styles.uiPluginSheetsBorderPanelButton} onClick={stopPropagation}>
                             <BorderLine type={BorderStyleTypes.THIN} />

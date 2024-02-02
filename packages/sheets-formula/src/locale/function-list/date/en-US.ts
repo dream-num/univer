@@ -16,8 +16,8 @@
 
 export default {
     DATE: {
-        description: `Returns the serial number of a particular date`,
-        abstract: `Returns the serial number of a particular date`,
+        description: 'Returns the serial number of a particular date',
+        abstract: 'Returns the serial number of a particular date',
         links: [
             {
                 title: 'Instruction',
@@ -30,8 +30,8 @@ export default {
         },
     },
     DATEDIF: {
-        description: `Calculates the number of days, months, or years between two dates. This function is useful in formulas where you need to calculate an age.`,
-        abstract: `Calculates the number of days, months, or years between two dates. This function is useful in formulas where you need to calculate an age.`,
+        description: 'Calculates the number of days, months, or years between two dates. This function is useful in formulas where you need to calculate an age.',
+        abstract: 'Calculates the number of days, months, or years between two dates. This function is useful in formulas where you need to calculate an age.',
         links: [
             {
                 title: 'Instruction',
@@ -44,8 +44,8 @@ export default {
         },
     },
     DATEVALUE: {
-        description: `Converts a date in the form of text to a serial number`,
-        abstract: `Converts a date in the form of text to a serial number`,
+        description: 'Converts a date in the form of text to a serial number',
+        abstract: 'Converts a date in the form of text to a serial number',
         links: [
             {
                 title: 'Instruction',
@@ -58,8 +58,8 @@ export default {
         },
     },
     DAY: {
-        description: `Converts a serial number to a day of the month`,
-        abstract: `Converts a serial number to a day of the month`,
+        description: 'Converts a serial number to a day of the month',
+        abstract: 'Converts a serial number to a day of the month',
         links: [
             {
                 title: 'Instruction',
@@ -72,8 +72,8 @@ export default {
         },
     },
     DAYS: {
-        description: `Returns the number of days between two dates`,
-        abstract: `Returns the number of days between two dates`,
+        description: 'Returns the number of days between two dates',
+        abstract: 'Returns the number of days between two dates',
         links: [
             {
                 title: 'Instruction',
@@ -86,8 +86,8 @@ export default {
         },
     },
     DAYS360: {
-        description: `Calculates the number of days between two dates based on a 360-day year`,
-        abstract: `Calculates the number of days between two dates based on a 360-day year`,
+        description: 'Calculates the number of days between two dates based on a 360-day year',
+        abstract: 'Calculates the number of days between two dates based on a 360-day year',
         links: [
             {
                 title: 'Instruction',
@@ -100,8 +100,8 @@ export default {
         },
     },
     EDATE: {
-        description: `Returns the serial number of the date that is the indicated number of months before or after the start date`,
-        abstract: `Returns the serial number of the date that is the indicated number of months before or after the start date`,
+        description: 'Returns the serial number of the date that is the indicated number of months before or after the start date',
+        abstract: 'Returns the serial number of the date that is the indicated number of months before or after the start date',
         links: [
             {
                 title: 'Instruction',
@@ -114,8 +114,8 @@ export default {
         },
     },
     EOMONTH: {
-        description: `Returns the serial number of the last day of the month before or after a specified number of months`,
-        abstract: `Returns the serial number of the last day of the month before or after a specified number of months`,
+        description: 'Returns the serial number of the last day of the month before or after a specified number of months',
+        abstract: 'Returns the serial number of the last day of the month before or after a specified number of months',
         links: [
             {
                 title: 'Instruction',
@@ -128,8 +128,8 @@ export default {
         },
     },
     HOUR: {
-        description: `Converts a serial number to an hour`,
-        abstract: `Converts a serial number to an hour`,
+        description: 'Converts a serial number to an hour',
+        abstract: 'Converts a serial number to an hour',
         links: [
             {
                 title: 'Instruction',
@@ -142,8 +142,8 @@ export default {
         },
     },
     ISOWEEKNUM: {
-        description: `Returns the number of the ISO week number of the year for a given date`,
-        abstract: `Returns the number of the ISO week number of the year for a given date`,
+        description: 'Returns the number of the ISO week number of the year for a given date',
+        abstract: 'Returns the number of the ISO week number of the year for a given date',
         links: [
             {
                 title: 'Instruction',
@@ -156,8 +156,8 @@ export default {
         },
     },
     MINUTE: {
-        description: `Converts a serial number to a minute`,
-        abstract: `Converts a serial number to a minute`,
+        description: 'Converts a serial number to a minute',
+        abstract: 'Converts a serial number to a minute',
         links: [
             {
                 title: 'Instruction',
@@ -170,8 +170,8 @@ export default {
         },
     },
     MONTH: {
-        description: `Converts a serial number to a month`,
-        abstract: `Converts a serial number to a month`,
+        description: 'Converts a serial number to a month',
+        abstract: 'Converts a serial number to a month',
         links: [
             {
                 title: 'Instruction',
@@ -184,8 +184,8 @@ export default {
         },
     },
     NETWORKDAYS: {
-        description: `Returns the number of whole workdays between two dates`,
-        abstract: `Returns the number of whole workdays between two dates`,
+        description: 'Returns the number of whole workdays between two dates',
+        abstract: 'Returns the number of whole workdays between two dates',
         links: [
             {
                 title: 'Instruction',
@@ -198,8 +198,8 @@ export default {
         },
     },
     NETWORKDAYS_INTL: {
-        description: `Returns the number of whole workdays between two dates using parameters to indicate which and how many days are weekend days`,
-        abstract: `Returns the number of whole workdays between two dates using parameters to indicate which and how many days are weekend days`,
+        description: 'Returns the number of whole workdays between two dates using parameters to indicate which and how many days are weekend days',
+        abstract: 'Returns the number of whole workdays between two dates using parameters to indicate which and how many days are weekend days',
         links: [
             {
                 title: 'Instruction',
@@ -212,8 +212,8 @@ export default {
         },
     },
     NOW: {
-        description: `Returns the serial number of the current date and time`,
-        abstract: `Returns the serial number of the current date and time`,
+        description: 'Returns the serial number of the current date and time',
+        abstract: 'Returns the serial number of the current date and time',
         links: [
             {
                 title: 'Instruction',
@@ -226,8 +226,8 @@ export default {
         },
     },
     SECOND: {
-        description: `Converts a serial number to a second`,
-        abstract: `Converts a serial number to a second`,
+        description: 'Converts a serial number to a second',
+        abstract: 'Converts a serial number to a second',
         links: [
             {
                 title: 'Instruction',
@@ -240,8 +240,8 @@ export default {
         },
     },
     TIME: {
-        description: `Returns the serial number of a particular time`,
-        abstract: `Returns the serial number of a particular time`,
+        description: 'Returns the serial number of a particular time',
+        abstract: 'Returns the serial number of a particular time',
         links: [
             {
                 title: 'Instruction',
@@ -254,8 +254,8 @@ export default {
         },
     },
     TIMEVALUE: {
-        description: `Converts a time in the form of text to a serial number`,
-        abstract: `Converts a time in the form of text to a serial number`,
+        description: 'Converts a time in the form of text to a serial number',
+        abstract: 'Converts a time in the form of text to a serial number',
         links: [
             {
                 title: 'Instruction',
@@ -268,8 +268,8 @@ export default {
         },
     },
     TODAY: {
-        description: `Returns the serial number of today's date`,
-        abstract: `Returns the serial number of today's date`,
+        description: 'Returns the serial number of today\'s date',
+        abstract: 'Returns the serial number of today\'s date',
         links: [
             {
                 title: 'Instruction',
@@ -282,8 +282,8 @@ export default {
         },
     },
     WEEKDAY: {
-        description: `Converts a serial number to a day of the week`,
-        abstract: `Converts a serial number to a day of the week`,
+        description: 'Converts a serial number to a day of the week',
+        abstract: 'Converts a serial number to a day of the week',
         links: [
             {
                 title: 'Instruction',
@@ -296,8 +296,8 @@ export default {
         },
     },
     WEEKNUM: {
-        description: `Converts a serial number to a number representing where the week falls numerically with a year`,
-        abstract: `Converts a serial number to a number representing where the week falls numerically with a year`,
+        description: 'Converts a serial number to a number representing where the week falls numerically with a year',
+        abstract: 'Converts a serial number to a number representing where the week falls numerically with a year',
         links: [
             {
                 title: 'Instruction',
@@ -310,8 +310,8 @@ export default {
         },
     },
     WORKDAY: {
-        description: `Returns the serial number of the date before or after a specified number of workdays`,
-        abstract: `Returns the serial number of the date before or after a specified number of workdays`,
+        description: 'Returns the serial number of the date before or after a specified number of workdays',
+        abstract: 'Returns the serial number of the date before or after a specified number of workdays',
         links: [
             {
                 title: 'Instruction',
@@ -324,8 +324,8 @@ export default {
         },
     },
     WORKDAY_INTL: {
-        description: `Returns the serial number of the date before or after a specified number of workdays using parameters to indicate which and how many days are weekend days`,
-        abstract: `Returns the serial number of the date before or after a specified number of workdays using parameters to indicate which and how many days are weekend days`,
+        description: 'Returns the serial number of the date before or after a specified number of workdays using parameters to indicate which and how many days are weekend days',
+        abstract: 'Returns the serial number of the date before or after a specified number of workdays using parameters to indicate which and how many days are weekend days',
         links: [
             {
                 title: 'Instruction',
@@ -338,8 +338,8 @@ export default {
         },
     },
     YEAR: {
-        description: `Converts a serial number to a year`,
-        abstract: `Converts a serial number to a year`,
+        description: 'Converts a serial number to a year',
+        abstract: 'Converts a serial number to a year',
         links: [
             {
                 title: 'Instruction',
@@ -352,8 +352,8 @@ export default {
         },
     },
     YEARFRAC: {
-        description: `Returns the year fraction representing the number of whole days between start_date and end_date`,
-        abstract: `Returns the year fraction representing the number of whole days between start_date and end_date`,
+        description: 'Returns the year fraction representing the number of whole days between start_date and end_date',
+        abstract: 'Returns the year fraction representing the number of whole days between start_date and end_date',
         links: [
             {
                 title: 'Instruction',

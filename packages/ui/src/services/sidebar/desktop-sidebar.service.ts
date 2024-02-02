@@ -18,7 +18,7 @@ import { toDisposable } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 import { Subject } from 'rxjs';
 
-import { type ISidebarMethodOptions } from '../../views/components/sidebar/interface';
+import type { ISidebarMethodOptions } from '../../views/components/sidebar/interface';
 import type { ISidebarService } from './sidebar.service';
 
 export class DesktopSidebarService implements ISidebarService {

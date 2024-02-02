@@ -346,24 +346,24 @@ const TEST_ROWS_COLS_MOVE_DEMO: IWorkbookData = {
         sheet1: {
             id: 'sheet1',
             cellData: {
-                '0': {
-                    '0': {
+                0: {
+                    0: {
                         v: 'A1',
                         s: 's1',
                     },
                 },
-                '1': {
-                    '1': {
+                1: {
+                    1: {
                         v: 'B2',
                         s: 's2',
                     },
-                    '4': {
+                    4: {
                         v: 'E2',
                         s: 's3',
                     },
                 },
-                '2': {
-                    '1': {
+                2: {
+                    1: {
                         v: 'B3',
                         s: 's4',
                     },
@@ -384,8 +384,8 @@ const TEST_ROWS_COLS_MOVE_DEMO: IWorkbookData = {
                     endColumn: 1,
                 },
             ],
-            rowData: { '1': { h: 30 } },
-            columnData: { '1': { w: 30 } },
+            rowData: { 1: { h: 30 } },
+            columnData: { 1: { w: 30 } },
             rowCount: 20,
             columnCount: 20,
         },

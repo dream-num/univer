@@ -16,8 +16,8 @@
 
 export default {
     ACCRINT: {
-        description: `定期的に利息が支払われる証券の未収利息額を返します。`,
-        abstract: `定期的に利息が支払われる証券の未収利息額を返します。`,
+        description: '定期的に利息が支払われる証券の未収利息額を返します。',
+        abstract: '定期的に利息が支払われる証券の未収利息額を返します。',
         links: [
             {
                 title: '指導',
@@ -30,8 +30,8 @@ export default {
         },
     },
     ACCRINTM: {
-        description: `満期日に利息が支払われる証券の未収利息額を返します。`,
-        abstract: `満期日に利息が支払われる証券の未収利息額を返します。`,
+        description: '満期日に利息が支払われる証券の未収利息額を返します。',
+        abstract: '満期日に利息が支払われる証券の未収利息額を返します。',
         links: [
             {
                 title: '指導',
@@ -44,8 +44,8 @@ export default {
         },
     },
     AMORDEGRC: {
-        description: `減価償却係数を使用して、各会計期における減価償却費を返します。`,
-        abstract: `減価償却係数を使用して、各会計期における減価償却費を返します。`,
+        description: '減価償却係数を使用して、各会計期における減価償却費を返します。',
+        abstract: '減価償却係数を使用して、各会計期における減価償却費を返します。',
         links: [
             {
                 title: '指導',
@@ -58,8 +58,8 @@ export default {
         },
     },
     AMORLINC: {
-        description: `各会計期における減価償却費を返します。`,
-        abstract: `各会計期における減価償却費を返します。`,
+        description: '各会計期における減価償却費を返します。',
+        abstract: '各会計期における減価償却費を返します。',
         links: [
             {
                 title: '指導',
@@ -72,8 +72,8 @@ export default {
         },
     },
     COUPDAYBS: {
-        description: `利払期間の第 1 日目から受渡日までの日数を返します。`,
-        abstract: `利払期間の第 1 日目から受渡日までの日数を返します。`,
+        description: '利払期間の第 1 日目から受渡日までの日数を返します。',
+        abstract: '利払期間の第 1 日目から受渡日までの日数を返します。',
         links: [
             {
                 title: '指導',
@@ -86,8 +86,8 @@ export default {
         },
     },
     COUPDAYS: {
-        description: `受渡日を含む利払期間内の日数を返します。`,
-        abstract: `受渡日を含む利払期間内の日数を返します。`,
+        description: '受渡日を含む利払期間内の日数を返します。',
+        abstract: '受渡日を含む利払期間内の日数を返します。',
         links: [
             {
                 title: '指導',
@@ -100,8 +100,8 @@ export default {
         },
     },
     COUPDAYSNC: {
-        description: `受渡日から次の利払日までの日数を返します。`,
-        abstract: `受渡日から次の利払日までの日数を返します。`,
+        description: '受渡日から次の利払日までの日数を返します。',
+        abstract: '受渡日から次の利払日までの日数を返します。',
         links: [
             {
                 title: '指導',
@@ -114,8 +114,8 @@ export default {
         },
     },
     COUPNCD: {
-        description: `受領日後の次の利息支払日を返します。`,
-        abstract: `受領日後の次の利息支払日を返します。`,
+        description: '受領日後の次の利息支払日を返します。',
+        abstract: '受領日後の次の利息支払日を返します。',
         links: [
             {
                 title: '指導',
@@ -128,8 +128,8 @@ export default {
         },
     },
     COUPNUM: {
-        description: `受領日と満期日の間に利息が支払われる回数を返します。`,
-        abstract: `受領日と満期日の間に利息が支払われる回数を返します。`,
+        description: '受領日と満期日の間に利息が支払われる回数を返します。',
+        abstract: '受領日と満期日の間に利息が支払われる回数を返します。',
         links: [
             {
                 title: '指導',
@@ -142,8 +142,8 @@ export default {
         },
     },
     COUPPCD: {
-        description: `受領日の直前の利息支払日を返します。`,
-        abstract: `受領日の直前の利息支払日を返します。`,
+        description: '受領日の直前の利息支払日を返します。',
+        abstract: '受領日の直前の利息支払日を返します。',
         links: [
             {
                 title: '指導',
@@ -156,8 +156,8 @@ export default {
         },
     },
     CUMIPMT: {
-        description: `指定した期間に、貸付金に対して支払われる利息の累計を返します。`,
-        abstract: `指定した期間に、貸付金に対して支払われる利息の累計を返します。`,
+        description: '指定した期間に、貸付金に対して支払われる利息の累計を返します。',
+        abstract: '指定した期間に、貸付金に対して支払われる利息の累計を返します。',
         links: [
             {
                 title: '指導',
@@ -170,8 +170,8 @@ export default {
         },
     },
     CUMPRINC: {
-        description: `指定した期間に、貸付金に対して支払われる元金の累計を返します。`,
-        abstract: `指定した期間に、貸付金に対して支払われる元金の累計を返します。`,
+        description: '指定した期間に、貸付金に対して支払われる元金の累計を返します。',
+        abstract: '指定した期間に、貸付金に対して支払われる元金の累計を返します。',
         links: [
             {
                 title: '指導',
@@ -184,8 +184,8 @@ export default {
         },
     },
     DB: {
-        description: `定率法 (Fixed-declining Balance Method) を使用して、特定の期における資産の減価償却費を返します。`,
-        abstract: `定率法 (Fixed-declining Balance Method) を使用して、特定の期における資産の減価償却費を返します。`,
+        description: '定率法 (Fixed-declining Balance Method) を使用して、特定の期における資産の減価償却費を返します。',
+        abstract: '定率法 (Fixed-declining Balance Method) を使用して、特定の期における資産の減価償却費を返します。',
         links: [
             {
                 title: '指導',
@@ -198,8 +198,8 @@ export default {
         },
     },
     DDB: {
-        description: `倍額定率法 (Double-declining Balance Method) を使用して、特定の期における資産の減価償却費を返します。`,
-        abstract: `倍額定率法 (Double-declining Balance Method) を使用して、特定の期における資産の減価償却費を返します。`,
+        description: '倍額定率法 (Double-declining Balance Method) を使用して、特定の期における資産の減価償却費を返します。',
+        abstract: '倍額定率法 (Double-declining Balance Method) を使用して、特定の期における資産の減価償却費を返します。',
         links: [
             {
                 title: '指導',
@@ -212,8 +212,8 @@ export default {
         },
     },
     DISC: {
-        description: `証券に対する割引率を返します。`,
-        abstract: `証券に対する割引率を返します。`,
+        description: '証券に対する割引率を返します。',
+        abstract: '証券に対する割引率を返します。',
         links: [
             {
                 title: '指導',
@@ -226,8 +226,8 @@ export default {
         },
     },
     DOLLARDE: {
-        description: `分数で表されたドル単位の価格を、小数表示に変換します。`,
-        abstract: `分数で表されたドル単位の価格を、小数表示に変換します。`,
+        description: '分数で表されたドル単位の価格を、小数表示に変換します。',
+        abstract: '分数で表されたドル単位の価格を、小数表示に変換します。',
         links: [
             {
                 title: '指導',
@@ -240,8 +240,8 @@ export default {
         },
     },
     DOLLARFR: {
-        description: `小数で表されたドル単位の価格を、分数表示に変換します。`,
-        abstract: `小数で表されたドル単位の価格を、分数表示に変換します。`,
+        description: '小数で表されたドル単位の価格を、分数表示に変換します。',
+        abstract: '小数で表されたドル単位の価格を、分数表示に変換します。',
         links: [
             {
                 title: '指導',
@@ -254,8 +254,8 @@ export default {
         },
     },
     DURATION: {
-        description: `定期的に利子が支払われる証券の年間のマコーレー デュレーションを返します。`,
-        abstract: `定期的に利子が支払われる証券の年間のマコーレー デュレーションを返します。`,
+        description: '定期的に利子が支払われる証券の年間のマコーレー デュレーションを返します。',
+        abstract: '定期的に利子が支払われる証券の年間のマコーレー デュレーションを返します。',
         links: [
             {
                 title: '指導',
@@ -268,8 +268,8 @@ export default {
         },
     },
     EFFECT: {
-        description: `実効年利率を返します。`,
-        abstract: `実効年利率を返します。`,
+        description: '実効年利率を返します。',
+        abstract: '実効年利率を返します。',
         links: [
             {
                 title: '指導',
@@ -282,8 +282,8 @@ export default {
         },
     },
     FV: {
-        description: `投資の将来価値を返します。`,
-        abstract: `投資の将来価値を返します。`,
+        description: '投資の将来価値を返します。',
+        abstract: '投資の将来価値を返します。',
         links: [
             {
                 title: '指導',
@@ -296,8 +296,8 @@ export default {
         },
     },
     FVSCHEDULE: {
-        description: `投資期間内の一連の金利を複利計算することにより、初期投資の元金の将来価値を返します。`,
-        abstract: `投資期間内の一連の金利を複利計算することにより、初期投資の元金の将来価値を返します。`,
+        description: '投資期間内の一連の金利を複利計算することにより、初期投資の元金の将来価値を返します。',
+        abstract: '投資期間内の一連の金利を複利計算することにより、初期投資の元金の将来価値を返します。',
         links: [
             {
                 title: '指導',
@@ -310,8 +310,8 @@ export default {
         },
     },
     INTRATE: {
-        description: `全額投資された証券の利率を返します。`,
-        abstract: `全額投資された証券の利率を返します。`,
+        description: '全額投資された証券の利率を返します。',
+        abstract: '全額投資された証券の利率を返します。',
         links: [
             {
                 title: '指導',
@@ -324,8 +324,8 @@ export default {
         },
     },
     IPMT: {
-        description: `投資期間内の指定された期に支払われる金利を返します。`,
-        abstract: `投資期間内の指定された期に支払われる金利を返します。`,
+        description: '投資期間内の指定された期に支払われる金利を返します。',
+        abstract: '投資期間内の指定された期に支払われる金利を返します。',
         links: [
             {
                 title: '指導',
@@ -338,8 +338,8 @@ export default {
         },
     },
     IRR: {
-        description: `一連の定期的なキャッシュ フローに対する内部利益率を返します。`,
-        abstract: `一連の定期的なキャッシュ フローに対する内部利益率を返します。`,
+        description: '一連の定期的なキャッシュ フローに対する内部利益率を返します。',
+        abstract: '一連の定期的なキャッシュ フローに対する内部利益率を返します。',
         links: [
             {
                 title: '指導',
@@ -352,8 +352,8 @@ export default {
         },
     },
     ISPMT: {
-        description: `投資期間内の指定された期に支払われる金利を返します。`,
-        abstract: `投資期間内の指定された期に支払われる金利を返します。`,
+        description: '投資期間内の指定された期に支払われる金利を返します。',
+        abstract: '投資期間内の指定された期に支払われる金利を返します。',
         links: [
             {
                 title: '指導',
@@ -366,8 +366,8 @@ export default {
         },
     },
     MDURATION: {
-        description: `額面価格を $100 と仮定して、証券に対する修正マコーレー デュレーションを返します。`,
-        abstract: `額面価格を $100 と仮定して、証券に対する修正マコーレー デュレーションを返します。`,
+        description: '額面価格を $100 と仮定して、証券に対する修正マコーレー デュレーションを返します。',
+        abstract: '額面価格を $100 と仮定して、証券に対する修正マコーレー デュレーションを返します。',
         links: [
             {
                 title: '指導',
@@ -380,8 +380,8 @@ export default {
         },
     },
     MIRR: {
-        description: `定期的に発生する一連の支払い (負の値) と収益 (正の値) に基づいて、修正内部利益率を返します。`,
-        abstract: `定期的に発生する一連の支払い (負の値) と収益 (正の値) に基づいて、修正内部利益率を返します。`,
+        description: '定期的に発生する一連の支払い (負の値) と収益 (正の値) に基づいて、修正内部利益率を返します。',
+        abstract: '定期的に発生する一連の支払い (負の値) と収益 (正の値) に基づいて、修正内部利益率を返します。',
         links: [
             {
                 title: '指導',
@@ -394,8 +394,8 @@ export default {
         },
     },
     NOMINAL: {
-        description: `名目年利率を返します。`,
-        abstract: `名目年利率を返します。`,
+        description: '名目年利率を返します。',
+        abstract: '名目年利率を返します。',
         links: [
             {
                 title: '指導',
@@ -408,8 +408,8 @@ export default {
         },
     },
     NPER: {
-        description: `投資に必要な期間を返します。`,
-        abstract: `投資に必要な期間を返します。`,
+        description: '投資に必要な期間を返します。',
+        abstract: '投資に必要な期間を返します。',
         links: [
             {
                 title: '指導',
@@ -422,8 +422,8 @@ export default {
         },
     },
     NPV: {
-        description: `定期的に発生する一連の支払い (負の値) と収益 (正の値)、および割引率を指定して、投資の正味現在価値を算出します。`,
-        abstract: `定期的に発生する一連の支払い (負の値) と収益 (正の値)、および割引率を指定して、投資の正味現在価値を算出します。`,
+        description: '定期的に発生する一連の支払い (負の値) と収益 (正の値)、および割引率を指定して、投資の正味現在価値を算出します。',
+        abstract: '定期的に発生する一連の支払い (負の値) と収益 (正の値)、および割引率を指定して、投資の正味現在価値を算出します。',
         links: [
             {
                 title: '指導',
@@ -436,8 +436,8 @@ export default {
         },
     },
     ODDFPRICE: {
-        description: `1 期目の日数が半端な証券に対して、額面 $100 あたりの価格を返します。`,
-        abstract: `1 期目の日数が半端な証券に対して、額面 $100 あたりの価格を返します。`,
+        description: '1 期目の日数が半端な証券に対して、額面 $100 あたりの価格を返します。',
+        abstract: '1 期目の日数が半端な証券に対して、額面 $100 あたりの価格を返します。',
         links: [
             {
                 title: '指導',
@@ -450,8 +450,8 @@ export default {
         },
     },
     ODDFYIELD: {
-        description: `1 期目の日数が半端な証券の利回りを返します。`,
-        abstract: `1 期目の日数が半端な証券の利回りを返します。`,
+        description: '1 期目の日数が半端な証券の利回りを返します。',
+        abstract: '1 期目の日数が半端な証券の利回りを返します。',
         links: [
             {
                 title: '指導',
@@ -464,8 +464,8 @@ export default {
         },
     },
     ODDLPRICE: {
-        description: `最終期の日数が半端な証券に対して、額面 $100 あたりの価格を返します。`,
-        abstract: `最終期の日数が半端な証券に対して、額面 $100 あたりの価格を返します。`,
+        description: '最終期の日数が半端な証券に対して、額面 $100 あたりの価格を返します。',
+        abstract: '最終期の日数が半端な証券に対して、額面 $100 あたりの価格を返します。',
         links: [
             {
                 title: '指導',
@@ -478,8 +478,8 @@ export default {
         },
     },
     ODDLYIELD: {
-        description: `最終期の日数が半端な証券の利回りを返します。`,
-        abstract: `最終期の日数が半端な証券の利回りを返します。`,
+        description: '最終期の日数が半端な証券の利回りを返します。',
+        abstract: '最終期の日数が半端な証券の利回りを返します。',
         links: [
             {
                 title: '指導',
@@ -492,8 +492,8 @@ export default {
         },
     },
     PDURATION: {
-        description: `投資が指定した価値に達するまでの投資に必要な期間を返します。`,
-        abstract: `投資が指定した価値に達するまでの投資に必要な期間を返します。`,
+        description: '投資が指定した価値に達するまでの投資に必要な期間を返します。',
+        abstract: '投資が指定した価値に達するまでの投資に必要な期間を返します。',
         links: [
             {
                 title: '指導',
@@ -506,8 +506,8 @@ export default {
         },
     },
     PMT: {
-        description: `定期支払額を算出します。`,
-        abstract: `定期支払額を算出します。`,
+        description: '定期支払額を算出します。',
+        abstract: '定期支払額を算出します。',
         links: [
             {
                 title: '指導',
@@ -520,8 +520,8 @@ export default {
         },
     },
     PPMT: {
-        description: `指定した期に支払われる元金を返します。`,
-        abstract: `指定した期に支払われる元金を返します。`,
+        description: '指定した期に支払われる元金を返します。',
+        abstract: '指定した期に支払われる元金を返します。',
         links: [
             {
                 title: '指導',
@@ -534,8 +534,8 @@ export default {
         },
     },
     PRICE: {
-        description: `定期的に利息が支払われる証券に対して、額面 $100 あたりの価格を返します。`,
-        abstract: `定期的に利息が支払われる証券に対して、額面 $100 あたりの価格を返します。`,
+        description: '定期的に利息が支払われる証券に対して、額面 $100 あたりの価格を返します。',
+        abstract: '定期的に利息が支払われる証券に対して、額面 $100 あたりの価格を返します。',
         links: [
             {
                 title: '指導',
@@ -548,8 +548,8 @@ export default {
         },
     },
     PRICEDISC: {
-        description: `割引証券の額面 $100 あたりの価格を返します。`,
-        abstract: `割引証券の額面 $100 あたりの価格を返します。`,
+        description: '割引証券の額面 $100 あたりの価格を返します。',
+        abstract: '割引証券の額面 $100 あたりの価格を返します。',
         links: [
             {
                 title: '指導',
@@ -562,8 +562,8 @@ export default {
         },
     },
     PRICEMAT: {
-        description: `満期日に利息が支払われる証券に対して、額面 $100 あたりの価格を返します。`,
-        abstract: `満期日に利息が支払われる証券に対して、額面 $100 あたりの価格を返します。`,
+        description: '満期日に利息が支払われる証券に対して、額面 $100 あたりの価格を返します。',
+        abstract: '満期日に利息が支払われる証券に対して、額面 $100 あたりの価格を返します。',
         links: [
             {
                 title: '指導',
@@ -576,8 +576,8 @@ export default {
         },
     },
     PV: {
-        description: `投資の現在価値を返します。`,
-        abstract: `投資の現在価値を返します。`,
+        description: '投資の現在価値を返します。',
+        abstract: '投資の現在価値を返します。',
         links: [
             {
                 title: '指導',
@@ -590,8 +590,8 @@ export default {
         },
     },
     RATE: {
-        description: `投資の利率を返します。`,
-        abstract: `投資の利率を返します。`,
+        description: '投資の利率を返します。',
+        abstract: '投資の利率を返します。',
         links: [
             {
                 title: '指導',
@@ -604,8 +604,8 @@ export default {
         },
     },
     RECEIVED: {
-        description: `全額投資された証券に対して、満期日に支払われる金額を返します。`,
-        abstract: `全額投資された証券に対して、満期日に支払われる金額を返します。`,
+        description: '全額投資された証券に対して、満期日に支払われる金額を返します。',
+        abstract: '全額投資された証券に対して、満期日に支払われる金額を返します。',
         links: [
             {
                 title: '指導',
@@ -618,8 +618,8 @@ export default {
         },
     },
     RRI: {
-        description: `投資の成長に対する等価利率を返します。`,
-        abstract: `投資の成長に対する等価利率を返します。`,
+        description: '投資の成長に対する等価利率を返します。',
+        abstract: '投資の成長に対する等価利率を返します。',
         links: [
             {
                 title: '指導',
@@ -632,8 +632,8 @@ export default {
         },
     },
     SLN: {
-        description: `定額法 (Straight-line Method) を使用して、資産の 1 期あたりの減価償却費を返します。`,
-        abstract: `定額法 (Straight-line Method) を使用して、資産の 1 期あたりの減価償却費を返します。`,
+        description: '定額法 (Straight-line Method) を使用して、資産の 1 期あたりの減価償却費を返します。',
+        abstract: '定額法 (Straight-line Method) を使用して、資産の 1 期あたりの減価償却費を返します。',
         links: [
             {
                 title: '指導',
@@ -646,8 +646,8 @@ export default {
         },
     },
     SYD: {
-        description: `級数法 (Sum-of-Year's Digits Method) を使用して、特定の期における減価償却費を返します。`,
-        abstract: `級数法 (Sum-of-Year's Digits Method) を使用して、特定の期における減価償却費を返します。`,
+        description: '級数法 (Sum-of-Year\'s Digits Method) を使用して、特定の期における減価償却費を返します。',
+        abstract: '級数法 (Sum-of-Year\'s Digits Method) を使用して、特定の期における減価償却費を返します。',
         links: [
             {
                 title: '指導',
@@ -660,8 +660,8 @@ export default {
         },
     },
     TBILLEQ: {
-        description: `米国財務省短期証券 (TB) の債券換算利回りを返します。`,
-        abstract: `米国財務省短期証券 (TB) の債券換算利回りを返します。`,
+        description: '米国財務省短期証券 (TB) の債券換算利回りを返します。',
+        abstract: '米国財務省短期証券 (TB) の債券換算利回りを返します。',
         links: [
             {
                 title: '指導',
@@ -674,8 +674,8 @@ export default {
         },
     },
     TBILLPRICE: {
-        description: `米国財務省短期証券 (TB) の額面 $100 あたりの価格を返します。`,
-        abstract: `米国財務省短期証券 (TB) の額面 $100 あたりの価格を返します。`,
+        description: '米国財務省短期証券 (TB) の額面 $100 あたりの価格を返します。',
+        abstract: '米国財務省短期証券 (TB) の額面 $100 あたりの価格を返します。',
         links: [
             {
                 title: '指導',
@@ -688,8 +688,8 @@ export default {
         },
     },
     TBILLYIELD: {
-        description: `米国財務省短期証券 (TB) の利回りを返します。`,
-        abstract: `米国財務省短期証券 (TB) の利回りを返します。`,
+        description: '米国財務省短期証券 (TB) の利回りを返します。',
+        abstract: '米国財務省短期証券 (TB) の利回りを返します。',
         links: [
             {
                 title: '指導',
@@ -702,8 +702,8 @@ export default {
         },
     },
     VDB: {
-        description: `倍額定率法または指定した方法を使用して、指定した期間における資産の減価償却費を返します。`,
-        abstract: `倍額定率法または指定した方法を使用して、指定した期間における資産の減価償却費を返します。`,
+        description: '倍額定率法または指定した方法を使用して、指定した期間における資産の減価償却費を返します。',
+        abstract: '倍額定率法または指定した方法を使用して、指定した期間における資産の減価償却費を返します。',
         links: [
             {
                 title: '指導',
@@ -716,8 +716,8 @@ export default {
         },
     },
     XIRR: {
-        description: `定期的でないキャッシュ フローに対する内部利益率を返します。`,
-        abstract: `定期的でないキャッシュ フローに対する内部利益率を返します。`,
+        description: '定期的でないキャッシュ フローに対する内部利益率を返します。',
+        abstract: '定期的でないキャッシュ フローに対する内部利益率を返します。',
         links: [
             {
                 title: '指導',
@@ -730,8 +730,8 @@ export default {
         },
     },
     XNPV: {
-        description: `定期的でないキャッシュ フローに対する正味現在価値を返します。`,
-        abstract: `定期的でないキャッシュ フローに対する正味現在価値を返します。`,
+        description: '定期的でないキャッシュ フローに対する正味現在価値を返します。',
+        abstract: '定期的でないキャッシュ フローに対する正味現在価値を返します。',
         links: [
             {
                 title: '指導',
@@ -744,8 +744,8 @@ export default {
         },
     },
     YIELD: {
-        description: `利息が定期的に支払われる証券の利回りを返します。`,
-        abstract: `利息が定期的に支払われる証券の利回りを返します。`,
+        description: '利息が定期的に支払われる証券の利回りを返します。',
+        abstract: '利息が定期的に支払われる証券の利回りを返します。',
         links: [
             {
                 title: '指導',
@@ -758,8 +758,8 @@ export default {
         },
     },
     YIELDDISC: {
-        description: `米国財務省短期証券 (TB) などの割引債の年利回りを返します。`,
-        abstract: `米国財務省短期証券 (TB) などの割引債の年利回りを返します。`,
+        description: '米国財務省短期証券 (TB) などの割引債の年利回りを返します。',
+        abstract: '米国財務省短期証券 (TB) などの割引債の年利回りを返します。',
         links: [
             {
                 title: '指導',
@@ -772,8 +772,8 @@ export default {
         },
     },
     YIELDMAT: {
-        description: `満期日に利息が支払われる証券の利回りを返します。`,
-        abstract: `満期日に利息が支払われる証券の利回りを返します。`,
+        description: '満期日に利息が支払われる証券の利回りを返します。',
+        abstract: '満期日に利息が支払われる証券の利回りを返します。',
         links: [
             {
                 title: '指導',

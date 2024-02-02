@@ -16,8 +16,8 @@
 
 export default {
     ACCRINT: {
-        description: `Returns the accrued interest for a security that pays periodic interest`,
-        abstract: `Returns the accrued interest for a security that pays periodic interest`,
+        description: 'Returns the accrued interest for a security that pays periodic interest',
+        abstract: 'Returns the accrued interest for a security that pays periodic interest',
         links: [
             {
                 title: 'Instruction',
@@ -30,8 +30,8 @@ export default {
         },
     },
     ACCRINTM: {
-        description: `Returns the accrued interest for a security that pays interest at maturity`,
-        abstract: `Returns the accrued interest for a security that pays interest at maturity`,
+        description: 'Returns the accrued interest for a security that pays interest at maturity',
+        abstract: 'Returns the accrued interest for a security that pays interest at maturity',
         links: [
             {
                 title: 'Instruction',
@@ -44,8 +44,8 @@ export default {
         },
     },
     AMORDEGRC: {
-        description: `Returns the depreciation for each accounting period by using a depreciation coefficient`,
-        abstract: `Returns the depreciation for each accounting period by using a depreciation coefficient`,
+        description: 'Returns the depreciation for each accounting period by using a depreciation coefficient',
+        abstract: 'Returns the depreciation for each accounting period by using a depreciation coefficient',
         links: [
             {
                 title: 'Instruction',
@@ -58,8 +58,8 @@ export default {
         },
     },
     AMORLINC: {
-        description: `Returns the depreciation for each accounting period`,
-        abstract: `Returns the depreciation for each accounting period`,
+        description: 'Returns the depreciation for each accounting period',
+        abstract: 'Returns the depreciation for each accounting period',
         links: [
             {
                 title: 'Instruction',
@@ -72,8 +72,8 @@ export default {
         },
     },
     COUPDAYBS: {
-        description: `Returns the number of days from the beginning of the coupon period to the settlement date`,
-        abstract: `Returns the number of days from the beginning of the coupon period to the settlement date`,
+        description: 'Returns the number of days from the beginning of the coupon period to the settlement date',
+        abstract: 'Returns the number of days from the beginning of the coupon period to the settlement date',
         links: [
             {
                 title: 'Instruction',
@@ -86,8 +86,8 @@ export default {
         },
     },
     COUPDAYS: {
-        description: `Returns the number of days in the coupon period that contains the settlement date`,
-        abstract: `Returns the number of days in the coupon period that contains the settlement date`,
+        description: 'Returns the number of days in the coupon period that contains the settlement date',
+        abstract: 'Returns the number of days in the coupon period that contains the settlement date',
         links: [
             {
                 title: 'Instruction',
@@ -100,8 +100,8 @@ export default {
         },
     },
     COUPDAYSNC: {
-        description: `Returns the number of days from the settlement date to the next coupon date`,
-        abstract: `Returns the number of days from the settlement date to the next coupon date`,
+        description: 'Returns the number of days from the settlement date to the next coupon date',
+        abstract: 'Returns the number of days from the settlement date to the next coupon date',
         links: [
             {
                 title: 'Instruction',
@@ -114,8 +114,8 @@ export default {
         },
     },
     COUPNCD: {
-        description: `Returns the next coupon date after the settlement date`,
-        abstract: `Returns the next coupon date after the settlement date`,
+        description: 'Returns the next coupon date after the settlement date',
+        abstract: 'Returns the next coupon date after the settlement date',
         links: [
             {
                 title: 'Instruction',
@@ -128,8 +128,8 @@ export default {
         },
     },
     COUPNUM: {
-        description: `Returns the number of coupons payable between the settlement date and maturity date`,
-        abstract: `Returns the number of coupons payable between the settlement date and maturity date`,
+        description: 'Returns the number of coupons payable between the settlement date and maturity date',
+        abstract: 'Returns the number of coupons payable between the settlement date and maturity date',
         links: [
             {
                 title: 'Instruction',
@@ -142,8 +142,8 @@ export default {
         },
     },
     COUPPCD: {
-        description: `Returns the previous coupon date before the settlement date`,
-        abstract: `Returns the previous coupon date before the settlement date`,
+        description: 'Returns the previous coupon date before the settlement date',
+        abstract: 'Returns the previous coupon date before the settlement date',
         links: [
             {
                 title: 'Instruction',
@@ -156,8 +156,8 @@ export default {
         },
     },
     CUMIPMT: {
-        description: `Returns the cumulative interest paid between two periods`,
-        abstract: `Returns the cumulative interest paid between two periods`,
+        description: 'Returns the cumulative interest paid between two periods',
+        abstract: 'Returns the cumulative interest paid between two periods',
         links: [
             {
                 title: 'Instruction',
@@ -170,8 +170,8 @@ export default {
         },
     },
     CUMPRINC: {
-        description: `Returns the cumulative principal paid on a loan between two periods`,
-        abstract: `Returns the cumulative principal paid on a loan between two periods`,
+        description: 'Returns the cumulative principal paid on a loan between two periods',
+        abstract: 'Returns the cumulative principal paid on a loan between two periods',
         links: [
             {
                 title: 'Instruction',
@@ -184,8 +184,8 @@ export default {
         },
     },
     DB: {
-        description: `Returns the depreciation of an asset for a specified period by using the fixed-declining balance method`,
-        abstract: `Returns the depreciation of an asset for a specified period by using the fixed-declining balance method`,
+        description: 'Returns the depreciation of an asset for a specified period by using the fixed-declining balance method',
+        abstract: 'Returns the depreciation of an asset for a specified period by using the fixed-declining balance method',
         links: [
             {
                 title: 'Instruction',
@@ -198,8 +198,8 @@ export default {
         },
     },
     DDB: {
-        description: `Returns the depreciation of an asset for a specified period by using the double-declining balance method or some other method that you specify`,
-        abstract: `Returns the depreciation of an asset for a specified period by using the double-declining balance method or some other method that you specify`,
+        description: 'Returns the depreciation of an asset for a specified period by using the double-declining balance method or some other method that you specify',
+        abstract: 'Returns the depreciation of an asset for a specified period by using the double-declining balance method or some other method that you specify',
         links: [
             {
                 title: 'Instruction',
@@ -212,8 +212,8 @@ export default {
         },
     },
     DISC: {
-        description: `Returns the discount rate for a security`,
-        abstract: `Returns the discount rate for a security`,
+        description: 'Returns the discount rate for a security',
+        abstract: 'Returns the discount rate for a security',
         links: [
             {
                 title: 'Instruction',
@@ -226,8 +226,8 @@ export default {
         },
     },
     DOLLARDE: {
-        description: `Converts a dollar price, expressed as a fraction, into a dollar price, expressed as a decimal number`,
-        abstract: `Converts a dollar price, expressed as a fraction, into a dollar price, expressed as a decimal number`,
+        description: 'Converts a dollar price, expressed as a fraction, into a dollar price, expressed as a decimal number',
+        abstract: 'Converts a dollar price, expressed as a fraction, into a dollar price, expressed as a decimal number',
         links: [
             {
                 title: 'Instruction',
@@ -240,8 +240,8 @@ export default {
         },
     },
     DOLLARFR: {
-        description: `Converts a dollar price, expressed as a decimal number, into a dollar price, expressed as a fraction`,
-        abstract: `Converts a dollar price, expressed as a decimal number, into a dollar price, expressed as a fraction`,
+        description: 'Converts a dollar price, expressed as a decimal number, into a dollar price, expressed as a fraction',
+        abstract: 'Converts a dollar price, expressed as a decimal number, into a dollar price, expressed as a fraction',
         links: [
             {
                 title: 'Instruction',
@@ -254,8 +254,8 @@ export default {
         },
     },
     DURATION: {
-        description: `Returns the annual duration of a security with periodic interest payments`,
-        abstract: `Returns the annual duration of a security with periodic interest payments`,
+        description: 'Returns the annual duration of a security with periodic interest payments',
+        abstract: 'Returns the annual duration of a security with periodic interest payments',
         links: [
             {
                 title: 'Instruction',
@@ -268,8 +268,8 @@ export default {
         },
     },
     EFFECT: {
-        description: `Returns the effective annual interest rate`,
-        abstract: `Returns the effective annual interest rate`,
+        description: 'Returns the effective annual interest rate',
+        abstract: 'Returns the effective annual interest rate',
         links: [
             {
                 title: 'Instruction',
@@ -282,8 +282,8 @@ export default {
         },
     },
     FV: {
-        description: `Returns the future value of an investment`,
-        abstract: `Returns the future value of an investment`,
+        description: 'Returns the future value of an investment',
+        abstract: 'Returns the future value of an investment',
         links: [
             {
                 title: 'Instruction',
@@ -296,8 +296,8 @@ export default {
         },
     },
     FVSCHEDULE: {
-        description: `Returns the future value of an initial principal after applying a series of compound interest rates`,
-        abstract: `Returns the future value of an initial principal after applying a series of compound interest rates`,
+        description: 'Returns the future value of an initial principal after applying a series of compound interest rates',
+        abstract: 'Returns the future value of an initial principal after applying a series of compound interest rates',
         links: [
             {
                 title: 'Instruction',
@@ -310,8 +310,8 @@ export default {
         },
     },
     INTRATE: {
-        description: `Returns the interest rate for a fully invested security`,
-        abstract: `Returns the interest rate for a fully invested security`,
+        description: 'Returns the interest rate for a fully invested security',
+        abstract: 'Returns the interest rate for a fully invested security',
         links: [
             {
                 title: 'Instruction',
@@ -324,8 +324,8 @@ export default {
         },
     },
     IPMT: {
-        description: `Returns the interest payment for an investment for a given period`,
-        abstract: `Returns the interest payment for an investment for a given period`,
+        description: 'Returns the interest payment for an investment for a given period',
+        abstract: 'Returns the interest payment for an investment for a given period',
         links: [
             {
                 title: 'Instruction',
@@ -338,8 +338,8 @@ export default {
         },
     },
     IRR: {
-        description: `Returns the internal rate of return for a series of cash flows`,
-        abstract: `Returns the internal rate of return for a series of cash flows`,
+        description: 'Returns the internal rate of return for a series of cash flows',
+        abstract: 'Returns the internal rate of return for a series of cash flows',
         links: [
             {
                 title: 'Instruction',
@@ -352,8 +352,8 @@ export default {
         },
     },
     ISPMT: {
-        description: `Calculates the interest paid during a specific period of an investment`,
-        abstract: `Calculates the interest paid during a specific period of an investment`,
+        description: 'Calculates the interest paid during a specific period of an investment',
+        abstract: 'Calculates the interest paid during a specific period of an investment',
         links: [
             {
                 title: 'Instruction',
@@ -366,8 +366,8 @@ export default {
         },
     },
     MDURATION: {
-        description: `Returns the Macauley modified duration for a security with an assumed par value of $100`,
-        abstract: `Returns the Macauley modified duration for a security with an assumed par value of $100`,
+        description: 'Returns the Macauley modified duration for a security with an assumed par value of $100',
+        abstract: 'Returns the Macauley modified duration for a security with an assumed par value of $100',
         links: [
             {
                 title: 'Instruction',
@@ -380,8 +380,8 @@ export default {
         },
     },
     MIRR: {
-        description: `Returns the internal rate of return where positive and negative cash flows are financed at different rates`,
-        abstract: `Returns the internal rate of return where positive and negative cash flows are financed at different rates`,
+        description: 'Returns the internal rate of return where positive and negative cash flows are financed at different rates',
+        abstract: 'Returns the internal rate of return where positive and negative cash flows are financed at different rates',
         links: [
             {
                 title: 'Instruction',
@@ -394,8 +394,8 @@ export default {
         },
     },
     NOMINAL: {
-        description: `Returns the annual nominal interest rate`,
-        abstract: `Returns the annual nominal interest rate`,
+        description: 'Returns the annual nominal interest rate',
+        abstract: 'Returns the annual nominal interest rate',
         links: [
             {
                 title: 'Instruction',
@@ -408,8 +408,8 @@ export default {
         },
     },
     NPER: {
-        description: `Returns the number of periods for an investment`,
-        abstract: `Returns the number of periods for an investment`,
+        description: 'Returns the number of periods for an investment',
+        abstract: 'Returns the number of periods for an investment',
         links: [
             {
                 title: 'Instruction',
@@ -422,8 +422,8 @@ export default {
         },
     },
     NPV: {
-        description: `Returns the net present value of an investment based on a series of periodic cash flows and a discount rate`,
-        abstract: `Returns the net present value of an investment based on a series of periodic cash flows and a discount rate`,
+        description: 'Returns the net present value of an investment based on a series of periodic cash flows and a discount rate',
+        abstract: 'Returns the net present value of an investment based on a series of periodic cash flows and a discount rate',
         links: [
             {
                 title: 'Instruction',
@@ -436,8 +436,8 @@ export default {
         },
     },
     ODDFPRICE: {
-        description: `Returns the price per $100 face value of a security with an odd first period`,
-        abstract: `Returns the price per $100 face value of a security with an odd first period`,
+        description: 'Returns the price per $100 face value of a security with an odd first period',
+        abstract: 'Returns the price per $100 face value of a security with an odd first period',
         links: [
             {
                 title: 'Instruction',
@@ -450,8 +450,8 @@ export default {
         },
     },
     ODDFYIELD: {
-        description: `Returns the yield of a security with an odd first period`,
-        abstract: `Returns the yield of a security with an odd first period`,
+        description: 'Returns the yield of a security with an odd first period',
+        abstract: 'Returns the yield of a security with an odd first period',
         links: [
             {
                 title: 'Instruction',
@@ -464,8 +464,8 @@ export default {
         },
     },
     ODDLPRICE: {
-        description: `Returns the price per $100 face value of a security with an odd last period`,
-        abstract: `Returns the price per $100 face value of a security with an odd last period`,
+        description: 'Returns the price per $100 face value of a security with an odd last period',
+        abstract: 'Returns the price per $100 face value of a security with an odd last period',
         links: [
             {
                 title: 'Instruction',
@@ -478,8 +478,8 @@ export default {
         },
     },
     ODDLYIELD: {
-        description: `Returns the yield of a security with an odd last period`,
-        abstract: `Returns the yield of a security with an odd last period`,
+        description: 'Returns the yield of a security with an odd last period',
+        abstract: 'Returns the yield of a security with an odd last period',
         links: [
             {
                 title: 'Instruction',
@@ -492,8 +492,8 @@ export default {
         },
     },
     PDURATION: {
-        description: `Returns the number of periods required by an investment to reach a specified value`,
-        abstract: `Returns the number of periods required by an investment to reach a specified value`,
+        description: 'Returns the number of periods required by an investment to reach a specified value',
+        abstract: 'Returns the number of periods required by an investment to reach a specified value',
         links: [
             {
                 title: 'Instruction',
@@ -506,8 +506,8 @@ export default {
         },
     },
     PMT: {
-        description: `Returns the periodic payment for an annuity`,
-        abstract: `Returns the periodic payment for an annuity`,
+        description: 'Returns the periodic payment for an annuity',
+        abstract: 'Returns the periodic payment for an annuity',
         links: [
             {
                 title: 'Instruction',
@@ -520,8 +520,8 @@ export default {
         },
     },
     PPMT: {
-        description: `Returns the payment on the principal for an investment for a given period`,
-        abstract: `Returns the payment on the principal for an investment for a given period`,
+        description: 'Returns the payment on the principal for an investment for a given period',
+        abstract: 'Returns the payment on the principal for an investment for a given period',
         links: [
             {
                 title: 'Instruction',
@@ -534,8 +534,8 @@ export default {
         },
     },
     PRICE: {
-        description: `Returns the price per $100 face value of a security that pays periodic interest`,
-        abstract: `Returns the price per $100 face value of a security that pays periodic interest`,
+        description: 'Returns the price per $100 face value of a security that pays periodic interest',
+        abstract: 'Returns the price per $100 face value of a security that pays periodic interest',
         links: [
             {
                 title: 'Instruction',
@@ -548,8 +548,8 @@ export default {
         },
     },
     PRICEDISC: {
-        description: `Returns the price per $100 face value of a discounted security`,
-        abstract: `Returns the price per $100 face value of a discounted security`,
+        description: 'Returns the price per $100 face value of a discounted security',
+        abstract: 'Returns the price per $100 face value of a discounted security',
         links: [
             {
                 title: 'Instruction',
@@ -562,8 +562,8 @@ export default {
         },
     },
     PRICEMAT: {
-        description: `Returns the price per $100 face value of a security that pays interest at maturity`,
-        abstract: `Returns the price per $100 face value of a security that pays interest at maturity`,
+        description: 'Returns the price per $100 face value of a security that pays interest at maturity',
+        abstract: 'Returns the price per $100 face value of a security that pays interest at maturity',
         links: [
             {
                 title: 'Instruction',
@@ -576,8 +576,8 @@ export default {
         },
     },
     PV: {
-        description: `Returns the present value of an investment`,
-        abstract: `Returns the present value of an investment`,
+        description: 'Returns the present value of an investment',
+        abstract: 'Returns the present value of an investment',
         links: [
             {
                 title: 'Instruction',
@@ -590,8 +590,8 @@ export default {
         },
     },
     RATE: {
-        description: `Returns the interest rate per period of an annuity`,
-        abstract: `Returns the interest rate per period of an annuity`,
+        description: 'Returns the interest rate per period of an annuity',
+        abstract: 'Returns the interest rate per period of an annuity',
         links: [
             {
                 title: 'Instruction',
@@ -604,8 +604,8 @@ export default {
         },
     },
     RECEIVED: {
-        description: `Returns the amount received at maturity for a fully invested security`,
-        abstract: `Returns the amount received at maturity for a fully invested security`,
+        description: 'Returns the amount received at maturity for a fully invested security',
+        abstract: 'Returns the amount received at maturity for a fully invested security',
         links: [
             {
                 title: 'Instruction',
@@ -618,8 +618,8 @@ export default {
         },
     },
     RRI: {
-        description: `Returns an equivalent interest rate for the growth of an investment`,
-        abstract: `Returns an equivalent interest rate for the growth of an investment`,
+        description: 'Returns an equivalent interest rate for the growth of an investment',
+        abstract: 'Returns an equivalent interest rate for the growth of an investment',
         links: [
             {
                 title: 'Instruction',
@@ -632,8 +632,8 @@ export default {
         },
     },
     SLN: {
-        description: `Returns the straight-line depreciation of an asset for one period`,
-        abstract: `Returns the straight-line depreciation of an asset for one period`,
+        description: 'Returns the straight-line depreciation of an asset for one period',
+        abstract: 'Returns the straight-line depreciation of an asset for one period',
         links: [
             {
                 title: 'Instruction',
@@ -646,8 +646,8 @@ export default {
         },
     },
     SYD: {
-        description: `Returns the sum-of-years' digits depreciation of an asset for a specified period`,
-        abstract: `Returns the sum-of-years' digits depreciation of an asset for a specified period`,
+        description: 'Returns the sum-of-years\' digits depreciation of an asset for a specified period',
+        abstract: 'Returns the sum-of-years\' digits depreciation of an asset for a specified period',
         links: [
             {
                 title: 'Instruction',
@@ -660,8 +660,8 @@ export default {
         },
     },
     TBILLEQ: {
-        description: `Returns the bond-equivalent yield for a Treasury bill`,
-        abstract: `Returns the bond-equivalent yield for a Treasury bill`,
+        description: 'Returns the bond-equivalent yield for a Treasury bill',
+        abstract: 'Returns the bond-equivalent yield for a Treasury bill',
         links: [
             {
                 title: 'Instruction',
@@ -674,8 +674,8 @@ export default {
         },
     },
     TBILLPRICE: {
-        description: `Returns the price per $100 face value for a Treasury bill`,
-        abstract: `Returns the price per $100 face value for a Treasury bill`,
+        description: 'Returns the price per $100 face value for a Treasury bill',
+        abstract: 'Returns the price per $100 face value for a Treasury bill',
         links: [
             {
                 title: 'Instruction',
@@ -688,8 +688,8 @@ export default {
         },
     },
     TBILLYIELD: {
-        description: `Returns the yield for a Treasury bill`,
-        abstract: `Returns the yield for a Treasury bill`,
+        description: 'Returns the yield for a Treasury bill',
+        abstract: 'Returns the yield for a Treasury bill',
         links: [
             {
                 title: 'Instruction',
@@ -702,8 +702,8 @@ export default {
         },
     },
     VDB: {
-        description: `Returns the depreciation of an asset for a specified or partial period by using a declining balance method`,
-        abstract: `Returns the depreciation of an asset for a specified or partial period by using a declining balance method`,
+        description: 'Returns the depreciation of an asset for a specified or partial period by using a declining balance method',
+        abstract: 'Returns the depreciation of an asset for a specified or partial period by using a declining balance method',
         links: [
             {
                 title: 'Instruction',
@@ -716,8 +716,8 @@ export default {
         },
     },
     XIRR: {
-        description: `Returns the internal rate of return for a schedule of cash flows that is not necessarily periodic`,
-        abstract: `Returns the internal rate of return for a schedule of cash flows that is not necessarily periodic`,
+        description: 'Returns the internal rate of return for a schedule of cash flows that is not necessarily periodic',
+        abstract: 'Returns the internal rate of return for a schedule of cash flows that is not necessarily periodic',
         links: [
             {
                 title: 'Instruction',
@@ -730,8 +730,8 @@ export default {
         },
     },
     XNPV: {
-        description: `Returns the net present value for a schedule of cash flows that is not necessarily periodic`,
-        abstract: `Returns the net present value for a schedule of cash flows that is not necessarily periodic`,
+        description: 'Returns the net present value for a schedule of cash flows that is not necessarily periodic',
+        abstract: 'Returns the net present value for a schedule of cash flows that is not necessarily periodic',
         links: [
             {
                 title: 'Instruction',
@@ -744,8 +744,8 @@ export default {
         },
     },
     YIELD: {
-        description: `Returns the yield on a security that pays periodic interest`,
-        abstract: `Returns the yield on a security that pays periodic interest`,
+        description: 'Returns the yield on a security that pays periodic interest',
+        abstract: 'Returns the yield on a security that pays periodic interest',
         links: [
             {
                 title: 'Instruction',
@@ -758,8 +758,8 @@ export default {
         },
     },
     YIELDDISC: {
-        description: `Returns the annual yield for a discounted security; for example, a Treasury bill`,
-        abstract: `Returns the annual yield for a discounted security; for example, a Treasury bill`,
+        description: 'Returns the annual yield for a discounted security; for example, a Treasury bill',
+        abstract: 'Returns the annual yield for a discounted security; for example, a Treasury bill',
         links: [
             {
                 title: 'Instruction',
@@ -772,8 +772,8 @@ export default {
         },
     },
     YIELDMAT: {
-        description: `Returns the annual yield of a security that pays interest at maturity`,
-        abstract: `Returns the annual yield of a security that pays interest at maturity`,
+        description: 'Returns the annual yield of a security that pays interest at maturity',
+        abstract: 'Returns the annual yield of a security that pays interest at maturity',
         links: [
             {
                 title: 'Instruction',

@@ -251,7 +251,7 @@ export class Toolbar extends Component<IProps, IState> {
                         className={styles.moreButton}
                         style={{ visibility: moreToolList.length ? 'visible' : 'hidden' }}
                     >
-                        <Tooltip title="toolbar.toolMoreTip" placement={'bottom'}>
+                        <Tooltip title="toolbar.toolMoreTip" placement="bottom">
                             <Button onClick={this.showMore}>
                                 <div style={{ fontSize: '14px' }}>{/* <CustomLabel label="toolbar.toolMore" /> */}</div>
                             </Button>
@@ -259,17 +259,19 @@ export class Toolbar extends Component<IProps, IState> {
                     </div>
                 </div>
 
-                {moreToolList.length ? (
-                    <div
-                        style={{ visibility: showMore ? 'visible' : 'hidden' }}
-                        className={`${styles.moreTool} ${styles.toolbar}`}
-                        ref={this.moreToolRef}
-                    >
-                        {this.getToolbarList(moreToolList)}
-                    </div>
-                ) : (
-                    ''
-                )}
+                {moreToolList.length
+                    ? (
+                        <div
+                            style={{ visibility: showMore ? 'visible' : 'hidden' }}
+                            className={`${styles.moreTool} ${styles.toolbar}`}
+                            ref={this.moreToolRef}
+                        >
+                            {this.getToolbarList(moreToolList)}
+                        </div>
+                    )
+                    : (
+                        ''
+                    )}
             </Container>
         );
     }

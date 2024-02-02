@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { type ICustomLabelProps } from '../../../components/custom-label/CustomLabel';
+import type { ICustomLabelProps } from '../../../components/custom-label/CustomLabel';
 
 export interface ISidebarMethodOptions {
     header?: ICustomLabelProps;

@@ -347,7 +347,7 @@ export class StartEditController extends Disposable {
         const clientHeight =
             document.body.clientHeight -
             startY -
-            parseFloat(styles.sheetFooterBarHeight) -
+            Number.parseFloat(styles.sheetFooterBarHeight) -
             canvasOffset.top -
             EDITOR_BORDER_SIZE * 2;
 
@@ -538,7 +538,7 @@ export class StartEditController extends Disposable {
                 const cursor = documentDataModel.getBody()!.dataStream.length - 2 || 0;
 
                 scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)?.scrollTo({
-                    y: Infinity,
+                    y: Number.POSITIVE_INFINITY,
                 });
 
                 this._textSelectionManagerService.replaceTextRanges([

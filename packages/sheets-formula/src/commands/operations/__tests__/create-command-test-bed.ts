@@ -30,8 +30,8 @@ const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
         sheet1: {
             id: 'sheet1',
             cellData: {
-                '1': {
-                    '1': {
+                1: {
+                    1: {
                         v: 1,
                     },
                 },

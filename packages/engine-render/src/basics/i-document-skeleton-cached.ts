@@ -80,7 +80,7 @@ export interface IDocumentSkeletonPage {
 
     pageNumber: number; // page页数
     pageNumberStart: number; // page开始页序号
-    verticalAlign: Boolean; // 垂直对齐，仅对一页生效
+    verticalAlign: boolean; // 垂直对齐，仅对一页生效
     angle: number; // 旋转角度，仅对一页生效
     width: number; // actual or content width，default 0
     height: number; // actual or content height, default 0

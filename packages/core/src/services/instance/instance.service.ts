@@ -31,7 +31,7 @@ export const enum UniverInstanceType {
     UNKNOWN = 0,
     DOC = 1,
     SHEET = 2,
-    // eslint-disable-next-line no-magic-numbers
+
     SLIDE = 3,
 }
 

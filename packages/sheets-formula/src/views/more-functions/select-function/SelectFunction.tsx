@@ -47,7 +47,7 @@ export function SelectFunction(props: ISelectFunctionProps) {
 
     const options = getFunctionTypeValues(FunctionType, localeService);
     options.unshift({
-        label: localeService.t(`formula.moreFunctions.allFunctions`),
+        label: localeService.t('formula.moreFunctions.allFunctions'),
         value: allTypeValue,
     });
 
@@ -137,7 +137,7 @@ export function SelectFunction(props: ISelectFunctionProps) {
                 <Select value={typeSelected} options={options} onChange={handleSelectChange} />
 
                 <Input
-                    placeholder={localeService.t(`formula.moreFunctions.searchFunctionPlaceholder`)}
+                    placeholder={localeService.t('formula.moreFunctions.searchFunctionPlaceholder')}
                     onKeyDown={handleSelectListKeyDown}
                     value={searchText}
                     onChange={handleSearchInputChange}
@@ -150,11 +150,9 @@ export function SelectFunction(props: ISelectFunctionProps) {
                 {selectList.map(({ name }, index) => (
                     <li
                         key={index}
-                        className={
-                            active === index
-                                ? `${styles.formulaSelectFunctionResultItem} ${styles.formulaSelectFunctionResultItemActive}`
-                                : styles.formulaSelectFunctionResultItem
-                        }
+                        className={active === index
+                            ? `${styles.formulaSelectFunctionResultItem} ${styles.formulaSelectFunctionResultItemActive}`
+                            : styles.formulaSelectFunctionResultItem}
                         onMouseEnter={() => handleLiMouseEnter(index)}
                         onMouseLeave={handleLiMouseLeave}
                         onClick={() => setCurrentFunctionInfo(index)}
@@ -173,9 +171,7 @@ export function SelectFunction(props: ISelectFunctionProps) {
 
                     <FunctionParams
                         title={localeService.t('formula.moreFunctions.syntax')}
-                        value={
-                            <FunctionHelp prefix={functionInfo.functionName} value={functionInfo.functionParameter} />
-                        }
+                        value={<FunctionHelp prefix={functionInfo.functionName} value={functionInfo.functionParameter} />}
                     />
 
                     <FunctionParams

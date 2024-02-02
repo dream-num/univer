@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable no-magic-numbers */
-
 import { swap32LE } from './swap';
 import inflate from './tiny-inflate';
 
@@ -121,11 +119,11 @@ export default class UnicodeTrie {
 
     get(codePoint: number) {
         let index;
-        if (codePoint < 0 || codePoint > 0x10ffff) {
+        if (codePoint < 0 || codePoint > 0x10FFFF) {
             return this.errorValue;
         }
 
-        if (codePoint < 0xd800 || (codePoint > 0xdbff && codePoint <= 0xffff)) {
+        if (codePoint < 0xD800 || (codePoint > 0xDBFF && codePoint <= 0xFFFF)) {
             // Ordinary BMP code point, excluding leading surrogates.
             // BMP uses a single level lookup.  BMP index starts at offset 0 in the index.
             // data is stored in the index array itself.
@@ -133,13 +131,13 @@ export default class UnicodeTrie {
             return this.data[index];
         }
 
-        if (codePoint <= 0xffff) {
+        if (codePoint <= 0xFFFF) {
             // Lead Surrogate Code Point.  A Separate index section is stored for
             // lead surrogate code units and code points.
             //   The main index has the code unit data.
             //   For this function, we need the code point data.
             index =
-                (this.data[LSCP_INDEX_2_OFFSET + ((codePoint - 0xd800) >> SHIFT_2)] << INDEX_SHIFT) +
+                (this.data[LSCP_INDEX_2_OFFSET + ((codePoint - 0xD800) >> SHIFT_2)] << INDEX_SHIFT) +
                 (codePoint & DATA_MASK);
             return this.data[index];
         }

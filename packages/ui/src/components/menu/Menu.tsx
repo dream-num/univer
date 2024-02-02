@@ -190,7 +190,7 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
      * @param v
      */
     const onChange = (v: string | number) => {
-        const newValue = isRealNum(v) && typeof v === 'string' ? parseInt(v) : v;
+        const newValue = isRealNum(v) && typeof v === 'string' ? Number.parseInt(v) : v;
         setInputValue(newValue);
     };
 
@@ -230,7 +230,7 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                     key={item.id}
                     eventKey={item.id}
                     popupOffset={[18, 0]}
-                    title={
+                    title={(
                         <span className={styles.menuItemContent}>
                             <CustomLabel
                                 title={item.title}
@@ -241,7 +241,7 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                             />
                             {item.shortcut && ` (${item.shortcut})`}
                         </span>
-                    }
+                    )}
                     expandIcon={<MoreSingle className={styles.menuItemMoreIcon} />}
                 >
                     {selections.length > 0 && (
@@ -282,11 +282,11 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                 key={item.id}
                 eventKey={item.id}
                 popupOffset={[18, 0]}
-                title={
+                title={(
                     <span className={styles.menuItemContent}>
                         <CustomLabel title={item.title} icon={item.icon} label={item.label} onChange={onChange} />
                     </span>
-                }
+                )}
                 expandIcon={<MoreSingle className={styles.menuItemMoreIcon} />}
             >
                 {menuItems.length && <MenuWrapper menuType={item.id} parentKey={item.id} onOptionSelect={onClick} />}

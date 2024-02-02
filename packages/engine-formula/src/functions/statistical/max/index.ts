@@ -20,7 +20,7 @@ import { BaseFunction } from '../../base-function';
 
 export class Max extends BaseFunction {
     override calculate(...variants: BaseValueObject[]) {
-        let accumulatorAll: BaseValueObject = new NumberValueObject(-Infinity);
+        let accumulatorAll: BaseValueObject = new NumberValueObject(Number.NEGATIVE_INFINITY);
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];
 

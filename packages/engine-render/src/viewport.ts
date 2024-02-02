@@ -543,13 +543,12 @@ export class Viewport {
         if (this._renderClipState) {
             ctx.beginPath();
             // DEPT: left is set by upper views but width and height is not
-            // eslint-disable-next-line no-magic-numbers
+
             const { scaleX, scaleY } = this._getBoundScale(m[0], m[3]);
             ctx.rect(this.left, this.top, (this.width || 0) * scaleX, (this.height || 0) * scaleY);
             ctx.clip();
         }
 
-        // eslint-disable-next-line no-magic-numbers
         ctx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
 
         const viewBound = this._calViewportRelativeBounding();
@@ -561,7 +560,7 @@ export class Viewport {
 
         if (this._scrollBar && isMaxLayer) {
             ctx.save();
-            // eslint-disable-next-line no-magic-numbers
+
             ctx.transform(n[0], n[1], n[2], n[3], n[4], n[5]);
             this._drawScrollbar(ctx);
             ctx.restore();
@@ -593,7 +592,6 @@ export class Viewport {
         return svCoord;
     }
 
-    // eslint-disable-next-line max-lines-per-function
     onMouseWheel(evt: IWheelEvent, state: EventState) {
         if (!this._scrollBar || this.isActive === false) {
             return;
@@ -987,11 +985,11 @@ export class Viewport {
         const m = sceneTrans.getMatrix();
 
         const scaleFromX = this._isRelativeX ? (m[0] < 1 ? m[0] : 1) : 1;
-        // eslint-disable-next-line no-magic-numbers
+
         const scaleFromY = this._isRelativeY ? (m[3] < 1 ? m[3] : 1) : 1;
 
         const scaleToX = this._isRelativeX ? 1 : m[0] < 1 ? m[0] : 1;
-        // eslint-disable-next-line no-magic-numbers
+
         const scaleToY = this._isRelativeY ? 1 : m[3] < 1 ? m[3] : 1;
 
         let width = this._width;
@@ -1004,7 +1002,6 @@ export class Viewport {
             width = size.width;
         }
 
-        // eslint-disable-next-line no-magic-numbers
         if (m[3] > 1) {
             height = size.height;
         }

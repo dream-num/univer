@@ -15,7 +15,7 @@
  */
 
 import { remove, toDisposable } from '@univerjs/core';
-import { type IDisposable } from '@wendellhu/redi';
+import type { IDisposable } from '@wendellhu/redi';
 
 /**
  * This service is responsible for storing layout information of the current

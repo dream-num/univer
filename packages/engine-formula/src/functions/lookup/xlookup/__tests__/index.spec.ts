@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable no-magic-numbers */
 import { describe, expect, it } from 'vitest';
 
 import { ArrayValueObject } from '../../../../engine/value-object/array-value-object';

@@ -175,7 +175,7 @@ export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
         }
         // font size
         else if (key === 'font-size') {
-            let fs = parseInt(value);
+            let fs = Number.parseInt(value);
 
             // Double the font size for superscripts and subscripts
             if (
@@ -187,7 +187,7 @@ export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
 
             // px to pt TODO@Dushusir: px or pt?
             if (value.indexOf('px') !== -1) {
-                fs = pxToPt(parseInt(value));
+                fs = pxToPt(Number.parseInt(value));
             }
 
             styleList.fs = fs;
@@ -573,11 +573,11 @@ function getTdHeight(height: string | null, defaultHeight: number) {
     if (!height) return defaultHeight;
     let firstHeight;
     if (height.includes('pt')) {
-        firstHeight = ptToPx(parseFloat(height));
+        firstHeight = ptToPx(Number.parseFloat(height));
     } else if (height.includes('px')) {
-        firstHeight = parseFloat(height);
+        firstHeight = Number.parseFloat(height);
     } else {
-        firstHeight = (parseFloat(height) * 72) / 96;
+        firstHeight = (Number.parseFloat(height) * 72) / 96;
     }
     return firstHeight;
 }

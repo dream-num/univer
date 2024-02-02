@@ -18,7 +18,7 @@ import { Disposable, toDisposable } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 import { Subject } from 'rxjs';
 
-import { type IDialogPartMethodOptions } from '../../views/components/dialog-part/interface';
+import type { IDialogPartMethodOptions } from '../../views/components/dialog-part/interface';
 import type { IDialogService } from './dialog.service';
 
 export class DesktopDialogService extends Disposable implements IDialogService {

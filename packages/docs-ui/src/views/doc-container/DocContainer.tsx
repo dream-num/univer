@@ -175,11 +175,9 @@ export class DocContainer extends Component<IBaseDocContainerProps> {
                                 {/* innerLeft */}
                             </aside>
                             <div
-                                className={
-                                    config.contentSplit === 'vertical'
-                                        ? style.contentContainerVertical
-                                        : style.contentContainerHorizontal
-                                }
+                                className={config.contentSplit === 'vertical'
+                                    ? style.contentContainerVertical
+                                    : style.contentContainerHorizontal}
                             >
                                 {!!config.contentSplit && (
                                     <div ref={this.splitLeftRef} className={style.contentInnerLeftContainer}>

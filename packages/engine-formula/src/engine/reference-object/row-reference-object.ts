@@ -28,9 +28,9 @@ export class RowReferenceObject extends BaseReferenceObject {
         this.setForcedUnitIdDirect(grid.unitId);
         this.setForcedSheetName(grid.sheetName);
         const range: IRange = {
-            startColumn: NaN,
+            startColumn: Number.NaN,
             startRow: grid.range.startRow,
-            endColumn: NaN,
+            endColumn: Number.NaN,
             endRow: -1,
         };
         this.setRangeData(range);

@@ -150,11 +150,9 @@ export function SearchFunction() {
                 {searchList.map((item, index) => (
                     <li
                         key={index}
-                        className={
-                            active === index
-                                ? `${styles.formulaSearchFunctionItem} ${styles.formulaSearchFunctionItemActive}`
-                                : styles.formulaSearchFunctionItem
-                        }
+                        className={active === index
+                            ? `${styles.formulaSearchFunctionItem} ${styles.formulaSearchFunctionItemActive}`
+                            : styles.formulaSearchFunctionItem}
                         onMouseEnter={() => handleLiMouseEnter(index)}
                         onMouseLeave={handleLiMouseLeave}
                         onClick={() => promptService.acceptFormulaName(item.name)}

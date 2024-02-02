@@ -42,11 +42,11 @@ const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
             id: 'sheet1',
             name: 'sheet1',
             cellData: {
-                '0': {
-                    '0': {
+                0: {
+                    0: {
                         v: 'A1',
                     },
-                    '1': {
+                    1: {
                         v: 'A2',
                     },
                 },

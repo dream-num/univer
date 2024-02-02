@@ -61,7 +61,7 @@ export class Background extends SheetExtension {
         background &&
             Object.keys(background).forEach((rgb: string) => {
                 const backgroundCache = background[rgb];
-                // eslint-disable-next-line no-magic-numbers
+
                 ctx.fillStyle = rgb || getColor([255, 255, 255])!;
                 ctx.beginPath();
                 backgroundCache.forValue((rowIndex, columnIndex) => {

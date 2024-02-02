@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable */
-
 const mutliNum = (function generate() {
     const obj = {};
     for (let i = 0, len = 17; i < len; i++) {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { type default as enUS } from './en-US';
+import type enUS from './en-US';
 
 const locale: typeof enUS = {
     univer: {

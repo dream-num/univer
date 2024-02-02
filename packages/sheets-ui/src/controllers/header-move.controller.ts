@@ -64,9 +64,9 @@ enum HEADER_MOVE_TYPE {
 
 @OnLifecycle(LifecycleStages.Rendered, HeaderMoveController)
 export class HeaderMoveController extends Disposable {
-    private _startOffsetX: number = -Infinity;
+    private _startOffsetX: number = Number.NEGATIVE_INFINITY;
 
-    private _startOffsetY: number = -Infinity;
+    private _startOffsetY: number = Number.NEGATIVE_INFINITY;
 
     private _moveHelperBackgroundShape: Nullable<Rect>;
 

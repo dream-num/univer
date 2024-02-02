@@ -45,10 +45,10 @@ export class ObservableHooks<T> extends Observable<T> {
     }
 
     override makeObserverTopPriority() {
-        /** cancel * */
+        /** cancel */
     }
 
     override makeObserverBottomPriority() {
-        /** cancel * */
+        /** cancel */
     }
 }

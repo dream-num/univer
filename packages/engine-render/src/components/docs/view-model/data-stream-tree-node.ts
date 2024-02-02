@@ -217,7 +217,7 @@ export class DataStreamTreeNode {
         node.remove();
     }
 
-    private _addIndexForBlock(addLen: number, index: number = -Infinity) {
+    private _addIndexForBlock(addLen: number, index: number = Number.NEGATIVE_INFINITY) {
         for (let i = 0, len = this.blocks.length; i < len; i++) {
             const block = this.blocks[i];
 

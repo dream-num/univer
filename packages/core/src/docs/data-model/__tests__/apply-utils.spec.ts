@@ -398,7 +398,7 @@ describe('test case in apply utils', () => {
             expect(body?.textRuns![2].ts?.bl).toBe(BooleanNumber.FALSE);
         });
 
-        it(`If textRuns doesn't intersect, they shouldn't be merged`, async () => {
+        it('If textRuns doesn\'t intersect, they shouldn\'t be merged', async () => {
             const updateTextRuns = [
                 {
                     st: 0,

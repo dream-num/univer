@@ -152,7 +152,6 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
         return sv;
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _updateViewport(
         id: string,
         rowHeaderWidth: number,

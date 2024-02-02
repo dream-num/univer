@@ -77,7 +77,7 @@ export function FindReplaceDialog() {
                 <InputWithSlot
                     autoFocus={true}
                     placeholder={localeService.t('univer.find-replace.dialog.find-placeholder')}
-                    slot={
+                    slot={(
                         <Pager
                             loop={true}
                             value={matchesPosition}
@@ -94,13 +94,13 @@ export function FindReplaceDialog() {
                                 }
                             }}
                         />
-                    }
+                    )}
                     value={findString}
                     onChange={(value) => onFindInputChange(value)}
                 />
 
                 <div className={styles.findReplaceExpandContainer}>
-                    <Button type={'text'} size="small" onClick={revealReplace}>
+                    <Button type="text" size="small" onClick={revealReplace}>
                         {localeService.t('univer.find-replace.dialog.advanced-finding')}
                     </Button>
                 </div>
@@ -132,7 +132,7 @@ export function FindReplaceDialog() {
                     />
                 </FormLayout>
                 <FormLayout label={localeService.t('univer.find-replace.dialog.find-range')}>
-                    <Select value={'123'} onChange={() => {}} />
+                    <Select value="123" onChange={() => {}} />
                 </FormLayout>
                 <Button type="primary">{localeService.t('univer.find-replace.dialog.find')}</Button>
                 <Button>{localeService.t('univer.find-replace.dialog.replace')}</Button>

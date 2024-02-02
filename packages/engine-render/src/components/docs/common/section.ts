@@ -24,8 +24,8 @@ export function createSkeletonSection(
     columnSeparatorType: ColumnSeparatorType = ColumnSeparatorType.NONE,
     top: number = 0,
     left: number = 0,
-    sectionWidth: number = Infinity,
-    sectionHeight: number = Infinity
+    sectionWidth: number = Number.POSITIVE_INFINITY,
+    sectionHeight: number = Number.POSITIVE_INFINITY
 ): IDocumentSkeletonSection {
     const columns: IDocumentSkeletonColumn[] = [];
     let colWidth = 0;
@@ -45,7 +45,7 @@ export function createSkeletonSection(
             left += colWidth + spaceWidth;
 
             if (i === columnProperties.length - 1) {
-                colWidth = sectionWidth !== Infinity ? sectionWidth - colWidth : width;
+                colWidth = sectionWidth !== Number.POSITIVE_INFINITY ? sectionWidth - colWidth : width;
                 spaceWidth = 0;
                 columns.push(_getSkeletonColumn(left, colWidth, spaceWidth, columnSeparatorType));
             }

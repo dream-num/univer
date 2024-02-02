@@ -202,7 +202,7 @@ export function handleJsonToDom(p: IDocumentData): string {
  * @param style
  * @returns
  */
-// eslint-disable-next-line max-lines-per-function
+
 export function handleStyleToString(style: IStyleData, isCell: boolean = false) {
     let str = '';
     const styleMap = new Map([
@@ -235,7 +235,7 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
             'it',
             () => {
                 if (style.it) {
-                    str += `font-style: italic; `;
+                    str += 'font-style: italic; ';
                 }
             },
         ],
@@ -243,7 +243,7 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
             'bl',
             () => {
                 if (style.bl) {
-                    str += `font-weight: bold; `;
+                    str += 'font-weight: bold; ';
                 }
             },
         ],
@@ -255,7 +255,7 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
                     if (str.indexOf('text-decoration-line') > -1) {
                         str = str.replace(/(?<=text-decoration-line:.*)\b(?=;)/g, ' underline');
                     } else {
-                        str += `text-decoration-line: underline; `;
+                        str += 'text-decoration-line: underline; ';
                     }
                     if (style.ul.cl && str.indexOf('text-decoration-color') === -1) {
                         str += `text-decoration-color: ${getColorStyle(style.ul.cl)}; `;
@@ -273,7 +273,7 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
                     if (str.indexOf('text-decoration-line') > -1) {
                         str = str.replace(/(?<=text-decoration-line:.*)\b(?=;)/g, ' line-through');
                     } else {
-                        str += `text-decoration-line: line-through; `;
+                        str += 'text-decoration-line: line-through; ';
                     }
                     if (style.st.cl && str.indexOf('text-decoration-color') === -1) {
                         str += `text-decoration-color: ${getColorStyle(style.st.cl)}; `;
@@ -291,7 +291,7 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
                     if (str.indexOf('text-decoration-line') > -1) {
                         str = str.replace(/(?<=text-decoration-line:.*)\b(?=;)/g, ' overline');
                     } else {
-                        str += `text-decoration-line: overline; `;
+                        str += 'text-decoration-line: overline; ';
                     }
                     if (style.ol.cl && str.indexOf('text-decoration-color') === -1) {
                         str += `text-decoration-color: ${getColorStyle(style.ol.cl)}; `;
@@ -339,9 +339,9 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
             'va',
             () => {
                 if (style.va === BaselineOffset.SUBSCRIPT) {
-                    str += `vertical-align: sub; `;
+                    str += 'vertical-align: sub; ';
                 } else if (style.va === BaselineOffset.SUPERSCRIPT) {
-                    str += `vertical-align: super; `;
+                    str += 'vertical-align: super; ';
                 }
             },
         ],
@@ -349,9 +349,9 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
             'td',
             () => {
                 if (style.td === TextDirection.LEFT_TO_RIGHT) {
-                    str += `direction: ltr; `;
+                    str += 'direction: ltr; ';
                 } else if (style.td === TextDirection.RIGHT_TO_LEFT) {
-                    str += `direction: rtl; `;
+                    str += 'direction: rtl; ';
                 }
             },
         ],
@@ -367,13 +367,13 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
             'ht',
             () => {
                 if (style.ht === HorizontalAlign.LEFT) {
-                    str += `text-align: left; `;
+                    str += 'text-align: left; ';
                 } else if (style.ht === HorizontalAlign.RIGHT) {
-                    str += `text-align: right; `;
+                    str += 'text-align: right; ';
                 } else if (style.ht === HorizontalAlign.CENTER) {
-                    str += `text-align: center; `;
+                    str += 'text-align: center; ';
                 } else if (style.ht === HorizontalAlign.JUSTIFIED) {
-                    str += `text-align: justify; `;
+                    str += 'text-align: justify; ';
                 }
             },
         ],
@@ -381,11 +381,11 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
             'vt',
             () => {
                 if (style.vt === VerticalAlign.BOTTOM) {
-                    str += `vertical-align: bottom; `;
+                    str += 'vertical-align: bottom; ';
                 } else if (style.vt === VerticalAlign.TOP) {
-                    str += `vertical-align: top; `;
+                    str += 'vertical-align: top; ';
                 } else if (style.vt === VerticalAlign.MIDDLE) {
-                    str += `vertical-align: middle; `;
+                    str += 'vertical-align: middle; ';
                 }
             },
         ],
@@ -393,11 +393,11 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
             'tb',
             () => {
                 if (style.tb === WrapStrategy.CLIP) {
-                    str += `text-overflow: clip; `;
+                    str += 'text-overflow: clip; ';
                 } else if (style.tb === WrapStrategy.OVERFLOW) {
-                    str += `text-break: overflow; `;
+                    str += 'text-break: overflow; ';
                 } else if (style.tb === WrapStrategy.WRAP) {
-                    str += `word-wrap: break-word;`;
+                    str += 'word-wrap: break-word;';
                 }
             },
         ],

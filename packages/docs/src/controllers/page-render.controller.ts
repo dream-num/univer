@@ -79,7 +79,7 @@ export class PageRenderController extends Disposable {
                 const { width, pageWidth, height, pageHeight } = page;
 
                 ctx.save();
-                // eslint-disable-next-line no-magic-numbers
+
                 ctx.translate(pageLeft - 0.5, pageTop - 0.5);
                 Rect.drawWith(ctx, {
                     width: pageSize?.width ?? pageWidth ?? width,

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable no-magic-numbers */
-
 import React, { useEffect, useRef } from 'react';
 
 import styles from './index.module.less';

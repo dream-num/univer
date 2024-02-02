@@ -23,7 +23,7 @@ export function createSkeletonColumn(
     columnIndex: number = 0,
     columnProperties: ISectionColumnProperties[],
     columnSeparatorType: ColumnSeparatorType = ColumnSeparatorType.NONE,
-    pageWidth: number = Infinity
+    pageWidth: number = Number.POSITIVE_INFINITY
 ): IDocumentSkeletonColumn {
     const { left, width, spaceWidth } = _calculateColumnSize(columnIndex, columnProperties, pageWidth);
 
@@ -53,7 +53,7 @@ function _calculateColumnSize(
     for (let i = 0; i <= columnIndex; i++) {
         const { width, paddingEnd } = columnProperties[i];
         if (i === columnProperties.length - 1) {
-            colWidth = pageWidth === Infinity ? pageWidth - colWidth : width;
+            colWidth = pageWidth === Number.POSITIVE_INFINITY ? pageWidth - colWidth : width;
             spaceWidth = 0;
         } else {
             spaceWidth = paddingEnd;

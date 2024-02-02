@@ -34,7 +34,7 @@ export class AppUIController {
 
     /**
      * Change language
-     * @param {String} locale new language
+     * @param {string} locale new language
      *
      * e: {target: HTMLSelectElement } reference from  https://stackoverflow.com/a/48443771
      *

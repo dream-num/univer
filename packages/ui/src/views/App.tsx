@@ -39,7 +39,6 @@ export interface IUniverAppProps extends IWorkbenchOptions {
     onRendered?: (container: HTMLElement) => void;
 }
 
-// eslint-disable-next-line max-lines-per-function
 export function App(props: IUniverAppProps) {
     const localeService = useDependency(LocaleService);
     const themeService = useDependency(ThemeService);

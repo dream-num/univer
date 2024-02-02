@@ -31,7 +31,6 @@ import { SetZoomRatioCommand } from '../../commands/commands/set-zoom-ratio.comm
 import { SetZoomRatioOperation } from '../../commands/operations/set-zoom-ratio.operation';
 import { SHEET_ZOOM_RANGE } from '../../common/keys';
 
-// eslint-disable-next-line no-magic-numbers
 const ZOOM_MAP = [50, 80, 100, 130, 150, 170, 200, 400];
 
 const DISABLE_DEBOUNCE_TIME = 100;
@@ -83,7 +82,6 @@ export function ZoomSlider() {
             return;
         }
 
-        // eslint-disable-next-line no-magic-numbers
         const zoomRatio = value / 100;
 
         commandService.executeCommand(SetZoomRatioCommand.id, {

@@ -73,6 +73,8 @@ jobs:
         steps:
             - name: Checkout
               uses: actions/checkout@v4
+              with:
+                  ref: v${{ github.event.inputs.release_version }}
 
             - name: Install pnpm
               uses: pnpm/action-setup@v2
@@ -111,6 +113,8 @@ jobs:
         steps:
             - name: Checkout
               uses: actions/checkout@v4
+              with:
+                  ref: v${{ github.event.inputs.release_version }}
 
             - name: Install pnpm
               uses: pnpm/action-setup@v2

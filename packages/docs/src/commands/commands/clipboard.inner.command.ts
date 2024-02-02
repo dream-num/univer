@@ -71,7 +71,7 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
             id: RichTextEditingMutation.id,
             params: {
                 unitId,
-                mutations: [],
+                actions: [],
             },
         };
 
@@ -108,7 +108,7 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
             memoryCursor.moveCursor(endOffset);
         }
 
-        doMutation.params.mutations = textX.serialize();
+        doMutation.params.actions = textX.serialize();
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,
@@ -182,7 +182,7 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
             id: RichTextEditingMutation.id,
             params: {
                 unitId,
-                mutations: [],
+                actions: [],
             },
         };
 
@@ -211,7 +211,7 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
             memoryCursor.moveCursor(endOffset);
         }
 
-        doMutation.params.mutations = textX.serialize();
+        doMutation.params.actions = textX.serialize();
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,

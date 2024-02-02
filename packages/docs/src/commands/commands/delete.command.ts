@@ -303,7 +303,7 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
             id: RichTextEditingMutation.id,
             params: {
                 unitId,
-                mutations: [],
+                actions: [],
             },
         };
 
@@ -338,7 +338,7 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
             segmentId,
         });
 
-        doMutation.params.mutations = textX.serialize();
+        doMutation.params.actions = textX.serialize();
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,

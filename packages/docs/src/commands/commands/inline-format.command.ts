@@ -172,7 +172,7 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
             id: RichTextEditingMutation.id,
             params: {
                 unitId,
-                mutations: [],
+                actions: [],
             },
         };
 
@@ -219,7 +219,7 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
             memoryCursor.moveCursor(endOffset);
         }
 
-        doMutation.params.mutations = textX.serialize();
+        doMutation.params.actions = textX.serialize();
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,

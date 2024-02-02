@@ -132,7 +132,7 @@ function getMutationParams(unitId: string, segmentId: string, prevBody: IDocumen
         id: RichTextEditingMutation.id,
         params: {
             unitId,
-            mutations: [],
+            actions: [],
         },
     };
 
@@ -158,7 +158,7 @@ function getMutationParams(unitId: string, segmentId: string, prevBody: IDocumen
         });
     }
 
-    doMutation.params.mutations = textX.serialize();
+    doMutation.params.actions = textX.serialize();
 
     return doMutation;
 }

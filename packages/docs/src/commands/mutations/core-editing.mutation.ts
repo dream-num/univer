@@ -20,11 +20,11 @@ import { DocViewModelManagerService } from '../../services/doc-view-model-manage
 
 export interface IRichTextEditingMutationParams {
     unitId: string;
-    mutations: TextXAction[];
+    actions: TextXAction[];
 }
 
 /**
- * The core mutator to change rich text mutations. The execution result would be undo mutation params. Could be directly
+ * The core mutator to change rich text actions. The execution result would be undo mutation params. Could be directly
  * send to undo redo service (will be used by the triggering command).
  */
 export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, IRichTextEditingMutationParams> = {
@@ -33,7 +33,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
     type: CommandType.MUTATION,
 
     handler: (accessor, params) => {
-        const { unitId, mutations } = params;
+        const { unitId, actions } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const documentDataModel = univerInstanceService.getUniverDocInstance(unitId);
 
@@ -44,15 +44,15 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
             throw new Error(`DocumentDataModel or documentViewModel not found for unitId: ${unitId}`);
         }
 
-        if (mutations.length === 0) {
+        if (actions.length === 0) {
             throw new Error('Mutation\'s length should great than 0 when call RichTextEditingMutation');
         }
 
         // Step 1: Update Doc Data Model.
-        const undoMutations = documentDataModel.apply(mutations);
+        const undoMutations = documentDataModel.apply(actions);
 
         // Step 2: Update Doc View Model.
-        const { segmentId } = mutations[0];
+        const { segmentId } = actions[0];
         const segmentDocumentDataModel = documentDataModel.getSelfOrHeaderFooterModel(segmentId);
         const segmentViewModel = documentViewModel.getSelfOrHeaderFooterViewModel(segmentId);
 
@@ -60,7 +60,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
 
         return {
             unitId,
-            mutations: undoMutations,
+            actions: undoMutations,
         };
     },
 };

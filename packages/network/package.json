@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/network",
-    "version": "0.1.0-beta.3",
+    "version": "0.1.0-beta.4",
     "private": false,
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
@@ -48,8 +48,7 @@
         "@wendellhu/redi": ">=0.12.13",
         "rxjs": ">=7.0.0"
     },
-    "dependencies": {
-    },
+    "dependencies": {},
     "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/shared": "workspace:*",

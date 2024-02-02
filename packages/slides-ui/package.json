@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/slides-ui",
-    "version": "0.1.0-beta.3",
+    "version": "0.1.0-beta.4",
     "private": true,
     "description": "Univer normal ui-plugin-slides",
     "author": "DreamNum <developer@univer.ai>",
@@ -54,8 +54,7 @@
         "@wendellhu/redi": ">=0.12.13",
         "react": ">=16.9.0"
     },
-    "dependencies": {
-    },
+    "dependencies": {},
     "devDependencies": {
         "@types/react": "^18.2.48",
         "@univerjs/core": "workspace:*",

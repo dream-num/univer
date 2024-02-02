@@ -36,6 +36,21 @@ export class RenderController extends Disposable {
         super();
         this._initHighlightCell();
         this._initSkeleton();
+        this._initRenderDataBar();
+    }
+
+    _initRenderDataBar() {
+        this._renderManagerService.currentRender$.subscribe((renderId) => {
+            const workbook = renderId && this._univerInstanceService.getUniverSheetInstance(renderId);
+            const render = workbook && this._renderManagerService.getRenderById(renderId);
+            if (render) {
+                const spreadsheetRender = render.mainComponent as Spreadsheet;
+                if (!spreadsheetRender.getExtensionByKey(dataBarUKey)) {
+                    const renderDataBar = new DataBar();
+                    spreadsheetRender.register(renderDataBar);
+                }
+            }
+        });
     }
 
     _initSkeleton() {

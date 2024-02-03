@@ -94,6 +94,11 @@ export class DateFunction extends BaseFunction {
             const date = new Date(yearValue, monthValue - 1, dayValue);
 
             const currentSerial = excelDateSerial(date);
+
+            if (currentSerial < 0) {
+                return new ErrorValueObject(ErrorType.NUM);
+            }
+
             const valueObject = new NumberValueObject(currentSerial);
             valueObject.setPattern(DEFFAULT_DATE_FORMAT);
 

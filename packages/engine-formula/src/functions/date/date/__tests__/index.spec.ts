@@ -20,6 +20,7 @@ import { FUNCTION_NAMES_DATE } from '../../function-names';
 import { DateFunction } from '..';
 import { NumberValueObject } from '../../../../engine/value-object/primitive-object';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ErrorType } from '../../../..';
 
 describe('Test date function', () => {
     const textFunction = new DateFunction(FUNCTION_NAMES_DATE.DATE);
@@ -31,6 +32,27 @@ describe('Test date function', () => {
             const day = new NumberValueObject(1);
             const result = textFunction.calculate(year, month, day);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([[45292]]);
+        });
+        it('Edge case, 1900.1.1', () => {
+            const year = new NumberValueObject(1900);
+            const month = new NumberValueObject(1);
+            const day = new NumberValueObject(1);
+            const result = textFunction.calculate(year, month, day);
+            expect(transformToValue(result.getArrayValue())).toStrictEqual([[1]]);
+        });
+        it('Edge case, 1900.1.0', () => {
+            const year = new NumberValueObject(1900);
+            const month = new NumberValueObject(1);
+            const day = new NumberValueObject(0);
+            const result = textFunction.calculate(year, month, day);
+            expect(transformToValue(result.getArrayValue())).toStrictEqual([[0]]);
+        });
+        it('Edge case, 1900.1.-1', () => {
+            const year = new NumberValueObject(1900);
+            const month = new NumberValueObject(1);
+            const day = new NumberValueObject(-1);
+            const result = textFunction.calculate(year, month, day);
+            expect(transformToValue(result.getArrayValue())).toStrictEqual([[ErrorType.NUM]]);
         });
 
         it('Year is single cell, month is one column, day is one row', () => {

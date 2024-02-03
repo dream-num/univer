@@ -98,7 +98,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
             },
             undoState: {
                 actions: undoActions,
-                // REFACTOR: @jocs selections 序列化为 ITextRangeWithStyle[] 类型
+                // TODO: @jocs serialize selections
                 textRanges: prevTextRanges ?? selections as unknown as ITextRangeWithStyle[],
             },
         };

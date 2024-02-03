@@ -409,20 +409,29 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         if (!worksheet) {
             return false;
         }
-        const manager = worksheet.getColumnManager();
+        const colManager = worksheet.getColumnManager();
+        const rowManager = worksheet.getRowManager();
         const defaultColumnWidth = worksheet.getConfig().defaultColumnWidth;
+        const defaultRowHeight = worksheet.getConfig().defaultRowHeight;
 
         const colProperties = [];
+        const rowProperties = [];
 
         for (let i = startColumn; i <= endColumn; i++) {
-            const column = manager.getColumnOrCreate(i);
+            const column = colManager.getColumnOrCreate(i);
             colProperties.push({ width: `${column.w || defaultColumnWidth}` });
+        }
+
+        for (let j = startRow; j <= endRow; j++) {
+            const row = rowManager.getRowOrCreate(j);
+            rowProperties.push({ height: `${row.h || defaultRowHeight}` });
         }
 
         const pasteRes = this._pasteUSM(
             {
                 cellMatrix,
                 colProperties,
+                rowProperties,
             }, // paste data
             {
                 unitId, // paste target

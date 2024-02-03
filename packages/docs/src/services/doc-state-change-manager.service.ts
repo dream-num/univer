@@ -36,7 +36,7 @@ export interface IDocStateChangeParams {
     noHistory?: boolean;
 }
 
-const HISTORY_DELAY = 1000;
+const HISTORY_DELAY = 300;
 
 // This class sends out state-changing events, what is the state, the data model,
 // and the cursor & selection, and this class mainly serves the History(undo/redo) module and

@@ -617,7 +617,6 @@ export const SLIDE_WORKBOOK_DATA: IWorkbookData = {
             },
             selections: ['A2'],
             rightToLeft: BooleanNumber.FALSE,
-            pluginMeta: {},
         },
     },
     // namedRanges: [

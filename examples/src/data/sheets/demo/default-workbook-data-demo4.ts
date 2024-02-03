@@ -1615,7 +1615,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
             },
             selections: ['A2'],
             rightToLeft: BooleanNumber.FALSE,
-            pluginMeta: {},
         },
     },
     // namedRanges: [

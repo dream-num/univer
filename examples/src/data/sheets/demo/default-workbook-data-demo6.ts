@@ -3295,7 +3295,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO6: IWorkbookData = {
             },
             selections: ['A1'],
             rightToLeft: 0,
-            pluginMeta: {},
         },
     },
 };

@@ -59,13 +59,12 @@ export class ActiveWorksheetController extends Disposable {
                 if (command.id === RemoveSheetMutation.id) {
                     return this._adjustActiveSheetOnRemoveSheet(command as IMutationInfo<IRemoveSheetMutationParams>);
                 }
+
                 if (
                     command.id === SetWorksheetHideMutation.id &&
                     (command.params as ISetWorksheetHideMutationParams).hidden
                 ) {
-                    return this._adjustActiveSheetOnHideSheet(
-                        command as IMutationInfo<ISetWorksheetHideMutationParams>
-                    );
+                    return this._adjustActiveSheetOnHideSheet(command as IMutationInfo<ISetWorksheetHideMutationParams>);
                 }
 
                 // It is a mutation that we comes from the collaboration peer so we should not handle them.
@@ -79,13 +78,12 @@ export class ActiveWorksheetController extends Disposable {
                 if (command.id === InsertSheetMutation.id) {
                     return this._adjustActiveSheetOnInsertSheet(command as IMutationInfo<IInsertSheetMutationParams>);
                 }
+
                 if (
                     command.id === SetWorksheetHideMutation.id &&
                     !(command.params as ISetWorksheetHideMutationParams).hidden
                 ) {
-                    return this._adjustActiveSheetOnShowSheet(
-                        command as IMutationInfo<ISetWorksheetHideMutationParams>
-                    );
+                    return this._adjustActiveSheetOnShowSheet(command as IMutationInfo<ISetWorksheetHideMutationParams>);
                 }
             })
         );
@@ -99,7 +97,7 @@ export class ActiveWorksheetController extends Disposable {
             return;
         }
 
-        const activeSheet = workbook?.getRawActiveSheet();
+        const activeSheet = workbook.getActiveSheet().getSheetId();
         if (activeSheet !== subUnitId) {
             return;
         }
@@ -142,7 +140,7 @@ export class ActiveWorksheetController extends Disposable {
         }
 
         // The deleted sheet is not the currently active sheet, we don't have to do things.
-        const activeSheet = workbook.getRawActiveSheet();
+        const activeSheet = workbook.getActiveSheet();
         if (activeSheet) {
             return;
         }

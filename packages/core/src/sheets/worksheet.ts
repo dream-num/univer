@@ -64,7 +64,6 @@ export class Worksheet {
             },
             selections: ['A1'],
             rightToLeft: BooleanNumber.FALSE,
-            pluginMeta: {},
             ...snapshot,
         };
 
@@ -268,16 +267,6 @@ export class Worksheet {
     }
 
     /**
-     * Returns WorkSheet Status
-     * @returns WorkSheet Status
-     */
-    getStatus() {
-        const { _snapshot: _config } = this;
-
-        return _config.status;
-    }
-
-    /**
      * Return WorkSheetZoomRatio
      * @return zoomRatio
      */
@@ -451,25 +440,6 @@ export class Worksheet {
         const { rightToLeft } = _config;
 
         return rightToLeft;
-    }
-
-    /**
-     * @typeParam T - plugin data structure
-     * @param name - plugin name
-     * @returns information stored by the plugin
-     */
-    getPluginMeta<T>(name: string): T {
-        return this._snapshot.pluginMeta[name];
-    }
-
-    /**
-     * @typeParam T - plugin data structure
-     * @param name - plugin name
-     * @param value - plugin value
-     * @returns
-     */
-    setPluginMeta<T>(name: string, value: T) {
-        this._snapshot.pluginMeta[name] = value;
     }
 
     /**

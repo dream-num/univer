@@ -13853,7 +13853,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
             },
             selections: ['A1'],
             rightToLeft: 0,
-            pluginMeta: {},
         },
         'sheet-0010': {
             name: 'sheet-0010',
@@ -15238,7 +15237,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
             },
             selections: ['A1'],
             rightToLeft: 0,
-            pluginMeta: {},
         },
         'sheet-0009': {
             name: 'sheet-0009',
@@ -16467,7 +16465,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
             },
             selections: ['A1'],
             rightToLeft: 0,
-            pluginMeta: {},
         },
         'sheet-0008': {
             name: 'sheet-0008',
@@ -18103,7 +18100,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
             },
             selections: ['A1'],
             rightToLeft: 0,
-            pluginMeta: {},
         },
         'sheet-0007': {
             name: 'sheet-0007',
@@ -18683,7 +18679,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
             },
             selections: ['A1'],
             rightToLeft: 0,
-            pluginMeta: {},
         },
         'sheet-0006': {
             name: 'sheet-0006',
@@ -19337,7 +19332,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
             },
             selections: ['A1'],
             rightToLeft: 0,
-            pluginMeta: {},
         },
         'sheet-0005': {
             name: 'sheet-0005',
@@ -20917,7 +20911,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
             },
             selections: ['A1'],
             rightToLeft: 0,
-            pluginMeta: {},
         },
         'sheet-0004': {
             type: SheetTypes.GRID,
@@ -21278,7 +21271,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
             },
             selections: ['A2'],
             rightToLeft: BooleanNumber.FALSE,
-            pluginMeta: {},
         },
         'sheet-0003': {
             type: SheetTypes.GRID,
@@ -21882,7 +21874,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
             },
             selections: ['A2'],
             rightToLeft: BooleanNumber.FALSE,
-            pluginMeta: {},
         },
         'sheet-0002': {
             type: SheetTypes.GRID,
@@ -22810,7 +22801,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
             },
             selections: ['A2'],
             rightToLeft: BooleanNumber.FALSE,
-            pluginMeta: {},
         },
         'sheet-0001': {
             type: SheetTypes.GRID,
@@ -23208,7 +23198,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
             },
             selections: ['A2'],
             rightToLeft: BooleanNumber.FALSE,
-            pluginMeta: {},
         },
         // 'sheet-0011': {
         //     type: SheetTypes.GRID,

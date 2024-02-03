@@ -555,8 +555,6 @@ export const DEFAULT_WORKBOOK_DATA: IWorkbookData = {
             },
             selections: ['A2'],
             rightToLeft: BooleanNumber.FALSE,
-            pluginMeta: {},
-            // metaData: [],
         },
         'sheet-02': {
             type: SheetTypes.GRID,
@@ -943,8 +941,6 @@ export const DEFAULT_WORKBOOK_DATA_DOWN: IWorkbookData = {
             },
             selections: ['A2'],
             rightToLeft: BooleanNumber.FALSE,
-            pluginMeta: {},
-            // metaData: [],
         },
         'sheet-0002': {
             type: SheetTypes.GRID,

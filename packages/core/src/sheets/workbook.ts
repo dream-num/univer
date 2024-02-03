@@ -50,6 +50,7 @@ export class Workbook extends Disposable {
     readonly sheetDisposed$ = this._sheetDisposed$.asObservable();
 
     private readonly _activeSheet$ = new BehaviorSubject<Nullable<Worksheet>>(null);
+    private get _activeSheet(): Nullable<Worksheet> { return this._activeSheet$.getValue(); }
     readonly activeSheet$ = this._activeSheet$.asObservable();
 
     /**
@@ -189,53 +190,43 @@ export class Workbook extends Disposable {
         return sheetOrder.findIndex((id) => id === sheetId);
     }
 
-    getRawActiveSheet(): Nullable<string> {
-        const { sheetOrder } = this._snapshot;
-        const activeSheetId = sheetOrder.find((sheetId) => {
-            const worksheet = this._worksheets.get(sheetId) as Worksheet;
-            return worksheet.getStatus() === BooleanNumber.TRUE;
-        });
-
-        return activeSheetId;
+    /**
+     *
+     * @returns
+     */
+    getRawActiveSheet(): Nullable<Worksheet> {
+        return this._activeSheet;
     }
 
+    /**
+     * Get the active sheet. If there is no active sheet, the first sheet would
+     * be set active.
+     */
     getActiveSheet(): Worksheet {
-        const { sheetOrder } = this._snapshot;
-        const activeSheetId = this.getRawActiveSheet();
-
-        if (!activeSheetId) {
-            return this._worksheets.get(sheetOrder[0]) as Worksheet;
+        const currentActive = this.getRawActiveSheet();
+        if (!currentActive) {
+            const worksheet = this._worksheets.get(this._snapshot.sheetOrder[0])!;
+            this.setActiveSheet(worksheet);
+            return worksheet;
         }
 
-        return this._worksheets.get(activeSheetId) as Worksheet;
+        return currentActive;
     }
 
-    __setActiveSheet(worksheet: Worksheet): void {
+    setActiveSheet(worksheet: Worksheet): void {
         this._activeSheet$.next(worksheet);
     }
 
     getActiveSheetIndex(): number {
         const { sheetOrder } = this._snapshot;
         return sheetOrder.findIndex((sheetId) => {
-            const worksheet = this._worksheets.get(sheetId) as Worksheet;
-            if (worksheet.getStatus() === 1) {
-                return true;
-            }
-            return false;
+            const worksheet = this._worksheets.get(sheetId)!;
+            return worksheet === this._activeSheet;
         });
     }
 
     getSheetSize(): number {
         return this._snapshot.sheetOrder.length;
-    }
-
-    /**
-     * Applies all pending Sheets changes.
-     *
-     * @returns void
-     */
-    flush(): void {
-        //TODO ..
     }
 
     getSheets(): Worksheet[] {

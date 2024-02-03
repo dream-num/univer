@@ -16784,7 +16784,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
             },
             selections: ['A1'],
             rightToLeft: 0,
-            pluginMeta: {},
         },
         // 'sheet-0011':{
         //     "name": "sheet-0011",
@@ -26647,7 +26646,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
         //         "A1"
         //     ],
         //     "rightToLeft": 0,
-        //     "pluginMeta": {}
         // }
     },
 };

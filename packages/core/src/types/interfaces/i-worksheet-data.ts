@@ -23,30 +23,25 @@ import type { IFreeze } from './i-freeze';
 import type { IRange, IRangeType } from './i-range';
 import type { IRowData } from './i-row-data';
 
-// type MetaData = {
-//     metadataId?: string;
-//     metadataKey: string;
-//     metadataValue?: string;
-//     visibility?: DeveloperMetadataVisibility;
-// };
-
-// TODO: name of the interface is not accurate, should be IWorksheetSnapshot
+// TODO: 考虑将非通用配置，抽离到插件
+// 比如 showGridlines 是 spreadsheet 特有的，而如果实现如普通表格，就不需要 showGridlines
 
 /**
- * Properties of a worksheet's configuration
- *
- * TODO: 考虑将非通用配置，抽离到插件
- *
- * 比如 showGridlines 是sheet特有的，而如果实现如普通表格，就不需要 showGridlines
+ * Snapshot of a worksheet.
  */
 export interface IWorksheetData {
-    type: SheetTypes;
+    /**
+     * Id of the worksheet. This should be unique and immutable across the lifecycle of the worksheet.
+     */
     id: string;
+
+    /** Name of the sheet. */
     name: string;
+
     tabColor: string;
 
     /**
-     * Determine whether the sheet is hidden
+     * Determine whether the sheet is hidden.
      *
      * @remarks
      * See {@link BooleanNumber| the BooleanNumber enum} for more details.
@@ -55,9 +50,6 @@ export interface IWorksheetData {
      */
     hidden: BooleanNumber;
     freeze: IFreeze;
-    /**
-     * row and column  count in worksheet, not like excel, it is unlimited
-     */
     rowCount: number;
     columnCount: number;
     zoomRatio: number;
@@ -65,28 +57,29 @@ export interface IWorksheetData {
     scrollLeft: number;
     defaultColumnWidth: number;
     defaultRowHeight: number;
+
+    /** All merged cells in this worksheet. */
     mergeData: IRange[];
-    hideRow: [];
-    hideColumn: [];
-    /**
-     * If the worksheet is the active one.
-     * @deprecated this should be removed
-     */
-    status: BooleanNumber;
+
+    /** A matrix storing cell contents by row and column index. */
     cellData: IObjectMatrixPrimitiveType<ICellData>;
-    rowData: IObjectArrayPrimitiveType<Partial<IRowData>>; // TODO:配置文件不能为ObjectArray实例，应该是纯json配置 @jerry
+    rowData: IObjectArrayPrimitiveType<Partial<IRowData>>;
     columnData: IObjectArrayPrimitiveType<Partial<IColumnData>>;
-    showGridlines: BooleanNumber;
+
     rowHeader: {
         width: number;
         hidden?: BooleanNumber;
     };
+
     columnHeader: {
         height: number;
         hidden?: BooleanNumber;
     };
+
+    showGridlines: BooleanNumber;
+
+    /** @deprecated */
     selections: IRangeType[];
+
     rightToLeft: BooleanNumber;
-    // metaData: MetaData[];
-    pluginMeta: IKeyValue;
 }

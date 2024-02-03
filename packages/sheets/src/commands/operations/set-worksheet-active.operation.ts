@@ -34,7 +34,7 @@ export const SetWorksheetActiveOperation: IOperation<ISetWorksheetActiveOperatio
         for (const [, worksheet] of worksheets) {
             if (worksheet.getSheetId() === params.subUnitId) {
                 worksheet.getConfig().status = BooleanNumber.TRUE;
-                workbook.__setActiveSheet(worksheet);
+                workbook.setActiveSheet(worksheet);
             } else {
                 worksheet.getConfig().status = BooleanNumber.FALSE;
             }

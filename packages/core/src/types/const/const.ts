@@ -119,7 +119,6 @@ export const DEFAULT_WORKSHEET: IWorksheetData = {
     cellData: {},
     rowData: {},
     columnData: {},
-    status: BooleanNumber.FALSE,
     showGridlines: BooleanNumber.TRUE,
     rowHeader: {
         width: DEFAULT_WORKSHEET_ROW_TITLE_WIDTH,
@@ -131,7 +130,6 @@ export const DEFAULT_WORKSHEET: IWorksheetData = {
     },
     selections: ['A1'],
     rightToLeft: BooleanNumber.FALSE,
-    pluginMeta: {},
 };
 /**
  * Default styles

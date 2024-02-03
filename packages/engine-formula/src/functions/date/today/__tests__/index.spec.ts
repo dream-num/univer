@@ -23,7 +23,19 @@ import { ErrorType } from '../../../..';
 
 // mock new Date() use V
 const _Date = Date;
-global.Date = vi.fn((...params) => params.length > 0 ? new _Date(params[0], params[1], params[2]) : new _Date(2020, 0, 1)) as any;
+global.Date = vi.fn((...params) => {
+    if (params.length === 1) {
+        return new _Date(params[0]);
+    }
+
+    if (params.length === 3) {
+        return new _Date(params[0], params[1], params[2]);
+    }
+
+    return new _Date(2020, 0, 1);
+}) as any;
+// global.Date = vi.fn((...params) => params.length > 0 ? new _Date(params[0], params[1], params[2]) : new _Date(2020, 0, 1)) as any;
+global.Date.UTC = _Date.UTC;
 
 describe('Test today function', () => {
     const textFunction = new Today(FUNCTION_NAMES_DATE.TODAY);

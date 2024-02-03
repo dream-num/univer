@@ -19,6 +19,10 @@ import { excelDateSerial } from '../date';
 
 describe('Test date', () => {
     it('Function excelDateSerial', () => {
+        expect(excelDateSerial(new Date(1900, 1, 28))).toBe(59);
+        expect(excelDateSerial(new Date(1900, 1, 29))).toBe(61);
+        expect(excelDateSerial(new Date(1900, 2, 1))).toBe(61);
+        expect(excelDateSerial(new Date(1901, 0, 1))).toBe(367);
         expect(excelDateSerial(new Date(2024, 1, 2))).toBe(45324);
     });
 });

@@ -19,12 +19,26 @@ export const DEFFAULT_DATE_FORMAT = 'yyyy/mm/dd';
 /**
  * Excel stores dates as sequential serial numbers so they can be used in calculations. By default, January 1, 1900 is serial number 1, and January 1, 2008 is serial number 39448 because it is 39,447 days after January 1, 1900.
  *
+ * Excel has a leap year error in 1900. February 29, 1900 is considered a legal date. In fact, there is no February 29 in 1900.
+ * 1900.2.28 Date Serial 59
+ * 1900.2.29 Date Serial 61
+ * 1900.3.1 Date Serial 61
+ * 1901.1.1 Date Serial 367
  * @param date
  * @returns
  */
 export function excelDateSerial(date: Date): number {
-    // TODO@Dushusir: set current time zone, reference https://stackoverflow.com/questions/38399465/how-to-get-list-of-all-timezones-in-javascript
-    const baseDate = new Date(1900, 0, 1); // January 1, 1900
-    const dayDifference = (date.getTime() - baseDate.getTime()) / (1000 * 3600 * 24);
-    return Math.ceil(dayDifference) + 1; // +1 for adjusting for Excel's 1900 leap year error
+    const baseDate = new Date(Date.UTC(1900, 0, 1)); // January 1, 1900, UTC
+    const leapDayDate = new Date(Date.UTC(1900, 1, 28)); // February 28, 1900, UTC
+    const dateInUTC = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+
+    // Calculate the difference in days between the base date and the input date
+    let dayDifference = (dateInUTC - baseDate.getTime()) / (1000 * 3600 * 24);
+
+    // If the date is later than February 28, 1900, the day difference needs to be adjusted to account for Excel errors
+    if (dateInUTC > leapDayDate.getTime()) {
+        dayDifference += 1;
+    }
+
+    return Math.floor(dayDifference) + 1; // Excel serial number starts from 1
 }

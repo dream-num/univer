@@ -18,7 +18,6 @@ import type { Nullable } from '../shared';
 import { ObjectMatrix, Rectangle, Tools } from '../shared';
 import { createRowColIter } from '../shared/row-col-iter';
 import { DEFAULT_WORKSHEET } from '../types/const';
-import type { SheetTypes } from '../types/enum';
 import { BooleanNumber } from '../types/enum';
 import type { ICellData, ICellDataForSheetInterceptor, IFreeze, IRange, IWorksheetData } from '../types/interfaces';
 import { ColumnManager } from './column-manager';
@@ -308,16 +307,6 @@ export class Worksheet {
         const { rowCount } = _config;
 
         return rowCount;
-    }
-
-    /**
-     * Returns the type of the sheet.
-     * @returns the type of the sheet
-     */
-    getType(): SheetTypes {
-        const { _snapshot: _config } = this;
-        const { type } = _config;
-        return type;
     }
 
     getRowCount(): number {

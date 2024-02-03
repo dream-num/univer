@@ -15,8 +15,7 @@
  */
 
 import type { IObjectArrayPrimitiveType, IObjectMatrixPrimitiveType } from '../../shared/object-matrix';
-import type { IKeyValue } from '../../shared/types';
-import type { BooleanNumber, SheetTypes } from '../enum';
+import type { BooleanNumber } from '../enum';
 import type { ICellData } from './i-cell-data';
 import type { IColumnData } from './i-column-data';
 import type { IFreeze } from './i-freeze';

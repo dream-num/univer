@@ -15,7 +15,7 @@
  */
 
 import type { IWorkbookData } from '@univerjs/core';
-import { BooleanNumber, BorderStyleTypes, LocaleType, SheetTypes } from '@univerjs/core';
+import { BooleanNumber, BorderStyleTypes, LocaleType } from '@univerjs/core';
 
 import { PAGE5_RICHTEXT_1 } from '../slides/rich-text/page5-richtext1';
 
@@ -25,7 +25,7 @@ export const SLIDE_WORKBOOK_DATA: IWorkbookData = {
     name: 'universheet',
     sheetOrder: ['sheet-0001'],
     styles: {
-        '1': {
+        1: {
             vt: 2,
             ht: 2,
             bl: 1,
@@ -37,7 +37,7 @@ export const SLIDE_WORKBOOK_DATA: IWorkbookData = {
                 rgb: 'rgb(255,255,255)',
             },
         },
-        '2': {
+        2: {
             vt: 2,
             ht: 2,
             bl: 1,
@@ -75,7 +75,7 @@ export const SLIDE_WORKBOOK_DATA: IWorkbookData = {
                 },
             },
         },
-        '3': {
+        3: {
             vt: 2,
             bg: {
                 rgb: 'rgb(105,126,146)',
@@ -112,7 +112,7 @@ export const SLIDE_WORKBOOK_DATA: IWorkbookData = {
                 },
             },
         },
-        '4': {
+        4: {
             fs: 12,
             vt: 2,
             pd: {
@@ -146,7 +146,7 @@ export const SLIDE_WORKBOOK_DATA: IWorkbookData = {
                 },
             },
         },
-        '5': {
+        5: {
             ht: 2,
             vt: 2,
             bd: {
@@ -176,7 +176,7 @@ export const SLIDE_WORKBOOK_DATA: IWorkbookData = {
                 },
             },
         },
-        '6': {
+        6: {
             ht: 1,
             vt: 2,
             tb: 3,
@@ -217,7 +217,6 @@ export const SLIDE_WORKBOOK_DATA: IWorkbookData = {
     appVersion: '3.0.0-alpha',
     sheets: {
         'sheet-0001': {
-            type: SheetTypes.GRID,
             id: 'sheet-0001',
             name: 'sheet-0001',
             tabColor: 'blue',
@@ -230,298 +229,298 @@ export const SLIDE_WORKBOOK_DATA: IWorkbookData = {
             defaultColumnWidth: 93,
             defaultRowHeight: 40,
             cellData: {
-                '1': {
-                    '1': {
+                1: {
+                    1: {
                         v: 'Variants',
                         s: '2',
                     },
-                    '2': {
+                    2: {
                         v: 'Platform',
                         s: '2',
                     },
-                    '3': {
+                    3: {
                         v: 'UGC Buzz volume',
                         s: '2',
                     },
-                    '9': {
+                    9: {
                         p: PAGE5_RICHTEXT_1,
                         s: '6',
                     },
                 },
-                '2': {
-                    '3': {
+                2: {
+                    3: {
                         v: "Jul'21",
                         s: '1',
                     },
-                    '4': {
+                    4: {
                         v: "Aug'21",
                         s: '1',
                     },
-                    '5': {
+                    5: {
                         v: "Sep'21",
                         s: '1',
                     },
-                    '6': {
+                    6: {
                         v: "Oct'21",
                         s: '1',
                     },
-                    '7': {
+                    7: {
                         v: "Nov'21",
                         s: '1',
                     },
-                    '8': {
+                    8: {
                         v: "Dec'21",
                         s: '1',
                     },
                 },
-                '3': {
-                    '1': {
+                3: {
+                    1: {
                         v: 'Eleva',
                         s: '3',
                     },
-                    '2': {
+                    2: {
                         v: 'Amazon',
                         s: '4',
                     },
-                    '3': {
+                    3: {
                         v: '4',
                         s: '5',
                     },
-                    '4': {
+                    4: {
                         v: '145',
                         s: '5',
                     },
-                    '5': {
+                    5: {
                         v: '44',
                         s: '5',
                     },
-                    '6': {
+                    6: {
                         v: '20',
                         s: '5',
                     },
-                    '7': {
+                    7: {
                         v: '7',
                         s: '5',
                     },
-                    '8': {
+                    8: {
                         v: '12',
                         s: '5',
                     },
                 },
-                '4': {
-                    '2': {
+                4: {
+                    2: {
                         v: 'Google',
                         s: '4',
                     },
-                    '3': {
+                    3: {
                         v: '2',
                         s: '5',
                     },
-                    '4': {
+                    4: {
                         v: '6',
                         s: '5',
                     },
-                    '5': {
+                    5: {
                         v: '5',
                         s: '5',
                     },
-                    '6': {
+                    6: {
                         v: '6',
                         s: '5',
                     },
-                    '7': {
+                    7: {
                         v: '12',
                         s: '5',
                     },
-                    '8': {
+                    8: {
                         v: '3113',
                         s: '5',
                     },
                 },
-                '5': {
-                    '2': {
+                5: {
+                    2: {
                         v: 'Amazon',
                         s: '4',
                     },
-                    '3': {
+                    3: {
                         v: '14',
                         s: '5',
                     },
-                    '4': {
+                    4: {
                         v: '13',
                         s: '5',
                     },
-                    '5': {
+                    5: {
                         v: '6',
                         s: '5',
                     },
-                    '6': {
+                    6: {
                         v: '6',
                         s: '5',
                     },
-                    '7': {
+                    7: {
                         v: '11',
                         s: '5',
                     },
-                    '8': {
+                    8: {
                         v: '2',
                         s: '5',
                     },
                 },
-                '6': {
-                    '1': {
+                6: {
+                    1: {
                         v: 'Similac',
                         s: '3',
                     },
-                    '2': {
+                    2: {
                         v: 'SaleForce',
                         s: '4',
                     },
-                    '3': {
+                    3: {
                         v: '451',
                         s: '5',
                     },
-                    '4': {
+                    4: {
                         v: '255',
                         s: '5',
                     },
-                    '5': {
+                    5: {
                         v: '72',
                         s: '5',
                     },
-                    '6': {
+                    6: {
                         v: '23',
                         s: '5',
                     },
-                    '7': {
+                    7: {
                         v: '163',
                         s: '5',
                     },
-                    '8': {
+                    8: {
                         v: '22',
                         s: '5',
                     },
                 },
-                '7': {
-                    '2': {
+                7: {
+                    2: {
                         v: 'Oracle',
                         s: '4',
                     },
-                    '3': {
+                    3: {
                         v: '0',
                         s: '5',
                     },
-                    '4': {
+                    4: {
                         v: '1',
                         s: '5',
                     },
-                    '5': {
+                    5: {
                         v: '1136',
                         s: '5',
                     },
-                    '6': {
+                    6: {
                         v: '11',
                         s: '5',
                     },
-                    '7': {
+                    7: {
                         v: '2',
                         s: '5',
                     },
-                    '8': {
+                    8: {
                         v: '1',
                         s: '5',
                     },
                 },
-                '8': {
-                    '2': {
+                8: {
+                    2: {
                         v: 'Apple',
                         s: '4',
                     },
-                    '3': {
+                    3: {
                         v: '7',
                         s: '5',
                     },
-                    '4': {
+                    4: {
                         v: '2',
                         s: '5',
                     },
-                    '5': {
+                    5: {
                         v: '10',
                         s: '5',
                     },
-                    '6': {
+                    6: {
                         v: '5',
                         s: '5',
                     },
-                    '7': {
+                    7: {
                         v: '6',
                         s: '5',
                     },
-                    '8': {
+                    8: {
                         v: '3',
                         s: '5',
                     },
                 },
-                '9': {
-                    '1': {
+                9: {
+                    1: {
                         v: 'TC',
                         s: '3',
                     },
-                    '2': {
+                    2: {
                         v: 'IBM',
                         s: '4',
                     },
-                    '3': {
+                    3: {
                         v: '1',
                         s: '5',
                     },
-                    '4': {
+                    4: {
                         v: '12',
                         s: '5',
                     },
-                    '5': {
+                    5: {
                         v: '2',
                         s: '5',
                     },
-                    '6': {
+                    6: {
                         v: '1',
                         s: '5',
                     },
-                    '7': {
+                    7: {
                         v: '1',
                         s: '5',
                     },
-                    '8': {
+                    8: {
                         v: '1',
                         s: '5',
                     },
                 },
-                '10': {
-                    '2': {
+                10: {
+                    2: {
                         v: 'Google',
                         s: '4',
                     },
-                    '3': {
+                    3: {
                         v: '26',
                         s: '5',
                     },
-                    '4': {
+                    4: {
                         v: '33',
                         s: '5',
                     },
-                    '5': {
+                    5: {
                         v: '33',
                         s: '5',
                     },
-                    '6': {
+                    6: {
                         v: '6',
                         s: '5',
                     },
-                    '7': {
+                    7: {
                         v: '22',
                         s: '5',
                     },
-                    '8': {
+                    8: {
                         v: '8',
                         s: '5',
                     },
@@ -573,40 +572,37 @@ export const SLIDE_WORKBOOK_DATA: IWorkbookData = {
             ],
 
             rowData: {
-                '0': {
+                0: {
                     h: 20,
                 },
             },
             columnData: {
-                '0': {
+                0: {
                     w: 20,
                 },
-                '2': {
+                2: {
                     w: 120,
                 },
-                '3': {
+                3: {
                     w: 60,
                 },
-                '4': {
+                4: {
                     w: 60,
                 },
-                '5': {
+                5: {
                     w: 60,
                 },
-                '6': {
+                6: {
                     w: 60,
                 },
-                '7': {
+                7: {
                     w: 60,
                 },
-                '8': {
+                8: {
                     w: 60,
                 },
             },
-            status: 1,
             showGridlines: 0,
-            hideRow: [],
-            hideColumn: [],
             rowHeader: {
                 width: 46,
                 hidden: BooleanNumber.FALSE,

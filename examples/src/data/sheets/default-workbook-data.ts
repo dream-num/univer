@@ -27,7 +27,6 @@ import {
     PositionedObjectLayoutType,
     PresetListType,
     SectionType,
-    SheetTypes,
     Tools,
     VerticalAlign,
     WrapStrategy,
@@ -65,7 +64,7 @@ const richTextTestFloat: IDocumentData = {
         },
     },
     body: {
-        dataStream: `在“第1题”工作表中完成以下操作\b上标日期列单元格数据验证，限制只能输入日期（介于1949年1月1日至2099年1月1日）\r\n`,
+        dataStream: '在“第1题”工作表中完成以下操作\b上标日期列单元格数据验证，限制只能输入日期（介于1949年1月1日至2099年1月1日）\r\n',
         textRuns: [
             {
                 st: 0,
@@ -139,8 +138,8 @@ const richTextTestFloat: IDocumentData = {
     },
     documentStyle: {
         pageSize: {
-            width: Infinity,
-            height: Infinity,
+            width: Number.POSITIVE_INFINITY,
+            height: Number.POSITIVE_INFINITY,
         },
         marginTop: 0,
         marginBottom: 0,
@@ -152,7 +151,7 @@ const richTextTestFloat: IDocumentData = {
 const richTextTest: IDocumentData = {
     id: 'd',
     body: {
-        dataStream: `在“第1题”工作表中完成以下操作\b上标日期列单元格数据验证，限制只能输入日期（介于1949年1月1日至2099年1月1日）\r\n`,
+        dataStream: '在“第1题”工作表中完成以下操作\b上标日期列单元格数据验证，限制只能输入日期（介于1949年1月1日至2099年1月1日）\r\n',
         textRuns: [
             {
                 st: 0,
@@ -226,8 +225,8 @@ const richTextTest: IDocumentData = {
     },
     documentStyle: {
         pageSize: {
-            width: Infinity,
-            height: Infinity,
+            width: Number.POSITIVE_INFINITY,
+            height: Number.POSITIVE_INFINITY,
         },
         marginTop: 0,
         marginBottom: 0,
@@ -245,7 +244,7 @@ export const DEFAULT_WORKBOOK_DATA: IWorkbookData = {
     name: 'universheet',
     sheetOrder: ['sheet-01', 'sheet-02', 'sheet-03', 'sheet-04', 'sheet-05', 'sheet-06'],
     styles: {
-        '1': {
+        1: {
             cl: {
                 rgb: 'blue',
             },
@@ -278,7 +277,7 @@ export const DEFAULT_WORKBOOK_DATA: IWorkbookData = {
             },
             ht: 3,
         },
-        '2': {
+        2: {
             bg: {
                 rgb: 'rgb(200, 2, 0)',
             },
@@ -286,7 +285,7 @@ export const DEFAULT_WORKBOOK_DATA: IWorkbookData = {
             ht: HorizontalAlign.RIGHT,
             vt: VerticalAlign.TOP,
         },
-        '3': {
+        3: {
             ht: HorizontalAlign.RIGHT,
             vt: VerticalAlign.MIDDLE,
             tb: WrapStrategy.WRAP,
@@ -331,123 +330,122 @@ export const DEFAULT_WORKBOOK_DATA: IWorkbookData = {
                 },
             },
         },
-        '4': {
+        4: {
             bg: {
                 rgb: 'rgb(0, 0, 255)',
             },
         },
-        '5': {
+        5: {
             tb: WrapStrategy.WRAP,
         },
     },
     appVersion: '3.0.0-alpha',
     sheets: {
         'sheet-01': {
-            type: SheetTypes.GRID,
             id: 'sheet-01',
             cellData: {
-                '0': {
-                    '0': {
+                0: {
+                    0: {
                         s: '1',
                         v: 1,
                     },
-                    '1': {
+                    1: {
                         s: '1',
                         v: 1,
                     },
-                    '5': {
+                    5: {
                         s: '1',
                         v: 8,
                     },
-                    '6': {
+                    6: {
                         s: '2',
                         v: 8,
                     },
                 },
-                '1': {
-                    '0': {
+                1: {
+                    0: {
                         v: 1,
                     },
-                    '1': {
+                    1: {
                         v: 1,
                     },
-                    '2': {
+                    2: {
                         v: 80,
                         s: '3',
                     },
-                    '3': {
+                    3: {
                         v: '富文本编辑',
                         s: '2',
                     },
                 },
-                '2': {
-                    '0': {
+                2: {
+                    0: {
                         v: 1111,
                     },
-                    '1': {
+                    1: {
                         v: 1111,
                     },
-                    '5': {
+                    5: {
                         s: '1',
                         v: 8,
                     },
-                    '6': {
+                    6: {
                         s: '1',
                         v: 8,
                     },
-                    '7': {
+                    7: {
                         s: '1',
                         v: 8,
                     },
-                    '8': {
+                    8: {
                         s: '1',
                         v: 8,
                     },
                 },
-                '3': {
-                    '0': {
+                3: {
+                    0: {
                         v: 1111,
                     },
-                    '1': {
+                    1: {
                         v: 1111,
                     },
                 },
-                '10': {
-                    '9': {
+                10: {
+                    9: {
                         v: 1111,
                         s: '2',
                     },
                 },
-                '13': {
-                    '9': {
+                13: {
+                    9: {
                         v: 1111,
                         s: '4',
                     },
                 },
-                '17': {
-                    '3': {
+                17: {
+                    3: {
                         v: '做移动端开发和前端开发的人员，对 MVC、MVP、MVVM 这几个名词应该都不陌生，这是三个最常用的应用架构模式，目的都是为了将业务和视图的实现代码分离',
                         s: '3',
                         p: richTextTest,
                     },
                 },
-                '20': {
-                    '10': {
+                20: {
+                    10: {
                         v: '北京马拉松组委会办公室一位接电话的女士证实，的确有这项规定，她还称2014年马拉松的预登记工作将在本周启动。北京马拉松比赛将在10月19日举行。',
                         s: '3',
                     },
-                    '12': {
+                    12: {
                         s: '4',
                     },
                 },
-                '29': {
-                    '13': {
+                29: {
+                    13: {
                         p: Tools.deepClone(richTextTest),
                         s: '4',
                     },
                 },
-                '32': {
-                    '3': {
+                32: {
+                    3: {
                         p: richTextTestFloat,
                         s: '5',
                     },
@@ -514,37 +512,34 @@ export const DEFAULT_WORKBOOK_DATA: IWorkbookData = {
                 },
             ],
             rowData: {
-                '3': {
+                3: {
                     h: 50,
                     hd: BooleanNumber.FALSE,
                 },
-                '4': {
+                4: {
                     h: 60,
                     hd: BooleanNumber.FALSE,
                 },
-                '29': {
+                29: {
                     h: 200,
                     hd: BooleanNumber.FALSE,
                 },
             },
             columnData: {
-                '5': {
+                5: {
                     w: 100,
                     hd: BooleanNumber.FALSE,
                 },
-                '6': {
+                6: {
                     w: 200,
                     hd: BooleanNumber.FALSE,
                 },
-                '13': {
+                13: {
                     w: 300,
                     hd: BooleanNumber.FALSE,
                 },
             },
-            status: 1,
             showGridlines: 1,
-            hideRow: [],
-            hideColumn: [],
             rowHeader: {
                 width: 46,
                 hidden: BooleanNumber.FALSE,
@@ -557,55 +552,50 @@ export const DEFAULT_WORKBOOK_DATA: IWorkbookData = {
             rightToLeft: BooleanNumber.FALSE,
         },
         'sheet-02': {
-            type: SheetTypes.GRID,
             id: 'sheet-02',
             name: 'sheet2',
             cellData: {
-                '0': {
-                    '0': {
+                0: {
+                    0: {
                         s: '1',
                         v: 1,
                     },
-                    '1': {
+                    1: {
                         s: '1',
                         v: 1,
                     },
-                    '5': {
+                    5: {
                         s: '1',
                         v: 8,
                     },
-                    '6': {
+                    6: {
                         s: '2',
                         v: 8,
                     },
                 },
-                '20': {
-                    '0': {
+                20: {
+                    0: {
                         v: 'sheet2',
                     },
-                    '1': {
+                    1: {
                         v: 'sheet2 - 2',
                     },
                 },
             },
         },
         'sheet-03': {
-            type: SheetTypes.GRID,
             id: 'sheet-03',
             name: 'sheet3',
         },
         'sheet-04': {
-            type: SheetTypes.GRID,
             id: 'sheet-04',
             name: 'sheet4',
         },
         'sheet-05': {
-            type: SheetTypes.GRID,
             id: 'sheet-05',
             name: 'sheet5',
         },
         'sheet-06': {
-            type: SheetTypes.GRID,
             id: 'sheet-06',
             name: 'sheet6',
         },
@@ -648,7 +638,7 @@ export const DEFAULT_WORKBOOK_DATA_DOWN: IWorkbookData = {
     name: 'universheet',
     sheetOrder: [],
     styles: {
-        '1': {
+        1: {
             cl: {
                 rgb: 'green',
             },
@@ -681,13 +671,13 @@ export const DEFAULT_WORKBOOK_DATA_DOWN: IWorkbookData = {
             },
             ht: 3,
         },
-        '2': {
+        2: {
             bg: {
                 rgb: 'rgb(2, 200, 0)',
             },
             fs: 24,
         },
-        '3': {
+        3: {
             ht: HorizontalAlign.RIGHT,
             vt: VerticalAlign.TOP,
             tb: WrapStrategy.WRAP,
@@ -732,7 +722,7 @@ export const DEFAULT_WORKBOOK_DATA_DOWN: IWorkbookData = {
                 },
             },
         },
-        '4': {
+        4: {
             bg: {
                 rgb: 'rgb(0, 0, 255)',
             },
@@ -741,105 +731,104 @@ export const DEFAULT_WORKBOOK_DATA_DOWN: IWorkbookData = {
     appVersion: '3.0.0-alpha',
     sheets: {
         'sheet-0001': {
-            type: SheetTypes.GRID,
             id: 'sheet-0001',
             cellData: {
-                '0': {
-                    '0': {
+                0: {
+                    0: {
                         s: '1',
                         v: 2,
                     },
-                    '1': {
+                    1: {
                         s: '1',
                         v: 1,
                     },
-                    '5': {
+                    5: {
                         s: '1',
                         v: 8,
                     },
-                    '6': {
+                    6: {
                         s: '2',
                         v: 8,
                     },
                 },
-                '1': {
-                    '0': {
+                1: {
+                    0: {
                         v: 22,
                     },
-                    '1': {
+                    1: {
                         v: 22,
                     },
-                    '2': {
+                    2: {
                         v: 80,
                         s: '3',
                     },
-                    '3': {
+                    3: {
                         v: '富文本编辑',
                         s: '2',
                     },
                 },
-                '2': {
-                    '0': {
+                2: {
+                    0: {
                         v: 2222,
                     },
-                    '1': {
+                    1: {
                         v: 2222,
                     },
-                    '5': {
+                    5: {
                         s: '1',
                         v: 8,
                     },
-                    '6': {
+                    6: {
                         s: '1',
                         v: 8,
                     },
-                    '7': {
+                    7: {
                         s: '1',
                         v: 8,
                     },
-                    '8': {
+                    8: {
                         s: '1',
                         v: 8,
                     },
                 },
-                '3': {
-                    '0': {
+                3: {
+                    0: {
                         v: 1111,
                     },
-                    '1': {
+                    1: {
                         v: 1111,
                     },
                 },
-                '10': {
-                    '9': {
+                10: {
+                    9: {
                         v: 1111,
                         s: '2',
                     },
                 },
-                '13': {
-                    '9': {
+                13: {
+                    9: {
                         v: 1111,
                         s: '4',
                     },
                 },
-                '17': {
-                    '3': {
+                17: {
+                    3: {
                         v: '做移动端开发和前端开发的人员，对 MVC、MVP、MVVM 这几个名词应该都不陌生，这是三个最常用的应用架构模式，目的都是为了将业务和视图的实现代码分离',
                         s: '3',
                         p: richTextTest,
                     },
                 },
-                '20': {
-                    '10': {
+                20: {
+                    10: {
                         v: '北京马拉松组委会办公室一位接电话的女士证实，的确有这项规定，她还称2014年马拉松的预登记工作将在本周启动。北京马拉松比赛将在10月19日举行。',
                         s: '3',
                     },
-                    '12': {
+                    12: {
                         s: '4',
                     },
                 },
-                '29': {
-                    '13': {
+                29: {
+                    13: {
                         p: Tools.deepClone(richTextTest),
                         s: '4',
                     },
@@ -900,37 +889,34 @@ export const DEFAULT_WORKBOOK_DATA_DOWN: IWorkbookData = {
                 },
             ],
             rowData: {
-                '3': {
+                3: {
                     h: 50,
                     hd: BooleanNumber.FALSE,
                 },
-                '4': {
+                4: {
                     h: 60,
                     hd: BooleanNumber.FALSE,
                 },
-                '29': {
+                29: {
                     h: 200,
                     hd: BooleanNumber.FALSE,
                 },
             },
             columnData: {
-                '5': {
+                5: {
                     w: 100,
                     hd: BooleanNumber.FALSE,
                 },
-                '6': {
+                6: {
                     w: 200,
                     hd: BooleanNumber.FALSE,
                 },
-                '13': {
+                13: {
                     w: 300,
                     hd: BooleanNumber.FALSE,
                 },
             },
-            status: 1,
             showGridlines: 1,
-            hideRow: [],
-            hideColumn: [],
             rowHeader: {
                 width: 46,
                 hidden: BooleanNumber.FALSE,
@@ -943,7 +929,6 @@ export const DEFAULT_WORKBOOK_DATA_DOWN: IWorkbookData = {
             rightToLeft: BooleanNumber.FALSE,
         },
         'sheet-0002': {
-            type: SheetTypes.GRID,
             id: 'sheet-0002',
             name: 'sheet0003',
         },

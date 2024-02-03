@@ -19,7 +19,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { FUNCTION_NAMES_DATE } from '../../function-names';
 import { Today } from '..';
 import { NumberValueObject } from '../../../../engine/value-object/primitive-object';
-import { ErrorType } from '../../../..';
+import { ErrorType } from '../../../../basics/error-type';
 
 // mock new Date() use V
 const _Date = Date;

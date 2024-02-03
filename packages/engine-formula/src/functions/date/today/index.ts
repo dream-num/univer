@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import type { BaseValueObject } from '../../..';
-import { ErrorType, ErrorValueObject, NumberValueObject } from '../../..';
 import { DEFFAULT_DATE_FORMAT, excelDateSerial } from '../../../basics/date';
+import { ErrorType } from '../../../basics/error-type';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Today extends BaseFunction {

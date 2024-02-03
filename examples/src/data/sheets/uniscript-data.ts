@@ -44,8 +44,6 @@ export const UNISCRIT_WORKBOOK_DATA_DEMO: IWorkbookData = {
             defaultColumnWidth: 73,
             defaultRowHeight: 19,
             mergeData: [],
-            hideRow: [],
-            hideColumn: [],
             cellData: {
                 0: {
                     0: {
@@ -5676,7 +5674,6 @@ export const UNISCRIT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                     hd: 0,
                 },
             },
-            status: 0,
             showGridlines: 1,
             rowHeader: {
                 width: 46,
@@ -5688,7 +5685,6 @@ export const UNISCRIT_WORKBOOK_DATA_DEMO: IWorkbookData = {
             },
             selections: ['A1'],
             rightToLeft: 0,
-            pluginMeta: {},
         },
     },
 };

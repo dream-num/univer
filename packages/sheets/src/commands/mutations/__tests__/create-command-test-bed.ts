@@ -83,7 +83,6 @@ const TEST_WORKBOOK_DATA_DEMO: () => IWorkbookData = () => ({
             },
             selections: ['A1'],
             rightToLeft: 0,
-            pluginMeta: {},
         },
     },
     resources: [

@@ -18,7 +18,6 @@ import {
     BooleanNumber,
     HorizontalAlign,
     LocaleType,
-    SheetTypes,
     TextDirection,
     VerticalAlign,
     WrapStrategy,
@@ -96,7 +95,6 @@ export const DEFAULT_WORKSHEET_COLUMN_TITLE_HEIGHT = 20;
  * Used as an init worksheet return value
  */
 export const DEFAULT_WORKSHEET: IWorksheetData = {
-    type: SheetTypes.GRID,
     name: 'Sheet1',
     id: 'sheet-01',
     tabColor: '',
@@ -115,12 +113,9 @@ export const DEFAULT_WORKSHEET: IWorksheetData = {
     defaultColumnWidth: DEFAULT_WORKSHEET_COLUMN_WIDTH,
     defaultRowHeight: DEFAULT_WORKSHEET_ROW_HEIGHT,
     mergeData: [],
-    hideRow: [],
-    hideColumn: [],
     cellData: {},
     rowData: {},
     columnData: {},
-    status: BooleanNumber.FALSE,
     showGridlines: BooleanNumber.TRUE,
     rowHeader: {
         width: DEFAULT_WORKSHEET_ROW_TITLE_WIDTH,
@@ -132,7 +127,6 @@ export const DEFAULT_WORKSHEET: IWorksheetData = {
     },
     selections: ['A1'],
     rightToLeft: BooleanNumber.FALSE,
-    pluginMeta: {},
 };
 /**
  * Default styles

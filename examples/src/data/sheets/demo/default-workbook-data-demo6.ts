@@ -2645,9 +2645,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO6: IWorkbookData = {
     sheets: {
         'sheet-0006': {
             name: 'sheet-0006',
-            status: 1,
             id: 'sheet-0006',
-            type: 0,
             tabColor: '',
             hidden: 0,
             rowCount: 15,
@@ -2695,8 +2693,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO6: IWorkbookData = {
                     endColumn: 7,
                 },
             ],
-            hideRow: [],
-            hideColumn: [],
             cellData: {
                 0: {
                     0: {
@@ -3295,7 +3291,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO6: IWorkbookData = {
             },
             selections: ['A1'],
             rightToLeft: 0,
-            pluginMeta: {},
         },
     },
 };

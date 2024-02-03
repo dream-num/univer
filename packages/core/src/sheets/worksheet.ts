@@ -18,7 +18,6 @@ import type { Nullable } from '../shared';
 import { ObjectMatrix, Rectangle, Tools } from '../shared';
 import { createRowColIter } from '../shared/row-col-iter';
 import { DEFAULT_WORKSHEET } from '../types/const';
-import type { SheetTypes } from '../types/enum';
 import { BooleanNumber } from '../types/enum';
 import type { ICellData, ICellDataForSheetInterceptor, IFreeze, IRange, IWorksheetData } from '../types/interfaces';
 import { ColumnManager } from './column-manager';
@@ -49,8 +48,6 @@ export class Worksheet {
         const mergedSnapshot: IWorksheetData = {
             ...DEFAULT_WORKSHEET,
             mergeData: [],
-            hideRow: [],
-            hideColumn: [],
             cellData: {},
             rowData: {},
             columnData: {},
@@ -64,7 +61,6 @@ export class Worksheet {
             },
             selections: ['A1'],
             rightToLeft: BooleanNumber.FALSE,
-            pluginMeta: {},
             ...snapshot,
         };
 
@@ -268,16 +264,6 @@ export class Worksheet {
     }
 
     /**
-     * Returns WorkSheet Status
-     * @returns WorkSheet Status
-     */
-    getStatus() {
-        const { _snapshot: _config } = this;
-
-        return _config.status;
-    }
-
-    /**
      * Return WorkSheetZoomRatio
      * @return zoomRatio
      */
@@ -321,16 +307,6 @@ export class Worksheet {
         const { rowCount } = _config;
 
         return rowCount;
-    }
-
-    /**
-     * Returns the type of the sheet.
-     * @returns the type of the sheet
-     */
-    getType(): SheetTypes {
-        const { _snapshot: _config } = this;
-        const { type } = _config;
-        return type;
     }
 
     getRowCount(): number {
@@ -451,25 +427,6 @@ export class Worksheet {
         const { rightToLeft } = _config;
 
         return rightToLeft;
-    }
-
-    /**
-     * @typeParam T - plugin data structure
-     * @param name - plugin name
-     * @returns information stored by the plugin
-     */
-    getPluginMeta<T>(name: string): T {
-        return this._snapshot.pluginMeta[name];
-    }
-
-    /**
-     * @typeParam T - plugin data structure
-     * @param name - plugin name
-     * @param value - plugin value
-     * @returns
-     */
-    setPluginMeta<T>(name: string, value: T) {
-        this._snapshot.pluginMeta[name] = value;
     }
 
     /**

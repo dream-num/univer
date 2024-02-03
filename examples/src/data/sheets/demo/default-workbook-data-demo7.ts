@@ -16134,9 +16134,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
     sheets: {
         'sheet-0012': {
             name: 'sheet-0012',
-            status: 1,
             id: 'sheet-0012',
-            type: 0,
             tabColor: '',
             hidden: 0,
             rowCount: 1000,
@@ -16154,8 +16152,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                     endColumn: 13,
                 },
             ],
-            hideRow: [],
-            hideColumn: [],
             cellData: {
                 0: {
                     0: {
@@ -16784,7 +16780,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
             },
             selections: ['A1'],
             rightToLeft: 0,
-            pluginMeta: {},
         },
         // 'sheet-0011':{
         //     "name": "sheet-0011",
@@ -26647,7 +26642,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
         //         "A1"
         //     ],
         //     "rightToLeft": 0,
-        //     "pluginMeta": {}
         // }
     },
 };

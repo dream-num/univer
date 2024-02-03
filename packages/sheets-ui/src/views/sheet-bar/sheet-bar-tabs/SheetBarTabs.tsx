@@ -15,7 +15,7 @@
  */
 
 import type { ICommandInfo } from '@univerjs/core';
-import { BooleanNumber, ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { Dropdown } from '@univerjs/design';
 import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import {
@@ -244,13 +244,14 @@ export function SheetBarTabs() {
         setActiveKey(currentSubUnitId);
 
         const sheets = workbook.getSheets();
+        const activeSheet = workbook.getActiveSheet();
         const sheetListItems = sheets
             .filter((sheet) => !sheet.isSheetHidden())
             .map((sheet, index) => ({
                 sheetId: sheet.getSheetId(),
                 label: sheet.getName(),
                 index,
-                selected: sheet.getStatus() === BooleanNumber.TRUE,
+                selected: activeSheet === sheet,
                 color: sheet.getTabColor() ?? undefined,
             }));
         setSheetList(sheetListItems);

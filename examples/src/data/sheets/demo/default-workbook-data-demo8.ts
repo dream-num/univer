@@ -20118,9 +20118,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO8: IWorkbookData = {
     sheets: {
         'sheet-0013': {
             name: 'sheet-0013',
-            status: 1,
             id: 'sheet-0013',
-            type: 0,
             tabColor: '',
             hidden: 0,
             rowCount: 1000,
@@ -20396,8 +20394,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO8: IWorkbookData = {
                     endColumn: 7,
                 },
             ],
-            hideRow: [],
-            hideColumn: [],
             cellData: {
                 0: {
                     0: {
@@ -38021,7 +38017,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO8: IWorkbookData = {
             },
             selections: ['A1'],
             rightToLeft: 0,
-            pluginMeta: {},
         },
     },
 };

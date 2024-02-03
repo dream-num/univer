@@ -55,24 +55,10 @@ export const RemoveSheetMutation: IMutation<IRemoveSheetMutationParams, boolean>
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const { subUnitId, unitId } = params;
         const workbook = univerInstanceService.getUniverSheetInstance(unitId);
-
         if (!workbook) {
             return false;
         }
 
-        const worksheets = workbook.getWorksheets();
-        const config = workbook.getConfig();
-
-        const { sheets } = config;
-        if (sheets[subUnitId] == null) {
-            throw new Error(`Remove sheet fail ${subUnitId} does not exist`);
-        }
-        const findIndex = config.sheetOrder.findIndex((id) => id === subUnitId);
-        delete sheets[subUnitId];
-
-        config.sheetOrder.splice(findIndex, 1);
-        worksheets.delete(subUnitId);
-
-        return true;
+        return workbook.removeSheet(subUnitId);
     },
 };

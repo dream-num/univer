@@ -15,7 +15,7 @@
  */
 
 import type { IWorkbookData } from '@univerjs/core';
-import { BooleanNumber, BorderStyleTypes, LocaleType, SheetTypes } from '@univerjs/core';
+import { BooleanNumber, BorderStyleTypes, LocaleType } from '@univerjs/core';
 
 import { PAGE5_RICHTEXT_1 } from '../slides/rich-text/page5-richtext1';
 
@@ -217,7 +217,6 @@ export const SLIDE_WORKBOOK_DATA: IWorkbookData = {
     appVersion: '3.0.0-alpha',
     sheets: {
         'sheet-0001': {
-            type: SheetTypes.GRID,
             id: 'sheet-0001',
             name: 'sheet-0001',
             tabColor: 'blue',
@@ -603,10 +602,7 @@ export const SLIDE_WORKBOOK_DATA: IWorkbookData = {
                     w: 60,
                 },
             },
-            status: 1,
             showGridlines: 0,
-            hideRow: [],
-            hideColumn: [],
             rowHeader: {
                 width: 46,
                 hidden: BooleanNumber.FALSE,
@@ -617,7 +613,6 @@ export const SLIDE_WORKBOOK_DATA: IWorkbookData = {
             },
             selections: ['A2'],
             rightToLeft: BooleanNumber.FALSE,
-            pluginMeta: {},
         },
     },
     // namedRanges: [

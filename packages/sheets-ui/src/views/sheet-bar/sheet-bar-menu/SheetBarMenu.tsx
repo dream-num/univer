@@ -112,12 +112,13 @@ export function SheetBarMenu(props: ISheetBarMenuProps) {
 
     const statusInit = () => {
         const sheets = workbook.getSheets();
+        const activeSheet = workbook.getActiveSheet();
         const worksheetMenuItems = sheets.map((sheet, index) => ({
             label: sheet.getName(),
             index: `${index}`,
             sheetId: sheet.getSheetId(),
             hidden: sheet.isSheetHidden() === BooleanNumber.TRUE,
-            selected: sheet.getStatus() === BooleanNumber.TRUE,
+            selected: activeSheet === sheet,
         }));
 
         setMenu(worksheetMenuItems);

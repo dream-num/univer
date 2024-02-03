@@ -27,7 +27,6 @@ import {
     PositionedObjectLayoutType,
     PresetListType,
     SectionType,
-    SheetTypes,
     Tools,
     VerticalAlign,
     WrapStrategy,
@@ -343,7 +342,6 @@ export const DEFAULT_WORKBOOK_DATA: IWorkbookData = {
     appVersion: '3.0.0-alpha',
     sheets: {
         'sheet-01': {
-            type: SheetTypes.GRID,
             id: 'sheet-01',
             cellData: {
                 0: {
@@ -541,10 +539,7 @@ export const DEFAULT_WORKBOOK_DATA: IWorkbookData = {
                     hd: BooleanNumber.FALSE,
                 },
             },
-            status: 1,
             showGridlines: 1,
-            hideRow: [],
-            hideColumn: [],
             rowHeader: {
                 width: 46,
                 hidden: BooleanNumber.FALSE,
@@ -555,11 +550,8 @@ export const DEFAULT_WORKBOOK_DATA: IWorkbookData = {
             },
             selections: ['A2'],
             rightToLeft: BooleanNumber.FALSE,
-            pluginMeta: {},
-            // metaData: [],
         },
         'sheet-02': {
-            type: SheetTypes.GRID,
             id: 'sheet-02',
             name: 'sheet2',
             cellData: {
@@ -592,22 +584,18 @@ export const DEFAULT_WORKBOOK_DATA: IWorkbookData = {
             },
         },
         'sheet-03': {
-            type: SheetTypes.GRID,
             id: 'sheet-03',
             name: 'sheet3',
         },
         'sheet-04': {
-            type: SheetTypes.GRID,
             id: 'sheet-04',
             name: 'sheet4',
         },
         'sheet-05': {
-            type: SheetTypes.GRID,
             id: 'sheet-05',
             name: 'sheet5',
         },
         'sheet-06': {
-            type: SheetTypes.GRID,
             id: 'sheet-06',
             name: 'sheet6',
         },
@@ -743,7 +731,6 @@ export const DEFAULT_WORKBOOK_DATA_DOWN: IWorkbookData = {
     appVersion: '3.0.0-alpha',
     sheets: {
         'sheet-0001': {
-            type: SheetTypes.GRID,
             id: 'sheet-0001',
             cellData: {
                 0: {
@@ -929,10 +916,7 @@ export const DEFAULT_WORKBOOK_DATA_DOWN: IWorkbookData = {
                     hd: BooleanNumber.FALSE,
                 },
             },
-            status: 1,
             showGridlines: 1,
-            hideRow: [],
-            hideColumn: [],
             rowHeader: {
                 width: 46,
                 hidden: BooleanNumber.FALSE,
@@ -943,11 +927,8 @@ export const DEFAULT_WORKBOOK_DATA_DOWN: IWorkbookData = {
             },
             selections: ['A2'],
             rightToLeft: BooleanNumber.FALSE,
-            pluginMeta: {},
-            // metaData: [],
         },
         'sheet-0002': {
-            type: SheetTypes.GRID,
             id: 'sheet-0002',
             name: 'sheet0003',
         },

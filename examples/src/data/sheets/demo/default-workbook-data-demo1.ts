@@ -15,7 +15,7 @@
  */
 
 import type { IWorkbookData } from '@univerjs/core';
-import { BooleanNumber, BorderStyleTypes, LocaleType, SheetTypes } from '@univerjs/core';
+import { BooleanNumber, BorderStyleTypes, LocaleType } from '@univerjs/core';
 
 export const DEFAULT_WORKBOOK_DATA_DEMO1: IWorkbookData = {
     id: 'workbook-01',
@@ -1236,7 +1236,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO1: IWorkbookData = {
     appVersion: '3.0.0-alpha',
     sheets: {
         'sheet-0003': {
-            type: SheetTypes.GRID,
             id: 'sheet-0003',
             name: 'sheet0003',
             cellData: {
@@ -1819,10 +1818,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO1: IWorkbookData = {
                     w: 30,
                 },
             },
-            status: 1,
             showGridlines: 0,
-            hideRow: [],
-            hideColumn: [],
             rowHeader: {
                 width: 46,
                 hidden: BooleanNumber.FALSE,
@@ -1833,7 +1829,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO1: IWorkbookData = {
             },
             selections: ['A2'],
             rightToLeft: BooleanNumber.FALSE,
-            pluginMeta: {},
         },
     },
     // namedRanges: [

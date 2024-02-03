@@ -36,7 +36,7 @@ export interface IDocStateChangeParams {
     noHistory?: boolean;
 }
 
-const HISTORY_DELAY = 300;
+const HISTORY_DELAY = 1000;
 
 // This class sends out state-changing events, what is the state, the data model,
 // and the cursor & selection, and this class mainly serves the History(undo/redo) module and
@@ -101,24 +101,23 @@ export class DocStateChangeManagerService extends RxDisposable {
         }
 
         const len = cacheStates.length;
-        // Use the first state.commandId as commandId, because we will only have one core mutation.
+        // Use the first state.commandId as commandId, because we will only have one core mutation type.
         const commandId = cacheStates[0].commandId;
+
+        const firstState = cacheStates[0];
+        const lastState = cacheStates[len - 1];
 
         const redoParams: IRichTextEditingMutationParams = {
             unitId,
-            actions: cacheStates.reduce((acc, cur) => {
-                return TextX.compose(acc, cur.redoState.actions);
-            }, [] as TextXAction[]),
-            textRanges: cacheStates[len - 1].redoState.textRanges,
+            actions: cacheStates.reduce((acc, cur) => TextX.compose(acc, cur.redoState.actions), [] as TextXAction[]),
+            textRanges: lastState.redoState.textRanges,
         };
 
         const undoParams: IRichTextEditingMutationParams = {
             unitId,
             // Always need to put undoParams after redoParams, because `reverse` will change the `cacheStates` order.
-            actions: cacheStates.reverse().reduce((acc, cur) => {
-                return TextX.compose(acc, cur.undoState.actions);
-            }, [] as TextXAction[]),
-            textRanges: cacheStates[0].undoState.textRanges,
+            actions: cacheStates.reverse().reduce((acc, cur) => TextX.compose(acc, cur.undoState.actions), [] as TextXAction[]),
+            textRanges: firstState.undoState.textRanges,
         };
 
         undoRedoService.pushUndoRedo({

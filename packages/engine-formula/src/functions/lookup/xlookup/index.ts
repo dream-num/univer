@@ -33,6 +33,10 @@ export class Xlookup extends BaseFunction {
         matchMode?: BaseValueObject,
         searchMode?: BaseValueObject
     ) {
+        if (lookupValue == null || lookupArray == null || returnArray == null) {
+            return new ErrorValueObject(ErrorType.NA);
+        }
+
         if (lookupValue.isError()) {
             return lookupValue;
         }

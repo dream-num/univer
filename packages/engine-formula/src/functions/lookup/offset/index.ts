@@ -30,6 +30,30 @@ export class Offset extends BaseFunction {
         height?: BaseValueObject,
         width?: BaseValueObject
     ) {
+        if (reference == null || rows == null || columns == null) {
+            return new ErrorValueObject(ErrorType.NA);
+        }
+
+        if (reference.isError()) {
+            return reference;
+        }
+
+        if (rows.isError()) {
+            return rows;
+        }
+
+        if (columns.isError()) {
+            return columns;
+        }
+
+        if (height?.isError()) {
+            return height;
+        }
+
+        if (width?.isError()) {
+            return width;
+        }
+
         if (!reference.isArray()) {
             return new ErrorValueObject(ErrorType.VALUE);
         }

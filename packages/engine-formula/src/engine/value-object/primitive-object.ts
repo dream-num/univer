@@ -102,47 +102,47 @@ export class NullValueObject extends BaseValueObject {
     }
 
     override sqrt(): BaseValueObject {
-        return new NumberValueObject(0, true);
+        return new NumberValueObject(0, true).sqrt();
     }
 
     override cbrt(): BaseValueObject {
-        return new NumberValueObject(0, true);
+        return new NumberValueObject(0, true).cbrt();
     }
 
     override cos(): BaseValueObject {
-        return new NumberValueObject(0, true);
+        return new NumberValueObject(0, true).cos();
     }
 
     override acos(): BaseValueObject {
-        return new NumberValueObject(0, true);
+        return new NumberValueObject(0, true).acos();
     }
 
     override acosh(): BaseValueObject {
-        return new NumberValueObject(0, true);
+        return new NumberValueObject(0, true).acosh();
     }
 
     override sin(): BaseValueObject {
-        return new NumberValueObject(0, true);
+        return new NumberValueObject(0, true).sin();
     }
 
     override asin(): BaseValueObject {
-        return new NumberValueObject(0, true);
+        return new NumberValueObject(0, true).asin();
     }
 
     override asinh(): BaseValueObject {
-        return new NumberValueObject(0, true);
+        return new NumberValueObject(0, true).asinh();
     }
 
     override tan(): BaseValueObject {
-        return new NumberValueObject(0, true);
+        return new NumberValueObject(0, true).tan();
     }
 
     override tanh(): BaseValueObject {
-        return new NumberValueObject(0, true);
+        return new NumberValueObject(0, true).tanh();
     }
 
     override atan(): BaseValueObject {
-        return new NumberValueObject(0, true);
+        return new NumberValueObject(0, true).atan();
     }
 
     override atan2(valueObject: BaseValueObject): BaseValueObject {
@@ -150,7 +150,7 @@ export class NullValueObject extends BaseValueObject {
     }
 
     override atanh(): BaseValueObject {
-        return new NumberValueObject(0, true);
+        return new NumberValueObject(0, true).atanh();
     }
 
     override log(): BaseValueObject {
@@ -162,11 +162,11 @@ export class NullValueObject extends BaseValueObject {
     }
 
     override exp(): BaseValueObject {
-        return new ErrorValueObject(ErrorType.NUM);
+        return new NumberValueObject(0, true).exp();
     }
 
     override abs(): BaseValueObject {
-        return new ErrorValueObject(ErrorType.NUM);
+        return new NumberValueObject(0, true).abs();
     }
 
     override round(valueObject: BaseValueObject): BaseValueObject {

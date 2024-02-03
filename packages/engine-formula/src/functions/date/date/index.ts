@@ -25,6 +25,10 @@ import { BaseFunction } from '../../base-function';
 
 export class DateFunction extends BaseFunction {
     override calculate(year: BaseValueObject, month: BaseValueObject, day: BaseValueObject) {
+        if (year == null || month == null || day == null) {
+            return new ErrorValueObject(ErrorType.NA);
+        }
+
         if (year.isError()) {
             return year;
         }

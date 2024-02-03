@@ -15,20 +15,21 @@
  */
 
 import { ErrorType } from '../../../basics/error-type';
-import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
+import type { FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 
 export class Abs extends BaseFunction {
     override calculate(variant: FunctionVariantType) {
+        if (variant == null) {
+            return new ErrorValueObject(ErrorType.NA);
+        }
+
         if (variant.isError()) {
             return new ErrorValueObject(ErrorType.VALUE);
         }
 
-        if (variant.isReferenceObject()) {
-            variant = (variant as BaseReferenceObject).toArrayValueObject();
-        }
         return (variant as BaseValueObject).abs();
     }
 }

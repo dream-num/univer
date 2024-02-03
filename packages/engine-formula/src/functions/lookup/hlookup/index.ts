@@ -27,6 +27,10 @@ export class Hlookup extends BaseFunction {
         rowIndexNum: BaseValueObject,
         rangeLookup?: BaseValueObject
     ) {
+        if (lookupValue == null || tableArray == null || rowIndexNum == null) {
+            return new ErrorValueObject(ErrorType.NA);
+        }
+
         if (lookupValue.isError()) {
             return lookupValue;
         }

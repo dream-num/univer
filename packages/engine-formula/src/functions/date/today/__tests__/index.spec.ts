@@ -34,7 +34,6 @@ global.Date = vi.fn((...params) => {
 
     return new _Date(2020, 0, 1);
 }) as any;
-// global.Date = vi.fn((...params) => params.length > 0 ? new _Date(params[0], params[1], params[2]) : new _Date(2020, 0, 1)) as any;
 global.Date.UTC = _Date.UTC;
 
 describe('Test today function', () => {

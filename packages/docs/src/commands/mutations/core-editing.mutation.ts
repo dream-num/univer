@@ -80,7 +80,10 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
 
         // Step 3: Update cursor & selection.
         if (!noNeedSetTextRange && textRanges) {
-            textSelectionManagerService.replaceTextRanges(textRanges);
+            // Update selection in the next frame.
+            requestAnimationFrame(() => {
+                textSelectionManagerService.replaceTextRanges(textRanges);
+            });
         }
 
         // Step 4: emit state change event.

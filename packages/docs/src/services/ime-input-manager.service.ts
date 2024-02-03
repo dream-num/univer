@@ -54,6 +54,7 @@ export class IMEInputManagerService implements IDisposable {
             actions: this._undoMutationParamsCache.reverse().reduce((acc, cur) => {
                 return TextX.compose(acc, cur.actions);
             }, [] as TextXAction[]),
+            textRanges: [], // Add empty array, will never use, just fix type error
         };
 
         const redoMutationParams: IRichTextEditingMutationParams = {
@@ -61,6 +62,7 @@ export class IMEInputManagerService implements IDisposable {
             actions: this._redoMutationParamsCache.reduce((acc, cur) => {
                 return TextX.compose(acc, cur.actions);
             }, [] as TextXAction[]),
+            textRanges: [], // Add empty array, will never use, just fix type error
         };
 
         return { redoMutationParams, undoMutationParams, previousActiveRange: this._previousActiveRange };

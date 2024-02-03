@@ -24,6 +24,7 @@ import {
     WrapStrategy,
 } from '../enum';
 import type { IWorkbookData, IWorksheetData } from '../interfaces';
+import { version } from '../../../package.json';
 
 /**
  * Used as an illegal range array return value
@@ -72,7 +73,7 @@ export const DEFAULT_WORKBOOK: IWorkbookData = {
     id: '',
     sheetOrder: [],
     name: '',
-    appVersion: '',
+    appVersion: version,
     locale: LocaleType.ZH_CN,
     styles: {},
     sheets: {},

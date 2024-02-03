@@ -24,7 +24,7 @@ import {
     TextXActionType,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
-import type { IActiveTextRange, TextRange } from '@univerjs/engine-render';
+import type { IActiveTextRange, ITextRangeWithStyle, TextRange } from '@univerjs/engine-render';
 import { getParagraphBySpan, hasListSpan, isFirstSpan, isIndentBySpan } from '@univerjs/engine-render';
 
 import { DocSkeletonManagerService } from '../../services/doc-skeleton-manager.service';
@@ -297,13 +297,15 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
                 endOffset: cursor,
                 style,
             },
-        ];
+        ] as ITextRangeWithStyle[];
 
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
             params: {
                 unitId,
                 actions: [],
+                textRanges,
+                prevTextRanges: [range],
             },
         };
 
@@ -345,33 +347,7 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
             IRichTextEditingMutationParams
         >(doMutation.id, doMutation.params);
 
-        textSelectionManagerService.replaceTextRanges(textRanges);
-
-        if (result) {
-            undoRedoService.pushUndoRedo({
-                unitID: unitId,
-                undoMutations: [{ id: RichTextEditingMutation.id, params: result }],
-                redoMutations: [{ id: RichTextEditingMutation.id, params: doMutation.params }],
-                undo() {
-                    commandService.syncExecuteCommand(RichTextEditingMutation.id, result);
-
-                    textSelectionManagerService.replaceTextRanges([range]);
-
-                    return true;
-                },
-                redo() {
-                    commandService.syncExecuteCommand(RichTextEditingMutation.id, doMutation.params);
-
-                    textSelectionManagerService.replaceTextRanges(textRanges);
-
-                    return true;
-                },
-            });
-
-            return true;
-        }
-
-        return false;
+        return Boolean(result);
     },
 };
 

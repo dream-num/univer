@@ -40,7 +40,6 @@ export const ReplaceContentCommand: ICommand<IReplaceContentCommandParams> = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
-        const undoRedoService = accessor.get(IUndoRedoService);
 
         const prevBody = univerInstanceService.getUniverDocInstance(unitId)?.getSnapshot().body;
         const selections = textSelectionManagerService.getSelections();
@@ -55,38 +54,14 @@ export const ReplaceContentCommand: ICommand<IReplaceContentCommandParams> = {
 
         const doMutation = getMutationParams(unitId, segmentId, prevBody, body);
 
+        doMutation.params.textRanges = textRanges;
+
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,
             IRichTextEditingMutationParams
         >(doMutation.id, doMutation.params);
 
-        textSelectionManagerService.replaceTextRanges(textRanges);
-
-        if (result) {
-            undoRedoService.pushUndoRedo({
-                unitID: unitId,
-                undoMutations: [{ id: RichTextEditingMutation.id, params: result }],
-                redoMutations: [{ id: RichTextEditingMutation.id, params: doMutation.params }],
-                undo() {
-                    commandService.syncExecuteCommand(RichTextEditingMutation.id, result);
-
-                    textSelectionManagerService.replaceTextRanges(selections);
-
-                    return true;
-                },
-                redo() {
-                    commandService.syncExecuteCommand(RichTextEditingMutation.id, doMutation.params);
-
-                    textSelectionManagerService.replaceTextRanges(textRanges);
-
-                    return true;
-                },
-            });
-
-            return true;
-        }
-
-        return false;
+        return Boolean(result);
     },
 };
 
@@ -116,6 +91,10 @@ export const CoverContentCommand: ICommand<ICoverContentCommandParams> = {
 
         const doMutation = getMutationParams(unitId, segmentId, prevBody, body);
 
+        // No need to set the cursor or selection.
+        doMutation.params.noNeedSetTextRange = true;
+        doMutation.params.noHistory = true;
+
         commandService.syncExecuteCommand<IRichTextEditingMutationParams, IRichTextEditingMutationParams>(
             doMutation.id,
             doMutation.params
@@ -133,6 +112,7 @@ function getMutationParams(unitId: string, segmentId: string, prevBody: IDocumen
         params: {
             unitId,
             actions: [],
+            textRanges: [],
         },
     };
 

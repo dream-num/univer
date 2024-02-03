@@ -26,7 +26,6 @@ import {
     CommandType,
     getDocsUpdateBody,
     ICommandService,
-    IUndoRedoService,
     IUniverInstanceService,
     MemoryCursor,
     TextX,
@@ -53,7 +52,6 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
 
     handler: async (accessor, params: IInnerPasteCommandParams) => {
         const { segmentId, body, textRanges } = params;
-        const undoRedoService = accessor.get(IUndoRedoService);
         const commandService = accessor.get(ICommandService);
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const currentUniverService = accessor.get(IUniverInstanceService);
@@ -72,6 +70,7 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
             params: {
                 unitId,
                 actions: [],
+                textRanges,
             },
         };
 
@@ -115,33 +114,7 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
             IRichTextEditingMutationParams
         >(doMutation.id, doMutation.params);
 
-        textSelectionManagerService.replaceTextRanges(textRanges);
-
-        if (result) {
-            undoRedoService.pushUndoRedo({
-                unitID: unitId,
-                undoMutations: [{ id: RichTextEditingMutation.id, params: result }],
-                redoMutations: [{ id: RichTextEditingMutation.id, params: doMutation.params }],
-                undo() {
-                    commandService.syncExecuteCommand(RichTextEditingMutation.id, result);
-
-                    textSelectionManagerService.replaceTextRanges(selections);
-
-                    return true;
-                },
-                redo() {
-                    commandService.syncExecuteCommand(RichTextEditingMutation.id, doMutation.params);
-
-                    textSelectionManagerService.replaceTextRanges(textRanges);
-
-                    return true;
-                },
-            });
-
-            return true;
-        }
-
-        return false;
+        return Boolean(result);
     },
 };
 
@@ -157,7 +130,6 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
 
     handler: async (accessor, params: IInnerCutCommandParams) => {
         const { segmentId, textRanges } = params;
-        const undoRedoService = accessor.get(IUndoRedoService);
         const commandService = accessor.get(ICommandService);
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const currentUniverService = accessor.get(IUniverInstanceService);
@@ -183,6 +155,7 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
             params: {
                 unitId,
                 actions: [],
+                textRanges,
             },
         };
 
@@ -218,33 +191,7 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
             IRichTextEditingMutationParams
         >(doMutation.id, doMutation.params);
 
-        textSelectionManagerService.replaceTextRanges(textRanges);
-
-        if (result) {
-            undoRedoService.pushUndoRedo({
-                unitID: unitId,
-                undoMutations: [{ id: RichTextEditingMutation.id, params: result }],
-                redoMutations: [{ id: RichTextEditingMutation.id, params: doMutation.params }],
-                undo() {
-                    commandService.syncExecuteCommand(RichTextEditingMutation.id, result);
-
-                    textSelectionManagerService.replaceTextRanges(selections);
-
-                    return true;
-                },
-                redo() {
-                    commandService.syncExecuteCommand(RichTextEditingMutation.id, doMutation.params);
-
-                    textSelectionManagerService.replaceTextRanges(textRanges);
-
-                    return true;
-                },
-            });
-
-            return true;
-        }
-
-        return false;
+        return Boolean(result);
     },
 };
 

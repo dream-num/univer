@@ -68,6 +68,69 @@ export interface IUndoRedoStatus {
 
 const STACK_CAPACITY = 20;
 
+abstract class MultiImplementationCommand implements IDisposable {
+    dispose(): void {}
+
+    async dispatchToHandlers(): Promise<boolean> {
+        return false;
+    }
+}
+
+export const RedoCommandId = 'univer.command.redo';
+export const UndoCommandId = 'univer.command.undo';
+
+export const UndoCommand = new (class extends MultiImplementationCommand implements ICommand {
+    readonly type = CommandType.COMMAND;
+
+    readonly id = UndoCommandId;
+
+    async handler(accessor: IAccessor) {
+        const undoRedoService = accessor.get(IUndoRedoService);
+        const element = undoRedoService.pitchTopUndoElement();
+        if (!element) {
+            return false;
+        }
+
+        const commandService = accessor.get(ICommandService);
+        const result = element.undo
+            ? await element.undo(element.undoMutations)
+            : sequenceExecute(element.undoMutations, commandService);
+        if (result) {
+            undoRedoService.popUndoToRedo();
+
+            return true;
+        }
+
+        return false;
+    }
+})();
+
+export const RedoCommand = new (class extends MultiImplementationCommand implements ICommand {
+    readonly type = CommandType.COMMAND;
+
+    readonly id = RedoCommandId;
+
+    async handler(accessor: IAccessor) {
+        const undoRedoService = accessor.get(IUndoRedoService);
+        const element = undoRedoService.pitchTopRedoElement();
+        if (!element) {
+            return false;
+        }
+
+        const commandService = accessor.get(ICommandService);
+        const result = element.redo
+            ? await element.redo(element.redoMutations)
+            : sequenceExecute(element.redoMutations, commandService);
+        if (result) {
+            undoRedoService.popRedoToUndo();
+
+            return true;
+        }
+
+        return false;
+    }
+})();
+
 /**
  * This UndoRedoService is local.
  */
@@ -242,63 +305,3 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
         return unitID;
     }
 }
-
-abstract class MultiImplementationCommand implements IDisposable {
-    dispose(): void {}
-
-    async dispatchToHandlers(): Promise<boolean> {
-        return false;
-    }
-}
-
-export const UndoCommand = new (class extends MultiImplementationCommand implements ICommand {
-    readonly type = CommandType.COMMAND;
-
-    readonly id = 'univer.command.undo';
-
-    async handler(accessor: IAccessor) {
-        const undoRedoService = accessor.get(IUndoRedoService);
-        const element = undoRedoService.pitchTopUndoElement();
-        if (!element) {
-            return false;
-        }
-
-        const commandService = accessor.get(ICommandService);
-        const result = element.undo
-            ? await element.undo(element.undoMutations)
-            : sequenceExecute(element.undoMutations, commandService);
-        if (result) {
-            undoRedoService.popUndoToRedo();
-
-            return true;
-        }
-
-        return false;
-    }
-})();
-
-export const RedoCommand = new (class extends MultiImplementationCommand implements ICommand {
-    readonly type = CommandType.COMMAND;
-
-    readonly id = 'univer.command.redo';
-
-    async handler(accessor: IAccessor) {
-        const undoRedoService = accessor.get(IUndoRedoService);
-        const element = undoRedoService.pitchTopRedoElement();
-        if (!element) {
-            return false;
-        }
-
-        const commandService = accessor.get(ICommandService);
-        const result = element.redo
-            ? await element.redo(element.redoMutations)
-            : sequenceExecute(element.redoMutations, commandService);
-        if (result) {
-            undoRedoService.popRedoToUndo();
-
-            return true;
-        }
-
-        return false;
-    }
-})();

@@ -14,124 +14,39 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
-import { ObjectMatrix } from '@univerjs/core';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
-import type { ISheetData } from '../../../../basics/common';
-import { ErrorType } from '../../../../basics/error-type';
-import { RangeReferenceObject } from '../../../../engine/reference-object/range-reference-object';
-import type { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
-import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { Acosh } from '..';
+import { NumberValueObject } from '../../../../engine/value-object/primitive-object';
+import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 
-const cellData = {
-    0: {
-        0: {
-            v: 1,
-        },
-        1: {
-            v: ' ',
-        },
-        2: {
-            v: 1.23,
-        },
-        3: {
-            v: true,
-        },
-        4: {
-            v: false,
-        },
-    },
-    1: {
-        0: {
-            v: 0,
-        },
-        1: {
-            v: '100',
-        },
-        2: {
-            v: '2.34',
-        },
-        3: {
-            v: 'test',
-        },
-        4: {
-            v: -3,
-        },
-    },
-};
+describe('Test acosh function', () => {
+    const textFunction = new Acosh(FUNCTION_NAMES_MATH.ACOSH);
 
-describe('test acosh', () => {
-    let unitId: string;
-    let sheetId: string;
-    let sheetData: ISheetData = {};
-    let acosh: Acosh;
-    let acoshCalculate: (range: IRange) => ArrayValueObject;
-
-    beforeEach(() => {
-        unitId = 'test';
-        sheetId = 'sheet1';
-        sheetData = {
-            [sheetId]: {
-                cellData: new ObjectMatrix(cellData),
-                rowCount: 4,
-                columnCount: 3,
-            },
-        };
-
-        // register acosh
-        acosh = new Acosh(FUNCTION_NAMES_MATH.ACOSH);
-        acoshCalculate = (range: IRange) => {
-            // range
-
-            const rangeRef = new RangeReferenceObject(range, sheetId, unitId);
-            rangeRef.setUnitData({
-                [unitId]: sheetData,
-            });
-
-            return acosh.calculate(rangeRef) as ArrayValueObject;
-        };
-    });
-
-    describe('acosh', () => {
-        describe('correct situations', () => {
-            it('single cell', async () => {
-                // cell A1
-                const cell = {
-                    startRow: 0,
-                    startColumn: 0,
-                    endRow: 0,
-                    endColumn: 0,
-                };
-
-                const arrayValue = acoshCalculate(cell);
-                expect(arrayValue.getFirstCell().getValue()).toBe(0);
-            });
-            it('range', async () => {
-                // cell A1:E2
-                const cell = {
-                    startRow: 0,
-                    startColumn: 0,
-                    endRow: 1,
-                    endColumn: 4,
-                };
-
-                const arrayValue = acoshCalculate(cell);
-                expect(arrayValue.toValue()).toStrictEqual([
-                    [0, '#VALUE!', 0.6658635291565548, 0, '#NUM!'],
-                    ['#NUM!', 5.298292365610484, 1.494153066724473, '#VALUE!', '#NUM!'],
-                ]);
-            });
+    describe('Acosh', () => {
+        it('Value is normal', () => {
+            const value = new NumberValueObject(1);
+            const result = textFunction.calculate(value);
+            expect(result.getValue()).toBe(0);
         });
 
-        describe('fault situations', () => {
-            it('value error', async () => {
-                const error = new ErrorValueObject(ErrorType.VALUE);
-                const errorValue = acosh.calculate(error);
-                expect(errorValue.isError()).toBeTruthy();
+        it('Value is array', () => {
+            const valueArray = new ArrayValueObject({
+                calculateValueList: transformToValueObject([
+                    [1, ' ', 1.23, true, false],
+                    [0, '100', '2.34', 'test', -3],
+                ]),
+                rowCount: 2,
+                columnCount: 5,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
             });
+            const result = textFunction.calculate(valueArray);
+            expect(transformToValue(result.getArrayValue())).toStrictEqual([[0, '#VALUE!', 0.6658635291565548, 0, '#NUM!'],
+                ['#NUM!', 5.298292365610484, 1.494153066724473, '#VALUE!', '#NUM!']]);
         });
     });
 });

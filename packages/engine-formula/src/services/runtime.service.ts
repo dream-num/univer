@@ -15,7 +15,7 @@
  */
 
 import type { ICellData, IRange, Nullable } from '@univerjs/core';
-import { CellValueType, Disposable, isNullCell, ObjectMatrix } from '@univerjs/core';
+import { CellValueType, Disposable, isNullCell, isRealNum, ObjectMatrix } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 
 import type {
@@ -642,6 +642,13 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                 return {
                     v,
                     t: CellValueType.BOOLEAN,
+                };
+            }
+            // String "00"
+            if (vo.isString() && isRealNum(v as string)) {
+                return {
+                    v,
+                    t: CellValueType.FORCE_STRING,
                 };
             }
             return {

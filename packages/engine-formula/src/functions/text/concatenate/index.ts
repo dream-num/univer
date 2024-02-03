@@ -57,7 +57,10 @@ export class Concatenate extends BaseFunction {
                     return textValueObject;
                 }
 
-                return new StringValueObject(`${resultValueObject?.getValue() || ''}${textValueObject.getValue()}`);
+                const resultValueObjectString = resultValueObject?.isNull() ? '' : resultValueObject?.getValue() ?? '';
+                const textValueObjectString = textValueObject?.isNull() ? '' : textValueObject?.getValue() ?? '';
+
+                return new StringValueObject(`${resultValueObjectString}${textValueObjectString}`);
             });
         }
 

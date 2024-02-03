@@ -15,13 +15,12 @@
  */
 
 import { ErrorType } from '../../../basics/error-type';
-import type { FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 
 export class Abs extends BaseFunction {
-    override calculate(variant: FunctionVariantType) {
+    override calculate(variant: BaseValueObject) {
         if (variant == null) {
             return new ErrorValueObject(ErrorType.NA);
         }
@@ -30,6 +29,6 @@ export class Abs extends BaseFunction {
             return new ErrorValueObject(ErrorType.VALUE);
         }
 
-        return (variant as BaseValueObject).abs();
+        return variant.abs();
     }
 }

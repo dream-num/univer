@@ -21,6 +21,7 @@ export interface IDataBarRenderParams {
         color: string;
         value: number; // -100 - 100.
         startPoint: number; //0-100
+        isGradient: boolean;
     };
 }
 export interface IDataBarCellData extends ICellData, IDataBarRenderParams {}

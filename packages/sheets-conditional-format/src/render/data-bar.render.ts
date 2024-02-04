@@ -21,13 +21,13 @@ import { SheetExtension } from '@univerjs/engine-render';
 import type { IDataBarCellData } from './type';
 
 export const dataBarUKey = 'sheet-conditional-rule-data-bar';
-const EXTENSION_Z_INDEX = 125;
+const EXTENSION_Z_INDEX = 35;
 
 export class DataBar extends SheetExtension {
     override uKey = dataBarUKey;
 
     override zIndex = EXTENSION_Z_INDEX;
-    _radius = 2;
+    _radius = 1;
     override draw(
         ctx: UniverRenderingContext,
         parentScale: IScale,
@@ -39,10 +39,12 @@ export class DataBar extends SheetExtension {
         if (!worksheet) {
             return false;
         }
+        ctx.save();
+        ctx.globalCompositeOperation = 'destination-over';
         Range.foreach(spreadsheetSkeleton.rowColumnSegment, (row, col) => {
             const cellData = worksheet.getCell(row, col) as IDataBarCellData;
             if (cellData && cellData.dataBar) {
-                const { color, value, startPoint } = cellData.dataBar;
+                const { color, value, startPoint, isGradient } = cellData.dataBar;
                 const cellInfo = this.getCellIndex(row, col, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
                 let { isMerged, isMergedMainCell, mergeInfo, startY, endY, startX, endX } = cellInfo;
                 if (isMerged) {
@@ -63,19 +65,38 @@ export class DataBar extends SheetExtension {
                 const paddingTopAndBottom = 2;
                 const width = borderWidth - paddingRightAndLeft * 2;
                 const height = borderHeight - paddingTopAndBottom * 2;
-                ctx.save();
-                ctx.beginPath();
-                ctx.fillStyle = color;
                 if (value > 0) {
                     const dataBarWidth = width * (1 - startPoint / 100) * value / 100;
-                    this._drawRectWithRoundedCorner(ctx, startX + paddingRightAndLeft + (startPoint / 100) * width, startY + paddingTopAndBottom, dataBarWidth, height, false, true, true, false);
+                    const x0 = startX + paddingRightAndLeft + (startPoint / 100) * width;
+                    const y0 = startY + paddingTopAndBottom;
+                    if (isGradient) {
+                        const gradient = ctx.createLinearGradient(x0, y0, x0 + dataBarWidth, y0);
+                        gradient.addColorStop(0, color);
+                        gradient.addColorStop(1, 'rgb(255 255 255)');
+                        ctx.fillStyle = gradient;
+                    } else {
+                        ctx.fillStyle = color;
+                    }
+
+                    this._drawRectWithRoundedCorner(ctx, x0, y0, dataBarWidth, height, false, true, true, false);
                 } else {
                     const dataBarWidth = width * startPoint / 100 * Math.abs(value) / 100;
-                    this._drawRectWithRoundedCorner(ctx, startX + paddingRightAndLeft + (startPoint / 100) * width - dataBarWidth, startY + paddingTopAndBottom, dataBarWidth, height, true, false, false, true);
+                    const x0 = startX + paddingRightAndLeft + (startPoint / 100) * width - dataBarWidth;
+                    const y0 = startY + paddingTopAndBottom;
+                    if (isGradient) {
+                        const gradient = ctx.createLinearGradient(x0, y0, x0 + dataBarWidth, y0);
+                        gradient.addColorStop(0, 'rgb(255 255 255)');
+                        gradient.addColorStop(1, color);
+                        ctx.fillStyle = gradient;
+                    } else {
+                        ctx.fillStyle = color;
+                    }
+
+                    this._drawRectWithRoundedCorner(ctx, x0, y0, dataBarWidth, height, true, false, false, true);
                 }
-                ctx.restore();
             }
         });
+        ctx.restore();
     }
 
     private _drawRectWithRoundedCorner(ctx: UniverRenderingContext, x: number, y: number, width: number, height: number, topLeftRadius: boolean, topRightRadius: boolean, bottomRightRadius: boolean, bottomLeftRadius: boolean) {

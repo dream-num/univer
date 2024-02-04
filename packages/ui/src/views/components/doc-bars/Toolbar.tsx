@@ -226,7 +226,6 @@ export function Toolbar(props: IToolbarProps) {
                     opacity: 0,
                 }}
             >
-                asdf
                 {Object.entries(toolbarGroups).map(([key, item]) => (
                     <div key={key} className={styles.toolbarGroup}>
                         {item.map((subItem) => (

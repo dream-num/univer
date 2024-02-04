@@ -17,7 +17,7 @@
 import type { IRange, Worksheet } from '@univerjs/core';
 import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Rectangle, Tools } from '@univerjs/core';
 import type { IInsertColMutationParams, IMoveColumnsMutationParams, IMoveRangeMutationParams, IMoveRowsMutationParams, IRemoveRowsMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { InsertColMutation, InsertRowMutation, INumfmtService, MoveColsMutation, MoveRangeMutation, MoveRowsMutation, RemoveColMutation, RemoveRowMutation, SetRangeValuesMutation } from '@univerjs/sheets';
+import { InsertColMutation, InsertRowMutation, MoveColsMutation, MoveRangeMutation, MoveRowsMutation, RemoveColMutation, RemoveRowMutation, SetRangeValuesMutation } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 import { Subject } from 'rxjs';
 import { filter } from 'rxjs/operators';
@@ -50,7 +50,6 @@ export class ConditionalFormatService extends Disposable {
     constructor(@Inject(ConditionalFormatRuleModel) private _conditionalFormatRuleModel: ConditionalFormatRuleModel,
         @Inject(ConditionalFormatViewModel) private _conditionalFormatViewModel: ConditionalFormatViewModel,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
-        @Inject(INumfmtService) private _numfmtService: INumfmtService,
         @Inject(ICommandService) private _commandService: ICommandService
     ) {
         super();

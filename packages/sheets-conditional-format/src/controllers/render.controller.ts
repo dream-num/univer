@@ -92,8 +92,11 @@ export class RenderController extends Disposable {
             if (result.style) {
                 Object.assign(s, result.style);
             }
-            if (result.dataBar) {
+            if (result.dataBar && result.dataBar.color) {
                 cloneCell.dataBar = result.dataBar;
+            }
+            if (result.colorScale) {
+                Object.assign(s, { bg: { rgb: result.colorScale } });
             }
             return next(cloneCell);
         },

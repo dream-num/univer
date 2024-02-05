@@ -17,11 +17,11 @@
 import type { ICellData } from '@univerjs/core';
 
 export interface IDataBarRenderParams {
-    dataBar: {
-        color: string;
-        value: number; // -100 - 100.
-        startPoint: number; //0-100
-        isGradient: boolean;
-    };
+    color: string;
+    value: number; // -100 - 100.
+    startPoint: number; //0-100
+    isGradient: boolean;
 }
-export interface IDataBarCellData extends ICellData, IDataBarRenderParams {}
+export interface IDataBarCellData extends ICellData {
+    dataBar: IDataBarRenderParams;
+}

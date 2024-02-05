@@ -29,6 +29,8 @@ import type { IDataBarRenderParams } from '../render/type';
 import { getCellValue, isNullable } from './calculate-unit/utils';
 import { dataBarCellCalculateUnit } from './calculate-unit/data-bar';
 import { highlightCellCalculateUnit } from './calculate-unit/highlight-cell';
+import type { IColorScaleRenderParams } from './calculate-unit/color-scale';
+import { colorScaleCellCalculateUnit } from './calculate-unit/color-scale';
 
 type ComputeStatus = 'computing' | 'end' | 'error';
 
@@ -57,6 +59,7 @@ export class ConditionalFormatService extends Disposable {
         this._initCacheManager();
         this._initRemoteCalculate();
         this._registerCalculationUnit(dataBarCellCalculateUnit);
+        this._registerCalculationUnit(colorScaleCellCalculateUnit);
         this._registerCalculationUnit(highlightCellCalculateUnit);
     }
 
@@ -78,15 +81,18 @@ export class ConditionalFormatService extends Disposable {
                 if (type === RuleType.highlightCell) {
                     ruleCacheItem!.ruleCache && Tools.deepMerge(pre, { style: ruleCacheItem!.ruleCache });
                 } else if (type === RuleType.colorScale) {
-                    pre.colorScale = ruleCacheItem!.ruleCache;
+                    const ruleCache = ruleCacheItem?.ruleCache as IColorScaleRenderParams;
+                    if (ruleCache && ruleCache !== '') {
+                        pre.colorScale = ruleCache;
+                    }
                 } else if (type === RuleType.dataBar) {
                     const ruleCache = ruleCacheItem?.ruleCache as IDataBarRenderParams;
-                    if (ruleCache) {
-                        pre.dataBar = ruleCache.dataBar;
+                    if (ruleCache && Object.keys(ruleCache).length > 0) {
+                        pre.dataBar = ruleCache;
                     }
                 }
                 return pre;
-            }, {} as { style?: IHighlightCell['style'] } & IDataBarRenderParams & { colorScale?: any });
+            }, {} as { style?: IHighlightCell['style'] } & { dataBar?: IDataBarRenderParams } & { colorScale?: IColorScaleRenderParams });
             return result;
         }
         return null;

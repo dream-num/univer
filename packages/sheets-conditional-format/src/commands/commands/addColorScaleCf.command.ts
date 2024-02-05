@@ -26,13 +26,13 @@ import { RuleType } from '../../base/const';
 import type { IAddConditionalRuleMutationParams } from '../mutations/addConditionalRule.mutation';
 import { addConditionalRuleMutation } from '../mutations/addConditionalRule.mutation';
 
-interface IAddUniqueValuesConditionalRuleParams {
+interface IAddColorScaleConditionalRuleParams {
     ranges: IRange[];
     stopIfTrue?: boolean;
     config: IColorScale['config'];
 
 }
-export const addColorScaleConditionalRuleCommand: ICommand<IAddUniqueValuesConditionalRuleParams> = {
+export const addColorScaleConditionalRuleCommand: ICommand<IAddColorScaleConditionalRuleParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.add-color-scale-conditional-rule',
     handler(accessor, params) {

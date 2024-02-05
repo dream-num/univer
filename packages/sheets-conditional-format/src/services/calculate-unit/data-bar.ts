@@ -39,7 +39,7 @@ export const dataBarCellCalculateUnit = {
         const min = getValueByType(ruleConfig.config.min, matrix)!;
         const max = getValueByType(ruleConfig.config.max, matrix)!;
         const isGradient = ruleConfig.config.isGradient;
-        const computeResult = new ObjectMatrix<{ dataBar: IDataBarRenderParams['dataBar'] }>();
+        const computeResult = new ObjectMatrix<IDataBarRenderParams >();
         if (min === max || max < min) {
             // todo nothing,i don't know how it work.
         } else if (min < 0 && max <= 0) {
@@ -50,7 +50,7 @@ export const dataBarCellCalculateUnit = {
                     return;
                 }
                 const v = (max - value) / length * 100;
-                computeResult.setValue(row, col, { dataBar: { color: ruleConfig.config.nativeColor, startPoint, value: -v, isGradient } });
+                computeResult.setValue(row, col, { color: ruleConfig.config.nativeColor, startPoint, value: -v, isGradient });
             });
         } else if (min < 0 && max > 0) {
             const length = Math.abs(max) + Math.abs(min);
@@ -61,10 +61,10 @@ export const dataBarCellCalculateUnit = {
                 }
                 if (value > 0) {
                     const v = Math.min(value / max, 1) * 100;
-                    computeResult.setValue(row, col, { dataBar: { color: ruleConfig.config.positiveColor, startPoint, value: v, isGradient } });
+                    computeResult.setValue(row, col, { color: ruleConfig.config.positiveColor, startPoint, value: v, isGradient });
                 } else {
                     const v = Math.min(Math.abs(value) / Math.abs(min), 1) * 100;
-                    computeResult.setValue(row, col, { dataBar: { color: ruleConfig.config.nativeColor, startPoint, value: -v, isGradient } });
+                    computeResult.setValue(row, col, { color: ruleConfig.config.nativeColor, startPoint, value: -v, isGradient });
                 }
             });
         } else if (min >= 0 && max > 0) {
@@ -75,10 +75,10 @@ export const dataBarCellCalculateUnit = {
                     return;
                 }
                 const v = (1 - (max - value) / length) * 100;
-                computeResult.setValue(row, col, { dataBar: { color: ruleConfig.config.positiveColor, startPoint, value: v, isGradient } });
+                computeResult.setValue(row, col, { color: ruleConfig.config.positiveColor, startPoint, value: v, isGradient });
             });
         }
-        const emptyStyle = {} as { dataBar: IDataBarRenderParams['dataBar'] };
+        const emptyStyle = {} as IDataBarRenderParams;
         rule.ranges.forEach((range) => {
             Range.foreach(range, (row, col) => {
                 if (!computeResult.getValue(row, col)) {

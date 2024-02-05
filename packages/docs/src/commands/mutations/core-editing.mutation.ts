@@ -14,31 +14,51 @@
  * limitations under the License.
  */
 
-import { CommandType, type IMutation, IUniverInstanceService, type TextXAction } from '@univerjs/core';
+import { CommandType, IUniverInstanceService } from '@univerjs/core';
+import type { IMutation, IMutationCommonParams, Nullable, TextXAction } from '@univerjs/core';
 
+import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import { DocViewModelManagerService } from '../../services/doc-view-model-manager.service';
+import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
+import type { IDocStateChangeParams } from '../../services/doc-state-change-manager.service';
+import { DocStateChangeManagerService } from '../../services/doc-state-change-manager.service';
+import { IMEInputManagerService } from '../../services/ime-input-manager.service';
 
-export interface IRichTextEditingMutationParams {
+export interface IRichTextEditingMutationParams extends IMutationCommonParams {
     unitId: string;
     actions: TextXAction[];
+    textRanges: Nullable<ITextRangeWithStyle[]>;
+    prevTextRanges?: Nullable<ITextRangeWithStyle[]>;
+    noNeedSetTextRange?: boolean;
+    noHistory?: boolean;
+    isCompositionEnd?: boolean;
 }
+
+const RichTextEditingMutationId = 'doc.mutation.rich-text-editing';
 
 /**
  * The core mutator to change rich text actions. The execution result would be undo mutation params. Could be directly
  * send to undo redo service (will be used by the triggering command).
  */
 export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, IRichTextEditingMutationParams> = {
-    id: 'doc.mutation.rich-text-editing',
+    id: RichTextEditingMutationId,
 
     type: CommandType.MUTATION,
 
     handler: (accessor, params) => {
-        const { unitId, actions } = params;
+        const { unitId, actions, textRanges, prevTextRanges, trigger, noNeedSetTextRange, noHistory, isCompositionEnd } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const documentDataModel = univerInstanceService.getUniverDocInstance(unitId);
 
         const docViewModelManagerService = accessor.get(DocViewModelManagerService);
         const documentViewModel = docViewModelManagerService.getViewModel(unitId);
+
+        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+        const selections = textSelectionManagerService.getSelections();
+
+        const docStateChangeManagerService = accessor.get(DocStateChangeManagerService);
+
+        const imeInputManagerService = accessor.get(IMEInputManagerService);
 
         if (documentDataModel == null || documentViewModel == null) {
             throw new Error(`DocumentDataModel or documentViewModel not found for unitId: ${unitId}`);
@@ -49,7 +69,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         }
 
         // Step 1: Update Doc Data Model.
-        const undoMutations = documentDataModel.apply(actions);
+        const undoActions = documentDataModel.apply(actions);
 
         // Step 2: Update Doc View Model.
         const { segmentId } = actions[0];
@@ -58,9 +78,51 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
 
         segmentViewModel.reset(segmentDocumentDataModel);
 
+        // Step 3: Update cursor & selection.
+        if (!noNeedSetTextRange && textRanges) {
+            // Update selection in the next frame.
+            requestAnimationFrame(() => {
+                textSelectionManagerService.replaceTextRanges(textRanges);
+            });
+        }
+
+        // Step 4: emit state change event.
+        const changeState: IDocStateChangeParams = {
+            commandId: RichTextEditingMutationId,
+            unitId,
+            trigger,
+            noHistory,
+            redoState: {
+                actions,
+                textRanges,
+            },
+            undoState: {
+                actions: undoActions,
+                // TODO: @jocs serialize selections
+                textRanges: prevTextRanges ?? selections as unknown as ITextRangeWithStyle[],
+            },
+        };
+
+        // Handle ime input.
+        if (isCompositionEnd) {
+            const historyParams = imeInputManagerService.fetchComposedUndoRedoMutationParams();
+
+            if (historyParams == null) {
+                throw new Error('historyParams is null in RichTextEditingMutation');
+            }
+
+            const { undoMutationParams, redoMutationParams, previousActiveRange } = historyParams;
+            changeState.redoState.actions = redoMutationParams.actions;
+            changeState.undoState.actions = undoMutationParams.actions;
+            changeState.undoState.textRanges = [previousActiveRange];
+        }
+
+        docStateChangeManagerService.setChangeState(changeState);
+
         return {
             unitId,
-            actions: undoMutations,
+            actions: undoActions,
+            textRanges: selections as unknown as ITextRangeWithStyle[],
         };
     },
 };

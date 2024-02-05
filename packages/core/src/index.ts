@@ -95,6 +95,8 @@ export {
     LocalUndoRedoService,
     RedoCommand,
     UndoCommand,
+    RedoCommandId,
+    UndoCommandId,
 } from './services/undoredo/undoredo.service';
 export * from './shared';
 

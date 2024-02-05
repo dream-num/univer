@@ -15,12 +15,11 @@
  */
 
 import type { ICommand, ICommandInfo, ITextRange } from '@univerjs/core';
-import { CommandType, ICommandService, IUndoRedoService, TextX, TextXActionType } from '@univerjs/core';
+import { CommandType, ICommandService, TextX, TextXActionType } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 
 import { getRetainAndDeleteFromReplace } from '../../basics/retain-delete-params';
 import { IMEInputManagerService } from '../../services/ime-input-manager.service';
-import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
 
@@ -42,8 +41,6 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
     handler: async (accessor, params: IIMEInputCommandParams) => {
         const { unitId, newText, oldTextLen, range, segmentId, textRanges, isCompositionEnd } = params;
         const commandService = accessor.get(ICommandService);
-        const undoRedoService = accessor.get(IUndoRedoService);
-        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const imeInputManagerService = accessor.get(IMEInputManagerService);
 
         const doMutation: ICommandInfo<IRichTextEditingMutationParams> = {
@@ -51,6 +48,7 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
             params: {
                 unitId,
                 actions: [],
+                textRanges,
             },
         };
 
@@ -87,6 +85,10 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
 
         doMutation.params!.actions = textX.serialize();
 
+        doMutation.params!.noHistory = !isCompositionEnd;
+
+        doMutation.params!.isCompositionEnd = isCompositionEnd;
+
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,
             IRichTextEditingMutationParams
@@ -94,44 +96,6 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
 
         imeInputManagerService.pushUndoRedoMutationParams(result, doMutation.params!);
 
-        textSelectionManagerService.replaceTextRanges(textRanges);
-
-        if (isCompositionEnd) {
-            if (result) {
-                const historyParams = imeInputManagerService.fetchComposedUndoRedoMutationParams();
-
-                if (historyParams == null) {
-                    return false;
-                }
-
-                const { undoMutationParams, redoMutationParams, previousActiveRange } = historyParams;
-
-                undoRedoService.pushUndoRedo({
-                    unitID: unitId,
-                    undoMutations: [{ id: RichTextEditingMutation.id, params: undoMutationParams }],
-                    redoMutations: [{ id: RichTextEditingMutation.id, params: redoMutationParams }],
-                    undo() {
-                        commandService.syncExecuteCommand(RichTextEditingMutation.id, undoMutationParams);
-
-                        textSelectionManagerService.replaceTextRanges([previousActiveRange]);
-
-                        return true;
-                    },
-                    redo() {
-                        commandService.syncExecuteCommand(RichTextEditingMutation.id, redoMutationParams);
-
-                        textSelectionManagerService.replaceTextRanges(textRanges);
-
-                        return true;
-                    },
-                });
-
-                return true;
-            }
-        } else {
-            return !!result;
-        }
-
-        return false;
+        return Boolean(result);
     },
 };

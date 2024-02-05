@@ -18,7 +18,6 @@ import type { ICommand, IMutationInfo, IParagraph } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
-    IUndoRedoService,
     IUniverInstanceService,
     MemoryCursor,
     PresetListType,
@@ -27,7 +26,7 @@ import {
     Tools,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
-import type { IActiveTextRange } from '@univerjs/engine-render';
+import type { IActiveTextRange, ITextRangeWithStyle } from '@univerjs/engine-render';
 
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
@@ -78,13 +77,13 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const currentUniverService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
-        const undoRedoService = accessor.get(IUndoRedoService);
 
         const { listType } = params;
 
         const dataModel = currentUniverService.getCurrentUniverDocInstance();
 
         const activeRange = textSelectionManagerService.getActiveRange();
+        const selections = textSelectionManagerService.getSelections();
         const paragraphs = dataModel.getBody()?.paragraphs;
 
         if (activeRange == null || paragraphs == null) {
@@ -120,6 +119,7 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
             params: {
                 unitId,
                 actions: [],
+                textRanges: selections as unknown as ITextRangeWithStyle[],
             },
         };
 
@@ -186,33 +186,7 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
             IRichTextEditingMutationParams
         >(doMutation.id, doMutation.params);
 
-        textSelectionManagerService.refreshSelection();
-
-        if (result) {
-            undoRedoService.pushUndoRedo({
-                unitID: unitId,
-                undoMutations: [{ id: RichTextEditingMutation.id, params: result }],
-                redoMutations: [{ id: RichTextEditingMutation.id, params: doMutation.params }],
-                undo() {
-                    commandService.syncExecuteCommand(RichTextEditingMutation.id, result);
-
-                    textSelectionManagerService.refreshSelection();
-
-                    return true;
-                },
-                redo() {
-                    commandService.syncExecuteCommand(RichTextEditingMutation.id, doMutation.params);
-
-                    textSelectionManagerService.refreshSelection();
-
-                    return true;
-                },
-            });
-
-            return true;
-        }
-
-        return true;
+        return Boolean(result);
     },
 };
 

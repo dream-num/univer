@@ -80,6 +80,7 @@ import {
     SelectAllShortcut,
 } from './shortcuts/cursor.shortcut';
 import { DocCanvasView } from './views/doc-canvas-view';
+import { DocStateChangeManagerService } from './services/doc-state-change-manager.service';
 
 export interface IUniverDocsConfig {
     hasScroll?: boolean;
@@ -187,6 +188,7 @@ export class UniverDocsPlugin extends Plugin {
                 // services
                 [DocSkeletonManagerService],
                 [DocViewModelManagerService],
+                [DocStateChangeManagerService],
                 [IMEInputManagerService],
                 [
                     IDocClipboardService,

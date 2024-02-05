@@ -24,11 +24,10 @@ import {
     Tools,
 } from '@univerjs/core';
 import type { IEditorInputConfig, ITextRangeWithStyle } from '@univerjs/engine-render';
-import { IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/engine-render';
+import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import type { Subscription } from 'rxjs';
 
-import { getDocObject } from '../basics/component-tools';
 import { IMEInputCommand } from '../commands/commands/ime-input.command';
 import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
 import { IMEInputManagerService } from '../services/ime-input-manager.service';
@@ -48,7 +47,6 @@ export class IMEInputController extends Disposable {
     constructor(
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
         @Inject(IMEInputManagerService) private readonly _imeInputManagerService: IMEInputManagerService,
         @ICommandService private readonly _commandService: ICommandService
@@ -168,9 +166,5 @@ export class IMEInputController extends Disposable {
         this._imeInputManagerService.clearUndoRedoMutationParamsCache();
 
         this._imeInputManagerService.setActiveRange(null);
-    }
-
-    private _getDocObject() {
-        return getDocObject(this._currentUniverService, this._renderManagerService);
     }
 }

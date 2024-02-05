@@ -15,7 +15,7 @@
  */
 
 import type { Nullable, TextXAction } from '@univerjs/core';
-import { IUndoRedoService, RedoCommandId, RxDisposable, TextX, UndoCommandId } from '@univerjs/core';
+import { ICommandService, IUndoRedoService, IUniverInstanceService, RedoCommandId, RxDisposable, TextX, UndoCommandId } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
@@ -49,9 +49,13 @@ export class DocStateChangeManagerService extends RxDisposable {
     private _timer: Nullable<ReturnType<typeof setTimeout>> = null;
 
     constructor(
-        @Inject(IUndoRedoService) private _undoRedoService: IUndoRedoService
+        @Inject(IUndoRedoService) private _undoRedoService: IUndoRedoService,
+        @ICommandService private readonly _commandService: ICommandService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
+
+        this._initialize();
     }
 
     setChangeState(changeState: IDocStateChangeParams) {
@@ -63,6 +67,23 @@ export class DocStateChangeManagerService extends RxDisposable {
         this._cacheChangeState(changeState);
         // Mutations by user or historyService need collaboration.
         this._docStateChange$.next(changeState);
+    }
+
+    private _initialize() {
+        this.disposeWithMe(
+            this._commandService.beforeCommandExecuted((command) => {
+                if (command.id === UndoCommandId || command.id === RedoCommandId) {
+                    const univerDoc = this._univerInstanceService.getCurrentUniverDocInstance();
+                    if (univerDoc == null) {
+                        return;
+                    }
+
+                    const unitId = univerDoc.getUnitId();
+
+                    this._pushHistory(unitId);
+                }
+            })
+        );
     }
 
     private _cacheChangeState(changeState: IDocStateChangeParams) {
@@ -84,6 +105,7 @@ export class DocStateChangeManagerService extends RxDisposable {
             if (this._timer) {
                 clearTimeout(this._timer);
             }
+
             this._timer = setTimeout(() => {
                 this._pushHistory(unitId);
             }, HISTORY_DELAY);

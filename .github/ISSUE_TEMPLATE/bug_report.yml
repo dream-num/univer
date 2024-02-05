@@ -7,22 +7,18 @@ body:
     - type: checkboxes
       id: initial-checklist
       attributes:
-          label: Initial checklist
+          label: Before you submit this issue, have you checked the following
           options:
               - label: Is this really a problem?
                 required: true
               - label: I have searched the Github Issues for similar issues, but did not find anything.
                 required: true
 
-    - type: dropdown
+    - type: input
       id: affected-versions
       attributes:
           label: Affected packages and versions
           description: Please test using the latest version of the relevant packages to make sure your issue has not already been fixed.
-          options:
-              - v0.1.0
-              - dev
-          default: 0
       validations:
           required: true
 
@@ -43,8 +39,11 @@ body:
     - type: textarea
       id: steps-to-reproduce
       attributes:
-          label: Steps to reproduce
-          description: How did this happen? Please provide a [minimal, reproducible example](https://stackoverflow.com/help/minimal-reproducible-example).
+          label: Reproduction link
+          description: |
+              We provide an [online template](https://stackblitz.com/~/github.com/awesome-univer/sheets-vite-demo), if your issue can be reproduced in this template, please provide the reproduction link here.
+              We also provide some other [template repositories](https://github.com/awesome-univer), you can choose one of them to reproduce your issue.
+              If your issue cannot be reproduced in the template, please provide as detailed reproduction steps as possible.
       validations:
           required: true
 
@@ -64,52 +63,8 @@ body:
       validations:
           required: true
 
-    - type: dropdown
-      id: javascript-runtime
+    - type: textarea
+      id: system-info
       attributes:
-          label: Runtime
-          description: |
-              What Browser are you using to run the editor?
-          multiple: true
-          options:
-              - Chrome
-              - Safari
-              - Firefox
-              - Electron
-              - Other (please specify in steps to reproduce)
-      validations:
-          required: false
-
-    - type: dropdown
-      id: operating-system
-      attributes:
-          label: OS
-          description: What operating system are you using?
-          multiple: true
-          options:
-              - Windows
-              - Linux
-              - macOS
-              - Other (please specify in steps to reproduce)
-      validations:
-          required: false
-
-    - type: dropdown
-      id: build-tools
-      attributes:
-          label: Build and bundle tools
-          description: What, if any, tools are used to build or bundle the project?
-          multiple: true
-          options:
-              - Webpack
-              - Rollup
-              - esbuild
-              - Parcel
-              - Create React App
-              - Gatsby
-              - Next.js
-              - Remix
-              - Vite
-              - Other (please specify in steps to reproduce)
-      validations:
-          required: false
+          label: System information
+          description: Output of `npx envinfo --system --binaries --browsers`

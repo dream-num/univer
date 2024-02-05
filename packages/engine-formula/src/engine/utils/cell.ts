@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { DEFAULT_EMPTY_DOCUMENT_VALUE, type ICellData, type Nullable } from '@univerjs/core';
+import { DEFAULT_EMPTY_DOCUMENT_VALUE } from '@univerjs/core';
+import type { ICellData, Nullable } from '@univerjs/core';
 
 export function getCellValue(cell: Nullable<ICellData>) {
     if (cell === null) {

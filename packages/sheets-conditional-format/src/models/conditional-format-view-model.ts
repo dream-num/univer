@@ -34,10 +34,11 @@ import type { Nullable } from '@univerjs/core';
 import { ObjectMatrix, Range } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import type { IDataBarRenderParams } from '../render/type';
-import type { IColorScale, IConditionFormatRule, IHighlightCell } from './type';
+import type { IColorScaleRenderParams } from '../services/calculate-unit/color-scale';
+import type { IConditionFormatRule, IHighlightCell } from './type';
 
 interface ICellItem {
-    cfList: { cfId: string; ruleCache?: Nullable<IHighlightCell['style'] | IDataBarRenderParams | IColorScale['config']>;isDirty: boolean }[];
+    cfList: { cfId: string; ruleCache?: Nullable<IHighlightCell['style'] | IDataBarRenderParams | IColorScaleRenderParams>;isDirty: boolean }[];
     composeCache?: any;
 }
 

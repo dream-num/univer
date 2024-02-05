@@ -38,7 +38,7 @@ export default antfu({
         'style/spaced-comment': 'off',
         'tunicorn/number-literal-case': 'off',
         'style/indent-binary-ops': 'off',
-
+        'ts/method-signature-style': 'off',
         'style/indent': ['error', 4, {
             ObjectExpression: 'first',
             SwitchCase: 1,

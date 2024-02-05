@@ -26,43 +26,11 @@ import {
     Tools,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
-import type { IActiveTextRange, ITextRangeWithStyle } from '@univerjs/engine-render';
+import type { IActiveTextRange } from '@univerjs/engine-render';
 
-import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
+import { serializeTextRange, TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
-
-interface IBulletListCommandParams {}
-
-export const BulletListCommand: ICommand<IBulletListCommandParams> = {
-    id: 'doc.command.bullet-list',
-
-    type: CommandType.COMMAND,
-
-    handler: (accessor) => {
-        const commandService = accessor.get(ICommandService);
-
-        return commandService.syncExecuteCommand(ListOperationCommand.id, {
-            listType: PresetListType.BULLET_LIST,
-        });
-    },
-};
-
-interface IOrderListCommandParams {}
-
-export const OrderListCommand: ICommand<IOrderListCommandParams> = {
-    id: 'doc.command.order-list',
-
-    type: CommandType.COMMAND,
-
-    handler: (accessor) => {
-        const commandService = accessor.get(ICommandService);
-
-        return commandService.syncExecuteCommand(ListOperationCommand.id, {
-            listType: PresetListType.ORDER_LIST,
-        });
-    },
-};
 
 interface IListOperationCommandParams {
     listType: PresetListType;
@@ -83,8 +51,9 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
         const dataModel = currentUniverService.getCurrentUniverDocInstance();
 
         const activeRange = textSelectionManagerService.getActiveRange();
-        const selections = textSelectionManagerService.getSelections();
+        const selections = textSelectionManagerService.getSelections() ?? [];
         const paragraphs = dataModel.getBody()?.paragraphs;
+        const serializedSelections = selections.map(serializeTextRange);
 
         if (activeRange == null || paragraphs == null) {
             return false;
@@ -119,7 +88,7 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
             params: {
                 unitId,
                 actions: [],
-                textRanges: selections as unknown as ITextRangeWithStyle[],
+                textRanges: serializedSelections,
             },
         };
 
@@ -187,6 +156,38 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
         >(doMutation.id, doMutation.params);
 
         return Boolean(result);
+    },
+};
+
+interface IBulletListCommandParams {}
+
+export const BulletListCommand: ICommand<IBulletListCommandParams> = {
+    id: 'doc.command.bullet-list',
+
+    type: CommandType.COMMAND,
+
+    handler: (accessor) => {
+        const commandService = accessor.get(ICommandService);
+
+        return commandService.syncExecuteCommand(ListOperationCommand.id, {
+            listType: PresetListType.BULLET_LIST,
+        });
+    },
+};
+
+interface IOrderListCommandParams {}
+
+export const OrderListCommand: ICommand<IOrderListCommandParams> = {
+    id: 'doc.command.order-list',
+
+    type: CommandType.COMMAND,
+
+    handler: (accessor) => {
+        const commandService = accessor.get(ICommandService);
+
+        return commandService.syncExecuteCommand(ListOperationCommand.id, {
+            listType: PresetListType.ORDER_LIST,
+        });
     },
 };
 

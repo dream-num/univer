@@ -19,7 +19,7 @@ import type { IMutation, IMutationCommonParams, Nullable, TextXAction } from '@u
 
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import { DocViewModelManagerService } from '../../services/doc-view-model-manager.service';
-import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
+import { serializeTextRange, TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import type { IDocStateChangeParams } from '../../services/doc-state-change-manager.service';
 import { DocStateChangeManagerService } from '../../services/doc-state-change-manager.service';
 import { IMEInputManagerService } from '../../services/ime-input-manager.service';
@@ -54,7 +54,9 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         const documentViewModel = docViewModelManagerService.getViewModel(unitId);
 
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
-        const selections = textSelectionManagerService.getSelections();
+        const selections = textSelectionManagerService.getSelections() ?? [];
+
+        const serializedSelections = selections.map(serializeTextRange);
 
         const docStateChangeManagerService = accessor.get(DocStateChangeManagerService);
 
@@ -98,8 +100,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
             },
             undoState: {
                 actions: undoActions,
-                // TODO: @jocs serialize selections
-                textRanges: prevTextRanges ?? selections as unknown as ITextRangeWithStyle[],
+                textRanges: prevTextRanges ?? serializedSelections,
             },
         };
 
@@ -122,7 +123,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         return {
             unitId,
             actions: undoActions,
-            textRanges: selections as unknown as ITextRangeWithStyle[],
+            textRanges: serializedSelections,
         };
     },
 };

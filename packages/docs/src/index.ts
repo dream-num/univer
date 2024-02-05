@@ -56,6 +56,6 @@ export {
 export { type IUniverDocsConfig, UniverDocsPlugin } from './doc-plugin';
 export { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
 export { DocViewModelManagerService } from './services/doc-view-model-manager.service';
-export { TextSelectionManagerService } from './services/text-selection-manager.service';
+export { TextSelectionManagerService, serializeTextRange } from './services/text-selection-manager.service';
 export { DocStateChangeManagerService, type IDocStateChangeParams } from './services/doc-state-change-manager.service';
 export { DocCanvasView } from './views/doc-canvas-view';

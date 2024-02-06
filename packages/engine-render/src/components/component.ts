@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { sortRules, sortRulesPrinting } from '@univerjs/core';
+import { sortRules } from '@univerjs/core';
 
 import { BaseObject } from '../base-object';
 import type { IViewportBound } from '../basics/vector2';

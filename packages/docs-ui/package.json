@@ -56,6 +56,7 @@
         "@univerjs/design": "workspace:*",
         "@univerjs/docs": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
+        "@univerjs/ui": "workspace:*",
         "@wendellhu/redi": ">=0.12.13",
         "react": ">=16.9.0"
     },
@@ -67,6 +68,7 @@
         "@univerjs/docs": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/shared": "workspace:*",
+        "@univerjs/ui": "workspace:*",
         "@wendellhu/redi": "^0.12.13",
         "less": "^4.2.0",
         "react": "^18.2.0",

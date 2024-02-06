@@ -165,6 +165,40 @@ export class BaseFunction extends Disposable {
         return logicValue;
     }
 
+    /**
+     * A logical value that specifies 1/TRUE , 0/FALSE, -1, default 1.
+     * The difference from getZeroOrOneByOneDefault is that we need to get -1
+     * @param logicValueObject
+     * @returns
+     */
+    getMatchTypeValue(logicValueObject?: BaseValueObject) {
+        if (logicValueObject == null) {
+            return 1;
+        }
+
+        let logicValue = 1;
+
+        if (logicValueObject.isArray()) {
+            logicValueObject = (logicValueObject as ArrayValueObject).getFirstCell();
+        }
+
+        if (logicValueObject.isBoolean()) {
+            const logicV = logicValueObject.getValue() as boolean;
+            if (logicV === false) {
+                logicValue = 0;
+            }
+        } else if (logicValueObject.isString()) {
+            return;
+        } else if (logicValueObject.isNumber()) {
+            const logicV = logicValueObject.getValue() as number;
+            if (logicV <= 0) {
+                logicValue = logicV;
+            }
+        }
+
+        return logicValue;
+    }
+
     binarySearch(
         value: BaseValueObject,
         searchArray: ArrayValueObject,

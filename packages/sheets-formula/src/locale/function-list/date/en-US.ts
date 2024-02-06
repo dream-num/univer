@@ -59,7 +59,7 @@ export default {
         },
     },
     DAY: {
-        description: 'Converts a serial number to a day of the month',
+        description: 'Returns the day of a date, represented by a serial number. The day is given as an integer ranging from 1 to 31.',
         abstract: 'Converts a serial number to a day of the month',
         links: [
             {
@@ -68,8 +68,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            serialNumber: { name: 'Serial Number', detail: 'The date of the day you are trying to find. Dates should be entered by using the DATE function, or as results of other formulas or functions. For example, use DATE(2008,5,23) for the 23rd day of May, 2008.' },
         },
     },
     DAYS: {
@@ -171,7 +170,7 @@ export default {
         },
     },
     MONTH: {
-        description: 'Converts a serial number to a month',
+        description: 'Returns the month of a date represented by a serial number. The month is given as an integer, ranging from 1 (January) to 12 (December).',
         abstract: 'Converts a serial number to a month',
         links: [
             {
@@ -180,8 +179,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            serialNumber: { name: 'Serial Number', detail: 'Required. The date of the month you are trying to find. Dates should be entered by using the DATE function, or as results of other formulas or functions. For example, use DATE(2008,5,23) for the 23rd day of May, 2008.' },
         },
     },
     NETWORKDAYS: {

@@ -23,6 +23,9 @@ import { ErrorValueObject } from '../../../engine/value-object/base-value-object
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
+/**
+ * TODO@Dushusir: support plaine text date: =EDATE("2020-1-1",1), =EDATE("2020/1/1",1) and other formats
+ */
 export class Edate extends BaseFunction {
     override calculate(startDate: BaseValueObject, months: BaseValueObject) {
         if (startDate == null || months == null) {
@@ -49,31 +52,36 @@ export class Edate extends BaseFunction {
             months.isArray() ? (months as ArrayValueObject).getColumnCount() : 1
         );
 
-        const yearArray = expandArrayValueObject(maxRowLength, maxColumnLength, startDate);
-        const monthArray = expandArrayValueObject(maxRowLength, maxColumnLength, months);
+        const startDateArray = expandArrayValueObject(maxRowLength, maxColumnLength, startDate);
+        const monthsArray = expandArrayValueObject(maxRowLength, maxColumnLength, months);
 
-        return yearArray.map((startDateObject, rowIndex, columnIndex) => {
-            const monthValueObject = monthArray.get(rowIndex, columnIndex);
+        return startDateArray.map((startDateObject, rowIndex, columnIndex) => {
+            const monthsValueObject = monthsArray.get(rowIndex, columnIndex);
 
             if (startDateObject.isError()) {
                 return startDateObject;
             }
 
-            if (monthValueObject.isError()) {
-                return monthValueObject;
+            if (monthsValueObject.isError()) {
+                return monthsValueObject;
             }
 
-            if (startDateObject.isString() || monthValueObject.isString()) {
+            if (startDateObject.isString() || startDateObject.isNull() || startDateObject.isBoolean() || monthsValueObject.isString() || monthsValueObject.isNull() || monthsValueObject.isBoolean()) {
                 return new ErrorValueObject(ErrorType.VALUE);
             }
 
             const startDateSerial = +startDateObject.getValue();
-            const monthValue = Math.floor(+monthValueObject.getValue());
+
+            if (startDateSerial < 0) {
+                return new ErrorValueObject(ErrorType.NUM);
+            }
+
+            const monthsValue = Math.floor(+monthsValueObject.getValue());
 
             const startDate = excelSerialToDate(startDateSerial);
 
             const year = startDate.getUTCFullYear();
-            const month = startDate.getUTCMonth() + monthValue;
+            const month = startDate.getUTCMonth() + monthsValue;
             const day = startDate.getUTCDate();
 
             const resultDate = new Date(Date.UTC(year, month, day));

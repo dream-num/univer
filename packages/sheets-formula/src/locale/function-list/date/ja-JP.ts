@@ -59,7 +59,7 @@ export default {
         },
     },
     DAY: {
-        description: 'シリアル値を日付に変換します。',
+        description: 'シリアル番号で表された、日付の日情報を返します。日情報は 1 ～ 31 の範囲内の整数で示されます。',
         abstract: 'シリアル値を日付に変換します。',
         links: [
             {
@@ -68,8 +68,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            serialNumber: { name: 'シリアル値', detail: '検索する日付を指定します。 日付は、DATE 関数を使って入力するか、他の数式または他の関数の結果を指定します。 たとえば、2008 年 5 月 23 日を入力する場合は、DATE(2008,5,23) を使用します。' },
         },
     },
     DAYS: {
@@ -180,8 +179,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            serialNumber: { name: 'シリアル値', detail: '検索する月の日付を指定します。 日付は、DATE 関数を使って入力するか、他の数式または他の関数の結果として指定します。 たとえば、2008 年 5 月 23 日を入力する場合は、DATE(2008,5,23) を使用します。' },
         },
     },
     NETWORKDAYS: {

@@ -97,15 +97,8 @@ export const FUNCTION_LIST_DATE: IFunctionInfo[] = [
         abstract: 'formula.functionList.DAY.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.DAY.functionParameter.number1.name',
-                detail: 'formula.functionList.DAY.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.DAY.functionParameter.number2.name',
-                detail: 'formula.functionList.DAY.functionParameter.number2.detail',
+                name: 'formula.functionList.DAY.functionParameter.serialNumber.name',
+                detail: 'formula.functionList.DAY.functionParameter.serialNumber.detail',
                 example: 'A1:A20',
                 require: 1,
                 repeat: 0,
@@ -273,15 +266,8 @@ export const FUNCTION_LIST_DATE: IFunctionInfo[] = [
         abstract: 'formula.functionList.MONTH.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.MONTH.functionParameter.number1.name',
-                detail: 'formula.functionList.MONTH.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.MONTH.functionParameter.number2.name',
-                detail: 'formula.functionList.MONTH.functionParameter.number2.detail',
+                name: 'formula.functionList.MONTH.functionParameter.serialNumber.name',
+                detail: 'formula.functionList.MONTH.functionParameter.serialNumber.detail',
                 example: 'A1:A20',
                 require: 1,
                 repeat: 0,
@@ -523,15 +509,8 @@ export const FUNCTION_LIST_DATE: IFunctionInfo[] = [
         abstract: 'formula.functionList.YEAR.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.YEAR.functionParameter.number1.name',
-                detail: 'formula.functionList.YEAR.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.YEAR.functionParameter.number2.name',
-                detail: 'formula.functionList.YEAR.functionParameter.number2.detail',
+                name: 'formula.functionList.YEAR.functionParameter.serialNumber.name',
+                detail: 'formula.functionList.YEAR.functionParameter.serialNumber.detail',
                 example: 'A1:A20',
                 require: 1,
                 repeat: 0,

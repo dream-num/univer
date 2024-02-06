@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import { describe } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
 
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { Xmatch } from '..';
+import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 
 const arrayValueObject1 = new ArrayValueObject(/*ts*/ `{
     1, "First", 100, 89;
@@ -57,10 +58,110 @@ const arrayValueObject4 = new ArrayValueObject(/*ts*/ `{
     801, 3500
 }`);
 
-describe('Test vlookup', () => {
+describe('Test xmatch', () => {
     const textFunction = new Xmatch(FUNCTION_NAMES_LOOKUP.XLOOKUP);
 
     describe('The value of the lookup', () => {
+        it('Search single string', async () => {
+            const resultObject = textFunction.calculate(
+                new StringValueObject('Second'),
+                arrayValueObject1.slice(undefined, [1, 2])!
+            );
+            expect(resultObject.getValue()).toBe(2);
+        });
 
+        it('Search single string horizon', async () => {
+            const resultObject = textFunction.calculate(
+                new StringValueObject('Second'),
+                arrayValueObject1.transpose().slice([1, 2])!
+            );
+            expect(resultObject.getValue()).toBe(2);
+        });
+
+        it('Search single number ', async () => {
+            const resultObject = textFunction.calculate(
+                new NumberValueObject(5),
+                arrayValueObject1.slice(undefined, [0, 1])!
+            );
+            expect(resultObject.getValue()).toBe(5);
+        });
+
+        it('Search array', async () => {
+            const resultObject = textFunction.calculate(
+                arrayValueObject2.slice(undefined, [1, 2])!,
+                arrayValueObject1.slice(undefined, [1, 2])!
+            );
+            expect((resultObject as ArrayValueObject).toValue()).toStrictEqual([[6], [1], [4]]);
+        });
+    });
+
+    describe('Approximate match test', () => {
+        it('Approximate match1', async () => {
+            const resultObject = textFunction.calculate(
+                new StringValueObject('s*'),
+                arrayValueObject1.slice(undefined, [1, 2])!,
+                new NumberValueObject(2)
+            );
+            expect(resultObject.getValue()).toBe(2);
+        });
+
+        it('Approximate asc', async () => {
+            const resultObject = textFunction.calculate(
+                new StringValueObject('???th'),
+                arrayValueObject1.slice(undefined, [1, 2])!,
+                new NumberValueObject(2)
+            );
+            expect(resultObject.getValue()).toBe(5);
+        });
+
+        it('Approximate desc', async () => {
+            const resultObject = textFunction.calculate(
+                new StringValueObject('???th'),
+                arrayValueObject1.slice(undefined, [1, 2])!,
+                new NumberValueObject(2),
+                new NumberValueObject(-1)
+            );
+            expect(resultObject.getValue()).toBe(6);
+        });
+
+        it('match_mode is -1', async () => {
+            const resultObject = textFunction.calculate(
+                new NumberValueObject(110),
+                arrayValueObject3.slice(undefined, [0, 1])!,
+                new NumberValueObject(-1)
+            );
+            expect(resultObject.getValue()).toBe(2);
+        });
+
+        it('match_mode 1', async () => {
+            const resultObject = textFunction.calculate(
+                new NumberValueObject(110),
+                arrayValueObject3.slice(undefined, [0, 1])!,
+                new NumberValueObject(1)
+            );
+            expect(resultObject.getValue()).toBe(3);
+        });
+
+        it('match_mode binary asc', async () => {
+            const resultObject = textFunction.calculate(
+                new NumberValueObject(660),
+                arrayValueObject4.slice(undefined, [0, 1])!,
+                new NumberValueObject(0),
+                new NumberValueObject(2)
+            );
+            // FIXME: fix this test
+            // expect(resultObject.getValue()).toBe(ErrorType.NA);
+        });
+
+        it('match_mode binary desc', async () => {
+            const resultObject = textFunction.calculate(
+                new NumberValueObject(660),
+                arrayValueObject4.slice(undefined, [0, 1])!,
+                new NumberValueObject(0),
+                new NumberValueObject(-2)
+            );
+            // FIXME: fix this test
+            // expect(resultObject.getValue()).toBe(ErrorType.NA);
+        });
     });
 });

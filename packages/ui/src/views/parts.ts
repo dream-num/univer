@@ -27,5 +27,5 @@ export const globalComponents: Set<() => ComponentType> = new Set([
     () => ConfirmPart,
     () => Notification,
     () => ContextMenu,
-    () => GlobalZone
+    () => GlobalZone,
 ]);

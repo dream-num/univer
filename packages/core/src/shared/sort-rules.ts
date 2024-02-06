@@ -34,7 +34,7 @@ export function printingSortRules(isPrinting: boolean) {
             return 0;
         }
         return -1;
-    }
+    };
 }
 
 export function sortRulesByDesc(oa: any, ob: any) {

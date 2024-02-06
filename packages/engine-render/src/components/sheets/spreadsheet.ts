@@ -15,7 +15,7 @@
  */
 
 import type { IRange, ISelectionCellWithCoord, Nullable } from '@univerjs/core';
-import { BooleanNumber, ObjectMatrix, sortRules, printingSortRules } from '@univerjs/core';
+import { BooleanNumber, ObjectMatrix, sortRules } from '@univerjs/core';
 
 import type { BaseObject } from '../../base-object';
 
@@ -532,7 +532,6 @@ export class Spreadsheet extends SheetComponent {
         // console.log('xx2', scaleX, scaleY, columnTotalWidth, rowTotalHeight, rowHeightAccumulation, columnWidthAccumulation);
         ctx.stroke();
         ctx.closePath();
-
 
         border?.forValue((rowIndex, columnIndex, borderCaches) => {
             if (!borderCaches) {

@@ -193,7 +193,6 @@ export class Font extends SheetExtension {
                             cellWidth - 2 / scale,
                             cellHeight - 2 / scale
                         );
-
                     }
 
                     ctx.translate(startX, startY);

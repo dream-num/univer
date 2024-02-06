@@ -31,17 +31,13 @@ const NO_CACHE_Z_INDEX = 20;
 export class Background extends SheetExtension {
     override uKey = UNIQUE_KEY;
 
-    override clone() {
-        return new Background();
+    override Z_INDEX = DOC_EXTENSION_Z_INDEX;
+
+    PRINTING_Z_INDEX = NO_CACHE_Z_INDEX;
+
+    override get zIndex() {
+        return (this.parent as Spreadsheet).isPrinting ? this.PRINTING_Z_INDEX : this.Z_INDEX;
     }
-
-    get spreadsheet() {
-        return this.parent as Spreadsheet;
-    }
-
-    override zIndex = DOC_EXTENSION_Z_INDEX;
-
-    override printingZIndex = NO_CACHE_Z_INDEX;
 
     override draw(
         ctx: UniverRenderingContext,
@@ -49,7 +45,7 @@ export class Background extends SheetExtension {
         spreadsheetSkeleton: SpreadsheetSkeleton,
         diffRanges?: IRange[]
     ) {
-        const { dataMergeCache, stylesCache } = spreadsheetSkeleton;
+        const { stylesCache } = spreadsheetSkeleton;
         const { background, backgroundPositions } = stylesCache;
         if (!spreadsheetSkeleton) {
             return;
@@ -68,9 +64,7 @@ export class Background extends SheetExtension {
         }
         ctx.save();
 
-        if (this.spreadsheet.allowCache) {
-            ctx.globalCompositeOperation = 'destination-over';
-        }
+        ctx.setGlobalCompositeOperation('destination-over');
 
         background &&
             Object.keys(background).forEach((rgb: string) => {

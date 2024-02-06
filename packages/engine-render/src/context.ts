@@ -774,6 +774,10 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     clearRectForTexture(x: number, y: number, width: number, height: number) {
         this.clearRect(x, y, width, height);
     }
+
+    setGlobalCompositeOperation(val: GlobalCompositeOperation) {
+        this._context.globalCompositeOperation = val;
+    }
 }
 
 /**
@@ -811,4 +815,6 @@ export class UniverPrintingContext extends UniverRenderingContext2D {
     }
 
     clearRectForTexture(x: number, y: number, width: number, height: number) { }
+
+    setGlobalCompositeOperation(val: GlobalCompositeOperation) { }
 }

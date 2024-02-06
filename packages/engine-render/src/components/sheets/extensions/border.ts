@@ -31,11 +31,7 @@ const BORDER_Z_INDEX = 50;
 export class Border extends SheetExtension {
     override uKey = UNIQUE_KEY;
 
-    override zIndex = BORDER_Z_INDEX;
-
-    override clone() {
-        return new Border();
-    }
+    override Z_INDEX = BORDER_Z_INDEX;
 
     override draw(
         ctx: UniverRenderingContext,

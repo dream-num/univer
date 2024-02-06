@@ -70,6 +70,8 @@ export class Spreadsheet extends SheetComponent {
         pageMarginTop: 0,
     });
 
+    isPrinting = false;
+
     constructor(
         oKey: string,
         spreadsheetSkeleton?: SpreadsheetSkeleton,
@@ -419,7 +421,7 @@ export class Spreadsheet extends SheetComponent {
         SpreadsheetExtensionRegistry.getData()
             .sort(sortRules)
             .forEach((extension) => {
-                this.register(extension.clone());
+                this.register(extension);
             });
         // this._borderAuxiliaryExtension = this.getExtensionByKey('DefaultBorderAuxiliaryExtension') as BorderAuxiliary;
         this._backgroundExtension = this.getExtensionByKey('DefaultBackgroundExtension') as Background;

@@ -36,9 +36,7 @@ export class ComponentExtension<T, U, V> {
 
     type!: U;
 
-    zIndex: number = 0;
-
-    printingZIndex: number | undefined;
+    Z_INDEX: number = 0;
 
     parent: Nullable<BaseObject>;
 
@@ -47,6 +45,10 @@ export class ComponentExtension<T, U, V> {
     translateY = 0;
 
     extensionOffset: IExtensionConfig = {};
+
+    get zIndex() {
+        return this.Z_INDEX;
+    }
 
     draw(ctx: UniverRenderingContext, parentScale: IScale, skeleton: T, diffBounds?: V) {
         /* abstract */

@@ -27,10 +27,6 @@ export enum SHEET_EXTENSION_TYPE {
 export class SheetExtension extends ComponentExtension<SpreadsheetSkeleton, SHEET_EXTENSION_TYPE, IRange[]> {
     override type = SHEET_EXTENSION_TYPE.GRID;
 
-    clone(): SheetExtension {
-        return this;
-    }
-
     getCellIndex(
         rowIndex: number,
         columnIndex: number,

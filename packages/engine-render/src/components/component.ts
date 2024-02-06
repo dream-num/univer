@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { printingSortRules } from '@univerjs/core';
+import { sortRules, sortRulesPrinting } from '@univerjs/core';
 
 import { BaseObject } from '../base-object';
 import type { IViewportBound } from '../basics/vector2';
@@ -22,8 +22,6 @@ import type { UniverRenderingContext } from '../context';
 import type { ComponentExtension } from './extension';
 
 export class RenderComponent<T, U, V> extends BaseObject {
-    isPrinting = false;
-
     private _extensions = new Map<string, ComponentExtension<T, U, V>>();
 
     get extensions() {
@@ -45,7 +43,7 @@ export class RenderComponent<T, U, V> extends BaseObject {
 
     getExtensionsByOrder() {
         const extensionArray = Array.from(this._extensions.values());
-        extensionArray.sort(printingSortRules(this.isPrinting));
+        extensionArray.sort(sortRules);
 
         return extensionArray;
     }

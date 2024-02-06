@@ -33,13 +33,9 @@ const EXTENSION_Z_INDEX = 30;
 export class Font extends SheetExtension {
     override uKey = UNIQUE_KEY;
 
-    override zIndex = EXTENSION_Z_INDEX;
+    override Z_INDEX = EXTENSION_Z_INDEX;
 
     changeFontColor: ObjectMatrix<IColorStyle> = new ObjectMatrix();
-
-    override clone() {
-        return new Font();
-    }
 
     get spreadsheet() {
         return this.parent as Spreadsheet;

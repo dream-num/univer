@@ -111,6 +111,7 @@ export class ConditionalFormatRuleModel {
                     this._conditionalFormatViewModel.sortCellCf(unitId, subUnitId, row, col, cfPriorityMap);
                 });
             });
+            this._conditionalFormatViewModel.markRuleDirty(unitId, subUnitId, rule);
             this._ruleChange$.next({ rule, subUnitId, unitId, type: 'set' });
         }
     }

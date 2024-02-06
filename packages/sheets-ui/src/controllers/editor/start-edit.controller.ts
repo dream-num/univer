@@ -55,8 +55,8 @@ import {
     Rect,
     ScrollBar,
 } from '@univerjs/engine-render';
-import { KeyCode } from '@univerjs/ui';
-import { Inject } from '@wendellhu/redi';
+import { KeyCode, LayoutService } from '@univerjs/ui';
+import { Inject, Optional } from '@wendellhu/redi';
 import type { Subscription } from 'rxjs';
 
 import { getEditorObject } from '../../basics/editor/get-editor-object';
@@ -96,7 +96,8 @@ export class StartEditController extends Disposable {
         @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(LocaleService) protected readonly _localService: LocaleService
+        @Inject(LocaleService) protected readonly _localService: LocaleService,
+        @Optional(LayoutService) private readonly _layoutService?: LayoutService
     ) {
         super();
 
@@ -117,6 +118,13 @@ export class StartEditController extends Disposable {
         this._initialKeyboardListener();
         this._initialCursorSync();
         this._listenEditorFocus();
+
+        if (this._layoutService) {
+            this.disposeWithMe(
+                // the content editable div should be regarded as part of the applications container
+                this._layoutService.registerContainer(this._textSelectionRenderManager.__getEditorContainer())
+            );
+        }
     }
 
     private _listenEditorFocus() {

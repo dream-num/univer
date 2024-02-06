@@ -18,8 +18,7 @@ import type { ICommandInfo, Nullable, Observer } from '@univerjs/core';
 import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import type { Documents, IMouseEvent, IPointerEvent } from '@univerjs/engine-render';
 import { CURSOR_TYPE, IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/engine-render';
-import { LayoutService } from '@univerjs/ui';
-import { Inject, Optional } from '@wendellhu/redi';
+import { Inject } from '@wendellhu/redi';
 
 import { getDocObjectById } from '../basics/component-tools';
 import type { ISetDocZoomRatioOperationParams } from '../commands/operations/set-doc-zoom-ratio.operation';
@@ -48,8 +47,7 @@ export class TextSelectionController extends Disposable {
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ITextSelectionRenderManager
         private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
-        @Optional(LayoutService) private readonly _layoutService?: LayoutService
+        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService
     ) {
         super();
 
@@ -74,13 +72,6 @@ export class TextSelectionController extends Disposable {
     private _initialize() {
         this._skeletonListener();
         this._commandExecutedListener();
-
-        if (this._layoutService) {
-            this.disposeWithMe(
-                // the content editable div should be regarded as part of the applications container
-                this._layoutService.registerContainer(this._textSelectionRenderManager.__getEditorContainer())
-            );
-        }
     }
 
     override dispose(): void {

@@ -15,7 +15,7 @@
  */
 
 import type { IOperation } from '@univerjs/core';
-import { BooleanNumber, CommandType, IUniverInstanceService } from '@univerjs/core';
+import { CommandType, IUniverInstanceService } from '@univerjs/core';
 
 export interface ISetWorksheetActiveOperationParams {
     unitId: string;
@@ -30,17 +30,14 @@ export const SetWorksheetActiveOperation: IOperation<ISetWorksheetActiveOperatio
 
         if (!workbook) return false;
 
-        // TODO: this should be changed to a inner state
         const worksheets = workbook.getWorksheets();
         for (const [, worksheet] of worksheets) {
             if (worksheet.getSheetId() === params.subUnitId) {
-                worksheet.getConfig().status = BooleanNumber.TRUE;
-                workbook.__setActiveSheet(worksheet);
-            } else {
-                worksheet.getConfig().status = BooleanNumber.FALSE;
+                workbook.setActiveSheet(worksheet);
+                return true;
             }
         }
 
-        return true;
+        return false;
     },
 };

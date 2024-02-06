@@ -30,7 +30,7 @@ export const PAGE3_RICHTEXT_2 = {
         rich: {
             id: 'd',
             body: {
-                dataStream: `combine SaaS, PaaS and IaaS with tailored\rprovides a curated set of tools, capabilities and processes that are packaged for easy consumption by developers and end users\r\n`,
+                dataStream: 'combine SaaS, PaaS and IaaS with tailored\rprovides a curated set of tools, capabilities and processes that are packaged for easy consumption by developers and end users\r\n',
                 textRuns: [
                     {
                         st: 0,

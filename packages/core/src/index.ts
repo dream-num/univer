@@ -95,6 +95,8 @@ export {
     LocalUndoRedoService,
     RedoCommand,
     UndoCommand,
+    RedoCommandId,
+    UndoCommandId,
 } from './services/undoredo/undoredo.service';
 export * from './shared';
 
@@ -105,6 +107,21 @@ export { normalizeTextRuns } from './docs/data-model/apply-utils/common';
 export type { PluginCtor } from './plugin/plugin';
 export { Range } from './sheets/range';
 export { Styles } from './sheets/styles';
+export {
+    DEFAULT_WORKSHEET_COLUMN_COUNT,
+    DEFAULT_WORKSHEET_COLUMN_COUNT_KEY,
+    DEFAULT_WORKSHEET_COLUMN_TITLE_HEIGHT_KEY,
+    DEFAULT_WORKSHEET_COLUMN_WIDTH_KEY,
+    DEFAULT_WORKSHEET_ROW_COUNT_KEY,
+    DEFAULT_WORKSHEET_ROW_HEIGHT_KEY,
+    DEFAULT_WORKSHEET_ROW_TITLE_WIDTH_KEY,
+    DEFAULT_WORKSHEET_COLUMN_TITLE_HEIGHT,
+    DEFAULT_WORKSHEET_COLUMN_WIDTH,
+    DEFAULT_WORKSHEET_ROW_COUNT,
+    DEFAULT_WORKSHEET_ROW_HEIGHT,
+    DEFAULT_WORKSHEET_ROW_TITLE_WIDTH,
+    mergeWorksheetSnapshotWithDefault,
+} from './sheets/sheet-snapshot-utils';
 export { SheetViewModel } from './sheets/view-model';
 export { getWorksheetUID, Workbook } from './sheets/workbook';
 export { Worksheet } from './sheets/worksheet';

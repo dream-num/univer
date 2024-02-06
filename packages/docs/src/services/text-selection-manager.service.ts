@@ -50,7 +50,7 @@ interface ITextSelectionManagerInsertParam extends ITextSelectionManagerSearchPa
 
 type ITextSelectionInfo = Map<string, Map<string, ITextSelectionInnerParam>>;
 
-function serializeTextRange(textRange: TextRange): ITextRangeWithStyle {
+export function serializeTextRange(textRange: TextRange): ITextRangeWithStyle {
     const { startOffset, endOffset, collapsed } = textRange;
 
     return {

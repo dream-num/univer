@@ -15,12 +15,12 @@
  */
 
 import type { IDocumentData, IWorkbookData } from '@univerjs/core';
-import { BooleanNumber, BorderStyleTypes, LocaleType, SheetTypes } from '@univerjs/core';
+import { BooleanNumber, BorderStyleTypes, LocaleType } from '@univerjs/core';
 
 const richTextDemo: IDocumentData = {
     id: 'd',
     body: {
-        dataStream: `Instructions: ①Project division - Fill in the specific division of labor after the project is disassembled: ②Responsible Person - Enter the responsible person's name here: ③Date-The specific execution time of the project (detailed to the date of a certain month), and the gray color block marks the planned real-time time of the division of labor of the project (for example, the specific execution time of [regional scene model arrangement and construction] is the 2 days marked in gray. \r\n`,
+        dataStream: 'Instructions: ①Project division - Fill in the specific division of labor after the project is disassembled: ②Responsible Person - Enter the responsible person\'s name here: ③Date-The specific execution time of the project (detailed to the date of a certain month), and the gray color block marks the planned real-time time of the division of labor of the project (for example, the specific execution time of [regional scene model arrangement and construction] is the 2 days marked in gray. \r\n',
         textRuns: [
             {
                 st: 0,
@@ -44,8 +44,8 @@ const richTextDemo: IDocumentData = {
     },
     documentStyle: {
         pageSize: {
-            width: Infinity,
-            height: Infinity,
+            width: Number.POSITIVE_INFINITY,
+            height: Number.POSITIVE_INFINITY,
         },
         marginTop: 0,
         marginBottom: 0,
@@ -60,7 +60,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
     name: 'universheet',
     sheetOrder: ['sheet-0001'],
     styles: {
-        '1': {
+        1: {
             fs: 30,
             vt: 2,
             bl: 1,
@@ -68,7 +68,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 l: 5,
             },
         },
-        '2': {
+        2: {
             vt: 2,
             bl: 1,
             bg: {
@@ -104,7 +104,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 },
             },
         },
-        '3': {
+        3: {
             vt: 2,
             bl: 1,
             bg: {
@@ -138,7 +138,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 },
             },
         },
-        '4': {
+        4: {
             bl: 1,
             vt: 2,
             pd: {
@@ -149,13 +149,13 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
             },
             ht: 2,
         },
-        '5': {
+        5: {
             vt: 2,
             pd: {
                 l: 5,
             },
         },
-        '6': {
+        6: {
             vt: 2,
             ht: 2,
             fs: 12,
@@ -163,7 +163,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 rgb: 'rgb(1,136,251)',
             },
         },
-        '7': {
+        7: {
             vt: 2,
             pd: {
                 l: 5,
@@ -198,7 +198,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 },
             },
         },
-        '8': {
+        8: {
             vt: 2,
             ht: 2,
             cl: {
@@ -211,13 +211,13 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 rgb: 'rgb(255,251,224)',
             },
         },
-        '9': {
+        9: {
             vt: 2,
             pd: {
                 l: 25,
             },
         },
-        '10': {
+        10: {
             bg: {
                 rgb: '#bf9000',
             },
@@ -231,7 +231,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 b: null,
             },
         },
-        '11': {
+        11: {
             vt: 2,
             ht: 2,
             fs: 24,
@@ -242,7 +242,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 rgb: '#fff',
             },
         },
-        '12': {
+        12: {
             bg: {
                 rgb: 'rgb(248,237,241)',
             },
@@ -253,7 +253,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 b: null,
             },
         },
-        '13': {
+        13: {
             vt: 2,
             ht: 2,
             bg: {
@@ -266,7 +266,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 b: null,
             },
         },
-        '14': {
+        14: {
             vt: 2,
             ht: 2,
             bg: {
@@ -281,7 +281,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 },
             },
         },
-        '15': {
+        15: {
             vt: 2,
             ht: 2,
             bg: {
@@ -294,7 +294,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 b: null,
             },
         },
-        '16': {
+        16: {
             vt: 2,
             ht: 2,
             bg: {
@@ -307,7 +307,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 b: null,
             },
         },
-        '17': {
+        17: {
             vt: 2,
             ht: 2,
             bg: {
@@ -320,7 +320,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 b: null,
             },
         },
-        '18': {
+        18: {
             vt: 2,
             ht: 2,
             bg: {
@@ -333,7 +333,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 b: null,
             },
         },
-        '19': {
+        19: {
             vt: 2,
             ht: 2,
             cl: {
@@ -349,7 +349,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 b: null,
             },
         },
-        '20': {
+        20: {
             vt: 2,
             ht: 2,
             cl: {
@@ -365,7 +365,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 b: null,
             },
         },
-        '21': {
+        21: {
             vt: 2,
             ht: 2,
             cl: {
@@ -381,7 +381,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 b: null,
             },
         },
-        '22': {
+        22: {
             vt: 2,
             ht: 2,
             cl: {
@@ -397,7 +397,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 b: null,
             },
         },
-        '23': {
+        23: {
             vt: 2,
             ht: 2,
             cl: {
@@ -413,7 +413,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 b: null,
             },
         },
-        '24': {
+        24: {
             bg: {
                 rgb: '#3d85c6',
             },
@@ -424,7 +424,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 b: null,
             },
         },
-        '25': {
+        25: {
             bg: {
                 rgb: '#c27ba0',
             },
@@ -435,7 +435,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 b: null,
             },
         },
-        '26': {
+        26: {
             bg: {
                 rgb: 'rgb(224, 102, 102)',
             },
@@ -446,7 +446,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 b: null,
             },
         },
-        '27': {
+        27: {
             bg: {
                 rgb: '#f90',
             },
@@ -457,7 +457,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 b: null,
             },
         },
-        '28': {
+        28: {
             bg: {
                 rgb: '#76a5af',
             },
@@ -468,7 +468,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 b: null,
             },
         },
-        '29': {
+        29: {
             bg: {
                 rgb: '#38761d',
             },
@@ -479,7 +479,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 b: null,
             },
         },
-        '30': {
+        30: {
             vt: 2,
             ht: 2,
             fs: 30,
@@ -497,7 +497,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 b: null,
             },
         },
-        '31': {
+        31: {
             bd: {
                 t: {
                     s: BorderStyleTypes.THIN,
@@ -525,7 +525,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 },
             },
         },
-        '32': {
+        32: {
             vt: 2,
             tb: 3,
             bd: {
@@ -550,7 +550,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 },
             },
         },
-        '33': {
+        33: {
             vt: 2,
             ht: 2,
             bd: {
@@ -580,7 +580,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 },
             },
         },
-        '34': {
+        34: {
             vt: 2,
             bd: {
                 t: null,
@@ -604,7 +604,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 },
             },
         },
-        '35': {
+        35: {
             vt: 2,
             ht: 2,
             bg: {
@@ -640,7 +640,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 },
             },
         },
-        '36': {
+        36: {
             vt: 2,
             ht: 2,
             bd: {
@@ -670,7 +670,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 },
             },
         },
-        '37': {
+        37: {
             vt: 2,
             ht: 2,
             bg: {
@@ -711,7 +711,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 },
             },
         },
-        '38': {
+        38: {
             vt: 2,
             tb: 3,
             bg: {
@@ -747,7 +747,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 },
             },
         },
-        '39': {
+        39: {
             vt: 2,
             ht: 2,
             bg: {
@@ -783,7 +783,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 },
             },
         },
-        '40': {
+        40: {
             vt: 2,
             ht: 2,
             fs: 24,
@@ -817,7 +817,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 },
             },
         },
-        '41': {
+        41: {
             ht: 3,
             bd: {
                 t: {
@@ -846,7 +846,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 },
             },
         },
-        '42': {
+        42: {
             vt: 2,
             cl: {
                 rgb: 'rgb(125,133,22)',
@@ -878,7 +878,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 },
             },
         },
-        '43': {
+        43: {
             vt: 2,
             ht: 2,
             bd: {
@@ -908,7 +908,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 },
             },
         },
-        '44': {
+        44: {
             vt: 2,
             ht: 2,
             bd: {
@@ -938,7 +938,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 },
             },
         },
-        '45': {
+        45: {
             vt: 2,
             tb: 3,
             pd: {
@@ -972,7 +972,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 },
             },
         },
-        '46': {
+        46: {
             vt: 2,
             ht: 2,
             bd: {
@@ -1002,7 +1002,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 },
             },
         },
-        '47': {
+        47: {
             vt: 2,
             ht: 2,
             bd: {
@@ -1032,7 +1032,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 },
             },
         },
-        '48': {
+        48: {
             vt: 2,
             bd: {
                 t: {
@@ -1061,7 +1061,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 },
             },
         },
-        '49': {
+        49: {
             vt: 2,
             bd: {
                 t: {
@@ -1090,7 +1090,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 },
             },
         },
-        '50': {
+        50: {
             vt: 2,
             ht: 2,
             bd: {
@@ -1120,7 +1120,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 },
             },
         },
-        '51': {
+        51: {
             vt: 2,
             ht: 2,
             bd: {
@@ -1150,7 +1150,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 },
             },
         },
-        '52': {
+        52: {
             bd: {
                 t: {
                     s: BorderStyleTypes.THIN,
@@ -1178,7 +1178,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 },
             },
         },
-        '53': {
+        53: {
             ht: 2,
             vt: 2,
             tr: {
@@ -1209,7 +1209,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 },
             },
         },
-        '54': {
+        54: {
             bd: {
                 l: {
                     s: BorderStyleTypes.THIN,
@@ -1225,7 +1225,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 },
             },
         },
-        '55': {
+        55: {
             ht: 3,
             vt: 3,
             tb: 3,
@@ -1255,262 +1255,261 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
     appVersion: '3.0.0-alpha',
     sheets: {
         'sheet-0001': {
-            type: SheetTypes.GRID,
             id: 'sheet-0001',
             cellData: {
-                '0': {
-                    '0': {
+                0: {
+                    0: {
                         s: '1',
                         v: 'A Schedule of Items',
                     },
                 },
-                '1': {
-                    '0': {
+                1: {
+                    0: {
                         s: '2',
                         v: 'Division of Project',
                     },
-                    '1': {
+                    1: {
                         s: '3',
                         v: 'Responsible Person',
                     },
-                    '2': {
+                    2: {
                         s: '4',
                         v: 'Date',
                     },
                 },
-                '2': {
-                    '0': {
+                2: {
+                    0: {
                         v: 'General Project Manager',
                         s: '5',
                     },
-                    '1': {
+                    1: {
                         v: '@XXX',
                         s: '6',
                     },
-                    '2': {
+                    2: {
                         v: 'March 1',
                         s: '5',
                     },
-                    '3': {
+                    3: {
                         v: 'March 2',
                         s: '5',
                     },
-                    '4': {
+                    4: {
                         v: 'March 3',
                         s: '5',
                     },
-                    '5': {
+                    5: {
                         v: 'March 4',
                         s: '5',
                     },
-                    '6': {
+                    6: {
                         v: 'March 5',
                         s: '5',
                     },
-                    '7': {
+                    7: {
                         v: 'March 6',
                         s: '5',
                     },
-                    '8': {
+                    8: {
                         v: 'March 7',
                         s: '5',
                     },
-                    '9': {
+                    9: {
                         v: 'March 8',
                         s: '5',
                     },
-                    '10': {
+                    10: {
                         v: 'March 9',
                         s: '5',
                     },
-                    '11': {
+                    11: {
                         v: 'March 10',
                         s: '5',
                     },
-                    '12': {
+                    12: {
                         v: 'March 11',
                         s: '5',
                     },
-                    '13': {
+                    13: {
                         v: 'March 12',
                         s: '5',
                     },
-                    '14': {
+                    14: {
                         v: 'March 13',
                         s: '5',
                     },
                 },
-                '3': {
-                    '0': {
+                3: {
+                    0: {
                         v: '1、Responsible Person of Model Section',
                         s: '7',
                     },
-                    '1': {
+                    1: {
                         v: '@George',
                         s: '8',
                     },
                 },
-                '4': {
-                    '0': {
+                4: {
+                    0: {
                         v: 'Advertisement Signboard',
                         s: '9',
                     },
-                    '1': {
+                    1: {
                         v: '@Paul',
                         s: '6',
                     },
-                    '4': {
+                    4: {
                         s: '10',
                     },
-                    '5': {
+                    5: {
                         s: '10',
                     },
-                    '6': {
+                    6: {
                         s: '10',
                     },
-                    '7': {
+                    7: {
                         s: '10',
                     },
-                    '8': {
+                    8: {
                         s: '10',
                     },
-                    '9': {
+                    9: {
                         s: '10',
                     },
-                    '10': {
+                    10: {
                         s: '10',
                     },
                 },
-                '5': {
-                    '0': {
+                5: {
+                    0: {
                         v: 'Transport Ready',
                         s: '9',
                     },
-                    '1': {
+                    1: {
                         v: '@George',
                         s: '6',
                     },
                 },
-                '6': {
-                    '0': {
+                6: {
+                    0: {
                         v: '2、Head of Special Effects Section',
                         s: '7',
                     },
-                    '1': {
+                    1: {
                         v: '@Paul',
                         s: '8',
                     },
                 },
-                '7': {
-                    '0': {
+                7: {
+                    0: {
                         v: 'Render Output Parameter Test',
                         s: '9',
                     },
-                    '1': {
+                    1: {
                         v: '@Paul',
                         s: '6',
                     },
-                    '3': {
+                    3: {
                         s: '25',
                     },
-                    '4': {
+                    4: {
                         s: '25',
                     },
-                    '5': {
+                    5: {
                         s: '25',
                     },
-                    '6': {
+                    6: {
                         s: '25',
                     },
-                    '7': {
+                    7: {
                         s: '25',
                     },
-                    '8': {
+                    8: {
                         s: '25',
                     },
-                    '9': {
+                    9: {
                         s: '25',
                     },
                 },
-                '8': {
-                    '0': {
+                8: {
+                    0: {
                         v: 'Camera Moving Mirror',
                         s: '9',
                     },
-                    '1': {
+                    1: {
                         v: '@Paul',
                         s: '6',
                     },
                 },
-                '9': {
-                    '0': {
+                9: {
+                    0: {
                         v: '3、Responsible Person of Rendering Section',
                         s: '7',
                     },
-                    '1': {
+                    1: {
                         v: '@Jennifer',
                         s: '8',
                     },
                 },
-                '10': {
-                    '0': {
+                10: {
+                    0: {
                         v: 'Scene Dynamic Element Design',
                         s: '9',
                     },
-                    '7': {
+                    7: {
                         s: '27',
                     },
-                    '8': {
+                    8: {
                         s: '27',
                     },
-                    '9': {
+                    9: {
                         s: '27',
                     },
-                    '10': {
+                    10: {
                         s: '27',
                     },
-                    '11': {
+                    11: {
                         s: '27',
                     },
                 },
-                '11': {
-                    '0': {
+                11: {
+                    0: {
                         v: 'Sky Map Selection',
                         s: '9',
                     },
                 },
-                '12': {
-                    '0': {
+                12: {
+                    0: {
                         v: 'Reference Scenario Data Collection',
                         s: '9',
                     },
                 },
-                '13': {
-                    '0': {
+                13: {
+                    0: {
                         v: 'Scene Dynamic Element Design',
                         s: '9',
                     },
-                    '2': {
+                    2: {
                         s: '29',
                     },
-                    '3': {
+                    3: {
                         s: '29',
                     },
-                    '4': {
+                    4: {
                         s: '29',
                     },
-                    '5': {
+                    5: {
                         s: '29',
                     },
-                    '6': {
+                    6: {
                         s: '29',
                     },
-                    '7': {
+                    7: {
                         s: '29',
                     },
                 },
-                '14': {
-                    '0': {
+                14: {
+                    0: {
                         p: richTextDemo,
                     },
                 },
@@ -1546,100 +1545,97 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 },
             ],
             rowData: {
-                '0': {
+                0: {
                     h: 70,
                 },
-                '2': {
+                2: {
                     h: 20,
                 },
-                '3': {
+                3: {
                     h: 20,
                 },
-                '4': {
+                4: {
                     h: 20,
                 },
-                '5': {
+                5: {
                     h: 20,
                 },
-                '6': {
+                6: {
                     h: 20,
                 },
-                '7': {
+                7: {
                     h: 20,
                 },
-                '8': {
+                8: {
                     h: 20,
                 },
-                '9': {
+                9: {
                     h: 20,
                 },
-                '10': {
+                10: {
                     h: 20,
                 },
-                '11': {
+                11: {
                     h: 20,
                 },
-                '12': {
+                12: {
                     h: 20,
                 },
-                '13': {
+                13: {
                     h: 20,
                 },
-                '14': {
+                14: {
                     h: 200,
                 },
             },
             columnData: {
-                '0': {
+                0: {
                     w: 250,
                 },
-                '1': {
+                1: {
                     w: 130,
                 },
-                '2': {
+                2: {
                     w: 60,
                 },
-                '3': {
+                3: {
                     w: 60,
                 },
-                '4': {
+                4: {
                     w: 60,
                 },
-                '5': {
+                5: {
                     w: 60,
                 },
-                '6': {
+                6: {
                     w: 60,
                 },
-                '7': {
+                7: {
                     w: 60,
                 },
-                '8': {
+                8: {
                     w: 60,
                 },
-                '9': {
+                9: {
                     w: 60,
                 },
-                '10': {
+                10: {
                     w: 60,
                 },
-                '11': {
+                11: {
                     w: 60,
                 },
-                '12': {
+                12: {
                     w: 60,
                 },
-                '13': {
+                13: {
                     w: 60,
                 },
-                '14': {
+                14: {
                     w: 60,
                 },
             },
-            status: 1,
             showGridlines: 1,
-            hideRow: [],
-            hideColumn: [],
             rowHeader: {
                 width: 46,
                 hidden: BooleanNumber.FALSE,
@@ -1650,7 +1646,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
             },
             selections: ['A2'],
             rightToLeft: BooleanNumber.FALSE,
-            pluginMeta: {},
         },
     },
     // namedRanges: [

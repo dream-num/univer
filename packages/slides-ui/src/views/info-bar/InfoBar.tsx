@@ -64,7 +64,7 @@ export class InfoBar extends Component<IProps, IState> {
                 </div> */}
                 {/* <LogoIcon style={{ width: '152px', height: '32px' }} /> */}
                 <div className={styles.sheetName}>
-                    <Tooltip title={rename.label} placement={'bottom'}>
+                    <Tooltip title={rename.label} placement="bottom">
                         <Input value={slide.label} />
                     </Tooltip>
                 </div>

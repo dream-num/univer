@@ -23,7 +23,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
     name: 'universheet',
     sheetOrder: ['sheet-0012'],
     styles: {
-        '1': {
+        1: {
             fs: 30,
             vt: 2,
             bl: 1,
@@ -31,7 +31,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 l: 5,
             },
         },
-        '2': {
+        2: {
             vt: 2,
             bl: 1,
             bg: {
@@ -67,7 +67,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 },
             },
         },
-        '3': {
+        3: {
             vt: 2,
             bl: 1,
             bg: {
@@ -101,7 +101,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 },
             },
         },
-        '4': {
+        4: {
             bl: 1,
             vt: 2,
             pd: {
@@ -112,13 +112,13 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
             },
             ht: 2,
         },
-        '5': {
+        5: {
             vt: 2,
             pd: {
                 l: 5,
             },
         },
-        '6': {
+        6: {
             vt: 2,
             ht: 2,
             fs: 12,
@@ -126,7 +126,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 rgb: 'rgb(1,136,251)',
             },
         },
-        '7': {
+        7: {
             vt: 2,
             pd: {
                 l: 5,
@@ -161,7 +161,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 },
             },
         },
-        '8': {
+        8: {
             vt: 2,
             ht: 2,
             cl: {
@@ -174,13 +174,13 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 rgb: 'rgb(255,251,224)',
             },
         },
-        '9': {
+        9: {
             vt: 2,
             pd: {
                 l: 25,
             },
         },
-        '10': {
+        10: {
             bg: {
                 rgb: '#bf9000',
             },
@@ -194,7 +194,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 b: null,
             },
         },
-        '11': {
+        11: {
             vt: 2,
             ht: 2,
             fs: 24,
@@ -205,7 +205,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 rgb: '#fff',
             },
         },
-        '12': {
+        12: {
             bg: {
                 rgb: 'rgb(248,237,241)',
             },
@@ -216,7 +216,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 b: null,
             },
         },
-        '13': {
+        13: {
             vt: 2,
             ht: 2,
             bg: {
@@ -229,7 +229,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 b: null,
             },
         },
-        '14': {
+        14: {
             vt: 2,
             ht: 2,
             bg: {
@@ -244,7 +244,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 },
             },
         },
-        '15': {
+        15: {
             vt: 2,
             ht: 2,
             bg: {
@@ -257,7 +257,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 b: null,
             },
         },
-        '16': {
+        16: {
             vt: 2,
             ht: 2,
             bg: {
@@ -270,7 +270,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 b: null,
             },
         },
-        '17': {
+        17: {
             vt: 2,
             ht: 2,
             bg: {
@@ -283,7 +283,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 b: null,
             },
         },
-        '18': {
+        18: {
             vt: 2,
             ht: 2,
             bg: {
@@ -296,7 +296,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 b: null,
             },
         },
-        '19': {
+        19: {
             vt: 2,
             ht: 2,
             cl: {
@@ -312,7 +312,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 b: null,
             },
         },
-        '20': {
+        20: {
             vt: 2,
             ht: 2,
             cl: {
@@ -328,7 +328,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 b: null,
             },
         },
-        '21': {
+        21: {
             vt: 2,
             ht: 2,
             cl: {
@@ -344,7 +344,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 b: null,
             },
         },
-        '22': {
+        22: {
             vt: 2,
             ht: 2,
             cl: {
@@ -360,7 +360,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 b: null,
             },
         },
-        '23': {
+        23: {
             vt: 2,
             ht: 2,
             cl: {
@@ -376,7 +376,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 b: null,
             },
         },
-        '24': {
+        24: {
             bg: {
                 rgb: '#3d85c6',
             },
@@ -387,7 +387,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 b: null,
             },
         },
-        '25': {
+        25: {
             bg: {
                 rgb: '#c27ba0',
             },
@@ -398,7 +398,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 b: null,
             },
         },
-        '26': {
+        26: {
             bg: {
                 rgb: 'rgb(224, 102, 102)',
             },
@@ -409,7 +409,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 b: null,
             },
         },
-        '27': {
+        27: {
             bg: {
                 rgb: '#f90',
             },
@@ -420,7 +420,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 b: null,
             },
         },
-        '28': {
+        28: {
             bg: {
                 rgb: '#76a5af',
             },
@@ -431,7 +431,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 b: null,
             },
         },
-        '29': {
+        29: {
             bg: {
                 rgb: '#38761d',
             },
@@ -442,7 +442,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 b: null,
             },
         },
-        '30': {
+        30: {
             vt: 2,
             ht: 2,
             fs: 30,
@@ -460,7 +460,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 b: null,
             },
         },
-        '31': {
+        31: {
             bd: {
                 t: {
                     s: 1,
@@ -488,7 +488,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 },
             },
         },
-        '32': {
+        32: {
             vt: 2,
             tb: 3,
             bd: {
@@ -513,7 +513,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 },
             },
         },
-        '33': {
+        33: {
             vt: 2,
             ht: 2,
             bd: {
@@ -543,7 +543,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 },
             },
         },
-        '34': {
+        34: {
             vt: 2,
             bd: {
                 t: null,
@@ -567,7 +567,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 },
             },
         },
-        '35': {
+        35: {
             vt: 2,
             ht: 2,
             bg: {
@@ -603,7 +603,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 },
             },
         },
-        '36': {
+        36: {
             vt: 2,
             ht: 2,
             bd: {
@@ -633,7 +633,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 },
             },
         },
-        '37': {
+        37: {
             vt: 2,
             ht: 2,
             bg: {
@@ -670,7 +670,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 },
             },
         },
-        '38': {
+        38: {
             vt: 2,
             tb: 3,
             bg: {
@@ -706,7 +706,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 },
             },
         },
-        '39': {
+        39: {
             vt: 2,
             ht: 2,
             bg: {
@@ -742,7 +742,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 },
             },
         },
-        '40': {
+        40: {
             vt: 2,
             ht: 2,
             fs: 24,
@@ -776,7 +776,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 },
             },
         },
-        '41': {
+        41: {
             ht: 3,
             bd: {
                 t: {
@@ -805,7 +805,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 },
             },
         },
-        '42': {
+        42: {
             vt: 2,
             cl: {
                 rgb: 'rgb(125,133,22)',
@@ -837,7 +837,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 },
             },
         },
-        '43': {
+        43: {
             vt: 2,
             ht: 2,
             bd: {
@@ -867,7 +867,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 },
             },
         },
-        '44': {
+        44: {
             vt: 2,
             ht: 2,
             bd: {
@@ -897,7 +897,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 },
             },
         },
-        '45': {
+        45: {
             vt: 2,
             tb: 3,
             pd: {
@@ -931,7 +931,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 },
             },
         },
-        '46': {
+        46: {
             vt: 2,
             ht: 2,
             bd: {
@@ -961,7 +961,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 },
             },
         },
-        '47': {
+        47: {
             vt: 2,
             ht: 2,
             bd: {
@@ -991,7 +991,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 },
             },
         },
-        '48': {
+        48: {
             vt: 2,
             bd: {
                 t: {
@@ -1020,7 +1020,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 },
             },
         },
-        '49': {
+        49: {
             vt: 2,
             bd: {
                 t: {
@@ -1049,7 +1049,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 },
             },
         },
-        '50': {
+        50: {
             vt: 2,
             ht: 2,
             bd: {
@@ -1079,7 +1079,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 },
             },
         },
-        '51': {
+        51: {
             vt: 2,
             ht: 2,
             bd: {
@@ -1109,7 +1109,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 },
             },
         },
-        '52': {
+        52: {
             bd: {
                 t: {
                     s: 1,
@@ -1137,7 +1137,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 },
             },
         },
-        '53': {
+        53: {
             ht: 2,
             vt: 2,
             tr: {
@@ -1168,7 +1168,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 },
             },
         },
-        '54': {
+        54: {
             bd: {
                 l: {
                     s: 1,
@@ -1184,7 +1184,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 },
             },
         },
-        '55': {
+        55: {
             ht: 3,
             vt: 3,
             tb: 3,
@@ -1210,7 +1210,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 },
             },
         },
-        '56': {
+        56: {
             vt: 2,
             ht: 2,
             fs: 30,
@@ -1228,7 +1228,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 b: null,
             },
         },
-        '57': {
+        57: {
             ht: 1,
             vt: 2,
             tb: 3,
@@ -16134,9 +16134,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
     sheets: {
         'sheet-0012': {
             name: 'sheet-0012',
-            status: 1,
             id: 'sheet-0012',
-            type: 0,
             tabColor: '',
             hidden: 0,
             rowCount: 1000,
@@ -16154,621 +16152,619 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                     endColumn: 13,
                 },
             ],
-            hideRow: [],
-            hideColumn: [],
             cellData: {
-                '0': {
-                    '0': {
+                0: {
+                    0: {
                         s: 'z3USRF',
                         v: '医用物资库存实时显示表',
                     },
-                    '1': {
+                    1: {
                         s: '0FdQGN',
                     },
-                    '2': {
+                    2: {
                         s: '0FdQGN',
                     },
-                    '3': {
+                    3: {
                         s: '0FdQGN',
                     },
-                    '4': {
+                    4: {
                         s: '0FdQGN',
                     },
-                    '5': {
+                    5: {
                         s: '0FdQGN',
                     },
-                    '6': {
+                    6: {
                         s: '0FdQGN',
                     },
-                    '7': {
+                    7: {
                         s: '0FdQGN',
                     },
-                    '8': {
+                    8: {
                         s: '0FdQGN',
                     },
-                    '9': {
+                    9: {
                         s: '0FdQGN',
                     },
-                    '10': {
+                    10: {
                         s: '0FdQGN',
                     },
-                    '11': {
+                    11: {
                         s: '0FdQGN',
                     },
-                    '12': {
+                    12: {
                         s: '0FdQGN',
                     },
-                    '13': {
+                    13: {
                         s: '0FdQGN',
                     },
-                    '14': {
+                    14: {
                         s: 'u5otPe',
                     },
                 },
-                '1': {
-                    '0': {
+                1: {
+                    0: {
                         s: 'cXJMQg',
                         v: '物资编码',
                     },
-                    '1': {
+                    1: {
                         s: 'bfU_wv',
                         v: '名称',
                     },
-                    '2': {
+                    2: {
                         s: 'bfU_wv',
                         v: '单价（元）',
                     },
-                    '3': {
+                    3: {
                         s: 'bfU_wv',
                         v: '功能',
                     },
-                    '4': {
+                    4: {
                         s: 'bfU_wv',
                         v: '单位',
                     },
-                    '5': {
+                    5: {
                         s: 'bfU_wv',
                         v: '物资负责人',
                     },
-                    '6': {
+                    6: {
                         s: 'bfU_wv',
                         v: '前期结转',
                     },
-                    '7': {
+                    7: {
                         s: 'bfU_wv',
                         v: '累计出库',
                     },
-                    '8': {
+                    8: {
                         s: 'bfU_wv',
                         v: '累计入库',
                     },
-                    '9': {
+                    9: {
                         s: 'bfU_wv',
                         v: '当前库存',
                     },
-                    '10': {
+                    10: {
                         s: 'bfU_wv',
                         v: '在库物资金额（元）',
                     },
-                    '11': {
+                    11: {
                         s: 'bfU_wv',
                         v: '安全库存',
                     },
-                    '12': {
+                    12: {
                         s: 'bfU_wv',
                         v: '是否紧缺',
                     },
-                    '13': {
+                    13: {
                         s: 'bfU_wv',
                         v: '紧缺数量',
                     },
-                    '14': {
+                    14: {
                         s: 'u5otPe',
                     },
                 },
-                '2': {
-                    '0': {
+                2: {
+                    0: {
                         s: '6blWcr',
                         v: 'A0001',
                     },
-                    '1': {
+                    1: {
                         s: 'uQ52tT',
                         v: '口罩',
                     },
-                    '2': {
+                    2: {
                         s: 'uQ52tT',
                         v: '3',
                     },
-                    '3': {
+                    3: {
                         s: 'uQ52tT',
                         v: '防护',
                     },
-                    '4': {
+                    4: {
                         s: 'uQ52tT',
                         v: '个',
                     },
-                    '5': {
+                    5: {
                         s: 'tqgl8Z',
                         v: '佐菲',
                     },
-                    '6': {
+                    6: {
                         s: 'uQ52tT',
                         v: '18000',
                     },
-                    '7': {
+                    7: {
                         s: 'uQ52tT',
                         v: '9688',
                     },
-                    '8': {
+                    8: {
                         s: 'uQ52tT',
                         v: '4000',
                     },
-                    '9': {
+                    9: {
                         s: 'uQ52tT',
                         v: '12312',
                     },
-                    '10': {
+                    10: {
                         s: 'uQ52tT',
                         v: '36936',
                     },
-                    '11': {
+                    11: {
                         s: 'uQ52tT',
                         v: '3000',
                     },
-                    '12': {
+                    12: {
                         s: 'uQ52tT',
                         v: '否',
                     },
-                    '13': {
+                    13: {
                         s: 'uQ52tT',
                         v: '——',
                     },
-                    '14': {
+                    14: {
                         s: 'u5otPe',
                     },
                 },
-                '3': {
-                    '0': {
+                3: {
+                    0: {
                         s: '6blWcr',
                         v: 'A0002',
                     },
-                    '1': {
+                    1: {
                         s: 'uQ52tT',
                         v: '护目镜',
                     },
-                    '2': {
+                    2: {
                         s: 'uQ52tT',
                         v: '100',
                     },
-                    '3': {
+                    3: {
                         s: 'uQ52tT',
                         v: '防护',
                     },
-                    '4': {
+                    4: {
                         s: 'uQ52tT',
                         v: '个',
                     },
-                    '5': {
+                    5: {
                         s: 'tqgl8Z',
                         v: '赛文',
                     },
-                    '6': {
+                    6: {
                         s: 'uQ52tT',
                         v: '3000',
                     },
-                    '7': {
+                    7: {
                         s: 'uQ52tT',
                         v: '822',
                     },
-                    '8': {
+                    8: {
                         s: 'uQ52tT',
                         v: '1245',
                     },
-                    '9': {
+                    9: {
                         s: 'uQ52tT',
                         v: '3423',
                     },
-                    '10': {
+                    10: {
                         s: 'uQ52tT',
                         v: '342300',
                     },
-                    '11': {
+                    11: {
                         s: 'uQ52tT',
                         v: '3000',
                     },
-                    '12': {
+                    12: {
                         s: 'uQ52tT',
                         v: '否',
                     },
-                    '13': {
+                    13: {
                         s: 'uQ52tT',
                         v: '——',
                     },
-                    '14': {
+                    14: {
                         s: 'u5otPe',
                     },
                 },
-                '4': {
-                    '0': {
+                4: {
+                    0: {
                         s: '6blWcr',
                         v: 'A0003',
                     },
-                    '1': {
+                    1: {
                         s: 'uQ52tT',
                         v: '防护服',
                     },
-                    '2': {
+                    2: {
                         s: 'uQ52tT',
                         v: '200',
                     },
-                    '3': {
+                    3: {
                         s: 'uQ52tT',
                         v: '防护',
                     },
-                    '4': {
+                    4: {
                         s: 'uQ52tT',
                         v: '个',
                     },
-                    '5': {
+                    5: {
                         s: 'tqgl8Z',
                         v: '杰克',
                     },
-                    '6': {
+                    6: {
                         s: 'uQ52tT',
                         v: '2000',
                     },
-                    '7': {
+                    7: {
                         s: 'uQ52tT',
                         v: '6500',
                     },
-                    '8': {
+                    8: {
                         s: 'uQ52tT',
                         v: '5400',
                     },
-                    '9': {
+                    9: {
                         s: 'uQ52tT',
                         v: '900',
                     },
-                    '10': {
+                    10: {
                         s: 'uQ52tT',
                         v: '180000',
                     },
-                    '11': {
+                    11: {
                         s: 'uQ52tT',
                         v: '3000',
                     },
-                    '12': {
+                    12: {
                         s: 'O1h8-j',
                         v: '是',
                     },
-                    '13': {
+                    13: {
                         s: 'uQ52tT',
                         v: '2100',
                     },
-                    '14': {
+                    14: {
                         s: 'u5otPe',
                     },
                 },
-                '5': {
-                    '0': {
+                5: {
+                    0: {
                         s: '6blWcr',
                         v: 'A0004',
                     },
-                    '1': {
+                    1: {
                         s: 'uQ52tT',
                         v: '测温仪',
                     },
-                    '2': {
+                    2: {
                         s: 'uQ52tT',
                         v: '50',
                     },
-                    '3': {
+                    3: {
                         s: 'uQ52tT',
                         v: '监测',
                     },
-                    '4': {
+                    4: {
                         s: 'uQ52tT',
                         v: '个',
                     },
-                    '5': {
+                    5: {
                         s: 'tqgl8Z',
                         v: '艾斯',
                     },
-                    '6': {
+                    6: {
                         s: 'uQ52tT',
                         v: '2400',
                     },
-                    '7': {
+                    7: {
                         s: 'uQ52tT',
                         v: '3200',
                     },
-                    '8': {
+                    8: {
                         s: 'uQ52tT',
                         v: '4300',
                     },
-                    '9': {
+                    9: {
                         s: 'uQ52tT',
                         v: '3500',
                     },
-                    '10': {
+                    10: {
                         s: 'uQ52tT',
                         v: '175000',
                     },
-                    '11': {
+                    11: {
                         s: 'uQ52tT',
                         v: '3000',
                     },
-                    '12': {
+                    12: {
                         s: 'uQ52tT',
                         v: '否',
                     },
-                    '13': {
+                    13: {
                         s: 'uQ52tT',
                         v: '——',
                     },
-                    '14': {
+                    14: {
                         s: 'u5otPe',
                     },
                 },
-                '6': {
-                    '0': {
+                6: {
+                    0: {
                         s: '6blWcr',
                         v: 'A0005',
                     },
-                    '1': {
+                    1: {
                         s: 'uQ52tT',
                         v: '酒精',
                     },
-                    '2': {
+                    2: {
                         s: 'uQ52tT',
                         v: '5',
                     },
-                    '3': {
+                    3: {
                         s: 'uQ52tT',
                         v: '消毒',
                     },
-                    '4': {
+                    4: {
                         s: 'uQ52tT',
                         v: '个',
                     },
-                    '5': {
+                    5: {
                         s: 'tqgl8Z',
                         v: '泰罗',
                     },
-                    '6': {
+                    6: {
                         s: 'uQ52tT',
                         v: '3000',
                     },
-                    '7': {
+                    7: {
                         s: 'uQ52tT',
                         v: '6000',
                     },
-                    '8': {
+                    8: {
                         s: 'uQ52tT',
                         v: '4800',
                     },
-                    '9': {
+                    9: {
                         s: 'uQ52tT',
                         v: '1800',
                     },
-                    '10': {
+                    10: {
                         s: 'uQ52tT',
                         v: '9000',
                     },
-                    '11': {
+                    11: {
                         s: 'uQ52tT',
                         v: '3000',
                     },
-                    '12': {
+                    12: {
                         s: 'O1h8-j',
                         v: '是',
                     },
-                    '13': {
+                    13: {
                         s: 'uQ52tT',
                         v: '1200',
                     },
-                    '14': {
+                    14: {
                         s: 'u5otPe',
                     },
                 },
-                '7': {
-                    '0': {
+                7: {
+                    0: {
                         s: '6blWcr',
                         v: 'A0006',
                     },
-                    '1': {
+                    1: {
                         s: 'uQ52tT',
                         v: '84消毒液',
                     },
-                    '2': {
+                    2: {
                         s: 'uQ52tT',
                         v: '10',
                     },
-                    '3': {
+                    3: {
                         s: 'uQ52tT',
                         v: '消毒',
                     },
-                    '4': {
+                    4: {
                         s: 'uQ52tT',
                         v: '个',
                     },
-                    '5': {
+                    5: {
                         s: 'tqgl8Z',
                         v: '雷欧',
                     },
-                    '6': {
+                    6: {
                         s: 'uQ52tT',
                         v: '1500',
                     },
-                    '7': {
+                    7: {
                         s: 'uQ52tT',
                         v: '1200',
                     },
-                    '8': {
+                    8: {
                         s: 'uQ52tT',
                         v: '1500',
                     },
-                    '9': {
+                    9: {
                         s: 'uQ52tT',
                         v: '1800',
                     },
-                    '10': {
+                    10: {
                         s: 'uQ52tT',
                         v: '18000',
                     },
-                    '11': {
+                    11: {
                         s: 'uQ52tT',
                         v: '3000',
                     },
-                    '12': {
+                    12: {
                         s: '7f6WGH',
                         v: '是',
                     },
-                    '13': {
+                    13: {
                         s: 'uQ52tT',
                         v: '1200',
                     },
-                    '14': {
+                    14: {
                         s: 'u5otPe',
                     },
                 },
-                '8': {
-                    '0': {
+                8: {
+                    0: {
                         s: 'u5otPe',
                     },
-                    '1': {
+                    1: {
                         s: 'u5otPe',
                     },
-                    '2': {
+                    2: {
                         s: 'u5otPe',
                     },
-                    '3': {
+                    3: {
                         s: 'u5otPe',
                     },
-                    '4': {
+                    4: {
                         s: 'u5otPe',
                     },
-                    '5': {
+                    5: {
                         s: 'u5otPe',
                     },
-                    '6': {
+                    6: {
                         s: 'u5otPe',
                     },
-                    '7': {
+                    7: {
                         s: 'u5otPe',
                     },
-                    '8': {
+                    8: {
                         s: 'u5otPe',
                     },
-                    '9': {
+                    9: {
                         s: 'u5otPe',
                     },
-                    '10': {
+                    10: {
                         s: 'u5otPe',
                     },
-                    '11': {
+                    11: {
                         s: 'u5otPe',
                     },
-                    '12': {
+                    12: {
                         s: 'u5otPe',
                     },
-                    '13': {
+                    13: {
                         s: 'u5otPe',
                     },
                 },
             },
             rowData: {
-                '0': {
+                0: {
                     hd: 0,
                     h: 60,
                 },
-                '1': {
+                1: {
                     hd: 0,
                     h: 60,
                 },
-                '2': {
+                2: {
                     hd: 0,
                     h: 60,
                 },
-                '3': {
+                3: {
                     hd: 0,
                     h: 60,
                 },
-                '4': {
+                4: {
                     hd: 0,
                     h: 60,
                 },
-                '5': {
+                5: {
                     hd: 0,
                     h: 60,
                 },
-                '6': {
+                6: {
                     hd: 0,
                     h: 60,
                 },
-                '7': {
+                7: {
                     hd: 0,
                     h: 60,
                 },
-                '18': {
+                18: {
                     hd: 0,
                     h: 1,
                 },
             },
             columnData: {
-                '0': {
+                0: {
                     w: 80,
                     hd: 0,
                 },
-                '1': {
+                1: {
                     w: 80,
                     hd: 0,
                 },
-                '2': {
+                2: {
                     w: 100,
                     hd: 0,
                 },
-                '3': {
+                3: {
                     w: 50,
                     hd: 0,
                 },
-                '4': {
+                4: {
                     w: 50,
                     hd: 0,
                 },
-                '5': {
+                5: {
                     w: 80,
                     hd: 0,
                 },
-                '6': {
+                6: {
                     w: 80,
                     hd: 0,
                 },
-                '7': {
+                7: {
                     w: 80,
                     hd: 0,
                 },
-                '8': {
+                8: {
                     w: 80,
                     hd: 0,
                 },
-                '9': {
+                9: {
                     w: 80,
                     hd: 0,
                 },
-                '10': {
+                10: {
                     w: 120,
                     hd: 0,
                 },
-                '11': {
+                11: {
                     w: 80,
                     hd: 0,
                 },
-                '12': {
+                12: {
                     w: 80,
                     hd: 0,
                 },
-                '13': {
+                13: {
                     w: 80,
                     hd: 0,
                 },
@@ -16784,7 +16780,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
             },
             selections: ['A1'],
             rightToLeft: 0,
-            pluginMeta: {},
         },
         // 'sheet-0011':{
         //     "name": "sheet-0011",
@@ -26647,7 +26642,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
         //         "A1"
         //     ],
         //     "rightToLeft": 0,
-        //     "pluginMeta": {}
         // }
     },
 };

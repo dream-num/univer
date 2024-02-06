@@ -61,7 +61,7 @@ describe('Test copy worksheet commands', () => {
                 if (!workbook) throw new Error('This is an error');
                 function getSheetCopyPart(sheet: Worksheet) {
                     const config = sheet.getConfig();
-                    const { id, name, status, ...rest } = config;
+                    const { id, name, ...rest } = config;
                     return rest;
                 }
 

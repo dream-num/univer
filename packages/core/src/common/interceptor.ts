@@ -41,7 +41,7 @@ export type IComposeInterceptors<T = any, C = any> = (
  * A helper to compose a certain type of interceptors.
  */
 export const composeInterceptors = <T, C>(interceptors: Array<IInterceptor<T, C>>) =>
-    // eslint-disable-next-line func-names
+
     function (initialValue: T, context: C) {
         let index = -1;
 

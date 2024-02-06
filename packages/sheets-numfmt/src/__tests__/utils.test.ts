@@ -33,7 +33,7 @@ const cellToRange = (row: number, col: number) =>
 describe('test numfmt utils function', () => {
     it('getCurrencyType', () => {
         expect(getCurrencyType(`_(${currencySymbols[3]} 123123`)).toBe(currencySymbols[3]);
-        expect(getCurrencyType(`_(# 123123`)).toBeUndefined();
+        expect(getCurrencyType('_(# 123123')).toBeUndefined();
         expect(getCurrencyType(`_(${currencySymbols[3]} 123123 ${currencySymbols[4]}`)).toBe(currencySymbols[3]);
     });
     it('getDecimalFromPattern', () => {
@@ -173,7 +173,7 @@ describe('test numfmt utils function', () => {
                 id: 'sheet.mutation.set.numfmt',
                 params: {
                     values: {
-                        '1': {
+                        1: {
                             ranges: [
                                 {
                                     startRow: 2,
@@ -189,7 +189,7 @@ describe('test numfmt utils function', () => {
                                 },
                             ],
                         },
-                        '2': {
+                        2: {
                             ranges: [
                                 {
                                     startRow: 4,
@@ -201,11 +201,11 @@ describe('test numfmt utils function', () => {
                         },
                     },
                     refMap: {
-                        '1': {
+                        1: {
                             pattern: 'a',
                             type: '',
                         },
-                        '2': {
+                        2: {
                             pattern: 'b',
                             type: '',
                         },

@@ -182,7 +182,7 @@ export class HeaderUnhideController extends RxDisposable {
                     hasPrevious,
                     hasNext,
                     left: position.startX - (hasPrevious ? UNHIDE_ICON_SIZE : 0),
-                    // eslint-disable-next-line no-magic-numbers
+
                     top: 20 - UNHIDE_ICON_SIZE,
                 },
                 () =>

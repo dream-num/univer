@@ -57,7 +57,7 @@ export class HeaderMenuController extends Disposable {
 
     private _hoverMenu: Nullable<HeaderMenuShape>;
 
-    private _currentColumn: number = Infinity;
+    private _currentColumn: number = Number.POSITIVE_INFINITY;
 
     private _observers: Array<Nullable<Observer<IPointerEvent | IMouseEvent>>> = [];
 

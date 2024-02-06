@@ -39,11 +39,11 @@ export const REFERENCE_REGEX_SINGLE_ROW = `^(${UNIT_NAME_REGEX})?(${SHEET_NAME_R
 
 export const REFERENCE_REGEX_SINGLE_COLUMN = `^(${UNIT_NAME_REGEX})?(${SHEET_NAME_REGEX})?\\s*?\\${ABSOLUTE_SYMBOL}?[A-Za-z]+$`;
 
-const TABLE_NAME_REGEX = `((?![~!@#$%^&*()_+<>?:,./;’，。、‘：“《》？~！@#￥%……（）【】\\[\\]\\/\\\\]).)+`;
+const TABLE_NAME_REGEX = '((?![~!@#$%^&*()_+<>?:,./;’，。、‘：“《》？~！@#￥%……（）【】\\[\\]\\/\\\\]).)+';
 
-const TABLE_TITLE_REGEX = `\\[#.+\\]\\s*?,\\s*?`;
+const TABLE_TITLE_REGEX = '\\[#.+\\]\\s*?,\\s*?';
 
-const TABLE_CONTENT_REGEX = `\\[((?<!#).)*\\]`;
+const TABLE_CONTENT_REGEX = '\\[((?<!#).)*\\]';
 
 const TABLE_MULTIPLE_COLUMN_REGEX = `${TABLE_CONTENT_REGEX}${RANGE_SYMBOL}${TABLE_CONTENT_REGEX}`;
 
@@ -53,9 +53,9 @@ export const REFERENCE_TABLE_SINGLE_COLUMN_REGEX = `^(${UNIT_NAME_REGEX})?${TABL
 
 export const REFERENCE_TABLE_MULTIPLE_COLUMN_REGEX = `^(${UNIT_NAME_REGEX})?${TABLE_NAME_REGEX}(\\[${TABLE_MULTIPLE_COLUMN_REGEX}\\])?$|^${TABLE_NAME_REGEX}(\\[${TABLE_TITLE_REGEX}${TABLE_MULTIPLE_COLUMN_REGEX}\\])?$`; // =Table1[[#Title],[Column1]:[Column2]] | =Table1[[Column1]:[Column2]]
 
-export const $SUPER_TABLE_COLUMN_REGEX = `[.*?]`;
+export const $SUPER_TABLE_COLUMN_REGEX = '[.*?]';
 
-export const $ARRAY_VALUE_REGEX = `{.*?}`;
+export const $ARRAY_VALUE_REGEX = '{.*?}';
 
 export function isReferenceString(refString: string) {
     return (

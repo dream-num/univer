@@ -94,7 +94,7 @@ describe('Test moving rows & cols', () => {
                 ...getId(),
                 range: { startRow: 0, startColumn: 4, endRow: 999, endColumn: 4, rangeType: 2 },
                 colInfo: {
-                    '0': {
+                    0: {
                         w: 212.28515625,
                         hd: 0,
                     },

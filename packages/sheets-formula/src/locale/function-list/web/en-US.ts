@@ -16,8 +16,8 @@
 
 export default {
     ENCODEURL: {
-        description: `Returns a URL-encoded string`,
-        abstract: `Returns a URL-encoded string`,
+        description: 'Returns a URL-encoded string',
+        abstract: 'Returns a URL-encoded string',
         links: [
             {
                 title: 'Instruction',
@@ -30,8 +30,8 @@ export default {
         },
     },
     FILTERXML: {
-        description: `Returns specific data from the XML content by using the specified XPath`,
-        abstract: `Returns specific data from the XML content by using the specified XPath`,
+        description: 'Returns specific data from the XML content by using the specified XPath',
+        abstract: 'Returns specific data from the XML content by using the specified XPath',
         links: [
             {
                 title: 'Instruction',
@@ -44,8 +44,8 @@ export default {
         },
     },
     WEBSERVICE: {
-        description: `Returns data from a web service`,
-        abstract: `Returns data from a web service`,
+        description: 'Returns data from a web service',
+        abstract: 'Returns data from a web service',
         links: [
             {
                 title: 'Instruction',

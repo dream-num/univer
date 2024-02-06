@@ -302,8 +302,8 @@ export default {
         },
     },
     LOOKUP: {
-        description: `When you need to look in a single row or column and find a value from the same position in a second row or column`,
-        abstract: `Looks up values in a vector or array`,
+        description: 'When you need to look in a single row or column and find a value from the same position in a second row or column',
+        abstract: 'Looks up values in a vector or array',
         links: [
             {
                 title: 'Instruction',
@@ -588,11 +588,11 @@ export default {
             },
             matchMode: {
                 name: '[match_mode]',
-                detail: `Specify the match type: 0 - Exact match. If none found, return #N/A. This is the default. -1 - Exact match. If none found, return the next smaller item. 1 - Exact match. If none found, return the next larger item. 2 - A wildcard match where *, ?, and ~ have special meaning.`,
+                detail: 'Specify the match type: 0 - Exact match. If none found, return #N/A. This is the default. -1 - Exact match. If none found, return the next smaller item. 1 - Exact match. If none found, return the next larger item. 2 - A wildcard match where *, ?, and ~ have special meaning.',
             },
             searchMode: {
                 name: '[search_mode]',
-                detail: `Specify the search mode to use: 1 - Perform a search starting at the first item. This is the default. -1 - Perform a reverse search starting at the last item. 2 - Perform a binary search that relies on lookup_array being sorted in ascending order. If not sorted, invalid results will be returned. -2 - Perform a binary search that relies on lookup_array being sorted in descending order. If not sorted, invalid results will be returned.`,
+                detail: 'Specify the search mode to use: 1 - Perform a search starting at the first item. This is the default. -1 - Perform a reverse search starting at the last item. 2 - Perform a binary search that relies on lookup_array being sorted in ascending order. If not sorted, invalid results will be returned. -2 - Perform a binary search that relies on lookup_array being sorted in descending order. If not sorted, invalid results will be returned.',
             },
         },
     },

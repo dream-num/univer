@@ -148,27 +148,33 @@ export function Toolbar(props: IToolbarProps) {
         );
     }, [group]);
 
+    const hasHeaderMenu = useMemo(() => (headerMenuComponents && headerMenuComponents.size > 0) || group.length > 1, [headerMenuComponents, group]);
+
     return (
         <>
-            <header className={styles.headerbar}>
-                <div className={styles.menubar}>
-                    {group.length > 1 &&
-                    group.map((item, index) => (
-                        <a
-                            key={index}
-                            className={clsx(styles.menubarItem, {
-                                [styles.menubarItemActive]: item.name === position,
-                            })}
-                            onClick={() => setPosition(item.name)}
-                        >
-                            {localeService.t(item.name)}
-                        </a>
-                    ))}
-                </div>
-                <div className={styles.headerMenu}>
-                    <ComponentContainer components={headerMenuComponents} />
-                </div>
-            </header>
+            {hasHeaderMenu
+                ? (
+                    <header className={styles.headerbar}>
+                        <div className={styles.menubar}>
+                            {group.length > 1 &&
+                        group.map((item, index) => (
+                            <a
+                                key={index}
+                                className={clsx(styles.menubarItem, {
+                                    [styles.menubarItemActive]: item.name === position,
+                                })}
+                                onClick={() => setPosition(item.name)}
+                            >
+                                {localeService.t(item.name)}
+                            </a>
+                        ))}
+                        </div>
+                        <div className={styles.headerMenu}>
+                            <ComponentContainer components={headerMenuComponents} />
+                        </div>
+                    </header>
+                )
+                : null}
 
             <div ref={toolbarRef} className={styles.toolbar}>
                 <div className={styles.toolbarContainer}>

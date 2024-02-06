@@ -144,11 +144,13 @@ export function FormulaBar() {
                 <div className={styles.formulaInput}>
                     <div onContextMenu={(e) => e.preventDefault()} className={styles.formulaContent} ref={editorRef} />
                     <div className={styles.arrowContainer} onClick={handleArrowClick}>
-                        {arrowDirection === ArrowDirection.Down ? (
-                            <DropdownSingle />
-                        ) : (
-                            <DropdownSingle style={{ transform: 'rotateZ(180deg)' }} />
-                        )}
+                        {arrowDirection === ArrowDirection.Down
+                            ? (
+                                <DropdownSingle />
+                            )
+                            : (
+                                <DropdownSingle style={{ transform: 'rotateZ(180deg)' }} />
+                            )}
                     </div>
                 </div>
             </div>

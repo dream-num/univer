@@ -59,14 +59,14 @@ const TEST_WORKBOOK_DATA_DEMO: () => IWorkbookData = () => ({
             hideColumn: [],
             cellData: {},
             rowData: {
-                '3': {
+                3: {
                     hd: 0,
                     h: 96.328125,
                     ia: BooleanNumber.FALSE,
                 },
             },
             columnData: {
-                '4': {
+                4: {
                     w: 212.28515625,
                     hd: 0,
                 },
@@ -83,7 +83,6 @@ const TEST_WORKBOOK_DATA_DEMO: () => IWorkbookData = () => ({
             },
             selections: ['A1'],
             rightToLeft: 0,
-            pluginMeta: {},
         },
     },
     resources: [

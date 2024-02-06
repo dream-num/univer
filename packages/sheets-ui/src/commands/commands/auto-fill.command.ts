@@ -27,7 +27,7 @@ export interface IAutoFillCommandParams {}
 export const AutoFillCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.auto-fill',
-    // eslint-disable-next-line max-lines-per-function
+
     handler: async (accessor: IAccessor, params: IAutoFillCommandParams) => {
         return true;
     },

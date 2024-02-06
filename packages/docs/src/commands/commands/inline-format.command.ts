@@ -22,7 +22,6 @@ import {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     ICommandService,
-    IUndoRedoService,
     IUniverInstanceService,
     MemoryCursor,
     TextX,
@@ -111,7 +110,6 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
     type: CommandType.COMMAND,
     handler: async (accessor, params: ISetInlineFormatCommandParams) => {
         const { segmentId, value, preCommandId } = params;
-        const undoRedoService = accessor.get(IUndoRedoService);
         const commandService = accessor.get(ICommandService);
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const currentUniverService = accessor.get(IUniverInstanceService);
@@ -173,6 +171,7 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
             params: {
                 unitId,
                 actions: [],
+                textRanges: selections,
             },
         };
 
@@ -226,48 +225,7 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
             IRichTextEditingMutationParams
         >(doMutation.id, doMutation.params);
 
-        const REFRESH_SELECTION_COMMAND_LIST = [
-            SetInlineFormatBoldCommand.id,
-            SetInlineFormatFontSizeCommand.id,
-            SetInlineFormatFontFamilyCommand.id,
-            SetInlineFormatSubscriptCommand.id,
-            SetInlineFormatSuperscriptCommand.id,
-        ];
-
-        /**
-         * refresh selection.
-         */
-        if (REFRESH_SELECTION_COMMAND_LIST.includes(preCommandId)) {
-            textSelectionManagerService.refreshSelection();
-        }
-
-        if (result) {
-            undoRedoService.pushUndoRedo({
-                unitID: unitId,
-                undoMutations: [{ id: RichTextEditingMutation.id, params: result }],
-                redoMutations: [{ id: RichTextEditingMutation.id, params: doMutation.params }],
-                undo() {
-                    commandService.syncExecuteCommand(RichTextEditingMutation.id, result);
-                    if (REFRESH_SELECTION_COMMAND_LIST.includes(preCommandId)) {
-                        textSelectionManagerService.refreshSelection();
-                    }
-
-                    return true;
-                },
-                redo() {
-                    commandService.syncExecuteCommand(RichTextEditingMutation.id, doMutation.params);
-                    if (REFRESH_SELECTION_COMMAND_LIST.includes(preCommandId)) {
-                        textSelectionManagerService.refreshSelection();
-                    }
-
-                    return true;
-                },
-            });
-
-            return true;
-        }
-
-        return false;
+        return Boolean(result);
     },
 };
 

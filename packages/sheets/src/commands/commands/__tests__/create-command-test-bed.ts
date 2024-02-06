@@ -24,6 +24,7 @@ import {
     LogLevel,
     Plugin,
     PluginType,
+    Tools,
     Univer,
 } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
@@ -42,11 +43,11 @@ const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
             id: 'sheet1',
             name: 'sheet1',
             cellData: {
-                '0': {
-                    '0': {
+                0: {
+                    0: {
                         v: 'A1',
                     },
-                    '1': {
+                    1: {
                         v: 'A2',
                     },
                 },
@@ -101,7 +102,7 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
     }
 
     univer.registerPlugin(TestSpyPlugin);
-    const sheet = univer.createUniverSheet(workbookConfig || TEST_WORKBOOK_DATA_DEMO);
+    const sheet = univer.createUniverSheet(Tools.deepClone(workbookConfig || TEST_WORKBOOK_DATA_DEMO));
 
     const univerInstanceService = injector.get(IUniverInstanceService);
     univerInstanceService.focusUniverInstance('test');

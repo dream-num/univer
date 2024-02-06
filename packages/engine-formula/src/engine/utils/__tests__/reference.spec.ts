@@ -115,8 +115,8 @@ describe('Test Reference', () => {
         expect(
             serializeRangeToRefString({
                 range: {
-                    startColumn: NaN,
-                    endColumn: NaN,
+                    startColumn: Number.NaN,
+                    endColumn: Number.NaN,
                     startRow: 15,
                     endRow: 15,
                     rangeType: RANGE_TYPE.ROW,
@@ -128,8 +128,8 @@ describe('Test Reference', () => {
         expect(
             serializeRangeToRefString({
                 range: {
-                    startColumn: NaN,
-                    endColumn: NaN,
+                    startColumn: Number.NaN,
+                    endColumn: Number.NaN,
                     startRow: 15,
                     endRow: 15,
                     rangeType: RANGE_TYPE.ROW,
@@ -173,10 +173,10 @@ describe('Test Reference', () => {
             range: {
                 endAbsoluteRefType: AbsoluteRefType.NONE,
                 endColumn: 1,
-                endRow: NaN,
+                endRow: Number.NaN,
                 startAbsoluteRefType: AbsoluteRefType.NONE,
                 startColumn: 0,
-                startRow: NaN,
+                startRow: Number.NaN,
                 rangeType: RANGE_TYPE.COLUMN,
             },
             sheetName: 'sheet1',
@@ -186,10 +186,10 @@ describe('Test Reference', () => {
         expect(deserializeRangeWithSheet('[workbook2]sheet1!10:100')).toStrictEqual({
             range: {
                 endAbsoluteRefType: AbsoluteRefType.NONE,
-                endColumn: NaN,
+                endColumn: Number.NaN,
                 endRow: 99,
                 startAbsoluteRefType: AbsoluteRefType.NONE,
-                startColumn: NaN,
+                startColumn: Number.NaN,
                 startRow: 9,
                 rangeType: RANGE_TYPE.ROW,
             },
@@ -200,10 +200,10 @@ describe('Test Reference', () => {
         expect(deserializeRangeWithSheet('10:100')).toStrictEqual({
             range: {
                 endAbsoluteRefType: AbsoluteRefType.NONE,
-                endColumn: NaN,
+                endColumn: Number.NaN,
                 endRow: 99,
                 startAbsoluteRefType: AbsoluteRefType.NONE,
-                startColumn: NaN,
+                startColumn: Number.NaN,
                 startRow: 9,
                 rangeType: RANGE_TYPE.ROW,
             },
@@ -211,13 +211,13 @@ describe('Test Reference', () => {
             unitId: '',
         });
 
-        expect(deserializeRangeWithSheet(`[workbook2]'sheet-1'!10:100`)).toStrictEqual({
+        expect(deserializeRangeWithSheet('[workbook2]\'sheet-1\'!10:100')).toStrictEqual({
             range: {
                 endAbsoluteRefType: AbsoluteRefType.NONE,
-                endColumn: NaN,
+                endColumn: Number.NaN,
                 endRow: 99,
                 startAbsoluteRefType: AbsoluteRefType.NONE,
-                startColumn: NaN,
+                startColumn: Number.NaN,
                 startRow: 9,
                 rangeType: RANGE_TYPE.ROW,
             },

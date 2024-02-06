@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable no-magic-numbers */
-
 import type { IScale, ITextDecoration } from '@univerjs/core';
 import { BooleanNumber, getColorStyle, TextDecoration } from '@univerjs/core';
 

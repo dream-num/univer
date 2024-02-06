@@ -7,23 +7,18 @@ body:
     - type: checkboxes
       id: initial-checklist
       attributes:
-          label: 初始清单
+          label: 在您提交此问题之前，您是否检查了以下内容？
           options:
               - label: 这真的是个问题吗？
                 required: true
               - label: 我已经在 Github Issues 中搜索过了，但没有找到类似的问题。
                 required: true
 
-    - type: dropdown
+    - type: input
       id: affected-versions
       attributes:
           label: 受影响的包和版本
-          multiple: true
           description: 请使用最新版本的相关包进行测试，以确保您的问题尚未解决。
-          options:
-              - v0.1.0
-              - dev
-          default: 0
       validations:
           required: true
 
@@ -44,8 +39,11 @@ body:
     - type: textarea
       id: steps-to-reproduce
       attributes:
-          label: 复现步骤
-          description: 如何复现您的问题？请提供一个 [最小可复现的例子](https://stackoverflow.com/help/minimal-reproducible-example).
+          label: 复现链接
+          description: |
+              我们提供了 [在线模板](https://stackblitz.com/~/github.com/awesome-univer/sheets-vite-demo)，如果您的问题可以在这个模板中复现，那么请在这里提供复现链接。
+              我们也提供了一些其他你可能会用到的 [模板仓库](https://github.com/awesome-univer)，你可以选择其中一个来复现你的问题。
+              如果您的问题无法在模板中复现，请提供尽可能详细的复现步骤。
       validations:
           required: true
 
@@ -81,36 +79,8 @@ body:
       validations:
           required: false
 
-    - type: dropdown
-      id: operating-system
+    - type: textarea
+      id: system-info
       attributes:
-          label: 操作系统
-          description: 您正在使用什么操作系统？
-          multiple: true
-          options:
-              - Windows
-              - Linux
-              - macOS
-              - 其他 (请在复现步骤中说明)
-      validations:
-          required: false
-
-    - type: dropdown
-      id: build-tools
-      attributes:
-          label: 构建工具
-          description: 如果有使用的话，您使用的是什么构建工具?
-          multiple: true
-          options:
-              - Webpack
-              - Rollup
-              - esbuild
-              - Parcel
-              - Create React App
-              - Gatsby
-              - Next.js
-              - Remix
-              - Vite
-              - 其他 (请在复现步骤中说明)
-      validations:
-          required: false
+          label: 系统信息
+          description: 在这里粘贴 `npx envinfo --system --binaries --browsers` 命令的输出结果

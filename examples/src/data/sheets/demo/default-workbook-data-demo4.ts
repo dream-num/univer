@@ -15,12 +15,12 @@
  */
 
 import type { IDocumentData, IWorkbookData } from '@univerjs/core';
-import { BooleanNumber, BorderStyleTypes, LocaleType, SheetTypes } from '@univerjs/core';
+import { BooleanNumber, BorderStyleTypes, LocaleType } from '@univerjs/core';
 
 const richTextDemo1: IDocumentData = {
     id: 'd',
     body: {
-        dataStream: `No.2824163\r\n`,
+        dataStream: 'No.2824163\r\n',
         textRuns: [
             {
                 st: 0,
@@ -46,8 +46,8 @@ const richTextDemo1: IDocumentData = {
     },
     documentStyle: {
         pageSize: {
-            width: Infinity,
-            height: Infinity,
+            width: Number.POSITIVE_INFINITY,
+            height: Number.POSITIVE_INFINITY,
         },
         marginTop: 0,
         marginBottom: 0,
@@ -62,7 +62,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
     name: 'universheet',
     sheetOrder: ['sheet-0004'],
     styles: {
-        '1': {
+        1: {
             fs: 30,
             vt: 2,
             bl: 1,
@@ -70,7 +70,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 l: 5,
             },
         },
-        '2': {
+        2: {
             vt: 2,
             bl: 1,
             bg: {
@@ -106,7 +106,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 },
             },
         },
-        '3': {
+        3: {
             vt: 2,
             bl: 1,
             bg: {
@@ -140,7 +140,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 },
             },
         },
-        '4': {
+        4: {
             bl: 1,
             vt: 2,
             pd: {
@@ -151,13 +151,13 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
             },
             ht: 2,
         },
-        '5': {
+        5: {
             vt: 2,
             pd: {
                 l: 5,
             },
         },
-        '6': {
+        6: {
             vt: 2,
             ht: 2,
             fs: 12,
@@ -165,7 +165,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 rgb: 'rgb(1,136,251)',
             },
         },
-        '7': {
+        7: {
             vt: 2,
             pd: {
                 l: 5,
@@ -200,7 +200,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 },
             },
         },
-        '8': {
+        8: {
             vt: 2,
             ht: 2,
             cl: {
@@ -213,13 +213,13 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 rgb: 'rgb(255,251,224)',
             },
         },
-        '9': {
+        9: {
             vt: 2,
             pd: {
                 l: 25,
             },
         },
-        '10': {
+        10: {
             bg: {
                 rgb: '#bf9000',
             },
@@ -233,7 +233,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 b: null,
             },
         },
-        '11': {
+        11: {
             vt: 2,
             ht: 2,
             fs: 24,
@@ -244,7 +244,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 rgb: '#fff',
             },
         },
-        '12': {
+        12: {
             bg: {
                 rgb: 'rgb(248,237,241)',
             },
@@ -255,7 +255,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 b: null,
             },
         },
-        '13': {
+        13: {
             vt: 2,
             ht: 2,
             bg: {
@@ -268,7 +268,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 b: null,
             },
         },
-        '14': {
+        14: {
             vt: 2,
             ht: 2,
             bg: {
@@ -283,7 +283,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 },
             },
         },
-        '15': {
+        15: {
             vt: 2,
             ht: 2,
             bg: {
@@ -296,7 +296,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 b: null,
             },
         },
-        '16': {
+        16: {
             vt: 2,
             ht: 2,
             bg: {
@@ -309,7 +309,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 b: null,
             },
         },
-        '17': {
+        17: {
             vt: 2,
             ht: 2,
             bg: {
@@ -322,7 +322,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 b: null,
             },
         },
-        '18': {
+        18: {
             vt: 2,
             ht: 2,
             bg: {
@@ -335,7 +335,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 b: null,
             },
         },
-        '19': {
+        19: {
             vt: 2,
             ht: 2,
             cl: {
@@ -351,7 +351,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 b: null,
             },
         },
-        '20': {
+        20: {
             vt: 2,
             ht: 2,
             cl: {
@@ -367,7 +367,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 b: null,
             },
         },
-        '21': {
+        21: {
             vt: 2,
             ht: 2,
             cl: {
@@ -383,7 +383,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 b: null,
             },
         },
-        '22': {
+        22: {
             vt: 2,
             ht: 2,
             cl: {
@@ -399,7 +399,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 b: null,
             },
         },
-        '23': {
+        23: {
             vt: 2,
             ht: 2,
             cl: {
@@ -415,7 +415,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 b: null,
             },
         },
-        '24': {
+        24: {
             bg: {
                 rgb: '#3d85c6',
             },
@@ -426,7 +426,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 b: null,
             },
         },
-        '25': {
+        25: {
             bg: {
                 rgb: '#c27ba0',
             },
@@ -437,7 +437,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 b: null,
             },
         },
-        '26': {
+        26: {
             bg: {
                 rgb: 'rgb(224, 102, 102)',
             },
@@ -448,7 +448,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 b: null,
             },
         },
-        '27': {
+        27: {
             bg: {
                 rgb: '#f90',
             },
@@ -459,7 +459,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 b: null,
             },
         },
-        '28': {
+        28: {
             bg: {
                 rgb: '#76a5af',
             },
@@ -470,7 +470,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 b: null,
             },
         },
-        '29': {
+        29: {
             bg: {
                 rgb: '#38761d',
             },
@@ -481,7 +481,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 b: null,
             },
         },
-        '30': {
+        30: {
             vt: 2,
             ht: 2,
             fs: 30,
@@ -499,7 +499,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 b: null,
             },
         },
-        '31': {
+        31: {
             bd: {
                 t: {
                     s: BorderStyleTypes.THIN,
@@ -527,7 +527,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 },
             },
         },
-        '32': {
+        32: {
             vt: 2,
             tb: 3,
             bd: {
@@ -552,7 +552,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 },
             },
         },
-        '33': {
+        33: {
             vt: 2,
             ht: 2,
             bd: {
@@ -582,7 +582,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 },
             },
         },
-        '34': {
+        34: {
             vt: 2,
             bd: {
                 t: null,
@@ -606,7 +606,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 },
             },
         },
-        '35': {
+        35: {
             vt: 2,
             ht: 2,
             bg: {
@@ -642,7 +642,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 },
             },
         },
-        '36': {
+        36: {
             vt: 2,
             ht: 2,
             bd: {
@@ -672,7 +672,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 },
             },
         },
-        '37': {
+        37: {
             vt: 2,
             ht: 2,
             bg: {
@@ -713,7 +713,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 },
             },
         },
-        '38': {
+        38: {
             vt: 2,
             tb: 3,
             bg: {
@@ -749,7 +749,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 },
             },
         },
-        '39': {
+        39: {
             vt: 2,
             ht: 2,
             bg: {
@@ -785,7 +785,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 },
             },
         },
-        '40': {
+        40: {
             vt: 2,
             ht: 2,
             fs: 24,
@@ -819,7 +819,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 },
             },
         },
-        '41': {
+        41: {
             ht: 3,
             bd: {
                 t: {
@@ -848,7 +848,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 },
             },
         },
-        '42': {
+        42: {
             vt: 2,
             cl: {
                 rgb: 'rgb(125,133,22)',
@@ -880,7 +880,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 },
             },
         },
-        '43': {
+        43: {
             vt: 2,
             ht: 2,
             bd: {
@@ -910,7 +910,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 },
             },
         },
-        '44': {
+        44: {
             vt: 2,
             ht: 2,
             bd: {
@@ -940,7 +940,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 },
             },
         },
-        '45': {
+        45: {
             vt: 2,
             tb: 3,
             pd: {
@@ -974,7 +974,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 },
             },
         },
-        '46': {
+        46: {
             vt: 2,
             ht: 2,
             bd: {
@@ -1004,7 +1004,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 },
             },
         },
-        '47': {
+        47: {
             vt: 2,
             ht: 2,
             bd: {
@@ -1034,7 +1034,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 },
             },
         },
-        '48': {
+        48: {
             vt: 2,
             bd: {
                 t: {
@@ -1063,7 +1063,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 },
             },
         },
-        '49': {
+        49: {
             vt: 2,
             bd: {
                 t: {
@@ -1092,7 +1092,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 },
             },
         },
-        '50': {
+        50: {
             vt: 2,
             ht: 2,
             bd: {
@@ -1122,7 +1122,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 },
             },
         },
-        '51': {
+        51: {
             vt: 2,
             ht: 2,
             bd: {
@@ -1152,7 +1152,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 },
             },
         },
-        '52': {
+        52: {
             bd: {
                 t: {
                     s: BorderStyleTypes.THIN,
@@ -1180,7 +1180,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 },
             },
         },
-        '53': {
+        53: {
             ht: 2,
             vt: 2,
             tr: {
@@ -1211,7 +1211,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 },
             },
         },
-        '54': {
+        54: {
             bd: {
                 l: {
                     s: BorderStyleTypes.THIN,
@@ -1227,7 +1227,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 },
             },
         },
-        '55': {
+        55: {
             ht: 3,
             vt: 3,
             tb: 3,
@@ -1257,174 +1257,173 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
     appVersion: '3.0.0-alpha',
     sheets: {
         'sheet-0004': {
-            type: SheetTypes.GRID,
             id: 'sheet-0004',
             name: 'sheet0004',
             cellData: {
-                '0': {
-                    '0': {
+                0: {
+                    0: {
                         s: '40',
                     },
-                    '1': {
+                    1: {
                         v: 'Travel Declaration Form',
                         s: '40',
                     },
-                    '8': {
+                    8: {
                         p: richTextDemo1,
                         s: '41',
                     },
-                    '10': {
+                    10: {
                         s: '52',
                     },
                 },
-                '1': {
-                    '1': {
+                1: {
+                    1: {
                         v: 'Department:',
                         s: '42',
                     },
-                    '6': {
+                    6: {
                         v: 'Application Date:',
                         s: '42',
                     },
                 },
-                '2': {
-                    '1': {
+                2: {
+                    1: {
                         v: 'Business Trip Employee',
                         s: '43',
                     },
-                    '2': {
+                    2: {
                         s: '46',
                     },
-                    '3': {
+                    3: {
                         v: 'Position',
                         s: '46',
                     },
-                    '4': {
+                    4: {
                         s: '46',
                     },
-                    '6': {
+                    6: {
                         s: '46',
                         v: 'Entourage',
                     },
-                    '7': {
+                    7: {
                         s: '47',
                     },
-                    '10': {
+                    10: {
                         v: 'Borrower write-off',
                         s: '53',
                     },
                 },
-                '3': {
-                    '1': {
+                3: {
+                    1: {
                         v: 'Business Trip Place',
                         s: '44',
                     },
-                    '2': {
+                    2: {
                         v: '                      To                      To                      To',
                         s: '48',
                     },
                 },
-                '4': {
-                    '1': {
+                4: {
+                    1: {
                         v: 'Amount',
                         s: '44',
                     },
-                    '2': {
+                    2: {
                         v: '(Capital)         万        仟        佰        拾        元        角        分',
                         s: '49',
                     },
-                    '7': {
+                    7: {
                         v: '(Lower) ¥',
                         s: '48',
                     },
                 },
-                '5': {
-                    '1': {
+                5: {
+                    1: {
                         v: 'Departure Time',
                         s: '44',
                     },
-                    '2': {
+                    2: {
                         s: '49',
                     },
-                    '3': {
+                    3: {
                         v: 'ETR',
                         s: '50',
                     },
-                    '5': {
+                    5: {
                         s: '50',
                     },
-                    '8': {
+                    8: {
                         v: 'Days',
                         s: '50',
                     },
-                    '9': {
+                    9: {
                         s: '48',
                     },
                 },
-                '6': {
-                    '1': {
+                6: {
+                    1: {
                         v: 'Reasons',
                         s: '44',
                     },
-                    '2': {
+                    2: {
                         s: '48',
                     },
                 },
-                '7': {
-                    '1': {
+                7: {
+                    1: {
                         v: 'Applicant For Travel',
                         s: '44',
                     },
-                    '2': {
+                    2: {
                         s: '50',
                     },
-                    '3': {
+                    3: {
                         v: 'Administrator',
                         s: '50',
                     },
-                    '4': {
+                    4: {
                         s: '50',
                     },
-                    '6': {
+                    6: {
                         v: 'Financial Manager',
                         s: '50',
                     },
-                    '7': {
+                    7: {
                         s: '50',
                     },
-                    '9': {
+                    9: {
                         v: 'Payee',
                         s: '51',
                     },
                 },
-                '8': {
-                    '1': {
+                8: {
+                    1: {
                         v: 'Department Head',
                         s: '44',
                     },
-                    '2': {
+                    2: {
                         s: '50',
                     },
-                    '3': {
+                    3: {
                         v: 'Manager',
                         s: '50',
                     },
-                    '4': {
+                    4: {
                         s: '50',
                     },
-                    '6': {
+                    6: {
                         v: 'Cashier',
                         s: '50',
                     },
-                    '7': {
+                    7: {
                         s: '50',
                     },
-                    '9': {
+                    9: {
                         s: '51',
                     },
                 },
-                '9': {
-                    '1': {
+                9: {
+                    1: {
                         v: 'Record: The loan is used exclusively for travel expenses, and the travel expenses will not be written off without a business trip application.',
                         s: '45',
                     },
@@ -1562,49 +1561,46 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
                 },
             ],
             rowData: {
-                '0': {
+                0: {
                     h: 50,
                 },
-                '1': {
+                1: {
                     h: 20,
                 },
-                '6': {
+                6: {
                     h: 150,
                 },
-                '9': {
+                9: {
                     h: 30,
                 },
             },
             columnData: {
-                '0': {
+                0: {
                     w: 20,
                 },
-                '1': {
+                1: {
                     w: 180,
                 },
-                '2': {
+                2: {
                     w: 120,
                 },
-                '4': {
+                4: {
                     w: 60,
                 },
-                '5': {
+                5: {
                     w: 60,
                 },
-                '7': {
+                7: {
                     w: 30,
                 },
-                '8': {
+                8: {
                     w: 90,
                 },
-                '10': {
+                10: {
                     w: 40,
                 },
             },
-            status: 1,
             showGridlines: 0,
-            hideRow: [],
-            hideColumn: [],
             rowHeader: {
                 width: 46,
                 hidden: BooleanNumber.FALSE,
@@ -1615,7 +1611,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookData = {
             },
             selections: ['A2'],
             rightToLeft: BooleanNumber.FALSE,
-            pluginMeta: {},
         },
     },
     // namedRanges: [

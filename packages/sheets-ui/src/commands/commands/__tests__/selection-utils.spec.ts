@@ -23,15 +23,15 @@ describe('Test selection utils', () => {
         // single range
         expect(
             isAllRowsCovered(
-                [{ startRow: 0, endRow: 999, startColumn: NaN, endColumn: NaN }],
-                [{ startRow: 0, endRow: 1, startColumn: NaN, endColumn: NaN }]
+                [{ startRow: 0, endRow: 999, startColumn: Number.NaN, endColumn: Number.NaN }],
+                [{ startRow: 0, endRow: 1, startColumn: Number.NaN, endColumn: Number.NaN }]
             )
         ).toBeFalsy();
 
         expect(
             isAllRowsCovered(
-                [{ startRow: 0, endRow: 999, startColumn: NaN, endColumn: NaN }],
-                [{ startRow: 0, endRow: 999, startColumn: NaN, endColumn: NaN }]
+                [{ startRow: 0, endRow: 999, startColumn: Number.NaN, endColumn: Number.NaN }],
+                [{ startRow: 0, endRow: 999, startColumn: Number.NaN, endColumn: Number.NaN }]
             )
         ).toBeTruthy();
 
@@ -39,12 +39,12 @@ describe('Test selection utils', () => {
         expect(
             isAllRowsCovered(
                 [
-                    { startRow: 0, endRow: 999, startColumn: NaN, endColumn: NaN },
-                    { startRow: 1000, endRow: 1999, startColumn: NaN, endColumn: NaN },
+                    { startRow: 0, endRow: 999, startColumn: Number.NaN, endColumn: Number.NaN },
+                    { startRow: 1000, endRow: 1999, startColumn: Number.NaN, endColumn: Number.NaN },
                 ],
                 [
-                    { startRow: 100, endRow: 999, startColumn: NaN, endColumn: NaN },
-                    { startRow: 1000, endRow: 1500, startColumn: NaN, endColumn: NaN },
+                    { startRow: 100, endRow: 999, startColumn: Number.NaN, endColumn: Number.NaN },
+                    { startRow: 1000, endRow: 1500, startColumn: Number.NaN, endColumn: Number.NaN },
                 ]
             )
         ).toBeFalsy();
@@ -52,12 +52,12 @@ describe('Test selection utils', () => {
         expect(
             isAllRowsCovered(
                 [
-                    { startRow: 0, endRow: 999, startColumn: NaN, endColumn: NaN },
-                    { startRow: 1000, endRow: 1999, startColumn: NaN, endColumn: NaN },
+                    { startRow: 0, endRow: 999, startColumn: Number.NaN, endColumn: Number.NaN },
+                    { startRow: 1000, endRow: 1999, startColumn: Number.NaN, endColumn: Number.NaN },
                 ],
                 [
-                    { startRow: 0, endRow: 1500, startColumn: NaN, endColumn: NaN },
-                    { startRow: 1000, endRow: 1999, startColumn: NaN, endColumn: NaN },
+                    { startRow: 0, endRow: 1500, startColumn: Number.NaN, endColumn: Number.NaN },
+                    { startRow: 1000, endRow: 1999, startColumn: Number.NaN, endColumn: Number.NaN },
                 ]
             )
         ).toBeTruthy();
@@ -67,15 +67,15 @@ describe('Test selection utils', () => {
         // single range
         expect(
             isAllColumnsCovered(
-                [{ startRow: NaN, endRow: NaN, startColumn: 0, endColumn: 999 }],
-                [{ startRow: NaN, endRow: NaN, startColumn: 0, endColumn: 1 }]
+                [{ startRow: Number.NaN, endRow: Number.NaN, startColumn: 0, endColumn: 999 }],
+                [{ startRow: Number.NaN, endRow: Number.NaN, startColumn: 0, endColumn: 1 }]
             )
         ).toBeFalsy();
 
         expect(
             isAllColumnsCovered(
-                [{ startRow: NaN, endRow: NaN, startColumn: 0, endColumn: 999 }],
-                [{ startRow: NaN, endRow: NaN, startColumn: 0, endColumn: 999 }]
+                [{ startRow: Number.NaN, endRow: Number.NaN, startColumn: 0, endColumn: 999 }],
+                [{ startRow: Number.NaN, endRow: Number.NaN, startColumn: 0, endColumn: 999 }]
             )
         ).toBeTruthy();
 
@@ -83,12 +83,12 @@ describe('Test selection utils', () => {
         expect(
             isAllColumnsCovered(
                 [
-                    { startRow: NaN, endRow: NaN, startColumn: 0, endColumn: 999 },
-                    { startRow: NaN, endRow: NaN, startColumn: 1000, endColumn: 1999 },
+                    { startRow: Number.NaN, endRow: Number.NaN, startColumn: 0, endColumn: 999 },
+                    { startRow: Number.NaN, endRow: Number.NaN, startColumn: 1000, endColumn: 1999 },
                 ],
                 [
-                    { startRow: NaN, endRow: NaN, startColumn: 100, endColumn: 999 },
-                    { startRow: NaN, endRow: NaN, startColumn: 1000, endColumn: 1500 },
+                    { startRow: Number.NaN, endRow: Number.NaN, startColumn: 100, endColumn: 999 },
+                    { startRow: Number.NaN, endRow: Number.NaN, startColumn: 1000, endColumn: 1500 },
                 ]
             )
         ).toBeFalsy();
@@ -96,12 +96,12 @@ describe('Test selection utils', () => {
         expect(
             isAllColumnsCovered(
                 [
-                    { startRow: NaN, endRow: NaN, startColumn: 0, endColumn: 999 },
-                    { startRow: NaN, endRow: NaN, startColumn: 1000, endColumn: 1999 },
+                    { startRow: Number.NaN, endRow: Number.NaN, startColumn: 0, endColumn: 999 },
+                    { startRow: Number.NaN, endRow: Number.NaN, startColumn: 1000, endColumn: 1999 },
                 ],
                 [
-                    { startRow: NaN, endRow: NaN, startColumn: 0, endColumn: 1500 },
-                    { startRow: NaN, endRow: NaN, startColumn: 1000, endColumn: 1999 },
+                    { startRow: Number.NaN, endRow: Number.NaN, startColumn: 0, endColumn: 1500 },
+                    { startRow: Number.NaN, endRow: Number.NaN, startColumn: 1000, endColumn: 1999 },
                 ]
             )
         ).toBeTruthy();

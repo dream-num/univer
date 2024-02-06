@@ -96,7 +96,7 @@ export class RemoteInstanceReplicaService implements IRemoteInstanceService {
             if (err instanceof Error) {
                 throw err;
             } else {
-                throw new Error(`${err}`);
+                throw new TypeError(`${err}`);
             }
         }
     }

@@ -185,7 +185,7 @@ export interface IStyleData extends IStyleBase {
      * textRotation
      */
     tr?: Nullable<ITextRotation>;
-    /** *
+    /**
      * textDirection
      */
     td?: Nullable<TextDirection>;

@@ -221,7 +221,7 @@ function ___getLevelAndSuffix(levelAndSuffixPre: string) {
     });
 
     return {
-        level: parseInt(level) - 1,
+        level: Number.parseInt(level) - 1,
         suffix,
     };
 }

@@ -16,8 +16,8 @@
 
 export default {
     ENCODEURL: {
-        description: `URL 形式でエンコードされた文字列を返します。`,
-        abstract: `URL 形式でエンコードされた文字列を返します。`,
+        description: 'URL 形式でエンコードされた文字列を返します。',
+        abstract: 'URL 形式でエンコードされた文字列を返します。',
         links: [
             {
                 title: '指導',
@@ -30,8 +30,8 @@ export default {
         },
     },
     FILTERXML: {
-        description: `指定された XPath に基づいて XML コンテンツの特定のデータを返します。`,
-        abstract: `指定された XPath に基づいて XML コンテンツの特定のデータを返します。`,
+        description: '指定された XPath に基づいて XML コンテンツの特定のデータを返します。',
+        abstract: '指定された XPath に基づいて XML コンテンツの特定のデータを返します。',
         links: [
             {
                 title: '指導',
@@ -44,8 +44,8 @@ export default {
         },
     },
     WEBSERVICE: {
-        description: `Web サービスからのデータを返します。`,
-        abstract: `Web サービスからのデータを返します。`,
+        description: 'Web サービスからのデータを返します。',
+        abstract: 'Web サービスからのデータを返します。',
         links: [
             {
                 title: '指導',

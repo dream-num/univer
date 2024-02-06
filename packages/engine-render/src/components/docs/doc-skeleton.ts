@@ -94,7 +94,7 @@ export class DocumentSkeleton extends Skeleton {
     getActualSize() {
         const skeletonData = this.getSkeletonData();
 
-        let actualWidth = -Infinity;
+        let actualWidth = Number.NEGATIVE_INFINITY;
         let actualHeight = 0;
 
         skeletonData?.pages.forEach((page) => {
@@ -111,7 +111,7 @@ export class DocumentSkeleton extends Skeleton {
     }
 
     private _getPageActualWidth(page: IDocumentSkeletonPage) {
-        let maxWidth = -Infinity;
+        let maxWidth = Number.NEGATIVE_INFINITY;
         for (const section of page.sections) {
             for (const column of section.columns) {
                 for (const line of column.lines) {
@@ -259,7 +259,7 @@ export class DocumentSkeleton extends Skeleton {
 
         let nearestNodeDistanceList: number[] = [];
 
-        let nearestNodeDistanceY = Infinity;
+        let nearestNodeDistanceY = Number.POSITIVE_INFINITY;
 
         for (let i = 0, len = pages.length; i < len; i++) {
             const page = pages[i];
@@ -359,7 +359,7 @@ export class DocumentSkeleton extends Skeleton {
                                             };
                                         }
 
-                                        if (nearestNodeDistanceY !== -Infinity) {
+                                        if (nearestNodeDistanceY !== Number.NEGATIVE_INFINITY) {
                                             nearestNodeList = [];
                                             nearestNodeDistanceList = [];
                                         }
@@ -371,7 +371,7 @@ export class DocumentSkeleton extends Skeleton {
 
                                         nearestNodeDistanceList.push(distanceX);
 
-                                        nearestNodeDistanceY = -Infinity;
+                                        nearestNodeDistanceY = Number.NEGATIVE_INFINITY;
                                         continue;
                                     }
 
@@ -471,7 +471,7 @@ export class DocumentSkeleton extends Skeleton {
      */
     private _createSkeleton(bounds?: IViewportBound) {
         // 每一个布局
-        const DEFAULT_PAGE_SIZE = { width: Infinity, height: Infinity };
+        const DEFAULT_PAGE_SIZE = { width: Number.POSITIVE_INFINITY, height: Number.POSITIVE_INFINITY };
         const viewModel = this.getViewModel();
         const { headerTreeMap, footerTreeMap } = viewModel;
         const { documentStyle, drawings, lists: customLists = {} } = viewModel.getDataModel();
@@ -588,11 +588,11 @@ export class DocumentSkeleton extends Skeleton {
             const footerIds = { defaultFooterId, evenPageFooterId, firstPageFooterId };
 
             if (pageSize.width === null) {
-                pageSize.width = Infinity;
+                pageSize.width = Number.POSITIVE_INFINITY;
             }
 
             if (pageSize.height === null) {
-                pageSize.height = Infinity;
+                pageSize.height = Number.POSITIVE_INFINITY;
             }
 
             const sectionBreakConfig: ISectionBreakConfig = {

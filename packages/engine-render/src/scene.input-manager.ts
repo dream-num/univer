@@ -69,7 +69,7 @@ export class InputManager {
 
     private _currentMouseEnterPicked: Nullable<BaseObject | ThinScene>;
 
-    private _startingPosition = new Vector2(Infinity, Infinity);
+    private _startingPosition = new Vector2(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY);
 
     private _delayedTimeout: NodeJS.Timeout | number = -1;
 
@@ -99,7 +99,6 @@ export class InputManager {
         }
     }
 
-    // eslint-disable-next-line max-lines-per-function
     attachControl(
         hasDown: boolean = true,
         hasUp: boolean = true,

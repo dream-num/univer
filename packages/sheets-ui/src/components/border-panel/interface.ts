@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { type IBorderInfo } from '@univerjs/sheets';
+import type { IBorderInfo } from '@univerjs/sheets';
 import type { ICustomComponentProps } from '@univerjs/ui';
 
 import { COMPONENT_PREFIX } from '../const';

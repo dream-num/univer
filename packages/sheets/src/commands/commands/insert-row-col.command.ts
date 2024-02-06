@@ -64,7 +64,7 @@ export interface IInsertRowCommandParams {
 }
 export const InsertRowCommandId = 'sheet.command.insert-row';
 /**
- * @internal use `InsertRowBeforeCommand` or `InsertRowAfterCommand` as an external user
+ * @internal
  *
  * this command and its interface should not be exported from index.ts
  */
@@ -244,7 +244,7 @@ export const InsertColCommandId = 'sheet.command.insert-col';
 export const InsertColCommand: ICommand<IInsertColCommandParams> = {
     type: CommandType.COMMAND,
     id: InsertColCommandId,
-    // eslint-disable-next-line max-lines-per-function
+
     handler: async (accessor: IAccessor, params: IInsertColCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);

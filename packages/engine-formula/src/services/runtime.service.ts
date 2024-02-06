@@ -27,7 +27,7 @@ import type {
 import { isInDirtyRange } from '../basics/dirty';
 import { ErrorType } from '../basics/error-type';
 import type { BaseAstNode } from '../engine/ast-node/base-ast-node';
-import { type BaseReferenceObject, type FunctionVariantType } from '../engine/reference-object/base-reference-object';
+import type { BaseReferenceObject, FunctionVariantType } from '../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../engine/value-object/base-value-object';
 import { IFormulaCurrentConfigService } from './current-data.service';
@@ -178,8 +178,8 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
     private _currentRow: number = -1;
     private _currentColumn: number = -1;
 
-    private _currentRowCount: number = -Infinity;
-    private _currentColumnCount: number = -Infinity;
+    private _currentRowCount: number = Number.NEGATIVE_INFINITY;
+    private _currentColumnCount: number = Number.NEGATIVE_INFINITY;
 
     private _currentSubUnitId: string = '';
     private _currentUnitId: string = '';

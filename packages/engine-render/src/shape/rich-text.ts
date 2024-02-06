@@ -243,8 +243,8 @@ export class RichText extends BaseObject {
             },
             documentStyle: {
                 pageSize: {
-                    width: Infinity,
-                    height: Infinity,
+                    width: Number.POSITIVE_INFINITY,
+                    height: Number.POSITIVE_INFINITY,
                 },
             },
         };

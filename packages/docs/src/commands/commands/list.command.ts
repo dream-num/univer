@@ -18,7 +18,6 @@ import type { ICommand, IMutationInfo, IParagraph } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
-    IUndoRedoService,
     IUniverInstanceService,
     MemoryCursor,
     PresetListType,
@@ -29,41 +28,9 @@ import {
 } from '@univerjs/core';
 import type { IActiveTextRange } from '@univerjs/engine-render';
 
-import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
+import { serializeTextRange, TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
-
-interface IBulletListCommandParams {}
-
-export const BulletListCommand: ICommand<IBulletListCommandParams> = {
-    id: 'doc.command.bullet-list',
-
-    type: CommandType.COMMAND,
-
-    handler: (accessor) => {
-        const commandService = accessor.get(ICommandService);
-
-        return commandService.syncExecuteCommand(ListOperationCommand.id, {
-            listType: PresetListType.BULLET_LIST,
-        });
-    },
-};
-
-interface IOrderListCommandParams {}
-
-export const OrderListCommand: ICommand<IOrderListCommandParams> = {
-    id: 'doc.command.order-list',
-
-    type: CommandType.COMMAND,
-
-    handler: (accessor) => {
-        const commandService = accessor.get(ICommandService);
-
-        return commandService.syncExecuteCommand(ListOperationCommand.id, {
-            listType: PresetListType.ORDER_LIST,
-        });
-    },
-};
 
 interface IListOperationCommandParams {
     listType: PresetListType;
@@ -78,14 +45,15 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const currentUniverService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
-        const undoRedoService = accessor.get(IUndoRedoService);
 
         const { listType } = params;
 
         const dataModel = currentUniverService.getCurrentUniverDocInstance();
 
         const activeRange = textSelectionManagerService.getActiveRange();
+        const selections = textSelectionManagerService.getSelections() ?? [];
         const paragraphs = dataModel.getBody()?.paragraphs;
+        const serializedSelections = selections.map(serializeTextRange);
 
         if (activeRange == null || paragraphs == null) {
             return false;
@@ -120,6 +88,7 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
             params: {
                 unitId,
                 actions: [],
+                textRanges: serializedSelections,
             },
         };
 
@@ -186,33 +155,39 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
             IRichTextEditingMutationParams
         >(doMutation.id, doMutation.params);
 
-        textSelectionManagerService.refreshSelection();
+        return Boolean(result);
+    },
+};
 
-        if (result) {
-            undoRedoService.pushUndoRedo({
-                unitID: unitId,
-                undoMutations: [{ id: RichTextEditingMutation.id, params: result }],
-                redoMutations: [{ id: RichTextEditingMutation.id, params: doMutation.params }],
-                undo() {
-                    commandService.syncExecuteCommand(RichTextEditingMutation.id, result);
+interface IBulletListCommandParams {}
 
-                    textSelectionManagerService.refreshSelection();
+export const BulletListCommand: ICommand<IBulletListCommandParams> = {
+    id: 'doc.command.bullet-list',
 
-                    return true;
-                },
-                redo() {
-                    commandService.syncExecuteCommand(RichTextEditingMutation.id, doMutation.params);
+    type: CommandType.COMMAND,
 
-                    textSelectionManagerService.refreshSelection();
+    handler: (accessor) => {
+        const commandService = accessor.get(ICommandService);
 
-                    return true;
-                },
-            });
+        return commandService.syncExecuteCommand(ListOperationCommand.id, {
+            listType: PresetListType.BULLET_LIST,
+        });
+    },
+};
 
-            return true;
-        }
+interface IOrderListCommandParams {}
 
-        return true;
+export const OrderListCommand: ICommand<IOrderListCommandParams> = {
+    id: 'doc.command.order-list',
+
+    type: CommandType.COMMAND,
+
+    handler: (accessor) => {
+        const commandService = accessor.get(ICommandService);
+
+        return commandService.syncExecuteCommand(ListOperationCommand.id, {
+            listType: PresetListType.ORDER_LIST,
+        });
     },
 };
 

@@ -183,11 +183,9 @@ export class SlideContainer extends Component<BaseSlideContainerProps> {
                                 <SlideBar {...methods.slideBar} />
                             </aside>
                             <div
-                                className={
-                                    config.contentSplit === 'vertical'
-                                        ? style.contentContainerVertical
-                                        : style.contentContainerHorizontal
-                                }
+                                className={config.contentSplit === 'vertical'
+                                    ? style.contentContainerVertical
+                                    : style.contentContainerHorizontal}
                             >
                                 {!!config.contentSplit && (
                                     <div ref={this.splitLeftRef} className={style.contentInnerLeftContainer}>

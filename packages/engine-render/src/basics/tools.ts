@@ -66,7 +66,7 @@ export const toPx = (num: number | string, ReferenceValue: Nullable<number>): nu
         return num;
     }
     if (ReferenceValue && num && Tools.isString(num) && num.substr(num.length - 1, 1) === '%') {
-        const numFloat = parseFloat(num) / PERCENT_TO_NUMBER_DIVIDE;
+        const numFloat = Number.parseFloat(num) / PERCENT_TO_NUMBER_DIVIDE;
         return ReferenceValue * numFloat;
     }
     return 0;

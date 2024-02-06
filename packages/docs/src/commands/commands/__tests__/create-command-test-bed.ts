@@ -29,6 +29,8 @@ import { Inject, Injector } from '@wendellhu/redi';
 
 import { DocViewModelManagerService } from '../../../services/doc-view-model-manager.service';
 import { TextSelectionManagerService } from '../../../services/text-selection-manager.service';
+import { DocStateChangeManagerService } from '../../../services/doc-state-change-manager.service';
+import { IMEInputManagerService } from '../../../services/ime-input-manager.service';
 import { ITextSelectionRenderManager, TextSelectionRenderManager } from './mock-text-selection-render-manager';
 
 const TEST_DOCUMENT_DATA_EN: IDocumentData = {
@@ -110,6 +112,8 @@ export function createCommandTestBed(workbookConfig?: IDocumentData, dependencie
         override onStarting(injector: Injector): void {
             injector.add([TextSelectionManagerService]);
             injector.add([DocViewModelManagerService]);
+            injector.add([DocStateChangeManagerService]);
+            injector.add([IMEInputManagerService]);
             injector.add([
                 ITextSelectionRenderManager,
                 {

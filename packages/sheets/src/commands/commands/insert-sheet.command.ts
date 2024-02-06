@@ -17,11 +17,11 @@
 import type { ICommand, IWorksheetData } from '@univerjs/core';
 import {
     CommandType,
-    DEFAULT_WORKSHEET,
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,
     LocaleService,
+    mergeWorksheetSnapshotWithDefault,
     Tools,
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
@@ -51,17 +51,13 @@ export const InsertSheetCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const localeService = accessor.get(LocaleService);
 
-        let unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-
-        if (params) {
-            unitId = params.unitId ?? unitId;
-        }
+        const unitId = params?.unitId ?? univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
 
         const workbook = univerInstanceService.getUniverSheetInstance(unitId);
         if (!workbook) return false;
 
         let index = workbook.getSheets().length;
-        let sheetConfig = Tools.deepClone(DEFAULT_WORKSHEET);
+        let sheetConfig = mergeWorksheetSnapshotWithDefault({});
         if (params) {
             index = params.index ?? index;
             if (params.sheet) {

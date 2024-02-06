@@ -168,24 +168,24 @@ const TEST_ROW_COL_INSERTION_DEMO: IWorkbookData = {
         sheet1: {
             id: 'sheet1',
             cellData: {
-                '0': {
-                    '0': {
+                0: {
+                    0: {
                         v: 'A1',
                         s: 's1',
                     },
                 },
-                '1': {
-                    '1': {
+                1: {
+                    1: {
                         v: 'B2',
                         s: 's2',
                     },
-                    '4': {
+                    4: {
                         v: 'E2',
                         s: 's3',
                     },
                 },
-                '2': {
-                    '1': {
+                2: {
+                    1: {
                         v: 'B3',
                         s: 's4',
                     },

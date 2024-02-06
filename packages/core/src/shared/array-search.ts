@@ -86,7 +86,7 @@ export function searchArray(arr: number[], num: number) {
         return 0;
     }
     if (num > arr[arr.length - 1]) {
-        return Infinity;
+        return Number.POSITIVE_INFINITY;
     }
 
     if (arr.length < 40 || num <= arr[20] || num >= arr[index - 20]) {

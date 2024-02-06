@@ -20,7 +20,7 @@ import { ILogService } from '../services/log/log.service';
 import type { Nullable } from '../shared';
 import { Tools } from '../shared';
 import { Disposable } from '../shared/lifecycle';
-import { DEFAULT_RANGE_ARRAY, DEFAULT_WORKBOOK, DEFAULT_WORKSHEET } from '../types/const';
+import { DEFAULT_RANGE_ARRAY, DEFAULT_WORKBOOK } from '../types/const';
 import { BooleanNumber } from '../types/enum';
 import type {
     IColumnStartEndData,
@@ -50,6 +50,7 @@ export class Workbook extends Disposable {
     readonly sheetDisposed$ = this._sheetDisposed$.asObservable();
 
     private readonly _activeSheet$ = new BehaviorSubject<Nullable<Worksheet>>(null);
+    private get _activeSheet(): Nullable<Worksheet> { return this._activeSheet$.getValue(); }
     readonly activeSheet$ = this._activeSheet$.asObservable();
 
     /**
@@ -82,7 +83,7 @@ export class Workbook extends Disposable {
 
     constructor(
         workbookData: Partial<IWorkbookData> = {},
-        @ILogService private readonly _log: ILogService
+        @ILogService private readonly _logService: ILogService
     ) {
         super();
 
@@ -98,7 +99,7 @@ export class Workbook extends Disposable {
         this._count = 1;
         this._worksheets = new Map<string, Worksheet>();
 
-        this._getDefaultWorkSheet();
+        this._passWorksheetSnapshots();
     }
 
     override dispose(): void {
@@ -113,7 +114,7 @@ export class Workbook extends Disposable {
         return Tools.deepClone(this._snapshot);
     }
 
-    static isIRangeType(range: IRangeType | IRangeType[]): Boolean {
+    static isIRangeType(range: IRangeType | IRangeType[]): boolean {
         return typeof range === 'string' || 'startRow' in range || 'row' in range;
     }
 
@@ -189,53 +190,60 @@ export class Workbook extends Disposable {
         return sheetOrder.findIndex((id) => id === sheetId);
     }
 
-    getRawActiveSheet(): Nullable<string> {
-        const { sheetOrder } = this._snapshot;
-        const activeSheetId = sheetOrder.find((sheetId) => {
-            const worksheet = this._worksheets.get(sheetId) as Worksheet;
-            return worksheet.getStatus() === BooleanNumber.TRUE;
-        });
-
-        return activeSheetId;
+    /**
+     *
+     * @returns
+     */
+    getRawActiveSheet(): Nullable<Worksheet> {
+        return this._activeSheet;
     }
 
+    /**
+     * Get the active sheet. If there is no active sheet, the first sheet would
+     * be set active.
+     */
     getActiveSheet(): Worksheet {
-        const { sheetOrder } = this._snapshot;
-        const activeSheetId = this.getRawActiveSheet();
-
-        if (!activeSheetId) {
-            return this._worksheets.get(sheetOrder[0]) as Worksheet;
+        const currentActive = this.getRawActiveSheet();
+        if (!currentActive) {
+            const worksheet = this._worksheets.get(this._snapshot.sheetOrder[0])!;
+            this.setActiveSheet(worksheet);
+            return worksheet;
         }
 
-        return this._worksheets.get(activeSheetId) as Worksheet;
+        return currentActive;
     }
 
-    __setActiveSheet(worksheet: Worksheet): void {
+    setActiveSheet(worksheet: Nullable<Worksheet>): void {
         this._activeSheet$.next(worksheet);
+    }
+
+    removeSheet(sheetId: string): boolean {
+        const sheetToRemove = this._worksheets.get(sheetId);
+        if (!sheetToRemove) {
+            return false;
+        }
+
+        if (this._activeSheet?.getSheetId() === sheetId) {
+            this.setActiveSheet(null);
+        }
+
+        this._worksheets.delete(sheetId);
+        this._snapshot.sheetOrder.splice(this._snapshot.sheetOrder.indexOf(sheetId), 1);
+        delete this._snapshot.sheets[sheetId];
+
+        return true;
     }
 
     getActiveSheetIndex(): number {
         const { sheetOrder } = this._snapshot;
         return sheetOrder.findIndex((sheetId) => {
-            const worksheet = this._worksheets.get(sheetId) as Worksheet;
-            if (worksheet.getStatus() === 1) {
-                return true;
-            }
-            return false;
+            const worksheet = this._worksheets.get(sheetId)!;
+            return worksheet === this._activeSheet;
         });
     }
 
     getSheetSize(): number {
         return this._snapshot.sheetOrder.length;
-    }
-
-    /**
-     * Applies all pending Sheets changes.
-     *
-     * @returns void
-     */
-    flush(): void {
-        //TODO ..
     }
 
     getSheets(): Worksheet[] {
@@ -420,7 +428,7 @@ export class Workbook extends Disposable {
             rangeTxt = txt;
         }
         if (rangeTxt.indexOf(':') === -1) {
-            const row = parseInt(rangeTxt.replace(/[^0-9]/g, ''), 10) - 1;
+            const row = Number.parseInt(rangeTxt.replace(/[^0-9]/g, ''), 10) - 1;
             const col = Tools.ABCatNum(rangeTxt.replace(/[^A-Za-z]/g, ''));
 
             if (!Number.isNaN(row) && !Number.isNaN(col)) {
@@ -443,8 +451,8 @@ export class Workbook extends Disposable {
         const col: IColumnStartEndData = [0, 0];
         const maxRow = this.getSheetBySheetName(sheetTxt)?.getMaxRows() || this.getActiveSheet()?.getMaxRows();
         const maxCol = this.getSheetBySheetName(sheetTxt)?.getMaxColumns() || this.getActiveSheet()?.getMaxColumns();
-        row[0] = parseInt(rangeTxt[0].replace(/[^0-9]/g, ''), 10) - 1;
-        row[1] = parseInt(rangeTxt[1].replace(/[^0-9]/g, ''), 10) - 1;
+        row[0] = Number.parseInt(rangeTxt[0].replace(/[^0-9]/g, ''), 10) - 1;
+        row[1] = Number.parseInt(rangeTxt[1].replace(/[^0-9]/g, ''), 10) - 1;
 
         if (Number.isNaN(row[0])) {
             row[0] = 0;
@@ -486,36 +494,31 @@ export class Workbook extends Disposable {
     /**
      * Get Default Sheet
      */
-    private _getDefaultWorkSheet(): void {
-        const { _snapshot: _config, _worksheets } = this;
-        const { sheets, sheetOrder } = _config;
+    private _passWorksheetSnapshots(): void {
+        const { _snapshot, _worksheets } = this;
+        const { sheets, sheetOrder } = _snapshot;
 
-        // One worksheet by default
+        // If there's no sheets in the snapshot, we should create one.
         if (Tools.isEmptyObject(sheets)) {
-            sheets[DEFAULT_WORKSHEET.id] = Object.assign(DEFAULT_WORKSHEET, {
-                status: BooleanNumber.TRUE,
-            });
+            const firstSheetId = Tools.generateRandomId();
+            sheets[firstSheetId] = { id: firstSheetId };
         }
 
-        let firstWorksheet = null;
-
+        // Pass all existing sheets.
         for (const sheetId in sheets) {
-            const config = sheets[sheetId];
+            const worksheetSnapshot = sheets[sheetId];
+            const { name } = worksheetSnapshot;
 
-            const { name } = config;
-            config.name = this.uniqueSheetName(name);
-
-            if (config.name !== name) {
-                this._log.warn(`The worksheet name ${name} is duplicated, we change it to ${config.name}`);
+            worksheetSnapshot.name = this.uniqueSheetName(name);
+            if (worksheetSnapshot.name !== name) {
+                this._logService.error(`The worksheet name ${name} is duplicated, we change it to ${worksheetSnapshot.name}`);
             }
 
-            const worksheet = new Worksheet(config, this._styles);
+            const worksheet = new Worksheet(worksheetSnapshot, this._styles);
             _worksheets.set(sheetId, worksheet);
+
             if (!sheetOrder.includes(sheetId)) {
                 sheetOrder.push(sheetId);
-            }
-            if (firstWorksheet == null) {
-                firstWorksheet = worksheet;
             }
         }
     }

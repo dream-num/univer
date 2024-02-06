@@ -18,7 +18,6 @@ export type { IDocObjectParam } from './basics/component-tools';
 export { getDocObject } from './basics/component-tools';
 export * from './basics/docs-view-key';
 export { BreakLineCommand } from './commands/commands/break-line.command';
-export { DocCopyCommand, DocCutCommand, DocPasteCommand } from './commands/commands/clipboard.command';
 export {
     DeleteCommand,
     type ICoverCommandParams,
@@ -59,3 +58,5 @@ export { DocViewModelManagerService } from './services/doc-view-model-manager.se
 export { TextSelectionManagerService, serializeTextRange } from './services/text-selection-manager.service';
 export { DocStateChangeManagerService, type IDocStateChangeParams } from './services/doc-state-change-manager.service';
 export { DocCanvasView } from './views/doc-canvas-view';
+export { SelectAllOperation } from './commands/operations/select-all.operation';
+export { CutContentCommand, InnerPasteCommand } from './commands/commands/clipboard.inner.command';

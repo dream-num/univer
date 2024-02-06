@@ -24,10 +24,8 @@ import {
     PluginType,
 } from '@univerjs/core';
 import { ITextSelectionRenderManager, TextSelectionRenderManager } from '@univerjs/engine-render';
-import { IShortcutService } from '@univerjs/ui';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
-
 import { BreakLineCommand } from './commands/commands/break-line.command';
 import { DeleteCommand, InsertCommand, UpdateCommand } from './commands/commands/core-editing.command';
 import { DeleteLeftCommand, DeleteRightCommand, MergeTwoParagraphCommand } from './commands/commands/delete.command';
@@ -52,7 +50,6 @@ import { MoveCursorOperation, MoveSelectionOperation } from './commands/operatio
 import { SelectAllOperation } from './commands/operations/select-all.operation';
 import { SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
 import { SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
-import { DocClipboardController } from './controllers/clipboard.controller';
 import { DocRenderController } from './controllers/doc-render.controller';
 import { FloatingObjectController } from './controllers/floating-object.controller';
 import { IMEInputController } from './controllers/ime-input.controller';
@@ -62,23 +59,10 @@ import { NormalInputController } from './controllers/normal-input.controller';
 import { PageRenderController } from './controllers/page-render.controller';
 import { TextSelectionController } from './controllers/text-selection.controller';
 import { ZoomController } from './controllers/zoom.controller';
-import { DocClipboardService, IDocClipboardService } from './services/clipboard/clipboard.service';
 import { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
 import { DocViewModelManagerService } from './services/doc-view-model-manager.service';
 import { IMEInputManagerService } from './services/ime-input-manager.service';
 import { TextSelectionManagerService } from './services/text-selection-manager.service';
-import { BreakLineShortcut, DeleteLeftShortcut, DeleteRightShortcut } from './shortcuts/core-editing.shortcut';
-import {
-    MoveCursorDownShortcut,
-    MoveCursorLeftShortcut,
-    MoveCursorRightShortcut,
-    MoveCursorUpShortcut,
-    MoveSelectionDownShortcut,
-    MoveSelectionLeftShortcut,
-    MoveSelectionRightShortcut,
-    MoveSelectionUpShortcut,
-    SelectAllShortcut,
-} from './shortcuts/cursor.shortcut';
 import { DocCanvasView } from './views/doc-canvas-view';
 import { DocStateChangeManagerService } from './services/doc-state-change-manager.service';
 
@@ -152,23 +136,6 @@ export class UniverDocsPlugin extends Plugin {
         ).forEach((command) => {
             this._injector.get(ICommandService).registerCommand(command);
         });
-
-        [
-            MoveCursorUpShortcut,
-            MoveCursorDownShortcut,
-            MoveCursorRightShortcut,
-            MoveCursorLeftShortcut,
-            MoveSelectionUpShortcut,
-            MoveSelectionDownShortcut,
-            MoveSelectionLeftShortcut,
-            MoveSelectionRightShortcut,
-            SelectAllShortcut,
-            DeleteLeftShortcut,
-            DeleteRightShortcut,
-            BreakLineShortcut,
-        ].forEach((shortcut) => {
-            this._injector.get(IShortcutService).registerShortcut(shortcut);
-        });
     }
 
     override onReady(): void {
@@ -191,12 +158,6 @@ export class UniverDocsPlugin extends Plugin {
                 [DocStateChangeManagerService],
                 [IMEInputManagerService],
                 [
-                    IDocClipboardService,
-                    {
-                        useClass: DocClipboardService,
-                    },
-                ],
-                [
                     ITextSelectionRenderManager,
                     {
                         useClass: TextSelectionRenderManager,
@@ -211,7 +172,6 @@ export class UniverDocsPlugin extends Plugin {
                 [NormalInputController],
                 [IMEInputController],
                 [InlineFormatController],
-                [DocClipboardController],
                 [MoveCursorController],
                 [ZoomController],
                 [FloatingObjectController],

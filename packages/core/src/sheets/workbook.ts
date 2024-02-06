@@ -83,7 +83,7 @@ export class Workbook extends Disposable {
 
     constructor(
         workbookData: Partial<IWorkbookData> = {},
-        @ILogService private readonly _log: ILogService
+        @ILogService private readonly _logService: ILogService
     ) {
         super();
 
@@ -500,8 +500,8 @@ export class Workbook extends Disposable {
 
         // If there's no sheets in the snapshot, we should create one.
         if (Tools.isEmptyObject(sheets)) {
-            // TODO@wzhudev: should use generated uuid
-            sheets['sheet-01'] = { id: 'sheet-01' };
+            const firstSheetId = Tools.generateRandomId();
+            sheets[firstSheetId] = { id: firstSheetId };
         }
 
         // Pass all existing sheets.
@@ -509,9 +509,9 @@ export class Workbook extends Disposable {
             const worksheetSnapshot = sheets[sheetId];
             const { name } = worksheetSnapshot;
 
-            const uniqueName = this.uniqueSheetName(name);
-            if (uniqueName !== name) {
-                throw new Error(`[Workbook]: The worksheet name ${name} is duplicated!`);
+            worksheetSnapshot.name = this.uniqueSheetName(name);
+            if (worksheetSnapshot.name !== name) {
+                this._logService.error(`The worksheet name ${name} is duplicated, we change it to ${worksheetSnapshot.name}`);
             }
 
             const worksheet = new Worksheet(worksheetSnapshot, this._styles);

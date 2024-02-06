@@ -28,6 +28,7 @@ import type {
 import {
     BooleanNumber,
     DEFAULT_WORKSHEET_COLUMN_WIDTH,
+    DEFAULT_WORKSHEET_COLUMN_WIDTH_KEY,
     DEFAULT_WORKSHEET_ROW_HEIGHT,
     handleStyleToString,
     ICommandService,
@@ -372,13 +373,15 @@ export class SheetClipboardController extends RxDisposable {
                 const addingColsCount = range.endColumn - maxColumn;
                 const existingColsCount = colProperties.length - addingColsCount;
 
+                const defaultColumnWidth = self._configService.getConfig<number>(DEFAULT_WORKSHEET_COLUMN_WIDTH_KEY) ?? DEFAULT_WORKSHEET_COLUMN_WIDTH;
+
                 if (addingColsCount > 0) {
                     const addColMutation: IInsertColMutationParams = {
                         unitId: unitId!,
                         subUnitId: subUnitId!,
                         range: { ...range, startColumn: maxColumn },
                         colInfo: colProperties.slice(existingColsCount).map((property) => ({
-                            w: property.width ? +property.width : DEFAULT_WORKSHEET_COLUMN_WIDTH,
+                            w: property.width ? +property.width : defaultColumnWidth,
                             hd: BooleanNumber.FALSE,
                         })),
                     };
@@ -394,7 +397,7 @@ export class SheetClipboardController extends RxDisposable {
                     ranges: [{ ...range, endRow: Math.min(range.endColumn, maxColumn) }],
                     colWidth: colProperties
                         .slice(0, existingColsCount)
-                        .map((property) => (property.width ? +property.width : DEFAULT_WORKSHEET_COLUMN_WIDTH)),
+                        .map((property) => (property.width ? +property.width : defaultColumnWidth)),
                 };
                 redoMutations.push({
                     id: SetWorksheetColWidthMutation.id,
@@ -584,6 +587,7 @@ export class SheetClipboardController extends RxDisposable {
                 const maxColumn = currentSheet!.getMaxColumns();
                 const addingColsCount = range.endColumn - maxColumn;
                 const existingColsCount = colProperties.length - addingColsCount;
+                const defaultColumnWidth = self._configService.getConfig<number>(DEFAULT_WORKSHEET_COLUMN_WIDTH_KEY) ?? DEFAULT_WORKSHEET_COLUMN_WIDTH;
 
                 const setColPropertyMutation: ISetWorksheetColWidthMutationParams = {
                     unitId: unitId!,
@@ -591,7 +595,7 @@ export class SheetClipboardController extends RxDisposable {
                     ranges: [{ ...range, endRow: Math.min(range.endColumn, maxColumn) }],
                     colWidth: colProperties
                         .slice(0, existingColsCount)
-                        .map((property) => (property.width ? +property.width : DEFAULT_WORKSHEET_COLUMN_WIDTH)),
+                        .map((property) => (property.width ? +property.width : defaultColumnWidth)),
                 };
                 redoMutations.push({
                     id: SetWorksheetColWidthMutation.id,

@@ -51,11 +51,7 @@ export const InsertSheetCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const localeService = accessor.get(LocaleService);
 
-        let unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-
-        if (params) {
-            unitId = params.unitId ?? unitId;
-        }
+        const unitId = params?.unitId ?? univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
 
         const workbook = univerInstanceService.getUniverSheetInstance(unitId);
         if (!workbook) return false;

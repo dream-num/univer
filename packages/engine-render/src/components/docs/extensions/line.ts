@@ -33,7 +33,7 @@ const DOC_EXTENSION_Z_INDEX = 40;
 export class Line extends docExtension {
     override uKey = UNIQUE_KEY;
 
-    override zIndex = DOC_EXTENSION_Z_INDEX;
+    override Z_INDEX = DOC_EXTENSION_Z_INDEX;
 
     private _preBackgroundColor = '';
 

@@ -20,7 +20,7 @@ import { SHEET_CONDITION_FORMAT_PLUGIN } from './base/const';
 import { ConditionalFormatService } from './services/conditional-format.service';
 import { ConditionalFormatRuleModel } from './models/conditional-format-rule-model';
 import { ConditionalFormatViewModel } from './models/conditional-format-view-model';
-import { RenderController } from './controllers/render.controller';
+import { RenderController } from './controllers/render.cf.controller';
 import { addAverageCfCommand } from './commands/commands/addAverageCf.command';
 import { addColorScaleConditionalRuleCommand } from './commands/commands/addColorScaleCf.command';
 import { addDataBarConditionalRuleCommand } from './commands/commands/addDataBarCf.command';
@@ -32,6 +32,8 @@ import { addTimePeriodCfCommand } from './commands/commands/addTimePeriodCf.comm
 import { addUniqueValuesCfCommand } from './commands/commands/addUniqueValuesCf.command';
 import { addConditionalRuleMutation } from './commands/mutations/addConditionalRule.mutation';
 import { deleteConditionalRuleMutation } from './commands/mutations/deleteConditionalRule.mutation';
+import { RefRangeController } from './controllers/ref-range.cf.controller';
+import { setConditionalRuleMutation } from './commands/mutations/setConditionalRule.mutation';
 
 export class SheetsConditionalFormatPlugin extends Plugin {
     static override type = PluginType.Sheet;
@@ -46,7 +48,7 @@ export class SheetsConditionalFormatPlugin extends Plugin {
         addUniqueValuesCfCommand,
     ];
 
-    static mutationList = [addConditionalRuleMutation, deleteConditionalRuleMutation];
+    static mutationList = [addConditionalRuleMutation, deleteConditionalRuleMutation, setConditionalRuleMutation];
     constructor(
         _config: unknown,
         @Inject(Injector) override readonly _injector: Injector,
@@ -61,6 +63,7 @@ export class SheetsConditionalFormatPlugin extends Plugin {
         this._injector.add([ConditionalFormatRuleModel]);
         this._injector.add([ConditionalFormatViewModel]);
         this._injector.add([RenderController]);
+        this._injector.add([RefRangeController]);
     }
 
     _initCommand() {

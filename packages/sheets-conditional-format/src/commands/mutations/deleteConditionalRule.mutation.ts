@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
+import type { IMutation } from '@univerjs/core';
 import {
     CommandType,
     Tools,
@@ -34,11 +34,12 @@ export const deleteConditionalRuleMutationUndoFactory = (accessor: IAccessor, pa
     const { unitId, subUnitId, cfId } = param;
     const rule = conditionalFormatRuleModel.getRule(unitId, subUnitId, cfId);
     if (rule) {
-        return { id: addConditionalRuleMutation.id, param: { unitId, subUnitId, rule: Tools.deepClone(rule) } as IAddConditionalRuleMutationParams };
+        return [{ id: addConditionalRuleMutation.id,
+                  params: { unitId, subUnitId, rule: Tools.deepClone(rule) } as IAddConditionalRuleMutationParams }];
     }
-    return null;
+    return [];
 };
-export const deleteConditionalRuleMutation: ICommand<IDeleteConditionalRuleMutationParams> = {
+export const deleteConditionalRuleMutation: IMutation<IDeleteConditionalRuleMutationParams> = {
     type: CommandType.MUTATION,
     id: 'sheet.mutation.delete-conditional-rule',
     handler(accessor, params) {

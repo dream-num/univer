@@ -431,6 +431,7 @@ importers:
         specifier: ^1.2.1
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
 =======
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
@@ -445,7 +446,13 @@ importers:
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.2.1)(less@4.2.0)
 >>>>>>> 5d49a0768 (chore(cf): format code)
 >>>>>>> 38115db70 (chore(cf): format code)
+<<<<<<< HEAD
 >>>>>>> 9af864941 (chore(cf): format code)
+=======
+=======
+        version: 1.2.1(@types/node@20.11.16)(happy-dom@13.2.1)(less@4.2.0)
+>>>>>>> 4dca3c6ae (feat(cf): conditional format support ref range)
+>>>>>>> 6b3ff90d8 (feat(cf): conditional format support ref range)
 
   packages/docs:
     devDependencies:
@@ -484,6 +491,7 @@ importers:
         specifier: ^1.2.1
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
 =======
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
@@ -498,7 +506,13 @@ importers:
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.2.1)(less@4.2.0)
 >>>>>>> 5d49a0768 (chore(cf): format code)
 >>>>>>> 38115db70 (chore(cf): format code)
+<<<<<<< HEAD
 >>>>>>> 9af864941 (chore(cf): format code)
+=======
+=======
+        version: 1.2.1(@types/node@20.11.16)(happy-dom@13.2.1)(less@4.2.0)
+>>>>>>> 4dca3c6ae (feat(cf): conditional format support ref range)
+>>>>>>> 6b3ff90d8 (feat(cf): conditional format support ref range)
 
   packages/docs-ui:
     devDependencies:
@@ -552,6 +566,7 @@ importers:
         specifier: ^1.2.1
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
 =======
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
@@ -566,7 +581,13 @@ importers:
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.2.1)(less@4.2.0)
 >>>>>>> 5d49a0768 (chore(cf): format code)
 >>>>>>> 38115db70 (chore(cf): format code)
+<<<<<<< HEAD
 >>>>>>> 9af864941 (chore(cf): format code)
+=======
+=======
+        version: 1.2.1(@types/node@20.11.16)(happy-dom@13.2.1)(less@4.2.0)
+>>>>>>> 4dca3c6ae (feat(cf): conditional format support ref range)
+>>>>>>> 6b3ff90d8 (feat(cf): conditional format support ref range)
 
   packages/engine-formula:
     dependencies:
@@ -609,6 +630,7 @@ importers:
         specifier: ^1.2.1
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
 =======
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
@@ -623,7 +645,13 @@ importers:
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.2.1)(less@4.2.0)
 >>>>>>> 5d49a0768 (chore(cf): format code)
 >>>>>>> 38115db70 (chore(cf): format code)
+<<<<<<< HEAD
 >>>>>>> 9af864941 (chore(cf): format code)
+=======
+=======
+        version: 1.2.1(@types/node@20.11.16)(happy-dom@13.2.1)(less@4.2.0)
+>>>>>>> 4dca3c6ae (feat(cf): conditional format support ref range)
+>>>>>>> 6b3ff90d8 (feat(cf): conditional format support ref range)
 
   packages/engine-numfmt:
     dependencies:
@@ -685,6 +713,7 @@ importers:
         specifier: ^1.2.1
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
 =======
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
@@ -699,7 +728,13 @@ importers:
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.2.1)(less@4.2.0)
 >>>>>>> 5d49a0768 (chore(cf): format code)
 >>>>>>> 38115db70 (chore(cf): format code)
+<<<<<<< HEAD
 >>>>>>> 9af864941 (chore(cf): format code)
+=======
+=======
+        version: 1.2.1(@types/node@20.11.16)(happy-dom@13.2.1)(less@4.2.0)
+>>>>>>> 4dca3c6ae (feat(cf): conditional format support ref range)
+>>>>>>> 6b3ff90d8 (feat(cf): conditional format support ref range)
 
   packages/facade:
     devDependencies:
@@ -872,14 +907,7 @@ importers:
         version: 1.3.1(@types/node@20.11.19)(less@4.2.0)
 =======
         specifier: ^1.2.1
-<<<<<<< HEAD
-<<<<<<< HEAD
-        version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
-=======
-        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
-=======
-        version: 1.2.1(@types/node@20.11.7)(happy-dom@13.2.1)(less@4.2.0)
->>>>>>> 5d49a0768 (chore(cf): format code)
+        version: 1.2.1(@types/node@20.11.16)(happy-dom@13.2.1)(less@4.2.0)
 
   packages/sheets-conditional-format:
     dependencies:
@@ -940,15 +968,16 @@ importers:
         version: 5.3.3
       vite:
         specifier: ^5.0.12
-        version: 5.0.12(@types/node@20.11.7)(less@4.2.0)
+        version: 5.0.12(@types/node@20.11.16)(less@4.2.0)
       vite-plugin-dts:
         specifier: ^3.7.1
-        version: 3.7.2(@types/node@20.11.7)(typescript@5.3.3)(vite@5.0.12)
+        version: 3.7.2(@types/node@20.11.16)(typescript@5.3.3)(vite@5.0.12)
       vite-plugin-externals:
         specifier: ^0.6.2
         version: 0.6.2(vite@5.0.12)
       vitest:
         specifier: ^1.2.1
+<<<<<<< HEAD
 <<<<<<< HEAD
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
 >>>>>>> 1070651f5 (fix(dev): fix dev config)
@@ -962,7 +991,13 @@ importers:
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.2.1)(less@4.2.0)
 >>>>>>> 5d49a0768 (chore(cf): format code)
 >>>>>>> 38115db70 (chore(cf): format code)
+<<<<<<< HEAD
 >>>>>>> 9af864941 (chore(cf): format code)
+=======
+=======
+        version: 1.2.1(@types/node@20.11.16)(happy-dom@13.2.1)(less@4.2.0)
+>>>>>>> 4dca3c6ae (feat(cf): conditional format support ref range)
+>>>>>>> 6b3ff90d8 (feat(cf): conditional format support ref range)
 
   packages/sheets-find-replace:
     devDependencies:
@@ -1004,6 +1039,7 @@ importers:
         specifier: ^1.2.1
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
 =======
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
@@ -1018,7 +1054,13 @@ importers:
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.2.1)(less@4.2.0)
 >>>>>>> 5d49a0768 (chore(cf): format code)
 >>>>>>> 38115db70 (chore(cf): format code)
+<<<<<<< HEAD
 >>>>>>> 9af864941 (chore(cf): format code)
+=======
+=======
+        version: 1.2.1(@types/node@20.11.16)(happy-dom@13.2.1)(less@4.2.0)
+>>>>>>> 4dca3c6ae (feat(cf): conditional format support ref range)
+>>>>>>> 6b3ff90d8 (feat(cf): conditional format support ref range)
 
   packages/sheets-formula:
     dependencies:
@@ -1091,6 +1133,7 @@ importers:
         specifier: ^1.2.1
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
 =======
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
@@ -1105,7 +1148,13 @@ importers:
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.2.1)(less@4.2.0)
 >>>>>>> 5d49a0768 (chore(cf): format code)
 >>>>>>> 38115db70 (chore(cf): format code)
+<<<<<<< HEAD
 >>>>>>> 9af864941 (chore(cf): format code)
+=======
+=======
+        version: 1.2.1(@types/node@20.11.16)(happy-dom@13.2.1)(less@4.2.0)
+>>>>>>> 4dca3c6ae (feat(cf): conditional format support ref range)
+>>>>>>> 6b3ff90d8 (feat(cf): conditional format support ref range)
 
   packages/sheets-numfmt:
     dependencies:
@@ -1172,6 +1221,7 @@ importers:
         specifier: ^1.2.1
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
 =======
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
@@ -1186,7 +1236,13 @@ importers:
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.2.1)(less@4.2.0)
 >>>>>>> 5d49a0768 (chore(cf): format code)
 >>>>>>> 38115db70 (chore(cf): format code)
+<<<<<<< HEAD
 >>>>>>> 9af864941 (chore(cf): format code)
+=======
+=======
+        version: 1.2.1(@types/node@20.11.16)(happy-dom@13.2.1)(less@4.2.0)
+>>>>>>> 4dca3c6ae (feat(cf): conditional format support ref range)
+>>>>>>> 6b3ff90d8 (feat(cf): conditional format support ref range)
 
   packages/sheets-ui:
     dependencies:
@@ -1256,6 +1312,7 @@ importers:
         specifier: ^1.2.1
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
 =======
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
@@ -1270,7 +1327,13 @@ importers:
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.2.1)(less@4.2.0)
 >>>>>>> 5d49a0768 (chore(cf): format code)
 >>>>>>> 38115db70 (chore(cf): format code)
+<<<<<<< HEAD
 >>>>>>> 9af864941 (chore(cf): format code)
+=======
+=======
+        version: 1.2.1(@types/node@20.11.16)(happy-dom@13.2.1)(less@4.2.0)
+>>>>>>> 4dca3c6ae (feat(cf): conditional format support ref range)
+>>>>>>> 6b3ff90d8 (feat(cf): conditional format support ref range)
 
   packages/sheets-zen-editor:
     dependencies:
@@ -1331,6 +1394,7 @@ importers:
         specifier: ^1.2.1
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
 =======
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
@@ -1345,7 +1409,13 @@ importers:
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.2.1)(less@4.2.0)
 >>>>>>> 5d49a0768 (chore(cf): format code)
 >>>>>>> 38115db70 (chore(cf): format code)
+<<<<<<< HEAD
 >>>>>>> 9af864941 (chore(cf): format code)
+=======
+=======
+        version: 1.2.1(@types/node@20.11.16)(happy-dom@13.2.1)(less@4.2.0)
+>>>>>>> 4dca3c6ae (feat(cf): conditional format support ref range)
+>>>>>>> 6b3ff90d8 (feat(cf): conditional format support ref range)
 
   packages/slides:
     dependencies:
@@ -1385,6 +1455,7 @@ importers:
         specifier: ^1.2.1
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
 =======
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
@@ -1399,7 +1470,13 @@ importers:
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.2.1)(less@4.2.0)
 >>>>>>> 5d49a0768 (chore(cf): format code)
 >>>>>>> 38115db70 (chore(cf): format code)
+<<<<<<< HEAD
 >>>>>>> 9af864941 (chore(cf): format code)
+=======
+=======
+        version: 1.2.1(@types/node@20.11.16)(happy-dom@13.2.1)(less@4.2.0)
+>>>>>>> 4dca3c6ae (feat(cf): conditional format support ref range)
+>>>>>>> 6b3ff90d8 (feat(cf): conditional format support ref range)
 
   packages/slides-ui:
     devDependencies:
@@ -1450,6 +1527,7 @@ importers:
         specifier: ^1.2.1
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
 =======
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
@@ -1464,7 +1542,13 @@ importers:
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.2.1)(less@4.2.0)
 >>>>>>> 5d49a0768 (chore(cf): format code)
 >>>>>>> 38115db70 (chore(cf): format code)
+<<<<<<< HEAD
 >>>>>>> 9af864941 (chore(cf): format code)
+=======
+=======
+        version: 1.2.1(@types/node@20.11.16)(happy-dom@13.2.1)(less@4.2.0)
+>>>>>>> 4dca3c6ae (feat(cf): conditional format support ref range)
+>>>>>>> 6b3ff90d8 (feat(cf): conditional format support ref range)
 
   packages/ui:
     dependencies:
@@ -1548,6 +1632,7 @@ importers:
         specifier: ^1.2.1
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
 =======
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
@@ -1565,8 +1650,17 @@ importers:
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.2.1)(less@4.2.0)
 >>>>>>> 5d49a0768 (chore(cf): format code)
 >>>>>>> 38115db70 (chore(cf): format code)
+<<<<<<< HEAD
 >>>>>>> 9af864941 (chore(cf): format code)
+<<<<<<< HEAD
 >>>>>>> 1d774e4f7 (chore(cf): format code)
+=======
+=======
+=======
+        version: 1.2.1(@types/node@20.11.16)(happy-dom@13.2.1)(less@4.2.0)
+>>>>>>> 4dca3c6ae (feat(cf): conditional format support ref range)
+>>>>>>> 6b3ff90d8 (feat(cf): conditional format support ref range)
+>>>>>>> ff83f954d (feat(cf): conditional format support ref range)
 
   packages/uniscript:
     dependencies:
@@ -1624,6 +1718,7 @@ importers:
         specifier: ^1.2.1
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         version: 1.2.1(@types/node@20.11.16)(less@4.2.0)
 =======
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.3.1)(less@4.2.0)
@@ -1638,7 +1733,13 @@ importers:
         version: 1.2.1(@types/node@20.11.7)(happy-dom@13.2.1)(less@4.2.0)
 >>>>>>> 5d49a0768 (chore(cf): format code)
 >>>>>>> 38115db70 (chore(cf): format code)
+<<<<<<< HEAD
 >>>>>>> 9af864941 (chore(cf): format code)
+=======
+=======
+        version: 1.2.1(@types/node@20.11.16)(happy-dom@13.2.1)(less@4.2.0)
+>>>>>>> 4dca3c6ae (feat(cf): conditional format support ref range)
+>>>>>>> 6b3ff90d8 (feat(cf): conditional format support ref range)
 
 packages:
 
@@ -1782,11 +1883,15 @@ packages:
       '@babel/helper-compilation-targets': 7.22.15
       '@babel/helper-module-transforms': 7.23.3(@babel/core@7.23.5)
       '@babel/helpers': 7.23.5
-      '@babel/parser': 7.23.6
+      '@babel/parser': 7.23.5
       '@babel/template': 7.22.15
       '@babel/traverse': 7.23.5
+<<<<<<< HEAD
       '@babel/types': 7.23.6
 >>>>>>> 89540337d (fix(dev): fix dev config)
+=======
+      '@babel/types': 7.23.5
+>>>>>>> 4dca3c6ae (feat(cf): conditional format support ref range)
       convert-source-map: 2.0.0
       debug: 4.3.4
       gensync: 1.0.0-beta.2
@@ -1829,8 +1934,12 @@ packages:
 =======
       '@babel/compat-data': 7.23.3
       '@babel/helper-validator-option': 7.22.15
+<<<<<<< HEAD
       browserslist: 4.22.2
 >>>>>>> 89540337d (fix(dev): fix dev config)
+=======
+      browserslist: 4.22.1
+>>>>>>> 4dca3c6ae (feat(cf): conditional format support ref range)
       lru-cache: 5.1.1
       semver: 6.3.1
 
@@ -5618,12 +5727,17 @@ packages:
     resolution: {integrity: sha512-qoQprZvz5wQFJwMDqeseRXWv3rqMvhgpbXFfVyWhbx9X47POIA6i/+dXefEmZKoAgOaTdaIgNSMqMIU61yRyzA==}
     dependencies:
 <<<<<<< HEAD
+<<<<<<< HEAD
       '@babel/parser': 7.23.9
       '@babel/types': 7.23.9
       '@types/babel__generator': 7.6.8
 =======
       '@babel/parser': 7.23.6
       '@babel/types': 7.23.6
+=======
+      '@babel/parser': 7.23.5
+      '@babel/types': 7.23.5
+>>>>>>> 4dca3c6ae (feat(cf): conditional format support ref range)
       '@types/babel__generator': 7.6.7
 >>>>>>> 89540337d (fix(dev): fix dev config)
       '@types/babel__template': 7.4.4
@@ -6110,9 +6224,12 @@ packages:
     resolution: {integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==}
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   /@univerjs/icons@0.1.39(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-LlvMLjF18VM1KKLybMpCEnetnyvQgb5ZvJA0HeWRnTNO8HFXlEpCJmXpAIajNGL+PjtZU4LTj3tMf/2C6prn/w==}
 =======
+=======
+>>>>>>> ff83f954d (feat(cf): conditional format support ref range)
 <<<<<<< HEAD
   /@univerjs/icons@0.1.30(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-TdI4MuVH6zkbeLXllrkVemilQ+MnTm7PJLwaQQXyuwl+YSuoe4m5S5nc6iE/CXzx7Zp5Nyhv1rsXetpXWcgEpA==}
@@ -6121,6 +6238,8 @@ packages:
   /@univerjs/icons@0.1.28(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-EMPdWp3gA0t/GPcUxOEWlKIXqlbgRbcVMC/i0z1IT3sDCOJ+lVq7ONe/rbpx4pupU9A6XvqTl73XbRV7O2bbhw==}
 =======
+=======
+>>>>>>> e851c3f81 (feat(cf): conditional format support ref range)
   /@univerjs/icons@0.1.26(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-tQZ+t24QsvjeR+8RvSzPzuHMuv+xcwAFW73uQ9mn6NE1QxIyFGMrXQzt8vDxnYbsP2HOIXnkOoCfBEJhfF+YAQ==}
     peerDependencies:
@@ -6131,11 +6250,19 @@ packages:
       react-dom: 18.2.0(react@18.2.0)
     dev: false
 
+<<<<<<< HEAD
   /@univerjs/icons@0.1.27(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-1mcnDgcmWxWW4O7TG+1OoqrPnExk6M9vqXfRdxQqm213lABfuBKcqz7BX/WjOnlzaimOzsgtPmUgEDdU2S5lJg==}
 >>>>>>> 5d49a0768 (chore(cf): format code)
 >>>>>>> ccfd7f42c (chore(cf): format code)
+<<<<<<< HEAD
 >>>>>>> 1d774e4f7 (chore(cf): format code)
+=======
+=======
+  /@univerjs/icons@0.1.28(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-EMPdWp3gA0t/GPcUxOEWlKIXqlbgRbcVMC/i0z1IT3sDCOJ+lVq7ONe/rbpx4pupU9A6XvqTl73XbRV7O2bbhw==}
+>>>>>>> e851c3f81 (feat(cf): conditional format support ref range)
+>>>>>>> ff83f954d (feat(cf): conditional format support ref range)
     peerDependencies:
       react: '*'
       react-dom: '*'
@@ -6181,7 +6308,7 @@ packages:
       magicast: 0.3.3
       picocolors: 1.0.0
       test-exclude: 6.0.0
-      vitest: 1.2.1(@types/node@20.11.7)(happy-dom@13.2.1)(less@4.2.0)
+      vitest: 1.2.1(@types/node@20.11.16)(happy-dom@13.2.1)(less@4.2.0)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -6991,6 +7118,7 @@ packages:
     dev: false
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   /browserslist@4.23.0:
     resolution: {integrity: sha512-QW8HiM1shhT2GuzkvklfjcKDiWFXHOeFCIA/huJPwHsslwcydgk7X+z2zXpEijP98UCY7HbubZt5J2Zgvf0CaQ==}
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
@@ -7001,6 +7129,18 @@ packages:
       node-releases: 2.0.14
       update-browserslist-db: 1.0.13(browserslist@4.23.0)
 =======
+=======
+  /browserslist@4.22.1:
+    resolution: {integrity: sha512-FEVc202+2iuClEhZhrWy6ZiAcRLvNMyYcxZ8raemul1DYVOVdFsbqckWLdsixQZCpJlwe77Z3UTalE7jsjnKfQ==}
+    engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
+    hasBin: true
+    dependencies:
+      caniuse-lite: 1.0.30001564
+      electron-to-chromium: 1.4.594
+      node-releases: 2.0.13
+      update-browserslist-db: 1.0.13(browserslist@4.22.1)
+
+>>>>>>> 4dca3c6ae (feat(cf): conditional format support ref range)
   /browserslist@4.22.2:
     resolution: {integrity: sha512-0UgcrvQmBDvZHFGdYUehrCNIazki7/lUP3kkoi/r3YB2amZbFM9J43ZRkJTXBUZK4gmx56+Sqk9+Vs9mwZx9+A==}
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
@@ -7010,7 +7150,11 @@ packages:
       electron-to-chromium: 1.4.640
       node-releases: 2.0.14
       update-browserslist-db: 1.0.13(browserslist@4.22.2)
+<<<<<<< HEAD
 >>>>>>> 89540337d (fix(dev): fix dev config)
+=======
+    dev: true
+>>>>>>> 4dca3c6ae (feat(cf): conditional format support ref range)
 
   /buffer-from@1.1.2:
     resolution: {integrity: sha512-E+XQCRwSbaaiChtv6k6Dwgc+bx+Bs6vuKJHHl5kox/BaKbhiXzqQOwK4cO22yElGp2OCmjwVhT3HmxgyPGnJfQ==}
@@ -7093,6 +7237,7 @@ packages:
     dev: false
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   /camelcase@7.0.1:
     resolution: {integrity: sha512-xlx1yCK2Oc1APsPXDL2LdlNP6+uu8OCDdhOBSVT279M/S+y75O30C2VuD8T2ogdePBBl7PfPF4504tnLgX3zfw==}
     engines: {node: '>=14.16'}
@@ -7101,6 +7246,14 @@ packages:
   /caniuse-lite@1.0.30001579:
     resolution: {integrity: sha512-u5AUVkixruKHJjw/pj9wISlcMpgFWzSrczLZbrqBSxukQixmg0SJ5sZTpvaFvxU0HoQKd4yoyAogyrAz9pzJnA==}
 >>>>>>> 89540337d (fix(dev): fix dev config)
+=======
+  /caniuse-lite@1.0.30001564:
+    resolution: {integrity: sha512-DqAOf+rhof+6GVx1y+xzbFPeOumfQnhYzVnZD6LAXijR77yPtm9mfOcqOnT3mpnJiZVT+kwLAFnRlZcIz+c6bg==}
+
+  /caniuse-lite@1.0.30001579:
+    resolution: {integrity: sha512-u5AUVkixruKHJjw/pj9wISlcMpgFWzSrczLZbrqBSxukQixmg0SJ5sZTpvaFvxU0HoQKd4yoyAogyrAz9pzJnA==}
+    dev: true
+>>>>>>> 4dca3c6ae (feat(cf): conditional format support ref range)
 
   /caniuse-lite@1.0.30001588:
     resolution: {integrity: sha512-+hVY9jE44uKLkH0SrUTqxjxqNTOWHsbnQDIKjwkZ3lNTzUUVdBLBGXtj/q5Mp5u98r3droaZAewQuEDzjQdZlQ==}
@@ -8122,12 +8275,21 @@ packages:
     dev: false
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   /electron-to-chromium@1.4.675:
     resolution: {integrity: sha512-+1u3F/XPNIdUwv8i1lDxHAxCvNNU0QIqgb1Ycn+Jnng8ITzWSvUqixRSM7NOazJuwhf65IV17f/VbKj8DmL26A==}
 =======
   /electron-to-chromium@1.4.640:
     resolution: {integrity: sha512-z/6oZ/Muqk4BaE7P69bXhUhpJbUM9ZJeka43ZwxsDshKtePns4mhBlh8bU5+yrnOnz3fhG82XLzGUXazOmsWnA==}
 >>>>>>> 89540337d (fix(dev): fix dev config)
+=======
+  /electron-to-chromium@1.4.594:
+    resolution: {integrity: sha512-xT1HVAu5xFn7bDfkjGQi9dNpMqGchUkebwf1GL7cZN32NSwwlHRPMSDJ1KN6HkS0bWUtndbSQZqvpQftKG2uFQ==}
+
+  /electron-to-chromium@1.4.640:
+    resolution: {integrity: sha512-z/6oZ/Muqk4BaE7P69bXhUhpJbUM9ZJeka43ZwxsDshKtePns4mhBlh8bU5+yrnOnz3fhG82XLzGUXazOmsWnA==}
+    dev: true
+>>>>>>> 4dca3c6ae (feat(cf): conditional format support ref range)
 
   /emoji-regex@10.3.0:
     resolution: {integrity: sha512-QpLs9D9v9kArv4lfDEgg1X/gN5XLnf/A6l9cs8SPZLRZR3ZkY9+kwIQTxm+fsSej5UMYGE8fdoaZVIBlqG0XTw==}
@@ -11624,8 +11786,19 @@ packages:
       formdata-polyfill: 4.0.10
     dev: true
 
+<<<<<<< HEAD
+=======
+  /node-int64@0.4.0:
+    resolution: {integrity: sha512-O5lz91xSOeoXP6DulyHfllpq+Eg00MWitZIbtPfoSEvqIHdl5gfcY6hYzDWnj0qD5tz52PI08u9qUvSVeUBeHw==}
+    dev: true
+
+  /node-releases@2.0.13:
+    resolution: {integrity: sha512-uYr7J37ae/ORWdZeQ1xxMJe3NtdmqMC/JZK+geofDrkLUApKRHPd18/TxtBOJ4A0/+uUIliorNrfYV6s1b02eQ==}
+
+>>>>>>> 6b3ff90d8 (feat(cf): conditional format support ref range)
   /node-releases@2.0.14:
     resolution: {integrity: sha512-y10wOWt8yZpqXmOgRo77WaHEmhYQYGNA6y421PKsKYWEK8aW+cqAphborZDhqfyKrbZEN92CN1X2KbafY2s7Yw==}
+    dev: true
 
   /normalize-package-data@2.5.0:
     resolution: {integrity: sha512-/5CMN3T0R4XTj4DcGaexo+roZSdSFW/0AOOTROrjxzCG1wrWXEsGbRKevjlIL+ZDE4sZlJr5ED4YW0yqmkK+eA==}
@@ -14483,8 +14656,21 @@ packages:
     dev: false
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   /update-browserslist-db@1.0.13(browserslist@4.23.0):
 =======
+=======
+  /update-browserslist-db@1.0.13(browserslist@4.22.1):
+    resolution: {integrity: sha512-xebP81SNcPuNpPP3uzeW1NYXxI3rxyJzF3pD6sH4jE7o/IX+WtSpwnVU+qIsDPyk0d3hmFQ7mjqc6AtV604hbg==}
+    hasBin: true
+    peerDependencies:
+      browserslist: '>= 4.21.0'
+    dependencies:
+      browserslist: 4.22.1
+      escalade: 3.1.1
+      picocolors: 1.0.0
+
+>>>>>>> 4dca3c6ae (feat(cf): conditional format support ref range)
   /update-browserslist-db@1.0.13(browserslist@4.22.2):
 >>>>>>> 89540337d (fix(dev): fix dev config)
     resolution: {integrity: sha512-xebP81SNcPuNpPP3uzeW1NYXxI3rxyJzF3pD6sH4jE7o/IX+WtSpwnVU+qIsDPyk0d3hmFQ7mjqc6AtV604hbg==}
@@ -14519,7 +14705,11 @@ packages:
       browserslist: 4.22.2
       escalade: 3.1.1
       picocolors: 1.0.0
+<<<<<<< HEAD
 >>>>>>> 89540337d (fix(dev): fix dev config)
+=======
+    dev: true
+>>>>>>> 4dca3c6ae (feat(cf): conditional format support ref range)
 
   /uri-js@4.4.1:
     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}
@@ -14643,7 +14833,7 @@ packages:
       es-module-lexer: 0.4.1
       fs-extra: 10.1.0
       magic-string: 0.25.9
-      vite: 5.0.12(@types/node@20.11.7)(less@4.2.0)
+      vite: 5.0.12(@types/node@20.11.16)(less@4.2.0)
     dev: true
 
   /vite@5.1.4(@types/node@20.11.24)(less@4.2.0):
@@ -14683,8 +14873,11 @@ packages:
       fsevents: 2.3.3
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   /vitest@1.3.1(@types/node@20.11.24)(happy-dom@13.3.8):
 =======
+=======
+>>>>>>> 6b3ff90d8 (feat(cf): conditional format support ref range)
 <<<<<<< HEAD
   /vitest@1.3.1(@types/node@20.11.19)(happy-dom@13.3.8):
 >>>>>>> 9af864941 (chore(cf): format code)
@@ -14694,6 +14887,9 @@ packages:
   /vitest@1.2.1(@types/node@20.11.16)(happy-dom@13.3.8):
 =======
   /vitest@1.2.1(@types/node@20.11.7)(happy-dom@13.2.1)(less@4.2.0):
+=======
+  /vitest@1.2.1(@types/node@20.11.16)(happy-dom@13.2.1)(less@4.2.0):
+>>>>>>> 4dca3c6ae (feat(cf): conditional format support ref range)
     resolution: {integrity: sha512-TRph8N8rnSDa5M2wKWJCMnztCZS9cDcgVTQ6tsTFTG/odHJ4l5yNVqvbeDJYJRZ6is3uxaEpFs8LL6QM+YFSdA==}
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
@@ -14718,7 +14914,7 @@ packages:
       jsdom:
         optional: true
     dependencies:
-      '@types/node': 20.11.7
+      '@types/node': 20.11.16
       '@vitest/expect': 1.2.1
       '@vitest/runner': 1.2.1
       '@vitest/snapshot': 1.2.1
@@ -14738,8 +14934,8 @@ packages:
       strip-literal: 1.3.0
       tinybench: 2.5.1
       tinypool: 0.8.1
-      vite: 5.0.12(@types/node@20.11.7)(less@4.2.0)
-      vite-node: 1.2.1(@types/node@20.11.7)(less@4.2.0)
+      vite: 5.0.12(@types/node@20.11.16)(less@4.2.0)
+      vite-node: 1.2.1(@types/node@20.11.16)(less@4.2.0)
       why-is-node-running: 2.2.2
     transitivePeerDependencies:
       - less
@@ -14751,8 +14947,7 @@ packages:
       - terser
     dev: true
 
-  /vitest@1.2.1(@types/node@20.11.7)(happy-dom@13.3.8):
->>>>>>> 5d49a0768 (chore(cf): format code)
+  /vitest@1.2.1(@types/node@20.11.16)(happy-dom@13.3.8):
     resolution: {integrity: sha512-TRph8N8rnSDa5M2wKWJCMnztCZS9cDcgVTQ6tsTFTG/odHJ4l5yNVqvbeDJYJRZ6is3uxaEpFs8LL6QM+YFSdA==}
 >>>>>>> 38115db70 (chore(cf): format code)
     engines: {node: ^18.0.0 || >=20.0.0}
@@ -14811,10 +15006,13 @@ packages:
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   /vitest@1.3.1(@types/node@20.11.24)(less@4.2.0):
 =======
 =======
 >>>>>>> 9af864941 (chore(cf): format code)
+=======
+>>>>>>> 6b3ff90d8 (feat(cf): conditional format support ref range)
 <<<<<<< HEAD
   /vitest@1.3.1(@types/node@20.11.19)(less@4.2.0):
 >>>>>>> 816d01ba3 (fix(dev): fix dev config)
@@ -14884,12 +15082,14 @@ packages:
       - terser
     dev: true
 
+<<<<<<< HEAD
   /vue-eslint-parser@9.4.2(eslint@8.57.0):
-    resolution: {integrity: sha512-Ry9oiGmCAK91HrKMtCrKFWmSFWvYkpGglCeFAIqDdr9zdXmMMpJOmUJS7WWsW7fX81h6mwHmUZCQQ1E0PkSwYQ==}
 =======
-  /vue-eslint-parser@9.4.1(eslint@8.56.0):
-    resolution: {integrity: sha512-EmIbJ5cCI/E06SlI8K5sldVZ+Ef5vy26Ck0lNALxgY7FEAMOjNR32qcsVM3FUJUbvVWTBEiOy5lQvbhPK/ynBw==}
->>>>>>> 5d49a0768 (chore(cf): format code)
+=======
+>>>>>>> 4dca3c6ae (feat(cf): conditional format support ref range)
+  /vue-eslint-parser@9.4.2(eslint@8.56.0):
+>>>>>>> 6b3ff90d8 (feat(cf): conditional format support ref range)
+    resolution: {integrity: sha512-Ry9oiGmCAK91HrKMtCrKFWmSFWvYkpGglCeFAIqDdr9zdXmMMpJOmUJS7WWsW7fX81h6mwHmUZCQQ1E0PkSwYQ==}
     engines: {node: ^14.17.0 || >=16.0.0}
     peerDependencies:
       eslint: '>=6.0.0'

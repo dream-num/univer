@@ -57,3 +57,19 @@ export function excelSerialToDate(serial: number): Date {
     const resultDate = new Date(baseDate.getTime() + dayDifference * (1000 * 3600 * 24));
     return resultDate;
 }
+
+export function formatDateDefault(date: Date): string {
+    // Get the year from the date object
+    const year: number = date.getFullYear();
+
+    // Get the month from the date object and add 1 (since getMonth() returns 0-11)
+    // Convert it to a string and pad with zero if necessary to ensure two digits
+    const month: string = (date.getMonth() + 1).toString().padStart(2, '0');
+
+    // Get the day from the date object
+    // Convert it to a string and pad with zero if necessary to ensure two digits
+    const day: string = date.getDate().toString().padStart(2, '0');
+
+    // Concatenate year, month, and day with '/' as separator to form yyyy/mm/dd format
+    return `${year}/${month}/${day}`;
+}

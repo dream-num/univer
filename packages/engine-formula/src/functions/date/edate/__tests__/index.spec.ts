@@ -19,6 +19,7 @@ import { describe, expect, it } from 'vitest';
 import { FUNCTION_NAMES_DATE } from '../../function-names';
 import { Edate } from '..';
 import { NumberValueObject } from '../../../../engine/value-object/primitive-object';
+import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 
 describe('Test edate function', () => {
     const textFunction = new Edate(FUNCTION_NAMES_DATE.EDATE);
@@ -28,7 +29,37 @@ describe('Test edate function', () => {
             const startDate = new NumberValueObject(43831);
             const months = new NumberValueObject(1);
             const result = textFunction.calculate(startDate, months);
-            expect(result.getValue()).toBe(43862);
+            expect(transformToValue(result.getArrayValue())).toStrictEqual([[43862]]);
+        });
+
+        it('Start date is array', () => {
+            const startDate = new ArrayValueObject({
+                calculateValueList: transformToValueObject([[43832], [43833]]),
+                rowCount: 2,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const months = new NumberValueObject(1);
+            const result = textFunction.calculate(startDate, months);
+            expect(transformToValue(result.getArrayValue())).toStrictEqual([[43863], [43864]]);
+        });
+
+        it('Months is array', () => {
+            const startDate = new NumberValueObject(43831);
+            const months = new ArrayValueObject({
+                calculateValueList: transformToValueObject([[1], [2]]),
+                rowCount: 2,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result = textFunction.calculate(startDate, months);
+            expect(transformToValue(result.getArrayValue())).toStrictEqual([[43862], [43891]]);
         });
     });
 });

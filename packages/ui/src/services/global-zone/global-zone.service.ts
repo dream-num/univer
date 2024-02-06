@@ -14,5 +14,19 @@
  * limitations under the License.
  */
 
-export { DesktopPrintService } from './desktop-print.service';
-export { IPrintService } from './print.service';
+import type { IDisposable } from '@wendellhu/redi';
+import { createIdentifier } from '@wendellhu/redi';
+import type { Subject } from 'rxjs';
+
+export const IGlobalZoneService = createIdentifier<IGlobalZoneService>('univer.print-service');
+
+export interface IGlobalZoneService {
+    readonly visible$: Subject<boolean>;
+    readonly componentKey$: Subject<string>;
+
+    set(key: string, component: any): IDisposable;
+
+    open(): void;
+
+    close(): void;
+}

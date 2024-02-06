@@ -20,9 +20,9 @@ import type { ForwardRefExoticComponent } from 'react';
 import { Subject } from 'rxjs';
 
 import { ComponentManager } from '../../common/component-manager';
-import type { IPrintService } from './print.service';
+import type { IGlobalZoneService } from './global-zone.service';
 
-export class DesktopPrintService implements IPrintService {
+export class DesktopGlobalZoneService implements IGlobalZoneService {
     readonly visible$ = new Subject<boolean>();
     readonly componentKey$ = new Subject<string>();
 

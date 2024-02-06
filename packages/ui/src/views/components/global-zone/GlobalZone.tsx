@@ -18,18 +18,18 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
 import React, { useEffect, useMemo, useState } from 'react';
 import { ComponentManager } from '../../../common/component-manager';
-import { IPrintService } from '../../../services/print/print.service';
+import { IGlobalZoneService } from '../../../services/global-zone';
 import { useObservable } from '../../../components/hooks/observable';
 
 import styles from './index.module.less';
 
-export function Print() {
-    const printService = useDependency(IPrintService);
+export function GlobalZone() {
+    const globalZoneService = useDependency(IGlobalZoneService);
     const [visible, setVisible] = useState(false);
-    const componentKey = useObservable(printService.componentKey$);
+    const componentKey = useObservable(globalZoneService.componentKey$);
     const componentManager = useDependency(ComponentManager);
 
-    const _className = clsx(styles.print, styles.printOpen);
+    const _className = clsx(styles.globalZone, styles.globalZoneOpen);
 
     const Component = useMemo(() => {
         const Component = componentManager.get(componentKey ?? '');
@@ -39,14 +39,14 @@ export function Print() {
     }, [componentKey]);
 
     useEffect(() => {
-        const subscription = printService.visible$.subscribe((val) => {
+        const subscription = globalZoneService.visible$.subscribe((val) => {
             setVisible(val);
         });
 
         return () => {
             subscription.unsubscribe();
         };
-    }, [printService.visible$]);
+    }, [globalZoneService.visible$]);
 
     if (!visible) {
         return null;

@@ -51,7 +51,6 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/sheets": "workspace:*",
-        "@univerjs/ui": "workspace:*",
         "@wendellhu/redi": ">=0.12.13",
         "rxjs": ">=7.0.0"
     },
@@ -61,7 +60,6 @@
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
-        "@univerjs/ui": "workspace:*",
         "@wendellhu/redi": "^0.12.13",
         "less": "^4.2.0",
         "rxjs": "^7.8.1",

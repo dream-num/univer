@@ -25,8 +25,8 @@ import { IClipboardInterfaceService } from '@univerjs/ui';
 
 import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import { takeUntil } from 'rxjs';
+import { CutContentCommand, InnerPasteCommand } from '@univerjs/docs';
 import { DocCopyCommand, DocCutCommand, DocPasteCommand, whenDocOrEditor } from '../commands/commands/clipboard.command';
-import { CutContentCommand, InnerPasteCommand } from '../commands/commands/clipboard.inner.command';
 import { IDocClipboardService } from '../services/clipboard/clipboard.service';
 
 @OnLifecycle(LifecycleStages.Steady, DocClipboardController)

@@ -20,8 +20,7 @@ import { HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, PLAIN_TEXT_CLIPBO
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier, Inject } from '@wendellhu/redi';
 
-import { TextSelectionManagerService } from '../text-selection-manager.service';
-import { CutContentCommand, InnerPasteCommand } from '../../commands/commands/clipboard.inner.command';
+import { CutContentCommand, InnerPasteCommand, TextSelectionManagerService } from '@univerjs/docs';
 import { copyContentCache, extractId, genId } from './copy-content-cache';
 import { HtmlToUDMService } from './html-to-udm/converter';
 import PastePluginLark from './html-to-udm/paste-plugins/plugin-lark';

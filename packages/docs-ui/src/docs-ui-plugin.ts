@@ -27,12 +27,28 @@ import {
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
+import { IShortcutService } from '@univerjs/ui';
+import {
+    MoveCursorDownShortcut,
+    MoveCursorLeftShortcut,
+    MoveCursorRightShortcut,
+    MoveCursorUpShortcut,
+    MoveSelectionDownShortcut,
+    MoveSelectionLeftShortcut,
+    MoveSelectionRightShortcut,
+    MoveSelectionUpShortcut,
+    SelectAllShortcut,
+} from './shortcuts/cursor.shortcut';
 import type { IUniverDocsUIConfig } from './basics';
 import { DefaultDocUiConfig } from './basics';
 import { DOC_UI_PLUGIN_NAME } from './basics/const/plugin-name';
 import { AppUIController } from './controllers';
 import { DocUIController } from './controllers/doc-ui.controller';
 import { zhCN } from './locale';
+
+import { BreakLineShortcut, DeleteLeftShortcut, DeleteRightShortcut } from './shortcuts/core-editing.shortcut';
+import { DocClipboardService, IDocClipboardService } from './services/clipboard/clipboard.service';
+import { DocClipboardController } from './controllers/clipboard.controller';
 
 export class UniverDocsUIPlugin extends Plugin {
     static override type = PluginType.Doc;
@@ -51,6 +67,7 @@ export class UniverDocsUIPlugin extends Plugin {
 
         this._config = Tools.deepMerge({}, DefaultDocUiConfig, this._config);
         this._initDependencies(_injector);
+        this._initializeCommands();
     }
 
     override onRendered(): void {
@@ -60,14 +77,40 @@ export class UniverDocsUIPlugin extends Plugin {
 
     override onDestroy(): void {}
 
+    private _initializeCommands(): void {
+        [
+            MoveCursorUpShortcut,
+            MoveCursorDownShortcut,
+            MoveCursorRightShortcut,
+            MoveCursorLeftShortcut,
+            MoveSelectionUpShortcut,
+            MoveSelectionDownShortcut,
+            MoveSelectionLeftShortcut,
+            MoveSelectionRightShortcut,
+            SelectAllShortcut,
+            DeleteLeftShortcut,
+            DeleteRightShortcut,
+            BreakLineShortcut,
+        ].forEach((shortcut) => {
+            this._injector.get(IShortcutService).registerShortcut(shortcut);
+        });
+    }
+
     private _initDependencies(injector: Injector) {
         const dependencies: Dependency[] = [
             [DocUIController],
+            [DocClipboardController],
             [
                 // controllers
                 AppUIController,
                 {
                     useFactory: () => this._injector.createInstance(AppUIController, this._config),
+                },
+            ],
+            [
+                IDocClipboardService,
+                {
+                    useClass: DocClipboardService,
                 },
             ],
         ];

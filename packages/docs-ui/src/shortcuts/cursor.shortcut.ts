@@ -18,8 +18,7 @@ import { Direction, EDITOR_ACTIVATED, FOCUSING_DOC } from '@univerjs/core';
 import type { IShortcutItem } from '@univerjs/ui';
 import { KeyCode, MetaKeys } from '@univerjs/ui';
 
-import { MoveCursorOperation, MoveSelectionOperation } from '../commands/operations/cursor.operation';
-import { SelectAllOperation } from '../commands/operations/select-all.operation';
+import { MoveCursorOperation, MoveSelectionOperation, SelectAllOperation } from '@univerjs/docs';
 
 export const MoveCursorUpShortcut: IShortcutItem = {
     id: MoveCursorOperation.id,

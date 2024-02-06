@@ -17,12 +17,12 @@
 import type { Nullable } from '../shared';
 import { ObjectMatrix, Rectangle, Tools } from '../shared';
 import { createRowColIter } from '../shared/row-col-iter';
-import { DEFAULT_WORKSHEET } from '../types/const';
-import { BooleanNumber } from '../types/enum';
+import type { BooleanNumber } from '../types/enum';
 import type { ICellData, ICellDataForSheetInterceptor, IFreeze, IRange, IWorksheetData } from '../types/interfaces';
 import { ColumnManager } from './column-manager';
 import { Range } from './range';
 import { RowManager } from './row-manager';
+import { mergeWorksheetSnapshotWithDefault } from './sheet-snapshot-utils';
 import type { Styles } from './styles';
 import { SheetViewModel } from './view-model';
 
@@ -45,26 +45,7 @@ export class Worksheet {
         snapshot: Partial<IWorksheetData>,
         private readonly _styles: Styles
     ) {
-        const mergedSnapshot: IWorksheetData = {
-            ...DEFAULT_WORKSHEET,
-            mergeData: [],
-            cellData: {},
-            rowData: {},
-            columnData: {},
-            rowHeader: {
-                width: 46,
-                hidden: BooleanNumber.FALSE,
-            },
-            columnHeader: {
-                height: 20,
-                hidden: BooleanNumber.FALSE,
-            },
-            selections: ['A1'],
-            rightToLeft: BooleanNumber.FALSE,
-            ...snapshot,
-        };
-
-        this._snapshot = mergedSnapshot;
+        this._snapshot = mergeWorksheetSnapshotWithDefault(snapshot);
 
         const { columnData, rowData, cellData } = this._snapshot;
         this._sheetId = this._snapshot.id ?? Tools.generateRandomId(6);

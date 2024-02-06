@@ -16,12 +16,11 @@
 
 import type { CommandListener, ICommandInfo, IRange, IWorkbookData, Workbook } from '@univerjs/core';
 import {
-    DEFAULT_WORKSHEET,
     ICommandService,
     IUniverInstanceService,
+    mergeWorksheetSnapshotWithDefault,
     RedoCommand,
     toDisposable,
-    Tools,
     UndoCommand,
 } from '@univerjs/core';
 import type {
@@ -81,7 +80,7 @@ export class FWorkbook {
      * @returns The new created sheet
      */
     create(name: string, rows: number, column: number): FWorksheet {
-        const newSheet = Tools.deepClone(DEFAULT_WORKSHEET);
+        const newSheet = mergeWorksheetSnapshotWithDefault({});
         newSheet.rowCount = rows;
         newSheet.columnCount = column;
         newSheet.name = name;

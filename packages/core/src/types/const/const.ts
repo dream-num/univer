@@ -22,7 +22,7 @@ import {
     VerticalAlign,
     WrapStrategy,
 } from '../enum';
-import type { IWorkbookData, IWorksheetData } from '../interfaces';
+import type { IWorkbookData } from '../interfaces';
 import { version } from '../../../package.json';
 
 /**
@@ -79,57 +79,8 @@ export const DEFAULT_WORKBOOK: IWorkbookData = {
     resources: [],
 };
 
-export const DEFAULT_WORKSHEET_ROW_COUNT = 1000;
-
-export const DEFAULT_WORKSHEET_COLUMN_COUNT = 20;
-
-export const DEFAULT_WORKSHEET_ROW_HEIGHT = 19;
-
-export const DEFAULT_WORKSHEET_COLUMN_WIDTH = 73;
-
-export const DEFAULT_WORKSHEET_ROW_TITLE_WIDTH = 46;
-
-export const DEFAULT_WORKSHEET_COLUMN_TITLE_HEIGHT = 20;
-
 /**
- * Used as an init worksheet return value
- */
-export const DEFAULT_WORKSHEET: IWorksheetData = {
-    name: 'Sheet1',
-    id: 'sheet-01',
-    tabColor: '',
-    hidden: BooleanNumber.FALSE,
-    rowCount: DEFAULT_WORKSHEET_ROW_COUNT,
-    columnCount: DEFAULT_WORKSHEET_COLUMN_COUNT,
-    zoomRatio: 1,
-    freeze: {
-        xSplit: 0,
-        ySplit: 0,
-        startRow: -1,
-        startColumn: -1,
-    },
-    scrollTop: 0,
-    scrollLeft: 0,
-    defaultColumnWidth: DEFAULT_WORKSHEET_COLUMN_WIDTH,
-    defaultRowHeight: DEFAULT_WORKSHEET_ROW_HEIGHT,
-    mergeData: [],
-    cellData: {},
-    rowData: {},
-    columnData: {},
-    showGridlines: BooleanNumber.TRUE,
-    rowHeader: {
-        width: DEFAULT_WORKSHEET_ROW_TITLE_WIDTH,
-        hidden: BooleanNumber.FALSE,
-    },
-    columnHeader: {
-        height: DEFAULT_WORKSHEET_COLUMN_TITLE_HEIGHT,
-        hidden: BooleanNumber.FALSE,
-    },
-    selections: ['A1'],
-    rightToLeft: BooleanNumber.FALSE,
-};
-/**
- * Default styles
+ * Default styles.
  */
 export const DEFAULT_STYLES = {
     /**

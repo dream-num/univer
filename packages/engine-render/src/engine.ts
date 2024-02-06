@@ -97,7 +97,7 @@ export class Engine extends ThinEngine<Scene> {
             pixelRatio,
         });
         this._canvasEle = this._canvas.getCanvasEle();
-        // this._canvas.setSize(elemWidth, elemHeight, pixelRatio);
+        this._canvas.setSize(elemWidth, elemHeight, pixelRatio);
         this._handleKeyboardAction();
         this._handlePointerAction();
     }

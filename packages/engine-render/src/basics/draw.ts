@@ -170,7 +170,7 @@ export function clearLineByBorderType(ctx: UniverRenderingContext, type: BORDER_
     // ctx.stroke();
 
     ctx.beginPath();
-    ctx.clearRect(drawStartX, drawStartY, drawEndX - drawStartX, drawEndY - drawStartY);
+    ctx.clearRectForTexture(drawStartX, drawStartY, drawEndX - drawStartX, drawEndY - drawStartY);
 }
 
 export function setLineType(ctx: UniverRenderingContext, style: BorderStyleTypes) {

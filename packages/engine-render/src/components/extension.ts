@@ -38,6 +38,8 @@ export class ComponentExtension<T, U, V> {
 
     zIndex: number = 0;
 
+    printingZIndex: number | undefined;
+
     parent: Nullable<BaseObject>;
 
     translateX = 0;

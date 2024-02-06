@@ -142,14 +142,12 @@ export class Font extends SheetExtension {
                                 cellHeight - 2 / scale
                             );
                             ctx.clip();
-                            if (this.spreadsheet.allowCache) {
-                                ctx.clearRect(
-                                    startX + 1 / scale,
-                                    startY + 1 / scale,
-                                    cellWidth - 2 / scale,
-                                    cellHeight - 2 / scale
-                                );
-                            }
+                            ctx.clearRectForTexture(
+                                startX + 1 / scale,
+                                startY + 1 / scale,
+                                cellWidth - 2 / scale,
+                                cellHeight - 2 / scale
+                            );
                         } else {
                             if (horizontalAlign === HorizontalAlign.CENTER) {
                                 this._clipRectangle(
@@ -189,14 +187,13 @@ export class Font extends SheetExtension {
                     } else {
                         ctx.rect(startX + 1 / scale, startY + 1 / scale, cellWidth - 2 / scale, cellHeight - 2 / scale);
                         ctx.clip();
-                        if (this.spreadsheet.allowCache) {
-                            ctx.clearRect(
-                                startX + 1 / scale,
-                                startY + 1 / scale,
-                                cellWidth - 2 / scale,
-                                cellHeight - 2 / scale
-                            );
-                        }
+                        ctx.clearRectForTexture(
+                            startX + 1 / scale,
+                            startY + 1 / scale,
+                            cellWidth - 2 / scale,
+                            cellHeight - 2 / scale
+                        );
+
                     }
 
                     ctx.translate(startX, startY);
@@ -276,9 +273,7 @@ export class Font extends SheetExtension {
 
         ctx.rect(startX, startY, endX - startX, endY - startY);
         ctx.clip();
-        if (this.spreadsheet.allowCache) {
-            ctx.clearRect(startX, startY, endX - startX, endY - startY);
-        }
+        ctx.clearRectForTexture(startX, startY, endX - startX, endY - startY);
     }
 }
 

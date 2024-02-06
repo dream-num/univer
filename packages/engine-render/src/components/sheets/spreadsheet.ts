@@ -15,7 +15,7 @@
  */
 
 import type { IRange, ISelectionCellWithCoord, Nullable } from '@univerjs/core';
-import { BooleanNumber, ObjectMatrix, sortRules } from '@univerjs/core';
+import { BooleanNumber, ObjectMatrix, sortRules, printingSortRules } from '@univerjs/core';
 
 import type { BaseObject } from '../../base-object';
 
@@ -425,9 +425,6 @@ export class Spreadsheet extends SheetComponent {
         this._backgroundExtension = this.getExtensionByKey('DefaultBackgroundExtension') as Background;
         this._borderExtension = this.getExtensionByKey('DefaultBorderExtension') as Border;
         this._fontExtension = this.getExtensionByKey('DefaultFontExtension') as Font;
-        if (!this._allowCache) {
-            this._backgroundExtension.zIndex = 20;
-        }
     }
 
     private _addMakeDirtyToScroll() {
@@ -536,39 +533,38 @@ export class Spreadsheet extends SheetComponent {
         ctx.stroke();
         ctx.closePath();
 
-        if (this._allowCache) {
-            border?.forValue((rowIndex, columnIndex, borderCaches) => {
-                if (!borderCaches) {
-                    return true;
-                }
 
-                const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(rowIndex, columnIndex);
+        border?.forValue((rowIndex, columnIndex, borderCaches) => {
+            if (!borderCaches) {
+                return true;
+            }
 
-                let { startY, endY, startX, endX } = cellInfo;
-                const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
+            const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(rowIndex, columnIndex);
 
-                if (isMerged) {
-                    return true;
-                }
+            let { startY, endY, startX, endX } = cellInfo;
+            const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
 
-                if (isMergedMainCell) {
-                    startY = mergeInfo.startY;
-                    endY = mergeInfo.endY;
-                    startX = mergeInfo.startX;
-                    endX = mergeInfo.endX;
-                }
+            if (isMerged) {
+                return true;
+            }
 
-                if (!(mergeInfo.startRow >= rowStart && mergeInfo.endRow <= rowEnd)) {
-                    return true;
-                }
+            if (isMergedMainCell) {
+                startY = mergeInfo.startY;
+                endY = mergeInfo.endY;
+                startX = mergeInfo.startX;
+                endX = mergeInfo.endX;
+            }
 
-                for (const key in borderCaches) {
-                    const { type } = borderCaches[key] as BorderCacheItem;
+            if (!(mergeInfo.startRow >= rowStart && mergeInfo.endRow <= rowEnd)) {
+                return true;
+            }
 
-                    clearLineByBorderType(ctx, type, { startX, startY, endX, endY });
-                }
-            });
-        }
+            for (const key in borderCaches) {
+                const { type } = borderCaches[key] as BorderCacheItem;
+
+                clearLineByBorderType(ctx, type, { startX, startY, endX, endY });
+            }
+        });
         // Clearing the dashed line issue caused by overlaid auxiliary lines and strokes
 
         ctx.closePath();
@@ -578,9 +574,7 @@ export class Spreadsheet extends SheetComponent {
         // overflow cell
         this._clearRectangle(ctx, rowHeightAccumulation, columnWidthAccumulation, overflowCache.toNativeArray());
 
-        if (this._allowCache) {
-            this._clearBackground(ctx, backgroundPositions);
-        }
+        this._clearBackground(ctx, backgroundPositions);
 
         ctx.restore();
     }
@@ -636,7 +630,7 @@ export class Spreadsheet extends SheetComponent {
                 endX = mergeInfo.endX;
             }
 
-            ctx.clearRect(startX, startY, endX - startX + 0.5, endY - startY + 0.5);
+            ctx.clearRectForTexture(startX, startY, endX - startX + 0.5, endY - startY + 0.5);
         });
     }
 }

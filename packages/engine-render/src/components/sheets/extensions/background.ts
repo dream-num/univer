@@ -41,6 +41,8 @@ export class Background extends SheetExtension {
 
     override zIndex = DOC_EXTENSION_Z_INDEX;
 
+    override printingZIndex = NO_CACHE_Z_INDEX;
+
     override draw(
         ctx: UniverRenderingContext,
         parentScale: IScale,

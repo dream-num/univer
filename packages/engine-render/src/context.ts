@@ -681,11 +681,11 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
         } else if ('mozDash' in this._context) {
             // verified that this works in firefox
 
-            (<any> this._context.mozDash) = segments;
+            (<any>this._context.mozDash) = segments;
         } else if ('webkitLineDash' in this._context) {
             // does not currently work for Safari
 
-            (<any> this._context.webkitLineDash) = segments;
+            (<any>this._context.webkitLineDash) = segments;
         }
 
         // no support for IE9 and IE10
@@ -770,19 +770,23 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
         const { scaleX, scaleY } = this._getScale();
         this._context.translate(x / scaleX, y / scaleY);
     }
+
+    clearRectForTexture(x: number, y: number, width: number, height: number) {
+        this.clearRect(x, y, width, height);
+    }
 }
 
 /**
  * TODO
  */
-export class UniverRenderingContextWebGL {}
+export class UniverRenderingContextWebGL { }
 
 /**
  * TODO
  */
-export class UniverRenderingContextWebGPU {}
+export class UniverRenderingContextWebGPU { }
 
-export class UniverRenderingContext extends UniverRenderingContext2D {}
+export class UniverRenderingContext extends UniverRenderingContext2D { }
 
 export class UniverPrintingContext extends UniverRenderingContext2D {
     private __getScale() {
@@ -805,4 +809,6 @@ export class UniverPrintingContext extends UniverRenderingContext2D {
         this._context.fillRect(x, y, width, height);
         this._context.restore();
     }
+
+    clearRectForTexture(x: number, y: number, width: number, height: number) { }
 }

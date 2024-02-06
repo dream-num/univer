@@ -24,6 +24,19 @@ export function sortRules(oa: any, ob: any) {
     return -1;
 }
 
+export function printingSortRules(isPrinting: boolean) {
+    return function (oa: any, ob: any) {
+        const getZIndex = (o: any) => !isPrinting ? o.zIndex : o.printingZIndex ?? o.zIndex;
+        if (getZIndex(oa) > getZIndex(ob)) {
+            return 1;
+        }
+        if (getZIndex(oa) === getZIndex(ob)) {
+            return 0;
+        }
+        return -1;
+    }
+}
+
 export function sortRulesByDesc(oa: any, ob: any) {
     if (oa.zIndex > ob.zIndex) {
         return -1;

@@ -185,6 +185,10 @@ export class FormulaDataModel extends Disposable {
         return this._numfmtItemMap;
     }
 
+    getNumfmtValue(unitId: string, sheetId: string, row: number, column: number) {
+        return this._numfmtItemMap[unitId]?.[sheetId]?.[row]?.[column];
+    }
+
     setNumfmtItemMap(value: INumfmtItemMap) {
         this._numfmtItemMap = value;
     }

@@ -681,11 +681,11 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
         } else if ('mozDash' in this._context) {
             // verified that this works in firefox
 
-            (<any> this._context.mozDash) = segments;
+            (<any>this._context.mozDash) = segments;
         } else if ('webkitLineDash' in this._context) {
             // does not currently work for Safari
 
-            (<any> this._context.webkitLineDash) = segments;
+            (<any>this._context.webkitLineDash) = segments;
         }
 
         // no support for IE9 and IE10
@@ -814,7 +814,7 @@ export class UniverPrintingContext extends UniverRenderingContext2D {
         this._context.restore();
     }
 
-    clearRectForTexture(x: number, y: number, width: number, height: number) { }
+    override clearRectForTexture(x: number, y: number, width: number, height: number) { }
 
-    setGlobalCompositeOperation(val: GlobalCompositeOperation) { }
+    override setGlobalCompositeOperation(val: GlobalCompositeOperation) { }
 }

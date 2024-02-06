@@ -944,14 +944,14 @@ export const FUNCTION_LIST_LOOKUP: IFunctionInfo[] = [
             {
                 name: 'formula.functionList.XMATCH.functionParameter.matchMode.name',
                 detail: 'formula.functionList.XMATCH.functionParameter.matchMode.detail',
-                example: 'A1:A20',
+                example: '0',
                 require: 0,
                 repeat: 0,
             },
             {
                 name: 'formula.functionList.XMATCH.functionParameter.searchMode.name',
                 detail: 'formula.functionList.XMATCH.functionParameter.searchMode.detail',
-                example: 'A1:A20',
+                example: '1',
                 require: 0,
                 repeat: 0,
             },

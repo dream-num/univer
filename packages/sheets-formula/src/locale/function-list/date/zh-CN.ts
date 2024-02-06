@@ -101,7 +101,7 @@ export default {
         },
     },
     EDATE: {
-        description: '返回用于表示开始日期之前或之后月数的日期的序列号',
+        description: '返回表示某个日期的序列号，该日期与指定日期 (start_date) 相隔（之前或之后）指示的月份数。 使用函数 EDATE 可以计算与发行日处于一月中同一天的到期日的日期。',
         abstract: '返回用于表示开始日期之前或之后月数的日期的序列号',
         links: [
             {
@@ -110,8 +110,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: '开始日期', detail: '一个代表开始日期的日期。 应使用 DATE 函数输入日期，或者将日期作为其他公式或函数的结果输入。 例如，使用函数 DATE(2008,5,23) 输入 2008 年 5 月 23 日。 如果日期以文本形式输入，则会出现问题。' },
+            months: { name: '月份', detail: 'Start Date 之前或之后的月份数。 Months 为正值将生成未来日期；为负值将生成过去日期。' },
         },
     },
     EOMONTH: {

@@ -15,10 +15,12 @@
  */
 
 import { DateFunction } from './date';
+import { Edate } from './edate';
 import { FUNCTION_NAMES_DATE } from './function-names';
 import { Today } from './today';
 
 export const functionDate = [
     [Today, FUNCTION_NAMES_DATE.TODAY],
     [DateFunction, FUNCTION_NAMES_DATE.DATE],
+    [Edate, FUNCTION_NAMES_DATE.EDATE],
 ];

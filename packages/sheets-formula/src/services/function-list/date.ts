@@ -163,16 +163,16 @@ export const FUNCTION_LIST_DATE: IFunctionInfo[] = [
         abstract: 'formula.functionList.EDATE.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.EDATE.functionParameter.number1.name',
-                detail: 'formula.functionList.EDATE.functionParameter.number1.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.EDATE.functionParameter.startDate.name',
+                detail: 'formula.functionList.EDATE.functionParameter.startDate.detail',
+                example: 'A1',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'formula.functionList.EDATE.functionParameter.number2.name',
-                detail: 'formula.functionList.EDATE.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.EDATE.functionParameter.months.name',
+                detail: 'formula.functionList.EDATE.functionParameter.months.detail',
+                example: '1',
                 require: 1,
                 repeat: 0,
             },

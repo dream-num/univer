@@ -101,7 +101,7 @@ export default {
         },
     },
     EDATE: {
-        description: 'Returns the serial number of the date that is the indicated number of months before or after the start date',
+        description: 'Returns the serial number that represents the date that is the indicated number of months before or after a specified date (the start_date). Use EDATE to calculate maturity dates or due dates that fall on the same day of the month as the date of issue.',
         abstract: 'Returns the serial number of the date that is the indicated number of months before or after the start date',
         links: [
             {
@@ -110,8 +110,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: 'Start Date', detail: 'A date that represents the start date. Dates should be entered by using the DATE function, or as results of other formulas or functions. For example, use DATE(2008,5,23) for the 23rd day of May, 2008. Problems can occur if dates are entered as text.' },
+            months: { name: 'Months', detail: 'The number of months before or after start_date. A positive value for months yields a future date; a negative value yields a past date.' },
         },
     },
     EOMONTH: {

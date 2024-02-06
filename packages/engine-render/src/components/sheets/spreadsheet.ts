@@ -421,7 +421,7 @@ export class Spreadsheet extends SheetComponent {
         SpreadsheetExtensionRegistry.getData()
             .sort(sortRules)
             .forEach((extension) => {
-                this.register(extension);
+                this.register(extension.clone());
             });
         // this._borderAuxiliaryExtension = this.getExtensionByKey('DefaultBorderAuxiliaryExtension') as BorderAuxiliary;
         this._backgroundExtension = this.getExtensionByKey('DefaultBackgroundExtension') as Background;

@@ -36,7 +36,11 @@ export class Background extends SheetExtension {
     PRINTING_Z_INDEX = NO_CACHE_Z_INDEX;
 
     override get zIndex() {
-        return (this.parent as Spreadsheet).isPrinting ? this.PRINTING_Z_INDEX : this.Z_INDEX;
+        return (this.parent as Spreadsheet)?.isPrinting ? this.PRINTING_Z_INDEX : this.Z_INDEX;
+    }
+
+    override clone() {
+        return new Background();
     }
 
     override draw(

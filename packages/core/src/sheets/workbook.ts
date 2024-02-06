@@ -20,7 +20,7 @@ import { ILogService } from '../services/log/log.service';
 import type { Nullable } from '../shared';
 import { Tools } from '../shared';
 import { Disposable } from '../shared/lifecycle';
-import { DEFAULT_RANGE_ARRAY, DEFAULT_WORKBOOK, DEFAULT_WORKSHEET } from '../types/const';
+import { DEFAULT_RANGE_ARRAY, DEFAULT_WORKBOOK } from '../types/const';
 import { BooleanNumber } from '../types/enum';
 import type {
     IColumnStartEndData,
@@ -99,7 +99,7 @@ export class Workbook extends Disposable {
         this._count = 1;
         this._worksheets = new Map<string, Worksheet>();
 
-        this._getDefaultWorkSheet();
+        this._passWorksheetSnapshots();
     }
 
     override dispose(): void {
@@ -494,36 +494,31 @@ export class Workbook extends Disposable {
     /**
      * Get Default Sheet
      */
-    private _getDefaultWorkSheet(): void {
-        const { _snapshot: _config, _worksheets } = this;
-        const { sheets, sheetOrder } = _config;
+    private _passWorksheetSnapshots(): void {
+        const { _snapshot, _worksheets } = this;
+        const { sheets, sheetOrder } = _snapshot;
 
-        // One worksheet by default
+        // If there's no sheets in the snapshot, we should create one.
         if (Tools.isEmptyObject(sheets)) {
-            sheets[DEFAULT_WORKSHEET.id] = Object.assign(DEFAULT_WORKSHEET, {
-                status: BooleanNumber.TRUE,
-            });
+            // TODO@wzhudev: should use generated uuid
+            sheets['sheet-01'] = { id: 'sheet-01' };
         }
 
-        let firstWorksheet = null;
-
+        // Pass all existing sheets.
         for (const sheetId in sheets) {
-            const config = sheets[sheetId];
+            const worksheetSnapshot = sheets[sheetId];
+            const { name } = worksheetSnapshot;
 
-            const { name } = config;
-            config.name = this.uniqueSheetName(name);
-
-            if (config.name !== name) {
-                this._log.warn(`The worksheet name ${name} is duplicated, we change it to ${config.name}`);
+            const uniqueName = this.uniqueSheetName(name);
+            if (uniqueName !== name) {
+                throw new Error(`[Workbook]: The worksheet name ${name} is duplicated!`);
             }
 
-            const worksheet = new Worksheet(config, this._styles);
+            const worksheet = new Worksheet(worksheetSnapshot, this._styles);
             _worksheets.set(sheetId, worksheet);
+
             if (!sheetOrder.includes(sheetId)) {
                 sheetOrder.push(sheetId);
-            }
-            if (firstWorksheet == null) {
-                firstWorksheet = worksheet;
             }
         }
     }

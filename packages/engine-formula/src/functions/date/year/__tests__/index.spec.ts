@@ -43,7 +43,7 @@ describe('Test year function', () => {
                 column: 0,
             });
             const result = textFunction.calculate(serialNumber);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([[1900, '#VALUE!', 1900, 1900, 1900, '#VALUE!'], [1900, 1900, 1900, '#VALUE!', '#NUM!', 1905]]);
+            expect(transformToValue(result.getArrayValue())).toStrictEqual([[1900, '#VALUE!', 1900, 1900, 1900, 1900], [1900, 1900, 1900, '#VALUE!', '#NUM!', 1905]]);
         });
     });
 });

@@ -37,7 +37,7 @@ export class Month extends BaseFunction {
                     return serialNumberObject;
                 }
 
-                if (serialNumberObject.isString() || serialNumberObject.isNull()) {
+                if (serialNumberObject.isString()) {
                     return new ErrorValueObject(ErrorType.VALUE);
                 }
 

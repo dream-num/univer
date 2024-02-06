@@ -66,7 +66,7 @@ export class Edate extends BaseFunction {
                 return monthsValueObject;
             }
 
-            if (startDateObject.isString() || startDateObject.isNull() || startDateObject.isBoolean() || monthsValueObject.isString() || monthsValueObject.isNull() || monthsValueObject.isBoolean()) {
+            if (startDateObject.isString() || startDateObject.isBoolean() || monthsValueObject.isString() || monthsValueObject.isBoolean()) {
                 return new ErrorValueObject(ErrorType.VALUE);
             }
 

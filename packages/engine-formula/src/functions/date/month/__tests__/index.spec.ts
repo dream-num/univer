@@ -43,7 +43,7 @@ describe('Test month function', () => {
                 column: 0,
             });
             const result = textFunction.calculate(serialNumber);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([[1, '#VALUE!', 1, 1, 1, '#VALUE!'], [1, 4, 1, '#VALUE!', '#NUM!', 3]]);
+            expect(transformToValue(result.getArrayValue())).toStrictEqual([[1, '#VALUE!', 1, 1, 1, 1], [1, 4, 1, '#VALUE!', '#NUM!', 3]]);
         });
     });
 });

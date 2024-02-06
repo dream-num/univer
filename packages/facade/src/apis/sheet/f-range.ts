@@ -412,21 +412,11 @@ export class FRange {
      * @param color The font color in CSS notation (such as '#ffffff' or 'white'); a null value resets the color.
      */
     setFontColor(color: string | null): this {
-        let style: IStyleTypeValue<IColorStyle | null>;
-
-        if (color === null) {
-            style = {
-                type: 'cl',
-                value: null,
-            };
-        } else {
-            style = {
-                type: 'cl',
-                value: {
-                    rgb: color,
-                },
-            };
-        }
+        const value: IColorStyle | null = color === null ? null : { rgb: color };
+        const style: IStyleTypeValue<IColorStyle | null> = {
+            type: 'cl',
+            value,
+        };
 
         const setStyleParams: ISetStyleCommandParams<IColorStyle | null> = {
             unitId: this._workbook.getUnitId(),

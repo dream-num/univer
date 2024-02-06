@@ -174,7 +174,7 @@ describe('Test FRange', () => {
     });
 
     it('Range getCellData', () => {
-        const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+        const activeSheet = univerAPI.getActiveWorkbook()!.getActiveSheet();
         activeSheet?.getRange(0, 0)?.setValue(1);
         const range = activeSheet?.getRange(0, 0);
         expect(range?.getCellData()?.v).toBe(1);

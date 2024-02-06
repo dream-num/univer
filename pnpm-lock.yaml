@@ -362,9 +362,6 @@ importers:
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
-      '@univerjs/ui':
-        specifier: workspace:*
-        version: link:../ui
       '@wendellhu/redi':
         specifier: ^0.12.13
         version: 0.12.13
@@ -404,9 +401,6 @@ importers:
       '@univerjs/shared':
         specifier: workspace:*
         version: link:../../common/shared
-      '@univerjs/ui':
-        specifier: workspace:*
-        version: link:../ui
       '@wendellhu/redi':
         specifier: ^0.12.13
         version: 0.12.13

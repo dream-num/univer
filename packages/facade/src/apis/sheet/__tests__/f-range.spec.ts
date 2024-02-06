@@ -173,11 +173,30 @@ describe('Test FRange', () => {
         expect(getStyleByPosition(3, 4, 3, 4)?.bg?.rgb).toBe('red');
     });
 
+    it('Range getCellData', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()!.getActiveSheet();
+        activeSheet?.getRange(0, 0)?.setValue(1);
+        const range = activeSheet?.getRange(0, 0);
+        expect(range?.getCellData()?.v).toBe(1);
+    });
+
+    it('Range getCellStyleData', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+        activeSheet?.getRange(0, 0)?.setValue(1);
+        activeSheet?.getRange(0, 0)?.setBackgroundColor('red');
+        const range = activeSheet?.getRange(0, 0);
+        expect(range?.getCellStyleData()?.bg?.rgb).toBe('red');
+
+        activeSheet?.getRange(0, 0, 2, 2)?.setFontWeight('bold');
+        expect(range?.getCellStyleData()?.bl).toBe(1);
+    });
+
     it('Range setFontWeight', () => {
         const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
 
         // change A1 font weight
         const range = activeSheet?.getRange(0, 0, 1, 1);
+        range?.setFontWeight(null);
         expect(getStyleByPosition(0, 0, 0, 0)?.bl).toBe(undefined);
         range?.setFontWeight('bold');
         expect(getStyleByPosition(0, 0, 0, 0)?.bl).toBe(1);
@@ -205,5 +224,231 @@ describe('Test FRange', () => {
         expect(getStyleByPosition(0, 2, 0, 2)?.bl).toBe(undefined);
         expect(getStyleByPosition(1, 1, 1, 1)?.bl).toBe(undefined);
         expect(getStyleByPosition(1, 2, 1, 2)?.bl).toBe(undefined);
+    });
+
+    it('Range setFontStyle', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+
+        // change A1 Font Style
+        const range = activeSheet?.getRange(0, 0);
+        range?.setFontStyle(null);
+        expect(getStyleByPosition(0, 0, 0, 0)?.it).toBe(undefined);
+        range?.setFontStyle('italic');
+        expect(getStyleByPosition(0, 0, 0, 0)?.it).toBe(1);
+        range?.setFontStyle('normal');
+        expect(getStyleByPosition(0, 0, 0, 0)?.it).toBe(0);
+        range?.setFontStyle(null);
+        expect(getStyleByPosition(0, 0, 0, 0)?.it).toBe(undefined);
+
+        // change A1:B2 Font Style
+        const range2 = activeSheet?.getRange(0, 0, 2, 2);
+        range2?.setFontStyle('italic');
+        expect(getStyleByPosition(0, 0, 0, 0)?.it).toBe(1);
+        expect(getStyleByPosition(0, 1, 0, 1)?.it).toBe(1);
+        expect(getStyleByPosition(1, 0, 1, 0)?.it).toBe(1);
+        expect(getStyleByPosition(1, 1, 1, 1)?.it).toBe(1);
+
+        range2?.setFontStyle('normal');
+        expect(getStyleByPosition(0, 0, 0, 0)?.it).toBe(0);
+        expect(getStyleByPosition(0, 1, 0, 1)?.it).toBe(0);
+        expect(getStyleByPosition(1, 0, 1, 0)?.it).toBe(0);
+        expect(getStyleByPosition(1, 1, 1, 1)?.it).toBe(0);
+
+        range2?.setFontStyle(null);
+        expect(getStyleByPosition(0, 0, 0, 0)?.it).toBe(undefined);
+        expect(getStyleByPosition(0, 1, 0, 1)?.it).toBe(undefined);
+        expect(getStyleByPosition(1, 0, 1, 0)?.it).toBe(undefined);
+        expect(getStyleByPosition(1, 1, 1, 1)?.it).toBe(undefined);
+    });
+
+    it('Range setFontLine', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+
+        // change A1 Font Line
+        const range = activeSheet?.getRange(0, 0);
+        range?.setFontLine(null);
+        expect(getStyleByPosition(0, 0, 0, 0)?.ul?.s).toBe(undefined);
+        range?.setFontLine('underline');
+        expect(getStyleByPosition(0, 0, 0, 0)?.ul?.s).toBe(1);
+        range?.setFontLine('line-through');
+        expect(getStyleByPosition(0, 0, 0, 0)?.st?.s).toBe(1);
+        range?.setFontLine('none');
+        expect(getStyleByPosition(0, 0, 0, 0)?.ul?.s).toBe(0);
+        expect(getStyleByPosition(0, 0, 0, 0)?.st?.s).toBe(0);
+        range?.setFontLine(null);
+        expect(getStyleByPosition(0, 0, 0, 0)?.ul).toBe(undefined);
+        expect(getStyleByPosition(0, 0, 0, 0)?.st).toBe(undefined);
+
+        // change A1:B2 Font Line
+        const range2 = activeSheet?.getRange(0, 0, 2, 2);
+        range2?.setFontLine('underline');
+        expect(getStyleByPosition(0, 0, 0, 0)?.ul?.s).toBe(1);
+        expect(getStyleByPosition(0, 1, 0, 1)?.ul?.s).toBe(1);
+        expect(getStyleByPosition(1, 0, 1, 0)?.ul?.s).toBe(1);
+        expect(getStyleByPosition(1, 1, 1, 1)?.ul?.s).toBe(1);
+
+        range2?.setFontLine('line-through');
+        expect(getStyleByPosition(0, 0, 0, 0)?.st?.s).toBe(1);
+        expect(getStyleByPosition(0, 1, 0, 1)?.st?.s).toBe(1);
+        expect(getStyleByPosition(1, 0, 1, 0)?.st?.s).toBe(1);
+        expect(getStyleByPosition(1, 1, 1, 1)?.st?.s).toBe(1);
+
+        range2?.setFontLine('none');
+        expect(getStyleByPosition(0, 0, 0, 0)?.ul?.s).toBe(0);
+        expect(getStyleByPosition(0, 1, 0, 1)?.ul?.s).toBe(0);
+        expect(getStyleByPosition(1, 0, 1, 0)?.ul?.s).toBe(0);
+        expect(getStyleByPosition(1, 1, 1, 1)?.ul?.s).toBe(0);
+
+        range2?.setFontLine(null);
+        expect(getStyleByPosition(0, 0, 0, 0)?.ul).toBe(undefined);
+        expect(getStyleByPosition(0, 1, 0, 1)?.ul).toBe(undefined);
+        expect(getStyleByPosition(1, 0, 1, 0)?.ul).toBe(undefined);
+        expect(getStyleByPosition(1, 1, 1, 1)?.ul).toBe(undefined);
+
+        expect(getStyleByPosition(0, 0, 0, 0)?.st).toBe(undefined);
+        expect(getStyleByPosition(0, 1, 0, 1)?.st).toBe(undefined);
+        expect(getStyleByPosition(1, 0, 1, 0)?.st).toBe(undefined);
+        expect(getStyleByPosition(1, 1, 1, 1)?.st).toBe(undefined);
+    });
+
+    it('Range setFontFamily', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+
+        // change A1 Font Family
+        const range = activeSheet?.getRange(0, 0);
+        range?.setFontFamily(null);
+        expect(getStyleByPosition(0, 0, 0, 0)?.ff).toBe(undefined);
+        range?.setFontFamily('Arial');
+        expect(getStyleByPosition(0, 0, 0, 0)?.ff).toBe('Arial');
+        range?.setFontFamily('宋体');
+        expect(getStyleByPosition(0, 0, 0, 0)?.ff).toBe('宋体');
+        range?.setFontFamily(null);
+        expect(getStyleByPosition(0, 0, 0, 0)?.ff).toBe(undefined);
+
+        // change A1:B2 Font Family
+        const range2 = activeSheet?.getRange(0, 0, 2, 2);
+        range2?.setFontFamily('Arial');
+        expect(getStyleByPosition(0, 0, 0, 0)?.ff).toBe('Arial');
+        expect(getStyleByPosition(0, 1, 0, 1)?.ff).toBe('Arial');
+        expect(getStyleByPosition(1, 0, 1, 0)?.ff).toBe('Arial');
+        expect(getStyleByPosition(1, 1, 1, 1)?.ff).toBe('Arial');
+
+        range2?.setFontFamily('宋体');
+        expect(getStyleByPosition(0, 0, 0, 0)?.ff).toBe('宋体');
+        expect(getStyleByPosition(0, 1, 0, 1)?.ff).toBe('宋体');
+        expect(getStyleByPosition(1, 0, 1, 0)?.ff).toBe('宋体');
+        expect(getStyleByPosition(1, 1, 1, 1)?.ff).toBe('宋体');
+
+        range2?.setFontFamily(null);
+        expect(getStyleByPosition(0, 0, 0, 0)?.ff).toBe(undefined);
+        expect(getStyleByPosition(0, 1, 0, 1)?.ff).toBe(undefined);
+        expect(getStyleByPosition(1, 0, 1, 0)?.ff).toBe(undefined);
+        expect(getStyleByPosition(1, 1, 1, 1)?.ff).toBe(undefined);
+    });
+
+    it('Range setFontSize', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+
+        // change A1 Font Size
+        const range = activeSheet?.getRange(0, 0);
+        range?.setFontSize(null);
+        expect(getStyleByPosition(0, 0, 0, 0)?.fs).toBe(undefined);
+        range?.setFontSize(12);
+        expect(getStyleByPosition(0, 0, 0, 0)?.fs).toBe(12);
+        range?.setFontSize(24);
+        expect(getStyleByPosition(0, 0, 0, 0)?.fs).toBe(24);
+        range?.setFontSize(null);
+        expect(getStyleByPosition(0, 0, 0, 0)?.fs).toBe(undefined);
+
+        // change A1:B2 Font Size
+        const range2 = activeSheet?.getRange(0, 0, 2, 2);
+        range2?.setFontSize(12);
+        expect(getStyleByPosition(0, 0, 0, 0)?.fs).toBe(12);
+        expect(getStyleByPosition(0, 1, 0, 1)?.fs).toBe(12);
+        expect(getStyleByPosition(1, 0, 1, 0)?.fs).toBe(12);
+        expect(getStyleByPosition(1, 1, 1, 1)?.fs).toBe(12);
+
+        range2?.setFontSize(24);
+        expect(getStyleByPosition(0, 0, 0, 0)?.fs).toBe(24);
+        expect(getStyleByPosition(0, 1, 0, 1)?.fs).toBe(24);
+        expect(getStyleByPosition(1, 0, 1, 0)?.fs).toBe(24);
+        expect(getStyleByPosition(1, 1, 1, 1)?.fs).toBe(24);
+
+        range2?.setFontSize(null);
+        expect(getStyleByPosition(0, 0, 0, 0)?.fs).toBe(undefined);
+        expect(getStyleByPosition(0, 1, 0, 1)?.fs).toBe(undefined);
+        expect(getStyleByPosition(1, 0, 1, 0)?.fs).toBe(undefined);
+        expect(getStyleByPosition(1, 1, 1, 1)?.fs).toBe(undefined);
+    });
+
+    it('Range setFontColor', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+
+        // change A1 Font Color
+        const range = activeSheet?.getRange(0, 0);
+        range?.setFontColor(null);
+        expect(getStyleByPosition(0, 0, 0, 0)?.cl).toBe(undefined);
+        range?.setFontColor('red');
+        expect(getStyleByPosition(0, 0, 0, 0)?.cl?.rgb).toBe('red');
+        range?.setFontColor('green');
+        expect(getStyleByPosition(0, 0, 0, 0)?.cl?.rgb).toBe('green');
+        range?.setFontColor(null);
+        expect(getStyleByPosition(0, 0, 0, 0)?.cl).toBe(undefined);
+
+        // change A1:B2 Font Color
+        const range2 = activeSheet?.getRange(0, 0, 2, 2);
+        range2?.setFontColor('red');
+        expect(getStyleByPosition(0, 0, 0, 0)?.cl?.rgb).toBe('red');
+        expect(getStyleByPosition(0, 1, 0, 1)?.cl?.rgb).toBe('red');
+        expect(getStyleByPosition(1, 0, 1, 0)?.cl?.rgb).toBe('red');
+        expect(getStyleByPosition(1, 1, 1, 1)?.cl?.rgb).toBe('red');
+
+        range2?.setFontColor('green');
+        expect(getStyleByPosition(0, 0, 0, 0)?.cl?.rgb).toBe('green');
+        expect(getStyleByPosition(0, 1, 0, 1)?.cl?.rgb).toBe('green');
+        expect(getStyleByPosition(1, 0, 1, 0)?.cl?.rgb).toBe('green');
+        expect(getStyleByPosition(1, 1, 1, 1)?.cl?.rgb).toBe('green');
+
+        range2?.setFontColor(null);
+        expect(getStyleByPosition(0, 0, 0, 0)?.cl).toBe(undefined);
+        expect(getStyleByPosition(0, 1, 0, 1)?.cl).toBe(undefined);
+        expect(getStyleByPosition(1, 0, 1, 0)?.cl).toBe(undefined);
+        expect(getStyleByPosition(1, 1, 1, 1)?.cl).toBe(undefined);
+    });
+
+    it('Range chain call set font styles', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+
+        // set A1 font styles
+        const range = activeSheet?.getRange(0, 0);
+
+        range
+            ?.setFontWeight('bold')
+            .setFontLine('underline')
+            .setFontFamily('Arial')
+            .setFontSize(24)
+            .setFontColor('red');
+
+        expect(getStyleByPosition(0, 0, 0, 0)?.bl).toBe(1);
+        expect(getStyleByPosition(0, 0, 0, 0)?.it).toBe(undefined);
+        expect(getStyleByPosition(0, 0, 0, 0)?.ul?.s).toBe(1);
+        expect(getStyleByPosition(0, 0, 0, 0)?.ff).toBe('Arial');
+        expect(getStyleByPosition(0, 0, 0, 0)?.fs).toBe(24);
+        expect(getStyleByPosition(0, 0, 0, 0)?.cl?.rgb).toBe('red');
+
+        // unset A1 font styles
+        range
+            ?.setFontWeight(null)
+            .setFontLine(null)
+            .setFontFamily(null)
+            .setFontSize(null)
+            .setFontColor(null);
+
+        expect(getStyleByPosition(0, 0, 0, 0)?.bl).toBe(undefined);
+        expect(getStyleByPosition(0, 0, 0, 0)?.it).toBe(undefined);
+        expect(getStyleByPosition(0, 0, 0, 0)?.ul).toBe(undefined);
+        expect(getStyleByPosition(0, 0, 0, 0)?.ff).toBe(undefined);
+        expect(getStyleByPosition(0, 0, 0, 0)?.fs).toBe(undefined);
+        expect(getStyleByPosition(0, 0, 0, 0)?.cl).toBe(undefined);
     });
 });

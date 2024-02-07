@@ -18,7 +18,7 @@ import Big from 'big.js';
 
 import { reverseCompareOperator } from '../../basics/calculate';
 import { BooleanValue, ConcatenateType } from '../../basics/common';
-import { ErrorType } from '../../basics/error-type';
+import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { compareToken } from '../../basics/token';
 import { compareWithWildcard, isWildcard } from '../utils/compare';
 import { ceil, floor, pow, round } from '../utils/math-kit';
@@ -277,11 +277,11 @@ export class BooleanValueObject extends BaseValueObject {
     }
 
     override sqrt(): BaseValueObject {
-        return this._convertTonNumber();
+        return this._convertTonNumber().sqrt();
     }
 
     override cbrt(): BaseValueObject {
-        return this._convertTonNumber();
+        return this._convertTonNumber().cbrt();
     }
 
     override cos(): BaseValueObject {
@@ -394,8 +394,10 @@ export class NumberValueObject extends BaseValueObject {
             return valueObject.plus(this);
         }
         const object = this.plusBy(valueObject.getValue());
+
+        // = 1 + #NAME? gets #NAME?, = 1 + #VALUE! gets #VALUE!
         if (object.isError()) {
-            return this;
+            return object;
         }
 
         return object;
@@ -463,6 +465,10 @@ export class NumberValueObject extends BaseValueObject {
     override plusBy(value: string | number | boolean): BaseValueObject {
         const currentValue = this.getValue();
         if (typeof value === 'string') {
+            // = 1 + #NAME? gets #NAME?, = 1 + #VALUE! gets #VALUE!
+            if (ERROR_TYPE_SET.has(value as ErrorType)) {
+                return new ErrorValueObject(value as ErrorType);
+            }
             return new ErrorValueObject(ErrorType.VALUE);
         }
         if (typeof value === 'number') {

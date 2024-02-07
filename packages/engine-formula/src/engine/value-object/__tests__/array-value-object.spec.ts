@@ -87,6 +87,54 @@ describe('arrayValueObject test', () => {
         });
     });
 
+    describe('Count', () => {
+        it('Normal count', () => {
+            const originValueObject = new ArrayValueObject({
+                calculateValueList: transformToValueObject([
+                    [1, ' ', 1.23, true, false],
+                    [0, '100', '2.34', 'test', -3],
+                ]),
+                rowCount: 2,
+                columnCount: 5,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            expect(originValueObject.count()?.getValue()).toBe(6);
+        });
+        it('CountA', () => {
+            const originValueObject = new ArrayValueObject({
+                calculateValueList: transformToValueObject([
+                    [1, ' ', 1.23, true, false],
+                    [0, '100', '2.34', 'test', -3],
+                ]),
+                rowCount: 2,
+                columnCount: 5,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            expect(originValueObject.countA()?.getValue()).toBe(10);
+        });
+        it('CountBlank', () => {
+            const originValueObject = new ArrayValueObject({
+                calculateValueList: transformToValueObject([
+                    [1, ' ', 1.23, true, false],
+                    [0, '100', '2.34', 'test', -3],
+                ]),
+                rowCount: 2,
+                columnCount: 5,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            expect(originValueObject.countBlank()?.getValue()).toBe(0);
+        });
+    });
+
     describe('pick', () => {
         it('normal', () => {
             const pickArrayValueObject = new ArrayValueObject({
@@ -143,6 +191,34 @@ describe('arrayValueObject test', () => {
         });
     });
 
+    describe('sum', () => {
+        it('normal', () => {
+            expect(originArrayValueObject.sum().getValue()).toStrictEqual(120);
+        });
+
+        // like numpy array
+        // [
+        //     [1, 0, 1.23, 1, 0],
+        //     [0, 100, 2.34, 0, -3],
+        // ]
+        it('nm multiple formats', () => {
+            const originValueObject = new ArrayValueObject({
+                calculateValueList: transformToValueObject([
+                    [1, ' ', 1.23, true, false],
+                    [0, '100', '2.34', 'test', -3],
+                ]),
+                rowCount: 2,
+                columnCount: 5,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+
+            expect(originValueObject.sum().getValue()).toStrictEqual(101.57);
+        });
+    });
+
     describe('mean', () => {
         it('normal', () => {
             expect(originArrayValueObject.mean().getValue()).toStrictEqual(8);
@@ -167,7 +243,7 @@ describe('arrayValueObject test', () => {
                 column: 0,
             });
 
-            expect(originValueObject.mean().getValue()).toStrictEqual(10.257);
+            expect(originValueObject.mean().getValue()).toStrictEqual(16.928333333333335);
         });
     });
 
@@ -176,7 +252,7 @@ describe('arrayValueObject test', () => {
             expect(originArrayValueObject.var().getValue()).toStrictEqual(18.666666666666668);
         });
 
-        it('nm multiple formats', () => {
+        it('var nm multiple formats', () => {
             const originValueObject = new ArrayValueObject({
                 calculateValueList: transformToValueObject([
                     [1, ' ', 1.23, true, false],
@@ -190,7 +266,7 @@ describe('arrayValueObject test', () => {
                 column: 0,
             });
 
-            expect(originValueObject.var().getValue()).toStrictEqual(896.592801);
+            expect(originValueObject.var().getValue()).toStrictEqual(1382.9296138888888);
         });
     });
 
@@ -213,7 +289,7 @@ describe('arrayValueObject test', () => {
                 column: 0,
             });
 
-            expect(originValueObject.std().getValue()).toStrictEqual(29.94315950263098);
+            expect(originValueObject.std().getValue()).toStrictEqual(37.187761614392564);
         });
     });
 
@@ -298,7 +374,11 @@ describe('arrayValueObject test', () => {
         });
 
         it('ValueObjectFactory create StringValueObject ', () => {
-            const stringValueObject = ValueObjectFactory.create('test');
+            let stringValueObject = ValueObjectFactory.create('test');
+
+            expect(stringValueObject.isString()).toBeTruthy();
+
+            stringValueObject = ValueObjectFactory.create(' ');
 
             expect(stringValueObject.isString()).toBeTruthy();
         });

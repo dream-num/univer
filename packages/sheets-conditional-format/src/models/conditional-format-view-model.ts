@@ -45,15 +45,12 @@ interface ICellItem {
 export class ConditionalFormatViewModel {
    //  Map<unitID ,<sheetId ,ObjectMatrix>>
     private _model: Map<string, Map<string, ObjectMatrix<ICellItem>>> = new Map();
-    private _getMatrix(unitId: string, subUnitId: string) {
-        return this._model.get(unitId)?.get(subUnitId);
-    }
 
     private _markDirty$ = new Subject<{ rule: IConditionFormatRule;unitId: string;subUnitId: string }>();
-    markDirty$ = this._markDirty$.asObservable();
+    public markDirty$ = this._markDirty$.asObservable();
 
     private _ensureMatrix(unitId: string, subUnitId: string) {
-        let _matrix = this._getMatrix(unitId, subUnitId);
+        let _matrix = this.getMatrix(unitId, subUnitId);
         if (!_matrix) {
             _matrix = new ObjectMatrix<ICellItem>();
             let unitModel = this._model.get(unitId);
@@ -66,8 +63,12 @@ export class ConditionalFormatViewModel {
         return _matrix;
     }
 
-    getCellCf(unitId: string, subUnitId: string, row: number, col: number, matrix?: ObjectMatrix<ICellItem>) {
-        const _matrix = matrix ?? this._getMatrix(unitId, subUnitId);
+    public getMatrix(unitId: string, subUnitId: string) {
+        return this._model.get(unitId)?.get(subUnitId);
+    }
+
+    public getCellCf(unitId: string, subUnitId: string, row: number, col: number, matrix?: ObjectMatrix<ICellItem>) {
+        const _matrix = matrix ?? this.getMatrix(unitId, subUnitId);
         if (!_matrix) {
             return null;
         }
@@ -75,7 +76,7 @@ export class ConditionalFormatViewModel {
         return value;
     }
 
-    setCellCfRuleCache(unitId: string, subUnitId: string, row: number, col: number, cfId: string, value: any) {
+    public setCellCfRuleCache(unitId: string, subUnitId: string, row: number, col: number, cfId: string, value: any) {
         const matrix = this._ensureMatrix(unitId, subUnitId);
         const cell = matrix.getValue(row, col);
         const item = cell?.cfList.find((e) => e.cfId === cfId);
@@ -85,14 +86,14 @@ export class ConditionalFormatViewModel {
         }
     }
 
-    deleteCellCf(
+    public deleteCellCf(
         unitId: string,
         subUnitId: string,
         row: number,
         col: number,
         cfId: string,
         matrix?: ObjectMatrix<ICellItem>) {
-        const _matrix = matrix ?? this._getMatrix(unitId, subUnitId);
+        const _matrix = matrix ?? this.getMatrix(unitId, subUnitId);
         if (_matrix) {
             const cellItem = _matrix.getValue(row, col);
             if (cellItem) {
@@ -108,7 +109,7 @@ export class ConditionalFormatViewModel {
         }
     }
 
-    pushCellCf(
+    public pushCellCf(
         unitId: string,
         subUnitId: string,
         row: number,
@@ -130,7 +131,7 @@ export class ConditionalFormatViewModel {
         _matrix.setValue(row, col, cellValue);
     }
 
-    sortCellCf(
+    public sortCellCf(
         unitId: string,
         subUnitId: string,
         row: number,
@@ -152,7 +153,7 @@ export class ConditionalFormatViewModel {
         }
     }
 
-    markRuleDirty(
+    public markRuleDirty(
         unitId: string,
         subUnitId: string,
         rule: IConditionFormatRule,

@@ -267,7 +267,7 @@ export class ConditionalFormatService extends Disposable {
         }));
     }
 
-    private _handleCalculateUnit(unitId: string, subUnitId: string, rule: IConditionFormatRule) {
+    private async _handleCalculateUnit(unitId: string, subUnitId: string, rule: IConditionFormatRule) {
         const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
         const worksheet = workbook?.getSheetBySheetId(subUnitId);
         let cache = this._getComputedCache(unitId, subUnitId, rule.cfId);
@@ -282,10 +282,7 @@ export class ConditionalFormatService extends Disposable {
         if (!unit || !worksheet) {
             return;
         }
-        const result = unit.handle(rule, worksheet);
-        // mock async message
-        setTimeout(() => {
-            this._ruleComputeStatus$.next({ status: 'end', unitId, subUnitId, cfId: rule.cfId, result });
-        }, 0);
+        const result = await unit.handle(rule, worksheet);
+        this._ruleComputeStatus$.next({ status: 'end', unitId, subUnitId, cfId: rule.cfId, result });
     }
 }

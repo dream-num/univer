@@ -282,28 +282,32 @@ export class SheetClipboardController extends RxDisposable {
                 if (addingRowsCount > 0) {
                     const rowInfo: IObjectArrayPrimitiveType<IRowData> = {};
                     rowProperties.slice(existingRowsCount).forEach((property, index) => {
-                        const style = property?.style;
-                        if (!style) {
-                            return;
+                        const { style, height: PropertyHeight } = property || {};
+                        if (style) {
+                            const cssTextArray = style.split(';');
+                            let height = DEFAULT_WORKSHEET_ROW_HEIGHT;
+
+                            cssTextArray.find((css) => {
+                                css = css.toLowerCase();
+                                const key = textTrim(css.substr(0, css.indexOf(':')));
+                                const value = textTrim(css.substr(css.indexOf(':') + 1));
+                                if (key === 'height') {
+                                    height = Number.parseFloat(value);
+                                    return true;
+                                }
+                                return false;
+                            });
+
+                            rowInfo[index] = {
+                                h: height,
+                                hd: BooleanNumber.FALSE,
+                            };
+                        } else if (PropertyHeight) {
+                            rowInfo[index] = {
+                                h: Number.parseFloat(PropertyHeight),
+                                hd: BooleanNumber.FALSE,
+                            };
                         }
-                        const cssTextArray = style.split(';');
-                        let height = DEFAULT_WORKSHEET_ROW_HEIGHT;
-
-                        cssTextArray.find((css) => {
-                            css = css.toLowerCase();
-                            const key = textTrim(css.substr(0, css.indexOf(':')));
-                            const value = textTrim(css.substr(css.indexOf(':') + 1));
-                            if (key === 'height') {
-                                height = Number.parseFloat(value);
-                                return true;
-                            }
-                            return false;
-                        });
-
-                        rowInfo[index] = {
-                            h: height,
-                            hd: BooleanNumber.FALSE,
-                        };
                     });
 
                     const addRowMutation: IInsertRowMutationParams = {
@@ -322,25 +326,26 @@ export class SheetClipboardController extends RxDisposable {
                 // TODO When Excel pasted, there was no width height, Do we still need to set the height?
                 const rowHeight: IObjectArrayPrimitiveType<number> = {};
                 rowProperties.slice(0, existingRowsCount).forEach((property, index) => {
-                    const style = property.style;
-                    if (!style) {
-                        return;
+                    const { style, height: propertyHeight } = property;
+                    if (style) {
+                        const cssTextArray = style.split(';');
+                        let height = DEFAULT_WORKSHEET_ROW_HEIGHT;
+
+                        cssTextArray.find((css) => {
+                            css = css.toLowerCase();
+                            const key = textTrim(css.substr(0, css.indexOf(':')));
+                            const value = textTrim(css.substr(css.indexOf(':') + 1));
+                            if (key === 'height') {
+                                height = Number.parseFloat(value);
+                                return true;
+                            }
+                            return false;
+                        });
+
+                        rowHeight[index + range.startRow] = height;
+                    } else if (propertyHeight) {
+                        rowHeight[index + range.startRow] = Number.parseFloat(propertyHeight);
                     }
-                    const cssTextArray = style.split(';');
-                    let height = DEFAULT_WORKSHEET_ROW_HEIGHT;
-
-                    cssTextArray.find((css) => {
-                        css = css.toLowerCase();
-                        const key = textTrim(css.substr(0, css.indexOf(':')));
-                        const value = textTrim(css.substr(css.indexOf(':') + 1));
-                        if (key === 'height') {
-                            height = Number.parseFloat(value);
-                            return true;
-                        }
-                        return false;
-                    });
-
-                    rowHeight[index] = height;
                 });
 
                 // apply row properties to the existing rows

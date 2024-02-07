@@ -18,6 +18,7 @@ import { Disposable, ILogService, LocaleService } from '@univerjs/core';
 import { createIdentifier, Inject, Optional } from '@wendellhu/redi';
 
 import { INotificationService } from '../notification/notification.service';
+import { supportClipboardAPI } from './clipboard-utils';
 
 export const PLAIN_TEXT_CLIPBOARD_MIME_TYPE = 'text/plain';
 export const HTML_CLIPBOARD_MIME_TYPE = 'text/html';
@@ -62,7 +63,7 @@ export const IClipboardInterfaceService = createIdentifier<IClipboardInterfaceSe
 
 export class BrowserClipboardService extends Disposable implements IClipboardInterfaceService {
     get supportClipboard(): boolean {
-        return typeof window.navigator.clipboard.readText === 'function';
+        return supportClipboardAPI();
     }
 
     constructor(

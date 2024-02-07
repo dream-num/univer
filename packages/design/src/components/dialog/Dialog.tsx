@@ -23,15 +23,23 @@ import { ConfigContext } from '../config-provider/ConfigProvider';
 import styles from './index.module.less';
 
 export interface IDialogProps {
-    width?: number | string;
-
     children: React.ReactNode;
+
+    /**
+     * The style of the dialog.
+     */
+    style?: React.CSSProperties;
 
     /**
      * Whether the dialog is visible.
      * @default false
      */
     visible?: boolean;
+
+    /**
+     * The width of the dialog.
+     */
+    width?: number | string;
 
     /**
      * The title of the dialog.
@@ -65,13 +73,14 @@ export interface IDialogProps {
 export function Dialog(props: IDialogProps) {
     const {
         children,
+        style,
         visible = false,
         title,
+        width,
         draggable = false,
         closeIcon = <CloseSingle />,
         footer,
         onClose,
-        width,
     } = props;
     const [dragDisabled, setDragDisabled] = useState(false);
 
@@ -118,6 +127,7 @@ export function Dialog(props: IDialogProps) {
             footer={footer}
             onClose={onClose}
             mask={!draggable}
+            style={style}
         >
             {children}
         </RcDialog>

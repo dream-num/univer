@@ -59,14 +59,16 @@ export class DocStateChangeManagerService extends RxDisposable {
     }
 
     setChangeState(changeState: IDocStateChangeParams) {
-        const { trigger } = changeState;
+        const { trigger, noHistory } = changeState;
         // No need to emit stateChange when the mutation is from collaboration.
         if (trigger == null) {
             return;
         }
         this._cacheChangeState(changeState);
         // Mutations by user or historyService need collaboration.
-        this._docStateChange$.next(changeState);
+        if (!noHistory) {
+            this._docStateChange$.next(changeState);
+        }
     }
 
     private _initialize() {

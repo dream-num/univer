@@ -29,6 +29,7 @@ import {
     NumberValueObject,
     StringValueObject,
 } from '../value-object/primitive-object';
+import { getCellValue } from '../utils/cell';
 
 export type NodeValueType = BaseValueObject | BaseReferenceObject | AsyncObject | AsyncArrayObject;
 
@@ -332,7 +333,7 @@ export class BaseReferenceObject extends ObjectClassType {
     }
 
     getCellValueObject(cell: ICellData) {
-        const value = cell.v || 0;
+        const value = getCellValue(cell);
         if (ERROR_TYPE_SET.has(value as ErrorType)) {
             return new ErrorValueObject(value as ErrorType);
         }

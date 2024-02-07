@@ -181,6 +181,30 @@ describe('Test insert function operation', () => {
                 const cell = {};
                 expect(isNumberCell(cell)).toBeFalsy();
             });
+            it('should return true when cell is rich text number', () => {
+                const cell = {
+                    p: {
+                        id: 'rich1',
+                        documentStyle: {},
+                        body: {
+                            dataStream: '111/r/n',
+                        },
+                    },
+                };
+                expect(isNumberCell(cell)).toBeTruthy();
+            });
+            it('should return true when cell is rich text', () => {
+                const cell = {
+                    p: {
+                        id: 'rich1',
+                        documentStyle: {},
+                        body: {
+                            dataStream: 'rich/r/n',
+                        },
+                    },
+                };
+                expect(isNumberCell(cell)).toBeFalsy();
+            });
         });
 
         describe('function isSingleCell', () => {

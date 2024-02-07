@@ -18,8 +18,10 @@ import type { ICellData, ICommand, IRange, Nullable, ObjectMatrix } from '@unive
 import {
     CellValueType,
     CommandType,
+    DEFAULT_EMPTY_DOCUMENT_VALUE,
     getCellValueType,
     ICommandService,
+    isRealNum,
     IUniverInstanceService,
     Rectangle,
 } from '@univerjs/core';
@@ -235,6 +237,19 @@ function findStartColumn(cellMatrix: ObjectMatrix<Nullable<ICellData>>, row: num
 }
 
 export function isNumberCell(cell: Nullable<ICellData>) {
+    if (cell?.p) {
+        const body = cell?.p.body;
+
+        if (body == null) {
+            return false;
+        }
+
+        const data = body.dataStream;
+        const lastString = data.substring(data.length - 2, data.length);
+        const newDataStream = lastString === DEFAULT_EMPTY_DOCUMENT_VALUE ? data.substring(0, data.length - 2) : data;
+
+        return isRealNum(newDataStream);
+    }
     return cell && (cell.t === CellValueType.NUMBER || getCellValueType(cell) === CellValueType.NUMBER);
 }
 

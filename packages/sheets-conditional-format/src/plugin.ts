@@ -20,7 +20,7 @@ import { SHEET_CONDITION_FORMAT_PLUGIN } from './base/const';
 import { ConditionalFormatService } from './services/conditional-format.service';
 import { ConditionalFormatRuleModel } from './models/conditional-format-rule-model';
 import { ConditionalFormatViewModel } from './models/conditional-format-view-model';
-import { RenderController } from './controllers/render.cf.controller';
+import { RenderController } from './controllers/cf.render.controller';
 import { addAverageCfCommand } from './commands/commands/addAverageCf.command';
 import { addColorScaleConditionalRuleCommand } from './commands/commands/addColorScaleCf.command';
 import { addDataBarConditionalRuleCommand } from './commands/commands/addDataBarCf.command';
@@ -32,7 +32,7 @@ import { addTimePeriodCfCommand } from './commands/commands/addTimePeriodCf.comm
 import { addUniqueValuesCfCommand } from './commands/commands/addUniqueValuesCf.command';
 import { addConditionalRuleMutation } from './commands/mutations/addConditionalRule.mutation';
 import { deleteConditionalRuleMutation } from './commands/mutations/deleteConditionalRule.mutation';
-import { RefRangeController } from './controllers/ref-range.cf.controller';
+import { RefRangeController } from './controllers/cf.ref-range.controller';
 import { setConditionalRuleMutation } from './commands/mutations/setConditionalRule.mutation';
 
 export class SheetsConditionalFormatPlugin extends Plugin {

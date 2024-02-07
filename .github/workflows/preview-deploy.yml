@@ -96,6 +96,7 @@ jobs:
 
         outputs:
             preview-url: ${{ steps.vercel-demo-dev.outputs.preview-url == '' && steps.vercel-demo.outputs.preview-url || steps.vercel-demo-dev.outputs.preview-url }}
+            commit-message: ${{ steps.commit-message.outputs.value }}
 
         steps:
             - name: Checkout
@@ -106,6 +107,10 @@ jobs:
 
             - name: Setup Node.js
               uses: ./.github/actions/setup-node
+
+            - name: Get commit message
+              id: commit-message
+              run: echo "value=$(git log -1 --pretty=%s)" >> $GITHUB_OUTPUT
 
             #  ================= Deploy Demo =================
             - name: 📦 Build demo
@@ -181,7 +186,7 @@ jobs:
                           },
                           "commit": {
                               "ref": "${{ needs.setup.outputs.ref }}",
-                              "message": "${{ github.event.workflow_run.head_commit.message }}",
+                              "message": "${{ needs.build-demo.outputs.commit-message }}",
                               "id": "${{ github.event.workflow_run.head_commit.id }}",
                               "author": "${{ github.event.workflow_run.head_commit.author.name }}"
                           },

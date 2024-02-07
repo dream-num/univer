@@ -91,10 +91,13 @@ export class StatusBarController extends Disposable {
                     }
                     if (selections) {
                         const primary = selections[selections.length - 1].primary;
-                        this._calculateSelection(
-                            selections.map((selection) => selection.range),
-                            primary
-                        );
+                        clearTimeout(this._calculateTimeout);
+                        this._calculateTimeout = setTimeout(() => {
+                            this._calculateSelection(
+                                selections.map((selection) => selection.range),
+                                primary
+                            );
+                        }, 100);
                     }
                 })
             )
@@ -151,12 +154,13 @@ export class StatusBarController extends Disposable {
                     return ref.toArrayValueObject(false);
                 });
                 const res = executor?.calculate(...arrayValue) as BaseValueObject;
-                if (!res.getValue) {
+                const value = res?.getValue();
+                if (!value) {
                     return undefined;
                 }
                 return {
                     func: f.func,
-                    value: (executor?.calculate(...arrayValue) as BaseValueObject).getValue(),
+                    value,
                 };
             });
             if (calcResult.every((r) => r === undefined)) {

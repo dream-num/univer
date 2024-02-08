@@ -35,6 +35,7 @@ import { deleteConditionalRuleMutation } from './commands/mutations/deleteCondit
 import { RefRangeController } from './controllers/cf.ref-range.controller';
 import { setConditionalRuleMutation } from './commands/mutations/setConditionalRule.mutation';
 import { ConditionalFormatCopyPasteController } from './controllers/cf.copy-paste.controller';
+import { ConditionAlFormatAutoFillController } from './controllers/cf.auto-fill.controller';
 
 export class SheetsConditionalFormatPlugin extends Plugin {
     static override type = PluginType.Sheet;
@@ -66,6 +67,7 @@ export class SheetsConditionalFormatPlugin extends Plugin {
         this._injector.add([RenderController]);
         this._injector.add([RefRangeController]);
         this._injector.add([ConditionalFormatCopyPasteController]);
+        this._injector.add([ConditionAlFormatAutoFillController]);
     }
 
     _initCommand() {

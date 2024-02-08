@@ -80,7 +80,7 @@ export class Worksheet {
     }
 
     /**
-     * get worksheet printable cell range
+     * Get worksheet printable cell range.
      * @returns
      */
     getCellMatrixPrintRange() {
